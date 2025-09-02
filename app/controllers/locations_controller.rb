@@ -59,21 +59,6 @@ class LocationsController < ApplicationController
     [nil, {}]
   end
 
-  # Displays a list of locations matching a given string.
-  def pattern
-    pattern = params[:pattern].to_s
-    loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if loc
-      redirect_to(location_path(loc.id))
-      [nil, {}]
-    else
-      query = create_query(
-        :Location, pattern: Location.user_format(@user, pattern)
-      )
-      [query, { link_all_sorts: true }]
-    end
-  end
-
   # Displays a list of all locations whose country matches the param.
   def country
     query = create_query(:Location, regexp: "#{params[:country]}$")

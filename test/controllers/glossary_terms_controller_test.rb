@@ -45,19 +45,17 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
+  def q_pattern(pattern)
+    { q: { model: :GlossaryTerm, pattern: } }
+  end
+
   def test_glossary_term_search
     conic = glossary_terms(:conic_glossary_term)
     convex = glossary_terms(:convex_glossary_term)
 
-    get(:index, params: { pattern: "conic" })
-    assert_redirected_to(glossary_term_path(conic.id))
-    assert_session_query_record_is_correct
-
-    get(:index, params: { pattern: conic.id })
-    assert_redirected_to(glossary_term_path(conic.id))
-
     login
-    get(:index, params: { pattern: "con" })
+    get(:index, params: q_pattern("con"))
+    assert_session_query_record_is_correct
     assert_template("index")
     assert_select(
       "a[href*='glossary_terms/#{conic.id}']", text: conic.name

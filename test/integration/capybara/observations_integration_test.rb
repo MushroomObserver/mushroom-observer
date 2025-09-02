@@ -170,12 +170,13 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
                     text: :runtime_no_matches.l(type: :observations.l))
     assert_match("Observations", page.title)
     assert_selector("#results", text: "")
+
+    corrected_pattern = "Agaricus campestris"
     assert_selector(
       "#content a[href *= 'observations?pattern=Agaricus+campestris']",
       text: names(:agaricus_campestris).search_name
     )
-
-    corrected_pattern = "Agaricus campestris"
+    assert_selector("#content div.alert-warning", text: corrected_pattern)
     obs = observations(:agaricus_campestris_obs)
 
     fill_in("pattern_search_pattern", with: corrected_pattern)

@@ -32,7 +32,7 @@ class CommentsController < ApplicationController
 
   # ApplicationController uses this table to dispatch #index to a private method
   def index_active_params
-    [:target, :pattern, :by_user, :for_user, :by].freeze
+    [:target, :pattern, :by_user, :for_user, :by, :q].freeze
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)

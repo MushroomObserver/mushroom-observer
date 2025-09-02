@@ -72,11 +72,28 @@ class ImagesControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_index_pattern_text_multiple_hits
+  # The pattern param is maintained only for backwards compatibility.
+  # Should redirect to SearchController#pattern
+  def test_index_pattern_param_redirected_to_search
     pattern = "USA"
 
     login
     get(:index, params: { pattern: pattern })
+    assert_redirected_to(
+      search_pattern_path(pattern_search: { pattern:, type: :images })
+    )
+  end
+
+  def q_pattern(pattern)
+    { q: { model: :Image, pattern: } }
+  end
+
+  def test_index_pattern_text_multiple_hits
+    pattern = "USA"
+    params = q_pattern(pattern)
+
+    login
+    get(:index, params:)
 
     assert_template("index", partial: "_image")
     assert_page_title(:IMAGES.l)
@@ -85,21 +102,13 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_index_pattern_text_no_hits
     pattern = "nothingMatchesAxotl"
+    params = q_pattern(pattern)
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params:)
 
     assert_flash_text(:runtime_no_matches.l(type: :images.l))
     assert_template("index")
-  end
-
-  def test_index_pattern_image_id
-    image = images(:commercial_inquiry_image)
-
-    login
-    get(:index, params: { pattern: image.id })
-
-    assert_redirected_to(image_path(image))
   end
 
   def test_show_image

@@ -2,40 +2,157 @@
 
 # searches defined by the url query string
 class SearchController < ApplicationController
-  # This is the action the search bar commits to.  It just redirects to one of
-  # several "foreign" search actions:
-  #   /comments/index (params[:pattern])
-  #   /glossary_terms/index (params[:pattern])
-  #   /herbaria/index (params[:pattern])
-  #   /herbarium_records/index (params[:pattern])
-  #   /images/index (params[:pattern])
-  #   /locations/index (params[:pattern])
-  #   /names/index (params[:pattern])
-  #   /observations/index (params[:pattern])
-  #   /projects/index (params[:pattern])
-  #   /species_lists/index (params[:pattern])
-  #   /users/index (params[:pattern])
-  #   /project/project_search
-  #   /species_lists/index
-  def pattern
-    pattern = params.dig(:pattern_search, :pattern) { |p| p.to_s.strip_squeeze }
-    unless (type = params.dig(:pattern_search, :type))
-      flash_and_redirect_invalid_search(type) and return
-    end
-
-    # Temporary 2025-08-14: safe-pluralize the type (will not double-pluralize)
-    # When reverting, also remove the `unless` block above.
-    type = type.to_s.pluralize.to_sym
-
-    # Save it so that we can keep it in the search bar in subsequent pages.
-    session[:pattern] = pattern
-    session[:search_type] = type
-
-    forward_pattern_search(type, pattern)
-  end
+  # These are plural symbols because the search bar sends them this way.
+  PATTERN_SEARCHABLE_MODELS = [
+    :comments, :glossary_terms, :herbaria, :herbarium_records, :images,
+    :locations, :names, :observations, :projects, :species_lists, :users
+  ].freeze
 
   # Image advanced search retired in 2021
   ADVANCED_SEARCHABLE_MODELS = [Location, Name, Observation].freeze
+
+  # This is the action the search bar commits to.
+  # It creates a query and forwards that to the appropriate index as :q.
+  def pattern
+    pattern = params.dig(:pattern_search, :pattern).to_s.strip_squeeze
+    type = params.dig(:pattern_search, :type)
+    # safe pluralize in case session[:search_type] is singular
+    type = type.to_s.pluralize.to_sym unless type == :google
+
+    unless (PATTERN_SEARCHABLE_MODELS + [:google]).include?(type)
+      flash_and_redirect_invalid_search(type) and return
+    end
+
+    save_pattern_and_proceed(type, pattern)
+  end
+
+  private
+
+  def save_pattern_and_proceed(type, pattern)
+    # Save it so that we can keep it in the search bar in subsequent pages.
+    # But don't save encoded incoming patterns that are too large.
+    unless pattern.bytesize > 4096
+      session[:pattern] = pattern
+      session[:search_type] = type
+    end
+
+    if type == :google
+      site_google_search(pattern)
+    else
+      forward_pattern_search(type, pattern)
+    end
+  end
+
+  def site_google_search(pattern)
+    if pattern.blank?
+      redirect_to("/")
+    else
+      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
+      redirect_to("https://google.com/search?#{search}")
+    end
+  end
+
+  # Convert pattern into :q here, so we hit the index with a standard permalink
+  # and have a saved query that we can refine in a search form.
+  def forward_pattern_search(type, pattern)
+    model_name = type.to_s.singularize.camelize.to_sym
+
+    if pattern.blank?
+      redirect_to(send(:"#{type}_path"))
+    elsif (obj = exact_match(model_name, pattern))
+      redirect_to(send(:"#{type.to_s.singularize}_path", obj.id))
+    else
+      build_query_and_redirect(type, model_name, pattern)
+    end
+  end
+
+  # If pattern is an identifier, redirect to the show page for that object.
+  def exact_match(model_name, pattern)
+    case model_name
+    when :User
+      user_exact_match(pattern)
+    else
+      maybe_pattern_is_an_id(model_name, pattern)
+    end
+  end
+
+  def user_exact_match(pattern)
+    if ((pattern.match?(/^\d+$/) && (user = User.safe_find(pattern))) ||
+       # (user = User.find_by(login: pattern)) ||
+       # (user = User.find_by(name: pattern)) ||
+       (user = User.find_by(email: pattern))) && user.verified
+      return user
+    end
+
+    false
+  end
+
+  def maybe_pattern_is_an_id(model_name, pattern)
+    if /^\d+$/.match?(pattern)
+      return model_name.to_s.constantize.safe_find(pattern)
+    end
+
+    false
+  end
+
+  def build_query_and_redirect(type, model_name, pattern)
+    # :Name and :Observation prevalidate the pattern with a PatternSearch
+    # instance, and check for errors defined by PatternSearch.
+    # :Location checks the user location format of the "pattern".
+    query = query_from_pattern(model_name, pattern)
+
+    # Finally we can redirect.
+    if coming_from_obs_needing_ids?(model_name)
+      redirect_to(identify_observations_path(q: query.q_param))
+    elsif single_result?(query)
+      redirect_to(send(:"#{type.to_s.singularize}_path", query.first_id))
+    else
+      redirect_to(send(:"#{type}_path", params: { q: query.q_param }))
+    end
+  end
+
+  def coming_from_obs_needing_ids?(model_name)
+    model_name == :Observation && params[:needs_naming]
+  end
+
+  def single_result?(query)
+    query.result_ids.length == 1
+  end
+
+  def query_from_pattern(model_name, pattern)
+    case model_name
+    when :Observation, :Name
+      pattern_search_query_from_pattern(model_name, pattern)
+    when :Location
+      location_query_from_pattern(pattern)
+    else
+      create_query(model_name, pattern:)
+    end
+  end
+
+  # Have to use PatternSearch here to catch invalid PatternSearch terms,
+  # and turn the keywords into query params.
+  # Can't just send pattern to Query as create_query(model_name, pattern:)
+  def pattern_search_query_from_pattern(model_name, pattern)
+    search = "PatternSearch::#{model_name}".constantize.new(pattern)
+    flash_pattern_search_errors(search) if search.errors.any?
+    create_query(model_name, search.query&.params || {})
+  end
+
+  def location_query_from_pattern(pattern)
+    create_query(:Location, pattern: Location.user_format(@user, pattern))
+  end
+
+  def flash_pattern_search_errors(search)
+    search.errors.each { |error| flash_error(error.to_s) }
+  end
+
+  def flash_and_redirect_invalid_search(type)
+    flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
+    redirect_back_or_default("/")
+  end
+
+  public
 
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
@@ -59,38 +176,6 @@ class SearchController < ApplicationController
   ##############################################################################
 
   private
-
-  def site_google_search(pattern)
-    if pattern.blank?
-      redirect_to("/")
-    else
-      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
-      redirect_to("https://google.com/search?#{search}")
-    end
-  end
-
-  # In the case of "needs_naming", this is added to the search path params
-  def forward_pattern_search(type, pattern)
-    case type
-    when :google
-      site_google_search(pattern)
-
-    when :comments, :glossary_terms, :herbaria, :herbarium_records, :images,
-         :locations, :names, :observations, :projects, :species_lists, :users
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: send(:"#{type}_path", params: { pattern: pattern }),
-        index_path: send(:"#{type}_path")
-      )
-    else
-      flash_and_redirect_invalid_search(type) and return
-    end
-  end
-
-  def flash_and_redirect_invalid_search(type)
-    flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-    redirect_back_or_default("/")
-  end
 
   # NOTE: The autocompleters for name, location, and user all make the ids
   # available now, so this could be a lot more efficient.
@@ -130,15 +215,6 @@ class SearchController < ApplicationController
   def add_applicable_filter_parameters(query_params, model)
     Query::Filter.by_model(model).each do |fltr|
       query_params[fltr.sym] = params.dig(:content_filter, fltr.sym)
-    end
-  end
-
-  def redirect_to_search_or_index(search_path:, index_path:, pattern: nil)
-    # If pattern is blank, this would devolve into a very expensive index.
-    if pattern.blank?
-      redirect_to(index_path)
-    else
-      redirect_to(search_path)
     end
   end
 
