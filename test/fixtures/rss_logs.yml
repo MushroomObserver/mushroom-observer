@@ -548,3 +548,31 @@ longest_obs_rss_log:
 even_longer_obs_rss_log:
   <<: *DEFAULTS
   observation: even_longer_obs
+
+even_longer_obs_rss_log:
+  <<: *DEFAULTS
+  observation: even_longer_obs
+
+suillus_weaverae_obs_rss_log:
+  <<: *DEFAULTS
+  observation: suillus_weaverae_obs
+
+dup_suillus_weaverae_obs_rss_log:
+  <<: *DEFAULTS
+  observation: dup_suillus_weaverae_obs
+
+nearby_suillus_weaverae_obs_rss_log:
+  <<: *DEFAULTS
+  observation: nearby_suillus_weaverae_obs
+
+faraway_suillus_weaverae_obs_rss_log:
+  <<: *DEFAULTS
+  observation: faraway_suillus_weaverae_obs
+
+older_suillus_weaverae_obs_rss_log:
+  <<: *DEFAULTS
+  observation: older_suillus_weaverae_obs
+
+suillus_granulatus_obs_rss_log:
+  <<: *DEFAULTS
+  observation: suillus_granulatus_obs

@@ -263,3 +263,14 @@ super_importers_project:
 empty_list_project:
   <<: *DEFAULTS
   species_lists: reused_list
+
+falmouth_2025_09_project:
+  <<: *DEFAULTS
+  user: dick
+  admin_group: dick_only
+  user_group: falmouth_2023_09_users
+  field_slip_prefix: FAL25
+  start_date: 2025-09-01
+  end_date: 2025-09-14
+  location: falmouth
+  observations: suillus_weaverae_obs, dup_suillus_weaverae_obs, nearby_suillus_weaverae_obs, faraway_suillus_weaverae_obs, older_suillus_weaverae_obs, suillus_granulatus_obs

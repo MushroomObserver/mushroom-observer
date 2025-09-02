@@ -52,6 +52,20 @@ class ObservationFields
     qr_list
   end
 
+  def similar_observations_value
+    return unless Name.ranks[observation.name.rank] <= Name.ranks[:Species]
+
+    similar_observations.count.to_s
+  end
+
+  def similar_observations
+    location_filter(
+      observation.name.observations.joins(:project_observations).
+        where(project_observations: { project_id: observation.project_ids }).
+        where(when: week_before..week_after).where.not(id: observation.id)
+    ).distinct
+  end
+
   private
 
   def create_field(name, value)
@@ -158,20 +172,6 @@ class ObservationFields
 
   def date_value
     observation.when.strftime("%B %d, %Y")
-  end
-
-  def similar_observations_value
-    return unless Name.ranks[observation.name.rank] <= Name.ranks[:Species]
-
-    similar_observations.count.to_s
-  end
-
-  def similar_observations
-    location_filter(
-      observation.name.observations.joins(:project_observations).
-        where(project_observations: { project_id: observation.project_ids }).
-        where(when: week_before..week_after).where.not(id: observation.id)
-    ).distinct
   end
 
   def location_filter(results)

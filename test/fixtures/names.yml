@@ -1371,3 +1371,27 @@ even_longer_name:
   deprecated: true
   created_at: 2025-08-21 08:14:10
   updated_at: 2025-08-21 08:14:10
+
+suillus_weaverae:
+  <<: *DEFAULTS
+  rank: <%= Name.ranks[:Species] %>
+  text_name: Suillus weaverae
+  author: '(A.H. Sm. & Shaffer) H. Engel & Klofac'
+  search_name: Suillus weaverae (A.H. Sm. & Shaffer) H. Engel & Klofac
+  display_name: '**__Suillus__** **__weaverae__** (A.H. Sm. & Shaffer) H. Engel & Klofac'
+  sort_name: Suillus weaverae  (A.H. Sm. & Shaffer) H. Engel & Klofac
+  deprecated: false
+  created_at: 2025-09-01 08:14:10
+  updated_at: 2025-09-01 08:14:10
+
+suillus_granulatus:
+  <<: *DEFAULTS
+  rank: <%= Name.ranks[:Species] %>
+  text_name: Suillus granulatus
+  author: '(L.) Roussel'
+  search_name: Suillus granulatus (L.) Roussel
+  display_name: '**__Suillus__** **__granulatus__** (L.) Roussel'
+  sort_name: Suillus granulatus  (L.) Roussel
+  deprecated: false
+  created_at: 2025-09-01 08:14:10
+  updated_at: 2025-09-01 08:14:10
