@@ -296,7 +296,7 @@ class HerbariaControllerTest < FunctionalTestCase
     pattern = "Personal Herbarium"
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params: { q: { model: Herbarium, pattern: pattern } })
 
     assert_page_title(:HERBARIA.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
@@ -314,16 +314,6 @@ class HerbariaControllerTest < FunctionalTestCase
         "#{herbarium.format_name})"
       )
     end
-  end
-
-  def test_index_pattern_integer
-    login
-    get(:index, params: { pattern: nybg.id })
-
-    assert_redirected_to(
-      herbarium_path(nybg),
-      "Herbarium search for ##{nybg.id} should show #{nybg.name} herbarium"
-    )
   end
 
   def test_index_reverse_records

@@ -49,7 +49,7 @@ class API2
         date: parse_range(:date, :date, help: :when_seen),
         by_users: parse_array(:user, :user, help: :observer),
         names: parse_array(:name, :name, as: :id),
-        locations: parse_array(:location, :location, as: :id),
+        within_locations: parse_array(:location, :location, as: :id),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
         herbarium_records: parse_array(:herbarium_record, :herbarium_record,
                                        as: :id),

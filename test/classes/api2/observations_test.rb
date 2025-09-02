@@ -107,7 +107,7 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_getting_observations_locations
-    obses = Observation.where(location: locations(:burbank))
+    obses = Observation.within_locations(locations(:burbank))
     assert(obses.length > 1)
     assert_api_pass(params_get(location: 'Burbank\, California\, USA'))
     assert_api_results(obses)

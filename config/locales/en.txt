@@ -440,6 +440,8 @@
   visual_model: visual model
   VISUAL_MODELS: Visual Models
   visual_models: visual models
+  WITHIN_LOCATIONS: Within Locations
+  within_locations: within locations
   VOTE: Vote
   vote: vote
   VOTES: Votes
@@ -3748,9 +3750,9 @@
   observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at a fungarium.
   observation_term_herbaria: "[:observation_term_herbarium]"
-  observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
+  observation_term_location: Mushroom was observed within the the geographic bounds ([:east], [:north], [:south], [:west]) of this Location, regardless of the exact name of the Location of the Observation. Location must be an existing MO Location. Cf. **[:region]**.
   observation_term_locations: "[:observation_term_location]"
-  observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
+  observation_term_region: The Observation's Location name includes this string. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown. Cf. **[:location]**.
   observation_term_pattern: "[:pattern]"
   observation_term_project: Observation belongs to one of these projects.
   observation_term_projects: "[:observation_term_project]"
@@ -3766,10 +3768,10 @@
   observation_term_field_slip: Observation corresponds to this field slip.
   observation_term_field_slips: "[:observation_term_field_slip]"
   observation_term_confidence: Confidence is in this range.
-  observation_term_east: Longitude of eastern edge of search region.
-  observation_term_west: Longitude of western edge of search region.
-  observation_term_north: Latitude of northern edge of search region.
-  observation_term_south: Latitude of southern edge of search region.
+  observation_term_east: Longitude of eastern edge of search area.
+  observation_term_west: Longitude of western edge of search area.
+  observation_term_north: Latitude of northern edge of search area.
+  observation_term_south: Latitude of southern edge of search area.
   observation_term_has_images: Has images? ("yes" or "no")
   observation_term_has_sequence: Has a sequence?
   observation_term_has_sequences: "[:observation_term_has_sequence]"
@@ -4560,6 +4562,7 @@
   query_herbaria: "[:herbaria]"
   query_herbarium_records: "[:herbarium_records]"
   query_locations: "[:locations]"
+  query_within_locations: "[:within_locations]"
   query_observations: "[:observations]"
   query_project_lists: "[:project_lists]"
   query_projects: "[:projects]"

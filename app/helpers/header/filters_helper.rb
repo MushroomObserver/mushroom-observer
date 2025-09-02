@@ -168,6 +168,7 @@ module Header
       field_slips: :FieldSlips,
       herbaria: :Herbaria,
       locations: :Locations,
+      within_locations: :Locations,
       names: :Names,
       lookup: :Names,
       clade: :Names,

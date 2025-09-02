@@ -9,6 +9,7 @@ class NamesController < ApplicationController
   # INDEX
   #
   def index
+    make_name_suggestions
     build_index_with_query
   end
 
@@ -39,42 +40,14 @@ class NamesController < ApplicationController
     [nil, {}]
   end
 
-  # Display list of names that match a string.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (name = Name.safe_find(pattern))
-      redirect_to(name_path(name.id))
-      [nil, {}]
-    else
-      show_non_id_pattern_results(pattern)
-    end
-  end
+  def make_name_suggestions
+    return unless @objects.empty? &&
+                  params[:q].is_a?(ActionController::Parameters) &&
+                  (original_spelling = params.dig(:q, :pattern))
 
-  def show_non_id_pattern_results(pattern)
-    # Have to use PatternSearch here to catch invalid PatternSearch terms.
-    # Can't just send pattern to Query as create_query(:Observation, pattern:)
-    search = PatternSearch::Name.new(pattern)
-    if search.errors.any?
-      search.errors.each do |error|
-        flash_error(error.to_s)
-      end
-      render("names/index")
-      [nil, {}]
-    else
-      # Call create_query to apply user content filters
-      query = create_query(:Name, search.query.params)
-      make_name_suggestions(search)
-      [query, {}]
-    end
-  end
+    return unless original_spelling
 
-  def make_name_suggestions(search)
-    alternate_spellings = search.query.params[:pattern]
-    return unless alternate_spellings && @objects.empty?
-
-    @name_suggestions =
-      Name.suggest_alternate_spellings(alternate_spellings)
+    @name_suggestions = Name.suggest_alternate_spellings(original_spelling)
   end
 
   # Disabling the cop because subaction methods are going away soon

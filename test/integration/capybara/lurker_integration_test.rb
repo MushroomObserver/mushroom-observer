@@ -174,7 +174,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
            "expected 2 Images in Observation, got #{image_count}")
   end
 
-  def test_search
+  def test_search_names
     login
 
     # Search for a name.  (Only one.)
@@ -183,24 +183,38 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     within("#pattern_search_form") { click_button("Search") }
     assert_match(names(:coprinus_comatus).text_name,
                  page.title, "Wrong page")
+  end
+
+  def test_search_observations
+    login
 
     # Search for observations of that name.  (Only one.)
+    fill_in("pattern_search_pattern", with: "Coprinus comatus")
     select("Observations", from: "pattern_search_type")
     within("#pattern_search_form") { click_button("Search") }
     assert_match(/#{observations(:coprinus_comatus_obs).id}/,
                  page.title, "Wrong page")
+  end
 
-    # Image pattern searches temporarily disabled for performamce
-    # 2021-09-12 JDC
-    # Search for images of the same thing.  (Still only one.)
-    # select("Images", from: "pattern_search_type")
-    # within("#pattern_search_form") { click_button("Search") }
-    # assert_match(
-    #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
-    #   current_fullpath
-    # )
+  # Image pattern searches temporarily disabled for performamce
+  # 2021-09-12 JDC
+  # def test_search_images
+  #   login
+
+  #   # Search for images of the same thing.  (Still only one.)
+  #   select("Images", from: "pattern_search_type")
+  #   within("#pattern_search_form") { click_button("Search") }
+  #   assert_match(
+  #     %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
+  #     current_fullpath
+  #   )
+  # end
+
+  def test_search_locations
+    login
 
     # There should be no locations of that name, though.
+    fill_in("pattern_search_pattern", with: "Coprinus comatus")
     select("Locations", from: "pattern_search_type")
     within("#pattern_search_form") { click_button("Search") }
     assert_match("Locations", page.title, "Wrong page")
@@ -221,7 +235,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
            "Found these: #{labels.inspect}")
   end
 
-  def test_search_from_obs_needing_ids
+  def test_search_observations_from_obs_needing_ids
     login
 
     visit("/observations/identify")
@@ -282,7 +296,6 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/obs/\d+})
     end
-
     # Bail if there are too many results — test will not work
     if has_selector?("#results .pagination a", text: /Next/)
       skip("Test skipped because it bombs when search results > " \
@@ -327,7 +340,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     assert_equal(
       query_params.symbolize_keys,
-      { locations: [loc.id.to_s], model: "Observation", order_by: "name" }
+      { model: "Observation", order_by: "name",
+        within_locations: [loc.id.to_s] }
     )
 
     # Go to first observation, and try stepping back and forth.
