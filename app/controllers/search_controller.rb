@@ -109,20 +109,27 @@ class SearchController < ApplicationController
   end
 
   def build_query_and_redirect(type, model_name, pattern)
-    # name and obs prevalidate the pattern with PatternSearch instance,
-    # and check for errors defined by PatternSearch.
-    # location alters format of pattern
-    # Finally we can build search and redirect.
+    # :Name and :Observation prevalidate the pattern with a PatternSearch
+    # instance, and check for errors defined by PatternSearch.
+    # :Location checks the user location format of the "pattern".
     query = query_from_pattern(model_name, pattern)
-    if model_name == :Observation && params[:needs_naming]
+
+    # Finally we can redirect.
+    if coming_from_obs_needing_ids?(model_name)
       redirect_to(identify_observations_path(q: query.q_param))
-    elsif query.result_ids.length == 1
+    elsif single_result?(query)
       redirect_to(send(:"#{type.to_s.singularize}_path", query.first_id))
     else
       redirect_to(send(:"#{type}_path", params: { q: query.q_param }))
     end
-    # Name and obs Controllers must dig :q, :pattern to check name suggestions
-    # on main index action.
+  end
+
+  def coming_from_obs_needing_ids?(model_name)
+    model_name == :Observation && params[:needs_naming]
+  end
+
+  def single_result?(query)
+    query.result_ids.length == 1
   end
 
   def query_from_pattern(model_name, pattern)
