@@ -248,7 +248,6 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     @spl1.add_observation(obs) # (shouldn't affect anything for create)
     @spl2.add_observation(obs)
     get(:new)
-    debugger
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :checked)
 
     # Make sure it remember state of checks if submit fails.
