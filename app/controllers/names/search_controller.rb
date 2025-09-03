@@ -70,7 +70,7 @@ module Names
             collapsed: [:pattern, :rank, :lichen]
           },
           quality: {
-            shown: [[:has_synonyms, :deprecated]],
+            shown: [[:misspellings, :deprecated]],
             collapsed: [[:has_author, :author_has],
                         [:has_citation, :citation_has],
                         [:has_default_description]]
