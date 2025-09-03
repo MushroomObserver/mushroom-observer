@@ -40,7 +40,7 @@ class InatExportsController < ApplicationController
         [params[:id].to_i]
       else
         query = find_query(:Observation)
-        [query.results.ids]
+        query.result_ids
       end
     # array of ids of Observations to export
     @mo_ids = Observation.where(id: @requested_ids, user: @user).
