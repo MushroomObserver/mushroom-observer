@@ -4549,12 +4549,12 @@
   # name queries
   query_names: "[:names]"
   query_lookup: "[:names]"
-  query_include_synonyms: with synonyms
-  query_include_subtaxa: with subtaxa
-  query_include_immediate_subtaxa: with immediate subtaxa
-  query_exclude_original_names: exclude original names
-  query_include_all_name_proposals: include all proposed names
-  query_exclude_consensus: exclude consensus name
+  query_include_synonyms: synonyms
+  query_include_subtaxa: subtaxa
+  query_include_immediate_subtaxa: immediate subtaxa
+  query_exclude_original_names: exclude original
+  query_include_all_name_proposals: all proposed
+  query_exclude_consensus: exclude consensus
 
   # records
   query_external_sites: "[:sites]"
