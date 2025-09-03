@@ -7,10 +7,15 @@ require "prawn/measurement_extensions"
 class ObservationLabels
   attr_reader :query, :page_width, :page_height
 
-  def initialize(query, page_width, page_height)
+  def initialize(query)
     @query = query
-    @page_width = page_width.in
-    @page_height = page_height.in
+    if query.results.count == 1
+      @page_width = 5.in
+      @page_height = 3.in
+    else
+      @page_width = 8.5.in
+      @page_height = 11.in
+    end
   end
 
   # Generates the PDF document and returns it as a string

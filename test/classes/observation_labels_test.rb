@@ -10,7 +10,7 @@ class ObservationLabelsTest < UnitTestCase
       log_contents = with_captured_logger do
         obs = Observation.first
         doc = ObservationLabels.new(
-          Query.lookup(:Observation, id_in_set: [obs.id]), 10.in, 10.in
+          Query.lookup(:Observation, id_in_set: [obs.id])
         )
         doc.generate
       end
