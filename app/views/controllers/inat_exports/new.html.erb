@@ -12,8 +12,14 @@
     <%= panel_block(id: "observation_counts",
                     heading: :inat_export_observation_counts.l,
                     class: "name-section") do %>
-      <p><b><%= :inat_export_requested.l %></b>: <%= @requested.to_i.to_s %></p>
-      <p><b><%= :inat_export_exportables.l %></b>: <%= @exportable.to_i.to_s %></p>
+      <p>
+        <b><%= :inat_export_requested.l %></b>:
+        <%= @requested_count&.to_i.to_s %>
+      </p>
+      <p>
+        <b><%= :inat_export_exportables.l %></b>:
+        <%= @exportable_count&.to_i.to_s %>
+      <p>
     <% end %>
 
     <%= panel_block do %>
