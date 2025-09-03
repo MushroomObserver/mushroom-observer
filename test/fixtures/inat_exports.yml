@@ -2,7 +2,7 @@
 
 DEFAULTS: &DEFAULTS
   user_id: nil
-  state: <%= InatImport.states[:Unstarted] %>
+  state: <%= InatExport.states[:Unstarted] %>
   mo_ids: ""
   token: ""
   inat_username: ""
