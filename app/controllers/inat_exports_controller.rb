@@ -12,7 +12,7 @@ class InatExportsController < ApplicationController
   #  observations index (which has an Observation query)
   def new
     @inat_export = InatExport.find_or_create_by(user: @user)
-    # return export_pending if @inat_export.job_pending?
+    return export_pending if @inat_export.job_pending?
 
     define_ivars
   end

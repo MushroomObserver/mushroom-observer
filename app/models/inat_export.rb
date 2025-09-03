@@ -38,7 +38,7 @@ class InatExport < ApplicationRecord
     Authorizing: 1,
     # trading iNat authorization code for an authentication token
     Authenticating: 2,
-    Importing: 3,
+    Exporting: 3,
     Done: 4
   }
 
@@ -52,7 +52,7 @@ class InatExport < ApplicationRecord
   BASE_AVG_EXPORT_SECONDS = 15
 
   def job_pending?
-    %w[Authenticating Exporting].include?(state)
+    %w[Authorizing Authenticating Exporting].include?(state)
   end
 
   def add_response_error(error)

@@ -35,20 +35,18 @@ class InatExportsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_new_inat_export_already_exporting
-    skip("Under Construction")
+  def test_new_cancel_return_to_observation
     obs = observations(:untrusted_hidden)
     user = obs.user
-    export = inat_exports(:katrina_inat_export)
 
     login(user.login)
-    get(:new)
+    get(:new, params: { id: obs.id })
 
     assert_flash_warning(
-      "Should flash warning if user starts iNat import while another is running"
+      "Should flash warning if user starts iNat export while another is running"
     )
     assert_redirected_to(
-      inat_export_path(export, params: { tracker_id: tracker.id })
+      observation_path(id: obs.id)
     )
   end
 
@@ -360,21 +358,6 @@ class InatExportsControllerTest < FunctionalTestCase
       user.reload.inat_username,
       "User inat_username shouldn't change if user denies authorization to MO"
     )
-  end
-
-  def test_cancel
-    skip("Under Construction")
-    import = inat_imports(:katrina_inat_import)
-    assert(import.job_pending? && !import.canceled?,
-           "Test needs a Import fixture with a uncancelled, pending Job")
-
-    login
-    get(:cancel, params: { id: import.id })
-
-    assert_response(:success)
-    assert_template(:show)
-    assert(import.reload.canceled?,
-           "Clicking cancel button should make InatImport.canceled? == true")
   end
 
   def test_show
