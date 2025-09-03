@@ -855,6 +855,7 @@ even_longer_obs:
 
 megacollybia_rodmanii_obs:
   <<: *DEFAULTS
+  user: foray_recorder
   name: megacollybia_rodmanii
   text_name: Megacollybia rodmanii
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
@@ -864,6 +865,7 @@ megacollybia_rodmanii_obs:
 
 dup_megacollybia_rodmanii_obs:
   <<: *DEFAULTS
+  user: foray_recorder
   name: megacollybia_rodmanii
   text_name: Megacollybia rodmanii
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
@@ -873,6 +875,7 @@ dup_megacollybia_rodmanii_obs:
 
 nearby_megacollybia_rodmanii_obs:
   <<: *DEFAULTS
+  user: foray_recorder
   name: megacollybia_rodmanii
   text_name: Megacollybia rodmanii
   lat: 41.6592
@@ -885,6 +888,7 @@ nearby_megacollybia_rodmanii_obs:
 
 faraway_megacollybia_rodmanii_obs:
   <<: *DEFAULTS
+  user: foray_recorder
   name: megacollybia_rodmanii
   text_name: Megacollybia rodmanii
   lat: 40.867
@@ -897,6 +901,7 @@ faraway_megacollybia_rodmanii_obs:
 
 older_megacollybia_rodmanii_obs:
   <<: *DEFAULTS
+  user: foray_recorder
   name: megacollybia_rodmanii
   text_name: Megacollybia rodmanii
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
@@ -906,6 +911,7 @@ older_megacollybia_rodmanii_obs:
 
 megacollybia_platyphylla_obs:
   <<: *DEFAULTS
+  user: foray_recorder
   name: megacollybia_platyphylla
   text_name: Megacollybia platyphylla
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
