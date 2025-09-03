@@ -87,7 +87,14 @@ module SearchHelper
     end
     # Re-add :sections for conditional fields.
     if [:names_fields_for_names, :names_fields_for_obs].include?(field_type)
-      args = args.merge(sections:, search:)
+      args = args.merge(sections:)
+    end
+
+    unless [:names_fields_for_names,
+            :names_fields_for_obs,
+            :multiple_autocompleter,
+            :region_with_in_box_fields].include?(field_type)
+      args = args.except(:search)
     end
 
     send(field_type, **args)
@@ -116,7 +123,6 @@ module SearchHelper
     defined[field]
   end
 
-  # TODO: fix this, component should be field_type
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
@@ -127,9 +133,7 @@ module SearchHelper
     args[:help] = search_help_text(args, field_type)
     args[:hidden_name] = search_check_for_hidden_field_name(args)
     # args[:class] = "mb-3"
-    args = search_prefill_or_select_values(args, field_type)
-
-    args.except(:search)
+    search_prefill_or_select_values(args, field_type)
   end
 
   # TODO: fix this, needs query tags not pattern search term tags
@@ -152,24 +156,20 @@ module SearchHelper
     nil
   end
 
-  def search_prefill_or_select_values(args, field_type)
-    if SEARCH_SELECT_TYPES.include?(field_type)
-      args[:selected] = args[:search].send(args[:field]) || nil
-    end
-    args
-  end
-
   ###############################################################
   #
   # FIELD HELPERS
   #
   def multiple_value_autocompleter(**args)
-    args[:type] = search_autocompleter_type(args[:field])
+    # rightward destructuring assignment, Ruby 3 feature
+    args => { field:, search: }
+    args[:type] = search_autocompleter_type(field)
     args[:separator] = SEARCH_SEPARATOR
     args[:textarea] = true
-    args[:hidden_name] = :"#{args[:field]}_id"
-    args[:hidden_value] = args.dig(:search, args[:field])
-    autocompleter_field(**args)
+    args[:hidden_name] = :"#{field}_id"
+    args[:hidden_value] = search_attribute_possibly_nested_value(search, field)
+    args[:value] = search_autocompleter_prefillable_values(search, field)
+    autocompleter_field(**args.except(:search))
   end
 
   def search_autocompleter_type(field)
@@ -185,22 +185,45 @@ module SearchHelper
     end
   end
 
+  def search_autocompleter_prefillable_values(search, field)
+    values = search_attribute_possibly_nested_value(search, field)
+    return search_string_but_not_id(values) unless values.is_a?(Array)
+
+    return nil unless search_string_but_not_id(values[0])
+
+    values.join(SEARCH_SEPARATOR)
+  end
+
+  # For autocompleters, if the value(s) is/are ids, we don't want those
+  # prefilled in the text field — they go in the "hidden_field" for ids.
+  # Prefill the visible text only if it's a string or array of strings.
+  def search_string_but_not_id(val)
+    if val.is_a?(Numeric) ||
+       (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
+      return nil
+    end
+
+    val
+  end
+
   def names_fields_for_names(**args)
     rows = [[:include_synonyms, :exclude_original_names],
             [:include_subtaxa, :include_immediate_subtaxa]]
-    search = args[:search]
-    names_fields_for_search(rows:, search:)
+    # rightward destructuring assignment, Ruby 3 feature
+    args => { form:, search: }
+    names_fields_for_search(form:, rows:, search:)
   end
 
   def names_fields_for_obs(**args)
     rows = [[:include_synonyms, :include_subtaxa],
             [:include_all_name_proposals, :exclude_consensus]]
-    search = args[:search]
-    names_fields_for_search(rows:, search:)
+    # rightward destructuring assignment, Ruby 3 feature
+    args => { form:, search: }
+    names_fields_for_search(form:, rows:, search:)
   end
 
-  def names_fields_for_search(rows:, search:)
-    fields_for(:names) do |f_n|
+  def names_fields_for_search(form:, rows:, search:)
+    form.fields_for(:names) do |f_n|
       autocompleter_with_conditional_fields(
         form: f_n, field: :lookup, label: :NAMES.l, search:, sections: rows
       )
@@ -216,7 +239,7 @@ module SearchHelper
     args => { form:, field:, label:, search:, sections: }
     # If there are conditional rows that should appear if user input, add these
     append = autocompleter_conditional_rows(form:, search:, sections:)
-    multiple_value_autocompleter(form:, field:, label:, append:)
+    multiple_value_autocompleter(form:, field:, label:, search:, append:)
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
@@ -367,12 +390,35 @@ module SearchHelper
   #   )
   # end
 
+  def search_prefill_or_select_values(args, field_type)
+    # rightward destructuring assignment, Ruby 3 feature
+    args => { field:, search: }
+    value = search_attribute_possibly_nested_value(search, field)
+
+    if SEARCH_SELECT_TYPES.include?(field_type)
+      args[:selected] = value
+    else
+      args[:value] = value
+    end
+    args
+  end
+
+  # Figure out if a field value is nested within the query, so we can access it
+  # to prefill nested fields in the form. See note in Searchable.
+  def search_attribute_possibly_nested_value(search, field)
+    unless controller.nested_field_names.include?(field)
+      return search.send(field) # simple accessor of the search Query object
+    end
+
+    search.send(:names)[field] # nested attributes have to be accessed by key
+  end
+
   def search_column_classes
     "col-xs-12 col-sm-6 col-md-12 col-lg-6"
   end
 
   # Separator for autocompleter fields.
-  SEARCH_SEPARATOR = ", "
+  SEARCH_SEPARATOR = "\n"
 
   # Convenience for subclasses to access helper methods via subclass.params
   SEARCH_FIELD_HELPERS = {

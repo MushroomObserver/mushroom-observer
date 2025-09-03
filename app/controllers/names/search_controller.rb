@@ -36,7 +36,7 @@ module Names
         misspellings: :select_misspellings,
         rank: :select_rank_range,
         lichen: :select_boolean
-      }
+      }.freeze
     end
 
     def nested_names_params
@@ -45,7 +45,7 @@ module Names
         include_subtaxa: :select_boolean,
         include_immediate_subtaxa: :select_boolean,
         exclude_original_names: :select_boolean
-      }
+      }.freeze
     end
 
     def fields_with_range

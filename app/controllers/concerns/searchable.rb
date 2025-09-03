@@ -13,6 +13,29 @@ module Searchable
   extend ActiveSupport::Concern
 
   included do
+    # We need these arrays to manually prefill nested values from the query.
+    #
+    # Note that Rails might prefill the values for us if it knew about the
+    # objects, i.e. if we we made nested ActiveModels for `:in_box` and the
+    # observation/names versions of `:names`. https://jamescrisp.org/2020/10/12/
+    # rails-activemodel-with-nested-objects-and-validation/
+    # (:names would be a Lookup::Names object, :in_box a Mappable::Box object.)
+    # This would require changing some of the attribute defs in Query, though.
+    def nested_field_names
+      nested_names_param_names + nested_in_box_param_names
+    end
+
+    def nested_names_param_names
+      keys = nested_names_params&.keys || []
+      return keys if keys.blank?
+
+      keys << :lookup
+    end
+
+    def nested_in_box_param_names
+      [:north, :south, :east, :west].freeze
+    end
+
     def show
       respond_to do |format|
         format.turbo_stream do
@@ -27,7 +50,7 @@ module Searchable
 
     def new
       set_up_form_field_groupings
-      @search = new_search_instance_from_query
+      @search = find_query(query_model)
     end
 
     def create
@@ -60,15 +83,9 @@ module Searchable
     # Should be new_query_instance. clear_form should update the current query,
     # removing params that wouldn't be in the form (like subqueries).
     # Need to parse and prepopulate range fields if there is a query.
-    def new_search_instance_from_query
-      if (@query = find_query(query_model))&.params.present?
-        query_subclass.new(
-          @query.params.slice(permitted_search_params.keys)
-        )
-      else
-        query_subclass.new
-      end
-    end
+    # def new_search_instance_from_query
+    #   @search = find_query(query_model)
+    # end
 
     # Passing some fields will raise an error if the required field is missing,
     # so just toss them. Not sure we have to do this, because Query will.

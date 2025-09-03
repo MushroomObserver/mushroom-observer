@@ -187,6 +187,10 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}")
   end
 
+  def test_observation_search_form
+    login
+  end
+
   # Tests of show_name_helper module
   # Prove that all these links appear under "Observations of"
   def test_links_to_observations_of

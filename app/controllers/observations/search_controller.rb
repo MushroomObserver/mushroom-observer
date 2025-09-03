@@ -41,7 +41,7 @@ module Observations
         species_lists: :multiple_value_autocompleter,
         project_lists: :multiple_value_autocompleter,
         field_slips: :text_field_with_label
-      }
+      }.freeze
     end
 
     def nested_names_params
@@ -52,7 +52,7 @@ module Observations
         exclude_original_names: :select_boolean,
         include_all_name_proposals: :select_boolean,
         exclude_consensus: :select_boolean
-      }
+      }.freeze
     end
 
     def fields_preferring_ids

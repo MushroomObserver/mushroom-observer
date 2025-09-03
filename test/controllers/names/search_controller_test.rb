@@ -19,6 +19,7 @@ module Names
     end
 
     def test_new_names_search_from_existing_query
+      login
       query = @controller.find_or_create_query(
         :Name, pattern: "petigera", misspellings: :either,
                has_classification: true, author_has: "Pers."
