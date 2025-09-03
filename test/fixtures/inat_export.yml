@@ -1,0 +1,26 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+DEFAULTS: &DEFAULTS
+  user_id: nil
+  state: <%= InatImport.states[:Unstarted] %>
+  mo_ids: ""
+  token: ""
+  inat_username: ""
+  export_all: false
+  exportables: 0
+  exported_count: 0
+  ended_at: nil
+  total_exported_count: nil
+  total_seconds: nil
+  avg_export_time: nil
+  last_obs_start: nil
+  cancel: false
+  response_errors: ""
+
+# katrina is in the middle of an export
+katrina_inat_import:
+  <<: *DEFAULTS
+  user: katrina
+  state: <%= InatExport.states[:Importing] %>
+  inat_username: katrina_inat_username
+  cancel: false
