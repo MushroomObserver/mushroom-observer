@@ -7,21 +7,12 @@ class InatExportsControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
   include Inat::Constants
 
-  def test_show
-    skip("Not yet implemented")
-    export = inat_exports(:rolf_inat_export)
-    tracker = InatExportJobTracker.create(inat_export: export.id)
+  def test_new_inat_export_of_obs
+    obs = observations(:coprinus_comatus_obs)
+    user = obs.user
 
-    login
-
-    get(:show, params: { id: export.id, tracker_id: tracker.id })
-
-    assert_response(:success)
-  end
-
-  def test_new_inat_export
-    login(users(:rolf).login)
-    get(:new)
+    login(user.login)
+    get(:new, params: { id: obs.id })
 
     assert_response(:success)
     assert_form_action(action: :create)
@@ -29,13 +20,14 @@ class InatExportsControllerTest < FunctionalTestCase
                   "Form needs a field for inputting iNat username")
   end
 
-  def test_new_inat_export_inat_username_prefilled
-    user = users(:mary)
+  def test_new_inat_export_of_obs_inat_username_prefilled
+    obs = observations(:minimal_unknown_obs)
+    user = obs.user
     assert(user.inat_username.present?,
            "Test needs a user fixture with an inat_username")
 
-    login(mary.login)
-    get(:new)
+    login(user.login)
+    get(:new, params: { id: obs.id })
 
     assert_select(
       "input[name=?][value=?]", "inat_username", user.inat_username, true,
@@ -45,9 +37,9 @@ class InatExportsControllerTest < FunctionalTestCase
 
   def test_new_inat_export_already_exporting
     skip("Under Construction")
-    user = users(:katrina)
+    obs = observations(:untrusted_hidden)
+    user = obs.user
     export = inat_exports(:katrina_inat_export)
-    tracker = inat_export_job_trackers(:katrina_tracker)
 
     login(user.login)
     get(:new)
@@ -383,5 +375,17 @@ class InatExportsControllerTest < FunctionalTestCase
     assert_template(:show)
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
+  end
+
+  def test_show
+    skip("Not yet implemented")
+    export = inat_exports(:rolf_inat_export)
+    tracker = InatExportJobTracker.create(inat_export: export.id)
+
+    login
+
+    get(:show, params: { id: export.id, tracker_id: tracker.id })
+
+    assert_response(:success)
   end
 end
