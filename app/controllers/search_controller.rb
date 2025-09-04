@@ -31,16 +31,25 @@ class SearchController < ApplicationController
   def save_pattern_and_proceed(type, pattern)
     # Save it so that we can keep it in the search bar in subsequent pages.
     # But don't save encoded incoming patterns that are too large.
-    unless pattern.bytesize > 4096
-      session[:pattern] = pattern
-      session[:search_type] = type
-    end
+    save_pattern_if_it_wont_overfill_cookie_store(type, pattern)
 
     if type == :google
       site_google_search(pattern)
     else
       forward_pattern_search(type, pattern)
     end
+  end
+
+  def save_pattern_if_it_wont_overfill_cookie_store(type, pattern)
+    return if session_data_size > 2048 || pattern.bytesize > 2048
+
+    session[:pattern] = pattern
+    session[:search_type] = type
+  end
+
+  # The CookieStore (Default) limit is 4096
+  def session_data_size
+    session.to_hash.compact.to_json.bytesize
   end
 
   def site_google_search(pattern)

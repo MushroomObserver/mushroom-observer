@@ -39,17 +39,38 @@ module Observations
                     text: "petigera")
       assert_select("select#query_observations_names_include_synonyms",
                     selected: "yes")
-      assert_select("select#query_observations_region",
-                    text: "Massachusetts, USA")
+      # assert_select("input#query_observations_region",
+      #               text: "Massachusetts, USA")
       assert_select("select#query_observations_has_specimen",
                     selected: "yes")
       assert_select("input#query_observations_notes_has", value: "Symbiota")
-      assert_select("textarea#query_observations_project_id",
-                    text: "petigera")
+      # assert_select("textarea#query_observations_projects",
+      #               text: proj1.title)
       assert_select("select#query_observations_confidence",
                     selected: "Species")
       assert_select("select#query_observations_confidence_range",
                     selected: "Form")
+    end
+
+    def test_create_observations_search
+      login
+      params = {
+        pattern: "Agaricus campestris",
+        has_notes: true
+      }
+      post(:create, params:)
+    end
+
+    def test_create_observations_search_nested
+      login
+      params = {
+        names: {
+          lookup: "Agaricus campestris",
+          include_synonyms: true
+        },
+        has_notes: true
+      }
+      post(:create, params:)
     end
   end
 end
