@@ -35,7 +35,8 @@ class InatExportsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_new_cancel_return_to_observation
+  def test_new_inat_export_pending
+    # Observation belongs to katrina, who's iNat export is busy Exporting
     obs = observations(:untrusted_hidden)
     user = obs.user
 
