@@ -4,7 +4,8 @@
 class ObservationLabels::Label
   LABEL_WIDTH = 5.in
   LABEL_HEIGHT = 3.in
-  MARGIN = 0.25.in
+  X_MARGIN = 0.25.in
+  Y_MARGIN = 0.5.in
   QR_CODE_SIZE = 0.75.in
 
   attr_reader :observation, :font_family, :pdf
@@ -38,13 +39,14 @@ class ObservationLabels::Label
   private
 
   def calculate_label_dimensions
-    content_width = LABEL_WIDTH - (2 * MARGIN)
-    content_height = LABEL_HEIGHT - (2 * MARGIN)
+    content_width = LABEL_WIDTH - (2 * X_MARGIN)
+    content_height = LABEL_HEIGHT - (2 * Y_MARGIN)
 
     {
       content_width: content_width,
       content_height: content_height,
-      margin: MARGIN
+      x_margin: X_MARGIN,
+      y_margin: Y_MARGIN
     }
   end
 
@@ -69,8 +71,8 @@ class ObservationLabels::Label
 
   def render_label_content(x_coord, y_coord, dimensions, fields,
                            space_allocation)
-    bounding_box_x = x_coord + dimensions[:margin]
-    bounding_box_y = y_coord - dimensions[:margin]
+    bounding_box_x = x_coord + dimensions[:x_margin]
+    bounding_box_y = y_coord - dimensions[:y_margin]
 
     pdf.bounding_box([bounding_box_x, bounding_box_y],
                      width: dimensions[:content_width],
