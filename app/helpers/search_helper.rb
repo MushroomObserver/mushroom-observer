@@ -70,32 +70,17 @@ module SearchHelper
 
   # Figure out what kind of field helper to call, based on definitions below.
   # Some field types need args, so there is both the component and args hash.
+  # NOTE: THIS IS WHERE THE ARGS BEGIN
   def search_field(form:, search:, field:, sections:)
     args = { form:, search:, field: }
+
     args[:label] ||= search_label(field)
     field_type = search_field_type_from_controller(field:)
     return unless field_type
 
     # Prepare args for the field helper.
-    args = prepare_args_for_search_field(args, field_type)
-    if field_type == :multiple_autocompleter
-      args[:type] = if field == :project_lists
-                      :project
-                    else
-                      field
-                    end
-    end
-    # Re-add :sections for conditional fields.
-    if [:names_fields_for_names, :names_fields_for_obs].include?(field_type)
-      args = args.merge(sections:)
-    end
-
-    unless [:names_fields_for_names,
-            :names_fields_for_obs,
-            :multiple_autocompleter,
-            :region_with_in_box_fields].include?(field_type)
-      args = args.except(:search)
-    end
+    args = prepare_args_for_search_field(args:, field_type:)
+    args = adjust_args_for_certain_fields(args:, field_type:, sections:)
 
     send(field_type, **args)
   end
@@ -126,14 +111,45 @@ module SearchHelper
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
-  def prepare_args_for_search_field(args, field_type)
+  def prepare_args_for_search_field(args:, field_type:)
     if field_type == :text_field_with_label && args[:field] != :pattern
       args[:inline] = true
     end
     args[:help] = search_help_text(args, field_type)
     args[:hidden_name] = search_check_for_hidden_field_name(args)
     # args[:class] = "mb-3"
-    search_prefill_or_select_values(args, field_type)
+    args = search_prefill_or_select_values(args, field_type)
+    debugger if args[:field] == :include_subtaxa
+    args
+  end
+
+  def adjust_args_for_certain_fields(args:, field_type:, sections:)
+    if field_type == :multiple_autocompleter
+      args[:type] = if args[:field] == :project_lists
+                      :project
+                    else
+                      args[:field]
+                    end
+    end
+    # readd :sections for conditional fields.
+    if search_fields_needing_sections.include?(field_type)
+      args = args.merge(sections:)
+    end
+    # Remove the search object unless we need it (will print otherwise)
+    unless search_fields_needing_search_object.include?(field_type)
+      args = args.except(:search)
+    end
+
+    args
+  end
+
+  def search_fields_needing_sections
+    [:names_fields_for_names, :names_fields_for_obs].freeze
+  end
+
+  def search_fields_needing_search_object
+    [:names_fields_for_names, :names_fields_for_obs,
+     :multiple_autocompleter, :region_with_in_box_fields].freeze
   end
 
   # TODO: fix this, needs query tags not pattern search term tags
@@ -207,26 +223,21 @@ module SearchHelper
   end
 
   def names_fields_for_names(**args)
-    rows = [[:include_synonyms, :exclude_original_names],
-            [:include_subtaxa, :include_immediate_subtaxa]]
-    # rightward destructuring assignment, Ruby 3 feature
-    args => { form:, search: }
-    names_fields_for_search(form:, rows:, search:)
+    args[:sections] = [[:include_synonyms, :exclude_original_names],
+                       [:include_subtaxa, :include_immediate_subtaxa]]
+    names_fields_for_search(**args)
   end
 
   def names_fields_for_obs(**args)
-    rows = [[:include_synonyms, :include_subtaxa],
-            [:include_all_name_proposals, :exclude_consensus]]
-    # rightward destructuring assignment, Ruby 3 feature
-    args => { form:, search: }
-    names_fields_for_search(form:, rows:, search:)
+    args[:sections] = [[:include_synonyms, :include_subtaxa],
+                       [:include_all_name_proposals, :exclude_consensus]]
+    names_fields_for_search(**args)
   end
 
-  def names_fields_for_search(form:, rows:, search:)
-    form.fields_for(:names) do |f_n|
-      autocompleter_with_conditional_fields(
-        form: f_n, field: :lookup, label: :NAMES.l, search:, sections: rows
-      )
+  def names_fields_for_search(**args)
+    args[:form].fields_for(:names) do |f_n|
+      args = args.merge(form: f_n, field: :lookup, label: :NAMES.l)
+      autocompleter_with_conditional_fields(**args)
     end
   end
 
@@ -236,10 +247,11 @@ module SearchHelper
     return if args[:sections].blank?
 
     # rightward destructuring assignment, Ruby 3 feature
-    args => { form:, field:, label:, search:, sections: }
+    args => { form:, search:, sections: }
+
     # If there are conditional rows that should appear if user input, add these
     append = autocompleter_conditional_rows(form:, search:, sections:)
-    multiple_value_autocompleter(form:, field:, label:, search:, append:)
+    multiple_value_autocompleter(append:, **args)
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
@@ -253,53 +265,54 @@ module SearchHelper
     end
   end
 
-  def select_yes(**)
+  def select_yes(**args)
     options = [
       ["", nil],
       ["yes", true]
     ]
-    select_with_label(options:, inline: true, **)
+    select_with_label(options:, inline: true, **args)
   end
 
-  def select_boolean(**)
+  def select_boolean(**args)
     options = [
       ["", nil],
       ["yes", true],
       ["no", false]
     ]
-    select_with_label(options:, inline: true, **)
+    select_with_label(options:, inline: true, **args)
   end
 
-  def select_misspellings(**)
+  def select_misspellings(**args)
     options = [
       ["", nil],
       ["yes", :yes],
       ["no", :no],
       ["both", :either]
     ]
-    select_with_label(options:, inline: true, **)
+    select_with_label(options:, inline: true, **args)
   end
 
   def select_rank_range(**args)
+    options = Name.all_ranks
     [
       tag.div(class: "d-inline-block mr-4") do
-        select_with_label(**search_rank_args(args))
+        select_with_label(options:, **search_rank_args(args))
       end,
       tag.div(class: "d-inline-block") do
-        select_with_label(**search_rank_range_args(args))
+        select_with_label(options:, **search_rank_range_args(args))
       end
     ].safe_join
   end
 
   def search_rank_args(args)
     args.except(:search).merge(
-      { options: Name.all_ranks, include_blank: true, inline: true }
+      { include_blank: true, inline: true }
     )
   end
 
   def search_rank_range_args(args)
     args.except(:search).merge(
-      { field: "#{args[:field]}_range", label: :to.l, options: Name.all_ranks,
+      { field: "#{args[:field]}_range", label: :to.l,
         include_blank: true, between: :optional, help: nil, inline: true }
     )
   end
@@ -393,6 +406,8 @@ module SearchHelper
   def search_prefill_or_select_values(args, field_type)
     # rightward destructuring assignment, Ruby 3 feature
     args => { field:, search: }
+    return args if [:names, :in_box].include?(field)
+
     value = search_attribute_possibly_nested_value(search, field)
 
     if SEARCH_SELECT_TYPES.include?(field_type)
