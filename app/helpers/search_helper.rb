@@ -294,48 +294,58 @@ module SearchHelper
     options = Name.all_ranks
     [
       tag.div(class: "d-inline-block mr-4") do
-        select_with_label(options:, **search_rank_args(args))
+        select_with_label(options:,
+                          **search_rank_args(args))
       end,
       tag.div(class: "d-inline-block") do
-        select_with_label(options:, **search_rank_range_args(args))
+        select_with_label(options:,
+                          **search_rank_range_args(args))
       end
     ].safe_join
   end
 
+  # these need to overwrite
   def search_rank_args(args)
+    value, _range = args[:selected]
     args.except(:search).merge(
-      { include_blank: true, inline: true }
+      { include_blank: true, inline: true, selected: value }
     )
   end
 
+  # these need to overwrite
   def search_rank_range_args(args)
+    _value, range = args[:selected]
     args.except(:search).merge(
-      { field: "#{args[:field]}_range", label: :to.l,
+      { field: "#{args[:field]}_range", label: :to.l, selected: range,
         include_blank: true, between: :optional, help: nil, inline: true }
     )
   end
 
   def select_confidence_range(**args)
-    confidences = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
+    options = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
     [
       tag.div(class: "d-inline-block mr-4") do
-        select_with_label(**search_confidence_args(confidences, args))
+        select_with_label(options:, **search_confidence_args(args))
       end,
       tag.div(class: "d-inline-block") do
-        select_with_label(**search_confidence_range_args(confidences, args))
+        select_with_label(options:, **search_confidence_range_args(args))
       end
     ].safe_join
   end
 
-  def search_confidence_args(confidences, args)
+  # these need to overwrite
+  def search_confidence_args(args)
+    value, _range = args[:selected]
     args.except(:search).merge(
-      { options: confidences, include_blank: true, inline: true }
+      { include_blank: true, inline: true, selected: value }
     )
   end
 
-  def search_confidence_range_args(confidences, args)
+  # these need to overwrite
+  def search_confidence_range_args(args)
+    _value, range = args[:selected]
     args.except(:search).merge(
-      { field: "#{args[:field]}_range", label: :to.l, options: confidences,
+      { field: "#{args[:field]}_range", label: :to.l, selected: range,
         include_blank: true, between: :optional, help: nil, inline: true }
     )
   end
