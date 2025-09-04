@@ -87,7 +87,7 @@ module Observations
       send_data(report.body, {
         type: report.mime_type,
         charset: report.encoding,
-        disposition: "attachment",
+        disposition: report.http_disposition,
         filename: report.filename
       }.merge(report.header || {}))
     end

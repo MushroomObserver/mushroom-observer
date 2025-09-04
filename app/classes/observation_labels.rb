@@ -9,7 +9,7 @@ class ObservationLabels
 
   def initialize(query)
     @query = query
-    if query.results.count == 1
+    if query.results.one?
       @page_width = 5.in
       @page_height = 3.in
     else
@@ -33,6 +33,10 @@ class ObservationLabels
 
   def mime_type
     "application/pdf"
+  end
+
+  def http_disposition
+    "inline"
   end
 
   def encoding
