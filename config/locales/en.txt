@@ -3054,12 +3054,14 @@
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
 
-# observation/inat_exports
+# inat_exports
   inat_export_create_title: Export to iNat
   inat_export_observation_counts: Observation Counts
   inat_export_requested: Export requested
   inat_export_exportables: Exportable
   inat_export_details: "* Excludes Observations which are not yours.\n* Excludes Observations previously imported from/exported to iNat."
+  inat_export_no_username: Missing your iNat Username
+  inat_export_no_exportables: The designated MO Observation(s) are not exportable to iNat
 
   # observation/inat_imports
   inat_import_create_title: Import from iNat
