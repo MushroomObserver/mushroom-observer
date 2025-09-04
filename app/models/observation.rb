@@ -257,7 +257,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def is_collector?(user)
-    user && notes[:Collector] == user.textile_name
+    user && notes[:Collector]&.include?("_user #{user.login}_")
   end
 
   def project_admin?(user = User.current)

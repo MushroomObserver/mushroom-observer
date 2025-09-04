@@ -599,4 +599,9 @@ class UserTest < UnitTestCase
       assert_equal(user, User.lookup_unique_text_name(user.unique_text_name))
     end
   end
+
+  def test_nihilist
+    user = users(:nihilist_user)
+    assert(user.textile_name.include?(user.login))
+  end
 end

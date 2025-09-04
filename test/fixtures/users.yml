@@ -222,3 +222,8 @@ inat_importer:
 
 foray_recorder:
   <<: *DEFAULTS
+
+nihilist_user:
+  <<: *DEFAULTS
+  login: Nil
+  name: ""

@@ -204,4 +204,41 @@ class AddDispatchControllerTest < FunctionalTestCase
     get(:new, params: { project: 999_999 })
     assert_redirected_to(new_observation_path)
   end
+
+  # Test project implied by species_list
+  def test_species_list_with_project
+    spl = species_lists(:unknown_species_list)
+    prefix = spl.projects.first.field_slip_prefix
+    field_slip = "123"
+    get(:new, params: {
+          object_type: "SpeciesList",
+          object_id: spl,
+          field_slip:
+        })
+
+    expected_url = "#{MO.http_domain}/qr/#{prefix}-#{field_slip}"
+    expected_params = "project=#{@project.id}&species_list=#{spl.id}"
+    expected_full_url = "#{expected_url}?#{expected_params}"
+
+    assert_redirected_to(expected_full_url)
+  end
+
+  # Test species_list without project
+  def test_species_list_without_project
+    spl = species_lists(:first_species_list)
+    field_slip = "123"
+    get(:new, params: {
+          object_type: "SpeciesList",
+          object_id: spl,
+          field_slip:
+        })
+
+    expected_url = new_observation_path
+    expected_params = "species_list=#{spl.id}"
+    expected_full_url = "#{expected_url}?#{expected_params}"
+
+    assert_redirected_to(expected_full_url)
+
+    assert_flash_warning(:bad_dispatch_code.t(code: field_slip))
+  end
 end
