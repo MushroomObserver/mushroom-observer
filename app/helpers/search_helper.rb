@@ -118,9 +118,7 @@ module SearchHelper
     args[:help] = search_help_text(args, field_type)
     args[:hidden_name] = search_check_for_hidden_field_name(args)
     # args[:class] = "mb-3"
-    args = search_prefill_or_select_values(args, field_type)
-    debugger if args[:field] == :include_subtaxa
-    args
+    search_prefill_or_select_values(args, field_type)
   end
 
   def adjust_args_for_certain_fields(args:, field_type:, sections:)
@@ -463,7 +461,8 @@ module SearchHelper
   }.freeze
 
   SEARCH_SELECT_TYPES = [
-    :yes, :boolean, :yes_no_both, :rank_range, :confidence
+    :select_yes, :select_boolean, :select_misspellings,
+    :select_rank_range, :select_confidence
   ].freeze
 
   def search_type_options
