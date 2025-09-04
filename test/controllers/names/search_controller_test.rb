@@ -27,10 +27,11 @@ module Names
       assert(query.id)
       assert_equal(query.id, session[:query_record])
       get(:new)
-      assert_select("input#pattern", text: "petigera")
-      assert_select("select#misspellings", text: "either")
-      assert_select("select#has_classification option[selected]", text: "yes")
-      assert_select("input#author_has", text: "Pers.")
+      assert_select("input#query_names_names_lookup", text: "petigera")
+      assert_select("select#query_names_misspellings", text: "either")
+      assert_select("select#query_names_has_classification option[selected]",
+                    text: "yes")
+      assert_select("input#query_names_author_has", text: "Pers.")
     end
 
     def test_create_names_search

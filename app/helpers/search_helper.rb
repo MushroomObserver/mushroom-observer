@@ -249,7 +249,7 @@ module SearchHelper
 
     # If there are conditional rows that should appear if user input, add these
     append = autocompleter_conditional_rows(form:, search:, sections:)
-    multiple_value_autocompleter(append:, **args)
+    multiple_value_autocompleter(append:, **args.except(:sections))
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
@@ -423,7 +423,7 @@ module SearchHelper
       return search.send(field) # simple accessor of the search Query object
     end
 
-    search.send(:names)[field] # nested attributes have to be accessed by key
+    search.send(:names)&.dig(field) # nested attributes accessed by key
   end
 
   def search_column_classes
