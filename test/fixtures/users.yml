@@ -223,4 +223,4 @@ inat_importer:
 nihilist_user:
   <<: *DEFAULTS
   login: Nil
-  name: <%= nil %>
+  name: ""
