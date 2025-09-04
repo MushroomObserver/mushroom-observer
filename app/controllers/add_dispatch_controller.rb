@@ -37,7 +37,6 @@ class AddDispatchController < ApplicationController
   end
 
   def find_code(project, code)
-    trace_tests
     return nil if code.blank?
     return code unless code[0].match?(/\d/)
     return "#{project.field_slip_prefix}-#{code}" if project

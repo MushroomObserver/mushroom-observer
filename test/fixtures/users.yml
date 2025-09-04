@@ -219,3 +219,8 @@ ann_user:
 inat_importer:
   <<: *DEFAULTS
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
+
+nihilist_user:
+  <<: *DEFAULTS
+  login: Nil
+  name: <%= nil %>
