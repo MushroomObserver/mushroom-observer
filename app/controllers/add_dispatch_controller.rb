@@ -32,8 +32,10 @@ class AddDispatchController < ApplicationController
     project = Project.safe_find(params[:project])
     return project if project
 
-    species_list = find_species_list
-    species_list&.projects&.first
+    projects = find_species_list&.projects
+    return nil unless projects
+
+    projects.where.not(field_slip_prefix: nil).first
   end
 
   def find_code(project, code)
