@@ -4,7 +4,9 @@
 # args should provide form, field, label at a minimum.
 # rubocop:disable Metrics/ModuleLength
 module SearchHelper
-  # Filter panel for a search form. Sections are shown and collapsed.
+  # Builds a single filter group, or panel, for a search form. The panel's
+  # field groups are defined in the controller, along with the field methods.
+  # Sections can be :shown/ :collapsed.
   # If sections[:collapsed] is present, part of the panel will be collapsed.
   def search_panel(form:, search:, heading:, sections:)
     shown = search_panel_shown(form:, search:, sections:)
@@ -70,7 +72,7 @@ module SearchHelper
 
   # Figure out what kind of field helper to call, based on definitions below.
   # Some field types need args, so there is both the component and args hash.
-  # NOTE: THIS IS WHERE THE ARGS BEGIN
+  # NOTE: THIS IS WHERE THE ARGS HASH BEGINS TO BE BUILT
   def search_field(form:, search:, field:, sections:)
     args = { form:, search:, field: }
 
@@ -147,7 +149,7 @@ module SearchHelper
 
   def search_fields_needing_search_object
     [:names_fields_for_names, :names_fields_for_obs,
-     :multiple_autocompleter, :region_with_in_box_fields].freeze
+     :multiple_value_autocompleter, :region_with_in_box_fields].freeze
   end
 
   # TODO: fix this, needs query tags not pattern search term tags

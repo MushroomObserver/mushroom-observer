@@ -36,6 +36,7 @@ module Searchable
       [:north, :south, :east, :west].freeze
     end
 
+    # Render help for the pattern search bar (if available), for current model
     def show
       respond_to do |format|
         format.turbo_stream do
@@ -50,7 +51,7 @@ module Searchable
 
     def new
       set_up_form_field_groupings
-      @search = find_query(query_model)
+      @search = find_or_create_query(query_model)
     end
 
     def create
