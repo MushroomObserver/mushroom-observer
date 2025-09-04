@@ -13,7 +13,7 @@ class AddDispatchController < ApplicationController
     # associated with Projects. The field, if provided, overrides the project
     # of the field slip if it's different.
     # This is how the Project context gets passed if it is relevant.
-    @project = Project.safe_find(params[:project])
+    @project = find_project
     @field_slip_code = find_code(@project, params[:field_slip])&.strip
     url = if @field_slip_code
             "#{MO.http_domain}/qr/#{@field_slip_code}"
@@ -28,11 +28,22 @@ class AddDispatchController < ApplicationController
 
   private
 
-  def find_code(project, code)
-    return nil if code.blank?
-    return code unless project && code[0].match?(/\d/)
+  def find_project
+    project = Project.safe_find(params[:project])
+    return project if project
 
-    "#{project.field_slip_prefix}-#{code}"
+    species_list = find_species_list
+    species_list&.projects&.first
+  end
+
+  def find_code(project, code)
+    trace_tests
+    return nil if code.blank?
+    return code unless code[0].match?(/\d/)
+    return "#{project.field_slip_prefix}-#{code}" if project
+
+    flash_warning(:bad_dispatch_code.t(code:))
+    nil
   end
 
   def dispatch_params
