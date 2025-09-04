@@ -6,95 +6,21 @@ module InatExportsController::Validators
   private
 
   def params_valid?
-    return
-
-    import_adequately_constrained? &&
-      imports_valid? &&
-      consented?
+    adequately_constrained? &&
+      exportables?
   end
 
-  def imports_valid?
-    imports_unambiguously_designated? &&
-      valid_inat_ids_param? &&
-      list_within_size_limits? &&
-      fresh_import? &&
-      unmirrored?
-  end
+  def adequately_constrained?
+    return true if params[:inat_username].present?
 
-  def imports_unambiguously_designated?
-    if (importing_all? && !listing_ids?) || (listing_ids? && !importing_all?)
-      return true
-    end
-
-    flash_warning(:inat_list_xor_all.l)
+    flash_warning(:inat_export_no_username.l)
     false
   end
 
-  def importing_all?
-    params[:all] == "1"
-  end
+  def exportables?
+    return true if params[:mo_ids].present?
 
-  def listing_ids?
-    params[:inat_ids].present?
-  end
-
-  def valid_inat_ids_param?
-    return true unless contains_illegal_characters?
-
-    flash_warning(:runtime_illegal_inat_id.l)
+    flash_warning(:inat_export_no_exportables.l)
     false
-  end
-
-  def contains_illegal_characters?
-    /[^\d ,]/.match?(params[:inat_ids])
-  end
-
-  def list_within_size_limits?
-    return true if importing_all? || # ignore list size if importing all
-                   params[:inat_ids].length <= 255
-
-    flash_warning(:inat_too_many_ids_listed.t)
-    false
-  end
-
-  # Are the listed MO IDs fresh (i.e., not already imported)?
-  def fresh_exports?
-    return true if importing_all?
-
-    previous_imports = Observation.where(mo_id: mo_id_list)
-    return true if previous_imports.none?
-
-    previous_imports.each do |import|
-      flash_warning(:inat_previous_import.t(inat_id: import.inat_id,
-                                            mo_obs_id: import.id))
-    end
-    false
-  end
-
-  def inat_id_list
-    params[:inat_ids].delete(" ").split(",").map(&:to_i)
-  end
-
-  def unmirrored?
-    return true if importing_all? # cannot test check this if importing all
-
-    conditions = inat_id_list.map do |inat_id|
-      Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
-    end
-    previously_mirrored = Observation.where(conditions.inject(:or)).to_a
-    return true if previously_mirrored.blank?
-
-    previously_mirrored.each do |obs|
-      flash_warning(:inat_previous_mirror.t(inat_id: mirrored_inat_id(obs),
-                                            mo_obs_id: obs.id))
-    end
-    false
-  end
-
-  # When Pulk's `mirror`Python script copies an MO Obs to iNat,
-  # it adds a link to the iNat obs in the MO Observation notes
-  def mirrored_inat_id(obs)
-    match = %r{#{SITE}/observations/(?'inat_id'\d+)}o.match(obs.notes.to_s)
-    match[:inat_id]
   end
 end

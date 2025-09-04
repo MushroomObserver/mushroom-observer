@@ -17,6 +17,14 @@ DEFAULTS: &DEFAULTS
   cancel: false
   response_errors: ""
 
+rolf_inat_import:
+  <<: *DEFAULTS
+  user: rolf
+  inat_username: rolf_inat_username
+  total_exported_count: nil # has no export history
+  total_seconds: nil
+  avg_export_time: nil
+
 # katrina is in the middle of an export
 katrina_inat_export:
   <<: *DEFAULTS
@@ -24,3 +32,11 @@ katrina_inat_export:
   state: <%= InatExport.states[:Exporting] %>
   inat_username: katrina_inat_username
   cancel: false
+
+  # ollie canceled an export
+ollie_inat_export:
+  <<: *DEFAULTS
+  user: ollie
+  state: <%= InatExport.states[:Done] %>
+  inat_username: null
+  cancel: true

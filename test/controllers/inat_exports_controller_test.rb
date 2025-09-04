@@ -51,19 +51,32 @@ class InatExportsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_create_cancel_reset
-    skip("Under Construction")
-    user = users(:ollie)
-    import = inat_imports(:ollie_inat_import)
-    assert(import.canceled?, "Test needs a canceled InatImport fixture")
-    id = "123"
-    params = { inat_ids: id, inat_username: user.inat_username, consent: 1 }
+  def test_create_inat_export
+    # TODO: stub authorization
+    obs = observations(:minimal_unknown_obs)
+    user = obs.user
+    assert(user.inat_username.present?,
+           "Test needs a an obs whose user has an inat_username")
+    params = { mo_ids: [obs.id], inat_username: user.inat_username }
 
     login(user.login)
     post(:create, params: params)
 
-    assert_not(import.reload.canceled?,
-               "`cancel` should be false when starting an import")
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+  end
+
+  def test_create_cancel_reset
+    skip("Under Construction")
+    user = users(:ollie)
+    export = inat_exports(:ollie_inat_export)
+    assert(export.canceled?, "Test needs a canceled InatExport fixture")
+    params = { id: 123, inat_username: user.inat_username }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_not(export.reload.canceled?,
+               "`cancel` should be reset to false when starting an export")
   end
 
   def test_create_missing_username

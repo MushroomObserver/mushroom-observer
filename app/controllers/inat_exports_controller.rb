@@ -3,6 +3,7 @@
 # import iNaturalist Observations as MO Observations
 class InatExportsController < ApplicationController
   include Inat::Constants
+  include Validators
 
   before_action :login_required
 
@@ -14,7 +15,8 @@ class InatExportsController < ApplicationController
     @inat_export = InatExport.find_or_create_by(user: @user)
     return export_pending if @inat_export.job_pending?
 
-    define_ivars
+    define_new_ivars
+    @inat_export.update(mo_ids: @mo_ids)
   end
 
   private
@@ -33,7 +35,7 @@ class InatExportsController < ApplicationController
     params[:id].present?
   end
 
-  def define_ivars
+  def define_new_ivars
     # id's of MO observations requested for export
     @requested_ids =
       if called_from_observation_page?
@@ -52,10 +54,34 @@ class InatExportsController < ApplicationController
   public
 
   def create
+    define_create_ivars
     return reload_form unless params_valid?
 
-    assure_user_has_inat_export_api_key
-    init_ivars
+    assure_user_has_mo_api_key
     request_inat_user_authorization
+  end
+
+  private
+
+  def define_create_ivars
+    @inat_export = InatExport.find_or_create_by(user: @user)
+    @mo_ids = @inat_export.mo_ids
+  end
+
+  def reload_form
+    @inat_username = params[:inat_username]
+    render(:new)
+  end
+
+  # TODO: DRY with InatImportsController#assure_user_has_inat_api_key
+  def assure_user_has_mo_api_key
+    key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
+    key = APIKey.create(user: @user, notes: MO_API_KEY_NOTES) if key.nil?
+    key.verify! if key.verified.nil?
+  end
+
+  # TODO: DRY with InatImportsController#request_inat_user_authorization
+  def request_inat_user_authorization
+    redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 end
