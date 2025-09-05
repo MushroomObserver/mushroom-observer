@@ -134,7 +134,7 @@
 #  notes_template_parts:: Array of notes_template headings
 #
 #  ==== Names
-#  text_name::          User name as: "loging" (for debugging)
+#  text_name::          User name as: "login" (for debugging)
 #  legal_name::         User name as: "First Last" or "login"
 #  unique_text_name::   User name as: "First Last (login)" or "login"
 #
