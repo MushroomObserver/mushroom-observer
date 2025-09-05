@@ -21,7 +21,7 @@ module Herbaria
     def create
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       if @user && (@herbarium.curator?(@user) || in_admin_mode?)
-        user = user_from_add_curator_param
+        user = User.lookup_unique_text_name(params[:add_curator])
         if user
           @herbarium.add_curator(user)
         else
@@ -30,17 +30,6 @@ module Herbaria
       end
       redirect_to(herbarium_path(@herbarium))
     end
-
-    def user_from_add_curator_param
-      user = User.find_by(login: params[:add_curator])
-      # someone typed, or type-ahead returned, a string which is a user.login
-      return user if user
-
-      # extract string inside parens from "Nathan Wilson (nathan)"
-      login = params[:add_curator][/\((?<login>[^)]+)\)$/, :login]
-      User.find_by(login: login)
-    end
-    private :user_from_add_curator_param
 
     def destroy
       @herbarium = find_or_goto_index(Herbarium, params[:id])
