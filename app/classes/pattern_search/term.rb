@@ -4,7 +4,7 @@ module PatternSearch
   # Parse PatternSearch parameter terms
   # Sample use:
   #   elsif term.var == :specimen
-  #     args[:has_specimen] = term.parse_boolean_string
+  #     query_params[:has_specimen] = term.parse_boolean_string
   class Term
     include Dates
 

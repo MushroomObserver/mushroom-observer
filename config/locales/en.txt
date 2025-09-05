@@ -3709,6 +3709,7 @@
 
   # Search bar help
   pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas. Recognized variables include:"
+  pattern_search_terms_short_help: Click the ? next to the search bar for a list of expected terms.
 
   observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
   observation_term_created: Date observation was first posted.
