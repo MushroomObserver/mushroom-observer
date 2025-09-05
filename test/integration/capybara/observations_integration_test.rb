@@ -166,8 +166,12 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     page.select("Observations", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
     assert_match("Observations", page.title)
-    assert_selector("#flash_notices",
-                    text: :runtime_no_matches.l(type: :observations.l))
+    assert_selector(
+      "#flash_notices",
+      text: :pattern_search_bad_term_error.tp(
+        type: :observation, help: "", term: "\"foo\""
+      ).as_displayed
+    )
   end
 
   def test_observation_pattern_search_with_correctable_pattern
