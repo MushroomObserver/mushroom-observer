@@ -140,11 +140,11 @@ class SearchController < ApplicationController
       session[:pattern] = nil
     end
     # This will create a blank query if there are errors.
-    find_or_create_query(model_name, search.query&.params || {})
+    create_query(model_name, search.query&.params || {})
   end
 
   def location_query_from_pattern(pattern)
-    find_or_create_query(
+    create_query(
       :Location, pattern: Location.user_format(@user, pattern)
     )
   end
