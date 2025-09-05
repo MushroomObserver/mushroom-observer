@@ -55,7 +55,7 @@ module PatternSearch
     end
 
     def help_message
-      "#{:pattern_search_terms_help.l}\n#{self.class.terms_help}"
+      :pattern_search_terms_short_help.l
     end
 
     def self.terms_help
