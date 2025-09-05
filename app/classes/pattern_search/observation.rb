@@ -75,7 +75,8 @@ module PatternSearch
     # This converts any search that *looks like* a name search into
     # an actual name search. NOTE: This affects the index title.
     def hack_name_query
-      return unless query_params[:pattern].present? && query_params[:names].empty? &&
+      return unless query_params[:pattern].present? &&
+                    query_params[:names].empty? &&
                     (is_pattern_a_name? || any_taxa_modifiers_present?)
 
       query_params[:names] = query_params[:pattern]
@@ -96,7 +97,8 @@ module PatternSearch
     end
 
     def is_pattern_a_name?
-      pat = ::Name.parse_name(query_params[:pattern])&.search_name || query_params[:pattern]
+      pat = ::Name.parse_name(query_params[:pattern])&.search_name ||
+            query_params[:pattern]
       ::Name.where(text_name: pat).or(::Name.where(search_name: pat)).any?
     end
 
