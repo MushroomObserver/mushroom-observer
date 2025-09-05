@@ -54,11 +54,8 @@ module PatternSearch
       query_params.except!(*modifiers)
     end
 
-    # 2025-09-04 - The "terms_help" message makes the flash too long,
-    # causes cookie session overflow.
     def help_message
-      ""
-      # "#{:pattern_search_terms_help.l}\n#{self.class.terms_help}"
+      :pattern_search_terms_short_help.l
     end
 
     def self.terms_help
