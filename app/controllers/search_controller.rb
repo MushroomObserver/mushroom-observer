@@ -31,10 +31,10 @@ class SearchController < ApplicationController
   def save_pattern_and_proceed(type, pattern)
     # Save it so that we can keep it in the search bar in subsequent pages.
     # But don't save encoded incoming patterns that are too large.
-    unless pattern.bytesize > 4096
-      session[:pattern] = pattern
-      session[:search_type] = type
-    end
+    # unless pattern.bytesize > 4096
+    #   session[:pattern] = pattern
+    #   session[:search_type] = type
+    # end
 
     if type == :google
       site_google_search(pattern)
@@ -130,17 +130,23 @@ class SearchController < ApplicationController
     end
   end
 
-  # Have to use PatternSearch here to catch invalid PatternSearch terms,
-  # and turn the keywords into query params.
-  # Can't just send pattern to Query as create_query(model_name, pattern:)
+  # Instantiate a PatternSearch to turn the keywords into query params and
+  # catch invalid PatternSearch terms. (We can't just send a raw pattern with
+  # keywords to Query as `create_query(model_name, pattern:)`)
   def pattern_search_query_from_pattern(model_name, pattern)
     search = "PatternSearch::#{model_name}".constantize.new(pattern)
-    flash_pattern_search_errors(search) if search.errors.any?
-    create_query(model_name, search.query&.params || {})
+    if search.errors.any?
+      flash_pattern_search_errors(search)
+      session[:pattern] = nil
+    end
+    # This will create a blank query if there are errors.
+    find_or_create_query(model_name, search.query&.params || {})
   end
 
   def location_query_from_pattern(pattern)
-    create_query(:Location, pattern: Location.user_format(@user, pattern))
+    find_or_create_query(
+      :Location, pattern: Location.user_format(@user, pattern)
+    )
   end
 
   def flash_pattern_search_errors(search)
