@@ -12,7 +12,6 @@
 #                          depending on the state of the export
 #                          https://www.inaturalist.org/pages/api+reference#authorization_code_flow
 #  mo_ids::                array of id's of MO Observations to be exported
-#  export_all:             whether to export all of user's relevant iNat obss
 #  exportables::           number of exportable observations in job
 #  exported_count::        running count of MO obss exported in associated job
 #  response_errors::       string of newline-separated error messages

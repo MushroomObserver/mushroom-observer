@@ -6,7 +6,6 @@ DEFAULTS: &DEFAULTS
   mo_ids: ""
   token: ""
   inat_username: ""
-  export_all: false
   exportables: 0
   exported_count: 0
   ended_at: nil
@@ -17,7 +16,7 @@ DEFAULTS: &DEFAULTS
   cancel: false
   response_errors: ""
 
-rolf_inat_import:
+rolf_inat_export:
   <<: *DEFAULTS
   user: rolf
   inat_username: rolf_inat_username
@@ -33,7 +32,7 @@ katrina_inat_export:
   inat_username: katrina_inat_username
   cancel: false
 
-  # ollie canceled an export
+# ollie canceled an export
 ollie_inat_export:
   <<: *DEFAULTS
   user: ollie

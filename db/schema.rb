@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_31_181722) do
+ActiveRecord::Schema[7.2].define(version: 2025_09_06_124649) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -208,7 +208,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_31_181722) do
     t.string "mo_ids"
     t.string "token"
     t.string "inat_username"
-    t.boolean "export_all"
     t.integer "exportables"
     t.integer "exported_count"
     t.datetime "ended_at"
