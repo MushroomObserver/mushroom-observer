@@ -53,7 +53,7 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_new_inat_export_of_observations_index
-    skip("Under Construction")
+    skip("Awaiting an `Export to Inat` Action on Observations index")
     obs = observations(:coprinus_comatus_obs)
     user = obs.user
 
@@ -94,7 +94,6 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_create_strip_inat_username
-    skip("Under Construction")
     export = inat_exports(:mary_inat_export)
     user = export.user
 
@@ -133,7 +132,6 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_create_assure_user_has_mo_api_key
-    # skip("Under Construction")
     export = inat_exports(:mary_inat_export)
     user = export.user
     assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).none?,
@@ -152,14 +150,13 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_create_authorization_request
-    skip("Under Construction")
     user = users(:rolf)
     inat_username = "rolf" # use different inat_username to test if it's updated
     export = inat_exports(:rolf_inat_export)
     assert_equal("Unstarted", export.state,
                  "Need a Unstarted inat_export fixture")
-    assert_equal(0, export.total_imported_count.to_i,
-                 "Test needs InatExport fixture without prior imports")
+    assert_equal(0, export.total_exported_count.to_i,
+                 "Test needs InatExport fixture without prior exports")
     inat_ids = "123,456,789"
 
     stub_request(:any, INAT_AUTHORIZATION_URL)
@@ -170,21 +167,22 @@ class InatExportsControllerTest < FunctionalTestCase
       "Authorization request to iNat shouldn't create MO Observation(s)"
     ) do
       post(:create,
-           params: { mo_ids: inat_ids, inat_username: inat_username,
-                     consent: 1 })
+           params: { mo_ids: inat_ids, inat_username: inat_username })
     end
 
     assert_response(:redirect)
-    assert_equal(inat_ids.split(",").length, inat_import.reload.importables,
-                 "Failed to save InatImport.importables")
-    assert_equal("Authorizing", inat_import.reload.state,
+    assert_equal("Authorizing", export.reload.state,
                  "MO should be awaiting authorization from iNat")
-    assert_equal(
-      InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
-      inat_import.avg_import_time
-    )
-    assert_equal(inat_username, inat_import.inat_username,
-                 "Failed to save InatImport.inat_username")
+    assert_equal(inat_username, export.inat_username,
+                 "Failed to save InatExport.inat_username")
+
+    # TODO: fix these tests, which are all related to the job tracker page.
+    # assert_equal(inat_ids.split(",").length, export.exportables,
+    #              "Failed to save InatExport.exportables")
+    # assert_equal(
+    #  InatExport.sum(:total_seconds) / InatExport.sum(:total_exported_count),
+    #  export.avg_export_time
+    # )
   end
 
   def test_authorization_response_denied
@@ -195,22 +193,6 @@ class InatExportsControllerTest < FunctionalTestCase
 
     assert_redirected_to(observations_path)
     assert_flash_error
-  end
-
-  def test_import_all_anothers_observations
-    skip("Under Construction")
-    user = users(:dick) # Dick is a iNat superimporter
-    params = { inat_username: "anything", inat_ids: nil,
-               consent: 1, all: 1 }
-
-    login(user.login)
-    assert_no_difference("Observation.count",
-                         "iNat obss imported without consent") do
-      post(:create, params: params)
-    end
-
-    assert_flash_text(:inat_importing_all_anothers.t)
-    assert_form_action(action: :create)
   end
 
   def test_import_authorized

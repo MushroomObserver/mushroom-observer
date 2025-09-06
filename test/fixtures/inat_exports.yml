@@ -29,7 +29,7 @@ mary_inat_export:
   <<: *DEFAULTS
   user: mary
   state: <%= InatExport.states[:Unstarted] %>
-  inat_username: " mary_inat_username "
+  inat_username: " marys_inat_username " # compare users.yml
 
 # ollie canceled an export
 ollie_inat_export:
