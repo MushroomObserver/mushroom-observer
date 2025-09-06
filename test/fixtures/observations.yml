@@ -800,6 +800,8 @@ current_obs:
   user: katrina
   where: Salt Point State Park, Sonoma Co., California, USA
   location: salt_point
+  notes:
+    :Collector: _user katrina_
 
 newbie_obs:
   <<: *DEFAULTS
@@ -828,6 +830,94 @@ old_name_obs:
   <<: *DEFAULTS
   name: lactifluus_subalpinus
   text_name: Lactifluus subalpinus
+
+low_alt_obs:
+  <<: *DEFAULTS
+  location: low_alt_only
+
+high_alt_obs:
+  <<: *DEFAULTS
+  location: high_alt_only
+
+longest_obs:
+  <<: *DEFAULTS
+  location: longest_location_name
+  where: "Pacific Crest Trail on Mount Hood from Timberline Lodge to Cascade Locks, Zigzag Ranger District & Hood River Ranger District, Mount Hood National Forest, Clackamas Co. & Multnomah Co., Oregon, USA"
+  name: longest_name
+  text_name: Singerocybe alboinfundibuliformis
+
+even_longer_obs:
+  <<: *DEFAULTS
+  name: even_longer_name
+  location: even_longer_location_name
+  text_name: <%= "B#{'a'*80}" %>
+  where: <%= "Sh#{'e'*200}pland" %>
+
+megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  when: 2025-09-01
+  created_at: 2025-09-01 04:05:03
+  updated_at: 2025-09-01 04:05:03
+
+dup_megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  when: 2025-09-01
+  created_at: 2025-09-01 04:05:03
+  updated_at: 2025-09-01 04:05:03
+
+nearby_megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  lat: 41.6592
+  lng: -70.6975
+  location: falmouth
+  where: Falmouth, Massachusetts, USA
+  when: 2025-09-08
+  created_at: 2025-09-08 04:05:03
+  updated_at: 2025-09-08 04:05:03
+
+faraway_megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  lat: 40.867
+  lng: -73.879
+  location: nybg_location
+  where: The New York Botanical Garden, Bronx, New York, USA
+  when: 2025-09-01
+  created_at: 2025-09-08 04:05:03
+  updated_at: 2025-09-08 04:05:03
+
+older_megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  when: 2025-08-01
+  created_at: 2025-08-01 04:05:03
+  updated_at: 2025-08-01 04:05:03
+
+megacollybia_platyphylla_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_platyphylla
+  text_name: Megacollybia platyphylla
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  when: 2025-09-01
+  created_at: 2025-09-01 04:05:03
+  updated_at: 2025-09-01 04:05:03
 
 #
 #

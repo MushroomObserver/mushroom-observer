@@ -139,17 +139,23 @@ class SearchController < ApplicationController
     end
   end
 
-  # Have to use PatternSearch here to catch invalid PatternSearch terms,
-  # and turn the keywords into query params.
-  # Can't just send pattern to Query as create_query(model_name, pattern:)
+  # Instantiate a PatternSearch to turn the keywords into query params and
+  # catch invalid PatternSearch terms. (We can't just send a raw pattern with
+  # keywords to Query as `create_query(model_name, pattern:)`)
   def pattern_search_query_from_pattern(model_name, pattern)
     search = "PatternSearch::#{model_name}".constantize.new(pattern)
-    flash_pattern_search_errors(search) if search.errors.any?
+    if search.errors.any?
+      flash_pattern_search_errors(search)
+      session[:pattern] = nil
+    end
+    # This will create a blank query if there are errors.
     create_query(model_name, search.query&.params || {})
   end
 
   def location_query_from_pattern(pattern)
-    create_query(:Location, pattern: Location.user_format(@user, pattern))
+    create_query(
+      :Location, pattern: Location.user_format(@user, pattern)
+    )
   end
 
   def flash_pattern_search_errors(search)

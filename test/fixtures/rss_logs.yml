@@ -529,10 +529,50 @@ provisional_obs_rss_log:
   <<: *DEFAULTS
   observation: provisional_obs
 
-provisional_obs_rss_log:
-  <<: *DEFAULTS
-  observation: provisional_obs
-
 old_name_obs_rss_log:
   <<: *DEFAULTS
   observation: old_name_obs
+
+low_alt_obs_rss_log:
+  <<: *DEFAULTS
+  observation: low_alt_obs
+
+high_alt_obs_rss_log:
+  <<: *DEFAULTS
+  observation: high_alt_obs
+
+longest_obs_rss_log:
+  <<: *DEFAULTS
+  observation: longest_obs
+
+even_longer_obs_rss_log:
+  <<: *DEFAULTS
+  observation: even_longer_obs
+
+even_longer_obs_rss_log:
+  <<: *DEFAULTS
+  observation: even_longer_obs
+
+megacollybia_rodmanii_obs_rss_log:
+  <<: *DEFAULTS
+  observation: megacollybia_rodmanii_obs
+
+dup_megacollybia_rodmanii_obs_rss_log:
+  <<: *DEFAULTS
+  observation: dup_megacollybia_rodmanii_obs
+
+nearby_megacollybia_rodmanii_obs_rss_log:
+  <<: *DEFAULTS
+  observation: nearby_megacollybia_rodmanii_obs
+
+faraway_megacollybia_rodmanii_obs_rss_log:
+  <<: *DEFAULTS
+  observation: faraway_megacollybia_rodmanii_obs
+
+older_megacollybia_rodmanii_obs_rss_log:
+  <<: *DEFAULTS
+  observation: older_megacollybia_rodmanii_obs
+
+megacollybia_platyphylla_obs_rss_log:
+  <<: *DEFAULTS
+  observation: megacollybia_platyphylla_obs

@@ -622,4 +622,17 @@ module GeneralExtensions
     end
     str == template
   end
+
+  def with_captured_logger
+    log_output = StringIO.new
+    old_logger = Rails.logger
+    Rails.logger = Logger.new(log_output)
+
+    yield
+
+    log_output.rewind
+    log_output.string
+  ensure
+    Rails.logger = old_logger
+  end
 end

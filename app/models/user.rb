@@ -134,7 +134,7 @@
 #  notes_template_parts:: Array of notes_template headings
 #
 #  ==== Names
-#  text_name::          User name as: "loging" (for debugging)
+#  text_name::          User name as: "login" (for debugging)
 #  legal_name::         User name as: "First Last" or "login"
 #  unique_text_name::   User name as: "First Last (login)" or "login"
 #
@@ -441,7 +441,11 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def textile_name
-    "_user #{login}_"
+    if name.blank?
+      "_user #{login}_"
+    else
+      "#{name} (_user #{login}_)"
+    end
   end
 
   def self.lookup_unique_text_name(str)

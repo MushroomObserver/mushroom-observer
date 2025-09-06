@@ -3,30 +3,30 @@
 module PatternSearch
   # Base class for PatternSearch; handles everything plus build_query
   class Base
-    attr_accessor :errors, :parser, :args, :query
+    attr_accessor :errors, :parser, :query_params, :query
 
     def initialize(string)
       self.errors = []
       self.parser = PatternSearch::Parser.new(string)
       build_query
-      real_model = model.name.to_sym
-      if args.include?(:pattern) && real_model == :Name
-        pat = args[:pattern]
-        args[:pattern] = ::Name.parse_name(pat)&.search_name || pat
+      model_symbol = model.name.to_sym
+      if query_params.include?(:pattern) && model_symbol == :Name
+        pat = query_params[:pattern]
+        query_params[:pattern] = ::Name.parse_name(pat)&.search_name || pat
       end
-      self.query = Query.lookup(real_model, args)
+      self.query = Query.lookup(model_symbol, query_params)
     rescue Error => e
       errors << e
     end
 
     def build_query
-      self.args = {}
+      self.query_params = {}
       parser.terms.each do |term|
         if term.var == :pattern
-          args[:pattern] = term.parse_pattern
+          query_params[:pattern] = term.parse_pattern
         elsif (param = lookup_param(term.var))
           query_param, parse_method = param
-          args[query_param] = term.send(parse_method)
+          query_params[query_param] = term.send(parse_method)
         else
           raise(
             PatternSearch::BadTermError.new(term: term,
@@ -44,18 +44,18 @@ module PatternSearch
       lookup, include_subtaxa, include_synonyms,
       include_immediate_subtaxa, exclude_original_names,
       include_all_name_proposals, exclude_consensus =
-        args.values_at(:names, *modifiers)
+        query_params.values_at(:names, *modifiers)
       names = { lookup:, include_subtaxa:, include_synonyms:,
                 include_immediate_subtaxa:, exclude_original_names:,
                 include_all_name_proposals:, exclude_consensus: }
       return if names.compact.blank?
 
-      args[:names] = names.compact
-      args.except!(*modifiers)
+      query_params[:names] = names.compact
+      query_params.except!(*modifiers)
     end
 
     def help_message
-      "#{:pattern_search_terms_help.l}\n#{self.class.terms_help}"
+      :pattern_search_terms_short_help.l
     end
 
     def self.terms_help

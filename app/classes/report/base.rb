@@ -31,5 +31,9 @@ module Report
         render.iconv(encoding) # This caused problems with UTF-16 encoding.
       end
     end
+
+    def http_disposition
+      "attachment"
+    end
   end
 end

@@ -219,3 +219,11 @@ ann_user:
 inat_importer:
   <<: *DEFAULTS
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
+
+foray_recorder:
+  <<: *DEFAULTS
+
+nihilist_user:
+  <<: *DEFAULTS
+  login: Nil
+  name: ""

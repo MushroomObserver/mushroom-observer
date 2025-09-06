@@ -75,40 +75,49 @@ module PatternSearch
     # This converts any search that *looks like* a name search into
     # an actual name search. NOTE: This affects the index title.
     def hack_name_query
-      return unless args[:pattern].present? && args[:names].empty? &&
+      return unless query_params[:pattern].present? &&
+                    query_params[:names].empty? &&
                     (is_pattern_a_name? || any_taxa_modifiers_present?)
 
-      args[:names] = args[:pattern]
-      args.delete(:pattern)
+      query_params[:names] = query_params[:pattern]
+      query_params.delete(:pattern)
     end
 
     def default_to_including_synonyms_and_subtaxa
-      return if args[:names].empty?
+      return if query_params[:names].empty?
 
-      args[:include_subtaxa] = true if args[:include_subtaxa].nil?
-      args[:include_synonyms] = true if args[:include_synonyms].nil?
+      if query_params[:include_subtaxa].nil?
+        query_params[:include_subtaxa] =
+          true
+      end
+      return unless query_params[:include_synonyms].nil?
+
+      query_params[:include_synonyms] =
+        true
     end
 
     def is_pattern_a_name?
-      pat = ::Name.parse_name(args[:pattern])&.search_name || args[:pattern]
+      pat = ::Name.parse_name(query_params[:pattern])&.search_name ||
+            query_params[:pattern]
       ::Name.where(text_name: pat).or(::Name.where(search_name: pat)).any?
     end
 
     def any_taxa_modifiers_present?
-      !args[:include_subtaxa].nil? ||
-        !args[:include_synonyms].nil? ||
-        !args[:include_all_name_proposals].nil? ||
-        !args[:exclude_consensus].nil?
+      !query_params[:include_subtaxa].nil? ||
+        !query_params[:include_synonyms].nil? ||
+        !query_params[:include_all_name_proposals].nil? ||
+        !query_params[:exclude_consensus].nil?
     end
 
     def put_nsew_params_in_box
-      north, south, east, west = args.values_at(:north, :south, :east, :west)
+      north, south, east, west = query_params.values_at(:north, :south, :east,
+                                                        :west)
       box = { north:, south:, east:, west: }
       return if box.compact.blank?
 
       box = validate_box(box)
-      args[:in_box] = box
-      args.except!(:north, :south, :east, :west)
+      query_params[:in_box] = box
+      query_params.except!(:north, :south, :east, :west)
     end
 
     def validate_box(box)
@@ -117,15 +126,16 @@ module PatternSearch
 
       check_for_missing_box_params
       # Just fix the box if they've got it swapped
-      if args[:south] > args[:north]
-        box = box.merge(north: args[:south], south: args[:north])
+      if query_params[:south] > query_params[:north]
+        box = box.merge(north: query_params[:south],
+                        south: query_params[:north])
       end
       box
     end
 
     def check_for_missing_box_params
       [:north, :south, :east, :west].each do |term|
-        next if args[term].present?
+        next if query_params[term].present?
 
         raise(PatternSearch::MissingValueError.new(var: term))
       end

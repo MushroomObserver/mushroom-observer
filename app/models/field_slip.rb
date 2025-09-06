@@ -117,7 +117,7 @@ class FieldSlip < AbstractModel
   def collector
     return observation.collector if observation&.collector
 
-    (user || @current_user).textile_name
+    (user || @current_user).unique_text_name
   end
 
   def date

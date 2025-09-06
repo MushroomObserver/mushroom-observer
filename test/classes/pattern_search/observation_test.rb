@@ -7,27 +7,27 @@ class PatternSearch::ObservationTest < UnitTestCase
     # "Turkey" is not a name, and no taxa modifiers present, so no reason to
     # suspect that this is a name query.  Should leave it completely alone.
     x = PatternSearch::Observation.new("Turkey")
-    assert_equal({ pattern: "Turkey" }, x.args)
+    assert_equal({ pattern: "Turkey" }, x.query_params)
 
     # "Agaricus" is a name, so let's assume this is a name query.  Note that
     # it will include synonyms and subtaxa by default.
     x = PatternSearch::Observation.new("Agaricus")
     assert_equal({ names: { lookup: "Agaricus", include_subtaxa: true,
-                            include_synonyms: true } }, x.args)
+                            include_synonyms: true } }, x.query_params)
 
     # "Turkey" is not a name, true, but user asked for synonyms to be included,
     # so they must have expected "Turkey" to be a name.  Note that it will also
     # include subtaxa by default, because that behavior was not specified.
     x = PatternSearch::Observation.new("Turkey include_synonyms:yes")
     assert_equal({ names: { lookup: "Turkey", include_synonyms: true,
-                            include_subtaxa: true } }, x.args)
+                            include_subtaxa: true } }, x.query_params)
 
     # Just make sure the user is allowed to explicitly turn off synonyms and
     # subtaxa in any names query.
     x = PatternSearch::Observation.new("Foo bar include_synonyms:no " \
                                        "include_subtaxa:no")
     assert_equal({ names: { lookup: "Foo bar", include_synonyms: false,
-                            include_subtaxa: false } }, x.args)
+                            include_subtaxa: false } }, x.query_params)
   end
 
   def test_observation_search_for_old_provisional
@@ -256,31 +256,6 @@ class PatternSearch::ObservationTest < UnitTestCase
     assert(expect.any?)
     x = PatternSearch::Observation.new("has_sequence:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
-  end
-
-  # 2024-04-16 temporary: test that we suggest new terms for retired terms.
-  def test_observation_search_bad_term_suggestions
-    x = PatternSearch::Observation.new("images:true")
-    assert_equal(
-      :pattern_search_bad_term_error_suggestion.tp(
-        term: "images", val: "true", new_term: "has_images"
-      ).to_s.as_displayed,
-      x.errors[0].to_s.t.as_displayed
-    )
-    y = PatternSearch::Observation.new("sequence:true")
-    assert_equal(
-      :pattern_search_bad_term_error_suggestion.tp(
-        term: "sequence", val: "true", new_term: "has_sequence"
-      ).to_s.as_displayed,
-      y.errors[0].to_s.t.as_displayed
-    )
-    z = PatternSearch::Observation.new("specimen:true")
-    assert_equal(
-      :pattern_search_bad_term_error_suggestion.tp(
-        term: "specimen", val: "true", new_term: "has_specimen"
-      ).to_s.as_displayed,
-      z.errors[0].to_s.t.as_displayed
-    )
   end
 
   def test_observation_search_has_name_no
