@@ -53,6 +53,7 @@ minimal_unknown_obs:
   herbarium_records: interesting_unknown
   collection_numbers: minimal_unknown_coll_num
   source: <%= Observation.sources[:mo_website] %>
+  inat_id: nil
 
 detailed_unknown_obs:
   <<: *DEFAULTS
@@ -97,6 +98,7 @@ coprinus_comatus_obs:
   herbarium_records: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
   collection_numbers: coprinus_comatus_coll_num
   needs_naming: 0
+  inat_id: nil
 
 agaricus_campestris_obs:
   <<: *DEFAULTS
@@ -285,6 +287,7 @@ untrusted_hidden:
   lat: 41.6055
   lng: -70.5055
   alt: 123
+  inat_id: nil
 
 amateur_obs:
   <<: *DEFAULTS

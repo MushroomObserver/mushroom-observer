@@ -234,7 +234,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
 
-    stub_request(:any, authorization_url)
+    stub_request(:any, INAT_AUTHORIZATION_URL)
     login(user.login)
 
     assert_no_difference(
@@ -268,7 +268,7 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Test needs InatImport fixture without prior imports")
     inat_ids = "123,456,789"
 
-    stub_request(:any, authorization_url)
+    stub_request(:any, INAT_AUTHORIZATION_URL)
     login(user.login)
 
     assert_no_difference(
@@ -296,7 +296,7 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_authorization_response_denied
     login
 
-    get(:authorization_response, params: authorization_denial_callback_params)
+    get(:authorization_response, params: AUTHORIZATION_DENIAL_CALLBACK_PARAMS)
 
     assert_redirected_to(observations_path)
     assert_flash_error
@@ -373,7 +373,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     login(user.login)
     get(:authorization_response,
-        params: authorization_denial_callback_params)
+        params: AUTHORIZATION_DENIAL_CALLBACK_PARAMS)
 
     assert_blank(
       user.reload.inat_username,
@@ -396,16 +396,6 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   ########## Utilities
-
-  # iNat url where user is sent in order to authorize MO access
-  # to iNat confidential data
-  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def authorization_url
-    "https://www.inaturalist.org/oauthenticate/authorize?" \
-    "client_id=#{Rails.application.credentials.inat.id}" \
-    "&redirect_uri=#{REDIRECT_URI}" \
-    "&response_type=code"
-  end
 
   def authorization_denial_callback_params
     { error: "access_denied",

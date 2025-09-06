@@ -62,4 +62,8 @@ show_links = user && (obs.external_links.any? || sites.any?)
     <%= render(partial: "observations/show/external_links",
                locals: { obs:, user:, sites: }) %>
   <% end %>
+
+  <% if user == obs.user && obs.exportable_to_inat? %>
+    <%= link_to("Export to iNat", new_inat_export_path(id: obs.id)) %>
+  <% end %>
 <% end %>
