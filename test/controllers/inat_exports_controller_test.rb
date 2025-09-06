@@ -186,7 +186,7 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_authorization_response_denied
-    skip("Under Construction")
+    skip("Awaiting implementation of :authorization_response action")
     login
 
     get(:authorization_response, params: AUTHORIZATION_DENIAL_CALLBACK_PARAMS)
@@ -196,7 +196,7 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_import_authorized
-    skip("Under Construction")
+    skip("Awaiting implementation of :authorization_response action")
     user = users(:rolf)
     assert_blank(user.inat_username,
                  "Test needs user fixture without an iNat username")
@@ -230,7 +230,7 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_inat_username_unchanged_if_authorization_denied
-    skip("Under Construction")
+    skip("Awaiting implementation of :authorization_response action")
     user = users(:rolf)
     assert_blank(user.inat_username,
                  "Test needs user fixture without an iNat username")
@@ -251,7 +251,7 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_show
-    skip("Not yet implemented")
+    skip("Awaiting implementation of Job, Tracker, and :show action")
     export = inat_exports(:rolf_inat_export)
     tracker = InatExportJobTracker.create(inat_export: export.id)
 
