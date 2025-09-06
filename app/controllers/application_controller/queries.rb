@@ -36,11 +36,15 @@ module ApplicationController::Queries
   #
   ##############################################################################
 
-  # Create a new Query of the given model.
+  # Create a new Query object for a model, without saving a QueryRecord or
+  # setting the session[:query_record]. Can be used to create a link/permalink,
+  # or retrieve records, without altering the current user's Query context.
+  #
   # Prefer this instead of directly calling Query.lookup or PatternSearch#query.
   # Takes the same query_params as Query#new or Query#lookup, but this is the
   # only place where user content filters are applied.
-  # (Related query links will preserve content filters in the subquery.)
+  #
+  # (NOTE: Related query links will preserve content filters in the subquery.)
   def create_query(model_symbol, query_params = {})
     query_params = add_user_content_filter_parameters(query_params,
                                                       model_symbol)
@@ -51,9 +55,10 @@ module ApplicationController::Queries
     Query.lookup(model_symbol, query_params)
   end
 
-  # Lookup an appropriate Query or create a default one if necessary.  If you
+  # Lookup an appropriate Query or create a default one if necessary. If you
   # pass in arguments, it modifies the query as necessary to ensure they are
   # correct. (Useful for specifying sort conditions, for example.)
+  # Saves the query and stores in session. Analogous to Query.lookup_and_save.
   def find_or_create_query(model_symbol, args = {})
     map_past_bys(args)
     model = model_symbol.to_s
