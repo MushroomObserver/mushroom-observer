@@ -7,7 +7,7 @@ class InatExportsControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
   include Inat::Constants
 
-  def test_new_inat_export_of_obs
+  def test_new_inat_export_of_observation
     obs = observations(:coprinus_comatus_obs)
     user = obs.user
 
@@ -18,6 +18,7 @@ class InatExportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
     assert_select("input#inat_username", true,
                   "Form needs a field for inputting iNat username")
+    assert_select("a[href=?]", observation_path(obs.id), text: :CANCEL.l)
   end
 
   def test_new_inat_export_of_obs_inat_username_prefilled
@@ -49,6 +50,21 @@ class InatExportsControllerTest < FunctionalTestCase
     assert_redirected_to(
       observation_path(id: obs.id)
     )
+  end
+
+  def test_new_inat_export_of_observations_index
+    skip("Under Construction")
+    obs = observations(:coprinus_comatus_obs)
+    user = obs.user
+
+    login(user.login)
+    get(:new, params: { id: obs.id })
+
+    assert_response(:success)
+    assert_form_action(action: :create)
+    assert_select("input#inat_username", true,
+                  "Form needs a field for inputting iNat username")
+    assert_select("a[href=?]", observations_path, text: :CANCEL.l)
   end
 
   def test_create_inat_export

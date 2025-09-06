@@ -36,6 +36,11 @@ class InatExportsController < ApplicationController
   end
 
   def define_new_ivars
+    @source = if called_from_observation_page?
+                :observation
+              else
+                :observations
+              end
     # id's of MO observations requested for export
     @requested_ids =
       if called_from_observation_page?
