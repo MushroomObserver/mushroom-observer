@@ -34,15 +34,14 @@ map = @herbarium.location
 
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
 
-        <%= form_with(url: herbaria_curators_path(id: @herbarium,
-                                                  q: q_param),
+        <%= form_with(url: herbaria_curators_path(id: @herbarium, q: q_param),
                       id: "herbarium_curators_form") do |f| %>
           <div class="form-inline mt-3">
             <%= autocompleter_field(form: f, field: :add_curator,
-                                        type: :user) %>
+                                    type: :user) %>
             <label for="add_curator">
               <%= submit_button(form: f,
-                                    button: :show_herbarium_add_curator.t) %>
+                                button: :show_herbarium_add_curator.t) %>
             </label>
           </div>
         <% end %>
