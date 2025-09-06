@@ -36,7 +36,7 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_new_inat_export_pending
-    # Observation belongs to katrina, who's iNat export is busy Exporting
+    # Observation belongs to katrina, whose iNat export is busy Exporting
     obs = observations(:untrusted_hidden)
     user = obs.user
 
@@ -52,7 +52,6 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_create_inat_export
-    # TODO: stub authorization
     obs = observations(:minimal_unknown_obs)
     user = obs.user
     assert(user.inat_username.present?,
