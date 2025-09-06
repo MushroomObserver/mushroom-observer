@@ -70,7 +70,20 @@ class InatExportsController < ApplicationController
 
   def define_create_ivars
     @inat_export = InatExport.find_or_create_by(user: @user)
-    @mo_ids = @inat_export.mo_ids
+    @inat_export.update(
+      state: "Authorizing",
+      # TODO: update importables
+      # importables: importables_count,
+      exported_count: 0,
+      # TODO: update avg_export_time
+      # avg_export_time: @inat_import.initial_avg_export_seconds,
+      inat_username: params[:inat_username]&.strip,
+      response_errors: "",
+      token: "",
+      log: [],
+      ended_at: nil,
+      cancel: false
+    )
   end
 
   def reload_form

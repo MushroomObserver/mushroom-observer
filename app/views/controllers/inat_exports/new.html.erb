@@ -4,7 +4,8 @@
 %>
 
 <div>
-  <%= form_with(url: inat_exports_path, method: :post) do |f| %>
+  <%= form_with(url: inat_exports_path({ mo_ids: @mo_ids }),
+                method: :post) do |f| %>
     <%= f.label(:inat_username, "#{:inat_username.l}: ") %>
     <%= f.text_field(:inat_username, size: 10, class: "form-control",
                      value: User.current.inat_username) %>
