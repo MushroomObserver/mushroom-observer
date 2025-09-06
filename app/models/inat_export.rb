@@ -24,9 +24,13 @@
 #  cancel/canceled::       Did the user requested canceling the Job
 #
 # == Methods
-#  total_expected_time     total expected time for associated Job
-#  last_obs_elapsed_time   time spent exporting a single MO obs
+#  add_response_error      add an error message to response_errors
 #  adequate_constraints?   enough constraints on which observations to export?
+#  initial_avg_export_seconds  estimated average time to export a single MO obs#
+#  job_pending?            is the associated Job still running?
+#  last_obs_elapsed_time   time spent exporting a single MO obs
+#  reset_last_obs_start    set last_obs_start to current time
+#  total_expected_time     total expected time for associated Job
 #
 class InatExport < ApplicationRecord
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
