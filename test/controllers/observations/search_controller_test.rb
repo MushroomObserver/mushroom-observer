@@ -25,7 +25,7 @@ module Observations
       login
       query = @controller.find_or_create_query(
         :Observation,
-        names: { lookup: "petigera", include_synonyms: true },
+        names: { lookup: "peltigera", include_synonyms: true },
         region: "Massachusetts, USA",
         has_specimen: true,
         notes_has: "Symbiota",
@@ -36,11 +36,11 @@ module Observations
       assert_equal(query.id, session[:query_record])
       get(:new)
       assert_select("textarea#query_observations_names_lookup",
-                    text: "petigera")
+                    text: "peltigera")
       assert_select("select#query_observations_names_include_synonyms",
                     selected: "yes")
-      # assert_select("input#query_observations_region",
-      #               text: "Massachusetts, USA")
+      assert_select("input#query_observations_region",
+                    text: "Massachusetts, USA")
       assert_select("select#query_observations_has_specimen",
                     selected: "yes")
       assert_select("input#query_observations_notes_has", value: "Symbiota")
