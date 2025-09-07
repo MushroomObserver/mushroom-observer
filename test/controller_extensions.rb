@@ -667,8 +667,8 @@ module ControllerExtensions
   end
 
   # Get the query_params encoded as a query string. Hard to reproduce otherwise
-  def query_string(query_string)
-    observations_path(q: query_string).split("?")[1]
+  def query_string(q_param)
+    observations_path(q: q_param).split("?")[1]
   end
 
   def assert_session_query_record_is_correct
