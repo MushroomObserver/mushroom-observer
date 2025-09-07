@@ -78,9 +78,11 @@ module LoginSystem
   # we can return to this location by calling redirect_back_or_default
   def store_location
     # guard against overlong query strings
-    return request.path unless request.fullpath.length < 256
-
-    session["return-to"] = request.fullpath
+    session["return-to"] = if request.fullpath.length > 256
+                             nil
+                           else
+                             request.fullpath
+                           end
   end
 
   # move to the last store_location call or to the passed default one
