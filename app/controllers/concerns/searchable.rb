@@ -59,7 +59,6 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       replace_strings_with_ids
-      # concatenate_range_fields
       validate_search_query_instance_from_params
       save_search_query
 
@@ -168,8 +167,10 @@ module Searchable
     end
 
     def save_search_query
+      query_params = params[:"query_#{search_type}"].to_unsafe_hash.
+                     deep_compact_blank.deep_symbolize_keys
       @query = Query.lookup_and_save(
-        query_model, **@search.attributes.deep_symbolize_keys.compact_blank
+        query_model, **query_params
       )
     end
 
