@@ -713,4 +713,68 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     results = @controller.instance_variable_get(:@objects).sort_by(&:id)
     assert_obj_arrays_equal(observations_in_region, results)
   end
+
+  def test_index_return_to_cookie_is_under_limit
+    query = @controller.create_query(:Observation, **PARAMS_UNDER_LIMIT)
+    get(:index, params: { q: query.q_param })
+    assert_not_nil(session["return-to"])
+    assert_match(query_string(query.q_param), session["return-to"])
+
+    query = @controller.create_query(:Observation, **NERFC_QUERY_PARAMS)
+    get(:index, params: { q: query.q_param })
+    assert_nil(session["return-to"])
+  end
+
+  PARAMS_UNDER_LIMIT =
+    { names: {
+        lookup: ["Agaricus campestris"],
+        include_synonyms: true,
+        include_subtaxa: true
+      },
+      region: "Massachusetts, USA",
+      has_images: true }.freeze
+
+  NERFC_QUERY_PARAMS =
+    { names: {
+        lookup:
+          ["Amanita ristichii",
+           "Boletus purpureorubellus",
+           "Butyriboletus billieae",
+           "Entoloma indigoferum",
+           "Caloboletus peckii",
+           "Clavulinopsis appalachiensis",
+           "Dendrocollybia racemosa",
+           "Echinodontium ballouii",
+           "Entoloma flavoviride",
+           "Helvella palustris",
+           "Hodophilus peckianus",
+           "Hypocreopsis rhododendri",
+           "Psathyrella epimyces",
+           "Pseudofistulina radicata",
+           "Squamanita imbachii",
+           "Squamanita umbonata",
+           "Tricholoma apium",
+           "Tricholoma grave",
+           "Underwoodia columnaris",
+           "Volvariella surrecta",
+           "Wynnea sparassoides"]
+      },
+      region:
+      ["Connecticut, USA",
+       "Maine, USA",
+       "Massachusetts, USA",
+       "New Hampshire, USA",
+       "New Jersey, USA",
+       "New York, USA",
+       "Pennsylvania, USA",
+       "Rhode Island, USA",
+       "Vermont, USA",
+       "New Brunswick, Canada",
+       "Newfoundland and Labrador, Canada",
+       "Newfoundland, Canada",
+       "Labrador, Canada",
+       "Nova Scotia, Canada",
+       "Eastern Ontario, Canada",
+       "Prince Edward Island, Canada",
+       "Quebec, Canada"] }.freeze
 end
