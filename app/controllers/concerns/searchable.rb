@@ -64,7 +64,7 @@ module Searchable
       save_search_query
 
       redirect_to(controller: "/#{parent_controller}", action: :index,
-                  q: @query.record.id.alphabetize)
+                  q: @query.q_param)
     end
 
     def search_type
