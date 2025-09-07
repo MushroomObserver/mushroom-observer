@@ -2,8 +2,17 @@
 // top nav bar
 // --------------------------------------------------
 
-.navbar-nav,
-.nav {
+.navbar-nav {
+  li {
+    form.button_to {
+      display: block;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+  }
+}
+
+#title_bar .nav {
   li {
     a,
     form.button_to {
