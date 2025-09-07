@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-# app/services/multiple_user_handler.rb
-
-class MultipleUserHandler
+class UserManagementService::MultipleUserHandler
   attr_reader :input_handler, :output_handler
 
   def initialize(input_handler:, output_handler:)

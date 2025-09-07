@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-# app/services/stdout_output_handler.rb
-
-class StdoutOutputHandler
+class UserManagementService::StdoutOutputHandler
   delegate :puts, to: :$stdout
 
   delegate :print, to: :$stdout

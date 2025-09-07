@@ -18,11 +18,6 @@ namespace :user do
 
   desc "Verify a user by login or email"
   task verify: :environment do
-    # Rails.logger = Logger.new($stdout, level: Logger::DEBUG,
-    #                                    formatter: proc { |_s, _d, _p, m|
-    #                                      "#{m}\n"
-    #                                    })
-
     service = UserManagementService.new
     result = service.verify_user?
     exit 1 unless result

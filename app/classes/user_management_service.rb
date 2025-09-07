@@ -17,13 +17,7 @@ class UserManagementService
     user_params = collect_user_params
     return false unless user_params
 
-    user = User.find_by(login: user_params[:login])
-
-    if user
-      handle_existing_user?(user, user_params)
-    else
-      create_new_user?(user_params)
-    end
+    create_new_user?(user_params)
   end
 
   def list_users
@@ -72,13 +66,13 @@ class UserManagementService
   def collect_login
     login = input_handler.get_input("Enter login: ")
     return validation_error?("Login cannot be blank") if login.blank?
+    return validation_error?("Login in use") if User.find_by(login:)
 
     login
   end
 
   def collect_name
     name = input_handler.get_input("Enter full name: ")
-    return validation_error?("Name cannot be blank") if name.blank?
 
     name
   end
@@ -111,30 +105,6 @@ class UserManagementService
       password: passwords[:password],
       password_confirmation: passwords[:password_confirmation]
     }
-  end
-
-  def handle_existing_user?(user, user_params)
-    output_handler.puts("User with login '#{user_params[:login]}' " \
-                        "already exists.")
-
-    unless input_handler.confirm?("Do you want to update this user?")
-      output_handler.puts("Operation cancelled.")
-      return false
-    end
-
-    update_existing_user?(user, user_params)
-  end
-
-  def update_existing_user?(user, user_params)
-    user.assign_attributes(user_params.merge(verified: Time.current))
-
-    if user.save
-      display_user_success(user, "updated")
-      true
-    else
-      display_user_errors(user, "updating")
-      false
-    end
   end
 
   def create_new_user?(user_params)

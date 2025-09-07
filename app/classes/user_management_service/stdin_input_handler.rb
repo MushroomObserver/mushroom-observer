@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-# app/services/stdin_input_handler.rb
-
-class StdinInputHandler
+class UserManagementService::StdinInputHandler
   def get_input(prompt)
     print(prompt) # rubocop:disable Rails/Output
     $stdin.gets.chomp.strip
