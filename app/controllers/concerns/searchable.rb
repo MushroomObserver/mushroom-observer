@@ -81,13 +81,6 @@ module Searchable
       false
     end
 
-    # Should be new_query_instance. clear_form should update the current query,
-    # removing params that wouldn't be in the form (like subqueries).
-    # Need to parse and prepopulate range fields if there is a query.
-    # def new_search_instance_from_query
-    #   @search = find_query(query_model)
-    # end
-
     # Passing some fields will raise an error if the required field is missing,
     # so just toss them. Not sure we have to do this, because Query will.
     # def remove_invalid_field_combinations
