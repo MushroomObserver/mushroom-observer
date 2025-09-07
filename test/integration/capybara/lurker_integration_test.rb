@@ -400,24 +400,39 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
   ################
 
-  private
+  # Custom login method for this test.
+  # Adds the bells and whistles from the method in CapybaraSessionExtensions.
+  def login(login = users(:zero_user).login, password = "testpassword",
+            remember_me: true, session: self)
+    login = login.login if login.is_a?(User) # get the right user field
+    session.visit(root_path)
+    session.first(:link, "Login").click
+    assert_equal("#{:app_title.l}: Please login",
+                 page_title(session), "Wrong page")
 
-  # Custom login method for this test. Consider adding the bells and whistles
-  # to the method in CapybaraSessionExtensions?
-  def login(login = users(:zero_user).login)
-    visit(root_path)
-    first(:link, "Login").click
-    assert_equal("#{:app_title.l}: Please login", page.title, "Wrong page")
-    fill_in("user_login", with: login)
-    fill_in("user_password", with: "testpassword")
-    click_button("Login")
+    session.within("#account_login_form") do
+      session.fill_in("user_login", with: login)
+      session.fill_in("user_password", with: password)
+      session.uncheck("user_remember_me") if remember_me == false
+
+      session.first(:button, type: "submit").click
+    end
 
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
     assert_equal(
       "#{:app_title.l}: #{:OBSERVATIONS.l}", #  by #{:sort_by_rss_log.l}
-      page.title, "Login failed"
+      page_title(session), "Login failed"
     )
+  end
+
+  # Weird. Named Capybara sessions have a document, not a page.
+  def page_title(session)
+    if session.respond_to?(:document)
+      session.document.title
+    elsif session.respond_to?(:page)
+      session.page.title
+    end
   end
 
   # This returns results so you can reset a `results` variable within test scope

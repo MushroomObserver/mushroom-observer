@@ -43,7 +43,7 @@ module CapybaraSessionExtensions
 
   # Login the given user in the current session.
   def login(login = users(:zero_user).login, password = "testpassword",
-            remember_me = true, session: self)
+            remember_me: true, session: self)
     login = login.login if login.is_a?(User) # get the right user field
     session.visit("/account/login/new")
     session.assert_selector("body.login__new")
