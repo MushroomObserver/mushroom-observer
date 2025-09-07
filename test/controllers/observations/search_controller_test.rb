@@ -18,7 +18,7 @@ module Observations
       get(:new)
     end
 
-    def test_new_observations_search_from_existing_query
+    def test_new_observations_search_form_prefilled_from_existing_query
       proj1 = projects(:bolete_project)
       proj2 = projects(:two_list_project)
 
@@ -61,18 +61,24 @@ module Observations
         has_notes: true
       }
       post(:create, params:)
+
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: { q: { model: :Observation, **params } })
     end
 
     def test_create_observations_search_nested
       login
       params = {
         names: {
-          lookup: "Agaricus campestris",
+          lookup: ["Agaricus campestris"],
           include_synonyms: true
         },
         has_notes: true
       }
       post(:create, params:)
+
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: { q: { model: :Observation, **params } })
     end
   end
 end
