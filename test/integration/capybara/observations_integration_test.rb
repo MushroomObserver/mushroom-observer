@@ -205,7 +205,21 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
   end
 
   def test_observation_search_form
+    lookup = "Agaricus campestris"
+
     login
+    visit("/observations/search/new")
+    within("#observations_search_form") do |form|
+      assert_selector("#query_observations_names_lookup")
+      form.fill_in("query_observations_names_lookup", with: lookup)
+      # assert_selector("#query_observations_names_lookup", text: lookup)
+      form.select("yes", from: "query_observations_names_include_synonyms")
+      first(:button, type: "submit").click
+    end
+
+    assert_no_selector("#flash_notices")
+    assert_selector("#filters", text: lookup)
+    assert_selector("#results", text: lookup)
   end
 
   # Tests of show_name_helper module
