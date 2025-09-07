@@ -42,8 +42,10 @@ module Names
 
     def test_create_names_search
       login
-      pattern = "Agaricus campestris"
-      params = { pattern:, misspellings: :either }
+      params = {
+        pattern: "Agaricus campestris",
+        misspellings: :either
+      }
       post(:create, params:)
 
       assert_redirected_to(controller: "/names", action: :index,
