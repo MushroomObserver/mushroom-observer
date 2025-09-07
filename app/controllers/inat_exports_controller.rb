@@ -19,6 +19,8 @@ class InatExportsController < ApplicationController
     @inat_export.update(mo_ids: @mo_ids)
   end
 
+  # ---------------------------------
+
   private
 
   def export_pending
@@ -56,6 +58,8 @@ class InatExportsController < ApplicationController
               each_with_object([]) { |obs, ary| ary << obs.id }
   end
 
+  # ---------------------------------
+
   public
 
   def create
@@ -65,6 +69,8 @@ class InatExportsController < ApplicationController
     assure_user_has_mo_api_key
     request_inat_user_authorization
   end
+
+  # ---------------------------------
 
   private
 
@@ -101,5 +107,52 @@ class InatExportsController < ApplicationController
   # TODO: DRY with InatImportsController#request_inat_user_authorization
   def request_inat_user_authorization
     redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+  end
+
+  # ---------------------------------
+
+  public
+
+  # iNat redirects here after user completes iNat authorization
+  def authorization_response
+    auth_code = params[:code]
+    return not_authorized if auth_code.blank?
+
+# FIXME: tempporary return in order to commit other changes
+return not_authorized
+
+    export = export_authenticating(auth_code)
+    export.reset_last_obs_start
+    tracker = fresh_tracker(export)
+
+    Rails.logger.info(
+      "Enqueueing InatExportJob for InatExport id: #{export.id}"
+    )
+    # InatExportJob.perform_now(export) # uncomment to manually test job
+    InatExportJob.perform_later(export) # uncomment for production
+
+    redirect_to(export_path(export, params: { tracker_id: tracker.id }))
+  end
+
+  # ---------------------------------
+
+  private
+
+  def not_authorized
+    flash_error(:inat_export_no_authorization.l)
+    # TODO: redirect back to obs page if came from there
+    redirect_to(observations_path)
+  end
+
+  def export_authenticating(auth_code)
+    export = InatExport.find_or_create_by(user: @user)
+    export.update(token: auth_code, state: "Authenticating")
+    export
+  end
+
+  def fresh_tracker(export)
+    InatExportJobTracker.where(export: export.id).
+      destroy_all # clean out this user's old tracker(s)
+    InatExportJobTracker.create(export: export.id)
   end
 end
