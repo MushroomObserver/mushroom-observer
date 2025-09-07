@@ -3,10 +3,10 @@
 # lib/tasks/user_management.rake
 
 namespace :user do
-  desc "Add or update a user from the command line"
+  desc "Add a user from the command line"
   task add: :environment do
     service = UserManagementService.new
-    result = service.create_or_update_user?
+    result = service.create_user?
     exit 1 unless result
   end
 

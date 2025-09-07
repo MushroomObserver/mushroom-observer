@@ -11,7 +11,7 @@ class UserManagementService
     @output_handler = output_handler
   end
 
-  def create_or_update_user?
+  def create_user?
     output_handler.print_header("User Creation/Update Tool")
 
     user_params = collect_user_params
@@ -72,9 +72,7 @@ class UserManagementService
   end
 
   def collect_name
-    name = input_handler.get_input("Enter full name: ")
-
-    name
+    input_handler.get_input("Enter full name: ")
   end
 
   def collect_email
