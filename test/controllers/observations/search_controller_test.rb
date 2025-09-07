@@ -40,12 +40,14 @@ module Observations
       assert_select("select#query_observations_names_include_synonyms",
                     selected: "yes")
       assert_select("input#query_observations_region",
-                    text: "Massachusetts, USA")
+                    value: "Massachusetts, USA")
       assert_select("select#query_observations_has_specimen",
                     selected: "yes")
       assert_select("input#query_observations_notes_has", value: "Symbiota")
-      # assert_select("textarea#query_observations_projects",
-      #               text: proj1.title)
+      assert_select("input#query_observations_projects_id",
+                    value: "#{proj1.id} #{proj2.id}") # hidden ids field
+      assert_select("textarea#query_observations_projects",
+                    text: "#{proj1.title}\n#{proj2.title}")
       assert_select("select#query_observations_confidence",
                     selected: "Species")
       assert_select("select#query_observations_confidence_range",

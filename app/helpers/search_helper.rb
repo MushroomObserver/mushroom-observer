@@ -203,23 +203,32 @@ module SearchHelper
 
   def search_autocompleter_prefillable_values(search, field)
     values = search_attribute_possibly_nested_value(search, field)
-    return search_string_but_not_id(values) unless values.is_a?(Array)
+    return values unless values.is_a?(Array)
 
-    return nil unless search_string_but_not_id(values[0])
-
-    values.join(SEARCH_SEPARATOR)
+    search_string_values(values, field)
   end
 
-  # For autocompleters, if the value(s) is/are ids, we don't want those
-  # prefilled in the text field — they go in the "hidden_field" for ids.
-  # Prefill the visible text only if it's a string or array of strings.
-  def search_string_but_not_id(val)
-    if val.is_a?(Numeric) ||
-       (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
-      return nil
-    end
+  # For autocompleters, if the value(s) is/are ids, we need to lookup the
+  # strings that should be prefilled in the text field — ids go in the
+  # "hidden_field" for ids.
+  def search_string_values(values, field)
+    values.map do |val|
+      if val.is_a?(Numeric) ||
+         (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
+        search_string_via_lookup_id(val, field)
+      else
+        val
+      end
+    end.join(SEARCH_SEPARATOR)
+  end
 
-    val
+  def search_string_via_lookup_id(val, field)
+    lookup_name = field.to_s.camelize # already plural
+    lookup_name = "Names" if lookup_name == "Lookup"
+    lookup = "Lookup::#{lookup_name}".constantize
+    title_method = lookup::TITLE_METHOD # this is the attribute we want
+    model = lookup_name.singularize.constantize
+    model.find(val.to_i).send(title_method)
   end
 
   def names_fields_for_names(**args)
