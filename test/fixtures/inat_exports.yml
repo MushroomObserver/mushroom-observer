@@ -1,0 +1,48 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+DEFAULTS: &DEFAULTS
+  user_id: nil
+  state: <%= InatExport.states[:Unstarted] %>
+  mo_ids: ""
+  token: ""
+  inat_username: ""
+  exportables: 0
+  exported_count: 0
+  ended_at: nil
+  total_exported_count: nil
+  total_seconds: nil
+  avg_export_time: nil
+  last_obs_start: nil
+  cancel: false
+  response_errors: ""
+
+# katrina is in the middle of an export
+katrina_inat_export:
+  <<: *DEFAULTS
+  user: katrina
+  state: <%= InatExport.states[:Exporting] %>
+  inat_username: katrina_inat_username
+  cancel: false
+
+# marytyped extra spaces in her iNat username
+mary_inat_export:
+  <<: *DEFAULTS
+  user: mary
+  state: <%= InatExport.states[:Unstarted] %>
+  inat_username: " marys_inat_username " # compare users.yml
+
+# ollie canceled an export
+ollie_inat_export:
+  <<: *DEFAULTS
+  user: ollie
+  state: <%= InatExport.states[:Done] %>
+  inat_username: null
+  cancel: true
+
+rolf_inat_export:
+  <<: *DEFAULTS
+  user: rolf
+  inat_username: rolf_inat_username
+  total_exported_count: nil # has no export history
+  total_seconds: nil
+  avg_export_time: nil

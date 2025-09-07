@@ -318,16 +318,26 @@ class ObservationsControllerShowTest < FunctionalTestCase
                        action: :update, naming_id: rolf_nmg.id,
                        observation_id: obs.id,
                        id: consensus.users_vote(rolf_nmg, rolf))
+    assert_match(
+      %r{inat_exports/new\?id=#{obs.id}}, @response.body,
+      "Obs should link to iNat export if owner logged in and " \
+      "obs not imported from, exported to, or mirrored on iNat"
+    )
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
     obs = observations(:coprinus_comatus_obs)
     get(:show, params: { id: obs.id })
     assert_show_observation
+
     assert_form_action(controller: "observations/namings/votes",
                        action: :update, naming_id: rolf_nmg.id,
                        observation_id: obs.id,
                        id: consensus.users_vote(rolf_nmg, mary))
+    assert_no_match(
+      %r{inat_exports/new\?id=#{obs.id}}, @response.body,
+      "Obs should not link to iNat export if owner not logged in"
+    )
 
     # Test a naming owned by the observer but the observer has 'No Opinion'.
     # Ensure that rolf owns @obs_with_no_opinion.

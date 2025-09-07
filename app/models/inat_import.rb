@@ -27,10 +27,17 @@
 #                          and in Job after each observation import
 #  cancel/canceled::       Did the user requested canceling the Job
 #
+# == Class Methods
+#  super_importers::        users who can import others' iNat obss
+#
 # == Methods
-#  total_expected_time     total expected time for associated Job
-#  last_obs_elapsed_time   time spent importing a single iNat obs
+#  add_response_error      add an error message to response_errors
 #  adequate_constraints?   enough constraints on which observations to import?
+#  initial_avg_import_seconds  estimated average time to import a single iNat obs
+#  job_pending?            Is there a job pending for this import?
+#  last_obs_elapsed_time   time since last_obs_start
+#  reset_last_obs_start    set last_obs_start to current time
+#  total_expected_time     total expected time for associated Job
 #
 class InatImport < ApplicationRecord
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?

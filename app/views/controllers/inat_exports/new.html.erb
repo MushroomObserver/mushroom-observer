@@ -1,0 +1,32 @@
+<%
+  add_page_title(:inat_export_create_title.l)
+  add_context_nav(inat_export_form_new_tabs(@source, @requested_ids))
+%>
+
+<div>
+  <%= form_with(url: inat_exports_path({ mo_ids: @mo_ids }),
+                method: :post) do |f| %>
+    <%= f.label(:inat_username, "#{:inat_username.l}: ") %>
+    <%= f.text_field(:inat_username, size: 10, class: "form-control",
+                     value: User.current.inat_username) %>
+
+    <%= panel_block(id: "observation_counts",
+                    heading: :inat_export_observation_counts.l,
+                    class: "name-section") do %>
+      <p>
+        <b><%= :inat_export_requested.l %></b>:
+        <%= @requested_ids&.length.to_i.to_s %>
+      </p>
+      <p>
+        <b><%= :inat_export_exportables.l %></b>:
+        <%= @mo_ids&.length.to_i.to_s %>
+      <p>
+    <% end %>
+
+    <%= panel_block do %>
+      <p><b><%= :inat_details_heading.l %></b></p>
+      <%= :inat_export_details.t %>
+    <% end %>
+    <%= f.submit(:SUBMIT.l, { class: "btn btn-default" }) %>
+  <% end %>
+</div>
