@@ -18,7 +18,7 @@ module Names
       get(:new)
     end
 
-    def test_new_names_search_from_existing_query
+    def test_new_names_search_form_prefilled_from_existing_query
       login
       query = @controller.find_or_create_query(
         :Name,
@@ -42,23 +42,27 @@ module Names
 
     def test_create_names_search
       login
-      params = {
-        pattern: "Agaricus campestris",
-        misspellings: :either
-      }
+      pattern = "Agaricus campestris"
+      params = { pattern:, misspellings: :either }
       post(:create, params:)
+
+      assert_redirected_to(controller: "/names", action: :index,
+                           params: { q: { model: :Name, **params } })
     end
 
     def test_create_names_search_nested
       login
       params = {
         names: {
-          lookup: "Agaricus campestris",
+          lookup: ["Agaricus campestris"],
           include_synonyms: true
         },
         misspellings: :either
       }
       post(:create, params:)
+
+      assert_redirected_to(controller: "/names", action: :index,
+                           params: { q: { model: :Name, **params } })
     end
   end
 end
