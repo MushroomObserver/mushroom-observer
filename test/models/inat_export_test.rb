@@ -4,7 +4,7 @@ require("test_helper")
 
 class InatExportTest < ActiveSupport::TestCase
   def test_total_expected_time_tabula_rasa
-    skip("Under Construction")
+    skip("Awaiting implementation of InatExportJob and Tracker")
     zero_out_prior_export_records
     export = inat_exports(:rolf_inat_export)
 
@@ -17,7 +17,7 @@ class InatExportTest < ActiveSupport::TestCase
   end
 
   def zero_out_prior_export_records
-    skip("Under Construction")
+    skip("Awaiting implementation of InatExportJob and Tracker")
     prior_exports = InatExport.where.not(total_exported_count: nil)
     prior_exports.each do |export|
       export.update(total_exported_count: nil, total_seconds: nil)
@@ -25,7 +25,7 @@ class InatExportTest < ActiveSupport::TestCase
   end
 
   def test_total_expected_time_user_without_prior_exports
-    skip("Under Construction")
+    skip("Awaiting implementation of InatExportJob and Tracker")
     export = inat_exports(:rolf_inat_export)
 
     assert_equal(
@@ -36,7 +36,7 @@ class InatExportTest < ActiveSupport::TestCase
   end
 
   def test_total_expected_time_user_with_prior_exports
-    skip("Under Construction")
+    skip("Awaiting implementation of InatExportJob and Tracker")
     export = inat_exports(:roy_inat_export)
 
     assert_equal(export.exportables * export.initial_avg_export_seconds,

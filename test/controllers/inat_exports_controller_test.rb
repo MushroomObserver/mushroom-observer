@@ -186,7 +186,6 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_authorization_response_denied
-    skip("Awaiting implementation of :authorization_response action")
     login
 
     get(:authorization_response, params: AUTHORIZATION_DENIAL_CALLBACK_PARAMS)
@@ -196,7 +195,7 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_import_authorized
-    skip("Awaiting implementation of :authorization_response action")
+    skip("Awaiting implementation of InatExportJob and Tracker")
     user = users(:rolf)
     assert_blank(user.inat_username,
                  "Test needs user fixture without an iNat username")
