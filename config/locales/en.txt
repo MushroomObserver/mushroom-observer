@@ -3062,6 +3062,8 @@
   inat_export_details: "* Excludes Observations which are not yours.\n* Excludes Observations previously imported from/exported to iNat."
   inat_export_no_username: Missing your iNat Username
   inat_export_no_exportables: The designated MO Observation(s) are not exportable to iNat
+  inat_export_no_authorization: Export aborted; MO did not receive authorization to access iNat user data
+
 
   # observation/inat_imports
   inat_import_create_title: Import from iNat
@@ -3081,7 +3083,7 @@
   inat_importing_all_anothers: You cannot import all observations of another person
 
   inat_import_started: Your import has started. Refresh page to update results.
-  inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
+  inat_no_authorization: Import aborted; MO did not receive authorization to access iNat user data
   inat_wrong_user: You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username.
   inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
