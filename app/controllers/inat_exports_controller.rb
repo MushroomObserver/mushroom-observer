@@ -123,7 +123,9 @@ return not_authorized
 
     export = export_authenticating(auth_code)
     export.reset_last_obs_start
-    tracker = fresh_tracker(export)
+
+    # FIXME: implement Job Tracker creation
+    # tracker = fresh_tracker(export)
 
     Rails.logger.info(
       "Enqueueing InatExportJob for InatExport id: #{export.id}"
@@ -131,7 +133,8 @@ return not_authorized
     # InatExportJob.perform_now(export) # uncomment to manually test job
     InatExportJob.perform_later(export) # uncomment for production
 
-    redirect_to(export_path(export, params: { tracker_id: tracker.id }))
+    # FIXME: impolement this after Job and Tracker are implemented
+    # redirect_to(export_path(export, params: { tracker_id: tracker.id }))
   end
 
   # ---------------------------------
@@ -151,6 +154,9 @@ return not_authorized
   end
 
   def fresh_tracker(export)
+    # FIXME: implement tracker
+    return
+
     InatExportJobTracker.where(export: export.id).
       destroy_all # clean out this user's old tracker(s)
     InatExportJobTracker.create(export: export.id)
