@@ -225,6 +225,7 @@ module SearchHelper
   def search_string_via_lookup_id(val, field)
     lookup_name = field.to_s.camelize # already plural
     lookup_name = "Names" if lookup_name == "Lookup"
+    lookup_name = "Users" if lookup_name == "ByUsers"
     lookup = "Lookup::#{lookup_name}".constantize
     title_method = lookup::TITLE_METHOD # this is the attribute we want
     model = lookup_name.singularize.constantize
