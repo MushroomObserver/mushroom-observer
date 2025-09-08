@@ -58,19 +58,28 @@ module Searchable
       return if clear_form?
 
       set_up_form_field_groupings # in case we need to re-render the form
-
-      @query_params = params[:"query_#{search_type}"].to_unsafe_hash.
-                      deep_compact_blank.deep_symbolize_keys
+      @query_params = params[search_object_name].permit(permittables)
       replace_strings_with_ids
-      validate_search_query_instance_from_params
-      save_search_query
+      redirect_to(action: :new) and return unless validate_search_instance?
 
+      save_search_query
       redirect_to(controller: "/#{parent_controller}", action: :index,
                   q: @query.q_param)
     end
 
+    # The form has some additional temporary params, need to permit these
+    def permittables
+      ranges = fields_with_range.map { |field| :"#{field}_range" }
+      ids = fields_preferring_ids.map { |field| :"#{field}_id" }
+      permitted_search_params.keys + ranges + ids
+    end
+
     def search_type
       self.class.name.deconstantize.underscore.to_sym
+    end
+
+    def search_object_name
+      :"query_#{search_type}"
     end
 
     private
@@ -109,59 +118,59 @@ module Searchable
 
     # `params.permit` will not accept nested params, or arrays from ranges,
     # so just add them back in. Query will validate and sanitize.
-    def validate_search_query_instance_from_params
-      @search = query_subclass.new(
+    # Note that this @search query instance is not the one that gets saved and
+    # sent, this step is ONLY for validation of the params.
+    def validate_search_instance?
+      @query_params = {
         **@query_params,
         **nested_params_re_added,
-        **concatenated_range_fields_re_added
-      )
-      return unless @search.invalid?
+        **joined_range_fields_re_added
+      }.deep_symbolize_keys
+      @search = Query.create_query(query_model, @query_params)
+      return true unless @search.invalid?
 
       messages = search_query_error_messages
       flash_error(messages) if messages
-      redirect_to(action: :new) and return
+      false
     end
 
     def search_query_error_messages
-      @search.validation_errors.compact_blank.map do |error|
-        concat(tag.div(error))
-      end
+      @search.validation_errors.compact_blank
     end
 
-    # Add the nested params back in if they're present
+    # Add the nested params back in if they're present in the original params
+    # See note above #validate_search_query_instance_from_params
     def nested_params_re_added
-      { names: names_with_lookup,
-        in_box: in_box_with_values }.compact_blank
+      {
+        names: names_with_lookup(params.dig(search_object_name, :names)),
+        in_box: in_box_with_values(params.dig(search_object_name, :in_box))
+      }.compact_blank
     end
 
-    def names_with_lookup
-      return nil if @query_params.dig(:names, :lookup).blank?
+    def names_with_lookup(names)
+      return nil if names[:lookup].blank?
 
-      @query_params[:names]
+      names.permit!
     end
 
-    def in_box_with_values
-      return nil if @query_params[:in_box].blank? ||
-                    (@query_params.dig(:in_box, :north).to_i.zero? &&
-                     @query_params.dig(:in_box, :south).to_i.zero?)
+    def in_box_with_values(in_box)
+      return nil if in_box.blank? ||
+                    (in_box[:north].to_i.zero? && in_box[:south].to_i.zero?)
 
-      @query_params[:in_box].to_unsafe_hash
+      in_box.permit!
     end
 
-    # Check for `fields_with_range`, and concatenate them if range val present
-    def concatenated_range_fields_re_added
+    # Check for `fields_with_range`, and join them into array if range present
+    def joined_range_fields_re_added
       return unless respond_to?(:fields_with_range)
 
-      re_added_hash = {}
+      range_params = {}
       fields_with_range.each do |key|
         next if @query_params[:"#{key}_range"].blank?
 
-        r_v = [@query_params[key], @query_params[:"#{key}_range"]].map do |val|
-          val.to_s.strip.to_f
-        end
-        re_added_hash[key] = r_v
+        range_params[key] = [@query_params[key], @query_params[:"#{key}_range"]]
       end
-      re_added_hash
+      range_params
     end
 
     def clear_relevant_query
@@ -171,9 +180,10 @@ module Searchable
       @query = Query.lookup_and_save(query_model)
     end
 
+    # Save the validated search params and send these to the index.
     def save_search_query
       @query = Query.lookup_and_save(
-        query_model, **@query_params
+        query_model, **@search.params
       )
     end
 
@@ -198,6 +208,14 @@ module Searchable
 
     def strings_with_commas
       [:location, :region].freeze
+    end
+
+    def fields_preferring_ids
+      []
+    end
+
+    def fields_with_range
+      []
     end
   end
 end

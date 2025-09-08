@@ -74,12 +74,20 @@ module Observations
           lookup: ["Agaricus campestris"],
           include_synonyms: true
         },
+        confidence: 33,
+        confidence_range: 66,
         has_notes: true
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: { q: { model: :Observation, **params } })
+      # The controller joins the confidence and confidence_range into an array
+      digested_params = params.merge(confidence: [33.0, 66.0])
+      digested_params.delete(:confidence_range)
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: { q: { model: :Observation, **digested_params } }
+      )
     end
   end
 end

@@ -59,12 +59,18 @@ module Names
           lookup: ["Agaricus campestris"],
           include_synonyms: true
         },
+        rank: :Species,
+        rank_range: :Genus,
         misspellings: :either
       }
       post(:create, params: { query_names: params })
 
+      # The controller joins the rank and rank_range into an array
+      digested_params = params.merge(rank: [:Species, :Genus])
+      digested_params.delete(:rank_range)
+
       assert_redirected_to(controller: "/names", action: :index,
-                           params: { q: { model: :Name, **params } })
+                           params: { q: { model: :Name, **digested_params } })
     end
   end
 end
