@@ -3522,16 +3522,16 @@
   review_email: Email
 
   user_add_tool: User Creation Tool
-  user_add_email_prompt: "Enter email: "
+  user_add_email_prompt: Enter email
   user_add_email_not_blank: Email cannot be blank
   user_add_email_invalid: Invalid email format
-  user_add_login_prompt: "Enter login: "
+  user_add_login_prompt: Enter login
   user_add_login_not_blank: Login cannot be blank
   user_add_login_in_use: Login in use
-  user_add_name_prompt: "Enter full name: "
-  user_add_password_prompt: "Enter password: "
+  user_add_name_prompt: Enter full name
+  user_add_password_prompt: Enter password
   user_add_password_not_blank: Password cannot be blank
-  user_add_password_confirm_prompt: "Confirm password: "
+  user_add_password_confirm_prompt: Confirm password
   user_add_password_no_match: Passwords do not match
   user_add_success: User '[login]' created successfully!
   user_add_verified: Verified

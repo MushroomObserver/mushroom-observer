@@ -34,7 +34,7 @@ class UserManagementService
   def verify_user?
     output_handler.print_header(:user_verify_tool.t)
 
-    identifier = input_handler.get_input("#{:user_verify_prompt.t}: ")
+    identifier = input_handler.get_input(:user_verify_prompt.t)
     return false if identifier.blank?
 
     if email_identifier?(identifier)

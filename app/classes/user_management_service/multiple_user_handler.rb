@@ -64,7 +64,7 @@ class UserManagementService::MultipleUserHandler
   end
 
   def get_user_choice(users)
-    prompt = "#{:user_verify_select.t(max: users.count + 1).unescape_html}: "
+    prompt = :user_verify_select.t(max: users.count + 1).unescape_html
     input_handler.get_input(prompt)
   end
 
