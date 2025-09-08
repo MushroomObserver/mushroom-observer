@@ -19,7 +19,8 @@ class UserManagementService::MultipleUserHandler
   private
 
   def display_multiple_users_header(_users, email)
-    output_handler.puts("Multiple users found with email '#{email}':")
+    msg = :user_verify_multiple_found.t(email:).unescape_html
+    output_handler.puts("#{msg}:")
     output_handler.puts("")
   end
 
@@ -32,16 +33,16 @@ class UserManagementService::MultipleUserHandler
   end
 
   def display_verify_all_option(users)
-    output_handler.puts("#{users.count + 1}. Verify all users")
+    output_handler.puts("#{users.count + 1}. #{:user_verify_all.t}")
     output_handler.puts("")
   end
 
   def format_verification_status(user)
     if user.verified?
       timestamp = user.verified.strftime("%Y-%m-%d %H:%M:%S")
-      "✓ Verified at #{timestamp}"
+      :user_verify_verified_at.t(timestamp:)
     else
-      "✗ Not verified"
+      :user_verify_not_verified.t
     end
   end
 
@@ -63,13 +64,13 @@ class UserManagementService::MultipleUserHandler
   end
 
   def get_user_choice(users)
-    prompt = "Select user to verify (1-#{users.count + 1}) or 'q' to quit: "
+    prompt = "#{:user_verify_select.t(max: users.count + 1).unescape_html}: "
     input_handler.get_input(prompt)
   end
 
   def quit_requested?(choice)
     quit_choice = %w[q quit].include?(choice.downcase)
-    output_handler.puts("Operation cancelled.") if quit_choice
+    output_handler.puts(:user_verify_cancelled.t) if quit_choice
     quit_choice
   end
 
@@ -82,14 +83,15 @@ class UserManagementService::MultipleUserHandler
   end
 
   def display_invalid_choice_message(users)
-    message = "Invalid choice. Please enter a number between 1 and " \
-              "#{users.count + 1}, or 'q' to quit."
+    message = :user_verify_invalid_choice.t(max: users.count + 1).unescape_html
     output_handler.puts(message)
   end
 
   def verify_all_users?(users)
     verified_count = count_and_verify_unverified_users(users)
-    display_verification_summary(verified_count)
+    output_handler.puts(
+      :user_verify_successful_n_users.t(count: verified_count)
+    )
     true
   end
 
@@ -102,18 +104,11 @@ class UserManagementService::MultipleUserHandler
 
       user.update!(verified: verification_time)
       verified_count += 1
-      output_handler.puts("Verified: #{user.login} at #{verification_time}")
+      output_handler.puts(:user_verify_one_user.t(login: user.login,
+                                                  time: verification_time))
     end
 
     verified_count
-  end
-
-  def display_verification_summary(verified_count)
-    if verified_count.positive?
-      output_handler.puts("Successfully verified #{verified_count} user(s).")
-    else
-      output_handler.puts("All users were already verified.")
-    end
   end
 
   def verify_selected_user?(user)
@@ -125,16 +120,18 @@ class UserManagementService::MultipleUserHandler
     true
   end
 
-  def display_already_verified_message(user, identifier)
+  def display_already_verified_message(user, login)
     timestamp = user.verified.strftime("%Y-%m-%d %H:%M:%S")
-    output_handler.puts("User '#{identifier}' is already verified " \
-                        "(#{timestamp}).")
+    output_handler.puts(
+      :user_verify_already_verified.t(login:, timestamp:).unescape_html
+    )
   end
 
-  def perform_verification(user, identifier)
-    verification_time = Time.current
-    user.update!(verified: verification_time)
-    output_handler.puts("User '#{identifier}' has been verified at " \
-                        "#{verification_time}.")
+  def perform_verification(user, login)
+    timestamp = Time.current
+    user.update!(verified: timestamp)
+    output_handler.puts(
+      :user_verify_verified.t(login:, timestamp:).unescape_html
+    )
   end
 end

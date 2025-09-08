@@ -223,6 +223,11 @@ inat_importer:
 foray_recorder:
   <<: *DEFAULTS
 
+unverified_recorder:
+  <<: *DEFAULTS
+  verified: nil
+  email: foray_recorder@collectivesource.com
+
 nihilist_user:
   <<: *DEFAULTS
   login: Nil

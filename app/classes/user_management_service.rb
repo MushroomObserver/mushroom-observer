@@ -12,7 +12,7 @@ class UserManagementService
   end
 
   def create_user?
-    output_handler.print_header("User Creation/Update Tool")
+    output_handler.print_header(:user_add_tool.t)
 
     user_params = collect_user_params
     return false unless user_params
@@ -22,9 +22,8 @@ class UserManagementService
 
   def list_users
     users = User.order(:login)
-
     if users.empty?
-      output_handler.puts("No users found.")
+      output_handler.puts(:user_list_no_users.t)
       return
     end
 
@@ -33,9 +32,9 @@ class UserManagementService
   end
 
   def verify_user?
-    output_handler.print_header("User Verification Tool")
+    output_handler.print_header(:user_verify_tool.t)
 
-    identifier = input_handler.get_input("Enter login or email: ")
+    identifier = input_handler.get_input("#{:user_verify_prompt.t}: ")
     return false if identifier.blank?
 
     if email_identifier?(identifier)
@@ -64,32 +63,36 @@ class UserManagementService
   end
 
   def collect_login
-    login = input_handler.get_input("Enter login: ")
-    return validation_error?("Login cannot be blank") if login.blank?
-    return validation_error?("Login in use") if User.find_by(login:)
+    login = input_handler.get_input(:user_add_login_prompt.t)
+    return validation_error?(:user_add_login_not_blank.t) if login.blank?
+    return validation_error?(:user_add_login_in_use.t) if User.find_by(login:)
 
     login
   end
 
   def collect_name
-    input_handler.get_input("Enter full name: ")
+    input_handler.get_input(:user_add_name_prompt.t)
   end
 
   def collect_email
-    email = input_handler.get_input("Enter email: ")
-    return validation_error?("Email cannot be blank") if email.blank?
-    return validation_error?("Invalid email format") unless valid_email?(email)
+    email = input_handler.get_input(:user_add_email_prompt.t)
+    return validation_error?(:user_add_email_not_blank.t) if email.blank?
+    unless valid_email?(email)
+      return validation_error?(:user_add_email_invalid.t)
+    end
 
     email
   end
 
   def collect_passwords
-    password = input_handler.get_password("Enter password: ")
-    return validation_error?("Password cannot be blank") if password.blank?
+    password = input_handler.get_password(:user_add_password_prompt.t)
+    return validation_error?(:user_add_password_not_blank.t) if password.blank?
 
-    confirmation = input_handler.get_password("Confirm password: ")
+    confirmation = input_handler.get_password(
+      :user_add_password_confirm_prompt.t
+    )
     if password != confirmation
-      return validation_error?("Passwords do not match")
+      return validation_error?(:user_add_password_no_match.t)
     end
 
     { password: password, password_confirmation: confirmation }
@@ -109,32 +112,32 @@ class UserManagementService
     user = User.new(user_params.merge(verified: Time.current))
 
     if user.save
-      display_user_success(user, "created")
+      display_user_success(user)
       true
     else
-      display_user_errors(user, "creating")
+      display_user_errors(user)
       false
     end
   end
 
-  def display_user_success(user, action)
-    output_handler.puts("User '#{user.login}' #{action} successfully!")
-    output_handler.puts("  Name: #{user.name}")
-    output_handler.puts("  Email: #{user.email}")
-    output_handler.puts("  Verified: #{user.verified}")
+  def display_user_success(user)
+    output_handler.puts(:user_add_success.t(login: user.login).unescape_html)
+    output_handler.puts("  #{:NAME.t}: #{user.name}")
+    output_handler.puts("  #{:EMAIL.t}: #{user.email}")
+    output_handler.puts("  #{:user_add_verified.t}: #{user.verified}")
   end
 
-  def display_user_errors(user, action)
-    output_handler.puts("Error #{action} user:")
+  def display_user_errors(user)
+    output_handler.puts(:user_add_error_header.t)
     user.errors.full_messages.each do |error|
       output_handler.puts("  - #{error}")
     end
   end
 
   def display_user_list_header
-    output_handler.puts("=== Users ===")
-    output_handler.printf("%-20s %-30s %-30s %-25s\n",
-                          "Login", "Name", "Email", "Verified")
+    output_handler.puts(:user_management_header.t(title: :USERS.t))
+    output_handler.puts(format("%-20s %-30s %-30s %-25s", :login_login.t,
+                               :NAME.t, :EMAIL.t, :user_add_verified.t))
     output_handler.puts("-" * 107)
   end
 
@@ -142,20 +145,18 @@ class UserManagementService
     verified_display = if user.verified?
                          user.verified.strftime("%Y-%m-%d %H:%M:%S")
                        else
-                         "No"
+                         :NOPE.t
                        end
-    output_handler.printf("%-20s %-30s %-30s %-25s\n",
-                          user.login,
-                          user.name[0..29],
-                          user.email[0..29],
-                          verified_display)
+    output_handler.puts(format("%-20s %-30s %-30s %-25s", user.login,
+                               user.name[0..29], user.email[0..29],
+                               verified_display))
   end
 
   def verify_by_email?(email)
-    users = User.where(email: email)
+    users = User.where(email: email).order(:login)
 
     if users.empty?
-      output_handler.puts("No users found with email '#{email}'")
+      output_handler.puts(:user_verify_email_missing.t(email:).unescape_html)
       false
     elsif single_user?(users)
       verify_single_user?(users.first, email)
@@ -171,7 +172,7 @@ class UserManagementService
     user = User.find_by(login: login)
 
     unless user
-      output_handler.puts("User with login '#{login}' not found.")
+      output_handler.puts(:user_verify_login_missing.t(login:).unescape_html)
       return false
     end
 
@@ -187,26 +188,22 @@ class UserManagementService
     true
   end
 
-  def display_already_verified_message(user, identifier)
+  def display_already_verified_message(user, login)
     timestamp = user.verified.strftime("%Y-%m-%d %H:%M:%S")
-    output_handler.puts("User '#{identifier}' is already verified " \
-                        "(#{timestamp}).")
+    output_handler.puts(:user_verify_already_verified.t(
+      login:, timestamp:
+    ).unescape_html)
   end
 
-  def perform_verification(user, identifier)
-    verification_time = Time.current
-    user.update!(verified: verification_time)
-    output_handler.puts("User '#{identifier}' has been verified at " \
-                        "#{verification_time}.")
+  def perform_verification(user, login)
+    timestamp = Time.current
+    user.update!(verified: timestamp)
+    output_handler.puts(:user_verify_verified.t(login:,
+                                                timestamp:).unescape_html)
   end
 
   def verify_single_user?(user, _identifier)
-    verification_time = Time.current
-    user.update!(verified: verification_time)
-    message = "User '#{user.login}' (#{user.email}) has been verified at " \
-              "#{verification_time}."
-    output_handler.puts(message)
-    true
+    verify_user_by_login?(user, user.login)
   end
 
   def email_identifier?(identifier)
@@ -222,7 +219,7 @@ class UserManagementService
   end
 
   def validation_error?(message)
-    output_handler.puts("Error: #{message}")
+    output_handler.puts("#{:user_add_error.t}: #{message}")
     false
   end
 end

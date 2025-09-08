@@ -2,26 +2,15 @@
 
 class UserManagementService::StdinInputHandler
   def get_input(prompt)
-    print(prompt) # rubocop:disable Rails/Output
+    Rails.logger.debug(prompt)
     $stdin.gets.chomp.strip
   end
 
   def get_password(prompt)
     require("io/console")
-    print(prompt) # rubocop:disable Rails/Output
+    Rails.logger.debug(prompt)
     password = $stdin.noecho(&:gets).chomp
-    puts # rubocop:disable Rails/Output
+    Rails.logger.debug("\n")
     password
-  end
-
-  def confirm?(message, default: false)
-    suffix = default ? "(Y/n)" : "(y/N)"
-    response = get_input("#{message} #{suffix}: ").downcase
-
-    if default
-      response != "n" && response != "no"
-    else
-      %w[y yes].include?(response)
-    end
   end
 end
