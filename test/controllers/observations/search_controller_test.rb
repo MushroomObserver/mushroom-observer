@@ -69,24 +69,36 @@ module Observations
 
     def test_create_observations_search_nested
       login
+      projects = [projects(:bolete_project), projects(:eol_project)]
+      location = locations(:burbank)
       params = {
+        names: {
+          lookup: "Agaricus campestris",
+          include_synonyms: true
+        },
+        in_box: location.bounding_box,
+        confidence: 33,
+        confidence_range: 66,
+        has_notes: true,
+        projects_id: projects.pluck(:id).join(",")
+      }
+      post(:create, params: { query_observations: params })
+
+      # The controller joins :confidence and :confidence_range into an array.
+      # Query validation turns :projects and :lookup into arrays.
+      validated_params = {
         names: {
           lookup: ["Agaricus campestris"],
           include_synonyms: true
         },
-        confidence: 33,
-        confidence_range: 66,
-        has_notes: true
+        in_box: location.bounding_box,
+        confidence: [33.0, 66.0],
+        has_notes: true,
+        projects: projects.pluck(:id)
       }
-      post(:create, params: { query_observations: params })
-
-      # The controller joins the confidence and confidence_range into an array
-      digested_params = params.merge(confidence: [33.0, 66.0])
-      digested_params.delete(:confidence_range)
-
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: { q: { model: :Observation, **digested_params } }
+        params: { q: { model: :Observation, **validated_params } }
       )
     end
   end

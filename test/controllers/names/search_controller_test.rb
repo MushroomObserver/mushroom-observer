@@ -56,7 +56,7 @@ module Names
       login
       params = {
         names: {
-          lookup: ["Agaricus campestris"],
+          lookup: "Agaricus campestris",
           include_synonyms: true
         },
         rank: :Species,
@@ -65,12 +65,18 @@ module Names
       }
       post(:create, params: { query_names: params })
 
-      # The controller joins the rank and rank_range into an array
-      digested_params = params.merge(rank: [:Species, :Genus])
-      digested_params.delete(:rank_range)
-
+      # The controller joins :rank and :rank_range into an array.
+      # Query validation turns :lookup into an array.
+      validated_params = {
+        names: {
+          lookup: ["Agaricus campestris"],
+          include_synonyms: true
+        },
+        rank: [:Species, :Genus],
+        misspellings: :either
+      }
       assert_redirected_to(controller: "/names", action: :index,
-                           params: { q: { model: :Name, **digested_params } })
+                           params: { q: { model: :Name, **validated_params } })
     end
   end
 end
