@@ -180,3 +180,11 @@ form {
   max-height: 30rem;
   overflow-y: auto;
 }
+
+.panel-body {
+  > .row:last-child .form-group,
+  > .autocompleter:last-child .form-group,
+  > .form-group:last-child {
+    margin-bottom: 0.25rem;
+  }
+}

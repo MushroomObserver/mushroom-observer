@@ -367,12 +367,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
-    filter_txt = "#{:query_names.l}: #{pattern}, with synonyms, with subtaxa"
+    modifiers = "#{:query_include_synonyms.l}, #{:query_include_subtaxa.l}"
+    filter_txt = "#{:query_names.l}: #{pattern}, #{modifiers}"
+    # We print both truncated and non-truncated filter captions, and show/hide
+    # via Stimulus, so the expected string will be duplicated.
     assert_equal(filter_txt + filter_txt,
                  css_select("#filters").text, "Filter text is wrong.")
 
     filter_txt_dup =
-      "#{:query_names.l}: #{pattern}, #{pattern}, with synonyms, with subtaxa"
+      "#{:query_names.l}: #{pattern}, #{pattern}, #{modifiers}"
     assert_not_equal(
       filter_txt_dup + filter_txt_dup,
       css_select("#filters").text,

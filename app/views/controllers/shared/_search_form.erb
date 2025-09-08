@@ -1,0 +1,28 @@
+<%# locals: (search: {}, field_columns: [], local: true) -%>
+<%
+form_args = { url: { action: :create }, model: search,
+              id: "#{controller.search_type}_search_form",
+              class: "faceted-search-form" }
+# form_args[:model] = search if search&:id
+%>
+
+<%= form_with(**form_args) do |form| %>
+
+  <%= tag.div(class: "row") do %>
+    <% field_columns&.each do |panels| %>
+
+      <%= tag.div(class: "col-xs-12 col-md-6") do %>
+        <% panels.each do |heading, sections| %>
+          <%= search_panel(form:, search:, heading:, sections:) %>
+        <% end %>
+      <% end %>
+
+    <% end %>
+  <% end %>
+
+  <%= tag.div(class: "text-center") do %>
+    <%= submit_button(form:, button: :SEARCH.l, class: "d-inline-block mx-3") %>
+    <%= submit_button(form:, button: :CLEAR.l, class: "d-inline-block mx-3") %>
+  <% end %>
+
+<% end %>

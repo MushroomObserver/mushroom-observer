@@ -13,6 +13,7 @@ module Searchable
   extend ActiveSupport::Concern
 
   included do
+    # Render help for the pattern search bar (if available), for current model
     def show
       respond_to do |format|
         format.turbo_stream do
@@ -25,7 +26,127 @@ module Searchable
       end
     end
 
+    def new
+      set_up_form_field_groupings
+      @search = find_or_create_query(query_model)
+    end
+
+    def create
+      return if clear_form?
+
+      set_up_form_field_groupings # in case we need to re-render the form
+      @query_params = params.require(search_object_name).permit(permittables)
+      split_names_lookup_strings
+      autocompleted_strings_to_ids
+      range_fields_to_arrays
+      redirect_to(action: :new) and return unless validate_search_instance?
+
+      save_search_query
+      redirect_to(controller: "/#{parent_controller}", action: :index,
+                  q: @query.q_param)
+    end
+
+    # Used by search_helper to prefill nested params
+    def nested_field_names
+      nested_names_param_names + nested_in_box_param_names
+    end
+
+    # Used by search_form
+    def search_type
+      self.class.name.deconstantize.underscore.to_sym
+    end
+
     private
+
+    def search_object_name
+      :"query_#{search_type}"
+    end
+
+    def clear_form?
+      if params[:commit] == :CLEAR.l
+        clear_relevant_query
+        redirect_to(action: :new) and return true
+      end
+      false
+    end
+
+    # The form has nested and temporary params, need to permit these.
+    # Params that take arrays or hashes must be declared.
+    def permittables
+      ranges = fields_with_range.map { |field| :"#{field}_range" }
+      ids = fields_preferring_ids.map { |field| :"#{field}_id" }
+      names = { names: nested_names_param_names }
+      in_box = { in_box: nested_in_box_param_names }
+      perm = permitted_search_params.keys + ranges + ids
+      perm << names
+      perm << in_box
+      perm
+    end
+
+    def nested_names_param_names
+      keys = nested_names_params&.keys || []
+      return keys if keys.blank?
+
+      keys << :lookup
+    end
+
+    def nested_in_box_param_names
+      [:north, :south, :east, :west].freeze
+    end
+
+    def split_names_lookup_strings
+      return if (vals = @query_params.dig(:names, :lookup)).blank?
+
+      @query_params[:names][:lookup] = vals.split("\r\n")
+    end
+
+    # Check for `fields_preferring_ids` and swap these in if appropriate
+    def autocompleted_strings_to_ids
+      return unless respond_to?(:fields_preferring_ids)
+
+      fields_preferring_ids.each do |key|
+        next if @query_params[:"#{key}_id"].blank?
+
+        @query_params[key] = @query_params[:"#{key}_id"].split(",")
+        @query_params.delete(:"#{key}_id")
+      end
+    end
+
+    # Check for `fields_with_range`, and join them into array if range present
+    def range_fields_to_arrays
+      return unless respond_to?(:fields_with_range)
+
+      fields_with_range.each do |key|
+        next if @query_params[:"#{key}_range"].blank?
+
+        @query_params[key] = [@query_params[key],
+                              @query_params[:"#{key}_range"]]
+        @query_params.delete(:"#{key}_range")
+      end
+    end
+
+    # Note that this @search query instance is not the one that gets saved and
+    # sent, this step is only for validation of the params.
+    def validate_search_instance?
+      @search = Query.create_query(query_model, @query_params)
+      return true unless @search.invalid?
+
+      messages = @search.validation_errors.compact_blank
+      flash_error(messages) if messages
+      false
+    end
+
+    def clear_relevant_query
+      return if (@query = find_query(query_model))&.params.blank?
+
+      # Save a blank query. This resets the query for this model everywhere.
+      @query = Query.lookup_and_save(query_model)
+    end
+
+    # Save the validated search params and send these to the index.
+    def save_search_query
+      @query = Query.lookup_and_save(query_model, **@search.params)
+    end
 
     def parent_controller
       self.class.name.deconstantize.underscore
@@ -38,13 +159,36 @@ module Searchable
 
     # Gets the query class relevant to each controller, assuming the controller
     # is namespaced like Observations::SearchController
-    def query_subclass
-      Query.const_get(self.class.module_parent.name)
+    # def query_subclass
+    #   Query.const_get(self.class.module_parent.name)
+    # end
+
+    def escape_location_string(location)
+      "\"#{location.tr(",", "\\,")}\""
     end
 
-    # the underscored symbol
-    def search_type
-      self.class.name.deconstantize.singularize.underscore.to_sym
+    # def strings_with_commas
+    #   [:location, :region].freeze
+    # end
+
+    def fields_preferring_ids
+      []
     end
+
+    def fields_with_range
+      []
+    end
+
+    # Passing some fields will raise an error if the required field is missing,
+    # so just toss them. Not sure we have to do this, because Query will.
+    # def remove_invalid_field_combinations
+    #   return unless respond_to?(:fields_with_requirements)
+
+    #   fields_with_requirements.each do |req, fields|
+    #     next if @search[req].present?
+
+    #     fields.each { |field| @search.delete(field) }
+    #   end
+    # end
   end
 end

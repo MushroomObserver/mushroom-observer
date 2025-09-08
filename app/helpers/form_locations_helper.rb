@@ -11,8 +11,9 @@ module FormLocationsHelper
     )
   end
 
-  # This will generate a compass rose of inputs for given form object.
-  # The inputs are for compass directions.
+  # This will generate a compass rose of inputs for given form object. The
+  # inputs are for compass directions. The object can be a Location or a Box
+  # (e.g. from query.in_box), that will prefill the values on load or reload.
   def form_compass_input_group(form:, obj:)
     capture do
       compass_groups.each do |dir|

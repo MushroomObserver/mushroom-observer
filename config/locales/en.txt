@@ -380,6 +380,8 @@
   project: project
   PROJECTS: Projects
   projects: projects
+  PROJECT_LISTS: Project Lists
+  project_lists: project lists
   PROJECT_ALIAS: Project Alias
   PROJECT_ALIASES: Project Aliases
   PUBLICATION: Publication
@@ -494,6 +496,7 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONNECTED_TO: Connected to
   CONSENSUS: Consensus
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
@@ -515,6 +518,8 @@
   # deposit of Sequence Bases in an Archive
   DEPOSIT: Deposit
   deposit: deposit
+  DETAIL: Detail
+  detail: detail
   # DQA is iNat-ese for Data Quality Assessment
   DQA: Quality Grade
   EDITOR: Editor
@@ -619,6 +624,8 @@
   reviewer: reviewer
   REVIEWERS: Reviewers
   reviewers: reviewers
+  SCOPE: Scope
+  scope: scope
   SECONDS: Seconds
   SIZE: Size
   size: size
@@ -760,6 +767,8 @@
   OKAY: Okay
   okay: okay
   OPEN: Open
+  pattern: pattern
+  PATTERN: Pattern
   # reload a form
   PREV_OBJECT: "[:PREV] [TYPE]"
   RELOAD: Reload
@@ -891,6 +900,7 @@
   show_object: Show [TYPE]
   show_objects: Show [TYPES]
   sort_by_object: Sort by [TYPE]
+  search_object: Search [TYPE]
 
   # Other generic phrases.
   added_to_list: Added observation to "[list]".
@@ -920,6 +930,8 @@
   "NO": "No"
   "yes": "yes"
   "no": "no"
+  TO: To
+  to: to
 
   ##############################################################################
 
@@ -1172,7 +1184,8 @@
   search_status_has_name: "Match found in [type]:"
   search_status_has_no_name: No match found in [type]
 
-  # These are the search terms we look for, e.g. "date" in "date:today".
+  # These are the keywords the PatternSearch class resolves as Query params,
+  # e.g. "date" in "date:today". They should not depend on other translations.
   search_term_author: author
   search_term_citation: citation
   search_term_classification: classification
@@ -1218,6 +1231,17 @@
   search_term_south: south
   search_term_user: user
   search_term_west: west
+
+  # These are for search forms and should recycle other translations
+  search_term_group_pattern: "[:PATTERN]"
+  search_term_group_search: "[:SEARCH]"
+  search_term_group_dates: "[:DATES]"
+  search_term_group_quality: "[:QUALITY]"
+  search_term_group_scope: "[:SCOPE]"
+  search_term_group_detail: "[:DETAIL]"
+  search_term_group_name: "[:NAME]"
+  search_term_group_location: "[:LOCATION]"
+  search_term_group_connected: "[:CONNECTED_TO]"
 
   # Words recognized in search bar.
   # e.g. "user:me"
@@ -2312,7 +2336,7 @@
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
   show_observation_no_clear_preference: no clear preference
-  show_observation_details: Details
+  show_observation_details: "[:DETAIL]"
   show_observation_details_inat_import: Imported [date] from
   show_observation_details_inat_export: Copied to iNaturalist as
   show_observation_inat_lat_lng: Public lat/lng
@@ -3708,27 +3732,44 @@
   location_help_rule_good_habits: "*Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name. Searching within Mushroom Observer can be helpful. If you don't find anything there, then look things up in Google Maps (https://maps.google.com) and Wikipedia (https://wikipedia.org). Also feel free to use the notes section of either an observation or a location to be more specific."
 
   # Search bar help
-  pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas. Recognized variables include:"
+  pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:"
+  pattern_search_terms_multiple: Separate multiple values with commas.
   pattern_search_terms_short_help: Click the ? next to the search bar for a list of expected terms.
 
+  # We're borrowing these for the help popups on the search forms, thus the
+  # similar entries. In the case of apparent duplicates, one will be the
+  # pattern search keyword, the other the query param.
   observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
+  observation_term_date: "[:observation_term_when]"
   observation_term_created: Date observation was first posted.
+  observation_term_created_at: "[:observation_term_created]"
   observation_term_modified: Date observation was last modified.
+  observation_term_updated_at: "[:observation_term_modified]"
   observation_term_name: Consensus name is one of these names.
+  observation_term_names: "[:observation_term_name]"
   observation_term_exclude_consensus: Exclude Observations whose consensus is a name listed in "name:value". (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
   observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at a fungarium.
+  observation_term_herbaria: "[:observation_term_herbarium]"
   observation_term_location: Mushroom was observed within the the geographic bounds ([:east], [:north], [:south], [:west]) of this Location, regardless of the exact name of the Location of the Observation. Location must be an existing MO Location. Cf. **[:region]**.
+  observation_term_locations: "[:observation_term_location]"
   observation_term_region: The Observation's Location name includes this string. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown. Cf. **[:location]**.
+  observation_term_pattern: "[:pattern]"
   observation_term_project: Observation belongs to one of these projects.
+  observation_term_projects: "[:observation_term_project]"
   observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these observation lists.
+  observation_term_species_lists: "[:observation_term_list]"
   observation_term_user: Observation created by one of these users.
+  observation_term_by_users: "[:observation_term_user]"
   observation_term_notes: Notes contains the given string.
+  observation_term_notes_has: "[:observation_term_notes]"
   observation_term_comments: Comments contain the given string.
+  observation_term_comments_has: "[:observation_term_comments]"
   observation_term_field_slip: Observation corresponds to this field slip.
+  observation_term_field_slips: "[:observation_term_field_slip]"
   observation_term_confidence: Confidence is in this range.
   observation_term_east: Longitude of eastern edge of search area.
   observation_term_west: Longitude of western edge of search area.
@@ -3736,24 +3777,36 @@
   observation_term_south: Latitude of southern edge of search area.
   observation_term_has_images: Has images? ("yes" or "no")
   observation_term_has_sequence: Has a sequence?
+  observation_term_has_sequences: "[:observation_term_has_sequence]"
   observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
   observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
+  observation_term_has_notes_fields: "[:observation_term_has_field]"
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
+  # We're borrowing these for the help popups on the search forms, thus the
+  # similar entries. In the case of apparent duplicates, one will be the
+  # pattern search keyword, the other the query param.
+  name_term_names: "[:NAMES]"
+  name_term_pattern: "[:PATTERN]"
   name_term_created: Date name was first used.
+  name_term_created_at: "[:name_term_created]"
   name_term_modified: Date name was last modified.
+  name_term_updated_at: "[:name_term_modified]"
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
+  name_term_include_immediate_subtaxa: Include immediate subtaxa of the given names.
+  name_term_exclude_original_names: Exclude the names entered above.
   name_term_has_observations: Only names for which we have observations?
   name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
   name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_misspellings: "[:name_term_include_misspellings]"
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   name_term_has_author: Has Author filled in?
   name_term_has_citation: Has Citation filled in?
@@ -3761,11 +3814,17 @@
   name_term_has_notes: "[:form_names_taxonomic_notes] filled in?"
   name_term_has_comments: Has any Comments?
   name_term_has_description: Has a public description?
+  name_term_has_default_description: "[:name_term_has_description]"
   name_term_author: Author contains this string.
+  name_term_author_has: "[:name_term_author]"
   name_term_citation: Citation contains this string.
+  name_term_citation_has: "[:name_term_citation]"
   name_term_classification: Classification contains this string.
+  name_term_classification_has: "[:name_term_classification]"
   name_term_notes: "[:form_names_taxonomic_notes] contains this string."
+  name_term_notes_has: "[:name_term_notes]"
   name_term_comments: At least one Comment contains this string.
+  name_term_comments_has: "[:name_term_comments]"
 
   # link to search bar help
   search_bar_help: Search Help
@@ -4396,10 +4455,10 @@
   query_validation_lookup: "Couldn't look up :[type] by: [val]."
 
   # Query filters.
-  query_created_at: created
-  query_updated_at: modified
-  query_date: date
-  query_id_in_set: ids
+  query_created_at: "[:created]"
+  query_updated_at: "[:modified]"
+  query_date: "[:date]"
+  query_id_in_set: "[:ids]"
 
   query_accession: sequence identifier
   query_accession_has: sequence identifier has
@@ -4426,23 +4485,24 @@
   query_description_has: description has
   query_field_slip_prefix_has: field slip prefix
   query_for_user: for
-  query_has_author: with author
-  query_has_citation: with citation
+  query_has_author: has author
+  query_has_citation: has citation
   query_has_classification: has classification
-  query_has_comments: with comments
-  query_has_default_description: with default description
-  query_has_descriptions: with descriptions
-  query_has_images: with images
-  query_has_notes: with notes
-  query_has_notes_fields: with notes fields
-  query_has_observations: with observations
+  query_has_comments: has comments
+  query_has_default_description: has default description
+  query_has_descriptions: has descriptions
+  query_has_images: has images
+  query_has_name: has name
+  query_has_notes: has notes
+  query_has_notes_fields: has notes fields
+  query_has_observations: has observations
   query_has_public_lat_lng: public geolocation
-  query_has_sequences: with sequences
-  query_has_species_lists: with observation lists
-  query_has_specimen: with specimen
-  query_has_summary: with summary
-  query_has_synonyms: with synonyms
-  query_has_votes: with votes
+  query_has_sequences: has sequences
+  query_has_species_lists: has observation lists
+  query_has_specimen: has specimen
+  query_has_summary: has summary
+  query_has_synonyms: has synonyms
+  query_has_votes: has votes
   query_initial_det: initial determination
   query_initial_det_has: initial determination has
   query_is_collection_location: is collection location
@@ -4492,12 +4552,12 @@
   # name queries
   query_names: "[:names]"
   query_lookup: "[:names]"
-  query_include_synonyms: with synonyms
-  query_include_subtaxa: with subtaxa
-  query_include_immediate_subtaxa: with immediate subtaxa
-  query_exclude_original_names: exclude original names
-  query_include_all_name_proposals: include all proposed names
-  query_exclude_consensus: exclude consensus name
+  query_include_synonyms: synonyms
+  query_include_subtaxa: subtaxa
+  query_include_immediate_subtaxa: immediate subtaxa
+  query_exclude_original_names: exclude original
+  query_include_all_name_proposals: all proposed
+  query_exclude_consensus: exclude consensus
 
   # records
   query_external_sites: "[:sites]"
