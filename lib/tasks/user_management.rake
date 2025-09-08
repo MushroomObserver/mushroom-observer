@@ -27,8 +27,8 @@ namespace :user do
   end
 
   def config_logger
-    STDOUT.sync = true
-    Rails.logger = Logger.new(STDOUT, level: Logger::DEBUG, 
-                              formatter: proc { |s,d,p,m| m })
+    $stdout.sync = true
+    Rails.logger = Logger.new($stdout, level: Logger::DEBUG,
+                                       formatter: proc { |_s, _d, _p, m| m })
   end
 end
