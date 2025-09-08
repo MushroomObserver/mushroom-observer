@@ -46,7 +46,7 @@ module Names
         pattern: "Agaricus campestris",
         misspellings: :either
       }
-      post(:create, params:)
+      post(:create, params: { query_names: params })
 
       assert_redirected_to(controller: "/names", action: :index,
                            params: { q: { model: :Name, **params } })
@@ -61,7 +61,7 @@ module Names
         },
         misspellings: :either
       }
-      post(:create, params:)
+      post(:create, params: { query_names: params })
 
       assert_redirected_to(controller: "/names", action: :index,
                            params: { q: { model: :Name, **params } })

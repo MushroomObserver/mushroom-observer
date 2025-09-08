@@ -54,13 +54,14 @@ module Observations
                     selected: "Form")
     end
 
+    # query_observations is the form object.
     def test_create_observations_search
       login
       params = {
         pattern: "Agaricus campestris",
         has_notes: true
       }
-      post(:create, params:)
+      post(:create, params: { query_observations: params })
 
       assert_redirected_to(controller: "/observations", action: :index,
                            params: { q: { model: :Observation, **params } })
@@ -75,7 +76,7 @@ module Observations
         },
         has_notes: true
       }
-      post(:create, params:)
+      post(:create, params: { query_observations: params })
 
       assert_redirected_to(controller: "/observations", action: :index,
                            params: { q: { model: :Observation, **params } })
