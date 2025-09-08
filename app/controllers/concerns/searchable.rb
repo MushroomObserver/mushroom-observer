@@ -58,6 +58,9 @@ module Searchable
       return if clear_form?
 
       set_up_form_field_groupings # in case we need to re-render the form
+
+      @query_params = params[:"query_#{search_type}"].to_unsafe_hash.
+                      deep_compact_blank.deep_symbolize_keys
       replace_strings_with_ids
       validate_search_query_instance_from_params
       save_search_query
@@ -97,9 +100,10 @@ module Searchable
       return unless respond_to?(:fields_preferring_ids)
 
       fields_preferring_ids.each do |key|
-        next if params[:"#{key}_id"].blank?
+        next if @query_params[:"#{key}_id"].blank?
 
-        params[key] = params[:"#{key}_id"]
+        @query_params[key] = @query_params[:"#{key}_id"]
+        @query_params.delete(:"#{key}_id")
       end
     end
 
@@ -107,7 +111,7 @@ module Searchable
     # so just add them back in. Query will validate and sanitize.
     def validate_search_query_instance_from_params
       @search = query_subclass.new(
-        **params.permit(permitted_search_params.keys),
+        **@query_params,
         **nested_params_re_added,
         **concatenated_range_fields_re_added
       )
@@ -131,17 +135,17 @@ module Searchable
     end
 
     def names_with_lookup
-      return nil if params.dig(:names, :lookup).blank?
+      return nil if @query_params.dig(:names, :lookup).blank?
 
-      params[:names].to_unsafe_hash
+      @query_params[:names]
     end
 
     def in_box_with_values
-      return nil if params[:in_box].blank? ||
-                    (params.dig(:in_box, :north).to_i.zero? &&
-                     params.dig(:in_box, :south).to_i.zero?)
+      return nil if @query_params[:in_box].blank? ||
+                    (@query_params.dig(:in_box, :north).to_i.zero? &&
+                     @query_params.dig(:in_box, :south).to_i.zero?)
 
-      params[:in_box].to_unsafe_hash
+      @query_params[:in_box].to_unsafe_hash
     end
 
     # Check for `fields_with_range`, and concatenate them if range val present
@@ -150,11 +154,12 @@ module Searchable
 
       re_added_hash = {}
       fields_with_range.each do |key|
-        next if params[:"#{key}_range"].blank?
+        next if @query_params[:"#{key}_range"].blank?
 
-        re_added_hash[key] = [params[key], params[:"#{key}_range"]].map do |val|
+        r_v = [@query_params[key], @query_params[:"#{key}_range"]].map do |val|
           val.to_s.strip.to_f
         end
+        re_added_hash[key] = r_v
       end
       re_added_hash
     end
@@ -167,10 +172,8 @@ module Searchable
     end
 
     def save_search_query
-      query_params = params[:"query_#{search_type}"].to_unsafe_hash.
-                     deep_compact_blank.deep_symbolize_keys
       @query = Query.lookup_and_save(
-        query_model, **query_params
+        query_model, **@query_params
       )
     end
 
