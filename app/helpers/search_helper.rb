@@ -149,7 +149,8 @@ module SearchHelper
 
   def search_fields_needing_search_object
     [:names_fields_for_names, :names_fields_for_obs,
-     :multiple_value_autocompleter, :region_with_in_box_fields].freeze
+     :single_value_autocompleter, :multiple_value_autocompleter,
+     :region_with_in_box_fields].freeze
   end
 
   # TODO: fix this, needs query tags not pattern search term tags
@@ -176,7 +177,20 @@ module SearchHelper
   #
   # FIELD HELPERS
   #
+  def single_value_autocompleter(**args)
+    raise("Autocompleter field needs a search object.") if args[:search].blank?
+
+    args => { field:, search: }
+    args[:type] = search_autocompleter_type(field)
+    args[:hidden_name] = :"#{field}_id"
+    args[:hidden_value] = search_attribute_possibly_nested_value(search, field)
+    args[:value] = search_autocompleter_prefillable_values(search, field)
+    autocompleter_field(**args.except(:search))
+  end
+
   def multiple_value_autocompleter(**args)
+    raise("Autocompleter field needs a search object.") if args[:search].blank?
+
     # rightward destructuring assignment, Ruby 3 feature
     args => { field:, search: }
     args[:type] = search_autocompleter_type(field)
@@ -194,7 +208,7 @@ module SearchHelper
       :project
     when :lookup
       :name
-    when :by_users
+    when :by_users, :by_editor
       :user
     else
       field.to_s.singularize.to_sym
