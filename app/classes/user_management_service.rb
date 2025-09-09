@@ -21,16 +21,20 @@ class UserManagementService
   end
 
   def verify_user?
-    output_handler.print_header(:user_verify_tool.t)
+    success = false
+    until success
+      output_handler.print_header(:user_verify_tool.t)
 
-    identifier = input_handler.get_input(:user_verify_prompt.t)
-    return false if identifier.blank?
+      identifier = input_handler.get_input(:user_verify_prompt.t)
+      return false if identifier.blank?
 
-    if email_identifier?(identifier)
-      verify_by_email?(identifier)
-    else
-      verify_by_login?(identifier)
+      success = if email_identifier?(identifier)
+                  verify_by_email?(identifier)
+                else
+                  verify_by_login?(identifier)
+                end
     end
+    true
   end
 
   private

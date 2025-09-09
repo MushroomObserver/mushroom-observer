@@ -24,7 +24,7 @@ class UserManagementServiceTest < UnitTestCase
 
   def test_verified_with_bad_login?
     bad_login = "bad-login"
-    fake_input = StringIO.new("#{bad_login}\n")
+    fake_input = StringIO.new("#{bad_login}\n\n")
     original_stdin = $stdin
     begin
       $stdin = fake_input
@@ -61,7 +61,7 @@ class UserManagementServiceTest < UnitTestCase
 
   def test_verified_bad_email?
     bad_email = "bad@email.com"
-    fake_input = StringIO.new("#{bad_email}\n")
+    fake_input = StringIO.new("#{bad_email}\n\n")
     original_stdin = $stdin
     begin
       $stdin = fake_input
@@ -102,7 +102,7 @@ class UserManagementServiceTest < UnitTestCase
   def test_mixed_same_email_quit
     users(:foray_recorder)
     user = users(:foray_recorder)
-    fake_input = StringIO.new("#{user.email}\nq\n")
+    fake_input = StringIO.new("#{user.email}\nq\n\n")
     original_stdin = $stdin
     begin
       $stdin = fake_input
@@ -185,7 +185,7 @@ class UserManagementServiceTest < UnitTestCase
   def test_mixed_same_email_verify_invalid
     user1 = users(:foray_recorder)
     users(:unverified_recorder)
-    fake_input = StringIO.new("#{user1.email}\nx\nq\n")
+    fake_input = StringIO.new("#{user1.email}\nx\nq\n\n")
     original_stdin = $stdin
     begin
       $stdin = fake_input
