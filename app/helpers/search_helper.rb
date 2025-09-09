@@ -401,10 +401,8 @@ module SearchHelper
   def search_minimal_location(search)
     if search&.in_box.present?
       box = search.in_box
-      args = {
-        id: nil, name: nil,
-        north: box.north, south: box.south, east: box.east, west: box.west
-      }
+      box => { north:, south:, east:, west: }
+      args = { id: nil, name: nil, north:, south:, east:, west: }
     else
       args = { id: nil, name: nil, north: 0, south: 0, east: 0, west: 0 }
     end
