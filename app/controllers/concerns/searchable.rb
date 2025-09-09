@@ -51,6 +51,11 @@ module Searchable
       nested_names_param_names + nested_in_box_param_names
     end
 
+    # Default. Override in controllers
+    def nested_names_params
+      {}
+    end
+
     # Used by search_form
     def search_type
       self.class.name.deconstantize.underscore.to_sym
