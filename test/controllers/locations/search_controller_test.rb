@@ -14,9 +14,11 @@ module Locations
 
     def test_new_locations_search_form_prefilled_from_existing_query
       login
+      location = locations(:burbank)
+      box = location.bounding_box
       query = @controller.find_or_create_query(
         :Location,
-        in_box: locations(:burbank).bounding_box,
+        in_box: box,
         has_notes: true,
         notes_has: "Symbiota",
         pattern: "anything",
@@ -27,15 +29,14 @@ module Locations
       assert(query.id)
       assert_equal(query.id, session[:query_record])
       get(:new)
-      assert_select("textarea#query_locations_names_lookup", text: "petigera")
-      assert_select("select#query_locations_names_include_synonyms",
+      assert_select("input#query_locations_in_box_south", value: box[:south])
+      assert_select("select#query_locations_has_notes", selected: "yes")
+      assert_select("input#query_locations_notes_has", value: "Symbiota")
+      assert_select("input#query_locations_pattern", value: "anything")
+      assert_select("input#query_locations_regexp", value: "Target")
+      assert_select("input#query_locations_by_editor", value: "Rolf Singer")
+      assert_select("select#query_locations_has_observations",
                     selected: "yes")
-      assert_select("select#query_locations_misspellings", selected: "either")
-      assert_select("select#query_locations_has_classification",
-                    selected: "yes")
-      assert_select("input#query_locations_author_has", value: "Pers.")
-      assert_select("select#query_locations_rank", selected: "Species")
-      assert_select("select#query_locations_rank_range", selected: "Form")
     end
 
     def test_create_locations_search
