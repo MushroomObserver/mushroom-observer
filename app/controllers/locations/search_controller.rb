@@ -23,7 +23,7 @@ module Locations
         has_notes: :select_boolean,
         notes_has: :text_field_with_label,
         by_users: :multiple_value_autocompleter,
-        by_editor: :autocompleter_field,
+        by_editor: :single_value_autocompleter,
         has_descriptions: :select_boolean,
         has_observations: :select_boolean
       }.freeze
@@ -46,8 +46,7 @@ module Locations
     def set_up_form_field_groupings
       @field_columns = [
         {
-          area: { shown: [:region] },
-          connected: { shown: [:by_users, :by_editor] }
+          area: { shown: [:region] }
         },
         {
           pattern: { shown: [:pattern], collapsed: [:regexp] },
@@ -55,7 +54,8 @@ module Locations
           detail: {
             shown: [[:has_notes, :notes_has],
                     [:has_observations, :has_descriptions]]
-          }
+          },
+          connected: { shown: [:by_users, :by_editor] }
         }
       ].freeze
     end
