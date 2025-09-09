@@ -42,8 +42,8 @@ module Locations
     def test_create_locations_search
       login
       params = {
-        pattern: "Agaricus campestris",
-        misspellings: :either
+        regexp: "urbank",
+        has_observations: true
       }
       post(:create, params: { query_locations: params })
 
@@ -53,29 +53,23 @@ module Locations
 
     def test_create_locations_search_nested
       login
+      location = locations(:california)
+      box = location.bounding_box
       params = {
-        locations: {
-          lookup: "Agaricus campestris",
-          include_synonyms: true
-        },
-        rank: :Species,
-        rank_range: :Genus,
-        misspellings: :either
+        in_box: box,
+        region: "California, USA"
       }
       post(:create, params: { query_locations: params })
 
-      # The controller joins :rank and :rank_range into an array.
-      # Query validation turns :lookup into an array.
+      # Query validation parses region as an array of region strings.
       validated_params = {
-        locations: {
-          lookup: ["Agaricus campestris"],
-          include_synonyms: true
-        },
-        rank: [:Species, :Genus],
-        misspellings: :either
+        in_box: box,
+        region: ["California, USA"]
       }
-      assert_redirected_to(controller: "/locations", action: :index,
-                           params: { q: { model: :Location, **validated_params } })
+      assert_redirected_to(
+        controller: "/locations", action: :index,
+        params: { q: { model: :Location, **validated_params } }
+      )
     end
   end
 end
