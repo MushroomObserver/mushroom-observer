@@ -3537,7 +3537,6 @@
   user_add_verified: Verified
   user_add_error_header: "Error creating user:"
   user_add_error: Error
-  user_list_no_users: No users found.
   user_verify_tool: User Verification Tool
   user_verify_prompt: Enter login or email
   user_verify_email_missing: No users found with email '[email]'

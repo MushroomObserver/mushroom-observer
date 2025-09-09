@@ -3,24 +3,6 @@
 require("test_helper")
 
 class UserManagementServiceTest < UnitTestCase
-  def test_list
-    log_contents = with_captured_logger do
-      service = UserManagementService.new
-      service.list_users
-    end
-    assert_match(/#{User.first.login}/, log_contents)
-  end
-
-  def test_list_no_users
-    User.delete_all
-
-    log_contents = with_captured_logger do
-      service = UserManagementService.new
-      service.list_users
-    end
-    assert_match(/#{:user_list_no_users.t}/, log_contents)
-  end
-
   def test_verified_login?
     user = users(:mary)
     fake_input = StringIO.new("#{user.login}\n")

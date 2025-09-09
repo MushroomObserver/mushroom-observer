@@ -11,13 +11,6 @@ namespace :user do
     exit 1 unless result
   end
 
-  desc "List all users"
-  task list: :environment do
-    config_logger
-    service = UserManagementService.new
-    service.list_users
-  end
-
   desc "Verify a user by login or email"
   task verify: :environment do
     config_logger

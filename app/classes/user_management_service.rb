@@ -20,17 +20,6 @@ class UserManagementService
     create_new_user?(user_params)
   end
 
-  def list_users
-    users = User.order(:login)
-    if users.empty?
-      output_handler.puts(:user_list_no_users.t)
-      return
-    end
-
-    display_user_list_header
-    users.each { |user| display_user_row(user) }
-  end
-
   def verify_user?
     output_handler.print_header(:user_verify_tool.t)
 
@@ -132,24 +121,6 @@ class UserManagementService
     user.errors.full_messages.each do |error|
       output_handler.puts("  - #{error}")
     end
-  end
-
-  def display_user_list_header
-    output_handler.puts(:user_management_header.t(title: :USERS.t))
-    output_handler.puts(format("%-20s %-30s %-30s %-25s", :login_login.t,
-                               :NAME.t, :EMAIL.t, :user_add_verified.t))
-    output_handler.puts("-" * 107)
-  end
-
-  def display_user_row(user)
-    verified_display = if user.verified?
-                         user.verified.strftime("%Y-%m-%d %H:%M:%S")
-                       else
-                         :NOPE.t
-                       end
-    output_handler.puts(format("%-20s %-30s %-30s %-25s", user.login,
-                               user.name[0..29], user.email[0..29],
-                               verified_display))
   end
 
   def verify_by_email?(email)
