@@ -101,5 +101,23 @@ module Observations
         params: { q: { model: :Observation, **validated_params } }
       )
     end
+
+    # Check that empty nested-names-params do not interfere with the query.
+    def test_create_observations_search_in_box
+      login
+      location = locations(:burbank)
+      params = {
+        names: {
+          lookup: "",
+          include_synonyms: ""
+        },
+        in_box: location.bounding_box
+      }
+      post(:create, params: { query_observations: params })
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: { q: { model: :Observation, **params.except(:names) } }
+      )
+    end
   end
 end

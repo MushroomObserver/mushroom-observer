@@ -95,7 +95,12 @@ module Searchable
     end
 
     def split_names_lookup_strings
-      return if (vals = @query_params.dig(:names, :lookup)).blank?
+      # Nested blank values will make for null query results,
+      # so eliminate the whole :names param if it doesn't have a lookup.
+      if (vals = @query_params.dig(:names, :lookup)).blank?
+        @query_params[:names] = nil
+        return
+      end
 
       @query_params[:names][:lookup] = vals.split("\r\n")
     end
