@@ -3545,6 +3545,40 @@
   review_amount: Amount
   review_email: Email
 
+  user_add_tool: User Creation Tool
+  user_add_email_prompt: Enter email
+  user_add_email_not_blank: Email cannot be blank
+  user_add_email_invalid: Invalid email format
+  user_add_login_prompt: Enter login
+  user_add_login_not_blank: Login cannot be blank
+  user_add_login_in_use: Login in use
+  user_add_name_prompt: Enter full name
+  user_add_password_prompt: Enter password
+  user_add_password_not_blank: Password cannot be blank
+  user_add_password_confirm_prompt: Confirm password
+  user_add_password_no_match: Passwords do not match
+  user_add_success: User '[login]' created successfully!
+  user_add_verified: Verified
+  user_add_error_header: "Error creating user:"
+  user_add_error: Error
+  user_verify_tool: User Verification Tool
+  user_verify_prompt: Enter login or email
+  user_verify_email_missing: No users found with email '[email]'
+  user_verify_login_missing: User with login '[login]' not found.
+  user_verify_already_verified: "User '[login]' is already verified ([timestamp])"
+  user_verify_verified: "User '[login]' verified at [timestamp]"
+  user_verify_multiple_found: Multiple users found with email '[email]'
+  user_verify_all: Verify all users
+  user_verify_verified_at: ✓ Verified at [timestamp]
+  user_verify_not_verified: ✗ Not verified
+  user_verify_select: "Select user to verify (1-[max]) or '1' to quit"
+  user_verify_cancelled: Operation cancelled.
+  user_verify_invalid_choice: Invalid choice. Please enter a number between 1 and [max], or 'q' to quit.
+  user_verify_successful_n_users: "Successfully verified [count] user(s)."
+  user_verify_one_user: "Verified: [login] at [time]"
+
+  user_management_header: "=== [title] ==="
+
   ##############################################################################
 
   # EMAIL MESSAGES
