@@ -375,7 +375,7 @@ module SearchHelper
 
   # currently combined with region for observations form
   def in_box_fields(**args)
-    fields_for(:in_box) do |fib|
+    args[:form].fields_for(:in_box) do |fib|
       search_compass_input_and_map(form: fib, search: args[:search])
     end
   end
