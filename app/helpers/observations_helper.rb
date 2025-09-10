@@ -81,7 +81,7 @@ module ObservationsHelper
   end
 
   def obs_consensus_id_flag
-    tag.span("(#{:show_observation_site_id.t})", class: "smaller")
+    tag.span("(#{:show_observation_site_id.t})", class: "small")
   end
 
   ##### Portion of page title that includes user's naming preference #########
