@@ -358,6 +358,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)
     consensus = Observation::NamingConsensus.new(obs)
+    assert_not_equal(obs.name.id, consensus.owner_preference.id)
 
     get(:show, params: { id: obs.id })
     assert_select("#owner_naming",
@@ -368,10 +369,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(
       :show, params: { id: observations(:owner_multiple_favorites).id }
     )
-    assert_select("#owner_naming",
-                  { text: /#{:show_observation_no_clear_preference.t}/,
-                    count: 1 },
-                  "Observation should show lack of owner naming preference")
+    assert_equal(css_select("#owner_naming").length, 0)
   end
 
   def test_show_owner_naming_view_owner_id_false
