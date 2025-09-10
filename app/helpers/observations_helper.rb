@@ -16,19 +16,19 @@ module ObservationsHelper
   #
   # NOTE: Must pass owner naming, or it will be recalculated on every obs.
   # Only used for the page <title> element. #title is composed from parts.
-  def observation_show_title(obs:, owner_naming: nil, user: nil)
+  def observation_show_title(obs:, show_owner_naming: nil, user: nil)
     obs_title_consensus_name_link(
-      name: obs.name, owner_naming: owner_naming, user:
+      name: obs.name, show_owner_naming:, user:
     )
   end
 
-  # name portion of Observation title
-  def obs_title_consensus_name_link(name:, user:, owner_naming: nil)
+  # name portion of Observation title.
+  def obs_title_consensus_name_link(name:, user:, show_owner_naming: nil)
     if name.deprecated &&
        (prefer_name = name.best_preferred_synonym).present?
       obs_title_with_preferred_synonym_link(name, prefer_name, user)
     else
-      obs_title_name_link(name, owner_naming, user)
+      obs_title_name_link(name, show_owner_naming, user)
     end
   end
 
@@ -65,7 +65,7 @@ module ObservationsHelper
     end
   end
 
-  def obs_title_name_link(name, owner_naming, user)
+  def obs_title_name_link(name, show_owner_naming, user)
     text = [
       if user
         link_to_display_name_brief_authors(
@@ -75,20 +75,20 @@ module ObservationsHelper
         name.user_display_name_brief_authors(user).t.small_author
       end
     ]
-    # Differentiate this Name from Observer Preference
-    text << obs_consensus_id_flag if owner_naming
+    # Differentiate this Name from observer's preferred by printing "(Site ID)"
+    text << obs_consensus_id_flag if show_owner_naming
     text.safe_join(" ")
   end
 
   def obs_consensus_id_flag
-    tag.span("(#{:show_observation_site_id.t})", class: "small")
+    tag.span("(#{:show_observation_site_id.t})", class: "small text-nowrap")
   end
 
   ##### Portion of page title that includes user's naming preference #########
 
   # Observer Preference: Hydnum repandum
-  def owner_naming_line(owner_name, current_user = User.current)
-    return unless current_user&.view_owner_id
+  def owner_naming_line(name:, owner_name:, user:)
+    return unless user&.view_owner_id && owner_name.id != name.id
 
     [
       "#{:show_observation_owner_id.t}:",

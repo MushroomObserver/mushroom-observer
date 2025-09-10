@@ -1,8 +1,11 @@
 <%
-# owner_naming must be defined before show_obs_page_title
-@owner_naming = owner_naming_line(@owner_name, @user)
+# owner_naming must be defined before show_obs_page_title.
+# nil if not user's pref, or namings are identical.
+show_owner_naming = owner_naming_line(
+  name: @observation.name, owner_name: @owner_name, user: @user
+)
 show_title = observation_show_title(
-  obs: @observation, owner_naming: @owner_naming, user: @user
+  obs: @observation, show_owner_naming:, user: @user
 )
 add_show_title(show_title, @observation)
 add_owner_naming(@owner_naming)
