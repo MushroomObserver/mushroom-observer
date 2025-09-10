@@ -8,7 +8,7 @@ show_title = observation_show_title(
   obs: @observation, show_owner_naming:, user: @user
 )
 add_show_title(show_title, @observation)
-add_owner_naming(@owner_naming)
+add_owner_naming(show_owner_naming)
 if @user
   add_pager_for(@observation)
   add_interest_icons(@user, @observation)
