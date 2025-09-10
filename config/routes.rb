@@ -665,6 +665,10 @@ MushroomObserver::Application.routes.draw do
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
+  namespace :projects do
+    resource :search, only: [:new, :create]
+  end
+
   resources :projects do
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"

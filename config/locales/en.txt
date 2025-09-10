@@ -3842,6 +3842,21 @@
   location_term_has_observations: Has observations?
   location_term_has_descriptions: Has a description?
 
+  project_term_members: Project has one of these members.
+  project_term_field_slip_prefix_has: Project field slips have this prefix.
+  project_term_by_users: Project created by one of these users.
+  project_term_has_observations: "[:location_term_has_observations]"
+  project_term_has_species_lists: Has observation lists?
+  project_term_has_images: Has images?
+  project_term_pattern: "[:PATTERN]"
+  project_term_title_has: Project title contains these words.
+  project_term_has_summary: Project has summary.
+  project_term_summary_has: Project summary has these words.
+  project_term_has_comments: Project has comments.
+  project_term_comments_has: Project comments have these words.
+  project_term_created_at: Date project was first used.
+  project_term_updated_at: Date project was last modified.
+
   # link to search bar help
   search_bar_help: Search Help
 
