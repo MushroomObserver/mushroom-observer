@@ -474,6 +474,10 @@ MushroomObserver::Application.routes.draw do
   resources :licenses, id: /\d+/
 
   # ----- Locations: a lot of actions  ----------------------------
+  namespace :locations do
+    resource :search, only: [:new, :create]
+  end
+
   resources :locations, id: /\d+/, shallow: true do
     member do
       get("reverse_name_order", to: "locations/reverse_name_order#update")

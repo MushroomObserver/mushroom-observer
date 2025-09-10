@@ -697,6 +697,7 @@
   by_letter: By letter
   GOTO: Go
   MENU: Menu
+  AREA: Area
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".
@@ -1186,6 +1187,7 @@
 
   # These are the keywords the PatternSearch class resolves as Query params,
   # e.g. "date" in "date:today". They should not depend on other translations.
+  # PatternSearch will attempt to parse the translations of these strings!
   search_term_author: author
   search_term_citation: citation
   search_term_classification: classification
@@ -1242,6 +1244,7 @@
   search_term_group_name: "[:NAME]"
   search_term_group_location: "[:LOCATION]"
   search_term_group_connected: "[:CONNECTED_TO]"
+  search_term_group_area: "[:AREA]"
 
   # Words recognized in search bar.
   # e.g. "user:me"
@@ -3859,6 +3862,19 @@
   name_term_notes_has: "[:name_term_notes]"
   name_term_comments: At least one Comment contains this string.
   name_term_comments_has: "[:name_term_comments]"
+
+  # Help text for search_form_fields
+  location_term_region: The Location's name includes this string. Partial match anchored at end, including country at least, e.g., "California, USA".
+  location_term_by_users: Location created by one of these users.
+  location_term_by_editor: Location edited by this user.
+  location_term_pattern: "[:PATTERN]"
+  location_term_regexp: Regexp
+  location_term_created_at: "Date [:location] was first used."
+  location_term_updated_at: "Date [:location] was last modified."
+  location_term_has_notes: "[:observation_term_has_notes]"
+  location_term_notes_has: "[:observation_term_notes]"
+  location_term_has_observations: Has observations?
+  location_term_has_descriptions: Has a description?
 
   # link to search bar help
   search_bar_help: Search Help

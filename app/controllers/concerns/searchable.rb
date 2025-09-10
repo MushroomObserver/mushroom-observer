@@ -36,9 +36,7 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
-      split_names_lookup_strings
-      autocompleted_strings_to_ids
-      range_fields_to_arrays
+      prepare_raw_params
       redirect_to(action: :new) and return unless validate_search_instance?
 
       save_search_query
@@ -46,9 +44,21 @@ module Searchable
                   q: @query.q_param)
     end
 
+    def prepare_raw_params
+      split_names_lookup_strings
+      null_in_box_if_empty
+      autocompleted_strings_to_ids
+      range_fields_to_arrays
+    end
+
     # Used by search_helper to prefill nested params
     def nested_field_names
       nested_names_param_names + nested_in_box_param_names
+    end
+
+    # Default. Override in controllers
+    def nested_names_params
+      {}
     end
 
     # Used by search_form
@@ -103,6 +113,17 @@ module Searchable
       end
 
       @query_params[:names][:lookup] = vals.split("\r\n")
+    end
+
+    # Nested blank values will make for null query results,
+    # so eliminate the whole :in_box param if it doesn't have values.
+    def null_in_box_if_empty
+      south = @query_params.dig(:in_box, :south)
+      north = @query_params.dig(:in_box, :north)
+      return unless (south.blank? || south.to_f.zero?) &&
+                    (north.blank? || north.to_f.zero?)
+
+      @query_params[:in_box] = nil
     end
 
     # Check for `fields_preferring_ids` and swap these in if appropriate
