@@ -349,7 +349,9 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_pattern_search_description_notes
-    expects = [names(:agaricus_campestras).id]
+    # NameDescription matches, but searching that
+    # by default leads to surprising results.
+    expects = [] # [names(:agaricus_campestras).id]
     scope = Name.pattern("prevent me")
     assert_query_scope(
       expects, scope, :Name, pattern: "prevent me"
@@ -357,7 +359,9 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_pattern_search_description_gen_desc
-    expects = [names(:suillus).id]
+    # NameDescription matches, but searching that
+    # by default leads to surprising results.
+    expects = [] # [names(:suillus).id]
     scope = Name.pattern("smell as sweet")
     assert_query_scope(
       expects, scope, :Name, pattern: "smell as sweet"
@@ -366,7 +370,9 @@ class Query::NamesTest < UnitTestCase
 
   # Prove pattern search gets hits for description look_alikes
   def test_name_pattern_search_description_look_alikes
-    expects = [names(:peltigera).id]
+    # NameDescription matches, but searching that
+    # by default leads to surprising results.
+    expects = [] # [names(:peltigera).id]
     scope = Name.pattern("superficially similar")
     assert_query_scope(
       expects, scope, :Name, pattern: "superficially similar"
