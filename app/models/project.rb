@@ -94,8 +94,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { order_by(::Query::Projects.default_order) }
 
   scope :members, lambda { |members|
+    ids = Lookup::Users.new(members).ids # User lookup only takes logins or ids
     joins(user_group: :user_group_users).
-      merge(UserGroupUser.where(user: members))
+      merge(UserGroupUser.where(user: ids))
   }
   scope :title_has,
         ->(phrase) { search_columns(Project[:title], phrase) }
