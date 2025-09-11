@@ -1898,6 +1898,10 @@
   list_observation_observations: Observations of
   list_observations_add_to_list: Add To / Remove From Observation List
   list_observations_download_as_csv: Download Observations
+  list_observations_bulk_rename: Bulk Rename
+
+  # observations/bulk_rename
+  bulk_rename_admin_required: Bulk Rename only enabled when in admin mode
 
   # locations/list_place_names (list_locations)
   list_place_names_known: Known Locations

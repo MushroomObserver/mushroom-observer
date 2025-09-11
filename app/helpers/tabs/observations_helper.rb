@@ -141,6 +141,9 @@ module Tabs
         observations_download_as_csv_tab(query),
         new_inat_import_tab
       ]
+      if in_admin_mode?
+        links.append(bulk_rename_import_tab(query))
+      end
       links.reject(&:empty?)
     end
 
@@ -248,6 +251,13 @@ module Tabs
       InternalLink.new(
         :create_observation_inat_import_link.l,
         add_q_param(new_inat_import_path, query)
+      ).tab
+    end
+
+    def bulk_rename_import_tab(query)
+      InternalLink.new(
+        :list_observations_bulk_rename.l,
+        add_q_param(new_observations_bulk_rename_path, query)
       ).tab
     end
 

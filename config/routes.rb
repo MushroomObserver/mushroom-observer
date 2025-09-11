@@ -598,6 +598,7 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
+    resources :bulk_rename, only: [:new, :create]
     resources :downloads, only: [:new, :create]
     resource :search, only: [:show, :new, :create]
 
