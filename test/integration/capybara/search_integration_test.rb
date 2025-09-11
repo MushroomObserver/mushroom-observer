@@ -50,4 +50,22 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#filters", text: location.bounding_box[:south])
     assert_selector("#results", text: locations(:burbank).text_name)
   end
+
+  def test_projects_search_form
+    members = users(:mary).login
+
+    login
+    visit("/projects/search/new")
+    within("#projects_search_form") do |form|
+      assert_selector("#query_projects_members")
+      form.fill_in("query_projects_members", with: members)
+
+      first(:button, type: "submit").click
+    end
+
+    assert_no_selector("#flash_notices")
+    assert_selector("#filters", text: users(:mary).name)
+    assert_selector("#results", text: projects(:two_list_project).title)
+    assert_selector("#results", text: projects(:empty_project).title)
+  end
 end
