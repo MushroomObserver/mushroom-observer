@@ -3,20 +3,19 @@ import { get } from "@rails/request.js" // allows us to call `get` below
 
 // Connects to data-controller="search-type"
 export default class extends Controller {
-  // targetHelp is the collapse div where help text will be rendered
-  static targets = ["select", "help", "toggle"]
-  // types are the
-  static values = { helpTypes: Array }
+  // targetHelp is the collapse div where help text or form will be rendered
+  static targets = ["select", "help", "toggle", "form"]
+  // helpTypes are PatternSearch classes, formTypes are existing faceted forms.
+  static values = { helpTypes: Array, formTypes: Array }
 
   connect() {
     this.element.dataset.searchType = "connected";
-    this.endpoint_url = "/search"
   }
 
   async getHelp(event) {
     event.stopPropagation()
 
-    const url = this.endpointUrl()
+    const url = this.helpUrl()
     // console.log(`got url ${url}`);
 
     if (!url) {
@@ -39,13 +38,23 @@ export default class extends Controller {
     this.toggleTarget.classList.add("d-none")
   }
 
-  endpointUrl() {
+  // The path to the :show action of the relevant #{Model}::SearchController
+  helpUrl() {
     const controller = this.selectTarget.value
-
     if (!controller || !this.helpTypesValue.includes(controller)) {
       return null
     }
 
     return "/" + controller + "/search"
+  }
+
+  // The path to the :new action of the relevant #{Model}::SearchController
+  formUrl() {
+    const controller = this.selectTarget.value
+    if (!controller || !this.formTypesValue.includes(controller)) {
+      return null
+    }
+
+    return "/" + controller + "/search/new"
   }
 }

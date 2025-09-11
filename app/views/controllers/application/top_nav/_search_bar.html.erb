@@ -1,10 +1,11 @@
-<%# locals: (search_help_types: []) %>
+<%# locals: (search_help_types: [], search_form_types: []) %>
 
 <%
 # Temporary 2025-08-14: safe-pluralize the type (will not double-pluralize)
 # When removing just revert to `session[:search_type]`
 default = session[:search_type]&.to_s&.pluralize&.to_sym || :observations
 help_controller = search_help_types.include?(default) ? default : nil
+form_controller = search_form_types.include?(default) ? default : nil
 search_options = options_for_select(search_type_options, default)
 form_group_class = class_names(
   %w[form-group has-feedback has-search d-flex flex-grow-1 mb-0]
@@ -21,8 +22,8 @@ help_classes << "d-none" unless help_controller
       link_icon(:info, title: :search_bar_help.t),
       class: class_names(help_classes),
       type: :button,
-      data: { toggle: "collapse", target: "#search_nav_help",
-              search_type_target: "toggle" },
+      data: { toggle: "collapse", search_type_target: "toggle",
+              target: "#search_nav_help", parent: "#search_nav_dynamic" },
       aria: { expanded: "false", controls: "search_nav_help" }
     ) %>
 
@@ -70,10 +71,15 @@ help_classes << "d-none" unless help_controller
 
   <% end %>
 
-  <%= tag.div(class: "collapse w-100", id: "search_nav_help",
-              data: { search_type_target: "help" }) do %>
-    <%= render(partial: "#{help_controller}/search/help") if help_controller %>
-  <% end %>
+  <%= tag.div(id: "search_nav_dynamic") do %>
+    <%= tag.div(class: "collapse w-100", id: "search_nav_form",
+                data: { search_type_target: "form" }) do
+      render(partial: "#{form_controller}/search/new") if form_controller
+    end %>
+    <%= tag.div(class: "collapse w-100", id: "search_nav_help",
+                data: { search_type_target: "help" }) do
+      render(partial: "#{help_controller}/search/help") if help_controller
+    end %>
 <% else %>
   <%= tag.strong(:app_login_reminder.t,
                  class: "navbar-text mx-2 text-nowrap") %>
