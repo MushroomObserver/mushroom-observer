@@ -181,10 +181,10 @@ module SearchHelper
     raise("Autocompleter field needs a search object.") if args[:search].blank?
 
     args => { field:, search: }
-    args[:type] = search_autocompleter_type(field)
+    type = args[:type] = search_autocompleter_type(field)
     args[:hidden_name] = :"#{field}_id"
     args[:hidden_value] = search_attribute_possibly_nested_value(search, field)
-    args[:value] = search_autocompleter_prefillable_values(search, field)
+    args[:value] = search_autocompleter_prefillable_values(search, field, type)
     autocompleter_field(**args.except(:search))
   end
 
