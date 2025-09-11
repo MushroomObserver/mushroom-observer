@@ -181,10 +181,10 @@ module SearchHelper
     raise("Autocompleter field needs a search object.") if args[:search].blank?
 
     args => { field:, search: }
-    args[:type] = search_autocompleter_type(field)
+    type = args[:type] = search_autocompleter_type(field)
     args[:hidden_name] = :"#{field}_id"
     args[:hidden_value] = search_attribute_possibly_nested_value(search, field)
-    args[:value] = search_autocompleter_prefillable_values(search, field)
+    args[:value] = search_autocompleter_prefillable_values(search, field, type)
     autocompleter_field(**args.except(:search))
   end
 
@@ -193,12 +193,12 @@ module SearchHelper
 
     # rightward destructuring assignment, Ruby 3 feature
     args => { field:, search: }
-    args[:type] = search_autocompleter_type(field)
+    type = args[:type] = search_autocompleter_type(field)
     args[:separator] = SEARCH_SEPARATOR
     args[:textarea] = true
     args[:hidden_name] = :"#{field}_id"
     args[:hidden_value] = search_attribute_possibly_nested_value(search, field)
-    args[:value] = search_autocompleter_prefillable_values(search, field)
+    args[:value] = search_autocompleter_prefillable_values(search, field, type)
     autocompleter_field(**args.except(:search))
   end
 
@@ -208,38 +208,37 @@ module SearchHelper
       :project
     when :lookup
       :name
-    when :by_users, :by_editor
+    when :by_users, :by_editor, :members
       :user
     else
       field.to_s.singularize.to_sym
     end
   end
 
-  def search_autocompleter_prefillable_values(search, field)
+  def search_autocompleter_prefillable_values(search, field, type)
     values = search_attribute_possibly_nested_value(search, field)
     return values unless values.is_a?(Array)
 
-    search_string_values(values, field)
+    search_string_values(values, type)
   end
 
   # For autocompleters, if the value(s) is/are ids, we need to lookup the
   # strings that should be prefilled in the text field — ids go in the
   # "hidden_field" for ids.
-  def search_string_values(values, field)
+  def search_string_values(values, type)
     values.map do |val|
       if val.is_a?(Numeric) ||
          (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
-        search_string_via_lookup_id(val, field)
+        search_string_via_lookup_id(val, type)
       else
         val
       end
     end.join(SEARCH_SEPARATOR)
   end
 
-  def search_string_via_lookup_id(val, field)
-    lookup_name = field.to_s.camelize # already plural
-    lookup_name = "Names" if lookup_name == "Lookup"
-    lookup_name = "Users" if lookup_name == "ByUsers"
+  # The autocompleter type is a model.type_tag
+  def search_string_via_lookup_id(val, type)
+    lookup_name = type.to_s.camelize.pluralize
     lookup = "Lookup::#{lookup_name}".constantize
     title_method = lookup::TITLE_METHOD # this is the attribute we want
     model = lookup_name.singularize.constantize
