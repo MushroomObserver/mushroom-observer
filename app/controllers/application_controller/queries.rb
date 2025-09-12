@@ -180,11 +180,10 @@ module ApplicationController::Queries
   #
   ##############################################################################
 
-  # Change the query that +query_param+ passes along to the next request,
-  # and update session[:query_record].
+  # Change the query stored in session[:query_record].
   # NOTE: ApplicationController::Indexes#show_index_setup calls this.
   def update_stored_query(query = nil)
-    clear_query_in_session
+    # clear_query_in_session
     return if browser.bot? || !query
 
     store_query_in_session(query)

@@ -89,7 +89,6 @@ class SpeciesListsController < ApplicationController
   ##############################################################################
 
   def show
-    clear_query_in_session
     return unless (@species_list = find_species_list!)
 
     set_project_ivar

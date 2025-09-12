@@ -137,8 +137,6 @@ class NamesController < ApplicationController
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
   def show
-    clear_query_in_session
-
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, Name, params[:id].to_s)
