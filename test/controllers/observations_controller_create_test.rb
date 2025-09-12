@@ -1307,6 +1307,13 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_match(name.text_name, @response.body)
   end
 
+  def test_collector_to_observation
+    login("katrina")
+    get(:new, params: { notes: { Collector: mary.textile_name } })
+
+    assert_match(mary.textile_name, @response.body)
+  end
+
   # Prove that notes are saved with template keys first, in the order listed in
   # the template, then Other, but without blank fields
   def test_create_observation_with_notes_template
