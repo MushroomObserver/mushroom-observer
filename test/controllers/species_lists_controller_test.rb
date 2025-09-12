@@ -186,7 +186,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     # there's no banner for this project
     assert_page_title(:SPECIES_LISTS.l)
-    assert_match(project.species_lists.first.title, @response.body)
+    spl = project.species_lists.first
+    assert_match(spl.title, @response.body)
+    assert_select("a[href*='species_lists/#{spl.id}?project=#{project.id}']")
   end
 
   def test_index_for_project_with_no_lists
