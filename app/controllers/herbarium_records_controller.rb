@@ -177,6 +177,7 @@ class HerbariumRecordsController < ApplicationController
       return
     end
 
+    # Existing record found with same herbarium + accession number
     if @other_record.can_edit?
       flash_herbarium_record_already_used_and_add_observation
     else
@@ -187,19 +188,31 @@ class HerbariumRecordsController < ApplicationController
 
   # create
   def save_herbarium_record_and_update_associations
-    @herbarium_record.save
-    @herbarium_record.add_observation(@observation)
-    flash_notice(
-      :runtime_added_to.t(type: :herbarium_record, name: :observation)
-    )
+    if @herbarium_record.save
+      @herbarium_record.add_observation(@observation)
+      flash_notice(
+        :runtime_added_to.t(type: :herbarium_record, name: :observation)
+      )
 
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @herbarium_record)
+      respond_to do |format|
+        format.html do
+          redirect_to_back_object_or_object(@back_object, @herbarium_record)
+        end
+        format.turbo_stream do
+          render_herbarium_records_section_update
+        end
       end
-      format.turbo_stream do
-        render_herbarium_records_section_update
+    else
+      # Handle validation errors, including duplicate accession numbers
+      if @herbarium_record.errors[:accession_number].present?
+        flash_error(:create_herbarium_record_duplicate_accession_number.t(
+          accession: @herbarium_record.accession_number,
+          herbarium: @herbarium_record.herbarium.name
+        ))
+      else
+        flash_error(@herbarium_record.errors.full_messages.join(", "))
       end
+      flash_and_reload_form
     end
   end
 
@@ -233,19 +246,31 @@ class HerbariumRecordsController < ApplicationController
 
   # update
   def update_herbarium_record_and_notify_curators(old_herbarium)
-    @herbarium_record.save
-    @herbarium_record.notify_curators if
-      @herbarium_record.herbarium != old_herbarium
-    flash_notice(:runtime_updated_at.t(type: :herbarium_record))
+    if @herbarium_record.save
+      @herbarium_record.notify_curators if
+        @herbarium_record.herbarium != old_herbarium
+      flash_notice(:runtime_updated_at.t(type: :herbarium_record))
 
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @herbarium_record)
+      respond_to do |format|
+        format.html do
+          redirect_to_back_object_or_object(@back_object, @herbarium_record)
+        end
+        @observation = @back_object # if we're here, we're on an obs page
+        format.turbo_stream do
+          render_herbarium_records_section_update
+        end
       end
-      @observation = @back_object # if we're here, we're on an obs page
-      format.turbo_stream do
-        render_herbarium_records_section_update
+    else
+      # Handle validation errors, including duplicate accession numbers
+      if @herbarium_record.errors[:accession_number].present?
+        flash_error(:create_herbarium_record_duplicate_accession_number.t(
+          accession: @herbarium_record.accession_number,
+          herbarium: @herbarium_record.herbarium.name
+        ))
+      else
+        flash_error(@herbarium_record.errors.full_messages.join(", "))
       end
+      flash_and_reload_form
     end
   end
 

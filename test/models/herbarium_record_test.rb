@@ -40,4 +40,38 @@ class HerbariumRecordTest < UnitTestCase
       assert_equal("My very own herbarium", user.personal_herbarium_name)
     end
   end
+
+  def test_accession_number_uniqueness_within_herbarium
+    nybg = herbaria(:nybg_herbarium)
+    rolf_herbarium = herbaria(:rolf_herbarium)
+    user = users(:rolf)
+
+    # Creating a record with a new accession number should succeed
+    record1 = HerbariumRecord.create!(
+      herbarium: nybg,
+      user: user,
+      initial_det: "Test species 1",
+      accession_number: "TEST-001"
+    )
+    assert(record1.persisted?)
+
+    # Creating another record with the same accession number in the same herbarium should fail
+    record2 = HerbariumRecord.new(
+      herbarium: nybg,
+      user: user,
+      initial_det: "Test species 2",
+      accession_number: "TEST-001"
+    )
+    assert_not(record2.valid?)
+    assert(record2.errors[:accession_number].present?)
+
+    # Creating a record with the same accession number in a different herbarium should succeed
+    record3 = HerbariumRecord.create!(
+      herbarium: rolf_herbarium,
+      user: user,
+      initial_det: "Test species 3",
+      accession_number: "TEST-001"
+    )
+    assert(record3.persisted?)
+  end
 end
