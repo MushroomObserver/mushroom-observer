@@ -178,7 +178,6 @@ class LocationsController < ApplicationController
 
   # Show a Location and one of its LocationDescription's, including a map.
   def show
-    clear_query_in_session
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, Location, params[:id].to_s)
