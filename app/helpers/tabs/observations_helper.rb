@@ -261,6 +261,10 @@ module Tabs
       ).tab
     end
 
+    def bulk_rename_new_tabs
+      [observations_index_tab]
+    end
+
     def naming_form_new_title(obs:)
       :create_naming_title.t(id: obs.id)
     end

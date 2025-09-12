@@ -1902,6 +1902,7 @@
 
   # observations/bulk_rename
   bulk_rename_admin_required: Bulk Rename only enabled when in admin mode
+  bulk_rename_title: Propose Name for Observations
 
   # locations/list_place_names (list_locations)
   list_place_names_known: Known Locations

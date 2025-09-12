@@ -1,0 +1,21 @@
+<%
+container_class(:double)
+add_page_title(:bulk_rename_title.t)
+add_context_nav(bulk_rename_new_tabs)
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-8">
+    <div class="mt-3">
+      Observation Details
+    </div>
+
+    <div class="mt-3">
+      <%= render(partial: "observations/bulk_rename/form",
+                 locals: { local: true,
+                           form_locals: { show_reasons: true } }) %>
+    </div>
+  </div>
+  <!--.col-->
+</div>
+<!--.row-->

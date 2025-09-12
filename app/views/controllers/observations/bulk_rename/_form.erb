@@ -1,0 +1,44 @@
+<%# locals: (local: false, form_locals: {}, show_reasons: true, context: "blank") -%>
+
+<%
+# Fields must be separate because they're included in the obs form too.
+# HTML ID's may seem overly precise, but there may be more than one of
+# these forms open on a page if modal. IDs must be unique.
+case action_name
+when "new", "create"
+  create = true
+  button_name = :CREATE.l
+  method = :post
+  # id = "obs_#{@observation.id}_naming_form"
+  # url = observation_namings_path(observation_id: @observation.id,
+  #                                approved_name: @given_name)
+when "edit", "update"
+  create = false
+  button_name = :SAVE_EDITS.l
+  method = :patch
+  # id = "obs_#{@observation.id}_naming_#{@naming.id}_form"
+  # url = observation_naming_path(observation_id: @observation.id,
+  #                               id: @naming.id,
+  #                               approved_name: @given_name)
+end
+
+# `local` true means do not send via Turbo.
+form_args = { model: @naming, url: url, method: method, id: id }
+if local
+  form_args = form_args.merge({ local: true })
+else
+  form_args = form_args.deep_merge({ data: { turbo: true } })
+end
+
+# `naming_locals`: modal forms can accept a `form_locals` local. The controller
+# may send `context` (i.e. where the form appears), which defaults to "blank".
+# `show_reasons` is false on the obs form, true on the naming form.
+naming_locals = { create:, button_name:, show_reasons:, context: }.merge(form_locals)
+%>
+
+<%= form_with(**form_args) do |f| %>
+
+  <%= render(partial: "observations/namings/fields", locals: naming_locals) %>
+  <%= submit_button(form: f, button: button_name, center: true) %>
+
+<% end # form %>
