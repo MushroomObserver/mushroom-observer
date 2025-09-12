@@ -4,7 +4,7 @@ import { get } from "@rails/request.js" // allows us to call `get` below
 // Connects to data-controller="search-type"
 export default class extends Controller {
   // targetHelp is the collapse div where help text or form will be rendered
-  static targets = ["select", "help", "toggle", "form"]
+  static targets = ["select", "help", "helpToggle", "form", "formToggle"]
   // helpTypes are PatternSearch classes, formTypes are existing faceted forms.
   static values = { helpTypes: Array, formTypes: Array }
 
@@ -26,7 +26,7 @@ export default class extends Controller {
     const response = await get(url, { responseKind: "turbo-stream" });
     if (response.ok) {
       // Turbo updates the element in the page already
-      this.toggleTarget.classList.remove("d-none")
+      this.helpToggleTarget.classList.remove("d-none")
     } else {
       console.log(`got a ${response.status}`);
     }
@@ -35,7 +35,7 @@ export default class extends Controller {
   // Both empties the collapse div and hides the toggle, to avoid confusion
   hideHelp() {
     this.helpTarget.innerHTML = ""
-    this.toggleTarget.classList.add("d-none")
+    this.helpToggleTarget.classList.add("d-none")
   }
 
   // The path to the :show action of the relevant #{Model}::SearchController
@@ -46,6 +46,32 @@ export default class extends Controller {
     }
 
     return "/" + controller + "/search"
+  }
+
+  async getForm(event) {
+    event.stopPropagation()
+
+    const url = this.formUrl()
+    // console.log(`got url ${url}`);
+
+    if (!url) {
+      this.hideForm()
+      return
+    }
+
+    const response = await get(url, { responseKind: "turbo-stream" });
+    if (response.ok) {
+      // Turbo updates the element in the page already
+      this.toggleTarget.classList.remove("d-none")
+    } else {
+      console.log(`got a ${response.status}`);
+    }
+  }
+
+  // Both empties the collapse div and hides the toggle, to avoid confusion
+  hideForm() {
+    this.formTarget.innerHTML = ""
+    this.formToggleTarget.classList.add("d-none")
   }
 
   // The path to the :new action of the relevant #{Model}::SearchController
