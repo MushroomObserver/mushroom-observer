@@ -169,7 +169,6 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def show_link_with_project(project)
-    trace_tests if project
     show_link_args.tap { |result| result[:project] = project.id if project }
   end
 
