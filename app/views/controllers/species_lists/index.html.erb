@@ -12,7 +12,8 @@ flash_error(@error) if @error && @objects.empty?
   <% if @objects.any? %>
     <%= tag.div(class: "list-group") do %>
       <%= render(partial: "species_list",
-                 collection: @objects, as: :species_list) %>
+          collection: @objects, as: :species_list,
+	  project: @project) %>
     <% end %>
   <% end %>
 <% end %>
