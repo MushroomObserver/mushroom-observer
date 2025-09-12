@@ -2743,6 +2743,7 @@
   create_herbarium_separately: The fungarium you entered doesn't exist. Please create it separately and then add the fungarium record to your observation.
   create_herbarium_record_missing_herbarium_name: Missing fungarium name.
   create_herbarium_record_already_used: This fungarium record already exists. We've added this observation to it. If that isn't correct, remove it from your observation, then add the correct fungarium record.
+  create_herbarium_record_duplicate_accession_number: The accession number "[accession]" is already in use for [herbarium]. Each specimen must have a unique accession number. Please use a different accession number.
   create_herbarium_record_already_used_by_someone_else: This accession number has already been recorded by someone else for [herbarium_name]. Try adding your initials to the accession number to distinguish labels.
   create_herbarium_record_only_curator_or_owner: Only curators can add fungarium records to other users' observations.
 

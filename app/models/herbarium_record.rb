@@ -53,6 +53,8 @@ class HerbariumRecord < AbstractModel
   # Used to allow herbarium name to be entered as text in forms.
   attr_accessor :herbarium_name
 
+  validates :accession_number, uniqueness: { scope: :herbarium_id }
+
   after_create :notify_curators
   before_update :log_update
   before_destroy :log_destroy
