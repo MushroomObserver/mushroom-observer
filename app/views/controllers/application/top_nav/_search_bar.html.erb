@@ -30,8 +30,11 @@ formToggle_classes << "d-none" unless form_controller
 <% if @user %>
   <%= tag.div(class: "w-100", id: "search_nav_elements") do %>
 
-    <%= tag.div(class: "collapse in w-100",
-                id: "search_bar_elements w-100") do %>
+    <%= tag.div(class: "collapse in w-100", id: "search_bar_elements",
+                data: {
+                  search_type_target: "bar",
+                  action: "$shown.bs.collapse->search-type#closeForm"
+                }) do %>
 
       <%= tag.div(class: "navbar-flex w-100 gap-2") do %>
 
@@ -40,8 +43,8 @@ formToggle_classes << "d-none" unless form_controller
           class: class_names(helpToggle_classes),
           type: :button,
           data: { toggle: "collapse", search_type_target: "helpToggle",
-                  target: "#search_nav_help" },
-          aria: { expanded: "false", controls: "search_nav_help" }
+                  target: "#search_bar_help" },
+          aria: { expanded: "false", controls: "search_bar_help" }
         ) %>
 
         <%= form_with(url: search_pattern_path, method: :get,
@@ -64,8 +67,10 @@ formToggle_classes << "d-none" unless form_controller
               <%= f_s.select(
                     :type, search_options, { },
                     { class: "form-control",
-                      data: { search_type_target: "select",
-                              action: "search-type#getHelp" } }
+                      data: {
+                        search_type_target: "select",
+                        action: "search-type#getHelp search-type#getForm"
+                      } }
                   ) %>
             <% end %><!--.form-group-->
           <% end %>
@@ -87,7 +92,7 @@ formToggle_classes << "d-none" unless form_controller
           class: class_names(formToggle_classes),
           type: :button,
           data: { toggle: "collapse", search_type_target: "formToggle",
-                  target: "#search_nav_form", parent: "#search_nav_elements" },
+                  target: "#search_nav_form" },
           aria: { expanded: "false", controls: "search_nav_form" }
         ) %>
 
@@ -101,11 +106,14 @@ formToggle_classes << "d-none" unless form_controller
     <% end %>
 
     <%= tag.div(class: "collapse w-100", id: "search_nav_form",
-                data: { search_type_target: "form" }) do
-      render(partial: "shared/search_form",
-             locals: { local: false,
-                       search: find_or_create_query(query_model),
-                       field_columns: }) if form_controller
+                data: {
+                  search_type_target: "form",
+                  action: "$shown.bs.collapse->search-type#closeBar"
+                }) do
+      # render(partial: "shared/search_form",
+      #        locals: { local: false,
+      #                  search: find_or_create_query(query_model),
+      #                  field_columns: }) if form_controller
     end %>
 
   <% end %>
