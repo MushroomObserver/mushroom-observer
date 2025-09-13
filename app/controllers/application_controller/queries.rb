@@ -23,7 +23,8 @@
 module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
-      :query_from_session, :query_params, :add_q_param, :q_param
+      :query_from_session, :query_params, :add_q_param, :q_param,
+      :find_or_create_query
     )
   end
 

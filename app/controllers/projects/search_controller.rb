@@ -41,30 +41,32 @@ module Projects
     #   [{ in_box: [:north, :south, :east, :west]
     # end
 
-    private
-
     # This is the list of fields that are displayed in the search form. In the
     # template, each hash is interpreted as a column, and each key is a
     # panel_body (either shown or hidden) with an array of fields or field
     # pairings.
-    def set_up_form_field_groupings
-      @field_columns = [
-        {
-          connected: {
-            shown: [:members, :field_slip_prefix_has],
-            collapsed: [:by_users, [:has_observations, :has_species_lists],
-                        [:has_images]]
-          }
-        },
-        {
-          detail: {
-            shown: [:pattern, :title_has],
-            collapsed: [[:has_summary, :summary_has],
-                        [:has_comments, :comments_has]]
-          },
-          dates: { shown: [:created_at, :updated_at] }
+    FIELD_COLUMNS = [
+      {
+        connected: {
+          shown: [:members, :field_slip_prefix_has],
+          collapsed: [:by_users, [:has_observations, :has_species_lists],
+                      [:has_images]]
         }
-      ].freeze
+      },
+      {
+        detail: {
+          shown: [:pattern, :title_has],
+          collapsed: [[:has_summary, :summary_has],
+                      [:has_comments, :comments_has]]
+        },
+        dates: { shown: [:created_at, :updated_at] }
+      }
+    ].freeze
+
+    private
+
+    def set_up_form_field_groupings
+      @field_columns = FIELD_COLUMNS
     end
   end
 end

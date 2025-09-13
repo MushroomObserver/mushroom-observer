@@ -29,6 +29,18 @@ module Searchable
     def new
       set_up_form_field_groupings
       @search = find_or_create_query(query_model)
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            :search_nav_form, # id of element to update contents of
+            partial: "shared/search_form",
+            locals: { local: false, search: @search,
+                      field_columns: @field_columns }
+          ))
+        end
+        format.html
+      end
     end
 
     def create

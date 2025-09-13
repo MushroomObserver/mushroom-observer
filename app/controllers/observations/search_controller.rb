@@ -69,6 +69,42 @@ module Observations
     #              :include_all_name_proposals, :exclude_consensus] }]
     # end
 
+    # This is the list of fields that are displayed in the search form. In the
+    # template, each hash is interpreted as a column, and each key is a
+    # panel_body (either shown or hidden) with an array of fields or field
+    # pairings.
+    FIELD_COLUMNS = [
+      {
+        dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
+        name: {
+          shown: [:names],
+          # NOTE: These appear via js if names[:lookup] input has any value.
+          # See SearchHelper#autocompleter_with_conditional_fields
+          # conditional: [[:include_subtaxa, :include_synonyms],
+          #               [:include_all_name_proposals, :exclude_consensus]],
+          collapsed: [:confidence, [:has_name, :lichen]]
+        },
+        location: {
+          shown: [:locations],
+          collapsed: [[:has_public_lat_lng, :is_collection_location],
+                      :region]
+        }
+      },
+      {
+        pattern: { shown: [:pattern], collapsed: [] },
+        detail: {
+          shown: [[:has_specimen, :has_sequences]],
+          collapsed: [[:has_images, :has_notes],
+                      [:has_notes_fields, :notes_has],
+                      [:has_comments, :comments_has]]
+        },
+        connected: {
+          shown: [:by_users, :projects],
+          collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
+        }
+      }
+    ].freeze
+
     private
 
     # This is the list of fields that are displayed in the search form. In the
@@ -76,37 +112,7 @@ module Observations
     # panel_body (either shown or hidden) with an array of fields or field
     # pairings.
     def set_up_form_field_groupings
-      @field_columns = [
-        {
-          dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
-          name: {
-            shown: [:names],
-            # NOTE: These appear via js if names[:lookup] input has any value.
-            # See SearchHelper#autocompleter_with_conditional_fields
-            # conditional: [[:include_subtaxa, :include_synonyms],
-            #               [:include_all_name_proposals, :exclude_consensus]],
-            collapsed: [:confidence, [:has_name, :lichen]]
-          },
-          location: {
-            shown: [:locations],
-            collapsed: [[:has_public_lat_lng, :is_collection_location],
-                        :region]
-          }
-        },
-        {
-          pattern: { shown: [:pattern], collapsed: [] },
-          detail: {
-            shown: [[:has_specimen, :has_sequences]],
-            collapsed: [[:has_images, :has_notes],
-                        [:has_notes_fields, :notes_has],
-                        [:has_comments, :comments_has]]
-          },
-          connected: {
-            shown: [:by_users, :projects],
-            collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
-          }
-        }
-      ].freeze
+      @field_columns = FIELD_COLUMNS
     end
   end
 end
