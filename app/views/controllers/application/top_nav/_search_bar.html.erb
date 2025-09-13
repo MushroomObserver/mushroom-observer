@@ -6,17 +6,6 @@
 default = session[:search_type]&.to_s&.pluralize&.to_sym || :observations
 help_controller = search_help_types.include?(default) ? default : nil
 form_controller = search_form_types.include?(default) ? default : nil
-query_model = if form_controller
-                form_controller.to_s.singularize.camelize.to_sym
-              else
-                nil
-              end
-field_columns = if form_controller
-                  ctrlr_module = form_controller.to_s.camelize
-                  "#{ctrlr_module}::SearchController::FIELD_COLUMNS".constantize
-                else
-                  nil
-                end
 search_options = options_for_select(search_type_options, default)
 form_group_class = class_names(
   %w[form-group has-feedback has-search d-flex flex-grow-1 mb-0]
@@ -45,7 +34,7 @@ formToggle_classes << "d-none" unless form_controller
           data: { toggle: "collapse", search_type_target: "helpToggle",
                   target: "#search_bar_help" },
           aria: { expanded: "false", controls: "search_bar_help" }
-        ) %>
+        ) if help_controller %>
 
         <%= form_with(url: search_pattern_path, method: :get,
                       class: "navbar-flex flex-grow-1 navbar-form px-0 gap-2",
