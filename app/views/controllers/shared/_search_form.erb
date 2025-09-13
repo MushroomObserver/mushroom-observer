@@ -3,7 +3,22 @@
 form_args = { url: { action: :create }, model: search,
               id: "#{controller.search_type}_search_form",
               class: "faceted-search-form" }
+toggle_classes = %w[btn btn-link navbar-link px-2]
 %>
+
+<% if local == false %>
+  <%= tag.div(class: "navbar-flex w-100") do %>
+    <%= tag.div(:SEARCH.l, class: "font-weight-bold h4") %>
+    <%= tag.button(
+      link_icon(:minus, title: "Short Form"),
+      class: class_names(toggle_classes),
+      type: :button,
+      data: { toggle: "collapse", search_type_target: "barToggle",
+              target: "#search_bar_elements" },
+      aria: { expanded: "false", controls: "search_bar_elements" }
+    ) %>
+  <% end %>
+<% end %>
 
 <%= form_with(**form_args) do |form| %>
 
