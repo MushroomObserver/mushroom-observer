@@ -27,14 +27,7 @@ formToggle_classes << "d-none" unless form_controller
 
       <%= tag.div(class: "navbar-flex w-100 gap-2") do %>
 
-        <%= tag.button(
-          link_icon(:info, title: :search_bar_help.t),
-          class: class_names(helpToggle_classes),
-          type: :button,
-          data: { toggle: "collapse", search_type_target: "helpToggle",
-                  target: "#search_bar_help" },
-          aria: { expanded: "false", controls: "search_bar_help" }
-        ) if help_controller %>
+        <%= search_help_toggle(help_controller:) %>
 
         <%= form_with(url: search_pattern_path, method: :get,
                       class: "navbar-flex flex-grow-1 navbar-form px-0 gap-2",
@@ -76,21 +69,12 @@ formToggle_classes << "d-none" unless form_controller
 
         <% end %>
 
-        <%= tag.button(
-          link_icon(:plus, title: :OPTIONS.l),
-          class: class_names(formToggle_classes),
-          type: :button,
-          data: { toggle: "collapse", search_type_target: "formToggle",
-                  target: "#search_nav_form" },
-          aria: { expanded: "false", controls: "search_nav_form" }
-        ) %>
+        <%= search_form_toggle(form_controller:) %>
 
       <% end %>
 
       <%= tag.div(class: "collapse w-100", id: "search_bar_help",
-                  data: { search_type_target: "help" }) do
-        render(partial: "#{help_controller}/search/help") if help_controller
-      end %>
+                  data: { search_type_target: "help" }) %>
 
     <% end %>
 
@@ -98,12 +82,7 @@ formToggle_classes << "d-none" unless form_controller
                 data: {
                   search_type_target: "form",
                   action: "$shown.bs.collapse->search-type#closeBar"
-                }) do
-      # render(partial: "shared/search_form",
-      #        locals: { local: false,
-      #                  search: find_or_create_query(query_model),
-      #                  field_columns: }) if form_controller
-    end %>
+                }) %>
 
   <% end %>
 

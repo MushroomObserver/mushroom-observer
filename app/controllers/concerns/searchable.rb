@@ -18,7 +18,7 @@ module Searchable
       respond_to do |format|
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
-            :search_nav_help, # id of element to update contents of
+            :search_bar_help, # id of element to update contents of
             partial: "#{parent_controller}/search/help"
           ))
         end

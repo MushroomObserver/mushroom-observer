@@ -3,7 +3,7 @@
 # helpers for search forms. These call field helpers in forms_helper.
 # args should provide form, field, label at a minimum.
 # rubocop:disable Metrics/ModuleLength
-module SearchHelper
+module SearchFormHelper
   # Builds a single filter group, or panel, for a search form. The panel's
   # field groups are defined in the controller, along with the field methods.
   # Sections can be :shown/ :collapsed.

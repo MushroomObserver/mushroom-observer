@@ -3891,10 +3891,10 @@
   project_term_created_at: Date project was first used.
   project_term_updated_at: Date project was last modified.
 
-  # link to search bar help
+  # Search bar
   search_bar_help: Search Help
-
-  # Search bar help page
+  search_bar_more_options: More Options
+  search_bar_fewer_options: Fewer Options
   search_bar_help_title: Search Bar Help
 
   # Privacy policy
