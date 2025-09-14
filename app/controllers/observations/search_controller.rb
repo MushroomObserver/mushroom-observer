@@ -75,7 +75,6 @@ module Observations
     # pairings.
     FIELD_COLUMNS = [
       {
-        dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
         name: {
           shown: [:names],
           # NOTE: These appear via js if names[:lookup] input has any value.
@@ -88,10 +87,11 @@ module Observations
           shown: [:locations],
           collapsed: [[:has_public_lat_lng, :is_collection_location],
                       :region]
-        }
+        },
+        pattern: { shown: [:pattern], collapsed: [] }
       },
       {
-        pattern: { shown: [:pattern], collapsed: [] },
+        dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
         detail: {
           shown: [[:has_specimen, :has_sequences]],
           collapsed: [[:has_images, :has_notes],
