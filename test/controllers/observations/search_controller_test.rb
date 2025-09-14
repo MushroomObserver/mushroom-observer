@@ -7,15 +7,29 @@ require("test_helper")
 # ------------------------------------------------------------
 module Observations
   class SearchControllerTest < FunctionalTestCase
-    def test_show
+    def test_show_help
       login
       get(:show)
+      assert_template("observations/search/_help")
+    end
+
+    def test_show_help_turbo
+      login
+      get(:show, format: :turbo_stream)
       assert_template("observations/search/_help")
     end
 
     def test_new_observations_search
       login("rolf")
       get(:new)
+      assert_template("observations/search/new")
+      assert_template("shared/_search_form")
+    end
+
+    def test_new_observations_search_turbo
+      login("rolf")
+      get(:new, format: :turbo_stream)
+      assert_template("shared/_search_form")
     end
 
     def test_new_observations_search_form_prefilled_from_existing_query

@@ -12,6 +12,12 @@ module Locations
       get(:new)
     end
 
+    def test_new_locations_search_turbo
+      login
+      get(:new, format: :turbo_stream)
+      assert_template("shared/_search_form")
+    end
+
     def test_new_locations_search_form_prefilled_from_existing_query
       login
       location = locations(:burbank)
