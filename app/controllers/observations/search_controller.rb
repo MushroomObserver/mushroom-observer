@@ -84,9 +84,9 @@ module Observations
           collapsed: [:confidence, [:has_name, :lichen]]
         },
         location: {
-          shown: [:locations],
+          shown: [:region],
           collapsed: [[:has_public_lat_lng, :is_collection_location],
-                      :region]
+                      :locations]
         },
         pattern: { shown: [:pattern], collapsed: [] }
       },
