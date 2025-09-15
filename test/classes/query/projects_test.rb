@@ -56,6 +56,16 @@ class Query::ProjectsTest < UnitTestCase
     )
   end
 
+  def test_project_region
+    region = "Albion, California, USA"
+    ids = [projects(:albion_project).id,
+           projects(:no_start_date_project).id,
+           projects(:no_end_date_project).id,
+           projects(:past_project).id]
+    scope = Project.region(region).order_by_default
+    assert_query_scope(ids, scope, :Project, region:)
+  end
+
   def test_project_title_has
     expects = [projects(:news_articles_project)]
     scope = Project.title_has("News Articles")

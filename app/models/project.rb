@@ -128,6 +128,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             Project[:field_slip_prefix].coalesce(""))
     search_columns(cols, phrase).distinct
   }
+  # Accepts multiple regions, see Observation.region for why this is singular
+  scope :region, lambda { |place_names|
+    where(location: Location.region(place_names))
+  }
 
   scope :user_is_member, lambda { |user|
     user = User.safe_find(user)
