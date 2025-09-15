@@ -72,13 +72,19 @@ module Observations
     def test_create_observations_search
       login
       params = {
-        pattern: "Agaricus campestris",
+        by_users: rolf.unique_text_name,
         has_notes: true
       }
       post(:create, params: { query_observations: params })
 
+      validated_params = {
+        by_users: rolf.id,
+        has_notes: true
+      }
       assert_redirected_to(controller: "/observations", action: :index,
-                           params: { q: { model: :Observation, **params } })
+                           params: {
+                             q: { model: :Observation, **validated_params }
+                           })
     end
 
     def test_create_observations_search_nested

@@ -20,7 +20,6 @@ module Projects
         has_observations: :select_boolean,
         has_images: :select_boolean,
         has_species_lists: :select_boolean,
-        pattern: :text_field_with_label,
         title_has: :text_field_with_label,
         has_summary: :select_boolean,
         summary_has: :text_field_with_label,
@@ -55,9 +54,8 @@ module Projects
       },
       {
         detail: {
-          shown: [:pattern, :title_has],
-          collapsed: [[:has_summary, :summary_has],
-                      [:has_comments, :comments_has]]
+          shown: [:title_has, [:has_summary, :summary_has]],
+          collapsed: [[:has_comments, :comments_has]]
         },
         dates: { shown: [:created_at, :updated_at] }
       }

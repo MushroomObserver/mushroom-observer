@@ -18,7 +18,6 @@ module Locations
         updated_at: :text_field_with_label,
         region: :region_with_in_box_fields,
         in_box: :in_box_fields,
-        pattern: :text_field_with_label,
         regexp: :text_field_with_label,
         has_notes: :select_boolean,
         notes_has: :text_field_with_label,
@@ -46,7 +45,7 @@ module Locations
         area: { shown: [:region] }
       },
       {
-        pattern: { shown: [:pattern], collapsed: [:regexp] },
+        pattern: { shown: [:regexp] },
         dates: { shown: [:created_at, :updated_at] },
         detail: {
           shown: [[:has_notes, :notes_has],

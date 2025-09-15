@@ -57,7 +57,8 @@ module Names
     def test_create_names_search
       login
       params = {
-        pattern: "Agaricus campestris",
+        has_classification: true,
+        classification_has: names(:agaricus_campestris).classification,
         misspellings: :either
       }
       post(:create, params: { query_names: params })

@@ -26,7 +26,6 @@ module Observations
         is_collection_location: :select_boolean,
         region: :region_with_in_box_fields,
         in_box: :in_box_fields,
-        pattern: :text_field_with_label,
         has_specimen: :select_boolean,
         has_sequences: :select_yes,
         has_images: :select_boolean,
@@ -87,8 +86,7 @@ module Observations
           shown: [:region],
           collapsed: [[:has_public_lat_lng, :is_collection_location],
                       :locations]
-        },
-        pattern: { shown: [:pattern], collapsed: [] }
+        }
       },
       {
         dates: { shown: [:date], collapsed: [:created_at, :updated_at] },

@@ -16,7 +16,6 @@ module Names
     def permitted_search_params
       {
         names: :names_fields_for_names,
-        pattern: :text_field_with_label,
         has_observations: :select_yes,
         deprecated: :select_boolean,
         has_author: :select_boolean,
@@ -57,21 +56,19 @@ module Names
     # with an array of fields or field pairings.
     FIELD_COLUMNS = [
       { name: {
-          shown: [:names],
-          # NOTE: These appear via js if names[:lookup] input has any value.
-          # See SearchHelper#autocompleter_with_conditional_fields
-          # conditional: [
-          #   [:include_subtaxa, :include_synonyms],
-          #   [:include_immediate_subtaxa, :exclude_original_names]
-          # ],
-          collapsed: [:pattern, :rank, :lichen]
-        },
-        quality: {
-          shown: [[:misspellings, :deprecated]],
-          collapsed: [[:has_author, :author_has],
-                      [:has_citation, :citation_has],
-                      [:has_default_description]]
-        } },
+        shown: [:names],
+        # NOTE: These appear via js if names[:lookup] input has any value.
+        # See SearchHelper#autocompleter_with_conditional_fields
+        # conditional: [
+        #   [:include_subtaxa, :include_synonyms],
+        #   [:include_immediate_subtaxa, :exclude_original_names]
+        # ],
+        collapsed: [[:deprecated, :lichen],
+                    :rank,
+                    [:has_author, :author_has],
+                    [:has_citation, :citation_has],
+                    [:has_default_description, :misspellings]]
+      } },
       { detail: {
           shown: [[:has_classification, :classification_has]],
           collapsed: [[:has_notes, :notes_has],

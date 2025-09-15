@@ -27,7 +27,6 @@ module Locations
         in_box: box,
         has_notes: true,
         notes_has: "Symbiota",
-        pattern: "anything",
         regexp: "Target",
         by_editor: users(:rolf).id,
         has_observations: true
@@ -38,7 +37,6 @@ module Locations
       assert_select("input#query_locations_in_box_south", value: box[:south])
       assert_select("select#query_locations_has_notes", selected: "yes")
       assert_select("input#query_locations_notes_has", value: "Symbiota")
-      assert_select("input#query_locations_pattern", value: "anything")
       assert_select("input#query_locations_regexp", value: "Target")
       assert_select("input#query_locations_by_editor", value: "Rolf Singer")
       assert_select("select#query_locations_has_observations",
