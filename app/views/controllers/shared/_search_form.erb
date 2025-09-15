@@ -8,7 +8,9 @@ toggle_classes = %w[btn btn-link navbar-link px-2]
 
 <% if local == false %>
   <%= tag.div(class: "navbar-flex w-100") do %>
-    <%= tag.div(:SEARCH.l, class: "font-weight-bold h4") %>
+    <%= tag.div(class: "font-weight-bold h5 text-larger") do
+      :search_form_title.t(type: controller.search_type.to_s.camelize.to_sym)
+    end %>
     <%= search_bar_toggle %>
   <% end %>
 <% end %>

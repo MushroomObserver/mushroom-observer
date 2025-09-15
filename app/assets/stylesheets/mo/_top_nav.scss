@@ -2,6 +2,13 @@
 // top nav bar
 // --------------------------------------------------
 
+#top_nav {
+  .border-top,
+  .border-bottom {
+    border-color: $TOP_BAR_BORDER_COLOR
+  }
+}
+
 .navbar-nav {
   li {
     form.button_to {

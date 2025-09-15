@@ -78,7 +78,7 @@ formToggle_classes << "d-none" unless form_controller
 
     <% end %>
 
-    <%= tag.div(class: "collapse w-100", id: "search_nav_form",
+    <%= tag.div(class: "collapse w-100 border-top", id: "search_nav_form",
                 data: {
                   search_type_target: "form",
                   action: "$shown.bs.collapse->search-type#closeBar"
