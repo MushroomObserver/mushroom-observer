@@ -25,7 +25,6 @@ module Projects
         members: [users(:mary).id, users(:katrina).id],
         title_has: "Symbiota",
         has_summary: true,
-        pattern: "anything",
         has_observations: true
       )
       assert(query.id)
@@ -35,7 +34,6 @@ module Projects
                     text: "Mary Newbie\nKatrina")
       assert_select("input#query_projects_title_has", value: "Symbiota")
       assert_select("select#query_projects_has_summary", selected: "yes")
-      assert_select("input#query_projects_pattern", value: "anything")
       assert_select("select#query_projects_has_observations", selected: "yes")
     end
 
