@@ -112,6 +112,8 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
         ->(phrase) { search_columns(SpeciesList[:where], phrase) }
 
   # Accepts multiple regions, see Observation.region for why this is singular
+  # This is different from Project.region because we allow undefined locations
+  # (`where` strings) for SpeciesList.
   scope :region, lambda { |place_names|
     place_names = [place_names].flatten
     place_names.map! { |val| search_where(val) }
