@@ -73,12 +73,13 @@ module Observations
       login
       params = {
         by_users: rolf.unique_text_name,
+        by_users_id: rolf.id, # autocompleter should supply
         has_notes: true
       }
       post(:create, params: { query_observations: params })
 
       validated_params = {
-        by_users: rolf.id,
+        by_users: [rolf.id],
         has_notes: true
       }
       assert_redirected_to(controller: "/observations", action: :index,
