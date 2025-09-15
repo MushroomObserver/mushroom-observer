@@ -98,6 +98,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     joins(user_group: :user_group_users).
       merge(UserGroupUser.where(user: ids))
   }
+  # Takes multiple name strings or ids, passes include_synonyms
+  scope :names, lambda { |names|
+    name_ids = Lookup::Names.new(names, include_synonyms: true).ids
+    return none unless name_ids
+
+    joins(:observations).where(Observation[:name_id].in(name_ids))
+  }
   scope :title_has,
         ->(phrase) { search_columns(Project[:title], phrase) }
   scope :has_summary,

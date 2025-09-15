@@ -44,6 +44,18 @@ class Query::ProjectsTest < UnitTestCase
                  :Project, members: [dick])
   end
 
+  def test_project_names
+    names = [names(:peltigera).search_name]
+    scope = Project.names(names).order_by_default
+    assert_query(scope, :Project, names: names)
+    assert_query(
+      [projects(:pinned_date_range_project),
+       projects(:unlimited_project),
+       projects(:one_genus_two_species_project)],
+      :Project, names: names
+    )
+  end
+
   def test_project_title_has
     expects = [projects(:news_articles_project)]
     scope = Project.title_has("News Articles")
