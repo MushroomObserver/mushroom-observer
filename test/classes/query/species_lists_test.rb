@@ -66,6 +66,15 @@ class Query::SpeciesListsTest < UnitTestCase
     )
   end
 
+  def test_species_list_names
+    names = [names(:agaricus_campestris).search_name]
+    scope = SpeciesList.names(names).order_by_default
+    assert_query(scope, :SpeciesList, names: names)
+    assert_query(
+      [species_lists(:one_genus_three_species_list)], :SpeciesList, names: names
+    )
+  end
+
   def test_species_list_for_projects
     assert_query([],
                  :SpeciesList, projects: projects(:empty_project))
@@ -110,6 +119,12 @@ class Query::SpeciesListsTest < UnitTestCase
     ids = [species_lists(:where_no_mushrooms_list).id]
     scope = SpeciesList.search_where("No Mushrooms").order_by_default
     assert_query_scope(ids, scope, :SpeciesList, search_where: "No Mushrooms")
+  end
+
+  def test_species_list_region
+    ids = [species_lists(:no_location_list).id]
+    scope = SpeciesList.region("Oregon, USA").order_by_default
+    assert_query_scope(ids, scope, :SpeciesList, region: "Oregon, USA")
   end
 
   def test_species_list_pattern
