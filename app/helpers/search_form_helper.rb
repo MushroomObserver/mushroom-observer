@@ -13,7 +13,7 @@ module SearchFormHelper
     collapsed = search_panel_collapsed(form:, search:, sections:)
     open = collapse = false
     if sections[:collapsed].present?
-      collapse = heading
+      collapse = "#{controller.search_type}_#{heading}"
       open = search_panel_open?(search:, sections:)
     end
     panel_block(heading: :"search_term_group_#{heading}".l,

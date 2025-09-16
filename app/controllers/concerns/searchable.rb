@@ -78,6 +78,15 @@ module Searchable
       self.class.name.deconstantize.underscore.to_sym
     end
 
+    def parent_controller
+      self.class.name.deconstantize.underscore
+    end
+
+    # Returns the capitalized :Symbol used by Query for the type of query.
+    def query_model
+      self.class.module_parent.name.singularize.to_sym
+    end
+
     private
 
     def search_object_name
@@ -184,15 +193,6 @@ module Searchable
     # Save the validated search params and send these to the index.
     def save_search_query
       @query = Query.lookup_and_save(query_model, **@search.params)
-    end
-
-    def parent_controller
-      self.class.name.deconstantize.underscore
-    end
-
-    # Returns the capitalized :Symbol used by Query for the type of query.
-    def query_model
-      self.class.module_parent.name.singularize.to_sym
     end
 
     # Gets the query class relevant to each controller, assuming the controller
