@@ -367,6 +367,14 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to(new_field_slip_url(code: code, id: code))
   end
 
+  def test_show_project_prphan_has_edit_link
+    login
+    fs = field_slips(:field_slip_project_orphan)
+    get(:show, params: { id: fs.id })
+    assert_response(:success)
+    assert_match(/#{:field_slip_edit.t}/, @response.body)
+  end
+
   def test_should_get_edit
     login(@field_slip.user.login)
     get(:edit, params: { id: @field_slip.id })
@@ -403,6 +411,13 @@ class FieldSlipsControllerTest < FunctionalTestCase
     get(:new, params: { code: "#{project.field_slip_prefix}-1234" })
     assert_match(project.location.display_name,
                  @response.body)
+  end
+
+  def test_should_edit_user_orphan
+    fs = field_slips(:field_slip_user_orphan)
+    login(mary.login)
+    get(:edit, params: { id: fs.id })
+    assert_response(:success)
   end
 
   def test_admin_should_get_edit

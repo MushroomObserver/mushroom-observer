@@ -52,3 +52,11 @@ field_slip_by_recorder:
   project: current_project
   code: CURR-0002
   user: rolf
+
+field_slip_project_orphan:
+  observation: recorder_obs
+  code: ORPH-0001
+
+field_slip_user_orphan:
+  project: current_project
+  code: ORPH-0002

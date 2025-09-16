@@ -117,7 +117,7 @@ class FieldSlip < AbstractModel
   def collector
     return observation.collector if observation&.collector
 
-    (user || @current_user).unique_text_name
+    (user || @current_user)&.unique_text_name
   end
 
   def date
@@ -141,7 +141,7 @@ class FieldSlip < AbstractModel
   end
 
   def can_edit?(current_user)
-    user == current_user ||
+    user.nil? || user == current_user ||
       (project&.is_admin?(current_user) && project.trusted_by?(user))
   end
 end
