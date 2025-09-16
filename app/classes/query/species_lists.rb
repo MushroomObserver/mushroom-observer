@@ -13,8 +13,10 @@ class Query::SpeciesLists < Query
   query_attr(:has_comments, { boolean: [true] })
   query_attr(:comments_has, :string)
   query_attr(:search_where, :string)
+  query_attr(:region, :string) # accepts multiple values for :search_where
   query_attr(:pattern, :string)
   query_attr(:locations, [Location])
+  query_attr(:names, [Name])
   query_attr(:projects, [Project])
   query_attr(:observation_query, { subquery: :Observation })
 

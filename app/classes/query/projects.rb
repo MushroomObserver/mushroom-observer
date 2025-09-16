@@ -6,6 +6,8 @@ class Query::Projects < Query
   query_attr(:id_in_set, [Project])
   query_attr(:by_users, [User])
   query_attr(:members, [User])
+  query_attr(:names, [Name])
+  query_attr(:region, :string) # accepts multiple values
   query_attr(:title_has, :string)
   query_attr(:has_summary, :boolean)
   query_attr(:summary_has, :string)
