@@ -111,9 +111,24 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :search_where,
         ->(phrase) { search_columns(SpeciesList[:where], phrase) }
 
+  # Accepts multiple regions, see Observation.region for why this is singular
+  # This is different from Project.region because we allow undefined locations
+  # (`where` strings) for SpeciesList.
+  scope :region, lambda { |place_names|
+    place_names = [place_names].flatten
+    place_names.map! { |val| search_where(val) }
+    or_clause(*place_names).distinct
+  }
   scope :locations, lambda { |locations|
     ids = Lookup::Locations.new(locations).ids
     where(location_id: ids).distinct
+  }
+  # Takes multiple name strings or ids, passes include_synonyms
+  scope :names, lambda { |names|
+    name_ids = Lookup::Names.new(names, include_synonyms: true).ids
+    return none unless name_ids
+
+    joins(:observations).where(Observation[:name_id].in(name_ids))
   }
   scope :projects, lambda { |projects|
     ids = Lookup::Projects.new(projects).ids
@@ -166,6 +181,10 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   # Callback that updates User contribution when removing Observation's.
   def remove_obs_callback(_obs)
     UserStats.update_contribution(:del, :species_list_entries, user_id)
+  end
+
+  def show_link_with_project(project)
+    show_link_args.tap { |result| result[:project] = project.id if project }
   end
 
   def self.find_by_title_with_wildcards(str)

@@ -98,6 +98,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     joins(user_group: :user_group_users).
       merge(UserGroupUser.where(user: ids))
   }
+  # Takes multiple name strings or ids, passes include_synonyms
+  scope :names, lambda { |names|
+    name_ids = Lookup::Names.new(names, include_synonyms: true).ids
+    return none unless name_ids
+
+    joins(:observations).where(Observation[:name_id].in(name_ids))
+  }
   scope :title_has,
         ->(phrase) { search_columns(Project[:title], phrase) }
   scope :has_summary,
@@ -120,6 +127,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     cols = (Project[:title] + Project[:summary].coalesce("") +
             Project[:field_slip_prefix].coalesce(""))
     search_columns(cols, phrase).distinct
+  }
+  # Accepts multiple regions, see Observation.region for why this is singular
+  scope :region, lambda { |place_names|
+    where(location: Location.region(place_names))
   }
 
   scope :user_is_member, lambda { |user|

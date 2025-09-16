@@ -1,4 +1,4 @@
-<%# locals: (species_list:, observation: nil, remove: false, add: false) %>
+<%# locals: (species_list:, observation: nil, remove: false, add: false, project: nil) %>
 
 <%#
 Each listing in the index, or
@@ -18,7 +18,7 @@ place = species_list.place_name.t rescue :UNKNOWN.l
     <%= tag.div do %>
       <%= tag.div do
         [
-          link_to(species_list.show_link_args) do
+          link_to(species_list.show_link_with_project(@project)) do
             tag.span(species_list.text_name.t, class: "list_what h4")
           end,
           tag.span("(#{species_list.when.to_s})", class: "list_when ml-4")
