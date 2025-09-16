@@ -60,7 +60,8 @@ module SpeciesLists
       },
       {
         detail: {
-          shown: [:title_has, [:has_notes, :notes_has]]
+          shown: [:title_has, [:has_notes, :notes_has]],
+          collapsed: [[:has_comments, :comments_has]]
         },
         dates: { shown: [:date, :created_at, :updated_at] }
       }

@@ -41,8 +41,9 @@ module SpeciesLists
     def test_create_species_lists_search
       login
       params = {
-        title_has: "Symbiota",
-        has_comments: true
+        title_has: "No",
+        has_comments: :no,
+        region: "Oregon, USA"
       }
       post(:create, params: { query_species_lists: params })
 
