@@ -27,7 +27,7 @@ module Observations
         region: :region_with_in_box_fields,
         in_box: :in_box_fields,
         has_specimen: :select_boolean,
-        has_sequences: :select_yes,
+        has_sequences: :select_yes, # ignores false
         has_images: :select_boolean,
         has_notes: :select_boolean,
         has_notes_fields: :text_field_with_label,

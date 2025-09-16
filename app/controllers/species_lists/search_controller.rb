@@ -21,7 +21,7 @@ module SpeciesLists
         title_has: :text_field_with_label,
         has_notes: :select_boolean,
         notes_has: :text_field_with_label,
-        has_comments: :select_boolean,
+        has_comments: :select_yes, # ignores false
         comments_has: :text_field_with_label,
         date: :text_field_with_label,
         created_at: :text_field_with_label,

@@ -42,13 +42,16 @@ module SpeciesLists
       login
       params = {
         title_has: "No",
-        has_comments: :no,
+        has_comments: false, # scope ignores false values
         region: "Oregon, USA"
       }
       post(:create, params: { query_species_lists: params })
 
-      assert_redirected_to(controller: "/species_lists", action: :index,
-                           params: { q: { model: :SpeciesList, **params } })
+      validated_params = params.except(:has_comments)
+      assert_redirected_to(
+        controller: "/species_lists", action: :index,
+        params: { q: { model: :SpeciesList, **validated_params } }
+      )
     end
   end
 end

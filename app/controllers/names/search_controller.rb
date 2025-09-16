@@ -16,7 +16,7 @@ module Names
     def permitted_search_params
       {
         names: :names_fields_for_names,
-        has_observations: :select_yes,
+        has_observations: :select_yes, # ignores false
         deprecated: :select_boolean,
         has_author: :select_boolean,
         author_has: :text_field_with_label,
