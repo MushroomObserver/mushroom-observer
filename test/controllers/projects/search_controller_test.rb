@@ -3,7 +3,7 @@
 require("test_helper")
 
 # ------------------------------------------------------------
-#  Locations search
+#  Projects search
 # ------------------------------------------------------------
 module Projects
   class SearchControllerTest < FunctionalTestCase

@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Projects search form and help.
+# SpeciesLists search form and help.
 #
-# Route: `project_search_path`, `new_project_search_path`
+# Route: `species_list_search_path`, `new_species_list_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
-# `{ controller: "/projects/search", action: :create }`
-module Projects
+# `{ controller: "/species_lists/search", action: :create }`
+module SpeciesLists
   class SearchController < ApplicationController
     include ::Searchable
 
@@ -14,21 +14,16 @@ module Projects
     # Also an index of helper methods to use for each field.
     def permitted_search_params
       {
-        members: :multiple_value_autocompleter,
+        by_users: :multiple_value_autocompleter,
+        projects: :multiple_value_autocompleter,
         names: :names_fields_for_obs,
         region: :text_field_with_label,
-        field_slip_prefix_has: :text_field_with_label,
-        by_users: :multiple_value_autocompleter,
-        has_observations: :select_boolean,
-        has_images: :select_boolean,
-        has_species_lists: :select_boolean,
         title_has: :text_field_with_label,
-        has_summary: :select_boolean,
-        summary_has: :text_field_with_label,
         has_notes: :select_boolean,
         notes_has: :text_field_with_label,
         has_comments: :select_boolean,
         comments_has: :text_field_with_label,
+        date: :text_field_with_label,
         created_at: :text_field_with_label,
         updated_at: :text_field_with_label
       }.freeze
@@ -46,7 +41,7 @@ module Projects
     end
 
     def fields_preferring_ids
-      [:by_users, :members]
+      [:by_users, :projects]
     end
 
     # def fields_with_requirements
@@ -60,18 +55,14 @@ module Projects
     FIELD_COLUMNS = [
       {
         connected: {
-          shown: [:members, :names, :region],
-          collapsed: [:field_slip_prefix_has, :by_users,
-                      [:has_observations, :has_species_lists],
-                      [:has_images]]
+          shown: [:names, :region, :projects, :by_users]
         }
       },
       {
         detail: {
-          shown: [:title_has, [:has_summary, :summary_has]],
-          collapsed: [[:has_comments, :comments_has]]
+          shown: [:title_has, [:has_notes, :notes_has]]
         },
-        dates: { shown: [:created_at, :updated_at] }
+        dates: { shown: [:date, :created_at, :updated_at] }
       }
     ].freeze
 

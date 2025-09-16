@@ -3773,6 +3773,21 @@
   pattern_search_terms_multiple: Separate multiple values with commas.
   pattern_search_terms_short_help: Click the ? next to the search bar for a list of expected terms.
 
+  query_term_names: "[type] has [:observations] of one of these [:names]."
+  query_term_region: "[type] is associated with this [:region]."
+  query_term_by_users: "[type] created by one of these [:users]."
+  query_term_title_has: "[type] [:title] contains these words."
+  query_term_has_comments: "[type] has any [:comments]?"
+  query_term_comments_has: "[type] [:comments] have these words."
+  query_term_has_notes: "[type] has [:notes]?"
+  query_term_notes_has: "[type] [:notes] have these words."
+  query_term_date: Date of [type].
+  query_term_created_at: Date [type] was first used.
+  query_term_updated_at: Date [type] was last modified.
+  query_term_projects: "[type] belongs to one of these [:projects]."
+  query_term_has_observations: "Has [:observations]?"
+  query_term_has_images: "Has [:images]?"
+
   # We're borrowing these for the help popups on the search forms, thus the
   # similar entries. In the case of apparent duplicates, one will be the
   # pattern search keyword, the other the query param.
@@ -3794,17 +3809,17 @@
   observation_term_locations: "[:observation_term_location]"
   observation_term_region: The Observation's Location name includes this string. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown. Cf. **[:location]**.
   observation_term_pattern: "[:pattern]"
-  observation_term_project: Observation belongs to one of these projects.
-  observation_term_projects: "[:observation_term_project]"
+  observation_term_project: "[:observation_term_projects]"
+  observation_term_projects: "[:query_term_projects(type=:OBSERVATION)]"
   observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these observation lists.
   observation_term_species_lists: "[:observation_term_list]"
-  observation_term_user: Observation created by one of these users.
-  observation_term_by_users: "[:observation_term_user]"
-  observation_term_notes: Notes contains the given string.
-  observation_term_notes_has: "[:observation_term_notes]"
-  observation_term_comments: Comments contain the given string.
-  observation_term_comments_has: "[:observation_term_comments]"
+  observation_term_user: "[:observation_term_by_users]"
+  observation_term_by_users: "[:query_term_by_users(type=:OBSERVATION)]"
+  observation_term_notes: "[:observation_term_notes_has]"
+  observation_term_notes_has: "[:query_term_notes_has(type=:OBSERVATION)]"
+  observation_term_comments: "[:observation_term_comments_has]"
+  observation_term_comments_has: "[:query_term_comments_has(type=:OBSERVATION)]"
   observation_term_field_slip: Observation corresponds to this field slip.
   observation_term_field_slips: "[:observation_term_field_slip]"
   observation_term_confidence: Confidence is in this range.
@@ -3818,11 +3833,11 @@
   observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
-  observation_term_has_notes: Has Notes?
+  observation_term_has_notes: "[:query_term_has_notes]"
   observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_notes_fields: "[:observation_term_has_field]"
-  observation_term_has_comments: Has any comments?
+  observation_term_has_comments: "[:query_term_has_comments]"
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
   # We're borrowing these for the help popups on the search forms, thus the
@@ -3830,10 +3845,10 @@
   # pattern search keyword, the other the query param.
   name_term_names: "[:NAMES]"
   name_term_pattern: "[:PATTERN]"
-  name_term_created: Date name was first used.
-  name_term_created_at: "[:name_term_created]"
-  name_term_modified: Date name was last modified.
-  name_term_updated_at: "[:name_term_modified]"
+  name_term_created: "[:name_term_created_at]"
+  name_term_created_at: "[:query_term_created_at(type=:LOCATION)]"
+  name_term_modified: "[:name_term_updated_at]"
+  name_term_updated_at: "[:query_term_updated_at(type=:LOCATION)]"
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
@@ -3865,31 +3880,54 @@
 
   # Help text for search_form_fields
   location_term_region: The Location's name includes this string. Partial match anchored at end, including country at least, e.g., "California, USA".
-  location_term_by_users: Location created by one of these users.
+  location_term_by_users: "[:query_term_by_users(type=:LOCATION)]"
   location_term_by_editor: Location edited by this user.
   location_term_pattern: "[:PATTERN]"
   location_term_regexp: Regexp
-  location_term_created_at: "Date [:location] was first used."
-  location_term_updated_at: "Date [:location] was last modified."
-  location_term_has_notes: "[:observation_term_has_notes]"
-  location_term_notes_has: "[:observation_term_notes]"
-  location_term_has_observations: Has observations?
+  location_term_created_at: "[:query_term_created_at(type=:LOCATION)]"
+  location_term_updated_at: "[:query_term_updated_at(type=:LOCATION)]"
+  location_term_has_notes: "[:query_term_has_notes(type=:LOCATION)]"
+  location_term_notes_has: "[:query_term_notes_has(type=:LOCATION)]"
+  location_term_has_observations: "[:query_term_has_observations]"
   location_term_has_descriptions: Has a description?
 
   project_term_members: Project has one of these members.
+  project_term_names: "[:query_term_names(type=:PROJECT)]"
+  project_term_include_synonyms: "[:observation_term_include_synonyms]"
+  project_term_include_subtaxa: "[:observation_term_include_subtaxa]"
+  project_term_include_all_name_proposals: "[:observation_term_include_all_name_proposals]"
+  project_term_exclude_consensus: "[:observation_term_exclude_consensus]"
+  project_term_region: "[:query_term_region(type=:PROJECT)]"
   project_term_field_slip_prefix_has: Project field slips have this prefix.
-  project_term_by_users: Project created by one of these users.
-  project_term_has_observations: "[:location_term_has_observations]"
-  project_term_has_species_lists: Has observation lists?
-  project_term_has_images: Has images?
+  project_term_by_users: "[:query_term_by_users(type=:PROJECT)]"
+  project_term_has_observations: "[:query_term_has_observations]"
+  project_term_has_species_lists: "Has [:species_lists]?"
+  project_term_has_images: "[:query_term_has_images]"
   project_term_pattern: "[:PATTERN]"
-  project_term_title_has: Project title contains these words.
-  project_term_has_summary: Project has summary.
-  project_term_summary_has: Project summary has these words.
-  project_term_has_comments: Project has comments.
-  project_term_comments_has: Project comments have these words.
-  project_term_created_at: Date project was first used.
-  project_term_updated_at: Date project was last modified.
+  project_term_title_has: "[:query_term_title_has(type=:PROJECT)]"
+  project_term_has_summary: "[:PROJECT] has summary."
+  project_term_summary_has: "[:PROJECT] summary has these words."
+  project_term_has_comments: "[:query_term_has_comments(type=:PROJECT)]"
+  project_term_comments_has: "[:query_term_comments_has(type=:PROJECT)]"
+  project_term_created_at: "[:query_term_created_at(type=:project)]"
+  project_term_updated_at: "[:query_term_updated_at(type=:project)]"
+
+  species_list_term_names: "[:query_term_names(type=:SPECIES_LIST)]"
+  species_list_term_include_synonyms: "[:observation_term_include_synonyms]"
+  species_list_term_include_subtaxa: "[:observation_term_include_subtaxa]"
+  species_list_term_include_all_name_proposals: "[:observation_term_include_all_name_proposals]"
+  species_list_term_exclude_consensus: "[:observation_term_exclude_consensus]"
+  species_list_term_region: "[:query_term_region(type=:SPECIES_LIST)]"
+  species_list_term_projects: "[:query_term_projects(type=:SPECIES_LIST)]"
+  species_list_term_by_users: "[:query_term_by_users(type=:SPECIES_LIST)]"
+  species_list_term_title_has: "[:query_term_title_has(type=:SPECIES_LIST)]"
+  species_list_term_has_notes: "[:query_term_has_notes(type=:SPECIES_LIST)]"
+  species_list_term_notes_has: "[:query_term_notes_has(type=:SPECIES_LIST)]"
+  species_list_term_has_comments: "[:query_term_has_comments(type=:SPECIES_LIST)]"
+  species_list_term_comments_has: "[:query_term_comments_has(type=:SPECIES_LIST)]"
+  species_list_term_date: "[:query_term_date(type=:SPECIES_LIST)]"
+  species_list_term_created_at: "[:query_term_created_at(type=:SPECIES_LIST)]"
+  species_list_term_updated_at: "[:query_term_updated_at(type=:SPECIES_LIST)]"
 
   # Search bar
   search_bar_help: Search Help
