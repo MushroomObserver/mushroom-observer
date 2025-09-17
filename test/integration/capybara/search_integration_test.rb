@@ -28,6 +28,31 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#results", text: observations(:agaricus_campestris_obs).id)
   end
 
+  def test_names_search_form
+    lookup = "Chlorophyllum" # Has subtaxa, one misspelled, both have author
+
+    login
+    visit("/names/search/new")
+    within("#names_search_form") do |form|
+      assert_selector("#query_names_names_lookup")
+      form.fill_in("query_names_names_lookup", with: lookup)
+      form.select("yes", from: "query_names_names_include_synonyms")
+      form.select("yes", from: "query_names_names_include_subtaxa")
+      form.select("yes", from: "query_names_names_exclude_original_names")
+      form.select("yes", from: "query_names_has_author")
+      form.select("both", from: "query_names_misspellings")
+
+      first(:button, type: "submit").click
+    end
+
+    assert_no_selector("#flash_notices")
+    assert_selector("#filters", text: lookup)
+    assert_selector("#results", text: lookup)
+    assert_no_selector("#results", text: names(:chlorophyllum).id)
+    assert_selector("#results", text: names(:chlorophyllum_rachodes).id)
+    assert_selector("#results", text: names(:chlorophyllum_rhacodes).id)
+  end
+
   def test_locations_search_form
     Location.update_box_area_and_center_columns
     region = "California, USA"
@@ -68,4 +93,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#results", text: projects(:two_list_project).title)
     assert_selector("#results", text: projects(:empty_project).title)
   end
+
+  def test_species_lists_search_form; end
+
+  def test_herbaria_search_form; end
 end
