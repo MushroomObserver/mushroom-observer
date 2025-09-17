@@ -401,6 +401,7 @@ MushroomObserver::Application.routes.draw do
     resources :curators, only: [:create, :destroy], id: /\d+/
     resources :merges, only: [:create]
     resources :nexts, only: [:show], id: /\d+/
+    resource :search, only: [:new, :create]
   end
   resources :herbaria, id: /\d+/
 

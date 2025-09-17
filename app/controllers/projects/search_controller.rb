@@ -2,7 +2,7 @@
 
 # Projects search form and help.
 #
-# Route: `project_search_path`, `new_project_search_path`
+# Route: `projects_search_path`, `new_projects_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
 # `{ controller: "/projects/search", action: :create }`
 module Projects

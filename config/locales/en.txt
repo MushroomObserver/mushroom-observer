@@ -3929,6 +3929,15 @@
   species_list_term_created_at: "[:query_term_created_at(type=:SPECIES_LIST)]"
   species_list_term_updated_at: "[:query_term_updated_at(type=:SPECIES_LIST)]"
 
+  herbarium_term_nonpersonal: "Institutional [:herbaria]."
+  herbarium_term_by_users: "[:query_term_by_users(type=:HERBARIUM)]"
+  herbarium_term_mailing_address_has: "[:HERBARIUM] mailing address in this region."
+  herbarium_term_code_has: "[:HERBARIUM] code contains this string."
+  herbarium_term_name_has: "[:HERBARIUM] name contains these words."
+  herbarium_term_description_has: "[:HERBARIUM] description contains these words."
+  herbarium_term_created_at: "[:query_term_created_at(type=:HERBARIUM)]"
+  herbarium_term_updated_at: "[:query_term_updated_at(type=:HERBARIUM)]"
+
   # Search bar
   search_bar_help: Search Help
   search_bar_more_options: More Options

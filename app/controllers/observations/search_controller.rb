@@ -2,7 +2,7 @@
 
 # Observations search form and help.
 #
-# Route: `observation_search_path`, `new_observation_search_path`
+# Route: `observations_search_path`, `new_observations_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
 # `{ controller: "/observations/search", action: :create }`
 module Observations

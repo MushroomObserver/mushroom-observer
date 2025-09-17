@@ -2,7 +2,7 @@
 
 # SpeciesLists search form and help.
 #
-# Route: `species_list_search_path`, `new_species_list_search_path`
+# Route: `species_lists_search_path`, `new_species_lists_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
 # `{ controller: "/species_lists/search", action: :create }`
 module SpeciesLists
