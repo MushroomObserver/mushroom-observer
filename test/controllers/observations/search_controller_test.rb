@@ -75,13 +75,15 @@ module Observations
       params = {
         by_users: rolf.unique_text_name,
         by_users_id: rolf.id, # autocompleter should supply
-        has_notes: true
+        has_notes: true,
+        lichen: false
       }
       post(:create, params: { query_observations: params })
 
       validated_params = {
         by_users: [rolf.id],
-        has_notes: true
+        has_notes: true,
+        lichen: false # this should be preserved, not "compacted" out.
       }
       assert_redirected_to(controller: "/observations", action: :index,
                            params: {

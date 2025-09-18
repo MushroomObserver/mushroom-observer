@@ -173,9 +173,12 @@ module Searchable
     end
 
     # Note that this @search query instance is not the one that gets saved and
-    # sent, this step is only for validation of the params.
+    # sent, this step is only for validation of the params and removing blanks.
+    # NOTE: We can't call @query_params.compact_blank, because we need to
+    # preserve `false` values.
     def validate_search_instance?
-      @search = Query.create_query(query_model, @query_params.compact_blank)
+      @query_params.reject! { |_k, v| v == "" }
+      @search = Query.create_query(query_model, @query_params)
       return true unless @search.invalid?
 
       messages = @search.validation_errors.compact_blank

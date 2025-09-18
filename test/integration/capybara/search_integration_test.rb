@@ -5,7 +5,9 @@ require("test_helper")
 # Tests which supplement controller/observations_controller_test.rb
 class ObservationsIntegrationTest < CapybaraIntegrationTestCase
   def test_observations_search_form
-    lookup = "Agaricus campestris"
+    shroom = "Agaricus campestris"
+    lichen = "Peltigera"
+    lookup = "#{shroom}\n#{lichen}"
     location = locations(:burbank)
 
     login
@@ -18,13 +20,15 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       location.bounding_box.each do |key, val|
         form.fill_in("query_observations_in_box_#{key}", with: val)
       end
+      form.select("no", from: "query_observations_lichen")
 
       first(:button, type: "submit").click
     end
 
     assert_no_selector("#flash_notices")
-    assert_selector("#filters", text: lookup)
-    assert_selector("#results", text: lookup)
+    assert_selector("#filters", text: shroom)
+    assert_selector("#results", text: shroom)
+    assert_no_selector("#results", text: lichen)
     assert_selector("#results", text: observations(:agaricus_campestris_obs).id)
   end
 
