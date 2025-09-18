@@ -104,6 +104,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     assert_template(:show)
     assert_template("shared/_matrix_box")
+    assert_select("a[href=?]", new_herbarium_record_path, false,
+                  "Fungarium Index should not have a `new` button")
   end
 
   def test_show_herbarium_record_has_notes
