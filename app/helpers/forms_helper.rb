@@ -504,6 +504,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   def field_label_opts(args)
     label_opts = {}
     label_opts[:index] = args[:index] if args[:index].present?
+    label_opts[:class] = "mr-3" if args[:inline].present?
     label_opts
   end
 
@@ -532,6 +533,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
     need_margin = args[:inline].present?
     between_class = need_margin ? "mr-3" : ""
+    trigger_class = need_margin ? "" : "ml-3"
 
     id = [
       nested_field_id(args),
@@ -542,7 +544,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
         if args[:between].present?
           concat(tag.span(class: "ml-3") { args[:between] })
         end
-        concat(collapse_info_trigger(id, class: "ml-3"))
+        concat(collapse_info_trigger(id, class: trigger_class))
       end
     end
     args[:append] = capture do
