@@ -67,8 +67,7 @@ module Header
 
     NAV_CREATABLES = %w[
       observations names species_lists projects locations images herbaria
-      collection_numbers glossary_terms field_slips
-      articles publications
+      glossary_terms field_slips articles publications
     ].freeze
 
     def nav_scan_qr_code(user, controller)
