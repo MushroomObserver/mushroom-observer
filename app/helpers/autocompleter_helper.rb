@@ -144,7 +144,7 @@ module AutocompleterHelper
   # minimum args :form, :type. Send :hidden_name to override default field name,
   # :hidden_value to fill id, :hidden_data to merge with hidden field data
   def autocompleter_hidden_field(**args)
-    return unless args[:form].present? && args[:field].present?
+    return unless args[:form].present? && args[:type].present?
 
     # Default field name is "#{type}_id", so obs.place_name gets obs.location_id
     id = args[:hidden_name] || :"#{args[:type]}_id"
