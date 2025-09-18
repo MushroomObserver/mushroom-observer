@@ -41,6 +41,7 @@ module Locations
       assert_select("input#query_locations_by_editor", value: "Rolf Singer")
       assert_select("select#query_locations_has_observations",
                     selected: "yes")
+      assert_equal(session[:search_type], :locations)
     end
 
     def test_create_locations_search

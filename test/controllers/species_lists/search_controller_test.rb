@@ -36,6 +36,7 @@ module SpeciesLists
       assert_select("select#query_species_lists_has_notes", selected: "yes")
       assert_select("textarea#query_species_lists_names_lookup",
                     text: "Boletus edulis")
+      assert_equal(session[:search_type], :species_lists)
     end
 
     def test_create_species_lists_search

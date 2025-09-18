@@ -52,6 +52,7 @@ module Names
       assert_select("input#query_names_author_has", value: "Pers.")
       assert_select("select#query_names_rank", selected: "Species")
       assert_select("select#query_names_rank_range", selected: "Form")
+      assert_equal(session[:search_type], :names)
     end
 
     def test_create_names_search

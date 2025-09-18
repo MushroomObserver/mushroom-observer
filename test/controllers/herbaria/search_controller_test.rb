@@ -35,6 +35,7 @@ module Herbaria
       assert_select("input#query_herbaria_name_has", value: "Rolf")
       assert_select("input#query_herbaria_description_has", value: "Something")
       assert_select("select#query_herbaria_nonpersonal", selected: nil)
+      assert_equal(session[:search_type], :herbaria)
     end
 
     def test_create_herbaria_search
@@ -46,10 +47,9 @@ module Herbaria
       }
       post(:create, params: { query_herbaria: params })
 
-      validated_params = params
       assert_redirected_to(
         controller: "/herbaria", action: :index,
-        params: { q: { model: :Herbarium, **validated_params } }
+        params: { q: { model: :Herbarium, **params } }
       )
     end
   end

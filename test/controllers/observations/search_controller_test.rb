@@ -66,6 +66,7 @@ module Observations
                     selected: "Species")
       assert_select("select#query_observations_confidence_range",
                     selected: "Form")
+      assert_equal(session[:search_type], :observations)
     end
 
     # query_observations is the form object.

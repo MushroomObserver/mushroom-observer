@@ -35,6 +35,7 @@ module Projects
       assert_select("input#query_projects_title_has", value: "Symbiota")
       assert_select("select#query_projects_has_summary", selected: "yes")
       assert_select("select#query_projects_has_observations", selected: "yes")
+      assert_equal(session[:search_type], :projects)
     end
 
     def test_create_projects_search
