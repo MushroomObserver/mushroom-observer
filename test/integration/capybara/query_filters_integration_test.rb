@@ -150,7 +150,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     login(user)
 
     # Verfy Advanced Search form
-    click_on("Advanced Search", match: :first)
+    visit("/search/advanced")
     within("#advanced_search_filters") do
       # Verify Labels.
       assert_text(:advanced_search_filters.t)
@@ -181,7 +181,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     # user who sees voucherless Observations, but hides imageless Observations
 
     # Verify additional parts of Advanced Search form
-    click_on("Advanced Search", match: :first)
+    visit("/search/advanced")
     filters = page.find("#advanced_search_filters")
     within(filters) do
       assert(find("#content_filter_has_images_yes").checked?)

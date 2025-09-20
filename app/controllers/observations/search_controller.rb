@@ -2,7 +2,7 @@
 
 # Observations search form and help.
 #
-# Route: `observation_search_path`, `new_observation_search_path`
+# Route: `observations_search_path`, `new_observations_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
 # `{ controller: "/observations/search", action: :create }`
 module Observations
@@ -26,9 +26,8 @@ module Observations
         is_collection_location: :select_boolean,
         region: :region_with_in_box_fields,
         in_box: :in_box_fields,
-        pattern: :text_field_with_label,
         has_specimen: :select_boolean,
-        has_sequences: :select_yes,
+        has_sequences: :select_yes, # ignores false
         has_images: :select_boolean,
         has_notes: :select_boolean,
         has_notes_fields: :text_field_with_label,
@@ -69,6 +68,41 @@ module Observations
     #              :include_all_name_proposals, :exclude_consensus] }]
     # end
 
+    # This is the list of fields that are displayed in the search form. In the
+    # template, each hash is interpreted as a column, and each key is a
+    # panel_body (either shown or hidden) with an array of fields or field
+    # pairings.
+    FIELD_COLUMNS = [
+      {
+        name: {
+          shown: [:names],
+          # NOTE: These appear via js if names[:lookup] input has any value.
+          # See SearchHelper#autocompleter_with_conditional_fields
+          # conditional: [[:include_subtaxa, :include_synonyms],
+          #               [:include_all_name_proposals, :exclude_consensus]],
+          collapsed: [:confidence, [:has_name, :lichen]]
+        },
+        location: {
+          shown: [:region],
+          collapsed: [[:has_public_lat_lng, :is_collection_location],
+                      :locations]
+        }
+      },
+      {
+        dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
+        detail: {
+          shown: [[:has_specimen, :has_sequences]],
+          collapsed: [[:has_images, :has_notes],
+                      [:has_notes_fields, :notes_has],
+                      [:has_comments, :comments_has]]
+        },
+        connected: {
+          shown: [:by_users, :projects],
+          collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
+        }
+      }
+    ].freeze
+
     private
 
     # This is the list of fields that are displayed in the search form. In the
@@ -76,37 +110,7 @@ module Observations
     # panel_body (either shown or hidden) with an array of fields or field
     # pairings.
     def set_up_form_field_groupings
-      @field_columns = [
-        {
-          dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
-          name: {
-            shown: [:names],
-            # NOTE: These appear via js if names[:lookup] input has any value.
-            # See SearchHelper#autocompleter_with_conditional_fields
-            # conditional: [[:include_subtaxa, :include_synonyms],
-            #               [:include_all_name_proposals, :exclude_consensus]],
-            collapsed: [:confidence, [:has_name, :lichen]]
-          },
-          location: {
-            shown: [:locations],
-            collapsed: [[:has_public_lat_lng, :is_collection_location],
-                        :region]
-          }
-        },
-        {
-          pattern: { shown: [:pattern], collapsed: [] },
-          detail: {
-            shown: [[:has_specimen, :has_sequences]],
-            collapsed: [[:has_images, :has_notes],
-                        [:has_notes_fields, :notes_has],
-                        [:has_comments, :comments_has]]
-          },
-          connected: {
-            shown: [:by_users, :projects],
-            collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
-          }
-        }
-      ].freeze
+      @field_columns = FIELD_COLUMNS
     end
   end
 end

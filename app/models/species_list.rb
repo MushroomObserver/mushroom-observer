@@ -124,11 +124,8 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     where(location_id: ids).distinct
   }
   # Takes multiple name strings or ids, passes include_synonyms
-  scope :names, lambda { |names|
-    name_ids = Lookup::Names.new(names, include_synonyms: true).ids
-    return none unless name_ids
-
-    joins(:observations).where(Observation[:name_id].in(name_ids))
+  scope :names, lambda { |lookup:, **args|
+    joins(:observations).merge(Observation.names(lookup:, **args))
   }
   scope :projects, lambda { |projects|
     ids = Lookup::Projects.new(projects).ids

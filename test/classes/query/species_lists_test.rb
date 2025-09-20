@@ -68,10 +68,11 @@ class Query::SpeciesListsTest < UnitTestCase
 
   def test_species_list_names
     names = [names(:agaricus_campestris).search_name]
-    scope = SpeciesList.names(names).order_by_default
-    assert_query(scope, :SpeciesList, names: names)
+    scope = SpeciesList.names(lookup: names).order_by_default
+    assert_query(scope, :SpeciesList, names: { lookup: names })
     assert_query(
-      [species_lists(:one_genus_three_species_list)], :SpeciesList, names: names
+      [species_lists(:one_genus_three_species_list)],
+      :SpeciesList, names: { lookup: names }
     )
   end
 

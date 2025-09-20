@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Locations search form and help.
+# Herbaria search form and help.
 #
-# Route: `locations_search_path`, `new_locations_search_path`
+# Route: `herbaria_search_path`, `new_herbaria_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
-# `{ controller: "/locations/search", action: :create }`
-module Locations
+# `{ controller: "/herbaria/search", action: :create }`
+module Herbaria
   class SearchController < ApplicationController
     include ::Searchable
 
@@ -14,22 +14,19 @@ module Locations
     # Also an index of helper methods to use for each field.
     def permitted_search_params
       {
-        created_at: :text_field_with_label,
-        updated_at: :text_field_with_label,
-        region: :region_with_in_box_fields,
-        in_box: :in_box_fields,
-        regexp: :text_field_with_label,
-        has_notes: :select_boolean,
-        notes_has: :text_field_with_label,
         by_users: :multiple_value_autocompleter,
-        by_editor: :single_value_autocompleter,
-        has_descriptions: :select_boolean,
-        has_observations: :select_boolean
+        nonpersonal: :select_yes,
+        code_has: :text_field_with_label,
+        name_has: :text_field_with_label,
+        description_has: :text_field_with_label,
+        mailing_address_has: :text_field_with_label,
+        created_at: :text_field_with_label,
+        updated_at: :text_field_with_label
       }.freeze
     end
 
     def fields_preferring_ids
-      [:by_users, :by_editor]
+      [:by_users]
     end
 
     # def fields_with_requirements
@@ -42,16 +39,15 @@ module Locations
     # pairings.
     FIELD_COLUMNS = [
       {
-        area: { shown: [:region] }
+        connected: {
+          shown: [:nonpersonal, :by_users, :mailing_address_has]
+        }
       },
       {
-        pattern: { shown: [:regexp] },
-        dates: { shown: [:created_at, :updated_at] },
         detail: {
-          shown: [[:has_notes, :notes_has],
-                  [:has_observations, :has_descriptions]]
+          shown: [:code_has, :name_has, :description_has]
         },
-        connected: { shown: [:by_users, :by_editor] }
+        dates: { shown: [:created_at, :updated_at] }
       }
     ].freeze
 

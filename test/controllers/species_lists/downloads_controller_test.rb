@@ -72,7 +72,7 @@ module SpeciesLists
       url = print_labels_for_observations_path(params:)
       assert_select("form[action='#{url}']")
 
-      url = species_list_downloads_path(spl.id, params:)
+      url = download_species_list_path(spl.id, params:)
       assert_select("form[action='#{url}']")
 
       url = observations_downloads_path(params:)
