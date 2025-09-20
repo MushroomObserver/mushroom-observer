@@ -48,6 +48,7 @@ module Header
     ].freeze
 
     # Descriptions also don't get a create button
+    # Herbarium records are created via Observations, not from the index
     def nav_create(user, controller)
       unless user &&
              controller.methods.include?(:new) &&
@@ -66,8 +67,7 @@ module Header
 
     NAV_CREATABLES = %w[
       observations names species_lists projects locations images herbaria
-      herbarium_records collection_numbers glossary_terms field_slips
-      articles publications
+      glossary_terms field_slips articles publications
     ].freeze
 
     def nav_scan_qr_code(user, controller)
