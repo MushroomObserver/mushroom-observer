@@ -530,7 +530,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     end
 
     need_margin = args[:inline].present?
-    between_class = need_margin ? "mr-3" : ""
+    between_class = need_margin ? "mr-3" : "form-between"
 
     id = [
       nested_field_id(args),
