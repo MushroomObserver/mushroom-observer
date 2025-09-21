@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 class RssLogsController < ApplicationController
-  before_action :login_required, except: [
-    # :index,
-    :rss,
-    :show
-  ]
+  before_action :login_required
   before_action :store_location, only: [:show]
 
   # Default page.  Just displays latest happenings.  The actual action is
