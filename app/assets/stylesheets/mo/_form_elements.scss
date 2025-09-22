@@ -4,6 +4,11 @@
 .radio {
   label {
     font-weight: $btn-font-weight;
+
+    // Because it's within the label, it doesn't get the label's margin.
+    .form-between {
+      margin-left: 1rem;
+    }
   }
 }
 
