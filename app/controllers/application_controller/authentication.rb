@@ -149,18 +149,18 @@ module ApplicationController::Authentication
   # Is the current User the correct User (or is admin mode on)?  Returns true
   # or false.  (*NOTE*: this is available to views.)
 
-  def permission?(obj, error_message)
-    result = (in_admin_mode? || obj.can_edit?(@user)) # rubocop:disable Style/RedundantParentheses
-    flash_error(error_message) unless result
-    result
+  def permission?(obj, error_message: nil)
+    permission = in_admin_mode? || correct_user_for_object?(obj)
+    flash_error(error_message) unless permission
+    permission
   end
 
   def can_delete?(obj)
-    permission?(obj, :runtime_no_destroy.l(type: obj.type_tag))
+    permission?(obj, error_message: :runtime_no_destroy.l(type: obj.type_tag))
   end
 
   def can_edit?(obj)
-    permission?(obj, :runtime_no_update.l(type: obj.type_tag))
+    permission?(obj, error_message: :runtime_no_update.l(type: obj.type_tag))
   end
 
   #   <% if check_permission(@object)
