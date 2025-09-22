@@ -2,7 +2,7 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <div class="text-center small image-controls">
-      <% if check_permission(@image) %>
+      <% if permission?(@image) %>
         <%= put_button(name: :image_show_rotate_left.t,
                        path: transform_image_path(id: @image.id,
                                                   op: :rotate_left,
@@ -30,7 +30,7 @@
         <%= image_vote_links(@user, @image) %>
       <% end %>
       <% if !@image.original_name.blank? &&
-            (check_permission(@image) ||
+            (permission?(@image) ||
               @image.user && @image.user.keep_filenames == "keep_and_show") %>
         <%= @image.original_name %>
       <% end %>
