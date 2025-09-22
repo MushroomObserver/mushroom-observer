@@ -9,12 +9,15 @@ module ImagesHelper
   #
   # Uses ImagePresenter to assemble data.
 
-  #   link::             Hash of { controller: xxx, action: xxx, etc. }
   #   size::             Size to show, default is thumbnail.
   #   votes::            Show vote buttons?
+  #   id_prefix::        Prefix for HTML ID of wrapping div.image-sizer
+  #   image_link::       Override where the image stretched link goes
   #   original::         Show original file name?
-  #   theater_on_click:: Should theater mode be opened when image clicked?
+  #   is_set::           Image is part of a set of images for lightbox
+  #   extra_classes::    Additions to default <img> tag classes
   #   html_options::     Additional HTML attributes to add to <img> tag.
+  #   full_width::       Do not set a width attribute on the <img> tag
   #   notes::            Show image notes??
   #
   # USE: interactive_image(user, image, args = { notes: "", extra_classes: "" })
@@ -52,7 +55,6 @@ module ImagesHelper
     { size: :huge,
       image_link: "#",
       img_class: "huge-image",
-      theater_on_click: true,
       votes: false }
   end
 
@@ -193,7 +195,7 @@ module ImagesHelper
     tag.div(class: "vote-meter progress",
             title: "#{image.num_votes} #{:Votes.t}") do
       tag.div("", class: "progress-bar", id: "vote_meter_bar_#{image.id}",
-                  role: "progressbar", style: "width: #{vote_percentage}%")
+                  style: "width: #{vote_percentage}%")
     end
   end
 
@@ -208,8 +210,7 @@ module ImagesHelper
             ].safe_join
           end,
           tag.span(class: "hidden data_container",
-                   data: { id: image.id, percentage: vote_percentage.to_s,
-                           role: "image_vote_percentage" })
+                   data: { id: image.id, percentage: vote_percentage.to_s })
         ].safe_join
       end
     end
@@ -248,7 +249,7 @@ module ImagesHelper
                class: "image-vote-link",
                path: image_vote_path(image_id: image.id, value: vote),
                title: image_vote_as_help_string(vote),
-               data: { role: "image_vote", image_id: image.id, value: vote })
+               data: { image_id: image.id, value: vote })
   end
 
   # image vote lookup used in show_image
