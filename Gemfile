@@ -63,6 +63,13 @@ gem("bootstrap-sass")
 # Use Terser as compressor for JavaScript assets
 gem("terser")
 
+# Phlex view components
+gem("phlex-rails")
+# Use `prop` keyword to define object arguments and their types, and set ivars.
+gem("literal")
+# Strict ivars: raises on nil (undefined). Require in config/boot.rb
+gem("strict_ivars", require: false)
+
 # importmap for js module handling
 gem("importmap-rails")
 # stimulus for simpler, more maintainable js
