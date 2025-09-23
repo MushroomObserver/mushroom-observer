@@ -16,34 +16,34 @@ module Names
     def permitted_search_params
       {
         names: :names_fields_for_names,
-        has_observations: :select_yes, # ignores false
-        deprecated: :select_boolean,
-        has_author: :select_boolean,
+        has_observations: :select_nil_yes, # ignores false
+        deprecated: :select_nil_boolean,
+        has_author: :select_nil_boolean,
         author_has: :text_field_with_label,
-        has_citation: :select_boolean,
+        has_citation: :select_nil_boolean,
         citation_has: :text_field_with_label,
-        has_classification: :select_boolean,
+        has_classification: :select_nil_boolean,
         classification_has: :text_field_with_label,
-        has_notes: :select_boolean,
+        has_notes: :select_nil_boolean,
         notes_has: :text_field_with_label,
-        has_comments: :select_yes,
+        has_comments: :select_nil_yes,
         comments_has: :text_field_with_label,
-        has_default_description: :select_boolean,
+        has_default_description: :select_nil_boolean,
         created_at: :text_field_with_label,
         updated_at: :text_field_with_label,
-        has_synonyms: :select_boolean,
+        has_synonyms: :select_nil_boolean,
         misspellings: :select_misspellings,
         rank: :select_rank_range,
-        lichen: :select_boolean
+        lichen: :select_nil_boolean
       }.freeze
     end
 
     def nested_names_params
       {
-        include_synonyms: :select_boolean,
-        include_subtaxa: :select_boolean,
-        include_immediate_subtaxa: :select_boolean,
-        exclude_original_names: :select_boolean
+        include_synonyms: :select_no_eq_nil_or_yes,
+        include_subtaxa: :select_no_eq_nil_or_yes,
+        include_immediate_subtaxa: :select_no_eq_nil_or_yes,
+        exclude_original_names: :select_no_eq_nil_or_yes
       }.freeze
     end
 

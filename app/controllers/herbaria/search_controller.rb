@@ -15,7 +15,7 @@ module Herbaria
     def permitted_search_params
       {
         by_users: :multiple_value_autocompleter,
-        nonpersonal: :select_yes,
+        nonpersonal: :select_nil_yes,
         code_has: :text_field_with_label,
         name_has: :text_field_with_label,
         description_has: :text_field_with_label,

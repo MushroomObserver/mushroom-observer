@@ -19,20 +19,20 @@ module Observations
         updated_at: :text_field_with_label,
         names: :names_fields_for_obs,
         confidence: :select_confidence_range,
-        has_name: :select_boolean,
-        lichen: :select_boolean,
+        has_name: :select_nil_boolean,
+        lichen: :select_nil_boolean,
         locations: :multiple_value_autocompleter,
-        has_public_lat_lng: :select_boolean,
-        is_collection_location: :select_boolean,
+        has_public_lat_lng: :select_nil_boolean,
+        is_collection_location: :select_nil_boolean,
         region: :region_with_in_box_fields,
         in_box: :in_box_fields,
-        has_specimen: :select_boolean,
-        has_sequences: :select_yes, # ignores false
-        has_images: :select_boolean,
-        has_notes: :select_boolean,
+        has_specimen: :select_nil_boolean,
+        has_sequences: :select_nil_yes, # ignores false
+        has_images: :select_nil_boolean,
+        has_notes: :select_nil_boolean,
         has_notes_fields: :text_field_with_label,
         notes_has: :text_field_with_label,
-        has_comments: :select_yes,
+        has_comments: :select_nil_yes,
         comments_has: :text_field_with_label,
         by_users: :multiple_value_autocompleter,
         projects: :multiple_value_autocompleter,
@@ -45,12 +45,12 @@ module Observations
 
     def nested_names_params
       {
-        include_synonyms: :select_boolean,
-        include_subtaxa: :select_boolean,
-        include_immediate_subtaxa: :select_boolean,
-        exclude_original_names: :select_boolean,
-        include_all_name_proposals: :select_boolean,
-        exclude_consensus: :select_boolean
+        include_synonyms: :select_no_eq_nil_or_yes,
+        include_subtaxa: :select_no_eq_nil_or_yes,
+        include_immediate_subtaxa: :select_no_eq_nil_or_yes,
+        exclude_original_names: :select_no_eq_nil_or_yes,
+        include_all_name_proposals: :select_no_eq_nil_or_yes,
+        exclude_consensus: :select_no_eq_nil_or_yes
       }.freeze
     end
 

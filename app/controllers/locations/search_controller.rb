@@ -19,12 +19,12 @@ module Locations
         region: :region_with_in_box_fields,
         in_box: :in_box_fields,
         regexp: :text_field_with_label,
-        has_notes: :select_boolean,
+        has_notes: :select_nil_boolean,
         notes_has: :text_field_with_label,
         by_users: :multiple_value_autocompleter,
         by_editor: :single_value_autocompleter,
-        has_descriptions: :select_boolean,
-        has_observations: :select_boolean
+        has_descriptions: :select_nil_boolean,
+        has_observations: :select_nil_boolean
       }.freeze
     end
 

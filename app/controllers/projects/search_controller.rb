@@ -19,15 +19,15 @@ module Projects
         region: :text_field_with_label,
         field_slip_prefix_has: :text_field_with_label,
         by_users: :multiple_value_autocompleter,
-        has_observations: :select_yes, # ignores false
-        has_images: :select_yes,
-        has_species_lists: :select_yes,
+        has_observations: :select_nil_yes, # ignores false
+        has_images: :select_nil_yes,
+        has_species_lists: :select_nil_yes,
         title_has: :text_field_with_label,
-        has_summary: :select_boolean,
+        has_summary: :select_nil_boolean,
         summary_has: :text_field_with_label,
-        has_notes: :select_boolean,
+        has_notes: :select_nil_boolean,
         notes_has: :text_field_with_label,
-        has_comments: :select_yes,
+        has_comments: :select_nil_yes,
         comments_has: :text_field_with_label,
         created_at: :text_field_with_label,
         updated_at: :text_field_with_label
@@ -36,12 +36,12 @@ module Projects
 
     def nested_names_params
       {
-        include_synonyms: :select_boolean,
-        include_subtaxa: :select_boolean,
-        include_immediate_subtaxa: :select_boolean,
-        exclude_original_names: :select_boolean,
-        include_all_name_proposals: :select_boolean,
-        exclude_consensus: :select_boolean
+        include_synonyms: :select_no_eq_nil_or_yes,
+        include_subtaxa: :select_no_eq_nil_or_yes,
+        include_immediate_subtaxa: :select_no_eq_nil_or_yes,
+        exclude_original_names: :select_no_eq_nil_or_yes,
+        include_all_name_proposals: :select_no_eq_nil_or_yes,
+        exclude_consensus: :select_no_eq_nil_or_yes
       }.freeze
     end
 

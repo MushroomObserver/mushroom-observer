@@ -19,9 +19,9 @@ module SpeciesLists
         names: :names_fields_for_obs,
         region: :text_field_with_label,
         title_has: :text_field_with_label,
-        has_notes: :select_boolean,
+        has_notes: :select_nil_boolean,
         notes_has: :text_field_with_label,
-        has_comments: :select_yes, # ignores false
+        has_comments: :select_nil_yes, # ignores false
         comments_has: :text_field_with_label,
         date: :text_field_with_label,
         created_at: :text_field_with_label,
@@ -31,12 +31,12 @@ module SpeciesLists
 
     def nested_names_params
       {
-        include_synonyms: :select_boolean,
-        include_subtaxa: :select_boolean,
-        include_immediate_subtaxa: :select_boolean,
-        exclude_original_names: :select_boolean,
-        include_all_name_proposals: :select_boolean,
-        exclude_consensus: :select_boolean
+        include_synonyms: :select_no_eq_nil_or_yes,
+        include_subtaxa: :select_no_eq_nil_or_yes,
+        include_immediate_subtaxa: :select_no_eq_nil_or_yes,
+        exclude_original_names: :select_no_eq_nil_or_yes,
+        include_all_name_proposals: :select_no_eq_nil_or_yes,
+        exclude_consensus: :select_no_eq_nil_or_yes
       }.freeze
     end
 
