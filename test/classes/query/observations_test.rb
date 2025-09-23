@@ -115,10 +115,15 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_confidence
-    assert_query(Observation.confidence(50, 70).order_by_default,
-                 :Observation, confidence: [50, 70])
-    assert_query(Observation.confidence(100).order_by_default,
-                 :Observation, confidence: [100])
+    expects = Observation.where(Observation[:vote_cache].gteq(0.1)).
+              order(when: :desc, id: :desc)
+    scope = Observation.confidence(0.1, 3).order_by_default
+    assert_query_scope(expects, scope, :Observation, confidence: [0.1, 3])
+
+    expects = Observation.where(Observation[:vote_cache].eq(3)).
+              order(when: :desc, id: :desc)
+    scope = Observation.confidence(3).order_by_default
+    assert_query_scope(expects, scope, :Observation, confidence: [3])
   end
 
   def test_observation_has_public_lat_lng

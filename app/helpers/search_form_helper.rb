@@ -347,7 +347,7 @@ module SearchFormHelper
   end
 
   def select_confidence_range(**args)
-    options = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
+    options = Vote.opinion_menu
     [
       tag.div(class: "d-inline-block mr-4") do
         select_with_label(options:, **search_confidence_args(args))
