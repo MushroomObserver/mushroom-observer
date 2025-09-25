@@ -86,6 +86,10 @@ class Herbarium < AbstractModel
         ->(str) { search_columns(Herbarium[:description], str) }
   scope :mailing_address_has,
         ->(str) { search_columns(Herbarium[:mailing_address], str) }
+  scope :by_users, lambda { |users|
+    ids = Lookup::Users.new(users).ids
+    where(personal_user_id: ids)
+  }
 
   scope :pattern, lambda { |phrase|
     cols = (Herbarium[:code].coalesce("") + Herbarium[:name] +

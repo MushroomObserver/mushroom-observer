@@ -6,6 +6,7 @@ container_classes = %w[
 top_nav_classes = class_names(container_classes, "justify-content-between")
 search_nav_classes = class_names(container_classes, "justify-content-center")
 search_help_types = [:names, :observations]
+search_form_types = [:names, :observations, :locations, :projects]
 left_classes = class_names(%w[
   d-flex flex-row align-items-center flex-grow-1 navbar_left
 ])
@@ -49,13 +50,14 @@ identify_page = controller.controller_name == "identify"
     <%= tag.div(class: "collapse w-100", id: "search_nav",
                 data: {
                   controller: "search-type",
-                  search_type_help_types_value: search_help_types
+                  search_type_help_types_value: search_help_types,
+                  search_type_form_types_value: search_form_types
                 }) do %>
       <% if identify_page %>
         <%= render(partial: "observations/identify/form_identify_filter") %>
       <% else %>
         <%= render(partial: "application/top_nav/search_bar",
-                   locals: { search_help_types: }) %>
+                   locals: { search_help_types:, search_form_types: }) %>
       <% end %>
     <% end %>
   <% end %>

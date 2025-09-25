@@ -217,7 +217,7 @@ module Tabs
     def observations_add_to_list_tab(query)
       InternalLink.new(
         :list_observations_add_to_list.l,
-        add_q_param(edit_species_list_observations_path, query)
+        add_q_param(species_lists_edit_observations_path, query)
       ).tab
     end
 

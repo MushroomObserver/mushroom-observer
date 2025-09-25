@@ -3,13 +3,19 @@
 require("test_helper")
 
 # ------------------------------------------------------------
-#  Locations search
+#  Projects search
 # ------------------------------------------------------------
 module Projects
   class SearchControllerTest < FunctionalTestCase
     def test_new_projects_search
       login
       get(:new)
+    end
+
+    def test_new_projects_search_turbo
+      login
+      get(:new, format: :turbo_stream)
+      assert_template("shared/_search_form")
     end
 
     def test_new_projects_search_form_prefilled_from_existing_query
@@ -19,7 +25,6 @@ module Projects
         members: [users(:mary).id, users(:katrina).id],
         title_has: "Symbiota",
         has_summary: true,
-        pattern: "anything",
         has_observations: true
       )
       assert(query.id)
@@ -29,8 +34,8 @@ module Projects
                     text: "Mary Newbie\nKatrina")
       assert_select("input#query_projects_title_has", value: "Symbiota")
       assert_select("select#query_projects_has_summary", selected: "yes")
-      assert_select("input#query_projects_pattern", value: "anything")
       assert_select("select#query_projects_has_observations", selected: "yes")
+      assert_equal(session[:search_type], :projects)
     end
 
     def test_create_projects_search

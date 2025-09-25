@@ -18,7 +18,7 @@ module Searchable
       respond_to do |format|
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
-            :search_nav_help, # id of element to update contents of
+            :search_bar_help, # id of element to update contents of
             partial: "#{parent_controller}/search/help"
           ))
         end
@@ -29,6 +29,18 @@ module Searchable
     def new
       set_up_form_field_groupings
       @search = find_or_create_query(query_model)
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            :search_nav_form, # id of element to update contents of
+            partial: "shared/search_form",
+            locals: { local: false, search: @search,
+                      field_columns: @field_columns }
+          ))
+        end
+        format.html
+      end
     end
 
     def create
@@ -64,6 +76,15 @@ module Searchable
     # Used by search_form
     def search_type
       self.class.name.deconstantize.underscore.to_sym
+    end
+
+    def parent_controller
+      self.class.name.deconstantize.underscore
+    end
+
+    # Returns the capitalized :Symbol used by Query for the type of query.
+    def query_model
+      self.class.module_parent.name.singularize.to_sym
     end
 
     private
@@ -152,8 +173,11 @@ module Searchable
     end
 
     # Note that this @search query instance is not the one that gets saved and
-    # sent, this step is only for validation of the params.
+    # sent, this step is only for validation of the params and removing blanks.
+    # NOTE: We can't call @query_params.compact_blank, because we need to
+    # preserve `false` values.
     def validate_search_instance?
+      @query_params.reject! { |_k, v| v == "" }
       @search = Query.create_query(query_model, @query_params)
       return true unless @search.invalid?
 
@@ -172,15 +196,6 @@ module Searchable
     # Save the validated search params and send these to the index.
     def save_search_query
       @query = Query.lookup_and_save(query_model, **@search.params)
-    end
-
-    def parent_controller
-      self.class.name.deconstantize.underscore
-    end
-
-    # Returns the capitalized :Symbol used by Query for the type of query.
-    def query_model
-      self.class.module_parent.name.singularize.to_sym
     end
 
     # Gets the query class relevant to each controller, assuming the controller

@@ -3,7 +3,7 @@
 # helpers for search forms. These call field helpers in forms_helper.
 # args should provide form, field, label at a minimum.
 # rubocop:disable Metrics/ModuleLength
-module SearchHelper
+module SearchFormHelper
   # Builds a single filter group, or panel, for a search form. The panel's
   # field groups are defined in the controller, along with the field methods.
   # Sections can be :shown/ :collapsed.
@@ -13,7 +13,7 @@ module SearchHelper
     collapsed = search_panel_collapsed(form:, search:, sections:)
     open = collapse = false
     if sections[:collapsed].present?
-      collapse = heading
+      collapse = "#{controller.search_type}_#{heading}"
       open = search_panel_open?(search:, sections:)
     end
     panel_block(heading: :"search_term_group_#{heading}".l,
@@ -288,7 +288,7 @@ module SearchHelper
     end
   end
 
-  def select_yes(**args)
+  def select_nil_yes(**args)
     options = [
       ["", nil],
       ["yes", true]
@@ -296,7 +296,15 @@ module SearchHelper
     select_with_label(options:, inline: true, **args)
   end
 
-  def select_boolean(**args)
+  def select_no_eq_nil_or_yes(**args)
+    options = [
+      ["no", nil],
+      ["yes", true]
+    ]
+    select_with_label(options:, inline: true, **args)
+  end
+
+  def select_nil_boolean(**args)
     options = [
       ["", nil],
       ["yes", true],
@@ -347,7 +355,7 @@ module SearchHelper
   end
 
   def select_confidence_range(**args)
-    options = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
+    options = Vote.opinion_menu
     [
       tag.div(class: "d-inline-block mr-4") do
         select_with_label(options:, **search_confidence_args(args))
@@ -466,36 +474,9 @@ module SearchHelper
   # Separator for autocompleter fields.
   SEARCH_SEPARATOR = "\n"
 
-  # Convenience for subclasses to access helper methods via subclass.params
-  SEARCH_FIELD_HELPERS = {
-    text_field: { component: :text_field_with_label, args: {} },
-    select_yes: { component: :search_yes_field, args: {} },
-    select_boolean: { component: :search_boolean_field, args: {} },
-    select_rank_range: { component: :search_rank_range_field, args: {} },
-    list_of_herbaria: { component: :autocompleter_field,
-                        args: { type: :herbarium,
-                                separator: SEARCH_SEPARATOR } },
-    list_of_locations: { component: :autocompleter_field,
-                         args: { type: :location, separator: "\n" } },
-    list_of_names: { component: :search_autocompleter_with_conditional_fields,
-                     args: { type: :name, separator: SEARCH_SEPARATOR } },
-    list_of_projects: { component: :autocompleter_field,
-                        args: { type: :project,
-                                separator: SEARCH_SEPARATOR } },
-    list_of_species_lists: { component: :autocompleter_field,
-                             args: { type: :species_list,
-                                     separator: SEARCH_SEPARATOR } },
-    list_of_users: { component: :autocompleter_field,
-                     args: { type: :user, separator: SEARCH_SEPARATOR } },
-    confidence: { component: :search_confidence_range_field, args: {} },
-    # handled in search_region_with_compass_fields
-    longitude: { component: nil, args: {} },
-    latitude: { component: nil, args: {} }
-  }.freeze
-
   SEARCH_SELECT_TYPES = [
-    :select_yes, :select_boolean, :select_misspellings,
-    :select_rank_range, :select_confidence
+    :select_nil_yes, :select_nil_boolean, :select_no_eq_nil_or_yes,
+    :select_misspellings, :select_rank_range, :select_confidence
   ].freeze
 
   def search_type_options

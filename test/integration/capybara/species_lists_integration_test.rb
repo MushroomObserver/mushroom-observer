@@ -117,7 +117,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     click_on(:species_list_show_add_remove_from_another_list.l)
 
     assert_match(
-      edit_species_list_observations_path, current_path,
+      species_lists_edit_observations_path, current_path,
       "Clicking #{:species_list_show_add_remove_from_another_list.l} " \
       "should go to #{:species_list_add_remove_title.l}"
     )
