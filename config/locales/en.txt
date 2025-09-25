@@ -3085,6 +3085,17 @@
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
 
+# inat_exports
+  inat_export_create_title: Export to iNat
+  inat_export_observation_counts: Observation Counts
+  inat_export_requested: Export requested
+  inat_export_exportables: Exportable
+  inat_export_details: "* Excludes Observations which are not yours.\n* Excludes Observations previously imported from/exported to iNat."
+  inat_export_no_username: Missing your iNat Username
+  inat_export_no_exportables: The designated MO Observation(s) are not exportable to iNat
+  inat_export_no_authorization: Export aborted; MO did not receive authorization to access iNat user data
+
+
   # observation/inat_imports
   inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
@@ -3103,7 +3114,7 @@
   inat_importing_all_anothers: You cannot import all observations of another person
 
   inat_import_started: Your import has started. Refresh page to update results.
-  inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
+  inat_no_authorization: Import aborted; MO did not receive authorization to access iNat user data
   inat_wrong_user: You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username.
   inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
@@ -3115,6 +3126,11 @@
 
   inat_details_heading: Details/Caveats
   inat_details_list: "* Excludes Observations previously imported from/exported to iNat.\n* MO imports only fungal observations.\n* MO lists most iNat data and/or maps it to analogous MO fields.\n* MO hides coordinates from the public if iNat obscured them.\n* The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
+
+  # /inat_export_job_tracker
+  INAT_EXPORTS: iNat Exports
+  inat_export_all: Export all my MO Observations
+  inat_export_tracker_pending: Please wait until your pending iNat Export is Done before starting a new one.
 
   # /inat_import_job_tracker
   INAT_IMPORTS: iNat Imports

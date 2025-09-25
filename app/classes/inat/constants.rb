@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Inat
-  # constants used in importing iNaturalist observations
+  # constants used in iNat imports and export
   module Constants
     # Site for authorization and authentication requests
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
@@ -24,6 +24,13 @@ class Inat
     INAT_AUTHORIZATION_URL =
       "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
       "&redirect_uri=#{REDIRECT_URI}&response_type=code".freeze
+
+    # iNat response when authorization is denied
+    AUTHORIZATION_DENIAL_CALLBACK_PARAMS = {
+      error: "access_denied",
+      error_description:
+        "The resource owner or authorization server denied the request."
+    }.freeze
 
     # The iNat API
     API_BASE = "https://api.inaturalist.org/v1"

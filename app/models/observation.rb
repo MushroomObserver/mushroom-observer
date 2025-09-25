@@ -1195,4 +1195,30 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       # Also see ObservationAPI#prefer_minimum_bounding_box_to_earth!
       presence || Location.unknown
   end
+
+  ##############################################################################
+
+  public
+
+  # iNat export stuff
+
+  def exportable_to_inat?
+    !imported_from_inat? && !exported_to_inat? && !mirrored_on_inat?
+  end
+
+  private
+
+  def imported_from_inat?
+    inat_id.present? || source == "mo_inat_import"
+  end
+
+  def exported_to_inat?
+    inat_id.present?
+  end
+
+  def mirrored_on_inat?
+    # Pulk's `mirror` script` adds this string (plus a link and date)
+    # to MO Observation notes when it copies an observation to iNaturalist.
+    notes_part_value(:Other)&.match?(/Mirrored on iNaturalist as/)
+  end
 end
