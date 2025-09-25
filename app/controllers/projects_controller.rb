@@ -93,7 +93,7 @@ class ProjectsController < ApplicationController
     @start_date_fixed = @project.start_date.present?
     @end_date_fixed = @project.end_date.present?
     @project_dates_any = !@start_date_fixed && !@end_date_fixed
-    return if check_permission!(@project)
+    return if permission!(@project)
 
     redirect_to(project_path(@project.id))
   end
@@ -126,9 +126,7 @@ class ProjectsController < ApplicationController
   def update
     return unless find_project_and_where!
 
-    unless check_permission!(@project)
-      return redirect_to(project_path(@project.id))
-    end
+    return redirect_to(project_path(@project.id)) unless permission!(@project)
 
     upload_image_if_present
     @summary = params[:project][:summary]
@@ -157,7 +155,7 @@ class ProjectsController < ApplicationController
   def destroy
     return unless find_project_and_where!
 
-    if !check_permission!(@project)
+    if !permission!(@project)
       redirect_to(project_path(@project.id))
     elsif !@project.destroy
       flash_error(:destroy_project_failed.t)

@@ -7,7 +7,7 @@ module Tabs
     # Can't access this page unless logged in as of 2023
     def species_list_show_tabs(list:, query: nil)
       tabs = species_list_logged_in_show_tabs(list, query)
-      return tabs unless check_permission(list)
+      return tabs unless permission?(list)
 
       tabs += species_list_user_show_tabs(list)
       tabs

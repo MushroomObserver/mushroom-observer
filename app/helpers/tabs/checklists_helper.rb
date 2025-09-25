@@ -34,7 +34,7 @@ module Tabs
       links = [
         show_object_tab(list)
       ]
-      if check_permission(list)
+      if permission?(list)
         links += [
           edit_species_list_tab(list)
         ]

@@ -9,7 +9,7 @@ panel_block(heading: :show_lists_header.t,
       obs.species_lists.map do |spl|
         tag.li(id: "species_list_#{spl.id}") do
           concat(link_to(spl.format_name.t, species_list_path(spl.id)))
-          if check_permission(spl)
+          if permission?(spl)
             concat(put_button(name: "[#{:REMOVE.t}]",
                               path: observation_species_list_path(
                                 id: obs.id, species_list_id: spl.id,

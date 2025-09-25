@@ -32,7 +32,7 @@ class ImagePresenter < BasePresenter
     # if image.is_a?(Image) && args[:original] == true
     #   notes = !image.notes || image.notes.blank? ? "" : image.notes
     #   show_name = image.original_name.present? &&
-    #               (check_permission(image) ||
+    #               (permission?(image) ||
     #                image.user && image.user.keep_filenames == :keep_and_show)
     #   notes += "\n#{image.original_name}" if show_name
     # end

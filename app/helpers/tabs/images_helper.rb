@@ -68,7 +68,7 @@ module Tabs
     end
 
     def image_mod_tabs(image)
-      return unless check_permission(image)
+      return unless permission?(image)
 
       [
         edit_image_tab(image),

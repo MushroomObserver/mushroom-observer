@@ -111,7 +111,7 @@ class SpeciesListsController < ApplicationController
   def edit
     return unless (@species_list = find_species_list!)
 
-    if check_permission!(@species_list)
+    if permission!(@species_list)
       @place_name = @species_list.place_name
       init_project_vars_for_edit(@species_list)
     else
@@ -127,7 +127,7 @@ class SpeciesListsController < ApplicationController
   def update
     return unless (@species_list = find_species_list!)
 
-    if check_permission!(@species_list)
+    if permission!(@species_list)
       process_species_list(:update)
     else
       redirect_to(species_list_path(@species_list))
@@ -138,7 +138,7 @@ class SpeciesListsController < ApplicationController
   def clear
     return unless (@species_list = find_species_list!)
 
-    if check_permission!(@species_list)
+    if permission!(@species_list)
       @species_list.clear
       flash_notice(:runtime_species_list_clear_success.t)
     end
@@ -148,7 +148,7 @@ class SpeciesListsController < ApplicationController
   def destroy
     return unless (@species_list = find_species_list!)
 
-    if check_permission!(@species_list)
+    if permission!(@species_list)
       @species_list.destroy
       id = params[:id].to_s
       flash_notice(:runtime_species_list_destroy_success.t(id: id))

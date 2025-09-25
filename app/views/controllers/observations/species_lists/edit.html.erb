@@ -21,7 +21,7 @@ end %>
         <%= render(
           partial: "species_lists/species_list",
           locals: { species_list: species_list, observation: @observation,
-                    remove: check_permission(species_list) }
+                    remove: permission?(species_list) }
         ) %>
       <% end %>
     <% end %>
@@ -34,7 +34,7 @@ end %>
         <%= render(
           partial: "species_lists/species_list",
           locals: { species_list: species_list, observation: @observation,
-                    add: check_permission(species_list) }
+                    add: permission?(species_list) }
         ) %>
       <% end %>
     <% end %>

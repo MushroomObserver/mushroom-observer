@@ -66,7 +66,7 @@ module GlossaryTerms
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
 
-      return if check_permission!(@object)
+      return if permission!(@object)
 
       redirect_to(glossary_term_path(@object.id))
     end
@@ -76,7 +76,7 @@ module GlossaryTerms
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
 
-      unless check_permission!(@object)
+      unless permission!(@object)
         return redirect_to(glossary_term_path(@object.id))
       end
 

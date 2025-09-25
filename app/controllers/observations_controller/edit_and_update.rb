@@ -28,7 +28,7 @@ module ObservationsController::EditAndUpdate
     return unless find_observation!
 
     # Make sure user owns this observation!
-    unless check_permission!(@observation)
+    unless permission!(@observation)
       redirect_to(action: :show, id: @observation.id) and return
     end
 
@@ -75,7 +75,7 @@ module ObservationsController::EditAndUpdate
     return unless find_observation!
 
     # Make sure user owns this observation!
-    unless check_permission!(@observation)
+    unless permission!(@observation)
       redirect_to(action: :show, id: @observation.id) and return
     end
 

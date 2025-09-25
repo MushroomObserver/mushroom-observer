@@ -137,7 +137,7 @@ module ObservationsHelper
   end
 
   def observation_show_image_links(obs:)
-    return "" unless check_permission(obs)
+    return "" unless permission?(obs)
 
     icon_link_to(*reuse_images_for_observation_tab(obs))
   end

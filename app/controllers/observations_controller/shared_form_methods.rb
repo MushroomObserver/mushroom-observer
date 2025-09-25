@@ -200,7 +200,7 @@ module ObservationsController::SharedFormMethods
 
     # Now check for edits.
     @good_images.map do |image|
-      next unless check_permission(image)
+      next unless permission?(image)
 
       args = params.dig(:good_image, image.id.to_s)
       next unless args

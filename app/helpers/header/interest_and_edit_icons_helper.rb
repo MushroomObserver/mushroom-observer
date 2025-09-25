@@ -14,7 +14,7 @@ module Header
   module InterestAndEditIconsHelper
     # Edit and destroy icons for the show page title bar.
     def add_edit_icons(object)
-      return unless check_permission(object)
+      return unless permission?(object)
 
       content_for(:edit_icons) do
         [
