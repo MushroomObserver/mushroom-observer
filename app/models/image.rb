@@ -1151,7 +1151,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   private_class_method def self.row_changed?(row)
     row[:old_id] != row[:new_id] ||
-    row[:old_holder] != row[:new_holder]
+      row[:old_holder] != row[:new_holder]
   end
 
   # Add license change records with a single insert to the db.
