@@ -11,7 +11,6 @@ class Inat
 
     delegate :inat_ids, to: :@import
     delegate :user, to: :@import
-    delegate :super_importers, to: :@import
 
     def initialize(import)
       @import = import
