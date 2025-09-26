@@ -10,6 +10,7 @@ class Inat
     attr_accessor :last_import_id
 
     delegate :inat_ids, to: :@import
+    delegate :user, to: :@import
 
     def initialize(import)
       @import = import
@@ -59,6 +60,10 @@ class Inat
         # and which haven't been exported from or inported to MO
         without_field: "Mushroom Observer URL"
       }.merge(args)
+      # But allow super importers to import obss of any iNat user
+      if InatImport.super_importers.include?(user)
+        query_args.delete(:user_login)
+      end
       headers = { authorization: "Bearer #{@import.token}", accept: :json }
       Inat::APIRequest.new(@import.token).
         request(path: "observations?#{query_args.to_query}", headers: headers)
