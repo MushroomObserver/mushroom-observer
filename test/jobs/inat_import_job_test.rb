@@ -549,22 +549,6 @@ class InatImportJobTest < ActiveJob::TestCase
     create_ivars_from_filename("calostoma_lutescens")
     stub_inat_interactions
 
-    stub_request(
-      :get,
-      "https://api.inaturalist.org/v1/observations?iconic_taxa=Fungi,Protozoa&id=195434438&id_above=0&only_id=false&order=asc&order_by=id&per_page=200&without_field=Mushroom%20Observer%20URL"
-    ).with(
-      body: "{}",
-      headers: {
-        "Accept" => "application/json",
-        "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-        "Authorization" => "Bearer MockJWT",
-        "Content-Length" => "2",
-        "Content-Type" => "application/json",
-        "Host" => "api.inaturalist.org",
-        "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
-      }
-    ).to_return(status: 200, body: @mock_inat_response, headers: {})
-
     assert_difference(
       "Observation.count", 1,
       "'super_importer' failed to import another user's observation"
