@@ -79,7 +79,7 @@ module InatImportJobTestDoubles
       without_field: "Mushroom Observer URL",
       user_login: @inat_import.inat_username
     }
-    query_args.delete(:user_login) if InatImport.super_importers.include?(@user)
+    query_args.delete(:user_login) if InatImport.super_importer?(@user)
 
     stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").
       with(headers:

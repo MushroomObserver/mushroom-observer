@@ -61,7 +61,7 @@ class Inat
         without_field: "Mushroom Observer URL"
       }.merge(args)
       # But allow super importers to import obss of any iNat user
-      if InatImport.super_importers.include?(user)
+      if InatImport.super_importer?(user)
         query_args.delete(:user_login)
       end
       headers = { authorization: "Bearer #{@import.token}", accept: :json }
