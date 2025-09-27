@@ -41,6 +41,21 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Form needs a field for inputting iNat username")
     assert_select("input[type=checkbox][id=consent]", true,
                   "Form needs checkbox requiring consent")
+
+    assert_select("input#inat_import_expected_count", true,
+                  "Form should have a field for expected import count")
+    assert_select(
+      "input#inat_import_expected_count[value=?]",
+      :inat_import_tbd.l, true,
+      "Initial expected import count should be #{:inat_import_tbd.l}"
+    )
+    assert_select("input#inat_expected_imports_link", true,
+                  "Form should have a field linking to expected imports")
+    assert_select(
+      "input#inat_expected_imports_link[value=?]",
+      :inat_import_tbd.l, true,
+      "Initial expected import link should be #{:inat_import_tbd.l}"
+    )
   end
 
   def test_new_inat_import_already_importing
