@@ -63,7 +63,7 @@ class InatImportJob < ApplicationJob
   end
 
   def super_importer?
-    InatImport.super_importers.include?(user)
+    InatImport.super_importer?(user)
   end
 
   def right_user?(inat_logged_in_user)
@@ -137,7 +137,7 @@ class InatImportJob < ApplicationJob
   def inat_username_updateable?
     # Don't update a SuperImporter's inat_username because
     # InatImport.inat_username could be someone else's inat_username.
-    return false if InatImport.super_importers.include?(user)
+    return false if InatImport.super_importer?(user)
 
     # Prevent changing inat_username to a non-existent iNat login
     # No errors or any imports means that iNat accepted the inat_username,
