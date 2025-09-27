@@ -562,7 +562,6 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_super_importer_all_inat_fungal_observations
-    skip("Under Construction")
     @user = users(:dick)
 
     file_name = "import_all"
@@ -580,6 +579,7 @@ class InatImportJobTest < ActiveJob::TestCase
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
 
     stub_inat_interactions
+    stub_inat_observation_request(id_above: 0, body_nil: true)
 
     assert_difference(
       "Observation.count", 0,
