@@ -79,7 +79,9 @@ module InatImportJobTestDoubles
       without_field: "Mushroom Observer URL",
       user_login: @inat_import.inat_username
     }
-    query_args.delete(:user_login) if InatImport.super_importer?(@user) && @inat_import.import_all == false
+    if InatImport.super_importer?(@user) && @inat_import.import_all == false
+      query_args.delete(:user_login)
+    end
 
     body = if body_nil
              nil
