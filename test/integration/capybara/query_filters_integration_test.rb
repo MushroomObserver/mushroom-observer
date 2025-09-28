@@ -17,8 +17,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     fill_in("pattern_search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
-    click_link("Show Locations")
-    click_link("Map Locations")
+    click_on("Show Locations", match: :first)
+    click_on("Map Locations", match: :first)
 
     filters = page.find("#filters")
     filters.assert_text(obs.name.text_name)
@@ -51,12 +51,12 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     results.assert_no_text(obs.id.to_s)
 
     # Show Locations (from obs index) should be filtered
-    click_link("Show Locations")
+    click_on("Show Locations", match: :first)
     # page.find("#index_bar").assert_text(:filtered.t)
     page.find("#filters").assert_text(:query_has_images.l)
 
     # And mapping them (from locations index) should also be filtered.
-    click_link("Map Locations")
+    click_on("Map Locations", match: :first)
     # page.find("#index_bar").assert_text(:filtered.t)
     # page.find("#filters").assert_text(:query_has_images.l)
 
