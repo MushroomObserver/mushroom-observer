@@ -53,8 +53,8 @@ module Observations
       init_ivars
       @observation = Observation.show_includes.find(params[:observation_id])
       @naming = naming_from_params
-      # N+1: What is this doing? Watch out for check_permission!
-      return redirect_to_obs(@observation) unless check_permission!(@naming)
+      # N+1: What is this doing? Watch out for permission!
+      return redirect_to_obs(@observation) unless permission!(@naming)
 
       init_edit_ivars
       @consensus = Observation::NamingConsensus.new(@observation)
@@ -70,8 +70,8 @@ module Observations
       init_ivars
       @observation = Observation.show_includes.find(params[:observation_id])
       @naming = naming_from_params
-      # N+1: What is this doing? Watch out for check_permission!
-      return redirect_to_obs(@observation) unless check_permission!(@naming)
+      # N+1: What is this doing? Watch out for permission!
+      return redirect_to_obs(@observation) unless permission!(@naming)
 
       @consensus = Observation::NamingConsensus.new(@observation)
       @vote = @consensus.users_vote(@naming, @user)
@@ -346,7 +346,7 @@ module Observations
     end
 
     def destroy_if_we_can(naming)
-      if !check_permission!(naming)
+      if !permission!(naming)
         flash_error(:runtime_destroy_naming_denied.t(id: naming.id))
       elsif !in_admin_mode? && !@consensus.deletable?(naming)
         flash_warning(:runtime_destroy_naming_someone_else.t)

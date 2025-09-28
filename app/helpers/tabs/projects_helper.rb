@@ -11,7 +11,7 @@ module Tabs
         projects_index_tab,
         object_return_tab(project)
       ]
-      links << destroy_project_tab(project) if check_permission(project)
+      links << destroy_project_tab(project) if permission?(project)
       links
     end
 
@@ -28,7 +28,7 @@ module Tabs
         projects_index_tab,
         object_return_tab(project)
       ]
-      return unless check_permission(project)
+      return unless permission?(project)
 
       # Note this is just an edit_project_tab with different wording
       links << change_member_status_tab(project)

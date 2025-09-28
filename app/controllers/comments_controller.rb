@@ -235,7 +235,7 @@ class CommentsController < ApplicationController
     return unless (@comment = find_comment!)
 
     @target = @comment.target
-    if !check_permission!(@comment)
+    if !permission!(@comment)
       # all html requests redirect to object show page
     elsif !@comment.destroy
       flash_error(:runtime_form_comments_destroy_failed.t(id: params[:id]))
@@ -319,7 +319,7 @@ class CommentsController < ApplicationController
   end
 
   def check_permission_or_redirect!(comment, target)
-    return true if check_permission!(comment)
+    return true if permission!(comment)
 
     show_flash_and_send_back(target)
     false
