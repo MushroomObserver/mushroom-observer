@@ -188,7 +188,8 @@ module Header
       ) do |f|
         [
           page_input_group_with_button(f, this_page, max_page),
-          q_param_to_hidden_fields(f) # (Just :q. :id not relevant on next page)
+          q_param_to_hidden_fields(f), # (Just :q. :id irrelevant on next page)
+          letter_param_hidden_field(f)
         ].safe_join
       end
     end
@@ -287,6 +288,18 @@ module Header
         form.hidden_field(key, value: value)
       end
       tags.safe_join("\n")
+    end
+
+    # Populated by params if present, to maintain context for goto page input.
+    # Value needs to get updated by Stimulus if user changes letter input.
+    # Needs to work on window action from other instance of same controller.
+    def letter_param_hidden_field(form)
+      form.hidden_field(
+        :letter,
+        value: params[:letter],
+        data: { page_input_target: "letterHiddenInput",
+                action: "letterUpdated@window->page-input#syncLetter" }
+      )
     end
   end
 end

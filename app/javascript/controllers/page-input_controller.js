@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="page-input"
 // Sanitizes the page number to min/max values
 export default class extends Controller {
-  static targets = ["numberInput", "letterInput"]
+  static targets = ["numberInput", "letterInput", "letterHiddenInput"]
   static values = { max: Number, letters: String }
 
   connect() {
@@ -30,10 +30,23 @@ export default class extends Controller {
     this.letterInputTarget.value = letterInput
     // if (letterInput == "") {
     this.letterInputTarget.setAttribute("value", letterInput)
-    // }
+    // emit the letterUpdated event
+    const event = new CustomEvent("letterUpdated", {
+      detail: {
+        letter: letterInput
+      },
+      bubbles: true, // Optional: Determines if the event bubbles up the DOM
+      cancelable: true, // Optional: Determines if the event can be canceled
+    })
+    document.dispatchEvent(event)
   }
 
   isLetter(char) {
     return /^[a-zA-Z]$/.test(char)
+  }
+
+  syncLetter(event) {
+    const letterInput = event?.detail?.letter
+    this.letterHiddenInputTarget.setAttribute("value", letterInput)
   }
 }
