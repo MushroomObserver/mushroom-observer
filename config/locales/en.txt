@@ -3792,7 +3792,7 @@
   # We're borrowing these for the help popups on the search forms, thus the
   # similar entries. In the case of apparent duplicates, one will be the
   # pattern search keyword, the other the query param.
-  observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
+  observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay: YYYY-MM-DD-YYYY-MM-DD, YYYY-YYYY, MM-MM.
   observation_term_date: "[:observation_term_when]"
   observation_term_created: Date observation was first posted.
   observation_term_created_at: "[:observation_term_created]"
@@ -3800,7 +3800,7 @@
   observation_term_updated_at: "[:observation_term_modified]"
   observation_term_name: Consensus name is one of these names.
   observation_term_names: "[:observation_term_name]"
-  observation_term_exclude_consensus: Exclude Observations whose consensus is a name listed in "name:value". (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
+  observation_term_exclude_consensus: Exclude Observations whose consensus name is one of these names. (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
   observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
