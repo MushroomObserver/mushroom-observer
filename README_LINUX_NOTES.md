@@ -43,7 +43,7 @@ which works better on black on white screens.
 ```sh
 cd
 mkdir .ssh
-chmod 700 .shh
+chmod 700 .ssh
 touch .ssh/authorized_keys
 ```
 
