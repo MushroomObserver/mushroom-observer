@@ -21,10 +21,13 @@ module Header
     def nav_index_link(rubric)
       return rubric unless (path = nav_linkable_controller_path)
 
+      model_name = controller.controller_model_name.pluralize.underscore
       link_to(
         rubric,
-        { controller: "/#{path}",
-          action: :index, q: q_param }
+        { controller: "/#{path}", action: :index },
+        class: "#{model_name}_index_link",
+        data: { toggle: "tooltip", placement: :bottom,
+                title: :INDEX_OBJECT.t(type: model_name.to_sym) }
       )
     end
 
@@ -44,7 +47,7 @@ module Header
 
     NAV_INDEXABLES = %w[
       observations names species_lists projects locations images herbaria
-      glossary_terms comments rss_logs
+      glossary_terms comments rss_logs field_slips
     ].freeze
 
     # Descriptions also don't get a create button
