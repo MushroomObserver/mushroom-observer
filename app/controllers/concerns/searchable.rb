@@ -58,7 +58,8 @@ module Searchable
 
     def prepare_raw_params
       split_names_lookup_strings
-      null_in_box_if_empty
+      null_box_if_invalid
+      null_region_if_overspecific_and_box_valid
       autocompleted_strings_to_ids
       range_fields_to_arrays
     end
@@ -138,13 +139,23 @@ module Searchable
 
     # Nested blank values will make for null query results,
     # so eliminate the whole :in_box param if it doesn't have values.
-    def null_in_box_if_empty
-      south = @query_params.dig(:in_box, :south)
-      north = @query_params.dig(:in_box, :north)
-      return unless (south.blank? || south.to_f.zero?) &&
-                    (north.blank? || north.to_f.zero?)
+    def null_box_if_invalid
+      return if valid_box?
 
       @query_params[:in_box] = nil
+    end
+
+    # A Google-looked-up region may not match a db value, so if it's longer
+    # than 3 segments ("Alameda County, California, USA"), toss the region.
+    def null_region_if_overspecific_and_box_valid
+      return unless (region = @query_params[:region]) &&
+                    valid_box? && region.split(",").length > 3
+
+      @query_params[:region] = nil
+    end
+
+    def valid_box?
+      ::Mappable::Box.new(**@query_params[:in_box]).valid?
     end
 
     # Check for `fields_preferring_ids` and swap these in if appropriate
