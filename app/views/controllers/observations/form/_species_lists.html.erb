@@ -9,7 +9,7 @@
       <% @lists.each do |list| %>
         <%= check_box_with_label(
           form: f_l, field: :"id_#{list.id}", label: list.title,
-          checked: @list_checks[list.id], disabled: !check_permission(list)
+          checked: @list_checks[list.id], disabled: !permission?(list)
         ) %>
       <% end %>
     <% end %>

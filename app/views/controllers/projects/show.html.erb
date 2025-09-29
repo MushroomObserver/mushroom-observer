@@ -82,7 +82,7 @@ container_class(:wide)
         ) %>
   <% end %>
 
-  <% if check_permission(@project) %>
+  <% if permission?(@project) %>
     <div class="mt-3">
       <%= link_to("#{@project.user_group.users.count} #{:MEMBERS.l}",
                   project_members_path(@project.id),

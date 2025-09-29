@@ -9,15 +9,44 @@
 #
 module Header
   module ContextNavHelper
-    # Short-hand to render shared context_nav partial for a given set of links.
+    # Shorthand to render shared context_nav partial for a given set of links.
     # Called in the view, defines `:context_nav` which is rendered in layout.
     def add_context_nav(links)
       return unless links.compact.length.positive?
 
+      add_context_nav_to_top_bar(links)
+      add_context_nav_to_sidebar(links)
+    end
+
+    def add_context_nav_to_top_bar(links)
       nav_links = context_nav_links(links)
       content_for(:context_nav) do
-        context_nav_dropdown(title: "Actions", id: "context_nav",
-                             links: nav_links)
+        context_nav_dropdown(title: :app_context_actions.l,
+                             id: "context_nav", links: nav_links)
+      end
+    end
+
+    def add_context_nav_to_sidebar(links)
+      classes = sidebar_css_classes
+      content_for(:context_nav_mobile) do
+        concat(
+          tag.div(
+            "#{:app_context_actions.t}:",
+            class: class_names(classes[:heading], classes[:mobile_only])
+          )
+        )
+        context_nav_sidebar_links(links, classes)
+      end
+    end
+
+    def context_nav_sidebar_links(links, classes)
+      links.each do |link|
+        concat(
+          sidebar_nav_link(
+            link,
+            class: class_names(classes[:indent], classes[:mobile_only])
+          )
+        )
       end
     end
 

@@ -105,7 +105,7 @@ module ObservationsController::New
   end
 
   def add_list(list)
-    return unless list && check_permission(list)
+    return unless list && permission?(list)
 
     @lists << list unless @lists.include?(list)
     @list_checks[list.id] = true

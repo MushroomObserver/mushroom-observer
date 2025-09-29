@@ -2,14 +2,6 @@
 
 module Tabs
   module FieldSlipsHelper
-    def field_slip_show_tabs(field_slip, user)
-      links = [field_slips_index_tab, new_field_slip_tab]
-      return links unless field_slip.can_edit?(user)
-
-      links.push(edit_field_slip_tab(field_slip),
-                 destroy_field_slip_tab(field_slip))
-    end
-
     def field_slip_edit_tabs(field_slip)
       [field_slips_index_tab, show_field_slip_tab(field_slip)]
     end
@@ -20,7 +12,7 @@ module Tabs
 
     def field_slips_index_tab
       InternalLink::Model.new(
-        :field_slip_index.t, FieldSlip, field_slips_path
+        :INDEX_OBJECT.t(type: :field_slips), FieldSlip, field_slips_path
       ).tab
     end
 
@@ -32,7 +24,8 @@ module Tabs
 
     def show_field_slip_tab(field_slip)
       InternalLink::Model.new(
-        :field_slip_show.t, field_slip, field_slip_path(field_slip)
+        :SHOW_OBJECT.t(type: :field_slip), field_slip,
+        field_slip_path(field_slip)
       ).tab
     end
 

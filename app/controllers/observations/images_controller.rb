@@ -63,7 +63,7 @@ module Observations
     end
 
     def check_image_permission!
-      return if check_permission!(@image)
+      return if permission!(@image)
 
       redirect_to(image_path(@image))
     end
@@ -204,7 +204,7 @@ module Observations
     end
 
     def check_observation_permission!
-      return true if check_permission!(@observation)
+      return true if permission!(@observation)
 
       redirect_to(permanent_observation_path(id: @observation.id))
       false

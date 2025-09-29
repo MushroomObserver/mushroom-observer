@@ -64,7 +64,7 @@ module SpeciesLists
     end
 
     def do_add_remove_observations_by_query(spl, query)
-      return unless check_permission!(spl)
+      return unless permission!(spl)
 
       if params[:commit] == :ADD.l
         do_add_observations_by_query(spl, query)
