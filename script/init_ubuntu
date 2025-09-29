@@ -1,0 +1,100 @@
+#!/usr/bin/bash
+# Run as user with sudo power
+
+cd /var/web/mushroom-observer
+rm -rf build
+mkdir build
+
+# Install chruby
+if [ ! -f /usr/local/share/chruby/chruby.sh ]; then
+    echo chruby needs to be installed
+    cd build
+    wget https://github.com/postmodern/chruby/archive/master.tar.gz
+    tar -xzvf master.tar.gz
+    rm master.tar.gz
+    cd chruby-master
+    sudo make install
+    cd ../..
+    echo "source /usr/local/share/chruby/chruby.sh" >> ~/.zshrc
+    echo "source /usr/local/share/chruby/auto.sh" >> ~/.zshrc
+    echo Installed chruby
+else
+    echo chruby install skipped: /usr/local/share/chruby/chruby.sh exists
+fi
+source ~/.zshrc
+
+# Install ruby-install
+which ruby-install
+if [ ! $? -eq 0 ]; then
+    echo ruby-install needs to be installed
+    cd build
+    wget https://github.com/postmodern/ruby-install/archive/master.tar.gz
+    tar -xzvf master.tar.gz
+    cd ruby-install-master
+    sudo make install
+    cd ../..
+    ruby-install ruby `cat .ruby-version`
+    echo Install ruby-install
+else
+    echo ruby-install already installed, skipping
+fi
+
+rm -rf build
+
+cd /var/web/mushroom-observer
+
+mkdir -p log public/images/{thumb,320,640,960,1280,orig}
+
+# Configure MO helper tools
+if [ ! -f /usr/local/bin/jpegresize ]; then
+    sudo gcc script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+    echo Built jpegresize
+else
+    echo jpegresize exists
+fi
+
+if [ ! -f /usr/local/bin/exifautotran ]; then
+    sudo cp script/exifautotran /usr/local/bin/exifautotran
+    sudo chmod 755 /usr/local/bin/exifautotran
+    echo Installed exifautotran script
+else
+    echo exifautotran exists
+fi
+
+# Setup database.yml
+if [ ! -f config/database.yml ]; then
+    cp db/vagrant/database.yml config/database.yml
+    echo Copied db/vagrant/database.yml to config/database.yml
+else
+    echo config/database.yml exists
+fi
+
+
+# Setup master.key
+if [ ! -f config/master.key ]; then
+    echo 5f343cfc11a623c470d23e25221972b5 > config/master.key
+    echo Created config/master.key
+else
+    echo config/master.key exists
+fi
+
+# Setup Rails gems
+bundle install
+
+# Setup database
+sudo mysql -u root mo_development -e ''
+if [ ! $? -eq 0 ]; then
+    sudo mysql -u root < db/initialize.sql
+    bin/rails db:environment:set RAILS_ENV=development
+    rails db:schema:load
+    rails db:fixtures:load
+    echo Created and populated mo_development database
+else
+    rails db:migrate
+    echo Ran migrations on the mo_development database
+fi
+
+rails lang:update
+
+# Rock and Roll!
+rails test
