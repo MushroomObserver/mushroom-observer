@@ -178,7 +178,7 @@ class SequencesController < ApplicationController
   # ---------- Create, Edit ----------------------------------------------------
 
   def make_sure_can_edit!(obj)
-    return true if check_permission(obj)
+    return true if permission?(obj)
 
     flash_warning(:permission_denied.t)
     show_flash_and_send_back
@@ -186,7 +186,7 @@ class SequencesController < ApplicationController
   end
 
   def make_sure_can_delete!(sequence)
-    return true if check_permission(sequence)
+    return true if permission?(sequence)
 
     flash_error(:permission_denied.t)
     show_flash_and_send_to_back_object

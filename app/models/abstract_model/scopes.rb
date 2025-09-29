@@ -144,6 +144,7 @@ module AbstractModel::Scopes
     # NOTE: On MO so far, all date columns are named :when.
     scope :date, lambda { |early, late = nil, col: :when|
       early, late = early if early.is_a?(Array)
+      early, late = ::DateRangeParser.new(early).range if late.blank?
       if late.blank?
         date_after(early, col:)
       else

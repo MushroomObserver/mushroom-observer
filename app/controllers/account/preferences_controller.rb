@@ -169,7 +169,7 @@ module Account
     end
 
     def permitted_user_with_valid_email_type?(user)
-      user && check_permission!(user) && EMAIL_TYPES.include?(email_type)
+      user && permission!(user) && EMAIL_TYPES.include?(email_type)
     end
 
     def email_type_setter

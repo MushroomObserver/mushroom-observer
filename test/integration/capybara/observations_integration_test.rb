@@ -19,15 +19,15 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     login
     name = names(:boletus_edulis)
     visit("/names/#{name.id}/map")
-    click_link("Show Observations")
+    click_on("Show Observations", match: :first)
     assert_match("Observations", page.title)
     filters = page.find_by_id("filters")
     filters.assert_text(name.text_name)
 
-    click_link("Show Map")
+    click_on("Show Map", match: :first)
     assert_match("Map of Observations", page.title)
-    # filters = page.find_by_id("filters")
-    # filters.assert_text(name.text_name)
+    filters = page.find_by_id("filters")
+    filters.assert_text(name.text_name)
   end
 
   # Prove that if a user clicks an Observation in Observation search results
