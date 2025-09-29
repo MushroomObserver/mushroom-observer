@@ -4402,9 +4402,6 @@
   # Advanced search error messages
   advanced_search_bad_q_error: Search expired or cannot be found. Please re-enter search criteria.
 
-  # Date Range Parser errors
-  date_range_parser_error: Invalid value for [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
-
   ##############################################################################
 
   # LESS IMPORTANT ENUMERATED SETS OF VALUES
