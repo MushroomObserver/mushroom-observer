@@ -659,8 +659,11 @@ class Query::ObservationsTest < UnitTestCase
     # years should return between
     assert_query(Observation.date("2005", "2009").order_by_default,
                  :Observation, date: %w[2005 2009])
-    # test scope accepts array values
+    # test scope accepts array values for year
     assert_query(Observation.date(%w[2005 2009]).order_by_default,
+                 :Observation, date: %w[2005 2009])
+    # test scope accepts string values for year
+    assert_query(Observation.date("2005-2009").order_by_default,
                  :Observation, date: %w[2005 2009])
     # in a month range, any year
     assert_query(Observation.date("05", "12").order_by_default,
@@ -668,11 +671,17 @@ class Query::ObservationsTest < UnitTestCase
     # in a month range, any year, within array
     assert_query(Observation.date(%w[05 12]).order_by_default,
                  :Observation, date: %w[05 12])
-    # in a date range, any year
-    assert_query(Observation.date("02-22", "08-22").order_by_default,
+    # in a month range, any year, within array
+    assert_query(Observation.date(%w[05 12]).order_by_default,
+                 :Observation, date: %w[05 12])
+    # in a date range, any year, via string
+    assert_query(Observation.date("02-22-08-22").order_by_default,
                  :Observation, date: %w[02-22 08-22])
     # period wraps around the new year
     assert_query(Observation.date("08-22", "02-22").order_by_default,
+                 :Observation, date: %w[08-22 02-22])
+    # period wraps around the new year, via string
+    assert_query(Observation.date("08-22-02-22").order_by_default,
                  :Observation, date: %w[08-22 02-22])
     # full dates
     assert_query(Observation.date("2009-08-22", "2009-10-20").order_by_default,
@@ -682,6 +691,9 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, date: %w[2015-08-22 2016-02-22])
     # as array
     assert_query(Observation.date(%w[2015-08-22 2016-02-22]).order_by_default,
+                 :Observation, date: %w[2015-08-22 2016-02-22])
+    # as string
+    assert_query(Observation.date("2015-08-22-2016-02-22").order_by_default,
                  :Observation, date: %w[2015-08-22 2016-02-22])
   end
 

@@ -41,7 +41,7 @@ module NamingsHelper
 
   # N+1: should not be checking permission here
   def naming_name_html(user, naming)
-    if check_permission(naming)
+    if permission?(naming)
       edit_link = modal_link_to(
         "obs_#{naming.observation_id}_naming_#{naming.id}",
         *edit_naming_tab(naming)
@@ -151,7 +151,7 @@ module NamingsHelper
   def naming_vote_form(naming, vote, context: "blank")
     vote_id = vote&.id
     method = vote_id ? :patch : :post
-    can_vote = check_permission(naming)
+    can_vote = permission?(naming)
     menu = if !can_vote || !vote || vote&.value&.zero?
              Vote.opinion_menu
            else

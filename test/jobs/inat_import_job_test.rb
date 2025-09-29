@@ -561,6 +561,35 @@ class InatImportJobTest < ActiveJob::TestCase
                "SuperImporter's inat_username should not change")
   end
 
+  def test_super_importer_all_inat_fungal_observations
+    @user = users(:dick)
+
+    file_name = "import_all"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    @inat_import = InatImport.create(user: @user,
+                                     inat_ids: "",
+                                     import_all: true,
+                                     token: "MockCode",
+                                     inat_username: "anything")
+    InatImportJobTracker.create(inat_import: @inat_import.id)
+    # limit it to one page to avoid complications of stubbing multiple
+    # inat api requests with multiple files
+    @mock_inat_response = limited_to_first_page(mock_inat_response)
+    @parsed_results =
+      JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
+
+    stub_inat_interactions
+    stub_inat_observation_request(id_above: 0, body_nil: true)
+
+    assert_difference(
+      "Observation.count", 0,
+      "Superimporter should not import all iNat fungal observations " \
+      "by all users"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+  end
+
   def test_import_canceled
     create_ivars_from_filename("listed_ids") # importing multiple observations
     # override ivar because this test wants to import multiple observations

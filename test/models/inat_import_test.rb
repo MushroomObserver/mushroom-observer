@@ -50,4 +50,15 @@ class InatImportTest < ActiveSupport::TestCase
       "Import without an iNat username does not adequately constrain imports"
     )
   end
+
+  def test_super_importer
+    assert(
+      InatImport.super_importer?(users(:dick)),
+      "Dick is a super importer"
+    )
+    assert_not(
+      InatImport.super_importer?(users(:roy)),
+      "Roy is not a super importer"
+    )
+  end
 end

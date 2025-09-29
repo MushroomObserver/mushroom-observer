@@ -58,6 +58,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     get(:new, params: { code: code })
     assert_response(:success)
     assert(response.body.include?(project.title))
+    assert_select('input[name="field_slip[collector]"]:not([value])')
   end
 
   def test_should_create_field_slip_with_last_viewed_obs

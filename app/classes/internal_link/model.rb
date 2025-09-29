@@ -12,7 +12,7 @@ class InternalLink
     def html_class
       result = if @alt_title
                  @alt_title
-               elsif @title.underscore.include?(model_name)
+               elsif @title.underscore.tr(" ", "_").include?(model_name)
                  @title
                else
                  "#{@title}_#{model_name}"
@@ -20,7 +20,7 @@ class InternalLink
       result += "_link"
       return result unless @model.respond_to?(:id)
 
-      "#{result}_#{@model.id}"
+      "#{result} #{result}_#{@model.id}"
     end
 
     def model_name
