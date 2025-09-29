@@ -48,7 +48,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
 
     visit(back) # back to edit herbarium record
-    first(text: "Cancel (Show Observation)").click
+    click_on("Cancel (Show Observation)", match: :first)
     assert_selector("body.observations__show")
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
 
