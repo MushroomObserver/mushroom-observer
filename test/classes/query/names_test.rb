@@ -533,7 +533,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_with_observation_subquery_date
     date = observations(:california_obs).when.as_json
     expects = Name.with_correct_spelling.joins(:observations).distinct.
-              where(Observation[:when] >= date).order_by_default
+              where(Observation[:when].eq(date)).order_by_default
     scope = Name.with_correct_spelling.joins(:observations).distinct.
             merge(Observation.date(date)).order_by_default
     assert_query_scope(expects, scope,
