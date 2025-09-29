@@ -123,9 +123,9 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
 
     assert_selector("body", class: "herbarium_records__edit")
     back = current_fullpath
-    first(class: "nonpersonal_herbaria_index_link").click
+    click_on(text: "Back to Fungarium Record Index", match: :first)
 
-    assert_selector("body", class: "herbaria__index")
+    assert_selector("body", class: "herbarium_records__index")
     visit(back)
 
     assert_selector("body", class: "herbarium_records__edit")
