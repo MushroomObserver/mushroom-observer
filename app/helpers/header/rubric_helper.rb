@@ -19,22 +19,20 @@ module Header
     end
 
     def nav_index_link(rubric)
-      return rubric unless (path = nav_linkable_controller_path)
+      return rubric unless (ctrlr = nav_linkable_controller)
 
-      model_name = controller.controller_model_name.pluralize.underscore
       link_to(
         rubric,
-        { controller: "/#{path}", action: :index },
-        class: "#{model_name}_index_link",
+        { controller: "/#{ctrlr.controller_path}", action: :index },
+        class: "#{ctrlr.controller_name}_index_link",
         data: { toggle: "tooltip", placement: :bottom,
-                title: :INDEX_OBJECT.t(type: model_name.to_sym) }
+                title: :INDEX_OBJECT.t(type: ctrlr.controller_name.to_sym) }
       )
     end
 
     # Check for a linkable (parent?) controller and return the path
-    def nav_linkable_controller_path
-      ctrlr = if (parent = parent_controller_module) &&
-                 Object.const_defined?(klass = "::#{parent}Controller")
+    def nav_linkable_controller
+      ctrlr = if (klass = nav_linkable_parent_controller)
                 klass.constantize.new
               else
                 controller
@@ -42,7 +40,16 @@ module Header
       return false unless ctrlr.methods.include?(:index) &&
                           NAV_INDEXABLES.include?(ctrlr.controller_name)
 
-      ctrlr.controller_path
+      ctrlr
+    end
+
+    def nav_linkable_parent_controller
+      unless (parent = parent_controller_module) &&
+             Object.const_defined?(klass = "::#{parent}Controller")
+        return false
+      end
+
+      klass
     end
 
     NAV_INDEXABLES = %w[
