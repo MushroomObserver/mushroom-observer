@@ -83,11 +83,50 @@ class QueryTest < UnitTestCase
     assert_validation_errors(Query.lookup(:Name, has_synonyms: "bogus"))
   end
 
-  def test_validate_params_date
+  def test_validate_params_date_with_spaces
     assert_equal(
       ["2021-01-06"],
       Query.lookup(:Observation, date: "Jan 06, 2021").params[:date]
     )
+  end
+
+  def test_validate_params_date_month_range
+    assert_equal(
+      %w[06-01 12-31],
+      Query.lookup(:Observation, date: "06-12").params[:date]
+    )
+  end
+
+  def test_validate_params_date_year_range
+    assert_equal(
+      %w[2009-01-01 2023-12-31],
+      Query.lookup(:Observation, date: "2009-2023").params[:date]
+    )
+  end
+
+  def test_validate_params_date_year_month_range
+    assert_equal(
+      %w[2009-02-01 2023-05-31],
+      Query.lookup(:Observation, date: "2009-02-2023-05").params[:date]
+    )
+  end
+
+  def test_validate_params_date_with_words
+    date = "2021-01-06"
+    today = Time.zone.today
+    todate = format("%04d-%02d-%02d", today.year, today.mon, today.day)
+    assert_equal(
+      [todate, todate],
+      Query.lookup(:Observation, date: "today").params[:date]
+    )
+    # Check mix of date and word
+    assert_equal(
+      [date, todate],
+      Query.lookup(:Observation, date: "2021-01-06-today").params[:date]
+    )
+  end
+
+  def test_validate_params_date_nil
     assert_equal(
       [nil],
       Query.lookup(:Observation, date: "0").params[:date]
