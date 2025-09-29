@@ -1479,6 +1479,7 @@
   app_advanced_search: Advanced Search
   app_timer: "time: [seconds] sec"
   app_index_timer: "[num] results in [seconds] sec"
+  app_context_actions: Actions
 
   # This shows up at the bottom of every page. We recommend something like: \n
   # "Translated into <Language> by _user your-login_"

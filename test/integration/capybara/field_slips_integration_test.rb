@@ -32,15 +32,15 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     select(@field_slip.project.title, from: :PROJECT.t)
     click_on(:field_slip_keep_obs.t)
 
-    assert_text(:field_slip_updated.t)
+    assert_selector(class: "alert", text: :field_slip_updated.t)
   end
 
   def test_destroying_a_field_slip
     login!(mary)
     visit(field_slip_url(@field_slip))
-    click_on(:DESTROY.t, match: :first)
+    click_on(:DESTROY_OBJECT.t(type: :field_slip), match: :first)
 
-    assert_text(:field_slip_destroyed.t)
+    assert_selector(class: "alert", text: :field_slip_destroyed.t)
   end
 
   def test_new_observation_violates_project_constraints
