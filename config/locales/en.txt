@@ -3792,7 +3792,7 @@
   # We're borrowing these for the help popups on the search forms, thus the
   # similar entries. In the case of apparent duplicates, one will be the
   # pattern search keyword, the other the query param.
-  observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay: YYYY-MM-DD-YYYY-MM-DD, YYYY-YYYY, MM-MM.
+  observation_term_when: "Date mushroom was observed: YYYY-MM-DD, YYYY or MM; ranges okay: YYYY-MM-DD-YYYY-MM-DD, YYYY-YYYY, MM-MM."
   observation_term_date: "[:observation_term_when]"
   observation_term_created: Date observation was first posted.
   observation_term_created_at: "[:observation_term_created]"
