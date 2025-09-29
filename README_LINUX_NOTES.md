@@ -67,5 +67,7 @@ timeouts.  Better to login from a real terminal window and run screen
 ```sh
 screen
 cd /var/web/mushroom-observer
-script/init_ubuntu
+script/build_ruby_ubuntu
+source ~/.zshrc
+script/setup_mo_ubuntu
 ```

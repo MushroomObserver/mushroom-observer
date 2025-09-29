@@ -2,46 +2,6 @@
 # Run as user with sudo power
 
 cd /var/web/mushroom-observer
-rm -rf build
-mkdir build
-
-# Install chruby
-if [ ! -f /usr/local/share/chruby/chruby.sh ]; then
-    echo chruby needs to be installed
-    cd build
-    wget https://github.com/postmodern/chruby/archive/master.tar.gz
-    tar -xzvf master.tar.gz
-    rm master.tar.gz
-    cd chruby-master
-    sudo make install
-    cd ../..
-    echo "source /usr/local/share/chruby/chruby.sh" >> ~/.zshrc
-    echo "source /usr/local/share/chruby/auto.sh" >> ~/.zshrc
-    echo Installed chruby
-else
-    echo chruby install skipped: /usr/local/share/chruby/chruby.sh exists
-fi
-source ~/.zshrc
-
-# Install ruby-install
-which ruby-install
-if [ ! $? -eq 0 ]; then
-    echo ruby-install needs to be installed
-    cd build
-    wget https://github.com/postmodern/ruby-install/archive/master.tar.gz
-    tar -xzvf master.tar.gz
-    cd ruby-install-master
-    sudo make install
-    cd ../..
-    ruby-install ruby `cat .ruby-version`
-    echo Install ruby-install
-else
-    echo ruby-install already installed, skipping
-fi
-
-rm -rf build
-
-cd /var/web/mushroom-observer
 
 mkdir -p log public/images/{thumb,320,640,960,1280,orig}
 
@@ -82,7 +42,7 @@ fi
 bundle install
 
 # Setup database
-sudo mysql -u root mo_development -e ''
+sudo mysql -u root mo_development -e 'desc users'
 if [ ! $? -eq 0 ]; then
     sudo mysql -u root < db/initialize.sql
     bin/rails db:environment:set RAILS_ENV=development
