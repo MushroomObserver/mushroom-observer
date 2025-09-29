@@ -297,9 +297,6 @@ class API2
 
     def parse_notes_fields!(set: false)
       prefix = set ? "set_" : ""
-      # notes = look_for_note_field_parameters(prefix)
-      # declare_parameter(:"#{prefix}notes[$field]", :string,
-      #                   help: :notes_field)
       notes = structure_notes(params[:"#{prefix}notes"])
       declare_parameter(:"#{prefix}notes", :string, help: :notes_field)
       return notes if set
@@ -319,19 +316,6 @@ class API2
         { Observation.other_notes_key => notes.to_s.strip }
       end
     end
-
-    # NJW 2025-09-27: I can't get this code to run using curl
-    # def look_for_note_field_parameters(prefix)
-    #   notes = Observation.no_notes
-    #   params.each do |key, val|
-    #     next unless (match = key.to_s.match(/^#{prefix}notes\[(.*)\]$/))
-
-    #     field = parse_notes_field_parameter!(match[1])
-    #     notes[field] = val.to_s.strip
-    #     ignore_parameter(key)
-    #   end
-    #   notes
-    # end
 
     def parse_notes_field_parameter!(str)
       keys = User.parse_notes_template(str)
