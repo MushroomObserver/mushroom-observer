@@ -280,8 +280,13 @@ module SearchFormHelper
   # Rows that only uncollapse if an autocompleter field has a value.
   # Note the data-autocompleter-target attribute.
   def autocompleter_conditional_rows(form:, search:, sections:)
+    # Open the rows if there are any params
+    if search.params[:names].slice(*sections.flatten).compact.present?
+      collapsed = "in"
+    end
+
     tag.div(data: { autocompleter_target: "collapseFields" },
-            class: "collapse") do
+            class: class_names("collapse", collapsed)) do
       sections.each do |subfield|
         concat(search_row(form:, field: subfield, search:, sections:))
       end
