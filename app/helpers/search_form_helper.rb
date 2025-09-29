@@ -114,9 +114,9 @@ module SearchFormHelper
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
   def prepare_args_for_search_field(args:, field_type:)
-    if field_type == :text_field_with_label && args[:field] != :pattern
-      args[:inline] = true
-    end
+    # if field_type == :text_field_with_label && args[:field] != :pattern
+    #   args[:inline] = true
+    # end
     args[:help] = search_help_text(args, field_type)
     args[:hidden_name] = search_check_for_hidden_field_name(args)
     # args[:class] = "mb-3"
