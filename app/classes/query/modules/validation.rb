@@ -245,9 +245,11 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       nil
     elsif val.acts_like?(:date)
       format_date(val)
-    elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s) ||
-          /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
-      val
+    # elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s) ||
+    #       /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
+    #   val
+    elsif (val2 = parse_date_range(val))
+      val2
     elsif (val2 = parse_date(val)).acts_like?(:date)
       format_date(val2)
     else
@@ -259,6 +261,12 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def parse_date(val)
     Date.parse(val)
   rescue Date::Error
+    nil
+  end
+
+  def parse_date_range(val)
+    ::DateRangeParser.new(val.to_s).range
+  rescue ::DateRangeParser::Error.new(val:)
     nil
   end
 
