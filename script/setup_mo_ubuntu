@@ -4,6 +4,8 @@
 cd /var/web/mushroom-observer
 
 mkdir -p log public/images/{thumb,320,640,960,1280,orig}
+touch log/test.log
+touch log/production.log
 
 # Configure MO helper tools
 if [ ! -f /usr/local/bin/jpegresize ]; then
