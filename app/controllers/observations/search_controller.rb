@@ -83,15 +83,16 @@ module Observations
           collapsed: [:confidence, [:has_name, :lichen]]
         },
         location: {
-          shown: [:locations, [:has_public_lat_lng, :is_collection_location]],
-          collapsed: [:region]
+          shown: [:locations],
+          collapsed: [[:has_public_lat_lng, :is_collection_location], :region]
         }
       },
       {
         dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
         detail: {
-          shown: [[:has_specimen, :has_sequences]],
-          collapsed: [[:has_images, :has_notes],
+          shown: [],
+          collapsed: [[:has_specimen, :has_sequences],
+                      [:has_images, :has_notes],
                       [:has_notes_fields, :notes_has],
                       [:has_comments, :comments_has]]
         },
