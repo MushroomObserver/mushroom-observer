@@ -44,7 +44,7 @@ module Searchable
     end
 
     def create
-      return if clear_form?
+      redirect_to(action: :new) and return if clear_form?
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
@@ -96,7 +96,7 @@ module Searchable
     def clear_form?
       if params[:commit] == :CLEAR.l
         clear_relevant_query
-        redirect_to(action: :new) and return true
+        return true
       end
       false
     end
@@ -187,6 +187,7 @@ module Searchable
     end
 
     def clear_relevant_query
+      clear_query_in_session
       return if (@query = find_query(query_model))&.params.blank?
 
       # Save a blank query. This resets the query for this model everywhere.
