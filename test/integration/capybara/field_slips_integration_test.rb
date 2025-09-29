@@ -18,7 +18,8 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     login!(mary)
     visit(field_slips_url)
     first(class: /field_slip_link_/).click
-    assert_text(:INDEX_OBJECT.t(type: :field_slips))
+    assert_selector("body.field_slips__show")
+    assert_selector("a", class: "field_slips_index_link")
   end
 
   def test_updating_a_field_slip
