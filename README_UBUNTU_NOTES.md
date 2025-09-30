@@ -9,65 +9,31 @@ Create a new droplet with the latest version of Ubuntu.  At the time of this wri
 
 Shortly after I was able to access the web-based console from the DO UI
 
-# Install needed packages:
-```sh
-apt update
-DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y upgrade
+# Run ubuntu_setup_root
+I don't recommend running straight from the web console due to
+potential timeouts.  Better to run screen.  Note that the -L option
+puts all the output in a file in the root home directory which can be
+reviewed for errors.  From the web-based console run the following:
 
-DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y install \
-tcsh zsh man vim lynx telnet emacs wget build-essential \
-bison libyaml-dev libxslt-dev mysql-server mysql-client \
-libmysqlclient-dev libcurl4-openssl-dev libssl-dev libapr1-dev \
-libaprutil1-dev libreadline-dev zlib1g-dev imagemagick \
-libmagickcore-dev libmagickwand-dev libjpeg-dev libjpeg-progs \
-libimage-exiftool-perl
+```sh
+  screen -L
+  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/njw-digitalocean-dev/script/ubuntu_setup_root | bash
 ```
 
-# Create directory for MO source
+# Run ubuntu_setup_mo
+You should now be able to either ssh in as the mo user from any system
+that has the key for any public key installed when the droplet was created
+using the IP address of the droplet.
 ```sh
-mkdir /var/web
-chmod 777 /var/web
+  ssh mo@<ip>
 ```
 
-# Create mo user:
+Either from that shell or from the root console after running:
 ```sh
-useradd -m -G sudo -s /bin/zsh mo
-passwd mo
-sudo su mo
+  sudo su mo
 ```
-Will ask for zsh config.  Selecting "2" is the simplest thing to do.
-However, I don't like the default `prompt adam1`, so I updated to `prompt walters`
-which works better on black on white screens.
-
-# Optionally configure SSH access as user mo
+run
 ```sh
-cd
-mkdir .ssh
-chmod 700 .ssh
-touch .ssh/authorized_keys
-```
-
-# Copy a public key into .ssh/authorized_keys
-```sh
-exit
-cat ~/.ssh/authorized_keys >> ~mo/.ssh/authorized_keys
-sudo su mo
-```
-
-# Checkout MO source code
-```sh
-cd /var/web
-git clone https://github.com/MushroomObserver/mushroom-observer.git
-cd mushroom-observer
-```
-
-# Initial a bunch more stuff now that we have the MO code
-I don't recommend running this from the web console due to potential
-timeouts.  Better to login from a real terminal window and run screen
-```sh
-screen
-cd /var/web/mushroom-observer
-script/build_ruby_ubuntu
-source ~/.zshrc
-script/setup_mo_ubuntu
+  screen -L
+  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/njw-digitalocean-dev/script/ubuntu_setup_mo | bash
 ```

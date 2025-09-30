@@ -1,7 +1,71 @@
 #!/usr/bin/bash
 # Run as user with sudo power
 
-cd /var/web/mushroom-observer
+username=mo
+
+# Prompts user for password
+if getent passwd "$username" > /dev/null 2>&1; then
+    useradd -m -G sudo -s /bin/zsh "$username"
+    passwd "$username"
+    echo "Successfully created user '$username'"
+else
+    echo "User '$username' already exists"
+fi
+
+user_home=$(getent passwd "$username" | cut -d: -f6)
+zshrc_path="$user_home/.zshrc"
+if [ ! -f "$zshrc_path" ]; then
+    cat > "$zshrc_path" << EOF
+# Lines configured by zsh-newuser-install
+HISTFILE=~/.histfile
+HISTSIZE=1000
+SAVEHIST=1000
+bindkey -e
+# End of lines configured by zsh-newuser-install
+# The following lines were added by compinstall
+zstyle :compinstall filename '/home/$username/.zshrc'
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+EOF
+    chown "$username:$username" "$zshrc_path"
+    chmod 644 "$zshrc_path"
+    echo "Successfully initialized .zshrc for user '$username'"
+else
+    echo "$zshrc_path already exists"
+fi
+
+ssh_dir="$user_home/.ssh"
+if [ ! -e "$ssh_dir" ]; then
+    mkdir "$ssh_dir"
+    cp ~/.ssh/authorized_keys >> "$ssh_dir/authorized_keys"
+    chmod 700 "$ssh_dir"
+    chown -R "$username:$username" "$ssh_dir"
+    echo "Successfully setup SSH for user '$username'"
+else
+    echo "$ssh_dir already exists"
+fi
+
+if [ ! -e /var/web ]; then
+    mkdir /var/web
+    chmod 777 /var/web
+    echo Created /var/web
+else
+    echo /var/web already exists
+fi
+
+apt update
+DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y upgrade
+DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y install \
+tcsh zsh man vim lynx telnet emacs wget build-essential \
+bison libyaml-dev libxslt-dev mysql-server mysql-client \
+libmysqlclient-dev libcurl4-openssl-dev libssl-dev libapr1-dev \
+libaprutil1-dev libreadline-dev zlib1g-dev imagemagick \
+libmagickcore-dev libmagickwand-dev libjpeg-dev libjpeg-progs \
+libimage-exiftool-perl
+
+cd /tmp
 rm -rf build
 mkdir build
 

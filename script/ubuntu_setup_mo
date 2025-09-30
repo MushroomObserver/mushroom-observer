@@ -1,7 +1,9 @@
 #!/usr/bin/bash
-# Run as user with sudo power
+# Run as mo user with sudo power
 
-cd /var/web/mushroom-observer
+cd /var/web
+git clone https://github.com/MushroomObserver/mushroom-observer.git
+cd mushroom-observer
 
 mkdir -p log public/images/{thumb,320,640,960,1280,orig}
 touch log/test.log
@@ -31,7 +33,6 @@ else
     echo config/database.yml exists
 fi
 
-
 # Setup master.key
 if [ ! -f config/master.key ]; then
     echo 5f343cfc11a623c470d23e25221972b5 > config/master.key
@@ -40,7 +41,7 @@ else
     echo config/master.key exists
 fi
 
-# Setup Rails gems
+# Install Rails gems
 bundle install
 
 # Setup database
