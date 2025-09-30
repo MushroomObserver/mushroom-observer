@@ -156,6 +156,8 @@ module Searchable
     end
 
     def valid_box?
+      return true if @query_params[:in_box].blank?
+
       ::Mappable::Box.new(**@query_params[:in_box]).valid?
     end
 
