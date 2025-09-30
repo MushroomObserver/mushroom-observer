@@ -1,15 +1,17 @@
 #!/usr/bin/bash
 # Run as user with sudo power
 
+DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y install zsh
+
 username=mo
 
 # Prompts user for password
 if getent passwd "$username" > /dev/null 2>&1; then
+    echo "User '$username' already exists"
+else
     useradd -m -G sudo -s /bin/zsh "$username"
     passwd "$username"
     echo "Successfully created user '$username'"
-else
-    echo "User '$username' already exists"
 fi
 
 user_home=$(getent passwd "$username" | cut -d: -f6)
