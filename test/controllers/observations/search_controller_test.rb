@@ -95,6 +95,8 @@ module Observations
       login
       projects = [projects(:bolete_project), projects(:eol_project)]
       location = locations(:burbank)
+      today = Time.zone.today
+      todate = format("%04d-%02d-%02d", today.year, today.mon, today.day)
       params = {
         names: {
           lookup: "Agaricus campestris",
@@ -104,7 +106,8 @@ module Observations
         confidence: 33,
         confidence_range: 66,
         has_notes: true,
-        projects_id: projects.pluck(:id).join(",")
+        projects_id: projects.pluck(:id).join(","),
+        date: "2021-01-06-today"
       }
       post(:create, params: { query_observations: params })
 
@@ -118,7 +121,8 @@ module Observations
         in_box: location.bounding_box,
         confidence: [33.0, 66.0],
         has_notes: true,
-        projects: projects.pluck(:id)
+        projects: projects.pluck(:id),
+        date: ["2021-01-06", todate]
       }
       assert_redirected_to(
         controller: "/observations", action: :index,
