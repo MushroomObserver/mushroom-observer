@@ -328,9 +328,11 @@ class Inat
     def to_rad(degrees) = degrees * Math::PI / 180.0
     private :to_rad
 
-    def importable? = taxon_importable? && self.when.present?
+    def importable? = taxon_importable? && observed_on_present?
 
     def taxon_importable? = fungi? || slime_mold?
+    def observed_on_present? = !observed_on_missing?
+    def observed_on_missing? = self.when.nil?
 
     ##########
 

@@ -504,6 +504,8 @@ class InatImportJobTest < ActiveJob::TestCase
     ) do
       InatImportJob.perform_now(@inat_import)
     end
+    assert_match(:inat_observed_missing_date.l, @inat_import.response_errors,
+                 "It should warn if the iNat Observed Date is missing")
   end
 
   def test_import_update_inat_username_if_job_succeeds

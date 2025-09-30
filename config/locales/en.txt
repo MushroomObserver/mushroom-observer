@@ -3102,6 +3102,7 @@
   inat_previous_mirror: iNat [inat_id] is a "mirror" of existing MO Observation [mo_obs_id]
   inat_too_many_ids_listed: Too many ids listed
   inat_importing_all_anothers: You cannot import all observations of another person
+  inat_observed_missing_date: Observed Missing Date
 
   inat_import_started: Your import has started. Refresh page to update results.
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
