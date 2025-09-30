@@ -190,6 +190,8 @@ class Inat
 
     def when
       observed_on = @obs[:observed_on_details]
+      return nil if observed_on.nil?
+
       ::Date.new(observed_on[:year], observed_on[:month], observed_on[:day])
     end
 
