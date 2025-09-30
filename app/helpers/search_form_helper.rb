@@ -455,10 +455,18 @@ module SearchFormHelper
 
     if SEARCH_SELECT_TYPES.include?(field_type)
       args[:selected] = value
+    elsif SEARCH_DATE_FIELDS.include?(field)
+      args[:value] = search_date_range_values(value)
     else
       args[:value] = value
     end
     args
+  end
+
+  def search_date_range_values(value)
+    return value unless value.is_a?(Array)
+
+    value.join("-")
   end
 
   # Figure out if a field value is nested within the query, so we can access it
@@ -482,6 +490,8 @@ module SearchFormHelper
     :select_nil_yes, :select_nil_boolean, :select_no_eq_nil_or_yes,
     :select_misspellings, :select_rank_range, :select_confidence
   ].freeze
+
+  SEARCH_DATE_FIELDS = [:date, :created_at, :updated_at].freeze
 
   def search_type_options
     [
