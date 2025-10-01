@@ -18,7 +18,7 @@ show_title_classes = %w[
     <%= tag.div(class: yield(:left_columns)) do %>
       <%= tag.nav(class: class_names(show_title_classes)) do
         concat(tag.h1(title, class: "h3 page-title mt-3 mb-4", id: "title"))
-        concat(show_page_edit_icons)
+        concat(show_page_edit_icons) if !(is_project && has_banner)
       end %>
       <% if !has_banner && project_subtitle %>
         <%= tag.div(class: "pl-3 mb-3") do
