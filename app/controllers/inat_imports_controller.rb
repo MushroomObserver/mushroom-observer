@@ -147,7 +147,6 @@ class InatImportsController < ApplicationController
   end
 
   def request_inat_user_authorization
-    debugger
     redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
