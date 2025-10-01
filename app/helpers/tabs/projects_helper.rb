@@ -224,7 +224,8 @@ module Tabs
                     **project_button_args),
         button_link(:IMAGES.l, img_link, **project_button_args),
         button_link(:DOWNLOAD.l,
-                    add_q_param(new_observations_download_path, query), **project_button_args)
+                    add_q_param(new_observations_download_path, query),
+                    **project_button_args)
       ]
       if project.field_slip_prefix
         buttons << button_link(:FIELD_SLIPS.t, field_slips_path(project:),
