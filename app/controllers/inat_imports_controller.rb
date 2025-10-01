@@ -83,7 +83,12 @@ class InatImportsController < ApplicationController
     return reload_form unless params_valid?
 
     assure_user_has_inat_import_api_key
+    @inat_import = InatImport.find_or_create_by(user: @user)
+    # must decide if user changed input before calling init_ivars
+    input_changed = user_input_changed?
     init_ivars
+    return update_form if input_changed
+
     request_inat_user_authorization
   end
 
@@ -93,6 +98,7 @@ class InatImportsController < ApplicationController
 
   def reload_form
     @inat_ids = params[:inat_ids]
+    @import_all = params[:all]
     @inat_username = params[:inat_username]
     render(:new)
   end
@@ -103,8 +109,13 @@ class InatImportsController < ApplicationController
     key.verify! if key.verified.nil?
   end
 
+  def user_input_changed?
+    params[:all] != @inat_import.import_all ||
+      params[:inat_ids] != @inat_import.inat_ids ||
+      params[:inat_username] != @inat_import.inat_username
+  end
+
   def init_ivars
-    @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(
       state: "Authorizing",
       import_all: params[:all],
@@ -131,7 +142,12 @@ class InatImportsController < ApplicationController
     params[:inat_ids].split(",").length
   end
 
+  def update_form
+    reload_form
+  end
+
   def request_inat_user_authorization
+    debugger
     redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
@@ -141,6 +157,7 @@ class InatImportsController < ApplicationController
 
   # iNat redirects here after user completes iNat authorization
   def authorization_response
+    debugger
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
 

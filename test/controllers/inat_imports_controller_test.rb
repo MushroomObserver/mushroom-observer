@@ -88,6 +88,26 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_counts_and_inks
+    user = users(:mary)
+    inat_ids = "123,456,789"
+
+    params = { inat_username: user.inat_username,
+               inat_ids: inat_ids,
+               all: "0",
+               consent: "1",
+               inat_import_expected_count: :inat_import_tbd.l,
+               inat_expected_imports_link: :inat_import_tbd.l }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_form_action({ action: :create },
+                       "InatImport form should reload after user fills it out")
+    # It should display expected import count
+    # If should display link to expected imports
+  end
+
   def test_create_cancel_reset
     user = users(:ollie)
     import = inat_imports(:ollie_inat_import)
