@@ -156,8 +156,6 @@ class InatImportsController < ApplicationController
 
   # iNat redirects here after user completes iNat authorization
   def authorization_response
-    debugger
-    auth_code = params[:code]
     return not_authorized if auth_code.blank?
 
     inat_import = inat_import_authenticating(auth_code)
