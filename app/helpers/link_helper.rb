@@ -394,4 +394,11 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
 
     button_to(path, html_options) { [content, icon].safe_join }
   end
+
+  def button_link(title, path, **args)
+    classes = %w[btn btn-default]
+    args[:class] = class_names(classes, args[:class])
+
+    link_to(title, path, **args)
+  end
 end
