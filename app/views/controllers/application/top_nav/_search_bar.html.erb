@@ -13,6 +13,8 @@ form_group_class = class_names(
 helpToggle_classes = formToggle_classes = %w[btn btn-link navbar-link px-2]
 helpToggle_classes << "d-none" unless help_controller
 formToggle_classes << "d-none" unless form_controller
+# Don't show the search form on the search form page, else id collisions
+is_search_page = controller.controller_name == "search"
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
@@ -69,7 +71,7 @@ formToggle_classes << "d-none" unless form_controller
 
         <% end %>
 
-        <%= search_form_toggle(form_controller:) %>
+        <%= search_form_toggle(form_controller:) unless is_search_page %>
 
       <% end %>
 
@@ -82,7 +84,7 @@ formToggle_classes << "d-none" unless form_controller
                 data: {
                   search_type_target: "form",
                   action: "$shown.bs.collapse->search-type#closeBar"
-                }) %>
+                }) unless is_search_page %>
 
   <% end %>
 

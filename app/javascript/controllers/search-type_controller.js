@@ -106,7 +106,7 @@ export default class extends Controller {
   // Bootstrap 3 accordions require css panels,
   // so we have to make our own accordion functionality.
   closeBar(event) {
-    console.log("closeBar")
+    // console.log("closeBar")
     if (this.hasBarTarget) {
       $(this.barTarget).collapse("hide")
     }
@@ -116,7 +116,7 @@ export default class extends Controller {
   }
 
   closeForm(event) {
-    console.log("closeForm")
+    // console.log("closeForm")
     if (this.hasFormTarget) {
       $(this.formTarget).collapse("hide")
     }

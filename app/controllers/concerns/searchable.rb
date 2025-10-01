@@ -28,7 +28,11 @@ module Searchable
 
     def new
       set_up_form_field_groupings
-      @search = find_or_create_query(query_model)
+      @search = if params[:clear].present?
+                  create_query(query_model)
+                else
+                  find_or_create_query(query_model)
+                end
 
       respond_to do |format|
         format.turbo_stream do

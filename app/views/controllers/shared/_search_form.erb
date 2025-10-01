@@ -30,7 +30,9 @@ form_args = { url: { action: :create }, model: search,
 
   <%= tag.div(class: "text-center") do %>
     <%= submit_button(form:, button: :SEARCH.l, class: "d-inline-block mx-3") %>
-    <%= submit_button(form:, button: :CLEAR.l, class: "d-inline-block mx-3") %>
+    <%= button_link(:CLEAR.l, { action: :new, clear: true },
+                    class: "d-inline-block mx-3 clear-button",
+                    data: { turbo_stream: true }) %>
   <% end %>
 
 <% end %>
