@@ -13,10 +13,10 @@ Shortly after I was able to access the web-based console from the DO UI
 I don't recommend running straight from the web console due to
 potential timeouts.  Better to run screen.  Note that the -L option
 puts all the output in a file in the root home directory which can be
-reviewed for errors.  From the web-based console run the following:
+reviewed for errors.  From the web-based console run `screen -L`
+followed by:
 
 ```sh
-  screen -L
   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/njw-digitalocean-dev/script/ubuntu_setup_root | bash
 ```
 

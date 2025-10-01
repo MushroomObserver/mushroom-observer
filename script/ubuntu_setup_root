@@ -41,7 +41,7 @@ fi
 ssh_dir="$user_home/.ssh"
 if [ ! -e "$ssh_dir" ]; then
     mkdir "$ssh_dir"
-    cp ~/.ssh/authorized_keys >> "$ssh_dir/authorized_keys"
+    cat ~/.ssh/authorized_keys >> "$ssh_dir/authorized_keys"
     chmod 700 "$ssh_dir"
     chown -R "$username:$username" "$ssh_dir"
     echo "Successfully setup SSH for user '$username'"
@@ -81,8 +81,8 @@ if [ ! -f /usr/local/share/chruby/chruby.sh ]; then
     cd chruby-master
     sudo make install
     cd ../..
-    echo "source /usr/local/share/chruby/chruby.sh" >> ~/.zshrc
-    echo "source /usr/local/share/chruby/auto.sh" >> ~/.zshrc
+    echo "source /usr/local/share/chruby/chruby.sh" >> ~mo/.zshrc
+    echo "source /usr/local/share/chruby/auto.sh" >> ~mo/.zshrc
     echo Installed chruby
 else
     echo chruby install skipped: /usr/local/share/chruby/chruby.sh exists
