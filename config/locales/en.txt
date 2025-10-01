@@ -4484,7 +4484,7 @@
   api_help_min_size: width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge
   api_help_misspellings: include misspellings? "either" means do not care and "only" means only show misspelt names
   api_help_north: max latitude
-  api_help_notes_field: set value of the custom notes template field, substitute field name for "$field"
+  api_help_notes_field: set value of notes field using square braces, e.g., set_notes%5BCap%5D=red"
   api_help_notes_has: search within notes
   api_help_number: collector's number
   api_help_number_has: search within collector's number
