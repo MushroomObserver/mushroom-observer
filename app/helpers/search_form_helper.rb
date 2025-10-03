@@ -241,9 +241,9 @@ module SearchFormHelper
     lookup_name = type.to_s.camelize.pluralize
     lookup = "Lookup::#{lookup_name}".constantize
     title_method = if type == :user
-                     :unique_text_name
+                     :unique_text_name # "Name (login)"
                    else
-                     lookup::TITLE_METHOD # this is the attribute we want
+                     lookup::TITLE_METHOD # usually the method we want
                    end
     model = lookup_name.singularize.constantize
     model.find(val.to_i).send(title_method)
