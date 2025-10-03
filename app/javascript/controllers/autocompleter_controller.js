@@ -1325,6 +1325,7 @@ export default class extends Controller {
 
   hiddenIdsChangedMultiple() {
     const hidden_ids = this.hiddenIdsAsIntegerArray();
+
     if (JSON.stringify(hidden_ids) == JSON.stringify(this.stored_ids)) {
       this.verbose("autocompleter: hidden_ids did not change");
     } else {
