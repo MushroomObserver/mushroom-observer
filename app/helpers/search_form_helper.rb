@@ -219,17 +219,17 @@ module SearchFormHelper
     values = search_attribute_possibly_nested_value(search, field)
     return values unless values.is_a?(Array)
 
-    search_string_values(values, type)
+    search_prefill_string_values(values, type)
   end
 
   # For autocompleters, if the value(s) is/are ids, we need to lookup the
   # strings that should be prefilled in the text field — ids go in the
   # "hidden_field" for ids.
-  def search_string_values(values, type)
+  def search_prefill_string_values(values, type)
     values.map do |val|
       if val.is_a?(Numeric) ||
          (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
-        search_string_via_lookup_id(val, type)
+        search_prefill_string_value_via_id(val, type)
       else
         val
       end
@@ -237,7 +237,7 @@ module SearchFormHelper
   end
 
   # The autocompleter type is a model.type_tag
-  def search_string_via_lookup_id(val, type)
+  def search_prefill_string_value_via_id(val, type)
     lookup_name = type.to_s.camelize.pluralize
     lookup = "Lookup::#{lookup_name}".constantize
     title_method = if type == :user
