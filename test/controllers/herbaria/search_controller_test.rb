@@ -31,7 +31,7 @@ module Herbaria
       assert_equal(query.id, session[:query_record])
       get(:new)
       assert_select("textarea#query_herbaria_by_users",
-                    text: "Mary Newbie\nKatrina")
+                    text: "Mary Newbie (mary)\nKatrina (katrina)")
       assert_select("input#query_herbaria_name_has", value: "Rolf")
       assert_select("input#query_herbaria_description_has", value: "Something")
       assert_select("select#query_herbaria_nonpersonal", selected: nil)

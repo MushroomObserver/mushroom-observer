@@ -31,7 +31,7 @@ module Projects
       assert_equal(query.id, session[:query_record])
       get(:new)
       assert_select("textarea#query_projects_members",
-                    text: "Mary Newbie\nKatrina")
+                    text: "Mary Newbie (mary)\nKatrina (katrina)")
       assert_select("input#query_projects_title_has", value: "Symbiota")
       assert_select("select#query_projects_has_summary", selected: "yes")
       assert_select("select#query_projects_has_observations", selected: "yes")

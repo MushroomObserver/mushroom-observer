@@ -31,7 +31,7 @@ module SpeciesLists
       assert_equal(query.id, session[:query_record])
       get(:new)
       assert_select("textarea#query_species_lists_by_users",
-                    text: "Mary Newbie\nKatrina")
+                    text: "Mary Newbie (mary)\nKatrina (katrina)")
       assert_select("input#query_species_lists_title_has", value: "Symbiota")
       assert_select("select#query_species_lists_has_notes", selected: "yes")
       assert_select("textarea#query_species_lists_names_lookup",
