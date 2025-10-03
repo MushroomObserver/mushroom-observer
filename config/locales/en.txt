@@ -3102,6 +3102,7 @@
   inat_previous_mirror: iNat [inat_id] is a "mirror" of existing MO Observation [mo_obs_id]
   inat_too_many_ids_listed: Too many ids listed
   inat_importing_all_anothers: You cannot import all observations of another person
+  inat_observed_missing_date: Observed Missing Date
 
   inat_import_started: Your import has started. Refresh page to update results.
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
@@ -4534,7 +4535,7 @@
   api_help_min_size: width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge
   api_help_misspellings: include misspellings? "either" means do not care and "only" means only show misspelt names
   api_help_north: max latitude
-  api_help_notes_field: set value of the custom notes template field, substitute field name for "$field"
+  api_help_notes_field: set value of notes field using square braces, e.g., set_notes%5BCap%5D=red"
   api_help_notes_has: search within notes
   api_help_number: collector's number
   api_help_number_has: search within collector's number
