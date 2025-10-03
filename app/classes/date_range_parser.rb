@@ -14,7 +14,7 @@ class DateRangeParser
   attr_reader :range
 
   def initialize(string)
-    @string = string.dup
+    @string = string.to_s
     @range = parse_date_range
   end
 
@@ -71,7 +71,7 @@ class DateRangeParser
 
   # rubocop:disable Metrics/AbcSize
   def parse_date_words
-    val = +@string
+    val = @string.dup
     val = val.tr!("_", " ") if val.include?("_")
     parse_date_word!(val, "today", :today, :day, 0)
     parse_date_word!(val, "yesterday", :yesterday, :day, 1)

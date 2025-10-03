@@ -43,7 +43,7 @@ module SpeciesLists
       put_requires_login(:update)
       assert_response(:redirect)
       assert_redirected_to(
-        edit_species_list_observations_path(species_list: "")
+        species_lists_edit_observations_path(species_list: "")
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
@@ -51,7 +51,7 @@ module SpeciesLists
       put(:update, params: params)
       assert_response(:redirect)
       assert_redirected_to(
-        edit_species_list_observations_path(species_list: "")
+        species_lists_edit_observations_path(species_list: "")
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
@@ -59,7 +59,7 @@ module SpeciesLists
       put(:update, params: params.merge(species_list: "blah"))
       assert_response(:redirect)
       assert_redirected_to(
-        edit_species_list_observations_path(species_list: "blah")
+        species_lists_edit_observations_path(species_list: "blah")
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
