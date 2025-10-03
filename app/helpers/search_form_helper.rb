@@ -240,7 +240,11 @@ module SearchFormHelper
   def search_string_via_lookup_id(val, type)
     lookup_name = type.to_s.camelize.pluralize
     lookup = "Lookup::#{lookup_name}".constantize
-    title_method = lookup::TITLE_METHOD # this is the attribute we want
+    title_method = if type == :user
+                     :unique_text_name
+                   else
+                     lookup::TITLE_METHOD # this is the attribute we want
+                   end
     model = lookup_name.singularize.constantize
     model.find(val.to_i).send(title_method)
   end
