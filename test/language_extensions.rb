@@ -7,32 +7,32 @@
 require("language")
 
 class Language
-  @@verbose_messages = []
+  @verbose_messages = []
 
   def self.override_input_files
-    @@localization_files = {}
-    @@export_files = {}
+    @localization_files = {}
+    @export_files = {}
   end
 
   def self.reset_input_file_override
-    @@localization_files = nil
-    @@export_files = nil
+    @localization_files = nil
+    @export_files = nil
   end
 
   def self.last_update=(val)
-    @@last_update = val
+    @last_update = val
   end
 
   def self.clear_verbose_messages
-    @@verbose_messages = []
+    @verbose_messages = []
   end
 
   def self.verbose_messages
-    @@verbose_messages
+    @verbose_messages
   end
 
   def verbose(msg)
-    @@verbose_messages << msg
+    @verbose_messages << msg
   end
 
   def send_private(*)
