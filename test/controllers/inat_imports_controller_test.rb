@@ -41,6 +41,21 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Form needs a field for inputting iNat username")
     assert_select("input[type=checkbox][id=consent]", true,
                   "Form needs checkbox requiring consent")
+
+    assert_select("input#inat_import_expected_count", true,
+                  "Form should have a field for expected import count")
+    assert_select(
+      "input#inat_import_expected_count[value=?]",
+      :inat_import_tbd.l, true,
+      "Initial expected import count should be #{:inat_import_tbd.l}"
+    )
+    assert_select("input#inat_expected_imports_link", true,
+                  "Form should have a field linking to expected imports")
+    assert_select(
+      "input#inat_expected_imports_link[value=?]",
+      :inat_import_tbd.l, true,
+      "Initial expected import link should be #{:inat_import_tbd.l}"
+    )
   end
 
   def test_new_inat_import_already_importing
@@ -71,6 +86,26 @@ class InatImportsControllerTest < FunctionalTestCase
       "input[name=?][value=?]", "inat_username", user.inat_username, true,
       "InatImport should pre-fill `inat_username` with user's inat_username"
     )
+  end
+
+  def test_create_counts_and_inks
+    user = users(:mary)
+    inat_ids = "123,456,789"
+
+    params = { inat_username: user.inat_username,
+               inat_ids: inat_ids,
+               all: "0",
+               consent: "1",
+               inat_import_expected_count: :inat_import_tbd.l,
+               inat_expected_imports_link: :inat_import_tbd.l }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_form_action({ action: :create },
+                       "InatImport form should reload after user fills it out")
+    # It should display expected import count
+    # If should display link to expected imports
   end
 
   def test_create_cancel_reset
