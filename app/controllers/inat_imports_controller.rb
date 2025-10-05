@@ -160,7 +160,7 @@ class InatImportsController < ApplicationController
 
   # iNat redirects here after user completes iNat authorization
   def authorization_response
-    return not_authorized if auth_code.blank?
+    return unauthorized if !defined?(auth_code) || auth_code.blank?
 
     inat_import = inat_import_authenticating(auth_code)
     inat_import.reset_last_obs_start
@@ -180,7 +180,7 @@ class InatImportsController < ApplicationController
 
   private
 
-  def not_authorized
+  def unauthorized
     flash_error(:inat_no_authorization.l)
     redirect_to(observations_path)
   end
