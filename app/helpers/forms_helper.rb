@@ -39,9 +39,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   def js_button(**args, &block)
     button = block ? capture(&block) : args[:button]
     opts = args.except(:form, :button, :class, :center)
-    opts[:class] = "btn btn-default"
-    opts[:class] += " center-block my-3" if args[:center] == true
-    opts[:class] += " #{args[:class]}" if args[:class].present?
+    classes = %w[btn btn-default]
+    classes += %w[center-block my-3] if args[:center] == true
+    opts[:class] = class_names(classes, args[:class])
 
     button_tag(button, type: :button, **opts)
   end
