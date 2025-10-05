@@ -18,11 +18,13 @@ DEFAULTS: &DEFAULTS
 rolf_inat_import:
   <<: *DEFAULTS
   user: rolf
+  inat_ids: "123,456,789,987"
   importables: 4 # rolf wants to import 4 Observations
   inat_username: rolf_inat_username
   total_imported_count: nil # has no import history
   total_seconds: nil
   avg_import_time: nil
+  inat_username: rolf_inat_username
 
 dick_inat_import:
   <<: *DEFAULTS

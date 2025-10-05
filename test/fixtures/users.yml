@@ -11,6 +11,7 @@ DEFAULTS: &DEFAULTS
   contribution:   10
   email:          $LABEL@collectivesource.com
   image_size:     <%= User.image_sizes[:medium] %>
+  inat_username:  "" # will be set by first iNat import
   keep_filenames: <%= User.keep_filenames[:toss] %>
   locale:         en
   login:          $LABEL
