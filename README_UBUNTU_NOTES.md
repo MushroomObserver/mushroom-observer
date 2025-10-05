@@ -40,7 +40,8 @@ created using the IP address of the droplet.
 ```
 
 # Run ubuntu_setup_mo as the mo user
+Again, I recomend running this inside `screen -L` if you aren't already
+doing that.
 ```sh
-  screen -L
   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/njw-digitalocean-dev/script/ubuntu_setup_mo | bash
 ```
