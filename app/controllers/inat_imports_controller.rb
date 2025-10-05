@@ -12,6 +12,7 @@
 # 1. User calls `new`, fills out form
 #    Adds a InatImport instance if user lacks one
 # 2. create
+#    reloads form if params invalid or changed
 #    saves some user data in a InatImport instance
 #      attributes include: user, inat_ids, token, state
 #    passes things off (redirects) to iNat at the INAT_AUTHORIZATION_URL
@@ -91,7 +92,6 @@ class InatImportsController < ApplicationController
 
     request_inat_user_authorization
   end
-
   # ---------------------------------
 
   private
@@ -110,7 +110,7 @@ class InatImportsController < ApplicationController
   end
 
   def user_input_changed?
-    truthy?(params[:all]) != @inat_import.import_all ||
+    truthy?(params[:all]) != truthy?(@inat_import.import_all) ||
       params[:inat_ids] != @inat_import.inat_ids ||
       params[:inat_username].strip != @inat_import.inat_username
   end

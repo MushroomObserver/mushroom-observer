@@ -79,6 +79,7 @@ katrina:
 roy:
   <<: *DEFAULTS
   name: Roy Halling
+  inat_username: roy_inat_username
   email_general_question: true
   location_format: <%= User.location_formats[:scientific] %>
   user_groups: all_users, burbank_admins, burbank_users, falmouth_2023_09_users

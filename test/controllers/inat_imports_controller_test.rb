@@ -418,10 +418,11 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_import_all
-    user = users(:mary)
-    params = { inat_username: user.inat_username, all: 1, consent: 1 }
+    inat_import = inat_imports(:roy_inat_import)
+    params = { inat_username: inat_import.inat_username, inat_ids: "", all: 1,
+               consent: 1 }
 
-    login(user.login)
+    login(inat_import.user.login)
     post(:create, params: params)
 
     assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)

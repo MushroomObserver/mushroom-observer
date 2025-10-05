@@ -24,7 +24,6 @@ rolf_inat_import:
   total_imported_count: nil # has no import history
   total_seconds: nil
   avg_import_time: nil
-  inat_username: rolf_inat_username
 
 dick_inat_import:
   <<: *DEFAULTS
@@ -53,6 +52,9 @@ inat_importer_inat_import:
 # need >= 1 inat_import with an import history
 roy_inat_import:
   <<: *DEFAULTS
+  user: roy
+  inat_username: roy_inat_username
+  import_all: 1 # true roy wants to import everything
   total_imported_count: 3 # imports in prior jobs
   total_seconds: 36 # seconds in prior jobs
 
