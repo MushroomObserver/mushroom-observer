@@ -158,9 +158,12 @@ class InatImportsController < ApplicationController
 
   public
 
-  # iNat redirects here after user completes iNat authorization
+  # iNat redirects here after user completes iNat authorization,
+  # passing a code param if the user authorized MO to access their iNat data
+  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def authorization_response
-    return unauthorized if !defined?(auth_code) || auth_code.blank?
+    auth_code = params[:code]
+    return unauthorized if auth_code.blank?
 
     inat_import = inat_import_authenticating(auth_code)
     inat_import.reset_last_obs_start
