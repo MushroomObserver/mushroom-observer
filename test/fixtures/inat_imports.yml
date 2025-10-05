@@ -6,7 +6,7 @@ DEFAULTS: &DEFAULTS
   token: ""
   inat_username: ""
   inat_ids: ""
-  import_all: false
+  import_all: 0 # false
   importables: 0
   imported_count: 0
   response_errors: ""
@@ -33,6 +33,7 @@ mary_inat_import:
   <<: *DEFAULTS
   user: mary
   inat_username: mary_inat_username
+  inat_ids: 123456789
 
 # katrina is in the middle of an import
 katrina_inat_import:

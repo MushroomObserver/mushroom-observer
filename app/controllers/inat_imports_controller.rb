@@ -110,9 +110,13 @@ class InatImportsController < ApplicationController
   end
 
   def user_input_changed?
-    params[:all] != @inat_import.import_all ||
+    truthy?(params[:all]) != @inat_import.import_all ||
       params[:inat_ids] != @inat_import.inat_ids ||
-      params[:inat_username] != @inat_import.inat_username
+      params[:inat_username].strip != @inat_import.inat_username
+  end
+
+  def truthy?(val)
+    val.to_s == "1" || val.to_s.downcase == "true"
   end
 
   def init_ivars

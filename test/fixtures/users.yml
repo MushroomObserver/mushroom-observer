@@ -44,7 +44,7 @@ mary:
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
   user_groups: all_users, eol_users, eol_admins, mary_only, bolete_users
   mailing_address: 123 Some Pl., Pasadena, CA 91106
-  inat_username: marys_inat_username
+  inat_username: mary_inat_username
 
 # Junk gets denied
 junk:
