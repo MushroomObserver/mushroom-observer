@@ -20,19 +20,26 @@ followed by:
   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/njw-digitalocean-dev/script/ubuntu_setup_root | bash
 ```
 
-# Run ubuntu_setup_mo
-You should now be able to either ssh in as the mo user from any system
-that has the key for any public key installed when the droplet was created
-using the IP address of the droplet.
+# Set mo password
+As root run so mo can sudo for the next phase:
+
+```sh
+  passwd mo
+```
+
+From the current shell you can now run:
+```sh
+  sudo su - mo
+```
+
+Or you should now be able to ssh in as the mo user from any system
+that has the key for any public key installed when the droplet was
+created using the IP address of the droplet.
 ```sh
   ssh mo@<ip>
 ```
 
-Either from that shell or from the root console after running:
-```sh
-  sudo su mo
-```
-run
+# Run ubuntu_setup_mo
 ```sh
   screen -L
   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/njw-digitalocean-dev/script/ubuntu_setup_mo | bash

@@ -2,12 +2,51 @@
 # Run as mo user with sudo power
 
 cd /var/web
-git clone https://github.com/MushroomObserver/mushroom-observer.git
+if [ ! -e mushroom-observer ]; then
+    git clone https://github.com/MushroomObserver/mushroom-observer.git
+    echo Cloned mushroom-observer repo
+else
+    echo /var/web/mushroom-observer exists
+fi
 cd mushroom-observer
+ruby-install ruby `cat .ruby-version`
 
-mkdir -p log public/images/{thumb,320,640,960,1280,orig}
-touch log/test.log
-touch log/production.log
+# Requires access to ruby
+source /usr/local/share/chruby/chruby.sh
+source /usr/local/share/chruby/auto.sh
+
+EXPECTED_RUBY=$(cat .ruby-version)
+ACTUAL_RUBY=$(ruby --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+if [ "$ACTUAL_RUBY" != "$EXPECTED_RUBY" ]; then
+    echo "ERROR: Ruby version mismatch"
+    echo "Required: $EXPECTED_RUBY"
+    echo "Installed: $ACTUAL_RUBY"
+    echo "Please install the correct Ruby version using ruby-install"
+    exit 1
+fi
+
+echo "Ruby version check passed: $ACTUAL_RUBY"
+
+if [ ! -e public/images/orig ]; then
+  mkdir -p log public/images/{thumb,320,640,960,1280,orig}
+  echo Created public/images directories
+else
+  echo public/images/orig exists
+fi
+
+if [ ! -f log/test.log ]; then
+  touch log/test.log
+  echo Created log/test.log
+else
+  echo log/test.log exists
+fi
+if [ ! -f log/production.log ]; then
+  touch log/production.log
+  echo Created log/production.log
+else
+  echo log/production.log exists
+fi
 
 # Configure MO helper tools
 if [ ! -f /usr/local/bin/jpegresize ]; then

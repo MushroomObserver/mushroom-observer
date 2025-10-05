@@ -10,7 +10,6 @@ if getent passwd "$username" > /dev/null 2>&1; then
     echo "User '$username' already exists"
 else
     useradd -m -G sudo -s /bin/zsh "$username"
-    passwd "$username"
     echo "Successfully created user '$username'"
 fi
 
@@ -98,7 +97,6 @@ if [ ! $? -eq 0 ]; then
     cd ruby-install-master
     sudo make install
     cd ../..
-    ruby-install ruby `cat .ruby-version`
     echo Install ruby-install
 else
     echo ruby-install already installed, skipping
