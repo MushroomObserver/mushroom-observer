@@ -25,20 +25,19 @@
       <p><b><%= :inat_details_heading.l %></b></p>
       <%= :inat_details_list.t %>
     <% end %>
-    <p>
-      <%= f.label(:inat_import_expected_count,
-                  "#{:inat_import_expected_count.l}: ") %>
-      <%= f.text_field(:inat_import_expected_count, size: 10,
-                       value: inat_expected_import_count,
-                       readonly: true) %>
-    </p>
-    <p>
-      <%= f.label(:inat_expected_imports_link,
-                  "#{:inat_expected_imports_link.l}: ") %>
-      <%= f.text_field(:inat_expected_imports_link, size: 10,
-                       value: inat_expected_imports_link,
-                       readonly: true) %>
-    </p>
+
+    <%= panel_block(id: "preview", heading: :inat_import_preview.l,
+                    class: "name-section") do
+      tag.div do
+        concat(tag.p(
+          "#{:inat_import_expected_count.l}: #{inat_expected_import_count}")
+        )
+        concat(tag.p(
+          "#{:inat_expected_imports_link.l}: #{inat_expected_imports_link}")
+        )
+      end
+    end %>
+
     <%= f.submit(:SUBMIT.l, { class: "btn btn-default" }) %>
   <% end %>
 </div>

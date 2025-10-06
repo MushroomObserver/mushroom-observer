@@ -3090,9 +3090,10 @@
   inat_choose_observations: "Inat Observations to Import:"
   inat_import_list: "Comma separated list of up to 10 observation #s"
   inat_import_all: Import all my iNat observations instead of a list
-  inat_import_consent: "(Required) I consent to creating MushroomObserver Observation(s) based on my iNatinaturalist observations, including their photos."
+  inat_import_consent: "(Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos."
   inat_username: iNat Username (mandatory)
-  inat_import_expected_count: Expected Import Count
+  inat_import_preview: Preview
+  inat_import_expected_count: Estimated Import Count
   inat_import_tbd: TBD
   inat_expected_imports_link: Link to Expected Imports
   # observation/inat_imports errors/warnings
