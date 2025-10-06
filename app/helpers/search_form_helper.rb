@@ -23,7 +23,8 @@ module SearchFormHelper
 
   # This returns the current search terms in the form of a hash.
   def search_params(search:)
-    search.attributes.compact_blank.transform_keys(&:to_sym)
+    # Do not compact_blank - preserve `false` values
+    search.attributes.compact.transform_keys(&:to_sym)
   end
 
   def search_panel_open?(search:, sections:)
