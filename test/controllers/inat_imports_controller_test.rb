@@ -327,39 +327,6 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_create_inat_username_updated
-    skip("Under Construction")
-    user = users(:rolf)
-    inat_username = "rolf" # use different inat_username to test if it's updated
-    inat_import = inat_imports(:rolf_inat_import)
-    assert_equal("Unstarted", inat_import.state,
-                 "Need a Unstarted inat_import fixture")
-    assert_equal(0, inat_import.total_imported_count.to_i,
-                 "Need InatImport fixture without prior imports")
-
-    stub_request(:any, authorization_url)
-    login(user.login)
-
-    post(:create, params: { inat_ids: inat_import.inat_ids,
-                            inat_username: inat_username,
-                            consent: 1 })
-
-    assert_equal(
-      INAT_AUTHORIZATION_URL, @response.location,
-      "It should redirect to iNat authorization if params valid and unchanged"
-    )
-    assert_equal(inat_ids.split(",").length, inat_import.reload.importables,
-                 "Failed to save InatImport.importables")
-    assert_equal("Authorizing", inat_import.reload.state,
-                 "MO should be awaiting authorization from iNat")
-    assert_equal(
-      InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
-      inat_import.avg_import_time
-    )
-    assert_equal(inat_username, inat_import.inat_username,
-                 "Failed to save InatImport.inat_username")
-  end
-
   def test_authorization_response_denied
     login
 
