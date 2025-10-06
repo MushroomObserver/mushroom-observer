@@ -89,11 +89,11 @@ class Lookup::Names < Lookup
                  Name.clean_incoming_string(val)
                end
     if parse&.author.present?
-      matches = Name.where(search_name: srch_str).select(*minimal_name_columns)
+      matches = Name.search_name_has(srch_str).select(*minimal_name_columns)
     end
     return matches unless matches.empty?
 
-    Name.where(text_name: srch_str).select(*minimal_name_columns)
+    Name.text_name_has(srch_str).select(*minimal_name_columns)
   end
 
   def add_synonyms_if_necessary(names)
