@@ -4,12 +4,13 @@
 # code:    string, unique code for field slip, starts with project prefix
 
 class FieldSlip < AbstractModel
-  attr_accessor :current_user
+  attr_reader :current_user
 
   belongs_to :observation
   belongs_to :project
   belongs_to :user
 
+  validates :user_id, presence: true
   validates :code, uniqueness: true
   validates :code, presence: true
   validate do |field_slip|
@@ -25,6 +26,13 @@ class FieldSlip < AbstractModel
     project_ids = Lookup::Projects.new(projects).ids
     where(project: project_ids).distinct
   }
+
+  def current_user=(a_user)
+    @current_user = a_user
+    return if user
+
+    self.user = a_user
+  end
 
   def code=(val)
     code = val.upcase
