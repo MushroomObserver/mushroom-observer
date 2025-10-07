@@ -147,7 +147,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
            })
     end
 
-    obs = FieldSlip.find_by(code: code).observation
+    fs = FieldSlip.find_by(code: code)
+    assert(fs.user)
+    obs = fs.observation
     assert_redirected_to(observation_url(obs))
     assert(project.member?(user))
     assert(project.observations.member?(obs))
