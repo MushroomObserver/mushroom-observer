@@ -23,8 +23,8 @@ module Locations
         notes_has: :text_field_with_label,
         by_users: :multiple_value_autocompleter,
         by_editor: :single_value_autocompleter,
-        has_descriptions: :select_nil_boolean,
-        has_observations: :select_nil_boolean
+        has_descriptions: :select_nil_yes, # ignores false
+        has_observations: :select_nil_yes # ignores false
       }.freeze
     end
 

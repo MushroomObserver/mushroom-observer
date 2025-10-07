@@ -22,8 +22,8 @@ class Query::Locations < Query
   # query_attr(:search_where, :string) # advanced search
   # query_attr(:search_user, :string) # advanced search
   # query_attr(:search_content, :string) # advanced search
-  query_attr(:has_descriptions, :boolean)
-  query_attr(:has_observations, :boolean)
+  query_attr(:has_descriptions, { boolean: [true] })
+  query_attr(:has_observations, { boolean: [true] })
   query_attr(:description_query, { subquery: :LocationDescription })
   query_attr(:observation_query, { subquery: :Observation })
 
