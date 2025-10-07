@@ -327,7 +327,7 @@ module SearchFormHelper
       ["", nil],
       ["yes", :yes],
       ["no", :no],
-      ["both", :either]
+      ["either", :either]
     ]
     select_with_label(options:, inline: true, **args)
   end
