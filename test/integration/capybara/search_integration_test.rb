@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Tests which supplement controller/observations_controller_test.rb
-class ObservationsIntegrationTest < CapybaraIntegrationTestCase
+class SearchIntegrationTest < CapybaraIntegrationTestCase
   def test_observations_search_form
     shroom = "Agaricus campestris"
     lichen = "Peltigera"
@@ -44,7 +44,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       form.select("yes", from: "query_names_names_include_subtaxa")
       form.select("yes", from: "query_names_names_exclude_original_names")
       form.select("yes", from: "query_names_has_author")
-      form.select("both", from: "query_names_misspellings")
+      form.select("either", from: "query_names_misspellings")
 
       first(:button, type: "submit").click
     end
@@ -98,7 +98,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#results", text: projects(:empty_project).title)
   end
 
-  def test_species_lists_search_form; end
+  # def test_species_lists_search_form; end
 
-  def test_herbaria_search_form; end
+  # def test_herbaria_search_form; end
 end
