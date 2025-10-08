@@ -85,6 +85,7 @@ class InatImportsController < ApplicationController
 
   def create
     @inat_import = InatImport.find_or_create_by(user: @user)
+    @inat_import.update(cancel: false) # reset cancel flag when starting create
     return reload_form unless params_valid?
 
     assure_user_has_inat_import_api_key

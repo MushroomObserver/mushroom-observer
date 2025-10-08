@@ -137,9 +137,11 @@ class InatImportsControllerTest < FunctionalTestCase
     import = inat_imports(:ollie_inat_import)
     user = import.user
     assert(import.canceled?, "Test needs a canceled InatImport fixture")
-    params = { inat_ids: import.inat_ids,
-               inat_username: user.inat_username,
-               consent: 1 }
+    params = {
+      inat_ids: import.inat_ids,
+      inat_username: user.inat_username,
+      consent: 1
+    }
 
     login(user.login)
     disable_unsafe_html_filter
