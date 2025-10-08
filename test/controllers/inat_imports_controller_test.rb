@@ -92,6 +92,7 @@ class InatImportsControllerTest < FunctionalTestCase
                inat_expected_imports_link: :inat_import_tbd.l }
 
     login(user.login)
+    disable_unsafe_html_filter
     post(:create, params: params)
 
     assert_form_action({ action: :create },
@@ -108,6 +109,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_ids: id, inat_username: user.inat_username, consent: 1 }
 
     login(user.login)
+    disable_unsafe_html_filter
     post(:create, params: params)
 
     assert_not(import.reload.canceled?,
@@ -120,6 +122,7 @@ class InatImportsControllerTest < FunctionalTestCase
                consent: 1 }
 
     login(import.user.login)
+    disable_unsafe_html_filter
     post(:create, params: params)
 
     assert_flash_text(:inat_missing_username.l)
@@ -130,6 +133,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_username: "anything", inat_ids: "",
                consent: 1 }
     login
+    disable_unsafe_html_filter
     assert_no_difference("Observation.count",
                          "Imported observation(s) though none designated") do
       post(:create, params: params)
@@ -142,7 +146,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_username: "anything", inat_ids: "7,8,9",
                all: 1, consent: 1 }
     login
-
+    disable_unsafe_html_filter
     assert_no_difference(
       "Observation.count",
       "Imported obs though user both listed IDs and checked Import All"
@@ -159,6 +163,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_username: "anything", inat_ids: "123*",
                consent: 1 }
     login
+    disable_unsafe_html_filter
     assert_no_difference("Observation.count",
                          "Imported observation(s) though none designated") do
       post(:create, params: params)
@@ -171,6 +176,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_username: "anything", inat_ids: 123,
                consent: 0 }
     login
+    disable_unsafe_html_filter
     assert_no_difference("Observation.count",
                          "iNat obss imported without consent") do
       post(:create, params: params)
@@ -187,6 +193,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_username: "anything", inat_ids: id_list, consent: 1 }
 
     login
+    disable_unsafe_html_filter
     post(:create, params: params)
 
     assert_form_action(action: :create)
@@ -207,6 +214,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_username: "anything", inat_ids: inat_id,
                consent: 1 }
     login
+    disable_unsafe_html_filter
     assert_no_difference("Observation.count",
                          "Imported a previously imported iNat obs") do
       post(:create, params: params)
@@ -235,6 +243,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_username: "anything", inat_ids: inat_id, consent: 1 }
 
     login
+    disable_unsafe_html_filter
     assert_no_difference(
       "Observation.count",
       "Imported an iNat obs which had been 'mirrored' from MO"
