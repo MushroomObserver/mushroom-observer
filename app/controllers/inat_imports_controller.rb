@@ -84,10 +84,10 @@ class InatImportsController < ApplicationController
   end
 
   def create
+    @inat_import = InatImport.find_or_create_by(user: @user)
     return reload_form unless params_valid?
 
     assure_user_has_inat_import_api_key
-    @inat_import = InatImport.find_or_create_by(user: @user)
     # must decide if user changed input before calling init_ivars
     input_changed = user_input_changed?
     init_ivars
