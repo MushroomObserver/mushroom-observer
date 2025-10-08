@@ -19,25 +19,25 @@ class InatImportsControllerTest < FunctionalTestCase
   include Inat::Constants
 
   # stub the iNat API request for the expected import count
-  def stub_count_request(inat_username:, inat_ids: nil, body: "{}")
+  def stub_count_request(inat_username:, ids: nil, body: "{}")
     stub_request(
       :get,
-      "https://api.inaturalist.org/v1/observations" \
-      "?iconic_taxa=Fungi,Protozoa" \
-      "&id=#{inat_ids}" \
+      "#{API_BASE}/observations" \
+      "?iconic_taxa=#{ICONIC_TAXA}" \
+      "&id=#{ids}" \
       "&only_id=true&page=1&per_page=1" \
       "&user_id=#{inat_username}" \
       "&without_field=Mushroom%20Observer%20URL"
     ).with(
-      body: "",
+      body: body,
       headers: {
-        "Accept"=>"application/json",
-        "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-        "Authorization"=>"Bearer",
-        "Content-Length"=>"2",
-        "Content-Type"=>"application/json",
-        "Host"=>"api.inaturalist.org",
-        "User-Agent"=>"rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
+        "Accept" => "application/json",
+        "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+        "Authorization" => "Bearer",
+        "Content-Length" => "2",
+        "Content-Type" => "application/json",
+        "Host" => "api.inaturalist.org",
+        "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
       }
     ).to_return(status: 200, body: body, headers: {})
   end
@@ -109,8 +109,9 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_create_counts_and_inks
-    user = users(:mary)
+  def test_create_counts_and_links
+    inat_import = inat_imports(:mary_inat_import)
+    user = inat_import.user
     inat_ids = "123,456,789"
 
     params = { inat_username: user.inat_username,
@@ -121,7 +122,8 @@ class InatImportsControllerTest < FunctionalTestCase
                inat_expected_imports_link: :inat_import_tbd.l }
 
     login(user.login)
-    stub_count_request(inat_username: user.inat_username, inat_ids: inat_ids)
+    stub_count_request(inat_username: inat_import.inat_username,
+                       ids: inat_ids)
     disable_unsafe_html_filter
     post(:create, params: params)
 
@@ -132,14 +134,16 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_cancel_reset
-    user = users(:ollie)
     import = inat_imports(:ollie_inat_import)
+    user = import.user
     assert(import.canceled?, "Test needs a canceled InatImport fixture")
-    id = "123"
-    params = { inat_ids: id, inat_username: user.inat_username, consent: 1 }
+    params = { inat_ids: import.inat_ids,
+               inat_username: user.inat_username,
+               consent: 1 }
 
     login(user.login)
     disable_unsafe_html_filter
+    stub_count_request(inat_username: user.inat_username)
     post(:create, params: params)
 
     assert_not(import.reload.canceled?,
