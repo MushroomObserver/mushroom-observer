@@ -156,11 +156,11 @@ module SearchFormHelper
 
   # TODO: fix this, needs query tags not pattern search term tags
   def search_help_text(args, field_type)
+    field_help = :"#{args[:search].type_tag}_term_#{args[:field]}".l
     multiple_note = if field_type == :multiple_autocompleter
                       :pattern_search_terms_multiple.l
                     end
-    [:"#{args[:search].type_tag}_term_#{args[:field]}".l,
-     multiple_note].compact.join(" ")
+    [field_help, multiple_note].compact.join(" ")
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
@@ -395,9 +395,10 @@ module SearchFormHelper
   def region_with_in_box_fields(**args)
     tag.div(data: { controller: "map", map_open: true }) do
       [
-        form_location_input_find_on_map(form: args[:form], field: :region,
-                                        value: args[:search]&.region,
-                                        label: "#{:REGION.t}:"),
+        form_location_input_find_on_map(
+          form: args[:form], field: :region, value: args[:search]&.region,
+          label: "#{:REGION.t}:", help: args[:help]
+        ),
         in_box_fields(**args)
       ].safe_join
     end

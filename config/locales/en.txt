@@ -3885,7 +3885,7 @@
   location_term_by_users: "[:query_term_by_users(type=:LOCATION)]"
   location_term_by_editor: Location edited by this user.
   location_term_pattern: "[:PATTERN]"
-  location_term_regexp: Regexp
+  location_term_regexp: "[:SEARCH]"
   location_term_created_at: "[:query_term_created_at(type=:LOCATION)]"
   location_term_updated_at: "[:query_term_updated_at(type=:LOCATION)]"
   location_term_has_notes: "[:query_term_has_notes(type=:LOCATION)]"
@@ -4643,7 +4643,7 @@
   query_pattern: search pattern
   query_quality: "[:quality]"
   query_rank: "[:rank]"
-  query_regexp: country
+  query_regexp: "[:search]"
   query_region: "[:regions]"
   query_sizes: sizes
   query_sources: sources
