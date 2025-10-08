@@ -2,12 +2,35 @@
 
 module Observations
   module InatImportsHelper
-    def inat_expected_import_count
-      :inat_import_tbd.l
+    include Inat::Constants
+
+    def inat_expected_import_count(import)
+      return :inat_import_tbd.l if imports_ambiguous?(import)
     end
 
-    def inat_expected_imports_link
-      :inat_import_tbd.l
+    def inat_expected_imports_link(import)
+      return :inat_import_tbd.l if imports_ambiguous?(import)
+
+      query_args = {
+        # obss of only the iNat user who has inat_username
+        user_login: import.inat_username,
+        # only fungi and slime molds
+        iconic_taxa: ICONIC_TAXA,
+        # and which haven't been exported from or inported to MO
+        without_field: "Mushroom Observer URL",
+        # streamline query and response; all we need is the count
+        only_id: true, per_page: 1
+      }
+      query_args[:id] = import.inat_ids if import.inat_ids.present?
+      link_to(:inat_expected_imports_link.l,
+              "#{API_BASE}/observations?#{query_args.to_query}")
+    end
+
+    private
+
+    def imports_ambiguous?(import)
+      import.inat_ids.blank? && !import.import_all? ||
+        import.inat_ids.present? && import.import_all?
     end
   end
 end

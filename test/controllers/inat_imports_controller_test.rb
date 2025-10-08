@@ -42,7 +42,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_select("input[type=checkbox][id=consent]", true,
                   "Form needs checkbox requiring consent")
 
-
     assert_select("#preview").text.include?(
       "#{:inat_import_expected_count.l}: #{:inat_import_tbd.l}"
     )
@@ -115,12 +114,12 @@ class InatImportsControllerTest < FunctionalTestCase
                "`cancel` should be false when starting an import")
   end
 
-  def test_create_missing_username
-    user = users(:rolf)
-    id = "123"
-    params = { inat_ids: id }
+  def test_create_missing_inat_username
+    import = inat_imports(:rolf_inat_import)
+    params = { inat_ids: import.inat_ids, inat_username: "",
+               consent: 1 }
 
-    login(user.login)
+    login(import.user.login)
     post(:create, params: params)
 
     assert_flash_text(:inat_missing_username.l)
