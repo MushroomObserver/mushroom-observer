@@ -159,6 +159,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
     login(import.user.login)
     disable_unsafe_html_filter
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     post(:create, params: params)
 
     assert_flash_text(:inat_missing_username.l)
