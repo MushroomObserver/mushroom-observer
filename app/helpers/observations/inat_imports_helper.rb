@@ -23,7 +23,7 @@ module Observations
       }
       query_args[:id] = import.inat_ids if import.inat_ids.present?
       link_to(:inat_expected_imports_link.l,
-              "#{API_BASE}/observations?#{query_args.to_query}")
+              "#{SITE}/observations?#{query_args.to_query}")
     end
 
     private
