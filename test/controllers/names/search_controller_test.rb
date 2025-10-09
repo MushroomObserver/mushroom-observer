@@ -77,7 +77,8 @@ module Names
         },
         rank: :Species,
         rank_range: :Genus,
-        misspellings: :either
+        misspellings: :either,
+        created_at: "2007"
       }
       post(:create, params: { query_names: params })
 
@@ -89,7 +90,8 @@ module Names
           include_synonyms: true
         },
         rank: [:Species, :Genus],
-        misspellings: :either
+        misspellings: :either,
+        created_at: %w[2007-01-01 2007-12-31]
       }
       assert_redirected_to(controller: "/names", action: :index,
                            params: { q: { model: :Name, **validated_params } })
