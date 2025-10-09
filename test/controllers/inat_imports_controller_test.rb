@@ -218,10 +218,19 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_illegal_observation_id
-    params = { inat_username: "anything", inat_ids: "123*",
-               consent: 1 }
-    login
+    import = inat_imports(:mary_inat_import)
+    import.update(inat_ids: "123*")
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0,
+      consent: 1
+    }
+
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     disable_unsafe_html_filter
+
     assert_no_difference("Observation.count",
                          "Imported observation(s) though none designated") do
       post(:create, params: params)
