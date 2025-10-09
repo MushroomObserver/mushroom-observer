@@ -240,10 +240,18 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_no_consent
-    params = { inat_username: "anything", inat_ids: 123,
-               consent: 0 }
-    login
+    import = inat_imports(:mary_inat_import)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0,
+      consent: 0
+    }
+
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     disable_unsafe_html_filter
+
     assert_no_difference("Observation.count",
                          "iNat obss imported without consent") do
       post(:create, params: params)
@@ -253,13 +261,24 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_too_many_ids_listed
-    # generate an id list that's barely too long
+    # generate an id list that's too long for the inat_ids column
+    # It'ss a string column with max length 255
     id_list = ""
     id = 1_234_567_890
     id_list += "#{id += 1}," until id_list.length > 255
-    params = { inat_username: "anything", inat_ids: id_list, consent: 1 }
 
-    login
+    import = inat_imports(:mary_inat_import)
+    # save as much as possible
+    import.update(inat_ids: id_list[0, 255])
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: id_list, all: 0,
+      consent: 1
+    }
+
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     disable_unsafe_html_filter
     post(:create, params: params)
 
