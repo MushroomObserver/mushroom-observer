@@ -183,6 +183,7 @@ class InatImportsControllerTest < FunctionalTestCase
     disable_unsafe_html_filter
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
+
     assert_no_difference("Observation.count",
                          "Imported observation(s) though none designated") do
       post(:create, params: params)
@@ -192,10 +193,18 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_list_and_all
-    params = { inat_username: "anything", inat_ids: "7,8,9",
-               all: 1, consent: 1 }
-    login
+    import = inat_imports(:mary_inat_import)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 1,
+      consent: 1
+    }
+
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     disable_unsafe_html_filter
+
     assert_no_difference(
       "Observation.count",
       "Imported obs though user both listed IDs and checked Import All"
