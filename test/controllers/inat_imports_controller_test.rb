@@ -171,13 +171,15 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_no_observations_designated
-    inat_import = inat_imports(:mary_inat_import)
-    user = inat_import.user
-    params = { inat_username: inat_import.inat_username,
-               inat_ids: "",
-               consent: 1 }
+    import = inat_imports(:mary_inat_import)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: "",
+      all: 0,
+      consent: 1
+    }
 
-    login(inat_import.user.login)
+    login(import.user.login)
     disable_unsafe_html_filter
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
