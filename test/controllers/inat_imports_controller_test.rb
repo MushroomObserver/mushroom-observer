@@ -287,29 +287,31 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_previously_imported
-    user = users(:rolf)
     inat_id = "1123456"
     Observation.create(
       where: "North Falmouth, Massachusetts, USA",
-      user: user,
+      user: mary,
       when: "2024-09-08",
       source: Observation.sources[:mo_inat_import],
       inat_id: inat_id
     )
+    import = inat_imports(:mary_inat_import)
+    import.update(inat_ids: inat_id)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0,
+      consent: 1
+    }
 
-    params = { inat_username: "anything", inat_ids: inat_id,
-               consent: 1 }
-    login
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     disable_unsafe_html_filter
+
     assert_no_difference("Observation.count",
                          "Imported a previously imported iNat obs") do
       post(:create, params: params)
     end
-
-    # NOTE: 2024-09-04 jdc
-    # I'd prefer that the flash include links to both obss,
-    # and that this (or another) assertion check for that.
-    # At the moment, it's taking too long to figure out how.
     assert_flash_text(/iNat #{inat_id} previously imported/)
   end
 
