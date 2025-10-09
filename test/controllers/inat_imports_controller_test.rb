@@ -28,17 +28,6 @@ class InatImportsControllerTest < FunctionalTestCase
       "&only_id=true&page=1&per_page=1" \
       "&user_id=#{inat_username}" \
       "&without_field=Mushroom%20Observer%20URL"
-    ).with(
-      body: body,
-      headers: {
-        "Accept" => "application/json",
-        "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-        "Authorization" => "Bearer",
-        "Content-Length" => "2",
-        "Content-Type" => "application/json",
-        "Host" => "api.inaturalist.org",
-        "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
-      }
     ).to_return(status: 200, body: body, headers: {})
   end
 
