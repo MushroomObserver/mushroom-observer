@@ -66,7 +66,7 @@ module Searchable
       null_region_if_overspecific_and_box_valid
       autocompleted_strings_to_ids
       range_fields_to_arrays
-      parse_date_range
+      parse_date_ranges
     end
 
     # Used by search_helper to prefill nested params
@@ -190,10 +190,14 @@ module Searchable
       end
     end
 
-    def parse_date_range
-      return if (date = @query_params[:date]).blank?
+    def parse_date_ranges
+      [:date, :created_at, :updated_at].each { |field| parse_date_range(field) }
+    end
 
-      @query_params[:date] = ::DateRangeParser.new(date).range
+    def parse_date_range(field)
+      return if (date = @query_params[field]).blank?
+
+      @query_params[field] = ::DateRangeParser.new(date).range
     end
 
     # Note that this @search query instance is not the one that gets saved and

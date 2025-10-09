@@ -62,14 +62,16 @@ module Locations
       box = location.bounding_box
       params = {
         in_box: box,
-        region: "California, USA"
+        region: "California, USA",
+        by_users: "mary"
       }
       post(:create, params: { query_locations: params })
 
       # Query validation parses region as an array of region strings.
       validated_params = {
         in_box: box,
-        region: ["California, USA"]
+        region: ["California, USA"],
+        by_users: %w[mary]
       }
       assert_redirected_to(
         controller: "/locations", action: :index,

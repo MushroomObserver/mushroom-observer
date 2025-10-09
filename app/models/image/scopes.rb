@@ -74,7 +74,7 @@ module Image::Scopes
     scope :confidence, lambda { |min, max = nil|
       joins(:observations).merge(Observation.confidence(min, max))
     }
-
+    # In this scope, false == !has_observations
     scope :has_observations, lambda { |bool = true|
       joined_relation_condition(:observation_images, bool:)
     }
