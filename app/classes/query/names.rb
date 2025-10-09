@@ -18,6 +18,7 @@ class Query::Names < Query
                        include_immediate_subtaxa: :boolean,
                        exclude_original_names: :boolean })
   query_attr(:text_name_has, :string)
+  query_attr(:search_name_has, :string)
   # query_attr(:clade, :string) # content filter
   # query_attr(:lichen, :boolean) # content filter
   query_attr(:misspellings, { string: [:no, :either, :only] })
