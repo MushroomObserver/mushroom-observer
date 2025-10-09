@@ -316,11 +316,10 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_previously_mirrored
-    user = users(:rolf)
     inat_id = "1234567"
     mirrored_obs = Observation.create(
       where: "North Falmouth, Massachusetts, USA",
-      user: user,
+      user: rolf,
       when: "2023-09-08",
       inat_id: nil,
       # When Pulk's `mirror`Python script copies an MO Obs to iNat,
@@ -328,10 +327,19 @@ class InatImportsControllerTest < FunctionalTestCase
       # See https://github.com/JacobPulk/mirror
       notes: { Other: "Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">observation #{inat_id}</a> on December 18, 2023" }
     )
-    params = { inat_username: "anything", inat_ids: inat_id, consent: 1 }
+    import = inat_imports(:mary_inat_import)
+    import.update(inat_ids: inat_id)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0,
+      consent: 1
+    }
 
-    login
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     disable_unsafe_html_filter
+
     assert_no_difference(
       "Observation.count",
       "Imported an iNat obs which had been 'mirrored' from MO"
@@ -339,10 +347,6 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    # NOTE: 2024-09-04 jdc
-    # I'd prefer that the flash include links to both obss,
-    # and that this (or another) assertion check for that.
-    # At the moment, it's taking too long to figure out how.
     assert_flash_text(
       "iNat #{inat_id} is a &#8220;mirror&#8221; of " \
       "existing MO Observation #{mirrored_obs.id}"
