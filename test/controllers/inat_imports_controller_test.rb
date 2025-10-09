@@ -153,9 +153,12 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_missing_inat_username
-    import = inat_imports(:rolf_inat_import)
-    params = { inat_ids: import.inat_ids, inat_username: "",
-               consent: 1 }
+    import = inat_imports(:mary_inat_import)
+    import.update(inat_username: nil)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0, consent: 1
+    }
 
     login(import.user.login)
     disable_unsafe_html_filter
@@ -168,10 +171,16 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_no_observations_designated
-    params = { inat_username: "anything", inat_ids: "",
+    inat_import = inat_imports(:mary_inat_import)
+    user = inat_import.user
+    params = { inat_username: inat_import.inat_username,
+               inat_ids: "",
                consent: 1 }
-    login
+
+    login(inat_import.user.login)
     disable_unsafe_html_filter
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     assert_no_difference("Observation.count",
                          "Imported observation(s) though none designated") do
       post(:create, params: params)
