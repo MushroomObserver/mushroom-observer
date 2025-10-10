@@ -23,7 +23,8 @@
 module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
-      :query_from_session, :query_params, :add_q_param, :q_param
+      :query_from_session, :query_params, :add_q_param, :q_param,
+      :find_or_create_query
     )
   end
 
@@ -199,6 +200,7 @@ module ApplicationController::Queries
   def store_query_in_session(query)
     query.save unless query.id
     session[:query_record] = query.id
+    session[:search_type] = query.search_type
   end
 
   # NOTE: If we're going to cache user stuff that depends on their present q,

@@ -3630,18 +3630,21 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
 
-    # This is somewhat counter-intuitive, but
-    #  is a rarely occuring edge case;
-    #  is consistent with the current behavior of pattern_search;
-    #  improves the performance of the scope; and
-    #  greatly simplifies the code.
-    # https://github.com/MushroomObserver/mushroom-observer/pull/1082/files#r928148711
-    # https://github.com/MushroomObserver/mushroom-observer/pull/1082#issuecomment-1193235924
+    # Since lookup now does pattern matching when include_subtaxa is
+    # true rather than precise name matching, "Amanita group" is now
+    # included when you select "include_subtaxa".
     assert_includes(
+      Name.names(lookup: "Amanita", include_subtaxa: true), amanita_group,
+      "`include_subtaxa` at or below genus <X> should include `<X> group`"
+    )
+    # However, the semantics of exclude_original_names has now changed
+    # to exclude the any of the pattern matching names.
+    assert_not_includes(
       Name.names(
         lookup: "Amanita", include_subtaxa: true, exclude_original_names: true
       ), amanita_group,
-      "`include_subtaxa` at or below genus <X> should include `<X> group`"
+      "`include_subtaxa` and `exclude_original_names` should not include " \
+      "`<X> group`"
     )
 
     assert_not_includes(

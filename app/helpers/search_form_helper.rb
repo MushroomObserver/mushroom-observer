@@ -3,7 +3,7 @@
 # helpers for search forms. These call field helpers in forms_helper.
 # args should provide form, field, label at a minimum.
 # rubocop:disable Metrics/ModuleLength
-module SearchHelper
+module SearchFormHelper
   # Builds a single filter group, or panel, for a search form. The panel's
   # field groups are defined in the controller, along with the field methods.
   # Sections can be :shown/ :collapsed.
@@ -13,7 +13,7 @@ module SearchHelper
     collapsed = search_panel_collapsed(form:, search:, sections:)
     open = collapse = false
     if sections[:collapsed].present?
-      collapse = heading
+      collapse = "#{controller.search_type}_#{heading}"
       open = search_panel_open?(search:, sections:)
     end
     panel_block(heading: :"search_term_group_#{heading}".l,
@@ -23,7 +23,8 @@ module SearchHelper
 
   # This returns the current search terms in the form of a hash.
   def search_params(search:)
-    search.attributes.compact_blank.transform_keys(&:to_sym)
+    # Do not compact_blank - preserve `false` values
+    search.attributes.compact.transform_keys(&:to_sym)
   end
 
   def search_panel_open?(search:, sections:)
@@ -114,9 +115,9 @@ module SearchHelper
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
   def prepare_args_for_search_field(args:, field_type:)
-    if field_type == :text_field_with_label && args[:field] != :pattern
-      args[:inline] = true
-    end
+    # if field_type == :text_field_with_label && args[:field] != :pattern
+    #   args[:inline] = true
+    # end
     args[:help] = search_help_text(args, field_type)
     args[:hidden_name] = search_check_for_hidden_field_name(args)
     # args[:class] = "mb-3"
@@ -155,11 +156,11 @@ module SearchHelper
 
   # TODO: fix this, needs query tags not pattern search term tags
   def search_help_text(args, field_type)
+    field_help = :"#{args[:search].type_tag}_term_#{args[:field]}".l
     multiple_note = if field_type == :multiple_autocompleter
                       :pattern_search_terms_multiple.l
                     end
-    [:"#{args[:search].type_tag}_term_#{args[:field]}".l,
-     multiple_note].compact.join(" ")
+    [field_help, multiple_note].compact.join(" ")
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
@@ -219,17 +220,17 @@ module SearchHelper
     values = search_attribute_possibly_nested_value(search, field)
     return values unless values.is_a?(Array)
 
-    search_string_values(values, type)
+    search_prefill_string_values(values, type)
   end
 
   # For autocompleters, if the value(s) is/are ids, we need to lookup the
   # strings that should be prefilled in the text field — ids go in the
   # "hidden_field" for ids.
-  def search_string_values(values, type)
+  def search_prefill_string_values(values, type)
     values.map do |val|
       if val.is_a?(Numeric) ||
          (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
-        search_string_via_lookup_id(val, type)
+        search_prefill_string_value_via_id(val, type)
       else
         val
       end
@@ -237,10 +238,14 @@ module SearchHelper
   end
 
   # The autocompleter type is a model.type_tag
-  def search_string_via_lookup_id(val, type)
+  def search_prefill_string_value_via_id(val, type)
     lookup_name = type.to_s.camelize.pluralize
     lookup = "Lookup::#{lookup_name}".constantize
-    title_method = lookup::TITLE_METHOD # this is the attribute we want
+    title_method = if type == :user
+                     :unique_text_name # "Name (login)"
+                   else
+                     lookup::TITLE_METHOD # usually the method we want
+                   end
     model = lookup_name.singularize.constantize
     model.find(val.to_i).send(title_method)
   end
@@ -280,15 +285,19 @@ module SearchHelper
   # Rows that only uncollapse if an autocompleter field has a value.
   # Note the data-autocompleter-target attribute.
   def autocompleter_conditional_rows(form:, search:, sections:)
+    # Open the conditional rows if there are any params present
+    names = search.params[:names]
+    collapsed = "in" if names&.slice(*sections.flatten)&.compact.present?
+
     tag.div(data: { autocompleter_target: "collapseFields" },
-            class: "collapse") do
+            class: class_names("collapse", collapsed)) do
       sections.each do |subfield|
         concat(search_row(form:, field: subfield, search:, sections:))
       end
     end
   end
 
-  def select_yes(**args)
+  def select_nil_yes(**args)
     options = [
       ["", nil],
       ["yes", true]
@@ -296,7 +305,15 @@ module SearchHelper
     select_with_label(options:, inline: true, **args)
   end
 
-  def select_boolean(**args)
+  def select_no_eq_nil_or_yes(**args)
+    options = [
+      ["no", nil],
+      ["yes", true]
+    ]
+    select_with_label(options:, inline: true, **args)
+  end
+
+  def select_nil_boolean(**args)
     options = [
       ["", nil],
       ["yes", true],
@@ -310,7 +327,7 @@ module SearchHelper
       ["", nil],
       ["yes", :yes],
       ["no", :no],
-      ["both", :either]
+      ["either", :either]
     ]
     select_with_label(options:, inline: true, **args)
   end
@@ -347,7 +364,7 @@ module SearchHelper
   end
 
   def select_confidence_range(**args)
-    options = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
+    options = Vote.opinion_menu
     [
       tag.div(class: "d-inline-block mr-4") do
         select_with_label(options:, **search_confidence_args(args))
@@ -378,9 +395,10 @@ module SearchHelper
   def region_with_in_box_fields(**args)
     tag.div(data: { controller: "map", map_open: true }) do
       [
-        form_location_input_find_on_map(form: args[:form], field: :region,
-                                        value: args[:search]&.region,
-                                        label: "#{:REGION.t}:"),
+        form_location_input_find_on_map(
+          form: args[:form], field: :region, value: args[:search]&.region,
+          label: "#{:REGION.t}:", help: args[:help]
+        ),
         in_box_fields(**args)
       ].safe_join
     end
@@ -443,10 +461,18 @@ module SearchHelper
 
     if SEARCH_SELECT_TYPES.include?(field_type)
       args[:selected] = value
+    elsif SEARCH_DATE_FIELDS.include?(field)
+      args[:value] = search_date_range_values(value)
     else
       args[:value] = value
     end
     args
+  end
+
+  def search_date_range_values(value)
+    return value unless value.is_a?(Array)
+
+    value.join("-")
   end
 
   # Figure out if a field value is nested within the query, so we can access it
@@ -466,37 +492,12 @@ module SearchHelper
   # Separator for autocompleter fields.
   SEARCH_SEPARATOR = "\n"
 
-  # Convenience for subclasses to access helper methods via subclass.params
-  SEARCH_FIELD_HELPERS = {
-    text_field: { component: :text_field_with_label, args: {} },
-    select_yes: { component: :search_yes_field, args: {} },
-    select_boolean: { component: :search_boolean_field, args: {} },
-    select_rank_range: { component: :search_rank_range_field, args: {} },
-    list_of_herbaria: { component: :autocompleter_field,
-                        args: { type: :herbarium,
-                                separator: SEARCH_SEPARATOR } },
-    list_of_locations: { component: :autocompleter_field,
-                         args: { type: :location, separator: "\n" } },
-    list_of_names: { component: :search_autocompleter_with_conditional_fields,
-                     args: { type: :name, separator: SEARCH_SEPARATOR } },
-    list_of_projects: { component: :autocompleter_field,
-                        args: { type: :project,
-                                separator: SEARCH_SEPARATOR } },
-    list_of_species_lists: { component: :autocompleter_field,
-                             args: { type: :species_list,
-                                     separator: SEARCH_SEPARATOR } },
-    list_of_users: { component: :autocompleter_field,
-                     args: { type: :user, separator: SEARCH_SEPARATOR } },
-    confidence: { component: :search_confidence_range_field, args: {} },
-    # handled in search_region_with_compass_fields
-    longitude: { component: nil, args: {} },
-    latitude: { component: nil, args: {} }
-  }.freeze
-
   SEARCH_SELECT_TYPES = [
-    :select_yes, :select_boolean, :select_misspellings,
-    :select_rank_range, :select_confidence
+    :select_nil_yes, :select_nil_boolean, :select_no_eq_nil_or_yes,
+    :select_misspellings, :select_rank_range, :select_confidence
   ].freeze
+
+  SEARCH_DATE_FIELDS = [:date, :created_at, :updated_at].freeze
 
   def search_type_options
     [
