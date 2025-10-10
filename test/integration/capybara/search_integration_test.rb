@@ -42,7 +42,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
       form.fill_in("query_names_names_lookup", with: lookup)
       form.select("yes", from: "query_names_names_include_synonyms")
       form.select("yes", from: "query_names_names_include_subtaxa")
-      form.select("yes", from: "query_names_names_exclude_original_names")
+      form.select("no", from: "query_names_names_exclude_original_names")
       form.select("yes", from: "query_names_has_author")
       form.select("either", from: "query_names_misspellings")
 
