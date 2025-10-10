@@ -88,12 +88,28 @@ class Lookup::Names < Lookup
                else
                  Name.clean_incoming_string(val)
                end
-    if parse&.author.present?
-      matches = Name.search_name_has(srch_str).select(*minimal_name_columns)
-    end
+    matches = author_search(parse, srch_str)
     return matches unless matches.empty?
 
-    Name.text_name_has(srch_str).select(*minimal_name_columns)
+    text_name_search(srch_str)
+  end
+
+  def author_search(parse, srch_str)
+    return if parse&.author.blank?
+
+    if @params[:include_subtaxa]
+      Name.search_name_has(srch_str).select(*minimal_name_columns)
+    else
+      Name.where(search_name: srch_str).select(*minimal_name_columns)
+    end
+  end
+
+  def text_name_search(srch_str)
+    if @params[:include_subtaxa]
+      return Name.text_name_has(srch_str).select(*minimal_name_columns)
+    end
+
+    Name.where(text_name: srch_str).select(*minimal_name_columns)
   end
 
   def add_synonyms_if_necessary(names)
