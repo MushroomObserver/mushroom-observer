@@ -42,6 +42,13 @@ class FieldSlip < AbstractModel
     update_project
   end
 
+  def observation=(val)
+    # Adopt the observation's user if we don't already have one
+    self.user = val.user unless user
+
+    self[:observation_id] = val.id
+  end
+
   def update_project
     prefix_match = code.match(/(^.+)[ -]\d+$/)
     return unless prefix_match

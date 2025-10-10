@@ -421,6 +421,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
     login(mary.login)
     get(:edit, params: { id: fs.id })
     assert_response(:success)
+    obs = Observation.last
+    fs.observation = obs
+    fs.save!
+    assert_equal(obs.user, fs.user)
   end
 
   def test_admin_should_get_edit
