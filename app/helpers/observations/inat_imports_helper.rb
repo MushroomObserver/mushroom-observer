@@ -47,7 +47,7 @@ module Observations
         # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
         # and which haven't been exported from or inported to MO
-        without_field: "Mushroom Observer URL",
+        without_field: "Mushroom Observer URL"
       }
       query_args[:id] = import.inat_ids if import.inat_ids.present?
       link_to(:inat_expected_imports_link.l,
