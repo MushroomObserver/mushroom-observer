@@ -176,7 +176,7 @@ class API2
 
         field_slip.update!(observation:)
       else
-        field_slip = FieldSlip.create!(observation:, code: @code)
+        field_slip = FieldSlip.create!(observation:, code: @code, user: @user)
         field_slip.current_user = @user
         field_slip.update_project
         field_slip.save!
