@@ -60,12 +60,8 @@ class InatImportsControllerTest < FunctionalTestCase
       ),
       "Form missing expected import count"
     )
-    assert(
-      assert_select("#preview").text.include?(
-        "#{:inat_expected_imports_link.l}: #{:inat_import_tbd.l}"
-      ),
-      "Form missing expected imports link"
-    )
+    assert_select("#preview a[href^='#{SITE}/observations']", false,
+                  "New form should not display link to expected imports")
   end
 
   def test_new_inat_import_already_importing
