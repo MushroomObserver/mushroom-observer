@@ -33,10 +33,7 @@
           "#{:inat_import_expected_count.l}: " \
           "#{inat_expected_import_count(@inat_import)}"
         ))
-        concat(tag.p(
-          "#{:inat_expected_imports_link.l}: " \
-          "#{inat_expected_imports_link(@inat_import)}"
-        ))
+        concat(tag.p(inat_expected_imports_link(@inat_import)))
       end
     end %>
 

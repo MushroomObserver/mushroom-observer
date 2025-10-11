@@ -39,7 +39,7 @@ module Observations
     private :response_body?
 
     def inat_expected_imports_link(import)
-      return :inat_import_tbd.l if imports_ambiguous?(import)
+      return nil if imports_ambiguous?(import)
 
       query_args = {
         # obss of only the iNat user who has inat_username
@@ -48,8 +48,6 @@ module Observations
         iconic_taxa: ICONIC_TAXA,
         # and which haven't been exported from or inported to MO
         without_field: "Mushroom Observer URL",
-        # streamline query and response; all we need is the count
-        only_id: true, per_page: 1
       }
       query_args[:id] = import.inat_ids if import.inat_ids.present?
       link_to(:inat_expected_imports_link.l,

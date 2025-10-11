@@ -112,14 +112,20 @@ class InatImportsControllerTest < FunctionalTestCase
 
     login(user.login)
     stub_count_request(inat_username: inat_import.inat_username,
-                       ids: inat_ids)
+                       ids: inat_ids, body: '{"total_results":3}')
     disable_unsafe_html_filter
     post(:create, params: params)
 
     assert_form_action({ action: :create },
                        "InatImport form should reload after user fills it out")
-    # It should display expected import count
-    # If should display link to expected imports
+    assert(
+      assert_select("#preview").text.include?(
+        "#{:inat_import_expected_count.l}: 3"
+      ),
+      "Reloaded form should display expected import count"
+    )
+    assert_select("#preview a[href^='#{SITE}/observations']", true,
+                  "Reloaded form should display link to expected imports")
   end
 
   def test_create_cancel_reset
