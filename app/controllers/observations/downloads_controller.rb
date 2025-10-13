@@ -24,7 +24,8 @@ module Observations
     def print_labels
       query = find_query(:Observation)
       if query
-        render_report(ObservationLabels.new(query))
+        # render_report(ObservationLabels.new(query))
+        render_report(RtfLabels.new(query))
       else
         flash_error(:runtime_search_has_expired.t)
         redirect_back_or_default("/")
@@ -48,7 +49,8 @@ module Observations
       elsif params[:commit] == :DOWNLOAD.l
         create_and_render_report
       elsif params[:commit] == :download_observations_print_labels.l
-        render_report(ObservationLabels.new(@query))
+        # render_report(ObservationLabels.new(@query))
+        render_report(RtfLabels.new(@query))
       end
     end
 
