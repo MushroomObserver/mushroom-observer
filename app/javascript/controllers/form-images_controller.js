@@ -309,7 +309,7 @@ export default class extends Controller {
   // - re-sort the carousel
   // - read the file with FileReader to display the image
   itemTargetConnected(itemElement) {
-    itemElement.dataset.stimulus = "connected";
+    itemElement.dataset.formImagesItem = "connected";
     // console.log("itemTargetConnected")
     // console.log(itemElement);
     if (itemElement.dataset.imageStatus == "good") return;
@@ -329,7 +329,7 @@ export default class extends Controller {
   }
 
   thumbnailTargetConnected(thumbElement) {
-    thumbElement.dataset.stimulus = "connected";
+    thumbElement.dataset.formImagesThumbnail = "connected";
     if (thumbElement.dataset.imageStatus == "good") return;
 
     // Attach it to the FileStore item if there is one,
@@ -409,13 +409,15 @@ export default class extends Controller {
   removeAttachedItem(event) {
     const _good_images = this.goodImageIdsTarget.value,
       _good_image_vals = _good_images.split(" "),
-      // event.target may be a nested span without data, so get data directly
-      _image_id = this.removeImgTarget.dataset.imageId,
+      // event.target may be a nested span without data, so get data from button
+      _image_id = event.target.closest("button").dataset.imageId,
+      // This is the observation's designated thumbnail id
       _thumb_id = this.thumbImageIdTarget.value;
 
     const _new = _good_image_vals.filter(item => item !== _image_id).join(" ");
     this.goodImageIdsTarget.value = _new;
 
+    // clear hidden_field value for observation thumbnail_id
     if (_thumb_id == _image_id) {
       this.thumbImageIdTarget.value = "";
     }
