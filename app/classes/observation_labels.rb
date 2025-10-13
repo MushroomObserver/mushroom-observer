@@ -24,10 +24,4 @@ class ObservationLabels
   def header
     {}
   end
-
-  private
-
-  def rtf_user?(user)
-    false
-  end
 end
