@@ -151,6 +151,7 @@ module Account
         [:license_id, :integer],
         [:locale, :string],
         [:location_format, :enum],
+        [:label_format, :enum],
         [:login, :string],
         [:no_emails, :boolean],
         [:notes_template, :string],

@@ -3,7 +3,7 @@
 # Main document class for generating PDF labels
 class ObservationLabels
   def initialize(user, query)
-    @report = if rtf_user?(user)
+    @report = if user.label_format == "rtf"
                 ObservationLabels::RtfLabels.new(query)
               else
                 ObservationLabels::PdfLabels.new(query)

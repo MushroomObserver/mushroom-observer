@@ -57,6 +57,6 @@ label_formats = [
 
 <%= select_with_label(form: f, field: :label_format, prefs: true,
                       inline: true, options: label_formats,
-                      selected: "pdf") %>
+                      selected: @user.label_format) %>
 
 <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
