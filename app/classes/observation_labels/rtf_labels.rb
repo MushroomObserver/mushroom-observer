@@ -3,7 +3,7 @@
 require("rtf")
 
 # Format observations as fancy labels in RTF format.
-class RtfLabels
+class ObservationLabels::RtfLabels
   PARAGRAPH_PREFIX = "\\pard\\plain \\s0\\dbch\\af8\\langfe1081\\dbch\\af8" \
                      "\\afs24\\alang1081\\ql\\keep\\nowidctlpar\\sb0\\sa720" \
                      "\\ltrpar\\hyphpar0\\aspalpha\\cf0\\loch\\f6\\fs24" \
@@ -27,6 +27,10 @@ class RtfLabels
 
   def mime_type
     "application/rtf"
+  end
+
+  def http_disposition
+    "inline"
   end
 
   def encoding
