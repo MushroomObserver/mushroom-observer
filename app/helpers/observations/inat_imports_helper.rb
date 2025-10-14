@@ -43,7 +43,7 @@ module Observations
 
       query_args = {
         # obss of only the iNat user who has inat_username
-        user_login: import.inat_username,
+        user_id: import.inat_username,
         # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
         # and which haven't been exported from or inported to MO

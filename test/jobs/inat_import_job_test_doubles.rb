@@ -77,7 +77,7 @@ module InatImportJobTestDoubles
       order: "asc",
       order_by: "id",
       without_field: "Mushroom Observer URL",
-      user_login: @inat_import.inat_username
+      user_id: @inat_import.inat_username
     }
 
     stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").
