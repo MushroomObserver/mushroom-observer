@@ -27,6 +27,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "&id=#{ids}" \
       "&only_id=true&page=1&per_page=1" \
       "&user_id=#{inat_username}" \
+      "&verifiable=any" \
       "&without_field=Mushroom%20Observer%20URL"
     ).to_return(status: 200, body: body, headers: {})
   end

@@ -12,6 +12,8 @@ module Observations
         user_id: import.inat_username,
         # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
+        # include casual, needs id, and reasarch grade observations
+        verifiable: "any",
         # and which haven't been exported from or inported to MO
         without_field: "Mushroom Observer URL",
         # always include id key to make stubbing easier
@@ -41,12 +43,11 @@ module Observations
     def inat_expected_imports_link(import)
       return nil if imports_ambiguous?(import)
 
+      # see inat_expected_import_count
       query_args = {
-        # obss of only the iNat user who has inat_username
         user_id: import.inat_username,
-        # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
-        # and which haven't been exported from or inported to MO
+        verifiable: "any",
         without_field: "Mushroom Observer URL"
       }
       query_args[:id] = import.inat_ids if import.inat_ids.present?

@@ -56,7 +56,9 @@ class Inat
         user_id: @import.inat_username,
         # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
-        # and which haven't been exported from or inported to MO
+        # include casual, needs id, and research grade observations
+        verifiable: "any",
+        # and which haven't been exported from or imported to MO
         without_field: "Mushroom Observer URL"
       }.merge(args)
       headers = { authorization: "Bearer #{@import.token}", accept: :json }
