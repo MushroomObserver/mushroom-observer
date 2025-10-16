@@ -93,15 +93,15 @@ class LookupTest < UnitTestCase
     assert_lookup_names([name1, name2, name3],
                         ["Macrolepiota"],
                         include_immediate_subtaxa: true)
-    assert_lookup_names([name1, name2, name3, name4, name5],
-                        ["Macrolepiota"],
-                        include_synonyms: 1, # test boolean
-                        include_subtaxa: 1)
-    assert_lookup_names([name2, name3, name4, name5],
+    assert_lookup_names([name4, name5],
                         ["Macrolepiota"],
                         include_synonyms: true,
                         include_subtaxa: true,
                         exclude_original_names: true)
+    assert_lookup_names([name1, name2, name3, name4, name5],
+                        ["Macrolepiota"],
+                        include_synonyms: 1, # test boolean
+                        include_subtaxa: 1)
 
     name5.update(synonym_id: nil)
     name5 = Name.where(text_name: "Pseudolepiota rachodes").
@@ -149,7 +149,7 @@ class LookupTest < UnitTestCase
     assert_lookup_names([name1, name2],
                         ["Peltigeraceae"],
                         include_immediate_subtaxa: true)
-    assert_lookup_names([name2, name4, name5, name6, name7],
+    assert_lookup_names([name1, name2, name4, name5, name6, name7],
                         ["Peltigera"],
                         include_subtaxa: true)
     assert_lookup_names([name2, name4, name6],

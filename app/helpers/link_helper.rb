@@ -275,7 +275,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     name = :DOWNLOAD.t if name.blank?
     path, identifier, icon, content = button_atts(
       :download,
-      new_species_list_download_path(id: target.id), args, name
+      new_download_species_list_path(id: target.id), args, name
     )
 
     html_options = {
