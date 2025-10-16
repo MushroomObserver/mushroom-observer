@@ -21,10 +21,6 @@ class ObservationLabels::RtfLabels
   # --------------------
   # These are all things expected by ObserverController#render_report.
 
-  def header
-    {}
-  end
-
   def mime_type
     "application/rtf"
   end
@@ -172,12 +168,19 @@ class ObservationLabels::RtfLabels
     loc = @obs.location
     if @obs.alt.present?
       ", #{@obs.alt} m"
-    elsif loc&.low.present?
-      if loc.high.present? && loc.low < loc.high
-        ", #{loc.low}–#{loc.high} m"
-      else
-        ", #{loc.low} m"
-      end
+    elsif loc
+      format_loc(loc)
+    end
+  end
+
+  def format_loc(loc)
+    low = loc.low || loc.high
+    return unless low
+
+    if loc.high && low != loc.high
+      ", #{loc.low}–#{loc.high} m"
+    else
+      ", #{loc.low} m"
     end
   end
 

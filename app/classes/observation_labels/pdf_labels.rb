@@ -42,10 +42,6 @@ class ObservationLabels::PdfLabels
     "observation_labels_#{Date.current}.pdf"
   end
 
-  def header
-    {}
-  end
-
   private
 
   def create_pdf_document

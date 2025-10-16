@@ -489,10 +489,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def legal_name_changed?
-    !legal_name_change.nil?
-  end
-
   def legal_name_change
     old_name = name_change ? name_change[0] : name
     old_login = login_change ? login_change[0] : login
