@@ -583,11 +583,10 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.perform_now(@inat_import)
     end
 
-    assert_match(
-      :inat_wrong_user.l(
-        inat_username: @inat_import.inat_username, me_user: me_user
-      ),
-      @inat_import.response_errors,
+    expect = :inat_wrong_user.l(inat_username: @inat_import.inat_username,
+                                me_user: me_user)
+    assert_includes(
+      @inat_import.response_errors, expect,
       "It should warn if a user tries to import another's iNat obs"
     )
   end
