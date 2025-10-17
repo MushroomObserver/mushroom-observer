@@ -24,6 +24,12 @@ module Observations
         page: 1
       }
       query_args[:id] = import.inat_ids if import.inat_ids.present?
+      # If specific iNat ids are provided and the importing user is a
+      # super-importer, don't restrict to superimporters own observations.
+      if query_args[:id].present? &&
+         InatImport.super_importers.include?(import.user)
+        query_args.delete(:user_id)
+      end
       begin
         response = Inat::APIRequest.new(nil). # no token for GET
                    request(path: "observations?#{query_args.to_query}")
@@ -51,6 +57,10 @@ module Observations
         without_field: "Mushroom Observer URL"
       }
       query_args[:id] = import.inat_ids if import.inat_ids.present?
+      if query_args[:id].present? &&
+         InatImport.super_importers.include?(import.user)
+        query_args.delete(:user_id)
+      end
       link_to(:inat_expected_imports_link.l,
               "#{SITE}/observations?#{query_args.to_query}")
     end
