@@ -52,22 +52,24 @@ class InatImportJob < ApplicationJob
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
     begin
+      # fetch the logged-in iNat user
+      # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = Inat::APIRequest.new(token).request(path: "users/me")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
 
-    inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
-    log("inat_logged_in_user: #{inat_logged_in_user}")
-    raise(:inat_wrong_user.t) unless right_user?(inat_logged_in_user)
+    me_user = JSON.parse(response.body)["results"].first["login"]
+    log("inat_logged_in_user: #{me_user}")
+    wrong_inat_user_error(me_user) unless me_user == inat_username
   end
 
   def super_importer?
     InatImport.super_importer?(user)
   end
 
-  def right_user?(inat_logged_in_user)
-    inat_logged_in_user == inat_username
+  def wrong_inat_user_error(me_user)
+    raise(:inat_wrong_user.t(inat_username: inat_username, me_user: me_user))
   end
 
   def import_requested_observations
