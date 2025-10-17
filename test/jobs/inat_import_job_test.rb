@@ -587,7 +587,7 @@ class InatImportJobTest < ActiveJob::TestCase
       :inat_wrong_user.l(
         inat_username: @inat_import.inat_username, me_user: me_user
       ),
-      @inat_import.response_errors.gsub("&#8220;", '"').gsub("&#8221;", '"'),
+      @inat_import.response_errors,
       "It should warn if a user tries to import another's iNat obs"
     )
   end
