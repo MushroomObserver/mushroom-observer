@@ -7,11 +7,24 @@ module Observations
     def inat_expected_import_count(import)
       return :inat_import_tbd.l if imports_ambiguous?(import)
 
-      query_args = {
-        # obss of only the iNat user who has inat_username
-        user_id: import.inat_username,
+      query_args = query_args(import)
+      begin
+        response = Inat::APIRequest.new(nil). # no token for GET
+                   request(path: "observations?#{query_args.to_query}")
+        return :inat_import_tbd.l unless response_body?(response)
+
+        JSON.parse(response.body)["total_results"]
+      rescue ::RestClient::ExceptionWithResponse
+        :inat_import_tbd.l
+      end
+    end
+
+    def query_args(import)
+      result = {
         # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
+        # obss of only the iNat user who has inat_username
+        user_id: import.inat_username,
         # include casual, needs id, and reasarch grade observations
         verifiable: "any",
         # and which haven't been exported from or inported to MO
@@ -23,23 +36,16 @@ module Observations
         per_page: 1,
         page: 1
       }
-      query_args[:id] = import.inat_ids if import.inat_ids.present?
+      result[:id] = import.inat_ids if import.inat_ids.present?
       # If specific iNat ids are provided and the importing user is a
-      # super-importer, don't restrict to superimporters own observations.
-      if query_args[:id].present? &&
+      # super_importer, don't restrict to super_importer's own observations.
+      if result[:id].present? &&
          InatImport.super_importers.include?(import.user)
-        query_args.delete(:user_id)
+        result.delete(:user_id)
       end
-      begin
-        response = Inat::APIRequest.new(nil). # no token for GET
-                   request(path: "observations?#{query_args.to_query}")
-        return :inat_import_tbd.l unless response_body?(response)
-
-        JSON.parse(response.body)["total_results"]
-      rescue ::RestClient::ExceptionWithResponse
-        :inat_import_tbd.l
-      end
+      result
     end
+    private :query_args
 
     def response_body?(response)
       response.code == 200 && response.body.present?
@@ -65,11 +71,10 @@ module Observations
               "#{SITE}/observations?#{query_args.to_query}")
     end
 
-    private
-
     def imports_ambiguous?(import)
       import.inat_ids.blank? && !import.import_all? ||
         import.inat_ids.present? && import.import_all?
     end
+    private :imports_ambiguous?
   end
 end
