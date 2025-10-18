@@ -29,6 +29,7 @@
 #  [:taxon]                taxon hash
 #  inat_taxon_name::       scientific name
 #  inat_taxon_rank::       rank (can be secondary)
+#  [:species_guess]        iNat's guess at the taxon name
 #  [:user][:login]         username
 #
 #  == MO attributes
@@ -343,7 +344,7 @@ class Inat
     def full_name
       if infrageneric?
         # iNat :name string is only the epithet. Ex: "Distantes"
-        prepend_genus_and_rank
+        @obs[:species_guess]
       elsif infraspecific?
         # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
         insert_rank_between_species_and_final_epithet

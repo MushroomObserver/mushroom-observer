@@ -267,6 +267,30 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  def test_import_job_unsuggestedinfra_generic_name
+    create_ivars_from_filename("validae")
+
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Amanita sect. Validae",
+      author: "((Fr.) Quél.",
+      search_name: "Amanita sect. Validae ((Fr.) Quél.",
+      display_name: "**__Amanita__** sect. **__Validae__** ((Fr.) Quél.",
+      rank: "Section",
+      user: @user
+    )
+
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    standard_assertions(obs: obs, name: name)
+  end
+
   def test_import_job_infra_specific_name
     create_ivars_from_filename("i_obliquus_f_sterilis")
 
