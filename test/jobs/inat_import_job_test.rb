@@ -575,15 +575,18 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_anothers_observation
     create_ivars_from_filename("calostoma_lutescens")
 
-    stub_inat_interactions(login: "another user")
+    inat_logged_in_user = "WrongUser"
+    stub_inat_interactions(login: inat_logged_in_user)
 
     assert_difference("Observation.count", 0,
                       "It should not import another user's observation") do
       InatImportJob.perform_now(@inat_import)
     end
 
-    assert_match(
-      :inat_wrong_user.l, @inat_import.response_errors,
+    expect = :inat_wrong_user.l(inat_username: @inat_import.inat_username,
+                                inat_logged_in_user: inat_logged_in_user)
+    assert_includes(
+      @inat_import.response_errors, expect,
       "It should warn if a user tries to import another's iNat obs"
     )
   end
