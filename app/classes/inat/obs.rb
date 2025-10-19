@@ -342,7 +342,7 @@ class Inat
     # ---- name-related
 
     def full_name
-      # iNat infragneric ObservationID's need special handling because
+      # iNat infrageneric ObservationID's need special handling because
       # they display as just the epithet, e.g, "Distantes"
       if infrageneric?
         # If species_guess is just an epithet,
