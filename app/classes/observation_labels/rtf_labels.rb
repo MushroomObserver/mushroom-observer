@@ -45,8 +45,7 @@ class ObservationLabels::RtfLabels
   private
 
   def observations
-    query.results(include: [:user, :name, :location, :sequences, :projects,
-                            :species_lists, :collection_numbers,
+    query.results(include: [:user, :name, :location, :collection_numbers,
                             { herbarium_records: :herbarium }])
   end
 
@@ -63,9 +62,6 @@ class ObservationLabels::RtfLabels
     add_gps
     add_date
     add_observer_if_necessary
-    add_sequences
-    add_projects
-    add_species_lists
     add_notes
     @para.to_rtf
   end
@@ -219,41 +215,6 @@ class ObservationLabels::RtfLabels
 
     label("Observer")
     @para << observer
-    @para.line_break
-  end
-
-  # --------------------
-
-  # Sequence accession numbers if present.
-  def add_sequences
-    return unless @obs.sequences.any?
-
-    label("Sequences")
-    @para << @obs.sequences.map do |seq|
-      "#{seq.locus} #{seq.archive} #{seq.accession}".strip_squeeze
-    end.join(" / ")
-    @para.line_break
-  end
-
-  # --------------------
-
-  # Projects if attached to any.
-  def add_projects
-    return unless @obs.projects.any?
-
-    label("Projects")
-    @para << @obs.projects.map(&:title).join(" / ")
-    @para.line_break
-  end
-
-  # --------------------
-
-  # Species lists if attached to any.
-  def add_species_lists
-    return unless @obs.species_lists.any?
-
-    label("Species Lists")
-    @para << @obs.species_lists.map(&:title).join(" / ")
     @para.line_break
   end
 
