@@ -59,17 +59,20 @@ class InatImportJob < ApplicationJob
       raise("iNat API user request failed: #{e.message}")
     end
 
-    me_user = JSON.parse(response.body)["results"].first["login"]
-    log("inat_logged_in_user: #{me_user}")
-    wrong_inat_user_error(me_user) unless me_user == inat_username
+    inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+    log("inat_logged_in_user: #{inat_logged_in_user}")
+    return if inat_logged_in_user == inat_username
+
+    wrong_inat_user_error(inat_logged_in_user)
   end
 
   def super_importer?
     InatImport.super_importer?(user)
   end
 
-  def wrong_inat_user_error(me_user)
-    raise(:inat_wrong_user.t(inat_username: inat_username, me_user: me_user))
+  def wrong_inat_user_error(inat_logged_in_user)
+    raise(:inat_wrong_user.t(inat_username: inat_username,
+                             inat_logged_in_user: inat_logged_in_user))
   end
 
   def import_requested_observations

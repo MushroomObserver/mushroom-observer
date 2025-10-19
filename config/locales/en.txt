@@ -3106,7 +3106,7 @@
 
   inat_import_started: Your import has started. Refresh page to update results.
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
-  inat_wrong_user: "[me_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
+  inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
   inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
   inat_snapshot_caption: iNat imported data
