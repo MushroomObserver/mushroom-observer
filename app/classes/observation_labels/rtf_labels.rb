@@ -119,7 +119,7 @@ class ObservationLabels::RtfLabels
     italic = false
     @para.bold do |bold|
       @obs.name.display_name.gsub("**", "").split("__").each do |part|
-        if part.present?
+        unless part.empty?
           if italic
             bold.italic { |i| i << part } if part.present?
           else
