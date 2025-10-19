@@ -6,7 +6,9 @@ container_classes = %w[
 top_nav_classes = class_names(container_classes, "justify-content-between")
 search_nav_classes = class_names(container_classes, "justify-content-center")
 search_help_types = [:names, :observations]
-search_form_types = [:names, :observations, :locations, :projects]
+search_form_types = [
+  :names, :observations, :locations, :projects, :herbaria, :species_lists
+]
 left_classes = class_names(%w[
   d-flex flex-row align-items-center flex-grow-1 navbar_left
 ])
