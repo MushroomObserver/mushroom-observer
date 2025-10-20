@@ -29,6 +29,7 @@
 #  [:taxon]                taxon hash
 #  inat_taxon_name::       scientific name
 #  inat_taxon_rank::       rank (can be secondary)
+#  [:species_guess]        iNat's guess at the taxon name
 #  [:user][:login]         username
 #
 #  == MO attributes
@@ -341,9 +342,20 @@ class Inat
     # ---- name-related
 
     def full_name
+      # iNat infrageneric ObservationID's need special handling because
+      # they display as just the epithet, e.g, "Distantes"
       if infrageneric?
-        # iNat :name string is only the epithet. Ex: "Distantes"
-        prepend_genus_and_rank
+        # If species_guess is just an epithet,
+        # get the genus and rank from the identifications
+        # This will be the case if the ObservationID was suggested by a user
+        if @obs[:species_guess].exclude?(" ")
+          prepend_genus_and_rank
+        # Otherwise, just use the species_guess as given
+        # It will be the full name, e.g. "Morchella sect. Distantes"
+        # This will be the case if the ObservationID was not suggested by a user
+        else
+          @obs[:species_guess]
+        end
       elsif infraspecific?
         # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
         insert_rank_between_species_and_final_epithet

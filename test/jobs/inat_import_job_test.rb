@@ -267,6 +267,56 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # iNat Observation ID is an infrageneric name which was suggested by a user
+  def test_import_job_suggested_infrageneric_name
+    create_ivars_from_filename("distantes")
+
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Morchella sect. Distantes",
+      author: "Boud.",
+      search_name: "Morchella sect. Distantes Boud.",
+      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
+      rank: "Section",
+      user: @user
+    )
+
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    standard_assertions(obs: obs, name: name)
+  end
+
+  # iNat Observation ID is an infrageneric name not suggested by any user
+  def test_import_job_unsuggested_infrageneric_name
+    create_ivars_from_filename("validae")
+
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Amanita sect. Validae",
+      author: "((Fr.) Quél.",
+      search_name: "Amanita sect. Validae ((Fr.) Quél.",
+      display_name: "**__Amanita__** sect. **__Validae__** ((Fr.) Quél.",
+      rank: "Section",
+      user: @user
+    )
+
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    standard_assertions(obs: obs, name: name)
+  end
+
   def test_import_job_infra_specific_name
     create_ivars_from_filename("i_obliquus_f_sterilis")
 
