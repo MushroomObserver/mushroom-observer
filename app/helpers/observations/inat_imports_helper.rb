@@ -5,17 +5,17 @@ module Observations
     include Inat::Constants
 
     def inat_expected_import_count(import)
-      return :inat_import_tbd.l if imports_ambiguous?(import)
+      return nil if imports_ambiguous?(import)
 
       query_args = query_args(import)
       begin
         response = Inat::APIRequest.new(nil). # no token for GET
                    request(path: "observations?#{query_args.to_query}")
-        return :inat_import_tbd.l unless response_body?(response)
+        return nil unless response_body?(response)
 
         JSON.parse(response.body)["total_results"]
       rescue ::RestClient::ExceptionWithResponse
-        :inat_import_tbd.l
+        nil
       end
     end
 

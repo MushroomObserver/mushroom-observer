@@ -60,6 +60,7 @@
 class InatImportsController < ApplicationController
   include Validators
   include Inat::Constants
+  include Observations::InatImportsHelper
 
   before_action :login_required
 
@@ -127,7 +128,7 @@ class InatImportsController < ApplicationController
     @inat_import.update(
       state: "Authorizing",
       import_all: params[:all],
-      importables: importables_count,
+      importables: preliminary_importables_count,
       imported_count: 0,
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_ids: params[:inat_ids],
@@ -138,13 +139,13 @@ class InatImportsController < ApplicationController
       ended_at: nil,
       cancel: false
     )
+    # refined count using iNat API query which
+    # excludes already imported/exported observations and non-fungi/slime molds
+    @inat_import.update(importables: inat_expected_import_count(@inat_import))
   end
 
-  # NOTE: jdc 2024-06-15 This method is a quick & dirty way to get
-  # an initial estimate when the user provides a list of iNat ids.
-  # When implementing import_all, we should instead use the iNat API
-  # to get the number of observations to be imported.
-  def importables_count
+  # Initial estimate based only on the user-provided list of iNat ids.
+  def preliminary_importables_count
     return nil if importing_all?
 
     params[:inat_ids].split(",").length

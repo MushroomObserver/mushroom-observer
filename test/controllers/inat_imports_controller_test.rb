@@ -390,6 +390,9 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_equal(0, inat_import.total_imported_count.to_i,
                  "Need InatImport fixture without prior imports")
 
+    stub_count_request(ids: inat_import.inat_ids,
+                       inat_username: inat_import.inat_username,
+                       body: '{"total_results":4}')
     stub_request(:any, authorization_url)
     login(user.login)
     post(:create, params: { inat_ids: inat_import.inat_ids,
@@ -475,6 +478,8 @@ class InatImportsControllerTest < FunctionalTestCase
                consent: 1 }
 
     login(inat_import.user.login)
+
+    stub_count_request(inat_username: inat_import.inat_username)
     post(:create, params: params)
 
     assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
