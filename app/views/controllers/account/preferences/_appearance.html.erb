@@ -22,6 +22,10 @@ image_sizes = options_for_select(
                    end
                  }, @user.image_size
                )
+label_formats = [
+  [:prefs_label_format_pdf.l, "pdf"],
+  [:prefs_label_format_rtf.l, "rtf"]
+]
 %>
 
 <%= tag.div(:prefs_appearance.t, class: "form-group mt-3 font-weight-bold") %>
@@ -50,5 +54,9 @@ image_sizes = options_for_select(
 
 <%= select_with_label(form: f, field: :image_size, prefs: true, inline: true,
                       options: image_sizes, selected: @user.image_size) %>
+
+<%= select_with_label(form: f, field: :label_format, prefs: true,
+                      inline: true, options: label_formats,
+                      selected: @user.label_format) %>
 
 <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

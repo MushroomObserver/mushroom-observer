@@ -576,3 +576,11 @@ older_megacollybia_rodmanii_obs_rss_log:
 megacollybia_platyphylla_obs_rss_log:
   <<: *DEFAULTS
   observation: megacollybia_platyphylla_obs
+
+unknown_with_alt_rss_log:
+  <<: *DEFAULTS
+  observation: unknown_with_alt
+
+low_alt_obs_with_lat_lng_rss_log:
+  <<: *DEFAULTS
+  observation: low_alt_obs_with_lat_lng

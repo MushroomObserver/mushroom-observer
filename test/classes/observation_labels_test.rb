@@ -10,9 +10,10 @@ class ObservationLabelsTest < UnitTestCase
       log_contents = with_captured_logger do
         obs = Observation.first
         doc = ObservationLabels.new(
+          rolf,
           Query.lookup(:Observation, id_in_set: [obs.id])
         )
-        doc.generate
+        doc.body
       end
       assert_match(/Helvetica/, log_contents)
     end
