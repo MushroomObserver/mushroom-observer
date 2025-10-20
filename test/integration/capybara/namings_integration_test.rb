@@ -138,7 +138,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       assert_true(form.has_unchecked_field?("naming_reasons_3_check"))
       assert_true(form.has_field?("naming_reasons_3_notes", text: ""))
     end
-    namer_session.click_link(text: "Cancel (Show Observation)")
+    namer_session.first(class: "observation_return_link").click
 
     login(voter, session: voter_session)
     assert_not_equal(namer_session.driver.request.cookies["mo_user"],

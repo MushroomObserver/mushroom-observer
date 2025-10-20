@@ -10,6 +10,7 @@ class Inat
     attr_accessor :last_import_id
 
     delegate :inat_ids, to: :@import
+    delegate :user, to: :@import
 
     def initialize(import)
       @import = import
@@ -34,6 +35,7 @@ class Inat
     def next_page
       result = next_request(id: inat_ids, id_above: @last_import_id)
       return nil if response_bad?(result)
+      return nil if result.body.blank?
 
       JSON.parse(result)
     end
@@ -61,13 +63,26 @@ class Inat
         # and which haven't been exported from or imported to MO
         without_field: "Mushroom Observer URL"
       }.merge(args)
+      # super_importers can import observations of other users.
+      # In order to do that, we must remove the user_login param
+      # But we shouldn't remove that param unless there are other constraints
+      # on which observations are imported,
+      # else it will import all fungal observations on iNat!
+      if super_importing_selected_observations_of_single_user?
+        query_args.delete(:user_login)
+      end
       headers = { authorization: "Bearer #{@import.token}", accept: :json }
+
       Inat::APIRequest.new(@import.token).
         request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
       error = { error: e.http_code, query: query_args.to_json }.to_json
       @import.add_response_error(error)
       e.response
+    end
+
+    def super_importing_selected_observations_of_single_user?
+      InatImport.super_importer?(user) && @import.import_all == false
     end
   end
 end

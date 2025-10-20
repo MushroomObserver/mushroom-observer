@@ -176,7 +176,7 @@ class API2
 
         field_slip.update!(observation:)
       else
-        field_slip = FieldSlip.create!(observation:, code: @code)
+        field_slip = FieldSlip.create!(observation:, code: @code, user: @user)
         field_slip.current_user = @user
         field_slip.update_project
         field_slip.save!
@@ -297,25 +297,24 @@ class API2
 
     def parse_notes_fields!(set: false)
       prefix = set ? "set_" : ""
-      notes = look_for_note_field_parameters(prefix)
-      other = parse(:string, :"#{prefix}notes")
-      notes[Observation.other_notes_key] = other unless other.nil?
-      declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
+      notes = structure_notes(params[:"#{prefix}notes"])
+      declare_parameter(:"#{prefix}notes", :string, help: :notes_field)
       return notes if set
 
       notes.compact_blank!
     end
 
-    def look_for_note_field_parameters(prefix)
-      notes = Observation.no_notes
-      params.each do |key, val|
-        next unless (match = key.to_s.match(/^#{prefix}notes\[(.*)\]$/))
+    def structure_notes(notes)
+      return {} if notes.nil?
 
-        field = parse_notes_field_parameter!(match[1])
-        notes[field] = val.to_s.strip
-        ignore_parameter(key)
+      if notes.is_a?(Hash)
+        notes.transform_values! do |value|
+          value.is_a?(String) ? value.strip : value
+        end
+        notes
+      else
+        { Observation.other_notes_key => notes.to_s.strip }
       end
-      notes
     end
 
     def parse_notes_field_parameter!(str)

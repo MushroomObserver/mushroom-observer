@@ -6,7 +6,7 @@
 module Header
   module TogglesHelper
     def search_nav_toggle
-      tag.div(class: "navbar-form px-sm-3") do
+      tag.div(class: "navbar-form px-2 px-sm-3") do
         tag.button(
           link_icon(:search, title: :SEARCH.l),
           class: "btn btn-sm btn-outline-default top_nav_button",

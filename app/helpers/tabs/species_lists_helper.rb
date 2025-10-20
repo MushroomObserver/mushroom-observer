@@ -7,7 +7,7 @@ module Tabs
     # Can't access this page unless logged in as of 2023
     def species_list_show_tabs(list:, query: nil)
       tabs = species_list_logged_in_show_tabs(list, query)
-      return tabs unless check_permission(list)
+      return tabs unless permission?(list)
 
       tabs += species_list_user_show_tabs(list)
       tabs
@@ -37,7 +37,7 @@ module Tabs
       InternalLink::Model.new(
         :species_list_show_add_new_observations.t,
         list,
-        new_species_list_write_in_path(list.id),
+        new_write_in_species_list_path(list.id),
         html_options: { help: :species_list_show_add_new_observations_help.l }
       ).tab
     end
@@ -46,7 +46,7 @@ module Tabs
       InternalLink::Model.new(
         :species_list_show_manage_projects.t,
         list,
-        edit_species_list_projects_path(list.id),
+        edit_projects_for_species_list_path(list.id),
         html_options: { help: :species_list_show_manage_projects_help.l }
       ).tab
     end
@@ -61,7 +61,7 @@ module Tabs
     def species_list_download_tab(list)
       InternalLink::Model.new(
         :species_list_show_download.t, list,
-        add_q_param(new_species_list_download_path(list.id))
+        add_q_param(new_download_species_list_path(list.id))
       ).tab
     end
 
@@ -84,7 +84,7 @@ module Tabs
       InternalLink::Model.new(
         :species_list_show_add_remove_from_another_list.t, list,
         add_q_param(
-          edit_species_list_observations_path(species_list: list.id), query
+          species_lists_edit_observations_path(species_list: list.id), query
         )
       ).tab
     end
@@ -99,7 +99,7 @@ module Tabs
     def write_in_species_list_tab(list)
       InternalLink::Model.new(
         :species_list_show_write_in.t, list,
-        new_species_list_write_in_path(id: list.id)
+        new_write_in_species_list_path(id: list.id)
       ).tab
     end
 
@@ -137,7 +137,7 @@ module Tabs
     def species_list_upload_tab(list)
       InternalLink::Model.new(
         :species_list_upload_title.t, list,
-        new_species_list_upload_path(list.id)
+        new_upload_species_list_path(list.id)
       ).tab
     end
 
@@ -161,7 +161,7 @@ module Tabs
 
     def name_lister_tab
       InternalLink.new(
-        :name_lister_title.t, new_species_list_name_lister_path
+        :name_lister_title.t, species_lists_new_name_lister_path
       ).tab
     end
 

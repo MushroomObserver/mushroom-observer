@@ -31,7 +31,7 @@ column_classes(:nine_three)
               locals: { observation:, user: @user,
                         species_list: @species_list,
                         image: observation.thumb_image_id,
-                        remove: check_permission(@species_list) }) %>
+                        remove: permission?(@species_list) }) %>
           <% end %>
         <% else %>
           <%= tag.div(:species_list_show_no_members.tp) %>

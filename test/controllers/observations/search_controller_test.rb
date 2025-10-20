@@ -7,15 +7,29 @@ require("test_helper")
 # ------------------------------------------------------------
 module Observations
   class SearchControllerTest < FunctionalTestCase
-    def test_show
+    def test_show_help
       login
       get(:show)
+      assert_template("observations/search/_help")
+    end
+
+    def test_show_help_turbo
+      login
+      get(:show, format: :turbo_stream)
       assert_template("observations/search/_help")
     end
 
     def test_new_observations_search
       login("rolf")
       get(:new)
+      assert_template("observations/search/new")
+      assert_template("shared/_search_form")
+    end
+
+    def test_new_observations_search_turbo
+      login("rolf")
+      get(:new, format: :turbo_stream)
+      assert_template("shared/_search_form")
     end
 
     def test_new_observations_search_form_prefilled_from_existing_query
@@ -52,25 +66,37 @@ module Observations
                     selected: "Species")
       assert_select("select#query_observations_confidence_range",
                     selected: "Form")
+      assert_equal(session[:search_type], :observations)
     end
 
     # query_observations is the form object.
     def test_create_observations_search
       login
       params = {
-        pattern: "Agaricus campestris",
-        has_notes: true
+        by_users: rolf.unique_text_name,
+        by_users_id: rolf.id, # autocompleter should supply
+        has_notes: true,
+        lichen: false
       }
       post(:create, params: { query_observations: params })
 
+      validated_params = {
+        by_users: [rolf.id],
+        has_notes: true,
+        lichen: false # this should be preserved, not "compacted" out.
+      }
       assert_redirected_to(controller: "/observations", action: :index,
-                           params: { q: { model: :Observation, **params } })
+                           params: {
+                             q: { model: :Observation, **validated_params }
+                           })
     end
 
     def test_create_observations_search_nested
       login
       projects = [projects(:bolete_project), projects(:eol_project)]
       location = locations(:burbank)
+      today = Time.zone.today
+      todate = format("%04d-%02d-%02d", today.year, today.mon, today.day)
       params = {
         names: {
           lookup: "Agaricus campestris",
@@ -80,7 +106,8 @@ module Observations
         confidence: 33,
         confidence_range: 66,
         has_notes: true,
-        projects_id: projects.pluck(:id).join(",")
+        projects_id: projects.pluck(:id).join(","),
+        date: "2021-01-06-today"
       }
       post(:create, params: { query_observations: params })
 
@@ -94,7 +121,8 @@ module Observations
         in_box: location.bounding_box,
         confidence: [33.0, 66.0],
         has_notes: true,
-        projects: projects.pluck(:id)
+        projects: projects.pluck(:id),
+        date: ["2021-01-06", todate]
       }
       assert_redirected_to(
         controller: "/observations", action: :index,

@@ -67,7 +67,7 @@ module InatImportJobTestDoubles
                 headers: {})
   end
 
-  def stub_inat_observation_request(id_above: 0)
+  def stub_inat_observation_request(id_above: 0, body_nil: false)
     query_args = {
       iconic_taxa: ICONIC_TAXA,
       id: @inat_import.inat_ids,
@@ -80,6 +80,15 @@ module InatImportJobTestDoubles
       without_field: "Mushroom Observer URL",
       user_id: @inat_import.inat_username
     }
+    if InatImport.super_importer?(@user) && @inat_import.import_all == false
+      query_args.delete(:user_login)
+    end
+
+    body = if body_nil
+             nil
+           else
+             @mock_inat_response
+           end
 
     stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").
       with(headers:
@@ -87,7 +96,7 @@ module InatImportJobTestDoubles
       "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
       "Authorization" => "Bearer MockJWT",
       "Host" => "api.inaturalist.org" }).
-      to_return(body: @mock_inat_response)
+      to_return(body: body)
   end
 
   def stub_inat_photo_requests

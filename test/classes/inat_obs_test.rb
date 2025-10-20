@@ -115,6 +115,21 @@ class InatObsTest < UnitTestCase
   end
   # rubocop:enable Style/NumericLiterals
 
+  def test_when
+    fname = "somion_unicolor"
+    mock_inat_obs = mock_observation(fname)
+    assert_equal(Date.new(2023, 3, 23), mock_inat_obs.when)
+
+    # create a mock_obs without an Observed on date
+    # iNat allows this!
+    mock_search = File.read("test/inat/#{fname}.txt")
+    temp = JSON.parse(mock_search)["results"].first
+    temp.keys.select { |k| k.start_with?("observed_on") }.
+      each { |k| temp.delete(k) }
+    mock_obs = Inat::Obs.new(JSON.generate(temp))
+    assert_nil(mock_obs.when)
+  end
+
   def test_name_sensu
     # Make sure fixtures still OK
     names = Name.where(text_name: "Coprinus", rank: "Genus", deprecated: false)

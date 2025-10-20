@@ -56,8 +56,8 @@ module Name::Scopes
     }
     scope :text_name_has,
           ->(phrase) { search_columns(Name[:text_name], phrase) }
-    # scope :search_name_has,
-    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
+    scope :search_name_has,
+          ->(phrase) { search_columns(Name[:search_name], phrase) }
 
     # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :misspellings, lambda { |boolish = :no|

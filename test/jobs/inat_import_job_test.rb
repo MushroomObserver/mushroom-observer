@@ -461,6 +461,53 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # Prove (inter alia) that the MO Naming.user differs from the importing user
+  # when the iNat user who made the 1st iNat id is another MO user
+  def test_import_observed_date_missing
+    create_ivars_from_filename("calostoma_lutescens")
+
+    user = users(:mary)
+    assert(user.inat_username.present?,
+           "Test needs user fixture with an inat_username")
+
+    # re-do the ivars to make mary the iNat user who made the 1st iNat id
+    parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
+    parsed_response[:results].first[:identifications].
+      first[:user][:login] = user.inat_username
+    # Remove all observed_on... key/values to simulate Observed date missing
+    parsed_response[:results].first.
+      keys.select { |k| k.start_with?("observed_on") }.
+      each { |k| parsed_response[:results].first.delete(k) }
+    @mock_inat_response = JSON.generate(parsed_response)
+    @parsed_results = parsed_response[:results]
+    @inat_import = create_inat_import
+    InatImportJobTracker.create(inat_import: @inat_import.id)
+
+    # Add objects which are not included in fixtures
+    Name.create(
+      text_name: "Calostoma lutescens", author: "(Schweinitz) Burnap",
+      search_name: "Calostoma lutescens (Schweinitz) Burnap",
+      display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
+      rank: "Species",
+      user: user
+    )
+    Location.create(user: user,
+                    name: "Sevier Co., Tennessee, USA",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+
+    stub_inat_interactions
+
+    assert_difference(
+      "Observation.count", 0,
+      "It should not create an Observation if iNat Observed Date Missing"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+    assert_match(:inat_observed_missing_date.l, @inat_import.response_errors,
+                 "It should warn if the iNat Observed Date is missing")
+  end
+
   def test_import_update_inat_username_if_job_succeeds
     updated_inat_username = "updatedInatUsername"
 
@@ -528,15 +575,18 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_anothers_observation
     create_ivars_from_filename("calostoma_lutescens")
 
-    stub_inat_interactions(login: "another user")
+    inat_logged_in_user = "WrongUser"
+    stub_inat_interactions(login: inat_logged_in_user)
 
     assert_difference("Observation.count", 0,
                       "It should not import another user's observation") do
       InatImportJob.perform_now(@inat_import)
     end
 
-    assert_match(
-      :inat_wrong_user.l, @inat_import.response_errors,
+    expect = :inat_wrong_user.l(inat_username: @inat_import.inat_username,
+                                inat_logged_in_user: inat_logged_in_user)
+    assert_includes(
+      @inat_import.response_errors, expect,
       "It should warn if a user tries to import another's iNat obs"
     )
   end
@@ -559,6 +609,35 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_empty(@inat_import.response_errors, "There should be no errors")
     assert_nil(@user.reload.inat_username,
                "SuperImporter's inat_username should not change")
+  end
+
+  def test_super_importer_all_inat_fungal_observations
+    @user = users(:dick)
+
+    file_name = "import_all"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    @inat_import = InatImport.create(user: @user,
+                                     inat_ids: "",
+                                     import_all: true,
+                                     token: "MockCode",
+                                     inat_username: "anything")
+    InatImportJobTracker.create(inat_import: @inat_import.id)
+    # limit it to one page to avoid complications of stubbing multiple
+    # inat api requests with multiple files
+    @mock_inat_response = limited_to_first_page(mock_inat_response)
+    @parsed_results =
+      JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
+
+    stub_inat_interactions
+    stub_inat_observation_request(id_above: 0, body_nil: true)
+
+    assert_difference(
+      "Observation.count", 0,
+      "Superimporter should not import all iNat fungal observations " \
+      "by all users"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
   end
 
   def test_import_canceled

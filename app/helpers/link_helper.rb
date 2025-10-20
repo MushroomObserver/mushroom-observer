@@ -275,7 +275,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     name = :DOWNLOAD.t if name.blank?
     path, identifier, icon, content = button_atts(
       :download,
-      new_species_list_download_path(id: target.id), args, name
+      new_download_species_list_path(id: target.id), args, name
     )
 
     html_options = {
@@ -393,5 +393,12 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     }.merge(args) # currently don't have to merge class arg upstream
 
     button_to(path, html_options) { [content, icon].safe_join }
+  end
+
+  def button_link(title, path, **args)
+    classes = %w[btn btn-default]
+    args[:class] = class_names(classes, args[:class])
+
+    link_to(title, path, **args)
   end
 end

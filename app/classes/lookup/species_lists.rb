@@ -9,6 +9,6 @@ class Lookup::SpeciesLists < Lookup
   end
 
   def lookup_method(name)
-    SpeciesList.where(title: name)
+    SpeciesList.title_has(name)
   end
 end

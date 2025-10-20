@@ -11,7 +11,7 @@ module Tabs
         projects_index_tab,
         object_return_tab(project)
       ]
-      links << destroy_project_tab(project) if check_permission(project)
+      links << destroy_project_tab(project) if permission?(project)
       links
     end
 
@@ -28,7 +28,7 @@ module Tabs
         projects_index_tab,
         object_return_tab(project)
       ]
-      return unless check_permission(project)
+      return unless permission?(project)
 
       # Note this is just an edit_project_tab with different wording
       links << change_member_status_tab(project)
@@ -177,38 +177,42 @@ module Tabs
        project_species_list_images_button(query)]
     end
 
-    def button_link(title, path)
-      styling = { class: "btn btn-default btn-lg my-3 mr-3" }
-      link_to(title, path, styling)
+    def project_button_args
+      { class: "btn-lg my-3 mr-3" }
     end
 
     def project_species_list_map_button(query)
-      button_link(:MAP.t, add_q_param(map_observations_path, query))
+      button_link(:MAP.l, add_q_param(map_observations_path, query),
+                  **project_button_args)
     end
 
     def project_species_list_observations_button(query)
-      button_link(:OBSERVATIONS.t, add_q_param(observations_path, query))
+      button_link(:OBSERVATIONS.l, add_q_param(observations_path, query),
+                  **project_button_args)
     end
 
     def project_species_list_names_button(list)
-      button_link(:NAMES.t,
-                  checklist_path(species_list_id: list.id))
+      button_link(:NAMES.l,
+                  checklist_path(species_list_id: list.id),
+                  **project_button_args)
     end
 
     def project_species_list_locations_button(query)
       return unless query && Query.related?(:Location, :Observation)
 
-      button_link(:LOCATIONS.t,
-                  InternalLink::RelatedQuery.new(Location, :Observation,
-                                                 query, controller).url)
+      locations_url = InternalLink::RelatedQuery.new(
+        Location, :Observation, query, controller
+      ).url
+      button_link(:LOCATIONS.l, locations_url, **project_button_args)
     end
 
     def project_species_list_images_button(query)
       return unless query && Query.related?(:Location, :Observation)
 
-      button_link(:IMAGES.t,
-                  InternalLink::RelatedQuery.new(Image, :Observation,
-                                                 query, controller).url)
+      images_url = InternalLink::RelatedQuery.new(
+        Image, :Observation, query, controller
+      ).url
+      button_link(:IMAGES.l, images_url, **project_button_args)
     end
 
     def project_observation_buttons(project, query)
@@ -216,14 +220,16 @@ module Tabs
 
       _img_name, img_link, = related_images_tab(:Observation, query)
       buttons = [
-        button_link(:MAP.t, add_q_param(map_observations_path, query)),
-        button_link(:IMAGES.l, img_link),
+        button_link(:MAP.t, add_q_param(map_observations_path, query),
+                    **project_button_args),
+        button_link(:IMAGES.l, img_link, **project_button_args),
         button_link(:DOWNLOAD.l,
-                    add_q_param(new_observations_download_path, query))
+                    add_q_param(new_observations_download_path, query),
+                    **project_button_args)
       ]
       if project.field_slip_prefix
-        buttons << button_link(:FIELD_SLIPS.t,
-                               field_slips_path(project:))
+        buttons << button_link(:FIELD_SLIPS.t, field_slips_path(project:),
+                               **project_button_args)
       end
 
       # Download Observations

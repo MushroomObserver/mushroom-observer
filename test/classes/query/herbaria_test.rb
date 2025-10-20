@@ -75,6 +75,14 @@ class Query::HerbariaTest < UnitTestCase
     )
   end
 
+  def test_herbarium_by_users
+    expects = [herbaria(:rolf_herbarium)]
+    scope = Herbarium.by_users(rolf.id)
+    assert_query_scope(
+      expects, scope, :Herbarium, by_users: rolf.id
+    )
+  end
+
   def test_herbarium_pattern_search
     expects = [herbaria(:nybg_herbarium)]
     scope = Herbarium.pattern("awesome")

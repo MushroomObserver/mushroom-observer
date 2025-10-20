@@ -79,7 +79,7 @@ module ImagesHelper
   def show_original_name?(image, original)
     original && image &&
       image.original_name.present? &&
-      (check_permission(image) ||
+      (permission?(image) ||
        image.user &&
        image.user.keep_filenames == "keep_and_show")
   end

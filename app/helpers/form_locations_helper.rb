@@ -2,9 +2,10 @@
 
 module FormLocationsHelper
   # The input for the location form, interacts with Stimulus map controller
-  def form_location_input_find_on_map(form:, field:, value: nil, label: nil)
+  def form_location_input_find_on_map(form:, field:, value: nil, label: nil,
+                                      help: :form_locations_help.t)
     text_field_with_label(
-      form:, field:, value:, label:, help: :form_locations_help.t,
+      form:, field:, value:, label:, help:,
       data: { autofocus: true, map_target: "placeInput" },
       button: :form_locations_find_on_map.l,
       button_data: { map_target: "showBoxBtn", action: "map#showBox" }
