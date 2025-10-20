@@ -49,12 +49,22 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action(action: :create)
+    assert_select("input[name=cancel], button[name=cancel], a[name=cancel]",
+                  true, "Form needs a Cancel button")
+    assert_select(
+      "a[name=cancel][href='#{new_observation_path}'], " \
+      "input[name=cancel][formaction='#{new_observation_path}'], " \
+      "button[name=cancel][formaction='#{new_observation_path}']",
+      true, "Cancel button should go to new_observation_path"
+    )
+
     assert_select("input#inat_ids", true,
                   "Form needs a field for inputting iNat ids")
     assert_select("input#inat_username", true,
                   "Form needs a field for inputting iNat username")
     assert_select("input[type=checkbox][id=consent]", true,
                   "Form needs checkbox requiring consent")
+
     assert(
       assert_select("#preview").text.include?(
         "#{:inat_import_expected_count.l}: #{:inat_import_tbd.l}"
