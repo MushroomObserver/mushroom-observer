@@ -46,11 +46,6 @@ else
   SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 end
 
-SimpleCov.start("rails") do
-  # Cover .erb files. https://github.com/simplecov-ruby/simplecov/pull/1037
-  enable_coverage_for_eval
-end
-
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
 require("minitest/reporters")
