@@ -28,6 +28,8 @@ else
   SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 end
 
+SimpleCov.start("rails")
+
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
 require("minitest/reporters")
