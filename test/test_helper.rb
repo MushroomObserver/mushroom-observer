@@ -28,7 +28,10 @@ else
   SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 end
 
-SimpleCov.start("rails")
+SimpleCov.start("rails") do
+  # An always empty file which is always reported as a coverage decrease
+  add_filter("/channels/application_cable/channel.rb")
+end
 
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
