@@ -1297,9 +1297,38 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_name_prov_name_with_trailing_nonbreaking_space
+  def test_name_prov_name_with_nonbreaking_space
+    # leading non-breaking space (U+00A0)
+    do_name_parse_test(
+      "\u00A0Cuphophyllus \"pratensis-IN01\"",
+      text_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      real_text_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      search_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      real_search_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      sort_name: "Cuphophyllus pratensis-in01",
+      display_name: "**__Cuphophyllus__** sp. **__'pratensis-IN01'__**",
+      parent_name: "Cuphophyllus",
+      rank: "Species",
+      author: "",
+      deprecated: false
+    )
+    # trailing non-breaking space
     do_name_parse_test(
       "Cuphophyllus \"pratensis-IN01\"\u00A0",
+      text_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      real_text_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      search_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      real_search_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      sort_name: "Cuphophyllus pratensis-in01",
+      display_name: "**__Cuphophyllus__** sp. **__'pratensis-IN01'__**",
+      parent_name: "Cuphophyllus",
+      rank: "Species",
+      author: "",
+      deprecated: false
+    )
+    # interior non-breaking space
+    do_name_parse_test(
+      "Cuphophyllus \u00A0\"pratensis-IN01\"",
       text_name: "Cuphophyllus sp. 'pratensis-IN01'",
       real_text_name: "Cuphophyllus sp. 'pratensis-IN01'",
       search_name: "Cuphophyllus sp. 'pratensis-IN01'",
