@@ -1297,6 +1297,22 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_prov_name_with_trailing_nonbreaking_space
+    do_name_parse_test(
+      "Cuphophyllus \"pratensis-IN01\"\u00A0",
+      text_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      real_text_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      search_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      real_search_name: "Cuphophyllus sp. 'pratensis-IN01'",
+      sort_name: "Cuphophyllus pratensis-in01",
+      display_name: "**__Cuphophyllus__** sp. **__'pratensis-IN01'__**",
+      parent_name: "Cuphophyllus",
+      rank: "Species",
+      author: "",
+      deprecated: false
+    )
+  end
+
   def test_name_prov_name_no_epithet
     do_name_parse_test(
       "Pleurotus 'MA02'",

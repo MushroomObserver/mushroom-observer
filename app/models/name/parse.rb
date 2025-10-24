@@ -590,7 +590,11 @@ module Name::Parse
       gsub(/‘|’/, "'").
       delete("\u2028"). # Unicode RLE that we see occasionally as line separator
       gsub(/\s+/, " ").
-      strip_squeeze
+      strip_squeeze.
+      # remove trailing spacing characters including non-breaking spaces
+      sub(/[\s\u00A0\u202F]+\z/, "").
+      # and the same for lead
+      sub(/\A[\s\u00A0\u202F]+/, "")
   end
 
   # Adjust +search_name+ string to collate correctly. Pass in +search_name+.
