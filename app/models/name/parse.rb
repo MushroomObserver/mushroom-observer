@@ -593,7 +593,7 @@ module Name::Parse
       strip_squeeze.
       # remove trailing spacing characters including non-breaking spaces
       sub(/[\s\u00A0\u202F]+\z/, "").
-      # and the same for lead
+      # and the same for leading
       sub(/\A[\s\u00A0\u202F]+/, "")
   end
 
