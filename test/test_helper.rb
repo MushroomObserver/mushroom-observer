@@ -29,6 +29,10 @@ else
 end
 
 SimpleCov.start("rails") do
+  # filters
+  # https://github.com/simplecov-ruby/simplecov?tab=readme-ov-file#defining-custom-filters
+  # Exclude lib as we have so little there.
+  add_filter(%r{/lib/})
   # An always empty file which is always reported as a coverage decrease
   add_filter("/channels/application_cable/channel.rb")
 end
