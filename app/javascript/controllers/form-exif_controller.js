@@ -19,7 +19,7 @@ export default class extends Controller {
   static outlets = ["autocompleter", "map"]
 
   connect() {
-    this.element.dataset.stimulus = "form-exif-connected";
+    this.element.dataset.formExif = "connected";
 
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,

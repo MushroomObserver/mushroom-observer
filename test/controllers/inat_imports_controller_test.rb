@@ -16,11 +16,7 @@ end
 # test importing iNaturalist Observations to Mushroom Observer
 class InatImportsControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
-
-  SITE = InatImportsController::SITE
-  REDIRECT_URI = InatImportsController::REDIRECT_URI
-  API_BASE = InatImportsController::API_BASE
-  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
+  include Inat::Constants
 
   def test_show
     import = inat_imports(:rolf_inat_import)
@@ -47,6 +43,22 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Form needs checkbox requiring consent")
   end
 
+  def test_new_inat_import_already_importing
+    user = users(:katrina)
+    import = inat_imports(:katrina_inat_import)
+    tracker = inat_import_job_trackers(:katrina_tracker)
+
+    login(user.login)
+    get(:new)
+
+    assert_flash_warning(
+      "Should flash warning if user starts iNat import while another is running"
+    )
+    assert_redirected_to(
+      inat_import_path(import, params: { tracker_id: tracker.id })
+    )
+  end
+
   def test_new_inat_import_inat_username_prefilled
     user = users(:mary)
     assert(user.inat_username.present?,
@@ -59,6 +71,20 @@ class InatImportsControllerTest < FunctionalTestCase
       "input[name=?][value=?]", "inat_username", user.inat_username, true,
       "InatImport should pre-fill `inat_username` with user's inat_username"
     )
+  end
+
+  def test_create_cancel_reset
+    user = users(:ollie)
+    import = inat_imports(:ollie_inat_import)
+    assert(import.canceled?, "Test needs a canceled InatImport fixture")
+    id = "123"
+    params = { inat_ids: id, inat_username: user.inat_username, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_not(import.reload.canceled?,
+               "`cancel` should be false when starting an import")
   end
 
   def test_create_missing_username
@@ -82,7 +108,24 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_flash_text(:inat_no_imports_designated.l)
+    assert_flash_text(:inat_list_xor_all.l)
+  end
+
+  def test_create_list_and_all
+    params = { inat_username: "anything", inat_ids: "7,8,9",
+               all: 1, consent: 1 }
+    login
+
+    assert_no_difference(
+      "Observation.count",
+      "Imported obs though user both listed IDs and checked Import All"
+    ) do
+      post(:create, params: params)
+    end
+    assert_flash_text(
+      :inat_list_xor_all.l,
+      "It should warn about listing IDs while checking Import All"
+    )
   end
 
   def test_create_illegal_observation_id
@@ -217,10 +260,13 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_create_authorization_request
     user = users(:rolf)
-    inat_username = "rolf"
+    inat_username = "rolf" # use different inat_username to test if it's updated
     inat_import = inat_imports(:rolf_inat_import)
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
+    assert_equal(0, inat_import.total_imported_count.to_i,
+                 "Test needs InatImport fixture without prior imports")
+    inat_ids = "123,456,789"
 
     stub_request(:any, authorization_url)
     login(user.login)
@@ -230,13 +276,19 @@ class InatImportsControllerTest < FunctionalTestCase
       "Authorization request to iNat shouldn't create MO Observation(s)"
     ) do
       post(:create,
-           params: { inat_ids: 123_456_789, inat_username: inat_username,
+           params: { inat_ids: inat_ids, inat_username: inat_username,
                      consent: 1 })
     end
 
     assert_response(:redirect)
+    assert_equal(inat_ids.split(",").length, inat_import.reload.importables,
+                 "Failed to save InatImport.importables")
     assert_equal("Authorizing", inat_import.reload.state,
                  "MO should be awaiting authorization from iNat")
+    assert_equal(
+      InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
+      inat_import.avg_import_time
+    )
     assert_equal(inat_username, inat_import.inat_username,
                  "Failed to save InatImport.inat_username")
   end
@@ -248,6 +300,21 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_redirected_to(observations_path)
     assert_flash_error
+  end
+
+  def test_import_all_anothers_observations
+    user = users(:dick) # Dick is a iNat superimporter
+    params = { inat_username: "anything", inat_ids: nil,
+               consent: 1, all: 1 }
+
+    login(user.login)
+    assert_no_difference("Observation.count",
+                         "iNat obss imported without consent") do
+      post(:create, params: params)
+    end
+
+    assert_flash_text(:inat_importing_all_anothers.t)
+    assert_form_action(action: :create)
   end
 
   def test_import_authorized
@@ -272,10 +339,25 @@ class InatImportsControllerTest < FunctionalTestCase
       end
     end
 
+    assert_in_delta(
+      0.25, inat_import.reload.last_obs_elapsed_time, 0.25,
+      "When job starts, elapsed time for 1st import should be <= 0.5 seconds"
+    )
+
     tracker = InatImportJobTracker.where(inat_import: inat_import.id).last
     assert_redirected_to(
       inat_import_path(inat_import, params: { tracker_id: tracker.id })
     )
+  end
+
+  def test_import_all
+    user = users(:mary)
+    params = { inat_username: user.inat_username, all: 1, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
   def test_inat_username_unchanged_if_authorization_denied
@@ -297,6 +379,20 @@ class InatImportsControllerTest < FunctionalTestCase
       user.reload.inat_username,
       "User inat_username shouldn't change if user denies authorization to MO"
     )
+  end
+
+  def test_cancel
+    import = inat_imports(:katrina_inat_import)
+    assert(import.job_pending? && !import.canceled?,
+           "Test needs a Import fixture with a uncancelled, pending Job")
+
+    login
+    get(:cancel, params: { id: import.id })
+
+    assert_response(:success)
+    assert_template(:show)
+    assert(import.reload.canceled?,
+           "Clicking cancel button should make InatImport.canceled? == true")
   end
 
   ########## Utilities

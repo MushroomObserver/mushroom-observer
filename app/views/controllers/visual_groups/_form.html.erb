@@ -2,18 +2,19 @@
               id: "visual_group_form") do |f| %>
 
   <% if visual_group.errors.any? %>
-    <div id="error_explanation">
-      <h2>
-	<%= pluralize(visual_group.errors.count, "error") %>
-	prohibited this visual_group from being saved:
-      </h2>
-
-      <ul>
-        <% visual_group.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
+    <% count = pluralize(
+      visual_group.errors.count, :error.t, plural: :errors.t
+    ) %>
+    <%= alert_block(level: :danger, id: "error_explanation") do
+      [
+        tag.h2("#{count} prohibited this visual_group from being saved:"),
+        tag.ul do
+          visual_group.errors.each do |error|
+            concat(tag.li(error.full_message))
+          end
+        end
+      ].safe_join
+    end %>
   <% end %>
 
   <div>

@@ -29,11 +29,11 @@ class ObjectLinkHelperTest < ActionView::TestCase
     link_text = "BP"
     assert_equal(expected_link(path, html_class, link_text),
                  link_to_object(projects(:bolete_project), "BP"))
-    # link to species list
+    # link to species_list
     spl = species_lists(:first_species_list)
     path = species_list_path(spl.id)
     html_class = "species_list_link_#{spl.id}"
-    link_text = "A Species List"
+    link_text = "An Observation List"
     assert_equal(expected_link(path, html_class, link_text),
                  link_to_object(species_lists(:first_species_list)))
     # link to non-existent object, name not supplied

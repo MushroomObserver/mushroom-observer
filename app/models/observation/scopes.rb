@@ -7,7 +7,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do
     # default ordering for index queries
     scope :order_by_default,
           -> { order_by(::Query::Observations.default_order) }
@@ -21,7 +21,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       on_date(ymd_string)
     }
     scope :found_after, lambda { |ymd_string|
-      date(ymd_string)
+      date_after(ymd_string)
     }
     scope :found_before, lambda { |ymd_string|
       date_before(ymd_string)
@@ -66,7 +66,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # (unlike Observation[:text_name]) and is not cached on the obs
     scope :pattern, lambda { |phrase|
       joins(:name).distinct.
-        search_columns((Observation[:where] + Name[:search_name]), phrase)
+        search_columns(Observation[:where] + Name[:search_name], phrase)
     }
     # More comprehensive search of Observation fields + Name.search_name,
     # (plus comments ?).
@@ -257,8 +257,16 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :locations, lambda { |locations|
-      location_ids = lookup_locations_by_name(locations)
+      location_ids = Lookup::Locations.new(locations).ids
       where(location: location_ids).distinct
+    }
+    # This is the new default search scope for observations by location:
+    # returns all observations whose lat/lng or location_lat/lng are
+    # within the box(es) of the given observations.
+    scope :within_locations, lambda { |locations|
+      locs = ::Lookup::Locations.new(locations).instances
+      in_boxes = locs.map! { |location| in_box(**location.bounding_box) }
+      or_clause(*in_boxes).distinct
     }
     # Pass Box kwargs (:north, :south, :east, :west), any order.
     # By default this scope selects only obs either with lat/lng or with useful
@@ -281,13 +289,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       box = Mappable::Box.new(**args.except(:vague))
       return none unless box.valid?
 
+      scope = all
       if include_vague_locations
         # this join is necessary for the `or` condition, which requires it
-        left_outer_joins(:location).gps_in_box_over_dateline(box).
-          or(Observation.associated_location_center_in_box_over_dateline(box))
+        scope.left_outer_joins(:location).gps_in_box_over_dateline(box).
+          or(scope.associated_location_center_in_box_over_dateline(box))
       else
-        gps_in_box_over_dateline(box).
-          or(Observation.cached_location_center_in_box_over_dateline(box))
+        scope.gps_in_box_over_dateline(box).
+          or(scope.cached_location_center_in_box_over_dateline(box))
       end
     }
     # In these the box.east edge is in the w hemisphere, -180..
@@ -325,13 +334,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       box = Mappable::Box.new(**args.except(:vague))
       return none unless box.valid?
 
+      scope = all
       if include_vague_locations
         # this join is necessary for the `or` condition, which requires it
-        left_outer_joins(:location).gps_in_box(box).
-          or(Observation.associated_location_center_in_box(box))
+        scope.left_outer_joins(:location).gps_in_box(box).
+          or(scope.associated_location_center_in_box(box))
       else
-        gps_in_box(box).or(
-          Observation.cached_location_center_in_box(box)
+        scope.gps_in_box(box).or(
+          scope.cached_location_center_in_box(box)
         )
       end
     }

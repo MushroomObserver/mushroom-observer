@@ -12,27 +12,22 @@ module ObservationsController::Destroy
 
     @observation.current_user = @user
     obs_id = @observation.id
-    next_state = nil
-    # decide where to redirect after deleting observation
-    if (this_state = find_query(:Observation))
-      this_state.current = @observation
-      next_state = this_state.next
+    # decide where to redirect after deleting observation, using Query.next_id
+    if (this_query = find_query(:Observation))
+      this_query.current_id = @observation.id
+      next_id = this_query.next_id
     end
 
-    if !check_permission!(@observation)
+    if !permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
-      redirect_to(add_query_param({ action: :show, id: obs_id },
-                                  this_state))
+      redirect_to({ action: :show, id: obs_id })
     elsif !@observation.destroy
       flash_error(:runtime_destroy_observation_failed.t(id: obs_id))
-      redirect_to(add_query_param({ action: :show, id: obs_id },
-                                  this_state))
+      redirect_to({ action: :show, id: obs_id })
     else
       flash_notice(:runtime_destroy_observation_success.t(id: param_id))
-      if next_state
-        redirect_to(add_query_param({ action: :show,
-                                      id: next_state.current_id },
-                                    next_state))
+      if this_query
+        redirect_to({ action: :show, id: next_id })
       else
         redirect_to(action: :index)
       end

@@ -6,8 +6,7 @@ add_page_title(:change_member_status_title.t(
 add_context_nav(project_member_form_edit_tabs(project: @project))
 
 action = { controller: "/projects/members", action: :update,
-            project_id: @project.id, candidate: @candidate.id,
-            q: get_query_param }
+           project_id: @project.id, candidate: @candidate.id }
 %>
 
 <%= form_with(url: action, method: :patch, id: "project_member_form") do |f| %>

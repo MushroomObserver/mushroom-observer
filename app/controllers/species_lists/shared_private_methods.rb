@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # private methods shared by SpeciesListsController and subcontrollers
-# rubocop:disable Metrics/ModuleLength
 module SpeciesLists
   module SharedPrivateMethods
     ############################################################################
@@ -13,207 +12,6 @@ module SpeciesLists
     def find_species_list!
       SpeciesList.show_includes.safe_find(params[:id].to_s) ||
         flash_error_and_goto_index(SpeciesList, params[:id].to_s)
-    end
-
-    # Validate list of names, and if successful, create observations.
-    # Parameters involved in name list validation:
-    #   params[:list][:members]               String user typed in big text area
-    #                                         on right side (strip_squozen)
-    #   params[:approved_names]               New names from prev post.
-    #   params[:approved_deprecated_names]    Deprecated names from prev post.
-    #   params[:chosen_multiple_names][name]  Radios choosing ambiguous names.
-    #   params[:chosen_approved_names][name]  Radios for accepted names.
-    #     (Both the last two radio boxes are hashes with:
-    #       key: ambiguous name as typed with nonalphas changed to underscores,
-    #       val: id of name user has chosen (via radio boxes in feedback)
-    #   params[:checklist_data][...]          Radios: hash from name id to "1".
-    #   params[:checklist_names][name_id]     (Used by view to give a name to
-    #                                         each id in checklist_data hash.)
-    # Bullet:
-    # https://blog.appsignal.com/2018/06/19/activerecords-counter-cache.html
-    def process_species_list(create_or_update)
-      redirected = false
-
-      # Update the timestamps/user/when/where/title/notes fields.
-      init_basic_species_list_fields(create_or_update)
-
-      # Validate place name.
-      validate_place_name
-
-      list = list_without_underscores
-
-      # Make sure all the names (that have been approved) exist.
-      construct_approved_names(list, params[:approved_names])
-
-      # Initialize NameSorter and give it all the information.
-      sorter = init_name_sorter(list)
-
-      # Now let us count all the ways in which NameSorter can fail...
-      failed = check_if_name_sorter_failed(sorter)
-
-      # Okay, at this point we've apparently validated the new list of names.
-      # Save the OTHER changes to the species list, then let this other method
-      # (construct_observations) create the observations.  This always succeeds,
-      # so we can redirect to show_species_list (or chain to create location).
-      if !failed && @dubious_where_reasons == []
-        if @species_list.save
-          redirected = update_redirect_and_flash_notices(create_or_update,
-                                                         sorter)
-        else
-          flash_object_errors(@species_list)
-        end
-      end
-
-      return if redirected
-
-      # Failed to create due to synonyms, unrecognized names, etc.
-      init_name_vars_from_sorter(@species_list, sorter)
-      init_member_vars_for_reload
-      init_project_vars_for_reload(@species_list)
-      re_render_appropriate_form(create_or_update)
-    end
-
-    def init_basic_species_list_fields(create_or_update)
-      now = Time.zone.now
-      @species_list.created_at = now if create_or_update == :create
-      @species_list.updated_at = now
-      @species_list.user = @user
-      if params[:species_list]
-        args = params[:species_list]
-        @species_list.attributes = args.permit(permitted_species_list_args)
-      end
-      @species_list.title = @species_list.title.to_s.strip_squeeze
-    end
-
-    def validate_place_name
-      if Location.is_unknown?(@species_list.place_name) ||
-         @species_list.place_name.blank?
-        @species_list.location = Location.unknown
-        @species_list.where = nil
-      end
-
-      @place_name = @species_list.place_name
-      @dubious_where_reasons = []
-      unless (@place_name != params[:approved_where]) &&
-             @species_list.location_id.nil?
-        return
-      end
-
-      db_name = Location.user_format(@user, @place_name)
-      @dubious_where_reasons = Location.dubious_name?(db_name, true)
-    end
-
-    def list_without_underscores
-      params.dig(:list, :members).to_s.tr("_", " ").strip_squeeze
-    end
-
-    def init_name_sorter(list)
-      sorter = NameSorter.new
-      sorter.add_chosen_names(params[:chosen_multiple_names])
-      sorter.add_chosen_names(params[:chosen_approved_names])
-      sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
-      sorter.check_for_deprecated_checklist(params[:checklist_data])
-      sorter.check_for_deprecated_names(@species_list.names) if @species_list.id
-      sorter.sort_names(@user, list)
-      sorter
-    end
-
-    def check_if_name_sorter_failed(sorter)
-      failed = false
-
-      # Does list have "Name one = Name two" type lines?
-      if sorter.has_new_synonyms
-        flash_error(:runtime_species_list_create_synonym.t)
-        sorter.reset_new_names
-        failed = true
-      end
-
-      # Are there any unrecognized names?
-      if sorter.new_name_strs != []
-        if Rails.env.test?
-          x = sorter.new_name_strs.map(&:to_s).inspect
-          flash_error("Unrecognized names given: #{x}")
-        end
-        failed = true
-      end
-
-      # Are there any ambiguous names?
-      unless sorter.only_single_names
-        if Rails.env.test?
-          x = sorter.multiple_line_strs.map(&:to_s).inspect
-          flash_error("Ambiguous names given: #{x}")
-        end
-        failed = true
-      end
-
-      # Are there any deprecated names which haven't been approved?
-      if sorter.has_unapproved_deprecated_names
-        if Rails.env.test?
-          x = sorter.deprecated_names.map(&:display_name).inspect
-          flash_error("Found deprecated names: #{x}")
-        end
-        failed = true
-      end
-
-      failed
-    end
-
-    def update_redirect_and_flash_notices(create_or_update, sorter)
-      if create_or_update == :create
-        @species_list.log(:log_species_list_created)
-        id = @species_list.id
-        flash_notice(:runtime_species_list_create_success.t(id: id))
-      else
-        @species_list.log(:log_species_list_updated)
-        id = @species_list.id
-        flash_notice(:runtime_species_list_edit_success.t(id: id))
-      end
-
-      update_projects(@species_list, params[:project])
-      construct_observations(@species_list, sorter)
-
-      if @species_list.location_id.nil?
-        redirect_to(new_location_path(where: @place_name,
-                                      set_species_list: @species_list.id))
-      else
-        redirect_to(species_list_path(@species_list))
-      end
-      true
-    end
-
-    # Creates observations for names written in and/or selected from checklist.
-    # Uses the member instance vars, as well as:
-    #   params[:chosen_approved_names]    Names from radio boxes.
-    #   params[:checklist_data]           Names from LHS check boxes.
-    def construct_observations(spl, sorter)
-      # Put together a list of arguments to use when creating new observations.
-      spl_args = init_spl_args(spl)
-
-      # This updates certain observation namings already in the list.  It looks
-      # for namings that are deprecated, then replaces them with approved
-      # synonyms which the user has chosen via radio boxes in
-      # params[:chosen_approved_names].
-      update_namings(spl)
-
-      # Add all names from text box into species_list. Creates a new observation
-      # for each name.  ("single names" are names that matched a single name
-      # uniquely.)
-      sorter.single_names.each do |name, timestamp|
-        spl_args[:when] = timestamp || spl.when
-        spl.construct_observation(name, spl_args)
-      end
-
-      # Add checked names from LHS check boxes.  It doesn't check if they are
-      # already in there; it creates new observations for each and stuffs it in.
-      spl_args[:when] = spl.when
-      return unless params[:checklist_data]
-
-      params[:checklist_data].each do |key, value|
-        next unless value == "1"
-
-        name = find_chosen_name(key.to_i, params[:chosen_approved_names])
-        spl.construct_observation(name, spl_args)
-      end
     end
 
     def init_spl_args(spl)
@@ -245,7 +43,19 @@ module SpeciesLists
           # (compensate for gsub in _form_species_lists)
           next unless (alt_name_id = chosen_names[naming.name_id.to_s])
 
+          # Getting here means there is an Observation in the SpeciesList
+          # that is currently using a Name that the user has chosen against.
+          # The code for updating the Naming has been here for a long time
+          # but not covered by tests.  Adding a test revealed a bug where
+          # the Observation name was not getting updated.  Should we even
+          # be doing this in the write in species UI?  If so,
+          # should there be a method on Observation or Naming to
+          # do the following?
           alt_name = Name.find(alt_name_id)
+          if observation.name == naming.name
+            observation.name = alt_name
+            observation.save
+          end
           naming.name = alt_name
           naming.save
         end
@@ -262,179 +72,20 @@ module SpeciesLists
       notes_out
     end
 
-    def find_chosen_name(id, alternatives)
-      if alternatives &&
-         (alt_id = alternatives[id.to_s])
-        Name.find(alt_id)
-      else
-        Name.find(id)
-      end
-    end
-
-    def re_render_appropriate_form(create_or_update)
-      case create_or_update
-      when :create
-        render(:new)
-      when :update
-        render(:edit)
-      end
-    end
-
-    # Called by the actions which use create/edit_species_list form.  It grabs a
-    # list of names to list with checkboxes in the left-hand column of the form.
-    # By default it looks up a query stored in the session (you can for example
-    # "save" another species list "for later" for this purpose).  The result is
-    # an Array of names where the values are [display_name, name_id].  This
-    # is destined for the instance variable @checklist.
-    def calc_checklist(query = nil)
-      return unless query ||= query_from_session
-
-      results = case query.model.name
-                when "Name"
-                  checklist_from_name_query(query)
-                when "Observation"
-                  checklist_from_observation_query(query)
-                when "Location"
-                  checklist_from_location_query(query)
-                when "RssLog"
-                  checklist_from_rss_log_query(query)
-                end
-      results.pluck(Name[:display_name], Name[:id])
-    end
-
-    def checklist_from_name_query(query)
-      query.scope.select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
-    # Only reason for ther join is to get the __Name formatting__.
-    # The obs table could be altered so it has both these values - AN 202503
-    def checklist_from_observation_query(query)
-      query.scope.joins(:name).
-        select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
-    def checklist_from_location_query(query)
-      query.scope.joins(observations: :name).
-        select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
-    def checklist_from_rss_log_query(query)
-      query.scope.joins(observations: :name).
-        where(RssLog[:observation_id].gt(0)).
-        select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
-    def init_name_vars_for_create
-      @checklist_names = {}
-      @new_names = []
-      @multiple_names = []
-      @deprecated_names = []
-      @list_members = nil
-      @checklist = nil
-      @place_name = nil
-    end
-
-    def init_name_vars_for_edit(spl)
-      init_name_vars_for_create
-      @deprecated_names = spl.names.where(deprecated: true)
-      @place_name = spl.place_name
-    end
-
-    def init_name_vars_for_clone(clone_id)
-      return unless (clone = SpeciesList.safe_find(clone_id))
-
-      query = create_query(:Observation, species_lists: clone)
-      @checklist = calc_checklist(query)
-      @species_list.when = clone.when
-      @species_list.place_name = clone.place_name
-      @species_list.location = clone.location
-      @species_list.title = clone.title
-    end
-
     def init_name_vars_from_sorter(spl, sorter)
-      @checklist_names = params[:checklist_data] || {}
       @new_names = sorter.new_name_strs.uniq.sort
-      @multiple_names = sorter.multiple_names.uniq.sort_by(&:search_name)
+      @multiple_names = names_with_other_authors(sorter)
       @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
       @list_members = sorter.all_line_strs.join("\r\n")
-      @checklist = nil
       @place_name = spl.place_name
     end
 
-    def init_member_vars_for_create
-      @member_vote = Vote.maximum_vote
-      @member_notes_parts = @species_list.form_notes_parts(@user)
-      @member_notes = @member_notes_parts.each_with_object({}) do |part, h|
-        h[part.to_sym] = ""
+    def names_with_other_authors(sorter)
+      names = sorter.multiple_names.uniq.sort_by(&:search_name)
+
+      names.map do |name|
+        [name, name.other_authors.includes([:observations])]
       end
-      @member_lat = nil
-      @member_lng = nil
-      @member_alt = nil
-      @member_is_collection_location = true
-      @member_specimen = false
-    end
-
-    def init_member_vars_for_edit(spl)
-      init_member_vars_for_create
-      spl_obss = spl.observations
-      return unless (obs = spl_obss.last)
-
-      # Not sure how to check vote efficiently...
-      consensus = Observation::NamingConsensus.new(obs)
-      @member_vote =
-        begin
-          consensus.users_vote(consensus.namings.first, @user).value
-        rescue StandardError
-          Vote.maximum_vote
-        end
-      init_member_notes_for_edit(spl_obss)
-      if all_obs_same_lat_lon_alt?(spl_obss)
-        @member_lat = obs.lat
-        @member_lng = obs.lng
-        @member_alt = obs.alt
-      end
-      if all_obs_same_attr?(spl_obss, :is_collection_location)
-        @member_is_collection_location = obs.is_collection_location
-      end
-      @member_specimen = obs.specimen if all_obs_same_attr?(spl_obss, :specimen)
-    end
-
-    def init_member_notes_for_edit(observations)
-      if all_obs_same_attr?(observations, :notes)
-        obs = observations.last
-        obs.form_notes_parts(@user).each do |part|
-          @member_notes[part.to_sym] = obs.notes_part_value(part)
-        end
-      else
-        @species_list.form_notes_parts(@user).each do |part|
-          @member_notes[part.to_sym] = ""
-        end
-      end
-    end
-
-    def all_obs_same_lat_lon_alt?(observations)
-      all_obs_same_attr?(observations, :lat) &&
-        all_obs_same_attr?(observations, :lng) &&
-        all_obs_same_attr?(observations, :alt)
-    end
-
-    # Do all observations have same values for the single given attribute?
-    def all_obs_same_attr?(observations, attr)
-      exemplar = observations.first.send(attr)
-      observations.all? { |o| o.send(attr) == exemplar }
-    end
-
-    def init_member_vars_for_reload
-      member_params    = params[:member] || {}
-      @member_vote     = member_params[:vote].to_s
-      # cannot leave @member_notes == nil because view expects a hash
-      @member_notes    = member_params[:notes] || Observation.no_notes
-      @member_lat      = member_params[:lat].to_s
-      @member_lng = member_params[:lng].to_s
-      @member_alt = member_params[:alt].to_s
-      @member_is_collection_location =
-        member_params[:is_collection_location].to_s == "1"
-      @member_specimen = member_params[:specimen].to_s == "1"
     end
 
     def init_project_vars
@@ -469,50 +120,5 @@ module SpeciesLists
                                    params[:project]["id_#{proj.id}"] == "1"
       end
     end
-
-    def update_projects(spl, checks)
-      return unless checks
-
-      any_changes = false
-      Project.where(id: User.current.projects_member.map(&:id)).
-        includes(:species_lists).find_each do |project|
-          before = spl.projects.include?(project)
-          after = checks["id_#{project.id}"] == "1"
-          next if before == after
-
-          change_project_species_lists(
-            project: project, spl: spl, change: (after ? :add : :remove)
-          )
-          any_changes = true
-        end
-
-      flash_notice(:species_list_show_manage_observations_too.t) if any_changes
-    end
-
-    def change_project_species_lists(project:, spl:, change: :add)
-      if change == :add
-        project.add_species_list(spl)
-        flash_notice(:attached_to_project.t(object: :species_list,
-                                            project: project.title))
-      else
-        project.remove_species_list(spl)
-        flash_notice(:removed_from_project.t(object: :species_list,
-                                             project: project.title))
-      end
-    end
-
-    def permitted_species_list_args
-      ["when(1i)", "when(2i)", "when(3i)", :place_name, :title, :notes]
-    end
-
-    def bulk_editor_new_val(attr, val)
-      case attr
-      when :is_collection_location, :specimen
-        val == "1"
-      else
-        val
-      end
-    end
   end
 end
-# rubocop:enable Metrics/ModuleLength

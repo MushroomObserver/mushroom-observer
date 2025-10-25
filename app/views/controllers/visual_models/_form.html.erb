@@ -1,23 +1,27 @@
 <%= form_with(model: visual_model) do |f| %>
   <% if visual_model.errors.any? %>
-    <div id="error_explanation">
-      <%= "#{pluralize(visual_model.errors.count,
-        :error.t, plural: :errors.t)} #{:visual_model_errors.t}" %>:
-      <ul>
-        <% visual_model.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
+    <% count = pluralize(
+      visual_model.errors.count, :error.t, plural: :errors.t
+    ) %>
+    <%= alert_block(level: :danger, id: "error_explanation") do
+      [
+        tag.h2("#{count} #{:visual_model_errors.t}:"),
+        tag.ul do
+          visual_model.errors.each do |error|
+            concat(tag.li(error.full_message))
+          end
+        end
+      ].safe_join
+    end %>
   <% end %>
 
-  <div class="form-group field">
+  <%= tag.div(class: "form-group field") do %>
     <%= f.label(:name) %>
     <%= f.text_field(:name, class: "form-control") %>
     <%= :VISUAL_MODEL.t %>
-  </div>
+  <% end %>
 
-  <div class="actions">
+  <%= tag.div(class: "actions") do %>
     <%= submit_button(form: f, button: :SUBMIT.t, center: true) %>
-  </div>
+  <% end %>
 <% end %>

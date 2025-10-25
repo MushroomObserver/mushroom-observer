@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Downloads a db snapshot from the images server to the `/mushroom-observer`
+# root directory, renames it `checkpoint.gz`, imports and uses it in MySQL,
+# and calls `db/clean.sql` to strip passwords and private gps data from the
+# database. Uses yesterday's db backup because these are not guaranteed to
+# exist yet for today's date.
+# Requires the user calling the script to have an SSH account on `images`.
+# Note this uses MacOSX shell syntax, intended for local use only.
+yesterdays_date=$(date -v -1d '+%Y%m%d')
+
+# Prompt the user for their name
+read -p "Your account name on the images server: " user_name
+
+# Download the checkpoint and rename it
+scp "$user_name@images.mushroomobserver.org:/data/images/backup/database-$yesterdays_date.gz" "./checkpoint.gz"
+
+# Strip the checkpoint
+./db/strip_checkpoint

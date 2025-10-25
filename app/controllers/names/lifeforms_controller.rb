@@ -6,19 +6,17 @@ module Names
     before_action :login_required
 
     def edit
-      pass_query_params
       find_name!
     end
 
     def update
-      pass_query_params
       return unless find_name!
 
       words = Name.all_lifeforms.select do |word|
         params.dig(:lifeform, word) == "1"
       end
       @name.update(lifeform: " #{words.join(" ")} ")
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private

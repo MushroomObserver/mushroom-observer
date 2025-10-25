@@ -39,9 +39,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   def js_button(**args, &block)
     button = block ? capture(&block) : args[:button]
     opts = args.except(:form, :button, :class, :center)
-    opts[:class] = "btn btn-default"
-    opts[:class] += " center-block my-3" if args[:center] == true
-    opts[:class] += " #{args[:class]}" if args[:class].present?
+    classes = %w[btn btn-default]
+    classes += %w[center-block my-3] if args[:center] == true
+    opts[:class] = class_names(classes, args[:class])
 
     button_tag(button, type: :button, **opts)
   end
@@ -97,9 +97,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
                                      args[:checked_value] || "1",
                                      args[:unchecked_value] || "0"))
         concat(args[:label])
-        if args[:between].present?
-          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
-        end
+        concat(args[:between]) if args[:between].present?
       end)
       concat(args[:append]) if args[:append].present?
     end
@@ -212,7 +210,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Content for `between` and `label_after` come right after the label on left,
   # content for `label_end` is at the end of the same line, right justified.
   def text_label_row(args, label_opts)
-    tag.div(class: "d-flex justify-content-between") do
+    display = args[:inline] == true ? "d-inline-flex" : "d-flex"
+    tag.div(class: "#{display} justify-content-between") do
       concat(tag.div do
         concat(args[:form].label(args[:field], args[:label], label_opts))
         concat(args[:between]) if args[:between].present?
@@ -503,8 +502,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   end
 
   def field_label_opts(args)
-    label_opts = { class: "mr-3" }
+    label_opts = {}
     label_opts[:index] = args[:index] if args[:index].present?
+    label_opts[:class] = "mr-3"
     label_opts
   end
 
@@ -529,13 +529,18 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       return args
     end
 
+    need_margin = args[:inline].present?
+    between_class = need_margin ? "mr-3" : "form-between"
+
     id = [
       nested_field_id(args),
       "help"
     ].compact_blank.join("_")
     args[:between] = capture do
-      concat(args[:between])
-      concat(collapse_info_trigger(id))
+      tag.span(class: between_class) do
+        concat(tag.span { args[:between] }) if args[:between].present?
+        concat(collapse_info_trigger(id))
+      end
     end
     args[:append] = capture do
       concat(args[:append])

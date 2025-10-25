@@ -3,21 +3,20 @@
 # html used in tabsets
 module Tabs
   module NamesHelper
-    # assemble links for "tabset" for show_name
-    def name_show_tabs(name:)
-      [edit_name_tab(name), new_name_tab].reject(&:empty?)
-    end
-
     def edit_name_tab(name)
-      InternalLink::Model.new(:show_name_edit_name.l, name,
-                              add_query_param(edit_name_path(name.id)),
-                              html_options: { icon: :edit }).tab
+      InternalLink::Model.new(
+        :show_name_edit_name.l, name,
+        edit_name_path(name.id),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def new_name_tab
-      InternalLink::Model.new(:show_name_add_name.l, Name,
-                              add_query_param(new_name_path),
-                              html_options: { icon: :add }).tab
+      InternalLink::Model.new(
+        :show_name_add_name.l, Name,
+        new_name_path,
+        html_options: { icon: :add }
+      ).tab
     end
 
     def edit_synonym_form_tab(name)
@@ -43,7 +42,7 @@ module Tabs
     def edit_name_synonym_tab(name)
       InternalLink::Model.new(
         :show_name_change_synonyms.l, name,
-        add_query_param(edit_synonyms_of_name_path(name.id)),
+        edit_synonyms_of_name_path(name.id),
         html_options: { icon: :synonyms }
       ).tab
     end
@@ -53,7 +52,7 @@ module Tabs
     def deprecate_name_tab(name)
       InternalLink::Model.new(
         :DEPRECATE.l, name,
-        add_query_param(form_to_deprecate_synonym_of_name_path(name.id)),
+        form_to_deprecate_synonym_of_name_path(name.id),
         html_options: { icon: :deprecate }
       ).tab
     end
@@ -62,7 +61,7 @@ module Tabs
     def approve_name_synonym_tab(name)
       InternalLink::Model.new(
         :APPROVE.l, name,
-        add_query_param(form_to_approve_synonym_of_name_path(name.id)),
+        form_to_approve_synonym_of_name_path(name.id),
         html_options: { icon: :approve }
       ).tab
     end
@@ -70,9 +69,11 @@ module Tabs
     # Show name panels:
     # Nomenclature tabs
     def index_fungorum_search_page_tab
-      InternalLink.new(:index_fungorum_search.l,
-                       index_fungorum_search_page_url,
-                       html_options: { target: :_blank, rel: :noopener }).tab
+      InternalLink.new(
+        :index_fungorum_search.l,
+        index_fungorum_search_page_url,
+        html_options: { target: :_blank, rel: :noopener }
+      ).tab
     end
 
     def index_fungorum_record_tab(name)
@@ -124,7 +125,7 @@ module Tabs
     def edit_name_lifeform_tab(name)
       InternalLink::Model.new(
         :EDIT.l, name,
-        add_query_param(edit_lifeform_of_name_path(name.id)),
+        edit_lifeform_of_name_path(name.id),
         html_options: { icon: :edit }
       ).tab
     end
@@ -135,31 +136,37 @@ module Tabs
 
       InternalLink::Model.new(
         :show_name_see_more.l, name,
-        add_query_param(name_description_path(name.description.id)),
+        name_description_path(name.description.id),
         html_options: { icon: :list }
       ).tab
     end
 
-    def name_edit_description_tab(user, name)
-      return unless name&.description
+    def name_edit_description_tab(name)
+      description = name&.description
+      return unless description && permission?(description)
 
-      InternalLink::Model.new(:EDIT.l, name,
-                              edit_name_description_path(user,
-                                                         name.description.id),
-                              html_options: { icon: :edit }).tab
+      InternalLink::Model.new(
+        :EDIT.l, name,
+        edit_name_description_path(description.id),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def name_new_description_tab(name)
-      InternalLink::Model.new(:show_name_create_description.l, name,
-                              new_name_description_path(name.id),
-                              html_options: { icon: :add }).tab
+      InternalLink::Model.new(
+        :show_name_create_description.l, name,
+        new_name_description_path(name.id),
+        html_options: { icon: :add }
+      ).tab
     end
 
     # classification tabs:
     def name_edit_classification_tab(name)
-      InternalLink::Model.new(:EDIT.l, name,
-                              edit_classification_of_name_path(name.id),
-                              html_options: { icon: :edit }).tab
+      InternalLink::Model.new(
+        :EDIT.l, name,
+        edit_classification_of_name_path(name.id),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def eol_name_tab(name)
@@ -221,7 +228,7 @@ module Tabs
     def occurrence_map_for_name_tab(name)
       InternalLink::Model.new(
         :show_name_distribution_map.t, name,
-        add_query_param(map_name_path(id: name.id)),
+        add_q_param(map_name_path(id: name.id)),
         html_options: { data: { action: "links#disable" } }
       ).tab
     end
@@ -250,7 +257,7 @@ module Tabs
     def edit_name_tracker_tab(name)
       InternalLink::Model.new(
         :show_name_email_tracking.t, name,
-        add_query_param(edit_tracker_of_name_path(name.id)),
+        edit_tracker_of_name_path(name.id),
         html_options: { icon: :tracking }
       ).tab
     end
@@ -258,7 +265,7 @@ module Tabs
     def new_name_tracker_tab(name)
       InternalLink::Model.new(
         :show_name_email_tracking.t, name,
-        add_query_param(new_tracker_of_name_path(name.id)),
+        new_tracker_of_name_path(name.id),
         html_options: { icon: :tracking }
       ).tab
     end
@@ -290,7 +297,7 @@ module Tabs
 
     #   desc_query = Query.lookup(:NameDescription, name_query: names_query)
     #   [:show_objects.t(type: :description),
-    #    add_query_param(name_descriptions_index_path, desc_query),
+    #    add_q_param(name_descriptions_index_path, desc_query),
     #    { class: tab_id(__method__.to_s) }]
     # end
 

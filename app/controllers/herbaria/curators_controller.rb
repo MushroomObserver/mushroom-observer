@@ -5,7 +5,6 @@ module Herbaria
   class CuratorsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params, only: [:destroy]
     before_action :keep_track_of_referrer, only: [:destroy]
 
     # Old MO Action (method)        New "Normalized" Action (method)
@@ -22,15 +21,14 @@ module Herbaria
     def create
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       if @user && (@herbarium.curator?(@user) || in_admin_mode?)
-        login = params[:add_curator].to_s.sub(/ <.*/, "")
-        user = User.find_by(login: login)
+        user = User.lookup_unique_text_name(params[:add_curator])
         if user
           @herbarium.add_curator(user)
         else
-          flash_error(:show_herbarium_no_user.t(login: login))
+          flash_error(:show_herbarium_no_user.t(login: params[:add_curator]))
         end
       end
-      redirect_with_query(herbarium_path(@herbarium))
+      redirect_to(herbarium_path(@herbarium))
     end
 
     def destroy
@@ -43,7 +41,7 @@ module Herbaria
       elsif user && @herbarium.curator?(user)
         @herbarium.delete_curator(user)
       end
-      redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
     end
 
     ############################################################################

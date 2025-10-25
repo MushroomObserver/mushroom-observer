@@ -8,7 +8,7 @@ module SpeciesLists
     def new
       return unless (@species_list = find_species_list!)
 
-      if check_permission!(@species_list)
+      if permission!(@species_list)
         query = create_query(:Observation, species_lists: @species_list,
                                            order_by: :name)
         @observation_list = query.results
@@ -21,14 +21,12 @@ module SpeciesLists
     def create
       return unless (@species_list = find_species_list!)
 
-      if check_permission!(@species_list)
+      if permission!(@species_list)
         sorter = NameSorter.new
         @species_list.file = params[:species_list][:file]
         @species_list.process_file_data(@user, sorter)
         init_name_vars_from_sorter(@species_list, sorter)
-        init_member_vars_for_edit(@species_list)
         init_project_vars_for_edit(@species_list)
-        @checklist ||= calc_checklist
         render("species_lists/edit")
       else
         redirect_to(species_list_path(@species_list))

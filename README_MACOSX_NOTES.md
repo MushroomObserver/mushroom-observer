@@ -218,12 +218,11 @@ or for bash:
    rbenv global $RUBY_VERSION
 ```
 
-### Load an MO database snapshot
+## Set up your MySQL database to work with MO
 
 - Make sure you have the file `config/database.yml`.
   If not, create the file with the content shown in footnote 2.<sup id="a2">[2](#f2)</sup>
-- download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
-- copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
+
 Then:
 
 Mac users must uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
@@ -237,7 +236,7 @@ shared:
   # socket: /var/run/mysqld/mysqld.sock
 ```
 
-Then:
+Then set up the database defaults:
 
 ```sh
 rake db:drop
@@ -246,10 +245,31 @@ mysql -u root -p < db/initialize.sql
 
 When prompted to "Enter password:" <br>
 Enter `root`, return.
-Then:
+
+## Load a MO database backup ("stripped" - without private data)
+
+**Easiest:** For core developers with an SSH account on the images server, you can download the most recent backup and strip it locally. Simply `cd` to your `mushroom-observer` directory and run:
+
+```sh
+db/download_checkpoint
+```
+
+You will need to enter your account username for `images.mushroomobserver.org`, because these database snapshots are not publicly available.
+
+This will install yesterday's database backup, stripped of passwords and private GPS data, in MySQL as `mo_development` for user `mo`. You can skip ahead to `rails lang:update` below.
+
+**Public alternative:** Every so often we generate a public, ready-made stripped checkpoint on the server, but it is likely _not at all current_. You can get this here:
+- download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
+- copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
+- install the database in MySQL:
 
 ```sh
 gunzip -c checkpoint_stripped.gz | mysql -u mo -pmo mo_development
+```
+
+Then:
+
+```sh
 rails lang:update
 rails db:migrate
 ```

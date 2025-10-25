@@ -344,3 +344,48 @@ loc_2_edited_by_roy:
 loc_hidden:
   <<: *DEFAULTS
   hidden: true
+
+pretoria:
+  name: "Pretoria, City of Tshwane Metropolitan Municipality, Gauteng, South Africa"
+  scientific_name: "South Africa, Gauteng, City of Tshwane Metropolitan Municipality, Pretoria"
+  north: -0.256014995575e2
+  south: -0.259158000946e2
+  west: 0.279505996704e2
+  east: 0.284452991486e2
+  high: 1590.94
+  low: 1297.26
+  box_area: 0.17319684776877e4
+  center_lat: -0.257586498261e2
+  center_lng: 0.281979494095e2
+
+low_alt_only:
+  <<: *DEFAULTS
+  low: -12345
+
+high_alt_only:
+  <<: *DEFAULTS
+  high: 12345
+
+longest_location_name:
+  <<: *DEFAULTS
+  name: "Pacific Crest Trail on Mount Hood from Timberline Lodge to Cascade Locks, Zigzag Ranger District & Hood River Ranger District, Mount Hood National Forest, Clackamas Co. & Multnomah Co., Oregon, USA"
+  scientific_name: "USA, Oregon, Clackamas Co. & Multnomah Co., Mount Hood National Forest, Zigzag Ranger District & Hood River Ranger District, Pacific Crest Trail on Mount Hood from Timberline Lodge to Cascade Locks"
+  north: 45.6493988037
+  south: 45.3283004761
+  west: -121.9240036011
+  east: -121.7070007324
+  box_area: 604.1670134674
+  center_lat: 45.4888496399
+  center_lng: -121.8155021668
+
+even_longer_location_name:
+  <<: *DEFAULTS
+  name: <%= "Sh#{'e'*200}pland" %>
+  scientific_name: <%= "Sh#{'e'*80}pland" %>
+  north: 45.6493988037
+  south: 45.3283004761
+  west: -121.9240036011
+  east: -121.7070007324
+  box_area: 604.1670134674
+  center_lat: 45.4888496399
+  center_lng: -121.8155021668

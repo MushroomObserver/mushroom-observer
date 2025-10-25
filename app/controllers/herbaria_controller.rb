@@ -51,9 +51,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   before_action :login_required
   # only: [:create, :destroy, :edit, :new, :update]
   before_action :store_location, only: [:create, :edit, :new, :show, :update]
-  before_action :pass_query_params, only: [
-    :create, :destroy, :edit, :new, :show, :update
-  ]
   before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
   ##############################################################################
@@ -80,19 +77,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def default_sort_order
-    ::Query::Herbaria.default_order # :name
+    ::Query::Herbaria.default_order # :records
   end
 
   def index_active_params
     [:pattern, :nonpersonal, :by, :q, :id].freeze
-  end
-
-  # Show selected list, based on current Query.
-  # (Linked from show template, next to "prev" and "next"... or will be.)
-  # Passes explicit :by param to affect title (only).
-  def sorted_index_opts
-    sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { order_by: sorted_by })
   end
 
   def nonpersonal
@@ -155,10 +144,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def render_modal_herbarium_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, action: modal_form_action,
-                     identifier: modal_identifier, local: false,
-                     form: "herbaria/form" }) and return
+    render(
+      partial: "shared/modal_form",
+      locals: { title: modal_title, identifier: modal_identifier,
+                user: @user, form: "herbaria/form",
+                form_locals: { local: false, action: modal_form_action } }
+    ) and return
   end
 
   def modal_identifier
@@ -173,9 +164,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def modal_title
     case action_name
     when "new", "create"
-      :create_herbarium_title.l
+      helpers.new_page_title(:new_object, :HERBARIUM)
     when "edit", "update"
-      :edit_herbarium_title.l
+      helpers.edit_page_title(:HERBARIUM_RECORD.l, @herbarium)
     end
   end
 
@@ -220,11 +211,10 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
     if user_can_destroy_herbarium?
       @herbarium.destroy
-      redirect_to_referrer ||
-        redirect_with_query(herbarium_path(@herbarium.try(&:id)))
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium.try(&:id)))
     else
       flash_error(:permission_denied.t)
-      redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
     end
   end
 
@@ -238,7 +228,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     return true if in_admin_mode? || @herbarium.can_edit?
 
     flash_error(:permission_denied.t)
-    redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
+    redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
     false
   end
 
@@ -404,7 +394,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def show_modal_flash_or_show_herbarium
     respond_to do |format|
       format.html do
-        redirect_with_query(herbarium_path(@herbarium)) and return
+        redirect_to(herbarium_path(@herbarium)) and return
       end
       format.turbo_stream do
         # Context here is the obs form.

@@ -27,7 +27,7 @@ group :rails do
   gem("actionview", "~> 7.2.2.1")
   gem("activejob", "~> 7.2.2.1")
   gem("activemodel", "~> 7.2.2.1")
-  gem("activerecord", "~> 7.2.2.1")
+  gem("activerecord", "~> 7.2.2.2")
   # gem("activestorage", "~> 7.2.2.1")
   gem("activesupport", "~> 7.2.2.1")
   gem("bundler")
@@ -71,10 +71,9 @@ gem("stimulus-rails")
 gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
-# redis for combining actioncable broadcasts with turbo_stream
-gem("redis", "~> 4.0")
 # minimal two way bridge between the V8 JavaScript engine and Ruby
-gem("mini_racer")
+# Locked here at "0.18.1" because "0.19.0" will not compile for nimmolo
+gem("mini_racer", "~> 0.18.1")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
@@ -142,7 +141,7 @@ gem("google-cloud-storage")
 # See https://github.com/rubyzip/rubyzip for details. The Changelog also
 # lists other enhancements and bugfixes that have been implemented since
 # version 2.3.0.
-gem("rubyzip", "~> 2.3.0")
+gem("rubyzip", "~> 3.2.0")
 
 # QR code generator
 gem("rqrcode")
@@ -156,6 +155,10 @@ gem("prawn-manual_builder")
 
 # csv generation support
 gem("csv")
+
+# calculate the Haversine distance between two points given their lat/lng
+# https://github.com/kristianmandrup/haversine
+gem("haversine")
 
 # Use puma as the app server, also available for system tests
 # To use Webrick locally, run `bundle config set --local without 'production'`

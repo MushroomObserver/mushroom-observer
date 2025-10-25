@@ -15,28 +15,20 @@ module ObservationsHelper
   #   Observation nnn: Aaa bbb Author(s) (Site ID)
   #
   # NOTE: Must pass owner naming, or it will be recalculated on every obs.
-  def show_obs_title(obs:, owner_naming: nil, user: nil)
-    [
-      obs_title_id(obs),
-      obs_title_consensus_name_link(name: obs.name,
-                                    owner_naming: owner_naming,
-                                    user:)
-    ].safe_join(" ")
+  # Only used for the page <title> element. #title is composed from parts.
+  def observation_show_title(obs:, show_owner_naming: nil, user: nil)
+    obs_title_consensus_name_link(
+      name: obs.name, show_owner_naming:, user:
+    )
   end
 
-  def obs_title_id(obs)
-    tag.span(class: "smaller") do
-      [:show_observation_header.t, tag.span("#{obs.id || "?"}:")].safe_join(" ")
-    end
-  end
-
-  # name portion of Observation title
-  def obs_title_consensus_name_link(name:, user:, owner_naming: nil)
+  # name portion of Observation title.
+  def obs_title_consensus_name_link(name:, user:, show_owner_naming: nil)
     if name.deprecated &&
        (prefer_name = name.best_preferred_synonym).present?
       obs_title_with_preferred_synonym_link(name, prefer_name, user)
     else
-      obs_title_name_link(name, owner_naming, user)
+      obs_title_name_link(name, show_owner_naming, user)
     end
   end
 
@@ -52,7 +44,7 @@ module ObservationsHelper
       ]
     else
       [
-        name.user_display_name_brief_authors(user).t,
+        name.user_display_name_brief_authors(user).t.small_author,
         # Differentiate deprecated consensus from preferred name
         obs_consensus_id_flag,
         prefer_name.user_display_name_without_authors(user).t
@@ -73,50 +65,47 @@ module ObservationsHelper
     end
   end
 
-  def obs_title_name_link(name, owner_naming, user)
+  def obs_title_name_link(name, show_owner_naming, user)
     text = [
       if user
         link_to_display_name_brief_authors(
           user, name, class: "obs_consensus_naming_link_#{name.id}"
         )
       else
-        name.user_display_name_brief_authors(user).t
+        name.user_display_name_brief_authors(user).t.small_author
       end
     ]
-    # Differentiate this Name from Observer Preference
-    text << obs_consensus_id_flag if owner_naming
+    # Differentiate this Name from observer's preferred by printing "(Site ID)"
+    text << obs_consensus_id_flag if show_owner_naming
     text.safe_join(" ")
   end
 
   def obs_consensus_id_flag
-    tag.span("(#{:show_observation_site_id.t})", class: "smaller")
+    tag.span("(#{:show_observation_site_id.t})", class: "small text-nowrap")
   end
 
   ##### Portion of page title that includes user's naming preference #########
 
-  # Observer Preference: Hydnum repandum
-  def owner_naming_line(owner_name, current_user = User.current)
-    return unless current_user&.view_owner_id
+  # Hydnum repandum (Observer Preference)
+  def owner_naming_line(name:, owner_name:, user:)
+    return unless user&.view_owner_id && owner_name && owner_name.id != name.id
 
     [
-      "#{:show_observation_owner_id.t}:",
-      owner_favorite_or_explanation(current_user, owner_name).t
+      owner_preferred_naming(user, owner_name).t,
+      "(#{:show_observation_owner_id.l})"
     ].safe_join(" ")
   end
 
-  def owner_favorite_or_explanation(current_user, owner_name)
-    if owner_name
-      link_to_display_name_brief_authors(
-        current_user, owner_name,
-        class: "obs_owner_naming_link_#{owner_name.id}"
-      )
-    else
-      :show_observation_no_clear_preference
-    end
+  # Note that this is called with `.t` above
+  def owner_preferred_naming(user, owner_name)
+    link_to_display_name_brief_authors(
+      user, owner_name, class: "obs_owner_naming_link_#{owner_name.id}"
+    )
   end
 
+  # Called by more than one method
   def link_to_display_name_brief_authors(user, name, **)
-    link_to(name.user_display_name_brief_authors(user).t,
+    link_to(name.user_display_name_brief_authors(user).t.small_author,
             name_path(id: name.id), **)
   end
 
@@ -148,9 +137,9 @@ module ObservationsHelper
   end
 
   def observation_show_image_links(obs:)
-    return "" unless check_permission(obs)
+    return "" unless permission?(obs)
 
-    icon_link_with_query(*reuse_images_for_observation_tab(obs))
+    icon_link_to(*reuse_images_for_observation_tab(obs))
   end
 
   # The following sections of the observation_details partial are also needed as

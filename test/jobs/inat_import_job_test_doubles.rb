@@ -1,28 +1,15 @@
 # frozen_string_literal: true
 
 module InatImportJobTestDoubles
-  # url for iNat authorization and authentication requests
-  SITE = InatImportsController::SITE
-  # MO url called by iNat after iNat user authorizes MO to access their data
-  REDIRECT_URI = InatImportsController::REDIRECT_URI
-  # iNat API url
-  API_BASE = InatImportsController::API_BASE
-  # Value of the iNat API "iconic_taxa" query param
-  ICONIC_TAXA = InatImportJob::ICONIC_TAXA
-  # base url for iNat CC-licensed and public domain photos
-  LICENSED_PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
-  # base url for iNat unlicensed photos
-  UNLICENSED_PHOTO_BASE = "https://static.inaturalist.org/photos"
+  include Inat::Constants
 
   def stub_inat_interactions(
     id_above: 0,
-    login: @inat_import.inat_username,
-    superimporter: false
+    login: @inat_import.inat_username
   )
     stub_token_requests
     stub_check_username_match(login)
-    stub_inat_observation_request(id_above: id_above,
-                                  superimporter: superimporter)
+    stub_inat_observation_request(id_above: id_above)
     stub_inat_photo_requests
     stub_modify_inat_observations
   end
@@ -80,7 +67,7 @@ module InatImportJobTestDoubles
                 headers: {})
   end
 
-  def stub_inat_observation_request(id_above: 0, superimporter: false)
+  def stub_inat_observation_request(id_above: 0, body_nil: false)
     query_args = {
       iconic_taxa: ICONIC_TAXA,
       id: @inat_import.inat_ids,
@@ -90,8 +77,17 @@ module InatImportJobTestDoubles
       order: "asc",
       order_by: "id",
       without_field: "Mushroom Observer URL",
-      user_login: (@inat_import.inat_username unless superimporter)
+      user_login: @inat_import.inat_username
     }
+    if InatImport.super_importer?(@user) && @inat_import.import_all == false
+      query_args.delete(:user_login)
+    end
+
+    body = if body_nil
+             nil
+           else
+             @mock_inat_response
+           end
 
     stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").
       with(headers:
@@ -99,7 +95,7 @@ module InatImportJobTestDoubles
       "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
       "Authorization" => "Bearer MockJWT",
       "Host" => "api.inaturalist.org" }).
-      to_return(body: @mock_inat_response)
+      to_return(body: body)
   end
 
   def stub_inat_photo_requests
@@ -129,37 +125,11 @@ module InatImportJobTestDoubles
 
   def stub_modify_inat_observations
     stub_add_observation_fields
-    stub_update_descriptions
   end
 
   def stub_add_observation_fields
     stub_request(:post, "#{API_BASE}/observation_field_values").
       to_return(status: 200, body: "".to_json,
                 headers: { "Content-Type" => "application/json" })
-  end
-
-  def stub_update_descriptions
-    date = Time.zone.today.strftime(MO.web_date_format)
-    @parsed_results.each do |obs|
-      updated_description =
-        "Imported by Mushroom Observer #{date}"
-      if obs[:description].present?
-        updated_description.prepend("#{obs[:description]}\n\n")
-      end
-
-      body = {
-        observation: {
-          description: updated_description,
-          ignore_photos: 1
-        }
-      }
-      headers = { authorization: "Bearer MockJWT",
-                  content_type: "application/json", accept: "application/json" }
-      stub_request(
-        :put, "#{API_BASE}/observations/#{obs[:id]}?ignore_photos=1"
-      ).
-        with(body: body.to_json, headers: headers).
-        to_return(status: 200, body: "".to_json, headers: {})
-    end
   end
 end

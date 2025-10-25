@@ -40,21 +40,21 @@ class SymbolExtensionsTest < UnitTestCase
     assert_equal("name", :name.l)
     assert_equal("Name", :Name.l)
     assert_equal("Name", :NAME.l)
-    assert_equal("species list", :species_list.l)
-    assert_equal("Species list", :Species_list.l)
-    assert_equal("Species List", :SPECIES_LIST.l)
-    assert_equal("species list",
+    assert_equal("observation list", :species_list.l)
+    assert_equal("Observation list", :Species_list.l)
+    assert_equal("Observation List", :SPECIES_LIST.l)
+    assert_equal("observation list",
                  Symbol.test_localize("[type]", type: :species_list))
-    assert_equal("Species list",
+    assert_equal("Observation list",
                  Symbol.test_localize("[Type]", type: :species_list))
-    assert_equal("Species list",
+    assert_equal("Observation list",
                  Symbol.test_localize("[tYpE]", type: :species_list))
-    assert_equal("Species List",
+    assert_equal("Observation List",
                  Symbol.test_localize("[TYPE]", type: :species_list))
-    assert_equal("species list", Symbol.test_localize("[:species_list]"))
-    assert_equal("Species list", Symbol.test_localize("[:Species_list]"))
-    assert_equal("Species list", Symbol.test_localize("[:sPeCiEs_lIsT]"))
-    assert_equal("Species List", Symbol.test_localize("[:SPECIES_LIST]"))
+    assert_equal("observation list", Symbol.test_localize("[:species_list]"))
+    assert_equal("Observation list", Symbol.test_localize("[:Species_list]"))
+    assert_equal("Observation list", Symbol.test_localize("[:sPeCiEs_lIsT]"))
+    assert_equal("Observation List", Symbol.test_localize("[:SPECIES_LIST]"))
   end
 
   def test_hello

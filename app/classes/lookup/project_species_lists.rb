@@ -17,7 +17,7 @@ class Lookup::ProjectSpeciesLists < Lookup
   end
 
   def lookup_method
-    # We're checking species lists for each project.
+    # We're checking species_lists for each project.
     project_ids = Lookup::Projects.new(@vals).ids
     return [] if project_ids.empty?
 

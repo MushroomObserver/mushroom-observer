@@ -19,7 +19,6 @@
 # rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
   before_action :store_location, except: [:index, :destroy]
-  before_action :pass_query_params, except: [:index]
   before_action :login_required
 
   ##############################################################################
@@ -58,21 +57,6 @@ class LocationsController < ApplicationController
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
     [nil, {}]
-  end
-
-  # Displays a list of locations matching a given string.
-  def pattern
-    pattern = params[:pattern].to_s
-    loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if loc
-      redirect_to(location_path(loc.id))
-      [nil, {}]
-    else
-      query = create_query(
-        :Location, pattern: Location.user_format(@user, pattern)
-      )
-      [query, { link_all_sorts: true }]
-    end
   end
 
   # Displays a list of all locations whose country matches the param.
@@ -194,7 +178,6 @@ class LocationsController < ApplicationController
 
   # Show a Location and one of its LocationDescription's, including a map.
   def show
-    clear_query_in_session
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, Location, params[:id].to_s)
@@ -428,10 +411,11 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(new_admin_emails_merge_requests_path(
-                            type: :Location, old_id: @location.id,
-                            new_id: merge.id
-                          ))
+      redirect_to(
+        new_admin_emails_merge_requests_path(
+          type: :Location, old_id: @location.id, new_id: merge.id
+        )
+      )
     end
   end
 
@@ -502,7 +486,7 @@ class LocationsController < ApplicationController
   def render_modal_location_form
     render(partial: "shared/modal_form",
            locals: { title: modal_title, identifier: modal_identifier,
-                     form: "locations/form" }) and return
+                     user: @user, form: "locations/form" }) and return
   end
 
   def modal_identifier
@@ -517,9 +501,9 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :create_location_title.t
+      new_page_title(:create_object, :LOCATION)
     when "edit", "update"
-      :edit_location_title.t(name: @location.display_name)
+      edit_page_title(@location.display_name, @location)
     end
   end
 

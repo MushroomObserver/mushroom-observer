@@ -1,9 +1,20 @@
-<%
-@query ||= nil # tbd what this was ever used for in the table
-%>
+<%# locals: (obs: nil, user: nil, consensus: nil) %>
 
 <!--OBSERVATION_NAMINGS / TABLE REFRESHED BY TURBO -->
-<%= tag.div(id: "observation_namings") do
-  observation_namings_table(@user, obs, consensus)
-end %>
+<%=
+tag.div(
+  id: "observation_namings",
+  class: "namings-table panel panel-default mb-4",
+  data: { controller: "section-update", section_update_user_value: user.id }
+) do
+  [
+    render(partial: "observations/show/namings/header",
+            locals: { obs:, **naming_header_row_content }),
+    render(partial: "observations/show/namings/rows",
+            locals: { user:, obs:, consensus: }),
+    render(partial: "observations/show/namings/footer",
+            locals: { user:, obs: })
+  ].safe_join
+end
+%>
 <!--/OBSERVATION_NAMINGS -->

@@ -7,7 +7,7 @@ module Image::Scopes
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do
     scope :order_by_default,
           -> { order_by(::Query::Images.default_order) }
 
@@ -74,7 +74,7 @@ module Image::Scopes
     scope :confidence, lambda { |min, max = nil|
       joins(:observations).merge(Observation.confidence(min, max))
     }
-
+    # In this scope, false == !has_observations
     scope :has_observations, lambda { |bool = true|
       joined_relation_condition(:observation_images, bool:)
     }
@@ -82,17 +82,18 @@ module Image::Scopes
       joins(:observation_images).
         where(observation_images: { observation: obs })
     }
-    scope :locations, lambda { |loc|
-      ids = lookup_locations_by_name(loc)
+    scope :locations, lambda { |locations|
+      return none if locations.blank?
+
       joins(observation_images: :observation).
-        where(observation: { location_id: ids })
+        merge(Observation.locations(locations)).distinct
     }
-    scope :projects, lambda { |proj|
-      ids = lookup_projects_by_name(proj)
+    scope :projects, lambda { |projects|
+      ids = Lookup::Projects.new(projects).ids
       joins(:project_images).where(project_images: { project_id: ids })
     }
-    scope :species_lists, lambda { |spl|
-      ids = lookup_species_lists_by_name(spl)
+    scope :species_lists, lambda { |species_lists|
+      ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(observation_images: { observation: :species_list_observations }).
         where(species_list_observations: { species_list_id: ids })
     }

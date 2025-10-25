@@ -7,7 +7,7 @@
         [
           # Status: <status>
           tag.span(class: "font-weight-bold") do
-            "#{:inat_import_tracker_status.t}: "
+            "#{:STATUS.l}: "
           end,
           tag.span(tracker.status),
           tag.br,
@@ -31,9 +31,15 @@
       tag.br,
 
       tag.span(class: "font-weight-bold") do
-        "#{:inat_import_tracker_elapsed.l}: "
+        "#{:inat_import_tracker_elapsed_time.l}: "
       end,
-      tag.span(tracker.elapsed),
+      tag.span(time_in_hours_minutes_seconds(tracker.elapsed_time)),
+      tag.br,
+
+      tag.span(class: "font-weight-bold") do
+        "#{:inat_import_tracker_estimated_remaining_time.l}: "
+      end,
+      tag.span(remaining_time_in_hours_minutes_seconds(tracker)),
       tag.br,
 
       tag.span(class: "font-weight-bold") do
@@ -44,6 +50,9 @@
 
       tag.span(tracker.error_caption, class: "font-weight-bold"),
       tag.span(tracker.response_errors, class: "violation-highlight"),
+      tag.br,
+
+      alert_block(tracker.help, level: :warning, class: "mt-3"),
       tag.br
     ].safe_join
   end

@@ -8,7 +8,6 @@ module Names::Synonyms
     # Form accessible from show_name that lets a user make call this an accepted
     # name, possibly deprecating its synonyms at the same time.
     def new
-      pass_query_params
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -16,7 +15,6 @@ module Names::Synonyms
     end
 
     def create
-      pass_query_params
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -25,7 +23,7 @@ module Names::Synonyms
       deprecate_others
       approve_this_one
       post_approval_comment
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private

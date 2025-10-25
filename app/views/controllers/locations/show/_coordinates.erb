@@ -1,5 +1,5 @@
 <% heading_links = [
-  icon_link_with_query(*edit_location_tab(@location))
+  icon_link_to(*edit_location_tab(@location))
 ]
 if in_admin_mode?
   heading_links << destroy_button(target: @location, icon: :delete)

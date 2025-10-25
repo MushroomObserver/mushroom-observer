@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_12_174607) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_13_142613) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -150,8 +150,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_174607) do
     t.text "description"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
-    t.string "code", limit: 8, default: "", null: false
+    t.string "code", limit: 8
     t.integer "personal_user_id"
+    t.index ["code"], name: "index_herbaria_on_code", unique: true
   end
 
   create_table "herbarium_curators", charset: "utf8mb3", force: :cascade do |t|
@@ -216,8 +217,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_174607) do
     t.boolean "import_all"
     t.integer "importables"
     t.integer "imported_count"
-    t.string "response_errors"
+    t.text "response_errors"
     t.datetime "ended_at"
+    t.integer "total_imported_count"
+    t.integer "total_seconds"
+    t.float "avg_import_time"
+    t.datetime "last_obs_start"
+    t.boolean "cancel"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -629,6 +635,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_174607) do
     t.datetime "updated_at", precision: nil
     t.integer "access_count"
     t.text "description"
+    t.boolean "permalink", default: false
   end
 
   create_table "queued_email_integers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -948,6 +955,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_174607) do
     t.boolean "no_emails", default: false, null: false
     t.string "inat_username"
     t.integer "original_image_quota", default: 0
+    t.integer "label_format", default: 1
     t.index ["login"], name: "login_index"
   end
 

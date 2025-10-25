@@ -4,12 +4,13 @@
 # code:    string, unique code for field slip, starts with project prefix
 
 class FieldSlip < AbstractModel
-  attr_accessor :current_user
+  attr_reader :current_user
 
   belongs_to :observation
   belongs_to :project
   belongs_to :user
 
+  validates :user_id, presence: true
   validates :code, uniqueness: true
   validates :code, presence: true
   validate do |field_slip|
@@ -26,6 +27,13 @@ class FieldSlip < AbstractModel
     where(project: project_ids).distinct
   }
 
+  def current_user=(a_user)
+    @current_user = a_user
+    return if user
+
+    self.user = a_user
+  end
+
   def code=(val)
     code = val.upcase
     return unless self[:code] != code
@@ -34,19 +42,26 @@ class FieldSlip < AbstractModel
     update_project
   end
 
+  def observation=(val)
+    # Adopt the observation's user if we don't already have one
+    self.user = val.user unless user
+
+    self[:observation_id] = val.id
+  end
+
   def update_project
     prefix_match = code.match(/(^.+)[ -]\d+$/)
     return unless prefix_match
 
     # Needs to get updated when Projects can share a field_slip_prefix
     candidate = Project.find_by(field_slip_prefix: prefix_match[1])
-    self.project = candidate if candidate&.can_add_field_slip(@current_user)
+    self.project = candidate if candidate&.can_add_field_slip?(@current_user)
   end
 
   def project=(project)
     return unless project != self.project
 
-    self[:project_id] = if project&.can_add_field_slip(@current_user)
+    self[:project_id] = if project&.can_add_field_slip?(@current_user)
                           project.id
                         end
   end
@@ -69,9 +84,12 @@ class FieldSlip < AbstractModel
     result.unshift([:field_slip_nil_project.t, nil])
   end
 
+  # Used by Mycoportal report
+  TREES_SHRUBS = :"Trees/Shrubs"
+
   def notes_fields
     # Should we figure out a way to internationalize these tags?
-    [:"Odor/Taste", :"Trees/Shrubs", :Substrate, :Habit, :Other].map do |field|
+    [:"Odor/Taste", TREES_SHRUBS, :Substrate, :Habit, :Other].map do |field|
       NoteField.new(name: field, value: field_value(field))
     end
   end
@@ -112,9 +130,7 @@ class FieldSlip < AbstractModel
   end
 
   def collector
-    return observation.collector if observation&.collector
-
-    (user || @current_user).textile_name
+    observation&.collector
   end
 
   def date
@@ -122,7 +138,11 @@ class FieldSlip < AbstractModel
   end
 
   def field_slip_name
-    observation&.field_slip_name || ""
+    observation&.field_slip_name || @default_field_slip_name || ""
+  end
+
+  def field_slip_name=(value)
+    @default_field_slip_name = value
   end
 
   def field_slip_id_by
@@ -134,7 +154,7 @@ class FieldSlip < AbstractModel
   end
 
   def can_edit?(current_user)
-    user == current_user ||
+    user.nil? || user == current_user ||
       (project&.is_admin?(current_user) && project.trusted_by?(user))
   end
 end

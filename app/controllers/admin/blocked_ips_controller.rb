@@ -59,15 +59,15 @@ module Admin
 
       match = ip.to_s.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
       return true if match &&
-                     valid_ip_num(match[1]) &&
-                     valid_ip_num(match[2]) &&
-                     valid_ip_num(match[3]) &&
-                     valid_ip_num(match[4])
+                     valid_ip_num?(match[1]) &&
+                     valid_ip_num?(match[2]) &&
+                     valid_ip_num?(match[3]) &&
+                     valid_ip_num?(match[4])
 
       flash_error("Invalid IP address: \"#{ip}\"")
     end
 
-    def valid_ip_num(num)
+    def valid_ip_num?(num)
       (0..255).cover?(num.to_i)
     end
   end

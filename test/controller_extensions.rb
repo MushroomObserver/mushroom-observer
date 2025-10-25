@@ -51,6 +51,16 @@ module ControllerExtensions
   #
   ##############################################################################
 
+  NAME_SCORE = 10
+  SPECIES_LIST_SCORE = 5
+
+  # Score for one observation:
+  #   species_list entry  1
+  #   observation         1
+  #   naming              1
+  #   vote                1
+  OBSERVATION_SCORE = 4
+
   # Second "get" won't update fullpath, so we must reset the request.
   def reget(action, **args)
     @request = @request.class.new
@@ -202,11 +212,11 @@ module ControllerExtensions
   #     {controller: controller1, action: :access_denied, ...},
   #     {controller: controller2, action: :succeeded, ...})
   #
-  def either_requires_either(method, page, altpage, params = {},
+  def either_requires_either(method, action, altpage, params = {},
                              username = "rolf", password = "testpassword")
     assert_request(
       method: method,
-      action: page,
+      action: action,
       params: params,
       user: params[:username] || username,
       password: params[:password] || password,
@@ -226,7 +236,7 @@ module ControllerExtensions
     # By default expect relative links.  Allow caller to override by
     # explicitly setting only_path: false.
     args[:only_path] = true unless args.key?(:only_path)
-    URI.decode_www_form_component(@controller.url_for(args))
+    @controller.url_for(args)
   end
 
   # Extract error message and backtrace from Rails's 500 response.  This should
@@ -648,11 +658,20 @@ module ControllerExtensions
     end
   end
 
-  # Assert index results. This measures <a> tags that link to an ID
+  # Assert index results. This measures <a> tags that link to an obs ID
   def assert_results(**attributes)
     assert_select(
       "#results .rss-what a:match('href', ?)", %r{^/obs/\d+}, attributes,
       "Wrong number of results displayed"
     )
+  end
+
+  # Get the query_params encoded as a query string. Hard to reproduce otherwise
+  def query_string(q_param)
+    observations_path(q: q_param).split("?")[1]
+  end
+
+  def assert_session_query_record_is_correct
+    assert_equal(QueryRecord.last.id, session[:query_record])
   end
 end

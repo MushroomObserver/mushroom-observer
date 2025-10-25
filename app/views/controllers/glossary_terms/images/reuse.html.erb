@@ -2,12 +2,10 @@
 add_page_title(:image_reuse_title.t(name: @object.unique_format_name))
 
 add_context_nav(glossary_term_image_form_tabs(term: @object))
-@container = :full
+container_class(:full)
 
-form_action = { controller: "/glossary_terms/images",
-                action: :attach,
-                id: @object.id,
-                q: get_query_param }
+form_action = { controller: "/glossary_terms/images", action: :attach,
+                id: @object.id }
 %>
 
 <%= render(partial: "shared/images_to_reuse",

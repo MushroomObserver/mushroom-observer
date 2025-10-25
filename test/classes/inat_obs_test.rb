@@ -56,17 +56,8 @@ class InatObsTest < UnitTestCase
                      mock_inat_obs.send(attribute))
       end
 
-    expected_notes =
-      { Collector: "jdcohenesq",
-        Other: "on Quercus\n\n&#8212;\n\nOriginally posted " \
-               "to Mushroom Observer on Mar. 7, 2024." }
-
-    assert_equal(
-      expected_notes, mock_inat_obs.notes,
-      "MO notes should include: iNat Collector || login, iNat Description"
-    )
-    expected_snapshot =
-      <<~SNAPSHOT.gsub(/^\s+/, "")
+    snapshot_subpoarts =
+      <<~SNAPSHOT.gsub(/^\s+/, "").chomp
         #{:USER.l}: #{mock_inat_obs[:user][:login]}\n
         #{:OBSERVED.l}: #{mock_inat_obs.when}\n
         #{:show_observation_inat_lat_lng.l}: #{mock_inat_obs.lat_lon_accuracy}\n
@@ -74,12 +65,23 @@ class InatObsTest < UnitTestCase
         #{:ID.l}: #{mock_inat_obs.inat_taxon_name}\n
         #{:DQA.l}: #{mock_inat_obs.dqa}\n
         #{:show_observation_inat_suggested_ids.l}: #{mock_inat_obs.suggested_id_names}\n
-        #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}\n
-        #{:PROJECTS.l}: #{:inat_not_imported.l}\n
-        #{:ANNOTATIONS.l}: #{:inat_not_imported.l}\n
-        #{:TAGS.l}: #{:inat_not_imported.l}\n
+        #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}
       SNAPSHOT
+    expected_snapshot = "\n#{snapshot_subpoarts}"
     assert_equal(expected_snapshot, mock_inat_obs.snapshot)
+
+    # Observation form needs the Notes "parts keys to be normalized
+    snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    other = "on Quercus<!--- blank line(s) removed --->\n" \
+            "&#8212;<!--- blank line(s) removed --->\n" \
+            "Originally posted to Mushroom Observer on Mar. 7, 2024."
+    expected_notes = { Collector: "jdcohenesq",
+                       snapshot_key => expected_snapshot,
+                       Other: other }
+    assert_equal(
+      expected_notes, mock_inat_obs.notes,
+      "MO notes should include: (iNat Collector || login) && iNat Description"
+    )
 
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
@@ -112,6 +114,21 @@ class InatObsTest < UnitTestCase
     assert_equal(3, mock_inat_obs[:identifications].size)
   end
   # rubocop:enable Style/NumericLiterals
+
+  def test_when
+    fname = "somion_unicolor"
+    mock_inat_obs = mock_observation(fname)
+    assert_equal(Date.new(2023, 3, 23), mock_inat_obs.when)
+
+    # create a mock_obs without an Observed on date
+    # iNat allows this!
+    mock_search = File.read("test/inat/#{fname}.txt")
+    temp = JSON.parse(mock_search)["results"].first
+    temp.keys.select { |k| k.start_with?("observed_on") }.
+      each { |k| temp.delete(k) }
+    mock_obs = Inat::Obs.new(JSON.generate(temp))
+    assert_nil(mock_obs.when)
+  end
 
   def test_name_sensu
     # Make sure fixtures still OK
@@ -255,11 +272,16 @@ class InatObsTest < UnitTestCase
     assert_equal(
       "Jasmine Silver & Jesse Burton",
       mock_observation("lycoperdon").collector,
-      "Notes Collector should be iNat Collector field if that field present"
+      "Notes Collector should be iNat `Collector` field if that field present"
     )
     assert_equal(
       "johnplischke", mock_observation("arrhenia_sp_NY02").collector,
       "Notes Collector should be iNat user if no iNat Collector field"
+    )
+    assert_equal(
+      "Michael Beug", mock_observation("russula_subabietis").collector,
+      "Notes Collector should be iNat \"Collector's Name\" field " \
+        "if that field present"
     )
   end
 
@@ -299,7 +321,7 @@ class InatObsTest < UnitTestCase
     assert_equal(:inat_dqa_research.l, mock_observation("somion_unicolor").dqa)
   end
 
-  def test_public_location
+  def test_location_public
     loc = locations(:albion)
     all_bounding_boxes = Location.contains_box(**loc.bounding_box)
     phony_locs = Location.where(north: 90, south: -90,
@@ -326,7 +348,7 @@ class InatObsTest < UnitTestCase
     assert_equal(loc, mock_inat_obs.location)
   end
 
-  def test_obscured_location
+  def test_location_obscured
     mock_inat_obs = mock_observation("distantes")
 
     Location.create(user: rolf,
@@ -375,16 +397,52 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  def test_location_absent
+    mock_inat_obs = mock_observation("no_location")
+    assert_nil(
+      mock_inat_obs.lat && mock_inat_obs.lng,
+      "MO lat/lng should be nil for iNat observations without location"
+    )
+    assert_nil(
+      mock_inat_obs.location,
+      "MO obs.location should be undefined for iNat obss without location"
+    )
+  end
+
   def test_notes
-    assert_equal({ Collector: "tyler_irvin" },
-                 mock_observation("coprinus").notes,
+    assert_equal("tyler_irvin", mock_observation("coprinus").notes[:Collector],
                  "MO Notes should always include Collector:")
     assert_equal(
       "Collection by Heidi Randall. \nSmells like T. suaveolens. ",
-      mock_observation("trametes").notes[:Other],
+      strip_html_comments(mock_observation("trametes").notes[:Other]),
       "iNat Description should be mapped to MO Notes Other"
     )
+
+    mock_obs = mock_observation("tremella_mesenterica")
+    assert_equal(
+      "", mock_obs.notes[:Other],
+      "Notes Other should be a blank String if iNat Description is empty"
+    )
+
+    mock_obs = mock_observation("tremella_mesenterica")
+    mock_obs[:description] = "before blank line\r\n\r\nafter blank line"
+    assert_not(
+      mock_obs.notes[:Other].match?(/\n{2,}/),
+      "Failed to compress consecutive newlines/returns from iNat Notes"
+    )
+    # Account for the solution of adding an html comment
+    # when compressing multiple blank lines
+    assert_equal(
+      "before blank line\nafter blank line",
+      strip_html_comments(mock_obs.notes[:Other]),
+      "Failed to compress consecutive newlines/returns from iNat Notes"
+    )
   end
+
+  def strip_html_comments(str)
+    str.gsub(/<!---.*?--->/m, "")
+  end
+  private :strip_html_comments
 
   def test_sequences
     mock_inat_obs = mock_observation("lycoperdon")

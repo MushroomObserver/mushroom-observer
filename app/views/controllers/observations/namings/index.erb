@@ -1,5 +1,6 @@
 <%=
 tag.div(id: "observation_namings") do
-  observation_namings_table(@user, @observation, @consensus)
+  render(partial: "observations/show/namings",
+         locals: { user: @user, obs: @observation, consensus: @consensus })
 end
 %>

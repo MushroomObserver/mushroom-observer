@@ -133,8 +133,8 @@ module Report
       vals = HerbariumRecord.joins(:observations).
              merge(plain_query).
              select(ObservationHerbariumRecord[:observation_id],
-                    (HerbariumRecord[:initial_det] + ": " +
-                     HerbariumRecord[:accession_number])).
+                    HerbariumRecord[:initial_det] + ": " +
+                     HerbariumRecord[:accession_number]).
              map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, col)
     end
@@ -172,6 +172,14 @@ module Report
              merge(plain_query).
              select(ObservationImage[:observation_id],
                     ObservationImage[:image_id]).
+             map { |rec| rec.attributes.values[0..1] }
+      add_column!(rows, vals, col)
+    end
+
+    def add_sequence_ids!(rows, col)
+      vals = Sequence.joins(:observation).
+             merge(plain_query).
+             select(Sequence[:observation_id], Sequence[:id]).
              map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, col)
     end

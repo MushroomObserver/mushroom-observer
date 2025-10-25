@@ -36,10 +36,25 @@ class PatternSearch::NameTest < UnitTestCase
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
+  def test_name_search_exclude_synonyms
+    expect = Name.names(lookup: names(:macrolepiota_rachodes),
+                        include_synonyms: false)
+    assert_not_empty(expect)
+    x = PatternSearch::Name.new("Macrolepiota rachodes include_synonyms:no")
+    assert_name_arrays_equal(expect, x.query.results, :sort)
+  end
+
   def test_name_search_include_subtaxa
     expect = Name.names(lookup: names(:agaricus), include_subtaxa: true)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("Agaricus include_subtaxa:yes")
+    assert_name_arrays_equal(expect, x.query.results, :sort)
+  end
+
+  def test_name_search_exclude_subtaxa
+    expect = Name.names(lookup: names(:agaricus), include_subtaxa: false)
+    assert_not_empty(expect)
+    x = PatternSearch::Name.new("Agaricus include_subtaxa:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 

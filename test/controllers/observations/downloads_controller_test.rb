@@ -9,12 +9,30 @@ module Observations
       assert(query.num_results > 1, "Test needs query with multiple results")
 
       login(:rolf)
-      get(:new, params: { q: query.id.alphabetize })
+      get(:new, params: { q: @controller.q_param(query) })
+
+      assert_no_flash
+      assert_response(:success)
+      assert_select("input[type=radio][id=format_mycoportal]", false,
+                    "Missing a MyCoPortal radio button")
+      assert_select("input[type=radio][id=format_mycoportal_image_list]", false,
+                    "Missing a MyCoPortal Images radio button")
+    end
+
+    def test_new_admin
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+      assert(query.num_results > 1, "Test needs query with multiple results")
+
+      login(:rolf)
+      make_admin("rolf")
+      get(:new, params: { q: @controller.q_param(query) })
 
       assert_no_flash
       assert_response(:success)
       assert_select("input[type=radio][id=format_mycoportal]", true,
                     "Missing a MyCoPortal radio button")
+      assert_select("input[type=radio][id=format_mycoportal_image_list]", true,
+                    "Missing a MyCoPortal Images radio button")
     end
 
     def test_download_observation_index
@@ -32,15 +50,16 @@ module Observations
         accession_number: "Mary #1234"
       )
 
-      get(:new, params: { q: query.id.alphabetize })
+      q = @controller.q_param(query)
+      get(:new, params: { q: })
       assert_no_flash
       assert_response(:success)
-      assert_match(%r{observations/downloads\?q=}, @response.body)
+      assert_select("form[action*='#{query_string(q)}']")
 
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q:,
           format: :raw,
           encoding: "UTF-8",
           commit: "Cancel"
@@ -53,7 +72,7 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q:,
           format: :raw,
           encoding: "UTF-8",
           commit: "Download"
@@ -97,7 +116,7 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q:,
           format: "raw",
           encoding: "ASCII",
           commit: "Download"
@@ -109,7 +128,7 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q:,
           format: "raw",
           encoding: "UTF-16",
           commit: "Download"
@@ -121,7 +140,7 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q:,
           format: "adolf",
           encoding: "UTF-8",
           commit: "Download"
@@ -133,8 +152,8 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
-          format: "darwin",
+          q:,
+          format: "dwca",
           encoding: "UTF-8",
           commit: "Download"
         }
@@ -145,7 +164,7 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q:,
           format: "symbiota",
           encoding: "UTF-8",
           commit: "Download"
@@ -157,7 +176,7 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q:,
           format: "fundis",
           encoding: "UTF-8",
           commit: "Download"
@@ -169,7 +188,7 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q:,
           format: "mycoportal",
           encoding: "UTF-8",
           commit: "Download"
@@ -177,6 +196,16 @@ module Observations
       )
       assert_no_flash
       assert_response(:success)
+
+      format = "nonexistent"
+      assert_raises("Invalid download type: #{format}") do
+        post(:create,
+             params: {
+               q:,
+               format: format,
+               commit: "Download"
+             })
+      end
     end
 
     def test_download_too_many_observations
@@ -184,7 +213,7 @@ module Observations
       login("mary")
 
       MO.stub(:max_downloads, Observation.count - 1) do
-        get(:new, params: { q: query.id.alphabetize })
+        get(:new, params: { q: @controller.q_param(query) })
       end
 
       assert_redirected_to(observations_path)
@@ -196,7 +225,7 @@ module Observations
       login("mary")
 
       MO.stub(:max_downloads, Observation.count - 1) do
-        get(:new, params: { q: query.id.alphabetize })
+        get(:new, params: { q: @controller.q_param(query) })
       end
 
       assert_response(:success)
@@ -208,7 +237,7 @@ module Observations
       make_admin("mary")
 
       MO.stub(:max_downloads, Observation.count - 1) do
-        get(:new, params: { q: query.id.alphabetize })
+        get(:new, params: { q: @controller.q_param(query) })
       end
 
       assert_response(:success)
@@ -216,6 +245,31 @@ module Observations
 
     def test_print_labels
       login
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+      assert_operator(query.num_results, :>=, 4)
+      get(:print_labels, params: { q: query.id.alphabetize })
+      assert_pdf(@response)
+
+      # Alternative entry point.
+      post(
+        :create,
+        params: {
+          q: @controller.q_param(query),
+          commit: "Print Labels"
+        }
+      )
+      assert_pdf(@response)
+    end
+
+    def rtf_user(user)
+      user.label_format = "rtf"
+      user.save
+      user
+    end
+
+    def test_print_rtf_labels
+      user = rtf_user(rolf)
+      login(user.login)
       query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert_operator(query.num_results, :>=, 4)
       get(:print_labels, params: { q: query.id.alphabetize })
@@ -228,15 +282,32 @@ module Observations
       post(
         :create,
         params: {
-          q: query.id.alphabetize,
+          q: @controller.q_param(query),
           commit: "Print Labels"
         }
       )
       assert_equal(query.num_results, @response.body.scan("\\pard").size)
     end
 
+    def assert_pdf(response)
+      assert_equal("application/pdf", response.content_type)
+      pdf_content = response.body.force_encoding("ASCII-8BIT")
+      assert(pdf_content.start_with?("%PDF-"), "Should generate valid PDF")
+      assert(pdf_content.include?("%%EOF"), "Should have valid PDF ending")
+    end
+
     def test_project_labels
       login("roy")
+      query = Query.lookup_and_save(
+        :Observation, projects: projects(:open_membership_project)
+      )
+      get(:print_labels, params: { q: query.id.alphabetize })
+      assert_pdf(@response)
+    end
+
+    def test_project_labels_rtf
+      user = rtf_user(roy)
+      login(user.login)
       query = Query.lookup_and_save(
         :Observation, projects: projects(:open_membership_project)
       )
@@ -252,7 +323,14 @@ module Observations
     def test_print_labels_all
       login
       query = Query.lookup_and_save(:Observation)
-      get(:print_labels, params: { q: query.id.alphabetize })
+      get(:print_labels, params: { q: @controller.q_param(query) })
+    end
+
+    def test_print_labels_all_rtf
+      user = rtf_user(rolf)
+      login(user.login)
+      query = Query.lookup_and_save(:Observation)
+      get(:print_labels, params: { q: @controller.q_param(query) })
     end
 
     def test_print_labels_query_nil
@@ -263,11 +341,45 @@ module Observations
       @controller.stub(:find_query, nil) do
         get(
           :print_labels,
-          params: { q: query.id.alphabetize, commit: "Print Labels" }
+          params: {
+            q: @controller.q_param(query), commit: "Print Labels"
+          }
         )
       end
 
       assert_flash_error
+    end
+
+    def test_mycoportal_image_list
+      query = Query.lookup_and_save(:Observation, by_users: [dick])
+      obss_with_images =
+        Observation.joins(:images).where(id: query.results(&:id)).
+        order(id: :asc, image_id: :asc)
+      assert(obss_with_images.many?,
+             "Test needs query which results in many Observations with Images")
+      assert(
+        obss_with_images.any? { |obs| obs.images.many? },
+        "Test needs query which results in >=1 Observations with many Images"
+      )
+      expect = ["catalogNumber,imageId"]
+      obss_with_images.uniq.each do |obs|
+        obs.images.each do |image|
+          expect << "MUOB #{obs.id}," \
+                    "https://mushroomobserver.org/images/1280/#{image.id}.jpg"
+        end
+      end
+
+      login
+      post(:create, params: { q: @controller.q_param(query),
+                              format: :mycoportal_image_list,
+                              encoding: "UTF-8",
+                              commit: "Download" })
+
+      assert_response(:success)
+      rows = @response.body.split("\n")
+      assert_equal("catalogNumber,imageId", rows.first, "Wrong header row")
+      assert_equal(obss_with_images.count + 1, rows.count)
+      assert_equal(expect, rows, "Wrong MyCoPortal Image List csv")
     end
   end
 end

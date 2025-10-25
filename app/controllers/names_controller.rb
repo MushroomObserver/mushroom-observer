@@ -3,13 +3,13 @@
 # rubocop:disable Metrics/ClassLength
 class NamesController < ApplicationController
   before_action :store_location, except: [:index]
-  before_action :pass_query_params, except: [:index]
   before_action :login_required
 
   ##############################################################################
   # INDEX
   #
   def index
+    make_name_suggestions
     build_index_with_query
   end
 
@@ -40,36 +40,18 @@ class NamesController < ApplicationController
     [nil, {}]
   end
 
-  # Display list of names that match a string.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (name = Name.safe_find(pattern))
-      redirect_to(name_path(name.id))
-      [nil, {}]
-    else
-      show_non_id_pattern_results(pattern)
-    end
-  end
+  def make_name_suggestions
+    return unless @objects.empty? &&
+                  params[:q].is_a?(ActionController::Parameters) &&
+                  (original_spelling = params.dig(:q, :pattern))
 
-  def show_non_id_pattern_results(pattern)
-    search = PatternSearch::Name.new(pattern)
-    if search.errors.any?
-      search.errors.each do |error|
-        flash_error(error.to_s)
-      end
-      render("names/index")
-      [nil, {}]
-    else
-      @suggest_alternate_spellings = search.query.params[:pattern]
-      # Call create_query to apply user content filters
-      query = create_query(:Name, search.query.params)
-      [query, {}]
-    end
+    return unless original_spelling
+
+    @name_suggestions = Name.suggest_alternate_spellings(original_spelling)
   end
 
   # Disabling the cop because subaction methods are going away soon
-  # rubocop:disable Naming/PredicateName
+  # rubocop:disable Naming/PredicatePrefix
   # Display list of names that have observations.
   def has_observations
     query = create_query(:Name, has_observations: 1)
@@ -82,7 +64,7 @@ class NamesController < ApplicationController
     query = create_query(:Name, has_descriptions: 1)
     [query, {}]
   end
-  # rubocop:enable Naming/PredicateName
+  # rubocop:enable Naming/PredicatePrefix
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
@@ -155,8 +137,6 @@ class NamesController < ApplicationController
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
   def show
-    clear_query_in_session
-
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, Name, params[:id].to_s)
@@ -404,12 +384,14 @@ class NamesController < ApplicationController
   def update_name
     @parse = parse_name
     if !minor_change? && @name.dependents? && !in_admin_mode?
-      redirect_with_query(new_admin_emails_name_change_requests_path(
-                            name_id: @name.id,
-                            # Auricularia Bull. [#17132]
-                            new_name_with_icn_id: "#{@parse.search_name} " \
-                                                  "[##{params[:name][:icn_id]}]"
-                          ))
+      redirect_to(
+        new_admin_emails_name_change_requests_path(
+          name_id: @name.id,
+          # Auricularia Bull. [#17132]
+          new_name_with_icn_id: "#{@parse.search_name} " \
+                                "[##{params[:name][:icn_id]}]"
+        )
+      )
       return
     end
 
@@ -451,14 +433,14 @@ class NamesController < ApplicationController
   end
 
   def redirect_to_show_name
-    redirect_with_query(@name.show_link_args)
+    redirect_to(@name.show_link_args)
   end
 
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(form_to_deprecate_synonym_of_name_path(@name.id))
+      redirect_to(form_to_deprecate_synonym_of_name_path(@name.id))
     else
-      redirect_with_query(form_to_approve_synonym_of_name_path(@name.id))
+      redirect_to(form_to_approve_synonym_of_name_path(@name.id))
     end
   end
 
@@ -582,7 +564,7 @@ class NamesController < ApplicationController
       subject: "Nontrivial Name Change",
       content: content
     )
-    NamesControllerTest.report_email(content) if Rails.env.test?
+    NamesControllerUpdateTest.report_email(content) if Rails.env.test?
   end
 
   def email_name_change_content
@@ -609,9 +591,9 @@ class NamesController < ApplicationController
       perform_merge_names(new_name)
       redirect_to_show_name
     else
-      redirect_with_query(new_admin_emails_merge_requests_path(
-                            type: :Name, old_id: @name.id, new_id: new_name.id
-                          ))
+      redirect_to(new_admin_emails_merge_requests_path(
+                    type: :Name, old_id: @name.id, new_id: new_name.id
+                  ))
     end
   end
 
@@ -687,7 +669,7 @@ class NamesController < ApplicationController
       subject: "Merger identifier conflict",
       content: content
     )
-    NamesControllerTest.report_email(content) if Rails.env.test?
+    NamesControllerUpdateMergeTest.report_email(content) if Rails.env.test?
   end
 
   # ----------------------------------------------------------------------------

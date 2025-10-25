@@ -16,7 +16,6 @@ module Names
     # Form accessible from show_name that lets a user review all the synonyms
     # of a name, removing others, writing in new, etc.
     def edit
-      pass_query_params
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -24,8 +23,6 @@ module Names
     end
 
     def update
-      pass_query_params
-
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -73,7 +70,7 @@ module Names
         flash_notice(:name_change_synonyms_confirm.t)
       else
         success = deprecate_other_names(sorter)
-        return redirect_to(name_path(@name.id, q: get_query_param)) if success
+        return redirect_to(name_path(@name.id)) if success
 
         flash_object_errors(@name)
         flash_object_errors(@name.synonym)

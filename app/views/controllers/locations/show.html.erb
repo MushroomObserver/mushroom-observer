@@ -1,35 +1,38 @@
 <%
-add_page_title(:show_location_title.t(name: @location.display_name))
-add_pager_for(@location)
-add_interest_icons(@user, @location)
-add_context_nav(location_show_tabs)
-@container = :full
+add_show_title(@location.display_name, @location)
+if @user
+  add_edit_icons(@location)
+  add_interest_icons(@user, @location)
+  add_pager_for(@location)
+end
+container_class(:full)
+column_classes(:seven_five)
 %>
 
 <% if @location.hidden %>
-  <p>
-    <%= :show_location_hidden.t %>
-  </p>
+  <%= tag.p(:show_location_hidden.t) %>
 <% end %>
 
-<div class="row">
-  <div class="col-md-7">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
     <%= tag.div(class: "mb-5") { make_map(objects: [@location]) } %>
     <%= render(partial: "locations/show/general_description_panel") %>
     <%= render(partial: "comments/comments_for_object",
                 locals: { object: @location, comments: @comments,
                           controls: @user, limit: 2 }) %>
-  </div>
+  <% end %>
 
-  <div class="col-md-5">
+  <%= tag.div(class: yield(:right_columns)) do %>
     <%= render(partial: "locations/show/coordinates") %>
     <%= render(partial: "locations/show/notes") %>
-    <%= show_alt_descriptions_panel(user: @user, object: @location, projects: @projects) %>
+    <%= show_alt_descriptions_panel(
+      user: @user, object: @location, projects: @projects
+    ) %>
     <%= render(partial: "locations/show/footer") %>
-  </div>
-</div>
+  <% end %>
+<% end %>
 <!--.row-->
 
-<div class="mt-3">
+<%= tag.div(class: "mt-3") do %>
   <%= show_object_footer(@user, @location, @versions) %>
-</div>
+<% end %>

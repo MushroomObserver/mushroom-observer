@@ -179,7 +179,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.element.dataset.stimulus = "autocompleter-connected";
+    this.element.dataset.autocompleter = "connected";
 
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
@@ -352,6 +352,12 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
+    // Check the input for prefilled values in a form
+    if (this.inputTarget.value.length > 0) {
+      // this.scheduleRefresh(); // matches may not be populated
+      this.updateHiddenId();
+    }
+
     const hidden_id = parseInt(this.hiddenTarget.value);
     this.cssHasIdOrNo(hidden_id);
   }
@@ -393,7 +399,7 @@ export default class extends Controller {
   // events. Stimulus uses `handleEvent` under the hood.
   // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
   handleEvent(event) {
-    // console.log(this.name);
+    // console.log("autocompleter: " + event.type)
     switch (event.type) {
       case "focus":
         this.ourFocus(event);
@@ -495,6 +501,7 @@ export default class extends Controller {
     const old_value = this.old_value;
     const new_value = this.inputTarget.value;
     // this.debug("ourChange(" + this.inputTarget.value + ")");
+    // console.log("ourChange(" + this.inputTarget.value + ")");
     if (new_value.length == 0) {
       this.cssCollapseFields();
       this.clearHiddenId();
@@ -577,7 +584,7 @@ export default class extends Controller {
   // ------------------------------ Timers ------------------------------
 
   // Schedule matches to be recalculated from primer, or even primer refreshed,
-  // after a polite delay. (Primer only refreshed if first letter changes.)
+  // after a polite delay.
   scheduleRefresh() {
     if (this.TYPE === "location_google") {
       this.scheduleGoogleRefresh();
@@ -780,11 +787,11 @@ export default class extends Controller {
     } else {
       this.scheduleHide();
     }
-    this.inputTarget.focus();
-    this.focused = true;
     this.assignHiddenId(new_match);
     this.setSearchToken(new_val); // updates input field
     this.ourChange(false);
+    this.inputTarget.focus();
+    this.focused = true;
   }
 
   // ------------------------------ Pulldown ------------------------------
@@ -1090,7 +1097,7 @@ export default class extends Controller {
   }
 
   // Clears not only the ID, but also any data attributes of selected row,
-  // and the most recent keeper.
+  // and for multiple value autocompleters, the most recent "keeper".
   clearHiddenId() {
     this.verbose("autocompleter:clearHiddenId()");
     // Before we change the hidden input, store the old value and data
@@ -1099,6 +1106,8 @@ export default class extends Controller {
     this.clearLastHiddenTargetValue();
     // This checks the hidden_data against the stored_data
     this.hiddenIdChanged();
+    // Remove the green checkmark
+    this.cssHasIdOrNo(null);
   }
 
   // Removes the last id in the hidden input (array as csv string)
@@ -1686,8 +1695,15 @@ export default class extends Controller {
 
   getInputArray() {
     this.verbose("autocompleter:getInputArray()");
-    const input_array =
-      this.inputTarget.value.split(this.SEPARATOR).map((v) => v.trim());
+    const input_value = this.inputTarget.value;
+    const input_array = (() => {
+      // Don't return an array with an empty string, return an empty array.
+      if (input_value == "") {
+        return [];
+      } else {
+        return input_value.split(this.SEPARATOR).map((v) => v.trim());
+      }
+    })();
     this.verbose(input_array);
     return input_array;
   }
@@ -1816,34 +1832,27 @@ export default class extends Controller {
   }
 
   // Process response from server:
-  // 1. first line is string actually used to match;
+  // 1. first line is first character of string actually used to match; [Unused]
   // 2. the last string is "..." if the set of results is incomplete;
   // 3. the rest are matching results.
   //
-  // `this.primer` is a huge array of records usually matching only the first
-  // letter typed, which is assumed not to change too often. `this.matches` is
-  // the smaller array of records "refined" from the primer, matching the search
-  // token as it is typed out. The pulldown menu is populated with the matches.
+  // `this.primer` is a huge array of records matching the letters
+  // typed to get the set down to a manageable size which is assumed
+  // not to change too often.  `this.matches` is the smaller array of
+  // records "refined" from the primer, matching the search token as
+  // it is typed out. The pulldown menu is populated with the matches.
   //
   processFetchResponse(new_primer) {
     this.verbose("autocompleter:processFetchResponse()");
 
     // Clear flag telling us request is pending.
     this.fetch_request = null;
-    // Record string actually used to do matching: might be less strict
-    // than one sent in request.
-    if (new_primer.length > 0)
-      this.last_fetch_request = new_primer[0]['name'];
 
     // Check for trailing "..." signaling incomplete set of results.
     if (new_primer.length > 1 &&
       new_primer[new_primer.length - 1]['name'] == "...") {
       this.last_fetch_incomplete = true;
       new_primer = new_primer.slice(0, new_primer.length - 1);
-      // if (this.focused)
-      //   just in case we need to refine the request due to
-      //   activity while waiting for this response
-      //   this.scheduleRefresh();
     } else {
       this.last_fetch_incomplete = false;
     }

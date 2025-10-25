@@ -1,9 +1,13 @@
 #!/bin/bash
 
+# Installs a downloaded db snapshot which must be named `checkpoint.gz` and
+# located in the `/mushroom-observer` root directory, and calls `db/clean.sql`
+# to strip passwords and private gps data from the database.
 database="mo_development"
 username="mo"
 password="mo"
 
 gunzip -c checkpoint.gz | mysql -u $username -p$password $database
-mysql -u $username -p$password $database -e "source clean.sql"
-mysqldump -u $username -p$password $database | gzip > checkpoint_stripped.gz
+mysql -u $username -p$password $database -e "source db/clean.sql"
+# Uncomment this if there's a need to output a stripped checkpoint locally.
+# mysqldump -u $username -p$password $database | gzip > checkpoint_stripped.gz

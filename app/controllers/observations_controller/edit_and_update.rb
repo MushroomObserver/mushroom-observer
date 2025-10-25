@@ -28,8 +28,8 @@ module ObservationsController::EditAndUpdate
     return unless find_observation!
 
     # Make sure user owns this observation!
-    unless check_permission!(@observation)
-      redirect_with_query(action: :show, id: @observation.id) and return
+    unless permission!(@observation)
+      redirect_to(action: :show, id: @observation.id) and return
     end
 
     init_license_var
@@ -75,8 +75,8 @@ module ObservationsController::EditAndUpdate
     return unless find_observation!
 
     # Make sure user owns this observation!
-    unless check_permission!(@observation)
-      redirect_with_query(action: :show, id: @observation.id) and return
+    unless permission!(@observation)
+      redirect_to(action: :show, id: @observation.id) and return
     end
 
     init_license_var
@@ -166,10 +166,10 @@ module ObservationsController::EditAndUpdate
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?
-      redirect_with_query(new_location_path(where: @observation.place_name,
-                                            set_observation: @observation.id))
+      redirect_to(new_location_path(where: @observation.place_name,
+                                    set_observation: @observation.id))
     else
-      redirect_with_query(permanent_observation_path(@observation.id))
+      redirect_to(permanent_observation_path(@observation.id))
     end
   end
 end

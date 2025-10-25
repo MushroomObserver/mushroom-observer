@@ -16,12 +16,30 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:Observation)
     assert(query.record.new_record?)
     assert_equal("Observation", query.model.to_s)
+    assert_equal(:observation, query.type_tag)
+    # Test QueryRecord.model? method:
+    query.record.save
+    assert(QueryRecord.model?(:Observation, query.record.id))
 
     query2 = Query.lookup_and_save(:Observation)
     assert_not(query2.record.new_record?)
     assert_equal(query, query2)
-
     assert_equal(query2, Query.safe_find(query2.id))
+
+    query3 = Query.lookup_and_save(:Observation, by_users: [users(:rolf).id])
+    assert_not(query3.record.new_record?)
+    assert_not_equal(query2, query3)
+    assert_equal(query3, Query.safe_find(query3.id))
+    # Test QueryRecord.check_param method:
+    assert_equal(
+      [users(:rolf).id],
+      QueryRecord.check_param(:by_users, query3.record.id)
+    )
+    # Be sure the permalink has been set on all of these
+    assert(QueryRecord.safe_find(query.id).permalink)
+    assert(QueryRecord.safe_find(query2.id).permalink)
+    assert(QueryRecord.safe_find(query3.id).permalink)
+
     assert_nil(Query.safe_find(0))
 
     updated_at = query2.record.updated_at
@@ -384,22 +402,30 @@ class QueryTest < UnitTestCase
     @names = Name.reorder(id: :asc)
 
     query.current = @names[2]
+    assert_equal(@names[1].id, query.prev_id)
     assert_equal(query, query.prev)
     assert_equal(@names[1].id, query.current_id)
+    assert_equal(@names[0].id, query.prev_id)
     assert_equal(query, query.prev)
     assert_equal(@names[0].id, query.current_id)
+    assert_nil(query.prev_id)
     assert_nil(query.prev)
     assert_equal(@names[0].id, query.current_id)
+    assert_equal(@names[1].id, query.next_id)
     assert_equal(query, query.next)
     assert_equal(@names[1].id, query.current_id)
+    assert_equal(@names[2].id, query.next_id)
     assert_equal(query, query.next)
     assert_equal(@names[2].id, query.current_id)
+    assert_equal(@names[-1].id, query.last_id)
     assert_equal(query, query.last)
     assert_equal(@names[-1].id, query.current_id)
     assert_equal(query, query.last)
     assert_equal(@names[-1].id, query.current_id)
+    assert_nil(query.next_id)
     assert_nil(query.next)
     assert_equal(@names[-1].id, query.current_id)
+    assert_equal(@names[0].id, query.first_id)
     assert_equal(query, query.first)
     assert_equal(@names[0].id, query.current_id)
     assert_equal(query, query.first)
@@ -610,6 +636,12 @@ class QueryTest < UnitTestCase
   def test_relatable
     assert(Query.lookup(:Observation, order_by: :id).relatable?(:Image))
     assert_not(Query.lookup(:Herbarium, order_by: :id).relatable?(:Project))
+  end
+
+  def test_q_param
+    params = { by_users: [rolf.id], names: { lookup: ["Coprinus comatus"] } }
+    query = Query.lookup(:Observation, **params)
+    assert_equal(query.q_param, { model: :Observation, **params })
   end
 
   ##############################################################################

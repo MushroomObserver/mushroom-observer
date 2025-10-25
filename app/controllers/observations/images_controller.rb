@@ -8,7 +8,6 @@ module Observations
   # Upload, attach, detach, edit Observation Images
   class ImagesController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     ###########################################################################
 
@@ -35,9 +34,8 @@ module Observations
       @image.attributes = permitted_image_params
 
       if image_or_projects_updated
-        # redirect_with_query(image_path(@image.id))
-        render("images/show",
-               location: image_path(@image.id, q: get_query_param))
+        # redirect_to(image_path(@image.id))
+        render("images/show", location: image_path(@image.id))
       else
         init_project_vars_for_reload(@image)
         render(:edit, location: edit_image_path(@image.id))
@@ -65,9 +63,9 @@ module Observations
     end
 
     def check_image_permission!
-      return if check_permission!(@image)
+      return if permission!(@image)
 
-      redirect_with_query(image_path(@image))
+      redirect_to(image_path(@image))
     end
 
     def permitted_image_params
@@ -206,9 +204,9 @@ module Observations
     end
 
     def check_observation_permission!
-      return true if check_permission!(@observation)
+      return true if permission!(@observation)
 
-      redirect_with_query(permanent_observation_path(id: @observation.id))
+      redirect_to(permanent_observation_path(id: @observation.id))
       false
     end
 
@@ -220,10 +218,9 @@ module Observations
         error = image.strip_gps!
         flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
       end
-      redirect_with_query(permanent_observation_path(id: @observation.id))
+      redirect_to(permanent_observation_path(id: @observation.id))
       # render("observations/show",
-      #        location: permanent_observation_path(id: @observation.id,
-      #                                             q: get_query_param))
+      #        location: permanent_observation_path(id: @observation.id))
     end
   end
 end

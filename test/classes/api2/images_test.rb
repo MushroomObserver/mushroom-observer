@@ -113,8 +113,10 @@ class API2::ImagesTest < UnitTestCase
   end
 
   def test_getting_images_location
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
     burbank = locations(:burbank)
-    imgs = burbank.observations.map(&:images).flatten
+    imgs = Image.locations(burbank)
     assert_not_empty(imgs)
     assert_api_pass(params_get(location: burbank.id))
     assert_api_results(imgs)
@@ -143,7 +145,7 @@ class API2::ImagesTest < UnitTestCase
   end
 
   def test_getting_images_has_observation
-    attached   = Image.select { |i| i.observations.count.positive? }
+    attached   = Image.select { |i| i.observations.any? }
     unattached = Image.all - attached
     assert_not_empty(attached)
     assert_not_empty(unattached)

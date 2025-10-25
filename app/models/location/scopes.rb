@@ -7,7 +7,7 @@ module Location::Scopes
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do
     # default ordering for index queries
     scope :order_by_default,
           -> { order_by(::Query::Locations.default_order) }
@@ -39,7 +39,7 @@ module Location::Scopes
 
     # This is a convenience for lookup by text name. Used by `observation_query`
     scope :locations, lambda { |locations|
-      location_ids = lookup_locations_by_name(locations)
+      location_ids = Lookup::Locations.new(locations).ids
       where(id: location_ids).distinct
     }
 

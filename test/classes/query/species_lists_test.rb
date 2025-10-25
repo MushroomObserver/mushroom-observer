@@ -66,6 +66,16 @@ class Query::SpeciesListsTest < UnitTestCase
     )
   end
 
+  def test_species_list_names
+    names = [names(:agaricus_campestris).search_name]
+    scope = SpeciesList.names(lookup: names).order_by_default
+    assert_query(scope, :SpeciesList, names: { lookup: names })
+    assert_query(
+      [species_lists(:one_genus_three_species_list)],
+      :SpeciesList, names: { lookup: names }
+    )
+  end
+
   def test_species_list_for_projects
     assert_query([],
                  :SpeciesList, projects: projects(:empty_project))
@@ -87,10 +97,11 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_title_has
-    ids = [species_lists(:first_species_list).id,
-           species_lists(:another_species_list).id]
-    scope = SpeciesList.title_has("A Species List").order_by_default
-    assert_query_scope(ids, scope, :SpeciesList, title_has: "A Species List")
+    ids = [species_lists(:another_species_list).id,
+           species_lists(:first_species_list).id]
+    scope = SpeciesList.title_has("An Observation List").order_by_default
+    assert_query_scope(ids, scope, :SpeciesList,
+                       title_has: "An Observation List")
   end
 
   def test_species_list_has_notes
@@ -99,8 +110,8 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_notes_has
-    ids = [species_lists(:first_species_list).id,
-           species_lists(:another_species_list).id]
+    ids = [species_lists(:another_species_list).id,
+           species_lists(:first_species_list).id]
     scope = SpeciesList.notes_has("Skunked").order_by_default
     assert_query_scope(ids, scope, :SpeciesList, notes_has: "Skunked")
   end
@@ -111,27 +122,44 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query_scope(ids, scope, :SpeciesList, search_where: "No Mushrooms")
   end
 
+  def test_species_list_region
+    ids = [species_lists(:no_location_list).id]
+    scope = SpeciesList.region("Oregon, USA").order_by_default
+    assert_query_scope(ids, scope, :SpeciesList, region: "Oregon, USA")
+  end
+
   def test_species_list_pattern
     assert_query([], :SpeciesList, pattern: "nonexistent pattern")
+
     # in title
-    pattern = "query_first_list"
-    expects = species_list_pattern_search(pattern)
-    assert_query(expects, :SpeciesList, pattern: "query_first_list")
+    list = species_lists(:query_first_list)
+    assert_pattern_search_query_scope(list, pattern: list.title)
+
+    # in title, with NULL where
+    list = species_lists(:no_where_list)
+    assert_pattern_search_query_scope(list, pattern: list.title)
+
     # in notes
-    pattern = species_lists(:query_notes_list).notes
-    expects = species_list_pattern_search(pattern)
-    assert_query(expects, :SpeciesList, pattern: pattern)
+    list = species_lists(:query_notes_list)
+    assert_pattern_search_query_scope(list, pattern: list.notes)
+
     # in location
     pattern = locations(:burbank).name
     expects = species_list_pattern_search(pattern)
     assert_query(expects, :SpeciesList, pattern: locations(:burbank).name)
+
     # in where
-    pattern = species_lists(:where_list).where
-    expects = species_list_pattern_search(pattern)
-    assert_query(expects, :SpeciesList, pattern: pattern)
+    list = species_lists(:where_list)
+    assert_pattern_search_query_scope(list, pattern: list.where)
 
     expects = SpeciesList.order_by_default
     assert_query(expects, :SpeciesList, pattern: "")
+  end
+
+  def assert_pattern_search_query_scope(list, pattern:)
+    ids = [list.id]
+    scope = species_list_pattern_search(pattern)
+    assert_query_scope(ids, scope, :SpeciesList, pattern: pattern)
   end
 
   def species_list_pattern_search(pattern)

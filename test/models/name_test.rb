@@ -159,7 +159,7 @@ class NameTest < UnitTestCase
     assert_equal("Coprinus", result[0].text_name)
     assert_equal("Coprinus comatus", result[1].text_name)
     assert_equal("Coprinus comatus var. bogus", result[2].text_name)
-    assert_equal("", result[0].author)
+    assert_equal(names(:coprinus).author, result[0].author)
     assert_equal("(O.F. Müll.) Pers.", result[1].author)
     assert_equal("(With) Author", result[2].author)
 
@@ -2853,6 +2853,10 @@ class NameTest < UnitTestCase
     assert_equal("Phylum", Name.guess_rank("Fossil-Anythingelse"))
   end
 
+  # --------------------------------------
+  #  Spelling
+  # --------------------------------------
+
   def test_parent_if_parent_deprecated
     User.current = rolf
     lepiota = names(:lepiota)
@@ -2994,6 +2998,27 @@ class NameTest < UnitTestCase
       [species4, species5],
       Name.suggest_alternate_spellings("Lecanoa grandis"), :sort
     )
+  end
+
+  def test_name_guessing
+    # Not all the genera actually have records in our test database.
+    Name.create_needed_names(rolf, "Agaricus")
+    Name.create_needed_names(rolf, "Pluteus")
+    Name.create_needed_names(rolf,
+                             "Coprinus comatus subsp. bogus var. varietus")
+
+    assert_name_suggestions("Agricus")
+    assert_name_suggestions("Ptligera")
+    assert_name_suggestions(" plutues _petastus  ")
+    assert_name_suggestions("Coprinis comatis")
+    assert_name_suggestions("Coprinis comatis Blah. Boggle")
+    assert_name_suggestions("Coprinis comatis Blah. Boggle var. varitus")
+  end
+
+  def assert_name_suggestions(str)
+    results = Name.suggest_alternate_spellings(str)
+    assert(results.any?,
+           "Couldn't suggest alternate spellings for #{str.inspect}.")
   end
 
   # --------------------------------------
@@ -3373,6 +3398,16 @@ class NameTest < UnitTestCase
     assert_names_equal(names(:stereum), names(:stereum_hirsutum).accepted_genus)
   end
 
+  def test_multiple_synonyms
+    name1 = names(:chlorophyllum_rachodes)
+    name2 = names(:macrolepiota_rachodes)
+    assert_not_equal(name1.synonym, name2.synonym)
+    name1.merge_synonyms(name2)
+    name1.reload
+    name2.reload
+    assert_equal(name1.synonym, name2.synonym)
+  end
+
   def test_can_propagate
     assert(names(:coprinus).can_propagate?,
            "Genus s.s. Classifications should be propagable")
@@ -3595,18 +3630,21 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
 
-    # This is somewhat counter-intuitive, but
-    #  is a rarely occuring edge case;
-    #  is consistent with the current behavior of pattern_search;
-    #  improves the performance of the scope; and
-    #  greatly simplifies the code.
-    # https://github.com/MushroomObserver/mushroom-observer/pull/1082/files#r928148711
-    # https://github.com/MushroomObserver/mushroom-observer/pull/1082#issuecomment-1193235924
+    # Since lookup now does pattern matching when include_subtaxa is
+    # true rather than precise name matching, "Amanita group" is now
+    # included when you select "include_subtaxa".
     assert_includes(
+      Name.names(lookup: "Amanita", include_subtaxa: true), amanita_group,
+      "`include_subtaxa` at or below genus <X> should include `<X> group`"
+    )
+    # However, the semantics of exclude_original_names has now changed
+    # to exclude the any of the pattern matching names.
+    assert_not_includes(
       Name.names(
         lookup: "Amanita", include_subtaxa: true, exclude_original_names: true
       ), amanita_group,
-      "`include_subtaxa` at or below genus <X> should include `<X> group`"
+      "`include_subtaxa` and `exclude_original_names` should not include " \
+      "`<X> group`"
     )
 
     assert_not_includes(
@@ -3640,6 +3678,9 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_locations
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
+
     assert_includes(
       Name.locations(locations(:burbank)), # at location called with Location
       names(:agaricus_campestris)

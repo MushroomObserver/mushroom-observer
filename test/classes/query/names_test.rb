@@ -260,6 +260,12 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, text_name_has: "Agaricus")
   end
 
+  def test_name_search_name_has
+    expects = Name.with_correct_spelling.
+              search_name_has("Agaricus").order_by_default
+    assert_query(expects, :Name, search_name_has: "Agaricus")
+  end
+
   def test_name_has_author
     expects = Name.with_correct_spelling.has_author.order_by_default
     assert_query(expects, :Name, has_author: true)
@@ -349,7 +355,9 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_pattern_search_description_notes
-    expects = [names(:agaricus_campestras).id]
+    # NameDescription matches, but searching that
+    # by default leads to surprising results.
+    expects = [] # [names(:agaricus_campestras).id]
     scope = Name.pattern("prevent me")
     assert_query_scope(
       expects, scope, :Name, pattern: "prevent me"
@@ -357,7 +365,9 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_pattern_search_description_gen_desc
-    expects = [names(:suillus).id]
+    # NameDescription matches, but searching that
+    # by default leads to surprising results.
+    expects = [] # [names(:suillus).id]
     scope = Name.pattern("smell as sweet")
     assert_query_scope(
       expects, scope, :Name, pattern: "smell as sweet"
@@ -366,7 +376,9 @@ class Query::NamesTest < UnitTestCase
 
   # Prove pattern search gets hits for description look_alikes
   def test_name_pattern_search_description_look_alikes
-    expects = [names(:peltigera).id]
+    # NameDescription matches, but searching that
+    # by default leads to surprising results.
+    expects = [] # [names(:peltigera).id]
     scope = Name.pattern("superficially similar")
     assert_query_scope(
       expects, scope, :Name, pattern: "superficially similar"
@@ -527,7 +539,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_with_observation_subquery_date
     date = observations(:california_obs).when.as_json
     expects = Name.with_correct_spelling.joins(:observations).distinct.
-              where(Observation[:when] >= date).order_by_default
+              where(Observation[:when].eq(date)).order_by_default
     scope = Name.with_correct_spelling.joins(:observations).distinct.
             merge(Observation.date(date)).order_by_default
     assert_query_scope(expects, scope,
@@ -648,6 +660,8 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_with_observation_subquery_locations
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
     loc = locations(:burbank)
     expects = Name.order_by_default.with_correct_spelling.joins(:observations).
               where(observations: { location: loc }).distinct

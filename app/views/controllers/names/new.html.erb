@@ -1,7 +1,7 @@
 <%
-add_page_title(:create_name_title.t)
+add_new_title(:create_object, :NAME)
 add_context_nav(name_form_new_tabs)
-action = add_query_param({ controller: "/names", action: :create })
+action = { controller: "/names", action: :create }
 %>
 
 <%= render(partial: "names/form",

@@ -5,10 +5,12 @@ require("test_helper")
 module Names
   class MapsControllerTest < FunctionalTestCase
     include ObjectLinkHelper
+
     # ----------------------------
     #  Maps
     # ----------------------------
 
+    # We do not offer maps for multiple names. You have to pass a name ID.
     # name with Observations that have Locations
     def test_map_names
       login

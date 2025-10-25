@@ -1,18 +1,17 @@
 <%
-add_page_title(:show_name_title.t(name: @name.user_display_name(@user)))
-
 Textile.user_register_name(@user, @name)
-add_pager_for(@name)
-add_interest_icons(@user, @name)
-add_context_nav(name_show_tabs(name: @name))
-
-@container = :full
+add_show_title(@name.user_display_name(@user).t.small_author, @name)
+if @user
+  add_edit_icons(@name)
+  add_interest_icons(@user, @name)
+  add_pager_for(@name)
+end
+container_class(:full)
+column_classes(:seven_five)
 %>
 
-<div class="row">
-
-  <!--LEFT COLUMN-->
-  <div class="col-xs-12 col-md-7">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
 
     <%= render(partial: "names/show/confident_observations_panel") %>
 
@@ -24,11 +23,10 @@ add_context_nav(name_show_tabs(name: @name))
                locals: { object: @name, comments: @comments,
                          controls: @user, limit: nil }) %>
 
-  </div>
-  <!--LEFT COLUMN-->
+  <% end %>
 
   <!--RIGHT COLUMN-->
-  <div class="col-xs-12 col-md-5">
+  <%= tag.div(class: yield(:right_columns)) do %>
 
     <%= render(partial: "names/show/observations_menu") %>
 
@@ -66,11 +64,9 @@ add_context_nav(name_show_tabs(name: @name))
       concat(:show_name_num_notifications.t(num: @name.interests))
     end %>
 
-  </div>
+  <% end %>
   <!--RIGHT COLUMN-->
-</div>
+<% end %>
 <!--.row-->
 
-<%=
-show_object_footer(@user, @name, @versions)
-%>
+<%= show_object_footer(@user, @name, @versions) %>

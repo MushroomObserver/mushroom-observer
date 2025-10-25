@@ -46,6 +46,7 @@
 
 // To make way for floating ID
 .rss-heading {
+  @extend .d-flex, .justify-content-between, .align-items-start;
 
   .rss-name {
     margin-right: 7.5rem;
@@ -54,6 +55,8 @@
   // Standardize the size of the ID
   small.rss-id {
     font-size: 1.05rem !important;
+    color: $text-color;
+    border-color: $text-color;
   }
   // small {
   //   font-size: 81%;
@@ -84,7 +87,7 @@ h5.rss-heading {
   text-overflow: ellipsis;
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: $screen-xs-max) {
   .rss-box-details {
     height: auto !important;
   }

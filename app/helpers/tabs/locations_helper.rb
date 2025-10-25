@@ -13,44 +13,17 @@ module Tabs
       ]
     end
 
-    # Composed links because there's interest_icons
-    def location_show_tabs
-      [
-        # observations_at_location_tab(location),
-        locations_index_tab,
-        new_location_tab
-        # edit_location_tab(location)
-      ]
-      # if in_admin_mode?
-      #   links += [
-      #     destroy_location_tab(location),
-      #     location_reverse_order_tab(location)
-      #   ]
-      # end
-      # links
-    end
-
-    # Dead code ** KEEP for bootstrap PR
-    # def location_show_heading_links(location:)
-    #   links = location_show_tabs(location: location)
-    #   icons = []
-    #   links.each do |link|
-    #     icons << icon_link_to(*link)
-    #   end
-    #   icons
-    # end
-
     def new_location_tab
       InternalLink::Model.new(
         :show_location_create.t, Location,
-        add_query_param(new_location_path),
+        new_location_path,
         html_options: { icon: :add }
       ).tab
     end
 
     def map_locations_tab(query)
       InternalLink.new(
-        :list_place_names_map.t, add_query_param(map_locations_path, query)
+        :list_place_names_map.t, add_q_param(map_locations_path, query)
       ).tab
     end
 
@@ -63,7 +36,7 @@ module Tabs
     def edit_location_tab(location)
       InternalLink::Model.new(
         :show_location_edit.t, location,
-        add_query_param(edit_location_path(location.id)),
+        edit_location_path(location.id),
         html_options: { icon: :edit }
       ).tab
     end
@@ -79,7 +52,7 @@ module Tabs
     def location_reverse_order_tab(location)
       InternalLink::Model.new(
         :show_location_reverse.t, location,
-        add_query_param(reverse_name_order_location_path(location.id)),
+        reverse_name_order_location_path(location.id),
         html_options: { icon: :back }
       ).tab
     end
@@ -90,7 +63,7 @@ module Tabs
 
       InternalLink::Model.new(
         :show_name_see_more.l, location,
-        add_query_param(location_description_path(location.description.id)),
+        location_description_path(location.description.id),
         html_options: { icon: :list }
       ).tab
     end
@@ -133,9 +106,11 @@ module Tabs
     end
 
     def observations_at_location_tab(location)
+      query = Query.lookup(:Observation, locations: location.id)
+
       InternalLink::Model.new(
         show_obs_link_title_with_count(location), location,
-        add_query_param(observations_path(location: location.id)),
+        add_q_param(observations_path, query),
         alt_title: :show_location_observations.t,
         html_options: { icon: :observations, show_text: true }
       ).tab

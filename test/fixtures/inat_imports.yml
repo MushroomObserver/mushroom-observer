@@ -10,11 +10,19 @@ DEFAULTS: &DEFAULTS
   importables: 0
   imported_count: 0
   response_errors: ""
+  total_imported_count: nil
+  total_seconds: nil
+  avg_import_time: nil
+  cancel: false
 
 rolf_inat_import:
   <<: *DEFAULTS
   user: rolf
+  importables: 4 # rolf wants to import 4 Observations
   inat_username: rolf_inat_username
+  total_imported_count: nil # has no import history
+  total_seconds: nil
+  avg_import_time: nil
 
 dick_inat_import:
   <<: *DEFAULTS
@@ -26,7 +34,37 @@ mary_inat_import:
   user: mary
   inat_username: mary_inat_username
 
+# katrina is in the middle of an import
+katrina_inat_import:
+  <<: *DEFAULTS
+  user: katrina
+  state: <%= InatImport.states[:Importing] %>
+  inat_username: katrina_inat_username
+  cancel: false
+
 inat_importer_inat_import:
   <<: *DEFAULTS
   user: inat_importer
   inat_username: inat_importer_inat_username
+
+# need >= 1 inat_import with an import history
+roy_inat_import:
+  <<: *DEFAULTS
+  total_imported_count: 3 # imports in prior jobs
+  total_seconds: 36 # seconds in prior jobs
+
+lone_wolf_import:
+  <<: *DEFAULTS
+  user: lone_wolf
+  importables: 2
+  state: <%= InatImport.states[:Done] %>
+  ended_at: <%= Time.zone.now + 15.seconds %>
+  response_errors: "Random error msg"
+
+# ollie canceled an import
+ollie_inat_import:
+  <<: *DEFAULTS
+  user: ollie
+  state: <%= InatImport.states[:Done] %>
+  inat_username: null # used in InatPageParserTest
+  cancel: true

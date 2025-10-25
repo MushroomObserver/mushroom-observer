@@ -1,13 +1,14 @@
 <%
-@container = :wide
+container_class(:wide)
 add_index_title(@query)
 add_context_nav(articles_index_tabs(user: @user))
 add_sorter(@query, articles_index_sorts)
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <div class="list-group">
     <%= render(partial: "articles/object", collection: @objects) %>
   </div>

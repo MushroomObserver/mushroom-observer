@@ -55,8 +55,8 @@ class Query::HerbariaTest < UnitTestCase
   end
 
   def test_herbarium_name_has
-    expects = [herbaria(:curatorless_herbarium), herbaria(:dick_herbarium),
-               herbaria(:rolf_herbarium)]
+    expects = [herbaria(:rolf_herbarium), herbaria(:curatorless_herbarium),
+               herbaria(:dick_herbarium)]
     scope = Herbarium.name_has("Herbarium").order_by_default
     assert_query_scope(expects, scope, :Herbarium, name_has: "Herbarium")
   end
@@ -72,6 +72,14 @@ class Query::HerbariaTest < UnitTestCase
     scope = Herbarium.mailing_address_has("Chicago")
     assert_query_scope(
       expects, scope, :Herbarium, mailing_address_has: "Chicago"
+    )
+  end
+
+  def test_herbarium_by_users
+    expects = [herbaria(:rolf_herbarium)]
+    scope = Herbarium.by_users(rolf.id)
+    assert_query_scope(
+      expects, scope, :Herbarium, by_users: rolf.id
     )
   end
 

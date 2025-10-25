@@ -14,12 +14,16 @@ module Observations
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(partial: "shared/modal_form",
-                 locals: { identifier: "observation_email",
-                           title: :ask_observation_question_title.t(
-                             name: @observation.unique_format_name
-                           ),
-                           form: "observations/emails/form" }) and return
+          render(
+            partial: "shared/modal_form",
+            locals: {
+              title: :ask_observation_question_title.t(
+                name: @observation.unique_format_name
+              ),
+              identifier: "observation_email",
+              user: @user, form: "observations/emails/form"
+            }
+          ) and return
         end
       end
     end
@@ -40,7 +44,7 @@ module Observations
     def show_flash_and_send_back
       respond_to do |format|
         format.html do
-          redirect_with_query(observation_path(@observation.id)) and return
+          redirect_to(observation_path(@observation.id)) and return
         end
         format.turbo_stream do
           render(partial: "shared/modal_flash_update",

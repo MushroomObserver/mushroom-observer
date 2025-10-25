@@ -9,7 +9,7 @@ require("test_helper")
 module Observations
   class SpeciesListsControllerTest < FunctionalTestCase
     def assigns_exist
-      !assigns(:all_lists).empty?
+      !assigns(:other_lists).empty? || !assigns(:obs_lists).empty?
     rescue StandardError
       # do nothing (This comment prevents Lint/SuppressedException offense.)
     end
@@ -17,8 +17,7 @@ module Observations
     def test_manage_species_lists
       obs = observations(:coprinus_comatus_obs)
       requires_login(:edit, id: obs.id)
-
-      assert(assigns_exist, "Missing species lists!")
+      assert(assigns_exist, "Missing species_lists!")
     end
 
     def test_add_observation_to_species_list
@@ -86,10 +85,10 @@ module Observations
 
       assert_flash_error(
         "Flash error should display if trying to remove an Observation " \
-        "from a Species list with an invalid `commit` mode"
+        "from a SpeciesList with an invalid `commit` mode"
       )
       assert(spl.reload.observations.member?(obs),
-             "Observation should remain in Species List")
+             "Observation should remain in Observation List")
     end
 
     def test_manage_species_list_with_projects

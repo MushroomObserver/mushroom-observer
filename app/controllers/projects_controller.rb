@@ -4,7 +4,7 @@ class ProjectsController < ApplicationController
   include Validators
 
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  before_action :store_location, only: [:show]
 
   ##############################################################################
   # INDEX
@@ -21,7 +21,7 @@ class ProjectsController < ApplicationController
 
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
-    [:pattern, :member, :by].freeze
+    [:pattern, :member, :by, :q].freeze
   end
 
   # Display list of projects with a given member, sorted by date.
@@ -49,7 +49,6 @@ class ProjectsController < ApplicationController
   # Inputs: params[:id] (project)
   # Outputs: @project
   def show
-    store_location
     return if find_project_and_where!.blank?
 
     set_ivars_for_show
@@ -94,9 +93,9 @@ class ProjectsController < ApplicationController
     @start_date_fixed = @project.start_date.present?
     @end_date_fixed = @project.end_date.present?
     @project_dates_any = !@start_date_fixed && !@end_date_fixed
-    return if check_permission!(@project)
+    return if permission!(@project)
 
-    redirect_to(project_path(@project.id, q: get_query_param))
+    redirect_to(project_path(@project.id))
   end
 
   def create
@@ -118,17 +117,16 @@ class ProjectsController < ApplicationController
     else
       return create_project(title, admin_name, params[:project][:place_name])
     end
-    @project = Project.new
+    @project = Project.new(project_params)
+    @project_dates_any = params[:project][:dates_any].downcase == "true"
     image_ivars
-    render(:new, location: new_project_path(q: get_query_param))
+    render(:new, location: new_project_path)
   end
 
   def update
     return unless find_project_and_where!
 
-    unless check_permission!(@project)
-      return redirect_to(project_path(@project.id, q: get_query_param))
-    end
+    return redirect_to(project_path(@project.id)) unless permission!(@project)
 
     upload_image_if_present
     @summary = params[:project][:summary]
@@ -139,13 +137,13 @@ class ProjectsController < ApplicationController
         @project.save
         @project.log_update
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
-        return redirect_to(project_path(@project.id, q: get_query_param))
+        return redirect_to(project_path(@project.id))
       else
         flash_object_errors(@project)
       end
     end
     image_ivars
-    render(:edit, location: edit_project_path(@project.id, q: get_query_param))
+    render(:edit, location: edit_project_path(@project.id))
   end
 
   # Callback to destroy a project.
@@ -157,19 +155,28 @@ class ProjectsController < ApplicationController
   def destroy
     return unless find_project_and_where!
 
-    if !check_permission!(@project)
-      redirect_to(project_path(@project.id, q: get_query_param))
+    if !permission!(@project)
+      redirect_to(project_path(@project.id))
     elsif !@project.destroy
       flash_error(:destroy_project_failed.t)
-      redirect_to(project_path(@project.id, q: get_query_param))
+      redirect_to(project_path(@project.id))
     else
       @project.log_destroy
       flash_notice(:destroy_project_success.t)
-      redirect_to(projects_path(q: get_query_param))
+      redirect_to(projects_path(q: q_param))
     end
   end
 
   private ############################################################
+
+  def project_params
+    params.require(:project).permit(
+      :open_membership, :title, :summary, :field_slip_prefix, :place_name,
+      :location_id,
+      :"start_date(1i)", :"start_date(2i)", :"start_date(3i)",
+      :"end_date(1i)", :"end_date(2i)", :"end_date(3i)"
+    )
+  end
 
   def image_ivars
     @licenses = License.available_names_and_ids(@user.license)
@@ -193,6 +200,10 @@ class ProjectsController < ApplicationController
               includes(:name, :user)
     # Save a lookup in comments_for_object
     @comments = @project.comments&.sort_by(&:created_at)&.reverse
+    # Matches for the list-search autocompleter
+    @object_names = @project.observations.joins(:name).
+                    select(Name[:text_name], Name[:id]).distinct.
+                    order(Name[:text_name])
   end
 
   def upload_image_if_present
@@ -276,7 +287,7 @@ class ProjectsController < ApplicationController
                               trust_level: "hidden_gps")
         @project.log_create
         flash_notice(:add_project_success.t)
-        return redirect_to(project_path(@project.id, q: get_query_param))
+        return redirect_to(project_path(@project.id))
       else
         flash_object_errors(@project)
       end
@@ -285,7 +296,7 @@ class ProjectsController < ApplicationController
     user_group&.destroy
     @project = Project.new
     image_ivars
-    render(:new, location: new_project_path(q: get_query_param))
+    render(:new, location: new_project_path)
   end
 
   def override_fixed_dates

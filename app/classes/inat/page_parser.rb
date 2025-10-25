@@ -1,33 +1,41 @@
 # frozen_string_literal: true
 
 class Inat
+  # Get one page of observations results (up to 200) from the iNat API,
+  # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
+  # returning a parsed JSON object.
   class PageParser
+    include Inat::Constants
+
     attr_accessor :last_import_id
 
-    # The iNat API
-    API_BASE = InatImportsController::API_BASE
-    # limit results iNat API requests, with Protozoa as a proxy for slime molds
-    ICONIC_TAXA = "Fungi,Protozoa"
+    delegate :inat_ids, to: :@import
+    delegate :user, to: :@import
 
-    def initialize(importer, ids, restricted_user_login)
-      @importer = importer
+    def initialize(import)
+      @import = import
       @last_import_id = 0
-      @ids = ids
-      @restricted_user_login = restricted_user_login
+      return if import.adequate_constraints?
+
+      # A belt-and-suspenders safety measure to prevent runaway imports
+      raise(
+        ArgumentError.new(
+          "PageParser called with InatImport which lacks adequate constraints"
+        )
+      )
     end
 
-    # Get one page of observations (up to 200)
-    # This is where we actually hit the iNat API
+    # Get next page of iNat API results, using per_page & id_above params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    # https://stackoverflow.com/a/11251654/3357635
     # NOTE: The `ids` parameter may be a comma-separated list of iNat obs
     # ids - that needs to be URL encoded to a string when passed as an arg here
     # because URI.encode_www_form deals with arrays by passing the same key
     # multiple times.
+    # https://stackoverflow.com/a/11251654/3357635
     def next_page
-      result = next_request(id: @ids, id_above: @last_import_id,
-                            user_login: @restricted_user_login)
+      result = next_request(id: inat_ids, id_above: @last_import_id)
       return nil if response_bad?(result)
+      return nil if result.body.blank?
 
       JSON.parse(result)
     end
@@ -46,23 +54,33 @@ class Inat
         id: nil, id_above: nil, only_id: false, per_page: 200,
         order: "asc", order_by: "id",
         # obss of only the iNat user with iNat login @inat_import.inat_username
-        user_login: nil,
+        # Prevents accidentally importing observations of multiple users
+        user_login: @import.inat_username,
+        # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
+        # and which haven't been exported from or inported to MO
         without_field: "Mushroom Observer URL"
       }.merge(args)
+      # super_importers can import observations of other users.
+      # In order to do that, we must remove the user_login param
+      # But we shouldn't remove that param unless there are other constraints
+      # on which observations are imported,
+      # else it will import all fungal observations on iNat!
+      if super_importing_selected_observations_of_single_user?
+        query_args.delete(:user_login)
+      end
+      headers = { authorization: "Bearer #{@import.token}", accept: :json }
 
-      # ::Inat.new(operation: query, token: @inat_import.token).body
-      # Nimmo 2024-06-19 jdc. Moving the request from the inat class to here.
-      # RestClient::Request.execute wasn't available in the class
-      headers = { authorization: "Bearer #{@importer.token}", accept: :json }
-      ::RestClient::Request.execute(
-        method: :get,
-        url: "#{API_BASE}/observations?#{query_args.to_query}",
-        headers: headers
-      )
+      Inat::APIRequest.new(@import.token).
+        request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
-      @importer.add_response_error(e.response)
+      error = { error: e.http_code, query: query_args.to_json }.to_json
+      @import.add_response_error(error)
       e.response
+    end
+
+    def super_importing_selected_observations_of_single_user?
+      InatImport.super_importer?(user) && @import.import_all == false
     end
   end
 end

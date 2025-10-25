@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# see application_controller.rb
+#  ==== Name validation
+#  construct_approved_names:: Creates a list of names if they've been approved.
+#  construct_approved_name::  (helper)
+#
 module ApplicationController::NameValidation
   ##############################################################################
   #
@@ -52,7 +55,7 @@ module ApplicationController::NameValidation
     end
 
     # Do the same thing for synonym (found the Approved = Synonym syntax).
-    return unless name_parse.has_synonym &&
+    return unless name_parse.has_synonym? &&
                   approved_names.member?(name_parse.synonym)
 
     construct_synonyms(name_parse)

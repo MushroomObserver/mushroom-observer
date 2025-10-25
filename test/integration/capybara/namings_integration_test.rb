@@ -36,7 +36,9 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       "form[action*='/observations/#{obs.id}/namings']"
     )
     # (Make sure there is a tab to go back to observations/show.)
-    assert_true(namer_session.has_link?(href: "/obs/#{obs.id}"))
+    assert_true(
+      namer_session.has_link?(href: /#{permanent_observation_path(obs)}/)
+    )
 
     namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       assert_true(form.has_field?("naming_name", text: ""))
@@ -75,7 +77,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     end
     namer_session.assert_selector("body.observations__show")
     assert_flash_success(session: namer_session)
-    assert_true(namer_session.has_text?("Observation #{obs.id}"))
+    assert_true(namer_session.has_text?(obs.id))
 
     obs.reload
     name = Name.find_by(text_name: text_name)
@@ -109,7 +111,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       form.first("input[type='submit']").click
     end
     namer_session.assert_selector("body.observations__show")
-    assert_true(namer_session.has_text?("Observation #{obs.id}"))
+    assert_true(namer_session.has_text?(obs.id))
 
     obs.reload
     name.reload
@@ -136,7 +138,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       assert_true(form.has_unchecked_field?("naming_reasons_3_check"))
       assert_true(form.has_field?("naming_reasons_3_notes", text: ""))
     end
-    namer_session.click_link(text: "Cancel (Show Observation)")
+    namer_session.first(class: "observation_return_link").click
 
     login(voter, session: voter_session)
     assert_not_equal(namer_session.driver.request.cookies["mo_user"],
@@ -172,7 +174,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # namer_session.successful_delete(obs, naming, text_name, orignal_name)
     namer_session.click_button(class: "destroy_naming_link_#{naming.id}")
     namer_session.assert_selector("body.observations__show")
-    assert_true(namer_session.has_text?("Observation #{obs.id}"))
+    assert_true(namer_session.has_text?(obs.id))
     assert_flash_success(session: namer_session)
 
     obs.reload

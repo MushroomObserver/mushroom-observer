@@ -49,7 +49,7 @@
 #    only_single_names
 #
 #    # Has the user entered any "Species one = Species two" lines?
-#    # (This syntax is not allowed while populating species lists, for example.)
+#    # (Syntax not allowed while populating species_lists, for example.)
 #    has_new_synonyms
 #
 #    # Checks to make sure user had a chance to choose from among the synonyms
@@ -249,7 +249,7 @@ class NameSorter
     end
 
     # Did user specify a synonym via the "Name = Synonym" syntax?
-    return unless name_parse.has_synonym
+    return unless name_parse.has_synonym?
 
     @has_new_synonyms = true
     return unless name_parse.find_synonym_names(user).empty?

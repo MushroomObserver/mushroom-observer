@@ -15,7 +15,7 @@ export default class extends GeocodeController {
     "editBoxBtn", "autocompleter"]
 
   connect() {
-    this.element.dataset.stimulus = "map-connected"
+    this.element.dataset.map = "connected"
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
     this.opened = this.element.dataset.mapOpen === "true"
@@ -188,27 +188,29 @@ export default class extends GeocodeController {
     if (!this.editable) {
       markerOptions.title = set.title
     }
-    this.marker = new google.maps.Marker(markerOptions)
+    const marker = new google.maps.Marker(markerOptions)
 
     if (!this.editable && set != null) {
-      this.giveMarkerInfoWindow(set)
+      this.giveMarkerInfoWindow(marker, set)
     } else {
       this.getElevations([set], "point")
-      this.makeMarkerEditable()
+      this.makeMarkerEditable(marker)
+      // Only set this.marker if it's a single-marker UI.
+      this.marker = marker
     }
   }
 
   // Only for single markers: listeners for dragging the marker
-  makeMarkerEditable() {
-    if (!this.marker) return
+  makeMarkerEditable(marker) {
+    if (!marker) return
 
     this.verbose("map:makeMarkerEditable")
     // clearTimeout(this.marker_edit_buffer)
     // this.marker_edit_buffer = setTimeout(() => {
     const events = ["position_changed", "dragend"]
     events.forEach((eventName) => {
-      this.marker.addListener(eventName, () => {
-        const newPosition = this.marker.getPosition()?.toJSON() // latlng object
+      marker.addListener(eventName, () => {
+        const newPosition = marker.getPosition()?.toJSON() // latlng object
         // if (this.hasNorthInputTarget) {
         //   const bounds = this.boundsOfPoint(newPosition)
         //   this.updateBoundsInputs(bounds)
@@ -224,7 +226,7 @@ export default class extends GeocodeController {
       })
     })
     // Give the current value to the inputs
-    const newPosition = this.marker.getPosition()?.toJSON()
+    const newPosition = marker.getPosition()?.toJSON()
     if (this.hasLatInputTarget && !this.latInputTarget.value) {
       this.updateLatLngInputs(newPosition)
     }
@@ -234,14 +236,15 @@ export default class extends GeocodeController {
   }
 
   // For point markers: make a clickable InfoWindow
-  giveMarkerInfoWindow(set) {
+  giveMarkerInfoWindow(marker, set) {
     this.verbose("map:giveMarkerInfoWindow")
     const info_window = new google.maps.InfoWindow({
-      content: set.caption
+      content: set.caption,
+      position: { lat: set.lat, lng: set.lng }
     })
 
-    google.maps.event.addListener(this.marker, "click", () => {
-      info_window.open(this.map, this.marker)
+    google.maps.event.addListener(marker, "click", () => {
+      info_window.open({ anchor: marker, map: this.map })
     })
   }
 

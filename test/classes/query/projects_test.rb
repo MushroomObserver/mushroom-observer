@@ -44,6 +44,31 @@ class Query::ProjectsTest < UnitTestCase
                  :Project, members: [dick])
   end
 
+  def test_project_names
+    names = {
+      lookup: [names(:peltigera).search_name],
+      include_synonyms: true
+    }
+    scope = Project.names(**names).order_by_default
+    assert_query(scope, :Project, names: names)
+    assert_query(
+      [projects(:pinned_date_range_project),
+       projects(:unlimited_project),
+       projects(:one_genus_two_species_project)],
+      :Project, names: names
+    )
+  end
+
+  def test_project_region
+    region = "Albion, California, USA"
+    ids = [projects(:albion_project).id,
+           projects(:no_start_date_project).id,
+           projects(:no_end_date_project).id,
+           projects(:past_project).id]
+    scope = Project.region(region).order_by_default
+    assert_query_scope(ids, scope, :Project, region:)
+  end
+
   def test_project_title_has
     expects = [projects(:news_articles_project)]
     scope = Project.title_has("News Articles")
@@ -110,9 +135,7 @@ class Query::ProjectsTest < UnitTestCase
   end
 
   def test_project_has_species_lists
-    expects = [projects(:two_list_project), projects(:lone_wolf_project),
-               projects(:open_membership_project), projects(:bolete_project),
-               projects(:eol_project)]
+    expects = Project.joins(:species_lists).distinct.order_by_default
     scope = Project.has_species_lists.order_by_default
     assert_query_scope(expects, scope, :Project, has_species_lists: "yes")
   end

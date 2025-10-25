@@ -10,8 +10,26 @@
 }
 
 .has-search .form-control {
-  padding-right: 12px;
-  padding-left: 30px;
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
+@media screen and (min-width: $screen-sm-min) {
+  .has-search .form-control {
+    padding-right: 12px;
+    padding-left: 30px;
+  }
+}
+
+.page-input .form-control-feedback {
+  right: 0;
+  left: initial;
+  background-color: transparent;
+}
+
+.page-input .form-control {
+  padding-right: 6px;
+  padding-left: 6px;
 }
 
 .toggle {
@@ -119,6 +137,18 @@
       display: inline-block;
     }
   }
+}
+
+// Fix for weird inherited indent from .name-section p
+.glyphicon {
+  text-indent: 0;
+  top: 3px;
+  font-size: 112%;
+
+  // &.link-icon {
+  //   background-color: white;
+  //   border-radius: 50%;
+  // }
 }
 
 .spinner-right {

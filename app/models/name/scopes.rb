@@ -43,21 +43,21 @@ module Name::Scopes
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do
     # default ordering for index queries
     scope :order_by_default,
           -> { order_by(::Query::Names.default_order) }
 
     scope :names, lambda { |lookup:, **related_name_args|
-      ids = lookup_names_by_name(lookup, related_name_args.compact)
+      ids = Lookup::Names.new(lookup, related_name_args.compact).ids
       return none unless ids
 
       where(id: ids).with_correct_spelling.distinct
     }
     scope :text_name_has,
           ->(phrase) { search_columns(Name[:text_name], phrase) }
-    # scope :search_name_has,
-    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
+    scope :search_name_has,
+          ->(phrase) { search_columns(Name[:search_name], phrase) }
 
     # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :misspellings, lambda { |boolish = :no|
@@ -215,8 +215,7 @@ module Name::Scopes
     # }
     # This is what's called by pattern_search
     scope :pattern, lambda { |phrase|
-      cols = Name.searchable_columns + NameDescription.searchable_columns
-      joins_default_descriptions.search_columns(cols, phrase)
+      search_columns(Name.searchable_columns, phrase)
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is `Name[:id].eq(NameDescription[:name_id])`
@@ -261,16 +260,16 @@ module Name::Scopes
       joins(:observations).distinct
     }
     scope :species_lists, lambda { |species_lists|
-      species_list_ids = lookup_species_lists_by_name(species_lists)
+      species_list_ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(observations: :species_list_observations).
         merge(SpeciesListObservation.where(species_list: species_list_ids)).
         distinct
     }
     # Accepts region string, location_id, or Location instance
     scope :locations, lambda { |locations|
-      location_ids = lookup_regions_by_name(locations)
-      joins(:observations).
-        where(observations: { location: location_ids }).distinct
+      return none if locations.blank?
+
+      joins(:observations).merge(Observation.locations(locations)).distinct
     }
     # Names with Observations whose lat/lon are in a box
     # Pass kwargs (:north, :south, :east, :west), any order

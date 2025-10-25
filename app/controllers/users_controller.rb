@@ -3,6 +3,7 @@
 # display information about, and edit, users
 class UsersController < ApplicationController
   before_action :login_required
+  before_action :store_location, only: [:show]
 
   ##############################################################################
   # INDEX
@@ -79,7 +80,7 @@ class UsersController < ApplicationController
   def index_display_opts(opts, _query)
     {
       letters: true,
-      include: :user_groups,
+      include: [:user_groups, :image, :location],
       matrix: !in_admin_mode?
     }.merge(opts)
   end
@@ -89,7 +90,6 @@ class UsersController < ApplicationController
   #############################################################################
 
   def show
-    store_location
     id = params[:id].to_s
     return unless find_user!
 

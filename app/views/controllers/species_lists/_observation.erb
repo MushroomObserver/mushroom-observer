@@ -1,0 +1,52 @@
+<%# locals: (observation:, user:, species_list:, image: false, remove: false) %>
+
+<%# One observation for the species list show page %>
+<%
+listing_classes = image ? "col-sm-8 col-md-9" : "col-xs-12"
+%>
+
+<%= tag.div(class: "list-group-item") do %>
+  <%= tag.div(class: "row") do %>
+    <% if image %>
+      <%= tag.div(class: "col-sm-4 col-md-3") do
+        interactive_image(
+          user,
+          observation.thumb_image,
+          image_link: observation_path(id: observation.id),
+          votes: true
+        )
+      end %>
+    <% end %>
+
+    <%= tag.div(class: listing_classes) do %>
+      <%= tag.div(
+        class: "d-flex justify-content-between align-items-start"
+      ) do %>
+
+        <%= tag.div(class: "observation_details") do %>
+          <%= tag.div(class: "font-weight-bold") do %>
+            <%= link_to(
+              observation.unique_format_name.t,
+              observation_path(id: observation.id)
+            ) %>
+          <% end %>
+          <%= tag.div(class: "font-weight-bold") do %>
+            <%= location_link(observation.where, observation.location) %>
+          <% end %>
+          <%= tag.div do
+            [user_link(observation.user), ": ", observation.when.web_date].safe_join
+          end %>
+        <% end %>
+
+        <% if remove %>
+          <%= tag.div(class: "manage_observation") do
+            if remove
+              species_list_remove_obs_button(species_list:, observation:)
+            end
+          end %>
+        <% end %>
+
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

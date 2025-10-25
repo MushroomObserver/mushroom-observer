@@ -8,7 +8,6 @@
 module CollectionNumbers
   class RemoveObservationsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # The edit action exists just to present a dialog box explaining
     # what the action does, with a remove button (to the :update action)
@@ -25,9 +24,8 @@ module CollectionNumbers
           render(
             partial: "shared/modal_form",
             locals: {
-              title: @title,
-              identifier: "collection_number_observation",
-              form: "collection_numbers/remove_observations/form"
+              title: @title, identifier: "collection_number_observation",
+              user: @user, form: "collection_numbers/remove_observations/form"
             }
           ) and return
         end
@@ -44,7 +42,7 @@ module CollectionNumbers
 
       respond_to do |format|
         format.html do
-          redirect_with_query(observation_path(@observation.id))
+          redirect_to(observation_path(@observation.id))
         end
         format.turbo_stream do
           render(

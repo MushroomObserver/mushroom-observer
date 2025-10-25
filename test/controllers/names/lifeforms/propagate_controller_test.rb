@@ -5,6 +5,7 @@ require("test_helper")
 module Names::Lifeforms
   class PropagateControllerTest < FunctionalTestCase
     include ObjectLinkHelper
+
     def test_propagate_lifeform
       name = names(:lecanorales)
       children = name.all_children

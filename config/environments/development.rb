@@ -135,6 +135,12 @@ MushroomObserver::Application.configure do
   #   # .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
   # end
   # config.logger = ActiveSupport::BroadcastLogger.new(*loggers)
+  # config.logger = ActiveSupport::Logger.new($stdout)
+
+  # Silence Solid Queue polling in the logs
+  ENV["SOLID_QUEUE_LOG_ON"] = "false" # used by a temporary hack below
+  config.solid_queue.logger = false
+  config.solid_queue.silence_polling = true
 
   # Serve assets in rails.
   config.public_file_server.enabled = true
@@ -176,6 +182,27 @@ MushroomObserver::Application.configure do
   # Set up ActionCable to use a standalone server at port 28080
   # config.action_cable.mount_path = nil
   # config.action_cable.url = "ws://localhost:28080" # use :wss in production
+end
+
+# Temporary hack until config.solid_queue.silence_queries is available
+# https://github.com/rails/solid_queue/issues/210
+module SilenceSolidQueue
+  def heartbeat
+    # only silence if explicitly set to not log (default to logging)
+    # true or not set (or anything else) means log, "false" means silence
+    silence_heartbeat = ENV["SOLID_QUEUE_LOG_ON"] == "false"
+
+    # if ActiveRecord::Base.logger
+    if silence_heartbeat && ActiveRecord::Base.logger
+      ActiveRecord::Base.logger.silence { super }
+    else
+      super
+    end
+  end
+end
+
+Rails.application.config.after_initialize do
+  SolidQueue::Process.prepend(SilenceSolidQueue)
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

@@ -1,21 +1,68 @@
 <!--top_nav-->
-<nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print"
-     data-nav-target="topNav">
+<%
+container_classes = %w[
+  container-fluid px-3 d-flex flex-row align-items-center
+]
+top_nav_classes = class_names(container_classes, "justify-content-between")
+search_nav_classes = class_names(container_classes, "justify-content-center")
+search_help_types = [:names, :observations]
+search_form_types = [
+  :names, :observations, :locations, :projects, :herbaria, :species_lists
+]
+left_classes = class_names(%w[
+  d-flex flex-row align-items-center flex-grow-1 navbar_left
+])
+right_classes = class_names(%w[
+  d-flex flex-row align-items-center justify-content-end navbar_right
+])
+identify_page = controller.controller_name == "identify"
+%>
 
-  <div class="container-fluid px-0">
-    <%= tag.span(rubric, class: "hidden") %>
-    <% if controller.controller_name == "identify" %>
-      <%= render(partial: "observations/identify/form_identify_filter") %>
-    <% else ##user is logged in %>
-      <%= render(partial: "application/top_nav/search_form") %>
+<%= tag.nav(class: "navbar navbar-default hidden-print mb-2",
+            id: "top_nav") do %>
+
+  <%= tag.div(class: top_nav_classes) do %>
+
+    <%# left side %>
+    <%= tag.div(class: left_classes) do %>
+      <%= left_nav_toggle %>
+      <%= tag.h4(nav_rubric(@query),
+                 class: "font-weight-bold mr-2", id: "rubric") %>
+      <%= tag.div(class: "mr-3 mr-sm-4 mr-lg-5") do
+        [
+          nav_create(@user, controller)
+        ].safe_join(" ")
+      end %>
     <% end %>
 
-    <% if @user.nil? %>
-      <%= render(partial: "application/top_nav/login") %>
-    <% else ##user is logged in %>
-      <%= render(partial: "application/top_nav/user_nav") %>
+    <%# right side %>
+    <%= tag.div(class: right_classes) do %>
+      <%= search_nav_toggle %>
+      <%= nav_scan_qr_code(@user, controller) %>
+      <%= tag.ul(class: "nav navbar-nav navbar-right hidden-xs mr-0") do %>
+        <%= yield(:context_nav) if content_for?(:context_nav) %>
+        <%= render(partial: "application/top_nav/user_nav") if !@user.nil? %>
+      <% end %>
+      <%= render(partial: "application/top_nav/login") if @user.nil? %>
     <% end %>
-  </div>
 
-</nav>
+  <% end %>
+
+  <%= tag.div(class: search_nav_classes) do %>
+    <%= tag.div(class: "collapse w-100", id: "search_nav",
+                data: {
+                  controller: "search-type",
+                  search_type_help_types_value: search_help_types,
+                  search_type_form_types_value: search_form_types
+                }) do %>
+      <% if identify_page %>
+        <%= render(partial: "observations/identify/form_identify_filter") %>
+      <% else %>
+        <%= render(partial: "application/top_nav/search_bar",
+                   locals: { search_help_types:, search_form_types: }) %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+<% end %>
 <!--/top_nav-->

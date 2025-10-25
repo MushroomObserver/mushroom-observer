@@ -1,12 +1,10 @@
 <%
-add_page_title(:image_edit_title.t(name: @image.unique_format_name))
-
+add_edit_title(@image.format_name, @image)
 add_context_nav(observation_images_edit_tabs(image: @image))
-@container = :wide
+container_class(:wide)
 form_action = { controller: "/observations/images",
                 action: :update,
-                id: @image.id,
-                q: get_query_param }
+                id: @image.id }
 %>
 
 <div class="row">
@@ -29,9 +27,9 @@ form_action = { controller: "/observations/images",
 
       <div class="text-center mt-3 mb-5">
         <%= submit_button(form: f, button: :SAVE_EDITS.l) %>
-        <%= link_with_query(:cancel_and_show.t(type: :image),
-                            image_path(@image.id),
-                            class: "btn btn-default") %>
+        <%= link_to(:cancel_and_show.t(type: :image),
+                    image_path(@image.id),
+                    class: "btn btn-default") %>
       </div>
 
     <% end %>

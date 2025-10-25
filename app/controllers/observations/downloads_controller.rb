@@ -8,14 +8,14 @@ module Observations
       @query = find_or_create_query(:Observation, order_by: params[:by])
       return too_many_results if too_many_results?
 
-      query_params_set(@query)
+      update_stored_query(@query) # also stores query in session
     end
 
     def create
       @query = find_or_create_query(:Observation, order_by: params[:by])
       raise("no robots!") if browser.bot? # failsafe only!
 
-      query_params_set(@query)
+      update_stored_query(@query) # also stores query in session
       @format = params[:format] || "raw"
       @encoding = params[:encoding] || "UTF-8"
       download_observations_switch
@@ -24,7 +24,7 @@ module Observations
     def print_labels
       query = find_query(:Observation)
       if query
-        render_report(Labels.new(query))
+        render_report(ObservationLabels.new(@user, query))
       else
         flash_error(:runtime_search_has_expired.t)
         redirect_back_or_default("/")
@@ -48,7 +48,7 @@ module Observations
       elsif params[:commit] == :DOWNLOAD.l
         create_and_render_report
       elsif params[:commit] == :download_observations_print_labels.l
-        render_report(Labels.new(@query))
+        render_report(ObservationLabels.new(@user, @query))
       end
     end
 
@@ -59,31 +59,35 @@ module Observations
       render_report(report)
     end
 
+    FORMATS = %w[
+      raw
+      adolf
+      dwca
+      symbiota
+      fundis
+      mycoportal
+      mycoportal_image_list
+    ].freeze
+    private_constant :FORMATS
+
     def create_report(args)
       format = args[:format].to_s
-      case format
-      when "raw"
-        Report::Raw.new(args)
-      when "adolf"
-        Report::Adolf.new(args)
-      when "darwin"
-        Report::Dwca.new(args)
-      when "symbiota"
-        Report::Symbiota.new(args)
-      when "fundis"
-        Report::Fundis.new(args)
-      when "mycoportal"
-        Report::Mycoportal.new(args)
-      else
-        raise("Invalid download type: #{format.inspect}")
-      end
+      return do_report(args, format) if FORMATS.include?(format)
+
+      raise("Invalid download type: #{format.inspect}")
+    end
+
+    def do_report(args, format)
+      report_class =
+        "Report::#{format.split("_").map(&:capitalize).join}".constantize
+      report_class.new(args)
     end
 
     def render_report(report)
       send_data(report.body, {
         type: report.mime_type,
         charset: report.encoding,
-        disposition: "attachment",
+        disposition: report.http_disposition,
         filename: report.filename
       }.merge(report.header || {}))
     end

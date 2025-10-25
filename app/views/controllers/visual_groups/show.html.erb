@@ -1,5 +1,6 @@
 <%
-  add_page_title(:show_visual_group_title.t(name: @visual_group.name))
+add_show_title(@visual_group.name, @visual_group)
+add_edit_icons(@visual_group)
 %>
 
 <p id="notice"><%= notice %></p>
@@ -42,7 +43,7 @@
 
 <%= render(partial: "visual_groups/image_matrix",
            locals: { visual_group: @visual_group, status: "included" }) %>
-<% @container = :full %>
+<% container_class(:full) %>
 
 <p>
   <%= link_to(:visual_group_edit.t,

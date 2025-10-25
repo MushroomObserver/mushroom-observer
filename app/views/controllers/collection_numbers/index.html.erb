@@ -1,29 +1,31 @@
 <%
-@container = :wide
+container_class(:wide)
 # the no_hits_title.
 add_index_title(@query)
 add_context_nav(collection_numbers_index_tabs(obs: @observation))
 add_sorter(@query, collection_numbers_index_sorts)
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <table class="table table-striped mt-3">
       <% @objects.each do |collection_number| %>
         <tr>
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
-              link_with_query(:EDIT.t,
+              link_to(:EDIT.t,
                 edit_collection_number_path(id: collection_number.id,
                                             params: { back: :index }),
-                class: "btn btn-default btn-sm")
+                class: "btn btn-default btn-sm"
+              )
             end %>
           </td>
           <td>
-            <i><%= link_with_query(collection_number.format_name.t,
-                     collection_number_path(collection_number)) %></i>
+            <i><%= link_to(collection_number.format_name.t,
+                           collection_number_path(collection_number)) %></i>
           </td>
           <td>
             <%= collection_number.observations.map do |obs|

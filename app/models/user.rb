@@ -134,7 +134,7 @@
 #  notes_template_parts:: Array of notes_template headings
 #
 #  ==== Names
-#  text_name::          User name as: "loging" (for debugging)
+#  text_name::          User name as: "login" (for debugging)
 #  legal_name::         User name as: "First Last" or "login"
 #  unique_text_name::   User name as: "First Last (login)" or "login"
 #
@@ -181,7 +181,7 @@
 #                       (defaults to personal_herbarium).
 #  personal_herbarium:: User's private herbarium:
 #                       "Name (login): Personal Herbarium".
-#  all_editable_species_lists:: Species Lists they own
+#  all_editable_species_lists:: Observation Lists they own
 #                       or that are attached to projects they're on.
 #
 #  ==== Other Stuff
@@ -207,6 +207,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   enum :location_format, { postal: 1, scientific: 2 },
        prefix: true, default: :postal, instance_methods: false
+
+  enum :label_format, { pdf: 1, rtf: 2 },
+       prefix: true, default: :pdf, instance_methods: false
 
   enum :hide_authors, { none: 1, above_species: 2 },
        prefix: true, default: :none, instance_methods: false
@@ -443,7 +446,11 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def textile_name
-    "_user #{login}_"
+    if name.blank?
+      "_user #{login}_"
+    else
+      "#{name} (_user #{login}_)"
+    end
   end
 
   def self.lookup_unique_text_name(str)
@@ -464,7 +471,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def self.find_name_match(users, str)
-    return users.first if users.count == 1
+    return users.first if users.one?
 
     users.find_each do |user|
       return user if user.unique_text_name == str
@@ -482,10 +489,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     else
       name
     end
-  end
-
-  def legal_name_changed?
-    !legal_name_change.nil?
   end
 
   def legal_name_change
@@ -584,19 +587,19 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    Project.joins(:admin_group_users).where(user_id: id)
+    Project.user_is_admin(id)
   end
 
   # Return an Array of Project's that this User is a member of.
   def projects_member(order: :created_at, include: nil)
-    @projects_member ||= Project.where(user_group: user_groups.ids).
+    @projects_member ||= Project.user_is_member(id).
                          includes(include).order(order).to_a
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
   # links for.
   def external_sites
-    @external_sites ||= ExternalSite.where(project: projects_member)
+    @external_sites ||= ExternalSite.user_is_site_project_member(id)
   end
 
   def preferred_herbarium_name
@@ -630,37 +633,24 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def personal_herbarium
-    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id)
+    # disable cop because RuboCop's suggested fix creates test failures
+    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id) # rubocop:disable Rails/FindByOrAssignmentMemoization
   end
 
   def create_personal_herbarium
-    # rubocop:disable Naming/MemoizedInstanceVariableName
-    @personal_herbarium ||= Herbarium.create(
+    # cop gives false positive
+    @personal_herbarium ||= Herbarium.create( # rubocop:disable Naming/MemoizedInstanceVariableName
       name: personal_herbarium_name,
       email: email,
       personal_user: self,
       curators: [self]
     )
-    # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
   # Return an ActiveRecord::Association of SpeciesList's that User created or
   # that are attached to a Project that the User is a member of.
   def all_editable_species_lists
-    @all_editable_species_lists ||=
-      if projects_member.any?
-        SpeciesList.
-          where(SpeciesList[:user_id].eq(id).
-          or(SpeciesList[:id].in(species_lists_in_users_projects))).distinct
-      else
-        species_lists
-      end
-  end
-
-  def species_lists_in_users_projects
-    project_ids = projects_member.map(&:id)
-    ProjectSpeciesList.where(project_id: project_ids).distinct.
-      pluck(:species_list_id)
+    @all_editable_species_lists ||= SpeciesList.editable_by_user(id)
   end
 
   ##############################################################################
@@ -1046,14 +1036,15 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.where(id: ids).delete_all
   end
 
-  # Delete all species lists the user created unless they belong to a project.
-  # (Private projects should already have been deleted by this point, so this
-  # in effect, really should read "unless they belong to a public project".)
-  # I think it's okay to delete observations even if they are attached to a
-  # project.  But species_lists are potentially a much more collaborative
-  # effort, so I don't think it's okay to delete lists that are attached to
-  # public projects just because the user happened to originally create them.
-  # -JPH 20220916
+  # Delete all species_lists the user created unless they belong
+  # to a project.  (Private projects should already have been deleted
+  # by this point, so this in effect, really should read "unless they
+  # belong to a public project".)  I think it's okay to delete
+  # observations even if they are attached to a project.  But
+  # species_lists are potentially a much more collaborative effort, so
+  # I don't think it's okay to delete lists that are attached to
+  # public projects just because the user happened to originally
+  # create them.  -JPH 20220916
   def delete_private_species_lists
     ids = (species_lists - species_lists.joins(:project_species_lists)).
           map(&:id)

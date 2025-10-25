@@ -594,7 +594,7 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.user_voted?(namg1, rolf))
     assert_not(consensus.user_voted?(namg1, mary))
     assert_not(consensus.user_voted?(namg1, dick))
-    assert_nil(consensus.owners_vote(namg1))
+    assert_nil(consensus.users_vote(namg1, obs.user))
     assert_nil(consensus.users_vote(namg1, rolf))
     assert_nil(consensus.users_vote(namg1, mary))
     assert_nil(consensus.users_vote(namg1, dick))
@@ -622,7 +622,8 @@ class ObservationTest < UnitTestCase
     obs.reload
     assert(consensus.owner_voted?(namg1))
     assert(consensus.user_voted?(namg1, rolf))
-    assert(vote = consensus.owners_vote(namg1))
+
+    assert(vote = consensus.users_vote(namg1, obs.user))
     assert_equal(vote, consensus.users_vote(namg1, rolf))
     assert(consensus.owners_favorite?(namg1))
     assert(consensus.users_favorite?(namg1, rolf))
@@ -782,7 +783,7 @@ class ObservationTest < UnitTestCase
     # has image
     assert_true(observations(:coprinus_comatus_obs).has_backup_data?)
 
-    # has species list
+    # has species_list
     assert_true(observations(:minimal_unknown_obs).has_backup_data?)
 
     # has specimen
@@ -1621,6 +1622,10 @@ class ObservationTest < UnitTestCase
     obs = observations(:amateur_obs)
     assert_equal("mo_iphone_app", obs.source)
     assert_equal(:source_credit_mo_iphone_app, obs.source_credit)
+
+    obs = observations(:imported_inat_obs)
+    assert_equal("mo_inat_import", obs.source)
+    assert_equal(:source_credit_mo_inat_import, obs.source_credit)
   end
 
   def test_hidden_location

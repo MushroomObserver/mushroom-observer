@@ -2,17 +2,19 @@
 
 module FormLocationsHelper
   # The input for the location form, interacts with Stimulus map controller
-  def form_location_input_find_on_map(form:, field:, value: nil, label: nil)
+  def form_location_input_find_on_map(form:, field:, value: nil, label: nil,
+                                      help: :form_locations_help.t)
     text_field_with_label(
-      form:, field:, value:, label:, help: :form_locations_help.t,
+      form:, field:, value:, label:, help:,
       data: { autofocus: true, map_target: "placeInput" },
       button: :form_locations_find_on_map.l,
       button_data: { map_target: "showBoxBtn", action: "map#showBox" }
     )
   end
 
-  # This will generate a compass rose of inputs for given form object.
-  # The inputs are for compass directions.
+  # This will generate a compass rose of inputs for given form object. The
+  # inputs are for compass directions. The object can be a Location or a Box
+  # (e.g. from query.in_box), that will prefill the values on load or reload.
   def form_compass_input_group(form:, obj:)
     capture do
       compass_groups.each do |dir|

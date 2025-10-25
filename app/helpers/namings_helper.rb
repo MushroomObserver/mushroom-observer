@@ -1,59 +1,12 @@
 # frozen_string_literal: true
 
-# helpers for namings view
-# TODO: some of this should be in a presenter or ViewComponents
+# These helpers generate HTML for the "cells" of the namings "table".
+# The main sections of this table are partials under "observations/show/namings"
+#
+# NOTE: some of the assembling of data could be in a presenter or component.
 # NOTE: We don't even print this table unless @user is logged in.
 # rubocop:disable Metrics/ModuleLength
 module NamingsHelper
-  ##### Observation Naming "table" content #########
-  def observation_namings_table(user, obs, consensus)
-    tag.div(class: "namings-table panel panel-default mb-4",
-            id: "namings_table") do
-      [
-        observation_namings_table_header(obs),
-        observation_namings_table_rows(user, consensus), # only rows get updated
-        observation_namings_table_footer(user, obs)
-      ].safe_join
-    end
-  end
-
-  private
-
-  # nested rows/columns parallel those in the row
-  def observation_namings_table_header(obs)
-    header = naming_header_row_content
-    behavior = "flex-column justify-content-end"
-    propose_icon = propose_naming_link(
-      obs.id, text: :show_namings_propose_new_name.t,
-              btn_class: "",
-              context: "namings_table", icon: true
-    )
-
-    tag.div(class: "panel-heading namings-table-header") do
-      tag.div(class: "row") do
-        concat(
-          tag.div(class: "col-xs-10 col-sm-11") do
-            tag.div(class: "row") do
-              [
-                tag.div(header[:heading],
-                        class: "col col-sm-4 d-block #{behavior}"),
-                tag.div(header[:user_name],
-                        class: "col col-sm-3 d-none d-sm-block #{behavior}"),
-                tag.div(header[:consensus_vote],
-                        class: "col col-sm-2 d-none d-sm-block #{behavior}"),
-                tag.div(header[:your_vote],
-                        class: "col col-sm-3 d-none d-sm-block #{behavior}")
-              ].safe_join
-            end
-          end
-        )
-        concat(tag.div(class: "col-xs-2 col-sm-1 #{behavior}") do
-          tag.span(propose_icon, class: "float-right d-sm-none")
-        end)
-      end
-    end
-  end
-
   def naming_header_row_content
     heading_html = tag.h4(:show_namings_proposed_names.t,
                           class: "panel-title")
@@ -67,27 +20,6 @@ module NamingsHelper
       consensus_vote: consensus_heading_html,
       your_vote: your_heading_html
     }
-  end
-
-  # NEW - needs a current consensus object
-  # n+1 should be ok
-  def observation_namings_table_rows(user, consensus)
-    namings = consensus.namings.sort_by(&:created_at)
-    any_names = consensus.namings&.length&.positive?
-
-    tag.div(
-      id: "namings_table_rows", class: "list-group list-group-flush",
-      data: { controller: "section-update" }
-    ) do
-      if any_names
-        namings.each do |naming|
-          row = naming_row_content(user, consensus, naming)
-          concat(namings_table_row(row))
-        end
-      else
-        tag.div(:show_namings_no_names_yet.t, class: "list-group-item")
-      end
-    end
   end
 
   # NEW - needs a current consensus object
@@ -107,39 +39,9 @@ module NamingsHelper
     }
   end
 
-  # Shows one proposed naming for this observation, with a tiny vote form.
-  # Also naming edit and delete buttons if the current user owns the naming.
-  # @vote is used by observations/namings/votes/form
-  # Note the nested grid: the reasons are packed under the left 11 cols,
-  # with the "eyes" graphic in the right 1 col for vertical space
-  # @vote = votes[naming.id]
-  def namings_table_row(row)
-    tag.div(class: "list-group-item") do
-      tag.div(class: "row align-items-center naming-row",
-              id: "observation_naming_#{row[:id]}") do
-        [
-          tag.div(class: "col col-sm-11") do
-            [
-              tag.div(class: "row align-items-center") do
-                [
-                  tag.div(row[:name], class: "col col-sm-4"),
-                  tag.div(row[:proposer], class: "col col-sm-3"),
-                  tag.div(row[:vote_tally], class: "col col-sm-2"),
-                  tag.div(row[:your_vote], class: "col col-sm-3")
-                ].safe_join
-              end,
-              tag.div(row[:reasons], class: "naming-reasons small mt-1")
-            ].safe_join
-          end,
-          tag.div(row[:eyes], class: "col-sm-1 d-none d-sm-block px-sm-0")
-        ].safe_join
-      end
-    end
-  end
-
   # N+1: should not be checking permission here
   def naming_name_html(user, naming)
-    if check_permission(naming)
+    if permission?(naming)
       edit_link = modal_link_to(
         "obs_#{naming.observation_id}_naming_#{naming.id}",
         *edit_naming_tab(naming)
@@ -180,7 +82,7 @@ module NamingsHelper
   # N+1: naming includes name
   def naming_name_link(user, naming)
     Textile.register_name(naming.name)
-    link_with_query(
+    link_to(
       naming.display_name_brief_authors(user).t.break_name.small_author,
       name_path(id: naming.name)
     )
@@ -196,7 +98,7 @@ module NamingsHelper
      user_link].safe_join
   end
 
-  # N+1: naming includes votes
+  # N+1: naming includes votes. Should have been reloaded by VotesController.
   def vote_tally_html(naming)
     vote_tally =
       (if naming.votes&.length&.positive?
@@ -218,11 +120,9 @@ module NamingsHelper
     percent = "#{naming.vote_percent.round}%"
 
     modal_link_to("naming_votes_#{naming.id}", h(percent),
-                  add_query_param(
-                    observation_naming_votes_path(
-                      observation_id: naming.observation_id,
-                      naming_id: naming.id
-                    )
+                  observation_naming_votes_path(
+                    observation_id: naming.observation_id,
+                    naming_id: naming.id
                   ),
                   class: "vote-percent btn btn-link px-0")
   end
@@ -240,8 +140,6 @@ module NamingsHelper
      naming_vote_form(naming, vote, context: "namings_table")].safe_join
   end
 
-  public
-
   # Naming Vote Form: a select that submits on change with Stimulus
   # a tiny form within a naming row for voting on this naming only
   # also called by matrix_box_vote_or_propose_ui
@@ -253,7 +151,7 @@ module NamingsHelper
   def naming_vote_form(naming, vote, context: "blank")
     vote_id = vote&.id
     method = vote_id ? :patch : :post
-    can_vote = check_permission(naming)
+    can_vote = permission?(naming)
     menu = if !can_vote || !vote || vote&.value&.zero?
              Vote.opinion_menu
            else
@@ -345,42 +243,7 @@ module NamingsHelper
     reasons.map { |reason| content_tag(:div, reason) }.safe_join
   end
 
-  # nested rows/columns parallel those in the row partial
-  def observation_namings_table_footer(user, obs)
-    suggest = obs.thumb_image_id.present? &&
-              (user.admin ||
-               MO.image_model_beta_testers.include?(user.id))
-    buttons = observation_naming_buttons(obs, suggest)
-    help_text = :show_namings_consensus_help.t
-    help = content_tag(:div, help_text, class: "card-text small")
-
-    [
-      tag.div(class: "panel-footer") do
-        tag.div(class: "row") do
-          tag.div(class: "col-sm-11") do
-            tag.div(class: "row") do
-              concat(tag.div(buttons, class: "col col-md-4"))
-              concat(tag.div(help, class: "col col-md-8"))
-            end
-          end
-        end
-      end,
-      tag.div(class: "panel-footer d-none d-sm-block py-2") do
-        tag.div(class: "row") do
-          tag.div(class: "col-sm-11") do
-            tag.div(class: "row") do
-              [
-                tag.div(vote_legend_yours, class: "col-xs-4 col-xs-offset-4"),
-                tag.div(vote_legend_consensus, class: "col-xs-4")
-              ].safe_join
-            end
-          end
-        end
-      end
-    ].safe_join
-  end
-
-  def observation_naming_buttons(obs, do_suggestions)
+  def observation_naming_buttons(user, obs)
     buttons = []
     buttons << propose_naming_link(
       obs.id,
@@ -388,7 +251,9 @@ module NamingsHelper
       btn_class: "btn btn-default btn-sm d-none d-sm-inline-block",
       context: "namings_table"
     )
-    buttons << suggest_namings_link(obs) if do_suggestions
+    suggest = obs.thumb_image_id.present? &&
+              (user.admin || MO.image_model_beta_testers.include?(user.id))
+    buttons << suggest_namings_link(obs) if suggest
     buttons.safe_join(tag.br)
   end
 
@@ -416,7 +281,7 @@ module NamingsHelper
       error: :suggestions_error.t
     }.to_json
     # NOTE: suggestions does not actually commit to this path, it's a js request
-    results_url = add_query_param(
+    results_url = add_q_param(
       naming_suggestions_for_observation_path(id: obs.id, names: :xxx)
     )
 
