@@ -30,6 +30,7 @@ class Query::Observations < Query
                         east: :float, west: :float })
   query_attr(:location_undefined, { boolean: [true] })
   query_attr(:locations, [Location])
+  query_attr(:within_locations, [Location])
   # query_attr(:region, :string) # content filter
 
   query_attr(:has_notes, :boolean)

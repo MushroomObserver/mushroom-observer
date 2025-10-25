@@ -11,8 +11,8 @@ require "haversine"
 # https://biokic.github.io/symbiota-docs/
 # https://github.com/Symbiota/Symbiota
 module Report
-  class Mycoportal < TSV
-    # http_domain for links to Observations and Images
+  class Mycoportal < CSV
+    # http_domain for links to Observations
     HTTP_DOMAIN = "https://mushroomobserver.org"
 
     # Label names for the columns in the report.
@@ -44,9 +44,7 @@ module Report
         "coordinateUncertaintyInMeters",
         "minimumElevationInMeters",
         "maximumElevationInMeters",
-        "disposition", # herbaria, "vouchered", or nil
-        "dateLastModified",
-        "imageUrl" # not a Symbiota or MCP field;
+        "disposition" # herbaria, "vouchered", or nil
       ]
     end
 
@@ -63,7 +61,7 @@ module Report
         substrate(row),
         occurence_remarks(row), # notes minus substrate and associatedTaxa
         associated_taxa(row), # was`host`
-        verbatim_atttributes(row), # anchored link to MO observation url
+        verbatim_attributes(row), # anchored link to MO observation url
         row.country, # country
         row.state, # stateProvince
         row.county, # county
@@ -73,9 +71,7 @@ module Report
         coordinate_uncertainty(row), # coordinateUncertaintyInMeters
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
-        disposition(row), # disposition
-        row.obs_updated_at, # dateLastModified
-        image_url(row.obs_thumb_image_id) # MO-specific (not an MCP field)
+        disposition(row) # disposition
       ]
     end
 
@@ -100,12 +96,10 @@ module Report
 
     # collector's number
     def record_number(row)
-      if collector_ids(row).blank?
-        ""
-      else
-        collector_ids(row).split("\n").
-          min_by(&:to_i).split("\t").last
-      end
+      return if collector_ids(row).blank?
+
+      collector_ids(row).split("\n").
+        min_by(&:to_i).split("\t").last
     end
 
     def substrate(row)
@@ -125,18 +119,14 @@ module Report
       host = explode_notes(row)[:host]
       trees_shrubs = explode_notes(row)[:trees_shrubs]
 
-      associates = if host.present?
-                     "host: #{host}"
-                   else
-                     ""
-                   end
+      associates = "host: #{host}" if host.present?
       return associates if trees_shrubs.blank?
 
       "#{trees_shrubs}; #{associates}"
     end
 
     # text of an anchored link to the MO Observation
-    def verbatim_atttributes(row)
+    def verbatim_attributes(row)
       "<a href='#{HTTP_DOMAIN}/#{row.obs_id}' " \
       "target='_blank' style='color: blue;'>" \
       "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
@@ -165,7 +155,7 @@ module Report
 
     ####### Additional columns and utilities
 
-    # additional columns
+    # extended data used to calculate some values
     # See app/classes/report/base_table.rb
     def extend_data!(rows)
       add_collector_ids!(rows, 1)
@@ -193,10 +183,6 @@ module Report
 
     private
 
-    def obs(row)
-      Observation.find(row.obs_id)
-    end
-
     def group?(row)
       row.name_rank == "Group"
     end
@@ -217,10 +203,8 @@ module Report
     end
 
     def provisional?(row)
-      return true if standard_provisional?(row)
-      return true if explicit_provisional?(row)
-
-      false
+      standard_provisional?(row) ||
+        explicit_provisional?(row)
     end
 
     def standard_provisional?(row)
@@ -237,7 +221,7 @@ module Report
       if row.name_author&.match(/(prov|crypt)\./)
         row.name_author
       else
-        "#{row.name_author} nom.prov."
+        "#{row.name_author} nom. prov."
       end
     end
 
@@ -294,23 +278,7 @@ module Report
         # because some whitespace combinations can confuse Textile
         # Example: `\r\n \r\n`
         gsub(/\s+/, " ").
-
-        # gsub("??", ""). # Remove Textile italics markup
-
         t.html_to_ascii
-    end
-
-    def image_url(id)
-      # This URL is permanent. It should always be correct,
-      # no matter how much we change the underlying image server(s).
-      # It is large, rather than full-size, because we no longer
-      # let anonymous users access full-size images because of
-      # bot/scraper issues
-      if id.present?
-        "#{HTTP_DOMAIN}/images/1280/#{id}.jpg"
-      else
-        ""
-      end
     end
   end
 end

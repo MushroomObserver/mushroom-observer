@@ -259,3 +259,18 @@ super_importers_project:
   user: webmaster # should track production
   admin_group: webmaster_only # should track production
   user_group: super_importers_users
+
+empty_list_project:
+  <<: *DEFAULTS
+  species_lists: reused_list
+
+falmouth_2025_09_project:
+  <<: *DEFAULTS
+  user: dick
+  admin_group: dick_only
+  user_group: falmouth_2023_09_users
+  field_slip_prefix: FAL25
+  start_date: 2025-09-01
+  end_date: 2025-09-14
+  location: falmouth
+  observations: megacollybia_rodmanii_obs, dup_megacollybia_rodmanii_obs, nearby_megacollybia_rodmanii_obs, faraway_megacollybia_rodmanii_obs, older_megacollybia_rodmanii_obs, megacollybia_platyphylla_obs

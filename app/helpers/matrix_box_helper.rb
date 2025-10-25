@@ -48,8 +48,7 @@ module MatrixBoxHelper
     wrap_class = "matrix-box #{columns} #{extra_classes}"
     wrap_args = args.except(:columns, :class, :id)
 
-    tag.li(class: wrap_class, id: box_id, **wrap_args,
-           data: { controller: "query-results" }) do
+    tag.li(class: wrap_class, id: box_id, **wrap_args) do
       capture(&block)
     end
   end
@@ -84,7 +83,8 @@ module MatrixBoxHelper
       [
         matrix_box_what(presenter, object_id, identify),
         matrix_box_where(presenter),
-        matrix_box_when_who(presenter)
+        matrix_box_when_who(presenter),
+        tag.div(matrix_box_source_credit(presenter), class: "small mt-3")
       ].safe_join
     end
   end
@@ -94,33 +94,34 @@ module MatrixBoxHelper
     # TODO: make box layouts specific to object type
     h_style = presenter.image_data ? "h5" : "h3"
     what = presenter.what # for an obs or rss_log, it's the obs
+    type = presenter.type
     consensus = presenter.consensus || nil
     identify_ui = matrix_box_vote_or_propose_ui(identify, what, consensus)
 
     tag.div(class: "rss-what") do
       [
         tag.h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
-          link_with_query(what.show_link_args,
-                          data: { query_results_target: "link" }) do
-            [
-              matrix_box_id_tag(id: presenter.id),
-              matrix_box_title(name: presenter.name, id: object_id)
-            ].safe_join
-          end
+          [
+            link_to(what.show_link_args) do
+              matrix_box_title(name: presenter.name, id: object_id, type:)
+            end,
+            matrix_box_id_tag(object: presenter.what)
+          ].safe_join
         end,
         identify_ui
       ].safe_join
     end
   end
 
-  def matrix_box_id_tag(id:)
-    tag.small("(#{id})", class: "rss-id float-right")
+  def matrix_box_id_tag(object:)
+    show_title_id_badge(object, "rss-id")
   end
 
   # NOTE: This is what gets Turbo updates with the identify UI
   #       (does not require presenter, only obs)
-  def matrix_box_title(name:, id:)
-    tag.span(name, class: "rss-name", id: "box_title_#{id}")
+  def matrix_box_title(name:, id:, type:)
+    bold = [:observation, :name].include?(type) ? "" : " font-weight-bold"
+    tag.span(name, class: class_names("rss-name", bold), id: "box_title_#{id}")
   end
 
   # Obs with uncertain name: vote on naming, or propose (if it's "Fungi")
@@ -163,15 +164,43 @@ module MatrixBoxHelper
     end
   end
 
+  def matrix_box_source_credit(presenter)
+    target = if presenter.respond_to?(:source_credit)
+               presenter
+             elsif presenter.respond_to?(:target) # rss_log presenter
+               presenter.target
+             end
+
+    return unless target.respond_to?(:source_credit) &&
+                  target.source_noteworthy?
+
+    tag.div(class: "source-credit") do
+      tag.small do
+        target.source_credit.tpl
+      end
+    end
+  end
+
   def matrix_box_log_footer(presenter)
     return unless presenter.detail.present? || presenter.display_time.present?
 
     tag.div(class: "panel-footer log-footer") do
-      if presenter.detail.present?
+      if presenter.detail.is_a?(User)
+        detail = matrix_box_user_detail(presenter.what)
+        concat(tag.div(detail, class: "rss-detail small"))
+      elsif presenter.detail.present?
         concat(tag.div(presenter.detail, class: "rss-detail small"))
       end
       concat(tag.div(presenter.display_time, class: "rss-what small"))
     end
+  end
+
+  def matrix_box_user_detail(user)
+    [
+      "#{:list_users_joined.l}: #{user.created_at.web_date}",
+      "#{:list_users_contribution.l}: #{user.contribution}",
+      link_to(:OBSERVATIONS.l, observations_path(by_user: user.id))
+    ].safe_join(tag.br)
   end
 
   # Obs with uncertain name: mark as reviewed (to skip in future)

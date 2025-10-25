@@ -11,14 +11,15 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
   def test_visiting_the_index
     login!(mary)
     visit(field_slips_url)
-    assert_selector("h1", text: :FIELD_SLIP.t)
+    assert_match(:FIELD_SLIP.t, page.title)
   end
 
   def test_navigating_to_show_field_slip
     login!(mary)
     visit(field_slips_url)
     first(class: /field_slip_link_/).click
-    assert_text(:field_slip_index.t)
+    assert_selector("body.field_slips__show")
+    assert_selector("a", class: "field_slips_index_link")
   end
 
   def test_updating_a_field_slip
@@ -31,15 +32,15 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     select(@field_slip.project.title, from: :PROJECT.t)
     click_on(:field_slip_keep_obs.t)
 
-    assert_text(:field_slip_updated.t)
+    assert_selector(class: "alert", text: :field_slip_updated.t)
   end
 
   def test_destroying_a_field_slip
     login!(mary)
     visit(field_slip_url(@field_slip))
-    click_on(:DESTROY.t, match: :first)
+    click_on(:DESTROY_OBJECT.t(type: :field_slip), match: :first)
 
-    assert_text(:field_slip_destroyed.t)
+    assert_selector(class: "alert", text: :field_slip_destroyed.t)
   end
 
   def test_new_observation_violates_project_constraints

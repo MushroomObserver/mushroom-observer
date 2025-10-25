@@ -6,7 +6,7 @@ xml.tag!(
   url: object.show_url,
   type: "name"
 ) do
-  xml_string(xml, :name, object.real_text_name)
+  xml_string(xml, :name, object.user_real_text_name(nil))
   xml_string(xml, :author, object.author)
   xml_string(xml, :rank, object.rank.to_s.downcase)
   xml_boolean(xml, :deprecated, true) if object.deprecated

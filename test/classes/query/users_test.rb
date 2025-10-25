@@ -9,7 +9,7 @@ class Query::UsersTest < UnitTestCase
 
   def test_user_all_by_name
     expects = User.order_by(:name)
-    assert_query(expects, :User)
+    assert_query(expects, :User, order_by: :name)
   end
 
   def test_user_order_by_login
@@ -19,7 +19,7 @@ class Query::UsersTest < UnitTestCase
 
   def test_user_order_by_contribution
     expects = User.order_by(:contribution)
-    assert_query(expects, :User, order_by: :contribution)
+    assert_query(expects, :User)
   end
 
   def test_user_order_by_last_login
@@ -55,7 +55,7 @@ class Query::UsersTest < UnitTestCase
   end
 
   def test_user_pattern_search_blank
-    assert_query(User.order(name: :asc, id: :desc).to_a,
+    assert_query(User.order(contribution: :desc, id: :desc).to_a,
                  :User, pattern: "")
   end
 

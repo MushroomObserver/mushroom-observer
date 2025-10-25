@@ -336,7 +336,7 @@ class Query
   delegate :attribute_names, to: :class
 
   # Define has_attribute? here, it doesn't exist yet for ActiveModel.
-  def self.has_attribute?(key) # rubocop:disable Naming/PredicateName
+  def self.has_attribute?(key) # rubocop:disable Naming/PredicatePrefix
     attribute_types.key?(key)
   end
   delegate :has_attribute?, to: :class
@@ -367,6 +367,16 @@ class Query
   end
   delegate :model, to: :class
 
+  def self.type_tag
+    name.demodulize.singularize.underscore.to_sym
+  end
+  delegate :type_tag, to: :class
+
+  def self.search_type
+    type_tag.to_s.pluralize.to_sym
+  end
+  delegate :search_type, to: :class
+
   # Can the current class be called as a subquery of the target Query class?
   def relatable?(target)
     self.class.related?(target, model.name.to_sym)
@@ -381,6 +391,12 @@ class Query
   # Defined in each subclass. Default order when `order_by` param not passed.
   def default_order
     self.class.default_order || :id
+  end
+
+  # Returns a hash describing the query instance.
+  # This gets encoded as the URL :q param for indexes etc.
+  def q_param
+    { model: model.name.to_sym, **params }
   end
 
   # Serialize the query params, adding the model, for saving to a QueryRecord.

@@ -9,7 +9,7 @@ module Tabs
           :comment_show_show.t(type: comment.target_type_localized)
         )
       ]
-      return unless check_permission(comment)
+      return unless permission?(comment)
 
       links += comment_mod_tabs(comment)
       links
@@ -41,9 +41,7 @@ module Tabs
     def new_comment_tab(object, btn_class: nil)
       InternalLink::Model.new(
         :show_comments_add_comment.l, object,
-        add_query_param(
-          new_comment_path(target: object.id, type: object.class.name)
-        ),
+        new_comment_path(target: object.id, type: object.class.name),
         html_options: { class: btn_class, icon: :add }
       ).tab
     end
@@ -51,7 +49,7 @@ module Tabs
     def edit_comment_tab(comment)
       InternalLink::Model.new(
         :comment_show_edit.t, comment,
-        add_query_param(edit_comment_path(comment.id)),
+        edit_comment_path(comment.id),
         html_options: { icon: :edit }
       ).tab
     end

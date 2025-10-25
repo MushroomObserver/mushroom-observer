@@ -27,7 +27,7 @@ module AutocompleterHelper
     ac_args[:label_end] = autocompleter_label_end(args)
     ac_args[:append] = autocompleter_append(args)
 
-    tag.div(id: args[:controller_id],
+    tag.div(id: args[:controller_id], class: "autocompleter",
             data: autocompleter_controller_data(args)) do
       if args[:textarea] == true
         concat(text_area_with_label(**ac_args))
@@ -141,11 +141,12 @@ module AutocompleterHelper
     )
   end
 
-  # minimum args :form, :type. Send :hidden_name to override default field name.
-  # Send :hidden_value to fill id, :hidden_data to merge with hidden field data
+  # minimum args :form, :type. Send :hidden_name to override default field name,
+  # :hidden_value to fill id, :hidden_data to merge with hidden field data
   def autocompleter_hidden_field(**args)
     return unless args[:form].present? && args[:type].present?
 
+    # Default field name is "#{type}_id", so obs.place_name gets obs.location_id
     id = args[:hidden_name] || :"#{args[:type]}_id"
     data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
     args[:form].hidden_field(

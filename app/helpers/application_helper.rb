@@ -6,7 +6,12 @@
 #  Methods available to all templates in the application:
 #
 #  css_theme
+#  default_container_class
 #  container_class
+#  default_column_classes
+#  column_classes
+#  default_content_padding
+#  content_padding
 #
 #  --------------------------
 #
@@ -14,45 +19,120 @@
 #  add_header                   # add to html header from within view
 #  reload_with_args             # add args to url that got us to this page
 #  add_args_to_url              # change params of arbitrary url
-#  url_after_delete             # url to return to after deleting object
 #  get_next_id
 #
 module ApplicationHelper
   # All helpers are autoloaded under Zeitwerk
-
-  def css_theme
+  def css_theme(user = nil)
     if in_admin_mode?
       "Admin"
     elsif session[:real_user_id].present?
       "Sudo"
-    elsif browser.bot? || !@user
+    elsif browser.bot? || !user
       MO.default_theme
     elsif MO.themes.member?(controller.action_name)
       # when looking at a theme's info page render it in that theme
       controller.action_name
-    elsif @user && @user&.theme.present? &&
-          MO.themes.member?(@user.theme)
-      @user.theme
-    elsif @user
+    elsif user && user&.theme.present? && MO.themes.member?(user.theme)
+      user.theme
+    elsif user
       MO.themes.sample
     end
   end
 
-  # Return a width class for the layout content container.
+  # This executes in the layout, but AFTER the template!
+  def default_container_class
+    return if content_for?(:container_class)
+
+    container_class
+  end
+
+  # Set a width class for the layout content container.
   # Defaults to :text width, currently the most common. :wide is for forms
   # These classes are MO-defined
   #
-  def container_class
-    @container ||= :text
-    case @container
-    when :text
-      "container-text"
-    when :text_image
-      "container-text-image"
-    when :wide
-      "container-wide"
-    else
-      "container-full"
+  def container_class(container = :text)
+    container ||= :text
+    content_for(:container_class, flush: true) do
+      case container
+      when :text
+        "container-text"
+      when :text_image
+        "container-text-image"
+      when :wide
+        "container-wide"
+      else
+        "container-full"
+      end
+    end
+  end
+
+  # This executes in the layout, but AFTER the template!
+  def default_column_classes
+    return if content_for?(:left_columns)
+
+    column_classes
+  end
+
+  # Call in a layout to sync the title-bar columns with the content columns.
+  def column_classes(columns = :twelve) # rubocop:disable Metrics/MethodLength
+    content_for(:left_columns, flush: true) do
+      case columns
+      when :nine_three
+        class_names("col-xs-12 col-md-9 col-lg-8")
+      when :eight_four
+        class_names("col-xs-12 col-md-8 col-lg-7")
+      when :seven_five
+        class_names("col-xs-12 col-md-7")
+      when :six
+        class_names("col-xs-12 col-md-6 col-lg-8")
+      when :six_even # users show
+        class_names("col-xs-12 col-lg-6")
+      else
+        class_names("col-xs-12")
+      end
+    end
+
+    content_for(:right_columns, flush: true) do
+      case columns
+      when :nine_three
+        class_names("col-xs-12 col-md-3 col-lg-4")
+      when :eight_four
+        class_names("col-xs-12 col-md-4 col-lg-5")
+      when :seven_five
+        class_names("col-xs-12 col-md-5")
+      when :six
+        class_names("col-xs-12 col-md-6 col-lg-4")
+      when :six_even
+        class_names("col-xs-12 col-lg-6")
+      else
+        class_names("col-xs-12")
+      end
+    end
+  end
+
+  # This executes in the layout, but AFTER the template!
+  def default_content_padding
+    return if content_for?(:content_padding)
+
+    content_padding
+  end
+
+  # Set content padding to line up with the title. If it needs different padding
+  # from the defaults below, call `content_padding(:panels)` or :no_panels
+  # in the template. If it's a mixed layout you can set it to :panels and wrap
+  # text blocks in the CSS class `content-block`, which will pad them the same.
+  # Must set some string class value or `default_content_padding` will override.
+  def content_padding(content_has = nil)
+    # Give defaults per action.
+    content_has ||= case action_name
+                    when "index", "show"
+                      :panels
+                    else
+                      :no_panels
+                    end
+    content_for(:content_padding, flush: true) do
+      content_has == :no_panels ? "p-3" : "p-0"
     end
   end
 
@@ -81,12 +161,12 @@ module ApplicationHelper
   # Returns a string that indicates the current user/logged_in/admin status.
   # Used as a simple cache key for templates that may have three
   # possible versions of cached HTML
-  def user_status_string
+  def user_status_string(user = nil)
     if in_admin_mode?
       "admin_mode"
     elsif browser.bot?
       "robot"
-    elsif !@user.nil?
+    elsif !user.nil?
       "logged_in"
     else
       "no_user"
@@ -161,32 +241,6 @@ module ApplicationHelper
     addr + "?" + args.keys.sort.map do |k| # rubocop:disable Style/StringConcatenation
       "#{CGI.escape(k)}=#{args[k] || ""}"
     end.join("&")
-  end
-
-  # Returns URL to return to after deleting an object.  Can't just return to
-  # the index, because we'd prefer to return to the correct page in the index,
-  # but to do that we need to know the id of next object.
-  def url_after_delete(object)
-    return nil unless object
-
-    id = get_next_id(object)
-    args = {
-      controller: object.show_controller,
-      action: object.index_action
-    }
-    args[:id] = id if id
-    url_for(add_query_param(args))
-  end
-
-  def get_next_id(object)
-    query = passed_query
-    return nil unless query
-    return nil unless query.model.to_s == object.class.name
-
-    idx = query.index(object)
-    return nil unless idx
-
-    query.result_ids[idx + 1] || query.result_ids[idx - 1]
   end
 
   def form_submit_text(obj)

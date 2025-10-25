@@ -270,6 +270,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     (all_subjects - [obj]).present?
   end
 
+  def title_subjects(format_method = :format_name)
+    all_subjects.map(&:"#{format_method}").uniq.sort.join(" & ")
+  end
+
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
   #
@@ -278,7 +282,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "Agaricus campestris L. & Agaricus californicus Peck. (3)"
   #
   def unique_text_name
-    title = all_subjects.map(&:text_name).uniq.sort.join(" & ")
+    title = title_subjects(:text_name)
     if title.blank?
       :image.l + " ##{id || "?"}"
     else
@@ -294,12 +298,18 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    title = all_subjects.map(&:format_name).uniq.sort.join(" & ")
-    if title.blank?
-      :image.l + " ##{id || "?"}"
-    else
-      title + " (#{id || "?"})"
-    end
+    title = format_name
+    id_format = if title == :image.l
+                  "##{id || "?"}"
+                else
+                  "(#{id || "?"})"
+                end
+    [title, id_format].safe_join(" ")
+  end
+
+  # Do the same without the ID, for new page titles that generate an ID UI
+  def format_name
+    title_subjects || :image.l
   end
 
   # How this image is refered to in the rss logs.
@@ -652,8 +662,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     name = name.sub(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
-    return unless name.present? && User.current &&
-                  User.current.keep_filenames != "toss"
+    return unless name.present? && user&.keep_filenames != "toss"
 
     self.original_name = name
   end
@@ -1007,7 +1016,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Log adding new image to an associated observation, glossary term, etc.
   def log_create_for(object)
-    object.log(:log_image_created, name: log_name, touch: true)
+    object.user_log(user, :log_image_created, name: log_name, touch: true)
   end
 
   # Log adding existing image to an associated observation, glossary term, etc.
@@ -1142,7 +1151,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   private_class_method def self.row_changed?(row)
     row[:old_id] != row[:new_id] ||
-    row[:old_holder] != row[:new_holder]
+      row[:old_holder] != row[:new_holder]
   end
 
   # Add license change records with a single insert to the db.

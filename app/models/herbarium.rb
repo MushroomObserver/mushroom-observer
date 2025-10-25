@@ -50,6 +50,9 @@
 ################################################################################
 
 class Herbarium < AbstractModel
+  # Used by create/edit form.
+  attr_accessor :place_name, :personal, :personal_user_name
+
   has_many :herbarium_records, dependent: :destroy
   belongs_to :location
 
@@ -60,8 +63,8 @@ class Herbarium < AbstractModel
   # personal_user_id is set to mark whose personal herbarium it is.
   belongs_to :personal_user, class_name: "User"
 
-  # Used by create/edit form.
-  attr_accessor :place_name, :personal, :personal_user_name
+  # Was unable to create an appropriate index that made Trilogy happy.
+  validates :code, uniqueness: true, allow_blank: true
 
   scope :order_by_default,
         -> { order_by(::Query::Herbaria.default_order) }
@@ -83,9 +86,13 @@ class Herbarium < AbstractModel
         ->(str) { search_columns(Herbarium[:description], str) }
   scope :mailing_address_has,
         ->(str) { search_columns(Herbarium[:mailing_address], str) }
+  scope :by_users, lambda { |users|
+    ids = Lookup::Users.new(users).ids
+    where(personal_user_id: ids)
+  }
 
   scope :pattern, lambda { |phrase|
-    cols = (Herbarium[:code] + Herbarium[:name] +
+    cols = (Herbarium[:code].coalesce("") + Herbarium[:name] +
             Herbarium[:description].coalesce("") +
             Herbarium[:mailing_address].coalesce(""))
     search_columns(cols, phrase).distinct

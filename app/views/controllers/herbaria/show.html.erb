@@ -1,11 +1,11 @@
 <%
-add_page_title(@herbarium.format_name.t)
-
+add_show_title(@herbarium.format_name.t, @herbarium)
+add_edit_icons(@herbarium)
 add_pager_for(@herbarium)
-add_context_nav(herbarium_show_tabs(herbarium: @herbarium, user: @user))
+add_context_nav(herbarium_show_tabs)
+container_class(:wide)
 
 map = @herbarium.location
-@container = :wide
 %>
 
 <% if @herbarium.mcp_searchable? %>
@@ -34,26 +34,25 @@ map = @herbarium.location
 
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
 
-        <%= form_with(url: herbaria_curators_path(id: @herbarium,
-                                                  q: get_query_param),
+        <%= form_with(url: herbaria_curators_path(id: @herbarium, q: q_param),
                       id: "herbarium_curators_form") do |f| %>
           <div class="form-inline mt-3">
             <%= autocompleter_field(form: f, field: :add_curator,
-                                        type: :user) %>
+                                    type: :user) %>
             <label for="add_curator">
               <%= submit_button(form: f,
-                                    button: :show_herbarium_add_curator.t) %>
+                                button: :show_herbarium_add_curator.t) %>
             </label>
           </div>
         <% end %>
 
       <% else %>
 
-        <%= link_with_query(
-                :show_herbarium_curator_request.t,
-                new_herbaria_curator_request_path(id: @herbarium.id),
-                class: "new_herbaria_curator_request_link"
-              ) %>
+        <%= link_to(
+              :show_herbarium_curator_request.t,
+              new_herbaria_curator_request_path(id: @herbarium.id),
+              class: "new_herbaria_curator_request_link"
+            ) %>
 
       <% end %>
     </div>

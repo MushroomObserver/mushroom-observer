@@ -1,50 +1,42 @@
 <%
-@container = :wide
+container_class(:full)
 add_index_title(@query)
 add_context_nav(herbaria_index_tabs(query: @query))
 add_sorter(@query, herbaria_index_sorts(query: @query))
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 nonpersonal = (@query&.params&.dig(:nonpersonal))
 %>
 
-<% if @merge %>
-  <div class="alert alert-warning container-text mt-3">
-    <%= :herbarium_index_merge_help.tp(name: @merge.format_name,
-                                     url: reload_with_args(merge: nil)) %>
-  </div>
-  <!--.container-text-->
-<% end %>
+<%= alert_block(level: :warning, class: "container-text mt-3") do
+  :herbarium_index_merge_help.tp(name: @merge.format_name,
+                                  url: reload_with_args(merge: nil))
+end if @merge %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
-    <table class="table-striped table-herbarium mt-3">
+    <table class="table table-striped table-herbarium w-100 mt-3">
       <thead>
         <tr>
-          <th><%= :herbarium_index_records.t %></th>
-          <th><%= :USER.t unless nonpersonal %></th>
           <th><%= :herbarium_code.t %></th>
-          <th><%= :NAME.t %></th>
+          <th><%= :herbarium_index_records.t %></th>
+          <th><%= :HERBARIUM.t %></th>
+          <th><%= :USER.t unless nonpersonal %></th>
         </tr>
       </thead>
       <tbody>
         <% @objects.each do |herbarium| %>
           <tr>
             <td>
-              <%= herbarium.herbarium_records.length %>
-            </td>
-            <td>
-              <%= if !nonpersonal && herbarium.personal_user.present?
-                    tag.span(user_link(herbarium.personal_user),
-                            title: herbarium.personal_user.unique_text_name)
-              end %>
-            </td>
-            <td>
               <%= herbarium.code %>
             </td>
             <td>
+              <%= herbarium.herbarium_records.length %>
+            </td>
+            <td>
               <% if !@merge || !@user %>
-                <%= link_with_query(
+                <%= link_to(
                       herbarium.name.t, herbarium_path(herbarium),
                       class: "herbarium_link_#{herbarium.id}"
                     ) %>
@@ -62,12 +54,18 @@ nonpersonal = (@query&.params&.dig(:nonpersonal))
               <% end %>
               <% if @user && !@merge &&
                       (herbarium.can_edit? || in_admin_mode?) %>
-              [<%= link_with_query(:EDIT.t, edit_herbarium_path(herbarium),
-                    class: "edit_herbarium_link_#{herbarium.id}") %> |
-              <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id),
-                    class: "merge_herbarium_link_#{herbarium.id}") %>]
-            <% end %>
-          </td>
+                [<%= link_to(:EDIT.t, edit_herbarium_path(herbarium),
+                             class: "edit_herbarium_link_#{herbarium.id}") %> |
+                <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id),
+                            class: "merge_herbarium_link_#{herbarium.id}") %>]
+              <% end %>
+            </td>
+            <td>
+              <%= if !nonpersonal && herbarium.personal_user.present?
+                    tag.span(user_link(herbarium.personal_user),
+                            title: herbarium.personal_user.unique_text_name)
+              end %>
+            </td>
         </tr>
       <% end %>
     </tbody>

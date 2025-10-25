@@ -11,7 +11,7 @@ module Tabs
         projects_index_tab,
         object_return_tab(project)
       ]
-      links << destroy_project_tab(project) if check_permission(project)
+      links << destroy_project_tab(project) if permission?(project)
       links
     end
 
@@ -28,19 +28,18 @@ module Tabs
         projects_index_tab,
         object_return_tab(project)
       ]
-      return unless check_permission(project)
+      return unless permission?(project)
 
       # Note this is just an edit_project_tab with different wording
       links << change_member_status_tab(project)
     end
 
     def projects_index_tab
-      InternalLink.new(:app_list_projects.t, projects_path).tab
+      InternalLink.new(:cancel_to_index.t(type: :PROJECT), projects_path).tab
     end
 
     def new_project_tab
-      InternalLink.new(:list_projects_add_project.t,
-                       add_query_param(new_project_path)).tab
+      InternalLink.new(:list_projects_add_project.t, new_project_path).tab
     end
 
     def change_member_status_tab(project)
@@ -54,6 +53,12 @@ module Tabs
                               html_options: { button: :destroy }).tab
     end
 
+    def projects_for_user_tab(user)
+      InternalLink.new(
+        :app_your_projects.l, projects_path(member: user.id)
+      ).tab
+    end
+
     # Add some alternate sorting criteria.
     def projects_index_sorts
       [
@@ -65,64 +70,66 @@ module Tabs
     end
 
     def add_project_banner(project)
-      add_page_title(link_to_object(project))
+      title = if controller.controller_name == "projects" &&
+                 action_name == "show"
+                [show_title_id_badge(project),
+                 link_to_object(project)].safe_join(" ")
+              else
+                link_to_object(project)
+              end
+
+      content_for(:banner_title) { title }
 
       if project.location
-        content_for(:location) do
+        content_for(:project_location) do
           tag.b(link_to(project.place_name, location_path(project.location.id)))
         end
       end
 
       if project.start_date && project.end_date
-        content_for(:date_range) do
+        content_for(:project_date_range) do
           tag.b(project.date_range)
         end
       end
 
-      add_background_image(project.image)
+      add_banner_image(project.image)
       project_tabs(project)
     end
 
-    def add_background_image(image)
+    def add_banner_image(image)
       return unless image
 
-      content_for(:background_image) do
-        image_tag(image.large_url, class: "image-title")
+      content_for(:banner_image) do
+        image_tag(image.large_url, class: "banner-image")
       end
     end
 
     def build_tab(link_text, link, controller)
       tag.li(class: "nav-item") do
-        classes = "mt-3 nav-link #{active_tab?(controller) ? "active" : ""}"
+        classes = "mt-3 nav-link #{"active" if active_tab?(controller)}"
         link_to(link_text, link,
                 { class: classes })
       end
     end
 
-    def violations_tab(project)
-      violations_count = project.count_violations
-      classes = if violations_count.zero?
-                  "mt-3 nav-link #{active_tab?("violations") ? "active" : ""}"
-                else
-                  "mt-3 nav-link text-warning"
-                end
+    def violations_button(project)
+      return unless project.constraints?
 
-      tag.li(class: "nav-item") do
-        link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
-                project_violations_path(project_id: project.id),
-                { class: classes })
-      end
+      violations_count = project.count_violations
+      btn_type = if violations_count.positive?
+                   "btn-warning"
+                 else
+                   "btn-default"
+                 end
+      classes = "btn btn-lg #{btn_type}"
+      link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
+              project_violations_path(project_id: project.id),
+              { class: classes })
     end
 
     def project_tabs(project)
       tabs = [build_tab(:SUMMARY.t, project_path(id: project.id), "projects")]
       tabs += observation_tabs(project)
-      tabs << build_tab("#{project.user_group.users.count} #{:MEMBERS.l}",
-                        project_members_path(project.id),
-                        "members")
-      tabs << build_tab("#{project.aliases.length} #{:PROJECT_ALIASES.l}",
-                        project_aliases_path(project_id: project.id), "aliases")
-      tabs << violations_tab(project) if project.constraints?
 
       content_for(:project_tabs) do
         tag.ul(safe_join(tabs), class: "nav nav-tabs")
@@ -135,15 +142,18 @@ module Tabs
         tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
                           observations_path(project:),
                           "observations")
+        tabs << build_tab("#{project.species_lists.length} #{:SPECIES_LISTS.l}",
+                          species_lists_path(project:),
+                          "species_lists")
         tabs << build_tab("#{project.name_count} #{:NAMES.l}",
                           checklist_path(project_id: project.id), "checklists")
         tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
                           project_locations_path(project_id: project.id),
                           "locations")
-      end
-      if project.field_slip_prefix
-        tabs << build_tab("#{project.field_slips.length} #{:FIELD_SLIPS.l}",
-                          field_slips_path(project:), "field_slips")
+      elsif project.species_lists.any?
+        tabs << build_tab("#{project.species_lists.length} #{:SPECIES_LISTS.l}",
+                          species_lists_path(project:),
+                          "species_lists")
       end
       tabs
     end
@@ -157,18 +167,71 @@ module Tabs
       current_tab == tab_name
     end
 
+    def project_species_list_buttons(list, query)
+      return unless list
+
+      [project_species_list_map_button(query),
+       project_species_list_observations_button(query),
+       project_species_list_names_button(list),
+       project_species_list_locations_button(query),
+       project_species_list_images_button(query)]
+    end
+
+    def project_button_args
+      { class: "btn-lg my-3 mr-3" }
+    end
+
+    def project_species_list_map_button(query)
+      button_link(:MAP.l, add_q_param(map_observations_path, query),
+                  **project_button_args)
+    end
+
+    def project_species_list_observations_button(query)
+      button_link(:OBSERVATIONS.l, add_q_param(observations_path, query),
+                  **project_button_args)
+    end
+
+    def project_species_list_names_button(list)
+      button_link(:NAMES.l,
+                  checklist_path(species_list_id: list.id),
+                  **project_button_args)
+    end
+
+    def project_species_list_locations_button(query)
+      return unless query && Query.related?(:Location, :Observation)
+
+      locations_url = InternalLink::RelatedQuery.new(
+        Location, :Observation, query, controller
+      ).url
+      button_link(:LOCATIONS.l, locations_url, **project_button_args)
+    end
+
+    def project_species_list_images_button(query)
+      return unless query && Query.related?(:Location, :Observation)
+
+      images_url = InternalLink::RelatedQuery.new(
+        Image, :Observation, query, controller
+      ).url
+      button_link(:IMAGES.l, images_url, **project_button_args)
+    end
+
     def project_observation_buttons(project, query)
       return unless project
 
-      img_name, img_link, = related_images_tab(:Observation, query)
-      styling = { class: "btn btn-default btn-lg my-3 mr-3" }
-      buttons = [link_to(:show_object.t(type: :map),
-                         map_observations_path(q: get_query_param(query)),
-                         styling),
-                 link_to(img_name, img_link, styling),
-                 link_to(:list_observations_download_as_csv.l,
-                         add_query_param(new_observations_download_path, query),
-                         styling)]
+      _img_name, img_link, = related_images_tab(:Observation, query)
+      buttons = [
+        button_link(:MAP.t, add_q_param(map_observations_path, query),
+                    **project_button_args),
+        button_link(:IMAGES.l, img_link, **project_button_args),
+        button_link(:DOWNLOAD.l,
+                    add_q_param(new_observations_download_path, query),
+                    **project_button_args)
+      ]
+      if project.field_slip_prefix
+        buttons << button_link(:FIELD_SLIPS.t, field_slips_path(project:),
+                               **project_button_args)
+      end
+
       # Download Observations
       content_for(:observation_buttons) do
         tag.div(safe_join(buttons))

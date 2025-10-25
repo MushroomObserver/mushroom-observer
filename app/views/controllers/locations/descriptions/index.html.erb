@@ -2,17 +2,18 @@
 add_index_title(@query)
 add_context_nav(location_description_index_tabs(query: @query))
 add_sorter(@query, descriptions_index_sorts)
-@container = :wide
+add_pagination(@pagination_data)
+container_class(:wide)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <div class="list-group">
       <% @objects.each do |desc| %>
         <div class="list-group-item">
-          <%= link_with_query(desc.format_name.t, desc.show_link_args) %>
+          <%= link_to(desc.format_name.t, desc.show_link_args) %>
         </div>
       <% end %>
     </div>

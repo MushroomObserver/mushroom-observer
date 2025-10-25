@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="year-input"
 export default class extends Controller {
   connect() {
-    this.element.dataset.stimulus = "year-input-connected";
+    this.element.dataset.yearInput = "connected";
 
     this.id = this.element.getAttribute("id");
     // console.log(this.id)

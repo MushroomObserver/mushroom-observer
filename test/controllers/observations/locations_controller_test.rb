@@ -35,9 +35,10 @@ module Observations
     end
 
     def test_add_to_location
-      User.current = rolf
+      # User.current = rolf
       albion = locations(:albion)
       obs = Observation.create!(
+        user: rolf,
         when: Time.zone.now,
         where: "undefined location",
         notes: "new observation"
@@ -58,6 +59,7 @@ module Observations
       login("roy")
       albion = locations(:albion)
       obs = Observation.create!(
+        user: roy,
         when: Time.zone.now,
         where: (where = "Albion, Mendocino Co., California, USA"),
         notes: "new observation"

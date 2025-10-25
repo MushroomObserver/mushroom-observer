@@ -4,6 +4,7 @@
 class ObservationsController
   module Index
     def index
+      make_name_suggestions
       build_index_with_query
     end
 
@@ -64,40 +65,18 @@ class ObservationsController
       raise("Query::Observations.advanced_search_params is undefined.")
     end
 
-    # Display matrix of Observations whose notes, etc. match a string pattern.
-    def pattern
-      pattern = params[:pattern].to_s
-      if pattern.match?(/^\d+$/) &&
-         (observation = Observation.safe_find(pattern))
-        redirect_to(permanent_observation_path(observation.id))
-      else
-        return_pattern_search_results(pattern)
-      end
-    end
+    # Different from NamesController. Returns arrays of [name, count]
+    def make_name_suggestions
+      return unless @objects.empty? &&
+                    params[:q].is_a?(ActionController::Parameters) &&
+                    (original_spelling = params.dig(:q, :pattern))
 
-    def return_pattern_search_results(pattern)
-      search = PatternSearch::Observation.new(pattern)
-      return render_pattern_search_error(search) if search.errors.any?
-
-      @suggest_alternate_spellings = search.query.params[:pattern]
-      # Call create_query to apply user content filters
-      query = create_query(:Observation, search.query.params)
-      if params[:needs_naming]
-        redirect_to(
-          identify_observations_path(q: get_query_param(query))
-        )
-        [nil, {}]
-      else
-        [query, {}]
+      names = Name.suggest_alternate_spellings(original_spelling)
+      @name_suggestions = names.sort_by(&:sort_name).map do |name|
+        query = Query.create_query(:Observation, pattern: name.text_name)
+        count = query.num_results
+        [name, count]
       end
-    end
-
-    def render_pattern_search_error(search)
-      search.errors.each { |error| flash_error(error.to_s) }
-      if params[:needs_naming]
-        redirect_to(identify_observations_path(q: get_query_param))
-      end
-      [nil, {}]
     end
 
     # Displays matrix of Observations with the given name proposed but not
@@ -154,7 +133,7 @@ class ObservationsController
         location = find_or_goto_index(Location, params[:location].to_s)
       )
 
-      query = create_query(:Observation, locations: location)
+      query = create_query(:Observation, within_locations: location)
       [query, {}]
     end
 
@@ -180,7 +159,7 @@ class ObservationsController
       [query, { always_index: true }]
     end
 
-    # Display matrix of Observations attached to a given species list.
+    # Display matrix of Observations attached to a given species_list.
     def species_list
       return unless (
         spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)

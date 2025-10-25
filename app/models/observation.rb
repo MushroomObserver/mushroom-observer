@@ -257,7 +257,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def is_collector?(user)
-    user && notes[:Collector] == user.textile_name
+    user && notes[:Collector]&.include?("_user #{user.login}_")
   end
 
   def project_admin?(user = User.current)
@@ -349,13 +349,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     msgs
   end
 
-  def update_view_stats
+  def update_view_stats(current_user = User.current)
     super
-    return if User.current.blank?
+    return if current_user.blank?
 
     @old_last_viewed_by ||= {}
-    @old_last_viewed_by[User.current_id] = last_viewed_by(User.current)
-    ObservationView.update_view_stats(id, User.current_id)
+    @old_last_viewed_by[current_user.id] = last_viewed_by(current_user)
+    ObservationView.update_view_stats(id, current_user.id)
   end
 
   def last_viewed_by(user)
@@ -470,15 +470,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # or they are members of a project that the observation belongs to, but
   # those are harder to determine. This catches the majority of cases.
   def public_lat
-    gps_hidden && user_id != User.current_id ? nil : lat
+    gps_hidden && user_id != @current_user&.id ? nil : lat
   end
 
   def public_lng
-    gps_hidden && user_id != User.current_id ? nil : lng
+    gps_hidden && user_id != @current_user&.id ? nil : lng
   end
 
-  def reveal_location?
-    !gps_hidden || can_edit? || project_admin?
+  def reveal_location?(user)
+    !gps_hidden || can_edit?(user) || project_admin?(user)
   end
 
   def display_lat_lng
@@ -620,9 +620,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Change spaces to underscores in keys
   #   notes_normalized_key("Nearby trees") #=> :Nearby_trees
   #   notes_normalized_key(:Other)         #=> :Other
-  def notes_normalized_key(part)
+  def self.notes_normalized_key(part)
     part.to_s.tr(" ", "_").to_sym
   end
+
+  delegate :notes_normalized_key, to: :Observation
 
   # Array of note parts (Strings) to display in create & edit form,
   # in following (display) order. Used by views.
@@ -712,7 +714,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Textile-marked-up name, never nil.
   def format_name
-    name.observation_name
+    name.user_observation_name(User.current)
   end
 
   def user_format_name(user)
@@ -802,8 +804,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add species_lists and herbarium_records to naming_includes
   def has_backup_data?
     !thumb_image_id.nil? ||
-      species_lists.count.positive? ||
-      herbarium_records.count.positive? ||
+      species_lists.any? ||
+      herbarium_records.any? ||
       specimen ||
       notes.length >= 100
   end
@@ -859,21 +861,25 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.
-  def add_spl_callback(_obs)
-    UserStats.update_contribution(:add, :species_list_entries, user_id)
+  def add_spl_callback(spl)
+    tmp_id = user_id
+    tmp_id ||= spl.user_id if spl.respond_to?(:user_id)
+    UserStats.update_contribution(:add, :species_list_entries, tmp_id)
   end
 
   # Callback that updates a User's contribution after removing an Observation
   # from a SpeciesList.
-  def remove_spl_callback(_obs)
-    UserStats.update_contribution(:del, :species_list_entries, user_id)
+  def remove_spl_callback(spl)
+    tmp_id = user_id
+    tmp_id ||= spl.user_id if spl.respond_to?(:user_id)
+    UserStats.update_contribution(:del, :species_list_entries, tmp_id)
   end
 
   # Callback that logs an Observation's destruction on all of its
   # SpeciesList's.  (Also saves list of Namings so they can be destroyed
   # by hand afterword without causing superfluous calc_consensuses.)
   def notify_species_lists
-    # Tell all the species lists it belonged to.
+    # Tell all the species_lists it belonged to.
     species_lists.each do |spl|
       spl.log(:log_observation_destroyed2, name: unique_format_name,
                                            touch: false)
@@ -887,6 +893,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Observation is destroyed.
   def destroy_dependents
     @old_namings.each do |naming|
+      naming.current_user = naming.observation.current_user
       naming.observation = nil # (tells it not to recalc consensus)
       naming.destroy
     end
@@ -1126,7 +1133,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def check_user
-    return if user || User.current
+    return if user || @current_user
 
     errors.add(:user, :validate_observation_user_missing.t)
   end

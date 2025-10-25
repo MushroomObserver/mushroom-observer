@@ -25,6 +25,12 @@
 class QueryRecord < ApplicationRecord
   attr_accessor :query
 
+  before_save :update_permalink_status
+
+  def update_permalink_status
+    self.permalink = true
+  end
+
   # This method instantiates a new Query from the description.
   def query # rubocop:disable Lint/DuplicateMethods
     ::Query.rebuild_from_description(description)
@@ -40,5 +46,28 @@ class QueryRecord < ApplicationRecord
     QueryRecord.where(QueryRecord[:updated_at] < 1.day.ago).delete_all
 
     @last_cleanup = Time.zone.now
+  end
+
+  # Checks and returns the value of a param in the saved QueryRecord
+  def self.check_param(param, qr_id)
+    query_record = QueryRecord.safe_find(qr_id)
+    return nil unless query_record
+
+    query_record.query.params[param]
+  end
+
+  # Checks query model. Send model as a symbol like :NameDescription
+  def self.model?(model, qr_id)
+    query_record = QueryRecord.safe_find(qr_id)
+    return false unless query_record
+
+    query_record.query.model.name == model.to_s
+  end
+
+  # copied from abstract model, which this does not inherit from
+  def self.safe_find(id)
+    find(id)
+  rescue ActiveRecord::RecordNotFound
+    nil
   end
 end

@@ -41,7 +41,7 @@ module AbstractModel::Scopes
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do
     scope :id_in_set, lambda { |ids|
       set = limited_id_set(ids) # [] is valid and should return none
       return none if set.empty?
@@ -50,19 +50,18 @@ module AbstractModel::Scopes
     }
 
     scope :by_users, lambda { |users|
-      ids = lookup_users_by_name(users)
+      ids = Lookup::Users.new(users).ids
       where(user: ids)
     }
-    scope :by_editor, lambda { |user|
+    scope :by_editor, lambda { |users|
       version_table = :"#{type_tag}_versions"
       unless ActiveRecord::Base.connection.table_exists?(version_table)
         return all
       end
 
-      user_id = user.is_a?(Integer) ? user : user&.id
-
-      joins(:versions).where("#{version_table}": { user_id: user_id }).
-        where.not(user: user).distinct
+      ids = Lookup::Users.new(users).ids
+      joins(:versions).where("#{version_table}": { user_id: ids }).
+        where.not(user: ids).distinct
     }
 
     # `created_at`/`updated_at` are versatile, and handle all Queries currently.
@@ -144,6 +143,7 @@ module AbstractModel::Scopes
     # NOTE: On MO so far, all date columns are named :when.
     scope :date, lambda { |early, late = nil, col: :when|
       early, late = early if early.is_a?(Array)
+      early, late = ::DateRangeParser.new(early).range if late.blank?
       if late.blank?
         date_after(early, col:)
       else
@@ -209,7 +209,7 @@ module AbstractModel::Scopes
             search_columns(Observation[:notes], phrase).distinct.map(&:id)
       ids += joins(comment_joins).
              search_columns(
-               (Observation[:notes] + Comment[:summary] + Comment[:comment]),
+               Observation[:notes] + Comment[:summary] + Comment[:comment],
                phrase
              ).distinct.map(&:id)
       where(id: ids).distinct
@@ -236,7 +236,7 @@ module AbstractModel::Scopes
               else
                 scope
               end
-      scope.search_columns((User[:login] + User[:name]), phrase)
+      scope.search_columns(User[:login] + User[:name], phrase)
     }
     scope :search_where, lambda { |phrase|
       scope = all
@@ -478,50 +478,6 @@ module AbstractModel::Scopes
       fields.reduce(starting) do |result, field|
         result + arel_table[field].coalesce("")
       end
-    end
-
-    def lookup_external_sites_by_name(vals)
-      Lookup::ExternalSites.new(vals).ids
-    end
-
-    def lookup_field_slips_by_name(vals)
-      Lookup::FieldSlips.new(vals).ids
-    end
-
-    def lookup_herbaria_by_name(vals)
-      Lookup::Herbaria.new(vals).ids
-    end
-
-    def lookup_herbarium_records_by_name(vals)
-      Lookup::HerbariumRecords.new(vals).ids
-    end
-
-    def lookup_locations_by_name(vals)
-      Lookup::Locations.new(vals).ids
-    end
-
-    def lookup_names_by_name(vals, params = {})
-      Lookup::Names.new(vals, **params).ids
-    end
-
-    def lookup_projects_by_name(vals)
-      Lookup::Projects.new(vals).ids
-    end
-
-    def lookup_lists_for_projects_by_name(vals)
-      Lookup::ProjectSpeciesLists.new(vals).ids
-    end
-
-    def lookup_species_lists_by_name(vals)
-      Lookup::SpeciesLists.new(vals).ids
-    end
-
-    def lookup_regions_by_name(vals)
-      Lookup::Regions.new(vals).ids
-    end
-
-    def lookup_users_by_name(vals)
-      Lookup::Users.new(vals).ids
     end
 
     def exact_match_condition(table_column, vals)

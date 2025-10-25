@@ -3,7 +3,27 @@
 require("test_helper")
 
 class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
+  def test_general_description_editable_by_permitted_user
+    name = names(:peltigera) # needs to have gen_desc
+
+    login!(katrina) # not permitted to edit description of above
+    visit("/names/#{name.id}")
+    within("#name_general_description") do
+      assert_no_link(text: "Edit")
+    end
+
+    # Log out and try again.
+    first(:button, text: :app_logout.l).click
+
+    login!(dick) # description owner
+    visit("/names/#{name.id}")
+    within("#name_general_description") do
+      click_on("Edit")
+    end
+    assert_selector("body.descriptions__edit")
+  end
   # -----------------------------------
+  #
   #  Test student creating draft for project.
   #  This could be refactored to use the methods from the second test?
   # -----------------------------------
@@ -293,6 +313,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     include Minitest::Assertions
     include CapybaraSessionExtensions
     include GeneralExtensions
+
     attr_accessor :user, :abilities, :name_we_are_working_on,
                   :name_description_data, :group_expectations,
                   :assertions # needed by Minitest::Assertions

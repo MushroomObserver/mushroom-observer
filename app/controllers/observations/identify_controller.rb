@@ -3,7 +3,6 @@
 module Observations
   class IdentifyController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def index
       build_index_with_query
@@ -18,6 +17,10 @@ module Observations
     # override the default? maybe no longer necessary
     def unfiltered_index_opts
       super.merge(query_args: { needs_naming: @user, order_by: :rss_log })
+    end
+
+    def default_sort_order
+      :rss_log
     end
 
     def index_active_params

@@ -1,4 +1,4 @@
-<%= form_with(url: add_query_param({ action: :create, id: @image.id }),
+<%= form_with(url: { action: :create, id: @image.id },
               scope: :commercial_inquiry) do |f| %>
 
   <%= tag.div(interactive_image(@user, @image, size: :medium, votes: false)) %>

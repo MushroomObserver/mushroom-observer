@@ -9,7 +9,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
     assert_template(partial: "_matrix_box")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
   end
 
   def test_index_with_non_default_sort
@@ -24,7 +24,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
 
@@ -47,7 +47,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_template("index", partial: "_image")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
@@ -64,47 +64,56 @@ class ImagesControllerTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Image)
 
     login
-    params = @controller.query_params(query_no_conditions).
-             merge({ advanced_search: true })
+    params = { q: @controller.q_param(query_no_conditions),
+               advanced_search: true }
     get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_index_pattern_text_multiple_hits
+  # The pattern param is maintained only for backwards compatibility.
+  # Should redirect to SearchController#pattern
+  def test_index_pattern_param_redirected_to_search
     pattern = "USA"
 
     login
     get(:index, params: { pattern: pattern })
+    assert_redirected_to(
+      search_pattern_path(pattern_search: { pattern:, type: :images })
+    )
+  end
+
+  def q_pattern(pattern)
+    { q: { model: :Image, pattern: } }
+  end
+
+  def test_index_pattern_text_multiple_hits
+    pattern = "USA"
+    params = q_pattern(pattern)
+
+    login
+    get(:index, params:)
 
     assert_template("index", partial: "_image")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_index_pattern_text_no_hits
     pattern = "nothingMatchesAxotl"
+    params = q_pattern(pattern)
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params:)
 
     assert_flash_text(:runtime_no_matches.l(type: :images.l))
     assert_template("index")
   end
 
-  def test_index_pattern_image_id
-    image = images(:commercial_inquiry_image)
-
-    login
-    get(:index, params: { pattern: image.id })
-
-    assert_redirected_to(image_path(image))
-  end
-
   def test_show_image
     image = images(:peltigera_image)
-    assert(ImageVote.where(image: image).count > 1,
+    assert(ImageVote.where(image: image).many?,
            "Use Image fixture with multiple votes for better coverage")
     num_views = image.num_views
     login
@@ -132,7 +141,7 @@ class ImagesControllerTest < FunctionalTestCase
   # Prove show works when params include obs
   def test_show_with_obs_param
     obs = observations(:peltigera_obs)
-    assert((image = obs.images.first), "Test needs Obs fixture with images")
+    assert(image = obs.images.first, "Test needs Obs fixture with images")
 
     login(obs.user.login)
 
@@ -146,7 +155,7 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_show_image_with_bad_vote
     image = images(:peltigera_image)
-    assert(ImageVote.where(image: image).count > 1,
+    assert(ImageVote.where(image: image).many?,
            "Use Image fixture with multiple votes for better coverage")
     # create invalid vote in order to cover line that rescues an error
     bad_vote = ImageVote.new(image: image, user: nil, value: Image.minimum_vote)
@@ -223,14 +232,15 @@ class ImagesControllerTest < FunctionalTestCase
     next_image = user.images.reorder(created_at: :asc).first
     obs = image.observations.reorder(created_at: :asc).first
     assert(obs.images.member?(image))
-    query = Query.lookup_and_save(:Image, by_users: user)
-    q = query.id.alphabetize
-    params = { id: image.id, q: q }
+    query = @controller.find_or_create_query(:Image, by_users: user)
+    q = @controller.q_param(query)
+    params = { id: image.id, q: }
 
-    delete_requires_user(:destroy, { action: :show, id: image.id, q: q },
+    delete_requires_user(:destroy, { action: :show, id: image.id },
                          params, user.login)
 
-    assert_redirected_to(action: :show, id: next_image.id, q: q)
+    assert_redirected_to(action: :show, id: next_image.id)
+    assert_session_query_record_is_correct
     assert_equal(0, user.reload.contribution)
     assert_not(obs.reload.images.member?(image))
   end

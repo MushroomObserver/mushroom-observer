@@ -1,5 +1,5 @@
 <%
-@container = :full
+container_class(:full)
 
 add_index_title(@query, map: true)
 add_context_nav(observation_maps_tabs(query: @query))
@@ -9,4 +9,4 @@ objects += @locations if @locations.any?
 %>
 
 <%= make_map(objects: objects, # CollapsibleCollection
-             query_params: query_params(@query), zoom: 2, map_type: "info") %>
+             query_param: q_param(@query), zoom: 2, map_type: "info") %>

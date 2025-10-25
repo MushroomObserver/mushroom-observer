@@ -170,8 +170,8 @@ class ReportTest < UnitTestCase
       "34.1622",
       "-118.3521",
       nil,
-      "123",
-      "123",
+      "148",
+      "294",
       "22",
       "7",
       "2010",
@@ -207,8 +207,8 @@ class ReportTest < UnitTestCase
       "34.185",
       "-118.33",
       "3892",
-      "123",
-      "123",
+      "148",
+      "294",
       "22",
       "7",
       "2010",
@@ -398,7 +398,7 @@ class ReportTest < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     expect = hashed_expect(obs).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_notes_and_images
@@ -418,17 +418,18 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "Habitat: lawn Other: First line. Second line."
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_sequence
     obs = observations(:locally_sequenced_obs)
+
     expect = hashed_expect(obs).merge(
       occurrenceRemarks: "Sequenced; ",
       locality: "North Falmouth, 68 Bay Rd., MO Inc."
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_agaricus_campestrus_obs
@@ -437,7 +438,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "From somewhere else"
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_compress_consecutive_whitespace
@@ -457,7 +458,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "Habitat: lawn Other: 1st line. 2nd line. 3rd line."
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_associated_taxa_trees_shrubs_host
@@ -476,7 +477,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "other remarks"
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_group
@@ -491,7 +492,7 @@ class ReportTest < UnitTestCase
       identificationQualifier: "group"
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_group_sensu
@@ -523,7 +524,7 @@ class ReportTest < UnitTestCase
       identificationQualifier: "group sensu Besette et al."
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_standard_provisional
@@ -545,7 +546,52 @@ class ReportTest < UnitTestCase
       identificationQualifier: "nom. prov."
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_standard_provisional_authored
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Geoglossum sp. 'MI01'",
+      author: "S.D. Russell",
+      search_name: "Geoglossum sp. 'MI01'",
+      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Geoglossum sp. 'MI01'",
+      identificationQualifier: "S.D. Russell nom. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_standard_provisional_authored_crypt
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Agaricus sp. 'IN01'",
+      author: "S.D. Russell crypt. temp.",
+      search_name: "Agaricus sp. 'IN01' S.D. Russell crypt. temp.",
+      display_name: "**__Agaricus__** sp. **__'IN01'__** " \
+                    "S.D. Russell crypt. temp."
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Agaricus sp. 'IN01'",
+      identificationQualifier: "S.D. Russell crypt. temp."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_explicit_provisional
@@ -567,30 +613,7 @@ class ReportTest < UnitTestCase
       identificationQualifier: "(A.H. Sm.) auct. comb. prov."
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
-  def test_mycoportal_standard_provisional_crypt
-    name = Name.create!(
-      user: rolf,
-      rank: "Species",
-      text_name: "Agaricus sp. 'IN01'",
-      author: "S.D. Russell crypt. temp.",
-      search_name: "Agaricus sp. 'IN01' S.D. Russell crypt. temp.",
-      display_name: "**__Agaricus__** sp. **__'IN01'__** " \
-                    "S.D. Russell crypt. temp."
-    )
-    location = locations(:burbank)
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: location, where: location.name,
-                              name: name)
-
-    expect = hashed_expect(obs).merge(
-      sciname: "Agaricus sp. 'IN01'",
-      identificationQualifier: "S.D. Russell crypt. temp."
-    ).values
-
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_identification_qualifier_sensu_non_stricto
@@ -604,14 +627,14 @@ class ReportTest < UnitTestCase
       identificationQualifier: "sensu lato"
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_coordinate_uncertainty_no_lat_lng
     obs = observations(:minimal_unknown_obs)
     expect = hashed_expect(obs).merge.values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_public
@@ -619,13 +642,15 @@ class ReportTest < UnitTestCase
 
     # Obs has lat/lng & they are public,
     # We don't know coordinate uncertainty; leave it blank.
-    expect = hashed_expect(obs).merge(
-      decimalLatitude: obs.lat.to_s,
-      decimalLongitude: obs.lng.to_s,
-      coordinateUncertaintyInMeters: ""
-    ).values
+    expect =
+      hashed_expect(obs).merge(
+        decimalLatitude: obs.lat.to_s,
+        decimalLongitude: obs.lng.to_s
+      )
+    expect[:coordinateUncertaintyInMeters] = nil
+    expect = expect.values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_hidden
@@ -646,23 +671,33 @@ class ReportTest < UnitTestCase
       coordinateUncertaintyInMeters: uncertainty
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_coordinate_uncertainty_nil_lat_lng_hidden
     obs = observations(:trusted_hidden)
+    loc = locations(:pretoria)
     # There are many (5,285) Obss with gps hidden, but no lat/lng
-    obs.update!(lat: nil, lng: nil)
+    obs.update!(location_id: loc.id, where: loc.name,
+                lat: nil, lng: nil)
     loc = obs.location
+    uncertainty = Haversine.distance(
+      loc.center_lat, loc.center_lng, loc.north, loc.east
+    ).to_meters.round.to_s
 
     expect = hashed_expect(obs).merge(
+      country: "South Africa",
+      stateProvince: "Gauteng",
+      county: nil,
+      locality: "City of Tshwane Metropolitan Municipality, Pretoria",
       decimalLatitude: loc.center_lat.round(4).to_s,
       decimalLongitude: loc.center_lng.round(4).to_s,
       minimumElevationInMeters: obs.alt.to_s,
-      maximumElevationInMeters: obs.alt.to_s
+      maximumElevationInMeters: obs.alt.to_s,
+      coordinateUncertaintyInMeters: uncertainty
     ).values
 
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_hidden_nil_location
@@ -679,14 +714,16 @@ class ReportTest < UnitTestCase
     )
     expect = hashed_expect(obs).merge(
       stateProvince: "Puerto Rico",
-      locality: "Humacao18.094914, -65.801449",
-      decimalLatitude: "",
-      decimalLongitude: "",
-      coordinateUncertaintyInMeters: "",
-      minimumElevationInMeters: "",
-      maximumElevationInMeters: ""
-    ).values
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+      locality: "Humacao18.094914, -65.801449"
+    )
+    [:decimalLatitude,
+     :decimalLongitude,
+     :coordinateUncertaintyInMeters,
+     :minimumElevationInMeters,
+     :maximumElevationInMeters].each { |key| expect[key] = nil }
+    expect = expect.values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
   def hashed_expect(obs)
@@ -699,47 +736,44 @@ class ReportTest < UnitTestCase
                            obs_location.south, obs_location.east).
           to_meters.round.to_s
       end
-    hsh = {
+    low = obs_location&.low
+    minimum_elevation = low.to_i.to_s if low.present?
+    high = obs_location&.high
+    maximum_elevation = high.to_i.to_s if high.present?
+
+    {
       dbpk: obs.id.to_s,
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
       sciname: obs.text_name,
-      identificationQualifier: "",
+      identificationQualifier: nil,
       recordedBy: obs.user.legal_name,
-      recordNumber: obs.collection_numbers.first&.number || "",
+      recordNumber: obs.collection_numbers.first&.number || nil,
       eventDate: obs_when.strftime("%Y-%m-%d"),
       substrate: "",
       occurrenceRemarks: obs.notes[:Other] || "",
-      associatedTaxa: "",
-      verbatimAttributes: verbatim_atttributes(obs),
+      associatedTaxa: nil,
+      verbatimAttributes: verbatim_attributes(obs),
       # where is assumed to have just city, state/province, country
       country: obs_where.split.last,
-      stateProvince: obs_where.split[-2]&.delete_suffix(",") || "",
-      county: "",
-      locality: obs_where.split[-3]&.delete_suffix(",") || "",
+      stateProvince: obs_where.split[-2]&.delete_suffix(",") || nil,
+      county: nil,
+      locality: obs_where.split[-3]&.delete_suffix(",") || nil,
       decimalLatitude: obs_location&.center_lat&.to_s,
       decimalLongitude: obs_location&.center_lng&.to_s,
-      coordinateUncertaintyInMeters: default_uncertainty,
+      coordinateUncertaintyInMeters: default_uncertainty || nil,
       # if low/high are nil, value must be empty string, not zero
-      minimumElevationInMeters: obs_location&.low&.to_i.to_s,
-      maximumElevationInMeters: obs_location&.high&.to_i.to_s,
-      disposition: "",
-      dateLastModified: "#{obs.updated_at.api_time} UTC"
+      minimumElevationInMeters: minimum_elevation,
+      maximumElevationInMeters: maximum_elevation,
+      disposition: nil
     }
-    # Include this key/value only if there are images.
-    hsh[:imageUrl] = image_url(obs) if obs.images.any?
-    hsh
   end
 
-  def verbatim_atttributes(obs)
+  def verbatim_attributes(obs)
     "<a href='#{Report::Mycoportal::HTTP_DOMAIN}/#{obs.id}' " \
     "target='_blank' style='color: blue;'>" \
     "Original observation ##{obs.id} (Mushroom Observer)" \
     "</a>"
-  end
-
-  def image_url(obs)
-    "#{Report::Mycoportal::HTTP_DOMAIN}/images/1280/#{obs.thumb_image_id}.jpg"
   end
 
   def test_rounding_of_latitudes_etc

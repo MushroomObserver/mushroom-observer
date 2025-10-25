@@ -39,20 +39,8 @@ module Tabs
       sorts.reject! { |x| x[0] == "user" }
     end
 
-    def herbarium_show_tabs(herbarium:, user:)
-      tabs = []
-      if herbarium.curators.empty? ||
-         herbarium.curator?(user) || in_admin_mode?
-        tabs += [
-          edit_herbarium_tab(herbarium),
-          destroy_herbarium_tab(herbarium)
-        ]
-      end
-      tabs += [
-        new_herbarium_tab,
-        nonpersonal_herbaria_index_tab
-      ]
-      tabs
+    def herbarium_show_tabs
+      [nonpersonal_herbaria_index_tab]
     end
 
     def herbarium_form_new_tabs
@@ -74,23 +62,9 @@ module Tabs
     end
 
     def new_herbarium_tab
-      InternalLink::Model.new(:create_herbarium.l, Herbarium,
-                              add_query_param(new_herbarium_path),
-                              alt_title: "new_herbarium").tab
-    end
-
-    def edit_herbarium_tab(herbarium)
       InternalLink::Model.new(
-        :edit_herbarium.l, herbarium,
-        add_query_param(edit_herbarium_path(herbarium.id))
-      ).tab
-    end
-
-    def destroy_herbarium_tab(herbarium)
-      InternalLink::Model.new(
-        :destroy_object.t(type: :herbarium),
-        herbarium, herbarium,
-        html_options: { button: :destroy, back: url_after_delete(herbarium) }
+        :create_herbarium.l, Herbarium,
+        new_herbarium_path, alt_title: "new_herbarium"
       ).tab
     end
 
@@ -103,14 +77,14 @@ module Tabs
     def herbarium_return_tab(herbarium)
       InternalLink::Model.new(
         :cancel_and_show.t(type: :herbarium), herbarium,
-        add_query_param(herbarium_path(herbarium))
+        herbarium_path(herbarium)
       ).tab
     end
 
     def nonpersonal_herbaria_index_tab
       InternalLink.new(
         :herbarium_index.t,
-        add_query_param(herbaria_path(nonpersonal: true)),
+        add_q_param(herbaria_path(nonpersonal: true)),
         alt_title: "nonpersonal_herbaria_index"
       ).tab
     end

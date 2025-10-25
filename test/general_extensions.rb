@@ -449,6 +449,15 @@ module GeneralExtensions
     end
   end
 
+  # for indexes: title is not displayed
+  def assert_page_title(expect, msg = "Wrong page or page.title")
+    assert_match(expect, css_select("title").text, msg)
+  end
+
+  def assert_banner_title(expect, msg = "Wrong banner title")
+    assert_match(expect, css_select("#banner_title").text, msg)
+  end
+
   def assert_displayed_filters(expect, msg = "Wrong filters")
     assert_match(expect, css_select("#filters").text, msg)
   end
@@ -508,10 +517,10 @@ module GeneralExtensions
     order_by = by.dup
     reverse = order_by.sub!(/^reverse_/, "") # changes by and returns boolean
     class_name = "#{adjusted_controller_class_name}_by_#{order_by}_link"
-    assert_select("#sorts a.#{class_name}[disabled=disabled]", text, msg)
+    assert_select(".sorts a.#{class_name}[disabled=disabled]", text, msg)
     return unless reverse
 
-    assert_select("#sorts a.#{class_name}[disabled=disabled]",
+    assert_select(".sorts a.#{class_name}[disabled=disabled]",
                   :sort_by_reverse.l, msg)
   end
 
@@ -612,5 +621,18 @@ module GeneralExtensions
       str.sub!(/^#{pattern}$/, line)
     end
     str == template
+  end
+
+  def with_captured_logger
+    log_output = StringIO.new
+    old_logger = Rails.logger
+    Rails.logger = Logger.new(log_output)
+
+    yield
+
+    log_output.rewind
+    log_output.string
+  ensure
+    Rails.logger = old_logger
   end
 end

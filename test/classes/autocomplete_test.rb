@@ -60,9 +60,9 @@ class AutocompleteTest < UnitTestCase
     results = auto.first_matching_record
     assert_equal("Gualala, California, USA", results.first[:name])
 
-    auto = Autocomplete::ForSpeciesList.new(string: "Another Species List")
+    auto = Autocomplete::ForSpeciesList.new(string: "Another Observation List")
     results = auto.first_matching_record
-    assert_equal("Another Species List", results.first[:name])
+    assert_equal("Another Observation List", results.first[:name])
 
     auto = Autocomplete::ForProject.new(string: "Bolete Project")
     results = auto.first_matching_record

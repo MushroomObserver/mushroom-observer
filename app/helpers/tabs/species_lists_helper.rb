@@ -7,7 +7,7 @@ module Tabs
     # Can't access this page unless logged in as of 2023
     def species_list_show_tabs(list:, query: nil)
       tabs = species_list_logged_in_show_tabs(list, query)
-      return tabs unless check_permission(list)
+      return tabs unless permission?(list)
 
       tabs += species_list_user_show_tabs(list)
       tabs
@@ -18,12 +18,14 @@ module Tabs
         species_list_download_tab(list),
         species_list_set_source_tab(list),
         clone_species_list_tab(list),
+        write_in_species_list_tab(list),
         species_list_add_remove_from_another_list_tab(list, query)
       ]
     end
 
     def species_list_user_show_tabs(list)
       [
+        add_new_observations_tab(list),
         manage_species_list_projects_tab(list),
         edit_species_list_tab(list),
         clear_species_list_tab(list),
@@ -31,11 +33,20 @@ module Tabs
       ]
     end
 
+    def add_new_observations_tab(list)
+      InternalLink::Model.new(
+        :species_list_show_add_new_observations.t,
+        list,
+        new_write_in_species_list_path(list.id),
+        html_options: { help: :species_list_show_add_new_observations_help.l }
+      ).tab
+    end
+
     def manage_species_list_projects_tab(list)
       InternalLink::Model.new(
         :species_list_show_manage_projects.t,
         list,
-        add_query_param(edit_species_list_projects_path(list.id)),
+        edit_projects_for_species_list_path(list.id),
         html_options: { help: :species_list_show_manage_projects_help.l }
       ).tab
     end
@@ -43,30 +54,37 @@ module Tabs
     def edit_species_list_tab(list)
       InternalLink::Model.new(
         :species_list_show_edit.t, list,
-        add_query_param(edit_species_list_path(list.id))
+        edit_species_list_path(list.id)
       ).tab
     end
 
     def species_list_download_tab(list)
       InternalLink::Model.new(
         :species_list_show_download.t, list,
-        add_query_param(new_species_list_download_path(list.id))
+        add_q_param(new_download_species_list_path(list.id))
       ).tab
     end
 
     def species_list_set_source_tab(list)
       InternalLink::Model.new(
         :species_list_show_set_source.t, list,
-        add_query_param(species_list_path(list.id, set_source: 1)),
+        add_q_param(species_list_path(list.id, set_source: 1)),
         html_options: { help: :species_list_show_set_source_help.l }
+      ).tab
+    end
+
+    def species_list_show_tab(list)
+      InternalLink::Model.new(
+        :cancel_and_show.t(TYPE: list.type_tag), list,
+        species_list_path(list.id)
       ).tab
     end
 
     def species_list_add_remove_from_another_list_tab(list, query = nil)
       InternalLink::Model.new(
         :species_list_show_add_remove_from_another_list.t, list,
-        add_query_param(
-          edit_species_list_observations_path(species_list: list.id), query
+        add_q_param(
+          species_lists_edit_observations_path(species_list: list.id), query
         )
       ).tab
     end
@@ -74,7 +92,14 @@ module Tabs
     def clone_species_list_tab(list)
       InternalLink::Model.new(
         :species_list_show_clone_list.t, list,
-        add_query_param(new_species_list_path(clone: list.id))
+        new_species_list_path(clone: list.id)
+      ).tab
+    end
+
+    def write_in_species_list_tab(list)
+      InternalLink::Model.new(
+        :species_list_show_write_in.t, list,
+        new_write_in_species_list_path(id: list.id)
       ).tab
     end
 
@@ -94,54 +119,12 @@ module Tabs
       ).tab
     end
 
-    def species_list_observations_tabs(list, query)
-      [species_list_observations_tab(query),
-       species_list_observations_locations_tab(list),
-       species_list_observations_names_tab(list),
-       species_list_observations_images_tab(list),
-       species_list_observations_checklist_tab(list),
-       species_list_observations_map_tab(query)]
-    end
-
-    def species_list_observations_tab(query)
-      InternalLink::Model.new(
-        :species_list_show_regular_index.t, SpeciesList,
-        add_query_param(observations_path, query),
-        html_options: { help: :species_list_show_regular_index_help.t }
-      ).tab
-    end
-
-    def species_list_obs_query(list)
-      controller.create_query(:Observation, species_lists: list)
-    end
-
-    def species_list_observations_locations_tab(list)
-      related_locations_tab(:Observation, species_list_obs_query(list))
-    end
-
-    def species_list_observations_names_tab(list)
-      related_names_tab(:Observation, species_list_obs_query(list))
-    end
-
-    def species_list_observations_images_tab(list)
-      related_images_tab(:Observation, species_list_obs_query(list))
-    end
-
-    def species_list_observations_checklist_tab(list)
-      InternalLink::Model.new(
-        :app_checklist.t, list, checklist_path(species_list_id: list.id)
-      ).tab
-    end
-
-    def species_list_observations_map_tab(query)
-      InternalLink::Model.new(
-        :show_object.t(type: :map), SpeciesList,
-        add_query_param(map_observations_path, query)
-      ).tab
-    end
-
     def species_list_form_new_tabs
-      [name_lister_tab]
+      [name_lister_tab, species_list_index_tab]
+    end
+
+    def species_list_write_in_form_tabs(list)
+      [species_list_show_tab(list)]
     end
 
     def species_list_form_edit_tabs(list:)
@@ -154,7 +137,7 @@ module Tabs
     def species_list_upload_tab(list)
       InternalLink::Model.new(
         :species_list_upload_title.t, list,
-        add_query_param(new_species_list_upload_path(list.id))
+        new_upload_species_list_path(list.id)
       ).tab
     end
 
@@ -168,28 +151,42 @@ module Tabs
 
     def observations_index_return_tab
       InternalLink.new(
-        :species_list_add_remove_cancel.t, add_query_param(observations_path)
+        :species_list_add_remove_cancel.t, add_q_param(observations_path)
       ).tab
     end
 
     def species_list_form_name_list_tabs
-      [name_lister_classic_tab]
+      [species_list_create_tab]
     end
 
     def name_lister_tab
       InternalLink.new(
-        :name_lister_title.t, new_species_list_name_lister_path
+        :name_lister_title.t, species_lists_new_name_lister_path
       ).tab
     end
 
-    def name_lister_classic_tab
+    def species_list_index_tab
       InternalLink.new(
-        :name_lister_classic.t, add_query_param(new_species_list_path)
+        :cancel_to_index.t(type: :SPECIES_LIST),
+        add_q_param(species_lists_path)
+      ).tab
+    end
+
+    def species_list_create_tab
+      InternalLink.new(
+        :create_object.t(type: :SPECIES_LIST),
+        new_species_list_path
       ).tab
     end
 
     def species_list_download_tabs(list:)
       [object_return_tab(list)]
+    end
+
+    def species_lists_for_user_tab(user)
+      InternalLink.new(
+        :app_your_lists.l, species_lists_path(by_user: user.id)
+      ).tab
     end
 
     def species_lists_index_sorts(query: nil)

@@ -18,7 +18,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_displayed_title(:COMMENTS.l)
+    assert_page_title(:COMMENTS.l)
     assert_sorted_by(by)
   end
 
@@ -30,7 +30,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
     assert_select(".comment", count: comments.size)
-    assert_displayed_title(:COMMENTS.l)
+    assert_page_title(:COMMENTS.l)
     assert_displayed_filters("#{:query_target.l}: #{target.unique_text_name.t}")
   end
 
@@ -62,26 +62,17 @@ class CommentsControllerTest < FunctionalTestCase
                                          value: params[:type].to_s))
   end
 
-  def test_index_pattern_id
-    id = comments(:fungi_comment).id
-
-    login
-    get(:index, params: { pattern: id })
-
-    assert_redirected_to(comment_path(id))
-  end
-
   def test_index_pattern_search_str
-    search_str = "Let's"
+    pattern = "Let's"
     assert(comments(:minimal_unknown_obs_comment_2).summary.
-           start_with?(search_str),
+           start_with?(pattern),
            "Search string must have a hit in Comment fixtures")
 
     login
-    get(:index, params: { pattern: search_str })
+    get(:index, params: { q: { model: :Comment, pattern: } })
 
-    assert_displayed_title(:COMMENTS.l)
-    assert_displayed_filters("#{:query_pattern.l}: #{search_str}")
+    assert_page_title(:COMMENTS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_index_by_user_who_created_one_comment
@@ -91,9 +82,10 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: rolf.id })
 
-    assert_redirected_to(action: "show",
-                         id: comments(:minimal_unknown_obs_comment_1).id,
-                         params: @controller.query_params(QueryRecord.last))
+    assert_redirected_to(
+      action: "show",
+      id: comments(:minimal_unknown_obs_comment_1).id
+    )
   end
 
   def test_index_by_user_who_created_multiple_comments
@@ -106,7 +98,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_displayed_title(:COMMENTS.l)
+    assert_page_title(:COMMENTS.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     # All Rolf's Comments are Observations, so the results should have
     # as many links to Observations as Rolf has Comments
@@ -115,6 +107,7 @@ class CommentsControllerTest < FunctionalTestCase
       { count: Comment.where(user: user).count },
       "Wrong number of links to Observations in results"
     )
+    assert_session_query_record_is_correct
   end
 
   def test_index_by_user_who_created_no_comments
@@ -143,8 +136,9 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { for_user: user.id })
 
     assert_template("index")
-    assert_displayed_title(:COMMENTS.l)
+    assert_page_title(:COMMENTS.l)
     assert_displayed_filters("#{:query_for_user.l}: #{user.name}")
+    assert_session_query_record_is_correct
   end
 
   def test_index_for_user_who_received_one_comment
@@ -159,6 +153,7 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { for_user: user.id })
 
     assert_match(comment_path(comment), redirect_to_url)
+    assert_session_query_record_is_correct
   end
 
   def test_index_for_user_who_received_no_comments
@@ -189,38 +184,53 @@ class CommentsControllerTest < FunctionalTestCase
     assert_template("show")
   end
 
-  def test_add_comment
+  def test_new_comment
     obs_id = observations(:minimal_unknown_obs).id
     requires_login(:new, target: obs_id, type: :Observation)
     assert_form_action(action: :create, target: obs_id, type: :Observation)
   end
 
-  def test_add_comment_to_project
+  def test_new_comment_turbo
+    obs_id = observations(:minimal_unknown_obs).id
+    login
+    get(:new, params: { target: obs_id, type: :Observation },
+              format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("comments/_form")
+    assert_form_action(action: :create, target: obs_id, type: :Observation)
+  end
+
+  def test_new_comment_for_project
     project_id = projects(:eol_project).id
     requires_login(:new, target: project_id, type: :Project)
     assert_form_action(action: :create, target: project_id, type: :Project)
   end
 
-  def test_add_comment_no_id
+  def test_new_comment_no_id
     login("dick")
     get(:new)
     assert_response(:redirect)
   end
 
-  def test_add_comment_to_name_with_synonyms
+  def test_new_comment_for_name_with_synonyms
     name_id = names(:chlorophyllum_rachodes).id
     requires_login(:new, target: name_id, type: :Name)
     assert_form_action(action: :create, target: name_id, type: :Name)
   end
 
-  def test_add_comment_to_unreadable_object
+  def test_new_comment_to_unreadable_object
     katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
+    params = { type: :NameDescription, target: katrina_is_not_reader.id }
     login(:katrina)
-    get(:new,
-        params: { type: :NameDescription, target: katrina_is_not_reader.id })
 
+    get(:new, params:)
     assert_flash_error("MO should flash if trying to comment on object" \
                        "for which user lacks read privileges")
+
+    # Test turbo shows flash error
+    get(:new, params:, format: :turbo_stream)
+    assert_template("shared/_modal_flash_update")
+    assert_flash_error
   end
 
   def test_edit_comment
@@ -231,6 +241,16 @@ class CommentsControllerTest < FunctionalTestCase
     requires_user(:edit,
                   [{ controller: "/observations", action: :show,
                      id: obs.id }], params)
+    assert_form_action(action: :update, id: comment.id.to_s)
+  end
+
+  def test_edit_comment_turbo
+    comment = comments(:minimal_unknown_obs_comment_1)
+    login
+
+    get(:edit, params: { id: comment.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("comments/_form")
     assert_form_action(action: :update, id: comment.id.to_s)
   end
 
@@ -248,7 +268,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_not(obs.comments.member?(comment))
   end
 
-  def test_save_comment
+  def test_create_comment
     assert_equal(10, rolf.contribution)
     obs = observations(:minimal_unknown_obs)
     comment_count = obs.comments.size

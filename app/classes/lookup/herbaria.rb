@@ -9,6 +9,6 @@ class Lookup::Herbaria < Lookup
   end
 
   def lookup_method(name)
-    Herbarium.where(name: name)
+    Herbarium.name_has(name)
   end
 end

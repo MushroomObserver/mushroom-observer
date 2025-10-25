@@ -1,13 +1,11 @@
 <%
 add_page_title("#{:FIELD_SLIP.t}: #{@field_slip.code}")
-add_context_nav(field_slip_show_tabs(@field_slip, @user))
-@container = :wide
+add_edit_icons(@field_slip)
+container_class(:wide)
 %>
 
-<% if notice %>
-  <p class="alert alert-success"><%= notice %></p>
-<% end %>
+<%= alert_block(notice, level: :success) if notice %>
 
-<%= render(@field_slip) %>
+<%= content_padded { render(@field_slip) } %>
 
 <%= show_object_footer(@user, @field_slip) %>

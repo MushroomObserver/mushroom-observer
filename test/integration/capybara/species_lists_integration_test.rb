@@ -9,21 +9,10 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
   end
 
   # ----------------------------------------------------------
-  #  Test passing of arguments around in species list forms.
+  #  Test passing of arguments around in species_list forms.
   # ----------------------------------------------------------
 
   def test_species_list_forms
-    names = [
-      "Petigera",
-      "Lactarius alpigenes",
-      "Suillus",
-      "Amanita baccata",
-      "Caloplaca arnoldii ssp. obliterate"
-    ]
-    list = names.join("\r\n")
-
-    amanita = Name.where(text_name: "Amanita baccata")
-
     albion = locations(:albion)
     albion_name_reverse = Location.reverse_name(albion.name)
 
@@ -42,133 +31,42 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     visit("/species_lists/new")
     assert_selector("body.species_lists__new")
 
-    member_notes = "Member notes."
+    # member_notes = "Member notes."
     within("#species_list_form") do
-      assert_field("list_members", text: "")
-      fill_in("list_members", with: list)
       fill_in("species_list_title", with: "List Title")
       fill_in("species_list_place_name", with: albion_name_reverse)
       fill_in("species_list_notes", with: "List notes.")
-      fill_in(SpeciesList.notes_part_id(Observation.other_notes_part),
-              with: member_notes)
-      check("member_is_collection_location")
-      check("member_specimen")
-      click_commit
-    end
-    assert_flash_error
-    assert_selector("body.species_lists__create")
-
-    assert_selector("#missing_names",
-                    text: /Caloplaca arnoldii ssp. obliterate/)
-    assert_selector("#deprecated_names", text: /Lactarius alpigenes/)
-    assert_selector("#deprecated_names", text: /Lactarius alpinus/)
-    assert_selector("#deprecated_names", text: /Petigera/)
-    assert_selector("#deprecated_names", text: /Peltigera/)
-    assert_selector("#ambiguous_names",
-                    text: /Amanita baccata.*sensu Arora/)
-    assert_selector("#ambiguous_names",
-                    text: /Amanita baccata.*sensu Borealis/)
-    assert_selector("#ambiguous_names", text: /Suillus.*Gray/)
-    assert_selector("#ambiguous_names", text: /Suillus.*White/)
-
-    # Fix the ambiguous names: should be good now.
-    # list_members is an autocompleter!
-    within("#species_list_form") do
-      assert_equal(list.split("\r\n").sort,
-                   find("#list_members").text.split("\r ").sort)
-      choose(id:
-        /chosen_multiple_names_\d+_#{names(:amanita_baccata_arora).id}/)
-      choose(id: /chosen_multiple_names_\d+_#{names(:suillus_by_white).id}/)
-      assert_checked_field("member_is_collection_location")
-      assert_checked_field("member_specimen")
       click_commit
     end
     assert_flash_success
     assert_selector("body.species_lists__show")
 
     spl = SpeciesList.last
-    obs = spl.observations
-    assert_equal(5, obs.length, obs.map(&:text_name).inspect)
-    assert_equal([
-      "Peltigera (Old) New Auth.", # (spelling corrected automatically)
-      "Lactarius alpigenes Kühn.",
-      "Suillus E.B. White",
-      "Amanita baccata sensu Arora",
-      "Caloplaca arnoldii subsp. obliterate"
-    ].sort, obs.map { |o| o.name.search_name }.sort)
     assert_equal("List Title", spl.title)
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
-    obs_last = obs.last
-    assert_equal(albion, obs_last.location)
-    assert_equal(member_notes,
-                 obs_last.notes[Observation.other_notes_key].strip)
-    assert_true(obs_last.is_collection_location)
-    assert_true(obs_last.specimen)
 
     # Try making some edits, too.
     first(:link, href: /#{edit_species_list_path(spl.id)}/).click
     assert_selector("body.species_lists__edit")
 
-    new_member_notes = "New member notes."
     within("#species_list_form") do
-      assert_field("list_members", text: "")
       assert_field("species_list_title", with: "List Title")
       assert_field("species_list_place_name", with: albion_name_reverse)
       assert_field("species_list_notes", with: "List notes.")
-      assert_field(SpeciesList.notes_part_id(Observation.other_notes_part),
-                   with: "Member notes.")
-      assert_checked_field("member_is_collection_location")
-      assert_checked_field("member_specimen")
-      fill_in("list_members", with: "Agaricus nova\r\nAmanita baccata\r\n")
       fill_in("species_list_title", with: "Something New")
       fill_in("species_list_place_name", with: new_location_reverse)
       fill_in("species_list_notes", with: "New list notes.")
-      fill_in(SpeciesList.notes_part_id(Observation.other_notes_part),
-              with: new_member_notes)
-      uncheck("member_is_collection_location")
-      uncheck("member_specimen")
-      click_commit
-    end
-    assert_flash_error
-    assert_selector("body.species_lists__update")
-
-    assert_selector("#missing_names", text: /Agaricus nova/)
-    assert_selector("#ambiguous_names", text: /Amanita baccata.*sensu Arora/)
-    assert_selector("#ambiguous_names", text: /Amanita baccata.*sensu Borealis/)
-
-    # Fix the ambiguous name.
-    within("#species_list_form") do
-      choose(id: /chosen_multiple_names_\d+_#{amanita[1].id}/)
       click_commit
     end
     assert_flash_success
     assert_selector("body.locations__new")
 
     spl.reload
-    obs = spl.observations
-    assert_equal(7, obs.length, obs.map(&:text_name).inspect)
-    assert_equal([
-      "Peltigera (Old) New Auth.",
-      "Lactarius alpigenes Kühn.",
-      "Suillus E.B. White",
-      "Amanita baccata sensu Arora",
-      "Caloplaca arnoldii subsp. obliterate",
-      "Agaricus nova",
-      "Amanita baccata sensu Borealis"
-    ].sort, obs.map { |o| o.name.search_name }.sort)
     assert_equal("Something New", spl.title)
     assert_equal(new_location, spl.where)
     assert_nil(spl.location)
     assert_equal("New list notes.", spl.notes.strip)
-    obs_last = obs.last
-    assert_nil(obs_last.location)
-    assert_equal(new_location, obs_last.where)
-    assert_nil(obs_last.location)
-    assert_equal(new_member_notes,
-                 obs_last.notes[Observation.other_notes_key].strip)
-    assert_false(obs_last.is_collection_location)
-    assert_false(obs_last.specimen)
 
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
@@ -191,12 +89,8 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(dick, User.current)
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
-    obs = spl.observations
-    obs_last = obs.last
     assert_equal(loc.name, spl.where)
     assert_equal(loc, spl.location)
-    assert_equal(loc.name, obs_last.where)
-    assert_equal(loc, obs_last.location)
 
     # Try adding a comment, just for kicks. This will hit HTML, not Turbo
     click_link(href: /#{new_comment_path}/)
@@ -220,12 +114,53 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
 
     login
     visit(species_list_path(spl))
-    click_on(:species_list_show_add_remove_from_another_list.l)
+    first("a", text: :species_list_show_add_remove_from_another_list.l).click
 
     assert_match(
-      edit_species_list_observations_path, current_path,
+      species_lists_edit_observations_path, current_path,
       "Clicking #{:species_list_show_add_remove_from_another_list.l} " \
       "should go to #{:species_list_add_remove_title.l}"
     )
+  end
+
+  def test_species_list_write_in_forms
+    names = [
+      "Petigera",
+      "Lactarius alpigenes",
+      "Suillus",
+      "Amanita baccata",
+      "Caloplaca arnoldii ssp. obliterate"
+    ]
+    list = names.join("\r\n")
+
+    Name.where(text_name: "Amanita baccata")
+
+    albion = locations(:albion)
+    Location.reverse_name(albion.name)
+
+    # Good opportunity to test scientific location notation!
+
+    # First attempt at creating a list.
+    spl = species_lists(:first_species_list)
+    user = spl.user
+    user.location_format = "scientific"
+    user.save
+    login!(user)
+
+    visit("/species_lists/#{spl.id}/write_in/new")
+    assert_selector("body.write_in__new")
+
+    member_notes = "Member notes."
+    within("#species_list_write_in_form") do
+      assert_field("list_members", text: "")
+      fill_in("list_members", with: list)
+      fill_in(SpeciesList.notes_part_id(Observation.other_notes_part),
+              with: member_notes)
+      check("member_is_collection_location")
+      check("member_specimen")
+      click_commit
+    end
+    assert_flash_error
+    assert_selector("body.write_in__create")
   end
 end

@@ -94,8 +94,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { order_by(::Query::Projects.default_order) }
 
   scope :members, lambda { |members|
+    ids = Lookup::Users.new(members).ids # User lookup only takes logins or ids
     joins(user_group: :user_group_users).
-      merge(UserGroupUser.where(user: members))
+      merge(UserGroupUser.where(user: ids))
+  }
+  # Takes multiple name strings or ids, passes include_synonyms
+  scope :names, lambda { |lookup:, **args|
+    joins(:observations).merge(Observation.names(lookup:, **args))
   }
   scope :title_has,
         ->(phrase) { search_columns(Project[:title], phrase) }
@@ -119,6 +124,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     cols = (Project[:title] + Project[:summary].coalesce("") +
             Project[:field_slip_prefix].coalesce(""))
     search_columns(cols, phrase).distinct
+  }
+  # Accepts multiple regions, see Observation.region for why this is singular
+  scope :region, lambda { |place_names|
+    where(location: Location.region(place_names))
+  }
+
+  scope :user_is_member, lambda { |user|
+    user = User.safe_find(user)
+    return all unless user
+
+    where(user_group: user.user_groups)
+  }
+
+  scope :user_is_admin, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+
+    joins(:admin_group_users).where(user: user_id)
   }
 
   scope :show_includes, lambda {
@@ -532,13 +554,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     FieldSlipJobTracker.where(prefix: field_slip_prefix)
   end
 
-  def can_add_field_slip(user)
+  def can_add_field_slip?(user)
     member?(user) || can_join?(user)
   end
 
   def alias_data(target)
     @target_alias_details ||= target_alias_details(target.class)
     @target_alias_details[target.id] || []
+  end
+
+  def check_for_alias(str, target_type)
+    project_alias = aliases.find_by(name: str, target_type:)
+    return str unless project_alias
+
+    project_alias.target.format_name
   end
 
   private ###############################

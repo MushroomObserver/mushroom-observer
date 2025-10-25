@@ -2,22 +2,6 @@
 
 module Tabs
   module GlossaryTermsHelper
-    def glossary_term_show_tabs(term:, user:)
-      return [] unless user
-
-      links = [
-        glossary_terms_index_tab,
-        new_glossary_term_tab,
-        edit_glossary_term_tab(term)
-      ]
-      links << destroy_glossary_term_tab(term) if in_admin_mode?
-      links
-    end
-
-    def glossary_term_index_tabs
-      [new_glossary_term_tab]
-    end
-
     def glossary_term_form_new_tabs
       [
         # Replace this link with a "Cancel" link (back to glossary)
@@ -60,24 +44,10 @@ module Tabs
       ).tab
     end
 
-    def destroy_glossary_term_tab(term)
-      InternalLink::Model.new(
-        :destroy_object.t(type: :glossary_term), term, term,
-        html_options: { button: :destroy }
-      ).tab
-    end
-
     def glossary_terms_index_tab
       InternalLink::Model.new(
         :glossary_term_index.t, GlossaryTerm,
         glossary_terms_path
-      ).tab
-    end
-
-    def new_glossary_term_tab
-      InternalLink::Model.new(
-        :create_glossary_term.t, GlossaryTerm,
-        new_glossary_term_path
       ).tab
     end
 

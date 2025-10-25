@@ -205,7 +205,7 @@ class API2ControllerTest < FunctionalTestCase
       thumbnail: images(:turned_over_image).id.to_s,
       projects: "EOL Project",
       code: "EOL-13579",
-      species_lists: "Another Species List"
+      species_lists: "Another Observation List"
     }
     post(:observations, params: params)
     assert_no_api_errors
@@ -487,8 +487,8 @@ class API2ControllerTest < FunctionalTestCase
     json = response.parsed_body
     votes = json["results"][0]["votes"]
     assert_equal(
-      "rolf",
-      votes.find { |v| v["id"] == rolfs_vote.id }["owner"]["login_name"]
+      :anonymous.l,
+      votes.find { |v| v["id"] == rolfs_vote.id }["owner"]
     )
     assert_equal(
       "mary",
@@ -511,7 +511,7 @@ class API2ControllerTest < FunctionalTestCase
     get(:observations, params: params.merge(api_key: rolfs_key.key))
     doc = REXML::Document.new(response.body)
     votes = doc.root.elements["results/result/votes"]
-    check_anonymity(votes, rolfs_vote, false)
+    check_anonymity(votes, rolfs_vote, true)
     check_anonymity(votes, marys_vote, false)
 
     get(:observations, params: params.merge(api_key: marys_key.key))

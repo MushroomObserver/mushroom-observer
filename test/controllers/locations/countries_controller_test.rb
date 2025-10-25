@@ -6,7 +6,7 @@ module Locations
   class CountriesControllerTest < FunctionalTestCase
     # include ObjectLinkHelper
 
-    def test_list_countries
+    def test_countries_index
       cc = CountryCounter.new
       links_to_countries_with_obss = cc.known_by_count.length
       links_to_other_localities_with_obss = cc.unknown_by_count.length
@@ -14,7 +14,7 @@ module Locations
       login
       get(:index)
 
-      assert_displayed_title(:list_countries_title.l)
+      assert_page_title(:list_countries_title.l)
       assert_select(
         "a:match('href', ?)", %r{^/locations\?country=\S+},
         { count: links_to_countries_with_obss +

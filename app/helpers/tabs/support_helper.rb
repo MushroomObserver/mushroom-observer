@@ -4,7 +4,7 @@ module Tabs
   module SupportHelper
     def support_donate_tabs
       links = [support_donors_tab]
-      return unless in_admin_mode?
+      return links unless in_admin_mode?
 
       links += support_admin_tabs
       links
@@ -12,7 +12,7 @@ module Tabs
 
     def support_donors_tabs
       links = [support_donate_tab]
-      return unless in_admin_mode?
+      return links unless in_admin_mode?
 
       links += support_admin_tabs
       links

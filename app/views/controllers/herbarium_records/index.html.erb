@@ -1,13 +1,14 @@
 <%
-@container = :wide
+container_class(:wide)
 add_index_title(@query)
 add_context_nav(herbarium_records_index_tabs(obs: @observation))
 add_sorter(@query, herbarium_records_index_sorts)
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <table class="table table-striped">
       <% @objects.each do |rec|
@@ -18,7 +19,7 @@ flash_error(@error) if @error && @objects.empty?
                   link_to(
                     :EDIT.t,
                     edit_herbarium_record_path(
-                      id: rec.id, back: :index, q: get_query_param
+                      id: rec.id, back: :index, q: q_param
                     ),
                     class: "btn btn-default btn-sm edit_herbarium_record_link_#{rec.id}"
                   )
@@ -30,10 +31,8 @@ flash_error(@error) if @error && @objects.empty?
                   :UNKNOWN.t %>
         </td>
         <td>
-          <%= link_to(rec.herbarium_label.t,
-                        herbarium_record_path(id: rec.id,
-                                              q: get_query_param),
-                        class: "herbarium_record_link_#{rec.id}") %>
+          <%= link_to(rec.herbarium_label.t, herbarium_record_path(id: rec.id),
+                      class: "herbarium_record_link_#{rec.id}") %>
         </td>
         <td>
           <%= rec.observations.map do |obs|

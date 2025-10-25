@@ -10,7 +10,6 @@ module Projects
   # CRUD for project members
   class MembersController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def index
       return unless find_project!
@@ -97,16 +96,16 @@ module Projects
 
     def return_to_caller(project, target)
       if target == "project_index"
-        redirect_to(project_path(project.id, q: get_query_param))
+        redirect_to(project_path(project.id))
       else
-        redirect_to(project_members_path(project.id, q: get_query_param))
+        redirect_to(project_members_path(project.id, q: q_param))
       end
     end
 
     def find_member(str)
       return User.safe_find(str) if str.to_s.match?(/^\d+$/)
 
-      User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
+      User.lookup_unique_text_name(str)
     end
 
     def update_membership(project, candidate)
@@ -143,7 +142,12 @@ module Projects
     end
 
     def add_observations(project, candidate)
-      # Can't use candidate.observations due to a bug in in_box
+      # Returns the count of observations added.
+      #
+      # Can't use candidate.observations due to a bug in in_box.
+      # Specifially, candidate.observations.in_box doesn't return
+      # the right thing because it incorrectly adds observations not
+      # from the candidate if they have no lat/long data.
       obs = Observation.all
       loc = project.location
       if loc
@@ -185,7 +189,7 @@ module Projects
 
     def must_be_project_admin!(id)
       flash_error(:change_member_status_denied.t)
-      redirect_to(project_members_path(id, q: get_query_param))
+      redirect_to(project_members_path(id, q: q_param))
     end
 
     # Add/remove a given User to/from a given UserGroup.
@@ -204,8 +208,8 @@ module Projects
       project_member = ProjectMember.find_by(project:, user:)
       unless project_member
         project_member = ProjectMember.create(project:, user:,
-                                              trust_level: "hidden_gps")
-        flash_notice(:add_members_with_gps_trust.l)
+                                              trust_level: "editing")
+        flash_notice(:add_members_with_editing.l)
       end
       return unless project_member
       return if type == :admin || add

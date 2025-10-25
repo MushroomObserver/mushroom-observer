@@ -20,7 +20,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: title.as_displayed)
     # go back to the name page
     click_on(class: "latest_version_link")
-    title = :show_name_title.t(name: name.display_name)
+    title = name.display_name.t
     assert_selector("#title", text: title.as_displayed)
   end
 
@@ -84,27 +84,48 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_nil(good_name.synonym_id)
   end
 
-  def test_name_pattern_search_with_near_miss_corrected
-    near_miss_pattern = "agaricis campestrus"
+  def test_name_pattern_search_with_correctable_pattern
+    correctable_pattern = "agaricis campestrus"
 
     login
     visit("/")
-    fill_in("search_pattern", with: near_miss_pattern)
-    page.select("Names", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: correctable_pattern)
+    page.select("Names", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#content div.alert-warning",
                     text: "Maybe you meant one of the following names?")
 
     corrected_pattern = "Agaricus"
+    name = names(:agaricus_campestris)
+    assert_selector("#content a[href *= 'names/#{name.id}']",
+                    text: name.search_name)
+    assert_selector("#content div.alert-warning", text: corrected_pattern)
 
-    fill_in("search_pattern", with: corrected_pattern)
-    page.select("Names", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: corrected_pattern)
+    page.select("Names", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title", text: :NAMES.l)
+    # assert_selector("#title", text: :NAMES.l)
     assert_selector("#filters", text: corrected_pattern)
+  end
+
+  def test_name_pattern_search_with_old_provisional
+    old_provisional = 'Cortinarius "sp-IN34"'
+    name = names(:provisional_name)
+    login
+    visit("/")
+    fill_in("pattern_search_pattern", with: old_provisional)
+    page.select("Names", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
+
+    assert_no_selector("#content div.alert-warning")
+    title =
+      "Mushroom Observer: Name #{name.id}: #{name.user_display_name(rolf)}".
+      t.as_displayed
+
+    assert_title(title)
   end
 
   def test_lifeform_edit

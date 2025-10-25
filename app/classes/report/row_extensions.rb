@@ -205,7 +205,10 @@ module Report
     def notes_to_hash
       # prefer safe_load to load for safety & to make RuboCop happy
       # 2nd argument whitelists Symbols, needed because notes have symbol keys
-      YAML.safe_load(@vals[9], permitted_classes: [Symbol])
+      val = @vals[9]
+      return val unless val.is_a?(String) || val.is_a?(Symbol)
+
+      YAML.safe_load(val, permitted_classes: [Symbol])
     end
   end
 end

@@ -1,5 +1,5 @@
 <%
-add_page_title(:edit_project_title.t(title: @project.title))
+add_edit_title(@project.title, @project)
 add_context_nav(project_form_edit_tabs(project: @project))
 
 button = :SAVE_EDITS.l

@@ -48,7 +48,6 @@ class ExportController < ApplicationController
   end
 
   def parse_params
-    pass_query_params
     @type = params[:type].to_s
     @value = params[:value].to_s
     @model_class = EXPORTABLE_MODELS.find { |m| m.name.downcase == @type }

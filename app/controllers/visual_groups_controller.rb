@@ -24,7 +24,6 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups/1/edit
   def edit
-    pass_query_params
     @visual_group = VisualGroup.find(params[:id])
     @filter = params[:filter]
     @filter = @visual_group.name unless @filter && @filter != ""

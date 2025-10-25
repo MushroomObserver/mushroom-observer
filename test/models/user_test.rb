@@ -495,7 +495,7 @@ class UserTest < UnitTestCase
     # Delete all of Mary's many lists except those in projects
     mary_lists = SpeciesList.where(user: mary)
     before_count = mary_lists.count
-    proj_lists = mary_lists.select { |list| list.projects.count.positive? }
+    proj_lists = mary_lists.select { |list| list.projects.any? }
     proj_count = proj_lists.count
     assert_operator(proj_count, ">", 0)
     assert_operator(before_count, ">", proj_count)
@@ -598,5 +598,10 @@ class UserTest < UnitTestCase
     User.find_each do |user|
       assert_equal(user, User.lookup_unique_text_name(user.unique_text_name))
     end
+  end
+
+  def test_nihilist
+    user = users(:nihilist_user)
+    assert(user.textile_name.include?(user.login))
   end
 end

@@ -31,10 +31,7 @@
 #
 class SequencesController < ApplicationController
   before_action :login_required
-  before_action :store_location, only: [:create, :edit, :new, :show, :update]
-  before_action :pass_query_params, only: [
-    :create, :destroy, :edit, :new, :show, :update
-  ]
+  before_action :store_location, except: :destroy
 
   ################# Actions that show data without modifying it
 
@@ -47,7 +44,6 @@ class SequencesController < ApplicationController
   # we don't offer sequence pattern search. However, the Query::Sequences
   # class can handle a pattern param.
   def index
-    store_location
     build_index_with_query
   end
 
@@ -182,7 +178,7 @@ class SequencesController < ApplicationController
   # ---------- Create, Edit ----------------------------------------------------
 
   def make_sure_can_edit!(obj)
-    return true if check_permission(obj)
+    return true if permission?(obj)
 
     flash_warning(:permission_denied.t)
     show_flash_and_send_back
@@ -190,7 +186,7 @@ class SequencesController < ApplicationController
   end
 
   def make_sure_can_delete!(sequence)
-    return true if check_permission(sequence)
+    return true if permission?(sequence)
 
     flash_error(:permission_denied.t)
     show_flash_and_send_to_back_object
@@ -234,7 +230,7 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_sequences_section_update }
-      format.html { redirect_with_query(redirect_to) }
+      format.html { redirect_to(redirect_to) }
     end
   end
 
@@ -255,8 +251,7 @@ class SequencesController < ApplicationController
     respond_to do |format|
       format.turbo_stream { render_modal_flash_update }
       format.html do
-        redirect_with_query(@sequence.observation.show_link_args) and
-          return
+        redirect_to(@sequence.observation.show_link_args) and return
       end
     end
   end
@@ -268,7 +263,7 @@ class SequencesController < ApplicationController
         if @back == "index"
           redirect_with_query(action: :index)
         else
-          redirect_with_query(@back_object.show_link_args)
+          redirect_to(@back_object.show_link_args)
         end
       end
     end
@@ -277,7 +272,7 @@ class SequencesController < ApplicationController
   def render_modal_sequence_form
     render(partial: "shared/modal_form",
            locals: { title: modal_title, identifier: modal_identifier,
-                     form: "sequences/form" }) and return
+                     user: @user, form: "sequences/form" }) and return
   end
 
   def modal_identifier
@@ -292,9 +287,9 @@ class SequencesController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.sequence_form_new_title
+      helpers.new_page_title(:add_object, :SEQUENCE)
     when "edit", "update"
-      helpers.sequence_form_edit_title(seq: @sequence)
+      helpers.edit_page_title(@sequence.unique_format_name, @sequence)
     end
   end
 

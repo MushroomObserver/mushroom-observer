@@ -11,7 +11,7 @@ module Observations
         user: @user,
         observation: @observation
       )
-      check_external_link_permission!(@observation)
+      check_external_link_permission!(obs: @observation)
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
         format.html
@@ -22,13 +22,17 @@ module Observations
       set_ivars_for_new
       @url = params.dig(:external_link, :url).to_s
       @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
-      check_external_link_permission!(@observation, @site)
+      unless check_external_link_permission!(obs: @observation, site: @site)
+        return
+      end
+
       create_external_link
     end
 
     def edit
       set_ivars_for_edit
-      check_external_link_permission!(@external_link)
+      return unless check_external_link_permission!(link: @external_link)
+
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
         format.html
@@ -38,13 +42,15 @@ module Observations
     def update
       set_ivars_for_edit
       @url = params.dig(:external_link, :url).to_s
-      check_external_link_permission!(@external_link)
+      return unless check_external_link_permission!(link: @external_link)
+
       update_external_link
     end
 
     def destroy
       set_ivars_for_edit
-      check_external_link_permission!(@external_link)
+      return unless check_external_link_permission!(link: @external_link)
+
       remove_external_link
     end
 
@@ -52,7 +58,7 @@ module Observations
 
     def set_ivars_for_new
       @observation = Observation.find(params[:id].to_s)
-      @sites = ExternalSite.sites_user_can_add_links_to(
+      @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
       @base_urls = {} # used as placeholders in the url field
@@ -69,15 +75,15 @@ module Observations
       @back_object = @observation
     end
 
-    def check_external_link_permission!(obs, site = nil)
-      if obs.is_a?(ExternalLink)
-        link = obs
+    def check_external_link_permission!(link: nil, obs: nil, site: nil)
+      if link
         obs  = link.observation
         site = link.external_site
       end
       return true if obs&.user == @user || site&.member?(@user) || @user.admin
 
-      flash_error("Permission denied.")
+      flash_warning(:permission_denied.t)
+      show_flash_and_send_back
       false
     end
 
@@ -148,16 +154,16 @@ module Observations
     end
 
     def show_flash_and_send_back
+      # for ExternalLinksControllerTest#test_external_link_permission, which
+      # tests check_external_link_permission! directly without sending a request
+      return unless @_response
+
       respond_to do |format|
-        format.html do
-          redirect_to(permanent_observation_path(@observation)) and
-            return
-        end
         # renders the flash in the modal, but not sure it's necessary
         # to have a response here. are they getting sent back?
-        format.turbo_stream do
-          render(partial: "shared/modal_flash_update",
-                 locals: { identifier: modal_identifier }) and return
+        format.turbo_stream { render_modal_flash_update }
+        format.html do
+          redirect_to(permanent_observation_path(@observation)) and return
         end
       end
     end
@@ -166,7 +172,7 @@ module Observations
       render(
         partial: "shared/modal_form",
         locals: { title: modal_title, identifier: modal_identifier,
-                  form: "observations/external_links/form" }
+                  user: @user, form: "observations/external_links/form" }
       ) and return
     end
 
@@ -182,23 +188,28 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        :show_observation_add_link.l
+        helpers.new_page_title(:add_object, :EXTERNAL_LINK)
       when "edit", "update"
-        :edit_object.t(type: :external_link)
+        helpers.edit_page_title(:EXTERNAL_LINK.l, @external_link)
       end
     end
 
     def render_external_links_section_update
       # need to reset this in case they can now add sites
       @observation = @observation.reload
-      @other_sites = ExternalSite.sites_user_can_add_links_to(
+      @other_sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
       render(
         partial: "observations/show/section_update",
         locals: { identifier: "external_links",
-                  obs: @observation, sites: @other_sites }
+                  obs: @observation, user: @user, sites: @other_sites }
       ) and return
+    end
+
+    def render_modal_flash_update
+      render(partial: "shared/modal_flash_update",
+             locals: { identifier: modal_identifier }) and return
     end
 
     # this updates both the form and the flash

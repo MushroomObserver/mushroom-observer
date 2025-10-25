@@ -25,7 +25,9 @@ class Query::ExternalLinksTest < UnitTestCase
   def test_external_link_by_users
     scope = ExternalLink.by_users(users(:mary)).order_by_default
     assert_query(scope, :ExternalLink, by_users: users(:mary))
-    assert_query([], :ExternalLink, by_users: users(:dick))
+    assert_query(ExternalLink.by_users(users(:dick)).order_by_default,
+                 :ExternalLink, by_users: users(:dick))
+    assert_query([], :ExternalLink, by_users: users(:zero_user))
   end
 
   def test_external_link_observations

@@ -29,7 +29,7 @@ module Mappable
     validate(:must_have_valid_bounds)
 
     def must_have_valid_bounds
-      return if south && north && south <= north
+      return if at_least_one_val_nonzero? && north_south_makes_sense?
 
       errors.add(:base, "Box must have valid boundaries.")
     end
@@ -47,6 +47,16 @@ module Mappable
     ############################################################################
 
     private
+
+    # to_i converts nil values to zero
+    def at_least_one_val_nonzero?
+      !(south.to_i.zero? && north.to_i.zero? &&
+        west.to_i.zero? && east.to_i.zero?)
+    end
+
+    def north_south_makes_sense?
+      south && north && south <= north
+    end
 
     # Return a valid longitude between -180 and 180, for `expand` method
     def rectify(lng)

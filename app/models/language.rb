@@ -28,6 +28,7 @@
 
 class Language < AbstractModel
   include LanguageExporter
+
   class << self
     include LanguageTracking
   end

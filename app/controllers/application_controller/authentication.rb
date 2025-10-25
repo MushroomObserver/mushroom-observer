@@ -1,9 +1,20 @@
 # frozen_string_literal: true
 
-# see application_controller.rb
+#  ==== User authentication
+#  autologin::              (filter: determine which user is logged in)
+#  login_for_ajax::         (filter: minimal version of autologin for ajax)
+#  permission?::            Make sure current User is the right one.
+#  permission!::            Same, but flashes "denied" message, too.
+#  reviewer?::              Is the current User a reviewer?
+#  in_admin_mode?::         Is the current User in admin mode?
+#  autologin_cookie_set::   (set autologin cookie)
+#  clear_autologin_cookie:: (clear autologin cookie)
+#  session_user_set::       (store user in session -- id only)
+#  session_user::           (retrieve user from session)
+#
 module ApplicationController::Authentication
   def self.included(base)
-    base.helper_method(:check_permission, :reviewer?, :in_admin_mode?)
+    base.helper_method(:permission?, :reviewer?, :in_admin_mode?)
   end
 
   ##############################################################################
@@ -137,15 +148,9 @@ module ApplicationController::Authentication
 
   # Is the current User the correct User (or is admin mode on)?  Returns true
   # or false.  (*NOTE*: this is available to views.)
-  #
-  #   <% if check_permission(@object)
-  #     link_to('Destroy', :action => :destroy_object)
-  #   end %>
-  #
-  def check_permission(obj)
+  def permission?(obj)
     in_admin_mode? || correct_user_for_object?(obj)
   end
-  # helper_method :check_permission
 
   def correct_user_for_object?(obj)
     owned_by_user?(obj) || editable_by_user?(obj) || obj_is_user?(obj)
@@ -155,21 +160,14 @@ module ApplicationController::Authentication
     obj.respond_to?(:user_id) && @user&.id == obj.user_id
   end
 
+  # Always send a @user to the model instance method `can_edit?`
+  # so it doesn't have to call User.current.
   def editable_by_user?(obj)
     obj.try(:can_edit?, @user)
   end
 
   def obj_is_user?(obj)
     (obj.is_a?(String) || obj.is_a?(Integer)) && obj.to_i == @user.id
-  end
-
-  # Make sure user is logged in and has posted something -- i.e., not a spammer.
-  def require_successful_user
-    return true if @user&.successful_contributor?
-
-    flash_warning(:unsuccessful_contributor_warning.t)
-    redirect_back_or_default("/")
-    false
   end
 
   private :correct_user_for_object?, :owned_by_user?, :editable_by_user?,
@@ -180,20 +178,34 @@ module ApplicationController::Authentication
   #
   #   def destroy_thing
   #     @thing = Thing.find(params[:id].to_s)
-  #     if check_permission!(@thing)
+  #     if permission!(@thing)
   #       @thing.destroy
   #       flash_notice "Success!"
   #     end
   #     redirect_to(:action => :show_thing)
   #   end
   #
-  def check_permission!(obj)
-    unless (result = check_permission(obj))
-      flash_error(:permission_denied.t)
-    end
-    result
+  def permission!(obj, error_message: :permission_denied.l)
+    flash_error(error_message) unless (permission = permission?(obj))
+    permission
   end
-  alias check_user_id check_permission!
+
+  def can_delete?(obj)
+    permission!(obj, error_message: :runtime_no_destroy.l(type: obj.type_tag))
+  end
+
+  def can_edit?(obj)
+    permission!(obj, error_message: :runtime_no_update.l(type: obj.type_tag))
+  end
+
+  # Make sure user is logged in and has posted something -- i.e., not a spammer.
+  def require_successful_user
+    return true if @user&.successful_contributor?
+
+    flash_warning(:unsuccessful_contributor_warning.t)
+    redirect_back_or_default("/")
+    false
+  end
 
   # Is the current User a reviewer?  Returns true or false.  (*NOTE*: this is
   # available to views.)
@@ -231,7 +243,7 @@ module ApplicationController::Authentication
 
   # Store User in session (id only).
   def session_user_set(user)
-    session[:user_id] = user ? user.id : nil
+    session[:user_id] = user&.id
     user
   end
 

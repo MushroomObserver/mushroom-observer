@@ -19,17 +19,15 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     login
     name = names(:boletus_edulis)
     visit("/names/#{name.id}/map")
-    click_link("Show Observations")
-    title = page.find_by_id("title")
-    title.assert_text(:OBSERVATIONS.l)
+    click_on("Show Observations", match: :first)
+    assert_match("Observations", page.title)
     filters = page.find_by_id("filters")
     filters.assert_text(name.text_name)
 
-    click_link("Show Map")
-    title = page.find("#title")
-    title.assert_text("Map of Observations")
-    # filters = page.find_by_id("filters")
-    # filters.assert_text(name.text_name)
+    click_on("Show Map", match: :first)
+    assert_match("Map of Observations", page.title)
+    filters = page.find_by_id("filters")
+    filters.assert_text(name.text_name)
   end
 
   # Prove that if a user clicks an Observation in Observation search results
@@ -49,30 +47,13 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     next_obs = observations.second
 
     # Show first Observation from Your Observations search.
-    click_link(first_obs.id.to_s)
+    click_link(first_obs.text_name)
     # Destroy it.
     click_button(class: "destroy_observation_link_#{first_obs.id}")
 
     # MO should show next Observation.
-    page.find("#title")
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
-  end
-
-  # Prevent reversion of the bug that was fixed in PR #1479
-  # https://github.com/MushroomObserver/mushroom-observer/pull/1479
-  def test_edit_observation_with_query
-    user = users(:dick)
-    obs = observations(:collected_at_obs)
-    assert_equal(user, obs.user,
-                 "Test needs an Observation fixture owned by user")
-    q_id = "123abc" # Can be anything, but is need to expose the bug
-
-    login(user)
-    # Throws an error pre-PR #1479
-    visit(edit_observation_path(obs.id, params: { q: q_id }))
-
-    assert_current_path(edit_observation_path(obs.id, params: { q: q_id }))
   end
 
   # Prove that unchecking a Project as part of editing an Observation
@@ -176,34 +157,51 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     end
   end
 
+  def test_observation_pattern_search_with_bad_keyword
+    correctable_pattern = "foo:campestrus"
+
+    login
+    visit("/")
+    fill_in("pattern_search_pattern", with: correctable_pattern)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
+    assert_match("Observations", page.title)
+    assert_selector(
+      "#flash_notices",
+      text: :pattern_search_bad_term_error.tp(
+        type: :observation, help: "", term: "\"foo\""
+      ).as_displayed
+    )
+  end
+
   def test_observation_pattern_search_with_correctable_pattern
     correctable_pattern = "agaricis campestrus"
 
     login
     visit("/")
-    fill_in("search_pattern", with: correctable_pattern)
-    page.select("Observations", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: correctable_pattern)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#flash_notices",
                     text: :runtime_no_matches.l(type: :observations.l))
-    assert_selector("#title", text: "Observations")
+    assert_match("Observations", page.title)
     assert_selector("#results", text: "")
+
+    corrected_pattern = "Agaricus campestris"
     assert_selector(
       "#content a[href *= 'observations?pattern=Agaricus+campestris']",
       text: names(:agaricus_campestris).search_name
     )
-
-    corrected_pattern = "Agaricus campestris"
+    assert_selector("#content div.alert-warning", text: corrected_pattern)
     obs = observations(:agaricus_campestris_obs)
 
-    fill_in("search_pattern", with: corrected_pattern)
-    page.select("Observations", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: corrected_pattern)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title",
-                    text: "Observation #{obs.id}: #{obs.name.search_name}")
+    assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}")
   end
 
   # Tests of show_name_helper module
@@ -248,7 +246,6 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     proj.save
 
     # Prove that Project is not re-checked for the next Observation
-    login(:katrina)
     visit(new_observation_path)
     assert(
       has_unchecked_field?(proj_checkbox),

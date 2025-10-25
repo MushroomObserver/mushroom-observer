@@ -1,6 +1,6 @@
 <%=
 if !@new_names.blank?
-  tag.div(class: "alert alert-danger", id: "missing_names") do
+  alert_block(level: :danger, id: "missing_names") do
     concat(tag.div(:form_list_feedback_missing_names.t,
                    class: "font-weight-bold"))
     concat(help_note(:div, :form_list_feedback_missing_names_help.t))
@@ -15,7 +15,7 @@ end
 
 <%=
 if !@deprecated_names.blank?
-  tag.div(class: "alert alert-warning", id: "deprecated_names") do
+  alert_block(level: :warning, id: "deprecated_names") do
     concat(tag.div(:form_species_lists_deprecated.t, class: "font-weight-bold"))
     concat(help_note(:div, :form_species_lists_deprecated_help.t))
     concat(tag.p do
@@ -40,15 +40,15 @@ end
 
 <%=
 if !@multiple_names.blank?
-  tag.div(class: "alert alert-warning", id: "ambiguous_names") do
+  alert_block(level: :warning, id: "ambiguous_names") do
     concat(tag.div(:form_species_lists_multiple_names.t,
                    class: "font-weight-bold"))
     concat(help_note(:div, :form_species_lists_multiple_names_help.t))
     concat(tag.p do
-      @multiple_names.each do |name|
+      @multiple_names.each do |name, other_authors|
         concat(tag.div(name.display_name.t))
         concat(fields_for(:chosen_multiple_names) do |f_c|
-          name.other_authors.each do |other_name|
+          other_authors.each do |other_name|
             concat(radio_with_label(form: f_c, field: name.id,
                                     value: other_name.id,
                                     class: "my-1 mr-4 d-inline-block",

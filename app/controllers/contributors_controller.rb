@@ -18,7 +18,7 @@ class ContributorsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::Users.default_order # :contribution
+    :contribution # ::Query::Users.default_order is :name
   end
 
   def unfiltered_index_opts
@@ -29,12 +29,12 @@ class ContributorsController < ApplicationController
   # Passes explicit :by param to affect title (only).
   # (Linked from show template, next to "prev" and "next"... or will be.)
   def sorted_index_opts
-    sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { has_contribution: true, order_by: sorted_by })
+    super.deep_merge(query_args: { has_contribution: true })
   end
 
   def index_display_opts(opts, _query)
     { matrix: true,
-      include: [:image] }.merge(opts)
+      letters: true,
+      include: [:image, :location] }.merge(opts)
   end
 end

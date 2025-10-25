@@ -1,51 +1,30 @@
 <%
-@container = :text_image
+container_class(:text_image)
 add_index_title(@query)
 add_context_nav(all_names_index_tabs(query: @query))
 add_sorter(@query, names_index_sorts(query: @query))
+# Let test_index test pass args to pagination_links.
+args = @test_pagination_args || {}
+add_pagination(@pagination_data, args)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<% if @suggest_alternate_spellings && @objects.empty?
-  names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
-  if names.any? %>
-  <div class="alert-warning">
-    <%= :list_observations_alternate_spellings.t %><br />
-    <ul type="none">
-      <% names.sort_by(&:sort_name).each do |name| %>
-        <%= link_to(name.user_display_name(@user).t, name.show_link_args) %><br />
-      <% end %>
-    </ul>
-  </div>
-<% end %>
+<% if @objects.empty? && @name_suggestions.any? %>
+  <%= render(partial: "names/show/name_suggestions",
+             locals: { names: @name_suggestions }) %>
 <% end %>
 
 <%= @help.tp if @help %>
 
-<% # Let test_index test pass args to pagination_links.
-  args = @test_pagination_args || {} %>
-<%= pagination_nav(@pagination_data, args) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <% counts = Name.count_observations(@objects) %>
 
-    <div class="list-group name-index">
-      <% @objects.each do |name| %>
-        <%= link_with_query(name.show_link_args, class: "list-group-item") do
-          concat(tag.span(name.user_display_name(@user).html_safe.t, class: "display-name"))
-          concat(tag.span(counts[name.id], class: "badge")) if counts[name.id]
-        end %>
-        <% if @has_descriptions %>
-          <% if (desc = name.description)%>
-            <span><%= desc.authors.map(&:login).join(", ") %></span>
-            <span><%= desc.note_status.map(&:to_s).join("/") %></span>
-            <span><%= :"review_#{desc.review_status}".l %></span>
-          <% else %>
-            <span>--- not the default ---</span>
-          <% end %>
-        <% end %>
-      <% end %>
-    </div>
+    <%= tag.div(class: "list-group name-index mb-3") do %>
+      <%= render(partial: "name", collection: @objects, as: :name,
+                 locals: { counts: }) %>
+    <% end %>
 
   <% end %>
 <% end %>

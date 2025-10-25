@@ -52,11 +52,11 @@ module PatternSearch
     # This converts any search that *looks like* a name search into
     # an actual name search. NOTE: This affects the index title.
     def hack_name_query
-      return unless args[:include_subtaxa].present? ||
-                    args[:include_synonyms].present?
+      return unless query_params.include?(:include_subtaxa) ||
+                    query_params.include?(:include_synonyms)
 
-      args[:names] = args[:pattern]
-      args.delete(:pattern)
+      query_params[:names] = query_params[:pattern]
+      query_params.delete(:pattern)
     end
   end
 end

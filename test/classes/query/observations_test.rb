@@ -115,10 +115,15 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_confidence
-    assert_query(Observation.confidence(50, 70).order_by_default,
-                 :Observation, confidence: [50, 70])
-    assert_query(Observation.confidence(100).order_by_default,
-                 :Observation, confidence: [100])
+    expects = Observation.where(Observation[:vote_cache].gteq(0.1)).
+              order(when: :desc, id: :desc)
+    scope = Observation.confidence(0.1, 3).order_by_default
+    assert_query_scope(expects, scope, :Observation, confidence: [0.1, 3])
+
+    expects = Observation.where(Observation[:vote_cache].eq(3)).
+              order(when: :desc, id: :desc)
+    scope = Observation.confidence(3).order_by_default
+    assert_query_scope(expects, scope, :Observation, confidence: [3])
   end
 
   def test_observation_has_public_lat_lng
@@ -246,6 +251,25 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
+  def test_observation_locations_multiple
+    locs = [locations(:burbank), locations(:mitrula_marsh)]
+    expects = Observation.locations(locs).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:name))
+
+    expects = Observation.locations(locs.map(&:id)).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:id))
+
+    expects = Observation.locations(locs.map(&:name)).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:id))
+  end
+
+  def test_observation_within_locations
+    expects = Observation.within_locations(locations(:california)).
+              order_by_default
+    assert_query(expects, :Observation,
+                 within_locations: locations(:california))
+  end
+
   def test_observation_projects
     assert_query([],
                  :Observation, projects: projects(:empty_project))
@@ -297,11 +321,41 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_in_box
-    # Have to do this, otherwise columns not populated
-    Location.update_box_area_and_center_columns
     box = { north: 35, south: 34, east: -118, west: -119 }
     assert_query(Observation.in_box(**box).order_by_default,
                  :Observation, in_box: box)
+  end
+
+  # `in_box` originally had a badly-formed `or` that did not preserve the
+  # original scope on both branches of the `or` condition. The result was
+  # that a chained `in_box` query returned (seemingly) everything `in_box`.
+  def test_observation_in_box_with_other_scopes
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
+    box = { north: 35, south: 34, east: -118, west: -119 }
+    in_box_expects = Query.lookup(:Observation, in_box: box)
+    # be sure we have more than one user's obs in this box
+    box_users = in_box_expects.results.pluck(:user_id).uniq
+    assert(box_users.size > 1)
+    assert(box_users.include?(mary.id))
+
+    chained_expects = Query.lookup(:Observation, in_box: box, by_users: mary.id)
+    assert_not_equal(in_box_expects.result_ids, chained_expects.result_ids)
+
+    box = locations(:california).bounding_box
+    in_box_expects = Query.lookup(:Observation, in_box: box)
+    # be sure we have more than one value in this box
+    box_names = in_box_expects.results.pluck(:name_id).uniq
+    assert(box_names.size > 1)
+
+    chained_expects = Query.lookup(
+      :Observation, in_box: box,
+                    names: {
+                      lookup: "Agaricus campestris",
+                      include_synonyms: true
+                    }
+    )
+    assert_not_equal(in_box_expects.result_ids, chained_expects.result_ids)
   end
 
   def test_observation_of_children
@@ -605,8 +659,11 @@ class Query::ObservationsTest < UnitTestCase
     # years should return between
     assert_query(Observation.date("2005", "2009").order_by_default,
                  :Observation, date: %w[2005 2009])
-    # test scope accepts array values
+    # test scope accepts array values for year
     assert_query(Observation.date(%w[2005 2009]).order_by_default,
+                 :Observation, date: %w[2005 2009])
+    # test scope accepts string values for year
+    assert_query(Observation.date("2005-2009").order_by_default,
                  :Observation, date: %w[2005 2009])
     # in a month range, any year
     assert_query(Observation.date("05", "12").order_by_default,
@@ -614,11 +671,17 @@ class Query::ObservationsTest < UnitTestCase
     # in a month range, any year, within array
     assert_query(Observation.date(%w[05 12]).order_by_default,
                  :Observation, date: %w[05 12])
-    # in a date range, any year
-    assert_query(Observation.date("02-22", "08-22").order_by_default,
+    # in a month range, any year, within array
+    assert_query(Observation.date(%w[05 12]).order_by_default,
+                 :Observation, date: %w[05 12])
+    # in a date range, any year, via string
+    assert_query(Observation.date("02-22-08-22").order_by_default,
                  :Observation, date: %w[02-22 08-22])
     # period wraps around the new year
     assert_query(Observation.date("08-22", "02-22").order_by_default,
+                 :Observation, date: %w[08-22 02-22])
+    # period wraps around the new year, via string
+    assert_query(Observation.date("08-22-02-22").order_by_default,
                  :Observation, date: %w[08-22 02-22])
     # full dates
     assert_query(Observation.date("2009-08-22", "2009-10-20").order_by_default,
@@ -628,6 +691,9 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, date: %w[2015-08-22 2016-02-22])
     # as array
     assert_query(Observation.date(%w[2015-08-22 2016-02-22]).order_by_default,
+                 :Observation, date: %w[2015-08-22 2016-02-22])
+    # as string
+    assert_query(Observation.date("2015-08-22-2016-02-22").order_by_default,
                  :Observation, date: %w[2015-08-22 2016-02-22])
   end
 

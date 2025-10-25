@@ -3,7 +3,6 @@
 module Projects
   class AliasesController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params, except: [:index]
     before_action :set_project_alias, only: [:show, :edit, :update, :destroy]
 
     def index
@@ -112,15 +111,15 @@ module Projects
       render(
         partial: "shared/modal_form",
         locals: { title: modal_title, identifier: modal_identifier,
-                  form: "projects/aliases/form", project_alias: @project_alias }
+                  user: @user, form: "projects/aliases/form",
+                  form_locals: { project_alias: @project_alias } }
       ) and return
     end
 
     def reload_modal_project_alias_form
       render(
         partial: "shared/modal_form_reload",
-        locals: { identifier: modal_identifier,
-                  form: "projects/aliases/form",
+        locals: { identifier: modal_identifier, form: "projects/aliases/form",
                   form_locals: { project_alias: @project_alias } }
       ) and return true
     end

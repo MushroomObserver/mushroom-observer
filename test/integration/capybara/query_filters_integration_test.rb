@@ -14,11 +14,11 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     obs = observations(:boletus_edulis_obs)
 
     login
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
-    click_button("Search")
-    click_link("Show Locations")
-    click_link("Map Locations")
+    fill_in("pattern_search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
+    click_on("Show Locations", match: :first)
+    click_on("Map Locations", match: :first)
 
     filters = page.find("#filters")
     filters.assert_text(obs.name.text_name)
@@ -37,13 +37,13 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     login(user)
 
     # search for Observations with same name as obs
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
     assert_selector("#filters", text: obs.name.text_name)
-    page.find("#title_bar").assert_text(:filtered.t)
+    page.find("#index_bar").assert_text(:filtered.t)
     results = page.find("#results")
     # Number of hits should == number of **imaged** Observations of obs.name
     results.assert_text(obs.name.text_name, count: imged_obss.size)
@@ -51,13 +51,13 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     results.assert_no_text(obs.id.to_s)
 
     # Show Locations (from obs index) should be filtered
-    click_link("Show Locations")
-    # page.find("#title_bar").assert_text(:filtered.t)
+    click_on("Show Locations", match: :first)
+    # page.find("#index_bar").assert_text(:filtered.t)
     page.find("#filters").assert_text(:query_has_images.l)
 
     # And mapping them (from locations index) should also be filtered.
-    click_link("Map Locations")
-    # page.find("#title_bar").assert_text(:filtered.t)
+    click_on("Map Locations", match: :first)
+    # page.find("#index_bar").assert_text(:filtered.t)
     # page.find("#filters").assert_text(:query_has_images.l)
 
     ### Now prove that turning filter off stops filtering ###
@@ -83,11 +83,11 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
                  "Region filter should be off")
 
     # Repeat the search
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
-    # page.find("#title_bar").assert_no_text(:filtered.t)
+    # page.find("#index_bar").assert_no_text(:filtered.t)
     page.find("#filters").assert_no_text(:query_has_images.l)
 
     results = page.find("#results")
@@ -126,11 +126,11 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
 
     # Prove that :has_specimen filter excludes voucherless Observations
     # Repeat the search
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
+    fill_in("pattern_search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :pattern_search_type)
 
-    click_button("Search")
-    # page.find("#title_bar").assert_text(:filtered.t)
+    within("#pattern_search_form") { click_button("Search") }
+    # page.find("#index_bar").assert_text(:filtered.t)
     page.find("#filters").assert_text(:query_has_specimen.l)
 
     results = page.find("#results")
@@ -150,7 +150,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     login(user)
 
     # Verfy Advanced Search form
-    click_on("Advanced Search", match: :first)
+    visit("/search/advanced")
     within("#advanced_search_filters") do
       # Verify Labels.
       assert_text(:advanced_search_filters.t)
@@ -167,7 +167,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     first(:button, :advanced_search_submit.l).click
 
     # Advance Search Filters should override user's { has_images: "yes" }
-    page.find("#title_bar").assert_no_text(:filtered.t)
+    page.find("#index_bar").assert_no_text(:filtered.t)
 
     results = page.find("#results")
     # Number of hits should == **total** Observations of obs.name
@@ -181,7 +181,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     # user who sees voucherless Observations, but hides imageless Observations
 
     # Verify additional parts of Advanced Search form
-    click_on("Advanced Search", match: :first)
+    visit("/search/advanced")
     filters = page.find("#advanced_search_filters")
     within(filters) do
       assert(find("#content_filter_has_images_yes").checked?)
@@ -197,7 +197,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
 
     # Advance Search Filters should override user content_filter so hits
     #   should == vouchered Observations of obs.name, both imaged and imageless
-    page.find("#title_bar").assert_no_text(:filtered.t)
+    page.find("#index_bar").assert_no_text(:filtered.t)
     expect = Observation.where(name: obs.name).where(specimen: true)
     results = page.find("#results")
     results.assert_text(obs.name.text_name, count: expect.size)

@@ -22,7 +22,7 @@ module Descriptions::Merges
 
       # Doesn't have permission to see source.
       flash_error(:runtime_description_private.t)
-      redirect_to(object_path_with_query(@src.parent))
+      redirect_to(@src.parent.show_link_args)
     end
 
     # POST method. Either merges descriptions, or tries to facilitate a merge.
@@ -48,7 +48,7 @@ module Descriptions::Merges
       return true if in_admin_mode? || @src.is_reader?(@user)
 
       flash_error(:runtime_description_private.t)
-      redirect_to(object_path_with_query(@src.parent))
+      redirect_to(@src.parent.show_link_args)
       false
     end
 
@@ -127,7 +127,7 @@ module Descriptions::Merges
                        to: @dest.unique_partial_format_name)
       flash_notice(:runtime_description_merge_success.
            t(old: @src.format_name, new: @dest.format_name))
-      redirect_to(object_path_with_query(@dest))
+      redirect_to(@dest.show_link_args)
     end
 
     def warn_and_render_edit_description_form

@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ['textField', 'select']
 
   connect() {
-    this.element.dataset.stimulus = "placeholder-connected";
+    this.element.dataset.placeholder = "connected";
     this.placeholders = JSON.parse(this.element.dataset.placeholders)
   }
 

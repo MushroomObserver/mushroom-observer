@@ -67,7 +67,6 @@ ACTIONS = {
 
     wrapup_2011: {},
     wrapup_2012: {}
-    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
@@ -265,8 +264,10 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  # Default page "/" is /observations ordered order_by: :rss_log
-  root "observations#index"
+  # Default page "/" is the login page to push back on spiders.
+  # Visiting this page as a logged in user now redirects to the /observations
+  # index page.
+  root "account/login#new"
 
   # Route /123 to /observations/123.
   get "obs/:id" => "observations#show", id: /\d+/, as: "permanent_observation"
@@ -400,6 +401,7 @@ MushroomObserver::Application.routes.draw do
     resources :curators, only: [:create, :destroy], id: /\d+/
     resources :merges, only: [:create]
     resources :nexts, only: [:show], id: /\d+/
+    resource :search, only: [:new, :create]
   end
   resources :herbaria, id: /\d+/
 
@@ -444,6 +446,8 @@ MushroomObserver::Application.routes.draw do
   get("inat_imports/authorization_response",
       to: "inat_imports#authorization_response",
       as: "inat_import_authorization_response")
+  put("inat_imports/cancel/:id", to: "inat_imports#cancel",
+                                 as: "inat_import_cancel")
   resources :inat_imports, only: [:show, :new, :create] do
     resources :job_trackers, only: [:show], module: :inat_imports
   end
@@ -471,6 +475,10 @@ MushroomObserver::Application.routes.draw do
   resources :licenses, id: /\d+/
 
   # ----- Locations: a lot of actions  ----------------------------
+  namespace :locations do
+    resource :search, only: [:new, :create]
+  end
+
   resources :locations, id: /\d+/, shallow: true do
     member do
       get("reverse_name_order", to: "locations/reverse_name_order#update")
@@ -501,6 +509,20 @@ MushroomObserver::Application.routes.draw do
   get("locations/map", to: "locations/maps#show", as: "map_locations")
 
   # ----- Names: a lot of actions  ----------------------------
+  namespace :names do
+    resource :search, only: [:show, :new, :create]
+
+    # Approve Name Tracker: GET endpoint for admin email links
+    get("trackers/:id/approve", to: "trackers/approve#new",
+                                as: "approve_tracker")
+    # Name EOL Data: show:
+    get("eol", to: "eol_data#show", as: "eol_data")
+    get("eol_preview", to: "eol_data/preview#show",
+                       as: "eol_preview")
+    get("eol_expanded_review", to: "eol_data/expanded_review#show",
+                               as: "eol_expanded_review")
+  end
+
   resources :names, id: /\d+/, shallow: true do
     # These routes are for dealing with name attributes.
     # They're not `resources` because they don't have their own IDs.
@@ -574,23 +596,13 @@ MushroomObserver::Application.routes.draw do
       to: "names/descriptions#index", as: "name_descriptions_index")
   # Test Index
   get("names/test_index", to: "names#test_index", as: "names_test_index")
-  # Names Map: show:
-  get("names/map", to: "names/maps#show", as: "map_names")
-  # Approve Name Tracker: GET endpoint for admin email links
-  get("names/trackers/:id/approve", to: "names/trackers/approve#new",
-                                    as: "approve_name_tracker")
-  # Name EOL Data: show:
-  get("names/eol", to: "names/eol_data#show", as: "names_eol_data")
-  get("names/eol_preview", to: "names/eol_data/preview#show",
-                           as: "names_eol_preview")
-  get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
-                                   as: "names_eol_expanded_review")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
+    resource :search, only: [:show, :new, :create]
 
-    # Not under resources :observations because the obs doesn't have an id yet
+    # uploads are not under resources because the obs doesn't have an id yet
     get("images/uploads/new", to: "images/uploads#new",
                               as: "new_image_upload_for")
     post("images/uploads", to: "images/uploads#create",
@@ -654,6 +666,10 @@ MushroomObserver::Application.routes.draw do
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
+  namespace :projects do
+    resource :search, only: [:new, :create]
+  end
+
   resources :projects do
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"
@@ -689,44 +705,83 @@ MushroomObserver::Application.routes.draw do
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
 
+  # ----- Add dispatch: new -------------------------------------------------
+  post "add_dispatch", to: "add_dispatch#new"
+
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
 
   # ----- Species Lists: standard actions -----------------------------------
-  resources :species_lists, id: /\d+/
+  namespace :species_lists do
+    resource :search, only: [:new, :create]
+    get("observations/edit", to: "observations#edit",
+                             as: "edit_observations")
+    match("observations(/:commit)", to: "observations#update",
+                                    via: [:put, :patch], as: "observations")
+    get("name_lister/new", to: "name_lists#new",
+                           as: "new_name_lister")
+    post("name_lister", to: "name_lists#create",
+                        as: "name_lister")
+  end
 
-  put("/species_lists/:id/clear", to: "species_lists#clear",
-                                  as: "clear_species_list")
+  resources :species_lists do
+    member do
+      put("clear", to: "species_lists#clear")
+      get("downloads/new", to: "species_lists/downloads#new",
+                           as: "new_download")
+      post("downloads", to: "species_lists/downloads#create", as: "download")
+      post("downloads/print_labels",
+           to: "species_lists/downloads#print_labels",
+           as: "download_print_labels_for")
+      get("projects", to: "species_lists/projects#edit",
+                      as: "edit_projects_for")
+      match("projects", to: "species_lists/projects#update",
+                        via: [:put, :patch], as: "projects_for")
+      get("uploads/new", to: "species_lists/uploads#new", as: "new_upload")
+      post("uploads", to: "species_lists/uploads#create", as: "upload")
+      get("write_in/new", to: "species_lists/write_in#new", as: "new_write_in")
+      post("write_in", to: "species_lists/write_in#create", as: "write_in")
+    end
+  end
 
-  get("/species_lists/name_lister/new", to: "species_lists/name_lists#new",
-                                        as: "new_species_list_name_lister")
-  post("/species_lists/name_lister", to: "species_lists/name_lists#create",
-                                     as: "species_list_name_lister")
-  get("/species_lists/:id/uploads/new", to: "species_lists/uploads#new",
-                                        as: "new_species_list_upload")
-  post("/species_lists/:id/uploads", to: "species_lists/uploads#create",
-                                     as: "species_list_uploads")
-  get("/species_lists/:id/downloads/new", to: "species_lists/downloads#new",
-                                          as: "new_species_list_download")
-  post("/species_lists/:id/downloads", to: "species_lists/downloads#create",
-                                       as: "species_list_downloads")
-  post("/species_lists/:id/downloads/print_labels",
-       to: "species_lists/downloads#print_labels",
-       as: "species_list_download_print_labels")
-  get("/species_lists/observations/edit",
-      to: "species_lists/observations#edit",
-      as: "edit_species_list_observations")
-  match("/species_lists/observations(/:commit)",
-        to: "species_lists/observations#update",
-        via: [:put, :patch],
-        as: "species_list_observations")
-  get("/species_lists/:id/projects",
-      to: "species_lists/projects#edit",
-      as: "edit_species_list_projects")
-  match("/species_lists/:id/projects",
-        to: "species_lists/projects#update",
-        via: [:put, :patch],
-        as: "species_list_projects")
+  # put("/species_lists/:id/clear", to: "species_lists#clear",
+  #                                 as: "clear_species_list")
+
+  # get("/species_lists/name_lister/new", to: "species_lists/name_lists#new",
+  #                                       as: "new_species_list_name_lister")
+  # post("/species_lists/name_lister", to: "species_lists/name_lists#create",
+  #                                    as: "species_list_name_lister")
+  # get("/species_lists/:id/uploads/new", to: "species_lists/uploads#new",
+  #                                       as: "new_species_list_upload")
+  # post("/species_lists/:id/uploads", to: "species_lists/uploads#create",
+  #                                    as: "species_list_uploads")
+  # get("/species_lists/:id/downloads/new", to: "species_lists/downloads#new",
+  #                                         as: "new_species_list_download")
+  # post("/species_lists/:id/downloads", to: "species_lists/downloads#create",
+  #                                      as: "species_list_downloads")
+  # post("/species_lists/:id/downloads/print_labels",
+  #      to: "species_lists/downloads#print_labels",
+  #      as: "species_list_download_print_labels")
+  # get("/species_lists/observations/edit",
+  #     to: "species_lists/observations#edit",
+  #     as: "edit_species_list_observations")
+  # match("/species_lists/observations(/:commit)",
+  #       to: "species_lists/observations#update",
+  #       via: [:put, :patch],
+  #       as: "species_list_observations")
+  # get("/species_lists/:id/projects",
+  #     to: "species_lists/projects#edit",
+  #     as: "edit_species_list_projects")
+  # match("/species_lists/:id/projects",
+  #       to: "species_lists/projects#update",
+  #       via: [:put, :patch],
+  #       as: "species_list_projects")
+  # get("/species_lists/:id/write_in/new",
+  #     to: "species_lists/write_in#new",
+  #     as: "new_species_list_write_in")
+  # post("/species_lists/:id/write_in",
+  #      to: "species_lists/write_in#create",
+  #      as: "species_list_write_in")
 
   # ----- Test if server is up  -------------------------------------
   resources :test, only: [:index], controller: "test"

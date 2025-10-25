@@ -2,13 +2,13 @@
 
 <%
 sequences = obs.sequences
-can_edit  = in_admin_mode? || obs.can_edit?
+can_edit  = in_admin_mode? || obs.can_edit?(user)
 %>
 
 <%=
 tag.div(
   id: "observation_sequences", class: "obs-sequence",
-  data: { controller: "section-update" }
+  data: { controller: "section-update", section_update_user_value: user.id }
 ) do
 
   concat(tag.div do
@@ -34,8 +34,7 @@ tag.div(
           )
           links << destroy_button(
             name: :destroy_object.t(type: :sequence),
-            target: sequence_path(id: sequence.id,
-                                  back: url_after_delete(sequence)),
+            target: sequence_path(id: sequence.id, back: observation_path(obs)),
             icon: :remove,
             class: "destroy_sequence_link_#{sequence.id}"
           )

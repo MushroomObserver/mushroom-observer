@@ -1,0 +1,87 @@
+# frozen_string_literal: true
+
+# Names search form and help.
+#
+# Route: `names_search_path`, `new_names_search_path`
+#
+# Call namespaced controller actions with a hash like
+# `{ controller: "/names/search", action: :create }`
+module Names
+  class SearchController < ApplicationController
+    include ::Searchable
+
+    before_action :login_required
+
+    # Also an index of helper methods to use for each field.
+    def permitted_search_params
+      {
+        names: :names_fields_for_names,
+        has_observations: :select_nil_yes, # ignores false
+        deprecated: :select_nil_boolean,
+        has_author: :select_nil_boolean,
+        author_has: :text_field_with_label,
+        has_citation: :select_nil_boolean,
+        citation_has: :text_field_with_label,
+        has_classification: :select_nil_boolean,
+        classification_has: :text_field_with_label,
+        has_notes: :select_nil_boolean,
+        notes_has: :text_field_with_label,
+        has_comments: :select_nil_yes,
+        comments_has: :text_field_with_label,
+        has_default_description: :select_nil_boolean,
+        created_at: :text_field_with_label,
+        updated_at: :text_field_with_label,
+        has_synonyms: :select_nil_boolean,
+        misspellings: :select_misspellings,
+        rank: :select_rank_range,
+        lichen: :select_nil_boolean
+      }.freeze
+    end
+
+    def nested_names_params
+      {
+        include_synonyms: :select_no_eq_nil_or_yes,
+        include_subtaxa: :select_no_eq_nil_or_yes,
+        include_immediate_subtaxa: :select_no_eq_nil_or_yes,
+        exclude_original_names: :select_no_eq_nil_or_yes
+      }.freeze
+    end
+
+    def fields_with_range
+      [:rank]
+    end
+
+    # This is the list of fields that are displayed in the search form. In the
+    # template, each hash is interpreted as a column, and each key is a panel
+    # with an array of fields or field pairings.
+    FIELD_COLUMNS = [
+      { name: {
+        shown: [:names],
+        # NOTE: These appear via js if names[:lookup] input has any value.
+        # See SearchHelper#autocompleter_with_conditional_fields
+        # conditional: [
+        #   [:include_subtaxa, :include_synonyms],
+        #   [:include_immediate_subtaxa, :exclude_original_names]
+        # ],
+        collapsed: [[:deprecated, :lichen],
+                    :rank,
+                    [:has_author, :author_has],
+                    [:has_citation, :citation_has],
+                    [:has_default_description, :misspellings]]
+      } },
+      { detail: {
+          shown: [[:has_classification, :classification_has]],
+          collapsed: [[:has_notes, :notes_has],
+                      [:has_comments, :comments_has],
+                      [:has_observations]]
+        },
+        dates: { shown: [[:created_at, :updated_at]], collapsed: [] } }
+    ].freeze
+
+    private
+
+    def set_up_form_field_groupings
+      @field_columns = FIELD_COLUMNS
+    end
+  end
+end

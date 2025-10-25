@@ -40,14 +40,6 @@
   width: 23px;
 }
 
-@media (min-width: $screen-sm-min) {
-  .interest-eyes {
-    position: absolute;
-    // bottom: $padding-base-horizontal;
-    left: $padding-base-horizontal;
-  }
-}
-
 //
 // style tweaks
 // --------------------------------------------------
@@ -100,6 +92,19 @@ ul.tight-list {
   font-weight: bold;
 }
 
-.btn-constraint-warning {
-  color: black;
+.content-block {
+  @extend .p-3;
+}
+
+.h3.page-title {
+  font-size: 22px;
+
+  .badge-id {
+    font-size: 66% !important
+  }
+
+  small {
+    @extend .ml-3;
+    color: $text-color;
+  }
 }

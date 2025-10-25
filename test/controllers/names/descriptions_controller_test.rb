@@ -26,7 +26,7 @@ module Names
       login
       get(:index)
 
-      assert_displayed_title(:NAME_DESCRIPTIONS.l)
+      assert_page_title(:NAME_DESCRIPTIONS.l)
     end
 
     def test_index_with_non_default_sort
@@ -61,7 +61,7 @@ module Names
       get(:index, params: { by_author: user })
 
       assert_template("index")
-      assert_displayed_title(:NAME_DESCRIPTIONS.l)
+      assert_page_title(:NAME_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
                     { count: descs_authored_by_user_count },
@@ -122,7 +122,7 @@ module Names
       get(:index, params: { by_editor: user.id })
 
       assert_template("index")
-      assert_displayed_title(:NAME_DESCRIPTIONS.l)
+      assert_page_title(:NAME_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
                     { count: descs_edited_by_user_count },
@@ -166,24 +166,26 @@ module Names
       description = name_descriptions(:coprinus_comatus_desc)
       id = description.id
       object = NameDescription.find(id)
-      params = @controller.find_query_and_next_object(object, :next, id)
       login
-      get(:show, params: { flow: :next, id: description.id })
-      q = @controller.query_params(QueryRecord.last)
+      get(:show, params: { flow: :next, id: })
+      next_data = @controller.find_query_and_next_object(object, :next, id)
+      params = { id: next_data[:id],
+                 q: @controller.q_param(next_data[:query]) }
       # from params above
-      assert_redirected_to(name_description_path(params[:id], params: q))
+      assert_redirected_to(name_description_path(**params))
     end
 
     def test_prev_description
       description = name_descriptions(:coprinus_comatus_desc)
       id = description.id
       object = NameDescription.find(id)
-      params = @controller.find_query_and_next_object(object, :prev, id)
       login
-      get(:show, params: { flow: :prev, id: description.id })
-      q = @controller.query_params(QueryRecord.last)
+      get(:show, params: { flow: :prev, id: })
+      prev_data = @controller.find_query_and_next_object(object, :prev, id)
+      params = { id: prev_data[:id],
+                 q: @controller.q_param(prev_data[:query]) }
       # from params above
-      assert_redirected_to(name_description_path(params[:id], params: q))
+      assert_redirected_to(name_description_path(**params))
     end
 
     def test_why_danny_cant_edit_lentinus_description

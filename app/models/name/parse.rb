@@ -515,7 +515,7 @@ module Name::Parse
     [
       format_name(names[..index].join(" "), deprecated),
       author,
-      format_name(names[index + 1..].join(" ").strip, deprecated)
+      format_name(names[(index + 1)..].join(" ").strip, deprecated)
     ].join(" ").strip
   end
 
@@ -530,7 +530,7 @@ module Name::Parse
 
   def standardize_subname(subname)
     if /^#{ANY_RANK_ABBR} /o.match?(subname)
-      match = /^([^\.\s]+)\.? (.+)$/.match(subname)
+      match = /^([^.\s]+)\.? (.+)$/.match(subname)
       raise(RankMessedUp.new) unless match
 
       rank = standardize_subrank(match[1])

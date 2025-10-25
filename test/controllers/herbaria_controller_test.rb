@@ -53,7 +53,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: herbarium.id })
 
-    assert_displayed_title(herbarium.format_name)
+    assert_page_title(herbarium.format_name)
     assert_select(
       "a[href^='#{new_herbaria_curator_request_path(id: herbarium)}']",
       { text: :show_herbarium_curator_request.l },
@@ -90,7 +90,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: herbarium.id })
 
-    assert_displayed_title(herbarium.format_name)
+    assert_page_title(herbarium.format_name)
     assert_select("form[action^='#{herbarium_path(herbarium)}']") do
       assert_select("input[value='delete']", true,
                     "Show Herbarium page is missing a destroy herbarium button")
@@ -110,7 +110,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number1.id, q: q, flow: "next" })
@@ -122,7 +122,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number2.id, q: q, flow: "prev" })
@@ -133,10 +133,10 @@ class HerbariaControllerTest < FunctionalTestCase
     set = [nybg, herbaria(:rolf_herbarium)]
     query = Query.lookup_and_save(:Herbarium, order_by: :name, id_in_set: set)
     login("zero") # Does not own any herbarium in set
-    get(:index, params: { q: query.record.id.alphabetize })
+    get(:index, params: { q: @controller.q_param(query) })
 
     assert_response(:success)
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     assert_select(
       "a:match('href', ?)", %r{^#{herbaria_path}/(\d+)}, { count: set.size },
       "Filtered index should list the results of the latest Herbaria query"
@@ -148,7 +148,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -274,7 +274,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { nonpersonal: true })
 
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     assert_displayed_filters(:query_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
@@ -296,9 +296,9 @@ class HerbariaControllerTest < FunctionalTestCase
     pattern = "Personal Herbarium"
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params: { q: { model: Herbarium, pattern: pattern } })
 
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
@@ -316,23 +316,13 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_pattern_integer
-    login
-    get(:index, params: { pattern: nybg.id })
-
-    assert_redirected_to(
-      herbarium_path(nybg),
-      "Herbarium search for ##{nybg.id} should show #{nybg.name} herbarium"
-    )
-  end
-
   def test_index_reverse_records
     login
     by = "reverse_records"
     get(:index, params: { by: })
 
     assert_response(:success)
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     assert_sorted_by(by)
     Herbarium.find_each do |herbarium|
       assert_select(
@@ -369,7 +359,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
   end
 
   def test_edit_with_curators_by_non_curator
@@ -386,7 +376,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
   end
 
   def test_edit_with_curators_by_admin
@@ -395,7 +385,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
 
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------

@@ -6,6 +6,14 @@ class Query::Projects < Query
   query_attr(:id_in_set, [Project])
   query_attr(:by_users, [User])
   query_attr(:members, [User])
+  query_attr(:names, { lookup: [Name],
+                       include_synonyms: :boolean,
+                       include_subtaxa: :boolean,
+                       include_immediate_subtaxa: :boolean,
+                       exclude_original_names: :boolean,
+                       include_all_name_proposals: :boolean,
+                       exclude_consensus: :boolean })
+  query_attr(:region, :string) # accepts multiple values
   query_attr(:title_has, :string)
   query_attr(:has_summary, :boolean)
   query_attr(:summary_has, :string)
