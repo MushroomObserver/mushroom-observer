@@ -18,6 +18,20 @@ class InatImportsControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
   include Inat::Constants
 
+  # stub the iNat API request for the expected import count
+  def stub_count_request(inat_username:, ids: nil, body: "{}")
+    stub_request(
+      :get,
+      "#{API_BASE}/observations" \
+      "?iconic_taxa=#{ICONIC_TAXA}" \
+      "&id=#{ids}" \
+      "&only_id=true&page=1&per_page=1" \
+      "&user_id=#{inat_username}" \
+      "&verifiable=any" \
+      "&without_field=Mushroom%20Observer%20URL"
+    ).to_return(status: 200, body: body, headers: {})
+  end
+
   def test_show
     import = inat_imports(:rolf_inat_import)
     tracker = InatImportJobTracker.create(inat_import: import.id)
@@ -35,12 +49,30 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action(action: :create)
+    assert_select("input[name=cancel], button[name=cancel], a[name=cancel]",
+                  true, "Form needs a Cancel button")
+    assert_select(
+      "a[name=cancel][href='#{new_observation_path}'], " \
+      "input[name=cancel][formaction='#{new_observation_path}'], " \
+      "button[name=cancel][formaction='#{new_observation_path}']",
+      true, "Cancel button should go to new_observation_path"
+    )
+
     assert_select("input#inat_ids", true,
                   "Form needs a field for inputting iNat ids")
     assert_select("input#inat_username", true,
                   "Form needs a field for inputting iNat username")
     assert_select("input[type=checkbox][id=consent]", true,
                   "Form needs checkbox requiring consent")
+
+    assert(
+      assert_select("#preview").text.include?(
+        "#{:inat_import_expected_count.l}: #{:inat_import_tbd.l}"
+      ),
+      "Form missing expected import count"
+    )
+    assert_select("#preview a[href^='#{SITE}/observations']", false,
+                  "New form should not display link to expected imports")
   end
 
   def test_new_inat_import_already_importing
@@ -73,26 +105,67 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_create_cancel_reset
-    user = users(:ollie)
-    import = inat_imports(:ollie_inat_import)
-    assert(import.canceled?, "Test needs a canceled InatImport fixture")
-    id = "123"
-    params = { inat_ids: id, inat_username: user.inat_username, consent: 1 }
+  def test_create_counts_and_links
+    inat_import = inat_imports(:mary_inat_import)
+    user = inat_import.user
+    inat_ids = "123,456,789"
+
+    params = { inat_username: user.inat_username,
+               inat_ids: inat_ids,
+               all: "0",
+               consent: "1",
+               inat_import_expected_count: :inat_import_tbd.l,
+               inat_expected_imports_link: :inat_import_tbd.l }
 
     login(user.login)
+    stub_count_request(inat_username: inat_import.inat_username,
+                       ids: inat_ids, body: '{"total_results":3}')
+    disable_unsafe_html_filter
+    post(:create, params: params)
+
+    assert_form_action({ action: :create },
+                       "InatImport form should reload after user fills it out")
+    assert(
+      assert_select("#preview").text.include?(
+        "#{:inat_import_expected_count.l}: 3"
+      ),
+      "Reloaded form should display expected import count"
+    )
+    assert_select("#preview a[href^='#{SITE}/observations']", true,
+                  "Reloaded form should display link to expected imports")
+  end
+
+  def test_create_cancel_reset
+    import = inat_imports(:ollie_inat_import)
+    user = import.user
+    assert(import.canceled?, "Test needs a canceled InatImport fixture")
+    params = {
+      inat_ids: import.inat_ids,
+      inat_username: user.inat_username,
+      consent: 1
+    }
+
+    login(user.login)
+    disable_unsafe_html_filter
+    stub_count_request(inat_username: user.inat_username)
     post(:create, params: params)
 
     assert_not(import.reload.canceled?,
                "`cancel` should be false when starting an import")
   end
 
-  def test_create_missing_username
-    user = users(:rolf)
-    id = "123"
-    params = { inat_ids: id }
+  def test_create_missing_inat_username
+    import = inat_imports(:mary_inat_import)
+    import.update(inat_username: nil)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0, consent: 1
+    }
 
-    login(user.login)
+    login(import.user.login)
+    disable_unsafe_html_filter
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
     post(:create, params: params)
 
     assert_flash_text(:inat_missing_username.l)
@@ -100,9 +173,19 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_no_observations_designated
-    params = { inat_username: "anything", inat_ids: "",
-               consent: 1 }
-    login
+    import = inat_imports(:mary_inat_import)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: "",
+      all: 0,
+      consent: 1
+    }
+
+    login(import.user.login)
+    disable_unsafe_html_filter
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
+
     assert_no_difference("Observation.count",
                          "Imported observation(s) though none designated") do
       post(:create, params: params)
@@ -112,9 +195,17 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_list_and_all
-    params = { inat_username: "anything", inat_ids: "7,8,9",
-               all: 1, consent: 1 }
-    login
+    import = inat_imports(:mary_inat_import)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 1,
+      consent: 1
+    }
+
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
+    disable_unsafe_html_filter
 
     assert_no_difference(
       "Observation.count",
@@ -129,9 +220,19 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_illegal_observation_id
-    params = { inat_username: "anything", inat_ids: "123*",
-               consent: 1 }
-    login
+    import = inat_imports(:mary_inat_import)
+    import.update(inat_ids: "123*")
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0,
+      consent: 1
+    }
+
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
+    disable_unsafe_html_filter
+
     assert_no_difference("Observation.count",
                          "Imported observation(s) though none designated") do
       post(:create, params: params)
@@ -141,9 +242,18 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_no_consent
-    params = { inat_username: "anything", inat_ids: 123,
-               consent: 0 }
-    login
+    import = inat_imports(:mary_inat_import)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0,
+      consent: 0
+    }
+
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
+    disable_unsafe_html_filter
+
     assert_no_difference("Observation.count",
                          "iNat obss imported without consent") do
       post(:create, params: params)
@@ -153,13 +263,25 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_too_many_ids_listed
-    # generate an id list that's barely too long
+    # generate an id list that's too long for the inat_ids column
+    # It'ss a string column with max length 255
     id_list = ""
     id = 1_234_567_890
     id_list += "#{id += 1}," until id_list.length > 255
-    params = { inat_username: "anything", inat_ids: id_list, consent: 1 }
 
-    login
+    import = inat_imports(:mary_inat_import)
+    # save as much as possible
+    import.update(inat_ids: id_list[0, 255])
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: id_list, all: 0,
+      consent: 1
+    }
+
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
+    disable_unsafe_html_filter
     post(:create, params: params)
 
     assert_form_action(action: :create)
@@ -167,37 +289,39 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_previously_imported
-    user = users(:rolf)
     inat_id = "1123456"
     Observation.create(
       where: "North Falmouth, Massachusetts, USA",
-      user: user,
+      user: mary,
       when: "2024-09-08",
       source: Observation.sources[:mo_inat_import],
       inat_id: inat_id
     )
+    import = inat_imports(:mary_inat_import)
+    import.update(inat_ids: inat_id)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0,
+      consent: 1
+    }
 
-    params = { inat_username: "anything", inat_ids: inat_id,
-               consent: 1 }
-    login
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
+    disable_unsafe_html_filter
+
     assert_no_difference("Observation.count",
                          "Imported a previously imported iNat obs") do
       post(:create, params: params)
     end
-
-    # NOTE: 2024-09-04 jdc
-    # I'd prefer that the flash include links to both obss,
-    # and that this (or another) assertion check for that.
-    # At the moment, it's taking too long to figure out how.
     assert_flash_text(/iNat #{inat_id} previously imported/)
   end
 
   def test_create_previously_mirrored
-    user = users(:rolf)
     inat_id = "1234567"
     mirrored_obs = Observation.create(
       where: "North Falmouth, Massachusetts, USA",
-      user: user,
+      user: rolf,
       when: "2023-09-08",
       inat_id: nil,
       # When Pulk's `mirror`Python script copies an MO Obs to iNat,
@@ -205,9 +329,19 @@ class InatImportsControllerTest < FunctionalTestCase
       # See https://github.com/JacobPulk/mirror
       notes: { Other: "Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">observation #{inat_id}</a> on December 18, 2023" }
     )
-    params = { inat_username: "anything", inat_ids: inat_id, consent: 1 }
+    import = inat_imports(:mary_inat_import)
+    import.update(inat_ids: inat_id)
+    params = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids, all: 0,
+      consent: 1
+    }
 
-    login
+    login(import.user.login)
+    stub_count_request(inat_username: import.inat_username,
+                       ids: import.inat_ids)
+    disable_unsafe_html_filter
+
     assert_no_difference(
       "Observation.count",
       "Imported an iNat obs which had been 'mirrored' from MO"
@@ -215,10 +349,6 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    # NOTE: 2024-09-04 jdc
-    # I'd prefer that the flash include links to both obss,
-    # and that this (or another) assertion check for that.
-    # At the moment, it's taking too long to figure out how.
     assert_flash_text(
       "iNat #{inat_id} is a &#8220;mirror&#8221; of " \
       "existing MO Observation #{mirrored_obs.id}"
@@ -229,7 +359,7 @@ class InatImportsControllerTest < FunctionalTestCase
     user = users(:mary)
     assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).none?,
            "Test needs user fixture without an MO API key for iNat imports")
-    inat_username = " #{user.name} " # simulate typing extra spaces
+    inat_username = " #{user.inat_username} " # simulate typing extra spaces
     inat_import = inat_imports(:mary_inat_import)
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
@@ -246,51 +376,53 @@ class InatImportsControllerTest < FunctionalTestCase
                      consent: 1 })
     end
 
+    assert_equal(
+      user.inat_username, inat_import.reload.inat_username,
+      "It should strip leading/trailing whitespace from inat_username"
+    )
     assert(
       APIKey.where(user: user, notes: MO_API_KEY_NOTES).
              where.not(verified: nil).one?,
       "MO should assure user has personal verified API key for iNat imports"
     )
-    assert_response(:redirect)
     assert_equal(
-      user.name, inat_import.reload.inat_username,
-      "It should strip leading/trailing whitespace from inat_username"
+      INAT_AUTHORIZATION_URL, @response.location,
+      "It should redirect to iNat authorization if params valid and unchanged"
     )
   end
 
   def test_create_authorization_request
     user = users(:rolf)
-    inat_username = "rolf" # use different inat_username to test if it's updated
     inat_import = inat_imports(:rolf_inat_import)
+    inat_import.update(importables: nil) # set to nil to test if later updated
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
     assert_equal(0, inat_import.total_imported_count.to_i,
-                 "Test needs InatImport fixture without prior imports")
-    inat_ids = "123,456,789"
+                 "Need InatImport fixture without prior imports")
 
+    stub_count_request(ids: inat_import.inat_ids,
+                       inat_username: inat_import.inat_username,
+                       body: '{"total_results":4}')
     stub_request(:any, authorization_url)
     login(user.login)
+    post(:create, params: { inat_ids: inat_import.inat_ids,
+                            inat_username: inat_import.inat_username,
+                            consent: 1 })
 
-    assert_no_difference(
-      "Observation.count",
-      "Authorization request to iNat shouldn't create MO Observation(s)"
-    ) do
-      post(:create,
-           params: { inat_ids: inat_ids, inat_username: inat_username,
-                     consent: 1 })
-    end
-
-    assert_response(:redirect)
-    assert_equal(inat_ids.split(",").length, inat_import.reload.importables,
-                 "Failed to save InatImport.importables")
+    assert_equal(
+      INAT_AUTHORIZATION_URL, @response.location,
+      "It should redirect to iNat authorization if params valid and unchanged"
+    )
     assert_equal("Authorizing", inat_import.reload.state,
                  "MO should be awaiting authorization from iNat")
+    assert_equal(
+      inat_import.inat_ids.split(",").length, inat_import.reload.importables,
+      "Failed to save InatImport.importables"
+    )
     assert_equal(
       InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
       inat_import.avg_import_time
     )
-    assert_equal(inat_username, inat_import.inat_username,
-                 "Failed to save InatImport.inat_username")
   end
 
   def test_authorization_response_denied
@@ -351,10 +483,13 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_import_all
-    user = users(:mary)
-    params = { inat_username: user.inat_username, all: 1, consent: 1 }
+    inat_import = inat_imports(:roy_inat_import)
+    params = { inat_username: inat_import.inat_username, inat_ids: "", all: 1,
+               consent: 1 }
 
-    login(user.login)
+    login(inat_import.user.login)
+
+    stub_count_request(inat_username: inat_import.inat_username)
     post(:create, params: params)
 
     assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)

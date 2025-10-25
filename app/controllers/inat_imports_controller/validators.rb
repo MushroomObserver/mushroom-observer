@@ -82,8 +82,9 @@ module InatImportsController::Validators
     params[:inat_ids].delete(" ").split(",").map(&:to_i)
   end
 
+  # Were any listed iNat IDs "mirrored" to iNat by Pulk's `mirror` script?
   def unmirrored?
-    return true if importing_all? # cannot test check this if importing all
+    return true if importing_all? # cannot check this if importing all
 
     conditions = inat_id_list.map do |inat_id|
       Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
