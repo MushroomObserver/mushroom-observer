@@ -4,6 +4,7 @@ class FieldSlipsController < ApplicationController
   include Show
   include Index
 
+  before_action :login_required
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :set_field_slip, only: [:edit, :update, :destroy]

@@ -41,6 +41,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | somion_unicolor | [**202555552**](https://www.inaturalist.org/observations/202555552) | 5 | public |  `jdcohenesq` Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
 | trametes | [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | user `dannymi` different collector; Notes; **Observation Fields: Collector**, place: 25th Ave NE, Seattle, WA, US, with huge error |
 | tremella_mesenterica | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | place: Lewisville, TX 75057, USA |
+| validae | [245268100](https://www.inaturalist.org/observations/245268100) | 1 | public | ObservationID is infrageneric name which was not suggested by any user |
 | xeromphalina_campanella_complex | [215969102](https://www.inaturalist.org/observations/215969102) | 2 | public | `jdcohenesq` **Complex** |
 | zero_results | n.a. | | n.a. | response with total_results: 0, to expose and prevent reversion of bug |
 <!-- markdownlint-enable MD013 -->

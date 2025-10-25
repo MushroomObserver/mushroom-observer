@@ -74,7 +74,7 @@ module ObservationsController::SharedFormMethods
   end
 
   def init_specimen_vars
-    @collectors_name   = @user.legal_name
+    @collectors_name   = params.dig(:notes, :Collector) || @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
     @herbarium_id      = @user.preferred_herbarium&.id
@@ -200,7 +200,7 @@ module ObservationsController::SharedFormMethods
 
     # Now check for edits.
     @good_images.map do |image|
-      next unless check_permission(image)
+      next unless permission?(image)
 
       args = params.dig(:good_image, image.id.to_s)
       next unless args

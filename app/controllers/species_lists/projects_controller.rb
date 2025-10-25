@@ -11,7 +11,7 @@ module SpeciesLists
     def edit
       return unless (@list = find_species_list!)
 
-      if check_permission!(@list)
+      if permission!(@list)
         @projects = projects_to_manage
         @object_states = manage_object_states
         @project_states = manage_project_states
@@ -23,7 +23,7 @@ module SpeciesLists
     def update
       return unless (@list = find_species_list!)
 
-      if check_permission!(@list)
+      if permission!(@list)
         @projects = projects_to_manage
         @object_states = manage_object_states
         @project_states = manage_project_states
@@ -130,7 +130,7 @@ module SpeciesLists
     end
 
     def attach_observations_to_project(proj)
-      obs = @list.observations.select { |o| check_permission(o) }
+      obs = @list.observations.select { |o| permission?(o) }
       obs -= proj.observations
       return unless obs.any?
 
@@ -142,7 +142,7 @@ module SpeciesLists
     end
 
     def remove_observations_from_project(proj)
-      obs = @list.observations.select { |o| check_permission(o) }
+      obs = @list.observations.select { |o| permission?(o) }
       unless @user.projects_member.include?(proj)
         obs.select! { |o| o.user == @user }
       end
@@ -158,7 +158,7 @@ module SpeciesLists
 
     def attach_images_to_project(proj)
       imgs = @list.observations.map(&:images).flatten.uniq.
-             select { |i| check_permission(i) }
+             select { |i| permission?(i) }
       imgs -= proj.images
       return unless imgs.any?
 
@@ -171,7 +171,7 @@ module SpeciesLists
 
     def remove_images_from_project(proj)
       imgs = @list.observations.map(&:images).flatten.uniq.
-             select { |i| check_permission(i) }
+             select { |i| permission?(i) }
       unless @user.projects_member.include?(proj)
         imgs.select! { |i| i.user == @user }
       end

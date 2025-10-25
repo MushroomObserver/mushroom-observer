@@ -18,7 +18,7 @@ module Searchable
       respond_to do |format|
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
-            :search_nav_help, # id of element to update contents of
+            :search_bar_help, # id of element to update contents of
             partial: "#{parent_controller}/search/help"
           ))
         end
@@ -28,11 +28,27 @@ module Searchable
 
     def new
       set_up_form_field_groupings
-      @search = find_or_create_query(query_model)
+      @search = if params[:clear].present?
+                  create_query(query_model)
+                else
+                  find_or_create_query(query_model)
+                end
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            :search_nav_form, # id of element to update contents of
+            partial: "shared/search_form",
+            locals: { local: false, search: @search,
+                      field_columns: @field_columns }
+          ))
+        end
+        format.html
+      end
     end
 
     def create
-      return if clear_form?
+      redirect_to(action: :new) and return if clear_form?
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
@@ -46,9 +62,11 @@ module Searchable
 
     def prepare_raw_params
       split_names_lookup_strings
-      null_in_box_if_empty
+      null_box_if_invalid
+      null_region_if_overspecific_and_box_valid
       autocompleted_strings_to_ids
       range_fields_to_arrays
+      parse_date_ranges
     end
 
     # Used by search_helper to prefill nested params
@@ -66,6 +84,15 @@ module Searchable
       self.class.name.deconstantize.underscore.to_sym
     end
 
+    def parent_controller
+      self.class.name.deconstantize.underscore
+    end
+
+    # Returns the capitalized :Symbol used by Query for the type of query.
+    def query_model
+      self.class.module_parent.name.singularize.to_sym
+    end
+
     private
 
     def search_object_name
@@ -75,7 +102,7 @@ module Searchable
     def clear_form?
       if params[:commit] == :CLEAR.l
         clear_relevant_query
-        redirect_to(action: :new) and return true
+        return true
       end
       false
     end
@@ -117,13 +144,25 @@ module Searchable
 
     # Nested blank values will make for null query results,
     # so eliminate the whole :in_box param if it doesn't have values.
-    def null_in_box_if_empty
-      south = @query_params.dig(:in_box, :south)
-      north = @query_params.dig(:in_box, :north)
-      return unless (south.blank? || south.to_f.zero?) &&
-                    (north.blank? || north.to_f.zero?)
+    def null_box_if_invalid
+      return if valid_box?
 
       @query_params[:in_box] = nil
+    end
+
+    # A Google-looked-up region may not match a db value, so if it's longer
+    # than 3 segments ("Alameda County, California, USA"), toss the region.
+    def null_region_if_overspecific_and_box_valid
+      return unless (region = @query_params[:region]) &&
+                    valid_box? && region.split(",").length > 3
+
+      @query_params[:region] = nil
+    end
+
+    def valid_box?
+      return true if @query_params[:in_box].blank?
+
+      ::Mappable::Box.new(**@query_params[:in_box]).valid?
     end
 
     # Check for `fields_preferring_ids` and swap these in if appropriate
@@ -151,9 +190,22 @@ module Searchable
       end
     end
 
+    def parse_date_ranges
+      [:date, :created_at, :updated_at].each { |field| parse_date_range(field) }
+    end
+
+    def parse_date_range(field)
+      return if (date = @query_params[field]).blank?
+
+      @query_params[field] = ::DateRangeParser.new(date).range
+    end
+
     # Note that this @search query instance is not the one that gets saved and
-    # sent, this step is only for validation of the params.
+    # sent, this step is only for validation of the params and removing blanks.
+    # NOTE: We can't call @query_params.compact_blank, because we need to
+    # preserve `false` values.
     def validate_search_instance?
+      @query_params.reject! { |_k, v| v == "" }
       @search = Query.create_query(query_model, @query_params)
       return true unless @search.invalid?
 
@@ -163,6 +215,7 @@ module Searchable
     end
 
     def clear_relevant_query
+      clear_query_in_session
       return if (@query = find_query(query_model))&.params.blank?
 
       # Save a blank query. This resets the query for this model everywhere.
@@ -172,15 +225,6 @@ module Searchable
     # Save the validated search params and send these to the index.
     def save_search_query
       @query = Query.lookup_and_save(query_model, **@search.params)
-    end
-
-    def parent_controller
-      self.class.name.deconstantize.underscore
-    end
-
-    # Returns the capitalized :Symbol used by Query for the type of query.
-    def query_model
-      self.class.module_parent.name.singularize.to_sym
     end
 
     # Gets the query class relevant to each controller, assuming the controller

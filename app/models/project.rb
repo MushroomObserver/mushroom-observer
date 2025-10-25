@@ -94,8 +94,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { order_by(::Query::Projects.default_order) }
 
   scope :members, lambda { |members|
+    ids = Lookup::Users.new(members).ids # User lookup only takes logins or ids
     joins(user_group: :user_group_users).
-      merge(UserGroupUser.where(user: members))
+      merge(UserGroupUser.where(user: ids))
+  }
+  # Takes multiple name strings or ids, passes include_synonyms
+  scope :names, lambda { |lookup:, **args|
+    joins(:observations).merge(Observation.names(lookup:, **args))
   }
   scope :title_has,
         ->(phrase) { search_columns(Project[:title], phrase) }
@@ -119,6 +124,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     cols = (Project[:title] + Project[:summary].coalesce("") +
             Project[:field_slip_prefix].coalesce(""))
     search_columns(cols, phrase).distinct
+  }
+  # Accepts multiple regions, see Observation.region for why this is singular
+  scope :region, lambda { |place_names|
+    where(location: Location.region(place_names))
   }
 
   scope :user_is_member, lambda { |user|

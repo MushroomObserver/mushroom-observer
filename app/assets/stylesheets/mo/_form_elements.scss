@@ -4,6 +4,11 @@
 .radio {
   label {
     font-weight: $btn-font-weight;
+
+    // Because it's within the label, it doesn't get the label's margin.
+    .form-between {
+      margin-left: 1rem;
+    }
   }
 }
 
@@ -182,9 +187,16 @@ form {
 }
 
 .panel-body {
-  > .row:last-child .form-group,
-  > .autocompleter:last-child .form-group,
-  > .form-group:last-child {
+  .row:last-child .form-group,
+  > .autocompleter:last-child .form-group.dropdown:last-child,
+  > .form-group:last-child
+  {
     margin-bottom: 0.25rem;
+  }
+
+  + .panel-collapse {
+    .panel-body {
+      padding-top: 0 !important;
+    }
   }
 }

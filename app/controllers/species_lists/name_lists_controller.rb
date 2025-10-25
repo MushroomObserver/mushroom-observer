@@ -56,7 +56,6 @@ module SpeciesLists
       return unless @user
 
       @species_list = SpeciesList.new
-      clear_query_in_session
       init_project_vars_for_create
       @list_members = params[:results].tr("|", " ").delete("*")
       render("species_lists/new")

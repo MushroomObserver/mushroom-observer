@@ -84,6 +84,15 @@ class InatImport < ApplicationRecord
     Project.find_by(title: "SuperImporters").user_group.users
   end
 
+  def self.super_importer?(user)
+    super_importers.include?(user)
+  end
+
+  # Total expected time for associated Job, in seconds.
+  # Based on number of importable observations and user's historical
+  # average import time.
+  # If user has no import history, use system-wide average import time.
+  # If no system-wide history, use BASE_AVG_IMPORT_SECONDS.
   def total_expected_time
     importables * initial_avg_import_seconds
   end

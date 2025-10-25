@@ -18,7 +18,6 @@ export default class extends Controller {
   // with the request, turbo-stream will send a 200 OK even if it didn't save.
   remove(event) {
     const initiatingUser = event?.detail?.user
-    debugger
     if (!initiatingUser || initiatingUser !== this.userValue) { return }
 
     // console.log("Removing modal")

@@ -34,9 +34,6 @@ module ObservationsController::New
     init_license_var
     init_new_image_var(Time.zone.now)
 
-    # Clear search list. [Huh? -JPH 20120513]
-    clear_query_in_session
-
     @observation = Observation.new
     if params[:notes]
       @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
@@ -108,7 +105,7 @@ module ObservationsController::New
   end
 
   def add_list(list)
-    return unless list && check_permission(list)
+    return unless list && permission?(list)
 
     @lists << list unless @lists.include?(list)
     @list_checks[list.id] = true

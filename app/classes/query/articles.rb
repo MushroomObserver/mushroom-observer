@@ -13,6 +13,6 @@ class Query::Articles < Query
   end
 
   def self.default_order
-    :created_at
+    :updated_at
   end
 end

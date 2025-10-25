@@ -141,12 +141,13 @@ module Tabs
       ).tab
     end
 
-    def name_edit_description_tab(user, name)
-      return unless name&.description
+    def name_edit_description_tab(name)
+      description = name&.description
+      return unless description && permission?(description)
 
       InternalLink::Model.new(
         :EDIT.l, name,
-        edit_name_description_path(user, name.description.id),
+        edit_name_description_path(description.id),
         html_options: { icon: :edit }
       ).tab
     end

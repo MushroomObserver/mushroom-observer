@@ -2,6 +2,13 @@
 // top nav bar
 // --------------------------------------------------
 
+#top_nav {
+  .border-top,
+  .border-bottom {
+    border-color: $TOP_BAR_BORDER_COLOR
+  }
+}
+
 .navbar-nav {
   li {
     form.button_to {
@@ -40,16 +47,16 @@
   border-left-width: 0px;
   padding: 0px;
 
-  a,
-  a:visited,
+  a:not(.clear-button),
+  a:visited:not(.clear-button),
   .btn-link {
     color: $navbar-default-color;
     background-color: $navbar-default-link-active-bg;
-  }
 
-  a:hover {
-    color: $navbar-default-link-hover-color;
-    background-color: $navbar-default-link-hover-bg;
+    &:hover {
+      color: $navbar-default-link-hover-color;
+      background-color: $navbar-default-link-hover-bg;
+    }
   }
 
   .navbar-nav {

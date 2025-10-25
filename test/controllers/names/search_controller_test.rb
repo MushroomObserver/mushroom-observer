@@ -7,15 +7,29 @@ require("test_helper")
 # ------------------------------------------------------------
 module Names
   class SearchControllerTest < FunctionalTestCase
-    def test_show
+    def test_show_help
       login
       get(:show)
+      assert_template("names/search/_help")
+    end
+
+    def test_show_help_turbo
+      login
+      get(:show, format: :turbo_stream)
       assert_template("names/search/_help")
     end
 
     def test_new_names_search
       login
       get(:new)
+      assert_template("names/search/new")
+      assert_template("shared/_search_form")
+    end
+
+    def test_new_names_search_turbo
+      login
+      get(:new, format: :turbo_stream)
+      assert_template("shared/_search_form")
     end
 
     def test_new_names_search_form_prefilled_from_existing_query
@@ -38,12 +52,14 @@ module Names
       assert_select("input#query_names_author_has", value: "Pers.")
       assert_select("select#query_names_rank", selected: "Species")
       assert_select("select#query_names_rank_range", selected: "Form")
+      assert_equal(session[:search_type], :names)
     end
 
     def test_create_names_search
       login
       params = {
-        pattern: "Agaricus campestris",
+        has_classification: true,
+        classification_has: names(:agaricus_campestris).classification,
         misspellings: :either
       }
       post(:create, params: { query_names: params })
@@ -61,7 +77,8 @@ module Names
         },
         rank: :Species,
         rank_range: :Genus,
-        misspellings: :either
+        misspellings: :either,
+        created_at: "2007"
       }
       post(:create, params: { query_names: params })
 
@@ -73,7 +90,8 @@ module Names
           include_synonyms: true
         },
         rank: [:Species, :Genus],
-        misspellings: :either
+        misspellings: :either,
+        created_at: %w[2007-01-01 2007-12-31]
       }
       assert_redirected_to(controller: "/names", action: :index,
                            params: { q: { model: :Name, **validated_params } })

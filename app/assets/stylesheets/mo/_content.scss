@@ -97,7 +97,11 @@ ul.tight-list {
 }
 
 .h3.page-title {
-  font-size: 20px;
+  font-size: 22px;
+
+  .badge-id {
+    font-size: 66% !important
+  }
 
   small {
     @extend .ml-3;

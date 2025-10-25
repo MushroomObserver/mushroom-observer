@@ -1,7 +1,10 @@
 <%
-@owner_naming = owner_naming_line(@owner_name) # before observation_show_title
+# before observation_show_title
+show_owner_naming = owner_naming_line(
+  name: @observation.name, owner_name: @owner_name, user: @user
+)
 show_title = observation_show_title(
-  obs: @observation, owner_naming: @owner_naming, user: @user
+  obs: @observation, show_owner_naming:, user: @user
 )
 add_page_title(show_title, [:OBSERVATION.l, show_title].safe_join(" "))
 num_images = @observation.images.length

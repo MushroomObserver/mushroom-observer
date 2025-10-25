@@ -24,14 +24,20 @@ class Inat
 
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
-      return unless @inat_obs.importable?
-
-      builder = Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
-      @observation = builder.mo_observation
-
-      update_inat_observation
-      increment_imported_counts
-      update_timings
+      if @inat_obs.importable?
+        builder =
+          Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
+        @observation = builder.mo_observation
+        update_inat_observation
+        increment_imported_counts
+        update_timings
+      elsif @inat_obs.observed_on_missing?
+        error = "iNat #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
+        @inat_import.add_response_error(error)
+      end
+      # NOTE: We need not handle the case where the taxon is not importable,
+      # because the iNat PageParser only requests observations of fungi and
+      # protozoa (a slime mold proxy).
     end
 
     private

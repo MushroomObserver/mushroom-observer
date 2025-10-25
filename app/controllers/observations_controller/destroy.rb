@@ -18,7 +18,7 @@ module ObservationsController::Destroy
       next_id = this_query.next_id
     end
 
-    if !check_permission!(@observation)
+    if !permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
       redirect_to({ action: :show, id: obs_id })
     elsif !@observation.destroy

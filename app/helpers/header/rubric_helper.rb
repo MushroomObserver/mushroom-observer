@@ -19,19 +19,20 @@ module Header
     end
 
     def nav_index_link(rubric)
-      return rubric unless (path = nav_linkable_controller_path)
+      return rubric unless (ctrlr = nav_linkable_controller)
 
       link_to(
         rubric,
-        { controller: "/#{path}",
-          action: :index, q: q_param }
+        { controller: "/#{ctrlr.controller_path}", action: :index },
+        class: "#{ctrlr.controller_name}_index_link",
+        data: { toggle: "tooltip", placement: :bottom,
+                title: :INDEX_OBJECT.t(type: ctrlr.controller_name.to_sym) }
       )
     end
 
     # Check for a linkable (parent?) controller and return the path
-    def nav_linkable_controller_path
-      ctrlr = if (parent = parent_controller_module) &&
-                 Object.const_defined?(klass = "::#{parent}Controller")
+    def nav_linkable_controller
+      ctrlr = if (klass = nav_linkable_parent_controller)
                 klass.constantize.new
               else
                 controller
@@ -39,15 +40,25 @@ module Header
       return false unless ctrlr.methods.include?(:index) &&
                           NAV_INDEXABLES.include?(ctrlr.controller_name)
 
-      ctrlr.controller_path
+      ctrlr
+    end
+
+    def nav_linkable_parent_controller
+      unless (parent = parent_controller_module) &&
+             Object.const_defined?(klass = "::#{parent}Controller")
+        return false
+      end
+
+      klass
     end
 
     NAV_INDEXABLES = %w[
       observations names species_lists projects locations images herbaria
-      glossary_terms comments rss_logs
+      glossary_terms comments rss_logs field_slips
     ].freeze
 
     # Descriptions also don't get a create button
+    # Herbarium records are created via Observations, not from the index
     def nav_create(user, controller)
       unless user &&
              controller.methods.include?(:new) &&
@@ -66,8 +77,7 @@ module Header
 
     NAV_CREATABLES = %w[
       observations names species_lists projects locations images herbaria
-      herbarium_records collection_numbers glossary_terms field_slips
-      articles publications
+      glossary_terms field_slips articles publications
     ].freeze
 
     def nav_scan_qr_code(user, controller)

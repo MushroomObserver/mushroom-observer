@@ -1479,6 +1479,7 @@
   app_advanced_search: Advanced Search
   app_timer: "time: [seconds] sec"
   app_index_timer: "[num] results in [seconds] sec"
+  app_context_actions: Actions
 
   # This shows up at the bottom of every page. We recommend something like: \n
   # "Translated into <Language> by _user your-login_"
@@ -2070,6 +2071,10 @@
   prefs_image_large: "[:image_show_large] (960 x 960)"
   prefs_image_huge: "[:image_show_huge] Huge (1280 x 1280)"
   prefs_image_full_size: "[:image_show_full_size]"
+  prefs_label_format: Preferred label format
+  prefs_label_format_pdf: Portable Document Format (PDF)
+  prefs_label_format_rtf: Rich Text Format (RTF)
+
   prefs_layout_count: List page items
   prefs_layout_title: List page layout
   prefs_rows_by: rows ×
@@ -2900,11 +2905,11 @@
   field_slip_creator: Creator
   field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
-  field_slip_edit: Edit [:FIELD_SLIP]
+  field_slip_edit: "[:edit_object(type=:FIELD_SLIP)]"
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
   field_slip_filter_by: Filter by [:PROJECT]
-  field_slip_index: "[:FIELD_SLIP] Index"
+  field_slip_index: "[:index_object(type=:FIELD_SLIPS)]"
   field_slip_job_no_project: No Project with id=[ID]
   field_slip_job_no_tracker: No Field Slip Tracker found
   field_slip_keep_obs: Save with Current Observation
@@ -3106,10 +3111,11 @@
   inat_previous_mirror: iNat [inat_id] is a "mirror" of existing MO Observation [mo_obs_id]
   inat_too_many_ids_listed: Too many ids listed
   inat_importing_all_anothers: You cannot import all observations of another person
+  inat_observed_missing_date: Observed Missing Date
 
   inat_import_started: Your import has started. Refresh page to update results.
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
-  inat_wrong_user: You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username.
+  inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
   inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
   inat_snapshot_caption: iNat imported data
@@ -3778,10 +3784,25 @@
   pattern_search_terms_multiple: Separate multiple values with commas.
   pattern_search_terms_short_help: Click the ? next to the search bar for a list of expected terms.
 
+  query_term_names: "[type] has [:observations] of one of these [:names]."
+  query_term_region: "[type] is associated with this [:region]."
+  query_term_by_users: "[type] created by one of these [:users]."
+  query_term_title_has: "[type] [:title] contains these words."
+  query_term_has_comments: "[type] has any [:comments]?"
+  query_term_comments_has: "[type] [:comments] have these words."
+  query_term_has_notes: "[type] has [:notes]?"
+  query_term_notes_has: "[type] [:notes] have these words."
+  query_term_date: Date of [type].
+  query_term_created_at: Date [type] was first used.
+  query_term_updated_at: Date [type] was last modified.
+  query_term_projects: "[type] belongs to one of these [:projects]."
+  query_term_has_observations: "Has [:observations]?"
+  query_term_has_images: "Has [:images]?"
+
   # We're borrowing these for the help popups on the search forms, thus the
   # similar entries. In the case of apparent duplicates, one will be the
   # pattern search keyword, the other the query param.
-  observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
+  observation_term_when: "Date mushroom was observed: YYYY-MM-DD, YYYY or MM; ranges okay: YYYY-MM-DD-YYYY-MM-DD, YYYY-YYYY, MM-MM."
   observation_term_date: "[:observation_term_when]"
   observation_term_created: Date observation was first posted.
   observation_term_created_at: "[:observation_term_created]"
@@ -3789,7 +3810,7 @@
   observation_term_updated_at: "[:observation_term_modified]"
   observation_term_name: Consensus name is one of these names.
   observation_term_names: "[:observation_term_name]"
-  observation_term_exclude_consensus: Exclude Observations whose consensus is a name listed in "name:value". (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
+  observation_term_exclude_consensus: Exclude Observations whose consensus name is one of these names. (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
   observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
@@ -3799,17 +3820,17 @@
   observation_term_locations: "[:observation_term_location]"
   observation_term_region: The Observation's Location name includes this string. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown. Cf. **[:location]**.
   observation_term_pattern: "[:pattern]"
-  observation_term_project: Observation belongs to one of these projects.
-  observation_term_projects: "[:observation_term_project]"
+  observation_term_project: "[:observation_term_projects]"
+  observation_term_projects: "[:query_term_projects(type=:OBSERVATION)]"
   observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these observation lists.
   observation_term_species_lists: "[:observation_term_list]"
-  observation_term_user: Observation created by one of these users.
-  observation_term_by_users: "[:observation_term_user]"
-  observation_term_notes: Notes contains the given string.
-  observation_term_notes_has: "[:observation_term_notes]"
-  observation_term_comments: Comments contain the given string.
-  observation_term_comments_has: "[:observation_term_comments]"
+  observation_term_user: "[:observation_term_by_users]"
+  observation_term_by_users: "[:query_term_by_users(type=:OBSERVATION)]"
+  observation_term_notes: "[:observation_term_notes_has]"
+  observation_term_notes_has: "[:query_term_notes_has(type=:OBSERVATION)]"
+  observation_term_comments: "[:observation_term_comments_has]"
+  observation_term_comments_has: "[:query_term_comments_has(type=:OBSERVATION)]"
   observation_term_field_slip: Observation corresponds to this field slip.
   observation_term_field_slips: "[:observation_term_field_slip]"
   observation_term_confidence: Confidence is in this range.
@@ -3823,11 +3844,11 @@
   observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
-  observation_term_has_notes: Has Notes?
+  observation_term_has_notes: "[:query_term_has_notes]"
   observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_notes_fields: "[:observation_term_has_field]"
-  observation_term_has_comments: Has any comments?
+  observation_term_has_comments: "[:query_term_has_comments]"
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
   # We're borrowing these for the help popups on the search forms, thus the
@@ -3835,10 +3856,10 @@
   # pattern search keyword, the other the query param.
   name_term_names: "[:NAMES]"
   name_term_pattern: "[:PATTERN]"
-  name_term_created: Date name was first used.
-  name_term_created_at: "[:name_term_created]"
-  name_term_modified: Date name was last modified.
-  name_term_updated_at: "[:name_term_modified]"
+  name_term_created: "[:name_term_created_at]"
+  name_term_created_at: "[:query_term_created_at(type=:LOCATION)]"
+  name_term_modified: "[:name_term_updated_at]"
+  name_term_updated_at: "[:query_term_updated_at(type=:LOCATION)]"
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
@@ -3869,23 +3890,73 @@
   name_term_comments_has: "[:name_term_comments]"
 
   # Help text for search_form_fields
-  location_term_region: The Location's name includes this string. Partial match anchored at end, including country at least, e.g., "California, USA".
-  location_term_by_users: Location created by one of these users.
+  location_term_region: The Location is within this Region; its name ends with this string. Must include the country, e.g., "California, USA".
+  location_term_by_users: "[:query_term_by_users(type=:LOCATION)]"
   location_term_by_editor: Location edited by this user.
   location_term_pattern: "[:PATTERN]"
-  location_term_regexp: Regexp
-  location_term_created_at: "Date [:location] was first used."
-  location_term_updated_at: "Date [:location] was last modified."
-  location_term_has_notes: "[:observation_term_has_notes]"
-  location_term_notes_has: "[:observation_term_notes]"
-  location_term_has_observations: Has observations?
+  location_term_regexp: "The Location's name includes this string."
+  location_term_created_at: "[:query_term_created_at(type=:LOCATION)]"
+  location_term_updated_at: "[:query_term_updated_at(type=:LOCATION)]"
+  location_term_has_notes: "[:query_term_has_notes(type=:LOCATION)]"
+  location_term_notes_has: "[:query_term_notes_has(type=:LOCATION)]"
+  location_term_has_observations: "[:query_term_has_observations]"
   location_term_has_descriptions: Has a description?
 
-  # link to search bar help
-  search_bar_help: Search Help
+  project_term_members: Project has one of these members.
+  project_term_names: "[:query_term_names(type=:PROJECT)]"
+  project_term_include_synonyms: "[:observation_term_include_synonyms]"
+  project_term_include_subtaxa: "[:observation_term_include_subtaxa]"
+  project_term_include_all_name_proposals: "[:observation_term_include_all_name_proposals]"
+  project_term_exclude_consensus: "[:observation_term_exclude_consensus]"
+  project_term_region: "[:query_term_region(type=:PROJECT)]"
+  project_term_field_slip_prefix_has: Project field slips have this prefix.
+  project_term_by_users: "[:query_term_by_users(type=:PROJECT)]"
+  project_term_has_observations: "[:query_term_has_observations]"
+  project_term_has_species_lists: "Has [:species_lists]?"
+  project_term_has_images: "[:query_term_has_images]"
+  project_term_pattern: "[:PATTERN]"
+  project_term_title_has: "[:query_term_title_has(type=:PROJECT)]"
+  project_term_has_summary: "[:PROJECT] has summary."
+  project_term_summary_has: "[:PROJECT] summary has these words."
+  project_term_has_comments: "[:query_term_has_comments(type=:PROJECT)]"
+  project_term_comments_has: "[:query_term_comments_has(type=:PROJECT)]"
+  project_term_created_at: "[:query_term_created_at(type=:project)]"
+  project_term_updated_at: "[:query_term_updated_at(type=:project)]"
 
-  # Search bar help page
+  species_list_term_names: "[:query_term_names(type=:SPECIES_LIST)]"
+  species_list_term_include_synonyms: "[:observation_term_include_synonyms]"
+  species_list_term_include_subtaxa: "[:observation_term_include_subtaxa]"
+  species_list_term_include_all_name_proposals: "[:observation_term_include_all_name_proposals]"
+  species_list_term_exclude_consensus: "[:observation_term_exclude_consensus]"
+  species_list_term_region: "[:query_term_region(type=:SPECIES_LIST)]"
+  species_list_term_projects: "[:query_term_projects(type=:SPECIES_LIST)]"
+  species_list_term_by_users: "[:query_term_by_users(type=:SPECIES_LIST)]"
+  species_list_term_title_has: "[:query_term_title_has(type=:SPECIES_LIST)]"
+  species_list_term_has_notes: "[:query_term_has_notes(type=:SPECIES_LIST)]"
+  species_list_term_notes_has: "[:query_term_notes_has(type=:SPECIES_LIST)]"
+  species_list_term_has_comments: "[:query_term_has_comments(type=:SPECIES_LIST)]"
+  species_list_term_comments_has: "[:query_term_comments_has(type=:SPECIES_LIST)]"
+  species_list_term_date: "[:query_term_date(type=:SPECIES_LIST)]"
+  species_list_term_created_at: "[:query_term_created_at(type=:SPECIES_LIST)]"
+  species_list_term_updated_at: "[:query_term_updated_at(type=:SPECIES_LIST)]"
+
+  herbarium_term_nonpersonal: "Institutional [:herbaria]."
+  herbarium_term_by_users: "[:query_term_by_users(type=:HERBARIUM)]"
+  herbarium_term_mailing_address_has: "[:HERBARIUM] mailing address in this region."
+  herbarium_term_code_has: "[:HERBARIUM] code contains this string."
+  herbarium_term_name_has: "[:HERBARIUM] name contains these words."
+  herbarium_term_description_has: "[:HERBARIUM] description contains these words."
+  herbarium_term_created_at: "[:query_term_created_at(type=:HERBARIUM)]"
+  herbarium_term_updated_at: "[:query_term_updated_at(type=:HERBARIUM)]"
+
+  # Search bar
+  search_bar_help: Search Help
+  search_bar_more_options: More Options
+  search_bar_fewer_options: Fewer Options
   search_bar_help_title: Search Bar Help
+
+  # Search titles
+  search_form_title: "[:SEARCH] [type]"
 
   # Privacy policy
   privacy_title: The Mushroom Observer Privacy Policy
@@ -4473,7 +4544,7 @@
   api_help_min_size: width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge
   api_help_misspellings: include misspellings? "either" means do not care and "only" means only show misspelt names
   api_help_north: max latitude
-  api_help_notes_field: set value of the custom notes template field, substitute field name for "$field"
+  api_help_notes_field: set value of notes field using square braces, e.g., set_notes%5BCap%5D=red"
   api_help_notes_has: search within notes
   api_help_number: collector's number
   api_help_number_has: search within collector's number
@@ -4581,7 +4652,7 @@
   query_pattern: search pattern
   query_quality: "[:quality]"
   query_rank: "[:rank]"
-  query_regexp: country
+  query_regexp: "[:search]"
   query_region: "[:regions]"
   query_sizes: sizes
   query_sources: sources

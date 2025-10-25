@@ -39,9 +39,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   def js_button(**args, &block)
     button = block ? capture(&block) : args[:button]
     opts = args.except(:form, :button, :class, :center)
-    opts[:class] = "btn btn-default"
-    opts[:class] += " center-block my-3" if args[:center] == true
-    opts[:class] += " #{args[:class]}" if args[:class].present?
+    classes = %w[btn btn-default]
+    classes += %w[center-block my-3] if args[:center] == true
+    opts[:class] = class_names(classes, args[:class])
 
     button_tag(button, type: :button, **opts)
   end
@@ -504,6 +504,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   def field_label_opts(args)
     label_opts = {}
     label_opts[:index] = args[:index] if args[:index].present?
+    label_opts[:class] = "mr-3"
     label_opts
   end
 
@@ -516,9 +517,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        if args[pos] == key
-          args[pos] = help_note(:span, "(#{key.l})", class: "ml-3")
-        end
+        args[pos] = help_note(:span, "(#{key.l})") if args[pos] == key
       end
     end
     args
@@ -531,7 +530,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     end
 
     need_margin = args[:inline].present?
-    between_class = need_margin ? "mr-3" : ""
+    between_class = need_margin ? "mr-3" : "form-between"
 
     id = [
       nested_field_id(args),
@@ -539,10 +538,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     ].compact_blank.join("_")
     args[:between] = capture do
       tag.span(class: between_class) do
-        if args[:between].present?
-          concat(tag.span(class: "ml-3") { args[:between] })
-        end
-        concat(collapse_info_trigger(id, class: "ml-3"))
+        concat(tag.span { args[:between] }) if args[:between].present?
+        concat(collapse_info_trigger(id))
       end
     end
     args[:append] = capture do

@@ -352,6 +352,12 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
+    // Check the input for prefilled values in a form
+    if (this.inputTarget.value.length > 0) {
+      // this.scheduleRefresh(); // matches may not be populated
+      this.updateHiddenId();
+    }
+
     const hidden_id = parseInt(this.hiddenTarget.value);
     this.cssHasIdOrNo(hidden_id);
   }
@@ -1091,7 +1097,7 @@ export default class extends Controller {
   }
 
   // Clears not only the ID, but also any data attributes of selected row,
-  // and the most recent keeper.
+  // and for multiple value autocompleters, the most recent "keeper".
   clearHiddenId() {
     this.verbose("autocompleter:clearHiddenId()");
     // Before we change the hidden input, store the old value and data
@@ -1100,6 +1106,8 @@ export default class extends Controller {
     this.clearLastHiddenTargetValue();
     // This checks the hidden_data against the stored_data
     this.hiddenIdChanged();
+    // Remove the green checkmark
+    this.cssHasIdOrNo(null);
   }
 
   // Removes the last id in the hidden input (array as csv string)
@@ -1687,8 +1695,15 @@ export default class extends Controller {
 
   getInputArray() {
     this.verbose("autocompleter:getInputArray()");
-    const input_array =
-      this.inputTarget.value.split(this.SEPARATOR).map((v) => v.trim());
+    const input_value = this.inputTarget.value;
+    const input_array = (() => {
+      // Don't return an array with an empty string, return an empty array.
+      if (input_value == "") {
+        return [];
+      } else {
+        return input_value.split(this.SEPARATOR).map((v) => v.trim());
+      }
+    })();
     this.verbose(input_array);
     return input_array;
   }
