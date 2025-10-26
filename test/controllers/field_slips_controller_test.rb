@@ -76,8 +76,28 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
+  end
+
+  def test_should_not_change_collector_of_last_viewed_obs
+    login(@field_slip.user.login)
+    ObservationView.update_view_stats(@field_slip.observation_id,
+                                      @field_slip.user_id)
+    collector = @field_slip.collector
+    code = "Y#{@field_slip.code}"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_last_obs.t,
+             field_slip: {
+               code: code,
+               project_id: projects(:eol_project).id,
+               collector: rolf.login
+             }
+           })
+    end
 
     slip = FieldSlip.find_by(code: code)
+    assert_equal(collector, slip.collector)
     assert_redirected_to(observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end

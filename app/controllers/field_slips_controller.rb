@@ -195,9 +195,13 @@ class FieldSlipsController < ApplicationController
     obs = @field_slip.observation
     return unless obs
 
+    # Don't update Collector
+    notes = field_slip_notes
+    notes.delete(:Collector)
+
     check_name
     # Don't override obs.when or obs.place_name
-    obs.notes.value_merge!(field_slip_notes)
+    obs.notes.value_merge!(notes)
     obs.notes.compact_blank!
     obs.save!
   end
