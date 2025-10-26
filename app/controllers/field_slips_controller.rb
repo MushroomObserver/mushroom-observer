@@ -197,7 +197,7 @@ class FieldSlipsController < ApplicationController
 
     # Don't update Collector
     notes = field_slip_notes
-    notes.delete(:Collector)
+    notes.delete(:Collector) unless @user == obs.user
 
     check_name
     # Don't override obs.when or obs.place_name
