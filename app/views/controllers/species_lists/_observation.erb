@@ -9,12 +9,12 @@ listing_classes = image ? "col-sm-8 col-md-9" : "col-xs-12"
   <%= tag.div(class: "row") do %>
     <% if image %>
       <%= tag.div(class: "col-sm-4 col-md-3") do
-        render InteractiveImage.new(
+        render(Components::InteractiveImage.new(
           user: user,
           image: observation.thumb_image,
           image_link: observation_path(id: observation.id),
           votes: true
-        )
+        ))
       end %>
     <% end %>
 

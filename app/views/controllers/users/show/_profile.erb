@@ -30,8 +30,13 @@ footer =
 
   <%= if @show_user.image_id
     tag.div(class: "float-left mr-5 mb-3") do
-      render InteractiveImage.new(user: @user, image: Image.find(@show_user.image_id), size: :small,
-                                               votes: false, id_prefix: "profile_image")
+      render(Components::InteractiveImage.new(
+        user: @user,
+        image: Image.find(@show_user.image_id),
+        size: :small,
+        votes: false,
+        id_prefix: "profile_image"
+      ))
     end
   end %>
 

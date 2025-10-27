@@ -2,6 +2,72 @@
 
 This document provides instructions for Claude Code when working on the Mushroom Observer codebase.
 
+## Coding Style Requirements
+
+### Always Use Parentheses for Method Calls with Arguments
+
+**Always use parentheses when calling methods that have arguments.**
+
+This applies to:
+- Ruby files (`.rb`)
+- ERB templates (`.erb`)
+- All method calls including `render`, helper methods, etc.
+
+```ruby
+# Good
+render(component)
+User.find(id)
+link_to(text, path)
+helper_method  # no args, no parens needed
+
+# Bad
+render component
+User.find id
+link_to text, path
+```
+
+See `.claude/style_guide.md` for comprehensive style examples.
+
+### Line Length Limits
+
+**Keep lines to 80 characters or less** in both Ruby and ERB files.
+
+#### Ruby Files:
+- Rubocop enforces 80 character line length
+- Split long lines using:
+  - Method chaining on new lines
+  - Breaking long parameter lists
+  - Extracting complex expressions to variables
+
+```ruby
+# Good
+render(Components::InteractiveImage.new(
+  user: @user,
+  image: @image,
+  votes: true
+))
+
+# Bad (too long)
+render(Components::InteractiveImage.new(user: @user, image: @image, votes: true, size: :medium))
+```
+
+#### ERB Templates:
+- **Also follow 80 character limit** even though Rubocop doesn't check ERB files
+- Break long lines in ERB using the same techniques as Ruby
+- ERB tags (`<%=`, `%>`) count toward the 80 character limit
+
+```erb
+<%# Good %>
+<%= render(Components::InteractiveImage.new(
+      user: @user,
+      image: @image,
+      votes: true
+    )) %>
+
+<%# Bad (too long) %>
+<%= render(Components::InteractiveImage.new(user: @user, image: @image, votes: true)) %>
+```
+
 ## Code Quality and Linting
 
 ### Always Run Rubocop on New Code

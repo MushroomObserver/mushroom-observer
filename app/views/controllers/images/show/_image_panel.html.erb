@@ -23,7 +23,11 @@
   </div><!--.panel-heading-->
   <div class="panel-body">
 
-    <%= render InteractiveImage.new(user: @user, image: @image, **image_show_args) %>
+    <%= render(Components::InteractiveImage.new(
+      user: @user,
+      image: @image,
+      **image_show_args
+    )) %>
 
     <div class="mt-3 text-center">
       <% if User.current %>

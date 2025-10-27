@@ -37,10 +37,12 @@ action = { controller: "/projects/members", action: :create,
       <tr>
         <td class="text-center">
           <%= if user.image_id
-          render InteractiveImage.new(
+          render(Components::InteractiveImage.new(
             user: user,
-            image: Image.find(user.image_id), votes: false, size: :thumbnail
-          )
+            image: Image.find(user.image_id),
+            votes: false,
+            size: :thumbnail
+          ))
               end %>
           <%= user_link(user, user.login) %>
         </td>

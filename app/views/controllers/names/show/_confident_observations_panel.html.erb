@@ -8,6 +8,6 @@ carousel_locals = {
 <%= if @best_images&.length&.positive?
   tag.div(class: "panel panel-default",
           id: "name_confident_observations") do
-    render Carousel.new(**carousel_locals)
+    render(Components::Carousel.new(**carousel_locals))
   end
 end %>
