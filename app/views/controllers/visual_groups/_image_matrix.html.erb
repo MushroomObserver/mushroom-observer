@@ -1,14 +1,14 @@
 <%= tag.div(id: "results") do
   paginated_results do
-    render MatrixTable.new do
+    render(Components::MatrixTable.new do
       @subset.each do |row|
-        render MatrixBox.new(id: row[0]) do
+        render(Components::MatrixBox.new(id: row[0]) do
           tag.div(class: "panel panel-default") do
             [
               tag.div(class: "thumbnail-container") do
-                render InteractiveImage.new(
+                render(Components::InteractiveImage.new(
                   user: @user, image: row[0], original: true, votes: false, full_width: true
-                )
+                ))
               end,
               tag.div(class: "panel-body") do
                 visual_group_status_links(
@@ -17,8 +17,8 @@
               end
             ].safe_join
           end
-        end
+        end)
       end
-    end
+    end)
   end
 end %>

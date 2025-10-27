@@ -39,18 +39,18 @@ include: [:user, { observations: :name }])
 
 <% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
 <%= paginated_results do %>
-  <%= render MatrixTable.new do %>
+  <%= render(Components::MatrixTable.new do %>
 
     <% @objects.each do |image| %>
-      <%= render MatrixBox.new(extra_class: "text-center", id: image.id) do %>
+      <%= render(Components::MatrixBox.new(extra_class: "text-center", id: image.id) do %>
         <%= panel_block do %>
-          <%= render InteractiveImage.new(user: @user, image: image, votes: false, original: true,
+          <%= render(Components::InteractiveImage.new(user: @user, image: image, votes: false, original: true,
                                                        image_link: form_action.merge(img_id: image.id),
                                                        link_method: :post,
-                                                       extra_classes: "image-to-reuse") %>
+                                                       extra_classes: "image-to-reuse")) %>
         <% end %>
-      <% end %>
+      <% end) %>
     <% end %>
 
-  <% end %>
+  <% end) %>
 <% end %>

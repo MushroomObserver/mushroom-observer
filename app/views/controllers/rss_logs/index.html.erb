@@ -10,5 +10,5 @@ flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginated_results do %>
-  <%= render MatrixTable.new(objects: @objects, cached: true) %>
+  <%= render(Components::MatrixTable.new(objects: @objects, cached: true)) %>
 <% end %>

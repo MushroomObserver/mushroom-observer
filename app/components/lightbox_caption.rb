@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# Lightbox caption component for building the HTML caption shown in the lightbox.
+# Lightbox caption component for building the HTML caption shown in the
+# lightbox.
 #
 # Handles two types of captions:
 # 1. Observation captions - full details with when/where/who, notes, and naming
@@ -66,29 +67,43 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_obs_title
-    btn_style = identify ? "text-bold" : "btn btn-primary"
+    h4(obs_title_attributes) do
+      render_obs_title_content
+    end
+  end
 
-    h4(
+  def obs_title_attributes
+    {
       id: "observation_what_#{obs.id}",
       class: "obs-what",
       data: {
         controller: "section-update",
         section_update_user_value: user&.id
       }
-    ) do
-      if identify
-        span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
-      end
-      whitespace
-      a(
-        obs.id,
-        href: helpers.url_for(obs.show_link_args),
-        class: "#{btn_style} mr-3",
-        id: "caption_obs_link_#{obs.id}"
-      )
-      whitespace
-      plain(obs.user_format_name(user).t.small_author)
-    end
+    }
+  end
+
+  def render_obs_title_content
+    render_obs_label if identify
+    whitespace
+    render_obs_link
+    whitespace
+    plain(obs.user_format_name(user).t.small_author)
+  end
+
+  def render_obs_label
+    span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
+  end
+
+  def render_obs_link
+    btn_style = identify ? "text-bold" : "btn btn-primary"
+
+    a(
+      obs.id,
+      href: helpers.url_for(obs.show_link_args),
+      class: "#{btn_style} mr-3",
+      id: "caption_obs_link_#{obs.id}"
+    )
   end
 
   def render_obs_when_where_who
@@ -107,24 +122,33 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_where
     p(class: "obs-where", id: "observation_where") do
-      label = if obs.is_collection_location
-                :show_observation_collection_location.t
-              else
-                :show_observation_seen_at.t
-              end
-      plain("#{label}: ")
-
-      if user
-        unsafe_raw(helpers.location_link(obs.where, obs.location, nil, true))
-      else
-        plain(obs.where)
-      end
-
-      if obs.location&.vague?
-        whitespace
-        render_vague_notice
-      end
+      plain("#{obs_where_label}: ")
+      render_obs_location
+      render_vague_notice_if_needed
     end
+  end
+
+  def obs_where_label
+    if obs.is_collection_location
+      :show_observation_collection_location.t
+    else
+      :show_observation_seen_at.t
+    end
+  end
+
+  def render_obs_location
+    if user
+      unsafe_raw(helpers.location_link(obs.where, obs.location, nil, true))
+    else
+      plain(obs.where)
+    end
+  end
+
+  def render_vague_notice_if_needed
+    return unless obs.location&.vague?
+
+    whitespace
+    render_vague_notice
   end
 
   def render_vague_notice
@@ -140,19 +164,18 @@ class Components::LightboxCaption < Components::Base
     return unless obs.lat && user
 
     p(class: "obs-where-gps", id: "observation_where_gps") do
-      if obs.reveal_location?(user)
-        link_text = [
-          obs.display_lat_lng.t,
-          obs.display_alt.t,
-          "[#{:click_for_map.t}]"
-        ].join(" ")
-        a(link_text, href: helpers.map_observation_path(id: obs.id))
-      end
-
-      if obs.gps_hidden
-        i("(#{:show_observation_gps_hidden.t})")
-      end
+      render_gps_link if obs.reveal_location?(user)
+      i("(#{:show_observation_gps_hidden.t})") if obs.gps_hidden
     end
+  end
+
+  def render_gps_link
+    link_text = [
+      obs.display_lat_lng.t,
+      obs.display_alt.t,
+      "[#{:click_for_map.t}]"
+    ].join(" ")
+    a(link_text, href: helpers.map_observation_path(id: obs.id))
   end
 
   def render_obs_who
@@ -160,38 +183,52 @@ class Components::LightboxCaption < Components::Base
 
     p(class: "obs-who", id: "observation_who") do
       plain("#{:WHO.t}: ")
-
-      if user
-        unsafe_raw(helpers.user_link(obs_user))
-      else
-        plain(obs_user.unique_text_name)
-      end
-
-      if user && obs_user != user && !obs_user&.no_emails &&
-         obs_user&.email_general_question
-        plain(" [")
-        unsafe_raw(
-          helpers.modal_link_to(
-            "observation_email",
-            *helpers.send_observer_question_tab(obs)
-          )
-        )
-        plain("]")
-      end
+      render_obs_user(obs_user)
+      render_contact_link(obs_user) if show_contact_link?(obs_user)
     end
+  end
+
+  def render_obs_user(obs_user)
+    if user
+      unsafe_raw(helpers.user_link(obs_user))
+    else
+      plain(obs_user.unique_text_name)
+    end
+  end
+
+  def show_contact_link?(obs_user)
+    user && obs_user != user && !obs_user&.no_emails &&
+      obs_user&.email_general_question
+  end
+
+  def render_contact_link(_obs_user)
+    plain(" [")
+    unsafe_raw(
+      helpers.modal_link_to(
+        "observation_email",
+        *helpers.send_observer_question_tab(obs)
+      )
+    )
+    plain("]")
   end
 
   def render_truncated_notes
     return unless obs.notes?
 
-    notes = obs.notes_show_formatted.truncate(150, separator: " ").
-            sub(/\A/, "#{:NOTES.t}: ").wring_out_textile.tpl
-
     div(class: "obs-notes", id: "observation_#{obs.id}_notes") do
-      Textile.clear_textile_cache
-      Textile.register_name(obs.name)
-      unsafe_raw(notes)
+      prepare_textile_cache
+      unsafe_raw(formatted_truncated_notes)
     end
+  end
+
+  def prepare_textile_cache
+    Textile.clear_textile_cache
+    Textile.register_name(obs.name)
+  end
+
+  def formatted_truncated_notes
+    obs.notes_show_formatted.truncate(150, separator: " ").
+      sub(/\A/, "#{:NOTES.t}: ").wring_out_textile.tpl
   end
 
   def render_image_caption

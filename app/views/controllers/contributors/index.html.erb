@@ -14,5 +14,5 @@ add_pagination(@pagination_data)
 <!--.row-->
 
 <%= paginated_results do %>
-  <%= render MatrixTable.new(objects: @objects) %>
+  <%= render(Components::MatrixTable.new(objects: @objects)) %>
 <% end %>

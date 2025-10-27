@@ -8,11 +8,11 @@ header_components = local_assigns[:header].presence || []
 footer_components = local_assigns[:footer]
 %>
 
-<%= render MatrixBox.new(
+<%= render(Components::MatrixBox.new(
   user: @user,
   object: object,
   columns: columns,
   identify: identify,
   header: header_components,
   footer: footer_components
-) %>
+)) %>

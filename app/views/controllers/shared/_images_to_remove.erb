@@ -6,15 +6,15 @@
 
   <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
-  <%= render MatrixTable.new do %>
+  <%= render(Components::MatrixTable.new do %>
 
     <% @object.images.each do |image| %>
 
-      <%= render MatrixBox.new(id: image.id) do %>
+      <%= render(Components::MatrixBox.new(id: image.id) do %>
         <%= tag.div(class: "py-3 text-center") do %>
           <% # no special link-or-button param here, there's a checkbox below %>
-          <%= render InteractiveImage.new(user: @user, image: image, original: true, votes: false,
-                                                       extra_classes: "image-to-remove") %>
+          <%= render(Components::InteractiveImage.new(user: @user, image: image, original: true, votes: false,
+                                                       extra_classes: "image-to-remove")) %>
         <% end %>
         <%= tag.div(class: "pb-3 text-center") do %>
           <%= fields_for(:selected) do |f_s| %>
@@ -22,11 +22,11 @@
             <%= f_s.label(image.id, "#{:image.t} ##{image.id}") %>
           <% end %>
         <% end %>
-      <% end %><!-- .matrix-box -->
+      <% end) %><!-- .matrix-box -->
 
     <% end %>
 
-  <% end %>
+  <% end) %>
 
   <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 

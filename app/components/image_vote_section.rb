@@ -2,7 +2,8 @@
 
 # Image vote section component for displaying image voting UI.
 #
-# Renders a vote meter (progress bar) and vote buttons for users to vote on images.
+# Renders a vote meter (progress bar) and vote buttons for users to
+# vote on images.
 # The component handles:
 # - Vote percentage calculation and display
 # - Progress bar visualization
@@ -87,32 +88,37 @@ class Components::ImageVoteSection < Components::Base
 
   def render_image_vote_links
     Image.all_votes.each_with_index do |vote, index|
-      plain("|") if index > 0
+      plain("|") if index.positive?
       render_vote_link(vote)
     end
   end
 
   def render_vote_link(vote)
     current_vote = image.users_vote(user)
-    vote_text = if vote.zero?
-                  "(x)"
-                else
-                  helpers.image_vote_as_short_string(vote)
-                end
 
     if current_vote == vote
-      span(helpers.image_vote_as_short_string(vote), class: "image-vote")
+      render_current_vote(vote)
     else
-      unsafe_raw(
-        helpers.put_button(
-          name: vote_text,
-          class: "image-vote-link",
-          path: helpers.image_vote_path(image_id: image.id, value: vote),
-          title: helpers.image_vote_as_help_string(vote),
-          data: { image_id: image.id, value: vote }
-        )
-      )
+      render_vote_button(vote)
     end
+  end
+
+  def render_current_vote(vote)
+    span(helpers.image_vote_as_short_string(vote), class: "image-vote")
+  end
+
+  def render_vote_button(vote)
+    vote_text = vote.zero? ? "(x)" : helpers.image_vote_as_short_string(vote)
+
+    unsafe_raw(
+      helpers.put_button(
+        name: vote_text,
+        class: "image-vote-link",
+        path: helpers.image_vote_path(image_id: image.id, value: vote),
+        title: helpers.image_vote_as_help_string(vote),
+        data: { image_id: image.id, value: vote }
+      )
+    )
   end
 
   def helpers
