@@ -50,8 +50,8 @@ module ImagesHelper
     ].safe_join
   end
 
-  # Args for the interactive image on Images#show (particular to that context)
-  def image_show_presenter_args
+  # Args for the InteractiveImage component on Images#show
+  def image_show_args
     { size: :huge,
       image_link: "#",
       img_class: "huge-image",

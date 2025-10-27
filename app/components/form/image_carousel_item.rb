@@ -46,11 +46,11 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
     img_instance, img_id = extract_image_and_id
     img_id ||= "img_id_missing" if upload
 
-    # Build presenter data
-    presenter_data = build_presenter_data(img_instance, img_id)
+    # Build render data
+    render_data = build_render_data(img_instance, img_id)
 
     # Render the carousel item
-    render_form_carousel_item(img_instance, img_id, presenter_data)
+    render_form_carousel_item(img_instance, img_id, render_data)
   end
 
   private

@@ -20,11 +20,11 @@ class Components::InteractiveImage < Components::BaseImage
     # Get image instance and ID
     img_instance, img_id = extract_image_and_id
 
-    # Build presenter data
-    presenter_data = build_presenter_data(img_instance, img_id)
+    # Build render data
+    render_data = build_render_data(img_instance, img_id)
 
     # Render the interactive image
-    render_interactive_image(img_instance, img_id, presenter_data)
+    render_interactive_image(img_instance, img_id, render_data)
   end
 
   private

@@ -41,11 +41,11 @@ class Components::CarouselThumbnail < Components::BaseImage
     # For uploads, use provided img_id or fallback
     final_img_id = img_id || final_img_id || "img_id_missing"
 
-    # Build presenter data
-    presenter_data = build_presenter_data(img_instance, final_img_id)
+    # Build render data
+    render_data = build_render_data(img_instance, final_img_id)
 
     # Render the thumbnail
-    render_thumbnail(final_img_id, presenter_data)
+    render_thumbnail(final_img_id, render_data)
   end
 
   private

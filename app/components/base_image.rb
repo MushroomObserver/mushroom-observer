@@ -74,15 +74,15 @@ class Components::BaseImage < Components::Base
     end
   end
 
-  # Build all presenter data needed for rendering
-  def build_presenter_data(img_instance, img_id)
+  # Build all rendering data needed for image display
+  def build_render_data(img_instance, img_id)
     img_urls = fetch_image_urls(img_instance, img_id)
     sizing = calculate_sizing(img_instance)
 
     {
       img_src: img_urls[size] || "",
       img_class: build_image_classes,
-      img_data: build_image_data(img_urls),
+      img_data: build_data_attributes(img_urls),
       img_id: img_id,
       html_id: "#{id_prefix}_#{img_id}",
       proportion: sizing[:proportion],
@@ -102,7 +102,7 @@ class Components::BaseImage < Components::Base
     class_names("img-fluid ab-fab object-fit-#{fit}", extra_classes)
   end
 
-  def build_image_data(img_urls)
+  def build_data_attributes(img_urls)
     { src: img_urls[size] || "" }.merge(data)
   end
 
