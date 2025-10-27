@@ -9,6 +9,6 @@ class Lookup::Projects < Lookup
   end
 
   def lookup_method(name)
-    Project.where(title: name)
+    Project.title_has(name.to_s.clean_pattern)
   end
 end

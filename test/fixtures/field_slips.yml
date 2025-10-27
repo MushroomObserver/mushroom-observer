@@ -57,6 +57,8 @@ field_slip_project_orphan:
   observation: recorder_obs
   code: ORPH-0001
 
+# In general FieldSlips should always have a User, but given that it's
+# relying on a Rails validatation it could happen.
 field_slip_user_orphan:
   project: current_project
   code: ORPH-0002

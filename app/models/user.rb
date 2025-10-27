@@ -208,6 +208,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   enum :location_format, { postal: 1, scientific: 2 },
        prefix: true, default: :postal, instance_methods: false
 
+  enum :label_format, { pdf: 1, rtf: 2 },
+       prefix: true, default: :pdf, instance_methods: false
+
   enum :hide_authors, { none: 1, above_species: 2 },
        prefix: true, default: :none, instance_methods: false
 
@@ -484,10 +487,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     else
       name
     end
-  end
-
-  def legal_name_changed?
-    !legal_name_change.nil?
   end
 
   def legal_name_change

@@ -21,7 +21,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       on_date(ymd_string)
     }
     scope :found_after, lambda { |ymd_string|
-      date(ymd_string)
+      date_after(ymd_string)
     }
     scope :found_before, lambda { |ymd_string|
       date_before(ymd_string)

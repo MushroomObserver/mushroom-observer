@@ -250,9 +250,23 @@ unknown_with_lat_lng:
   text_name: Fungi
   lat: 34.1622
   lng: -118.3521
-  alt: 123
   notes:
     :Other: "unknown_with_lat_lng"
+
+unknown_with_alt:
+  <<: *DEFAULTS
+  created_at: 2025-10-15 09:20:00
+  updated_at: 2025-10-15 09:21:00
+  log_updated_at: 2025-10-15 09:21:00
+  when: 2025-10-15
+  location: burbank
+  where: Burbank, California, USA
+  user: mary
+  name: fungi
+  text_name: Fungi
+  alt: 123
+  notes:
+    :Other: "unknown_with_alt"
 
 trusted_hidden:
   <<: *DEFAULTS
@@ -833,6 +847,12 @@ old_name_obs:
 
 low_alt_obs:
   <<: *DEFAULTS
+  location: low_alt_only
+
+low_alt_obs_with_lat_lng:
+  <<: *DEFAULTS
+  lat: 41.6592
+  lng: -70.6975
   location: low_alt_only
 
 high_alt_obs:

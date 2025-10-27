@@ -79,7 +79,7 @@ gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
 # minimal two way bridge between the V8 JavaScript engine and Ruby
-# Locked here because "0.19.0" will not compile for nimmolo
+# Locked here at "0.18.1" because "0.19.0" will not compile for nimmolo
 gem("mini_racer", "~> 0.18.1")
 
 # Add Arel helpers for more concise query syntax in Arel
@@ -148,7 +148,7 @@ gem("google-cloud-storage")
 # See https://github.com/rubyzip/rubyzip for details. The Changelog also
 # lists other enhancements and bugfixes that have been implemented since
 # version 2.3.0.
-gem("rubyzip", "~> 3.1.0")
+gem("rubyzip", "~> 3.2.0")
 
 # QR code generator
 gem("rqrcode")

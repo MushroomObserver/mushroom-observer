@@ -26,7 +26,7 @@ module Observations
       return unless (@species_list = find_species_list!) &&
                     (@observation = find_observation!)
 
-      unless check_permission!(@species_list)
+      unless permission!(@species_list)
         return redirect_to(species_list_path(@species_list.id))
       end
 

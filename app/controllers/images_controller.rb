@@ -249,7 +249,7 @@ class ImagesController < ApplicationController
 
   def delete_and_redirect(next_state = nil)
     return redirect_to(action: :show, id: @image.id) unless
-      check_permission!(@image)
+      permission!(@image)
 
     @image.log_destroy
     @image.destroy

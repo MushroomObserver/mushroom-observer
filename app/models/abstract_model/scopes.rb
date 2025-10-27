@@ -53,16 +53,15 @@ module AbstractModel::Scopes
       ids = Lookup::Users.new(users).ids
       where(user: ids)
     }
-    scope :by_editor, lambda { |user|
+    scope :by_editor, lambda { |users|
       version_table = :"#{type_tag}_versions"
       unless ActiveRecord::Base.connection.table_exists?(version_table)
         return all
       end
 
-      user_id = user.is_a?(Integer) ? user : user&.id
-
-      joins(:versions).where("#{version_table}": { user_id: user_id }).
-        where.not(user: user).distinct
+      ids = Lookup::Users.new(users).ids
+      joins(:versions).where("#{version_table}": { user_id: ids }).
+        where.not(user: ids).distinct
     }
 
     # `created_at`/`updated_at` are versatile, and handle all Queries currently.
@@ -144,6 +143,7 @@ module AbstractModel::Scopes
     # NOTE: On MO so far, all date columns are named :when.
     scope :date, lambda { |early, late = nil, col: :when|
       early, late = early if early.is_a?(Array)
+      early, late = ::DateRangeParser.new(early).range if late.blank?
       if late.blank?
         date_after(early, col:)
       else

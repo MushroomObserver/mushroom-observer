@@ -51,7 +51,7 @@ module SpeciesLists
 
       flash_error(:species_list_add_remove_bad_name.t(name: id.inspect))
       # id is guaranteed by .to_s not to be nil, but may be a blank string
-      redirect_to(edit_species_list_observations_path(species_list: id))
+      redirect_to(species_lists_edit_observations_path(species_list: id))
       nil
     end
 
@@ -64,7 +64,7 @@ module SpeciesLists
     end
 
     def do_add_remove_observations_by_query(spl, query)
-      return unless check_permission!(spl)
+      return unless permission!(spl)
 
       if params[:commit] == :ADD.l
         do_add_observations_by_query(spl, query)

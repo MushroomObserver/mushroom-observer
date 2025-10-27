@@ -4,12 +4,13 @@
 # code:    string, unique code for field slip, starts with project prefix
 
 class FieldSlip < AbstractModel
-  attr_accessor :current_user
+  attr_reader :current_user
 
   belongs_to :observation
   belongs_to :project
   belongs_to :user
 
+  validates :user_id, presence: true
   validates :code, uniqueness: true
   validates :code, presence: true
   validate do |field_slip|
@@ -26,12 +27,26 @@ class FieldSlip < AbstractModel
     where(project: project_ids).distinct
   }
 
+  def current_user=(a_user)
+    @current_user = a_user
+    return if user
+
+    self.user = a_user
+  end
+
   def code=(val)
     code = val.upcase
     return unless self[:code] != code
 
     self[:code] = code
     update_project
+  end
+
+  def observation=(val)
+    # Adopt the observation's user if we don't already have one
+    self.user = val.user unless user
+
+    self[:observation_id] = val.id
   end
 
   def update_project
@@ -115,9 +130,7 @@ class FieldSlip < AbstractModel
   end
 
   def collector
-    return observation.collector if observation&.collector
-
-    (user || @current_user)&.unique_text_name
+    observation&.collector
   end
 
   def date

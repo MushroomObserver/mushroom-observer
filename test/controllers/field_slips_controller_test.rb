@@ -58,6 +58,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     get(:new, params: { code: code })
     assert_response(:success)
     assert(response.body.include?(project.title))
+    assert_select('input[name="field_slip[collector]"]:not([value])')
   end
 
   def test_should_create_field_slip_with_last_viewed_obs
@@ -146,7 +147,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
            })
     end
 
-    obs = FieldSlip.find_by(code: code).observation
+    fs = FieldSlip.find_by(code: code)
+    assert(fs.user)
+    obs = fs.observation
     assert_redirected_to(observation_url(obs))
     assert(project.member?(user))
     assert(project.observations.member?(obs))
@@ -418,6 +421,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
     login(mary.login)
     get(:edit, params: { id: fs.id })
     assert_response(:success)
+    obs = Observation.last
+    fs.observation = obs
+    fs.save!
+    assert_equal(obs.user, fs.user)
   end
 
   def test_admin_should_get_edit

@@ -48,7 +48,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
 
     visit(back) # back to edit herbarium record
-    click_on(text: "Cancel (Show Observation)")
+    click_on("Cancel (Show Observation)", match: :first)
     assert_selector("body.observations__show")
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
 
@@ -82,7 +82,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.herbarium_records__edit")
     assert_selector("#herbarium_record_form")
     back = current_fullpath
-    click_on(text: "Cancel (Show Fungarium Record)")
+    first(class: "herbarium_record_return_link").click
 
     assert_selector("body.herbarium_records__show")
     visit(back)
@@ -110,7 +110,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     )
     first(class: "herbarium_records_for_herbarium_link").click
 
-    assert_selector("body.herbarium_records__index")
+    assert_selector("body", class: "herbarium_records__index")
     assert_selector("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")
     click_on(class: "edit_herbarium_record_link_#{rec.id}")
 
@@ -121,22 +121,23 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
 
-    assert_selector("body.herbarium_records__edit")
+    assert_selector("body", class: "herbarium_records__edit")
     back = current_fullpath
-    click_on(text: "Back to Fungarium Record Index")
+    click_on(text: "Back to Fungarium Record Index", match: :first)
 
-    assert_selector("body.herbarium_records__index")
+    assert_selector("body", class: "herbarium_records__index")
     visit(back)
 
+    assert_selector("body", class: "herbarium_records__edit")
     within("#herbarium_record_form") do
       fill_in("herbarium_record_herbarium_name", with: rec.herbarium.name)
       click_commit
     end
 
-    assert_selector("body.herbarium_records__index")
+    assert_selector("body", class: "herbarium_records__index")
     click_on(class: "destroy_herbarium_record_link_#{rec.id}")
 
-    assert_selector("body.herbarium_records__index")
+    assert_selector("body", class: "herbarium_records__index")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
 
@@ -169,7 +170,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     obs = observations(:minimal_unknown_obs)
     login!("mary")
     visit(new_herbarium_record_path(observation_id: obs.id))
-    click_link(class: "nonpersonal_herbaria_index_link")
+    first(class: "nonpersonal_herbaria_index_link").click
 
     assert_match(:HERBARIA.l, page.title)
   end
@@ -236,7 +237,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_equal([], user.curated_herbaria)
     login!(user.login)
     visit(herbaria_path)
-    click_link(class: "new_herbarium_link")
+    first(class: "new_herbarium_link").click
 
     within("#herbarium_form") do
       assert_field("herbarium_name")

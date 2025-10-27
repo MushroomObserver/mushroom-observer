@@ -260,6 +260,12 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, text_name_has: "Agaricus")
   end
 
+  def test_name_search_name_has
+    expects = Name.with_correct_spelling.
+              search_name_has("Agaricus").order_by_default
+    assert_query(expects, :Name, search_name_has: "Agaricus")
+  end
+
   def test_name_has_author
     expects = Name.with_correct_spelling.has_author.order_by_default
     assert_query(expects, :Name, has_author: true)
@@ -533,7 +539,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_with_observation_subquery_date
     date = observations(:california_obs).when.as_json
     expects = Name.with_correct_spelling.joins(:observations).distinct.
-              where(Observation[:when] >= date).order_by_default
+              where(Observation[:when].eq(date)).order_by_default
     scope = Name.with_correct_spelling.joins(:observations).distinct.
             merge(Observation.date(date)).order_by_default
     assert_query_scope(expects, scope,

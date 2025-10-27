@@ -45,8 +45,11 @@ class Query::ProjectsTest < UnitTestCase
   end
 
   def test_project_names
-    names = [names(:peltigera).search_name]
-    scope = Project.names(names).order_by_default
+    names = {
+      lookup: [names(:peltigera).search_name],
+      include_synonyms: true
+    }
+    scope = Project.names(**names).order_by_default
     assert_query(scope, :Project, names: names)
     assert_query(
       [projects(:pinned_date_range_project),

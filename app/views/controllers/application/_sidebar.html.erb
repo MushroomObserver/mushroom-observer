@@ -1,13 +1,5 @@
 <%
-classes = {
-  wrapper: "navbar navbar-inverse sidebar-nav list-group",
-  heading: "list-group-item disabled font-weight-bold",
-  item: "list-group-item",
-  admin: "list-group-item list-group-item-danger indent",
-  indent: "list-group-item indent",
-  mobile_only: "visible-xs",
-  desktop_only: "hidden-xs"
-}
+classes = sidebar_css_classes
 %>
 
 <nav id="sidebar" class="sidebar-offcanvas col-xs-8 col-sm-2 hidden-print">
@@ -30,6 +22,8 @@ classes = {
                       locals: { classes: classes }) %>
         <% end %>
       <% end %>
+
+      <%= yield(:context_nav_mobile) if @user %>
 
       <%# If caching obs/spl, this should be keyed for both User and QueryRecord
           (i.e. cache invalidated if query record updated, or new ID). %>

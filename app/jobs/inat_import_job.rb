@@ -52,6 +52,8 @@ class InatImportJob < ApplicationJob
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
     begin
+      # fetch the logged-in iNat user
+      # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = Inat::APIRequest.new(token).request(path: "users/me")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
@@ -59,15 +61,18 @@ class InatImportJob < ApplicationJob
 
     inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
     log("inat_logged_in_user: #{inat_logged_in_user}")
-    raise(:inat_wrong_user.t) unless right_user?(inat_logged_in_user)
+    return if inat_logged_in_user == inat_username
+
+    wrong_inat_user_error(inat_logged_in_user)
   end
 
   def super_importer?
-    InatImport.super_importers.include?(user)
+    InatImport.super_importer?(user)
   end
 
-  def right_user?(inat_logged_in_user)
-    inat_logged_in_user == inat_username
+  def wrong_inat_user_error(inat_logged_in_user)
+    raise(:inat_wrong_user.t(inat_username: inat_username,
+                             inat_logged_in_user: inat_logged_in_user))
   end
 
   def import_requested_observations
@@ -137,7 +142,7 @@ class InatImportJob < ApplicationJob
   def inat_username_updateable?
     # Don't update a SuperImporter's inat_username because
     # InatImport.inat_username could be someone else's inat_username.
-    return false if InatImport.super_importers.include?(user)
+    return false if InatImport.super_importer?(user)
 
     # Prevent changing inat_username to a non-existent iNat login
     # No errors or any imports means that iNat accepted the inat_username,

@@ -1,0 +1,102 @@
+#!/usr/bin/bash
+# Run as mo user with sudo power
+
+cd /var/web
+if [ ! -e mushroom-observer ]; then
+    git clone https://github.com/MushroomObserver/mushroom-observer.git
+    echo Cloned mushroom-observer repo
+else
+    echo /var/web/mushroom-observer exists
+fi
+cd mushroom-observer
+ruby-install ruby `cat .ruby-version`
+
+# Requires access to ruby
+source /usr/local/share/chruby/chruby.sh
+source /usr/local/share/chruby/auto.sh
+
+EXPECTED_RUBY=$(cat .ruby-version)
+ACTUAL_RUBY=$(ruby --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+if [ "$ACTUAL_RUBY" != "$EXPECTED_RUBY" ]; then
+    echo "ERROR: Ruby version mismatch"
+    echo "Required: $EXPECTED_RUBY"
+    echo "Installed: $ACTUAL_RUBY"
+    echo "Please install the correct Ruby version using ruby-install"
+    exit 1
+fi
+
+echo "Ruby version check passed: $ACTUAL_RUBY"
+
+if [ ! -e public/images/orig ]; then
+  mkdir -p log public/images/{thumb,320,640,960,1280,orig}
+  echo Created public/images directories
+else
+  echo public/images/orig exists
+fi
+
+if [ ! -f log/test.log ]; then
+  touch log/test.log
+  echo Created log/test.log
+else
+  echo log/test.log exists
+fi
+if [ ! -f log/production.log ]; then
+  touch log/production.log
+  echo Created log/production.log
+else
+  echo log/production.log exists
+fi
+
+# Configure MO helper tools
+if [ ! -f /usr/local/bin/jpegresize ]; then
+    sudo gcc script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+    echo Built jpegresize
+else
+    echo jpegresize exists
+fi
+
+if [ ! -f /usr/local/bin/exifautotran ]; then
+    sudo cp script/exifautotran /usr/local/bin/exifautotran
+    sudo chmod 755 /usr/local/bin/exifautotran
+    echo Installed exifautotran script
+else
+    echo exifautotran exists
+fi
+
+# Setup database.yml
+if [ ! -f config/database.yml ]; then
+    cp db/vagrant/database.yml config/database.yml
+    echo Copied db/vagrant/database.yml to config/database.yml
+else
+    echo config/database.yml exists
+fi
+
+# Setup master.key
+if [ ! -f config/master.key ]; then
+    echo 5f343cfc11a623c470d23e25221972b5 > config/master.key
+    echo Created config/master.key
+else
+    echo config/master.key exists
+fi
+
+# Install Rails gems
+bundle install
+
+# Setup database
+sudo mysql -u root mo_development -e 'desc users'
+if [ ! $? -eq 0 ]; then
+    sudo mysql -u root < db/initialize.sql
+    bin/rails db:environment:set RAILS_ENV=development
+    rails db:schema:load
+    rails db:fixtures:load
+    echo Created and populated mo_development database
+else
+    rails db:migrate
+    echo Ran migrations on the mo_development database
+fi
+
+rails lang:update
+
+# Rock and Roll!
+rails test
