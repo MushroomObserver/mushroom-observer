@@ -101,7 +101,7 @@ class Components::Carousel < Components::Base
     ].safe_join
   end
 
-  def control_button(carousel_id, direction)
+  def control_button(carousel_id, direction) # rubocop:disable Metrics/AbcSize
     position = direction == :prev ? "left" : "right"
     icon = direction == :prev ? "chevron-left" : "chevron-right"
     label = direction == :prev ? :PREV : :NEXT

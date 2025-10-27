@@ -176,79 +176,56 @@ class Components::BaseImage < Components::Base
     ) { icon }
   end
 
-  # Build lightbox caption HTML
+  # Build lightbox caption HTML using LightboxCaption component
   def lightbox_caption_html(lightbox_data)
     return unless lightbox_data
 
-    obs = lightbox_data[:obs]
-    parts = []
-
-    if obs.is_a?(Observation)
-      parts += lightbox_obs_caption_parts(obs, lightbox_data[:identify])
-    elsif lightbox_data[:image]&.notes.present?
-      parts << lightbox_image_caption(lightbox_data[:image])
-    end
-
-    image_for_links = lightbox_data[:image] || lightbox_data[:image_id]
-    parts << caption_image_links(image_for_links)
-    safe_join(parts)
+    render LightboxCaption.new(
+      user: user,
+      image: lightbox_data[:image],
+      image_id: lightbox_data[:image_id],
+      obs: lightbox_data[:obs],
+      identify: lightbox_data[:identify]
+    )
   end
 
-  # Observation caption parts for lightbox
-  def lightbox_obs_caption_parts(obs, identify)
-    helpers = ApplicationController.helpers
-    parts = []
-
-    parts << helpers.caption_identify_ui(obs: obs) if identify
-    parts << helpers.caption_obs_title(user: user, obs: obs, identify: identify)
-    parts << helpers.observation_details_when_where_who(obs: obs, user: user)
-    parts << helpers.caption_truncated_notes(obs: obs)
-    parts
-  end
-
-  # Image-only caption for lightbox
-  def lightbox_image_caption(image)
-    helpers.tag.div(image.notes.tl.truncate_html(300), class: "image-notes")
-  end
-
-  # Caption image links (original, EXIF)
-  def caption_image_links(image_or_image_id)
-    helpers = ApplicationController.helpers
-    links = []
-    links << helpers.original_image_link(image_or_image_id, "lightbox_link")
-    links << " | "
-    links << helpers.image_exif_link(image_or_image_id, "lightbox_link")
-    helpers.tag.p(class: "caption-image-links my-3") do
-      helpers.safe_join(links)
-    end
-  end
-
-  # Render vote section for an image
+  # Render vote section for an image using ImageVoteSection component
   def render_image_vote_section(img_instance)
     return unless votes && img_instance
 
-    helpers = ApplicationController.helpers
-    unsafe_raw(helpers.image_vote_section_html(user, img_instance, votes))
+    render ImageVoteSection.new(user: user, image: img_instance, votes: votes)
   end
 
   # Render original filename if applicable
   def render_original_filename(img_instance)
-    return unless img_instance
+    return unless show_original_name?(img_instance)
 
-    helpers = ApplicationController.helpers
-    unsafe_raw(helpers.image_owner_original_name(img_instance, original))
+    div(img_instance.original_name)
+  end
+
+  # Check if original filename should be shown
+  def show_original_name?(img)
+    return false unless original && img && img.original_name.present?
+
+    helpers.permission?(img) ||
+      (img.user && img.user.keep_filenames == "keep_and_show")
   end
 
   # Render stretched link based on link method
   def render_stretched_link(path, method = link_method)
-    helpers = ApplicationController.helpers
-
     case method
     when :get
       a(href: path, class: stretched_link_classes)
     when :post, :put, :patch, :delete
-      # These require form helpers, use unsafe_raw
-      unsafe_raw(helpers.image_stretched_link(path, method))
+      # These require button_to which generates a form with CSRF protection
+      unsafe_raw(
+        helpers.button_to(
+          path,
+          method: method,
+          class: stretched_link_classes,
+          form: { data: { turbo: true } }
+        ) { "" }
+      )
     end
   end
 

@@ -12,7 +12,7 @@ flash_error(@error) if @error && @objects.empty?
 </div>
 
 <%= paginated_results do %>
-  <%= matrix_table(objects: @objects, identify: true, cached: true) %>
+  <%= render MatrixTable.new(objects: @objects, locals: { identify: true }, cached: true) %>
 <% end %>
 
 <!--AJAX SAVING VOTE MESSAGE-->
