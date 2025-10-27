@@ -57,7 +57,7 @@ module MatrixBoxHelper
     return unless image
 
     tag.div(class: "thumbnail-container") do
-      interactive_image(user, image, **args)
+      render InteractiveImage.new(user: user, image: image, **args)
     end
   end
 

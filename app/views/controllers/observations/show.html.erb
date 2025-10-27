@@ -32,7 +32,7 @@ carousel_locals = {
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
     <%= tag.div(class: "panel panel-default") do
-      render(partial: "shared/carousel", locals: carousel_locals)
+      render Carousel.new(**carousel_locals)
     end %>
   <% end %>
 

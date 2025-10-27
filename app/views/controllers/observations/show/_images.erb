@@ -23,9 +23,9 @@ links = observation_show_image_links(obs: obs)
 
         <%= tag.div(class: "list-group-item") do %>
 
-          <%= interactive_image(
-                @user,
-                image,
+          <%= render InteractiveImage.new(
+                user: @user,
+                image: image,
                 image_link: image.show_link_args.merge({ obs: obs.id }),
                 original: true,
                 is_set: true,

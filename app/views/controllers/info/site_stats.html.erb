@@ -11,8 +11,8 @@ container_class(:full)
     if obs_length > 0 %>
       <% @observations[0,3].each do |obs| %>
         <div class="pb-1">
-          <%= interactive_image(
-            @user, obs.thumb_image, image_link: observation_path(obs.id), votes: true
+          <%= render InteractiveImage.new(
+            user: @user, image: obs.thumb_image, image_link: observation_path(obs.id), votes: true
           ) %><br/>
           <br/>
         </div>
@@ -39,8 +39,8 @@ container_class(:full)
 <div class="hidden-xs col-md-3">
   <% if obs_length > 3 %>
     <% @observations[3,3].each do |obs| %>
-      <%= interactive_image(
-            @user, obs.thumb_image, image_link: observation_path(obs.id),
+      <%= render InteractiveImage.new(
+            user: @user, image: obs.thumb_image, image_link: observation_path(obs.id),
             votes: true
           ) %><br/>
       <br/>

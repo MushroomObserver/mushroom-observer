@@ -63,8 +63,8 @@ container_class(:double)
         <% end %>
       </td>
       <td>
-        <%= interactive_image(
-              @user, sugg.image_obs.thumb_image,
+        <%= render InteractiveImage.new(
+              user: @user, image: sugg.image_obs.thumb_image,
               image_link: image_path(id: sugg.image_obs.id)
             ) if sugg.image_obs.present? %>
       </td>

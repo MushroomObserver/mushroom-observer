@@ -37,7 +37,7 @@ form_action = { controller: "/observations/images",
   <!--.col-->
 
   <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
-    <%= interactive_image(@user, @image, size: :medium, votes: true) %>
+    <%= render InteractiveImage.new(user: @user, image: @image, size: :medium, votes: true) %>
   </div>
   <!--.col-->
 
