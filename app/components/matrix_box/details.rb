@@ -6,12 +6,12 @@
 # identify UI, and source credit for a matrix box item.
 #
 # @example
-#   render MatrixBoxDetails.new(
+#   render MatrixBox::Details.new(
 #     data: render_data,
 #     user: @user,
 #     identify: true
 #   )
-class Components::MatrixBoxDetails < Components::Base
+class Components::MatrixBox::Details < Components::Base
   include Phlex::Rails::Helpers::LinkTo
   include Phlex::Rails::Helpers::ClassNames
 
@@ -47,13 +47,11 @@ class Components::MatrixBoxDetails < Components::Base
 
   def render_title
     fragment("box_title") do
-      bold = if [:observation, :name].include?(@data[:type])
-               ""
-             else
-               " font-weight-bold"
-             end
-      span(class: class_names("rss-name", bold),
-           id: "box_title_#{@data[:id]}") { @data[:name] }
+      render Components::MatrixBox::Title.new(
+        id: @data[:id],
+        name: @data[:name],
+        type: @data[:type]
+      )
     end
   end
 

@@ -66,43 +66,12 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_title
     fragment("obs_title") do
-      h4(obs_title_attributes) do
-        render_obs_title_content
-      end
+      render Components::LightboxCaption::ObservationTitle.new(
+        obs: @obs,
+        user: @user,
+        identify: @identify
+      )
     end
-  end
-
-  def obs_title_attributes
-    {
-      id: "observation_what_#{@obs.id}",
-      class: "obs-what",
-      data: {
-        controller: "section-update",
-        section_update_user_value: @user&.id
-      }
-    }
-  end
-
-  def render_obs_title_content
-    render_obs_label if @identify
-    whitespace
-    render_obs_link
-    whitespace
-    plain(@obs.user_format_name(@user).t.small_author)
-  end
-
-  def render_obs_label
-    span(class: "font-weight-normal") { "#{:OBSERVATION.l}: " }
-  end
-
-  def render_obs_link
-    btn_style = @identify ? "text-bold" : "btn btn-primary"
-
-    a(
-      href: url_for(@obs.show_link_args),
-      class: "#{btn_style} mr-3",
-      id: "caption_obs_link_#{@obs.id}"
-    ) { @obs.id }
   end
 
   def render_obs_when_where_who
