@@ -1,22 +1,24 @@
 <%# locals: (obs:, user:) %>
 
 <%# Replace the title in the lightbox caption %>
-<%= turbo_stream.replace("observation_what_#{obs.id}") do
+<%= turbo_stream.replace(
+  "observation_what_#{obs.id}",
   Components::LightboxCaption.new(
     obs: obs,
     user: user,
     image: obs.thumb_image,
     identify: true
   ).call(fragments: ["obs_title"])
-end %>
+) %>
 
 <%# Replace the title in the matrix_box %>
-<%= turbo_stream.replace("box_title_#{obs.id}") do
+<%= turbo_stream.replace(
+  "box_title_#{obs.id}",
   Components::MatrixBox.new(
     user: user,
     object: obs
   ).call(fragments: ["box_title"])
-end %>
+) %>
 
 <%# are not removed via data-controller="section-update" because replaced %>
 <%= turbo_stream.close_modal("modal_obs_#{obs.id}_naming") %>

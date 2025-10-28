@@ -37,7 +37,7 @@ class Components::MatrixBox < Components::Base
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
 
   def view_template(&block)
-    if object
+    if @object
       render_object_layout
     elsif block
       render_custom_layout(&block)
@@ -80,7 +80,7 @@ class Components::MatrixBox < Components::Base
 
   # Build render data based on object type
   def build_render_data
-    case object
+    case @object
     when Image
       extract_image_data
     when Observation
@@ -90,26 +90,26 @@ class Components::MatrixBox < Components::Base
     when User
       extract_user_data
     else
-      { id: object.id, type: :unknown }
+      { id: @object.id, type: :unknown }
     end
   end
 
   def extract_image_data
     {
-      id: object.id,
+      id: @object.id,
       type: :image,
       when: begin
-              object.when.web_date
+              @object.when.web_date
             rescue StandardError
               nil
             end,
-      who: object.user,
-      name: object.unique_format_name.t,
-      what: object,
+      who: @object.user,
+      name: @object.unique_format_name.t,
+      what: @object,
       where: nil,
       location: nil,
-      image: object,
-      image_link: object.show_link_args,
+      image: @object,
+      image_link: @object.show_link_args,
       full_width: true
     }
   end
@@ -117,42 +117,42 @@ class Components::MatrixBox < Components::Base
   # rubocop:disable Metrics/AbcSize
   def extract_observation_data
     data = {
-      id: object.id,
+      id: @object.id,
       type: :observation,
-      when: object.when.web_date,
-      who: object.user,
-      name: object.user_format_name(object.user).t.break_name.small_author,
-      what: object,
-      where: object.where,
-      location: object.location,
-      consensus: Observation::NamingConsensus.new(object),
-      detail: object.rss_log&.detail,
-      time: object.rss_log&.updated_at
+      when: @object.when.web_date,
+      who: @object.user,
+      name: @object.user_format_name(@object.user).t.break_name.small_author,
+      what: @object,
+      where: @object.where,
+      location: @object.location,
+      consensus: Observation::NamingConsensus.new(@object),
+      detail: @object.rss_log&.detail,
+      time: @object.rss_log&.updated_at
     }
 
-    add_observation_image_data(data) if object.thumb_image_id
+    add_observation_image_data(data) if @object.thumb_image_id
     data
   end
   # rubocop:enable Metrics/AbcSize
 
   def add_observation_image_data(data)
-    data[:image] = object.thumb_image
-    data[:image_link] = object.show_link_args
+    data[:image] = @object.thumb_image
+    data[:image_link] = @object.show_link_args
     data[:obs] = object
     data[:full_width] = true
   end
 
   # rubocop:disable Metrics/AbcSize
   def extract_rss_log_data
-    target = object.target
+    target = @object.target
     data = {
-      id: target&.id || object.id,
-      type: object.target_type || :rss_log,
+      id: target&.id || @object.id,
+      type: @object.target_type || :rss_log,
       when: target.respond_to?(:when) ? target.when&.web_date : nil,
       who: target&.user,
-      what: target || object,
-      detail: object.detail,
-      time: object.updated_at
+      what: target || @object,
+      detail: @object.detail,
+      time: @object.updated_at
     }
 
     data[:name] = extract_rss_log_name(target)
@@ -163,12 +163,12 @@ class Components::MatrixBox < Components::Base
   # rubocop:enable Metrics/AbcSize
 
   def extract_rss_log_name(target)
-    if object.target_type == :image
+    if @object.target_type == :image
       target.unique_format_name.t
     elsif target
       target.format_name.t.break_name.small_author
     else
-      object.format_name.t.break_name.small_author
+      @object.format_name.t.break_name.small_author
     end
   end
 
@@ -190,22 +190,22 @@ class Components::MatrixBox < Components::Base
 
   def extract_user_data
     data = {
-      id: object.id,
+      id: @object.id,
       type: :user,
       detail: object,
-      name: object.unique_text_name,
+      name: @object.unique_text_name,
       what: object,
-      where: object.location&.name,
-      location: object.location
+      where: @object.location&.name,
+      location: @object.location
     }
 
-    add_user_image_data(data) if object.image_id
+    add_user_image_data(data) if @object.image_id
     data
   end
 
   def add_user_image_data(data)
-    data[:image] = object.image
-    data[:image_link] = object.show_link_args
+    data[:image] = @object.image
+    data[:image_link] = @object.show_link_args
     data[:votes] = false
     data[:full_width] = true
   end

@@ -13,6 +13,7 @@
 #   )
 class Components::MatrixBoxDetails < Components::Base
   include Phlex::Rails::Helpers::LinkTo
+  include Phlex::Rails::Helpers::ClassNames
 
   prop :data, Hash
   prop :user, _Nilable(User), default: nil
@@ -51,8 +52,8 @@ class Components::MatrixBoxDetails < Components::Base
              else
                " font-weight-bold"
              end
-      span(@data[:name], class: class_names("rss-name", bold),
-                         id: "box_title_#{@data[:id]}")
+      span(class: class_names("rss-name", bold),
+           id: "box_title_#{@data[:id]}") { @data[:name] }
     end
   end
 
@@ -98,7 +99,7 @@ class Components::MatrixBoxDetails < Components::Base
 
     div(class: "rss-what") do
       small(class: "nowrap-ellipsis") do
-        span(@data[:when], class: "rss-when")
+        span(class: "rss-when") { @data[:when] }
         plain(": ")
         user_link(@data[:who], nil, class: "rss-who")
       end

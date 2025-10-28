@@ -103,7 +103,7 @@ class Components::ImageVoteSection < Components::Base
   end
 
   def render_current_vote(vote)
-    span(image_vote_as_short_string(vote), class: "image-vote")
+    span(class: "image-vote") { image_vote_as_short_string(vote) }
   end
 
   def render_vote_button(vote)
