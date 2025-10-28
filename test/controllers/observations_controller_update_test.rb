@@ -105,7 +105,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       observation: {
         place_name: where,
         when: obs.when,
-        notes: obs.notes,
+        notes: obs.notes.to_h,
         specimen: obs.specimen
       },
       log_change: "0"
@@ -175,7 +175,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       observation: {
         place_name: obs.place_name,
         when: obs.when,
-        notes: obs.notes,
+        notes: obs.notes.to_h,
         specimen: obs.specimen,
         thumb_image_id: "0"
       },
@@ -204,7 +204,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       observation: {
         place_name: obs.place_name,
         when: obs.when,
-        notes: obs.notes,
+        notes: obs.notes.to_h,
         specimen: obs.specimen,
         thumb_image_id: "0"
       },

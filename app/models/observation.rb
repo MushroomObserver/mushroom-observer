@@ -541,7 +541,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #     First user key: value
   #     Second user key: value
   #     ...
-  #   both user-supplied  and general Other keys:
+  #   both user-supplied and general Other keys:
   #     Notes:
   #     First user key: value
   #     Second user key: value
@@ -561,9 +561,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def notes
-    return self[:notes] if self[:notes].is_a?(Hash)
+    value = read_attribute(:notes)
+    return Observation.no_notes unless value.is_a?(Hash)
+    return NormalizedHash.new(value) unless value.is_a?(NormalizedHash)
 
-    Observation.no_notes
+    value
   end
 
   # no_notes persisted in the db
