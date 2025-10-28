@@ -31,7 +31,7 @@ class Components::LightboxCaption < Components::Base
   prop :image, _Nilable(Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
   prop :obs, _Union(Observation, Hash), default: -> { {} }
-  prop :@identify, _Boolean, default: false
+  prop :identify, _Boolean, default: false
 
   def view_template
     if @obs.is_a?(Observation)
@@ -54,15 +54,13 @@ class Components::LightboxCaption < Components::Base
 
   def render_identify_ui
     div(class: "obs-identify mb-3", id: "observation_identify_#{@obs.id}") do
-      unsafe_raw(
-        helpers.propose_naming_link(
-          @obs.id,
-          context: "lightgallery",
-          btn_class: "btn btn-primary d-inline-block"
-        )
+      propose_naming_link(
+        @obs.id,
+        context: "lightgallery",
+        btn_class: "btn btn-primary d-inline-block"
       )
-      span("&nbsp;".html_safe, class: "mx-2")
-      unsafe_raw(helpers.mark_as_reviewed_toggle(@obs.id))
+      span(class: "mx-2") { whitespace }
+      mark_as_reviewed_toggle(@obs.id)
     end
   end
 
@@ -94,7 +92,7 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_obs_label
-    span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
+    span(class: "font-weight-normal") { "#{:OBSERVATION.l}: " }
   end
 
   def render_obs_link
@@ -102,7 +100,7 @@ class Components::LightboxCaption < Components::Base
 
     a(
       @obs.id,
-      href: helpers.url_for(@obs.show_link_args),
+      href: url_for(@obs.show_link_args),
       class: "#{btn_style} mr-3",
       id: "caption_obs_link_#{@obs.id}"
     )
@@ -140,7 +138,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_location
     if user
-      unsafe_raw(helpers.location_link(@obs.where, @obs.location, nil, true))
+      location_link(@obs.where, @obs.location, nil, true)
     else
       plain(@obs.where)
     end
@@ -177,7 +175,7 @@ class Components::LightboxCaption < Components::Base
       @obs.display_alt.t,
       "[#{:click_for_map.t}]"
     ].join(" ")
-    a(link_text, href: helpers.map_observation_path(id: @obs.id))
+    a(link_text, href: map_observation_path(id: @obs.id))
   end
 
   def render_obs_who
@@ -192,7 +190,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_user(obs_user)
     if user
-      unsafe_raw(helpers.user_link(@obs.user))
+      user_link(@obs.user)
     else
       plain(obs_user.unique_text_name)
     end
@@ -205,11 +203,9 @@ class Components::LightboxCaption < Components::Base
 
   def render_contact_link(_obs_user)
     plain(" [")
-    unsafe_raw(
-      helpers.modal_link_to(
-        "observation_email",
-        *helpers.send_observer_question_tab(@obs)
-      )
+    modal_link_to(
+      "observation_email",
+      *send_observer_question_tab(@obs)
     )
     plain("]")
   end
@@ -219,7 +215,7 @@ class Components::LightboxCaption < Components::Base
 
     div(class: "obs-notes", id: "observation_#{@obs.id}_notes") do
       prepare_textile_cache
-      unsafe_raw(formatted_truncated_notes)
+      raw(formatted_truncated_notes)
     end
   end
 
@@ -235,7 +231,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_image_caption
     div(class: "image-notes") do
-      unsafe_raw(image.notes.tl.truncate_html(300))
+      raw(image.notes.tl.truncate_html(300))
     end
   end
 
@@ -280,17 +276,11 @@ class Components::LightboxCaption < Components::Base
                  image_or_image_id
                end
 
-    unsafe_raw(
-      helpers.modal_link_to(
-        "image_exif_#{image_id}",
-        :image_show_exif.t,
-        helpers.exif_image_path(id: image_id),
-        { class: "lightbox_link" }
-      )
+    modal_link_to(
+      "image_exif_#{image_id}",
+      :image_show_exif.t,
+      exif_image_path(id: image_id),
+      { class: "lightbox_link" }
     )
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
   end
 end

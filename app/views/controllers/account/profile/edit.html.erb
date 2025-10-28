@@ -13,7 +13,7 @@ add_context_nav(account_profile_edit_tabs)
     <% if @user.image %>
       <%= render(Components::InteractiveImage.new(
         user: @user,
-        image: @user.image_id,
+        image: @user.image,
         votes: false
       )) %>
       <%= put_button(name: :profile_image_remove.t,

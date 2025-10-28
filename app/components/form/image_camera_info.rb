@@ -20,6 +20,7 @@
 #   )
 class Components::Form::ImageCameraInfo < Components::Base
   include Phlex::Rails::Helpers::LabelTag
+  include Phlex::Rails::Helpers::LinkTo
 
   # Properties
   prop :img_id, Integer, &:to_i
@@ -52,7 +53,7 @@ class Components::Form::ImageCameraInfo < Components::Base
   def render_date_field
     div do
       strong { "#{:DATE.l}: " }
-      unsafe_raw(helpers.carousel_exif_to_image_date_button(date: @date))
+      exif_to_image_date_button
     end
   end
 
@@ -64,9 +65,7 @@ class Components::Form::ImageCameraInfo < Components::Base
   end
 
   def render_transfer_button
-    unsafe_raw(helpers.carousel_transfer_exif_button(
-                 has_exif: @date.present? || @lat.present?
-               ))
+    transfer_exif_button
   end
 
   def render_file_info
@@ -99,24 +98,46 @@ class Components::Form::ImageCameraInfo < Components::Base
         build_gps_part(:LNG, @lng, "exif_lng"),
         build_alt_part
       ]
-      plain(parts.join(", "))
+      raw(parts.join(", "))
     end
   end
 
   def build_gps_part(label_key, value, css_class)
-    strong_tag = helpers.tag.strong("#{label_key.l}: ")
-    span_tag = helpers.tag.span(value, class: css_class)
-    strong_tag + span_tag
+    "<strong>#{label_key.l}: </strong><span class=\"#{css_class}\">#{value}</span>"
   end
 
   def build_alt_part
-    strong_tag = helpers.tag.strong("#{:ALT.l}: ")
-    span_tag = helpers.tag.span(@alt, class: "exif_alt")
-    "#{strong_tag}#{span_tag} m"
+    "<strong>#{:ALT.l}: </strong><span class=\"exif_alt\">#{@alt}</span> m"
   end
 
   def render_no_gps_message
     span(class: "exif_no_gps d-none") { :image_no_geolocation.l }
+  end
+
+  def exif_to_image_date_button
+    link_to(
+      "#",
+      data: { action: "form-exif#exifToImageDate:prevent" }
+    ) do
+      span(class: "exif_date") { @date }
+    end
+  end
+
+  def transfer_exif_button
+    has_exif = @date.present? || @lat.present?
+    button_classes = class_names("btn btn-default",
+                                 "use_exif_btn btn-sm ab-top-right",
+                                 "d-none": !has_exif)
+
+    button(
+      type: "button",
+      class: button_classes,
+      data: { form_exif_target: "useExifBtn",
+              action: "form-exif#transferExifToObs:prevent" }
+    ) do
+      span(class: "when-enabled") { :image_use_exif.l }
+      span(class: "when-disabled") { :image_exif_copied.l }
+    end
   end
 
   def helpers

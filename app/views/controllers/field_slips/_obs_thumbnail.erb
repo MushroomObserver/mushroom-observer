@@ -5,11 +5,11 @@
     concat(tag.div(class: "thumbnail-container") do
       render(Components::InteractiveImage.new(
         user: @user,
-        image: obs.thumb_image_id,
+        image: obs.thumb_image,
         votes: false,
         image_link: observation_path(obs)
       ))
-    end) if obs.thumb_image_id.present?
+    end) if obs.thumb_image.present?
     concat(tag.div(class: "panel-body") do
       link_to(obs.user_unique_format_name(@user).t, observation_path(obs))
     end)

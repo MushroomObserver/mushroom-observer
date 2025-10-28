@@ -87,14 +87,13 @@ class Components::CarouselItem < Components::BaseImage
       # Image info (copyright, notes)
       if caption_content.present?
         div(class: "image-info d-none d-sm-block") do
-          unsafe_raw(caption_content)
+          raw(caption_content)
         end
       end
     end
   end
 
   def image_info_html(img_instance, obj)
-    helpers = ApplicationController.helpers
-    helpers.image_info(img_instance, obj, original: @original)
+    image_info(img_instance, obj, original: @original)
   end
 end

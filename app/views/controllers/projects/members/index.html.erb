@@ -36,10 +36,10 @@ action = { controller: "/projects/members", action: :create,
     <% @users.sort_by(&:login).each do |user| %>
       <tr>
         <td class="text-center">
-          <%= if user.image_id
+          <%= if user.image
           render(Components::InteractiveImage.new(
             user: user,
-            image: Image.find(user.image_id),
+            image: user.image,
             votes: false,
             size: :thumbnail
           ))

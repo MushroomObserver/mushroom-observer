@@ -17,6 +17,8 @@
 class Components::BaseImage < Components::Base
   include Phlex::Rails::Helpers::ImageTag
   include Phlex::Rails::Helpers::LinkTo
+  include Phlex::Rails::Helpers::ButtonTo
+  include Phlex::Rails::Helpers::ClassNames
 
   # Type definitions
   Size = _Union(*Image::ALL_SIZES)
@@ -25,6 +27,10 @@ class Components::BaseImage < Components::Base
 
   # Core properties
   prop :user, _Nilable(User)
+  # Accept both Image instances and Integer IDs.
+  # Integer IDs are needed for form components (e.g., Form::ImageCarouselItem)
+  # that handle newly uploaded images with provisional IDs before persistence.
+  # Subclasses like InteractiveImage can override this to restrict to Image only.
   prop :image, _Union(Image, Integer, nil) do |value|
     case value
     when Image, Integer then value
@@ -43,7 +49,7 @@ class Components::BaseImage < Components::Base
   prop :id_prefix, String, default: "interactive_image"
 
   # Link configuration
-  prop :image_link, _Nilable(String), default: nil
+  prop :image_link, _Nilable(_Union(String, Hash)), default: nil
   prop :link_method, Verb, default: :get
 
   # Image fitting and data
@@ -87,7 +93,7 @@ class Components::BaseImage < Components::Base
       html_id: "#{@id_prefix}_#{img_id}",
       proportion: sizing[:proportion],
       width: sizing[:width],
-      image_link: @image_link || image_path(id: img_id),
+      image_link: normalize_link(@image_link) || image_path(img_id),
       lightbox_data: build_lightbox_data(img_instance, img_id, img_urls)
     }
   end
@@ -191,7 +197,7 @@ class Components::BaseImage < Components::Base
 
   # Render vote section for an image using ImageVoteSection component
   def render_image_vote_section(img_instance)
-    return unless votes && img_instance
+    return unless @votes && img_instance
 
     render(ImageVoteSection.new(user: @user, image: img_instance,
                                 votes: @votes))
@@ -201,14 +207,14 @@ class Components::BaseImage < Components::Base
   def render_original_filename(img_instance)
     return unless show_original_name?(img_instance)
 
-    div(img_instance.original_name)
+    div { img_instance.original_name }
   end
 
   # Check if original filename should be shown
   def show_original_name?(img)
     return false unless @original && img && img.original_name.present?
 
-    helpers.permission?(@img) ||
+    permission?(@img) ||
       (img.user && img.user.keep_filenames == "keep_and_show")
   end
 
@@ -219,14 +225,12 @@ class Components::BaseImage < Components::Base
       a(href: path, class: stretched_link_classes)
     when :post, :put, :patch, :delete
       # These require button_to which generates a form with CSRF protection
-      unsafe_raw(
-        helpers.button_to(
-          path,
-          method: method,
-          class: stretched_link_classes,
-          form: { data: { turbo: true } }
-        ) { "" }
-      )
+      button_to(
+        path,
+        method: method,
+        class: stretched_link_classes,
+        form: { data: { turbo: true } }
+      ) { "" }
     end
   end
 
@@ -235,18 +239,12 @@ class Components::BaseImage < Components::Base
     "image-link ab-fab stretched-link"
   end
 
-  # Helper to build CSS class names
-  def class_names(*classes)
-    ActionController::Base.helpers.class_names(*classes)
-  end
+  # Normalize link to URL string (convert Hash to URL if needed)
+  def normalize_link(link)
+    return nil if link.nil?
+    return link if link.is_a?(String)
 
-  # Helper to get safe_join from helpers
-  def safe_join(array, separator = nil)
-    ApplicationController.helpers.safe_join(array, separator)
-  end
-
-  # Access to Rails helpers
-  def helpers
-    @helpers ||= ApplicationController.helpers
+    # Convert Hash to relative URL path using url_for
+    url_for(link.merge(only_path: true))
   end
 end

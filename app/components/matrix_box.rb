@@ -24,6 +24,7 @@
 #   end
 class Components::MatrixBox < Components::Base
   include Phlex::Rails::Helpers::LinkTo
+  include Phlex::Rails::Helpers::ClassNames
 
   # Properties
   prop :user, _Nilable(User), default: nil
@@ -33,7 +34,7 @@ class Components::MatrixBox < Components::Base
   prop :extra_class, String, default: ""
   prop :identify, _Boolean, default: false
   prop :header, Array, default: -> { [] }
-  prop :footer, _Union(Array, _Boolean), default: -> { [] }
+  prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
 
   def view_template(&block)
     if object
@@ -55,7 +56,7 @@ class Components::MatrixBox < Components::Base
     ) do
       div(class: "panel panel-default") do
         # Header components (if any)
-        header.each { |component| unsafe_raw(component) } if header.any?
+        header.each { |component| raw(component) } if header.any?
 
         # Main content: image and details
         div(class: "panel-sizing") do
@@ -71,8 +72,8 @@ class Components::MatrixBox < Components::Base
 
   def render_custom_layout(&block)
     li(
-      id: id ? "box_#{id}" : nil,
-      class: class_names("matrix-box", columns, extra_class),
+      id: @id ? "box_#{@id}" : nil,
+      class: class_names("matrix-box", @columns, @extra_class),
       &block
     )
   end

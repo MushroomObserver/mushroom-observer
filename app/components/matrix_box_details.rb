@@ -34,7 +34,7 @@ class Components::MatrixBoxDetails < Components::Base
 
     div(class: "rss-what") do
       h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
-        a(href: helpers.url_for(@data[:what].show_link_args)) do
+        a(href: url_for(@data[:what].show_link_args)) do
           render_title
         end
         render_id_badge(@data[:what])
@@ -58,7 +58,7 @@ class Components::MatrixBoxDetails < Components::Base
 
   def render_id_badge(obj)
     whitespace
-    unsafe_raw(helpers.show_title_id_badge(obj, "rss-id"))
+    show_title_id_badge(obj, "rss-id")
   end
 
   def render_identify_ui
@@ -72,15 +72,13 @@ class Components::MatrixBoxDetails < Components::Base
         class: "vote-select-container mb-3",
         data: { vote_cache: obs.vote_cache }
       ) do
-        unsafe_raw(helpers.naming_vote_form(naming, nil, context: "matrix_box"))
+        naming_vote_form(naming, nil, context: "matrix_box")
       end
     else
-      unsafe_raw(
-        helpers.propose_naming_link(
-          obs.id,
-          btn_class: "btn btn-default d-inline-block mb-3",
-          context: "matrix_box"
-        )
+      propose_naming_link(
+        obs.id,
+        btn_class: "btn btn-default d-inline-block mb-3",
+        context: "matrix_box"
       )
     end
   end
@@ -90,7 +88,7 @@ class Components::MatrixBoxDetails < Components::Base
 
     div(class: "rss-where") do
       small do
-        unsafe_raw(helpers.location_link(@data[:where], @data[:location]))
+        location_link(@data[:where], @data[:location])
       end
     end
   end
@@ -102,7 +100,7 @@ class Components::MatrixBoxDetails < Components::Base
       small(class: "nowrap-ellipsis") do
         span(@data[:when], class: "rss-when")
         plain(": ")
-        unsafe_raw(helpers.user_link(@data[:who], nil, class: "rss-who"))
+        user_link(@data[:who], nil, class: "rss-who")
       end
     end
   end
@@ -115,13 +113,9 @@ class Components::MatrixBoxDetails < Components::Base
     div(class: "small mt-3") do
       div(class: "source-credit") do
         small do
-          unsafe_raw(target.source_credit.tpl)
+          raw(target.source_credit.tpl)
         end
       end
     end
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
   end
 end

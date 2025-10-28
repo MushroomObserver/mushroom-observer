@@ -18,12 +18,12 @@ class Components::MatrixBoxFooter < Components::Base
   prop :data, Hash
   prop :user, _Nilable(User), default: nil
   prop :identify, _Boolean, default: false
-  prop :footer, _Union(Array, _Boolean), default: -> { [] }
+  prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
 
   def view_template
     # Handle explicit footer components
     if @footer.is_a?(Array)
-      @footer.each { |component| unsafe_raw(component) } if @footer.any?
+      @footer.each { |component| raw(component) } if @footer.any?
       return
     end
 
@@ -66,11 +66,9 @@ class Components::MatrixBoxFooter < Components::Base
       br
       plain("#{:list_users_contribution.l}: #{user.contribution}")
       br
-      unsafe_raw(
-        helpers.link_to(
-          :OBSERVATIONS.l,
-          helpers.observations_path(by_user: user.id)
-        )
+      link_to(
+        :OBSERVATIONS.l,
+        observations_path(by_user: user.id)
       )
     end
   end
@@ -81,17 +79,11 @@ class Components::MatrixBoxFooter < Components::Base
     div(
       class: "panel-footer panel-active text-center position-relative"
     ) do
-      unsafe_raw(
-        helpers.mark_as_reviewed_toggle(
-          @data[:id],
-          "box_reviewed",
-          "stretched-link"
-        )
+      mark_as_reviewed_toggle(
+        @data[:id],
+        "box_reviewed",
+        "stretched-link"
       )
     end
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
   end
 end

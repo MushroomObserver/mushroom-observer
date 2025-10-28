@@ -21,6 +21,9 @@
 #     camera_info: { lat: "45.5", lng: "-122.6", ... }
 #   )
 class Components::Form::ImageCarouselItem < Components::BaseImage
+  include Phlex::Rails::Helpers::LabelTag
+  include Phlex::Rails::Helpers::RadioButtonTag
+
   # Additional form carousel-specific properties
   prop :index, Integer, default: 0
   prop :upload, _Boolean, default: false
@@ -125,22 +128,54 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
 
   def render_thumbnail_button(img_instance)
     div(class: "top-left p-4") do
-      unsafe_raw(helpers.carousel_set_thumb_img_button(
-                   image: img_instance,
-                   thumb_id: @thumb_id
-                 ))
+      set_thumb_img_button(img_instance)
+    end
+  end
+
+  # Note that this is not `observation[thumb_image_id]`, a hidden field that
+  # is set by the Stimulus controller on the basis of these radios' value.
+  def set_thumb_img_button(image)
+    value = image&.id || "true"
+    checked = @thumb_id&.== image&.id
+    label_classes = class_names("btn btn-default btn-sm thumb_img_btn",
+                                active: checked)
+
+    label_tag(
+      :thumb_image_id,
+      class: label_classes,
+      data: { form_images_target: "thumbImgBtn",
+              action: "click->form-images#setObsThumbnail" }
+    ) do
+      [
+        radio_button_tag(
+          :thumb_image_id, value,
+          class: "mr-3", checked: checked,
+          data: { form_images_target: "thumbImgRadio" }
+        ),
+        span(class: "set_thumb_img_text") { :image_set_default.l },
+        span(class: "is_thumb_img_text") { :image_add_default.l }
+      ].safe_join
     end
   end
 
   def render_remove_button(img_instance)
     div(class: "top-right p-4") do
-      unsafe_raw(helpers.carousel_remove_image_button(
-                   image_id: img_instance&.id
-                 ))
+      remove_image_button(img_instance&.id)
     end
   end
 
-  def helpers
-    @helpers ||= ApplicationController.helpers
+  def remove_image_button(image_id)
+    action = image_id ? "removeAttachedItem" : "removeClickedItem"
+    data = { form_images_target: "removeImg",
+             action: "form-images##{action}:prevent" }
+    data[:image_id] = image_id if image_id
+
+    button_classes = class_names("btn btn-default",
+                                 "remove_image_button btn-sm fade in")
+
+    button(type: "button", class: button_classes, data: data) do
+      span { :image_remove_remove.l }
+      link_icon(:remove, class: "text-danger ml-3")
+    end
   end
 end

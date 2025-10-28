@@ -54,7 +54,7 @@ module ImagesHelper
   def image_show_args
     { size: :huge,
       image_link: "#",
-      img_class: "huge-image",
+      extra_classes: "huge-image",
       votes: false }
   end
 

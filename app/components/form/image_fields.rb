@@ -19,6 +19,8 @@
 #     upload: false
 #   )
 class Components::Form::ImageFields < Components::Base
+  include Phlex::Rails::Helpers::FieldsFor
+
   # Properties
   prop :user, _Nilable(User)
   prop :image, _Nilable(Image), default: nil
@@ -27,19 +29,25 @@ class Components::Form::ImageFields < Components::Base
 
   def view_template
     # Show upload messages for upload images
-    unsafe_raw(helpers.carousel_upload_messages) if @upload
+    upload_messages if @upload
 
     # Render form fields
     image_field = @upload ? :temp_image : :good_image
 
-    unsafe_raw(
-      helpers.fields_for(image_field) do |ffi|
-        render_form_fields(ffi)
-      end
-    )
+    fields_for(image_field) do |ffi|
+      render_form_fields(ffi)
+    end
   end
 
   private
+
+  # Replaced by js
+  def upload_messages
+    div(class: "carousel-upload-messages") do
+      span(class: "text-danger warn-text") { "" }
+      span(class: "text-success info-text") { "" }
+    end
+  end
 
   def render_form_fields(form)
     fields = [
@@ -51,11 +59,11 @@ class Components::Form::ImageFields < Components::Base
 
     fields << render_original_name_field(form) unless @upload
 
-    helpers.safe_join(fields)
+    fields.join.html_safe
   end
 
   def render_notes_field(form)
-    helpers.text_area_with_label(
+    text_area_with_label(
       form: form,
       field: :notes,
       index: @img_id,
@@ -66,7 +74,7 @@ class Components::Form::ImageFields < Components::Base
   end
 
   def render_date_field(form)
-    helpers.date_select_with_label(
+    date_select_with_label(
       form: form,
       field: :when,
       index: @img_id,
@@ -77,7 +85,7 @@ class Components::Form::ImageFields < Components::Base
   end
 
   def render_copyright_field(form)
-    helpers.text_field_with_label(
+    text_field_with_label(
       form: form,
       field: :copyright_holder,
       index: @img_id,
@@ -87,7 +95,7 @@ class Components::Form::ImageFields < Components::Base
   end
 
   def render_license_field(form)
-    helpers.select_with_label(
+    select_with_label(
       form: form,
       field: :license_id,
       index: @img_id,
@@ -98,7 +106,7 @@ class Components::Form::ImageFields < Components::Base
   end
 
   def render_original_name_field(form)
-    helpers.text_field_with_label(
+    text_field_with_label(
       form: form,
       field: :original_name,
       index: @img_id,
@@ -122,9 +130,5 @@ class Components::Form::ImageFields < Components::Base
     else
       @image.license_id
     end
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
   end
 end

@@ -43,7 +43,7 @@ class Components::Form::ImageCarousel < Components::Base
 
         # Carousel controls
         div(class: "carousel-control-wrap row") do
-          unsafe_raw(helpers.carousel_controls(@html_id))
+          render(Components::CarouselControls.new(carousel_id: @html_id))
         end
       end
 

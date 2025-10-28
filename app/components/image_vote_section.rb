@@ -55,7 +55,6 @@ class Components::ImageVoteSection < Components::Base
       title: "#{@image.num_votes} #{:Votes.t}"
     ) do
       div(
-        "",
         class: "progress-bar",
         id: "vote_meter_bar_#{@image.id}",
         style: "width: #{vote_percentage}%"
@@ -104,24 +103,18 @@ class Components::ImageVoteSection < Components::Base
   end
 
   def render_current_vote(vote)
-    span(helpers.image_vote_as_short_string(vote), class: "image-vote")
+    span(image_vote_as_short_string(vote), class: "image-vote")
   end
 
   def render_vote_button(vote)
-    vote_text = vote.zero? ? "(x)" : helpers.image_vote_as_short_string(vote)
+    vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
 
-    unsafe_raw(
-      helpers.put_button(
-        name: vote_text,
-        class: "image-vote-link",
-        path: helpers.image_vote_path(image_id: @image.id, value: vote),
-        title: helpers.image_vote_as_help_string(vote),
-        data: { image_id: @image.id, value: vote }
-      )
+    put_button(
+      name: vote_text,
+      class: "image-vote-link",
+      path: image_vote_path(image_id: @image.id, value: vote),
+      title: image_vote_as_help_string(vote),
+      data: { image_id: @image.id, value: vote }
     )
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
   end
 end

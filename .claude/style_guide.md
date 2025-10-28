@@ -71,7 +71,7 @@ div(class: "container", id: "main") do
 end
 
 # Bad - Rails tag helpers
-unsafe_raw(
+raw(
   helpers.tag.div(class: "container", id: "main") do
     helpers.tag.h1("Title")
     helpers.tag.p("Some text", class: "description")
@@ -84,7 +84,7 @@ unsafe_raw(
 **Use Phlex rendering methods** for outputting content:
 - `plain(text)` - for plain text
 - `whitespace` - for spacing between elements
-- `unsafe_raw(html)` - only when necessary for Rails helpers that return HTML strings
+- `raw(html)` - only when necessary for Rails helpers that return HTML strings
 
 ```ruby
 # Good
@@ -100,7 +100,7 @@ end
 # Bad - using safe_join or building arrays
 def view_template
   div do
-    unsafe_raw(safe_join(["Hello ", tag.b("World"), "!"]))
+    raw(safe_join(["Hello ", tag.b("World"), "!"]))
   end
 end
 ```
@@ -123,7 +123,7 @@ def render_links
   links = items.map do |item|
     helpers.link_to(item.name, item.path)
   end
-  unsafe_raw(safe_join(links, "|"))
+  raw(safe_join(links, "|"))
 end
 ```
 
@@ -152,7 +152,7 @@ end
 def render_original_filename(img_instance)
   return unless img_instance
 
-  unsafe_raw(helpers.image_owner_original_name(img_instance, original))
+  raw(helpers.image_owner_original_name(img_instance, original))
 end
 ```
 

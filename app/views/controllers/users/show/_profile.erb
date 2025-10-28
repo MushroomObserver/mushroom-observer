@@ -28,11 +28,11 @@ footer =
 <%= panel_block(heading: heading, id: "user_profile",
                 heading_links: heading_links, footer: footer) do %>
 
-  <%= if @show_user.image_id
+  <%= if @show_user.image
     tag.div(class: "float-left mr-5 mb-3") do
       render(Components::InteractiveImage.new(
         user: @user,
-        image: Image.find(@show_user.image_id),
+        image: @show_user.image,
         size: :small,
         votes: false,
         id_prefix: "profile_image"

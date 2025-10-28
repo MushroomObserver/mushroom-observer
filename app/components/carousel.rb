@@ -20,7 +20,9 @@ class Components::Carousel < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   # Properties
-  prop :images, Array
+  prop :images, Array do |value|
+    value.respond_to?(:to_a) ? value.to_a : value
+  end
   prop :user, _Nilable(User)
   prop :object, _Nilable(Object), default: nil
   prop :size, Components::BaseImage::Size, default: :large
@@ -56,7 +58,7 @@ class Components::Carousel < Components::Base
     div(class: "panel-heading carousel-heading") do
       h4(class: "panel-title") do
         plain(@title)
-        span(class: "float-right") { unsafe_raw(@links) }
+        span(class: "float-right") { raw(@links) } if @links.present?
       end
     end
   end
@@ -84,40 +86,12 @@ class Components::Carousel < Components::Base
 
         # Carousel controls (if multiple images)
         if @images.length > 1
-          unsafe_raw(render_carousel_controls(final_html_id))
+          render(Components::CarouselControls.new(carousel_id: final_html_id))
         end
       end
 
       # Thumbnail navigation (if enabled)
       render_thumbnail_navigation(final_html_id) if @thumbnails
-    end
-  end
-
-  def render_carousel_controls(carousel_id)
-    [
-      control_button(carousel_id, :prev),
-      control_button(carousel_id, :next)
-    ].safe_join
-  end
-
-  def control_button(carousel_id, direction)
-    position = direction == :prev ? "left" : "right"
-
-    link_to("##{carousel_id}",
-            class: "#{position} carousel-control",
-            role: "button",
-            data: { slide: direction.to_s }) do
-      render_control_button_content(direction)
-    end
-  end
-
-  def render_control_button_content(direction)
-    icon = direction == :prev ? "chevron-left" : "chevron-right"
-    label = direction == :prev ? :PREV : :NEXT
-
-    div(class: "btn") do
-      span(class: "glyphicon glyphicon-#{icon}", aria: { hidden: "true" })
-      span(label.l, class: "sr-only")
     end
   end
 
@@ -142,13 +116,5 @@ class Components::Carousel < Components::Base
     ) do
       plain(:show_observation_no_images.l)
     end
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
-  end
-
-  def safe_join(array, separator = nil)
-    helpers.safe_join(array, separator)
   end
 end
