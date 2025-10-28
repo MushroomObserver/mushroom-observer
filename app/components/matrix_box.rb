@@ -192,9 +192,9 @@ class Components::MatrixBox < Components::Base
     data = {
       id: @object.id,
       type: :user,
-      detail: object,
+      detail: @object,
       name: @object.unique_text_name,
-      what: object,
+      what: @object,
       where: @object.location&.name,
       location: @object.location
     }

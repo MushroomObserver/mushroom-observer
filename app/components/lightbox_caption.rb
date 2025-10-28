@@ -99,11 +99,10 @@ class Components::LightboxCaption < Components::Base
     btn_style = @identify ? "text-bold" : "btn btn-primary"
 
     a(
-      @obs.id,
       href: url_for(@obs.show_link_args),
       class: "#{btn_style} mr-3",
       id: "caption_obs_link_#{@obs.id}"
-    )
+    ) { @obs.id }
   end
 
   def render_obs_when_where_who
@@ -116,7 +115,7 @@ class Components::LightboxCaption < Components::Base
   def render_obs_when
     p(class: "obs-when", id: "observation_when") do
       plain("#{:WHEN.t}: ")
-      b(@obs.when.web_date)
+      b { @obs.when.web_date }
     end
   end
 
@@ -156,7 +155,7 @@ class Components::LightboxCaption < Components::Base
     title += " #{:show_observation_improve_location.l}" if user == @obs.user
 
     p(class: "ml-3") do
-      em(title)
+      em { title }
     end
   end
 
@@ -165,7 +164,7 @@ class Components::LightboxCaption < Components::Base
 
     p(class: "obs-where-gps", id: "observation_where_gps") do
       render_gps_link if @obs.reveal_location?(@user)
-      i("(#{:show_observation_gps_hidden.t})") if @obs.gps_hidden
+      i { "(#{:show_observation_gps_hidden.t})" } if @obs.gps_hidden
     end
   end
 
@@ -175,7 +174,7 @@ class Components::LightboxCaption < Components::Base
       @obs.display_alt.t,
       "[#{:click_for_map.t}]"
     ].join(" ")
-    a(link_text, href: map_observation_path(id: @obs.id))
+    a(href: map_observation_path(id: @obs.id)) { link_text }
   end
 
   def render_obs_who
@@ -253,7 +252,6 @@ class Components::LightboxCaption < Components::Base
          end
 
     a(
-      :image_show_original.t,
       href: "/images/#{id}/original",
       class: "lightbox_link",
       target: "_blank",
@@ -266,7 +264,7 @@ class Components::LightboxCaption < Components::Base
         "maxed-out-text": :image_show_original_maxed_out.t,
         "error-text": :image_show_original_error.t
       }
-    )
+    ) { :image_show_original.t }
   end
 
   def render_image_exif_link(image_or_image_id)

@@ -52,12 +52,12 @@ class Components::MatrixBoxFooter < Components::Base
     if detail.is_a?(User)
       render_user_detail(detail)
     else
-      div(detail, class: "rss-detail small")
+      div(class: "rss-detail small") { detail }
     end
   end
 
   def render_footer_time(time)
-    div(time.display_time, class: "rss-what small") if time
+    div(class: "rss-what small") { time.display_time } if time
   end
 
   def render_user_detail(user)
