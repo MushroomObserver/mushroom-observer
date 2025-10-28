@@ -2,8 +2,9 @@
 
 # Matrix table component for displaying grids of matrix boxes.
 #
-# Renders a responsive grid layout with Stimulus controller for dynamic resizing.
-# Can render a collection of objects or accept a block for custom content.
+# Renders a responsive grid layout with Stimulus controller for dynamic
+# resizing. Can render a collection of objects or accept a block for
+# custom content.
 #
 # @example With block
 #   render MatrixTable.new do

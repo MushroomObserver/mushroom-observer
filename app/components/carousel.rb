@@ -84,7 +84,6 @@ class Components::Carousel < Components::Base
 
         # Carousel controls (if multiple images)
         if @images.length > 1
-          whitespace
           unsafe_raw(render_carousel_controls(final_html_id))
         end
       end
@@ -101,22 +100,24 @@ class Components::Carousel < Components::Base
     ].safe_join
   end
 
-  def control_button(carousel_id, direction) # rubocop:disable Metrics/AbcSize
+  def control_button(carousel_id, direction)
     position = direction == :prev ? "left" : "right"
-    icon = direction == :prev ? "chevron-left" : "chevron-right"
-    label = direction == :prev ? :PREV : :NEXT
 
     link_to("##{carousel_id}",
             class: "#{position} carousel-control",
             role: "button",
             data: { slide: direction.to_s }) do
-      helpers.tag.div(class: "btn") do
-        helpers.concat(
-          helpers.tag.span(class: "glyphicon glyphicon-#{icon}",
-                           aria: { hidden: "true" })
-        )
-        helpers.concat(helpers.tag.span(label.l, class: "sr-only"))
-      end
+      render_control_button_content(direction)
+    end
+  end
+
+  def render_control_button_content(direction)
+    icon = direction == :prev ? "chevron-left" : "chevron-right"
+    label = direction == :prev ? :PREV : :NEXT
+
+    div(class: "btn") do
+      span(class: "glyphicon glyphicon-#{icon}", aria: { hidden: "true" })
+      span(label.l, class: "sr-only")
     end
   end
 

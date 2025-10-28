@@ -110,8 +110,6 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
                  upload: @upload
                ))
 
-        whitespace
-
         render(Components::Form::ImageCameraInfo.new(
                  img_id: img_id,
                  **@camera_info

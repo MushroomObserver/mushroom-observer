@@ -1,0 +1,97 @@
+# frozen_string_literal: true
+
+# Matrix box footer section component.
+#
+# Renders the footer section for a matrix box, handling:
+# - Log footer (detail, time)
+# - Identify footer (mark as reviewed toggle)
+# - Custom footer components (when footer prop is an Array)
+#
+# @example
+#   render MatrixBoxFooter.new(
+#     data: render_data,
+#     user: @user,
+#     identify: true,
+#     footer: []
+#   )
+class Components::MatrixBoxFooter < Components::Base
+  prop :data, Hash
+  prop :user, _Nilable(User), default: nil
+  prop :identify, _Boolean, default: false
+  prop :footer, _Union(Array, _Boolean), default: -> { [] }
+
+  def view_template
+    # Handle explicit footer components
+    if @footer.is_a?(Array)
+      @footer.each { |component| unsafe_raw(component) } if @footer.any?
+      return
+    end
+
+    # Skip footer if explicitly false
+    return if @footer == false
+
+    # Default footers
+    render_log_footer
+    render_identify_footer
+  end
+
+  private
+
+  def render_log_footer
+    return unless @data[:detail].present? || @data[:time].present?
+
+    div(class: "panel-footer log-footer") do
+      render_footer_detail(@data[:detail])
+      render_footer_time(@data[:time])
+    end
+  end
+
+  def render_footer_detail(detail)
+    return if detail.blank?
+
+    if detail.is_a?(User)
+      render_user_detail(detail)
+    else
+      div(detail, class: "rss-detail small")
+    end
+  end
+
+  def render_footer_time(time)
+    div(time.display_time, class: "rss-what small") if time
+  end
+
+  def render_user_detail(user)
+    div(class: "rss-detail small") do
+      plain("#{:list_users_joined.l}: #{user.created_at.web_date}")
+      br
+      plain("#{:list_users_contribution.l}: #{user.contribution}")
+      br
+      unsafe_raw(
+        helpers.link_to(
+          :OBSERVATIONS.l,
+          helpers.observations_path(by_user: user.id)
+        )
+      )
+    end
+  end
+
+  def render_identify_footer
+    return unless @identify && @data[:type] == :observation
+
+    div(
+      class: "panel-footer panel-active text-center position-relative"
+    ) do
+      unsafe_raw(
+        helpers.mark_as_reviewed_toggle(
+          @data[:id],
+          "box_reviewed",
+          "stretched-link"
+        )
+      )
+    end
+  end
+
+  def helpers
+    @helpers ||= ApplicationController.helpers
+  end
+end

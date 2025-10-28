@@ -193,7 +193,8 @@ class Components::BaseImage < Components::Base
   def render_image_vote_section(img_instance)
     return unless votes && img_instance
 
-    render(ImageVoteSection.new(user: @user, image: img_instance, votes: @votes))
+    render(ImageVoteSection.new(user: @user, image: img_instance,
+                                votes: @votes))
   end
 
   # Render original filename if applicable

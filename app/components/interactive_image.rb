@@ -40,7 +40,6 @@ class Components::InteractiveImage < Components::BaseImage
       render_image_overlays(img_instance, data)
     end
 
-    whitespace
     render_original_filename(img_instance)
   end
 
@@ -78,9 +77,7 @@ class Components::InteractiveImage < Components::BaseImage
   end
 
   def render_image_overlays(img_instance, data)
-    whitespace
     render_lightbox_link(data[:lightbox_data]) if data[:lightbox_data]
-    whitespace
     render_image_vote_section(img_instance)
   end
 end

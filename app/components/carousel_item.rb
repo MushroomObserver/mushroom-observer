@@ -70,11 +70,7 @@ class Components::CarouselItem < Components::BaseImage
 
   def render_carousel_overlays(_img_instance, data)
     render_stretched_link(data[:image_link]) if @user && data[:image_link]
-
-    whitespace
     render_lightbox_link(data[:lightbox_data]) if data[:lightbox_data]
-
-    whitespace
   end
 
   def render_carousel_caption(img_instance, _data)
@@ -90,7 +86,6 @@ class Components::CarouselItem < Components::BaseImage
 
       # Image info (copyright, notes)
       if caption_content.present?
-        whitespace
         div(class: "image-info d-none d-sm-block") do
           unsafe_raw(caption_content)
         end

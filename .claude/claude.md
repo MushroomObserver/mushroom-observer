@@ -274,6 +274,12 @@ Resources:
 - Phlex caching: https://www.phlex.fun/components/caching
 - Literal properties: https://literal.fun/docs/properties.html
 
+### Template Digesting Errors
+
+**Note**: You may see errors like "Couldn't find template for digesting: Components/Component" in test logs. This is harmless - Phlex components are pure Ruby and don't have ERB templates to digest.
+
+The test environment has been configured to suppress these errors via a custom logger formatter in `config/environments/test.rb`.
+
 ## Required Workflow for New Components
 
 When creating new Phlex components:

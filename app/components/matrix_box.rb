@@ -3,7 +3,8 @@
 # Matrix box component for displaying objects in a responsive grid.
 #
 # This component can be used in two ways:
-# 1. With an object - renders the standard layout for Image, Observation, RssLog, or User
+# 1. With an object - renders the standard layout for Image, Observation,
+#    RssLog, or User
 # 2. With a block - renders a simple <li> wrapper for custom content
 #
 # @example Standard object rendering
@@ -96,7 +97,11 @@ class Components::MatrixBox < Components::Base
     {
       id: object.id,
       type: :image,
-      when: (object.when.web_date rescue nil),
+      when: begin
+              object.when.web_date
+            rescue StandardError
+              nil
+            end,
       who: object.user,
       name: object.unique_format_name.t,
       what: object,
@@ -108,6 +113,7 @@ class Components::MatrixBox < Components::Base
     }
   end
 
+  # rubocop:disable Metrics/AbcSize
   def extract_observation_data
     data = {
       id: object.id,
@@ -123,16 +129,19 @@ class Components::MatrixBox < Components::Base
       time: object.rss_log&.updated_at
     }
 
-    if object.thumb_image_id
-      data[:image] = object.thumb_image
-      data[:image_link] = object.show_link_args
-      data[:obs] = object
-      data[:full_width] = true
-    end
-
+    add_observation_image_data(data) if object.thumb_image_id
     data
   end
+  # rubocop:enable Metrics/AbcSize
 
+  def add_observation_image_data(data)
+    data[:image] = object.thumb_image
+    data[:image_link] = object.show_link_args
+    data[:obs] = object
+    data[:full_width] = true
+  end
+
+  # rubocop:disable Metrics/AbcSize
   def extract_rss_log_data
     target = object.target
     data = {
@@ -145,27 +154,37 @@ class Components::MatrixBox < Components::Base
       time: object.updated_at
     }
 
-    data[:name] = if object.target_type == :image
-                    target.unique_format_name.t
-                  elsif target
-                    target.format_name.t.break_name.small_author
-                  else
-                    object.format_name.t.break_name.small_author
-                  end
-
-    if target.respond_to?(:location)
-      data[:where] = target.where
-      data[:location] = target.location
-    end
-
-    if target.respond_to?(:thumb_image) && target&.thumb_image
-      data[:image] = target.thumb_image
-      data[:image_link] = target.show_link_args
-      data[:obs] = target if target.respond_to?(:is_collection_location)
-      data[:full_width] = true
-    end
-
+    data[:name] = extract_rss_log_name(target)
+    add_rss_log_location_data(data, target)
+    add_rss_log_image_data(data, target)
     data
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def extract_rss_log_name(target)
+    if object.target_type == :image
+      target.unique_format_name.t
+    elsif target
+      target.format_name.t.break_name.small_author
+    else
+      object.format_name.t.break_name.small_author
+    end
+  end
+
+  def add_rss_log_location_data(data, target)
+    return unless target.respond_to?(:location)
+
+    data[:where] = target.where
+    data[:location] = target.location
+  end
+
+  def add_rss_log_image_data(data, target)
+    return unless target.respond_to?(:thumb_image) && target&.thumb_image
+
+    data[:image] = target.thumb_image
+    data[:image_link] = target.show_link_args
+    data[:obs] = target if target.respond_to?(:is_collection_location)
+    data[:full_width] = true
   end
 
   def extract_user_data
@@ -179,14 +198,15 @@ class Components::MatrixBox < Components::Base
       location: object.location
     }
 
-    if object.image_id
-      data[:image] = object.image
-      data[:image_link] = object.show_link_args
-      data[:votes] = false
-      data[:full_width] = true
-    end
-
+    add_user_image_data(data) if object.image_id
     data
+  end
+
+  def add_user_image_data(data)
+    data[:image] = object.image
+    data[:image_link] = object.show_link_args
+    data[:votes] = false
+    data[:full_width] = true
   end
 
   # Render image section
@@ -194,176 +214,34 @@ class Components::MatrixBox < Components::Base
     return unless data[:image]
 
     div(class: "thumbnail-container") do
-      render InteractiveImage.new(
-        user: user,
-        image: data[:image],
-        image_link: data[:image_link],
-        obs: data[:obs] || {},
-        votes: data.fetch(:votes, true),
-        full_width: data.fetch(:full_width, true)
-      )
+      render(InteractiveImage.new(
+               user: user,
+               image: data[:image],
+               image_link: data[:image_link],
+               obs: data[:obs] || {},
+               votes: data.fetch(:votes, true),
+               full_width: data.fetch(:full_width, true)
+             ))
     end
   end
 
   # Render details section
   def render_details_section(data)
-    div(class: "panel-body rss-box-details") do
-      render_what_section(data)
-      render_where_section(data)
-      render_when_who_section(data)
-      render_source_credit(data)
-    end
-  end
-
-  def render_what_section(data)
-    h_style = data[:image] ? "h5" : "h3"
-
-    div(class: "rss-what") do
-      h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
-        a(href: helpers.url_for(data[:what].show_link_args)) do
-          render_title(data)
-        end
-        render_id_badge(data[:what])
-      end
-
-      render_identify_ui(data) if identify
-    end
-  end
-
-  def render_title(data)
-    fragment("box_title") do
-      bold = [:observation, :name].include?(data[:type]) ? "" : " font-weight-bold"
-      span(data[:name], class: class_names("rss-name", bold),
-                        id: "box_title_#{data[:id]}")
-    end
-  end
-
-  def render_id_badge(obj)
-    whitespace
-    unsafe_raw(helpers.show_title_id_badge(obj, "rss-id"))
-  end
-
-  def render_identify_ui(data)
-    return unless data[:type] == :observation && data[:consensus]
-
-    consensus = data[:consensus]
-    obs = data[:what]
-
-    if (obs.name_id != 1) && (naming = consensus.consensus_naming)
-      div(
-        class: "vote-select-container mb-3",
-        data: { vote_cache: obs.vote_cache }
-      ) do
-        unsafe_raw(helpers.naming_vote_form(naming, nil, context: "matrix_box"))
-      end
-    else
-      unsafe_raw(
-        helpers.propose_naming_link(
-          obs.id,
-          btn_class: "btn btn-default d-inline-block mb-3",
-          context: "matrix_box"
-        )
-      )
-    end
-  end
-
-  def render_where_section(data)
-    return unless data[:where]
-
-    div(class: "rss-where") do
-      small do
-        unsafe_raw(helpers.location_link(data[:where], data[:location]))
-      end
-    end
-  end
-
-  def render_when_who_section(data)
-    return if data[:when].blank?
-
-    div(class: "rss-what") do
-      small(class: "nowrap-ellipsis") do
-        span(data[:when], class: "rss-when")
-        plain(": ")
-        unsafe_raw(helpers.user_link(data[:who], nil, class: "rss-who"))
-      end
-    end
-  end
-
-  def render_source_credit(data)
-    target = data[:what]
-    return unless target.respond_to?(:source_credit) &&
-                  target.source_noteworthy?
-
-    div(class: "small mt-3") do
-      div(class: "source-credit") do
-        small do
-          unsafe_raw(target.source_credit.tpl)
-        end
-      end
-    end
+    render(MatrixBoxDetails.new(
+             data: data,
+             user: @user,
+             identify: @identify
+           ))
   end
 
   # Render footer section
   def render_footer_section(data)
-    # Handle explicit footer components
-    if footer.is_a?(Array)
-      footer.each { |component| unsafe_raw(component) } if footer.any?
-      return
-    end
-
-    # Skip footer if explicitly false
-    return if footer == false
-
-    # Default footers
-    render_log_footer(data)
-    render_identify_footer(data)
-  end
-
-  def render_log_footer(data)
-    return unless data[:detail].present? || data[:time].present?
-
-    div(class: "panel-footer log-footer") do
-      if data[:detail].is_a?(User)
-        render_user_detail(data[:detail])
-      elsif data[:detail].present?
-        div(data[:detail], class: "rss-detail small")
-      end
-
-      if data[:time]
-        div(data[:time].display_time, class: "rss-what small")
-      end
-    end
-  end
-
-  def render_user_detail(user)
-    div(class: "rss-detail small") do
-      plain("#{:list_users_joined.l}: #{user.created_at.web_date}")
-      br
-      plain("#{:list_users_contribution.l}: #{user.contribution}")
-      br
-      unsafe_raw(
-        helpers.link_to(
-          :OBSERVATIONS.l,
-          helpers.observations_path(by_user: user.id)
-        )
-      )
-    end
-  end
-
-  def render_identify_footer(data)
-    return unless identify && data[:type] == :observation
-
-    div(
-      class: "panel-footer panel-active text-center position-relative"
-    ) do
-      unsafe_raw(
-        helpers.mark_as_reviewed_toggle(
-          data[:id],
-          "box_reviewed",
-          "stretched-link"
-        )
-      )
-    end
+    render(MatrixBoxFooter.new(
+             data: data,
+             user: @user,
+             identify: @identify,
+             footer: @footer
+           ))
   end
 
   def helpers
