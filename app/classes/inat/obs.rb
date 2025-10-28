@@ -345,6 +345,8 @@ class Inat
       # iNat infrageneric ObservationID's need special handling because
       # they display as just the epithet, e.g, "Distantes"
       if infrageneric?
+        foo = infrageneric_name_string
+        return foo
         # If species_guess is just an epithet,
         # get the genus and rank from the identifications
         # This will be the case if the ObservationID was suggested by a user
@@ -367,6 +369,16 @@ class Inat
     def infrageneric?
       %w[subgenus section subsection stirps series subseries].
         include?(inat_taxon_rank)
+    end
+
+    def infrageneric_name_string
+      ancestors = self[:taxon][:ancestor_ids].join(",")
+      taxa_request = Inat::APIRequest.new(nil) # token not needed
+      response = taxa_request.request(path: "taxa/#{ancestors}?rank=genus")
+      body = JSON.parse(response.body, symbolize_names: true)
+      genus = body[:results].first[:name]
+
+      "#{genus} #{inat_taxon_rank} #{inat_taxon_name}"
     end
 
     def prepend_genus_and_rank

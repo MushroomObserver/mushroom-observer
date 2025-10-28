@@ -5,6 +5,7 @@ require_relative("inat_import_job_test_doubles")
 
 class InatImportJobTest < ActiveJob::TestCase
   include InatImportJobTestDoubles
+  include Inat::Constants
 
   def setup
     @user = users(:inat_importer)
@@ -270,7 +271,6 @@ class InatImportJobTest < ActiveJob::TestCase
   # iNat Observation ID is an infrageneric name which was suggested by a user
   def test_import_job_suggested_infrageneric_name
     create_ivars_from_filename("distantes")
-
     # Add objects which are not included in fixtures
     name = Name.create(
       text_name: "Morchella sect. Distantes",
@@ -280,8 +280,55 @@ class InatImportJobTest < ActiveJob::TestCase
       rank: "Section",
       user: @user
     )
-
     stub_inat_interactions
+    ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
+    # rubocop:disable Style/NumericLiterals
+    stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
+      with(
+        body: "{}",
+        headers: {
+          "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer",
+          "Content-Length" => "2",
+          "Content-Type" => "application/json",
+          "Host" => "api.inaturalist.org",
+          "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
+        }
+      ).
+      to_return(
+        status: 200,
+        # simplified response body; omits many fields unneeded for this test
+        body: {
+          total_results: 1,
+          page: 1,
+          per_page: 30,
+          results: [
+            {
+              id: 56830,
+              rank: "genus",
+              rank_level: 20,
+              iconic_taxon_id: 47170,
+              ancestor_ids: [
+                48460,
+                47170,
+                48250,
+                372740,
+                152032,
+                48717,
+                56831,
+                56830
+              ],
+              is_active: true,
+              name: "Morchella",
+              parent_id: 56831,
+              ancestry: "48460/47170/48250/372740/152032/48717/56831"
+            }
+          ]
+        }.to_json,
+        headers: {}
+      )
+    # rubocop:enable Style/NumericLiterals
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -307,6 +354,39 @@ class InatImportJobTest < ActiveJob::TestCase
     )
 
     stub_inat_interactions
+    # stub the name lookup for the infrageneric name
+    stub_request(:get, "https://api.inaturalist.org/v1/taxa/48460,47170,47169,492000,50814,1094814,47167,785522,118249,1149497,48419,1142598,932781?rank=genus").
+      with(
+        body: "{}",
+        headers: {
+          "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer",
+          "Content-Length" => "2",
+          "Content-Type" => "application/json",
+          "Host" => "api.inaturalist.org",
+          "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
+        }
+      ).
+      to_return(
+        status: 200,
+        body: {
+          total_results: 1,
+          page: 1,
+          per_page: 30,
+          results: [
+            {
+              id: 48419,
+              rank: "genus",
+              rank_level: 20,
+              iconic_taxon_id: 47170,
+              is_active: true,
+              name: "Amanita"
+            }
+          ]
+        }.to_json,
+        headers: {}
+      )
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
