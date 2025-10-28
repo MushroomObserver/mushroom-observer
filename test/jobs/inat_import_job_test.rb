@@ -294,7 +294,7 @@ class InatImportJobTest < ActiveJob::TestCase
           "Content-Length" => "2",
           "Content-Type" => "application/json",
           "Host" => "api.inaturalist.org",
-          "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
+          # "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
         }
       ).
       to_return(
@@ -367,7 +367,7 @@ class InatImportJobTest < ActiveJob::TestCase
           "Content-Length" => "2",
           "Content-Type" => "application/json",
           "Host" => "api.inaturalist.org",
-          "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
+          # "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
         }
       ).
       to_return(
