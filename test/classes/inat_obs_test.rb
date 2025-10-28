@@ -158,6 +158,51 @@ class InatObsTest < UnitTestCase
 
     mock_inat_obs = mock_observation("distantes")
 
+    stub_request(:get, "https://api.inaturalist.org/v1/taxa/48460,47170,48250,372740,152032,48717,56831,56830,1062676?rank=genus").
+      with(
+        body: "{}",
+        headers: {
+              'Accept'=>'application/json',
+              'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+              'Authorization'=>'Bearer',
+              'Content-Length'=>'2',
+              'Content-Type'=>'application/json',
+              'Host'=>'api.inaturalist.org',
+              'User-Agent'=>'rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108'
+        }
+      ).
+      to_return(
+        status: 200,
+        body: {
+          total_results: 1,
+          page: 1,
+          per_page: 30,
+          results: [
+            {
+              id: 56830,
+              rank: "genus",
+              rank_level: 20,
+              iconic_taxon_id: 47170,
+              ancestor_ids: [
+                48460,
+                47170,
+                48250,
+                372740,
+                152032,
+                48717,
+                56831,
+                56830
+              ],
+              is_active: true,
+              name: "Morchella",
+              parent_id: 56831,
+              ancestry: "48460/47170/48250/372740/152032/48717/56831"
+            }
+          ]
+        }.to_json,
+        headers: {}
+      )
+
     assert_equal(name.id, mock_inat_obs.name_id)
     assert_equal(name.text_name, mock_inat_obs.text_name)
   end
