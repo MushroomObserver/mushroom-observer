@@ -8,6 +8,7 @@
 # See the Observation cache for the primary use case
 class NormalizedHash
   extend Forwardable
+
   def_delegators :@hash, :[], :keys, :values, :each, :each_pair, :map, :select,
                  :reject, :empty?, :size, :length, :to_s, :inspect, :except,
                  :key?, :has_key?, :include?, :fetch, :dig, :merge, :delete,
@@ -19,24 +20,24 @@ class NormalizedHash
   end
 
   def []=(key, value)
-    normalized_key = key.to_s.gsub(' ', '_')
+    normalized_key = key.to_s.tr(" ", "_")
     comparison_key = normalized_key.downcase
-    
+
     existing_key = @hash.keys.find do |existing|
       existing.to_s.downcase == comparison_key
     end
-    
+
     if existing_key
       @hash[existing_key] = value
     else
       @hash[normalized_key.to_sym] = value
     end
   end
-  
+
   # Return the underlying hash for serialization
   def to_h
     @hash
   end
-  
-  alias_method :to_hash, :to_h
+
+  alias to_hash to_h
 end
