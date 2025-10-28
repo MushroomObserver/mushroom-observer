@@ -15,7 +15,7 @@
 #     image: @image,
 #     image_id: @image.id,
 #     obs: @observation,
-#     @identify: true
+#     identify: true
 #   )
 #
 # @example With image only
@@ -46,14 +46,14 @@ class Components::LightboxCaption < Components::Base
   private
 
   def render_obs_caption_parts
-    render_@identify_ui if @identify
+    render_identify_ui if @identify
     render_obs_title
     render_obs_when_where_who
     render_truncated_notes
   end
 
-  def render_@identify_ui
-    div(class: "obs-@identify mb-3", id: "observation_@identify_#{@obs.id}") do
+  def render_identify_ui
+    div(class: "obs-identify mb-3", id: "observation_identify_#{@obs.id}") do
       unsafe_raw(
         helpers.propose_naming_link(
           @obs.id,
