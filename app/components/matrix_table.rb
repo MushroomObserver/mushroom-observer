@@ -11,13 +11,26 @@
 #     render MatrixBox.new(id: 2) { "Content" }
 #   end
 #
-# @example With collection
-#   render MatrixTable.new(objects: @observations, partial: "shared/matrix_box")
+# @example With collection of objects
+#   render MatrixTable.new(objects: @observations, user: @user)
+#
+# @example With caching enabled
+#   render MatrixTable.new(
+#     objects: @observations,
+#     user: @user,
+#     cached: true
+#   )
+#
+# @example With collection and local options
+#   render MatrixTable.new(
+#     objects: @observations,
+#     user: @user,
+#     locals: { identify: true }
+#   )
 class Components::MatrixTable < Components::Base
   # Properties
   prop :objects, _Nilable(Array), default: nil
-  prop :partial, String, default: "shared/matrix_box"
-  prop :as, Symbol, default: :object
+  prop :user, _Nilable(User), default: nil
   prop :cached, _Boolean, default: false
   prop :locals, Hash, default: -> { {} }
 
@@ -31,43 +44,29 @@ class Components::MatrixTable < Components::Base
     ) do
       if block
         yield
-      elsif cached && objects
+      elsif @cached && @objects
         render_cached_boxes
-      elsif objects
-        render_collection
+      elsif @objects
+        render_matrix_boxes
       end
     end
 
-    div("", class: "clearfix")
+    div(class: "clearfix")
   end
 
   private
 
   def render_cached_boxes
-    objects.each do |object|
-      helpers.cache(object) do
-        unsafe_raw(
-          helpers.render(
-            partial: partial,
-            locals: locals.merge(as => object)
-          )
-        )
+    @objects.each do |object|
+      cache(object) do
+        render(MatrixBox.new(user: @user, object: object, **@locals))
       end
     end
   end
 
-  def render_collection
-    unsafe_raw(
-      helpers.render(
-        partial: partial,
-        collection: objects,
-        as: as,
-        locals: locals
-      )
-    )
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
+  def render_matrix_boxes
+    @objects.each do |object|
+      render(MatrixBox.new(user: @user, object: object, **@locals))
+    end
   end
 end

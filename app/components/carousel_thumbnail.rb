@@ -39,7 +39,7 @@ class Components::CarouselThumbnail < Components::BaseImage
     img_instance, final_img_id = extract_image_and_id
 
     # For uploads, use provided img_id or fallback
-    final_img_id = img_id || final_img_id || "img_id_missing"
+    final_img_id = @img_id || final_img_id || "img_id_missing"
 
     # Build render data
     render_data = build_render_data(img_instance, final_img_id)
@@ -51,15 +51,15 @@ class Components::CarouselThumbnail < Components::BaseImage
   private
 
   def render_thumbnail(final_img_id, data)
-    active = index.zero? ? "active" : ""
-    image_status = upload ? "upload" : "good"
+    active = @index.zero? ? "active" : ""
+    image_status = @upload ? "upload" : "good"
 
     li(
       id: "carousel_thumbnail_#{final_img_id}",
       class: ["carousel-indicator mx-1", active],
       data: {
-        target: "##{html_id}",
-        slide_to: index.to_s,
+        target: "##{@html_id}",
+        slide_to: @index.to_s,
         form_images_target: "thumbnail",
         image_uuid: final_img_id,
         image_status: image_status
@@ -67,7 +67,7 @@ class Components::CarouselThumbnail < Components::BaseImage
     ) do
       img(
         src: data[:img_src],
-        alt: notes,
+        alt: @notes,
         class: data[:img_class],
         data: data[:img_data]
       )

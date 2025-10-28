@@ -67,10 +67,10 @@ class Components::BaseImage < Components::Base
 
   # Extract image instance and ID from the image prop
   def extract_image_and_id
-    if image.is_a?(Image)
-      [image, image.id]
+    if @image.is_a?(Image)
+      [@image, @image.id]
     else
-      [nil, image]
+      [nil, @image]
     end
   end
 
@@ -80,30 +80,30 @@ class Components::BaseImage < Components::Base
     sizing = calculate_sizing(img_instance)
 
     {
-      img_src: img_urls[size] || "",
+      img_src: img_urls[@size] || "",
       img_class: build_image_classes,
       img_data: build_data_attributes(img_urls),
       img_id: img_id,
-      html_id: "#{id_prefix}_#{img_id}",
+      html_id: "#{@id_prefix}_#{img_id}",
       proportion: sizing[:proportion],
       width: sizing[:width],
-      image_link: image_link || image_path(id: img_id),
+      image_link: @image_link || image_path(id: img_id),
       lightbox_data: build_lightbox_data(img_instance, img_id, img_urls)
     }
   end
 
   def fetch_image_urls(img_instance, img_id)
-    return {} if upload
+    return {} if @upload
 
     img_instance&.all_urls || Image.all_urls(img_id)
   end
 
   def build_image_classes
-    class_names("img-fluid ab-fab object-fit-#{fit}", extra_classes)
+    class_names("img-fluid ab-fab object-fit-#{@fit}", @extra_classes)
   end
 
   def build_data_attributes(img_urls)
-    { src: img_urls[size] || "" }.merge(data)
+    { src: img_urls[@size] || "" }.merge(@data)
   end
 
   # Calculate image sizing for lazy load aspect ratio
@@ -132,11 +132,11 @@ class Components::BaseImage < Components::Base
   end
 
   def calculate_width(img_instance, img_proportion)
-    return false if full_width
+    return false if @full_width
 
     img_width = BigDecimal(img_instance.width || 100)
     img_height = BigDecimal(img_instance.height || 100)
-    size_index = Image::ALL_SIZES_INDEX[size]
+    size_index = Image::ALL_SIZES_INDEX[@size]
 
     container_width = if img_width > img_height
                         size_index
@@ -150,21 +150,21 @@ class Components::BaseImage < Components::Base
   def build_lightbox_data(img_instance, img_id, img_urls)
     return nil unless img_instance
 
-    lb_size = user&.image_size&.to_sym || :huge
+    lb_size = @user&.image_size&.to_sym || :huge
 
     {
       url: img_urls[lb_size],
-      id: is_set ? "observation-set" : SecureRandom.uuid,
+      id: @is_set ? "observation-set" : SecureRandom.uuid,
       image: img_instance,
       image_id: img_id,
-      obs: obs,
-      identify: identify
+      obs: @obs,
+      identify: @identify
     }
   end
 
   # Render lightbox link button
   def render_lightbox_link(lightbox_data)
-    return unless lightbox_data
+    return unless @lightbox_data
 
     icon = i(class: "glyphicon glyphicon-fullscreen")
     caption = lightbox_caption_html(lightbox_data)
@@ -178,10 +178,10 @@ class Components::BaseImage < Components::Base
 
   # Build lightbox caption HTML using LightboxCaption component
   def lightbox_caption_html(lightbox_data)
-    return unless lightbox_data
+    return unless @lightbox_data
 
     render(LightboxCaption.new(
-             user: user,
+             user: @user,
              image: lightbox_data[:image],
              image_id: lightbox_data[:image_id],
              obs: lightbox_data[:obs],
@@ -193,7 +193,7 @@ class Components::BaseImage < Components::Base
   def render_image_vote_section(img_instance)
     return unless votes && img_instance
 
-    render(ImageVoteSection.new(user: user, image: img_instance, votes: votes))
+    render(ImageVoteSection.new(user: @user, image: img_instance, votes: @votes))
   end
 
   # Render original filename if applicable
@@ -205,14 +205,14 @@ class Components::BaseImage < Components::Base
 
   # Check if original filename should be shown
   def show_original_name?(img)
-    return false unless original && img && img.original_name.present?
+    return false unless @original && img && img.original_name.present?
 
-    helpers.permission?(img) ||
+    helpers.permission?(@img) ||
       (img.user && img.user.keep_filenames == "keep_and_show")
   end
 
   # Render stretched link based on link method
-  def render_stretched_link(path, method = link_method)
+  def render_stretched_link(path, method = @link_method)
     case method
     when :get
       a(href: path, class: stretched_link_classes)

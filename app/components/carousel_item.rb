@@ -55,21 +55,21 @@ class Components::CarouselItem < Components::BaseImage
   end
 
   def build_item_classes
-    active = index.zero? ? "active" : ""
+    active = @index.zero? ? "active" : ""
     class_names("item carousel-item", active)
   end
 
   def render_carousel_image(data)
     img(
       src: data[:img_src],
-      alt: notes,
+      alt: @notes,
       class: data[:img_class],
       data: data[:img_data]
     )
   end
 
   def render_carousel_overlays(_img_instance, data)
-    render_stretched_link(data[:image_link]) if user && data[:image_link]
+    render_stretched_link(data[:image_link]) if @user && data[:image_link]
 
     whitespace
     render_lightbox_link(data[:lightbox_data]) if data[:lightbox_data]
@@ -78,8 +78,8 @@ class Components::CarouselItem < Components::BaseImage
   end
 
   def render_carousel_caption(img_instance, _data)
-    caption_content = if img_instance && object
-                        image_info_html(img_instance, object)
+    caption_content = if img_instance && @object
+                        image_info_html(img_instance, @object)
                       else
                         ""
                       end
@@ -100,6 +100,6 @@ class Components::CarouselItem < Components::BaseImage
 
   def image_info_html(img_instance, obj)
     helpers = ApplicationController.helpers
-    helpers.image_info(img_instance, obj, original: original)
+    helpers.image_info(img_instance, obj, original: @original)
   end
 end

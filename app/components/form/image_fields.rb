@@ -27,10 +27,10 @@ class Components::Form::ImageFields < Components::Base
 
   def view_template
     # Show upload messages for upload images
-    unsafe_raw(helpers.carousel_upload_messages) if upload
+    unsafe_raw(helpers.carousel_upload_messages) if @upload
 
     # Render form fields
-    image_field = upload ? :temp_image : :good_image
+    image_field = @upload ? :temp_image : :good_image
 
     unsafe_raw(
       helpers.fields_for(image_field) do |ffi|
@@ -49,7 +49,7 @@ class Components::Form::ImageFields < Components::Base
       render_license_field(form)
     ]
 
-    fields << render_original_name_field(form) unless upload
+    fields << render_original_name_field(form) unless @upload
 
     helpers.safe_join(fields)
   end
@@ -58,9 +58,9 @@ class Components::Form::ImageFields < Components::Base
     helpers.text_area_with_label(
       form: form,
       field: :notes,
-      index: img_id,
+      index: @img_id,
       rows: 2,
-      value: image&.notes,
+      value: @image&.notes,
       label: :form_images_notes.l
     )
   end
@@ -69,9 +69,9 @@ class Components::Form::ImageFields < Components::Base
     helpers.date_select_with_label(
       form: form,
       field: :when,
-      index: img_id,
-      value: image&.when,
-      object: image,
+      index: @img_id,
+      value: @image&.when,
+      object: @image,
       label: :form_images_when_taken.l
     )
   end
@@ -80,8 +80,8 @@ class Components::Form::ImageFields < Components::Base
     helpers.text_field_with_label(
       form: form,
       field: :copyright_holder,
-      index: img_id,
-      value: image&.copyright_holder,
+      index: @img_id,
+      value: @image&.copyright_holder,
       label: :form_images_copyright_holder.l
     )
   end
@@ -90,7 +90,7 @@ class Components::Form::ImageFields < Components::Base
     helpers.select_with_label(
       form: form,
       field: :license_id,
-      index: img_id,
+      index: @img_id,
       label: :form_images_select_license.t.html_safe, # rubocop:disable Rails/OutputSafety
       options: license_options,
       selected: selected_license
@@ -101,26 +101,26 @@ class Components::Form::ImageFields < Components::Base
     helpers.text_field_with_label(
       form: form,
       field: :original_name,
-      index: img_id,
-      value: image&.original_name,
+      index: @img_id,
+      value: @image&.original_name,
       size: 40,
       label: :form_images_original_name.l
     )
   end
 
   def license_options
-    if upload
-      License.available_names_and_ids(user.license)
+    if @upload
+      License.available_names_and_ids(@user.license)
     else
-      License.available_names_and_ids(image.license)
+      License.available_names_and_ids(@image.license)
     end
   end
 
   def selected_license
-    if upload
-      user.license_id
+    if @upload
+      @user.license_id
     else
-      image.license_id
+      @image.license_id
     end
   end
 

@@ -231,9 +231,11 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_title(data)
-    bold = [:observation, :name].include?(data[:type]) ? "" : " font-weight-bold"
-    span(data[:name], class: class_names("rss-name", bold),
-                      id: "box_title_#{data[:id]}")
+    fragment("box_title") do
+      bold = [:observation, :name].include?(data[:type]) ? "" : " font-weight-bold"
+      span(data[:name], class: class_names("rss-name", bold),
+                        id: "box_title_#{data[:id]}")
+    end
   end
 
   def render_id_badge(obj)

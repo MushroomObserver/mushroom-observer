@@ -15,7 +15,7 @@
 #     image: @image,
 #     image_id: @image.id,
 #     obs: @observation,
-#     identify: true
+#     @identify: true
 #   )
 #
 # @example With image only
@@ -31,12 +31,12 @@ class Components::LightboxCaption < Components::Base
   prop :image, _Nilable(Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
   prop :obs, _Union(Observation, Hash), default: -> { {} }
-  prop :identify, _Boolean, default: false
+  prop :@identify, _Boolean, default: false
 
   def view_template
-    if obs.is_a?(Observation)
+    if @obs.is_a?(Observation)
       render_obs_caption_parts
-    elsif image&.notes.present?
+    elsif @image&.notes.present?
       render_image_caption
     end
 
@@ -46,49 +46,51 @@ class Components::LightboxCaption < Components::Base
   private
 
   def render_obs_caption_parts
-    render_identify_ui if identify
+    render_@identify_ui if @identify
     render_obs_title
     render_obs_when_where_who
     render_truncated_notes
   end
 
-  def render_identify_ui
-    div(class: "obs-identify mb-3", id: "observation_identify_#{obs.id}") do
+  def render_@identify_ui
+    div(class: "obs-@identify mb-3", id: "observation_@identify_#{@obs.id}") do
       unsafe_raw(
         helpers.propose_naming_link(
-          obs.id,
+          @obs.id,
           context: "lightgallery",
           btn_class: "btn btn-primary d-inline-block"
         )
       )
       span("&nbsp;".html_safe, class: "mx-2")
-      unsafe_raw(helpers.mark_as_reviewed_toggle(obs.id))
+      unsafe_raw(helpers.mark_as_reviewed_toggle(@obs.id))
     end
   end
 
   def render_obs_title
-    h4(obs_title_attributes) do
-      render_obs_title_content
+    fragment("obs_title") do
+      h4(obs_title_attributes) do
+        render_obs_title_content
+      end
     end
   end
 
   def obs_title_attributes
     {
-      id: "observation_what_#{obs.id}",
+      id: "observation_what_#{@obs.id}",
       class: "obs-what",
       data: {
         controller: "section-update",
-        section_update_user_value: user&.id
+        section_update_user_value: @user&.id
       }
     }
   end
 
   def render_obs_title_content
-    render_obs_label if identify
+    render_obs_label if @identify
     whitespace
     render_obs_link
     whitespace
-    plain(obs.user_format_name(user).t.small_author)
+    plain(@obs.user_format_name(@user).t.small_author)
   end
 
   def render_obs_label
@@ -96,13 +98,13 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_obs_link
-    btn_style = identify ? "text-bold" : "btn btn-primary"
+    btn_style = @identify ? "text-bold" : "btn btn-primary"
 
     a(
-      obs.id,
-      href: helpers.url_for(obs.show_link_args),
+      @obs.id,
+      href: helpers.url_for(@obs.show_link_args),
       class: "#{btn_style} mr-3",
-      id: "caption_obs_link_#{obs.id}"
+      id: "caption_obs_link_#{@obs.id}"
     )
   end
 
@@ -116,7 +118,7 @@ class Components::LightboxCaption < Components::Base
   def render_obs_when
     p(class: "obs-when", id: "observation_when") do
       plain("#{:WHEN.t}: ")
-      b(obs.when.web_date)
+      b(@obs.when.web_date)
     end
   end
 
@@ -129,7 +131,7 @@ class Components::LightboxCaption < Components::Base
   end
 
   def obs_where_label
-    if obs.is_collection_location
+    if @obs.is_collection_location
       :show_observation_collection_location.t
     else
       :show_observation_seen_at.t
@@ -138,14 +140,14 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_location
     if user
-      unsafe_raw(helpers.location_link(obs.where, obs.location, nil, true))
+      unsafe_raw(helpers.location_link(@obs.where, @obs.location, nil, true))
     else
-      plain(obs.where)
+      plain(@obs.where)
     end
   end
 
   def render_vague_notice_if_needed
-    return unless obs.location&.vague?
+    return unless @obs.location&.vague?
 
     whitespace
     render_vague_notice
@@ -153,7 +155,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_vague_notice
     title = :show_observation_vague_location.l
-    title += " #{:show_observation_improve_location.l}" if user == obs.user
+    title += " #{:show_observation_improve_location.l}" if user == @obs.user
 
     p(class: "ml-3") do
       em(title)
@@ -161,25 +163,25 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_obs_where_gps
-    return unless obs.lat && user
+    return unless @obs.lat && user
 
     p(class: "obs-where-gps", id: "observation_where_gps") do
-      render_gps_link if obs.reveal_location?(user)
-      i("(#{:show_observation_gps_hidden.t})") if obs.gps_hidden
+      render_gps_link if @obs.reveal_location?(@user)
+      i("(#{:show_observation_gps_hidden.t})") if @obs.gps_hidden
     end
   end
 
   def render_gps_link
     link_text = [
-      obs.display_lat_lng.t,
-      obs.display_alt.t,
+      @obs.display_lat_lng.t,
+      @obs.display_alt.t,
       "[#{:click_for_map.t}]"
     ].join(" ")
-    a(link_text, href: helpers.map_observation_path(id: obs.id))
+    a(link_text, href: helpers.map_observation_path(id: @obs.id))
   end
 
   def render_obs_who
-    obs_user = obs.user
+    obs_user = @obs.user
 
     p(class: "obs-who", id: "observation_who") do
       plain("#{:WHO.t}: ")
@@ -190,14 +192,14 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_user(obs_user)
     if user
-      unsafe_raw(helpers.user_link(obs_user))
+      unsafe_raw(helpers.user_link(@obs.user))
     else
       plain(obs_user.unique_text_name)
     end
   end
 
   def show_contact_link?(obs_user)
-    user && obs_user != user && !obs_user&.no_emails &&
+    @user && obs_user != @user && !obs_user&.no_emails &&
       obs_user&.email_general_question
   end
 
@@ -206,16 +208,16 @@ class Components::LightboxCaption < Components::Base
     unsafe_raw(
       helpers.modal_link_to(
         "observation_email",
-        *helpers.send_observer_question_tab(obs)
+        *helpers.send_observer_question_tab(@obs)
       )
     )
     plain("]")
   end
 
   def render_truncated_notes
-    return unless obs.notes?
+    return unless @obs.notes?
 
-    div(class: "obs-notes", id: "observation_#{obs.id}_notes") do
+    div(class: "obs-notes", id: "observation_#{@obs.id}_notes") do
       prepare_textile_cache
       unsafe_raw(formatted_truncated_notes)
     end
@@ -223,11 +225,11 @@ class Components::LightboxCaption < Components::Base
 
   def prepare_textile_cache
     Textile.clear_textile_cache
-    Textile.register_name(obs.name)
+    Textile.register_name(@obs.name)
   end
 
   def formatted_truncated_notes
-    obs.notes_show_formatted.truncate(150, separator: " ").
+    @obs.notes_show_formatted.truncate(150, separator: " ").
       sub(/\A/, "#{:NOTES.t}: ").wring_out_textile.tpl
   end
 

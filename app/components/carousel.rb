@@ -31,13 +31,13 @@ class Components::Carousel < Components::Base
 
   def view_template
     # Generate HTML ID if not provided
-    final_html_id = html_id || generate_html_id
+    final_html_id = @html_id || generate_html_id
 
     # Render heading if thumbnails enabled
-    render_carousel_heading if thumbnails
+    render_carousel_heading if @thumbnails
 
     # Render carousel or no images message
-    if images&.any?
+    if @images&.any?
       render_carousel(final_html_id)
     else
       render_no_images_message
@@ -47,16 +47,16 @@ class Components::Carousel < Components::Base
   private
 
   def generate_html_id
-    type = object&.type_tag || "image"
-    object_id = object&.id || "unknown"
+    type = @object&.type_tag || "image"
+    object_id = @object&.id || "unknown"
     "#{type}_#{object_id}_carousel"
   end
 
   def render_carousel_heading
     div(class: "panel-heading carousel-heading") do
       h4(class: "panel-title") do
-        plain(title)
-        span(class: "float-right") { unsafe_raw(links) }
+        plain(@title)
+        span(class: "float-right") { unsafe_raw(@links) }
       end
     end
   end
@@ -70,27 +70,27 @@ class Components::Carousel < Components::Base
       # Carousel inner (slides)
       div(class: "carousel-inner bg-light", role: "listbox") do
         # Render each carousel item
-        images.each_with_index do |image, index|
+        @images.each_with_index do |image, index|
           next unless image
 
           render(Components::CarouselItem.new(
-                   user: user,
+                   user: @user,
                    image: image,
-                   object: object,
-                   size: size,
+                   object: @object,
+                   size: @size,
                    index: index
                  ))
         end
 
         # Carousel controls (if multiple images)
-        if images.length > 1
+        if @images.length > 1
           whitespace
           unsafe_raw(render_carousel_controls(final_html_id))
         end
       end
 
       # Thumbnail navigation (if enabled)
-      render_thumbnail_navigation(final_html_id) if thumbnails
+      render_thumbnail_navigation(final_html_id) if @thumbnails
     end
   end
 
@@ -122,11 +122,11 @@ class Components::Carousel < Components::Base
 
   def render_thumbnail_navigation(carousel_id)
     ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
-      images.each_with_index do |image, index|
+      @images.each_with_index do |image, index|
         next unless image
 
         render(Components::CarouselThumbnail.new(
-                 user: user,
+                 user: @user,
                  image: image,
                  index: index,
                  html_id: carousel_id

@@ -20,11 +20,11 @@ class Components::ImageVoteSection < Components::Base
   prop :votes, _Boolean, default: true
 
   def view_template
-    return unless votes && image
+    return unless @votes && @image
 
     div(
       class: "vote-section require-user",
-      id: "image_vote_#{image.id}"
+      id: "image_vote_#{@image.id}"
     ) do
       render_vote_meter_and_links
     end
@@ -40,8 +40,8 @@ class Components::ImageVoteSection < Components::Base
   end
 
   def calculate_vote_percentage
-    if image.vote_cache
-      ((image.vote_cache / Image.all_votes.length) * 100).floor
+    if @image.vote_cache
+      ((@image.vote_cache / Image.all_votes.length) * 100).floor
     else
       0
     end
@@ -52,12 +52,12 @@ class Components::ImageVoteSection < Components::Base
 
     div(
       class: "vote-meter progress",
-      title: "#{image.num_votes} #{:Votes.t}"
+      title: "#{@image.num_votes} #{:Votes.t}"
     ) do
       div(
         "",
         class: "progress-bar",
-        id: "vote_meter_bar_#{image.id}",
+        id: "vote_meter_bar_#{@image.id}",
         style: "width: #{vote_percentage}%"
       )
     end
@@ -65,7 +65,7 @@ class Components::ImageVoteSection < Components::Base
 
   def render_vote_buttons(vote_percentage)
     div(class: "vote-buttons mt-2") do
-      div(class: "image-vote-links", id: "image_vote_links_#{image.id}") do
+      div(class: "image-vote-links", id: "image_vote_links_#{@image.id}") do
         div(class: "text-center small") do
           render_user_vote_link
           render_image_vote_links
@@ -73,14 +73,14 @@ class Components::ImageVoteSection < Components::Base
 
         span(
           class: "hidden data_container",
-          data: { id: image.id, percentage: vote_percentage.to_s }
+          data: { id: @image.id, percentage: vote_percentage.to_s }
         )
       end
     end
   end
 
   def render_user_vote_link
-    return unless user && image.users_vote(user).present?
+    return unless @user && @image.users_vote(@user).present?
 
     render_vote_link(0)
     whitespace
@@ -94,7 +94,7 @@ class Components::ImageVoteSection < Components::Base
   end
 
   def render_vote_link(vote)
-    current_vote = image.users_vote(user)
+    current_vote = @image.users_vote(@user)
 
     if current_vote == vote
       render_current_vote(vote)
@@ -114,9 +114,9 @@ class Components::ImageVoteSection < Components::Base
       helpers.put_button(
         name: vote_text,
         class: "image-vote-link",
-        path: helpers.image_vote_path(image_id: image.id, value: vote),
+        path: helpers.image_vote_path(image_id: @image.id, value: vote),
         title: helpers.image_vote_as_help_string(vote),
-        data: { image_id: image.id, value: vote }
+        data: { image_id: @image.id, value: vote }
       )
     )
   end

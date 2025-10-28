@@ -32,10 +32,10 @@ class Components::Form::ImageCameraInfo < Components::Base
 
   def view_template
     div(
-      id: "camera_info_#{img_id}",
+      id: "camera_info_#{@img_id}",
       class: "well well-sm position-relative"
     ) do
-      label(for: "camera_info_#{img_id}") { :image_camera_info.l }
+      label(for: "camera_info_#{@img_id}") { :image_camera_info.l }
       render_exif_info
       render_file_info
     end
@@ -52,7 +52,7 @@ class Components::Form::ImageCameraInfo < Components::Base
   def render_date_field
     div do
       strong { "#{:DATE.l}: " }
-      unsafe_raw(helpers.carousel_exif_to_image_date_button(date: date))
+      unsafe_raw(helpers.carousel_exif_to_image_date_button(date: @date))
     end
   end
 
@@ -65,13 +65,13 @@ class Components::Form::ImageCameraInfo < Components::Base
 
   def render_transfer_button
     unsafe_raw(helpers.carousel_transfer_exif_button(
-                 has_exif: date.present? || lat.present?
+                 has_exif: @date.present? || @lat.present?
                ))
   end
 
   def render_file_info
     div(class: "form-group mb-0 overflow-hidden") do
-      render_filename if file_name.present?
+      render_filename if @file_name.present?
       render_filesize
     end
   end
@@ -79,14 +79,14 @@ class Components::Form::ImageCameraInfo < Components::Base
   def render_filename
     div do
       strong { "#{:image_file_name.l}: " }
-      span(class: "file_name") { file_name }
+      span(class: "file_name") { @file_name }
     end
   end
 
   def render_filesize
     div do
       strong { "#{:image_file_size.l}: " }
-      span(class: "file_size") { file_size }
+      span(class: "file_size") { @file_size }
     end
   end
 
@@ -95,8 +95,8 @@ class Components::Form::ImageCameraInfo < Components::Base
   def render_gps_info
     span(class: "exif_gps") do
       parts = [
-        build_gps_part(:LAT, lat, "exif_lat"),
-        build_gps_part(:LNG, lng, "exif_lng"),
+        build_gps_part(:LAT, @lat, "exif_lat"),
+        build_gps_part(:LNG, @lng, "exif_lng"),
         build_alt_part
       ]
       plain(parts.join(", "))
@@ -111,7 +111,7 @@ class Components::Form::ImageCameraInfo < Components::Base
 
   def build_alt_part
     strong_tag = helpers.tag.strong("#{:ALT.l}: ")
-    span_tag = helpers.tag.span(alt, class: "exif_alt")
+    span_tag = helpers.tag.span(@alt, class: "exif_alt")
     "#{strong_tag}#{span_tag} m"
   end
 

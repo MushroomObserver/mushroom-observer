@@ -15,7 +15,7 @@
 #   )
 class Components::InteractiveImage < Components::BaseImage
   def view_template
-    return if upload && image.blank?
+    return if @upload && @image.blank?
 
     # Get image instance and ID
     img_instance, img_id = extract_image_and_id
@@ -61,7 +61,7 @@ class Components::InteractiveImage < Components::BaseImage
   def render_lazy_image(img_id, data)
     img(
       src: image_path("placeholder.svg"),
-      alt: notes,
+      alt: @notes,
       class: "#{data[:img_class]} lazy image_#{img_id}",
       data: data[:img_data]
     )
@@ -71,7 +71,7 @@ class Components::InteractiveImage < Components::BaseImage
     noscript do
       img(
         src: data[:img_src],
-        alt: notes,
+        alt: @notes,
         class: "#{data[:img_class]} img-noscript image_#{img_id}"
       )
     end

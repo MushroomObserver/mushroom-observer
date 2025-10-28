@@ -204,15 +204,86 @@ See these files for good examples of refactored code:
 - `app/components/image_vote_section.rb` - Extracted `render_current_vote` and `render_vote_button`
 - `app/components/lightbox_caption.rb` - Extracted multiple helper methods to reduce complexity
 
+## Phlex and Literal Components
+
+### Accessing Literal Properties
+
+**IMPORTANT**: Literal::Properties must be accessed as instance variables, not as method calls.
+
+```ruby
+class Components::Example < Components::Base
+  prop :user, _Nilable(User)
+  prop :cached, _Boolean, default: false
+
+  def view_template
+    # ✅ Correct - access as instance variable
+    return unless @user
+    if @cached
+      # ...
+    end
+
+    # ❌ Wrong - will cause "undefined local variable or method" error
+    return unless user
+    if cached
+      # ...
+    end
+  end
+end
+```
+
+### Phlex HTML Element Syntax
+
+**Empty Elements**: Don't pass empty strings to Phlex HTML elements.
+
+```ruby
+# ✅ Correct
+div(class: "clearfix")
+span(class: "badge")
+
+# ❌ Wrong
+div("", class: "clearfix")
+span("", class: "badge")
+```
+
+### Fragment Caching in Phlex
+
+**Enable caching** by adding `cache_store` method to `Components::Base`:
+
+```ruby
+class Components::Base < Phlex::HTML
+  def cache_store
+    Rails.cache
+  end
+end
+```
+
+**Use caching** in components:
+
+```ruby
+def render_cached_items
+  @items.each do |item|
+    cache(item) do
+      render(ItemComponent.new(item: item))
+    end
+  end
+end
+```
+
+Resources:
+- Phlex documentation: https://www.phlex.fun/
+- Phlex caching: https://www.phlex.fun/components/caching
+- Literal properties: https://literal.fun/docs/properties.html
+
 ## Required Workflow for New Components
 
 When creating new Phlex components:
 
 1. **Create the component** with proper structure and type-safe props
 2. **Write the implementation** following the style guide
-3. **Run Rubocop** and fix all violations
-4. **Run tests** if applicable
-5. **Commit** only after Rubocop is clean
+3. **Access Literal props as `@instance_variables`** (not method calls)
+4. **Run Rubocop** and fix all violations
+5. **Run tests** if applicable
+6. **Commit** only after Rubocop is clean
 
 ## Summary
 

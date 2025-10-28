@@ -44,7 +44,7 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
   def view_template
     # Get image instance and ID
     img_instance, img_id = extract_image_and_id
-    img_id ||= "img_id_missing" if upload
+    img_id ||= "img_id_missing" if @upload
 
     # Build render data
     render_data = build_render_data(img_instance, img_id)
@@ -70,7 +70,7 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
   end
 
   def build_item_classes
-    active = index.zero? ? "active" : ""
+    active = @index.zero? ? "active" : ""
     ["item carousel-item", active]
   end
 
@@ -80,10 +80,10 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
       form_exif_target: "item",
       action: "form-exif:populated->form-images#itemExifPopulated",
       image_uuid: img_id,
-      image_status: upload ? "upload" : "good"
+      image_status: @upload ? "upload" : "good"
     }
 
-    item_data[:geocode] = camera_info.to_json unless upload
+    item_data[:geocode] = @camera_info.to_json unless @upload
     item_data
   end
 
@@ -92,7 +92,7 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
       div(class: "image-position") do
         img(
           src: data[:img_src],
-          alt: notes,
+          alt: @notes,
           class: data[:img_class],
           data: data[:img_data]
         )
@@ -104,17 +104,17 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
     div(class: "col-12 col-md-6") do
       div(class: "form-panel") do
         render(Components::Form::ImageFields.new(
-                 user: user,
+                 user: @user,
                  image: img_instance,
                  img_id: img_id,
-                 upload: upload
+                 upload: @upload
                ))
 
         whitespace
 
         render(Components::Form::ImageCameraInfo.new(
                  img_id: img_id,
-                 **camera_info
+                 **@camera_info
                ))
       end
     end
@@ -129,7 +129,7 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
     div(class: "top-left p-4") do
       unsafe_raw(helpers.carousel_set_thumb_img_button(
                    image: img_instance,
-                   thumb_id: thumb_id
+                   thumb_id: @thumb_id
                  ))
     end
   end

@@ -24,7 +24,7 @@ class Components::Form::ImageCarousel < Components::Base
 
   def view_template
     div(
-      id: html_id,
+      id: @html_id,
       class: "carousel slide image-form-carousel",
       data: {
         ride: "false",
@@ -43,7 +43,7 @@ class Components::Form::ImageCarousel < Components::Base
 
         # Carousel controls
         div(class: "carousel-control-wrap row") do
-          unsafe_raw(helpers.carousel_controls(html_id))
+          unsafe_raw(helpers.carousel_controls(@html_id))
         end
       end
 
@@ -60,27 +60,27 @@ class Components::Form::ImageCarousel < Components::Base
   private
 
   def render_carousel_items
-    images&.each_with_index do |image, index|
+    @images&.each_with_index do |image, index|
       upload = image&.created_at.nil?
 
       render(Components::Form::ImageCarouselItem.new(
-               user: user,
+               user: @user,
                image: image || index,
                index: index,
                upload: upload,
-               thumb_id: thumb_id,
-               camera_info: exif_data[image&.id] || {}
+               thumb_id: @thumb_id,
+               camera_info: @exif_data[image&.id] || {}
              ))
     end
   end
 
   def render_thumbnails
-    images&.each_with_index do |image, index|
+    @images&.each_with_index do |image, index|
       render(Components::CarouselThumbnail.new(
-               user: user,
+               user: @user,
                image: image,
                index: index,
-               html_id: html_id
+               html_id: @html_id
              ))
     end
   end
