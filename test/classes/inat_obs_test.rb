@@ -4,6 +4,8 @@ require("test_helper")
 
 # test encapsulated imported iNat observations
 class InatObsTest < UnitTestCase
+  include Inat::Constants
+
   # disable cop to facilitate typing/reading id's
   # rubocop:disable Style/NumericLiterals
   def test_complicated_public_obs
@@ -157,18 +159,14 @@ class InatObsTest < UnitTestCase
     )
 
     mock_inat_obs = mock_observation("distantes")
-
-    stub_request(:get, "https://api.inaturalist.org/v1/taxa/48460,47170,48250,372740,152032,48717,56831,56830,1062676?rank=genus").
+    ancestor_ids = mock_inat_obs[:taxon][:ancestor_ids].join(",")
+    stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
       with(
-        body: "{}",
         headers: {
-              'Accept'=>'application/json',
-              'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-              'Authorization'=>'Bearer',
-              'Content-Length'=>'2',
-              'Content-Type'=>'application/json',
-              'Host'=>'api.inaturalist.org',
-              # 'User-Agent'=>'rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108'
+          "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer",
+          "Host" => "api.inaturalist.org"
         }
       ).
       # maximumly simplified response; only fields needed for this test

@@ -281,26 +281,11 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
     stub_inat_interactions
-    # stub the name lookup for the infrageneric name
     ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
-    stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
-      with(
-        body: "{}",
-        headers: {
-          "Accept" => "application/json",
-          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Authorization" => "Bearer",
-          "Content-Length" => "2",
-          "Content-Type" => "application/json",
-          "Host" => "api.inaturalist.org",
-        }
-      ).
-      # maximumly simplified response; only fields needed for this test
-      to_return(
-        status: 200,
-        body: { results: [{ name: "Morchella" }] }.to_json,
-        headers: {}
-      )
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -326,27 +311,11 @@ class InatImportJobTest < ActiveJob::TestCase
     )
 
     stub_inat_interactions
-    # stub the name lookup for the infrageneric name
     ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
-    stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
-      with(
-        body: "{}",
-        headers: {
-          "Accept" => "application/json",
-          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Authorization" => "Bearer",
-          "Content-Length" => "2",
-          "Content-Type" => "application/json",
-          "Host" => "api.inaturalist.org",
-          # "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
-        }
-      ).
-      # maximumly simplified response; only fields needed for this test
-      to_return(
-        status: 200,
-        body: { results: [{ name: "Amanita" }] }.to_json,
-        headers: {}
-      )
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Amanita" }] }
+    )
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do

@@ -132,4 +132,21 @@ module InatImportJobTestDoubles
       to_return(status: 200, body: "".to_json,
                 headers: { "Content-Type" => "application/json" })
   end
+
+  def stub_genus_lookup(ancestor_ids:, body:)
+    stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
+      with(
+        headers: {
+          "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer",
+          "Host" => "api.inaturalist.org"
+        }
+      ).
+      to_return(
+        status: 200,
+        body: body.to_json,
+        headers: {}
+      )
+  end
 end
