@@ -23,7 +23,7 @@ class Components::MatrixBoxFooter < Components::Base
   def view_template
     # Handle explicit footer components
     if @footer.is_a?(Array)
-      @footer.each { |component| raw(component) } if @footer.any?
+      @footer.each { |component| render(component) } if @footer.any?
       return
     end
 

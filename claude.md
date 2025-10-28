@@ -88,6 +88,72 @@ helpers.location_link(...)
 
 4. Use `raw()` sparingly - only for HTML strings that are already marked safe. Registered output helpers don't need `raw()` wrapping.
 
+## Using `raw()` for HTML Strings
+
+**IMPORTANT**: Phlex's `raw()` method only accepts content that has been explicitly marked as safe with `.html_safe`.
+
+### Examples:
+```ruby
+# Bad ✗ - will raise "You passed an unsafe object to raw"
+raw("<strong>#{label}: </strong>")
+raw(parts.join(", "))
+raw(@links)
+
+# Good ✓ - mark content as safe first
+raw("<strong>#{label}: </strong>".html_safe)
+raw(parts.join(", ").html_safe)
+raw(@links.html_safe)
+```
+
+### When to use `raw()`:
+- For HTML strings you've built manually that need to be rendered
+- For string properties that contain HTML markup
+- Only when you trust the content (never for user input)
+
+### When NOT to use `raw()`:
+- For rendering components - use `render(component)` instead
+- For registered output helpers - they already return safe HTML
+- For Phlex HTML methods - they handle safety automatically
+
+## Prefer Phlex Methods Over ActionView Helpers
+
+When possible, use native Phlex HTML methods instead of Rails ActionView tag helpers. Phlex methods are more idiomatic and don't require extra includes.
+
+### Examples:
+
+#### Labels:
+```ruby
+# Avoid ✗ - requires include Phlex::Rails::Helpers::LabelTag
+include Phlex::Rails::Helpers::LabelTag
+label_tag(:field_name, class: "label-class", data: { ... })
+
+# Prefer ✓ - native Phlex method
+label(for: "field_name", class: "label-class", data: { ... }) { "Label text" }
+```
+
+#### Buttons:
+```ruby
+# Avoid ✗ - requires include Phlex::Rails::Helpers::ButtonTag
+include Phlex::Rails::Helpers::ButtonTag
+button_tag("Click me", type: "button", class: "btn")
+
+# Prefer ✓ - native Phlex method
+button(type: "button", class: "btn") { "Click me" }
+```
+
+#### Divs, Spans, etc:
+```ruby
+# Always use native Phlex methods
+div(class: "container") { "Content" }
+span(class: "badge") { "New" }
+p(class: "text") { "Paragraph" }
+```
+
+### When to use Rails helpers:
+- For form helpers like `fields_for`, `form_with`, etc.
+- For specialized helpers like `link_to`, `image_tag` that have complex behavior
+- For helpers that don't have Phlex equivalents
+
 ## Literal Properties
 
 All component properties must be accessed as instance variables (with `@`):

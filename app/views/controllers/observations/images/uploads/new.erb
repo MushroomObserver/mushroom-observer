@@ -2,7 +2,7 @@
 # On form reload we don't have @image, so pass explicitly
 turbo_stream.prepend(
   "added_images",
-  Components::Form::ImageCarouselItem.new(
+  ::Components::Form::ImageCarouselItem.new(
     user: @user,
     image: @image,
     index: params[:index].to_i,
@@ -18,8 +18,13 @@ turbo_stream.prepend(
 <%=
 turbo_stream.prepend(
   "added_thumbnails",
-  partial: "shared/carousel_thumbnail",
-  locals: { upload: true, index: params[:index], img_id: params[:img_id],
-            html_id: "observation_upload_images_carousel" }
+  ::Components::CarouselThumbnail.new(
+    user: @user,
+    image: nil,
+    upload: true,
+    index: params[:index].to_i,
+    img_id: params[:img_id],
+    html_id: "observation_upload_images_carousel"
+  )
 )
 %>

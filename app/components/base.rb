@@ -21,6 +21,7 @@ class Components::Base < Phlex::HTML
   register_output_helper :date_select_with_label
   register_output_helper :text_field_with_label
   register_output_helper :select_with_label
+  register_output_helper :link_icon
 
   # Register custom value helpers (return values)
   register_value_helper :permission?

@@ -52,11 +52,11 @@ class Components::MatrixBox < Components::Base
 
     li(
       id: "box_#{render_data[:id]}",
-      class: class_names("matrix-box", columns, extra_class)
+      class: class_names("matrix-box", @columns, @extra_class)
     ) do
       div(class: "panel panel-default") do
         # Header components (if any)
-        header.each { |component| raw(component) } if header.any?
+        @header.each { |component| render(component) } if @header.any?
 
         # Main content: image and details
         div(class: "panel-sizing") do
@@ -216,7 +216,7 @@ class Components::MatrixBox < Components::Base
 
     div(class: "thumbnail-container") do
       render(InteractiveImage.new(
-               user: user,
+               user: @user,
                image: data[:image],
                image_link: data[:image_link],
                obs: data[:obs] || {},

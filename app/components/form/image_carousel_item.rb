@@ -21,7 +21,6 @@
 #     camera_info: { lat: "45.5", lng: "-122.6", ... }
 #   )
 class Components::Form::ImageCarouselItem < Components::BaseImage
-  include Phlex::Rails::Helpers::LabelTag
   include Phlex::Rails::Helpers::RadioButtonTag
 
   # Additional form carousel-specific properties
@@ -140,8 +139,8 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
     label_classes = class_names("btn btn-default btn-sm thumb_img_btn",
                                 active: checked)
 
-    label_tag(
-      :thumb_image_id,
+    label(
+      for: "thumb_image_id",
       class: label_classes,
       data: { form_images_target: "thumbImgBtn",
               action: "click->form-images#setObsThumbnail" }

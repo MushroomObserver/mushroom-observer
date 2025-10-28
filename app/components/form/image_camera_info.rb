@@ -19,7 +19,7 @@
 #     file_size: "2.5 MB"
 #   )
 class Components::Form::ImageCameraInfo < Components::Base
-  include Phlex::Rails::Helpers::LabelTag
+  include Phlex::Rails::Helpers::ClassNames
   include Phlex::Rails::Helpers::LinkTo
 
   # Properties
@@ -98,7 +98,7 @@ class Components::Form::ImageCameraInfo < Components::Base
         build_gps_part(:LNG, @lng, "exif_lng"),
         build_alt_part
       ]
-      raw(parts.join(", "))
+      raw(parts.join(", ").html_safe)
     end
   end
 
