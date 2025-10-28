@@ -341,29 +341,15 @@ class Inat
 
     # ---- name-related
 
-    def full_name
-      # iNat infrageneric ObservationID's need special handling because
-      # they display as just the epithet, e.g, "Distantes"
-      if infrageneric?
-        foo = infrageneric_name_string
-        return foo
-        # If species_guess is just an epithet,
-        # get the genus and rank from the identifications
-        # This will be the case if the ObservationID was suggested by a user
-        if @obs[:species_guess].exclude?(" ")
-          prepend_genus_and_rank
-        # Otherwise, just use the species_guess as given
-        # It will be the full name, e.g. "Morchella sect. Distantes"
-        # This will be the case if the ObservationID was not suggested by a user
-        else
-          @obs[:species_guess]
-        end
-      elsif infraspecific?
-        # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
-        insert_rank_between_species_and_final_epithet
-      else
-        inat_taxon_name
-      end
+    def full_name_string
+      # iNat infrageneric Observation ID's need special handling because
+      # iNat does not provide a name string which includes the genus.
+      return infrageneric_name_string if infrageneric?
+
+      # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
+      return insert_rank_between_species_and_final_epithet if infraspecific?
+
+      inat_taxon_name
     end
 
     def infrageneric?
@@ -375,27 +361,15 @@ class Inat
       ancestors = self[:taxon][:ancestor_ids].join(",")
       taxa_request = Inat::APIRequest.new(nil) # token not needed
       response = taxa_request.request(path: "taxa/#{ancestors}?rank=genus")
-      body = JSON.parse(response.body, symbolize_names: true)
-      genus = body[:results].first[:name]
+
+      # get the genus via a separate API taxa request,
+      # rather than trying to parse the resuls of the obs request
+      # The latter proved too complex and unreliable
+      genus = JSON.parse(
+        response.body, symbolize_names: true
+      )[:results].first[:name]
 
       "#{genus} #{inat_taxon_rank} #{inat_taxon_name}"
-    end
-
-    def prepend_genus_and_rank
-      # Search the identifications of this iNat observation
-      # for an identification of the inat_taxon[:id]
-      self[:identifications].each do |identification|
-        next unless identifies_this_obs?(identification)
-
-        # search the identification's ancestors to find the genus
-        identification[:taxon][:ancestors].each do |ancestor|
-          next unless ancestor[:rank] == "genus"
-
-          #  return a string comprising Genus rank epithet
-          #  ex: "Morchella section Distantes"
-          return "#{ancestor[:name]} #{inat_taxon_rank} #{inat_taxon_name}"
-        end
-      end
     end
 
     def infraspecific? = %w[subspecies variety form].include?(inat_taxon_rank)
@@ -403,10 +377,6 @@ class Inat
     def insert_rank_between_species_and_final_epithet
       words = inat_taxon_name.split
       "#{words[0..1].join(" ")} #{inat_taxon_rank} #{words[2]}"
-    end
-
-    def identifies_this_obs?(identification)
-      identification[:taxon][:id] == self[:taxon][:id]
     end
 
     def matching_group_names
@@ -420,7 +390,7 @@ class Inat
       ::Name.where(
         # parse it to get MO's text_name rank abbreviation
         # E.g. "sect." instead of "section"
-        text_name: ::Name.parse_name(full_name).text_name,
+        text_name: ::Name.parse_name(full_name_string).text_name,
         rank: inat_taxon_rank.titleize,
         correct_spelling_id: nil
       ).
