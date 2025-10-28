@@ -18,19 +18,19 @@ class Components::MatrixBoxFooter < Components::Base
   prop :data, Hash
   prop :user, _Nilable(User), default: nil
   prop :identify, _Boolean, default: false
-  prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
+  prop :footer, _Union(Array, _Boolean), default: -> { [] }
 
   def view_template
     # Handle explicit footer components
-    if @footer.is_a?(Array)
-      @footer.each { |component| render(component) } if @footer.any?
+    if @footer.is_a?(Array) && @footer.any?
+      @footer.each { |component| render(component) }
       return
     end
 
     # Skip footer if explicitly false
     return if @footer == false
 
-    # Default footers
+    # Default footers (when footer is [] or not provided)
     render_log_footer
     render_identify_footer
   end
