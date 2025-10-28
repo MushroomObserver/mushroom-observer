@@ -281,6 +281,7 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
     stub_inat_interactions
+    # stub the name lookup for the infrageneric name
     ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
     # rubocop:disable Style/NumericLiterals
     stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
@@ -355,7 +356,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions
     # stub the name lookup for the infrageneric name
-    stub_request(:get, "https://api.inaturalist.org/v1/taxa/48460,47170,47169,492000,50814,1094814,47167,785522,118249,1149497,48419,1142598,932781?rank=genus").
+    ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
+    stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
       with(
         body: "{}",
         headers: {
@@ -376,10 +378,10 @@ class InatImportJobTest < ActiveJob::TestCase
           per_page: 30,
           results: [
             {
-              id: 48419,
+              id: 48419, # rubocop:disable Style/NumericLiterals
               rank: "genus",
               rank_level: 20,
-              iconic_taxon_id: 47170,
+              iconic_taxon_id: 47170, # rubocop:disable Style/NumericLiterals
               is_active: true,
               name: "Amanita"
             }
