@@ -283,7 +283,6 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions
     # stub the name lookup for the infrageneric name
     ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
-    # rubocop:disable Style/NumericLiterals
     stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
       with(
         body: "{}",
@@ -294,42 +293,14 @@ class InatImportJobTest < ActiveJob::TestCase
           "Content-Length" => "2",
           "Content-Type" => "application/json",
           "Host" => "api.inaturalist.org",
-          # "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
         }
       ).
+      # maximumly simplified response; only fields needed for this test
       to_return(
         status: 200,
-        # simplified response body; omits many fields unneeded for this test
-        body: {
-          total_results: 1,
-          page: 1,
-          per_page: 30,
-          results: [
-            {
-              id: 56830,
-              rank: "genus",
-              rank_level: 20,
-              iconic_taxon_id: 47170,
-              ancestor_ids: [
-                48460,
-                47170,
-                48250,
-                372740,
-                152032,
-                48717,
-                56831,
-                56830
-              ],
-              is_active: true,
-              name: "Morchella",
-              parent_id: 56831,
-              ancestry: "48460/47170/48250/372740/152032/48717/56831"
-            }
-          ]
-        }.to_json,
+        body: { results: [{ name: "Morchella" }] }.to_json,
         headers: {}
       )
-    # rubocop:enable Style/NumericLiterals
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -370,23 +341,10 @@ class InatImportJobTest < ActiveJob::TestCase
           # "User-Agent" => "rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108"
         }
       ).
+      # maximumly simplified response; only fields needed for this test
       to_return(
         status: 200,
-        body: {
-          total_results: 1,
-          page: 1,
-          per_page: 30,
-          results: [
-            {
-              id: 48419, # rubocop:disable Style/NumericLiterals
-              rank: "genus",
-              rank_level: 20,
-              iconic_taxon_id: 47170, # rubocop:disable Style/NumericLiterals
-              is_active: true,
-              name: "Amanita"
-            }
-          ]
-        }.to_json,
+        body: { results: [{ name: "Amanita" }] }.to_json,
         headers: {}
       )
 

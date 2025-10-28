@@ -171,35 +171,10 @@ class InatObsTest < UnitTestCase
               # 'User-Agent'=>'rest-client/2.1.0 (darwin24 x86_64) ruby/3.3.6p108'
         }
       ).
+      # maximumly simplified response; only fields needed for this test
       to_return(
         status: 200,
-        body: {
-          total_results: 1,
-          page: 1,
-          per_page: 30,
-          results: [
-            {
-              id: 56830,
-              rank: "genus",
-              rank_level: 20,
-              iconic_taxon_id: 47170,
-              ancestor_ids: [
-                48460,
-                47170,
-                48250,
-                372740,
-                152032,
-                48717,
-                56831,
-                56830
-              ],
-              is_active: true,
-              name: "Morchella",
-              parent_id: 56831,
-              ancestry: "48460/47170/48250/372740/152032/48717/56831"
-            }
-          ]
-        }.to_json,
+        body: { results: [{ name: "Morchella" }] }.to_json,
         headers: {}
       )
 
