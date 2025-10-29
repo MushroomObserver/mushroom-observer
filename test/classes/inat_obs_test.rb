@@ -160,7 +160,8 @@ class InatObsTest < UnitTestCase
 
     mock_inat_obs = mock_observation("distantes")
     ancestor_ids = mock_inat_obs[:taxon][:ancestor_ids].join(",")
-    stub_request(:get, "#{API_BASE}/taxa?ids=#{ancestor_ids}&rank=genus").
+
+    stub_request(:get, "#{API_BASE}/taxa?id=#{ancestor_ids}&rank=genus").
       with(
         headers: {
           "Accept" => "application/json",
@@ -183,8 +184,9 @@ class InatObsTest < UnitTestCase
   end
 
   def user_agent
-    "rest-client/#{RestClient::VERSION} (#{RbConfig::CONFIG["host_os"]} " \
-    "#{RUBY_PLATFORM}) ruby/#{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
+    "rest-client/#{RestClient::VERSION} " \
+    "(#{RbConfig::CONFIG["host_os"]} #{RbConfig::CONFIG["host_cpu"]}) " \
+    "ruby/#{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
   end
 
   def test_infraspecific_name
