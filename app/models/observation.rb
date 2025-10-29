@@ -651,10 +651,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def notes_orphaned_parts(user)
     return [] if notes.blank?
 
-    notes_keys = notes.keys.map(&:to_s).each do |key|
-      key.tr!("_", " ")
+    # Normalization for comparison (lowercase)
+    normalize_for_comparison = ->(key) { normalize_for_display(key).downcase }
+
+    known_keys = (user.notes_template_parts + [other_notes_part]).
+                 map(&normalize_for_comparison).
+                 to_set
+    notes.keys.each_with_object([]) do |key, result|
+      normalized_key = normalize_for_comparison.call(key)
+      next if known_keys.include?(normalized_key)
+
+      result << normalize_for_display(key)
+      known_keys << normalized_key
     end
-    notes_keys - user.notes_template_parts - [other_notes_part]
   end
 
   # notes as a String, captions (keys) without added formstting,
@@ -670,7 +679,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
     result = notes.each_with_object(+"") do |(key, value), str|
-      str << "#{markup}#{key}#{markup}: #{value}\n"
+      str << "#{markup}#{key.to_s.tr("_", " ")}#{markup}: #{value}\n"
     end
     result.chomp
   end
@@ -1180,6 +1189,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   private
+
+  def normalize_for_display(key)
+    key.to_s.tr("_", " ")
+  end
 
   def prefer_minimum_bounding_box_to_earth
     return unless location && Location.is_unknown?(location.name) &&
