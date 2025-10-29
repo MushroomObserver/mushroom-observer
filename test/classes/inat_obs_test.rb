@@ -5,6 +5,7 @@ require("test_helper")
 # test encapsulated imported iNat observations
 class InatObsTest < UnitTestCase
   include Inat::Constants
+  include InatStubHelpers
 
   # disable cop to facilitate typing/reading id's
   # rubocop:disable Style/NumericLiterals
@@ -161,23 +162,10 @@ class InatObsTest < UnitTestCase
     mock_inat_obs = mock_observation("distantes")
     ancestor_ids = mock_inat_obs[:taxon][:ancestor_ids].join(",")
 
-    stub_request(:get, "#{API_BASE}/taxa?id=#{ancestor_ids}&rank=genus").
-      with(
-        headers: {
-          "Accept" => "application/json",
-          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host" => "api.inaturalist.org",
-          # RestClient complains if User-Agent missing
-          # Must be set dynamically because it differs per machine, including CI
-          "User-Agent" => user_agent
-        }
-      ).
-      # maximumly simplified response; only fields needed for this test
-      to_return(
-        status: 200,
-        body: { results: [{ name: "Morchella" }] }.to_json,
-        headers: {}
-      )
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
 
     assert_equal(name.id, mock_inat_obs.name_id)
     assert_equal(name.text_name, mock_inat_obs.text_name)

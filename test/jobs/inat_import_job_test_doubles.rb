@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require_relative("../support/inat_stub_helpers")
+
 module InatImportJobTestDoubles
   include Inat::Constants
+  include InatStubHelpers
 
   def stub_inat_interactions(
     id_above: 0,
@@ -133,31 +136,5 @@ module InatImportJobTestDoubles
                 headers: { "Content-Type" => "application/json" })
   end
 
-  def stub_genus_lookup(ancestor_ids:, body:)
-    stub_request(:get, "#{API_BASE}/taxa?id=#{ancestor_ids}&rank=genus").
-      with(
-        headers: {
-          "Accept" => "application/json",
-          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host" => "api.inaturalist.org",
-          # RestClient complains if User-Agent missing
-          # Must be set dynamically because it differs per machine, including CI
-          "User-Agent" => user_agent
-        }
-      ).
-      to_return(
-        status: 200,
-        body: body.to_json,
-        headers: {}
-      )
-  end
-
-  # NOTE: jdc 2025-10-29
-  # webmock 3.26.0 is very picky about the User-Agent string, and
-  # it's different here than in test/classes/inat_obs_test.rb#user_agent
-  def user_agent
-    "rest-client/#{RestClient::VERSION} " \
-    "(#{RbConfig::CONFIG["host_os"]} #{RbConfig::CONFIG["host_cpu"]}) " \
-    "ruby/#{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
-  end
+  # stub_genus_lookup and user_agent moved to test/support/inat_stub_helpers.rb
 end
