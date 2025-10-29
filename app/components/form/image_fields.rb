@@ -59,7 +59,7 @@ class Components::Form::ImageFields < Components::Base
 
     fields << render_original_name_field(form) unless @upload
 
-    fields.join.html_safe
+    fields.join
   end
 
   def render_notes_field(form)

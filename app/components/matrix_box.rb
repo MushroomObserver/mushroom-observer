@@ -114,8 +114,7 @@ class Components::MatrixBox < Components::Base
     }
   end
 
-  # rubocop:disable Metrics/AbcSize
-  def extract_observation_data
+  def extract_observation_data # rubocop:disable Metrics/AbcSize
     data = {
       id: @object.id,
       type: :observation,
@@ -133,7 +132,6 @@ class Components::MatrixBox < Components::Base
     add_observation_image_data(data) if @object.thumb_image_id
     data
   end
-  # rubocop:enable Metrics/AbcSize
 
   def add_observation_image_data(data)
     data[:image] = @object.thumb_image
@@ -142,7 +140,6 @@ class Components::MatrixBox < Components::Base
     data[:full_width] = true
   end
 
-  # rubocop:disable Metrics/AbcSize
   def extract_rss_log_data
     target = @object.target
     data = {
@@ -160,7 +157,6 @@ class Components::MatrixBox < Components::Base
     add_rss_log_image_data(data, target)
     data
   end
-  # rubocop:enable Metrics/AbcSize
 
   def extract_rss_log_name(target)
     if @object.target_type == :image
@@ -243,9 +239,5 @@ class Components::MatrixBox < Components::Base
              identify: @identify,
              footer: @footer
            ))
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
   end
 end

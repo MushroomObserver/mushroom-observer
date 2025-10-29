@@ -92,22 +92,26 @@ class Components::Form::ImageCameraInfo < Components::Base
   private
 
   def render_gps_info
-    span(class: "exif_gps") do
-      parts = [
-        build_gps_part(:LAT, @lat, "exif_lat"),
-        build_gps_part(:LNG, @lng, "exif_lng"),
-        build_alt_part
-      ]
-      raw(parts.join(", ").html_safe)
-    end
+    parts = [
+      build_gps_part(:LAT, @lat, "exif_lat"),
+      build_gps_part(:LNG, @lng, "exif_lng"),
+      build_alt_part
+    ]
+    span(class: "exif_gps") { parts.join(", ") }
   end
 
   def build_gps_part(label_key, value, css_class)
-    "<strong>#{label_key.l}: </strong><span class=\"#{css_class}\">#{value}</span>"
+    [
+      strong { "#{label_key.l}:" },
+      span(class: css_class) { value }
+    ].join(" ")
   end
 
   def build_alt_part
-    "<strong>#{:ALT.l}: </strong><span class=\"exif_alt\">#{@alt}</span> m"
+    [
+      strong { "#{:ALT.l}:" },
+      span(class: "exif_alt") { @alt }
+    ].join(" ")
   end
 
   def render_no_gps_message
@@ -138,9 +142,5 @@ class Components::Form::ImageCameraInfo < Components::Base
       span(class: "when-enabled") { :image_use_exif.l }
       span(class: "when-disabled") { :image_exif_copied.l }
     end
-  end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
   end
 end

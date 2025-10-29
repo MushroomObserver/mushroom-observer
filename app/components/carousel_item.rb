@@ -35,15 +35,9 @@ class Components::CarouselItem < Components::BaseImage
     img_instance, img_id = extract_image_and_id
 
     # Build render data
-    render_data = build_render_data(img_instance, img_id)
+    data = build_render_data(img_instance, img_id)
 
     # Render the carousel item
-    render_carousel_item(img_instance, img_id, render_data)
-  end
-
-  private
-
-  def render_carousel_item(img_instance, img_id, data)
     div(
       id: "carousel_item_#{img_id}",
       class: build_item_classes
@@ -53,6 +47,8 @@ class Components::CarouselItem < Components::BaseImage
       render_carousel_caption(img_instance, data)
     end
   end
+
+  private
 
   def build_item_classes
     active = @index.zero? ? "active" : ""
@@ -74,26 +70,20 @@ class Components::CarouselItem < Components::BaseImage
   end
 
   def render_carousel_caption(img_instance, _data)
-    caption_content = if img_instance && @object
-                        image_info_html(img_instance, @object)
-                      else
-                        ""
-                      end
+    caption = image_info_html(img_instance)
 
     div(class: "carousel-caption") do
       # Vote section
       render_image_vote_section(img_instance)
 
       # Image info (copyright, notes)
-      if caption_content.present?
-        div(class: "image-info d-none d-sm-block") do
-          raw(caption_content)
-        end
-      end
+      div(class: "image-info d-none d-sm-block") { caption } if caption.present?
     end
   end
 
-  def image_info_html(img_instance, obj)
-    image_info(img_instance, obj, original: @original)
+  def image_info_html(img_instance)
+    return "" unless img_instance && @object
+
+    image_info(img_instance, @object, original: @original)
   end
 end

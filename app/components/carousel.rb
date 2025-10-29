@@ -58,7 +58,7 @@ class Components::Carousel < Components::Base
     div(class: "panel-heading carousel-heading") do
       h4(class: "panel-title") do
         plain(@title)
-        span(class: "float-right") { raw(@links.html_safe) } if @links.present?
+        span(class: "float-right") { @links } if @links.present?
       end
     end
   end

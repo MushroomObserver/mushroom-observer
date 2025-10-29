@@ -84,8 +84,4 @@ class Components::Form::ImageCarousel < Components::Base
              ))
     end
   end
-
-  def helpers
-    @helpers ||= ApplicationController.helpers
-  end
 end

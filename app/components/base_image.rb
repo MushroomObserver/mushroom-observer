@@ -30,7 +30,8 @@ class Components::BaseImage < Components::Base
   # Accept both Image instances and Integer IDs.
   # Integer IDs are needed for form components (e.g., Form::ImageCarouselItem)
   # that handle newly uploaded images with provisional IDs before persistence.
-  # Subclasses like InteractiveImage can override this to restrict to Image only.
+  # Subclasses like InteractiveImage can override this to restrict to Image
+  # instances only.
   prop :image, _Union(Image, Integer, nil) do |value|
     case value
     when Image, Integer then value

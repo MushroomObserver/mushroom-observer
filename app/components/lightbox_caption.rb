@@ -66,11 +66,11 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_title
     fragment("obs_title") do
-      render Components::LightboxCaption::ObservationTitle.new(
-        obs: @obs,
-        user: @user,
-        identify: @identify
-      )
+      render(Components::LightboxCaption::ObservationTitle.new(
+               obs: @obs,
+               user: @user,
+               identify: @identify
+             ))
     end
   end
 
@@ -105,7 +105,7 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_obs_location
-    if user
+    if @user
       location_link(@obs.where, @obs.location, nil, true)
     else
       plain(@obs.where)
@@ -115,21 +115,17 @@ class Components::LightboxCaption < Components::Base
   def render_vague_notice_if_needed
     return unless @obs.location&.vague?
 
-    whitespace
-    render_vague_notice
-  end
-
-  def render_vague_notice
     title = :show_observation_vague_location.l
-    title += " #{:show_observation_improve_location.l}" if user == @obs.user
+    title += " #{:show_observation_improve_location.l}" if @user == @obs.user
 
+    whitespace
     p(class: "ml-3") do
       em { title }
     end
   end
 
   def render_obs_where_gps
-    return unless @obs.lat && user
+    return unless @obs.lat && @user
 
     p(class: "obs-where-gps", id: "observation_where_gps") do
       render_gps_link if @obs.reveal_location?(@user)
@@ -157,7 +153,7 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_obs_user(obs_user)
-    if user
+    if @user
       user_link(@obs.user)
     else
       plain(obs_user.unique_text_name)
@@ -181,9 +177,9 @@ class Components::LightboxCaption < Components::Base
   def render_truncated_notes
     return unless @obs.notes?
 
+    prepare_textile_cache
     div(class: "obs-notes", id: "observation_#{@obs.id}_notes") do
-      prepare_textile_cache
-      raw(formatted_truncated_notes)
+      formatted_truncated_notes
     end
   end
 
@@ -198,9 +194,7 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_image_caption
-    div(class: "image-notes") do
-      raw(image.notes.tl.truncate_html(300))
-    end
+    div(class: "image-notes") { image.notes.tl.truncate_html(300) }
   end
 
   def render_image_links

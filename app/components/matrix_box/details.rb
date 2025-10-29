@@ -47,11 +47,11 @@ class Components::MatrixBox::Details < Components::Base
 
   def render_title
     fragment("box_title") do
-      render Components::MatrixBox::Title.new(
-        id: @data[:id],
-        name: @data[:name],
-        type: @data[:type]
-      )
+      render(Components::MatrixBox::Title.new(
+               id: @data[:id],
+               name: @data[:name],
+               type: @data[:type]
+             ))
     end
   end
 
@@ -86,9 +86,7 @@ class Components::MatrixBox::Details < Components::Base
     return unless @data[:where]
 
     div(class: "rss-where") do
-      small do
-        location_link(@data[:where], @data[:location])
-      end
+      small { location_link(@data[:where], @data[:location]) }
     end
   end
 
@@ -111,9 +109,7 @@ class Components::MatrixBox::Details < Components::Base
 
     div(class: "small mt-3") do
       div(class: "source-credit") do
-        small do
-          raw(target.source_credit.tpl)
-        end
+        small { target.source_credit.tpl }
       end
     end
   end

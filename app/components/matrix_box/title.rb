@@ -20,15 +20,13 @@
 #     type: :user
 #   )
 class Components::MatrixBox::Title < Components::Base
-  include Phlex::Rails::Helpers::ClassNames
-
   prop :id, Integer
   prop :name, String
   prop :type, Symbol
 
   def view_template
     span(
-      class: class_names("rss-name", title_weight),
+      class: ["rss-name", title_weight].join(" "),
       id: "box_title_#{@id}"
     ) { @name }
   end
@@ -39,7 +37,7 @@ class Components::MatrixBox::Title < Components::Base
     if [:observation, :name].include?(@type)
       ""
     else
-      " font-weight-bold"
+      "font-weight-bold"
     end
   end
 end

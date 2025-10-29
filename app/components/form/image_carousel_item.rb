@@ -127,13 +127,13 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
 
   def render_thumbnail_button(img_instance)
     div(class: "top-left p-4") do
-      set_thumb_img_button(img_instance)
+      button_to_set_thumb_img(img_instance)
     end
   end
 
   # Note that this is not `observation[thumb_image_id]`, a hidden field that
   # is set by the Stimulus controller on the basis of these radios' value.
-  def set_thumb_img_button(image)
+  def button_to_set_thumb_img(image)
     value = image&.id || "true"
     checked = @thumb_id&.== image&.id
     label_classes = class_names("btn btn-default btn-sm thumb_img_btn",
