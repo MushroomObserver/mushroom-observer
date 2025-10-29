@@ -4,6 +4,7 @@ require "test_helper"
 
 class MatrixBoxTest < UnitTestCase
   include ComponentTestHelper
+
   def setup
     @user = users(:rolf)
   end
@@ -79,11 +80,11 @@ class MatrixBoxTest < UnitTestCase
     assert_includes(html, "custom-class")
   end
 
-  # Note: Testing custom block content requires Phlex DSL context
+  # NOTE: Testing custom block content requires Phlex DSL context
   # This test is commented out as it requires the block to be evaluated
   # in the component's Phlex context, not the test context
   # def test_renders_custom_block_content
-  #   component = Components::MatrixBox.new(id: 123, extra_class: "test-class") do
+  #   component = Components::MatrixBox.new(id: 123, extra_class: "test-cls") do
   #     div { "Custom content" }
   #   end
   #   html = render(component)

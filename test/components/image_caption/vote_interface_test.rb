@@ -4,6 +4,7 @@ require "test_helper"
 
 class ImageCaptionVoteInterfaceTest < UnitTestCase
   include ComponentTestHelper
+
   def setup
     @user = users(:rolf)
     @image = images(:connected_coprinus_comatus_image)
@@ -56,7 +57,7 @@ class ImageCaptionVoteInterfaceTest < UnitTestCase
     assert_match(/image-vote/, html)
   end
 
-  # Note: VoteInterface component does not check for nil user currently
+  # NOTE: VoteInterface component does not check for nil user currently
   # The component will render even with nil user, which may be a bug
   # Commenting out this test until component behavior is clarified
   # def test_does_not_render_for_nil_user
@@ -70,8 +71,9 @@ class ImageCaptionVoteInterfaceTest < UnitTestCase
   #   assert_equal("", html)
   # end
 
-  # Note: VoteInterface component type requires Image instance, cannot pass nil
-  # This test documents that the component enforces type safety at initialization
+  # NOTE: VoteInterface component type requires Image instance, cannot pass nil
+  # This test documents that the component enforces type safety at
+  # initialization
   # def test_does_not_render_for_nil_image
   #   component = Components::ImageCaption::VoteInterface.new(
   #     user: @user,

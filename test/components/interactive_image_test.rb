@@ -4,6 +4,7 @@ require "test_helper"
 
 class InteractiveImageTest < UnitTestCase
   include ComponentTestHelper
+
   def setup
     @user = users(:rolf)
     @image = images(:connected_coprinus_comatus_image)
@@ -88,8 +89,9 @@ class InteractiveImageTest < UnitTestCase
     assert_equal("", html)
   end
 
-  # Note: Rendering with nil image for non-upload causes URL generation errors
-  # This test documents expected behavior but is commented out due to current implementation
+  # NOTE: Rendering with nil image for non-upload causes URL generation errors
+  # This test documents expected behavior but is commented out due to current
+  # implementation
   # def test_renders_for_non_upload_with_nil_image
   #   component = Components::InteractiveImage.new(
   #     user: @user,
