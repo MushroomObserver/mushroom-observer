@@ -160,13 +160,15 @@ class InatObsTest < UnitTestCase
 
     mock_inat_obs = mock_observation("distantes")
     ancestor_ids = mock_inat_obs[:taxon][:ancestor_ids].join(",")
-    stub_request(:get, "#{API_BASE}/taxa/#{ancestor_ids}?rank=genus").
+    stub_request(:get, "#{API_BASE}/taxa?ids=#{ancestor_ids}&rank=genus").
       with(
         headers: {
           "Accept" => "application/json",
           "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Authorization" => "Bearer",
-          "Host" => "api.inaturalist.org"
+          "Host" => "api.inaturalist.org",
+          # RestClient complains if User-Agent missing
+          # Must be set dynamically because it differs per machine, including CI
+          "User-Agent" => user_agent
         }
       ).
       # maximumly simplified response; only fields needed for this test
@@ -178,6 +180,11 @@ class InatObsTest < UnitTestCase
 
     assert_equal(name.id, mock_inat_obs.name_id)
     assert_equal(name.text_name, mock_inat_obs.text_name)
+  end
+
+  def user_agent
+    "rest-client/#{RestClient::VERSION} (#{RbConfig::CONFIG["host_os"]} " \
+    "#{RUBY_PLATFORM}) ruby/#{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
   end
 
   def test_infraspecific_name

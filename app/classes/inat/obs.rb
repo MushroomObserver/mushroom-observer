@@ -57,6 +57,8 @@
 #
 class Inat
   class Obs
+    include Inat::Constants
+
     def initialize(imported_inat_obs_data)
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
     end
@@ -357,16 +359,26 @@ class Inat
         include?(inat_taxon_rank)
     end
 
+    # Get the genus of an iNat infrageneric taxon via an API query
+    # requesting the taxon's ancestor which has rank: genus.
+    # NOTE: 2025-10-29 jdc
+    # iNat infrageneric name strings lack the genus.
+    # They take the form "rank Epithet". ex: "section Validae"
+    # Get the genus via a separate API taxa request,
+    # rather than try to parse the results of the iNat API observation request.
+    # The latter proved too complex and unreliable.
     def infrageneric_name_string
-      ancestors = self[:taxon][:ancestor_ids].join(",")
-      taxa_request = Inat::APIRequest.new(nil) # token not needed
-      response = taxa_request.request(path: "taxa/#{ancestors}?rank=genus")
+      ancestor_ids = self[:taxon][:ancestor_ids].join(",")
+      params = { id: ancestor_ids, rank: "genus" }
+      url = "#{API_BASE}/taxa?#{params.to_query}"
 
-      # get the genus via a separate API taxa request,
-      # rather than trying to parse the resuls of the obs request
-      # The latter proved too complex and unreliable
+      res = RestClient::Request.execute(
+        method: :get,
+        url: url,
+        headers: { Accept: "application/json" }
+      )
       genus = JSON.parse(
-        response.body, symbolize_names: true
+        res.body, symbolize_names: true
       )[:results].first[:name]
 
       "#{genus} #{inat_taxon_rank} #{inat_taxon_name}"
