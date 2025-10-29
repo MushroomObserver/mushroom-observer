@@ -17,7 +17,7 @@
                                                   size: @size)) %> |
       <% end %>
       <%= render(Components::ImageCaption::OriginalImageLink.new(image: @image)) %> |
-      <%= render(Components::ImageCaption::ExifLink.new(image_id: @image.id)) %>
+      <%= render(Components::ImageCaption::EXIFLink.new(image_id: @image.id)) %>
 
     </div><!--.text-center-->
   </div><!--.panel-heading-->

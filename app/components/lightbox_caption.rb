@@ -228,7 +228,7 @@ class Components::LightboxCaption < Components::Base
                  image_or_image_id
                end
 
-    render(ImageCaption::ExifLink.new(
+    render(ImageCaption::EXIFLink.new(
              image_id: image_id,
              link_class: "lightbox_link"
            ))

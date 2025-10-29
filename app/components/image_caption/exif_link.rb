@@ -3,16 +3,16 @@
 # Component for rendering a link to view image EXIF data in a modal.
 #
 # @example Basic usage
-#   render Components::ImageCaption::ExifLink.new(
+#   render Components::ImageCaption::EXIFLink.new(
 #     image_id: @image.id
 #   )
 #
 # @example With custom CSS class
-#   render Components::ImageCaption::ExifLink.new(
+#   render Components::ImageCaption::EXIFLink.new(
 #     image_id: @image.id,
 #     link_class: "custom-link-class"
 #   )
-class Components::ImageCaption::ExifLink < Components::Base
+class Components::ImageCaption::EXIFLink < Components::Base
   prop :image_id, Integer, &:to_i
   prop :link_class, String, default: ""
 
