@@ -28,7 +28,7 @@ class Components::LightboxCaption < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   prop :user, _Nilable(User)
-  prop :image, _Nilable(Image), default: nil
+  prop :image, _Nilable(::Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
   prop :obs, _Union(Observation, Hash), default: -> { {} }
   prop :identify, _Boolean, default: false
@@ -208,40 +208,29 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_original_image_link(image_or_image_id)
-    id = if image_or_image_id.is_a?(Image)
-           image_or_image_id.id
-         else
-           image_or_image_id
-         end
-
-    a(
-      href: "/images/#{id}/original",
-      class: "lightbox_link",
-      target: "_blank",
-      rel: "noopener",
-      data: {
-        controller: "image-loader",
-        action: "click->image-loader#load",
-        "image-loader-target": "link",
-        "loading-text": :image_show_original_loading.t,
-        "maxed-out-text": :image_show_original_maxed_out.t,
-        "error-text": :image_show_original_error.t
-      }
-    ) { :image_show_original.t }
+    if image_or_image_id.is_a?(::Image)
+      render(ImageCaption::OriginalImageLink.new(
+               image: image_or_image_id,
+               link_class: "lightbox_link"
+             ))
+    else
+      render(ImageCaption::OriginalImageLink.new(
+               image_id: image_or_image_id,
+               link_class: "lightbox_link"
+             ))
+    end
   end
 
   def render_image_exif_link(image_or_image_id)
-    image_id = if image_or_image_id.is_a?(Image)
+    image_id = if image_or_image_id.is_a?(::Image)
                  image_or_image_id.id
                else
                  image_or_image_id
                end
 
-    modal_link_to(
-      "image_exif_#{image_id}",
-      :image_show_exif.t,
-      exif_image_path(id: image_id),
-      { class: "lightbox_link" }
-    )
+    render(ImageCaption::ExifLink.new(
+             image_id: image_id,
+             link_class: "lightbox_link"
+           ))
   end
 end

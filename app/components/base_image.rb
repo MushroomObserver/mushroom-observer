@@ -21,7 +21,7 @@ class Components::BaseImage < Components::Base
   include Phlex::Rails::Helpers::ClassNames
 
   # Type definitions
-  Size = _Union(*Image::ALL_SIZES)
+  Size = _Union(*::Image::ALL_SIZES)
   Verb = _Union(:get, :post, :put, :patch, :delete)
   Fit = _Union(:cover, :contain)
 
@@ -32,9 +32,9 @@ class Components::BaseImage < Components::Base
   # that handle newly uploaded images with provisional IDs before persistence.
   # Subclasses like InteractiveImage can override this to restrict to Image
   # instances only.
-  prop :image, _Union(Image, Integer, nil) do |value|
+  prop :image, _Union(::Image, Integer, nil) do |value|
     case value
-    when Image, Integer then value
+    when ::Image, Integer then value
     when String then value.to_i
     end
   end
@@ -74,7 +74,7 @@ class Components::BaseImage < Components::Base
 
   # Extract image instance and ID from the image prop
   def extract_image_and_id
-    if @image.is_a?(Image)
+    if @image.is_a?(::Image)
       [@image, @image.id]
     else
       [nil, @image]
@@ -102,7 +102,7 @@ class Components::BaseImage < Components::Base
   def fetch_image_urls(img_instance, img_id)
     return {} if @upload
 
-    img_instance&.all_urls || Image.all_urls(img_id)
+    img_instance&.all_urls || ::Image.all_urls(img_id)
   end
 
   def build_image_classes
@@ -143,7 +143,7 @@ class Components::BaseImage < Components::Base
 
     img_width = BigDecimal(img_instance.width || 100)
     img_height = BigDecimal(img_instance.height || 100)
-    size_index = Image::ALL_SIZES_INDEX[@size]
+    size_index = ::Image::ALL_SIZES_INDEX[@size]
 
     container_width = if img_width > img_height
                         size_index
@@ -196,12 +196,15 @@ class Components::BaseImage < Components::Base
            ))
   end
 
-  # Render vote section for an image using ImageVoteSection component
+  # Render vote section for an image using ImageCaption::VoteInterface component
   def render_image_vote_section(img_instance)
     return unless @votes && img_instance
 
-    render(ImageVoteSection.new(user: @user, image: img_instance,
-                                votes: @votes))
+    render(ImageCaption::VoteInterface.new(
+             user: @user,
+             image: img_instance,
+             votes: @votes
+           ))
   end
 
   # Render original filename if applicable
@@ -215,7 +218,7 @@ class Components::BaseImage < Components::Base
   def show_original_name?(img)
     return false unless @original && img && img.original_name.present?
 
-    permission?(@img) ||
+    permission?(img) ||
       (img.user && img.user.keep_filenames == "keep_and_show")
   end
 

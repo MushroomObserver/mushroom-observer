@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Image vote section component for displaying image voting UI.
+# Image vote interface component for displaying image voting UI.
 #
 # Renders a vote meter (progress bar) and vote buttons for users to
 # vote on images.
@@ -11,12 +11,16 @@
 # - Current user's vote display
 #
 # @example
-#   render ImageVoteSection.new(user: @user, image: @image, votes: true)
-class Components::ImageVoteSection < Components::Base
+#   render Components::ImageCaption::VoteInterface.new(
+#     user: @user,
+#     image: @image,
+#     votes: true
+#   )
+class Components::ImageCaption::VoteInterface < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   prop :user, _Nilable(User)
-  prop :image, Image
+  prop :image, ::Image
   prop :votes, _Boolean, default: true
 
   def view_template
@@ -41,7 +45,7 @@ class Components::ImageVoteSection < Components::Base
 
   def calculate_vote_percentage
     if @image.vote_cache
-      ((@image.vote_cache / Image.all_votes.length) * 100).floor
+      ((@image.vote_cache / ::Image.all_votes.length) * 100).floor
     else
       0
     end
@@ -64,7 +68,10 @@ class Components::ImageVoteSection < Components::Base
 
   def render_vote_buttons(vote_percentage)
     div(class: "vote-buttons mt-2") do
-      div(class: "image-vote-links", id: "image_vote_links_#{@image.id}") do
+      div(
+        class: "image-vote-links",
+        id: "image_vote_links_#{@image.id}"
+      ) do
         div(class: "text-center small") do
           render_user_vote_link
           render_image_vote_links
@@ -72,7 +79,10 @@ class Components::ImageVoteSection < Components::Base
 
         span(
           class: "hidden data_container",
-          data: { id: @image.id, percentage: vote_percentage.to_s }
+          data: {
+            id: @image.id,
+            percentage: vote_percentage.to_s
+          }
         )
       end
     end
@@ -86,7 +96,7 @@ class Components::ImageVoteSection < Components::Base
   end
 
   def render_image_vote_links
-    Image.all_votes.each_with_index do |vote, index|
+    ::Image.all_votes.each_with_index do |vote, index|
       plain("|") if index.positive?
       render_vote_link(vote)
     end

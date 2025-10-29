@@ -48,6 +48,9 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
     img_instance, img_id = extract_image_and_id
     img_id ||= "img_id_missing" if @upload
 
+    # Ensure img_id is not an Image object (convert to integer if needed)
+    img_id = img_id.id if img_id.is_a?(::Image)
+
     # Build render data
     render_data = build_render_data(img_instance, img_id)
 

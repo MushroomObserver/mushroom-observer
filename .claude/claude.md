@@ -245,6 +245,51 @@ div("", class: "clearfix")
 span("", class: "badge")
 ```
 
+### Rendering Phlex Fragments
+
+**To render specific fragments from a Phlex component**, use the `.call(fragments: [...])` method:
+
+```erb
+<%# Render only the "copyright" fragment from ImageInfo component %>
+<%= Components::ImageInfo.new(
+      user: @user,
+      image: @image
+    ).call(fragments: ["copyright"]) %>
+```
+
+**In the component**, wrap fragment content with `fragment("name")` block:
+
+```ruby
+class Components::ImageInfo < Components::Base
+  def view_template
+    # Full template renders all fragments
+    [owner_name, copyright, notes].compact_blank.safe_join
+  end
+
+  # Fragment method - wrap content with fragment() to enable selective rendering
+  def copyright
+    return "" unless @image
+
+    fragment("copyright") do
+      div(class: "copyright") { "© #{@image.year}" }
+    end
+  end
+
+  # Non-fragment method - always rendered when component is rendered
+  def owner_name
+    div(class: "owner") { @image.owner }
+  end
+end
+```
+
+**Important**:
+- Wrap the content you want to be selectively renderable with `fragment("name") do ... end`
+- The fragment name passed to `fragment()` must match the name in `.call(fragments: ["name"])`
+- Methods not wrapped with `fragment()` will always be rendered
+
+Resources:
+- Phlex fragments: https://www.phlex.fun/components/fragments.html
+
 ### Fragment Caching in Phlex
 
 **Enable caching** by adding `cache_store` method to `Components::Base`:

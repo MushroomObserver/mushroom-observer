@@ -15,7 +15,6 @@ class Components::Base < Phlex::HTML
   register_output_helper :user_link
   register_output_helper :mark_as_reviewed_toggle
   register_output_helper :modal_link_to
-  register_output_helper :image_info
   register_output_helper :put_button
   register_output_helper :text_area_with_label
   register_output_helper :date_select_with_label

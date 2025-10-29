@@ -43,7 +43,7 @@ class Components::Form::ImageCarousel < Components::Base
 
         # Carousel controls
         div(class: "carousel-control-wrap row") do
-          render(Components::CarouselControls.new(carousel_id: @html_id))
+          render(Components::Carousel::Controls.new(carousel_id: @html_id))
         end
       end
 
@@ -76,7 +76,7 @@ class Components::Form::ImageCarousel < Components::Base
 
   def render_thumbnails
     @images&.each_with_index do |image, index|
-      render(Components::CarouselThumbnail.new(
+      render(Components::Carousel::Thumbnail.new(
                user: @user,
                image: image,
                index: index,

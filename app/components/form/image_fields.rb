@@ -23,7 +23,7 @@ class Components::Form::ImageFields < Components::Base
 
   # Properties
   prop :user, _Nilable(User)
-  prop :image, _Nilable(Image), default: nil
+  prop :image, _Nilable(::Image), default: nil
   prop :img_id, Integer, &:to_i
   prop :upload, _Boolean, default: false
 
@@ -117,18 +117,18 @@ class Components::Form::ImageFields < Components::Base
   end
 
   def license_options
-    if @upload
-      License.available_names_and_ids(@user.license)
+    if @upload || @image.nil?
+      License.available_names_and_ids(@user&.license)
     else
-      License.available_names_and_ids(@image.license)
+      License.available_names_and_ids(@image&.license)
     end
   end
 
   def selected_license
-    if @upload
-      @user.license_id
+    if @upload || @image.nil?
+      @user&.license_id
     else
-      @image.license_id
+      @image&.license_id
     end
   end
 end

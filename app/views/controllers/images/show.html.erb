@@ -42,7 +42,10 @@ column_classes(:six)
   <%= tag.div(class: yield(:left_columns)) do %>
     <div class="small text-center">
       <div>
-        <%= image_copyright(@image) %>
+        <%= render Components::ImageCaption::Copyright.new(
+              user: @user,
+              image: @image
+            ) %>
       </div>
       <div class="py-5px mb-3">
         <%= render(partial: "shared/form_license_badge",

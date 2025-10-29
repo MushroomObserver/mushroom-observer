@@ -5,8 +5,8 @@
 # Renders previous/next navigation buttons for Bootstrap carousels.
 #
 # @example
-#   render Components::CarouselControls.new(carousel_id: "my_carousel")
-class Components::CarouselControls < Components::Base
+#   render Components::Carousel::Controls.new(carousel_id: "my_carousel")
+class Components::Carousel::Controls < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   prop :carousel_id, String

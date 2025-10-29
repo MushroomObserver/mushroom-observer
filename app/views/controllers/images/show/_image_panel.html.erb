@@ -16,8 +16,8 @@
                                                   op: :mirror,
                                                   size: @size)) %> |
       <% end %>
-      <%= original_image_link(@image, "") %> |
-      <%= image_exif_link(@image.id, "") %>
+      <%= render(Components::ImageCaption::OriginalImageLink.new(image: @image)) %> |
+      <%= render(Components::ImageCaption::ExifLink.new(image_id: @image.id)) %>
 
     </div><!--.text-center-->
   </div><!--.panel-heading-->
@@ -29,16 +29,20 @@
       **image_show_args
     )) %>
 
-    <div class="mt-3 text-center">
-      <% if User.current %>
-        <%= image_vote_links(@user, @image) %>
-      <% end %>
-      <% if !@image.original_name.blank? &&
-            (permission?(@image) ||
-              @image.user && @image.user.keep_filenames == "keep_and_show") %>
+    <% if User.current %>
+      <%= render(Components::ImageCaption::VoteInterface.new(
+        user: @user,
+        image: @image,
+        votes: true
+      )) %>
+    <% end %>
+    <% if !@image.original_name.blank? &&
+          (permission?(@image) ||
+            @image.user && @image.user.keep_filenames == "keep_and_show") %>
+      <div class="mt-3 text-center">
         <%= @image.original_name %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
 
   </div><!--.panel-body-->
 </div><!--.panel-->

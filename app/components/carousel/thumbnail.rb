@@ -6,13 +6,13 @@
 # Handles both uploaded images (no Image record) and existing images.
 #
 # @example
-#   render Components::CarouselThumbnail.new(
+#   render Components::Carousel::Thumbnail.new(
 #     user: current_user,
 #     image: @image,
 #     index: 0,
 #     html_id: "observation_123_carousel"
 #   )
-class Components::CarouselThumbnail < Components::BaseImage
+class Components::Carousel::Thumbnail < Components::BaseImage
   # Additional thumbnail-specific properties
   prop :index, Integer, default: 0
   prop :html_id, String
@@ -40,6 +40,9 @@ class Components::CarouselThumbnail < Components::BaseImage
 
     # For uploads, use provided img_id or fallback
     final_img_id = @img_id || final_img_id || "img_id_missing"
+
+    # Ensure final_img_id is not an Image object (convert to integer if needed)
+    final_img_id = final_img_id.id if final_img_id.is_a?(::Image)
 
     # Build render data
     render_data = build_render_data(img_instance, final_img_id)

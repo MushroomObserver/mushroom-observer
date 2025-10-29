@@ -73,6 +73,7 @@ require("rails/test_help")
   check_for_unsafe_html
   uploaded_string
 
+  component_test_helper
   unit_test_case
   functional_test_case
   integration_test_case

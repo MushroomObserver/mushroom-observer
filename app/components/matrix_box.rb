@@ -81,7 +81,7 @@ class Components::MatrixBox < Components::Base
   # Build render data based on object type
   def build_render_data
     case @object
-    when Image
+    when ::Image
       extract_image_data
     when Observation
       extract_observation_data
@@ -136,7 +136,7 @@ class Components::MatrixBox < Components::Base
   def add_observation_image_data(data)
     data[:image] = @object.thumb_image
     data[:image_link] = @object.show_link_args
-    data[:obs] = object
+    data[:obs] = @object
     data[:full_width] = true
   end
 
