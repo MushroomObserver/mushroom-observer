@@ -171,11 +171,6 @@ class InatObsTest < UnitTestCase
     assert_equal(name.text_name, mock_inat_obs.text_name)
   end
 
-  def user_agent
-    "rest-client/#{RestClient::VERSION} " \
-    "(#{RbConfig::CONFIG["host_os"]} #{RbConfig::CONFIG["host_cpu"]}) " \
-    "ruby/#{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
-  end
 
   def test_infraspecific_name
     name = Name.create(
