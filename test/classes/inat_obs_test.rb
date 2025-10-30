@@ -171,7 +171,6 @@ class InatObsTest < UnitTestCase
     assert_equal(name.text_name, mock_inat_obs.text_name)
   end
 
-
   def test_infraspecific_name
     name = Name.create(
       user: rolf,
