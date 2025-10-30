@@ -85,6 +85,9 @@ require("rails/test_help")
   require_relative(file)
 end
 
+# Load any custom test support helpers (e.g. test/support/*.rb)
+Dir[File.join(__dir__, "support", "*.rb")].each { |f| require f }
+
 I18n.enforce_available_locales = true
 
 # Function for creating a log (trace_tests.out) of the tests called

@@ -4,6 +4,9 @@ require("test_helper")
 
 # test encapsulated imported iNat observations
 class InatObsTest < UnitTestCase
+  include Inat::Constants
+  include InatStubHelpers
+
   # disable cop to facilitate typing/reading id's
   # rubocop:disable Style/NumericLiterals
   def test_complicated_public_obs
@@ -157,6 +160,12 @@ class InatObsTest < UnitTestCase
     )
 
     mock_inat_obs = mock_observation("distantes")
+    ancestor_ids = mock_inat_obs[:taxon][:ancestor_ids].join(",")
+
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
 
     assert_equal(name.id, mock_inat_obs.name_id)
     assert_equal(name.text_name, mock_inat_obs.text_name)

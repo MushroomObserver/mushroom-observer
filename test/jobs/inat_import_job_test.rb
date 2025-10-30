@@ -5,6 +5,7 @@ require_relative("inat_import_job_test_doubles")
 
 class InatImportJobTest < ActiveJob::TestCase
   include InatImportJobTestDoubles
+  include Inat::Constants
 
   def setup
     @user = users(:inat_importer)
@@ -270,7 +271,6 @@ class InatImportJobTest < ActiveJob::TestCase
   # iNat Observation ID is an infrageneric name which was suggested by a user
   def test_import_job_suggested_infrageneric_name
     create_ivars_from_filename("distantes")
-
     # Add objects which are not included in fixtures
     name = Name.create(
       text_name: "Morchella sect. Distantes",
@@ -280,8 +280,12 @@ class InatImportJobTest < ActiveJob::TestCase
       rank: "Section",
       user: @user
     )
-
     stub_inat_interactions
+    ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -307,6 +311,11 @@ class InatImportJobTest < ActiveJob::TestCase
     )
 
     stub_inat_interactions
+    ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Amanita" }] }
+    )
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
