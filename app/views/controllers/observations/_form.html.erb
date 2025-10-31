@@ -71,10 +71,10 @@ form_element_data = {
     inner_id: "observation_images_details", formatted_content: true,
     collapse: "observation_images_details_inner", open: true
   )) do %>
-    <%= concat(render(partial: "observations/form/images", locals: { f: })) %>
-    <%= concat(render(partial: "observations/form/details",
-                      locals: { f:, action:, button_name:, location: @location,
-                                logging_optional: })) %>
+    <%= render(partial: "observations/form/images", locals: { f: }) %>
+    <%= render(partial: "observations/form/details",
+               locals: { f:, action:, button_name:, location: @location,
+                         logging_optional: }) %>
   <% end %>
 
   <%= render(Components::Panel.new(
