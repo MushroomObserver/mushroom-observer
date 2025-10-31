@@ -563,6 +563,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def notes
     value = read_attribute(:notes)
     return Observation.no_notes unless value.is_a?(Hash)
+
     NormalizedHash.new(value)
   end
 
