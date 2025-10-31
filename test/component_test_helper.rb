@@ -39,7 +39,7 @@ module ComponentTestHelper
   def assert_html(html, selector, text: nil)
     doc = Nokogiri::HTML(html)
     element = doc.at_css(selector)
-    assert element, "Expected to find element matching '#{selector}'"
+    assert(element, "Expected to find element matching '#{selector}'")
     assert_includes(element.text, text) if text
   end
 end

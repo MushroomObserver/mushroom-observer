@@ -58,14 +58,16 @@ class AlertTest < UnitTestCase
 
   def test_renders_alert_with_data_attributes
     html = render_component(
-      Components::Alert.new("Test", data: { controller: "alert", target: "message" })
+      Components::Alert.new(
+        "Test", data: { controller: "alert", target: "message" }
+      )
     )
 
     doc = Nokogiri::HTML(html)
     div = doc.at_css("div.alert")
 
-    assert_equal "alert", div["data-controller"]
-    assert_equal "message", div["data-target"]
+    assert_equal("alert", div["data-controller"])
+    assert_equal("message", div["data-target"])
   end
 
   def test_renders_alert_with_multiple_custom_attributes
@@ -82,16 +84,15 @@ class AlertTest < UnitTestCase
     doc = Nokogiri::HTML(html)
     div = doc.at_css("div.alert")
 
-    assert_equal "test-alert", div["id"]
-    assert div["class"].include?("alert")
-    assert div["class"].include?("alert-info")
-    assert div["class"].include?("custom-class")
-    assert_equal "123", div["data-value"]
+    assert_equal("test-alert", div["id"])
+    assert(div["class"].include?("alert"))
+    assert(div["class"].include?("alert-info"))
+    assert(div["class"].include?("custom-class"))
+    assert_equal("123", div["data-value"])
   end
 
   def test_default_level_is_warning
     html = render_component(Components::Alert.new("Test"))
-
     assert_html(html, "div.alert.alert-warning")
   end
 end

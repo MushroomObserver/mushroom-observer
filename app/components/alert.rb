@@ -4,25 +4,27 @@ module Components
   # Bootstrap alert component
   #
   # @example Basic usage
-  #   render Components::Alert.new("Success!", level: :success)
+  #   render(Components::Alert.new("Success!", level: :success))
   #
   # @example With block
-  #   render Components::Alert.new(level: :warning) do
+  #   render(Components::Alert.new(level: :warning) do
   #     plain "Warning: "
   #     strong "Be careful!"
-  #   end
+  #   end)
   #
   # @example With custom attributes
-  #   render Components::Alert.new(
+  #   render(Components::Alert.new(
   #     "Info message",
   #     level: :info,
   #     id: "my-alert",
   #     class: "my-custom-class"
-  #   )
+  #   ))
   class Alert < Base
     # @param message [String, nil] The alert message (optional if using block)
-    # @param level [Symbol] The Bootstrap alert level (:success, :info, :warning, :danger)
-    # @param attributes [Hash] Additional HTML attributes (id, class, data, etc.)
+    # @param level [Symbol] The Bootstrap alert level
+    #                       (:success, :info, :warning, :danger)
+    # @param attributes [Hash] Additional HTML attributes
+    #                          (id, class, data, etc.)
     def initialize(message = nil, level: :warning, **attributes)
       @message = message
       @level = level
@@ -30,10 +32,10 @@ module Components
       super()
     end
 
-    def view_template(&)
+    def view_template(&block)
       div(**alert_attributes) do
         if @message
-          plain @message
+          plain(@message)
         elsif block_given?
           yield
         end
