@@ -32,7 +32,7 @@ module Components
       super()
     end
 
-    def view_template(&block)
+    def view_template
       div(**alert_attributes) do
         if @message
           plain(@message)
