@@ -11,18 +11,18 @@ heading_links = @user ? link.html_safe : ""
       inner_id: "name_lifeform",
       attributes: { data: { name_panels_target: "lifeform" } }
     )) do %>
-  <%= if !@name.lifeform.blank?
-        concat(tag.div(class: "mb-2") do
-          @name.lifeform.strip.split(" ").each do |word|
-            concat(tag.p(:"lifeform_#{word}".t))
-          end
-        end)
-      end %>
+  <% if !@name.lifeform.blank? %>
+    <%= tag.div(class: "mb-2") do %>
+      <% @name.lifeform.strip.split(" ").each do |word| %>
+        <%= tag.p(:"lifeform_#{word}".t) %>
+      <% end %>
+    <% end %>
+  <% end %>
 
-  <%= if @first_child
-        concat(tag.p(
-          link_to(:show_name_propagate_lifeform.t,
-                  form_to_propagate_lifeform_of_name_path(@name.id))
-        ))
-      end %>
+  <% if @first_child %>
+    <%= tag.p(
+      link_to(:show_name_propagate_lifeform.t,
+              form_to_propagate_lifeform_of_name_path(@name.id))
+    ) %>
+  <% end %>
 <% end %>

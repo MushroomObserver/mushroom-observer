@@ -2,8 +2,8 @@
 <%#
   Builds a single filter group, or panel, for a search form. The panel's
   field groups are defined in the controller, along with the field methods.
-  Sections can be :shown/ :collapsed.
-  If sections[:collapsed] is present, part of the panel will be collapsed.
+  Sections can be shown or collapsed.
+  If sections["collapsed"] is present, part of the panel will be collapsed.
 %>
 <%
   shown = search_panel_shown(form:, search:, sections:)
