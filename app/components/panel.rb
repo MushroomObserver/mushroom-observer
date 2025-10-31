@@ -103,14 +103,12 @@ class Components::Panel < Components::Base
       # needs to be rendered as HTML, not escaped as text
       # rubocop:disable Rails/OutputSafety
       raw(@heading.html_safe)
-      # rubocop:enable Rails/OutputSafety
       if @heading_links.present?
-        # heading_links contains HTML from link_to helper that needs to be
-        # rendered as HTML, not escaped as text
-        # rubocop:disable Rails/OutputSafety
+        # heading_links contains HTML from link_to helper
+        # that needs to be rendered as HTML, not escaped as text
         span(class: "float-right") { raw(@heading_links.html_safe) }
-        # rubocop:enable Rails/OutputSafety
       end
+      # rubocop:enable Rails/OutputSafety
     end
   end
 
