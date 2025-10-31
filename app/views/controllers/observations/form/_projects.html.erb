@@ -26,7 +26,7 @@ end
     <% if error_messages.present? || suspect_messages.present? %>
       <%= tag.div(id: "project_messages") do
         [error_messages, suspect_messages].compact.each do |messages|
-          concat(alert_block(level: messages[:level]) do
+          concat(render(Components::Alert.new(level: messages[:level])) do
             [
               tag.div(
                 "#{:form_observations_projects_out_of_range.t(

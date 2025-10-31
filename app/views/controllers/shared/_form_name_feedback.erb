@@ -20,7 +20,7 @@ parent_deprecated - t/f
 ##### Warnings #####
 if valid_names
 
-  alert_block(level: :warning, id: "name_messages") do
+  render(Components::Alert.new(level: :warning, id: "name_messages")) do
     concat(tag.div do
       if suggest_corrections || names.blank?
         :form_naming_not_recognized.t(name: given_name)
@@ -68,7 +68,7 @@ if valid_names
 ##### Errors #####
 elsif names&.length == 0
 
-  alert_block(level: :danger, id: "name_messages") do
+  render(Components::Alert.new(level: :danger, id: "name_messages")) do
     concat(tag.div(:form_naming_not_recognized.t(name: given_name)))
     concat(help_note(
       :div, :form_naming_not_recognized_help.t(button: button_name)
@@ -77,7 +77,7 @@ elsif names&.length == 0
 
 elsif names&.length &.> 1
 
-  alert_block(level: :danger, id: "name_messages") do
+  render(Components::Alert.new(level: :danger, id: "name_messages")) do
     concat(tag.div(
       [:form_naming_multiple_names.t(name: given_name), ":"].safe_join
     ))
