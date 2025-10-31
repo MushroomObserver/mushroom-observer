@@ -38,7 +38,11 @@ class Components::Panel::Heading < Components::Base
 
   def render_static_heading
     h4(class: "panel-title") do
-      plain(@heading)
+      # heading may contain HTML (e.g., submit buttons, formatted text) that
+      # needs to be rendered as HTML, not escaped as text
+      # rubocop:disable Rails/OutputSafety
+      raw(@heading.html_safe)
+      # rubocop:enable Rails/OutputSafety
       if @heading_links.present?
         # heading_links contains HTML from link_to helper that needs to be
         # rendered as HTML, not escaped as text
@@ -60,7 +64,11 @@ class Components::Panel::Heading < Components::Base
         data: { toggle: "collapse" },
         aria: { expanded: @open, controls: @collapse }
       ) do
-        plain(@heading)
+        # heading may contain HTML (e.g., submit buttons, formatted text) that
+        # needs to be rendered as HTML, not escaped as text
+        # rubocop:disable Rails/OutputSafety
+        raw(@heading.html_safe)
+        # rubocop:enable Rails/OutputSafety
         span(class: "float-right") { render_collapse_icons }
       end
     end

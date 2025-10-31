@@ -43,10 +43,19 @@
 #     heading: "Title",
 #     panel_bodies: ["First body", "Second body"]
 #   )
+#
+# @example Panel with thumbnail
+#   render Components::Panel.new(
+#     heading: "Title",
+#     thumbnail: image_tag("photo.jpg")
+#   ) do
+#     "Panel content"
+#   end
 class Components::Panel < Components::Base
   prop :heading, _Nilable(String), default: nil
   prop :heading_links, _Nilable(String), default: nil
   prop :footer, _Nilable(String), default: nil
+  prop :thumbnail, _Nilable(String), default: nil
   prop :panel_class, _Nilable(String), default: nil
   prop :inner_class, _Nilable(String), default: nil
   prop :inner_id, _Nilable(String), default: nil
@@ -70,6 +79,7 @@ class Components::Panel < Components::Base
       **@attributes
     ) do
       render_heading if @heading
+      render_thumbnail if @thumbnail
       render_body_or_bodies(content)
       render_footer if @footer
     end
@@ -85,6 +95,12 @@ class Components::Panel < Components::Base
              collapse_message: @collapse_message,
              open: @open
            ))
+  end
+
+  def render_thumbnail
+    # rubocop:disable Rails/OutputSafety
+    div(class: "thumbnail-container") { raw(@thumbnail.html_safe) }
+    # rubocop:enable Rails/OutputSafety
   end
 
   def render_body_or_bodies(content)
@@ -126,7 +142,8 @@ class Components::Panel < Components::Base
     return raw(content.html_safe) if @formatted_content
     # rubocop:enable Rails/OutputSafety
 
-    # Only put inner_id on body if there's no heading (otherwise it's on outer div)
+    # Only put inner_id on body if there's no heading
+    # (otherwise it's on outer div)
     body_id = @heading.present? ? nil : @inner_id
 
     render(Components::Panel::Body.new(
