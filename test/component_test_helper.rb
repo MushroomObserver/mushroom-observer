@@ -4,14 +4,10 @@
 # Based on https://www.phlex.fun/components/testing.html
 module ComponentTestHelper
   # Render a Phlex component with proper Rails view context
-  def render(component)
-    view_context.render(component)
-  end
+  delegate :render, to: :view_context
 
   # Get the Rails view context needed for components to access helpers
-  def view_context
-    controller.view_context
-  end
+  delegate :view_context, to: :controller
 
   # Create a test controller instance
   def controller
