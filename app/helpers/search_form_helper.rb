@@ -4,23 +4,6 @@
 # args should provide form, field, label at a minimum.
 # rubocop:disable Metrics/ModuleLength
 module SearchFormHelper
-  # Builds a single filter group, or panel, for a search form. The panel's
-  # field groups are defined in the controller, along with the field methods.
-  # Sections can be :shown/ :collapsed.
-  # If sections[:collapsed] is present, part of the panel will be collapsed.
-  def search_panel(form:, search:, heading:, sections:)
-    shown = search_panel_shown(form:, search:, sections:)
-    collapsed = search_panel_collapsed(form:, search:, sections:)
-    open = collapse = false
-    if sections[:collapsed].present?
-      collapse = "#{controller.search_type}_#{heading}"
-      open = search_panel_open?(search:, sections:)
-    end
-    panel_block(heading: :"search_term_group_#{heading}".l,
-                collapse:, open:, collapse_message: :MORE.l,
-                panel_bodies: [shown, collapsed])
-  end
-
   # This returns the current search terms in the form of a hash.
   def search_params(search:)
     # Do not compact_blank - preserve `false` values

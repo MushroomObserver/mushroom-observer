@@ -1,0 +1,27 @@
+<%# locals: (form: nil, search: nil, heading: nil, sections: nil) -%>
+<%#
+  Builds a single filter group, or panel, for a search form. The panel's
+  field groups are defined in the controller, along with the field methods.
+  Sections can be :shown/ :collapsed.
+  If sections[:collapsed] is present, part of the panel will be collapsed.
+%>
+<%
+  shown = search_panel_shown(form:, search:, sections:)
+  collapsed = search_panel_collapsed(form:, search:, sections:)
+  open = collapse = nil
+  if sections[:collapsed].present?
+    collapse = "#{controller.search_type}_#{heading}"
+    open = search_panel_open?(search:, sections:)
+  end
+%>
+
+<%= render(
+      Components::Panel.new(
+        heading: :"search_term_group_#{heading}".l,
+        collapse:,
+        open: open || false,
+        collapse_message: :MORE.l,
+        panel_bodies: [shown, collapsed],
+        formatted_content: true
+      )
+    ) %>
