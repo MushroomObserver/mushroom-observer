@@ -88,13 +88,13 @@ class Components::Panel < Components::Base
   private
 
   def render_heading
-    render(Components::Panel::Heading.new(
-             heading: @heading,
-             heading_links: @heading_links,
-             collapse: @collapse,
-             collapse_message: @collapse_message,
-             open: @open
-           ))
+    PanelHeading(
+      heading: @heading,
+      heading_links: @heading_links,
+      collapse: @collapse,
+      collapse_message: @collapse_message,
+      open: @open
+    )
   end
 
   def render_thumbnail
@@ -146,14 +146,14 @@ class Components::Panel < Components::Base
     # (otherwise it's on outer div)
     body_id = @heading.present? ? nil : @inner_id
 
-    render(Components::Panel::Body.new(
-             content: content,
-             inner_class: @inner_class,
-             inner_id: body_id
-           ))
+    PanelBody(
+      content: content,
+      inner_class: @inner_class,
+      inner_id: body_id
+    )
   end
 
   def render_footer
-    render(Components::Panel::Footer.new(footer: @footer))
+    PanelFooter(footer: @footer)
   end
 end

@@ -562,3 +562,31 @@ def normalize_link(link)
   url_for(link.merge(only_path: true))
 end
 ```
+
+## Component Organization
+
+### Favor Top-Level Components Over Namespacing
+
+**Important**: Prefer flat, top-level component organization over nested namespaces.
+
+**Reason**: The phlex-rails Kit syntax (which enables automatic rendering of components by name) does not work with namespaced components. Kit syntax is much more ergonomic than calling `render()`, so it's worth keeping components at the top level to enable this feature.
+
+#### Examples:
+
+```ruby
+# ✅ Good - top-level components (enables Kit syntax)
+Components::Panel
+Components::PanelHeading
+Components::PanelBody
+Components::PanelFooter
+
+# ❌ Avoid - namespaced components (breaks Kit syntax)
+Components::Panel
+Components::Panel::Heading
+Components::Panel::Body
+Components::Panel::Footer
+```
+
+**Context**: We initially tried namespacing the Panel subcomponents as `Panel::Heading`, `Panel::Body`, etc., but discovered that this breaks the Kit syntax feature in phlex-rails (see [issue #316](https://github.com/yippee-fun/phlex-rails/issues/316)). Since Kit syntax provides significant developer experience benefits, we've chosen to use top-level components instead.
+
+**Naming Convention**: For related components, use a consistent prefix (e.g., `PanelHeading`, `PanelBody`, `PanelFooter`) to indicate their relationship while keeping them at the top level.

@@ -3,21 +3,21 @@
 # Component for rendering panel headings with optional collapse functionality.
 #
 # @example Basic heading
-#   render Components::Panel::Heading.new(heading: "Title")
+#   render Components::PanelHeading.new(heading: "Title")
 #
 # @example Heading with links
-#   render Components::Panel::Heading.new(
+#   render Components::PanelHeading.new(
 #     heading: "Title",
 #     heading_links: link_to("Edit", edit_path)
 #   )
 #
 # @example Collapsible heading
-#   render Components::Panel::Heading.new(
+#   render Components::PanelHeading.new(
 #     heading: "Click to expand",
 #     collapse: "my_panel",
 #     open: false
 #   )
-class Components::Panel::Heading < Components::Base
+class Components::PanelHeading < Components::Base
   prop :heading, String
   prop :heading_links, _Nilable(String), default: nil
   prop :collapse, _Nilable(String), default: nil

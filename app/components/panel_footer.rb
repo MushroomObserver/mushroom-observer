@@ -3,8 +3,8 @@
 # Component for rendering panel footer content.
 #
 # @example Basic footer
-#   render Components::Panel::Footer.new(footer: "Footer content")
-class Components::Panel::Footer < Components::Base
+#   render Components::PanelFooter.new(footer: "Footer content")
+class Components::PanelFooter < Components::Base
   prop :footer, String
 
   def view_template
