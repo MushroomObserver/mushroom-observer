@@ -11,7 +11,10 @@ messages = {
 }
 %>
 
-<%= panel_block(id: "list_search", class: "mt-3") do %>
+<%= render(Components::Panel.new(
+      inner_id: "list_search",
+      panel_class: "mt-3"
+    )) do %>
   <%= form_with(url: add_dispatch_path, method: :post) do |form| %>
     <%= form.hidden_field(:object_id, value: object.id) %>
     <%= form.hidden_field(:object_type, value: object.class.name) %>

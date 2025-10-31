@@ -5,8 +5,10 @@ link2 = icon_link_to(*name_edit_description_tab(@name))
 heading_links = @user ? [link1, link2].reject(&:nil?).safe_join(" | ") : ""
 %>
 
-<%= render Components::Panel.new(inner_id: "name_general_description",
-                                  heading: heading,
-                                  heading_links: heading_links) do
-  @best_description.tpl
-end %>
+<%= render(Components::Panel.new(
+      inner_id: "name_general_description",
+      heading: heading,
+      heading_links: heading_links
+    )) do %>
+  <%= @best_description.tpl %>
+<% end %>

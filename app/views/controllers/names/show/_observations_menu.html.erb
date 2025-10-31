@@ -3,11 +3,12 @@
 heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
 %>
 
-<%= panel_block(heading: :about_this_taxon.l,
-                heading_links: heading_link,
-                id: "name_observations_menu",) do
-
-  tag.div(class: "row") do
+<%= render(Components::Panel.new(
+      heading: :about_this_taxon.l,
+      heading_links: heading_link,
+      inner_id: "name_observations_menu"
+    )) do %>
+  <%= tag.div(class: "row") do
 
     concat(tag.div(class: "col-sm-6 name-section") do
       concat(tag.p(:show_observations_of.t))
@@ -44,7 +45,5 @@ heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
         concat(tag.p(link_to(*wikipedia_term_tab(@name))))
       end)
     end)
-
-  end
-
-end %>
+  end %>
+<% end %>

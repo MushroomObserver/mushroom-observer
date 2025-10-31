@@ -2,12 +2,11 @@
 # Section showing information about consensus name in ShowObservation
 %>
 
-<%=
-panel_block(
-  id: "observation_name_info",
-  heading: :about_this_taxon.l,
-  inner_class: "name-section small"
-) do %>
+<%= render(Components::Panel.new(
+      inner_id: "observation_name_info",
+      heading: :about_this_taxon.l,
+      inner_class: "name-section small"
+    )) do %>
 
   <%= tag.div(class: "row") do %>
     <%= tag.div(class: "col-xs-6") do

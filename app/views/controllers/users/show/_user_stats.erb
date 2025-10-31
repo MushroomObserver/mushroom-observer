@@ -4,8 +4,10 @@ paths = user_stats_link_paths(@show_user)
 total = 0
 %>
 
-<%= panel_block(heading: :show_user_title.t(user: name),
-                id: "user_stats") do %>
+<%= render(Components::Panel.new(
+      heading: :show_user_title.t(user: name),
+      inner_id: "user_stats"
+    )) do %>
 
   <table class="table table-condensed bg-none mb-0">
     <% rows.each do |row|

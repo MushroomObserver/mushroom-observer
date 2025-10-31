@@ -66,23 +66,23 @@ form_element_data = {
 
   <%= submit_button(form: f, button: button_name, center: true) %>
 
-  <%= panel_block(
+  <%= render(Components::Panel.new(
     heading: "#{:IMAGES.l} + #{:show_observation_details.l}",
-    id: "observation_images_details", formatted_content: true,
+    inner_id: "observation_images_details", formatted_content: true,
     collapse: "observation_images_details_inner", open: true
-  ) do
-    concat(render(partial: "observations/form/images", locals: { f: }))
-    concat(render(partial: "observations/form/details",
-                  locals: { f:, action:, button_name:, location: @location,
-                            logging_optional: }))
-  end %>
+  )) do %>
+    <%= concat(render(partial: "observations/form/images", locals: { f: })) %>
+    <%= concat(render(partial: "observations/form/details",
+                      locals: { f:, action:, button_name:, location: @location,
+                                logging_optional: })) %>
+  <% end %>
 
-  <%= panel_block(
+  <%= render(Components::Panel.new(
     heading: "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}",
-    id: "observation_naming_specimen", # @given_name.present?
+    inner_id: "observation_naming_specimen", # @given_name.present?
     collapse: "observation_naming_specimen_inner", open: create
-  ) do
-    tag.div(class: "row") do
+  )) do %>
+    <%= tag.div(class: "row") do
       concat(tag.div(class: "col-xs-12 col-md-6") do
         render(partial: "observations/namings/fields", locals: naming_locals)
       end) if create
@@ -90,35 +90,36 @@ form_element_data = {
         render(partial: "observations/form/specimen_section",
                locals: { f:, action: })
       end)
-    end
-  end %>
-
-  <%= panel_block(
-    heading: :NOTES.l, id: "observation_notes",
-    collapse: "observation_notes_inner", open: notes_open
-  ) do
-    render(partial: "shared/notes_fields",
-           locals: { form: f, fields: notes_fields })
-  end %>
-
-  <% if show_projects %>
-    <%= panel_block(
-      heading: :PROJECTS.l, id: "observation_projects",
-      collapse: "observation_projects_inner",
-      open: @project_checks.any?
-    ) do
-      render(partial: "observations/form/projects", locals: { button_name: })
     end %>
   <% end %>
 
+  <%= render(Components::Panel.new(
+    heading: :NOTES.l, inner_id: "observation_notes",
+    collapse: "observation_notes_inner", open: notes_open
+  )) do %>
+    <%= render(partial: "shared/notes_fields",
+               locals: { form: f, fields: notes_fields }) %>
+  <% end %>
+
+  <% if show_projects %>
+    <%= render(Components::Panel.new(
+      heading: :PROJECTS.l, inner_id: "observation_projects",
+      collapse: "observation_projects_inner",
+      open: @project_checks.any?
+    )) do %>
+      <%= render(partial: "observations/form/projects",
+                 locals: { button_name: }) %>
+    <% end %>
+  <% end %>
+
   <% if show_lists %>
-    <%= panel_block(
-      heading: :SPECIES_LISTS.l, id: "observation_lists",
+    <%= render(Components::Panel.new(
+      heading: :SPECIES_LISTS.l, inner_id: "observation_lists",
       collapse: "observation_lists_inner",
       open: @list_checks.any?
-    ) do
-      render(partial: "observations/form/species_lists")
-    end %>
+    )) do %>
+      <%= render(partial: "observations/form/species_lists") %>
+    <% end %>
   <% end %>
 
 <% end %><!--[/form:observation]-->
