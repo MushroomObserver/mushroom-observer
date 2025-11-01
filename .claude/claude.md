@@ -347,30 +347,6 @@ See `.claude/style_guide.md` for additional coding style requirements.
 
 ## Phlex Component Development
 
-### Phlex HTML Methods - No Positional Arguments
-
-**IMPORTANT**: Phlex HTML methods (`div`, `span`, `p`, `a`, `li`, etc.) do NOT accept positional arguments for content. They only accept:
-1. Named keyword arguments (attributes)
-2. A block for content
-
-#### Examples:
-
-```ruby
-# Bad ✗ - positional argument not allowed
-div("", class: "progress-bar")
-span("Click here", class: "label")
-
-# Good ✓ - use a block for content
-div(class: "progress-bar")  # empty div
-span(class: "label") { "Click here" }
-p(class: "text") { "Hello world" }
-
-# Good ✓ - no content, just attributes
-div(class: "progress-bar", id: "meter", style: "width: 50%")
-```
-
-If you see errors like `wrong number of arguments (given X, expected Y)` on a Phlex HTML method call, check if you're passing a positional argument instead of using a block.
-
 ### Including Rails Built-in Helpers
 
 Rails helpers are available as Phlex modules under `Phlex::Rails::Helpers`. The module name matches the helper method name in PascalCase.
@@ -562,3 +538,31 @@ def normalize_link(link)
   url_for(link.merge(only_path: true))
 end
 ```
+
+## Component Organization
+
+### Favor Top-Level Components Over Namespacing
+
+**Important**: Prefer flat, top-level component organization over nested namespaces.
+
+**Reason**: The phlex-rails Kit syntax (which enables automatic rendering of components by name) does not work with namespaced components. Kit syntax is much more ergonomic than calling `render()`, so it's worth keeping components at the top level to enable this feature.
+
+#### Examples:
+
+```ruby
+# ✅ Good - top-level components (enables Kit syntax)
+Components::Panel
+Components::PanelHeading
+Components::PanelBody
+Components::PanelFooter
+
+# ❌ Avoid - namespaced components (breaks Kit syntax)
+Components::Panel
+Components::Panel::Heading
+Components::Panel::Body
+Components::Panel::Footer
+```
+
+**Context**: We initially tried namespacing the Panel subcomponents as `Panel::Heading`, `Panel::Body`, etc., but discovered that this breaks the Kit syntax feature in phlex-rails (see [issue #316](https://github.com/yippee-fun/phlex-rails/issues/316)). Since Kit syntax provides significant developer experience benefits, we've chosen to use top-level components instead.
+
+**Naming Convention**: For related components, use a consistent prefix (e.g., `PanelHeading`, `PanelBody`, `PanelFooter`) to indicate their relationship while keeping them at the top level.
