@@ -3,7 +3,7 @@
     <% count = pluralize(
       visual_model.errors.count, :error.t, plural: :errors.t
     ) %>
-    <%= alert_block(level: :danger, id: "error_explanation") do
+    <%= render(Components::Alert.new(level: :danger, id: "error_explanation")) do
       [
         tag.h2("#{count} #{:visual_model_errors.t}:"),
         tag.ul do

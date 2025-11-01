@@ -1,8 +1,8 @@
 <%# feedback about @dubious_where_reasons %>
 
 <%= if @dubious_where_reasons&.any?
-  alert_block(level: :warning, class: "my-3",
-              id: "dubious_location_messages") do
+  render(Components::Alert.new(level: :warning, class: "my-3",
+                                id: "dubious_location_messages")) do
     concat(tag.div(@dubious_where_reasons.safe_join(safe_br)))
     concat(tag.span(:form_observations_dubious_help.t(button: button),
                     class: "help-note"))

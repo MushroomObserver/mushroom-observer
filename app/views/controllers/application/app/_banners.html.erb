@@ -19,8 +19,11 @@ admin_banner_classes = "h3 text-center font-weight-bold p-2"
 
   <%= tag.div(data: { controller: "banner" }) do
     [
-      alert_block(level: :success, class: "message-banner",
-                  data: { banner_target: "banner" }) do
+      render(Components::Alert.new(
+        level: :success,
+        class: "message-banner",
+        data: { banner_target: "banner" }
+      )) do
         [
           tag.button(
             link_icon(:chevron_up, title: :CLOSE.l),

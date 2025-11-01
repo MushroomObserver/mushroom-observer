@@ -10,7 +10,7 @@ container_class(:text)
 
 <%= form_with(url: action) do |f| %>
 
-  <%= alert_block(level: :warning) do
+  <%= render(Components::Alert.new(level: :warning)) do
     concat(@message.tp)
     @options.each do |name|
       concat(radio_with_label(

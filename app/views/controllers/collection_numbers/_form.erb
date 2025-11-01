@@ -21,10 +21,10 @@ end
 <%= form_with(**form_args) do |f| %>
 
   <% if @collection_number.observations.size > 1 %>
-    <%= alert_block(
+    <%= render(Components::Alert.new(
       :edit_affects_multiple_observations.t(type: :collection_number),
       level: :warning, class: "multiple-observations-warning"
-    ) %>
+    )) %>
   <% end %>
 
   <%= text_field_with_label(form: f, field: :name, between: :required,

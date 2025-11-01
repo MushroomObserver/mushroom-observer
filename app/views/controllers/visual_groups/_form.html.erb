@@ -5,7 +5,7 @@
     <% count = pluralize(
       visual_group.errors.count, :error.t, plural: :errors.t
     ) %>
-    <%= alert_block(level: :danger, id: "error_explanation") do
+    <%= render(Components::Alert.new(level: :danger, id: "error_explanation")) do
       [
         tag.h2("#{count} prohibited this visual_group from being saved:"),
         tag.ul do
