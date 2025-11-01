@@ -55,6 +55,13 @@ class Inat
 
     def complex? = @taxon[:rank] == "complex"
 
+    def matching_group_names
+      # MO equivalent could be "group", "clade", or "complex"
+      ::Name.where(::Name[:text_name] =~ /^#{@taxon[:name]}/).
+        where(rank: "Group", correct_spelling_id: nil).
+        order(deprecated: :asc)
+    end
+
     def matching_names_at_regular_ranks
       ::Name.where(
         # parse it to get MO's text_name rank abbreviation
@@ -117,12 +124,6 @@ class Inat
         # iNat doesn't have taxon names "sensu xxx"
         # so don't map them to MO Names sensu xxx
         where.not(::Name[:author] =~ /^sensu /)
-    end
-
-    def matching_complexes
-      # text_names of MO groups include "group" or the like
-      ::Name.where(::Name[:text_name] =~ /^#{@inat_taxon[:name]}/).
-        where(rank: "Group")
     end
 =end
   end

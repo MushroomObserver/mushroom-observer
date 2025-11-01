@@ -353,13 +353,6 @@ class Inat
       identification[:taxon][:id] == self[:taxon][:id]
     end
 
-    def matching_group_names
-      # MO equivalent could be "group", "clade", or "complex"
-      ::Name.where(::Name[:text_name] =~ /^#{inat_taxon_name}/).
-        where(rank: "Group", correct_spelling_id: nil).
-        order(deprecated: :asc)
-    end
-
     # ----- Other
 
     def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
