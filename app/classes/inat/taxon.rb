@@ -1,7 +1,26 @@
 # frozen_string_literal: true
 
+# maps an iNat taxon to an MO Name
 #
-# class to map iNat taxa to MO Names
+# operates on an iNat :taxon hash:
+#   :taxon in a result of an iNat API observation search
+#   :identifications[:taxon] in a result of an iNat API observation search
+# The hash includes:
+#   { id: Integer, name: String, rank: String, ...}
+# and for identifications, also:
+#   { ancestors_ids: [Integer, ...] }
+#
+#  == Usage
+# example usages
+#  obs_taxon = Inat::Taxon.new(inat_obs[:taxon])
+#  name = obs_taxon.name
+#
+#  ident_taxon = Inat::Taxon.new(identification[:taxon])
+#  name = ident_taxon.name
+#
+# The primary reason for the existence of this class is that
+# the results of an iNat observation search do not include
+# the ICN scientific names of taxa at infrageneric and infraspecific ranks.
 #
 #  == Class methods
 #
