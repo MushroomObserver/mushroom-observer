@@ -52,8 +52,9 @@ class InatObsTest < UnitTestCase
       # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
-    # mapping to MO Observation attributes
-    %w[gps_hidden lat lng name_id source text_name when where].
+    # mapping to MO Observation attributes, other than name attributes
+    # Name attributes mappings are tested in InatTaxonTest
+    %w[gps_hidden lat lng source when where].
       each do |attribute|
         assert_equal(expected_mapping.send(attribute),
                      mock_inat_obs.send(attribute))
