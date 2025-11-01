@@ -59,15 +59,18 @@ class Inat
   class Obs
     include Inat::Constants
 
+    # Allow hash key access to the iNat observation data
+    delegate :[], to: :@obs
+    delegate :[]=, to: :@obs
+
+    delegate :name, to: :@obs_taxon
+    delegate :id, to: :name, prefix: true
+    delegate :text_name, to: :name
+
     def initialize(imported_inat_obs_data)
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
       @obs_taxon = Inat::Taxon.new(@obs[:taxon])
     end
-
-    # Allow hash key access to the iNat observation data
-    delegate :[], to: :@obs
-
-    delegate :[]=, to: :@obs
 
     ########## iNat attributes
 
@@ -91,10 +94,6 @@ class Inat
     def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
-
-    def name = @obs_taxon.name
-
-    def name_id = name.id
 
     def notes
       # Observation form requires a "normalized" key (no spaces) for Notes parts
@@ -181,8 +180,6 @@ class Inat
     end
 
     def source = "mo_inat_import"
-
-    def text_name = name.text_name
 
     def when
       observed_on = @obs[:observed_on_details]
