@@ -15,7 +15,6 @@
 #  assert_false::               Make sure something is false.
 #  assert_blank::               Make sure something is blank.
 #  assert_not_blank::           Make sure something is not blank.
-#  assert_not_match::           Make sure a string does NOT match.
 #  assert_dates_equal::         Compare two Date/Time/DateTime/TimeWithZone
 #                               instances as dates.
 #  assert_objs_equal::          Compare two model instances.

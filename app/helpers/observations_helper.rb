@@ -244,7 +244,7 @@ module ObservationsHelper
       Textile.register_name(obs.name)
       concat("<p>#{:NOTES.t}:<br>".t)
       notes.each_with_object(+"") do |(key, value), _str|
-        concat("+#{key}+: #{value}<br>".tl)
+        concat("+#{key.to_s.tr("_", " ")}+: #{value}<br>".tl)
       end
       concat("</p>".t)
     end
