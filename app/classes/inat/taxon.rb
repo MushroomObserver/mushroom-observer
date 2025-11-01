@@ -105,6 +105,11 @@ class Inat
 
     def infraspecific? = %w[subspecies variety form].include?(@taxon[:rank])
 
+    def insert_rank_between_species_and_final_epithet
+      words = @taxon[:name].split
+      "#{words[0..1].join(" ")} #{@taxon[:rank]} #{words[2]}"
+    end
+
     def taxon_name = @taxon[:name]
 
     def best_mo_name(names)

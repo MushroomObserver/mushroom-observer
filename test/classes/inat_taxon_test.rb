@@ -39,9 +39,32 @@ class InatTaxonTest < UnitTestCase
                  "Incorrect MO Name for iNat community id")
   end
 
+  def test_infraspecific_name
+    name = Name.create(
+      user: rolf,
+      rank: "Form",
+      text_name: "Inonotus obliquus f. sterilis",
+      search_name: "Inonotus obliquus f. sterilis (Vanin) Balandaykin & Zmitr.",
+      display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
+                    "(Vanin) Balandaykin & Zmitr.",
+      sort_name: "Inonotus obliquus  {7f.  sterilis  " \
+                 "(Vanin) Balandaykin & Zmitr.",
+      author: "(Vanin) Balandaykin & Zmitr.",
+      icn_id: 809_726
+    )
+
+    mock_inat_obs = mock_observation("i_obliquus_f_sterilis")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+
+    assert_equal(name.id, inat_taxon.name.id)
+    assert_equal(name.text_name, inat_taxon.name.text_name)
+  end
+
   def test_mo_homonyms
     # Prove that it rerurns first homonym
-    skip("under construction") # see issue #2381
+    # NOTE: see this issue for possible improviements
+    #https://github.com/MushroomObserver/mushroom-observer/issues/2381
+    skip("under construction")
   end
 
   ########

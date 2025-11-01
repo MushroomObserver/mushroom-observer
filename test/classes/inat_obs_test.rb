@@ -162,26 +162,6 @@ class InatObsTest < UnitTestCase
     assert_equal(name.text_name, mock_inat_obs.text_name)
   end
 
-  def test_infraspecific_name
-    name = Name.create(
-      user: rolf,
-      rank: "Form",
-      text_name: "Inonotus obliquus f. sterilis",
-      search_name: "Inonotus obliquus f. sterilis (Vanin) Balandaykin & Zmitr.",
-      display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
-                    "(Vanin) Balandaykin & Zmitr.",
-      sort_name: "Inonotus obliquus  {7f.  sterilis  " \
-                 "(Vanin) Balandaykin & Zmitr.",
-      author: "(Vanin) Balandaykin & Zmitr.",
-      icn_id: 809_726
-    )
-
-    mock_inat_obs = mock_observation("i_obliquus_f_sterilis")
-
-    assert_equal(name.id, mock_inat_obs.name_id)
-    assert_equal(name.text_name, mock_inat_obs.text_name)
-  end
-
   def test_names_alternative_authors
     # Make sure fixtures still OK
     names = Name.where(text_name: "Agrocybe arvalis", rank: "Species",

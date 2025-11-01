@@ -344,11 +344,6 @@ class Inat
       end
     end
 
-    def insert_rank_between_species_and_final_epithet
-      words = inat_taxon_name.split
-      "#{words[0..1].join(" ")} #{inat_taxon_rank} #{words[2]}"
-    end
-
     def identifies_this_obs?(identification)
       identification[:taxon][:id] == self[:taxon][:id]
     end
