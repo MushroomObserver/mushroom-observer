@@ -66,7 +66,7 @@ class Inat
       ::Name.where(
         # parse it to get MO's text_name rank abbreviation
         # E.g. "sect." instead of "section"
-        text_name: ::Name.parse_name(full_name).text_name,
+        text_name: ::Name.parse_name(full_name_string).text_name,
         rank: @taxon[:rank].titleize,
         correct_spelling_id: nil
       ).
@@ -98,17 +98,53 @@ class Inat
       end
     end
 
+    def full_name_string
+      # iNat infrageneric Observation ID's need special handling because
+      # iNat does not provide a name string which includes the genus.
+      return infrageneric_name_string if infrageneric?
+
+      # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
+      return insert_rank_between_species_and_final_epithet if infraspecific?
+
+      inat_taxon_name
+    end
+
+    # Get the genus of an iNat infrageneric taxon via an API query
+    # requesting the taxon's ancestor which has rank: genus.
+    # NOTE: 2025-10-29 jdc
+    # iNat infrageneric name strings lack the genus.
+    # They take the form "rank Epithet". ex: "section Validae"
+    # Get the genus via a separate API taxa request,
+    # rather than try to parse the results of the iNat API observation request.
+    # The latter proved too complex and unreliable.
+    def infrageneric_name_string
+      ancestor_ids = self[:taxon][:ancestor_ids].join(",")
+      params = { id: ancestor_ids, rank: "genus" }
+      url = "#{API_BASE}/taxa?#{params.to_query}"
+
+      res = RestClient::Request.execute(
+        method: :get,
+        url: url,
+        headers: { Accept: "application/json" }
+      )
+      genus = JSON.parse(
+        res.body, symbolize_names: true
+      )[:results].first[:name]
+
+      "#{genus} #{inat_taxon_rank} #{inat_taxon_name}"
+    end
+
     def infrageneric?
       %w[subgenus section subsection stirps series subseries].
         include?(@taxon[:rank])
     end
 
-    def infraspecific? = %w[subspecies variety form].include?(@taxon[:rank])
-
     def insert_rank_between_species_and_final_epithet
       words = @taxon[:name].split
       "#{words[0..1].join(" ")} #{@taxon[:rank]} #{words[2]}"
     end
+
+    def infraspecific? = %w[subspecies variety form].include?(@taxon[:rank])
 
     def taxon_name = @taxon[:name]
 
