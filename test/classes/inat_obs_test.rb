@@ -133,36 +133,6 @@ class InatObsTest < UnitTestCase
     assert_nil(mock_obs.when)
   end
 
-  def test_names_alternative_authors
-    # Make sure fixtures still OK
-    names = Name.where(text_name: "Agrocybe arvalis", rank: "Species",
-                       deprecated: false)
-    assert(names.many? { |name| !name.author.start_with?("sensu ") },
-           "Test needs a name with many non-sensu matching fixtures")
-
-    mock_inat_obs = mock_observation("agrocybe_arvalis")
-    assert_equal(
-      "Agrocybe arvalis", mock_inat_obs.text_name,
-      "Any of multiple, correctly spelled, approved Names will do."
-    )
-  end
-
-  def test_names_approved_vs_deprecated
-    # Make sure fixtures still OK
-    names = Name.reorder(id: :asc).
-            where(text_name: "Agrocybe arvalis", rank: "Species",
-                  deprecated: false)
-    assert(names.many? { |name| !name.author.start_with?("sensu ") },
-           "Test needs a name with many non-sensu matching fixtures")
-    first_name = names.first
-    first_name.deprecated = true
-    first_name.save
-
-    mock_inat_obs = mock_observation("agrocybe_arvalis")
-    assert_equal(names.second.id, mock_inat_obs.name_id,
-                 "Prefer non-deprecated Name when mapping iNat id to MO Name")
-  end
-
   def test_inat_observation_fields
     assert(mock_observation("trametes").inat_obs_fields.any?)
     assert(mock_observation("evernia").inat_obs_fields.none?)
@@ -181,6 +151,8 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  # NOTE: iNat provisional names are not iNat taxa;
+  # Rather, they simply string values of an observation field
   def test_provisional_name
     mock_inat_obs = mock_observation("arrhenia_sp_NY02")
     prov_name = mock_inat_obs.inat_prov_name
@@ -234,30 +206,6 @@ class InatObsTest < UnitTestCase
       "Notes Collector should be iNat \"Collector's Name\" field " \
         "if that field present"
     )
-  end
-
-  def test_complex_without_mo_match
-    mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
-    assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)
-    assert_equal("complex", mock_inat_obs.inat_taxon_rank)
-    assert_equal(
-      Name.unknown.text_name, mock_inat_obs.text_name,
-      "iNat complex without MO name match should map to the Unknown name"
-    )
-  end
-
-  def test_complex_with_mo_match
-    name = Name.create(
-      text_name: "Xeromphalina campanella group", author: "",
-      search_name: "Xeromphalina campanella group",
-      display_name: "**__Xeromphalina campanella__** group",
-      rank: "Group",
-      user: users(:rolf)
-    )
-    mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
-    assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)
-    assert_equal("complex", mock_inat_obs.inat_taxon_rank)
-    assert_equal(name.text_name, mock_inat_obs.text_name)
   end
 
   def test_tags

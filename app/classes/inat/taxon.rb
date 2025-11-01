@@ -26,7 +26,7 @@
 #
 #  == Instance methods
 #
-#  name:: MO Name corresponding to the iNat taxon
+#  name:: MO Name object corresponding to the iNat taxon
 #
 class Inat
   class Taxon
