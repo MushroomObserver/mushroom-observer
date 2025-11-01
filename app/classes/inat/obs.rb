@@ -78,9 +78,7 @@ class Inat
 
     # NOTE: Fixes ABC count of `snapshot` because
     # inat_taxon_name is one fewer Branch than self[:taxon][:name]
-    def inat_taxon_name = self[:taxon][:name]
 
-    def inat_taxon_rank = self[:taxon][:rank]
 
     ########## MO attributes
 
@@ -88,18 +86,6 @@ class Inat
     def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
-
-    def name_id
-      names =
-        # iNat "Complex" definition
-        # https://www.inaturalist.org/pages/curator+guide#complexes
-        if complex?
-          matching_group_names
-        else
-          matching_names_at_regular_ranks
-        end
-      best_mo_name(names)
-    end
 
     def notes
       # Observation form requires a "normalized" key (no spaces) for Notes parts
@@ -341,34 +327,6 @@ class Inat
 
     # ---- name-related
 
-    def full_name
-      # iNat infrageneric ObservationID's need special handling because
-      # they display as just the epithet, e.g, "Distantes"
-      if infrageneric?
-        # If species_guess is just an epithet,
-        # get the genus and rank from the identifications
-        # This will be the case if the ObservationID was suggested by a user
-        if @obs[:species_guess].exclude?(" ")
-          prepend_genus_and_rank
-        # Otherwise, just use the species_guess as given
-        # It will be the full name, e.g. "Morchella sect. Distantes"
-        # This will be the case if the ObservationID was not suggested by a user
-        else
-          @obs[:species_guess]
-        end
-      elsif infraspecific?
-        # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
-        insert_rank_between_species_and_final_epithet
-      else
-        inat_taxon_name
-      end
-    end
-
-    def infrageneric?
-      %w[subgenus section subsection stirps series subseries].
-        include?(inat_taxon_rank)
-    end
-
     def prepend_genus_and_rank
       # Search the identifications of this iNat observation
       # for an identification of the inat_taxon[:id]
@@ -386,8 +344,6 @@ class Inat
       end
     end
 
-    def infraspecific? = %w[subspecies variety form].include?(inat_taxon_rank)
-
     def insert_rank_between_species_and_final_epithet
       words = inat_taxon_name.split
       "#{words[0..1].join(" ")} #{inat_taxon_rank} #{words[2]}"
@@ -404,30 +360,7 @@ class Inat
         order(deprecated: :asc)
     end
 
-    def matching_names_at_regular_ranks
-      ::Name.where(
-        # parse it to get MO's text_name rank abbreviation
-        # E.g. "sect." instead of "section"
-        text_name: ::Name.parse_name(full_name).text_name,
-        rank: inat_taxon_rank.titleize,
-        correct_spelling_id: nil
-      ).
-        # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
-        where.not(::Name[:author] =~ /^sensu /).
-        order(deprecated: :asc)
-    end
-
-    def best_mo_name(names)
-      # It's simplest to pick the 1st one if there are any
-      # (They've already been sorted)
-      return names.first.id if names.any?
-
-      ::Name.unknown.id
-    end
-
     # ----- Other
-
-    def complex? = (inat_taxon_rank == "complex")
 
     def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
 

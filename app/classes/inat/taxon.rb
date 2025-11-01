@@ -30,26 +30,85 @@
 #
 class Inat
   class Taxon
-    def initialize(inat_taxon)
-      @inat_taxon = inat_taxon
+    # Allow hash key access to the iNat observation data
+    delegate :[], to: :@taxon
+
+    def initialize(taxon)
+      @taxon = taxon
     end
 
     def name
-      mo_names = matching_mo_names
-      return ::Name.unknown if mo_names.none?
-      return mo_names.first if mo_names.one?
-
-      # iNat name maps to multiple MO Names
-      # So for the moment, just map it to Fungi
-      # For possible improvements, see
-      # https://github.com/MushroomObserver/mushroom-observer/issues/2381
-      ::Name.unknown
+      names =
+        # iNat "Complex" definition
+        # https://www.inaturalist.org/pages/curator+guide#complexes
+        if complex?
+          matching_group_names
+        else
+          matching_names_at_regular_ranks
+        end
+      best_mo_name(names)
     end
 
     #########
 
     private
 
+    def complex? = @taxon[:rank] == "complex"
+
+    def matching_names_at_regular_ranks
+      ::Name.where(
+        # parse it to get MO's text_name rank abbreviation
+        # E.g. "sect." instead of "section"
+        text_name: ::Name.parse_name(full_name).text_name,
+        rank: @taxon[:rank].titleize,
+        correct_spelling_id: nil
+      ).
+        # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
+        where.not(::Name[:author] =~ /^sensu /).
+        order(deprecated: :asc)
+    end
+
+    def full_name
+      # iNat infrageneric ObservationID's need special handling because
+      # they display as just the epithet, e.g, "Distantes"
+      if infrageneric?
+        # If species_guess is just an epithet,
+        # get the genus and rank from the identifications
+        # This will be the case if the ObservationID was suggested by a user
+        if @obs[:species_guess].exclude?(" ")
+          prepend_genus_and_rank
+        # Otherwise, just use the species_guess as given
+        # It will be the full name, e.g. "Morchella sect. Distantes"
+        # This will be the case if the ObservationID was not suggested by a user
+        else
+          @obs[:species_guess]
+        end
+      elsif infraspecific?
+        # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
+        insert_rank_between_species_and_final_epithet
+      else
+        taxon_name
+      end
+    end
+
+    def infrageneric?
+      %w[subgenus section subsection stirps series subseries].
+        include?(@taxon[:rank])
+    end
+
+    def infraspecific? = %w[subspecies variety form].include?(@taxon[:rank])
+
+    def taxon_name = @taxon[:name]
+
+    def best_mo_name(names)
+      # Simplest to pick the 1st one if there are any
+      # (They've already been sorted)
+      return names.first if names.any?
+
+      ::Name.unknown
+    end
+
+=begin # pre-PR methods
     def matching_mo_names
       return matching_complexes if complex?
 
@@ -60,14 +119,11 @@ class Inat
         where.not(::Name[:author] =~ /^sensu /)
     end
 
-    def complex?
-      @inat_taxon[:rank] == "complex"
-    end
-
     def matching_complexes
       # text_names of MO groups include "group" or the like
       ::Name.where(::Name[:text_name] =~ /^#{@inat_taxon[:name]}/).
         where(rank: "Group")
     end
+=end
   end
 end
