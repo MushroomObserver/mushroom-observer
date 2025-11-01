@@ -75,47 +75,27 @@ class Inat
         order(deprecated: :asc)
     end
 
-    def full_name
-      # iNat infrageneric ObservationID's need special handling because
-      # they display as just the epithet, e.g, "Distantes"
-      if infrageneric?
-        # If species_guess is just an epithet,
-        # get the genus and rank from the identifications
-        # This will be the case if the ObservationID was suggested by a user
-        if @obs[:species_guess].exclude?(" ")
-          prepend_genus_and_rank
-        # Otherwise, just use the species_guess as given
-        # It will be the full name, e.g. "Morchella sect. Distantes"
-        # This will be the case if the ObservationID was not suggested by a user
-        else
-          @obs[:species_guess]
-        end
-      elsif infraspecific?
-        # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
-        insert_rank_between_species_and_final_epithet
-      else
-        taxon_name
-      end
-    end
-
     def full_name_string
       # iNat infrageneric Observation ID's need special handling because
       # iNat does not provide a name string which includes the genus.
       return infrageneric_name_string if infrageneric?
 
-      # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
+      # iNat infraspecific :name strings omits the rank.
+      # Ex: "Inonotus obliquus sterilis"
       return insert_rank_between_species_and_final_epithet if infraspecific?
 
-      inat_taxon_name
+      @taxon[:name]
     end
 
     # Get the genus of an iNat infrageneric taxon via an API query
     # requesting the taxon's ancestor which has rank: genus.
     # NOTE: 2025-10-29 jdc
     # iNat infrageneric name strings lack the genus.
-    # They take the form "rank Epithet". ex: "section Validae"
-    # Get the genus via a separate API taxa request,
-    # rather than try to parse the results of the iNat API observation request.
+    # They're just the epithet, e.g. "Validae",
+    # which iNat displays as rank + epithet, e.g. "section Validae".
+    #
+    # Use an API taxa request, rather than try to parse the results of
+    # the iNat API observation request.
     # The latter proved too complex and unreliable.
     def infrageneric_name_string
       ancestor_ids = self[:taxon][:ancestor_ids].join(",")
@@ -131,7 +111,7 @@ class Inat
         res.body, symbolize_names: true
       )[:results].first[:name]
 
-      "#{genus} #{inat_taxon_rank} #{inat_taxon_name}"
+      "#{genus} #{@taxon[:rank]} #{@taxon[:name]}"
     end
 
     def infrageneric?
