@@ -133,44 +133,6 @@ class InatObsTest < UnitTestCase
     assert_nil(mock_obs.when)
   end
 
-  def test_name_sensu
-    # Make sure fixtures still OK
-    names = Name.where(text_name: "Coprinus", rank: "Genus", deprecated: false)
-    assert(names.any? { |name| name.author.start_with?("sensu ") } &&
-           names.one? { |name| !name.author.start_with?("sensu ") },
-           "Test needs a Name fixture matching >= 1 MO `sensu` Name " \
-           "and exactly 1 MO non-sensu Name")
-
-    mock_inat_obs = mock_observation("coprinus")
-
-    assert_equal(names(:coprinus).id, mock_inat_obs.name_id)
-    assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
-  end
-
-  def test_infrageneric_name
-    name = Name.create(
-      user: rolf,
-      rank: "Section",
-      text_name: "Morchella sect. Distantes",
-      search_name: "Morchella sect. Distantes Boud.",
-      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
-      sort_name: "Morchella  {2sect.  Distantes  Boud.",
-      author: "Boud.",
-      icn_id: 547_941
-    )
-
-    mock_inat_obs = mock_observation("distantes")
-    ancestor_ids = mock_inat_obs[:taxon][:ancestor_ids].join(",")
-
-    stub_genus_lookup(
-      ancestor_ids: ancestor_ids,
-      body: { results: [{ name: "Morchella" }] }
-    )
-
-    assert_equal(name.id, mock_inat_obs.name_id)
-    assert_equal(name.text_name, mock_inat_obs.text_name)
-  end
-
   def test_infraspecific_name
     name = Name.create(
       user: rolf,

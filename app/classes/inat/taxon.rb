@@ -30,6 +30,8 @@
 #
 class Inat
   class Taxon
+    include Inat::Constants
+
     # Allow hash key access to the iNat observation data
     delegate :[], to: :@taxon
 
@@ -98,7 +100,7 @@ class Inat
     # the iNat API observation request.
     # The latter proved too complex and unreliable.
     def infrageneric_name_string
-      ancestor_ids = self[:taxon][:ancestor_ids].join(",")
+      ancestor_ids = self[:ancestor_ids].join(",")
       params = { id: ancestor_ids, rank: "genus" }
       url = "#{API_BASE}/taxa?#{params.to_query}"
 

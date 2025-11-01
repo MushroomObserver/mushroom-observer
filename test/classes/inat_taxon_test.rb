@@ -4,6 +4,8 @@ require("test_helper")
 
 # test encapsulated imported iNat observations
 class InatTaxonTest < UnitTestCase
+  include InatStubHelpers
+
   def test_name_basic
     mock_inat_obs = mock_observation("somion_unicolor")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
@@ -37,6 +39,43 @@ class InatTaxonTest < UnitTestCase
 
     assert_equal(x_campanella_group, inat_taxon.name,
                  "Incorrect MO Name for iNat community id")
+  end
+
+  def test_name_sensu
+    names = Name.where(text_name: "Coprinus", rank: "Genus", deprecated: false)
+    assert(names.any? { |name| name.author.start_with?("sensu ") },
+           "Test needs a Name fixture matching >= 1 MO `sensu` Name ")
+    assert(names.one? { |name| !name.author.start_with?("sensu ") },
+           "Test needs a Name fixture matching exactly 1 MO non-sensu Name")
+
+    mock_inat_obs = mock_observation("coprinus")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+
+    assert_equal(names(:coprinus), inat_taxon.name)
+  end
+
+  def test_infrageneric_name
+    name = Name.create(
+      user: rolf,
+      rank: "Section",
+      text_name: "Morchella sect. Distantes",
+      search_name: "Morchella sect. Distantes Boud.",
+      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
+      sort_name: "Morchella  {2sect.  Distantes  Boud.",
+      author: "Boud.",
+      icn_id: 547_941
+    )
+
+    mock_inat_obs = mock_observation("distantes")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+
+    ancestor_ids = inat_taxon[:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
+
+    assert_equal(name, inat_taxon.name)
   end
 
   def test_mo_homonyms
