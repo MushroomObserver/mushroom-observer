@@ -7,10 +7,13 @@
   heading_links = @user ? [link1, link2].reject(&:nil?).safe_join(" | ") : ""
   %>
 
-  <%= panel_block(id: "location_general_description",
-                  heading: heading, heading_links: heading_links) do
-    @description.notes.tpl
-  end %>
+  <%= render(Components::Panel.new(
+        inner_id: "location_general_description",
+        heading: heading,
+        heading_links: heading_links
+      )) do %>
+    <%= @description.notes.tpl %>
+  <% end %>
 
 <% end %>
 

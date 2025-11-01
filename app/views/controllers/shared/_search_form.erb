@@ -21,7 +21,13 @@ form_args = { url: { action: :create }, model: search,
 
       <%= tag.div(class: "col-xs-12 col-md-6") do %>
         <% panels.each do |heading, sections| %>
-          <%= search_panel(form:, search:, heading:, sections:) %>
+          <%= render(
+                "controllers/shared/search_panel",
+                form:,
+                search:,
+                heading:,
+                sections:
+              ) %>
         <% end %>
       <% end %>
 

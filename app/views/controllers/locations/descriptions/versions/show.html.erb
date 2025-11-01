@@ -7,7 +7,11 @@ add_context_nav(location_description_version_tabs(description: @description,
                                               desc_title: desc_title))
 %>
 
-<%= show_past_versions(@description, @versions) %>
+<%= render(
+      "controllers/shared/version_table",
+      obj: @description,
+      versions: @versions
+    ) %>
 
 <%= render(partial: "descriptions/description_details_and_alts_panel") %>
 

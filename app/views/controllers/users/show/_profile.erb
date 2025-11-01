@@ -25,8 +25,12 @@ footer =
   end
 %>
 
-<%= panel_block(heading: heading, id: "user_profile",
-                heading_links: heading_links, footer: footer) do %>
+<%= render(Components::Panel.new(
+      heading: heading,
+      inner_id: "user_profile",
+      heading_links: heading_links,
+      footer: footer
+    )) do %>
 
   <%= if @show_user.image_id
     tag.div(class: "float-left mr-5 mb-3") do

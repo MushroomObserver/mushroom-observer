@@ -7,9 +7,12 @@ if in_admin_mode?
 end
 footer = icon_link_with_query(*observations_at_location_tab(@location))
 %>
-<%= panel_block(id: "location_coordinates",
-                heading: :COORDINATES.l, footer: footer,
-                heading_links: heading_links.safe_join(" | ")) do %>
+<%= render(Components::Panel.new(
+      inner_id: "location_coordinates",
+      heading: :COORDINATES.l,
+      footer: footer,
+      heading_links: heading_links.safe_join(" | ")
+    )) do %>
 
   <div class="text-center mx-auto" style="max-width:30em">
     <div class="text-center my-4">

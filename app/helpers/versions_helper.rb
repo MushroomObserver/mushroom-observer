@@ -22,26 +22,6 @@ module VersionsHelper
     end
   end
 
-  # Show list of past versions for show_past_object pages.
-  #
-  #   <%= show_past_versions(name) %>
-  #
-  #   # Renders something like this:
-  #   <p>
-  #     Other Versions:<br/>
-  #       N: Latest Name<br/>
-  #       N-1: Previous Name<br/>
-  #       ...
-  #       1: Original Name<br/>
-  #   </p>
-  #
-  def show_past_versions(obj, versions, args = {})
-    panel_block(heading: :VERSIONS.t, id: "#{obj.type_tag}_versions") do
-      make_table(rows: build_version_table(obj, versions, args),
-                 table_opts: { class: "table-hover mb-0" })
-    end
-  end
-
   private
 
   def previous_version_link(previous_version, obj)

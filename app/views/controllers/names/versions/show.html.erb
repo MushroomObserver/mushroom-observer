@@ -18,8 +18,12 @@ column_classes(:six)
   <% end %>
 
   <%= tag.div(class: yield(:right_columns)) do %>
-    <%= show_past_versions(@name, @versions,
-                           bold: lambda {|v| !v.deprecated}) %>
+    <%= render(
+          "controllers/shared/version_table",
+          obj: @name,
+          versions: @versions,
+          args: { bold: lambda {|v| !v.deprecated} }
+        ) %>
   <% end %>
 <% end %>
 

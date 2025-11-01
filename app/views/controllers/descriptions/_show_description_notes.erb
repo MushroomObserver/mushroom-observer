@@ -1,3 +1,20 @@
 <%# panels for any description, one per notes field %>
+<%
+desc = @description
+model = desc.type_tag.to_s.camelize.constantize
+type = desc.parent.type_tag
+Textile.register_name(desc.name) if type == :name
 
-<%= show_description_notes_all(@description) %>
+any_notes = false
+model.all_note_fields.each do |field|
+  value = desc.send(field).to_s
+  next unless value.match?(/\S/)
+
+  any_notes = true
+%>
+  <%= render(Components::Panel.new(heading: :"form_#{type}s_#{field}".l)) do %>
+    <%= value.tpl %>
+  <% end %>
+<% end %>
+
+<%= :show_description_empty.tpl unless any_notes %>

@@ -231,28 +231,6 @@ module DescriptionsHelper
     html
   end
 
-  # This is the same as show_alt_descriptions, but in its own panel block.
-  def show_alt_descriptions_panel(user:, object:, projects: nil, current: nil)
-    type = object.type_tag
-
-    # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(user:, object:, type:, current:)
-    any = list.any?
-    list << indent + :"show_#{type}_no_descriptions".t unless any
-    html = list.safe_join(safe_br)
-
-    add_list_of_projects(object, type, html, projects) if projects.present?
-
-    # Show existing drafts, with link to create new one.
-    panel_block(
-      id: "alt_descriptions",
-      heading: :show_name_descriptions.l,
-      heading_links: icon_link_to(*create_description_tab(object, type))
-    ) do
-      html
-    end
-  end
-
   # Show list of projects user is a member of.
   def add_list_of_projects(object, type, html, projects)
     return if projects.blank?
@@ -265,28 +243,6 @@ module DescriptionsHelper
     html2 = list.safe_join(safe_br)
     html += tag.p(html2)
     html
-  end
-
-  # Loops through all notes and returns a panel with heading for each note field
-  def show_description_notes_all(desc)
-    model = desc.type_tag.to_s.camelize.constantize
-    type = desc.parent.type_tag
-    Textile.register_name(desc.name) if type == :name
-
-    any_notes = false
-    model.all_note_fields.map do |field|
-      value = desc.send(field).to_s
-      next unless value.match?(/\S/)
-
-      any_notes = true
-      concat(
-        panel_block(heading: :"form_#{type}s_#{field}".l) do
-          value.tpl
-        end
-      )
-    end
-
-    :show_description_empty.tpl unless any_notes
   end
 
   def show_description_authors_and_editors(desc, versions, user)
