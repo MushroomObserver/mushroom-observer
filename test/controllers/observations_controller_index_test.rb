@@ -110,7 +110,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { id: obs.id })
 
-    assert_template("shared/_matrix_box")
     assert_page_title(:OBSERVATIONS.l)
     assert_select("body.observations__index", true)
     assert_select(

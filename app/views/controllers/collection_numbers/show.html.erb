@@ -11,8 +11,12 @@ add_pager_for(@collection_number)
 </div>
 
 <ul class="row list-unstyled mt-3">
-  <%= render(partial: "shared/matrix_box", locals: { columns: "col-xs-12" },
-              collection: @collection_number.observations, as: :object) %>
+  <% @collection_number.observations.each do |object| %>
+    <%= render(::Components::MatrixBox.new(
+                 user: @user,
+                 object: object,
+                 columns: "col-xs-12")) %>
+  <% end %>
 </ul>
 
 <div class="text-center">

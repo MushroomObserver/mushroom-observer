@@ -53,9 +53,10 @@ usr = field_slip.user
     <div class="col-12 col-sm-6">
       <% if obs %>
       <ul class="row list-unstyled container-thumbnail mt-3">
-        <%= render(partial: "shared/matrix_box",
-                    locals: { object: field_slip.observation,
-                              columns: "col-xs-12" }) %>
+        <%= render(::Components::MatrixBox.new(
+                     user: @user,
+                     object: field_slip.observation,
+                     columns: "col-xs-12")) %>
       </ul>
       <% end %>
     </div>

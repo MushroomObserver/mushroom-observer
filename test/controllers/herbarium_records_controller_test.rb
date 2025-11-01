@@ -103,7 +103,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:show, params: { id: herbarium_record.id })
 
     assert_template(:show)
-    assert_template("shared/_matrix_box")
     assert_select("a[href=?]", new_herbarium_record_path, false,
                   "Fungarium Index should not have a `new` button")
   end
@@ -114,7 +113,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: herbarium_record.id })
     assert_template(:show)
-    assert_template("shared/_matrix_box")
   end
 
   def test_show_herbarium_record_mcp_searchable
@@ -172,7 +170,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("rolf")
     get(:new, params: { observation_id: obs_id })
     assert_template("new")
-    assert_template("shared/_matrix_box")
     assert_equal(assigns(:herbarium_record).accession_number, "MO #{obs_id}")
   end
 
@@ -194,7 +191,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("rolf")
     get(:new, params: { observation_id: obs.id })
     assert_template("new")
-    assert_template("shared/_matrix_box")
     assert(assigns(:herbarium_record))
     assert_equal(assigns(:herbarium_record).accession_number,
                  obs.collection_numbers.first.format_name)
@@ -208,7 +204,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("rolf")
     get(:new, params: { observation_id: obs.id })
     assert_template("new")
-    assert_template("shared/_matrix_box")
     assert(assigns(:herbarium_record))
     assert_equal(assigns(:herbarium_record).accession_number,
                  obs.field_slips.first.code)

@@ -30,7 +30,7 @@ column_classes(:nine_three)
               partial: "species_lists/observation",
               locals: { observation:, user: @user,
                         species_list: @species_list,
-                        image: observation.thumb_image_id,
+                        image: observation.thumb_image.present?,
                         remove: permission?(@species_list) }) %>
           <% end %>
         <% else %>

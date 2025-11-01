@@ -12,9 +12,10 @@ add_context_nav(herbarium_record_form_new_tabs(obs: @observation))
 
   <div class="col-xs-12 col-sm-5">
     <ul class="row list-unstyled">
-      <%= render(partial: "shared/matrix_box",
-                 locals: { object: @observation.rss_log || @observation,
-                           columns: "col-xs-12" }) %>
+      <%= render(::Components::MatrixBox.new(
+                   user: @user,
+                   object: @observation.rss_log || @observation,
+                   columns: "col-xs-12")) %>
     </ul>
   </div>
 </div>
