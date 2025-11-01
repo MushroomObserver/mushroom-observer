@@ -137,17 +137,5 @@ class Inat
 
       ::Name.unknown
     end
-
-=begin # pre-PR methods
-    def matching_mo_names
-      return matching_complexes if complex?
-
-      ::Name.where(text_name: @inat_taxon[:name],
-                   rank: @inat_taxon[:rank].titleize).
-        # iNat doesn't have taxon names "sensu xxx"
-        # so don't map them to MO Names sensu xxx
-        where.not(::Name[:author] =~ /^sensu /)
-    end
-=end
   end
 end
