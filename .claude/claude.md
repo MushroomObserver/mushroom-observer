@@ -347,30 +347,6 @@ See `.claude/style_guide.md` for additional coding style requirements.
 
 ## Phlex Component Development
 
-### Phlex HTML Methods - No Positional Arguments
-
-**IMPORTANT**: Phlex HTML methods (`div`, `span`, `p`, `a`, `li`, etc.) do NOT accept positional arguments for content. They only accept:
-1. Named keyword arguments (attributes)
-2. A block for content
-
-#### Examples:
-
-```ruby
-# Bad ✗ - positional argument not allowed
-div("", class: "progress-bar")
-span("Click here", class: "label")
-
-# Good ✓ - use a block for content
-div(class: "progress-bar")  # empty div
-span(class: "label") { "Click here" }
-p(class: "text") { "Hello world" }
-
-# Good ✓ - no content, just attributes
-div(class: "progress-bar", id: "meter", style: "width: 50%")
-```
-
-If you see errors like `wrong number of arguments (given X, expected Y)` on a Phlex HTML method call, check if you're passing a positional argument instead of using a block.
-
 ### Including Rails Built-in Helpers
 
 Rails helpers are available as Phlex modules under `Phlex::Rails::Helpers`. The module name matches the helper method name in PascalCase.
