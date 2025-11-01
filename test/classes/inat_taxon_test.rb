@@ -78,6 +78,26 @@ class InatTaxonTest < UnitTestCase
     assert_equal(name, inat_taxon.name)
   end
 
+  def test_infraspecific_name
+    name = Name.create(
+      user: rolf,
+      rank: "Form",
+      text_name: "Inonotus obliquus f. sterilis",
+      search_name: "Inonotus obliquus f. sterilis (Vanin) Balandaykin & Zmitr.",
+      display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
+                    "(Vanin) Balandaykin & Zmitr.",
+      sort_name: "Inonotus obliquus  {7f.  sterilis  " \
+                 "(Vanin) Balandaykin & Zmitr.",
+      author: "(Vanin) Balandaykin & Zmitr.",
+      icn_id: 809_726
+    )
+
+    mock_inat_obs = mock_observation("i_obliquus_f_sterilis")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+
+    assert_equal(name, inat_taxon.name)
+  end
+
   def test_mo_homonyms
     skip("under construction")
   end
