@@ -27,19 +27,19 @@
 #  [:quality_grade]        casual, needs id, research
 #  [:tags]                 array of tags
 #  [:taxon]                taxon hash
-#  inat_taxon_name::       scientific name
-#  inat_taxon_rank::       rank (can be secondary)
-#  [:species_guess]        iNat's guess at the taxon name
+#  inat_taxon_name::       iNat's name for the observation [:taxon]
+#  inat_taxon_rank::       iNat's rank for the observation [:taxon]
 #  [:user][:login]         username
 #
 #  == MO attributes
 #  gps_hidden
 #  license::
-#  name_id
-#  notes
 #  lat
 #  lng
 #  location
+#  name
+#  name_id
+#  notes
 #  text_name
 #  when
 #  where
@@ -61,6 +61,7 @@ class Inat
 
     def initialize(imported_inat_obs_data)
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
+      @obs_taxon = Inat::Taxon.new(@obs[:taxon])
     end
 
     # Allow hash key access to the iNat observation data
@@ -80,9 +81,9 @@ class Inat
 
     # NOTE: Fixes ABC count of `snapshot` because
     # inat_taxon_name is one fewer Branch than self[:taxon][:name]
-    def inat_taxon_name = self[:taxon][:name]
+    def inat_taxon_name = @obs_taxon[:name]
 
-    def inat_taxon_rank = self[:taxon][:rank]
+    def inat_taxon_rank = @obs_taxon[:rank]
 
     ########## MO attributes
 
@@ -91,17 +92,9 @@ class Inat
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
 
-    def name_id
-      names =
-        # iNat "Complex" definition
-        # https://www.inaturalist.org/pages/curator+guide#complexes
-        if complex?
-          matching_group_names
-        else
-          matching_names_at_regular_ranks
-        end
-      best_mo_name(names)
-    end
+    def name = @obs_taxon.name
+
+    def name_id = name.id
 
     def notes
       # Observation form requires a "normalized" key (no spaces) for Notes parts
@@ -189,7 +182,7 @@ class Inat
 
     def source = "mo_inat_import"
 
-    def text_name = ::Name.find(name_id).text_name
+    def text_name = name.text_name
 
     def when
       observed_on = @obs[:observed_on_details]
