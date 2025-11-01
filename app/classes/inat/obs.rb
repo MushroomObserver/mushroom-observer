@@ -354,11 +354,6 @@ class Inat
       inat_taxon_name
     end
 
-    def infrageneric?
-      %w[subgenus section subsection stirps series subseries].
-        include?(inat_taxon_rank)
-    end
-
     # Get the genus of an iNat infrageneric taxon via an API query
     # requesting the taxon's ancestor which has rank: genus.
     # NOTE: 2025-10-29 jdc
@@ -384,44 +379,7 @@ class Inat
       "#{genus} #{inat_taxon_rank} #{inat_taxon_name}"
     end
 
-    def infraspecific? = %w[subspecies variety form].include?(inat_taxon_rank)
-
-    def insert_rank_between_species_and_final_epithet
-      words = inat_taxon_name.split
-      "#{words[0..1].join(" ")} #{inat_taxon_rank} #{words[2]}"
-    end
-
-    def matching_group_names
-      # MO equivalent could be "group", "clade", or "complex"
-      ::Name.where(::Name[:text_name] =~ /^#{inat_taxon_name}/).
-        where(rank: "Group", correct_spelling_id: nil).
-        order(deprecated: :asc)
-    end
-
-    def matching_names_at_regular_ranks
-      ::Name.where(
-        # parse it to get MO's text_name rank abbreviation
-        # E.g. "sect." instead of "section"
-        text_name: ::Name.parse_name(full_name_string).text_name,
-        rank: inat_taxon_rank.titleize,
-        correct_spelling_id: nil
-      ).
-        # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
-        where.not(::Name[:author] =~ /^sensu /).
-        order(deprecated: :asc)
-    end
-
-    def best_mo_name(names)
-      # It's simplest to pick the 1st one if there are any
-      # (They've already been sorted)
-      return names.first.id if names.any?
-
-      ::Name.unknown.id
-    end
-
     # ----- Other
-
-    def complex? = (inat_taxon_rank == "complex")
 
     def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
 
