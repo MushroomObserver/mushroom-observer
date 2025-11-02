@@ -493,6 +493,13 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_prov_name_ncbi_style
     create_ivars_from_filename("hygrocybe_sp_conica-CA06_ncbi_style")
     stub_inat_interactions
+    # stub the identification taxon genus lookup (Subgenus Hygrocybe)
+    ident = @parsed_results.first[:identifications].second
+    ancestor_ids = ident[:taxon][:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Hygrocybe" }] }
+    )
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
