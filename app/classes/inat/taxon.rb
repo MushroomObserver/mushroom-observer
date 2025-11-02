@@ -6,9 +6,9 @@
 #   :taxon in a result of an iNat API observation search
 #   :identifications[:taxon] in a result of an iNat API observation search
 #  The hash includes:
-#   { id: Integer, name: String, rank: String, ...}
+#   { id: Integer, name: String, rank: String, ancestor_ids: [Integer, ...] ...}
 #  and for identifications, also:
-#   { ancestor_ids: [Integer, ...] }
+#   ancestors: [ { id: Integer, name: String, rank: String, ... }, ... ]
 #
 #  == Usage
 #  example usages
