@@ -317,6 +317,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
+    assert_snapshot_suggested_ids(obs)
   end
 
   # iNat Observation ID is an infrageneric name not suggested by any user
@@ -979,13 +980,16 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def assert_snapshot_suggested_ids(obs)
-    ids = @parsed_results.first[:identifications]
-    unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
-      ary << id[:taxon][:name]
+    idents = @parsed_results.first[:identifications]
+    # Get the MO Names corresponding to the iNat suggested taxon names
+    # Because iNat names may not be ICN-compliant, e.g. infrageneric names
+    unique_suggested_taxon_names = idents.each_with_object([]) do |ident, ary|
+      ident_taxon = ::Inat::Taxon.new(ident[:taxon])
+      ary << ident_taxon.name
     end
-    unique_suggested_taxon_names.each do |taxon_name|
-      assert_match(taxon_name, obs.notes.to_s,
-                   "Notes Snapshot missing suggested name #{taxon_name}")
+    unique_suggested_taxon_names.each do |name|
+      assert_match(name.text_name, obs.notes.to_s,
+                   "Notes Snapshot missing suggested name #{name.text_name}")
     end
   end
 
