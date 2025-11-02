@@ -236,6 +236,8 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_obs_with_sequence_and_multiple_ids
     create_ivars_from_filename("lycoperdon")
 
+    # create objects which are not included in fixtures:
+    # the iNat observation name
     name = Name.create(
       text_name: "Lycoperdon", author: "Pers.",
       search_name: "Lycoperdon Pers.",
@@ -243,6 +245,29 @@ class InatImportJobTest < ActiveJob::TestCase
       rank: "Genus",
       user: @user
     )
+    # and suggested identification names so that we can test Notes snapshot
+    Name.create(
+      text_name: "Calvatia", author: "Fr.",
+      search_name: "Calvatia Fr.",
+      display_name: "**__Calvatia__** Fr.",
+      rank: "Genus",
+      user: @user
+    )
+    Name.create(
+      text_name: "Lycoperdon subumbrinum", author: "Jeppson & E. Larsson",
+      search_name: "Lycoperdon subumbrinum Jeppson & E. Larsson",
+      display_name: "**__Lycoperdon subumbrinum__** Jeppson & E. Larsson",
+      rank: "Species",
+      user: @user
+    )
+    Name.create(
+      text_name: "Lycoperdon umbrinum", author: "Pers.",
+      search_name: "Lycoperdon umbrinum Pers.",
+      display_name: "**__Lycoperdon umbrinum__** Pers.",
+      rank: "Species",
+      user: @user
+    )
+
 
     stub_inat_interactions
 
