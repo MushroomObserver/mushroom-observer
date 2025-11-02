@@ -7,8 +7,7 @@ module InatImportsController::Validators
 
   def params_valid?
     import_adequately_constrained? &&
-      imports_valid? &&
-      consented?
+      imports_valid?
   end
 
   # See InatImport.adequate_constraints?
@@ -116,13 +115,6 @@ module InatImportsController::Validators
     end
 
     flash_warning(:inat_importing_all_anothers.t)
-    false
-  end
-
-  def consented?
-    return true if params[:consent] == "1"
-
-    flash_warning(:inat_consent_required.t)
     false
   end
 end

@@ -62,8 +62,6 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Form needs a field for inputting iNat ids")
     assert_select("input#inat_username", true,
                   "Form needs a field for inputting iNat username")
-    assert_select("input[type=checkbox][id=consent]", true,
-                  "Form needs checkbox requiring consent")
 
     assert(
       assert_select("#preview").text.include?(
@@ -113,7 +111,6 @@ class InatImportsControllerTest < FunctionalTestCase
     params = { inat_username: user.inat_username,
                inat_ids: inat_ids,
                all: "0",
-               consent: "1",
                inat_import_expected_count: :inat_import_tbd.l,
                inat_expected_imports_link: :inat_import_tbd.l }
 
@@ -141,8 +138,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(import.canceled?, "Test needs a canceled InatImport fixture")
     params = {
       inat_ids: import.inat_ids,
-      inat_username: user.inat_username,
-      consent: 1
+      inat_username: user.inat_username
     }
 
     login(user.login)
@@ -159,7 +155,7 @@ class InatImportsControllerTest < FunctionalTestCase
     import.update(inat_username: nil)
     params = {
       inat_username: import.inat_username,
-      inat_ids: import.inat_ids, all: 0, consent: 1
+      inat_ids: import.inat_ids, all: 0
     }
 
     login(import.user.login)
@@ -177,8 +173,7 @@ class InatImportsControllerTest < FunctionalTestCase
     params = {
       inat_username: import.inat_username,
       inat_ids: "",
-      all: 0,
-      consent: 1
+      all: 0
     }
 
     login(import.user.login)
@@ -198,8 +193,7 @@ class InatImportsControllerTest < FunctionalTestCase
     import = inat_imports(:mary_inat_import)
     params = {
       inat_username: import.inat_username,
-      inat_ids: import.inat_ids, all: 1,
-      consent: 1
+      inat_ids: import.inat_ids, all: 1
     }
 
     login(import.user.login)
@@ -224,8 +218,7 @@ class InatImportsControllerTest < FunctionalTestCase
     import.update(inat_ids: "123*")
     params = {
       inat_username: import.inat_username,
-      inat_ids: import.inat_ids, all: 0,
-      consent: 1
+      inat_ids: import.inat_ids, all: 0
     }
 
     login(import.user.login)
@@ -241,27 +234,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_illegal_inat_id.l)
   end
 
-  def test_create_no_consent
-    import = inat_imports(:mary_inat_import)
-    params = {
-      inat_username: import.inat_username,
-      inat_ids: import.inat_ids, all: 0,
-      consent: 0
-    }
-
-    login(import.user.login)
-    stub_count_request(inat_username: import.inat_username,
-                       ids: import.inat_ids)
-    disable_unsafe_html_filter
-
-    assert_no_difference("Observation.count",
-                         "iNat obss imported without consent") do
-      post(:create, params: params)
-    end
-
-    assert_flash_text(:inat_consent_required.l)
-  end
-
   def test_create_too_many_ids_listed
     # generate an id list that's too long for the inat_ids column
     # It'ss a string column with max length 255
@@ -274,8 +246,7 @@ class InatImportsControllerTest < FunctionalTestCase
     import.update(inat_ids: id_list[0, 255])
     params = {
       inat_username: import.inat_username,
-      inat_ids: id_list, all: 0,
-      consent: 1
+      inat_ids: id_list, all: 0
     }
 
     login(import.user.login)
@@ -301,8 +272,7 @@ class InatImportsControllerTest < FunctionalTestCase
     import.update(inat_ids: inat_id)
     params = {
       inat_username: import.inat_username,
-      inat_ids: import.inat_ids, all: 0,
-      consent: 1
+      inat_ids: import.inat_ids, all: 0
     }
 
     login(import.user.login)
@@ -333,8 +303,7 @@ class InatImportsControllerTest < FunctionalTestCase
     import.update(inat_ids: inat_id)
     params = {
       inat_username: import.inat_username,
-      inat_ids: import.inat_ids, all: 0,
-      consent: 1
+      inat_ids: import.inat_ids, all: 0
     }
 
     login(import.user.login)
@@ -374,8 +343,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "Authorization request to iNat shouldn't create MO Observation(s)"
     ) do
       post(:create,
-           params: { inat_ids: 123_456_789, inat_username: inat_username,
-                     consent: 1 })
+           params: { inat_ids: 123_456_789, inat_username: inat_username })
     end
 
     assert_equal(
@@ -408,8 +376,7 @@ class InatImportsControllerTest < FunctionalTestCase
     stub_request(:any, authorization_url)
     login(user.login)
     post(:create, params: { inat_ids: inat_import.inat_ids,
-                            inat_username: inat_import.inat_username,
-                            consent: 1 })
+                            inat_username: inat_import.inat_username })
 
     assert_equal(
       INAT_AUTHORIZATION_URL, @response.location,
@@ -438,8 +405,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_import_all_anothers_observations
     user = users(:dick) # Dick is a iNat superimporter
-    params = { inat_username: "anything", inat_ids: nil,
-               consent: 1, all: 1 }
+    params = { inat_username: "anything", inat_ids: nil, all: 1 }
 
     login(user.login)
     assert_no_difference("Observation.count",

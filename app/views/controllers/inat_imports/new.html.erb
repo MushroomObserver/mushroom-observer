@@ -19,9 +19,6 @@
                                class: "mt-3", label: :inat_import_all.l) %>
     <% end %>
 
-    <%= check_box_with_label(form: f, field: :consent,
-                             class: "mt-3", label: :inat_import_consent.l) %>
-
     <%= panel_block(id: "preview", heading: :inat_import_preview.l,
                     class: "name-section") do
       tag.div do
