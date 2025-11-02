@@ -99,16 +99,13 @@ class Components::Panel < Components::Base
 
   def render_static_heading
     h4(class: "panel-title") do
-      # heading may contain HTML (e.g., submit buttons, formatted text) that
-      # needs to be rendered as HTML, not escaped as text
-      # rubocop:disable Rails/OutputSafety
-      raw(@heading.html_safe)
+      # heading should always be SafeBuffers
+      raw(@heading)
       if @heading_links.present?
         # heading_links contains HTML from link_to helper
         # that needs to be rendered as HTML, not escaped as text
         span(class: "float-right") { raw(@heading_links.html_safe) }
       end
-      # rubocop:enable Rails/OutputSafety
     end
   end
 
@@ -125,9 +122,7 @@ class Components::Panel < Components::Base
       ) do
         # heading may contain HTML (e.g., submit buttons, formatted text) that
         # needs to be rendered as HTML, not escaped as text
-        # rubocop:disable Rails/OutputSafety
-        raw(@heading.html_safe)
-        # rubocop:enable Rails/OutputSafety
+        raw(@heading)
         span(class: "float-right") { render_collapse_icons }
       end
     end
@@ -140,17 +135,9 @@ class Components::Panel < Components::Base
       end
     end
 
-    chevron_down = link_icon(:chevron_down, title: :OPEN.l,
-                                            class: "active-icon")
-    chevron_up = link_icon(:chevron_up, title: :CLOSE.l)
-
-    # link_icon returns HTML strings that need to be rendered as HTML,
-    # not escaped as text. Nil check needed as link_icon may return nil
-    # in test environments where icon assets aren't available
-    # rubocop:disable Rails/OutputSafety
-    raw(chevron_down.html_safe) if chevron_down
-    raw(chevron_up.html_safe) if chevron_up
-    # rubocop:enable Rails/OutputSafety
+    link_icon(:chevron_down, title: :OPEN.l,
+              class: "active-icon")
+    link_icon(:chevron_up, title: :CLOSE.l)
   end
 
   def render_thumbnail

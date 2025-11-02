@@ -6,7 +6,7 @@ class PanelTest < UnitTestCase
   include ComponentTestHelper
 
   def test_basic_panel_with_heading_and_content
-    component = Components::Panel.new(heading: "Test Heading") do
+    component = Components::Panel.new(heading: "Test Heading".html_safe) do
       "Panel content"
     end
 
@@ -21,7 +21,7 @@ class PanelTest < UnitTestCase
 
   def test_panel_with_footer
     component = Components::Panel.new(
-      heading: "Test Heading",
+      heading: "Test Heading".html_safe,
       footer: "Footer text"
     ) do
       "Panel content"
@@ -35,7 +35,7 @@ class PanelTest < UnitTestCase
 
   def test_panel_with_custom_class
     component = Components::Panel.new(
-      heading: "Test",
+      heading: "Test".html_safe,
       panel_class: "custom-class"
     ) do
       "Content"
@@ -48,7 +48,7 @@ class PanelTest < UnitTestCase
 
   def test_collapsible_panel
     component = Components::Panel.new(
-      heading: "Click to expand",
+      heading: "Click to expand".html_safe,
       collapse: "test_panel",
       open: false
     ) do
@@ -65,7 +65,7 @@ class PanelTest < UnitTestCase
 
   def test_collapsible_panel_open
     component = Components::Panel.new(
-      heading: "Click to collapse",
+      heading: "Click to collapse".html_safe,
       collapse: "test_panel",
       open: true
     ) do

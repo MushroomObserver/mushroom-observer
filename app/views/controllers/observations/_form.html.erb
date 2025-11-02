@@ -67,7 +67,7 @@ form_element_data = {
   <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(Components::Panel.new(
-    heading: "#{:IMAGES.l} + #{:show_observation_details.l}",
+    heading: :IMAGES.l + " + " + :show_observation_details.l,
     inner_id: "observation_images_details", formatted_content: true,
     collapse: "observation_images_details_inner", open: true
   )) do %>
@@ -78,7 +78,7 @@ form_element_data = {
   <% end %>
 
   <%= render(Components::Panel.new(
-    heading: "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}",
+    heading: :IDENTIFICATION.l + " + " + :SPECIMEN.l,
     inner_id: "observation_naming_specimen", # @given_name.present?
     collapse: "observation_naming_specimen_inner", open: create
   )) do %>

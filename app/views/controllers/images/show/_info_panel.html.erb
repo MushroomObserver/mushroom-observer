@@ -1,6 +1,6 @@
     <!-- INFO_PANEL -->
     <%= render(Components::Panel.new(
-          heading: "#{:NOTES.t}:",
+          heading: :NOTES.t + ":",
           inner_class: "py-5px"
         )) do %>
       <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
