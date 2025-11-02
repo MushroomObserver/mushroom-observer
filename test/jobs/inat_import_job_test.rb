@@ -245,7 +245,7 @@ class InatImportJobTest < ActiveJob::TestCase
       rank: "Genus",
       user: @user
     )
-    # and suggested identification names so that we can test Notes snapshot
+    # add suggested IDs so that we can test Notes snapshot
     Name.create(
       text_name: "Calvatia", author: "Fr.",
       search_name: "Calvatia Fr.",
@@ -267,7 +267,6 @@ class InatImportJobTest < ActiveJob::TestCase
       rank: "Species",
       user: @user
     )
-
 
     stub_inat_interactions
 
