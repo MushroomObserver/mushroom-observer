@@ -281,7 +281,15 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
     stub_inat_interactions
+    # stub the Observation taxon genus lookup
     ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
+    # stub the identification taxon genus lookup
+    ident = @parsed_results.first[:identifications].first
+    ancestor_ids = ident[:taxon][:ancestor_ids].join(",")
     stub_genus_lookup(
       ancestor_ids: ancestor_ids,
       body: { results: [{ name: "Morchella" }] }
