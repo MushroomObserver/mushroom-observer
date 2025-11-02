@@ -74,7 +74,7 @@ class InatObsTest < UnitTestCase
     expected_snapshot = "\n#{snapshot_subpoarts}"
     assert_equal(expected_snapshot, mock_inat_obs.snapshot)
 
-    # Observation form needs the Notes "parts keys to be normalized
+    # Observation form needs the Notes "parts" keys to be normalized
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
     other = "on Quercus<!--- blank line(s) removed --->\n" \
             "&#8212;<!--- blank line(s) removed --->\n" \

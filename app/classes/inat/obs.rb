@@ -287,9 +287,11 @@ class Inat
       # Get unique suggested taxon ids
       # (iNat allows multiple suggestions for a single observation)
       "\n#{
-        self[:identifications].each_with_object([]) do |id, ary|
-          ary << "&nbsp;&nbsp;_#{id[:taxon][:name]}_ by #{id[:user][:login]} " \
-          "#{id[:created_at_details][:date]}"
+        self[:identifications].each_with_object([]) do |ident, ary|
+          ident_taxon = Inat::Taxon.new(ident[:taxon])
+          ary << "&nbsp;&nbsp;_#{ident_taxon.name.text_name}_ " \
+                 "by #{ident[:user][:login]} " \
+                 "#{ident[:created_at_details][:date]}"
         end.join("\n")
       }"
     end

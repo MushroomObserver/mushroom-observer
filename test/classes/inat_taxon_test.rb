@@ -157,9 +157,28 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
-  ########
+  def test_infrageneric_identification
+    name = Name.create(
+      user: rolf,
+      rank: "Section",
+      text_name: "Morchella sect. Distantes",
+      search_name: "Morchella sect. Distantes Boud.",
+      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
+      sort_name: "Morchella  {2sect.  Distantes  Boud.",
+      author: "Boud.",
+      icn_id: 547_941
+    )
 
-  private
+    mock_inat_obs = mock_observation("distantes")
+    ident_taxon = Inat::Taxon.new(mock_inat_obs[:identifications].last[:taxon])
+    ancestor_ids = ident_taxon[:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
+
+    assert_equal(name, ident_taxon.name)
+  end
 
   def mock_observation(filename)
     mock_search = File.read("test/inat/#{filename}.txt")
