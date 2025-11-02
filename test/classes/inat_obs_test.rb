@@ -52,8 +52,9 @@ class InatObsTest < UnitTestCase
       # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
-    # mapping to MO Observation attributes
-    %w[gps_hidden lat lng name_id source text_name when where].
+    # mapping to MO Observation attributes, other than name attributes
+    # Name attributes mappings are tested in InatTaxonTest
+    %w[gps_hidden lat lng source when where].
       each do |attribute|
         assert_equal(expected_mapping.send(attribute),
                      mock_inat_obs.send(attribute))
@@ -73,7 +74,7 @@ class InatObsTest < UnitTestCase
     expected_snapshot = "\n#{snapshot_subpoarts}"
     assert_equal(expected_snapshot, mock_inat_obs.snapshot)
 
-    # Observation form needs the Notes "parts keys to be normalized
+    # Observation form needs the Notes "parts" keys to be normalized
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
     other = "on Quercus<!--- blank line(s) removed --->\n" \
             "&#8212;<!--- blank line(s) removed --->\n" \
@@ -133,94 +134,6 @@ class InatObsTest < UnitTestCase
     assert_nil(mock_obs.when)
   end
 
-  def test_name_sensu
-    # Make sure fixtures still OK
-    names = Name.where(text_name: "Coprinus", rank: "Genus", deprecated: false)
-    assert(names.any? { |name| name.author.start_with?("sensu ") } &&
-           names.one? { |name| !name.author.start_with?("sensu ") },
-           "Test needs a Name fixture matching >= 1 MO `sensu` Name " \
-           "and exactly 1 MO non-sensu Name")
-
-    mock_inat_obs = mock_observation("coprinus")
-
-    assert_equal(names(:coprinus).id, mock_inat_obs.name_id)
-    assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
-  end
-
-  def test_infrageneric_name
-    name = Name.create(
-      user: rolf,
-      rank: "Section",
-      text_name: "Morchella sect. Distantes",
-      search_name: "Morchella sect. Distantes Boud.",
-      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
-      sort_name: "Morchella  {2sect.  Distantes  Boud.",
-      author: "Boud.",
-      icn_id: 547_941
-    )
-
-    mock_inat_obs = mock_observation("distantes")
-    ancestor_ids = mock_inat_obs[:taxon][:ancestor_ids].join(",")
-
-    stub_genus_lookup(
-      ancestor_ids: ancestor_ids,
-      body: { results: [{ name: "Morchella" }] }
-    )
-
-    assert_equal(name.id, mock_inat_obs.name_id)
-    assert_equal(name.text_name, mock_inat_obs.text_name)
-  end
-
-  def test_infraspecific_name
-    name = Name.create(
-      user: rolf,
-      rank: "Form",
-      text_name: "Inonotus obliquus f. sterilis",
-      search_name: "Inonotus obliquus f. sterilis (Vanin) Balandaykin & Zmitr.",
-      display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
-                    "(Vanin) Balandaykin & Zmitr.",
-      sort_name: "Inonotus obliquus  {7f.  sterilis  " \
-                 "(Vanin) Balandaykin & Zmitr.",
-      author: "(Vanin) Balandaykin & Zmitr.",
-      icn_id: 809_726
-    )
-
-    mock_inat_obs = mock_observation("i_obliquus_f_sterilis")
-
-    assert_equal(name.id, mock_inat_obs.name_id)
-    assert_equal(name.text_name, mock_inat_obs.text_name)
-  end
-
-  def test_names_alternative_authors
-    # Make sure fixtures still OK
-    names = Name.where(text_name: "Agrocybe arvalis", rank: "Species",
-                       deprecated: false)
-    assert(names.many? { |name| !name.author.start_with?("sensu ") },
-           "Test needs a name with many non-sensu matching fixtures")
-
-    mock_inat_obs = mock_observation("agrocybe_arvalis")
-    assert_equal(
-      "Agrocybe arvalis", mock_inat_obs.text_name,
-      "Any of multiple, correctly spelled, approved Names will do."
-    )
-  end
-
-  def test_names_approved_vs_deprecated
-    # Make sure fixtures still OK
-    names = Name.reorder(id: :asc).
-            where(text_name: "Agrocybe arvalis", rank: "Species",
-                  deprecated: false)
-    assert(names.many? { |name| !name.author.start_with?("sensu ") },
-           "Test needs a name with many non-sensu matching fixtures")
-    first_name = names.first
-    first_name.deprecated = true
-    first_name.save
-
-    mock_inat_obs = mock_observation("agrocybe_arvalis")
-    assert_equal(names.second.id, mock_inat_obs.name_id,
-                 "Prefer non-deprecated Name when mapping iNat id to MO Name")
-  end
-
   def test_inat_observation_fields
     assert(mock_observation("trametes").inat_obs_fields.any?)
     assert(mock_observation("evernia").inat_obs_fields.none?)
@@ -239,6 +152,8 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  # NOTE: iNat provisional names are not iNat taxa;
+  # Rather, they simply string values of an observation field
   def test_provisional_name
     mock_inat_obs = mock_observation("arrhenia_sp_NY02")
     prov_name = mock_inat_obs.inat_prov_name
@@ -292,30 +207,6 @@ class InatObsTest < UnitTestCase
       "Notes Collector should be iNat \"Collector's Name\" field " \
         "if that field present"
     )
-  end
-
-  def test_complex_without_mo_match
-    mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
-    assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)
-    assert_equal("complex", mock_inat_obs.inat_taxon_rank)
-    assert_equal(
-      Name.unknown.text_name, mock_inat_obs.text_name,
-      "iNat complex without MO name match should map to the Unknown name"
-    )
-  end
-
-  def test_complex_with_mo_match
-    name = Name.create(
-      text_name: "Xeromphalina campanella group", author: "",
-      search_name: "Xeromphalina campanella group",
-      display_name: "**__Xeromphalina campanella__** group",
-      rank: "Group",
-      user: users(:rolf)
-    )
-    mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
-    assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)
-    assert_equal("complex", mock_inat_obs.inat_taxon_rank)
-    assert_equal(name.text_name, mock_inat_obs.text_name)
   end
 
   def test_tags
