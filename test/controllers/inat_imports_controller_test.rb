@@ -364,9 +364,11 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
 
+    stub_count_request(ids: inat_import.inat_ids,
+                       inat_username: inat_import.inat_username)
     stub_request(:any, authorization_url)
-    login(user.login)
 
+    login(user.login)
     assert_no_difference(
       "Observation.count",
       "Authorization request to iNat shouldn't create MO Observation(s)"
