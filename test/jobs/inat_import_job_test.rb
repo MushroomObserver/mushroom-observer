@@ -277,19 +277,10 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
-
+    assert_snapshot_suggested_ids(obs)
     assert(obs.sequences.one?, "Obs should have a sequence")
     assert_equal(@user, obs.sequences.first.user,
                  "Sequences should belong to the user who imported the obs")
-
-    ids = @parsed_results.first[:identifications]
-    unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
-      ary << id[:taxon][:name]
-    end
-    unique_suggested_taxon_names.each do |taxon_name|
-      assert_match(taxon_name, obs.notes.to_s,
-                   "Notes Snapshot missing suggested name #{taxon_name}")
-    end
   end
 
   # iNat Observation ID is an infrageneric name which was suggested by a user
@@ -985,6 +976,17 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(naming.present?, "Naming for MO consensus ID")
     assert_equal(user, naming.user,
                  "Naming should belong to #{user.login}")
+  end
+
+  def assert_snapshot_suggested_ids(obs)
+    ids = @parsed_results.first[:identifications]
+    unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
+      ary << id[:taxon][:name]
+    end
+    unique_suggested_taxon_names.each do |taxon_name|
+      assert_match(taxon_name, obs.notes.to_s,
+                   "Notes Snapshot missing suggested name #{taxon_name}")
+    end
   end
 
   # -------- Other Utilities
