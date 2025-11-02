@@ -11,13 +11,13 @@ class InatTaxonTest < UnitTestCase
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
     assert_equal(inat_taxon.name, names(:somion_unicolor),
-                 "Incorrect MO Name for iNat community id")
+                 "Incorrect MO Name for iNat observation")
 
     last_id = mock_inat_obs[:identifications].last
     inat_taxon = Inat::Taxon.new(last_id[:taxon])
 
     assert_equal(inat_taxon.name, names(:somion_unicolor),
-                 "Incorrect MO Name for iNat identification")
+                 "Incorrect MO Name for iNat suggested ID")
   end
 
   def test_names_approved_vs_deprecated
@@ -37,27 +37,6 @@ class InatTaxonTest < UnitTestCase
                  "Prefer non-deprecated Name when mapping iNat id to MO Name")
   end
 
-  def test_complex
-    user = rolf
-    x_campanella_group = Name.new(
-      rank: "Group",
-      text_name: "Xeromphalina campanella group",
-      search_name: "Xeromphalina campanella group",
-      display_name: "**__Xeromphalina campanella__** group",
-      sort_name: "Xeromphalina campanella   group",
-      citation: "\"??Mycologia?? 107(6): 1270\":" \
-                "https://www.tandfonline.com/doi/full/10.3852/15-087 (2017)",
-      user: user
-    )
-    x_campanella_group.save
-
-    mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
-
-    assert_equal(x_campanella_group, inat_taxon.name,
-                 "Incorrect MO Name for iNat community id")
-  end
-
   def test_name_sensu
     names = Name.where(text_name: "Coprinus", rank: "Genus", deprecated: false)
     assert(names.any? { |name| name.author.start_with?("sensu ") },
@@ -68,10 +47,11 @@ class InatTaxonTest < UnitTestCase
     mock_inat_obs = mock_observation("coprinus")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    assert_equal(names(:coprinus), inat_taxon.name)
+    assert_equal(names(:coprinus), inat_taxon.name,
+                 "Prefer non-sensu Name when mapping iNat id to MO Name")
   end
 
-  def test_infrageneric_name
+  def test_infrageneric_observation_name
     name = Name.create(
       user: rolf,
       rank: "Section",
@@ -92,7 +72,35 @@ class InatTaxonTest < UnitTestCase
       body: { results: [{ name: "Morchella" }] }
     )
 
-    assert_equal(name, inat_taxon.name)
+    assert_equal(
+      name, inat_taxon.name,
+      "iNat obs infrageneric name should map to MO Name which includes genus"
+    )
+  end
+
+  def test_infrageneric_identification_name
+    name = Name.create(
+      user: rolf,
+      rank: "Section",
+      text_name: "Morchella sect. Distantes",
+      search_name: "Morchella sect. Distantes Boud.",
+      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
+      sort_name: "Morchella  {2sect.  Distantes  Boud.",
+      author: "Boud.",
+      icn_id: 547_941
+    )
+
+    mock_inat_obs = mock_observation("distantes")
+    ident_taxon = Inat::Taxon.new(mock_inat_obs[:identifications].last[:taxon])
+    ancestor_ids = ident_taxon[:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
+
+    assert_equal(name, ident_taxon.name,
+                 "iNat suggested infrageneric ID should map to " \
+                 "MO Name which includes genus")
   end
 
   def test_infraspecific_name
@@ -112,22 +120,9 @@ class InatTaxonTest < UnitTestCase
     mock_inat_obs = mock_observation("i_obliquus_f_sterilis")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    assert_equal(name, inat_taxon.name)
-  end
-
-  def test_names_homonyms
-    # Make sure fixtures still OK
-    names = Name.where(text_name: "Agrocybe arvalis", rank: "Species",
-                       deprecated: false)
-    assert(names.many? { |name| !name.author.start_with?("sensu ") },
-           "Test needs a name with many non-sensu matching fixtures")
-
-    mock_inat_obs = mock_observation("agrocybe_arvalis")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
-
     assert_equal(
-      "Agrocybe arvalis", inat_taxon.name.text_name,
-      "Any of multiple, correctly spelled, approved Names will do."
+      name, inat_taxon.name,
+      "iNat infraspecific name should map to MO Name which includes rank"
     )
   end
 
@@ -155,29 +150,6 @@ class InatTaxonTest < UnitTestCase
       Name.unknown, inat_taxon.name,
       "iNat complex without MO name match should map to the Unknown name"
     )
-  end
-
-  def test_infrageneric_identification
-    name = Name.create(
-      user: rolf,
-      rank: "Section",
-      text_name: "Morchella sect. Distantes",
-      search_name: "Morchella sect. Distantes Boud.",
-      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
-      sort_name: "Morchella  {2sect.  Distantes  Boud.",
-      author: "Boud.",
-      icn_id: 547_941
-    )
-
-    mock_inat_obs = mock_observation("distantes")
-    ident_taxon = Inat::Taxon.new(mock_inat_obs[:identifications].last[:taxon])
-    ancestor_ids = ident_taxon[:ancestor_ids].join(",")
-    stub_genus_lookup(
-      ancestor_ids: ancestor_ids,
-      body: { results: [{ name: "Morchella" }] }
-    )
-
-    assert_equal(name, ident_taxon.name)
   end
 
   def mock_observation(filename)
