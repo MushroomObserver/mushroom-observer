@@ -2,13 +2,13 @@
 
 #  maps an iNat taxon to an MO Name
 #
-#  perates on an iNat :taxon hash:
+#  Operates on an iNat :taxon hash:
 #   :taxon in a result of an iNat API observation search
 #   :identifications[:taxon] in a result of an iNat API observation search
 #  The hash includes:
 #   { id: Integer, name: String, rank: String, ...}
 #  and for identifications, also:
-#   { ancestors_ids: [Integer, ...] }
+#   { ancestor_ids: [Integer, ...] }
 #
 #  == Usage
 #  example usages
