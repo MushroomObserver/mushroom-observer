@@ -4,9 +4,10 @@
 
 <%= render(Components::Panel.new(
       inner_id: "observation_name_info",
-      heading: :about_this_taxon.l,
-      inner_class: "name-section small"
-    )) do %>
+      panel_class: "name-section small"
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new { :about_this_taxon.l }) %>
+  <%= panel.render(Components::PanelBody.new) do %>
 
   <%= tag.div(class: "row") do %>
     <%= tag.div(class: "col-xs-6") do
@@ -18,5 +19,5 @@
       concat(user_name_links_web(@user, name: obs.name).safe_join)
     end %>
   <% end %>
-
+  <% end %>
 <% end %>

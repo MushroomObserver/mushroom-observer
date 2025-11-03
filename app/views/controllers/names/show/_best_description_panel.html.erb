@@ -6,9 +6,15 @@ heading_links = @user ? [link1, link2].reject(&:nil?).safe_join(" | ") : ""
 %>
 
 <%= render(Components::Panel.new(
-      inner_id: "name_general_description",
-      heading: heading,
-      heading_links: heading_links
-    )) do %>
-  <%= @best_description.tpl %>
+      inner_id: "name_general_description"
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= heading %>
+    <% if @user %>
+      <span class="float-right"><%= heading_links %></span>
+    <% end %>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
+    <%= @best_description.tpl %>
+  <% end %>
 <% end %>

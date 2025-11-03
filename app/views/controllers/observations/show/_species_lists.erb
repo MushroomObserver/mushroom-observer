@@ -1,9 +1,12 @@
 <% link = icon_link_with_query(*observation_manage_lists_tab(obs, user)) %>
 <%= render(Components::Panel.new(
-      heading: :show_lists_header.t,
-      heading_links: link,
       inner_id: "observation_species_lists"
-    )) do %>
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= :show_lists_header.t %>
+    <span class="float-right"><%= link %></span>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
   <%= if obs.species_lists.any?
         tag.ul(class: "list-unstyled mb-0") do
           obs.species_lists.map do |spl|
@@ -21,4 +24,5 @@
           end.safe_join
         end
       end %>
+  <% end %>
 <% end %>

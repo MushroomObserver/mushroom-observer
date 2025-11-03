@@ -1,0 +1,111 @@
+Started with run options --seed 13881
+
+
+Progress: |[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[0m[1000D[K[31mERROR[0m SearchIntegrationTest#test_observations_search_form (356.31s)
+Minitest::UnexpectedError:         ActionView::Template::Error: undefined method `html_safe' for nil
+            app/views/controllers/shared/_search_panel.erb:23
+            app/components/panel_body.rb:21:in `block in view_template'
+            app/components/panel_body.rb:20:in `view_template'
+            app/views/controllers/shared/_search_panel.erb:23
+            app/components/panel.rb:41:in `block in view_template'
+            app/components/panel.rb:36:in `view_template'
+            app/views/controllers/shared/_search_panel.erb:16
+            app/views/controllers/shared/_search_form.erb:24
+            app/views/controllers/shared/_search_form.erb:23:in `each'
+            app/views/controllers/shared/_search_form.erb:23
+            app/views/controllers/shared/_search_form.erb:22
+            app/views/controllers/shared/_search_form.erb:20:in `each'
+            app/views/controllers/shared/_search_form.erb:20
+            app/views/controllers/shared/_search_form.erb:19
+            app/views/controllers/shared/_search_form.erb:17
+            app/views/controllers/observations/search/new.erb:6
+            app/controllers/application_controller.rb:148:in `catch_errors_and_log_request_stats'
+            test/integration/capybara/search_integration_test.rb:14:in `test_observations_search_form'
+
+[32m=[0m[32m=[0m[32m=[0m[0m[1000D[K[31mERROR[0m Observations::SearchControllerTest#test_new_observations_search_form_prefilled_from_existing_query (369.34s)
+Minitest::UnexpectedError:         ActionView::Template::Error: undefined method `html_safe' for nil
+            app/views/controllers/shared/_search_panel.erb:23
+            app/components/panel_body.rb:21:in `block in view_template'
+            app/components/panel_body.rb:20:in `view_template'
+            app/views/controllers/shared/_search_panel.erb:23
+            app/components/panel.rb:41:in `block in view_template'
+            app/components/panel.rb:36:in `view_template'
+            app/views/controllers/shared/_search_panel.erb:16
+            app/views/controllers/shared/_search_form.erb:24
+            app/views/controllers/shared/_search_form.erb:23:in `each'
+            app/views/controllers/shared/_search_form.erb:23
+            app/views/controllers/shared/_search_form.erb:22
+            app/views/controllers/shared/_search_form.erb:20:in `each'
+            app/views/controllers/shared/_search_form.erb:20
+            app/views/controllers/shared/_search_form.erb:19
+            app/views/controllers/shared/_search_form.erb:17
+            app/views/controllers/observations/search/new.erb:6
+            app/controllers/application_controller.rb:148:in `catch_errors_and_log_request_stats'
+            test/functional_test_case.rb:23:in `get'
+            test/controllers/observations/search_controller_test.rb:51:in `test_new_observations_search_form_prefilled_from_existing_query'
+
+[0m[1000D[K[31mERROR[0m Observations::SearchControllerTest#test_new_observations_search_turbo (369.59s)
+Minitest::UnexpectedError:         ActionView::Template::Error: undefined method `html_safe' for nil
+            app/views/controllers/shared/_search_panel.erb:23
+            app/components/panel_body.rb:21:in `block in view_template'
+            app/components/panel_body.rb:20:in `view_template'
+            app/views/controllers/shared/_search_panel.erb:23
+            app/components/panel.rb:41:in `block in view_template'
+            app/components/panel.rb:36:in `view_template'
+            app/views/controllers/shared/_search_panel.erb:16
+            app/views/controllers/shared/_search_form.erb:24
+            app/views/controllers/shared/_search_form.erb:23:in `each'
+            app/views/controllers/shared/_search_form.erb:23
+            app/views/controllers/shared/_search_form.erb:22
+            app/views/controllers/shared/_search_form.erb:20:in `each'
+            app/views/controllers/shared/_search_form.erb:20
+            app/views/controllers/shared/_search_form.erb:19
+            app/views/controllers/shared/_search_form.erb:17
+            app/controllers/concerns/searchable.rb:39:in `block (2 levels) in new'
+            app/controllers/concerns/searchable.rb:37:in `new'
+            app/controllers/application_controller.rb:148:in `catch_errors_and_log_request_stats'
+            test/functional_test_case.rb:23:in `get'
+            test/controllers/observations/search_controller_test.rb:31:in `test_new_observations_search_turbo'
+
+[0m[1000D[K[31mERROR[0m Observations::SearchControllerTest#test_new_observations_search (369.69s)
+Minitest::UnexpectedError:         ActionView::Template::Error: undefined method `html_safe' for nil
+            app/views/controllers/shared/_search_panel.erb:23
+            app/components/panel_body.rb:21:in `block in view_template'
+            app/components/panel_body.rb:20:in `view_template'
+            app/views/controllers/shared/_search_panel.erb:23
+            app/components/panel.rb:41:in `block in view_template'
+            app/components/panel.rb:36:in `view_template'
+            app/views/controllers/shared/_search_panel.erb:16
+            app/views/controllers/shared/_search_form.erb:24
+            app/views/controllers/shared/_search_form.erb:23:in `each'
+            app/views/controllers/shared/_search_form.erb:23
+            app/views/controllers/shared/_search_form.erb:22
+            app/views/controllers/shared/_search_form.erb:20:in `each'
+            app/views/controllers/shared/_search_form.erb:20
+            app/views/controllers/shared/_search_form.erb:19
+            app/views/controllers/shared/_search_form.erb:17
+            app/views/controllers/observations/search/new.erb:6
+            app/controllers/application_controller.rb:148:in `catch_errors_and_log_request_stats'
+            test/functional_test_case.rb:23:in `get'
+            test/controllers/observations/search_controller_test.rb:24:in `test_new_observations_search'
+
+[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[32m=[0m[0m[1000D[K[31m FAIL[0m NamesControllerShowTest#test_show_name_inherit_link (483.13s)
+        Classification area lacks a Copy from parent. link.
+        Expected: 1
+          Actual: 8
+        test/controllers/names_controller_show_test.rb:311:in `test_show_name_inherit_link'
+
+[0m[1000D[K[31m FAIL[0m NamesControllerShowTest#test_show_name_sensu_lato (485.39s)
+        Name sensu lato should not have propagate classification link.
+        Expected: 0
+          Actual: 31
+        test/controllers/names_controller_show_test.rb:327:in `test_show_name_sensu_lato'
+
+[32m=[0mWARNING: The convert command is deprecated in IMv7, use "magick" instead of "convert" or "magick convert"
+
+[32m=[0m[32m=[0m|
+
+Finished in 506.50190s
+3347 tests, 27697 assertions, [31m2 failures, 4 errors, [0m[33m0 skips[0m
+Coverage report generated for Minitest to /Users/nimmo/Documents/GitHub/developer-startup/mushroom-observer/coverage.
+Line Coverage: 0.0% (0 / 49559)

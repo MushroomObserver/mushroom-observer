@@ -2,21 +2,27 @@
 <% review ||= false %>
 
 <%= render(Components::Panel.new(
-      inner_id: "description_details_and_alts",
-      heading: :show_observation_details.l,
-      heading_links: description_change_links(@user, @description),
-      footer: review ? show_description_export_and_review(@description) : nil
-    )) do %>
-  <%= tag.div(class: "row") do
-        [
-          tag.div(class: "col-xs-12 col-md-6") do
-            show_description_details(@description, @versions, @user)
-          end,
-          tag.div(class: "col-xs-12 col-md-6") do
-            show_alt_descriptions(user: @user, object: @description.parent,
-                                  projects: @projects,
-                                  current: @description)
-          end
-        ].safe_join
-      end %>
+      inner_id: "description_details_and_alts"
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= :show_observation_details.l %>
+    <span class="float-right"><%= description_change_links(@user, @description) %></span>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
+    <%= tag.div(class: "row") do
+          [
+            tag.div(class: "col-xs-12 col-md-6") do
+              show_description_details(@description, @versions, @user)
+            end,
+            tag.div(class: "col-xs-12 col-md-6") do
+              show_alt_descriptions(user: @user, object: @description.parent,
+                                    projects: @projects,
+                                    current: @description)
+            end
+          ].safe_join
+        end %>
+  <% end %>
+  <% if review %>
+    <%= panel.render(Components::PanelFooter.new { show_description_export_and_review(@description) }) %>
+  <% end %>
 <% end %>

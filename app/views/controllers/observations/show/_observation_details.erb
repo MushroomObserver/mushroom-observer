@@ -7,10 +7,15 @@ show_links = user && (obs.external_links.any? || sites.any?)
 
 <%= render(Components::Panel.new(
       inner_id: "observation_details",
-      heading: :show_observation_details.l,
-      heading_links: user && obs_details_links(obs),
-      inner_class: "name-section"
-    )) do %>
+      panel_class: "name-section"
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= :show_observation_details.l %>
+    <% if user %>
+      <span class="float-right"><%= obs_details_links(obs) %></span>
+    <% end %>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
 
   <%= observation_details_when_where_who(obs:, user:) %>
 
@@ -63,5 +68,6 @@ show_links = user && (obs.external_links.any? || sites.any?)
   <% if show_links %>
     <%= render(partial: "observations/show/external_links",
                locals: { obs:, user:, sites: }) %>
+  <% end %>
   <% end %>
 <% end %>

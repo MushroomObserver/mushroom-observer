@@ -7,8 +7,6 @@ heading_links = icon_link_to(*observation_hide_thumbnail_map_tab(obs))
 
 <%= render(Components::Panel.new(
       inner_id: "observation_thumbnail_map",
-      heading: :MAP.t,
-      heading_links: heading_links,
       attributes: {
         data: {
           controller: "thumbnail-map",
@@ -16,7 +14,12 @@ heading_links = icon_link_to(*observation_hide_thumbnail_map_tab(obs))
           map_url: map_url
         }
       }
-    )) do %>
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= :MAP.t %>
+    <span class="float-right"><%= heading_links %></span>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
 
   <%= tag.div(class: "thumbnail-map-container",
               data: { thumbnail_map_target: "mapContainer" }) do %>
@@ -65,5 +68,5 @@ heading_links = icon_link_to(*observation_hide_thumbnail_map_tab(obs))
 
     <% end %>
   <% end %>
-
+  <% end %>
 <% end %>

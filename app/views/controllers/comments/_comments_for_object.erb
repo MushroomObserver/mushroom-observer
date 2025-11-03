@@ -9,23 +9,31 @@
 <%# NOTE: #comments is the inner list-group, not the whole panel %>
 
 <%= render(Components::Panel.new(
-  inner_id: "comments_for_object",
-  heading: :COMMENTS.t,
-  heading_links: (controls ? new_comment_link(object, btn_class: nil,
-                                               icon: true) : nil),
-  footer: (controls && limit && and_more > 0 ?
-           link_to(:show_comments_and_more.t(num: and_more),
-                   comments_path(target: object.id, type: object.class.name),
-                   class: "float-right") : nil)
-)) do %>
-  <div id="comments" class="list-group list-group-flush comments">
-    <% unless comments.empty? %>
-      <% comments.each do |comment| %>
-        <%= render(partial: "comments/comment", object: comment,
-                   locals: { controls: }) %>
-      <% end %>
+  inner_id: "comments_for_object"
+)) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= :COMMENTS.t %>
+    <% if controls %>
+      <span class="float-right"><%= new_comment_link(object, btn_class: nil, icon: true) %></span>
     <% end %>
-    <%= tag.div(:show_comments_no_comments_yet.t,
-                class: "list-group-item none-yet") %>
-  </div>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
+    <div id="comments" class="list-group list-group-flush comments">
+      <% unless comments.empty? %>
+        <% comments.each do |comment| %>
+          <%= render(partial: "comments/comment", object: comment,
+                     locals: { controls: }) %>
+        <% end %>
+      <% end %>
+      <%= tag.div(:show_comments_no_comments_yet.t,
+                  class: "list-group-item none-yet") %>
+    </div>
+  <% end %>
+  <% if controls && limit && and_more > 0 %>
+    <%= panel.render(Components::PanelFooter.new {
+      link_to(:show_comments_and_more.t(num: and_more),
+              comments_path(target: object.id, type: object.class.name),
+              class: "float-right")
+    }) %>
+  <% end %>
 <% end %>

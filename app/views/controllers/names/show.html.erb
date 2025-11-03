@@ -58,13 +58,15 @@ column_classes(:seven_five)
     end %>
 
     <%= render(Components::Panel.new(
-          inner_id: "name_footer",
-          footer: footer
-        )) do %>
-      <%= concat(tag.div(id: "name_authors_editors") do
-            show_authors_and_editors(obj: @name, versions: @versions, user: @user)
-          end) %>
-      <%= concat(:show_name_num_notifications.t(num: @name.interests)) %>
+          inner_id: "name_footer"
+        )) do |panel| %>
+      <%= panel.render(Components::PanelBody.new) do %>
+        <%= concat(tag.div(id: "name_authors_editors") do
+              show_authors_and_editors(obj: @name, versions: @versions, user: @user)
+            end) %>
+        <%= concat(:show_name_num_notifications.t(num: @name.interests)) %>
+      <% end %>
+      <%= panel.render(Components::PanelFooter.new { footer }) %>
     <% end %>
 
   <% end %>

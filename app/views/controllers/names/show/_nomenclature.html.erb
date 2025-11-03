@@ -10,11 +10,14 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
 %>
 
 <%= render(Components::Panel.new(
-      heading: :show_name_nomenclature.l,
-      heading_links: heading_links,
-      inner_class: "name-section",
+      panel_class: "name-section",
       inner_id: "nomenclature"
-    )) do %>
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= :show_name_nomenclature.l %>
+    <span class="float-right"><%= heading_links %></span>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
   <% concat(tag.div(class: "row") do
 
     concat(tag.div(class: "col-sm-6 name-section") do
@@ -123,5 +126,6 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
       end
     end
     %>
+  <% end %>
   <% end %>
 <% end %>

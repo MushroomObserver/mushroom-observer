@@ -8,11 +8,17 @@
   %>
 
   <%= render(Components::Panel.new(
-        inner_id: "location_general_description",
-        heading: heading,
-        heading_links: heading_links
-      )) do %>
-    <%= @description.notes.tpl %>
+        inner_id: "location_general_description"
+      )) do |panel| %>
+    <%= panel.render(Components::PanelHeading.new) do %>
+      <%= heading %>
+      <% if @user %>
+        <span class="float-right"><%= heading_links %></span>
+      <% end %>
+    <% end %>
+    <%= panel.render(Components::PanelBody.new) do %>
+      <%= @description.notes.tpl %>
+    <% end %>
   <% end %>
 
 <% end %>

@@ -5,12 +5,17 @@ heading_links = @user ? link.html_safe : ""
 %>
 
 <%= render(Components::Panel.new(
-      heading: heading,
-      heading_links: heading_links,
-      inner_class: "name-section",
+      panel_class: "name-section",
       inner_id: "name_lifeform",
       attributes: { data: { name_panels_target: "lifeform" } }
-    )) do %>
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= heading %>
+    <% if @user %>
+      <span class="float-right"><%= heading_links %></span>
+    <% end %>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
   <% if !@name.lifeform.blank? %>
     <%= tag.div(class: "mb-2") do %>
       <% @name.lifeform.strip.split(" ").each do |word| %>
@@ -19,10 +24,11 @@ heading_links = @user ? link.html_safe : ""
     <% end %>
   <% end %>
 
-  <% if @first_child %>
-    <%= tag.p(
-      link_to(:show_name_propagate_lifeform.t,
-              form_to_propagate_lifeform_of_name_path(@name.id))
-    ) %>
+    <% if @first_child %>
+      <%= tag.p(
+        link_to(:show_name_propagate_lifeform.t,
+                form_to_propagate_lifeform_of_name_path(@name.id))
+      ) %>
+    <% end %>
   <% end %>
 <% end %>

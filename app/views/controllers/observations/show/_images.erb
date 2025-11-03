@@ -3,10 +3,13 @@ links = observation_show_image_links(obs: obs)
 %>
 
 <%= render(Components::Panel.new(
-      heading: :IMAGES.t,
-      heading_links: links,
-      inner_class: "show_images list-group text-center m-0"
-    )) do %>
+      panel_class: "show_images list-group text-center m-0"
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= :IMAGES.t %>
+    <span class="float-right"><%= links %></span>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
   <% if @images.any? %>
     <%
     # This sort puts the thumbnail first.
@@ -36,5 +39,6 @@ links = observation_show_image_links(obs: obs)
         <%= tag.div(notes, class: "text-center") if !notes.blank? %>
       </div>
     <% end %>
+  <% end %>
   <% end %>
 <% end %>

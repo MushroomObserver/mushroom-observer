@@ -8,20 +8,27 @@
 <%
   shown = search_panel_shown(form:, search:, sections:)
   collapsed = search_panel_collapsed(form:, search:, sections:)
-  open = collapse = nil
-  if sections[:collapsed].present?
-    collapse = "#{controller.search_type}_#{heading}"
-    open = search_panel_open?(search:, sections:)
-  end
+  has_collapse = sections[:collapsed].present?
+  collapse_id = has_collapse ? "#{controller.search_type}_#{heading}" : nil
+  open = has_collapse ? search_panel_open?(search:, sections:) : false
 %>
 
-<%= render(
-      Components::Panel.new(
-        heading: :"search_term_group_#{heading}".l,
-        collapse:,
-        open: open || false,
-        collapse_message: :MORE.l,
-        panel_bodies: [shown, collapsed],
-        formatted_content: true
-      )
-    ) %>
+<%= render(Components::Panel.new) do |panel| %>
+  <% if has_collapse %>
+    <%= panel.render(Components::PanelCollapseHeading.new(
+      target: collapse_id,
+      open:,
+      collapse_message: :MORE.l
+    ) { :"search_term_group_#{heading}".l }) %>
+    <%= panel.render(Components::PanelBody.new { shown }) %>
+    <%= panel.render(Components::PanelCollapseBody.new(
+      id: collapse_id,
+      open:
+    ) do %>
+      <%= panel.render(Components::PanelBody.new { collapsed }) %>
+    <% end) %>
+  <% else %>
+    <%= panel.render(Components::PanelHeading.new { :"search_term_group_#{heading}".l }) %>
+    <%= panel.render(Components::PanelBody.new { shown }) %>
+  <% end %>
+<% end %>

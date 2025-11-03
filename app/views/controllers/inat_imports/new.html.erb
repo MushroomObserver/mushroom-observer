@@ -10,20 +10,24 @@
                      value: User.current.inat_username) %>
 
     <%= render(Components::Panel.new(inner_id: "choose_observation",
-                     heading: :inat_choose_observations.l,
-                     inner_class: "name-section")) do %>
-      <%= f.label(:inat_id, "#{:inat_import_list.l}: ") %>
-      <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
-                       class: "form-control") %>
-      <%= check_box_with_label(form: f, field: :all,
-                               class: "mt-3", label: :inat_import_all.l) %>
+                     panel_class: "name-section")) do |panel| %>
+      <%= panel.render(Components::PanelHeading.new { :inat_choose_observations.l }) %>
+      <%= panel.render(Components::PanelBody.new) do %>
+        <%= f.label(:inat_id, "#{:inat_import_list.l}: ") %>
+        <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
+                         class: "form-control") %>
+        <%= check_box_with_label(form: f, field: :all,
+                                 class: "mt-3", label: :inat_import_all.l) %>
+      <% end %>
     <% end %>
 
     <%= check_box_with_label(form: f, field: :consent,
                              class: "mt-3", label: :inat_import_consent.l) %>
-    <%= render(Components::Panel.new) do %>
-      <p><b><%= :inat_details_heading.l %></b></p>
-      <%= :inat_details_list.t %>
+    <%= render(Components::Panel.new) do |panel| %>
+      <%= panel.render(Components::PanelBody.new) do %>
+        <p><b><%= :inat_details_heading.l %></b></p>
+        <%= :inat_details_list.t %>
+      <% end %>
     <% end %>
     <%= f.submit(:SUBMIT.l, { class: "btn btn-default" }) %>
   <% end %>

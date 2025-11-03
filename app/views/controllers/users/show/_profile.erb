@@ -26,11 +26,15 @@ footer =
 %>
 
 <%= render(Components::Panel.new(
-      heading: heading,
-      inner_id: "user_profile",
-      heading_links: heading_links,
-      footer: footer
-    )) do %>
+      inner_id: "user_profile"
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= heading %>
+    <% if heading_links %>
+      <span class="float-right"><%= heading_links %></span>
+    <% end %>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
 
   <%= if @show_user.image_id
     tag.div(class: "float-left mr-5 mb-3") do
@@ -62,13 +66,17 @@ footer =
     <%= @show_user.notes.tpl %>
   <% end %>
 
-  <%= tag.div(class: "mt-3") do %>
-    <% links = user_profile_tabs(show_user: @show_user, user: @user) %>
-    <% links = context_nav_links(links) %>
-    <%= tag.ul(class: "list-unstyled mb-0") do %>
-      <% links.reject(&:nil?).each do |link| %>
-        <%= tag.li(link) %>
+    <%= tag.div(class: "mt-3") do %>
+      <% links = user_profile_tabs(show_user: @show_user, user: @user) %>
+      <% links = context_nav_links(links) %>
+      <%= tag.ul(class: "list-unstyled mb-0") do %>
+        <% links.reject(&:nil?).each do |link| %>
+          <%= tag.li(link) %>
+        <% end %>
       <% end %>
     <% end %>
+  <% end %>
+  <% if footer %>
+    <%= panel.render(Components::PanelFooter.new { footer }) %>
   <% end %>
 <% end %>

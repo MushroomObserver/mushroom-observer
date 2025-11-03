@@ -6,11 +6,10 @@ class PanelTest < UnitTestCase
   include ComponentTestHelper
 
   def test_basic_panel_with_heading_and_content
-    component = Components::Panel.new(heading: "Test Heading") do
-      "Panel content"
+    html = render(Components::Panel.new) do |panel|
+      panel.render(Components::PanelHeading.new { "Test Heading" })
+      panel.render(Components::PanelBody.new { "Panel content" })
     end
-
-    html = render(component)
 
     assert_includes(html, "panel panel-default")
     assert_includes(html, "panel-heading")
@@ -20,60 +19,44 @@ class PanelTest < UnitTestCase
   end
 
   def test_panel_with_footer
-    component = Components::Panel.new(
-      heading: "Test Heading",
-      footer: "Footer text"
-    ) do
-      "Panel content"
+    html = render(Components::Panel.new) do |panel|
+      panel.render(Components::PanelHeading.new { "Test Heading" })
+      panel.render(Components::PanelBody.new { "Panel content" })
+      panel.render(Components::PanelFooter.new { "Footer text" })
     end
-
-    html = render(component)
 
     assert_includes(html, "panel-footer")
     assert_includes(html, "Footer text")
   end
 
   def test_panel_with_custom_class
-    component = Components::Panel.new(
-      heading: "Test",
-      panel_class: "custom-class"
-    ) do
-      "Content"
+    html = render(Components::Panel.new(panel_class: "custom-class")) do |panel|
+      panel.render(Components::PanelHeading.new { "Test" })
+      panel.render(Components::PanelBody.new { "Content" })
     end
-
-    html = render(component)
 
     assert_includes(html, "panel panel-default custom-class")
   end
 
-  def test_collapsible_panel
-    component = Components::Panel.new(
-      heading: "Click to expand",
-      collapse: "test_panel",
-      open: false
-    ) do
-      "Collapsible content"
+  def test_panel_with_multiple_bodies
+    html = render(Components::Panel.new) do |panel|
+      panel.render(Components::PanelHeading.new { "Test" })
+      panel.render(Components::PanelBody.new { "First body" })
+      panel.render(Components::PanelBody.new { "Second body" })
     end
 
-    html = render(component)
-
-    assert_includes(html, 'id="test_panel"')
-    assert_includes(html, "panel-collapse collapse")
-    assert_includes(html, "panel-collapse-trigger")
-    assert_not_includes(html, "panel-collapse collapse in")
+    assert_includes(html, "First body")
+    assert_includes(html, "Second body")
   end
 
-  def test_collapsible_panel_open
-    component = Components::Panel.new(
-      heading: "Click to collapse",
-      collapse: "test_panel",
-      open: true
-    ) do
-      "Expanded content"
+  def test_panel_with_thumbnail
+    html = render(Components::Panel.new) do |panel|
+      panel.render(Components::PanelHeading.new { "Test" })
+      panel.render(Components::PanelThumbnail.new { "Thumbnail content" })
+      panel.render(Components::PanelBody.new { "Body content" })
     end
 
-    html = render(component)
-
-    assert_includes(html, "panel-collapse collapse in")
+    assert_includes(html, "thumbnail-container")
+    assert_includes(html, "Thumbnail content")
   end
 end

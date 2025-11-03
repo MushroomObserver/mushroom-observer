@@ -3,13 +3,14 @@
 <%# Show table of past versions for show_past_object pages. %>
 <%= render(
       Components::Panel.new(
-        heading: :VERSIONS.t,
-        inner_id: "#{obj.type_tag}_versions",
-        formatted_content: true
+        inner_id: "#{obj.type_tag}_versions"
       )
-    ) do
-      make_table(
-        rows: build_version_table(obj, versions, args),
-        table_opts: { class: "table-hover mb-0" }
-      )
+    ) do |panel|
+      panel.render(Components::PanelHeading.new { :VERSIONS.t })
+      panel.render(Components::PanelBody.new {
+        make_table(
+          rows: build_version_table(obj, versions, args),
+          table_opts: { class: "table-hover mb-0" }
+        ).html_safe
+      })
     end %>

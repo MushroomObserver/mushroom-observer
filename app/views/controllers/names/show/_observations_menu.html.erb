@@ -4,10 +4,13 @@ heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
 %>
 
 <%= render(Components::Panel.new(
-      heading: :about_this_taxon.l,
-      heading_links: heading_link,
       inner_id: "name_observations_menu"
-    )) do %>
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= :about_this_taxon.l %>
+    <span class="float-right"><%= heading_link %></span>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
   <%= tag.div(class: "row") do
 
     concat(tag.div(class: "col-sm-6 name-section") do
@@ -46,4 +49,5 @@ heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
       end)
     end)
   end %>
+  <% end %>
 <% end %>

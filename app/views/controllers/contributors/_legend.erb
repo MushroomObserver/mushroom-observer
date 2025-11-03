@@ -25,9 +25,13 @@ total = 0
 %>
 
 <%= render(Components::Panel.new(
-      heading: heading, heading_links: links,
-      inner_class: "collapse", inner_id: "contribution_legend"
-    )) do %>
+      panel_class: "collapse", inner_id: "contribution_legend"
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= heading %>
+    <span class="float-right"><%= links %></span>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
 
   <%= tag.div(:users_by_contribution_1.tp, class: "mb-3") %>
 
@@ -65,5 +69,5 @@ total = 0
   </table>
 
   <%= :users_by_contribution_3.tp %>
-
+  <% end %>
 <% end %>

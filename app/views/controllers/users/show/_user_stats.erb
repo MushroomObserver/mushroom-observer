@@ -5,11 +5,11 @@ total = 0
 %>
 
 <%= render(Components::Panel.new(
-      heading: :show_user_title.t(user: name),
       inner_id: "user_stats"
-    )) do %>
-
-  <table class="table table-condensed bg-none mb-0">
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new { :show_user_title.t(user: name) }) %>
+  <%= panel.render(Components::PanelBody.new) do %>
+    <table class="table table-condensed bg-none mb-0">
     <% rows.each do |row|
       field = row[:field]
       label = row[:label]
@@ -49,6 +49,6 @@ total = 0
         <td align="right"><%= total %></td>
       </tr>
     <% end %>
-  </table>
-
+    </table>
+  <% end %>
 <% end %>

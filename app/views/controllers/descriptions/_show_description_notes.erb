@@ -12,8 +12,11 @@ model.all_note_fields.each do |field|
 
   any_notes = true
 %>
-  <%= render(Components::Panel.new(heading: :"form_#{type}s_#{field}".l)) do %>
-    <%= value.tpl %>
+  <%= render(Components::Panel.new) do |panel| %>
+    <%= panel.render(Components::PanelHeading.new { :"form_#{type}s_#{field}".l }) %>
+    <%= panel.render(Components::PanelBody.new) do %>
+      <%= value.tpl %>
+    <% end %>
   <% end %>
 <% end %>
 

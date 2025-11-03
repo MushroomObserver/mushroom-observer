@@ -5,15 +5,21 @@ heading_links = @user ? link.html_safe : ""
 %>
 
 <%= render(Components::Panel.new(
-      heading: heading,
-      heading_links: heading_links,
-      inner_class: "name-section",
+      panel_class: "name-section",
       inner_id: "name_classification",
       attributes: { data: { name_panels_target: "classification" } }
-    )) do %>
-  <%= concat(approved_name_and_parents(@name)) %>
-  <%= concat(name_subtaxa_query_link(@name, @children_query)) if @first_child %>
-  <%= concat(refresh_classification_link(@name)) %>
-  <%= concat(propagate_classification_link(@name)) if @first_child %>
-  <%= concat(inherit_classification_link(@name)) %>
+    )) do |panel| %>
+  <%= panel.render(Components::PanelHeading.new) do %>
+    <%= heading %>
+    <% if @user %>
+      <span class="float-right"><%= heading_links %></span>
+    <% end %>
+  <% end %>
+  <%= panel.render(Components::PanelBody.new) do %>
+    <%= approved_name_and_parents(@name) %>
+    <%= name_subtaxa_query_link(@name, @children_query) if @first_child %>
+    <%= refresh_classification_link(@name) %>
+    <%= propagate_classification_link(@name) if @first_child %>
+    <%= inherit_classification_link(@name) %>
+  <% end %>
 <% end %>
