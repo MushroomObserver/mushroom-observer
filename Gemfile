@@ -67,8 +67,9 @@ gem("terser")
 gem("phlex-rails")
 # Use `prop` keyword to define object arguments and their types, and set ivars.
 gem("literal")
-# Strict ivars: raises on nil (undefined). Require in config/boot.rb
-gem("strict_ivars", require: false)
+# Strict ivars: raises a NameError if an ivar is nil (undefined). Must be
+# required in config/boot.rb to work: https://github.com/yippee-fun/strict_ivars
+# gem("strict_ivars", require: false)
 
 # importmap for js module handling
 gem("importmap-rails")

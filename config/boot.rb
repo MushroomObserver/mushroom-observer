@@ -7,4 +7,4 @@ require("bundler/setup") if File.exist?(ENV["BUNDLE_GEMFILE"])
 
 # Strict Ivars raises a NameError when you read an undefined instance varaible
 # Reduces sneaky view errors from unexpected nils
-require("strict_ivars")
+# require("strict_ivars")
