@@ -82,7 +82,6 @@ export default class extends Controller {
   }
 
   tryToGeolocate() {
-    debugger
     this.verbose("geocode:tryToGeolocate")
     const address = this.placeInputTarget.value
 
@@ -250,7 +249,6 @@ export default class extends Controller {
     // Return if controller property needElevations is false
     if (!this.needElevationsValue) return false
 
-    debugger
     this.verbose("geocode:getElevations")
     // "Get Elevation" button on a form sends this param
     if (this.hasGetElevationTarget &&
