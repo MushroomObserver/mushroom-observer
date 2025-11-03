@@ -17,6 +17,8 @@
           class: "form-control") %>
       <%= check_box_with_label(form: f, field: :all,
                                class: "mt-3", label: :inat_import_all.l) %>
+      <%= :inat_import_all_details_intro.tp %>
+      <%= :inat_import_all_details.tp %>
     <% end %>
 
     <%= panel_block(id: "preview", heading: :inat_import_preview.l,
