@@ -9,7 +9,6 @@ class InatImportsTest < CapybaraIntegrationTestCase
     visit(new_inat_import_path)
 
     fill_in("inat_username", with: "anything")
-    page.check("consent")
     click_on("Submit")
 
     assert_flash_text(:inat_list_xor_all.l)
