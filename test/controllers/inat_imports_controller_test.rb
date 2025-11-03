@@ -117,7 +117,6 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     stub_count_request(inat_username: inat_import.inat_username,
                        ids: inat_ids, body: '{"total_results":3}')
-    disable_unsafe_html_filter
     post(:create, params: params)
 
     assert_form_action({ action: :create },
@@ -142,7 +141,6 @@ class InatImportsControllerTest < FunctionalTestCase
     }
 
     login(user.login)
-    disable_unsafe_html_filter
     stub_count_request(inat_username: user.inat_username)
     post(:create, params: params)
 
@@ -159,7 +157,6 @@ class InatImportsControllerTest < FunctionalTestCase
     }
 
     login(import.user.login)
-    disable_unsafe_html_filter
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
     post(:create, params: params)
@@ -177,7 +174,6 @@ class InatImportsControllerTest < FunctionalTestCase
     }
 
     login(import.user.login)
-    disable_unsafe_html_filter
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
 
@@ -199,7 +195,6 @@ class InatImportsControllerTest < FunctionalTestCase
     login(import.user.login)
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
-    disable_unsafe_html_filter
 
     assert_no_difference(
       "Observation.count",
@@ -224,7 +219,6 @@ class InatImportsControllerTest < FunctionalTestCase
     login(import.user.login)
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
-    disable_unsafe_html_filter
 
     assert_no_difference("Observation.count",
                          "Imported observation(s) though none designated") do
@@ -252,7 +246,6 @@ class InatImportsControllerTest < FunctionalTestCase
     login(import.user.login)
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
-    disable_unsafe_html_filter
     post(:create, params: params)
 
     assert_form_action(action: :create)
@@ -278,7 +271,6 @@ class InatImportsControllerTest < FunctionalTestCase
     login(import.user.login)
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
-    disable_unsafe_html_filter
 
     assert_no_difference("Observation.count",
                          "Imported a previously imported iNat obs") do
@@ -309,7 +301,6 @@ class InatImportsControllerTest < FunctionalTestCase
     login(import.user.login)
     stub_count_request(inat_username: import.inat_username,
                        ids: import.inat_ids)
-    disable_unsafe_html_filter
 
     assert_no_difference(
       "Observation.count",
