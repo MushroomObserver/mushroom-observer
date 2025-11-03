@@ -53,12 +53,7 @@ class Components::PanelCollapseHeading < Components::Base
       end
     end
 
-    chevron_down = link_icon(:chevron_down, title: :OPEN.l,
-                                            class: "active-icon")
-    chevron_up = link_icon(:chevron_up, title: :CLOSE.l)
-
-    # rubocop:disable Rails/OutputSafety
-    raw("#{chevron_down} #{chevron_up}")
-    # rubocop:enable Rails/OutputSafety
+    link_icon(:chevron_down, title: :OPEN.l, class: "active-icon")
+    link_icon(:chevron_up, title: :CLOSE.l)
   end
 end
