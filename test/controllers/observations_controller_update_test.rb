@@ -25,6 +25,23 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
                   count: 1)
   end
 
+  def test_edit_observation_form_with_duplicate_note_field
+    obs = observations(:template_and_orphaned_notes_obs)
+    user = obs.user
+    login(user.login)
+    key = obs.notes.keys.find { |k| k.to_s.include?("_") }.to_s
+    template = key.tr("_", " ")
+    user_option = template.upcase
+    alt_option = "Alt #{template}"
+    user.notes_template += ", #{user_option}, #{alt_option}"
+    user.save!
+    params = { id: obs.id }
+    get(:edit, params:)
+    assert_no_match(/\[#{key}\]/, @response.body, 1)
+    assert_match(/\[#{key.upcase}\]/, @response.body)
+    assert_match(/\[#{alt_option.tr(" ", "_")}\]/, @response.body, 1)
+  end
+
   def test_collector_can_edit_observation
     obs = observations(:newbie_obs)
     login("foray_newbie")
