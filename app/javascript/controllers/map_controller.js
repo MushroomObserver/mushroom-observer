@@ -48,10 +48,14 @@ export default class extends GeocodeController {
     this.lastGeocodedLatLng = { lat: null, lng: null }
     this.lastGeolocatedAddress = ""
 
+    this.libraries = ["maps", "geocoding", "marker"]
+    if (this.needElevationsValue == true)
+      this.libraries.push("elevation")
+
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
       version: "quarterly",
-      libraries: ["maps", "geocoding", "marker", "elevation"]
+      libraries: this.libraries
     })
 
     if (this.collection) {
@@ -80,7 +84,8 @@ export default class extends GeocodeController {
     loader
       .load()
       .then((google) => {
-        this.elevationService = new google.maps.ElevationService()
+        if (this.needElevationsValue == true)
+          this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
         // Everything except the obs form map: draw the map.
         if (!(this.map_type === "observation" && this.editable)) {

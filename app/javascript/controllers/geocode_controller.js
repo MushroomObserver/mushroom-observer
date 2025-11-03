@@ -11,6 +11,7 @@ export default class extends Controller {
     "highInput", "lowInput", "placeInput", "locationId",
     "latInput", "lngInput", "altInput", "getElevation"]
   static outlets = ["autocompleter"]
+  static values = { needElevations: Boolean, default: true }
 
   connect() {
     this.element.dataset.geocode = "connected"
@@ -27,17 +28,22 @@ export default class extends Controller {
     this.lastGeocodedLatLng = { lat: null, lng: null }
     this.lastGeolocatedAddress = ""
 
+    this.libraries = ["maps", "geocoding", "marker"]
+    if (this.needElevationsValue == true)
+      this.libraries.push("elevation")
+
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
       version: "quarterly",
-      libraries: ["maps", "geocoding", "marker", "elevation"]
+      libraries: this.libraries
     })
 
     loader
       .load()
       .then((google) => {
-        this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
+        if (this.needElevationsValue == true)
+          this.elevationService = new google.maps.ElevationService()
       })
       .catch((e) => {
         console.error("error loading gmaps: " + e)
@@ -76,6 +82,7 @@ export default class extends Controller {
   }
 
   tryToGeolocate() {
+    debugger
     this.verbose("geocode:tryToGeolocate")
     const address = this.placeInputTarget.value
 
@@ -241,6 +248,9 @@ export default class extends Controller {
   // `points` is then the event
   getElevations(points, type = "") {
     // Return if controller property needElevations is false
+    if (!this.needElevationsValue) return false
+
+    debugger
     this.verbose("geocode:getElevations")
     // "Get Elevation" button on a form sends this param
     if (this.hasGetElevationTarget &&
@@ -273,6 +283,8 @@ export default class extends Controller {
 
   // Computes an array of arrays of [lat, lng] from a set of bounds on the fly
   // Returns array of Google Map points {lat:, lng:} LatLngLiteral objects
+  // Does not actually get elevations from the API.
+  // Only lat/lng points that can be sent for elevations.
   sampleElevationPointsOf(bounds) {
     return [
       { lat: bounds?.south, lng: bounds?.west },
