@@ -22,7 +22,7 @@ end
 
   <% if @herbarium_record.observations.size > 1 %>
     <%= render(Components::Alert.new(
-      :edit_affects_multiple_observations.t(type: :herbarium_record),
+      message: :edit_affects_multiple_observations.t(type: :herbarium_record),
       level: :warning, class: "multiple-observations-warning"
     )) %>
   <% end %>

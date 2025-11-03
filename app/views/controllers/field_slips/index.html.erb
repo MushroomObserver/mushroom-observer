@@ -7,7 +7,7 @@ container_class(:wide)
 project_title = @query&.params_cache&.dig(:project)&.title || ""
 %>
 
-<%= render(Components::Alert.new(notice, level: :success)) if notice %>
+<%= render(Components::Alert.new(message: notice, level: :success)) if notice %>
 
 <%= tag.div(class: "content-block") do %>
   <% if @project %>

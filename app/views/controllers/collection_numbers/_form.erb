@@ -22,7 +22,7 @@ end
 
   <% if @collection_number.observations.size > 1 %>
     <%= render(Components::Alert.new(
-      :edit_affects_multiple_observations.t(type: :collection_number),
+      message: :edit_affects_multiple_observations.t(type: :collection_number),
       level: :warning, class: "multiple-observations-warning"
     )) %>
   <% end %>

@@ -52,7 +52,7 @@
       tag.span(tracker.response_errors, class: "violation-highlight"),
       tag.br,
 
-      render(Components::Alert.new(tracker.help, level: :warning, class: "mt-3")),
+      render(Components::Alert.new(message: tracker.help, level: :warning, class: "mt-3")),
       tag.br
     ].safe_join
   end

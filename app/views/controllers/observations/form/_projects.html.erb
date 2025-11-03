@@ -5,14 +5,14 @@
 error_messages = suspect_messages = nil
 if @error_checked_projects.any?
   error_messages = {
-    level: "danger",
+    level: :danger,
     list: @error_checked_projects,
     help: :form_observations_projects_out_of_range_help.t
   }
 end
 if @suspect_checked_projects.any?
   suspect_messages = {
-    level: "warning",
+    level: :warning,
     list: @suspect_checked_projects,
     help: :form_observations_projects_out_of_range_help.t +
           :form_observations_projects_out_of_range_admin_help.t(button_name:)
