@@ -240,6 +240,7 @@ export default class extends Controller {
   // Action can be attached to the "Get Elevation" button.
   // `points` is then the event
   getElevations(points, type = "") {
+    // Return if controller property needElevations is false
     this.verbose("geocode:getElevations")
     // "Get Elevation" button on a form sends this param
     if (this.hasGetElevationTarget &&
