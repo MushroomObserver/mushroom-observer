@@ -1,4 +1,4 @@
-<%= tag.div(class: "alert-warning") do %>
+<%= render(Components::Alert.new(level: :warning)) do %>
   <%= tag.p("#{:list_observations_suggestions.t}:") %>
   <% names.each do |name, count| %>
     <%= tag.div(class: "pl-3") do %>
