@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require_relative("../support/inat_stub_helpers")
+
 module InatImportJobTestDoubles
   include Inat::Constants
+  include InatStubHelpers
 
   def stub_inat_interactions(
     id_above: 0,
@@ -132,4 +135,6 @@ module InatImportJobTestDoubles
       to_return(status: 200, body: "".to_json,
                 headers: { "Content-Type" => "application/json" })
   end
+
+  # stub_genus_lookup and user_agent moved to test/support/inat_stub_helpers.rb
 end
