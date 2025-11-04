@@ -18,7 +18,9 @@
 
   <% if project_alias.errors.any? %>
     <% count = pluralize(project_alias.errors.count, "error") %>
-    <%= render(Components::Alert.new(level: :danger, id: "error_explanation")) do
+    <%= render(
+      Components::Alert.new(level: :danger, id: "error_explanation")
+    ) do
       [
         tag.h2("#{count} prohibited this project alias from being saved:"),
         tag.ul do

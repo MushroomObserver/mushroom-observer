@@ -9,9 +9,11 @@ flash_error(@error) if @error && @objects.empty?
 nonpersonal = (@query&.params&.dig(:nonpersonal))
 %>
 
-<%= render(Components::Alert.new(level: :warning, class: "container-text mt-3")) do
+<%= render(
+  Components::Alert.new(level: :warning, class: "container-text mt-3")
+) do
   :herbarium_index_merge_help.tp(name: @merge.format_name,
-                                  url: reload_with_args(merge: nil))
+                                 url: reload_with_args(merge: nil))
 end if @merge %>
 
 <%= paginated_results do %>
