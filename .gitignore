@@ -36,7 +36,7 @@ coverage
 .vscode
 
 # Ignore Claude code config
-.claude
+.claude/
 
 # Ignore sensitive config stuff.
 /config/master.key
