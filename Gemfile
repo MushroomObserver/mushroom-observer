@@ -67,6 +67,8 @@ gem("terser")
 gem("phlex-rails")
 # Use `prop` keyword to define object arguments and their types, and set ivars.
 gem("literal")
+# Enable Slot API for Phlex
+gem("phlex-slotable")
 # Strict ivars: raises a NameError if an ivar is nil (undefined). Must be
 # required in config/boot.rb to work: https://github.com/yippee-fun/strict_ivars
 # gem("strict_ivars", require: false)

@@ -345,6 +345,8 @@ GEM
       phlex (~> 2.3.0)
       railties (>= 7.1, < 9)
       zeitwerk (~> 2.7)
+    phlex-slotable (1.0.0)
+      phlex (>= 2, < 3)
     pp (0.6.3)
       prettyprint
     prawn (2.5.0)
@@ -618,6 +620,7 @@ DEPENDENCIES
   mo_acts_as_versioned (>= 0.6.6)!
   oauth2
   phlex-rails
+  phlex-slotable
   prawn
   prawn-manual_builder
   prawn-svg
