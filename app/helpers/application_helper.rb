@@ -143,15 +143,16 @@ module ApplicationHelper
     return "" unless flash_notices?
 
     notices = flash_get_notices
-    alert_class = case flash_notice_level
-                  when 0 then "alert-success"
-                  when 1 then "alert-warning"
-                  when 2 then "alert-danger"
-                  end
+    level = case flash_notice_level
+            when 0 then :success
+            when 1 then :warning
+            when 2 then :danger
+            end
     flash_clear
 
-    render(partial: "application/app/flash_notices",
-           locals: { notices:, alert_class: })
+    render(Components::Alert.new(
+             level: level, id: "flash_notices", class: "mt-3"
+           )) { notices }
   end
 
   def render_turbo_stream_flash_messages

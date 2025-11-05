@@ -376,7 +376,9 @@ module SearchFormHelper
   end
 
   def region_with_in_box_fields(**args)
-    tag.div(data: { controller: "map", map_open: true }) do
+    tag.div(
+      data: { controller: "map", map_open: true, need_elevations_value: false }
+    ) do
       [
         form_location_input_find_on_map(
           form: args[:form], field: :region, value: args[:search]&.region,
@@ -405,10 +407,8 @@ module SearchFormHelper
   end
 
   def search_editable_map(minimal_loc)
-    # capture do
     make_map(objects: [minimal_loc], editable: true, map_type: "location",
              map_open: true, controller: nil)
-    # end
   end
 
   # To be mappable, we need to instantiate a minimal location from the search.

@@ -4,7 +4,7 @@ add_edit_icons(@field_slip)
 container_class(:wide)
 %>
 
-<%= alert_block(notice, level: :success) if notice %>
+<%= render(Components::Alert.new(message: notice, level: :success)) if notice %>
 
 <%= content_padded { render(@field_slip) } %>
 

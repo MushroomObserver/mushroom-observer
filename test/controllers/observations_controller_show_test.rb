@@ -67,6 +67,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_match("+photo", @response.body)
     assert_match("/lookups/lookup_user/rolf", @response.body)
+    assert_no_match("orphaned_caption_1", @response.body)
+    assert_match("orphaned caption 1", @response.body)
   end
 
   def test_show_observation_with_simple_notes

@@ -35,6 +35,9 @@ coverage
 # Ignore VS Code config
 .vscode
 
+# Ignore Claude code config
+.claude/
+
 # Ignore sensitive config stuff.
 /config/master.key
 /config/newrelic.yml
