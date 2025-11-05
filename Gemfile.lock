@@ -255,6 +255,8 @@ GEM
     libv8-node (23.6.1.0-x86_64-linux)
     libv8-node (23.6.1.0-x86_64-linux-musl)
     lint_roller (1.1.0)
+    literal (1.8.1)
+      zeitwerk
     logger (1.7.0)
     loofah (2.24.1)
       crass (~> 1.0.2)
@@ -337,6 +339,12 @@ GEM
       ast (~> 2.4.1)
       racc
     pdf-core (0.10.0)
+    phlex (2.3.1)
+      zeitwerk (~> 2.7)
+    phlex-rails (2.3.1)
+      phlex (~> 2.3.0)
+      railties (>= 7.1, < 9)
+      zeitwerk (~> 2.7)
     pp (0.6.3)
       prettyprint
     prawn (2.5.0)
@@ -601,6 +609,7 @@ DEPENDENCIES
   i18n
   importmap-rails
   jbuilder
+  literal
   mimemagic
   mini_racer (~> 0.18.1)
   minitest
@@ -608,6 +617,7 @@ DEPENDENCIES
   mission_control-jobs
   mo_acts_as_versioned (>= 0.6.6)!
   oauth2
+  phlex-rails
   prawn
   prawn-manual_builder
   prawn-svg

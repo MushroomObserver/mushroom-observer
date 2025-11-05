@@ -63,6 +63,14 @@ gem("bootstrap-sass")
 # Use Terser as compressor for JavaScript assets
 gem("terser")
 
+# Phlex view components
+gem("phlex-rails")
+# Use `prop` keyword to define object arguments and their types, and set ivars.
+gem("literal")
+# Strict ivars: raises a NameError if an ivar is nil (undefined). Must be
+# required in config/boot.rb to work: https://github.com/yippee-fun/strict_ivars
+# gem("strict_ivars", require: false)
+
 # importmap for js module handling
 gem("importmap-rails")
 # stimulus for simpler, more maintainable js
@@ -125,9 +133,6 @@ gem("rest-client")
 gem("google-cloud-storage")
 
 # for creating zip files
-# RubyZip 3.0 is coming!
-# **********************
-
 # The public API of some Rubyzip classes has been modernized to use named
 # parameters for optional arguments. Please check your usage of the
 # following classes:
@@ -135,12 +140,6 @@ gem("google-cloud-storage")
 #   * `Zip::Entry`
 #   * `Zip::InputStream`
 #   * `Zip::OutputStream`
-
-# Please ensure that your Gemfiles and .gemspecs are suitably restrictive
-# to avoid an unexpected breakage when 3.0 is released (e.g. ~> 2.3.0).
-# See https://github.com/rubyzip/rubyzip for details. The Changelog also
-# lists other enhancements and bugfixes that have been implemented since
-# version 2.3.0.
 gem("rubyzip", "~> 3.2.1")
 
 # QR code generator
