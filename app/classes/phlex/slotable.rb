@@ -3,9 +3,22 @@
 require "phlex"
 
 # NOTE: This is MO's adaptation of the gem `phlex-slotable`.
-# The difference is only syntax: our setter methods don't start with `with_`.
-# This file should be kept up to date with the main gem, but that's not
-# expected to change often.
+# This file should be kept up to date with the main gem, but
+# it's not expected to change often. The gem documentation
+# recommends including this file in a Rails app as an alternative
+# to introducing a gem dependency.
+#
+# The difference is syntax: our setter methods don't start with
+# `with_#{slot}`.
+#
+# In this example, the gem syntax would be `list.with_item`
+#
+#   render(Components::List.new) do |list|
+#     list.item { "Item A" }
+#     list.item { "Item B" }
+#     list.item { "Item C" }
+#   end
+#
 module Phlex
   module Slotable
     autoload :VERSION, "./slotable/version"
