@@ -351,7 +351,7 @@ class Textile < String
       (?: _[a-zA-Z]+)? # optionally including underscores
     )
     \s+
-    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
+    (?<id> [^_\s](?:[^\n]+?[^_\s])?) # id -- integer or string
     (?: _+)
 
     (?! (?: \w|</[a-z]+>)) # discard if trailed by word char or html close tag

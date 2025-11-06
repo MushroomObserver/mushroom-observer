@@ -193,6 +193,13 @@ class LookupsControllerTest < FunctionalTestCase
                       "/lookups/lookup_user/I.+G.+Saponov")
   end
 
+  def test_underscore_user_lookup
+    login
+    user = users(:underscore_user)
+    get(:lookup_user, params: { id: user.login })
+    assert_redirected_to(user_path(user.id))
+  end
+
   def test_lookup_glossary_term_by_number
     term = glossary_terms(:conic_glossary_term)
 
