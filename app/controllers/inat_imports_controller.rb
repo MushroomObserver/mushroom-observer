@@ -126,7 +126,6 @@ class InatImportsController < ApplicationController
 
   def init_ivars
     @inat_import.update(
-      state: "Authorizing",
       import_all: params[:all],
       importables: preliminary_importables_count,
       imported_count: 0,
@@ -156,6 +155,7 @@ class InatImportsController < ApplicationController
   end
 
   def request_inat_user_authorization
+    @inat_import.update(state: "Authorizing")
     redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
