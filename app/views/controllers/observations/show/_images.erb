@@ -41,7 +41,7 @@ links = observation_show_image_links(obs: obs)
             notes = notes.safe_join(safe_br)
           %>
           <%= tag.div(notes, class: "text-center") if !notes.blank? %>
-        </div>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
