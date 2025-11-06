@@ -64,12 +64,9 @@ class Components::Panel < Components::Base
     end
   end
 
-  def render_heading(classes:, &content)
+  def render_heading(classes:)
     classes = classes.presence || "h4 panel-title"
-    render_heading_inner(classes:, &content)
-  end
 
-  def render_heading_inner(classes:)
     div(class: "panel-heading") do
       div(class: classes) do
         span { yield if block_given? }
