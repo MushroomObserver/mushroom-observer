@@ -10,8 +10,12 @@ footer = icon_link_with_query(*observations_at_location_tab(@location))
 <%= render(Components::Panel.new(
       panel_id: "location_coordinates"
     )) do |panel| %>
-  <%= panel.with_heading { :COORDINATES.l } %>
-  <%= panel.with_heading_links { heading_links.safe_join(" | ") } %>
+  <%= panel.with_heading do %>
+    <%= :COORDINATES.l %>
+  <% end %>
+  <%= panel.with_heading_links do %>
+    <%= heading_links.safe_join(" | ") %>
+  <% end %>
   <%= panel.with_body do %>
     <div class="text-center mx-auto" style="max-width:30em">
       <div class="text-center my-4">
@@ -45,5 +49,7 @@ footer = icon_link_with_query(*observations_at_location_tab(@location))
       </div><!-- .text-center -->
     </div><!-- .text-center -->
   <% end %>
-  <%= panel.with_footer { footer } %>
+  <%= panel.with_footer do %>
+    <%= footer %>
+  <% end %>
 <% end %>

@@ -27,8 +27,12 @@ total = 0
 <%= render(Components::Panel.new(
       panel_class: "collapse", panel_id: "contribution_legend"
     )) do |panel| %>
-  <%= panel.with_heading { heading } %>
-  <%= panel.with_heading_links { links } %>
+  <%= panel.with_heading do %>
+    <%= heading %>
+  <% end %>
+  <%= panel.with_heading_links do %>
+    <%= links %>
+  <% end %>
   <%= panel.with_body do %>
     <%= tag.div(:users_by_contribution_1.tp, class: "mb-3") %>
 

@@ -2,8 +2,12 @@
 <%= render(Components::Panel.new(
       panel_id: "observation_species_lists"
     )) do |panel| %>
-  <%= panel.with_heading { :show_lists_header.t } %>
-  <%= panel.with_heading_links { link } %>
+  <%= panel.with_heading do %>
+    <%= :show_lists_header.t %>
+  <% end %>
+  <%= panel.with_heading_links do %>
+    <%= link %>
+  <% end %>
   <% if obs.species_lists.any? %>
     <%= panel.with_body do %>
       <%= tag.ul(class: "list-unstyled mb-0") do

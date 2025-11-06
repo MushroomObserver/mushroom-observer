@@ -6,7 +6,9 @@
       panel_id: "observation_name_info",
       panel_class: "name-section small"
     )) do |panel| %>
-  <%= panel.with_heading { :about_this_taxon.l } %>
+  <%= panel.with_heading do %>
+    <%= :about_this_taxon.l %>
+  <% end %>
   <%= panel.with_body do %>
     <%= tag.div(class: "row") do %>
       <%= tag.div(class: "col-xs-6") do

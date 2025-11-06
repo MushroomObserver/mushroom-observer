@@ -38,7 +38,9 @@ class Components::Panel < Components::Base
   prop :collapse_message, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
 
-  slot :heading
+  slot :heading, lambda { |classes: nil, &content|
+    render_heading(classes:, &content)
+  }
   slot :heading_links
   slot :thumbnail
   slot :body, lambda { |classes: nil, collapse: false, &content|
@@ -56,16 +58,18 @@ class Components::Panel < Components::Base
       # yield if block_given?
 
       render_thumbnail if thumbnail_slot?
-      render_heading if heading_slot?
+      render(heading_slot) if heading_slot?
       body_slots.each { |slot| render(slot) } if body_slots?
       render_footer if footer_slot?
     end
   end
 
-  def render_heading
+  def render_heading(classes:, &content)
+    classes = classes.presence || "h4 panel-title"
+
     div(class: "panel-heading") do
-      h4(class: "panel-title") do
-        render(heading_slot)
+      div(class: classes) do
+        yield if block_given?
         render_heading_links if heading_links_slot? || @collapsible
       end
     end

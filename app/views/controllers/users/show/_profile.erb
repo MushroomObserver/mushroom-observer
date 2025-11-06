@@ -26,8 +26,14 @@ footer =
 %>
 
 <%= render(Components::Panel.new(panel_id: "user_profile")) do |panel| %>
-  <%= panel.with_heading { heading } %>
-  <%= panel.with_heading_links { heading_links } if heading_links %>
+  <%= panel.with_heading do %>
+    <%= heading %>
+  <% end %>
+  <% if heading_links %>
+    <%= panel.with_heading_links do %>
+      <%= heading_links %>
+    <% end %>
+  <% end %>
   <%= panel.with_body do %>
     <%= if @show_user.image_id
       tag.div(class: "float-left mr-5 mb-3") do
@@ -72,5 +78,10 @@ footer =
       <% end %>
     <% end %>
   <% end %>
-  <%= panel.with_footer { footer } if footer %>
+
+  <% if footer %>
+    <%= panel.with_footer do %>
+      <%= footer %>
+    <% end %>
+  <% end %>
 <% end %>

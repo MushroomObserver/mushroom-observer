@@ -8,8 +8,14 @@
       panel_id: "observation_details",
       panel_class: "name-section"
     )) do |panel| %>
-  <%= panel.with_heading { :show_observation_details.l } %>
-  <%= panel.with_heading_links { obs_details_links(obs) } if user %>
+  <%= panel.with_heading do %>
+    <%= :show_observation_details.l %>
+  <% end %>
+  <% if user %>
+    <%= panel.with_heading_links do %>
+      <%= obs_details_links(obs) %>
+    <% end %>
+  <% end %>
   <%= panel.with_body do %>
     <%= observation_details_when_where_who(obs:, user:) %>
 
