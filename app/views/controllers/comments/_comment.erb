@@ -24,7 +24,8 @@ tag.div(
             [target_name_link, target_type].safe_join(" ")
           end)
         end
-        concat(tag.div(comment.summary.tl, class: "font-weight-bold"))
+        concat(tag.div(comment.summary.tl,
+                       class: "comment-summary font-weight-bold"))
         concat(tag.div(class: "comment-info") do
           concat(tag.span(class: "comment-author text-nowrap") do
             ["#{:BY.t}: ",

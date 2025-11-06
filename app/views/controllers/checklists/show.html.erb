@@ -18,13 +18,15 @@ add_context_nav(checklist_show_tabs(user: @show_user, list: @species_list))
   </h4>
 <% end %>
 
-<%= render(Components::Panel.new(panel_class: "checklist")) do %>
-  <ul class="list-unstyled">
-    <% @data.taxa.each do |taxon| %>
-      <%= checklist_name_link(taxon:, data: @data,
-                              params: [@show_user, @project, @location, @species_list]) %>
-    <% end %>
-  </ul>
+<%= render(Components::Panel.new(panel_class: "checklist")) do |panel| %>
+  <%= panel.with_body do %>
+    <ul class="list-unstyled">
+      <% @data.taxa.each do |taxon| %>
+        <%= checklist_name_link(taxon:, data: @data,
+                                params: [@show_user, @project, @location, @species_list]) %>
+      <% end %>
+    </ul>
+  <% end %>
 <% end %>
 
 <div>

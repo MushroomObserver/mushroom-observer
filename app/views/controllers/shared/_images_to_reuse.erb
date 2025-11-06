@@ -43,11 +43,13 @@ include: [:user, { observations: :name }])
 
     <% @objects.each do |image| %>
       <%= matrix_box(class: "text-center", id: image.id) do %>
-        <%= render Components::Panel.new do %>
-          <%= interactive_image(@user, image, votes: false, original: true,
-                                image_link: form_action.merge(img_id: image.id),
-                                link_method: :post,
-                                extra_classes: "image-to-reuse") %>
+        <%= render Components::Panel.new do |panel| %>
+          <%= panel.with_body do %>
+            <%= interactive_image(@user, image, votes: false, original: true,
+                                  image_link: form_action.merge(img_id: image.id),
+                                  link_method: :post,
+                                  extra_classes: "image-to-reuse") %>
+          <% end %>
         <% end %>
       <% end %>
     <% end %>

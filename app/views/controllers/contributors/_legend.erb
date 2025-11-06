@@ -27,47 +27,44 @@ total = 0
 <%= render(Components::Panel.new(
       panel_class: "collapse", inner_id: "contribution_legend"
     )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new) do %>
-    <%= heading %>
-    <span class="float-right"><%= links %></span>
-  <% end %>
-  <%= panel.render(Components::PanelBody.new) do %>
+  <%= panel.with_heading { heading } %>
+  <%= panel.with_heading_links { links } %>
+  <%= panel.with_body do %>
+    <%= tag.div(:users_by_contribution_1.tp, class: "mb-3") %>
 
-  <%= tag.div(:users_by_contribution_1.tp, class: "mb-3") %>
+    <table class="table text-center bg-none mx-lg-5">
+      <% UserStats.fields_with_weight.keys.each do |field| %>
+        <tr>
+          <td><%= "user_stats_#{field}".to_sym.t %></td>
+          <td><%= UserStats::ALL_FIELDS[field][:weight] %></td>
+          <td></td>
+        </tr><!--.row-->
+      <% end %>
+    </table>
 
-  <table class="table text-center bg-none mx-lg-5">
-    <% UserStats.fields_with_weight.keys.each do |field| %>
-      <tr>
-        <td><%= "user_stats_#{field}".to_sym.t %></td>
-        <td><%= UserStats::ALL_FIELDS[field][:weight] %></td>
-        <td></td>
-      </tr><!--.row-->
-    <% end %>
-  </table>
+    <%= tag.p(:users_by_contribution_2.t, class: "pt-3") %>
 
-  <%= tag.p(:users_by_contribution_2.t, class: "pt-3") %>
-
-  <table class="table table-condensed bg-none w-auto mx-auto">
-    <% example_weights.each do |example|
-      add = (counter == 0) ? tag.span("", class: "ml-4") : "+"
-      counter += 1
-      total += example[:number] * example[:weight]
-      example_math = [
-        add, example[:number], "*", example[:weight]
-      ].safe_join(" ") %>
+    <table class="table table-condensed bg-none w-auto mx-auto">
+      <% example_weights.each do |example|
+        add = (counter == 0) ? tag.span("", class: "ml-4") : "+"
+        counter += 1
+        total += example[:number] * example[:weight]
+        example_math = [
+          add, example[:number], "*", example[:weight]
+        ].safe_join(" ") %>
+        <%= tag.tr do
+          concat(tag.td(example_math))
+          concat(tag.td(["(", example[:text], ")"].safe_join))
+          concat(tag.td)
+        end %>
+      <% end %>
       <%= tag.tr do
-        concat(tag.td(example_math))
-        concat(tag.td(["(", example[:text], ")"].safe_join))
+        concat(tag.td { tag.span(total.to_s, class: "ml-4") })
+        concat(tag.td(:users_by_contribution_2f.t))
         concat(tag.td)
       end %>
-    <% end %>
-    <%= tag.tr do
-      concat(tag.td { tag.span(total.to_s, class: "ml-4") })
-      concat(tag.td(:users_by_contribution_2f.t))
-      concat(tag.td)
-    end %>
-  </table>
+    </table>
 
-  <%= :users_by_contribution_3.tp %>
+    <%= :users_by_contribution_3.tp %>
   <% end %>
 <% end %>

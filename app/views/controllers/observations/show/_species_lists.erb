@@ -2,27 +2,25 @@
 <%= render(Components::Panel.new(
       inner_id: "observation_species_lists"
     )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new) do %>
-    <%= :show_lists_header.t %>
-    <span class="float-right"><%= link %></span>
-  <% end %>
-  <%= panel.render(Components::PanelBody.new) do %>
-  <%= if obs.species_lists.any?
-        tag.ul(class: "list-unstyled mb-0") do
-          obs.species_lists.map do |spl|
-            tag.li(id: "species_list_#{spl.id}") do
-              concat(link_to(spl.format_name.t, species_list_path(spl.id)))
-              if permission?(spl)
-                concat(put_button(name: "[#{:REMOVE.t}]",
-                                  path: observation_species_list_path(
-                                    id: obs.id, species_list_id: spl.id,
-                                    commit: "remove"
-                                  ),
-                                  data: { confirm: :are_you_sure.l }))
+  <%= panel.with_heading { :show_lists_header.t } %>
+  <%= panel.with_heading_links { link } %>
+  <% if obs.species_lists.any? %>
+    <%= panel.with_body do %>
+      <%= tag.ul(class: "list-unstyled mb-0") do
+            obs.species_lists.map do |spl|
+              tag.li(id: "species_list_#{spl.id}") do
+                concat(link_to(spl.format_name.t, species_list_path(spl.id)))
+                if permission?(spl)
+                  concat(put_button(name: "[#{:REMOVE.t}]",
+                                    path: observation_species_list_path(
+                                      id: obs.id, species_list_id: spl.id,
+                                      commit: "remove"
+                                    ),
+                                    data: { confirm: :are_you_sure.l }))
+                end
               end
-            end
-          end.safe_join
-        end
-      end %>
+            end.safe_join
+          end %>
+    <% end %>
   <% end %>
 <% end %>

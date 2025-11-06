@@ -42,4 +42,53 @@ module ComponentTestHelper
     assert(element, "Expected to find element matching '#{selector}'")
     assert_includes(element.text, text) if text
   end
+
+  # Assert that a child selector is nested within a parent selector
+  def assert_nested(html, parent_selector:, child_selector:, text: nil)
+    doc = Nokogiri::HTML(html)
+    parent = doc.at_css(parent_selector)
+    assert(
+      parent,
+      "Expected to find parent element matching '#{parent_selector}'"
+    )
+
+    child = parent.at_css(child_selector)
+    assert(
+      child,
+      "Expected to find child element '#{child_selector}' " \
+      "within parent '#{parent_selector}'"
+    )
+
+    assert_includes(child.text, text) if text
+    child
+  end
+
+  # Assert that text content is within a specific nested structure
+  def assert_text_in_nested_selector(html, text:, parent:, child: nil)
+    doc = Nokogiri::HTML(html)
+    parent_element = doc.at_css(parent)
+    assert(
+      parent_element,
+      "Expected to find parent element matching '#{parent}'"
+    )
+
+    if child
+      child_element = parent_element.at_css(child)
+      assert(
+        child_element,
+        "Expected to find child element '#{child}' within parent '#{parent}'"
+      )
+      assert_includes(
+        child_element.text,
+        text,
+        "Expected '#{child}' within '#{parent}' to contain '#{text}'"
+      )
+    else
+      assert_includes(
+        parent_element.text,
+        text,
+        "Expected '#{parent}' to contain '#{text}'"
+      )
+    end
+  end
 end

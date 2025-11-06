@@ -1,8 +1,8 @@
 <%= render(Components::Panel.new(
       inner_id: "name_projects"
     )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new { :show_name_create_draft.t }) %>
-  <%= panel.render(Components::PanelBody.new) do %>
+  <%= panel.with_heading { :show_name_create_draft.t } %>
+  <%= panel.with_body do %>
     <% @projects.each do |project| %>
       <%= link_to(
         project.title,

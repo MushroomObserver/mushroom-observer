@@ -1,15 +1,13 @@
-<% footer = tag.div(id: "location_previous") do
-  show_previous_version(@location, @versions)
-end %>
-
-<%= render(Components::Panel.new(
-      inner_id: "location_footer"
-    )) do |panel| %>
-  <%= panel.render(Components::PanelBody.new) do %>
-    <%= concat(tag.div(id: "location_authors_editors") do
+<%= render(Components::Panel.new(inner_id: "location_footer")) do |panel| %>
+  <%= panel.with_body do %>
+    <%= tag.div(id: "location_authors_editors") do
           show_authors_and_editors(obj: @location, versions: @versions, user: @user)
-        end) %>
-    <%= concat(:show_name_num_notifications.t(num: @location.interests)) %>
+        end %>
+    <%= :show_name_num_notifications.t(num: @location.interests) %>
   <% end %>
-  <%= panel.render(Components::PanelFooter.new { footer }) %>
+  <%= panel.with_footer do %>
+    <%= tag.div(id: "location_previous") do
+          show_previous_version(@location, @versions)
+        end %>
+  <% end %>
 <% end %>

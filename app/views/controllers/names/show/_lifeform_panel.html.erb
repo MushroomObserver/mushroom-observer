@@ -9,20 +9,16 @@ heading_links = @user ? link.html_safe : ""
       inner_id: "name_lifeform",
       attributes: { data: { name_panels_target: "lifeform" } }
     )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new) do %>
-    <%= heading %>
-    <% if @user %>
-      <span class="float-right"><%= heading_links %></span>
-    <% end %>
-  <% end %>
-  <%= panel.render(Components::PanelBody.new) do %>
-  <% if !@name.lifeform.blank? %>
-    <%= tag.div(class: "mb-2") do %>
-      <% @name.lifeform.strip.split(" ").each do |word| %>
-        <%= tag.p(:"lifeform_#{word}".t) %>
+  <%= panel.with_heading { heading } %>
+  <%= panel.with_heading_links { heading_links } if @user %>
+  <%= panel.with_body do %>
+    <% if !@name.lifeform.blank? %>
+      <%= tag.div(class: "mb-2") do %>
+        <% @name.lifeform.strip.split(" ").each do |word| %>
+          <%= tag.p(:"lifeform_#{word}".t) %>
+        <% end %>
       <% end %>
     <% end %>
-  <% end %>
 
     <% if @first_child %>
       <%= tag.p(

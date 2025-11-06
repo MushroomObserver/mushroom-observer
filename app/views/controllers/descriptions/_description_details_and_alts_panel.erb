@@ -4,11 +4,11 @@
 <%= render(Components::Panel.new(
       inner_id: "description_details_and_alts"
     )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new) do %>
-    <%= :show_observation_details.l %>
-    <span class="float-right"><%= description_change_links(@user, @description) %></span>
-  <% end %>
-  <%= panel.render(Components::PanelBody.new) do %>
+  <%= panel.with_heading { :show_observation_details.l } %>
+  <%= panel.with_heading_links do
+        description_change_links(@user, @description)
+      end %>
+  <%= panel.with_body do %>
     <%= tag.div(class: "row") do
           [
             tag.div(class: "col-xs-12 col-md-6") do
@@ -22,7 +22,7 @@
           ].safe_join
         end %>
   <% end %>
-  <% if review %>
-    <%= panel.render(Components::PanelFooter.new { show_description_export_and_review(@description) }) %>
-  <% end %>
+  <%= panel.with_footer do
+        show_description_export_and_review(@description)
+      end if review %>
 <% end %>

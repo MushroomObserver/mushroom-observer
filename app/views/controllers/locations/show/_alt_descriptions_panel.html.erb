@@ -12,12 +12,10 @@ html = add_list_of_projects(object, type, html, projects) if projects.present?
 %>
 
 <%# Show existing drafts, with link to create new one. %>
-<%= render(Components::Panel.new(
-      inner_id: "alt_descriptions"
-    )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new) do %>
-    <%= :show_name_descriptions.l %>
-    <span class="float-right"><%= icon_link_to(*create_description_tab(object, type)) %></span>
-  <% end %>
-  <%= panel.render(Components::PanelBody.new { html.html_safe }) %>
+<%= render(Components::Panel.new(inner_id: "alt_descriptions")) do |panel| %>
+  <%= panel.with_heading { :show_name_descriptions.l } %>
+  <%= panel.with_heading_links do
+        icon_link_to(*create_description_tab(object, type))
+      end %>
+  <%= panel.with_body { html.html_safe } %>
 <% end %>

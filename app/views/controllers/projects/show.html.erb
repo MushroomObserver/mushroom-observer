@@ -7,23 +7,28 @@ container_class(:wide)
 
 <%= render(partial: "shared/list_search", locals: { object: @project }) %>
 
-<%= render(Components::Panel.new(inner_id: "project_summary")) do %>
-  <%= tag.p(@project.summary.to_s.html_safe.tpl) %>
+<%= render(Components::Panel.new(inner_id: "project_summary")) do |panel| %>
+  <%= panel.with_body do %>
+    <%= tag.p(@project.summary.to_s.html_safe.tpl) %>
 
-  <% if @drafts.any? %>
-    <p><b><%= :show_project_drafts.t %>:</b>
-      <%= @drafts.length %><br />
-      <div class="ml-3">
-        <% @drafts.each do |draft| %>
-        <%= link_to(draft.name&.display_name&.t,
-                    name_description_path(draft.id)) %>
-        (<%= user_link(draft.user) %>)<br />
-        <% end %>
-      </div>
-    </p>
+    <% if @drafts.any? %>
+      <p><b><%= :show_project_drafts.t %>:</b>
+        <%= @drafts.length %><br />
+        <div class="ml-3">
+          <% @drafts.each do |draft| %>
+          <%= link_to(draft.name&.display_name&.t,
+                      name_description_path(draft.id)) %>
+          (<%= user_link(draft.user) %>)<br />
+          <% end %>
+        </div>
+      </p>
+    <% end %>
+
+    <%= tag.p do
+          [tag.strong("#{:show_project_created_at.l}:"),
+           @project.created_at.web_date].safe_join(" ")
+        end %>
   <% end %>
-
-  <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
 <% end %>
 
 <p id="project_join_trust_edit">

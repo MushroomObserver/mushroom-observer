@@ -5,40 +5,38 @@ links = observation_show_image_links(obs: obs)
 <%= render(Components::Panel.new(
       panel_class: "show_images list-group text-center m-0"
     )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new) do %>
-    <%= :IMAGES.t %>
-    <span class="float-right"><%= links %></span>
-  <% end %>
-  <%= panel.render(Components::PanelBody.new) do %>
-  <% if @images.any? %>
-    <%
-    # This sort puts the thumbnail first.
-    # We can't use thumb_image, because we haven't eager-loaded it;
-    # we *have* eager-loaded all the other images.
-    @images.each do |image| %>
-      <div class="list-group-item">
-        <%= interactive_image(
-              @user,
-              image,
-              image_link: image.show_link_args.merge({ obs: obs.id }),
-              original: true,
-              is_set: true,
-              votes: true
-            ) %>
+  <%= panel.with_heading { :IMAGES.t } %>
+  <%= panel.with_heading_links { links } %>
+  <%= panel.with_body do %>
+    <% if @images.any? %>
+      <%
+      # This sort puts the thumbnail first.
+      # We can't use thumb_image, because we haven't eager-loaded it;
+      # we *have* eager-loaded all the other images.
+      @images.each do |image| %>
+        <div class="list-group-item">
+          <%= interactive_image(
+                @user,
+                image,
+                image_link: image.show_link_args.merge({ obs: obs.id }),
+                original: true,
+                is_set: true,
+                votes: true
+              ) %>
 
-        <%
-          notes = []
-          if image.copyright_holder != obs.user.legal_name
-            notes << image_copyright(image)
-          end
-          if !image.notes.blank?
-            notes << image.notes.tl.truncate_html(300)
-          end
-          notes = notes.safe_join(safe_br)
-        %>
-        <%= tag.div(notes, class: "text-center") if !notes.blank? %>
-      </div>
+          <%
+            notes = []
+            if image.copyright_holder != obs.user.legal_name
+              notes << image_copyright(image)
+            end
+            if !image.notes.blank?
+              notes << image.notes.tl.truncate_html(300)
+            end
+            notes = notes.safe_join(safe_br)
+          %>
+          <%= tag.div(notes, class: "text-center") if !notes.blank? %>
+        </div>
+      <% end %>
     <% end %>
-  <% end %>
   <% end %>
 <% end %>

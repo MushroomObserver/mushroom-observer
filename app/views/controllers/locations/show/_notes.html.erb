@@ -1,15 +1,9 @@
-<%= unless @location.notes.blank?
-      render(Components::Panel.new(
-        inner_id: "location_notes"
-      )) do |panel|
-        panel.render(Components::PanelHeading.new) do
-          concat(:NOTES.l)
-          concat(tag.span(class: "float-right") do
-            icon_link_to(*edit_location_tab(@location))
-          end)
-        end
-        panel.render(Components::PanelBody.new) do
-          @location.notes.to_s.html_safe.tpl
-        end
+<%= render(Components::Panel.new(inner_id: "location_notes")) do |panel|
+      panel.with_heading do
+        concat(:NOTES.l)
+        concat(tag.span(class: "float-right") do
+          icon_link_to(*edit_location_tab(@location))
+        end)
       end
-    end %>
+      panel.with_body { @location.notes.to_s.html_safe.tpl }
+    end unless @location.notes.blank? %>

@@ -5,16 +5,10 @@ link = icon_link_to(*name_new_description_tab(@name))
 heading_links = @user ? link&.html_safe : ""
 %>
 
-<%= render(Components::Panel.new(
-      inner_id: "name_descriptions"
-    )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new) do %>
-    <%= heading %>
-    <% if @user %>
-      <span class="float-right"><%= heading_links %></span>
-    <% end %>
-  <% end %>
-  <%= panel.render(Components::PanelBody.new) do %>
+<%= render(Components::Panel.new(inner_id: "name_descriptions")) do |panel| %>
+  <%= panel.with_heading { heading } %>
+  <%= panel.with_heading_links { heading_links } if @user %>
+  <%= panel.with_body do %>
     <% description_links.each do |desc| %>
       <%= tag.div(desc) %>
     <% end %>

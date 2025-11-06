@@ -46,18 +46,18 @@ form_element_data = {
 %>
 
 <%= form_with(
-  model: @observation,
-  url: {
-    action:,
-    id: @observation,
-    approved_name: @given_name,
-    approved_where: @place_name
-  },
-  method:,
-  multipart: true,
-  id: "observation_form",
-  data: form_element_data
-) do |f| %>
+      model: @observation,
+      url: {
+        action:,
+        id: @observation,
+        approved_name: @given_name,
+        approved_where: @place_name
+      },
+      method:,
+      multipart: true,
+      id: "observation_form",
+      data: form_element_data
+    ) do |f| %>
 
   <% if @field_code %>
     <%= tag.p("#{:form_observations_field_code.t} #{@field_code}") %>
@@ -67,103 +67,78 @@ form_element_data = {
   <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(Components::Panel.new(
-    inner_id: "observation_images_details"
-  )) do |panel| %>
-    <%= panel.render(Components::PanelCollapseHeading.new(
-      target: "observation_images_details_inner",
-      open: true
-    ) { "#{:IMAGES.l} + #{:show_observation_details.l}" }) %>
-    <%= panel.render(Components::PanelCollapseBody.new(
-      id: "observation_images_details_inner",
-      open: true
-    ) do %>
+        inner_id: "observation_images_details",
+        collapsible: true,
+        collapse_id: "observation_images_details_inner",
+        expanded: true
+      )) do |panel| %>
+    <%= panel.with_heading do
+          "#{:IMAGES.l} + #{:show_observation_details.l}"
+        end %>
+    <%= panel.with_body(collapse: true) do %>
       <%= render(partial: "observations/form/images", locals: { f: }) %>
       <%= render(partial: "observations/form/details",
                  locals: { f:, action:, button_name:, location: @location,
                            logging_optional: }) %>
-    <% end) %>
-  <% end %>
-
-  <%= render(Components::Panel.new(
-    inner_id: "observation_naming_specimen"
-  )) do |panel| %>
-    <%= panel.render(Components::PanelCollapseHeading.new(
-      target: "observation_naming_specimen_inner",
-      open: create
-    ) { "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}" }) %>
-    <%= panel.render(Components::PanelCollapseBody.new(
-      id: "observation_naming_specimen_inner",
-      open: create
-    ) do %>
-      <%= panel.render(Components::PanelBody.new do %>
-        <%= tag.div(class: "row") do
-          concat(tag.div(class: "col-xs-12 col-md-6") do
-            render(partial: "observations/namings/fields", locals: naming_locals)
-          end) if create
-          concat(tag.div(class: "col-xs-12 col-md-6") do
-            render(partial: "observations/form/specimen_section",
-                   locals: { f:, action: })
-          end)
-        end %>
-      <% end) %>
-    <% end) %>
-  <% end %>
-
-  <%= render(Components::Panel.new(
-    inner_id: "observation_notes"
-  )) do |panel| %>
-    <%= panel.render(Components::PanelCollapseHeading.new(
-      target: "observation_notes_inner",
-      open: notes_open
-    ) { :NOTES.l }) %>
-    <%= panel.render(Components::PanelCollapseBody.new(
-      id: "observation_notes_inner",
-      open: notes_open
-    ) do %>
-      <%= panel.render(Components::PanelBody.new do %>
-        <%= render(partial: "shared/notes_fields",
-                   locals: { form: f, fields: notes_fields }) %>
-      <% end) %>
-    <% end) %>
-  <% end %>
-
-  <% if show_projects %>
-    <%= render(Components::Panel.new(
-      inner_id: "observation_projects"
-    )) do |panel| %>
-      <%= panel.render(Components::PanelCollapseHeading.new(
-        target: "observation_projects_inner",
-        open: @project_checks.any?
-      ) { :PROJECTS.l }) %>
-      <%= panel.render(Components::PanelCollapseBody.new(
-        id: "observation_projects_inner",
-        open: @project_checks.any?
-      ) do %>
-        <%= panel.render(Components::PanelBody.new do %>
-          <%= render(partial: "observations/form/projects",
-                     locals: { button_name: }) %>
-        <% end) %>
-      <% end) %>
     <% end %>
   <% end %>
 
-  <% if show_lists %>
-    <%= render(Components::Panel.new(
-      inner_id: "observation_lists"
-    )) do |panel| %>
-      <%= panel.render(Components::PanelCollapseHeading.new(
-        target: "observation_lists_inner",
-        open: @list_checks.any?
-      ) { :SPECIES_LISTS.l }) %>
-      <%= panel.render(Components::PanelCollapseBody.new(
-        id: "observation_lists_inner",
-        open: @list_checks.any?
-      ) do %>
-        <%= panel.render(Components::PanelBody.new do %>
-          <%= render(partial: "observations/form/species_lists") %>
-        <% end) %>
-      <% end) %>
+  <%= render(Components::Panel.new(
+        inner_id: "observation_naming_specimen",
+        collapsible: true,
+        collapse_id: "observation_naming_specimen_inner",
+        expanded: create
+      )) do |panel| %>
+    <%= panel.with_heading { "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}" } %>
+    <%= panel.with_body(collapse: true) do %>
+      <%= tag.div(class: "row") do
+        concat(tag.div(class: "col-xs-12 col-md-6") do
+          render(partial: "observations/namings/fields", locals: naming_locals)
+        end) if create
+        concat(tag.div(class: "col-xs-12 col-md-6") do
+          render(partial: "observations/form/specimen_section",
+                 locals: { f:, action: })
+        end)
+      end %>
     <% end %>
   <% end %>
+
+  <%= render(Components::Panel.new(
+        inner_id: "observation_notes",
+        collapsible: true,
+        collapse_id: "observation_notes_inner",
+        expanded: notes_open
+      )) do |panel| %>
+    <%= panel.with_heading { :NOTES.l } %>
+    <%= panel.with_body(collapse: true) do %>
+      <%= render(partial: "shared/notes_fields",
+                 locals: { form: f, fields: notes_fields }) %>
+    <% end %>
+  <% end %>
+
+  <%= render(Components::Panel.new(
+        inner_id: "observation_projects",
+        collapsible: true,
+        collapse_id: "observation_projects_inner",
+        expanded: @project_checks.any?
+      )) do |panel| %>
+    <%= panel.with_heading { :PROJECTS.l } %>
+    <%= panel.with_body(collapse: true) do %>
+      <%= render(partial: "observations/form/projects",
+                 locals: { button_name: }) %>
+    <% end %>
+  <% end if show_projects %>
+
+  <%= render(Components::Panel.new(
+        inner_id: "observation_lists",
+        collapsible: true,
+        collapse_id: "observation_lists_inner",
+        expanded: @list_checks.any?
+      )) do |panel| %>
+    <%= panel.with_heading { :SPECIES_LISTS.l } %>
+    <%= panel.with_body(collapse: true) do %>
+      <%= render(partial: "observations/form/species_lists") %>
+    <% end %>
+  <% end if show_lists %>
 
 <% end %><!--[/form:observation]-->

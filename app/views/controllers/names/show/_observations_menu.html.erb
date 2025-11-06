@@ -1,53 +1,52 @@
 <%#  This is just a two-column panel %>
 <%
+heading = :about_this_taxon.l
 heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
 %>
 
 <%= render(Components::Panel.new(
       inner_id: "name_observations_menu"
     )) do |panel| %>
-  <%= panel.render(Components::PanelHeading.new) do %>
-    <%= :about_this_taxon.l %>
-    <span class="float-right"><%= heading_link %></span>
-  <% end %>
-  <%= panel.render(Components::PanelBody.new) do %>
-  <%= tag.div(class: "row") do
+  <%= panel.with_heading { heading } %>
+  <%= panel.with_heading_links { heading_link } %>
+  <%= panel.with_body do %>
+    <%= tag.div(class: "row") do
 
-    concat(tag.div(class: "col-sm-6 name-section") do
-      concat(tag.p(:show_observations_of.t))
-      concat(tag.div(class: "pl-3") do
-        concat(name_related_taxa_observation_links(@name, @obss))
-        # Observations of this name's subtaxa, if any
-        concat(tag.p do
-          [link_to(:show_subtaxa_obss.l,
-                   add_q_param(observations_path, @subtaxa_query)),
-           " (#{@has_subtaxa})"].safe_join
-        end) if @has_subtaxa
+      concat(tag.div(class: "col-sm-6 name-section") do
+        concat(tag.p(:show_observations_of.t))
+        concat(tag.div(class: "pl-3") do
+          concat(name_related_taxa_observation_links(@name, @obss))
+          # Observations of this name's subtaxa, if any
+          concat(tag.p do
+            [link_to(:show_subtaxa_obss.l,
+                    add_q_param(observations_path, @subtaxa_query)),
+            " (#{@has_subtaxa})"].safe_join
+          end) if @has_subtaxa
+        end)
+        concat(tag.div(class: "py-3") do
+          concat(tag.p(link_to(*occurrence_map_for_name_tab(@name))))
+        end)
       end)
-      concat(tag.div(class: "py-3") do
-        concat(tag.p(link_to(*occurrence_map_for_name_tab(@name))))
-      end)
-    end)
 
-    concat(tag.div(class: "col-sm-6 name-section") do
-      concat(tag.p("#{:research_links.l}:"))
-      concat(tag.div(class: "pl-3") do
-        if @name.classification =~ /Phylum: _Ascomycota_/
-          concat(tag.p(link_to(*ascomycete_org_name_tab(@name))))
-        end
-        concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
-        concat(tag.p(link_to(*gbif_name_tab(@name))))
-        concat(tag.p(link_to(*user_google_images_for_name_tab(@user, @name))))
-        concat(tag.p(link_to(*google_name_tab(@name))))
-        concat(tag.p(link_to(*inat_name_tab(@name))))
-        if @name.searchable_in_registry?
-          concat(tag.p(link_to(*mushroomexpert_name_tab(@name))))
-          concat(tag.p(link_to(*mycoportal_name_tab(@name))))
-        end
-        concat(tag.p(link_to(*ncbi_nucleotide_term_tab(@name))))
-        concat(tag.p(link_to(*wikipedia_term_tab(@name))))
+      concat(tag.div(class: "col-sm-6 name-section") do
+        concat(tag.p("#{:research_links.l}:"))
+        concat(tag.div(class: "pl-3") do
+          if @name.classification =~ /Phylum: _Ascomycota_/
+            concat(tag.p(link_to(*ascomycete_org_name_tab(@name))))
+          end
+          concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
+          concat(tag.p(link_to(*gbif_name_tab(@name))))
+          concat(tag.p(link_to(*user_google_images_for_name_tab(@user, @name))))
+          concat(tag.p(link_to(*google_name_tab(@name))))
+          concat(tag.p(link_to(*inat_name_tab(@name))))
+          if @name.searchable_in_registry?
+            concat(tag.p(link_to(*mushroomexpert_name_tab(@name))))
+            concat(tag.p(link_to(*mycoportal_name_tab(@name))))
+          end
+          concat(tag.p(link_to(*ncbi_nucleotide_term_tab(@name))))
+          concat(tag.p(link_to(*wikipedia_term_tab(@name))))
+        end)
       end)
-    end)
-  end %>
+    end %>
   <% end %>
 <% end %>

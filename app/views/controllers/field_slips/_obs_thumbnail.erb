@@ -1,12 +1,10 @@
 <%= render(Components::Panel.new) do |panel| %>
-  <% if obs.thumb_image_id.present? %>
-    <%= panel.render(Components::PanelThumbnail.new {
-      interactive_image(@user, obs.thumb_image_id, votes: false,
-                        image_link: observation_path(obs))
-    }) %>
-  <% end %>
-  <%= panel.render(Components::PanelHeading.new { submit_button(form: form, button: button) }) %>
-  <%= panel.render(Components::PanelBody.new) do %>
+  <%= panel.with_thumbnail do
+        interactive_image(@user, obs.thumb_image_id, votes: false,
+                          image_link: observation_path(obs))
+      end if obs.thumb_image_id.present? %>
+  <%= panel.with_heading { submit_button(form: form, button: button) } %>
+  <%= panel.with_body do %>
     <%= link_to(obs.user_unique_format_name(@user).t, observation_path(obs)) %>
   <% end %>
 <% end %>

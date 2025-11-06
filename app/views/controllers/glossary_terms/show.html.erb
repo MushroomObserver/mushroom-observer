@@ -37,9 +37,11 @@ column_classes(:eight_four)
 <%= tag.div(class: "row") do %>
   <% @other_images.each do |image|  %>
     <%= tag.div(class: "col-sm-4") do %>
-      <%= render(Components::Panel.new) do %>
-        <%= interactive_image(@user, image, votes: true,
-                              id_prefix: "glossary_term_image") %>
+      <%= render(Components::Panel.new) do |panel| %>
+        <%= panel.with_thumbnail do
+              interactive_image(@user, image, votes: true,
+                                id_prefix: "glossary_term_image")
+            end %>
       <% end %>
     <% end %>
   <% end %>
@@ -57,8 +59,10 @@ column_classes(:eight_four)
 
 <%= render(Components::Panel.new(
       inner_id: "glossary_term_authors_editors"
-    )) do %>
-  <%= show_authors_and_editors(
-        obj: @glossary_term, versions: @versions, user: @user
-      ) %>
+    )) do |panel| %>
+  <%= panel.with_body do
+        show_authors_and_editors(
+          obj: @glossary_term, versions: @versions, user: @user
+        )
+      end %>
 <% end %>
