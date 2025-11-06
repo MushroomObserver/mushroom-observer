@@ -17,8 +17,8 @@
                                                 op: :mirror,
                                                 size: @size)) %> |
     <% end %>
-    <%= render(Components::ImageOriginalLink.new(image: @image)) %> |
-    <%= render(Components::ImageEXIFLink.new(image_id: @image.id)) %>
+    <%= original_image_link(@image, "") %> |
+    <%= image_exif_link(@image.id, "") %>
   <% end %><!--.panel-heading-->
 
   <%= panel.with_body do %>
