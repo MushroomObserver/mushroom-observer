@@ -6,8 +6,14 @@ heading_links = @user ? link&.html_safe : ""
 %>
 
 <%= render(Components::Panel.new(panel_id: "name_descriptions")) do |panel| %>
-  <%= panel.with_heading { heading } %>
-  <%= panel.with_heading_links { heading_links } if @user %>
+  <%= panel.with_heading do %>
+    <%= heading %>
+  <% end %>
+  <% if @user %>
+    <%= panel.with_heading_links do %>
+      <%= heading_links %>
+    <% end %>
+  <% end %>
   <%= panel.with_body do %>
     <% description_links.each do |desc| %>
       <%= tag.div(desc) %>

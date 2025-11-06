@@ -8,7 +8,15 @@ heading_links = @user ? [link1, link2].reject(&:nil?).safe_join(" | ") : ""
 <%= render(Components::Panel.new(
       panel_id: "name_general_description"
     )) do |panel| %>
-  <%= panel.with_heading { heading } %>
-  <%= panel.with_heading_links { heading_links } if @user %>
-  <%= panel.with_body { @best_description.tpl } %>
+  <%= panel.with_heading do %>
+    <%= heading %>
+  <% end %>
+  <% if @user %>
+    <%= panel.with_heading_links do %>
+      <%= heading_links %>
+    <% end %>
+  <% end %>
+  <%= panel.with_body do %>
+    <%= @best_description.tpl %>
+  <% end %>
 <% end %>

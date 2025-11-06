@@ -7,7 +7,9 @@
           image_link: observation_path(obs)
         ))
       end if obs.thumb_image_id.present? %>
-  <%= panel.with_heading { submit_button(form: form, button: button) } %>
+  <%= panel.with_heading do %>
+    <%= submit_button(form: form, button: button) %>
+  <% end %>
   <%= panel.with_body do %>
     <%= link_to(obs.user_unique_format_name(@user).t, observation_path(obs)) %>
   <% end %>

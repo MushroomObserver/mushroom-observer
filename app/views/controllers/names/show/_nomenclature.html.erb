@@ -13,8 +13,14 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
       panel_class: "name-section",
       panel_id: "nomenclature"
     )) do |panel| %>
-  <%= panel.with_heading { :show_name_nomenclature.l } %>
-  <%= panel.with_heading_links { heading_links } if @user %>
+  <%= panel.with_heading do %>
+    <%= :show_name_nomenclature.l %>
+  <% end %>
+  <% if @user %>
+    <%= panel.with_heading_links do %>
+      <%= heading_links %>
+    <% end %>
+  <% end %>
   <%= panel.with_body do %>
     <% concat(tag.div(class: "row") do
 

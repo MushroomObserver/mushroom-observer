@@ -245,6 +245,51 @@ div("", class: "clearfix")
 span("", class: "badge")
 ```
 
+### Phlex Slots in ERB Templates
+
+**CRITICAL**: Phlex slot blocks behave differently in ERB templates vs pure
+Ruby/Phlex code.
+
+#### In Pure Ruby/Phlex Code (Tests, Components)
+
+Inline blocks work fine because the block's return value is captured:
+
+```ruby
+# ✅ Works in test files and pure Phlex components
+render(Components::Panel.new) do |panel|
+  panel.with_heading { "Test Heading" }
+  panel.with_body { "Content" }
+end
+```
+
+#### In ERB Templates
+
+Blocks must explicitly output content using `<%= %>` tags, not just return
+values:
+
+```erb
+<%# ❌ Wrong - block returns value but doesn't output to ERB buffer %>
+<%= panel.with_heading { "Test" } %>
+<%= panel.with_heading { :NOTES.l } %>
+
+<%# ✅ Correct - block explicitly outputs content to ERB buffer %>
+<%= panel.with_heading do %>
+  Test
+<% end %>
+
+<%= panel.with_heading do %>
+  <%= :NOTES.l %>
+<% end %>
+```
+
+**Why the difference?**
+- In pure Ruby/Phlex, `yield` captures the block's return value
+- In ERB, the block needs to output to the ERB buffer via `<%= %>`
+
+**When fixing existing code:**
+- Test files (`.rb`) with `panel.with_heading { "string" }` are fine
+- ERB files (`.erb`) with `panel.with_heading { "string" }` need fixing
+
 ### Rendering Phlex Fragments
 
 **To render specific fragments from a Phlex component**, use the `.call(fragments: [...])` method:

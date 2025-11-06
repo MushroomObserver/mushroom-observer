@@ -1,25 +1,24 @@
 <!-- IMAGE_PANEL -->
-<%= render(Components::Panel.new) do |panel| %>
-  <%= panel.with_heading do %>
-    <div class="text-center small image-controls">
-      <% if permission?(@image) %>
-        <%= put_button(name: :image_show_rotate_left.t,
-                       path: transform_image_path(id: @image.id,
-                                                  op: :rotate_left,
-                                                  size: @size)) %> |
-        <%= put_button(name: :image_show_rotate_right.t,
-                       path: transform_image_path(id: @image.id,
-                                                  op: :rotate_right,
-                                                  size: @size)) %> |
-        <%= put_button(name: :image_show_mirror.t,
-                       path: transform_image_path(id: @image.id,
-                                                  op: :mirror,
-                                                  size: @size)) %> |
-      <% end %>
-      <%= render(Components::ImageOriginalLink.new(image: @image)) %> |
-      <%= render(Components::ImageEXIFLink.new(image_id: @image.id)) %>
-
-    </div><!--.text-center-->
+<%= render(Components::Panel.new(panel_id: "image_panel")) do |panel| %>
+  <%= panel.with_heading(
+    classes: "text-center small font-weight-normal image-controls"
+  ) do %>
+    <% if permission?(@image) %>
+      <%= put_button(name: :image_show_rotate_left.t,
+                      path: transform_image_path(id: @image.id,
+                                                op: :rotate_left,
+                                                size: @size)) %> |
+      <%= put_button(name: :image_show_rotate_right.t,
+                      path: transform_image_path(id: @image.id,
+                                                op: :rotate_right,
+                                                size: @size)) %> |
+      <%= put_button(name: :image_show_mirror.t,
+                      path: transform_image_path(id: @image.id,
+                                                op: :mirror,
+                                                size: @size)) %> |
+    <% end %>
+    <%= render(Components::ImageOriginalLink.new(image: @image)) %> |
+    <%= render(Components::ImageEXIFLink.new(image_id: @image.id)) %>
   <% end %><!--.panel-heading-->
 
   <%= panel.with_body do %>

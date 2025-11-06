@@ -9,8 +9,14 @@ heading_links = @user ? link.html_safe : ""
       panel_id: "name_classification",
       attributes: { data: { name_panels_target: "classification" } }
     )) do |panel| %>
-  <%= panel.with_heading { heading } %>
-  <%= panel.with_heading_links { heading_links } if @user %>
+  <%= panel.with_heading do %>
+    <%= heading %>
+  <% end %>
+  <% if @user %>
+    <%= panel.with_heading_links do %>
+      <%= heading_links %>
+    <% end %>
+  <% end %>
   <%= panel.with_body do %>
     <%= approved_name_and_parents(@name) %>
     <%= name_subtaxa_query_link(@name, @children_query) if @first_child %>

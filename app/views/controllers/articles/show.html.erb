@@ -10,7 +10,9 @@ add_edit_icons(@article)
 <% end %>
 
 <%= render(Components::Panel.new(panel_class: "mt-3")) do |panel| %>
-  <%= panel.with_body { @article.body.tpl } %>
+  <%= panel.with_body do %>
+    <%= @article.body.tpl %>
+  <% end %>
 <% end %>
 
 <%= show_object_footer(@user, @article) %>

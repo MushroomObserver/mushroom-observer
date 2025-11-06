@@ -5,5 +5,7 @@
           icon_link_to(*edit_location_tab(@location))
         end)
       end
-      panel.with_body { @location.notes.to_s.html_safe.tpl }
+      panel.with_body do
+        @location.notes.to_s.html_safe.tpl
+      end
     end unless @location.notes.blank? %>
