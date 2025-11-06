@@ -55,7 +55,7 @@ vote = (@image.vote_cache + 0.5).to_i rescue 0
     <!-- /YOUR_VOTE -->
   <% end %><!-- .panel-body -->
 
-  <%= panel.with_body(class: "p-0") do %>
+  <%= panel.with_body(classes: "p-0") do %>
     <!-- VOTE_TABLE -->
     <div id="show_votes_container">
       <% if votes.any? %>
