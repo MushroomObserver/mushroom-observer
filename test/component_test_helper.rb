@@ -14,6 +14,15 @@ module ComponentTestHelper
     @controller ||= ActionView::TestCase::TestController.new
   end
 
+  # Render a component and return the HTML string
+  def render_component(component, &block)
+    if block
+      render(component, &block)
+    else
+      render(component)
+    end
+  end
+
   # Parse rendered HTML as a Nokogiri fragment for advanced assertions
   def render_fragment(component)
     html = render(component)
@@ -24,5 +33,13 @@ module ComponentTestHelper
   def render_document(component)
     html = render(component)
     Nokogiri::HTML5(html)
+  end
+
+  # Assert HTML contains a specific CSS selector with optional text
+  def assert_html(html, selector, text: nil)
+    doc = Nokogiri::HTML(html)
+    element = doc.at_css(selector)
+    assert(element, "Expected to find element matching '#{selector}'")
+    assert_includes(element.text, text) if text
   end
 end

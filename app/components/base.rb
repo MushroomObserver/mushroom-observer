@@ -6,6 +6,7 @@ class Components::Base < Phlex::HTML
   # Include any helpers you want to be available across all components
   include Phlex::Rails::Helpers::Routes
   include Phlex::Rails::Helpers::LinkTo
+  include Phlex::Rails::Helpers::ClassNames
 
   # Register custom output helpers (return HTML)
   register_output_helper :show_title_id_badge
@@ -21,6 +22,7 @@ class Components::Base < Phlex::HTML
   register_output_helper :text_field_with_label
   register_output_helper :select_with_label
   register_output_helper :link_icon
+  register_output_helper :make_table
 
   # Register custom value helpers (return values)
   register_value_helper :permission?

@@ -4,7 +4,7 @@ action = controller.action_name
 
 <% if field_slip.errors.any? %>
   <% count = pluralize(field_slip.errors.count, :error.t, plural: :errors.t) %>
-  <%= alert_block(level: :danger) do
+  <%= render(Components::Alert.new(level: :danger)) do
     [
       tag.p("#{count} #{:field_slip_errors.t}:"),
       tag.ul do
