@@ -12,7 +12,7 @@
 # - Top-right overlay: Remove image button
 #
 # @example
-#   render Components::Form::ImageCarouselItem.new(
+#   render Components::FormCarouselItem.new(
 #     user: current_user,
 #     image: @image,
 #     index: 0,
@@ -20,7 +20,7 @@
 #     thumb_id: 123,
 #     camera_info: { lat: "45.5", lng: "-122.6", ... }
 #   )
-class Components::Form::ImageCarouselItem < Components::BaseImage
+class Components::FormCarouselItem < Components::BaseImage
   include Phlex::Rails::Helpers::RadioButtonTag
 
   # Additional form carousel-specific properties
@@ -108,14 +108,14 @@ class Components::Form::ImageCarouselItem < Components::BaseImage
   def render_form_column(img_instance, img_id)
     div(class: "col-12 col-md-6") do
       div(class: "form-panel") do
-        render(Components::Form::ImageFields.new(
+        render(Components::FormImageFields.new(
                  user: @user,
                  image: img_instance,
                  img_id: img_id,
                  upload: @upload
                ))
 
-        render(Components::Form::ImageCameraInfo.new(
+        render(Components::FormCameraInfo.new(
                  img_id: img_id,
                  **@camera_info
                ))

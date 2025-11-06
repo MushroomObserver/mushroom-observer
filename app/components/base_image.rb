@@ -28,7 +28,7 @@ class Components::BaseImage < Components::Base
   # Core properties
   prop :user, _Nilable(User)
   # Accept both Image instances and Integer IDs.
-  # Integer IDs are needed for form components (e.g., Form::ImageCarouselItem)
+  # Integer IDs are needed for form components (e.g., FormCarouselItem)
   # that handle newly uploaded images with provisional IDs before persistence.
   # Subclasses like InteractiveImage can override this to restrict to Image
   # instances only.
@@ -196,11 +196,11 @@ class Components::BaseImage < Components::Base
            ))
   end
 
-  # Render vote section for an image using ImageCaption::VoteInterface component
+  # Render vote section for an image using ImageVoteInterface component
   def render_image_vote_section(img_instance)
     return unless @votes && img_instance
 
-    render(ImageCaption::VoteInterface.new(
+    render(ImageVoteInterface.new(
              user: @user,
              image: img_instance,
              votes: @votes

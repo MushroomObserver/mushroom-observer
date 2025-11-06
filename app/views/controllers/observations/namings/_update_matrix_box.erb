@@ -2,7 +2,7 @@
 
 <%# Replace the title in the lightbox caption %>
 <%= turbo_stream.replace("observation_what_#{obs.id}") do %>
-  <%= Components::LightboxCaption::ObservationTitle.new(
+  <%= Components::LightboxObservationTitle.new(
     obs: obs,
     user: user,
     identify: false
@@ -11,7 +11,7 @@
 
 <%# Replace the title in the matrix_box %>
 <%= turbo_stream.replace("box_title_#{obs.id}") do %>
-  <%= Components::MatrixBox::Title.new(
+  <%= Components::MatrixBoxTitle.new(
     id: obs.id,
     name: obs.format_name,
     type: :observation

@@ -11,7 +11,7 @@ class ImageCaptionVoteInterfaceTest < UnitTestCase
   end
 
   def test_renders_with_votes_enabled
-    component = Components::ImageCaption::VoteInterface.new(
+    component = Components::ImageVoteInterface.new(
       user: @user,
       image: @image,
       votes: true
@@ -22,7 +22,7 @@ class ImageCaptionVoteInterfaceTest < UnitTestCase
   end
 
   def test_renders_with_votes_disabled
-    component = Components::ImageCaption::VoteInterface.new(
+    component = Components::ImageVoteInterface.new(
       user: @user,
       image: @image,
       votes: false
@@ -34,7 +34,7 @@ class ImageCaptionVoteInterfaceTest < UnitTestCase
   end
 
   def test_renders_vote_meter
-    component = Components::ImageCaption::VoteInterface.new(
+    component = Components::ImageVoteInterface.new(
       user: @user,
       image: @image,
       votes: true
@@ -46,7 +46,7 @@ class ImageCaptionVoteInterfaceTest < UnitTestCase
   end
 
   def test_renders_vote_buttons
-    component = Components::ImageCaption::VoteInterface.new(
+    component = Components::ImageVoteInterface.new(
       user: @user,
       image: @image,
       votes: true
@@ -61,7 +61,7 @@ class ImageCaptionVoteInterfaceTest < UnitTestCase
   # The component will render even with nil user, which may be a bug
   # Commenting out this test until component behavior is clarified
   # def test_does_not_render_for_nil_user
-  #   component = Components::ImageCaption::VoteInterface.new(
+  #   component = Components::ImageVoteInterface.new(
   #     user: nil,
   #     image: @image,
   #     votes: true
@@ -75,7 +75,7 @@ class ImageCaptionVoteInterfaceTest < UnitTestCase
   # This test documents that the component enforces type safety at
   # initialization
   # def test_does_not_render_for_nil_image
-  #   component = Components::ImageCaption::VoteInterface.new(
+  #   component = Components::ImageVoteInterface.new(
   #     user: @user,
   #     image: nil,
   #     votes: true

@@ -7,19 +7,19 @@
 # while other types get bold weight.
 #
 # @example With observation
-#   render MatrixBox::Title.new(
+#   render MatrixBoxTitle.new(
 #     id: obs.id,
 #     name: obs.format_name,
 #     type: :observation
 #   )
 #
 # @example With user
-#   render MatrixBox::Title.new(
+#   render MatrixBoxTitle.new(
 #     id: user.id,
 #     name: user.unique_text_name,
 #     type: :user
 #   )
-class Components::MatrixBox::Title < Components::Base
+class Components::MatrixBoxTitle < Components::Base
   prop :id, Integer
   prop :name, String
   prop :type, Symbol

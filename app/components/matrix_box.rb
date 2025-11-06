@@ -224,7 +224,7 @@ class Components::MatrixBox < Components::Base
 
   # Render details section
   def render_details_section(data)
-    render(Components::MatrixBox::Details.new(
+    render(Components::MatrixBoxDetails.new(
              data: data,
              user: @user,
              identify: @identify
@@ -233,7 +233,7 @@ class Components::MatrixBox < Components::Base
 
   # Render footer section
   def render_footer_section(data)
-    render(Components::MatrixBox::Footer.new(
+    render(Components::MatrixBoxFooter.new(
              data: data,
              user: @user,
              identify: @identify,

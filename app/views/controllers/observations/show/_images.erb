@@ -29,7 +29,7 @@ links = observation_show_image_links(obs: obs)
           <%
             notes = []
             if image.copyright_holder != obs.user.legal_name
-              notes << render(Components::ImageCaption::Copyright.new(
+              notes << render(Components::ImageCopyright.new(
                 user: @user,
                 image: image,
                 object: obs

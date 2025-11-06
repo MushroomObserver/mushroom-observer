@@ -16,8 +16,8 @@
                                                   op: :mirror,
                                                   size: @size)) %> |
       <% end %>
-      <%= render(Components::ImageCaption::OriginalImageLink.new(image: @image)) %> |
-      <%= render(Components::ImageCaption::EXIFLink.new(image_id: @image.id)) %>
+      <%= render(Components::ImageOriginalLink.new(image: @image)) %> |
+      <%= render(Components::ImageEXIFLink.new(image_id: @image.id)) %>
 
     </div><!--.text-center-->
   <% end %><!--.panel-heading-->
@@ -30,7 +30,7 @@
     )) %>
     <div class="mt-3 text-center">
       <% if @user %>
-        <%= render(Components::ImageCaption::VoteInterface.new(
+        <%= render(Components::ImageVoteInterface.new(
           user: @user,
           image: @image,
           votes: true

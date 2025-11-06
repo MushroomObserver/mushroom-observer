@@ -9,13 +9,13 @@
 # - Carousel caption with votes and image info
 #
 # @example
-#   render Components::Carousel::Item.new(
+#   render Components::CarouselItem.new(
 #     user: current_user,
 #     image: @image,
 #     object: @observation,
 #     index: 0
 #   )
-class Components::Carousel::Item < Components::BaseImage
+class Components::CarouselItem < Components::BaseImage
   # Additional carousel-specific properties
   prop :index, Integer, default: 0
   prop :object, _Nilable(Object), default: nil
@@ -84,7 +84,7 @@ class Components::Carousel::Item < Components::BaseImage
   def image_info_html(img_instance)
     return "" unless img_instance && @object
 
-    render(Components::ImageCaption::Info.new(
+    render(Components::ImageInfo.new(
              user: @user,
              image: img_instance,
              object: @object,

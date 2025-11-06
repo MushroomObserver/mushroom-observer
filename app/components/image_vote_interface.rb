@@ -11,12 +11,12 @@
 # - Current user's vote display
 #
 # @example
-#   render Components::ImageCaption::VoteInterface.new(
+#   render Components::ImageVoteInterface.new(
 #     user: @user,
 #     image: @image,
 #     votes: true
 #   )
-class Components::ImageCaption::VoteInterface < Components::Base
+class Components::ImageVoteInterface < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   prop :user, _Nilable(User)

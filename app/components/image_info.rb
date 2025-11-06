@@ -6,7 +6,7 @@
 # Can render complete image info or just copyright fragment.
 #
 # @example Full image info
-#   render Components::ImageCaption::Info.new(
+#   render Components::ImageInfo.new(
 #     user: current_user,
 #     image: @image,
 #     object: @observation,
@@ -14,11 +14,11 @@
 #   )
 #
 # @example Just copyright
-#   render Components::ImageCaption::Info.new(
+#   render Components::ImageInfo.new(
 #     user: current_user,
 #     image: @image
 #   ).copyright
-class Components::ImageCaption::Info < Components::Base
+class Components::ImageInfo < Components::Base
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image)
   prop :object, _Nilable(Object), default: nil
@@ -34,11 +34,11 @@ class Components::ImageCaption::Info < Components::Base
     ].compact_blank.safe_join
   end
 
-  # Render copyright using ImageCaption::Copyright component
+  # Render copyright using ImageCopyright component
   def copyright
     return "" unless @image
 
-    render(Components::ImageCaption::Copyright.new(
+    render(Components::ImageCopyright.new(
              user: @user,
              image: @image,
              object: @object

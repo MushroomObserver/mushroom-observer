@@ -6,13 +6,13 @@
 # It includes form fields for each image and EXIF camera metadata display.
 #
 # @example
-#   render Components::Form::ImageCarousel.new(
+#   render Components::FormCarousel.new(
 #     user: current_user,
 #     images: @good_images,
 #     thumb_id: @observation.thumb_image_id,
 #     exif_data: @exif_data
 #   )
-class Components::Form::ImageCarousel < Components::Base
+class Components::FormCarousel < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   # Properties
@@ -43,7 +43,7 @@ class Components::Form::ImageCarousel < Components::Base
 
         # Carousel controls
         div(class: "carousel-control-wrap row") do
-          render(Components::Carousel::Controls.new(carousel_id: @html_id))
+          render(Components::CarouselControls.new(carousel_id: @html_id))
         end
       end
 
@@ -63,7 +63,7 @@ class Components::Form::ImageCarousel < Components::Base
     @images&.each_with_index do |image, index|
       upload = image&.created_at.nil?
 
-      render(Components::Form::ImageCarouselItem.new(
+      render(Components::FormCarouselItem.new(
                user: @user,
                image: image || index,
                index: index,
@@ -76,7 +76,7 @@ class Components::Form::ImageCarousel < Components::Base
 
   def render_thumbnails
     @images&.each_with_index do |image, index|
-      render(Components::Carousel::Thumbnail.new(
+      render(Components::CarouselThumbnail.new(
                user: @user,
                image: image,
                index: index,

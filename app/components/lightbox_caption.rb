@@ -66,7 +66,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_title
     fragment("obs_title") do
-      render(Components::LightboxCaption::ObservationTitle.new(
+      render(Components::LightboxObservationTitle.new(
                obs: @obs,
                user: @user,
                identify: @identify
@@ -209,12 +209,12 @@ class Components::LightboxCaption < Components::Base
 
   def render_original_image_link(image_or_image_id)
     if image_or_image_id.is_a?(::Image)
-      render(ImageCaption::OriginalImageLink.new(
+      render(ImageOriginalLink.new(
                image: image_or_image_id,
                link_class: "lightbox_link"
              ))
     else
-      render(ImageCaption::OriginalImageLink.new(
+      render(ImageOriginalLink.new(
                image_id: image_or_image_id,
                link_class: "lightbox_link"
              ))
@@ -228,7 +228,7 @@ class Components::LightboxCaption < Components::Base
                  image_or_image_id
                end
 
-    render(ImageCaption::EXIFLink.new(
+    render(ImageEXIFLink.new(
              image_id: image_id,
              link_class: "lightbox_link"
            ))

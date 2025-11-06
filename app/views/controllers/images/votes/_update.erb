@@ -1,6 +1,6 @@
 <%=
 turbo_stream.update("image_vote_#{@image.id}") do
-  render(Components::ImageCaption::VoteInterface.new(
+  render(Components::ImageVoteInterface.new(
     user: @user,
     image: @image,
     votes: true

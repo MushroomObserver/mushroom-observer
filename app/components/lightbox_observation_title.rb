@@ -7,15 +7,15 @@
 # as a link along with the author attribution.
 #
 # @example Basic usage
-#   render LightboxCaptionObservationTitle.new(obs: @observation, user: @user)
+#   render LightboxObservationTitle.new(obs: @observation, user: @user)
 #
 # @example With identify mode (shows "OBSERVATION:" label)
-#   render LightboxCaptionObservationTitle.new(
+#   render LightboxObservationTitle.new(
 #     obs: @observation,
 #     user: @user,
 #     identify: true
 #   )
-class Components::LightboxCaption::ObservationTitle < Components::Base
+class Components::LightboxObservationTitle < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   prop :obs, Observation

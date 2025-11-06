@@ -42,7 +42,7 @@ column_classes(:six)
   <%= tag.div(class: yield(:left_columns)) do %>
     <div class="small text-center">
       <div>
-        <%= render Components::ImageCaption::Copyright.new(
+        <%= render Components::ImageCopyright.new(
               user: @user,
               image: @image
             ) %>

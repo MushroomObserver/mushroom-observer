@@ -3,21 +3,21 @@
 # Component for rendering a link to view the original image.
 #
 # @example Basic usage with an image instance
-#   render Components::ImageCaption::OriginalImageLink.new(
+#   render Components::ImageOriginalLink.new(
 #     image: @image
 #   )
 #
 # @example With an image ID
-#   render Components::ImageCaption::OriginalImageLink.new(
+#   render Components::ImageOriginalLink.new(
 #     image_id: @image.id
 #   )
 #
 # @example With custom CSS class
-#   render Components::ImageCaption::OriginalImageLink.new(
+#   render Components::ImageOriginalLink.new(
 #     image: @image,
 #     link_class: "custom-link-class"
 #   )
-class Components::ImageCaption::OriginalImageLink < Components::Base
+class Components::ImageOriginalLink < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   prop :image, _Nilable(::Image), default: nil

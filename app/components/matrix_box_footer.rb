@@ -8,13 +8,13 @@
 # - Custom footer components (when footer prop is an Array)
 #
 # @example
-#   render MatrixBox::Footer.new(
+#   render MatrixBoxFooter.new(
 #     data: render_data,
 #     user: @user,
 #     identify: true,
 #     footer: []
 #   )
-class Components::MatrixBox::Footer < Components::Base
+class Components::MatrixBoxFooter < Components::Base
   prop :data, Hash
   prop :user, _Nilable(User), default: nil
   prop :identify, _Boolean, default: false

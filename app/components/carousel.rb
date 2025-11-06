@@ -78,7 +78,7 @@ class Components::Carousel < Components::Base
         @images.each_with_index do |image, index|
           next unless image
 
-          render(Components::Carousel::Item.new(
+          render(Components::CarouselItem.new(
                    user: @user,
                    image: image,
                    object: @object,
@@ -89,7 +89,7 @@ class Components::Carousel < Components::Base
 
         # Carousel controls (if multiple images)
         if @images.length > 1
-          render(Components::Carousel::Controls.new(carousel_id: final_html_id))
+          render(Components::CarouselControls.new(carousel_id: final_html_id))
         end
       end
 
@@ -103,7 +103,7 @@ class Components::Carousel < Components::Base
       @images.each_with_index do |image, index|
         next unless image
 
-        render(Components::Carousel::Thumbnail.new(
+        render(Components::CarouselThumbnail.new(
                  user: @user,
                  image: image,
                  index: index,

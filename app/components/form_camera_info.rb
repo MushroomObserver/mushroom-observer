@@ -9,7 +9,7 @@
 # - Button to transfer EXIF data to observation form
 #
 # @example
-#   render Components::Form::ImageCameraInfo.new(
+#   render Components::FormCameraInfo.new(
 #     img_id: 123,
 #     lat: "45.5231",
 #     lng: "-122.6765",
@@ -18,7 +18,7 @@
 #     file_name: "IMG_1234.jpg",
 #     file_size: "2.5 MB"
 #   )
-class Components::Form::ImageCameraInfo < Components::Base
+class Components::FormCameraInfo < Components::Base
   include Phlex::Rails::Helpers::ClassNames
   include Phlex::Rails::Helpers::LinkTo
 

@@ -2,7 +2,7 @@
 # On form reload we don't have @image, so pass explicitly
 turbo_stream.prepend(
   "added_images",
-  ::Components::Form::ImageCarouselItem.new(
+  ::Components::FormCarouselItem.new(
     user: @user,
     image: @image,
     index: params[:index].to_i,

@@ -12,13 +12,13 @@
 # Handles both upload images (temp_image) and existing images (good_image).
 #
 # @example
-#   render Components::Form::ImageFields.new(
+#   render Components::FormImageFields.new(
 #     user: current_user,
 #     image: @image,
 #     img_id: 123,
 #     upload: false
 #   )
-class Components::Form::ImageFields < Components::Base
+class Components::FormImageFields < Components::Base
   include Phlex::Rails::Helpers::FieldsFor
 
   # Properties

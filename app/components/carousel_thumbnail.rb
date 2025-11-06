@@ -6,13 +6,13 @@
 # Handles both uploaded images (no Image record) and existing images.
 #
 # @example
-#   render Components::Carousel::Thumbnail.new(
+#   render Components::CarouselThumbnail.new(
 #     user: current_user,
 #     image: @image,
 #     index: 0,
 #     html_id: "observation_123_carousel"
 #   )
-class Components::Carousel::Thumbnail < Components::BaseImage
+class Components::CarouselThumbnail < Components::BaseImage
   # Additional thumbnail-specific properties
   prop :index, Integer, default: 0
   prop :html_id, String
