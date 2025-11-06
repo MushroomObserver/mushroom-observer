@@ -25,7 +25,7 @@ total = 0
 %>
 
 <%= render(Components::Panel.new(
-      panel_class: "collapse", inner_id: "contribution_legend"
+      panel_class: "collapse", panel_id: "contribution_legend"
     )) do |panel| %>
   <%= panel.with_heading { heading } %>
   <%= panel.with_heading_links { links } %>

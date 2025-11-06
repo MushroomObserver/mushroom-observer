@@ -5,7 +5,7 @@ link = icon_link_to(*name_new_description_tab(@name))
 heading_links = @user ? link&.html_safe : ""
 %>
 
-<%= render(Components::Panel.new(inner_id: "name_descriptions")) do |panel| %>
+<%= render(Components::Panel.new(panel_id: "name_descriptions")) do |panel| %>
   <%= panel.with_heading { heading } %>
   <%= panel.with_heading_links { heading_links } if @user %>
   <%= panel.with_body do %>

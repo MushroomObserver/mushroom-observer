@@ -9,7 +9,7 @@
 <%# NOTE: #comments is the inner list-group, not the whole panel %>
 
 <%= render(Components::Panel.new(
-  inner_id: "comments_for_object"
+  panel_id: "comments_for_object"
 )) do |panel| %>
   <%= panel.with_heading { :COMMENTS.t } %>
   <% if controls %>

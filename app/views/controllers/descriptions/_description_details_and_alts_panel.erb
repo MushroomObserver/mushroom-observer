@@ -2,7 +2,7 @@
 <% review ||= false %>
 
 <%= render(Components::Panel.new(
-      inner_id: "description_details_and_alts"
+      panel_id: "description_details_and_alts"
     )) do |panel| %>
   <%= panel.with_heading { :show_observation_details.l } %>
   <%= panel.with_heading_links do

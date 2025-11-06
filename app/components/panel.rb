@@ -23,7 +23,7 @@
 # @example Panel with custom class and ID
 #   render(Components::Panel.new(
 #     panel_class: "custom-panel",
-#     inner_id: "my_panel"
+#     panel_id: "my_panel"
 #   ) do |panel|
 #     panel.with_body { "Content" }
 #   end)
@@ -31,7 +31,7 @@ class Components::Panel < Components::Base
   include Phlex::Slotable
 
   prop :panel_class, _Nilable(String), default: nil
-  prop :inner_id, _Nilable(String), default: nil
+  prop :panel_id, _Nilable(String), default: nil
   prop :attributes, Hash, default: -> { {} }
   prop :collapsible, _Nilable(_Boolean), default: nil
   prop :collapse_id, _Nilable(String), default: nil
@@ -50,7 +50,7 @@ class Components::Panel < Components::Base
     classes = class_names("panel panel-default", @panel_class)
     div(
       class: classes,
-      id: @inner_id,
+      id: @panel_id,
       **@attributes
     ) do
       # yield if block_given?

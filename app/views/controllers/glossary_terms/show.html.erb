@@ -58,7 +58,7 @@ column_classes(:eight_four)
 <% end %>
 
 <%= render(Components::Panel.new(
-      inner_id: "glossary_term_authors_editors"
+      panel_id: "glossary_term_authors_editors"
     )) do |panel| %>
   <%= panel.with_body do
         show_authors_and_editors(

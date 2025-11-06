@@ -11,7 +11,7 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
 
 <%= render(Components::Panel.new(
       panel_class: "name-section",
-      inner_id: "nomenclature"
+      panel_id: "nomenclature"
     )) do |panel| %>
   <%= panel.with_heading { :show_name_nomenclature.l } %>
   <%= panel.with_heading_links { heading_links } if @user %>

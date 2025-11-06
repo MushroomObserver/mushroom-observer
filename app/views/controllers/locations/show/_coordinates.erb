@@ -8,7 +8,7 @@ end
 footer = icon_link_with_query(*observations_at_location_tab(@location))
 %>
 <%= render(Components::Panel.new(
-      inner_id: "location_coordinates"
+      panel_id: "location_coordinates"
     )) do |panel| %>
   <%= panel.with_heading { :COORDINATES.l } %>
   <%= panel.with_heading_links { heading_links.safe_join(" | ") } %>

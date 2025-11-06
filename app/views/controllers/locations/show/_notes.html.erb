@@ -1,4 +1,4 @@
-<%= render(Components::Panel.new(inner_id: "location_notes")) do |panel|
+<%= render(Components::Panel.new(panel_id: "location_notes")) do |panel|
       panel.with_heading do
         concat(:NOTES.l)
         concat(tag.span(class: "float-right") do

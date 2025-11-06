@@ -5,7 +5,7 @@ heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
 %>
 
 <%= render(Components::Panel.new(
-      inner_id: "name_observations_menu"
+      panel_id: "name_observations_menu"
     )) do |panel| %>
   <%= panel.with_heading { heading } %>
   <%= panel.with_heading_links { heading_link } %>

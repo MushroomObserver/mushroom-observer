@@ -6,7 +6,7 @@ heading_links = @user ? link.html_safe : ""
 
 <%= render(Components::Panel.new(
       panel_class: "name-section",
-      inner_id: "name_classification",
+      panel_id: "name_classification",
       attributes: { data: { name_panels_target: "classification" } }
     )) do |panel| %>
   <%= panel.with_heading { heading } %>

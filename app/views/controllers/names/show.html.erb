@@ -57,7 +57,7 @@ column_classes(:seven_five)
       concat(export_status_controls(@name))
     end %>
 
-    <%= render(Components::Panel.new(inner_id: "name_footer")) do |panel| %>
+    <%= render(Components::Panel.new(panel_id: "name_footer")) do |panel| %>
       <%= panel.with_body do %>
         <%= tag.div(id: "name_authors_editors") do
               show_authors_and_editors(obj: @name, versions: @versions, user: @user)

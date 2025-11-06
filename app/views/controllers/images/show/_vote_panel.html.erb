@@ -4,7 +4,7 @@ vote = (@image.vote_cache + 0.5).to_i rescue 0
 %>
 
 <!-- VOTE_PANEL -->
-<%= render(Components::Panel.new(inner_id: "image_vote_content")) do |panel| %>
+<%= render(Components::Panel.new(panel_id: "image_vote_content")) do |panel| %>
 
   <!-- CURRENT_VOTE -->
   <%= panel.with_heading do %>

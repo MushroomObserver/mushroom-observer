@@ -5,7 +5,7 @@ heading_links = @user ? link.html_safe : ""
 %>
 
 <%= render(Components::Panel.new(
-      inner_id: "name_notes"
+      panel_id: "name_notes"
     )) do |panel| %>
   <%= panel.with_heading { heading } %>
   <%= panel.with_heading_links { heading_links } if @user %>

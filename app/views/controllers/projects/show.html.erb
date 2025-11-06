@@ -7,7 +7,7 @@ container_class(:wide)
 
 <%= render(partial: "shared/list_search", locals: { object: @project }) %>
 
-<%= render(Components::Panel.new(inner_id: "project_summary")) do |panel| %>
+<%= render(Components::Panel.new(panel_id: "project_summary")) do |panel| %>
   <%= panel.with_body do %>
     <%= tag.p(@project.summary.to_s.html_safe.tpl) %>
 

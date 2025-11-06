@@ -67,7 +67,7 @@ form_element_data = {
   <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(Components::Panel.new(
-        inner_id: "observation_images_details",
+        panel_id: "observation_images_details",
         collapsible: true,
         collapse_id: "observation_images_details_inner",
         expanded: true
@@ -84,7 +84,7 @@ form_element_data = {
   <% end %>
 
   <%= render(Components::Panel.new(
-        inner_id: "observation_naming_specimen",
+        panel_id: "observation_naming_specimen",
         collapsible: true,
         collapse_id: "observation_naming_specimen_inner",
         expanded: create
@@ -104,7 +104,7 @@ form_element_data = {
   <% end %>
 
   <%= render(Components::Panel.new(
-        inner_id: "observation_notes",
+        panel_id: "observation_notes",
         collapsible: true,
         collapse_id: "observation_notes_inner",
         expanded: notes_open
@@ -117,7 +117,7 @@ form_element_data = {
   <% end %>
 
   <%= render(Components::Panel.new(
-        inner_id: "observation_projects",
+        panel_id: "observation_projects",
         collapsible: true,
         collapse_id: "observation_projects_inner",
         expanded: @project_checks.any?
@@ -130,7 +130,7 @@ form_element_data = {
   <% end if show_projects %>
 
   <%= render(Components::Panel.new(
-        inner_id: "observation_lists",
+        panel_id: "observation_lists",
         collapsible: true,
         collapse_id: "observation_lists_inner",
         expanded: @list_checks.any?

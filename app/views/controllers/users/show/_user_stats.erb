@@ -5,7 +5,7 @@ total = 0
 %>
 
 <%= render(Components::Panel.new(
-      inner_id: "user_stats"
+      panel_id: "user_stats"
     )) do |panel| %>
   <%= panel.with_heading { :show_user_title.t(user: name) } %>
   <%= panel.with_body do %>

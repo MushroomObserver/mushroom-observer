@@ -2,7 +2,7 @@
 
 <%# Show table of past versions for show_past_object pages. %>
 <%= render(Components::Panel.new(
-      inner_id: "#{obj.type_tag}_versions"
+      panel_id: "#{obj.type_tag}_versions"
     )) do |panel|
       panel.with_heading { :VERSIONS.t }
       panel.with_body {

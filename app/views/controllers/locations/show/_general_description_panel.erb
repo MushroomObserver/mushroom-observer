@@ -8,7 +8,7 @@
   %>
 
   <%= render(Components::Panel.new(
-        inner_id: "location_general_description"
+        panel_id: "location_general_description"
       )) do |panel| %>
     <%= panel.with_heading { heading } %>
     <%= panel.with_heading_links { heading_links } if @user %>

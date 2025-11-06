@@ -25,7 +25,7 @@ footer =
   end
 %>
 
-<%= render(Components::Panel.new(inner_id: "user_profile")) do |panel| %>
+<%= render(Components::Panel.new(panel_id: "user_profile")) do |panel| %>
   <%= panel.with_heading { heading } %>
   <%= panel.with_heading_links { heading_links } if heading_links %>
   <%= panel.with_body do %>
