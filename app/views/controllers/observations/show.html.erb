@@ -31,9 +31,7 @@ carousel_locals = {
 
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
-    <%= tag.div(class: "panel panel-default") do
-      render(Components::Carousel.new(**carousel_locals))
-    end %>
+    <%= render(Components::Carousel.new(**carousel_locals)) %>
   <% end %>
 
   <%= tag.div(class: yield(:right_columns)) do %>

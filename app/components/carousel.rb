@@ -30,19 +30,22 @@ class Components::Carousel < Components::Base
   prop :links, String, default: ""
   prop :thumbnails, _Boolean, default: true
   prop :html_id, _Nilable(String), default: nil
+  prop :panel_id, _Nilable(String), default: nil
 
   def view_template
     # Generate HTML ID if not provided
     final_html_id = @html_id || generate_html_id
 
-    # Render heading if thumbnails enabled
-    render_carousel_heading if @thumbnails
+    div(class: "panel panel-default", id: @panel_id) do
+      # Render heading if thumbnails enabled
+      render_carousel_heading if @thumbnails
 
-    # Render carousel or no images message
-    if @images&.any?
-      render_carousel(final_html_id)
-    else
-      render_no_images_message
+      # Render carousel or no images message
+      if @images&.any?
+        render_carousel(final_html_id)
+      else
+        render_no_images_message
+      end
     end
   end
 
