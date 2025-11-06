@@ -1,8 +1,6 @@
 <!-- INFO_PANEL -->
-<%= render(Components::Panel.new(panel_id: "info_panel")) do |panel| %>
-  <%= panel.with_heading do %>
-    <%= :NOTES.l %>:
-  <% end %>
+<%= render(Components::Panel.new(panel_id: "info_panel", panel_class: "py-2")) do |panel| %>
+  <%= panel.with_heading { "#{:NOTES.t}:" } %>
   <%= panel.with_body do %>
     <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
     <div><%= :OWNER.t %>: <%= user_link(@image.user) %></div>

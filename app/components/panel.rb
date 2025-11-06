@@ -73,6 +73,7 @@ class Components::Panel < Components::Base
     div(class: "panel-heading") do
       div(class: classes) do
         span { yield if block_given? }
+        whitespace
         render_heading_links if heading_links_slot? || @collapsible
       end
     end

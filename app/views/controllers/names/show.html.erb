@@ -64,9 +64,7 @@ column_classes(:seven_five)
             end %>
         <%= :show_name_num_notifications.t(num: @name.interests) %>
       <% end %>
-      <%= panel.with_footer do %>
-        <%= footer %>
-      <% end %>
+      <%= panel.with_footer { footer } %>
     <% end %>
 
   <% end %>

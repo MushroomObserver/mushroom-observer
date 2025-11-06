@@ -5,12 +5,8 @@ links = observation_show_image_links(obs: obs)
 <%= render(Components::Panel.new(
       panel_class: "show_images list-group text-center m-0"
     )) do |panel| %>
-  <%= panel.with_heading do %>
-    <%= :IMAGES.t %>
-  <% end %>
-  <%= panel.with_heading_links do %>
-    <%= links %>
-  <% end %>
+  <%= panel.with_heading { :IMAGES.t } %>
+  <%= panel.with_heading_links { links } %>
   <%= panel.with_body do %>
     <% if @images.any? %>
       <%
