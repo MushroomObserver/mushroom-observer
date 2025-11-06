@@ -1,8 +1,5 @@
 <!-- INFO_PANEL -->
-<%= render(Components::Panel.new(
-      panel_class: "py-2",
-      panel_id: "info_panel"
-    )) do |panel| %>
+<%= render(Components::Panel.new(panel_id: "info_panel")) do |panel| %>
   <%= panel.with_heading do %>
     <%= :NOTES.l %>:
   <% end %>
