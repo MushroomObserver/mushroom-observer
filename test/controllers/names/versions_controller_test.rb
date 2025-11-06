@@ -26,7 +26,8 @@ module Names
 
       # Check that the version table panel heading renders
       assert_select("#name_versions .panel-heading") do |elements|
-        assert_equal(1, elements.size, "Should find version table panel heading")
+        assert_equal(1, elements.size,
+                     "Should find version table panel heading")
         assert_match(/Versions/, elements.first.text)
       end
 

@@ -16,7 +16,7 @@ vote = (@image.vote_cache + 0.5).to_i rescue 0
   <% if @user %>
     <% current = @image.users_vote(@user).to_i %>
     <!-- YOUR_VOTE -->
-    <%= panel.with_body(classes: "py-2") do %>
+    <%= panel.with_body do %>
       <div class="text-center mb-3">
         <p>
           <%= :image_show_your_vote.t %>:
