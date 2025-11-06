@@ -41,8 +41,8 @@ class Components::Panel < Components::Base
   slot :heading
   slot :heading_links
   slot :thumbnail
-  slot :body, lambda { |collapse: false, &content|
-    render_body(collapse:, &content)
+  slot :body, lambda { |classes: nil, collapse: false, &content|
+    render_body(classes:, collapse:, &content)
   }, collection: true
   slot :footer
 
@@ -80,7 +80,9 @@ class Components::Panel < Components::Base
   end
 
   def render_collapse_icons
-    classes = class_names("panel-collapse-trigger", collapsed_class)
+    classes = class_names(
+      "panel-collapse-trigger", @expanded ? "" : "collapsed"
+    )
     link_to(
       "##{@collapse_id}",
       class: classes,
@@ -88,19 +90,19 @@ class Components::Panel < Components::Base
       data: { toggle: "collapse" },
       aria: { expanded: @expanded, controls: @collapse_id }
     ) do
-      if @collapse_message.present?
-        span(class: "font-weight-normal mr-2") do
-          plain(@collapse_message)
-        end
-      end
+      render_collapse_message
 
       link_icon(:chevron_down, title: :OPEN.l, class: "active-icon")
       link_icon(:chevron_up, title: :CLOSE.l)
     end
   end
 
-  def collapsed_class
-    @expanded ? "" : "collapsed"
+  def render_collapse_message
+    return if @collapse_message.blank?
+
+    span(class: "font-weight-normal mr-2") do
+      plain(@collapse_message)
+    end
   end
 
   def render_thumbnail
@@ -109,22 +111,23 @@ class Components::Panel < Components::Base
     end
   end
 
-  def render_body(collapse:, &content)
-    return render_collapse_body(&content) if collapse
+  def render_body(classes:, collapse:, &content)
+    return render_collapse_body(classes:, &content) if collapse
 
-    render_plain_body(&content)
+    render_plain_body(classes:, &content)
   end
 
-  def render_plain_body
-    div(class: "panel-body") do
+  def render_plain_body(classes:)
+    classes = class_names("panel-body", classes)
+    div(class: classes) do
       yield if block_given?
     end
   end
 
-  def render_collapse_body(&content)
-    classes = class_names("panel-collapse collapse", @expanded ? "in" : nil)
-    div(class: classes, id: @collapse_id) do
-      render_plain_body(&content)
+  def render_collapse_body(classes:, &content)
+    wrap_class = class_names("panel-collapse collapse", @expanded ? "in" : nil)
+    div(class: wrap_class, id: @collapse_id) do
+      render_plain_body(classes:, &content)
     end
   end
 

@@ -1,21 +1,19 @@
 <%
 votes = find_list_of_votes(@image)
+vote = (@image.vote_cache + 0.5).to_i rescue 0
 %>
 
 <!-- VOTE_PANEL -->
-<div id="image_vote_content" class="panel panel-default">
+<%= render(Components::Panel.new(inner_id: "image_vote_content")) do |panel| %>
 
   <!-- CURRENT_VOTE -->
-  <div class="panel-heading">
+  <%= panel.with_heading do %>
     <b><%= :image_show_quality.t %></b>:
-    <span class="small"><%=
-      vote = (@image.vote_cache + 0.5).to_i rescue 0
-      image_vote_as_long_string(vote).t
-    %></span>
-  </div>
+    <span class="small"><%= image_vote_as_long_string(vote).t %></span>
+  <% end %>
   <!-- /CURRENT_VOTE -->
 
-  <div class="panel-body py-2">
+  <%= panel.with_body(classes: "py-2") do %>
     <!-- YOUR_VOTE -->
     <% if @user
       current = @image.users_vote(@user).to_i %>
@@ -55,30 +53,32 @@ votes = find_list_of_votes(@image)
       </div>
     <% end %>
     <!-- /YOUR_VOTE -->
-  </div><!-- .panel-body -->
+  <% end %><!-- .panel-body -->
 
-  <!-- VOTE_TABLE -->
-  <div id="show_votes_container">
-    <% if votes.any? %>
-      <table id="show_votes_table" class="table table-striped mt-3 mb-0">
-        <thead>
-          <tr>
-            <th><%= :USER.t %></th>
-            <th><%= :VOTE.t %></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% votes.each do |vote| %>
+  <%= panel.with_body(class: "p-0") do %>
+    <!-- VOTE_TABLE -->
+    <div id="show_votes_container">
+      <% if votes.any? %>
+        <table id="show_votes_table" class="table table-striped mt-3 mb-0">
+          <thead>
             <tr>
-              <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
-              <td><%= :"image_vote_short_#{vote.value}".t %></td>
+              <th><%= :USER.t %></th>
+              <th><%= :VOTE.t %></th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
-    <% end %>
-  </div><!-- #show_votes_container -->
-  <!-- /VOTE_TABLE -->
+          </thead>
+          <tbody>
+            <% votes.each do |vote| %>
+              <tr>
+                <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
+                <td><%= :"image_vote_short_#{vote.value}".t %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div><!-- #show_votes_container -->
+    <!-- /VOTE_TABLE -->
+  <% end %><!-- .panel-body -->
 
-</div><!-- .panel -->
+<% end %><!-- .panel -->
 <!-- /VOTE_PANEL -->
