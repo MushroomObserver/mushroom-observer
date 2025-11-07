@@ -34,17 +34,18 @@ class Components::Carousel < Components::Base
 
   def view_template
     # Generate HTML ID if not provided
-    final_html_id = @html_id || generate_html_id
+    @html_id ||= generate_html_id
 
-    div(class: "panel panel-default", id: @panel_id) do
+    Panel(panel_id: @panel_id) do |panel|
       # Render heading if thumbnails enabled
-      render_carousel_heading if @thumbnails
+      panel.with_heading { @title } if @thumbnails
+      panel.with_heading_links { @links } if @links.present?
 
       # Render carousel or no images message
       if @images&.any?
-        render_carousel(final_html_id)
+        render_carousel(panel)
       else
-        render_no_images_message
+        render_no_images_message(panel)
       end
     end
   end
@@ -66,10 +67,10 @@ class Components::Carousel < Components::Base
     end
   end
 
-  def render_carousel(final_html_id)
-    div(
-      id: final_html_id,
-      class: "carousel slide show-carousel",
+  def render_carousel(panel)
+    panel.with_thumbnail(
+      id: @html_id,
+      classes: "carousel slide show-carousel",
       data: { ride: "false", interval: "false" }
     ) do
       # Carousel inner (slides)
@@ -88,15 +89,15 @@ class Components::Carousel < Components::Base
         end
 
         # Carousel controls (if multiple images)
-        CarouselControls(carousel_id: final_html_id) if @images.length > 1
+        CarouselControls(carousel_id: @html_id) if @images.length > 1
       end
 
       # Thumbnail navigation (if enabled)
-      render_thumbnail_navigation(final_html_id) if @thumbnails
+      render_thumbnail_navigation if @thumbnails
     end
   end
 
-  def render_thumbnail_navigation(carousel_id)
+  def render_thumbnail_navigation
     ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
       @images.each_with_index do |image, index|
         next unless image
@@ -105,15 +106,15 @@ class Components::Carousel < Components::Base
           user: @user,
           image: image,
           index: index,
-          html_id: carousel_id
+          html_id: @html_id
         )
       end
     end
   end
 
-  def render_no_images_message
-    div(
-      class: "p-4 my-5 w-100 h-100 text-center h3 text-muted"
+  def render_no_images_message(panel)
+    panel.with_thumbnail(
+      classes: "p-4 my-5 w-100 h-100 text-center h3 text-muted"
     ) do
       plain(:show_observation_no_images.l)
     end
