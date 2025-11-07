@@ -28,7 +28,7 @@ class Components::LightboxObservationTitle < Components::Base
       whitespace
       render_link
       whitespace
-      plain(@obs.user_format_name(@user).t.small_author)
+      @obs.user_format_name(@user).t.small_author
     end
   end
 

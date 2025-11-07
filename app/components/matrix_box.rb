@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 # Matrix box component for displaying objects in a responsive grid.
+# Essentially a wrapper for a Panel component
 #
 # This component can be used in two ways:
-# 1. With an object - renders the standard layout for Image, Observation,
-#    RssLog, or User
+# 1. With an object - calculates everything it needs from the @object and
+#    renders a standard layout for Image, Observation, RssLog, or User
 # 2. With a block - renders a simple <li> wrapper for custom content
 #
 # @example Standard object rendering
@@ -23,6 +24,7 @@
 #     tag.div(class: "panel panel-default") { "Custom content" }
 #   end
 class Components::MatrixBox < Components::Base
+  include Components::MatrixBox::RenderData
   include Phlex::Rails::Helpers::LinkTo
   include Phlex::Rails::Helpers::ClassNames
 
@@ -33,7 +35,6 @@ class Components::MatrixBox < Components::Base
   prop :columns, String, default: "col-xs-12 col-sm-6 col-md-4 col-lg-3"
   prop :extra_class, String, default: ""
   prop :identify, _Boolean, default: false
-  prop :header, Array, default: -> { [] }
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
 
   def view_template(&block)
@@ -48,24 +49,21 @@ class Components::MatrixBox < Components::Base
 
   def render_object_layout
     # Build render data from object
-    render_data = build_render_data
+    @data = build_render_data
 
     li(
-      id: "box_#{render_data[:id]}",
+      id: "box_#{@data[:id]}",
       class: class_names("matrix-box", @columns, @extra_class)
     ) do
       div(class: "panel panel-default") do
-        # Header components (if any)
-        @header.each { |component| render(component) } if @header.any?
-
-        # Main content: image and details
+        # Main content: thumbnail and details
         div(class: "panel-sizing") do
-          render_image_section(render_data)
-          render_details_section(render_data)
+          render_thumbnail_section
+          render_details_section
         end
 
         # Footer components
-        render_footer_section(render_data)
+        render_footer_section
       end
     end
   end
@@ -78,166 +76,169 @@ class Components::MatrixBox < Components::Base
     )
   end
 
-  # Build render data based on object type
-  def build_render_data
-    case @object
-    when ::Image
-      extract_image_data
-    when Observation
-      extract_observation_data
-    when RssLog
-      extract_rss_log_data
-    when User
-      extract_user_data
-    else
-      { id: @object.id, type: :unknown }
-    end
-  end
-
-  def extract_image_data
-    {
-      id: @object.id,
-      type: :image,
-      when: begin
-              @object.when.web_date
-            rescue StandardError
-              nil
-            end,
-      who: @object.user,
-      name: @object.unique_format_name.t,
-      what: @object,
-      where: nil,
-      location: nil,
-      image: @object,
-      image_link: @object.show_link_args,
-      full_width: true
-    }
-  end
-
-  def extract_observation_data # rubocop:disable Metrics/AbcSize
-    data = {
-      id: @object.id,
-      type: :observation,
-      when: @object.when.web_date,
-      who: @object.user,
-      name: @object.user_format_name(@object.user).t.break_name.small_author,
-      what: @object,
-      where: @object.where,
-      location: @object.location,
-      consensus: Observation::NamingConsensus.new(@object),
-      detail: @object.rss_log&.detail,
-      time: @object.rss_log&.updated_at
-    }
-
-    add_observation_image_data(data) if @object.thumb_image_id
-    data
-  end
-
-  def add_observation_image_data(data)
-    data[:image] = @object.thumb_image
-    data[:image_link] = @object.show_link_args
-    data[:obs] = @object
-    data[:full_width] = true
-  end
-
-  def extract_rss_log_data
-    target = @object.target
-    data = {
-      id: target&.id || @object.id,
-      type: @object.target_type || :rss_log,
-      when: target.respond_to?(:when) ? target.when&.web_date : nil,
-      who: target&.user,
-      what: target || @object,
-      detail: @object.detail,
-      time: @object.updated_at
-    }
-
-    data[:name] = extract_rss_log_name(target)
-    add_rss_log_location_data(data, target)
-    add_rss_log_image_data(data, target)
-    data
-  end
-
-  def extract_rss_log_name(target)
-    if @object.target_type == :image
-      target.unique_format_name.t
-    elsif target
-      target.format_name.t.break_name.small_author
-    else
-      @object.format_name.t.break_name.small_author
-    end
-  end
-
-  def add_rss_log_location_data(data, target)
-    return unless target.respond_to?(:location)
-
-    data[:where] = target.where
-    data[:location] = target.location
-  end
-
-  def add_rss_log_image_data(data, target)
-    return unless target.respond_to?(:thumb_image) && target&.thumb_image
-
-    data[:image] = target.thumb_image
-    data[:image_link] = target.show_link_args
-    data[:obs] = target if target.respond_to?(:is_collection_location)
-    data[:full_width] = true
-  end
-
-  def extract_user_data
-    data = {
-      id: @object.id,
-      type: :user,
-      detail: @object,
-      name: @object.unique_text_name,
-      what: @object,
-      where: @object.location&.name,
-      location: @object.location
-    }
-
-    add_user_image_data(data) if @object.image_id
-    data
-  end
-
-  def add_user_image_data(data)
-    data[:image] = @object.image
-    data[:image_link] = @object.show_link_args
-    data[:votes] = false
-    data[:full_width] = true
-  end
-
   # Render image section
-  def render_image_section(data)
-    return unless data[:image]
+  def render_thumbnail_section
+    return unless @data[:image]
 
     div(class: "thumbnail-container") do
       render(InteractiveImage.new(
                user: @user,
-               image: data[:image],
-               image_link: data[:image_link],
-               obs: data[:obs] || {},
-               votes: data.fetch(:votes, true),
-               full_width: data.fetch(:full_width, true)
+               image: @data[:image],
+               image_link: @data[:image_link],
+               obs: @data[:obs] || {},
+               votes: @data.fetch(:votes, true),
+               full_width: @data.fetch(:full_width, true)
              ))
     end
   end
 
   # Render details section
-  def render_details_section(data)
-    render(Components::MatrixBoxDetails.new(
-             data: data,
-             user: @user,
-             identify: @identify
-           ))
+  def render_details_section
+    div(class: "panel-body rss-box-details") do
+      render_what_section
+      render_where_section
+      render_when_who_section
+      render_source_credit
+    end
+  end
+
+  def render_what_section
+    h_style = @data[:image] ? "h5" : "h3"
+
+    div(class: "rss-what") do
+      h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
+        a(href: url_for(@data[:what].show_link_args)) do
+          render_title
+        end
+        render_id_badge(@data[:what])
+      end
+
+      render_identify_ui if @identify
+    end
+  end
+
+  def render_title
+    fragment("box_title") do
+      render(Components::MatrixBoxTitle.new(
+               id: @data[:id],
+               name: @data[:name],
+               type: @data[:type]
+             ))
+    end
+  end
+
+  def render_id_badge(obj)
+    whitespace
+    show_title_id_badge(obj, "rss-id")
+  end
+
+  def render_identify_ui
+    return unless @data[:type] == :observation && @data[:consensus]
+
+    consensus = @data[:consensus]
+    obs = @data[:what]
+
+    if (obs.name_id != 1) && (naming = consensus.consensus_naming)
+      div(
+        class: "vote-select-container mb-3",
+        data: { vote_cache: obs.vote_cache }
+      ) do
+        naming_vote_form(naming, nil, context: "matrix_box")
+      end
+    else
+      propose_naming_link(
+        obs.id,
+        btn_class: "btn btn-default d-inline-block mb-3",
+        context: "matrix_box"
+      )
+    end
+  end
+
+  def render_where_section
+    return unless @data[:where]
+
+    div(class: "rss-where") do
+      small { location_link(@data[:where], @data[:location]) }
+    end
+  end
+
+  def render_when_who_section
+    return if @data[:when].blank?
+
+    div(class: "rss-what") do
+      small(class: "nowrap-ellipsis") do
+        span(class: "rss-when") { @data[:when] }
+        plain(": ")
+        user_link(@data[:who], nil, class: "rss-who")
+      end
+    end
+  end
+
+  def render_source_credit
+    target = @data[:what]
+    return unless target.respond_to?(:source_credit) &&
+                  target.source_noteworthy?
+
+    div(class: "small mt-3") do
+      div(class: "source-credit") do
+        small { target.source_credit.tpl }
+      end
+    end
   end
 
   # Render footer section
-  def render_footer_section(data)
-    render(Components::MatrixBoxFooter.new(
-             data: data,
-             user: @user,
-             identify: @identify,
-             footer: @footer
-           ))
+  def render_footer_section
+    render_log_footer
+    render_identify_footer
+  end
+
+  def render_log_footer
+    return unless @data[:detail].present? || @data[:time].present?
+
+    div(class: "panel-footer log-footer") do
+      render_footer_detail(@data[:detail])
+      render_footer_time(@data[:time])
+    end
+  end
+
+  def render_footer_detail(detail)
+    return if detail.blank?
+
+    if detail.is_a?(User)
+      render_user_detail(detail)
+    else
+      div(class: "rss-detail small") { detail }
+    end
+  end
+
+  def render_footer_time(time)
+    div(class: "rss-what small") { time.display_time } if time
+  end
+
+  def render_user_detail(user)
+    div(class: "rss-detail small") do
+      plain("#{:list_users_joined.l}: #{user.created_at.web_date}")
+      br
+      plain("#{:list_users_contribution.l}: #{user.contribution}")
+      br
+      link_to(
+        :OBSERVATIONS.l,
+        observations_path(by_user: user.id)
+      )
+    end
+  end
+
+  def render_identify_footer
+    return unless @identify && @data[:type] == :observation
+
+    div(
+      class: "panel-footer panel-active text-center position-relative"
+    ) do
+      mark_as_reviewed_toggle(
+        @data[:id],
+        "box_reviewed",
+        "stretched-link"
+      )
+    end
   end
 end

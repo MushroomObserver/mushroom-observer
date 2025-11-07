@@ -1,10 +1,10 @@
 <div id="results">
 <%= paginated_results do %>
-  <%= render(Components::MatrixTable.new do %>
+  <%= render(Components::MatrixTable.new) do %>
     <% @subset.each do |row| %>
       <% image = row[0] %>
       <% status = row[1] %>
-      <%= render(Components::MatrixBox.new(id: image.id) do %>
+      <%= render(Components::MatrixBox.new(id: image.id)) do %>
         <%= tag.div(class: "panel panel-default") do
           [
             tag.div(class: "thumbnail-container") do
@@ -19,8 +19,8 @@
             end
           ].safe_join
         end %>
-      <% end) %>
+      <% end %>
     <% end %>
-  <% end) %>
+  <% end %>
 <% end %>
 </div>
