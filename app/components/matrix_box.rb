@@ -55,15 +55,11 @@ class Components::MatrixBox < Components::Base
       id: "box_#{@data[:id]}",
       class: class_names("matrix-box", @columns, @extra_class)
     ) do
-      div(class: "panel panel-default") do
-        # Main content: thumbnail and details
-        div(class: "panel-sizing") do
-          render_thumbnail_section
-          render_details_section
-        end
-
-        # Footer components
-        render_footer_section
+      Panel(sizing: true) do |panel|
+        render_thumbnail_section(panel)
+        render_details_section(panel)
+        render_log_footer(panel)
+        render_identify_footer(panel)
       end
     end
   end
@@ -77,10 +73,10 @@ class Components::MatrixBox < Components::Base
   end
 
   # Render image section
-  def render_thumbnail_section
+  def render_thumbnail_section(panel)
     return unless @data[:image]
 
-    div(class: "thumbnail-container") do
+    panel.with_thumbnail do
       InteractiveImage(
         user: @user,
         image: @data[:image],
@@ -93,8 +89,8 @@ class Components::MatrixBox < Components::Base
   end
 
   # Render details section
-  def render_details_section
-    div(class: "panel-body rss-box-details") do
+  def render_details_section(panel)
+    panel.with_body(classes: "rss-box-details") do
       render_what_section
       render_where_section
       render_when_who_section
@@ -186,16 +182,10 @@ class Components::MatrixBox < Components::Base
     end
   end
 
-  # Render footer section
-  def render_footer_section
-    render_log_footer
-    render_identify_footer
-  end
-
-  def render_log_footer
+  def render_log_footer(panel)
     return unless @data[:detail].present? || @data[:time].present?
 
-    div(class: "panel-footer log-footer") do
+    panel.with_footer(classes: "log-footer") do
       render_footer_detail(@data[:detail])
       render_footer_time(@data[:time])
     end
@@ -228,12 +218,8 @@ class Components::MatrixBox < Components::Base
     end
   end
 
-  def render_identify_footer
-    return unless @identify && @data[:type] == :observation
-
-    div(
-      class: "panel-footer panel-active text-center position-relative"
-    ) do
+  def render_identify_footer(panel)
+    panel.with_footer(classes: "panel-active text-center position-relative") do
       mark_as_reviewed_toggle(
         @data[:id],
         "box_reviewed",
