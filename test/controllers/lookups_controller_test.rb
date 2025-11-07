@@ -116,6 +116,13 @@ class LookupsControllerTest < FunctionalTestCase
     assert_redirected_to(%r{/names})
   end
 
+  def test_lookup_name_with_plus_sign
+    login
+    name = names(:coprinus_comatus).text_name.tr(" ", "+")
+    get(:lookup_name, params: { id: name })
+    assert_redirected_to(%r{/names/#{names(:coprinus_comatus).id}})
+  end
+
   def test_lookup_name_matching_only_glossary_term
     term = glossary_terms(:multiple_word_glossary_term)
 
