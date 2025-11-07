@@ -37,6 +37,10 @@ class Components::Panel < Components::Base
   prop :collapse_id, _Nilable(String), default: nil
   prop :collapse_message, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
+  # Special for matrix boxes, for Bootstrap 3 "grid" effect via Stimulus:
+  # Wrap thumbnail and body in .panel-sizing div, equalized per row.
+  # Remove this when migrating to Bootstrap >= 4.
+  prop :sizing, _Boolean, default: false
 
   slot :heading, lambda { |classes: nil, &content|
     render_heading(classes:, &content)
@@ -46,7 +50,9 @@ class Components::Panel < Components::Base
   slot :body, lambda { |classes: nil, collapse: false, &content|
     render_body(classes:, collapse:, &content)
   }, collection: true
-  slot :footer
+  slot :footer, lambda { |classes: nil, &content|
+    render_footer(classes:, &content)
+  }, collection: true
 
   def view_template
     classes = class_names("panel panel-default", @panel_class)
@@ -55,12 +61,9 @@ class Components::Panel < Components::Base
       id: @panel_id,
       **@attributes
     ) do
-      # yield if block_given?
-
-      render_thumbnail if thumbnail_slot?
       render(heading_slot) if heading_slot?
-      body_slots.each { |slot| render(slot) } if body_slots?
-      render_footer if footer_slot?
+      render_thumbnail_and_body
+      footer_slots.each { |slot| render(slot) } if footer_slots?
     end
   end
 
@@ -110,6 +113,20 @@ class Components::Panel < Components::Base
     end
   end
 
+  def render_thumbnail_and_body
+    # Special for matrix boxes in Bootstrap 3 only
+    if @sizing
+      div(class: "panel-sizing") { render_middle_sections }
+    else
+      render_middle_sections
+    end
+  end
+
+  def render_middle_sections
+    render_thumbnail if thumbnail_slot?
+    body_slots.each { |slot| render(slot) } if body_slots?
+  end
+
   def render_thumbnail
     div(class: "thumbnail-container") do
       render(thumbnail_slot)
@@ -136,9 +153,10 @@ class Components::Panel < Components::Base
     end
   end
 
-  def render_footer
-    div(class: "panel-footer") do
-      render(footer_slot)
+  def render_footer(classes:)
+    classes = class_names("panel-footer", classes)
+    div(class: classes) do
+      yield if block_given?
     end
   end
 end
