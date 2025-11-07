@@ -46,7 +46,9 @@ class Components::Panel < Components::Base
     render_heading(classes:, &content)
   }
   slot :heading_links
-  slot :thumbnail
+  slot :thumbnail, lambda { |classes: nil, &content|
+    render_thumbnail(classes:, &content)
+  }
   slot :body, lambda { |classes: nil, collapse: false, &content|
     render_body(classes:, collapse:, &content)
   }, collection: true
@@ -67,12 +69,12 @@ class Components::Panel < Components::Base
     end
   end
 
-  def render_heading(classes:)
+  def render_heading(classes:, &content)
     classes = classes.presence || "h4 panel-title"
 
     div(class: "panel-heading") do
       div(class: classes) do
-        span { yield if block_given? }
+        span(&content)
         whitespace
         render_heading_links if heading_links_slot? || @collapsible
       end
@@ -123,14 +125,13 @@ class Components::Panel < Components::Base
   end
 
   def render_middle_sections
-    render_thumbnail if thumbnail_slot?
+    render(thumbnail_slot) if thumbnail_slot?
     body_slots.each { |slot| render(slot) } if body_slots?
   end
 
-  def render_thumbnail
-    div(class: "thumbnail-container") do
-      render(thumbnail_slot)
-    end
+  def render_thumbnail(classes:, &content)
+    classes ||= "thumbnail-container"
+    div(class: classes, &content)
   end
 
   def render_body(classes:, collapse:, &content)
@@ -139,11 +140,9 @@ class Components::Panel < Components::Base
     render_plain_body(classes:, &content)
   end
 
-  def render_plain_body(classes:)
+  def render_plain_body(classes:, &content)
     classes = class_names("panel-body", classes)
-    div(class: classes) do
-      yield if block_given?
-    end
+    div(class: classes, &content)
   end
 
   def render_collapse_body(classes:, &content)

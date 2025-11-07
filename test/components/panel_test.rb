@@ -104,6 +104,18 @@ class PanelTest < UnitTestCase
     assert_includes(html, "Thumbnail content")
   end
 
+  def test_panel_with_carousel_for_thumbnail
+    html = render(Components::Panel.new) do |panel|
+      panel.with_heading { "Test" }
+      panel.with_thumbnail(classes: "carousel") { "Carousel content" }
+      panel.with_body { "Body content" }
+    end
+
+    assert_not_includes(html, "thumbnail-container")
+    assert_includes(html, "carousel")
+    assert_includes(html, "Carousel content")
+  end
+
   def test_panel_with_multiple_footers
     html = render(Components::Panel.new) do |panel|
       panel.with_heading { "Test" }
