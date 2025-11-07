@@ -9,9 +9,14 @@ module ComponentTestHelper
   # Get the Rails view context needed for components to access helpers
   delegate :view_context, to: :controller
 
-  # Create a test controller instance
+  # Create a test controller instance with auth methods
   def controller
-    @controller ||= ActionView::TestCase::TestController.new
+    @controller ||= begin
+                      ctrl = ActionView::TestCase::TestController.new
+                      # Include Authentication module for permission? method
+                      ctrl.class.include(ApplicationController::Authentication)
+                      ctrl
+                    end
   end
 
   # Render a component and return the HTML string
