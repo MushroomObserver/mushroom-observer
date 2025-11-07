@@ -7,27 +7,27 @@
 # custom content.
 #
 # @example With block
-#   render MatrixTable.new do
-#     render MatrixBox.new(id: 1) { "Content" }
-#     render MatrixBox.new(id: 2) { "Content" }
+#   render(MatrixTable.new) do |table|
+#     table.render(MatrixBox.new(id: 1) { "Content" })
+#     table.render(MatrixBox.new(id: 2) { "Content" })
 #   end
 #
 # @example With collection of objects
-#   render MatrixTable.new(objects: @observations, user: @user)
+#   render(MatrixTable.new(objects: @observations, user: @user))
 #
 # @example With caching enabled
-#   render MatrixTable.new(
+#   render(MatrixTable.new(
 #     objects: @observations,
 #     user: @user,
 #     cached: true
-#   )
+#   ))
 #
 # @example With collection and local options
-#   render MatrixTable.new(
+#   render(MatrixTable.new(
 #     objects: @observations,
 #     user: @user,
 #     locals: { identify: true }
-#   )
+#   ))
 class Components::MatrixTable < Components::Base
   # Properties
   prop :objects, _Nilable(Array), default: nil
@@ -59,10 +59,21 @@ class Components::MatrixTable < Components::Base
 
   def render_cached_boxes
     @objects.each do |object|
-      cache(object) do
+      if should_cache_object?(object)
+        cache(object) do
+          MatrixBox(user: @user, object: object, **@locals)
+        end
+      else
         MatrixBox(user: @user, object: object, **@locals)
       end
     end
+  end
+
+  def should_cache_object?(object)
+    return true unless object.respond_to?(:thumb_image)
+
+    # Don't cache if thumb_image hasn't been transferred to image server
+    object.thumb_image&.transferred != false
   end
 
   def render_matrix_boxes
