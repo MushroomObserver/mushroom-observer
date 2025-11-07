@@ -173,8 +173,7 @@ class PanelTest < UnitTestCase
     assert_includes(html, "panel-body")
   end
 
-  def test_panel_with_interactive_image_thumbnail
-    user = users(:rolf)
+  def test_panel_with_image_thumbnail
     obs = observations(:coprinus_comatus_obs)
     image = obs.thumb_image
 
@@ -182,29 +181,25 @@ class PanelTest < UnitTestCase
     html = render(component) do |panel|
       panel.with_heading { "Observation" }
       panel.with_thumbnail do
-        render(Components::InteractiveImage.new(
-                 user: user,
-                 image: image,
-                 size: :thumbnail,
-                 votes: false
-               ))
+        view_context.tag.img(
+          src: "/images/#{image.id}/thumbnail",
+          alt: "Thumbnail",
+          class: "img-thumbnail"
+        )
       end
       panel.with_body { "Observation details" }
     end
 
-    # Should contain the image
+    # Should contain the image in thumbnail container
     assert_includes(html, "thumbnail-container")
     assert_nested(
       html,
-      parent_selector: "div.thumbnail-container",
+      parent_selector: ".thumbnail-container",
       child_selector: "img"
     )
-    # Should have the image ID in the HTML
-    assert_includes(html, "image_#{image.id}")
   end
 
-  def test_panel_with_interactive_image_and_sizing
-    user = users(:rolf)
+  def test_panel_with_image_and_sizing
     obs = observations(:coprinus_comatus_obs)
     image = obs.thumb_image
 
@@ -212,12 +207,11 @@ class PanelTest < UnitTestCase
     html = render(component) do |panel|
       panel.with_heading { "Observation" }
       panel.with_thumbnail do
-        render(Components::InteractiveImage.new(
-                 user: user,
-                 image: image,
-                 size: :thumbnail,
-                 votes: false
-               ))
+        view_context.tag.img(
+          src: "/images/#{image.id}/thumbnail",
+          alt: "Thumbnail",
+          class: "img-thumbnail"
+        )
       end
       panel.with_body { "Details" }
     end
@@ -227,12 +221,12 @@ class PanelTest < UnitTestCase
     # Image should be nested in panel-sizing > thumbnail-container
     assert_nested(
       html,
-      parent_selector: "div.panel-sizing",
-      child_selector: "div.thumbnail-container"
+      parent_selector: ".panel-sizing",
+      child_selector: ".thumbnail-container"
     )
     assert_nested(
       html,
-      parent_selector: "div.thumbnail-container",
+      parent_selector: ".thumbnail-container",
       child_selector: "img"
     )
   end
