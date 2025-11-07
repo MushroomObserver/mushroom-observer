@@ -10,17 +10,17 @@
 #     user: current_user,
 #     image: @image,
 #     index: 0,
-#     html_id: "observation_123_carousel"
+#     carousel_id: "observation_123_carousel"
 #   )
 class Components::CarouselThumbnail < Components::BaseImage
   # Additional thumbnail-specific properties
   prop :index, Integer, default: 0
-  prop :html_id, String
+  prop :carousel_id, String
   prop :img_id, _Nilable(Integer), default: nil do |value|
     value&.to_i
   end
 
-  def initialize(html_id:, index: 0, img_id: nil, **props)
+  def initialize(carousel_id:, index: 0, img_id: nil, **props)
     # Set thumbnail-specific defaults
     props[:size] ||= :thumbnail
     props[:fit] ||= :contain
@@ -61,7 +61,7 @@ class Components::CarouselThumbnail < Components::BaseImage
       id: "carousel_thumbnail_#{@img_id}",
       class: ["carousel-indicator mx-1", active],
       data: {
-        target: "##{@html_id}",
+        target: "##{@carousel_id}",
         slide_to: @index.to_s,
         form_images_target: "thumbnail",
         image_uuid: @img_id,

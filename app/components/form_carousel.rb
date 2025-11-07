@@ -18,13 +18,13 @@ class Components::FormCarousel < Components::Base
   # Properties
   prop :images, _Nilable(Array), default: nil
   prop :user, _Nilable(User)
-  prop :html_id, String, default: "observation_upload_images_carousel"
+  prop :carousel_id, String, default: "observation_upload_images_carousel"
   prop :thumb_id, _Nilable(Integer), default: nil
   prop :exif_data, Hash, default: -> { {} }
 
   def view_template
     div(
-      id: @html_id,
+      id: @carousel_id,
       class: "carousel slide image-form-carousel",
       data: {
         ride: "false",
@@ -43,7 +43,7 @@ class Components::FormCarousel < Components::Base
 
         # Carousel controls
         div(class: "carousel-control-wrap row") do
-          CarouselControls(carousel_id: @html_id)
+          CarouselControls(carousel_id: @carousel_id)
         end
       end
 
@@ -80,7 +80,7 @@ class Components::FormCarousel < Components::Base
         user: @user,
         image: image,
         index: index,
-        html_id: @html_id
+        carousel_id: @carousel_id
       )
     end
   end

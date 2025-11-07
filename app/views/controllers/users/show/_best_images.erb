@@ -1,12 +1,10 @@
-<%
-carousel_locals = {
-  object: @show_user,
-  images: @best_images,
-  title: :show_user_observations_by.t(name: name),
-  panel_id: "user_best_images"
-}
-%>
+<%# locals: (name: nil) %>
 
 <%= if @best_images&.length&.positive?
-  render(Components::Carousel.new(**carousel_locals))
+  render(Components::Carousel.new(
+    object: @show_user,
+    images: @best_images,
+    title: :show_user_observations_by.t(name: name),
+    panel_id: "user_best_images"
+  ))
 end %>

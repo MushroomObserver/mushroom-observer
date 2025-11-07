@@ -93,11 +93,11 @@ class FormCarouselTest < UnitTestCase
     )
   end
 
-  def test_renders_with_custom_html_id
+  def test_renders_with_custom_carousel_id
     component = Components::FormCarousel.new(
       user: @user,
       images: @images,
-      html_id: "custom_carousel_id",
+      carousel_id: "custom_carousel_id",
       exif_data: @exif_data
     )
     html = render(component)
@@ -107,7 +107,7 @@ class FormCarouselTest < UnitTestCase
     assert_includes(html, 'data-target="#custom_carousel_id"')
   end
 
-  def test_uses_default_html_id
+  def test_uses_default_carousel_id
     component = Components::FormCarousel.new(
       user: @user,
       images: @images,

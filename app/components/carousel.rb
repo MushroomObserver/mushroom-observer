@@ -29,12 +29,12 @@ class Components::Carousel < Components::Base
   prop :title, String, default: -> { :IMAGES.t }
   prop :links, String, default: ""
   prop :thumbnails, _Boolean, default: true
-  prop :html_id, _Nilable(String), default: nil
+  prop :carousel_id, _Nilable(String), default: nil
   prop :panel_id, _Nilable(String), default: nil
 
   def view_template
-    # Generate HTML ID if not provided
-    @html_id ||= generate_html_id
+    # Generate carousel ID if not provided
+    @carousel_id ||= generate_carousel_id
 
     Panel(panel_id: @panel_id) do |panel|
       # Render heading if thumbnails enabled
@@ -52,7 +52,7 @@ class Components::Carousel < Components::Base
 
   private
 
-  def generate_html_id
+  def generate_carousel_id
     type = @object&.type_tag || "image"
     object_id = @object&.id || "unknown"
     "#{type}_#{object_id}_carousel"
@@ -69,7 +69,7 @@ class Components::Carousel < Components::Base
 
   def render_carousel(panel)
     panel.with_thumbnail(
-      id: @html_id,
+      id: @carousel_id,
       classes: "carousel slide show-carousel",
       data: { ride: "false", interval: "false" }
     ) do
@@ -89,7 +89,7 @@ class Components::Carousel < Components::Base
         end
 
         # Carousel controls (if multiple images)
-        CarouselControls(carousel_id: @html_id) if @images.length > 1
+        CarouselControls(carousel_id: @carousel_id) if @images.length > 1
       end
 
       # Thumbnail navigation (if enabled)
@@ -106,7 +106,7 @@ class Components::Carousel < Components::Base
           user: @user,
           image: image,
           index: index,
-          html_id: @html_id
+          carousel_id: @carousel_id
         )
       end
     end

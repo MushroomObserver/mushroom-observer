@@ -1,16 +1,9 @@
-<%
-carousel_locals = {
-  object: @name,
-  images: @best_images,
-  title: :show_name_most_confident.l,
-  links: "",
-  panel_id: "name_confident_observations"
-}
-%>
-
 <%= if @best_images&.length&.positive?
-  tag.div(class: "panel panel-default",
-          id: "name_confident_observations") do
-    render(Components::Carousel.new(**carousel_locals))
-  end
+  render(Components::Carousel.new(
+    object: @name,
+    images: @best_images,
+    title: :show_name_most_confident.l,
+    links: "",
+    panel_id: "name_confident_observations"
+  ))
 end %>
