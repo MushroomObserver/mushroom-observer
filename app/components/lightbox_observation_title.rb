@@ -23,7 +23,7 @@ class Components::LightboxObservationTitle < Components::Base
   prop :identify, _Boolean, default: false
 
   def view_template
-    h4(title_attributes) do
+    h4(**title_attributes) do
       render_label if @identify
       whitespace
       render_link

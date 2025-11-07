@@ -170,8 +170,9 @@ class Components::BaseImage < Components::Base
   end
 
   # Render lightbox link button
-  def render_lightbox_link(lightbox_data)
-    return unless @lightbox_data
+  def render_lightbox_link
+    lightbox_data = @data&.[](:lightbox_data)
+    return unless lightbox_data
 
     icon = i(class: "glyphicon glyphicon-fullscreen")
     caption = lightbox_caption_html(lightbox_data)
@@ -185,7 +186,7 @@ class Components::BaseImage < Components::Base
 
   # Build lightbox caption HTML using LightboxCaption component
   def lightbox_caption_html(lightbox_data)
-    return unless @lightbox_data
+    return unless lightbox_data
 
     render(LightboxCaption.new(
              user: @user,
@@ -197,41 +198,45 @@ class Components::BaseImage < Components::Base
   end
 
   # Render vote section for an image using ImageVoteInterface component
-  def render_image_vote_section(img_instance)
-    return unless @votes && img_instance
+  def render_image_vote_section
+    return unless @votes && @img_instance
 
     render(ImageVoteInterface.new(
              user: @user,
-             image: img_instance,
+             image: @img_instance,
              votes: @votes
            ))
   end
 
   # Render original filename if applicable
-  def render_original_filename(img_instance)
-    return unless show_original_name?(img_instance)
+  def render_original_filename
+    return unless show_original_name?
 
-    div { img_instance.original_name }
+    div { @img_instance.original_name }
   end
 
   # Check if original filename should be shown
-  def show_original_name?(img)
-    return false unless @original && img && img.original_name.present?
+  def show_original_name?
+    return false unless @original && @img_instance &&
+                        @img_instance.original_name.present?
 
-    permission?(img) ||
-      (img.user && img.user.keep_filenames == "keep_and_show")
+    permission?(@img_instance) ||
+      (@img_instance.user &&
+       @img_instance.user.keep_filenames == "keep_and_show")
   end
 
   # Render stretched link based on link method
-  def render_stretched_link(path, method = @link_method)
-    case method
+  def render_stretched_link
+    path = @data&.[](:image_link)
+
+    case @link_method
     when :get
       a(href: path, class: stretched_link_classes)
     when :post, :put, :patch, :delete
       # These require button_to which generates a form with CSRF protection
       button_to(
         path,
-        method: method,
+        method: @link_method,
         class: stretched_link_classes,
         form: { data: { turbo: true } }
       ) { "" }

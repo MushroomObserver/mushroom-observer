@@ -32,19 +32,19 @@ class Components::CarouselItem < Components::BaseImage
 
   def view_template
     # Get image instance and ID
-    img_instance, img_id = extract_image_and_id
+    @img_instance, @img_id = extract_image_and_id
 
     # Build render data
-    data = build_render_data(img_instance, img_id)
+    @data = build_render_data(@img_instance, @img_id)
 
     # Render the carousel item
     div(
-      id: "carousel_item_#{img_id}",
+      id: "carousel_item_#{@img_id}",
       class: build_item_classes
     ) do
-      render_carousel_image(data)
-      render_carousel_overlays(img_instance, data)
-      render_carousel_caption(img_instance, data)
+      render_carousel_image
+      render_carousel_overlays
+      render_carousel_caption
     end
   end
 
@@ -55,40 +55,71 @@ class Components::CarouselItem < Components::BaseImage
     class_names("item carousel-item", active)
   end
 
-  def render_carousel_image(data)
+  def render_carousel_image
     img(
-      src: data[:img_src],
+      src: @data[:img_src],
       alt: @notes,
-      class: data[:img_class],
-      data: data[:img_data]
+      class: @data[:img_class],
+      data: @data[:img_data]
     )
   end
 
-  def render_carousel_overlays(_img_instance, data)
-    render_stretched_link(data[:image_link]) if @user && data[:image_link]
-    render_lightbox_link(data[:lightbox_data]) if data[:lightbox_data]
+  def render_carousel_overlays
+    render_stretched_link if @user && @data[:image_link]
+    render_lightbox_link if @data[:lightbox_data]
   end
 
-  def render_carousel_caption(img_instance, _data)
-    caption = image_info_html(img_instance)
+  def render_carousel_caption
+    caption = image_info_html
 
     div(class: "carousel-caption") do
       # Vote section
-      render_image_vote_section(img_instance)
+      render_image_vote_section
 
       # Image info (copyright, notes)
       div(class: "image-info d-none d-sm-block") { caption } if caption.present?
     end
   end
 
-  def image_info_html(img_instance)
-    return "" unless img_instance && @object
+  def image_info_html
+    return "" unless @img_instance && @object
 
-    render(Components::ImageInfo.new(
+    [
+      owner_original_name,
+      copyright,
+      notes
+    ].compact_blank.safe_join
+  end
+
+  # Render copyright using ImageCopyright component
+  def copyright
+    return "" unless @img_instance
+
+    render(Components::ImageCopyright.new(
              user: @user,
-             image: img_instance,
-             object: @object,
-             original: @original
+             image: @img_instance,
+             object: @object
            ))
+  end
+
+  def owner_original_name
+    return "" unless show_original_name? &&
+                     (owner_name = @img_instance.original_name).present?
+
+    div(class: "image-original-name") { owner_name }
+  end
+
+  def show_original_name?
+    @original && @img_instance &&
+      @img_instance.original_name.present? &&
+      (permission?(@img_instance) ||
+       @img_instance.user &&
+       @img_instance.user.keep_filenames == "keep_and_show")
+  end
+
+  def notes
+    return "" if @img_instance.notes.blank?
+
+    div(class: "image-notes") { @img_instance.notes.tl.truncate_html(300) }
   end
 end

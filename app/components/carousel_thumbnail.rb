@@ -36,43 +36,43 @@ class Components::CarouselThumbnail < Components::BaseImage
 
   def view_template
     # Get image instance and ID
-    img_instance, final_img_id = extract_image_and_id
+    @img_instance, @img_id = extract_image_and_id
 
-    # For uploads, use provided img_id or fallback
-    final_img_id = @img_id || final_img_id || "img_id_missing"
+    # For uploads, use fallback if no ID
+    @img_id ||= "img_id_missing"
 
-    # Ensure final_img_id is not an Image object (convert to integer if needed)
-    final_img_id = final_img_id.id if final_img_id.is_a?(::Image)
+    # Ensure img_id is not an Image object (convert to integer if needed)
+    @img_id = @img_id.id if @img_id.is_a?(::Image)
 
     # Build render data
-    render_data = build_render_data(img_instance, final_img_id)
+    @data = build_render_data(@img_instance, @img_id)
 
     # Render the thumbnail
-    render_thumbnail(final_img_id, render_data)
+    render_thumbnail
   end
 
   private
 
-  def render_thumbnail(final_img_id, data)
+  def render_thumbnail
     active = @index.zero? ? "active" : ""
     image_status = @upload ? "upload" : "good"
 
     li(
-      id: "carousel_thumbnail_#{final_img_id}",
+      id: "carousel_thumbnail_#{@img_id}",
       class: ["carousel-indicator mx-1", active],
       data: {
         target: "##{@html_id}",
         slide_to: @index.to_s,
         form_images_target: "thumbnail",
-        image_uuid: final_img_id,
+        image_uuid: @img_id,
         image_status: image_status
       }
     ) do
       img(
-        src: data[:img_src],
+        src: @data[:img_src],
         alt: @notes,
-        class: data[:img_class],
-        data: data[:img_data]
+        class: @data[:img_class],
+        data: @data[:img_data]
       )
     end
   end

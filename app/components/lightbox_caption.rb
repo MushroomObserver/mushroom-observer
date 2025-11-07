@@ -194,11 +194,11 @@ class Components::LightboxCaption < Components::Base
   end
 
   def render_image_caption
-    div(class: "image-notes") { image.notes.tl.truncate_html(300) }
+    div(class: "image-notes") { @image.notes.tl.truncate_html(300) }
   end
 
   def render_image_links
-    image_for_links = image || image_id
+    image_for_links = @image || @image_id
 
     p(class: "caption-image-links my-3") do
       render_original_image_link(image_for_links)

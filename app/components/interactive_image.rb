@@ -24,66 +24,66 @@ class Components::InteractiveImage < Components::BaseImage
     return if @upload && @image.blank?
 
     # Get image instance and ID
-    img_instance, img_id = extract_image_and_id
+    @img_instance, @img_id = extract_image_and_id
 
     # Build render data
-    render_data = build_render_data(img_instance, img_id)
+    @data = build_render_data(@img_instance, @img_id)
 
     # Render the interactive image
-    render_interactive_image(img_instance, img_id, render_data)
+    render_interactive_image
   end
 
   private
 
-  def render_interactive_image(img_instance, img_id, data)
+  def render_interactive_image
     div(
-      id: data[:html_id],
+      id: @data[:html_id],
       class: "image-sizer position-relative mx-auto",
-      style: build_width_style(data[:width])
+      style: build_width_style(@data[:width])
     ) do
-      render_image_container(img_id, data)
-      render_stretched_link(data[:image_link])
-      render_image_overlays(img_instance, data)
+      render_image_container
+      render_stretched_link
+      render_image_overlays
     end
 
-    render_original_filename(img_instance)
+    render_original_filename
   end
 
   def build_width_style(width)
     width.present? ? "width: #{width}px;" : ""
   end
 
-  def render_image_container(img_id, data)
+  def render_image_container
     div(
       class: "image-lazy-sizer overflow-hidden",
-      style: "padding-bottom: #{data[:proportion]}%;"
+      style: "padding-bottom: #{@data[:proportion]}%;"
     ) do
-      render_lazy_image(img_id, data)
-      render_noscript_image(img_id, data)
+      render_lazy_image
+      render_noscript_image
     end
   end
 
-  def render_lazy_image(img_id, data)
+  def render_lazy_image
     img(
       src: image_path("placeholder.svg"),
       alt: @notes,
-      class: "#{data[:img_class]} lazy image_#{img_id}",
-      data: data[:img_data]
+      class: "#{@data[:img_class]} lazy image_#{@img_id}",
+      data: @data[:img_data]
     )
   end
 
-  def render_noscript_image(img_id, data)
+  def render_noscript_image
     noscript do
       img(
-        src: data[:img_src],
+        src: @data[:img_src],
         alt: @notes,
-        class: "#{data[:img_class]} img-noscript image_#{img_id}"
+        class: "#{@data[:img_class]} img-noscript image_#{@img_id}"
       )
     end
   end
 
-  def render_image_overlays(img_instance, data)
-    render_lightbox_link(data[:lightbox_data]) if data[:lightbox_data]
-    render_image_vote_section(img_instance)
+  def render_image_overlays
+    render_lightbox_link if @data[:lightbox_data]
+    render_image_vote_section
   end
 end

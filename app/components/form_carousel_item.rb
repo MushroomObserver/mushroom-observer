@@ -45,31 +45,31 @@ class Components::FormCarouselItem < Components::BaseImage
 
   def view_template
     # Get image instance and ID
-    img_instance, img_id = extract_image_and_id
-    img_id ||= "img_id_missing" if @upload
+    @img_instance, @img_id = extract_image_and_id
+    @img_id ||= "img_id_missing" if @upload
 
     # Ensure img_id is not an Image object (convert to integer if needed)
-    img_id = img_id.id if img_id.is_a?(::Image)
+    @img_id = @img_id.id if @img_id.is_a?(::Image)
 
     # Build render data
-    render_data = build_render_data(img_instance, img_id)
+    @data = build_render_data(@img_instance, @img_id)
 
     # Render the carousel item
-    render_form_carousel_item(img_instance, img_id, render_data)
+    render_form_carousel_item
   end
 
   private
 
-  def render_form_carousel_item(img_instance, img_id, data)
+  def render_form_carousel_item
     div(
-      id: "carousel_item_#{img_id}",
+      id: "carousel_item_#{@img_id}",
       class: build_item_classes,
-      data: build_item_data(img_id)
+      data: build_item_data
     ) do
       div(class: "row") do
-        render_image_column(data)
-        render_form_column(img_instance, img_id)
-        render_control_buttons(img_instance)
+        render_image_column
+        render_form_column
+        render_control_buttons
       end
     end
   end
@@ -79,12 +79,12 @@ class Components::FormCarouselItem < Components::BaseImage
     ["item carousel-item", active]
   end
 
-  def build_item_data(img_id)
+  def build_item_data
     item_data = {
       form_images_target: "item",
       form_exif_target: "item",
       action: "form-exif:populated->form-images#itemExifPopulated",
-      image_uuid: img_id,
+      image_uuid: @img_id,
       image_status: @upload ? "upload" : "good"
     }
 
@@ -92,53 +92,53 @@ class Components::FormCarouselItem < Components::BaseImage
     item_data
   end
 
-  def render_image_column(data)
+  def render_image_column
     div(class: "col-12 col-md-6") do
       div(class: "image-position") do
         img(
-          src: data[:img_src],
+          src: @data[:img_src],
           alt: @notes,
-          class: data[:img_class],
-          data: data[:img_data]
+          class: @data[:img_class],
+          data: @data[:img_data]
         )
       end
     end
   end
 
-  def render_form_column(img_instance, img_id)
+  def render_form_column
     div(class: "col-12 col-md-6") do
       div(class: "form-panel") do
         render(Components::FormImageFields.new(
                  user: @user,
-                 image: img_instance,
-                 img_id: img_id,
+                 image: @img_instance,
+                 img_id: @img_id,
                  upload: @upload
                ))
 
         render(Components::FormCameraInfo.new(
-                 img_id: img_id,
+                 img_id: @img_id,
                  **@camera_info
                ))
       end
     end
   end
 
-  def render_control_buttons(img_instance)
-    render_thumbnail_button(img_instance)
-    render_remove_button(img_instance)
+  def render_control_buttons
+    render_thumbnail_button
+    render_remove_button
   end
 
-  def render_thumbnail_button(img_instance)
+  def render_thumbnail_button
     div(class: "top-left p-4") do
-      button_to_set_thumb_img(img_instance)
+      button_to_set_thumb_img
     end
   end
 
   # Note that this is not `observation[thumb_image_id]`, a hidden field that
   # is set by the Stimulus controller on the basis of these radios' value.
-  def button_to_set_thumb_img(image)
-    value = image&.id || "true"
-    checked = @thumb_id&.== image&.id
+  def button_to_set_thumb_img
+    value = @img_instance&.id || "true"
+    checked = @thumb_id&.== @img_instance&.id
     label_classes = class_names("btn btn-default btn-sm thumb_img_btn",
                                 active: checked)
 
@@ -160,9 +160,9 @@ class Components::FormCarouselItem < Components::BaseImage
     end
   end
 
-  def render_remove_button(img_instance)
+  def render_remove_button
     div(class: "top-right p-4") do
-      remove_image_button(img_instance&.id)
+      remove_image_button(@img_instance&.id)
     end
   end
 
