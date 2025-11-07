@@ -1,0 +1,167 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+class MatrixTableTest < UnitTestCase
+  include ComponentTestHelper
+
+  def setup
+    @user = users(:rolf)
+  end
+
+  def test_renders_empty_table_when_no_objects
+    component = Components::MatrixTable.new
+    html = render(component)
+
+    assert_includes(html, "list-unstyled")
+    assert_includes(html, "matrix-table")
+  end
+
+  def test_renders_observations_without_caching
+    observations = [
+      observations(:coprinus_comatus_obs),
+      observations(:agaricus_campestris_obs)
+    ]
+    component = Components::MatrixTable.new(
+      objects: observations,
+      user: @user,
+      cached: false
+    )
+    html = render(component)
+
+    assert_includes(html, "box_#{observations.first.id}")
+    assert_includes(html, "box_#{observations.second.id}")
+  end
+
+  def test_caches_observations_with_transferred_images
+    obs = observations(:coprinus_comatus_obs)
+    # Stub transferred to return true
+    obs.thumb_image.stub(:transferred, true) do
+      component = Components::MatrixTable.new(
+        objects: [obs],
+        user: @user,
+        cached: true
+      )
+
+      # Expect cache to be called
+      cache_called = false
+      component.stub(:cache, lambda { |_obj, &block|
+        cache_called = true
+        block.call
+      }) do
+        render(component)
+      end
+
+      assert(cache_called, "Expected cache to be called for transferred image")
+    end
+  end
+
+  def test_does_not_cache_observations_with_untransferred_images
+    obs = observations(:coprinus_comatus_obs)
+    # Stub transferred to return false
+    obs.thumb_image.stub(:transferred, false) do
+      component = Components::MatrixTable.new(
+        objects: [obs],
+        user: @user,
+        cached: true
+      )
+
+      # Expect cache NOT to be called
+      cache_called = false
+      component.stub(:cache, lambda { |_obj, &block|
+        cache_called = true
+        block.call
+      }) do
+        html = render(component)
+        # Should still render the box, just not cached
+        assert_includes(html, "box_#{obs.id}")
+      end
+
+      assert_not(
+        cache_called,
+        "Expected cache NOT to be called for untransferred image"
+      )
+    end
+  end
+
+  def test_caches_objects_without_thumb_image
+    user = users(:katrina)
+    component = Components::MatrixTable.new(
+      objects: [user],
+      user: @user,
+      cached: true
+    )
+
+    # Expect cache to be called for user objects
+    cache_called = false
+    component.stub(:cache, lambda { |_obj, &block|
+      cache_called = true
+      block.call
+    }) do
+      render(component)
+    end
+
+    assert(
+      cache_called,
+      "Expected cache to be called for objects without thumb_image"
+    )
+  end
+
+  def test_caches_observations_with_nil_thumb_image
+    obs = observations(:minimal_unknown_obs)
+    assert_nil(obs.thumb_image,
+               "Test requires observation with nil thumb_image")
+
+    component = Components::MatrixTable.new(
+      objects: [obs],
+      user: @user,
+      cached: true
+    )
+
+    # Expect cache to be called when thumb_image is nil
+    cache_called = false
+    component.stub(:cache, lambda { |_obj, &block|
+      cache_called = true
+      block.call
+    }) do
+      render(component)
+    end
+
+    assert(
+      cache_called,
+      "Expected cache to be called when thumb_image is nil"
+    )
+  end
+
+  def test_renders_with_custom_locals
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::MatrixTable.new(
+      objects: [obs],
+      user: @user,
+      locals: { extra_class: "custom-class" }
+    )
+    html = render(component)
+
+    assert_includes(html, "custom-class")
+  end
+
+  def test_renders_with_block
+    component = Components::MatrixTable.new
+    html = render(component) do |table|
+      table.render(
+        Components::MatrixBox.new(
+          id: 123,
+          extra_class: "block-test"
+        ) do
+          view_context.tag.div(class: "panel panel-default") do
+            "Custom content"
+          end
+        end
+      )
+    end
+
+    assert_includes(html, "box_123")
+    assert_includes(html, "block-test")
+    assert_includes(html, "Custom content")
+  end
+end
