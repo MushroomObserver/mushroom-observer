@@ -46,8 +46,8 @@ class Components::Panel < Components::Base
     render_heading(classes:, &content)
   }
   slot :heading_links
-  slot :thumbnail, lambda { |classes: nil, &content|
-    render_thumbnail(classes:, &content)
+  slot :thumbnail, lambda { |classes: nil, id: nil, data: nil, &content|
+    render_thumbnail(classes:, id:, data:, &content)
   }
   slot :body, lambda { |classes: nil, collapse: false, &content|
     render_body(classes:, collapse:, &content)
@@ -129,9 +129,10 @@ class Components::Panel < Components::Base
     body_slots.each { |slot| render(slot) } if body_slots?
   end
 
-  def render_thumbnail(classes:, &content)
+  def render_thumbnail(classes:, id:, data:, &content)
     classes ||= "thumbnail-container"
-    div(class: classes, &content)
+    args = { class: classes, id:, data: }.compact
+    div(**args, &content)
   end
 
   def render_body(classes:, collapse:, &content)
