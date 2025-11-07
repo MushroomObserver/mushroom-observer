@@ -188,24 +188,24 @@ class Components::BaseImage < Components::Base
   def lightbox_caption_html(lightbox_data)
     return unless lightbox_data
 
-    render(LightboxCaption.new(
-             user: @user,
-             image: lightbox_data[:image],
-             image_id: lightbox_data[:image_id],
-             obs: lightbox_data[:obs],
-             identify: lightbox_data[:identify]
-           ))
+    LightboxCaption(
+      user: @user,
+      image: lightbox_data[:image],
+      image_id: lightbox_data[:image_id],
+      obs: lightbox_data[:obs],
+      identify: lightbox_data[:identify]
+    )
   end
 
   # Render vote section for an image using ImageVoteInterface component
   def render_image_vote_section
     return unless @votes && @img_instance
 
-    render(ImageVoteInterface.new(
-             user: @user,
-             image: @img_instance,
-             votes: @votes
-           ))
+    ImageVoteInterface(
+      user: @user,
+      image: @img_instance,
+      votes: @votes
+    )
   end
 
   # Render original filename if applicable

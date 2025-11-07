@@ -78,19 +78,17 @@ class Components::Carousel < Components::Base
         @images.each_with_index do |image, index|
           next unless image
 
-          render(Components::CarouselItem.new(
-                   user: @user,
-                   image: image,
-                   object: @object,
-                   size: @size,
-                   index: index
-                 ))
+          CarouselItem(
+            user: @user,
+            image: image,
+            object: @object,
+            size: @size,
+            index: index
+          )
         end
 
         # Carousel controls (if multiple images)
-        if @images.length > 1
-          render(Components::CarouselControls.new(carousel_id: final_html_id))
-        end
+        CarouselControls(carousel_id: final_html_id) if @images.length > 1
       end
 
       # Thumbnail navigation (if enabled)
@@ -103,12 +101,12 @@ class Components::Carousel < Components::Base
       @images.each_with_index do |image, index|
         next unless image
 
-        render(Components::CarouselThumbnail.new(
-                 user: @user,
-                 image: image,
-                 index: index,
-                 html_id: carousel_id
-               ))
+        CarouselThumbnail(
+          user: @user,
+          image: image,
+          index: index,
+          html_id: carousel_id
+        )
       end
     end
   end

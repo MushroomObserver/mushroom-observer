@@ -43,7 +43,7 @@ class Components::FormCarousel < Components::Base
 
         # Carousel controls
         div(class: "carousel-control-wrap row") do
-          render(Components::CarouselControls.new(carousel_id: @html_id))
+          CarouselControls(carousel_id: @html_id)
         end
       end
 
@@ -63,25 +63,25 @@ class Components::FormCarousel < Components::Base
     @images&.each_with_index do |image, index|
       upload = image&.created_at.nil?
 
-      render(Components::FormCarouselItem.new(
-               user: @user,
-               image: image || index,
-               index: index,
-               upload: upload,
-               thumb_id: @thumb_id,
-               camera_info: @exif_data[image&.id] || {}
-             ))
+      FormCarouselItem(
+        user: @user,
+        image: image || index,
+        index: index,
+        upload: upload,
+        thumb_id: @thumb_id,
+        camera_info: @exif_data[image&.id] || {}
+      )
     end
   end
 
   def render_thumbnails
     @images&.each_with_index do |image, index|
-      render(Components::CarouselThumbnail.new(
-               user: @user,
-               image: image,
-               index: index,
-               html_id: @html_id
-             ))
+      CarouselThumbnail(
+        user: @user,
+        image: image,
+        index: index,
+        html_id: @html_id
+      )
     end
   end
 end

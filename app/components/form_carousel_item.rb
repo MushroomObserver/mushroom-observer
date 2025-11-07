@@ -108,17 +108,17 @@ class Components::FormCarouselItem < Components::BaseImage
   def render_form_column
     div(class: "col-12 col-md-6") do
       div(class: "form-panel") do
-        render(Components::FormImageFields.new(
-                 user: @user,
-                 image: @img_instance,
-                 img_id: @img_id,
-                 upload: @upload
-               ))
+        FormImageFields(
+          user: @user,
+          image: @img_instance,
+          img_id: @img_id,
+          upload: @upload
+        )
 
-        render(Components::FormCameraInfo.new(
-                 img_id: @img_id,
-                 **@camera_info
-               ))
+        FormCameraInfo(
+          img_id: @img_id,
+          **@camera_info
+        )
       end
     end
   end

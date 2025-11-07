@@ -60,14 +60,14 @@ class Components::MatrixTable < Components::Base
   def render_cached_boxes
     @objects.each do |object|
       cache(object) do
-        render(MatrixBox.new(user: @user, object: object, **@locals))
+        MatrixBox(user: @user, object: object, **@locals)
       end
     end
   end
 
   def render_matrix_boxes
     @objects.each do |object|
-      render(MatrixBox.new(user: @user, object: object, **@locals))
+      MatrixBox(user: @user, object: object, **@locals)
     end
   end
 end

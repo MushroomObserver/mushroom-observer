@@ -81,14 +81,14 @@ class Components::MatrixBox < Components::Base
     return unless @data[:image]
 
     div(class: "thumbnail-container") do
-      render(InteractiveImage.new(
-               user: @user,
-               image: @data[:image],
-               image_link: @data[:image_link],
-               obs: @data[:obs] || {},
-               votes: @data.fetch(:votes, true),
-               full_width: @data.fetch(:full_width, true)
-             ))
+      InteractiveImage(
+        user: @user,
+        image: @data[:image],
+        image_link: @data[:image_link],
+        obs: @data[:obs] || {},
+        votes: @data.fetch(:votes, true),
+        full_width: @data.fetch(:full_width, true)
+      )
     end
   end
 
@@ -119,11 +119,11 @@ class Components::MatrixBox < Components::Base
 
   def render_title
     fragment("box_title") do
-      render(Components::MatrixBoxTitle.new(
-               id: @data[:id],
-               name: @data[:name],
-               type: @data[:type]
-             ))
+      MatrixBoxTitle(
+        id: @data[:id],
+        name: @data[:name],
+        type: @data[:type]
+      )
     end
   end
 

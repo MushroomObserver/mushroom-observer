@@ -95,11 +95,11 @@ class Components::CarouselItem < Components::BaseImage
   def copyright
     return "" unless @img_instance
 
-    render(Components::ImageCopyright.new(
-             user: @user,
-             image: @img_instance,
-             object: @object
-           ))
+    ImageCopyright(
+      user: @user,
+      image: @img_instance,
+      object: @object
+    )
   end
 
   def owner_original_name
