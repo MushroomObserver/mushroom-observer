@@ -88,6 +88,20 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_new_inat_import_inat_username_prefilled
+    user = users(:mary)
+    assert(user.inat_username.present?,
+           "Test needs a user fixture with an inat_username")
+
+    login(mary.login)
+    get(:new)
+
+    assert_select(
+      "input[name=?][value=?]", "inat_username", user.inat_username, true,
+      "InatImport should pre-fill `inat_username` with user's inat_username"
+    )
+  end
+
   def test_new_inat_import_already_importing
     user = users(:katrina)
     import = inat_imports(:katrina_inat_import)
@@ -101,20 +115,6 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_redirected_to(
       inat_import_path(import, params: { tracker_id: tracker.id })
-    )
-  end
-
-  def test_new_inat_import_inat_username_prefilled
-    user = users(:mary)
-    assert(user.inat_username.present?,
-           "Test needs a user fixture with an inat_username")
-
-    login(mary.login)
-    get(:new)
-
-    assert_select(
-      "input[name=?][value=?]", "inat_username", user.inat_username, true,
-      "InatImport should pre-fill `inat_username` with user's inat_username"
     )
   end
 
