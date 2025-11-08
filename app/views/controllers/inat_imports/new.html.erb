@@ -14,9 +14,10 @@
                     class: "name-section") do %>
       <%= f.label(:inat_id, "#{:inat_import_list.l}: ") %>
       <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
-          class: "form-control") %>
-      <%= check_box_with_label(form: f, field: :all,
-                               class: "mt-3", label: :inat_import_all.l) %>
+                       class: "form-control") %>
+      <%= check_box_with_label(form: f, field: :all, class: "mt-3",
+                               label: :inat_import_all.l,
+                               checked: (@import_all.to_i == 1)) %>
       <%= :inat_import_all_details_intro.tp %>
       <%= :inat_import_all_details.tp %>
     <% end %>
