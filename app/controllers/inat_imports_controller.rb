@@ -95,7 +95,6 @@ class InatImportsController < ApplicationController
   def create
     @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(cancel: false) # reset cancel flag when starting create
-    debugger
     return reload_form unless params_valid?
 
     # must decide if user changed input before calling init_ivars
@@ -103,7 +102,6 @@ class InatImportsController < ApplicationController
     init_ivars
     return update_form if input_changed
 
-    debugger
     request_inat_user_authorization
   end
   # ---------------------------------
