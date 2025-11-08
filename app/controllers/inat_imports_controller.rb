@@ -79,6 +79,7 @@ class InatImportsController < ApplicationController
         inat_import_path(@inat_import, params: { tracker_id: tracker.id })
       )
     else
+      assure_user_has_inat_import_api_key
       @inat_import.update(inat_ids: "", import_all: false)
       render(:new)
     end
@@ -89,7 +90,6 @@ class InatImportsController < ApplicationController
     @inat_import.update(cancel: false) # reset cancel flag when starting create
     return reload_form unless params_valid?
 
-    assure_user_has_inat_import_api_key
     # must decide if user changed input before calling init_ivars
     input_changed = user_input_changed?
     init_ivars

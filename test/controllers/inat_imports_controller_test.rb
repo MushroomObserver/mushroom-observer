@@ -73,6 +73,21 @@ class InatImportsControllerTest < FunctionalTestCase
                   "New form should not display link to expected imports")
   end
 
+  def test_new_inat_import_api_key_created
+    user = users(:mary)
+    assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).none?,
+           "Test needs user fixture without an MO API key for iNat imports")
+
+    login(user.login)
+    get(:new)
+
+    assert(
+      APIKey.where(user: user, notes: MO_API_KEY_NOTES).
+             where.not(verified: nil).one?,
+      "Failed to create personal verified API key for iNat imports"
+    )
+  end
+
   def test_new_inat_import_already_importing
     user = users(:katrina)
     import = inat_imports(:katrina_inat_import)
@@ -340,11 +355,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_equal(
       user.inat_username, inat_import.reload.inat_username,
       "It should strip leading/trailing whitespace from inat_username"
-    )
-    assert(
-      APIKey.where(user: user, notes: MO_API_KEY_NOTES).
-             where.not(verified: nil).one?,
-      "MO should assure user has personal verified API key for iNat imports"
     )
     assert_equal(
       INAT_AUTHORIZATION_URL, @response.location,
