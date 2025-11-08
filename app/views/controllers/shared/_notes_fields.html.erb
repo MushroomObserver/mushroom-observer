@@ -33,7 +33,7 @@ indent = form.object_name == "observation" ? "" : "ml-5"
         <% if form.object_name == "observation"
           field = @observation.notes_normalized_key(part)
           value = @observation.notes_part_value(part)
-          label = other ? "#{:NOTES.t}:" : "#{part.to_s.humanize}:"
+          label = other ? "#{:NOTES.t}:" : "#{part.to_s}:"
         else
           field = part.name
           value = part.value

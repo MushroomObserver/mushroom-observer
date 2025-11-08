@@ -1220,7 +1220,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   def notes_template_forbid_duplicates
     return if notes_template.blank?
 
-    squished = notes_template.split(",").map(&:squish)
+    squished = notes_template.split(",").map { |s| s.squish.downcase }
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
     dups.each do |dup|
       errors.add(:notes_template, :prefs_notes_template_no_dups.t(part: dup))

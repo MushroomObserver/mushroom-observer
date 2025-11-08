@@ -17,6 +17,7 @@ module MapHelper
       controller: "map",
       map_target: "mapDiv",
       map_type: "info",
+      need_elevations_value: true,
       map_open: true,
       editable: false,
       controls: [:large_map, :map_type].to_json,

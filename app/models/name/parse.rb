@@ -589,7 +589,8 @@ module Name::Parse
       gsub(/“|”/, '"'). # let RedCloth format quotes
       gsub(/‘|’/, "'").
       delete("\u2028"). # Unicode RLE that we see occasionally as line separator
-      gsub(/\s+/, " ").
+      # normalize whitespace characters including non-breaking spaces
+      gsub(/([\t\r\n\f\v\u00A0\u202F]+)/, " ").
       strip_squeeze
   end
 

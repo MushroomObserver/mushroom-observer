@@ -73,6 +73,7 @@ require("rails/test_help")
   check_for_unsafe_html
   uploaded_string
 
+  component_test_helper
   unit_test_case
   functional_test_case
   integration_test_case
@@ -80,6 +81,9 @@ require("rails/test_help")
 ].each do |file|
   require_relative(file)
 end
+
+# Load any custom test support helpers (e.g. test/support/*.rb)
+Dir[File.join(__dir__, "support", "*.rb")].each { |f| require f }
 
 I18n.enforce_available_locales = true
 
