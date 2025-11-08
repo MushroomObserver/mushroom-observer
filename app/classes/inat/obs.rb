@@ -27,18 +27,19 @@
 #  [:quality_grade]        casual, needs id, research
 #  [:tags]                 array of tags
 #  [:taxon]                taxon hash
-#  inat_taxon_name::       scientific name
-#  inat_taxon_rank::       rank (can be secondary)
+#  inat_taxon_name::       iNat's name for the observation [:taxon]
+#  inat_taxon_rank::       iNat's rank for the observation [:taxon]
 #  [:user][:login]         username
 #
 #  == MO attributes
 #  gps_hidden
 #  license::
-#  name_id
-#  notes
 #  lat
 #  lng
 #  location
+#  name
+#  name_id
+#  notes
 #  text_name
 #  when
 #  where
@@ -56,14 +57,20 @@
 #
 class Inat
   class Obs
-    def initialize(imported_inat_obs_data)
-      @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
-    end
+    include Inat::Constants
 
     # Allow hash key access to the iNat observation data
     delegate :[], to: :@obs
-
     delegate :[]=, to: :@obs
+
+    delegate :name, to: :@obs_taxon
+    delegate :id, to: :name, prefix: true
+    delegate :text_name, to: :name
+
+    def initialize(imported_inat_obs_data)
+      @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
+      @obs_taxon = Inat::Taxon.new(@obs[:taxon])
+    end
 
     ########## iNat attributes
 
@@ -77,9 +84,9 @@ class Inat
 
     # NOTE: Fixes ABC count of `snapshot` because
     # inat_taxon_name is one fewer Branch than self[:taxon][:name]
-    def inat_taxon_name = self[:taxon][:name]
+    def inat_taxon_name = @obs_taxon[:name]
 
-    def inat_taxon_rank = self[:taxon][:rank]
+    def inat_taxon_rank = @obs_taxon[:rank]
 
     ########## MO attributes
 
@@ -87,18 +94,6 @@ class Inat
     def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
-
-    def name_id
-      names =
-        # iNat "Complex" definition
-        # https://www.inaturalist.org/pages/curator+guide#complexes
-        if complex?
-          matching_group_names
-        else
-          matching_names_at_regular_ranks
-        end
-      best_mo_name(names)
-    end
 
     def notes
       # Observation form requires a "normalized" key (no spaces) for Notes parts
@@ -185,8 +180,6 @@ class Inat
     end
 
     def source = "mo_inat_import"
-
-    def text_name = ::Name.find(name_id).text_name
 
     def when
       observed_on = @obs[:observed_on_details]
@@ -294,9 +287,11 @@ class Inat
       # Get unique suggested taxon ids
       # (iNat allows multiple suggestions for a single observation)
       "\n#{
-        self[:identifications].each_with_object([]) do |id, ary|
-          ary << "&nbsp;&nbsp;_#{id[:taxon][:name]}_ by #{id[:user][:login]} " \
-          "#{id[:created_at_details][:date]}"
+        self[:identifications].each_with_object([]) do |ident, ary|
+          ident_taxon = Inat::Taxon.new(ident[:taxon])
+          ary << "&nbsp;&nbsp;_#{ident_taxon.name.text_name}_ " \
+                 "by #{ident[:user][:login]} " \
+                 "#{ident[:created_at_details][:date]}"
         end.join("\n")
       }"
     end
@@ -338,84 +333,7 @@ class Inat
 
     private
 
-    # ---- name-related
-
-    def full_name
-      if infrageneric?
-        # iNat :name string is only the epithet. Ex: "Distantes"
-        prepend_genus_and_rank
-      elsif infraspecific?
-        # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
-        insert_rank_between_species_and_final_epithet
-      else
-        inat_taxon_name
-      end
-    end
-
-    def infrageneric?
-      %w[subgenus section subsection stirps series subseries].
-        include?(inat_taxon_rank)
-    end
-
-    def prepend_genus_and_rank
-      # Search the identifications of this iNat observation
-      # for an identification of the inat_taxon[:id]
-      self[:identifications].each do |identification|
-        next unless identifies_this_obs?(identification)
-
-        # search the identification's ancestors to find the genus
-        identification[:taxon][:ancestors].each do |ancestor|
-          next unless ancestor[:rank] == "genus"
-
-          #  return a string comprising Genus rank epithet
-          #  ex: "Morchella section Distantes"
-          return "#{ancestor[:name]} #{inat_taxon_rank} #{inat_taxon_name}"
-        end
-      end
-    end
-
-    def infraspecific? = %w[subspecies variety form].include?(inat_taxon_rank)
-
-    def insert_rank_between_species_and_final_epithet
-      words = inat_taxon_name.split
-      "#{words[0..1].join(" ")} #{inat_taxon_rank} #{words[2]}"
-    end
-
-    def identifies_this_obs?(identification)
-      identification[:taxon][:id] == self[:taxon][:id]
-    end
-
-    def matching_group_names
-      # MO equivalent could be "group", "clade", or "complex"
-      ::Name.where(::Name[:text_name] =~ /^#{inat_taxon_name}/).
-        where(rank: "Group", correct_spelling_id: nil).
-        order(deprecated: :asc)
-    end
-
-    def matching_names_at_regular_ranks
-      ::Name.where(
-        # parse it to get MO's text_name rank abbreviation
-        # E.g. "sect." instead of "section"
-        text_name: ::Name.parse_name(full_name).text_name,
-        rank: inat_taxon_rank.titleize,
-        correct_spelling_id: nil
-      ).
-        # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
-        where.not(::Name[:author] =~ /^sensu /).
-        order(deprecated: :asc)
-    end
-
-    def best_mo_name(names)
-      # It's simplest to pick the 1st one if there are any
-      # (They've already been sorted)
-      return names.first.id if names.any?
-
-      ::Name.unknown.id
-    end
-
     # ----- Other
-
-    def complex? = (inat_taxon_rank == "complex")
 
     def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
 

@@ -5,6 +5,7 @@ require_relative("inat_import_job_test_doubles")
 
 class InatImportJobTest < ActiveJob::TestCase
   include InatImportJobTestDoubles
+  include Inat::Constants
 
   def setup
     @user = users(:inat_importer)
@@ -235,11 +236,35 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_obs_with_sequence_and_multiple_ids
     create_ivars_from_filename("lycoperdon")
 
+    # create objects which are not included in fixtures:
+    # the iNat observation name
     name = Name.create(
       text_name: "Lycoperdon", author: "Pers.",
       search_name: "Lycoperdon Pers.",
       display_name: "**__Lycoperdon__** Pers.",
       rank: "Genus",
+      user: @user
+    )
+    # add suggested IDs so that we can test Notes snapshot
+    Name.create(
+      text_name: "Calvatia", author: "Fr.",
+      search_name: "Calvatia Fr.",
+      display_name: "**__Calvatia__** Fr.",
+      rank: "Genus",
+      user: @user
+    )
+    Name.create(
+      text_name: "Lycoperdon subumbrinum", author: "Jeppson & E. Larsson",
+      search_name: "Lycoperdon subumbrinum Jeppson & E. Larsson",
+      display_name: "**__Lycoperdon subumbrinum__** Jeppson & E. Larsson",
+      rank: "Species",
+      user: @user
+    )
+    Name.create(
+      text_name: "Lycoperdon umbrinum", author: "Pers.",
+      search_name: "Lycoperdon umbrinum Pers.",
+      display_name: "**__Lycoperdon umbrinum__** Pers.",
+      rank: "Species",
       user: @user
     )
 
@@ -252,19 +277,77 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
-
+    assert_snapshot_suggested_ids(obs)
     assert(obs.sequences.one?, "Obs should have a sequence")
     assert_equal(@user, obs.sequences.first.user,
                  "Sequences should belong to the user who imported the obs")
+  end
 
-    ids = @parsed_results.first[:identifications]
-    unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
-      ary << id[:taxon][:name]
+  # iNat Observation ID is an infrageneric name which was suggested by a user
+  def test_import_job_suggested_infrageneric_name
+    create_ivars_from_filename("distantes")
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Morchella sect. Distantes",
+      author: "Boud.",
+      search_name: "Morchella sect. Distantes Boud.",
+      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
+      rank: "Section",
+      user: @user
+    )
+    stub_inat_interactions
+    # stub the Observation taxon genus lookup
+    ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
+    # stub the identification taxon genus lookup
+    ident = @parsed_results.first[:identifications].first
+    ancestor_ids = ident[:taxon][:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Morchella" }] }
+    )
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
     end
-    unique_suggested_taxon_names.each do |taxon_name|
-      assert_match(taxon_name, obs.notes.to_s,
-                   "Notes Snapshot missing suggested name #{taxon_name}")
+
+    obs = Observation.last
+    standard_assertions(obs: obs, name: name)
+    assert_snapshot_suggested_ids(obs)
+  end
+
+  # iNat Observation ID is an infrageneric name not suggested by any user
+  def test_import_job_unsuggested_infrageneric_name
+    create_ivars_from_filename("validae")
+
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Amanita sect. Validae",
+      author: "((Fr.) Quél.",
+      search_name: "Amanita sect. Validae ((Fr.) Quél.",
+      display_name: "**__Amanita__** sect. **__Validae__** ((Fr.) Quél.",
+      rank: "Section",
+      user: @user
+    )
+
+    stub_inat_interactions
+    ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Amanita" }] }
+    )
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
     end
+
+    obs = Observation.last
+    standard_assertions(obs: obs, name: name)
   end
 
   def test_import_job_infra_specific_name
@@ -426,6 +509,13 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_prov_name_ncbi_style
     create_ivars_from_filename("hygrocybe_sp_conica-CA06_ncbi_style")
     stub_inat_interactions
+    # stub the identification taxon genus lookup (Subgenus Hygrocybe)
+    ident = @parsed_results.first[:identifications].second
+    ancestor_ids = ident[:taxon][:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Hygrocybe" }] }
+    )
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -888,6 +978,20 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(naming.present?, "Naming for MO consensus ID")
     assert_equal(user, naming.user,
                  "Naming should belong to #{user.login}")
+  end
+
+  def assert_snapshot_suggested_ids(obs)
+    idents = @parsed_results.first[:identifications]
+    # Get the MO Names corresponding to the iNat suggested taxon names
+    # Because iNat names may not be ICN-compliant, e.g. infrageneric names
+    unique_suggested_taxon_names = idents.each_with_object([]) do |ident, ary|
+      ident_taxon = ::Inat::Taxon.new(ident[:taxon])
+      ary << ident_taxon.name
+    end
+    unique_suggested_taxon_names.each do |name|
+      assert_match(name.text_name, obs.notes.to_s,
+                   "Notes Snapshot missing suggested name #{name.text_name}")
+    end
   end
 
   # -------- Other Utilities

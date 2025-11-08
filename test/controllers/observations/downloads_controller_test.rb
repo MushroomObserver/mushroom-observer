@@ -261,6 +261,34 @@ module Observations
       assert_pdf(@response)
     end
 
+    def rtf_user(user)
+      user.label_format = "rtf"
+      user.save
+      user
+    end
+
+    def test_print_rtf_labels
+      user = rtf_user(rolf)
+      login(user.login)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+      assert_operator(query.num_results, :>=, 4)
+      get(:print_labels, params: { q: query.id.alphabetize })
+      # \pard is paragraph command in rtf, one paragraph per result
+      assert_equal(query.num_results, @response.body.scan("\\pard").size)
+      assert_match(/314159/, @response.body) # make sure fundis id in there!
+      assert_match(/Mary Newbie 174/, @response.body) # and collection number!
+
+      # Alternative entry point.
+      post(
+        :create,
+        params: {
+          q: @controller.q_param(query),
+          commit: "Print Labels"
+        }
+      )
+      assert_equal(query.num_results, @response.body.scan("\\pard").size)
+    end
+
     def assert_pdf(response)
       assert_equal("application/pdf", response.content_type)
       pdf_content = response.body.force_encoding("ASCII-8BIT")
@@ -277,10 +305,30 @@ module Observations
       assert_pdf(@response)
     end
 
+    def test_project_labels_rtf
+      user = rtf_user(roy)
+      login(user.login)
+      query = Query.lookup_and_save(
+        :Observation, projects: projects(:open_membership_project)
+      )
+      get(:print_labels, params: { q: query.id.alphabetize })
+      trusted_hidden = observations(:trusted_hidden)
+      untrusted_hidden = observations(:untrusted_hidden)
+      assert_match(/#{trusted_hidden.lat}/, @response.body)
+      assert_no_match(/#{untrusted_hidden.lat}/, @response.body)
+    end
+
     # Print labels for all observations just to be sure all cases (more or less)
     # are tested and at least not crashing.
     def test_print_labels_all
       login
+      query = Query.lookup_and_save(:Observation)
+      get(:print_labels, params: { q: @controller.q_param(query) })
+    end
+
+    def test_print_labels_all_rtf
+      user = rtf_user(rolf)
+      login(user.login)
       query = Query.lookup_and_save(:Observation)
       get(:print_labels, params: { q: @controller.q_param(query) })
     end

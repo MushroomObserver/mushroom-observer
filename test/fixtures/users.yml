@@ -234,3 +234,8 @@ nihilist_user:
   <<: *DEFAULTS
   login: Nil
   name: ""
+
+underscore_user:
+  <<: *DEFAULTS
+  login: I_am_crazy_about_underscores
+  name: Underscore Crazy

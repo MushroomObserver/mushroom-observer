@@ -604,4 +604,9 @@ class UserTest < UnitTestCase
     user = users(:nihilist_user)
     assert(user.textile_name.include?(user.login))
   end
+
+  def test_user_with_underscore
+    user = users(:lone_wolf)
+    assert_match(/lookup_user/, user.textile_name.tl)
+  end
 end

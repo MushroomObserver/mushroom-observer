@@ -115,6 +115,22 @@ MushroomObserver::Application.configure do
   # Set log level.
   config.log_level = :ERROR
 
+  # Suppress template digesting errors for Phlex components
+  # (Phlex components don't have ERB templates to digest)
+  config.action_view.logger = Logger.new($stdout).tap do |logger|
+    logger.level = Logger::ERROR
+
+    # Filter out the Phlex component template errors
+    original_formatter = Logger::Formatter.new
+    logger.formatter = proc do |severity, datetime, progname, msg|
+      if msg.to_s.include?("Couldn't find template for digesting: Components/")
+        next
+      end
+
+      original_formatter.call(severity, datetime, progname, msg)
+    end
+  end
+
   # Raise error when a before_action's only/except options reference missing
   # actions
   config.action_controller.raise_on_missing_callback_actions = true

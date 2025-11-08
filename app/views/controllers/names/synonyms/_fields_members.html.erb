@@ -1,6 +1,6 @@
 <%# alerts plus list of members and option to deprecate all %>
 
-<% alert_block(level: :danger) do
+<% render(Components::Alert.new(level: :danger)) do
   [
     tag.div(:form_synonyms_missing_names.t),
     tag.div(class: "pl-3") do

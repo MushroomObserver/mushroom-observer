@@ -32,11 +32,23 @@ module MatrixBoxHelper
     # matrix box has one version except langs.
     # css hides image vote ui when body.no-user
     objects.each do |object|
-      cache(object) do
+      if should_cache_object?(object)
+        cache(object) do
+          concat(render(partial: "shared/matrix_box",
+                        locals: { object: object }.merge(locals)))
+        end
+      else
         concat(render(partial: "shared/matrix_box",
                       locals: { object: object }.merge(locals)))
       end
     end
+  end
+
+  def should_cache_object?(object)
+    return true unless object.respond_to?(:thumb_image)
+
+    # Don't cache if thumb_image hasn't been transferred to image server
+    object.thumb_image&.transferred != false
   end
 
   # Use this helper to produce a standard li.matrix-box with an object id.

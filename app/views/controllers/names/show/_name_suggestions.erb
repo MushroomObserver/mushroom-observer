@@ -1,4 +1,4 @@
-<%= tag.div(class: "alert-warning") do %>
+<%= render(Components::Alert.new(level: :warning)) do %>
   <%= tag.div(:list_observations_alternate_spellings.t) %>
   <%= tag.ul(type: "none") do %>
     <% names.sort_by(&:sort_name).each do |name| %>
