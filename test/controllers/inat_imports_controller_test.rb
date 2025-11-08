@@ -121,7 +121,7 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_create_counts_and_links
     inat_import = inat_imports(:mary_inat_import)
     user = inat_import.user
-    inat_ids = "123,456,789"
+    inat_ids = "456,789,123"
 
     params = { inat_username: user.inat_username,
                inat_ids: inat_ids,
