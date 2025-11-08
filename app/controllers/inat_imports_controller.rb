@@ -97,10 +97,11 @@ class InatImportsController < ApplicationController
     @inat_import.update(cancel: false) # reset cancel flag when starting create
     return reload_form unless params_valid?
 
-    # must decide if user changed input before calling init_ivars
-    input_changed = user_input_changed?
+    # decide if user changed input before initializing ivars because
+    # init_ivars clobbers @inat_import.inat_ids, import_all, inat_username
+    user_input_changed = user_input_changed?
     init_ivars
-    return update_form if input_changed
+    return update_form if user_input_changed
 
     request_inat_user_authorization
   end
@@ -109,6 +110,8 @@ class InatImportsController < ApplicationController
   private
 
   def reload_form
+    # use separate ivars instead of updating @inat_import
+    # because a param may violate InatImport column constraints
     @inat_ids = params[:inat_ids]
     @import_all = params[:all]
     @inat_username = params[:inat_username]
