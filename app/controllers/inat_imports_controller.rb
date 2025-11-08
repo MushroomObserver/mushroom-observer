@@ -115,13 +115,22 @@ class InatImportsController < ApplicationController
     @inat_ids = params[:inat_ids]
     @import_all = params[:all]
     @inat_username = params[:inat_username]
+    # store last user input to detect changes on next submit
+    # We can't use inat_import as it might not be saved. See comment above.
+    @last_user_params = {
+      inat_ids: @inat_ids,
+      all: @import_all,
+      inat_username: @inat_username
+    }
     render(:new)
   end
 
   def user_input_changed?
-    truthy?(params[:all]) != truthy?(@inat_import.import_all) ||
-      params[:inat_ids] != @inat_import.inat_ids ||
-      params[:inat_username].strip != @inat_import.inat_username
+    return true unless instance_variable_defined?(:@last_user_params)
+
+    params[:inat_ids] != @last_user_params[:inat_ids] ||
+      params[:all] != @last_user_params[:all] ||
+      params[:inat_username].strip != @last_user_params[:inat_username]
   end
 
   def truthy?(val)
