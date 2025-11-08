@@ -101,7 +101,7 @@ class InatImportsController < ApplicationController
     # init_ivars clobbers @inat_import.inat_ids, import_all, inat_username
     user_input_changed = user_input_changed?
     init_ivars
-    return update_form if user_input_changed
+    return reload_form if user_input_changed
 
     request_inat_user_authorization
   end
@@ -161,10 +161,6 @@ class InatImportsController < ApplicationController
     return nil if importing_all?
 
     params[:inat_ids].split(",").length
-  end
-
-  def update_form
-    reload_form
   end
 
   def request_inat_user_authorization
