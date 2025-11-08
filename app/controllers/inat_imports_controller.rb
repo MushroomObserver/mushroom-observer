@@ -85,9 +85,17 @@ class InatImportsController < ApplicationController
     end
   end
 
+  def assure_user_has_inat_import_api_key
+    key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
+    key = APIKey.create(user: @user, notes: MO_API_KEY_NOTES) if key.nil?
+    key.verify! if key.verified.nil?
+  end
+  private :assure_user_has_inat_import_api_key
+
   def create
     @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(cancel: false) # reset cancel flag when starting create
+    debugger
     return reload_form unless params_valid?
 
     # must decide if user changed input before calling init_ivars
@@ -95,6 +103,7 @@ class InatImportsController < ApplicationController
     init_ivars
     return update_form if input_changed
 
+    debugger
     request_inat_user_authorization
   end
   # ---------------------------------
@@ -106,12 +115,6 @@ class InatImportsController < ApplicationController
     @import_all = params[:all]
     @inat_username = params[:inat_username]
     render(:new)
-  end
-
-  def assure_user_has_inat_import_api_key
-    key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
-    key = APIKey.create(user: @user, notes: MO_API_KEY_NOTES) if key.nil?
-    key.verify! if key.verified.nil?
   end
 
   def user_input_changed?
