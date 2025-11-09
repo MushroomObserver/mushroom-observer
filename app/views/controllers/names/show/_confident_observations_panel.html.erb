@@ -1,9 +1,0 @@
-<%= if @best_images&.length&.positive?
-  render(Components::Carousel.new(
-    object: @name,
-    images: @best_images,
-    title: :show_name_most_confident.l,
-    links: "",
-    panel_id: "name_confident_observations"
-  ))
-end %>

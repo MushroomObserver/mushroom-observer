@@ -13,7 +13,15 @@ column_classes(:seven_five)
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
 
-    <%= render(partial: "names/show/confident_observations_panel") %>
+    <%= if @best_images&.length&.positive?
+      render(Components::Carousel.new(
+        object: @name,
+        images: @best_images,
+        title: :show_name_most_confident.l,
+        links: "",
+        panel_id: "name_confident_observations"
+      ))
+    end %>
 
     <% if @best_description.present? %>
       <%= render(partial: "names/show/best_description_panel") %>

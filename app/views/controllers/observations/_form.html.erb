@@ -83,7 +83,12 @@ form_element_data = {
     <%= panel.with_body(
           collapse: true, classes: "p-0", id: "observation_images"
         ) do %>
-      <%= render(partial: "observations/form/images") %>
+      <%= render(Components::FormCarousel.new(
+            images: @good_images,
+            exif_data: @exif_data || {},
+            thumb_id: @observation.thumb_image_id,
+            user: @user
+          )) %>
     <% end %>
     <%= panel.with_body(
           collapse: true, classes: "border-top", id: "observation_details"
