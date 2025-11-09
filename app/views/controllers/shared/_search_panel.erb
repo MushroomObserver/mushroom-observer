@@ -16,15 +16,7 @@
 <%= render(Components::Panel.new(
       collapsible:, collapse_id:, expanded:
     )) do |panel| %>
-  <%= panel.with_heading do %>
-    <%= :"search_term_group_#{heading}".l %>
-  <% end %>
-  <%= panel.with_body do %>
-    <%= shown %>
-  <% end %>
-  <% if collapsible %>
-    <%= panel.with_body(collapse: true) do %>
-      <%= collapsed %>
-    <% end %>
-  <% end %>
+  <%= panel.with_heading { :"search_term_group_#{heading}".l } %>
+  <%= panel.with_body { shown } %>
+  <%= panel.with_body(collapse: true) { collapsed } if collapsible %>
 <% end %>

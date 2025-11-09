@@ -4,9 +4,7 @@
 <%= render(Components::Panel.new(
       panel_id: "#{obj.type_tag}_versions"
     )) do |panel| %>
-  <%= panel.with_heading do %>
-    <%= :VERSIONS.t %>
-  <% end %>
+  <%= panel.with_heading { :VERSIONS.l } %>
   <%= panel.with_body do %>
     <%= make_table(
           rows: build_version_table(obj, versions, args),

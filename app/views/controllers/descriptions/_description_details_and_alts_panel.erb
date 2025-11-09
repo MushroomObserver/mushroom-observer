@@ -4,9 +4,7 @@
 <%= render(Components::Panel.new(
       panel_id: "description_details_and_alts"
     )) do |panel| %>
-  <%= panel.with_heading do %>
-    <%= :show_observation_details.l %>
-  <% end %>
+  <%= panel.with_heading { :show_observation_details.l } %>
   <%= panel.with_heading_links do
         description_change_links(@user, @description)
       end %>

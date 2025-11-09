@@ -7,9 +7,7 @@ total = 0
 <%= render(Components::Panel.new(
       panel_id: "user_stats"
     )) do |panel| %>
-  <%= panel.with_heading do %>
-    <%= :show_user_title.t(user: name) %>
-  <% end %>
+  <%= panel.with_heading { :show_user_title.t(user: name) } %>
   <%= panel.with_body do %>
     <table class="table table-condensed bg-none mb-0">
     <% rows.each do |row|

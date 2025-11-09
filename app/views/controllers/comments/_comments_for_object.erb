@@ -11,9 +11,7 @@
 <%= render(Components::Panel.new(
   panel_id: "comments_for_object"
 )) do |panel| %>
-  <%= panel.with_heading do %>
-    <%= :COMMENTS.t %>
-  <% end %>
+  <%= panel.with_heading { :COMMENTS.t } %>
   <% if controls %>
     <%= panel.with_heading_links do
           new_comment_link(object, btn_class: nil, icon: true)

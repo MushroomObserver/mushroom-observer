@@ -11,9 +11,7 @@
 
     <%= render(Components::Panel.new(panel_id: "choose_observation",
                      panel_class: "name-section")) do |panel| %>
-      <%= panel.with_heading do %>
-        <%= :inat_choose_observations.l %>
-      <% end %>
+      <%= panel.with_heading { :inat_choose_observations.l } %>
       <%= panel.with_body do %>
         <%= f.label(:inat_id, "#{:inat_import_list.l}: ") %>
         <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
