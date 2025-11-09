@@ -178,8 +178,11 @@ future_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_lng
   open_membership: true
-  start_date: <%= Time.zone.tomorrow %>
-  end_date: <%= Time.zone.tomorrow %>
+  # Use +7.days instead of .tomorrow to avoid race condition around midnight
+  # where fixtures load with tomorrow's date, but by the time the test runs,
+  # midnight has passed and "tomorrow" becomes "today", causing test to fail
+  start_date: <%= Time.zone.today + 7.days %>
+  end_date: <%= Time.zone.today + 7.days %>
 
 current_project:
   <<: *DEFAULTS
