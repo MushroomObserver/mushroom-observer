@@ -338,6 +338,7 @@ class InatImportsControllerTest < FunctionalTestCase
     inat_import = inat_imports(:mary_inat_import)
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
+    params = { inat_ids: 123_456_789, inat_username: inat_username }
 
     stub_count_request(ids: inat_import.inat_ids,
                        inat_username: inat_import.inat_username)
@@ -348,17 +349,16 @@ class InatImportsControllerTest < FunctionalTestCase
       "Observation.count",
       "Authorization request to iNat shouldn't create MO Observation(s)"
     ) do
-      post(:create,
-           params: { inat_ids: 123_456_789, inat_username: inat_username })
+      post(:create, params: params)
     end
 
+    assert_template(
+      :new,
+      "It should reload the form after the user completes it the first time"
+    )
     assert_equal(
       user.inat_username, inat_import.reload.inat_username,
       "It should strip leading/trailing whitespace from inat_username"
-    )
-    assert_equal(
-      INAT_AUTHORIZATION_URL, @response.location,
-      "It should redirect to iNat authorization if params valid and unchanged"
     )
   end
 
