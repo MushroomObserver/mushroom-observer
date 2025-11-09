@@ -257,4 +257,41 @@ class MatrixBoxTest < UnitTestCase
       child_selector: "div.rss-what"
     )
   end
+
+  def test_does_not_render_identify_ui_and_footer_when_identify_is_false
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::MatrixBox.new(
+      user: @user,
+      object: obs,
+      identify: false
+    )
+    html = render(component)
+
+    # Should not have identify UI (vote container or propose naming link)
+    assert_not_includes(html, "vote-select-container")
+    assert_not_includes(html, "context=matrix_box")
+    # Should not have identify footer
+    assert_not_includes(html, "panel-active")
+    assert_not_includes(html, "box_reviewed")
+  end
+
+  def test_renders_identify_ui_and_footer_when_identify_is_true
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::MatrixBox.new(
+      user: @user,
+      object: obs,
+      identify: true
+    )
+    html = render(component)
+
+    # Should have identify UI (vote container or propose naming link)
+    assert(
+      html.include?("vote-select-container") ||
+        html.include?("context=matrix_box"),
+      "Expected identify UI to be rendered"
+    )
+    # Should have identify footer
+    assert_includes(html, "panel-active")
+    assert_includes(html, "box_reviewed")
+  end
 end

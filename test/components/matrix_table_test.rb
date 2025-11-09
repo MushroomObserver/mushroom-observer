@@ -133,16 +133,39 @@ class MatrixTableTest < UnitTestCase
     )
   end
 
-  def test_renders_with_custom_locals
+  def test_does_not_render_identify_ui_and_footer_when_identify_is_false
     obs = observations(:coprinus_comatus_obs)
     component = Components::MatrixTable.new(
       objects: [obs],
       user: @user,
-      locals: { extra_class: "custom-class" }
+      identify: false
     )
     html = render(component)
 
-    assert_includes(html, "custom-class")
+    # Should not have identify UI or footer
+    assert_not_includes(html, "vote-select-container")
+    assert_not_includes(html, "context=matrix_box")
+    assert_not_includes(html, "panel-active")
+    assert_not_includes(html, "box_reviewed")
+  end
+
+  def test_renders_identify_ui_and_footer_when_identify_is_true
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::MatrixTable.new(
+      objects: [obs],
+      user: @user,
+      identify: true
+    )
+    html = render(component)
+
+    # Should have identify UI and footer
+    assert(
+      html.include?("vote-select-container") ||
+        html.include?("context=matrix_box"),
+      "Expected identify UI to be rendered"
+    )
+    assert_includes(html, "panel-active")
+    assert_includes(html, "box_reviewed")
   end
 
   def test_renders_with_block

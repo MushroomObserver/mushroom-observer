@@ -219,6 +219,8 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_identify_footer(panel)
+    return unless @identify
+
     panel.with_footer(classes: "panel-active text-center position-relative") do
       mark_as_reviewed_toggle(
         @data[:id],

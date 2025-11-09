@@ -22,18 +22,18 @@
 #     cached: true
 #   ))
 #
-# @example With collection and local options
+# @example With identify mode enabled
 #   render(MatrixTable.new(
 #     objects: @observations,
 #     user: @user,
-#     locals: { identify: true }
+#     identify: true
 #   ))
 class Components::MatrixTable < Components::Base
   # Properties
   prop :objects, _Nilable(Array), default: nil
   prop :user, _Nilable(User), default: nil
   prop :cached, _Boolean, default: false
-  prop :locals, Hash, default: -> { {} }
+  prop :identify, _Boolean, default: false
 
   def view_template(&block)
     ul(
@@ -61,10 +61,10 @@ class Components::MatrixTable < Components::Base
     @objects.each do |object|
       if should_cache_object?(object)
         cache(object) do
-          MatrixBox(user: @user, object: object, **@locals)
+          MatrixBox(user: @user, object: object, identify: @identify)
         end
       else
-        MatrixBox(user: @user, object: object, **@locals)
+        MatrixBox(user: @user, object: object, identify: @identify)
       end
     end
   end
@@ -78,7 +78,7 @@ class Components::MatrixTable < Components::Base
 
   def render_matrix_boxes
     @objects.each do |object|
-      MatrixBox(user: @user, object: object, **@locals)
+      MatrixBox(user: @user, object: object, identify: @identify)
     end
   end
 end

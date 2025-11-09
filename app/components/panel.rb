@@ -14,9 +14,21 @@
 # @example Panel with all subcomponents
 #   render(Components::Panel.new do |panel|
 #     panel.with_heading { strong { "Title" } }
-#     panel.with_thumbnail { image_tag("photo.jpg") }
+#     panel.with_thumbnail { image("photo.jpg") }
 #     panel.with_body { "First section" }
 #     panel.with_body { "Second section" }
+#     panel.witih_footer { "Footer text" }
+#   end)
+#
+# @example Panel with collapsing body
+#   render(Components::Panel.new(
+#     collapsible: true,
+#     collapse_target: "#hidden"
+#   ) do |panel|
+#     panel.with_heading { strong { "Title" } }
+#     panel.with_thumbnail { image("photo.jpg") }
+#     panel.with_body { "First section" }
+#     panel.with_body(collapse: true) { "Second section" }
 #     panel.witih_footer { "Footer text" }
 #   end)
 #
@@ -33,7 +45,10 @@ class Components::Panel < Components::Base
   prop :panel_class, _Nilable(String), default: nil
   prop :panel_id, _Nilable(String), default: nil
   prop :attributes, Hash, default: -> { {} }
+  # Set collapsible: :true on component, plus panel.with_body(collapse: true)
   prop :collapsible, _Nilable(_Boolean), default: nil
+  # Normally :collapse_target should be an id selector, like "#collapse_target".
+  # For multiple collapsing bodies off one trigger, pass a class: ".targets"
   prop :collapse_target, _Nilable(String), default: nil
   prop :collapse_message, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
