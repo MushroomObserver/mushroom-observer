@@ -1,7 +1,11 @@
 <%= render(Components::Panel.new) do |panel| %>
   <%= panel.with_thumbnail do
-        interactive_image(@user, obs.thumb_image_id, votes: false,
-                          image_link: observation_path(obs))
+        render(Components::InteractiveImage.new(
+          user: @user,
+          image: obs.thumb_image,
+          votes: false,
+          image_link: observation_path(obs)
+        ))
       end if obs.thumb_image_id.present? %>
   <%= panel.with_heading { submit_button(form: form, button: button) } %>
   <%= panel.with_body do %>

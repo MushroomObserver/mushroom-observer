@@ -26,8 +26,12 @@ herbarium = @herbarium_record.herbarium
 </div>
 
 <ul class="row list-unstyled">
-  <%= render(partial: "shared/matrix_box", locals: { columns: "col-xs-12" },
-             collection: @herbarium_record.observations, as: :object) %>
+  <% @herbarium_record.observations.each do |object| %>
+    <%= render(::Components::MatrixBox.new(
+                 user: @user,
+                 object: object,
+                 columns: "col-xs-12")) %>
+  <% end %>
 </ul>
 
 <div class="text-center">

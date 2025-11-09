@@ -17,11 +17,13 @@ column_classes(:eight_four)
 
   <%= tag.div(class: yield(:right_columns)) do %>
     <% if @glossary_term.thumb_image %>
-      <%= interactive_image(
-        @user,
-        @glossary_term.thumb_image, size: :medium, votes: true,
-                                    id_prefix: "glossary_term_image"
-      ) %>
+      <%= render(Components::InteractiveImage.new(
+        user: @user,
+        image: @glossary_term.thumb_image,
+        size: :medium,
+        votes: true,
+        id_prefix: "glossary_term_image"
+      )) %>
     <% end %>
   <% end %>
 <% end %>
@@ -39,8 +41,12 @@ column_classes(:eight_four)
     <%= tag.div(class: "col-sm-4") do %>
       <%= render(Components::Panel.new) do |panel| %>
         <%= panel.with_thumbnail do
-              interactive_image(@user, image, votes: true,
-                                id_prefix: "glossary_term_image")
+              render(Components::InteractiveImage.new(
+                user: @user,
+                image: image,
+                votes: true,
+                id_prefix: "glossary_term_image"
+              ))
             end %>
       <% end %>
     <% end %>

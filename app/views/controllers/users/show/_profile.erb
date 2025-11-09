@@ -29,10 +29,15 @@ footer =
   <%= panel.with_heading { heading } %>
   <%= panel.with_heading_links { heading_links } if heading_links %>
   <%= panel.with_body do %>
-    <%= if @show_user.image_id
+    <%= if @show_user.image
       tag.div(class: "float-left mr-5 mb-3") do
-        interactive_image(@user, Image.find(@show_user.image_id), size: :small,
-                          votes: false, id_prefix: "profile_image")
+        render(Components::InteractiveImage.new(
+          user: @user,
+          image: @show_user.image,
+          size: :small,
+          votes: false,
+          id_prefix: "profile_image"
+        ))
       end
     end %>
 
@@ -72,5 +77,6 @@ footer =
       <% end %>
     <% end %>
   <% end %>
+
   <%= panel.with_footer { footer } if footer %>
 <% end %>

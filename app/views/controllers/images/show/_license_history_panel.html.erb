@@ -35,7 +35,10 @@ if chgs.any? %>
               <%= link_to(@image.license.display_name.t, @image.license.url) %>
             </td>
             <td>
-              <%= image_copyright(@image) %>
+              <%= render Components::ImageCopyright.new(
+                    user: @user,
+                    image: @image
+                  ) %>
             </td>
           </tr>
         </tbody>

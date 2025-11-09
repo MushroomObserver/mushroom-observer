@@ -8,7 +8,7 @@ class ImagesControllerTest < FunctionalTestCase
   # other subactions in order of index_active_params
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
-    assert_template(partial: "_matrix_box")
+    assert_select(".matrix-box")
     assert_page_title(:IMAGES.l)
   end
 
@@ -23,7 +23,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_template(partial: "_matrix_box")
+    assert_select(".matrix-box")
     assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end

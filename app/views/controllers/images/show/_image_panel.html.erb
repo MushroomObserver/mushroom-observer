@@ -17,15 +17,26 @@
                                                 op: :mirror,
                                                 size: @size)) %> |
     <% end %>
-    <%= original_image_link(@image, "") %> |
-    <%= image_exif_link(@image.id, "") %>
+    <%= render(Components::ImageOriginalLink.new(image: @image)) %> |
+    <%= render(Components::ImageEXIFLink.new(image_id: @image.id)) %>
   <% end %><!--.panel-heading-->
 
   <%= panel.with_body do %>
-    <%= interactive_image(@user, @image, **image_show_presenter_args) %>
+    <%= render(Components::InteractiveImage.new(
+      user: @user,
+      image: @image,
+      size: :huge,
+      image_link: "#",
+      extra_classes: "huge-image",
+      votes: false
+    )) %>
     <div class="mt-3 text-center">
-      <% if User.current %>
-        <%= image_vote_links(@user, @image) %>
+      <% if @user %>
+        <%= render(Components::ImageVoteInterface.new(
+          user: @user,
+          image: @image,
+          votes: true
+        )) %>
       <% end %>
       <% if !@image.original_name.blank? &&
             (permission?(@image) ||
