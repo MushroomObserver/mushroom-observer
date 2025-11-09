@@ -9,7 +9,7 @@ class PanelTest < UnitTestCase
     edit_link = view_context.link_to("Edit", "/edit", class: "btn btn-sm")
     html = render(Components::Panel.new(
                     collapsible: true,
-                    collapse_id: "collapsing_panel",
+                    collapse_target: "#collapsing_panel",
                     expanded: false,
                     collapse_message: "Show details"
                   )) do |panel|

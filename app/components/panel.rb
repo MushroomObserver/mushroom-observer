@@ -34,7 +34,7 @@ class Components::Panel < Components::Base
   prop :panel_id, _Nilable(String), default: nil
   prop :attributes, Hash, default: -> { {} }
   prop :collapsible, _Nilable(_Boolean), default: nil
-  prop :collapse_id, _Nilable(String), default: nil
+  prop :collapse_target, _Nilable(String), default: nil
   prop :collapse_message, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
   # Special for matrix boxes, for Bootstrap 3 "grid" effect via Stimulus:
@@ -49,8 +49,8 @@ class Components::Panel < Components::Base
   slot :thumbnail, lambda { |classes: nil, id: nil, data: nil, &content|
     render_thumbnail(classes:, id:, data:, &content)
   }
-  slot :body, lambda { |classes: nil, collapse: false, &content|
-    render_body(classes:, collapse:, &content)
+  slot :body, lambda { |classes: nil, id: nil, collapse: false, &content|
+    render_body(classes:, collapse:, id:, &content)
   }, collection: true
   slot :footer, lambda { |classes: nil, &content|
     render_footer(classes:, &content)
@@ -58,6 +58,7 @@ class Components::Panel < Components::Base
 
   def view_template
     classes = class_names("panel panel-default", @panel_class)
+    define_collapse_target
     div(
       class: classes,
       id: @panel_id,
@@ -66,6 +67,16 @@ class Components::Panel < Components::Base
       render(heading_slot) if heading_slot?
       render_thumbnail_and_body
       footer_slots.each { |slot| render(slot) } if footer_slots?
+    end
+  end
+
+  def define_collapse_target
+    return if @collapse_target.blank?
+
+    if @collapse_target.start_with?("#")
+      @collapse_id = @collapse_target[1..]
+    elsif @collapse_target.start_with?(".")
+      @collapse_class = @collapse_target[1..]
     end
   end
 
@@ -94,10 +105,10 @@ class Components::Panel < Components::Base
       "panel-collapse-trigger", @expanded ? "" : "collapsed"
     )
     link_to(
-      "##{@collapse_id}",
+      "javascript:void(0)",
+      role: :button,
       class: classes,
-      role: "button",
-      data: { toggle: "collapse" },
+      data: { toggle: "collapse", target: @collapse_target },
       aria: { expanded: @expanded, controls: @collapse_id }
     ) do
       render_collapse_message
@@ -136,22 +147,24 @@ class Components::Panel < Components::Base
     div(**args, &content)
   end
 
-  def render_body(classes:, collapse:, &content)
-    return render_collapse_body(classes:, &content) if collapse
+  def render_body(classes:, id:, collapse:, &content)
+    return render_collapse_body(classes:, id:, &content) if collapse
 
-    render_plain_body(classes:, &content)
+    render_plain_body(classes:, id:, &content)
   end
 
-  def render_plain_body(classes:, &content)
+  def render_plain_body(classes:, id:, &content)
     classes = class_names("panel-body", classes)
-    div(class: classes, &content)
+    div(class: classes, id:, &content)
   end
 
-  def render_collapse_body(classes:, &content)
-    wrap_class = class_names("panel-collapse collapse", @expanded ? "in" : nil)
-    div(class: wrap_class, id: @collapse_id) do
-      render_plain_body(classes:, &content)
-    end
+  def render_collapse_body(classes:, id:, &content)
+    expanded = @expanded ? "in" : nil
+    args = {
+      class: class_names("panel-collapse collapse", expanded, @collapse_class),
+      id: @collapse_id
+    }.compact
+    div(**args) { render_plain_body(classes:, id:, &content) }
   end
 
   def render_footer(classes:)
