@@ -9,12 +9,12 @@
   shown = search_panel_shown(form:, search:, sections:)
   collapsed = search_panel_collapsed(form:, search:, sections:)
   collapsible = sections[:collapsed].present?
-  collapse_id = collapsible ? "#{controller.search_type}_#{heading}" : nil
+  collapse_target = collapsible ? "##{controller.search_type}_#{heading}" : nil
   expanded = collapsible ? search_panel_open?(search:, sections:) : false
 %>
 
 <%= render(Components::Panel.new(
-      collapsible:, collapse_id:, expanded:
+      collapsible:, collapse_target:, expanded:
     )) do |panel| %>
   <%= panel.with_heading { :"search_term_group_#{heading}".l } %>
   <%= panel.with_body { shown } %>

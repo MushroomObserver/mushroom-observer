@@ -69,14 +69,25 @@ form_element_data = {
   <%= render(Components::Panel.new(
         panel_id: "observation_images_details",
         collapsible: true,
-        collapse_id: "observation_images_details_inner",
+        collapse_target: ".observation_images_details_inner",
         expanded: true
       )) do |panel| %>
     <%= panel.with_heading do
           "#{:IMAGES.l} + #{:show_observation_details.l}"
         end %>
-    <%= panel.with_body(collapse: true) do %>
-      <%= render(partial: "observations/form/images", locals: { f: }) %>
+    <%= panel.with_body(
+          collapse: true, classes: "border-bottom", id: "observation_upload"
+        ) do %>
+      <%= render(partial: "observations/form/upload", locals: { f: }) %>
+    <% end %>
+    <%= panel.with_body(
+          collapse: true, classes: "p-0", id: "observation_images"
+        ) do %>
+      <%= render(partial: "observations/form/images") %>
+    <% end %>
+    <%= panel.with_body(
+          collapse: true, classes: "border-top", id: "observation_details"
+        ) do %>
       <%= render(partial: "observations/form/details",
                  locals: { f:, action:, button_name:, location: @location,
                            logging_optional: }) %>
@@ -86,7 +97,7 @@ form_element_data = {
   <%= render(Components::Panel.new(
         panel_id: "observation_naming_specimen",
         collapsible: true,
-        collapse_id: "observation_naming_specimen_inner",
+        collapse_target: "#observation_naming_specimen_inner",
         expanded: create
       )) do |panel| %>
     <%= panel.with_heading { "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}" } %>
@@ -106,7 +117,7 @@ form_element_data = {
   <%= render(Components::Panel.new(
         panel_id: "observation_notes",
         collapsible: true,
-        collapse_id: "observation_notes_inner",
+        collapse_target: "#observation_notes_inner",
         expanded: notes_open
       )) do |panel| %>
     <%= panel.with_heading { :NOTES.l } %>
@@ -119,7 +130,7 @@ form_element_data = {
   <%= render(Components::Panel.new(
         panel_id: "observation_projects",
         collapsible: true,
-        collapse_id: "observation_projects_inner",
+        collapse_target: "#observation_projects_inner",
         expanded: @project_checks.any?
       )) do |panel| %>
     <%= panel.with_heading { :PROJECTS.l } %>
@@ -132,7 +143,7 @@ form_element_data = {
   <%= render(Components::Panel.new(
         panel_id: "observation_lists",
         collapsible: true,
-        collapse_id: "observation_lists_inner",
+        collapse_target: "#observation_lists_inner",
         expanded: @list_checks.any?
       )) do |panel| %>
     <%= panel.with_heading { :SPECIES_LISTS.l } %>
