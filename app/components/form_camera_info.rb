@@ -92,26 +92,28 @@ class Components::FormCameraInfo < Components::Base
   private
 
   def render_gps_info
-    parts = [
-      build_gps_part(:LAT, @lat, "exif_lat"),
-      build_gps_part(:LNG, @lng, "exif_lng"),
-      build_alt_part
-    ]
-    span(class: "exif_gps") { parts.join(", ") }
+    return if @lat.blank? && @lng.blank? && @alt.blank?
+
+    span(class: "exif_gps") do
+      first = true
+      [:lat, :lng, :alt].each do |field|
+        value = instance_variable_get("@#{field}")
+        next if value.blank?
+
+        plain(", ") unless first
+        first = false
+        render_gps_part(field, value)
+      end
+    end
   end
 
-  def build_gps_part(label_key, value, css_class)
-    [
-      strong { "#{label_key.l}:" },
-      span(class: css_class) { value }
-    ].join(" ")
-  end
+  def render_gps_part(field, value)
+    label_key = field.upcase
+    css_class = "exif_#{field}"
 
-  def build_alt_part
-    [
-      strong { "#{:ALT.l}:" },
-      span(class: "exif_alt") { @alt }
-    ].join(" ")
+    strong { "#{label_key.l}:" }
+    whitespace
+    span(class: css_class) { value }
   end
 
   def render_no_gps_message
