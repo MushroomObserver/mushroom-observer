@@ -117,11 +117,11 @@ class InteractiveImageTest < UnitTestCase
 
     # The data-sub-html should contain the image links from LightboxCaption
     assert_match(
-      /data-sub-html="[^"]*\/images\/#{@image.id}\/original[^"]*"/,
+      %r{data-sub-html="[^"]*/images/#{@image.id}/original[^"]*"},
       html
     )
     assert_match(
-      /data-sub-html="[^"]*\/images\/#{@image.id}\/exif[^"]*"/,
+      %r{data-sub-html="[^"]*/images/#{@image.id}/exif[^"]*"},
       html
     )
     assert_match(/data-sub-html="[^"]*lightbox_link[^"]*"/, html)
