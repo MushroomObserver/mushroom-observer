@@ -103,4 +103,27 @@ class InteractiveImageTest < UnitTestCase
   #   # Should render even with nil image (will use placeholder)
   #   assert_includes(html, "image-sizer")
   # end
+
+  def test_theater_button_has_data_sub_html_with_image_links
+    component = Components::InteractiveImage.new(
+      user: @user,
+      image: @image
+    )
+    html = render(component)
+
+    # Should have theater button with data-sub-html attribute
+    assert_includes(html, 'class="theater-btn"')
+    assert_match(/data-sub-html="[^"]*caption-image-links[^"]*"/, html)
+
+    # The data-sub-html should contain the image links from LightboxCaption
+    assert_match(
+      /data-sub-html="[^"]*\/images\/#{@image.id}\/original[^"]*"/,
+      html
+    )
+    assert_match(
+      /data-sub-html="[^"]*\/images\/#{@image.id}\/exif[^"]*"/,
+      html
+    )
+    assert_match(/data-sub-html="[^"]*lightbox_link[^"]*"/, html)
+  end
 end

@@ -174,27 +174,29 @@ class Components::BaseImage < Components::Base
     lightbox_data = @data&.[](:lightbox_data)
     return unless lightbox_data
 
-    icon = i(class: "glyphicon glyphicon-fullscreen")
-    caption = lightbox_caption_html(lightbox_data)
-
     a(
       href: lightbox_data[:url],
       class: "theater-btn",
-      data: { sub_html: caption }
-    ) { icon }
+      data: { sub_html: lightbox_caption_html(lightbox_data) }
+    ) do
+      i(class: "glyphicon glyphicon-fullscreen")
+    end
   end
 
   # Build lightbox caption HTML using LightboxCaption component
+  # Returns an HTML string for use in data-sub-html attribute
   def lightbox_caption_html(lightbox_data)
     return unless lightbox_data
 
-    LightboxCaption(
-      user: @user,
-      image: lightbox_data[:image],
-      image_id: lightbox_data[:image_id],
-      obs: lightbox_data[:obs],
-      identify: lightbox_data[:identify]
-    )
+    capture do
+      LightboxCaption(
+        user: @user,
+        image: lightbox_data[:image],
+        image_id: lightbox_data[:image_id],
+        obs: lightbox_data[:obs],
+        identify: lightbox_data[:identify]
+      )
+    end
   end
 
   # Render vote section for an image using ImageVoteInterface component

@@ -44,6 +44,15 @@ class CarouselTest < UnitTestCase
       child_selector: ".carousel-item"
     )
 
+    # Image original name should be nested within carousel caption (if shown)
+    if html.include?("image-original-name")
+      assert_nested(
+        html,
+        parent_selector: ".carousel-caption",
+        child_selector: ".image-original-name"
+      )
+    end
+
     # Controls only show with multiple images
     if @images.length > 1
       assert_includes(html, "carousel-control-prev")

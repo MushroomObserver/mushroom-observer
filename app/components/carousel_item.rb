@@ -70,14 +70,14 @@ class Components::CarouselItem < Components::BaseImage
   end
 
   def render_carousel_caption
-    caption = image_info_html
-
     div(class: "carousel-caption") do
       # Vote section
       render_image_vote_section
 
       # Image info (copyright, notes)
-      div(class: "image-info d-none d-sm-block") { caption } if caption.present?
+      if image_info_html.present?
+        div(class: "image-info d-none d-sm-block") { image_info_html }
+      end
     end
   end
 
