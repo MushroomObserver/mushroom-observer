@@ -5,14 +5,15 @@ MAILTO=webmaster@mushroomobserver.org
 *   * * * * /var/web/mo/bin/run script/update_ip_stats.rb
 */5 * * * * /var/web/mo/bin/run rake email:send -f /var/web/mushroom-observer/Rakefile
 */6 * * * * /var/web/mo/bin/run script/retransfer_images
+# This runs staggered three minutes after retransfer_images:
+3-59/6 * * * * rsync -av --remove-source-files /var/web/mo/public/images/ mo@images.mushroomobserver.org:/data/images/mo/
 */4 * * * * /var/web/mo/bin/run script/parse_log
 1   * * * * /var/web/mo/bin/run script/check_for_orphaned_thumbnails
-03  3 * * * /var/web/mo/bin/run script/script/purge_original_image_cache.rb
-08  3 * * * /var/web/mo/bin/run script/script/reset_user_original_image_quotas.rb
 13  3 * * * /var/web/mo/bin/run script/backup_blocked_ips.sh
 33  3 * * * /var/web/mo/bin/run script/refresh_name_lister_cache
 53  3 * * * /var/web/mo/bin/run script/check_rss_logs
-13  4 * * * /var/web/mo/bin/run script/verify_images
+# This has been superseded by the rsync command above:
+# 13  4 * * * /var/web/mo/bin/run script/verify_images
 43  4 * * * /var/web/mo/bin/run script/refresh_sitemap
 13  5 * * * /var/web/mo/bin/run script/refresh_caches
 43  5 * * * /var/web/mo/bin/run script/backup_database.sh

@@ -116,7 +116,7 @@ class Components::Panel < Components::Base
   end
 
   def render_thumbnail_and_body
-    # Special for matrix boxes in Bootstrap 3 only
+    # Special .panel-sizing div for matrix boxes, in Bootstrap 3 only
     if @sizing
       div(class: "panel-sizing") { render_middle_sections }
     else
@@ -130,6 +130,7 @@ class Components::Panel < Components::Base
   end
 
   def render_thumbnail(classes:, id:, data:, &content)
+    # `classes` entirely replaceable here. .thumbnail-container is the default
     classes ||= "thumbnail-container"
     args = { class: classes, id:, data: }.compact
     div(**args, &content)
