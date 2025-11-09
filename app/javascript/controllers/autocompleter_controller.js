@@ -152,7 +152,8 @@ export default class extends Controller {
   // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
     "createBtn", "hasIdIndicator", "keepBtn", "editBtn", "mapWrap", "collapseFields"]
-  static outlets = ["map"]
+  // Note: map outlet is not declared here because it's optional
+  // We manually access it via getMapOutlet() when needed
 
   initialize() {
     Object.assign(this, DEFAULT_OPTS);
@@ -287,7 +288,7 @@ export default class extends Controller {
   }
 
   leaveCreate() {
-    if (!(['location_google'].includes(this.TYPE) && this.hasMapOutlet)) return;
+    if (!(['location_google'].includes(this.TYPE) && this.hasConnectedMapOutlet())) return;
 
     this.verbose("autocompleter: leaveCreate()");
     const location = this.mapOutlet.validateLatLngInputs(false);
@@ -297,9 +298,30 @@ export default class extends Controller {
     }
   }
 
+  // Manually get the map outlet controller (since it's optional)
+  get mapOutlet() {
+    try {
+      const selector = this.element.dataset.autocompleterMapOutlet;
+      if (!selector) return null;
+
+      const element = document.querySelector(selector);
+      if (!element) return null;
+
+      // Get the map controller instance from the element
+      return this.application.getControllerForElementAndIdentifier(element, "map");
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Check if map outlet is connected and available
+  hasConnectedMapOutlet() {
+    return this.mapOutlet !== null;
+  }
+
   // Connects autocompleter to map controller to call its methods
   activateMapOutlet(location = false) {
-    if (!this.hasMapOutlet) {
+    if (!this.hasConnectedMapOutlet()) {
       this.verbose("autocompleter: no map outlet");
       return;
     }
@@ -325,7 +347,7 @@ export default class extends Controller {
   }
 
   deactivateMapOutlet() {
-    if (!this.hasMapOutlet) return;
+    if (!this.hasConnectedMapOutlet()) return;
 
     this.verbose("autocompleter: deactivateMapOutlet()");
     if (this.mapOutlet.rectangle) this.mapOutlet.clearRectangle();
@@ -611,7 +633,7 @@ export default class extends Controller {
   // stuck with a single geolocatePlaceName result, which is only ever one.
   // If we don't have lat/lngs, just draw the pulldown.
   scheduleGoogleRefresh() {
-    if (this.hasMapOutlet &&
+    if (this.hasConnectedMapOutlet() &&
       this.mapOutlet.hasLatInputTarget &&
       this.mapOutlet.hasLngInputTarget &&
       this.mapOutlet?.latInputTarget.value &&
@@ -631,7 +653,7 @@ export default class extends Controller {
       // STORE AND COMPARE SEARCH STRING. Otherwise we're doing double lookups
       if (this.hasGeocodeOutlet) {
         this.geocodeOutlet.tryToGeolocate(current_input);
-      } else if (this.hasMapOutlet) {
+      } else if (this.hasConnectedMapOutlet()) {
         this.mapOutlet.tryToGeolocate(current_input);
       }
       // still necessary if primer unchanged, as likely?
@@ -1257,7 +1279,7 @@ export default class extends Controller {
   }
   // only clear if we're not in "ignorePlaceInput" mode
   ignoringTextInput() {
-    if (!this.hasMapOutlet) return false;
+    if (!this.hasConnectedMapOutlet()) return false;
 
     this.verbose("autocompleter:ignoringTextInput()");
     return this.mapOutlet.ignorePlaceInput;
@@ -1366,7 +1388,7 @@ export default class extends Controller {
           this.keepBtnTarget.classList.remove('active');
         }
         this.inputTarget.focus();
-        if (this.hasMapOutlet) {
+        if (this.hasConnectedMapOutlet()) {
           this.mapOutlet.showBox();
         }
       }, 750)
