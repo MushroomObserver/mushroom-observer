@@ -1,0 +1,14 @@
+<%# locals: (obj: nil, versions: nil, args: {}) -%>
+
+<%# Show table of past versions for show_past_object pages. %>
+<%= render(Components::Panel.new(
+      panel_id: "#{obj.type_tag}_versions"
+    )) do |panel|
+      panel.with_heading { :VERSIONS.t }
+      panel.with_body {
+        make_table(
+          rows: build_version_table(obj, versions, args),
+          table_opts: { class: "table-hover mb-0" }
+        ).html_safe
+      }
+    end %>

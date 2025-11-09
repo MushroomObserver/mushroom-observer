@@ -309,6 +309,18 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_show_observation
 
+    # Test that comments appear for observation with comments
+    obs = observations(:minimal_unknown_obs)
+    get(:show, params: { id: obs.id })
+    assert_show_observation
+    assert_select("#comments") do
+      assert_select(".comment-summary", text: "A comment on minimal unknown")
+      assert_select(".comment-summary", /complicated/)
+    end
+    # Test that the panel title and new comment link appears.
+    assert_select("#comments_for_object .panel-heading",
+                  text: "#{:COMMENTS.l} #{:show_comments_add_comment.l}")
+
     # You must be logged in to get the show_obs naming table now.
     # Test it on obs with two namings (Rolf's and Mary's), with owner logged in.
     obs = observations(:coprinus_comatus_obs)

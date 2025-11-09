@@ -4,5 +4,10 @@ link = icon_link_to(*edit_name_tab(@name))
 heading_links = @user ? link.html_safe : ""
 %>
 
-<%= panel_block(id: "name_notes", heading: heading,
-                heading_links: heading_links) do @name.notes.tpl end %>
+<%= render(Components::Panel.new(
+      panel_id: "name_notes"
+    )) do |panel| %>
+  <%= panel.with_heading { heading } %>
+  <%= panel.with_heading_links { heading_links } if @user %>
+  <%= panel.with_body { @name.notes.tpl } %>
+<% end %>

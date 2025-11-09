@@ -25,9 +25,8 @@ column_classes(:seven_five)
   <%= tag.div(class: yield(:right_columns)) do %>
     <%= render(partial: "locations/show/coordinates") %>
     <%= render(partial: "locations/show/notes") %>
-    <%= show_alt_descriptions_panel(
-      user: @user, object: @location, projects: @projects
-    ) %>
+    <%= render partial: "locations/show/alt_descriptions_panel",
+               locals: { user: @user, object: @location, projects: @projects } %>
     <%= render(partial: "locations/show/footer") %>
   <% end %>
 <% end %>

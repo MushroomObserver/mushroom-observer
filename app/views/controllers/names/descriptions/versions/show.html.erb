@@ -12,7 +12,11 @@ add_context_nav(name_description_version_tabs(description: @description,
 Textile.register_name(@name)
 %>
 
-<%= show_past_versions(@description, @versions) %>
+<%= render(
+      "controllers/shared/version_table",
+      obj: @description,
+      versions: @versions
+    ) %>
 
 <%= render(partial: "descriptions/description_details_and_alts_panel") %>
 

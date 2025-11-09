@@ -2,64 +2,66 @@
 
 <%
 # The basic info of the observation. Sections get updated by JS
-show_links = user && (obs.external_links.any? || sites.any?)
 %>
 
-<%= panel_block(id: "observation_details",
-                heading: :show_observation_details.l,
-                heading_links: user && obs_details_links(obs),
-                class: "name-section") do %>
+<%= render(Components::Panel.new(
+      panel_id: "observation_details",
+      panel_class: "name-section"
+    )) do |panel| %>
+  <%= panel.with_heading { :show_observation_details.l } %>
+  <%= panel.with_heading_links { obs_details_links(obs) } if user %>
+  <%= panel.with_body do %>
+    <%= observation_details_when_where_who(obs:, user:) %>
 
-  <%= observation_details_when_where_who(obs:, user:) %>
-
-  <% if user %>
-    <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
-      if obs.specimen
-        :show_observation_specimen_available.t
-      else
-        :show_observation_specimen_not_available.t
-      end
-    end %>
-  <% end %>
-
-  <%= observation_details_notes(obs: obs) %>
-
-  <% if user && obs.projects.present? %>
-    <%= tag.div(class: "obs-projects", id: "observation_projects") do
-      concat([tag.span("#{:PROJECTS.t}:"), tag.br].safe_join)
-      obs.projects.each do |project|
-        concat(tag.div(link_to_object(project), class: "indent"))
-      end
-    end %>
-  <% end %>
-
-  <% if user && obs.field_slips.present? %>
-    <%= tag.div(class: "obs-field-slips", id: "observation_field_slips") do
-      if obs.field_slips.count == 1
-        concat(tag.span("#{:FIELD_SLIP.t}: "))
-        concat(link_to_object(obs.field_slips[0]))
-      else
-        concat([tag.span("#{:FIELD_SLIPS.t}:"), tag.br].safe_join)
-        obs.field_slips.each do |field_slip|
-          concat(tag.div(link_to_object(field_slip), class: "indent"))
+    <% if user %>
+      <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
+        if obs.specimen
+          :show_observation_specimen_available.t
+        else
+          :show_observation_specimen_not_available.t
         end
-      end
-    end %>
-  <% end %>
+      end %>
+    <% end %>
 
-  <% if user %>
-    <%= render(partial: "observations/show/collection_numbers",
-               locals: { obs:, user: }) %>
+    <%= observation_details_notes(obs: obs) %>
 
-    <%= render(partial: "observations/show/herbarium_records",
-               locals: { obs:, user: }) %>
+    <% if user && obs.projects.present? %>
+      <%= tag.div(class: "obs-projects", id: "observation_projects") do
+        concat([tag.span("#{:PROJECTS.t}:"), tag.br].safe_join)
+        obs.projects.each do |project|
+          concat(tag.div(link_to_object(project), class: "indent"))
+        end
+      end %>
+    <% end %>
 
-    <%= render(partial: "observations/show/sequences",
-               locals: { obs:, user: }) %>
-  <% end %>
+    <% if user && obs.field_slips.present? %>
+      <%= tag.div(class: "obs-field-slips", id: "observation_field_slips") do
+        if obs.field_slips.count == 1
+          concat(tag.span("#{:FIELD_SLIP.t}: "))
+          concat(link_to_object(obs.field_slips[0]))
+        else
+          concat([tag.span("#{:FIELD_SLIPS.t}:"), tag.br].safe_join)
+          obs.field_slips.each do |field_slip|
+            concat(tag.div(link_to_object(field_slip), class: "indent"))
+          end
+        end
+      end %>
+    <% end %>
 
-  <% if show_links %>
-    <%= render(partial: "observations/show/external_links",
-               locals: { obs:, user:, sites: }) %>
+    <% if user %>
+      <%= render(partial: "observations/show/collection_numbers",
+                locals: { obs:, user: }) %>
+
+      <%= render(partial: "observations/show/herbarium_records",
+                locals: { obs:, user: }) %>
+
+      <%= render(partial: "observations/show/sequences",
+                locals: { obs:, user: }) %>
+    <% end %>
+
+    <% if user && (obs.external_links.any? || sites.any?) %>
+      <%= render(partial: "observations/show/external_links",
+                locals: { obs:, user:, sites: }) %>
+    <% end %>
   <% end %>
 <% end %>

@@ -1,9 +1,13 @@
-<%= panel_block(id: "name_projects", heading: :show_name_create_draft.t) do
-  @projects.map do |project|
-    concat(link_to(
-      project.title,
-      new_name_description_path(@name.id, project: project.id, source: :project)
-    ))
-    concat(safe_br)
-  end
-end %>
+<%= render(Components::Panel.new(
+      panel_id: "name_projects"
+    )) do |panel| %>
+  <%= panel.with_heading { :show_name_create_draft.t } %>
+  <%= panel.with_body do %>
+    <% @projects.each do |project| %>
+      <%= link_to(
+        project.title,
+        new_name_description_path(@name.id, project: project.id, source: :project)
+      ) %><%= safe_br %>
+    <% end %>
+  <% end %>
+<% end %>
