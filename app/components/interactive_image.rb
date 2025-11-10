@@ -65,7 +65,7 @@ class Components::InteractiveImage < Components::BaseImage
 
   def render_lazy_image
     img(
-      src: image_path("placeholder.svg"),
+      src: asset_path("placeholder.svg"),
       alt: @notes,
       class: "#{@data[:img_class]} lazy image_#{@img_id}",
       data: @data[:img_data]

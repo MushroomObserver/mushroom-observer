@@ -15,11 +15,6 @@
 #
 # Subclasses should implement view_template to define their specific rendering.
 class Components::BaseImage < Components::Base
-  include Phlex::Rails::Helpers::ImageTag
-  include Phlex::Rails::Helpers::LinkTo
-  include Phlex::Rails::Helpers::ButtonTo
-  include Phlex::Rails::Helpers::ClassNames
-
   # Type definitions
   Size = _Union(*::Image::ALL_SIZES)
   Verb = _Union(:get, :post, :put, :patch, :delete)
@@ -27,15 +22,15 @@ class Components::BaseImage < Components::Base
 
   # Core properties
   prop :user, _Nilable(User)
-  # Accept both Image instances and Integer IDs.
-  # Integer IDs are needed for form components (e.g., FormCarouselItem)
+  prop :image, _Nilable(::Image)
+
+  # Allow for explicitly passed img_id in uploads
+  # String IDs are needed for form components (e.g., FormCarouselItem)
   # that handle newly uploaded images with provisional IDs before persistence.
-  # Subclasses like InteractiveImage can override this to restrict to Image
-  # instances only.
-  prop :image, _Union(::Image, Integer, nil) do |value|
+  prop :img_id, _Union(Integer, String, nil) do |value|
     case value
-    when ::Image, Integer then value
-    when String then value.to_i
+    when Integer then value.to_s
+    when String then value
     end
   end
 
@@ -72,12 +67,15 @@ class Components::BaseImage < Components::Base
 
   protected
 
-  # Extract image instance and ID from the image prop
+  # Extract image instance and ID from the image prop.
+  # Allow for explicitly passed img_id in uploads
   def extract_image_and_id
     if @image.is_a?(::Image)
-      [@image, @image.id]
+      @img_id ||= @image.id
+      [@image, @img_id]
     else
-      [nil, @image]
+      @img_id ||= @image
+      [nil, @img_id]
     end
   end
 
