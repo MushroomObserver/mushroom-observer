@@ -15,11 +15,6 @@
 #
 # Subclasses should implement view_template to define their specific rendering.
 class Components::BaseImage < Components::Base
-  include Phlex::Rails::Helpers::ImageTag
-  include Phlex::Rails::Helpers::LinkTo
-  include Phlex::Rails::Helpers::ButtonTo
-  include Phlex::Rails::Helpers::ClassNames
-
   # Type definitions
   Size = _Union(*::Image::ALL_SIZES)
   Verb = _Union(:get, :post, :put, :patch, :delete)
