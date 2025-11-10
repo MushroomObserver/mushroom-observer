@@ -34,7 +34,7 @@
 #  adequate_constraints?   enough constraints on which observations to import?
 #
 class InatImport < ApplicationRecord
-  attribute :last_user_inputs, :json, default: {}
+  attribute :last_user_inputs, :json, default: -> { {} }
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
 
   enum :state, {
