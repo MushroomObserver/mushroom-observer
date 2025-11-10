@@ -9,7 +9,7 @@
 #   render Components::FormCarousel.new(
 #     user: current_user,
 #     images: @good_images,
-#     thumb_id: @observation.thumb_image_id,
+#     obs_thumb_id: @observation.thumb_image_id,
 #     exif_data: @exif_data
 #   )
 class Components::FormCarousel < Components::Base
@@ -19,7 +19,7 @@ class Components::FormCarousel < Components::Base
   prop :images, _Nilable(Array), default: nil
   prop :user, _Nilable(User)
   prop :carousel_id, String, default: "observation_upload_images_carousel"
-  prop :thumb_id, _Nilable(Integer), default: nil
+  prop :obs_thumb_id, _Nilable(Integer), default: nil
   prop :exif_data, Hash, default: -> { {} }
 
   def view_template
@@ -65,10 +65,10 @@ class Components::FormCarousel < Components::Base
 
       FormCarouselItem(
         user: @user,
-        image: image || index,
+        image: image,
         index: index,
         upload: upload,
-        thumb_id: @thumb_id,
+        obs_thumb_id: @obs_thumb_id,
         camera_info: @exif_data[image&.id] || {}
       )
     end

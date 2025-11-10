@@ -17,7 +17,7 @@
 #     image: @image,
 #     index: 0,
 #     upload: false,
-#     thumb_id: 123,
+#     obs_thumb_id: 123,
 #     camera_info: { lat: "45.5", lng: "-122.6", ... }
 #   )
 class Components::FormCarouselItem < Components::BaseImage
@@ -26,10 +26,10 @@ class Components::FormCarouselItem < Components::BaseImage
   # Additional form carousel-specific properties
   prop :index, Integer, default: 0
   prop :upload, _Boolean, default: false
-  prop :thumb_id, _Nilable(Integer), default: nil
+  prop :obs_thumb_id, _Nilable(Integer), default: nil
   prop :camera_info, Hash, default: -> { {} }
 
-  def initialize(index: 0, upload: false, thumb_id: nil, camera_info: {},
+  def initialize(index: 0, upload: false, obs_thumb_id: nil, camera_info: {},
                  **props)
     # Set form carousel-specific defaults
     props[:size] ||= :large
@@ -48,7 +48,8 @@ class Components::FormCarouselItem < Components::BaseImage
     @img_instance, @img_id = extract_image_and_id
     @img_id ||= "img_id_missing" if @upload
 
-    # Ensure img_id is not an Image object (convert to integer if needed)
+    # Ensure img_id is not an Image object (convert to string if needed)
+    # This should not be necessary! Remove
     @img_id = @img_id.id if @img_id.is_a?(::Image)
 
     # Build render data
@@ -138,7 +139,7 @@ class Components::FormCarouselItem < Components::BaseImage
   # is set by the Stimulus controller on the basis of these radios' value.
   def button_to_set_thumb_img
     value = @img_instance&.id || "true"
-    checked = @thumb_id&.== @img_instance&.id
+    checked = @obs_thumb_id&.== @img_instance&.id
     label_classes = class_names("btn btn-default btn-sm thumb_img_btn",
                                 active: checked)
 

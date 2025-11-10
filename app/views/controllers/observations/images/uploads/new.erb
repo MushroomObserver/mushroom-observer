@@ -5,6 +5,7 @@ turbo_stream.prepend(
   ::Components::FormCarouselItem.new(
     user: @user,
     image: @image,
+    img_id: params[:img_id],
     index: params[:index].to_i,
     upload: true,
     thumb_id: nil,
@@ -20,10 +21,10 @@ turbo_stream.prepend(
   "added_thumbnails",
   ::Components::CarouselThumbnail.new(
     user: @user,
-    image: nil,
-    upload: true,
-    index: params[:index].to_i,
+    image: @image,
     img_id: params[:img_id],
+    index: params[:index].to_i,
+    upload: true,
     carousel_id: "observation_upload_images_carousel"
   )
 )

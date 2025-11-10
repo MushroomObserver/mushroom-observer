@@ -16,7 +16,7 @@ class FormCarouselTest < UnitTestCase
     component = Components::FormCarousel.new(
       user: @user,
       images: @images,
-      thumb_id: @images.first.id,
+      obs_thumb_id: @images.first.id,
       exif_data: @exif_data
     )
     html = render(component)
@@ -149,12 +149,12 @@ class FormCarouselTest < UnitTestCase
     assert_includes(html, "carousel-inner")
   end
 
-  def test_passes_thumb_id_to_carousel_items
-    thumb_id = @images.first.id
+  def test_passes_obs_thumb_id_to_carousel_items
+    obs_thumb_id = @images.first.id
     component = Components::FormCarousel.new(
       user: @user,
       images: @images,
-      thumb_id: thumb_id,
+      obs_thumb_id: obs_thumb_id,
       exif_data: @exif_data
     )
     html = render(component)
