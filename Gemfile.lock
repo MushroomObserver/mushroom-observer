@@ -144,8 +144,8 @@ GEM
       logger
     faraday-follow_redirects (0.4.0)
       faraday (>= 1, < 3)
-    faraday-net_http (3.4.1)
-      net-http (>= 0.5.0)
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
     fastimage (2.4.0)
     ferrum (0.17.1)
       addressable (~> 2.5)
@@ -244,7 +244,7 @@ GEM
     jbuilder (2.14.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    json (2.15.2)
+    json (2.16.0)
     jwt (3.1.2)
       base64
     language_server-protocol (3.17.0.5)
@@ -326,7 +326,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.10-x86_64-linux-musl)
       racc (~> 1.4)
-    oauth2 (2.0.17)
+    oauth2 (2.0.18)
       faraday (>= 0.17.3, < 4.0)
       jwt (>= 1.0, < 4.0)
       logger (~> 1.2)
