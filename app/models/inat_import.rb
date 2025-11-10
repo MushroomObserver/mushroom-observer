@@ -18,6 +18,7 @@
 #  import_all:             whether to import all of user's relevant iNat obss
 #  importables::           number of importable observations in job
 #  imported_count::        running count of iNat obss imported in associated job
+#  last_user_inputs::      Last user inputs to form, stored as JSON
 #  response_errors::       string of newline-separated error messages
 #  total_imported_count::  historical count of iNat obss imported by this user
 #  total_seconds::         all-time seconds this user spent importing iNat obss
@@ -33,6 +34,7 @@
 #  adequate_constraints?   enough constraints on which observations to import?
 #
 class InatImport < ApplicationRecord
+  attribute :last_user_inputs, :json, default: {}
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
 
   enum :state, {
@@ -50,9 +52,27 @@ class InatImport < ApplicationRecord
 
   serialize :log, type: Array, coder: YAML
 
+  # extra safety (ensure non-nil even when loading older DB rows with NULL)
+  after_initialize { self.last_user_inputs ||= {} }
+
   # Expected average import time if no user has ever imported anything
   # (Only gets used once.)
   BASE_AVG_IMPORT_SECONDS = 15
+
+  # Helpers for accessing the JSON column `last_user_inputs` as a Ruby Hash.
+  # Keys are normalized to strings so storage is consistent across adapters.
+  def last_user_input(key)
+    return nil unless last_user_inputs
+
+    last_user_inputs[key.to_s] || last_user_inputs[key.to_sym]
+  end
+
+  # CoPilot says: use this method instead of mutating the Hash directly,
+  # so that ActiveRecord knows the attribute has changed and will persist it.
+  def set_last_user_input(key, value, save: true)
+    self.last_user_inputs = (last_user_inputs || {}).merge(key.to_s => value)
+    save if save && persisted?
+  end
 
   # Are there enough constraints on which observations to import?
   # See also InatImportsController::Validators#adequately_constrained?
