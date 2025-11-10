@@ -83,7 +83,7 @@ gem("requestjs-rails")
 gem("turbo-rails")
 # minimal two way bridge between the V8 JavaScript engine and Ruby
 # Locked here at "0.18.1" because "0.19.0" will not compile for nimmolo
-gem("mini_racer", "~> 0.18.1")
+gem("mini_racer", "~> 0.19.1")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers

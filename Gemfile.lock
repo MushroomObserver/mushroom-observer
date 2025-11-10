@@ -248,12 +248,12 @@ GEM
     jwt (3.1.2)
       base64
     language_server-protocol (3.17.0.5)
-    libv8-node (23.6.1.0)
-    libv8-node (23.6.1.0-aarch64-linux)
-    libv8-node (23.6.1.0-arm64-darwin)
-    libv8-node (23.6.1.0-x86_64-darwin)
-    libv8-node (23.6.1.0-x86_64-linux)
-    libv8-node (23.6.1.0-x86_64-linux-musl)
+    libv8-node (24.1.0.0)
+    libv8-node (24.1.0.0-aarch64-linux)
+    libv8-node (24.1.0.0-arm64-darwin)
+    libv8-node (24.1.0.0-x86_64-darwin)
+    libv8-node (24.1.0.0-x86_64-linux)
+    libv8-node (24.1.0.0-x86_64-linux-musl)
     lint_roller (1.1.0)
     literal (1.8.1)
       zeitwerk
@@ -276,8 +276,8 @@ GEM
       nokogiri (~> 1)
       rake
     mini_mime (1.1.5)
-    mini_racer (0.18.1)
-      libv8-node (~> 23.6.1.0)
+    mini_racer (0.19.1)
+      libv8-node (~> 24.1.0.0)
     minitest (5.26.1)
     minitest-reporters (1.7.1)
       ansi
@@ -614,7 +614,7 @@ DEPENDENCIES
   jbuilder
   literal
   mimemagic
-  mini_racer (~> 0.18.1)
+  mini_racer (~> 0.19.1)
   minitest
   minitest-reporters
   mission_control-jobs
