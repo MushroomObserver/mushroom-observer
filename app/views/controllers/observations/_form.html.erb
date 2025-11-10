@@ -86,7 +86,7 @@ form_element_data = {
       <%= render(Components::FormCarousel.new(
             images: @good_images,
             exif_data: @exif_data || {},
-            thumb_id: @observation.thumb_image_id,
+            obs_thumb_id: @observation.thumb_image_id,
             user: @user
           )) %>
     <% end %>
