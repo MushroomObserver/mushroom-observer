@@ -1,0 +1,38 @@
+# frozen_string_literal: true
+
+# Form for creating/editing comments
+class Components::CommentForm < Components::ApplicationForm
+  def view_template
+    render_summary_field
+    render_comment_field
+    render_submit_button
+  end
+
+  private
+
+  def render_summary_field
+    text_field(:summary, label: "#{:form_comments_summary.t}:",
+                         size: 80,
+                         data: { autofocus: true })
+  end
+
+  def render_comment_field
+    textarea_field(:comment, label: "#{:form_comments_comment.t}:",
+                             rows: 10,
+                             help: :shared_textile_help.l)
+  end
+
+  def render_submit_button
+    submit(submit_text, class: "btn btn-default center-block my-3",
+                        data: { turbo_submits_with: submits_text,
+                                disable_with: submit_text })
+  end
+
+  def submit_text
+    @model.persisted? ? :SAVE_EDITS.l : :CREATE.l
+  end
+
+  def submits_text
+    :SUBMITTING.l
+  end
+end

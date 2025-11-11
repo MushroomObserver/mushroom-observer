@@ -31,8 +31,10 @@ end
 
   <%# bases %>
   <% between =
-      help_note(:span,
-                "(#{:form_sequence_bases_or_deposit_required.t})") +
+      render(Components::HelpNote.new(
+        element: :span,
+        content: "(#{:form_sequence_bases_or_deposit_required.t})"
+      )) +
       link_to("(#{:form_sequence_bases_format.t})",
                 WebSequenceArchive.blast_format_help,
                 class: "d-inline-block float-right",
@@ -44,7 +46,10 @@ end
   <%# deposit info %>
   <%= static_text_with_label(
         form: f, field: :deposit, inline: true, label: :DEPOSIT.t + ":",
-        value: help_note(:span, "(#{:form_sequence_valid_deposit.t})")
+        value: render(Components::HelpNote.new(
+          element: :span,
+          content: "(#{:form_sequence_valid_deposit.t})"
+        ))
       ) %>
 
   <%= select_with_label(form: f, field: :archive, label: :ARCHIVE.t + ":",

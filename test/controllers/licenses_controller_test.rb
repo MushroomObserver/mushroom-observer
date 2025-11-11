@@ -219,7 +219,7 @@ class LicensesControllerTest < FunctionalTestCase
       "License edit page missing link to Index"
     )
     assert_select(
-      "input[type=checkbox][name='deprecated'][checked='checked']", true,
+      "input[type=checkbox][name='license[deprecated]'][checked]", true,
       "License form `Deprecated` checkbox should be checked"
     )
   end

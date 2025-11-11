@@ -20,12 +20,17 @@ action = { controller: "/names/synonyms/approve", action: :create,
     <% end %></p>
 <% end %>
 
-<%= help_note(:div, :name_approve_deprecate_help.tp) %>
+<%= render(Components::HelpNote.new(
+      element: :div,
+      content: :name_approve_deprecate_help.tp
+    )) %>
 
 <%= text_area_with_label(form: f, field: :comment, inline: true,
                            label: :name_approve_comments.t + ":",
                            cols: 80, rows: 5, data: { autofocus: true }) %>
-<%= help_note(:div,
-                :name_approve_comments_help.tp(name: @name.display_name)) %>
+<%= render(Components::HelpNote.new(
+      element: :div,
+      content: :name_approve_comments_help.tp(name: @name.display_name)
+    )) %>
 
 <% end %>

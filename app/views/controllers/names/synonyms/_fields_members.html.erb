@@ -8,7 +8,10 @@
         concat(tag.div(h(n)))
       end
     end,
-    help_note(:span, :form_synonyms_missing_names_help.t)
+    render(Components::HelpNote.new(
+      element: :span,
+      content: :form_synonyms_missing_names_help.t
+    ))
   ].safe_join
 end if @new_names.present? %>
 

@@ -22,10 +22,16 @@ charsets = ["ISO-8859-1", "WINDOWS-1252", "UTF-8"]
     <%= select_with_label(
           form: f, field: :charset, label: :name_lister_charset.t + ":",
           options: charsets, selected: @charset, inline: true,
-          append: help_note(:span, :name_lister_charset_help.t)
+          append: render(Components::HelpNote.new(
+            element: :span,
+            content: :name_lister_charset_help.t
+          ))
         ) %>
   <% end %>
 
-  <%= help_note(:div, :name_lister_help.tp) %>
+  <%= render(Components::HelpNote.new(
+        element: :div,
+        content: :name_lister_help.tp
+      )) %>
 
 <% end %>

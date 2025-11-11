@@ -9,7 +9,10 @@
 
 <div class="mt-4">
   <%= :prefs_email_comments.t %>:
-  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+  <%= render(Components::HelpNote.new(
+        element: :span,
+        content: ["(", :prefs_email_please_notify.t, ")"].safe_join
+      )) %>
 </div>
 
 <%= check_box_with_label(form: f, field: :email_comments_owner, prefs: true) %>
@@ -18,7 +21,10 @@
 
 <div class="mt-4">
   <%= :prefs_email_observations.t %>:
-  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+  <%= render(Components::HelpNote.new(
+        element: :span,
+        content: ["(", :prefs_email_please_notify.t, ")"].safe_join
+      )) %>
 </div>
 
 <%= check_box_with_label(form: f, field: :email_observations_consensus,
@@ -27,7 +33,10 @@
                          prefs: true) %>
 <div class="mt-4">
   <%= :prefs_email_names.t %>:
-  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+  <%= render(Components::HelpNote.new(
+        element: :span,
+        content: ["(", :prefs_email_please_notify.t, ")"].safe_join
+      )) %>
 </div>
 
 <%= check_box_with_label(form: f, field: :email_names_admin, prefs: true) %>
@@ -37,7 +46,10 @@
 
 <div class="mt-4">
   <%= :prefs_email_locations.t %>:
-  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+  <%= render(Components::HelpNote.new(
+        element: :span,
+        content: ["(", :prefs_email_please_notify.t, ")"].safe_join
+      )) %>
 </div>
 
 <%= check_box_with_label(form: f, field: :email_locations_admin, prefs: true) %>
@@ -48,7 +60,10 @@
 
 <div class="mt-4">
   <%= :prefs_email_general.t %>:
-  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+  <%= render(Components::HelpNote.new(
+        element: :span,
+        content: ["(", :prefs_email_please_notify.t, ")"].safe_join
+      )) %>
 </div>
 
 <%= check_box_with_label(form: f, field: :email_general_feature, prefs: true) %>

@@ -1,6 +1,9 @@
 <%# Notes Settings of Account Preferences Form %>
 
-<% between = help_note(:p, :prefs_notes_template_explanation.t) %>
+<% between = render(Components::HelpNote.new(
+                  element: :p,
+                  content: :prefs_notes_template_explanation.t
+                )) %>
 
 <%= text_area_with_label(form: f, field: :notes_template, prefs: true,
                          rows: 1, between: between) %>

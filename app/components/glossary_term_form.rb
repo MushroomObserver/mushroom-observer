@@ -1,0 +1,66 @@
+# frozen_string_literal: true
+
+# Form for creating/editing glossary terms
+class Components::GlossaryTermForm < Components::ApplicationForm
+  def initialize(model, show_locked: false, **)
+    @show_locked = show_locked
+    super(model, **)
+  end
+
+  def view_template(&block)
+    render_locked_checkbox if @show_locked
+    render_name_field
+    render_description_field
+    yield if block
+    render_submit_button
+  end
+
+  private
+
+  def render_locked_checkbox
+    checkbox_field(:locked, label: :edit_glossary_term_locked.l, class: "mt-3")
+  end
+
+  def render_name_field
+    text_field(:name, label: "#{:glossary_term_name.l}:",
+                      data: { autofocus: true },
+                      append: name_help_text)
+  end
+
+  def render_description_field
+    textarea_field(:description, label: "#{:glossary_term_description.l}:",
+                                 rows: 16,
+                                 append: description_help_text)
+  end
+
+  def render_submit_button
+    submit(:SAVE.t, class: "btn btn-default center-block my-3",
+                    data: { turbo_submits_with: :SUBMITTING.l,
+                            disable_with: :SAVE.l })
+  end
+
+  def name_help_text
+    p do
+      :form_glossary_name_help.t
+      whitespace
+      glossary_doc_link
+    end
+  end
+
+  def description_help_text
+    p do
+      :form_glossary_description_help.t
+      whitespace
+      glossary_doc_link
+      plain(". ")
+      :field_textile_link.t
+    end
+  end
+
+  def glossary_doc_link
+    link_to(
+      :glossary_term_index_documentation.t,
+      "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glossary.md"
+    )
+  end
+end

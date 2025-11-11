@@ -7,19 +7,23 @@ add_context_nav(herbaria_curator_request_tabs(herbarium: @herbarium))
 
 <%= :show_herbarium_curator_help.tp %>
 
-<%= form_with(url: herbaria_curator_requests_path(id: @herbarium, back: @back,
-                                                  q: q_param),
-              id: "herbarium_curator_request_form") do |f| %>
+<%
+# Simple form object for curator request
+form_object = Struct.new(:notes, keyword_init: true) do
+  def persisted?
+    false
+  end
 
-  <div class="form-group mt-3">
-    <%= f.label(:name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>
-  </div>
-  <div class="form-group mt-3">
-    <%= f.label(:notes, "#{:NOTES.t}:") %>
-    <%= f.text_area(:notes, rows: 10, class: "form-control",
-                    data: { autofocus: true }) %>
-  </div>
+  def model_name
+    ActiveModel::Name.new(self.class, nil, "herbarium_curator_request")
+  end
+end.new(notes: "")
+%>
 
-  <%= submit_button(form: f, button: :SEND.l, center: true) %>
-
-<% end %>
+<%= render(Components::HerbariumCuratorRequestForm.new(
+      form_object,
+      herbarium_name: @herbarium.name.t,
+      action: herbaria_curator_requests_path(id: @herbarium, back: @back,
+                                              q: q_param),
+      id: "herbarium_curator_request_form"
+    )) %>

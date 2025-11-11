@@ -7,8 +7,10 @@ button = (action == :create) ? :CREATE.t : :SAVE.t
 
   <%= text_area_with_label(form: f, field: :full, rows: 10,
                            label: :publication_full.t + ":",
-                           between: help_note(:span,
-                                              :publication_full_help.t)) %>
+                           between: render(Components::HelpNote.new(
+                             element: :span,
+                             content: :publication_full_help.t
+                           ))) %>
 
   <%= text_field_with_label(form: f, field: :link,
                             label: :publication_link.t + ":") %>

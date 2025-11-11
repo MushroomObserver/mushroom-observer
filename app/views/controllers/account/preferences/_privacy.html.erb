@@ -32,8 +32,10 @@ filename_values = [
 
 <%= select_with_label(form: f, field: :license_id, label: "#{:LICENSE.l}:",
                       options: @licenses, selected: @user.license_id,
-                      between: help_note(:span,
-                        ["(", :prefs_license_note.l, ")"].safe_join),
+                      between: render(Components::HelpNote.new(
+                        element: :span,
+                        content: ["(", :prefs_license_note.l, ")"].safe_join
+                      )),
                       width: :auto) %>
 
 <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

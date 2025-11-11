@@ -1,10 +1,22 @@
 <p>
   <%= :field_slip_qr_intro.t %>
 </p>
-<%=
-form_with(url: { action: :create }, data: { controller: "qr-reader" } ) do |f|
-  text_field_with_label(form: f, field: :qr_code, label: :app_qrcode.t,
-                        data: { qr_reader_target: "input",
-                                action: "qr-reader#handleInput" })
-end
+<%
+# Simple form object for QR code
+form_object = Struct.new(:qr_code, keyword_init: true) do
+  def persisted?
+    false
+  end
+
+  def model_name
+    ActiveModel::Name.new(self.class, nil, "qr_code")
+  end
+end.new(qr_code: "")
 %>
+
+<%= render(Components::QRReaderForm.new(
+      form_object,
+      action: field_slips_qr_reader_path,
+      data: { controller: "qr-reader" },
+      id: "qr_reader_form"
+    )) %>

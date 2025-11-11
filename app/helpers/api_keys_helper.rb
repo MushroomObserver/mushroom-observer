@@ -175,31 +175,24 @@ module APIKeysHelper
   def api_keys_new_form_container
     tag.div(class: "panel-collapse collapse no-transition",
             id: "new_key_form_container") do
-      form_with(model: APIKey.new, url: account_api_keys_path,
-                method: :post, data: { turbo: true },
-                id: "new_api_key_form") do |f|
-        concat(f.label(:notes, :account_api_keys_notes_label.t))
-        concat(tag.div(class: "input-group") do
-          concat(
-            tag.span(class: "input-group-btn") do
-              tag.button(link_icon(:cancel, title: :CANCEL.l),
-                         type: :button,
-                         class: "btn btn-default",
-                         aria: { expanded: "true",
-                                 controls: "new_key_button_container" },
-                         data: { toggle: "collapse",
-                                 target: "#new_key_button_container",
-                                 parent: "#new_key_row" })
-            end
-          )
-          concat(f.text_field(:notes, size: 40, id: "new_api_key_notes",
-                                      class: "form-control border-none"))
-          concat(tag.span(class: "input-group-btn") do
-            f.button(:CREATE.l, type: :submit, class: "btn btn-default",
-                                turbo_submits_with: :show_namings_saving.l)
-          end)
-        end)
+      cancel_button_html = tag.span(class: "input-group-btn") do
+        tag.button(link_icon(:cancel, title: :CANCEL.l),
+                   type: :button,
+                   class: "btn btn-default",
+                   aria: { expanded: "true",
+                           controls: "new_key_button_container" },
+                   data: { toggle: "collapse",
+                           target: "#new_key_button_container",
+                           parent: "#new_key_row" })
       end
+
+      render(::Components::APIKeyForm.new(
+               APIKey.new,
+               action: account_api_keys_path,
+               id: "new_api_key_form",
+               data: { turbo: true },
+               cancel_button: cancel_button_html
+             ))
     end
   end
 end
