@@ -92,7 +92,7 @@ class Components::FormCameraInfo < Components::Base
   private
 
   def render_gps_info
-    return if @lat.blank? && @lng.blank? && @alt.blank?
+    return span(class: "exif_gps") if @lat.blank? && @lng.blank? && @alt.blank?
 
     span(class: "exif_gps") do
       first = true

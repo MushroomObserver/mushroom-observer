@@ -16,7 +16,7 @@ class Components::FormCarousel < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   # Properties
-  prop :images, _Nilable(Array), default: nil
+  prop :images, _Nilable(_Array(Image)), default: nil
   prop :user, _Nilable(User)
   prop :carousel_id, String, default: "observation_upload_images_carousel"
   prop :obs_thumb_id, _Nilable(Integer), default: nil
@@ -50,7 +50,7 @@ class Components::FormCarousel < Components::Base
       # Thumbnail navigation
       ol(
         id: "added_thumbnails",
-        class: "carousel-indicators panel-footer py-2 px-0 mb-0"
+        class: thumbnail_classes
       ) do
         render_thumbnails
       end
@@ -58,6 +58,14 @@ class Components::FormCarousel < Components::Base
   end
 
   private
+
+  def thumbnail_classes
+    base_classes = "carousel-indicators panel-footer py-2 px-0 mb-0"
+    image_count = @images&.length || 0
+    return "#{base_classes} d-none" if image_count <= 1
+
+    base_classes
+  end
 
   def render_carousel_items
     @images&.each_with_index do |image, index|
