@@ -318,6 +318,13 @@ export default class extends Controller {
     // Attach a reference to the dom element to the item object so we can
     // populate the item object as well as the element
     const item = this.findFileStoreItem(itemElement);
+    if (!item) {
+      console.error("Could not find FileStore item for carousel item", {
+        uuid: itemElement.dataset.imageUuid,
+        fileStore: this.fileStore
+      });
+      return;
+    }
     item.dom_element = itemElement;
 
     if (item.file_size > this.max_image_size)
@@ -334,6 +341,13 @@ export default class extends Controller {
 
     // Attach it to the FileStore item if there is one,
     const item = this.findFileStoreItem(thumbElement);
+    if (!item) {
+      console.error("Could not find FileStore item for thumbnail", {
+        uuid: thumbElement.dataset.imageUuid,
+        fileStore: this.fileStore
+      });
+      return;
+    }
     item.thumbnail_element = thumbElement;
     this.setImgSrc(item, thumbElement);
     this.sortCarousel();
@@ -360,16 +374,16 @@ export default class extends Controller {
   // Show or hide the controls, depending on the total.
   showOrHideCarouselControls() {
     const _items = this.carouselTarget.querySelectorAll('.carousel-item'),
-      _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
+      _indicontrols = this.carouselTarget.querySelector('#added_thumbnails'),
       _controls = this.carouselTarget.querySelector('.carousel-control'),
       _count = _items.length;
 
     if (_count > 1) {
-      _indicontrols.classList.remove('d-none');
-      _controls.classList.remove('d-none');
+      _indicontrols?.classList.remove('d-none');
+      _controls?.classList.remove('d-none');
     } else {
-      _indicontrols.classList.add('d-none');
-      _controls.classList.add('d-none');
+      _indicontrols?.classList.add('d-none');
+      _controls?.classList.add('d-none');
     }
   }
 
