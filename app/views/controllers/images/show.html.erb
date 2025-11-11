@@ -19,11 +19,9 @@ column_classes(:six)
     <%= render(partial: "images/show/info_panel") %>
 
     <% if reviewer? %>
-      <div class="mb-3 text-center">
-        <%= export_status_controls(@image) %>
-      </div>
-      <div class="mb-3 text-center">
-        <%= export_status_ml_controls(@image) %>
+      <div class="mb-5 text-center">
+        <p><%= export_status_controls(@image) %></p>
+        <p><%= export_status_ml_controls(@image) %></p>
       </div>
     <% end %>
 
@@ -42,7 +40,10 @@ column_classes(:six)
   <%= tag.div(class: yield(:left_columns)) do %>
     <div class="small text-center">
       <div>
-        <%= image_copyright(@image) %>
+        <%= render Components::ImageCopyright.new(
+              user: @user,
+              image: @image
+            ) %>
       </div>
       <div class="py-5px mb-3">
         <%= render(partial: "shared/form_license_badge",

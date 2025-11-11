@@ -17,6 +17,10 @@ column_classes(:seven_five)
   <% end %>
 <% end %>
 
-<%= show_past_versions(@location, @versions) %>
+<%= render(
+      "controllers/shared/version_table",
+      obj: @location,
+      versions: @versions
+    ) %>
 
 <%= show_object_footer(@user, @location, @versions) %>

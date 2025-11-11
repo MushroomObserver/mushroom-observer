@@ -14,7 +14,7 @@ module Projects
     def index
       return unless find_project!
 
-      @users = @project.user_group.users
+      @users = @project.user_group.users.includes(:image)
     end
 
     # View that lists all verified users with links to add each as a member.

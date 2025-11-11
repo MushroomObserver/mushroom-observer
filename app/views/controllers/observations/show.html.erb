@@ -22,18 +22,18 @@ show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
 show_lists = @user # && @observation.species_lists.any?
 
 obs_locals = { obs: @observation, consensus: @consensus, user: @user }
-carousel_locals = {
-  object: @observation, images: @images,
-  html_id: "observation_images", user: @user,
-  title: :IMAGES.t, links: observation_show_image_links(obs: @observation)
-}
 %>
 
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
-    <%= tag.div(class: "panel panel-default") do
-      render(partial: "shared/carousel", locals: carousel_locals)
-    end %>
+    <%= render(Components::Carousel.new(
+          object: @observation,
+          images: @images,
+          carousel_id: "observation_images",
+          user: @user,
+          title: :IMAGES.t,
+          links: observation_show_image_links(obs: @observation)
+        )) %>
   <% end %>
 
   <%= tag.div(class: yield(:right_columns)) do %>

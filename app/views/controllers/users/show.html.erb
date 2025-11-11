@@ -20,7 +20,14 @@ name = @show_user.login
   <% end %>
 
   <%= tag.div(class: yield(:right_columns)) do %>
-    <%= render(partial: "users/show/best_images", locals: { name: name }) %>
+    <%= if @best_images&.length&.positive?
+      render(Components::Carousel.new(
+        object: @show_user,
+        images: @best_images,
+        title: :show_user_observations_by.t(name: name),
+        panel_id: "user_best_images"
+      ))
+    end %>
   <% end %>
 
 <% end %>

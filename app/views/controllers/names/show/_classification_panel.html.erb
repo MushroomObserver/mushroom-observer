@@ -4,17 +4,18 @@ link = icon_link_to(*name_edit_classification_tab(@name))
 heading_links = @user ? link.html_safe : ""
 %>
 
-<%=
-panel_block(heading: heading, heading_links: heading_links,
-            inner_class: "name-section",
-            id: "name_classification",
-            data: { name_panels_target: "classification" }) do
-
-  concat(approved_name_and_parents(@name))
-  concat(name_subtaxa_query_link(@name, @children_query)) if @first_child
-  concat(refresh_classification_link(@name))
-  concat(propagate_classification_link(@name)) if @first_child
-  concat(inherit_classification_link(@name))
-
-end
-%>
+<%= render(Components::Panel.new(
+      panel_class: "name-section",
+      panel_id: "name_classification",
+      attributes: { data: { name_panels_target: "classification" } }
+    )) do |panel| %>
+  <%= panel.with_heading { heading } %>
+  <%= panel.with_heading_links { heading_links } if @user %>
+  <%= panel.with_body do %>
+    <%= approved_name_and_parents(@name) %>
+    <%= name_subtaxa_query_link(@name, @children_query) if @first_child %>
+    <%= refresh_classification_link(@name) %>
+    <%= propagate_classification_link(@name) if @first_child %>
+    <%= inherit_classification_link(@name) %>
+  <% end %>
+<% end %>

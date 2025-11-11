@@ -79,11 +79,11 @@ ul.tight-list {
   .table-responsive {
     border-color: transparent;
   }
-  .panel-body.border-top {
-    border-top: 1px solid #ddd;
+  .border-top {
+    border-top: 1px solid $panel-inner-border;
   }
-  .panel-body.border-bottom {
-    border-bottom: 1px solid #ddd;
+  .border-bottom {
+    border-bottom: 1px solid $panel-inner-border;
   }
 }
 

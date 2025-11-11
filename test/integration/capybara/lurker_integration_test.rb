@@ -11,7 +11,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     visit("/activity_logs")
     rss_log = RssLog.where.not(observation_id: nil).reorder(:updated_at).last
-    assert_selector("#box_#{rss_log.id} .rss-id",
+    # For RSS logs with observation targets, the box ID is the observation ID
+    assert_selector("#box_#{rss_log.observation_id} .rss-id",
                     text: rss_log.observation_id)
 
     # This is a bad test.  It doesn't handle adding new observations

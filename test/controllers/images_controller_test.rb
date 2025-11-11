@@ -8,7 +8,7 @@ class ImagesControllerTest < FunctionalTestCase
   # other subactions in order of index_active_params
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
-    assert_template(partial: "_matrix_box")
+    assert_select(".matrix-box")
     assert_page_title(:IMAGES.l)
   end
 
@@ -23,7 +23,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_template(partial: "_matrix_box")
+    assert_select(".matrix-box")
     assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
@@ -124,6 +124,26 @@ class ImagesControllerTest < FunctionalTestCase
     (Image::ALL_SIZES + [:original]).each do |size|
       get(:show, params: { id: image.id, size: size })
       assert_template("show", partial: "_form_ccbyncsa25")
+    end
+  end
+
+  def test_show_image_info_panel_heading
+    image = images(:peltigera_image)
+    login
+    get(:show, params: { id: image.id })
+    assert_response(:success)
+
+    # First check that the image panel heading is working
+    assert_select("#image_panel .panel-heading") do |elements|
+      assert_equal(1, elements.size, "Should find image panel heading")
+      # Should contain the control links
+      assert_match(/Show Original Image/, elements.first.text)
+    end
+
+    # Now check that the info panel heading "Notes:" is present
+    assert_select("#info_panel .panel-heading") do |elements|
+      assert_equal(1, elements.size, "Should find info panel heading")
+      assert_match(/Notes:/, elements.first.text)
     end
   end
 

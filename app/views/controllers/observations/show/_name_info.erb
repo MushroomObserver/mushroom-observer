@@ -2,22 +2,21 @@
 # Section showing information about consensus name in ShowObservation
 %>
 
-<%=
-panel_block(
-  id: "observation_name_info",
-  heading: :about_this_taxon.l,
-  inner_class: "name-section small"
-) do %>
-
-  <%= tag.div(class: "row") do %>
-    <%= tag.div(class: "col-xs-6") do
-      concat(tag.div("#{:on_mo.l}:", class: "font-weight-bold"))
-      concat(name_links_on_mo(user: @user, name: obs.name).safe_join)
-    end %>
-    <%= tag.div(class: "col-xs-6") do
-      concat(tag.div("#{:on_the_web.l}:", class: "font-weight-bold"))
-      concat(user_name_links_web(@user, name: obs.name).safe_join)
-    end %>
+<%= render(Components::Panel.new(
+      panel_id: "observation_name_info",
+      panel_class: "name-section small"
+    )) do |panel| %>
+  <%= panel.with_heading { :about_this_taxon.l } %>
+  <%= panel.with_body do %>
+    <%= tag.div(class: "row") do %>
+      <%= tag.div(class: "col-xs-6") do
+        concat(tag.div("#{:on_mo.l}:", class: "font-weight-bold"))
+        concat(name_links_on_mo(user: @user, name: obs.name).safe_join)
+      end %>
+      <%= tag.div(class: "col-xs-6") do
+        concat(tag.div("#{:on_the_web.l}:", class: "font-weight-bold"))
+        concat(user_name_links_web(@user, name: obs.name).safe_join)
+      end %>
+    <% end %>
   <% end %>
-
 <% end %>

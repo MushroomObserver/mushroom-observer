@@ -17,11 +17,13 @@ column_classes(:eight_four)
 
   <%= tag.div(class: yield(:right_columns)) do %>
     <% if @glossary_term.thumb_image %>
-      <%= interactive_image(
-        @user,
-        @glossary_term.thumb_image, size: :medium, votes: true,
-                                    id_prefix: "glossary_term_image"
-      ) %>
+      <%= render(Components::InteractiveImage.new(
+        user: @user,
+        image: @glossary_term.thumb_image,
+        size: :medium,
+        votes: true,
+        id_prefix: "glossary_term_image"
+      )) %>
     <% end %>
   <% end %>
 <% end %>
@@ -37,10 +39,16 @@ column_classes(:eight_four)
 <%= tag.div(class: "row") do %>
   <% @other_images.each do |image|  %>
     <%= tag.div(class: "col-sm-4") do %>
-      <%= panel_block do
-        interactive_image(@user, image, votes: true,
-                          id_prefix: "glossary_term_image")
-      end %>
+      <%= render(Components::Panel.new) do |panel| %>
+        <%= panel.with_thumbnail do
+              render(Components::InteractiveImage.new(
+                user: @user,
+                image: image,
+                votes: true,
+                id_prefix: "glossary_term_image"
+              ))
+            end %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>
@@ -55,8 +63,12 @@ column_classes(:eight_four)
   <% end %>
 <% end %>
 
-<%= panel_block(id: "glossary_term_authors_editors") do
-  show_authors_and_editors(
-    obj: @glossary_term, versions: @versions, user: @user
-  )
-end %>
+<%= render(Components::Panel.new(
+      panel_id: "glossary_term_authors_editors"
+    )) do |panel| %>
+  <%= panel.with_body do
+        show_authors_and_editors(
+          obj: @glossary_term, versions: @versions, user: @user
+        )
+      end %>
+<% end %>

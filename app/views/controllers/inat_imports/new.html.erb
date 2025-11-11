@@ -9,37 +9,47 @@
     <%= f.text_field(:inat_username, size: 10, class: "form-control",
                      value: User.current.inat_username) %>
 
-    <%= panel_block(id: "choose_observation",
-                    heading: :inat_choose_observations.l,
-                    class: "name-section") do %>
-      <%= f.label(:inat_id, "#{:inat_import_list.l}: ") %>
-      <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
-                       class: "form-control") %>
-      <%= check_box_with_label(form: f, field: :all, class: "mt-3",
-                               label: :inat_import_all.l,
-                               checked: (@import_all.to_i == 1)) %>
-      <%= :inat_import_all_details_intro.tp %>
-      <%= :inat_import_all_details.tp %>
+    <%= render(Components::Panel.new(panel_id: "choose_observation",
+                     panel_class: "name-section")) do |panel| %>
+      <%= panel.with_heading { :inat_choose_observations.l } %>
+      <%= panel.with_body do %>
+        <%= f.label(:inat_id, "#{:inat_import_list.l}: ") %>
+        <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
+                         class: "form-control") %>
+        <%= check_box_with_label(form: f, field: :all,
+                                 class: "mt-3", label: :inat_import_all.l) %>
+        <%= :inat_import_all_details_intro.tp %>
+        <%= :inat_import_all_details.tp %>
+      <% end %>
     <% end %>
 
-    <%= panel_block(id: "preview", heading: :inat_import_preview.l,
-                    class: "name-section") do
-      tag.div do
-        concat(tag.p(
-          "#{:inat_import_expected_count.l}: " \
-          "#{inat_expected_import_count(@inat_import) || :inat_import_tbd.l}"
-        ))
-        concat(tag.p(inat_expected_imports_link(@inat_import)))
-      end
-    end %>
+    <%= render(Components::Panel.new(panel_id: "choose_observation",
+                     panel_class: "name-section")) do |panel| %>
+      <%= panel.with_heading { :inat_import_preview.l } %>
+      <%= panel.with_body do %>
+        <div>
+          <p>
+            <%= :inat_import_expected_count.l %>
+            <%= inat_expected_import_count(@inat_import) ||
+                :inat_import_tbd.l %>
+          </p>
+          <p>
+            <%= inat_expected_imports_link(@inat_import) %>
+          </p>
+        </div>
+      <% end %>
+    <% end %>
 
-    <%= panel_block do %>
-      <p><b><%= :inat_details_heading.l %></b></p>
-      <%= :inat_details_list.t %>
+    <%= render(Components::Panel.new) do |panel| %>
+      <%= panel.with_body do %>
+        <p><b><%= :inat_details_heading.l %></b></p>
+        <%= :inat_details_list.t %>
+      <% end %>
     <% end %>
 
   <%= f.submit(:SUBMIT.l, { class: "btn btn-default" }) %>
   <%= link_to(:CANCEL.l, new_observation_path, name: "cancel",
         class: "btn btn-default") %>
+
   <% end %>
 </div>

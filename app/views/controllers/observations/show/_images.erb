@@ -2,19 +2,13 @@
 links = observation_show_image_links(obs: obs)
 %>
 
-<%= tag.div(class: "panel panel-default") do %>
-
-  <%= tag.div(class: "panel-heading") do
-    tag.h4(class: "panel-title") do
-      concat(:IMAGES.t)
-      concat(tag.span(links, class: "float-right"))
-    end
-  end %>
-
-  <% if @images.any? %>
-
-    <%= tag.div(class: "show_images list-group text-center m-0") do %>
-
+<%= render(Components::Panel.new(
+      panel_class: "show_images list-group text-center m-0"
+    )) do |panel| %>
+  <%= panel.with_heading { :IMAGES.t } %>
+  <%= panel.with_heading_links { links } %>
+  <%= panel.with_body do %>
+    <% if @images.any? %>
       <%
       # This sort puts the thumbnail first.
       # We can't use thumb_image, because we haven't eager-loaded it;
@@ -23,33 +17,32 @@ links = observation_show_image_links(obs: obs)
 
         <%= tag.div(class: "list-group-item") do %>
 
-          <%= interactive_image(
-                @user,
-                image,
+          <%= render(Components::InteractiveImage.new(
+                user: @user,
+                image: image,
                 image_link: image.show_link_args.merge({ obs: obs.id }),
                 original: true,
                 is_set: true,
                 votes: true
-              ) %>
+              )) %>
 
-          <%=
+          <%
             notes = []
             if image.copyright_holder != obs.user.legal_name
-              notes << image_copyright(image)
+              notes << render(Components::ImageCopyright.new(
+                user: @user,
+                image: image,
+                object: obs
+              ))
             end
             if !image.notes.blank?
               notes << image.notes.tl.truncate_html(300)
             end
             notes = notes.safe_join(safe_br)
-            tag.div(notes, class: "text-center") if !notes.blank?
           %>
-
-        <% end # .list-group-item %>
-
-      <% end # each %>
-
-    <% end # .list-group %>
-
-  <% end # if @images.any? %>
-
-<% end # .panel %>
+          <%= tag.div(notes, class: "text-center") if !notes.blank? %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

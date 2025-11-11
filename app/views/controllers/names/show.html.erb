@@ -13,7 +13,15 @@ column_classes(:seven_five)
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
 
-    <%= render(partial: "names/show/confident_observations_panel") %>
+    <%= if @best_images&.length&.positive?
+      render(Components::Carousel.new(
+        object: @name,
+        images: @best_images,
+        title: :show_name_most_confident.l,
+        links: "",
+        panel_id: "name_confident_observations"
+      ))
+    end %>
 
     <% if @best_description.present? %>
       <%= render(partial: "names/show/best_description_panel") %>
@@ -57,12 +65,15 @@ column_classes(:seven_five)
       concat(export_status_controls(@name))
     end %>
 
-    <%= panel_block(id: "name_footer", footer: footer) do
-      concat(tag.div(id: "name_authors_editors") do
-        show_authors_and_editors(obj: @name, versions: @versions, user: @user)
-      end)
-      concat(:show_name_num_notifications.t(num: @name.interests))
-    end %>
+    <%= render(Components::Panel.new(panel_id: "name_footer")) do |panel| %>
+      <%= panel.with_body do %>
+        <%= tag.div(id: "name_authors_editors") do
+              show_authors_and_editors(obj: @name, versions: @versions, user: @user)
+            end %>
+        <%= :show_name_num_notifications.t(num: @name.interests) %>
+      <% end %>
+      <%= panel.with_footer { footer } %>
+    <% end %>
 
   <% end %>
   <!--RIGHT COLUMN-->
