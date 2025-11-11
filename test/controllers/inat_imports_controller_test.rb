@@ -363,36 +363,47 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_authorization_request
-    skip("needs revision") # TODO: fix this test
-    user = users(:rolf)
-    inat_import = inat_imports(:rolf_inat_import)
-    inat_import.update(importables: nil) # set to nil to test if later updated
-    assert_equal("Unstarted", inat_import.state,
-                 "Need a Unstarted inat_import fixture")
-    assert_equal(0, inat_import.total_imported_count.to_i,
-                 "Need InatImport fixture without prior imports")
+    import = inat_imports(:rolf_inat_import)
+    assert_equal("Unstarted", import.state, "Need a Unstarted import fixture")
+    assert_equal(0, import.total_imported_count.to_i,
+                 "Need import fixture without prior imports")
+    # ensure user's inat_username matches import's inat_username
+    import.user.update(inat_username: import.inat_username)
 
-    stub_count_request(ids: inat_import.inat_ids,
-                       inat_username: inat_import.inat_username,
+    # prevent the form from reloading by settingc
+    # params user inputs equal to saved user inputs
+    last_user_inputs = {
+      inat_username: import.inat_username,
+      inat_ids: import.inat_ids,
+      all: "0"
+    }
+    import.update(last_user_inputs: last_user_inputs)
+    params = last_user_inputs.merge(
+      last_user_inputs: last_user_inputs,
+      importables: nil # set to nil to test if later updated
+    )
+
+    stub_count_request(ids: import.inat_ids,
+                       inat_username: import.inat_username,
                        body: '{"total_results":4}')
     stub_request(:any, authorization_url)
-    login(user.login)
-    post(:create, params: { inat_ids: inat_import.inat_ids,
-                            inat_username: inat_import.inat_username })
+
+    login(import.user.login)
+    post(:create, params: params)
 
     assert_equal(
       INAT_AUTHORIZATION_URL, @response.location,
       "It should redirect to iNat authorization if params valid and unchanged"
     )
-    assert_equal("Authorizing", inat_import.reload.state,
+    assert_equal("Authorizing", import.reload.state,
                  "MO should be awaiting authorization from iNat")
     assert_equal(
-      inat_import.inat_ids.split(",").length, inat_import.reload.importables,
+      import.inat_ids.split(",").length, import.reload.importables,
       "Failed to save InatImport.importables"
     )
     assert_equal(
       InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
-      inat_import.avg_import_time
+      import.avg_import_time
     )
   end
 
@@ -453,14 +464,18 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_import_all
-    skip("needs revision") # TODO: fix this test
-    inat_import = inat_imports(:roy_inat_import)
-    params = { inat_username: inat_import.inat_username, inat_ids: "", all: 1,
-               consent: 1 }
+    import = inat_imports(:roy_inat_import)
+    # prevent the form from reloading by setting
+    # params user inputs equal to saved user inputs
+    last_user_inputs = {
+      inat_username: import.inat_username, inat_ids: "", all: "1"
+    }
+    import.update(last_user_inputs: last_user_inputs)
+    params = last_user_inputs.merge(last_user_inputs: last_user_inputs)
 
-    login(inat_import.user.login)
+    login(import.user.login)
 
-    stub_count_request(inat_username: inat_import.inat_username)
+    stub_count_request(inat_username: import.inat_username)
     post(:create, params: params)
 
     assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)

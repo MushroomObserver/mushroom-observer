@@ -94,14 +94,16 @@ class InatImportsController < ApplicationController
 
   def create
     @inat_import = InatImport.find_or_create_by(user: @user)
-    @inat_import.update(cancel: false) # reset cancel flag when starting create
+
+    # decide if user changed input before clobbering inat_import
+    user_input_unchanged = user_input_unchanged?
+    @inat_import.update(
+      cancel: false # reset cancel flag when starting create
+    )
     return reload_form unless params_valid?
 
-    # decide if user changed input before initializing ivars because
-    # init_ivars clobbers @inat_import.inat_ids, import_all, inat_username
-    user_input_changed = user_input_changed?
     init_ivars
-    return reload_form if user_input_changed
+    return reload_form unless user_input_unchanged
 
     request_inat_user_authorization
   end
@@ -114,23 +116,15 @@ class InatImportsController < ApplicationController
     # because a param may violate InatImport column constraints
     @inat_ids = params[:inat_ids]
     @import_all = params[:all]
-    @inat_username = params[:inat_username]
-    # store last user input to detect changes on next submit
-    # We can't use inat_import as it might not be saved. See comment above.
-    @last_user_params = {
-      inat_ids: @inat_ids,
-      all: @import_all,
-      inat_username: @inat_username
-    }
+    @inat_username = params[:inat_username].strip
     render(:new)
   end
 
-  def user_input_changed?
-    return true unless instance_variable_defined?(:@last_user_params)
-
-    params[:inat_ids] != @last_user_params[:inat_ids] ||
-      params[:all] != @last_user_params[:all] ||
-      params[:inat_username].strip != @last_user_params[:inat_username]
+  def user_input_unchanged?
+    params[:inat_ids] == @inat_import[:last_user_inputs]["inat_ids"] &&
+      params[:all] == @inat_import[:last_user_inputs]["all"] &&
+      params[:inat_username].strip ==
+        @inat_import[:last_user_inputs]["inat_username"]
   end
 
   def truthy?(val)
