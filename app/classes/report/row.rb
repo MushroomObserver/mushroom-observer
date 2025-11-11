@@ -46,7 +46,7 @@ module Report
     end
 
     def obs_url
-      "#{MO.http_domain}/#{obs_id}"
+      "#{MO.http_domain}/obs/#{obs_id}"
     end
 
     def obs_when

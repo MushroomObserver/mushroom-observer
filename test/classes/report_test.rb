@@ -3,8 +3,8 @@
 require("test_helper")
 
 class ReportTest < UnitTestCase
-  LAT_INDEX = 17
-  LONG_INDEX = 18
+  LAT_INDEX = 19
+  LONG_INDEX = 20
 
   def test_adolf
     obs = observations(:agaricus_campestris_obs)
@@ -130,7 +130,7 @@ class ReportTest < UnitTestCase
       "5",
       "2006",
       "2006-05-11",
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "file://#{Rails.root.join("public/test_server1/orig/#{img1.id}.jpg ")}" \
         "file://#{Rails.root.join("public/test_server1/orig/#{img2.id}.jpg")}",
       "FunDiS",
@@ -176,7 +176,7 @@ class ReportTest < UnitTestCase
       "7",
       "2010",
       "2010-07-22",
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "",
       "FunDiS",
       "John Doe",
@@ -213,7 +213,7 @@ class ReportTest < UnitTestCase
       "7",
       "2010",
       "2010-07-22",
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "",
       "FunDiS",
       "",
@@ -232,14 +232,19 @@ class ReportTest < UnitTestCase
 
   def test_raw
     obs = observations(:detailed_unknown_obs)
+    cns = obs.collection_numbers.map do |cn|
+      "#{cn.id}\t#{cn.name}\t#{cn.number}"
+    end
     expect = [
       obs.id.to_s,
       obs.user.id.to_s,
       "mary",
       "Mary Newbie",
       "2006-05-11",
+      nil,
       "X",
       "Cortinarius sp.: 1234, Fungi: 314159",
+      cns.join("\n"),
       obs.name.id.to_s,
       "Fungi",
       nil,
@@ -262,7 +267,7 @@ class ReportTest < UnitTestCase
       "X",
       obs.thumb_image.id.to_s,
       "Found in a strange place... & with śtrangè characters™",
-      "https://mushroomobserver.org/#{obs.id}"
+      "https://mushroomobserver.org/obs/#{obs.id}"
     ]
     do_csv_test(Report::Raw, obs, expect, &:id)
   end
@@ -306,7 +311,7 @@ class ReportTest < UnitTestCase
       "Agaricus",
       "Habitat: lawn Other: First line. Second line.",
       obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
@@ -342,7 +347,7 @@ class ReportTest < UnitTestCase
       "",
       "From somewhere else",
       obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}"
+      "https://mushroomobserver.org/obs/#{obs.id}"
     ]
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
@@ -386,7 +391,7 @@ class ReportTest < UnitTestCase
       "Agaricus",
       "Habitat: lawn Other: 1st line. 2nd line. 3rd line.",
       obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
