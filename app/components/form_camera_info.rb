@@ -23,7 +23,8 @@ class Components::FormCameraInfo < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   # Properties
-  prop :img_id, Integer, &:to_i
+  # All props are nilable to handle cases where data may not be available
+  prop :img_id, _Nilable(String), &:to_s
   # GPS coordinates can be passed as Float, Integer, or String
   # Convert to string for display, handling blank values
   prop :lat, _Nilable(String) do |v|
@@ -35,9 +36,9 @@ class Components::FormCameraInfo < Components::Base
   prop :alt, _Nilable(String) do |v|
     v.present? ? v.to_s : ""
   end
-  prop :date, String, default: ""
-  prop :file_name, String, default: ""
-  prop :file_size, String, default: ""
+  prop :date, _Nilable(String), default: ""
+  prop :file_name, _Nilable(String), default: ""
+  prop :file_size, _Nilable(String), default: ""
 
   def view_template
     div(
