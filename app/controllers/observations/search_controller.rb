@@ -21,7 +21,7 @@ module Observations
         confidence: :select_confidence_range,
         has_name: :select_nil_boolean,
         lichen: :select_nil_boolean,
-        locations: :multiple_value_autocompleter,
+        within_locations: :multiple_value_autocompleter,
         has_public_lat_lng: :select_nil_boolean,
         is_collection_location: :select_nil_boolean,
         region: :region_with_in_box_fields,
@@ -83,7 +83,7 @@ module Observations
           collapsed: [:confidence, [:has_name, :lichen]]
         },
         location: {
-          shown: [:locations],
+          shown: [:within_locations],
           collapsed: [[:has_public_lat_lng, :is_collection_location], :region]
         }
       },
