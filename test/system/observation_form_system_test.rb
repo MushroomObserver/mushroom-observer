@@ -298,7 +298,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Ok, enough. By now, the carousel image should be showing the second image.
     assert_selector(
-      ".carousel-item[data-image-status='upload'][data-form-images-item='connected']",
+      ".carousel-item[data-image-status='upload']" \
+      "[data-form-images-item='connected']",
       visible: :visible, wait: 10
     )
     # Try removing the geotagged image
@@ -402,7 +403,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    # GPS data should be in observation fields (not in Camera Info for "good" images)
+    # GPS data should be in observation fields)
     assert_field("observation_lat", with: SO_PASA_EXIF[:lat].to_s)
     assert_field("observation_lng", with: SO_PASA_EXIF[:lng].to_s)
     # This geolocation is for Pasadena
@@ -416,8 +417,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Submit observation form without errors
     fill_in("observation_place_name", with: "Pasadena, California, USA")
     assert_field("observation_place_name", with: "Pasadena, California, USA")
-    # Note: EXIF extraction from "good" images works in browser but is unreliable
-    # in system tests due to async image loading from test server. Skip this check.
+    # NOTE: EXIF extraction from "good" images works in browser but is
+    # unreliablein system tests due to async image loading from test server.
+    # Skip this check.
     # assert_image_gps_copied_to_obs(SO_PASA_EXIF, status: "good")
 
     # Carousel items are re-output with image records this time.
@@ -510,7 +512,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_unchecked_field("thumb_image_id_#{geo.id}", visible: :all)
 
     # Test Bug Fix: Verify saved geotagged image extracts and displays EXIF GPS
-    # This tests that JavaScript extracts EXIF from saved images, not just uploads
+    # Tests that JavaScript extracts EXIF from saved images, not just uploads
     find("#carousel_thumbnail_#{geo.id}").click
     geo_item = find("#carousel_item_#{geo.id}", visible: :all)
     within(geo_item) do
@@ -688,7 +690,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       sleep(1) # Wait for carousel to transition
     end
 
-    # For "good" images, wait for the image to load from server before EXIF extraction
+    # For "good" images, wait for image load from server before EXIF extraction
     if status == "good"
       within(carousel_item) do
         # Wait for the carousel image element to be present and loaded

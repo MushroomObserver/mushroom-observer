@@ -107,9 +107,9 @@ class FormCameraInfoTest < UnitTestCase
   def test_accepts_float_values_for_gps_coordinates
     component = Components::FormCameraInfo.new(
       img_id: 123,
-      lat: 45.5231,  # Float
-      lng: -122.6765,  # Float
-      alt: 100.5,  # Float
+      lat: 45.5231, # Float
+      lng: -122.6765, # Float
+      alt: 100.5, # Float
       date: "2024-01-15",
       file_name: "IMG_1234.jpg",
       file_size: "2.5 MB"
@@ -130,9 +130,9 @@ class FormCameraInfoTest < UnitTestCase
   def test_accepts_integer_values_for_gps_coordinates
     component = Components::FormCameraInfo.new(
       img_id: 123,
-      lat: 45,  # Integer
-      lng: -122,  # Integer
-      alt: 100,  # Integer
+      lat: 45, # Integer
+      lng: -122, # Integer
+      alt: 100, # Integer
       date: "2024-01-15"
     )
     html = render(component)
