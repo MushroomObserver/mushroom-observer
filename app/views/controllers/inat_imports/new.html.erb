@@ -23,13 +23,13 @@
       <% end %>
     <% end %>
 
-    <%= render(Components::Panel.new(panel_id: "choose_observation",
+    <%= render(Components::Panel.new(panel_id: "preview",
                      panel_class: "name-section")) do |panel| %>
       <%= panel.with_heading { :inat_import_preview.l } %>
       <%= panel.with_body do %>
         <div>
           <p>
-            <%= :inat_import_expected_count.l %>
+            <%= :inat_import_expected_count.l %>:
             <%= inat_expected_import_count(@inat_import) ||
                 :inat_import_tbd.l %>
           </p>
