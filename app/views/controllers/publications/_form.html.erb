@@ -1,29 +1,5 @@
-<%
-button = (action == :create) ? :CREATE.t : :SAVE.t
-%>
-
-<%= form_with(model: @publication, action: action,
-              id: "publication_form") do |f| %>
-
-  <%= text_area_with_label(form: f, field: :full, rows: 10,
-                           label: :publication_full.t + ":",
-                           between: render(Components::HelpNote.new(
-                             element: :span,
-                             content: :publication_full_help.t
-                           ))) %>
-
-  <%= text_field_with_label(form: f, field: :link,
-                            label: :publication_link.t + ":") %>
-
-  <%= check_box_with_label(form: f, field: :peer_reviewed,
-                           label: :publication_peer_reviewed.t) %>
-
-  <%= text_area_with_label(form: f, field: :how_helped, rows: 10,
-                           label: :publication_how_helped.t + ":") %>
-
-  <%= check_box_with_label(form: f, field: :mo_mentioned,
-                           label: :publication_mo_mentioned.t) %>
-
-  <%= submit_button(form: f, button: button, center: true) %>
-
-<% end %>
+<%= render(Components::PublicationForm.new(
+      @publication,
+      action: publication_form_action(@publication, action),
+      id: "publication_form"
+    )) %>

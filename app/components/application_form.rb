@@ -14,6 +14,7 @@
 #       submit "Sign up"
 #     end
 #   end
+# rubocop:disable Metrics/ClassLength
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
 
@@ -197,6 +198,25 @@ class Components::ApplicationForm < Superform::Rails::Form
       field(field_name).text(**field_opts, type: "number"),
       **wrapper_opts
     )
+  end
+
+  # Override Superform's submit to add Bootstrap styling and turbo support
+  # @param value [String] the button text (defaults to submit_value from model)
+  # @param options [Hash] submit button options
+  # @option options [Boolean] :center center the button (default false)
+  # @option options [String] :submits_with text shown while submitting
+  # @option options [String] :class additional CSS classes
+  # @option options [Hash] :data additional data attributes
+  def submit(value = submit_value, center: false, submits_with: nil, **options)
+    submits_with ||= :SUBMITTING.l
+    classes = %w[btn btn-default]
+    classes << "center-block my-3" if center
+    classes << options[:class] if options[:class].present?
+
+    data = { turbo_submits_with: submits_with,
+             disable_with: value }.merge(options[:data] || {})
+
+    super(value, **options.merge(class: classes.join(" "), data: data))
   end
 
   private
@@ -449,3 +469,4 @@ class Components::ApplicationForm < Superform::Rails::Form
     ].compact_blank.join("_")
   end
 end
+# rubocop:enable Metrics/ClassLength

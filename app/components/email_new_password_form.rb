@@ -6,19 +6,11 @@ class Components::EmailNewPasswordForm < Components::ApplicationForm
     text_field(:login, label: "#{:login_user.t}:", class_name: "mt-3",
                        data: { autofocus: true })
 
-    submit(:SEND.l, class: "btn btn-default center-block my-3",
-                    data: { turbo_submits_with: submits_text,
-                            disable_with: :SEND.l })
+    submit(:SEND.l, center: true)
   end
 
   # Override to use :new_user scope instead of :user
   def key
     :new_user
-  end
-
-  private
-
-  def submits_text
-    :SUBMITTING.l
   end
 end

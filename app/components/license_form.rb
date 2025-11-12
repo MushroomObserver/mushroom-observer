@@ -27,9 +27,7 @@ class Components::LicenseForm < Components::ApplicationForm
   end
 
   def render_submit_button
-    submit(:SUBMIT.t, class: "btn btn-default center-block my-3",
-                      data: { turbo_submits_with: submits_text,
-                              disable_with: :SUBMIT.t })
+    submit(:SUBMIT.t, center: true)
   end
 
   def display_name_help
@@ -38,9 +36,5 @@ class Components::LicenseForm < Components::ApplicationForm
 
   def url_help
     div(class: "help-block") { :license_url_help.t }
-  end
-
-  def submits_text
-    :SUBMITTING.l
   end
 end

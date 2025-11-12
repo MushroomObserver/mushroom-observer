@@ -10,19 +10,11 @@ class Components::ProjectAdminRequestForm < Components::ApplicationForm
 
     textarea_field(:content, label: "#{:request_message.t}:", rows: 5)
 
-    submit(:SEND.l, class: "btn btn-default center-block my-3",
-                    data: { turbo_submits_with: submits_text,
-                            disable_with: :SEND.l })
+    submit(:SEND.l, center: true)
   end
 
   # Override to use :email scope
   def key
     :email
-  end
-
-  private
-
-  def submits_text
-    :SUBMITTING.l
   end
 end

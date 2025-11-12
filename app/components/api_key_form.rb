@@ -32,8 +32,7 @@ class Components::APIKeyForm < Components::ApplicationForm
              ))
 
       span(class: "input-group-btn") do
-        submit(:CREATE.l, class: "btn btn-default",
-                          data: { turbo_submits_with: submits_text })
+        submit(:CREATE.l, submits_with: submits_text)
       end
     end
   end
@@ -42,11 +41,8 @@ class Components::APIKeyForm < Components::ApplicationForm
     text_field(:notes, label: :account_api_keys_notes_label.t,
                        class: "mt-3", id: "new_api_key_notes")
 
-    submit(:account_api_keys_create_button.l,
-           class: "btn btn-default center-block my-3",
-           id: "create_button",
-           data: { turbo_submits_with: submits_text,
-                   disable_with: submit_text })
+    submit(submit_text, center: true, submits_with: submits_text,
+                        id: "create_button")
   end
 
   def submit_text

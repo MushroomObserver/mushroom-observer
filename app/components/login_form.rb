@@ -27,9 +27,7 @@ class Components::LoginForm < Components::ApplicationForm
   end
 
   def render_submit_button
-    submit(:login_login.l, class: "btn btn-default center-block my-3",
-                           data: { turbo_submits_with: submits_text,
-                                   disable_with: :login_login.l })
+    submit(:login_login.l, center: true)
   end
 
   def render_help_text
@@ -37,9 +35,5 @@ class Components::LoginForm < Components::ApplicationForm
       :login_forgot_password.tp
       :login_having_problems.tp
     end
-  end
-
-  def submits_text
-    :SUBMITTING.l
   end
 end

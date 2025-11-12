@@ -34,9 +34,7 @@ class Components::GlossaryTermForm < Components::ApplicationForm
   end
 
   def render_submit_button
-    submit(:SAVE.t, class: "btn btn-default center-block my-3",
-                    data: { turbo_submits_with: :SUBMITTING.l,
-                            disable_with: :SAVE.l })
+    submit(:SAVE.t, center: true)
   end
 
   def name_help_text

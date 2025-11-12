@@ -23,16 +23,10 @@ class Components::CommentForm < Components::ApplicationForm
   end
 
   def render_submit_button
-    submit(submit_text, class: "btn btn-default center-block my-3",
-                        data: { turbo_submits_with: submits_text,
-                                disable_with: submit_text })
+    submit(submit_text, center: true)
   end
 
   def submit_text
     @model.persisted? ? :SAVE_EDITS.l : :CREATE.l
-  end
-
-  def submits_text
-    :SUBMITTING.l
   end
 end
