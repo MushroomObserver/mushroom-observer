@@ -638,6 +638,13 @@ class InatImportJobTest < ActiveJob::TestCase
                       "Failed to create multiple observations") do
       InatImportJob.perform_now(@inat_import)
     end
+    # Assert that the job logged the parsed page with iNat observation IDs
+    log_content = Rails.root.join("log/job.log").read
+    assert_match(
+      /Got parsed page with iNat 195434438-231104466/,
+      log_content,
+      "Log missing parsed page message with iNat 1st and last observation IDs"
+    )
   end
 
   # Prove that "Import all my iNat observations imports" multiple obsservations

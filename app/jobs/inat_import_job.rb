@@ -109,10 +109,12 @@ class InatImportJob < ApplicationJob
   end
 
   def import_parsed_page_of_observations(parsed_page)
-    log("Got iNat response page #{parsed_page["page"]}")
+    log("Got parsed page with iNat " \
+      "#{parsed_page["results"].first["id"]}-" \
+      "#{parsed_page["results"].last["id"]}")
     inat_import.update(importables: parsed_page["total_results"])
     observation_importer.import_page(parsed_page)
-    log("Imported observations on page ##{parsed_page["page"]}")
+    log("Finished importing observations on parsed page")
   end
 
   def more_pages?(parsed_page)
