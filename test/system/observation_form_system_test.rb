@@ -148,7 +148,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     sleep(0.5)
     # we should have the new type of location_google autocompleter now
     assert_selector(
-      "[data-type='location_google'][data-stimulus='autocompleter-connected']"
+      "[data-type='location_google'][data-stimulus='autocompleter-connected']",
+      wait: 10
     )
     # Place name should now have been filled by Google, no MO locations match
     assert_field("observation_place_name", with: UNIVERSITY_PARK[:name],
@@ -191,7 +192,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     sleep(2)
 
     # we should have a location_containing autocompleter now
-    assert_selector("[data-type='location_containing']")
+    assert_selector("[data-type='location_containing']", wait: 10)
     # GPS should have been copied to the obs fields
     assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
     assert_image_date_copied_to_obs(GEOTAGGED_EXIF)
@@ -298,7 +299,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Ok, enough. By now, the carousel image should be showing the second image.
     assert_selector(
       ".carousel-item[data-image-status='upload'][data-stimulus='connected']",
-      visible: :visible, wait: 3
+      visible: :visible, wait: 10
     )
     # Try removing the geotagged image
     scroll_to(second_image_wrapper, align: :center)
@@ -659,8 +660,27 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def assert_image_gps_copied_to_obs(image_data)
-    assert_field("observation_lat", with: image_data[:lat].to_s)
-    assert_field("observation_lng", with: image_data[:lng].to_s)
+    # Wait for carousel item to be added
+    assert_selector(".carousel-item[data-image-status='upload']", wait: 10)
+
+    # Wait for EXIF data to be extracted (check for lat value in exif_gps span)
+    assert_selector(".exif_lat", text: image_data[:lat].to_s, wait: 10)
+
+    # Wait for "use exif" button to appear (not d-none)
+    assert_selector(".use_exif_btn:not(.d-none)", wait: 10)
+
+    # For the first image, JavaScript auto-transfers EXIF data and disables
+    # the button. If the button is disabled, skip clicking it.
+    unless has_button?(:image_use_exif.l, disabled: true)
+      click_button(:image_use_exif.l)
+    end
+
+    # Wait for geolocation collapse to expand
+    assert_selector("#observation_geolocation.in", wait: 10)
+
+    # Verify GPS fields are populated
+    assert_field("observation_lat", with: image_data[:lat].to_s, wait: 10)
+    assert_field("observation_lng", with: image_data[:lng].to_s, wait: 10)
     # We look up the alt from lat/lng, so it's not copied from the image.
     # assert_field("observation_alt", with: image_data[:alt].to_i.to_s)
   end

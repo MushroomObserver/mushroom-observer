@@ -92,17 +92,22 @@ class Components::FormCameraInfo < Components::Base
   private
 
   def render_gps_info
-    return span(class: "exif_gps") if @lat.blank? && @lng.blank? && @alt.blank?
-
     span(class: "exif_gps") do
-      first = true
-      [:lat, :lng, :alt].each do |field|
+      # Always render all three fields so JavaScript can find and populate them
+      [:lat, :lng, :alt].each_with_index do |field, index|
         value = instance_variable_get("@#{field}")
-        next if value.blank?
+        has_value = value.present?
 
-        plain(", ") unless first
-        first = false
-        render_gps_part(field, value)
+        # Wrap each field so we can hide it when empty
+        wrapper_class = class_names("exif_#{field}_wrapper",
+                                     "d-none": !has_value)
+
+        span(class: wrapper_class) do
+          # Add comma before non-first fields
+          plain(", ") if index > 0
+
+          render_gps_part(field, value || "")
+        end
       end
     end
   end

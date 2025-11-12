@@ -75,6 +75,9 @@ export default class extends Controller {
       _exif_lat = itemElement.querySelector(".exif_lat"),
       _exif_lng = itemElement.querySelector(".exif_lng"),
       _exif_alt = itemElement.querySelector(".exif_alt"),
+      _exif_lat_wrapper = itemElement.querySelector(".exif_lat_wrapper"),
+      _exif_lng_wrapper = itemElement.querySelector(".exif_lng_wrapper"),
+      _exif_alt_wrapper = itemElement.querySelector(".exif_alt_wrapper"),
       _use_exif_button = itemElement.querySelector('.use_exif_btn');
 
     // Geocode Logic
@@ -91,6 +94,18 @@ export default class extends Controller {
       _exif_lat.innerText = lat == null ? lat : lat.toFixed(4);
       _exif_lng.innerText = lng == null ? lng : lng.toFixed(4);
       _exif_alt.innerText = alt == null ? alt : alt.toFixed(0);
+
+      // Show the wrapper spans by removing d-none class
+      if (_exif_lat_wrapper && lat != null) {
+        _exif_lat_wrapper.classList.remove('d-none');
+      }
+      if (_exif_lng_wrapper && lng != null) {
+        _exif_lng_wrapper.classList.remove('d-none');
+      }
+      if (_exif_alt_wrapper && alt != null) {
+        _exif_alt_wrapper.classList.remove('d-none');
+      }
+
       _use_exif_button.classList.remove('d-none');
     } else {
       // Show the "no GPS" message
