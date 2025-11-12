@@ -11,9 +11,9 @@
 # @example
 #   render Components::FormCameraInfo.new(
 #     img_id: 123,
-#     lat: "45.5231",
-#     lng: "-122.6765",
-#     alt: "100",
+#     lat: 45.5231,  # Can be Float, Integer, or String
+#     lng: -122.6765,
+#     alt: 100,
 #     date: "2024-01-15",
 #     file_name: "IMG_1234.jpg",
 #     file_size: "2.5 MB"
@@ -24,9 +24,17 @@ class Components::FormCameraInfo < Components::Base
 
   # Properties
   prop :img_id, Integer, &:to_i
-  prop :lat, String, default: ""
-  prop :lng, String, default: ""
-  prop :alt, String, default: ""
+  # GPS coordinates can be passed as Float, Integer, or String
+  # Convert to string for display, handling blank values
+  prop :lat, _Nilable(String) do |v|
+    v.present? ? v.to_s : ""
+  end
+  prop :lng, _Nilable(String) do |v|
+    v.present? ? v.to_s : ""
+  end
+  prop :alt, _Nilable(String) do |v|
+    v.present? ? v.to_s : ""
+  end
   prop :date, String, default: ""
   prop :file_name, String, default: ""
   prop :file_size, String, default: ""

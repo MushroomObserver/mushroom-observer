@@ -32,8 +32,13 @@ export default class extends Controller {
   itemTargetConnected(itemElement) {
     // console.log("itemTargetConnected")
     // console.log(itemElement);
-    if (itemElement.dataset.imageStatus == "good") return;
-    itemElement.dataset.geocode = "";
+    // Skip if already initialized to avoid re-extracting EXIF data
+    if (itemElement.dataset.initialized == "true") return;
+
+    // Initialize geocode if not already set (for uploads)
+    if (itemElement.dataset.imageStatus != "good") {
+      itemElement.dataset.geocode = "";
+    }
 
     // extract the EXIF data (async) and populate the item and element
     this.getExifData(itemElement);
@@ -44,10 +49,23 @@ export default class extends Controller {
   getExifData(itemElement) {
     const _image = itemElement.querySelector('.carousel-image');
 
-    _image.onload = async () => {
-      const _exif_data = await ExifReader.load(_image.src);
-      this.populateExifData(itemElement, _exif_data);
+    const loadExifData = async () => {
+      try {
+        const _exif_data = await ExifReader.load(_image.src);
+        this.populateExifData(itemElement, _exif_data);
+      } catch (error) {
+        console.log("Could not load EXIF data:", error);
+      }
     };
+
+    // If image is already loaded (e.g., from cache or saved image),
+    // extract EXIF data immediately
+    if (_image.complete && _image.naturalHeight !== 0) {
+      loadExifData();
+    } else {
+      // Otherwise, wait for image to load
+      _image.onload = loadExifData;
+    }
   }
 
   // Now that we've read the data from the loaded file, populate carousel-item

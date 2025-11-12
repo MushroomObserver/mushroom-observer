@@ -103,4 +103,43 @@ class FormCameraInfoTest < UnitTestCase
     # (Stimulus controller will show it if needed)
     assert_includes(html, "exif_no_gps d-none")
   end
+
+  def test_accepts_float_values_for_gps_coordinates
+    component = Components::FormCameraInfo.new(
+      img_id: 123,
+      lat: 45.5231,  # Float
+      lng: -122.6765,  # Float
+      alt: 100.5,  # Float
+      date: "2024-01-15",
+      file_name: "IMG_1234.jpg",
+      file_size: "2.5 MB"
+    )
+    html = render(component)
+
+    # Should convert floats to strings and render correctly
+    assert_includes(html, "45.5231")
+    assert_includes(html, "-122.6765")
+    assert_includes(html, "100.5")
+
+    # Wrappers should not have d-none class when values are present
+    assert_includes(html, 'class="exif_lat_wrapper"')
+    assert_includes(html, 'class="exif_lng_wrapper"')
+    assert_includes(html, 'class="exif_alt_wrapper"')
+  end
+
+  def test_accepts_integer_values_for_gps_coordinates
+    component = Components::FormCameraInfo.new(
+      img_id: 123,
+      lat: 45,  # Integer
+      lng: -122,  # Integer
+      alt: 100,  # Integer
+      date: "2024-01-15"
+    )
+    html = render(component)
+
+    # Should convert integers to strings and render correctly
+    assert_includes(html, "45")
+    assert_includes(html, "-122")
+    assert_includes(html, "100")
+  end
 end
