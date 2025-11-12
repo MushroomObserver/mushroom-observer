@@ -63,12 +63,9 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_select("input#inat_username", true,
                   "Form needs a field for inputting iNat username")
 
-    assert(
-      assert_select("#preview").text.include?(
-        "#{:inat_import_expected_count.l}: #{:inat_import_tbd.l}"
-      ),
-      "Form missing expected import count"
-    )
+    assert_match(/#{:inat_import_expected_count.l}:\s+#{:inat_import_tbd.l}/,
+                 assert_select("#preview").text,
+                 "Form missing expected import count")
     assert_select("#preview a[href^='#{SITE}/observations']", false,
                   "New form should not display link to expected imports")
   end
@@ -136,12 +133,10 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_form_action({ action: :create },
                        "InatImport form should reload after user fills it out")
-    assert(
-      assert_select("#preview").text.include?(
-        "#{:inat_import_expected_count.l}: 3"
-      ),
-      "Reloaded form should display expected import count"
-    )
+
+    assert_match(/#{:inat_import_expected_count.l}:\s+3/,
+                 assert_select("#preview").text,
+                 "Reloaded form should display expected import count")
     assert_select("#preview a[href^='#{SITE}/observations']", true,
                   "Reloaded form should display link to expected imports")
   end
