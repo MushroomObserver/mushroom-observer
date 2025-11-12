@@ -10,10 +10,13 @@ tag.div(
     tag.div do
       concat("#{:EXTERNAL_LINKS.l}: ")
       concat(
-        [ "[",
-          modal_link_to("external_link", *new_external_link_tab(obs: obs)),
-          "] "
-        ].safe_join("")
+        sites.sort_by(&:name).map do |site|
+          [ "#{site.name}: [",
+            modal_link_to("external_link",
+                          *new_external_link_tab(obs: obs, site: site)),
+            "] "
+          ].safe_join("")
+        end.safe_join
       ) if sites.any?
     end,
 

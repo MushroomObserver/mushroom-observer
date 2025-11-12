@@ -42,7 +42,8 @@ module Tabs
       InternalLink::Model.new(
         :show_comments_add_comment.l, object,
         new_comment_path(target: object.id, type: object.class.name),
-        html_options: { class: btn_class, icon: :add }
+        html_options: { class: btn_class, icon: :add },
+        css_class: "new_comment"
       ).tab
     end
 

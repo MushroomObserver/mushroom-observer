@@ -55,8 +55,6 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_field("location_east", with: "3.985", type: :hidden)
     assert_field("location_south", with: "44.3055", type: :hidden)
     assert_field("location_west", with: "3.9113", type: :hidden)
-    assert_field("location_high", with: "1388.2098", type: :hidden)
-    assert_field("location_low", with: "287.8201", type: :hidden)
 
     within("#herbarium_form") do
       fill_in("herbarium_name", with: "Herbarium des Cévennes")

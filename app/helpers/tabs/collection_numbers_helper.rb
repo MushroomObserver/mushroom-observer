@@ -56,7 +56,8 @@ module Tabs
       InternalLink::Model.new(
         :create_collection_number.l, CollectionNumber,
         new_collection_number_path(observation_id: obs.id),
-        html_options: { icon: :add }
+        html_options: { icon: :add },
+        css_class: "new_collection_number"
       ).tab
     end
 

@@ -4,11 +4,11 @@
 #
 module Tabs
   module ExternalLinksHelper
-    def new_external_link_tab(obs:)
+    def new_external_link_tab(obs:, site:)
       InternalLink.new(
         :show_observation_add_link.l,
-        new_external_link_path(id: obs.id),
-        html_options: { icon: :add }
+        new_external_link_path(id: obs.id, site: site.id),
+        html_options: { icon: :add, class: "new_external_link_link_#{site.id}" }
       ).tab
     end
 

@@ -68,7 +68,8 @@ module Tabs
       InternalLink::Model.new(
         :show_observation_add_sequence.t, Sequence,
         new_sequence_path(observation_id: obs.id),
-        html_options: { icon: :add }
+        html_options: { icon: :add },
+        css_class: "new_sequence"
       ).tab
     end
 

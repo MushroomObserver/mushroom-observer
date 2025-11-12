@@ -61,11 +61,13 @@ module Observations
       @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
-      @base_urls = {} # used as placeholders in the url field
-      @sites.each { |site| @base_urls[site.name] = site.base_url }
-
-      # @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
+      set_base_urls_and_selected_site
       @back_object = @observation
+    end
+
+    def set_base_urls_and_selected_site
+      @base_urls = @sites.index_by(&:name).transform_values(&:base_url)
+      @site = ExternalSite.find(params[:site]) if params[:site].present?
     end
 
     def set_ivars_for_edit

@@ -26,7 +26,9 @@ class LocationFormSystemTest < ApplicationSystemTestCase
     assert_field("location_east", with: "3.985")
     assert_field("location_south", with: "44.3055")
     assert_field("location_west", with: "3.9113")
-    assert_field("location_high", with: "1388.2098")
+
+    click_button(:form_locations_get_elevation.l)
+    assert_field("location_high", with: "1388.2098", wait: 10)
     assert_field("location_low", with: "287.8201")
   end
 end

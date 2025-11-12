@@ -205,7 +205,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#modal_external_link")
     within("#modal_external_link") do
       assert_field("external_link_url")
-      fill_in("external_link_url", with: "https://wedont.validatethese.urls")
+      fill_in("external_link_url",
+              with: "https://www.mycoportal.org/portal/collections/list.php?id=123")
       click_commit
     end
     assert_no_selector("#modal_external_link")
@@ -221,11 +222,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#modal_external_link_#{link.id}") do
       assert_field("external_link_url")
       fill_in("external_link_url",
-              with: "https://wedont.validatethese.urls/yet")
+              with: "https://www.mycoportal.org/portal/collections/list.php?id=456")
       click_commit
     end
     assert_no_selector("#modal_external_link_#{link.id}")
-    assert_equal(link.reload.url, "https://wedont.validatethese.urls/yet")
+    assert_equal(link.reload.url,
+                 "https://www.mycoportal.org/portal/collections/list.php?id=456")
 
     # try remove links
     # external_link
