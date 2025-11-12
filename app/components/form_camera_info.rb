@@ -100,11 +100,11 @@ class Components::FormCameraInfo < Components::Base
 
         # Wrap each field so we can hide it when empty
         wrapper_class = class_names("exif_#{field}_wrapper",
-                                     "d-none": !has_value)
+                                    "d-none": !has_value)
 
         span(class: wrapper_class) do
           # Add comma before non-first fields
-          plain(", ") if index > 0
+          plain(", ") if index.positive?
 
           render_gps_part(field, value || "")
         end
