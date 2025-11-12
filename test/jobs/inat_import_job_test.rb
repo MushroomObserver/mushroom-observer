@@ -12,6 +12,9 @@ class InatImportJobTest < ActiveJob::TestCase
     directory_path = Rails.public_path.join("test_images/orig")
     FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
     @external_link_base_url = ExternalSite.find_by(name: "iNaturalist").base_url
+    return unless Rails.root.join("log/job.log").exist?
+
+    Rails.root.join("log/job.log").write("")
   end
 
   # Had 1 identification, 0 photos, 0 observation_fields
