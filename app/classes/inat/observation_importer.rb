@@ -31,6 +31,8 @@ class Inat
         update_inat_observation
         increment_imported_counts
         update_timings
+        msg = "Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}"
+        log_to_file(msg)
       elsif @inat_obs.observed_on_missing?
         error = "iNat #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
         @inat_import.add_response_error(error)
@@ -82,6 +84,12 @@ class Inat
         avg_import_time: total_seconds / (@inat_import.imported_count || 1)
       )
       @inat_import.reset_last_obs_start
+    end
+
+    def log_to_file(message)
+      Rails.root.join("log/job.log").open("a") do |f|
+        f.puts("[#{Time.current}] #{message}")
+      end
     end
   end
 end

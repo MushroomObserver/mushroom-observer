@@ -625,9 +625,12 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_multiple
     create_ivars_from_filename("listed_ids")
 
+    first_id = @parsed_results.first[:id]
+    last_id = @parsed_results.last[:id]
+
     # override ivar because this test wants to import multiple observations
     @inat_import = InatImport.create(user: @user,
-                                     inat_ids: "231104466,195434438",
+                                     inat_ids: "#{last_id},#{first_id}",
                                      token: "MockCode",
                                      inat_username: "anything")
     # update the tracker's inat_import accordingly
@@ -641,10 +644,13 @@ class InatImportJobTest < ActiveJob::TestCase
     # Assert that the job logged the parsed page with iNat observation IDs
     log_content = Rails.root.join("log/job.log").read
     assert_match(
-      /Got parsed page with iNat 195434438-231104466/,
-      log_content,
+      /Got parsed page with iNat #{first_id}-#{last_id}/, log_content,
       "Log missing parsed page message with iNat 1st and last observation IDs"
     )
+    assert_match(/Imported iNat #{first_id} as MO \d+/, log_content,
+                 "Failed to log importing of iNat #{first_id}")
+    assert_match(/Imported iNat #{last_id} as MO \d+/, log_content,
+                 "Failed to log importing of iNat #{last_id}")
   end
 
   # Prove that "Import all my iNat observations imports" multiple obsservations
