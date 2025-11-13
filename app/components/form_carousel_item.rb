@@ -89,9 +89,7 @@ class Components::FormCarouselItem < Components::BaseImage
       image_status: @upload ? "upload" : "good"
     }
 
-    unless @upload
-      item_data[:geocode] = @camera_info.to_json
-    end
+    item_data[:geocode] = @camera_info.to_json unless @upload
     item_data
   end
 

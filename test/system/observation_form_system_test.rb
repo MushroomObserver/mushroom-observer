@@ -231,28 +231,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def test_edit_observation_extracts_exif_from_saved_images
-    # Test that form-exif JS extracts EXIF data from saved "good" images
-    # when editing an observation. This tests the fix for the bug where
-    # EXIF was only extracted from "upload" images, not saved images.
+    # Test that Camera Info displays EXIF data from saved "good" images
+    # when editing an observation. The server extracts EXIF from original
+    # image files and passes it to FormCameraInfo via camera_info props.
     setup_image_dirs
     user = users(:katrina)
     login!(user)
-
-    # Stub Image.all_urls to return test fixture paths for :original
-    # so ExifReader can actually load the geotagged test images
-    Image.class_eval do
-      alias_method :original_all_urls, :all_urls
-      def all_urls
-        urls = original_all_urls
-        # Override :original to point to test fixtures with EXIF data
-        if original_name == "geotagged.jpg"
-          urls[:original] = "/test/images/geotagged.jpg"
-        elsif original_name == "geotagged_s_pasadena.jpg"
-          urls[:original] = "/test/images/geotagged_s_pasadena.jpg"
-        end
-        urls
-      end
-    end
 
     # Create observation with two geotagged images with different coordinates
     visit(new_observation_path)
@@ -293,36 +277,26 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       img.original_name == "geotagged_s_pasadena.jpg"
     end
 
-    # Test Miami image - Click thumbnail and verify EXIF extraction
+    # Test Miami image - Click thumbnail and verify Camera Info displays EXIF
     find("#carousel_thumbnail_#{miami_img.id}").click
-    sleep(2) # Give time for carousel transition and image loading
+    sleep(0.5) # Give time for carousel transition
     miami_item = find("#carousel_item_#{miami_img.id}", visible: :all)
     within(miami_item) do
-      # Wait for EXIF extraction - JS must fetch original image and parse EXIF
-      # This is async and may take time in test environment
-      assert_selector(".exif_lat", text: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+      # Camera Info should display GPS from server-extracted EXIF
+      assert_selector(".exif_lat", text: GEOTAGGED_EXIF[:lat].to_s)
       assert_selector(".exif_lng", text: GEOTAGGED_EXIF[:lng].to_s)
       assert_selector(".exif_alt", text: GEOTAGGED_EXIF[:alt].to_s)
     end
 
-    # Test Pasadena image - Click thumbnail and verify EXIF extraction
+    # Test Pasadena image - Click thumbnail and verify Camera Info displays EXIF
     find("#carousel_thumbnail_#{pasadena_img.id}").click
-    sleep(2) # Give time for carousel transition and image loading
+    sleep(0.5) # Give time for carousel transition
     pasadena_item = find("#carousel_item_#{pasadena_img.id}", visible: :all)
     within(pasadena_item) do
-      # Wait for EXIF extraction - JS must fetch original image and parse EXIF
-      # This is async and may take time in test environment
-      assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s, wait: 10)
+      # Camera Info should display GPS from server-extracted EXIF
+      assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s)
       assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s)
       assert_selector(".exif_alt", text: SO_PASA_EXIF[:alt].to_s)
-    end
-  ensure
-    # Restore original Image.all_urls method
-    Image.class_eval do
-      if method_defined?(:original_all_urls)
-        alias_method :all_urls, :original_all_urls
-        remove_method :original_all_urls
-      end
     end
   end
 

@@ -226,7 +226,8 @@ module ObservationsController::SharedFormMethods
   def get_exif_data(images)
     data = {}
     images.each do |image|
-      exif_data = image&.read_exif_geocode
+      # Don't hide GPS for the owner viewing their own edit form
+      exif_data = image&.read_exif_geocode(hide_gps: false)
       # If no EXIF data (no GPS), provide basic info from database
       if exif_data.nil?
         exif_data = {
