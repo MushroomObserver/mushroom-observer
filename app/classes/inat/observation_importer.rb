@@ -38,8 +38,6 @@ class Inat
 
     def create_mo_observation
       builder = Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
-      return date_missing if @inat_obs.observed_on_missing?
-
       @observation = builder.mo_observation
     rescue StandardError => e
       log("Failed to import iNat #{@inat_obs[:id]}: #{e.message}")
