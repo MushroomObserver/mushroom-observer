@@ -3813,6 +3813,7 @@
   observation_term_herbaria: "[:observation_term_herbarium]"
   observation_term_location: Mushroom was observed within the the geographic bounds ([:east], [:north], [:south], [:west]) of this Location, regardless of the exact name of the Location of the Observation. Location must be an existing MO Location. Cf. **[:region]**.
   observation_term_locations: "[:observation_term_location]"
+  observation_term_within_locations: "[:observation_term_location]"
   observation_term_region: The Observation's Location name includes this string. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown. Cf. **[:location]**.
   observation_term_pattern: "[:pattern]"
   observation_term_project: "[:observation_term_projects]"
