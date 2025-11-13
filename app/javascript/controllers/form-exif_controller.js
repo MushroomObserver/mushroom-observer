@@ -35,10 +35,16 @@ export default class extends Controller {
     // Skip if already initialized to avoid re-extracting EXIF data
     if (itemElement.dataset.initialized == "true") return;
 
-    // Initialize geocode if not already set (for uploads)
-    if (itemElement.dataset.imageStatus != "good") {
-      itemElement.dataset.geocode = "";
+    // For saved "good" images, the server has already extracted EXIF data
+    // from the original files and passed it via camera_info props.
+    // We only need to extract EXIF in the browser for "upload" images.
+    if (itemElement.dataset.imageStatus == "good") {
+      itemElement.dataset.initialized = "true";
+      return;
     }
+
+    // Initialize geocode for uploads
+    itemElement.dataset.geocode = "";
 
     // extract the EXIF data (async) and populate the item and element
     this.getExifData(itemElement);

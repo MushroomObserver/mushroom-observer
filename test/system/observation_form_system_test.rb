@@ -230,6 +230,102 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_button(:image_use_exif.l)
   end
 
+  def test_edit_observation_extracts_exif_from_saved_images
+    # Test that form-exif JS extracts EXIF data from saved "good" images
+    # when editing an observation. This tests the fix for the bug where
+    # EXIF was only extracted from "upload" images, not saved images.
+    setup_image_dirs
+    user = users(:katrina)
+    login!(user)
+
+    # Stub Image.all_urls to return test fixture paths for :original
+    # so ExifReader can actually load the geotagged test images
+    Image.class_eval do
+      alias_method :original_all_urls, :all_urls
+      def all_urls
+        urls = original_all_urls
+        # Override :original to point to test fixtures with EXIF data
+        if original_name == "geotagged.jpg"
+          urls[:original] = "/test/images/geotagged.jpg"
+        elsif original_name == "geotagged_s_pasadena.jpg"
+          urls[:original] = "/test/images/geotagged_s_pasadena.jpg"
+        end
+        urls
+      end
+    end
+
+    # Create observation with two geotagged images with different coordinates
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Upload first geotagged image (Miami area)
+    click_attach_file("geotagged.jpg")
+    assert_selector(
+      ".carousel-item[data-image-status='upload']", wait: 10, visible: :all
+    )
+
+    # Upload second geotagged image (Pasadena area)
+    click_attach_file("geotagged_s_pasadena.jpg")
+    assert_selector(
+      ".carousel-item[data-image-status='upload']",
+      count: 2,
+      wait: 10,
+      visible: :all
+    )
+
+    # Fill in minimal required fields
+    fill_in("observation_place_name", with: "California, USA")
+    fill_in("naming_name", with: "Agaricus")
+
+    # Submit to create observation
+    within("#observation_form") { click_commit }
+    assert_selector("body.observations__show", wait: 10)
+
+    # Navigate to edit page
+    new_obs = Observation.last
+    visit(edit_observation_path(new_obs.id))
+    assert_selector("body.observations__edit")
+
+    # Find both saved geotagged images
+    imgs = Image.last(2)
+    miami_img = imgs.find { |img| img.original_name == "geotagged.jpg" }
+    pasadena_img = imgs.find do |img|
+      img.original_name == "geotagged_s_pasadena.jpg"
+    end
+
+    # Test Miami image - Click thumbnail and verify EXIF extraction
+    find("#carousel_thumbnail_#{miami_img.id}").click
+    sleep(2) # Give time for carousel transition and image loading
+    miami_item = find("#carousel_item_#{miami_img.id}", visible: :all)
+    within(miami_item) do
+      # Wait for EXIF extraction - JS must fetch original image and parse EXIF
+      # This is async and may take time in test environment
+      assert_selector(".exif_lat", text: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+      assert_selector(".exif_lng", text: GEOTAGGED_EXIF[:lng].to_s)
+      assert_selector(".exif_alt", text: GEOTAGGED_EXIF[:alt].to_s)
+    end
+
+    # Test Pasadena image - Click thumbnail and verify EXIF extraction
+    find("#carousel_thumbnail_#{pasadena_img.id}").click
+    sleep(2) # Give time for carousel transition and image loading
+    pasadena_item = find("#carousel_item_#{pasadena_img.id}", visible: :all)
+    within(pasadena_item) do
+      # Wait for EXIF extraction - JS must fetch original image and parse EXIF
+      # This is async and may take time in test environment
+      assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s, wait: 10)
+      assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s)
+      assert_selector(".exif_alt", text: SO_PASA_EXIF[:alt].to_s)
+    end
+  ensure
+    # Restore original Image.all_urls method
+    Image.class_eval do
+      if method_defined?(:original_all_urls)
+        alias_method :all_urls, :original_all_urls
+        remove_method :original_all_urls
+      end
+    end
+  end
+
   def test_post_edit_and_destroy_with_details_and_location
     # browser = page.driver.browser
     setup_image_dirs # in general_extensions

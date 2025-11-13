@@ -26,15 +26,16 @@ class Components::FormCameraInfo < Components::Base
   # All props are nilable to handle cases where data may not be available
   prop :img_id, _Nilable(String), &:to_s
   # GPS coordinates can be passed as Float, Integer, or String
-  # Convert to string for display, handling blank values
-  prop :lat, _Nilable(String) do |v|
-    v.present? ? v.to_s : ""
+  # Coerce to Float for semantic correctness
+  # (Phlex will convert to string when rendering)
+  prop :lat, _Nilable(_Union(String, Integer, Float)) do |v|
+    v.present? ? v.to_f : nil
   end
-  prop :lng, _Nilable(String) do |v|
-    v.present? ? v.to_s : ""
+  prop :lng, _Nilable(_Union(String, Integer, Float)) do |v|
+    v.present? ? v.to_f : nil
   end
-  prop :alt, _Nilable(String) do |v|
-    v.present? ? v.to_s : ""
+  prop :alt, _Nilable(_Union(String, Integer, Float)) do |v|
+    v.present? ? v.to_f : nil
   end
   prop :date, _Nilable(String), default: ""
   prop :file_name, _Nilable(String), default: ""
@@ -115,7 +116,7 @@ class Components::FormCameraInfo < Components::Base
           # Add comma before non-first fields
           plain(", ") if index.positive?
 
-          render_gps_part(field, value || "")
+          render_gps_part(field, value)
         end
       end
     end
