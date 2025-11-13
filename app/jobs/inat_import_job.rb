@@ -123,7 +123,7 @@ class InatImportJob < ApplicationJob
 
   def observation_importer
     @observation_importer ||=
-      ::Inat::ObservationImporter.new(inat_import, user)
+      ::Inat::ObservationImporter.new(inat_import, user, self)
   end
 
   def done
