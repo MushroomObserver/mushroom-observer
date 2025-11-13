@@ -16,9 +16,6 @@ class Components::CarouselThumbnail < Components::BaseImage
   # Additional thumbnail-specific properties
   prop :index, Integer, default: 0
   prop :carousel_id, String
-  prop :img_id, _Nilable(Integer), default: nil do |value|
-    value&.to_i
-  end
 
   def initialize(carousel_id:, index: 0, img_id: nil, **props)
     # Set thumbnail-specific defaults

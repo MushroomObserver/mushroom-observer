@@ -32,7 +32,15 @@ export default class extends Controller {
   itemTargetConnected(itemElement) {
     // console.log("itemTargetConnected")
     // console.log(itemElement);
+    // Skip if already initialized to avoid re-extracting EXIF data
+    if (itemElement.dataset.initialized == "true") return;
+
+    // For saved "good" images, the server has already extracted EXIF data
+    // from the original files and passed it via camera_info props.
+    // We only need to extract EXIF in the browser for "upload" images.
     if (itemElement.dataset.imageStatus == "good") return;
+
+    // Initialize geocode for uploads
     itemElement.dataset.geocode = "";
 
     // extract the EXIF data (async) and populate the item and element
@@ -44,10 +52,23 @@ export default class extends Controller {
   getExifData(itemElement) {
     const _image = itemElement.querySelector('.carousel-image');
 
-    _image.onload = async () => {
-      const _exif_data = await ExifReader.load(_image.src);
-      this.populateExifData(itemElement, _exif_data);
+    const loadExifData = async () => {
+      try {
+        const _exif_data = await ExifReader.load(_image.src);
+        this.populateExifData(itemElement, _exif_data);
+      } catch (error) {
+        console.log("Could not load EXIF data:", error);
+      }
     };
+
+    // If image is already loaded (e.g., from cache or saved image),
+    // extract EXIF data immediately
+    if (_image.complete && _image.naturalHeight !== 0) {
+      loadExifData();
+    } else {
+      // Otherwise, wait for image to load
+      _image.onload = loadExifData;
+    }
   }
 
   // Now that we've read the data from the loaded file, populate carousel-item
@@ -75,6 +96,9 @@ export default class extends Controller {
       _exif_lat = itemElement.querySelector(".exif_lat"),
       _exif_lng = itemElement.querySelector(".exif_lng"),
       _exif_alt = itemElement.querySelector(".exif_alt"),
+      _exif_lat_wrapper = itemElement.querySelector(".exif_lat_wrapper"),
+      _exif_lng_wrapper = itemElement.querySelector(".exif_lng_wrapper"),
+      _exif_alt_wrapper = itemElement.querySelector(".exif_alt_wrapper"),
       _use_exif_button = itemElement.querySelector('.use_exif_btn');
 
     // Geocode Logic
@@ -91,6 +115,18 @@ export default class extends Controller {
       _exif_lat.innerText = lat == null ? lat : lat.toFixed(4);
       _exif_lng.innerText = lng == null ? lng : lng.toFixed(4);
       _exif_alt.innerText = alt == null ? alt : alt.toFixed(0);
+
+      // Show the wrapper spans by removing d-none class
+      if (_exif_lat_wrapper && lat != null) {
+        _exif_lat_wrapper.classList.remove('d-none');
+      }
+      if (_exif_lng_wrapper && lng != null) {
+        _exif_lng_wrapper.classList.remove('d-none');
+      }
+      if (_exif_alt_wrapper && alt != null) {
+        _exif_alt_wrapper.classList.remove('d-none');
+      }
+
       _use_exif_button.classList.remove('d-none');
     } else {
       // Show the "no GPS" message

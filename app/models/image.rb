@@ -398,7 +398,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def full_filepath(size)
-    image_url(size).full_filepath(MO.local_image_files)
+    standard_path = image_url(size).full_filepath(MO.local_image_files)
+
+    # In test environment, if the standard path doesn't exist and this is the
+    # original size, fall back to test fixtures. This allows EXIF extraction
+    # to work in tests without running the full image processing pipeline.
+    if Rails.env.test? &&
+       ["orig", :original].include?(size) &&
+       !File.exist?(standard_path) &&
+       original_name.present?
+      fixture_path = Rails.root.join("test/images", original_name)
+      return fixture_path.to_s if File.exist?(fixture_path)
+    end
+
+    standard_path
   end
 
   # Defines methods for each size. e.g. `{size}_url`
@@ -803,8 +816,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Get exif data from image by reading the header straight off the file,
   # remotely. Returns nil if it fails. Costly.
-  def read_exif_data(flags = [])
-    hide_gps = observations.any?(&:gps_hidden)
+  # @param hide_gps [Boolean, nil] Override GPS hiding. If nil, checks
+  #   observations to determine whether to hide GPS.
+  def read_exif_data(flags = [], hide_gps: nil)
+    hide_gps = observations.any?(&:gps_hidden) if hide_gps.nil?
 
     if transferred
       cmd = Shellwords.escape("script/exiftool_remote")
@@ -823,11 +838,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # This returns a { lat:, lng:, ... } hash if the image has GPS data in EXIF.
   # Returns nil if it fails. Note that it only reads these fields.
   # Used for edit obs, to allow re-syncing image data to obs.
-  def read_exif_geocode
+  def read_exif_geocode(hide_gps: nil)
     # flag -n means numerical format, rather than degrees/minutes/seconds.
     flags = %w[-n -GPSLatitude -GPSLongitude -GPSAltitude -filesize
                -DateTimeOriginal]
-    data = read_exif_data(flags)[0]
+    data = read_exif_data(flags, hide_gps: hide_gps)[0]
     return nil unless data
 
     lat = lng = alt = date = file_size = nil
