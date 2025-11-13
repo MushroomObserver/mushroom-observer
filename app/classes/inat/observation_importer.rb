@@ -36,11 +36,28 @@ class Inat
 
     private
 
+    def unimportable
+      log_with_response_error("Skipped #{@inat_obs[:id]} not importable")
+    end
+
+    def date_missing
+      log_with_response_error(
+        "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
+      )
+    end
+
+    def log_with_response_error(msg)
+      log(msg)
+      @inat_import.add_response_error(msg)
+    end
+
     def create_mo_observation
       builder = Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
       @observation = builder.mo_observation
     rescue StandardError => e
-      log("Failed to import iNat #{@inat_obs[:id]}: #{e.message}")
+      log_with_response_error(
+        "Failed to import iNat #{@inat_obs[:id]}: #{e.message}"
+      )
       nil
     end
 
@@ -49,17 +66,6 @@ class Inat
       update_inat_observation
       increment_imported_counts
       update_timings
-    end
-
-    def unimportable
-      msg = "Skipped #{@inat_obs[:id]} not importable"
-      log(msg)
-      @inat_import.add_response_error(msg)
-    end
-
-    def date_missing
-      msg = "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
-      @inat_import.add_response_error(msg)
     end
 
     def update_inat_observation
@@ -85,7 +91,7 @@ class Inat
                 payload: payload)
     rescue ::RestClient::ExceptionWithResponse => e
       error = { error: e.http_code, payload: payload }.to_json
-      @inat_import.add_response_error(error)
+      log_with_response_error(error)
       e.response
     end
 
