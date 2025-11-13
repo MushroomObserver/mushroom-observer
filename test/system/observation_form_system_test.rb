@@ -527,9 +527,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find("#observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    assert_selector(
-      "[data-type='name'][data-autocompleter='connected']"
-    )
+    assert_selector("[data-type='name'][data-autocompleter='connected']")
     fill_in("naming_name", with: "Agaricus campestris")
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
