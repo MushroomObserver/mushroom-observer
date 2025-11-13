@@ -25,34 +25,44 @@ class Inat
 
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
-      if @inat_obs.importable?
-        builder =
-          Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
+      return unimportable unless @inat_obs.taxon_importable?
+      return date_missing if @inat_obs.observed_on_missing?
 
-        begin
-          @observation = builder.mo_observation
-        rescue StandardError => e
-          msg = "Failed to import iNat #{@inat_obs[:id]}: #{e.message}"
-          log(msg)
-          return
-        end
+      create_mo_observation
+      return unless @observation
 
-        msg = "Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}"
-        log(msg)
-
-        update_inat_observation
-        increment_imported_counts
-        update_timings
-      elsif @inat_obs.observed_on_missing?
-        error = "iNat #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
-        @inat_import.add_response_error(error)
-      end
-      # NOTE: We need not handle the case where the taxon is not importable,
-      # because the iNat PageParser only requests observations of fungi and
-      # protozoa (a slime mold proxy).
+      finalize_import
     end
 
     private
+
+    def create_mo_observation
+      builder = Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
+      return date_missing if @inat_obs.observed_on_missing?
+
+      @observation = builder.mo_observation
+    rescue StandardError => e
+      log("Failed to import iNat #{@inat_obs[:id]}: #{e.message}")
+      nil
+    end
+
+    def finalize_import
+      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
+      update_inat_observation
+      increment_imported_counts
+      update_timings
+    end
+
+    def unimportable
+      msg = "Skipped #{@inat_obs[:id]} not importable"
+      log(msg)
+      @inat_import.add_response_error(msg)
+    end
+
+    def date_missing
+      msg = "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
+      @inat_import.add_response_error(msg)
+    end
 
     def update_inat_observation
       update_mushroom_observer_url_field
