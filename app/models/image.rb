@@ -398,14 +398,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def full_filepath(size)
-    # In test environment, for original size, use test fixtures if they exist
-    # This allows EXIF extraction to work in tests
-    if Rails.env.test? && size == "orig" && original_name.present?
+    standard_path = image_url(size).full_filepath(MO.local_image_files)
+
+    # In test environment, if the standard path doesn't exist and this is the
+    # original size, fall back to test fixtures. This allows EXIF extraction
+    # to work in tests without running the full image processing pipeline.
+    if Rails.env.test? &&
+       (size == "orig" || size == :original) &&
+       !File.exist?(standard_path) &&
+       original_name.present?
       fixture_path = Rails.root.join("test/images", original_name)
       return fixture_path.to_s if File.exist?(fixture_path)
     end
 
-    image_url(size).full_filepath(MO.local_image_files)
+    standard_path
   end
 
   # Defines methods for each size. e.g. `{size}_url`
