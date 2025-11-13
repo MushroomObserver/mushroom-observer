@@ -167,6 +167,14 @@ module Report
       add_column!(rows, vals, col)
     end
 
+    def add_field_slips!(rows, col)
+      vals = FieldSlip.joins(:observation).
+             merge(plain_query).
+             select(FieldSlip[:observation_id], FieldSlip[:code]).
+             map { |rec| rec.attributes.values[0..1] }
+      add_column!(rows, vals, col)
+    end
+
     def add_image_ids!(rows, col)
       vals = Image.joins(:observations).
              merge(plain_query).
