@@ -38,10 +38,7 @@ export default class extends Controller {
     // For saved "good" images, the server has already extracted EXIF data
     // from the original files and passed it via camera_info props.
     // We only need to extract EXIF in the browser for "upload" images.
-    if (itemElement.dataset.imageStatus == "good") {
-      itemElement.dataset.initialized = "true";
-      return;
-    }
+    if (itemElement.dataset.imageStatus == "good") return;
 
     // Initialize geocode for uploads
     itemElement.dataset.geocode = "";

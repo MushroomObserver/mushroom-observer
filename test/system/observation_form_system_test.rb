@@ -148,7 +148,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     sleep(0.5)
     # we should have the new type of location_google autocompleter now
     assert_selector(
-      "[data-type='location_google'][data-stimulus='autocompleter-connected']",
+      "[data-type='location_google'][data-autocompleter='connected']",
       wait: 10
     )
     # Place name should now have been filled by Google, no MO locations match
@@ -528,7 +528,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     assert_selector(
-      "[data-type='name'][data-stimulus='autocompleter-connected']"
+      "[data-type='name'][data-autocompleter='connected']"
     )
     fill_in("naming_name", with: "Agaricus campestris")
     assert_field("naming_name", with: "Agaricus campestris")
