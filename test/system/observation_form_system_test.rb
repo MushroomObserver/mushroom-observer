@@ -119,8 +119,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def test_autofill_location_from_geotagged_image
-    # Combined test: First test when no MO location matches (Google autocompleter),
-    # then create a matching location and test that it gets used (location_containing)
+    # Combined test: First test when no MO location matches (Google
+    # autocompleter), then create a matching location and test that it
+    # gets used (location_containing autocompleter)
     setup_image_dirs # in general_extensions
     login!(katrina)
 
@@ -537,7 +538,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     within("#observation_form") { click_commit }
 
-    # Note: The flash message for location creation is commented out in
+    # NOTE: The flash message for location creation is commented out in
     # locationable.rb line 117, so we don't expect it here
     # assert_flash_for_create_location
     assert_selector("body.observations__show")
@@ -633,7 +634,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
-    # Note: Flash message behavior may have changed - commenting out for now
+    # NOTE: Flash message behavior may have changed - commenting out for now
     # assert_flash_for_edit_observation
     assert_edit_observation_is_correct(expected_values_after_edit)
     assert_show_observation_page_has_important_info
@@ -777,13 +778,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # via camera_info props to FormCameraInfo. For "upload" images, wait for
     # JavaScript to extract EXIF from the file.
     if status == "upload"
-      # Wait for EXIF data to be extracted (check for lat value in exif_gps span)
+      # Wait for EXIF data to be extracted (check lat in exif_gps span)
       assert_selector(".exif_lat", text: image_data[:lat].to_s, wait: 15)
     else
       # For "good" images, EXIF should already be present from server
-      # Check for visible or invisible exif_lat (may be hidden in inactive items)
+      # Check for visible/invisible exif_lat (may be hidden if inactive)
       assert_selector(".exif_lat", text: image_data[:lat].to_s,
-                      visible: :all, wait: 5)
+                                   visible: :all, wait: 5)
     end
 
     # Wait for "use exif" button to appear (not d-none)

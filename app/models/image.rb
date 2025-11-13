@@ -404,7 +404,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     # original size, fall back to test fixtures. This allows EXIF extraction
     # to work in tests without running the full image processing pipeline.
     if Rails.env.test? &&
-       (size == "orig" || size == :original) &&
+       ["orig", :original].include?(size) &&
        !File.exist?(standard_path) &&
        original_name.present?
       fixture_path = Rails.root.join("test/images", original_name)
