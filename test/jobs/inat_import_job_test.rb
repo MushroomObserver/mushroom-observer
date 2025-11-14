@@ -475,7 +475,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.one?, "Obs should have one sequence")
 
     email = QueuedEmail.first
-    expected_subject = "#{@user.login} created #{name.text_name}"
+    expected_subject =
+      "#{@user.login} created #{name.user_real_text_name(@user)}"
     assert_equal(
       expected_subject, email&.subject,
       "Failed to create email to Webmaster with subject: `#{expected_subject}`"
