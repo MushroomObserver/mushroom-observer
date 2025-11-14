@@ -11,7 +11,7 @@ module Name::Notify
   def notify_webmaster
     return if skip_notify
 
-    user ||= @current_user || User.admin
+    user = self.user
     QueuedEmail::Webmaster.create_email(
       user,
       subject: "#{user.login} created #{user_real_text_name(user)}",

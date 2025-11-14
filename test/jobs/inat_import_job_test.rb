@@ -440,6 +440,7 @@ class InatImportJobTest < ActiveJob::TestCase
     create_ivars_from_filename("arrhenia_sp_NY02")
 
     stub_inat_interactions
+    QueuedEmail.queue = true
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -472,6 +473,14 @@ class InatImportJobTest < ActiveJob::TestCase
                  proposed_name_notes)
 
     assert(obs.sequences.one?, "Obs should have one sequence")
+
+    email = QueuedEmail.first
+    expected_subject = "#{@user.login} created #{name.text_name}"
+    assert_equal(
+      expected_subject, email&.subject,
+      "Failed to create email to Webmaster with subject: `#{expected_subject}`"
+    )
+    QueuedEmail.queue = false
   end
 
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
