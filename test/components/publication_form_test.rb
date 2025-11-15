@@ -7,7 +7,7 @@ class PublicationFormTest < UnitTestCase
 
   def setup
     @user = users(:rolf)
-    @publication = Publication.new  # New publication for create form
+    @publication = Publication.new # New publication for create form
 
     # Set up controller request context for form URL generation
     controller.request = ActionDispatch::TestRequest.create
@@ -49,11 +49,11 @@ class PublicationFormTest < UnitTestCase
     # ERB version (what the old form would generate)
     erb_html = render_erb_version
 
-    puts "\n\n=== COMPONENT HTML ==="
-    puts component_html
-    puts "\n=== ERB HTML ==="
-    puts erb_html
-    puts "\n==================\n\n"
+    puts("\n\n=== COMPONENT HTML ===")
+    puts(component_html)
+    puts("\n=== ERB HTML ===")
+    puts(erb_html)
+    puts("\n==================\n\n")
 
     # Both should work and contain key elements
     assert(component_html.present?)
@@ -81,9 +81,11 @@ class PublicationFormTest < UnitTestCase
 
   def render_erb_version
     # Simulate what the old ERB partial would generate
-    url = @publication.persisted? ?
-          view_context.publication_path(@publication) :
-          view_context.publications_path
+    url = if @publication.persisted?
+            view_context.publication_path(@publication)
+          else
+            view_context.publications_path
+          end
     view_context.form_with(
       model: @publication,
       url: url,
@@ -137,7 +139,7 @@ class PublicationFormTest < UnitTestCase
         center: true
       )
 
-      fields.join.html_safe
+      fields.safe_join
     end
   end
 end
