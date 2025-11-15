@@ -14,7 +14,7 @@ class DiscardStaleJobsJob < ApplicationJob
     # When a job fails SolidQueue adds an entry to the
     # SolidQueue::FailedExecution table.
     old_failed_executions =
-      # FaildedExecution.created_at is when the job failed.
+      # FailedExecution.created_at is when the job failed.
       SolidQueue::FailedExecution.where(created_at: ...discard_date)
     return if old_failed_executions.none?
 
