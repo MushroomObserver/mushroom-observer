@@ -35,15 +35,15 @@ if valid_names
     end)
     if valid_names.length > 0
       if suggest_corrections
-        concat(render(Components::HelpNote.new(
-          element: :div,
-          content: :form_naming_correct_help.t(button: button_name, name: given_name)
-        )))
+        concat(tag.div(
+          :form_naming_correct_help.t(button: button_name, name: given_name),
+          class: "help-note mr-3"
+        ))
       else
-        concat(render(Components::HelpNote.new(
-          element: :div,
-          content: :form_naming_deprecated_help.t(button: button_name, name: given_name)
-        )))
+        concat(tag.div(
+          :form_naming_deprecated_help.t(button: button_name, name: given_name),
+          class: "help-note mr-3"
+        ))
       end
       concat(tag.div do
         if !suggest_corrections && !parent_deprecated
@@ -59,10 +59,10 @@ if valid_names
         end)
       end)
     else
-      concat(render(Components::HelpNote.new(
-        element: :div,
-        content: :form_naming_not_recognized_help.t(button: button_name)
-      )))
+      concat(tag.div(
+        :form_naming_not_recognized_help.t(button: button_name),
+        class: "help-note mr-3"
+      ))
     end
   end
 
@@ -71,10 +71,10 @@ elsif names&.length == 0
 
   render(Components::Alert.new(level: :danger, id: "name_messages")) do
     concat(tag.div(:form_naming_not_recognized.t(name: given_name)))
-    concat(render(Components::HelpNote.new(
-      element: :div,
-      content: :form_naming_not_recognized_help.t(button: button_name)
-    )))
+    concat(tag.div(
+      :form_naming_not_recognized_help.t(button: button_name),
+      class: "help-note mr-3"
+    ))
   end
 
 elsif names&.length &.> 1
@@ -92,9 +92,8 @@ elsif names&.length &.> 1
         ))
       end
     end)
-    concat(render(Components::HelpNote.new(
-      element: :div, content: :form_naming_multiple_names_help.t
-    )))
+    concat(tag.div(:form_naming_multiple_names_help.t,
+                   class: "help-note mr-3"))
   end
 
 end %>

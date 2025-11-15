@@ -13,15 +13,19 @@ class Components::PublicationForm < Components::ApplicationForm
 
   private
 
+  # Automatically determine action URL based on whether record is persisted
+  def form_action
+    return view_context.publications_path if model.nil? || !model.persisted?
+
+    view_context.publication_path(model)
+  end
+
   def render_full_field
     textarea_field(
       :full,
       rows: 10,
       label: "#{:publication_full.t}:",
-      between: render(Components::HelpNote.new(
-                        element: :span,
-                        content: :publication_full_help.t
-                      ))
+      between: span(class: "help-note mr-3") { :publication_full_help.t }
     )
   end
 

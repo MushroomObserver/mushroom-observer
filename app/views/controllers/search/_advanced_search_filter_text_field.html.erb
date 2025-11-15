@@ -5,10 +5,8 @@ autocompleter = case filter.sym.to_s
                 else
                   filter.sym.to_s
                 end
-between = render(Components::HelpNote.new(
-            element: :span,
-            content: :"advanced_search_filter_#{filter.sym}".t
-          ))
+between = tag.span(:"advanced_search_filter_#{filter.sym}".t,
+                   class: "help-note mr-3")
 autocompleter_field(
   form: f, field: filter.sym, type: autocompleter, label: "#{filter.name.t}:",
   between: between, value: @filter_defaults[filter.sym], separator: " OR "

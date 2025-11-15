@@ -19,10 +19,8 @@
 
   <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
 
-  <% mod_betw = render(Components::HelpNote.new(
-                  element: :span,
-                  content: :advanced_search_result_type_help.t
-                )) %>
+  <% mod_betw = tag.span(:advanced_search_result_type_help.t,
+                         class: "help-note mr-3") %>
   <%= select_with_label(
     form: f, field: :model, label: :advanced_search_result_type.t + ":",
     options: models, between: mod_betw,
@@ -30,34 +28,26 @@
             action: "advanced-search#disableUnusedFilters" }
   ) %>
 
-  <% nam_betw = render(Components::HelpNote.new(
-                  element: :span,
-                  content: :advanced_search_name_help.t
-                )) %>
+  <% nam_betw = tag.span(:advanced_search_name_help.t,
+                         class: "help-note mr-3") %>
   <%= autocompleter_field(form: f, field: :search_name, type: :name,
                           label: "#{:NAME.t}:", between: nam_betw,
                           separator: " OR ") %>
 
-  <% usr_betw = render(Components::HelpNote.new(
-                  element: :span,
-                  content: :advanced_search_observer_help.t
-                )) %>
+  <% usr_betw = tag.span(:advanced_search_observer_help.t,
+                         class: "help-note mr-3") %>
   <%= autocompleter_field(form: f, field: :search_user, type: :user,
                           label: "#{:OBSERVER.t}:", between: usr_betw,
                           separator: " OR ") %>
 
-  <% loc_betw = render(Components::HelpNote.new(
-                  element: :span,
-                  content: :advanced_search_location_help.t
-                )) %>
+  <% loc_betw = tag.span(:advanced_search_location_help.t,
+                         class: "help-note mr-3") %>
   <%= autocompleter_field(form: f, field: :search_where, type: :location,
                           label: "#{:LOCATION.t}:", between: loc_betw,
                           separator: " OR " ) %>
 
-  <% cnt_betw = render(Components::HelpNote.new(
-                  element: :span,
-                  content: :advanced_search_content_help.t
-                )) %>
+  <% cnt_betw = tag.span(:advanced_search_content_help.t,
+                         class: "help-note mr-3") %>
   <% cnt_appd = help_block(:p, :advanced_search_content_notes.t) %>
   <%= text_field_with_label(form: f, field: :search_content,
                             label: :advanced_search_content.t + ":",

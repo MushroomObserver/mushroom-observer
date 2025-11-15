@@ -2,13 +2,8 @@
 
 # Form for creating/editing glossary terms
 class Components::GlossaryTermForm < Components::ApplicationForm
-  def initialize(model, show_locked: false, **)
-    @show_locked = show_locked
-    super(model, **)
-  end
-
   def view_template(&block)
-    render_locked_checkbox if @show_locked
+    render_locked_checkbox if show_locked_field?
     render_name_field
     render_description_field
     yield if block
@@ -16,6 +11,18 @@ class Components::GlossaryTermForm < Components::ApplicationForm
   end
 
   private
+
+  # Automatically determine action URL based on whether record is persisted
+  def form_action
+    return view_context.glossary_terms_path if model.nil? || !model.persisted?
+
+    view_context.glossary_term_path(model)
+  end
+
+  # Show locked checkbox only in admin mode
+  def show_locked_field?
+    view_helper(:in_admin_mode?)
+  end
 
   def render_locked_checkbox
     checkbox_field(:locked, label: :edit_glossary_term_locked.l, class: "mt-3")

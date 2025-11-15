@@ -14,9 +14,72 @@
 #       submit "Sign up"
 #     end
 #   end
+#
+# @example Auto-determining action URL (eliminates _form.html.erb partials)
+#   class LicenseForm < Components::ApplicationForm
+#     def view_template
+#       text_field(:display_name)
+#       submit
+#     end
+#
+#     private
+#
+#     def form_action
+#       model.persisted? ? view_context.license_path(model) : view_context.licenses_path
+#     end
+#   end
+#
+#   # In new.html.erb and edit.html.erb, just render the form directly:
+#   <%= render(Components::LicenseForm.new(@license)) %>
+#
+# @example Accessing view helpers (like in_admin_mode?)
+#   class GlossaryTermForm < Components::ApplicationForm
+#     def view_template
+#       text_field(:name)
+#       checkbox_field(:locked) if show_locked_field?
+#       submit
+#     end
+#
+#     private
+#
+#     def show_locked_field?
+#       view_helper(:in_admin_mode?)
+#     end
+#   end
 # rubocop:disable Metrics/ClassLength
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
+
+  # Override initialize to store whether we need to auto-determine action
+  # Form subclasses can define a private form_action method to customize behavior
+  def initialize(model, action: nil, **options)
+    @auto_determine_action = action.nil? && respond_to?(:form_action, true)
+    super(model, action: action, **options)
+  end
+
+  # Override around_template to set action before rendering if needed
+  def around_template
+    # Determine action now that helpers are available
+    if @auto_determine_action && @action.nil?
+      @action = form_action
+    end
+    super
+  end
+
+  # Access view helpers like in_admin_mode?, current_user, etc.
+  # Delegates to view_context since helpers. is deprecated
+  #
+  # @example
+  #   def show_admin_fields?
+  #     admin_mode?
+  #   end
+  #
+  #   def admin_mode?
+  #     view_helper(:in_admin_mode?)
+  #   end
+  def view_helper(helper_name, *args, **kwargs, &block)
+    view_context.public_send(helper_name, *args, **kwargs, &block)
+  end
 
   # Define slots for field wrappers
   slot :between
@@ -350,7 +413,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     when Symbol
       # :optional or :required shorthand
-      HelpNote(content: "(#{between.l})")
+      span(class: "help-note mr-3") { "(#{between.l})" }
     else
       # Plain text
       plain(between.to_s)
@@ -368,7 +431,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     when Symbol
       # :optional or :required shorthand
-      HelpNote(content: "(#{append.l})")
+      span(class: "help-note mr-3") { "(#{append.l})" }
     else
       # HTML-safe string or plain text
       if append.respond_to?(:html_safe?) && append.html_safe?

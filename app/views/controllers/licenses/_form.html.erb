@@ -1,5 +1,0 @@
-<%
-action_url = @license.persisted? ? license_path(@license) : licenses_path
-%>
-
-<%= render(Components::LicenseForm.new(@license, action: action_url)) %>

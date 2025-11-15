@@ -11,6 +11,13 @@ class Components::LicenseForm < Components::ApplicationForm
 
   private
 
+  # Automatically determine action URL based on whether record is persisted
+  def form_action
+    return view_context.licenses_path if model.nil? || !model.persisted?
+
+    view_context.license_path(model)
+  end
+
   def render_display_name_field
     text_field(:display_name, label: "#{:license_display_name.t}:",
                               data: { autofocus: true },

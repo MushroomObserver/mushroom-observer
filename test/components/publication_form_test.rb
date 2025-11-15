@@ -7,7 +7,7 @@ class PublicationFormTest < UnitTestCase
 
   def setup
     @user = users(:rolf)
-    @publication = publications(:minimal_unknown)
+    @publication = Publication.new  # New publication for create form
 
     # Set up controller request context for form URL generation
     controller.request = ActionDispatch::TestRequest.create
@@ -36,7 +36,8 @@ class PublicationFormTest < UnitTestCase
   def test_form_has_correct_attributes
     form = render_component_form
 
-    assert_includes(form, 'action="/test_form_path"')
+    # Form auto-determines action for new record
+    assert_includes(form, 'action="/publications"')
     assert_includes(form, 'method="post"')
     assert_includes(form, 'id="publication_form"')
   end
@@ -73,7 +74,6 @@ class PublicationFormTest < UnitTestCase
   def render_component_form
     form = Components::PublicationForm.new(
       @publication,
-      action: "/test_form_path",
       id: "publication_form"
     )
     render(form)
@@ -81,9 +81,12 @@ class PublicationFormTest < UnitTestCase
 
   def render_erb_version
     # Simulate what the old ERB partial would generate
+    url = @publication.persisted? ?
+          view_context.publication_path(@publication) :
+          view_context.publications_path
     view_context.form_with(
       model: @publication,
-      url: "/test_form_path",
+      url: url,
       id: "publication_form"
     ) do |f|
       fields = []
@@ -94,10 +97,8 @@ class PublicationFormTest < UnitTestCase
         field: :full,
         rows: 10,
         label: "#{:publication_full.t}:",
-        between: render(Components::HelpNote.new(
-                          element: :span,
-                          content: :publication_full_help.t
-                        ))
+        between: view_context.tag.span(:publication_full_help.t,
+                                       class: "help-note mr-3")
       )
 
       # Link field

@@ -3,6 +3,6 @@ add_new_title(:create_object, :GLOSSARY_TERM)
 add_context_nav(glossary_term_form_new_tabs)
 %>
 
-<%= render("form", button_name: :SAVE.l) do |f| %>
+<%= render(Components::GlossaryTermForm.new(@glossary_term, html: { multipart: true })) do %>
   <%= render(partial: "shared/image_upload_fields") %>
 <% end %>
