@@ -21,7 +21,7 @@ class Inat
       add_inat_sequences
       @observation
     rescue StandardError => e
-      # Remove partially created Observation from the db
+      # Remove incomplete Observation from the db
       @observation&.destroy
       raise(e)
     end
