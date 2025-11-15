@@ -25,7 +25,8 @@
 #     private
 #
 #     def form_action
-#       model.persisted? ? view_context.license_path(model) : view_context.licenses_path
+#       model.persisted? ? view_context.license_path(model) :
+#                          view_context.licenses_path
 #     end
 #   end
 #
@@ -51,18 +52,16 @@ class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
 
   # Override initialize to store whether we need to auto-determine action
-  # Form subclasses can define a private form_action method to customize behavior
-  def initialize(model, action: nil, **options)
+  # Form subclasses can define private form_action to customize behavior
+  def initialize(model, action: nil, **)
     @auto_determine_action = action.nil? && respond_to?(:form_action, true)
-    super(model, action: action, **options)
+    super
   end
 
   # Override around_template to set action before rendering if needed
   def around_template
     # Determine action now that helpers are available
-    if @auto_determine_action && @action.nil?
-      @action = form_action
-    end
+    @action = form_action if @auto_determine_action && @action.nil?
     super
   end
 
@@ -77,8 +76,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   def admin_mode?
   #     view_helper(:in_admin_mode?)
   #   end
-  def view_helper(helper_name, *args, **kwargs, &block)
-    view_context.public_send(helper_name, *args, **kwargs, &block)
+  def view_helper(helper_name, ...)
+    view_context.public_send(helper_name, ...)
   end
 
   # Define slots for field wrappers
