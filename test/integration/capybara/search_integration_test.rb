@@ -98,6 +98,27 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#results", text: projects(:empty_project).title)
   end
 
+  def test_observations_search_form_within_locations
+    california = "California, USA"
+
+    login
+    visit("/observations/search/new")
+    within("#observations_search_form") do |form|
+      assert_selector("#query_observations_within_locations")
+      form.fill_in("query_observations_within_locations", with: california)
+
+      first(:button, type: "submit").click
+    end
+
+    assert_no_selector("#flash_notices")
+    assert_selector("#filters", text: "within locations: #{california}")
+    # Verify observations from California localities appear in results
+    # Spot-check for observations from Burbank, Point Reyes, and Pasadena
+    assert_selector("#results", text: "Burbank, California, USA")
+    assert_selector("#results", text: "Point Reyes National Seashore")
+    assert_selector("#results", text: "Pasadena, California, USA")
+  end
+
   # def test_species_lists_search_form; end
 
   # def test_herbaria_search_form; end

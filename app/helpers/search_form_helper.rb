@@ -194,6 +194,8 @@ module SearchFormHelper
       :name
     when :by_users, :by_editor, :members
       :user
+    when :within_locations
+      :location
     else
       field.to_s.singularize.to_sym
     end

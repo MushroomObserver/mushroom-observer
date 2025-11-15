@@ -36,7 +36,6 @@ export default class extends Controller {
 
     // Must be in jQuery for Bootstrap 3 and 4
     $("#mo_ajax_progress").modal('show');
-    // this.element.setAttribute("data-stimulus", "sending")
     this.element.requestSubmit();
   }
 }

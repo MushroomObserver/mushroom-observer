@@ -87,7 +87,6 @@ module Observations
       assert_response(:success)
       assert_equal(expected, ids[0..last_expected_index],
                    "Exported 1st column incorrect")
-      last_row = rows[last_expected_index].chomp
       o = obs.last
       nm = o.name
       l = o.location
@@ -95,23 +94,25 @@ module Observations
       state =   l.name.split(", ")[-2]
       city =    l.name.split(", ")[-3]
       labels =  o.try(:herbarium_records).map(&:herbarium_label).join(", ")
+      cns = o.collection_numbers.map do |cn|
+        "#{cn.id}\t#{cn.name}\t#{cn.number}"
+      end
+      cn_str = cns.join("\n")
 
       # Hard coded values below come from the actual
       # part of a test failure message.
       # If fixtures change, these may also need to be changed.
-      assert_equal(
-        "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
-        "X,\"#{labels}\"," \
+      expected = "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
+        ",X,\"#{labels}\",\"#{cn_str}\"," \
         "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
         "#{l.id},#{country},#{state},,#{city}," \
         ",,,34.22,34.15,-118.29,-118.37," \
         "#{l.high.to_f.round},#{l.low.to_f.round}," \
         "#{"X" if o.is_collection_location},#{o.thumb_image_id}," \
         "#{o.notes[Observation.other_notes_key]}," \
-        "#{MO.http_domain}/#{o.id}",
-        last_row.iconv("utf-8"),
-        "Exported last row incorrect"
-      )
+        "#{MO.http_domain}/obs/#{o.id}"
+
+      assert(response.body.include?(expected))
 
       post(
         :create,

@@ -11,9 +11,9 @@
 # @example
 #   render Components::FormCameraInfo.new(
 #     img_id: 123,
-#     lat: "45.5231",
-#     lng: "-122.6765",
-#     alt: "100",
+#     lat: 45.5231,  # Can be Float, Integer, or String
+#     lng: -122.6765,
+#     alt: 100,
 #     date: "2024-01-15",
 #     file_name: "IMG_1234.jpg",
 #     file_size: "2.5 MB"
@@ -23,13 +23,23 @@ class Components::FormCameraInfo < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   # Properties
-  prop :img_id, Integer, &:to_i
-  prop :lat, String, default: ""
-  prop :lng, String, default: ""
-  prop :alt, String, default: ""
-  prop :date, String, default: ""
-  prop :file_name, String, default: ""
-  prop :file_size, String, default: ""
+  # All props are nilable to handle cases where data may not be available
+  prop :img_id, _Nilable(String), &:to_s
+  # GPS coordinates can be passed as Float, Integer, or String
+  # Coerce to Float for semantic correctness
+  # (Phlex will convert to string when rendering)
+  prop :lat, _Nilable(_Union(String, Integer, Float)) do |v|
+    v.present? ? v.to_f : nil
+  end
+  prop :lng, _Nilable(_Union(String, Integer, Float)) do |v|
+    v.present? ? v.to_f : nil
+  end
+  prop :alt, _Nilable(_Union(String, Integer, Float)) do |v|
+    v.present? ? v.to_f : nil
+  end
+  prop :date, _Nilable(String), default: ""
+  prop :file_name, _Nilable(String), default: ""
+  prop :file_size, _Nilable(String), default: ""
 
   def view_template
     div(
@@ -92,17 +102,22 @@ class Components::FormCameraInfo < Components::Base
   private
 
   def render_gps_info
-    return span(class: "exif_gps") if @lat.blank? && @lng.blank? && @alt.blank?
-
     span(class: "exif_gps") do
-      first = true
-      [:lat, :lng, :alt].each do |field|
+      # Always render all three fields so JavaScript can find and populate them
+      [:lat, :lng, :alt].each_with_index do |field, index|
         value = instance_variable_get("@#{field}")
-        next if value.blank?
+        has_value = value.present?
 
-        plain(", ") unless first
-        first = false
-        render_gps_part(field, value)
+        # Wrap each field so we can hide it when empty
+        wrapper_class = class_names("exif_#{field}_wrapper",
+                                    "d-none": !has_value)
+
+        span(class: wrapper_class) do
+          # Add comma before non-first fields
+          plain(", ") if index.positive?
+
+          render_gps_part(field, value)
+        end
       end
     end
   end

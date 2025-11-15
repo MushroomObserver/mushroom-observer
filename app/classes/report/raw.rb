@@ -10,8 +10,10 @@ module Report
         user_login
         user_name
         collection_date
+        field_slip
         has_specimen
         original_label
+        collection_numbers
         consensus_name_id
         consensus_name
         consensus_author
@@ -45,8 +47,10 @@ module Report
         row.user_login,
         row.user_name,
         row.obs_when,
-        row.obs_specimen,
         row.val(1),
+        row.obs_specimen,
+        row.val(2),
+        row.val(3),
         row.name_id,
         row.name_text_name,
         row.name_author,
@@ -74,7 +78,9 @@ module Report
     end
 
     def extend_data!(rows)
-      add_herbarium_labels!(rows, 1)
+      add_field_slips!(rows, 1)
+      add_herbarium_labels!(rows, 2)
+      add_collector_ids!(rows, 3)
     end
 
     def sort_after(rows)
