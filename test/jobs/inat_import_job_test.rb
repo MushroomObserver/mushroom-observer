@@ -653,6 +653,61 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to log importing of iNat #{last_id}")
   end
 
+  # Prove that import continues with subsequent observations
+  # when an error occurs during import of one observation
+  def test_import_multiple_continues_after_error
+    create_ivars_from_filename("listed_ids")
+
+    first_id = @parsed_results.first[:id]
+    last_id = @parsed_results.last[:id]
+
+    # override ivar because this test wants to import multiple observations
+    @inat_import = create_inat_import(inat_ids: "#{first_id},#{last_id}",
+                                      inat_username: "anything")
+    # update the tracker's inat_import accordingly
+    InatImportJobTracker.update(inat_import: @inat_import.id)
+
+    stub_inat_interactions
+    # Claude's suggestion for stubbing a method to raise an error during the
+    # first import but not the second
+    # Stub Inat::Obs#notes to raise an error for the first observation only
+    # This method is called during MoObservationBuilder,
+    # which has error handling
+    original_notes_method = Inat::Obs.instance_method(:notes)
+    Inat::Obs.class_eval do
+      define_method(:notes) do
+        if self[:id] == first_id
+          raise(StandardError.new("Simulated error in Inat::Obs#notes"))
+        end
+
+        original_notes_method.bind_call(self)
+      end
+    end
+
+    # The import should create only the second observation (last_id)
+    # because the first one (first_id) will fail
+    assert_difference("Observation.count", 1,
+                      "Should still create the second observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    # Assert that the job logged the error for the first observation
+    @inat_import.reload
+    assert_match(/Simulated error in Inat::Obs#notes/,
+                 @inat_import.response_errors,
+                 "Failed to log error for first observation")
+
+    # Assert that the second observation was still imported
+    log_content = Rails.root.join("log/job.log").read
+    assert_match(/Imported iNat #{last_id} as MO \d+/, log_content,
+                 "Failed to import second observation after error in first")
+
+    # Clean up the stubbed method - restore original
+    Inat::Obs.class_eval do
+      define_method(:notes, original_notes_method)
+    end
+  end
+
   # Prove that "Import all my iNat observations imports" multiple obsservations
   # NOTE: It would be complicated to prove that it imports multiple pages.
   def test_import_all
