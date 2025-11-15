@@ -11,10 +11,10 @@ class DiscardStaleJobsJob < ApplicationJob
   end
 
   def discard_stale_failed_jobs(discard_date)
-    # Solid Queue does not have a failed or failed_at column.
-    # Instead it tracks failed jobs using the finished_at column
-    # and a related failed executions table
+    # When a job fails SolidQueue adds an entry to the
+    # SolidQueue::FailedExecution table.
     old_failed_executions =
+      # FaildedExecution.created_at is when the job failed.
       SolidQueue::FailedExecution.where(created_at: ...discard_date)
     return if old_failed_executions.none?
 
@@ -27,7 +27,9 @@ class DiscardStaleJobsJob < ApplicationJob
     end
 
     discarded = old_failed_count - SolidQueue::FailedExecution.count
-    log("Discarded #{discarded} jobs which failed before #{discard_date}")
+    log(
+      "Removed #{discarded} FailedExecutions failing before #{discard_date}"
+    )
   end
 
   def discard_stale_finished_jobs
