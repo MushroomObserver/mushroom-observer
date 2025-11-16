@@ -5,20 +5,8 @@ require "test_helper"
 class QRReaderFormTest < UnitTestCase
   include ComponentTestHelper
 
-  # Test model that includes necessary ActiveModel modules
-  class TestQRModel
-    include ActiveModel::Model
-    include ActiveModel::Attributes
-
-    attribute :qr_code, :string
-
-    def persisted?
-      false
-    end
-  end
-
   def setup
-    @model = TestQRModel.new
+    @model = FieldSlip.new
     controller.request = ActionDispatch::TestRequest.create
   end
 
