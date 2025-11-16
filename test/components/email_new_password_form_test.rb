@@ -39,26 +39,6 @@ class EmailNewPasswordFormTest < UnitTestCase
     assert_includes(form, 'method="post"')
   end
 
-  def test_component_vs_erb_html
-    skip("HTML comparison - enable puts statements to see output")
-
-    # Component version
-    component_html = render_form
-
-    # ERB version (what the old form would generate)
-    erb_html = render_erb_version
-
-    # puts "\n\n=== COMPONENT HTML ==="
-    # puts component_html
-    # puts "\n=== ERB HTML ==="
-    # puts erb_html
-    # puts "\n==================\n\n"
-
-    # Both should work, but HTML may differ slightly
-    assert(component_html.present?)
-    assert(erb_html.present?)
-  end
-
   private
 
   def render_form
@@ -68,23 +48,5 @@ class EmailNewPasswordFormTest < UnitTestCase
       id: "account_email_new_password_form"
     )
     render(form)
-  end
-
-  def render_erb_version
-    view_context.form_with(
-      scope: :new_user,
-      model: @user,
-      url: "/test_form_path",
-      id: "account_email_new_password_form"
-    ) do |f|
-      view_context.text_field_with_label(
-        form: f,
-        field: :login,
-        label: "#{:login_user.t}:",
-        class: "mt-3",
-        data: { autofocus: true }
-      ) +
-        view_context.submit_button(form: f, button: :SEND.l, center: true)
-    end
   end
 end

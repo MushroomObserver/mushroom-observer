@@ -5,21 +5,8 @@ require "test_helper"
 class ProjectAdminRequestFormTest < UnitTestCase
   include ComponentTestHelper
 
-  # Test model that includes necessary ActiveModel modules
-  class TestEmail
-    include ActiveModel::Model
-    include ActiveModel::Attributes
-
-    attribute :subject, :string
-    attribute :content, :string
-
-    def persisted?
-      false
-    end
-  end
-
   def setup
-    @model = TestEmail.new
+    @model = FormObject::ProjectAdminRequest.new
     controller.request = ActionDispatch::TestRequest.create
   end
 

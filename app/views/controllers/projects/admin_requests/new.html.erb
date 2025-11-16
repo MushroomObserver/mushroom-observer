@@ -1,20 +1,9 @@
 <%
   add_page_title(:admin_request_title.t(title: @project.title))
-
-  # Simple form object for admin request
-  form_object = Struct.new(:subject, :content, keyword_init: true) do
-    def persisted?
-      false
-    end
-
-    def model_name
-      ActiveModel::Name.new(self.class, nil, "email")
-    end
-  end.new(subject: "", content: "")
 %>
 
 <%= render(Components::ProjectAdminRequestForm.new(
-      form_object,
+      FormObject::ProjectAdminRequest.new,
       action: url_for(controller: "/projects/admin_requests",
                       action: :create,
                       project_id: @project.id),

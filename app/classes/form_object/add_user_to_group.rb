@@ -28,8 +28,8 @@ class FormObject::AddUserToGroup
 
     group.users << user
     true
-  rescue StandardError
-    errors.add(:base, :runtime_error.t)
+  rescue StandardError => e
+    errors.add(:base, "An error occurred: #{e.message}")
     false
   end
 

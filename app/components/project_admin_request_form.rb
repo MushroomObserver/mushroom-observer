@@ -3,7 +3,7 @@
 # Form for requesting project admin access
 class Components::ProjectAdminRequestForm < Components::ApplicationForm
   def view_template
-    render_note
+    raw(:admin_request_note.tp) # rubocop:disable Rails/OutputSafety
     render_subject_field
     render_content_field
     submit(:SEND.l, center: true)
@@ -15,10 +15,6 @@ class Components::ProjectAdminRequestForm < Components::ApplicationForm
   end
 
   private
-
-  def render_note
-    :admin_request_note.tp
-  end
 
   def render_subject_field
     text_field(:subject, label: "#{:request_subject.t}:",

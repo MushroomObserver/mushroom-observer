@@ -7,21 +7,8 @@ add_context_nav(herbaria_curator_request_tabs(herbarium: @herbarium))
 
 <%= :show_herbarium_curator_help.tp %>
 
-<%
-# Simple form object for curator request
-form_object = Struct.new(:notes, keyword_init: true) do
-  def persisted?
-    false
-  end
-
-  def model_name
-    ActiveModel::Name.new(self.class, nil, "herbarium_curator_request")
-  end
-end.new(notes: "")
-%>
-
 <%= render(Components::HerbariumCuratorRequestForm.new(
-      form_object,
+      FormObject::HerbariumCuratorRequest.new,
       herbarium_name: @herbarium.name.t,
       action: herbaria_curator_requests_path(id: @herbarium, back: @back,
                                               q: q_param),

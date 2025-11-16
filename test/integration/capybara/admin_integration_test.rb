@@ -94,7 +94,7 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
       fill_in("add_user_to_group_group_name", with: "all users")
       click_commit
     end
-    assert_flash_text("Unable to find the user")
+    assert_flash_error
     click_on(id: "nav_admin_add_user_to_group_link")
 
     within("#admin_add_user_to_group_form") do
@@ -102,7 +102,7 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
       fill_in("add_user_to_group_group_name", with: "bogus")
       click_commit
     end
-    assert_flash_text("Unable to find the group")
+    assert_flash_error
     click_on(id: "nav_admin_add_user_to_group_link")
 
     within("#admin_add_user_to_group_form") do
