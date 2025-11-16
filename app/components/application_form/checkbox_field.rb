@@ -17,10 +17,17 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template
-      render_with_wrapper do
-        # Inherits proper checkbox behavior from Superform
-        # (hidden input + checked)
+      label_option = wrapper_options[:label]
+
+      if label_option == false
+        # Render checkbox without label wrapper
         super
+      else
+        render_with_wrapper do
+          # Inherits proper checkbox behavior from Superform
+          # (hidden input + checked)
+          super
+        end
       end
     end
 
@@ -28,7 +35,12 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # rubocop:disable Metrics/AbcSize
     def render_with_wrapper
-      label_text = wrapper_options[:label] || field.key.to_s.humanize
+      label_option = wrapper_options[:label]
+      label_text = if label_option.is_a?(String)
+                     label_option
+                   else
+                     field.key.to_s.humanize
+                   end
       class_name = wrapper_options[:class_name]
 
       div(class: checkbox_class(class_name)) do

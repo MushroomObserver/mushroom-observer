@@ -29,12 +29,18 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # rubocop:disable Metrics/AbcSize
     def render_with_wrapper
-      label_text = wrapper_options[:label] || field.key.to_s.humanize
+      label_option = wrapper_options[:label]
+      show_label = label_option != false
+      label_text = if label_option.is_a?(String)
+                     label_option
+                   else
+                     field.key.to_s.humanize
+                   end
       inline = wrapper_options[:inline] || false
       class_name = wrapper_options[:class_name]
 
       div(class: form_group_class("form-group", inline, class_name)) do
-        render_label_row(label_text, inline)
+        render_label_row(label_text, inline) if show_label
         yield
         render_help_after_field
         render(append_slot) if append_slot

@@ -96,7 +96,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Text field with label and Bootstrap form-group wrapper
   # @param field_name [Symbol] the field name
   # @param options [Hash] all field and wrapper options
-  # @option options [String] :label label text (optional, inferred from field)
+  # @option options [String,false] :label label text (optional, inferred from
+  #   field name), or false to omit label
   # @option options [String] :help help text displayed below field
   # @option options [Boolean] :prefs auto-generate label from prefs translation
   # @option options [Boolean] :inline render label and field inline

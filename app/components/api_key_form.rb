@@ -19,14 +19,14 @@ class Components::APIKeyForm < Components::ApplicationForm
   private
 
   def render_table_layout
-    label(for: "new_api_key_notes") { :account_api_keys_notes_label.t }
+    label(for: field(:notes).dom.id) { :account_api_keys_notes_label.t }
 
     div(class: "input-group") do
       render_cancel_button if @cancel_target
 
       render(field(:notes).text(
+               wrapper_options: { label: false },
                size: 40,
-               id: "new_api_key_notes",
                class: "form-control border-none"
              ))
 
@@ -50,8 +50,7 @@ class Components::APIKeyForm < Components::ApplicationForm
   end
 
   def render_standalone_layout
-    text_field(:notes, label: :account_api_keys_notes_label.t,
-                       class: "mt-3", id: "new_api_key_notes")
+    text_field(:notes, label: :account_api_keys_notes_label.t, class: "mt-3")
 
     submit(submit_text, center: true, submits_with: submits_text,
                         id: "create_button")
