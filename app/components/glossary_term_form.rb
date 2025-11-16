@@ -3,7 +3,7 @@
 # Form for creating/editing glossary terms
 class Components::GlossaryTermForm < Components::ApplicationForm
   def view_template(&block)
-    render_locked_checkbox if show_locked_field?
+    render_locked_checkbox if in_admin_mode?
     render_name_field
     render_description_field
     yield if block
@@ -17,11 +17,6 @@ class Components::GlossaryTermForm < Components::ApplicationForm
     return view_context.glossary_terms_path if model.nil? || !model.persisted?
 
     view_context.glossary_term_path(model)
-  end
-
-  # Show locked checkbox only in admin mode
-  def show_locked_field?
-    view_helper(:in_admin_mode?)
   end
 
   def render_locked_checkbox

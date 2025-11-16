@@ -37,14 +37,8 @@
 #   class GlossaryTermForm < Components::ApplicationForm
 #     def view_template
 #       text_field(:name)
-#       checkbox_field(:locked) if show_locked_field?
+#       checkbox_field(:locked) if in_admin_mode?
 #       submit
-#     end
-#
-#     private
-#
-#     def show_locked_field?
-#       view_helper(:in_admin_mode?)
 #     end
 #   end
 class Components::ApplicationForm < Superform::Rails::Form
@@ -64,20 +58,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     super
   end
 
-  # Access view helpers like in_admin_mode?, current_user, etc.
-  # Delegates to view_context since helpers. is deprecated
-  #
-  # @example
-  #   def show_admin_fields?
-  #     admin_mode?
-  #   end
-  #
-  #   def admin_mode?
-  #     view_helper(:in_admin_mode?)
-  #   end
-  def view_helper(helper_name, ...)
-    view_context.public_send(helper_name, ...)
-  end
+  # Register view helpers that forms might need
+  # Use register_value_helper for helpers that return values (not HTML)
+  register_value_helper :in_admin_mode?
+  register_value_helper :current_user
 
   # Wrapper option keys that should not be passed to the field itself
   WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :class_name, :addon,
