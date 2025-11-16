@@ -926,17 +926,35 @@ class InatImportJobTest < ActiveJob::TestCase
                 body: JSON.generate({ error: error, status: status }),
                 headers: {})
 
+    # Save the observation count before the job runs
+    obs_count_before = Observation.count
+
     InatImportJob.perform_now(@inat_import)
+
+    # The observation should have been destroyed after the error
+    assert_equal(obs_count_before, Observation.count,
+                 "Observation should be destroyed after error")
 
     errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
     assert_equal(status, errors[:error], "Incorrect error status")
-    assert_equal(errors[:payload],
-                 { observation_field_value: {
-                   observation_id: @inat_import.inat_ids.to_i,
-                   observation_field_id: MO_URL_OBSERVATION_FIELD_ID,
-                   value: "#{MO.http_domain}/#{Observation.last.id}"
-                 } }, "Incorrect error payload")
+
+    # The payload should contain the observation_field_value details
+    payload = errors[:payload]
+    assert(payload.is_a?(Hash), "Error payload should be a hash")
+    assert_equal(@inat_import.inat_ids.to_i,
+                 payload[:observation_field_value][:observation_id],
+                 "Incorrect observation_id in error payload")
+    assert_equal(MO_URL_OBSERVATION_FIELD_ID,
+                 payload[:observation_field_value][:observation_field_id],
+                 "Incorrect observation_field_id in error payload")
+
+    log_content = Rails.root.join("log/job.log").read
+    assert_no_match(/Imported iNat #{@parsed_results.first[:id]}/,
+                    log_content,
+                    "Should not log import success when error occurs")
   end
+
+  ########## Utilities
 
   ########## Utilities
 

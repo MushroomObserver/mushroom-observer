@@ -62,10 +62,14 @@ class Inat
     end
 
     def finalize_import
-      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
       update_inat_observation
+      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
       increment_imported_counts
       update_timings
+    rescue StandardError
+      # Error already logged by the method that raised it
+      @observation&.destroy
+      nil
     end
 
     def update_inat_observation
@@ -92,7 +96,7 @@ class Inat
     rescue ::RestClient::ExceptionWithResponse => e
       error = { error: e.http_code, payload: payload }.to_json
       log_with_response_error(error)
-      e.response
+      raise(e)
     end
 
     def increment_imported_counts
