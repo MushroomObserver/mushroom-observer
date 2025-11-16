@@ -41,9 +41,9 @@ class Components::ApplicationForm < Superform::Rails::Form
                    else
                      field.key.to_s.humanize
                    end
-      class_name = wrapper_options[:class_name]
+      wrap_class = wrapper_options[:wrap_class]
 
-      div(class: checkbox_class(class_name)) do
+      div(class: checkbox_class(wrap_class)) do
         label(for: field.dom.id) do
           yield
           plain(" #{label_text}")
@@ -56,10 +56,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
     # rubocop:enable Metrics/AbcSize
 
-    def checkbox_class(class_name)
-      wrap_class = "checkbox"
-      wrap_class += " #{class_name}" if class_name.present?
-      wrap_class
+    def checkbox_class(wrap_class)
+      classes = "checkbox"
+      classes += " #{wrap_class}" if wrap_class.present?
+      classes
     end
   end
 end

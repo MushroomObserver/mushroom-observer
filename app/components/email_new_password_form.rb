@@ -3,7 +3,7 @@
 # Form for requesting a new password via email
 class Components::EmailNewPasswordForm < Components::ApplicationForm
   def view_template
-    text_field(:login, label: "#{:login_user.t}:", class_name: "mt-3",
+    text_field(:login, label: "#{:login_user.t}:", wrap_class: "mt-3",
                        data: { autofocus: true })
 
     submit(:SEND.l, center: true)

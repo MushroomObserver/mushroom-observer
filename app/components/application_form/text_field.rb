@@ -42,9 +42,9 @@ class Components::ApplicationForm < Superform::Rails::Form
                      field.key.to_s.humanize
                    end
       inline = wrapper_options[:inline] || false
-      class_name = wrapper_options[:class_name]
+      wrap_class = wrapper_options[:wrap_class]
 
-      div(class: form_group_class("form-group", inline, class_name)) do
+      div(class: form_group_class("form-group", inline, wrap_class)) do
         render_label_row(label_text, inline) if show_label
         render_field_input(&field_input)
         render_help_after_field
@@ -90,11 +90,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    def form_group_class(base, inline, class_name)
-      wrap_class = base
-      wrap_class += " form-inline" if inline && base == "form-group"
-      wrap_class += " #{class_name}" if class_name.present?
-      wrap_class
+    def form_group_class(base, inline, wrap_class)
+      classes = base
+      classes += " form-inline" if inline && base == "form-group"
+      classes += " #{wrap_class}" if wrap_class.present?
+      classes
     end
   end
 end

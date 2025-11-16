@@ -50,7 +50,8 @@ class Components::APIKeyForm < Components::ApplicationForm
   end
 
   def render_standalone_layout
-    text_field(:notes, label: :account_api_keys_notes_label.t, class: "mt-3")
+    text_field(:notes, label: :account_api_keys_notes_label.t,
+                       wrap_class: "mt-3")
 
     submit(submit_text, center: true, submits_with: submits_text,
                         id: "create_button")

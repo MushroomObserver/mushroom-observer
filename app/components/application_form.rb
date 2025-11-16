@@ -64,7 +64,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   register_value_helper :current_user
 
   # Wrapper option keys that should not be passed to the field itself
-  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :class_name, :addon,
+  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class, :addon,
                      :button, :button_data, :monospace].freeze
 
   # Override the Field class to use our custom components
@@ -101,7 +101,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @option options [String] :help help text displayed below field
   # @option options [Boolean] :prefs auto-generate label from prefs translation
   # @option options [Boolean] :inline render label and field inline
-  # @option options [String] :class_name additional CSS classes for wrapper
+  # @option options [String] :wrap_class CSS classes for wrapper div
+  # @option options [String] :class CSS classes for input element
   # @option options [String] :addon text addon (static, not interactive)
   # @option options [String] :button button addon (interactive)
   # @option options [Hash] :button_data data attributes for button addon

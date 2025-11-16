@@ -20,7 +20,8 @@ class Components::GlossaryTermForm < Components::ApplicationForm
   end
 
   def render_locked_checkbox
-    checkbox_field(:locked, label: :edit_glossary_term_locked.l, class: "mt-3")
+    checkbox_field(:locked, label: :edit_glossary_term_locked.l,
+                            wrap_class: "mt-3")
   end
 
   def render_name_field

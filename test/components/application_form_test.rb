@@ -93,6 +93,15 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, 'type="checkbox"')
   end
 
+  def test_checkbox_field_applies_wrap_class_to_wrapper
+    form = render_form do
+      checkbox_field(:placeholder, label: "Test", wrap_class: "mt-3")
+    end
+
+    # wrap_class should be on wrapper div, not the input
+    assert_match(/<div class="checkbox mt-3">/, form)
+  end
+
   # Select field tests
   def test_select_field_renders_with_basic_options
     options = [["Option 1", "1"], ["Option 2", "2"], ["Option 3", "3"]]
