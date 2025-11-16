@@ -464,7 +464,14 @@ class FieldSlipsControllerTest < FunctionalTestCase
     login(mary.login)
     get(:edit, params: { id: fs.id })
     assert_response(:success)
-    obs = Observation.last
+    # Create a new observation for this test instead of using Observation.last
+    # to avoid deadlocks with other tests in the suite
+    obs = Observation.create!(
+      user: mary,
+      when: Time.zone.now,
+      where: "Test Location",
+      name: names(:fungi)
+    )
     fs.observation = obs
     fs.save!
     assert_equal(obs.user, fs.user)
