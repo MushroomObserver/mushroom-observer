@@ -1,17 +1,7 @@
-<%
-add_page_title(:add_user_to_group_title.t)
-
-# Simple form object for add user to group
-# Note: No model_name - creates bare field names without prefix
-form_object = Struct.new(:user_name, :group_name, keyword_init: true) do
-  def persisted?
-    false
-  end
-end.new(user_name: "", group_name: "")
-%>
+<% add_page_title(:add_user_to_group_title.t) %>
 
 <%= render(Components::AddUserToGroupForm.new(
-      form_object,
+      FormObject::AddUserToGroup.new,
       action: admin_add_user_to_group_path,
       id: "admin_add_user_to_group_form"
     )) %>

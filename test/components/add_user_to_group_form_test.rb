@@ -6,7 +6,10 @@ class AddUserToGroupFormTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
-    @model = Struct.new(:user_name, :group_name).new("test_user", "test_group")
+    @model = FormObject::AddUserToGroup.new(
+      user_name: "test_user",
+      group_name: "test_group"
+    )
     controller.request = ActionDispatch::TestRequest.create
   end
 
@@ -14,7 +17,7 @@ class AddUserToGroupFormTest < UnitTestCase
     form = render_form
 
     assert_includes(form, :add_user_to_group_user.t)
-    assert_includes(form, 'name="user_name"')
+    assert_includes(form, 'name="add_user_to_group[user_name]"')
     assert_includes(form, 'value="test_user"')
     assert_includes(form, "data-autofocus")
   end
@@ -23,7 +26,7 @@ class AddUserToGroupFormTest < UnitTestCase
     form = render_form
 
     assert_includes(form, :add_user_to_group_group.t)
-    assert_includes(form, 'name="group_name"')
+    assert_includes(form, 'name="add_user_to_group[group_name]"')
     assert_includes(form, 'value="test_group"')
   end
 
