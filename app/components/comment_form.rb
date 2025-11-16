@@ -2,6 +2,20 @@
 
 # Form for creating/editing comments
 class Components::CommentForm < Components::ApplicationForm
+  def initialize(model, local: false, **)
+    @local = local
+    super(model, id: "comment_form", **)
+  end
+
+  def around_template
+    # Set turbo data attribute only when not local
+    unless @local
+      @attributes[:data] ||= {}
+      @attributes[:data][:turbo] = true
+    end
+    super
+  end
+
   def view_template
     render_summary_field
     render_comment_field
@@ -9,6 +23,14 @@ class Components::CommentForm < Components::ApplicationForm
   end
 
   private
+
+  def form_action
+    if @model.persisted?
+      comment_path(id: @model.id)
+    else
+      comments_path(target: @model.target_id, type: @model.target_type)
+    end
+  end
 
   def render_summary_field
     text_field(:summary, label: "#{:form_comments_summary.t}:",

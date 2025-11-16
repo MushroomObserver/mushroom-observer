@@ -4,6 +4,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap checkbox field component with checkbox wrapper and slots
   class CheckboxField < Superform::Rails::Components::Checkbox
     include Phlex::Slotable
+    include FieldWithHelp
 
     slot :between
     slot :append
@@ -34,8 +35,10 @@ class Components::ApplicationForm < Superform::Rails::Form
         label(for: field.dom.id) do
           yield
           plain(" #{label_text}")
+          render_help_in_label_row
           render(between_slot) if between_slot
         end
+        render_help_after_field
         render(append_slot) if append_slot
       end
     end

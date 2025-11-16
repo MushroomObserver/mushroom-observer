@@ -22,29 +22,21 @@ class APIKeyFormTest < UnitTestCase
   end
 
   def test_renders_table_layout_with_cancel_button
-    cancel_button_html = view_context.tag.span(
-      view_context.tag.button("Cancel", class: "btn btn-default"),
-      class: "input-group-btn"
-    )
-
-    form = render_form_with_cancel(cancel_button_html)
+    form = render_form_with_cancel
 
     assert_includes(form, "input-group")
-    assert_includes(form, "Cancel")
+    assert_includes(form, :CANCEL.l)
     assert_includes(form, "input-group-btn")
     assert_includes(form, 'id="new_api_key_notes"')
+    assert_includes(form, 'data-toggle="collapse"')
   end
 
-  def test_cancel_button_renders_when_provided
-    cancel_button_html = view_context.tag.span(
-      "CANCEL BUTTON",
-      class: "input-group-btn test-cancel"
-    )
+  def test_cancel_button_has_correct_data_attributes
+    form = render_form_with_cancel
 
-    form = render_form_with_cancel(cancel_button_html)
-
-    assert_includes(form, "CANCEL BUTTON")
-    assert_includes(form, "test-cancel")
+    assert_includes(form, 'data-target="#test_target"')
+    assert_includes(form, 'data-parent="#test_parent"')
+    assert_includes(form, 'aria-controls="test_target"')
   end
 
   def test_cancel_button_not_rendered_when_nil
@@ -64,12 +56,13 @@ class APIKeyFormTest < UnitTestCase
     render(form)
   end
 
-  def render_form_with_cancel(cancel_button)
+  def render_form_with_cancel
     form = Components::APIKeyForm.new(
       @api_key,
       action: "/test_api_keys_path",
       id: "new_api_key_form",
-      cancel_button: cancel_button
+      cancel_target: "test_target",
+      cancel_parent: "test_parent"
     )
     render(form)
   end

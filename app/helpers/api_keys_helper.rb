@@ -175,23 +175,13 @@ module APIKeysHelper
   def api_keys_new_form_container
     tag.div(class: "panel-collapse collapse no-transition",
             id: "new_key_form_container") do
-      cancel_button_html = tag.span(class: "input-group-btn") do
-        tag.button(link_icon(:cancel, title: :CANCEL.l),
-                   type: :button,
-                   class: "btn btn-default",
-                   aria: { expanded: "true",
-                           controls: "new_key_button_container" },
-                   data: { toggle: "collapse",
-                           target: "#new_key_button_container",
-                           parent: "#new_key_row" })
-      end
-
       render(::Components::APIKeyForm.new(
                APIKey.new,
                action: account_api_keys_path,
                id: "new_api_key_form",
                data: { turbo: true },
-               cancel_button: cancel_button_html
+               cancel_target: "new_key_button_container",
+               cancel_parent: "new_key_row"
              ))
     end
   end

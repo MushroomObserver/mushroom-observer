@@ -5,6 +5,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   class SelectField < Superform::Rails::Components::Select
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
+    include FieldWithHelp
 
     slot :between
     slot :append
@@ -43,6 +44,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       div(class: form_group_class("form-group", inline, class_name)) do
         render_label_row(label_text, inline)
         yield
+        render_help_after_field
         render(append_slot) if append_slot
       end
     end
@@ -54,6 +56,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       div(class: "#{display} justify-content-between") do
         div do
           label(for: field.dom.id, class: "mr-3") { label_text }
+          render_help_in_label_row
           render(between_slot) if between_slot
         end
       end

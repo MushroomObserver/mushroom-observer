@@ -45,9 +45,12 @@ class ImageVoteAnonymityFormTest < UnitTestCase
   private
 
   def render_form
-    form = Components::ImageVoteAnonymityForm.new(
+    form_object = FormObject::ImageVoteAnonymity.new(
       num_anonymous: 5,
-      num_public: 10,
+      num_public: 10
+    )
+    form = Components::ImageVoteAnonymityForm.new(
+      form_object,
       action: "/test_action"
     )
     render(form)

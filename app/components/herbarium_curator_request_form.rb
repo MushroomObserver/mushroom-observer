@@ -15,8 +15,6 @@ class Components::HerbariumCuratorRequestForm < Components::ApplicationForm
     textarea_field(:notes, label: "#{:NOTES.l}:", rows: 10,
                            data: { autofocus: true })
 
-    submit(:SEND.l, class: "btn btn-default center-block my-3",
-                    data: { turbo_submits_with: :SUBMITTING.l,
-                            disable_with: :SEND.l })
+    submit(:SEND.l, center: true)
   end
 end

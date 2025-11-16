@@ -1,13 +1,9 @@
-<%
-add_page_title(:image_vote_anonymity_title.t)
-form_action = {
-  controller: "/images/votes/anonymity",
-  action: :update
-}
-%>
+<% add_page_title(:image_vote_anonymity_title.t) %>
 
 <%= render(Components::ImageVoteAnonymityForm.new(
-      num_anonymous: @num_anonymous,
-      num_public: @num_public,
-      action: url_for(form_action)
+      FormObject::ImageVoteAnonymity.new(
+        num_anonymous: @num_anonymous,
+        num_public: @num_public
+      ),
+      action: images_votes_anonymity_path
     )) %>
