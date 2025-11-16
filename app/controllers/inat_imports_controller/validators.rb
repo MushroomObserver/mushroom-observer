@@ -7,8 +7,7 @@ module InatImportsController::Validators
 
   def params_valid?
     import_adequately_constrained? &&
-      imports_valid? &&
-      consented?
+      imports_valid?
   end
 
   # See InatImport.adequate_constraints?
@@ -82,8 +81,9 @@ module InatImportsController::Validators
     params[:inat_ids].delete(" ").split(",").map(&:to_i)
   end
 
+  # Were any listed iNat IDs "mirrored" to iNat by Pulk's `mirror` script?
   def unmirrored?
-    return true if importing_all? # cannot test check this if importing all
+    return true if importing_all? # cannot check this if importing all
 
     conditions = inat_id_list.map do |inat_id|
       Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
@@ -115,13 +115,6 @@ module InatImportsController::Validators
     end
 
     flash_warning(:inat_importing_all_anothers.t)
-    false
-  end
-
-  def consented?
-    return true if params[:consent] == "1"
-
-    flash_warning(:inat_consent_required.t)
     false
   end
 end
