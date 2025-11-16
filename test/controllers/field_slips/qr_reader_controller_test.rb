@@ -13,7 +13,7 @@ module FieldSlips
     def test_create
       login
       code = "NEW-1234"
-      post(:create, params: { field_slip: { code: code } })
+      post(:create, params: { field_slip: { code: } })
       assert_redirected_to("#{MO.http_domain}/qr/#{code}")
     end
 
@@ -29,7 +29,7 @@ module FieldSlips
     def test_create_bad_url
       login
       code = "http://realbad.com"
-      post(:create, params: { field_slip: { code: code } })
+      post(:create, params: { field_slip: { code: } })
       assert_redirected_to(field_slips_qr_reader_new_path)
     end
   end
