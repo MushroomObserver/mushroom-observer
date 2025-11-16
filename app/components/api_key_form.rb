@@ -21,9 +21,7 @@ class Components::APIKeyForm < Components::ApplicationForm
     label(for: "new_api_key_notes") { :account_api_keys_notes_label.t }
 
     div(class: "input-group") do
-      # rubocop:disable Lint/Void
-      @cancel_button
-      # rubocop:enable Lint/Void
+      render(@cancel_button) if @cancel_button.present?
 
       render(field(:notes).text(
                size: 40,

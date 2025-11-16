@@ -3,7 +3,7 @@
 # Form for requesting project admin access
 class Components::ProjectAdminRequestForm < Components::ApplicationForm
   def view_template
-    :admin_request_note.tp
+    render(:admin_request_note.tp)
 
     text_field(:subject, label: "#{:request_subject.t}:",
                          data: { autofocus: true })

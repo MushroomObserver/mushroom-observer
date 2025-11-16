@@ -25,38 +25,12 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, 'type="text"')
   end
 
-  def test_text_field_with_help_text
-    form = render_form do
-      text_field(:name, label: "Name", help: "Enter collection name")
-    end
-
-    assert_includes(form, "Name")
-    assert_includes(form, "info-collapse-trigger")
-    assert_includes(form, "Enter collection name")
-  end
-
   def test_text_field_with_inline_option
     form = render_form do
       text_field(:name, label: "Name", inline: true)
     end
 
     assert_includes(form, "form-inline")
-  end
-
-  def test_text_field_with_between_content
-    form = render_form do
-      text_field(:name, label: "Name", between: :optional)
-    end
-
-    assert_includes(form, "(optional)")
-  end
-
-  def test_text_field_with_append_content
-    form = render_form do
-      text_field(:name, label: "Name", append: :required)
-    end
-
-    assert_includes(form, "(required)")
   end
 
   def test_text_field_with_addon
@@ -119,18 +93,6 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, 'type="checkbox"')
   end
 
-  def test_checkbox_field_with_help_text
-    form = render_form do
-      checkbox_field(:placeholder,
-                     label: "Test",
-                     help: "Help text")
-    end
-
-    assert_includes(form, "Test")
-    assert_includes(form, "info-collapse-trigger")
-    assert_includes(form, "Help text")
-  end
-
   # Select field tests
   def test_select_field_renders_with_basic_options
     options = [["Option 1", "1"], ["Option 2", "2"], ["Option 3", "3"]]
@@ -147,18 +109,43 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, "Option 3")
   end
 
-  def test_select_field_with_help_text
-    options = [%w[Yes true], %w[No false]]
+  # Slot tests
+  def test_text_field_with_between_slot
     form = render_form do
-      select_field(:number,
-                   options,
-                   label: "Active",
-                   help: "Select option")
+      text_field(:name, label: "Name") do |field|
+        field.with_between do
+          span(class: "help-note") { "(optional)" }
+        end
+      end
     end
 
-    assert_includes(form, "Active")
-    assert_includes(form, "info-collapse-trigger")
-    assert_includes(form, "Select option")
+    assert_includes(form, "(optional)")
+    assert_includes(form, "help-note")
+  end
+
+  def test_text_field_with_append_slot
+    form = render_form do
+      text_field(:name, label: "Name") do |field|
+        field.with_append do
+          span(class: "help-note") { "(required)" }
+        end
+      end
+    end
+
+    assert_includes(form, "(required)")
+    assert_includes(form, "help-note")
+  end
+
+  def test_checkbox_field_with_between_slot
+    form = render_form do
+      checkbox_field(:placeholder, label: "Test") do |field|
+        field.with_between do
+          em { "Note" }
+        end
+      end
+    end
+
+    assert_includes(form, "<em>Note</em>")
   end
 
   # Custom class name test
