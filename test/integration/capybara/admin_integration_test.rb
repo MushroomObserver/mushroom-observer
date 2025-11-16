@@ -90,16 +90,16 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
     click_on(id: "nav_admin_add_user_to_group_link")
 
     within("#admin_add_user_to_group_form") do
-      fill_in("user_name", with: "bogus")
-      fill_in("group_name", with: "all users")
+      fill_in("add_user_to_group_user_name", with: "bogus")
+      fill_in("add_user_to_group_group_name", with: "all users")
       click_commit
     end
     assert_flash_text("Unable to find the user")
     click_on(id: "nav_admin_add_user_to_group_link")
 
     within("#admin_add_user_to_group_form") do
-      fill_in("user_name", with: "rolf")
-      fill_in("group_name", with: "bogus")
+      fill_in("add_user_to_group_user_name", with: "rolf")
+      fill_in("add_user_to_group_group_name", with: "bogus")
       click_commit
     end
     assert_flash_text("Unable to find the group")
@@ -107,8 +107,8 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
 
     within("#admin_add_user_to_group_form") do
       # rolf is already a member of all users. no go
-      fill_in("user_name", with: "rolf")
-      fill_in("group_name", with: "all users")
+      fill_in("add_user_to_group_user_name", with: "rolf")
+      fill_in("add_user_to_group_group_name", with: "all users")
       click_commit
     end
     assert_flash_text("is already a member of")
@@ -116,8 +116,8 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
 
     within("#admin_add_user_to_group_form") do
       # rolf is not a member of Bolete Project, so can be added
-      fill_in("user_name", with: "rolf")
-      fill_in("group_name", with: "Bolete Project")
+      fill_in("add_user_to_group_user_name", with: "rolf")
+      fill_in("add_user_to_group_group_name", with: "Bolete Project")
       click_commit
     end
     assert_flash_success

@@ -17,7 +17,7 @@ class Components::ProjectAdminRequestForm < Components::ApplicationForm
   private
 
   def render_note
-    render(:admin_request_note.tp)
+    :admin_request_note.tp
   end
 
   def render_subject_field

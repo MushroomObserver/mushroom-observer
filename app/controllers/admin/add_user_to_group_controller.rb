@@ -11,8 +11,14 @@ module Admin
         flash_notice(:add_user_to_group_success.
           t(user: form.user.name, group: form.group.name))
       else
-        form.errors.full_messages.each do |message|
-          flash_error(message)
+        # Check if the only error is "already in group" - if so, it's a warning
+        if form.errors.count == 1 &&
+           form.errors[:base].any? { |msg| msg.match?(/already a member/) }
+          flash_warning(form.errors.full_messages.first)
+        else
+          form.errors.full_messages.each do |message|
+            flash_error(message)
+          end
         end
       end
 
