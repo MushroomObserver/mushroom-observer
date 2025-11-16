@@ -6,7 +6,7 @@ class Components::LoginForm < Components::ApplicationForm
     render_login_field
     render_password_field
     render_remember_me_field
-    render_submit_button
+    submit(:login_login.l, center: true)
     render_help_text
   end
 
@@ -24,10 +24,6 @@ class Components::LoginForm < Components::ApplicationForm
 
   def render_remember_me_field
     checkbox_field(:remember_me, label: :login_remember_me.t, class: "mt-3")
-  end
-
-  def render_submit_button
-    submit(:login_login.l, center: true)
   end
 
   def render_help_text

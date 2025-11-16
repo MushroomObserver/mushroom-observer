@@ -6,7 +6,7 @@ class Components::LicenseForm < Components::ApplicationForm
     render_display_name_field
     render_url_field
     render_deprecated_checkbox
-    render_submit_button
+    submit(:SUBMIT.t, center: true)
   end
 
   private
@@ -31,10 +31,6 @@ class Components::LicenseForm < Components::ApplicationForm
 
   def render_deprecated_checkbox
     checkbox_field(:deprecated, label: :license_form_checkbox_deprecated.t)
-  end
-
-  def render_submit_button
-    submit(:SUBMIT.t, center: true)
   end
 
   def display_name_help

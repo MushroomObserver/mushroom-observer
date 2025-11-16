@@ -8,7 +8,7 @@ class Components::PublicationForm < Components::ApplicationForm
     render_peer_reviewed_field
     render_how_helped_field
     render_mo_mentioned_field
-    render_submit_button
+    submit(submit_text, center: true)
   end
 
   private
@@ -44,10 +44,6 @@ class Components::PublicationForm < Components::ApplicationForm
 
   def render_mo_mentioned_field
     checkbox_field(:mo_mentioned, label: :publication_mo_mentioned.t)
-  end
-
-  def render_submit_button
-    submit(submit_text, center: true)
   end
 
   def submit_text

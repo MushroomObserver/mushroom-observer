@@ -7,7 +7,7 @@ class Components::GlossaryTermForm < Components::ApplicationForm
     render_name_field
     render_description_field
     yield if block
-    render_submit_button
+    submit(:SAVE.t, center: true)
   end
 
   private
@@ -33,10 +33,6 @@ class Components::GlossaryTermForm < Components::ApplicationForm
     textarea_field(:description, label: "#{:glossary_term_description.l}:",
                                  rows: 16,
                                  append: description_help_text)
-  end
-
-  def render_submit_button
-    submit(:SAVE.t, center: true)
   end
 
   def name_help_text
