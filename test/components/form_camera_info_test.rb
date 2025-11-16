@@ -45,11 +45,23 @@ class FormCameraInfoTest < UnitTestCase
     html = render(component)
 
     # Should always render GPS span so JavaScript can populate it
-    assert_includes(html, 'class="exif_gps"')
+    assert_match(/<span class="exif_gps">/, html)
     # All wrapper spans should have d-none class when values are blank
-    assert_includes(html, 'class="exif_lat_wrapper d-none"')
-    assert_includes(html, 'class="exif_lng_wrapper d-none"')
-    assert_includes(html, 'class="exif_alt_wrapper d-none"')
+    assert_match(
+      /<span class="exif_lat_wrapper d-none">/,
+      html,
+      "Expected lat wrapper to have d-none class when value is blank"
+    )
+    assert_match(
+      /<span class="exif_lng_wrapper d-none">/,
+      html,
+      "Expected lng wrapper to have d-none class when value is blank"
+    )
+    assert_match(
+      /<span class="exif_alt_wrapper d-none">/,
+      html,
+      "Expected alt wrapper to have d-none class when value is blank"
+    )
   end
 
   def test_renders_partial_gps_info
