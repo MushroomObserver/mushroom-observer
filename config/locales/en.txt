@@ -3386,7 +3386,7 @@
   add_user_to_group_no_user: Unable to find the [:user], '[user]'.
   add_user_to_group_success: "[user] added to [group]."
   add_user_to_group_title: Add [:user] to Group
-  add_user_to_group_user: "[:user] name"
+  add_user_to_group_user: "[:USER] name"
 
   # admin_request/author_request emails
   admin_request_change_member_status: Change [:user]'s status

@@ -25,6 +25,7 @@ class Components::PublicationForm < Components::ApplicationForm
       :full,
       rows: 10,
       label: "#{:publication_full.t}:",
+      wrap_class: "mt-3",
       between: span(class: "help-note mr-3") { :publication_full_help.t }
     )
   end

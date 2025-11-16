@@ -20,24 +20,22 @@ class Components::LicenseForm < Components::ApplicationForm
 
   def render_display_name_field
     text_field(:display_name, label: "#{:license_display_name.t}:",
-                              data: { autofocus: true },
-                              append: display_name_help)
+                              data: { autofocus: true }) do |f|
+      f.with_append do
+        div(class: "help-block") { :license_display_name_help.t }
+      end
+    end
   end
 
   def render_url_field
-    text_field(:url, label: "#{:license_url.t}:",
-                     append: url_help)
+    text_field(:url, label: "#{:license_url.t}:") do |f|
+      f.with_append do
+        div(class: "help-block") { :license_url_help.t }
+      end
+    end
   end
 
   def render_deprecated_checkbox
     checkbox_field(:deprecated, label: :license_form_checkbox_deprecated.t)
-  end
-
-  def display_name_help
-    div(class: "help-block") { :license_display_name_help.t }
-  end
-
-  def url_help
-    div(class: "help-block") { :license_url_help.t }
   end
 end

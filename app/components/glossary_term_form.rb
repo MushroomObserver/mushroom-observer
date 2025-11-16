@@ -26,31 +26,29 @@ class Components::GlossaryTermForm < Components::ApplicationForm
 
   def render_name_field
     text_field(:name, label: "#{:glossary_term_name.l}:",
-                      data: { autofocus: true },
-                      append: name_help_text)
+                      data: { autofocus: true }) do |f|
+      f.with_append do
+        p do
+          plain(:form_glossary_name_help.l)
+          whitespace
+          glossary_doc_link
+        end
+      end
+    end
   end
 
   def render_description_field
     textarea_field(:description, label: "#{:glossary_term_description.l}:",
-                                 rows: 16,
-                                 append: description_help_text)
-  end
-
-  def name_help_text
-    p do
-      :form_glossary_name_help.t
-      whitespace
-      glossary_doc_link
-    end
-  end
-
-  def description_help_text
-    p do
-      :form_glossary_description_help.t
-      whitespace
-      glossary_doc_link
-      plain(". ")
-      :field_textile_link.t
+                                 rows: 16) do |f|
+      f.with_append do
+        p do
+          plain(:form_glossary_description_help.l)
+          whitespace
+          glossary_doc_link
+          plain(". ")
+          raw(:field_textile_link.t) # rubocop:disable Rails/OutputSafety
+        end
+      end
     end
   end
 

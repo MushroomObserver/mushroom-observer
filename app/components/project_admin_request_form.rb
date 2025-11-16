@@ -17,7 +17,7 @@ class Components::ProjectAdminRequestForm < Components::ApplicationForm
   private
 
   def render_subject_field
-    text_field(:subject, label: "#{:request_subject.t}:",
+    text_field(:subject, label: "#{:request_subject.t}:", wrap_class: "mt-3",
                          data: { autofocus: true })
   end
 

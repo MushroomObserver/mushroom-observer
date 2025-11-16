@@ -8,7 +8,11 @@ class Components::HerbariumCuratorRequestForm < Components::ApplicationForm
   end
 
   def view_template
-    div(class: "form-group mt-3") { "#{:HERBARIUM.l}: #{@herbarium_name}" }
+    div(class: "form-group mt-3") do
+      strong { "#{:HERBARIUM.l}:" }
+      whitespace
+      plain(@herbarium_name)
+    end
 
     textarea_field(:notes, label: "#{:NOTES.l}:", rows: 10,
                            data: { autofocus: true })
