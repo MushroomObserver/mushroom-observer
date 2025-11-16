@@ -6,7 +6,7 @@ class LoginFormTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
-    @model = User.new
+    @model = FormObject::Login.new(login: "testuser", remember_me: true)
     controller.request = ActionDispatch::TestRequest.create
   end
 

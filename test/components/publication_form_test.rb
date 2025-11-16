@@ -49,11 +49,11 @@ class PublicationFormTest < UnitTestCase
     # ERB version (what the old form would generate)
     erb_html = render_erb_version
 
-    puts("\n\n=== COMPONENT HTML ===")
-    puts(component_html)
-    puts("\n=== ERB HTML ===")
-    puts(erb_html)
-    puts("\n==================\n\n")
+    # puts("\n\n=== COMPONENT HTML ===")
+    # puts(component_html)
+    # puts("\n=== ERB HTML ===")
+    # puts(erb_html)
+    # puts("\n==================\n\n")
 
     # Both should work and contain key elements
     assert(component_html.present?)

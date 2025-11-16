@@ -1,20 +1,7 @@
-<%
-add_page_title(:login_please_login.t)
-
-# Simple form object for login
-form_object = Struct.new(:login, :password, :remember_me, keyword_init: true) do
-  def persisted?
-    false
-  end
-
-  def model_name
-    ActiveModel::Name.new(self.class, nil, "user")
-  end
-end.new(login: @login, password: "", remember_me: @remember)
-%>
+<% add_page_title(:login_please_login.t) %>
 
 <%= render(Components::LoginForm.new(
-      form_object,
+      FormObject::Login.new(login: @login, remember_me: @remember),
       action: account_login_path,
       id: "account_login_form"
     )) %>
