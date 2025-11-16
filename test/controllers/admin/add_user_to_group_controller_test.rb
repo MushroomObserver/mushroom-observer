@@ -11,26 +11,32 @@ module Admin
 
       # Happy path
       make_admin
+      roy = users(:roy).login
+      bolete = user_groups(:bolete_users).name
       post(:create,
-           params: { add_user_to_group: { user_name: users(:roy).login,
-                                          group_name: user_groups(:bolete_users).name } })
+           params: { add_user_to_group: { user_name: roy,
+                                          group_name: bolete } })
       assert_flash_success
-      assert(users(:roy).in_group?(user_groups(:bolete_users).name))
+      assert(users(:roy).in_group?(bolete))
 
       # Unhappy paths
       post(:create,
-           params: { add_user_to_group: { user_name: users(:roy).login,
-                                          group_name: user_groups(:bolete_users).name } })
+           params: { add_user_to_group: { user_name: roy,
+                                          group_name: bolete } })
       assert_flash_warning # Roy is already a member; we just added him above.
 
       post(:create,
-           params: { add_user_to_group: { user_name: "AbsoluteNonsenseVermslons",
-                                          group_name: user_groups(:bolete_users).name } })
+           params: { add_user_to_group: {
+             user_name: "AbsoluteNonsenseVermslons",
+             group_name: bolete
+           } })
       assert_flash_error
 
       post(:create,
-           params: { add_user_to_group: { user_name: users(:roy).login,
-                                          group_name: "AbsoluteNonsenseVermslons" } })
+           params: { add_user_to_group: {
+             user_name: roy,
+             group_name: "AbsoluteNonsenseVermslons"
+           } })
       assert_flash_error
     end
   end
