@@ -19,11 +19,6 @@ class Components::NameTrackerForm < Components::ApplicationForm
 
   private
 
-  def form_action
-    # Construct URL from the model's name association
-    trackers_name_path(model.name_id)
-  end
-
   def render_submit_buttons
     div(class: "text-center my-3") do
       if model
@@ -59,7 +54,16 @@ class Components::NameTrackerForm < Components::ApplicationForm
     end
   end
 
+  def form_action
+    url_for(controller: "names/trackers", action: :create, id: model.name.id,
+            only_path: true)
+  end
+
+  protected
+
   def form_method
-    @method
+    return super unless @method
+
+    @method.to_s.downcase == "get" ? "get" : "post"
   end
 end
