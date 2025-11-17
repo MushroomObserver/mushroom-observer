@@ -5,7 +5,7 @@ add_context_nav(glossary_term_form_new_tabs)
 
 <%= render(Components::GlossaryTermForm.new(
   @glossary_term,
-  html: { multipart: true },
+  enctype: "multipart/form-data",
   upload_params: {
     copyright_holder: @copyright_holder,
     copyright_year: @copyright_year,

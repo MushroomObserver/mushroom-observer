@@ -156,7 +156,7 @@ class GlossaryTermsController < ApplicationController
     return false unless (saved_image = process_upload(image_args))
 
     @glossary_term.add_image(saved_image)
-    return false if @glossary_term.save # happy path
+    return true if @glossary_term.save # happy path
 
     # term failed, so clean up the orphaned (unassociated) image
     # and its flash notice ("Successfully uploaded image ...")

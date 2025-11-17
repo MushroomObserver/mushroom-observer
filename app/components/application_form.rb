@@ -314,8 +314,12 @@ class Components::ApplicationForm < Superform::Rails::Form
   end
 
   def render_upload_license(upload, licenses, selected_id)
+    # Superform expects [value, display] but Rails returns [display, value]
+    # So we need to swap them
+    swapped_licenses = licenses.map { |display, value| [value, display] }
+
     license_select = upload.field(:license_id).select(
-      licenses,
+      swapped_licenses,
       wrapper_options: { label: "#{:LICENSE.l}:", inline: true },
       selected: selected_id
     )
