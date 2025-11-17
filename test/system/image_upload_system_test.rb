@@ -2,7 +2,7 @@
 
 require("application_system_test_case")
 
-class GlossaryTermsTest < ApplicationSystemTestCase
+class ImageUploadSystemTest < ApplicationSystemTestCase
   def test_create_glossary_term_with_image_upload
     setup_image_dirs
 
@@ -23,7 +23,7 @@ class GlossaryTermsTest < ApplicationSystemTestCase
 
     # Fill in copyright fields
     fill_in("glossary_term_upload_copyright_holder", with: user.name)
-    select(Time.now.year.to_s, from: "glossary_term_upload_copyright_year")
+    select(Time.zone.now.year.to_s, from: "glossary_term_upload_copyright_year")
 
     # License is pre-selected with user's default (since we fixed
     # the value/display swap)
