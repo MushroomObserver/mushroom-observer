@@ -209,8 +209,8 @@ module Descriptions::Permissions
         @description.authors.sort_by(&:login) +
         @description.editors.sort_by(&:login) +
         [@user]
-      ).map { |user| UserGroup.one_user(user) }
-      @groups.uniq!
+      ).compact.map { |user| UserGroup.one_user(user) }
+      @groups = @groups.compact.uniq
       @groups = @groups.reject { |g| g.name.match(/^user \d+$/) } +
                 @groups.select { |g| g.name.match(/^user \d+$/) }
     end

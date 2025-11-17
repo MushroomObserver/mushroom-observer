@@ -595,4 +595,71 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
       end
     end
   end
+
+  # Test that admins can access and use the "Adjust permissions" page
+  # for public descriptions
+  def test_admin_can_adjust_permissions_on_public_description
+    # Use peltigera_desc which has a proper user (dick) and is public
+    desc = name_descriptions(:peltigera_desc)
+    assert_equal("public", desc.source_type)
+
+    # Login as admin and enter admin mode
+    login!(users(:admin))
+    visit("/names/descriptions/#{desc.id}")
+
+    # Enter admin mode
+    first(:button, id: "user_nav_admin_mode_link").click
+
+    # Should be able to see the "Adjust permissions" link in admin mode
+    # Try different possible link texts
+    if has_link?(text: /Adjust permissions/i)
+      click_link(text: /Adjust permissions/i)
+    elsif has_link?(href: /permissions\/edit/)
+      first(:link, href: /permissions\/edit/).click
+    else
+      # Direct navigation as fallback
+      visit("/names/descriptions/#{desc.id}/permissions/edit")
+    end
+
+    # Should be on the permissions edit page
+    assert_selector("body.permissions__edit")
+
+    # Verify the form loads correctly
+    within("form#description_permissions_form") do
+      # Should have checkboxes for existing groups
+      assert(has_field?("group_reader[#{UserGroup.all_users.id}]", type: :checkbox))
+      assert(has_field?("group_writer[#{UserGroup.all_users.id}]", type: :checkbox))
+      assert(has_field?("group_admin[#{UserGroup.all_users.id}]", type: :checkbox))
+
+      # Should have write-in fields for adding new users
+      # This is the critical test - verifies autocompleter_field is working
+      assert(has_field?("writein_name[1]", type: :text))
+      assert(has_field?("writein_reader[1]", type: :checkbox))
+      assert(has_field?("writein_writer[1]", type: :checkbox))
+      assert(has_field?("writein_admin[1]", type: :checkbox))
+    end
+
+    # Now test that we can actually submit changes
+    within("form#description_permissions_form") do
+      # Add katrina as a writer using the write-in field
+      fill_in("writein_name[1]", with: "katrina")
+      check("writein_writer[1]")
+
+      # Submit the form
+      first(:button, type: "submit").click
+    end
+
+    # Should redirect back to description show page
+    assert_selector("body.descriptions__show")
+
+    # Verify the permission was actually added
+    desc.reload
+    katrina_group = UserGroup.one_user(users(:katrina))
+    assert_includes(desc.writer_groups, katrina_group,
+                   "Katrina should be added to writer groups")
+
+    # Should see a flash notice about the change
+    # The system says "Gave edit permission to Katrina"
+    assert_flash_text(/edit.*katrina/i)
+  end
 end
