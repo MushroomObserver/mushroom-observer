@@ -96,6 +96,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       SelectField.new(self, collection: options, attributes: attributes,
                             wrapper_options: wrapper_options)
     end
+
+    def hidden(wrapper_options: {}, **attributes)
+      HiddenField.new(self, attributes: attributes,
+                            wrapper_options: wrapper_options)
+    end
+
+    def static(wrapper_options: {}, **attributes)
+      StaticTextField.new(self, attributes: attributes,
+                                wrapper_options: wrapper_options)
+    end
   end
 
   # Main field wrapper methods with Bootstrap styling
