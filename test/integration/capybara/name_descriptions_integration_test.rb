@@ -614,8 +614,8 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     # Try different possible link texts
     if has_link?(text: /Adjust permissions/i)
       click_link(text: /Adjust permissions/i)
-    elsif has_link?(href: /permissions\/edit/)
-      first(:link, href: /permissions\/edit/).click
+    elsif has_link?(href: %r{permissions/edit})
+      first(:link, href: %r{permissions/edit}).click
     else
       # Direct navigation as fallback
       visit("/names/descriptions/#{desc.id}/permissions/edit")
@@ -627,9 +627,12 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     # Verify the form loads correctly
     within("form#description_permissions_form") do
       # Should have checkboxes for existing groups
-      assert(has_field?("group_reader[#{UserGroup.all_users.id}]", type: :checkbox))
-      assert(has_field?("group_writer[#{UserGroup.all_users.id}]", type: :checkbox))
-      assert(has_field?("group_admin[#{UserGroup.all_users.id}]", type: :checkbox))
+      assert(has_field?("group_reader[#{UserGroup.all_users.id}]",
+                        type: :checkbox))
+      assert(has_field?("group_writer[#{UserGroup.all_users.id}]",
+                        type: :checkbox))
+      assert(has_field?("group_admin[#{UserGroup.all_users.id}]",
+                        type: :checkbox))
 
       # Should have write-in fields for adding new users
       # This is the critical test - verifies autocompleter_field is working
@@ -656,7 +659,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     desc.reload
     katrina_group = UserGroup.one_user(users(:katrina))
     assert_includes(desc.writer_groups, katrina_group,
-                   "Katrina should be added to writer groups")
+                    "Katrina should be added to writer groups")
 
     # Should see a flash notice about the change
     # The system says "Gave edit permission to Katrina"
