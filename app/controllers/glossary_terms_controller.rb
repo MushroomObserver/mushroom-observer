@@ -123,11 +123,12 @@ class GlossaryTermsController < ApplicationController
   end
 
   def assign_image_form_ivars
-    @copyright_holder = params.dig(:upload, :copyright_holder) || @user.name
-    @copyright_year = params.dig(:upload, :copyright_year)&.to_i ||
-                      Time.now.utc.year
+    upload_params = params.dig(:glossary_term, :upload) || {}
+
+    @copyright_holder = upload_params[:copyright_holder] || @user.name
+    @copyright_year = upload_params[:copyright_year]&.to_i || Time.now.utc.year
     @licenses = License.available_names_and_ids(@user.license)
-    @upload_license_id = params.dig(:upload, :license_id) || @user.license_id
+    @upload_license_id = upload_params[:license_id] || @user.license_id
   end
 
   def reload_form(form)
@@ -165,7 +166,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def upload_specified?
-    params[:upload] && params[:upload][:image].present?
+    params.dig(:glossary_term, :upload, :image).present?
   end
 
   def process_upload(args)
@@ -205,12 +206,13 @@ class GlossaryTermsController < ApplicationController
   end
 
   def strong_upload_image_param
+    upload = params[:glossary_term][:upload]
     {
-      copyright_holder: params[:upload][:copyright_holder],
-      when: Time.local(params[:upload][:copyright_year]).utc,
-      license: License.safe_find(params[:upload][:license_id]),
+      copyright_holder: upload[:copyright_holder],
+      when: Time.local(upload[:copyright_year]).utc,
+      license: License.safe_find(upload[:license_id]),
       user: @user,
-      image: params[:upload][:image]
+      image: upload[:image]
     }
   end
 
@@ -218,7 +220,7 @@ class GlossaryTermsController < ApplicationController
   # Do this only in test environment
   def permit_upload_image_param
     args = strong_upload_image_param
-    args[:image] = params[:upload][:image]
+    args[:image] = params[:glossary_term][:upload][:image]
     args
   end
 end

@@ -144,7 +144,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       assert_select("form [name='glossary_term[#{attr}]']", { count: 1 },
                     "Form should have one field for #{attr}")
     end
-    assert_select("input#upload_image", { count: 1 },
+    assert_select("input[name='glossary_term[upload][image]']", { count: 1 },
                   "Form should include upload image field")
   end
 
@@ -480,11 +480,14 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def create_term_params
     {
-      glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
-      upload: {
-        copyright_holder: "Insil Choi",
-        copyright_year: "2013",
-        license_id: licenses(:ccnc30).id
+      glossary_term: {
+        name: "Xevnoc",
+        description: "Convex spelled backward",
+        upload: {
+          copyright_holder: "Insil Choi",
+          copyright_year: "2013",
+          license_id: licenses(:ccnc30).id
+        }
       }
     }.freeze
   end
@@ -492,11 +495,14 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def changes_to_conic
     {
       id: glossary_terms(:conic_glossary_term).id,
-      glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
-      upload: {
-        copyright_holder: "Insil Choi",
-        copyright_year: 2013,
-        license_id: licenses(:ccnc25).id
+      glossary_term: {
+        name: "Xevnoc",
+        description: "Convex spelled backward",
+        upload: {
+          copyright_holder: "Insil Choi",
+          copyright_year: 2013,
+          license_id: licenses(:ccnc25).id
+        }
       }
     }.freeze
   end
@@ -509,14 +515,14 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     {
       glossary_term: {
         name: "Pancake",
-        description: "Flat"
-      },
-      upload: {
-        image: file,
-        copyright_holder: "zuul",
-        copyright_year: 2013,
-        when: Time.current,
-        license_id: licenses(:ccnc25).id
+        description: "Flat",
+        upload: {
+          image: file,
+          copyright_holder: "zuul",
+          copyright_year: 2013,
+          when: Time.current,
+          license_id: licenses(:ccnc25).id
+        }
       }
     }.freeze
   end

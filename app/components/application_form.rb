@@ -64,6 +64,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   register_value_helper :current_user
   register_value_helper :url_for
 
+  # We don't need to register form helpers anymore - using Superform fields
+
   # Wrapper option keys that should not be passed to the field itself
   WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class, :addon,
                      :button, :button_data, :monospace].freeze
@@ -266,10 +268,13 @@ class Components::ApplicationForm < Superform::Rails::Form
   end
 
   # Renders image upload fields in a :upload namespace
-  # Creates params[:upload][image], params[:upload][copyright_holder], etc.
-  def upload_fields(copyright_holder:, copyright_year:, licenses:,
-                    upload_license_id:, file_field_label: "#{:IMAGE.l}:",
-                    file_field_between: nil)
+  # Creates params[:model][:upload][image], etc. (nested under form model)
+  def upload_fields(file_field_label: "#{:IMAGE.l}:",
+                    file_field_between: nil, **args)
+    args => {
+      copyright_holder:, copyright_year:, licenses:, upload_license_id:
+    }
+
     namespace(:upload) do |upload|
       render_upload_image_field(upload, file_field_label, file_field_between)
       render_upload_copyright_holder(upload, copyright_holder)

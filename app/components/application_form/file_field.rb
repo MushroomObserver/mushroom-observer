@@ -25,6 +25,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
+    # rubocop:disable Metrics/AbcSize
     def render_with_wrapper
       label_option = wrapper_options[:label]
       show_label = label_option != false
@@ -42,6 +43,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         render(append_slot) if append_slot
       end
     end
+    # rubocop:enable Metrics/AbcSize
 
     def render_label_row(label_text)
       label(for: field.dom.id) { label_text }
