@@ -16,11 +16,14 @@ class LicensesFormIntegrationTest < CapybaraIntegrationTestCase
     # Fill in the form with valid data
     fill_in("license_display_name", with: "Test License")
     fill_in("license_url", with: "https://example.com/license")
-    click_commit
 
-    # Verify no 500 error - form should submit without crashing
-    assert_no_selector("h1", text: /error|exception/i)
-    assert_selector("body")
+    # Scope click to the licenses form (not logout button!)
+    within("form[action='/licenses']") do
+      click_commit
+    end
+
+    # Verify successful creation
+    assert_selector("body.licenses__show")
   end
 
   def test_edit_license
@@ -35,10 +38,13 @@ class LicensesFormIntegrationTest < CapybaraIntegrationTestCase
 
     # Update the form with valid data
     fill_in("license_url", with: "https://updated.example.com/license")
-    click_commit
 
-    # Verify no 500 error - form should submit without crashing
-    assert_no_selector("h1", text: /error|exception/i)
-    assert_selector("body")
+    # Scope click to the correct form
+    within("form[action='#{license_path(license)}']") do
+      click_commit
+    end
+
+    # Verify successful update
+    assert_selector("body.licenses__show")
   end
 end

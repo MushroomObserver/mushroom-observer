@@ -15,11 +15,14 @@ class PublicationsFormIntegrationTest < CapybaraIntegrationTestCase
     # Fill in the form with valid data
     fill_in("publication_full", with: "Test Publication Citation")
     fill_in("publication_link", with: "https://example.com/publication")
-    click_commit
 
-    # Verify no 500 error - form should submit without crashing
-    assert_no_selector("h1", text: /error|exception/i)
-    assert_selector("body")
+    # Scope click to the publications form
+    within("form[action='/publications']") do
+      click_commit
+    end
+
+    # Verify successful creation
+    assert_selector("body.publications__show")
   end
 
   def test_edit_publication
@@ -34,10 +37,13 @@ class PublicationsFormIntegrationTest < CapybaraIntegrationTestCase
     # Update the form with valid data
     fill_in("publication_how_helped",
             with: "Updated information about how MO helped")
-    click_commit
 
-    # Verify no 500 error - form should submit without crashing
-    assert_no_selector("h1", text: /error|exception/i)
-    assert_selector("body")
+    # Scope click to the correct form
+    within("form[action='#{publication_path(publication)}']") do
+      click_commit
+    end
+
+    # Verify successful update
+    assert_selector("body.publications__show")
   end
 end

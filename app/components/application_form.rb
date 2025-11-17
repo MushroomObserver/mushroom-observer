@@ -62,6 +62,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Use register_value_helper for helpers that return values (not HTML)
   register_value_helper :in_admin_mode?
   register_value_helper :current_user
+  register_value_helper :url_for
 
   # Wrapper option keys that should not be passed to the field itself
   WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class, :addon,
@@ -77,6 +78,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     def textarea(wrapper_options: {}, **attributes)
       TextareaField.new(self, attributes: attributes,
                               wrapper_options: wrapper_options)
+    end
+
+    def file(wrapper_options: {}, **attributes)
+      FileField.new(self, attributes: attributes,
+                          wrapper_options: wrapper_options)
     end
 
     def checkbox(wrapper_options: {}, **attributes)
@@ -257,5 +263,70 @@ class Components::ApplicationForm < Superform::Rails::Form
              disable_with: value }.merge(options[:data] || {})
 
     super(value, **options.merge(class: classes.join(" "), data: data))
+  end
+
+  # Renders image upload fields in a :upload namespace
+  # Creates params[:upload][image], params[:upload][copyright_holder], etc.
+  def upload_fields(copyright_holder:, copyright_year:, licenses:,
+                    upload_license_id:, file_field_label: "#{:IMAGE.l}:",
+                    file_field_between: nil)
+    namespace(:upload) do |upload|
+      render_upload_image_field(upload, file_field_label, file_field_between)
+      render_upload_copyright_holder(upload, copyright_holder)
+      render_upload_year(upload, copyright_year)
+      render_upload_license(upload, licenses, upload_license_id)
+    end
+  end
+
+  private
+
+  def render_upload_image_field(upload, label, between)
+    render(
+      upload.field(:image).file(
+        wrapper_options: { label: label, between: between }
+      )
+    )
+  end
+
+  def render_upload_copyright_holder(upload, holder)
+    render(
+      upload.field(:copyright_holder).text(
+        wrapper_options: { label: "#{:image_copyright_holder.l}:",
+                           inline: true },
+        value: holder
+      )
+    )
+  end
+
+  def render_upload_year(upload, year)
+    render(
+      upload.field(:copyright_year).select(
+        upload_year_options,
+        wrapper_options: { label: "#{:WHEN.l}:", inline: true },
+        selected: year
+      )
+    )
+  end
+
+  def render_upload_license(upload, licenses, selected_id)
+    license_select = upload.field(:license_id).select(
+      licenses,
+      wrapper_options: { label: "#{:LICENSE.l}:", inline: true },
+      selected: selected_id
+    )
+
+    license_select.with_append do
+      div(class: "help-block") do
+        plain("(")
+        plain(:image_copyright_warning.t)
+        plain(")")
+      end
+    end
+
+    render(license_select)
+  end
+
+  def upload_year_options
+    (1980..Time.zone.now.year).to_a.reverse.map { |y| [y.to_s, y] }
   end
 end

@@ -13,12 +13,10 @@ class ImageVoteAnonymityFormIntegrationTest < CapybaraIntegrationTestCase
     visit(images_edit_vote_anonymity_path)
     assert_selector("body.anonymity__edit")
 
-    # The form has no input fields, just submit buttons
-    # Click one of the submit buttons to test form submission
-    click_commit
+    # The form has two submit buttons, click the enabled one by value
+    click_button("Make all votes anonymous")
 
-    # Verify no 500 error - form should submit without crashing
-    assert_no_selector("h1", text: /error|exception/i)
-    assert_selector("body")
+    # Verify successful update (redirects to preferences)
+    assert_selector("body.preferences__edit")
   end
 end

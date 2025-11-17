@@ -2,11 +2,17 @@
 
 # Form for creating/editing glossary terms
 class Components::GlossaryTermForm < Components::ApplicationForm
-  def view_template(&block)
+  # Override initialize to accept upload field props (only for new form)
+  def initialize(model, action: nil, upload_params: nil, **)
+    @upload_params = upload_params
+    super(model, action: action, **)
+  end
+
+  def view_template
     render_locked_checkbox if in_admin_mode?
     render_name_field
     render_description_field
-    yield if block
+    render_upload_fields if @upload_params
     submit(:SAVE.t, center: true)
   end
 
@@ -56,6 +62,15 @@ class Components::GlossaryTermForm < Components::ApplicationForm
     link_to(
       :glossary_term_index_documentation.t,
       "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glossary.md"
+    )
+  end
+
+  def render_upload_fields
+    upload_fields(
+      copyright_holder: @upload_params[:copyright_holder],
+      copyright_year: @upload_params[:copyright_year],
+      licenses: @upload_params[:licenses],
+      upload_license_id: @upload_params[:upload_license_id]
     )
   end
 end

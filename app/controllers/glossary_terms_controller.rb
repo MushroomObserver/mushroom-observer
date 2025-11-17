@@ -165,7 +165,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def upload_specified?
-    params[:upload][:image]
+    params[:upload] && params[:upload][:image].present?
   end
 
   def process_upload(args)
