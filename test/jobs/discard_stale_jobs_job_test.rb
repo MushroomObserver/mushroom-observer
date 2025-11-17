@@ -6,7 +6,7 @@ class DiscardStaleJobsJobTest < ActiveJob::TestCase
   def test_discarding_failed_jobs
     assert_difference(
       "SolidQueue::FailedExecution.count", -1,
-      "Should discard 1 stale failed Job"
+      "Should remove 1 entry from FailedExecutions"
     ) do
       DiscardStaleJobsJob.perform_now
     end
