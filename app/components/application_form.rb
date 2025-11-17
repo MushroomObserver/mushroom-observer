@@ -44,19 +44,8 @@
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
 
-  # Override initialize to store whether we need to auto-determine action
-  # Form subclasses can define private form_action to customize behavior
-  def initialize(model, action: nil, **)
-    @auto_determine_action = action.nil? && respond_to?(:form_action, true)
-    super
-  end
-
-  # Override around_template to set action before rendering if needed
-  def around_template
-    # Determine action now that helpers are available
-    @action = form_action if @auto_determine_action && @action.nil?
-    super
-  end
+  # Form subclasses can override form_action to derive action URLs from model
+  # associations or other logic, eliminating the need to pass explicit actions
 
   # Register view helpers that forms might need
   # Use register_value_helper for helpers that return values (not HTML)
