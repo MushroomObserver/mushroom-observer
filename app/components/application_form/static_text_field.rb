@@ -16,6 +16,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     attr_reader :wrapper_options, :field, :attributes
 
     def initialize(field, attributes:, wrapper_options: {})
+      super()
       @field = field
       @attributes = attributes
       @wrapper_options = wrapper_options
