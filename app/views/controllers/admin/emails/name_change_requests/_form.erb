@@ -1,5 +1,5 @@
 <%= render(Components::NameChangeRequestForm.new(
-  nil,
+  FormObject::NameChangeRequest.new,
   name: @name,
   new_name: @new_name,
   new_name_with_icn_id: @new_name_with_icn_id

@@ -10,8 +10,18 @@
 #   field(:user_id).hidden(
 #     wrapper_options: { label: "User:", value: "John Doe" }
 #   )
-class Components::ApplicationForm
-  class HiddenField < FieldWithHelp
+class Components::ApplicationForm < Superform::Rails::Form
+  class HiddenField < Phlex::HTML
+    include FieldWithHelp
+
+    attr_reader :wrapper_options, :field, :attributes
+
+    def initialize(field, attributes:, wrapper_options: {})
+      @field = field
+      @attributes = attributes
+      @wrapper_options = wrapper_options
+    end
+
     def view_template
       div(class: wrapper_class) do
         render_label

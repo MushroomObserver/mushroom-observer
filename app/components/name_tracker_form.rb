@@ -4,18 +4,25 @@
 # Allows users to enable/disable tracking for a name and configure
 # email notification templates.
 class Components::NameTrackerForm < Components::ApplicationForm
-  prop :action
-  prop :method
-  prop :note_template
+  def initialize(model, method: nil, note_template: nil, **)
+    @method = method
+    @note_template = note_template
+    super(model, id: "name_tracker_form", **)
+  end
 
   def view_template
-    super(id: "name_tracker_form") do
+    super do
       render_submit_buttons
       render_tracker_fields
     end
   end
 
   private
+
+  def form_action
+    # Construct URL from the model's name association
+    trackers_name_path(model.name_id)
+  end
 
   def render_submit_buttons
     div(class: "text-center my-3") do
@@ -50,10 +57,6 @@ class Components::NameTrackerForm < Components::ApplicationForm
       )
       br
     end
-  end
-
-  def form_action
-    @action
   end
 
   def form_method

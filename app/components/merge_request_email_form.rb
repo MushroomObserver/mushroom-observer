@@ -3,9 +3,12 @@
 # Form for submitting a merge request email to admins.
 # Allows users to request merging two objects (e.g., names or locations).
 class Components::MergeRequestEmailForm < Components::ApplicationForm
-  prop :old_obj
-  prop :new_obj
-  prop :model_class
+  def initialize(model, old_obj:, new_obj:, model_class:, **)
+    @old_obj = old_obj
+    @new_obj = new_obj
+    @model_class = model_class
+    super(model, **)
+  end
 
   def view_template
     super do
@@ -52,11 +55,11 @@ class Components::MergeRequestEmailForm < Components::ApplicationForm
   end
 
   def form_action
-    {
+    url_for(
       action: :create,
       type: @model_class.name,
       old_id: @old_obj.id,
       new_id: @new_obj.id
-    }
+    )
   end
 end

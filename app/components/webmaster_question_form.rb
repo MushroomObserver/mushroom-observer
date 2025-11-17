@@ -3,9 +3,12 @@
 # Form for submitting a question to the webmaster.
 # Allows users to ask questions about the site.
 class Components::WebmasterQuestionForm < Components::ApplicationForm
-  prop :email
-  prop :email_error, default: false
-  prop :content
+  def initialize(model, email: nil, email_error: false, content: nil, **)
+    @email = email
+    @email_error = email_error
+    @content = content
+    super(model, **)
+  end
 
   def view_template
     super do
@@ -50,6 +53,6 @@ class Components::WebmasterQuestionForm < Components::ApplicationForm
   end
 
   def form_action
-    { action: :create }
+    url_for(action: :create)
   end
 end

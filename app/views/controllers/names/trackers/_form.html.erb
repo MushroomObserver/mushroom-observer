@@ -1,7 +1,5 @@
-<%# locals: (action:, method:) %>
 <%= render(Components::NameTrackerForm.new(
-  @name_tracker,
-  action: action,
-  method: method,
+  @name_tracker || NameTracker.new(name: @name),
+  method: local_assigns[:method],
   note_template: @note_template
 )) %>

@@ -9,8 +9,18 @@
 #   field(:name).static(
 #     wrapper_options: { label: "Name:", value: "John Doe" }
 #   )
-class Components::ApplicationForm
-  class StaticTextField < FieldWithHelp
+class Components::ApplicationForm < Superform::Rails::Form
+  class StaticTextField < Phlex::HTML
+    include FieldWithHelp
+
+    attr_reader :wrapper_options, :field, :attributes
+
+    def initialize(field, attributes:, wrapper_options: {})
+      @field = field
+      @attributes = attributes
+      @wrapper_options = wrapper_options
+    end
+
     def view_template
       div(class: wrapper_class) do
         render_label
