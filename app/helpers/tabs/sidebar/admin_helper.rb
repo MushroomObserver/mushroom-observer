@@ -11,7 +11,6 @@ module Tabs
           admin_users_tab,
           admin_banners_tab,
           admin_email_all_users_tab,
-          admin_add_user_to_group_tab,
           admin_licenses_tab
         ]
       end
@@ -55,13 +54,6 @@ module Tabs
         InternalLink.new(
           :app_email_all_users.t, new_admin_emails_features_path,
           html_options: { id: "nav_admin_emails_features_link" }
-        ).tab
-      end
-
-      def admin_add_user_to_group_tab
-        InternalLink.new(
-          :app_add_to_group.t, new_admin_add_user_to_group_path,
-          html_options: { id: "nav_admin_add_user_to_group_link" }
         ).tab
       end
 
