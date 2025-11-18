@@ -35,6 +35,7 @@ class ImageLoaderJobTest < ActiveJob::TestCase
   DIR = Rails.root.join("tmp/downloads")
 
   def setup
+    super
     @mock_storage = MockStorage.new
     @test_image = Image.reorder(created_at: :asc).first
     @test_file = "#{DIR}/#{@test_image.id}.jpg"

@@ -4,6 +4,7 @@ require("test_helper")
 
 class AddDispatchControllerTest < FunctionalTestCase
   def setup
+    super
     @user = users(:rolf)
     @project = projects(:bolete_project)
     @species_list = species_lists(:first_species_list)

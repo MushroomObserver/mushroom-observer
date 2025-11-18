@@ -6,6 +6,7 @@ class InteractiveImageTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
+    super
     @user = users(:rolf)
     @image = images(:connected_coprinus_comatus_image)
   end

@@ -6,6 +6,7 @@ class MatrixBoxTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
+    super
     @user = users(:rolf)
   end
 

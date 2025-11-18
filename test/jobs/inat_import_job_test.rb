@@ -8,6 +8,7 @@ class InatImportJobTest < ActiveJob::TestCase
   include Inat::Constants
 
   def setup
+    super
     @user = users(:inat_importer)
     directory_path = Rails.public_path.join("test_images/orig")
     FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
