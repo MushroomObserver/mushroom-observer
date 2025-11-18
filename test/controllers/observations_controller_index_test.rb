@@ -6,6 +6,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   tests ObservationsController
 
   def setup
+    super
     # Must do this to get center lats saved on fixtures without lat/lng.
     Location.update_box_area_and_center_columns
   end

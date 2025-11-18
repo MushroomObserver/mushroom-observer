@@ -4,6 +4,7 @@ require("test_helper")
 
 class CommentTest < UnitTestCase
   def setup
+    super
     QueuedEmail.queue = true
   end
 
