@@ -1,7 +1,0 @@
-<% add_page_title(:add_user_to_group_title.t) %>
-
-<%= render(Components::AddUserToGroupForm.new(
-      FormObject::AddUserToGroup.new,
-      action: admin_add_user_to_group_path,
-      id: "admin_add_user_to_group_form"
-    )) %>

@@ -3063,9 +3063,7 @@
   image_vote_anonymity_title: Change Anonymity of Your Image Votes
   image_vote_anonymity_num_anonymous: Number of anonymous votes
   image_vote_anonymity_num_public: Number of public votes
-  image_vote_anonymity_make_anonymous: Make all votes anonymous
   image_vote_anonymity_make_public: Make all votes public
-  image_vote_anonymity_made_anonymous: Made all of your image votes anonymous. Please also check your vote preference below to ensure that future votes are also anonymous.
   image_vote_anonymity_made_public: Made all of your image votes public. Please also check your vote preference below to ensure that future votes are also public.
   image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", please "contact us":/admin/emails/webmaster_questions/new for help.
 

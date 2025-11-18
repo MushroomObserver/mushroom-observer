@@ -4,41 +4,25 @@
 class Components::ImageVoteAnonymityForm < Components::ApplicationForm
   def view_template
     div(class: "mt-3") do
-      render_anonymous
-      render_spacer
-      render_public
+      render_anonymous_count
+      render_public_count
+      submit(:image_vote_anonymity_make_public.l, disabled: anon.zero?)
     end
   end
 
   private
 
-  def render_anonymous
-    div(class: "d-inline-block text-center") do
-      p do
-        plain("#{:image_vote_anonymity_num_anonymous.t}:")
-        whitespace
-        strong { anon }
-      end
-      div do
-        submit(:image_vote_anonymity_make_anonymous.l, disabled: anon.positive?)
-      end
+  def render_anonymous_count
+    p do
+      plain("#{:image_vote_anonymity_num_anonymous.t}: ")
+      strong { anon }
     end
   end
 
-  def render_spacer
-    div(class: "d-inline-block p-5")
-  end
-
-  def render_public
-    div(class: "d-inline-block text-center") do
-      p do
-        plain("#{:image_vote_anonymity_num_public.t}:")
-        whitespace
-        strong { pub }
-      end
-      div do
-        submit(:image_vote_anonymity_make_public.l, disabled: pub.positive?)
-      end
+  def render_public_count
+    p do
+      plain("#{:image_vote_anonymity_num_public.t}: ")
+      strong { pub }
     end
   end
 
