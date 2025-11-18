@@ -1,10 +1,10 @@
 <p>
   <%= :field_slip_qr_intro.t %>
 </p>
-<%=
-form_with(url: { action: :create }, data: { controller: "qr-reader" } ) do |f|
-  text_field_with_label(form: f, field: :qr_code, label: :app_qrcode.t,
-                        data: { qr_reader_target: "input",
-                                action: "qr-reader#handleInput" })
-end
-%>
+
+<%= render(Components::QRReaderForm.new(
+      FieldSlip.new,
+      action: field_slips_qr_reader_path,
+      data: { controller: "qr-reader" },
+      id: "qr_reader_form"
+    )) %>

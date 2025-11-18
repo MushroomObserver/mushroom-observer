@@ -7,8 +7,8 @@ module FieldSlips
     def new; end
 
     def create
-      params = permitted_qr_params
-      return unless check_for_qr_code(params)
+      field_slip_params = permitted_qr_params
+      return unless check_for_qr_code(field_slip_params)
 
       redirect_to("#{MO.http_domain}/qr/#{@qr_code.strip}")
     end
@@ -16,11 +16,11 @@ module FieldSlips
     private
 
     def permitted_qr_params
-      params.permit(:qr_code)
+      params.require(:field_slip).permit(:code)
     end
 
-    def check_for_qr_code(params)
-      @qr_code = params[:qr_code]
+    def check_for_qr_code(field_slip_params)
+      @qr_code = field_slip_params[:code]
       if @qr_code.start_with?("http")
         if @qr_code.start_with?("https://mushroomobserver.org/qr/", "http://mushroomobserver.org/qr/")
           @qr_code = @qr_code.split("/")[-1]

@@ -3063,9 +3063,7 @@
   image_vote_anonymity_title: Change Anonymity of Your Image Votes
   image_vote_anonymity_num_anonymous: Number of anonymous votes
   image_vote_anonymity_num_public: Number of public votes
-  image_vote_anonymity_make_anonymous: Make all votes anonymous
   image_vote_anonymity_make_public: Make all votes public
-  image_vote_anonymity_made_anonymous: Made all of your image votes anonymous. Please also check your vote preference below to ensure that future votes are also anonymous.
   image_vote_anonymity_made_public: Made all of your image votes public. Please also check your vote preference below to ensure that future votes are also public.
   image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", please "contact us":/admin/emails/webmaster_questions/new for help.
 
@@ -3386,7 +3384,7 @@
   add_user_to_group_no_user: Unable to find the [:user], '[user]'.
   add_user_to_group_success: "[user] added to [group]."
   add_user_to_group_title: Add [:user] to Group
-  add_user_to_group_user: "[:user] name"
+  add_user_to_group_user: "[:USER] name"
 
   # admin_request/author_request emails
   admin_request_change_member_status: Change [:user]'s status

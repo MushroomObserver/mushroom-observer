@@ -31,7 +31,8 @@ end
   <%= autocompleter_field(
     form: f, field: :proposed_name, type: :name,
     value: @given_name, label: "#{:name_deprecate_preferred.t}:", autofocus: true,
-    append: help_note(:div, :name_deprecate_preferred_help.tp), inline: true
+    append: tag.div(:name_deprecate_preferred_help.tp, class: "help-note mr-3"),
+    inline: true
   ) %>
 
   <%= check_box_with_label(form: f, field: :is_misspelling,
@@ -41,6 +42,7 @@ end
   <%= text_area_with_label(form: f, field: :comment, inline: true,
                            value: @comment, cols: 80, rows: 5,
                            label: "#{:name_deprecate_comments.t}:",
-                           append: help_note(:div, deprecate_comments_help)) %>
+                           append: tag.div(deprecate_comments_help,
+                                           class: "help-note mr-3")) %>
 
 <% end %>

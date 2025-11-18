@@ -321,8 +321,6 @@ MushroomObserver::Application.routes.draw do
     get("review_donations", to: "donations#edit") # alternate path
     resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
-    resource :add_user_to_group, only: [:new, :create],
-                                 controller: "add_user_to_group"
     namespace :emails do
       resource :features, only: [:new, :create], controller: "features"
       resource :webmaster_questions, only: [:new, :create],
@@ -421,8 +419,9 @@ MushroomObserver::Application.routes.draw do
                      as: "license_updater")
     get("/votes/anonymity", to: "/images/votes/anonymity#edit",
                             as: "edit_vote_anonymity")
-    put("/votes/anonymity", to: "/images/votes/anonymity#update",
-                            as: "bulk_vote_anonymity_updater")
+    match("/votes/anonymity", to: "/images/votes/anonymity#update",
+                              via: [:put, :patch],
+                              as: "bulk_vote_anonymity_updater")
   end
   resources :images, only: [:index, :show, :destroy] do
     member do

@@ -8,7 +8,7 @@
         concat(tag.div(h(n)))
       end
     end,
-    help_note(:span, :form_synonyms_missing_names_help.t)
+    tag.span(:form_synonyms_missing_names_help.t, class: "help-note mr-3")
   ].safe_join
 end if @new_names.present? %>
 
