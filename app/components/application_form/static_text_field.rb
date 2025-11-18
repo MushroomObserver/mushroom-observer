@@ -23,9 +23,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template
-      div(class: wrapper_class) do
-        render_label
-        p(display_text, class: "form-control-static")
+      inline = @wrapper_options[:inline] || false
+      wrap_class = @wrapper_options[:wrap_class]
+      label_text = @wrapper_options[:label]
+
+      div(class: form_group_class("form-group", inline, wrap_class)) do
+        render_label(label_text, inline) if label_text
+        p(class: "form-control-static") { display_text }
       end
     end
 
@@ -33,6 +37,17 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def display_text
       @wrapper_options[:value] || @wrapper_options[:text] || ""
+    end
+
+    def form_group_class(base, inline, wrap_class)
+      classes = base
+      classes += " form-inline" if inline && base == "form-group"
+      classes += " #{wrap_class}" if wrap_class.present?
+      classes
+    end
+
+    def render_label(text, _inline)
+      label(class: "mr-3") { text } if text
     end
   end
 end

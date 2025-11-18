@@ -21,7 +21,7 @@ class Components::NameTrackerForm < Components::ApplicationForm
 
   def render_submit_buttons
     div(class: "text-center my-3") do
-      if model
+      if model.persisted?
         submit(:UPDATE.t)
         whitespace
         submit(:DISABLE.t)

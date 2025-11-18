@@ -48,9 +48,9 @@ class Components::VisualGroupForm < Components::ApplicationForm
 
   def render_name_field
     div(class: "form-group") do
-      field(:name).label
+      render(field(:name).label)
       div(class: "form-inline") do
-        field(:name).text(size: 40, class: "form-control")
+        render(field(:name).text(size: 40, class: "form-control"))
         span(class: "ml-3") { :VISUAL_GROUP.t }
       end
     end

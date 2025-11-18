@@ -121,10 +121,13 @@ class Components::ApplicationForm < Superform::Rails::Form
                             wrapper_options: wrapper_options)
     end
 
-    def hidden(wrapper_options: {}, **attributes)
-      HiddenField.new(self, attributes: attributes,
-                            wrapper_options: wrapper_options)
+    def read_only(wrapper_options: {}, **attributes)
+      ReadOnlyField.new(self, attributes: attributes,
+                              wrapper_options: wrapper_options)
     end
+
+    # Alias for backwards compatibility
+    alias hidden read_only
 
     def static(wrapper_options: {}, **attributes)
       StaticTextField.new(self, attributes: attributes,
