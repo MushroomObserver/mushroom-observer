@@ -44,6 +44,17 @@ module GeneralExtensions
   # Useful to test that an object doesn't include or isn't equal to something
   ARBITRARY_SHA = "7b2d0b50147a2a6497236a722c9c7a9136d2879c"
 
+  GPS_CLOSE_ENOUGH = 0.001
+
+  # These used to be automatically instantiated fixtures, e.g., @dick, etc.
+  # Now we dynamically provide helper methods for all user fixtures.
+  # This allows tests to write `rolf` instead of `users(:rolf)`.
+  #
+  # To add support for other fixture types, add them to FIXTURE_ACCESSORS.
+  FIXTURE_ACCESSORS = {
+    users: :user
+  }.freeze
+
   ##############################################################################
   #
   #  :section: Test unit helpers
@@ -60,33 +71,32 @@ module GeneralExtensions
     APIKey.select(:notes).where(key: "sort_test").order(:notes).to_a
   end
 
-  # These used to be automatically instantiated fixtures, e.g., @dick, etc.
-  def rolf
-    users(:rolf)
+  # Dynamically provide fixture accessor methods
+  def method_missing(method_name, *args, **kwargs, &block)
+    # Only handle zero-argument method calls
+    return super unless args.empty? && kwargs.empty? && block.nil?
+
+    # Check if this is a user fixture
+    if user_fixture_exists?(method_name)
+      users(method_name)
+    else
+      # Not a fixture accessor, use normal method_missing behavior
+      super
+    end
   end
 
-  def mary
-    users(:mary)
+  def respond_to_missing?(method_name, include_private = false)
+    user_fixture_exists?(method_name) || super
   end
 
-  def junk
-    users(:junk)
-  end
+  private
 
-  def dick
-    users(:dick)
-  end
+  # Check if a user fixture with the given name exists
+  def user_fixture_exists?(fixture_name)
+    return false unless defined?(@loaded_fixtures)
+    return false unless @loaded_fixtures["users"]
 
-  def katrina
-    users(:katrina)
-  end
-
-  def roy
-    users(:roy)
-  end
-
-  def lone_wolf
-    users(:lone_wolf)
+    @loaded_fixtures["users"].fixtures.key?(fixture_name.to_s)
   end
 
   def use_test_locales(&block)
@@ -214,8 +224,6 @@ module GeneralExtensions
   def assert_name_arrays_equal(expect, got, *)
     assert_arrays_equal(expect, got, *, &:search_name)
   end
-
-  GPS_CLOSE_ENOUGH = 0.001
 
   # Compare two latitudes or longitudes.
   #
