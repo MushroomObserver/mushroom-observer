@@ -66,6 +66,11 @@ jobs:
       - name: Update translation files
         run: bundle exec rake lang:update
 
+      - name: Create log files
+        run: |
+          touch log/test.log
+          touch log/production.log
+
       # And finally we can run the test suite
       - name: Run tests
         env:
