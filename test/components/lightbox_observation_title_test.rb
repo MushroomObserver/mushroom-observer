@@ -6,6 +6,7 @@ class LightboxObservationTitleTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
+    super
     @user = users(:rolf)
     @obs = observations(:coprinus_comatus_obs)
   end

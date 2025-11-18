@@ -6,6 +6,7 @@ class CarouselTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
+    super
     @user = users(:rolf)
     @obs = observations(:coprinus_comatus_obs)
     @images = @obs.images.to_a

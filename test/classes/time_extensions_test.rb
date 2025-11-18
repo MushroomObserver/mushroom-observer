@@ -40,6 +40,7 @@ class TimeWithZoneExtensionsTest < ActiveSupport::TestCase
   include TimeExtensionsInterfaceTest
 
   def setup
+    super
     @object = Time.zone.now
   end
 end
@@ -49,6 +50,7 @@ class DateExtensionsTest < ActiveSupport::TestCase
   include DateExtensionsInterfaceTest
 
   def setup
+    super
     @object = Time.zone.today
   end
 end
@@ -59,6 +61,7 @@ class DateTimeExtensionsTest < ActiveSupport::TestCase
   include TimeExtensionsInterfaceTest
 
   def setup
+    super
     @object = DateTime.now
   end
 end
