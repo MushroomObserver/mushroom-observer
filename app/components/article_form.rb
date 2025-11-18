@@ -35,7 +35,7 @@ class Components::ArticleForm < Components::ApplicationForm
     end
   end
 
-  def help_block(&block)
-    div(class: "help-block") { raw(yield.html_safe) }
+  def help_block
+    div(class: "help-block") { raw(yield.html_safe) } # rubocop:disable Rails/OutputSafety
   end
 end
