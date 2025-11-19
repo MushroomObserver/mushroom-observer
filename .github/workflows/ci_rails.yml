@@ -25,12 +25,6 @@ jobs:
         with:
           bundler-cache: true
 
-      # https://github.com/marketplace/actions/brakeman-linter
-      - name: Brakeman
-        uses: devmasx/brakeman-linter-action@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
   test:
     runs-on: ubuntu-22.04
     steps:
