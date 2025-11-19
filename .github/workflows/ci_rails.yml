@@ -101,9 +101,10 @@ jobs:
       - name: Run RuboCop
         run: bundle exec rubocop --parallel
 
+      # https://github.com/reviewdog/action-brakeman
       - name: Run Brakeman
         uses: reviewdog/action-brakeman@v2
         with:
           github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          fail_on_error: false
+          reporter: github-pr-check
+          fail_level: none
