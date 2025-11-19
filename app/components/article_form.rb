@@ -18,7 +18,7 @@ class Components::ArticleForm < Components::ApplicationForm
                        data: { autofocus: true }) do |field_component|
       field_component.with_append do
         help_block do
-          "#{:form_article_title_help.t}#{:field_textile_link.t}"
+          "#{:form_article_title_help.t} #{:field_textile_link.t}"
         end
       end
     end
