@@ -117,14 +117,8 @@ jobs:
         run: bundle exec rubocop --parallel
 
       - name: Run Brakeman
-        run: |
-          bundle exec brakeman --no-pager -f json -o brakeman-report.json
-          bundle exec brakeman --no-pager --no-exit-on-warn --no-exit-on-error -f text
-        continue-on-error: true
-
-      - name: Brakeman Report
-        if: github.event_name == 'pull_request'
-        uses: devmasx/brakeman-linter-action@v1.0.0
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          REPORT_PATH: brakeman-report.json
+        uses: reviewdog/action-brakeman@v2
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          fail_on_error: false
