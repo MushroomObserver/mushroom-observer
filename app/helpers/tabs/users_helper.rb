@@ -93,12 +93,12 @@ module Tabs
 
     def admin_change_user_bonuses_tab(user)
       InternalLink::Model.new(:change_user_bonuses.t,
-                              user, edit_admin_users_path(user.id)).tab
+                              user, edit_admin_user_path(user.id)).tab
     end
 
     def admin_destroy_user_tab(user)
       InternalLink::Model.new(:destroy_object.t(TYPE: User),
-                              user, admin_users_path(id: user.id),
+                              user, admin_user_path(id: user.id),
                               html_options: { button: :destroy }).tab
     end
 

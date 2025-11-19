@@ -450,6 +450,16 @@ class UserStats < ApplicationRecord
     user.update(contribution: contribution)
   end
 
+  # Format bonuses as a string for textarea editing
+  def formatted_bonuses
+    return "" unless bonuses
+
+    bonuses.map do |points, reason|
+      format("%<points>-6d %<reason>s",
+             points: points, reason: reason.gsub(/\s+/, " "))
+    end.join("\n")
+  end
+
   private
 
   # Do a query to get the number of records in a given category for a User.

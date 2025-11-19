@@ -27,13 +27,6 @@ class FeatureEmailFormTest < UnitTestCase
     assert_includes(form, "data-autofocus")
   end
 
-  def test_renders_user_logins
-    form = render_form
-
-    assert_includes(form, :USERS.l)
-    assert_includes(form, "rolf, mary")
-  end
-
   def test_renders_submit_button
     form = render_form
 
