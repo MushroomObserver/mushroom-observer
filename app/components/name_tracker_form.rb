@@ -7,7 +7,7 @@ class Components::NameTrackerForm < Components::ApplicationForm
   def initialize(model, method: nil, note_template: nil, **)
     @method = method
     @note_template = note_template
-    super(model, id: "name_tracker_form", **)
+    super(model, **)
   end
 
   def view_template
@@ -32,35 +32,34 @@ class Components::NameTrackerForm < Components::ApplicationForm
   end
 
   def render_tracker_fields
-    namespace(:name_tracker) do |builder|
-      render(
-        builder.field(:note_template_enabled).checkbox(
-          wrapper_options: {
-            label: :email_tracking_note.t,
-            wrap_class: "mt-5"
-          }
-        )
+    render(
+      field(:note_template_enabled).checkbox(
+        wrapper_options: {
+          label: :email_tracking_note.t,
+          wrap_class: "mt-5"
+        }
       )
+    )
 
-      div(class: "help-note mt-2 mb-5") do
-        :email_tracking_note_help.t
-      end
-
-      render(
-        builder.field(:note_template).textarea(
-          rows: 16,
-          cols: 80,
-          value: @note_template,
-          data: { autofocus: true },
-          id: "name_tracker_note_template"
-        )
-      )
-      br
+    div(class: "help-note mt-2 mb-5") do
+      :email_tracking_note_help.t
     end
+
+    render(
+      field(:note_template).textarea(
+        rows: 16,
+        cols: 80,
+        value: @note_template,
+        data: { autofocus: true },
+        id: "name_tracker_note_template"
+      )
+    )
+    br
   end
 
   def form_action
-    url_for(controller: "names/trackers", action: :create, id: model.name.id,
+    action = model.persisted? ? :update : :create
+    url_for(controller: "names/trackers", action: action, id: model.name.id,
             only_path: true)
   end
 

@@ -3,7 +3,4 @@ add_page_title(:create_donation_title.l)
 add_context_nav(admin_donations_form_new_tabs)
 %>
 
-<%= render(Components::DonationForm.new(
-      @donation,
-      id: "admin_new_donations_form"
-    )) %>
+<%= render(Components::DonationForm.new(@donation)) %>

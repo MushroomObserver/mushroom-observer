@@ -30,7 +30,7 @@ class NameTrackerFormTest < UnitTestCase
 
     assert_includes(form, :email_tracking_note.t)
     assert_includes(form,
-                    'name="name_tracker[name_tracker][note_template_enabled]"')
+                    'name="name_tracker[note_template_enabled]"')
   end
 
   def test_renders_note_template_help
@@ -42,7 +42,7 @@ class NameTrackerFormTest < UnitTestCase
   def test_renders_note_template_textarea
     form = render_form
 
-    assert_includes(form, 'name="name_tracker[name_tracker][note_template]"')
+    assert_includes(form, 'name="name_tracker[note_template]"')
     assert_includes(form, "rows=\"16\"")
     assert_includes(form, "cols=\"80\"")
     assert_includes(form, "data-autofocus")

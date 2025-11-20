@@ -6,7 +6,7 @@
 class Components::VisualGroupForm < Components::ApplicationForm
   def initialize(model, visual_model:, **)
     @visual_model = visual_model
-    super(model, id: "visual_group_form", local: true, **)
+    super(model, local: true, **)
   end
 
   def view_template

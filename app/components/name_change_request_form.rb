@@ -57,7 +57,7 @@ class Components::NameChangeRequestForm < Components::ApplicationForm
     url_for(
       action: :create,
       name_id: @name.id,
-      new_name: @new_name
+      new_name_with_icn_id: @new_name_with_icn_id
     )
   end
 end

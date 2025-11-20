@@ -4,7 +4,7 @@
 class Components::CommentForm < Components::ApplicationForm
   def initialize(model, local: false, **)
     @local = local
-    super(model, id: "comment_form", **)
+    super(model, **)
   end
 
   def around_template

@@ -79,6 +79,13 @@
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
 
+  # Automatically set form ID based on class name unless explicitly provided
+  def initialize(model, id: nil, **options)
+    # Generate ID from class name: Components::APIKeyForm -> "api_key_form"
+    auto_id = id || self.class.name.demodulize.underscore
+    super(model, **options.merge(id: auto_id))
+  end
+
   # Form subclasses can override form_action to derive action URLs from model
   # associations or other logic, eliminating the need to pass explicit actions
 
