@@ -20,8 +20,6 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       click_on("Your Observations")
 
       assert_selector("body.observations__index")
-      # Debug: save screenshot to see what's wrong
-      page.save_screenshot("/tmp/observations_index.png")
       assert_link(text: /#{obs.text_name}/)
       click_link(text: /#{obs.text_name}/)
 
