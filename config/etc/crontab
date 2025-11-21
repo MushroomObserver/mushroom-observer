@@ -7,7 +7,7 @@ MAILTO=webmaster@mushroomobserver.org
 */6 * * * * /var/web/mo/bin/run script/retransfer_images
 # This runs staggered three minutes after retransfer_images:
 # 3-59/6 * * * * rsync -av --remove-source-files /var/web/mo/public/images/ mo@images.mushroomobserver.org:/data/images/mo/
-3-59/6 * * * * (cd /var/web/mo/public/images && find . -type f -mmin +1) | rsync -av --remove-source-files --files-from=- /var/web/mo/public/images/ mo@images.mushroomobserver.org:/data/images/mo/
+3-59/6 * * * * (cd /var/web/mo/public/images && find . -type f -mmin +3) | rsync -av --remove-source-files --files-from=- /var/web/mo/public/images/ mo@images.mushroomobserver.org:/data/images/mo/
 */4 * * * * /var/web/mo/bin/run script/parse_log
 1   * * * * /var/web/mo/bin/run script/check_for_orphaned_thumbnails
 13  3 * * * /var/web/mo/bin/run script/backup_blocked_ips.sh
