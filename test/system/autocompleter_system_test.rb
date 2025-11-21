@@ -60,17 +60,22 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector("body.search__new")
 
     # Location: Roy's location pref is scientific
+    # Clear any prefilled value
+    fill_in("query_observations_within_locations", with: "")
+
     field = find_field("query_observations_within_locations")
     field.click
+    # Type search term
     field.send_keys("U")
     assert_selector(".auto_complete", wait: 5) # wait for autocomplete to appear
     field.send_keys("SA, Califo")
-    assert_selector(".auto_complete ul li a", minimum: 1) # verify results appear
+    assert_selector(".auto_complete ul li a", minimum: 1) # verify results
     @browser.keyboard.type(:down, :tab) # select first result
     sleep(0.5)
     # Verify something was selected (starts with "USA, California")
     value = find_field("query_observations_within_locations").value
-    assert(value.start_with?("USA, California"), "Expected location to start with 'USA, California' but got: #{value}")
+    assert(value.start_with?("USA, California"),
+           "Expected 'USA, California' but got: #{value}")
   end
 
   def test_autocompleter_in_naming_modal

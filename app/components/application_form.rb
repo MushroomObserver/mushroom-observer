@@ -82,7 +82,9 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Automatically set form ID based on class name unless explicitly provided
   def initialize(model, id: nil, **options)
     # Generate ID from class name: Components::APIKeyForm -> "api_key_form"
-    auto_id = id || self.class.name.demodulize.underscore
+    # For anonymous classes (tests), default to "application_form"
+    auto_id = id || self.class.name&.demodulize&.underscore ||
+              "application_form"
     super(model, **options.merge(id: auto_id))
   end
 

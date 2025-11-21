@@ -25,14 +25,10 @@ class Components::CommentForm < Components::ApplicationForm
   private
 
   def form_action
-    # Add turbo_stream format param for modal forms
-    format_param = @turbo_stream ? { format: :turbo_stream } : {}
-
     if @model.persisted?
-      comment_path(id: @model.id, **format_param)
+      comment_path(id: @model.id)
     else
-      comments_path(target: @model.target_id, type: @model.target_type,
-                    **format_param)
+      comments_path(target: @model.target_id, type: @model.target_type)
     end
   end
 

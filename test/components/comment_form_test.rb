@@ -44,7 +44,7 @@ class CommentFormTest < UnitTestCase
   def test_enables_turbo_by_default
     form = render_form
 
-    assert_match(/<form[^>]*\sdata-turbo[>\s]/, form)
+    assert_match(/<form[^>]*\sdata-turbo="true"/, form)
   end
 
   def test_omits_turbo_when_local_true
