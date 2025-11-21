@@ -45,7 +45,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#modal_collection_number") do
       assert_field("collection_number_name")
       assert_field("collection_number_number")
-      fill_in("collection_number_name", with: "")  # Explicitly clear
+      fill_in("collection_number_name", with: "") # Explicitly clear
       fill_in("collection_number_number", with: unique_number)
       click_commit
     end
