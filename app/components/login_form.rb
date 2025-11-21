@@ -7,6 +7,7 @@ class Components::LoginForm < Components::ApplicationForm
     render_password_field
     render_remember_me_field
     submit(:login_login.l, center: true)
+    render_forgot_login_text
     render_help_text
   end
 
