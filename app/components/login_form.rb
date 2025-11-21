@@ -37,7 +37,7 @@ class Components::LoginForm < Components::ApplicationForm
 
   def render_help_text
     div(class: "form-group mt-3") do
-      raw(:login_having_problems.tp) # rubocop:enable Rails/OutputSafety
+      raw(:login_having_problems.tp) # rubocop:disable Rails/OutputSafety
     end
   end
 end
