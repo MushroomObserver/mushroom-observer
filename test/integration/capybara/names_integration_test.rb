@@ -62,8 +62,10 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     # Verify database effect
     tracker = NameTracker.find_by(name: name, user: rolf)
     assert(tracker, "Tracker should have been created")
-    assert_equal("Test note about :observation", tracker.note_template,
-                 "Note template should be saved. Got: #{tracker.note_template.inspect}")
+    assert_equal(
+      "Test note about :observation", tracker.note_template,
+      "Note template should be saved. Got: #{tracker.note_template.inspect}"
+    )
   end
 
   def test_update_name_tracker

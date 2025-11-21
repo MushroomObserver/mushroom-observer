@@ -34,17 +34,24 @@ class DonationsIntegrationTest < CapybaraIntegrationTestCase
     first("button", text: "Turn on Admin Mode").click
     donation = donations(:unreviewed)
 
+    # Verify donation starts as unreviewed
+    assert_not(donation.reviewed, "Donation should start as unreviewed")
+
     # Visit the edit donation page
     visit(edit_admin_donations_path)
     assert_selector("body.donations__edit")
 
-    # The edit page shows all donations, find and update the specific one
-    # This form is a bit special - it edits multiple donations at once
-    # Note: edit page uses form_with directly, not DonationForm component
+    # The edit page shows all donations in a table with checkboxes
     assert_selector("#admin_review_donations_form")
 
-    # Note: The actual update test would be more complex due to
-    # the multi-record form structure. This smoke test verifies
-    # the form loads correctly.
+    # Check the "reviewed" checkbox for the unreviewed donation
+    within("#admin_review_donations_form") do
+      check("reviewed_#{donation.id}")
+      click_commit
+    end
+
+    # Verify database effect - donation should now be marked as reviewed
+    donation.reload
+    assert(donation.reviewed, "Donation should have been marked as reviewed")
   end
 end

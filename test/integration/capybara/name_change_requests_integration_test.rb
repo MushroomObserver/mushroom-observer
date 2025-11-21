@@ -24,9 +24,9 @@ class NameChangeRequestsIntegrationTest < CapybaraIntegrationTestCase
 
     # Visit the new name change request page with required params
     visit(new_admin_emails_name_change_requests_path(
-      name_id: name.id,
-      new_name_with_icn_id: new_name_with_icn_id
-    ))
+            name_id: name.id,
+            new_name_with_icn_id: new_name_with_icn_id
+          ))
     assert_selector("body.name_change_requests__new")
 
     # Fill in the notes field
