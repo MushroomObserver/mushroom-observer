@@ -5,8 +5,12 @@ require("test_helper")
 # Simple smoke test for email new password form submission
 class EmailNewPasswordFormIntegrationTest < CapybaraIntegrationTestCase
   def test_request_new_password
-    # Visit the email new password page (no login required)
-    visit(account_email_new_password_path)
+    # Start at the login page
+    visit(new_account_login_path)
+    assert_selector("body.login__new")
+
+    # Click the "Email me a new one." link to go to password reset page
+    click_link("Email me a new one.")
     assert_selector("body.login__email_new_password")
 
     # Fill in the form with a valid login
