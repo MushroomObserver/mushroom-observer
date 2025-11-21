@@ -3,15 +3,15 @@
 # Form for creating/editing comments
 class Components::CommentForm < Components::ApplicationForm
   def initialize(model, local: false, **)
-    @local = local
+    @turbo_stream = !local
     super(model, **)
   end
 
   def around_template
-    # Set turbo data attribute only when not local
-    unless @local
+    # Set turbo data attribute for turbo_stream forms
+    if @turbo_stream
       @attributes[:data] ||= {}
-      @attributes[:data][:turbo] = true
+      @attributes[:data][:turbo] = "true"
     end
     super
   end
@@ -25,10 +25,14 @@ class Components::CommentForm < Components::ApplicationForm
   private
 
   def form_action
+    # Add turbo_stream format param for modal forms
+    format_param = @turbo_stream ? { format: :turbo_stream } : {}
+
     if @model.persisted?
-      comment_path(id: @model.id)
+      comment_path(id: @model.id, **format_param)
     else
-      comments_path(target: @model.target_id, type: @model.target_type)
+      comments_path(target: @model.target_id, type: @model.target_type,
+                    **format_param)
     end
   end
 
