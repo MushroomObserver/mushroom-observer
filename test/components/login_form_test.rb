@@ -48,6 +48,12 @@ class LoginFormTest < UnitTestCase
     assert_includes(form, :login_having_problems.tp)
   end
 
+  def test_renders_forgot_login_text
+    form = render_form
+
+    assert_includes(form, :login_forgot_password.tp)
+  end
+
   private
 
   def render_form

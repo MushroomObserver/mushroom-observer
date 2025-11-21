@@ -7,6 +7,7 @@ class Components::LoginForm < Components::ApplicationForm
     render_password_field
     render_remember_me_field
     submit(:login_login.l, center: true)
+    render_forgot_login_text
     render_help_text
   end
 
@@ -28,9 +29,14 @@ class Components::LoginForm < Components::ApplicationForm
                                  wrap_class: "mt-3")
   end
 
-  def render_help_text
+  def render_forgot_login_text
     div(class: "form-group mt-3") do
       :login_forgot_password.tp
+    end
+  end
+
+  def render_help_text
+    div(class: "form-group mt-3") do
       :login_having_problems.tp
     end
   end
