@@ -58,11 +58,11 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query(ids, :SpeciesList, by_users: rolf, order_by: :id)
   end
 
-  def test_species_list_within_locations
-    scope = SpeciesList.within_locations(locations(:burbank)).order_by_default
-    assert_query(scope, :SpeciesList, within_locations: locations(:burbank))
+  def test_species_list_locations
+    scope = SpeciesList.locations(locations(:burbank)).order_by_default
+    assert_query(scope, :SpeciesList, locations: locations(:burbank))
     assert_query(
-      [], :SpeciesList, within_locations: locations(:unused_location)
+      [], :SpeciesList, locations: locations(:unused_location)
     )
   end
 

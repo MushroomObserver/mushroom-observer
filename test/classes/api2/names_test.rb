@@ -128,7 +128,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_locations
     loc   = locations(:burbank)
-    names = Name.with_correct_spelling.locations(loc)
+    names = Name.with_correct_spelling.within_locations(loc)
     assert_not_empty(names)
     assert_api_pass(params_get(location: loc.id))
     assert_api_results(names)

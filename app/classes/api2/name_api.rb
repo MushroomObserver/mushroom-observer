@@ -60,7 +60,7 @@ class API2
 
     def parse_observation_query_parameters
       {
-        locations: parse_array(:string, :location),
+        within_locations: parse_array(:string, :location),
         species_lists: parse_array(:string, :species_list)
       }
     end

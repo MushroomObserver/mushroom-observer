@@ -119,11 +119,9 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     place_names.map! { |val| search_where(val) }
     or_clause(*place_names).distinct
   }
-  scope :within_locations, lambda { |locations|
-    return none if locations.blank?
-
-    joins(species_list_observations: :observation).
-      merge(Observation.within_locations(locations)).distinct
+  scope :locations, lambda { |locations|
+    ids = Lookup::Locations.new(locations).ids
+    where(location_id: ids).distinct
   }
   # Takes multiple name strings or ids, passes include_synonyms
   scope :names, lambda { |lookup:, **args|

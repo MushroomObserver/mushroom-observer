@@ -42,6 +42,12 @@ module Location::Scopes
     scope :notes_has,
           ->(phrase) { search_columns(Location[:notes], phrase) }
 
+    # This is a convenience for lookup by text name. Used by `observation_query`
+    scope :locations, lambda { |locations|
+      location_ids = Lookup::Locations.new(locations).ids
+      where(id: location_ids).distinct
+    }
+
     # Does not search location notes, observation notes or comments on either.
     # We do not yet support location comment queries.
     scope :pattern, lambda { |phrase|
