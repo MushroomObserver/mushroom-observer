@@ -15,40 +15,40 @@ class NameChangeRequestFormTest < UnitTestCase
   end
 
   def test_renders_form_with_help_text
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :email_name_change_request_help.tp)
+    assert_includes(html, :email_name_change_request_help.tp)
   end
 
   def test_renders_current_name_field
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :NAME.t)
-    assert_includes(form, @name.unique_search_name)
-    assert_includes(form, "[##{@name.icn_id}]")
+    assert_includes(html, :NAME.t)
+    assert_includes(html, @name.unique_search_name)
+    assert_includes(html, "[##{@name.icn_id}]")
   end
 
   def test_renders_new_name_hidden_field
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :new_name.t)
-    assert_includes(form, @new_name_with_icn_id)
+    assert_includes(html, :new_name.t)
+    assert_includes(html, @new_name_with_icn_id)
   end
 
   def test_renders_notes_field
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :Notes.t)
-    assert_includes(form, 'name="name_change_request[notes]"')
-    assert_includes(form, "rows=\"10\"")
-    assert_includes(form, "data-autofocus")
+    assert_includes(html, :Notes.t)
+    assert_html(html, "textarea[name='name_change_request[notes]']")
+    assert_html(html, "textarea[rows='10']")
+    assert_html(html, "textarea[data-autofocus]")
   end
 
   def test_renders_submit_button
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :SEND.l)
-    assert_includes(form, "center-block")
+    assert_html(html, "input[type='submit'][value='#{:SEND.l}']")
+    assert_html(html, ".center-block")
   end
 
   private

@@ -14,32 +14,32 @@ class PublicationFormTest < UnitTestCase
   end
 
   def test_renders_form_with_all_fields
-    form = render_component_form
+    html = render_component_form
 
-    assert_includes(form, "form-group")
-    assert_includes(form, :publication_full.t)
-    assert_includes(form, :publication_link.t)
-    assert_includes(form, :publication_peer_reviewed.t)
-    assert_includes(form, :publication_how_helped.t)
-    assert_includes(form, :publication_mo_mentioned.t)
+    assert_html(html, ".form-group")
+    assert_includes(html, :publication_full.t)
+    assert_includes(html, :publication_link.t)
+    assert_includes(html, :publication_peer_reviewed.t)
+    assert_includes(html, :publication_how_helped.t)
+    assert_includes(html, :publication_mo_mentioned.t)
   end
 
   def test_renders_submit_button
-    form = render_component_form
+    html = render_component_form
 
-    assert_includes(form, :CREATE.t)
-    assert_includes(form, "btn btn-default")
-    assert_includes(form, "center-block my-3")
-    assert_includes(form, "data-turbo-submits-with")
+    assert_html(html, "input[type='submit'][value='#{:CREATE.t}']")
+    assert_html(html, ".btn.btn-default")
+    assert_html(html, ".center-block.my-3")
+    assert_html(html, "input[data-turbo-submits-with]")
   end
 
   def test_form_has_correct_attributes
-    form = render_component_form
+    html = render_component_form
 
     # Form auto-determines action for new record
-    assert_includes(form, 'action="/publications"')
-    assert_includes(form, 'method="post"')
-    assert_includes(form, 'id="publication_form"')
+    assert_html(html, "form[action='/publications']")
+    assert_html(html, "form[method='post']")
+    assert_html(html, "form[id='publication_form']")
   end
 
   def test_component_vs_erb_html

@@ -10,37 +10,30 @@ class VisualGroupFormTest < UnitTestCase
     @visual_model = visual_models(:visual_model_one)
     @visual_group = VisualGroup.new(visual_model: @visual_model)
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_form_with_name_field
-    form = render_form
-
-    assert_includes(form, 'name="visual_group[name]"')
-    assert_includes(form, 'size="40"')
-    assert_includes(form, :VISUAL_GROUP.t)
+    assert_html(@html, "input[name='visual_group[name]']")
+    assert_html(@html, "input[size='40']")
+    assert_includes(@html, :VISUAL_GROUP.t)
   end
 
   def test_renders_form_with_description_field
-    form = render_form
-
-    assert_includes(form, :DESCRIPTION.t)
-    assert_includes(form, 'name="visual_group[description]"')
-    assert_includes(form, "rows=\"10\"")
-    assert_includes(form, "cols=\"60\"")
+    assert_includes(@html, :DESCRIPTION.t)
+    assert_html(@html, "textarea[name='visual_group[description]']")
+    assert_html(@html, "textarea[rows='10']")
+    assert_html(@html, "textarea[cols='60']")
   end
 
   def test_renders_form_with_approved_checkbox
-    form = render_form
-
-    assert_includes(form, :APPROVED.t)
-    assert_includes(form, 'name="visual_group[approved]"')
+    assert_includes(@html, :APPROVED.t)
+    assert_html(@html, "input[name='visual_group[approved]']")
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :SUBMIT.t)
-    assert_includes(form, "center-block")
+    assert_html(@html, "input[type='submit'][value='#{:SUBMIT.t}']")
+    assert_html(@html, ".center-block")
   end
 
   private

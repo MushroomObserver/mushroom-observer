@@ -8,53 +8,44 @@ class LicenseFormTest < UnitTestCase
   def setup
     @license = License.new
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_form_with_display_name_field
-    form = render_form
-
-    assert_includes(form, :license_display_name.t)
-    assert_includes(form, 'name="license[display_name]"')
-    assert_includes(form, "data-autofocus")
+    assert_includes(@html, :license_display_name.t)
+    assert_html(@html, "input[name='license[display_name]']")
+    assert_html(@html, "input[data-autofocus]")
   end
 
   def test_renders_form_with_url_field
-    form = render_form
-
-    assert_includes(form, :license_url.t)
-    assert_includes(form, 'name="license[url]"')
+    assert_includes(@html, :license_url.t)
+    assert_html(@html, "input[name='license[url]']")
   end
 
   def test_renders_form_with_deprecated_checkbox
-    form = render_form
-
-    assert_includes(form, :license_form_checkbox_deprecated.t)
-    assert_includes(form, 'name="license[deprecated]"')
-    assert_includes(form, 'type="checkbox"')
+    assert_includes(@html, :license_form_checkbox_deprecated.t)
+    assert_html(@html, "input[name='license[deprecated]']")
+    assert_html(@html, "input[type='checkbox']")
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :SUBMIT.t)
-    assert_includes(form, "btn btn-default")
-    assert_includes(form, "center-block my-3")
+    assert_html(@html, "input[type='submit'][value='#{:SUBMIT.t}']")
+    assert_html(@html, ".btn.btn-default")
+    assert_html(@html, ".center-block.my-3")
   end
 
   def test_form_has_correct_attributes_for_new_record
-    form = render_form
-
-    assert_includes(form, 'action="/licenses"')
-    assert_includes(form, 'method="post"')
+    assert_html(@html, "form[action='/licenses']")
+    assert_html(@html, "form[method='post']")
   end
 
   def test_form_has_correct_attributes_for_existing_record
     @license = licenses(:ccnc25)
-    form = render_form
+    html = render_form
 
-    assert_includes(form, "action=\"/licenses/#{@license.id}\"")
-    assert_includes(form, 'name="_method"')
-    assert_includes(form, 'value="patch"')
+    assert_html(html, "form[action='/licenses/#{@license.id}']")
+    assert_html(html, "input[name='_method']")
+    assert_html(html, "input[value='patch']")
   end
 
   private

@@ -13,27 +13,22 @@ class UserBonusesFormTest < UnitTestCase
                            [30, "Test reason 3"]]
     @help_text = "Test help text"
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_form_with_help_text
-    form = render_form
-
-    assert_includes(form, @help_text)
+    assert_includes(@html, @help_text)
   end
 
   def test_renders_form_with_val_textarea
-    form = render_form
-
-    assert_includes(form, 'name="user_stats[val]"')
-    assert_includes(form, "rows=\"5\"")
-    assert_includes(form, @user_stats.formatted_bonuses)
+    assert_html(@html, "textarea[name='user_stats[val]']")
+    assert_html(@html, "textarea[rows='5']")
+    assert_includes(@html, @user_stats.formatted_bonuses)
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :SAVE_EDITS.l)
-    assert_includes(form, "center-block")
+    assert_html(@html, "input[type='submit'][value='#{:SAVE_EDITS.l}']")
+    assert_html(@html, ".center-block")
   end
 
   private

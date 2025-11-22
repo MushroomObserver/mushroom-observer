@@ -14,38 +14,38 @@ class MergeRequestEmailFormTest < UnitTestCase
   end
 
   def test_renders_form_with_help_text
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :email_merge_request_help.tp(type: Name.type_tag))
+    assert_includes(html, :email_merge_request_help.tp(type: Name.type_tag))
   end
 
   def test_renders_old_object_field
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :NAME.t)
-    assert_includes(form, @old_name.unique_format_name.t)
+    assert_includes(html, :NAME.t)
+    assert_includes(html, @old_name.unique_format_name.t)
   end
 
   def test_renders_new_object_field
-    form = render_form
+    html = render_form
 
-    assert_includes(form, @new_name.unique_format_name.t)
+    assert_includes(html, @new_name.unique_format_name.t)
   end
 
   def test_renders_notes_field
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :Notes.t)
-    assert_includes(form, 'name="merge_request[notes]"')
-    assert_includes(form, "rows=\"10\"")
-    assert_includes(form, "data-autofocus")
+    assert_includes(html, :Notes.t)
+    assert_html(html, "textarea[name='merge_request[notes]']")
+    assert_html(html, "textarea[rows='10']")
+    assert_html(html, "textarea[data-autofocus]")
   end
 
   def test_renders_submit_button
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :SEND.l)
-    assert_includes(form, "center-block")
+    assert_html(html, "input[type='submit'][value='#{:SEND.l}']")
+    assert_html(html, ".center-block")
   end
 
   private

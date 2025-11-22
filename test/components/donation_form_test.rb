@@ -9,44 +9,35 @@ class DonationFormTest < UnitTestCase
     super
     @donation = Donation.new
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_form_with_amount_field
-    form = render_form
-
-    assert_includes(form, :confirm_amount.t)
-    assert_includes(form, 'name="donation[amount]"')
-    assert_includes(form, 'size="7"')
+    assert_includes(@html, :confirm_amount.t)
+    assert_html(@html, "input[name='donation[amount]']")
+    assert_html(@html, "input[size='7']")
   end
 
   def test_renders_form_with_who_field
-    form = render_form
-
-    assert_includes(form, :WHO.t)
-    assert_includes(form, 'name="donation[who]"')
-    assert_includes(form, 'size="50"')
+    assert_includes(@html, :WHO.t)
+    assert_html(@html, "input[name='donation[who]']")
+    assert_html(@html, "input[size='50']")
   end
 
   def test_renders_form_with_anonymous_checkbox
-    form = render_form
-
-    assert_includes(form, :donate_anonymous.t)
-    assert_includes(form, 'name="donation[anonymous]"')
-    assert_includes(form, 'type="checkbox"')
+    assert_includes(@html, :donate_anonymous.t)
+    assert_html(@html, "input[name='donation[anonymous]']")
+    assert_html(@html, "input[type='checkbox']")
   end
 
   def test_renders_form_with_email_field
-    form = render_form
-
-    assert_includes(form, :EMAIL.t)
-    assert_includes(form, 'name="donation[email]"')
+    assert_includes(@html, :EMAIL.t)
+    assert_html(@html, "input[name='donation[email]']")
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :create_donation_add.l)
-    assert_includes(form, "center-block")
+    assert_html(@html, "input[type='submit'][value='#{:create_donation_add.l}']")
+    assert_html(@html, ".center-block")
   end
 
   private
