@@ -262,7 +262,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # This is the new default search scope for observations by location:
     # returns all observations whose lat/lng or location_lat/lng are
-    # within the box(es) of the given observations.
+    # within the box(es) of the given locations.
     scope :within_locations, lambda { |locations|
       locs = ::Lookup::Locations.new(locations).instances
       return none if locs.blank?
