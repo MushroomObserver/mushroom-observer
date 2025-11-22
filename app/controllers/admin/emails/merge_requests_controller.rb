@@ -60,7 +60,7 @@ module Admin
         when "Name"
           Name
         else
-          flash_error("Invalid type param: #{val.inspect}.")
+          flash_error(:runtime_invalid.t(type: '"type"', value: val.to_s))
           redirect_back_or_default("/")
           nil
         end
