@@ -80,7 +80,6 @@ class ExternalLinkFormTest < UnitTestCase
       observation: @observation,
       sites: @sites,
       site: @site,
-      base_urls: @base_urls,
       user: @user,
       action: "/test_action",
       id: "external_link_form",
@@ -95,7 +94,6 @@ class ExternalLinkFormTest < UnitTestCase
       observation: @observation,
       sites: @sites,
       site: @site,
-      base_urls: @base_urls,
       user: @user,
       action: "/test_action",
       id: "external_link_form",
@@ -110,7 +108,6 @@ class ExternalLinkFormTest < UnitTestCase
       observation: @observation,
       sites: @sites,
       site: @site,
-      base_urls: @base_urls,
       user: @user
     )
     render(form)

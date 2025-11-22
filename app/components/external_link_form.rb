@@ -2,15 +2,13 @@
 
 # Form for creating or editing external links for observations
 class Components::ExternalLinkForm < Components::ApplicationForm
-  def initialize(model, observation:, sites:, site:, base_urls:, user:,
-                 back: nil, **)
-    @observation = observation
-    @sites = sites
-    @site = site
-    @base_urls = base_urls
-    @user = user
-    @back = back
-    super(model, **)
+  def initialize(model, **kwargs)
+    @observation = kwargs.delete(:observation)
+    @sites = kwargs.delete(:sites)
+    @site = kwargs.delete(:site) || @sites&.first
+    @user = kwargs.delete(:user)
+    @back = kwargs.delete(:back)
+    super
   end
 
   def view_template
@@ -73,6 +71,12 @@ class Components::ExternalLinkForm < Components::ApplicationForm
     )
   end
 
+  def base_urls
+    @base_urls ||= @sites.each_with_object({}) do |site, hash|
+      hash[site.name] = site.base_url
+    end
+  end
+
   def submit_text
     model.persisted? ? :UPDATE.l : :ADD.l
   end
@@ -100,7 +104,7 @@ class Components::ExternalLinkForm < Components::ApplicationForm
     # Add stimulus controller for placeholder behavior
     @attributes[:data] ||= {}
     @attributes[:data][:controller] = "placeholder"
-    @attributes[:data][:placeholders] = @base_urls.to_json
+    @attributes[:data][:placeholders] = base_urls.to_json
     super
   end
 end

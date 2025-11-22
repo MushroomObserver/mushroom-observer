@@ -184,8 +184,7 @@ module Observations
             observation: @observation,
             back: @back,
             sites: @sites,
-            site: @site,
-            base_urls: @base_urls
+            site: @site
           }
         }
       ) and return
@@ -240,8 +239,7 @@ module Observations
             observation: @observation,
             back: @back,
             sites: @sites,
-            site: @site,
-            base_urls: @base_urls
+            site: @site
           }
         }
       ) and return true

@@ -58,7 +58,7 @@ module ModalsHelper
     params
   end
 
-  def add_observation_param(params, model, observation, component_class)
+  def add_observation_param(params, model, observation, _component_class)
     case model.class.name.to_sym
     when :CollectionNumber, :HerbariumRecord, :ExternalLink
       params[:observation] = observation
@@ -68,11 +68,10 @@ module ModalsHelper
   end
 
   def add_form_specific_params(params, component_class, locals)
-    if component_class == Components::ExternalLinkForm
-      params[:user] = locals[:user] if locals[:user]
-      params[:sites] = locals[:sites] if locals[:sites]
-      params[:site] = locals[:site] if locals[:site]
-      params[:base_urls] = locals[:base_urls] if locals[:base_urls]
-    end
+    return unless component_class == Components::ExternalLinkForm
+
+    params[:user] = locals[:user] if locals[:user]
+    params[:sites] = locals[:sites] if locals[:sites]
+    params[:site] = locals[:site] if locals[:site]
   end
 end
