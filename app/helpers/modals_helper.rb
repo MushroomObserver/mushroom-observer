@@ -13,16 +13,25 @@ module ModalsHelper
   # @return [String] Rendered HTML
   def render_form_or_component(form, model:, observation: nil, back: nil,
                                **form_locals)
-    # Map form paths to their corresponding component classes
+    # Map model classes to their corresponding component classes
     component_map = {
-      "collection_numbers/form" => Components::CollectionNumberForm,
-      "sequences/form" => Components::SequenceForm
+      Comment: Components::CommentForm,
+      ExternalLink: Components::ExternalLinkForm,
+      HerbariumRecord: Components::HerbariumRecordForm,
+      CollectionNumber: Components::CollectionNumberForm,
+      Sequence: Components::SequenceForm
     }
 
-    component_class = component_map[form]
+    component_class = component_map[model.class.name.to_sym]
 
     if component_class
-      render_modal_component(component_class, model, observation, back)
+      render_modal_component(
+        component_class,
+        model,
+        observation,
+        back,
+        form_locals
+      )
     else
       render(partial: form, locals: form_locals)
     end
@@ -30,24 +39,40 @@ module ModalsHelper
 
   private
 
-  def render_modal_component(component_class, model, observation, back)
-    params = build_component_params(component_class, model, observation, back)
+  def render_modal_component(component_class, model, observation, back, locals)
+    params = build_component_params(
+      component_class,
+      model,
+      observation,
+      back,
+      locals
+    )
     render(component_class.new(model, **params))
   end
 
-  def build_component_params(component_class, model, observation, back)
+  def build_component_params(component_class, model, observation, back, locals)
     params = { local: false } # Modal forms are turbo forms
     add_observation_param(params, model, observation, component_class)
+    add_form_specific_params(params, component_class, locals)
     params[:back] = back if back
     params
   end
 
   def add_observation_param(params, model, observation, component_class)
-    case component_class.name
-    when "Components::CollectionNumberForm"
+    case model.class.name.to_sym
+    when :CollectionNumber, :HerbariumRecord, :ExternalLink
       params[:observation] = observation
-    when "Components::SequenceForm"
+    when :Sequence
       params[:observation] = observation || model&.observation
+    end
+  end
+
+  def add_form_specific_params(params, component_class, locals)
+    if component_class == Components::ExternalLinkForm
+      params[:user] = locals[:user] if locals[:user]
+      params[:sites] = locals[:sites] if locals[:sites]
+      params[:site] = locals[:site] if locals[:site]
+      params[:base_urls] = locals[:base_urls] if locals[:base_urls]
     end
   end
 end

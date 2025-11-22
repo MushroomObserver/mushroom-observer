@@ -9,8 +9,15 @@ add_edit_title(:EXTERNAL_LINK.l, @external_link)
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(partial: "observations/external_links/form",
-               locals: { local: true }) %>
+    <%= render(Components::ExternalLinkForm.new(
+          @external_link,
+          observation: @observation,
+          sites: [@site],
+          site: @site,
+          base_urls: @base_urls,
+          user: @user,
+          back: @back
+        )) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

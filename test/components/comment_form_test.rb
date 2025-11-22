@@ -74,7 +74,8 @@ class CommentFormTest < UnitTestCase
     form = Components::CommentForm.new(
       @comment,
       action: "/test_action",
-      id: "comment_form"
+      id: "comment_form",
+      local: false
     )
     render(form)
   end

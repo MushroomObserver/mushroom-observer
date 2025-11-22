@@ -149,6 +149,11 @@ class Components::ApplicationForm < Superform::Rails::Form
                               wrapper_options: wrapper_options)
     end
 
+    def autocompleter(type:, wrapper_options: {}, **attributes)
+      AutocompleterField.new(self, type: type, attributes: attributes,
+                                   wrapper_options: wrapper_options)
+    end
+
     # Alias for backwards compatibility
     alias hidden read_only
 

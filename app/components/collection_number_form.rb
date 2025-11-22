@@ -19,14 +19,12 @@ class Components::CollectionNumberForm < Components::ApplicationForm
   private
 
   def render_multiple_observations_warning
-    render(
-      Components::Alert.new(
-        message: :edit_affects_multiple_observations.t(
-          type: :collection_number
-        ),
-        level: :warning,
-        class: "multiple-observations-warning"
-      )
+    Alert(
+      message: :edit_affects_multiple_observations.t(
+        type: :collection_number
+      ),
+      level: :warning,
+      class: "multiple-observations-warning"
     )
   end
 

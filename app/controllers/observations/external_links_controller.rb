@@ -64,7 +64,7 @@ module Observations
       @base_urls = {} # used as placeholders in the url field
       @sites.each { |site| @base_urls[site.name] = site.base_url }
 
-      # @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
+      @site = @sites&.first
       @back_object = @observation
     end
 
@@ -72,6 +72,8 @@ module Observations
       @external_link = ExternalLink.find(params[:id].to_s)
       @observation = Observation.find(@external_link.observation_id)
       @site = ExternalSite.find(@external_link.external_site_id)
+      @sites = [@site]
+      @base_urls = { @site.name => @site.base_url }
       @back_object = @observation
     end
 
@@ -171,8 +173,21 @@ module Observations
     def render_modal_external_link_form
       render(
         partial: "shared/modal_form",
-        locals: { title: modal_title, identifier: modal_identifier,
-                  user: @user, form: "observations/external_links/form" }
+        locals: {
+          title: modal_title,
+          identifier: modal_identifier,
+          user: @user,
+          form: "observations/external_links/form",
+          form_locals: {
+            user: @user,
+            model: @external_link,
+            observation: @observation,
+            back: @back,
+            sites: @sites,
+            site: @site,
+            base_urls: @base_urls
+          }
+        }
       ) and return
     end
 
@@ -216,8 +231,19 @@ module Observations
     def reload_external_link_modal_form_and_flash
       render(
         partial: "shared/modal_form_reload",
-        locals: { identifier: modal_identifier,
-                  form: "observations/external_links/form" }
+        locals: {
+          identifier: modal_identifier,
+          form: "observations/external_links/form",
+          form_locals: {
+            user: @user,
+            model: @external_link,
+            observation: @observation,
+            back: @back,
+            sites: @sites,
+            site: @site,
+            base_urls: @base_urls
+          }
+        }
       ) and return true
     end
   end
