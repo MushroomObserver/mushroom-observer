@@ -133,7 +133,12 @@ class SequencesControllerTest < FunctionalTestCase
     login("zero") # This user has no Observations
     get(:new, params: { observation_id: obs.id }, format: :turbo_stream)
     assert_template("shared/_modal_form")
-    assert_template("sequences/_form")
+    # Verify SequenceForm component rendered
+    assert_select("form#sequence_form")
+    assert_select("textarea#sequence_locus")
+    assert_select("textarea#sequence_bases")
+    assert_select("select#sequence_archive")
+    assert_select("input#sequence_accession")
   end
 
   def test_new_login_required
@@ -356,7 +361,12 @@ class SequencesControllerTest < FunctionalTestCase
     login(observer.login)
     get(:edit, params: { id: sequence.id }, format: :turbo_stream)
     assert_template("shared/_modal_form")
-    assert_template("sequences/_form")
+    # Verify SequenceForm component rendered
+    assert_select("form#sequence_form")
+    assert_select("textarea#sequence_locus")
+    assert_select("textarea#sequence_bases")
+    assert_select("select#sequence_archive")
+    assert_select("input#sequence_accession")
   end
 
   def test_edit_deposited_sequence

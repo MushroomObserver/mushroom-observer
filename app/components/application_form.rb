@@ -80,12 +80,26 @@ class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
 
   # Automatically set form ID based on class name unless explicitly provided
-  def initialize(model, id: nil, **options)
+  # @param model [ActiveRecord::Base] the model object for the form
+  # @param id [String] optional form ID (auto-generated from class name if nil)
+  # @param local [Boolean] if true, renders non-turbo form (default: true)
+  # @param options [Hash] additional options passed to Superform
+  def initialize(model, id: nil, local: true, **options)
     # Generate ID from class name: Components::APIKeyForm -> "api_key_form"
     # For anonymous classes (tests), default to "application_form"
     auto_id = id || self.class.name&.demodulize&.underscore ||
               "application_form"
+    @turbo_stream = !local
     super(model, **options.merge(id: auto_id))
+  end
+
+  def around_template
+    # Set turbo data attribute for turbo_stream forms
+    if @turbo_stream
+      @attributes[:data] ||= {}
+      @attributes[:data][:turbo] = "true"
+    end
+    super
   end
 
   # Form subclasses can override form_action to derive action URLs from model

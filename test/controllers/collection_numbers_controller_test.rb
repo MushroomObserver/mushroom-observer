@@ -153,7 +153,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     get(:new, params: { observation_id: obs_id }, format: :turbo_stream)
     assert_template("shared/_modal_form")
-    assert_template("collection_numbers/_form")
+    # Verify CollectionNumberForm component rendered
+    assert_select("form#collection_number_form")
+    assert_select("input#collection_number_name")
+    assert_select("input#collection_number_number")
   end
 
   def test_create_collection_number_with_turbo
@@ -320,7 +323,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: number.id }, format: :turbo_stream)
     assert_template("shared/_modal_form")
-    assert_template("collection_numbers/_form")
+    # Verify CollectionNumberForm component rendered
+    assert_select("form#collection_number_form")
+    assert_select("input#collection_number_name")
+    assert_select("input#collection_number_number")
   end
 
   def test_edit_collection_number_multiple_obs
