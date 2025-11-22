@@ -10,6 +10,7 @@ class NameTest < UnitTestCase
     assert(parse, "Expected this to parse: #{string}")
     params = parse.params
     params[:rank] = force_rank if force_rank
+    params[:user] = rolf
     name = Name.new_name(params)
 
     # If there's already a name with this search_name, update and use it.
