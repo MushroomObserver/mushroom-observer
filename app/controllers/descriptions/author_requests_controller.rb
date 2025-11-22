@@ -16,7 +16,7 @@ module Descriptions
       @object = AbstractModel.find_object(params[:type], params[:id].to_s)
       send_author_emails
       flash_notice(:request_success.t)
-      redirect_to(@object.show_link_args)
+      redirect_to(@object.show_link_args, allow_other_host: false)
     end
 
     private
