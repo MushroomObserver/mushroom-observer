@@ -21,7 +21,10 @@ class ImageVoteAnonymityFormTest < UnitTestCase
   def test_renders_make_public_button
     html = render_form(num_anonymous: 5, num_public: 10)
 
-    assert_html(html, "input[type='submit'][value='#{:image_vote_anonymity_make_public.l}']")
+    assert_html(
+      html,
+      "input[type='submit'][value='#{:image_vote_anonymity_make_public.l}']"
+    )
   end
 
   def test_form_has_correct_attributes

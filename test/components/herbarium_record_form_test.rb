@@ -71,7 +71,8 @@ class HerbariumRecordFormTest < UnitTestCase
     @herbarium_record = herbarium_records(:interesting_unknown)
     html = render_form_without_action
 
-    assert_html(html, "form[action*='/herbarium_records/#{@herbarium_record.id}']")
+    assert_html(html,
+                "form[action*='/herbarium_records/#{@herbarium_record.id}']")
   end
 
   private

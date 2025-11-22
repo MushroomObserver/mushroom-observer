@@ -18,7 +18,10 @@ class APIKeyFormTest < UnitTestCase
     assert_html(html, ".form-group")
     assert_includes(html, :account_api_keys_notes_label.t)
     assert_html(html, "#api_key_notes")
-    assert_html(html, "input[type='submit'][value='#{:account_api_keys_create_button.l}']")
+    assert_html(
+      html,
+      "input[type='submit'][value='#{:account_api_keys_create_button.l}']"
+    )
   end
 
   def test_renders_table_layout_with_cancel_button

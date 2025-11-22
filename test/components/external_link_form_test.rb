@@ -34,7 +34,8 @@ class ExternalLinkFormTest < UnitTestCase
   end
 
   def test_renders_hidden_observation_id_field
-    assert_html(@html, "input[type='hidden'][name='external_link[observation_id]']")
+    assert_html(@html,
+                "input[type='hidden'][name='external_link[observation_id]']")
   end
 
   def test_renders_submit_button_for_new_record

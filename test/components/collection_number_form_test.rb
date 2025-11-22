@@ -62,7 +62,8 @@ class CollectionNumberFormTest < UnitTestCase
     @collection_number = collection_numbers(:coprinus_comatus_coll_num)
     html = render_form_without_action
 
-    assert_html(html, "form[action*='/collection_numbers/#{@collection_number.id}']")
+    assert_html(html,
+                "form[action*='/collection_numbers/#{@collection_number.id}']")
   end
 
   private
