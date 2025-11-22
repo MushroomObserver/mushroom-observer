@@ -34,7 +34,7 @@ module Location::Scopes
     # Used by Lookup::Locations
     # to match the most general area containing all search terms
     scope :shortest_names_with, lambda { |pattern|
-      name_has(pattern).order(Location[:name].length.coalesce_blank(999_999))
+      name_has(pattern).order(Location[:name].length.coalesce(999_999))
     }
 
     scope :has_notes,
