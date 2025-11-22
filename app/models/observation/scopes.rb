@@ -265,6 +265,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # within the box(es) of the given observations.
     scope :within_locations, lambda { |locations|
       locs = ::Lookup::Locations.new(locations).instances
+      return none if locs.blank?
+
       in_boxes = locs.map! { |location| in_box(**location.bounding_box) }
       or_clause(*in_boxes).distinct
     }

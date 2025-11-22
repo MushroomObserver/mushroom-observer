@@ -33,6 +33,9 @@ class LookupTest < UnitTestCase
   def test_lookup_locations_by_name
     expects = [locations(:salt_point), locations(:burbank)]
     assert_lookup_objects(:Locations, expects, expects.map(&:name))
+    # Make sure this does not return every location in California
+    expects = [locations(:california)]
+    assert_lookup_objects(:Locations, expects, expects.map(&:name))
   end
 
   def test_lookup_projects_by_name

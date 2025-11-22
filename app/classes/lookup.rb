@@ -56,6 +56,8 @@ class Lookup
   def prepare_vals(vals)
     return [] if vals.blank?
 
+    # Deal with multiple vals from autocompleter
+    vals = vals.split("\n") if vals.is_a?(String)
     [vals].flatten
   end
 
