@@ -15,7 +15,7 @@ class Query::SpeciesLists < Query
   query_attr(:search_where, :string)
   query_attr(:region, :string) # accepts multiple values for :search_where
   query_attr(:pattern, :string)
-  query_attr(:locations, [Location])
+  query_attr(:within_locations, [Location])
   query_attr(:names, { lookup: [Name],
                        include_synonyms: :boolean,
                        include_subtaxa: :boolean,

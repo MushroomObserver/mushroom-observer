@@ -266,10 +266,11 @@ module Name::Scopes
         distinct
     }
     # Accepts region string, location_id, or Location instance
-    scope :locations, lambda { |locations|
+    scope :within_locations, lambda { |locations|
       return none if locations.blank?
 
-      joins(:observations).merge(Observation.locations(locations)).distinct
+      joins(:observations).
+        merge(Observation.within_locations(locations)).distinct
     }
     # Names with Observations whose lat/lon are in a box
     # Pass kwargs (:north, :south, :east, :west), any order

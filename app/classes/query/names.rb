@@ -41,7 +41,7 @@ class Query::Names < Query
   # query_attr(:search_where, :string) # advanced search
   # query_attr(:search_user, :string) # advanced search
   # query_attr(:search_content, :string) # advanced search
-  query_attr(:locations, [Location])
+  query_attr(:within_locations, [Location])
   query_attr(:species_lists, [SpeciesList])
   query_attr(:needs_description, :boolean)
   query_attr(:has_descriptions, :boolean)

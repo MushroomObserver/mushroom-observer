@@ -116,17 +116,17 @@ class Query::NamesTest < UnitTestCase
   end
 
   # Takes region strings or ids, but not instances
-  def test_name_locations
+  def test_name_within_locations
     locations = [locations(:salt_point), locations(:gualala)].
                 map { |x| x.id.to_s }
-    expects = Name.locations(locations).order_by_default
-    assert_query(expects, :Name, locations: locations)
+    expects = Name.within_locations(locations).order_by_default
+    assert_query(expects, :Name, within_locations: locations)
     # locations = [locations(:salt_point), locations(:gualala)]
     # assert_query(expects, :Name, locations: locations)
 
     locations = ["Sonoma Co., California, USA"]
-    expects = Name.locations(locations).order_by_default
-    assert_query(expects, :Name, locations: locations)
+    expects = Name.within_locations(locations).order_by_default
+    assert_query(expects, :Name, within_locations: locations)
   end
 
   def test_name_species_lists
