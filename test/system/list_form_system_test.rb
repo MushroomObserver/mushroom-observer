@@ -8,8 +8,9 @@ class ListFormSystemTest < ApplicationSystemTestCase
     rolf = users("rolf")
     login!(rolf)
 
-    visit("/species_lists/new")
-    assert_selector("body.species_lists__new")
+    species_list = species_lists("first_species_list")
+    visit("/species_lists/#{species_list.id}/write_in/new")
+    assert_selector("body.write_in__new")
     assert_field("list_members")
     assert_field("list_name_id", type: :hidden)
 
@@ -43,8 +44,9 @@ class ListFormSystemTest < ApplicationSystemTestCase
     rolf = users("rolf")
     login!(rolf)
 
-    visit("/species_lists/new")
-    assert_selector("body.species_lists__new")
+    species_list = species_lists("first_species_list")
+    visit("/species_lists/#{species_list.id}/write_in/new")
+    assert_selector("body.write_in__new")
     assert_field("list_members")
     assert_field("list_name_id", type: :hidden)
 

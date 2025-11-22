@@ -23,7 +23,7 @@ class AccountAPIKeysSystemTest < ApplicationSystemTestCase
     click_button("new_key_button")
     assert_selector("#new_api_key_form")
     within("#new_api_key_form") do
-      fill_in("new_api_key_notes", with: "New key idea")
+      fill_in("api_key_notes", with: "New key idea")
       click_commit
     end
 

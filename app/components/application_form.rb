@@ -15,14 +15,12 @@
 #     end
 #   end
 #
-# @example Auto-determining action URL (eliminates _form.html.erb partials)
+# @example Deriving action URL from model (eliminates passing action from view)
 #   class LicenseForm < Components::ApplicationForm
 #     def view_template
 #       text_field(:display_name)
 #       submit
 #     end
-#
-#     private
 #
 #     def form_action
 #       model.persisted? ? view_context.license_path(model) :
@@ -32,6 +30,43 @@
 #
 #   # In new.html.erb and edit.html.erb, just render the form directly:
 #   <%= render(Components::LicenseForm.new(@license)) %>
+#
+# @example Deriving action URL from model associations
+#   # For forms where the action depends on an associated model
+#   class NameTrackerForm < Components::ApplicationForm
+#     def view_template
+#       text_field(:note_template)
+#       submit
+#     end
+#
+#     def form_action
+#       # Access model associations to build the URL
+#       url_for(controller: "names/trackers", action: :create,
+#               id: model.name.id, only_path: true)
+#     end
+#   end
+#
+#   # In the view, no need to pass action:
+#   <%= render(Components::NameTrackerForm.new(
+#     @name_tracker || NameTracker.new(name: @name)
+#   )) %>
+#
+# @example Custom form method logic
+#   # Override form_method when you need custom HTTP method logic
+#   class CustomForm < Components::ApplicationForm
+#     def initialize(model, method: nil, **)
+#       @method = method
+#       super(model, **)
+#     end
+#
+#     protected
+#
+#     def form_method
+#       return super unless @method  # IMPORTANT: Always call super as fallback
+#
+#       @method.to_s.downcase == "get" ? "get" : "post"
+#     end
+#   end
 #
 # @example Accessing view helpers (like in_admin_mode?)
 #   class GlossaryTermForm < Components::ApplicationForm
@@ -44,19 +79,17 @@
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
 
-  # Override initialize to store whether we need to auto-determine action
-  # Form subclasses can define private form_action to customize behavior
-  def initialize(model, action: nil, **)
-    @auto_determine_action = action.nil? && respond_to?(:form_action, true)
-    super
+  # Automatically set form ID based on class name unless explicitly provided
+  def initialize(model, id: nil, **options)
+    # Generate ID from class name: Components::APIKeyForm -> "api_key_form"
+    # For anonymous classes (tests), default to "application_form"
+    auto_id = id || self.class.name&.demodulize&.underscore ||
+              "application_form"
+    super(model, **options.merge(id: auto_id))
   end
 
-  # Override around_template to set action before rendering if needed
-  def around_template
-    # Determine action now that helpers are available
-    @action = form_action if @auto_determine_action && @action.nil?
-    super
-  end
+  # Form subclasses can override form_action to derive action URLs from model
+  # associations or other logic, eliminating the need to pass explicit actions
 
   # Register view helpers that forms might need
   # Use register_value_helper for helpers that return values (not HTML)
@@ -95,6 +128,19 @@ class Components::ApplicationForm < Superform::Rails::Form
     def select(options, wrapper_options: {}, **attributes)
       SelectField.new(self, collection: options, attributes: attributes,
                             wrapper_options: wrapper_options)
+    end
+
+    def read_only(wrapper_options: {}, **attributes)
+      ReadOnlyField.new(self, attributes: attributes,
+                              wrapper_options: wrapper_options)
+    end
+
+    # Alias for backwards compatibility
+    alias hidden read_only
+
+    def static(wrapper_options: {}, **attributes)
+      StaticTextField.new(self, attributes: attributes,
+                                wrapper_options: wrapper_options)
     end
   end
 

@@ -31,41 +31,66 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     scroll_to(find("#observation_collection_numbers"), align: :center)
     assert_link(:create_collection_number.l)
-    assert_selector(".new_collection_number_link")
-    # click_link(:create_collection_number.l) # it's too small to click
-    first(:css, ".new_collection_number_link").trigger("click")
+    # Link is too small to click normally, use trigger
+    find_link(:create_collection_number.l).trigger("click")
 
     assert_selector("#modal_collection_number", wait: 6)
 
+    # Generate unique collection number and name using timestamp
+    timestamp = Time.now.to_i
+    unique_number = "TEST-#{timestamp}"
+    unique_name = "TestCollector-#{timestamp}"
+
+    # Test validation - submit without required collector name
     within("#modal_collection_number") do
+      assert_field("collection_number_name")
       assert_field("collection_number_number")
-      fill_in("collection_number_number", with: "02134")
+      fill_in("collection_number_name", with: "") # Explicitly clear
+      fill_in("collection_number_number", with: unique_number)
       click_commit
     end
+    sleep(1) # Give turbo time to process
+
+    # Modal should stay open with validation error
+    assert_selector("#modal_collection_number")
+    within("#modal_collection_number") do
+      assert_text(/missing|required/i)
+    end
+
+    # Now fill in the missing name and resubmit
+    within("#modal_collection_number") do
+      fill_in("collection_number_name", with: unique_name)
+      click_commit
+    end
+    sleep(1)
+
+    # Modal should close after successful submission
     assert_no_selector("#modal_collection_number")
 
     c_n = CollectionNumber.last
 
     within("#observation_collection_numbers") do
-      assert_link(text: /02134/)
+      assert_link(text: /#{unique_number}/)
       assert_link(:edit_collection_number.l)
-      find(:css, ".edit_collection_number_link_#{c_n.id}").trigger("click")
+      find_link(:edit_collection_number.l).trigger("click")
     end
 
     assert_selector("#modal_collection_number_#{c_n.id}", wait: 6)
 
+    # Edit to a new unique number
+    updated_number = "#{unique_number}-UPDATED"
     within("#modal_collection_number_#{c_n.id}") do
       assert_field("collection_number_number")
-      fill_in("collection_number_number", with: "021345")
+      fill_in("collection_number_number", with: updated_number)
       click_commit
     end
     assert_no_selector("#modal_collection_number_#{c_n.id}")
 
     within("#observation_collection_numbers") do
-      assert_link(text: /021345/)
+      assert_link(text: /#{updated_number}/)
     end
 
-    assert_equal(c_n.reload.number, "021345")
+    assert_equal(c_n.reload.number, updated_number)
 
     # try remove links
     # collection_number
@@ -80,7 +105,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
     end
     assert_no_selector("#modal_collection_number_observation")
-    assert_no_link(text: /021345/)
+    assert_no_link(text: /#{updated_number}/)
   end
 
   def test_add_and_edit_herbarium_records
@@ -94,16 +119,20 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#observation_herbarium_records") do
       assert_link(text: /#{fmr.accession_number}/)
       assert_link(:edit_herbarium_record.l)
-      find(:css, ".edit_herbarium_record_link_#{fmr.id}").trigger("click")
+      find_link(:edit_herbarium_record.l).trigger("click")
     end
 
     assert_selector("#modal_herbarium_record_#{fmr.id}", wait: 6)
 
+    # Edit accession number
     within("#modal_herbarium_record_#{fmr.id}") do
       assert_field("herbarium_record_accession_number")
       fill_in("herbarium_record_accession_number", with: "6234234")
       click_commit
     end
+    sleep(1)
+
+    # Modal should close after successful submission
     assert_no_selector("#modal_herbarium_record_#{fmr.id}")
 
     within("#observation_herbarium_records") do
@@ -134,9 +163,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     # new sequence
     assert_link(:show_observation_add_sequence.l)
-    find(:css, ".new_sequence_link").trigger("click")
+    find_link(:show_observation_add_sequence.l).trigger("click")
 
     assert_selector("#modal_sequence", wait: 6)
+
+    # Test validation - submit with invalid DNA sequence
     within("#modal_sequence") do
       assert_field("sequence_locus")
       assert_field("sequence_bases")
@@ -144,23 +175,28 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_field("sequence_accession")
       assert_field("sequence_notes")
       fill_in("sequence_locus", with: "LSU")
-      fill_in("sequence_bases", with: "not quite there")
+      fill_in("sequence_bases", with: "not a valid DNA sequence")
       select("UNITE", from: "sequence_archive")
       fill_in("sequence_accession", with: "323232")
       click_commit
     end
+    sleep(1)
 
-    assert_selector("#modal_sequence_flash")
-    within("#modal_sequence_flash") do
-      assert_selector("#flash_notices", text: /invalid code/)
+    # Modal should stay open with validation error
+    assert_selector("#modal_sequence")
+    within("#modal_sequence") do
+      assert_text(/invalid code/i)
     end
 
+    # Now fix with valid DNA sequence and resubmit
     bfs = sequences(:bare_formatted_sequence)
-
     within("#modal_sequence") do
       fill_in("sequence_bases", with: bfs.bases)
       click_commit
     end
+    sleep(1)
+
+    # Modal should close after successful submission
     assert_no_selector("#modal_sequence")
 
     # edit sequence
@@ -199,15 +235,33 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     site = external_sites(:mycoportal)
     within("#observation_external_links") do
       assert_link(text: :ADD.l)
-      find(:css, ".new_external_link_link_#{site.id}").trigger("click")
+      find_link(:ADD.l).trigger("click")
     end
 
+    # Test validation - submit with invalid URL
     assert_selector("#modal_external_link")
     within("#modal_external_link") do
       assert_field("external_link_url")
-      fill_in("external_link_url", with: "https://wedont.validatethese.urls")
+      select(site.name, from: "external_link_external_site_id")
+      fill_in("external_link_url", with: "not-a-valid-url")
       click_commit
     end
+    sleep(1)
+
+    # Modal should stay open with validation error
+    assert_selector("#modal_external_link")
+    within("#modal_external_link") do
+      assert_text(/invalid/i)
+    end
+
+    # Now fix with valid URL and resubmit
+    within("#modal_external_link") do
+      fill_in("external_link_url", with: "https://www.mycoportal.org/portal/collections/123")
+      click_commit
+    end
+    sleep(1)
+
+    # Modal should close after successful submission
     assert_no_selector("#modal_external_link")
 
     # edit external link
@@ -215,17 +269,16 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#observation_external_links") do
       assert_link(text: /MycoPortal/)
       assert_link(text: :EDIT.l)
-      find(:css, ".edit_external_link_link_#{link.id}").trigger("click")
+      find_link(:EDIT.l).trigger("click")
     end
 
     within("#modal_external_link_#{link.id}") do
       assert_field("external_link_url")
-      fill_in("external_link_url",
-              with: "https://wedont.validatethese.urls/yet")
+      fill_in("external_link_url", with: "https://www.mycoportal.org/portal/collections/456")
       click_commit
     end
     assert_no_selector("#modal_external_link_#{link.id}")
-    assert_equal(link.reload.url, "https://wedont.validatethese.urls/yet")
+    assert_equal(link.reload.url, "https://www.mycoportal.org/portal/collections/456")
 
     # try remove links
     # external_link

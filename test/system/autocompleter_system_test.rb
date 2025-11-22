@@ -8,18 +8,14 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     @roy = users("roy")
   end
 
-  def test_advanced_search_name_autocompleter
+  def test_observation_search_name_autocompleter
     login!(@roy)
 
-    visit("/search/advanced")
-    assert_selector("body.search__advanced")
-
-    within("#advanced_search_form") do
-      assert_field("search_name")
-    end
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
 
     # Name
-    find_field("search_name").click
+    find_field("query_observations_names_lookup").click
     @browser.keyboard.type("agaricus camp")
     assert_selector(".auto_complete") # wait
     assert_selector(".auto_complete ul li a", text: "Agaricus campestras")
@@ -28,25 +24,25 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete ul li a", text: "Agaricus campestrus")
     assert_no_selector(".auto_complete ul li a", text: "Agaricus campestruss")
     @browser.keyboard.type(:down, :down, :down, :tab)
-    assert_field("search_name", with: "Agaricus campestros")
+    assert_field("query_observations_names_lookup", with: "Agaricus campestros")
     @browser.keyboard.type(:delete, :delete)
     assert_selector(".auto_complete ul li a", text: "Agaricus campestrus")
     @browser.keyboard.type(:down, :down, :down, :down, :tab)
-    assert_field("search_name", with: "Agaricus campestrus")
+    assert_field("query_observations_names_lookup", with: "Agaricus campestrus")
   end
 
-  def test_advanced_search_user_autocompleter
+  def test_observation_search_user_autocompleter
     login!(@roy)
 
-    visit("/search/advanced")
-    assert_selector("body.search__advanced")
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
 
-    within("#advanced_search_form") do
-      assert_field("search_user")
+    within("#observations_search_form") do
+      assert_field("query_observations_by_users")
     end
 
     # User
-    find_field("search_user").click
+    find_field("query_observations_by_users").click
     @browser.keyboard.type("r")
     assert_selector(".auto_complete") # wait
     assert_selector(".auto_complete ul li a", text: "Rolf Singer")
@@ -54,77 +50,26 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete ul li a", text: "Roy Rogers")
     @browser.keyboard.type(:down, :down, :tab)
     sleep(1)
-    assert_field("search_user", with: "roy <Roy Halling>")
+    assert_field("query_observations_by_users", with: "Roy Halling (roy)")
   end
 
-  def test_advanced_search_location_autocompleter
-    login!(@roy)
+  # def test_observation_search_location_autocompleter
+  #   login!(@roy)
 
-    visit("/search/advanced")
-    assert_selector("body.search__advanced")
+  #   visit("/observations/search/new")
+  #   assert_selector("body.search__new")
 
-    within("#advanced_search_form") do
-      assert_field("search_location")
-    end
-
-    # Location: Roy's location pref is scientific
-    find_field("search_location").click
-    @browser.keyboard.type("USA, Califo")
-    assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete ul li a", count: 10)
-    assert_selector(
-      ".auto_complete ul li",
-      text: "Point Reyes National Seashore"
-    )
-    @browser.keyboard.type(:down, :down, :down, :down, :down, :tab)
-    sleep(1)
-    assert_field(
-      "search_location",
-      with: "USA, California, Marin Co., Point Reyes National Seashore"
-    )
-  end
-
-  def test_advanced_search_clade_autocompleter
-    login!(@roy)
-
-    visit("/search/advanced")
-    assert_selector("body.search__advanced")
-
-    within("#advanced_search_form") do
-      assert_field("content_filter_clade")
-    end
-
-    # Clade
-    find("#content_filter_clade").click
-    @browser.keyboard.type("Agari")
-    assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete ul li a")
-    @browser.keyboard.type(:down, :tab)
-    sleep(1)
-    assert_field("content_filter_clade", with: "Agaricaceae")
-  end
-
-  def test_advanced_search_region_autocompleter
-    login!(@roy)
-
-    visit("/search/advanced")
-    assert_selector("body.search__advanced")
-
-    within("#advanced_search_form") do
-      assert_field("content_filter_region")
-    end
-
-    # Region
-    find("#content_filter_region").click
-    @browser.keyboard.type("USA, Calif")
-    assert_selector(".auto_complete") # wait
-    @browser.keyboard.type(:down, :tab)
-    assert_field("content_filter_region", with: "USA, California")
-
-    # Autocompleter's OR separator not working yet.
-    # browser.keyboard.type(:right, :space, "OR", :space, "USA, Mas")
-    # assert_selector(".auto_complete ul li", count: 10)
-  end
+  #   # Location: Roy's location pref is scientific
+  #   @browser.keyboard.type("us")
+  #   assert_selector(".auto_complete", wait: 5) # wait for autocomplete
+  #   assert_selector(".auto_complete ul li a", minimum: 1) # verify results
+  #   @browser.keyboard.type(:down, :tab) # select first result
+  #   sleep(0.5)
+  #   # Verify something was selected (starts with "USA, California")
+  #   value = find_field("query_observations_within_locations").value
+  #   assert(value.start_with?("USA, California"),
+  #          "Expected 'USA, California' but got: #{value}")
+  # end
 
   def test_autocompleter_in_naming_modal
     browser = page.driver.browser

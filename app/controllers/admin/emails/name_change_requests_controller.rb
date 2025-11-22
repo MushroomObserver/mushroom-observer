@@ -69,13 +69,14 @@ module Admin
       end
 
       def change_request_content(name_with_icn_id, new_name_with_icn_id)
+        notes = params.dig(:name_change_request, :notes) || params[:notes]
         :email_name_change_request.l(
           user: @user.login,
           old_name: name_with_icn_id,
           new_name: new_name_with_icn_id,
           show_url: @name.show_url,
           edit_url: @name.edit_url,
-          notes: params[:notes].to_s.strip_html.strip_squeeze
+          notes: notes.to_s.strip_html.strip_squeeze
         )
       end
     end

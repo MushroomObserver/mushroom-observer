@@ -79,10 +79,17 @@ module Observations
     def test_propose_naming_turbo_from_lightgallery_ui
       args = propose_naming_setup
       params = args[:params].merge(context: "lightgallery")
+      obs = args[:obs]
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
       assert_template("observations/namings/_update_matrix_box")
+
+      # Check that turbo_stream replace action is in response
+      assert_match(
+        /turbo-stream.*action="replace".*target="box_title_#{obs.id}"/,
+        @response.body
+      )
 
       post_propose_naming_assertions(args)
     end

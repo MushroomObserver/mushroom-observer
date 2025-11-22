@@ -46,17 +46,25 @@ module Names
     end
 
     def initialize_tracking_form_new
-      @note_template = :email_tracking_note_template.l(
+      @note_template = default_note_template
+    end
+
+    def initialize_tracking_form_edit
+      if @name_tracker
+        @note_template = @name_tracker.note_template
+        @name_tracker.note_template_enabled = @note_template.present?
+        @interest = Interest.find_by(target: @name_tracker)
+      else
+        @note_template = default_note_template
+      end
+    end
+
+    def default_note_template
+      :email_tracking_note_template.l(
         species_name: @name.real_text_name,
         mailing_address: @user.mailing_address_for_tracking_template,
         users_name: @user.legal_name
       )
-    end
-
-    def initialize_tracking_form_edit
-      @note_template = @name_tracker.note_template
-      @name_tracker.note_template_enabled = @note_template.present?
-      @interest = Interest.find_by(target: @name_tracker)
     end
 
     def submit_tracking_form_create

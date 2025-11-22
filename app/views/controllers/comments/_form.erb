@@ -1,2 +1,2 @@
-<%# locals: (comment:) %>
-<%= render(Components::CommentForm.new(comment)) %>
+<%# locals: (comment:, local: false) %>
+<%= render(Components::CommentForm.new(comment, local: local)) %>

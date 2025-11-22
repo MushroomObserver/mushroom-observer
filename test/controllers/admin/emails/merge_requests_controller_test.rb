@@ -14,23 +14,32 @@ module Admin
           new_id: name2.id
         }
 
+        # Test 1: Not logged in - should redirect
         get(:new, params: params)
         assert_response(:redirect)
 
+        # Test 2: Logged in but type param is nil - should show type error
         login("rolf")
         get(:new, params: params.except(:type))
         assert_response(:redirect)
+        assert_flash_error(:runtime_invalid.t(type: '"type"', value: ""))
+
+        # Test 3: Logged in but type param is invalid
+        get(:new, params: params.merge(type: :Bogus))
+        assert_response(:redirect)
+        assert_flash_error(:runtime_invalid.t(type: '"type"', value: "Bogus"))
+
+        # Test 4: Valid type but missing required params
         get(:new, params: params.except(:old_id))
         assert_response(:redirect)
         get(:new, params: params.except(:new_id))
-        assert_response(:redirect)
-        get(:new, params: params.merge(type: :Bogus))
         assert_response(:redirect)
         get(:new, params: params.merge(old_id: -123))
         assert_response(:redirect)
         get(:new, params: params.merge(new_id: -456))
         assert_response(:redirect)
 
+        # Test 5: Valid request with all params - should succeed
         get(:new, params: params)
         assert_response(:success)
         assert_names_equal(name1, assigns(:old_obj))
@@ -51,11 +60,27 @@ module Admin
           notes: "SHAZAM"
         }
 
+        # Test 1: Not logged in - should redirect and not send email
         post(:create, params: params)
         assert_response(:redirect)
         assert_equal(email_count, ActionMailer::Base.deliveries.count)
 
+        # Test 2: Logged in but type param is nil
+        # Should show type error and not send email
         login("rolf")
+        post(:create, params: params.except(:type))
+        assert_response(:redirect)
+        assert_flash_error(:runtime_invalid.t(type: '"type"', value: ""))
+        assert_equal(email_count, ActionMailer::Base.deliveries.count)
+
+        # Test 3: Logged in with invalid type
+        # Should show type error and not send email
+        post(:create, params: params.merge(type: :Bogus))
+        assert_response(:redirect)
+        assert_flash_error(:runtime_invalid.t(type: '"type"', value: "Bogus"))
+        assert_equal(email_count, ActionMailer::Base.deliveries.count)
+
+        # Test 4: Valid request - should send email
         post(:create, params: params)
         assert_response(:redirect)
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)

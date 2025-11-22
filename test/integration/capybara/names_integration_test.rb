@@ -35,6 +35,71 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     template.assert_no_text(":mailing_address")
   end
 
+  def test_create_name_tracker
+    name = names(:boletus_edulis)
+    login(rolf)
+
+    # Visit the new name tracker page
+    visit("/names/#{name.id}/trackers/new")
+    assert_selector("body.trackers__new")
+
+    # Fill in the note template
+    fill_in("name_tracker_note_template",
+            with: "Test note about :observation")
+
+    # Check the checkbox to enable note template
+    page.check("name_tracker[note_template_enabled]")
+
+    # Submit the form to the correct action
+    within("form[action='/names/#{name.id}/trackers']") do
+      click_button("Enable")
+    end
+
+    # Verify successful creation (redirects to name page)
+    assert_selector("body.names__show")
+    assert_current_path(name_path(name))
+
+    # Verify database effect
+    tracker = NameTracker.find_by(name: name, user: rolf)
+    assert(tracker, "Tracker should have been created")
+    assert_equal(
+      "Test note about :observation", tracker.note_template,
+      "Note template should be saved. Got: #{tracker.note_template.inspect}"
+    )
+  end
+
+  def test_update_name_tracker
+    name = names(:coprinus_comatus)
+    login(rolf)
+
+    # Ensure tracker exists in fixtures or create it
+    tracker = NameTracker.find_by(name: name, user: rolf)
+    assert(tracker, "Tracker should exist for this test")
+
+    # Visit the edit name tracker page
+    visit("/names/#{name.id}/trackers/edit")
+    assert_selector("body.trackers__edit")
+
+    # Update the form
+    fill_in("name_tracker_note_template", with: "Updated note about :observer")
+
+    # Ensure checkbox is checked
+    page.check("name_tracker[note_template_enabled]")
+
+    # Submit the form to the correct action
+    within("form[action='/names/#{name.id}/trackers']") do
+      click_button("Update")
+    end
+
+    # Verify successful update
+    assert_selector("body.names__show")
+    assert_current_path(name_path(name))
+
+    # Verify database effect
+    tracker.reload
+    assert_equal("Updated note about :observer", tracker.note_template)
+  end
+
   def test_name_deprecation
     bad_name = names(:agaricus_campestros)
     good_name = names(:agaricus_campestris)

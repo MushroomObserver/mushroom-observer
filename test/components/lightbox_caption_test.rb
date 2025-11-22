@@ -46,6 +46,8 @@ class LightboxCaptionTest < UnitTestCase
     # Should have identify section
     assert_includes(html, "obs-identify")
     assert_includes(html, "observation_identify_#{@obs.id}")
+    # Should have "Propose a Name" button
+    assert_includes(html, "Propose a Name")
   end
 
   def test_does_not_render_identify_ui_when_disabled

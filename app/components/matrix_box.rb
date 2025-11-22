@@ -83,7 +83,8 @@ class Components::MatrixBox < Components::Base
         image_link: @data[:image_link],
         obs: @data[:obs] || {},
         votes: @data.fetch(:votes, true),
-        full_width: @data.fetch(:full_width, true)
+        full_width: @data.fetch(:full_width, true),
+        identify: @identify
       )
     end
   end
@@ -114,13 +115,11 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_title
-    fragment("box_title") do
-      MatrixBoxTitle(
-        id: @data[:id],
-        name: @data[:name],
-        type: @data[:type]
-      )
-    end
+    MatrixBoxTitle(
+      id: @data[:id],
+      name: @data[:name],
+      type: @data[:type]
+    )
   end
 
   def render_id_badge(obj)

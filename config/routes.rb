@@ -316,7 +316,7 @@ MushroomObserver::Application.routes.draw do
                        as: "mode"
     get("switch_users", to: "mode#edit") # alternate path
 
-    resource :users, only: [:edit, :update, :destroy]
+    resources :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit") # alternate path
     resources :banners, only: [:index, :create]
