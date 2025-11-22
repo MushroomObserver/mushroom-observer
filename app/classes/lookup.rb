@@ -57,7 +57,7 @@ class Lookup
     return [] if vals.blank?
 
     # Multiple vals may come from autocompleters as a single multiline string
-    vals = vals.split("\n") if vals.is_a?(String)
+    vals = vals.split("\n").compact_blank if vals.is_a?(String)
     [vals].flatten
   end
 
