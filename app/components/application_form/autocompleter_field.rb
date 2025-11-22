@@ -97,7 +97,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_with_wrapper
-      extract_wrapper_options => { show_label:, label_text:, inline:, wrap_class: }
+      extract_wrapper_options => {
+        show_label:, label_text:, inline:, wrap_class:
+      }
 
       div(class: form_group_class("form-group", inline, wrap_class),
           data: { autocompleter_target: "wrap" }) do
