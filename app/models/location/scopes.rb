@@ -31,6 +31,13 @@ module Location::Scopes
     }
     scope :name_has,
           ->(phrase) { search_columns(Location[:name], phrase) }
+    # Used by Lookup::Locations
+    # to match the most general area containing all search terms
+    scope :shortest_names_with, lambda { |pattern|
+      return none if pattern.blank?
+
+      name_has(pattern).order(Location[:name].length)
+    }
 
     scope :has_notes,
           ->(bool = true) { not_blank_condition(Location[:notes], bool:) }
