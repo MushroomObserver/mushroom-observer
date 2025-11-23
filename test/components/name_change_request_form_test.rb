@@ -17,7 +17,10 @@ class NameChangeRequestFormTest < UnitTestCase
   def test_renders_form_with_help_text
     html = render_form
 
-    assert_html(html, "body", text: :email_name_change_request_help.tp.as_displayed)
+    assert_html(
+      html, "body",
+      text: :email_name_change_request_help.tp.as_displayed
+    )
   end
 
   def test_renders_current_name_field

@@ -16,7 +16,10 @@ class MergeRequestEmailFormTest < UnitTestCase
   def test_renders_form_with_help_text
     html = render_form
 
-    assert_html(html, "body", text: :email_merge_request_help.tp(type: Name.type_tag).as_displayed)
+    assert_html(
+      html, "body",
+      text: :email_merge_request_help.tp(type: Name.type_tag).as_displayed
+    )
   end
 
   def test_renders_old_object_field
