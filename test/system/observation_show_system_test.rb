@@ -111,7 +111,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
   end
 
   def test_add_and_edit_herbarium_records
-    browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
     visit(observation_path(@obs))

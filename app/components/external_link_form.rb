@@ -51,7 +51,7 @@ class Components::ExternalLinkForm < Components::ApplicationForm
     options = if model.persisted?
                 [@site.name]
               else
-                @sites.sort_by(&:name).map { |site| [site.name, site.id] }
+                @sites.sort_by(&:name).map { |site| [site.id, site.name] }
               end
 
     render(

@@ -6,12 +6,12 @@ module ModalsHelper
   # forms. This allows gradual migration from ERB partials to Superform.
   #
   # @param form [String] The form path (e.g., "collection_numbers/form")
-  # @param model [ActiveRecord::Base] The model instance for the form
+  # @param model [ActiveRecord::Base, nil] The model instance for the form
   # @param observation [Observation] Optional observation instance
   # @param back [String] Optional back parameter
   # @param form_locals [Hash] Locals to pass to the form
   # @return [String] Rendered HTML
-  def render_form_or_component(form, model:, observation: nil, back: nil,
+  def render_form_or_component(form, model: nil, observation: nil, back: nil,
                                **form_locals)
     # Map model classes to their corresponding component classes
     component_map = {
@@ -22,7 +22,7 @@ module ModalsHelper
       Sequence: Components::SequenceForm
     }
 
-    component_class = component_map[model.class.name.to_sym]
+    component_class = model ? component_map[model.class.name.to_sym] : nil
 
     if component_class
       render_modal_component(

@@ -65,7 +65,6 @@ class Components::CollectionNumberForm < Components::ApplicationForm
       url_params[:back] = @back if @back.present?
       url_for(
         controller: "collection_numbers",
-        action: :update,
         id: model.id,
         **url_params,
         only_path: true
