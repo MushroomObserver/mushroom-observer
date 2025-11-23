@@ -19,41 +19,54 @@ module Observations
     end
 
     # NOTE: the assigns(:observations) are Mappable::MinimalObservations!
-    def test_map_observation_hidden_gps
+    def test_map_observation_unhidden_gps
       obs = observations(:unknown_with_lat_lng)
+
       login("rolf") # a user who does not own obs
       get(:show, params: { id: obs.id })
-      assert_true(assigns(:observations).map { |o| o.lat.to_s }.join.
-                                         include?("34.1622"))
-      assert_true(assigns(:observations).map { |o| o.lng.to_s }.join.
-                                         include?("118.3521"))
 
-      obs.update(gps_hidden: true)
-      get(:show, params: { id: obs.id })
-      assert_false(assigns(:observations).map { |o| o.lat.to_s }.join.
-                                          include?("34.1622"))
-      assert_false(assigns(:observations).map { |o| o.lng.to_s }.join.
-                                          include?("118.3521"))
+      assert_includes(
+        assigns(:observations).map { |o| o.lat.to_s }.join, obs.lat.to_s,
+        "User map of unhidden observation should include geoloc with lat"
+      )
+      assert_includes(
+        assigns(:observations).map { |o| o.lng.to_s }.join, obs.lng.to_s,
+        "User map of unhidden observation should include geoloc with lng"
+      )
     end
 
-    def test_map_observations_hidden_gps
-      obs = observations(:unknown_with_lat_lng)
-      query = Query.lookup_and_save(:Observation, by_users: mary.id)
-      assert(query.result_ids.include?(obs.id))
+    # NOTE: the assigns(:observations) are Mappable::MinimalObservations!
+    def test_map_observation_hidden_gps_owner
+      obs = observations(:trusted_hidden)
 
-      login("rolf") # a user who does not own obs
-      # get(:index, params: { q: @controller.q_param(query) })
-      # assert_true(assigns(:observations).map { |o| o.lat.to_s }.join.
-      #                                    include?("34.1622"))
-      # assert_true(assigns(:observations).map { |o| o.lng.to_s }.join.
-      #                                    include?("118.3521"))
+      login(obs.user.login)
+      get(:show, params: { id: obs.id })
 
-      obs.update(gps_hidden: true)
-      get(:index, params: { q: @controller.q_param(query) })
-      assert_false(assigns(:observations).map { |o| o.lat.to_s }.join.
-                                          include?("34.1622"))
-      assert_false(assigns(:observations).map { |o| o.lng.to_s }.join.
-                                          include?("118.3521"))
+      assert_includes(
+        assigns(:observations).map { |o| o.lat.to_s }.join, obs.lat.to_s,
+        "Owner map of hidden observation should include geoloc with lat"
+      )
+      assert_includes(
+        assigns(:observations).map { |o| o.lng.to_s }.join, obs.lng.to_s,
+        "Owner map of hidden observation should include geoloc with lng"
+      )
+    end
+
+    # NOTE: the assigns(:observations) are Mappable::MinimalObservations!
+    def test_map_observation_hidden_gps_non_owner
+      obs = observations(:trusted_hidden)
+
+      login("rolf")
+      get(:show, params: { id: obs.id })
+
+      assert_not_includes(
+        assigns(:observations).map { |o| o.lat.to_s }.join, obs.lat.to_s,
+        "Non-owner map of hidden observation should not include geoloc with lat"
+      )
+      assert_not_includes(
+        assigns(:observations).map { |o| o.lng.to_s }.join, obs.lng.to_s,
+        "Non-owner map of hidden observation should not include geoloc with lng"
+      )
     end
   end
 end

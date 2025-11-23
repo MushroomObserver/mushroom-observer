@@ -22,10 +22,18 @@ module Observations
       @observation = find_or_goto_index(Observation, params[:id].to_s)
       return unless @observation
 
+      if permission?(@observation)
+        lat = @observation.lat
+        lng = @observation.lng
+      else
+        lat = @observation.public_lat
+        lng = @observation.public_lng
+      end
+
       @observations = [
         Mappable::MinimalObservation.new(id: @observation.id,
-                                         lat: @observation.public_lat,
-                                         lng: @observation.public_lng,
+                                         lat: lat,
+                                         lng: lng,
                                          location: @observation.location,
                                          location_id: @observation.location_id)
       ]
