@@ -3722,32 +3722,32 @@ class NameTest < UnitTestCase
     assert_empty(Name.species_lists(species_lists(:first_species_list)))
   end
 
-  def test_scope_locations
+  def test_scope_within_locations
     # Have to do this, otherwise columns not populated
     Location.update_box_area_and_center_columns
 
     assert_includes(
-      Name.locations(locations(:burbank)), # at location called with Location
+      Name.within_locations(locations(:burbank)), # called with Location
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.locations(locations(:burbank).id), # at location called with id
+      Name.within_locations(locations(:burbank).id), # called with id
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.locations(locations(:burbank).name), # called with string
+      Name.within_locations(locations(:burbank).name), # called with string
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.locations(locations(:california).name), # region
+      Name.within_locations(locations(:california).name), # region
       names(:agaricus_campestris)
     )
     assert_not_includes(
-      Name.locations(locations(:obs_default_location)),
+      Name.within_locations(locations(:obs_default_location)),
       names(:notification_but_no_observation)
     )
     assert_empty(
-      Name.locations({}),
+      Name.within_locations({}),
       "Name.at_location should be empty if called with bad argument class"
     )
   end
