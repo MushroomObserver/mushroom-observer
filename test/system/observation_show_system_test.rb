@@ -152,20 +152,29 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_link(text: /6234234/)
     end
 
-    # # try remove links
-    # # herbarium_record
-    # within("#observation_herbarium_records") do
-    #   assert_link(:REMOVE.l)
-    #   find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
-    # end
-    # # confirm is in modal
-    # assert_selector("#modal_herbarium_record_observation")
-    # within("#modal_herbarium_record_observation") do
-    #   assert_button(:REMOVE.l)
-    #   find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
-    # end
-    # assert_no_selector("#modal_herbarium_record_observation")
-    # assert_no_link(text: /6234234/)
+    # Test remove herbarium record
+    within("#observation_herbarium_records") do
+      # Verify remove link has text-danger class
+      assert_selector("a.text-danger", text: :REMOVE.l)
+      # Click the remove link
+      find("a", text: :REMOVE.l).trigger("click")
+    end
+
+    # Modal should appear
+    assert_selector("#modal_herbarium_record_observation", wait: 6)
+
+    # Confirm removal in modal
+    within("#modal_herbarium_record_observation") do
+      assert_button(:REMOVE.l)
+      find("button", text: :REMOVE.l).trigger("click")
+    end
+    sleep(1)
+
+    # Modal should close and record should be removed from the list
+    assert_no_selector("#modal_herbarium_record_observation")
+    within("#observation_herbarium_records") do
+      assert_no_link(text: /6234234/)
+    end
   end
 
   def test_add_and_edit_sequences
