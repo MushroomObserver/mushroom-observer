@@ -12,11 +12,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :between
     slot :append
 
-    attr_reader :wrapper_options, :autocompleter_type
+    attr_reader :wrapper_options, :autocompleter_type, :textarea
 
-    def initialize(field, type:, attributes: {}, wrapper_options: {})
+    def initialize(field, type:, textarea: false, attributes: {},
+                   wrapper_options: {})
       super(field, attributes: attributes)
       @autocompleter_type = type
+      @textarea = textarea
       @wrapper_options = wrapper_options
     end
 
@@ -48,13 +50,18 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_input_field
-      input(
-        **attributes,
-        class: class_names(attributes[:class], "dropdown", "form-control"),
+      field_attributes = attributes.merge(
+        class: class_names(attributes[:class], "dropdown"),
         placeholder: :start_typing.l,
         autocomplete: "off",
         data: { autocompleter_target: "input" }
       )
+
+      if textarea
+        render(field.textarea(**field_attributes))
+      else
+        render(field.text(**field_attributes))
+      end
     end
 
     def render_dropdown

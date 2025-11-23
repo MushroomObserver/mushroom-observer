@@ -149,8 +149,10 @@ class Components::ApplicationForm < Superform::Rails::Form
                               wrapper_options: wrapper_options)
     end
 
-    def autocompleter(type:, wrapper_options: {}, **attributes)
-      AutocompleterField.new(self, type: type, attributes: attributes,
+    def autocompleter(type:, textarea: false, wrapper_options: {},
+                      **attributes)
+      AutocompleterField.new(self, type: type, textarea: textarea,
+                                   attributes: attributes,
                                    wrapper_options: wrapper_options)
     end
 
