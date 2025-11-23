@@ -13,24 +13,24 @@ class ArticleFormTest < UnitTestCase
   end
 
   def test_renders_form_with_title_field
-    assert_includes(@html, :article_title.t)
+    assert_html(@html, "body", text: :article_title.l)
     assert_html(@html, "input[name='article[title]']")
     assert_html(@html, "input[data-autofocus]")
   end
 
   def test_renders_form_with_body_field
-    assert_includes(@html, :article_body.t)
+    assert_html(@html, "body", text: :article_body.l)
     assert_html(@html, "textarea[name='article[body]']")
     assert_html(@html, "textarea[rows='10']")
   end
 
   def test_renders_textile_help_for_title
-    assert_includes(@html, :form_article_title_help.t)
-    assert_includes(@html, :field_textile_link.t)
+    assert_html(@html, "body", text: :form_article_title_help.tp.as_displayed)
+    assert_html(@html, "body", text: :field_textile_link.tp.as_displayed)
   end
 
   def test_renders_textile_help_for_body
-    assert_includes(@html, :field_textile_link.t)
+    assert_html(@html, "body", text: :field_textile_link.tp.as_displayed)
   end
 
   def test_renders_submit_button

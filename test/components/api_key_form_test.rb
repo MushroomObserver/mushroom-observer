@@ -16,7 +16,9 @@ class APIKeyFormTest < UnitTestCase
     html = render_form_without_cancel
 
     assert_html(html, ".form-group")
-    assert_includes(html, :account_api_keys_notes_label.t)
+    assert_html(
+      html, "label", text: :account_api_keys_notes_label.l
+    )
     assert_html(html, "#api_key_notes")
     assert_html(
       html,

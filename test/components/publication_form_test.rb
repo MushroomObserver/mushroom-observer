@@ -17,11 +17,11 @@ class PublicationFormTest < UnitTestCase
     html = render_component_form
 
     assert_html(html, ".form-group")
-    assert_includes(html, :publication_full.t)
-    assert_includes(html, :publication_link.t)
-    assert_includes(html, :publication_peer_reviewed.t)
-    assert_includes(html, :publication_how_helped.t)
-    assert_includes(html, :publication_mo_mentioned.t)
+    assert_html(html, "body", text: :publication_full.l)
+    assert_html(html, "body", text: :publication_link.l)
+    assert_html(html, "body", text: :publication_peer_reviewed.l)
+    assert_html(html, "body", text: :publication_how_helped.l)
+    assert_html(html, "body", text: :publication_mo_mentioned.l)
   end
 
   def test_renders_submit_button

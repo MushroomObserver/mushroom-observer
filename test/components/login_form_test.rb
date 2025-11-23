@@ -12,19 +12,19 @@ class LoginFormTest < UnitTestCase
   end
 
   def test_renders_form_with_login_field
-    assert_includes(@html, :login_user.t)
+    assert_html(@html, "body", text: :login_user.l)
     assert_html(@html, "input[name='user[login]']")
     assert_html(@html, "input[data-autofocus]")
   end
 
   def test_renders_form_with_password_field
-    assert_includes(@html, :login_password.t)
+    assert_html(@html, "body", text: :login_password.l)
     assert_html(@html, "input[name='user[password]']")
     assert_html(@html, "input[type='password']")
   end
 
   def test_renders_remember_me_checkbox
-    assert_includes(@html, :login_remember_me.t)
+    assert_html(@html, "body", text: :login_remember_me.l)
     assert_html(@html, "input[name='user[remember_me]']")
     assert_html(@html, "input[type='checkbox']")
   end
@@ -36,11 +36,11 @@ class LoginFormTest < UnitTestCase
   end
 
   def test_renders_help_text
-    assert_includes(@html, :login_having_problems.tp)
+    assert_html(@html, "body", text: :login_having_problems.tp.as_displayed)
   end
 
   def test_renders_forgot_login_text
-    assert_includes(@html, :login_forgot_password.tp)
+    assert_html(@html, "body", text: :login_forgot_password.tp.as_displayed)
   end
 
   private

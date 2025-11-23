@@ -12,9 +12,9 @@ class ImageVoteAnonymityFormTest < UnitTestCase
   def test_renders_vote_counts
     html = render_form(num_anonymous: 5, num_public: 10)
 
-    assert_includes(html, :image_vote_anonymity_num_anonymous.t)
+    assert_html(html, "body", text: :image_vote_anonymity_num_anonymous.l)
     assert_includes(html, "5")
-    assert_includes(html, :image_vote_anonymity_num_public.t)
+    assert_html(html, "body", text: :image_vote_anonymity_num_public.l)
     assert_includes(html, "10")
   end
 

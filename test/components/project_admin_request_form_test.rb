@@ -12,13 +12,13 @@ class ProjectAdminRequestFormTest < UnitTestCase
   end
 
   def test_renders_form_with_subject_field
-    assert_includes(@html, :request_subject.t)
+    assert_html(@html, "body", text: :request_subject.l)
     assert_html(@html, "input[name='email[subject]']")
     assert_html(@html, "input[data-autofocus]")
   end
 
   def test_renders_form_with_content_field
-    assert_includes(@html, :request_message.t)
+    assert_html(@html, "body", text: :request_message.l)
     assert_html(@html, "textarea[name='email[content]']")
     assert_html(@html, "textarea[rows='5']")
   end

@@ -12,18 +12,18 @@ class LicenseFormTest < UnitTestCase
   end
 
   def test_renders_form_with_display_name_field
-    assert_includes(@html, :license_display_name.t)
+    assert_html(@html, "body", text: :license_display_name.l)
     assert_html(@html, "input[name='license[display_name]']")
     assert_html(@html, "input[data-autofocus]")
   end
 
   def test_renders_form_with_url_field
-    assert_includes(@html, :license_url.t)
+    assert_html(@html, "body", text: :license_url.l)
     assert_html(@html, "input[name='license[url]']")
   end
 
   def test_renders_form_with_deprecated_checkbox
-    assert_includes(@html, :license_form_checkbox_deprecated.t)
+    assert_html(@html, "body", text: :license_form_checkbox_deprecated.l)
     assert_html(@html, "input[name='license[deprecated]']")
     assert_html(@html, "input[type='checkbox']")
   end

@@ -16,18 +16,18 @@ class VisualGroupFormTest < UnitTestCase
   def test_renders_form_with_name_field
     assert_html(@html, "input[name='visual_group[name]']")
     assert_html(@html, "input[size='40']")
-    assert_includes(@html, :VISUAL_GROUP.t)
+    assert_html(@html, "body", text: :VISUAL_GROUP.l)
   end
 
   def test_renders_form_with_description_field
-    assert_includes(@html, :DESCRIPTION.t)
+    assert_html(@html, "body", text: :DESCRIPTION.l)
     assert_html(@html, "textarea[name='visual_group[description]']")
     assert_html(@html, "textarea[rows='10']")
     assert_html(@html, "textarea[cols='60']")
   end
 
   def test_renders_form_with_approved_checkbox
-    assert_includes(@html, :APPROVED.t)
+    assert_html(@html, "body", text: :APPROVED.l)
     assert_html(@html, "input[name='visual_group[approved]']")
   end
 

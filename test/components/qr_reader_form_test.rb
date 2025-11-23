@@ -12,7 +12,7 @@ class QRReaderFormTest < UnitTestCase
   end
 
   def test_renders_qr_code_field
-    assert_includes(@html, :app_qrcode.t)
+    assert_html(@html, "body", text: :app_qrcode.l)
     assert_html(@html, "input[data-qr-reader-target='input']")
     assert_html(@html, "input[data-action='qr-reader#handleInput']")
   end

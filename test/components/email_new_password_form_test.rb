@@ -15,7 +15,7 @@ class EmailNewPasswordFormTest < UnitTestCase
 
   def test_renders_form_with_login_field
     assert_html(@html, ".form-group")
-    assert_includes(@html, :login_user.t)
+    assert_html(@html, "body", text: :login_user.l)
     assert_html(@html, "input[name='new_user[login]']")
     assert_html(@html, "input[type='text']")
     assert_html(@html, ".mt-3")

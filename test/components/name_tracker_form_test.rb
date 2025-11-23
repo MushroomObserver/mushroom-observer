@@ -28,14 +28,14 @@ class NameTrackerFormTest < UnitTestCase
   def test_renders_note_template_checkbox
     html = render_form
 
-    assert_includes(html, :email_tracking_note.t)
+    assert_html(html, "body", text: :email_tracking_note.l)
     assert_html(html, "input[name='name_tracker[note_template_enabled]']")
   end
 
   def test_renders_note_template_help
     html = render_form
 
-    assert_includes(html, :email_tracking_note_help.t)
+    assert_html(html, "body", text: :email_tracking_note_help.tp.as_displayed)
   end
 
   def test_renders_note_template_textarea

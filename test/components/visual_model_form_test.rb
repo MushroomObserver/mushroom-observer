@@ -14,7 +14,7 @@ class VisualModelFormTest < UnitTestCase
 
   def test_renders_form_with_name_field
     assert_html(@html, "input[name='visual_model[name]']")
-    assert_includes(@html, :VISUAL_MODEL.t)
+    assert_html(@html, "body", text: :VISUAL_MODEL.l)
   end
 
   def test_renders_submit_button

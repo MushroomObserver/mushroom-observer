@@ -12,13 +12,13 @@ class GlossaryTermFormTest < UnitTestCase
   end
 
   def test_renders_form_with_name_field
-    assert_includes(@html, :glossary_term_name.l)
+    assert_html(@html, "body", text: :glossary_term_name.l)
     assert_html(@html, "input[name='glossary_term[name]']")
     assert_html(@html, "input[data-autofocus]")
   end
 
   def test_renders_form_with_description_field
-    assert_includes(@html, :glossary_term_description.l)
+    assert_html(@html, "body", text: :glossary_term_description.l)
     assert_html(@html, "textarea[name='glossary_term[description]']")
     assert_html(@html, "textarea[rows='16']")
   end

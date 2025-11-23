@@ -16,13 +16,13 @@ class MergeRequestEmailFormTest < UnitTestCase
   def test_renders_form_with_help_text
     html = render_form
 
-    assert_includes(html, :email_merge_request_help.tp(type: Name.type_tag))
+    assert_html(html, "body", text: :email_merge_request_help.tp(type: Name.type_tag).as_displayed)
   end
 
   def test_renders_old_object_field
     html = render_form
 
-    assert_includes(html, :NAME.t)
+    assert_html(html, "body", text: :NAME.l)
     assert_includes(html, @old_name.unique_format_name.t)
   end
 
@@ -35,7 +35,7 @@ class MergeRequestEmailFormTest < UnitTestCase
   def test_renders_notes_field
     html = render_form
 
-    assert_includes(html, :Notes.t)
+    assert_html(html, "body", text: :Notes.l)
     assert_html(html, "textarea[name='merge_request[notes]']")
     assert_html(html, "textarea[rows='10']")
     assert_html(html, "textarea[data-autofocus]")

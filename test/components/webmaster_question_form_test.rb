@@ -15,18 +15,18 @@ class WebmasterQuestionFormTest < UnitTestCase
   end
 
   def test_renders_form_with_help_note
-    assert_includes(@html, :ask_webmaster_note.tp)
+    assert_html(@html, "body", text: :ask_webmaster_note.tp.as_displayed)
   end
 
   def test_renders_form_with_email_field
-    assert_includes(@html, :ask_webmaster_your_email.t)
+    assert_html(@html, "body", text: :ask_webmaster_your_email.l)
     assert_html(@html, "input[name='webmaster_question[user][email]']")
     assert_html(@html, "input[size='60']")
     assert_includes(@html, @user_email)
   end
 
   def test_renders_form_with_question_field
-    assert_includes(@html, :ask_webmaster_question.t)
+    assert_html(@html, "body", text: :ask_webmaster_question.l)
     assert_html(@html, "textarea[name='webmaster_question[question][content]']")
     assert_html(@html, "textarea[rows='10']")
     assert_includes(@html, @content)

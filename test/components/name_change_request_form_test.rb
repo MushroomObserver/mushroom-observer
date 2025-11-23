@@ -17,13 +17,13 @@ class NameChangeRequestFormTest < UnitTestCase
   def test_renders_form_with_help_text
     html = render_form
 
-    assert_includes(html, :email_name_change_request_help.tp)
+    assert_html(html, "body", text: :email_name_change_request_help.tp.as_displayed)
   end
 
   def test_renders_current_name_field
     html = render_form
 
-    assert_includes(html, :NAME.t)
+    assert_html(html, "body", text: :NAME.l)
     assert_includes(html, @name.unique_search_name)
     assert_includes(html, "[##{@name.icn_id}]")
   end
@@ -31,14 +31,14 @@ class NameChangeRequestFormTest < UnitTestCase
   def test_renders_new_name_hidden_field
     html = render_form
 
-    assert_includes(html, :new_name.t)
+    assert_html(html, "body", text: :new_name.l)
     assert_includes(html, @new_name_with_icn_id)
   end
 
   def test_renders_notes_field
     html = render_form
 
-    assert_includes(html, :Notes.t)
+    assert_html(html, "body", text: :Notes.l)
     assert_html(html, "textarea[name='name_change_request[notes]']")
     assert_html(html, "textarea[rows='10']")
     assert_html(html, "textarea[data-autofocus]")

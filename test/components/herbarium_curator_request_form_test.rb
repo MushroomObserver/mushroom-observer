@@ -24,12 +24,12 @@ class HerbariumCuratorRequestFormTest < UnitTestCase
   end
 
   def test_renders_herbarium_name
-    assert_includes(@html, :HERBARIUM.l)
+    assert_html(@html, "body", text: :HERBARIUM.l)
     assert_includes(@html, "Test Herbarium")
   end
 
   def test_renders_notes_field
-    assert_includes(@html, :NOTES.l)
+    assert_html(@html, "body", text: :NOTES.l)
     assert_html(@html, "textarea[rows='10']")
     assert_html(@html, "textarea[data-autofocus]")
   end
