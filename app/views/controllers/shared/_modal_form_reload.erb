@@ -8,5 +8,5 @@
 end %>
 
 <%= turbo_stream.replace("#{identifier}_form") do
-  render(partial: form, locals: form_locals.merge(local: false))
+  render_form_or_component(form, **form_locals.merge(local: false))
 end %>

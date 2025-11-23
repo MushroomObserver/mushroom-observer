@@ -11,37 +11,30 @@ class WebmasterQuestionFormTest < UnitTestCase
     @user_email = "test@example.com"
     @content = "My question"
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_form_with_help_note
-    form = render_form
-
-    assert_includes(form, :ask_webmaster_note.tp)
+    assert_html(@html, "body", text: :ask_webmaster_note.tp.as_displayed)
   end
 
   def test_renders_form_with_email_field
-    form = render_form
-
-    assert_includes(form, :ask_webmaster_your_email.t)
-    assert_includes(form, 'name="webmaster_question[user][email]"')
-    assert_includes(form, 'size="60"')
-    assert_includes(form, @user_email)
+    assert_html(@html, "body", text: :ask_webmaster_your_email.l)
+    assert_html(@html, "input[name='webmaster_question[user][email]']")
+    assert_html(@html, "input[size='60']")
+    assert_includes(@html, @user_email)
   end
 
   def test_renders_form_with_question_field
-    form = render_form
-
-    assert_includes(form, :ask_webmaster_question.t)
-    assert_includes(form, 'name="webmaster_question[question][content]"')
-    assert_includes(form, "rows=\"10\"")
-    assert_includes(form, @content)
+    assert_html(@html, "body", text: :ask_webmaster_question.l)
+    assert_html(@html, "textarea[name='webmaster_question[question][content]']")
+    assert_html(@html, "textarea[rows='10']")
+    assert_includes(@html, @content)
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :SEND.l)
-    assert_includes(form, "center-block")
+    assert_html(@html, "input[type='submit'][value='#{:SEND.l}']")
+    assert_html(@html, ".center-block")
   end
 
   private

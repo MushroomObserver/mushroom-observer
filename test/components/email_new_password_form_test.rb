@@ -10,33 +10,28 @@ class EmailNewPasswordFormTest < UnitTestCase
 
     # Set up controller request context for form URL generation
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_form_with_login_field
-    form = render_form
-
-    assert_includes(form, "form-group")
-    assert_includes(form, :login_user.t)
-    assert_includes(form, 'name="new_user[login]"')
-    assert_includes(form, 'type="text"')
-    assert_includes(form, "mt-3")
-    assert_includes(form, "data-autofocus")
+    assert_html(@html, ".form-group")
+    assert_html(@html, "body", text: :login_user.l)
+    assert_html(@html, "input[name='new_user[login]']")
+    assert_html(@html, "input[type='text']")
+    assert_html(@html, ".mt-3")
+    assert_html(@html, "input[data-autofocus]")
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :SEND.l)
-    assert_includes(form, "btn btn-default")
-    assert_includes(form, "center-block my-3")
-    assert_includes(form, "data-turbo-submits-with")
+    assert_html(@html, "input[type='submit'][value='#{:SEND.l}']")
+    assert_html(@html, ".btn.btn-default")
+    assert_html(@html, ".center-block.my-3")
+    assert_html(@html, "input[data-turbo-submits-with]")
   end
 
   def test_form_has_correct_attributes
-    form = render_form
-
-    assert_includes(form, 'action="/test_form_path"')
-    assert_includes(form, 'method="post"')
+    assert_html(@html, "form[action='/test_form_path']")
+    assert_html(@html, "form[method='post']")
   end
 
   private

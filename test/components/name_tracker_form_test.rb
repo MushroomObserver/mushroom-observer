@@ -13,39 +13,38 @@ class NameTrackerFormTest < UnitTestCase
   end
 
   def test_renders_enable_button_for_new_tracker
-    form = render_form_for_new_tracker
+    html = render_form_for_new_tracker
 
-    assert_includes(form, :ENABLE.t)
+    assert_html(html, "input[type='submit'][value='#{:ENABLE.t}']")
   end
 
   def test_renders_update_and_disable_buttons_for_existing_tracker
-    form = render_form_for_existing_tracker
+    html = render_form_for_existing_tracker
 
-    assert_includes(form, :UPDATE.t)
-    assert_includes(form, :DISABLE.t)
+    assert_html(html, "input[type='submit'][value='#{:UPDATE.t}']")
+    assert_html(html, "input[type='submit'][value='#{:DISABLE.t}']")
   end
 
   def test_renders_note_template_checkbox
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :email_tracking_note.t)
-    assert_includes(form,
-                    'name="name_tracker[note_template_enabled]"')
+    assert_html(html, "body", text: :email_tracking_note.l)
+    assert_html(html, "input[name='name_tracker[note_template_enabled]']")
   end
 
   def test_renders_note_template_help
-    form = render_form
+    html = render_form
 
-    assert_includes(form, :email_tracking_note_help.t)
+    assert_html(html, "body", text: :email_tracking_note_help.tp.as_displayed)
   end
 
   def test_renders_note_template_textarea
-    form = render_form
+    html = render_form
 
-    assert_includes(form, 'name="name_tracker[note_template]"')
-    assert_includes(form, "rows=\"16\"")
-    assert_includes(form, "cols=\"80\"")
-    assert_includes(form, "data-autofocus")
+    assert_html(html, "textarea[name='name_tracker[note_template]']")
+    assert_html(html, "textarea[rows='16']")
+    assert_html(html, "textarea[cols='80']")
+    assert_html(html, "textarea[data-autofocus]")
   end
 
   private

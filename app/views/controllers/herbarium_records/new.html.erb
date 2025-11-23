@@ -7,9 +7,10 @@ add_context_nav(herbarium_record_form_new_tabs(obs: @observation))
 <div class="row">
   <div class="col-xs-12 col-sm-7">
     <span class="text-larger mb-3"><%= :Observation.t %> #<%= @observation.id %></span><!-- .text-larger -->
-    <%= render(partial: "herbarium_records/form", locals: { local: true }) %>
+    <%= render(Components::HerbariumRecordForm.new(
+          @herbarium_record, observation: @observation
+        )) %>
   </div>
-
   <div class="col-xs-12 col-sm-5">
     <ul class="row list-unstyled">
       <%= render(::Components::MatrixBox.new(

@@ -14,8 +14,7 @@ class Components::VisualModelForm < Components::ApplicationForm
   private
 
   def render_errors
-    render(Components::Alert.new(level: :danger,
-                                 id: "error_explanation")) do
+    Alert(level: :danger, id: "error_explanation") do
       [error_header, error_list].join.html_safe # rubocop:disable Rails/OutputSafety
     end
   end

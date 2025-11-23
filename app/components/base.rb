@@ -25,6 +25,7 @@ class Components::Base < Phlex::HTML
   register_output_helper :select_with_label
   register_output_helper :link_icon
   register_output_helper :make_table
+  register_output_helper :help_block_with_arrow
 
   # Register custom value helpers (return values)
   register_value_helper :permission?
@@ -32,6 +33,7 @@ class Components::Base < Phlex::HTML
   register_value_helper :image_vote_as_short_string
   register_value_helper :image_vote_as_help_string
   register_value_helper :send_observer_question_tab
+  register_value_helper :sequence_archive_options
 
   # Enable fragment caching
   def cache_store

@@ -30,9 +30,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__show")
 
     scroll_to(find("#observation_collection_numbers"), align: :center)
-    assert_link(:create_collection_number.l)
-    # Link is too small to click normally, use trigger
-    find_link(:create_collection_number.l).trigger("click")
+    within("#observation_collection_numbers") do
+      assert_link(:create_collection_number.l)
+      # Link is too small to click normally, use trigger
+      find_link(:create_collection_number.l).trigger("click")
+    end
 
     assert_selector("#modal_collection_number", wait: 6)
 

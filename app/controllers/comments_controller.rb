@@ -256,13 +256,13 @@ class CommentsController < ApplicationController
     render(partial: "shared/modal_form",
            locals: { title: modal_title, identifier: modal_identifier,
                      user: @user, form: "comments/form",
-                     form_locals: { comment: @comment } }) and return
+                     form_locals: { model: @comment } }) and return
   end
 
   def reload_modal_form
     render(partial: "shared/modal_form_reload",
            locals: { identifier: modal_identifier, form: "comments/form",
-                     form_locals: { comment: @comment } })
+                     form_locals: { model: @comment } })
   end
 
   def modal_identifier

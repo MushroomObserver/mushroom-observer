@@ -252,7 +252,7 @@ class CommentsControllerTest < FunctionalTestCase
 
     get(:edit, params: { id: comment.id }, format: :turbo_stream)
     assert_template("shared/_modal_form")
-    assert_template("comments/_form")
+    assert_select("form#comment_form")
     assert_form_action(action: :update, id: comment.id.to_s)
   end
 
