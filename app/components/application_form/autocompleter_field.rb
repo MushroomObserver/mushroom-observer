@@ -6,20 +6,26 @@ class Components::ApplicationForm < Superform::Rails::Form
   class AutocompleterField < Superform::Rails::Components::Input
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Rails::Helpers::LinkTo
-    include Phlex::Slotable
-    include FieldWithHelp
 
-    slot :between
-    slot :append
+    register_output_helper :link_icon
+    register_output_helper :icon_link_to
+    register_output_helper :modal_link_to
 
-    attr_reader :wrapper_options, :autocompleter_type, :textarea
+    attr_reader :wrapper_options, :autocompleter_type, :textarea,
+                :find_text, :keep_text, :edit_text, :create_text,
+                :create, :create_path
 
-    def initialize(field, type:, textarea: false, attributes: {},
-                   wrapper_options: {})
-      super(field, attributes: attributes)
+    def initialize(field, type:, textarea: false, **options)
+      super(field, attributes: options.fetch(:attributes, {}))
       @autocompleter_type = type
       @textarea = textarea
-      @wrapper_options = wrapper_options
+      @wrapper_options = options.fetch(:wrapper_options, {})
+      @find_text = options[:find_text]
+      @keep_text = options[:keep_text]
+      @edit_text = options[:edit_text]
+      @create_text = options[:create_text]
+      @create = options[:create]
+      @create_path = options[:create_path]
     end
 
     def view_template
@@ -28,11 +34,10 @@ class Components::ApplicationForm < Superform::Rails::Form
         class: "autocompleter",
         data: controller_data
       ) do
-        render_with_wrapper do
-          render_input_field
+        render_input_field do
+          render_dropdown
+          render_hidden_field
         end
-        render_dropdown
-        render_hidden_field
       end
     end
 
@@ -49,19 +54,134 @@ class Components::ApplicationForm < Superform::Rails::Form
       }
     end
 
-    def render_input_field
-      field_attributes = attributes.merge(
-        class: class_names(attributes[:class], "dropdown"),
+    def render_input_field(&block)
+      field_component = create_field_component
+      add_slots_to_field(field_component, &block)
+      render(field_component)
+    end
+
+    def create_field_component
+      field_attributes = autocompleter_field_attributes
+      field_wrapper_options = autocompleter_wrapper_options
+
+      if textarea
+        field.textarea(**field_attributes,
+                       wrapper_options: field_wrapper_options)
+      else
+        field.text(**field_attributes, wrapper_options: field_wrapper_options)
+      end
+    end
+
+    def autocompleter_field_attributes
+      {
         placeholder: :start_typing.l,
         autocomplete: "off",
         data: { autocompleter_target: "input" }
-      )
+      }.deep_merge(attributes)
+    end
 
-      if textarea
-        render(field.textarea(**field_attributes))
-      else
-        render(field.text(**field_attributes))
-      end
+    def autocompleter_wrapper_options
+      wrapper_options.merge(
+        wrap_data: { autocompleter_target: "wrap" },
+        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown")
+      )
+    end
+
+    def add_slots_to_field(field_component, &block)
+      # Add label_after buttons to between slot (after label)
+      field_component.with_between { render_label_after }
+
+      # Add label_end buttons to label_end slot
+      field_component.with_label_end { render_label_end }
+
+      # Add dropdown and hidden field to append slot
+      field_component.with_append(&block) if block
+    end
+
+    # Renders all label_after elements (goes in between slot after label)
+    # rubocop:disable Rails/OutputSafety
+    def render_label_after
+      raw(render_has_id_indicator)
+      raw(render_find_button) if find_text
+      raw(render_keep_box_button) if keep_text
+      raw(render_edit_box_button) if keep_text
+    end
+
+    # Renders all label_end elements (goes in label_end slot)
+    def render_label_end
+      raw(render_create_button) if create_text && create.blank?
+      raw(render_modal_create_link) if create_text && create.present? &&
+                                       create_path.present?
+    end
+    # rubocop:enable Rails/OutputSafety
+
+    def render_has_id_indicator
+      link_icon(
+        :check,
+        title: :autocompleter_has_id.l,
+        class: "px-2 text-success has-id-indicator",
+        data: { autocompleter_target: "hasIdIndicator" }
+      )
+    end
+
+    def render_find_button
+      return unless find_text
+
+      icon_link_to(
+        find_text, "#",
+        icon: :find_on_map, show_text: false, icon_class: "text-primary",
+        name: "find_#{autocompleter_type}", class: "ml-3 find-btn d-none",
+        data: { map_target: "showBoxBtn",
+                action: "map#showBox:prevent" }
+      )
+    end
+
+    def render_keep_box_button
+      return unless keep_text
+
+      icon_link_to(
+        keep_text, "#",
+        icon: :apply, show_text: false, icon_class: "text-primary",
+        name: "keep_#{autocompleter_type}", class: "ml-3 keep-btn d-none",
+        data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
+                action: "map#toggleBoxLock:prevent form-exif#showFields" }
+      )
+    end
+
+    def render_edit_box_button
+      return unless keep_text
+
+      icon_link_to(
+        edit_text, "#",
+        icon: :edit, show_text: false, icon_class: "text-primary",
+        name: "edit_#{autocompleter_type}", class: "ml-3 edit-btn d-none",
+        data: { autocompleter_target: "editBtn", map_target: "editBoxBtn",
+                action: "map#toggleBoxLock:prevent form-exif#showFields" }
+      )
+    end
+
+    def render_create_button
+      return if !create_text || create.present?
+
+      icon_link_to(
+        create_text, "#",
+        id: "create_#{autocompleter_type}_btn", class: "ml-3 create-button",
+        icon: :plus, show_text: true, icon_class: "text-primary",
+        name: "create_#{autocompleter_type}",
+        data: { autocompleter_target: "createBtn",
+                action: "autocompleter#swapCreate:prevent" }
+      )
+    end
+
+    def render_modal_create_link
+      return unless create_text && create.present? && create_path.present?
+
+      modal_link_to(
+        create, create_text, create_path,
+        icon: :plus, show_text: true, icon_class: "text-primary",
+        name: "create_#{autocompleter_type}", class: "ml-3 create-link",
+        data: { autocompleter_target: "createBtn" }
+      )
     end
 
     def render_dropdown
@@ -101,53 +221,6 @@ class Components::ApplicationForm < Superform::Rails::Form
         readonly: true,
         data: { autocompleter_target: "hidden" }
       )
-    end
-
-    def render_with_wrapper
-      extract_wrapper_options => {
-        show_label:, label_text:, inline:, wrap_class:
-      }
-
-      div(class: form_group_class("form-group", inline, wrap_class),
-          data: { autocompleter_target: "wrap" }) do
-        render_label_row(label_text, inline) if show_label
-        yield
-        render_help_after_field
-        render(append_slot) if append_slot
-      end
-    end
-
-    def extract_wrapper_options
-      label_option = wrapper_options[:label]
-      show_label = label_option != false
-      label_text = if label_option.is_a?(String)
-                     label_option
-                   else
-                     field.key.to_s.humanize
-                   end
-      inline = wrapper_options[:inline] || false
-      wrap_class = wrapper_options[:wrap_class]
-
-      { show_label:, label_text:, inline:, wrap_class: }
-    end
-
-    def render_label_row(label_text, inline)
-      display = inline ? "d-inline-flex" : "d-flex"
-
-      div(class: "#{display} justify-content-between") do
-        div do
-          label(for: field.dom.id, class: "mr-3") { label_text }
-          render_help_in_label_row
-          render(between_slot) if between_slot
-        end
-      end
-    end
-
-    def form_group_class(base, inline, wrap_class)
-      classes = base
-      classes += " form-inline" if inline && base == "form-group"
-      classes += " #{wrap_class}" if wrap_class.present?
-      classes
     end
   end
 end

@@ -8,6 +8,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include FieldWithHelp
 
     slot :between
+    slot :label_end
     slot :append
 
     attr_reader :wrapper_options
@@ -38,8 +39,10 @@ class Components::ApplicationForm < Superform::Rails::Form
                    end
       inline = wrapper_options[:inline] || false
       wrap_class = wrapper_options[:wrap_class]
+      wrap_data = wrapper_options[:wrap_data]
 
-      div(class: form_group_class("form-group", inline, wrap_class)) do
+      div(class: form_group_class("form-group", inline, wrap_class),
+          data: wrap_data) do
         render_label_row(label_text, inline) if show_label
         yield
         render_help_after_field
@@ -56,6 +59,11 @@ class Components::ApplicationForm < Superform::Rails::Form
           label(for: field.dom.id, class: "mr-3") { label_text }
           render_help_in_label_row
           render(between_slot) if between_slot
+        end
+        if label_end_slot
+          div do
+            render(label_end_slot)
+          end
         end
       end
     end
