@@ -282,7 +282,7 @@ module Searchable
         :select_no_eq_nil_or_yes
       when :misspellings
         :select_misspellings
-      when :range
+      when :rank
         :select_rank_range
       when :confidence
         :select_confidence_range
@@ -299,7 +299,6 @@ module Searchable
 
     def field_ui_by_query_attr_definition(field)
       definition = query_subclass.attribute_types[field]&.accepts
-
       case definition
       when :boolean
         :select_nil_boolean
@@ -307,7 +306,7 @@ module Searchable
         :text_field_with_label
       when Array
         field_ui_for_array_definition(definition)
-      when AbstractModel
+      when Class
         :single_value_autocompleter
       when Hash
         field_ui_for_hash_definition(definition)
@@ -327,7 +326,7 @@ module Searchable
       case definition.first
       when :string, :time, :date
         :text_field_with_label
-      when Object
+      when Class
         :multiple_value_autocompleter
       end
     end
@@ -340,7 +339,7 @@ module Searchable
 
     def names_field_ui_for_this_controller
       case search_type
-      when :observations
+      when :observations, :projects, :species_lists
         :names_fields_for_obs
       when :names
         :names_fields_for_names
