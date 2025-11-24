@@ -19,7 +19,7 @@ module Searchable
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
             :search_bar_help, # id of element to update contents of
-            partial: "#{parent_controller}/search/help"
+            partial: "#{search_type}/search/help"
           ))
         end
         format.html
@@ -56,7 +56,7 @@ module Searchable
       redirect_to(action: :new) and return unless validate_search_instance?
 
       save_search_query
-      redirect_to(controller: "/#{parent_controller}", action: :index,
+      redirect_to(controller: "/#{search_type}", action: :index,
                   q: @query.q_param)
     end
 
@@ -77,13 +77,15 @@ module Searchable
     # Default. Override in controllers
     def nested_names_params = []
 
-    # Used by search_form
-    def search_type = self.class.name.deconstantize.underscore.to_sym
+    # e.g. "SpeciesLists"
+    def module_name = self.class.name.deconstantize
 
-    def parent_controller = self.class.name.deconstantize.underscore
+    # e.g. :species_lists - Used by search_form
+    def search_type = module_name.underscore.to_sym
 
-    # Returns the capitalized :Symbol used by Query for the type of query.
-    def query_model = self.class.module_parent.name.singularize.to_sym
+    # e.g. :SpeciesList
+    # Returns the capitalized :ModelSymbol used by Query for the type of query.
+    def query_model = module_name.singularize.to_sym
 
     private
 
@@ -92,7 +94,7 @@ module Searchable
     # Gets the query class relevant to each controller, assuming the controller
     # is namespaced like Observations::SearchController
     def query_subclass
-      Query.const_get(self.class.module_parent.name)
+      Query.const_get(module_name)
     end
 
     def clear_form?
