@@ -429,7 +429,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           ->(bool = true) { where(specimen: bool) }
 
     scope :has_sequences, lambda { |bool = true|
-      return all unless bool
+      return all if bool.nil?
 
       joined_relation_condition(:sequences, bool:)
     }

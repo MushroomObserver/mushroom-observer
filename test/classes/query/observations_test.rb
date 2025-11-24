@@ -189,8 +189,10 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_has_sequences
     assert_query(Observation.has_sequences(true).order_by_default,
                  :Observation, has_sequences: true)
-    assert_query(Observation.order_by_default,
+    assert_query(Observation.has_sequences(false).order_by_default,
                  :Observation, has_sequences: false)
+    assert_query(Observation.order_by_default,
+                 :Observation, has_sequences: nil)
   end
 
   def test_observation_has_images

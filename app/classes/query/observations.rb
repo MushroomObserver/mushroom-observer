@@ -39,7 +39,7 @@ class Query::Observations < Query
   query_attr(:pattern, :string)
   query_attr(:has_comments, { boolean: [true] })
   query_attr(:comments_has, :string)
-  query_attr(:has_sequences, { boolean: [true] })
+  query_attr(:has_sequences, :boolean)
   # query_attr(:has_specimen, :boolean) # content filter
   # query_attr(:has_images, :boolean) # content filter
 
