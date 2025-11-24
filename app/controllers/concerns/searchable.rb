@@ -71,12 +71,12 @@ module Searchable
 
     # Used by search_helper to prefill nested params
     def nested_field_names
-      nested_names_param_names + nested_in_box_param_names
+      nested_names_params + nested_in_box_params
     end
 
     # Default. Override in controllers
     def nested_names_params
-      {}
+      []
     end
 
     # Used by search_form
@@ -112,22 +112,15 @@ module Searchable
     def permittables
       ranges = fields_with_range.map { |field| :"#{field}_range" }
       ids = fields_preferring_ids.map { |field| :"#{field}_id" }
-      names = { names: nested_names_param_names }
-      in_box = { in_box: nested_in_box_param_names }
-      perm = permitted_search_params.keys + ranges + ids
+      names = { names: nested_names_params }
+      in_box = { in_box: nested_in_box_params }
+      perm = permitted_search_params + ranges + ids
       perm << names
       perm << in_box
       perm
     end
 
-    def nested_names_param_names
-      keys = nested_names_params&.keys || []
-      return keys if keys.blank?
-
-      keys << :lookup
-    end
-
-    def nested_in_box_param_names
+    def nested_in_box_params
       [:north, :south, :east, :west].freeze
     end
 
@@ -255,13 +248,13 @@ module Searchable
     #   end
     # end
 
-    # The controllers define how they're going to parse their
+    # The query attributes define how they're going to parse their
     # fields, so we can use that to assign a field helper.
     def search_field_type_from_controller(field:)
       # return :pattern if field == :pattern
 
-      defined = permitted_search_params.merge(nested_names_params)
-      unless defined[field]
+      defined = permitted_search_params + nested_names_params
+      unless defined.include?(field)
         raise("No input defined for #{field} in #{controller_name}")
       end
 
