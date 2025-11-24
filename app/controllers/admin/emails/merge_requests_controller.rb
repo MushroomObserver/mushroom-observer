@@ -79,6 +79,7 @@ module Admin
       end
 
       def merge_request_content
+        notes = params.dig(:merge_request, :notes) || params[:notes]
         :email_merge_objects.l(
           user: @user.login,
           type: @model.type_tag,
@@ -88,7 +89,7 @@ module Admin
           show_that_url: @new_obj.show_url,
           edit_this_url: @old_obj.edit_url,
           edit_that_url: @new_obj.edit_url,
-          notes: params[:notes].to_s.strip_html.strip_squeeze
+          notes: notes.to_s.strip_html.strip_squeeze
         )
       end
     end

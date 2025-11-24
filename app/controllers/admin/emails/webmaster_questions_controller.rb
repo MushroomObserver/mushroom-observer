@@ -25,8 +25,10 @@ module Admin
       end
 
       def create
-        @email = params.dig(:user, :email)
-        @content = params.dig(:question, :content)
+        @email = params.dig(:webmaster_question, :user, :email) ||
+                 params.dig(:user, :email)
+        @content = params.dig(:webmaster_question, :question, :content) ||
+                   params.dig(:question, :content)
         @email_error = false
         create_webmaster_question
       end
@@ -37,10 +39,13 @@ module Admin
         if @email.blank? || @email.index("@").nil?
           flash_error(:runtime_ask_webmaster_need_address.t)
           @email_error = true
+          render(:new)
         elsif @content.blank?
           flash_error(:runtime_ask_webmaster_need_content.t)
+          render(:new)
         elsif non_user_potential_spam?
           flash_error(:runtime_ask_webmaster_antispam.t)
+          render(:new)
         else
           QueuedEmail::Webmaster.create_email(@user, sender_email: @email,
                                                      content: @content)
