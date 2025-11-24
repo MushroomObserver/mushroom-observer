@@ -467,7 +467,9 @@ module ControllerExtensions
   def assert_response(arg, msg = "")
     return unless arg
 
-    if arg == :success || arg == :redirect || arg.is_a?(Integer)
+    # Is it a standard Rails HTTP status symbol or other pass-through value?
+    if (arg.is_a?(Symbol) && Rack::Utils::SYMBOL_TO_STATUS_CODE.key?(arg)) ||
+       arg == :success || arg == :redirect || arg.is_a?(Integer)
       super
     else
       # Put together good error message telling us exactly what happened.
