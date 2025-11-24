@@ -90,4 +90,73 @@ class PublicationsControllerTest < FunctionalTestCase
 
     assert_redirected_to(publications_path)
   end
+
+  # HTML format tests for permission/validation failures
+  def test_should_not_update_publication_without_permission
+    login("mary")
+    put(:update, params: { id: publications(:one_pub).id,
+                           publication: { full: "New" } })
+    assert_redirected_to(publications_path)
+  end
+
+  def test_should_not_update_publication_with_errors
+    login
+    put(:update, params: { id: publications(:one_pub).id,
+                           publication: { full: "" } })
+    assert_response(:success)
+    assert_template(:edit)
+  end
+
+  def test_should_not_destroy_publication_without_permission
+    login("mary")
+    assert_no_difference("Publication.count") do
+      delete(:destroy, params: { id: publications(:one_pub).id })
+    end
+    assert_redirected_to(publications_path)
+  end
+
+  # XML format tests for coverage
+  def test_should_create_publication_xml
+    disable_unsafe_html_filter
+    login
+    ref = "Author, J.R. 2014. Test Publication."
+    assert_difference("Publication.count", +1) do
+      post(:create, params: { publication: { full: ref } }, format: :xml)
+    end
+    assert_response(201) # created
+  end
+
+  def test_should_not_create_publication_with_errors_xml
+    disable_unsafe_html_filter
+    login
+    assert_no_difference("Publication.count") do
+      post(:create, params: { publication: { full: "" } }, format: :xml)
+    end
+    assert_response(422) # unprocessable_content
+  end
+
+  def test_should_not_update_publication_without_permission_xml
+    disable_unsafe_html_filter
+    login("mary")
+    put(:update, params: { id: publications(:one_pub).id,
+                           publication: { full: "New" } }, format: :xml)
+    assert_response(422) # unprocessable_content
+  end
+
+  def test_should_not_update_publication_with_errors_xml
+    disable_unsafe_html_filter
+    login
+    put(:update, params: { id: publications(:one_pub).id,
+                           publication: { full: "" } }, format: :xml)
+    assert_response(422) # unprocessable_content
+  end
+
+  def test_should_not_destroy_publication_without_permission_xml
+    disable_unsafe_html_filter
+    login("mary")
+    assert_no_difference("Publication.count") do
+      delete(:destroy, params: { id: publications(:one_pub).id }, format: :xml)
+    end
+    assert_response(422) # unprocessable_content
+  end
 end
