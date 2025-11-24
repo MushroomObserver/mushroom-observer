@@ -65,8 +65,10 @@ module Admin
         flash = args[:flash]
         post(:create,
              params: {
-               user: { email: email },
-               question: { content: args[:content] || "Some content" }
+               webmaster_question: {
+                 user: { email: email },
+                 question: { content: args[:content] || "Some content" }
+               }
              })
         assert_response(response)
         assert_flash_text(flash) if flash
