@@ -123,7 +123,7 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_difference("Publication.count", +1) do
       post(:create, params: { publication: { full: ref } }, format: :xml)
     end
-    assert_response(201) # created
+    assert_response(:created)
   end
 
   def test_should_not_create_publication_with_errors_xml
@@ -132,7 +132,7 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_no_difference("Publication.count") do
       post(:create, params: { publication: { full: "" } }, format: :xml)
     end
-    assert_response(422) # unprocessable_content
+    assert_response(:unprocessable_content)
   end
 
   def test_should_not_update_publication_without_permission_xml
@@ -140,7 +140,7 @@ class PublicationsControllerTest < FunctionalTestCase
     login("mary")
     put(:update, params: { id: publications(:one_pub).id,
                            publication: { full: "New" } }, format: :xml)
-    assert_response(422) # unprocessable_content
+    assert_response(:unprocessable_content)
   end
 
   def test_should_not_update_publication_with_errors_xml
@@ -148,7 +148,7 @@ class PublicationsControllerTest < FunctionalTestCase
     login
     put(:update, params: { id: publications(:one_pub).id,
                            publication: { full: "" } }, format: :xml)
-    assert_response(422) # unprocessable_content
+    assert_response(:unprocessable_content)
   end
 
   def test_should_not_destroy_publication_without_permission_xml
@@ -157,6 +157,6 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_no_difference("Publication.count") do
       delete(:destroy, params: { id: publications(:one_pub).id }, format: :xml)
     end
-    assert_response(422) # unprocessable_content
+    assert_response(:unprocessable_content)
   end
 end
