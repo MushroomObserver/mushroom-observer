@@ -12,6 +12,7 @@
 # 1. User calls `new`, fills out form
 #    Adds a InatImport instance if user lacks one
 # 2. create
+#    reloads form if params invalid or changed
 #    saves some user data in a InatImport instance
 #      attributes include: user, inat_ids, token, state
 #    passes things off (redirects) to iNat at the INAT_AUTHORIZATION_URL
@@ -59,6 +60,7 @@
 class InatImportsController < ApplicationController
   include Validators
   include Inat::Constants
+  include Observations::InatImportsHelper
 
   before_action :login_required
 
@@ -69,32 +71,18 @@ class InatImportsController < ApplicationController
 
   def new
     @inat_import = InatImport.find_or_create_by(user: @user)
-    return unless @inat_import.job_pending?
-
-    tracker = InatImportJobTracker.where(inat_import: @inat_import).
-              order(:created_at).last
-    flash_warning(:inat_import_tracker_pending.l)
-    redirect_to(
-      inat_import_path(@inat_import, params: { tracker_id: tracker.id })
-    )
-  end
-
-  def create
-    return reload_form unless params_valid?
-
-    assure_user_has_inat_import_api_key
-    init_ivars
-    request_inat_user_authorization
-  end
-
-  # ---------------------------------
-
-  private
-
-  def reload_form
-    @inat_ids = params[:inat_ids]
-    @inat_username = params[:inat_username]
-    render(:new)
+    if @inat_import.job_pending?
+      tracker = InatImportJobTracker.where(inat_import: @inat_import).
+                order(:created_at).last
+      flash_warning(:inat_import_tracker_pending.l)
+      redirect_to(
+        inat_import_path(@inat_import, params: { tracker_id: tracker.id })
+      )
+    else
+      assure_user_has_inat_import_api_key
+      @inat_import.update(inat_ids: "", import_all: false)
+      render(:new)
+    end
   end
 
   def assure_user_has_inat_import_api_key
@@ -102,13 +90,51 @@ class InatImportsController < ApplicationController
     key = APIKey.create(user: @user, notes: MO_API_KEY_NOTES) if key.nil?
     key.verify! if key.verified.nil?
   end
+  private :assure_user_has_inat_import_api_key
+
+  def create
+    @inat_import = InatImport.find_or_create_by(user: @user)
+
+    # decide if user changed input before clobbering inat_import
+    user_input_unchanged = user_input_unchanged?
+    @inat_import.update(
+      cancel: false # reset cancel flag when starting create
+    )
+    return reload_form unless params_valid?
+
+    init_ivars
+    return reload_form unless user_input_unchanged
+
+    request_inat_user_authorization
+  end
+  # ---------------------------------
+
+  private
+
+  def reload_form
+    # use separate ivars instead of updating @inat_import
+    # because a param may violate InatImport column constraints
+    @inat_ids = params[:inat_ids]
+    @import_all = params[:all]
+    @inat_username = params[:inat_username].strip
+    render(:new)
+  end
+
+  def user_input_unchanged?
+    params[:inat_ids] == @inat_import[:last_user_inputs]["inat_ids"] &&
+      params[:all] == @inat_import[:last_user_inputs]["all"] &&
+      params[:inat_username].strip ==
+        @inat_import[:last_user_inputs]["inat_username"]
+  end
+
+  def truthy?(val)
+    val.to_s == "1" || val.to_s.downcase == "true"
+  end
 
   def init_ivars
-    @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(
-      state: "Authorizing",
       import_all: params[:all],
-      importables: importables_count,
+      importables: preliminary_importables_count,
       imported_count: 0,
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_ids: params[:inat_ids],
@@ -119,19 +145,20 @@ class InatImportsController < ApplicationController
       ended_at: nil,
       cancel: false
     )
+    # refined count using iNat API query which
+    # excludes already imported/exported observations and non-fungi/slime molds
+    @inat_import.update(importables: inat_expected_import_count(@inat_import))
   end
 
-  # NOTE: jdc 2024-06-15 This method is a quick & dirty way to get
-  # an initial estimate when the user provides a list of iNat ids.
-  # When implementing import_all, we should instead use the iNat API
-  # to get the number of observations to be imported.
-  def importables_count
+  # Initial estimate based only on the user-provided list of iNat ids.
+  def preliminary_importables_count
     return nil if importing_all?
 
     params[:inat_ids].split(",").length
   end
 
   def request_inat_user_authorization
+    @inat_import.update(state: "Authorizing")
     redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
@@ -139,10 +166,12 @@ class InatImportsController < ApplicationController
 
   public
 
-  # iNat redirects here after user completes iNat authorization
+  # iNat redirects here after user completes iNat authorization,
+  # passing a code param if the user authorized MO to access their iNat data
+  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def authorization_response
     auth_code = params[:code]
-    return not_authorized if auth_code.blank?
+    return unauthorized if auth_code.blank?
 
     inat_import = inat_import_authenticating(auth_code)
     inat_import.reset_last_obs_start
@@ -162,7 +191,7 @@ class InatImportsController < ApplicationController
 
   private
 
-  def not_authorized
+  def unauthorized
     flash_error(:inat_no_authorization.l)
     redirect_to(observations_path)
   end

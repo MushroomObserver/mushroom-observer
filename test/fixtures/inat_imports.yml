@@ -6,7 +6,7 @@ DEFAULTS: &DEFAULTS
   token: ""
   inat_username: ""
   inat_ids: ""
-  import_all: false
+  import_all: 0 # false
   importables: 0
   imported_count: 0
   response_errors: ""
@@ -18,6 +18,7 @@ DEFAULTS: &DEFAULTS
 rolf_inat_import:
   <<: *DEFAULTS
   user: rolf
+  inat_ids: "123,456,789,987"
   importables: 4 # rolf wants to import 4 Observations
   inat_username: rolf_inat_username
   total_imported_count: nil # has no import history
@@ -33,6 +34,7 @@ mary_inat_import:
   <<: *DEFAULTS
   user: mary
   inat_username: mary_inat_username
+  inat_ids: 123456789
 
 # katrina is in the middle of an import
 katrina_inat_import:
@@ -50,6 +52,9 @@ inat_importer_inat_import:
 # need >= 1 inat_import with an import history
 roy_inat_import:
   <<: *DEFAULTS
+  user: roy
+  inat_username: roy_inat_username
+  import_all: 1 # true roy wants to import everything
   total_imported_count: 3 # imports in prior jobs
   total_seconds: 36 # seconds in prior jobs
 
