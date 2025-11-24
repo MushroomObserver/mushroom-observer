@@ -49,7 +49,11 @@ module Herbaria
     def test_create
       email_count = ActionMailer::Base.deliveries.count
       login("mary")
-      post(:create, params: { id: nybg.id, notes: "ZZYZX" })
+      post(:create,
+           params: {
+             id: nybg.id,
+             herbarium_curator_request: { notes: "ZZYZX" }
+           })
 
       assert_redirected_to(herbarium_path(nybg))
       assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
