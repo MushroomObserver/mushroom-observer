@@ -80,20 +80,6 @@ module SearchFormHelper
     end
   end
 
-  # The controllers define how they're going to parse their
-  # fields, so we can use that to assign a field helper.
-  def search_field_type_from_controller(field:)
-    # return :pattern if field == :pattern
-
-    defined = controller.permitted_search_params.
-              merge(controller.nested_names_params)
-    unless defined[field]
-      raise("No input defined for #{field} in #{controller.controller_name}")
-    end
-
-    defined[field]
-  end
-
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.

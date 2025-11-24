@@ -227,12 +227,6 @@ module Searchable
       @query = Query.lookup_and_save(query_model, **@search.params)
     end
 
-    # Gets the query class relevant to each controller, assuming the controller
-    # is namespaced like Observations::SearchController
-    # def query_subclass
-    #   Query.const_get(self.class.module_parent.name)
-    # end
-
     def escape_location_string(location)
       "\"#{location.tr(",", "\\,")}\""
     end
@@ -260,5 +254,97 @@ module Searchable
     #     fields.each { |field| @search.delete(field) }
     #   end
     # end
+
+    # The controllers define how they're going to parse their
+    # fields, so we can use that to assign a field helper.
+    def search_field_type_from_controller(field:)
+      # return :pattern if field == :pattern
+
+      defined = permitted_search_params.merge(nested_names_params)
+      unless defined[field]
+        raise("No input defined for #{field} in #{controller_name}")
+      end
+
+      search_field_ui(field)
+    end
+    helper_method :search_field_type_from_controller
+
+    def search_field_ui(field) # rubocop:disable Metrics/CyclomaticComplexity
+      # handle exceptions first
+      case field
+      when :names
+        names_field_ui_for_this_controller
+      when :lookup
+        :multiple_value_autocompleter
+      when :include_synonyms, :include_subtaxa,
+        :include_immediate_subtaxa, :exclude_original_names,
+        :exclude_consensus, :include_all_name_proposals
+        :select_nil_boolean
+      when :misspellings
+        :select_misspellings
+      when :range
+        :select_rank_range
+      when :confidence
+        :select_confidence_range
+      when :region
+        :region_with_in_box_fields
+      when :in_box
+        :in_box_fields
+      when :field_slips
+        :text_field_with_label
+      else
+        field_ui_by_query_attr_definition(field)
+      end
+    end
+
+    def field_ui_by_query_attr_definition(field)
+      definition = query_subclass.attribute_types[field]&.accepts
+
+      case definition
+      when :boolean
+        :select_nil_boolean
+      when :string
+        :text_field_with_label
+      when Array
+        field_ui_for_array_definition(definition)
+      when AbstractModel
+        :single_value_autocompleter
+      when Hash
+        field_ui_for_hash_definition(definition)
+      end
+    end
+
+    # e.g. { boolean: [true] }
+    def field_ui_for_hash_definition(definition)
+      case definition.keys.first.to_sym
+      when :boolean
+        :select_nil_yes
+      end
+    end
+
+    # e.g. [:string], [Location]
+    def field_ui_for_array_definition(definition)
+      case definition.first
+      when :string, :time, :date
+        :text_field_with_label
+      when Object
+        :multiple_value_autocompleter
+      end
+    end
+
+    # Gets the query class relevant to each controller, assuming the controller
+    # is namespaced like Observations::SearchController
+    def query_subclass
+      Query.const_get(self.class.module_parent.name)
+    end
+
+    def names_field_ui_for_this_controller
+      case search_type
+      when :observations
+        :names_fields_for_obs
+      when :names
+        :names_fields_for_names
+      end
+    end
   end
 end
