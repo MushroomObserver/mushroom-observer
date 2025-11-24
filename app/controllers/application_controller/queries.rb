@@ -332,7 +332,7 @@ module ApplicationController::Queries
   def redirect_to(*args)
     flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage?
     if args.member?(:back)
-      redirect_back(fallback_location: "/")
+      redirect_back_or_to("/")
     else
       super
     end
