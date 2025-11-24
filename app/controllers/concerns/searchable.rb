@@ -262,7 +262,7 @@ module Searchable
     end
     helper_method :search_field_type_from_controller
 
-    def search_field_ui(field) # rubocop:disable Metrics/CyclomaticComplexity
+    def search_field_ui(field)
       # handle exceptions first
       case field
       when :names
@@ -271,7 +271,25 @@ module Searchable
         :multiple_value_autocompleter
       when :include_synonyms, :include_subtaxa,
         :include_immediate_subtaxa, :exclude_original_names,
-        :exclude_consensus, :include_all_name_proposals
+        :exclude_consensus, :include_all_name_proposals,
+        :misspellings, :rank, :confidence
+        custom_select_ui(field)
+      when :region
+        region_field_ui_for_this_controller
+      when :in_box
+        :in_box_fields
+      when :field_slips # not an autocompleter
+        :text_field_with_label
+      else
+        field_ui_by_query_attr_definition(field)
+      end
+    end
+
+    def custom_select_ui(field)
+      case field
+      when :include_synonyms, :include_subtaxa,
+           :include_immediate_subtaxa, :exclude_original_names,
+           :exclude_consensus, :include_all_name_proposals
         :select_no_eq_nil_or_yes
       when :misspellings
         :select_misspellings
@@ -279,14 +297,6 @@ module Searchable
         :select_rank_range
       when :confidence
         :select_confidence_range
-      when :region
-        region_field_ui_for_this_controller
-      when :in_box
-        :in_box_fields
-      when :field_slips
-        :text_field_with_label
-      else
-        field_ui_by_query_attr_definition(field)
       end
     end
 
