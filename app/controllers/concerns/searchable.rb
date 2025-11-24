@@ -313,6 +313,11 @@ module Searchable
         :single_value_autocompleter
       when Hash
         field_ui_for_hash_definition(definition)
+      else
+        raise(
+          "Unhandled query attribute definition (search UI) for " \
+          "#{field}: #{definition.inspect}"
+        )
       end
     end
 
