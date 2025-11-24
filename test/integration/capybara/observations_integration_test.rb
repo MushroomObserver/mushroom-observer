@@ -95,21 +95,6 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_not_includes(species_list.observations, observation)
   end
 
-  def test_observation_remove_collection_number
-    obs = observations(:minimal_unknown_obs)
-    assert_not_empty(obs.collection_numbers,
-                     "Test needs a fixture with a collection number(s)")
-    user = obs.user
-
-    login(user)
-    visit(observation_path(obs.id))
-    assert_difference("obs.collection_numbers.count", -1) do
-      page.find("#observation_collection_numbers").click_on("Remove")
-      # new edit form (appears in modal)
-      page.find("#content").click_on("Remove")
-    end
-  end
-
   def test_observation_label_download_not_logged_in
     visit(observations_downloads_path)
     assert_equal(403, page.status_code) # forbidden

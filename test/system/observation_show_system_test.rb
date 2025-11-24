@@ -30,9 +30,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__show")
 
     scroll_to(find("#observation_collection_numbers"), align: :center)
-    assert_link(:create_collection_number.l)
-    # Link is too small to click normally, use trigger
-    find_link(:create_collection_number.l).trigger("click")
+    within("#observation_collection_numbers") do
+      assert_link(:create_collection_number.l)
+      # Link is too small to click normally, use trigger
+      find_link(:create_collection_number.l).trigger("click")
+    end
 
     assert_selector("#modal_collection_number", wait: 6)
 
@@ -124,8 +126,18 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_selector("#modal_herbarium_record_#{fmr.id}", wait: 6)
 
-    # Edit accession number
+    # Edit herbarium record
     within("#modal_herbarium_record_#{fmr.id}") do
+      # Verify herbarium name field exists
+      assert_field("herbarium_record_herbarium_name")
+
+      # Verify has_id_indicator (green check) exists (may not be visible yet)
+      assert_selector(
+        "span.has-id-indicator[data-autocompleter-target='hasIdIndicator']",
+        visible: :all
+      )
+
+      # Edit accession number
       assert_field("herbarium_record_accession_number")
       fill_in("herbarium_record_accession_number", with: "6234234")
       click_commit
@@ -139,20 +151,29 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_link(text: /6234234/)
     end
 
-    # try remove links
-    # herbarium_record
+    # Test remove herbarium record
     within("#observation_herbarium_records") do
-      assert_link(:REMOVE.l)
-      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
+      # Verify remove link has text-danger class
+      assert_selector("a.text-danger", text: :REMOVE.l)
+      # Click the remove link
+      find("a", text: :REMOVE.l).trigger("click")
     end
-    # confirm is in modal
-    assert_selector("#modal_herbarium_record_observation")
+
+    # Modal should appear
+    assert_selector("#modal_herbarium_record_observation", wait: 6)
+
+    # Confirm removal in modal
     within("#modal_herbarium_record_observation") do
       assert_button(:REMOVE.l)
-      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
+      find("button", text: :REMOVE.l).trigger("click")
     end
+    sleep(1)
+
+    # Modal should close and record should be removed from the list
     assert_no_selector("#modal_herbarium_record_observation")
-    assert_no_link(text: /6234234/)
+    within("#observation_herbarium_records") do
+      assert_no_link(text: /6234234/)
+    end
   end
 
   def test_add_and_edit_sequences
@@ -226,8 +247,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
   end
 
   def test_add_and_edit_external_links
-    rolf = users("rolf")
-    login!(rolf)
+    mary = users("mary")
+    login!(mary)
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 

@@ -26,8 +26,7 @@ class Components::VisualGroupForm < Components::ApplicationForm
     count = view_context.pluralize(model.errors.count, :error.t,
                                    plural: :errors.t)
 
-    render(Components::Alert.new(level: :danger,
-                                 id: "error_explanation")) do
+    Alert(level: :danger, id: "error_explanation") do
       [error_header(count), error_list].join.html_safe # rubocop:disable Rails/OutputSafety
     end
   end

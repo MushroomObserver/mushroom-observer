@@ -92,7 +92,7 @@ module Tabs
         edit_collection_number_remove_observation_path(
           collection_number_id: c_n.id, observation_id: obs.id
         ),
-        html_options: { icon: :remove }
+        html_options: { icon: :remove, class: "text-danger" }
       ).tab
     end
   end

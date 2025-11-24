@@ -12,7 +12,9 @@ add_context_nav(
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(partial: "herbarium_records/form", locals: { local: true }) %>
+    <%= render(Components::HerbariumRecordForm.new(
+          @herbarium_record, back: @back
+        )) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

@@ -91,8 +91,13 @@ module Tabs
       url = edit_herbarium_record_remove_observation_path(
         herbarium_record_id: h_r.id, observation_id: obs.id
       )
-      InternalLink::Model.new(:REMOVE.t, h_r, url,
-                              html_options: { icon: :remove }).tab
+      InternalLink::Model.new(
+        :REMOVE.t, h_r, url,
+        html_options: {
+          icon: :remove,
+          class: "text-danger"
+        }
+      ).tab
     end
   end
 end

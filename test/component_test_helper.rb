@@ -40,12 +40,56 @@ module ComponentTestHelper
     Nokogiri::HTML5(html)
   end
 
-  # Assert HTML contains a specific CSS selector with optional text
-  def assert_html(html, selector, text: nil)
+  # Assert HTML contains a specific CSS selector with optional checks
+  # @param html [String] The HTML to search
+  # @param selector [String] CSS selector to find the element
+  # @param text [String] Optional text content to find in element.text
+  # @param count [Integer] Optional exact count of matching elements
+  # @param classes [String] Optional CSS class name to check (without dot)
+  # @param attribute [Hash] Optional attribute to check, e.g., { name: "value" }
+  def assert_html(html, selector, **options)
+    text = options[:text]
+    count = options[:count]
+    classes = options[:classes]
+    attribute = options[:attribute]
+
     doc = Nokogiri::HTML(html)
-    element = doc.at_css(selector)
-    assert(element, "Expected to find element matching '#{selector}'")
+
+    if count
+      elements = doc.css(selector)
+      assert_equal(
+        count, elements.size,
+        "Expected #{count} element(s) matching '#{selector}', " \
+        "found #{elements.size}"
+      )
+      return if count.zero?
+
+      element = elements.first
+    else
+      element = doc.at_css(selector)
+      assert(element, "Expected to find element matching '#{selector}'")
+    end
+
     assert_includes(element.text, text) if text
+
+    if classes
+      element_classes = element["class"]&.split || []
+      assert_includes(
+        element_classes, classes,
+        "Expected element to have class '#{classes}'"
+      )
+    end
+
+    return unless attribute
+
+    attribute.each do |attr_name, expected_value|
+      actual_value = element[attr_name.to_s]
+      assert_equal(
+        expected_value, actual_value,
+        "Expected #{attr_name}='#{expected_value}', " \
+        "got #{attr_name}='#{actual_value}'"
+      )
+    end
   end
 
   # Assert that a child selector is nested within a parent selector

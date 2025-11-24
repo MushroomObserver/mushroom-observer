@@ -146,9 +146,13 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def render_modal_herbarium_form
     render(
       partial: "shared/modal_form",
-      locals: { title: modal_title, identifier: modal_identifier,
-                user: @user, form: "herbaria/form",
-                form_locals: { local: false, action: modal_form_action } }
+      locals: {
+        title: modal_title,
+        identifier: modal_identifier,
+        user: @user,
+        form: "herbaria/form",
+        form_locals: { local: false, action: modal_form_action }
+      }
     ) and return
   end
 

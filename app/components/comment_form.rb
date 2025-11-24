@@ -2,20 +2,6 @@
 
 # Form for creating/editing comments
 class Components::CommentForm < Components::ApplicationForm
-  def initialize(model, local: false, **)
-    @turbo_stream = !local
-    super(model, **)
-  end
-
-  def around_template
-    # Set turbo data attribute for turbo_stream forms
-    if @turbo_stream
-      @attributes[:data] ||= {}
-      @attributes[:data][:turbo] = "true"
-    end
-    super
-  end
-
   def view_template
     render_summary_field
     render_comment_field

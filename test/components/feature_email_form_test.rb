@@ -10,28 +10,23 @@ class FeatureEmailFormTest < UnitTestCase
     @email = FormObject::FeatureEmail.new
     @users = [users(:rolf), users(:mary)]
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_form_with_user_count
-    form = render_form
-
-    assert_includes(form, "Sending to #{@users.length} users")
+    assert_includes(@html, "Sending to #{@users.length} users")
   end
 
   def test_renders_form_with_content_field
-    form = render_form
-
-    assert_includes(form, "Feature Email:")
-    assert_includes(form, 'name="feature_email[content]"')
-    assert_includes(form, "rows=\"20\"")
-    assert_includes(form, "data-autofocus")
+    assert_includes(@html, "Feature Email:")
+    assert_html(@html, "textarea[name='feature_email[content]']")
+    assert_html(@html, "textarea[rows='20']")
+    assert_html(@html, "textarea[data-autofocus]")
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :SEND.l)
-    assert_includes(form, "center-block")
+    assert_html(@html, "input[type='submit'][value='#{:SEND.l}']")
+    assert_html(@html, ".center-block")
   end
 
   private
