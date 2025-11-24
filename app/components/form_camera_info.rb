@@ -29,13 +29,13 @@ class Components::FormCameraInfo < Components::Base
   # Coerce to Float for semantic correctness
   # (Phlex will convert to string when rendering)
   prop :lat, _Nilable(_Union(String, Integer, Float)) do |v|
-    v.present? ? v.to_f : nil
+    v.presence&.to_f
   end
   prop :lng, _Nilable(_Union(String, Integer, Float)) do |v|
-    v.present? ? v.to_f : nil
+    v.presence&.to_f
   end
   prop :alt, _Nilable(_Union(String, Integer, Float)) do |v|
-    v.present? ? v.to_f : nil
+    v.presence&.to_f
   end
   prop :date, _Nilable(String), default: ""
   prop :file_name, _Nilable(String), default: ""
