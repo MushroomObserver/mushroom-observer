@@ -38,7 +38,8 @@ class WebmasterQuestionSystemTest < ApplicationSystemTestCase
     assert_field(:ask_webmaster_your_email.t, with: rolf.email)
 
     # Fill in the question
-    fill_in(:ask_webmaster_question.t, with: "I found a bug in the observation form")
+    fill_in(:ask_webmaster_question.t,
+            with: "I found a bug in the observation form")
 
     # Submit the form
     click_commit
