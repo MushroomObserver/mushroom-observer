@@ -5,7 +5,7 @@
 
 mycoportal:
   name:     MycoPortal
-  project:  # No project - all observation owners can add links
+  project:  empty_project # mary is only member and admin
   base_url: "https://www.mycoportal.org/portal/collections/"
 
 inaturalist:

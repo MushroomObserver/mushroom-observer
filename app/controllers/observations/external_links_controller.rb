@@ -11,7 +11,12 @@ module Observations
         user: @user,
         observation: @observation
       )
-      check_external_link_permission!(obs: @observation)
+      if @sites.empty?
+        flash_warning(:permission_denied.t)
+        show_flash_and_send_back
+        return
+      end
+
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
         format.html

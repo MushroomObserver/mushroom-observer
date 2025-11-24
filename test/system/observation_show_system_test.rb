@@ -247,8 +247,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
   end
 
   def test_add_and_edit_external_links
-    rolf = users("rolf")
-    login!(rolf)
+    mary = users("mary")
+    login!(mary)
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
