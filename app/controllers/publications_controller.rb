@@ -76,7 +76,9 @@ class PublicationsController < ApplicationController
     respond_to do |format|
       if !can_edit?(@publication)
         format.html { redirect_to(publications_url) }
-        format.xml  { render(xml: "can't edit", status: :unprocessable_content) }
+        format.xml  do
+          render(xml: "can't edit", status: :unprocessable_content)
+        end
       elsif @publication.update(permitted_publication_params)
         flash_notice(:runtime_updated_at.t(type: :publication))
         format.html { redirect_to(@publication) }
