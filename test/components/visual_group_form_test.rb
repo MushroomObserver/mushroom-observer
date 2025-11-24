@@ -36,6 +36,30 @@ class VisualGroupFormTest < UnitTestCase
     assert_html(@html, ".center-block")
   end
 
+  def test_auto_determines_url_for_new_visual_group
+    html = render_form_without_action
+    expected_action = "/visual_models/#{@visual_model.id}/visual_groups"
+    assert_html(html, "form[action='#{expected_action}']")
+  end
+
+  def test_auto_determines_url_for_existing_visual_group
+    @visual_group = visual_groups(:visual_group_one)
+    html = render_form_without_action
+
+    assert_html(html, "form[action='/visual_groups/#{@visual_group.id}']")
+  end
+
+  def test_renders_errors_when_model_has_errors
+    @visual_group.errors.add(:name, "can't be blank")
+    html = render_form
+
+    assert_html(html, "#error_explanation")
+    assert_html(html, "h2")
+    assert_html(html, "li")
+    assert_match(/1 #{:error.t}/, html)
+    assert_match(/Name can.{1,6}t be blank/, html)
+  end
+
   private
 
   def render_form
@@ -44,6 +68,14 @@ class VisualGroupFormTest < UnitTestCase
       visual_model: @visual_model,
       action: "/test_action",
       id: "visual_group_form"
+    )
+    render(form)
+  end
+
+  def render_form_without_action
+    form = Components::VisualGroupForm.new(
+      @visual_group,
+      visual_model: @visual_model
     )
     render(form)
   end
