@@ -110,6 +110,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   register_value_helper :in_admin_mode?
   register_value_helper :current_user
   register_value_helper :url_for
+  register_value_helper :rank_as_string
 
   # We don't need to register form helpers anymore - using Superform fields
 
