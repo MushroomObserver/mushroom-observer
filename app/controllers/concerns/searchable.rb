@@ -75,28 +75,24 @@ module Searchable
     end
 
     # Default. Override in controllers
-    def nested_names_params
-      []
-    end
+    def nested_names_params = []
 
     # Used by search_form
-    def search_type
-      self.class.name.deconstantize.underscore.to_sym
-    end
+    def search_type = self.class.name.deconstantize.underscore.to_sym
 
-    def parent_controller
-      self.class.name.deconstantize.underscore
-    end
+    def parent_controller = self.class.name.deconstantize.underscore
 
     # Returns the capitalized :Symbol used by Query for the type of query.
-    def query_model
-      self.class.module_parent.name.singularize.to_sym
-    end
+    def query_model = self.class.module_parent.name.singularize.to_sym
 
     private
 
-    def search_object_name
-      :"query_#{search_type}"
+    def search_object_name = :"query_#{search_type}"
+
+    # Gets the query class relevant to each controller, assuming the controller
+    # is namespaced like Observations::SearchController
+    def query_subclass
+      Query.const_get(self.class.module_parent.name)
     end
 
     def clear_form?
@@ -120,9 +116,7 @@ module Searchable
       perm
     end
 
-    def nested_in_box_params
-      [:north, :south, :east, :west].freeze
-    end
+    def nested_in_box_params = [:north, :south, :east, :west].freeze
 
     def split_names_lookup_strings
       # Nested blank values will make for null query results,
@@ -220,21 +214,15 @@ module Searchable
       @query = Query.lookup_and_save(query_model, **@search.params)
     end
 
-    def escape_location_string(location)
-      "\"#{location.tr(",", "\\,")}\""
-    end
+    def escape_location_string(location) = "\"#{location.tr(",", "\\,")}\""
 
     # def strings_with_commas
     #   [:location, :region].freeze
     # end
 
-    def fields_preferring_ids
-      []
-    end
+    def fields_preferring_ids = []
 
-    def fields_with_range
-      []
-    end
+    def fields_with_range = []
 
     # Passing some fields will raise an error if the required field is missing,
     # so just toss them. Not sure we have to do this, because Query will.
@@ -337,12 +325,6 @@ module Searchable
       when Class # e.g. [Project]
         :multiple_value_autocompleter
       end
-    end
-
-    # Gets the query class relevant to each controller, assuming the controller
-    # is namespaced like Observations::SearchController
-    def query_subclass
-      Query.const_get(self.class.module_parent.name)
     end
 
     def names_field_ui_for_this_controller
