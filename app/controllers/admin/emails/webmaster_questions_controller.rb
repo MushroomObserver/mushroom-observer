@@ -36,22 +36,42 @@ module Admin
       private
 
       def create_webmaster_question
-        if @email.blank? || @email.index("@").nil?
-          flash_error(:runtime_ask_webmaster_need_address.t)
-          @email_error = true
-          render(:new)
+        if invalid_email?
+          handle_invalid_email
         elsif @content.blank?
-          flash_error(:runtime_ask_webmaster_need_content.t)
-          render(:new)
+          handle_missing_content
         elsif non_user_potential_spam?
-          flash_error(:runtime_ask_webmaster_antispam.t)
-          render(:new)
+          handle_spam
         else
-          QueuedEmail::Webmaster.create_email(@user, sender_email: @email,
-                                                     content: @content)
-          flash_notice(:runtime_ask_webmaster_success.t)
-          redirect_to("/")
+          send_email_and_redirect
         end
+      end
+
+      def invalid_email?
+        @email.blank? || @email.index("@").nil?
+      end
+
+      def handle_invalid_email
+        flash_error(:runtime_ask_webmaster_need_address.t)
+        @email_error = true
+        render(:new)
+      end
+
+      def handle_missing_content
+        flash_error(:runtime_ask_webmaster_need_content.t)
+        render(:new)
+      end
+
+      def handle_spam
+        flash_error(:runtime_ask_webmaster_antispam.t)
+        render(:new)
+      end
+
+      def send_email_and_redirect
+        QueuedEmail::Webmaster.create_email(@user, sender_email: @email,
+                                                   content: @content)
+        flash_notice(:runtime_ask_webmaster_success.t)
+        redirect_to("/")
       end
 
       def non_user_potential_spam?
