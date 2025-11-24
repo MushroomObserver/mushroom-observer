@@ -297,9 +297,9 @@ module Searchable
         :select_nil_boolean
       when :string
         :text_field_with_label
-      when Array
+      when Array # e.g. [Name]
         field_ui_for_array_definition(definition)
-      when Class
+      when Class # e.g. User
         :single_value_autocompleter
       when Hash
         field_ui_for_hash_definition(definition)
@@ -319,7 +319,7 @@ module Searchable
       case definition.first
       when :string, :time, :date
         :text_field_with_label
-      when Class
+      when Class # e.g. [Project]
         :multiple_value_autocompleter
       end
     end
