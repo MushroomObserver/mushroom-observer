@@ -57,7 +57,7 @@ module Admin
           type: :Name,
           old_id: name1.id,
           new_id: name2.id,
-          notes: "SHAZAM"
+          merge_request: { notes: "SHAZAM" }
         }
 
         # Test 1: Not logged in - should redirect and not send email

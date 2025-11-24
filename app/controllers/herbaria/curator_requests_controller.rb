@@ -44,7 +44,7 @@ module Herbaria
     end
 
     def curator_request_content
-      notes = params.dig(:herbarium_curator_request, :notes) || params[:notes]
+      notes = params.dig(:herbarium_curator_request, :notes)
       "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
         "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
         "Notes: #{notes}"

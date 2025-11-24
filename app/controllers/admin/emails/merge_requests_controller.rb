@@ -79,7 +79,7 @@ module Admin
       end
 
       def merge_request_content
-        notes = params.dig(:merge_request, :notes) || params[:notes]
+        notes = params.dig(:merge_request, :notes)
         :email_merge_objects.l(
           user: @user.login,
           type: @model.type_tag,

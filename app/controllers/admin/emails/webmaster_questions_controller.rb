@@ -25,10 +25,8 @@ module Admin
       end
 
       def create
-        @email = params.dig(:webmaster_question, :user, :email) ||
-                 params.dig(:user, :email)
-        @content = params.dig(:webmaster_question, :question, :content) ||
-                   params.dig(:question, :content)
+        @email = params.dig(:webmaster_question, :user, :email)
+        @content = params.dig(:webmaster_question, :question, :content)
         @email_error = false
         create_webmaster_question
       end
