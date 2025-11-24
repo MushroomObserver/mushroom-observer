@@ -195,7 +195,9 @@ class LookupTest < UnitTestCase
   end
 
   def create_test_name(name)
-    name = Name.new_name(Name.parse_name(name).params)
+    params = Name.parse_name(name).params
+    params[:user] ||= rolf
+    name = Name.new_name(params)
     name.save
     name
   end
