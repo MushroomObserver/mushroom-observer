@@ -279,7 +279,7 @@ module Searchable
       when :include_synonyms, :include_subtaxa,
         :include_immediate_subtaxa, :exclude_original_names,
         :exclude_consensus, :include_all_name_proposals
-        :select_nil_boolean
+        :select_no_eq_nil_or_yes
       when :misspellings
         :select_misspellings
       when :range
@@ -287,7 +287,7 @@ module Searchable
       when :confidence
         :select_confidence_range
       when :region
-        :region_with_in_box_fields
+        region_field_ui_for_this_controller
       when :in_box
         :in_box_fields
       when :field_slips
@@ -344,6 +344,15 @@ module Searchable
         :names_fields_for_obs
       when :names
         :names_fields_for_names
+      end
+    end
+
+    def region_field_ui_for_this_controller
+      case search_type
+      when :observations, :locations
+        :region_with_in_box_fields
+      else
+        :text_field_with_label
       end
     end
   end
