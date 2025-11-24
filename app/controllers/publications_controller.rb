@@ -63,7 +63,7 @@ class PublicationsController < ApplicationController
         format.html { render(action: :new) }
         format.xml  do
           render(xml: @publication.errors,
-                 status: :unprocessable_entity)
+                 status: :unprocessable_content)
         end
       end
     end
@@ -76,7 +76,7 @@ class PublicationsController < ApplicationController
     respond_to do |format|
       if !can_edit?(@publication)
         format.html { redirect_to(publications_url) }
-        format.xml  { render(xml: "can't edit", status: :unprocessable_entity) }
+        format.xml  { render(xml: "can't edit", status: :unprocessable_content) }
       elsif @publication.update(permitted_publication_params)
         flash_notice(:runtime_updated_at.t(type: :publication))
         format.html { redirect_to(@publication) }
@@ -86,7 +86,7 @@ class PublicationsController < ApplicationController
         format.html { render(action: :edit) }
         format.xml  do
           render(xml: @publication.errors,
-                 status: :unprocessable_entity)
+                 status: :unprocessable_content)
         end
       end
     end
@@ -105,7 +105,7 @@ class PublicationsController < ApplicationController
         format.html { redirect_to(publications_url) }
         format.xml  do
           render(xml: "can't delete",
-                 status: :unprocessable_entity)
+                 status: :unprocessable_content)
         end
       end
     end
