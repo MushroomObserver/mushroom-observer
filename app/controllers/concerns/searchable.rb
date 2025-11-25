@@ -91,12 +91,6 @@ module Searchable
 
     def search_object_name = :"query_#{search_type}"
 
-    # Gets the query class relevant to each controller, assuming the controller
-    # is namespaced like Observations::SearchController
-    def query_subclass
-      Query.const_get(module_name)
-    end
-
     def clear_form?
       if params[:commit] == :CLEAR.l
         clear_relevant_query
@@ -238,113 +232,10 @@ module Searchable
     #   end
     # end
 
-    # The query attributes define how they're going to parse their
-    # fields, so we can use that to assign a field helper.
+    # Delegates to SearchFieldUI service object to determine UI component type
     def search_field_type_from_controller(field:)
-      # return :pattern if field == :pattern
-
-      defined = permitted_search_params + nested_names_params
-      unless defined.include?(field)
-        raise("No input defined for #{field} in #{controller_name}")
-      end
-
-      search_field_ui(field)
+      SearchFieldUI.for(controller: self, field: field)
     end
     helper_method :search_field_type_from_controller
-
-    def search_field_ui(field)
-      # handle exceptions first
-      case field
-      when :names
-        names_field_ui_for_this_controller
-      when :lookup
-        :multiple_value_autocompleter
-      when :include_synonyms, :include_subtaxa,
-        :include_immediate_subtaxa, :exclude_original_names,
-        :exclude_consensus, :include_all_name_proposals,
-        :misspellings, :rank, :confidence
-        custom_select_ui(field)
-      when :region
-        region_field_ui_for_this_controller
-      when :in_box
-        :in_box_fields
-      when :field_slips # not an autocompleter
-        :text_field_with_label
-      else
-        field_ui_by_query_attr_definition(field)
-      end
-    end
-
-    def custom_select_ui(field)
-      case field
-      when :include_synonyms, :include_subtaxa,
-           :include_immediate_subtaxa, :exclude_original_names,
-           :exclude_consensus, :include_all_name_proposals
-        :select_no_eq_nil_or_yes
-      when :misspellings
-        :select_misspellings
-      when :rank
-        :select_rank_range
-      when :confidence
-        :select_confidence_range
-      end
-    end
-
-    def field_ui_by_query_attr_definition(field)
-      definition = query_subclass.attribute_types[field]&.accepts
-      case definition
-      when :boolean
-        :select_nil_boolean
-      when :string
-        :text_field_with_label
-      when Array # e.g. [Name]
-        field_ui_for_array_definition(definition)
-      when Class # e.g. User
-        :single_value_autocompleter
-      when Hash
-        field_ui_for_hash_definition(definition)
-      else
-        raise(
-          "Unhandled query attribute definition (search UI) for " \
-          "#{field}: #{definition.inspect}"
-        )
-      end
-    end
-
-    # e.g. { boolean: [true] }
-    def field_ui_for_hash_definition(definition)
-      case definition.keys.first.to_sym
-      when :boolean
-        :select_nil_yes
-      end
-    end
-
-    # e.g. [:string], [Location]
-    def field_ui_for_array_definition(definition)
-      case definition.first
-      when :string, :time, :date
-        :text_field_with_label
-      when Class # e.g. [Project]
-        :multiple_value_autocompleter
-      end
-    end
-
-    def names_field_ui_for_this_controller
-      case search_type
-      when :observations, :projects, :species_lists
-        :names_fields_for_obs
-      when :names
-        :names_fields_for_names
-      end
-    end
-
-    def region_field_ui_for_this_controller
-      case search_type
-      when :observations, :locations
-        :region_with_in_box_fields
-      else
-        :text_field_with_label
-      end
-    end
   end
 end
