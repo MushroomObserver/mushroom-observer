@@ -265,7 +265,9 @@ class Components::SearchForm < Components::ApplicationForm
                         type: type,
                         label: field_label(field_name),
                         help: field_help(field_name),
-                        value: prefilled_autocompleter_value(field_name, type))
+                        value: prefilled_autocompleter_value(
+                          field_value(field_name), type
+                        ))
   end
 
   def render_multiple_value_autocompleter(field_name:)
@@ -275,7 +277,9 @@ class Components::SearchForm < Components::ApplicationForm
                         textarea: true,
                         label: field_label(field_name),
                         help: multiple_help(field_name),
-                        value: prefilled_autocompleter_value(field_name, type))
+                        value: prefilled_autocompleter_value(
+                          field_value(field_name), type
+                        ))
   end
 
   def render_names_fields_for_obs(field_name:) # rubocop:disable Lint/UnusedMethodArgument

@@ -9,7 +9,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     include AutocompleterPrefill
   #
   #     def some_method
-  #       prefilled_autocompleter_value(:user_id, :user)
+  #       prefilled_autocompleter_value(field_value(:user_id), :user)
   #     end
   #   end
   module AutocompleterPrefill
@@ -32,8 +32,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Returns prefilled value(s) for an autocompleter field
     # Converts IDs to display names for better UX
-    def prefilled_autocompleter_value(field_name, type, values: nil)
-      values ||= field_value(field_name)
+    def prefilled_autocompleter_value(values, type)
       return values unless values.is_a?(Array)
 
       prefill_string_values(values, type)

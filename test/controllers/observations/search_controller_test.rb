@@ -23,13 +23,13 @@ module Observations
       login("rolf")
       get(:new)
       assert_template("observations/search/new")
-      assert_template("shared/_search_form")
+      assert_select("#observations_search_form")
     end
 
     def test_new_observations_search_turbo
       login("rolf")
       get(:new, format: :turbo_stream)
-      assert_template("shared/_search_form")
+      assert_select("#observations_search_form")
     end
 
     def test_new_observations_search_form_prefilled_from_existing_query

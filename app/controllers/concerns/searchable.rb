@@ -38,9 +38,8 @@ module Searchable
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
             :search_nav_form, # id of element to update contents of
-            partial: "shared/search_form",
-            locals: { local: false, search: @search,
-                      field_columns: @field_columns }
+            Components::SearchForm.new(@search, search_controller: self,
+                                                local: false)
           ))
         end
         format.html

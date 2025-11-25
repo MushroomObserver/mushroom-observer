@@ -20,9 +20,10 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def view_template(&content)
       render_with_wrapper do
-        content ||= proc { field.dom.value }
-        textarea(**attributes, class: class_names(attributes[:class],
-                                                  "form-control"), &content)
+        content ||= proc { attributes[:value] || field.dom.value }
+        textarea(**attributes.except(:value),
+                 class: class_names(attributes[:class], "form-control"),
+                 &content)
       end
     end
 

@@ -23,13 +23,13 @@ module Names
       login
       get(:new)
       assert_template("names/search/new")
-      assert_template("shared/_search_form")
+      assert_select("#names_search_form")
     end
 
     def test_new_names_search_turbo
       login
       get(:new, format: :turbo_stream)
-      assert_template("shared/_search_form")
+      assert_select("#names_search_form")
     end
 
     def test_new_names_search_form_prefilled_from_existing_query
