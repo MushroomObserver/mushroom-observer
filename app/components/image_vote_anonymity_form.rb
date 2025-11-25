@@ -2,6 +2,10 @@
 
 # Form for changing image vote anonymity (no fields, just submit buttons)
 class Components::ImageVoteAnonymityForm < Components::ApplicationForm
+  def initialize(model, **)
+    super(model, method: :put, **)
+  end
+
   def view_template
     div(class: "mt-3") do
       render_anonymous_count
@@ -32,5 +36,10 @@ class Components::ImageVoteAnonymityForm < Components::ApplicationForm
 
   def pub
     model.num_public
+  end
+
+  def form_action
+    url_for(controller: "images/votes/anonymity", action: :update,
+            only_path: true)
   end
 end

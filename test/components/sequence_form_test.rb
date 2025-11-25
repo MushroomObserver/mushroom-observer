@@ -7,8 +7,8 @@ class SequenceFormTest < UnitTestCase
 
   def setup
     super
-    @sequence = Sequence.new
     @observation = observations(:coprinus_comatus_obs)
+    @sequence = Sequence.new(observation: @observation)
     controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
@@ -71,32 +71,24 @@ class SequenceFormTest < UnitTestCase
   private
 
   def render_form
-    form = Components::SequenceForm.new(
-      @sequence,
-      observation: @observation,
-      action: "/test_action",
-      id: "sequence_form",
-      local: false
-    )
-    render(form)
+    render(Components::SequenceForm.new(
+             @sequence,
+             action: "/test_action",
+             id: "sequence_form",
+             local: false
+           ))
   end
 
   def render_form_local
-    form = Components::SequenceForm.new(
-      @sequence,
-      observation: @observation,
-      action: "/test_action",
-      id: "sequence_form",
-      local: true
-    )
-    render(form)
+    render(Components::SequenceForm.new(
+             @sequence,
+             action: "/test_action",
+             id: "sequence_form",
+             local: true
+           ))
   end
 
   def render_form_without_action
-    form = Components::SequenceForm.new(
-      @sequence,
-      observation: @observation
-    )
-    render(form)
+    render(Components::SequenceForm.new(@sequence))
   end
 end

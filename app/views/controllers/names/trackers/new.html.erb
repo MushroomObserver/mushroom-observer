@@ -1,11 +1,6 @@
 <%
-# Form to create a tracker, via params[:commit]
-
 add_page_title(:email_tracking_title.t(name: @name.display_name))
-
 add_context_nav(name_forms_return_tabs(name: @name))
-
-action = { controller: "/names/trackers", action: :create, id: @name.id }
 %>
 
 <div class="mt-5 mb-5">
@@ -18,5 +13,7 @@ action = { controller: "/names/trackers", action: :create, id: @name.id }
   end %>
 </div>
 
-<%= render(partial: "names/trackers/form", locals: { action: action,
-                                                     method: :post }) %>
+<%= render(Components::NameTrackerForm.new(
+      NameTracker.new(name: @name),
+      note_template: @note_template
+    )) %>
