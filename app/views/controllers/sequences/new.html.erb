@@ -8,7 +8,7 @@ add_context_nav(sequence_form_tabs(obj: @observation))
   <div class="col-xs-12 col-sm-7">
     <%= render(partial: "sequences/observation_title",
                locals: { observation: @observation }) %>
-    <%= render(Components::SequenceForm.new(@sequence)) %>
+    <%= render(Components::SequenceForm.new(@sequence, observation: @observation)) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">
