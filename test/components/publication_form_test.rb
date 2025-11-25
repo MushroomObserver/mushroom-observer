@@ -45,6 +45,6 @@ class PublicationFormTest < UnitTestCase
   private
 
   def render_component_form
-    render(Components::PublicationForm.new(@publication, id: "publication_form"))
+    render(Components::PublicationForm.new(@publication))
   end
 end
