@@ -3,5 +3,5 @@ add_new_title(:create_object, :NAME)
 add_context_nav(name_form_new_tabs)
 %>
 
-<%= render(Components::NameForm.new(@name, name_string: @name_string,
-                                    button: :CREATE.l)) %>
+<%= render(Components::NameForm.new(@name, user: @user,
+                                    name_string: @name_string)) %>

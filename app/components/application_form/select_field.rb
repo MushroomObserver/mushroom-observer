@@ -19,13 +19,28 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def view_template(&options_block)
       render_with_wrapper do
+        # Exclude `selected` from select tag attrs - it's used by options()
+        select_attrs = attributes.except(:selected)
         if options_block
-          select(**attributes, class: select_classes, &options_block)
+          select(**select_attrs, class: select_classes, &options_block)
         else
-          select(**attributes, class: select_classes) do
+          select(**select_attrs, class: select_classes) do
             options(*@collection)
           end
         end
+      end
+    end
+
+    # Override to use `selected` attribute if field.value is nil
+    def options(*collection)
+      selected_value = attributes[:selected]
+      map_options(collection).each do |key, value|
+        is_selected = if field.value.nil?
+                        selected_value == key
+                      else
+                        field.value == key
+                      end
+        option(selected: is_selected, value: key) { value }
       end
     end
 

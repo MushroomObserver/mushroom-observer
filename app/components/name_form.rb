@@ -2,20 +2,17 @@
 
 # Form for creating and editing Name records
 class Components::NameForm < Components::ApplicationForm
-  # rubocop:disable Metrics/ParameterLists
-  def initialize(model, name_string: "", misspelling: nil,
-                 correct_spelling: nil, button: nil, **)
-    # rubocop:enable Metrics/ParameterLists
-    @name_string = name_string
-    @misspelling = misspelling
-    @correct_spelling = correct_spelling
-    @button = button
-    super(model, **)
+  def initialize(model, **options)
+    @user = options.delete(:user)
+    @name_string = options.delete(:name_string) || ""
+    @misspelling = options.delete(:misspelling)
+    @correct_spelling = options.delete(:correct_spelling)
+    super(model, **options) # rubocop:disable Style/SuperArguments
   end
 
   def view_template
     super do
-      submit(@button, center: true)
+      submit(button_text, center: true)
 
       render_admin_locked_checkbox if in_admin_mode?
 
@@ -29,11 +26,15 @@ class Components::NameForm < Components::ApplicationForm
       render_misspelling_fields if show_misspelling_fields?
       render_notes_field
 
-      submit(@button, center: true)
+      submit(button_text, center: true)
     end
   end
 
   private
+
+  def button_text
+    @model.new_record? ? :CREATE.l : :SAVE_EDITS.l
+  end
 
   def render_admin_locked_checkbox
     field(:locked).checkbox(
@@ -45,7 +46,9 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_editable_fields
-    render(help_block_component(:div, :form_names_detailed_help.l))
+    # rubocop:disable Rails/OutputSafety
+    raw(help_block_component(:div, :form_names_detailed_help.l))
+    # rubocop:enable Rails/OutputSafety
 
     render_icn_id_field
     render_rank_and_status_fields
@@ -56,13 +59,15 @@ class Components::NameForm < Components::ApplicationForm
   def render_icn_id_field
     div(class: "form-inline my-3") do
       append_text = help_block_component(:p, :form_names_identifier_help.l)
-      field(:icn_id).text(
-        wrapper_options: {
-          label: "#{:form_names_icn_id.l}:",
-          inline: true,
-          addon: append_text
-        },
-        size: 8
+      render(
+        field(:icn_id).text(
+          wrapper_options: {
+            label: "#{:form_names_icn_id.l}:",
+            inline: true,
+            addon: append_text
+          },
+          size: 8
+        )
       )
     end
   end
@@ -93,23 +98,27 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_text_name_field
-    field(:text_name).text(
-      wrapper_options: {
-        label: "#{:form_names_text_name.l}:",
-        addon: help_block_component(:p, :form_names_text_name_help.l)
-      },
-      value: @name_string,
-      data: { autofocus: true }
+    render(
+      field(:text_name).text(
+        wrapper_options: {
+          label: "#{:form_names_text_name.l}:",
+          addon: help_block_component(:p, :form_names_text_name_help.l)
+        },
+        value: @name_string,
+        data: { autofocus: true }
+      )
     )
   end
 
   def render_author_field
-    field(:author).textarea(
-      wrapper_options: {
-        label: "#{:Authority.l}:",
-        addon: help_block_component(:p, :form_names_author_help.l)
-      },
-      rows: 2
+    render(
+      field(:author).textarea(
+        wrapper_options: {
+          label: "#{:Authority.l}:",
+          addon: help_block_component(:p, :form_names_author_help.l)
+        },
+        rows: 2
+      )
     )
   end
 
@@ -119,52 +128,62 @@ class Components::NameForm < Components::ApplicationForm
       render_locked_status_field
       render_locked_text_name_field
       render_locked_author_field
-      render(help_block_component(:div, :show_name_locked.tp))
+      # rubocop:disable Rails/OutputSafety
+      raw(help_block_component(:div, :show_name_locked.tp))
+      # rubocop:enable Rails/OutputSafety
     end
   end
 
   def render_locked_rank_field
-    field(:rank).hidden(
-      wrapper_options: {
-        label: "#{:Rank.l}:",
-        inline: true,
-        wrap_class: "mb-0",
-        text: :"Rank_#{@model.rank.to_s.downcase}".l
-      }
+    render(
+      field(:rank).hidden(
+        wrapper_options: {
+          label: "#{:Rank.l}:",
+          inline: true,
+          wrap_class: "mb-0",
+          text: :"Rank_#{@model.rank.to_s.downcase}".l
+        }
+      )
     )
   end
 
   def render_locked_status_field
-    field(:deprecated).hidden(
-      wrapper_options: {
-        label: "#{:Status.l}:",
-        inline: true,
-        wrap_class: "mb-0",
-        text: @model.deprecated ? :DEPRECATED.l : :ACCEPTED.l
-      }
+    render(
+      field(:deprecated).hidden(
+        wrapper_options: {
+          label: "#{:Status.l}:",
+          inline: true,
+          wrap_class: "mb-0",
+          text: @model.deprecated ? :DEPRECATED.l : :ACCEPTED.l
+        }
+      )
     )
   end
 
   def render_locked_text_name_field
-    field(:text_name).hidden(
-      wrapper_options: {
-        label: "#{:Name.l}:",
-        inline: true,
-        wrap_class: "mb-0",
-        text: @model.user_real_text_name(current_user).l
-      },
-      value: @name_string
+    render(
+      field(:text_name).hidden(
+        wrapper_options: {
+          label: "#{:Name.l}:",
+          inline: true,
+          wrap_class: "mb-0",
+          text: @model.user_real_text_name(@user)
+        },
+        value: @name_string
+      )
     )
   end
 
   def render_locked_author_field
-    field(:author).hidden(
-      wrapper_options: {
-        label: "#{:Authority.l}:",
-        inline: true,
-        wrap_class: "mb-0",
-        text: @model.author.l
-      }
+    render(
+      field(:author).hidden(
+        wrapper_options: {
+          label: "#{:Authority.l}:",
+          inline: true,
+          wrap_class: "mb-0",
+          text: @model.author
+        }
+      )
     )
   end
 
@@ -187,11 +206,13 @@ class Components::NameForm < Components::ApplicationForm
 
   def render_misspelling_fields
     div(class: "my-4 mx-0") do
-      field(:misspelling).checkbox(
-        wrapper_options: {
-          label: :form_names_misspelling.l
-        },
-        checked: @misspelling
+      render(
+        field(:misspelling).checkbox(
+          wrapper_options: {
+            label: :form_names_misspelling.l
+          },
+          checked: @misspelling
+        )
       )
 
       render(
@@ -224,20 +245,25 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def rank_options
-    Name.all_ranks.map { |r| [rank_as_string(r), r] }
+    # Superform expects [value, label]
+    Name.all_ranks.map { |r| [r, rank_as_string(r)] }
   end
 
   def status_options
-    [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
+    # Superform expects [value, label]
+    [[false, :ACCEPTED.l], [true, :DEPRECATED.l]]
   end
 
   def show_misspelling_fields?
     !@misspelling.nil? && (in_admin_mode? || !@model.locked)
   end
 
+  # rubocop:disable Rails/OutputSafety
   def help_block_component(tag_name, content)
-    view_context.tag.send(tag_name, content, class: "help-block")
+    # Content comes from trusted locale files
+    view_context.tag.send(tag_name, content.html_safe, class: "help-block")
   end
+  # rubocop:enable Rails/OutputSafety
 
   def form_action
     url_for(action: controller_action)
