@@ -193,14 +193,24 @@ class Components::SearchForm < Components::ApplicationForm
     "col-xs-12 col-sm-6 col-md-12 col-lg-6"
   end
 
+  # Helper to check if a field is a date field
+  def date_field?(field_name)
+    [:date, :created_at, :updated_at].include?(field_name)
+  end
+
   # Field type renderers
   # Each method renders a specific field type using ApplicationForm methods
 
   def render_text_field_with_label(field_name:)
+    value = if date_field?(field_name)
+              date_field_value(field_name)
+            else
+              field_value(field_name)
+            end
     text_field(field_name,
                label: field_label(field_name),
                help: field_help(field_name),
-               value: field_value(field_name))
+               value: value)
   end
 
   def render_select_nil_yes(field_name:)
