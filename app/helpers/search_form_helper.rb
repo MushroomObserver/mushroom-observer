@@ -61,7 +61,7 @@ module SearchFormHelper
     args = { form:, search:, field: }
 
     args[:label] ||= search_label(field)
-    field_type = search_field_type_from_controller(field:)
+    field_type = SearchFieldUI.for(controller:, field:)
     return unless field_type
 
     # Prepare args for the field helper.
@@ -78,20 +78,6 @@ module SearchFormHelper
     else
       :"query_#{field}".l.humanize
     end
-  end
-
-  # The controllers define how they're going to parse their
-  # fields, so we can use that to assign a field helper.
-  def search_field_type_from_controller(field:)
-    # return :pattern if field == :pattern
-
-    defined = controller.permitted_search_params.
-              merge(controller.nested_names_params)
-    unless defined[field]
-      raise("No input defined for #{field} in #{controller.controller_name}")
-    end
-
-    defined[field]
   end
 
   # Prepares HTML args for the field helper. This is where we can make

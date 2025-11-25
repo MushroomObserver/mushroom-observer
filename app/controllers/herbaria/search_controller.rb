@@ -11,18 +11,17 @@ module Herbaria
 
     before_action :login_required
 
-    # Also an index of helper methods to use for each field.
     def permitted_search_params
-      {
-        by_users: :multiple_value_autocompleter,
-        nonpersonal: :select_nil_yes,
-        code_has: :text_field_with_label,
-        name_has: :text_field_with_label,
-        description_has: :text_field_with_label,
-        mailing_address_has: :text_field_with_label,
-        created_at: :text_field_with_label,
-        updated_at: :text_field_with_label
-      }.freeze
+      [
+        :by_users,
+        :nonpersonal,
+        :code_has,
+        :name_has,
+        :description_has,
+        :mailing_address_has,
+        :created_at,
+        :updated_at
+      ].freeze
     end
 
     def fields_preferring_ids

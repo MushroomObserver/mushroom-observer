@@ -19,7 +19,7 @@ module Searchable
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
             :search_bar_help, # id of element to update contents of
-            partial: "#{parent_controller}/search/help"
+            partial: "#{search_type}/search/help"
           ))
         end
         format.html
@@ -56,7 +56,7 @@ module Searchable
       redirect_to(action: :new) and return unless validate_search_instance?
 
       save_search_query
-      redirect_to(controller: "/#{parent_controller}", action: :index,
+      redirect_to(controller: "/#{search_type}", action: :index,
                   q: @query.q_param)
     end
 
@@ -71,33 +71,25 @@ module Searchable
 
     # Used by search_helper to prefill nested params
     def nested_field_names
-      nested_names_param_names + nested_in_box_param_names
+      nested_names_params + nested_in_box_params
     end
 
     # Default. Override in controllers
-    def nested_names_params
-      {}
-    end
+    def nested_names_params = []
 
-    # Used by search_form
-    def search_type
-      self.class.name.deconstantize.underscore.to_sym
-    end
+    # e.g. "SpeciesLists"
+    def module_name = self.class.name.deconstantize
 
-    def parent_controller
-      self.class.name.deconstantize.underscore
-    end
+    # e.g. :species_lists - Used by search_form
+    def search_type = module_name.underscore.to_sym
 
-    # Returns the capitalized :Symbol used by Query for the type of query.
-    def query_model
-      self.class.module_parent.name.singularize.to_sym
-    end
+    # e.g. :SpeciesList
+    # Returns the capitalized :ModelSymbol used by Query for the type of query.
+    def query_model = module_name.singularize.to_sym
 
     private
 
-    def search_object_name
-      :"query_#{search_type}"
-    end
+    def search_object_name = :"query_#{search_type}"
 
     def clear_form?
       if params[:commit] == :CLEAR.l
@@ -112,24 +104,15 @@ module Searchable
     def permittables
       ranges = fields_with_range.map { |field| :"#{field}_range" }
       ids = fields_preferring_ids.map { |field| :"#{field}_id" }
-      names = { names: nested_names_param_names }
-      in_box = { in_box: nested_in_box_param_names }
-      perm = permitted_search_params.keys + ranges + ids
+      names = { names: nested_names_params }
+      in_box = { in_box: nested_in_box_params }
+      perm = permitted_search_params + ranges + ids
       perm << names
       perm << in_box
       perm
     end
 
-    def nested_names_param_names
-      keys = nested_names_params&.keys || []
-      return keys if keys.blank?
-
-      keys << :lookup
-    end
-
-    def nested_in_box_param_names
-      [:north, :south, :east, :west].freeze
-    end
+    def nested_in_box_params = [:north, :south, :east, :west].freeze
 
     def split_names_lookup_strings
       # Nested blank values will make for null query results,
@@ -227,27 +210,15 @@ module Searchable
       @query = Query.lookup_and_save(query_model, **@search.params)
     end
 
-    # Gets the query class relevant to each controller, assuming the controller
-    # is namespaced like Observations::SearchController
-    # def query_subclass
-    #   Query.const_get(self.class.module_parent.name)
-    # end
-
-    def escape_location_string(location)
-      "\"#{location.tr(",", "\\,")}\""
-    end
+    def escape_location_string(location) = "\"#{location.tr(",", "\\,")}\""
 
     # def strings_with_commas
     #   [:location, :region].freeze
     # end
 
-    def fields_preferring_ids
-      []
-    end
+    def fields_preferring_ids = []
 
-    def fields_with_range
-      []
-    end
+    def fields_with_range = []
 
     # Passing some fields will raise an error if the required field is missing,
     # so just toss them. Not sure we have to do this, because Query will.
