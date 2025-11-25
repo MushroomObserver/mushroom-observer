@@ -78,7 +78,7 @@ class Components::NameForm < Components::ApplicationForm
           wrapper_options: {
             label: "#{:Rank.l}:"
           },
-          selected: @model.rank || "Species"
+          selected: @model.rank
         )
       )
 
