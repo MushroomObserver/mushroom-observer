@@ -10,6 +10,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :between
     slot :label_end
     slot :append
+    slot :addon
 
     attr_reader :wrapper_options
 
@@ -29,7 +30,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     private
 
     # rubocop:disable Metrics/AbcSize
-    def render_with_wrapper
+    def render_with_wrapper(&block)
       label_option = wrapper_options[:label]
       show_label = label_option != false
       label_text = if label_option.is_a?(String)
@@ -44,7 +45,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       div(class: form_group_class("form-group", inline, wrap_class),
           data: wrap_data) do
         render_label_row(label_text, inline) if show_label
-        yield
+        render_field_with_addon(&block)
         render_help_after_field
         render(append_slot) if append_slot
       end
@@ -65,6 +66,17 @@ class Components::ApplicationForm < Superform::Rails::Form
             render(label_end_slot)
           end
         end
+      end
+    end
+
+    def render_field_with_addon
+      if addon_slot
+        div(class: "input-group") do
+          yield
+          span(class: "input-group-addon") { render(addon_slot) }
+        end
+      else
+        yield
       end
     end
 

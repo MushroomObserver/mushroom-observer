@@ -10,6 +10,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :between
     slot :label_end
     slot :append
+    slot :addon
 
     attr_reader :wrapper_options
 
@@ -74,14 +75,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_field_input
-      addon = wrapper_options[:addon]
       button = wrapper_options[:button]
       button_data = wrapper_options[:button_data] || {}
 
-      if addon.present?
+      if addon_slot
         div(class: "input-group") do
           yield
-          span(class: "input-group-addon") { addon }
+          span(class: "input-group-addon") { render(addon_slot) }
         end
       elsif button.present?
         div(class: "input-group") do

@@ -46,9 +46,7 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_editable_fields
-    # rubocop:disable Rails/OutputSafety
-    raw(help_block_component(:div, :form_names_detailed_help.l))
-    # rubocop:enable Rails/OutputSafety
+    div(class: "help-block") { :form_names_detailed_help.l }
 
     render_icn_id_field
     render_rank_and_status_fields
@@ -58,17 +56,17 @@ class Components::NameForm < Components::ApplicationForm
 
   def render_icn_id_field
     div(class: "form-inline my-3") do
-      append_text = help_block_component(:p, :form_names_identifier_help.l)
-      render(
-        field(:icn_id).text(
-          wrapper_options: {
-            label: "#{:form_names_icn_id.l}:",
-            inline: true,
-            addon: append_text
-          },
-          size: 8
-        )
+      icn_field = field(:icn_id).text(
+        wrapper_options: {
+          label: "#{:form_names_icn_id.l}:",
+          inline: true
+        },
+        size: 8
       )
+      icn_field.with_addon do
+        p(class: "help-block") { :form_names_identifier_help.l }
+      end
+      render(icn_field)
     end
   end
 
@@ -98,28 +96,26 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_text_name_field
-    render(
-      field(:text_name).text(
-        wrapper_options: {
-          label: "#{:form_names_text_name.l}:",
-          addon: help_block_component(:p, :form_names_text_name_help.l)
-        },
-        value: @name_string,
-        data: { autofocus: true }
-      )
+    text_name_field = field(:text_name).text(
+      wrapper_options: { label: "#{:form_names_text_name.l}:" },
+      value: @name_string,
+      data: { autofocus: true }
     )
+    text_name_field.with_addon do
+      p(class: "help-block") { :form_names_text_name_help.l }
+    end
+    render(text_name_field)
   end
 
   def render_author_field
-    render(
-      field(:author).textarea(
-        wrapper_options: {
-          label: "#{:Authority.l}:",
-          addon: help_block_component(:p, :form_names_author_help.l)
-        },
-        rows: 2
-      )
+    author_field = field(:author).textarea(
+      wrapper_options: { label: "#{:Authority.l}:" },
+      rows: 2
     )
+    author_field.with_addon do
+      p(class: "help-block") { :form_names_author_help.l }
+    end
+    render(author_field)
   end
 
   def render_locked_fields
@@ -129,7 +125,7 @@ class Components::NameForm < Components::ApplicationForm
       render_locked_text_name_field
       render_locked_author_field
       # rubocop:disable Rails/OutputSafety
-      raw(help_block_component(:div, :show_name_locked.tp))
+      div(class: "help-block") { raw(:show_name_locked.tp) }
       # rubocop:enable Rails/OutputSafety
     end
   end
@@ -188,20 +184,19 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_citation_field
-    append_text = view_context.tag.p(class: "help-block") do
-      :form_names_citation_help.l +
-        :form_names_citation_textilize_note.l
-    end
-
-    render(
-      field(:citation).textarea(
-        wrapper_options: {
-          label: "#{:Citation.l}:",
-          addon: append_text
-        },
-        rows: 3
-      )
+    citation_field = field(:citation).textarea(
+      wrapper_options: { label: "#{:Citation.l}:" },
+      rows: 3
     )
+    citation_field.with_addon do
+      # rubocop:disable Rails/OutputSafety
+      p(class: "help-block") do
+        raw(:form_names_citation_help.l)
+        raw(:form_names_citation_textilize_note.l)
+      end
+      # rubocop:enable Rails/OutputSafety
+    end
+    render(citation_field)
   end
 
   def render_misspelling_fields
@@ -257,13 +252,6 @@ class Components::NameForm < Components::ApplicationForm
   def show_misspelling_fields?
     !@misspelling.nil? && (in_admin_mode? || !@model.locked)
   end
-
-  # rubocop:disable Rails/OutputSafety
-  def help_block_component(tag_name, content)
-    # Content comes from trusted locale files
-    view_context.tag.send(tag_name, content.html_safe, class: "help-block")
-  end
-  # rubocop:enable Rails/OutputSafety
 
   def form_action
     url_for(action: controller_action)
