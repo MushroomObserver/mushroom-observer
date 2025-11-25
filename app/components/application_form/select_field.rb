@@ -63,7 +63,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         div do
           label(for: field.dom.id, class: "mr-3") { label_text }
           render_help_in_label_row
-          render(between_slot) if between_slot
+          render_between_slot
         end
       end
     end

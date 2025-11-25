@@ -28,7 +28,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       @create_path = options[:create_path]
     end
 
-    def view_template
+    def view_template(&block)
       div(
         id: controller_id,
         class: "autocompleter",
@@ -38,6 +38,8 @@ class Components::ApplicationForm < Superform::Rails::Form
           render_dropdown
           render_hidden_field
         end
+        # Yield block for additional content (e.g., conditional collapse fields)
+        yield if block
       end
     end
 
@@ -50,7 +52,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     def controller_data
       {
         controller: :autocompleter,
-        type: autocompleter_type
+        # Use string to prevent underscore-to-hyphen conversion in data attrs
+        type: autocompleter_type.to_s
       }
     end
 

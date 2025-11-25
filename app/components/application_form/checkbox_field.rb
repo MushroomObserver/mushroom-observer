@@ -48,7 +48,7 @@ class Components::ApplicationForm < Superform::Rails::Form
           yield
           plain(" #{label_text}")
           render_help_in_label_row
-          render(between_slot) if between_slot
+          render_between_slot
         end
         render_help_after_field
         render(append_slot) if append_slot
