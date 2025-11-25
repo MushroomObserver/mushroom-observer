@@ -2,7 +2,4 @@
   <%= :field_slip_qr_intro.t %>
 </p>
 
-<%= render(Components::QRReaderForm.new(
-      FieldSlip.new,
-      action: field_slips_qr_reader_path
-    )) %>
+<%= render(Components::QRReaderForm.new(FieldSlip.new)) %>

@@ -13,4 +13,9 @@ class Components::QRReaderForm < Components::ApplicationForm
                       data: { qr_reader_target: "input",
                               action: "qr-reader#handleInput" })
   end
+
+  def form_action
+    url_for(controller: "field_slips/qr_reader", action: :create,
+            only_path: true)
+  end
 end
