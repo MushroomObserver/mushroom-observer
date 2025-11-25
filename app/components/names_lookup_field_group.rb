@@ -16,6 +16,7 @@
 #   end
 class Components::NamesLookupFieldGroup < Components::Base
   include Phlex::Rails::Helpers::ClassNames
+  include Components::ApplicationForm::AutocompleterPrefill
 
   prop :names_namespace, _Any
   prop :query, Query
@@ -54,25 +55,11 @@ class Components::NamesLookupFieldGroup < Components::Base
     values = names[:lookup]
     return values unless values.is_a?(Array)
 
-    prefill_string_values(values)
+    prefill_string_values(values, :name)
   end
 
-  def prefill_string_values(values)
-    values.map do |val|
-      if numeric_value?(val)
-        prefill_via_id(val)
-      else
-        val
-      end
-    end.join("\n")
-  end
-
-  def numeric_value?(val)
-    val.is_a?(Numeric) ||
-      (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
-  end
-
-  def prefill_via_id(val)
+  # Override to use display_name for names (includes formatting)
+  def prefill_via_id(val, _type)
     Name.find(val.to_i).display_name
   rescue ActiveRecord::RecordNotFound
     val
