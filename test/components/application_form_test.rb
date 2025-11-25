@@ -35,12 +35,16 @@ class ApplicationFormTest < UnitTestCase
 
   def test_text_field_with_addon
     form = render_form do
-      text_field(:number, label: "Number", addon: "#")
+      text_field(:number, label: "Number") do |f|
+        f.with_addon do
+          p(class: "help-block") { "Help text" }
+        end
+      end
     end
 
     assert_includes(form, "input-group")
     assert_includes(form, "input-group-addon")
-    assert_includes(form, "#")
+    assert_includes(form, '<p class="help-block">Help text</p>')
   end
 
   def test_text_field_with_button
