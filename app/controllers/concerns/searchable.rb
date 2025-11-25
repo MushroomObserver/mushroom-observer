@@ -231,11 +231,5 @@ module Searchable
     #     fields.each { |field| @search.delete(field) }
     #   end
     # end
-
-    # Delegates to SearchFieldUI service object to determine UI component type
-    def search_field_type_from_controller(field:)
-      SearchFieldUI.for(controller: self, field: field)
-    end
-    helper_method :search_field_type_from_controller
   end
 end

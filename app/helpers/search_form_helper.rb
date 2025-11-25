@@ -61,7 +61,7 @@ module SearchFormHelper
     args = { form:, search:, field: }
 
     args[:label] ||= search_label(field)
-    field_type = search_field_type_from_controller(field:)
+    field_type = SearchFieldUI.for(controller:, field:)
     return unless field_type
 
     # Prepare args for the field helper.
