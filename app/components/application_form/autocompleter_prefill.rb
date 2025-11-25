@@ -61,6 +61,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       title_method = type == :user ? :unique_text_name : lookup::TITLE_METHOD
       model_class = lookup_name.singularize.constantize
       model_class.find(val.to_i).send(title_method)
+    rescue ActiveRecord::RecordNotFound
+      val
     end
   end
 end
