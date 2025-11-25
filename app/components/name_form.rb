@@ -163,7 +163,7 @@ class Components::NameForm < Components::ApplicationForm
           label: "#{:Name.l}:",
           inline: true,
           wrap_class: "mb-0",
-          text: @model.user_real_text_name(@user)
+          text: @name_string
         },
         value: @name_string
       )
