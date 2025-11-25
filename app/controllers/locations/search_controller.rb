@@ -11,21 +11,20 @@ module Locations
 
     before_action :login_required
 
-    # Also an index of helper methods to use for each field.
     def permitted_search_params
-      {
-        created_at: :text_field_with_label,
-        updated_at: :text_field_with_label,
-        region: :region_with_in_box_fields,
-        in_box: :in_box_fields,
-        regexp: :text_field_with_label,
-        has_notes: :select_nil_boolean,
-        notes_has: :text_field_with_label,
-        by_users: :multiple_value_autocompleter,
-        by_editor: :single_value_autocompleter,
-        has_descriptions: :select_nil_yes, # ignores false
-        has_observations: :select_nil_yes # ignores false
-      }.freeze
+      [
+        :created_at,
+        :updated_at,
+        :region,
+        :in_box,
+        :regexp,
+        :has_notes,
+        :notes_has,
+        :by_users,
+        :by_editor,
+        :has_descriptions,
+        :has_observations
+      ].freeze
     end
 
     def fields_preferring_ids

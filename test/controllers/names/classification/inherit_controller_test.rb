@@ -8,7 +8,9 @@ module Names::Classification
 
     def create_name(name)
       parse = Name.parse_name(name)
-      Name.new_name(parse.params)
+      params = parse.params
+      params[:user] ||= rolf
+      Name.new_name(params)
     end
 
     def test_get_inherit_classification
