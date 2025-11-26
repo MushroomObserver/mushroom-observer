@@ -11,6 +11,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     register_output_helper :icon_link_to
     register_output_helper :modal_link_to
 
+    # Types with dedicated Stimulus controllers
+    SUPPORTED_TYPE_CONTROLLERS = [
+      :name, :user, :location, :herbarium, :project, :species_list,
+      :clade, :region
+    ].freeze
+
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
                 :create, :create_path
@@ -49,9 +55,24 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def controller_data
       {
-        controller: :autocompleter,
+        controller: stimulus_controller_name,
         type: autocompleter_type
       }
+    end
+
+    # Returns the Stimulus controller name for this autocompleter type.
+    # Type-specific controllers use naming convention: autocompleter--{type}
+    # Falls back to legacy :autocompleter controller for unsupported types.
+    def stimulus_controller_name
+      if type_specific_controller_exists?
+        :"autocompleter--#{autocompleter_type}"
+      else
+        :autocompleter # Legacy controller
+      end
+    end
+
+    def type_specific_controller_exists?
+      SUPPORTED_TYPE_CONTROLLERS.include?(autocompleter_type.to_sym)
     end
 
     def render_input_field(&block)
