@@ -66,21 +66,19 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete") # wait for autocomplete
     assert_selector(".auto_complete ul li a", text: "Rolf Singer")
     @browser.keyboard.type(:down, :tab)
-    sleep(0.5)
+    # Capybara's assert_field waits for the value to appear
     assert_field("query_observations_by_users", with: "Rolf Singer (rolf)")
 
-    # Hidden ID should be set
+    # Hidden ID should be set - wait for it to have a non-empty value
     hidden_field = find("#query_observations_by_users_id", visible: false)
-    assert_not_empty(hidden_field.value, "Hidden ID should be set after selection")
+    assert(hidden_field.value.present?,
+           "Hidden ID should be set after selection")
 
-    # Clear the field with select-all and delete
-    find_field("query_observations_by_users").click
-    @browser.keyboard.type([:meta, "a"], :backspace)
-    sleep(0.5)
+    # Clear the field - use Capybara's cross-platform method
+    fill_in("query_observations_by_users", with: "")
 
-    # Hidden ID should now be empty
-    assert_empty(hidden_field.value,
-                 "Hidden ID should be cleared when text is cleared")
+    # Hidden ID should now be empty (use waiting matcher)
+    assert_field("query_observations_by_users_id", type: :hidden, with: "")
   end
 
   # def test_observation_search_location_autocompleter
