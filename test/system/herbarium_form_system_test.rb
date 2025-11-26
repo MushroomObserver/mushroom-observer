@@ -56,40 +56,12 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_field("herbarium_place_name",
                  with: "Génolhac, Gard, Occitanie, France", wait: 10)
 
-    # Debug: Check DOM state - find hidden field with location in name
-    all_hiddens = all("input[type='hidden']", visible: :all)
-    puts "\n=== Hidden Fields ==="
-    all_hiddens.each do |h|
-      if h[:id]&.include?("location") || h[:name]&.include?("location")
-        puts "  id=#{h[:id]} name=#{h[:name]} value=[#{h.value}]"
-      end
-    end
-
-    # Check if hidden field is inside the controller element
-    puts "\n=== Checking hidden field location ==="
-    ac_el = find("#herbarium_location_autocompleter", visible: :all)
-    puts "Autocompleter controller: #{ac_el[:'data-controller']}"
-    puts "Autocompleter type: #{ac_el[:'data-type']}"
-
-    # Check if the hidden field is inside the controller
-    inside_hidden = ac_el.has_css?("#herbarium_location_id", visible: :all,
-                                    wait: 0)
-    puts "Hidden inside autocompleter: #{inside_hidden}"
-
-    # Check the hidden field's target attribute
-    hidden_el = find("#herbarium_location_id", visible: :all)
-    puts "Hidden target attr: #{hidden_el[:'data-autocompleter--location-target']}"
-
-    # Wait for hidden field to be updated (may happen async)
-    sleep 1
+    # Verify hidden fields are populated correctly
     assert_field("herbarium_location_id", with: "-1", type: :hidden, wait: 5)
     assert_field("location_north", with: "44.3726", type: :hidden)
     assert_field("location_east", with: "3.985", type: :hidden)
     assert_field("location_south", with: "44.3055", type: :hidden)
     assert_field("location_west", with: "3.9113", type: :hidden)
-    # NOTE: location_high and location_low may not be populated by geocoder
-    # assert_field("location_high", with: "1388.2098", type: :hidden)
-    # assert_field("location_low", with: "287.8201", type: :hidden)
 
     within("#herbarium_form") do
       fill_in("herbarium_name", with: "Herbarium des Cévennes")

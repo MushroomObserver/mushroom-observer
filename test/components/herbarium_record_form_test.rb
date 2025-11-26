@@ -15,7 +15,8 @@ class HerbariumRecordFormTest < UnitTestCase
 
   def test_renders_form_with_herbarium_name_field
     assert_html(@html, "input[name='herbarium_record[herbarium_name]']")
-    assert_html(@html, "input[data-autocompleter-target='input']")
+    # Herbarium type uses namespaced target: data-autocompleter--herbarium-target
+    assert_html(@html, "input[data-autocompleter--herbarium-target='input']")
   end
 
   def test_renders_form_with_initial_det_field

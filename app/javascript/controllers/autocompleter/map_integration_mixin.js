@@ -109,6 +109,9 @@ export const MapIntegrationMixin = {
 
   // Map controller sends back a primer formatted for the autocompleter
   refreshGooglePrimer({ primer }) {
+    // Ensure primer is processed even if input lost focus (e.g., after clicking
+    // "New locality" button). processFetchResponse checks this.focused.
+    this.focused = true;
     this.processFetchResponse(primer)
   },
 
