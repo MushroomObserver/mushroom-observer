@@ -2,6 +2,11 @@
 
 # rubocop:disable Metrics/AbcSize
 module AutocompleterHelper
+  # Types with dedicated Stimulus controllers (must match JS controllers)
+  SUPPORTED_TYPE_CONTROLLERS = [
+    :name, :user, :location, :herbarium, :project, :species_list, :clade,
+    :region
+  ].freeze
   # MO's autocompleter_field is a text_field that fetches suggestions from the
   # db for the requested model. (For a textarea, pass textarea: true.)
   #
@@ -16,13 +21,14 @@ module AutocompleterHelper
   # turn their crap off. (documented on SO)
   #
   def autocompleter_field(**args)
+    target_key = target_attr_key(args[:type])
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
-      data: { autocompleter_target: "input" }
+      data: { target_key => "input" }
     }.deep_merge(args.except(*autocompleter_outer_args))
     ac_args[:class] = class_names("dropdown", args[:class])
     # inner form-group wrap, because dropdown is position-absolute
-    ac_args[:wrap_data] = { autocompleter_target: "wrap" }
+    ac_args[:wrap_data] = { target_key => "wrap" }
     ac_args[:label_after] = autocompleter_label_after(args)
     ac_args[:label_end] = autocompleter_label_end(args)
     ac_args[:append] = autocompleter_append(args)
@@ -38,6 +44,15 @@ module AutocompleterHelper
     end
   end
 
+  # Returns the Stimulus target attribute key for the given type.
+  # For namespaced controllers like autocompleter--location, targets use
+  # data-autocompleter--location-target (Rails: :autocompleter__location_target)
+  def target_attr_key(type)
+    controller = stimulus_controller_name(type)
+    # Convert autocompleter--location to autocompleter__location_target
+    :"#{controller.to_s.tr("-", "_")}_target"
+  end
+
   # Any arg not on this list gets sent to the text field/area.
   def autocompleter_outer_args
     [:controller_data, :controller_id, :type, :separator, :textarea,
@@ -47,19 +62,44 @@ module AutocompleterHelper
 
   # This data goes on the outer div (controller element), not the input field.
   def autocompleter_controller_data(args)
+    type = args[:type]
+    controller_name = stimulus_controller_name(type)
     {
-      controller: :autocompleter,
-      type: args[:type],
-      separator: args[:separator],
-      autocompleter_map_outlet: args[:map_outlet],
-      autocompleter_geocode_outlet: args[:geocode_outlet]
-    }.deep_merge(args[:outer_data] || {})
+      controller: controller_name,
+      type: type,
+      separator: args[:separator]
+    }.merge(autocompleter_outlet_data(controller_name, args)).
+      deep_merge(args[:outer_data] || {})
+  end
+
+  # Returns the Stimulus controller name for this autocompleter type.
+  # Type-specific controllers use naming convention: autocompleter--{type}
+  # Falls back to legacy :autocompleter controller for unsupported types.
+  def stimulus_controller_name(type)
+    if SUPPORTED_TYPE_CONTROLLERS.include?(type&.to_sym)
+      :"autocompleter--#{type}"
+    else
+      :autocompleter
+    end
+  end
+
+  # Build outlet data attributes with correct controller prefix
+  def autocompleter_outlet_data(controller_name, args)
+    prefix = controller_name.to_s.tr("-", "_")
+    data = {}
+    data[:"#{prefix}_map_outlet"] = args[:map_outlet] if args[:map_outlet]
+    if args[:geocode_outlet]
+      data[:"#{prefix}_geocode_outlet"] =
+        args[:geocode_outlet]
+    end
+    data
   end
 
   def autocompleter_label_after(args)
+    target_key = target_attr_key(args[:type])
     capture do
       [
-        autocompleter_has_id_indicator,
+        autocompleter_has_id_indicator(target_key),
         autocompleter_find_button(args),
         autocompleter_keep_box_button(args),
         autocompleter_edit_box_button(args)
@@ -74,22 +114,24 @@ module AutocompleterHelper
     end
   end
 
-  def autocompleter_has_id_indicator
+  def autocompleter_has_id_indicator(target_key)
     link_icon(:check, title: :autocompleter_has_id.l,
                       class: "ml-3 px-2 text-success has-id-indicator",
-                      data: { autocompleter_target: "hasIdIndicator" })
+                      data: { target_key => "hasIdIndicator" })
   end
 
   def autocompleter_create_button(args)
     return if !args[:create_text] || args[:create].present?
 
+    controller = stimulus_controller_name(args[:type])
+    target_key = target_attr_key(args[:type])
     icon_link_to(
       args[:create_text], "#",
       id: "create_#{args[:type]}_btn", class: "ml-3 create-button",
       icon: :plus, show_text: true, icon_class: "text-primary",
       name: "create_#{args[:type]}",
-      data: { autocompleter_target: "createBtn",
-              action: "autocompleter#swapCreate:prevent" }
+      data: { target_key => "createBtn",
+              action: "#{controller}#swapCreate:prevent" }
     )
   end
 
@@ -97,11 +139,12 @@ module AutocompleterHelper
     return unless args[:create_text] && args[:create].present? &&
                   args[:create_path].present?
 
+    target_key = target_attr_key(args[:type])
     modal_link_to(
       args[:create], args[:create_text], args[:create_path],
       icon: :plus, show_text: true, icon_class: "text-primary",
       name: "create_#{args[:type]}", class: "ml-3 create-link",
-      data: { autocompleter_target: "createBtn" }
+      data: { target_key => "createBtn" }
     )
   end
 
@@ -120,11 +163,12 @@ module AutocompleterHelper
   def autocompleter_keep_box_button(args)
     return unless args[:keep_text]
 
+    target_key = target_attr_key(args[:type])
     icon_link_to(
       args[:keep_text], "#",
       icon: :apply, show_text: false, icon_class: "text-primary",
       name: "keep_#{args[:type]}", class: "ml-3 keep-btn d-none",
-      data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
+      data: { target_key => "keepBtn", map_target: "lockBoxBtn",
               action: "map#toggleBoxLock:prevent form-exif#showFields" }
     )
   end
@@ -132,11 +176,12 @@ module AutocompleterHelper
   def autocompleter_edit_box_button(args)
     return unless args[:keep_text]
 
+    target_key = target_attr_key(args[:type])
     icon_link_to(
       args[:edit_text], "#",
       icon: :edit, show_text: false, icon_class: "text-primary",
       name: "edit_#{args[:type]}", class: "ml-3 edit-btn d-none",
-      data: { autocompleter_target: "editBtn", map_target: "editBoxBtn",
+      data: { target_key => "editBtn", map_target: "editBoxBtn",
               action: "map#toggleBoxLock:prevent form-exif#showFields" }
     )
   end
@@ -148,7 +193,8 @@ module AutocompleterHelper
 
     # Default field name is "#{type}_id", so obs.place_name gets obs.location_id
     id = args[:hidden_name] || :"#{args[:type]}_id"
-    data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
+    target_key = target_attr_key(args[:type])
+    data = { target_key => "hidden" }.merge(args[:hidden_data] || {})
     args[:form].hidden_field(
       id,
       value: args[:hidden_value], data:, class: "form-control", readonly: true
@@ -156,19 +202,22 @@ module AutocompleterHelper
   end
 
   def autocompleter_append(args)
-    [autocompleter_dropdown,
+    controller = stimulus_controller_name(args[:type])
+    [autocompleter_dropdown(controller),
      autocompleter_hidden_field(**args)].safe_join
   end
 
-  def autocompleter_dropdown
+  def autocompleter_dropdown(controller = :autocompleter)
+    # Derive target key from controller name
+    target_key = :"#{controller.to_s.tr("-", "_")}_target"
     tag.div(class: "auto_complete dropdown-menu",
-            data: { autocompleter_target: "pulldown",
-                    action: "scroll->autocompleter#scrollList:passive" }) do
-      tag.ul(class: "virtual_list", data: { autocompleter_target: "list" }) do
+            data: { target_key => "pulldown",
+                    action: "scroll->#{controller}#scrollList:passive" }) do
+      tag.ul(class: "virtual_list", data: { target_key => "list" }) do
         10.times do |i|
           concat(tag.li(class: "dropdown-item") do
             link_to("", "#", data: {
-                      row: i, action: "click->autocompleter#selectRow:prevent"
+                      row: i, action: "click->#{controller}#selectRow:prevent"
                     })
           end)
         end
