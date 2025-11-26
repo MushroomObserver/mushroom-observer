@@ -1,6 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 import { mo_form_utilities, EVENT_KEYS } from "src/mo_form_utilities"
 import { get } from "@rails/request.js"
+import { MultiValueMixin } from "controllers/autocompleter/multi_value_mixin"
+import { MapIntegrationMixin } from "controllers/autocompleter/map_integration_mixin"
 
 // @pellaea's autocompleter is different from other open source autocompleter
 // libraries. It can match words out of order, as in "scientific"
@@ -176,6 +178,10 @@ export default class extends Controller {
     // Shared MO utilities, imported at the top:
     this.EVENT_KEYS = EVENT_KEYS;
     Object.assign(this, mo_form_utilities);
+
+    // Apply mixins for multi-value and map integration features
+    Object.assign(this, MultiValueMixin);
+    Object.assign(this, MapIntegrationMixin);
   }
 
   connect() {

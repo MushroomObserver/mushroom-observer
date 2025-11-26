@@ -53,6 +53,36 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_field("query_observations_by_users", with: "Roy Halling (roy)")
   end
 
+  # https://github.com/MushroomObserver/mushroom-observer/issues/3374
+  def test_clearing_autocompleter_clears_hidden_id
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    # Select a user via autocomplete
+    find_field("query_observations_by_users").click
+    @browser.keyboard.type("rolf")
+    assert_selector(".auto_complete") # wait for autocomplete
+    assert_selector(".auto_complete ul li a", text: "Rolf Singer")
+    @browser.keyboard.type(:down, :tab)
+    sleep(0.5)
+    assert_field("query_observations_by_users", with: "Rolf Singer (rolf)")
+
+    # Hidden ID should be set
+    hidden_field = find("#query_observations_by_users_id", visible: false)
+    assert_not_empty(hidden_field.value, "Hidden ID should be set after selection")
+
+    # Clear the field with select-all and delete
+    find_field("query_observations_by_users").click
+    @browser.keyboard.type([:meta, "a"], :backspace)
+    sleep(0.5)
+
+    # Hidden ID should now be empty
+    assert_empty(hidden_field.value,
+                 "Hidden ID should be cleared when text is cleared")
+  end
+
   # def test_observation_search_location_autocompleter
   #   login!(@roy)
 

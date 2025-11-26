@@ -17,6 +17,7 @@ pin "@hotwired/turbo-rails", to: "turbo.min.js", preload: true
 pin "@hotwired/stimulus", to: "stimulus.min.js", preload: true
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js", preload: true
 pin_all_from "app/javascript/controllers", under: "controllers"
+pin_all_from "app/javascript/controllers/autocompleter", under: "controllers/autocompleter"
 
 pin "exifreader" # @4.16.0
 pin "vanilla-lazyload" # @17.8.5
