@@ -102,6 +102,23 @@ class AutocompleterFieldTest < UnitTestCase
     assert_html(html, "ul.virtual_list")
   end
 
+  def test_textarea_autocompleter_has_newline_separator
+    html = render_textarea_autocompleter
+
+    # Textarea autocompleters should have newline separator for multi-value
+    assert_html(html, ".autocompleter[data-separator='\n']")
+  end
+
+  def test_text_input_autocompleter_has_no_separator
+    html = render_with_component
+
+    # Text input autocompleters should NOT have separator (single value only)
+    doc = Nokogiri::HTML(html)
+    autocompleter = doc.at_css(".autocompleter")
+    assert_nil(autocompleter["data-separator"],
+               "Text input autocompleter should not have separator attribute")
+  end
+
   def test_hidden_field_derives_id_field_name
     html = render_with_component
 

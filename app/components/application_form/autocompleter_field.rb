@@ -50,11 +50,14 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def controller_data
-      {
+      data = {
         controller: :autocompleter,
         # Use string to prevent underscore-to-hyphen conversion in data attrs
         type: autocompleter_type.to_s
       }
+      # Textarea autocompleters accept multiple values separated by newlines
+      data[:separator] = "\n" if textarea
+      data
     end
 
     def render_input_field(&block)

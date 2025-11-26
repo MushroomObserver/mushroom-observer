@@ -147,5 +147,118 @@ module Observations
         params: { q: { model: :Observation, **params.except(:names) } }
       )
     end
+
+    # ---------------------------------------------------------------
+    #  Multi-value autocompleter tests (newline-separated values)
+    #  Test each autocompleter type once to verify multi-value handling
+    # ---------------------------------------------------------------
+
+    def test_create_with_multiple_users
+      login
+      user1 = users(:rolf)
+      user2 = users(:mary)
+      params = {
+        by_users: "#{user1.unique_text_name}\n#{user2.unique_text_name}",
+        by_users_id: "#{user1.id},#{user2.id}"
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: { q: { model: :Observation, by_users: [user1.id, user2.id] } }
+      )
+    end
+
+    def test_create_with_multiple_projects
+      login
+      proj1 = projects(:bolete_project)
+      proj2 = projects(:eol_project)
+      params = {
+        projects: "#{proj1.title}\n#{proj2.title}",
+        projects_id: "#{proj1.id},#{proj2.id}"
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: { q: { model: :Observation, projects: [proj1.id, proj2.id] } }
+      )
+    end
+
+    def test_create_with_multiple_herbaria
+      login
+      herb1 = herbaria(:nybg_herbarium)
+      herb2 = herbaria(:fundis_herbarium)
+      params = {
+        herbaria: "#{herb1.name}\n#{herb2.name}",
+        herbaria_id: "#{herb1.id},#{herb2.id}"
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: { q: { model: :Observation, herbaria: [herb1.id, herb2.id] } }
+      )
+    end
+
+    def test_create_with_multiple_locations
+      login
+      loc1 = locations(:burbank)
+      loc2 = locations(:albion)
+      # Note: within_locations uses location names, not IDs
+      params = {
+        within_locations: "#{loc1.name}\n#{loc2.name}"
+      }
+      post(:create, params: { query_observations: params })
+
+      # Location names are passed as-is (not converted to IDs)
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: {
+            model: :Observation,
+            within_locations: ["#{loc1.name}\n#{loc2.name}"]
+          }
+        }
+      )
+    end
+
+    def test_create_with_multiple_species_lists
+      login
+      list1 = species_lists(:first_species_list)
+      list2 = species_lists(:another_species_list)
+      params = {
+        species_lists: "#{list1.title}\n#{list2.title}",
+        species_lists_id: "#{list1.id},#{list2.id}"
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, species_lists: [list1.id, list2.id] }
+        }
+      )
+    end
+
+    def test_create_with_multiple_names_lookup
+      login
+      params = {
+        names: {
+          lookup: "Agaricus campestris\nCoprinus comatus"
+        }
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: {
+            model: :Observation,
+            names: { lookup: ["Agaricus campestris", "Coprinus comatus"] }
+          }
+        }
+      )
+    end
   end
 end
