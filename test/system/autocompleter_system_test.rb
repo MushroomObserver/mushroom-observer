@@ -71,7 +71,9 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Hidden ID should be set
     hidden_field = find("#query_observations_by_users_id", visible: false)
-    assert_not_empty(hidden_field.value, "Hidden ID should be set after selection")
+    assert_not_empty(
+      hidden_field.value, "Hidden ID should be set after selection"
+    )
 
     # Clear the field with select-all and delete
     find_field("query_observations_by_users").click
@@ -79,7 +81,9 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     sleep(0.5)
 
     # Hidden ID should now be empty
-    assert_empty(hidden_field.value, "Hidden ID should be cleared when text is cleared")
+    assert_empty(
+      hidden_field.value, "Hidden ID should be cleared when text is cleared"
+    )
   end
 
   # def test_observation_search_location_autocompleter
