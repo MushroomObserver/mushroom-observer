@@ -71,6 +71,128 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   #          "Expected 'USA, California' but got: #{value}")
   # end
 
+  # ---------------------------------------------------------------
+  #  Multi-value autocompleter tests
+  #  Test that textarea autocompleters can accept multiple values
+  # ---------------------------------------------------------------
+
+  def test_multi_value_name_autocompleter
+    login!(@roy)
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_names_lookup")
+    field.click
+
+    # Type first name and select
+    @browser.keyboard.type("agaricus camp")
+    assert_selector(".auto_complete ul li a", text: "Agaricus campestris")
+    @browser.keyboard.type(:down, :tab)
+    # Should have selected a name
+    value = field.value
+    assert_match(/Agaricus/, value)
+
+    # Wait for menu to close (has 0.5s delay), then add newline
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("coprinus")
+    assert_selector(".auto_complete ul li a", text: "Coprinus comatus", wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify both names are in the textarea, separated by newline
+    final_value = field.value
+    assert_match(/Agaricus/, final_value, "First name should be present")
+    assert_match(/Coprinus/, final_value, "Second name should be present")
+    assert_match(/\n/, final_value, "Names should be separated by newline")
+  end
+
+  def test_multi_value_user_autocompleter
+    login!(@roy)
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_by_users")
+    field.click
+
+    # Type first user and select
+    @browser.keyboard.type("rolf")
+    assert_selector(".auto_complete ul li a", text: "Rolf Singer")
+    @browser.keyboard.type(:down, :tab)
+    value = field.value
+    assert_match(/Rolf/, value)
+
+    # Wait for menu to close (has 0.5s delay), then add newline
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("mary")
+    assert_selector(".auto_complete ul li a", text: "Mary Newbie", wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify both users are in the textarea
+    final_value = field.value
+    assert_match(/Rolf/, final_value, "First user should be present")
+    assert_match(/Mary/, final_value, "Second user should be present")
+    assert_match(/\n/, final_value, "Users should be separated by newline")
+  end
+
+  def test_multi_value_project_autocompleter
+    login!(@roy)
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_projects")
+    field.click
+
+    # Type first project and select
+    @browser.keyboard.type("bolete")
+    assert_selector(".auto_complete ul li a", text: "Bolete Project")
+    @browser.keyboard.type(:down, :tab)
+    value = field.value
+    assert_match(/Bolete/, value)
+
+    # Wait for menu to close (has 0.5s delay), then add newline
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("eol")
+    assert_selector(".auto_complete ul li a", text: "EOL Project", wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify both projects are in the textarea
+    final_value = field.value
+    assert_match(/Bolete/, final_value, "First project should be present")
+    assert_match(/EOL/, final_value, "Second project should be present")
+    assert_match(/\n/, final_value, "Projects should be separated by newline")
+  end
+
+  def test_multi_value_location_autocompleter
+    login!(@roy)
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_within_locations")
+    field.click
+
+    # Type first location and select (Roy's preference is scientific format)
+    @browser.keyboard.type("burbank")
+    assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 3)
+    @browser.keyboard.type(:down, :tab)
+    value = field.value
+    assert_match(/Burbank/i, value)
+
+    # Wait for menu to close (has 0.5s delay), then add newline
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("albion")
+    assert_selector(".auto_complete ul li a", text: /Albion/i, wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify both locations are in the textarea
+    final_value = field.value
+    assert_match(/Burbank/i, final_value, "First location should be present")
+    assert_match(/Albion/i, final_value, "Second location should be present")
+    assert_match(/\n/, final_value, "Locations should be separated by newline")
+  end
+
   def test_autocompleter_in_naming_modal
     browser = page.driver.browser
     rolf = users("rolf")
