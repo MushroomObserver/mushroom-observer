@@ -234,6 +234,32 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, "Collection name")
   end
 
+  # Test select field with inferred label (no label option, uses humanize)
+  # Covers SelectField line 62: field.key.to_s.humanize
+  def test_select_field_with_inferred_label
+    options = [["Opt 1", "1"], ["Opt 2", "2"]]
+    form = render_form do
+      select_field(:collection_name, options)
+    end
+
+    # Field name :collection_name should be humanized to "Collection name"
+    assert_includes(form, "Collection name")
+    assert_includes(form, "<select")
+  end
+
+  # Test select with label: true (explicit non-string, non-false label)
+  # Also covers SelectField line 62
+  def test_select_field_with_label_true
+    options = [["Opt A", "a"], ["Opt B", "b"]]
+    form = render_form do
+      select_field(:number, options, label: true)
+    end
+
+    # Should use humanized field name as label
+    assert_includes(form, "Number")
+    assert_includes(form, "<select")
+  end
+
   private
 
   def render_form(&block)

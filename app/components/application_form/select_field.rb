@@ -33,13 +33,14 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # Override to use `selected` attribute if field.value is nil
+    # Compares as strings to handle boolean values (Phlex omits value="false")
     def options(*collection)
       selected_value = attributes[:selected]
       map_options(collection).each do |key, value|
         is_selected = if field.value.nil?
-                        selected_value == key
+                        selected_value.to_s == key.to_s
                       else
-                        field.value == key
+                        field.value.to_s == key.to_s
                       end
         option(selected: is_selected, value: key) { value }
       end

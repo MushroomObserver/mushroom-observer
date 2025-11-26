@@ -87,7 +87,7 @@ class Components::NameForm < Components::ApplicationForm
         field(:deprecated).select(
           status_options,
           wrapper_options: { label: "#{:Status.l}:" },
-          selected: @model.deprecated || false
+          selected: (@model.deprecated || false).to_s
         )
       )
     end
@@ -243,7 +243,8 @@ class Components::NameForm < Components::ApplicationForm
 
   def status_options
     # Superform expects [value, label]
-    [[false, :ACCEPTED.l], [true, :DEPRECATED.l]]
+    # Use strings because Phlex omits value attribute for boolean false
+    [["false", :ACCEPTED.l], ["true", :DEPRECATED.l]]
   end
 
   def show_misspelling_fields?
