@@ -211,11 +211,12 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
   end
 
   # REGRESSION TEST for bug: When marking a name as misspelt via the edit form,
-  # the flash incorrectly says "No changes made" even though changes were made.
+  # the flash incorrectly said "No changes made" even though changes were made.
   # Root cause: merge_synonyms (in Name::Synonymy) calls self.save, which clears
-  # the dirty tracking. Then perform_change_existing_name sees @name.changed?
-  # is false and sets any_changes = false, triggering the incorrect flash.
-  # This test FAILS until the bug is fixed.
+  # the dirty tracking. Then perform_change_existing_name saw @name.changed?
+  # is false and set any_changes = false, triggering the incorrect flash.
+  # Fix: update_correct_spelling now returns true when changes were saved via
+  # mark_misspelled, and perform_change_existing_name uses this return value.
   def test_mark_name_as_misspelt_via_edit_form
     bad_name = names(:agaricus_campestros)
     good_name = names(:agaricus_campestris)
@@ -254,9 +255,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(bad_name.synonym_id, good_name.synonym_id,
                  "Both names should share the same synonym")
 
-    # BUG: This assertion currently fails because the flash incorrectly shows
-    # "No changes made" even though the name was changed and saved.
-    # When the bug is fixed, this should pass.
+    # Verify flash does NOT show "No changes made"
     page.assert_no_text("No changes made")
   end
 
