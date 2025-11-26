@@ -296,7 +296,7 @@ module ApplicationController::Queries
     query ||= current_query
     query&.q_param
   end
-  # helper_method :q_param
+  # helper_method :q_param # defined in application_controller.rb
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
   def redirect_with_query(args, query = nil)

@@ -5,7 +5,7 @@
 class Components::SequenceForm < Components::ApplicationForm
   include Phlex::Rails::Helpers::LinkTo
 
-  def initialize(model, observation:, back: nil, **)
+  def initialize(model, observation: nil, back: nil, **)
     @observation = observation
     @back = back
     super(model, **)
@@ -152,9 +152,13 @@ class Components::SequenceForm < Components::ApplicationForm
       url_for(
         controller: "sequences",
         action: :create,
-        observation_id: @observation.id,
+        observation_id: observation.id,
         only_path: true
       )
     end
+  end
+
+  def observation
+    @observation || model.observation
   end
 end

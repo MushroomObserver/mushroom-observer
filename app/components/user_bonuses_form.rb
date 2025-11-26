@@ -3,14 +3,9 @@
 # Form for editing user contribution bonuses (admin only).
 # Allows admins to manually adjust user bonus points.
 class Components::UserBonusesForm < Components::ApplicationForm
-  def initialize(model, help_text:, **)
-    @help_text = help_text
-    super(model, **)
-  end
-
   def view_template
     super do
-      div(class: "help-note mr-3") { @help_text }
+      div(class: "help-note mr-3") { :change_user_bonuses_help.tp }
       textarea_field(:val, value: model.formatted_bonuses, rows: 5,
                            class: "mt-3")
       submit(:SAVE_EDITS.l, center: true)
