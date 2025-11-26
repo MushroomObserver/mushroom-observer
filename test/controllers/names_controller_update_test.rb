@@ -102,6 +102,39 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_equal(rolf, name.user)
   end
 
+  # Regression test for bug where adding an author to a name without one
+  # incorrectly redirected to the approve/deprecate synonyms screen.
+  # The bug was caused by Phlex omitting the value attribute for boolean false,
+  # so params[:name][:deprecated] was empty instead of "false".
+  def test_edit_name_add_author_does_not_redirect_to_synonyms
+    name = names(:conocybe_filaris)
+    assert_equal("Conocybe filaris", name.text_name)
+    assert_blank(name.author)
+    assert_equal(false, name.deprecated)
+
+    params = {
+      id: name.id,
+      name: {
+        text_name: "Conocybe filaris",
+        author: "New Author",
+        rank: "Species",
+        deprecated: "false" # Must be string "false", not empty or boolean
+      }
+    }
+    login("rolf")
+    put(:update, params: params)
+
+    # Should redirect to the name show page, NOT to approve/deprecate synonyms
+    assert_redirected_to(name_path(name.id))
+    assert_no_match(/synonyms/, @response.redirect_url.to_s)
+    assert_flash_success
+
+    # Verify the author was saved
+    assert_equal("New Author", name.reload.author)
+    # Verify deprecated status unchanged
+    assert_equal(false, name.deprecated)
+  end
+
   def test_edit_name_no_changes
     name = names(:conocybe_filaris)
     text_name = name.text_name
