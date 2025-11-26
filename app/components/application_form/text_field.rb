@@ -10,7 +10,6 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :between
     slot :label_end
     slot :append
-    slot :addon
 
     attr_reader :wrapper_options
 
@@ -58,17 +57,21 @@ class Components::ApplicationForm < Superform::Rails::Form
     # rubocop:enable Metrics/AbcSize
 
     def render_label_row(label_text, inline)
-      display = inline ? "d-inline-flex" : "d-flex"
-
-      div(class: "#{display} justify-content-between") do
-        div do
-          label(for: field.dom.id, class: "mr-3") { label_text }
-          render_help_in_label_row
-          render(between_slot) if between_slot
-        end
-        if label_end_slot
+      # Simple label if no slots or help
+      if !between_slot && !label_end_slot && !wrapper_options[:help]
+        label(for: field.dom.id, class: "mr-3") { label_text }
+      else
+        display = inline ? "d-inline-flex" : "d-flex"
+        div(class: "#{display} justify-content-between") do
           div do
-            render(label_end_slot)
+            label(for: field.dom.id, class: "mr-3") { label_text }
+            render_help_in_label_row
+            render(between_slot) if between_slot
+          end
+          if label_end_slot
+            div do
+              render(label_end_slot)
+            end
           end
         end
       end
@@ -78,12 +81,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       button = wrapper_options[:button]
       button_data = wrapper_options[:button_data] || {}
 
-      if addon_slot
-        div(class: "input-group") do
-          yield
-          span(class: "input-group-addon") { render(addon_slot) }
-        end
-      elsif button.present?
+      if button.present?
         div(class: "input-group") do
           yield
           span(class: "input-group-btn") do

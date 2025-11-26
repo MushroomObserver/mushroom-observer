@@ -63,7 +63,7 @@ class Components::NameForm < Components::ApplicationForm
         },
         size: 8
       )
-      icn_field.with_addon do
+      icn_field.with_append do
         p(class: "help-block") { :form_names_identifier_help.l }
       end
       render(icn_field)
@@ -76,7 +76,8 @@ class Components::NameForm < Components::ApplicationForm
         field(:rank).select(
           rank_options,
           wrapper_options: {
-            label: "#{:Rank.l}:"
+            label: "#{:Rank.l}:",
+            wrap_class: "mr-4"
           },
           selected: @model.rank
         )
@@ -85,10 +86,7 @@ class Components::NameForm < Components::ApplicationForm
       render(
         field(:deprecated).select(
           status_options,
-          wrapper_options: {
-            label: "#{:Status.l}:",
-            wrap_class: "pl-3"
-          },
+          wrapper_options: { label: "#{:Status.l}:" },
           selected: @model.deprecated || false
         )
       )
@@ -96,12 +94,12 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_text_name_field
-    text_name_field = field(:text_name).text(
+    text_name_field = field(:text_name).textarea(
       wrapper_options: { label: "#{:form_names_text_name.l}:" },
-      value: @name_string,
+      rows: 1,
       data: { autofocus: true }
-    )
-    text_name_field.with_addon do
+    ) { @name_string }
+    text_name_field.with_append do
       p(class: "help-block") { :form_names_text_name_help.l }
     end
     render(text_name_field)
@@ -112,7 +110,7 @@ class Components::NameForm < Components::ApplicationForm
       wrapper_options: { label: "#{:Authority.l}:" },
       rows: 2
     )
-    author_field.with_addon do
+    author_field.with_append do
       p(class: "help-block") { :form_names_author_help.l }
     end
     render(author_field)
@@ -188,7 +186,7 @@ class Components::NameForm < Components::ApplicationForm
       wrapper_options: { label: "#{:Citation.l}:" },
       rows: 3
     )
-    citation_field.with_addon do
+    citation_field.with_append do
       # rubocop:disable Rails/OutputSafety
       p(class: "help-block") do
         raw(:form_names_citation_help.l)
@@ -224,19 +222,17 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_notes_field
-    between_text = view_context.tag.div(:form_names_taxonomic_notes_warning.l,
-                                        class: "mark")
-
-    render(
-      field(:notes).textarea(
-        wrapper_options: {
-          label: "#{:form_names_taxonomic_notes.l}:",
-          between: between_text,
-          help: :shared_textile_help.l
-        },
-        rows: 6
-      )
+    notes_field = field(:notes).textarea(
+      wrapper_options: {
+        label: "#{:form_names_taxonomic_notes.l}:",
+        help: :shared_textile_help.l
+      },
+      rows: 6
     )
+    notes_field.with_between do
+      div(class: "mark") { :form_names_taxonomic_notes_warning.l }
+    end
+    render(notes_field)
   end
 
   def rank_options
@@ -254,10 +250,10 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def form_action
-    url_for(action: controller_action)
-  end
-
-  def controller_action
-    @model.new_record? ? :create : :update
+    if @model.new_record?
+      view_context.names_path
+    else
+      view_context.name_path(@model)
+    end
   end
 end

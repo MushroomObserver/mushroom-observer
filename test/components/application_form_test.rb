@@ -33,17 +33,15 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, "form-inline")
   end
 
-  def test_text_field_with_addon
+  def test_text_field_with_append
     form = render_form do
       text_field(:number, label: "Number") do |f|
-        f.with_addon do
+        f.with_append do
           p(class: "help-block") { "Help text" }
         end
       end
     end
 
-    assert_includes(form, "input-group")
-    assert_includes(form, "input-group-addon")
     assert_includes(form, '<p class="help-block">Help text</p>')
   end
 

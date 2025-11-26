@@ -72,13 +72,17 @@ class Components::ApplicationForm < Superform::Rails::Form
     # rubocop:enable Metrics/AbcSize
 
     def render_label_row(label_text, inline)
-      display = inline ? "d-inline-flex" : "d-flex"
-
-      div(class: "#{display} justify-content-between") do
-        div do
-          label(for: field.dom.id, class: "mr-3") { label_text }
-          render_help_in_label_row
-          render(between_slot) if between_slot
+      # Simple label if no slots or help
+      if !between_slot && !wrapper_options[:help]
+        label(for: field.dom.id, class: "mr-3") { label_text }
+      else
+        display = inline ? "d-inline-flex" : "d-flex"
+        div(class: "#{display} justify-content-between") do
+          div do
+            label(for: field.dom.id, class: "mr-3") { label_text }
+            render_help_in_label_row
+            render(between_slot) if between_slot
+          end
         end
       end
     end

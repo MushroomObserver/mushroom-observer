@@ -179,12 +179,11 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @option options [Boolean] :inline render label and field inline
   # @option options [String] :wrap_class CSS classes for wrapper div
   # @option options [String] :class CSS classes for input element
-  # @option options [String] :addon text addon (static, not interactive)
-  # @option options [String] :button button addon (interactive)
-  # @option options [Hash] :button_data data attributes for button addon
+  # @option options [String] :button button text (renders input-group with btn)
+  # @option options [Hash] :button_data data attributes for button
   # All other options passed to the input element
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append` (after input, end of form-group)
   def text_field(field_name, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
