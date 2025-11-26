@@ -2,6 +2,11 @@
 
 # Form for requesting project admin access
 class Components::ProjectAdminRequestForm < Components::ApplicationForm
+  def initialize(model, project:, **)
+    @project = project
+    super(model, **)
+  end
+
   def view_template
     raw(:admin_request_note.tp) # rubocop:disable Rails/OutputSafety
     render_subject_field
@@ -23,5 +28,10 @@ class Components::ProjectAdminRequestForm < Components::ApplicationForm
 
   def render_content_field
     textarea_field(:content, label: "#{:request_message.t}:", rows: 5)
+  end
+
+  def form_action
+    url_for(controller: "/projects/admin_requests", action: :create,
+            project_id: @project.id, only_path: true)
   end
 end

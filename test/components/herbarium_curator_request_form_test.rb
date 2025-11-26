@@ -18,14 +18,16 @@ class HerbariumCuratorRequestFormTest < UnitTestCase
   end
 
   def setup
+    super
     @model = TestRequest.new
+    @herbarium = herbaria(:nybg_herbarium)
     controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 
   def test_renders_herbarium_name
     assert_html(@html, "body", text: :HERBARIUM.l)
-    assert_includes(@html, "Test Herbarium")
+    assert_includes(@html, @herbarium.name)
   end
 
   def test_renders_notes_field
@@ -46,9 +48,7 @@ class HerbariumCuratorRequestFormTest < UnitTestCase
   def render_form
     form = Components::HerbariumCuratorRequestForm.new(
       @model,
-      herbarium_name: "Test Herbarium",
-      action: "/test_action",
-      id: "herbarium_curator_request_form"
+      herbarium: @herbarium
     )
     render(form)
   end
