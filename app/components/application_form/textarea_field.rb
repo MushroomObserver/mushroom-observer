@@ -20,7 +20,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def view_template(&content)
       render_with_wrapper do
-        content ||= proc { field.dom.value }
+        # Use value attribute, then field value, as default content
+        default_value = attributes.delete(:value) || field.dom.value
+        content ||= proc { default_value }
         textarea(**attributes, class: class_names(attributes[:class],
                                                   "form-control"), &content)
       end

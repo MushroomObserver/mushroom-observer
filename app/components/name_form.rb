@@ -96,9 +96,10 @@ class Components::NameForm < Components::ApplicationForm
   def render_text_name_field
     text_name_field = field(:text_name).textarea(
       wrapper_options: { label: "#{:form_names_text_name.l}:" },
+      value: @name_string,
       rows: 1,
       data: { autofocus: true }
-    ) { @name_string }
+    )
     text_name_field.with_append do
       p(class: "help-block") { :form_names_text_name_help.l }
     end
