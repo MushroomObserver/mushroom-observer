@@ -33,14 +33,16 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, "form-inline")
   end
 
-  def test_text_field_with_addon
+  def test_text_field_with_append
     form = render_form do
-      text_field(:number, label: "Number", addon: "#")
+      text_field(:number, label: "Number") do |f|
+        f.with_append do
+          p(class: "help-block") { "Help text" }
+        end
+      end
     end
 
-    assert_includes(form, "input-group")
-    assert_includes(form, "input-group-addon")
-    assert_includes(form, "#")
+    assert_includes(form, '<p class="help-block">Help text</p>')
   end
 
   def test_text_field_with_button
@@ -199,6 +201,63 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, "Count")
     assert_includes(form, "form-control")
     assert_includes(form, 'type="number"')
+  end
+
+  # Test select with custom options block - renders component directly
+  def test_select_field_with_custom_options_block
+    # Create a field for testing
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+    select_field = form.field(:number)
+    select_component = select_field.select([])
+
+    # Render with custom options block using view_context helpers
+    html = render(select_component) do
+      view_context.tag.option("Option A", value: "a") +
+        view_context.tag.option("Option B", value: "b")
+    end
+
+    assert_includes(html, "<select")
+    assert_includes(html, "Option A")
+    assert_includes(html, "Option B")
+    assert_includes(html, 'value="a"')
+    assert_includes(html, 'value="b"')
+  end
+
+  # Test field with inferred label (humanized field name)
+  def test_text_field_with_inferred_label
+    form = render_form do
+      text_field(:collection_name)
+    end
+
+    # Field name :collection_name should be humanized to "Collection name"
+    assert_includes(form, "Collection name")
+  end
+
+  # Test select field with inferred label (no label option, uses humanize)
+  # Covers SelectField line 62: field.key.to_s.humanize
+  def test_select_field_with_inferred_label
+    options = [["Opt 1", "1"], ["Opt 2", "2"]]
+    form = render_form do
+      select_field(:collection_name, options)
+    end
+
+    # Field name :collection_name should be humanized to "Collection name"
+    assert_includes(form, "Collection name")
+    assert_includes(form, "<select")
+  end
+
+  # Test select with label: true (explicit non-string, non-false label)
+  # Also covers SelectField line 62
+  def test_select_field_with_label_true
+    options = [["Opt A", "a"], ["Opt B", "b"]]
+    form = render_form do
+      select_field(:number, options, label: true)
+    end
+
+    # Should use humanized field name as label
+    assert_includes(form, "Number")
+    assert_includes(form, "<select")
   end
 
   private

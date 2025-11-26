@@ -6,6 +6,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
     include FieldWithHelp
+    include FieldLabelRow
 
     slot :between
     slot :label_end
@@ -56,34 +57,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
     # rubocop:enable Metrics/AbcSize
 
-    def render_label_row(label_text, inline)
-      display = inline ? "d-inline-flex" : "d-flex"
-
-      div(class: "#{display} justify-content-between") do
-        div do
-          label(for: field.dom.id, class: "mr-3") { label_text }
-          render_help_in_label_row
-          render(between_slot) if between_slot
-        end
-        if label_end_slot
-          div do
-            render(label_end_slot)
-          end
-        end
-      end
-    end
-
     def render_field_input
-      addon = wrapper_options[:addon]
       button = wrapper_options[:button]
       button_data = wrapper_options[:button_data] || {}
 
-      if addon.present?
-        div(class: "input-group") do
-          yield
-          span(class: "input-group-addon") { addon }
-        end
-      elsif button.present?
+      if button.present?
         div(class: "input-group") do
           yield
           span(class: "input-group-btn") do
