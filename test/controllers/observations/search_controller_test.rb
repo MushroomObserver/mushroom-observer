@@ -205,7 +205,7 @@ module Observations
       login
       loc1 = locations(:burbank)
       loc2 = locations(:albion)
-      # Note: within_locations uses location names, not IDs
+      # NOTE: within_locations uses location names, not IDs
       params = {
         within_locations: "#{loc1.name}\n#{loc2.name}"
       }
