@@ -75,6 +75,13 @@ class Components::ApplicationForm < Superform::Rails::Form
       SUPPORTED_TYPE_CONTROLLERS.include?(autocompleter_type.to_sym)
     end
 
+    # Returns the Stimulus target attribute key for this autocompleter type.
+    # For namespaced controllers like autocompleter--location, targets use
+    # data-autocompleter--location-target (autocompleter__location_target)
+    def target_attr_key
+      :"#{stimulus_controller_name.to_s.tr("-", "_")}_target"
+    end
+
     def render_input_field(&block)
       field_component = create_field_component
       add_slots_to_field(field_component, &block)
@@ -97,13 +104,13 @@ class Components::ApplicationForm < Superform::Rails::Form
       {
         placeholder: :start_typing.l,
         autocomplete: "off",
-        data: { autocompleter_target: "input" }
+        data: { target_attr_key => "input" }
       }.deep_merge(attributes)
     end
 
     def autocompleter_wrapper_options
       wrapper_options.merge(
-        wrap_data: { autocompleter_target: "wrap" },
+        wrap_data: { target_attr_key => "wrap" },
         wrap_class: class_names(wrapper_options[:wrap_class], "dropdown")
       )
     end
@@ -141,7 +148,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         :check,
         title: :autocompleter_has_id.l,
         class: "px-2 text-success has-id-indicator",
-        data: { autocompleter_target: "hasIdIndicator" }
+        data: { target_attr_key => "hasIdIndicator" }
       )
     end
 
@@ -164,7 +171,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         keep_text, "#",
         icon: :apply, show_text: false, icon_class: "text-primary",
         name: "keep_#{autocompleter_type}", class: "ml-3 keep-btn d-none",
-        data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
+        data: { target_attr_key => "keepBtn", map_target: "lockBoxBtn",
                 action: "map#toggleBoxLock:prevent form-exif#showFields" }
       )
     end
@@ -176,7 +183,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         edit_text, "#",
         icon: :edit, show_text: false, icon_class: "text-primary",
         name: "edit_#{autocompleter_type}", class: "ml-3 edit-btn d-none",
-        data: { autocompleter_target: "editBtn", map_target: "editBoxBtn",
+        data: { target_attr_key => "editBtn", map_target: "editBoxBtn",
                 action: "map#toggleBoxLock:prevent form-exif#showFields" }
       )
     end
@@ -189,8 +196,8 @@ class Components::ApplicationForm < Superform::Rails::Form
         id: "create_#{autocompleter_type}_btn", class: "ml-3 create-button",
         icon: :plus, show_text: true, icon_class: "text-primary",
         name: "create_#{autocompleter_type}",
-        data: { autocompleter_target: "createBtn",
-                action: "autocompleter#swapCreate:prevent" }
+        data: { target_attr_key => "createBtn",
+                action: "#{stimulus_controller_name}#swapCreate:prevent" }
       )
     end
 
@@ -201,7 +208,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         create, create_text, create_path,
         icon: :plus, show_text: true, icon_class: "text-primary",
         name: "create_#{autocompleter_type}", class: "ml-3 create-link",
-        data: { autocompleter_target: "createBtn" }
+        data: { target_attr_key => "createBtn" }
       )
     end
 
@@ -209,12 +216,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       div(
         class: "auto_complete dropdown-menu",
         data: {
-          autocompleter_target: "pulldown",
-          action: "scroll->autocompleter#scrollList:passive"
+          target_attr_key => "pulldown",
+          action: "scroll->#{stimulus_controller_name}#scrollList:passive"
         }
       ) do
         ul(class: "virtual_list",
-           data: { autocompleter_target: "list" }) do
+           data: { target_attr_key => "list" }) do
           10.times do |i|
             li(class: "dropdown-item") do
               link_to(
@@ -222,7 +229,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                 "#",
                 data: {
                   row: i,
-                  action: "click->autocompleter#selectRow:prevent"
+                  action: "click->#{stimulus_controller_name}#selectRow:prevent"
                 }
               )
             end
@@ -240,7 +247,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                                  "[#{autocompleter_type}_id]"),
         class: "form-control",
         readonly: true,
-        data: { autocompleter_target: "hidden" }
+        data: { target_attr_key => "hidden" }
       )
     end
   end

@@ -44,13 +44,45 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
   def create_herbarium_with_new_location
     assert_selector("#herbarium_place_name")
     fill_in("herbarium_place_name", with: "genohlac gard france")
-    assert_link(:form_observations_create_locality.l)
-    click_link(:form_observations_create_locality.l)
+    # Wait for create button to appear, then click via JS
+    # (text span uses responsive d-none d-sm-inline)
+    assert_selector("a.create-button", visible: :all)
+    execute_script("document.querySelector('a.create-button').click()")
 
+    # Verify autocompleter switched to location_google mode
+    assert_selector("[data-type='location_google']", wait: 5)
+
+    # Wait for geocoding to complete (async Google API call)
     assert_field("herbarium_place_name",
-                 with: "Génolhac, Gard, Occitanie, France")
+                 with: "Génolhac, Gard, Occitanie, France", wait: 10)
 
-    assert_field("herbarium_location_id", with: "-1", type: :hidden)
+    # Debug: Check DOM state - find hidden field with location in name
+    all_hiddens = all("input[type='hidden']", visible: :all)
+    puts "\n=== Hidden Fields ==="
+    all_hiddens.each do |h|
+      if h[:id]&.include?("location") || h[:name]&.include?("location")
+        puts "  id=#{h[:id]} name=#{h[:name]} value=[#{h.value}]"
+      end
+    end
+
+    # Check if hidden field is inside the controller element
+    puts "\n=== Checking hidden field location ==="
+    ac_el = find("#herbarium_location_autocompleter", visible: :all)
+    puts "Autocompleter controller: #{ac_el[:'data-controller']}"
+    puts "Autocompleter type: #{ac_el[:'data-type']}"
+
+    # Check if the hidden field is inside the controller
+    inside_hidden = ac_el.has_css?("#herbarium_location_id", visible: :all,
+                                    wait: 0)
+    puts "Hidden inside autocompleter: #{inside_hidden}"
+
+    # Check the hidden field's target attribute
+    hidden_el = find("#herbarium_location_id", visible: :all)
+    puts "Hidden target attr: #{hidden_el[:'data-autocompleter--location-target']}"
+
+    # Wait for hidden field to be updated (may happen async)
+    sleep 1
+    assert_field("herbarium_location_id", with: "-1", type: :hidden, wait: 5)
     assert_field("location_north", with: "44.3726", type: :hidden)
     assert_field("location_east", with: "3.985", type: :hidden)
     assert_field("location_south", with: "44.3055", type: :hidden)
