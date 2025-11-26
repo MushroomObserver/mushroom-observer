@@ -53,6 +53,34 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_field("query_observations_by_users", with: "Roy Halling (roy)")
   end
 
+  # https://github.com/MushroomObserver/mushroom-observer/issues/3374
+  def test_clearing_autocompleter_clears_hidden_id
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    # Select a user via autocomplete
+    find_field("query_observations_by_users").click
+    @browser.keyboard.type("rolf")
+    assert_selector(".auto_complete") # wait for autocomplete
+    assert_selector(".auto_complete ul li a", text: "Rolf Singer")
+    @browser.keyboard.type(:down, :tab)
+    # Capybara's assert_field waits for the value to appear
+    assert_field("query_observations_by_users", with: "Rolf Singer (rolf)")
+
+    # Hidden ID should be set - wait for it to have a non-empty value
+    hidden_field = find("#query_observations_by_users_id", visible: false)
+    assert(hidden_field.value.present?,
+           "Hidden ID should be set after selection")
+
+    # Clear the field - use Capybara's cross-platform method
+    fill_in("query_observations_by_users", with: "")
+
+    # Hidden ID should now be empty (use waiting matcher)
+    assert_field("query_observations_by_users_id", type: :hidden, with: "")
+  end
+
   # def test_observation_search_location_autocompleter
   #   login!(@roy)
 

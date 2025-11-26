@@ -6,6 +6,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
     include FieldWithHelp
+    include FieldLabelRow
 
     slot :between
     slot :append
@@ -19,13 +20,29 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def view_template(&options_block)
       render_with_wrapper do
+        # Exclude `selected` from select tag attrs - it's used by options()
+        select_attrs = attributes.except(:selected)
         if options_block
-          select(**attributes, class: select_classes, &options_block)
+          select(**select_attrs, class: select_classes, &options_block)
         else
-          select(**attributes, class: select_classes) do
+          select(**select_attrs, class: select_classes) do
             options(*@collection)
           end
         end
+      end
+    end
+
+    # Override to use `selected` attribute if field.value is nil
+    # Compares as strings to handle boolean values (Phlex omits value="false")
+    def options(*collection)
+      selected_value = attributes[:selected]
+      map_options(collection).each do |key, value|
+        is_selected = if field.value.nil?
+                        selected_value.to_s == key.to_s
+                      else
+                        field.value.to_s == key.to_s
+                      end
+        option(selected: is_selected, value: key) { value }
       end
     end
 
@@ -55,18 +72,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
     # rubocop:enable Metrics/AbcSize
-
-    def render_label_row(label_text, inline)
-      display = inline ? "d-inline-flex" : "d-flex"
-
-      div(class: "#{display} justify-content-between") do
-        div do
-          label(for: field.dom.id, class: "mr-3") { label_text }
-          render_help_in_label_row
-          render_between_slot
-        end
-      end
-    end
 
     def form_group_class(base, inline, wrap_class)
       classes = base

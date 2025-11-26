@@ -6,6 +6,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
     include FieldWithHelp
+    include FieldLabelRow
 
     slot :between
     slot :label_end
@@ -20,10 +21,11 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def view_template(&content)
       render_with_wrapper do
-        content ||= proc { attributes[:value] || field.dom.value }
-        textarea(**attributes.except(:value),
-                 class: class_names(attributes[:class], "form-control"),
-                 &content)
+        # Use value attribute, then field value, as default content
+        default_value = attributes.delete(:value) || field.dom.value
+        content ||= proc { default_value }
+        textarea(**attributes, class: class_names(attributes[:class],
+                                                  "form-control"), &content)
       end
     end
 
@@ -51,23 +53,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
     # rubocop:enable Metrics/AbcSize
-
-    def render_label_row(label_text, inline)
-      display = inline ? "d-inline-flex" : "d-flex"
-
-      div(class: "#{display} justify-content-between") do
-        div do
-          label(for: field.dom.id, class: "mr-3") { label_text }
-          render_help_in_label_row
-          render_between_slot
-        end
-        if label_end_slot
-          div do
-            render(label_end_slot)
-          end
-        end
-      end
-    end
 
     def form_group_class(base, inline, wrap_class)
       classes = base

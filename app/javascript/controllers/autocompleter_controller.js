@@ -389,6 +389,7 @@ export default class extends Controller {
     this.inputTarget.addEventListener("keydown", this);
     this.inputTarget.addEventListener("keyup", this);
     this.inputTarget.addEventListener("keypress", this);
+    this.inputTarget.addEventListener("input", this);
     this.inputTarget.addEventListener("change", this);
     // Turbo: check this. May need to be turbo.before_render or before_visit
     window.addEventListener("beforeunload", this);
@@ -415,6 +416,9 @@ export default class extends Controller {
         break;
       case "keyup":
         this.ourKeyup(event);
+        break;
+      case "input":
+        this.ourChange(true);
         break;
       case "change":
         this.ourChange(event);
@@ -1028,7 +1032,9 @@ export default class extends Controller {
       if (this.lastHiddenTargetValue() != perfect_match['id']) {
         this.assignHiddenId(perfect_match);
       }
-    } else if (!this.ignoringTextInput()) {
+    } else if (!this.ignoringTextInput() && this.matches.length > 0) {
+      // Only clear if we have matches to validate against.
+      // If matches haven't loaded yet, trust the form's prefilled hidden value.
       this.clearHiddenId();
     }
   }
@@ -1113,7 +1119,11 @@ export default class extends Controller {
   // Removes the last id in the hidden input (array as csv string)
   clearLastHiddenTargetValue() {
     this.verbose("autocompleter:clearLastHiddenTargetValue()");
-    if (this.SEPARATOR) {
+    // If input is completely empty, clear everything regardless of SEPARATOR
+    if (this.inputTarget.value.length === 0) {
+      this.clearHiddenIdAndData();
+      this.keepers = [];
+    } else if (this.SEPARATOR) {
       this.clearLastHiddenIdAndKeeper();
     } else {
       this.clearHiddenIdAndData();
@@ -1134,18 +1144,20 @@ export default class extends Controller {
     this.verbose(idx);
 
     if (idx > -1 && hidden_ids.length > idx) {
-      hidden_ids.slice(idx, 1);
+      hidden_ids.splice(idx, 1);
       this.hiddenTarget.value = hidden_ids.join(",");
       // also clear the dataset
-      if (this.keepers.length > idx)
+      if (this.keepers.length > idx) {
         this.verbose("autocompleter:keepers: ")
-      this.verbose(JSON.stringify(this.keepers));
-      this.keepers.slice(idx, 1);
+        this.verbose(JSON.stringify(this.keepers));
+        this.keepers.splice(idx, 1);
+      }
     }
   }
 
   clearHiddenIdAndData() {
     this.hiddenTarget.value = '';
+    this.hiddenTarget.setAttribute('value', '');
     // clear the dataset also
     Object.keys(this.hiddenTarget.dataset).forEach(key => {
       if (!key.match(/Target/))

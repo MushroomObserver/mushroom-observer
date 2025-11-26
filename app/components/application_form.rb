@@ -110,11 +110,12 @@ class Components::ApplicationForm < Superform::Rails::Form
   register_value_helper :in_admin_mode?
   register_value_helper :current_user
   register_value_helper :url_for
+  register_value_helper :rank_as_string
 
   # We don't need to register form helpers anymore - using Superform fields
 
   # Wrapper option keys that should not be passed to the field itself
-  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class, :addon,
+  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
                      :button, :button_data, :monospace].freeze
 
   # Override the Field class to use our custom components
@@ -178,12 +179,11 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @option options [Boolean] :inline render label and field inline
   # @option options [String] :wrap_class CSS classes for wrapper div
   # @option options [String] :class CSS classes for input element
-  # @option options [String] :addon text addon (static, not interactive)
-  # @option options [String] :button button addon (interactive)
-  # @option options [Hash] :button_data data attributes for button addon
+  # @option options [String] :button button text (renders input-group with btn)
+  # @option options [Hash] :button_data data attributes for button
   # All other options passed to the input element
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append` (after input, end of form-group)
   def text_field(field_name, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
