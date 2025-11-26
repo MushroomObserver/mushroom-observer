@@ -203,6 +203,37 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, 'type="number"')
   end
 
+  # Test select with custom options block - renders component directly
+  def test_select_field_with_custom_options_block
+    # Create a field for testing
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+    select_field = form.field(:number)
+    select_component = select_field.select([])
+
+    # Render with custom options block using view_context helpers
+    html = render(select_component) do
+      view_context.tag.option("Option A", value: "a") +
+        view_context.tag.option("Option B", value: "b")
+    end
+
+    assert_includes(html, "<select")
+    assert_includes(html, "Option A")
+    assert_includes(html, "Option B")
+    assert_includes(html, 'value="a"')
+    assert_includes(html, 'value="b"')
+  end
+
+  # Test field with inferred label (humanized field name)
+  def test_text_field_with_inferred_label
+    form = render_form do
+      text_field(:collection_name)
+    end
+
+    # Field name :collection_name should be humanized to "Collection name"
+    assert_includes(form, "Collection name")
+  end
+
   private
 
   def render_form(&block)
