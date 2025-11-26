@@ -6,7 +6,9 @@ class ProjectAdminRequestFormTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
+    super
     @model = FormObject::ProjectAdminRequest.new
+    @project = projects(:eol_project)
     controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
@@ -39,11 +41,6 @@ class ProjectAdminRequestFormTest < UnitTestCase
   private
 
   def render_form
-    form = Components::ProjectAdminRequestForm.new(
-      @model,
-      action: "/test_action",
-      id: "project_admin_request_form"
-    )
-    render(form)
+    render(Components::ProjectAdminRequestForm.new(@model, project: @project))
   end
 end

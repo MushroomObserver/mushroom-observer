@@ -4,8 +4,7 @@
 # Allows users to enable/disable tracking for a name and configure
 # email notification templates.
 class Components::NameTrackerForm < Components::ApplicationForm
-  def initialize(model, method: nil, note_template: nil, **)
-    @method = method
+  def initialize(model, note_template: nil, **)
     @note_template = note_template
     super(model, **)
   end
@@ -61,13 +60,5 @@ class Components::NameTrackerForm < Components::ApplicationForm
     action = model.persisted? ? :update : :create
     url_for(controller: "names/trackers", action: action, id: model.name.id,
             only_path: true)
-  end
-
-  protected
-
-  def form_method
-    return super unless @method
-
-    @method.to_s.downcase == "get" ? "get" : "post"
   end
 end

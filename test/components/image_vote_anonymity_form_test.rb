@@ -30,10 +30,9 @@ class ImageVoteAnonymityFormTest < UnitTestCase
   def test_form_has_correct_attributes
     html = render_form(num_anonymous: 5, num_public: 10)
 
-    assert_html(html, "form[action='/test_action']")
+    assert_html(html, "form[action='/images/votes/anonymity']")
     assert_html(html, "form[method='post']")
-    assert_html(html, "input[name='_method']")
-    assert_html(html, "input[value='patch']")
+    assert_html(html, "input[name='_method'][value='put']")
   end
 
   def test_public_button_disabled_when_no_anon_votes_exist
@@ -51,10 +50,6 @@ class ImageVoteAnonymityFormTest < UnitTestCase
       num_anonymous: num_anonymous,
       num_public: num_public
     )
-    form = Components::ImageVoteAnonymityForm.new(
-      form_object,
-      action: "/test_action"
-    )
-    render(form)
+    render(Components::ImageVoteAnonymityForm.new(form_object))
   end
 end
