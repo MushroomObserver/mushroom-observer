@@ -65,13 +65,12 @@ module AutocompleterHelper
     type = args[:type]
     controller_name = stimulus_controller_name(type)
     outlet_data = autocompleter_outlet_data(controller_name, args)
-    result = {
+    {
       controller: controller_name,
       type: type,
       separator: args[:separator]
     }.merge(outlet_data).
       deep_merge(args[:controller_data] || {})
-    result
   end
 
   # Returns the Stimulus controller name for this autocompleter type.
@@ -193,8 +192,8 @@ module AutocompleterHelper
   def autocompleter_hidden_field(**args)
     return unless args[:form].present? && args[:type].present?
 
-    # Default field name is "#{type}_id", so obs.place_name gets obs.location_id
-    id = args[:hidden_name] || :"#{args[:type]}_id"
+    # Default field name is "#{field}_id", so controller gets e.g. place_name_id
+    id = args[:hidden_name] || :"#{args[:field]}_id"
     target_key = target_attr_key(args[:type])
     data = { target_key => "hidden" }.merge(args[:hidden_data] || {})
     args[:form].hidden_field(
