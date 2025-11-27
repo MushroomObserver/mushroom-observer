@@ -147,16 +147,30 @@ module Searchable
       ::Mappable::Box.new(**@query_params[:in_box]).valid?
     end
 
-    # Check for `fields_preferring_ids` and swap these in if appropriate
+    # Check for `fields_preferring_ids` and swap these in if appropriate.
+    # Prefer IDs, but fall back to name strings if more names than IDs
+    # (meaning some values weren't autocompleted).
     def autocompleted_strings_to_ids
       return unless respond_to?(:fields_preferring_ids)
 
-      fields_preferring_ids.each do |key|
-        next if @query_params[:"#{key}_id"].blank?
+      fields_preferring_ids.each { |key| swap_ids_for_field(key) }
+    end
 
-        @query_params[key] = @query_params[:"#{key}_id"].split(",")
-        @query_params.delete(:"#{key}_id")
-      end
+    def swap_ids_for_field(key)
+      ids = parse_ids_field(key)
+      return if ids.blank?
+
+      names = parse_names_field(key)
+      # Prefer IDs unless more names than IDs (some weren't autocompleted)
+      @query_params[key] = ids unless names.size > ids.size
+    end
+
+    def parse_ids_field(key)
+      @query_params.delete(:"#{key}_id")&.split(",") || []
+    end
+
+    def parse_names_field(key)
+      @query_params[key]&.split("\n")&.map(&:strip) || []
     end
 
     # Check for `fields_with_range`, and join them into array if range present
