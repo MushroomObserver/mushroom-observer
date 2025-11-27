@@ -1,8 +1,9 @@
 <%
 add_edit_title(@name.user_display_name(@user), @name)
 add_context_nav(name_form_edit_tabs(name: @name))
-action = { controller: "/names", action: :update, id: @name.id }
 %>
 
-<%= render(partial: "names/form",
-           locals: { action: action, button: :SAVE_EDITS.l }) %>
+<%= render(Components::NameForm.new(@name, user: @user,
+                                    name_string: @name_string,
+                                    misspelling: @misspelling,
+                                    correct_spelling: @correct_spelling)) %>
