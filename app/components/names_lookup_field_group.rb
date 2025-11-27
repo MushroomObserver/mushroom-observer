@@ -89,8 +89,15 @@ class Components::NamesLookupFieldGroup < Components::Base
   end
 
   def collapse_class
-    # Show expanded if any modifier has a value
-    "in" if modifiers_have_values?
+    # Show expanded if lookup has a value OR any modifier has a value
+    "in" if lookup_has_value? || modifiers_have_values?
+  end
+
+  def lookup_has_value?
+    names = @query.names
+    return false unless names.is_a?(Hash)
+
+    names[:lookup].present?
   end
 
   def modifiers_have_values?

@@ -182,14 +182,31 @@ class SearchFormTest < UnitTestCase
                         "shown fields are set")
   end
 
-  # TDD test: Verify modifier collapse is NOT expanded when modifiers empty
-  def test_names_lookup_modifier_collapse_not_expanded_when_empty
+  # TDD test: Modifier collapse should be expanded when lookup has value
+  # (even if no modifier fields are set)
+  def test_names_lookup_modifier_collapse_expanded_when_lookup_has_value
     agaricus = names(:agaricus)
     query = Query::Observations.new
     query.names = {
       lookup: [agaricus.id]
-      # No modifier fields set
+      # No modifier fields set, but lookup has a value
     }
+
+    html = render_form_with_query(query)
+    doc = Nokogiri::HTML(html)
+
+    # The collapse div SHOULD have class "in" because lookup has a value
+    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    assert(collapse_div, "Should have collapse div for modifier fields")
+    assert_includes(collapse_div["class"], "in",
+                    "Collapse div should have 'in' class when lookup " \
+                    "has a value")
+  end
+
+  # TDD test: Modifier collapse NOT expanded when names hash is empty
+  def test_names_lookup_modifier_collapse_not_expanded_when_names_empty
+    query = Query::Observations.new
+    # Don't set any names at all
 
     html = render_form_with_query(query)
     doc = Nokogiri::HTML(html)
@@ -199,7 +216,7 @@ class SearchFormTest < UnitTestCase
     assert(collapse_div, "Should have collapse div for modifier fields")
     assert_not_includes(collapse_div["class"].to_s, "in",
                         "Collapse div should NOT have 'in' class when " \
-                        "modifiers are empty")
+                        "names is empty")
   end
 
   private
