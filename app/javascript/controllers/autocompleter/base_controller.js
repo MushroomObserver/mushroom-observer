@@ -71,6 +71,14 @@ const INTERNAL_OPTS = {
   has_create_link: false
 }
 
+// Shared static properties for subclasses (Stimulus doesn't inherit statics)
+export const AUTOCOMPLETER_TARGETS = [
+  "input", "select", "pulldown", "list", "hidden", "wrap",
+  "createBtn", "hasIdIndicator", "keepBtn", "editBtn", "mapWrap",
+  "collapseFields"
+]
+export const AUTOCOMPLETER_OUTLETS = ["map"]
+
 // Type configurations for runtime type switching (used by swap method)
 const AUTOCOMPLETER_TYPES = {
   clade: {
@@ -120,10 +128,8 @@ const AUTOCOMPLETER_TYPES = {
 }
 
 export default class BaseAutocompleterController extends Controller {
-  static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
-    "createBtn", "hasIdIndicator", "keepBtn", "editBtn", "mapWrap",
-    "collapseFields"]
-  static outlets = ["map"]
+  static targets = AUTOCOMPLETER_TARGETS
+  static outlets = AUTOCOMPLETER_OUTLETS
 
   // ---------------------- Lifecycle ----------------------
 

@@ -1,4 +1,6 @@
-import BaseAutocompleterController from "./base_controller"
+import BaseAutocompleterController, {
+  AUTOCOMPLETER_TARGETS, AUTOCOMPLETER_OUTLETS
+} from "./base_controller"
 
 /**
  * RegionController - Autocompleter for Region searches
@@ -8,6 +10,10 @@ import BaseAutocompleterController from "./base_controller"
  * Example: typing "california " matches regions containing "California"
  */
 export default class RegionController extends BaseAutocompleterController {
+  // Must redeclare static properties - JavaScript doesn't inherit them
+  static targets = AUTOCOMPLETER_TARGETS
+  static outlets = AUTOCOMPLETER_OUTLETS
+
   /**
    * Type-specific configuration for region autocompleters.
    */

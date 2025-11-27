@@ -1,4 +1,6 @@
-import BaseAutocompleterController from "./base_controller"
+import BaseAutocompleterController, {
+  AUTOCOMPLETER_TARGETS, AUTOCOMPLETER_OUTLETS
+} from "./base_controller"
 
 /**
  * CladeController - Autocompleter for Clade (taxonomic) searches
@@ -7,6 +9,10 @@ import BaseAutocompleterController from "./base_controller"
  * Example: typing "agaric" matches "Agaricales", "Agaricus"
  */
 export default class CladeController extends BaseAutocompleterController {
+  // Must redeclare static properties - JavaScript doesn't inherit them
+  static targets = AUTOCOMPLETER_TARGETS
+  static outlets = AUTOCOMPLETER_OUTLETS
+
   /**
    * Type-specific configuration for clade autocompleters.
    */

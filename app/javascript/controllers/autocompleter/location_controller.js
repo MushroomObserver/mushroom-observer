@@ -1,4 +1,6 @@
-import BaseAutocompleterController from "./base_controller"
+import BaseAutocompleterController, {
+  AUTOCOMPLETER_TARGETS, AUTOCOMPLETER_OUTLETS
+} from "./base_controller"
 
 /**
  * LocationAutocompleterController - Autocompleter for Location records
@@ -13,6 +15,10 @@ import BaseAutocompleterController from "./base_controller"
  */
 export default class LocationAutocompleterController
   extends BaseAutocompleterController {
+  // Must redeclare static properties - JavaScript doesn't inherit them
+  static targets = AUTOCOMPLETER_TARGETS
+  static outlets = AUTOCOMPLETER_OUTLETS
+
   /**
    * Type-specific configuration for location autocompleters.
    * Starts in "location" mode - can be swapped to other modes at runtime.
