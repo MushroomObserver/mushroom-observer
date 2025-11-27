@@ -38,7 +38,8 @@ class Components::NamesLookupFieldGroup < Components::Base
         label: :NAMES.l,
         help: field_help
       },
-      value: prefilled_lookup_value
+      value: prefilled_lookup_value,
+      hidden_value: prefilled_lookup_ids
     )
     render(field_component, &block)
   end
@@ -56,6 +57,21 @@ class Components::NamesLookupFieldGroup < Components::Base
     return values unless values.is_a?(Array)
 
     prefill_string_values(values, :name)
+  end
+
+  # Returns IDs for hidden field, joined by newlines (textarea separator)
+  def prefilled_lookup_ids
+    names = @query.names
+    return nil unless names.is_a?(Hash)
+
+    values = names[:lookup]
+    return nil unless values.is_a?(Array)
+
+    # Filter to only include integer IDs (not string names)
+    ids = values.select { |v| v.is_a?(Integer) || v.to_s.match?(/\A\d+\z/) }
+    return nil if ids.empty?
+
+    ids.join("\n")
   end
 
   # Override to use display_name for names (includes formatting)

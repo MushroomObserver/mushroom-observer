@@ -13,7 +13,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
-                :create, :create_path
+                :create, :create_path, :hidden_value, :hidden_data
 
     def initialize(field, type:, textarea: false, **options)
       super(field, attributes: options.fetch(:attributes, {}))
@@ -26,6 +26,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       @create_text = options[:create_text]
       @create = options[:create]
       @create_path = options[:create_path]
+      @hidden_value = options[:hidden_value]
+      @hidden_data = options[:hidden_data]
     end
 
     def view_template(&block)
@@ -223,10 +225,18 @@ class Components::ApplicationForm < Superform::Rails::Form
         id: "#{field.dom.id}_id",
         name: field.dom.name.sub(/\[#{field.key}\]$/,
                                  "[#{autocompleter_type}_id]"),
+        value: hidden_value,
         class: "form-control",
         readonly: true,
-        data: { autocompleter_target: "hidden" }
+        data: hidden_field_data
       )
+    end
+
+    def hidden_field_data
+      base_data = { autocompleter_target: "hidden" }
+      return base_data unless hidden_data
+
+      base_data.merge(hidden_data)
     end
   end
 end
