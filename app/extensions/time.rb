@@ -53,6 +53,11 @@ class ActiveSupport::TimeWithZone
   def email_time
     strftime(MO.email_time_format)
   end
+
+  # Format as YYYY-MM-DD HH:MM:SS for display
+  def display_time
+    in_time_zone(Time.zone).strftime("%F %T")
+  end
 end
 
 # Make MO date and time formats available to Time, just in case.
@@ -69,10 +74,7 @@ class Time
 
   delegate :email_time, to: :in_time_zone
 
-  # dd Mon yyyy hh:mm:ss
-  def display_time
-    strftime("%F %T")
-  end
+  delegate :display_time, to: :in_time_zone
 end
 
 # Make MO date formats available to Date, just in case.
@@ -98,4 +100,6 @@ class DateTime
   delegate :api_time, to: :in_time_zone
 
   delegate :email_time, to: :in_time_zone
+
+  delegate :display_time, to: :in_time_zone
 end
