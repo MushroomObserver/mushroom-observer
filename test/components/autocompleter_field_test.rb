@@ -16,7 +16,8 @@ class AutocompleterFieldTest < UnitTestCase
 
     # Should have outer autocompleter wrapper with type-specific controller
     # herbarium type uses autocompleter--herbarium controller
-    assert_html(html, ".autocompleter[data-controller='autocompleter--herbarium']")
+    assert_html(html,
+                ".autocompleter[data-controller='autocompleter--herbarium']")
     assert_html(html, ".autocompleter[data-type='herbarium']")
 
     # Should have form-group wrapper inside with target and dropdown class
@@ -54,11 +55,12 @@ class AutocompleterFieldTest < UnitTestCase
     )
 
     # Should have hidden field INSIDE form-group wrapper
+    # Hidden field name matches field key (herbarium_name → herbarium_name_id)
     assert_nested(
       html,
       parent_selector: wrap_selector,
       child_selector: "input[type='hidden']" \
-                      "[name='herbarium_record[herbarium_id]']"
+                      "[name='herbarium_record[herbarium_name_id]']"
     )
     assert_nested(
       html,
@@ -113,10 +115,11 @@ class AutocompleterFieldTest < UnitTestCase
   def test_hidden_field_derives_id_field_name
     html = render_with_component
 
-    # Hidden field should transform herbarium_name to herbarium_id
+    # Hidden field name is field_key + _id (herbarium_name → herbarium_name_id)
+    # This ensures controllers receive the expected param name
     assert_html(
       html,
-      "input[type='hidden'][name='herbarium_record[herbarium_id]']"
+      "input[type='hidden'][name='herbarium_record[herbarium_name_id]']"
     )
   end
 

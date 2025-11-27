@@ -239,12 +239,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_hidden_field
-      # Hidden field stores the selected ID (e.g., herbarium_id)
+      # Hidden field stores the selected ID. Use field.key (original field name)
+      # so controller gets e.g. by_users_id, not user_id.
       input(
         type: "hidden",
         id: "#{field.dom.id}_id",
         name: field.dom.name.sub(/\[#{field.key}\]$/,
-                                 "[#{autocompleter_type}_id]"),
+                                 "[#{field.key}_id]"),
         class: "form-control",
         readonly: true,
         data: { target_attr_key => "hidden" }
