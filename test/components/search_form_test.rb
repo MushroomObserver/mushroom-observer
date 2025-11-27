@@ -219,6 +219,19 @@ class SearchFormTest < UnitTestCase
                         "names is empty")
   end
 
+  # TDD test: by_users hidden field should have correct name for controller
+  # The controller expects `by_users_id`, not `user_id`
+  def test_by_users_hidden_field_has_correct_name
+    html = render_form
+
+    doc = Nokogiri::HTML(html)
+    hidden_field = doc.at_css("input[type='hidden'][name*='by_users_id']")
+
+    assert(hidden_field,
+           "by_users autocompleter should have hidden field " \
+           "query_observations[by_users_id], not [user_id]")
+  end
+
   private
 
   def render_form(local: true)
