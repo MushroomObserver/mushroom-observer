@@ -19,12 +19,11 @@ class ObservationsControllerTimezoneTest < FunctionalTestCase
 
     obs = Observation.create!(
       user: rolf,
-      when: Date.new(2024, 6, 15),
+      when: utc_time.to_date,
       where: "Somewhere",
       name: names(:fungi)
     )
 
-    # Create rss_log with specific updated_at time that will appear in footer
     rss_log = RssLog.create!(
       observation: obs,
       updated_at: utc_time,
@@ -34,23 +33,20 @@ class ObservationsControllerTimezoneTest < FunctionalTestCase
 
     obs.update!(rss_log: rss_log)
 
-    # Set timezone to Pacific (UTC-7 in summer, UTC-8 in winter)
+    # Set viewer's timezone: Pacific (UTC-7 in summer, UTC-8 in winter)
     # On June 15, Pacific Daylight Time is UTC-7
-    # So midnight UTC = 5:00 PM PDT previous day (June 14)
-    pacific_tz = "America/Los_Angeles"
+    # So midnight UTC should display as 5:00 PM PDT previous day
+    viewer_tz = "America/Los_Angeles"
+    expected_date = utc_time.in_time_zone(viewer_tz).strftime("%Y-%m-%d")
+    expected_time = utc_time.in_time_zone(viewer_tz).strftime("%H:%M:%S")
+    utc_date = utc_time.strftime("%Y-%m-%d")
+    utc_time_str = utc_time.strftime("%H:%M:%S")
 
     login
-    cookies[:tz] = pacific_tz
+    cookies[:tz] = viewer_tz
     get(:index, params: { id: obs.id })
 
-    # Expected time in Pacific timezone
-    # UTC 2024-06-15 00:00:00 should display as
-    # PDT 2024-06-14 17:00:00 (UTC-7)
-    expected_date = "2024-06-14"
-    expected_time = "17:00:00"
-
     # The footer should contain the time formatted in Pacific timezone
-    # Looking for the pattern YYYY-MM-DD HH:MM:SS in the box for our observation
     box_id = "box_#{obs.id}"
 
     assert_select(
@@ -63,7 +59,7 @@ class ObservationsControllerTimezoneTest < FunctionalTestCase
                   "Index should display hour in viewer's timezone")
     assert_select("##{box_id} .log-footer .rss-what") do |elements|
       elements.each do |element|
-        assert_no_match(/2024-06-15\s+00:00:00/, element.text,
+        assert_no_match(/#{utc_date}\s+#{utc_time_str}/, element.text,
                         "Index should convert to viewer's timezone")
       end
     end
