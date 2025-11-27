@@ -31,7 +31,7 @@ class Components::RegionWithBoxFields < Components::Base
     @form_namespace.text_field(
       :region,
       label: "#{:REGION.t}:",
-      help: :form_locations_help.t,
+      help: :form_regions_help.t,
       value: @query&.region,
       data: { autofocus: true, map_target: "placeInput" },
       button: :form_locations_find_on_map.l,

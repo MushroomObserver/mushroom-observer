@@ -331,7 +331,7 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def multiple_help(field_name)
-    [field_help(field_name), :pattern_search_terms_multiple.l].join(" ")
+    [field_help(field_name), :form_search_terms_multiple.l].join(" ")
   end
 
   def field_value(field_name)
