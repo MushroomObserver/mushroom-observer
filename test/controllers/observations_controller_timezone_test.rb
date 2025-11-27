@@ -34,8 +34,6 @@ class ObservationsControllerTimezoneTest < FunctionalTestCase
     obs.update!(rss_log: rss_log)
 
     # Set viewer's timezone: Pacific (UTC-7 in summer, UTC-8 in winter)
-    # On June 15, Pacific Daylight Time is UTC-7
-    # So midnight UTC should display as 5:00 PM PDT previous day
     viewer_tz = "America/Los_Angeles"
     expected_date = utc_time.in_time_zone(viewer_tz).strftime("%Y-%m-%d")
     expected_time = utc_time.in_time_zone(viewer_tz).strftime("%H:%M:%S")
