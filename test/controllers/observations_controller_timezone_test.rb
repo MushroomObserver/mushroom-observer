@@ -52,11 +52,11 @@ class ObservationsControllerTimezoneTest < FunctionalTestCase
     # The footer should contain the time formatted in Pacific timezone
     # Looking for the pattern YYYY-MM-DD HH:MM:SS in the box for our observation
     box_id = "box_#{obs.id}"
-    
+
     # First, verify the box exists in the response
-    assert_select("##{box_id}", { count: 1 }, 
+    assert_select("##{box_id}", { count: 1 },
                   "Could not find observation box with id='#{box_id}' in the response")
-    
+
     assert_select("##{box_id} .log-footer .rss-what", /#{expected_date}\s+#{expected_time}/,
                   "Index should display time '#{expected_date} #{expected_time}' in " \
                   "Pacific timezone (UTC-7), not '2024-06-15 00:00:00' in UTC/server time")
