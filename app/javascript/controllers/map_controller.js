@@ -350,8 +350,8 @@ export default class extends GeocodeController {
     if (["location"].includes(this.map_type)) {
       if (this.opened) {
         this.clearMarkerDrawBuffer()
-        // this.marker_draw_buffer = setTimeout(this.calculateMarker(), 1000)
-        this.marker_draw_buffer = setTimeout(this.calculateRectangle(), 1000)
+        this.marker_draw_buffer =
+          setTimeout(() => this.calculateRectangle(), 1000)
       }
     }
     if (["observation", "hybrid"].includes(this.map_type)) {
@@ -368,7 +368,8 @@ export default class extends GeocodeController {
       } else {
         if (this.opened) {
           this.clearMarkerDrawBuffer()
-          this.marker_draw_buffer = setTimeout(this.calculateMarker(), 1000)
+          this.marker_draw_buffer =
+            setTimeout(() => this.calculateMarker(), 1000)
         }
       }
     }
@@ -397,7 +398,7 @@ export default class extends GeocodeController {
     this.verbose("map:showBox")
     // buffer inputs if they're still typing
     clearTimeout(this.marker_draw_buffer)
-    this.marker_draw_buffer = setTimeout(this.checkForBox(), 1000)
+    this.marker_draw_buffer = setTimeout(() => this.checkForBox(), 1000)
   }
 
   // Check what kind of input we have and call the appropriate function

@@ -24,7 +24,9 @@ class Components::RegionWithBoxFields < Components::Base
   private
 
   def map_controller_data
-    { controller: "map", map_open: true, need_elevations_value: false }
+    # Phlex converts underscores to dashes for symbol keys.
+    # Use string "true" for correct JS comparison (dataset values are strings)
+    { controller: "map", map_open: "true" }
   end
 
   def render_region_field
@@ -65,14 +67,13 @@ class Components::RegionWithBoxFields < Components::Base
   end
 
   def render_east_west_row(directions, in_box_ns)
-    render_compass_input(directions[0], in_box_ns, "col-xs-4 text-center")
+    render_compass_input(directions[0], in_box_ns, "col-xs-4")
     render_compass_help
-    render_compass_input(directions[1], in_box_ns, "col-xs-4 text-center")
+    render_compass_input(directions[1], in_box_ns, "col-xs-4")
   end
 
   def render_single_compass_input(direction, in_box_ns)
-    render_compass_input(direction, in_box_ns,
-                         "col-xs-4 col-xs-offset-4 text-center")
+    render_compass_input(direction, in_box_ns, "col-xs-4 col-xs-offset-4")
   end
 
   def render_compass_input(direction, in_box_ns, col_classes)
@@ -99,9 +100,9 @@ class Components::RegionWithBoxFields < Components::Base
   end
 
   def box_value(direction)
-    return 0 if @query&.in_box.blank?
+    return 0.0 if @query&.in_box.blank?
 
-    @query.in_box[direction] || 0
+    (@query.in_box[direction] || 0).to_f
   end
 
   # rubocop:disable Rails/OutputSafety
