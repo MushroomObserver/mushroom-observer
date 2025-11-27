@@ -33,7 +33,7 @@ t_s = {
                           class: "create-label")].safe_join(" "),
         value: @default_place_name || location&.name,
         help: observation_location_help,
-        hidden_value: location&.id,
+        hidden_name: :location_id, hidden_value: location&.id,
         hidden_data: { map_target: "locationId",
                         north: location&.north, south: location&.south,
                         east: location&.east, west: location&.west },

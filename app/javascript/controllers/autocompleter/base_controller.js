@@ -79,6 +79,13 @@ export const AUTOCOMPLETER_TARGETS = [
 ]
 export const AUTOCOMPLETER_OUTLETS = ["map"]
 
+// Types that have their own dedicated controller files.
+// Used by swap() to determine if controller change is needed.
+const CONTROLLER_TYPES = [
+  "clade", "herbarium", "location", "name",
+  "project", "region", "species_list", "user"
+]
+
 // Type configurations for runtime type switching (used by swap method)
 const AUTOCOMPLETER_TYPES = {
   clade: {
@@ -189,6 +196,11 @@ export default class BaseAutocompleterController extends Controller {
    * controllers (e.g., map, geocode, form-exif) to change the autocompleter
    * behavior dynamically.
    *
+   * If swapping to a type with its own dedicated controller (e.g., clade to
+   * region), changes the data-controller attribute and lets Stimulus handle
+   * the disconnect/connect. Otherwise, reinitializes in place (e.g., location
+   * to location_google).
+   *
    * @param {Object} detail - Contains type and optional request_params
    */
   swap({ detail }) {
@@ -198,8 +210,25 @@ export default class BaseAutocompleterController extends Controller {
     } else if (detail?.hasOwnProperty("type")) {
       type = detail.type;
     }
-    if (type == undefined) { return; }
+    if (type == undefined || type === this.TYPE) { return; }
 
+    if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
+      console.warn("BaseAutocompleter: Invalid type: \"" + type + "\"");
+      return;
+    }
+
+    // Check if we need to switch to a different controller
+    // (e.g., clade -> region requires controller change)
+    if (this.shouldChangeController(type)) {
+      this.verbose("autocompleter:swap controller to " + type);
+      const newController = `autocompleter--${type}`;
+      this.element.setAttribute("data-type", type);
+      this.element.setAttribute("data-controller", newController);
+      // Stimulus will disconnect this controller and connect the new one
+      return;
+    }
+
+    // Otherwise, reinitialize in place (e.g., location -> location_google)
     let location = false;
     if (detail?.hasOwnProperty("request_params") &&
       detail.request_params?.hasOwnProperty("lat") &&
@@ -207,30 +236,42 @@ export default class BaseAutocompleterController extends Controller {
       location = detail.request_params;
     }
 
-    if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
-      console.warn("BaseAutocompleter: Invalid type: \"" + type + "\"");
-    } else {
-      this.verbose("autocompleter:swap " + type);
-      this.TYPE = type;
-      this.element.setAttribute("data-type", type);
-      // Add dependent properties and allow overrides
-      Object.assign(this, AUTOCOMPLETER_TYPES[type]);
-      Object.assign(this, detail); // type, request_params
-      // Reset state
-      this.primer = [];
-      this.matches = [];
-      this.stored_data = { id: 0 };
-      this.keepers = [];
-      this.last_fetch_params = '';
-      // Re-prepare inputs
-      this.prepareInputElement();
-      this.prepareHiddenInput();
-      if (!this.hasEditBtnTarget ||
-        this.editBtnTarget?.classList?.contains('d-none')) {
-        this.clearHiddenId();
-      }
-      this.constrainedSelectionUI(location);
+    this.verbose("autocompleter:swap " + type);
+    this.TYPE = type;
+    this.element.setAttribute("data-type", type);
+    // Add dependent properties and allow overrides
+    Object.assign(this, AUTOCOMPLETER_TYPES[type]);
+    Object.assign(this, detail); // type, request_params
+    // Reset state
+    this.primer = [];
+    this.matches = [];
+    this.stored_data = { id: 0 };
+    this.keepers = [];
+    this.last_fetch_params = '';
+    // Re-prepare inputs
+    this.prepareInputElement();
+    this.prepareHiddenInput();
+    if (!this.hasEditBtnTarget ||
+      this.editBtnTarget?.classList?.contains('d-none')) {
+      this.clearHiddenId();
     }
+    this.constrainedSelectionUI(location);
+  }
+
+  /**
+   * Determine if swapping to newType requires changing the Stimulus controller.
+   * Returns true if newType has a dedicated controller AND it's different from
+   * the current controller.
+   */
+  shouldChangeController(newType) {
+    // Only types in CONTROLLER_TYPES have dedicated controllers
+    if (!CONTROLLER_TYPES.includes(newType)) return false;
+
+    // Get current controller type from identifier (e.g., "autocompleter--clade")
+    const currentType = this.identifier.replace("autocompleter--", "");
+
+    // Change controller if switching to a different dedicated controller type
+    return CONTROLLER_TYPES.includes(currentType) && currentType !== newType;
   }
 
   /**
@@ -942,10 +983,16 @@ export default class BaseAutocompleterController extends Controller {
   /**
    * Override in subclasses to provide type-specific matching.
    * Should populate this.matches based on this.primer and search token.
+   *
+   * Default implementation checks UNORDERED flag for runtime switching
+   * (e.g., when swap() is called from a select dropdown).
    */
   populateMatchesForType() {
-    // Default: normal exact match
-    this.populateNormal();
+    if (this.UNORDERED) {
+      this.populateUnordered();
+    } else {
+      this.populateNormal();
+    }
   }
 
   populateNormal() {

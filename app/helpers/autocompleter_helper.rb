@@ -75,13 +75,11 @@ module AutocompleterHelper
 
   # Returns the Stimulus controller name for this autocompleter type.
   # Type-specific controllers use naming convention: autocompleter--{type}
-  # Falls back to legacy :autocompleter controller for unsupported types.
   def stimulus_controller_name(type)
-    if SUPPORTED_TYPE_CONTROLLERS.include?(type&.to_sym)
-      :"autocompleter--#{type}"
-    else
-      :autocompleter
+    unless SUPPORTED_TYPE_CONTROLLERS.include?(type&.to_sym)
+      Rails.logger.warn("Unknown autocompleter type: #{type}")
     end
+    :"autocompleter--#{type}"
   end
 
   # Build outlet data attributes with correct controller prefix
