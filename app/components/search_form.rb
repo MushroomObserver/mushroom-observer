@@ -271,25 +271,25 @@ class Components::SearchForm < Components::ApplicationForm
 
   def render_single_value_autocompleter(field_name:)
     type = autocompleter_type(field_name)
+    ids = field_value(field_name)
     autocompleter_field(field_name,
                         type: type,
                         label: field_label(field_name),
                         help: field_help(field_name),
-                        value: prefilled_autocompleter_value(
-                          field_value(field_name), type
-                        ))
+                        value: prefilled_autocompleter_value(ids, type),
+                        hidden_value: prefilled_hidden_value(ids))
   end
 
   def render_multiple_value_autocompleter(field_name:)
     type = autocompleter_type(field_name)
+    ids = field_value(field_name)
     autocompleter_field(field_name,
                         type: type,
                         textarea: true,
                         label: field_label(field_name),
                         help: multiple_help(field_name),
-                        value: prefilled_autocompleter_value(
-                          field_value(field_name), type
-                        ))
+                        value: prefilled_autocompleter_value(ids, type),
+                        hidden_value: prefilled_hidden_value(ids))
   end
 
   def render_names_fields_for_obs(field_name:) # rubocop:disable Lint/UnusedMethodArgument

@@ -59,7 +59,7 @@ module Observations
                     selected: "yes")
       assert_select("input#query_observations_notes_has", value: "Symbiota")
       assert_select("input#query_observations_projects_id",
-                    value: "#{proj1.id} #{proj2.id}") # hidden ids field
+                    value: "#{proj1.id},#{proj2.id}") # hidden ids field
       assert_select("textarea#query_observations_projects",
                     text: "#{proj1.title}\n#{proj2.title}")
       assert_select("select#query_observations_confidence",
@@ -67,6 +67,24 @@ module Observations
       assert_select("select#query_observations_confidence_range",
                     selected: "Form")
       assert_equal(session[:search_type], :observations)
+    end
+
+    def test_new_observations_search_form_prefilled_by_users
+      user1 = users(:rolf)
+      user2 = users(:mary)
+
+      login
+      query = @controller.find_or_create_query(
+        :Observation,
+        by_users: [user1.id, user2.id]
+      )
+      assert(query.id)
+      get(:new)
+      # Check both textarea and hidden ID field are prefilled
+      assert_select("textarea#query_observations_by_users",
+                    text: "#{user1.unique_text_name}\n#{user2.unique_text_name}")
+      assert_select("input#query_observations_by_users_id",
+                    value: "#{user1.id},#{user2.id}")
     end
 
     # query_observations is the form object.
