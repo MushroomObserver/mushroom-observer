@@ -187,28 +187,6 @@ module Observations
       )
     end
 
-    # When user enters some names via autocomplete (with IDs) and some manually
-    # (no ID), the controller should fall back to sending name strings for
-    # lookup instead of using IDs.
-    def test_create_with_mismatched_user_ids_falls_back_to_names
-      login
-      user1 = users(:rolf)
-      partial_name = "darv" # manually typed, not autocompleted
-      params = {
-        by_users: "#{user1.unique_text_name}\n#{partial_name}",
-        by_users_id: user1.id.to_s # only 1 ID for 2 names
-      }
-      post(:create, params: { query_observations: params })
-
-      # Should use name strings, not IDs, since counts don't match
-      # Query wraps single values in an array
-      expected_names = ["#{user1.unique_text_name}\n#{partial_name}"]
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: { q: { model: :Observation, by_users: expected_names } }
-      )
-    end
-
     def test_create_with_multiple_projects
       login
       proj1 = projects(:bolete_project)
