@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-# Test that observation index displays times in the user's timezone
+# Tests of displayed time
 class ObservationsControllerTimezoneTest < FunctionalTestCase
   tests ObservationsController
 
@@ -53,20 +53,18 @@ class ObservationsControllerTimezoneTest < FunctionalTestCase
     # Looking for the pattern YYYY-MM-DD HH:MM:SS in the box for our observation
     box_id = "box_#{obs.id}"
 
-    # First, verify the box exists in the response
-    assert_select("##{box_id}", { count: 1 },
-                  "Could not find observation box with id='#{box_id}' in the response")
+    assert_select(
+      "##{box_id}", { count: 1 },
+      "Response is missing observation box with id='#{box_id}'"
+    )
 
-    assert_select("##{box_id} .log-footer .rss-what", /#{expected_date}\s+#{expected_time}/,
-                  "Index should display time '#{expected_date} #{expected_time}' in " \
-                  "Pacific timezone (UTC-7), not '2024-06-15 00:00:00' in UTC/server time")
-
-    # Also verify it does NOT show the UTC/server time in this box
-    # (This is the failing assertion that proves timezone conversion works)
+    assert_select("##{box_id} .log-footer .rss-what",
+                  /#{expected_date}\s+#{expected_time}/,
+                  "Index should display hour in viewer's timezone")
     assert_select("##{box_id} .log-footer .rss-what") do |elements|
       elements.each do |element|
         assert_no_match(/2024-06-15\s+00:00:00/, element.text,
-                        "Index should NOT display the UTC/server time, it should convert to viewer's timezone")
+                        "Index should convert to viewer's timezone")
       end
     end
   end
