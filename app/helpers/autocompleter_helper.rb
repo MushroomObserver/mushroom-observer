@@ -191,7 +191,10 @@ module AutocompleterHelper
     return unless args[:form].present? && args[:type].present?
 
     # Default field name is "#{field}_id", so controller gets e.g. place_name_id
-    id = args[:hidden_name] || :"#{args[:field]}_id"
+    # If field has brackets (e.g., "writein_name[1]"), convert to underscores
+    # to avoid Rails param parsing conflicts: "writein_name_1_id"
+    field = args[:field].to_s.tr("[]", "_").chomp("_")
+    id = args[:hidden_name] || :"#{field}_id"
     target_key = target_attr_key(args[:type])
     data = { target_key => "hidden" }.merge(args[:hidden_data] || {})
     args[:form].hidden_field(

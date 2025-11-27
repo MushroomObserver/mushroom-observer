@@ -19,7 +19,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
-                :create, :create_path
+                :create, :create_path, :hidden_name
 
     def initialize(field, type:, textarea: false, **options)
       super(field, attributes: options.fetch(:attributes, {}))
@@ -32,6 +32,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       @create_text = options[:create_text]
       @create = options[:create]
       @create_path = options[:create_path]
+      @hidden_name = options[:hidden_name]
     end
 
     def view_template
@@ -237,17 +238,29 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_hidden_field
-      # Hidden field stores the selected ID. Use field.key (original field name)
-      # so controller gets e.g. by_users_id, not user_id.
       input(
         type: "hidden",
-        id: "#{field.dom.id}_id",
-        name: field.dom.name.sub(/\[#{field.key}\]$/,
-                                 "[#{field.key}_id]"),
+        id: hidden_field_id,
+        name: hidden_field_name,
         class: "form-control",
         readonly: true,
         data: { target_attr_key => "hidden" }
       )
+    end
+
+    # Hidden field stores the selected ID. Use field.key (original field name)
+    # so controller gets e.g. by_users_id, not user_id.
+    def hidden_field_id
+      hidden_name || "#{field.dom.id}_id"
+    end
+
+    # If field key has brackets (e.g., "writein_name[1]"), convert to
+    # underscores to avoid Rails param parsing conflicts.
+    def hidden_field_name
+      return hidden_name if hidden_name
+
+      key = field.key.to_s.tr("[]", "_").chomp("_")
+      field.dom.name.sub(/\[#{field.key}\]$/, "[#{key}_id]")
     end
   end
 end
