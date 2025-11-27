@@ -94,10 +94,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("[data-type='location']")
     find(id: "observation_place_name").trigger("click")
     # This should make the "create_locality" button appear.
-    # It works fine in headless mode.
-    assert_selector(".create-button span",
-                    text: /#{:form_observations_create_locality.l}/)
-    click_on(:form_observations_create_locality.l)
+    # (button text is hidden on small viewports via d-none d-sm-inline)
+    within("#observation_location_autocompleter") do
+      assert_selector(".create-button", visible: :all)
+      btn = find(".create-button", visible: :all)
+      execute_script("arguments[0].click()", btn)
+    end
     assert_selector("[data-type='location_google']")
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: "", type: :hidden)
@@ -509,7 +511,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     fill_in("observation_place_name", with: "south pas")
-    click_on(:form_observations_create_locality.l)
+    # Click "New locality" button (text hidden on small viewports)
+    within("#observation_location_autocompleter") do
+      assert_selector(".create-button", visible: :all)
+      btn = find(".create-button", visible: :all)
+      execute_script("arguments[0].click()", btn)
+    end
     # lat/lng does not match Google's Pasadena, but does match South Pasadena
     assert_selector("[data-type='location_google']")
     find("#observation_place_name").trigger("focus")
