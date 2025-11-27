@@ -56,7 +56,7 @@ class ActiveSupport::TimeWithZone
 
   # Format as YYYY-MM-DD HH:MM:SS for display
   def display_time
-    in_time_zone(Time.zone).strftime("%F %T")
+    strftime("%F %T")
   end
 end
 
