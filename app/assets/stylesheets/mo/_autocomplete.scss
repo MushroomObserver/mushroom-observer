@@ -73,7 +73,7 @@ li.dropdown-item {
 
     &:hover {
       color: $dropdown-link-color;
-      background-color: $dropdown-link-hover-bg;
+      background-color: $dropdown-link-hover-bg !important;
       text-decoration: none;
     }
   }
@@ -81,7 +81,7 @@ li.dropdown-item {
   &.active {
     a {
       color: $dropdown-link-color;
-      background-color: $dropdown-link-hover-bg;
+      background-color: $dropdown-link-hover-bg !important;
     }
   }
 }
