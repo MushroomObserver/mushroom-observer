@@ -26,7 +26,7 @@ class Components::RegionWithBoxFields < Components::Base
   def map_controller_data
     # Phlex converts underscores to dashes for symbol keys.
     # Use string "true" for correct JS comparison (dataset values are strings)
-    { controller: "map", map_open: "true" }
+    { controller: "map", map_open: "true", need_elevations_value: false }
   end
 
   def render_region_field
