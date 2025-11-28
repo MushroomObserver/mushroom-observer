@@ -45,8 +45,7 @@ class Components::NamesLookupFieldGroup < Components::Base
   end
 
   def field_help
-    help_key = :"#{@query.type_tag}_term_names"
-    [help_key.l, :pattern_search_terms_multiple.l].join(" ")
+    :form_search_terms_multiple.l
   end
 
   def prefilled_lookup_value
