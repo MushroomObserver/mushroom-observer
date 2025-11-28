@@ -2,7 +2,6 @@
 
 require("test_helper")
 # MO time extensions wrap Date, DateTime, and Time
-# So test need to use those Classes in ways which offend RuboCop
 
 # test public interface of a class which includes date
 module DateExtensionsInterfaceTest
@@ -12,10 +11,6 @@ module DateExtensionsInterfaceTest
 
   def test_responds_to_email_date
     assert_respond_to(@object, :email_date)
-  end
-
-  def test_responds_to_web_date
-    assert_respond_to(@object, :web_date)
   end
 end
 
@@ -31,6 +26,10 @@ module TimeExtensionsInterfaceTest
 
   def test_responds_to_web_time
     assert_respond_to(@object, :web_time)
+  end
+
+  def test_responds_to_display_time
+    assert_respond_to(@object, :display_time)
   end
 end
 
