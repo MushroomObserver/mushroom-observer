@@ -1,12 +1,32 @@
 # frozen_string_literal: true
 
 class Autocomplete::ForName < Autocomplete::ByString
+  # Minimum characters before switching from beginning-match to word-match
+  WORD_MATCH_THRESHOLD = 4
+
   def rough_matches(letter)
     names = Name.with_correct_spelling.
             select(:text_name, :id, :deprecated).distinct.
-            where(Name[:text_name].matches("#{letter}%"))
+            where(name_match_condition(letter))
 
     matches_array(names)
+  end
+
+  private
+
+  # Returns Arel condition for matching names.
+  # Short queries (< WORD_MATCH_THRESHOLD): match beginning of name only
+  # Longer queries: match beginning of any word in the name
+  def name_match_condition(letter)
+    beginning_match = Name[:text_name].matches("#{letter}%")
+
+    if letter.length < WORD_MATCH_THRESHOLD
+      beginning_match
+    else
+      # Match beginning of name OR beginning of any word after a space
+      word_match = Name[:text_name].matches("% #{letter}%")
+      beginning_match.or(word_match)
+    end
   end
 
   def exact_match(string)
