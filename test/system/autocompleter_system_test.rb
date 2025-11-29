@@ -304,6 +304,61 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   end
 
   # ---------------------------------------------------------------
+  #  Pasted multi-value autocompleter tests
+  #  Test that pasting multiple values matches IDs and shows checkmark
+  # ---------------------------------------------------------------
+
+  def test_pasted_user_names_get_matching_ids
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    # Get user names from fixtures
+    rolf = users(:rolf)
+    mary = users(:mary)
+    dick = users(:dick)
+
+    # Prepare the pasted text (user names separated by newlines)
+    pasted_text = [
+      "Rolf Singer (rolf)",
+      "Mary Newbie (mary)",
+      "Tricky Dick (dick)"
+    ].join("\n")
+
+    # Fill the field with the pasted text (simulates paste)
+    field = find_field("query_observations_by_users")
+    field.fill_in(with: pasted_text)
+
+    # Trigger blur to process the pasted values
+    field.send_keys(:tab)
+
+    # Wait for staggered fetch requests: 0ms, 450ms, 900ms for 3 users
+    hidden_field = find("#query_observations_by_users_id", visible: false)
+
+    # Poll for IDs to appear (up to 5 seconds)
+    ids = []
+    10.times do
+      sleep(0.5)
+      ids = hidden_field.value.split(",").map(&:to_i).reject(&:zero?)
+      break if ids.length >= 3
+    end
+
+    assert_includes(ids, rolf.id, "Rolf's ID should be in hidden field")
+    assert_includes(ids, mary.id, "Mary's ID should be in hidden field")
+    assert_includes(ids, dick.id, "Dick's ID should be in hidden field")
+
+    # Checkmark should be visible
+    autocompleter = field.ancestor(".autocompleter")
+    within(autocompleter) do
+      indicator = find(".has-id-indicator", visible: :all)
+      style = indicator.style("display")
+      assert_equal("inline-block", style["display"],
+                   "Checkmark should be visible after pasting matching names")
+    end
+  end
+
+  # ---------------------------------------------------------------
   #  Prefilled autocompleter indicator tests
   #  Test that the green checkmark appears for prefilled values
   # ---------------------------------------------------------------

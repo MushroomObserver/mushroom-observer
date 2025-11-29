@@ -149,14 +149,21 @@ export const MultiValueMixin = {
   // check if any names in `keepers` are not in the input values.
   // if so, remove them from the keepers and the hidden input.
   removeUnusedKeepersAndIds() {
-    if (!this.SEPARATOR || this.keepers.length === 0) return;
+    if (!this.SEPARATOR) return;
+
+    const input_names = this.getInputArray();
+
+    // If we have no keepers yet (e.g., pasting fresh), just try to add missing
+    if (this.keepers.length === 0) {
+      this.addMissingKeepersAndIds(input_names);
+      return;
+    }
 
     this.verbose("MultiValueMixin:removeUnusedKeepersAndIds()");
     this.verbose("MultiValueMixin:keepers: ")
     this.verbose(JSON.stringify(this.keepers));
 
-    const input_names = this.getInputArray(),
-      hidden_ids = this.hiddenIdsAsIntegerArray();
+    const hidden_ids = this.hiddenIdsAsIntegerArray();
     this.verbose("MultiValueMixin:input_names: ")
     this.verbose(JSON.stringify(input_names));
     this.verbose("MultiValueMixin:hidden_ids: ")
@@ -294,6 +301,8 @@ export const MultiValueMixin = {
       if (!this.keepers.includes(exact_match)) {
         this.keepers.splice(idx, 1, exact_match);
       }
+      // Update the indicator to show IDs were found
+      this.cssHasIdOrNo(exact_match['id']);
     }
   }
 };
