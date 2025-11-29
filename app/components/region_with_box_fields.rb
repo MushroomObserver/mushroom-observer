@@ -30,8 +30,9 @@ class Components::RegionWithBoxFields < Components::Base
   end
 
   def render_region_field
-    @form_namespace.text_field(
+    @form_namespace.autocompleter_field(
       :region,
+      type: :region,
       label: "#{:REGION.t}:",
       help: :form_regions_help.t,
       value: @query&.region,
