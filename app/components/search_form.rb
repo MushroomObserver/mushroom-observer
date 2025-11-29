@@ -235,7 +235,8 @@ class Components::SearchForm < Components::ApplicationForm
 
   def render_select_misspellings(field_name:)
     # Superform uses [value, label] order (opposite of Rails)
-    options = [["", ""], ["yes", "yes"], ["no", "no"], ["either", "either"]]
+    # Valid values from query_attr: [:no, :either, :only]
+    options = [["", ""], ["no", "no"], ["either", "either"], ["only", "only"]]
     select_field(field_name, options,
                  label: field_label(field_name),
                  help: field_help(field_name),
