@@ -201,7 +201,15 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_footer_time(time)
-    div(class: "rss-what small") { time.display_time } if time
+    return unless time
+
+    div(
+      class: "rss-what rss-updated-at small",
+      data: { controller: "local-time", local_time_utc_value: time.utc.iso8601 }
+    ) do
+      # Server-rendered fallback for no-JS clients; replaced by Stimulus
+      time.display_time
+    end
   end
 
   def render_user_detail(user)
