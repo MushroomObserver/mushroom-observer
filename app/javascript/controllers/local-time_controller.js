@@ -23,6 +23,7 @@ export default class extends Controller {
     const minutes = String(date.getMinutes()).padStart(2, "0")
     const seconds = String(date.getSeconds()).padStart(2, "0")
 
-    this.element.textContent = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+    this.element.textContent =
+      `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
   }
 }
