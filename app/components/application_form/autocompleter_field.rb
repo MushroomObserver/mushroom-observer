@@ -19,7 +19,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
-                :create, :create_path, :hidden_name
+                :create, :create_path, :hidden_name, :hidden_data,
+                :extra_controller_data
 
     def initialize(field, type:, textarea: false, **options)
       super(field, attributes: options.fetch(:attributes, {}))
@@ -33,6 +34,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       @create = options[:create]
       @create_path = options[:create_path]
       @hidden_name = options[:hidden_name]
+      @hidden_data = options[:hidden_data]
+      @extra_controller_data = options[:controller_data] || {}
     end
 
     def view_template
@@ -58,7 +61,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       {
         controller: stimulus_controller_name,
         type: autocompleter_type
-      }
+      }.merge(extra_controller_data)
     end
 
     # Returns the Stimulus controller name for this autocompleter type.
@@ -244,8 +247,15 @@ class Components::ApplicationForm < Superform::Rails::Form
         name: hidden_field_name,
         class: "form-control",
         readonly: true,
-        data: { target_attr_key => "hidden" }
+        data: hidden_field_data
       )
+    end
+
+    def hidden_field_data
+      base_data = { target_attr_key => "hidden" }
+      return base_data unless hidden_data
+
+      base_data.merge(hidden_data)
     end
 
     # Hidden field stores the selected ID. Use field.key (original field name)

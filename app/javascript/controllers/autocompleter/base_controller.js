@@ -962,6 +962,12 @@ export default class BaseAutocompleterController extends Controller {
         }
         this.inputTarget.focus();
         if (this.hasMapOutlet) {
+          // Fill box inputs from location data if available
+          if (hidden_data.north || hidden_data.south ||
+              hidden_data.east || hidden_data.west) {
+            this.mapOutlet.updateBoundsInputs(hidden_data);
+          }
+          // Trigger map rectangle drawing (requires placeInput and locationId)
           this.mapOutlet.showBox();
         }
       }, 750)
