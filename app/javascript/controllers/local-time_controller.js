@@ -23,7 +23,12 @@ export default class extends Controller {
     const minutes = String(date.getMinutes()).padStart(2, "0")
     const seconds = String(date.getSeconds()).padStart(2, "0")
 
+    // Get timezone abbreviation (e.g., "PST", "EST")
+    const timezone = new Intl.DateTimeFormat('en-US', {
+      timeZoneName: 'short'
+    }).formatToParts(date).find(part => part.type === 'timeZoneName')?.value || ''
+
     this.element.textContent =
-      `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+      `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${timezone}`
   }
 }

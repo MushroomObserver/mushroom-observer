@@ -20,11 +20,11 @@ class LocalTimeSystemTest < ApplicationSystemTestCase
                  utc_value,
                  "Expected ISO8601 UTC format")
 
-    # Verify the displayed time format is YYYY-MM-DD HH:MM:SS
+    # Verify the displayed time format is YYYY-MM-DD HH:MM:SS TZ
     displayed_time = time_element.text
-    assert_match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+    assert_match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \S+$/,
                  displayed_time,
-                 "Expected local time format YYYY-MM-DD HH:MM:SS")
+                 "Expected local time format YYYY-MM-DD HH:MM:SS TZ")
 
     # Verify the controller connected by checking the time was converted
     # (The UTC and displayed times should differ unless in UTC timezone)
@@ -57,7 +57,10 @@ class LocalTimeSystemTest < ApplicationSystemTestCase
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
-        const expectedLocal = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        const timezone = new Intl.DateTimeFormat('en-US', {
+          timeZoneName: 'short'
+        }).formatToParts(date).find(part => part.type === 'timeZoneName')?.value || '';
+        const expectedLocal = `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${timezone}`;
 
         return {
           utcValue: utcValue,
