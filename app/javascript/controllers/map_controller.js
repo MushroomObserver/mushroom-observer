@@ -403,7 +403,6 @@ export default class extends GeocodeController {
 
   // Check what kind of input we have and call the appropriate function
   checkForBox() {
-    // this.showBoxBtnTarget.disabled = true
     this.verbose("map:checkForBox")
     let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {

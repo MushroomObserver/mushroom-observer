@@ -154,7 +154,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Note: :value stays in attributes since it goes to the text/textarea field
     AUTOCOMPLETER_OPTIONS = [:find_text, :keep_text, :edit_text, :create_text,
                              :create, :create_path, :hidden_value,
-                             :hidden_data].freeze
+                             :hidden_data, :controller_data].freeze
 
     def autocompleter(type:, textarea: false, wrapper_options: {},
                       **attributes)

@@ -252,6 +252,10 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
     end
   end
 
+  # TODO: Test that selecting an MO location from region autocompleter
+  # fills box inputs. Needs manual verification first.
+  # def test_region_autocompleter_fills_box_inputs; end
+
   # def test_species_lists_search_form; end
 
   # def test_herbaria_search_form; end

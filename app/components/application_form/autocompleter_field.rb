@@ -13,12 +13,18 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
-                :create, :create_path, :hidden_value, :hidden_data
+                :create, :create_path, :hidden_value, :hidden_data,
+                :extra_controller_data
 
     def initialize(field, type:, textarea: false, **options)
-      super(field, attributes: options.fetch(:attributes, {}))
+      super(field, attributes: {})
       @autocompleter_type = type
       @textarea = textarea
+      extract_options(options)
+    end
+
+    def extract_options(options)
+      @field_attributes = options.fetch(:attributes, {})
       @wrapper_options = options.fetch(:wrapper_options, {})
       @find_text = options[:find_text]
       @keep_text = options[:keep_text]
@@ -28,6 +34,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       @create_path = options[:create_path]
       @hidden_value = options[:hidden_value]
       @hidden_data = options[:hidden_data]
+      @extra_controller_data = options[:controller_data] || {}
     end
 
     def view_template(&block)
@@ -59,7 +66,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       }
       # Textarea autocompleters accept multiple values separated by newlines
       data[:separator] = "\n" if textarea
-      data
+      # Merge any extra data attributes (e.g., outlet connections)
+      data.merge(extra_controller_data)
     end
 
     def render_input_field(&block)
@@ -85,7 +93,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         placeholder: :start_typing.l,
         autocomplete: "off",
         data: { autocompleter_target: "input" }
-      }.deep_merge(attributes)
+      }.deep_merge(@field_attributes)
     end
 
     def autocompleter_wrapper_options

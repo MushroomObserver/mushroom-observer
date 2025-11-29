@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # Region autocompleter - queries Location records filtered to "region-sized"
-# places (3-4 comma-separated parts = county/city level).
+# places (1-4 comma-separated parts = country through sub-county level).
 #
 # Uses the same word-beginning matching as ForLocation for good typeahead UX,
-# but filters to locations with 2-3 commas (3-4 parts like
-# "Berkeley, Alameda Co., California, USA").
+# but filters to locations with 0-3 commas (1-4 parts like
+# "Bolivia" through "Perigord, Dordogne, Nouvelle-Aquitaine, France").
 class Autocomplete::ForRegion < Autocomplete::ByWord
-  # Minimum parts: 3 = county level ("Alameda Co., California, USA")
-  # Maximum parts: 4 = city level ("Berkeley, Alameda Co., California, USA")
-  MIN_COMMAS = 2
+  # Minimum parts: 1 = country level ("Bolivia")
+  # Maximum parts: 4 = sub-county ("Perigord, Dordogne, Nouvelle-Aquitaine, France")
+  MIN_COMMAS = 0
   MAX_COMMAS = 3
 
   attr_accessor :reverse
@@ -20,20 +20,23 @@ class Autocomplete::ForRegion < Autocomplete::ByWord
   end
 
   # Match word beginnings like ForLocation, but filter to region-sized places
+  # Order by box_area descending so broader regions appear first
   def rough_matches(letter)
     locations =
-      Location.select(:name, :id, :north, :south, :east, :west).
+      Location.select(:name, :id, :north, :south, :east, :west, :box_area).
       where(Location[:name].matches("#{letter}%").
         or(Location[:name].matches("% #{letter}%"))).
-      where(comma_count_filter)
+      where(comma_count_filter).
+      order(box_area: :desc)
 
     matches_array(locations)
   end
 
   def exact_match(string)
-    location = Location.select(:name, :id, :north, :south, :east, :west).
-               where(Location[:name].eq(string)).
-               where(comma_count_filter).first
+    location =
+      Location.select(:name, :id, :north, :south, :east, :west, :box_area).
+      where(Location[:name].eq(string)).
+      where(comma_count_filter).first
     return [] unless location
 
     matches_array([location])
@@ -49,13 +52,14 @@ class Autocomplete::ForRegion < Autocomplete::ByWord
   end
 
   # Turn the instances into hashes, and alter name order if requested
+  # Preserves box_area DESC order from query (bigger regions first)
   def matches_array(locations)
     matches = locations.map do |location|
       location = location.attributes.symbolize_keys
       location[:name] = Location.reverse_name(location[:name]) if reverse
       location
     end
-    matches.sort_by! { |loc| [loc[:name], -loc[:id]] }
+    # Don't re-sort - preserve box_area order from query
     matches.uniq { |loc| loc[:name] }
   end
 end
