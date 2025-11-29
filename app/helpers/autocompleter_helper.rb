@@ -197,9 +197,12 @@ module AutocompleterHelper
     id = args[:hidden_name] || :"#{field}_id"
     target_key = target_attr_key(args[:type])
     data = { target_key => "hidden" }.merge(args[:hidden_data] || {})
+    # Convert array of IDs to comma-separated string for multi-value fields
+    hidden_val = args[:hidden_value]
+    hidden_val = hidden_val.join(",") if hidden_val.is_a?(Array)
     args[:form].hidden_field(
       id,
-      value: args[:hidden_value], data:, class: "form-control", readonly: true
+      value: hidden_val, data:, class: "form-control", readonly: true
     )
   end
 
