@@ -226,11 +226,18 @@ class Components::ApplicationForm < Superform::Rails::Form
         id: "#{field.dom.id}_id",
         name: field.dom.name.sub(/\[#{field.key}\]$/,
                                  "[#{field.key}_id]"),
-        value: hidden_value,
+        value: normalized_hidden_value,
         class: "form-control",
         readonly: true,
         data: hidden_field_data
       )
+    end
+
+    # Convert array of IDs to comma-separated string for multi-value fields
+    def normalized_hidden_value
+      return hidden_value unless hidden_value.is_a?(Array)
+
+      hidden_value.join(",")
     end
 
     def hidden_field_data

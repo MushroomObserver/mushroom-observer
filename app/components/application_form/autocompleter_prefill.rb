@@ -38,13 +38,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       prefill_string_values(values, type)
     end
 
-    # Returns comma-separated IDs for the hidden field
-    def prefilled_hidden_value(values)
-      return nil unless values.is_a?(Array)
-
-      values.join(",")
-    end
-
     private
 
     def prefill_string_values(values, type)
