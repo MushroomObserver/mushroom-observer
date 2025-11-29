@@ -55,7 +55,8 @@ module Observations
     end
 
     def fields_preferring_ids
-      [:by_users, :projects, :herbaria, :project_lists, :species_lists]
+      [:by_users, :projects, :herbaria, :project_lists, :species_lists,
+       :within_locations]
     end
 
     def fields_with_range

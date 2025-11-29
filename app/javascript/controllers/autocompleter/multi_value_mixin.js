@@ -149,7 +149,7 @@ export const MultiValueMixin = {
   // check if any names in `keepers` are not in the input values.
   // if so, remove them from the keepers and the hidden input.
   removeUnusedKeepersAndIds() {
-    if (!this.SEPARATOR || this.keepers == []) return;
+    if (!this.SEPARATOR || this.keepers.length === 0) return;
 
     this.verbose("MultiValueMixin:removeUnusedKeepersAndIds()");
     this.verbose("MultiValueMixin:keepers: ")
