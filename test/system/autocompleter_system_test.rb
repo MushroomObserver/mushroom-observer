@@ -246,4 +246,100 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_no_selector("#modal_obs_#{obs.id}_naming", wait: 9)
     within("#observation_namings") { assert_text("Peltigeraceae", wait: 6) }
   end
+
+  # ---------------------------------------------------------------
+  #  Autocompleter indicator tests
+  #  Test that the green checkmark appears when values are selected
+  # ---------------------------------------------------------------
+
+  def test_multi_value_autocompleter_shows_checkmark_after_selections
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    autocompleter = find("#query_observations_by_users_autocompleter", wait: 5)
+    field = find_field("query_observations_by_users")
+
+    # Select first user
+    field.click
+    @browser.keyboard.type("rolf")
+    assert_selector(".auto_complete ul li a", text: "Rolf Singer", wait: 5)
+    @browser.keyboard.type(:down, :tab)
+    assert_field("query_observations_by_users", with: /Rolf/)
+
+    # Wait for menu to close, then add second user
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("mary")
+    assert_selector(".auto_complete ul li a", text: "Mary Newbie", wait: 5)
+    @browser.keyboard.type(:down, :tab)
+
+    # Wait for menu to close, then add third user
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("dick")
+    assert_selector(".auto_complete ul li a", text: "Tricky Dick", wait: 5)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify all three users are in the field
+    final_value = field.value
+    assert_match(/Rolf/, final_value, "First user should be present")
+    assert_match(/Mary/, final_value, "Second user should be present")
+    assert_match(/Tricky Dick/, final_value, "Third user should be present")
+
+    # Hidden IDs should have all three
+    hidden_field = find("#query_observations_by_users_id", visible: false)
+    ids = hidden_field.value.split(",")
+    assert_equal(3, ids.length, "Should have 3 IDs in hidden field")
+
+    # Checkmark should be visible
+    within(autocompleter) do
+      indicator = find(".has-id-indicator", visible: :all)
+      style = indicator.style("display")
+      assert_equal("inline-block", style["display"],
+                   "Checkmark should be visible after multiple selections")
+    end
+  end
+
+  # ---------------------------------------------------------------
+  #  Prefilled autocompleter indicator tests
+  #  Test that the green checkmark appears for prefilled values
+  # ---------------------------------------------------------------
+
+  def test_prefilled_autocompleter_shows_checkmark
+    login!(@roy)
+
+    # Get project IDs from fixtures
+    project1 = projects(:bolete_project)
+    project2 = projects(:eol_project)
+    project3 = projects(:one_genus_two_species_project)
+
+    # Create query and get q_param (no need to save)
+    query = Query.lookup(:Observation,
+                         projects: [project1.id, project2.id, project3.id])
+    url_params = { q: query.q_param }.to_query
+
+    # Visit search form with the q param to prefill
+    visit("/observations/search/new?#{url_params}")
+    assert_selector("body.search__new")
+
+    # The textarea should have the project names
+    field = find_field("query_observations_projects")
+    assert_match(/Bolete/, field.value)
+
+    # Hidden field should have all 3 IDs
+    hidden_field = find("#query_observations_projects_id", visible: false)
+    ids = hidden_field.value.split(",")
+    assert_equal(3, ids.length, "Should have 3 IDs prefilled")
+
+    # Checkmark should be visible
+    autocompleter = find("#query_observations_projects_autocompleter")
+    within(autocompleter) do
+      indicator = find(".has-id-indicator", visible: :all)
+      style = indicator.style("display")
+      assert_equal("inline-block", style["display"],
+                   "Checkmark should be visible for prefilled values")
+    end
+  end
 end

@@ -1282,11 +1282,15 @@ export default class extends Controller {
   cssHasIdOrNo(hidden_id) {
     this.verbose("autocompleter:cssHasIdOrNo()");
 
-    if (hidden_id && hidden_id !== NaN && hidden_id != 0) {
+    if (hidden_id && !isNaN(hidden_id) && hidden_id != 0) {
       this.wrapTarget.classList.add('has-id');
       this.wrapTarget.classList.remove('offer-create');
       if (this.hasKeepBtnTarget) {
         this.keepBtnTarget.classList.remove("d-none");
+      }
+      // Directly show indicator as backup to CSS cascade
+      if (this.hasHasIdIndicatorTarget) {
+        this.hasIdIndicatorTarget.style.display = 'inline-block';
       }
     } else {
       this.wrapTarget.classList.remove('has-id');
@@ -1296,6 +1300,10 @@ export default class extends Controller {
       }
       if (this.hasKeepBtnTarget) {
         this.keepBtnTarget.classList.add("d-none");
+      }
+      // Directly hide indicator as backup to CSS cascade
+      if (this.hasHasIdIndicatorTarget) {
+        this.hasIdIndicatorTarget.style.display = 'none';
       }
     }
     // On forms where a map may not be relevant, we also show/hide the map.
