@@ -8,7 +8,8 @@
 # "Bolivia" through "Perigord, Dordogne, Nouvelle-Aquitaine, France").
 class Autocomplete::ForRegion < Autocomplete::ByWord
   # Minimum parts: 1 = country level ("Bolivia")
-  # Maximum parts: 4 = sub-county ("Perigord, Dordogne, Nouvelle-Aquitaine, France")
+  # Maximum parts: 4 = sub-county
+  #   e.g. "Perigord, Dordogne, Nouvelle-Aquitaine, France"
   MIN_COMMAS = 0
   MAX_COMMAS = 3
 
