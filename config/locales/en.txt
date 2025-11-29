@@ -1798,6 +1798,9 @@
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:SEE_MESSAGE_BELOW]+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+[:SEE_MESSAGE_BELOW]+":#name_messages
 
+  # region search form
+  form_regions_help: Enter a region name (country, state, county, etc.) to filter results to that geographic area. Start typing and select from the dropdown.
+
   # observations/_form_species_list
   form_species_lists_title: Title
   form_species_lists_species_to_add: Select Species to Add
