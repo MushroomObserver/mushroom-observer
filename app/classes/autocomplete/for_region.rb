@@ -1,7 +1,17 @@
 # frozen_string_literal: true
 
-# This requires Stimulus delaying the fetch until we have a complete word.
+# Region autocompleter - queries Location records filtered to "region-sized"
+# places (1-4 comma-separated parts = country through sub-county level).
+#
+# Uses the same word-beginning matching as ForLocation for good typeahead UX,
+# but filters to locations with 0-3 commas (1-4 parts like
+# "Bolivia" through "Perigord, Dordogne, Nouvelle-Aquitaine, France").
 class Autocomplete::ForRegion < Autocomplete::ByWord
+  # Minimum parts: 1 = country level ("Bolivia")
+  # Maximum parts: 4 = sub-county ("Perigord, Dordogne, Nouvelle-Aquitaine, France")
+  MIN_COMMAS = 0
+  MAX_COMMAS = 3
+
   attr_accessor :reverse
 
   def initialize(params)
@@ -9,35 +19,47 @@ class Autocomplete::ForRegion < Autocomplete::ByWord
     self.reverse = (params[:format] == "scientific")
   end
 
-  # Using observation.where gives the possibility of strings with no ID.
-  # Trying to match "region" means matching the end of the postal format string.
-  # "scientific" format users will have the country first, so reverse words
-  def rough_matches(words)
-    words = Location.reverse_name(words) if reverse
-    regions = Observation.region(words).select(:where, :location_id)
+  # Match word beginnings like ForLocation, but filter to region-sized places
+  # Order by box_area descending so broader regions appear first
+  def rough_matches(letter)
+    locations =
+      Location.select(:name, :id, :north, :south, :east, :west, :box_area).
+      where(Location[:name].matches("#{letter}%").
+        or(Location[:name].matches("% #{letter}%"))).
+      where(comma_count_filter).
+      order(box_area: :desc)
 
-    matches_array(regions)
+    matches_array(locations)
   end
 
-  # Doesn't make sense to have an exact match for a region.
-  # def exact_match(words)
-  #   words = Location.reverse_name(words) if reverse
-  #   region = Observation.region(words).select(:where, :location_id).first
-  #   return [] unless region
+  def exact_match(string)
+    location =
+      Location.select(:name, :id, :north, :south, :east, :west, :box_area).
+      where(Location[:name].eq(string)).
+      where(comma_count_filter).first
+    return [] unless location
 
-  #   matches_array([region])
-  # end
+    matches_array([location])
+  end
+
+  private
+
+  # SQL filter for locations with MIN_COMMAS to MAX_COMMAS commas
+  # (LENGTH(name) - LENGTH(REPLACE(name, ',', ''))) counts commas
+  def comma_count_filter
+    comma_count = "LENGTH(name) - LENGTH(REPLACE(name, ',', ''))"
+    Arel.sql("(#{comma_count}) BETWEEN #{MIN_COMMAS} AND #{MAX_COMMAS}")
+  end
 
   # Turn the instances into hashes, and alter name order if requested
-  # Also change the names of the hash keys.
-  def matches_array(regions)
-    matches = regions.map do |region|
-      region = region.attributes.symbolize_keys
-      format = reverse ? Location.reverse_name(region[:where]) : region[:where]
-      { name: format, id: region[:location_id] || 0 }
+  # Preserves box_area DESC order from query (bigger regions first)
+  def matches_array(locations)
+    matches = locations.map do |location|
+      location = location.attributes.symbolize_keys
+      location[:name] = Location.reverse_name(location[:name]) if reverse
+      location
     end
-    # Sort by name and prefer those with a non-zero ID
-    matches.sort_by! { |reg| [reg[:name], -reg[:id]] }
-    matches.uniq { |reg| reg[:name] }
+    # Don't re-sort - preserve box_area order from query
+    matches.uniq { |loc| loc[:name] }
   end
 end

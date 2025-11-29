@@ -33,6 +33,8 @@ const DEFAULT_OPTS = {
   COLLAPSE: 0,
   // whether to send a new request for every letter, in the case of "region"
   WHOLE_WORDS_ONLY: false,
+  // whether to preserve server order instead of sorting alphabetically
+  PRESERVE_ORDER: false,
   // where to request primer from
   AJAX_URL: "/autocompleters/new/",
   // how long to wait before sending AJAX request (seconds)
@@ -101,7 +103,7 @@ const AUTOCOMPLETER_TYPES = {
   },
   region: {
     UNORDERED: true,
-    WHOLE_WORDS_ONLY: true,
+    PRESERVE_ORDER: true,
     model: 'location'
   },
   species_list: {
@@ -339,6 +341,7 @@ export default class extends Controller {
     this.mapOutlet.highInputTarget.value = '';
     this.mapOutlet.lowInputTarget.value = '';
   }
+
 
   // pulldownTargetConnected() {
   //   this.getRowHeight();
@@ -1387,7 +1390,13 @@ export default class extends Controller {
         }
         this.inputTarget.focus();
         if (this.hasMapOutlet) {
-          this.mapOutlet.showBox();
+          // Fill box inputs from location data if available
+          if (hidden_data.north || hidden_data.south ||
+              hidden_data.east || hidden_data.west) {
+            this.mapOutlet.updateBoundsInputs(hidden_data);
+            // Trigger map rectangle drawing (requires placeInput and locationId)
+            this.mapOutlet.showBox();
+          }
         }
       }, 750)
     }
@@ -1421,8 +1430,10 @@ export default class extends Controller {
     else
       this.populateNormal();
 
-    // Sort and remove duplicates, unless it's already sorted.
-    if (!this.ACT_LIKE_SELECT)
+    // Sort and remove duplicates, unless already sorted or preserving order.
+    // PRESERVE_ORDER skips sorting (server handles order); duplicates already
+    // removed server-side.
+    if (!this.ACT_LIKE_SELECT && !this.PRESERVE_ORDER)
       this.matches = this.removeDups(this.matches.sort(
         (a, b) => (a.name || "").localeCompare(b.name || "")
       ));

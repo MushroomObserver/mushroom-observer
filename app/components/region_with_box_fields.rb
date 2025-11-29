@@ -15,13 +15,17 @@ class Components::RegionWithBoxFields < Components::Base
   prop :form_namespace, _Any
 
   def view_template
-    div(data: map_controller_data) do
+    div(id: map_element_id, data: map_controller_data) do
       render_region_field
       render_in_box_fields
     end
   end
 
   private
+
+  def map_element_id
+    "region_map_controller"
+  end
 
   def map_controller_data
     # Phlex converts underscores to dashes for symbol keys.
@@ -30,14 +34,19 @@ class Components::RegionWithBoxFields < Components::Base
   end
 
   def render_region_field
-    @form_namespace.text_field(
+    @form_namespace.autocompleter_field(
       :region,
+      type: :region,
       label: "#{:REGION.t}:",
       help: :form_regions_help.t,
       value: @query&.region,
-      data: { autofocus: true, map_target: "placeInput" },
       button: :form_locations_find_on_map.l,
-      button_data: { map_target: "showBoxBtn", action: "map#showBox" }
+      button_data: { map_target: "showBoxBtn", action: "map#showBox" },
+      controller_data: { autocompleter_map_outlet: "##{map_element_id}" },
+      # Make text input a placeInput target so showBox() passes early return
+      data: { map_target: "placeInput" },
+      # Make hidden field a locationId target so mapLocationIdData() reads it
+      hidden_data: { map_target: "locationId" }
     )
   end
 
