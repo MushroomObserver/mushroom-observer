@@ -1168,7 +1168,7 @@ export default class extends Controller {
   // check if any names in `keepers` are not in the input values.
   // if so, remove them from the keepers and the hidden input.
   removeUnusedKeepersAndIds() {
-    if (!this.SEPARATOR || this.keepers == []) return;
+    if (!this.SEPARATOR || this.keepers.length === 0) return;
 
     this.verbose("autocompleter:removeUnusedKeepersAndIds()");
     this.verbose("autocompleter:keepers: ")
