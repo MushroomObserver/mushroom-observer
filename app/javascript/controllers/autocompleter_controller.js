@@ -101,7 +101,6 @@ const AUTOCOMPLETER_TYPES = {
   },
   region: {
     UNORDERED: true,
-    WHOLE_WORDS_ONLY: true,
     model: 'location'
   },
   species_list: {
