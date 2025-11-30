@@ -21,7 +21,7 @@ class CollapseHelpBlockTest < UnitTestCase
     ) { "Content" }
 
     assert_html(html, "div.collapse#help_2")
-    refute_includes(html, "arrow-")
+    assert_not_includes(html, "arrow-")
   end
 
   def test_renders_with_arrow_down_when_direction_down
@@ -30,7 +30,7 @@ class CollapseHelpBlockTest < UnitTestCase
     ) { "Content" }
 
     assert_html(html, "div.arrow-down.hidden-xs")
-    refute_includes(html, "mt-3")
+    assert_not_includes(html, "mt-3")
   end
 
   def test_renders_with_arrow_up_when_direction_up
@@ -52,7 +52,7 @@ class CollapseHelpBlockTest < UnitTestCase
     ) { "Mobile content" }
 
     assert_html(html, "div.arrow-up")
-    refute_includes(html, "hidden-xs")
+    assert_not_includes(html, "hidden-xs")
   end
 
   def test_renders_arrow_hidden_on_mobile_when_mobile_false
@@ -87,7 +87,7 @@ class CollapseHelpBlockTest < UnitTestCase
       )
     ) { "Left" }
     assert_html(html_left, "div.arrow-left")
-    refute_includes(html_left, "hidden-xs")
+    assert_not_includes(html_left, "hidden-xs")
 
     # Test right arrow without mobile
     html_right = render_component(
