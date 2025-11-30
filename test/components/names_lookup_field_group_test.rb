@@ -80,6 +80,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
     assert(field_stub.called)
     names_ns.verify
   end
+
   # Test line 160: else "" in bool_to_string
   def test_bool_to_string_returns_empty_string_for_nil
     component = create_component
