@@ -315,4 +315,50 @@ class SearchFormTest < UnitTestCase
     )
     render(form)
   end
+
+  def test_render_select_no_eq_nil_or_yes
+    query = Query::Observations.new(has_location: true)
+    html = render_form_with_query(query)
+
+    # The has_location field uses :no_eq_nil_or_yes style
+    # which renders [["", "no"], ["true", "yes"]] options
+    assert_html(html, "select[name='query[has_location]']")
+    doc = Nokogiri::HTML(html)
+    select = doc.at_css("select[name='query[has_location]']")
+    options = select.css("option")
+    assert_equal(2, options.size)
+    assert_equal("", options[0]["value"])
+    assert_equal("true", options[1]["value"])
+  end
+
+  def test_field_label_for_non_pattern_field
+    query = Query::Observations.new(text_name_has: "test")
+    html = render_form_with_query(query)
+
+    # Should use :"query_#{field_name}".l.humanize
+    assert_html(html, "label", text: "Text name has")
+  end
+
+  def test_field_value_for_nested_field
+    query = Query::Observations.new(names: { include_synonyms: true })
+    html = render_form_with_query(query)
+
+    # Should access nested names field
+    doc = Nokogiri::HTML(html)
+    select = doc.at_css("select[name='query[names][include_synonyms]']")
+    assert(select, "Should have nested field")
+    selected_option = select.at_css("option[selected]")
+    assert_equal("true", selected_option&.[]("value")) if selected_option
+  end
+
+  def test_date_field_value_joins_array
+    query = Query::Observations.new(created_at: [2024, 1, 15])
+    html = render_form_with_query(query)
+
+    # Should join array elements with "-"
+    doc = Nokogiri::HTML(html)
+    input = doc.at_css("input[name='query[created_at]']")
+    assert(input, "Should have created_at input")
+    assert_equal("2024-1-15", input["value"])
+  end
 end
