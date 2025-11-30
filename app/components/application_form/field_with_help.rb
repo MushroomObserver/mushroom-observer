@@ -11,11 +11,23 @@ class Components::ApplicationForm < Superform::Rails::Form
       render_help_text if wrapper_options[:help]
     end
 
+    # Renders the between slot with appropriate margin class
+    def render_between_slot
+      return unless between_slot
+
+      span(class: between_class) { render(between_slot) }
+    end
+
+    # Returns the appropriate class for form-between elements
+    def between_class
+      "form-between mr-3"
+    end
+
     private
 
     def render_help_icon
       help_id = "#{field.dom.id}_help"
-      span(class: "form-between") do
+      span(class: between_class) do
         a(href: "##{help_id}",
           class: "info-collapse-trigger",
           role: "button",

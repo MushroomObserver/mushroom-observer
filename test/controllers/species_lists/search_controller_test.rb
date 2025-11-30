@@ -15,7 +15,7 @@ module SpeciesLists
     def test_new_species_lists_search_turbo
       login
       get(:new, format: :turbo_stream)
-      assert_template("shared/_search_form")
+      assert_select("#species_lists_search_form")
     end
 
     def test_new_species_lists_search_form_prefilled_from_existing_query

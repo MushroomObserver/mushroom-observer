@@ -42,24 +42,33 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
   end
 
   def create_herbarium_with_new_location
-    assert_selector("#herbarium_place_name")
-    fill_in("herbarium_place_name", with: "genohlac gard france")
-    assert_link(:form_observations_create_locality.l)
-    click_link(:form_observations_create_locality.l)
-
-    assert_field("herbarium_place_name",
-                 with: "Génolhac, Gard, Occitanie, France")
-
-    assert_field("herbarium_location_id", with: "-1", type: :hidden)
-    assert_field("location_north", with: "44.3726", type: :hidden)
-    assert_field("location_east", with: "3.985", type: :hidden)
-    assert_field("location_south", with: "44.3055", type: :hidden)
-    assert_field("location_west", with: "3.9113", type: :hidden)
-    # NOTE: location_high and location_low may not be populated by geocoder
-    # assert_field("location_high", with: "1388.2098", type: :hidden)
-    # assert_field("location_low", with: "287.8201", type: :hidden)
-
     within("#herbarium_form") do
+      assert_selector("#herbarium_place_name")
+      fill_in("herbarium_place_name", with: "genohlac gard france")
+
+      # Wait for create button to appear, then click via JS
+      # (button text is hidden on small viewports via d-none d-sm-inline,
+      # so Cuprite can't click it directly)
+      assert_selector(".create-button", visible: :all, wait: 5)
+      btn = find(".create-button", visible: :all)
+      execute_script("arguments[0].click()", btn)
+
+      # Verify autocompleter switched to location_google mode
+      assert_selector("[data-type='location_google']", wait: 5)
+
+      # Wait for hidden ID to be set (proves geocoding worked)
+      assert_field("herbarium_location_id", with: "-1", type: :hidden, wait: 10)
+
+      # Wait for geocoding to complete (async Google API call)
+      assert_field("herbarium_place_name",
+                   with: "Génolhac, Gard, Occitanie, France", wait: 10)
+
+      # Verify hidden fields are populated correctly
+      assert_field("location_north", with: "44.3726", type: :hidden)
+      assert_field("location_east", with: "3.985", type: :hidden)
+      assert_field("location_south", with: "44.3055", type: :hidden)
+      assert_field("location_west", with: "3.9113", type: :hidden)
+
       fill_in("herbarium_name", with: "Herbarium des Cévennes")
       fill_in("herbarium_code", with: "CEV")
       click_commit
