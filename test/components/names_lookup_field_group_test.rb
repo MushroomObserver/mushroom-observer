@@ -12,18 +12,67 @@ class NamesLookupFieldGroupTest < UnitTestCase
     controller.request = ActionDispatch::TestRequest.create
   end
 
-  # Test line 80: Name.find(val.to_i).display_name
-  def test_prefill_via_id_returns_name_display_name
-    component = create_component
-    result = component.send(:prefill_via_id, @name.id, :name)
-    assert_equal(@name.display_name, result)
+  # Indirectly covers line 80 by asserting autocompleter value uses display_name
+  def test_autocompleter_value_uses_display_names
+    @query.names = { lookup: [@name.id] }
+
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      raise("unexpected field: #{sym}") unless sym == :lookup
+
+      lookup_field_stub
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: []
+    )
+
+    component.stub(:render, nil) do
+      render_component(component)
+    end
+
+    assert_includes(lookup_field_stub.opts[:value], @name.display_name)
   end
 
-  # Test line 80: rescue block when record not found
-  def test_prefill_via_id_returns_original_value_when_not_found
-    component = create_component
-    result = component.send(:prefill_via_id, 999_999_999, :name)
-    assert_equal(999_999_999, result)
+  # Indirectly covers line 80 rescue by asserting unknown ID passes through
+  def test_autocompleter_value_passes_through_unknown_id
+    unknown_id = 999_999_999
+    @query.names = { lookup: [unknown_id] }
+
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      raise("unexpected field: #{sym}") unless sym == :lookup
+
+      lookup_field_stub
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: []
+    )
+
+    component.stub(:render, nil) do
+      render_component(component)
+    end
+
+    assert_includes(lookup_field_stub.opts[:value], unknown_id.to_s)
   end
 
   # Test lines 106-107: if field_pair.is_a?(Array) in render_modifier_rows
@@ -81,106 +130,369 @@ class NamesLookupFieldGroupTest < UnitTestCase
     names_ns.verify
   end
 
-  # Test line 160: else "" in bool_to_string
-  def test_bool_to_string_returns_empty_string_for_nil
-    component = create_component
+  # Indirectly cover bool_to_string by capturing selected value passed to select
+  def test_select_selected_is_empty_string_for_nil
+    @query.names = {}
+    field_stub = Struct.new(:call) do
+      def select(_options, wrapper_options:, selected:)
+        self.call = { wrapper_options:, selected: }
+        self
+      end
+    end.new
 
-    assert_equal("", component.send(:bool_to_string, nil))
-    assert_equal("", component.send(:bool_to_string, ""))
-    assert_equal("", component.send(:bool_to_string, "other"))
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      case sym
+      when :include_synonyms then field_stub
+      when :lookup then lookup_field_stub
+      else raise("unexpected field: #{sym}")
+      end
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [:include_synonyms]
+    )
+
+    component.stub(:render, nil) { render_component(component) }
+
+    assert_equal("", field_stub.call[:selected])
   end
 
-  def test_bool_to_string_converts_true_to_string
-    component = create_component
-    assert_equal("true", component.send(:bool_to_string, true))
+  def test_select_selected_is_true_string_when_true
+    @query.names = { include_synonyms: true }
+    field_stub = Struct.new(:call) do
+      def select(_options, wrapper_options:, selected:)
+        self.call = { wrapper_options:, selected: }
+        self
+      end
+    end.new
+
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      case sym
+      when :include_synonyms then field_stub
+      when :lookup then lookup_field_stub
+      else raise("unexpected field: #{sym}")
+      end
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [:include_synonyms]
+    )
+
+    component.stub(:render, nil) { render_component(component) }
+
+    assert_equal("true", field_stub.call[:selected])
   end
 
-  def test_bool_to_string_converts_false_to_string
-    component = create_component
-    assert_equal("false", component.send(:bool_to_string, false))
+  def test_select_selected_is_false_string_when_false
+    @query.names = { include_synonyms: false }
+    field_stub = Struct.new(:call) do
+      def select(_options, wrapper_options:, selected:)
+        self.call = { wrapper_options:, selected: }
+        self
+      end
+    end.new
+
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      case sym
+      when :include_synonyms then field_stub
+      when :lookup then lookup_field_stub
+      else raise("unexpected field: #{sym}")
+      end
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [:include_synonyms]
+    )
+
+    component.stub(:render, nil) { render_component(component) }
+
+    assert_equal("false", field_stub.call[:selected])
   end
 
-  def test_prefilled_lookup_value_with_name_ids
+  def test_autocompleter_value_with_name_ids
     @query.names = { lookup: [@name.id] }
-    component = create_component
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
 
-    result = component.send(:prefilled_lookup_value)
-    assert_includes(result, @name.display_name)
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      raise unless sym == :lookup
+
+      lookup_field_stub
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: []
+    )
+
+    component.stub(:render, nil) do
+      render_component(component)
+    end
+
+    assert_includes(lookup_field_stub.opts[:value], @name.display_name)
   end
 
-  def test_prefilled_lookup_value_with_multiple_names
+  def test_autocompleter_value_with_multiple_names
     name2 = names(:fungi)
     @query.names = { lookup: [@name.id, name2.id] }
-    component = create_component
 
-    result = component.send(:prefilled_lookup_value)
-    assert_includes(result, @name.display_name)
-    assert_includes(result, name2.display_name)
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      raise unless sym == :lookup
+
+      lookup_field_stub
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: []
+    )
+
+    component.stub(:render, nil) do
+      render_component(component)
+    end
+
+    assert_includes(lookup_field_stub.opts[:value], @name.display_name)
+    assert_includes(lookup_field_stub.opts[:value], name2.display_name)
   end
 
-  def test_prefilled_lookup_ids_returns_ids_joined_by_newlines
+  def test_autocompleter_hidden_value_is_ids_joined_by_newlines
     name2 = names(:fungi)
     @query.names = { lookup: [@name.id, name2.id] }
-    component = create_component
 
-    result = component.send(:prefilled_lookup_ids)
-    assert_equal("#{@name.id}\n#{name2.id}", result)
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      raise unless sym == :lookup
+
+      lookup_field_stub
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: []
+    )
+
+    component.stub(:render, nil) do
+      render_component(component)
+    end
+
+    assert_equal("#{@name.id}\n#{name2.id}",
+                 lookup_field_stub.opts[:hidden_value])
   end
 
-  def test_lookup_has_value_returns_true_when_lookup_present
+  def test_collapse_has_in_class_when_lookup_present
     @query.names = { lookup: [@name.id] }
-    component = create_component
 
-    assert(component.send(:lookup_has_value?))
+    # Minimal stubs for required names namespace calls
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      sym == :lookup ? lookup_field_stub : Struct.new(:x).new
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: []
+    )
+    html = component.stub(:render, nil) { render_component(component) }
+    assert_html(html, 'div[data-autocompleter-target="collapseFields"]',
+                classes: "in")
   end
 
-  def test_lookup_has_value_returns_false_when_lookup_empty
+  def test_collapse_without_values_has_no_in_class
     @query.names = {}
-    component = create_component
 
-    assert_not(component.send(:lookup_has_value?))
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      sym == :lookup ? lookup_field_stub : Struct.new(:x).new
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: []
+    )
+    html = component.stub(:render, nil) { render_component(component) }
+    # Should have collapse container without 'in' class
+    assert_html(html, 'div[data-autocompleter-target="collapseFields"]')
+    doc = Nokogiri::HTML(html)
+    el = doc.at_css('div[data-autocompleter-target="collapseFields"]')
+    classes = el["class"]&.split || []
+    assert_not(classes.include?("in"))
   end
 
-  def test_modifiers_have_values_returns_true_when_modifiers_set
+  def test_collapse_has_in_class_when_modifiers_set
     @query.names = { include_synonyms: true }
-    component = create_component(modifier_fields: [[:include_synonyms]])
 
-    assert(component.send(:modifiers_have_values?))
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+    select_field_stub = Struct.new(:called) do
+      def select(*)
+        self.called = true
+        self
+      end
+    end.new
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      case sym
+      when :lookup then lookup_field_stub
+      when :include_synonyms then select_field_stub
+      else
+        raise("unexpected field: #{sym}")
+      end
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [[:include_synonyms]]
+    )
+    html = component.stub(:render, nil) { render_component(component) }
+    assert_html(html, 'div[data-autocompleter-target="collapseFields"]',
+                classes: "in")
   end
 
-  def test_modifiers_have_values_returns_false_when_no_modifiers
+  def test_collapse_without_modifiers_has_no_in_class
     @query.names = {}
-    component = create_component(modifier_fields: [[:include_synonyms]])
 
-    assert_not(component.send(:modifiers_have_values?))
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+    select_field_stub = Struct.new(:called) do
+      def select(*)
+        self.called = true
+        self
+      end
+    end.new
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      case sym
+      when :lookup then lookup_field_stub
+      when :include_synonyms then select_field_stub
+      else
+        raise("unexpected field: #{sym}")
+      end
+    end
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [[:include_synonyms]]
+    )
+    html = component.stub(:render, nil) { render_component(component) }
+    doc = Nokogiri::HTML(html)
+    el = doc.at_css('div[data-autocompleter-target="collapseFields"]')
+    classes = el["class"]&.split || []
+    assert_not(classes.include?("in"))
   end
 
-  def test_collapse_class_returns_in_when_lookup_has_value
-    @query.names = { lookup: [@name.id] }
-    component = create_component
+  # covered via test_collapse_has_in_class_when_lookup_present
 
-    assert_equal("in", component.send(:collapse_class))
-  end
+  # covered via test_collapse_has_in_class_when_modifiers_set
 
-  def test_collapse_class_returns_in_when_modifiers_have_values
+  # covered via test_collapse_without_values_has_no_in_class
+
+  def test_field_selected_value_integrates_into_select
     @query.names = { include_synonyms: true }
-    component = create_component(modifier_fields: [[:include_synonyms]])
+    field_stub = Struct.new(:call) do
+      def select(_options, wrapper_options:, selected:)
+        self.call = { wrapper_options:, selected: }
+        self
+      end
+    end.new
 
-    assert_equal("in", component.send(:collapse_class))
-  end
+    lookup_field_stub = Struct.new(:opts) do
+      def autocompleter(**opts)
+        self.opts = opts
+        self
+      end
+    end.new
+    names_ns = Object.new
+    names_ns.define_singleton_method(:field) do |sym|
+      case sym
+      when :include_synonyms then field_stub
+      when :lookup then lookup_field_stub
+      else raise("unexpected field: #{sym}")
+      end
+    end
 
-  def test_collapse_class_returns_nil_when_no_values
-    @query.names = {}
-    component = create_component
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [:include_synonyms]
+    )
 
-    assert_nil(component.send(:collapse_class))
-  end
+    component.stub(:render, nil) { render_component(component) }
 
-  def test_field_selected_value_returns_value_from_query
-    @query.names = { include_synonyms: true }
-    component = create_component
-
-    assert_equal(true, component.send(:field_selected_value, :include_synonyms))
+    assert_equal("true", field_stub.call[:selected])
   end
 
   private
