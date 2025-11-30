@@ -66,10 +66,18 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def form_attributes
-    {
+    attrs = {
       id: "#{search_type}_search_form",
       class: "faceted-search-form pb-4"
     }
+    attrs[:data] = turbo_stream_data unless @local
+    attrs
+  end
+
+  # When not local (nav dropdown), use turbo_stream for in-place updates.
+  # When local (search page), #search_nav_form doesn't exist, so skip it.
+  def turbo_stream_data
+    { turbo_stream: "true" }
   end
 
   # Delegate to controller for search configuration
@@ -367,9 +375,10 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def render_clear_button
+    data_attrs = @local ? {} : turbo_stream_data
     a(href: clear_url,
       class: "btn btn-default d-inline-block mx-3 clear-button",
-      data: { turbo_stream: true }) do
+      data: data_attrs) do
       :CLEAR.l
     end
   end

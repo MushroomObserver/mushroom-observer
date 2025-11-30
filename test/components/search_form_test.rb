@@ -26,6 +26,29 @@ class SearchFormTest < UnitTestCase
     assert_html(html, "form#observations_search_form")
   end
 
+  # When local (on a search page), form should NOT use turbo_stream
+  def test_form_no_turbo_stream_when_local
+    html = render_form(local: true)
+    doc = Nokogiri::HTML(html)
+
+    form = doc.at_css("form#observations_search_form")
+    assert(form, "Should have form")
+    assert_nil(form["data-turbo-stream"],
+               "Form should NOT have data-turbo-stream when local")
+  end
+
+  # When not local (in nav dropdown), form SHOULD use turbo_stream
+  # for future in-place result updates
+  def test_form_uses_turbo_stream_when_not_local
+    html = render_form(local: false)
+    doc = Nokogiri::HTML(html)
+
+    form = doc.at_css("form#observations_search_form")
+    assert(form, "Should have form")
+    assert_equal("true", form["data-turbo-stream"],
+                 "Form should have data-turbo-stream='true' when not local")
+  end
+
   def test_renders_panels_for_field_columns
     html = render_form
 
@@ -44,6 +67,32 @@ class SearchFormTest < UnitTestCase
     html = render_form
 
     assert_html(html, "a.clear-button", text: :CLEAR.l)
+  end
+
+  # When local (on a search page), clear button should NOT use turbo_stream
+  # because #search_nav_form doesn't exist on search pages
+  def test_clear_button_no_turbo_stream_when_local
+    html = render_form(local: true)
+    doc = Nokogiri::HTML(html)
+
+    clear_btn = doc.at_css("a.clear-button")
+    assert(clear_btn, "Should have clear button")
+    assert_nil(clear_btn["data-turbo-stream"],
+               "Clear button should NOT have data-turbo-stream when local")
+    assert_match(%r{/search/new\?clear=true}, clear_btn["href"],
+                 "Clear button should link to search/new with clear param")
+  end
+
+  # When not local (in nav dropdown), clear button SHOULD use turbo_stream
+  # to update #search_nav_form without full page reload
+  def test_clear_button_uses_turbo_stream_when_not_local
+    html = render_form(local: false)
+    doc = Nokogiri::HTML(html)
+
+    clear_btn = doc.at_css("a.clear-button")
+    assert(clear_btn, "Should have clear button")
+    assert_equal("true", clear_btn["data-turbo-stream"],
+                 "Clear button should have data-turbo-stream='true' when not local")
   end
 
   def test_renders_header_when_not_local
