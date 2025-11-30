@@ -3780,7 +3780,7 @@
   form_search_terms_multiple: Separate multiple values with a [return].
 
   query_term_names: "[type] has [:observations] of one of these [:names]."
-  query_term_region: "[type] is associated with this [:region]."
+  query_term_region: "[type] has a Locality whose name ends with [:region]."
   query_term_by_users: "[type] created by one of these [:users]."
   query_term_title_has: "[type] [:title] contains these words."
   query_term_has_comments: "[type] has any [:comments]?"
