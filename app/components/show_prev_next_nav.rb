@@ -5,8 +5,8 @@
 class Components::ShowPrevNextNav < Components::Base
   BTN_CLASSES = %w[navbar-link navbar-left btn btn-lg px-0].freeze
 
-  prop :object, _Any
-  prop :query, _Nilable(_Any)
+  prop :object, _Nilable(Object), default: nil
+  prop :query, _Nilable(Query), default: nil
 
   def view_template
     return unless @object && @query
