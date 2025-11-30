@@ -16,19 +16,15 @@ class NamesLookupFieldGroupTest < UnitTestCase
   def test_autocompleter_value_uses_display_names
     @query.names = { lookup: [@name.id] }
 
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      raise("unexpected field: #{sym}") unless sym == :lookup
-
-      lookup_field_stub
+    value_seen = nil
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+      value_seen = opts[:value]
+      true
     end
+
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -36,11 +32,9 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: []
     )
 
-    component.stub(:render, nil) do
-      render_component(component)
-    end
+    component.stub(:render, nil) { render_component(component) }
 
-    assert_includes(lookup_field_stub.opts[:value], @name.display_name)
+    assert_includes(value_seen, @name.display_name)
   end
 
   # Indirectly covers line 80 rescue by asserting unknown ID passes through
@@ -48,19 +42,15 @@ class NamesLookupFieldGroupTest < UnitTestCase
     unknown_id = 999_999_999
     @query.names = { lookup: [unknown_id] }
 
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      raise("unexpected field: #{sym}") unless sym == :lookup
-
-      lookup_field_stub
+    value_seen = nil
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+      value_seen = opts[:value]
+      true
     end
+
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -68,11 +58,9 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: []
     )
 
-    component.stub(:render, nil) do
-      render_component(component)
-    end
+    component.stub(:render, nil) { render_component(component) }
 
-    assert_includes(lookup_field_stub.opts[:value], unknown_id.to_s)
+    assert_includes(value_seen, unknown_id.to_s)
   end
 
   # Test lines 106-107: if field_pair.is_a?(Array) in render_modifier_rows
@@ -104,15 +92,20 @@ class NamesLookupFieldGroupTest < UnitTestCase
     @query.names = { include_synonyms: true }
 
     # Stub namespace to capture select invocation
-    field_stub = Struct.new(:called, :args) do
-      def select(*args, **_kwargs)
-        self.called = true
-        self.args = args
-      end
-    end.new(false, nil)
+    select_called = false
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **_kwargs|
+      select_called = true
+      true
+    end
+
+    # field(:include_synonyms) is called after field(:lookup) in view_template
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
 
     names_ns = Minitest::Mock.new
-    names_ns.expect(:field, field_stub, [:include_synonyms])
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -122,38 +115,28 @@ class NamesLookupFieldGroupTest < UnitTestCase
 
     # Execute branch: else -> render_select_field(field_pair)
     # Stub out Phlex render to avoid requiring a real component
-    component.stub(:render, nil) do
-      component.send(:render_modifier_rows)
-    end
+    component.stub(:render, nil) { component.send(:render_modifier_rows) }
 
-    assert(field_stub.called)
+    assert(select_called)
     names_ns.verify
   end
 
   # Indirectly cover bool_to_string by capturing selected value passed to select
   def test_select_selected_is_empty_string_for_nil
     @query.names = {}
-    field_stub = Struct.new(:call) do
-      def select(_options, wrapper_options:, selected:)
-        self.call = { wrapper_options:, selected: }
-        self
-      end
-    end.new
-
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      case sym
-      when :include_synonyms then field_stub
-      when :lookup then lookup_field_stub
-      else raise("unexpected field: #{sym}")
-      end
+    selected_seen = nil
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **kwargs|
+      selected_seen = kwargs[:selected]
+      true
     end
+
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -163,32 +146,24 @@ class NamesLookupFieldGroupTest < UnitTestCase
 
     component.stub(:render, nil) { render_component(component) }
 
-    assert_equal("", field_stub.call[:selected])
+    assert_equal("", selected_seen)
   end
 
   def test_select_selected_is_true_string_when_true
     @query.names = { include_synonyms: true }
-    field_stub = Struct.new(:call) do
-      def select(_options, wrapper_options:, selected:)
-        self.call = { wrapper_options:, selected: }
-        self
-      end
-    end.new
-
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      case sym
-      when :include_synonyms then field_stub
-      when :lookup then lookup_field_stub
-      else raise("unexpected field: #{sym}")
-      end
+    selected_seen = nil
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **kwargs|
+      selected_seen = kwargs[:selected]
+      true
     end
+
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -198,32 +173,24 @@ class NamesLookupFieldGroupTest < UnitTestCase
 
     component.stub(:render, nil) { render_component(component) }
 
-    assert_equal("true", field_stub.call[:selected])
+    assert_equal("true", selected_seen)
   end
 
   def test_select_selected_is_false_string_when_false
     @query.names = { include_synonyms: false }
-    field_stub = Struct.new(:call) do
-      def select(_options, wrapper_options:, selected:)
-        self.call = { wrapper_options:, selected: }
-        self
-      end
-    end.new
-
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      case sym
-      when :include_synonyms then field_stub
-      when :lookup then lookup_field_stub
-      else raise("unexpected field: #{sym}")
-      end
+    selected_seen = nil
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **kwargs|
+      selected_seen = kwargs[:selected]
+      true
     end
+
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -233,24 +200,20 @@ class NamesLookupFieldGroupTest < UnitTestCase
 
     component.stub(:render, nil) { render_component(component) }
 
-    assert_equal("false", field_stub.call[:selected])
+    assert_equal("false", selected_seen)
   end
 
   def test_autocompleter_value_with_name_ids
     @query.names = { lookup: [@name.id] }
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      raise unless sym == :lookup
-
-      lookup_field_stub
+    value_seen = nil
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+      value_seen = opts[:value]
+      true
     end
+
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -258,30 +221,24 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: []
     )
 
-    component.stub(:render, nil) do
-      render_component(component)
-    end
+    component.stub(:render, nil) { render_component(component) }
 
-    assert_includes(lookup_field_stub.opts[:value], @name.display_name)
+    assert_includes(value_seen, @name.display_name)
   end
 
   def test_autocompleter_value_with_multiple_names
     name2 = names(:fungi)
     @query.names = { lookup: [@name.id, name2.id] }
 
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      raise unless sym == :lookup
-
-      lookup_field_stub
+    value_seen = nil
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+      value_seen = opts[:value]
+      true
     end
+
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -289,31 +246,25 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: []
     )
 
-    component.stub(:render, nil) do
-      render_component(component)
-    end
+    component.stub(:render, nil) { render_component(component) }
 
-    assert_includes(lookup_field_stub.opts[:value], @name.display_name)
-    assert_includes(lookup_field_stub.opts[:value], name2.display_name)
+    assert_includes(value_seen, @name.display_name)
+    assert_includes(value_seen, name2.display_name)
   end
 
   def test_autocompleter_hidden_value_is_ids_joined_by_newlines
     name2 = names(:fungi)
     @query.names = { lookup: [@name.id, name2.id] }
 
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      raise unless sym == :lookup
-
-      lookup_field_stub
+    hidden_seen = nil
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+      hidden_seen = opts[:hidden_value]
+      true
     end
+
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -321,28 +272,19 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: []
     )
 
-    component.stub(:render, nil) do
-      render_component(component)
-    end
+    component.stub(:render, nil) { render_component(component) }
 
-    assert_equal("#{@name.id}\n#{name2.id}",
-                 lookup_field_stub.opts[:hidden_value])
+    assert_equal("#{@name.id}\n#{name2.id}", hidden_seen)
   end
 
   def test_collapse_has_in_class_when_lookup_present
     @query.names = { lookup: [@name.id] }
 
     # Minimal stubs for required names namespace calls
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      sym == :lookup ? lookup_field_stub : Struct.new(:x).new
-    end
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -357,16 +299,10 @@ class NamesLookupFieldGroupTest < UnitTestCase
   def test_collapse_without_values_has_no_in_class
     @query.names = {}
 
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      sym == :lookup ? lookup_field_stub : Struct.new(:x).new
-    end
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -385,27 +321,17 @@ class NamesLookupFieldGroupTest < UnitTestCase
   def test_collapse_has_in_class_when_modifiers_set
     @query.names = { include_synonyms: true }
 
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-    select_field_stub = Struct.new(:called) do
-      def select(*)
-        self.called = true
-        self
-      end
-    end.new
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      case sym
-      when :lookup then lookup_field_stub
-      when :include_synonyms then select_field_stub
-      else
-        raise("unexpected field: #{sym}")
-      end
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    select_field_called = false
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **_kwargs|
+      select_field_called = true
+      true
     end
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -420,27 +346,13 @@ class NamesLookupFieldGroupTest < UnitTestCase
   def test_collapse_without_modifiers_has_no_in_class
     @query.names = {}
 
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-    select_field_stub = Struct.new(:called) do
-      def select(*)
-        self.called = true
-        self
-      end
-    end.new
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      case sym
-      when :lookup then lookup_field_stub
-      when :include_synonyms then select_field_stub
-      else
-        raise("unexpected field: #{sym}")
-      end
-    end
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) { true }
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -462,27 +374,18 @@ class NamesLookupFieldGroupTest < UnitTestCase
 
   def test_field_selected_value_integrates_into_select
     @query.names = { include_synonyms: true }
-    field_stub = Struct.new(:call) do
-      def select(_options, wrapper_options:, selected:)
-        self.call = { wrapper_options:, selected: }
-        self
-      end
-    end.new
-
-    lookup_field_stub = Struct.new(:opts) do
-      def autocompleter(**opts)
-        self.opts = opts
-        self
-      end
-    end.new
-    names_ns = Object.new
-    names_ns.define_singleton_method(:field) do |sym|
-      case sym
-      when :include_synonyms then field_stub
-      when :lookup then lookup_field_stub
-      else raise("unexpected field: #{sym}")
-      end
+    selected_seen = nil
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **kwargs|
+      selected_seen = kwargs[:selected]
+      true
     end
+
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
@@ -492,7 +395,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
 
     component.stub(:render, nil) { render_component(component) }
 
-    assert_equal("true", field_stub.call[:selected])
+    assert_equal("true", selected_seen)
   end
 
   private
