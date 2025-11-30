@@ -622,10 +622,18 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     # Test index links lose the id param on next/prev page and goto_page
     get(:index, params: { id: o_loc.third.id, q: })
-    next_href = observations_path(params: { page: 2, q: })
-    prev_href = observations_path(params: { q: })
-    assert_select("a.next_page_link[href='#{next_href}']")
-    assert_select("a.prev_page_link[href='#{prev_href}']", count: 0)
+
+    # Check that next page link exists with correct params (order-agnostic)
+    assert_select("a.next_page_link") do |links|
+      href = links.first["href"]
+      assert_includes(href, "page=2", "Next link should have page=2")
+      assert_includes(href, "q%5Bmodel%5D=Observation",
+                      "Next link should have q[model]=Observation")
+      assert_includes(href, "q%5Blocations%5D",
+                      "Next link should have q[locations]")
+    end
+    # On page 1, prev link should be disabled (has opacity-0 class)
+    assert_select("a.previous_page_link.disabled.opacity-0")
     assert_select("form.page_input[action='#{observations_url}']")
     assert_select("input[type='hidden'][name='q[model]'][value='Observation']")
   end

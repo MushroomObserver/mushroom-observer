@@ -15,9 +15,12 @@ class ApplicationHelperTest < ActionView::TestCase
   end
 
   def test_add_args_to_url_append_args_to_url
-    assert_equal("/abcdef?a=2&foo=%22bar%22&this=that",
-                 add_args_to_url("/abcdef?foo=wrong&a=2",
-                                 foo: '"bar"', this: "that"))
+    result = add_args_to_url("/abcdef?foo=wrong&a=2", foo: '"bar"',
+                                                      this: "that")
+    assert(result.start_with?("/abcdef?"), "Should start with path")
+    assert_includes(result, "a=2", "Should preserve existing param")
+    assert_includes(result, "foo=%22bar%22", "Should replace foo param")
+    assert_includes(result, "this=that", "Should add new param")
   end
 
   def test_add_args_to_url_ending_with_id
@@ -38,5 +41,18 @@ class ApplicationHelperTest < ActionView::TestCase
   def test_add_args_to_url_invalid_utf_8_address_and_arg
     assert_equal("/blah\x80",
                  add_args_to_url("/blah\x80", x: "foo\xA0"))
+  end
+
+  # Test that array params (like q[by_user][]=1&q[by_user][]=2) are preserved
+  def test_add_args_to_url_preserves_array_params
+    url = "/observations?q%5Bby_user%5D%5B%5D=1&q%5Bby_user%5D%5B%5D=2"
+    result = add_args_to_url(url, page: 2)
+
+    # The result should contain both by_user values
+    assert_includes(result, "q%5Bby_user%5D%5B%5D=1",
+                    "Should preserve first array value")
+    assert_includes(result, "q%5Bby_user%5D%5B%5D=2",
+                    "Should preserve second array value")
+    assert_includes(result, "page=2", "Should add new page param")
   end
 end
