@@ -92,7 +92,7 @@ class SearchFormTest < UnitTestCase
     clear_btn = doc.at_css("a.clear-button")
     assert(clear_btn, "Should have clear button")
     assert_equal("true", clear_btn["data-turbo-stream"],
-                 "Clear button should have data-turbo-stream='true' when not local")
+                 "Clear button needs data-turbo-stream when not local")
   end
 
   def test_renders_header_when_not_local
