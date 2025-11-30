@@ -99,12 +99,9 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    # field(:include_synonyms) is called after field(:lookup) in view_template
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
-
+    # In this test we call render_modifier_rows directly, so only the
+    # modifier field should be fetched.
     names_ns = Minitest::Mock.new
-    names_ns.expect(:field, lookup_field_mock, [:lookup])
     names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
@@ -365,12 +362,6 @@ class NamesLookupFieldGroupTest < UnitTestCase
     classes = el["class"]&.split || []
     assert_not(classes.include?("in"))
   end
-
-  # covered via test_collapse_has_in_class_when_lookup_present
-
-  # covered via test_collapse_has_in_class_when_modifiers_set
-
-  # covered via test_collapse_without_values_has_no_in_class
 
   def test_field_selected_value_integrates_into_select
     @query.names = { include_synonyms: true }
