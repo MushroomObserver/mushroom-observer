@@ -254,7 +254,7 @@ class Components::SearchForm < Components::ApplicationForm
 
   def render_select_rank_range(field_name:)
     options = [nil] + Name.all_ranks
-    value, range_value = field_value(field_name) || [nil, nil]
+    value, range_value = sorted_rank_range(field_value(field_name))
 
     render(ApplicationForm::SelectRangeField.new(
              form: self, field_name:, options:,
@@ -264,11 +264,19 @@ class Components::SearchForm < Components::ApplicationForm
            ))
   end
 
+  # Sort rank range values to [low, high] order for display
+  def sorted_rank_range(range)
+    return [nil, nil] if range.blank?
+
+    sorted = range.sort_by { |v| Name.all_ranks.index(v.to_s) || 0 }
+    [sorted.first, sorted.last]
+  end
+
   def render_select_confidence_range(field_name:)
     # Superform uses [value, label] - Vote.opinion_menu returns [label, value]
     options = [[nil, ""]] +
               Vote.opinion_menu.map { |label, value| [value, label] }
-    value, range_value = field_value(field_name) || [nil, nil]
+    value, range_value = sorted_confidence_range(field_value(field_name))
 
     render(ApplicationForm::SelectRangeField.new(
              form: self, field_name:, options:,
@@ -276,6 +284,14 @@ class Components::SearchForm < Components::ApplicationForm
              label: field_label(field_name),
              help: field_help(field_name)
            ))
+  end
+
+  # Sort confidence range values to [low, high] order for display
+  def sorted_confidence_range(range)
+    return [nil, nil] if range.blank?
+
+    sorted = range.map(&:to_f).sort
+    [sorted.first, sorted.last]
   end
 
   def render_single_value_autocompleter(field_name:)
