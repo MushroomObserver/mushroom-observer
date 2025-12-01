@@ -448,9 +448,10 @@ export default class extends Controller {
           break;
         case this.EVENT_KEYS.tab:
         case this.EVENT_KEYS.return:
-          event.preventDefault();
-          if (this.current_row >= 0)
+          if (this.current_row >= 0) {
+            event.preventDefault();
             this.selectRow(this.current_row - this.scroll_offset);
+          }
           break;
         case this.EVENT_KEYS.home:
           this.goHome();
