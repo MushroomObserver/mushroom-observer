@@ -45,14 +45,18 @@ class ApplicationHelperTest < ActionView::TestCase
 
   # Test that array params (like q[by_user][]=1&q[by_user][]=2) are preserved
   def test_add_args_to_url_preserves_array_params
-    url = "/observations?q%5Bby_user%5D%5B%5D=1&q%5Bby_user%5D%5B%5D=2"
+    # "q%5Bby_user%5D%5B%5D=1&q%5Bby_user%5D%5B%5D=2"
+    query_string = Rack::Utils.build_nested_query(q: { by_user: [1, 2] })
+    url = "/observations?#{query_string}"
     result = add_args_to_url(url, page: 2)
 
     # The result should contain both by_user values
-    assert_includes(result, "q%5Bby_user%5D%5B%5D=1",
-                    "Should preserve first array value")
-    assert_includes(result, "q%5Bby_user%5D%5B%5D=2",
-                    "Should preserve second array value")
+    # "q%5Bby_user%5D%5B%5D=1"
+    by_user_1 = Rack::Utils.build_nested_query(q: { by_user: [1] })
+    # "q%5Bby_user%5D%5B%5D=2"
+    by_user_2 = Rack::Utils.build_nested_query(q: { by_user: [2] })
+    assert_includes(result, by_user_1, "Should preserve first array value")
+    assert_includes(result, by_user_2, "Should preserve second array value")
     assert_includes(result, "page=2", "Should add new page param")
   end
 end

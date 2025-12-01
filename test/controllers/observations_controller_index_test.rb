@@ -638,6 +638,52 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_select("input[type='hidden'][name='q[model]'][value='Observation']")
   end
 
+  # Regression test for https://github.com/MushroomObserver/mushroom-observer/pull/3528
+  # Array params like by_users=[1,2,3] must be preserved when paginating
+  # Full flow: search with multiple users -> paginate -> search form prefilled
+  def test_index_pagination_preserves_array_params
+    # Use three users with enough combined observations to trigger pagination
+    user1 = users(:dick)   # 39 obs
+    user2 = users(:rolf)   # 14 obs
+    user3 = users(:mary)   # 7 obs = 60 total, exceeds default page size
+    query = Query.lookup_and_save(:Observation,
+                                  by_users: [user1.id, user2.id, user3.id])
+    q = @controller.q_param(query)
+
+    login
+    get(:index, params: { q: q })
+
+    # Build expected encoded strings using Rack::Utils for readability
+    # "q%5Bby_users%5D%5B%5D=#{user1.id}"
+    by_user_1 = Rack::Utils.build_nested_query(q: { by_users: [user1.id] })
+    # "q%5Bby_users%5D%5B%5D=#{user2.id}"
+    by_user_2 = Rack::Utils.build_nested_query(q: { by_users: [user2.id] })
+    # "q%5Bby_users%5D%5B%5D=#{user3.id}"
+    by_user_3 = Rack::Utils.build_nested_query(q: { by_users: [user3.id] })
+
+    # Check that next page link preserves ALL array values
+    assert_select("a.next_page_link") do |links|
+      href = links.first["href"]
+      assert_includes(href, by_user_1,
+                      "Next link should preserve first by_users value")
+      assert_includes(href, by_user_2,
+                      "Next link should preserve second by_users value")
+      assert_includes(href, by_user_3,
+                      "Next link should preserve third by_users value")
+    end
+
+    # Also check the page input form has hidden fields for all three values
+    assert_select("input[type='hidden'][name='q[by_users][]']" \
+                  "[value='#{user1.id}']")
+    assert_select("input[type='hidden'][name='q[by_users][]']" \
+                  "[value='#{user2.id}']")
+    assert_select("input[type='hidden'][name='q[by_users][]']" \
+                  "[value='#{user3.id}']")
+
+    # Search form prefilling is tested in
+    # test/controllers/observations/search_controller_test.rb
+  end
+
   def test_index_project
     project = projects(:bolete_project)
 
