@@ -385,7 +385,7 @@ module Observations
         params: {
           q: {
             model: :Observation,
-            has_notes_fields: ["Substrate", "Cap_Color", "Other_Field"]
+            has_notes_fields: %w[Substrate Cap_Color Other_Field]
           }
         }
       )
