@@ -159,17 +159,37 @@ module Searchable
       end
     end
 
-    # Check for `fields_with_range`, and join them into array if range present
+    # Check for `fields_with_range`, and join them into array if range present.
+    # Sorts values so the range is in correct order (min, max).
     def range_fields_to_arrays
       return unless respond_to?(:fields_with_range)
 
       fields_with_range.each do |key|
         next if @query_params[:"#{key}_range"].blank?
 
-        @query_params[key] = [@query_params[key],
-                              @query_params[:"#{key}_range"]]
+        range = [@query_params[key], @query_params[:"#{key}_range"]]
+        @query_params[key] = sort_range_values(range)
         @query_params.delete(:"#{key}_range")
       end
+    end
+
+    # Sort range values so min comes first. Works for both numeric values
+    # (confidence) and string values (rank) that have a defined order.
+    def sort_range_values(range)
+      return range if range.any?(&:blank?)
+
+      sort_rank_range(range) || sort_numeric_range(range)
+    end
+
+    def sort_rank_range(range)
+      str_range = range.map(&:to_s)
+      return unless str_range.all? { |v| Name.all_ranks.include?(v) }
+
+      str_range.sort_by { |v| Name.all_ranks.index(v) }
+    end
+
+    def sort_numeric_range(range)
+      range.map(&:to_f).sort
     end
 
     def parse_date_ranges

@@ -89,12 +89,54 @@ module Names
           lookup: ["Agaricus campestris"],
           include_synonyms: true
         },
-        rank: [:Species, :Genus],
+        rank: %w[Species Genus],
         misspellings: :either,
         created_at: %w[2007-01-01 2007-12-31]
       }
       assert_redirected_to(controller: "/names", action: :index,
                            params: { q: { model: :Name, **validated_params } })
+    end
+
+    # ---------------------------------------------------------------
+    #  Range value ordering tests
+    #  Ensure that range values are sorted correctly regardless of input order
+    # ---------------------------------------------------------------
+
+    def test_create_with_rank_range_reversed
+      # Submit with higher rank first (Genus), lower rank second (Species)
+      # In Name.all_ranks, Form < Species < Genus, so Genus has higher index
+      login
+      params = {
+        rank: "Genus", # higher rank (index 8)
+        rank_range: "Species" # lower rank (index 3)
+      }
+      post(:create, params: { query_names: params })
+
+      # Should be sorted as [lower, higher] = ["Species", "Genus"]
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, rank: %w[Species Genus] }
+        }
+      )
+    end
+
+    def test_create_with_rank_range_correct_order
+      # Submit with lower rank first (Form), higher rank second (Species)
+      login
+      params = {
+        rank: "Form",         # lower rank (index 0)
+        rank_range: "Species" # higher rank (index 3)
+      }
+      post(:create, params: { query_names: params })
+
+      # Should remain as ["Form", "Species"]
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, rank: %w[Form Species] }
+        }
+      )
     end
   end
 end

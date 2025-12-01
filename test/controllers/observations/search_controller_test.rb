@@ -278,5 +278,46 @@ module Observations
         }
       )
     end
+
+    # ---------------------------------------------------------------
+    #  Range value ordering tests
+    #  Ensure that range values are sorted correctly regardless of input order
+    # ---------------------------------------------------------------
+
+    def test_create_with_confidence_range_reversed
+      # Submit with high value first, low value second - should be sorted
+      login
+      params = {
+        confidence: 2.0,       # high value
+        confidence_range: -1.0 # low value
+      }
+      post(:create, params: { query_observations: params })
+
+      # Should be sorted as [low, high] = [-1.0, 2.0]
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, confidence: [-1.0, 2.0] }
+        }
+      )
+    end
+
+    def test_create_with_confidence_range_correct_order
+      # Submit with low value first, high value second - should stay same
+      login
+      params = {
+        confidence: -1.0,     # low value
+        confidence_range: 2.0 # high value
+      }
+      post(:create, params: { query_observations: params })
+
+      # Should remain as [-1.0, 2.0]
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, confidence: [-1.0, 2.0] }
+        }
+      )
+    end
   end
 end

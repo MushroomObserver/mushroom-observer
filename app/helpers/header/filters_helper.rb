@@ -199,6 +199,9 @@ module Header
     # NOTE: Can respond to special methods for certain keys.
     # Defaults to using the lookup method defined in CAPTIONABLE_QUERY_PARAMS
     def filter_lookup_text_val(query, key, val, truncate)
+      # Handle confidence values specially - display labels instead of numbers
+      return confidence_val_as_label(val) if key == :confidence
+
       return param_val_itself(key, val, truncate) unless PARAM_LOOKUPS.key?(key)
 
       # Allow overrides (second param `true` means check for private methods)
@@ -206,6 +209,15 @@ module Header
         tag.i(filter_lookup_strings(query, key, truncate))
       else
         filter_lookup_strings(query, key, truncate)
+      end
+    end
+
+    # Convert confidence numeric values to human-readable labels
+    def confidence_val_as_label(val)
+      if val.is_a?(Array)
+        val.map { |v| Vote.confidence(v.to_f) }.join(" – ")
+      else
+        Vote.confidence(val.to_f)
       end
     end
 
