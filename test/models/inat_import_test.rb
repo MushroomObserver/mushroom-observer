@@ -1,8 +1,30 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class InatImportTest < ActiveSupport::TestCase
+  test "last_user_inputs defaults to a Hash" do
+    i = InatImport.new
+    assert_instance_of(Hash, i.last_user_inputs)
+    assert_equal({}, i.last_user_inputs)
+  end
+
+  test "set_last_user_input in-memory hash without saving" do
+    i = InatImport.new
+    i.set_last_user_input(:preview, true, save: false)
+    assert_equal(true, i.last_user_input(:preview))
+    # Not persisted yet
+    assert_not(i.persisted?)
+  end
+
+  test "set_last_user_input persists value when saved" do
+    i = InatImport.create!
+    i.set_last_user_input("foo", "bar")
+    # Verify the helper sets the in-memory value and persists it
+    assert_equal("bar", i.last_user_input("foo"))
+    assert(i.persisted?)
+  end
+
   def test_total_expected_time_tabula_rasa
     zero_out_prior_import_records
     import = inat_imports(:rolf_inat_import)

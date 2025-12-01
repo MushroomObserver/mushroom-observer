@@ -831,7 +831,8 @@ class InatImportJobTest < ActiveJob::TestCase
       order: "asc",
       order_by: "id",
       without_field: "Mushroom Observer URL",
-      user_login: @inat_import.inat_username
+      verifiable: "any",
+      user_id: @inat_import.inat_username
     }
     error = "Unauthorized"
     status = 401
