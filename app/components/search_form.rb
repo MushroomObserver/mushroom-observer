@@ -221,6 +221,16 @@ class Components::SearchForm < Components::ApplicationForm
                value: value)
   end
 
+  def render_textarea_field_with_label(field_name:)
+    value = array_to_newlines(field_value(field_name))
+    text_field(field_name,
+               textarea: true,
+               rows: 1,
+               label: field_label(field_name),
+               help: field_help(field_name),
+               value: value)
+  end
+
   def render_select_nil_yes(field_name:)
     render_boolean_select(field_name:, style: :nil_yes)
   end
@@ -379,6 +389,13 @@ class Components::SearchForm < Components::ApplicationForm
     when false then "false"
     else ""
     end
+  end
+
+  # Convert array values to newline-separated string for textarea display
+  def array_to_newlines(val)
+    return val unless val.is_a?(Array)
+
+    val.join("\n")
   end
 
   # Form buttons

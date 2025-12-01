@@ -241,12 +241,12 @@ module Searchable
     def fields_with_range = []
 
     # Convert spaces to underscores in notes field names.
-    # "INat notes field, Other Field" => ["INat_notes_field", "Other_Field"]
+    # "INat notes field\nOther Field" => ["INat_notes_field", "Other_Field"]
     def normalize_notes_fields
       return if (val = @query_params[:has_notes_fields]).blank?
 
       @query_params[:has_notes_fields] =
-        val.split(",").map { |f| f.strip.tr(" ", "_") }
+        val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
     end
 
     # Passing some fields will raise an error if the required field is missing,

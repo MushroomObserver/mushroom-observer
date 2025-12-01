@@ -373,13 +373,13 @@ module Observations
       )
     end
 
-    def test_create_with_multiple_notes_fields_comma_separated
+    def test_create_with_multiple_notes_fields_newline_separated
       login
-      # User types multiple fields separated by commas
-      params = { has_notes_fields: "Substrate, Cap Color, Other Field" }
+      # User types multiple fields separated by newlines (textarea input)
+      params = { has_notes_fields: "Substrate\nCap Color\nOther Field" }
       post(:create, params: { query_observations: params })
 
-      # Should be split on comma, spaces converted to underscores
+      # Should be split on newline, spaces converted to underscores
       assert_redirected_to(
         controller: "/observations", action: :index,
         params: {
