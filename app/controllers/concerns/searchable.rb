@@ -66,6 +66,7 @@ module Searchable
       autocompleted_strings_to_ids
       range_fields_to_arrays
       parse_date_ranges
+      normalize_notes_fields
     end
 
     # Used by search_helper to prefill nested params
@@ -238,6 +239,15 @@ module Searchable
     def fields_preferring_ids = []
 
     def fields_with_range = []
+
+    # Convert spaces to underscores in notes field names.
+    # "INat notes field, Other Field" => ["INat_notes_field", "Other_Field"]
+    def normalize_notes_fields
+      return if (val = @query_params[:has_notes_fields]).blank?
+
+      @query_params[:has_notes_fields] =
+        val.split(",").map { |f| f.strip.tr(" ", "_") }
+    end
 
     # Passing some fields will raise an error if the required field is missing,
     # so just toss them. Not sure we have to do this, because Query will.

@@ -353,5 +353,42 @@ module Observations
       assert_select("select#query_observations_confidence_range",
                     selected: "Doubtful")
     end
+
+    # ---------------------------------------------------------------
+    #  Notes fields normalization tests
+    # ---------------------------------------------------------------
+
+    def test_create_with_has_notes_fields_converts_spaces
+      login
+      # User types friendly field name with spaces
+      params = { has_notes_fields: "INat notes field" }
+      post(:create, params: { query_observations: params })
+
+      # Spaces should be converted to underscores, case preserved
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, has_notes_fields: ["INat_notes_field"] }
+        }
+      )
+    end
+
+    def test_create_with_multiple_notes_fields_comma_separated
+      login
+      # User types multiple fields separated by commas
+      params = { has_notes_fields: "Substrate, Cap Color, Other Field" }
+      post(:create, params: { query_observations: params })
+
+      # Should be split on comma, spaces converted to underscores
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: {
+            model: :Observation,
+            has_notes_fields: ["Substrate", "Cap_Color", "Other_Field"]
+          }
+        }
+      )
+    end
   end
 end
