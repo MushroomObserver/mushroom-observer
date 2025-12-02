@@ -5,6 +5,7 @@ require("test_helper")
 module Users
   class EmailsControllerTest < FunctionalTestCase
     include ActiveJob::TestHelper
+
     def test_ask_questions
       id = mary.id
       requires_login(:new, id: id)
