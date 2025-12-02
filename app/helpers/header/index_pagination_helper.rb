@@ -30,7 +30,7 @@ module Header
     private
 
     def render_index_pagination(pagination_data, args, position:)
-      render(Components::IndexPagination.new(
+      render(Components::IndexPaginationNav.new(
                pagination_data: pagination_data,
                position: position,
                args: args,

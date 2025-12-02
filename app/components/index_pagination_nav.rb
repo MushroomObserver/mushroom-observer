@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Components::IndexPagination < Components::Base
+class Components::IndexPaginationNav < Components::Base
   include Phlex::Slotable
 
   slot :sorter

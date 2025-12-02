@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class IndexPaginationTest < UnitTestCase
+class IndexPaginationNavTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
@@ -20,7 +20,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -43,7 +43,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :bottom,
                     request_url: @request_url,
@@ -62,7 +62,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -97,7 +97,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -117,7 +117,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -137,7 +137,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -157,7 +157,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -186,7 +186,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -220,7 +220,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -246,7 +246,7 @@ class IndexPaginationTest < UnitTestCase
       used_letters: %w[A B C D E]
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -270,7 +270,7 @@ class IndexPaginationTest < UnitTestCase
       # No letter_arg, letter, or used_letters
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -290,7 +290,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -315,7 +315,7 @@ class IndexPaginationTest < UnitTestCase
       number_arg: :page
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -354,7 +354,7 @@ class IndexPaginationTest < UnitTestCase
       used_letters: %w[A B C]
     )
 
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: pagination_data,
                     position: :top,
                     request_url: @request_url,
@@ -374,7 +374,7 @@ class IndexPaginationTest < UnitTestCase
   end
 
   def test_renders_nothing_when_pagination_data_nil
-    html = render(Components::IndexPagination.new(
+    html = render(Components::IndexPaginationNav.new(
                     pagination_data: nil,
                     position: :top,
                     request_url: @request_url,
