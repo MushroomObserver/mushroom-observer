@@ -442,7 +442,8 @@ class SearchFormTest < UnitTestCase
     confidence_range_select = doc.at_css("#query_observations_confidence_range")
     assert(confidence_range_select, "Should have confidence_range select")
     selected_range = confidence_range_select.at_css("option[selected]")
-    assert(selected_range, "Second confidence select should have selected option")
+    assert(selected_range,
+           "Second confidence select should have selected option")
     assert_equal("2.0", selected_range["value"])
   end
 
