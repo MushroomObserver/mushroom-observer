@@ -386,6 +386,66 @@ class SearchFormTest < UnitTestCase
                     "Collapse should be expanded when modifier has value")
   end
 
+  # Rank range with only the second value set should use minimum as first value
+  # Bug: ["", "Species"] should be parsed as ["Form", "Species"] (Form is min)
+  # Note: rank is a Names query field, not Observations
+  def test_rank_range_with_blank_first_value_uses_minimum
+    query = Query::Names.new
+    # Simulate user selecting blank first, "Species" second
+    query.rank = ["", "Species"]
+
+    search_controller = ::Names::SearchController.new
+    form = Components::SearchForm.new(
+      query,
+      search_controller: search_controller,
+      local: true,
+      form_action_url: "/names/search"
+    )
+    html = render(form)
+    doc = Nokogiri::HTML(html)
+
+    # First select should have "Form" selected (the minimum rank)
+    rank_select = doc.at_css("#query_names_rank")
+    assert(rank_select, "Should have rank select")
+    selected = rank_select.at_css("option[selected]")
+    assert(selected, "First rank select should have a selected option")
+    assert_equal("Form", selected["value"],
+                 "First rank should default to minimum 'Form' when blank")
+
+    # Second select should have "Species" selected
+    rank_range_select = doc.at_css("#query_names_rank_range")
+    assert(rank_range_select, "Should have rank_range select")
+    selected_range = rank_range_select.at_css("option[selected]")
+    assert(selected_range, "Second rank select should have selected option")
+    assert_equal("Species", selected_range["value"])
+  end
+
+  # Confidence range with only the second value set should use minimum as first
+  # Bug: [nil, 2.0] should be parsed as [-3.0, 2.0] (-3.0 is min confidence)
+  def test_confidence_range_with_blank_first_value_uses_minimum
+    query = Query::Observations.new
+    # Simulate user selecting blank first, "Promising" (2.0) second
+    query.confidence = [nil, 2.0]
+
+    html = render_form_with_query(query)
+    doc = Nokogiri::HTML(html)
+
+    # First select should have -3.0 selected (the minimum confidence)
+    confidence_select = doc.at_css("#query_observations_confidence")
+    assert(confidence_select, "Should have confidence select")
+    selected = confidence_select.at_css("option[selected]")
+    assert(selected, "First confidence select should have a selected option")
+    assert_equal("-3.0", selected["value"],
+                 "First confidence should default to minimum -3.0 when blank")
+
+    # Second select should have 2.0 selected
+    confidence_range_select = doc.at_css("#query_observations_confidence_range")
+    assert(confidence_range_select, "Should have confidence_range select")
+    selected_range = confidence_range_select.at_css("option[selected]")
+    assert(selected_range, "Second confidence select should have selected option")
+    assert_equal("2.0", selected_range["value"])
+  end
+
   # Cover RegionWithBoxFields box_value and build_minimal_location
   # when in_box has values (lines 114, 130, 132)
   def test_region_fields_prefilled_with_box_values
