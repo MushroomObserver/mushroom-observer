@@ -69,22 +69,30 @@ module Observations
       assert_equal(session[:search_type], :observations)
     end
 
-    def test_new_observations_search_form_prefilled_by_users
+    # Test that multiple users in by_users are properly prefilled
+    def test_new_observations_search_form_prefilled_with_multiple_users
       user1 = users(:rolf)
       user2 = users(:mary)
+      user3 = users(:dick)
 
       login
       query = @controller.find_or_create_query(
         :Observation,
-        by_users: [user1.id, user2.id]
+        by_users: [user1.id, user2.id, user3.id]
       )
       assert(query.id)
       get(:new)
-      # Check both textarea and hidden ID field are prefilled
-      expected_text = "#{user1.unique_text_name}\n#{user2.unique_text_name}"
-      assert_select("textarea#query_observations_by_users", text: expected_text)
-      assert_select("input#query_observations_by_users_id",
-                    value: "#{user1.id},#{user2.id}")
+      # Textarea should show newline-separated user names
+      assert_select(
+        "textarea#query_observations_by_users",
+        text: "#{user1.unique_text_name}\n#{user2.unique_text_name}\n" \
+              "#{user3.unique_text_name}"
+      )
+      # Hidden field should have space-separated ids
+      assert_select(
+        "input#query_observations_by_users_id",
+        value: "#{user1.id} #{user2.id} #{user3.id}"
+      )
     end
 
     # query_observations is the form object.
