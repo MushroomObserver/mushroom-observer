@@ -467,7 +467,13 @@ module ControllerExtensions
   def assert_response(arg, msg = "")
     return unless arg
 
-    if arg == :success || arg == :redirect || arg.is_a?(Integer)
+    rails_response_predicates =
+      ActionDispatch::Assertions::ResponseAssertions::RESPONSE_PREDICATES
+    # Is it a standard Rails HTTP status symbol?
+    if (arg.is_a?(Symbol) && Rack::Utils::SYMBOL_TO_STATUS_CODE.key?(arg)) ||
+       # or Rails response predicate (:success, :missing, :redirect, :error)?
+       (arg.is_a?(Symbol) && rails_response_predicates.key?(arg)) ||
+       arg.is_a?(Integer)
       super
     else
       # Put together good error message telling us exactly what happened.
