@@ -281,14 +281,16 @@ class Components::SearchForm < Components::ApplicationForm
     fill_single_value_range(range, sorted, Name.all_ranks)
   end
 
-  # When only one value provided, fill in min or max based on which was blank.
+  # When only one value provided, fill in min based on which was blank.
+  # If first is blank, fill with min (range from min to value).
+  # If second is blank, leave it nil (exact match on first value).
   def fill_single_value_range(original, sorted, all_values)
     return [sorted.first, sorted.last] if sorted.size > 1
 
     if original.first.to_s.blank?
       [all_values.first, sorted.first]
     else
-      [sorted.first, all_values.last]
+      [sorted.first, nil]
     end
   end
 
@@ -307,7 +309,7 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   # Sort confidence range values to [low, high] order for display.
-  # If one value is blank/nil, substitute the minimum (-3.0) or maximum (3.0).
+  # If first is blank, fill with minimum. If second is blank, leave nil.
   def sorted_confidence_range(range)
     return [nil, nil] if range.blank?
 
@@ -318,6 +320,8 @@ class Components::SearchForm < Components::ApplicationForm
     fill_confidence_range(range, sorted)
   end
 
+  # If first is blank, fill with min (range from min to value).
+  # If second is blank, fill with max (scope treats nil as ≥ first).
   def fill_confidence_range(original, sorted)
     return [sorted.first, sorted.last] if sorted.size > 1
 
