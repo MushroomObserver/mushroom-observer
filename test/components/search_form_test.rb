@@ -295,6 +295,117 @@ class SearchFormTest < UnitTestCase
            "query_observations[by_users_id], not [user_id]")
   end
 
+  # NOTE: render_select_no_eq_nil_or_yes was removed as dead code.
+  # The :select_no_eq_nil_or_yes style (used for include_synonyms, etc.)
+  # is rendered by NamesLookupFieldGroup, not SearchForm directly.
+  # See test/components/names_lookup_field_group_test.rb for coverage.
+
+  def test_field_label_uses_query_translation
+    # date is a valid Observations field in the "shown" section
+    html = render_form
+
+    # Should use :"query_#{field_name}".l.humanize for labels
+    doc = Nokogiri::HTML(html)
+    label = doc.at_css("label[for='query_observations_date']")
+    assert(label, "Should have date label")
+    assert_equal(:query_date.l.humanize, label.text.strip)
+  end
+
+  def test_date_field_prefills_string_value
+    query = Query::Observations.new(date: "2024-01-15")
+    html = render_form_with_query(query)
+
+    doc = Nokogiri::HTML(html)
+    input = doc.at_css("#query_observations_date")
+    assert(input, "Should have date input")
+    assert_equal("2024-01-15", input["value"])
+  end
+
+  def test_date_field_joins_array_for_range
+    # Date ranges are stored as arrays: ["start", "end"]
+    query = Query::Observations.new
+    query.date = %w[2021-01-06 2021-01-15]
+    html = render_form_with_query(query)
+
+    doc = Nokogiri::HTML(html)
+    input = doc.at_css("#query_observations_date")
+    assert(input, "Should have date input")
+    assert_equal("2021-01-06-2021-01-15", input["value"])
+  end
+
+  # Cover NamesLookupFieldGroup bool_to_string false branch (line 160)
+  def test_names_modifier_prefilled_with_false
+    agaricus = names(:agaricus)
+    query = Query::Observations.new
+    query.names = {
+      lookup: [agaricus.id],
+      include_synonyms: false
+    }
+
+    html = render_form_with_query(query)
+    doc = Nokogiri::HTML(html)
+
+    include_synonyms = doc.at_css("#query_observations_names_include_synonyms")
+    assert(include_synonyms, "Should have include_synonyms select")
+    selected_option = include_synonyms.at_css("option[selected]")
+    # When false, the "no" option (value="") should NOT be selected,
+    # but we need to verify false is handled
+    assert_nil(selected_option,
+               "include_synonyms=false should not select any option " \
+               "(no option has value='false')")
+  end
+
+  # Cover NamesLookupFieldGroup prefill_via_id rescue branch (line 80)
+  def test_names_lookup_with_unknown_id_passes_through
+    unknown_id = 999_999_999
+    query = Query::Observations.new
+    query.names = { lookup: [unknown_id] }
+
+    html = render_form_with_query(query)
+    doc = Nokogiri::HTML(html)
+
+    lookup_input = doc.at_css("#query_observations_names_lookup")
+    assert(lookup_input, "Should have names lookup input")
+    # Unknown ID should pass through as-is
+    assert_equal(unknown_id.to_s, lookup_input["value"])
+  end
+
+  # Cover NamesLookupFieldGroup modifiers_have_values? (lines 106-107)
+  # This is called when lookup is empty but modifiers have values
+  def test_collapse_expanded_when_only_modifier_has_value
+    query = Query::Observations.new
+    # No lookup, but modifier has value
+    query.names = { include_synonyms: true }
+
+    html = render_form_with_query(query)
+    doc = Nokogiri::HTML(html)
+
+    # Collapse should be expanded because modifier has value
+    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    assert(collapse_div, "Should have collapse div")
+    assert_includes(collapse_div["class"], "in",
+                    "Collapse should be expanded when modifier has value")
+  end
+
+  # Cover RegionWithBoxFields box_value and build_minimal_location
+  # when in_box has values (lines 114, 130, 132)
+  def test_region_fields_prefilled_with_box_values
+    query = Query::Observations.new
+    query.in_box = { north: 45.0, south: 40.0, east: -70.0, west: -80.0 }
+
+    html = render_form_with_query(query)
+    doc = Nokogiri::HTML(html)
+
+    # Check that box inputs have prefilled values
+    north_input = doc.at_css("input[name*='north']")
+    assert(north_input, "Should have north input")
+    assert_equal("45.0", north_input["value"])
+
+    south_input = doc.at_css("input[name*='south']")
+    assert(south_input, "Should have south input")
+    assert_equal("40.0", south_input["value"])
+  end
+
   private
 
   def render_form(local: true)
@@ -315,51 +426,5 @@ class SearchFormTest < UnitTestCase
       form_action_url: "/observations/search"
     )
     render(form)
-  end
-
-  def test_render_select_no_eq_nil_or_yes
-    query = Query::Observations.new(has_location: true)
-    html = render_form_with_query(query)
-
-    # The has_location field uses :no_eq_nil_or_yes style
-    # which renders [["", "no"], ["true", "yes"]] options
-    assert_html(html, "select[name='query[has_location]']")
-    doc = Nokogiri::HTML(html)
-    select = doc.at_css("select[name='query[has_location]']")
-    options = select.css("option")
-    assert_equal(2, options.size)
-    assert_equal("", options[0]["value"])
-    assert_equal("true", options[1]["value"])
-  end
-
-  def test_field_label_for_non_pattern_field
-    query = Query::Observations.new(text_name_has: "test")
-    html = render_form_with_query(query)
-
-    # Should use :"query_#{field_name}".l.humanize
-    assert_html(html, "label", text: "Text name has")
-  end
-
-  def test_field_value_for_nested_field
-    query = Query::Observations.new(names: { include_synonyms: true })
-    html = render_form_with_query(query)
-
-    # Should access nested names field
-    doc = Nokogiri::HTML(html)
-    select = doc.at_css("select[name='query[names][include_synonyms]']")
-    assert(select, "Should have nested field")
-    selected_option = select.at_css("option[selected]")
-    assert_equal("true", selected_option&.[]("value")) if selected_option
-  end
-
-  def test_date_field_value_joins_array
-    query = Query::Observations.new(created_at: [2024, 1, 15])
-    html = render_form_with_query(query)
-
-    # Should join array elements with "-"
-    doc = Nokogiri::HTML(html)
-    input = doc.at_css("input[name='query[created_at]']")
-    assert(input, "Should have created_at input")
-    assert_equal("2024-1-15", input["value"])
   end
 end

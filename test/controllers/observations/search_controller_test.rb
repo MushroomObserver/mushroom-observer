@@ -319,5 +319,76 @@ module Observations
         }
       )
     end
+
+    # ---------------------------------------------------------------
+    #  Confidence range prefill tests
+    # ---------------------------------------------------------------
+
+    def test_prefill_confidence_range_both_negative
+      # Bug: "As If!" (-3.0) to "Doubtful" (-1.0) - first select was blank
+      login
+      query = @controller.find_or_create_query(
+        :Observation,
+        confidence: [-3.0, -1.0]
+      )
+      assert(query.id)
+      get(:new)
+
+      # Both selects should be prefilled
+      assert_select("select#query_observations_confidence", selected: "As If!")
+      assert_select("select#query_observations_confidence_range",
+                    selected: "Doubtful")
+    end
+
+    def test_prefill_confidence_range_from_url_params
+      # Bug: Loading search/new with q params didn't prefill first confidence
+      # URL: /observations/search/new?q[confidence][]=-3.0&q[confidence][]=-1.0
+      login
+
+      q_params = { q: { model: "Observation", confidence: [-3.0, -1.0] } }
+      get(:new, params: q_params)
+
+      # Both selects should be prefilled
+      assert_select("select#query_observations_confidence", selected: "As If!")
+      assert_select("select#query_observations_confidence_range",
+                    selected: "Doubtful")
+    end
+
+    # ---------------------------------------------------------------
+    #  Notes fields normalization tests
+    # ---------------------------------------------------------------
+
+    def test_create_with_has_notes_fields_converts_spaces
+      login
+      # User types friendly field name with spaces
+      params = { has_notes_fields: "INat notes field" }
+      post(:create, params: { query_observations: params })
+
+      # Spaces should be converted to underscores, case preserved
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, has_notes_fields: ["INat_notes_field"] }
+        }
+      )
+    end
+
+    def test_create_with_multiple_notes_fields_newline_separated
+      login
+      # User types multiple fields separated by newlines (textarea input)
+      params = { has_notes_fields: "Substrate\nCap Color\nOther Field" }
+      post(:create, params: { query_observations: params })
+
+      # Should be split on newline, spaces converted to underscores
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: {
+            model: :Observation,
+            has_notes_fields: %w[Substrate Cap_Color Other_Field]
+          }
+        }
+      )
+    end
   end
 end

@@ -50,8 +50,9 @@ module Names
       assert_select("select#query_names_misspellings", selected: "include")
       assert_select("select#query_names_has_classification", selected: "yes")
       assert_select("input#query_names_author_has", value: "Pers.")
-      assert_select("select#query_names_rank", selected: "Species")
-      assert_select("select#query_names_rank_range", selected: "Form")
+      # Form normalizes rank range to [low, high] order
+      assert_select("select#query_names_rank", selected: "Form")
+      assert_select("select#query_names_rank_range", selected: "Species")
       assert_equal(session[:search_type], :names)
     end
 
@@ -137,6 +138,29 @@ module Names
           q: { model: :Name, rank: %w[Form Species] }
         }
       )
+    end
+
+    # ---------------------------------------------------------------
+    #  Rank range prefill tests
+    #  Form should always display [low, high] order regardless of query order
+    # ---------------------------------------------------------------
+
+    def test_prefill_rank_range_normalizes_to_low_high_order
+      # Even if query stores [high, low], form should display [low, high]
+      login
+      # Query stores reversed order: ["Species", "Form"] (high to low)
+      query = @controller.find_or_create_query(
+        :Name,
+        rank: %w[Species Form]
+      )
+      assert(query.id)
+      get(:new)
+
+      # Form should normalize to [low, high] order:
+      # Form (lower rank) should be in the first select
+      assert_select("select#query_names_rank", selected: "Form")
+      # Species (higher rank) should be in the range select
+      assert_select("select#query_names_rank_range", selected: "Species")
     end
   end
 end

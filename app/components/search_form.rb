@@ -24,8 +24,7 @@ class Components::SearchForm < Components::ApplicationForm
   # Boolean select option styles
   BOOL_OPTIONS = {
     nil_yes: [["", ""], ["true", "yes"]],
-    nil_boolean: [["", ""], ["true", "yes"], ["false", "no"]],
-    no_eq_nil_or_yes: [["", "no"], ["true", "yes"]]
+    nil_boolean: [["", ""], ["true", "yes"], ["false", "no"]]
   }.freeze
 
   # Additional wrapper options for search-specific fields
@@ -221,16 +220,22 @@ class Components::SearchForm < Components::ApplicationForm
                value: value)
   end
 
+  def render_textarea_field_with_label(field_name:)
+    value = array_to_newlines(field_value(field_name))
+    text_field(field_name,
+               textarea: true,
+               rows: 1,
+               label: field_label(field_name),
+               help: field_help(field_name),
+               value: value)
+  end
+
   def render_select_nil_yes(field_name:)
     render_boolean_select(field_name:, style: :nil_yes)
   end
 
   def render_select_nil_boolean(field_name:)
     render_boolean_select(field_name:, style: :nil_boolean)
-  end
-
-  def render_select_no_eq_nil_or_yes(field_name:)
-    render_boolean_select(field_name:, style: :no_eq_nil_or_yes)
   end
 
   def render_boolean_select(field_name:, style:)
@@ -254,7 +259,7 @@ class Components::SearchForm < Components::ApplicationForm
 
   def render_select_rank_range(field_name:)
     options = [nil] + Name.all_ranks
-    value, range_value = field_value(field_name) || [nil, nil]
+    value, range_value = sorted_rank_range(field_value(field_name))
 
     render(ApplicationForm::SelectRangeField.new(
              form: self, field_name:, options:,
@@ -264,11 +269,19 @@ class Components::SearchForm < Components::ApplicationForm
            ))
   end
 
+  # Sort rank range values to [low, high] order for display
+  def sorted_rank_range(range)
+    return [nil, nil] if range.blank?
+
+    sorted = range.sort_by { |v| Name.all_ranks.index(v.to_s) || 0 }
+    [sorted.first, sorted.last]
+  end
+
   def render_select_confidence_range(field_name:)
     # Superform uses [value, label] - Vote.opinion_menu returns [label, value]
     options = [[nil, ""]] +
               Vote.opinion_menu.map { |label, value| [value, label] }
-    value, range_value = field_value(field_name) || [nil, nil]
+    value, range_value = sorted_confidence_range(field_value(field_name))
 
     render(ApplicationForm::SelectRangeField.new(
              form: self, field_name:, options:,
@@ -276,6 +289,14 @@ class Components::SearchForm < Components::ApplicationForm
              label: field_label(field_name),
              help: field_help(field_name)
            ))
+  end
+
+  # Sort confidence range values to [low, high] order for display
+  def sorted_confidence_range(range)
+    return [nil, nil] if range.blank?
+
+    sorted = range.map(&:to_f).sort
+    [sorted.first, sorted.last]
   end
 
   def render_single_value_autocompleter(field_name:)
@@ -328,11 +349,7 @@ class Components::SearchForm < Components::ApplicationForm
   # Field helpers
 
   def field_label(field_name)
-    if field_name == :pattern
-      :PATTERN.l
-    else
-      :"query_#{field_name}".l.humanize
-    end
+    :"query_#{field_name}".l.humanize
   end
 
   def field_help(field_name)
@@ -344,11 +361,11 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def field_value(field_name)
-    return model.send(field_name) unless nested_field_names.include?(field_name)
-
-    model.send(:names)&.dig(field_name)
+    model.send(field_name)
   end
 
+  # Date/time fields may be stored as arrays (e.g., ["2021-01-06-00-00-00"])
+  # Join with "-" for display in text input
   def date_field_value(field_name)
     value = field_value(field_name)
     return value unless value.is_a?(Array)
@@ -363,6 +380,13 @@ class Components::SearchForm < Components::ApplicationForm
     when false then "false"
     else ""
     end
+  end
+
+  # Convert array values to newline-separated string for textarea display
+  def array_to_newlines(val)
+    return val unless val.is_a?(Array)
+
+    val.join("\n")
   end
 
   # Form buttons
