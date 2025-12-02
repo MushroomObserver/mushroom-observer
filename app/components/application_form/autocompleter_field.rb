@@ -13,12 +13,18 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
-                :create, :create_path
+                :create, :create_path, :hidden_value, :hidden_data,
+                :extra_controller_data
 
     def initialize(field, type:, textarea: false, **options)
-      super(field, attributes: options.fetch(:attributes, {}))
+      super(field, attributes: {})
       @autocompleter_type = type
       @textarea = textarea
+      extract_options(options)
+    end
+
+    def extract_options(options)
+      @field_attributes = options.fetch(:attributes, {})
       @wrapper_options = options.fetch(:wrapper_options, {})
       @find_text = options[:find_text]
       @keep_text = options[:keep_text]
@@ -26,9 +32,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       @create_text = options[:create_text]
       @create = options[:create]
       @create_path = options[:create_path]
+      @hidden_value = options[:hidden_value]
+      @hidden_data = options[:hidden_data]
+      @extra_controller_data = options[:controller_data] || {}
     end
 
-    def view_template
+    def view_template(&block)
       div(
         id: controller_id,
         class: "autocompleter",
@@ -38,6 +47,8 @@ class Components::ApplicationForm < Superform::Rails::Form
           render_dropdown
           render_hidden_field
         end
+        # Yield block for additional content (e.g., conditional collapse fields)
+        yield if block
       end
     end
 
@@ -48,10 +59,15 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def controller_data
-      {
+      data = {
         controller: :autocompleter,
-        type: autocompleter_type
+        # Use string to prevent underscore-to-hyphen conversion in data attrs
+        type: autocompleter_type.to_s
       }
+      # Textarea autocompleters accept multiple values separated by newlines
+      data[:separator] = "\n" if textarea
+      # Merge any extra data attributes (e.g., outlet connections)
+      data.merge(extra_controller_data)
     end
 
     def render_input_field(&block)
@@ -77,7 +93,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         placeholder: :start_typing.l,
         autocomplete: "off",
         data: { autocompleter_target: "input" }
-      }.deep_merge(attributes)
+      }.deep_merge(@field_attributes)
     end
 
     def autocompleter_wrapper_options
@@ -211,16 +227,32 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_hidden_field
-      # Hidden field stores the selected ID (e.g., herbarium_id)
+      # Hidden field stores the selected ID. Use field.key (original field name)
+      # so controller gets e.g. by_users_id, not user_id.
       input(
         type: "hidden",
         id: "#{field.dom.id}_id",
         name: field.dom.name.sub(/\[#{field.key}\]$/,
-                                 "[#{autocompleter_type}_id]"),
+                                 "[#{field.key}_id]"),
+        value: normalized_hidden_value,
         class: "form-control",
         readonly: true,
-        data: { autocompleter_target: "hidden" }
+        data: hidden_field_data
       )
+    end
+
+    # Convert array of IDs to comma-separated string for multi-value fields
+    def normalized_hidden_value
+      return hidden_value unless hidden_value.is_a?(Array)
+
+      hidden_value.join(",")
+    end
+
+    def hidden_field_data
+      base_data = { autocompleter_target: "hidden" }
+      return base_data unless hidden_data
+
+      base_data.merge(hidden_data)
     end
   end
 end
