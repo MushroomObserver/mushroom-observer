@@ -2470,7 +2470,7 @@
 
   # account/signup
   signup_title: Account signup
-  signup_name: Name (optional). Do not include your email unless you want to  display it to all users
+  signup_name: Name (optional). Do not include your email unless you want to display it to all users
   signup_login: Desired login. Do not include your email unless you want to  display it to all users
   signup_email_address: Email address
   signup_email_confirmation: Confirm email
