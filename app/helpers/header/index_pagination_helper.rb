@@ -278,13 +278,11 @@ module Header
     def q_param_to_hidden_fields(form)
       # This flattens the hash as it is in the permalink.
       # Seems safer than trying to parse the incoming URI's query_string.
-      query_string = Rack::Utils.build_nested_query(
-        { q: q_param(query_from_session) }
-      )
+      query_string = { q: q_param(query_from_session) }.to_query
       # Sets them up them the way a form would, i.e. fields_for(:q)
-      pairs = query_string.split(Rack::Utils::DEFAULT_SEP)
+      pairs = query_string.split("&")
       tags = pairs.map do |pair|
-        key, value = pair.split("=", 2).map { |str| Rack::Utils.unescape(str) }
+        key, value = pair.split("=", 2).map { |str| CGI.unescape(str) }
         form.hidden_field(key, value: value)
       end
       tags.safe_join("\n")

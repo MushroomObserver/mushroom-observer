@@ -18,7 +18,7 @@
 class Components::CarouselItem < Components::BaseImage
   # Additional carousel-specific properties
   prop :index, Integer, default: 0
-  prop :object, _Nilable(Object), default: nil
+  prop :object, _Nilable(AbstractModel), default: nil
 
   def initialize(index: 0, object: nil, **props)
     # Set carousel-specific defaults
