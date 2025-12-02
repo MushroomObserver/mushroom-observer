@@ -30,7 +30,7 @@ class Components::MatrixBox < Components::Base
 
   # Properties
   prop :user, _Nilable(User), default: nil
-  prop :object, _Nilable(Object), default: nil
+  prop :object, _Nilable(AbstractModel), default: nil
   prop :id, _Nilable(_Union(Integer, String)), default: nil
   prop :columns, String, default: "col-xs-12 col-sm-6 col-md-4 col-lg-3"
   prop :extra_class, String, default: ""
