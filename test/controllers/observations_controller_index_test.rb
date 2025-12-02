@@ -623,14 +623,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # Test index links lose the id param on next/prev page and goto_page
     get(:index, params: { id: o_loc.third.id, q: })
 
+    # Build expected encoded strings using Hash#to_query for readability
+    q_model = { q: { model: "Observation" } }.to_query
+    q_locations = { q: { locations: nil } }.to_query.sub("=", "") # Just the key
+
     # Check that next page link exists with correct params (order-agnostic)
     assert_select("a.next_page_link") do |links|
       href = links.first["href"]
       assert_includes(href, "page=2", "Next link should have page=2")
-      assert_includes(href, "q%5Bmodel%5D=Observation",
+      assert_includes(href, q_model,
                       "Next link should have q[model]=Observation")
-      assert_includes(href, "q%5Blocations%5D",
-                      "Next link should have q[locations]")
+      assert_includes(href, q_locations, "Next link should have q[locations]")
     end
     # On page 1, prev link should be disabled (has opacity-0 class)
     assert_select("a.previous_page_link.disabled.opacity-0")
@@ -653,13 +656,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { q: q })
 
-    # Build expected encoded strings using Rack::Utils for readability
-    # "q%5Bby_users%5D%5B%5D=#{user1.id}"
-    by_user_1 = Rack::Utils.build_nested_query(q: { by_users: [user1.id] })
-    # "q%5Bby_users%5D%5B%5D=#{user2.id}"
-    by_user_2 = Rack::Utils.build_nested_query(q: { by_users: [user2.id] })
-    # "q%5Bby_users%5D%5B%5D=#{user3.id}"
-    by_user_3 = Rack::Utils.build_nested_query(q: { by_users: [user3.id] })
+    # Build expected encoded strings using Hash#to_query for readability
+    by_user_1 = { q: { by_users: [user1.id] } }.to_query
+    by_user_2 = { q: { by_users: [user2.id] } }.to_query
+    by_user_3 = { q: { by_users: [user3.id] } }.to_query
 
     # Check that next page link preserves ALL array values
     assert_select("a.next_page_link") do |links|

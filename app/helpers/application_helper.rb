@@ -229,10 +229,10 @@ module ApplicationHelper
       end
     end
 
-    # Put it back together using Rack to properly encode nested params
+    # Put it back together using Hash#to_query to properly encode nested params
     return addr if args.empty?
 
-    "#{addr}?#{Rack::Utils.build_nested_query(args)}"
+    "#{addr}?#{args.to_query}"
   end
 
   def form_submit_text(obj)
