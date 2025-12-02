@@ -4254,6 +4254,7 @@
   # These shouldn't need translating, but you are free to override if you need to.
   runtime_edit_article_success: "[:runtime_updated_id(type=:article,value=id)]"
   runtime_ask_observation_question_success: "[:runtime_delivered_question]"
+  runtime_ask_user_question_missing_fields: Please provide both a subject and message.
   runtime_ask_user_question_success: "[:runtime_delivered_question]"
   runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"
   runtime_ask_webmaster_need_content: "[:runtime_missing(field=:comment)]"

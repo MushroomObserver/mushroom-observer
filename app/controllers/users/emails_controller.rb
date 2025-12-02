@@ -29,16 +29,32 @@ module Users
     def create
       @target = find_or_goto_index(User, params[:id].to_s)
       return unless @target && can_email_user_question?(@target)
+      return redirect_with_missing_fields_error unless email_fields_present?
 
-      subject = params.dig(:email, :subject)
-      content = params.dig(:email, :content)
-      QueuedEmail::UserQuestion.create_email(@user, @target, subject, content)
+      UserQuestionMailer.build(@user, @target, subject, content).deliver_later
       flash_notice(:runtime_ask_user_question_success.t)
 
       show_flash_and_send_back
     end
 
     private
+
+    def subject
+      params.dig(:email, :subject)
+    end
+
+    def content
+      params.dig(:email, :content)
+    end
+
+    def email_fields_present?
+      subject.present? && content.present?
+    end
+
+    def redirect_with_missing_fields_error
+      flash_error(:runtime_ask_user_question_missing_fields.t)
+      redirect_to(user_path(@target.id))
+    end
 
     def show_flash_and_send_back
       respond_to do |format|
