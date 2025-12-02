@@ -176,10 +176,14 @@ module Searchable
 
     # Sort range values so min comes first. Works for both numeric values
     # (confidence) and string values (rank) that have a defined order.
+    # Filters out blank values before sorting to avoid validation errors.
     def sort_range_values(range)
-      return range if range.any?(&:blank?)
+      # Filter out blank values before sorting
+      non_blank = range.compact_blank
+      return [] if non_blank.empty?
+      return non_blank if non_blank.size == 1
 
-      sort_rank_range(range) || sort_numeric_range(range)
+      sort_rank_range(non_blank) || sort_numeric_range(non_blank)
     end
 
     def sort_rank_range(range)

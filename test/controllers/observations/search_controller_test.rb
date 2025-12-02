@@ -363,6 +363,66 @@ module Observations
     end
 
     # ---------------------------------------------------------------
+    #  Single value confidence tests (blank + value scenarios)
+    #  Regression test for bug where selecting only the second dropdown
+    #  caused validation errors due to nil values
+    # ---------------------------------------------------------------
+
+    def test_create_with_only_confidence_range_value
+      # Submit with first dropdown blank, only second dropdown selected
+      # This previously caused validation errors with [nil, 2.0]
+      login
+      params = {
+        confidence: "", # blank/empty
+        confidence_range: 2.0 # only this one selected
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, confidence: [2.0] }
+        }
+      )
+    end
+
+    def test_create_with_only_first_confidence_value
+      # Submit with only first dropdown selected, second blank
+      login
+      params = {
+        confidence: 1.0,
+        confidence_range: "" # blank/empty
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, confidence: [1.0] }
+        }
+      )
+    end
+
+    def test_create_with_both_confidence_values_blank
+      # Submit with both dropdowns blank (no confidence filter)
+      login
+      params = {
+        confidence: "",
+        confidence_range: "",
+        has_images: true # add another param so query isn't completely empty
+      }
+      post(:create, params: { query_observations: params })
+
+      # Should create query without confidence parameter
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, has_images: true }
+        }
+      )
+    end
+
+    # ---------------------------------------------------------------
     #  Notes fields normalization tests
     # ---------------------------------------------------------------
 
