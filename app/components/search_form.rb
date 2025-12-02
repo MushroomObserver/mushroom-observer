@@ -24,8 +24,7 @@ class Components::SearchForm < Components::ApplicationForm
   # Boolean select option styles
   BOOL_OPTIONS = {
     nil_yes: [["", ""], ["true", "yes"]],
-    nil_boolean: [["", ""], ["true", "yes"], ["false", "no"]],
-    no_eq_nil_or_yes: [["", "no"], ["true", "yes"]]
+    nil_boolean: [["", ""], ["true", "yes"], ["false", "no"]]
   }.freeze
 
   # Additional wrapper options for search-specific fields
@@ -239,10 +238,6 @@ class Components::SearchForm < Components::ApplicationForm
     render_boolean_select(field_name:, style: :nil_boolean)
   end
 
-  def render_select_no_eq_nil_or_yes(field_name:)
-    render_boolean_select(field_name:, style: :no_eq_nil_or_yes)
-  end
-
   def render_boolean_select(field_name:, style:)
     select_field(field_name, BOOL_OPTIONS[style],
                  label: field_label(field_name),
@@ -354,11 +349,7 @@ class Components::SearchForm < Components::ApplicationForm
   # Field helpers
 
   def field_label(field_name)
-    if field_name == :pattern
-      :PATTERN.l
-    else
-      :"query_#{field_name}".l.humanize
-    end
+    :"query_#{field_name}".l.humanize
   end
 
   def field_help(field_name)
@@ -370,11 +361,11 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def field_value(field_name)
-    return model.send(field_name) unless nested_field_names.include?(field_name)
-
-    model.send(:names)&.dig(field_name)
+    model.send(field_name)
   end
 
+  # Date/time fields may be stored as arrays (e.g., ["2021-01-06-00-00-00"])
+  # Join with "-" for display in text input
   def date_field_value(field_name)
     value = field_value(field_name)
     return value unless value.is_a?(Array)

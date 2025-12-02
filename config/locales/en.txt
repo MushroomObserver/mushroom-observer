@@ -4649,7 +4649,7 @@
   query_quality: "[:quality]"
   query_rank: "[:rank]"
   query_regexp: "[:search]"
-  query_region: "[:regions]"
+  query_region: "[:region]"
   query_sizes: sizes
   query_sources: sources
   query_summary_has: summary has

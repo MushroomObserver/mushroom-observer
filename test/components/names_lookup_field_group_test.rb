@@ -87,34 +87,37 @@ class NamesLookupFieldGroupTest < UnitTestCase
     assert_not(modifier_fields.first.is_a?(Array))
   end
 
-  # Cover non-array branch by executing render_modifier_rows
-  def test_render_modifier_rows_calls_select_for_single_field
+  # Cover non-array branch (line 115) by rendering with single field modifier
+  def test_render_modifier_rows_handles_single_field
     @query.names = { include_synonyms: true }
 
-    # Stub namespace to capture select invocation
-    select_called = false
+    # Create real select field that will be rendered
+    select_rendered = false
     select_field_mock = Minitest::Mock.new
     select_field_mock.expect(:select, select_field_mock) do |*_args, **_kwargs|
-      select_called = true
+      select_rendered = true
       true
     end
 
-    # In this test we call render_modifier_rows directly, so only the
-    # modifier field should be fetched.
+    # Need to also stub the lookup field for view_template
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+
     names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
     names_ns.expect(:field, select_field_mock, [:include_synonyms])
 
     component = Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,
       query: @query,
-      modifier_fields: [:include_synonyms]
+      modifier_fields: [:include_synonyms] # Single field, not array pair
     )
 
-    # Execute branch: else -> render_select_field(field_pair)
-    # Stub out Phlex render to avoid requiring a real component
-    component.stub(:render, nil) { component.send(:render_modifier_rows) }
+    # Render the full component - this executes render_modifier_rows
+    # which hits the else branch (line 115) for single fields
+    component.stub(:render, nil) { render_component(component) }
 
-    assert(select_called)
+    assert(select_rendered, "Should call select for single field modifier")
     names_ns.verify
   end
 
