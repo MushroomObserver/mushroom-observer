@@ -105,6 +105,8 @@ class API2::NamesTest < UnitTestCase
     assert_not_empty(names)
     assert_not_empty(goods)
     assert_not_empty(bads)
+    assert_api_pass(params_get(updated_at: "20091012", misspellings: :include))
+    assert_api_results(names)
     assert_api_pass(params_get(updated_at: "20091012", misspellings: :either))
     assert_api_results(names)
     assert_api_pass(params_get(updated_at: "20091012", misspellings: :only))

@@ -1253,8 +1253,8 @@
   search_value_true: yes|true
   # e.g. "has_specimen:no"
   search_value_false: no|false
-  # e.g. "include_misspellings:either" meaning include both correctly and incorrectly spelled names
-  search_value_both: both|either
+  # e.g. "include_misspellings:include" meaning include both correctly and incorrectly spelled names
+  search_value_include: include
   # e.g. "date:last month-today"
   search_value_today: today
   search_value_yesterday: yesterday
@@ -3864,7 +3864,7 @@
   name_term_has_observations: Only names for which we have observations?
   name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
-  name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"only\" = only misspelled names, \"include\" = include both correctly and mis-spelled names."
   name_term_misspellings: "[:name_term_include_misspellings]"
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   name_term_has_author: Has Author filled in?
@@ -4538,7 +4538,7 @@
   api_help_mailing_address: postal address
   api_help_min_rank: group or genus or better
   api_help_min_size: width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge
-  api_help_misspellings: include misspellings? "either" means do not care and "only" means only show misspelt names
+  api_help_misspellings: include misspellings? "include" means do not care and "only" means only show misspelt names
   api_help_north: max latitude
   api_help_notes_field: set value of notes field using square braces, e.g., set_notes%5BCap%5D=red"
   api_help_notes_has: search within notes

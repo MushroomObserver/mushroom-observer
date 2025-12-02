@@ -134,14 +134,14 @@ class SearchFormTest < UnitTestCase
     assert(yes_option, "has_author should have option with value='true'")
     assert_equal("yes", yes_option.text)
 
-    # Verify misspellings has correct option values: [:no, :either, :only]
+    # Verify misspellings has correct option values: [:no, :include, :only]
     misspellings_select = doc.at_css("#query_names_misspellings")
     assert(misspellings_select, "Should have misspellings select")
     no_option = misspellings_select.at_css("option[value='no']")
-    either_option = misspellings_select.at_css("option[value='either']")
+    include_option = misspellings_select.at_css("option[value='include']")
     only_option = misspellings_select.at_css("option[value='only']")
     assert(no_option, "misspellings should have option with value='no'")
-    assert(either_option, "misspellings should have option with value='either'")
+    assert(include_option, "misspellings should have option with value='include'")
     assert(only_option, "misspellings should have option with value='only'")
     # Should NOT have 'yes' option (that was a bug)
     yes_option = misspellings_select.at_css("option[value='yes']")
