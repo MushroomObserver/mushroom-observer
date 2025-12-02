@@ -45,15 +45,14 @@ class Components::IndexPaginationNav < Components::Base
     return unless @pagination_data && @pagination_data.num_pages > 1
 
     setup_letter_params
-    arg = @pagination_data.number_arg
-    this_page, prev_page, next_page, max_page = number_pagination_pages
+    setup_page_numbers
 
     nav(class: "paginate pagination_numbers navbar-flex pl-4") do
-      render_prev_page_link(prev_page, arg)
+      render_page_link(:prev, disabled: @prev_page < 1)
       render_page_label
-      render_goto_page_input(this_page, max_page)
-      render_max_page_link(max_page, arg)
-      render_next_page_link(next_page, max_page, arg)
+      render_goto_page_input(@this_page, @max_page)
+      render_max_page_link(@max_page)
+      render_page_link(:next, disabled: @next_page > @max_page)
     end
   end
 
@@ -68,43 +67,37 @@ class Components::IndexPaginationNav < Components::Base
     div(class: "navbar-text mx-0 hidden-xs") { :PAGE.l }
   end
 
-  def render_max_page_link(max_page, arg)
-    max_url = pagination_link_url(max_page, arg)
+  def render_max_page_link(max_page)
+    max_url = pagination_link_url(max_page)
     div(class: "navbar-text ml-0 mr-2 hidden-xs") { :of.l }
     div(class: "navbar-text mx-0") { a(href: max_url) { max_page.to_s } }
   end
 
-  def number_pagination_pages
-    max_page = @pagination_data.num_pages
-    this_page = @pagination_data.number
-    this_page = 1 if this_page < 1
-    this_page = max_page if this_page > max_page
-    prev_page = this_page - 1
-    next_page = this_page + 1
-    [this_page, prev_page, next_page, max_page]
+  def setup_page_numbers
+    @max_page = @pagination_data.num_pages
+    @this_page = @pagination_data.number
+    @this_page = 1 if @this_page < 1
+    @this_page = @max_page if @this_page > @max_page
+    @prev_page = @this_page - 1
+    @next_page = @this_page + 1
+    @page_arg = @pagination_data.number_arg
   end
 
-  def render_prev_page_link(prev_page, arg)
-    disabled = prev_page < 1 ? "disabled opacity-0" : ""
+  def render_page_link(direction, disabled:)
+    page = instance_variable_get(:"@#{direction}_page")
     classes = class_names(
-      %w[navbar-link btn btn-lg px-0 previous_page_link], disabled
+      "navbar-link btn btn-lg px-0", "#{direction}_page_link",
+      ("disabled opacity-0" if disabled)
     )
-    url = pagination_link_url(prev_page, arg)
-    a(href: url, class: classes) { link_icon(:prev, title: :PREV.t) }
+    url = pagination_link_url(page)
+    a(href: url, class: classes) do
+      link_icon(direction, title: direction.to_s.upcase.to_sym.t, class: "px-2")
+    end
   end
 
-  def render_next_page_link(next_page, max, arg)
-    disabled = next_page > max ? "disabled opacity-0" : ""
-    classes = class_names(
-      %w[navbar-link btn btn-lg px-0 next_page_link], disabled
-    )
-    url = pagination_link_url(next_page, arg)
-    a(href: url, class: classes) { link_icon(:next, title: :NEXT.t) }
-  end
-
-  def pagination_link_url(page, arg)
+  def pagination_link_url(page)
     params = @args[:params] || {}
-    params[arg] = page
+    params[@page_arg] = page
     url = add_args_to_url(@request_url, params.merge(id: nil))
     if @args[:anchor]
       url.sub!(/#.*/, "")

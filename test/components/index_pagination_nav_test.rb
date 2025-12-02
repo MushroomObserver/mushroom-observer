@@ -74,7 +74,7 @@ class IndexPaginationNavTest < UnitTestCase
     assert_includes(html, 'class="paginate pagination_numbers navbar-flex')
 
     # Should have prev/next page links
-    assert_includes(html, "previous_page_link")
+    assert_includes(html, "prev_page_link")
     assert_includes(html, "next_page_link")
 
     # Should have page input form
@@ -126,7 +126,7 @@ class IndexPaginationNavTest < UnitTestCase
                   ))
 
     # Prev link should have disabled class
-    assert_html(html, "a.previous_page_link.disabled")
+    assert_html(html, "a.prev_page_link.disabled")
   end
 
   def test_next_link_disabled_on_last_page
@@ -168,7 +168,7 @@ class IndexPaginationNavTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # Prev link should NOT have disabled class
-    prev_link = doc.at_css("a.previous_page_link")
+    prev_link = doc.at_css("a.prev_page_link")
     assert(prev_link, "Expected prev link")
     assert_not_includes(prev_link["class"], "disabled")
 
@@ -327,7 +327,7 @@ class IndexPaginationNavTest < UnitTestCase
     assert_nested(
       html,
       parent_selector: "nav.pagination_numbers",
-      child_selector: "a.previous_page_link"
+      child_selector: "a.prev_page_link"
     )
 
     assert_nested(
