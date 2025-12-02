@@ -162,5 +162,67 @@ module Names
       # Species (higher rank) should be in the range select
       assert_select("select#query_names_rank_range", selected: "Species")
     end
+
+    # ---------------------------------------------------------------
+    #  Single value rank tests (blank + value scenarios)
+    #  Regression test for bug where selecting only the second dropdown
+    #  caused validation errors due to nil values
+    # ---------------------------------------------------------------
+
+    def test_create_with_only_rank_range_value
+      # Submit with first dropdown blank, only second dropdown selected
+      # This previously caused validation errors with [nil, "Species"]
+      login
+      params = {
+        rank: "", # blank/empty
+        rank_range: "Species" # only this one selected
+      }
+      post(:create, params: { query_names: params })
+
+      # Should filter out the blank value and create query with single rank
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, rank: ["Species"] }
+        }
+      )
+    end
+
+    def test_create_with_only_first_rank_value
+      # Submit with only first dropdown selected, second blank
+      login
+      params = {
+        rank: "Genus",
+        rank_range: "" # blank/empty
+      }
+      post(:create, params: { query_names: params })
+
+      # Should filter out the blank value and create query with single rank
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, rank: ["Genus"] }
+        }
+      )
+    end
+
+    def test_create_with_both_rank_values_blank
+      # Submit with both dropdowns blank (no rank filter)
+      login
+      params = {
+        rank: "",
+        rank_range: "",
+        has_author: true # add another param so query isn't completely empty
+      }
+      post(:create, params: { query_names: params })
+
+      # Should create query without rank parameter
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, has_author: true }
+        }
+      )
+    end
   end
 end
