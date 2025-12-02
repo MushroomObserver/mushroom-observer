@@ -26,6 +26,8 @@ module Users
       end
     end
 
+    # Migrated from QueuedEmail::UserQuestion to ActionMailer + ActiveJob.
+    # See .claude/deliver_later_migration_plan.md for details.
     def create
       @target = find_or_goto_index(User, params[:id].to_s)
       return unless @target && can_email_user_question?(@target)

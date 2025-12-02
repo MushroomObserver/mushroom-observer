@@ -4,6 +4,7 @@ require("test_helper")
 
 module Users
   class EmailsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
     def test_ask_questions
       id = mary.id
       requires_login(:new, id: id)
@@ -29,7 +30,17 @@ module Users
           content: "Email question"
         }
       }
-      post_requires_login(:create, params)
+
+      # Verify email job is enqueued with correct mailer, method, and args.
+      # This also tests that User objects serialize correctly via GlobalID.
+      assert_enqueued_with(
+        job: ActionMailer::MailDeliveryJob,
+        args: ["UserQuestionMailer", "build", "deliver_now",
+               { args: [rolf, mary, "Email subject", "Email question"] }]
+      ) do
+        post_requires_login(:create, params)
+      end
+
       assert_redirected_to(user_path(mary.id))
       assert_flash_text(:runtime_ask_user_question_success.t)
     end
