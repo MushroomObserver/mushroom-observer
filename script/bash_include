@@ -8,7 +8,7 @@
 #  testing              Flag: 1 if in test mode.
 #  errors               Flag: 1 if any errors occurred in log_cmd or log_mysql.
 #  log_file             Temporary log file.
-#                      
+#
 #  keep_cumulative_log  Run this if you want a permanent cumulative log kept for this command.
 #  rails_constant       Extract a global constant from ruby config/consts.rb.
 #  time_stamp           Prints time stamp to stdout: "YYYYMMDD HH:MM:SS TZ"
@@ -64,13 +64,13 @@ function time_stamp {
 
 # Wait until no other processes are running the given command(s). Examples:
 #   wait_for "(scp|ssh)"
-#   wait_for "(convert|jpegresize)"
+#   wait_for "(magick|jpegresize)"
 function wait_for {
   while (ps -e | grep " $*\$" > /dev/null); do sleep 5; done
 }
 
 # Run the given command, logging date and any stdout or stderr. Example:
-#   run convert -thumbnail 200x200 large.jpg thumb.jpg
+#   run magick -thumbnail 200x200 large.jpg thumb.jpg
 function log_cmd {
   echo $(time_stamp)">" $* >> $log_file
   if !($* >> $log_file 2>&1); then
@@ -85,7 +85,7 @@ function log_cmd {
 # Run the given mysql command without logging or anything else.
 function run_mysql {
   config_file=$app_root/config/mysql-$RAILS_ENV.cnf
-  mysql --defaults-extra-file=$config_file -q -s -e "$*"  
+  mysql --defaults-extra-file=$config_file -q -s -e "$*"
 }
 
 # Run the given mysql command, logging the command and any errors. Example:
