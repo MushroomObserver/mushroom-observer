@@ -105,6 +105,6 @@ jobs:
       - name: Run Brakeman
         uses: reviewdog/action-brakeman@v2
         with:
-          github_token: ${{ secrets.github_token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-check
           fail_level: none
