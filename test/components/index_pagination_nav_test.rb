@@ -389,4 +389,50 @@ class IndexPaginationNavTest < UnitTestCase
     assert_not_includes(html, "pagination_numbers")
     assert_not_includes(html, "pagination_letters")
   end
+
+  def test_clamps_page_number_when_below_minimum
+    pagination_data = PaginationData.new(
+      number: 0,
+      num_per_page: 10,
+      num_total: 50,
+      number_arg: :page
+    )
+
+    html = render(Components::IndexPaginationNav.new(
+                    pagination_data: pagination_data,
+                    position: :top,
+                    request_url: @request_url,
+                    form_action_url: @form_action_url,
+                    q_params: @q_params
+                  ))
+
+    # Page input should show 1, not 0
+    assert_html(html, "input[name='page']", attribute: { value: "1" })
+
+    # Prev link should be disabled (we're on first page)
+    assert_html(html, "a.prev_page_link.disabled")
+  end
+
+  def test_clamps_page_number_when_above_maximum
+    pagination_data = PaginationData.new(
+      number: 99,
+      num_per_page: 10,
+      num_total: 50,
+      number_arg: :page
+    )
+
+    html = render(Components::IndexPaginationNav.new(
+                    pagination_data: pagination_data,
+                    position: :top,
+                    request_url: @request_url,
+                    form_action_url: @form_action_url,
+                    q_params: @q_params
+                  ))
+
+    # Page input should show 5 (max page), not 99
+    assert_html(html, "input[name='page']", attribute: { value: "5" })
+
+    # Next link should be disabled (we're on last page)
+    assert_html(html, "a.next_page_link.disabled")
+  end
 end

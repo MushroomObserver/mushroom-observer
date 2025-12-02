@@ -95,6 +95,9 @@ class Components::IndexPaginationNav < Components::Base
     end
   end
 
+  # Build URL for pagination links (prev/next page, max page link).
+  # If args[:anchor] is set, appends a URL fragment (e.g., "#results")
+  # so the browser scrolls to that element after page load.
   def pagination_link_url(page)
     params = @args[:params] || {}
     params[@page_arg] = page
