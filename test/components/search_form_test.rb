@@ -141,7 +141,8 @@ class SearchFormTest < UnitTestCase
     include_option = misspellings_select.at_css("option[value='include']")
     only_option = misspellings_select.at_css("option[value='only']")
     assert(no_option, "misspellings should have option with value='no'")
-    assert(include_option, "misspellings should have option with value='include'")
+    assert(include_option,
+           "misspellings should have option with value='include'")
     assert(only_option, "misspellings should have option with value='only'")
     # Should NOT have 'yes' option (that was a bug)
     yes_option = misspellings_select.at_css("option[value='yes']")

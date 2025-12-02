@@ -64,7 +64,7 @@ module PatternSearch
     def parse_no_include_only
       val = make_sure_there_is_one_value!
       if /^(include|both|either|#{:search_value_include.l})$/i.match?(val)
-        return "include" 
+        return "include"
       end
       return "no"     if /^(0|no|false|#{:search_value_false.l})$/i.match?(val)
       return "only"   if /^(1|yes|true|#{:search_value_true.l})$/i.match?(val)
