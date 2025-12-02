@@ -150,11 +150,22 @@ class Components::ApplicationForm < Superform::Rails::Form
                               wrapper_options: wrapper_options)
     end
 
+    # Autocompleter-specific options that should NOT go in field attributes
+    # Note: :value stays in attributes since it goes to the text/textarea field
+    AUTOCOMPLETER_OPTIONS = [:find_text, :keep_text, :edit_text, :create_text,
+                             :create, :create_path, :hidden_value,
+                             :hidden_data, :controller_data].freeze
+
     def autocompleter(type:, textarea: false, wrapper_options: {},
                       **attributes)
+      # Extract autocompleter-specific options from attributes
+      ac_options = attributes.slice(*AUTOCOMPLETER_OPTIONS)
+      field_attributes = attributes.except(*AUTOCOMPLETER_OPTIONS)
+
       AutocompleterField.new(self, type: type, textarea: textarea,
-                                   attributes: attributes,
-                                   wrapper_options: wrapper_options)
+                                   attributes: field_attributes,
+                                   wrapper_options: wrapper_options,
+                                   **ac_options)
     end
 
     # Alias for backwards compatibility
@@ -307,6 +318,30 @@ class Components::ApplicationForm < Superform::Rails::Form
     field_component = field(field_name).text(
       wrapper_options: wrapper_opts,
       type: "number",
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Autocompleter field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param type [Symbol] the autocompleter type (:name, :location, :user, etc.)
+  # @param options [Hash] all field and wrapper options
+  # @option options [Boolean] :textarea use textarea instead of text input
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots with `with_between`
+  #   and `with_append`
+  def autocompleter_field(field_name, type:, textarea: false, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).autocompleter(
+      type: type,
+      textarea: textarea,
+      wrapper_options: wrapper_opts,
       **field_opts
     )
 

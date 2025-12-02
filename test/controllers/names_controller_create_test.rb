@@ -505,7 +505,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     end
 
     assert_response(:redirect)
-    name = Name.order(created_at: :asc).last
+    name = Name.order(id: :desc).first
     assert_equal("Genus", name.rank)
     assert_equal("Gen. 'Hemimycena3'", name.text_name)
     assert_equal("Gen. 'Hemimycena3'", name.search_name)

@@ -19,13 +19,18 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
-                :create, :create_path, :hidden_name, :hidden_data,
-                :extra_controller_data
+                :create, :create_path, :hidden_name, :hidden_value,
+                :hidden_data, :extra_controller_data
 
     def initialize(field, type:, textarea: false, **options)
-      super(field, attributes: options.fetch(:attributes, {}))
+      super(field, attributes: {})
       @autocompleter_type = type
       @textarea = textarea
+      extract_options(options)
+    end
+
+    def extract_options(options)
+      @field_attributes = options.fetch(:attributes, {})
       @wrapper_options = options.fetch(:wrapper_options, {})
       @find_text = options[:find_text]
       @keep_text = options[:keep_text]
@@ -34,11 +39,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       @create = options[:create]
       @create_path = options[:create_path]
       @hidden_name = options[:hidden_name]
+      @hidden_value = options[:hidden_value]
       @hidden_data = options[:hidden_data]
       @extra_controller_data = options[:controller_data] || {}
     end
 
-    def view_template
+    def view_template(&block)
       div(
         id: controller_id,
         class: "autocompleter",
@@ -48,6 +54,8 @@ class Components::ApplicationForm < Superform::Rails::Form
           render_dropdown
           render_hidden_field
         end
+        # Yield block for additional content (e.g., conditional collapse fields)
+        yield if block
       end
     end
 
@@ -245,10 +253,18 @@ class Components::ApplicationForm < Superform::Rails::Form
         type: "hidden",
         id: hidden_field_id,
         name: hidden_field_name,
+        value: normalized_hidden_value,
         class: "form-control",
         readonly: true,
         data: hidden_field_data
       )
+    end
+
+    # Convert array of IDs to comma-separated string for multi-value fields
+    def normalized_hidden_value
+      return hidden_value unless hidden_value.is_a?(Array)
+
+      hidden_value.join(",")
     end
 
     def hidden_field_data

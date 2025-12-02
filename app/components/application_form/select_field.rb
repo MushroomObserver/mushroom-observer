@@ -32,18 +32,23 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Override to use `selected` attribute if field.value is nil
+    # Override to use `selected` attribute if field.value is nil or an array.
+    # Arrays occur with range fields (e.g., confidence: [-3.0, -1.0]) where we
+    # pass individual `selected` values for each select in the range pair.
     # Compares as strings to handle boolean values (Phlex omits value="false")
     def options(*collection)
-      selected_value = attributes[:selected]
       map_options(collection).each do |key, value|
-        is_selected = if field.value.nil?
-                        selected_value.to_s == key.to_s
-                      else
-                        field.value.to_s == key.to_s
-                      end
-        option(selected: is_selected, value: key) { value }
+        option(selected: option_selected?(key), value: key) { value }
       end
+    end
+
+    def option_selected?(key)
+      val = use_selected_attribute? ? attributes[:selected] : field.value
+      val.to_s == key.to_s
+    end
+
+    def use_selected_attribute?
+      field.value.nil? || field.value.is_a?(Array)
     end
 
     private

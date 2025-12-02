@@ -55,8 +55,11 @@ class SearchFieldUI
          :misspellings, :rank, :confidence
       custom_select_ui
     when :region then region_field_ui
-    when :in_box then :in_box_fields
+    # NOTE: :in_box is rendered as a nested namespace within
+    # RegionWithBoxFields, not a standalone field. Uncomment if used directly.
+    # when :in_box then :in_box_fields
     when :field_slips then :text_field_with_label
+    when :has_notes_fields then :textarea_field_with_label
     else
       field_ui_from_query_attribute
     end

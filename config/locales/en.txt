@@ -1681,6 +1681,7 @@
   form_locations_refs: "[:form_names_refs]"
   form_locations_refs_help: "[:form_names_refs_help]"
   form_locations_help: Here you can define the place where you observed mushrooms, if a matching place doesn't exist in Mushroom Observer already. Please try to define locations that will be reusable by yourself or others. If you have an idea of the location's name, you can start typing and Google will return its best guess of the place you typed, and draw a box of the approximate boundaries on the map. At this point, you can manually edit both the boundaries and the name of the place. <a href="/locations/help" target="_new">More about Locations on MO.</a>
+  form_regions_help: The region for your search. Click "[:form_locations_find_on_map]" to view or modify the boundary area.
   form_locations_find_on_map: Find on Map
   form_locations_get_elevation: Get Elevations
   form_locations_lat_long_help: All values should be in decimal degrees.
@@ -3779,9 +3780,10 @@
   pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:"
   pattern_search_terms_multiple: Separate multiple values with commas.
   pattern_search_terms_short_help: Click the ? next to the search bar for a list of expected terms.
+  form_search_terms_multiple: Separate multiple values with a [return].
 
   query_term_names: "[type] has [:observations] of one of these [:names]."
-  query_term_region: "[type] is associated with this [:region]."
+  query_term_region: "[type] has a Locality whose name ends with [:region]."
   query_term_by_users: "[type] created by one of these [:users]."
   query_term_title_has: "[type] [:title] contains these words."
   query_term_has_comments: "[type] has any [:comments]?"
@@ -4650,7 +4652,7 @@
   query_quality: "[:quality]"
   query_rank: "[:rank]"
   query_regexp: "[:search]"
-  query_region: "[:regions]"
+  query_region: "[:region]"
   query_sizes: sizes
   query_sources: sources
   query_summary_has: summary has

@@ -23,13 +23,13 @@ module Names
       login
       get(:new)
       assert_template("names/search/new")
-      assert_template("shared/_search_form")
+      assert_select("#names_search_form")
     end
 
     def test_new_names_search_turbo
       login
       get(:new, format: :turbo_stream)
-      assert_template("shared/_search_form")
+      assert_select("#names_search_form")
     end
 
     def test_new_names_search_form_prefilled_from_existing_query
@@ -50,8 +50,9 @@ module Names
       assert_select("select#query_names_misspellings", selected: "either")
       assert_select("select#query_names_has_classification", selected: "yes")
       assert_select("input#query_names_author_has", value: "Pers.")
-      assert_select("select#query_names_rank", selected: "Species")
-      assert_select("select#query_names_rank_range", selected: "Form")
+      # Form normalizes rank range to [low, high] order
+      assert_select("select#query_names_rank", selected: "Form")
+      assert_select("select#query_names_rank_range", selected: "Species")
       assert_equal(session[:search_type], :names)
     end
 
@@ -89,12 +90,139 @@ module Names
           lookup: ["Agaricus campestris"],
           include_synonyms: true
         },
-        rank: [:Species, :Genus],
+        rank: %w[Species Genus],
         misspellings: :either,
         created_at: %w[2007-01-01 2007-12-31]
       }
       assert_redirected_to(controller: "/names", action: :index,
                            params: { q: { model: :Name, **validated_params } })
+    end
+
+    # ---------------------------------------------------------------
+    #  Range value ordering tests
+    #  Ensure that range values are sorted correctly regardless of input order
+    # ---------------------------------------------------------------
+
+    def test_create_with_rank_range_reversed
+      # Submit with higher rank first (Genus), lower rank second (Species)
+      # In Name.all_ranks, Form < Species < Genus, so Genus has higher index
+      login
+      params = {
+        rank: "Genus", # higher rank (index 8)
+        rank_range: "Species" # lower rank (index 3)
+      }
+      post(:create, params: { query_names: params })
+
+      # Should be sorted as [lower, higher] = ["Species", "Genus"]
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, rank: %w[Species Genus] }
+        }
+      )
+    end
+
+    def test_create_with_rank_range_correct_order
+      # Submit with lower rank first (Form), higher rank second (Species)
+      login
+      params = {
+        rank: "Form",         # lower rank (index 0)
+        rank_range: "Species" # higher rank (index 3)
+      }
+      post(:create, params: { query_names: params })
+
+      # Should remain as ["Form", "Species"]
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, rank: %w[Form Species] }
+        }
+      )
+    end
+
+    # ---------------------------------------------------------------
+    #  Rank range prefill tests
+    #  Form should always display [low, high] order regardless of query order
+    # ---------------------------------------------------------------
+
+    def test_prefill_rank_range_normalizes_to_low_high_order
+      # Even if query stores [high, low], form should display [low, high]
+      login
+      # Query stores reversed order: ["Species", "Form"] (high to low)
+      query = @controller.find_or_create_query(
+        :Name,
+        rank: %w[Species Form]
+      )
+      assert(query.id)
+      get(:new)
+
+      # Form should normalize to [low, high] order:
+      # Form (lower rank) should be in the first select
+      assert_select("select#query_names_rank", selected: "Form")
+      # Species (higher rank) should be in the range select
+      assert_select("select#query_names_rank_range", selected: "Species")
+    end
+
+    # ---------------------------------------------------------------
+    #  Single value rank tests (blank + value scenarios)
+    #  Regression test for bug where selecting only the second dropdown
+    #  caused validation errors due to nil values
+    # ---------------------------------------------------------------
+
+    def test_create_with_only_rank_range_value
+      # Submit with first dropdown blank, only second dropdown selected
+      # This previously caused validation errors with [nil, "Species"]
+      login
+      params = {
+        rank: "", # blank/empty
+        rank_range: "Species" # only this one selected
+      }
+      post(:create, params: { query_names: params })
+
+      # Should filter out the blank value and create query with single rank
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, rank: ["Species"] }
+        }
+      )
+    end
+
+    def test_create_with_only_first_rank_value
+      # Submit with only first dropdown selected, second blank
+      login
+      params = {
+        rank: "Genus",
+        rank_range: "" # blank/empty
+      }
+      post(:create, params: { query_names: params })
+
+      # Should filter out the blank value and create query with single rank
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, rank: ["Genus"] }
+        }
+      )
+    end
+
+    def test_create_with_both_rank_values_blank
+      # Submit with both dropdowns blank (no rank filter)
+      login
+      params = {
+        rank: "",
+        rank_range: "",
+        has_author: true # add another param so query isn't completely empty
+      }
+      post(:create, params: { query_names: params })
+
+      # Should create query without rank parameter
+      assert_redirected_to(
+        controller: "/names", action: :index,
+        params: {
+          q: { model: :Name, has_author: true }
+        }
+      )
     end
   end
 end
