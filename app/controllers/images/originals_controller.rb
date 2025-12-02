@@ -16,7 +16,9 @@ module Images
       log_request(@user, @image)
 
       respond_to do |format|
-        format.html { redirect_to(@image.cached_original_url) }
+        format.html do
+          redirect_to(@image.cached_original_url, allow_other_host: false)
+        end
         format.json { cache_original_image }
       end
     end
