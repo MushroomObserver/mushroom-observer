@@ -33,14 +33,9 @@ module Images
       return unless
         (@image = find_or_goto_index(Image, params[:id].to_s)) &&
         can_email_user_question?(@image, method: :email_general_commercial)
+      return unless content_present?
 
       # Migrated from QueuedEmail::CommercialInquiry to deliver_later.
-      content = params.dig(:commercial_inquiry, :content)
-      if content.blank?
-        flash_error(:runtime_missing.t(field: :message.l))
-        render(:new) and return
-      end
-
       CommercialInquiryMailer.build(@user, @image, content).deliver_later
       flash_notice(:runtime_commercial_inquiry_success.t)
 
@@ -48,6 +43,18 @@ module Images
     end
 
     private
+
+    def content
+      params.dig(:commercial_inquiry, :content)
+    end
+
+    def content_present?
+      return true if content.present?
+
+      flash_error(:runtime_missing.t(field: :message.l))
+      render(:new)
+      false
+    end
 
     def show_flash_and_send_back
       respond_to do |format|
