@@ -4,6 +4,8 @@ require("test_helper")
 
 # tests of Herbarium controller
 class HerbariaControllerTest < FunctionalTestCase
+  include ActiveJob::TestHelper
+
   # ---------- Helpers ----------
 
   def nybg
@@ -391,11 +393,12 @@ class HerbariaControllerTest < FunctionalTestCase
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def test_create
-    QueuedEmail.queue = true
-    count_before = QueuedEmail.count
+    email_count = ActionMailer::Base.deliveries.count
     herbarium_count = Herbarium.count
     login("katrina")
-    post(:create, params: { herbarium: create_params })
+    perform_enqueued_jobs do
+      post(:create, params: { herbarium: create_params })
+    end
 
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
@@ -408,13 +411,12 @@ class HerbariaControllerTest < FunctionalTestCase
                  herbarium.mailing_address)
     assert_equal(create_params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
-    assert_equal(count_before + 1, QueuedEmail.count)
-    email = QueuedEmail.last
-    assert_equal(katrina.id, email.user_id)
-    assert_equal(katrina.email, email.get_string(:sender_email))
-    assert_match(/new herbarium/i, email.get_string(:subject))
-    assert_includes(email.get_note, "Burbank Herbarium")
-    QueuedEmail.queue = false
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
+    email = ActionMailer::Base.deliveries.last
+    assert_match(/katrina/, email.to_s)
+    assert_match(/new herbarium/i, email.to_s)
+    assert_match(/Burbank Herbarium/, email.to_s)
   end
 
   def test_create_no_login

@@ -150,12 +150,13 @@ class AccountController < ApplicationController
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
 
-      QueuedEmail::Webmaster.create_email(
-        @user,
+      # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+      content = WebmasterMailer.prepend_user(@user, denied_message(@new_user))
+      WebmasterMailer.build(
         sender_email: MO.accounts_email_address,
         subject: "Account Denied",
-        content: denied_message(@new_user)
-      )
+        content: content
+      ).deliver_later
     end
     false
   end

@@ -56,13 +56,17 @@ module Admin
       end
 
       def send_name_change_request(name_with_icn_id, new_name_with_icn_id)
+        # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
         temporarily_set_locale(MO.default_locale) do
-          QueuedEmail::Webmaster.create_email(
-            @user,
-            content: change_request_content(name_with_icn_id,
-                                            new_name_with_icn_id),
-            subject: "Request to change Name having dependents"
+          content = WebmasterMailer.prepend_user(
+            @user, change_request_content(name_with_icn_id,
+                                          new_name_with_icn_id)
           )
+          WebmasterMailer.build(
+            sender_email: @user.email,
+            content: content,
+            subject: "Request to change Name having dependents"
+          ).deliver_later
         end
         flash_notice(:email_change_name_request_success.t)
         redirect_to(@name.show_link_args)

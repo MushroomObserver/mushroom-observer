@@ -5,6 +5,8 @@ require("test_helper")
 module Admin
   module Emails
     class MergeRequestsControllerTest < FunctionalTestCase
+      include ActiveJob::TestHelper
+
       def test_email_merge_request
         name1 = Name.all.sample
         name2 = Name.all.sample
@@ -81,7 +83,9 @@ module Admin
         assert_equal(email_count, ActionMailer::Base.deliveries.count)
 
         # Test 4: Valid request - should send email
-        post(:create, params: params)
+        perform_enqueued_jobs do
+          post(:create, params: params)
+        end
         assert_response(:redirect)
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
         assert_match(/SHAZAM/, ActionMailer::Base.deliveries.last.to_s)

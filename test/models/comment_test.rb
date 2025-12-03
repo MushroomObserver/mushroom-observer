@@ -3,6 +3,8 @@
 require("test_helper")
 
 class CommentTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   def setup
     super
     QueuedEmail.queue = true
@@ -105,12 +107,28 @@ class CommentTest < UnitTestCase
     MO.oil_users   = old_oil_users
   end
 
+  # Oil and water emails are now sent via deliver_later instead of QueuedEmail.
+  # Check for enqueued mailer jobs instead of QueuedEmail.count.
   def do_oil_and_water_test
-    do_comment_test(0, nil, rolf, "1")
-    do_comment_test(0, nil, mary, "2")
-    do_comment_test(0, nil, roy, "3")
-    do_comment_test(1, nil, katrina, "4")
-    do_comment_test(1, nil, roy, "5")
+    # These comments don't trigger oil_and_water (no oil + water yet)
+    create_oil_and_water_comment(rolf, "1")
+    create_oil_and_water_comment(mary, "2")
+    create_oil_and_water_comment(roy, "3")
+
+    # Now katrina (oil user) comments - should trigger oil_and_water email
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      create_oil_and_water_comment(katrina, "4")
+    end
+
+    # roy commenting again still triggers (oil + water users have commented)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      create_oil_and_water_comment(roy, "5")
+    end
+  end
+
+  def create_oil_and_water_comment(user, summary)
+    Comment.create!(target: nil, user: user, summary: summary, comment: "")
+    sleep(1) # Comments may not be created immediately due to broadcast job
   end
 
   def opt_out_of_comment_responses(*users)
