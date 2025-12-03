@@ -10,11 +10,14 @@ module Admin
 
       def create
         @users = feature_email_recipients
-        return unless content_present?
+        return unless message_present?
 
         # Migrated from QueuedEmail::Features to ActionMailer + ActiveJob.
         # See .claude/deliver_later_migration_plan.md for details.
-        @users.each { |user| FeaturesMailer.build(user, content).deliver_later }
+        message = params[:feature_email][:content]
+        @users.each do |receiver|
+          FeaturesMailer.build(receiver:, message:).deliver_later
+        end
         flash_notice(:send_feature_email_success.t)
         redirect_to(users_path(by: "name"))
       end
@@ -26,12 +29,8 @@ module Admin
           where.not(verified: nil)
       end
 
-      def content
-        params[:feature_email][:content]
-      end
-
-      def content_present?
-        return true if content.present?
+      def message_present?
+        return true if params[:feature_email][:content].present?
 
         flash_error(:runtime_missing.t(field: :message.l))
         render(:new)

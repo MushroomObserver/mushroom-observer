@@ -143,8 +143,10 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_features_email
+    message = "A feature"
+
     run_mail_test("email_features", rolf) do
-      FeaturesMailer.build(rolf, "A feature").deliver_now
+      FeaturesMailer.build(receiver: rolf, message:).deliver_now
     end
   end
 
