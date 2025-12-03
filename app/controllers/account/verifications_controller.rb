@@ -66,12 +66,12 @@ module Account
 
     # Route linked from the "reverify" template. Re-sends verification email.
     def resend_email
-      return unless (user = find_or_goto_index(User, params[:id]))
+      return unless (receiver = find_or_goto_index(User, params[:id]))
 
       # Migrated from QueuedEmail::VerifyAccount to ActionMailer + ActiveJob.
       # See .claude/deliver_later_migration_plan.md for details.
-      VerifyAccountMailer.build(user).deliver_later
-      self.class.notify_root_of_verification_email(user)
+      VerifyAccountMailer.build(receiver:).deliver_later
+      self.class.notify_root_of_verification_email(receiver)
       flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
       redirect_back_or_default(account_welcome_path)
     end

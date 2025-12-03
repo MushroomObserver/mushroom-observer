@@ -95,7 +95,8 @@ class API2
       user.reload
       # Migrated from QueuedEmail::VerifyAccount to ActionMailer + ActiveJob.
       # See .claude/deliver_later_migration_plan.md for details.
-      VerifyAccountMailer.build(user).deliver_later
+      receiver = user
+      VerifyAccountMailer.build(receiver:).deliver_later
     end
 
     def build_deleter
