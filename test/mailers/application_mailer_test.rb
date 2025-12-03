@@ -131,10 +131,6 @@ class ApplicationMailerTest < UnitTestCase
     name1 = names(:agaricus_campestris)
     name2 = obs.name
 
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name2.search_name = name2.search_name.to_ascii
-    name2.display_name = name2.display_name.to_ascii
-
     run_mail_test("consensus_change", mary) do
       ConsensusChangeMailer.build(dick, mary, obs, name1, name2).deliver_now
     end
@@ -212,11 +208,6 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_observation_change_email
     obs = observations(:coprinus_comatus_obs)
-    name = obs.name
-
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name.search_name = name.search_name.to_ascii
-    name.display_name = name.display_name.to_ascii
 
     run_mail_test("observation_change", mary) do
       ObservationChangeMailer.build(
@@ -230,11 +221,6 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_observation_destroy_email
     obs = observations(:coprinus_comatus_obs)
-    name = obs.name
-
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name.search_name = name.search_name.to_ascii
-    name.display_name = name.display_name.to_ascii
 
     run_mail_test("observation_destroy", mary) do
       ObservationChangeMailer.build(
