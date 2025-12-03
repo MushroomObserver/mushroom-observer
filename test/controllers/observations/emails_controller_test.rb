@@ -4,6 +4,8 @@ require("test_helper")
 
 module Observations
   class EmailsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     def test_access_form
       obs = observations(:coprinus_comatus_obs)
       requires_login(:new, id: obs.id)
@@ -25,7 +27,15 @@ module Observations
           content: "Testing question"
         }
       }
-      post_requires_login(:create, params)
+      login
+      assert_enqueued_with(
+        job: ActionMailer::MailDeliveryJob,
+        args: lambda { |args|
+          args[0] == "ObserverQuestionMailer" && args[1] == "build"
+        }
+      ) do
+        post(:create, params: params)
+      end
       assert_redirected_to(observation_path(obs.id))
       assert_flash_text(:runtime_ask_observation_question_success.t)
     end
