@@ -44,6 +44,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       @extra_controller_data = options[:controller_data] || {}
     end
 
+    # Override superclass method to use our @field_attributes
+    def attributes
+      @field_attributes
+    end
+
     def view_template(&block)
       div(
         id: controller_id,
@@ -66,10 +71,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def controller_data
-      {
+      data = {
         controller: stimulus_controller_name,
         type: autocompleter_type
-      }.merge(extra_controller_data)
+      }
+      # Textarea autocompleters accept multiple values separated by newlines
+      data[:separator] = "\n" if textarea
+      data.merge(extra_controller_data)
     end
 
     # Returns the Stimulus controller name for this autocompleter type.
