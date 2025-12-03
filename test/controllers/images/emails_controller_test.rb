@@ -4,6 +4,8 @@ require("test_helper")
 
 module Images
   class EmailsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     def test_try_commercial_inquiry
       id = images(:in_situ_image).id
       requires_login(:new, id: id)
@@ -23,7 +25,10 @@ module Images
           content: "Testing commercial_inquiry"
         }
       }
-      post_requires_login(:create, params)
+      login("rolf")
+      assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+        post(:create, params: params)
+      end
       assert_redirected_to(image_path(image.id))
     end
   end

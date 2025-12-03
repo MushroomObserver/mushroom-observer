@@ -34,8 +34,9 @@ module Images
         (@image = find_or_goto_index(Image, params[:id].to_s)) &&
         can_email_user_question?(@image, method: :email_general_commercial)
 
+      # Migrated from QueuedEmail::CommercialInquiry to deliver_later.
       content = params.dig(:commercial_inquiry, :content)
-      QueuedEmail::CommercialInquiry.create_email(@user, @image, content)
+      CommercialInquiryMailer.build(@user, @image, content).deliver_later
       flash_notice(:runtime_commercial_inquiry_success.t)
 
       show_flash_and_send_back
