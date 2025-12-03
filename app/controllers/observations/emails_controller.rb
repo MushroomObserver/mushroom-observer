@@ -29,36 +29,36 @@ module Observations
     end
 
     def create
-      @observation = find_or_goto_index(Observation, params[:id].to_s)
-      return unless @observation && can_email_user_question?(@observation)
-      return unless question_present?
+      observation = find_or_goto_index(Observation, params[:id].to_s)
+      return unless observation && can_email_user_question?(observation)
+      return unless message_present?(observation)
 
       # Migrated from QueuedEmail::ObserverQuestion to ActionMailer + ActiveJob.
       # See .claude/deliver_later_migration_plan.md for details.
-      ObserverQuestionMailer.build(@user, @observation, question).deliver_later
+      message = params.dig(:question, :content)
+      ObserverQuestionMailer.build(
+        sender: @user, observation:, message:
+      ).deliver_later
       flash_notice(:runtime_ask_observation_question_success.t)
 
-      show_flash_and_send_back
+      show_flash_and_send_back(observation)
     end
 
     private
 
-    def question
-      params.dig(:question, :content)
-    end
-
-    def question_present?
-      return true if question.present?
+    def message_present?(observation)
+      return true if params.dig(:question, :content).present?
 
       flash_error(:runtime_missing.t(field: :message.l))
+      @observation = observation
       render(:new)
       false
     end
 
-    def show_flash_and_send_back
+    def show_flash_and_send_back(observation)
       respond_to do |format|
         format.html do
-          redirect_to(observation_path(@observation.id)) and return
+          redirect_to(observation_path(observation.id)) and return
         end
         format.turbo_stream do
           render(partial: "shared/modal_flash_update",
