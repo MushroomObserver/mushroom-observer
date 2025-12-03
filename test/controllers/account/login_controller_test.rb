@@ -5,6 +5,8 @@ require("test_helper")
 # tests of Login controller
 module Account
   class LoginControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     def setup
       @request.host = "localhost"
       super
@@ -114,8 +116,13 @@ module Account
 
       user = users(:roy)
       old_password = user.password
-      post(:new_password_request,
-           params: { new_user: { login: users(:roy).login } })
+      assert_enqueued_with(
+        job: ActionMailer::MailDeliveryJob,
+        args: ->(args) { args[0] == "PasswordMailer" && args[1] == "build" }
+      ) do
+        post(:new_password_request,
+             params: { new_user: { login: users(:roy).login } })
+      end
       user.reload
       assert_not_equal(user.password, old_password,
                        "New password should be different from old")
