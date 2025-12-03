@@ -102,30 +102,32 @@ class PatternSearchTest < UnitTestCase
     assert_raises(PatternSearch::BadYesError) { x.parse_boolean(:only_yes) }
   end
 
-  def test_parse_yes_no_both
+  def test_parse_no_include_only
     x = PatternSearch::Term.new(:xxx)
     x.vals = []
-    assert_raises(PatternSearch::MissingValueError) { x.parse_yes_no_both }
+    assert_raises(PatternSearch::MissingValueError) { x.parse_no_include_only }
     x.vals = [1, 2]
-    assert_raises(PatternSearch::TooManyValuesError) { x.parse_yes_no_both }
+    assert_raises(PatternSearch::TooManyValuesError) { x.parse_no_include_only }
     x.vals = ["blah"]
-    assert_raises(PatternSearch::BadYesNoBothError) { x.parse_yes_no_both }
+    assert_raises(PatternSearch::BadYesNoBothError) { x.parse_no_include_only }
     x.vals = ["yes"]
-    assert_equal("only", x.parse_yes_no_both)
+    assert_equal("only", x.parse_no_include_only)
     x.vals = ["TRUE"]
-    assert_equal("only", x.parse_yes_no_both)
+    assert_equal("only", x.parse_no_include_only)
     x.vals = ["1"]
-    assert_equal("only", x.parse_yes_no_both)
+    assert_equal("only", x.parse_no_include_only)
     x.vals = ["NO"]
-    assert_equal("no", x.parse_yes_no_both)
+    assert_equal("no", x.parse_no_include_only)
     x.vals = ["false"]
-    assert_equal("no", x.parse_yes_no_both)
+    assert_equal("no", x.parse_no_include_only)
     x.vals = ["0"]
-    assert_equal("no", x.parse_yes_no_both)
+    assert_equal("no", x.parse_no_include_only)
+    x.vals = ["include"]
+    assert_equal("include", x.parse_no_include_only)
     x.vals = ["both"]
-    assert_equal("either", x.parse_yes_no_both)
+    assert_equal("include", x.parse_no_include_only)
     x.vals = ["EITHER"]
-    assert_equal("either", x.parse_yes_no_both)
+    assert_equal("include", x.parse_no_include_only)
   end
 
   def test_parse_float
