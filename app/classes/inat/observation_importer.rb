@@ -44,7 +44,7 @@ class Inat
     end
 
     def date_missing?
-      return false unless @inat_obs.observed_on_missing?
+      return false if @inat_obs.observed_on_present?
 
       log_with_response_error(
         "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
