@@ -269,12 +269,29 @@ class Components::SearchForm < Components::ApplicationForm
            ))
   end
 
-  # Sort rank range values to [low, high] order for display
+  # Sort rank range values to [low, high] order for display.
+  # If one value is blank, substitute the minimum or maximum rank.
   def sorted_rank_range(range)
     return [nil, nil] if range.blank?
 
-    sorted = range.sort_by { |v| Name.all_ranks.index(v.to_s) || 0 }
-    [sorted.first, sorted.last]
+    values = range.reject { |v| v.to_s.blank? }
+    return [nil, nil] if values.empty?
+
+    sorted = values.sort_by { |v| Name.all_ranks.index(v.to_s) || 0 }
+    fill_single_value_range(range, sorted, Name.all_ranks)
+  end
+
+  # When only one value provided, fill in min based on which was blank.
+  # If first is blank, fill with min (range from min to value).
+  # If second is blank, leave it nil (exact match on first value).
+  def fill_single_value_range(original, sorted, all_values)
+    return [sorted.first, sorted.last] if sorted.size > 1
+
+    if original.first.to_s.blank?
+      [all_values.first, sorted.first]
+    else
+      [sorted.first, nil]
+    end
   end
 
   def render_select_confidence_range(field_name:)
@@ -291,12 +308,28 @@ class Components::SearchForm < Components::ApplicationForm
            ))
   end
 
-  # Sort confidence range values to [low, high] order for display
+  # Sort confidence range values to [low, high] order for display.
+  # If first is blank, fill with minimum. If second is blank, leave nil.
   def sorted_confidence_range(range)
     return [nil, nil] if range.blank?
 
-    sorted = range.map(&:to_f).sort
-    [sorted.first, sorted.last]
+    values = range.reject { |v| v.nil? || v.to_s.blank? }
+    return [nil, nil] if values.empty?
+
+    sorted = values.map(&:to_f).sort
+    fill_confidence_range(range, sorted)
+  end
+
+  # If first is blank, fill with min (range from min to value).
+  # If second is blank, fill with max (scope treats nil as ≥ first).
+  def fill_confidence_range(original, sorted)
+    return [sorted.first, sorted.last] if sorted.size > 1
+
+    if original.first.nil? || original.first.to_s.blank?
+      [Vote::MINIMUM_VOTE.to_f, sorted.first]
+    else
+      [sorted.first, Vote::MAXIMUM_VOTE.to_f]
+    end
   end
 
   def render_single_value_autocompleter(field_name:)
