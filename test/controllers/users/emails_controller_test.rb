@@ -32,12 +32,14 @@ module Users
         }
       }
 
-      # Verify email job is enqueued with correct mailer, method, and args.
+      # Verify email job is enqueued with correct mailer, method, and kwargs.
       # This also tests that User objects serialize correctly via GlobalID.
       assert_enqueued_with(
         job: ActionMailer::MailDeliveryJob,
         args: ["UserQuestionMailer", "build", "deliver_now",
-               { args: [rolf, mary, "Email subject", "Email question"] }]
+               { args: [{ sender: rolf, receiver: mary,
+                          subject: "Email subject",
+                          message: "Email question" }] }]
       ) do
         post_requires_login(:create, params)
       end

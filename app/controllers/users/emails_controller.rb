@@ -29,39 +29,36 @@ module Users
     # Migrated from QueuedEmail::UserQuestion to ActionMailer + ActiveJob.
     # See .claude/deliver_later_migration_plan.md for details.
     def create
-      @target = find_or_goto_index(User, params[:id].to_s)
-      return unless @target && can_email_user_question?(@target)
-      return redirect_with_missing_fields_error unless email_fields_present?
+      receiver = find_or_goto_index(User, params[:id].to_s)
+      return unless receiver && can_email_user_question?(receiver)
+      return missing_fields_error(receiver) if email_fields_missing?
 
-      UserQuestionMailer.build(@user, @target, subject, content).deliver_later
+      subject = params.dig(:email, :subject)
+      message = params.dig(:email, :content)
+      UserQuestionMailer.build(
+        sender: @user, receiver:, subject:, message:
+      ).deliver_later
       flash_notice(:runtime_ask_user_question_success.t)
 
-      show_flash_and_send_back
+      show_flash_and_send_back(receiver)
     end
 
     private
 
-    def subject
-      params.dig(:email, :subject)
+    def email_fields_missing?
+      params.dig(:email, :subject).blank? ||
+        params.dig(:email, :content).blank?
     end
 
-    def content
-      params.dig(:email, :content)
-    end
-
-    def email_fields_present?
-      subject.present? && content.present?
-    end
-
-    def redirect_with_missing_fields_error
+    def missing_fields_error(receiver)
       flash_error(:runtime_ask_user_question_missing_fields.t)
-      redirect_to(user_path(@target.id))
+      redirect_to(user_path(receiver.id))
     end
 
-    def show_flash_and_send_back
+    def show_flash_and_send_back(receiver)
       respond_to do |format|
         format.html do
-          redirect_to(user_path(@target.id)) and return
+          redirect_to(user_path(receiver.id)) and return
         end
         format.turbo_stream do
           render(partial: "shared/modal_flash_update",
