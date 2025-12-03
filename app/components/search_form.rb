@@ -321,8 +321,8 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   # If first is blank, fill with min (range from min to value).
-  # If second is blank, keep as single value - scope handles the appropriate range.
-  # Single value behavior:
+  # If second is blank, keep as single value - scope handles the
+  # appropriate range. Single value behavior:
   # - 0.0: Exact match
   # - Positive: Range from (next_lower, value]
   # - Negative: Range from [value, next_higher)
