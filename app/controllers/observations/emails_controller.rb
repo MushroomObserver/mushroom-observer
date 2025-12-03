@@ -31,12 +31,7 @@ module Observations
     def create
       @observation = find_or_goto_index(Observation, params[:id].to_s)
       return unless @observation && can_email_user_question?(@observation)
-
-      question = params.dig(:question, :content)
-      if question.blank?
-        flash_error(:runtime_missing.t(field: :message.l))
-        render(:new) and return
-      end
+      return unless question_present?
 
       # Migrated from QueuedEmail::ObserverQuestion to ActionMailer + ActiveJob.
       # See .claude/deliver_later_migration_plan.md for details.
@@ -47,6 +42,18 @@ module Observations
     end
 
     private
+
+    def question
+      params.dig(:question, :content)
+    end
+
+    def question_present?
+      return true if question.present?
+
+      flash_error(:runtime_missing.t(field: :message.l))
+      render(:new)
+      false
+    end
 
     def show_flash_and_send_back
       respond_to do |format|
