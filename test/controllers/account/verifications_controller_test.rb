@@ -62,7 +62,8 @@ module Account
       )
       assert_enqueued_with(
         job: ActionMailer::MailDeliveryJob,
-        args: ["VerifyAccountMailer", "build", "deliver_now", { args: [user] }]
+        args: ["VerifyAccountMailer", "build", "deliver_now",
+               { args: [{ receiver: user }] }]
       ) do
         post(:resend_email, params: { id: user.id })
       end
