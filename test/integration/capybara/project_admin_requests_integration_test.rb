@@ -4,14 +4,14 @@ require("test_helper")
 
 # Simple smoke tests for project admin request form submission
 class ProjectAdminRequestsIntegrationTest < CapybaraIntegrationTestCase
-  def test_create_project_admin_request
-    # Enable email queuing for this test
-    original_queue_email = Rails.application.config.queue_email
-    Rails.application.config.queue_email = true
+  include ActiveJob::TestHelper
 
+  def test_create_project_admin_request
     # Login as a user (not the project admin)
     login(users(:katrina))
     project = projects(:eol_project)
+    admin_count = project.admin_group.users.count
+    assert(admin_count.positive?, "Project should have at least one admin")
 
     # Visit the new project admin request page
     visit(new_project_admin_request_path(project))
@@ -21,26 +21,16 @@ class ProjectAdminRequestsIntegrationTest < CapybaraIntegrationTestCase
     fill_in("email_subject", with: "Request to admin project")
     fill_in("email_content", with: "I would like to help admin this project")
 
-    # Submit the form
-    within("#project_admin_request_form") do
-      click_commit
+    # Submit the form - should enqueue one email per admin
+    assert_enqueued_jobs(admin_count, only: ActionMailer::MailDeliveryJob) do
+      within("#project_admin_request_form") do
+        click_commit
+      end
+      # Wait for redirect
+      assert_selector("body.projects__show")
     end
 
-    # Verify successful creation (redirects to project page)
-    assert_selector("body.projects__show")
+    # Verify successful redirect to project page
     assert_current_path(project_path(project))
-
-    # Verify database effect - verify that QueuedEmails were created
-    # (one for each admin in the project's admin group)
-    emails = QueuedEmail.where(flavor: "QueuedEmail::ProjectAdminRequest")
-    assert(emails.any?, "Admin request emails should have been queued")
-
-    # Verify emails were sent to the project admins (mary is in eol_admins)
-    admin_ids = project.admin_group.users.pluck(:id)
-    email_recipient_ids = emails.pluck(:to_user_id)
-    assert_equal(admin_ids.sort, email_recipient_ids.sort)
-  ensure
-    # Restore original email queuing setting
-    Rails.application.config.queue_email = original_queue_email
   end
 end
