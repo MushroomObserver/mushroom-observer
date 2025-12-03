@@ -127,12 +127,14 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_consensus_change_email
-    obs = observations(:coprinus_comatus_obs)
-    name1 = names(:agaricus_campestris)
-    name2 = obs.name
+    observation = observations(:coprinus_comatus_obs)
+    old_name = names(:agaricus_campestris)
+    new_name = observation.name
 
     run_mail_test("consensus_change", mary) do
-      ConsensusChangeMailer.build(dick, mary, obs, name1, name2).deliver_now
+      ConsensusChangeMailer.build(
+        sender: dick, receiver: mary, observation:, old_name:, new_name:
+      ).deliver_now
     end
   end
 
@@ -207,24 +209,26 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_observation_change_email
-    obs = observations(:coprinus_comatus_obs)
+    observation = observations(:coprinus_comatus_obs)
+    note = "date,location,specimen,is_collection_location,notes," \
+           "thumb_image_id,added_image,removed_image"
 
     run_mail_test("observation_change", mary) do
       ObservationChangeMailer.build(
-        dick, mary, obs,
-        "date,location,specimen,is_collection_location,notes," \
-        "thumb_image_id,added_image,removed_image",
-        obs.created_at
+        sender: dick, receiver: mary, observation:, note:,
+        time: observation.created_at
       ).deliver_now
     end
   end
 
   def test_observation_destroy_email
-    obs = observations(:coprinus_comatus_obs)
+    observation = observations(:coprinus_comatus_obs)
+    note = "**__Coprinus comatus__** L. (123)"
 
     run_mail_test("observation_destroy", mary) do
       ObservationChangeMailer.build(
-        dick, mary, nil, "**__Coprinus comatus__** L. (123)", obs.created_at
+        sender: dick, receiver: mary, observation: nil, note:,
+        time: observation.created_at
       ).deliver_now
     end
   end

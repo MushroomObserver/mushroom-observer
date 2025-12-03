@@ -4,7 +4,7 @@
 class ConsensusChangeMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(sender, receiver, observation, old_name, new_name)
+  def build(sender:, receiver:, observation:, old_name:, new_name:)
     setup_user(receiver)
     @observation = observation
     @old_name = old_name

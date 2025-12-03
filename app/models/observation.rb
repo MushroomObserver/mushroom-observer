@@ -952,11 +952,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     recipients = interested_users - [sender]
     note = changes.join(",")
 
-    recipients.each do |recipient|
-      next if recipient.no_emails
+    recipients.each do |receiver|
+      next if receiver.no_emails
 
       ObservationChangeMailer.build(
-        sender, recipient, self, note, updated_at
+        sender:, receiver:, observation: self, note:, time: updated_at
       ).deliver_later
     end
   end
@@ -967,11 +967,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     recipients = interested_users - [sender]
     note = user_unique_format_name(User.current)
 
-    recipients.each do |recipient|
-      next if recipient.no_emails
+    recipients.each do |receiver|
+      next if receiver.no_emails
 
       ObservationChangeMailer.build(
-        sender, recipient, nil, note, Time.zone.now
+        sender:, receiver:, observation: nil, note:, time: Time.zone.now
       ).deliver_later
     end
   end
@@ -1012,9 +1012,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
+    (recipients.uniq - [sender]).each do |receiver|
       ConsensusChangeMailer.build(
-        sender, recipient, self, old_name, new_name
+        sender:, receiver:, observation: self, old_name:, new_name:
       ).deliver_later
     end
   end
@@ -1044,9 +1044,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
+    (recipients.uniq - [sender]).each do |receiver|
       ConsensusChangeMailer.build(
-        sender, recipient, self, old_name, new_name
+        sender:, receiver:, observation: self, old_name:, new_name:
       ).deliver_later
     end
   end
