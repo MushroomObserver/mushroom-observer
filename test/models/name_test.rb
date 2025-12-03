@@ -2833,22 +2833,20 @@ class NameTest < UnitTestCase
   end
 
   def test_skip_notify
-    QueuedEmail.queue = true
     User.current = users(:roy)
     name = names(:coprinus_comatus)
     name.skip_notify = true
-    assert_difference("QueuedEmail.count", 0) do
+    assert_no_enqueued_jobs do
       name.update(
         Name.parse_name("Coprinus comatus  (O.F. Müll.) Persoon").params
       )
     end
     name.skip_notify = false
-    assert_difference("QueuedEmail.count", 2) do
+    assert_enqueued_jobs(2) do
       name.update(
         Name.parse_name("Coprinus comatus  (O.F. Müll.) Pers.").params
       )
     end
-    QueuedEmail.queue = false
   end
 
   # Prove that alphabetized sort_names give us names in the expected order
