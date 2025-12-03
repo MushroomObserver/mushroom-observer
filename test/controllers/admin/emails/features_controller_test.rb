@@ -29,6 +29,17 @@ module Admin
         end
         assert_redirected_to(users_path(by: "name"))
       end
+
+      def test_features_requires_content
+        login("rolf")
+        make_admin("rolf")
+
+        assert_no_enqueued_jobs do
+          post(:create, params: { feature_email: { content: "" } })
+        end
+        assert_flash_error
+        assert_template(:new)
+      end
     end
   end
 end
