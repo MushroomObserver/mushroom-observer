@@ -318,17 +318,7 @@ class QueuedEmailTest < UnitTestCase
                  to: users(:unverified))
   end
 
-  def test_webmaster_question_email
-    # Note that there is no `from` or `to` User instance for these,
-    # because anyone can email the webmaster, even without an account.
-    subject = "Euh..."
-    content = "What's up with this button here?"
-    QueuedEmail::Webmaster.create_email(nil, sender_email: mary.email,
-                                             content: content, subject: subject)
-    assert_email(0,
-                 flavor: "QueuedEmail::Webmaster",
-                 sender_email: mary.email,
-                 subject: "Euh...",
-                 note: content)
-  end
+  # test_webmaster_question_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_webmaster_email
+  # and test/controllers/admin/emails/webmaster_questions_controller_test.rb
 end
