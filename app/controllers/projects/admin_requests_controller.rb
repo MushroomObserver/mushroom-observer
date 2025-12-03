@@ -24,6 +24,12 @@ module Projects
 
       subject = params[:email][:subject]
       content = params[:email][:content]
+
+      if content.blank?
+        flash_error(:runtime_missing.t(field: :request_message.l))
+        render(:new) and return
+      end
+
       @project.admin_group.users.each do |receiver|
         ProjectAdminRequestMailer.build(sender, receiver, @project,
                                         subject, content).deliver_later

@@ -33,4 +33,27 @@ class ProjectAdminRequestsIntegrationTest < CapybaraIntegrationTestCase
     # Verify successful redirect to project page
     assert_current_path(project_path(project))
   end
+
+  def test_create_project_admin_request_requires_content
+    login(users(:katrina))
+    project = projects(:eol_project)
+
+    visit(new_project_admin_request_path(project))
+    assert_selector("body.admin_requests__new")
+
+    # Fill in subject but leave content blank
+    fill_in("email_subject", with: "Request to admin project")
+    fill_in("email_content", with: "")
+
+    # Submit the form - should NOT enqueue any emails
+    assert_no_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do
+      within("#project_admin_request_form") do
+        click_commit
+      end
+    end
+
+    # Should re-render the form with error (body class is create, not new)
+    assert_selector("#project_admin_request_form")
+    assert_flash_text(:runtime_missing.l(field: :request_message.l))
+  end
 end
