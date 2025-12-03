@@ -123,10 +123,12 @@ class HerbariumRecord < AbstractModel
     recipients = herbarium.try(&:curators) || []
     return if recipients.member?(sender)
 
-    recipients.each do |recipient|
-      next if recipient.no_emails
+    recipients.each do |receiver|
+      next if receiver.no_emails
 
-      AddHerbariumRecordMailer.build(sender, recipient, self).deliver_later
+      AddHerbariumRecordMailer.build(
+        sender:, receiver:, herbarium_record: self
+      ).deliver_later
     end
   end
 
