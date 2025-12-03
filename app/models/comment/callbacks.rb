@@ -79,7 +79,7 @@ module Comment::Callbacks
 
   def send_comment_notifications(users)
     users.each do |recipient|
-      QueuedEmail::CommentAdd.find_or_create_email(user, recipient, self)
+      CommentMailer.build(user, recipient, target, self).deliver_later
     end
   end
 

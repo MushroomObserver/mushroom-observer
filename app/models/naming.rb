@@ -227,7 +227,7 @@ class Naming < AbstractModel
 
     # Send to everyone (except the person who created the naming!)
     (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::NameProposal.create_email(sender, recipient, obs, self)
+      NameProposalMailer.build(sender, recipient, self, obs).deliver_later
     end
   end
 

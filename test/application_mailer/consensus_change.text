@@ -8,7 +8,7 @@ Consensus Change
 Consensus has changed for observation #<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>:
 
 Old name: Agaricus campestris L.
-New name: Coprinus comatus (O.F. Müll.) Pers.
+New name: Coprinus comatus (O.F. Mull.) Pers.
 Time: IGNORE
 By: Tricky Dick (dick)
 

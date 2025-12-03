@@ -64,18 +64,8 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_comment_add_email
-    QueuedEmail::CommentAdd.find_or_create_email(
-      rolf, mary, comments(:minimal_unknown_obs_comment_1)
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::CommentAdd",
-                 from: rolf,
-                 to: mary,
-                 comment: comments(:minimal_unknown_obs_comment_1).id)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # NOTE: test_comment_add_email removed - CommentAdd now uses deliver_later.
+  # Mailer tested in application_mailer_test.rb.
 
   def test_commercial_inquiry_email
     image = images(:amateur_image)
@@ -91,22 +81,8 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_consensus_change_email
-    QueuedEmail::ConsensusChange.create_email(
-      rolf, mary,
-      observations(:coprinus_comatus_obs),
-      names(:agaricus_campestris), names(:coprinus_comatus)
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::ConsensusChange",
-                 from: rolf,
-                 to: mary,
-                 observation: observations(:coprinus_comatus_obs).id,
-                 old_name: names(:agaricus_campestris).id,
-                 new_name: names(:coprinus_comatus).id)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # NOTE: test_consensus_change_email removed - ConsensusChange now uses
+  # deliver_later. Mailer tested in application_mailer_test.rb.
 
   def test_features_email
     QueuedEmail::Features.create_email(mary, "blah blah blah")
@@ -160,21 +136,8 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_name_proposal_email
-    QueuedEmail::NameProposal.create_email(
-      rolf, mary,
-      observations(:coprinus_comatus_obs),
-      namings(:coprinus_comatus_naming)
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::NameProposal",
-                 from: rolf,
-                 to: mary,
-                 naming: namings(:coprinus_comatus_naming).id,
-                 observation: observations(:coprinus_comatus_obs).id)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # NOTE: test_name_proposal_email removed - NameProposal now uses
+  # deliver_later. Mailer tested in application_mailer_test.rb.
 
   def test_naming_email
     QueuedEmail::NameTracking.create_email(
@@ -206,47 +169,9 @@ class QueuedEmailTest < UnitTestCase
                  note: "What's going on with that pileus?")
   end
 
-  def test_observation_change_email
-    QueuedEmail::ObservationChange.change_observation(
-      rolf, mary, observations(:coprinus_comatus_obs)
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::ObservationChange",
-                 from: rolf,
-                 to: mary,
-                 observation: observations(:coprinus_comatus_obs).id,
-                 note: "")
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
-
-  def test_observation_destroy
-    QueuedEmail::ObservationChange.destroy_observation(
-      rolf, mary, observations(:coprinus_comatus_obs)
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::ObservationChange",
-                 from: rolf,
-                 to: mary,
-                 observation: 0,
-                 note: observations(:coprinus_comatus_obs).unique_format_name)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
-
-  def test_observation_add_image_email
-    QueuedEmail::ObservationChange.change_images(
-      rolf, mary, observations(:coprinus_comatus_obs), :added_image
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::ObservationChange",
-                 from: rolf,
-                 to: mary,
-                 observation: observations(:coprinus_comatus_obs).id,
-                 note: "added_image")
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # NOTE: test_observation_change_email, test_observation_destroy, and
+  # test_observation_add_image_email removed - ObservationChange now uses
+  # deliver_later. Mailer tested in application_mailer_test.rb.
 
   def test_password_email
     password = String.random(10)

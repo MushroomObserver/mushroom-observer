@@ -136,9 +136,7 @@ class ApplicationMailerTest < UnitTestCase
     name2.display_name = name2.display_name.to_ascii
 
     run_mail_test("consensus_change", mary) do
-      email = QueuedEmail::ConsensusChange.create_email(dick, mary, obs,
-                                                        name1, name2)
-      ConsensusChangeMailer.build(email).deliver_now
+      ConsensusChangeMailer.build(dick, mary, obs, name1, name2).deliver_now
     end
   end
 
