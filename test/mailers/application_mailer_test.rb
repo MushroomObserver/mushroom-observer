@@ -207,8 +207,10 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_password_email
+    password = "A password"
+
     run_mail_test("new_password", rolf) do
-      PasswordMailer.build(rolf, "A password").deliver_now
+      PasswordMailer.build(receiver: rolf, password:).deliver_now
     end
   end
 
