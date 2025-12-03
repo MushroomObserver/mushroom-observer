@@ -13,14 +13,15 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_send_email
-    email = QueuedEmail::NameChange.new(user: rolf, to_user: mary)
+    email = QueuedEmail::NameProposal.new(user: rolf, to_user: mary)
     assert_not(email.send_email)
   end
 
   def test_dump
-    subject = "Supercalifragilistic"
-    note = "Phantasmagorical observations"
-    email = QueuedEmail::UserQuestion.create_email(rolf, mary, subject, note)
+    project = projects(:eol_project)
+    email = QueuedEmail::ProjectAdminRequest.create_email(
+      rolf, mary, project, "Supercalifragilistic", "Phantasmagorical request"
+    )
     email.send_email
     dump = QueuedEmail.last.dump
     assert_match(/supercalifragilistic/i, dump)
@@ -31,7 +32,7 @@ class QueuedEmailTest < UnitTestCase
 
   def test_send_email_exception
     raises_exception = -> { raise(RuntimeError.new) }
-    email = QueuedEmail::NameChange.new(user: rolf, to_user: mary)
+    email = QueuedEmail::NameProposal.new(user: rolf, to_user: mary)
     email.stub(:deliver_email, raises_exception) do
       original_stderr = $stderr.clone
       $stderr.reopen(File.new(File::NULL, "w"))
