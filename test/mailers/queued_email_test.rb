@@ -176,23 +176,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_naming_email
-    QueuedEmail::NameTracking.create_email(
-      name_trackers(:agaricus_campestris_name_tracker_with_note),
-      namings(:agaricus_campestris_naming)
-    )
-    assert_email(
-      0,
-      flavor: "QueuedEmail::NameTracking",
-      from: mary,
-      to: rolf,
-      naming: namings(:agaricus_campestris_naming).id,
-      name_tracker:
-      name_trackers(:agaricus_campestris_name_tracker_with_note).id
-    )
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_naming_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_naming_tracker_email
+  # and test/mailers/application_mailer_test.rb#test_naming_observer_email
 
   def test_observer_question_email
     observation = observations(:coprinus_comatus_obs) # rolf's
