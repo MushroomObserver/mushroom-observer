@@ -194,17 +194,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_observer_question_email
-    observation = observations(:coprinus_comatus_obs) # rolf's
-    question = "What's going on with that pileus?"
-    QueuedEmail::ObserverQuestion.create_email(mary, observation, question)
-    assert_email(0,
-                 flavor: "QueuedEmail::ObserverQuestion",
-                 from: mary,
-                 to: rolf,
-                 observation: observation.id,
-                 note: "What's going on with that pileus?")
-  end
+  # test_observer_question_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_observer_question_email
+  # and test/controllers/observations/emails_controller_test.rb
 
   def test_observation_change_email
     QueuedEmail::ObservationChange.change_observation(
