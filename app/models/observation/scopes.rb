@@ -90,9 +90,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
+    # Special case: "No Opinion" (0) searches for exactly 0.0
     scope :confidence, lambda { |min, max = nil|
       min, max = min if min.is_a?(Array)
-      if max.nil? || max == min # max may be 0
+      # Special case: 0 (No Opinion) should match exactly, not >= 0
+      if (max.nil? || max == min) && min.to_f.zero?
+        where(Observation[:vote_cache].eq(0))
+      elsif max.nil? || max == min # max may be 0
         where(Observation[:vote_cache].gteq(min))
       else
         where(Observation[:vote_cache].in(min..max))

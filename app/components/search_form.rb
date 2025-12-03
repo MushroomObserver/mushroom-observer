@@ -322,11 +322,15 @@ class Components::SearchForm < Components::ApplicationForm
 
   # If first is blank, fill with min (range from min to value).
   # If second is blank, fill with max (scope treats nil as ≥ first).
+  # Special case: "No Opinion" (0) doesn't fill with max, stays as single value.
   def fill_confidence_range(original, sorted)
     return [sorted.first, sorted.last] if sorted.size > 1
 
     if original.first.nil? || original.first.to_s.blank?
       [Vote::MINIMUM_VOTE.to_f, sorted.first]
+    elsif sorted.first.zero?
+      # "No Opinion" (0) should not be filled with maximum - exact match only
+      [sorted.first, nil]
     else
       [sorted.first, Vote::MAXIMUM_VOTE.to_f]
     end

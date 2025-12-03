@@ -153,7 +153,7 @@ class Vote < AbstractModel
     [:vote_confidence_0,   -3.0]
   ].freeze
 
-  NO_OPINION_VAL = [:vote_no_opinion, 0].freeze
+  NO_OPINION_VAL = [:vote_no_opinion, 0.0].freeze
 
   # List of options interpreted as "confidence".
   #
@@ -174,7 +174,10 @@ class Vote < AbstractModel
   end
 
   # Find label of closest value in the "confidence" menu.
+  # Special case: 0 returns "No Opinion"
   def self.confidence(val)
+    return no_opinion if val.to_f.zero?
+
     lookup_value(val, confidence_menu)
   end
 
