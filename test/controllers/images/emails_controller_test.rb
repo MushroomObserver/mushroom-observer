@@ -37,7 +37,8 @@ module Images
       login("rolf")
 
       assert_no_enqueued_jobs do
-        post(:create, params: { id: image.id, commercial_inquiry: { content: "" } })
+        post(:create,
+             params: { id: image.id, commercial_inquiry: { content: "" } })
       end
       assert_flash_error
       assert_template(:new)
