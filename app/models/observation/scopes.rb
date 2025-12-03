@@ -90,15 +90,41 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
-    # Special case: "No Opinion" (0) searches for exactly 0.0
+    #
+    # Single value behavior:
+    # - 0.0 (No Opinion): Exact match
+    # - Positive values: Range from (next_lower, value] - e.g., "Promising"
+    #   searches for vote_cache > 1.0 AND <= 2.0
+    # - Negative values: Range from [value, next_higher) - e.g., "Not Likely"
+    #   searches for vote_cache >= -2.0 AND < -1.0
     scope :confidence, lambda { |min, max = nil|
       min, max = min if min.is_a?(Array)
-      # Special case: 0 (No Opinion) should match exactly, not >= 0
-      if (max.nil? || max == min) && min.to_f.zero?
-        where(Observation[:vote_cache].eq(0))
-      elsif max.nil? || max == min # max may be 0
-        where(Observation[:vote_cache].gteq(min))
+      confidence_levels = [3.0, 2.0, 1.0, 0.0, -1.0, -2.0, -3.0].freeze
+
+      if max.nil? || max == min
+        # Single value search
+        value = min.to_f
+
+        if value.zero?
+          # No Opinion: exact match
+          where(Observation[:vote_cache].eq(0))
+        elsif value.positive?
+          # Positive confidence: range from (next_lower, value]
+          next_lower = confidence_levels.select do |v|
+            v < value
+          end.max || (value - 1.0)
+          where(Observation[:vote_cache].gt(next_lower).
+                and(Observation[:vote_cache].lteq(value)))
+        else
+          # Negative confidence: range from [value, next_higher)
+          next_higher = confidence_levels.select do |v|
+            v > value
+          end.min || (value + 1.0)
+          where(Observation[:vote_cache].gteq(value).
+                and(Observation[:vote_cache].lt(next_higher)))
+        end
       else
+        # Range search: use as-is
         where(Observation[:vote_cache].in(min..max))
       end
     }
