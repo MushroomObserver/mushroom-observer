@@ -32,20 +32,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_approval_email
-    user = katrina
-    subject = "this is the subject!"
-    content = "your request has been approved"
-    QueuedEmail::Approval.find_or_create_email(user, subject, content)
-    email = assert_email(
-      0,
-      from: User.admin,
-      to: user,
-      subject: subject,
-      note: content
-    )
-    assert(email.deliver_email)
-  end
+  # test_approval_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_approval_email
+  # and test/controllers/names/trackers/approve_controller_test.rb
 
   def test_author_request_email
     QueuedEmail::AuthorRequest.create_email(
