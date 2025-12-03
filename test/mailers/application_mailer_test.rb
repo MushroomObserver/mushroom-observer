@@ -119,10 +119,10 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_commercial_email
     image = images(:commercial_inquiry_image)
+    message = "Did test_commercial_inquiry work?"
+
     run_mail_test("commercial_inquiry", image.user) do
-      CommercialInquiryMailer.build(
-        mary, image, "Did test_commercial_inquiry work?"
-      ).deliver_now
+      CommercialInquiryMailer.build(sender: mary, image:, message:).deliver_now
     end
   end
 

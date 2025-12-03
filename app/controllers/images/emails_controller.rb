@@ -30,36 +30,37 @@ module Images
     end
 
     def create
-      return unless
-        (@image = find_or_goto_index(Image, params[:id].to_s)) &&
-        can_email_user_question?(@image, method: :email_general_commercial)
-      return unless content_present?
+      image = find_or_goto_index(Image, params[:id].to_s)
+      return unless image &&
+                    can_email_user_question?(image,
+                                             method: :email_general_commercial)
+      return unless content_present?(image)
 
       # Migrated from QueuedEmail::CommercialInquiry to deliver_later.
-      CommercialInquiryMailer.build(@user, @image, content).deliver_later
+      message = params.dig(:commercial_inquiry, :content)
+      CommercialInquiryMailer.build(
+        sender: @user, image:, message:
+      ).deliver_later
       flash_notice(:runtime_commercial_inquiry_success.t)
 
-      show_flash_and_send_back
+      show_flash_and_send_back(image)
     end
 
     private
 
-    def content
-      params.dig(:commercial_inquiry, :content)
-    end
-
-    def content_present?
-      return true if content.present?
+    def content_present?(image)
+      return true if params.dig(:commercial_inquiry, :content).present?
 
       flash_error(:runtime_missing.t(field: :message.l))
+      @image = image
       render(:new)
       false
     end
 
-    def show_flash_and_send_back
+    def show_flash_and_send_back(image)
       respond_to do |format|
         format.html do
-          redirect_to(image_path(@image.id)) and return
+          redirect_to(image_path(image.id)) and return
         end
         format.turbo_stream do
           render(partial: "shared/modal_flash_update",
