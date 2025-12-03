@@ -19,8 +19,11 @@ class QueuedEmailTest < UnitTestCase
 
   def test_dump
     subject = "Supercalifragilistic"
-    note = "Phantasmagorical observations"
-    email = QueuedEmail::UserQuestion.create_email(rolf, mary, subject, note)
+    message = "Phantasmagorical observations"
+    project = projects(:eol_project)
+    email = QueuedEmail::ProjectAdminRequest.create_email(
+      rolf, mary, project, subject, message
+    )
     email.send_email
     dump = QueuedEmail.last.dump
     assert_match(/supercalifragilistic/i, dump)
