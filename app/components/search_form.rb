@@ -334,7 +334,9 @@ class Components::SearchForm < Components::ApplicationForm
       [Vote::MINIMUM_VOTE.to_f, sorted.first]
     else
       # Single value selection - don't fill with max, let scope handle the range
-      [sorted.first, nil]
+      # Return integer 0 for "No Opinion" to match Vote.opinion_menu
+      first_value = sorted.first.zero? ? 0 : sorted.first
+      [first_value, nil]
     end
   end
 

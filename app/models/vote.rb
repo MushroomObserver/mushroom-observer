@@ -153,7 +153,7 @@ class Vote < AbstractModel
     [:vote_confidence_0,   -3.0]
   ].freeze
 
-  NO_OPINION_VAL = [:vote_no_opinion, 0.0].freeze
+  NO_OPINION_VAL = [:vote_no_opinion, 0].freeze
 
   # List of options interpreted as "confidence".
   #

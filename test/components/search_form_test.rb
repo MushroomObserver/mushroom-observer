@@ -559,8 +559,8 @@ class SearchFormTest < UnitTestCase
     end
 
     assert(selected, "First confidence select should have selected option")
-    assert_equal("0.0", selected["value"],
-                 "First confidence should be 0.0 (No Opinion)")
+    assert_equal("0", selected["value"],
+                 "First confidence should be 0 (No Opinion)")
 
     # Second select should have blank/nil option selected (exact match,
     # not a range)

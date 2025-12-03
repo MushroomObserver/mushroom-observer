@@ -454,17 +454,20 @@ module Observations
       assert(query.id)
       get(:new)
 
-      # First select should have "No Opinion" (0.0) selected
+      # First select should have "No Opinion" (0) selected
       assert_select("select#query_observations_confidence") do
-        assert_select("option[selected][value='0.0']")
+        assert_select("option[selected][value='0']")
       end
-      # Second select should have blank option selected (exact match, not a range)
+      # Second select should have blank option selected (exact match,
+      # not a range)
       assert_select("select#query_observations_confidence_range") do
         assert_select("option[selected]") do |options|
           assert_equal(1, options.length)
           # The blank option has an empty or nil value attribute
-          assert(options.first["value"].blank?,
-                 "Second confidence dropdown should have blank value for No Opinion")
+          assert(
+            options.first["value"].blank?,
+            "Second confidence dropdown should have blank value for No Opinion"
+          )
         end
       end
     end
