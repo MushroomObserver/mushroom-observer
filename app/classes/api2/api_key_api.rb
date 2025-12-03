@@ -57,7 +57,9 @@ class API2
       return if api_key.verified
 
       # Migrated from QueuedEmail::VerifyAPIKey to deliver_later.
-      VerifyAPIKeyMailer.build(@for_user, @user, api_key).deliver_later
+      VerifyAPIKeyMailer.build(
+        receiver: @for_user, app_user: @user, api_key:
+      ).deliver_later
     end
 
     def get
