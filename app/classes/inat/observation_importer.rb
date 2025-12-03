@@ -25,8 +25,8 @@ class Inat
 
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
-      return unimportable unless @inat_obs.taxon_importable?
-      return date_missing if @inat_obs.observed_on_missing?
+      return if unimportable?
+      return if date_missing?
 
       create_mo_observation
       return unless @observation
@@ -36,14 +36,20 @@ class Inat
 
     private
 
-    def unimportable
+    def unimportable?
+      return false if @inat_obs.taxon_importable?
+
       log_with_response_error("Skipped #{@inat_obs[:id]} not importable")
+      true
     end
 
-    def date_missing
+    def date_missing?
+      return false unless @inat_obs.observed_on_missing?
+
       log_with_response_error(
         "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
       )
+      true
     end
 
     def log_with_response_error(msg)
