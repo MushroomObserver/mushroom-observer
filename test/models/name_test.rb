@@ -1924,9 +1924,9 @@ class NameTest < UnitTestCase
   end
 
   def test_ancestors_3
-    # Make sure only Ascomycetes through Peltigera have
-    # Ascomycota in their classification at first.
-    assert_equal(4, Name.classification_has("Ascomycota").count)
+    # Names with Ascomycota in classification OR search_name starting with it.
+    # Includes: Ascomycota itself + Ascomycetes through Peltigera.
+    assert_equal(5, Name.classification_has("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -3714,6 +3714,20 @@ class NameTest < UnitTestCase
     assert_empty(
       Name.comments_has(comments(:detailed_unknown_obs_comment).summary)
     )
+  end
+
+  def test_scope_classification_has_includes_genus
+    # Classification column doesn't include Genus, but scientifically it should.
+    # Searching for "Coprinus" should find species in that genus.
+    coprinus = names(:coprinus)
+    coprinus_comatus = names(:coprinus_comatus)
+
+    results = Name.classification_has("Coprinus")
+
+    assert_includes(results, coprinus,
+                    "Should find genus itself")
+    assert_includes(results, coprinus_comatus,
+                    "Should find species within the genus")
   end
 
   def test_scope_species_lists

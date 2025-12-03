@@ -111,8 +111,23 @@ module Name::Scopes
 
     scope :has_classification,
           ->(bool = true) { not_blank_condition(Name[:classification], bool:) }
-    scope :classification_has,
-          ->(phrase) { search_columns(Name[:classification], phrase) }
+    # Search classification column and genus (first word of text_name).
+    # Classification only stores ranks above Genus, but scientifically,
+    # classification includes Genus. This scope enables searching for genus
+    # names to find species within that genus.
+    scope :classification_has, lambda { |phrase|
+      classification_matches = search_columns(Name[:classification], phrase)
+      genus_matches = genus_has(phrase)
+      return classification_matches if genus_matches.nil?
+
+      or_clause(classification_matches, genus_matches).distinct
+    }
+    # Match names where text_name starts with a single-word phrase.
+    scope :genus_has, lambda { |phrase|
+      return nil if phrase.blank? || phrase.strip.include?(" ")
+
+      where(Name[:text_name].matches("#{phrase.strip}%")).distinct
+    }
 
     scope :has_notes,
           ->(bool = true) { not_blank_condition(Name[:notes], bool:) }
