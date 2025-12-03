@@ -86,9 +86,11 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_approval_email
+    subject = "test subject"
+    message = "test content"
+
     run_mail_test("approval", rolf) do
-      ApprovalMailer.build(katrina, "test subject", "test content").
-        deliver_now
+      ApprovalMailer.build(receiver: katrina, subject:, message:).deliver_now
     end
   end
 
