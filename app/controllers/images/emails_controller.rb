@@ -36,6 +36,11 @@ module Images
 
       # Migrated from QueuedEmail::CommercialInquiry to deliver_later.
       content = params.dig(:commercial_inquiry, :content)
+      if content.blank?
+        flash_error(:runtime_missing.t(field: :message.l))
+        render(:new) and return
+      end
+
       CommercialInquiryMailer.build(@user, @image, content).deliver_later
       flash_notice(:runtime_commercial_inquiry_success.t)
 

@@ -31,5 +31,16 @@ module Images
       end
       assert_redirected_to(image_path(image.id))
     end
+
+    def test_send_commercial_inquiry_requires_content
+      image = images(:commercial_inquiry_image)
+      login("rolf")
+
+      assert_no_enqueued_jobs do
+        post(:create, params: { id: image.id, commercial_inquiry: { content: "" } })
+      end
+      assert_flash_error
+      assert_template(:new)
+    end
   end
 end
