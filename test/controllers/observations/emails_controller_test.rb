@@ -39,5 +39,16 @@ module Observations
       assert_redirected_to(observation_path(obs.id))
       assert_flash_text(:runtime_ask_observation_question_success.t)
     end
+
+    def test_send_observation_question_requires_content
+      obs = observations(:minimal_unknown_obs)
+      login
+
+      assert_no_enqueued_jobs do
+        post(:create, params: { id: obs.id, question: { content: "" } })
+      end
+      assert_flash_error
+      assert_template(:new)
+    end
   end
 end

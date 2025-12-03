@@ -33,6 +33,11 @@ module Observations
       return unless @observation && can_email_user_question?(@observation)
 
       question = params.dig(:question, :content)
+      if question.blank?
+        flash_error(:runtime_missing.t(field: :message.l))
+        render(:new) and return
+      end
+
       # Migrated from QueuedEmail::ObserverQuestion to ActionMailer + ActiveJob.
       # See .claude/deliver_later_migration_plan.md for details.
       ObserverQuestionMailer.build(@user, @observation, question).deliver_later
