@@ -5,6 +5,8 @@ require("test_helper")
 module Admin
   module Emails
     class FeaturesControllerTest < FunctionalTestCase
+      include ActiveJob::TestHelper
+
       def test_features
         page = :create
         params = { feature_email: { content: "test" } }
@@ -19,7 +21,12 @@ module Admin
         assert_flash_text(/denied|only.*admin/i)
 
         make_admin("rolf")
-        post(page, params: params)
+        assert_enqueued_with(
+          job: ActionMailer::MailDeliveryJob,
+          args: ->(args) { args[0] == "FeaturesMailer" && args[1] == "build" }
+        ) do
+          post(page, params: params)
+        end
         assert_redirected_to(users_path(by: "name"))
       end
     end

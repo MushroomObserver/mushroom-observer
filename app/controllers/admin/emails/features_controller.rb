@@ -11,9 +11,11 @@ module Admin
       def create
         @users = ::User.where(email_general_feature: true, no_emails: false).
                  where.not(verified: nil)
+        # Migrated from QueuedEmail::Features to ActionMailer + ActiveJob.
+        # See .claude/deliver_later_migration_plan.md for details.
         @users.each do |user|
-          QueuedEmail::Features.create_email(user,
-                                             params[:feature_email][:content])
+          FeaturesMailer.build(user, params[:feature_email][:content]).
+            deliver_later
         end
         flash_notice(:send_feature_email_success.t)
         redirect_to(users_path(by: "name"))
