@@ -78,8 +78,11 @@ module Comment::Callbacks
   end
 
   def send_comment_notifications(users)
-    users.each do |recipient|
-      CommentMailer.build(user, recipient, target, self).deliver_later
+    comment = self
+    users.each do |receiver|
+      CommentMailer.build(
+        sender: user, receiver:, target:, comment:
+      ).deliver_later
     end
   end
 

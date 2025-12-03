@@ -226,8 +226,11 @@ class Naming < AbstractModel
     recipients.reject!(&:no_emails)
 
     # Send to everyone (except the person who created the naming!)
-    (recipients.uniq - [sender]).each do |recipient|
-      NameProposalMailer.build(sender, recipient, self, obs).deliver_later
+    naming = self
+    (recipients.uniq - [sender]).each do |receiver|
+      NameProposalMailer.build(
+        sender:, receiver:, naming:, observation: obs
+      ).deliver_later
     end
   end
 

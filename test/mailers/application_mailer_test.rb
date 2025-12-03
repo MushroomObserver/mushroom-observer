@@ -102,18 +102,24 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_comment_email
-    obs = observations(:minimal_unknown_obs)
+    target = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_2)
+
     run_mail_test("comment_response", rolf) do
-      CommentMailer.build(dick, rolf, obs, comment).deliver_now
+      CommentMailer.build(
+        sender: dick, receiver: rolf, target:, comment:
+      ).deliver_now
     end
   end
 
   def test_comment_email2
-    obs = observations(:minimal_unknown_obs)
+    target = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_1)
+
     run_mail_test("comment", mary) do
-      CommentMailer.build(rolf, mary, obs, comment).deliver_now
+      CommentMailer.build(
+        sender: rolf, receiver: mary, target:, comment:
+      ).deliver_now
     end
   end
 
@@ -181,9 +187,12 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_name_proposal_email
     naming = namings(:coprinus_comatus_other_naming)
-    obs = observations(:coprinus_comatus_obs)
+    observation = observations(:coprinus_comatus_obs)
+
     run_mail_test("name_proposal", rolf) do
-      NameProposalMailer.build(mary, rolf, naming, obs).deliver_now
+      NameProposalMailer.build(
+        sender: mary, receiver: rolf, naming:, observation:
+      ).deliver_now
     end
   end
 
