@@ -35,6 +35,13 @@ class CommentTest < UnitTestCase
     assert_user_arrays_equal(expected, comment.send(:highlighted_users, string))
   end
 
+  def test_user_highlighting_by_numeric_id
+    # Test looking up user by numeric ID string (covers line 127)
+    comment = Comment.reorder(created_at: :asc).first
+    result = comment.send(:lookup_user, mary.id.to_s)
+    assert_equal(mary, result)
+  end
+
   def test_user_highlighting_emails
     # owned by rolf, namings by rolf and mary, no comments
     obs = observations(:coprinus_comatus_obs).reload
@@ -71,6 +78,37 @@ class CommentTest < UnitTestCase
     do_comment_response_where_mary_opts_in(obs)
     do_comment_response_where_mary_and_dick_opt_in(obs)
     do_comment_response_where_everyone_opts_in(obs)
+  end
+
+  def test_comment_notification_with_interest_state_true
+    # Test Interest with state=true adds user to recipients (lines 75, 76)
+    obs = observations(:minimal_unknown_obs)
+    obs.comments.destroy_all
+    opt_out_of_comment_responses(rolf, mary, dick, katrina)
+    # Mary is the owner, so also disable owner notifications
+    mary.update!(email_comments_owner: false)
+
+    # katrina has Interest state=true in this obs - should be notified
+    Interest.create!(user: katrina, target: obs, state: true)
+
+    # katrina should be notified even though she opted out of comment responses
+    do_comment_test(1, obs, dick, "interest test", "testing interest state")
+    Interest.where(target: obs).destroy_all
+  end
+
+  def test_comment_notification_with_interest_state_false
+    # Test Interest with state=false removes user from recipients (line 78)
+    obs = observations(:minimal_unknown_obs)
+    obs.comments.destroy_all
+    opt_in_to_comment_responses(rolf, mary)
+    rolf.update!(email_comments_owner: true)
+
+    # rolf would normally be notified as owner, but state=false removes him
+    Interest.create!(user: rolf, target: obs, state: false)
+
+    # Only mary should be notified (rolf removed by Interest state=false)
+    do_comment_test(1, obs, dick, "interest test 2", "testing interest remove")
+    Interest.where(target: obs).destroy_all
   end
 
   def do_comment_response_where_everyone_opts_out(obs)

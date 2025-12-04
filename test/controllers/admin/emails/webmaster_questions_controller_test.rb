@@ -14,6 +14,12 @@ module Admin
         assert_form_action(action: :create)
       end
 
+      def test_page_loads_turbo_stream
+        login
+        get(:new, format: :turbo_stream)
+        assert_response(:success)
+      end
+
       def test_send_webmaster_question
         email_count = ActionMailer::Base.deliveries.count
         login("rolf")

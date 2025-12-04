@@ -17,7 +17,7 @@ module Admin
               locals: {
                 title: :ask_webmaster_title.l,
                 identifier: "webmaster_question_email",
-                user: @user, form: "admin/email/webmaster_questions/form"
+                user: @user, form: "admin/emails/webmaster_questions/form"
               }
             ) and return
           end
