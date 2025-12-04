@@ -321,14 +321,22 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   # If first is blank, fill with min (range from min to value).
-  # If second is blank, fill with max (scope treats nil as ≥ first).
+  # If second is blank, keep as single value - scope handles the
+  # appropriate range. Single value behavior:
+  # - 0.0: Exact match
+  # - Positive: Range from (next_lower, value]
+  # - Negative: Range from [value, next_higher)
   def fill_confidence_range(original, sorted)
     return [sorted.first, sorted.last] if sorted.size > 1
 
     if original.first.nil? || original.first.to_s.blank?
+      # First dropdown blank, second has value - range from min to that value
       [Vote::MINIMUM_VOTE.to_f, sorted.first]
     else
-      [sorted.first, Vote::MAXIMUM_VOTE.to_f]
+      # Single value selection - don't fill with max, let scope handle the range
+      # Return integer 0 for "No Opinion" to match Vote.opinion_menu
+      first_value = sorted.first.zero? ? 0 : sorted.first
+      [first_value, nil]
     end
   end
 

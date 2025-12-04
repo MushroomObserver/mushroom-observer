@@ -4,6 +4,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
+  # Confidence levels for vote_cache filtering
+  CONFIDENCE_LEVELS = [3.0, 2.0, 1.0, 0.0, -1.0, -2.0, -3.0].freeze
+
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
@@ -90,14 +93,81 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
+    #
+    # Single value behavior:
+    # - 0.0 (No Opinion): Exact match
+    # - Positive values: Range from (next_lower, value] - e.g., "Promising"
+    #   searches for vote_cache > 1.0 AND <= 2.0
+    # - Negative values: Range from [value, next_higher) - e.g., "Not Likely"
+    #   searches for vote_cache >= -2.0 AND < -1.0
+    #
+    # Range behavior combines the lower bound from min with upper bound
+    # from max:
+    # - "Promising" to "I'd Call It That": vote_cache > 1.0 AND <= 3.0
+    # - "Not Likely" to "Promising": vote_cache >= -2.0 AND <= 2.0
     scope :confidence, lambda { |min, max = nil|
       min, max = min if min.is_a?(Array)
-      if max.nil? || max == min # max may be 0
-        where(Observation[:vote_cache].gteq(min))
+
+      if max.nil? || max == min
+        confidence_single_value(min.to_f)
       else
-        where(Observation[:vote_cache].in(min..max))
+        confidence_range(min.to_f, max.to_f)
       end
     }
+
+    def self.confidence_single_value(value)
+      if value.zero?
+        where(Observation[:vote_cache].eq(0))
+      elsif value.positive?
+        confidence_positive_single(value)
+      else
+        confidence_negative_single(value)
+      end
+    end
+
+    def self.confidence_positive_single(value)
+      next_lower = CONFIDENCE_LEVELS.select { |v| v < value }.max ||
+                   (value - 1.0)
+      where(Observation[:vote_cache].gt(next_lower).
+            and(Observation[:vote_cache].lteq(value)))
+    end
+
+    def self.confidence_negative_single(value)
+      next_higher = CONFIDENCE_LEVELS.select { |v| v > value }.min ||
+                    (value + 1.0)
+      where(Observation[:vote_cache].gteq(value).
+            and(Observation[:vote_cache].lt(next_higher)))
+    end
+
+    def self.confidence_range(min_val, max_val)
+      lower = confidence_lower_bound(min_val)
+      upper = confidence_upper_bound(max_val)
+      where(lower.and(upper))
+    end
+
+    def self.confidence_lower_bound(value)
+      if value.zero?
+        Observation[:vote_cache].gteq(0)
+      elsif value.positive?
+        next_lower = CONFIDENCE_LEVELS.select { |v| v < value }.max ||
+                     (value - 1.0)
+        Observation[:vote_cache].gt(next_lower)
+      else
+        Observation[:vote_cache].gteq(value)
+      end
+    end
+
+    def self.confidence_upper_bound(value)
+      if value.zero?
+        Observation[:vote_cache].lteq(0)
+      elsif value.positive?
+        Observation[:vote_cache].lteq(value)
+      else
+        next_higher = CONFIDENCE_LEVELS.select { |v| v > value }.min ||
+                      (value + 1.0)
+        Observation[:vote_cache].lt(next_higher)
+      end
+    end
     scope :needs_naming, lambda { |user|
       needs_naming_generally.not_reviewed_by_user(user).distinct
     }
