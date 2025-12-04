@@ -99,6 +99,128 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   #          "Expected 'USA, California' but got: #{value}")
   # end
 
+  # ---------------------------------------------------------------
+  #  Multi-value autocompleter tests
+  #  Test that textarea autocompleters can accept multiple values
+  # ---------------------------------------------------------------
+
+  def test_multi_value_name_autocompleter
+    login!(@roy)
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_names_lookup")
+    field.click
+
+    # Type first name and select
+    @browser.keyboard.type("agaricus camp")
+    assert_selector(".auto_complete ul li a", text: "Agaricus campestris")
+    @browser.keyboard.type(:down, :tab)
+    # Should have selected a name
+    value = field.value
+    assert_match(/Agaricus/, value)
+
+    # Wait for menu to close (has 0.5s delay), then add newline
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("coprinus")
+    assert_selector(".auto_complete ul li a", text: "Coprinus comatus", wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify both names are in the textarea, separated by newline
+    final_value = field.value
+    assert_match(/Agaricus/, final_value, "First name should be present")
+    assert_match(/Coprinus/, final_value, "Second name should be present")
+    assert_match(/\n/, final_value, "Names should be separated by newline")
+  end
+
+  def test_multi_value_user_autocompleter
+    login!(@roy)
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_by_users")
+    field.click
+
+    # Type first user and select
+    @browser.keyboard.type("rolf")
+    assert_selector(".auto_complete ul li a", text: "Rolf Singer")
+    @browser.keyboard.type(:down, :tab)
+    value = field.value
+    assert_match(/Rolf/, value)
+
+    # Wait for menu to close (has 0.5s delay), then add newline
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("mary")
+    assert_selector(".auto_complete ul li a", text: "Mary Newbie", wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify both users are in the textarea
+    final_value = field.value
+    assert_match(/Rolf/, final_value, "First user should be present")
+    assert_match(/Mary/, final_value, "Second user should be present")
+    assert_match(/\n/, final_value, "Users should be separated by newline")
+  end
+
+  def test_multi_value_project_autocompleter
+    login!(@roy)
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_projects")
+    field.click
+
+    # Type first project and select
+    @browser.keyboard.type("bolete")
+    assert_selector(".auto_complete ul li a", text: "Bolete Project")
+    @browser.keyboard.type(:down, :tab)
+    value = field.value
+    assert_match(/Bolete/, value)
+
+    # Wait for menu to close (has 0.5s delay), then add newline
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("eol")
+    assert_selector(".auto_complete ul li a", text: "EOL Project", wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify both projects are in the textarea
+    final_value = field.value
+    assert_match(/Bolete/, final_value, "First project should be present")
+    assert_match(/EOL/, final_value, "Second project should be present")
+    assert_match(/\n/, final_value, "Projects should be separated by newline")
+  end
+
+  def test_multi_value_location_autocompleter
+    login!(@roy)
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_within_locations")
+    field.click
+
+    # Type first location and select (Roy's preference is scientific format)
+    @browser.keyboard.type("burbank")
+    assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 3)
+    @browser.keyboard.type(:down, :tab)
+    value = field.value
+    assert_match(/Burbank/i, value)
+
+    # Wait for menu to close (has 0.5s delay), then add newline
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("albion")
+    assert_selector(".auto_complete ul li a", text: /Albion/i, wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify both locations are in the textarea
+    final_value = field.value
+    assert_match(/Burbank/i, final_value, "First location should be present")
+    assert_match(/Albion/i, final_value, "Second location should be present")
+    assert_match(/\n/, final_value, "Locations should be separated by newline")
+  end
+
   def test_autocompleter_in_naming_modal
     browser = page.driver.browser
     rolf = users("rolf")
@@ -123,5 +245,156 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     within("#obs_#{obs.id}_naming_form") { click_commit }
     assert_no_selector("#modal_obs_#{obs.id}_naming", wait: 9)
     within("#observation_namings") { assert_text("Peltigeraceae", wait: 6) }
+  end
+
+  # ---------------------------------------------------------------
+  #  Autocompleter indicator tests
+  #  Test that the green checkmark appears when values are selected
+  # ---------------------------------------------------------------
+
+  def test_multi_value_autocompleter_shows_checkmark_after_selections
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    autocompleter = find("#query_observations_by_users_autocompleter", wait: 5)
+    field = find_field("query_observations_by_users")
+
+    # Select first user
+    field.click
+    @browser.keyboard.type("rolf")
+    assert_selector(".auto_complete ul li a", text: "Rolf Singer", wait: 5)
+    @browser.keyboard.type(:down, :tab)
+    assert_field("query_observations_by_users", with: /Rolf/)
+
+    # Wait for menu to close, then add second user
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("mary")
+    assert_selector(".auto_complete ul li a", text: "Mary Newbie", wait: 5)
+    @browser.keyboard.type(:down, :tab)
+
+    # Wait for menu to close, then add third user
+    sleep(0.6)
+    @browser.keyboard.type(:enter)
+    @browser.keyboard.type("dick")
+    assert_selector(".auto_complete ul li a", text: "Tricky Dick", wait: 5)
+    @browser.keyboard.type(:down, :tab)
+
+    # Verify all three users are in the field
+    final_value = field.value
+    assert_match(/Rolf/, final_value, "First user should be present")
+    assert_match(/Mary/, final_value, "Second user should be present")
+    assert_match(/Tricky Dick/, final_value, "Third user should be present")
+
+    # Hidden IDs should have all three
+    hidden_field = find("#query_observations_by_users_id", visible: false)
+    ids = hidden_field.value.split(",")
+    assert_equal(3, ids.length, "Should have 3 IDs in hidden field")
+
+    # Checkmark should be visible
+    within(autocompleter) do
+      indicator = find(".has-id-indicator", visible: :all)
+      style = indicator.style("display")
+      assert_equal("inline-block", style["display"],
+                   "Checkmark should be visible after multiple selections")
+    end
+  end
+
+  # ---------------------------------------------------------------
+  #  Pasted multi-value autocompleter tests
+  #  Test that pasting multiple values matches IDs and shows checkmark
+  # ---------------------------------------------------------------
+
+  def test_pasted_user_names_get_matching_ids
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    # Get user names from fixtures
+    rolf = users(:rolf)
+    mary = users(:mary)
+    dick = users(:dick)
+
+    # Prepare the pasted text (user names separated by newlines)
+    pasted_text = [
+      "Rolf Singer (rolf)",
+      "Mary Newbie (mary)",
+      "Tricky Dick (dick)"
+    ].join("\n")
+
+    # Fill the field with the pasted text (simulates paste)
+    field = find_field("query_observations_by_users")
+    field.fill_in(with: pasted_text)
+
+    # Trigger blur to process the pasted values
+    field.send_keys(:tab)
+
+    # Wait for staggered fetch requests: 0ms, 450ms, 900ms for 3 users
+    hidden_field = find("#query_observations_by_users_id", visible: false)
+
+    # Poll for IDs to appear (up to 5 seconds)
+    ids = []
+    10.times do
+      sleep(0.5)
+      ids = hidden_field.value.split(",").map(&:to_i).reject(&:zero?)
+      break if ids.length >= 3
+    end
+
+    assert_includes(ids, rolf.id, "Rolf's ID should be in hidden field")
+    assert_includes(ids, mary.id, "Mary's ID should be in hidden field")
+    assert_includes(ids, dick.id, "Dick's ID should be in hidden field")
+
+    # Checkmark should be visible
+    autocompleter = find("#query_observations_by_users_autocompleter")
+    within(autocompleter) do
+      indicator = find(".has-id-indicator", visible: :all)
+      style = indicator.style("display")
+      assert_equal("inline-block", style["display"],
+                   "Checkmark should be visible after pasting matching names")
+    end
+  end
+
+  # ---------------------------------------------------------------
+  #  Prefilled autocompleter indicator tests
+  #  Test that the green checkmark appears for prefilled values
+  # ---------------------------------------------------------------
+
+  def test_prefilled_autocompleter_shows_checkmark
+    login!(@roy)
+
+    # Get project IDs from fixtures
+    project1 = projects(:bolete_project)
+    project2 = projects(:eol_project)
+    project3 = projects(:one_genus_two_species_project)
+
+    # Create query and get q_param (no need to save)
+    query = Query.lookup(:Observation,
+                         projects: [project1.id, project2.id, project3.id])
+    url_params = { q: query.q_param }.to_query
+
+    # Visit search form with the q param to prefill
+    visit("/observations/search/new?#{url_params}")
+    assert_selector("body.search__new")
+
+    # The textarea should have the project names
+    field = find_field("query_observations_projects")
+    assert_match(/Bolete/, field.value)
+
+    # Hidden field should have all 3 IDs
+    hidden_field = find("#query_observations_projects_id", visible: false)
+    ids = hidden_field.value.split(",")
+    assert_equal(3, ids.length, "Should have 3 IDs prefilled")
+
+    # Checkmark should be visible
+    autocompleter = find("#query_observations_projects_autocompleter")
+    within(autocompleter) do
+      indicator = find(".has-id-indicator", visible: :all)
+      style = indicator.style("display")
+      assert_equal("inline-block", style["display"],
+                   "Checkmark should be visible for prefilled values")
+    end
   end
 end

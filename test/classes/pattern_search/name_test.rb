@@ -95,7 +95,7 @@ class PatternSearch::NameTest < UnitTestCase
 
     expect = Name.all
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("include_misspellings:both")
+    x = PatternSearch::Name.new("include_misspellings:either")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 

@@ -4,6 +4,8 @@ require("test_helper")
 
 module Users
   class EmailsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     def test_ask_questions
       id = mary.id
       requires_login(:new, id: id)
@@ -29,9 +31,49 @@ module Users
           content: "Email question"
         }
       }
-      post_requires_login(:create, params)
+
+      # Verify email job is enqueued with correct mailer, method, and kwargs.
+      # This also tests that User objects serialize correctly via GlobalID.
+      assert_enqueued_with(
+        job: ActionMailer::MailDeliveryJob,
+        args: ["UserQuestionMailer", "build", "deliver_now",
+               { args: [{ sender: rolf, receiver: mary,
+                          subject: "Email subject",
+                          message: "Email question" }] }]
+      ) do
+        post_requires_login(:create, params)
+      end
+
       assert_redirected_to(user_path(mary.id))
       assert_flash_text(:runtime_ask_user_question_success.t)
+    end
+
+    def test_send_user_question_missing_subject
+      login("rolf")
+      params = {
+        id: mary.id,
+        email: {
+          subject: "",
+          content: "Email question"
+        }
+      }
+      post(:create, params: params)
+      assert_redirected_to(user_path(mary.id))
+      assert_flash_text(:runtime_ask_user_question_missing_fields.t)
+    end
+
+    def test_send_user_question_missing_content
+      login("rolf")
+      params = {
+        id: mary.id,
+        email: {
+          subject: "Email subject",
+          content: ""
+        }
+      }
+      post(:create, params: params)
+      assert_redirected_to(user_path(mary.id))
+      assert_flash_text(:runtime_ask_user_question_missing_fields.t)
     end
   end
 end

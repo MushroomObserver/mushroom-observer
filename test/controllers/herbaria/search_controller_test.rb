@@ -15,7 +15,7 @@ module Herbaria
     def test_new_herbaria_search_turbo
       login
       get(:new, format: :turbo_stream)
-      assert_template("shared/_search_form")
+      assert_select("#herbaria_search_form")
     end
 
     def test_new_herbaria_search_form_prefilled_from_existing_query

@@ -80,7 +80,10 @@ export default class extends Controller {
     const response = await get(url, { responseKind: "turbo-stream" });
     if (response.ok) {
       // Turbo updates the element in the page already
-      this.formToggleTarget.classList.remove("d-none")
+      // Guard: formToggle not rendered on search pages
+      if (this.hasFormToggleTarget) {
+        this.formToggleTarget.classList.remove("d-none")
+      }
     } else {
       console.log(`got a ${response.status}`);
     }
@@ -88,9 +91,14 @@ export default class extends Controller {
 
   // Fires when search-type select is changed
   // Both empties the collapse div and hides the toggle, to avoid confusion
+  // Guard: form/formToggle not rendered on search pages (is_search_page)
   hideForm() {
-    this.formTarget.innerHTML = ""
-    this.formToggleTarget.classList.add("d-none")
+    if (this.hasFormTarget) {
+      this.formTarget.innerHTML = ""
+    }
+    if (this.hasFormToggleTarget) {
+      this.formToggleTarget.classList.add("d-none")
+    }
   }
 
   // The path to the :new action of the relevant #{Model}::SearchController

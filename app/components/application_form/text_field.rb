@@ -60,6 +60,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_field_input
       button = wrapper_options[:button]
       button_data = wrapper_options[:button_data] || {}
+      addon = wrapper_options[:addon]
 
       if button.present?
         div(class: "input-group") do
@@ -70,6 +71,11 @@ class Components::ApplicationForm < Superform::Rails::Form
               button
             end
           end
+        end
+      elsif addon.present?
+        div(class: "input-group") do
+          yield
+          span(class: "input-group-addon") { addon }
         end
       else
         yield

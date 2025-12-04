@@ -3,6 +3,8 @@ add_new_title(:search_object, :PROJECTS)
 container_class(:wide)
 %>
 
-<%= render(partial: "shared/search_form",
-           locals: { local: true, search: @search,
-                     field_columns: @field_columns } ) %>
+<%= render(Components::SearchForm.new(
+      @search,
+      search_controller: controller,
+      local: true
+    )) %>

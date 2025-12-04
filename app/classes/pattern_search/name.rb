@@ -10,7 +10,7 @@ module PatternSearch
       deprecated: [:deprecated, :parse_boolean],
       has_synonyms: [:has_synonyms, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
-      include_misspellings: [:misspellings, :parse_yes_no_both],
+      include_misspellings: [:misspellings, :parse_no_include_only],
       include_subtaxa: [:include_subtaxa, :parse_boolean],
       include_synonyms: [:include_synonyms, :parse_boolean],
       rank: [:rank, :parse_rank_range],
