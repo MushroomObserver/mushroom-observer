@@ -636,7 +636,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       assert_includes(href, q_locations, "Next link should have q[locations]")
     end
     # On page 1, prev link should be disabled (has opacity-0 class)
-    assert_select("a.previous_page_link.disabled.opacity-0")
+    assert_select("a.prev_page_link.disabled.opacity-0")
     assert_select("form.page_input[action='#{observations_url}']")
     assert_select("input[type='hidden'][name='q[model]'][value='Observation']")
   end

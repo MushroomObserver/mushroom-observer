@@ -179,7 +179,7 @@
 #  value will be parsed like an ActiveRecord "enum". The declaration should
 #  state an array of allowable values; others will be ignored.
 #
-#    { string: [:no, :either, :only] }
+#    { string: [:no, :include, :only] }
 #    { boolean: [true] } # this is a way of saying "ignore false"
 #
 #  If the first key in the hash is `:subquery`, the attribute is parsed as a
