@@ -82,11 +82,13 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Returns the Stimulus controller name for this autocompleter type.
     # Type-specific controllers use naming convention: autocompleter--{type}
+    # Stimulus normalizes underscores to hyphens, so we do the same here
+    # to ensure data-action attributes match the normalized controller name.
     def stimulus_controller_name
       unless type_specific_controller_exists?
         Rails.logger.warn("Unknown autocompleter type: #{autocompleter_type}")
       end
-      :"autocompleter--#{autocompleter_type}"
+      :"autocompleter--#{autocompleter_type.to_s.tr("_", "-")}"
     end
 
     def type_specific_controller_exists?

@@ -22,8 +22,13 @@ class Autocomplete::ForSpeciesList < Autocomplete::ByWord
   def matches_array(lists)
     lists.map do |list|
       list = list.attributes.symbolize_keys
-      { name: list[:title], id: list[:id] }
+      { name: strip_textile(list[:title]), id: list[:id] }
     end
     # matches.sort_by! { |list| list[:name] }
+  end
+
+  # Remove textile formatting characters (* and _) from string
+  def strip_textile(str)
+    str.gsub(/[_*]/, "")
   end
 end
