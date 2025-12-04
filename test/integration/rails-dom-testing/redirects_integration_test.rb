@@ -176,7 +176,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
     )
   end
 
-  # ActivityLogs (RssLogs) old-style type param  ---------------------------------
+  # ActivityLogs (RssLogs) old-style type param  ------------------------------
   def test_activity_logs_old_style_type_param_redirects_and_checks_boxes
     login
 
