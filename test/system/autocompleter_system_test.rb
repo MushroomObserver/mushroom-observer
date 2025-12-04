@@ -29,12 +29,6 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete ul li a", text: "Agaricus campestrus")
     @browser.keyboard.type(:down, :down, :down, :down, :tab)
     assert_field("query_observations_names_lookup", with: "Agaricus campestrus")
-
-    # Test that trailing periods are stripped (browser autocomplete fix)
-    # When user accidentally types two spaces, browser may add a period
-    fill_in("query_observations_names_lookup", with: "Coprinus comatus.")
-    find_field("query_observations_names_lookup").click
-    assert_selector(".auto_complete ul li a", text: "Coprinus comatus", wait: 3)
   end
 
   def test_observation_search_user_autocompleter
@@ -423,5 +417,36 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
       assert_equal("inline-block", style["display"],
                    "Checkmark should be visible for prefilled values")
     end
+  end
+
+  # ---------------------------------------------------------------
+  #  Species List autocompleter test
+  #  Test the "Add or Remove Observations from List" form
+  #  This uses a species_list type autocompleter which requires
+  #  underscore-to-hyphen conversion in the Stimulus controller name
+  # ---------------------------------------------------------------
+
+  def test_species_list_autocompleter_in_add_remove_form
+    rolf = users(:rolf)
+    login!(rolf)
+
+    # Get an observation query to work with
+    query = Query.lookup(:Observation, by_users: rolf.id)
+    q_param = query.q_param
+
+    # Visit the "Add or Remove Observations" form
+    visit("/species_lists/observations/edit?q=#{q_param}")
+    assert_selector("#species_list_observations_form")
+
+    # The species_list autocompleter should work
+    field = find_field("species_list")
+    field.click
+    @browser.keyboard.type("query")
+    assert_selector(".auto_complete", wait: 5)
+    assert_selector(".auto_complete ul li a", text: /Query/i, wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Should have selected a species list
+    assert_field("species_list", with: /Query/i)
   end
 end

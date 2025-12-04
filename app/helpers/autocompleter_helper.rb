@@ -75,11 +75,13 @@ module AutocompleterHelper
 
   # Returns the Stimulus controller name for this autocompleter type.
   # Type-specific controllers use naming convention: autocompleter--{type}
+  # Stimulus normalizes underscores to hyphens, so we do the same here
+  # to ensure data-action attributes match the normalized controller name.
   def stimulus_controller_name(type)
     unless SUPPORTED_TYPE_CONTROLLERS.include?(type&.to_sym)
       Rails.logger.warn("Unknown autocompleter type: #{type}")
     end
-    :"autocompleter--#{type}"
+    :"autocompleter--#{type.to_s.tr("_", "-")}"
   end
 
   # Build outlet data attributes with correct controller prefix
