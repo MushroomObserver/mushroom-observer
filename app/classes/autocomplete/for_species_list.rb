@@ -31,8 +31,8 @@ class Autocomplete::ForSpeciesList < Autocomplete::ByWord
   # Textile uses _text_ for italic and *text* or **text** for bold
   # Only strip when markers are at word boundaries (start/end/space)
   def strip_textile(str)
-    str.gsub(/\*\*([^*]+)\*\*/, '\1').                          # **bold**
-        gsub(/\*([^*]+)\*/, '\1').                              # *bold*
-        gsub(/(^|[[:space:]])_([^_]+)_([[:space:]]|$)/, '\1\2\3') # _italic_
+    str.gsub(/\*\*([^*]+)\*\*/, '\1'). # **bold**
+      gsub(/\*([^*]+)\*/, '\1'). # *bold*
+      gsub(/(^|[[:space:]])_([^_]+)_([[:space:]]|$)/, '\1\2\3') # _italic_
   end
 end
