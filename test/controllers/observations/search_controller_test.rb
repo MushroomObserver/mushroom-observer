@@ -487,5 +487,21 @@ module Observations
       assert_match(%r{/observations}, @response.redirect_url)
       assert_no_flash
     end
+
+    def test_session_locale_is_loaded
+      # Use a user without a locale preference to ensure session locale is used
+      user = users(:zero_user)
+      user.update(locale: nil)
+      login(user.login)
+
+      # Set locale in session after login
+      session[:locale] = "es"
+
+      # Make a request that will trigger set_locale
+      get(:new)
+
+      # Verify that session locale was loaded and used
+      assert_equal("es", I18n.locale.to_s)
+    end
   end
 end
