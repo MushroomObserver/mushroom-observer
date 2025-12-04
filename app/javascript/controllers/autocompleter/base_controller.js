@@ -1178,6 +1178,9 @@ export default class BaseAutocompleterController extends Controller {
       const extents = this.searchTokenExtents();
       token = val.substring(extents.start, extents.end);
     }
+    // Strip trailing periods that may be added by browser autocomplete
+    // when user accidentally types two spaces (e.g., "Amanita muscaria.")
+    token = token.replace(/\.+$/, '');
     return token;
   }
 

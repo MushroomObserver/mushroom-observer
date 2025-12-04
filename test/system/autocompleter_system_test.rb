@@ -29,6 +29,12 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete ul li a", text: "Agaricus campestrus")
     @browser.keyboard.type(:down, :down, :down, :down, :tab)
     assert_field("query_observations_names_lookup", with: "Agaricus campestrus")
+
+    # Test that trailing periods are stripped (browser autocomplete fix)
+    # When user accidentally types two spaces, browser may add a period
+    fill_in("query_observations_names_lookup", with: "Coprinus comatus.")
+    find_field("query_observations_names_lookup").click
+    assert_selector(".auto_complete ul li a", text: "Coprinus comatus", wait: 3)
   end
 
   def test_observation_search_user_autocompleter
