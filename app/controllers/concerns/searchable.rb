@@ -52,15 +52,13 @@ module Searchable
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
 
-      return if query_string_too_long?
+      redirect_to(action: :new) and return if query_string_too_long?
 
       prepare_raw_params
 
       redirect_to(action: :new) and return unless validate_search_instance?
 
-      save_search_query
-      redirect_to(controller: "/#{search_type}", action: :index,
-                  q: @query.q_param)
+      save_and_redirect_to_search_results
     end
 
     def prepare_raw_params
@@ -238,6 +236,12 @@ module Searchable
       @query = Query.lookup_and_save(query_model, **@search.params)
     end
 
+    def save_and_redirect_to_search_results
+      save_search_query
+      redirect_to(controller: "/#{search_type}", action: :index,
+                  q: @query.q_param)
+    end
+
     def escape_location_string(location) = "\"#{location.tr(",", "\\,")}\""
 
     # def strings_with_commas
@@ -265,7 +269,6 @@ module Searchable
       return false unless query_string.length > 9_500
 
       flash_error(:search_url_too_long.l)
-      redirect_to(action: :new)
       true
     end
 
