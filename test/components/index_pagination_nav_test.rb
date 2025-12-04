@@ -435,4 +435,40 @@ class IndexPaginationNavTest < UnitTestCase
     # Next link should be disabled (we're on last page)
     assert_html(html, "a.next_page_link.disabled")
   end
+
+  def test_pagination_links_include_anchor_when_specified
+    pagination_data = PaginationData.new(
+      number: 2,
+      num_per_page: 10,
+      num_total: 50,
+      number_arg: :page
+    )
+
+    html = render(Components::IndexPaginationNav.new(
+                    pagination_data: pagination_data,
+                    position: :top,
+                    request_url: @request_url,
+                    form_action_url: @form_action_url,
+                    q_params: @q_params,
+                    args: { anchor: "results" }
+                  ))
+
+    doc = Nokogiri::HTML(html)
+
+    # Prev link should have anchor
+    prev_link = doc.at_css("a.prev_page_link")
+    assert(prev_link, "Expected prev link")
+    assert_includes(prev_link["href"], "#results")
+
+    # Next link should have anchor
+    next_link = doc.at_css("a.next_page_link")
+    assert(next_link, "Expected next link")
+    assert_includes(next_link["href"], "#results")
+
+    # Max page link should have anchor
+    max_link = doc.at_css("nav.pagination_numbers a:not(.prev_page_link)" \
+                          ":not(.next_page_link)")
+    assert(max_link, "Expected max page link")
+    assert_includes(max_link["href"], "#results")
+  end
 end
