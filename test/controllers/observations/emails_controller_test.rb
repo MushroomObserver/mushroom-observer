@@ -19,6 +19,13 @@ module Observations
       assert_redirected_to(permanent_observation_path(mary_obs.id))
     end
 
+    def test_access_form_turbo_stream
+      obs = observations(:coprinus_comatus_obs)
+      login
+      get(:new, params: { id: obs.id }, format: :turbo_stream)
+      assert_response(:success)
+    end
+
     def test_send_observation_question
       obs = observations(:minimal_unknown_obs)
       params = {
@@ -37,6 +44,23 @@ module Observations
         post(:create, params: params)
       end
       assert_redirected_to(observation_path(obs.id))
+      assert_flash_text(:runtime_ask_observation_question_success.t)
+    end
+
+    def test_send_observation_question_turbo_stream
+      obs = observations(:minimal_unknown_obs)
+      params = {
+        id: obs.id,
+        question: { content: "Testing question" }
+      }
+      login
+      assert_enqueued_with(
+        job: ActionMailer::MailDeliveryJob,
+        args: ->(args) { args[0] == "ObserverQuestionMailer" }
+      ) do
+        post(:create, params: params, format: :turbo_stream)
+      end
+      assert_response(:success)
       assert_flash_text(:runtime_ask_observation_question_success.t)
     end
 
