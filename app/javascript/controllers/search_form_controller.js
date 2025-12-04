@@ -15,7 +15,7 @@ export default class extends Controller {
     }
 
     const queryString = params.toString()
-    const maxLength = parseInt(form.dataset.maxQueryLength)
+    const maxLength = parseInt(form.dataset.maxQueryLength, 10)
 
     if (queryString.length > maxLength) {
       event.preventDefault()
