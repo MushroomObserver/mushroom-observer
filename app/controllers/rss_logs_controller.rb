@@ -37,11 +37,13 @@ class RssLogsController < ApplicationController
     )
   end
 
-  # Redirect old-style top-level type param to proper q param URL.
+  # Redirect old-style top-level `type` param to proper `q` param URL.
   # This handles bookmarked URLs like /activity_logs?type=observation
   def type
     validated_type = validate_type_param(params[:type])
-    redirect_to(activity_logs_path(q: { model: "RssLog", type: validated_type }))
+    redirect_to(
+      activity_logs_path(q: { model: :RssLog, type: validated_type })
+    )
   end
 
   # Validate type param (array or string) and return sanitized string
