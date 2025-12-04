@@ -263,7 +263,7 @@ module Searchable
 
     def query_string_too_long?
       # Build the query string that would be generated as URL params
-      # Need to account for the nested structure: query_observations[field]=value
+      # Nust account for the nested structure: query_observations[field]=value
       query_string = { search_object_name => @query_params }.to_query
       # Puma's limit is 10,240; use 9,500 for safety margin
       query_string.length > 9_500

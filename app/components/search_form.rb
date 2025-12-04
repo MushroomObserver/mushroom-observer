@@ -30,7 +30,8 @@ class Components::SearchForm < Components::ApplicationForm
   # Additional wrapper options for search-specific fields
   SEARCH_WRAPPER_OPTIONS = [:selected, :between].freeze
 
-  # Maximum URL length Puma will accept (10,240 minus safety margin for base URL)
+  # Maximum URL length Puma will accept
+  # (10,240 minus safety margin for base URL)
   MAX_QUERY_STRING_LENGTH = 9_500
 
   # NOTE: Using regular initialization instead of Literal props because
