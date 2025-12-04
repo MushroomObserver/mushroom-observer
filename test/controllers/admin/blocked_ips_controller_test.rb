@@ -4,6 +4,16 @@ require("test_helper")
 
 module Admin
   class BlockedIpsControllerTest < FunctionalTestCase
+    def setup
+      super
+      # Ensure blocked_ips.txt exists (may not exist on CI)
+      FileUtils.touch(MO.blocked_ips_file)
+      FileUtils.touch(MO.okay_ips_file)
+      # Reset IpStats to ensure clean state, especially when running
+      # in parallel with other tests that modify blocked_ips.txt
+      IpStats.reset!
+    end
+
     def test_blocked_ips
       ActiveSupport.to_time_preserves_timezone = true
       new_ip = "5.4.3.2"

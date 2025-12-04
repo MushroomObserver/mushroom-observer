@@ -37,34 +37,68 @@ class RssLogsController < ApplicationController
     )
   end
 
-  # Requests with param `type` potentially show an array of types
-  # of objects. The array comes from the checkboxes in tabset.
-  # Refactored so this sends type under q param, goes through :sorted_index
-  # This maintained for backwards compatibility only.
+  # Redirect old-style top-level `type` param to proper `q` param URL.
+  # This handles bookmarked URLs like /activity_logs?type=observation
   def type
-    query = find_or_create_query(:RssLog, type: index_type_from_params)
-    [query, index_display_at_id_opts]
+    validated_type = validate_type_param(params[:type])
+    redirect_to(
+      activity_logs_path(q: { model: :RssLog, type: validated_type })
+    )
+  end
+
+  # Validate type param (array or string) and return sanitized string
+  def validate_type_param(param)
+    if param.is_a?(Array)
+      validate_type_array(param)
+    elsif param.is_a?(String)
+      validate_type_string(param)
+    else
+      "all"
+    end
   end
 
   # Get the types whose value == "1"
+  # Handles:
+  # - String types from pagination/bookmarks: "observation name"
+  # - Array types from form checkboxes: ["observation", "name"]
+  # - Old-style top-level type param for backwards compatibility
   def index_type_from_params
     types = ""
     param = if (query = query_from_q_param)
-              query.params[:type]
+              # Query validated type as string; if nil, check raw q param
+              query.params[:type] || params.dig(:q, :type)
             else
               params[:type]
             end
 
-    if param.is_a?(ActionController::Parameters)
-      types = param.select { |_key, value| value == "1" }.keys
-      types = RssLog::ALL_TYPE_TAGS.map(&:to_s).intersection(types)
-      types = "all" if types.length == RssLog::ALL_TYPE_TAGS.length
-      types = "none" if types.empty?
+    if param.is_a?(Array)
+      types = validate_type_array(param)
     elsif param.is_a?(String)
-      types = param
+      types = validate_type_string(param)
     end
-    types = types.map(&:to_s).join(" ") if types.is_a?(Array)
     types
+  end
+
+  # Validate array of types (from form checkboxes or bookmarked URLs)
+  def validate_type_array(param)
+    valid_tags = RssLog::ALL_TYPE_TAGS.map(&:to_s)
+    validated = param.map(&:to_s).select { |t| valid_tags.include?(t) }
+    return "none" if validated.empty?
+    return "all" if validated.length == valid_tags.length
+
+    validated.join(" ")
+  end
+
+  # Validate type string to ensure only valid type tags are used
+  def validate_type_string(param)
+    return param if param.in?(%w[all none])
+
+    valid_tags = RssLog::ALL_TYPE_TAGS.map(&:to_s)
+    validated = param.split.select { |t| valid_tags.include?(t) }
+    return "none" if validated.empty?
+    return "all" if validated.length == valid_tags.length
+
+    validated.join(" ")
   end
 
   # Hook runs before template displayed. Must return query.
