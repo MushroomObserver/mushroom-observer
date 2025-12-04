@@ -61,13 +61,13 @@ module Name::Scopes
 
     # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :misspellings, lambda { |boolish = :no|
-      # if :either, returns all
+      # if :include, returns all
       case boolish.to_sym
       when :no
         where(correct_spelling_id: nil)
       when :only
         where.not(correct_spelling_id: nil)
-      when :either
+      when :include
         all
       end
     }
