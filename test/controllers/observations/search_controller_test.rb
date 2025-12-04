@@ -469,8 +469,9 @@ module Observations
 
       post(:create, params: { query_observations: params })
 
-      # Should redirect back to form with error
-      assert_redirected_to(action: :new)
+      # Should render form with error (not redirect, so form can show values)
+      assert_response(:success)
+      assert_template(:new)
       assert_flash_error
     end
 

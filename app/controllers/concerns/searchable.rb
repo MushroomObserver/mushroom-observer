@@ -52,11 +52,20 @@ module Searchable
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
 
-      redirect_to(action: :new) and return if query_string_too_long?
+      if query_string_too_long?
+        # Store raw params and create a Query object for form re-rendering
+        @raw_user_params = @query_params.to_h.deep_dup
+        @search = Query.create_query(query_model, {})
+        @search.instance_variable_set(:@raw_user_params, @raw_user_params)
+        return render(:new)
+      end
+
+      # Store unprocessed params for form re-rendering on validation failure
+      @raw_user_params = @query_params.to_h.deep_dup
 
       prepare_raw_params
 
-      redirect_to(action: :new) and return unless validate_search_instance?
+      return render(:new) unless validate_search_instance?
 
       save_and_redirect_to_search_results
     end
@@ -216,6 +225,8 @@ module Searchable
     def validate_search_instance?
       @query_params.reject! { |_k, v| v == "" }
       @search = Query.create_query(query_model, @query_params)
+      # Preserve raw user input for form re-rendering on validation failure
+      @search.instance_variable_set(:@raw_user_params, @raw_user_params)
       return true unless @search.invalid?
 
       messages = @search.validation_errors.compact_blank

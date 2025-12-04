@@ -49,6 +49,17 @@ class Components::NamesLookupFieldGroup < Components::Base
   end
 
   def prefilled_lookup_value
+    # Check for raw user params first (from validation failure)
+    if @query.instance_variable_defined?(:@raw_user_params)
+      raw_params = @query.instance_variable_get(:@raw_user_params)
+      if raw_params.is_a?(Hash) && raw_params.key?(:names)
+        raw_names = raw_params[:names]
+        if raw_names.is_a?(Hash) && raw_names.key?(:lookup)
+          return raw_names[:lookup]
+        end
+      end
+    end
+
     names = @query.names
     return nil unless names.is_a?(Hash)
 

@@ -39,7 +39,7 @@ class Components::RegionWithBoxFields < Components::Base
       type: :region,
       label: "#{:REGION.t}:",
       help: :form_regions_help.t,
-      value: @query&.region,
+      value: region_value,
       button: :form_locations_find_on_map.l,
       button_data: { map_target: "showBoxBtn", action: "map#showBox" },
       controller_data: { autocompleter_map_outlet: "##{map_element_id}" },
@@ -108,7 +108,27 @@ class Components::RegionWithBoxFields < Components::Base
     end
   end
 
+  def region_value
+    # Check for raw user params first (from validation failure)
+    if @query&.instance_variable_defined?(:@raw_user_params)
+      raw_params = @query.instance_variable_get(:@raw_user_params)
+      return raw_params[:region] if raw_params.is_a?(Hash) && raw_params.key?(:region)
+    end
+    @query&.region
+  end
+
   def box_value(direction)
+    # Check for raw user params first (from validation failure)
+    if @query&.instance_variable_defined?(:@raw_user_params)
+      raw_params = @query.instance_variable_get(:@raw_user_params)
+      if raw_params.is_a?(Hash) && raw_params.key?(:in_box)
+        raw_box = raw_params[:in_box]
+        if raw_box.is_a?(Hash) && raw_box.key?(direction)
+          return raw_box[direction]
+        end
+      end
+    end
+
     return 0.0 if @query&.in_box.blank?
 
     (@query.in_box[direction] || 0).to_f

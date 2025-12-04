@@ -339,24 +339,36 @@ class Components::SearchForm < Components::ApplicationForm
   def render_single_value_autocompleter(field_name:)
     type = autocompleter_type(field_name)
     ids = field_value(field_name)
+    # If we have raw user input (string, not IDs), use it directly
+    display_value = if ids.is_a?(String)
+                      ids
+                    else
+                      prefilled_autocompleter_value(ids, type)
+                    end
     autocompleter_field(field_name,
                         type: type,
                         label: field_label(field_name),
                         help: field_help(field_name),
-                        value: prefilled_autocompleter_value(ids, type),
-                        hidden_value: ids)
+                        value: display_value,
+                        hidden_value: ids.is_a?(String) ? nil : ids)
   end
 
   def render_multiple_value_autocompleter(field_name:)
     type = autocompleter_type(field_name)
     ids = field_value(field_name)
+    # If we have raw user input (string, not IDs), use it directly
+    display_value = if ids.is_a?(String)
+                      ids
+                    else
+                      prefilled_autocompleter_value(ids, type)
+                    end
     autocompleter_field(field_name,
                         type: type,
                         textarea: true,
                         label: field_label(field_name),
                         help: multiple_help(field_name),
-                        value: prefilled_autocompleter_value(ids, type),
-                        hidden_value: ids)
+                        value: display_value,
+                        hidden_value: ids.is_a?(String) ? nil : ids)
   end
 
   def render_names_fields_for_obs(field_name:) # rubocop:disable Lint/UnusedMethodArgument
@@ -398,6 +410,19 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def field_value(field_name)
+    # If there are raw user params (from validation failure), use those first
+    # so the form displays what the user actually submitted
+    if model.instance_variable_defined?(:@raw_user_params)
+      raw_params = model.instance_variable_get(:@raw_user_params)
+      # For autocompleter fields, the raw param might be stored as field_name_id
+      if raw_params.key?(field_name)
+        return raw_params[field_name]
+      elsif raw_params.key?(:"#{field_name}_id")
+        # Return the string value from the _id field (before it was converted)
+        return raw_params[:"#{field_name}_id"]
+      end
+    end
+
     model.send(field_name)
   end
 
