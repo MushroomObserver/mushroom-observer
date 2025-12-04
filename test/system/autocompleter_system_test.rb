@@ -99,6 +99,26 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   #          "Expected 'USA, California' but got: #{value}")
   # end
 
+  def test_observation_search_region_autocompleter
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    # Expand the Location panel to reveal the region field
+    find("[data-target='#observations_location']").click
+    assert_selector("#observations_location.in", wait: 3)
+
+    # Region autocompleter should show matches as user types
+    # (no trailing space required - that was a bug we fixed)
+    find_field("query_observations_region").click
+    @browser.keyboard.type("calif")
+    assert_selector(".auto_complete", wait: 5) # wait for autocomplete
+    assert_selector(".auto_complete ul li a", text: /California/i, wait: 3)
+    @browser.keyboard.type(:down, :tab)
+    assert_field("query_observations_region", with: /California/i)
+  end
+
   # ---------------------------------------------------------------
   #  Multi-value autocompleter tests
   #  Test that textarea autocompleters can accept multiple values

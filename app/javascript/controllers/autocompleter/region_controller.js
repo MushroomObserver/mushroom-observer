@@ -5,9 +5,8 @@ import BaseAutocompleterController, {
 /**
  * RegionController - Autocompleter for Region searches
  *
- * Uses unordered matching with WHOLE_WORDS_ONLY mode.
- * Only sends requests when user finishes typing a word (trailing space/comma).
- * Example: typing "california " matches regions containing "California"
+ * Uses unordered matching. Results are preserved in server order (by box_area)
+ * so broader regions appear first.
  */
 export default class RegionController extends BaseAutocompleterController {
   // Must redeclare static properties - JavaScript doesn't inherit them
@@ -22,7 +21,7 @@ export default class RegionController extends BaseAutocompleterController {
       TYPE: "region",
       model: "location",
       UNORDERED: true,
-      WHOLE_WORDS_ONLY: true
+      PRESERVE_ORDER: true
     }
   }
 

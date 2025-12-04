@@ -26,6 +26,7 @@ const DEFAULT_OPTS = {
   UNORDERED: false,
   COLLAPSE: 0,
   WHOLE_WORDS_ONLY: false,
+  PRESERVE_ORDER: false,
   AJAX_URL: "/autocompleters/new/",
   REFRESH_DELAY: 0.33,
   HIDE_DELAY: 0.50,
@@ -121,7 +122,7 @@ const AUTOCOMPLETER_TYPES = {
   },
   region: {
     UNORDERED: true,
-    WHOLE_WORDS_ONLY: true,
+    PRESERVE_ORDER: true,
     model: 'location'
   },
   species_list: {
@@ -984,7 +985,10 @@ export default class BaseAutocompleterController extends Controller {
     // Call type-specific match population
     this.populateMatchesForType();
 
-    if (!this.ACT_LIKE_SELECT)
+    // Sort and remove duplicates, unless already sorted or preserving order.
+    // PRESERVE_ORDER skips sorting (server handles order); duplicates already
+    // removed server-side.
+    if (!this.ACT_LIKE_SELECT && !this.PRESERVE_ORDER)
       this.matches = this.removeDups(this.matches.sort(
         (a, b) => (a.name || "").localeCompare(b.name || "")
       ));
