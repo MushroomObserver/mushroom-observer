@@ -115,59 +115,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
 
-    def self.confidence_single_value(value)
-      if value.zero?
-        where(Observation[:vote_cache].eq(0))
-      elsif value.positive?
-        confidence_positive_single(value)
-      else
-        confidence_negative_single(value)
-      end
-    end
-
-    def self.confidence_positive_single(value)
-      next_lower = CONFIDENCE_LEVELS.select { |v| v < value }.max ||
-                   (value - 1.0)
-      where(Observation[:vote_cache].gt(next_lower).
-            and(Observation[:vote_cache].lteq(value)))
-    end
-
-    def self.confidence_negative_single(value)
-      next_higher = CONFIDENCE_LEVELS.select { |v| v > value }.min ||
-                    (value + 1.0)
-      where(Observation[:vote_cache].gteq(value).
-            and(Observation[:vote_cache].lt(next_higher)))
-    end
-
-    def self.confidence_range(min_val, max_val)
-      lower = confidence_lower_bound(min_val)
-      upper = confidence_upper_bound(max_val)
-      where(lower.and(upper))
-    end
-
-    def self.confidence_lower_bound(value)
-      if value.zero?
-        Observation[:vote_cache].gteq(0)
-      elsif value.positive?
-        next_lower = CONFIDENCE_LEVELS.select { |v| v < value }.max ||
-                     (value - 1.0)
-        Observation[:vote_cache].gt(next_lower)
-      else
-        Observation[:vote_cache].gteq(value)
-      end
-    end
-
-    def self.confidence_upper_bound(value)
-      if value.zero?
-        Observation[:vote_cache].lteq(0)
-      elsif value.positive?
-        Observation[:vote_cache].lteq(value)
-      else
-        next_higher = CONFIDENCE_LEVELS.select { |v| v > value }.min ||
-                      (value + 1.0)
-        Observation[:vote_cache].lt(next_higher)
-      end
-    end
     scope :needs_naming, lambda { |user|
       needs_naming_generally.not_reviewed_by_user(user).distinct
     }
@@ -633,6 +580,58 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
               ":#{field}:"
             end
       Observation[:notes].matches("%#{pat}%")
+    end
+
+    def confidence_single_value(value)
+      if value.zero?
+        where(Observation[:vote_cache].eq(0))
+      elsif value.positive?
+        confidence_positive_single(value)
+      else
+        confidence_negative_single(value)
+      end
+    end
+
+    def confidence_positive_single(value)
+      next_lower = CONFIDENCE_LEVELS.select { |v| v < value }.max || 0.0
+      where(Observation[:vote_cache].gt(next_lower).
+            and(Observation[:vote_cache].lteq(value)))
+    end
+
+    def confidence_negative_single(value)
+      next_higher = CONFIDENCE_LEVELS.select { |v| v > value }.min || 0.0
+      where(Observation[:vote_cache].gteq(value).
+            and(Observation[:vote_cache].lt(next_higher)))
+    end
+
+    def confidence_range(min_val, max_val)
+      lower = confidence_lower_bound(min_val)
+      upper = confidence_upper_bound(max_val)
+      where(lower.and(upper))
+    end
+
+    def confidence_lower_bound(value)
+      if value.zero?
+        Observation[:vote_cache].gteq(0)
+      elsif value.positive?
+        next_lower = CONFIDENCE_LEVELS.select { |v| v < value }.max ||
+                     (value - 1.0)
+        Observation[:vote_cache].gt(next_lower)
+      else
+        Observation[:vote_cache].gteq(value)
+      end
+    end
+
+    def confidence_upper_bound(value)
+      if value.zero?
+        Observation[:vote_cache].lteq(0)
+      elsif value.positive?
+        Observation[:vote_cache].lteq(value)
+      else
+        next_higher = CONFIDENCE_LEVELS.select { |v| v > value }.min ||
+                      (value + 1.0)
+        Observation[:vote_cache].lt(next_higher)
+      end
     end
   end
 end
