@@ -15,6 +15,8 @@ module ComponentTestHelper
                       ctrl = ActionView::TestCase::TestController.new
                       # Include Authentication module for permission? method
                       ctrl.class.include(ApplicationController::Authentication)
+                      # Include Queries module for add_q_param method
+                      ctrl.class.include(ApplicationController::Queries)
                       ctrl
                     end
   end
