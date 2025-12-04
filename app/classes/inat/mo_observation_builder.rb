@@ -20,6 +20,10 @@ class Inat
       update_names_and_proposals
       add_inat_sequences
       @observation
+    rescue StandardError => e
+      # Remove incomplete Observation from the db
+      @observation&.destroy
+      raise(e)
     end
 
     private
