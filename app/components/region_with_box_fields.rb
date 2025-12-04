@@ -112,7 +112,9 @@ class Components::RegionWithBoxFields < Components::Base
     # Check for raw user params first (from validation failure)
     if @query&.instance_variable_defined?(:@raw_user_params)
       raw_params = @query.instance_variable_get(:@raw_user_params)
-      return raw_params[:region] if raw_params.is_a?(Hash) && raw_params.key?(:region)
+      if raw_params.is_a?(Hash) && raw_params.key?(:region)
+        return raw_params[:region]
+      end
     end
     @query&.region
   end
