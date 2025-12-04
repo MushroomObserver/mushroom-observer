@@ -274,7 +274,7 @@ export const MultiValueMixin = {
   // If we get a match, add the record to the hidden input and keepers array.
   processMatchFetchResponse(new_primer) {
     this.verbose("MultiValueMixin:processMatchFetchResponse()");
-    this.verbose("MultiValueMixin:new_primer: ")
+    this.verbose("MultiValueMixin:new_primer: ");
     this.verbose(JSON.stringify(new_primer));
 
     // Clear flag telling us request is pending.

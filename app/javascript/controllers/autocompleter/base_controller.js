@@ -828,7 +828,7 @@ export default class BaseAutocompleterController extends Controller {
     if (this.SEPARATOR) {
       return this.hiddenTarget.value.split(",").pop();
     } else {
-      this.hiddenTarget.value
+      return this.hiddenTarget.value
     }
   }
 
