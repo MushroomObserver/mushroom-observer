@@ -30,6 +30,9 @@ class Components::SearchForm < Components::ApplicationForm
   # Additional wrapper options for search-specific fields
   SEARCH_WRAPPER_OPTIONS = [:selected, :between].freeze
 
+  # Maximum URL length Puma will accept (10,240 minus safety margin for base URL)
+  MAX_QUERY_STRING_LENGTH = 9_500
+
   # NOTE: Using regular initialization instead of Literal props because
   # Superform::Rails::Form has its own initialization pattern
   # @param search [Query] the query model
@@ -67,9 +70,13 @@ class Components::SearchForm < Components::ApplicationForm
   def form_attributes
     attrs = {
       id: "#{search_type}_search_form",
-      class: "faceted-search-form pb-4"
+      class: "faceted-search-form pb-4",
+      data: {
+        max_query_length: MAX_QUERY_STRING_LENGTH,
+        action: "submit->search-form#validateLength"
+      }
     }
-    attrs[:data] = turbo_stream_data unless @local
+    attrs[:data].merge!(turbo_stream_data) unless @local
     attrs
   end
 

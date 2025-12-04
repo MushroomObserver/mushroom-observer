@@ -51,7 +51,15 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
+
+      # Validate URL length before processing params
+      if query_string_too_long?
+        flash_error(:search_url_too_long.l)
+        redirect_to(action: :new) and return
+      end
+
       prepare_raw_params
+
       redirect_to(action: :new) and return unless validate_search_instance?
 
       save_search_query
@@ -251,6 +259,14 @@ module Searchable
 
       @query_params[:has_notes_fields] =
         val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
+    end
+
+    def query_string_too_long?
+      # Build the query string that would be generated as URL params
+      # Need to account for the nested structure: query_observations[field]=value
+      query_string = { search_object_name => @query_params }.to_query
+      # Puma's limit is 10,240; use 9,500 for safety margin
+      query_string.length > 9_500
     end
 
     # Passing some fields will raise an error if the required field is missing,

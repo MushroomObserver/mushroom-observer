@@ -458,5 +458,34 @@ module Observations
         }
       )
     end
+
+    def test_create_with_query_string_too_long
+      login
+      # Create a very long notes string that will exceed the 9,500 char limit
+      # when serialized to query params. Account for URL encoding and nested
+      # param structure: query_observations[notes_has]=value
+      very_long_string = "x" * 9_470 # Will result in >9,500 char query string
+      params = { notes_has: very_long_string }
+
+      post(:create, params: { query_observations: params })
+
+      # Should redirect back to form with error
+      assert_redirected_to(action: :new)
+      assert_flash_error
+    end
+
+    def test_create_with_acceptable_query_string_length
+      login
+      # Create a long but acceptable string (under the limit)
+      acceptable_string = "x" * 5_000
+      params = { notes_has: acceptable_string }
+
+      post(:create, params: { query_observations: params })
+
+      # Should successfully redirect to index with query params
+      assert_response(:redirect)
+      assert_match(%r{/observations}, @response.redirect_url)
+      assert_no_flash
+    end
   end
 end
