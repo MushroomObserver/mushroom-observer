@@ -117,20 +117,8 @@ module Name::Scopes
     # names to find species within that genus.
     scope :classification_has, lambda { |phrase|
       classification_matches = search_columns(Name[:classification], phrase)
-      genus_matches = genus_has(phrase)
-      return classification_matches if genus_matches.nil?
-
-      # Both relations must have same structure for .or() to work.
-      # Add .distinct to classification_matches to match genus_matches.
-      or_clause(classification_matches.distinct, genus_matches)
-    }
-    # Match names where text_name starts with the genus (first word of phrase).
-    # For "Amanita muscaria", matches names starting with "Amanita".
-    scope :genus_has, lambda { |phrase|
-      return nil if phrase.blank?
-
-      genus = phrase.strip.split.first
-      where(Name[:text_name].matches("#{genus}%")).distinct
+      text_name_matches = text_name_has(phrase)
+      or_clause(classification_matches.distinct, text_name_matches.distinct)
     }
 
     scope :has_notes,

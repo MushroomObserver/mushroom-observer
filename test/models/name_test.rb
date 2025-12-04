@@ -3731,20 +3731,20 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_classification_has_with_species_name
-    # Searching for a species name like "Amanita boudieri" should find
-    # varieties/forms of that species by matching the genus in text_name.
-    amanita = names(:amanita)
+    # Searching for a binomial like "Amanita boudieri" should find the species
+    # and its infraspecifics, but NOT other Amanita species.
     amanita_boudieri = names(:amanita_boudieri)
     amanita_boudieri_var = names(:amanita_boudieri_var_beillei)
+    amanita_baccata = names(:amanita_baccata_arora)
 
     results = Name.classification_has("Amanita boudieri")
 
-    assert_includes(results, amanita,
-                    "Should find genus Amanita")
     assert_includes(results, amanita_boudieri,
                     "Should find Amanita boudieri")
     assert_includes(results, amanita_boudieri_var,
                     "Should find Amanita boudieri var. beillei")
+    assert_not_includes(results, amanita_baccata,
+                        "Should NOT find other Amanita species like baccata")
   end
 
   def test_scope_species_lists
