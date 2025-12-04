@@ -5,6 +5,8 @@ require("test_helper")
 # tests of Verifications controller
 module Account
   class VerificationsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     def test_anon_user_verify
       get(:new)
 
@@ -58,7 +60,13 @@ module Account
         login: "micky",
         email: "mm@disney.com"
       )
-      post(:resend_email, params: { id: user.id })
+      assert_enqueued_with(
+        job: ActionMailer::MailDeliveryJob,
+        args: ["VerifyAccountMailer", "build", "deliver_now",
+               { args: [{ receiver: user }] }]
+      ) do
+        post(:resend_email, params: { id: user.id })
+      end
       assert_flash_success
     end
 
