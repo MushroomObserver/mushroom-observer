@@ -423,6 +423,56 @@ module Observations
     end
 
     # ---------------------------------------------------------------
+    #  "No Opinion" (0) special case tests
+    # ---------------------------------------------------------------
+
+    def test_create_with_no_opinion_searches_for_exact_zero
+      # User selects "No Opinion" (0) in first dropdown, second blank
+      # Should search for exactly vote_cache = 0, not >= 0
+      login
+      params = {
+        confidence: 0,
+        confidence_range: ""
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: {
+          q: { model: :Observation, confidence: [0.0] }
+        }
+      )
+    end
+
+    def test_prefill_no_opinion_confidence
+      # Bug: "No Opinion" (0) should display correctly, not be filled with max
+      login
+      query = @controller.find_or_create_query(
+        :Observation,
+        confidence: [0]
+      )
+      assert(query.id)
+      get(:new)
+
+      # First select should have "No Opinion" (0) selected
+      assert_select("select#query_observations_confidence") do
+        assert_select("option[selected][value='0']")
+      end
+      # Second select should have blank option selected (exact match,
+      # not a range)
+      assert_select("select#query_observations_confidence_range") do
+        assert_select("option[selected]") do |options|
+          assert_equal(1, options.length)
+          # The blank option has an empty or nil value attribute
+          assert(
+            options.first["value"].blank?,
+            "Second confidence dropdown should have blank value for No Opinion"
+          )
+        end
+      end
+    end
+
+    # ---------------------------------------------------------------
     #  Notes fields normalization tests
     # ---------------------------------------------------------------
 

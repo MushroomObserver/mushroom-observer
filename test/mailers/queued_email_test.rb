@@ -303,12 +303,9 @@ class QueuedEmailTest < UnitTestCase
                  api_key: key.id)
   end
 
-  def test_verify_account_email
-    QueuedEmail::VerifyAccount.create_email(users(:unverified))
-    assert_email(0,
-                 flavor: "QueuedEmail::VerifyAccount",
-                 to: users(:unverified))
-  end
+  # test_verify_account_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_verify_email
+  # and test/controllers/account_controller_test.rb
 
   def test_webmaster_question_email
     # Note that there is no `from` or `to` User instance for these,

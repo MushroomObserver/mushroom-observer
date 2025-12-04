@@ -480,10 +480,11 @@ class SearchFormTest < UnitTestCase
                  "Second rank should be blank for exact match")
   end
 
-  # Confidence with first value set, second blank = ≥ first (fill with max)
-  def test_confidence_range_with_blank_second_value_uses_maximum
+  # Confidence with first value set, second blank = single value
+  # (scope handles range)
+  def test_confidence_single_positive_value_stays_single
     query = Query::Observations.new
-    query.confidence = [2.0, nil]
+    query.confidence = [2.0]
 
     html = render_form_with_query(query)
     doc = Nokogiri::HTML(html)
@@ -495,13 +496,85 @@ class SearchFormTest < UnitTestCase
     assert(selected, "First confidence select should have selected option")
     assert_equal("2.0", selected["value"])
 
-    # Second select should have 3.0 (maximum) selected
+    # Second select should have blank option selected (single value,
+    # not a range)
     confidence_range_select = doc.at_css("#query_observations_confidence_range")
     assert(confidence_range_select, "Should have confidence_range select")
     selected_range = confidence_range_select.at_css("option[selected]")
     assert(selected_range,
-           "Second confidence should have max selected")
-    assert_equal("3.0", selected_range["value"])
+           "Second confidence select should have an option selected")
+    assert_equal(
+      "", selected_range["value"].to_s,
+      "Second confidence should have blank value for single value search"
+    )
+  end
+
+  # Negative confidence single value stays single
+  def test_confidence_single_negative_value_stays_single
+    query = Query::Observations.new
+    query.confidence = [-1.0]
+
+    html = render_form_with_query(query)
+    doc = Nokogiri::HTML(html)
+
+    # First select should have -1.0 selected
+    confidence_select = doc.at_css("#query_observations_confidence")
+    assert(confidence_select, "Should have confidence select")
+    selected = confidence_select.at_css("option[selected]")
+    assert(selected, "First confidence select should have selected option")
+    assert_equal("-1.0", selected["value"])
+
+    # Second select should have blank option selected (single value,
+    # not a range)
+    confidence_range_select = doc.at_css("#query_observations_confidence_range")
+    assert(confidence_range_select, "Should have confidence_range select")
+    selected_range = confidence_range_select.at_css("option[selected]")
+    assert(selected_range,
+           "Second confidence select should have an option selected")
+    assert_equal(
+      "", selected_range["value"].to_s,
+      "Second confidence should have blank value for single value search"
+    )
+  end
+
+  # "No Opinion" (0) should not be filled with maximum - exact match only
+  def test_confidence_no_opinion_stays_single_value
+    query = Query::Observations.new
+    query.confidence = [0.0]
+
+    html = render_form_with_query(query)
+    doc = Nokogiri::HTML(html)
+
+    # First select should have 0 (No Opinion) selected
+    confidence_select = doc.at_css("#query_observations_confidence")
+    assert(confidence_select, "Should have confidence select")
+    selected = confidence_select.at_css("option[selected]")
+
+    # Debug: print all options if test fails
+    unless selected
+      puts("\n=== DEBUG: First dropdown options ===")
+      confidence_select.css("option").each do |opt|
+        puts("  value=#{opt["value"].inspect}, " \
+             "selected=#{opt["selected"].inspect}, text=#{opt.text}")
+      end
+    end
+
+    assert(selected, "First confidence select should have selected option")
+    assert_equal("0", selected["value"],
+                 "First confidence should be 0 (No Opinion)")
+
+    # Second select should have blank/nil option selected (exact match,
+    # not a range)
+    confidence_range_select = doc.at_css("#query_observations_confidence_range")
+    assert(confidence_range_select, "Should have confidence_range select")
+    # The blank option should be selected
+    selected_range = confidence_range_select.at_css("option[selected]")
+    assert(selected_range,
+           "Second confidence select should have an option selected")
+    assert_equal(
+      "", selected_range["value"].to_s,
+      "Second confidence should have blank value for No Opinion (exact match)"
+    )
   end
 
   # Cover RegionWithBoxFields box_value and build_minimal_location

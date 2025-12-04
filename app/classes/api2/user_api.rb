@@ -93,8 +93,9 @@ class API2
       key.verified = nil
       key.save
       user.reload
-      email = QueuedEmail::VerifyAccount.create_email(user)
-      email.destroy if email.send_email
+      # Migrated from QueuedEmail::VerifyAccount to ActionMailer + ActiveJob.
+      # See .claude/deliver_later_migration_plan.md for details.
+      VerifyAccountMailer.build(receiver: user).deliver_later
     end
 
     def build_deleter
