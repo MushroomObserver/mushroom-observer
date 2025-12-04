@@ -145,21 +145,19 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # Renders all label_after elements (goes in between slot after label)
-    # rubocop:disable Rails/OutputSafety
     def render_label_after
-      raw(render_has_id_indicator)
-      raw(render_find_button) if find_text
-      raw(render_keep_box_button) if keep_text
-      raw(render_edit_box_button) if keep_text
+      render_has_id_indicator
+      render_find_button if find_text
+      render_keep_box_button if keep_text
+      render_edit_box_button if keep_text
     end
 
     # Renders all label_end elements (goes in label_end slot)
     def render_label_end
-      raw(render_create_button) if create_text && create.blank?
-      raw(render_modal_create_link) if create_text && create.present? &&
-                                       create_path.present?
+      render_create_button if create_text && create.blank?
+      render_modal_create_link if create_text && create.present? &&
+                                  create_path.present?
     end
-    # rubocop:enable Rails/OutputSafety
 
     def render_has_id_indicator
       link_icon(

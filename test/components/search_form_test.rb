@@ -523,6 +523,17 @@ class SearchFormTest < UnitTestCase
     assert_equal("40.0", south_input["value"])
   end
 
+  # Test array_to_newlines with array value (line 422)
+  def test_textarea_field_with_array_value_joins_with_newlines
+    query = Query::Observations.new
+    query.has_notes_fields = %w[Substrate Cap_Color]
+
+    html = render_form_with_query(query)
+
+    # The value should be joined with newlines
+    assert_includes(html, "Substrate\nCap_Color")
+  end
+
   private
 
   def render_form(local: true)

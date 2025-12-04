@@ -12,6 +12,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :label_end
     slot :append
 
+    # Make slot accessors public (Phlex::Slotable makes them private by default)
+    public :between_slot, :label_end_slot, :append_slot
+
     attr_reader :wrapper_options
 
     def initialize(field, attributes:, wrapper_options: {})
