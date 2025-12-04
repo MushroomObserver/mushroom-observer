@@ -35,6 +35,7 @@ class Components::Base < Phlex::HTML
   register_value_helper :send_observer_question_tab
   register_value_helper :sequence_archive_options
   register_value_helper :add_q_param
+  register_value_helper :add_args_to_url
 
   # Enable fragment caching
   def cache_store
