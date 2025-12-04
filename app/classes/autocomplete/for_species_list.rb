@@ -22,17 +22,8 @@ class Autocomplete::ForSpeciesList < Autocomplete::ByWord
   def matches_array(lists)
     lists.map do |list|
       list = list.attributes.symbolize_keys
-      { name: strip_textile(list[:title]), id: list[:id] }
+      { name: list[:title].strip_textile, id: list[:id] }
     end
     # matches.sort_by! { |list| list[:name] }
-  end
-
-  # Remove textile formatting from string
-  # Textile uses _text_ for italic and *text* or **text** for bold
-  # Only strip when markers are at word boundaries (start/end/space)
-  def strip_textile(str)
-    str.gsub(/\*\*([^*]+)\*\*/, '\1'). # **bold**
-      gsub(/\*([^*]+)\*/, '\1'). # *bold*
-      gsub(/(^|[[:space:]])_([^_]+)_([[:space:]]|$)/, '\1\2\3') # _italic_
   end
 end

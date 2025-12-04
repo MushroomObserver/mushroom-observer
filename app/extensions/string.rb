@@ -18,6 +18,7 @@
 #  to_ascii::           Convert string from UTF-8 to plain ASCII.
 #  iconv::              Convert string from UTF-8 to "charset".
 #  strip_html::         Remove HTML tags (not entities) from string.
+#  strip_textile::      Remove Textile formatting from string.
 #  truncate_html::      Truncate an HTML string to N display characters.
 #  html_to_ascii::      Convert HTML into plain text.
 #  gsub_html_special_chars:: auxiliary to html_to_ascii
@@ -469,6 +470,16 @@ class String
   # Remove hyperlinks from an HTML string.
   def strip_links
     gsub(%r{</?a.*?>}, "")
+  end
+
+  # Remove (some) Textile formatting from string — just italic and bold.
+  # Textile uses _text_ for italic and *text* or **text** for bold.
+  # Only strips when markers are at word boundaries (start/end/space),
+  # so names like "lone_wolf_list" are preserved.
+  def strip_textile
+    gsub(/\*\*([^*]+)\*\*/, '\1').                          # **bold**
+      gsub(/\*([^*]+)\*/, '\1').                            # *bold*
+      gsub(/(^|[[:space:]])_([^_]+)_([[:space:]]|$)/, '\1\2\3') # _italic_
   end
 
   # Truncate an HTML string, being careful to close off any open formatting
