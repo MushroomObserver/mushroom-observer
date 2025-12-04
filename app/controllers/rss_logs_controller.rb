@@ -41,7 +41,7 @@ class RssLogsController < ApplicationController
   # This handles bookmarked URLs like /activity_logs?type=observation
   def type
     validated_type = validate_type_param(params[:type])
-    redirect_to(activity_logs_path(q: { type: validated_type }))
+    redirect_to(activity_logs_path(q: { model: "RssLog", type: validated_type }))
   end
 
   # Validate type param (array or string) and return sanitized string

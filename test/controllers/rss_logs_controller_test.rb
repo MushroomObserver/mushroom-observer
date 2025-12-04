@@ -237,12 +237,14 @@ class RssLogsControllerTest < FunctionalTestCase
     # Old-style string type param should redirect to q param URL
     get(:index, params: { type: "observation" })
     assert_response(:redirect)
+    assert_match(/q%5Bmodel%5D=RssLog/, @response.location)
     assert_match(/q%5Btype%5D=observation/, @response.location)
 
     # Old-style array type param should redirect to q param URL
     get(:index, params: { type: %w[glossary_term article] })
     assert_response(:redirect)
     # Should contain both types (order may vary)
+    assert_match(/q%5Bmodel%5D=RssLog/, @response.location)
     assert_match(/q%5Btype%5D=/, @response.location)
     assert_match(/glossary_term/, @response.location)
     assert_match(/article/, @response.location)

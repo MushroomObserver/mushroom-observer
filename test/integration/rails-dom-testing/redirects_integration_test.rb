@@ -175,4 +175,27 @@ class RedirectsIntegrationTest < IntegrationTestCase
       :get, "/species_list/show_species_list//#{spl.id}", species_list_path(spl)
     )
   end
+
+  # ActivityLogs (RssLogs) old-style type param  ---------------------------------
+  def test_activity_logs_old_style_type_param_redirects_and_checks_boxes
+    login
+
+    # Visit old-style URL with top-level type param
+    # The type param triggers the `type` action which redirects to q[type]
+    # Integration tests automatically follow redirects
+    get(activity_logs_path(params: { type: "observation" }))
+    assert_response(:success)
+
+    # Verify we ended up at the correct URL with q params
+    assert_match(/q%5Bmodel%5D=RssLog/, request.fullpath)
+    assert_match(/q%5Btype%5D=observation/, request.fullpath)
+
+    # The observation checkbox should be checked
+    assert_select("input[type='checkbox'][name='q[type][]']" \
+                  "[value='observation'][checked='checked']")
+
+    # Other checkboxes should NOT be checked
+    assert_select("input[type='checkbox'][name='q[type][]']" \
+                  "[value='name']:not([checked])")
+  end
 end
