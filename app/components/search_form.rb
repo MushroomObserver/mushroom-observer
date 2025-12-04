@@ -71,13 +71,9 @@ class Components::SearchForm < Components::ApplicationForm
   def form_attributes
     attrs = {
       id: "#{search_type}_search_form",
-      class: "faceted-search-form pb-4",
-      data: {
-        max_query_length: MAX_QUERY_STRING_LENGTH,
-        action: "submit->search-form#validateLength"
-      }
+      class: "faceted-search-form pb-4"
     }
-    attrs[:data].merge!(turbo_stream_data) unless @local
+    attrs[:data] = turbo_stream_data unless @local
     attrs
   end
 
