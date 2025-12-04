@@ -251,6 +251,11 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { type: "evil<script>" })
     assert_response(:redirect)
     assert_match(/q%5Btype%5D=none/, @response.location)
+
+    # Non-string/non-array type (e.g., hash) should redirect with "all"
+    get(:index, params: { type: { weird: "hash" } })
+    assert_response(:redirect)
+    assert_match(/q%5Btype%5D=all/, @response.location)
   end
 
   def test_type_filter_preserves_other_query_params
