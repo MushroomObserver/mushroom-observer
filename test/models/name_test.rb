@@ -3730,6 +3730,23 @@ class NameTest < UnitTestCase
                     "Should find species within the genus")
   end
 
+  def test_scope_classification_has_with_species_name
+    # Searching for a species name like "Amanita boudieri" should find
+    # varieties/forms of that species by matching the genus in text_name.
+    amanita = names(:amanita)
+    amanita_boudieri = names(:amanita_boudieri)
+    amanita_boudieri_var = names(:amanita_boudieri_var_beillei)
+
+    results = Name.classification_has("Amanita boudieri")
+
+    assert_includes(results, amanita,
+                    "Should find genus Amanita")
+    assert_includes(results, amanita_boudieri,
+                    "Should find Amanita boudieri")
+    assert_includes(results, amanita_boudieri_var,
+                    "Should find Amanita boudieri var. beillei")
+  end
+
   def test_scope_species_lists
     assert_includes(
       Name.species_lists(species_lists(:unknown_species_list)), names(:fungi)
