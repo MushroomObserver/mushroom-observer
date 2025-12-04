@@ -92,7 +92,9 @@ module ComponentTestHelper
     end
   end
 
-  # Assert that a child selector is nested within a parent selector
+  # Assert that a child selector is nested within a parent selector.
+  # If text is provided, searches ALL matching children for one containing
+  # that text, not just the first match.
   def assert_nested(html, parent_selector:, child_selector:, text: nil)
     doc = Nokogiri::HTML(html)
     parent = doc.at_css(parent_selector)
@@ -101,15 +103,24 @@ module ComponentTestHelper
       "Expected to find parent element matching '#{parent_selector}'"
     )
 
-    child = parent.at_css(child_selector)
+    children = parent.css(child_selector)
     assert(
-      child,
+      children.any?,
       "Expected to find child element '#{child_selector}' " \
       "within parent '#{parent_selector}'"
     )
 
-    assert_includes(child.text, text) if text
-    child
+    return children.first unless text
+
+    # Find a child that contains the specified text
+    matching_child = children.find { |c| c.text.include?(text) }
+    assert(
+      matching_child,
+      "Expected a '#{child_selector}' within '#{parent_selector}' " \
+      "to contain '#{text}', but none did. " \
+      "Found: #{children.map(&:text).inspect}"
+    )
+    matching_child
   end
 
   # Assert that text content is within a specific nested structure
