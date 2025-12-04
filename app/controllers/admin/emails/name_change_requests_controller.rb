@@ -8,7 +8,10 @@ module Admin
       before_action :login_required
 
       def new
-        return unless check_both_names!
+        unless check_both_names!
+          redirect_back_or_default("/")
+          return
+        end
 
         unless check_different_icn_ids
           redirect_back_or_default("/")
@@ -23,7 +26,7 @@ module Admin
               locals: {
                 title: :email_name_change_request_title.l,
                 identifier: "name_change_request_email",
-                user: @user, form: "admin/email/name_change_requests/form"
+                user: @user, form: "admin/emails/name_change_requests/form"
               }
             ) and return
           end
@@ -31,7 +34,10 @@ module Admin
       end
 
       def create
-        return unless check_both_names!
+        unless check_both_names!
+          redirect_back_or_default("/")
+          return
+        end
 
         unless (name_with_icn_id = check_different_icn_ids)
           redirect_back_or_default("/")

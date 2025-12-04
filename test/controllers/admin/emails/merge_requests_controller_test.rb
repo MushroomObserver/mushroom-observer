@@ -90,6 +90,51 @@ module Admin
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
         assert_match(/SHAZAM/, ActionMailer::Base.deliveries.last.to_s)
       end
+
+      def test_email_merge_request_turbo_stream
+        login("rolf")
+        name1 = names(:agaricus_campestris)
+        name2 = names(:boletus_edulis)
+        params = { type: :Name, old_id: name1.id, new_id: name2.id }
+
+        get(:new, params: params, format: :turbo_stream)
+        assert_response(:success)
+      end
+
+      def test_email_merge_request_with_invalid_objects
+        login("rolf")
+        name1 = names(:agaricus_campestris)
+        params = {
+          type: :Name,
+          old_id: name1.id,
+          new_id: -999,
+          merge_request: { notes: "test" }
+        }
+
+        # Test create with invalid new_id redirects
+        post(:create, params: params)
+        assert_response(:redirect)
+      end
+
+      def test_email_merge_request_herbarium_type
+        login("rolf")
+        herb1 = herbaria(:nybg_herbarium)
+        herb2 = herbaria(:fundis_herbarium)
+        params = { type: :Herbarium, old_id: herb1.id, new_id: herb2.id }
+
+        get(:new, params: params)
+        assert_response(:success)
+      end
+
+      def test_email_merge_request_location_type
+        login("rolf")
+        loc1 = locations(:burbank)
+        loc2 = locations(:albion)
+        params = { type: :Location, old_id: loc1.id, new_id: loc2.id }
+
+        get(:new, params: params)
+        assert_response(:success)
+      end
     end
   end
 end
