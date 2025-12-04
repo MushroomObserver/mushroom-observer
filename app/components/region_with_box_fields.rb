@@ -120,17 +120,20 @@ class Components::RegionWithBoxFields < Components::Base
   end
 
   def box_value(direction)
-    # Check for raw user params first (from validation failure)
-    if @query&.instance_variable_defined?(:@raw_user_params)
-      raw_params = @query.instance_variable_get(:@raw_user_params)
-      if raw_params.is_a?(Hash) && raw_params.key?(:in_box)
-        raw_box = raw_params[:in_box]
-        if raw_box.is_a?(Hash) && raw_box.key?(direction)
-          return raw_box[direction]
-        end
-      end
-    end
+    raw_box_value(direction) || validated_box_value(direction)
+  end
 
+  def raw_box_value(direction)
+    return unless @query&.instance_variable_defined?(:@raw_user_params)
+
+    raw_params = @query.instance_variable_get(:@raw_user_params)
+    return unless raw_params.is_a?(Hash) && raw_params.key?(:in_box)
+
+    raw_box = raw_params[:in_box]
+    raw_box[direction] if raw_box.is_a?(Hash) && raw_box.key?(direction)
+  end
+
+  def validated_box_value(direction)
     return 0.0 if @query&.in_box.blank?
 
     (@query.in_box[direction] || 0).to_f
