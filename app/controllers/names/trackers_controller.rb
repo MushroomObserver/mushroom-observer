@@ -25,6 +25,8 @@ module Names
       return unless find_name!
 
       find_name_tracker
+      return redirect_to(new_tracker_of_name_path(@name)) unless @name_tracker
+
       initialize_tracking_form_edit
     end
 
@@ -50,13 +52,9 @@ module Names
     end
 
     def initialize_tracking_form_edit
-      if @name_tracker
-        @note_template = @name_tracker.note_template
-        @name_tracker.note_template_enabled = @note_template.present?
-        @interest = Interest.find_by(target: @name_tracker)
-      else
-        @note_template = default_note_template
-      end
+      @note_template = @name_tracker.note_template
+      @name_tracker.note_template_enabled = @note_template.present?
+      @interest = Interest.find_by(target: @name_tracker)
     end
 
     def default_note_template
