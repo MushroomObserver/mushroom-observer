@@ -85,4 +85,16 @@ class VoteTest < UnitTestCase
       assert_equal(true, ov.reviewed)
     end
   end
+
+  def test_confidence_returns_no_opinion_for_zero
+    # Bug: Vote.confidence(0) was returning "Doubtful" instead of "No Opinion"
+    assert_equal("No Opinion", Vote.confidence(0))
+    assert_equal("No Opinion", Vote.confidence(0.0))
+  end
+
+  def test_confidence_returns_labels_for_nonzero_values
+    assert_equal("I'd Call It That", Vote.confidence(3.0))
+    assert_equal("Doubtful", Vote.confidence(-1.0))
+    assert_equal("As If!", Vote.confidence(-3.0))
+  end
 end
