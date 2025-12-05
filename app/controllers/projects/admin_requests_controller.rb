@@ -17,16 +17,23 @@ module Projects
     end
 
     # Redirects back to show_project.
+    # Migrated from QueuedEmail::ProjectAdminRequest to deliver_later.
     def create
       sender = @user
       return unless find_project!
 
       subject = params[:email][:subject]
-      content = params[:email][:content]
+      message = params[:email][:content]
+
+      if message.blank?
+        flash_error(:runtime_missing.t(field: :request_message.l))
+        render(:new) and return
+      end
+
       @project.admin_group.users.each do |receiver|
-        QueuedEmail::ProjectAdminRequest.create_email(sender, receiver,
-                                                      @project, subject,
-                                                      content)
+        ProjectAdminRequestMailer.build(
+          sender:, receiver:, project: @project, subject:, message:
+        ).deliver_later
       end
       flash_notice(:admin_request_success.t(title: @project.title))
       redirect_to(project_path(@project.id))

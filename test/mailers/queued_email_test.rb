@@ -258,21 +258,9 @@ class QueuedEmailTest < UnitTestCase
                  password: password)
   end
 
-  def test_project_admin_request_email
-    # Rolf wants to be an admin of Mary's project. She's the only admin
-    project = projects(:two_list_project) # mary's
-    subject = "Can i be an admin of your project?"
-    message = "I too am interested in this project"
-    QueuedEmail::ProjectAdminRequest.create_email(rolf, mary, project,
-                                                  subject, message)
-    assert_email(0,
-                 flavor: "QueuedEmail::ProjectAdminRequest",
-                 from: rolf,
-                 to: mary,
-                 project: project.id,
-                 subject: subject,
-                 note: message)
-  end
+  # test_project_admin_request_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_project_admin_request_email
+  # and test/controllers/projects/admin_requests_controller_test.rb
 
   def test_publish_email
     QueuedEmail::Publish.create_email(rolf, mary, names(:peltigera))
