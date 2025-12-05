@@ -559,5 +559,29 @@ module Observations
       # Verify the raw string input is displayed back in the form
       assert_match("Invalid User Name", @response.body)
     end
+
+    def test_names_lookup_shows_raw_string_on_validation_error
+      login
+
+      # Post with invalid names lookup input that fails validation and
+      # triggers query string too long error so form re-renders with raw input
+      params = {
+        names: {
+          lookup: "Invalid Name That Does Not Exist",
+          include_synonyms: "true"
+        },
+        notes_has: "x" * 9_470 # Trigger validation error
+      }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form (not redirect) with validation error
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+
+      # Verify the raw string input is displayed back in the form
+      assert_match("Invalid Name That Does Not Exist", @response.body)
+    end
   end
 end
