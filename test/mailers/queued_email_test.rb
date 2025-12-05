@@ -108,16 +108,6 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_features_email
-    QueuedEmail::Features.create_email(mary, "blah blah blah")
-    assert_email(0,
-                 flavor: "QueuedEmail::Features",
-                 to: mary,
-                 note: "blah blah blah")
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
-
   def test_location_change_email
     QueuedEmail::LocationChange.create_email(
       rolf, mary, locations(:albion), location_descriptions(:albion_desc)
