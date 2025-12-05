@@ -56,7 +56,9 @@ module Observations
       login
       assert_enqueued_with(
         job: ActionMailer::MailDeliveryJob,
-        args: ->(args) { args[0] == "ObserverQuestionMailer" && args[1] == "build" }
+        args: lambda { |args|
+          args[0] == "ObserverQuestionMailer" && args[1] == "build"
+        }
       ) do
         post(:create, params: params, format: :turbo_stream)
       end
