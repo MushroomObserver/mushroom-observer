@@ -534,6 +534,21 @@ class ObservationTest < UnitTestCase
     QueuedEmail.queue = false
   end
 
+  def test_email_notification_is_collection_location_change
+    NameTracker.all.map(&:destroy)
+    QueuedEmail.queue = true
+
+    obs = observations(:coprinus_comatus_obs)
+    Interest.create(target: obs, user: mary, state: true)
+
+    User.current = rolf
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      obs.update(is_collection_location: !obs.is_collection_location)
+    end
+    assert_equal(0, QueuedEmail.count)
+    QueuedEmail.queue = false
+  end
+
   def test_vote_favorite
     @fungi = names(:fungi)
     @name1 = names(:agaricus_campestris)
