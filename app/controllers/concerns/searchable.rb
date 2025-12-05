@@ -12,6 +12,10 @@
 module Searchable
   extend ActiveSupport::Concern
 
+  # Maximum URL length Puma will accept
+  # (10,240 minus safety margin for base URL)
+  MAX_QUERY_STRING_LENGTH = 9_500
+
   included do
     # Render help for the pattern search bar (if available), for current model
     def show
@@ -277,8 +281,7 @@ module Searchable
       # Build the query string that would be generated as URL params
       # Must account for the nested structure: query_observations[field]=value
       query_string = { search_object_name => @query_params }.to_query
-      # Puma's limit is 10,240; use 9,500 for safety margin
-      return false unless query_string.length > 9_500
+      return false unless query_string.length > MAX_QUERY_STRING_LENGTH
 
       flash_error(:search_url_too_long.l)
       true
