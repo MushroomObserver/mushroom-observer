@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class InatImportTest < ActiveSupport::TestCase
   def test_total_expected_time_tabula_rasa
@@ -60,5 +60,15 @@ class InatImportTest < ActiveSupport::TestCase
       InatImport.super_importer?(users(:roy)),
       "Roy is not a super importer"
     )
+  end
+
+  def test_add_response_error_with_exception
+    import = inat_imports(:rolf_inat_import)
+    error = StandardError.new("Exception error message")
+
+    import.add_response_error(error)
+    import.reload
+
+    assert_match(/Exception error message/, import.response_errors)
   end
 end

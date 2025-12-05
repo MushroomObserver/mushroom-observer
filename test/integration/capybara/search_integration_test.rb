@@ -44,7 +44,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
       form.select("yes", from: "query_names_names_include_subtaxa")
       form.select("no", from: "query_names_names_exclude_original_names")
       form.select("yes", from: "query_names_has_author")
-      form.select("either", from: "query_names_misspellings")
+      form.select("include", from: "query_names_misspellings")
 
       first(:button, type: "submit").click
     end
