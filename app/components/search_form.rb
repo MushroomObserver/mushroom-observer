@@ -417,13 +417,7 @@ class Components::SearchForm < Components::ApplicationForm
     # so the form displays what the user actually submitted
     if model.instance_variable_defined?(:@raw_user_params)
       raw_params = model.instance_variable_get(:@raw_user_params)
-      # For autocompleter fields, the raw param might be stored as field_name_id
-      if raw_params.key?(field_name)
-        return raw_params[field_name]
-      elsif raw_params.key?(:"#{field_name}_id")
-        # Return the string value from the _id field (before it was converted)
-        return raw_params[:"#{field_name}_id"]
-      end
+      return raw_params[field_name] if raw_params.key?(field_name)
     end
 
     model.send(field_name)
