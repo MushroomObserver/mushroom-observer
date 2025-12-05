@@ -3,6 +3,8 @@
 require("test_helper")
 
 class ObservationsControllerCreateTest < FunctionalTestCase
+  include ActiveJob::TestHelper
+
   tests ObservationsController
 
   def modified_generic_params(params, user)
@@ -476,8 +478,6 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   end
 
   def test_create_observation_that_generates_email
-    QueuedEmail.queue = true
-    count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
     name_trackers = NameTracker.where(name: name)
     assert_equal(2, name_trackers.length,
@@ -486,18 +486,20 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     mary.update(no_emails: true)
 
     where = "Simple, Massachusetts, USA"
-    generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: name.text_name } },
-      1, 1, 0, 0
-    )
+    # One tracker has no_emails, so only 1 email should be enqueued
+    assert_enqueued_jobs(1) do
+      generic_construct_observation(
+        { observation: { place_name: where },
+          naming: { name: name.text_name } },
+        1, 1, 0, 0
+      )
+    end
     obs = assigns(:observation)
     nam = assigns(:naming)
 
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_equal(name.id, nam.name_id) # Make sure it's the right name
     assert_not_nil(obs.rss_log)
-    assert_equal(count_before + 1, QueuedEmail.count)
-    QueuedEmail.queue = false
   end
 
   def test_create_observation_with_unknown_decimal_geolocation_and_unknown_name

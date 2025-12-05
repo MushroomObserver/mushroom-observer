@@ -188,7 +188,16 @@ class Naming < AbstractModel
                     (!n.require_specimen || observation.specimen)
         next if n.user.no_emails
 
-        QueuedEmail::NameTracking.create_email(n, self)
+        # Migrated from QueuedEmail::NameTracking to deliver_later.
+        # Always notify the tracker.
+        naming = self
+        NamingTrackerMailer.build(receiver: n.user, naming:).deliver_later
+        # Conditionally notify the observer if tracker has note_template.
+        if n.note_template.present? && n.approved
+          NamingObserverMailer.build(
+            receiver: observation.user, naming:, name_tracker: n
+          ).deliver_later
+        end
         done_user[n.user_id] = true
       end
     end
