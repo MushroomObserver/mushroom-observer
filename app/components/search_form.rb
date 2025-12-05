@@ -347,12 +347,7 @@ class Components::SearchForm < Components::ApplicationForm
   def render_single_value_autocompleter(field_name:)
     type = autocompleter_type(field_name)
     ids = field_value(field_name)
-    # If we have raw user input (string, not IDs), use it directly
-    display_value = if ids.is_a?(String)
-                      ids
-                    else
-                      prefilled_autocompleter_value(ids, type)
-                    end
+    display_value = prefilled_autocompleter_value(ids, type)
     autocompleter_field(field_name,
                         type: type,
                         label: field_label(field_name),
