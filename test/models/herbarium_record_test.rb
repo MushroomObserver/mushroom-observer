@@ -3,6 +3,8 @@
 require("test_helper")
 
 class HerbariumRecordTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   def test_fields
     assert_not(herbarium_records(:interesting_unknown).observations.empty?)
     assert(herbarium_records(:interesting_unknown).herbarium)
@@ -38,6 +40,41 @@ class HerbariumRecordTest < UnitTestCase
     assert_equal("My very own herbarium", user.personal_herbarium_name)
     I18n.with_locale(:fr) do
       assert_equal("My very own herbarium", user.personal_herbarium_name)
+    end
+  end
+
+  # Test that creating a herbarium record by a non-curator emails the curators.
+  def test_notify_curators_emails_curators
+    nybg = herbaria(:nybg_herbarium)
+    curators = nybg.curators
+    assert(curators.count >= 2, "Need herbarium with multiple curators")
+    non_curator = mary
+    assert_not(curators.include?(non_curator))
+
+    # Creating a record should enqueue emails to each curator
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      HerbariumRecord.create!(
+        herbarium: nybg,
+        user: non_curator,
+        accession_number: "TEST-001",
+        initial_det: "Agaricus campestris"
+      )
+    end
+  end
+
+  # Test that curators don't get emailed when they create their own records.
+  def test_notify_curators_skips_self
+    nybg = herbaria(:nybg_herbarium)
+    curator = nybg.curators.first
+
+    # Curator creating a record should NOT enqueue any emails
+    assert_no_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do
+      HerbariumRecord.create!(
+        herbarium: nybg,
+        user: curator,
+        accession_number: "TEST-002",
+        initial_det: "Agaricus campestris"
+      )
     end
   end
 end

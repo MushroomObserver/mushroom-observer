@@ -17,20 +17,9 @@ class QueuedEmailTest < UnitTestCase
     assert(RunLevel.is_normal?)
   end
 
-  def test_add_herbarium_record_email
-    # Dick's fungarium is empty. Mary wants to add `fundis_record` to it
-    f_r = herbarium_records(:fundis_record)
-    QueuedEmail::AddRecordToHerbarium.create_email(
-      mary, dick, f_r
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::AddRecordToHerbarium",
-                 from: mary,
-                 to: dick,
-                 herbarium_record: f_r.id)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_add_herbarium_record_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_add_herbarium_record_email
+  # and test/models/herbarium_record_test.rb
 
   def test_approval_email
     user = katrina
