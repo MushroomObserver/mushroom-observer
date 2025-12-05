@@ -539,14 +539,14 @@ module Observations
       assert_no_flash
     end
 
-      def test_multiple_value_autocompleter_displays_raw_string_on_validation_error
+    def test_multiple_value_autocompleter_shows_raw_string_on_validation_error
       login
 
-      # Post with invalid autocompleter input (String) that will fail validation
-      # and trigger query string too long error so form re-renders with raw input
+      # Post with invalid autocompleter input (String) that fails validation and
+      # triggers query string too long error so form re-renders with raw input
       params = {
-        by_users: "Invalid User Name",  # String input, not IDs
-        notes_has: "x" * 9_470  # Trigger validation error
+        by_users: "Invalid User Name", # String input, not IDs
+        notes_has: "x" * 9_470 # Trigger validation error
       }
 
       post(:create, params: { query_observations: params })
