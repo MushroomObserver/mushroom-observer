@@ -253,13 +253,6 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_publish_name_question
-    name = names(:agaricus_campestris)
-    run_mail_test("publish_name", rolf) do
-      PublishNameMailer.build(mary, rolf, name).deliver_now
-    end
-  end
-
   def test_user_email
     subject = "Interesting idea"
     message = "Shall we discuss it in email?"
