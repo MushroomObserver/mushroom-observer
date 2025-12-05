@@ -26,6 +26,10 @@ ccwiki30:
   display_name: Creative Commons Wikipedia Compatible v3.0
   url: https://creativecommons.org/licenses/by-sa/3.0/
 
+ccby:
+  display_name: Creative Commons Attribution v4.0 (Wikipedia compatible)
+  url: https://creativecommons.org/licenses/by/4.0/
+
 ccbync:
   display_name: Creative Commons Attribution Non-commercial v4.0
   url: https://creativecommons.org/licenses/by-nc/4.0/

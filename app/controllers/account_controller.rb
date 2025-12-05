@@ -61,8 +61,9 @@ class AccountController < ApplicationController
 
       UserGroup.create_user(@new_user)
       flash_notice("#{:runtime_signup_success.tp} #{:email_spam_notice.tp}")
-      email = QueuedEmail::VerifyAccount.create_email(@new_user)
-      email.destroy if email.send_email
+      # Migrated from QueuedEmail::VerifyAccount to ActionMailer + ActiveJob.
+      # See .claude/deliver_later_migration_plan.md for details.
+      VerifyAccountMailer.build(receiver: @new_user).deliver_later
       UserStats.create({ user_id: @new_user.id })
     end
 

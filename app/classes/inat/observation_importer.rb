@@ -7,11 +7,12 @@ class Inat
   class ObservationImporter
     include Inat::Constants
 
-    attr_reader :inat_import, :user
+    attr_reader :inat_import, :user, :job
 
-    def initialize(inat_import, user)
+    def initialize(inat_import, user, job = nil)
       @inat_import = inat_import
       @user = user
+      @job = job
     end
 
     def import_page(page)
@@ -24,23 +25,58 @@ class Inat
 
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
-      if @inat_obs.importable?
-        builder =
-          Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
-        @observation = builder.mo_observation
-        update_inat_observation
-        increment_imported_counts
-        update_timings
-      elsif @inat_obs.observed_on_missing?
-        error = "iNat #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
-        @inat_import.add_response_error(error)
-      end
-      # NOTE: We need not handle the case where the taxon is not importable,
-      # because the iNat PageParser only requests observations of fungi and
-      # protozoa (a slime mold proxy).
+      return if unimportable?
+      return if date_missing?
+
+      create_mo_observation
+      return unless @observation
+
+      finalize_import
     end
 
     private
+
+    def unimportable?
+      return false if @inat_obs.taxon_importable?
+
+      log_with_response_error("Skipped #{@inat_obs[:id]} not importable")
+      true
+    end
+
+    def date_missing?
+      return false if @inat_obs.observed_on_present?
+
+      log_with_response_error(
+        "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
+      )
+      true
+    end
+
+    def log_with_response_error(msg)
+      log(msg)
+      @inat_import.add_response_error(msg)
+    end
+
+    def create_mo_observation
+      builder = Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
+      @observation = builder.mo_observation
+    rescue StandardError => e
+      log_with_response_error(
+        "Failed to import iNat #{@inat_obs[:id]}: #{e.message}"
+      )
+      nil
+    end
+
+    def finalize_import
+      update_inat_observation
+      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
+      increment_imported_counts
+      update_timings
+    rescue StandardError
+      # Error already logged by the method that raised it
+      @observation&.destroy
+      nil
+    end
 
     def update_inat_observation
       update_mushroom_observer_url_field
@@ -65,8 +101,8 @@ class Inat
                 payload: payload)
     rescue ::RestClient::ExceptionWithResponse => e
       error = { error: e.http_code, payload: payload }.to_json
-      @inat_import.add_response_error(error)
-      e.response
+      log_with_response_error(error)
+      raise(e)
     end
 
     def increment_imported_counts
@@ -82,6 +118,12 @@ class Inat
         avg_import_time: total_seconds / (@inat_import.imported_count || 1)
       )
       @inat_import.reset_last_obs_start
+    end
+
+    def log(message)
+      return unless job
+
+      job.log(message)
     end
   end
 end
