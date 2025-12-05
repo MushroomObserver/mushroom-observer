@@ -1589,6 +1589,97 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.confidence(3.1, 3.2))
   end
 
+  def test_scope_confidence_single_value_ranges
+    # Single positive values should search for range (next_lower, value]
+    # "Promising" (2.0) should match vote_cache > 1.0 AND <= 2.0
+    promising_results = Observation.confidence(2.0)
+    promising_results.each do |obs|
+      assert(obs.vote_cache > 1.0,
+             "vote_cache should be > 1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+    end
+
+    # Single negative values should search for range [value, next_higher)
+    # "Doubtful" (-1.0) should match vote_cache >= -1.0 AND < 0.0
+    doubtful_results = Observation.confidence(-1.0)
+    doubtful_results.each do |obs|
+      assert(obs.vote_cache >= -1.0,
+             "vote_cache should be >= -1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < 0.0,
+             "vote_cache should be < 0.0, got #{obs.vote_cache}")
+    end
+
+    # "No Opinion" (0.0) should match exactly 0.0
+    no_opinion_results = Observation.confidence(0.0)
+    no_opinion_results.each do |obs|
+      assert_equal(0.0, obs.vote_cache, "vote_cache should be exactly 0.0")
+    end
+
+    # "I'd Call It That" (3.0) should match vote_cache > 2.0 AND <= 3.0
+    max_results = Observation.confidence(3.0)
+    max_results.each do |obs|
+      assert(obs.vote_cache > 2.0,
+             "vote_cache should be > 2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 3.0,
+             "vote_cache should be <= 3.0, got #{obs.vote_cache}")
+    end
+
+    # "As If!" (-3.0) should match vote_cache >= -3.0 AND < -2.0
+    min_results = Observation.confidence(-3.0)
+    min_results.each do |obs|
+      assert(obs.vote_cache >= -3.0,
+             "vote_cache should be >= -3.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < -2.0,
+             "vote_cache should be < -2.0, got #{obs.vote_cache}")
+    end
+  end
+
+  def test_scope_confidence_range_searches
+    # Range searches should combine lower bound from min with upper bound
+    # from max
+
+    # "Promising" (2.0) to "I'd Call It That" (3.0)
+    # Should search for vote_cache > 1.0 AND <= 3.0
+    promising_to_max = Observation.confidence(2.0, 3.0)
+    promising_to_max.each do |obs|
+      assert(obs.vote_cache > 1.0,
+             "vote_cache should be > 1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 3.0,
+             "vote_cache should be <= 3.0, got #{obs.vote_cache}")
+    end
+
+    # "Could Be" (1.0) to "Promising" (2.0)
+    # Should search for vote_cache > 0.0 AND <= 2.0
+    could_be_to_promising = Observation.confidence(1.0, 2.0)
+    could_be_to_promising.each do |obs|
+      assert(obs.vote_cache > 0.0,
+             "vote_cache should be > 0.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+    end
+
+    # "Not Likely" (-2.0) to "Promising" (2.0)
+    # Should search for vote_cache >= -2.0 AND <= 2.0
+    not_likely_to_promising = Observation.confidence(-2.0, 2.0)
+    not_likely_to_promising.each do |obs|
+      assert(obs.vote_cache >= -2.0,
+             "vote_cache should be >= -2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+    end
+
+    # "Not Likely" (-2.0) to "Doubtful" (-1.0)
+    # Should search for vote_cache >= -2.0 AND < 0.0
+    not_likely_to_doubtful = Observation.confidence(-2.0, -1.0)
+    not_likely_to_doubtful.each do |obs|
+      assert(obs.vote_cache >= -2.0,
+             "vote_cache should be >= -2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < 0.0,
+             "vote_cache should be < 0.0, got #{obs.vote_cache}")
+    end
+  end
+
   # Currently Query ignores false, so scope does too.
   # def test_scope_has_comments_false
   #   assert_includes(Observation.has_comments(false),
