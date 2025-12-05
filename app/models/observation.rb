@@ -801,8 +801,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       if thumb_image_id == img.id
         update(thumb_image: images.empty? ? nil : images.first)
       else
-        # Need to trigger after_commit manually since update wasn't called
-        flush_observation_change_emails
+        # Touch to trigger after_commit within proper transaction flow
+        touch
       end
     end
     img
@@ -927,19 +927,26 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Track a pending change for email notification batching.
-  # Changes are flushed by flush_observation_change_emails.
+  # Uses Thread.current for thread safety across concurrent requests.
   def track_change(change_type)
-    @pending_changes ||= []
-    return if @pending_changes.include?(change_type)
+    key = pending_changes_key
+    Thread.current[key] ||= []
+    return if Thread.current[key].include?(change_type)
 
-    @pending_changes << change_type
+    Thread.current[key] << change_type
   end
 
   # Returns and clears the list of pending changes.
   def pending_changes
-    changes = @pending_changes || []
-    @pending_changes = []
+    key = pending_changes_key
+    changes = Thread.current[key] || []
+    Thread.current[key] = nil
     changes
+  end
+
+  # Unique key per observation instance for thread-local storage.
+  def pending_changes_key
+    :"observation_#{id}_pending_changes"
   end
 
   # Send batched observation change emails. Called after all changes are made.
