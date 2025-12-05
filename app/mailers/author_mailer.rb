@@ -4,7 +4,7 @@
 class AuthorMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(sender, receiver, object, subject, message)
+  def build(sender:, receiver:, object:, subject:, message:)
     setup_user(receiver)
     @title = subject
     @sender = sender

@@ -27,12 +27,16 @@ module Names::Trackers
       subject = :email_subject_name_tracker_approval.l(
         name: tracker.name.display_name
       )
-      content = :email_name_tracker_body.l(
+      message = :email_name_tracker_body.l(
         user: tracker.user.legal_name,
         name: tracker.name.display_name,
         link: "#{MO.http_domain}/interests/?type=NameTracker"
       )
-      QueuedEmail::Approval.find_or_create_email(tracker.user, subject, content)
+      # Migrated from QueuedEmail::Approval to deliver_later.
+      # Note: QueuedEmail truncated subject to 100 bytes, but that's handled
+      # by the database column size limit if needed.
+      receiver = tracker.user
+      ApprovalMailer.build(receiver:, subject:, message:).deliver_later
     end
   end
 end

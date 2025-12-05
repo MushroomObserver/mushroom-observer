@@ -4,11 +4,11 @@
 class ApprovalMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(user, subject, content)
-    setup_user(user)
+  def build(receiver:, subject:, message:)
+    setup_user(receiver)
     @title = subject
-    @message = content
-    debug_log(:approval, ::User.admin, user)
-    mo_mail(@title, to: user, reply_to: MO.webmaster_email_address)
+    @message = message
+    debug_log(:approval, ::User.admin, receiver)
+    mo_mail(@title, to: receiver, reply_to: MO.webmaster_email_address)
   end
 end
