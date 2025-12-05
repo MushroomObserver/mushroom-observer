@@ -139,10 +139,12 @@ class Query::SequencesTest < UnitTestCase
       [seq1, seq2], scope,
       :Sequence, observation_query: { species_lists: "List of mysteries" }
     )
-    scope = Sequence.observation_query(confidence: "2").order_by(:id)
+    # seq4's observation (peltigera_obs) has vote_cache ~2.4, which falls
+    # in "I'd Call It That" (3.0) range: vote_cache > 2.0 AND <= 3.0
+    scope = Sequence.observation_query(confidence: "3").order_by(:id)
     assert_query_scope(
       [seq4], scope,
-      :Sequence, observation_query: { confidence: "2" }
+      :Sequence, observation_query: { confidence: "3" }
     )
   end
 

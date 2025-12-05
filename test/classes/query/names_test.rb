@@ -26,7 +26,7 @@ class Query::NamesTest < UnitTestCase
     expect_good = expect.with_correct_spelling
     expect_bad  = expect.with_incorrect_spelling
     assert_query(expect_good.to_a, :Name)
-    assert_query(expect.to_a, :Name, misspellings: :either)
+    assert_query(expect.to_a, :Name, misspellings: :include)
     assert_query(expect_good.to_a, :Name, misspellings: :no)
     assert_query(expect_bad.to_a, :Name, misspellings: :only)
   end
@@ -200,15 +200,6 @@ class Query::NamesTest < UnitTestCase
     )
   end
 
-  # def test_name_deprecated_only
-  #   expects = Name.with_correct_spelling.deprecated.order_by_default
-  #   assert_query(expects, :Name, deprecated: :only)
-  #   expects = Name.with_correct_spelling.not_deprecated.order_by_default
-  #   assert_query(expects, :Name, deprecated: :no)
-  #   expects = Name.with_correct_spelling.order_by_default
-  #   assert_query(expects, :Name, deprecated: :either)
-  # end
-
   def test_name_deprecated
     expects = Name.with_correct_spelling.deprecated.order_by_default
     assert_query(expects, :Name, deprecated: true)
@@ -339,10 +330,10 @@ class Query::NamesTest < UnitTestCase
     # search_name
     assert_query([], :Name, pattern: "petigera")
     expects = [names(:petigera).id]
-    scope = Name.pattern("petigera").misspellings(:either)
+    scope = Name.pattern("petigera").misspellings(:include)
     assert_query_scope(
       expects, scope,
-      :Name, pattern: "petigera", misspellings: :either
+      :Name, pattern: "petigera", misspellings: :include
     )
   end
 
