@@ -43,5 +43,28 @@ module Images
       assert_flash_error
       assert_template(:new)
     end
+
+    def test_new_turbo_stream
+      image = images(:in_situ_image)
+      login("rolf")
+
+      get(:new, params: { id: image.id }, as: :turbo_stream)
+
+      assert_response(:success)
+    end
+
+    def test_create_turbo_stream
+      image = images(:commercial_inquiry_image)
+      params = {
+        id: image.id,
+        commercial_inquiry: { content: "Testing commercial_inquiry" }
+      }
+      login("rolf")
+
+      assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+        post(:create, params: params, as: :turbo_stream)
+      end
+      assert_response(:success)
+    end
   end
 end
