@@ -149,8 +149,13 @@ class API2
     private
 
     def parse_misspellings
-      parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only],
-                                  help: 1)
+      result = parse(:enum, :misspellings,
+                     default: :no,
+                     limit: [:no, :include, :either, :only],
+                     help: 1)
+      return :include if result == :either
+
+      result
     end
 
     def validate_classification!(params)
