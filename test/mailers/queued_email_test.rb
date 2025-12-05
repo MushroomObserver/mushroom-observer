@@ -275,17 +275,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_user_question_email
-    subject = "Hiya"
-    content = "What's up?"
-    QueuedEmail::UserQuestion.create_email(mary, dick, subject, content)
-    assert_email(0,
-                 flavor: "QueuedEmail::UserQuestion",
-                 from: mary,
-                 to: dick,
-                 subject: "Hiya",
-                 note: "What's up?")
-  end
+  # test_user_question_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_user_question_email
+  # and test/controllers/users/emails_controller_test.rb
 
   def test_verify_api_key_email
     key = api_keys(:marys_api_key)
@@ -301,12 +293,9 @@ class QueuedEmailTest < UnitTestCase
                  api_key: key.id)
   end
 
-  def test_verify_account_email
-    QueuedEmail::VerifyAccount.create_email(users(:unverified))
-    assert_email(0,
-                 flavor: "QueuedEmail::VerifyAccount",
-                 to: users(:unverified))
-  end
+  # test_verify_account_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_verify_email
+  # and test/controllers/account_controller_test.rb
 
   def test_webmaster_question_email
     # Note that there is no `from` or `to` User instance for these,

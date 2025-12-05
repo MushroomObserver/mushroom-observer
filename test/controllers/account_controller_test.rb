@@ -5,6 +5,8 @@ require("test_helper")
 # Test user AccountControllerTest
 # signup, verification, prefs, profile, api
 class AccountControllerTest < FunctionalTestCase
+  include ActiveJob::TestHelper
+
   def setup
     @request.host = "localhost"
     super
@@ -15,15 +17,22 @@ class AccountControllerTest < FunctionalTestCase
   def test_signup
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
-    post(:create, params: { new_user: {
-           login: " newbob ",
-           password: " newpassword ",
-           password_confirmation: " newpassword ",
-           email: " webmaster@mushroomobserver.org ",
-           email_confirmation: "  webmaster@mushroomobserver.org  ",
-           name: " needs a name! ",
-           theme: "NULL"
-         } })
+
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: ->(args) { args[0] == "VerifyAccountMailer" && args[1] == "build" }
+    ) do
+      post(:create, params: { new_user: {
+             login: " newbob ",
+             password: " newpassword ",
+             password_confirmation: " newpassword ",
+             email: " webmaster@mushroomobserver.org ",
+             email_confirmation: "  webmaster@mushroomobserver.org  ",
+             name: " needs a name! ",
+             theme: "NULL"
+           } })
+    end
+
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
     assert_equal(num_users + 1, User.count)
     user = User.last

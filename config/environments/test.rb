@@ -141,6 +141,9 @@ MushroomObserver::Application.configure do
 
   config.bot_enabled = true
 
+  # Use :test adapter so we can assert on enqueued jobs.
+  # Tests that need deliver_later to run synchronously should use
+  # perform_enqueued_jobs { ... } block.
   config.active_job.queue_adapter = :test
 
   # ----------------------------
