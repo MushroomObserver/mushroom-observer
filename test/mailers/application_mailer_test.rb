@@ -263,16 +263,19 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_user_email
+    subject = "Interesting idea"
+    message = "Shall we discuss it in email?"
+
     run_mail_test("user_question", mary) do
       UserQuestionMailer.build(
-        rolf, mary, "Interesting idea", "Shall we discuss it in email?"
+        sender: rolf, receiver: mary, subject:, message:
       ).deliver_now
     end
   end
 
   def test_verify_email
     run_mail_test("verify", mary) do
-      VerifyAccountMailer.build(mary).deliver_now
+      VerifyAccountMailer.build(receiver: mary).deliver_now
     end
   end
 
@@ -299,14 +302,18 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_undeliverable_email
     mary.update(email: "bogus.address")
-    UserQuestionMailer.build(rolf, mary, "subject", "body").deliver_now
+    UserQuestionMailer.build(
+      sender: rolf, receiver: mary, subject: "subject", message: "body"
+    ).deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not have delivered an email to 'bogus.address'.")
   end
 
   def test_opt_out
     mary.update(no_emails: true)
-    UserQuestionMailer.build(rolf, mary, "subject", "body").deliver_now
+    UserQuestionMailer.build(
+      sender: rolf, receiver: mary, subject: "subject", message: "body"
+    ).deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not deliver email if recipient has opted out.")
   end

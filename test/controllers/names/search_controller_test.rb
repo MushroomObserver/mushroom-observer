@@ -37,7 +37,7 @@ module Names
       query = @controller.find_or_create_query(
         :Name,
         names: { lookup: "petigera", include_synonyms: true },
-        misspellings: :either,
+        misspellings: :include,
         has_classification: true, author_has: "Pers.",
         rank: %w[Species Form]
       )
@@ -47,7 +47,7 @@ module Names
       assert_select("textarea#query_names_names_lookup", text: "petigera")
       assert_select("select#query_names_names_include_synonyms",
                     selected: "yes")
-      assert_select("select#query_names_misspellings", selected: "either")
+      assert_select("select#query_names_misspellings", selected: "include")
       assert_select("select#query_names_has_classification", selected: "yes")
       assert_select("input#query_names_author_has", value: "Pers.")
       # Form normalizes rank range to [low, high] order
@@ -61,7 +61,7 @@ module Names
       params = {
         has_classification: true,
         classification_has: names(:agaricus_campestris).classification,
-        misspellings: :either
+        misspellings: :include
       }
       post(:create, params: { query_names: params })
 
@@ -78,7 +78,7 @@ module Names
         },
         rank: :Species,
         rank_range: :Genus,
-        misspellings: :either,
+        misspellings: :include,
         created_at: "2007"
       }
       post(:create, params: { query_names: params })
@@ -91,7 +91,7 @@ module Names
           include_synonyms: true
         },
         rank: %w[Species Genus],
-        misspellings: :either,
+        misspellings: :include,
         created_at: %w[2007-01-01 2007-12-31]
       }
       assert_redirected_to(controller: "/names", action: :index,
