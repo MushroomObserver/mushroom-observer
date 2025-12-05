@@ -108,10 +108,6 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  # test_features_email removed - migrated to deliver_later
-  # See test/mailers/application_mailer_test.rb#test_features_email
-  # and test/controllers/admin/emails/features_controller_test.rb
-
   def test_location_change_email
     QueuedEmail::LocationChange.create_email(
       rolf, mary, locations(:albion), location_descriptions(:albion_desc)

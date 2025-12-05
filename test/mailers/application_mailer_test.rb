@@ -142,14 +142,6 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_features_email
-    message = "A feature"
-
-    run_mail_test("email_features", rolf) do
-      FeaturesMailer.build(receiver: rolf, message:).deliver_now
-    end
-  end
-
   def test_location_change_email
     loc = locations(:albion)
     desc = loc.description
