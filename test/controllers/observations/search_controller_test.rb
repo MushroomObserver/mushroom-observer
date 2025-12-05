@@ -583,5 +583,55 @@ module Observations
       # Verify the raw string input is displayed back in the form
       assert_match("Invalid Name That Does Not Exist", @response.body)
     end
+
+    def test_region_shows_raw_string_on_validation_error
+      login
+
+      # Post with region input that fails validation and
+      # triggers query string too long error so form re-renders with raw input
+      params = {
+        region: "Nonexistent Region, Mars",
+        notes_has: "x" * 9_470 # Trigger validation error
+      }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form (not redirect) with validation error
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+
+      # Verify the raw string input is displayed back in the form
+      assert_match("Nonexistent Region, Mars", @response.body)
+    end
+
+    def test_bounding_box_shows_raw_values_on_validation_error
+      login
+
+      # Post with bounding box coordinates that fail validation and
+      # trigger query string too long error so form re-renders with raw input
+      params = {
+        in_box: {
+          north: "45.5",
+          south: "40.2",
+          east: "-71.0",
+          west: "-73.5"
+        },
+        notes_has: "x" * 9_470 # Trigger validation error
+      }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form (not redirect) with validation error
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+
+      # Verify the raw bounding box values are displayed back in the form
+      assert_match("45.5", @response.body)
+      assert_match("40.2", @response.body)
+      assert_match("-71.0", @response.body)
+      assert_match("-73.5", @response.body)
+    end
   end
 end
