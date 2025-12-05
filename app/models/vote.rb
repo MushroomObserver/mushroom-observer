@@ -174,7 +174,10 @@ class Vote < AbstractModel
   end
 
   # Find label of closest value in the "confidence" menu.
+  # Special case: 0 returns "No Opinion"
   def self.confidence(val)
+    return no_opinion if val.to_f.zero?
+
     lookup_value(val, confidence_menu)
   end
 
