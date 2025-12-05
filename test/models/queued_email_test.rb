@@ -19,8 +19,11 @@ class QueuedEmailTest < UnitTestCase
 
   def test_dump
     subject = "Supercalifragilistic"
-    note = "Phantasmagorical observations"
-    email = QueuedEmail::UserQuestion.create_email(rolf, mary, subject, note)
+    message = "Phantasmagorical observations"
+    project = projects(:eol_project)
+    email = QueuedEmail::ProjectAdminRequest.create_email(
+      rolf, mary, project, subject, message
+    )
     email.send_email
     dump = QueuedEmail.last.dump
     assert_match(/supercalifragilistic/i, dump)
@@ -40,13 +43,7 @@ class QueuedEmailTest < UnitTestCase
     end
   end
 
-  def test_verify_account_with_user
-    # User.current should always be nil when the VerifyAccount email is
-    # created, so this should never happen, but somehow *has* happened multiple
-    # times in the wild.  It's worth testing.
-    User.current = dick
-    QueuedEmail::VerifyAccount.create_email(dick)
-    email = QueuedEmail.last
-    assert_nil(email&.user)
-  end
+  # test_verify_account_with_user removed - migrated to deliver_later
+  # The VerifyAccount email no longer uses QueuedEmail, so there's nothing
+  # to test here. The new implementation uses VerifyAccountMailer.deliver_later.
 end
