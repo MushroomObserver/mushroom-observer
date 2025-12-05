@@ -538,5 +538,26 @@ module Observations
       assert_match(%r{/observations}, @response.redirect_url)
       assert_no_flash
     end
+
+      def test_multiple_value_autocompleter_displays_raw_string_on_validation_error
+      login
+
+      # Post with invalid autocompleter input (String) that will fail validation
+      # and trigger query string too long error so form re-renders with raw input
+      params = {
+        by_users: "Invalid User Name",  # String input, not IDs
+        notes_has: "x" * 9_470  # Trigger validation error
+      }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form (not redirect) with validation error
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+
+      # Verify the raw string input is displayed back in the form
+      assert_match("Invalid User Name", @response.body)
+    end
   end
 end
