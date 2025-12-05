@@ -4,6 +4,8 @@ require("test_helper")
 require("rexml/document")
 
 class API2ControllerTest < FunctionalTestCase
+  include ActiveJob::TestHelper
+
   def assert_api_failed
     @api = assigns(:api)
     assert_not(@api.errors.empty?, "Expected API to fail with errors.")
@@ -381,11 +383,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(CGI.escapeHTML("New API2 Key"), notes.to_s)
   end
 
-  # NOTE: Checking ActionMailer::Base.deliveries works here only because
-  #       QueuedEmail.queue == false.
-  #       The mail is sent via QueuedEmail but delivered immediately.
   def test_post_api_key
-    QueuedEmail.queue = false
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)
@@ -399,6 +397,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(rolf, api_key.user)
     assert_not_nil(api_key.verified)
+    # No email sent when key is verified (user creating key for themselves)
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
     params = {
@@ -406,7 +405,10 @@ class API2ControllerTest < FunctionalTestCase
       app: "Mushroom Mapper",
       for_user: mary.id
     }
-    post(:api_keys, params: params)
+    # Use perform_enqueued_jobs to execute deliver_later immediately
+    perform_enqueued_jobs do
+      post(:api_keys, params: params)
+    end
     assert_no_api_errors
     api_key = APIKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
