@@ -23,11 +23,13 @@ module Descriptions
 
     def send_author_emails
       subject = params.dig(:email, :subject).to_s
-      content = params.dig(:email, :content).to_s
+      message = params.dig(:email, :content).to_s
 
       (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|
-        QueuedEmail::AuthorRequest.create_email(@user, receiver, @object,
-                                                subject, content)
+        # Migrated from QueuedEmail::AuthorRequest to deliver_later.
+        AuthorMailer.build(
+          sender: @user, receiver:, object: @object, subject:, message:
+        ).deliver_later
       end
     end
   end

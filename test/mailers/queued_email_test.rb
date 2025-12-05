@@ -36,22 +36,9 @@ class QueuedEmailTest < UnitTestCase
   # See test/mailers/application_mailer_test.rb#test_approval_email
   # and test/controllers/names/trackers/approve_controller_test.rb
 
-  def test_author_request_email
-    QueuedEmail::AuthorRequest.create_email(
-      mary, dick, name_descriptions(:peltigera_desc),
-      "Hi", "Please make me the author"
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::AuthorRequest",
-                 from: mary,
-                 to: dick,
-                 obj_id: name_descriptions(:peltigera_desc).id,
-                 obj_type: "name_description",
-                 subject: "Hi",
-                 note: "Please make me the author")
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_author_request_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_author_request_email
+  # and test/controllers/descriptions/author_requests_controller_test.rb
 
   def test_comment_add_email
     QueuedEmail::CommentAdd.find_or_create_email(
