@@ -203,7 +203,8 @@ class SearchFormTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # The collapse div should have class "in" to be expanded
-    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    selector = "[data-autocompleter--name-target='collapseFields']"
+    collapse_div = doc.at_css(selector)
     assert(collapse_div, "Should have collapse div for modifier fields")
     assert_includes(collapse_div["class"], "in",
                     "Collapse div should have 'in' class when modifiers " \
@@ -259,7 +260,8 @@ class SearchFormTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # The collapse div SHOULD have class "in" because lookup has a value
-    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    selector = "[data-autocompleter--name-target='collapseFields']"
+    collapse_div = doc.at_css(selector)
     assert(collapse_div, "Should have collapse div for modifier fields")
     assert_includes(collapse_div["class"], "in",
                     "Collapse div should have 'in' class when lookup " \
@@ -275,7 +277,8 @@ class SearchFormTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # The collapse div should NOT have class "in"
-    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    selector = "[data-autocompleter--name-target='collapseFields']"
+    collapse_div = doc.at_css(selector)
     assert(collapse_div, "Should have collapse div for modifier fields")
     assert_not_includes(collapse_div["class"].to_s, "in",
                         "Collapse div should NOT have 'in' class when " \
@@ -381,7 +384,8 @@ class SearchFormTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # Collapse should be expanded because modifier has value
-    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    selector = "[data-autocompleter--name-target='collapseFields']"
+    collapse_div = doc.at_css(selector)
     assert(collapse_div, "Should have collapse div")
     assert_includes(collapse_div["class"], "in",
                     "Collapse should be expanded when modifier has value")

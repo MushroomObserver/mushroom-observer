@@ -29,6 +29,15 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete ul li a", text: "Agaricus campestrus")
     @browser.keyboard.type(:down, :down, :down, :down, :tab)
     assert_field("query_observations_names_lookup", with: "Agaricus campestrus")
+
+    # Test that nested modifier fields (synonyms, subtaxa) appear when typing
+    # The collapse div should be visible now that a name is entered
+    collapse_selector = "[data-autocompleter--name-target='collapseFields']"
+    assert_selector(collapse_selector, visible: true)
+    # Should contain the include_synonyms select field
+    within(collapse_selector) do
+      assert_selector("select[name*='include_synonyms']")
+    end
   end
 
   def test_observation_search_user_autocompleter
