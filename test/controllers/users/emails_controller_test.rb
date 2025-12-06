@@ -75,5 +75,26 @@ module Users
       assert_redirected_to(user_path(mary.id))
       assert_flash_text(:runtime_ask_user_question_missing_fields.t)
     end
+
+    def test_new_turbo_stream
+      login("rolf")
+      get(:new, params: { id: mary.id }, as: :turbo_stream)
+      assert_response(:success)
+    end
+
+    def test_create_turbo_stream
+      login("rolf")
+      params = {
+        id: mary.id,
+        user_question: {
+          subject: "Email subject",
+          message: "Email question"
+        }
+      }
+      assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+        post(:create, params: params, as: :turbo_stream)
+      end
+      assert_response(:success)
+    end
   end
 end

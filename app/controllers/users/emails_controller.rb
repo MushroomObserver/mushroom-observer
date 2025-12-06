@@ -19,8 +19,12 @@ module Users
             locals: {
               title: :ask_user_question_title.t(user: @target.legal_name),
               identifier: "user_question_email",
-              model: FormObject::UserQuestion.new,
-              target: @target
+              user: @user,
+              form: "users/emails/form",
+              form_locals: {
+                model: FormObject::UserQuestion.new,
+                target: @target
+              }
             }
           ) and return
         end
