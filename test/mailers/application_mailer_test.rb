@@ -71,7 +71,9 @@ class ApplicationMailerTest < UnitTestCase
   def test_add_herbarium_record_email
     herbarium_record = herbarium_records(:interesting_unknown)
     run_mail_test("add_herbarium_record_not_curator", rolf) do
-      AddHerbariumRecordMailer.build(mary, rolf, herbarium_record).deliver_now
+      AddHerbariumRecordMailer.build(
+        sender: mary, receiver: rolf, herbarium_record:
+      ).deliver_now
     end
   end
 
