@@ -34,8 +34,8 @@ module Admin
       end
 
       def create
-        @email = params.dig(:webmaster_question, :user, :email)
-        @message = params.dig(:webmaster_question, :question, :message)
+        @email = params.dig(:webmaster_question, :email)
+        @message = params.dig(:webmaster_question, :message)
         @email_error = false
         create_webmaster_question
       end

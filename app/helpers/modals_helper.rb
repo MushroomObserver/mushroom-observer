@@ -23,7 +23,9 @@ module ModalsHelper
       WebmasterQuestion: Components::WebmasterQuestionForm
     }
 
-    component_class = model ? component_map[model.class.name.to_sym] : nil
+    # Use demodulized name to handle both ActiveRecord and FormObject classes
+    model_key = model&.class&.name&.demodulize&.to_sym
+    component_class = model_key ? component_map[model_key] : nil
 
     if component_class
       render_modal_component(

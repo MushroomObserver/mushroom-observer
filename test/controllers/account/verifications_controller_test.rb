@@ -113,12 +113,21 @@ module Account
         login: "micky",
         email: "mm@disney.com"
       )
+      # Should enqueue VerifyAccountMailer to user
       assert_enqueued_with(
         job: ActionMailer::MailDeliveryJob,
         args: ["VerifyAccountMailer", "build", "deliver_now",
                { args: [{ receiver: user }] }]
       ) do
-        post(:resend_email, params: { id: user.id })
+        # Should also enqueue WebmasterMailer to notify root
+        assert_enqueued_with(
+          job: ActionMailer::MailDeliveryJob,
+          args: lambda { |args|
+            args[0] == "WebmasterMailer" && args[1] == "build"
+          }
+        ) do
+          post(:resend_email, params: { id: user.id })
+        end
       end
       assert_flash_success
     end

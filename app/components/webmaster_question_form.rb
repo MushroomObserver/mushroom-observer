@@ -23,33 +23,29 @@ class Components::WebmasterQuestionForm < Components::ApplicationForm
   private
 
   def render_email_field
-    namespace(:user) do |builder|
-      render(builder.field(:email).text(
-               wrapper_options: {
-                 label: "#{:ask_webmaster_your_email.t}:"
-               },
-               value: @email,
-               size: 60,
-               data: {
-                 autofocus: @email.blank? || @email_error
-               }
-             ))
-    end
+    render(field(:email).text(
+             wrapper_options: {
+               label: "#{:ask_webmaster_your_email.t}:"
+             },
+             value: @email,
+             size: 60,
+             data: {
+               autofocus: @email.blank? || @email_error
+             }
+           ))
   end
 
   def render_question_field
-    namespace(:question) do |builder|
-      render(builder.field(:message).textarea(
-               wrapper_options: {
-                 label: "#{:ask_webmaster_question.t}:"
-               },
-               value: @message,
-               rows: 10,
-               data: {
-                 autofocus: @email.present? && !@email_error
-               }
-             ))
-    end
+    render(field(:message).textarea(
+             wrapper_options: {
+               label: "#{:ask_webmaster_question.t}:"
+             },
+             value: @message,
+             rows: 10,
+             data: {
+               autofocus: @email.present? && !@email_error
+             }
+           ))
   end
 
   def form_action

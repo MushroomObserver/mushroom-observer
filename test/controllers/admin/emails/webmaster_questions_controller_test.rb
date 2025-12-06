@@ -106,8 +106,8 @@ module Admin
         post(:create,
              params: {
                webmaster_question: {
-                 user: { email: email },
-                 question: { message: args[:message] || "Some message" }
+                 email: email,
+                 message: args[:message] || "Some message"
                }
              })
         assert_response(response)
