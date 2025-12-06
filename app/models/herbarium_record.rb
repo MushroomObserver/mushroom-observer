@@ -117,15 +117,18 @@ class HerbariumRecord < AbstractModel
   end
 
   # Send email notifications when herbarium_record created by non-curator.
+  # Migrated from QueuedEmail::AddRecordToHerbarium to ActionMailer + ActiveJob.
   def notify_curators
     sender = user
     recipients = herbarium.try(&:curators) || []
     return if recipients.member?(sender)
 
-    recipients.each do |recipient|
-      next if recipient.no_emails
+    recipients.each do |receiver|
+      next if receiver.no_emails
 
-      QueuedEmail::AddRecordToHerbarium.create_email(sender, recipient, self)
+      AddHerbariumRecordMailer.build(
+        sender:, receiver:, herbarium_record: self
+      ).deliver_later
     end
   end
 

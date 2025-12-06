@@ -8,14 +8,17 @@ module Name::Notify
   end
 
   # Notify webmaster that a new name was created.
+  # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
   def notify_webmaster
     return if skip_notify
 
-    QueuedEmail::Webmaster.create_email(
-      user,
+    content = WebmasterMailer.prepend_user(user,
+                                           "#{MO.http_domain}/names/#{id}")
+    WebmasterMailer.build(
+      sender_email: user.email,
       subject: "#{user.login} created #{user_real_text_name(user)}",
-      content: "#{MO.http_domain}/names/#{id}"
-    )
+      content: content
+    ).deliver_later
   end
 
   # This is called after saving potential changes to a Name.  It will determine

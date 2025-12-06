@@ -2271,6 +2271,48 @@ class NameTest < UnitTestCase
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
   end
 
+  def test_notify_interest_state_false
+    # Test Interest with state=false removes user from recipients (line 90)
+    name = names(:peltigera)
+    desc = name_descriptions(:peltigera_desc)
+
+    # Mary is author, rolf is editor - both would normally be notified
+    User.current = nil
+    Name.without_revision do
+      desc.authors.clear
+      desc.editors.clear
+    end
+    desc.authors << mary
+    desc.editors << rolf
+
+    mary.update!(email_names_author: true)
+    rolf.update!(email_names_editor: true)
+    dick.update!(email_names_editor: false, email_names_author: false)
+
+    # Dick creates Interest with state=false - explicitly opts out
+    Interest.where(target: name).destroy_all
+    Interest.create!(user: dick, target: name, state: false)
+
+    QueuedEmail.queue = true
+    QueuedEmail.all.map(&:destroy)
+
+    # Katrina makes a change - should notify mary and rolf, but NOT dick
+    User.current = katrina
+    name.reload
+    name.citation = "Katrina added citation."
+    name.save
+
+    # Should have 2 emails (mary and rolf), not 3 (dick was removed)
+    assert_equal(2, QueuedEmail.count)
+    recipients = QueuedEmail.all.map { |q| User.find(q.to_user_id) }
+    assert_includes(recipients, mary)
+    assert_includes(recipients, rolf)
+    assert_not_includes(recipients, dick)
+
+    QueuedEmail.queue = false
+    Interest.where(target: name).destroy_all
+  end
+
   def test_misspelling
     User.current = rolf
 
@@ -2846,6 +2888,35 @@ class NameTest < UnitTestCase
       name.update(
         Name.parse_name("Coprinus comatus  (O.F. Müll.) Pers.").params
       )
+    end
+  end
+
+  def test_notify_webmaster
+    # Test notify_webmaster sends email via deliver_later
+    User.current = rolf
+    name = Name.new(
+      text_name: "Testname webmaster",
+      display_name: "**__Testname webmaster__**",
+      user: rolf
+    )
+
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      name.notify_webmaster
+    end
+  end
+
+  def test_notify_webmaster_skip_notify
+    # Test that skip_notify prevents notify_webmaster
+    User.current = rolf
+    name = Name.new(
+      text_name: "Testname skip",
+      display_name: "**__Testname skip__**",
+      user: rolf
+    )
+    name.skip_notify = true
+
+    assert_no_enqueued_jobs do
+      name.notify_webmaster
     end
   end
 
