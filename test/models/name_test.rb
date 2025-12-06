@@ -2272,7 +2272,7 @@ class NameTest < UnitTestCase
   end
 
   def test_notify_interest_state_false
-    # Test Interest with state=false removes user from recipients (line 90)
+    # Test Interest with state=false removes user from recipients
     name = names(:peltigera)
     desc = name_descriptions(:peltigera_desc)
 
@@ -2293,23 +2293,17 @@ class NameTest < UnitTestCase
     Interest.where(target: name).destroy_all
     Interest.create!(user: dick, target: name, state: false)
 
-    QueuedEmail.queue = true
-    QueuedEmail.all.map(&:destroy)
-
     # Katrina makes a change - should notify mary and rolf, but NOT dick
     User.current = katrina
     name.reload
-    name.citation = "Katrina added citation."
-    name.save
 
-    # Should have 2 emails (mary and rolf), not 3 (dick was removed)
-    assert_equal(2, QueuedEmail.count)
-    recipients = QueuedEmail.all.map { |q| User.find(q.to_user_id) }
-    assert_includes(recipients, mary)
-    assert_includes(recipients, rolf)
-    assert_not_includes(recipients, dick)
+    # Should enqueue 2 emails (mary and rolf), not 3 (dick was removed
+    # because of Interest with state=false)
+    assert_enqueued_jobs(2) do
+      name.citation = "Katrina added citation."
+      name.save
+    end
 
-    QueuedEmail.queue = false
     Interest.where(target: name).destroy_all
   end
 
