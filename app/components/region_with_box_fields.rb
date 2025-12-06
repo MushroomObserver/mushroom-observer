@@ -42,7 +42,9 @@ class Components::RegionWithBoxFields < Components::Base
       value: @query&.region,
       button: :form_locations_find_on_map.l,
       button_data: { map_target: "showBoxBtn", action: "map#showBox" },
-      controller_data: { autocompleter__region_map_outlet: "##{map_element_id}" },
+      controller_data: {
+        autocompleter__region_map_outlet: "##{map_element_id}"
+      },
       # Make text input a placeInput target so showBox() passes early return
       data: { map_target: "placeInput" },
       # Make hidden field a locationId target so mapLocationIdData() reads it
