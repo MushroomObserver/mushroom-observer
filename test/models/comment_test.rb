@@ -3,6 +3,8 @@
 require("test_helper")
 
 class CommentTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   def setup
     super
     QueuedEmail.queue = true
@@ -105,12 +107,22 @@ class CommentTest < UnitTestCase
     MO.oil_users   = old_oil_users
   end
 
+  # oil_and_water uses QueuedEmail::Webmaster, not deliver_later
   def do_oil_and_water_test
-    do_comment_test(0, nil, rolf, "1")
-    do_comment_test(0, nil, mary, "2")
-    do_comment_test(0, nil, roy, "3")
-    do_comment_test(1, nil, katrina, "4")
-    do_comment_test(1, nil, roy, "5")
+    do_oil_and_water_comment(0, nil, rolf, "1")
+    do_oil_and_water_comment(0, nil, mary, "2")
+    do_oil_and_water_comment(0, nil, roy, "3")
+    do_oil_and_water_comment(1, nil, katrina, "4")
+    do_oil_and_water_comment(1, nil, roy, "5")
+  end
+
+  # oil_and_water emails still use QueuedEmail::Webmaster
+  def do_oil_and_water_comment(expected_count, obs, user, summary)
+    old = QueuedEmail.count
+    Comment.create!(target: obs, user: user, summary: summary, comment: "")
+    actual_count = QueuedEmail.count - old
+    assert_equal(expected_count, actual_count,
+                 "Expected #{expected_count} QueuedEmail, got #{actual_count}")
   end
 
   def opt_out_of_comment_responses(*users)
@@ -125,33 +137,19 @@ class CommentTest < UnitTestCase
     end
   end
 
-  def do_comment_test(chg, obs, user, summary, comment = "")
-    old = num_emails
+  # CommentMailer now uses deliver_later, so we count enqueued jobs.
+  def do_comment_test(expected_count, obs, user, summary, comment = "")
     obs&.reload # (to ensure it sees chgs in user prefs)
+    job_start = enqueued_jobs.size
     Comment.create!(
       target: obs,
       user: user,
       summary: summary,
       comment: comment
     )
-    # Comments seem to not be created immediately because of broadcast job
-    sleep(1)
-    assert_equal(chg, num_emails - old, queued_emails(old))
-  end
-
-  def num_emails
-    QueuedEmail.count
-  end
-
-  def queued_emails(start)
-    return "No emails were queued" if num_emails == start
-
-    strs = QueuedEmail.all[start..].map do |mail|
-      to_user = mail&.to_user_id ? User.find(mail.to_user_id)&.login : nil
-      email = mail&.id ? QueuedEmail.find(mail.id) : nil
-      "to: #{to_user}, email: #{email}"
-    end
-    "These emails were queued:\n#{strs.join("\n")}"
+    actual_count = enqueued_jobs.size - job_start
+    assert_equal(expected_count, actual_count,
+                 "Expected #{expected_count} emails, got #{actual_count}")
   end
 
   def test_polymorphic_joins

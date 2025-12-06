@@ -4,7 +4,7 @@
 class NameProposalMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(sender, receiver, naming, observation)
+  def build(sender:, receiver:, naming:, observation:)
     setup_user(receiver)
     @title = :email_subject_name_proposal.l(
       name: naming.user_text_name(receiver),
@@ -12,8 +12,7 @@ class NameProposalMailer < ApplicationMailer
     )
     @naming = naming
     @observation = observation
-    debug_log(:name_proposal, sender, receiver,
-              naming: naming, observation: observation)
+    debug_log(:name_proposal, sender, receiver, naming:, observation:)
     mo_mail(@title, to: receiver)
   end
 end

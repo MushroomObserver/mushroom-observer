@@ -55,7 +55,7 @@ class ApplicationMailer < ActionMailer::Base
     content_style = calc_content_style(headers)
     from = calc_email(headers[:from]) || MO.news_email_address
     reply_to = calc_email(headers[:reply_to]) || MO.noreply_email_address
-    mail(subject: "[MO] #{title.to_ascii}",
+    mail(subject: "[MO] #{title}",
          to: to,
          from: from,
          reply_to: reply_to,
