@@ -168,8 +168,8 @@ module Mappable
       @south_east = [@south, @east]
       @edges = [@north, @south, @east, @west]
       if @north && @south
-        @is_point = @north ? (@north - @south) < 0.0001 : false
-        @is_box = @north ? (@north - @south) >= 0.0001 : false
+        @is_point = @north ? (@north - @south) < MO.box_epsilon : false
+        @is_box = @north ? (@north - @south) >= MO.box_epsilon : false
         @lat = ((@north + @south) / 2.0).round(4)
         @north_south_distance = @north ? @north - @south : nil
       end

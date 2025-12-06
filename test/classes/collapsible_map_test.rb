@@ -35,21 +35,22 @@ class CollapsibleMapTest < UnitTestCase
   def assert_mapset(*args)
     mapset, lat, long, north, south, east, west, north_south, east_west = args
     assert_extents(mapset, north, south, east, west)
-    assert_in_delta(lat, mapset.lat, 0.0001,
+    e = MO.box_epsilon
+    assert_in_delta(lat, mapset.lat, e,
                     "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
-    assert_in_delta(long, mapset.lng, 0.0001)
-    assert_in_delta(lat, mapset.center[0], 0.0001)
-    assert_in_delta(long, mapset.center[1], 0.0001)
-    assert_in_delta(north, mapset.north_west[0], 0.0001)
-    assert_in_delta(west, mapset.north_west[1], 0.0001)
-    assert_in_delta(north, mapset.north_east[0], 0.0001)
-    assert_in_delta(east, mapset.north_east[1], 0.0001)
-    assert_in_delta(south, mapset.south_west[0], 0.0001)
-    assert_in_delta(west, mapset.south_west[1], 0.0001)
-    assert_in_delta(south, mapset.south_east[0], 0.0001)
-    assert_in_delta(east, mapset.south_east[1], 0.0001)
-    assert_in_delta(north_south, mapset.north_south_distance, 0.0001)
-    assert_in_delta(east_west, mapset.east_west_distance, 0.0001)
+    assert_in_delta(long, mapset.lng, e)
+    assert_in_delta(lat, mapset.center[0], e)
+    assert_in_delta(long, mapset.center[1], e)
+    assert_in_delta(north, mapset.north_west[0], e)
+    assert_in_delta(west, mapset.north_west[1], e)
+    assert_in_delta(north, mapset.north_east[0], e)
+    assert_in_delta(east, mapset.north_east[1], e)
+    assert_in_delta(south, mapset.south_west[0], e)
+    assert_in_delta(west, mapset.south_west[1], e)
+    assert_in_delta(south, mapset.south_east[0], e)
+    assert_in_delta(east, mapset.south_east[1], e)
+    assert_in_delta(north_south, mapset.north_south_distance, e)
+    assert_in_delta(east_west, mapset.east_west_distance, e)
   end
 
   def assert_extents(mapset, north, south, east, west)
@@ -167,10 +168,10 @@ class CollapsibleMapTest < UnitTestCase
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box contained entirely inside.
-    loc.north -= 0.0001
-    loc.south += 0.0001
-    loc.east -= 0.0001
-    loc.west += 0.0001
+    loc.north -= MO.box_epsilon
+    loc.south += MO.box_epsilon
+    loc.east -= MO.box_epsilon
+    loc.west += MO.box_epsilon
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
