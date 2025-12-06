@@ -12,6 +12,10 @@
 module Searchable
   extend ActiveSupport::Concern
 
+  # Maximum URL length Puma will accept
+  # (10,240 minus safety margin for base URL)
+  MAX_QUERY_STRING_LENGTH = 9_500
+
   included do
     # Render help for the pattern search bar (if available), for current model
     def show
@@ -51,12 +55,24 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
-      prepare_raw_params
-      redirect_to(action: :new) and return unless validate_search_instance?
 
-      save_search_query
-      redirect_to(controller: "/#{search_type}", action: :index,
-                  q: @query.q_param)
+      return handle_query_string_too_long if query_string_too_long?
+
+      # Store unprocessed params for form re-rendering on validation failure
+      @raw_user_params = @query_params.to_h.deep_dup
+
+      prepare_raw_params
+
+      return render(:new) unless validate_search_instance?
+
+      save_and_redirect_to_search_results
+    end
+
+    def handle_query_string_too_long
+      @raw_user_params = @query_params.to_h.deep_dup
+      @search = Query.create_query(query_model, {})
+      @search.instance_variable_set(:@raw_user_params, @raw_user_params)
+      render(:new)
     end
 
     def prepare_raw_params
@@ -214,6 +230,8 @@ module Searchable
     def validate_search_instance?
       @query_params.reject! { |_k, v| v == "" }
       @search = Query.create_query(query_model, @query_params)
+      # Preserve raw user input for form re-rendering on validation failure
+      @search.instance_variable_set(:@raw_user_params, @raw_user_params)
       return true unless @search.invalid?
 
       messages = @search.validation_errors.compact_blank
@@ -234,6 +252,12 @@ module Searchable
       @query = Query.lookup_and_save(query_model, **@search.params)
     end
 
+    def save_and_redirect_to_search_results
+      save_search_query
+      redirect_to(controller: "/#{search_type}", action: :index,
+                  q: @query.q_param)
+    end
+
     def escape_location_string(location) = "\"#{location.tr(",", "\\,")}\""
 
     # def strings_with_commas
@@ -251,6 +275,16 @@ module Searchable
 
       @query_params[:has_notes_fields] =
         val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
+    end
+
+    def query_string_too_long?
+      # Build the query string that would be generated as URL params
+      # Must account for the nested structure: query_observations[field]=value
+      query_string = { search_object_name => @query_params }.to_query
+      return false unless query_string.length > MAX_QUERY_STRING_LENGTH
+
+      flash_error(:search_url_too_long.l)
+      true
     end
 
     # Passing some fields will raise an error if the required field is missing,
