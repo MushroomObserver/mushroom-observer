@@ -66,19 +66,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_commercial_inquiry_email
-    image = images(:amateur_image)
-    QueuedEmail::CommercialInquiry.create_email(
-      rolf, image, "What's shakin' with this?"
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::CommercialInquiry",
-                 from: rolf,
-                 to: image.user,
-                 note: "What's shakin' with this?")
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_commercial_inquiry_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_commercial_email
+  # and test/controllers/images/emails_controller_test.rb
 
   def test_consensus_change_email
     QueuedEmail::ConsensusChange.create_email(
