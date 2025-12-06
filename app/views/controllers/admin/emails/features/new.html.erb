@@ -1,8 +1,0 @@
-<%
-add_page_title("Email Features")
-%>
-
-<%= render(Components::FeatureEmailForm.new(
-  FormObject::FeatureEmail.new,
-  users: @users
-)) %>

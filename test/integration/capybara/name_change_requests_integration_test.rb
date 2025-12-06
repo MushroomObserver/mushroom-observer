@@ -4,11 +4,9 @@ require("test_helper")
 
 # Simple smoke tests for name change request form submission
 class NameChangeRequestsIntegrationTest < CapybaraIntegrationTestCase
-  def test_create_name_change_request
-    # Enable email queuing for this test
-    original_queue_email = Rails.application.config.queue_email
-    Rails.application.config.queue_email = true
+  include ActiveJob::TestHelper
 
+  def test_create_name_change_request
     # Login as admin
     login(users(:admin))
     first("button", text: "Turn on Admin Mode").click
@@ -32,20 +30,18 @@ class NameChangeRequestsIntegrationTest < CapybaraIntegrationTestCase
     # Fill in the notes field
     fill_in("name_change_request_notes", with: "Test name change request")
 
-    # Submit the form
-    within("#name_change_request_form") do
-      click_commit
+    # Submit the form - verify email is enqueued
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        args[0] == "WebmasterMailer" && args[1] == "build"
+      }
+    ) do
+      within("#name_change_request_form") do
+        click_commit
+      end
+      # Wait for redirect
+      assert_selector("body.names__show")
     end
-
-    # Verify successful creation (redirects to name page)
-    assert_selector("body.names__show")
-
-    # Verify database effect - email was queued
-    email = QueuedEmail.where(flavor: "QueuedEmail::Webmaster").last
-    assert(email, "Webmaster email should have been queued")
-    assert_includes(email.get_note, "Test name change request")
-  ensure
-    # Restore original email queuing setting
-    Rails.application.config.queue_email = original_queue_email
   end
 end

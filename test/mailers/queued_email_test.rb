@@ -17,20 +17,9 @@ class QueuedEmailTest < UnitTestCase
     assert(RunLevel.is_normal?)
   end
 
-  def test_add_herbarium_record_email
-    # Dick's fungarium is empty. Mary wants to add `fundis_record` to it
-    f_r = herbarium_records(:fundis_record)
-    QueuedEmail::AddRecordToHerbarium.create_email(
-      mary, dick, f_r
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::AddRecordToHerbarium",
-                 from: mary,
-                 to: dick,
-                 herbarium_record: f_r.id)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_add_herbarium_record_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_add_herbarium_record_email
+  # and test/models/herbarium_record_test.rb
 
   def test_approval_email
     user = katrina
@@ -77,19 +66,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_commercial_inquiry_email
-    image = images(:amateur_image)
-    QueuedEmail::CommercialInquiry.create_email(
-      rolf, image, "What's shakin' with this?"
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::CommercialInquiry",
-                 from: rolf,
-                 to: image.user,
-                 note: "What's shakin' with this?")
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_commercial_inquiry_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_commercial_email
+  # and test/controllers/images/emails_controller_test.rb
 
   def test_consensus_change_email
     QueuedEmail::ConsensusChange.create_email(
@@ -104,16 +83,6 @@ class QueuedEmailTest < UnitTestCase
                  observation: observations(:coprinus_comatus_obs).id,
                  old_name: names(:agaricus_campestris).id,
                  new_name: names(:coprinus_comatus).id)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
-
-  def test_features_email
-    QueuedEmail::Features.create_email(mary, "blah blah blah")
-    assert_email(0,
-                 flavor: "QueuedEmail::Features",
-                 to: mary,
-                 note: "blah blah blah")
     email = QueuedEmail.first.deliver_email
     assert(email)
   end
@@ -180,17 +149,9 @@ class QueuedEmailTest < UnitTestCase
   # See test/mailers/application_mailer_test.rb#test_naming_tracker_email
   # and test/mailers/application_mailer_test.rb#test_naming_observer_email
 
-  def test_observer_question_email
-    observation = observations(:coprinus_comatus_obs) # rolf's
-    question = "What's going on with that pileus?"
-    QueuedEmail::ObserverQuestion.create_email(mary, observation, question)
-    assert_email(0,
-                 flavor: "QueuedEmail::ObserverQuestion",
-                 from: mary,
-                 to: rolf,
-                 observation: observation.id,
-                 note: "What's going on with that pileus?")
-  end
+  # test_observer_question_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_observer_question_email
+  # and test/controllers/observations/emails_controller_test.rb
 
   def test_observation_change_email
     QueuedEmail::ObservationChange.change_observation(
@@ -234,42 +195,13 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_password_email
-    password = String.random(10)
+  # test_password_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_password_email
+  # and test/controllers/account/login_controller_test.rb
 
-    QueuedEmail::Password.create_email(mary, password)
-    assert_email(0,
-                 flavor: "QueuedEmail::Password",
-                 to: mary,
-                 password: password)
-  end
-
-  def test_project_admin_request_email
-    # Rolf wants to be an admin of Mary's project. She's the only admin
-    project = projects(:two_list_project) # mary's
-    subject = "Can i be an admin of your project?"
-    message = "I too am interested in this project"
-    QueuedEmail::ProjectAdminRequest.create_email(rolf, mary, project,
-                                                  subject, message)
-    assert_email(0,
-                 flavor: "QueuedEmail::ProjectAdminRequest",
-                 from: rolf,
-                 to: mary,
-                 project: project.id,
-                 subject: subject,
-                 note: message)
-  end
-
-  def test_publish_email
-    QueuedEmail::Publish.create_email(rolf, mary, names(:peltigera))
-    assert_email(0,
-                 flavor: "QueuedEmail::Publish",
-                 from: rolf,
-                 to: mary,
-                 name: names(:peltigera).id)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_project_admin_request_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_project_admin_request_email
+  # and test/controllers/projects/admin_requests_controller_test.rb
 
   # test_user_question_email removed - migrated to deliver_later
   # See test/mailers/application_mailer_test.rb#test_user_question_email
@@ -293,17 +225,7 @@ class QueuedEmailTest < UnitTestCase
   # See test/mailers/application_mailer_test.rb#test_verify_email
   # and test/controllers/account_controller_test.rb
 
-  def test_webmaster_question_email
-    # Note that there is no `from` or `to` User instance for these,
-    # because anyone can email the webmaster, even without an account.
-    subject = "Euh..."
-    content = "What's up with this button here?"
-    QueuedEmail::Webmaster.create_email(nil, sender_email: mary.email,
-                                             content: content, subject: subject)
-    assert_email(0,
-                 flavor: "QueuedEmail::Webmaster",
-                 sender_email: mary.email,
-                 subject: "Euh...",
-                 note: content)
-  end
+  # test_webmaster_question_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_webmaster_email
+  # and test/controllers/admin/emails/webmaster_questions_controller_test.rb
 end

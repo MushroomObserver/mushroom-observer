@@ -33,12 +33,15 @@ module Comment::Callbacks
     return unless user_ids.intersect?(::MO.water_users)
     return unless user_ids.intersect?(::MO.oil_users)
 
-    QueuedEmail::Webmaster.create_email(
-      User.admin,
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    content = WebmasterMailer.prepend_user(
+      User.admin, oil_and_water_content(user_ids)
+    )
+    WebmasterMailer.build(
       sender_email: MO.noreply_email_address,
       subject: oil_and_water_subject,
-      content: oil_and_water_content(user_ids)
-    )
+      content: content
+    ).deliver_later
   end
 
   ##########################################################################
