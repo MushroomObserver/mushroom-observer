@@ -69,11 +69,11 @@ module Admin
       def send_merge_request
         # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
         temporarily_set_locale(MO.default_locale) do
-          content = WebmasterMailer.prepend_user(@user, merge_request_content)
+          message = WebmasterMailer.prepend_user(@user, merge_request_content)
           WebmasterMailer.build(
             sender_email: @user.email,
             subject: "#{@model.name} Merge Request",
-            content: content
+            message:
           ).deliver_later
         end
         flash_notice(:email_merge_request_success.t)

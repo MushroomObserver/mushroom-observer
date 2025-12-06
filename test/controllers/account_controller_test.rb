@@ -125,15 +125,21 @@ class AccountControllerTest < FunctionalTestCase
       notes: ""
     }
 
+    # Empty theme doesn't send email (theme.present? is false)
     @request.session["return-to"] = referrer
-    post(:create, params: { new_user: params.merge(theme: "") })
+    assert_no_enqueued_jobs do
+      post(:create, params: { new_user: params.merge(theme: "") })
+    end
     assert_no_flash
     assert_nil(User.find_by(login: "spammer"))
     assert_nil(@request.session["user_id"])
     assert_redirected_to(referrer)
 
+    # Invalid theme sends "Account Denied" email to webmaster
     @request.session["return-to"] = referrer
-    post(:create, params: { new_user: params.merge(theme: "spammer") })
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      post(:create, params: { new_user: params.merge(theme: "spammer") })
+    end
     assert_no_flash
     assert_nil(User.find_by(login: "spammer"))
     assert_nil(@request.session["user_id"])

@@ -81,11 +81,11 @@ module Account
       url = "#{MO.http_domain}/account/verify/#{user.id}?" \
             "auth_code=#{user.auth_code}"
       body = :email_verify_intro.tp(user: user.login, link: url)
-      content = "email: #{user.email}\n\n #{body.html_to_ascii}"
+      message = "email: #{user.email}\n\n #{body.html_to_ascii}"
       WebmasterMailer.build(
         sender_email: user.email,
         subject: :email_subject_verify.l,
-        content: content
+        message:
       ).deliver_later
     end
 

@@ -5,6 +5,7 @@ require("test_helper")
 module Names
   class TrackersControllerTest < FunctionalTestCase
     include ObjectLinkHelper
+    include ActiveJob::TestHelper
 
     # ----------------------------
     #  Name Trackers.
@@ -87,7 +88,15 @@ module Names
         }
       }
       login("rolf")
-      post(:create, params: params)
+      # Should enqueue WebmasterMailer to notify about note_template
+      assert_enqueued_with(
+        job: ActionMailer::MailDeliveryJob,
+        args: lambda { |args|
+          args[0] == "WebmasterMailer" && args[1] == "build"
+        }
+      ) do
+        post(:create, params: params)
+      end
       assert_redirected_to(name_path(name.id))
       # This is needed before the next find for some reason
       count_after = NameTracker.count

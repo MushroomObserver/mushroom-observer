@@ -575,13 +575,13 @@ class NamesController < ApplicationController
 
   def email_admin_name_change
     # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
-    content = WebmasterMailer.prepend_user(@user, email_name_change_content)
+    message = WebmasterMailer.prepend_user(@user, email_name_change_content)
     WebmasterMailer.build(
       sender_email: @user.email,
       subject: "Nontrivial Name Change",
-      content: content
+      message:
     ).deliver_later
-    NamesControllerUpdateTest.report_email(content) if Rails.env.test?
+    NamesControllerUpdateTest.report_email(message) if Rails.env.test?
   end
 
   def email_name_change_content
@@ -673,7 +673,7 @@ class NamesController < ApplicationController
   end
 
   def email_admin_icn_id_conflict(survivor)
-    content = :email_merger_icn_id_conflict.l(
+    message = :email_merger_icn_id_conflict.l(
       name: survivor.user_real_search_name(@user),
       surviving_icn_id: survivor.icn_id,
       deleted_icn_id: @name.icn_id,
@@ -682,13 +682,13 @@ class NamesController < ApplicationController
       edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
     # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
-    content = WebmasterMailer.prepend_user(@user, content)
+    message = WebmasterMailer.prepend_user(@user, message)
     WebmasterMailer.build(
       sender_email: @user.email,
       subject: "Merger identifier conflict",
-      content: content
+      message:
     ).deliver_later
-    NamesControllerUpdateMergeTest.report_email(content) if Rails.env.test?
+    NamesControllerUpdateMergeTest.report_email(message) if Rails.env.test?
   end
 
   # ----------------------------------------------------------------------------

@@ -12,12 +12,12 @@ module Name::Notify
   def notify_webmaster
     return if skip_notify
 
-    content = WebmasterMailer.prepend_user(user,
+    message = WebmasterMailer.prepend_user(user,
                                            "#{MO.http_domain}/names/#{id}")
     WebmasterMailer.build(
       sender_email: user.email,
       subject: "#{user.login} created #{user_real_text_name(user)}",
-      content: content
+      message:
     ).deliver_later
   end
 
