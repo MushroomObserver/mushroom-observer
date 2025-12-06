@@ -5,6 +5,8 @@ require("test_helper")
 module Herbaria
   # test of actions to request being a curator of a herbarium
   class CuratorRequestsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     # ---------- Helpers ----------
 
     def nybg
@@ -49,11 +51,13 @@ module Herbaria
     def test_create
       email_count = ActionMailer::Base.deliveries.count
       login("mary")
-      post(:create,
-           params: {
-             id: nybg.id,
-             herbarium_curator_request: { notes: "ZZYZX" }
-           })
+      perform_enqueued_jobs do
+        post(:create,
+             params: {
+               id: nybg.id,
+               herbarium_curator_request: { notes: "ZZYZX" }
+             })
+      end
 
       assert_redirected_to(herbarium_path(nybg))
       assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
