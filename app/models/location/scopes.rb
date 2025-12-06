@@ -4,6 +4,10 @@ module Location::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
+  # Small epsilon buffer (~11 meters at equator) to account for rounding
+  # in form inputs when comparing bounding box coordinates
+  IN_BOX_EPSILON = 0.0001
+
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
@@ -101,18 +105,25 @@ module Location::Scopes
       box = Mappable::Box.new(**args)
       return none unless box.valid?
 
-      where((Location[:south] >= box.south).and(Location[:north] <= box.north).
+      e = IN_BOX_EPSILON
+      where((Location[:south] >= box.south - e).
+            and(Location[:north] <= box.north + e).
             # Location[:west] between w & 180 OR between 180 and e
-            and((Location[:west] >= box.west).or(Location[:west] <= box.east)).
-            and((Location[:east] >= box.west).or(Location[:east] <= box.east)))
+            and((Location[:west] >= box.west - e).
+                or(Location[:west] <= box.east + e)).
+            and((Location[:east] >= box.west - e).
+                or(Location[:east] <= box.east + e)))
     }
     # mostly a helper for in_box
     scope :in_box_regular, lambda { |**args|
       box = Mappable::Box.new(**args)
       return none unless box.valid?
 
-      where((Location[:south] >= box.south).and(Location[:north] <= box.north).
-            and(Location[:west] >= box.west).and(Location[:east] <= box.east).
+      e = IN_BOX_EPSILON
+      where((Location[:south] >= box.south - e).
+            and(Location[:north] <= box.north + e).
+            and(Location[:west] >= box.west - e).
+            and(Location[:east] <= box.east + e).
             and(Location[:west] <= Location[:east]))
     }
     # Pass kwargs (:north, :south, :east, :west), any order
