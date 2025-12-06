@@ -322,7 +322,6 @@ MushroomObserver::Application.routes.draw do
     resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
     namespace :emails do
-      resource :features, only: [:new, :create], controller: "features"
       resource :webmaster_questions, only: [:new, :create],
                                      controller: "webmaster_questions"
       resource :merge_requests, only: [:new, :create],

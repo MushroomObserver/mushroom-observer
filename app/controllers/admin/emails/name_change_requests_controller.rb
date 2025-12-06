@@ -8,7 +8,10 @@ module Admin
       before_action :login_required
 
       def new
-        return unless check_both_names!
+        unless check_both_names!
+          redirect_back_or_default("/")
+          return
+        end
 
         unless check_different_icn_ids
           redirect_back_or_default("/")
@@ -23,7 +26,7 @@ module Admin
               locals: {
                 title: :email_name_change_request_title.l,
                 identifier: "name_change_request_email",
-                user: @user, form: "admin/email/name_change_requests/form"
+                user: @user, form: "admin/emails/name_change_requests/form"
               }
             ) and return
           end
@@ -31,7 +34,10 @@ module Admin
       end
 
       def create
-        return unless check_both_names!
+        unless check_both_names!
+          redirect_back_or_default("/")
+          return
+        end
 
         unless (name_with_icn_id = check_different_icn_ids)
           redirect_back_or_default("/")
@@ -56,13 +62,17 @@ module Admin
       end
 
       def send_name_change_request(name_with_icn_id, new_name_with_icn_id)
+        # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
         temporarily_set_locale(MO.default_locale) do
-          QueuedEmail::Webmaster.create_email(
-            @user,
-            content: change_request_content(name_with_icn_id,
-                                            new_name_with_icn_id),
-            subject: "Request to change Name having dependents"
+          content = WebmasterMailer.prepend_user(
+            @user, change_request_content(name_with_icn_id,
+                                          new_name_with_icn_id)
           )
+          WebmasterMailer.build(
+            sender_email: @user.email,
+            content: content,
+            subject: "Request to change Name having dependents"
+          ).deliver_later
         end
         flash_notice(:email_change_name_request_success.t)
         redirect_to(@name.show_link_args)

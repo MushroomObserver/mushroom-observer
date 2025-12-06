@@ -18,6 +18,29 @@ module Names
       assert_form_action(action: :create, id: name.id)
     end
 
+    def test_email_tracking_edit_with_existing_tracker
+      name = names(:coprinus_comatus)
+      name_tracker = NameTracker.find_by(name: name, user: rolf)
+      assert(name_tracker, "Test needs a fixture with existing tracker")
+
+      login("rolf")
+      get(:edit, params: { id: name.id })
+
+      assert_template("names/trackers/edit")
+      assert_form_action(action: :update, id: name.id)
+    end
+
+    def test_email_tracking_edit_without_existing_tracker_redirects_to_new
+      name = names(:conocybe_filaris)
+      name_tracker = NameTracker.find_by(name: name, user: rolf)
+      assert_nil(name_tracker, "Test needs a name without existing tracker")
+
+      login("rolf")
+      get(:edit, params: { id: name.id })
+
+      assert_redirected_to(new_tracker_of_name_path(name))
+    end
+
     def test_email_tracking_enable_no_note
       name = names(:conocybe_filaris)
       count_before = NameTracker.count
