@@ -26,9 +26,9 @@ module Users
     def test_send_user_question
       params = {
         id: mary.id,
-        email: {
+        user_question: {
           subject: "Email subject",
-          content: "Email question"
+          message: "Email question"
         }
       }
 
@@ -52,9 +52,9 @@ module Users
       login("rolf")
       params = {
         id: mary.id,
-        email: {
+        user_question: {
           subject: "",
-          content: "Email question"
+          message: "Email question"
         }
       }
       post(:create, params: params)
@@ -62,13 +62,13 @@ module Users
       assert_flash_text(:runtime_ask_user_question_missing_fields.t)
     end
 
-    def test_send_user_question_missing_content
+    def test_send_user_question_missing_message
       login("rolf")
       params = {
         id: mary.id,
-        email: {
+        user_question: {
           subject: "Email subject",
-          content: ""
+          message: ""
         }
       }
       post(:create, params: params)

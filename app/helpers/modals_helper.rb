@@ -20,7 +20,8 @@ module ModalsHelper
       HerbariumRecord: Components::HerbariumRecordForm,
       CollectionNumber: Components::CollectionNumberForm,
       Sequence: Components::SequenceForm,
-      WebmasterQuestion: Components::WebmasterQuestionForm
+      WebmasterQuestion: Components::WebmasterQuestionForm,
+      UserQuestion: Components::UserQuestionForm
     }
 
     # Use demodulized name to handle both ActiveRecord and FormObject classes
@@ -76,6 +77,8 @@ module ModalsHelper
       add_external_link_params(params, locals)
     when "Components::WebmasterQuestionForm"
       add_webmaster_question_params(params, locals)
+    when "Components::UserQuestionForm"
+      add_user_question_params(params, locals)
     end
   end
 
@@ -88,6 +91,12 @@ module ModalsHelper
   def add_webmaster_question_params(params, locals)
     params[:email] = locals[:email] if locals[:email]
     params[:email_error] = locals[:email_error] if locals.key?(:email_error)
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def add_user_question_params(params, locals)
+    params[:target] = locals[:target] if locals[:target]
+    params[:subject] = locals[:subject] if locals[:subject]
     params[:message] = locals[:message] if locals[:message]
   end
 
