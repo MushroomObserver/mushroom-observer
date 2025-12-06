@@ -1,54 +1,73 @@
 <%# filter for identify observations index %>
 <%# Replaces the usual pattern_search form in the top nav %>
-
-<%# TODO: make the form input have selects with autocomplete that send the ID %>
-<%# Otherwise the records have to be looked up (several times) %>
-
+<%#
+  This form swaps between clade and region autocompleter types.
+  Both target namespaces are needed so either controller can find elements.
+  Both actions are needed so swapping works in either direction.
+%>
 <%
-# Show the incoming `needs_naming` query in the search bar if there has been one
 filter_type = params.dig(:filter, :type) || false
 selected = filter_type ? filter_type.to_sym : :clade
 value = filter_type ? params.dig(:filter, :term) : ""
-options = [
-  [:CLADE.l, :clade],
-  [:REGION.l, :region],
-  # [:USER.l, :user],
-]
+options = [[:CLADE.l, :clade], [:REGION.l, :region]]
+initial_controller = "autocompleter--#{selected}"
 %>
 
 <%= form_with(url: identify_observations_path, method: :get,
               class: "navbar-form navbar-left", scope: :filter,
               id: "identify_filter",
-              data: { controller: :autocompleter, type: :clade }) do |f| %>
+              data: { controller: initial_controller, type: selected }) do |f| %>
 
   <%= tag.div(class: "form-group has-feedback has-search dropdown",
-              data: { autocompleter_target: "wrap" } ) do %>
-    <%= tag.span(
-      "", class: "glyphicon glyphicon-search form-control-feedback"
-    ) %>
-    <%# f.label(:term, "Filter by:") %>
-    <%= autocompleter_hidden_field(form: f, type: :clade) %>
-    <%= f.text_field(
-      :term, value: value, placeholder: :filter_by.l,
-      class: "form-control", size: 42, autocomplete: "one-time-code",
-      data: { autocompleter_target: "input" }
-    ) %>
-    <%= autocompleter_dropdown %>
-    <%# autocompleter_field(
-      form: f, field: :term, type: :clade, value: value,
-      placeholder: :filter_by.l, size: 42, autofocus: true,
-      data: { controller: nil,
-              action: "autocompleter-swap:swap->autocompleter#swap" }) %>
-
-  <% end %><!--.form-group-->
+              data: {
+                autocompleter__clade_target: "wrap",
+                autocompleter__region_target: "wrap"
+              }) do %>
+    <%= tag.span("", class: "glyphicon glyphicon-search form-control-feedback") %>
+    <%= f.hidden_field(:term_id, value: nil, data: {
+          autocompleter__clade_target: "hidden",
+          autocompleter__region_target: "hidden"
+        }) %>
+    <%= f.text_field(:term, value: value, placeholder: :filter_by.l,
+          class: "form-control", size: 42, autocomplete: "one-time-code",
+          data: {
+            autocompleter__clade_target: "input",
+            autocompleter__region_target: "input"
+          }) %>
+    <%# Dropdown with both namespaces %>
+    <%= tag.div(class: "auto_complete dropdown-menu", data: {
+          autocompleter__clade_target: "pulldown",
+          autocompleter__region_target: "pulldown",
+          action: [
+            "scroll->autocompleter--clade#scrollList:passive",
+            "scroll->autocompleter--region#scrollList:passive"
+          ].join(" ")
+        }) do %>
+      <%= tag.ul(class: "virtual_list", data: {
+            autocompleter__clade_target: "list",
+            autocompleter__region_target: "list"
+          }) do %>
+        <% 10.times do |i| %>
+          <%= tag.li(class: "dropdown-item") do %>
+            <%= link_to("", "#", data: { row: i, action: [
+                  "click->autocompleter--clade#selectRow:prevent",
+                  "click->autocompleter--region#selectRow:prevent"
+                ].join(" ") }) %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
 
   <%= f.select(:type, options, { selected: selected },
-               { class: "form-control",
-                 data: { autocompleter_target: "select",
-                         action: "autocompleter#swap" } }) %>
+        { class: "form-control",
+          data: {
+            autocompleter__clade_target: "select",
+            autocompleter__region_target: "select",
+            action: "autocompleter--clade#swap autocompleter--region#swap"
+          } }) %>
 
   <%= f.submit(:SEARCH.l, class: "btn btn-default") %>
-
   <%= f.submit(:CLEAR.l, class: "btn btn-default") %>
 
 <% end %>

@@ -4,7 +4,6 @@ require("application_system_test_case")
 
 class HerbariumFormSystemTest < ApplicationSystemTestCase
   def test_create_fungarium_new_location
-    # browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
 
@@ -12,7 +11,6 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.herbaria__new")
     create_herbarium_with_new_location
 
-    # assert_no_selector("#modal_herbarium")
     assert_selector("body.herbaria__show")
     assert_selector("h1", text: "Herbarium des Cévennes (CEV)")
     assert_selector("#herbarium_location",

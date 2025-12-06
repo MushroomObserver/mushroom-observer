@@ -292,7 +292,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: []
     )
     html = component.stub(:render, nil) { render_component(component) }
-    assert_html(html, 'div[data-autocompleter-target="collapseFields"]',
+    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]',
                 classes: "in")
   end
 
@@ -311,9 +311,9 @@ class NamesLookupFieldGroupTest < UnitTestCase
     )
     html = component.stub(:render, nil) { render_component(component) }
     # Should have collapse container without 'in' class
-    assert_html(html, 'div[data-autocompleter-target="collapseFields"]')
+    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]')
     doc = Nokogiri::HTML(html)
-    el = doc.at_css('div[data-autocompleter-target="collapseFields"]')
+    el = doc.at_css('div[data-autocompleter--name-target="collapseFields"]')
     classes = el["class"]&.split || []
     assert_not(classes.include?("in"))
   end
@@ -339,7 +339,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: [[:include_synonyms]]
     )
     html = component.stub(:render, nil) { render_component(component) }
-    assert_html(html, 'div[data-autocompleter-target="collapseFields"]',
+    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]',
                 classes: "in")
   end
 
@@ -361,7 +361,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
     )
     html = component.stub(:render, nil) { render_component(component) }
     doc = Nokogiri::HTML(html)
-    el = doc.at_css('div[data-autocompleter-target="collapseFields"]')
+    el = doc.at_css('div[data-autocompleter--name-target="collapseFields"]')
     classes = el["class"]&.split || []
     assert_not(classes.include?("in"))
   end

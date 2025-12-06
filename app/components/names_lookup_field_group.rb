@@ -81,7 +81,7 @@ class Components::NamesLookupFieldGroup < Components::Base
   end
 
   def render_conditional_collapse
-    div(data: { autocompleter_target: "collapseFields" },
+    div(data: { autocompleter__name_target: "collapseFields" },
         class: class_names("collapse", collapse_class)) do
       render_modifier_rows
     end

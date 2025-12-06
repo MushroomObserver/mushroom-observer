@@ -25,7 +25,9 @@ class Autocomplete
   end
 
   def initialize(params = {})
-    self.string = params[:string].to_s.strip_squeeze
+    # Strip trailing periods that may be added by browser autocomplete
+    # when user accidentally types two spaces (e.g., "Amanita muscaria.")
+    self.string = params[:string].to_s.strip_squeeze.sub(/\.+\z/, "")
     self.all = params[:all].present?
     self.whole = params[:whole].present?
   end

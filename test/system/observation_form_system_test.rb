@@ -93,7 +93,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # autocompleter is unconstrained
     assert_selector("[data-type='location']")
     find(id: "observation_place_name").trigger("click")
-    # Click "New locality" button (text hidden on small viewports)
+    # This should make the "create_locality" button appear.
+    # (button text is hidden on small viewports via d-none d-sm-inline)
     within("#observation_location_autocompleter") do
       assert_selector(".create-button", visible: :all)
       btn = find(".create-button", visible: :all)

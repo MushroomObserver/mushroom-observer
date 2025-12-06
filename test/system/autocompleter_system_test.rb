@@ -29,6 +29,15 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete ul li a", text: "Agaricus campestrus")
     @browser.keyboard.type(:down, :down, :down, :down, :tab)
     assert_field("query_observations_names_lookup", with: "Agaricus campestrus")
+
+    # Test that nested modifier fields (synonyms, subtaxa) appear when typing
+    # The collapse div should be visible now that a name is entered
+    collapse_selector = "[data-autocompleter--name-target='collapseFields']"
+    assert_selector(collapse_selector, visible: true)
+    # Should contain the include_synonyms select field
+    within(collapse_selector) do
+      assert_selector("select[name*='include_synonyms']")
+    end
   end
 
   def test_observation_search_user_autocompleter
@@ -98,6 +107,26 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   #   assert(value.start_with?("USA, California"),
   #          "Expected 'USA, California' but got: #{value}")
   # end
+
+  def test_observation_search_region_autocompleter
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    # Expand the Location panel to reveal the region field
+    find("[data-target='#observations_location']").click
+    assert_selector("#observations_location.in", wait: 3)
+
+    # Region autocompleter should show matches as user types
+    # (no trailing space required - that was a bug we fixed)
+    find_field("query_observations_region").click
+    @browser.keyboard.type("calif")
+    assert_selector(".auto_complete", wait: 5) # wait for autocomplete
+    assert_selector(".auto_complete ul li a", text: /California/i, wait: 3)
+    @browser.keyboard.type(:down, :tab)
+    assert_field("query_observations_region", with: /California/i)
+  end
 
   # ---------------------------------------------------------------
   #  Multi-value autocompleter tests
@@ -258,8 +287,9 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     visit("/observations/search/new")
     assert_selector("body.search__new")
 
-    autocompleter = find("#query_observations_by_users_autocompleter", wait: 5)
     field = find_field("query_observations_by_users")
+    # Find the autocompleter wrapper by going up from the field
+    autocompleter = field.ancestor(".autocompleter")
 
     # Select first user
     field.click
@@ -348,7 +378,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_includes(ids, dick.id, "Dick's ID should be in hidden field")
 
     # Checkmark should be visible
-    autocompleter = find("#query_observations_by_users_autocompleter")
+    autocompleter = field.ancestor(".autocompleter")
     within(autocompleter) do
       indicator = find(".has-id-indicator", visible: :all)
       style = indicator.style("display")
@@ -389,12 +419,43 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_equal(3, ids.length, "Should have 3 IDs prefilled")
 
     # Checkmark should be visible
-    autocompleter = find("#query_observations_projects_autocompleter")
+    autocompleter = field.ancestor(".autocompleter")
     within(autocompleter) do
       indicator = find(".has-id-indicator", visible: :all)
       style = indicator.style("display")
       assert_equal("inline-block", style["display"],
                    "Checkmark should be visible for prefilled values")
     end
+  end
+
+  # ---------------------------------------------------------------
+  #  Species List autocompleter test
+  #  Test the "Add or Remove Observations from List" form
+  #  This uses a species_list type autocompleter which requires
+  #  underscore-to-hyphen conversion in the Stimulus controller name
+  # ---------------------------------------------------------------
+
+  def test_species_list_autocompleter_in_add_remove_form
+    rolf = users(:rolf)
+    login!(rolf)
+
+    # Get an observation query to work with
+    query = Query.lookup(:Observation, by_users: rolf.id)
+    q_param = query.q_param
+
+    # Visit the "Add or Remove Observations" form
+    visit("/species_lists/observations/edit?q=#{q_param}")
+    assert_selector("#species_list_observations_form")
+
+    # The species_list autocompleter should work
+    field = find_field("species_list")
+    field.click
+    @browser.keyboard.type("query")
+    assert_selector(".auto_complete", wait: 5)
+    assert_selector(".auto_complete ul li a", text: /Query/i, wait: 3)
+    @browser.keyboard.type(:down, :tab)
+
+    # Should have selected a species list
+    assert_field("species_list", with: /Query/i)
   end
 end

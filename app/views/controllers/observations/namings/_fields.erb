@@ -28,7 +28,7 @@ confidences = options_for_select(menu, @vote&.value)
 <% end %>
 
 <%= fields_for(:naming) do |f_n| %>
-  <% vote_reasons = tag.div(data: { autocompleter_target: "collapseFields" },
+  <% vote_reasons = tag.div(data: { autocompleter__name_target: "collapseFields" },
                             class: ("collapse" if context == "blank")) do
     [
       f_n.fields_for(:vote) do |f_v|

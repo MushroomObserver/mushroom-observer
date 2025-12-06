@@ -16,7 +16,7 @@ const internalConfig = {
 export default class extends Controller {
   static targets = ["carousel", "item", "useExifBtn",
     "collapseFields", "collapseCheck"]
-  static outlets = ["autocompleter", "map"]
+  static outlets = ["autocompleter--location", "map"]
 
   connect() {
     this.element.dataset.formExif = "connected";
@@ -262,8 +262,8 @@ export default class extends Controller {
       _obs_alt.value = alt == null ? alt : alt.toFixed(0);
 
       // should trigger change to update the autocompleter and the map
-      if (this.hasAutocompleterOutlet) {
-        this.autocompleterOutlet.swap({
+      if (this.hasAutocompleterLocationOutlet) {
+        this.autocompleterLocationOutlet.swap({
           detail: { type: "location_containing", request_params: { lat, lng } }
         });
       }

@@ -132,8 +132,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_field("herbarium_record_herbarium_name")
 
       # Verify has_id_indicator (green check) exists (may not be visible yet)
+      # Uses namespaced target: data-autocompleter--herbarium-target
       assert_selector(
-        "span.has-id-indicator[data-autocompleter-target='hasIdIndicator']",
+        "span.has-id-indicator" \
+        "[data-autocompleter--herbarium-target='hasIdIndicator']",
         visible: :all
       )
 

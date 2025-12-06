@@ -51,6 +51,27 @@ class AutocompleteTest < UnitTestCase
     assert(results.pluck(:name).include?("Rolf Singer (rolf)"))
   end
 
+  # ForName uses word matching after WORD_MATCH_THRESHOLD characters.
+  # Short queries only match beginning of name (genus).
+  # Longer queries match any word in the name (genus or epithet).
+  def test_name_word_matching
+    # "cam" (3 chars) is below threshold - only matches beginning of name
+    # No names start with "cam" in fixtures
+    auto = Autocomplete::ForName.new(string: "cam")
+    results = auto.matching_records
+    names = results.pluck(:name)
+    assert_not(names.include?("Agaricus campestris"),
+               "Short query should not match epithet")
+
+    # "camp" (4 chars) is at/above threshold - matches any word
+    # "Agaricus campestris" has word "campestris" starting with "camp"
+    auto = Autocomplete::ForName.new(string: "camp")
+    results = auto.matching_records
+    names = results.pluck(:name)
+    assert(names.include?("Agaricus campestris"),
+           "Long query should match epithet via word matching")
+  end
+
   def test_typical_use_with_exact_match
     auto = Autocomplete::ForName.new(string: "Agaricus campestris")
     results = auto.first_matching_record

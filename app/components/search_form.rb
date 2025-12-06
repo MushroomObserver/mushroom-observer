@@ -89,10 +89,6 @@ class Components::SearchForm < Components::ApplicationForm
     @search_controller.search_type
   end
 
-  def nested_field_names
-    @search_controller.nested_field_names
-  end
-
   # Header (shown when not local/inline)
 
   def render_header
