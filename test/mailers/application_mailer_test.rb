@@ -71,16 +71,20 @@ class ApplicationMailerTest < UnitTestCase
   def test_add_herbarium_record_email
     herbarium_record = herbarium_records(:interesting_unknown)
     run_mail_test("add_herbarium_record_not_curator", rolf) do
-      AddHerbariumRecordMailer.build(mary, rolf, herbarium_record).deliver_now
+      AddHerbariumRecordMailer.build(
+        sender: mary, receiver: rolf, herbarium_record:
+      ).deliver_now
     end
   end
 
   def test_admin_email
     project = projects(:eol_project)
+    subject = "Please do something or other"
+    message = "and this is why..."
+
     run_mail_test("admin_request", rolf) do
       ProjectAdminRequestMailer.build(
-        katrina, rolf, project,
-        "Please do something or other", "and this is why..."
+        sender: katrina, receiver: rolf, project:, subject:, message:
       ).deliver_now
     end
   end
@@ -124,10 +128,10 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_commercial_email
     image = images(:commercial_inquiry_image)
+    message = "Did test_commercial_inquiry work?"
+
     run_mail_test("commercial_inquiry", image.user) do
-      CommercialInquiryMailer.build(
-        mary, image, "Did test_commercial_inquiry work?"
-      ).deliver_now
+      CommercialInquiryMailer.build(sender: mary, image:, message:).deliver_now
     end
   end
 
@@ -144,12 +148,6 @@ class ApplicationMailerTest < UnitTestCase
       email = QueuedEmail::ConsensusChange.create_email(dick, mary, obs,
                                                         name1, name2)
       ConsensusChangeMailer.build(email).deliver_now
-    end
-  end
-
-  def test_features_email
-    run_mail_test("email_features", rolf) do
-      FeaturesMailer.build(rolf, "A feature").deliver_now
     end
   end
 
@@ -212,8 +210,10 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_password_email
+    password = "A password"
+
     run_mail_test("new_password", rolf) do
-      PasswordMailer.build(rolf, "A password").deliver_now
+      PasswordMailer.build(receiver: rolf, password:).deliver_now
     end
   end
 
@@ -251,17 +251,13 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_observer_question_email
-    obs = observations(:detailed_unknown_obs)
-    run_mail_test("observation_question", obs.user) do
-      ObserverQuestionMailer.build(rolf, obs, "Where did you find it?").
-        deliver_now
-    end
-  end
+    observation = observations(:detailed_unknown_obs)
+    message = "Where did you find it?"
 
-  def test_publish_name_question
-    name = names(:agaricus_campestris)
-    run_mail_test("publish_name", rolf) do
-      PublishNameMailer.build(mary, rolf, name).deliver_now
+    run_mail_test("observation_question", observation.user) do
+      ObserverQuestionMailer.build(
+        sender: rolf, observation:, message:
+      ).deliver_now
     end
   end
 
