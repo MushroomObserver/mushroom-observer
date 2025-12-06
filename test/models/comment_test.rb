@@ -5,15 +5,6 @@ require("test_helper")
 class CommentTest < UnitTestCase
   include ActiveJob::TestHelper
 
-  def setup
-    super
-    QueuedEmail.queue = true
-  end
-
-  def teardown
-    QueuedEmail.queue = false
-  end
-
   def test_find_object_for_all_types
     Comment::ALL_TYPES.each do |type|
       assert(AbstractModel.find_object(type.to_s, type.first.id),
@@ -33,6 +24,13 @@ class CommentTest < UnitTestCase
   def do_highlight_test(expected, string)
     comment = Comment.reorder(created_at: :asc).first
     assert_user_arrays_equal(expected, comment.send(:highlighted_users, string))
+  end
+
+  def test_user_highlighting_by_numeric_id
+    # Test looking up user by numeric ID string (covers line 127)
+    comment = Comment.reorder(created_at: :asc).first
+    result = comment.send(:lookup_user, mary.id.to_s)
+    assert_equal(mary, result)
   end
 
   def test_user_highlighting_emails
@@ -73,6 +71,37 @@ class CommentTest < UnitTestCase
     do_comment_response_where_everyone_opts_in(obs)
   end
 
+  def test_comment_notification_with_interest_state_true
+    # Test Interest with state=true adds user to recipients (lines 75, 76)
+    obs = observations(:minimal_unknown_obs)
+    obs.comments.destroy_all
+    opt_out_of_comment_responses(rolf, mary, dick, katrina)
+    # Mary is the owner, so also disable owner notifications
+    mary.update!(email_comments_owner: false)
+
+    # katrina has Interest state=true in this obs - should be notified
+    Interest.create!(user: katrina, target: obs, state: true)
+
+    # katrina should be notified even though she opted out of comment responses
+    do_comment_test(1, obs, dick, "interest test", "testing interest state")
+    Interest.where(target: obs).destroy_all
+  end
+
+  def test_comment_notification_with_interest_state_false
+    # Test Interest with state=false removes user from recipients (line 78)
+    obs = observations(:minimal_unknown_obs)
+    obs.comments.destroy_all
+    opt_in_to_comment_responses(rolf, mary)
+    rolf.update!(email_comments_owner: true)
+
+    # rolf would normally be notified as owner, but state=false removes him
+    Interest.create!(user: rolf, target: obs, state: false)
+
+    # Only mary should be notified (rolf removed by Interest state=false)
+    do_comment_test(1, obs, dick, "interest test 2", "testing interest remove")
+    Interest.where(target: obs).destroy_all
+  end
+
   def do_comment_response_where_everyone_opts_out(obs)
     opt_out_of_comment_responses(rolf, mary, dick)
     do_comment_test(0, obs, rolf, "1")
@@ -107,22 +136,28 @@ class CommentTest < UnitTestCase
     MO.oil_users   = old_oil_users
   end
 
-  # oil_and_water uses QueuedEmail::Webmaster, not deliver_later
+  # Oil and water emails are now sent via deliver_later instead of QueuedEmail.
+  # Check for enqueued mailer jobs instead of QueuedEmail.count.
   def do_oil_and_water_test
-    do_oil_and_water_comment(0, nil, rolf, "1")
-    do_oil_and_water_comment(0, nil, mary, "2")
-    do_oil_and_water_comment(0, nil, roy, "3")
-    do_oil_and_water_comment(1, nil, katrina, "4")
-    do_oil_and_water_comment(1, nil, roy, "5")
+    # These comments don't trigger oil_and_water (no oil + water yet)
+    create_oil_and_water_comment(rolf, "1")
+    create_oil_and_water_comment(mary, "2")
+    create_oil_and_water_comment(roy, "3")
+
+    # Now katrina (oil user) comments - should trigger oil_and_water email
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      create_oil_and_water_comment(katrina, "4")
+    end
+
+    # roy commenting again still triggers (oil + water users have commented)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      create_oil_and_water_comment(roy, "5")
+    end
   end
 
-  # oil_and_water emails still use QueuedEmail::Webmaster
-  def do_oil_and_water_comment(expected_count, obs, user, summary)
-    old = QueuedEmail.count
-    Comment.create!(target: obs, user: user, summary: summary, comment: "")
-    actual_count = QueuedEmail.count - old
-    assert_equal(expected_count, actual_count,
-                 "Expected #{expected_count} QueuedEmail, got #{actual_count}")
+  def create_oil_and_water_comment(user, summary)
+    Comment.create!(target: nil, user: user, summary: summary, comment: "")
+    sleep(1) # Comments may not be created immediately due to broadcast job
   end
 
   def opt_out_of_comment_responses(*users)

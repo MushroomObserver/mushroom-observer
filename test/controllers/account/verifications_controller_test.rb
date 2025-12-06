@@ -49,6 +49,59 @@ module Account
       assert_raises(RuntimeError) { post(:reverify) }
     end
 
+    # The create action is for API-created users who choose a password
+    def test_create_verify_with_valid_auth_code
+      user = User.create!(
+        login: "api_user",
+        email: "api@example.com"
+      )
+      assert_not(user.verified)
+
+      post(:create, params: { id: user.id, auth_code: user.auth_code })
+      assert_template(:new)
+      assert(@request.session[:user_id])
+      assert(user.reload.verified)
+    end
+
+    def test_create_verify_with_invalid_auth_code
+      user = User.create!(
+        login: "api_user",
+        email: "api@example.com"
+      )
+
+      post(:create, params: { id: user.id, auth_code: "bogus" })
+      assert_template(:reverify)
+      assert_not(@request.session[:user_id])
+    end
+
+    def test_create_verify_already_logged_in_as_same_user
+      user = User.create!(
+        login: "api_user",
+        password: "testpassword",
+        password_confirmation: "testpassword",
+        email: "api@example.com"
+      )
+      user.verify
+      login(user.login)
+
+      post(:create, params: { id: user.id, auth_code: user.auth_code })
+      assert_redirected_to(account_welcome_path)
+    end
+
+    def test_create_verify_already_verified
+      user = User.create!(
+        login: "api_user",
+        password: "testpassword",
+        password_confirmation: "testpassword",
+        email: "api@example.com"
+      )
+      user.verify
+
+      post(:create, params: { id: user.id, auth_code: user.auth_code })
+      assert_redirected_to(new_account_login_path)
+      assert_flash_warning
+    end
+
     def test_anon_user_resend_email
       get(:resend_email)
 

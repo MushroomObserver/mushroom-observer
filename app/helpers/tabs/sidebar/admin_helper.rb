@@ -10,7 +10,6 @@ module Tabs
           admin_switch_users_tab,
           admin_users_tab,
           admin_banners_tab,
-          admin_email_all_users_tab,
           admin_licenses_tab
         ]
       end
@@ -47,13 +46,6 @@ module Tabs
         InternalLink.new(
           :change_banner_title.t, admin_banners_path,
           html_options: { id: "nav_admin_edit_banner_link" }
-        ).tab
-      end
-
-      def admin_email_all_users_tab
-        InternalLink.new(
-          :app_email_all_users.t, new_admin_emails_features_path,
-          html_options: { id: "nav_admin_emails_features_link" }
         ).tab
       end
 

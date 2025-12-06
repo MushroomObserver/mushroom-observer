@@ -17,7 +17,7 @@ module Admin
               locals: {
                 title: :ask_webmaster_title.l,
                 identifier: "webmaster_question_email",
-                user: @user, form: "admin/email/webmaster_questions/form"
+                user: @user, form: "admin/emails/webmaster_questions/form"
               }
             ) and return
           end
@@ -66,8 +66,10 @@ module Admin
       end
 
       def send_email_and_redirect
-        QueuedEmail::Webmaster.create_email(@user, sender_email: @email,
-                                                   content: @content)
+        # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+        content = WebmasterMailer.prepend_user(@user, @content)
+        WebmasterMailer.build(sender_email: @email, content: content).
+          deliver_later
         flash_notice(:runtime_ask_webmaster_success.t)
         redirect_to("/")
       end
