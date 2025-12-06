@@ -24,7 +24,7 @@ module ModalsHelper
     }
 
     # Use demodulized name to handle both ActiveRecord and FormObject classes
-    model_key = model&.class&.name&.demodulize&.to_sym
+    model_key = demodulized_class_name(model)
     component_class = model_key ? component_map[model_key] : nil
 
     if component_class
@@ -73,13 +73,27 @@ module ModalsHelper
   def add_form_specific_params(params, component_class, locals)
     case component_class.name
     when "Components::ExternalLinkForm"
-      params[:user] = locals[:user] if locals[:user]
-      params[:sites] = locals[:sites] if locals[:sites]
-      params[:site] = locals[:site] if locals[:site]
+      add_external_link_params(params, locals)
     when "Components::WebmasterQuestionForm"
-      params[:email] = locals[:email] if locals[:email]
-      params[:email_error] = locals[:email_error] if locals.key?(:email_error)
-      params[:message] = locals[:message] if locals[:message]
+      add_webmaster_question_params(params, locals)
     end
+  end
+
+  def add_external_link_params(params, locals)
+    params[:user] = locals[:user] if locals[:user]
+    params[:sites] = locals[:sites] if locals[:sites]
+    params[:site] = locals[:site] if locals[:site]
+  end
+
+  def add_webmaster_question_params(params, locals)
+    params[:email] = locals[:email] if locals[:email]
+    params[:email_error] = locals[:email_error] if locals.key?(:email_error)
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def demodulized_class_name(model)
+    return nil unless model
+
+    model.class.name.demodulize.to_sym
   end
 end
