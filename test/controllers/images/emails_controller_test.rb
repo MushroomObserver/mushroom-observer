@@ -22,7 +22,7 @@ module Images
       params = {
         id: image.id,
         commercial_inquiry: {
-          content: "Testing commercial_inquiry"
+          message: "Testing commercial_inquiry"
         }
       }
       login("rolf")
@@ -32,13 +32,13 @@ module Images
       assert_redirected_to(image_path(image.id))
     end
 
-    def test_send_commercial_inquiry_requires_content
+    def test_send_commercial_inquiry_requires_message
       image = images(:commercial_inquiry_image)
       login("rolf")
 
       assert_no_enqueued_jobs do
         post(:create,
-             params: { id: image.id, commercial_inquiry: { content: "" } })
+             params: { id: image.id, commercial_inquiry: { message: "" } })
       end
       assert_flash_error
       assert_template(:new)
@@ -57,7 +57,7 @@ module Images
       image = images(:commercial_inquiry_image)
       params = {
         id: image.id,
-        commercial_inquiry: { content: "Testing commercial_inquiry" }
+        commercial_inquiry: { message: "Testing commercial_inquiry" }
       }
       login("rolf")
 
