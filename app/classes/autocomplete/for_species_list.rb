@@ -22,7 +22,7 @@ class Autocomplete::ForSpeciesList < Autocomplete::ByWord
   def matches_array(lists)
     lists.map do |list|
       list = list.attributes.symbolize_keys
-      { name: list[:title].strip_textile, id: list[:id] }
+      { name: list[:title], id: list[:id] }
     end
     # matches.sort_by! { |list| list[:name] }
   end
