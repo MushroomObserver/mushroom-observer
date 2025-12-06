@@ -79,10 +79,12 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_admin_email
     project = projects(:eol_project)
+    subject = "Please do something or other"
+    message = "and this is why..."
+
     run_mail_test("admin_request", rolf) do
       ProjectAdminRequestMailer.build(
-        katrina, rolf, project,
-        "Please do something or other", "and this is why..."
+        sender: katrina, receiver: rolf, project:, subject:, message:
       ).deliver_now
     end
   end
