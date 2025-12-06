@@ -627,6 +627,25 @@ class LocationTest < UnitTestCase
     )
   end
 
+  # Regression test: searching with a location's own bounding box (rounded to
+  # 4 decimal places as in form inputs) should return that location.
+  def test_scope_in_box_finds_location_with_rounded_coordinates
+    salt_point = locations(:salt_point)
+
+    # Simulate form input rounding (4 decimal places)
+    rounded_box = {
+      north: salt_point.north.round(4),
+      south: salt_point.south.round(4),
+      east: salt_point.east.round(4),
+      west: salt_point.west.round(4)
+    }
+
+    results = Location.in_box(**rounded_box)
+    assert_includes(results, salt_point,
+                    "in_box should find location when searched with its own " \
+                    "rounded bounding box coordinates")
+  end
+
   def test_scope_contains_box
     # loc doesn't straddle 180
     #   potential br (bounding rectangle, external_loc) to "left" of loc
