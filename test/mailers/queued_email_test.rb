@@ -240,15 +240,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_password_email
-    password = String.random(10)
-
-    QueuedEmail::Password.create_email(mary, password)
-    assert_email(0,
-                 flavor: "QueuedEmail::Password",
-                 to: mary,
-                 password: password)
-  end
+  # test_password_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_password_email
+  # and test/controllers/account/login_controller_test.rb
 
   def test_project_admin_request_email
     # Rolf wants to be an admin of Mary's project. She's the only admin
