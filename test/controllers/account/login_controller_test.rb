@@ -118,7 +118,12 @@ module Account
       old_password = user.password
       assert_enqueued_with(
         job: ActionMailer::MailDeliveryJob,
-        args: ->(args) { args[0] == "PasswordMailer" && args[1] == "build" }
+        args: lambda { |args|
+          args[0] == "PasswordMailer" &&
+            args[1] == "build" &&
+            args[3][:args][0][:receiver] == user &&
+            args[3][:args][0][:password].is_a?(String)
+        }
       ) do
         post(:new_password_request,
              params: { new_user: { login: users(:roy).login } })

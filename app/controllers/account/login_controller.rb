@@ -105,8 +105,7 @@ module Account
                      :email_spam_notice.tp)
         # Migrated from QueuedEmail::Password to ActionMailer + ActiveJob.
         # See .claude/deliver_later_migration_plan.md for details.
-        receiver = @new_user
-        PasswordMailer.build(receiver:, password:).deliver_later
+        PasswordMailer.build(receiver: @new_user, password:).deliver_later
         render("account/login/new")
       else
         flash_object_errors(@new_user)
