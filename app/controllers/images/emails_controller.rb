@@ -22,7 +22,13 @@ module Images
                 name: @image.unique_format_name
               ),
               identifier: "commercial_inquiry_email",
-              user: @user, form: "images/emails/form"
+              user: @user,
+              form: "images/emails/form",
+              form_locals: {
+                model: FormObject::CommercialInquiry.new,
+                image: @image,
+                user: @user
+              }
             }
           ) and return
         end
@@ -34,10 +40,10 @@ module Images
       return unless image &&
                     can_email_user_question?(image,
                                              method: :email_general_commercial)
-      return unless content_present?(image)
+      return unless message_present?(image)
 
       # Migrated from QueuedEmail::CommercialInquiry to deliver_later.
-      message = params.dig(:commercial_inquiry, :content)
+      message = params.dig(:commercial_inquiry, :message)
       CommercialInquiryMailer.build(
         sender: @user, image:, message:
       ).deliver_later
@@ -48,8 +54,8 @@ module Images
 
     private
 
-    def content_present?(image)
-      return true if params.dig(:commercial_inquiry, :content).present?
+    def message_present?(image)
+      return true if params.dig(:commercial_inquiry, :message).present?
 
       flash_error(:runtime_missing.t(field: :message.l))
       @image = image
