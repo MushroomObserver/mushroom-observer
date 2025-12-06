@@ -35,7 +35,7 @@ module Observations
 
       # Migrated from QueuedEmail::ObserverQuestion to ActionMailer + ActiveJob.
       # See .claude/deliver_later_migration_plan.md for details.
-      message = params.dig(:question, :content)
+      message = params.dig(:question, :message)
       ObserverQuestionMailer.build(
         sender: @user, observation:, message:
       ).deliver_later
@@ -47,7 +47,7 @@ module Observations
     private
 
     def message_present?(observation)
-      return true if params.dig(:question, :content).present?
+      return true if params.dig(:question, :message).present?
 
       flash_error(:runtime_missing.t(field: :message.l))
       @observation = observation

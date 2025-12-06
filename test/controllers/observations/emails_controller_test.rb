@@ -31,7 +31,7 @@ module Observations
       params = {
         id: obs.id,
         question: {
-          content: "Testing question"
+          message: "Testing question"
         }
       }
       login
@@ -51,7 +51,7 @@ module Observations
       obs = observations(:minimal_unknown_obs)
       params = {
         id: obs.id,
-        question: { content: "Testing question" }
+        question: { message: "Testing question" }
       }
       login
       assert_enqueued_with(
@@ -66,12 +66,12 @@ module Observations
       assert_flash_text(:runtime_ask_observation_question_success.t)
     end
 
-    def test_send_observation_question_requires_content
+    def test_send_observation_question_requires_message
       obs = observations(:minimal_unknown_obs)
       login
 
       assert_no_enqueued_jobs do
-        post(:create, params: { id: obs.id, question: { content: "" } })
+        post(:create, params: { id: obs.id, question: { message: "" } })
       end
       assert_flash_error
       assert_template(:new)
