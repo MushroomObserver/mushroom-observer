@@ -282,10 +282,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
     center_lat = (north + south) / 2
     center_lon = (east + west) / 2
-    self.north = center_lat + 0.0001
-    self.south = center_lat - 0.0001
-    self.east = center_lon + 0.0001
-    self.west = center_lon - 0.0001
+    self.north = center_lat + MO.box_epsilon
+    self.south = center_lat - MO.box_epsilon
+    self.east = center_lon + MO.box_epsilon
+    self.west = center_lon - MO.box_epsilon
   end
 
   def found_here?(obs)

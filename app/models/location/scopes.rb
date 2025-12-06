@@ -4,10 +4,6 @@ module Location::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
-  # Small epsilon buffer (~11 meters at equator) to account for rounding
-  # in form inputs when comparing bounding box coordinates
-  IN_BOX_EPSILON = 0.0001
-
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
@@ -105,7 +101,7 @@ module Location::Scopes
       box = Mappable::Box.new(**args)
       return none unless box.valid?
 
-      e = IN_BOX_EPSILON
+      e = MO.box_epsilon
       where((Location[:south] >= box.south - e).
             and(Location[:north] <= box.north + e).
             # Location[:west] between w & 180 OR between 180 and e
@@ -119,7 +115,7 @@ module Location::Scopes
       box = Mappable::Box.new(**args)
       return none unless box.valid?
 
-      e = IN_BOX_EPSILON
+      e = MO.box_epsilon
       where((Location[:south] >= box.south - e).
             and(Location[:north] <= box.north + e).
             and(Location[:west] >= box.west - e).
