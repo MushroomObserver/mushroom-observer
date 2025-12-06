@@ -20,7 +20,8 @@ module ModalsHelper
       HerbariumRecord: Components::HerbariumRecordForm,
       CollectionNumber: Components::CollectionNumberForm,
       Sequence: Components::SequenceForm,
-      WebmasterQuestion: Components::WebmasterQuestionForm
+      WebmasterQuestion: Components::WebmasterQuestionForm,
+      ObserverQuestion: Components::ObserverQuestionForm
     }
 
     # Use demodulized name to handle both ActiveRecord and FormObject classes
@@ -56,7 +57,7 @@ module ModalsHelper
   def build_component_params(component_class, model, observation, back, locals)
     params = { local: false } # Modal forms are turbo forms
     add_observation_param(params, model, observation, component_class)
-    add_form_specific_params(params, component_class, locals)
+    add_form_specific_params(params, component_class, observation, locals)
     params[:back] = back if back
     params
   end
@@ -70,12 +71,14 @@ module ModalsHelper
     end
   end
 
-  def add_form_specific_params(params, component_class, locals)
+  def add_form_specific_params(params, component_class, observation, locals)
     case component_class.name
     when "Components::ExternalLinkForm"
       add_external_link_params(params, locals)
     when "Components::WebmasterQuestionForm"
       add_webmaster_question_params(params, locals)
+    when "Components::ObserverQuestionForm"
+      add_observer_question_params(params, observation, locals)
     end
   end
 
@@ -88,6 +91,11 @@ module ModalsHelper
   def add_webmaster_question_params(params, locals)
     params[:email] = locals[:email] if locals[:email]
     params[:email_error] = locals[:email_error] if locals.key?(:email_error)
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def add_observer_question_params(params, observation, locals)
+    params[:observation] = observation if observation
     params[:message] = locals[:message] if locals[:message]
   end
 
