@@ -135,11 +135,11 @@ module Names
              "Name: ##{name.id} / #{name.search_name}\n" \
              "Note: [[#{name_tracker.note_template}]]\n\n" \
              "#{MO.http_domain}/names/trackers/#{name_tracker.id}/approve"
-      content = WebmasterMailer.prepend_user(@user, body)
+      message = WebmasterMailer.prepend_user(@user, body)
       WebmasterMailer.build(
         sender_email: user.email,
         subject: "New Name Tracker with Template",
-        content: content
+        message:
       ).deliver_later
 
       # Let the user know that the note_template feature requires approval.

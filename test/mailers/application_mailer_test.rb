@@ -277,7 +277,7 @@ class ApplicationMailerTest < UnitTestCase
     run_mail_test("webmaster_question") do
       WebmasterMailer.build(
         sender_email: mary.email,
-        content: "A question"
+        message: "A question"
       ).deliver_now
     end
   end

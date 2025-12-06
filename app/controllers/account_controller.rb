@@ -152,11 +152,11 @@ class AccountController < ApplicationController
       # to automate creation of accounts?
 
       # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
-      content = WebmasterMailer.prepend_user(@user, denied_message(@new_user))
+      message = WebmasterMailer.prepend_user(@user, denied_message(@new_user))
       WebmasterMailer.build(
         sender_email: MO.accounts_email_address,
         subject: "Account Denied",
-        content: content
+        message:
       ).deliver_later
     end
     false
