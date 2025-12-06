@@ -250,17 +250,6 @@ class QueuedEmailTest < UnitTestCase
                  note: message)
   end
 
-  def test_publish_email
-    QueuedEmail::Publish.create_email(rolf, mary, names(:peltigera))
-    assert_email(0,
-                 flavor: "QueuedEmail::Publish",
-                 from: rolf,
-                 to: mary,
-                 name: names(:peltigera).id)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
-
   # test_user_question_email removed - migrated to deliver_later
   # See test/mailers/application_mailer_test.rb#test_user_question_email
   # and test/controllers/users/emails_controller_test.rb
