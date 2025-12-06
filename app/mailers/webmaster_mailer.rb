@@ -4,10 +4,10 @@
 class WebmasterMailer < ApplicationMailer
   after_action :webmaster_delivery, only: [:build]
 
-  def build(sender_email:, content:, subject: nil)
+  def build(sender_email:, message:, subject: nil)
     I18n.locale = MO.default_locale
     @title = subject || :email_subject_webmaster_question.l(user: sender_email)
-    @question = content
+    @question = message
     mo_mail(@title,
             to: MO.webmaster_email_address,
             from: MO.webmaster_email_address,

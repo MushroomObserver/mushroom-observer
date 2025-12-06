@@ -1,6 +1,6 @@
 <%= render(Components::WebmasterQuestionForm.new(
-  FormObject::WebmasterQuestion.new(email: @email, content: @content),
+  FormObject::WebmasterQuestion.new(email: @email, message: @message),
   email: @email,
   email_error: @email_error,
-  content: @content
+  message: @message
 )) %>

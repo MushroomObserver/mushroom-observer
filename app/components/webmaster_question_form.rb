@@ -3,10 +3,10 @@
 # Form for submitting a question to the webmaster.
 # Allows users to ask questions about the site.
 class Components::WebmasterQuestionForm < Components::ApplicationForm
-  def initialize(model, email: nil, email_error: false, content: nil, **)
+  def initialize(model, email: nil, email_error: false, message: nil, **)
     @email = email
     @email_error = email_error
-    @content = content
+    @message = message
     super(model, **)
   end
 
@@ -39,11 +39,11 @@ class Components::WebmasterQuestionForm < Components::ApplicationForm
 
   def render_question_field
     namespace(:question) do |builder|
-      render(builder.field(:content).textarea(
+      render(builder.field(:message).textarea(
                wrapper_options: {
                  label: "#{:ask_webmaster_question.t}:"
                },
-               value: @content,
+               value: @message,
                rows: 10,
                data: {
                  autofocus: @email.present? && !@email_error

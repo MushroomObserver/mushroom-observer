@@ -40,7 +40,7 @@ module Admin
         perform_enqueued_jobs do
           ask_webmaster_test(
             "anonymous@example.com",
-            content: "I noticed something odd",
+            message: "I noticed something odd",
             response: :redirect,
             flash: :runtime_ask_webmaster_success.t
           )
@@ -63,17 +63,17 @@ module Admin
 
       def test_send_webmaster_question_need_content
         ask_webmaster_test("bogus@email.com",
-                           content: "",
+                           message: "",
                            flash: :runtime_ask_webmaster_need_content.t)
       end
 
       def test_send_webmaster_question_antispam
         disable_unsafe_html_filter
         ask_webmaster_test("bogus@email.com",
-                           content: "Buy <a href='http://junk'>Me!</a>",
+                           message: "Buy <a href='http://junk'>Me!</a>",
                            flash: :runtime_ask_webmaster_antispam.t)
         ask_webmaster_test("okay_user@email.com",
-                           content: "iwxobjUzvkhmaCt",
+                           message: "iwxobjUzvkhmaCt",
                            flash: :runtime_ask_webmaster_antispam.t)
       end
 
@@ -85,7 +85,7 @@ module Admin
         perform_enqueued_jobs do
           ask_webmaster_test(
             user.email,
-            content: "https://mushroomobserver.org/123 has an error",
+            message: "https://mushroomobserver.org/123 has an error",
             response: :redirect,
             flash: :runtime_ask_webmaster_success.t
           )
@@ -107,7 +107,7 @@ module Admin
              params: {
                webmaster_question: {
                  user: { email: email },
-                 question: { content: args[:content] || "Some content" }
+                 question: { message: args[:message] || "Some message" }
                }
              })
         assert_response(response)

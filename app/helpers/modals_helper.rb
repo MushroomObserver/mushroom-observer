@@ -19,7 +19,8 @@ module ModalsHelper
       ExternalLink: Components::ExternalLinkForm,
       HerbariumRecord: Components::HerbariumRecordForm,
       CollectionNumber: Components::CollectionNumberForm,
-      Sequence: Components::SequenceForm
+      Sequence: Components::SequenceForm,
+      WebmasterQuestion: Components::WebmasterQuestionForm
     }
 
     component_class = model ? component_map[model.class.name.to_sym] : nil
@@ -68,10 +69,15 @@ module ModalsHelper
   end
 
   def add_form_specific_params(params, component_class, locals)
-    return unless component_class == Components::ExternalLinkForm
-
-    params[:user] = locals[:user] if locals[:user]
-    params[:sites] = locals[:sites] if locals[:sites]
-    params[:site] = locals[:site] if locals[:site]
+    case component_class.name
+    when "Components::ExternalLinkForm"
+      params[:user] = locals[:user] if locals[:user]
+      params[:sites] = locals[:sites] if locals[:sites]
+      params[:site] = locals[:site] if locals[:site]
+    when "Components::WebmasterQuestionForm"
+      params[:email] = locals[:email] if locals[:email]
+      params[:email_error] = locals[:email_error] if locals.key?(:email_error)
+      params[:message] = locals[:message] if locals[:message]
+    end
   end
 end
