@@ -194,17 +194,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_observer_question_email
-    observation = observations(:coprinus_comatus_obs) # rolf's
-    question = "What's going on with that pileus?"
-    QueuedEmail::ObserverQuestion.create_email(mary, observation, question)
-    assert_email(0,
-                 flavor: "QueuedEmail::ObserverQuestion",
-                 from: mary,
-                 to: rolf,
-                 observation: observation.id,
-                 note: "What's going on with that pileus?")
-  end
+  # test_observer_question_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_observer_question_email
+  # and test/controllers/observations/emails_controller_test.rb
 
   def test_observation_change_email
     QueuedEmail::ObservationChange.change_observation(
@@ -248,15 +240,9 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_password_email
-    password = String.random(10)
-
-    QueuedEmail::Password.create_email(mary, password)
-    assert_email(0,
-                 flavor: "QueuedEmail::Password",
-                 to: mary,
-                 password: password)
-  end
+  # test_password_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_password_email
+  # and test/controllers/account/login_controller_test.rb
 
   def test_project_admin_request_email
     # Rolf wants to be an admin of Mary's project. She's the only admin
@@ -297,17 +283,7 @@ class QueuedEmailTest < UnitTestCase
   # See test/mailers/application_mailer_test.rb#test_verify_email
   # and test/controllers/account_controller_test.rb
 
-  def test_webmaster_question_email
-    # Note that there is no `from` or `to` User instance for these,
-    # because anyone can email the webmaster, even without an account.
-    subject = "Euh..."
-    content = "What's up with this button here?"
-    QueuedEmail::Webmaster.create_email(nil, sender_email: mary.email,
-                                             content: content, subject: subject)
-    assert_email(0,
-                 flavor: "QueuedEmail::Webmaster",
-                 sender_email: mary.email,
-                 subject: "Euh...",
-                 note: content)
-  end
+  # test_webmaster_question_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_webmaster_email
+  # and test/controllers/admin/emails/webmaster_questions_controller_test.rb
 end
