@@ -56,13 +56,13 @@ class Components::TextileSandboxForm < Components::ApplicationForm
 
   def render_up_arrows
     div(class: "sandbox-up-ptr center-block mt-3 mb-3") do
-      img(src: view_context.image_path("up_arrow.png"), alt: "Up arrow")
+      img(src: helpers.asset_path("up_arrow.png"), alt: "Up arrow")
       whitespace
       submit(:sandbox_test.l, class: "btn btn-default")
       whitespace
       submit(:sandbox_test_codes.l, class: "btn btn-default")
       whitespace
-      img(src: view_context.image_path("up_arrow.png"), alt: "Up arrow")
+      img(src: helpers.asset_path("up_arrow.png"), alt: "Up arrow")
     end
   end
 
