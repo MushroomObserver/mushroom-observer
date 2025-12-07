@@ -1,0 +1,172 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+class NamingFormTest < UnitTestCase
+  include ComponentTestHelper
+
+  def setup
+    super
+    @naming = Naming.new
+    @observation = observations(:coprinus_comatus_obs)
+    @vote = Vote.new
+    controller.request = ActionDispatch::TestRequest.create
+    @html = render_new_form
+  end
+
+  def test_renders_form_with_name_autocompleter
+    assert_html(@html, "input[name='naming[name]']")
+    assert_html(@html, "input[data-autocompleter-target='input']")
+  end
+
+  def test_renders_form_with_vote_select
+    assert_html(@html, "select[name='naming[vote][value]']")
+  end
+
+  def test_renders_form_with_reasons_fields
+    assert_html(@html, "input[name='naming[reasons][1][check]']")
+  end
+
+  def test_renders_form_with_context_hidden_field
+    assert_html(@html, "input[type='hidden'][name='context']")
+  end
+
+  def test_renders_submit_button_for_new_naming
+    assert_html(@html, "input[type='submit'][value='#{:CREATE.l}']")
+    assert_html(@html, "input.btn.btn-default")
+  end
+
+  def test_renders_submit_button_for_existing_naming
+    @naming = namings(:coprinus_comatus_naming)
+    html = render_edit_form
+
+    assert_html(html, "input[type='submit'][value='#{:SAVE_EDITS.l}']")
+  end
+
+  def test_auto_determines_url_for_new_naming
+    assert_html(@html, "form[action*='namings']")
+  end
+
+  def test_auto_determines_url_for_existing_naming
+    @naming = namings(:coprinus_comatus_naming)
+    html = render_edit_form
+
+    assert_html(html, "form[action*='/namings/#{@naming.id}']")
+  end
+
+  def test_form_id_for_new_naming
+    assert_html(@html, "form[id='obs_#{@observation.id}_naming_form']")
+  end
+
+  def test_form_id_for_existing_naming
+    @naming = namings(:coprinus_comatus_naming)
+    html = render_edit_form
+
+    assert_html(html,
+                "form[id='obs_#{@observation.id}_naming_#{@naming.id}_form']")
+  end
+
+  def test_collapse_class_for_blank_context
+    assert_html(@html, "div.collapse[data-autocompleter-target='collapseFields']")
+  end
+
+  def test_no_collapse_class_for_lightbox_context
+    html = render_form_with_context("lightbox")
+
+    doc = Nokogiri::HTML(html)
+    collapse_div = doc.at_css("div[data-autocompleter-target='collapseFields']")
+    refute_includes(collapse_div["class"].to_s, "collapse")
+  end
+
+  def test_includes_blank_option_for_new_naming
+    assert_html(@html, "select[name='naming[vote][value]'] option[value='']")
+  end
+
+  def test_no_blank_option_for_existing_naming
+    @naming = namings(:coprinus_comatus_naming)
+    @vote = votes(:coprinus_comatus_owner_vote)
+    html = render_edit_form
+
+    doc = Nokogiri::HTML(html)
+    blank_option = doc.at_css("select[name='naming[vote][value]'] option[value='']")
+    assert_nil(blank_option)
+  end
+
+  def test_selects_vote_value_for_existing_naming
+    @naming = namings(:coprinus_comatus_naming)
+    @vote = votes(:coprinus_comatus_owner_vote)
+    html = render_edit_form
+
+    assert_html(html, "option[selected][value='#{@vote.value}']")
+  end
+
+  def test_enables_turbo_when_local_false
+    html = render_form_with_local(false)
+    assert_html(html, "form[data-turbo='true']")
+  end
+
+  def test_omits_turbo_when_local_true
+    html = render_form_with_local(true)
+    doc = Nokogiri::HTML(html)
+
+    assert_nil(doc.at_css("form[data-turbo]"))
+  end
+
+  private
+
+  def render_new_form
+    form = Components::NamingForm.new(
+      @naming,
+      observation: @observation,
+      vote: @vote,
+      given_name: "",
+      reasons: @naming.init_reasons,
+      show_reasons: true,
+      context: "blank",
+      local: true
+    )
+    render(form)
+  end
+
+  def render_edit_form(given_name: "")
+    form = Components::NamingForm.new(
+      @naming,
+      observation: @observation,
+      vote: @vote,
+      given_name: given_name,
+      reasons: @naming.init_reasons,
+      show_reasons: true,
+      context: "lightbox",
+      local: true
+    )
+    render(form)
+  end
+
+  def render_form_with_context(context)
+    form = Components::NamingForm.new(
+      @naming,
+      observation: @observation,
+      vote: @vote,
+      given_name: "",
+      reasons: @naming.init_reasons,
+      show_reasons: true,
+      context: context,
+      local: true
+    )
+    render(form)
+  end
+
+  def render_form_with_local(local)
+    form = Components::NamingForm.new(
+      @naming,
+      observation: @observation,
+      vote: @vote,
+      given_name: "",
+      reasons: @naming.init_reasons,
+      show_reasons: true,
+      context: "blank",
+      local: local
+    )
+    render(form)
+  end
+end

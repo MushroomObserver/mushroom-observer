@@ -44,7 +44,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrap_class = wrapper_options[:wrap_class]
 
       div(class: checkbox_class(wrap_class)) do
-        label(for: field.dom.id) do
+        label(for: field.dom.id, **label_attributes) do
           yield
           plain(" #{label_text}")
           render_help_in_label_row
@@ -55,6 +55,21 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
     # rubocop:enable Metrics/AbcSize
+
+    def label_attributes
+      {}.tap do |attrs|
+        attrs[:data] = wrapper_options[:label_data] if label_data?
+        attrs[:aria] = wrapper_options[:label_aria] if label_aria?
+      end
+    end
+
+    def label_data?
+      wrapper_options[:label_data]
+    end
+
+    def label_aria?
+      wrapper_options[:label_aria]
+    end
 
     def checkbox_class(wrap_class)
       classes = "checkbox"

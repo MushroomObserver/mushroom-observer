@@ -136,6 +136,7 @@ module Observations
           user: @user, form: "observations/namings/form",
           form_locals: {
             model: @naming,
+            observation: @observation,
             local: false,
             show_reasons: true,
             context: params[:context]
