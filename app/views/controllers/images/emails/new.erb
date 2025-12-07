@@ -1,5 +1,9 @@
-<%
-add_page_title(:commercial_inquiry_title.t(name: @image.unique_format_name))
-%>
+<% add_page_title(:commercial_inquiry_title.t(name: @image.unique_format_name)) %>
 
-<%= render(partial: "images/emails/form", locals: { local: true }) %>
+<%= render(Components::CommercialInquiryForm.new(
+      FormObject::CommercialInquiry.new,
+      image: @image,
+      user: @user,
+      message: @message,
+      local: true
+    )) %>
