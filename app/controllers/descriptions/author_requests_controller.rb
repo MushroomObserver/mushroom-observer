@@ -23,7 +23,7 @@ module Descriptions
 
     def send_author_emails
       subject = params.dig(:email, :subject).to_s
-      message = params.dig(:email, :content).to_s
+      message = params.dig(:email, :message).to_s
 
       (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|
         # Migrated from QueuedEmail::AuthorRequest to deliver_later.
