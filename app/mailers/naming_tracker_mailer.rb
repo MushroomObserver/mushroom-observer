@@ -11,7 +11,7 @@ class NamingTrackerMailer < ApplicationMailer
     @title = :email_subject_naming_for_tracker.l(name:)
     @observation = naming.observation
     @naming = naming
-    debug_log(:naming_for_observer, nil, receiver,
+    debug_log(:naming_for_tracker, nil, receiver,
               naming:, observation: naming.observation)
     mo_mail(@title, to: receiver)
   end

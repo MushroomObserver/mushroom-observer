@@ -193,7 +193,8 @@ class Naming < AbstractModel
         naming = self
         NamingTrackerMailer.build(receiver: n.user, naming:).deliver_later
         # Conditionally notify the observer if tracker has note_template.
-        if n.note_template.present? && n.approved
+        # Don't send if tracker is the observer (they'd get a self-email).
+        if n.note_template.present? && n.approved && n.user != observation.user
           NamingObserverMailer.build(
             receiver: observation.user, naming:, name_tracker: n
           ).deliver_later
