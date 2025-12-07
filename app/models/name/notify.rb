@@ -40,9 +40,21 @@ module Name::Notify
     # Remove users who have opted out of all emails.
     recipients.reject!(&:no_emails)
 
-    # Send notification to all except the person who triggered the change.
+    send_name_change_emails(sender, recipients)
+  end
+
+  def send_name_change_emails(sender, recipients)
+    # Migrated from QueuedEmail::NameChange to deliver_later.
+    # Calculate versions now while saved_changes? is still accurate.
+    old_name_ver = saved_changes? ? version - 1 : version
+
     (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)
+      NameChangeMailer.build(
+        sender:, receiver: recipient, name: self,
+        old_name_ver:, new_name_ver: version,
+        description: nil, old_desc_ver: 0, new_desc_ver: 0,
+        review_status: "no_change"
+      ).deliver_later
     end
   end
 

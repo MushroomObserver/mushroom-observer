@@ -4,17 +4,21 @@
 class NameChangeMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(email)
-    @name_change = email.name_change
-    @desc_change = email.desc_change
-    setup_user(email.to_user)
+  # Refactored to accept serializable arguments for deliver_later compatibility.
+  # ObjectChange instances are constructed here from the IDs and versions.
+  def build(**args)
+    args => { sender:, receiver:, name:, old_name_ver:, new_name_ver:,
+              description:, old_desc_ver:, new_desc_ver:, review_status: }
+    setup_user(receiver)
+    @name_change = ObjectChange.new(name, old_name_ver, new_name_ver)
+    @desc_change = ObjectChange.new(description, old_desc_ver, new_desc_ver)
     @title = :email_subject_name_change.l(name: calc_search_name(@name_change))
-    @sender = email.user
-    @time = email.queued
-    @review_status = calc_review_status(email.review_status)
-    debug_log(:name_change, @sender, @user,
-              name: @name_change.object, description: @desc_change.object)
-    mo_mail(@title, to: @user)
+    @sender = sender
+    @time = name.updated_at
+    @review_status = calc_review_status(review_status)
+    debug_log(:name_change, sender, receiver,
+              name: name, description: description)
+    mo_mail(@title, to: receiver)
   end
 
   private

@@ -42,27 +42,8 @@ class QueuedEmailTest < UnitTestCase
   # test_location_change_email removed - migrated to deliver_later
   # See test/mailers/application_mailer_test.rb#test_location_change_email
 
-  def test_name_change_email
-    QueuedEmail::NameChange.create_email(
-      rolf, mary, names(:peltigera), name_descriptions(:peltigera_desc), true
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::NameChange",
-                 from: rolf,
-                 to: mary,
-                 name: names(:peltigera).id,
-                 description: name_descriptions(:peltigera_desc).id,
-                 old_name_version: names(:peltigera).version,
-                 new_name_version: names(:peltigera).version,
-                 old_description_version:
-                   name_descriptions(:peltigera_desc).version,
-                 new_description_version:
-                   name_descriptions(:peltigera_desc).version,
-                 review_status:
-                   name_descriptions(:peltigera_desc).review_status.to_s)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_name_change_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_name_change_email
 
   # NOTE: test_name_proposal_email removed - NameProposal now uses
   # deliver_later. Mailer tested in application_mailer_test.rb.
