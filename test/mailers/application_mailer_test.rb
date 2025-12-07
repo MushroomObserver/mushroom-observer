@@ -90,18 +90,23 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_approval_email
+    subject = "test subject"
+    message = "test content"
+
     run_mail_test("approval", rolf) do
-      ApprovalMailer.build(katrina, "test subject", "test content").
-        deliver_now
+      ApprovalMailer.build(receiver: katrina, subject:, message:).deliver_now
     end
   end
 
   def test_author_email
-    obj = names(:coprinus_comatus)
+    object = names(:coprinus_comatus).description
+    subject = "Please do something or other"
+    message = "and this is why..."
+
     run_mail_test("author_request", rolf) do
-      AuthorMailer.build(katrina, rolf, obj.description,
-                         "Please do something or other", "and this is why...").
-        deliver_now
+      AuthorMailer.build(
+        sender: katrina, receiver: rolf, object:, subject:, message:
+      ).deliver_now
     end
   end
 
@@ -152,9 +157,11 @@ class ApplicationMailerTest < UnitTestCase
     loc = locations(:albion)
     desc = loc.description
     run_mail_test("location_change", mary) do
-      LocationChangeMailer.build(dick, mary, loc.updated_at,
-                                 ObjectChange.new(loc, 1, 2),
-                                 ObjectChange.new(desc, 1, 2)).deliver_now
+      LocationChangeMailer.build(
+        sender: dick, receiver: mary, location: loc,
+        old_loc_ver: 1, new_loc_ver: 2,
+        description: desc, old_desc_ver: 1, new_desc_ver: 2
+      ).deliver_now
     end
   end
 
@@ -274,14 +281,18 @@ class ApplicationMailerTest < UnitTestCase
     run_mail_test("webmaster_question") do
       WebmasterMailer.build(
         sender_email: mary.email,
-        content: "A question"
+        message: "A question"
       ).deliver_now
     end
   end
 
   def test_verify_api_key_email
+    api_key = api_keys(:rolfs_api_key)
+
     run_mail_test("verify_api_key", rolf) do
-      VerifyAPIKeyMailer.build(rolf, dick, api_keys(:rolfs_api_key)).deliver_now
+      VerifyAPIKeyMailer.build(
+        receiver: rolf, app_user: dick, api_key:
+      ).deliver_now
     end
   end
 

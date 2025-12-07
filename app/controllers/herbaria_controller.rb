@@ -361,11 +361,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
            "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
            "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
            "Obj: #{@herbarium.show_url}\n"
-    content = WebmasterMailer.prepend_user(@user, body)
+    message = WebmasterMailer.prepend_user(@user, body)
     WebmasterMailer.build(
       sender_email: @user.email,
       subject: "New Herbarium",
-      content: content
+      message:
     ).deliver_later
   end
 

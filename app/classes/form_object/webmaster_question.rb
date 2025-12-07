@@ -7,7 +7,7 @@ class FormObject::WebmasterQuestion
   include ActiveModel::Attributes
 
   attribute :email, :string
-  attribute :content, :string
+  attribute :message, :string
 
   # Override model_name to control form field namespacing
   # This makes field names match controller expectations
