@@ -212,6 +212,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
+  after_commit :flush_observation_change_emails, on: [:create, :update]
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
@@ -775,8 +776,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       images << img
       self.thumb_image = img unless thumb_image
       self.updated_at = Time.zone.now
+      track_change(:added_image)
       save
-      notify_users(:added_image)
       reload
     end
     img
@@ -796,10 +797,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def remove_image(img)
     if images.include?(img) || thumb_image_id == img.id
       images.delete(img)
+      track_change(:removed_image)
       if thumb_image_id == img.id
         update(thumb_image: images.empty? ? nil : images.first)
+      else
+        # Touch to trigger after_commit within proper transaction flow
+        touch
       end
-      notify_users(:removed_image)
     end
     img
   end
@@ -904,61 +908,84 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # Callback that sends email notifications after save.
+  # Callback that tracks which fields changed for email notifications.
   def notify_users_after_change
-    if !id ||
-       saved_change_to_when? ||
-       saved_change_to_where? ||
-       saved_change_to_location_id? ||
-       saved_change_to_notes? ||
-       saved_change_to_specimen? ||
-       saved_change_to_is_collection_location? ||
-       saved_change_to_thumb_image_id?
-      notify_users(:change)
-    end
+    track_change(:date) if saved_change_to_when?
+    track_change(:location) if saved_change_to_place?
+    track_change(:notes) if saved_change_to_notes?
+    track_change(:specimen) if saved_change_to_specimen?
+    track_change(:thumb_image_id) if saved_change_to_thumb_image_id?
+    return unless saved_change_to_is_collection_location?
+
+    track_change(:is_collection_location)
   end
 
-  # Callback that sends email notifications after destroy.
+  # Callback that sends destroy notification before observation is destroyed.
+  # This must be sent immediately since the observation won't exist after.
   def notify_users_before_destroy
-    notify_users(:destroy)
+    send_observation_destroyed_emails
   end
 
-  # Send email notifications upon change to Observation.  Several actions are
-  # possible:
-  #
-  # added_image::   Image was added.
-  # removed_image:: Image was removed.
-  # change::        Other changes (e.g. to notes).
-  # destroy::       Observation destroyed.
-  #
-  #   obs.images << Image.create
-  #   obs.notify_users(:added_image)
-  #
-  def notify_users(action)
+  # Track a pending change for email notification batching.
+  # Uses Thread.current for thread safety across concurrent requests.
+  def track_change(change_type)
+    key = pending_changes_key
+    Thread.current[key] ||= []
+    return if Thread.current[key].include?(change_type)
+
+    Thread.current[key] << change_type
+  end
+
+  # Returns and clears the list of pending changes.
+  def pending_changes
+    key = pending_changes_key
+    changes = Thread.current[key] || []
+    Thread.current[key] = nil
+    changes
+  end
+
+  # Unique key per observation instance for thread-local storage.
+  def pending_changes_key
+    :"observation_#{id}_pending_changes"
+  end
+
+  # Send batched observation change emails. Called after all changes are made.
+  # Migrated from QueuedEmail::ObservationChange to deliver_later.
+  def flush_observation_change_emails
+    changes = pending_changes
+    return if changes.empty?
+
     sender = user
-    recipients = []
+    recipients = interested_users - [sender]
+    note = changes.join(",")
 
-    # Send to people who have registered interest.
-    interests.each do |interest|
-      recipients.push(interest.user) if interest.state
+    recipients.each do |receiver|
+      next if receiver.no_emails
+
+      ObservationChangeMailer.build(
+        sender:, receiver:, observation: self, note:, time: updated_at
+      ).deliver_later
     end
+  end
 
-    # Send notification to all except the person who triggered the change.
-    recipients.uniq.each do |recipient|
-      next if !recipient || recipient == sender || recipient.no_emails
+  # Send immediate destroy notification (can't batch - obs is being deleted).
+  def send_observation_destroyed_emails
+    sender = user
+    recipients = interested_users - [sender]
+    note = user_unique_format_name(User.current)
 
-      case action
-      when :destroy
-        QueuedEmail::ObservationChange.destroy_observation(sender, recipient,
-                                                           self)
-      when :change
-        QueuedEmail::ObservationChange.change_observation(sender, recipient,
-                                                          self)
-      else
-        QueuedEmail::ObservationChange.change_images(sender, recipient, self,
-                                                     action)
-      end
+    recipients.each do |receiver|
+      next if receiver.no_emails
+
+      ObservationChangeMailer.build(
+        sender:, receiver:, observation: nil, note:, time: Time.zone.now
+      ).deliver_later
     end
+  end
+
+  # Get list of users interested in this observation (for email notifications).
+  def interested_users
+    interests.select(&:state).filter_map(&:user).uniq
   end
 
   # Send email notifications upon change to consensus.
@@ -992,9 +1019,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::ConsensusChange.create_email(sender, recipient, self,
-                                                old_name, new_name)
+    (recipients.uniq - [sender]).each do |receiver|
+      ConsensusChangeMailer.build(
+        sender:, receiver:, observation: self, old_name:, new_name:
+      ).deliver_later
     end
   end
 
@@ -1023,9 +1051,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::ConsensusChange.create_email(sender, recipient, self,
-                                                old_name, new_name)
+    (recipients.uniq - [sender]).each do |receiver|
+      ConsensusChangeMailer.build(
+        sender:, receiver:, observation: self, old_name:, new_name:
+      ).deliver_later
     end
   end
 

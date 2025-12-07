@@ -111,18 +111,24 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_comment_email
-    obs = observations(:minimal_unknown_obs)
+    target = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_2)
+
     run_mail_test("comment_response", rolf) do
-      CommentMailer.build(dick, rolf, obs, comment).deliver_now
+      CommentMailer.build(
+        sender: dick, receiver: rolf, target:, comment:
+      ).deliver_now
     end
   end
 
   def test_comment_email2
-    obs = observations(:minimal_unknown_obs)
+    target = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_1)
+
     run_mail_test("comment", mary) do
-      CommentMailer.build(rolf, mary, obs, comment).deliver_now
+      CommentMailer.build(
+        sender: rolf, receiver: mary, target:, comment:
+      ).deliver_now
     end
   end
 
@@ -136,18 +142,14 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_consensus_change_email
-    obs = observations(:coprinus_comatus_obs)
-    name1 = names(:agaricus_campestris)
-    name2 = obs.name
-
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name2.search_name = name2.search_name.to_ascii
-    name2.display_name = name2.display_name.to_ascii
+    observation = observations(:coprinus_comatus_obs)
+    old_name = names(:agaricus_campestris)
+    new_name = observation.name
 
     run_mail_test("consensus_change", mary) do
-      email = QueuedEmail::ConsensusChange.create_email(dick, mary, obs,
-                                                        name1, name2)
-      ConsensusChangeMailer.build(email).deliver_now
+      ConsensusChangeMailer.build(
+        sender: dick, receiver: mary, observation:, old_name:, new_name:
+      ).deliver_now
     end
   end
 
@@ -192,9 +194,12 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_name_proposal_email
     naming = namings(:coprinus_comatus_other_naming)
-    obs = observations(:coprinus_comatus_obs)
+    observation = observations(:coprinus_comatus_obs)
+
     run_mail_test("name_proposal", rolf) do
-      NameProposalMailer.build(mary, rolf, naming, obs).deliver_now
+      NameProposalMailer.build(
+        sender: mary, receiver: rolf, naming:, observation:
+      ).deliver_now
     end
   end
 
@@ -222,34 +227,26 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_observation_change_email
-    obs = observations(:coprinus_comatus_obs)
-    name = obs.name
-
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name.search_name = name.search_name.to_ascii
-    name.display_name = name.display_name.to_ascii
+    observation = observations(:coprinus_comatus_obs)
+    note = "date,location,specimen,is_collection_location,notes," \
+           "thumb_image_id,added_image,removed_image"
 
     run_mail_test("observation_change", mary) do
       ObservationChangeMailer.build(
-        dick, mary, obs,
-        "date,location,specimen,is_collection_location,notes," \
-        "thumb_image_id,added_image,removed_image",
-        obs.created_at
+        sender: dick, receiver: mary, observation:, note:,
+        time: observation.created_at
       ).deliver_now
     end
   end
 
   def test_observation_destroy_email
-    obs = observations(:coprinus_comatus_obs)
-    name = obs.name
-
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name.search_name = name.search_name.to_ascii
-    name.display_name = name.display_name.to_ascii
+    observation = observations(:coprinus_comatus_obs)
+    note = "**__Coprinus comatus__** L. (123)"
 
     run_mail_test("observation_destroy", mary) do
       ObservationChangeMailer.build(
-        dick, mary, nil, "**__Coprinus comatus__** L. (123)", obs.created_at
+        sender: dick, receiver: mary, observation: nil, note:,
+        time: observation.created_at
       ).deliver_now
     end
   end
