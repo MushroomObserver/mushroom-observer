@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Send emails directly to the observation user via the application
+# Send emails directly to another user via the application
 module Users
   class EmailsController < ApplicationController
     include ::Emailable
@@ -19,7 +19,12 @@ module Users
             locals: {
               title: :ask_user_question_title.t(user: @target.legal_name),
               identifier: "user_question_email",
-              user: @user, form: "users/emails/form"
+              user: @user,
+              form: "users/emails/form",
+              form_locals: {
+                model: FormObject::UserQuestion.new,
+                target: @target
+              }
             }
           ) and return
         end
@@ -33,8 +38,8 @@ module Users
       return unless receiver && can_email_user_question?(receiver)
       return missing_fields_error(receiver) if email_fields_missing?
 
-      subject = params.dig(:email, :subject)
-      message = params.dig(:email, :content)
+      subject = params.dig(:user_question, :subject)
+      message = params.dig(:user_question, :message)
       UserQuestionMailer.build(
         sender: @user, receiver:, subject:, message:
       ).deliver_later
@@ -46,8 +51,8 @@ module Users
     private
 
     def email_fields_missing?
-      params.dig(:email, :subject).blank? ||
-        params.dig(:email, :content).blank?
+      params.dig(:user_question, :subject).blank? ||
+        params.dig(:user_question, :message).blank?
     end
 
     def missing_fields_error(receiver)
