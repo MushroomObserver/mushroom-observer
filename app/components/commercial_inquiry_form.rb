@@ -22,7 +22,7 @@ class Components::CommercialInquiryForm < Components::ApplicationForm
   private
 
   def render_image_preview
-    div do
+    div(class: "mb-3") do
       render(Components::InteractiveImage.new(
                user: @user,
                image: @image,
