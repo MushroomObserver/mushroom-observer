@@ -20,7 +20,7 @@ class Components::ObserverQuestionForm < Components::ApplicationForm
 
   def render_user_label
     bold_user = "**#{@observation.user.legal_name}**"
-    p { :ask_user_question_label.t(user: bold_user) }
+    p { :ask_observation_question_label.t(user: bold_user) }
   end
 
   def render_message_field
