@@ -21,7 +21,8 @@ module ModalsHelper
       CollectionNumber: Components::CollectionNumberForm,
       Sequence: Components::SequenceForm,
       WebmasterQuestion: Components::WebmasterQuestionForm,
-      ObserverQuestion: Components::ObserverQuestionForm
+      ObserverQuestion: Components::ObserverQuestionForm,
+      UserQuestion: Components::UserQuestionForm
     }
 
     # Use demodulized name to handle both ActiveRecord and FormObject classes
@@ -79,6 +80,8 @@ module ModalsHelper
       add_webmaster_question_params(params, locals)
     when "Components::ObserverQuestionForm"
       add_observer_question_params(params, observation, locals)
+    when "Components::UserQuestionForm"
+      add_user_question_params(params, locals)
     end
   end
 
@@ -96,6 +99,12 @@ module ModalsHelper
 
   def add_observer_question_params(params, observation, locals)
     params[:observation] = observation if observation
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def add_user_question_params(params, locals)
+    params[:target] = locals[:target] if locals[:target]
+    params[:subject] = locals[:subject] if locals[:subject]
     params[:message] = locals[:message] if locals[:message]
   end
 

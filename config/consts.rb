@@ -102,6 +102,9 @@ MushroomObserver::Application.configure do
   config.location_bad_terms_file = "#{location_path}bad_terms.yml"
   config.unknown_location_name = "Earth"
   config.obs_location_max_area = 24_000
+  # Geographic epsilon for bounding box comparisons (~11 meters at equator).
+  # Used for: rounding tolerance, point vs box threshold, minimal box size.
+  config.box_epsilon = 0.0001
 
   # Limit the number of objects we draw on a google map.
   config.max_map_objects = 100
