@@ -63,25 +63,8 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_location_change_email
-    QueuedEmail::LocationChange.create_email(
-      rolf, mary, locations(:albion), location_descriptions(:albion_desc)
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::LocationChange",
-                 from: rolf,
-                 to: mary,
-                 location: locations(:albion).id,
-                 description: location_descriptions(:albion_desc).id,
-                 old_location_version: locations(:albion).version,
-                 new_location_version: locations(:albion).version,
-                 old_description_version:
-                   location_descriptions(:albion_desc).version,
-                 new_description_version:
-                   location_descriptions(:albion_desc).version)
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_location_change_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_location_change_email
 
   def test_name_change_email
     QueuedEmail::NameChange.create_email(

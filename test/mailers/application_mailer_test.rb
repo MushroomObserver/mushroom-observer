@@ -155,9 +155,11 @@ class ApplicationMailerTest < UnitTestCase
     loc = locations(:albion)
     desc = loc.description
     run_mail_test("location_change", mary) do
-      LocationChangeMailer.build(dick, mary, loc.updated_at,
-                                 ObjectChange.new(loc, 1, 2),
-                                 ObjectChange.new(desc, 1, 2)).deliver_now
+      LocationChangeMailer.build(
+        sender: dick, receiver: mary, location: loc,
+        old_loc_ver: 1, new_loc_ver: 2,
+        description: desc, old_desc_ver: 1, new_desc_ver: 2
+      ).deliver_now
     end
   end
 
