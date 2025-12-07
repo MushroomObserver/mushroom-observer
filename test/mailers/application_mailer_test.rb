@@ -90,18 +90,23 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_approval_email
+    subject = "test subject"
+    message = "test content"
+
     run_mail_test("approval", rolf) do
-      ApprovalMailer.build(katrina, "test subject", "test content").
-        deliver_now
+      ApprovalMailer.build(receiver: katrina, subject:, message:).deliver_now
     end
   end
 
   def test_author_email
-    obj = names(:coprinus_comatus)
+    object = names(:coprinus_comatus).description
+    subject = "Please do something or other"
+    message = "and this is why..."
+
     run_mail_test("author_request", rolf) do
-      AuthorMailer.build(katrina, rolf, obj.description,
-                         "Please do something or other", "and this is why...").
-        deliver_now
+      AuthorMailer.build(
+        sender: katrina, receiver: rolf, object:, subject:, message:
+      ).deliver_now
     end
   end
 
@@ -283,8 +288,12 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_verify_api_key_email
+    api_key = api_keys(:rolfs_api_key)
+
     run_mail_test("verify_api_key", rolf) do
-      VerifyAPIKeyMailer.build(rolf, dick, api_keys(:rolfs_api_key)).deliver_now
+      VerifyAPIKeyMailer.build(
+        receiver: rolf, app_user: dick, api_key:
+      ).deliver_now
     end
   end
 

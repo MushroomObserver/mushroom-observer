@@ -1379,7 +1379,8 @@ class ObservationTest < UnitTestCase
   end
 
   def tiny_box
-    @tiny_box ||= { north: 0.0001, south: 0.0001, east: 0.0001, west: 0 }
+    e = MO.box_epsilon
+    @tiny_box ||= { north: e, south: e, east: e, west: 0 }
   end
 
   def missing_west_box

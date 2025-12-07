@@ -21,7 +21,8 @@ module ModalsHelper
       CollectionNumber: Components::CollectionNumberForm,
       Sequence: Components::SequenceForm,
       WebmasterQuestion: Components::WebmasterQuestionForm,
-      CommercialInquiry: Components::CommercialInquiryForm
+      CommercialInquiry: Components::CommercialInquiryForm,
+      UserQuestion: Components::UserQuestionForm
     }
 
     # Use demodulized name to handle both ActiveRecord and FormObject classes
@@ -79,6 +80,8 @@ module ModalsHelper
       add_webmaster_question_params(params, locals)
     when "Components::CommercialInquiryForm"
       add_commercial_inquiry_params(params, locals)
+    when "Components::UserQuestionForm"
+      add_user_question_params(params, locals)
     end
   end
 
@@ -97,6 +100,12 @@ module ModalsHelper
   def add_commercial_inquiry_params(params, locals)
     params[:image] = locals[:image] if locals[:image]
     params[:user] = locals[:user] if locals[:user]
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def add_user_question_params(params, locals)
+    params[:target] = locals[:target] if locals[:target]
+    params[:subject] = locals[:subject] if locals[:subject]
     params[:message] = locals[:message] if locals[:message]
   end
 
