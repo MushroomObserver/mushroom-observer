@@ -14,7 +14,7 @@ class NameChangeMailer < ApplicationMailer
     @desc_change = ObjectChange.new(description, old_desc_ver, new_desc_ver)
     @title = :email_subject_name_change.l(name: calc_search_name(@name_change))
     @sender = sender
-    @time = name&.updated_at || Time.zone.now
+    @time = name.updated_at
     @review_status = calc_review_status(review_status)
     debug_log(:name_change, sender, receiver,
               name: name, description: description)
