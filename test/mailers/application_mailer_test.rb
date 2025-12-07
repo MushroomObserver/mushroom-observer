@@ -167,9 +167,12 @@ class ApplicationMailerTest < UnitTestCase
     name = names(:peltigera)
     desc = name.description
     run_mail_test("name_change", mary) do
-      email = QueuedEmail::NameChange.create_email(dick, mary,
-                                                   name, desc, true, true)
-      NameChangeMailer.build(email).deliver_now
+      NameChangeMailer.build(
+        sender: dick, receiver: mary, name: name,
+        old_name_ver: name.version - 1, new_name_ver: name.version,
+        description: desc, old_desc_ver: desc.version - 1,
+        new_desc_ver: desc.version, review_status: desc.review_status.to_s
+      ).deliver_now
     end
   end
 
@@ -178,13 +181,12 @@ class ApplicationMailerTest < UnitTestCase
     name = names(:peltigera)
     desc = name.description
     run_mail_test("name_change2", mary) do
-      name.version = 1
-      desc.version = 1
-      email = QueuedEmail::NameChange.create_email(dick, mary,
-                                                   name, desc, false, true)
-      assert(email.old_name_version.zero?)
-      assert(email.old_description_version.zero?)
-      NameChangeMailer.build(email).deliver_now
+      NameChangeMailer.build(
+        sender: dick, receiver: mary, name: name,
+        old_name_ver: 0, new_name_ver: 1,
+        description: desc, old_desc_ver: 0, new_desc_ver: 1,
+        review_status: "no_change"
+      ).deliver_now
     end
   end
 
