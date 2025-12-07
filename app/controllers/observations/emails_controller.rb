@@ -21,7 +21,12 @@ module Observations
                 name: @observation.unique_format_name
               ),
               identifier: "observation_email",
-              user: @user, form: "observations/emails/form"
+              user: @user,
+              form: "observations/emails/form",
+              form_locals: {
+                model: FormObject::ObserverQuestion.new,
+                observation: @observation
+              }
             }
           ) and return
         end
@@ -34,8 +39,7 @@ module Observations
       return unless message_present?(observation)
 
       # Migrated from QueuedEmail::ObserverQuestion to ActionMailer + ActiveJob.
-      # See .claude/deliver_later_migration_plan.md for details.
-      message = params.dig(:question, :content)
+      message = params.dig(:observer_question, :message)
       ObserverQuestionMailer.build(
         sender: @user, observation:, message:
       ).deliver_later
@@ -47,7 +51,7 @@ module Observations
     private
 
     def message_present?(observation)
-      return true if params.dig(:question, :content).present?
+      return true if params.dig(:observer_question, :message).present?
 
       flash_error(:runtime_missing.t(field: :message.l))
       @observation = observation

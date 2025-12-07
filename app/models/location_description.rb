@@ -198,11 +198,23 @@ class LocationDescription < Description
     # Remove users who have opted out of all emails.
     recipients.reject!(&:no_emails)
 
-    # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::LocationChange.create_email(
-        sender, recipient, location, self
-      )
+    send_location_change_emails(sender, recipients)
+  end
+
+  private
+
+  def send_location_change_emails(sender, recipients)
+    # Migrated from QueuedEmail::LocationChange to deliver_later.
+    # Calculate versions now while saved_changes? is still accurate.
+    loc = location
+    old_desc_ver = saved_changes? ? version - 1 : version
+
+    (recipients.uniq - [sender]).each do |receiver|
+      LocationChangeMailer.build(
+        sender:, receiver:, location: loc, old_loc_ver: loc.version,
+        new_loc_ver: loc.version, description: self, old_desc_ver:,
+        new_desc_ver: version
+      ).deliver_later
     end
   end
 end

@@ -21,37 +21,13 @@ class QueuedEmailTest < UnitTestCase
   # See test/mailers/application_mailer_test.rb#test_add_herbarium_record_email
   # and test/models/herbarium_record_test.rb
 
-  def test_approval_email
-    user = katrina
-    subject = "this is the subject!"
-    content = "your request has been approved"
-    QueuedEmail::Approval.find_or_create_email(user, subject, content)
-    email = assert_email(
-      0,
-      from: User.admin,
-      to: user,
-      subject: subject,
-      note: content
-    )
-    assert(email.deliver_email)
-  end
+  # test_approval_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_approval_email
+  # and test/controllers/names/trackers/approve_controller_test.rb
 
-  def test_author_request_email
-    QueuedEmail::AuthorRequest.create_email(
-      mary, dick, name_descriptions(:peltigera_desc),
-      "Hi", "Please make me the author"
-    )
-    assert_email(0,
-                 flavor: "QueuedEmail::AuthorRequest",
-                 from: mary,
-                 to: dick,
-                 obj_id: name_descriptions(:peltigera_desc).id,
-                 obj_type: "name_description",
-                 subject: "Hi",
-                 note: "Please make me the author")
-    email = QueuedEmail.first.deliver_email
-    assert(email)
-  end
+  # test_author_request_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_author_email
+  # and test/controllers/descriptions/author_requests_controller_test.rb
 
   def test_comment_add_email
     QueuedEmail::CommentAdd.find_or_create_email(
@@ -185,19 +161,9 @@ class QueuedEmailTest < UnitTestCase
   # See test/mailers/application_mailer_test.rb#test_user_question_email
   # and test/controllers/users/emails_controller_test.rb
 
-  def test_verify_api_key_email
-    key = api_keys(:marys_api_key)
-
-    # Dick is creating an API for Mary at Mary's request.
-    # The email is from Dick to Mary, the "user" is Mary, the "app_user"
-    # is Dick.
-    QueuedEmail::VerifyAPIKey.create_email(mary, dick, key)
-    assert_email(0,
-                 flavor: "QueuedEmail::VerifyAPIKey",
-                 from: dick,
-                 to: mary,
-                 api_key: key.id)
-  end
+  # test_verify_api_key_email removed - migrated to deliver_later
+  # See test/mailers/application_mailer_test.rb#test_verify_api_key_email
+  # and test/classes/api2/api_keys_test.rb
 
   # test_verify_account_email removed - migrated to deliver_later
   # See test/mailers/application_mailer_test.rb#test_verify_email

@@ -17,10 +17,10 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     perform_enqueued_jobs do
       within("#webmaster_question_form") do
         # Email field should be pre-filled with user's email
-        assert_field("webmaster_question_user_email", with: rolf.email)
+        assert_field("webmaster_question_email", with: rolf.email)
 
         # Fill in the question
-        fill_in("webmaster_question_question_content",
+        fill_in("webmaster_question_message",
                 with: "I found a bug in the observation form")
 
         # Submit the form
@@ -47,9 +47,9 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     perform_enqueued_jobs do
       within("#webmaster_question_form") do
         # Fill in both email and question
-        fill_in("webmaster_question_user_email",
+        fill_in("webmaster_question_email",
                 with: "concerned_user@example.com")
-        fill_in("webmaster_question_question_content",
+        fill_in("webmaster_question_message",
                 with: "I noticed something odd with the species page")
 
         # Submit the form
@@ -72,8 +72,8 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
 
     within("#webmaster_question_form") do
       # Leave email blank
-      fill_in("webmaster_question_user_email", with: "")
-      fill_in("webmaster_question_question_content",
+      fill_in("webmaster_question_email", with: "")
+      fill_in("webmaster_question_message",
               with: "This is my question")
 
       click_commit
@@ -87,8 +87,8 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     visit(new_admin_emails_webmaster_questions_path)
 
     within("#webmaster_question_form") do
-      fill_in("webmaster_question_user_email", with: "test@example.com")
-      fill_in("webmaster_question_question_content", with: "")
+      fill_in("webmaster_question_email", with: "test@example.com")
+      fill_in("webmaster_question_message", with: "")
 
       click_commit
     end
@@ -101,9 +101,9 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     visit(new_admin_emails_webmaster_questions_path)
 
     within("#webmaster_question_form") do
-      fill_in("webmaster_question_user_email", with: "spammer@example.com")
+      fill_in("webmaster_question_email", with: "spammer@example.com")
       # Content with URL should trigger spam protection
-      fill_in("webmaster_question_question_content",
+      fill_in("webmaster_question_message",
               with: "Check out http://spam-site.com")
 
       click_commit
@@ -124,7 +124,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     perform_enqueued_jobs do
       within("#webmaster_question_form") do
         # Logged in users can include URLs in their questions
-        fill_in("webmaster_question_question_content",
+        fill_in("webmaster_question_message",
                 with: "Page https://mushroomobserver.org/123 has an error")
 
         click_commit
