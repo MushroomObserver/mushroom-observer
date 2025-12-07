@@ -37,7 +37,7 @@ class QueuedEmailTest < UnitTestCase
   end
 
   # test_author_request_email removed - migrated to deliver_later
-  # See test/mailers/application_mailer_test.rb#test_author_request_email
+  # See test/mailers/application_mailer_test.rb#test_author_email
   # and test/controllers/descriptions/author_requests_controller_test.rb
 
   def test_comment_add_email
