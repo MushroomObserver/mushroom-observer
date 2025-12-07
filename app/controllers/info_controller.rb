@@ -33,12 +33,12 @@ class InfoController < ApplicationController
   # Simple form letting us test our implementation of Textile.
   def textile_sandbox
     if request.method == "POST"
-      @code = params[:code]
+      @code = params[:code] || params.dig(:textile_sandbox, :code)
       @submit = params[:commit]
     else
       @code = nil
     end
-    render(action: :textile_sandbox)
+    @textile_sandbox = TextileSandbox.new(code: @code)
   end
 
   # Allow translator to enter a special note linked to from the lower left.
