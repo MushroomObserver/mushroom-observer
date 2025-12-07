@@ -33,8 +33,6 @@ module Names::Trackers
         link: "#{MO.http_domain}/interests/?type=NameTracker"
       )
       # Migrated from QueuedEmail::Approval to deliver_later.
-      # Note: QueuedEmail truncated subject to 100 bytes, but that's handled
-      # by the database column size limit if needed.
       receiver = tracker.user
       ApprovalMailer.build(receiver:, subject:, message:).deliver_later
     end
