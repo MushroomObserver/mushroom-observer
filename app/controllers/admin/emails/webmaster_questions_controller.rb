@@ -6,7 +6,7 @@ module Admin
     class WebmasterQuestionsController < ApplicationController
       def new
         @email = params.dig(:user, :email)
-        @content = params.dig(:question, :content)
+        @message = params.dig(:question, :message)
         @email = @user.email if @user
 
         respond_to do |format|
@@ -17,7 +17,16 @@ module Admin
               locals: {
                 title: :ask_webmaster_title.l,
                 identifier: "webmaster_question_email",
-                user: @user, form: "admin/emails/webmaster_questions/form"
+                user: @user,
+                form: "admin/emails/webmaster_questions/form",
+                form_locals: {
+                  model: FormObject::WebmasterQuestion.new(
+                    email: @email, message: @message
+                  ),
+                  email: @email,
+                  email_error: false,
+                  message: @message
+                }
               }
             ) and return
           end
@@ -25,8 +34,8 @@ module Admin
       end
 
       def create
-        @email = params.dig(:webmaster_question, :user, :email)
-        @content = params.dig(:webmaster_question, :question, :content)
+        @email = params.dig(:webmaster_question, :email)
+        @message = params.dig(:webmaster_question, :message)
         @email_error = false
         create_webmaster_question
       end
@@ -36,7 +45,7 @@ module Admin
       def create_webmaster_question
         if invalid_email?
           handle_invalid_email
-        elsif @content.blank?
+        elsif @message.blank?
           handle_missing_content
         elsif non_user_potential_spam?
           handle_spam
@@ -67,8 +76,8 @@ module Admin
 
       def send_email_and_redirect
         # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
-        content = WebmasterMailer.prepend_user(@user, @content)
-        WebmasterMailer.build(sender_email: @email, content: content).
+        message = WebmasterMailer.prepend_user(@user, @message)
+        WebmasterMailer.build(sender_email: @email, message:).
           deliver_later
         flash_notice(:runtime_ask_webmaster_success.t)
         redirect_to("/")
@@ -76,9 +85,9 @@ module Admin
 
       def non_user_potential_spam?
         !@user && (
-          /https?:/.match?(@content) ||
-          %r{<[/a-zA-Z]+>}.match?(@content) ||
-          @content.exclude?(" ")
+          /https?:/.match?(@message) ||
+          %r{<[/a-zA-Z]+>}.match?(@message) ||
+          @message.exclude?(" ")
         )
       end
     end

@@ -11,7 +11,7 @@ add_page_title(:author_request_title.t(title: @object.format_name))
                             label: :request_subject.t + ":",
                             data: { autofocus: true }) %>
 
-  <%= text_area_with_label(form: f, field: :content, rows: 10,
+  <%= text_area_with_label(form: f, field: :message, rows: 10,
                             label: :request_message.t + ":") %>
 
   <%= submit_button(form: f, button: :SEND.l, center: true) %>

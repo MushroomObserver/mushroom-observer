@@ -282,14 +282,18 @@ class ApplicationMailerTest < UnitTestCase
     run_mail_test("webmaster_question") do
       WebmasterMailer.build(
         sender_email: mary.email,
-        content: "A question"
+        message: "A question"
       ).deliver_now
     end
   end
 
   def test_verify_api_key_email
+    api_key = api_keys(:rolfs_api_key)
+
     run_mail_test("verify_api_key", rolf) do
-      VerifyAPIKeyMailer.build(rolf, dick, api_keys(:rolfs_api_key)).deliver_now
+      VerifyAPIKeyMailer.build(
+        receiver: rolf, app_user: dick, api_key:
+      ).deliver_now
     end
   end
 
