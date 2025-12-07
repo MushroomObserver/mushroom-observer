@@ -208,8 +208,9 @@ export default class extends Controller {
   // Update the place input target with an MO-formatted version of the Google
   // result, only if we're on a form with a non-autocompleted place input.
   updatePlaceInputTarget(result) {
-    if (!this.hasPlaceInputTarget ||
-      this.placeInputTarget.dataset?.controller == "autocomplete") return false
+    if (!this.hasPlaceInputTarget) return false
+    // Skip autocompleted inputs - their controller manages the value
+    if (this.placeInputTarget.dataset?.autocompleter) return false
 
     this.verbose("geocode:updatePlaceInputTarget")
     this.placeInputTarget.value = this.formatMOPlaceName(result)

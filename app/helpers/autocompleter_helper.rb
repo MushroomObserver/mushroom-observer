@@ -24,7 +24,7 @@ module AutocompleterHelper
     target_key = target_attr_key(args[:type])
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
-      data: { target_key => "input" }
+      data: { target_key => "input", autocompleter: true }
     }.deep_merge(args.except(*autocompleter_outer_args))
     ac_args[:class] = class_names("dropdown", args[:class])
     # inner form-group wrap, because dropdown is position-absolute

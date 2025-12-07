@@ -124,7 +124,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       {
         placeholder: :start_typing.l,
         autocomplete: "off",
-        data: { target_attr_key => "input" }
+        data: { target_attr_key => "input", autocompleter: true }
       }.deep_merge(attributes)
     end
 
