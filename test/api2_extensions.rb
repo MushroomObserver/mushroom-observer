@@ -171,13 +171,13 @@ module API2Extensions
     assert_in_delta(Time.zone.now, loc.updated_at, 1.minute)
     assert_users_equal(@user, loc.user)
     assert_equal(@name, loc.display_name)
-    assert_in_delta(@north, loc.north, 0.0001)
-    assert_in_delta(@south, loc.south, 0.0001)
-    assert_in_delta(@east, loc.east, 0.0001)
-    assert_in_delta(@west, loc.west, 0.0001)
-    assert_in_delta(@high, loc.high, 0.0001) if @high
+    assert_in_delta(@north, loc.north, MO.box_epsilon)
+    assert_in_delta(@south, loc.south, MO.box_epsilon)
+    assert_in_delta(@east, loc.east, MO.box_epsilon)
+    assert_in_delta(@west, loc.west, MO.box_epsilon)
+    assert_in_delta(@high, loc.high, MO.box_epsilon) if @high
     assert_nil(loc.high) unless @high
-    assert_in_delta(@low, loc.low, 0.0001) if @low
+    assert_in_delta(@low, loc.low, MO.box_epsilon) if @low
     assert_nil(loc.low) unless @low
     assert_equal(@notes, loc.notes) if @notes
     assert_nil(loc.notes) unless @notes

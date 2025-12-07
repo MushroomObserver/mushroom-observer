@@ -5,15 +5,6 @@ require("test_helper")
 class CommentTest < UnitTestCase
   include ActiveJob::TestHelper
 
-  def setup
-    super
-    QueuedEmail.queue = true
-  end
-
-  def teardown
-    QueuedEmail.queue = false
-  end
-
   def test_find_object_for_all_types
     Comment::ALL_TYPES.each do |type|
       assert(AbstractModel.find_object(type.to_s, type.first.id),
@@ -148,25 +139,26 @@ class CommentTest < UnitTestCase
   # Oil and water emails are now sent via deliver_later instead of QueuedEmail.
   # Check for enqueued mailer jobs instead of QueuedEmail.count.
   def do_oil_and_water_test
+    obs = observations(:minimal_unknown_obs)
+
     # These comments don't trigger oil_and_water (no oil + water yet)
-    create_oil_and_water_comment(rolf, "1")
-    create_oil_and_water_comment(mary, "2")
-    create_oil_and_water_comment(roy, "3")
+    create_oil_and_water_comment(obs, rolf, "1")
+    create_oil_and_water_comment(obs, mary, "2")
+    create_oil_and_water_comment(obs, roy, "3")
 
     # Now katrina (oil user) comments - should trigger oil_and_water email
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
-      create_oil_and_water_comment(katrina, "4")
+      create_oil_and_water_comment(obs, katrina, "4")
     end
 
     # roy commenting again still triggers (oil + water users have commented)
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
-      create_oil_and_water_comment(roy, "5")
+      create_oil_and_water_comment(obs, roy, "5")
     end
   end
 
-  def create_oil_and_water_comment(user, summary)
-    Comment.create!(target: nil, user: user, summary: summary, comment: "")
-    sleep(1) # Comments may not be created immediately due to broadcast job
+  def create_oil_and_water_comment(target, user, summary)
+    Comment.create!(target: target, user: user, summary: summary, comment: "")
   end
 
   def opt_out_of_comment_responses(*users)
@@ -181,33 +173,19 @@ class CommentTest < UnitTestCase
     end
   end
 
-  def do_comment_test(chg, obs, user, summary, comment = "")
-    old = num_emails
+  # CommentMailer now uses deliver_later, so we count enqueued jobs.
+  def do_comment_test(expected_count, obs, user, summary, comment = "")
     obs&.reload # (to ensure it sees chgs in user prefs)
+    job_start = enqueued_jobs.size
     Comment.create!(
       target: obs,
       user: user,
       summary: summary,
       comment: comment
     )
-    # Comments seem to not be created immediately because of broadcast job
-    sleep(1)
-    assert_equal(chg, num_emails - old, queued_emails(old))
-  end
-
-  def num_emails
-    QueuedEmail.count
-  end
-
-  def queued_emails(start)
-    return "No emails were queued" if num_emails == start
-
-    strs = QueuedEmail.all[start..].map do |mail|
-      to_user = mail&.to_user_id ? User.find(mail.to_user_id)&.login : nil
-      email = mail&.id ? QueuedEmail.find(mail.id) : nil
-      "to: #{to_user}, email: #{email}"
-    end
-    "These emails were queued:\n#{strs.join("\n")}"
+    actual_count = enqueued_jobs.size - job_start
+    assert_equal(expected_count, actual_count,
+                 "Expected #{expected_count} emails, got #{actual_count}")
   end
 
   def test_polymorphic_joins

@@ -34,13 +34,13 @@ module Comment::Callbacks
     return unless user_ids.intersect?(::MO.oil_users)
 
     # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
-    content = WebmasterMailer.prepend_user(
+    message = WebmasterMailer.prepend_user(
       User.admin, oil_and_water_content(user_ids)
     )
     WebmasterMailer.build(
       sender_email: MO.noreply_email_address,
       subject: oil_and_water_subject,
-      content: content
+      message:
     ).deliver_later
   end
 
@@ -81,8 +81,11 @@ module Comment::Callbacks
   end
 
   def send_comment_notifications(users)
-    users.each do |recipient|
-      QueuedEmail::CommentAdd.find_or_create_email(user, recipient, self)
+    comment = self
+    users.each do |receiver|
+      CommentMailer.build(
+        sender: user, receiver:, target:, comment:
+      ).deliver_later
     end
   end
 
