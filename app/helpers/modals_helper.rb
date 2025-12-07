@@ -22,6 +22,7 @@ module ModalsHelper
       Sequence: Components::SequenceForm,
       WebmasterQuestion: Components::WebmasterQuestionForm,
       ObserverQuestion: Components::ObserverQuestionForm,
+      CommercialInquiry: Components::CommercialInquiryForm,
       UserQuestion: Components::UserQuestionForm
     }
 
@@ -80,6 +81,8 @@ module ModalsHelper
       add_webmaster_question_params(params, locals)
     when "Components::ObserverQuestionForm"
       add_observer_question_params(params, observation, locals)
+    when "Components::CommercialInquiryForm"
+      add_commercial_inquiry_params(params, locals)
     when "Components::UserQuestionForm"
       add_user_question_params(params, locals)
     end
@@ -99,6 +102,12 @@ module ModalsHelper
 
   def add_observer_question_params(params, observation, locals)
     params[:observation] = observation if observation
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def add_commercial_inquiry_params(params, locals)
+    params[:image] = locals[:image] if locals[:image]
+    params[:user] = locals[:user] if locals[:user]
     params[:message] = locals[:message] if locals[:message]
   end
 
