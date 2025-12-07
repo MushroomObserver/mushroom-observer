@@ -16,7 +16,7 @@ class ObserverQuestionFormTest < UnitTestCase
 
   def test_renders_form_with_user_label
     bold_user = "**#{@observation.user.legal_name}**"
-    expected = :ask_user_question_label.t(user: bold_user).as_displayed
+    expected = :ask_observation_question_label.t(user: bold_user).as_displayed
     assert_html(@html, "p", text: expected)
     assert_html(@html, "p b", text: @observation.user.legal_name)
   end
