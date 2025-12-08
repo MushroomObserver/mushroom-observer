@@ -62,7 +62,7 @@ class Components::NamingReasonsFields < Components::Base
 
   def checkbox_label_aria(reason)
     {
-      expanded: "false",
+      expanded: reason.used?.to_s,
       controls: "reasons_#{reason.num}_notes"
     }
   end

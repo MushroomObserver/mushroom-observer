@@ -134,15 +134,34 @@ module Observations
         locals: {
           title: modal_title, identifier: modal_identifier,
           user: @user, form: "observations/namings/form",
-          form_locals: {
-            model: @naming,
-            observation: @observation,
-            local: false,
-            show_reasons: true,
-            context: params[:context]
-          }
+          form_locals: naming_form_locals
         }
       ) and return
+    end
+
+    def naming_form_locals
+      {
+        model: @naming,
+        observation: @observation,
+        local: false,
+        show_reasons: true,
+        context: params[:context],
+        vote: @vote,
+        given_name: @given_name,
+        reasons: @reasons,
+        feedback: naming_feedback
+      }
+    end
+
+    def naming_feedback
+      return {} unless defined?(@names)
+
+      {
+        names: @names,
+        valid_names: @valid_names,
+        suggest_corrections: @suggest_corrections,
+        parent_deprecated: @parent_deprecated
+      }
     end
 
     def modal_identifier

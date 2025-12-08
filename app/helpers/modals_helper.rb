@@ -2,6 +2,7 @@
 
 # Helper methods for modal dialogs and forms
 module ModalsHelper
+  NAMING_FORM_KEYS = [:context, :vote, :given_name, :reasons, :feedback].freeze
   # Renders either a Superform component or a legacy ERB partial for modal
   # forms. This allows gradual migration from ERB partials to Superform.
   #
@@ -99,7 +100,11 @@ module ModalsHelper
 
   def add_naming_form_params(params, locals)
     params[:show_reasons] = locals[:show_reasons] if locals.key?(:show_reasons)
-    params[:context] = locals[:context] if locals[:context]
+    copy_present_keys(params, locals, NAMING_FORM_KEYS)
+  end
+
+  def copy_present_keys(params, locals, keys)
+    keys.each { |key| params[key] = locals[key] if locals[key] }
   end
 
   def add_webmaster_question_params(params, locals)
