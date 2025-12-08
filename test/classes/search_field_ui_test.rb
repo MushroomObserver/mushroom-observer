@@ -154,7 +154,7 @@ class SearchFieldUITest < UnitTestCase
   # Test hash with boolean field
   def test_hash_with_boolean_field
     ui = SearchFieldUI.new(controller: @obs_controller, field: :has_comments)
-    assert_equal(:select_nil_yes, ui.ui_type)
+    assert_equal(:select_nil_boolean, ui.ui_type)
   end
 
   # Test error when field is not permitted

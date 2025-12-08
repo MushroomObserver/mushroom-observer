@@ -37,7 +37,7 @@ class Query::Observations < Query
   query_attr(:notes_has, :string)
   query_attr(:has_notes_fields, [:string])
   query_attr(:pattern, :string)
-  query_attr(:has_comments, { boolean: [true] })
+  query_attr(:has_comments, :boolean)
   query_attr(:comments_has, :string)
   query_attr(:has_sequences, :boolean)
   query_attr(:has_field_slips, :boolean)
