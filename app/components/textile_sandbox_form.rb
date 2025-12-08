@@ -39,15 +39,15 @@ class Components::TextileSandboxForm < Components::ApplicationForm
 
   def render_result_section
     div(class: "mb-4") do
-      strong { plain :sandbox_look_like.t + ":" }
+      strong { plain("#{:sandbox_look_like.t}:") }
       div(class: "sandbox mt-2") do
         if @submit_type == :sandbox_test.l
           # Render the textile code as HTML
-          raw @model.code.tpl
+          raw(@model.code.tpl) # rubocop:disable Rails/OutputSafety
         else
           # Show HTML codes
           code do
-            plain view_context.escape_html(@model.code.tpl)
+            plain(view_context.escape_html(@model.code.tpl))
           end
         end
       end
@@ -77,33 +77,44 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   end
 
   def render_help_section
+    render_quick_reference
+    render_more_help_links
+    render_web_reference_links
+  end
+
+  def render_quick_reference
     div(class: "mt-3") do
       p do
-        strong { plain :sandbox_quick_ref.t + ":" }
+        strong { plain("#{:sandbox_quick_ref.t}:") }
       end
-      pre { raw :sandbox_sample.l }
+      pre { raw(:sandbox_sample.l) } # rubocop:disable Rails/OutputSafety
     end
+  end
 
-    strong { plain :sandbox_more_help.t + ":" }
+  def render_more_help_links
+    strong { plain("#{:sandbox_more_help.t}:") }
     div(class: "pl-3") do
       # Translation not needed as document title is static
-      a(href: "https://docs.google.com/document/d/10NiaPDKoK_k3bRIoU1smGXSycDczf_jdkmW-xt-Wf20/edit?usp=sharing",
+      a(href: "https://docs.google.com/document/d/" \
+              "10NiaPDKoK_k3bRIoU1smGXSycDczf_jdkmW-xt-Wf20",
         target: "_blank") { "MO Flavored Textile" }
       br
     end
+  end
 
-    strong { plain :sandbox_web_refs.t + ":" }
+  def render_web_reference_links
+    strong { plain("#{:sandbox_web_refs.t}:") }
     div(class: "pl-3") do
       a(href: "https://hobix.com/textile", target: "_blank") do
-        plain :sandbox_link_hobix_textile_reference.t
+        plain(:sandbox_link_hobix_textile_reference.t)
       end
       br
       a(href: "https://hobix.com/quick", target: "_blank") do
-        plain :sandbox_link_hobix_textile_cheatsheet.t
+        plain(:sandbox_link_hobix_textile_cheatsheet.t)
       end
       br
       a(href: "https://textile-lang.com/", target: "_blank") do
-        plain :sandbox_link_textile_language_website.t
+        plain(:sandbox_link_textile_language_website.t)
       end
       br
     end
