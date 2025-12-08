@@ -40,6 +40,7 @@ class Components::TextileSandboxForm < Components::ApplicationForm
     url_for(controller: "info", action: :textile_sandbox, only_path: true)
   end
 
+  # Render the Textile input, showing either rendered HTML or HTML codes
   def render_result_section
     div(class: "mb-4") do
       strong { plain("#{:sandbox_look_like.t}:") }
@@ -70,9 +71,7 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   end
 
   def render_code_field
-    textarea_field(:code,
-                   label: "#{:sandbox_enter.t}:",
-                   rows: 8)
+    textarea_field(:code, label: "#{:sandbox_enter.t}:", rows: 8)
   end
 
   def render_submit_buttons
