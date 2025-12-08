@@ -104,7 +104,8 @@ class Components::TextileSandboxForm < Components::ApplicationForm
       # Translation not needed as document title is static
       a(href: "https://docs.google.com/document/d/" \
               "10NiaPDKoK_k3bRIoU1smGXSycDczf_jdkmW-xt-Wf20",
-        target: "_blank") { "MO Flavored Textile" }
+        target: "_blank",
+        rel: "noopener noreferrer") { "MO Flavored Textile" }
       br
     end
   end
@@ -112,15 +113,21 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   def render_web_reference_links
     strong { plain("#{:sandbox_web_refs.t}:") }
     div(class: "pl-3") do
-      a(href: "https://hobix.com/textile", target: "_blank") do
+      a(href: "https://hobix.com/textile",
+        target: "_blank",
+        rel: "noopener noreferrer") do
         plain(:sandbox_link_hobix_textile_reference.t)
       end
       br
-      a(href: "https://hobix.com/quick", target: "_blank") do
+      a(href: "https://hobix.com/quick",
+        target: "_blank",
+        rel: "noopener noreferrer") do
         plain(:sandbox_link_hobix_textile_cheatsheet.t)
       end
       br
-      a(href: "https://textile-lang.com/", target: "_blank") do
+      a(href: "https://textile-lang.com/",
+        target: "_blank",
+        rel: "noopener noreferrer") do
         plain(:sandbox_link_textile_language_website.t)
       end
       br
