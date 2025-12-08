@@ -10,6 +10,9 @@
 #         submit_type: @submit
 #       )) %>
 class Components::TextileSandboxForm < Components::ApplicationForm
+  # Register asset_path as a value helper for generating asset URLs
+  register_value_helper :asset_path
+
   # @param model [TextileSandbox] struct with code attribute
   # @param show_result [Boolean] whether to show the rendered result above form
   # @param submit_type [String] the submit button that was clicked
@@ -56,13 +59,13 @@ class Components::TextileSandboxForm < Components::ApplicationForm
 
   def render_up_arrows
     div(class: "sandbox-up-ptr center-block mt-3 mb-3") do
-      img(src: helpers.asset_path("up_arrow.png"), alt: "Up arrow")
+      img(src: asset_path("up_arrow.png"), alt: "Up arrow")
       whitespace
       submit(:sandbox_test.l, class: "btn btn-default")
       whitespace
       submit(:sandbox_test_codes.l, class: "btn btn-default")
       whitespace
-      img(src: helpers.asset_path("up_arrow.png"), alt: "Up arrow")
+      img(src: asset_path("up_arrow.png"), alt: "Up arrow")
     end
   end
 
