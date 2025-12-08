@@ -107,9 +107,27 @@ form_element_data = {
       )) do |panel| %>
     <%= panel.with_heading { "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}" } %>
     <%= panel.with_body(collapse: true) do %>
+      <% if create && @given_name.present? %>
+        <%= render(Components::FormNameFeedback.new(
+              button_name: button_name,
+              given_name: @given_name,
+              names: @names,
+              valid_names: @valid_names,
+              suggest_corrections: @suggest_corrections || false,
+              parent_deprecated: @parent_deprecated
+            )) %>
+      <% end %>
       <%= tag.div(class: "row") do
         concat(tag.div(class: "col-xs-12 col-md-6") do
-          render(partial: "observations/namings/fields", locals: naming_locals)
+          render(Components::NamingFields.new(
+                   create:,
+                   show_reasons: false,
+                   unfocused: true,
+                   name_help: :form_naming_name_help_leave_blank.t,
+                   vote: @vote,
+                   given_name: @given_name || "",
+                   reasons: @reasons
+                 ))
         end) if create
         concat(tag.div(class: "col-xs-12 col-md-6") do
           render(partial: "observations/form/specimen_section",

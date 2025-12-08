@@ -23,10 +23,8 @@ class Components::NamingForm < Components::ApplicationForm
   end
 
   def view_template
-    if @given_name.present?
-      render(partial("shared/form_name_feedback", **feedback_locals))
-    end
-    render_naming_namespace
+    render_name_feedback if @given_name.present?
+    render_naming_fields
     input(type: "hidden", name: "context", value: @context)
     submit(button_name, center: true)
   end
@@ -82,86 +80,26 @@ class Components::NamingForm < Components::ApplicationForm
     @create ? :CREATE.l : :SAVE_EDITS.l
   end
 
-  def feedback_locals
-    {
-      button_name: button_name,
-      given_name: @given_name,
-      names: @feedback[:names],
-      valid_names: @feedback[:valid_names],
-      suggest_corrections: @feedback[:suggest_corrections],
-      parent_deprecated: @feedback[:parent_deprecated]
-    }
-  end
-
-  def render_naming_namespace
-    # Don't wrap in namespace(:naming) - the form is already for a Naming model
-    render_name_autocompleter(self)
-  end
-
-  def render_name_autocompleter(naming)
-    name_field = naming.field(:name).autocompleter(
-      type: :name,
-      wrapper_options: {
-        label: "#{:WHAT.t}:",
-        help: :form_naming_name_help.t
-      },
-      value: @given_name,
-      autofocus: focus_on_name?
-    )
-
-    render(name_field) do
-      render_vote_reasons_collapse(naming)
-    end
-  end
-
-  def render_vote_reasons_collapse(naming)
-    div(data: { autocompleter_target: "collapseFields" },
-        class: collapse_class) do
-      render_vote_field(naming)
-      render_reasons_field if @show_reasons
-    end
-  end
-
-  def collapse_class
-    @context == "blank" ? "collapse" : nil
-  end
-
-  def render_vote_field(naming)
-    naming.namespace(:vote) do |vote|
-      menu = @create ? [["", ""]] + confidence_menu : confidence_menu
-      render(vote.field(:value).select(
-               menu,
-               wrapper_options: {
-                 label: "#{:form_naming_confidence.t}:"
-               },
-               selected: @vote&.value,
-               autofocus: focus_on_vote?
-             ))
-    end
-  end
-
-  def render_reasons_field
-    render(Components::NamingReasonsFields.new(
-             reasons: @reasons,
-             form_namespace: self
+  def render_name_feedback
+    render(Components::FormNameFeedback.new(
+             button_name: button_name,
+             given_name: @given_name,
+             names: @feedback[:names],
+             valid_names: @feedback[:valid_names],
+             suggest_corrections: @feedback[:suggest_corrections] || false,
+             parent_deprecated: @feedback[:parent_deprecated]
            ))
   end
 
-  def confidence_menu
-    # Superform expects [value, label] but Rails returns [label, value]
-    menu = if @vote&.value&.nonzero?
-             Vote.confidence_menu
-           else
-             Vote.opinion_menu
-           end
-    menu.map { |label, value| [value, label] }
-  end
-
-  def focus_on_name?
-    !@create || @given_name.empty?
-  end
-
-  def focus_on_vote?
-    @create && @given_name.present?
+  def render_naming_fields
+    render(Components::NamingFields.new(
+             form_namespace: self,
+             vote: @vote,
+             given_name: @given_name,
+             reasons: @reasons,
+             show_reasons: @show_reasons,
+             context: @context,
+             create: @create
+           ))
   end
 end
