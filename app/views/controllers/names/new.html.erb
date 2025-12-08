@@ -1,8 +1,7 @@
 <%
 add_new_title(:create_object, :NAME)
 add_context_nav(name_form_new_tabs)
-action = { controller: "/names", action: :create }
 %>
 
-<%= render(partial: "names/form",
-           locals: { action: action, button: :CREATE.l }) %>
+<%= render(Components::NameForm.new(@name, user: @user,
+                                    name_string: @name_string)) %>

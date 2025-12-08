@@ -4,6 +4,8 @@ require("test_helper")
 
 # Tests for methods in models/name.rb and models/name/xxx.rb
 class NameTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   def create_test_name(string, force_rank = nil)
     User.current = rolf
     parse = Name.parse_name(string)
@@ -1924,9 +1926,9 @@ class NameTest < UnitTestCase
   end
 
   def test_ancestors_3
-    # Make sure only Ascomycetes through Peltigera have
-    # Ascomycota in their classification at first.
-    assert_equal(4, Name.classification_has("Ascomycota").count)
+    # Names with Ascomycota in classification OR search_name starting with it.
+    # Includes: Ascomycota itself + Ascomycetes through Peltigera.
+    assert_equal(5, Name.classification_has("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -2041,8 +2043,6 @@ class NameTest < UnitTestCase
     desc.reload
     name_version = name.version
     description_version = desc.version
-    QueuedEmail.queue = true
-    QueuedEmail.all.map(&:destroy)
 
     assert_equal(0, desc.authors.length)
     assert_equal(0, desc.editors.length)
@@ -2054,7 +2054,7 @@ class NameTest < UnitTestCase
     # 3 Dick:       .       .       .       .
     # 4 Katrina:    x       x       x       .
     # Authors: --        editors: --         reviewer: -- (unreviewed)
-    # Rolf erases notes: notify Katrina (all), Rolf becomes editor.
+    # Rolf erases notes: no emails (no authors yet), Rolf becomes editor.
     User.current = rolf
     desc.reload
     desc.classification = ""
@@ -2064,14 +2064,14 @@ class NameTest < UnitTestCase
     desc.habitat = ""
     desc.look_alikes = ""
     desc.uses = ""
-    assert_equal(0, QueuedEmail.count)
-    desc.save
+    assert_no_enqueued_jobs do
+      desc.save
+    end
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
     assert_nil(desc.reviewer_id)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(0, QueuedEmail.count)
 
     # email types:  author  editor  review  interest
     # 1 Rolf:       x       x       x       .
@@ -2082,26 +2082,31 @@ class NameTest < UnitTestCase
     # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
     User.current = mary
     desc.reload
-    desc.gen_desc = "Mary wrote this."
-    desc.save
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        mailer_args = args[3][:args].first
+        args[0] == "NameChangeMailer" &&
+          mailer_args[:sender] == mary &&
+          mailer_args[:receiver] == rolf &&
+          mailer_args[:name] == name &&
+          mailer_args[:description] == desc &&
+          mailer_args[:old_name_ver] == name.version &&
+          mailer_args[:new_name_ver] == name.version &&
+          mailer_args[:old_desc_ver] == description_version + 1 &&
+          mailer_args[:new_desc_ver] == description_version + 2 &&
+          mailer_args[:review_status] == "no_change"
+      }
+    ) do
+      desc.gen_desc = "Mary wrote this."
+      desc.save
+    end
     assert_equal(description_version + 2, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(1, desc.editors.length)
     assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::NameChange",
-                 from: mary,
-                 to: rolf,
-                 name: name.id,
-                 description: desc.id,
-                 old_name_version: name.version,
-                 new_name_version: name.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version,
-                 review_status: "no_change")
 
     # Rolf doesn't want to be notified if people change names he's edited.
     rolf.email_names_editor = false
@@ -2116,26 +2121,31 @@ class NameTest < UnitTestCase
     # Dick changes uses: notify Mary (author); Dick becomes editor.
     User.current = dick
     desc.reload
-    desc.uses = "Something more new."
-    desc.save
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        mailer_args = args[3][:args].first
+        args[0] == "NameChangeMailer" &&
+          mailer_args[:sender] == dick &&
+          mailer_args[:receiver] == mary &&
+          mailer_args[:name] == name &&
+          mailer_args[:description] == desc &&
+          mailer_args[:old_name_ver] == name.version &&
+          mailer_args[:new_name_ver] == name.version &&
+          mailer_args[:old_desc_ver] == description_version + 2 &&
+          mailer_args[:new_desc_ver] == description_version + 3 &&
+          mailer_args[:review_status] == "no_change"
+      }
+    ) do
+      desc.uses = "Something more new."
+      desc.save
+    end
     assert_equal(description_version + 3, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
-                 flavor: "QueuedEmail::NameChange",
-                 from: dick,
-                 to: mary,
-                 name: name.id,
-                 description: desc.id,
-                 old_name_version: name.version,
-                 new_name_version: name.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version,
-                 review_status: "no_change")
 
     # Mary opts out of author emails, add Katrina as new author.
     desc.add_author(katrina)
@@ -2151,25 +2161,31 @@ class NameTest < UnitTestCase
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     User.current = rolf
     desc.reload
-    desc.update_review_status("inaccurate")
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        mailer_args = args[3][:args].first
+        args[0] == "NameChangeMailer" &&
+          mailer_args[:sender] == rolf &&
+          mailer_args[:receiver] == katrina &&
+          mailer_args[:name] == name &&
+          mailer_args[:description] == desc &&
+          mailer_args[:old_name_ver] == name.version &&
+          mailer_args[:new_name_ver] == name.version &&
+          # NOTE: update_review_status doesn't create a new version
+          mailer_args[:old_desc_ver] == description_version + 3 &&
+          mailer_args[:new_desc_ver] == description_version + 3 &&
+          mailer_args[:review_status] == "inaccurate"
+      }
+    ) do
+      desc.update_review_status("inaccurate")
+    end
     assert_equal(description_version + 3, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(rolf.id, desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
-                 flavor: "QueuedEmail::NameChange",
-                 from: rolf,
-                 to: katrina,
-                 name: name.id,
-                 description: desc.id,
-                 old_name_version: name.version,
-                 new_name_version: name.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version,
-                 review_status: "inaccurate")
 
     # Have Katrina express disinterest.
     Interest.create(target: name, user: katrina, state: false)
@@ -2183,13 +2199,30 @@ class NameTest < UnitTestCase
     # Dick changes look-alikes: notify Rolf (reviewer), clear review status
     User.current = dick
     desc.reload
-    desc.look_alikes = "Dick added this -- it's suspect"
-    # (This is exactly what is normally done by name controller in edit_name.
-    # Yes, Dick isn't actually trying to review, and isn't even a reviewer.
-    # The point is to update the review date if Dick *were*, or reset the
-    # status to unreviewed in the present case that he *isn't*.)
-    desc.update_review_status("inaccurate")
-    desc.save
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        mailer_args = args[3][:args].first
+        args[0] == "NameChangeMailer" &&
+          mailer_args[:sender] == dick &&
+          mailer_args[:receiver] == rolf &&
+          mailer_args[:name] == name &&
+          mailer_args[:description] == desc &&
+          mailer_args[:old_name_ver] == name.version &&
+          mailer_args[:new_name_ver] == name.version &&
+          mailer_args[:old_desc_ver] == description_version + 3 &&
+          mailer_args[:new_desc_ver] == description_version + 4 &&
+          mailer_args[:review_status] == "unreviewed"
+      }
+    ) do
+      desc.look_alikes = "Dick added this -- it's suspect"
+      # (This is exactly what is normally done by name controller in edit_name.
+      # Yes, Dick isn't actually trying to review, and isn't even a reviewer.
+      # The point is to update the review date if Dick *were*, or reset the
+      # status to unreviewed in the present case that he *isn't*.)
+      desc.update_review_status("inaccurate")
+      desc.save
+    end
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
@@ -2197,18 +2230,6 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(4, QueuedEmail.count)
-    assert_email(3,
-                 flavor: "QueuedEmail::NameChange",
-                 from: dick,
-                 to: rolf,
-                 name: name.id,
-                 description: desc.id,
-                 old_name_version: name.version,
-                 new_name_version: name.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version,
-                 review_status: "unreviewed")
 
     # Mary expresses interest.
     Interest.create(target: name, user: mary, state: true)
@@ -2219,11 +2240,28 @@ class NameTest < UnitTestCase
     # 3 Dick:       .       .       .       .
     # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
-    # Rolf changes 'uses': notify Mary (interest).
+    # Rolf changes citation (on Name, not desc): notify Mary (interest).
     User.current = rolf
     name.reload
-    name.citation = "Rolf added this."
-    name.save
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        mailer_args = args[3][:args].first
+        args[0] == "NameChangeMailer" &&
+          mailer_args[:sender] == rolf &&
+          mailer_args[:receiver] == mary &&
+          mailer_args[:name] == name &&
+          mailer_args[:description].nil? &&
+          mailer_args[:old_name_ver] == name_version &&
+          mailer_args[:new_name_ver] == name_version + 1 &&
+          mailer_args[:old_desc_ver].zero? &&
+          mailer_args[:new_desc_ver].zero? &&
+          mailer_args[:review_status] == "no_change"
+      }
+    ) do
+      name.citation = "Rolf added this."
+      name.save
+    end
     assert_equal(name_version + 1, name.version)
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
@@ -2231,19 +2269,42 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(5, QueuedEmail.count)
-    assert_email(4,
-                 flavor: "QueuedEmail::NameChange",
-                 from: rolf,
-                 to: mary,
-                 name: name.id,
-                 description: 0,
-                 old_name_version: name.version - 1,
-                 new_name_version: name.version,
-                 old_description_version: 0,
-                 new_description_version: 0,
-                 review_status: "no_change")
-    QueuedEmail.queue = false
+  end
+
+  def test_notify_interest_state_false
+    # Test Interest with state=false removes user from recipients
+    name = names(:peltigera)
+    desc = name_descriptions(:peltigera_desc)
+
+    # Mary is author, rolf is editor - both would normally be notified
+    User.current = nil
+    Name.without_revision do
+      desc.authors.clear
+      desc.editors.clear
+    end
+    desc.authors << mary
+    desc.editors << rolf
+
+    mary.update!(email_names_author: true)
+    rolf.update!(email_names_editor: true)
+    dick.update!(email_names_editor: false, email_names_author: false)
+
+    # Dick creates Interest with state=false - explicitly opts out
+    Interest.where(target: name).destroy_all
+    Interest.create!(user: dick, target: name, state: false)
+
+    # Katrina makes a change - should notify mary and rolf, but NOT dick
+    User.current = katrina
+    name.reload
+
+    # Should enqueue 2 emails (mary and rolf), not 3 (dick was removed
+    # because of Interest with state=false)
+    assert_enqueued_jobs(2) do
+      name.citation = "Katrina added citation."
+      name.save
+    end
+
+    Interest.where(target: name).destroy_all
   end
 
   def test_misspelling
@@ -2808,22 +2869,49 @@ class NameTest < UnitTestCase
   end
 
   def test_skip_notify
-    QueuedEmail.queue = true
     User.current = users(:roy)
     name = names(:coprinus_comatus)
     name.skip_notify = true
-    assert_difference("QueuedEmail.count", 0) do
+    assert_no_enqueued_jobs do
       name.update(
         Name.parse_name("Coprinus comatus  (O.F. Müll.) Persoon").params
       )
     end
     name.skip_notify = false
-    assert_difference("QueuedEmail.count", 2) do
+    assert_enqueued_jobs(2) do
       name.update(
         Name.parse_name("Coprinus comatus  (O.F. Müll.) Pers.").params
       )
     end
-    QueuedEmail.queue = false
+  end
+
+  def test_notify_webmaster
+    # Test notify_webmaster sends email via deliver_later
+    User.current = rolf
+    name = Name.new(
+      text_name: "Testname webmaster",
+      display_name: "**__Testname webmaster__**",
+      user: rolf
+    )
+
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      name.notify_webmaster
+    end
+  end
+
+  def test_notify_webmaster_skip_notify
+    # Test that skip_notify prevents notify_webmaster
+    User.current = rolf
+    name = Name.new(
+      text_name: "Testname skip",
+      display_name: "**__Testname skip__**",
+      user: rolf
+    )
+    name.skip_notify = true
+
+    assert_no_enqueued_jobs do
+      name.notify_webmaster
+    end
   end
 
   # Prove that alphabetized sort_names give us names in the expected order
@@ -3716,6 +3804,37 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_scope_classification_has_includes_genus
+    # Classification column doesn't include Genus, but scientifically it should.
+    # Searching for "Coprinus" should find species in that genus.
+    coprinus = names(:coprinus)
+    coprinus_comatus = names(:coprinus_comatus)
+
+    results = Name.classification_has("Coprinus")
+
+    assert_includes(results, coprinus,
+                    "Should find genus itself")
+    assert_includes(results, coprinus_comatus,
+                    "Should find species within the genus")
+  end
+
+  def test_scope_classification_has_with_species_name
+    # Searching for a binomial like "Amanita boudieri" should find the species
+    # and its infraspecifics, but NOT other Amanita species.
+    amanita_boudieri = names(:amanita_boudieri)
+    amanita_boudieri_var = names(:amanita_boudieri_var_beillei)
+    amanita_baccata = names(:amanita_baccata_arora)
+
+    results = Name.classification_has("Amanita boudieri")
+
+    assert_includes(results, amanita_boudieri,
+                    "Should find Amanita boudieri")
+    assert_includes(results, amanita_boudieri_var,
+                    "Should find Amanita boudieri var. beillei")
+    assert_not_includes(results, amanita_baccata,
+                        "Should NOT find other Amanita species like baccata")
+  end
+
   def test_scope_species_lists
     assert_includes(
       Name.species_lists(species_lists(:unknown_species_list)), names(:fungi)
@@ -3778,7 +3897,8 @@ class NameTest < UnitTestCase
       obs_in_cal_without_lat_lng.name,
       "Name.in_box should exclude Names whose only Observations lack lat/long"
     )
-    box = { north: 0.0001, south: 0, east: 0.0001, west: 0 }
+    e = MO.box_epsilon
+    box = { north: e, south: 0, east: e, west: 0 }
     assert_empty(Name.in_box(**box))
   end
 

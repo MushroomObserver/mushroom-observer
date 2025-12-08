@@ -9,8 +9,7 @@ add_context_nav(herbaria_curator_request_tabs(herbarium: @herbarium))
 
 <%= render(Components::HerbariumCuratorRequestForm.new(
       FormObject::HerbariumCuratorRequest.new,
-      herbarium_name: @herbarium.name.t,
-      action: herbaria_curator_requests_path(id: @herbarium, back: @back,
-                                              q: q_param),
-      id: "herbarium_curator_request_form"
+      herbarium: @herbarium,
+      back: @back,
+      q_param: q_param
     )) %>

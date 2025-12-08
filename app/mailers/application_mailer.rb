@@ -23,6 +23,13 @@ class ApplicationMailer < ActionMailer::Base
     address.to_s.match?(URI::MailTo::EMAIL_REGEXP)
   end
 
+  # Prepend user info to content for context in emails to webmaster/admins.
+  def self.prepend_user(user, content)
+    return content if user.blank?
+
+    "(from User ##{user.id} #{user.name}(#{user.login}))\n#{content}"
+  end
+
   private
 
   def webmaster_delivery
@@ -55,7 +62,7 @@ class ApplicationMailer < ActionMailer::Base
     content_style = calc_content_style(headers)
     from = calc_email(headers[:from]) || MO.news_email_address
     reply_to = calc_email(headers[:reply_to]) || MO.noreply_email_address
-    mail(subject: "[MO] #{title.to_ascii}",
+    mail(subject: "[MO] #{title}",
          to: to,
          from: from,
          reply_to: reply_to,

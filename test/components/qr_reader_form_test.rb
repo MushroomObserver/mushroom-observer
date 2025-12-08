@@ -21,14 +21,15 @@ class QRReaderFormTest < UnitTestCase
     assert_html(@html, ".form-control")
   end
 
+  def test_form_has_default_id_and_data_controller
+    assert_html(@html, "form#qr_reader_form")
+    assert_html(@html, "form[data-controller='qr-reader']")
+  end
+
   private
 
   def render_form
-    form = Components::QRReaderForm.new(
-      @model,
-      action: "/test_action",
-      id: "qr_reader_form"
-    )
+    form = Components::QRReaderForm.new(@model, action: "/test_action")
     render(form)
   end
 end

@@ -318,15 +318,30 @@ class NameDescription < Description
       # Remove users who have opted out of all emails.
       recipients.reject!(&:no_emails)
 
-      # Send notification to all except the person who triggered the change.
-      (recipients.uniq - [sender]).each do |recipient|
-        QueuedEmail::NameChange.create_email(sender, recipient, name, self,
-                                             saved_change_to_review_status?)
-      end
+      send_name_change_emails(sender, recipients)
     end
 
     # No longer need this.
     @old_reviewer = nil
+  end
+
+  def send_name_change_emails(sender, recipients)
+    # Migrated from QueuedEmail::NameChange to deliver_later.
+    # Calculate versions now while saved_version_changes? is still accurate.
+    # Use saved_version_changes? (not saved_changes?) because review_status
+    # changes don't create new versions.
+    n = name
+    old_desc_ver = saved_version_changes? ? version - 1 : version
+    review = saved_change_to_review_status? ? review_status : "no_change"
+
+    (recipients.uniq - [sender]).each do |recipient|
+      NameChangeMailer.build(
+        sender:, receiver: recipient, name: n,
+        old_name_ver: n.version, new_name_ver: n.version,
+        description: self, old_desc_ver:, new_desc_ver: version,
+        review_status: review
+      ).deliver_later
+    end
   end
 
   ##############################################################################

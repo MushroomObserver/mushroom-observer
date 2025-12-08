@@ -36,11 +36,13 @@ module Herbaria
     private
 
     def send_curator_request_email
-      QueuedEmail::Webmaster.create_email(
-        @user,
+      # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+      message = WebmasterMailer.prepend_user(@user, curator_request_content)
+      WebmasterMailer.build(
+        sender_email: @user.email,
         subject: "Herbarium Curator Request",
-        content: curator_request_content
-      )
+        message:
+      ).deliver_later
     end
 
     def curator_request_content

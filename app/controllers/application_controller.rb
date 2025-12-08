@@ -349,6 +349,7 @@ class ApplicationController < ActionController::Base
     create_query(:Image, by_users: user, order_by: :updated_at)
   end
   helper_method :query_images_to_reuse
+  helper_method :q_param
 
   ##############################################################################
 

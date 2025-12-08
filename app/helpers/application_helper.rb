@@ -200,21 +200,14 @@ module ApplicationHelper
   #
   def add_args_to_url(url, new_args)
     new_args = new_args.clone
-    args = {}
 
     # Garbage in, garbage out...
     return url unless url.valid_encoding?
 
-    # Parse parameters off of current URL.
+    # Parse parameters off of current URL using Rack to handle nested/array
+    # params like q[by_user][]=1&q[by_user][]=2
     addr, parms = url.split("?")
-    (parms ? parms.split("&") : []).each do |arg|
-      var, val = arg.split("=")
-      next unless var && var != ""
-
-      var = CGI.unescape(var)
-      # See note below about precedence in case of redundancy.
-      args[var] = val unless args.key?(var)
-    end
+    args = parms ? Rack::Utils.parse_nested_query(parms) : {}
 
     # Deal with the special "/xxx/id" case.
     if %r{/(\d+)$}.match?(addr)
@@ -232,16 +225,14 @@ module ApplicationHelper
       elsif val.is_a?(ActiveRecord::Base)
         args[var.to_s] = val.id.to_s
       else
-        args[var.to_s] = CGI.escape(val.to_s)
+        args[var.to_s] = val.to_s
       end
     end
 
-    # Put it back together.
-    return addr if args.keys.empty?
+    # Put it back together using Hash#to_query to properly encode nested params
+    return addr if args.empty?
 
-    addr + "?" + args.keys.sort.map do |k| # rubocop:disable Style/StringConcatenation
-      "#{CGI.escape(k)}=#{args[k] || ""}"
-    end.join("&")
+    "#{addr}?#{args.to_query}"
   end
 
   def form_submit_text(obj)

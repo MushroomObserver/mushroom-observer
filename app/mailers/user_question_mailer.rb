@@ -4,12 +4,12 @@
 class UserQuestionMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(sender, user, subject, content)
-    setup_user(user)
+  def build(sender:, receiver:, subject:, message:)
+    setup_user(receiver)
     @title = subject
     @sender = sender
-    @message = content || ""
-    debug_log(:user_question, sender, user)
-    mo_mail(@title, to: user, reply_to: sender)
+    @message = message || ""
+    debug_log(:user_question, sender, receiver)
+    mo_mail(@title, to: receiver, reply_to: sender)
   end
 end

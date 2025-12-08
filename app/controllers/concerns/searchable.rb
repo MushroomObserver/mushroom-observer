@@ -38,9 +38,8 @@ module Searchable
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
             :search_nav_form, # id of element to update contents of
-            partial: "shared/search_form",
-            locals: { local: false, search: @search,
-                      field_columns: @field_columns }
+            Components::SearchForm.new(@search, search_controller: self,
+                                                local: false)
           ))
         end
         format.html
@@ -67,6 +66,7 @@ module Searchable
       autocompleted_strings_to_ids
       range_fields_to_arrays
       parse_date_ranges
+      normalize_notes_fields
     end
 
     # Used by search_helper to prefill nested params
@@ -122,7 +122,7 @@ module Searchable
         return
       end
 
-      @query_params[:names][:lookup] = vals.split("\r\n")
+      @query_params[:names][:lookup] = vals.split("\n").map(&:strip)
     end
 
     # Nested blank values will make for null query results,
@@ -160,17 +160,41 @@ module Searchable
       end
     end
 
-    # Check for `fields_with_range`, and join them into array if range present
+    # Check for `fields_with_range`, and join them into array if range present.
+    # Sorts values so the range is in correct order (min, max).
     def range_fields_to_arrays
       return unless respond_to?(:fields_with_range)
 
       fields_with_range.each do |key|
         next if @query_params[:"#{key}_range"].blank?
 
-        @query_params[key] = [@query_params[key],
-                              @query_params[:"#{key}_range"]]
+        range = [@query_params[key], @query_params[:"#{key}_range"]]
+        @query_params[key] = sort_range_values(range)
         @query_params.delete(:"#{key}_range")
       end
+    end
+
+    # Sort range values so min comes first. Works for both numeric values
+    # (confidence) and string values (rank) that have a defined order.
+    # Filters out blank values before sorting to avoid validation errors.
+    def sort_range_values(range)
+      # Filter out blank values before sorting
+      non_blank = range.compact_blank
+      return [] if non_blank.empty?
+      return non_blank if non_blank.size == 1
+
+      sort_rank_range(non_blank) || sort_numeric_range(non_blank)
+    end
+
+    def sort_rank_range(range)
+      str_range = range.map(&:to_s)
+      return unless str_range.all? { |v| Name.all_ranks.include?(v) }
+
+      str_range.sort_by { |v| Name.all_ranks.index(v) }
+    end
+
+    def sort_numeric_range(range)
+      range.map(&:to_f).sort
     end
 
     def parse_date_ranges
@@ -219,6 +243,15 @@ module Searchable
     def fields_preferring_ids = []
 
     def fields_with_range = []
+
+    # Convert spaces to underscores in notes field names.
+    # "INat notes field\nOther Field" => ["INat_notes_field", "Other_Field"]
+    def normalize_notes_fields
+      return if (val = @query_params[:has_notes_fields]).blank?
+
+      @query_params[:has_notes_fields] =
+        val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
+    end
 
     # Passing some fields will raise an error if the required field is missing,
     # so just toss them. Not sure we have to do this, because Query will.

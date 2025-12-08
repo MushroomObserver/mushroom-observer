@@ -4,8 +4,5 @@
 
 <%= render(Components::ProjectAdminRequestForm.new(
       FormObject::ProjectAdminRequest.new,
-      action: url_for(controller: "/projects/admin_requests",
-                      action: :create,
-                      project_id: @project.id),
-      id: "project_admin_request_form"
+      project: @project
     )) %>

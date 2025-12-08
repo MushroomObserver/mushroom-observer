@@ -2,7 +2,7 @@
 Textile.user_register_name(@user, @name)
 add_show_title(@name.user_display_name(@user).t.small_author, @name)
 if @user
-  add_edit_icons(@name)
+  # add_edit_icons(@name) edit name link is in nomenclature panel
   add_interest_icons(@user, @name)
   add_pager_for(@name)
 end

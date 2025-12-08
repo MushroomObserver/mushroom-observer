@@ -61,13 +61,13 @@ module Name::Scopes
 
     # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :misspellings, lambda { |boolish = :no|
-      # if :either, returns all
+      # if :include, returns all
       case boolish.to_sym
       when :no
         where(correct_spelling_id: nil)
       when :only
         where.not(correct_spelling_id: nil)
-      when :either
+      when :include
         all
       end
     }
@@ -111,8 +111,15 @@ module Name::Scopes
 
     scope :has_classification,
           ->(bool = true) { not_blank_condition(Name[:classification], bool:) }
-    scope :classification_has,
-          ->(phrase) { search_columns(Name[:classification], phrase) }
+    # Search classification column and genus (first word of text_name).
+    # Classification only stores ranks above Genus, but scientifically,
+    # classification includes Genus. This scope enables searching for genus
+    # names to find species within that genus.
+    scope :classification_has, lambda { |phrase|
+      classification_matches = search_columns(Name[:classification], phrase)
+      text_name_matches = text_name_has(phrase)
+      or_clause(classification_matches.distinct, text_name_matches.distinct)
+    }
 
     scope :has_notes,
           ->(bool = true) { not_blank_condition(Name[:notes], bool:) }

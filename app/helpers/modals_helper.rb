@@ -19,10 +19,16 @@ module ModalsHelper
       ExternalLink: Components::ExternalLinkForm,
       HerbariumRecord: Components::HerbariumRecordForm,
       CollectionNumber: Components::CollectionNumberForm,
-      Sequence: Components::SequenceForm
+      Sequence: Components::SequenceForm,
+      WebmasterQuestion: Components::WebmasterQuestionForm,
+      ObserverQuestion: Components::ObserverQuestionForm,
+      CommercialInquiry: Components::CommercialInquiryForm,
+      UserQuestion: Components::UserQuestionForm
     }
 
-    component_class = model ? component_map[model.class.name.to_sym] : nil
+    # Use demodulized name to handle both ActiveRecord and FormObject classes
+    model_key = demodulized_class_name(model)
+    component_class = model_key ? component_map[model_key] : nil
 
     if component_class
       render_modal_component(
@@ -53,7 +59,7 @@ module ModalsHelper
   def build_component_params(component_class, model, observation, back, locals)
     params = { local: false } # Modal forms are turbo forms
     add_observation_param(params, model, observation, component_class)
-    add_form_specific_params(params, component_class, locals)
+    add_form_specific_params(params, component_class, observation, locals)
     params[:back] = back if back
     params
   end
@@ -67,11 +73,53 @@ module ModalsHelper
     end
   end
 
-  def add_form_specific_params(params, component_class, locals)
-    return unless component_class == Components::ExternalLinkForm
+  def add_form_specific_params(params, component_class, observation, locals)
+    case component_class.name
+    when "Components::ExternalLinkForm"
+      add_external_link_params(params, locals)
+    when "Components::WebmasterQuestionForm"
+      add_webmaster_question_params(params, locals)
+    when "Components::ObserverQuestionForm"
+      add_observer_question_params(params, observation, locals)
+    when "Components::CommercialInquiryForm"
+      add_commercial_inquiry_params(params, locals)
+    when "Components::UserQuestionForm"
+      add_user_question_params(params, locals)
+    end
+  end
 
+  def add_external_link_params(params, locals)
     params[:user] = locals[:user] if locals[:user]
     params[:sites] = locals[:sites] if locals[:sites]
     params[:site] = locals[:site] if locals[:site]
+  end
+
+  def add_webmaster_question_params(params, locals)
+    params[:email] = locals[:email] if locals[:email]
+    params[:email_error] = locals[:email_error] if locals.key?(:email_error)
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def add_observer_question_params(params, observation, locals)
+    params[:observation] = observation if observation
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def add_commercial_inquiry_params(params, locals)
+    params[:image] = locals[:image] if locals[:image]
+    params[:user] = locals[:user] if locals[:user]
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def add_user_question_params(params, locals)
+    params[:target] = locals[:target] if locals[:target]
+    params[:subject] = locals[:subject] if locals[:subject]
+    params[:message] = locals[:message] if locals[:message]
+  end
+
+  def demodulized_class_name(model)
+    return nil unless model
+
+    model.class.name.demodulize.to_sym
   end
 end

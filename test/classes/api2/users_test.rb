@@ -5,6 +5,7 @@ require("api2_extensions")
 
 class API2::UsersTest < UnitTestCase
   include API2Extensions
+  include ActiveJob::TestHelper
 
   def test_basic_user_get
     do_basic_get_test(User)
@@ -51,6 +52,7 @@ class API2::UsersTest < UnitTestCase
       email: @email,
       password: "secret"
     }
+    # No API key requested, so no VerifyAccount email should be queued
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting user")
     assert_obj_arrays_equal([User.last], api.results)
@@ -92,10 +94,16 @@ class API2::UsersTest < UnitTestCase
       mailing_address: @address,
       create_key: @new_key
     }
-    api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting user")
-    assert_obj_arrays_equal([User.last], api.results)
-    assert_last_user_correct
+    # With create_key, VerifyAccount email should be queued
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: ->(args) { args[0] == "VerifyAccountMailer" && args[1] == "build" }
+    ) do
+      api = API2.execute(params)
+      assert_no_errors(api, "Errors while posting user")
+      assert_obj_arrays_equal([User.last], api.results)
+      assert_last_user_correct
+    end
     params[:login] = "miles"
     assert_api_fail(params.merge(name: "x" * 1000))
     assert_api_fail(params.merge(locale: "xx"))

@@ -356,14 +356,17 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def notify_admins_of_new_herbarium
-    QueuedEmail::Webmaster.create_email(
-      @user,
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    body = "User created a new herbarium:\n" \
+           "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
+           "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
+           "Obj: #{@herbarium.show_url}\n"
+    message = WebmasterMailer.prepend_user(@user, body)
+    WebmasterMailer.build(
+      sender_email: @user.email,
       subject: "New Herbarium",
-      content: "User created a new herbarium:\n" \
-               "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
-               "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
-               "Obj: #{@herbarium.show_url}\n"
-    )
+      message:
+    ).deliver_later
   end
 
   def user_can_destroy_herbarium?

@@ -33,6 +33,8 @@ const DEFAULT_OPTS = {
   COLLAPSE: 0,
   // whether to send a new request for every letter, in the case of "region"
   WHOLE_WORDS_ONLY: false,
+  // whether to preserve server order instead of sorting alphabetically
+  PRESERVE_ORDER: false,
   // where to request primer from
   AJAX_URL: "/autocompleters/new/",
   // how long to wait before sending AJAX request (seconds)
@@ -101,7 +103,7 @@ const AUTOCOMPLETER_TYPES = {
   },
   region: {
     UNORDERED: true,
-    WHOLE_WORDS_ONLY: true,
+    PRESERVE_ORDER: true,
     model: 'location'
   },
   species_list: {
@@ -340,6 +342,7 @@ export default class extends Controller {
     this.mapOutlet.lowInputTarget.value = '';
   }
 
+
   // pulldownTargetConnected() {
   //   this.getRowHeight();
   // }
@@ -389,6 +392,7 @@ export default class extends Controller {
     this.inputTarget.addEventListener("keydown", this);
     this.inputTarget.addEventListener("keyup", this);
     this.inputTarget.addEventListener("keypress", this);
+    this.inputTarget.addEventListener("input", this);
     this.inputTarget.addEventListener("change", this);
     // Turbo: check this. May need to be turbo.before_render or before_visit
     window.addEventListener("beforeunload", this);
@@ -416,6 +420,9 @@ export default class extends Controller {
       case "keyup":
         this.ourKeyup(event);
         break;
+      case "input":
+        this.ourChange(true);
+        break;
       case "change":
         this.ourChange(event);
         break;
@@ -441,9 +448,10 @@ export default class extends Controller {
           break;
         case this.EVENT_KEYS.tab:
         case this.EVENT_KEYS.return:
-          event.preventDefault();
-          if (this.current_row >= 0)
+          if (this.current_row >= 0) {
+            event.preventDefault();
             this.selectRow(this.current_row - this.scroll_offset);
+          }
           break;
         case this.EVENT_KEYS.home:
           this.goHome();
@@ -1028,7 +1036,9 @@ export default class extends Controller {
       if (this.lastHiddenTargetValue() != perfect_match['id']) {
         this.assignHiddenId(perfect_match);
       }
-    } else if (!this.ignoringTextInput()) {
+    } else if (!this.ignoringTextInput() && this.matches.length > 0) {
+      // Only clear if we have matches to validate against.
+      // If matches haven't loaded yet, trust the form's prefilled hidden value.
       this.clearHiddenId();
     }
   }
@@ -1113,7 +1123,11 @@ export default class extends Controller {
   // Removes the last id in the hidden input (array as csv string)
   clearLastHiddenTargetValue() {
     this.verbose("autocompleter:clearLastHiddenTargetValue()");
-    if (this.SEPARATOR) {
+    // If input is completely empty, clear everything regardless of SEPARATOR
+    if (this.inputTarget.value.length === 0) {
+      this.clearHiddenIdAndData();
+      this.keepers = [];
+    } else if (this.SEPARATOR) {
       this.clearLastHiddenIdAndKeeper();
     } else {
       this.clearHiddenIdAndData();
@@ -1134,18 +1148,20 @@ export default class extends Controller {
     this.verbose(idx);
 
     if (idx > -1 && hidden_ids.length > idx) {
-      hidden_ids.slice(idx, 1);
+      hidden_ids.splice(idx, 1);
       this.hiddenTarget.value = hidden_ids.join(",");
       // also clear the dataset
-      if (this.keepers.length > idx)
+      if (this.keepers.length > idx) {
         this.verbose("autocompleter:keepers: ")
-      this.verbose(JSON.stringify(this.keepers));
-      this.keepers.slice(idx, 1);
+        this.verbose(JSON.stringify(this.keepers));
+        this.keepers.splice(idx, 1);
+      }
     }
   }
 
   clearHiddenIdAndData() {
     this.hiddenTarget.value = '';
+    this.hiddenTarget.setAttribute('value', '');
     // clear the dataset also
     Object.keys(this.hiddenTarget.dataset).forEach(key => {
       if (!key.match(/Target/))
@@ -1156,14 +1172,21 @@ export default class extends Controller {
   // check if any names in `keepers` are not in the input values.
   // if so, remove them from the keepers and the hidden input.
   removeUnusedKeepersAndIds() {
-    if (!this.SEPARATOR || this.keepers == []) return;
+    if (!this.SEPARATOR) return;
+
+    const input_names = this.getInputArray();
+
+    // If we have no keepers yet (e.g., pasting fresh), just try to add missing
+    if (this.keepers.length === 0) {
+      this.addMissingKeepersAndIds(input_names);
+      return;
+    }
 
     this.verbose("autocompleter:removeUnusedKeepersAndIds()");
     this.verbose("autocompleter:keepers: ")
     this.verbose(JSON.stringify(this.keepers));
 
-    const input_names = this.getInputArray(),
-      hidden_ids = this.hiddenIdsAsIntegerArray();
+    const hidden_ids = this.hiddenIdsAsIntegerArray();
     this.verbose("autocompleter:input_names: ")
     this.verbose(JSON.stringify(input_names));
     this.verbose("autocompleter:hidden_ids: ")
@@ -1270,11 +1293,15 @@ export default class extends Controller {
   cssHasIdOrNo(hidden_id) {
     this.verbose("autocompleter:cssHasIdOrNo()");
 
-    if (hidden_id && hidden_id !== NaN && hidden_id != 0) {
+    if (hidden_id && !isNaN(hidden_id) && hidden_id != 0) {
       this.wrapTarget.classList.add('has-id');
       this.wrapTarget.classList.remove('offer-create');
       if (this.hasKeepBtnTarget) {
         this.keepBtnTarget.classList.remove("d-none");
+      }
+      // Directly show indicator as backup to CSS cascade
+      if (this.hasHasIdIndicatorTarget) {
+        this.hasIdIndicatorTarget.style.display = 'inline-block';
       }
     } else {
       this.wrapTarget.classList.remove('has-id');
@@ -1284,6 +1311,10 @@ export default class extends Controller {
       }
       if (this.hasKeepBtnTarget) {
         this.keepBtnTarget.classList.add("d-none");
+      }
+      // Directly hide indicator as backup to CSS cascade
+      if (this.hasHasIdIndicatorTarget) {
+        this.hasIdIndicatorTarget.style.display = 'none';
       }
     }
     // On forms where a map may not be relevant, we also show/hide the map.
@@ -1367,7 +1398,13 @@ export default class extends Controller {
         }
         this.inputTarget.focus();
         if (this.hasMapOutlet) {
-          this.mapOutlet.showBox();
+          // Fill box inputs from location data if available
+          if (hidden_data.north || hidden_data.south ||
+              hidden_data.east || hidden_data.west) {
+            this.mapOutlet.updateBoundsInputs(hidden_data);
+            // Trigger map rectangle drawing (requires placeInput and locationId)
+            this.mapOutlet.showBox();
+          }
         }
       }, 750)
     }
@@ -1401,8 +1438,10 @@ export default class extends Controller {
     else
       this.populateNormal();
 
-    // Sort and remove duplicates, unless it's already sorted.
-    if (!this.ACT_LIKE_SELECT)
+    // Sort and remove duplicates, unless already sorted or preserving order.
+    // PRESERVE_ORDER skips sorting (server handles order); duplicates already
+    // removed server-side.
+    if (!this.ACT_LIKE_SELECT && !this.PRESERVE_ORDER)
       this.matches = this.removeDups(this.matches.sort(
         (a, b) => (a.name || "").localeCompare(b.name || "")
       ));
@@ -1828,6 +1867,9 @@ export default class extends Controller {
 
   // Map controller sends back a primer formatted for the autocompleter
   refreshGooglePrimer({ primer }) {
+    // Ensure primer is processed even if input lost focus (e.g., after clicking
+    // "New locality" button). processFetchResponse checks this.focused.
+    this.focused = true;
     this.processFetchResponse(primer)
   }
 
@@ -1940,6 +1982,8 @@ export default class extends Controller {
       if (!this.keepers.includes(exact_match)) {
         this.keepers.splice(idx, 1, exact_match);
       }
+      // Update the indicator to show IDs were found
+      this.cssHasIdOrNo(exact_match['id']);
     }
   }
 

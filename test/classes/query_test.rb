@@ -63,12 +63,12 @@ class QueryTest < UnitTestCase
     assert_equal("id", Query.lookup(:Name, order_by: :id).params[:order_by])
 
     assert_equal(
-      :either,
-      Query.lookup(:Name, misspellings: :either).params[:misspellings]
+      :include,
+      Query.lookup(:Name, misspellings: :include).params[:misspellings]
     )
     assert_equal(
-      :either,
-      Query.lookup(:Name, misspellings: "either").params[:misspellings]
+      :include,
+      Query.lookup(:Name, misspellings: "include").params[:misspellings]
     )
     assert_validation_errors(Query.lookup(:Name, misspellings: "bogus"))
     assert_validation_errors(Query.lookup(:Name, misspellings: true))
@@ -290,7 +290,7 @@ class QueryTest < UnitTestCase
     @names = Name.reorder(id: :asc).order(:id)
     @pagination_data = PaginationData.new(number: number,
                                           num_per_page: num_per_page)
-    @query = Query.lookup(:Name, misspellings: :either, order_by: :id)
+    @query = Query.lookup(:Name, misspellings: :include, order_by: :id)
   end
 
   def paginate_test(number, num_per_page, expected_nths)
@@ -398,7 +398,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_next_and_prev
-    query = Query.lookup(:Name, misspellings: :either, order_by: :id)
+    query = Query.lookup(:Name, misspellings: :include, order_by: :id)
     @names = Name.reorder(id: :asc)
 
     query.current = @names[2]

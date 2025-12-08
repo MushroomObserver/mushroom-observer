@@ -23,7 +23,7 @@ module Admin
               locals: {
                 title: :email_merge_request_title.t(type: @model.type_tag),
                 identifier: "merge_request_email",
-                user: @user, form: "admin/email/merge_requests/form"
+                user: @user, form: "admin/emails/merge_requests/form"
               }
             ) and return
           end
@@ -67,12 +67,14 @@ module Admin
       end
 
       def send_merge_request
+        # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
         temporarily_set_locale(MO.default_locale) do
-          QueuedEmail::Webmaster.create_email(
-            @user,
+          message = WebmasterMailer.prepend_user(@user, merge_request_content)
+          WebmasterMailer.build(
+            sender_email: @user.email,
             subject: "#{@model.name} Merge Request",
-            content: merge_request_content
-          )
+            message:
+          ).deliver_later
         end
         flash_notice(:email_merge_request_success.t)
         redirect_to(@old_obj.show_link_args)

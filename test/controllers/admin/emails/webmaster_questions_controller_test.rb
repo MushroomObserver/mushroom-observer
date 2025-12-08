@@ -5,6 +5,8 @@ require("test_helper")
 module Admin
   module Emails
     class WebmasterQuestionsControllerTest < FunctionalTestCase
+      include ActiveJob::TestHelper
+
       def test_page_loads
         login
         get(:new)
@@ -12,14 +14,22 @@ module Admin
         assert_form_action(action: :create)
       end
 
+      def test_page_loads_turbo_stream
+        login
+        get(:new, format: :turbo_stream)
+        assert_response(:success)
+      end
+
       def test_send_webmaster_question
         email_count = ActionMailer::Base.deliveries.count
         login("rolf")
-        ask_webmaster_test(
-          "rolf@mushroomobserver.org",
-          response: :redirect,
-          flash: :runtime_ask_webmaster_success.t
-        )
+        perform_enqueued_jobs do
+          ask_webmaster_test(
+            "rolf@mushroomobserver.org",
+            response: :redirect,
+            flash: :runtime_ask_webmaster_success.t
+          )
+        end
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
         assert_match(/rolf@mushroomobserver.org/,
                      ActionMailer::Base.deliveries.last.to_s)
@@ -27,12 +37,14 @@ module Admin
 
       def test_send_webmaster_question_anonymous
         email_count = ActionMailer::Base.deliveries.count
-        ask_webmaster_test(
-          "anonymous@example.com",
-          content: "I noticed something odd",
-          response: :redirect,
-          flash: :runtime_ask_webmaster_success.t
-        )
+        perform_enqueued_jobs do
+          ask_webmaster_test(
+            "anonymous@example.com",
+            message: "I noticed something odd",
+            response: :redirect,
+            flash: :runtime_ask_webmaster_success.t
+          )
+        end
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
         assert_match(/anonymous@example.com/,
                      ActionMailer::Base.deliveries.last.to_s)
@@ -51,17 +63,17 @@ module Admin
 
       def test_send_webmaster_question_need_content
         ask_webmaster_test("bogus@email.com",
-                           content: "",
+                           message: "",
                            flash: :runtime_ask_webmaster_need_content.t)
       end
 
       def test_send_webmaster_question_antispam
         disable_unsafe_html_filter
         ask_webmaster_test("bogus@email.com",
-                           content: "Buy <a href='http://junk'>Me!</a>",
+                           message: "Buy <a href='http://junk'>Me!</a>",
                            flash: :runtime_ask_webmaster_antispam.t)
         ask_webmaster_test("okay_user@email.com",
-                           content: "iwxobjUzvkhmaCt",
+                           message: "iwxobjUzvkhmaCt",
                            flash: :runtime_ask_webmaster_antispam.t)
       end
 
@@ -70,12 +82,14 @@ module Admin
         email_count = ActionMailer::Base.deliveries.count
         user = users(:rolf)
         login(user.login)
-        ask_webmaster_test(
-          user.email,
-          content: "https://mushroomobserver.org/123 has an error",
-          response: :redirect,
-          flash: :runtime_ask_webmaster_success.t
-        )
+        perform_enqueued_jobs do
+          ask_webmaster_test(
+            user.email,
+            message: "https://mushroomobserver.org/123 has an error",
+            response: :redirect,
+            flash: :runtime_ask_webmaster_success.t
+          )
+        end
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
       end
 
@@ -92,8 +106,8 @@ module Admin
         post(:create,
              params: {
                webmaster_question: {
-                 user: { email: email },
-                 question: { content: args[:content] || "Some content" }
+                 email: email,
+                 message: args[:message] || "Some message"
                }
              })
         assert_response(response)
