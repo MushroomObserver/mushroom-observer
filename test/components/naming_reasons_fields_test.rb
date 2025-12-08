@@ -18,8 +18,8 @@ class NamingReasonsFieldsTest < UnitTestCase
 
   def test_renders_checkbox_for_each_reason
     @naming.init_reasons.each_key do |num|
-      assert_html(@html,
-                  "input[type='checkbox'][name='naming[reasons][#{num}][check]']")
+      selector = "input[type='checkbox'][name='naming[reasons][#{num}][check]']"
+      assert_html(@html, selector)
     end
   end
 
@@ -55,7 +55,8 @@ class NamingReasonsFieldsTest < UnitTestCase
     html = render_form_with_reasons(reasons: reasons)
 
     doc = Nokogiri::HTML(html)
-    checkbox = doc.at_css("input[type='checkbox'][name='naming[reasons][1][check]']")
+    selector = "input[type='checkbox'][name='naming[reasons][1][check]']"
+    checkbox = doc.at_css(selector)
     container = doc.at_css("div[id='reasons_1_notes']")
 
     assert(checkbox["checked"], "checkbox should be checked")
@@ -66,7 +67,7 @@ class NamingReasonsFieldsTest < UnitTestCase
     doc = Nokogiri::HTML(@html)
     container = doc.at_css("div[id='reasons_1_notes']")
 
-    refute_includes(container["class"], "show")
+    assert_not_includes(container["class"], "show")
   end
 
   private
