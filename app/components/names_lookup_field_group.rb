@@ -148,9 +148,14 @@ class Components::NamesLookupFieldGroup < Components::Base
 
   def field_selected_value(field_name)
     names = @query.names
-    return nil unless names.is_a?(Hash)
+    return default_value_for(field_name) unless names.is_a?(Hash)
 
-    names[field_name]
+    names[field_name].nil? ? default_value_for(field_name) : names[field_name]
+  end
+
+  # Returns the default value for a field when it's nil/unset
+  def default_value_for(field_name)
+    field_name == :include_subtaxa ? true : nil
   end
 
   # Convert boolean values to strings for select options
