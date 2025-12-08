@@ -42,10 +42,10 @@ class InfoController < ApplicationController
     textile_sandbox = TextileSandbox.new(code: code)
 
     render(Components::TextileSandboxForm.new(
-      textile_sandbox,
-      show_result: !code.nil?,
-      submit_type: submit
-    ), layout: true)
+             textile_sandbox,
+             show_result: !code.nil?,
+             submit_type: submit
+           ), layout: true)
   end
 
   # Allow translator to enter a special note linked to from the lower left.
