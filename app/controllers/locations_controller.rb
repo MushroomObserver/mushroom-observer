@@ -389,7 +389,7 @@ class LocationsController < ApplicationController
       if (user = User.safe_find(@set_user))
         user.location = @location
         user.save
-        redirect_to(user_path(@set_user.id))
+        redirect_to(user_path(user))
       end
     else
       redirect_to(location_path(@location.id))
