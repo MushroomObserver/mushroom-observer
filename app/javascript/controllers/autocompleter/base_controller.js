@@ -969,8 +969,11 @@ export default class BaseAutocompleterController extends Controller {
               hidden_data.east || hidden_data.west) {
             this.mapOutlet.updateBoundsInputs(hidden_data);
           }
-          // Trigger map rectangle drawing (requires placeInput and locationId)
-          this.mapOutlet.showBox();
+          // Only trigger map rectangle drawing when a location was selected
+          // (has an ID). Don't trigger Google geocode when ID is cleared.
+          if (hidden_id) {
+            this.mapOutlet.showBox();
+          }
         }
       }, 750)
     }
