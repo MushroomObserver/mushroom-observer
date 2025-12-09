@@ -8,7 +8,7 @@ class TextileIntegrationTest < CapybaraIntegrationTestCase
     login(mary)
     visit(info_textile_sandbox_path)
 
-    fill_in("code", with: "_Aborts_\n_aborts_")
+    fill_in("textile_sandbox_code", with: "_Aborts_\n_aborts_")
     click_on("Test")
 
     assert(page.has_content?("_aborts_"))
