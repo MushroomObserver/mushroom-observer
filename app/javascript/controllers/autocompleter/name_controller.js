@@ -1,6 +1,6 @@
 import BaseAutocompleterController, {
   AUTOCOMPLETER_TARGETS, AUTOCOMPLETER_OUTLETS
-} from "./base_controller"
+} from "controllers/autocompleter/base_controller"
 
 /**
  * NameAutocompleterController - Autocompleter for Name (taxon) records
