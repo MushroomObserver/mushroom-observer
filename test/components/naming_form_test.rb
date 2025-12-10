@@ -129,6 +129,19 @@ class NamingFormTest < UnitTestCase
     assert_html(html, "#name_messages")
   end
 
+  def test_renders_parent_deprecated_feedback
+    @naming = namings(:coprinus_comatus_naming)
+    deprecated_parent = names(:lactarius)
+    html = render_form_with_feedback(
+      given_name: "Some name",
+      names: [names(:agaricus_campestris)],
+      valid_names: [names(:coprinus_comatus)],
+      parent_deprecated: deprecated_parent
+    )
+
+    assert_html(html, "#name_messages")
+  end
+
   def test_enables_turbo_when_local_false
     html = render_form_with_local(false)
     assert_html(html, "form[data-turbo='true']")
@@ -199,14 +212,19 @@ class NamingFormTest < UnitTestCase
     render(form)
   end
 
-  def render_form_with_feedback(given_name:, names: nil, valid_names: nil)
+  def render_form_with_feedback(given_name:, names: nil, valid_names: nil,
+                                 parent_deprecated: nil)
     form = Components::NamingForm.new(
       @naming,
       observation: @observation,
       vote: @vote,
       given_name: given_name,
       reasons: @naming.init_reasons,
-      feedback: { names: names, valid_names: valid_names },
+      feedback: {
+        names: names,
+        valid_names: valid_names,
+        parent_deprecated: parent_deprecated
+      },
       show_reasons: true,
       context: "lightbox",
       local: true
