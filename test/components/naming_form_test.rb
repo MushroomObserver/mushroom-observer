@@ -119,6 +119,16 @@ class NamingFormTest < UnitTestCase
     assert_html(html, "input[name='naming[reasons][1][check]']")
   end
 
+  def test_renders_name_feedback_when_given_name_present
+    @naming = namings(:coprinus_comatus_naming)
+    html = render_form_with_feedback(
+      given_name: "Unknown name",
+      names: []
+    )
+
+    assert_html(html, "#name_messages")
+  end
+
   def test_enables_turbo_when_local_false
     html = render_form_with_local(false)
     assert_html(html, "form[data-turbo='true']")
@@ -185,6 +195,21 @@ class NamingFormTest < UnitTestCase
       show_reasons: true,
       context: "blank",
       local: local
+    )
+    render(form)
+  end
+
+  def render_form_with_feedback(given_name:, names: nil, valid_names: nil)
+    form = Components::NamingForm.new(
+      @naming,
+      observation: @observation,
+      vote: @vote,
+      given_name: given_name,
+      reasons: @naming.init_reasons,
+      feedback: { names: names, valid_names: valid_names },
+      show_reasons: true,
+      context: "lightbox",
+      local: true
     )
     render(form)
   end
