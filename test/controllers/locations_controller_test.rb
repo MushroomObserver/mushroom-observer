@@ -556,6 +556,23 @@ class LocationsControllerTest < FunctionalTestCase
     construct_location_error(params)
   end
 
+  # Regression test for bug where @set_user.id was called on a String,
+  # causing NoMethodError: undefined method `id' for an instance of String
+  def test_create_location_with_set_user
+    user = users(:mary)
+    login(user.login)
+    params = barton_flats_params
+    params[:set_user] = user.id.to_s
+
+    assert_nil(user.location)
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(user_path(user))
+    user.reload
+    assert_equal(loc, user.location)
+  end
+
   ##############################################################################
   #
   #    EDIT
