@@ -213,7 +213,7 @@ class NamingFormTest < UnitTestCase
   end
 
   def render_form_with_feedback(given_name:, names: nil, valid_names: nil,
-                                 parent_deprecated: nil)
+                                parent_deprecated: nil)
     form = Components::NamingForm.new(
       @naming,
       observation: @observation,
