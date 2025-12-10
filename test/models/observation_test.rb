@@ -1582,6 +1582,21 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
+  def test_scope_has_field_slips
+    # minimal_unknown_obs has field_slip_one in fixtures
+    assert_includes(Observation.has_field_slips(true),
+                    observations(:minimal_unknown_obs))
+    # coprinus_comatus_obs has no field slips
+    assert_not_includes(Observation.has_field_slips(true),
+                        observations(:coprinus_comatus_obs))
+
+    # Test false - should return observations WITHOUT field slips
+    assert_includes(Observation.has_field_slips(false),
+                    observations(:coprinus_comatus_obs))
+    assert_not_includes(Observation.has_field_slips(false),
+                        observations(:minimal_unknown_obs))
+  end
+
   # Currently Query ignores false, so scope does too.
   # def test_scope_has_sequences_false
   #   assert_includes(Observation.has_sequences(false),

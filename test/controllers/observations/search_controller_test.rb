@@ -95,6 +95,21 @@ module Observations
       )
     end
 
+    def test_new_observations_search_form_prefilled_with_has_field_slips
+      login
+      query = @controller.find_or_create_query(
+        :Observation,
+        has_field_slips: true,
+        has_images: false
+      )
+      assert(query.id)
+      get(:new)
+      assert_select("select#query_observations_has_field_slips",
+                    selected: "yes")
+      assert_select("select#query_observations_has_images",
+                    selected: "no")
+    end
+
     # query_observations is the form object.
     def test_create_observations_search
       login
@@ -110,6 +125,24 @@ module Observations
         by_users: [rolf.id],
         has_notes: true,
         lichen: false # this should be preserved, not "compacted" out.
+      }
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: {
+                             q: { model: :Observation, **validated_params }
+                           })
+    end
+
+    def test_create_observations_search_with_has_field_slips
+      login
+      params = {
+        has_field_slips: true,
+        has_images: false
+      }
+      post(:create, params: { query_observations: params })
+
+      validated_params = {
+        has_field_slips: true,
+        has_images: false
       }
       assert_redirected_to(controller: "/observations", action: :index,
                            params: {

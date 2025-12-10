@@ -28,6 +28,7 @@ module Observations
         :has_specimen,
         :has_sequences,
         :has_images,
+        :has_field_slips,
         :has_notes,
         :has_notes_fields,
         :notes_has,
@@ -93,7 +94,8 @@ module Observations
         detail: {
           shown: [],
           collapsed: [[:has_specimen, :has_sequences],
-                      [:has_images, :has_notes],
+                      [:has_images, :has_field_slips],
+                      [:has_notes],
                       [:has_notes_fields, :notes_has],
                       [:has_comments, :comments_has]]
         },
