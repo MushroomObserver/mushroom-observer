@@ -28,7 +28,7 @@ class Components::NamingFields < Components::Base
   prop :given_name, String, default: ""
   prop :reasons, _Nilable(Hash), default: nil
   prop :show_reasons, _Boolean, default: true
-  prop :context, String, default: "blank"
+  prop :context, _Nilable(String), default: nil
   prop :create, _Boolean, default: true
   prop :name_help, String, default: -> { :form_naming_name_help.t }
   prop :unfocused, _Boolean, default: false

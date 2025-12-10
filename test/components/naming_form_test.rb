@@ -16,7 +16,7 @@ class NamingFormTest < UnitTestCase
 
   def test_renders_form_with_name_autocompleter
     assert_html(@html, "input[name='naming[name]']")
-    assert_html(@html, "input[data-autocompleter-target='input']")
+    assert_html(@html, "input[data-autocompleter--name-target='input']")
   end
 
   def test_renders_form_with_vote_select
