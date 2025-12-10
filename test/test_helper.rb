@@ -145,6 +145,20 @@ module ActiveSupport
     # in integration tests -- they do not yet inherit this setting
     fixtures :all
 
+    # Clean up thread-local storage before each test to ensure isolation
+    # in parallel test execution. This prevents User.current from leaking
+    # between tests running in the same thread.
+    setup do
+      Thread.current[:mushroom_observer_user] = nil
+      Thread.current[:mushroom_observer_location_format] = nil
+    end
+
+    # Clean up thread-local storage after each test
+    teardown do
+      Thread.current[:mushroom_observer_user] = nil
+      Thread.current[:mushroom_observer_location_format] = nil
+    end
+
     # Add more helper methods to be used by all tests here...
 
     # Standard setup to run before every test.  Sets the locale, timezone,
