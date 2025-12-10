@@ -100,15 +100,21 @@ module GeneralExtensions
   end
 
   def use_test_locales(&block)
-    Language.alt_locales_path("config/test_locales", &block)
-    FileUtils.remove_dir(Rails.root.join("config/test_locales"), force: true)
+    # Use worker-specific directory in parallel mode to avoid conflicts
+    worker_suffix = ENV.key?("TEST_ENV_NUMBER") ? "-#{ENV["TEST_ENV_NUMBER"].empty? ? "0" : ENV["TEST_ENV_NUMBER"]}" : ""
+    locales_dir = "config/test_locales#{worker_suffix}"
+
+    Language.alt_locales_path(locales_dir, &block)
+    FileUtils.remove_dir(Rails.root.join(locales_dir), force: true)
   end
 
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
     return if FileTest.exist?(MO.local_image_files)
 
-    setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
+    # For parallel workers, the path might be test_images-0, test_images-2, etc.
+    # We always copy from setup_images
+    setup_images = MO.local_image_files.gsub(/test_images(-\d+)?$/, "setup_images")
     FileUtils.cp_r(setup_images, MO.local_image_files)
   end
 

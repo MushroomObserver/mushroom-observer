@@ -9,6 +9,58 @@ class ImageConfigData
     root = File.expand_path("..", __dir__)
     @env = ENV.fetch("RAILS_ENV", "development")
     @config = YAML.load_file("#{root}/config/image_config.yml")[@env]
+    make_paths_worker_specific! if parallel_test_mode?
+  end
+
+  private
+
+  def parallel_test_mode?
+    # Rails sets TEST_ENV_NUMBER for parallel test workers
+    # It's "" for worker 0, "2" for worker 1, "3" for worker 2, etc.
+    @env == "test" && ENV.key?("TEST_ENV_NUMBER")
+  end
+
+  def worker_suffix
+    # TEST_ENV_NUMBER is "" for worker 0, "2" for worker 1, "3" for worker 2, etc.
+    worker_id = ENV["TEST_ENV_NUMBER"]
+    worker_id.empty? ? "0" : worker_id
+  end
+
+  def make_paths_worker_specific!
+    # Update local_image_files path
+    @config["local_image_files"] = append_worker_suffix(@config["local_image_files"])
+
+    # Update image_sources paths
+    @config["image_sources"]&.each do |_source_name, source_config|
+      %i[test read write].each do |key|
+        next unless source_config[key].is_a?(String)
+        next if source_config[key] == ":transferred_flag"
+
+        source_config[key] = append_worker_suffix(source_config[key])
+      end
+    end
+  end
+
+  def append_worker_suffix(path)
+    # Don't modify URLs or special flags
+    return path if path.start_with?("https://", "http://") || path == ":transferred_flag"
+
+    # Handle file:// URLs and regular paths
+    if path.start_with?("file://")
+      prefix = "file://"
+      actual_path = path.sub(/^file:\/\//, "")
+    else
+      prefix = ""
+      actual_path = path
+    end
+
+    # Append worker suffix to test_images, test_server paths
+    modified_path = actual_path.gsub(
+      /(test_images|test_server\d+)(?=\/|$)/,
+      "\\1-#{worker_suffix}"
+    )
+
+    "#{prefix}#{modified_path}"
   end
 end
 
@@ -110,6 +162,7 @@ MushroomObserver::Application.configure do
   config.max_map_objects = 100
 
   # Where images are kept locally until they are transferred.
+  # In test environment with parallel workers, paths include worker ID to avoid conflicts
   config.local_image_files = format(
     IMAGE_CONFIG_DATA.config["local_image_files"], root: MO.root
   )
