@@ -1597,6 +1597,21 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
+  def test_scope_has_collection_numbers
+    # minimal_unknown_obs has minimal_unknown_coll_num in fixtures
+    assert_includes(Observation.has_collection_numbers(true),
+                    observations(:minimal_unknown_obs))
+    # peltigera_obs has no collection numbers
+    assert_not_includes(Observation.has_collection_numbers(true),
+                        observations(:peltigera_obs))
+
+    # Test false - should return observations WITHOUT collection numbers
+    assert_includes(Observation.has_collection_numbers(false),
+                    observations(:peltigera_obs))
+    assert_not_includes(Observation.has_collection_numbers(false),
+                        observations(:minimal_unknown_obs))
+  end
+
   # Currently Query ignores false, so scope does too.
   # def test_scope_has_sequences_false
   #   assert_includes(Observation.has_sequences(false),

@@ -204,6 +204,15 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, has_field_slips: nil)
   end
 
+  def test_observation_has_collection_numbers
+    assert_query(Observation.has_collection_numbers(true).order_by_default,
+                 :Observation, has_collection_numbers: true)
+    assert_query(Observation.has_collection_numbers(false).order_by_default,
+                 :Observation, has_collection_numbers: false)
+    assert_query(Observation.order_by_default,
+                 :Observation, has_collection_numbers: nil)
+  end
+
   def test_observation_has_images
     assert_query(Observation.has_images(true).order_by_default,
                  :Observation, has_images: true)

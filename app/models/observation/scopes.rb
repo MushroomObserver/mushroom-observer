@@ -453,6 +453,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joined_relation_condition(:field_slips, bool:)
     }
 
+    scope :has_collection_numbers, lambda { |bool = true|
+      joined_relation_condition(:collection_numbers, bool:)
+    }
+
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
     scope :field_slips, lambda { |codes|

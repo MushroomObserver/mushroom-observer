@@ -110,6 +110,21 @@ module Observations
                     selected: "no")
     end
 
+    def test_new_observations_search_form_prefilled_with_has_collection_numbers
+      login
+      query = @controller.find_or_create_query(
+        :Observation,
+        has_collection_numbers: true,
+        has_notes: false
+      )
+      assert(query.id)
+      get(:new)
+      assert_select("select#query_observations_has_collection_numbers",
+                    selected: "yes")
+      assert_select("select#query_observations_has_notes",
+                    selected: "no")
+    end
+
     # query_observations is the form object.
     def test_create_observations_search
       login
@@ -143,6 +158,24 @@ module Observations
       validated_params = {
         has_field_slips: true,
         has_images: false
+      }
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: {
+                             q: { model: :Observation, **validated_params }
+                           })
+    end
+
+    def test_create_observations_search_with_has_collection_numbers
+      login
+      params = {
+        has_collection_numbers: true,
+        has_notes: false
+      }
+      post(:create, params: { query_observations: params })
+
+      validated_params = {
+        has_collection_numbers: true,
+        has_notes: false
       }
       assert_redirected_to(controller: "/observations", action: :index,
                            params: {

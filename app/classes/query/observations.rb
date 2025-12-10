@@ -41,6 +41,7 @@ class Query::Observations < Query
   query_attr(:comments_has, :string)
   query_attr(:has_sequences, :boolean)
   query_attr(:has_field_slips, :boolean)
+  query_attr(:has_collection_numbers, :boolean)
   # query_attr(:has_specimen, :boolean) # content filter
   # query_attr(:has_images, :boolean) # content filter
 
