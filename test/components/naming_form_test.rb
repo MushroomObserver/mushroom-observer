@@ -102,6 +102,23 @@ class NamingFormTest < UnitTestCase
     assert_html(html, "option[selected][value='#{@vote.value}']")
   end
 
+  # Test for bug: edit naming form missing vote/confidence and reasons fields
+  def test_renders_vote_field_for_existing_naming_in_modal
+    @naming = namings(:coprinus_comatus_naming)
+    @vote = votes(:coprinus_comatus_owner_vote)
+    html = render_edit_form
+
+    assert_html(html, "select[name='naming[vote][value]']")
+  end
+
+  def test_renders_reasons_fields_for_existing_naming
+    @naming = namings(:coprinus_comatus_naming)
+    @vote = votes(:coprinus_comatus_owner_vote)
+    html = render_edit_form
+
+    assert_html(html, "input[name='naming[reasons][1][check]']")
+  end
+
   def test_enables_turbo_when_local_false
     html = render_form_with_local(false)
     assert_html(html, "form[data-turbo='true']")
