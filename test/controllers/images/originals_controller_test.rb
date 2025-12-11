@@ -34,15 +34,34 @@ end
 # tests of Images controller
 module Images
   class OriginalsControllerTest < FunctionalTestCase
-    DIR = Rails.root.join("tmp/downloads")
-
     def setup
       super
       @mock_storage = MockStorage.new
       @test_image = Image.reorder(created_at: :asc).first
-      @test_file = "#{DIR}/#{@test_image.id}.jpg"
+      @test_file = "#{download_dir}/#{@test_image.id}.jpg"
       @id_cutoff = @test_image.id + 1
-      FileUtils.rm_rf(DIR)
+      FileUtils.rm_rf(download_dir)
+    end
+
+    # Worker-specific download directory for parallel testing
+    def download_dir
+      @download_dir ||= begin
+        if (worker_num = database_worker_number)
+          Rails.root.join("tmp/downloads-#{worker_num}")
+        else
+          Rails.root.join("tmp/downloads")
+        end
+      end
+    end
+
+    def database_worker_number
+      return nil unless ActiveRecord::Base.connected?
+
+      db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
+      match = db_name.to_s.match(/-(\d+)$/)
+      match ? match[1] : nil
+    rescue
+      nil
     end
 
     def with_stubs(&block)
@@ -50,14 +69,14 @@ module Images
         to_return(status: 200, body: "", headers: {})
 
       Google::Cloud::Storage.stub(:new, @mock_storage) do
-        MO.stub(:local_original_image_cache_path, DIR) do
+        MO.stub(:local_original_image_cache_path, download_dir) do
           MO.stub(:next_image_id_to_go_to_cloud, @id_cutoff, &block)
         end
       end
     end
 
     def teardown
-      FileUtils.rm_rf(DIR)
+      FileUtils.rm_rf(download_dir)
     end
 
     def test_normal_html_request
