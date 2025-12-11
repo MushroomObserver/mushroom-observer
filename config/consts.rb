@@ -12,11 +12,11 @@ class ImageConfigData
 
   # Return config with worker-specific paths applied lazily
   def config
-    # Check TEST_ENV_NUMBER each time to support parallel testing
-    # (it's set after Rails loads but before tests run)
+    # Check database worker number each time to support parallel testing
+    # (Rails appends -N to database names for parallel workers)
     if parallel_test_mode?
       # Cache the worker-specific config to avoid repeated deep copies
-      worker_id = ENV["TEST_ENV_NUMBER"]
+      worker_id = database_worker_number
       @worker_config_cache[worker_id] ||= apply_worker_specific_paths(@base_config)
     else
       @base_config
@@ -26,15 +26,30 @@ class ImageConfigData
   private
 
   def parallel_test_mode?
-    # Rails sets TEST_ENV_NUMBER for parallel test workers
-    # It's "" for worker 0, "2" for worker 1, "3" for worker 2, etc.
-    @env == "test" && ENV.key?("TEST_ENV_NUMBER")
+    # Rails 7 parallel testing appends worker numbers to database names
+    # (e.g., mo_test-0, mo_test-1, etc.) but doesn't set TEST_ENV_NUMBER
+    @env == "test" && database_worker_number.present?
   end
 
   def worker_suffix
-    # TEST_ENV_NUMBER is "" for worker 0, "2" for worker 1, "3" for worker 2, etc.
-    worker_id = ENV["TEST_ENV_NUMBER"]
-    worker_id.empty? ? "0" : worker_id
+    database_worker_number || "0"
+  end
+
+  def database_worker_number
+    return @database_worker_number if defined?(@database_worker_number)
+
+    @database_worker_number = begin
+      # Extract worker number from database name (e.g., "mo_test-8" -> "8")
+      # This works in both Rails 7 parallelization and parallel_tests gem
+      require "active_record" unless defined?(ActiveRecord)
+      return nil unless ActiveRecord::Base.connected?
+
+      db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
+      match = db_name.to_s.match(/-(\d+)$/)
+      match ? match[1] : nil
+    rescue
+      nil
+    end
   end
 
   def apply_worker_specific_paths(base_config)

@@ -110,12 +110,22 @@ module GeneralExtensions
 
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
-    return if FileTest.exist?(MO.local_image_files)
+    image_dir = MO.local_image_files
+
+    # Check if directory exists AND has required subdirectories
+    required_subdirs = %w[orig thumb 640]
+    all_exist = FileTest.exist?(image_dir) &&
+                required_subdirs.all? { |subdir| FileTest.exist?(File.join(image_dir, subdir)) }
+
+    return if all_exist
+
+    # Remove incomplete directory if it exists
+    FileUtils.rm_rf(image_dir) if FileTest.exist?(image_dir)
 
     # For parallel workers, the path might be test_images-0, test_images-2, etc.
     # We always copy from setup_images
-    setup_images = MO.local_image_files.gsub(/test_images(-\d+)?$/, "setup_images")
-    FileUtils.cp_r(setup_images, MO.local_image_files)
+    setup_images = image_dir.gsub(/test_images(-\d+)?$/, "setup_images")
+    FileUtils.cp_r(setup_images, image_dir)
   end
 
   # This seems to have disappeared from rails.
