@@ -117,6 +117,8 @@ module Searchable
     def split_names_lookup_strings
       # Nested blank values will make for null query results,
       # so eliminate the whole :names param if it doesn't have a lookup.
+      # Note: The form component (names_lookup_field_group.rb) handles
+      # preserving nested values like include_subtaxa for display.
       if (vals = @query_params.dig(:names, :lookup)).blank?
         @query_params[:names] = nil
         return

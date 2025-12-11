@@ -125,6 +125,22 @@ module Observations
                     selected: "no")
     end
 
+    def test_new_observations_search_form_retains_include_subtaxa_false
+      login
+      # Create a query with a name lookup and include_subtaxa explicitly false
+      query = @controller.find_or_create_query(
+        :Observation,
+        names: { lookup: "Agaricus", include_subtaxa: false }
+      )
+      assert(query.id)
+      get(:new)
+      # Verify that both the lookup and include_subtaxa are retained
+      assert_select("textarea#query_observations_names_lookup",
+                    text: "Agaricus")
+      assert_select("select#query_observations_names_include_subtaxa",
+                    selected: "no")
+    end
+
     # query_observations is the form object.
     def test_create_observations_search
       login
@@ -145,6 +161,21 @@ module Observations
                            params: {
                              q: { model: :Observation, **validated_params }
                            })
+    end
+
+    def test_create_observations_search_with_blank_name_and_include_subtaxa
+      login
+      # Simulate form submission with no name but include_subtaxa defaulted to true
+      params = {
+        names: {
+          lookup: "",
+          include_subtaxa: "true"
+        }
+      }
+      post(:create, params: { query_observations: params })
+      # Should redirect to observations index with no names param
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: { q: { model: :Observation } })
     end
 
     def test_create_observations_search_with_has_field_slips
