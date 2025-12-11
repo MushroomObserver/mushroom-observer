@@ -3,13 +3,24 @@
 require("yaml")
 
 class ImageConfigData
-  attr_reader :config
-
   def initialize
     root = File.expand_path("..", __dir__)
     @env = ENV.fetch("RAILS_ENV", "development")
-    @config = YAML.load_file("#{root}/config/image_config.yml")[@env]
-    make_paths_worker_specific! if parallel_test_mode?
+    @base_config = YAML.load_file("#{root}/config/image_config.yml")[@env]
+    @worker_config_cache = {}
+  end
+
+  # Return config with worker-specific paths applied lazily
+  def config
+    # Check TEST_ENV_NUMBER each time to support parallel testing
+    # (it's set after Rails loads but before tests run)
+    if parallel_test_mode?
+      # Cache the worker-specific config to avoid repeated deep copies
+      worker_id = ENV["TEST_ENV_NUMBER"]
+      @worker_config_cache[worker_id] ||= apply_worker_specific_paths(@base_config)
+    else
+      @base_config
+    end
   end
 
   private
@@ -26,12 +37,15 @@ class ImageConfigData
     worker_id.empty? ? "0" : worker_id
   end
 
-  def make_paths_worker_specific!
+  def apply_worker_specific_paths(base_config)
+    # Deep copy to avoid modifying the base config
+    config = Marshal.load(Marshal.dump(base_config))
+
     # Update local_image_files path
-    @config["local_image_files"] = append_worker_suffix(@config["local_image_files"])
+    config["local_image_files"] = append_worker_suffix(config["local_image_files"])
 
     # Update image_sources paths
-    @config["image_sources"]&.each do |_source_name, source_config|
+    config["image_sources"]&.each do |_source_name, source_config|
       %i[test read write].each do |key|
         next unless source_config[key].is_a?(String)
         next if source_config[key] == ":transferred_flag"
@@ -39,6 +53,8 @@ class ImageConfigData
         source_config[key] = append_worker_suffix(source_config[key])
       end
     end
+
+    config
   end
 
   def append_worker_suffix(path)
@@ -56,7 +72,7 @@ class ImageConfigData
 
     # Append worker suffix to test_images, test_server paths
     modified_path = actual_path.gsub(
-      /(test_images|test_server\d+)(?=\/|$)/,
+      /(test_images|test_server\d+|test_locales)(?=\/|$)/,
       "\\1-#{worker_suffix}"
     )
 
@@ -163,14 +179,18 @@ MushroomObserver::Application.configure do
 
   # Where images are kept locally until they are transferred.
   # In test environment with parallel workers, paths include worker ID to avoid conflicts
-  config.local_image_files = format(
-    IMAGE_CONFIG_DATA.config["local_image_files"], root: MO.root
-  )
+  # Define as a method to ensure lazy evaluation for parallel testing
+  def config.local_image_files
+    format(IMAGE_CONFIG_DATA.config["local_image_files"], root: MO.root)
+  end
 
   # Definition of image sources.  Keys are :test, :read and :write.  Values are
   # URLs.  Leave :write blank for read-only sources.  :transferred_flag tells MO
   # to test for existence of file by using image#transferred flag.
-  config.image_sources = IMAGE_CONFIG_DATA.config["image_sources"]
+  # Define as a method to ensure lazy evaluation for parallel testing
+  def config.image_sources
+    IMAGE_CONFIG_DATA.config["image_sources"]
+  end
 
   # Search order when serving images.
   # Key is size, e.g., :thumbnail, :small, etc.
@@ -180,8 +200,10 @@ MushroomObserver::Application.configure do
   # config.image_fallback_source = :mycolab
 
   # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
-  config.keep_these_image_sizes_local =
+  # Define as a method to ensure lazy evaluation for parallel testing
+  def config.keep_these_image_sizes_local
     IMAGE_CONFIG_DATA.config["keep_these_image_sizes_local"]
+  end
 
   # We transfer originals to cloud archive storage right away, but we keep
   # them on the image server for as long as we can, deleting them in batches.
