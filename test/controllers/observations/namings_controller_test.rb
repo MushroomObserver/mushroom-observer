@@ -33,7 +33,6 @@ module Observations
       login
       get(:new, params:, format: :turbo_stream)
       assert_template("shared/_modal_form")
-      assert_template("observations/namings/_form")
       assert_form_action(action: "create", approved_name: "",
                          observation_id: obs.id.to_s)
     end
@@ -394,7 +393,6 @@ module Observations
       params = edit_form_test_setup
       get(:edit, params:, format: :turbo_stream)
       assert_template("shared/_modal_form")
-      assert_template("observations/namings/_form")
       assert_no_flash(
         "User should be able to edit his own Naming without warning or error"
       )
@@ -733,9 +731,6 @@ module Observations
     def assert_edit
       assert_template("observations/namings/edit")
       assert_template("observations/show/_observation_details")
-      assert_template("shared/_form_name_feedback")
-      assert_template("observations/namings/_form")
-      assert_template("observations/namings/_fields")
       assert_template("observations/show/_images")
     end
 

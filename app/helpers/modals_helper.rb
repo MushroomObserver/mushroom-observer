@@ -2,6 +2,7 @@
 
 # Helper methods for modal dialogs and forms
 module ModalsHelper
+  NAMING_FORM_KEYS = [:context, :vote, :given_name, :reasons, :feedback].freeze
   # Renders either a Superform component or a legacy ERB partial for modal
   # forms. This allows gradual migration from ERB partials to Superform.
   #
@@ -20,6 +21,7 @@ module ModalsHelper
       HerbariumRecord: Components::HerbariumRecordForm,
       CollectionNumber: Components::CollectionNumberForm,
       Sequence: Components::SequenceForm,
+      Naming: Components::NamingForm,
       WebmasterQuestion: Components::WebmasterQuestionForm,
       ObserverQuestion: Components::ObserverQuestionForm,
       CommercialInquiry: Components::CommercialInquiryForm,
@@ -66,7 +68,7 @@ module ModalsHelper
 
   def add_observation_param(params, model, observation, _component_class)
     case model.class.name.to_sym
-    when :CollectionNumber, :HerbariumRecord, :ExternalLink
+    when :CollectionNumber, :HerbariumRecord, :ExternalLink, :Naming
       params[:observation] = observation
     when :Sequence
       params[:observation] = observation || model&.observation
@@ -77,6 +79,8 @@ module ModalsHelper
     case component_class.name
     when "Components::ExternalLinkForm"
       add_external_link_params(params, locals)
+    when "Components::NamingForm"
+      add_naming_form_params(params, locals)
     when "Components::WebmasterQuestionForm"
       add_webmaster_question_params(params, locals)
     when "Components::ObserverQuestionForm"
@@ -92,6 +96,15 @@ module ModalsHelper
     params[:user] = locals[:user] if locals[:user]
     params[:sites] = locals[:sites] if locals[:sites]
     params[:site] = locals[:site] if locals[:site]
+  end
+
+  def add_naming_form_params(params, locals)
+    params[:show_reasons] = locals[:show_reasons] if locals.key?(:show_reasons)
+    copy_present_keys(params, locals, NAMING_FORM_KEYS)
+  end
+
+  def copy_present_keys(params, locals, keys)
+    keys.each { |key| params[key] = locals[key] if locals[key] }
   end
 
   def add_webmaster_question_params(params, locals)
