@@ -62,7 +62,7 @@ class Components::NamingForm < Components::ApplicationForm
   def extract_display_options(naming, kwargs)
     @reasons = kwargs.delete(:reasons) || naming.init_reasons
     @show_reasons = kwargs.delete(:show_reasons) != false
-    @context = kwargs.delete(:context) || "blank"
+    @context = kwargs.delete(:context)
     @local = kwargs.delete(:local) != false
     @create = naming.new_record?
     @naming_id = naming.id
