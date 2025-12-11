@@ -5,14 +5,6 @@
 focus_on_name = !unfocused && (!create || @given_name.empty?)
 focus_on_vote = !unfocused && (create && @given_name.present?)
 
-feedback_locals = {
-  button_name: button_name,
-  given_name: @given_name,
-  names: @names,
-  valid_names: @valid_names,
-  suggest_corrections: @suggest_corrections,
-  parent_deprecated: @parent_deprecated
-}
 menu = unless @vote&.value&.nonzero?
          Vote.opinion_menu
        else
@@ -22,9 +14,14 @@ confidences = options_for_select(menu, @vote&.value)
 %>
 
 <% if @given_name.present? %>
-  <%= tag.div do
-        render(partial: "shared/form_name_feedback", locals: feedback_locals)
-      end %>
+  <%= render(Components::FormNameFeedback.new(
+        given_name: @given_name,
+        button_name: button_name,
+        names: @names,
+        valid_names: @valid_names,
+        suggest_corrections: @suggest_corrections || false,
+        parent_deprecated: @parent_deprecated
+      )) %>
 <% end %>
 
 <%= fields_for(:naming) do |f_n| %>
