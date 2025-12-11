@@ -171,8 +171,10 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_has_comments
     assert_query(Observation.has_comments(true).order_by_default,
                  :Observation, has_comments: true)
-    assert_query(Observation.order_by_default,
+    assert_query(Observation.has_comments(false).order_by_default,
                  :Observation, has_comments: false)
+    assert_query(Observation.order_by_default,
+                 :Observation, has_comments: nil)
   end
 
   def test_observation_comments_has
