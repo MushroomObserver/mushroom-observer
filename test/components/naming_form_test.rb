@@ -67,8 +67,10 @@ class NamingFormTest < UnitTestCase
   end
 
   def test_collapse_class_for_blank_context
-    assert_html(@html,
-                "div.collapse[data-autocompleter--name-target='collapseFields']")
+    assert_html(
+      @html,
+      "div.collapse[data-autocompleter--name-target='collapseFields']"
+    )
   end
 
   def test_no_collapse_class_for_lightbox_context
