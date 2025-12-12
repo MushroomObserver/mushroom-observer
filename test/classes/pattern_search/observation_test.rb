@@ -187,14 +187,6 @@ class PatternSearch::ObservationTest < UnitTestCase
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_field_slip
-    code_val = field_slips(:field_slip_one).code
-    expect = Observation.field_slips(code_val)
-    assert(expect.any?)
-    x = PatternSearch::Observation.new("field_slip:#{code_val}")
-    assert_obj_arrays_equal(expect, x.query.results, :sort)
-  end
-
   def test_observation_search_confidence
     expect = Observation.confidence(3)
     assert(expect.any?)

@@ -187,11 +187,14 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_getting_observations_has_comments
-    obses = Comment.where(target_type: "Observation").
-            map(&:target).uniq.sort_by(&:id)
-    assert(obses.length > 1)
+    with = Observation.has_comments
+    without = Observation.has_comments(false)
+    assert(with.length > 1)
+    assert(without.length > 1)
     assert_api_pass(params_get(has_comments: "yes"))
-    assert_api_results(obses)
+    assert_api_results(with)
+    assert_api_pass(params_get(has_comments: "no"))
+    assert_api_results(without)
   end
 
   def test_getting_observations_has_specimen

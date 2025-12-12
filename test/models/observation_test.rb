@@ -1582,13 +1582,57 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
-  # Currently Query ignores false, so scope does too.
-  # def test_scope_has_sequences_false
-  #   assert_includes(Observation.has_sequences(false),
-  #                   observations(:minimal_unknown_obs))
-  #   assert_not_includes(Observation.has_sequences(false),
-  #                       observations(:genbanked_obs))
-  # end
+  def test_scope_has_field_slips
+    # minimal_unknown_obs has field_slip_one in fixtures
+    assert_includes(Observation.has_field_slips(true),
+                    observations(:minimal_unknown_obs))
+    # coprinus_comatus_obs has no field slips
+    assert_not_includes(Observation.has_field_slips(true),
+                        observations(:coprinus_comatus_obs))
+
+    # Test false - should return observations WITHOUT field slips
+    assert_includes(Observation.has_field_slips(false),
+                    observations(:coprinus_comatus_obs))
+    assert_not_includes(Observation.has_field_slips(false),
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_has_collection_numbers
+    # minimal_unknown_obs has minimal_unknown_coll_num in fixtures
+    assert_includes(Observation.has_collection_numbers(true),
+                    observations(:minimal_unknown_obs))
+    # peltigera_obs has no collection numbers
+    assert_not_includes(Observation.has_collection_numbers(true),
+                        observations(:peltigera_obs))
+
+    # Test false - should return observations WITHOUT collection numbers
+    assert_includes(Observation.has_collection_numbers(false),
+                    observations(:peltigera_obs))
+    assert_not_includes(Observation.has_collection_numbers(false),
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_has_comments
+    # minimal_unknown_obs has comments in fixtures
+    assert_includes(Observation.has_comments,
+                    observations(:minimal_unknown_obs))
+    # unlisted_rolf_obs has no comments
+    assert_not_includes(Observation.has_comments,
+                        observations(:unlisted_rolf_obs))
+
+    # Test false - should return observations WITHOUT comments
+    assert_includes(Observation.has_comments(false),
+                    observations(:unlisted_rolf_obs))
+    assert_not_includes(Observation.has_comments(false),
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_has_sequences_false
+    assert_includes(Observation.has_sequences(false),
+                    observations(:minimal_unknown_obs))
+    assert_not_includes(Observation.has_sequences(false),
+                        observations(:genbanked_obs))
+  end
 
   def test_scope_confidence
     assert_includes(Observation.confidence(0, 0),
@@ -1695,14 +1739,6 @@ class ObservationTest < UnitTestCase
              "vote_cache should be < 0.0, got #{obs.vote_cache}")
     end
   end
-
-  # Currently Query ignores false, so scope does too.
-  # def test_scope_has_comments_false
-  #   assert_includes(Observation.has_comments(false),
-  #                   observations(:unlisted_rolf_obs))
-  #   assert_not_includes(Observation.has_comments(false),
-  #                       observations(:minimal_unknown_obs))
-  # end
 
   def test_source_credit
     obs = observations(:coprinus_comatus_obs)

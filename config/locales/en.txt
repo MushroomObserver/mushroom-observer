@@ -3793,6 +3793,8 @@
   query_term_projects: "[type] belongs to one of these [:projects]."
   query_term_has_observations: "Has [:observations]?"
   query_term_has_images: "Has [:images]?"
+  query_term_has_field_slips: "Has [:field_slips]?"
+  query_term_has_collection_numbers: "Has [:collection_numbers]?"
 
   # We're borrowing these for the help popups on the search forms, thus the
   # similar entries. In the case of apparent duplicates, one will be the
@@ -3837,6 +3839,8 @@
   observation_term_has_images: Has images? ("yes" or "no")
   observation_term_has_sequence: Has a sequence?
   observation_term_has_sequences: "[:observation_term_has_sequence]"
+  observation_term_has_field_slips: "[:query_term_has_field_slips]"
+  observation_term_has_collection_numbers: "[:query_term_has_collection_numbers]"
   observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
@@ -4611,9 +4615,11 @@
   query_has_author: has author
   query_has_citation: has citation
   query_has_classification: has classification
+  query_has_collection_numbers: has collection numbers
   query_has_comments: has comments
   query_has_default_description: has default description
   query_has_descriptions: has descriptions
+  query_has_field_slips: has field slips
   query_has_images: has images
   query_has_name: has name
   query_has_notes: has notes

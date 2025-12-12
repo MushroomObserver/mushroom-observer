@@ -392,6 +392,60 @@ class NamesLookupFieldGroupTest < UnitTestCase
     assert_equal("true", selected_seen)
   end
 
+  def test_include_subtaxa_defaults_to_true_when_nil
+    @query.names = {}
+    selected_seen = nil
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **kwargs|
+      selected_seen = kwargs[:selected]
+      true
+    end
+
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_subtaxa])
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [:include_subtaxa]
+    )
+
+    component.stub(:render, nil) { render_component(component) }
+
+    assert_equal("true", selected_seen,
+                 "include_subtaxa should default to 'true' when nil")
+  end
+
+  def test_include_subtaxa_respects_explicit_false
+    @query.names = { include_subtaxa: false }
+    selected_seen = nil
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **kwargs|
+      selected_seen = kwargs[:selected]
+      true
+    end
+
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_subtaxa])
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [:include_subtaxa]
+    )
+
+    component.stub(:render, nil) { render_component(component) }
+
+    assert_equal("false", selected_seen,
+                 "include_subtaxa should respect explicit false value")
+  end
+
   private
 
   def create_component(modifier_fields: [])

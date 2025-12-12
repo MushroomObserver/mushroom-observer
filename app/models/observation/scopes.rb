@@ -446,17 +446,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           ->(bool = true) { where(specimen: bool) }
 
     scope :has_sequences, lambda { |bool = true|
-      return all unless bool
-
       joined_relation_condition(:sequences, bool:)
+    }
+
+    scope :has_field_slips, lambda { |bool = true|
+      joined_relation_condition(:field_slips, bool:)
+    }
+
+    scope :has_collection_numbers, lambda { |bool = true|
+      joined_relation_condition(:collection_numbers, bool:)
     }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
-    scope :field_slips, lambda { |codes|
-      fs_ids = Lookup::FieldSlips.new(codes).ids
-      joins(:field_slips).where(field_slips: { id: fs_ids }).distinct
-    }
     scope :herbaria, lambda { |herbaria|
       h_ids = Lookup::Herbaria.new(herbaria).ids
       joins(observation_herbarium_records: :herbarium_record).
