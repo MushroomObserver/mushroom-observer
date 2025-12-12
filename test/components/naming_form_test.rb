@@ -68,14 +68,16 @@ class NamingFormTest < UnitTestCase
 
   def test_collapse_class_for_blank_context
     assert_html(@html,
-                "div.collapse[data-autocompleter-target='collapseFields']")
+                "div.collapse[data-autocompleter--name-target='collapseFields']")
   end
 
   def test_no_collapse_class_for_lightbox_context
     html = render_form_with_context("lightbox")
 
     doc = Nokogiri::HTML(html)
-    collapse_div = doc.at_css("div[data-autocompleter-target='collapseFields']")
+    collapse_div = doc.at_css(
+      "div[data-autocompleter--name-target='collapseFields']"
+    )
     assert_not_includes(collapse_div["class"].to_s, "collapse")
   end
 
