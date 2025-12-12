@@ -29,8 +29,6 @@ module Searchable
     def new
       set_up_form_field_groupings
       @search = build_search_query
-      restore_names_preferences_to_query
-
       respond_to do |format|
         format.turbo_stream { render(turbo_stream: turbo_stream_update) }
         format.html
@@ -128,50 +126,13 @@ module Searchable
     def nested_in_box_params = [:north, :south, :east, :west].freeze
 
     def split_names_lookup_strings
-      # If lookup is blank, remove the :names param for the query, but first
-      # preserve any user preferences (like include_subtaxa) in the session
-      # so they can be restored when the form is displayed again.
+      # If lookup is blank, remove the :names param for the query
       if (vals = @query_params.dig(:names, :lookup)).blank?
-        preserve_names_preferences_in_session
         @query_params[:names] = nil
         return
       end
 
       @query_params[:names][:lookup] = vals.split("\n").map(&:strip)
-    end
-
-    # Preserve names preferences (like include_subtaxa) in session
-    # when submitting a search without a name lookup, so they persist
-    # across searches.
-    def preserve_names_preferences_in_session
-      return unless @query_params[:names].is_a?(Hash)
-
-      # Only preserve boolean preferences, not lookup values
-      preferences = @query_params[:names].slice(
-        :include_subtaxa,
-        :include_synonyms,
-        :include_immediate_subtaxa,
-        :exclude_original_names,
-        :include_all_name_proposals,
-        :exclude_consensus
-      ).compact # Use compact, not compact_blank, to preserve false values
-
-      session[:names_preferences] = preferences if preferences.present?
-    end
-
-    # Restore saved names preferences from session to the query if it has no
-    # names param, so user preferences persist across searches.
-    def restore_names_preferences_to_query
-      return unless @search
-      return unless @search.respond_to?(:names) # Only for queries with names
-      return if @search.names.present? # Don't override existing names params
-
-      preferences = session[:names_preferences]
-      return if preferences.blank?
-
-      # Temporarily add preferences to the query for display purposes only
-      # This doesn't save the query, just makes the values available to the form
-      @search.names = preferences.symbolize_keys
     end
 
     # Nested blank values will make for null query results,

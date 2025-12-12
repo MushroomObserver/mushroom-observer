@@ -179,34 +179,69 @@ module Observations
                            params: { q: { model: :Observation } })
     end
 
-    def test_subtaxa_value_persists_after_blank_name_submission
+    # Test reset_search_query creates a new blank query
+    def test_reset_search_query_creates_blank_query
       login
-      # First search: submit with name and subtaxa=false
-      params = {
-        names: {
-          lookup: "Agaricus",
-          include_subtaxa: "false"
-        }
-      }
-      post(:create, params: { query_observations: params })
-      assert_response(:redirect)
 
-      # Second search: clear the name but subtaxa is still false
-      # This should preserve the subtaxa preference in the session
-      params = {
-        names: {
-          lookup: "",
-          include_subtaxa: "false"
-        },
-        has_specimen: "true"
-      }
-      post(:create, params: { query_observations: params })
-      assert_response(:redirect)
+      # First, create a query with parameters
+      query = @controller.find_or_create_query(
+        :Observation,
+        names: { lookup: "Agaricus" },
+        has_specimen: true
+      )
+      original_query_id = query.id
+      assert(query.params.present?, "Original query should have params")
 
-      # Return to search form - subtaxa should STILL be "no" from session prefs
+      # Now load the form with clear=1, which triggers reset_search_query
+      get(:new, params: { clear: "1" })
+
+      # Verify a NEW query was created (different ID)
+      new_query = @controller.instance_variable_get(:@search)
+      assert_not_equal(original_query_id, new_query.id,
+                       "reset_search_query should create a NEW query")
+
+      # Verify the new query is blank (no params)
+      assert(new_query.params.blank? || new_query.params == {},
+             "reset_search_query should create a BLANK query with no params")
+
+      # Verify session[:names_preferences] was deleted
+      assert_nil(session[:names_preferences],
+                 "reset_search_query should delete names_preferences")
+    end
+
+    # Test clear_form? when commit button is "Clear"
+    def test_clear_form_with_clear_button
+      login
+
+      # First, create a query with parameters
+      query = @controller.find_or_create_query(
+        :Observation,
+        names: { lookup: "Coprinus comatus" },
+        has_specimen: true
+      )
+      query.id
+      assert(query.params.present?, "Original query should have params")
+
+      # Post to create with commit="Clear" (the localized CLEAR button value)
+      # This triggers clear_form? which calls clear_relevant_query and redirects
+      post(:create, params: {
+             query_observations: {
+               names: { lookup: "Agaricus" }
+             },
+             commit: :CLEAR.l # This is "Clear" in English
+           })
+
+      # Verify it redirected to :new (not to index with search results)
+      # This proves clear_form? returned true and the early return was triggered
+      assert_redirected_to(action: :new)
+
+      # Now load the form to verify the query was cleared
       get(:new)
-      assert_select("select#query_observations_names_include_subtaxa",
-                    selected: "no")
+      cleared_query = @controller.instance_variable_get(:@search)
+
+      # The query should have blank params after being cleared
+      assert(cleared_query.params.blank? || cleared_query.params == {},
+             "clear_form? should result in a blank query")
     end
 
     def test_create_observations_search_with_has_field_slips
