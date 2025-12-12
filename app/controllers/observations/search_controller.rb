@@ -39,8 +39,7 @@ module Observations
         :projects,
         :herbaria,
         :species_lists,
-        :project_lists,
-        :field_slips
+        :project_lists
       ].freeze
     end
 
@@ -102,7 +101,7 @@ module Observations
         },
         connected: {
           shown: [:by_users, :projects],
-          collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
+          collapsed: [:herbaria, :species_lists, :project_lists]
         }
       }
     ].freeze

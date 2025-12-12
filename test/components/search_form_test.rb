@@ -351,11 +351,10 @@ class SearchFormTest < UnitTestCase
     include_synonyms = doc.at_css("#query_observations_names_include_synonyms")
     assert(include_synonyms, "Should have include_synonyms select")
     selected_option = include_synonyms.at_css("option[selected]")
-    # When false, the "no" option (value="") should NOT be selected,
-    # but we need to verify false is handled
-    assert_nil(selected_option,
-               "include_synonyms=false should not select any option " \
-               "(no option has value='false')")
+    # When false, the "no" option (value="false") should be selected
+    assert(selected_option, "include_synonyms=false should select 'no' option")
+    assert_equal("false", selected_option["value"])
+    assert_equal("no", selected_option.text)
   end
 
   # Cover NamesLookupFieldGroup prefill_via_id rescue branch (line 80)
