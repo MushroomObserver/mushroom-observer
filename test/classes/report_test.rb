@@ -131,8 +131,8 @@ class ReportTest < UnitTestCase
       "2006",
       "2006-05-11",
       "https://mushroomobserver.org/obs/#{obs.id}",
-      "file://#{Rails.root.join("public/test_server1/orig/#{img1.id}.jpg ")}" \
-        "file://#{Rails.root.join("public/test_server1/orig/#{img2.id}.jpg")}",
+      "file://#{test_server_path("test_server1/orig/#{img1.id}.jpg ")}" \
+        "file://#{test_server_path("test_server1/orig/#{img2.id}.jpg")}",
       "FunDiS",
       "",
       "",
@@ -986,5 +986,19 @@ class ReportTest < UnitTestCase
     assert_equal(expect[:variety_author].to_s, row.variety_author.to_s)
     assert_equal(expect[:form_author].to_s, row.form_author.to_s)
     assert_equal(expect[:cf].to_s, row.cf.to_s)
+  end
+
+  # Generate worker-specific test_server paths for parallel testing
+  def test_server_path(relative_path)
+    if (worker_num = database_worker_number)
+      # Transform test_server1 -> test_server1-12, etc.
+      modified_path = relative_path.gsub(
+        %r{(test_server\d+)(?=/|$)},
+        "\\1-#{worker_num}"
+      )
+      Rails.root.join("public/#{modified_path}")
+    else
+      Rails.root.join("public/#{relative_path}")
+    end
   end
 end
