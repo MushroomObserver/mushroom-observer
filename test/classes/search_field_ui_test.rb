@@ -20,7 +20,6 @@ class SearchFieldUITest < UnitTestCase
         :in_box,
         :has_comments,
         :include_synonyms,
-        :field_slips,
         :undefined_field
       ]
     end
@@ -111,12 +110,6 @@ class SearchFieldUITest < UnitTestCase
   #   ui = SearchFieldUI.new(controller: @obs_controller, field: :in_box)
   #   assert_equal(:in_box_fields, ui.ui_type)
   # end
-
-  # Test special case: field_slips
-  def test_field_slips
-    ui = SearchFieldUI.new(controller: @obs_controller, field: :field_slips)
-    assert_equal(:text_field_with_label, ui.ui_type)
-  end
 
   # Test custom select UI: include_synonyms
   def test_include_synonyms

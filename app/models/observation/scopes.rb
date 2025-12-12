@@ -459,10 +459,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
-    scope :field_slips, lambda { |codes|
-      fs_ids = Lookup::FieldSlips.new(codes).ids
-      joins(:field_slips).where(field_slips: { id: fs_ids }).distinct
-    }
     scope :herbaria, lambda { |herbaria|
       h_ids = Lookup::Herbaria.new(herbaria).ids
       joins(observation_herbarium_records: :herbarium_record).

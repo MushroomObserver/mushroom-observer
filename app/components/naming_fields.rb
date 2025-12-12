@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 # Renders naming fields (name autocompleter, vote, reasons) for embedding
-# in forms. Can be used standalone or within a larger form like observation.
+# in Superform-based forms. For ERB forms, use the _fields.erb partial.
 #
-# Two usage modes:
-# 1. Superform mode: pass form_namespace (a Superform namespace)
-# 2. Rails mode: pass no form_namespace, uses fields_for(:naming) internally
-#
-# @param form_namespace [Superform::Namespace, nil] the parent form namespace
+# @param form_namespace [Superform::Namespace] the parent form namespace
 # @param vote [Vote] the vote object
 # @param given_name [String] the name typed by user
 # @param reasons [Hash] the naming reasons from Naming#init_reasons
@@ -17,13 +13,7 @@
 # @param name_help [String] help text for the name field
 # @param unfocused [Boolean] if true, don't autofocus any field
 class Components::NamingFields < Components::Base
-  include Phlex::Rails::Helpers::FieldsFor
-
-  register_output_helper :autocompleter_field
-  register_output_helper :select_with_label
-  register_output_helper :naming_form_reasons_fields
-
-  prop :form_namespace, _Nilable(_Any), default: nil
+  prop :form_namespace, _Any
   prop :vote, _Nilable(Vote), default: -> { Vote.new }
   prop :given_name, String, default: ""
   prop :reasons, _Nilable(Hash), default: nil
@@ -34,22 +24,12 @@ class Components::NamingFields < Components::Base
   prop :unfocused, _Boolean, default: false
 
   def view_template
-    if @form_namespace
-      render_superform_fields
-    else
-      render_rails_fields
-    end
+    render_name_autocompleter
   end
 
   private
 
-  # ----- Superform mode -----
-
-  def render_superform_fields
-    render_name_autocompleter_superform
-  end
-
-  def render_name_autocompleter_superform
+  def render_name_autocompleter
     name_field = @form_namespace.field(:name).autocompleter(
       type: :name,
       wrapper_options: {
@@ -61,19 +41,19 @@ class Components::NamingFields < Components::Base
     )
 
     render(name_field) do
-      render_vote_reasons_collapse_superform
+      render_vote_reasons_collapse
     end
   end
 
-  def render_vote_reasons_collapse_superform
-    div(data: { autocompleter_target: "collapseFields" },
+  def render_vote_reasons_collapse
+    div(data: { autocompleter__name_target: "collapseFields" },
         class: collapse_class) do
-      render_vote_field_superform
-      render_reasons_field_superform if @show_reasons
+      render_vote_field
+      render_reasons_field if @show_reasons
     end
   end
 
-  def render_vote_field_superform
+  def render_vote_field
     @form_namespace.namespace(:vote) do |vote_ns|
       menu = @create ? [["", ""]] + confidence_menu : confidence_menu
       render(vote_ns.field(:value).select(
@@ -87,7 +67,7 @@ class Components::NamingFields < Components::Base
     end
   end
 
-  def render_reasons_field_superform
+  def render_reasons_field
     return unless @reasons
 
     render(Components::NamingReasonsFields.new(
@@ -95,53 +75,6 @@ class Components::NamingFields < Components::Base
              form_namespace: @form_namespace
            ))
   end
-
-  # ----- Rails mode (using fields_for) -----
-
-  def render_rails_fields
-    fields_for(:naming) do |f_n|
-      vote_reasons_html = capture_vote_reasons(f_n)
-      autocompleter_field(
-        form: f_n, field: :name, type: :name,
-        label: "#{:WHAT.t}:",
-        value: @given_name, autofocus: focus_on_name?, help: @name_help,
-        append: vote_reasons_html
-      )
-    end
-  end
-
-  def capture_vote_reasons(f_n)
-    view_context.tag.div(
-      data: { autocompleter_target: "collapseFields" },
-      class: collapse_class
-    ) do
-      parts = []
-      parts << render_vote_field_rails(f_n)
-      parts << render_reasons_field_rails(f_n) if @show_reasons && @reasons
-      view_context.safe_join(parts.compact)
-    end
-  end
-
-  def render_vote_field_rails(f_n)
-    f_n.fields_for(:vote) do |f_v|
-      select_with_label(
-        form: f_v, field: :value,
-        options: raw_menu,
-        selected: @vote&.value,
-        include_blank: @create,
-        label: "#{:form_naming_confidence.t}:",
-        autofocus: focus_on_vote?
-      )
-    end
-  end
-
-  def render_reasons_field_rails(f_n)
-    f_n.fields_for(:reasons) do |f_r|
-      naming_form_reasons_fields(f_r, @reasons)
-    end
-  end
-
-  # ----- Shared helpers -----
 
   def collapse_class
     @context == "blank" ? "collapse" : nil
