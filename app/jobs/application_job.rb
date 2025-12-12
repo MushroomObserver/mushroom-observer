@@ -19,21 +19,10 @@ class ApplicationJob < ActiveJob::Base
 
   def job_log_path
     # Use worker-specific log files in parallel testing to avoid conflicts
-    if Rails.env.test? && (worker_num = database_worker_number)
+    if Rails.env.test? && (worker_num = IMAGE_CONFIG_DATA.database_worker_number)
       "log/job-#{worker_num}.log"
     else
       "log/job.log"
     end
-  end
-
-  def database_worker_number
-    # Extract worker number from database name (e.g., "mo_test-8" -> "8")
-    return nil unless ActiveRecord::Base.connected?
-
-    db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
-    match = db_name.to_s.match(/-(\d+)$/)
-    match ? match[1] : nil
-  rescue
-    nil
   end
 end

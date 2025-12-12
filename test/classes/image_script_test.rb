@@ -29,17 +29,6 @@ class ImageScriptTest < UnitTestCase
     end
   end
 
-  def database_worker_number
-    # Extract worker number from database name (e.g., "mo_test-8" -> "8")
-    return nil unless ActiveRecord::Base.connected?
-
-    db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
-    match = db_name.to_s.match(/-(\d+)$/)
-    match ? match[1] : nil
-  rescue
-    nil
-  end
-
   # Environment variables to pass to bash scripts for worker-specific paths
   def script_env
     env = { "MO_IMAGE_ROOT" => local_root }

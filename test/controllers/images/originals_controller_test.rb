@@ -54,16 +54,6 @@ module Images
       end
     end
 
-    def database_worker_number
-      return nil unless ActiveRecord::Base.connected?
-
-      db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
-      match = db_name.to_s.match(/-(\d+)$/)
-      match ? match[1] : nil
-    rescue
-      nil
-    end
-
     def with_stubs(&block)
       stub_request(:post, "https://oauth2.googleapis.com/token").
         to_return(status: 200, body: "", headers: {})

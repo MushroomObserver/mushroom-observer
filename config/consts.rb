@@ -24,6 +24,15 @@ class ImageConfigData
     end
   end
 
+  # Extract worker number from database name for parallel testing
+  # Rails 7 parallel testing uses database names like mo_test-0, mo_test-1, etc.
+  # This is publicly accessible so both app and test code can use it
+  def database_worker_number
+    return @database_worker_number if defined?(@database_worker_number)
+
+    @database_worker_number = extract_database_worker_number
+  end
+
   private
 
   def parallel_test_mode?
@@ -34,12 +43,6 @@ class ImageConfigData
 
   def worker_suffix
     database_worker_number || "0"
-  end
-
-  def database_worker_number
-    return @database_worker_number if defined?(@database_worker_number)
-
-    @database_worker_number = extract_database_worker_number
   end
 
   def apply_worker_specific_paths(base_config)

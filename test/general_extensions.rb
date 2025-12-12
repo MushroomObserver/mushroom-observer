@@ -99,9 +99,15 @@ module GeneralExtensions
     @loaded_fixtures["users"].fixtures.key?(fixture_name.to_s)
   end
 
+  # Delegate to central implementation in ImageConfigData
+  def database_worker_number
+    IMAGE_CONFIG_DATA.database_worker_number
+  end
+
   def use_test_locales(&block)
     # Use worker-specific directory in parallel mode to avoid conflicts
-    worker_suffix = ENV.key?("TEST_ENV_NUMBER") ? "-#{ENV["TEST_ENV_NUMBER"].empty? ? "0" : ENV["TEST_ENV_NUMBER"]}" : ""
+    worker_num = database_worker_number
+    worker_suffix = worker_num ? "-#{worker_num}" : ""
     locales_dir = "config/test_locales#{worker_suffix}"
 
     Language.alt_locales_path(locales_dir, &block)
@@ -115,7 +121,9 @@ module GeneralExtensions
     # Check if directory exists AND has required subdirectories
     required_subdirs = %w[orig thumb 640]
     all_exist = FileTest.exist?(image_dir) &&
-                required_subdirs.all? { |subdir| FileTest.exist?(File.join(image_dir, subdir)) }
+                required_subdirs.all? do |subdir|
+                  FileTest.exist?(File.join(image_dir, subdir))
+                end
 
     return if all_exist
 

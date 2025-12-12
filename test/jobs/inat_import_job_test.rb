@@ -28,17 +28,6 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
-  def database_worker_number
-    # Extract worker number from database name (e.g., "mo_test-8" -> "8")
-    return nil unless ActiveRecord::Base.connected?
-
-    db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
-    match = db_name.to_s.match(/-(\d+)$/)
-    match ? match[1] : nil
-  rescue
-    nil
-  end
-
   # Had 1 identification, 0 photos, 0 observation_fields
   def test_import_job_basic_obs
     create_ivars_from_filename("calostoma_lutescens")
