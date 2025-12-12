@@ -129,8 +129,8 @@ class Components::NamesLookupFieldGroup < Components::Base
 
   def render_select_field(field_name)
     # Superform uses [value, label] order (opposite of Rails)
-    # Use string "true" instead of boolean true for proper HTML rendering
-    options = [["", "no"], ["true", "yes"]]
+    # Use string "false"/"true" instead of booleans for HTML rendering
+    options = [%w[false no], %w[true yes]]
     field_component = @names_namespace.field(field_name).select(
       options,
       wrapper_options: {

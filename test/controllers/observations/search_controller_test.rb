@@ -165,7 +165,8 @@ module Observations
 
     def test_create_observations_search_with_blank_name_and_include_subtaxa
       login
-      # Simulate form submission with no name but include_subtaxa defaulted to true
+      # Simulate form submission with no name but include_subtaxa
+      # defaulted to true
       params = {
         names: {
           lookup: "",
@@ -176,6 +177,36 @@ module Observations
       # Should redirect to observations index with no names param
       assert_redirected_to(controller: "/observations", action: :index,
                            params: { q: { model: :Observation } })
+    end
+
+    def test_subtaxa_value_persists_after_blank_name_submission
+      login
+      # First search: submit with name and subtaxa=false
+      params = {
+        names: {
+          lookup: "Agaricus",
+          include_subtaxa: "false"
+        }
+      }
+      post(:create, params: { query_observations: params })
+      assert_response(:redirect)
+
+      # Second search: clear the name but subtaxa is still false
+      # This should preserve the subtaxa preference in the session
+      params = {
+        names: {
+          lookup: "",
+          include_subtaxa: "false"
+        },
+        has_specimen: "true"
+      }
+      post(:create, params: { query_observations: params })
+      assert_response(:redirect)
+
+      # Return to search form - subtaxa should STILL be "no" from session prefs
+      get(:new)
+      assert_select("select#query_observations_names_include_subtaxa",
+                    selected: "no")
     end
 
     def test_create_observations_search_with_has_field_slips
