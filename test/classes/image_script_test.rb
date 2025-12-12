@@ -33,9 +33,7 @@ class ImageScriptTest < UnitTestCase
   def script_env
     env = { "MO_IMAGE_ROOT" => local_root }
     # Pass worker-specific mysql config file path
-    if (worker_num = database_worker_number)
-      env["MO_MYSQL_CONFIG"] = mysql_config_file.to_s
-    end
+    env["MO_MYSQL_CONFIG"] = mysql_config_file.to_s if database_worker_number
     env
   end
 
@@ -92,8 +90,8 @@ class ImageScriptTest < UnitTestCase
            WHERE id=#{in_situ_id}"
     system("mysql --defaults-extra-file=#{mysql_config_file} -e '#{cmd}'")
     FileUtils.rm_rf(local_root)
-    FileUtils.rm_rf("#{remote_server_path(1)}")
-    FileUtils.rm_rf("#{remote_server_path(2)}")
+    FileUtils.rm_rf(remote_server_path(1).to_s)
+    FileUtils.rm_rf(remote_server_path(2).to_s)
     clear_image_transferred_state_externally(in_situ_id)
     clear_image_transferred_state_externally(turned_over_id)
     super
@@ -151,7 +149,8 @@ class ImageScriptTest < UnitTestCase
     tempfile = Tempfile.new("test").path
     original_image = Rails.root.join("test/images/pleopsidium.tiff")
     FileUtils.cp(original_image, "#{local_root}/orig/#{in_situ_id}.tiff")
-    errors, status = Open3.capture2e(script_env, script, in_situ_id.to_s, "tiff", "1", "2")
+    errors, status = Open3.capture2e(script_env, script, in_situ_id.to_s,
+                                     "tiff", "1", "2")
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
     File.open(tempfile, "w") do |file|
@@ -162,7 +161,8 @@ class ImageScriptTest < UnitTestCase
       file.puts("#{local_root}/320//#{in_situ_id}.jpg")
       file.puts("#{local_root}/thumb//#{in_situ_id}.jpg")
     end
-    output, _status = Open3.capture2(script_env, script_file("jpegsize"), "-f", tempfile)
+    output, _status = Open3.capture2(script_env, script_file("jpegsize"), "-f",
+                                     tempfile)
     sizes = output.each_line.map do |line|
       line[(local_root.length + 1)..].chomp
     end
@@ -242,50 +242,53 @@ class ImageScriptTest < UnitTestCase
     assert_true(get_image_transferred_state_externally(in_situ_id))
     assert_true(get_image_transferred_state_externally(turned_over_id))
 
-    assert_equal("A", File.read("#{remote_server_path(1)}/orig/#{in_situ_id}.tiff"),
+    server1 = remote_server_path(1)
+    server2 = remote_server_path(2)
+
+    assert_equal("A", File.read("#{server1}/orig/#{in_situ_id}.tiff"),
                  "orig/#{in_situ_id}.tiff wrong for server 1")
-    assert_equal("B", File.read("#{remote_server_path(1)}/orig/#{in_situ_id}.jpg"),
+    assert_equal("B", File.read("#{server1}/orig/#{in_situ_id}.jpg"),
                  "orig/#{in_situ_id}.jpg wrong for server 1")
-    assert_equal("C", File.read("#{remote_server_path(1)}/1280/#{in_situ_id}.jpg"),
+    assert_equal("C", File.read("#{server1}/1280/#{in_situ_id}.jpg"),
                  "1280/#{in_situ_id}.jpg wrong for server 1")
-    assert_equal("D", File.read("#{remote_server_path(1)}/960/#{in_situ_id}.jpg"),
+    assert_equal("D", File.read("#{server1}/960/#{in_situ_id}.jpg"),
                  "960/#{in_situ_id}.jpg wrong for server 1")
-    assert_equal("E", File.read("#{remote_server_path(1)}/640/#{in_situ_id}.jpg"),
+    assert_equal("E", File.read("#{server1}/640/#{in_situ_id}.jpg"),
                  "640/#{in_situ_id}.jpg wrong for server 1")
-    assert_equal("F", File.read("#{remote_server_path(1)}/320/#{in_situ_id}.jpg"),
+    assert_equal("F", File.read("#{server1}/320/#{in_situ_id}.jpg"),
                  "320/#{in_situ_id}.jpg wrong for server 1")
-    assert_equal("G", File.read("#{remote_server_path(1)}/thumb/#{in_situ_id}.jpg"),
+    assert_equal("G", File.read("#{server1}/thumb/#{in_situ_id}.jpg"),
                  "thumb/#{in_situ_id}.jpg wrong for server 1")
-    assert_equal("H", File.read("#{remote_server_path(1)}/960/#{turned_over_id}.jpg"),
+    assert_equal("H", File.read("#{server1}/960/#{turned_over_id}.jpg"),
                  "960/#{turned_over_id}.jpg wrong for server 1")
-    assert_equal("I", File.read("#{remote_server_path(1)}/640/#{turned_over_id}.jpg"),
+    assert_equal("I", File.read("#{server1}/640/#{turned_over_id}.jpg"),
                  "640/#{turned_over_id}.jpg wrong for server 1")
-    assert_equal("J", File.read("#{remote_server_path(1)}/320/#{turned_over_id}.jpg"),
+    assert_equal("J", File.read("#{server1}/320/#{turned_over_id}.jpg"),
                  "320/#{turned_over_id}.jpg wrong for server 1")
-    assert_equal("K", File.read("#{remote_server_path(1)}/thumb/#{turned_over_id}.jpg"),
+    assert_equal("K", File.read("#{server1}/thumb/#{turned_over_id}.jpg"),
                  "thumb/#{turned_over_id}.jpg wrong for server 1")
-    assert_equal("E", File.read("#{remote_server_path(2)}/640/#{in_situ_id}.jpg"),
+    assert_equal("E", File.read("#{server2}/640/#{in_situ_id}.jpg"),
                  "640/#{in_situ_id}.jpg wrong for server 2")
-    assert_equal("F", File.read("#{remote_server_path(2)}/320/#{in_situ_id}.jpg"),
+    assert_equal("F", File.read("#{server2}/320/#{in_situ_id}.jpg"),
                  "320/#{in_situ_id}.jpg wrong for server 2")
-    assert_equal("G", File.read("#{remote_server_path(2)}/thumb/#{in_situ_id}.jpg"),
+    assert_equal("G", File.read("#{server2}/thumb/#{in_situ_id}.jpg"),
                  "thumb/#{in_situ_id}.jpg wrong for server 2")
-    assert_equal("I", File.read("#{remote_server_path(2)}/640/#{turned_over_id}.jpg"),
+    assert_equal("I", File.read("#{server2}/640/#{turned_over_id}.jpg"),
                  "640/#{turned_over_id}.jpg wrong for server 2")
-    assert_equal("J", File.read("#{remote_server_path(2)}/320/#{turned_over_id}.jpg"),
+    assert_equal("J", File.read("#{server2}/320/#{turned_over_id}.jpg"),
                  "320/#{turned_over_id}.jpg wrong for server 2")
-    assert_equal("K", File.read("#{remote_server_path(2)}/thumb/#{turned_over_id}.jpg"),
+    assert_equal("K", File.read("#{server2}/thumb/#{turned_over_id}.jpg"),
                  "thumb/#{turned_over_id}.jpg wrong for server 2")
 
-    assert_not(File.exist?("#{remote_server_path(2)}/orig/#{in_situ_id}.tiff"),
+    assert_not(File.exist?("#{server2}/orig/#{in_situ_id}.tiff"),
                "orig/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert_not(File.exist?("#{remote_server_path(2)}/orig/#{in_situ_id}.jpg"),
+    assert_not(File.exist?("#{server2}/orig/#{in_situ_id}.jpg"),
                "orig/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert_not(File.exist?("#{remote_server_path(2)}/1280/#{in_situ_id}.jpg"),
+    assert_not(File.exist?("#{server2}/1280/#{in_situ_id}.jpg"),
                "1280/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert_not(File.exist?("#{remote_server_path(2)}/960/#{in_situ_id}.jpg"),
+    assert_not(File.exist?("#{server2}/960/#{in_situ_id}.jpg"),
                "960/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert_not(File.exist?("#{remote_server_path(2)}/960/#{turned_over_id}.jpg"),
+    assert_not(File.exist?("#{server2}/960/#{turned_over_id}.jpg"),
                "960/#{turned_over_id}.jpg shouldnt be on server 2")
   end
 
@@ -336,15 +339,20 @@ class ImageScriptTest < UnitTestCase
     File.write("#{remote_server_path(1)}/960/#{commercial_id}.jpg", "ABCDEF")
     File.write("#{remote_server_path(1)}/640/#{commercial_id}.jpg", "ABCDEFG")
     File.write("#{remote_server_path(1)}/320/#{commercial_id}.jpg", "ABCDEFGH")
-    File.write("#{remote_server_path(1)}/960/#{disconnected_id}.jpg", "allcorrupted!")
-    File.write("#{remote_server_path(1)}/640/#{disconnected_id}.jpg", "allcorrupted!")
-    File.write("#{remote_server_path(1)}/320/#{disconnected_id}.jpg", "allcorrupted!")
+    File.write("#{remote_server_path(1)}/960/#{disconnected_id}.jpg",
+               "allcorrupted!")
+    File.write("#{remote_server_path(1)}/640/#{disconnected_id}.jpg",
+               "allcorrupted!")
+    File.write("#{remote_server_path(1)}/320/#{disconnected_id}.jpg",
+               "allcorrupted!")
     File.write("#{remote_server_path(2)}/640/#{in_situ_id}.jpg", "correct")
     File.write("#{remote_server_path(2)}/320/#{in_situ_id}.jpg", "correct")
     File.write("#{remote_server_path(2)}/640/#{turned_over_id}.jpg", "ABCD")
     File.write("#{remote_server_path(2)}/320/#{turned_over_id}.jpg", "ABCDE")
-    File.write("#{remote_server_path(2)}/640/#{commercial_id}.jpg", "allcorrupted!")
-    File.write("#{remote_server_path(2)}/320/#{commercial_id}.jpg", "allcorrupted!")
+    File.write("#{remote_server_path(2)}/640/#{commercial_id}.jpg",
+               "allcorrupted!")
+    File.write("#{remote_server_path(2)}/320/#{commercial_id}.jpg",
+               "allcorrupted!")
     cmd = "#{script} --verbose 2>&1 > #{tempfile}"
     status = system(script_env, cmd)
     errors = File.read(tempfile)

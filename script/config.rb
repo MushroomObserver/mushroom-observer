@@ -36,7 +36,7 @@ class ImageConfigData
   def apply_worker_paths(sources)
     # Deep copy to avoid modifying the original
     result = Marshal.load(Marshal.dump(sources))
-    result.each do |_server, specs|
+    result.each_value do |specs|
       [:test, :read, :write].each do |key|
         next unless specs[key].is_a?(String)
         next if specs[key] == ":transferred_flag"
@@ -50,11 +50,13 @@ class ImageConfigData
   def append_worker_suffix(path)
     # Extract worker number from MO_IMAGE_ROOT
     # e.g., "/path/to/test_images-8" -> "8"
-    return path unless ENV["MO_IMAGE_ROOT"] =~ /-(\d+)$/
+    return path unless ENV.fetch("MO_IMAGE_ROOT", nil) =~ /-(\d+)$/
+
     worker_suffix = Regexp.last_match(1)
 
     # Don't modify URLs or special flags
-    return path if path.start_with?("https://", "http://") || path == ":transferred_flag"
+    return path if path.start_with?("https://",
+                                    "http://") || path == ":transferred_flag"
 
     # Handle file:// URLs and regular paths
     if path.start_with?("file://")
@@ -67,7 +69,7 @@ class ImageConfigData
 
     # Append worker suffix to test_images, test_server paths
     modified_path = actual_path.gsub(
-      /(test_images|test_server\d+|test_locales)(?=\/|$)/,
+      %r{(test_images|test_server\d+|test_locales)(?=/|$)},
       "\\1-#{worker_suffix}"
     )
 

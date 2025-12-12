@@ -45,13 +45,11 @@ module Images
 
     # Worker-specific download directory for parallel testing
     def download_dir
-      @download_dir ||= begin
-        if (worker_num = database_worker_number)
-          Rails.root.join("tmp/downloads-#{worker_num}")
-        else
-          Rails.root.join("tmp/downloads")
-        end
-      end
+      @download_dir ||= if (worker_num = database_worker_number)
+                          Rails.root.join("tmp/downloads-#{worker_num}")
+                        else
+                          Rails.root.join("tmp/downloads")
+                        end
     end
 
     def with_stubs(&block)

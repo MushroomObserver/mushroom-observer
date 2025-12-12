@@ -18,14 +18,14 @@ class UserThreadSafetyTest < UnitTestCase
     threads = [
       Thread.new do
         User.current = alice
-        sleep 0.05 # Give time for race condition to occur
+        sleep(0.05) # Give time for race condition to occur
         results[:thread1_user_id] = User.current&.id
         results[:thread1_expected_id] = alice.id
       end,
       Thread.new do
-        sleep 0.01 # Start slightly after first thread
+        sleep(0.01) # Start slightly after first thread
         User.current = bob
-        sleep 0.05
+        sleep(0.05)
         results[:thread2_user_id] = User.current&.id
         results[:thread2_expected_id] = bob.id
       end
@@ -35,10 +35,12 @@ class UserThreadSafetyTest < UnitTestCase
 
     # With class variables (current implementation), these will FAIL
     # because threads share the same @@user variable
+    thread1_login = User.find_by(id: results[:thread1_user_id])&.login
+    thread2_login = User.find_by(id: results[:thread2_user_id])&.login
     assert_equal results[:thread1_expected_id], results[:thread1_user_id],
-                 "Thread 1 should see alice, but sees #{User.find_by(id: results[:thread1_user_id])&.login}"
+                 "Thread 1 should see alice, but sees #{thread1_login}"
     assert_equal results[:thread2_expected_id], results[:thread2_user_id],
-                 "Thread 2 should see bob, but sees #{User.find_by(id: results[:thread2_user_id])&.login}"
+                 "Thread 2 should see bob, but sees #{thread2_login}"
   end
 
   test "User.current_location_format maintains isolation between threads" do
@@ -54,14 +56,14 @@ class UserThreadSafetyTest < UnitTestCase
     threads = [
       Thread.new do
         User.current = alice
-        sleep 0.05
+        sleep(0.05)
         results[:thread1_format] = User.current_location_format
         results[:thread1_expected] = "postal"
       end,
       Thread.new do
-        sleep 0.01
+        sleep(0.01)
         User.current = bob
-        sleep 0.05
+        sleep(0.05)
         results[:thread2_format] = User.current_location_format
         results[:thread2_expected] = "scientific"
       end
