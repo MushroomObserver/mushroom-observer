@@ -17,7 +17,8 @@ class ImageConfigData
     if parallel_test_mode?
       # Cache the worker-specific config to avoid repeated deep copies
       worker_id = database_worker_number
-      @worker_config_cache[worker_id] ||= apply_worker_specific_paths(@base_config)
+      @worker_config_cache[worker_id] ||=
+        apply_worker_specific_paths(@base_config)
     else
       @base_config
     end
@@ -38,18 +39,7 @@ class ImageConfigData
   def database_worker_number
     return @database_worker_number if defined?(@database_worker_number)
 
-    @database_worker_number = begin
-      # Extract worker number from database name (e.g., "mo_test-8" -> "8")
-      # This works in both Rails 7 parallelization and parallel_tests gem
-      require "active_record" unless defined?(ActiveRecord)
-      return nil unless ActiveRecord::Base.connected?
-
-      db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
-      match = db_name.to_s.match(/-(\d+)$/)
-      match ? match[1] : nil
-    rescue
-      nil
-    end
+    @database_worker_number = extract_database_worker_number
   end
 
   def apply_worker_specific_paths(base_config)
@@ -57,11 +47,12 @@ class ImageConfigData
     config = Marshal.load(Marshal.dump(base_config))
 
     # Update local_image_files path
-    config["local_image_files"] = append_worker_suffix(config["local_image_files"])
+    config["local_image_files"] =
+      append_worker_suffix(config["local_image_files"])
 
     # Update image_sources paths
-    config["image_sources"]&.each do |_source_name, source_config|
-      %i[test read write].each do |key|
+    config["image_sources"]&.each_value do |source_config|
+      [:test, :read, :write].each do |key|
         next unless source_config[key].is_a?(String)
         next if source_config[key] == ":transferred_flag"
 
@@ -74,12 +65,13 @@ class ImageConfigData
 
   def append_worker_suffix(path)
     # Don't modify URLs or special flags
-    return path if path.start_with?("https://", "http://") || path == ":transferred_flag"
+    return path if path.start_with?("https://",
+                                    "http://") || path == ":transferred_flag"
 
     # Handle file:// URLs and regular paths
     if path.start_with?("file://")
       prefix = "file://"
-      actual_path = path.sub(/^file:\/\//, "")
+      actual_path = path.sub(%r{^file://}, "")
     else
       prefix = ""
       actual_path = path
@@ -87,11 +79,24 @@ class ImageConfigData
 
     # Append worker suffix to test_images, test_server paths
     modified_path = actual_path.gsub(
-      /(test_images|test_server\d+|test_locales)(?=\/|$)/,
+      %r{(test_images|test_server\d+|test_locales)(?=/|$)},
       "\\1-#{worker_suffix}"
     )
 
     "#{prefix}#{modified_path}"
+  end
+
+  # Extract worker number from database name (e.g., "mo_test-8" -> "8")
+  # This works in both Rails 7 parallelization and parallel_tests gem
+  def extract_database_worker_number
+    require("active_record") unless defined?(ActiveRecord)
+    return nil unless ActiveRecord::Base.connected?
+
+    db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
+    match = db_name.to_s.match(/-(\d+)$/)
+    match ? match[1] : nil
+  rescue StandardError
+    nil
   end
 end
 
@@ -193,7 +198,8 @@ MushroomObserver::Application.configure do
   config.max_map_objects = 100
 
   # Where images are kept locally until they are transferred.
-  # In test environment with parallel workers, paths include worker ID to avoid conflicts
+  # In test environment with parallel workers, paths include worker ID
+  # to avoid conflicts
   # Define as a method to ensure lazy evaluation for parallel testing
   def config.local_image_files
     format(IMAGE_CONFIG_DATA.config["local_image_files"], root: MO.root)
@@ -247,9 +253,33 @@ MushroomObserver::Application.configure do
   config.image_upload_max_size = 20_971_520 # 20*1024*1024 = 20 Mb
 
   # Files used to prevent abuse of server.
-  config.blocked_ips_file = "#{config.root}/config/blocked_ips.txt"
-  config.okay_ips_file = "#{config.root}/config/okay_ips.txt"
-  config.ip_stats_file = "#{config.root}/log/ip_stats.txt"
+  # Define as methods to ensure worker-specific paths in parallel testing
+  def config.blocked_ips_file
+    if env == "test" &&
+       (worker_num = IMAGE_CONFIG_DATA.send(:database_worker_number))
+      "#{root}/config/blocked_ips-#{worker_num}.txt"
+    else
+      "#{root}/config/blocked_ips.txt"
+    end
+  end
+
+  def config.okay_ips_file
+    if env == "test" &&
+       (worker_num = IMAGE_CONFIG_DATA.send(:database_worker_number))
+      "#{root}/config/okay_ips-#{worker_num}.txt"
+    else
+      "#{root}/config/okay_ips.txt"
+    end
+  end
+
+  def config.ip_stats_file
+    if env == "test" &&
+       (worker_num = IMAGE_CONFIG_DATA.send(:database_worker_number))
+      "#{root}/log/ip_stats-#{worker_num}.txt"
+    else
+      "#{root}/log/ip_stats.txt"
+    end
+  end
 
   # Flag intended for controller when the debugger gets invoked.
   # Use with lines like: debugger if MO.debugger_flag
