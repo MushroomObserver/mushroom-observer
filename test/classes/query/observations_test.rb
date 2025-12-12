@@ -229,20 +229,6 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, has_specimen: false)
   end
 
-  def test_observation_field_slips
-    f_s = field_slips(:field_slip_one)
-    assert_query([observations(:minimal_unknown_obs)],
-                 :Observation, field_slips: f_s.code)
-    fs2 = field_slips(:field_slip_falmouth_one)
-    assert_query([observations(:falmouth_2022_obs),
-                  observations(:minimal_unknown_obs)],
-                 :Observation, field_slips: [f_s.id, fs2.id])
-    assert_query(Observation.field_slips([f_s.code, fs2.code]).order_by_default,
-                 :Observation, field_slips: [f_s.code, fs2.code])
-    assert_query(Observation.field_slips([f_s.id, fs2.id]).order_by_default,
-                 :Observation, field_slips: [f_s.id, fs2.id])
-  end
-
   def test_observation_herbarium_records
     h_r = herbarium_records(:interesting_unknown)
     assert_query_scope([observations(:detailed_unknown_obs),

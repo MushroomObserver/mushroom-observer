@@ -45,7 +45,6 @@ class Query::Observations < Query
   # query_attr(:has_specimen, :boolean) # content filter
   # query_attr(:has_images, :boolean) # content filter
 
-  query_attr(:field_slips, [FieldSlip])
   query_attr(:herbaria, [Herbarium])
   query_attr(:herbarium_records, [HerbariumRecord])
   query_attr(:projects, [Project])
