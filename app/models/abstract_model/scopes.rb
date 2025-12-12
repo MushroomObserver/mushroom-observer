@@ -260,7 +260,6 @@ module AbstractModel::Scopes
     }
 
     # Used in Name, Observation and Project so far.
-    # Ignores false.
     scope :has_comments, lambda { |bool = true|
       joined_relation_condition(:comments, bool:)
     }
