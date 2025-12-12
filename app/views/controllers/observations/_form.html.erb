@@ -119,15 +119,10 @@ form_element_data = {
       <% end %>
       <%= tag.div(class: "row") do
         concat(tag.div(class: "col-xs-12 col-md-6") do
-          render(Components::NamingFields.new(
-                   create:,
-                   show_reasons: false,
-                   unfocused: true,
-                   name_help: :form_naming_name_help_leave_blank.t,
-                   vote: @vote,
-                   given_name: @given_name || "",
-                   reasons: @reasons
-                 ))
+          render(partial: "observations/namings/fields",
+                 locals: { create:, button_name:, show_reasons: false,
+                           unfocused: true,
+                           name_help: :form_naming_name_help_leave_blank.t })
         end) if create
         concat(tag.div(class: "col-xs-12 col-md-6") do
           render(partial: "observations/form/specimen_section",
