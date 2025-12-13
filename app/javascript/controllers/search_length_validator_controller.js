@@ -52,8 +52,10 @@ export default class extends Controller {
       if (typeof value === 'string') {
         const fieldExcluded = excludedFields.includes(key)
         const defaultExcluded = defaultValues.includes(value)
-        const excluded = fieldExcluded || defaultExcluded
-        console.log(`Field: ${key}, Length: ${value.length}, Excluded: ${excluded} (field: ${fieldExcluded}, default: ${defaultExcluded}), Value: ${value.substring(0, 50)}...`)
+        // Exclude rank fields (Names search only)
+        const isRankField = key.includes('[rank]') || key.includes('[rank_range]')
+        const excluded = fieldExcluded || defaultExcluded || isRankField
+        console.log(`Field: ${key}, Length: ${value.length}, Excluded: ${excluded} (field: ${fieldExcluded}, default: ${defaultExcluded}, rank: ${isRankField}), Value: ${value.substring(0, 50)}...`)
         if (!excluded) {
           totalLength += value.length
         }
