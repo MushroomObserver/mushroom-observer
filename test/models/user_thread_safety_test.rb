@@ -3,9 +3,7 @@
 require "test_helper"
 
 class UserThreadSafetyTest < UnitTestCase
-  # This test verifies that User.current is NOT thread-safe with class variables
-  # It should FAIL with the current implementation
-  # It should PASS after converting to Thread.current
+  # This test verifies that User.current is now thread-safe
 
   test "User.current maintains isolation between threads" do
     alice = users(:rolf)
