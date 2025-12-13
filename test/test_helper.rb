@@ -106,8 +106,11 @@ module ActiveSupport
     # Run tests in parallel with specified workers
     # Threshold can be set via PARALLEL_TEST_THRESHOLD environment variable
     # Default is 50 (Rails default) if not set
+    # Note: Disable parallel testing when collecting coverage (CI=true) because
+    # SimpleCov doesn't fully support Rails 7's built-in parallel testing
     threshold = ENV["PARALLEL_TEST_THRESHOLD"]&.to_i || 50
-    parallelize(workers: :number_of_processors, threshold: threshold)
+    workers = ENV["CI"] == "true" ? 1 : :number_of_processors
+    parallelize(workers: workers, threshold: threshold)
 
     ##########################################################################
     #  Transactional fixtures
