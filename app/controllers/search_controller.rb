@@ -31,10 +31,12 @@ class SearchController < ApplicationController
   private
 
   def pattern_too_long?(pattern)
-    return false if pattern.length <= 9500
+    return false if pattern.length <= Searchable::MAX_SEARCH_INPUT_LENGTH
 
     flash_error(
-      :runtime_search_string_too_long.t(max: 9500, length: pattern.length)
+      :runtime_search_string_too_long.t(
+        max: Searchable::MAX_SEARCH_INPUT_LENGTH, length: pattern.length
+      )
     )
     redirect_back_or_to(root_path)
     true

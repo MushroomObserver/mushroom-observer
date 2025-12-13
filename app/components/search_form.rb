@@ -71,7 +71,7 @@ class Components::SearchForm < Components::ApplicationForm
       class: "faceted-search-form pb-4",
       data: {
         controller: "search-length-validator",
-        search_length_validator_max_length_value: 9500,
+        search_length_validator_max_length_value: Searchable::MAX_SEARCH_INPUT_LENGTH,
         search_length_validator_search_type_value: search_type
       }
     }
