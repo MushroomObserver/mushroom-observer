@@ -48,6 +48,7 @@ class Components::SearchForm < Components::ApplicationForm
 
   def view_template
     render_header unless @local
+    div(id: "search_#{search_type}_flash") # turbo_stream update target
     render_form_columns
     render_form_buttons
   end
@@ -57,7 +58,7 @@ class Components::SearchForm < Components::ApplicationForm
   # Form configuration
 
   def form_tag(&block)
-    form(action: form_action, method: form_method, **form_attributes, &block)
+    form(action: form_action, method: :post, **form_attributes, &block)
   end
 
   def form_action
@@ -67,9 +68,14 @@ class Components::SearchForm < Components::ApplicationForm
   def form_attributes
     attrs = {
       id: "#{search_type}_search_form",
-      class: "faceted-search-form pb-4"
+      class: "faceted-search-form pb-4",
+      data: {
+        controller: "search-length-validator",
+        search_length_validator_max_length_value: 9500,
+        search_length_validator_search_type_value: search_type
+      }
     }
-    attrs[:data] = turbo_stream_data unless @local
+    attrs[:data].merge!(turbo_stream_data) unless @local
     attrs
   end
 

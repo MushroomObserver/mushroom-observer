@@ -3,8 +3,10 @@ add_new_title(:search_object, :PROJECTS)
 container_class(:wide)
 %>
 
-<%= render(Components::SearchForm.new(
-      @search,
-      search_controller: controller,
-      local: true
-    )) %>
+<div id="projects_search_container">
+  <%= render(Components::SearchForm.new(
+        @search,
+        search_controller: controller,
+        local: @local.nil? ? true : @local
+      )) %>
+</div>

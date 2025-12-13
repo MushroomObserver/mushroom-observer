@@ -27,6 +27,7 @@ module Searchable
     end
 
     def new
+      @local = params[:local] != "false"
       set_up_form_field_groupings
       @search = build_search_query
       respond_to do |format|
@@ -40,6 +41,7 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
+
       prepare_raw_params
       redirect_to(action: :new) and return unless validate_search_instance?
 
@@ -261,6 +263,54 @@ module Searchable
 
       @query_params[:has_notes_fields] =
         val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
+    end
+
+    # Maximum allowed total length of all search input fields
+    MAX_SEARCH_INPUT_LENGTH = 9500
+
+    # Validate that the cumulative length of all search inputs doesn't exceed
+    # the maximum to prevent Puma URL length errors (10,240 char limit).
+    # Returns true if valid, false if too long (and sets flash.now).
+    def validate_total_input_length
+      total_length = calculate_total_input_length(@query_params)
+
+      return true if total_length <= MAX_SEARCH_INPUT_LENGTH
+
+      flash.now[:alert] = :search_input_too_long.l(
+        length: total_length,
+        max: MAX_SEARCH_INPUT_LENGTH
+      )
+      false
+    end
+
+    # Calculate total character count of all string values in params hash
+    def calculate_total_input_length(params_hash)
+      params_hash.values.sum do |value|
+        case value
+        when String
+          value.length
+        when Array
+          value.sum { |v| v.is_a?(String) ? v.length : 0 }
+        when Hash
+          calculate_total_input_length(value)
+        else
+          0
+        end
+      end
+    end
+
+    # Build a search query from current params for re-rendering the form
+    # with validation errors
+    def build_search_query_from_params
+      # Create a copy of params to avoid modifying the original
+      params_copy = @query_params.deep_dup
+
+      # Split names lookup string if present (normally done in prepare_raw_params)
+      if (vals = params_copy.dig(:names, :lookup)).is_a?(String) && vals.present?
+        params_copy[:names][:lookup] = vals.split("\n").map(&:strip)
+      end
+
+      Query.create_query(query_model, params_copy)
     end
 
     # Passing some fields will raise an error if the required field is missing,
