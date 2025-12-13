@@ -14,7 +14,12 @@ class ScriptTest < UnitTestCase
     worker_num = database_worker_number
     if worker_num
       config_file = Rails.root.join("config/mysql-test-#{worker_num}.cnf")
-      { "MO_MYSQL_CONFIG" => config_file.to_s, "RAILS_ENV" => "test" }
+      db_name = "mo_test-#{worker_num}"
+      {
+        "MO_MYSQL_CONFIG" => config_file.to_s,
+        "MO_TEST_DATABASE" => db_name,
+        "RAILS_ENV" => "test"
+      }
     else
       { "RAILS_ENV" => "test" }
     end
