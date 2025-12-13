@@ -7,6 +7,6 @@ container_class(:wide)
   <%= render(Components::SearchForm.new(
         @search,
         search_controller: controller,
-        local: @local.nil? ? true : @local
+        local: @local != false
       )) %>
 </div>

@@ -646,9 +646,10 @@ class SearchFormTest < UnitTestCase
 
     form = doc.at_css("form#observations_search_form")
     assert_equal(
-      "9500",
+      Searchable::MAX_SEARCH_INPUT_LENGTH.to_s,
       form["data-search-length-validator-max-length-value"],
-      "Form should have max length value set to 9500"
+      "Form should have max length value set to " \
+      "#{Searchable::MAX_SEARCH_INPUT_LENGTH}"
     )
   end
 
