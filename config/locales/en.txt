@@ -902,6 +902,7 @@
   show_objects: Show [TYPES]
   sort_by_object: Sort by [TYPE]
   search_object: Search [TYPE]
+  search_url_too_long: Your search parameters are too long and will result in an error. Please simplify your search criteria.
 
   # Other generic phrases.
   added_to_list: Added observation to "[list]".

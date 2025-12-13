@@ -671,5 +671,130 @@ module Observations
         }
       )
     end
+
+    def test_create_with_query_string_too_long
+      login
+      # Create a very long notes string that will exceed the 9,500 char limit
+      # when serialized to query params. Account for URL encoding and nested
+      # param structure: query_observations[notes_has]=value
+      very_long_string = "x" * 9_470 # Will result in >9,500 char query string
+      params = { notes_has: very_long_string }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form with error (not redirect, so form can show values)
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+    end
+
+    def test_create_with_acceptable_query_string_length
+      login
+      # Create a long but acceptable string (under the limit)
+      acceptable_string = "x" * 5_000
+      params = { notes_has: acceptable_string }
+
+      post(:create, params: { query_observations: params })
+
+      # Should successfully redirect to index with query params
+      assert_response(:redirect)
+      assert_match(%r{/observations}, @response.redirect_url)
+      assert_no_flash
+    end
+
+    def test_multiple_value_autocompleter_shows_raw_string_on_validation_error
+      login
+
+      # Post with invalid autocompleter input (String) that fails validation and
+      # triggers query string too long error so form re-renders with raw input
+      params = {
+        by_users: "Invalid User Name", # String input, not IDs
+        notes_has: "x" * 9_470 # Trigger validation error
+      }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form (not redirect) with validation error
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+
+      # Verify the raw string input is displayed back in the form
+      assert_match("Invalid User Name", @response.body)
+    end
+
+    def test_names_lookup_shows_raw_string_on_validation_error
+      login
+
+      # Post with invalid names lookup input that fails validation and
+      # triggers query string too long error so form re-renders with raw input
+      params = {
+        names: {
+          lookup: "Invalid Name That Does Not Exist",
+          include_synonyms: "true"
+        },
+        notes_has: "x" * 9_470 # Trigger validation error
+      }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form (not redirect) with validation error
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+
+      # Verify the raw string input is displayed back in the form
+      assert_match("Invalid Name That Does Not Exist", @response.body)
+    end
+
+    def test_region_shows_raw_string_on_validation_error
+      login
+
+      # Post with region input that fails validation and
+      # triggers query string too long error so form re-renders with raw input
+      params = {
+        region: "Nonexistent Region, Mars",
+        notes_has: "x" * 9_470 # Trigger validation error
+      }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form (not redirect) with validation error
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+
+      # Verify the raw string input is displayed back in the form
+      assert_match("Nonexistent Region, Mars", @response.body)
+    end
+
+    def test_bounding_box_shows_raw_values_on_validation_error
+      login
+
+      # Post with bounding box coordinates that fail validation and
+      # trigger query string too long error so form re-renders with raw input
+      params = {
+        in_box: {
+          north: "45.5",
+          south: "40.2",
+          east: "-71.0",
+          west: "-73.5"
+        },
+        notes_has: "x" * 9_470 # Trigger validation error
+      }
+
+      post(:create, params: { query_observations: params })
+
+      # Should render form (not redirect) with validation error
+      assert_response(:success)
+      assert_template(:new)
+      assert_flash_error
+
+      # Verify the raw bounding box values are displayed back in the form
+      assert_match("45.5", @response.body)
+      assert_match("40.2", @response.body)
+      assert_match("-71.0", @response.body)
+      assert_match("-73.5", @response.body)
+    end
   end
 end
