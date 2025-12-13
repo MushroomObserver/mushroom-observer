@@ -12,6 +12,9 @@
 module Searchable
   extend ActiveSupport::Concern
 
+  # Maximum allowed total length of all search input fields
+  MAX_SEARCH_INPUT_LENGTH = 9500
+
   included do
     # Render help for the pattern search bar (if available), for current model
     def show
@@ -264,9 +267,6 @@ module Searchable
       @query_params[:has_notes_fields] =
         val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
     end
-
-    # Maximum allowed total length of all search input fields
-    MAX_SEARCH_INPUT_LENGTH = 9500
 
     # Validate that the cumulative length of all search inputs doesn't exceed
     # the maximum to prevent Puma URL length errors (10,240 char limit).
