@@ -276,7 +276,7 @@ class SearchControllerTest < FunctionalTestCase
 
     # Test with pattern over the limit (should fail)
     # Use a pattern that won't be reduced by strip_squeeze
-    pattern = "abcd" * 2376  # 9504 characters
+    pattern = "abcd" * 2376 # 9504 characters
     params = { pattern_search: { pattern:, type: :locations } }
     get(:pattern, params:)
     assert_response(:redirect)
