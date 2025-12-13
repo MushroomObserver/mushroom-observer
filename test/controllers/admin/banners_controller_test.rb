@@ -9,8 +9,8 @@ class Admin::BannersControllerTest < FunctionalTestCase
 
   def test_should_get_index
     get(:index)
-    assert_response :success
-    assert_select "textarea", banners(:one).message
+    assert_response(:success)
+    assert_select("textarea", banners(:one).message)
   end
 
   def test_should_create_banner
@@ -18,7 +18,7 @@ class Admin::BannersControllerTest < FunctionalTestCase
       post(:create, params: { banner: { message: "New Banner" } })
     end
 
-    assert_redirected_to admin_banners_path
+    assert_redirected_to(admin_banners_path)
   end
 
   def test_should_not_create_banner_with_empty_message
@@ -26,7 +26,7 @@ class Admin::BannersControllerTest < FunctionalTestCase
       post(:create, params: { banner: { message: "" } })
     end
 
-    assert_response :success
-    assert_select "div", "Failed to update banner."
+    assert_response(:success)
+    assert_select("div", "Failed to update banner.")
   end
 end

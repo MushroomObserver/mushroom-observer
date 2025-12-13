@@ -300,7 +300,7 @@ class ImageScriptTest < UnitTestCase
     cmd = "#{script} --verbose 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert status, "Something went wrong with #{script}:\n#{errors}"
+    assert(status, "Something went wrong with #{script}:\n#{errors}")
     assert_equal(<<-ERROR_TEXT.unindent, errors)
       Listing local 1280
       Listing local 320
