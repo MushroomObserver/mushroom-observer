@@ -47,7 +47,7 @@ class ImageConfigData
 
   def apply_worker_specific_paths(base_config)
     # Deep copy to avoid modifying the base config
-    config = Marshal.load(Marshal.dump(base_config))
+    config = base_config.deep_dup
 
     # Update local_image_files path
     config["local_image_files"] =
