@@ -35,10 +35,10 @@ class UserThreadSafetyTest < UnitTestCase
     # because threads share the same @@user variable
     thread1_login = User.find_by(id: results[:thread1_user_id])&.login
     thread2_login = User.find_by(id: results[:thread2_user_id])&.login
-    assert_equal results[:thread1_expected_id], results[:thread1_user_id],
-                 "Thread 1 should see alice, but sees #{thread1_login}"
-    assert_equal results[:thread2_expected_id], results[:thread2_user_id],
-                 "Thread 2 should see bob, but sees #{thread2_login}"
+    assert_equal(results[:thread1_expected_id], results[:thread1_user_id],
+                 "Thread 1 should see alice, but sees #{thread1_login}")
+    assert_equal(results[:thread2_expected_id], results[:thread2_user_id],
+                 "Thread 2 should see bob, but sees #{thread2_login}")
   end
 
   def test_user_current_location_format_maintains_isolation_between_threads
@@ -69,9 +69,9 @@ class UserThreadSafetyTest < UnitTestCase
 
     threads.each(&:join)
 
-    assert_equal results[:thread1_expected], results[:thread1_format],
-                 "Thread 1 should see 'postal' format"
-    assert_equal results[:thread2_expected], results[:thread2_format],
-                 "Thread 2 should see 'scientific' format"
+    assert_equal(results[:thread1_expected], results[:thread1_format],
+                 "Thread 1 should see 'postal' format")
+    assert_equal(results[:thread2_expected], results[:thread2_format],
+                 "Thread 2 should see 'scientific' format")
   end
 end
