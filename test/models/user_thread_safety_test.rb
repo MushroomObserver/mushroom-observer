@@ -5,7 +5,7 @@ require "test_helper"
 class UserThreadSafetyTest < UnitTestCase
   # This test verifies that User.current is now thread-safe
 
-  test "User.current maintains isolation between threads" do
+  def test_user_current_maintains_isolation_between_threads
     alice = users(:rolf)
     bob = users(:mary)
 
@@ -41,7 +41,7 @@ class UserThreadSafetyTest < UnitTestCase
                  "Thread 2 should see bob, but sees #{thread2_login}"
   end
 
-  test "User.current_location_format maintains isolation between threads" do
+  def test_user_current_location_format_maintains_isolation_between_threads
     alice = users(:rolf)
     bob = users(:mary)
 
