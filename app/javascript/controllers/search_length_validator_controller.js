@@ -35,11 +35,31 @@ export default class extends Controller {
     const formData = new FormData(this.element)
     let totalLength = 0
 
+    // Fields to exclude from length calculation
+    const excludedFields = [
+      'authenticity_token',
+      'commit',
+      'utf8',
+      '_method',
+      'button'
+    ]
+
+    // Default values to exclude from length calculation
+    const defaultValues = ['true', 'false', '0.0', '']
+
+    console.log('=== Form Field Analysis ===')
     for (const [key, value] of formData.entries()) {
       if (typeof value === 'string') {
-        totalLength += value.length
+        const fieldExcluded = excludedFields.includes(key)
+        const defaultExcluded = defaultValues.includes(value)
+        const excluded = fieldExcluded || defaultExcluded
+        console.log(`Field: ${key}, Length: ${value.length}, Excluded: ${excluded} (field: ${fieldExcluded}, default: ${defaultExcluded}), Value: ${value.substring(0, 50)}...`)
+        if (!excluded) {
+          totalLength += value.length
+        }
       }
     }
+    console.log(`Total Length: ${totalLength}`)
 
     return totalLength
   }
