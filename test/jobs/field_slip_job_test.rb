@@ -3,7 +3,7 @@
 require("test_helper")
 
 class FieldSlipJobTest < ActiveJob::TestCase
-  test "it should perform" do
+  def test_it_should_perform
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_page_two)
     job.perform(tracker.id)
@@ -11,7 +11,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     File.delete(tracker.filepath)
   end
 
-  test "it should perform with one per page" do
+  def test_it_should_perform_with_one_per_page
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_one_per_page)
     job.perform(tracker.id)
@@ -19,7 +19,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     File.delete(tracker.filepath)
   end
 
-  test "it should delete old trackers" do
+  def test_it_should_delete_old_trackers
     old_tracker_id = field_slip_job_trackers(:fsjt_old).id
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_page_two)
@@ -28,7 +28,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     assert_nil(FieldSlipJobTracker.find_by(id: old_tracker_id))
   end
 
-  test "it should delete old tracker files" do
+  def test_it_should_delete_old_tracker_files
     old_filepath = field_slip_job_trackers(:fsjt_old).filepath
     FileUtils.touch(old_filepath)
     job = FieldSlipJob.new

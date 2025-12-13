@@ -9,7 +9,7 @@ class ScriptTest < UnitTestCase
 
   ##############################################################################
 
-  test "autoreply" do
+  def test_autoreply
     sender = "test@email.com"
     subject = "RE: do not reply"
     header = "To: blah\nFrom: blah\nSubject: blah"
@@ -19,7 +19,7 @@ class ScriptTest < UnitTestCase
     env = { "SENDER" => sender }
     cmd = "echo \"#{header}\n\n#{body}\" | #{script} \"#{subject}\" " \
           "> #{tempfile}"
-    assert system(env, cmd)
+    assert(system(env, cmd))
     expect = <<-EMAIL.unindent
       To: #{sender}
       Subject: #{subject}
@@ -47,11 +47,11 @@ class ScriptTest < UnitTestCase
   #   end
   # end
 
-  test "lookup_user" do
+  def test_lookup_user
     script = script_file("lookup_user")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} dick > #{tempfile}"
-    assert system(cmd)
+    assert(system(cmd))
     expect =
       "id login name email verified last_use\n" \
       "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com " \
@@ -60,38 +60,38 @@ class ScriptTest < UnitTestCase
     assert_equal(expect, actual)
   end
 
-  test "make_eol_xml" do
+  def test_make_eol_xml
     script = script_file("make_eol_xml")
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
-    assert !File.exist?(dest_file) || File.empty?(dest_file)
+    assert(!File.exist?(dest_file) || File.empty?(dest_file))
     cmd = "#{script} #{dest_file} > #{stdout_file}"
 
     script_succeeded = system(cmd)
 
-    assert script_succeeded, "Script failed."
-    assert File.size(dest_file).positive?,
-           "#{dest_file} should have content but is empty."
+    assert(script_succeeded, "Script failed.")
+    assert(File.size(dest_file).positive?,
+           "#{dest_file} should have content but is empty.")
     assert_equal("", File.read(stdout_file),
                  "#{stdout_file} should be empty, but has content")
     # In test mode, the script just grabs first observation from api
     # (or mocks grabbing the first observation from api).
     # We don't care about testing name/eol, we just want to test that
     # the script can successfully wget any page from the server!
-    assert File.read(dest_file).include?('<results number="1">')
+    assert(File.read(dest_file).include?('<results number="1">'))
     # system("cp #{dest_file} x.xml")
   end
 
-  test "parse_log" do
+  def test_parse_log
     script = script_file("parse_log")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} &>#{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert status, "Something went wrong with #{script}:\n#{errors}"
+    assert(status, "Something went wrong with #{script}:\n#{errors}")
   end
 
-  test "refresh_name_lister_cache" do
+  def test_refresh_name_lister_cache
     script = script_file("refresh_name_lister_cache")
     tempfile = Tempfile.new("test").path
     output_file = MO.name_lister_cache_file
