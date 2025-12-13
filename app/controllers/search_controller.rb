@@ -23,6 +23,11 @@ class SearchController < ApplicationController
       flash_and_redirect_invalid_search(type) and return
     end
 
+    if pattern.length > 9500
+      flash_error(:runtime_search_string_too_long.t(max: 9500, length: pattern.length))
+      redirect_back(fallback_location: root_path) and return
+    end
+
     save_pattern_and_proceed(type, pattern)
   end
 
