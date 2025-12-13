@@ -63,6 +63,8 @@ root> mysql -u root -p
   CREATE USER 'mo'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
   # set password for 'mo'@'localhost' = password('$DB_PASSWORD');
   GRANT ALL PRIVILEGES ON mo_production.* TO 'mo'@'localhost' WITH GRANT OPTION;
+  # If using this server for development/testing with parallel test execution:
+  # GRANT ALL PRIVILEGES ON `mo_test-%`.* TO 'mo'@'localhost';
   EXIT
 root> scp $SNAPSHOT_PATH/checkpoint.gz .
 root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mo_production

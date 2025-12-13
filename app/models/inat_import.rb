@@ -75,7 +75,9 @@ class InatImport < ApplicationRecord
           else
             error.message
           end
-    response_errors << "#{msg}\n"
+    # Initialize response_errors if nil (can happen in parallel testing)
+    self.response_errors = "" if response_errors.nil?
+    self.response_errors += "#{msg}\n"
     save
   end
 

@@ -11,9 +11,14 @@ class IpStatsTest < UnitTestCase
     setup_file(MO.okay_ips_file, "#{fixture_path}/okay_ips.txt")
   end
 
-  # Might want to explicitly delete blocked_ips.txt and okay_ip.txt
-  # in case tests in other modules are sensitive to them.  This module
-  # could leave them in a random state.
+  def teardown
+    # Clean up worker-specific IP files to avoid polluting the repository
+    File.delete(MO.blocked_ips_file) if File.exist?(MO.blocked_ips_file)
+    File.delete(MO.okay_ips_file) if File.exist?(MO.okay_ips_file)
+    File.delete(MO.ip_stats_file) if File.exist?(MO.ip_stats_file)
+    IpStats.reset!
+    super
+  end
 
   def setup_file(dest_file, src_file)
     return if File.exist?(dest_file) &&

@@ -32,24 +32,33 @@ class MockFile
 end
 
 class ImageLoaderJobTest < ActiveJob::TestCase
-  DIR = Rails.root.join("tmp/downloads")
+  include GeneralExtensions
 
   def setup
     super
     @mock_storage = MockStorage.new
     @test_image = Image.reorder(created_at: :asc).first
-    @test_file = "#{DIR}/#{@test_image.id}.jpg"
-    FileUtils.rm_rf(DIR)
+    @test_file = "#{download_dir}/#{@test_image.id}.jpg"
+    FileUtils.rm_rf(download_dir)
+  end
+
+  # Worker-specific download directory for parallel testing
+  def download_dir
+    @download_dir ||= if (worker_num = database_worker_number)
+                        Rails.root.join("tmp/downloads-#{worker_num}")
+                      else
+                        Rails.root.join("tmp/downloads")
+                      end
   end
 
   def with_stubs(&block)
     Google::Cloud::Storage.stub(:new, @mock_storage) do
-      MO.stub(:local_original_image_cache_path, DIR, &block)
+      MO.stub(:local_original_image_cache_path, download_dir, &block)
     end
   end
 
   def teardown
-    FileUtils.rm_rf(DIR)
+    FileUtils.rm_rf(download_dir)
   end
 
   test "image download works" do

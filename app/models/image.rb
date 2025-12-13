@@ -806,7 +806,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def strip_gps!
     return nil if gps_stripped
 
-    output, status = Open3.capture2e("script/strip_exif", id.to_s,
+    # Pass the worker-specific image root for parallel testing
+    env = { "MO_IMAGE_ROOT" => MO.local_image_files }
+    output, status = Open3.capture2e(env, "script/strip_exif", id.to_s,
                                      transferred ? "1" : "0")
     return output unless status.success?
 

@@ -104,7 +104,13 @@ end
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers
-    # parallelize(workers: :number_of_processors)
+    # Threshold can be set via PARALLEL_TEST_THRESHOLD environment variable
+    # Default is 50 (Rails default) if not set
+    # Note: Disable parallel testing when collecting coverage (CI=true) because
+    # SimpleCov doesn't fully support Rails 7's built-in parallel testing
+    threshold = ENV["PARALLEL_TEST_THRESHOLD"]&.to_i || 50
+    workers = ENV["CI"] == "true" ? 1 : :number_of_processors
+    parallelize(workers: workers, threshold: threshold)
 
     ##########################################################################
     #  Transactional fixtures
@@ -144,6 +150,20 @@ module ActiveSupport
     # Note: You'll currently still have to declare fixtures explicitly
     # in integration tests -- they do not yet inherit this setting
     fixtures :all
+
+    # Clean up thread-local storage before each test to ensure isolation
+    # in parallel test execution. This prevents User.current from leaking
+    # between tests running in the same thread.
+    setup do
+      Thread.current[:mushroom_observer_user] = nil
+      Thread.current[:mushroom_observer_location_format] = nil
+    end
+
+    # Clean up thread-local storage after each test
+    teardown do
+      Thread.current[:mushroom_observer_user] = nil
+      Thread.current[:mushroom_observer_location_format] = nil
+    end
 
     # Add more helper methods to be used by all tests here...
 
