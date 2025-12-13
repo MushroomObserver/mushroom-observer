@@ -34,12 +34,25 @@ class ImageConfigData
   private
 
   def apply_worker_paths(sources)
-    # Deep copy to avoid modifying the original
-    result = Marshal.load(Marshal.dump(sources))
+    # Manual deep copy to avoid modifying the original
+    # Can't use Marshal (security risk) or JSON (loses symbols)
+    result = {}
+    sources.each do |server, specs|
+      result[server] = {}
+      specs.each do |key, value|
+        # Copy values, preserving symbols
+        result[server][key] = if value.is_a?(Array)
+                                value.dup
+                              else
+                                value
+                              end
+      end
+    end
+
+    # Apply worker-specific path transformations
     result.each_value do |specs|
       [:test, :read, :write].each do |key|
         next unless specs[key].is_a?(String)
-        next if specs[key] == ":transferred_flag"
 
         specs[key] = append_worker_suffix(specs[key])
       end
