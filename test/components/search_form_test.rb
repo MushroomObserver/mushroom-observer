@@ -631,4 +631,53 @@ class SearchFormTest < UnitTestCase
     )
     render(form)
   end
+
+  # ------- Length Validation Infrastructure Tests -------
+
+  def test_form_has_length_validator_stimulus_controller
+    html = render_form
+
+    assert_html(html, "form[data-controller='search-length-validator']")
+  end
+
+  def test_form_has_max_length_value_attribute
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    form = doc.at_css("form#observations_search_form")
+    assert_equal(
+      Searchable::MAX_SEARCH_INPUT_LENGTH.to_s,
+      form["data-search-length-validator-max-length-value"],
+      "Form should have max length value set to " \
+      "#{Searchable::MAX_SEARCH_INPUT_LENGTH}"
+    )
+  end
+
+  def test_form_has_search_type_value_attribute
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    form = doc.at_css("form#observations_search_form")
+    assert_equal(
+      "observations",
+      form["data-search-length-validator-search-type-value"],
+      "Form should have search type value set"
+    )
+  end
+
+  def test_form_has_flash_container_div
+    html = render_form
+
+    assert_html(html, "#search_observations_flash",
+                "Form should have flash container for error messages")
+  end
+
+  def test_form_uses_post_method
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    form = doc.at_css("form#observations_search_form")
+    assert_equal("post", form["method"],
+                 "Form should use POST method to avoid URL length limits")
+  end
 end

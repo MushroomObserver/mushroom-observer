@@ -266,4 +266,20 @@ class SearchControllerTest < FunctionalTestCase
     get(:pattern, params:)
     assert_redirected_to(user_path(user.id))
   end
+
+  def test_pattern_search_rejects_overlong_pattern
+    # Test with pattern exactly at the limit (should work)
+    pattern = "a" * Searchable::MAX_SEARCH_INPUT_LENGTH
+    params = { pattern_search: { pattern:, type: :locations } }
+    get(:pattern, params:)
+    assert_redirected_to(locations_path(q: { model: :Location, pattern: }))
+
+    # Test with pattern over the limit (should fail)
+    # Use a pattern that won't be reduced by strip_squeeze
+    pattern = "abcd" * 2376 # 9504 characters
+    params = { pattern_search: { pattern:, type: :locations } }
+    get(:pattern, params:)
+    assert_response(:redirect)
+    assert_flash_error
+  end
 end
