@@ -35,7 +35,7 @@ PARALLEL_TEST_THRESHOLD=999999 rails test # Force all tests serial
 
 **❌ Bad - Hardcoded paths**
 ```ruby
-test "export data" do
+def test_export_data
   output_file = "/tmp/export.csv"
   exporter.export(output_file)
   assert File.exist?(output_file)
@@ -44,7 +44,7 @@ end
 
 **✅ Good - Use Tempfile**
 ```ruby
-test "export data" do
+def test_export_data
   tempfile = Tempfile.new("export").path
   exporter.export(tempfile)
   assert File.exist?(tempfile)
@@ -54,7 +54,7 @@ end
 **✅ Good - Worker-specific paths**
 ```ruby
 # For files that must have specific names
-test "export data" do
+def test_export_data
   worker_num = database_worker_number || "0"
   output_file = "/tmp/export-#{worker_num}.csv"
   exporter.export(output_file)
@@ -110,7 +110,7 @@ end
 # Available in all test cases via GeneralExtensions
 include GeneralExtensions
 
-test "worker-specific operation" do
+def test_worker_specific_operation
   worker_num = database_worker_number  # Returns "0", "1", "2", etc., or nil
   config_file = Rails.root.join("config/mysql-test-#{worker_num}.cnf")
   # ...
@@ -125,7 +125,7 @@ This helper extracts the worker number from the database name (e.g., `mo_test-7`
 
 **❌ Bad - No environment configuration**
 ```ruby
-test "script that queries database" do
+def test_script_that_queries_database
   system("script/lookup_user dick > output.txt")
   # Script connects to mo_test instead of mo_test-3!
 end
@@ -145,7 +145,7 @@ def script_env
   end
 end
 
-test "script that queries database" do
+def test_script_that_queries_database
   tempfile = Tempfile.new("test").path
   cmd = "script/lookup_user dick > #{tempfile}"
   assert system(script_env, cmd)
@@ -163,7 +163,7 @@ The image system automatically handles worker isolation:
 # config/consts.rb automatically appends worker suffix to paths
 # test_images → test_images-0, test_images-1, etc.
 
-test "upload image" do
+def test_upload_image
   # Just use normal image operations
   upload_image(fixture_file_upload("files/test.jpg"))
   # Automatically goes to correct worker-specific directory
@@ -206,7 +206,7 @@ This pattern is already implemented for:
 **✅ Solution**: Use worker-specific locale directories:
 
 ```ruby
-test "export locales" do
+def test_export_locales
   # config/consts.rb automatically handles this
   # test_locales → test_locales-0, test_locales-1, etc.
   LanguageExporter.export_locales
@@ -218,7 +218,7 @@ end
 
 **❌ Bad - Race conditions**
 ```ruby
-test "async operation" do
+def test_async_operation
   start_background_job
   sleep(1)  # Hope it finishes in 1 second
   assert job_completed?
@@ -227,7 +227,7 @@ end
 
 **✅ Good - Poll with timeout**
 ```ruby
-test "async operation" do
+def test_async_operation
   start_background_job
 
   timeout = 5.seconds.from_now
@@ -245,7 +245,7 @@ end
 
 **❌ Bad - Relying on mutable state**
 ```ruby
-test "first observation" do
+def test_first_observation
   # Assumes observations.count stays constant
   assert_equal 50, Observation.count
 end
@@ -253,7 +253,7 @@ end
 
 **✅ Good - Use fixtures or create test data**
 ```ruby
-test "first observation" do
+def test_first_observation
   # Use fixture references
   obs = observations(:minimal_unknown_obs)
   assert obs.name.nil?
@@ -302,7 +302,7 @@ When writing new tests:
 
 3. **Add logging to identify worker**
    ```ruby
-   test "flaky test" do
+   def test_flaky_test
      worker = database_worker_number || "serial"
      puts "Running in worker: #{worker}"
      # ...
@@ -316,7 +316,7 @@ When writing new tests:
 
 5. **Check the actual database being used**
    ```ruby
-   test "debug database" do
+   def test_debug_database
      db_name = ActiveRecord::Base.connection_db_config.configuration_hash[:database]
      puts "Using database: #{db_name}"
    end
