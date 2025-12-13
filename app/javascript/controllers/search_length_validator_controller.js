@@ -65,6 +65,7 @@ export default class extends Controller {
   }
 
   showError(actualLength) {
+    console.log(`showError called with ${actualLength}, searchType: ${this.searchTypeValue}`)
     const errorHtml = `
       <div class="alert alert-danger">
         <a class="close" data-dismiss="alert">×</a>
@@ -74,7 +75,9 @@ export default class extends Controller {
       </div>
     `
 
-    const flashDiv = document.getElementById(`search_${this.searchTypeValue}_flash`)
+    const searchType = this.searchTypeValue.replace(/-/g, '_')
+    const flashDiv = document.getElementById(`search_${searchType}_flash`)
+    console.log(`flashDiv found:`, flashDiv)
     if (flashDiv) {
       flashDiv.innerHTML = errorHtml
       flashDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
@@ -82,7 +85,8 @@ export default class extends Controller {
   }
 
   clearError() {
-    const flashDiv = document.getElementById(`search_${this.searchTypeValue}_flash`)
+    const searchType = this.searchTypeValue.replace(/-/g, '_')
+    const flashDiv = document.getElementById(`search_${searchType}_flash`)
     if (flashDiv) {
       flashDiv.innerHTML = ''
     }
