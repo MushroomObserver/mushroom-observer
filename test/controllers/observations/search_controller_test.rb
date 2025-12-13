@@ -679,7 +679,8 @@ module Observations
     def test_server_handles_very_long_input_without_error
       login
       # Create input that would exceed URL limits but is fine in POST body
-      long_text = "x" * 15_000 # Well over 9500 limit
+      # Well over MAX_SEARCH_INPUT_LENGTH limit
+      long_text = "x" * 15_000
       params = {
         notes_has: long_text,
         has_specimen: true
