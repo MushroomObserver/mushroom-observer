@@ -671,5 +671,63 @@ module Observations
         }
       )
     end
+
+    # ------- Server Handling of Long Inputs (POST method) -------
+    # These tests prove that when long inputs reach the server (if JS fails),
+    # the server can handle them without crashing since POST puts data in body
+
+    def test_server_handles_very_long_input_without_error
+      login
+      # Create input that would exceed URL limits but is fine in POST body
+      long_text = "x" * 15_000 # Well over 9500 limit
+      params = {
+        notes_has: long_text,
+        has_specimen: true
+      }
+
+      # Should not raise an error, even though JS validation would prevent this
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      # Should successfully create search and redirect
+      assert_response(:redirect)
+      assert_match(/observations/, response.redirect_url)
+    end
+
+    def test_server_handles_multiple_long_fields
+      login
+      # Multiple long fields that collectively would be problematic in URL
+      long_text1 = "a" * 8000
+      long_text2 = "b" * 8000
+      params = {
+        notes_has: long_text1,
+        comments_has: long_text2
+      }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_response(:redirect)
+    end
+
+    def test_server_handles_long_nested_params
+      login
+      # Test with long names lookup
+      long_names = (1..1000).map { |i| "Species#{i}" }.join("\n")
+      params = {
+        names: {
+          lookup: long_names,
+          include_synonyms: true
+        }
+      }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_response(:redirect)
+    end
   end
 end
