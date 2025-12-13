@@ -269,7 +269,7 @@ class SearchControllerTest < FunctionalTestCase
 
   def test_pattern_search_rejects_overlong_pattern
     # Test with pattern exactly at the limit (should work)
-    pattern = "a" * 9500
+    pattern = "a" * Searchable::MAX_SEARCH_INPUT_LENGTH
     params = { pattern_search: { pattern:, type: :locations } }
     get(:pattern, params:)
     assert_redirected_to(locations_path(q: { model: :Location, pattern: }))
