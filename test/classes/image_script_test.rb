@@ -86,7 +86,7 @@ class ImageScriptTest < UnitTestCase
 
   ##############################################################################
 
-  test "fixture_id_defs" do
+  def test_fixture_id_defs
     assert_equal(images(:in_situ_image).id, in_situ_id,
                  "in_situ_id defined incorrectly")
     assert_equal(images(:turned_over_image).id, turned_over_id,
@@ -98,7 +98,7 @@ class ImageScriptTest < UnitTestCase
                  "disconnected_id defined incorrectly")
   end
 
-  test "process_image" do
+  def test_process_image
     script = script_file("process_image")
     tempfile = Tempfile.new("test").path
     original_image = Rails.root.join("test/images/pleopsidium.tiff")
@@ -160,7 +160,7 @@ class ImageScriptTest < UnitTestCase
     end
   end
 
-  test "retransfer_images" do
+  def test_retransfer_images
     # In unit tests, ActiveRecord wraps all work on the database in a
     # transaction.  Soon as you look at the database it becomes immune to
     # external changes for the rest of the test.  In this test we want to check
@@ -241,7 +241,7 @@ class ImageScriptTest < UnitTestCase
                "960/#{turned_over_id}.jpg shouldnt be on server 2")
   end
 
-  test "rotate_image" do
+  def test_rotate_image
     script = script_file("rotate_image")
     tempfile = Tempfile.new("test").path
     test_image = Rails.root.join("test/images/sticky.jpg")
@@ -265,7 +265,7 @@ class ImageScriptTest < UnitTestCase
     assert_equal(true, img.transferred)
   end
 
-  test "verify_images" do
+  def test_verify_images
     script = script_file("verify_images")
     tempfile = Tempfile.new("test").path
     File.write("#{local_root}/orig/#{turned_over_id}.tiff", "A")

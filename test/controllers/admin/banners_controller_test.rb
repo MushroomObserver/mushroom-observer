@@ -7,13 +7,13 @@ class Admin::BannersControllerTest < FunctionalTestCase
     make_admin("admin")
   end
 
-  test "should get index" do
+  def test_should_get_index
     get(:index)
     assert_response :success
     assert_select "textarea", banners(:one).message
   end
 
-  test "should create banner" do
+  def test_should_create_banner
     assert_difference("Banner.count", 1) do
       post(:create, params: { banner: { message: "New Banner" } })
     end
@@ -21,7 +21,7 @@ class Admin::BannersControllerTest < FunctionalTestCase
     assert_redirected_to admin_banners_path
   end
 
-  test "should not create banner with empty message" do
+  def test_should_not_create_banner_with_empty_message
     assert_no_difference("Banner.count") do
       post(:create, params: { banner: { message: "" } })
     end

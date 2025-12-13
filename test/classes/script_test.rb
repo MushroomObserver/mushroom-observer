@@ -9,7 +9,7 @@ class ScriptTest < UnitTestCase
 
   ##############################################################################
 
-  test "autoreply" do
+  def test_autoreply
     sender = "test@email.com"
     subject = "RE: do not reply"
     header = "To: blah\nFrom: blah\nSubject: blah"
@@ -47,7 +47,7 @@ class ScriptTest < UnitTestCase
   #   end
   # end
 
-  test "lookup_user" do
+  def test_lookup_user
     script = script_file("lookup_user")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} dick > #{tempfile}"
@@ -60,7 +60,7 @@ class ScriptTest < UnitTestCase
     assert_equal(expect, actual)
   end
 
-  test "make_eol_xml" do
+  def test_make_eol_xml
     script = script_file("make_eol_xml")
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
@@ -82,7 +82,7 @@ class ScriptTest < UnitTestCase
     # system("cp #{dest_file} x.xml")
   end
 
-  test "parse_log" do
+  def test_parse_log
     script = script_file("parse_log")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} &>#{tempfile}"
@@ -91,7 +91,7 @@ class ScriptTest < UnitTestCase
     assert status, "Something went wrong with #{script}:\n#{errors}"
   end
 
-  test "refresh_name_lister_cache" do
+  def test_refresh_name_lister_cache
     script = script_file("refresh_name_lister_cache")
     tempfile = Tempfile.new("test").path
     output_file = MO.name_lister_cache_file
