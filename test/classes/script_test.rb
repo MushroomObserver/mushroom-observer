@@ -3,8 +3,21 @@
 require("test_helper")
 
 class ScriptTest < UnitTestCase
+  include GeneralExtensions
+
   def script_file(cmd)
     Rails.root.join("script/#{cmd}").to_s
+  end
+
+  # Environment for running scripts with worker-specific database config
+  def script_env
+    worker_num = database_worker_number
+    if worker_num
+      config_file = Rails.root.join("config/mysql-test-#{worker_num}.cnf")
+      { "MO_MYSQL_CONFIG" => config_file.to_s, "RAILS_ENV" => "test" }
+    else
+      { "RAILS_ENV" => "test" }
+    end
   end
 
   ##############################################################################
@@ -16,7 +29,7 @@ class ScriptTest < UnitTestCase
     body = "Some sort of comment.\nObject notification."
     tempfile = Tempfile.new("test").path
     script = script_file("autoreply")
-    env = { "SENDER" => sender }
+    env = script_env.merge("SENDER" => sender)
     cmd = "echo \"#{header}\n\n#{body}\" | #{script} \"#{subject}\" " \
           "> #{tempfile}"
     assert system(env, cmd)
@@ -51,7 +64,7 @@ class ScriptTest < UnitTestCase
     script = script_file("lookup_user")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} dick > #{tempfile}"
-    assert system(cmd)
+    assert system(script_env, cmd)
     expect =
       "id login name email verified last_use\n" \
       "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com " \
@@ -67,7 +80,7 @@ class ScriptTest < UnitTestCase
     assert !File.exist?(dest_file) || File.empty?(dest_file)
     cmd = "#{script} #{dest_file} > #{stdout_file}"
 
-    script_succeeded = system(cmd)
+    script_succeeded = system(script_env, cmd)
 
     assert script_succeeded, "Script failed."
     assert File.size(dest_file).positive?,
@@ -86,7 +99,7 @@ class ScriptTest < UnitTestCase
     script = script_file("parse_log")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} &>#{tempfile}"
-    status = system(cmd)
+    status = system(script_env, cmd)
     errors = File.read(tempfile)
     assert status, "Something went wrong with #{script}:\n#{errors}"
   end
@@ -97,7 +110,7 @@ class ScriptTest < UnitTestCase
     output_file = MO.name_lister_cache_file
     FileUtils.rm(output_file) if File.exist?(output_file)
     cmd = "#{script} 2>&1 > #{tempfile}"
-    status = system(cmd)
+    status = system(script_env, cmd)
     errors = File.read(tempfile)
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
