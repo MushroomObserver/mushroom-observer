@@ -45,7 +45,7 @@ export default class extends Controller {
     ]
 
     // Default values to exclude from length calculation
-    const defaultValues = ['true', 'false', '0.0', '']
+    const defaultValues = ['true', 'false', '0.0', '', 'no', 'yes']
 
     console.log('=== Form Field Analysis ===')
     for (const [key, value] of formData.entries()) {
