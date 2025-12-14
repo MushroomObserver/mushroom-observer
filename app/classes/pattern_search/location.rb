@@ -58,12 +58,5 @@ module PatternSearch
       box
     end
 
-    def check_for_missing_box_params
-      [:north, :south, :east, :west].each do |term|
-        next if query_params[term].present?
-
-        raise(PatternSearch::MissingValueError.new(var: term))
-      end
-    end
   end
 end
