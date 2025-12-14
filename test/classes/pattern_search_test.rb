@@ -1,3 +1,4 @@
+
 # frozen_string_literal: true
 
 require("test_helper")
@@ -429,7 +430,6 @@ class PatternSearchTest < UnitTestCase
     # Verify key parameters exist
     assert(params.key?(:region))
     assert(params.key?(:user))
-    assert(params.key?(:editor))
     assert(params.key?(:created))
     assert(params.key?(:modified))
     assert(params.key?(:has_notes))
@@ -482,12 +482,6 @@ class PatternSearchTest < UnitTestCase
     assert_equal(true, search.query.params[:has_descriptions])
   end
 
-  def test_location_pattern_search_with_editor
-    dick = users(:dick)
-    search = PatternSearch::Location.new("editor:dick")
-    assert_equal(dick.id, search.query.params[:by_editor])
-  end
-
   def test_location_pattern_search_with_bounding_box
     search = PatternSearch::Location.new(
       "north:35 south:34 east:-118 west:-119"
@@ -496,6 +490,77 @@ class PatternSearchTest < UnitTestCase
       { north: 35.0, south: 34.0, east: -118.0, west: -119.0 },
       search.query.params[:in_box]
     )
+  end
+
+  def test_location_pattern_search_with_swapped_north_south
+    # Should auto-correct swapped north/south values
+    search = PatternSearch::Location.new(
+      "north:34 south:35 east:-118 west:-119"
+    )
+    assert_equal(
+      { north: 35.0, south: 34.0, east: -118.0, west: -119.0 },
+      search.query.params[:in_box]
+    )
+  end
+
+  def test_location_pattern_search_with_missing_north
+    search = PatternSearch::Location.new("south:34 east:-118 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
+    assert_equal(:north, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_missing_south
+    search = PatternSearch::Location.new("north:35 east:-118 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
+    assert_equal(:south, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_missing_east
+    search = PatternSearch::Location.new("north:35 south:34 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
+    assert_equal(:east, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_missing_west
+    search = PatternSearch::Location.new("north:35 south:34 east:-118")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
+    assert_equal(:west, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_invalid_north
+    # North latitude must be between -90 and 90
+    search = PatternSearch::Location.new("north:95 south:34 east:-118 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
+    assert_equal(:north, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_invalid_south
+    # South latitude must be between -90 and 90
+    search = PatternSearch::Location.new("north:35 south:-95 east:-118 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
+    assert_equal(:south, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_invalid_east
+    # East longitude must be between -180 and 180
+    search = PatternSearch::Location.new("north:35 south:34 east:185 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
+    assert_equal(:east, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_invalid_west
+    # West longitude must be between -180 and 180
+    search = PatternSearch::Location.new("north:35 south:34 east:-118 west:-185")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
+    assert_equal(:west, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_dates

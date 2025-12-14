@@ -3892,7 +3892,6 @@
   # Help text for search_form_fields
   location_term_region: The Location's name includes this string. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a backslash as shown.
   location_term_by_users: "[:query_term_by_users(type=:LOCATION)]"
-  location_term_by_editor: Location edited by this user.
   location_term_pattern: "[:PATTERN]"
   location_term_regexp: "The Location's name includes this string."
   location_term_created: Date location was first posted.
@@ -3900,7 +3899,6 @@
   location_term_modified: Date location was last modified.
   location_term_updated_at: "[:location_term_modified]"
   location_term_user: "[:location_term_by_users]"
-  location_term_editor: "[:location_term_by_editor]"
   location_term_notes: "[:location_term_notes_has]"
   location_term_has_notes: "[:query_term_has_notes(type=:LOCATION)]"
   location_term_notes_has: "[:query_term_notes_has(type=:LOCATION)]"
