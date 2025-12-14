@@ -19,7 +19,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     File.delete(tracker.filepath)
   end
 
-  def test_it_should_delete_old_trackers
+  def test_deletes_old_trackers
     old_tracker_id = field_slip_job_trackers(:fsjt_old).id
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_page_two)
