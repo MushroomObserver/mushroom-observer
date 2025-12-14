@@ -90,6 +90,9 @@ function run_mysql {
   else
     config_file=$app_root/config/mysql-$RAILS_ENV.cnf
   fi
+  if [[ ! -e "$config_file" ]]; then
+    die "MySQL config file '$config_file' does not exist. Aborting."
+  fi
   mysql --defaults-extra-file=$config_file -q -s -e "$*"
 }
 
