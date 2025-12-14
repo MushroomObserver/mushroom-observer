@@ -259,7 +259,7 @@ MushroomObserver::Application.configure do
   # Define as methods to ensure worker-specific paths in parallel testing
   def config.blocked_ips_file
     if env == "test" &&
-       (worker_num = IMAGE_CONFIG_DATA.send(:database_worker_number))
+       (worker_num = IMAGE_CONFIG_DATA.database_worker_number)
       "#{root}/config/blocked_ips-#{worker_num}.txt"
     else
       "#{root}/config/blocked_ips.txt"
@@ -268,7 +268,7 @@ MushroomObserver::Application.configure do
 
   def config.okay_ips_file
     if env == "test" &&
-       (worker_num = IMAGE_CONFIG_DATA.send(:database_worker_number))
+       (worker_num = IMAGE_CONFIG_DATA.database_worker_number)
       "#{root}/config/okay_ips-#{worker_num}.txt"
     else
       "#{root}/config/okay_ips.txt"
@@ -277,7 +277,7 @@ MushroomObserver::Application.configure do
 
   def config.ip_stats_file
     if env == "test" &&
-       (worker_num = IMAGE_CONFIG_DATA.send(:database_worker_number))
+       (worker_num = IMAGE_CONFIG_DATA.database_worker_number)
       "#{root}/log/ip_stats-#{worker_num}.txt"
     else
       "#{root}/log/ip_stats.txt"
