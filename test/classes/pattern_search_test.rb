@@ -429,10 +429,12 @@ class PatternSearchTest < UnitTestCase
     # Verify key parameters exist
     assert(params.key?(:region))
     assert(params.key?(:user))
+    assert(params.key?(:editor))
     assert(params.key?(:created))
     assert(params.key?(:modified))
     assert(params.key?(:has_notes))
     assert(params.key?(:has_observations))
+    assert(params.key?(:has_descriptions))
     assert(params.key?(:north))
     assert(params.key?(:south))
     assert(params.key?(:east))
@@ -473,6 +475,17 @@ class PatternSearchTest < UnitTestCase
   def test_location_pattern_search_with_has_observations
     search = PatternSearch::Location.new("has_observations:yes")
     assert_equal(true, search.query.params[:has_observations])
+  end
+
+  def test_location_pattern_search_with_has_descriptions
+    search = PatternSearch::Location.new("has_descriptions:yes")
+    assert_equal(true, search.query.params[:has_descriptions])
+  end
+
+  def test_location_pattern_search_with_editor
+    dick = users(:dick)
+    search = PatternSearch::Location.new("editor:dick")
+    assert_equal(dick.id, search.query.params[:by_editor])
   end
 
   def test_location_pattern_search_with_bounding_box
