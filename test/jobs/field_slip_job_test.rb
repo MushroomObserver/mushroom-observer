@@ -28,7 +28,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     assert_nil(FieldSlipJobTracker.find_by(id: old_tracker_id))
   end
 
-  def test_it_should_delete_old_tracker_files
+  def test_deletes_old_tracker_files
     old_filepath = field_slip_job_trackers(:fsjt_old).filepath
     FileUtils.touch(old_filepath)
     job = FieldSlipJob.new
