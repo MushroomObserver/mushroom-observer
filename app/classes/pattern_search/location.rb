@@ -45,18 +45,6 @@ module PatternSearch
 
     private
 
-    def validate_box(box)
-      validator = Mappable::Box.new(**box)
-      return box if validator.valid?
-
-      check_for_missing_box_params
-      # Just fix the box if they've got it swapped
-      if query_params[:south] > query_params[:north]
-        box = box.merge(north: query_params[:south],
-                        south: query_params[:north])
-      end
-      box
-    end
 
   end
 end
