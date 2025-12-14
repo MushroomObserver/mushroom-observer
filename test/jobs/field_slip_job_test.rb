@@ -11,7 +11,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     File.delete(tracker.filepath)
   end
 
-  def test_it_should_perform_with_one_per_page
+  def test_performs_with_one_per_page
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_one_per_page)
     job.perform(tracker.id)
