@@ -45,17 +45,6 @@ module PatternSearch
 
     private
 
-    def put_nsew_params_in_box
-      north, south, east, west = query_params.values_at(:north, :south, :east,
-                                                        :west)
-      box = { north:, south:, east:, west: }
-      return if box.compact.blank?
-
-      box = validate_box(box)
-      query_params[:in_box] = box
-      query_params.except!(:north, :south, :east, :west)
-    end
-
     def validate_box(box)
       validator = Mappable::Box.new(**box)
       return box if validator.valid?
