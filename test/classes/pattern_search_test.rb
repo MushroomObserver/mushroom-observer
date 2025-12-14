@@ -507,28 +507,28 @@ class PatternSearchTest < UnitTestCase
     search = PatternSearch::Location.new("south:34 east:-118 west:-119")
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
-    assert(search.errors.first.to_s.include?(":north"))
+    assert_equal(:north, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_missing_south
     search = PatternSearch::Location.new("north:35 east:-118 west:-119")
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
-    assert(search.errors.first.to_s.include?(":south"))
+    assert_equal(:south, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_missing_east
     search = PatternSearch::Location.new("north:35 south:34 west:-119")
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
-    assert(search.errors.first.to_s.include?(":east"))
+    assert_equal(:east, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_missing_west
     search = PatternSearch::Location.new("north:35 south:34 east:-118")
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
-    assert(search.errors.first.to_s.include?(":west"))
+    assert_equal(:west, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_invalid_north
@@ -536,7 +536,7 @@ class PatternSearchTest < UnitTestCase
     search = PatternSearch::Location.new("north:95 south:34 east:-118 west:-119")
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
-    assert(search.errors.first.to_s.include?(":north"))
+    assert_equal(:north, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_invalid_south
@@ -544,7 +544,7 @@ class PatternSearchTest < UnitTestCase
     search = PatternSearch::Location.new("north:35 south:-95 east:-118 west:-119")
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
-    assert(search.errors.first.to_s.include?(":south"))
+    assert_equal(:south, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_invalid_east
@@ -552,7 +552,7 @@ class PatternSearchTest < UnitTestCase
     search = PatternSearch::Location.new("north:35 south:34 east:185 west:-119")
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
-    assert(search.errors.first.to_s.include?(":east"))
+    assert_equal(:east, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_invalid_west
@@ -560,7 +560,7 @@ class PatternSearchTest < UnitTestCase
     search = PatternSearch::Location.new("north:35 south:34 east:-118 west:-185")
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
-    assert(search.errors.first.to_s.include?(":west"))
+    assert_equal(:west, search.errors.first.args[:var])
   end
 
   def test_location_pattern_search_with_dates
