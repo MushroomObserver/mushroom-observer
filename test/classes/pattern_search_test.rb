@@ -455,6 +455,11 @@ class PatternSearchTest < UnitTestCase
     assert_equal(["California, USA"], search.query.params[:region])
   end
 
+  def test_location_pattern_search_with_region_smart_quotes
+    search = PatternSearch::Location.new("region:“California, USA”")
+    assert_equal(["California, USA"], search.query.params[:region])
+  end
+
   def test_location_pattern_search_with_user
     dick = users(:dick)
     search = PatternSearch::Location.new("user:dick")
