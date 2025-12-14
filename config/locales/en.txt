@@ -3891,6 +3891,7 @@
 
   # Help text for search_form_fields
   location_term_region: The Location's name includes this string. Partial match anchored at end, including country at least, e.g., "California, USA".
+  location_term_by_editor: Location edited by this user.
   location_term_by_users: "[:query_term_by_users(type=:LOCATION)]"
   location_term_pattern: "[:PATTERN]"
   location_term_regexp: "The Location's name includes this string."
