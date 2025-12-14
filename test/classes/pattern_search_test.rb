@@ -485,6 +485,41 @@ class PatternSearchTest < UnitTestCase
     )
   end
 
+  def test_location_pattern_search_with_swapped_north_south
+    # Should auto-correct swapped north/south values
+    search = PatternSearch::Location.new(
+      "north:34 south:35 east:-118 west:-119"
+    )
+    assert_equal(
+      { north: 35.0, south: 34.0, east: -118.0, west: -119.0 },
+      search.query.params[:in_box]
+    )
+  end
+
+  def test_location_pattern_search_with_missing_north
+    assert_raises(PatternSearch::MissingValueError) do
+      PatternSearch::Location.new("south:34 east:-118 west:-119")
+    end
+  end
+
+  def test_location_pattern_search_with_missing_south
+    assert_raises(PatternSearch::MissingValueError) do
+      PatternSearch::Location.new("north:35 east:-118 west:-119")
+    end
+  end
+
+  def test_location_pattern_search_with_missing_east
+    assert_raises(PatternSearch::MissingValueError) do
+      PatternSearch::Location.new("north:35 south:34 west:-119")
+    end
+  end
+
+  def test_location_pattern_search_with_missing_west
+    assert_raises(PatternSearch::MissingValueError) do
+      PatternSearch::Location.new("north:35 south:34 east:-118")
+    end
+  end
+
   def test_location_pattern_search_with_dates
     search = PatternSearch::Location.new("created:2021-01-01")
     assert_equal(%w[2021-01-01 2021-01-01],
