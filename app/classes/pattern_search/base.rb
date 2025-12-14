@@ -79,7 +79,6 @@ module PatternSearch
     end
 
     def check_for_missing_box_params
-      debugger
       [:north, :south, :east, :west].each do |term|
         next if query_params[term].present?
 
