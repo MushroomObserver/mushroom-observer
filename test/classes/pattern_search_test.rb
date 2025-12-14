@@ -520,6 +520,34 @@ class PatternSearchTest < UnitTestCase
     end
   end
 
+  def test_location_pattern_search_with_invalid_north
+    # North latitude must be between -90 and 90
+    assert_raises(PatternSearch::BadFloatError) do
+      PatternSearch::Location.new("north:95 south:34 east:-118 west:-119")
+    end
+  end
+
+  def test_location_pattern_search_with_invalid_south
+    # South latitude must be between -90 and 90
+    assert_raises(PatternSearch::BadFloatError) do
+      PatternSearch::Location.new("north:35 south:-95 east:-118 west:-119")
+    end
+  end
+
+  def test_location_pattern_search_with_invalid_east
+    # East longitude must be between -180 and 180
+    assert_raises(PatternSearch::BadFloatError) do
+      PatternSearch::Location.new("north:35 south:34 east:185 west:-119")
+    end
+  end
+
+  def test_location_pattern_search_with_invalid_west
+    # West longitude must be between -180 and 180
+    assert_raises(PatternSearch::BadFloatError) do
+      PatternSearch::Location.new("north:35 south:34 east:-118 west:-185")
+    end
+  end
+
   def test_location_pattern_search_with_dates
     search = PatternSearch::Location.new("created:2021-01-01")
     assert_equal(%w[2021-01-01 2021-01-01],
