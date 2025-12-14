@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 require("test_helper")
@@ -533,7 +532,8 @@ class PatternSearchTest < UnitTestCase
 
   def test_location_pattern_search_with_invalid_north
     # North latitude must be between -90 and 90
-    search = PatternSearch::Location.new("north:95 south:34 east:-118 west:-119")
+    spec = "north:95 south:34 east:-118 west:-119"
+    search = PatternSearch::Location.new(spec)
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
     assert_equal(:north, search.errors.first.args[:var])
@@ -541,7 +541,8 @@ class PatternSearchTest < UnitTestCase
 
   def test_location_pattern_search_with_invalid_south
     # South latitude must be between -90 and 90
-    search = PatternSearch::Location.new("north:35 south:-95 east:-118 west:-119")
+    spec = "north:35 south:-95 east:-118 west:-119"
+    search = PatternSearch::Location.new(spec)
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
     assert_equal(:south, search.errors.first.args[:var])
@@ -549,7 +550,8 @@ class PatternSearchTest < UnitTestCase
 
   def test_location_pattern_search_with_invalid_east
     # East longitude must be between -180 and 180
-    search = PatternSearch::Location.new("north:35 south:34 east:185 west:-119")
+    spec = "north:35 south:34 east:185 west:-119"
+    search = PatternSearch::Location.new(spec)
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
     assert_equal(:east, search.errors.first.args[:var])
@@ -557,7 +559,8 @@ class PatternSearchTest < UnitTestCase
 
   def test_location_pattern_search_with_invalid_west
     # West longitude must be between -180 and 180
-    search = PatternSearch::Location.new("north:35 south:34 east:-118 west:-185")
+    spec = "north:35 south:34 east:-118 west:-185"
+    search = PatternSearch::Location.new(spec)
     assert_equal(1, search.errors.length)
     assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
     assert_equal(:west, search.errors.first.args[:var])

@@ -41,9 +41,5 @@ module PatternSearch
       super
       put_nsew_params_in_box
     end
-
-    private
-
-
   end
 end
