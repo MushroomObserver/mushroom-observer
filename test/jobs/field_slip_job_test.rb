@@ -3,7 +3,7 @@
 require("test_helper")
 
 class FieldSlipJobTest < ActiveJob::TestCase
-  def test_it_should_perform
+  def test_perform
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_page_two)
     job.perform(tracker.id)
