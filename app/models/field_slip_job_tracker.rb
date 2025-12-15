@@ -43,8 +43,6 @@ class FieldSlipJobTracker < AbstractModel
 
   def filepath
     dir = pdf_dir
-    return nil unless dir # Return nil if directory is not set
-
     # Cache the filepath but only if the directory hasn't changed
     # This allows tests to stub the directory while maintaining performance
     if @cached_dir == dir && @filepath
