@@ -7,6 +7,26 @@ module Header
   class ContextNavHelperTest < ActionView::TestCase
     include LinkHelper
 
+    # Test that add_context_nav handles nil links gracefully
+    def test_add_context_nav_with_nil_links
+      # This should not raise an error
+      assert_nothing_raised do
+        add_context_nav(nil)
+      end
+      # Should not add context_nav content
+      assert_nil(content_for(:context_nav))
+    end
+
+    # Test that add_context_nav handles empty array gracefully
+    def test_add_context_nav_with_empty_links
+      # This should not raise an error
+      assert_nothing_raised do
+        add_context_nav([])
+      end
+      # Should not add context_nav content
+      assert_nil(content_for(:context_nav))
+    end
+
     # destroy_button tab tested in articles_controller_test
     # That method calls `add_q_param` and others unavailable to helper tests
     # put_button is not used for articles, but we're just testing HTML output
