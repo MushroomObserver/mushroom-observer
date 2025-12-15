@@ -15,6 +15,9 @@ module Searchable
   # Maximum allowed total length of all search input fields
   MAX_SEARCH_INPUT_LENGTH = 9500
 
+  # Default values to exclude from length calculation
+  DEFAULT_EXCLUDED_VALUES = ["true", "false", "0.0", "", "no", "yes"].freeze
+
   included do
     # Render help for the pattern search bar (if available), for current model
     def show
@@ -44,6 +47,9 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
+
+      # Validate total input length before processing
+      return if search_input_too_long?
 
       prepare_raw_params
       redirect_to(action: :new) and return unless validate_search_instance?
@@ -266,6 +272,52 @@ module Searchable
 
       @query_params[:has_notes_fields] =
         val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
+    end
+
+    # Validate total length of search input to prevent Puma URL errors
+    def search_input_too_long?
+      total_length = calculate_search_input_length(@query_params)
+      return false if total_length <= MAX_SEARCH_INPUT_LENGTH
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            "search_#{search_type}_flash",
+            partial: "search/length_error",
+            locals: { length: total_length, max: MAX_SEARCH_INPUT_LENGTH }
+          ))
+        end
+        format.html do
+          flash_error(
+            :runtime_search_string_too_long.t(
+              max: MAX_SEARCH_INPUT_LENGTH,
+              length: total_length
+            )
+          )
+          redirect_to(action: :new)
+        end
+      end
+      true
+    end
+
+    # Default values to exclude from length calculation
+    DEFAULT_EXCLUDED_VALUES = ["true", "false", "0.0", "", "no", "yes"].freeze
+
+    # Calculate total length excluding metadata and default values
+    def calculate_search_input_length(params_hash)
+      total = 0
+      params_hash.each do |key, value|
+        next unless value.is_a?(String)
+        # Exclude default values
+        next if DEFAULT_EXCLUDED_VALUES.include?(value)
+        # Exclude rank fields (Names search)
+        next if key.to_s.include?("rank")
+        # Exclude bounding box coordinates
+        next if key.to_s.include?("in_box")
+
+        total += value.length
+      end
+      total
     end
 
     # Passing some fields will raise an error if the required field is missing,
