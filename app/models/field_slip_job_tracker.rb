@@ -44,7 +44,7 @@ class FieldSlipJobTracker < AbstractModel
   def filepath
     dir = pdf_dir
     FileUtils.mkdir_p(dir)
-    @filepath ||= "#{dir}/#{filename}"
+    "#{dir}/#{filename}"
   end
 
   def link
