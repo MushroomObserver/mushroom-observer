@@ -50,12 +50,12 @@ class FieldSlipJobTest < ActiveJob::TestCase
   end
 
   def test_deletes_old_tracker_files
+    job = FieldSlipJob.new
+    tracker = field_slip_job_trackers(:fsjt_page_two)
     FieldSlipJobTracker.stub(:pdf_directory, @pdf_dir) do
       old_tracker = field_slip_job_trackers(:fsjt_old)
       old_filepath = old_tracker.filepath
       FileUtils.touch(old_filepath)
-      job = FieldSlipJob.new
-      tracker = field_slip_job_trackers(:fsjt_page_two)
       job.perform(tracker.id)
       File.delete(tracker.filepath)
       assert_not(File.exist?(old_filepath))
