@@ -43,8 +43,15 @@ class FieldSlipJobTracker < AbstractModel
 
   def filepath
     dir = pdf_dir
-    FileUtils.mkdir_p(dir)
-    "#{dir}/#{filename}"
+    # Cache the filepath but only if the directory hasn't changed
+    # This allows tests to stub the directory while maintaining performance
+    if @cached_dir == dir
+      @filepath
+    else
+      FileUtils.mkdir_p(dir)
+      @cached_dir = dir
+      @filepath = "#{dir}/#{filename}"
+    end
   end
 
   def link
