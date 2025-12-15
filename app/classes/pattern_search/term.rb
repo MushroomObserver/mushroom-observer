@@ -164,6 +164,11 @@ module PatternSearch
       end
     end
 
+    def parse_user
+      val = make_sure_there_is_one_value!
+      parse_one_user(val).id
+    end
+
     def parse_list_of_strings
       vals
     end
