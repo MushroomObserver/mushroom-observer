@@ -4,6 +4,11 @@ require "test_helper"
 
 class UserThreadSafetyTest < UnitTestCase
   # This test verifies that User.current is now thread-safe
+  #
+  # These tests use Concurrent::CountDownLatch for deterministic synchronization
+  # instead of sleep() to avoid timing-related flakiness. The latches ensure
+  # that threads reach specific checkpoints before proceeding, guaranteeing
+  # that race conditions are properly tested without relying on timing.
 
   def test_user_current_maintains_isolation_between_threads
     alice = users(:rolf)
@@ -12,18 +17,28 @@ class UserThreadSafetyTest < UnitTestCase
     # Store results from each thread
     results = Concurrent::Hash.new
 
+    # Use CountDownLatch to synchronize threads for deterministic race condition
+    # Both threads will set their User.current, wait for each other, then verify
+    setup_latch = Concurrent::CountDownLatch.new(2)
+    check_latch = Concurrent::CountDownLatch.new(2)
+
     # Run two threads that set different users
     threads = [
       Thread.new do
         User.current = alice
-        sleep(0.05) # Give time for race condition to occur
+        setup_latch.count_down
+        setup_latch.wait # Wait for both threads to set their User.current
+        check_latch.count_down
+        check_latch.wait # Ensure both threads check at the same time
         results[:thread1_user_id] = User.current&.id
         results[:thread1_expected_id] = alice.id
       end,
       Thread.new do
-        sleep(0.01) # Start slightly after first thread
         User.current = bob
-        sleep(0.05)
+        setup_latch.count_down
+        setup_latch.wait # Wait for both threads to set their User.current
+        check_latch.count_down
+        check_latch.wait # Ensure both threads check at the same time
         results[:thread2_user_id] = User.current&.id
         results[:thread2_expected_id] = bob.id
       end
@@ -51,17 +66,26 @@ class UserThreadSafetyTest < UnitTestCase
 
     results = Concurrent::Hash.new
 
+    # Use CountDownLatch for deterministic synchronization
+    setup_latch = Concurrent::CountDownLatch.new(2)
+    check_latch = Concurrent::CountDownLatch.new(2)
+
     threads = [
       Thread.new do
         User.current = alice
-        sleep(0.05)
+        setup_latch.count_down
+        setup_latch.wait # Wait for both threads to set their User.current
+        check_latch.count_down
+        check_latch.wait # Ensure both threads check at the same time
         results[:thread1_format] = User.current_location_format
         results[:thread1_expected] = "postal"
       end,
       Thread.new do
-        sleep(0.01)
         User.current = bob
-        sleep(0.05)
+        setup_latch.count_down
+        setup_latch.wait # Wait for both threads to set their User.current
+        check_latch.count_down
+        check_latch.wait # Ensure both threads check at the same time
         results[:thread2_format] = User.current_location_format
         results[:thread2_expected] = "scientific"
       end
