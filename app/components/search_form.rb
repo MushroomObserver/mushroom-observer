@@ -69,7 +69,12 @@ class Components::SearchForm < Components::ApplicationForm
     attrs = {
       id: "#{search_type}_search_form",
       class: "faceted-search-form pb-4",
-      data: {}
+      data: {
+        controller: "search-length-validator",
+        search_length_validator_max_length_value:
+          Searchable::MAX_SEARCH_INPUT_LENGTH,
+        search_length_validator_search_type_value: search_type
+      }
     }
     attrs[:data].merge!(turbo_stream_data) unless @local
     attrs
