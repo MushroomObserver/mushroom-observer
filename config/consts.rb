@@ -8,6 +8,7 @@ class ImageConfigData
     @env = ENV.fetch("RAILS_ENV", "development")
     @base_config = YAML.load_file("#{root}/config/image_config.yml")[@env]
     @worker_config_cache = {}
+    @cache_mutex = Mutex.new
   end
 
   # Return config with worker-specific paths applied lazily
@@ -17,8 +18,11 @@ class ImageConfigData
     if parallel_test_mode?
       # Cache the worker-specific config to avoid repeated deep copies
       worker_id = database_worker_number
-      @worker_config_cache[worker_id] ||=
-        apply_worker_specific_paths(@base_config)
+      # Thread-safe cache access to support potential multi-threaded environments
+      @cache_mutex.synchronize do
+        @worker_config_cache[worker_id] ||=
+          apply_worker_specific_paths(@base_config)
+      end
     else
       @base_config
     end
