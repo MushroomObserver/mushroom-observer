@@ -239,7 +239,52 @@ def test_async_operation
 end
 ```
 
-### 9. Fixture Data Assumptions
+### 9. Modifying Constants in Tests
+
+**Problem**: Modifying constants at runtime using `remove_const` and `const_set` causes thread-safety issues in parallel tests, as constants are shared across all threads.
+
+**❌ Bad - Modifying constants**
+```ruby
+def setup
+  @original_dir = MyClass::DIRECTORY
+  MyClass.send(:remove_const, :DIRECTORY)
+  MyClass.const_set(:DIRECTORY, worker_specific_dir)
+end
+
+def teardown
+  MyClass.send(:remove_const, :DIRECTORY)
+  MyClass.const_set(:DIRECTORY, @original_dir)
+end
+```
+
+**✅ Good - Dependency injection with stubbing**
+```ruby
+# In the class being tested:
+class MyClass
+  DIRECTORY = "public/files"
+  
+  def self.directory
+    DIRECTORY
+  end
+  
+  def file_path
+    dir = self.class.directory
+    "#{dir}/#{filename}"
+  end
+end
+
+# In the test:
+def test_with_custom_directory
+  MyClass.stub(:directory, worker_specific_dir) do
+    # Test code that uses MyClass instances
+    # All instances will use the stubbed directory
+  end
+end
+```
+
+This pattern uses method delegation and stubbing instead of modifying constants, making tests thread-safe.
+
+### 10. Fixture Data Assumptions
 
 **Problem**: Assuming specific database state that might be modified by other tests.
 
@@ -273,6 +318,7 @@ When writing new tests:
 - [ ] Never hardcode paths like `/tmp/output.txt`
 - [ ] Use thread-local storage (`Thread.current[:key]`) not class variables
 - [ ] Clear thread-local storage in setup/teardown
+- [ ] Never modify constants with `remove_const`/`const_set` - use dependency injection and stubbing instead
 - [ ] Include `GeneralExtensions` when using `database_worker_number`
 - [ ] Pass `script_env` when calling bash scripts that query the database
 - [ ] Don't assume specific counts or IDs in fixtures
