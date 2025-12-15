@@ -360,8 +360,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   user = User.current
   #
   def self.current
-    # trace_tests
-    # debugger
     Thread.current[:mushroom_observer_user]
   end
 
@@ -370,8 +368,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   user_id = User.current_id
   #
   def self.current_id
-    # trace_tests
-    # debugger
     current&.id
   end
 
