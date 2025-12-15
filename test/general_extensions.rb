@@ -104,6 +104,15 @@ module GeneralExtensions
     IMAGE_CONFIG_DATA.database_worker_number
   end
 
+  # Worker-specific download directory for parallel testing
+  def download_dir
+    @download_dir ||= if (worker_num = database_worker_number)
+                        Rails.root.join("tmp/downloads-#{worker_num}")
+                      else
+                        Rails.root.join("tmp/downloads")
+                      end
+  end
+
   def use_test_locales(&block)
     # Use worker-specific directory in parallel mode to avoid conflicts
     worker_num = database_worker_number

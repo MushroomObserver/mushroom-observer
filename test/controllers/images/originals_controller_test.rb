@@ -34,6 +34,8 @@ end
 # tests of Images controller
 module Images
   class OriginalsControllerTest < FunctionalTestCase
+    include GeneralExtensions
+
     def setup
       super
       @mock_storage = MockStorage.new
@@ -41,15 +43,6 @@ module Images
       @test_file = "#{download_dir}/#{@test_image.id}.jpg"
       @id_cutoff = @test_image.id + 1
       FileUtils.rm_rf(download_dir)
-    end
-
-    # Worker-specific download directory for parallel testing
-    def download_dir
-      @download_dir ||= if (worker_num = database_worker_number)
-                          Rails.root.join("tmp/downloads-#{worker_num}")
-                        else
-                          Rails.root.join("tmp/downloads")
-                        end
     end
 
     def with_stubs(&block)
