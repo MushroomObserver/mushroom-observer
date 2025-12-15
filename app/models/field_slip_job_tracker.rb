@@ -45,7 +45,7 @@ class FieldSlipJobTracker < AbstractModel
     dir = pdf_dir
     # Cache the filepath but only if the directory hasn't changed
     # This allows tests to stub the directory while maintaining performance
-    if @cached_dir == dir
+    if @cached_dir == dir && @filepath
       @filepath
     else
       FileUtils.mkdir_p(dir)
@@ -55,7 +55,8 @@ class FieldSlipJobTracker < AbstractModel
   end
 
   def link
-    "#{MO.http_domain}/#{SUBDIR}/#{filename}"
+    # Use the basename of pdf_dir to support worker-specific directories in tests
+    "#{MO.http_domain}/#{File.basename(pdf_dir)}/#{filename}"
   end
 
   def elapsed_time
