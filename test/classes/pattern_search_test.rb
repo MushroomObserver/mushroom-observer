@@ -429,6 +429,7 @@ class PatternSearchTest < UnitTestCase
     # Verify key parameters exist
     assert(params.key?(:region))
     assert(params.key?(:user))
+    assert(params.key?(:editor))
     assert(params.key?(:created))
     assert(params.key?(:modified))
     assert(params.key?(:has_notes))
@@ -464,6 +465,12 @@ class PatternSearchTest < UnitTestCase
     dick = users(:dick)
     search = PatternSearch::Location.new("user:dick")
     assert_equal([dick.id], search.query.params[:by_users])
+  end
+
+  def test_location_pattern_search_with_editor
+    rolf = users(:rolf)
+    search = PatternSearch::Location.new("editor:rolf")
+    assert_equal(rolf.id, search.query.params[:by_editor])
   end
 
   def test_location_pattern_search_with_notes
@@ -581,6 +588,7 @@ class PatternSearchTest < UnitTestCase
     help_text = PatternSearch::Location.terms_help
     assert(help_text.include?("region"))
     assert(help_text.include?("user"))
+    assert(help_text.include?("editor"))
     assert(help_text.include?("created"))
     assert(help_text.include?("modified"))
     assert(help_text.include?("has_notes"))
