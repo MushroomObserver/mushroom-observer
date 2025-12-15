@@ -9,6 +9,11 @@ class FieldSlipJobTracker < AbstractModel
 
   belongs_to :user
 
+  # Returns the PDF directory to use. Can be overridden in subclasses or tests.
+  def self.pdf_directory
+    PDF_DIR
+  end
+
   def self.create(*args)
     args[0][:status] = "Starting"
     super
@@ -32,9 +37,14 @@ class FieldSlipJobTracker < AbstractModel
     @filename ||= "#{prefix}-#{code_num(start)}-#{code_num(last)}-#{id}.pdf"
   end
 
+  def pdf_dir
+    self.class.pdf_directory
+  end
+
   def filepath
-    FileUtils.mkdir_p(PDF_DIR)
-    @filepath ||= "#{PDF_DIR}/#{filename}"
+    dir = pdf_dir
+    FileUtils.mkdir_p(dir)
+    @filepath ||= "#{dir}/#{filename}"
   end
 
   def link
