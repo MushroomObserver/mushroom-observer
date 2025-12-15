@@ -7,7 +7,6 @@
 # have response_errors initialized.
 class UpdateNilResponseErrorsInInatImports < ActiveRecord::Migration[7.2]
   def up
-    # Update existing records with nil response_errors to empty string
     execute <<-SQL.squish
       UPDATE inat_imports
       SET response_errors = ''
