@@ -285,14 +285,16 @@ class SearchControllerTest < FunctionalTestCase
     redirect_url = URI.parse(redirect_to_url)
     query_params = CGI.parse(redirect_url.query)
 
-    # Verify that by_users parameter is present (indicating PatternSearch worked)
-    # and pattern parameter is NOT present (would indicate raw pattern was used)
+    # Verify that by_users parameter is present (PatternSearch worked)
+    # and pattern parameter is NOT present (raw pattern was used)
     assert(query_params.key?("q[by_users][]"),
-           "Location pattern search should extract user: keyword into by_users parameter")
+           "Location pattern search should extract user: keyword into " \
+           "by_users parameter")
     assert_equal([user.id.to_s], query_params["q[by_users][]"],
                  "by_users parameter should contain the user ID")
     assert_predicate(query_params["q[pattern]"], :blank?,
-                     "Location pattern search should not include raw pattern with keywords")
+                     "Location pattern search should not include raw " \
+                     "pattern with keywords")
 
     # Test with editor: keyword as well
     params = { pattern_search: { pattern: "editor:#{user.login}",
@@ -304,10 +306,12 @@ class SearchControllerTest < FunctionalTestCase
     query_params = CGI.parse(redirect_url.query)
 
     assert(query_params.key?("q[by_editor]"),
-           "Location pattern search should extract editor: keyword into by_editor parameter")
+           "Location pattern search should extract editor: keyword into " \
+           "by_editor parameter")
     assert_equal([user.id.to_s], query_params["q[by_editor]"],
                  "by_editor parameter should contain the user ID")
     assert_predicate(query_params["q[pattern]"], :blank?,
-                     "Location pattern search should not include raw pattern with keywords")
+                     "Location pattern search should not include raw " \
+                     "pattern with keywords")
   end
 end
