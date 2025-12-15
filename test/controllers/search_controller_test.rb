@@ -280,11 +280,11 @@ class SearchControllerTest < FunctionalTestCase
 
     # Should redirect to locations index with proper query params
     assert_redirected_to(/locations/)
-    
+
     # Parse the redirect URL to extract query parameters
     redirect_url = URI.parse(redirect_to_url)
     query_params = CGI.parse(redirect_url.query)
-    
+
     # Verify that by_users parameter is present (indicating PatternSearch worked)
     # and pattern parameter is NOT present (would indicate raw pattern was used)
     assert(query_params.key?("q[by_users][]"),
@@ -293,16 +293,16 @@ class SearchControllerTest < FunctionalTestCase
                  "by_users parameter should contain the user ID")
     assert_nil(query_params["q[pattern]"],
                "Location pattern search should not include raw pattern with keywords")
-    
+
     # Test with editor: keyword as well
     params = { pattern_search: { pattern: "editor:#{user.login}",
                                  type: :locations } }
     get(:pattern, params:)
-    
+
     assert_redirected_to(/locations/)
     redirect_url = URI.parse(redirect_to_url)
     query_params = CGI.parse(redirect_url.query)
-    
+
     assert(query_params.key?("q[by_editor]"),
            "Location pattern search should extract editor: keyword into by_editor parameter")
     assert_equal([user.id.to_s], query_params["q[by_editor]"],
