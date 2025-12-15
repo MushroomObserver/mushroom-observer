@@ -61,7 +61,7 @@ class ImageLoaderJobTest < ActiveJob::TestCase
     FileUtils.rm_rf(download_dir)
   end
 
-  test "image download works" do
+  def test_image_download_works
     rolf_count = users(:rolf).original_image_quota
     admin_count = User.admin.original_image_quota
     with_stubs do
@@ -72,7 +72,7 @@ class ImageLoaderJobTest < ActiveJob::TestCase
     end
   end
 
-  test "image already there" do
+  def test_image_already_there
     FileUtils.mkdir_p(File.dirname(@test_file))
     File.write(@test_file, "already cached")
     with_stubs do
@@ -81,7 +81,7 @@ class ImageLoaderJobTest < ActiveJob::TestCase
     end
   end
 
-  test "image download fails" do
+  def test_image_download_fails
     with_stubs do
       MockBucket.stub(:new, -> { raise("test") }) do
         ImageLoaderJob.perform_now(@test_image.id, users(:rolf).id)
