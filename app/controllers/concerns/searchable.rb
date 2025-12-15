@@ -13,7 +13,7 @@ module Searchable
   extend ActiveSupport::Concern
 
   # Maximum allowed total length of all search input fields
-  MAX_SEARCH_INPUT_LENGTH = 9500
+  MAX_SEARCH_INPUT_LENGTH = 8000
 
   included do
     # Render help for the pattern search bar (if available), for current model

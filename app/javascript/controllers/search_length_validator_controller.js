@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["flash"]
   static values = {
-    maxLength: { type: Number, default: 9500 },
+    maxLength: { type: Number, default: 8000 },
     searchType: String
   }
 
