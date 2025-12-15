@@ -18,7 +18,7 @@ class ImageConfigData
     if parallel_test_mode?
       # Cache the worker-specific config to avoid repeated deep copies
       worker_id = database_worker_number
-      # Thread-safe cache access to support potential multi-threaded environments
+      # Thread-safe cache access to support multi-threaded environments
       @cache_mutex.synchronize do
         @worker_config_cache[worker_id] ||=
           apply_worker_specific_paths(@base_config)
