@@ -43,6 +43,8 @@ class FieldSlipJobTracker < AbstractModel
 
   def filepath
     dir = pdf_dir
+    return nil unless dir # Return nil if directory is not set
+
     # Cache the filepath but only if the directory hasn't changed
     # This allows tests to stub the directory while maintaining performance
     if @cached_dir == dir && @filepath
@@ -55,8 +57,7 @@ class FieldSlipJobTracker < AbstractModel
   end
 
   def link
-    # Use the basename of pdf_dir to support worker-specific directories in tests
-    "#{MO.http_domain}/#{File.basename(pdf_dir)}/#{filename}"
+    "#{MO.http_domain}/#{SUBDIR}/#{filename}"
   end
 
   def elapsed_time
