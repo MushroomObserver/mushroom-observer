@@ -69,7 +69,7 @@ class ScriptTest < UnitTestCase
     script = script_file("lookup_user")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} dick > #{tempfile}"
-    assert system(script_env, cmd)
+    assert(system(script_env, cmd))
     expect =
       "id login name email verified last_use\n" \
       "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com " \
