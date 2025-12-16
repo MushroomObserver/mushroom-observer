@@ -39,7 +39,67 @@ module Report
 
     def initialize(vals)
       @vals = vals
+      validate_column_alignment!
     end
+
+    private
+
+    # Validate that columns are correctly aligned by checking data types
+    # This catches race conditions in parallel testing where columns
+    # get misaligned
+    def validate_column_alignment!
+      return if @vals.empty?
+
+      # Check critical columns that have failed in parallel tests
+      validate_notes_column!
+      validate_updated_at_column!
+      validate_name_text_name_column!
+    end
+
+    def validate_notes_column!
+      return if @vals[9].blank?
+
+      # notes should be a String (YAML), Hash, or nil - never a Time
+      return unless @vals[9].is_a?(Time) || @vals[9].is_a?(DateTime)
+
+      raise_column_misalignment_error(
+        9, "notes", "String/Hash", @vals[9].class
+      )
+    end
+
+    def validate_updated_at_column!
+      return if @vals[10].blank?
+
+      # updated_at should be Time/DateTime/String, not a Hash
+      return unless @vals[10].is_a?(Hash)
+
+      raise_column_misalignment_error(
+        10, "updated_at", "Time/DateTime/String", @vals[10].class
+      )
+    end
+
+    def validate_name_text_name_column!
+      return if @vals[15].blank?
+
+      # name_text_name should be String, not numeric or Time
+      return unless @vals[15].is_a?(Numeric) || @vals[15].is_a?(Time)
+
+      raise_column_misalignment_error(
+        15, "name_text_name", "String", @vals[15].class
+      )
+    end
+
+    def raise_column_misalignment_error(index, column_name, expected, actual)
+      raise(
+        "Column misalignment detected in Report::Row! " \
+        "Expected @vals[#{index}] (#{column_name}) to be #{expected}, " \
+        "but got #{actual}. " \
+        "This indicates a race condition in parallel testing. " \
+        "Row data: #{@vals.first(20).inspect}"
+      )
+    end
+
+    public
 
     def obs_id
       @vals[0].presence&.to_i
