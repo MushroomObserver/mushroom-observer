@@ -12,6 +12,9 @@
 module Searchable
   extend ActiveSupport::Concern
 
+  # Maximum allowed total length of all search input fields
+  MAX_SEARCH_INPUT_LENGTH = 8000
+
   included do
     # Render help for the pattern search bar (if available), for current model
     def show
@@ -27,6 +30,7 @@ module Searchable
     end
 
     def new
+      @local = params[:local] != "false"
       set_up_form_field_groupings
       @search = build_search_query
       respond_to do |format|
@@ -40,6 +44,7 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
+
       prepare_raw_params
       redirect_to(action: :new) and return unless validate_search_instance?
 
