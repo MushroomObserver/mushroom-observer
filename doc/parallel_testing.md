@@ -4,6 +4,49 @@
 
 Mushroom Observer uses Rails 7's built-in parallel testing to speed up test execution. Tests run concurrently across multiple worker processes, each with its own database and isolated resources. This document outlines best practices for writing parallel-safe tests.
 
+## Setup
+
+### First-Time Setup
+
+Before running parallel tests for the first time, you need to:
+
+1. **Ensure your `config/database.yml` supports parallel testing**
+
+   Your test configuration should include the `MO_TEST_DATABASE` environment variable:
+
+   ```yaml
+   test:
+     # Support worker-specific databases in parallel testing
+     # Set MO_TEST_DATABASE env var to override (e.g., mo_test-0, mo_test-1, etc.)
+     database: <%= ENV.fetch("MO_TEST_DATABASE", "mo_test") %>
+     username: mo
+     password: mo
+   ```
+
+   If you copied from `db/macos/database.yml` or `db/vagrant/database.yml`, this should already be configured.
+
+2. **Generate MySQL configuration files for each worker**
+
+   ```bash
+   rails parallel:test:setup
+   ```
+
+   This creates `config/mysql-test-0.cnf`, `config/mysql-test-1.cnf`, etc., with your database credentials. These files are needed by bash scripts that connect to the database during tests.
+
+3. **Create worker-specific test databases**
+
+   Rails will automatically create these when you run tests, but you can also create them manually:
+
+   ```bash
+   rails db:test:prepare
+   ```
+
+### Troubleshooting Setup
+
+If you encounter errors like "Failed to open required defaults file: /path/to/mysql-test-5.cnf":
+- Run `rails parallel:test:setup` to generate the missing config files
+- Verify your `config/database.yml` includes the `MO_TEST_DATABASE` environment variable
+
 ## How Parallel Testing Works
 
 Rails 7 parallel testing:

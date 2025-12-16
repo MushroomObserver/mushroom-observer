@@ -27,9 +27,16 @@ shared:
     sql_mode: TRADITIONAL
 
 development:
-  database: mo_development
-  username: mo
-  password: mo
+  primary:
+    database: mo_development
+    username: mo
+    password: mo
+  cache:
+    database: cache_development
+    username: mo
+    password: mo
+    host: localhost
+    migrations_paths: "db/cache/migrate"
 
 # Warning: The database defined as 'test' will be erased and
 # re-generated from your development database when you run 'rake'.
