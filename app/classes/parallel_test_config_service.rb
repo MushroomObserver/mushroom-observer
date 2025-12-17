@@ -92,6 +92,12 @@ class ParallelTestConfigService
     config_path = rails_root.join("config/mysql-test-#{worker_num}.cnf")
     database_name = "mo_test-#{worker_num}"
 
+    # Security note: MySQL config files require plain-text passwords by design.
+    # This is acceptable because:
+    # 1. These are test-only credentials for local development
+    # 2. Files are in .gitignore and never committed
+    # 3. Only used for parallel test execution
+    # 4. Cleaned up after tests complete
     File.write(config_path, mysql_config_content(
                               database_name,
                               credentials[:username],
