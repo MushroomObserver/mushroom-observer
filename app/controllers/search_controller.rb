@@ -23,10 +23,25 @@ class SearchController < ApplicationController
       flash_and_redirect_invalid_search(type) and return
     end
 
+    return if pattern_too_long?(pattern)
+
     save_pattern_and_proceed(type, pattern)
   end
 
   private
+
+  def pattern_too_long?(pattern)
+    return false if pattern.length <= Searchable::MAX_SEARCH_INPUT_LENGTH
+
+    flash_error(
+      :runtime_search_string_too_long.t(
+        max: Searchable::MAX_SEARCH_INPUT_LENGTH,
+        length: pattern.length
+      )
+    )
+    redirect_back_or_to(root_path)
+    true
+  end
 
   def save_pattern_and_proceed(type, pattern)
     # Save it so that we can keep it in the search bar in subsequent pages.
