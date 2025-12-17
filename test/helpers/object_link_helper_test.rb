@@ -43,6 +43,21 @@ class ObjectLinkHelperTest < ActionView::TestCase
                "Non-existent object should lack link.")
   end
 
+  def test_user_link_with_nil
+    result = user_link(nil)
+    assert_equal("?", result)
+    assert(result.html_safe?, "user_link(nil) should return html_safe string")
+  end
+
+  def test_user_link_with_user
+    user = users(:rolf)
+    result = user_link(user)
+    path = user_path(user.id)
+    html_class = "user_link_#{user.id}"
+    link_text = user.unique_text_name
+    assert_equal(expected_link(path, html_class, link_text), result)
+  end
+
   # - Helper Methods -----------------------------------------------------------
 
   def expected_link(path, html_class, link_text)

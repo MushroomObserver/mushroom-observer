@@ -190,7 +190,7 @@ module ObjectLinkHelper
   #
   def user_link(user, name = nil, args = {})
     if !user
-      return "?"
+      return "?".html_safe
     elsif user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
       user_id = user
