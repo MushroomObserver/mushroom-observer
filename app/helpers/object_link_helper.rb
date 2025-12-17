@@ -190,7 +190,7 @@ module ObjectLinkHelper
   #
   def user_link(user, name = nil, args = {})
     if !user
-      return :unknown_user_name.t.html_safe # rubocop:disable Rails/OutputSafety
+      return :unknown_user_name.t
     elsif user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
       user_id = user
