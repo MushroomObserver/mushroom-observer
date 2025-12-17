@@ -11,7 +11,7 @@ module PatternSearch
       # strings / lists
       region: [:region, :parse_list_of_strings],
       user: [:by_users, :parse_list_of_users],
-      editor: [:by_editor, :parse_user],
+      editor: [:by_editor, :parse_list_of_users],
       notes: [:notes_has, :parse_string],
 
       # numeric - bounding box

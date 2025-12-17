@@ -305,10 +305,10 @@ class SearchControllerTest < FunctionalTestCase
     redirect_url = URI.parse(redirect_to_url)
     query_params = CGI.parse(redirect_url.query)
 
-    assert(query_params.key?("q[by_editor]"),
+    assert(query_params.key?("q[by_editor][]"),
            "Location pattern search should extract editor: keyword into " \
            "by_editor parameter")
-    assert_equal([user.id.to_s], query_params["q[by_editor]"],
+    assert_equal([user.id.to_s], query_params["q[by_editor][]"],
                  "by_editor parameter should contain the user ID")
     assert_predicate(query_params["q[pattern]"], :blank?,
                      "Location pattern search should not include raw " \

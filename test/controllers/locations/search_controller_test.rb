@@ -40,7 +40,7 @@ module Locations
         has_notes: true,
         notes_has: "Symbiota",
         regexp: "Target",
-        by_editor: users(:rolf).id,
+        by_editor: [users(:rolf).id],
         has_observations: true
       )
       assert(query.id)
@@ -50,7 +50,8 @@ module Locations
       assert_select("select#query_locations_has_notes", selected: "yes")
       assert_select("input#query_locations_notes_has", value: "Symbiota")
       assert_select("input#query_locations_regexp", value: "Target")
-      assert_select("input#query_locations_by_editor", value: "Rolf Singer")
+      assert_select("textarea#query_locations_by_editor",
+                    text: "Rolf Singer (rolf)")
       assert_select("select#query_locations_has_observations",
                     selected: "yes")
       assert_equal(session[:search_type], :locations)

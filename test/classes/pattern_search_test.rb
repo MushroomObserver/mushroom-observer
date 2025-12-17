@@ -470,7 +470,7 @@ class PatternSearchTest < UnitTestCase
   def test_location_pattern_search_with_editor
     rolf = users(:rolf)
     search = PatternSearch::Location.new("editor:rolf")
-    assert_equal(rolf.id, search.query.params[:by_editor])
+    assert_equal([rolf.id], search.query.params[:by_editor])
   end
 
   def test_location_pattern_search_with_notes
