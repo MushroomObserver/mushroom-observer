@@ -45,8 +45,7 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
   def test_user_link_with_nil
     result = user_link(nil)
-    assert_equal("?", result)
-    assert(result.html_safe?, "user_link(nil) should return html_safe string")
+    assert_equal(:unknown_user_name.l, result)
   end
 
   def test_user_link_with_user
