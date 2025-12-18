@@ -44,7 +44,7 @@ Reorganized the file with clear section headers:
 
 ### 4. Updated References to Use Semantic Colors
 Several existing variables now reference the new semantic colors for better maintainability:
-- `$DARK_COLOR`: Now uses `#000000` rather than the Bootstrap 5 standard of `#212529`.  This update may happen in a future phase.
+- `$DARK_COLOR`: Newly introduced semantic dark color, defined as `#000000` instead of the Bootstrap 5 standard `#212529`. Alignment with Bootstrap's default may be revisited in a future phase.
 - `$BODY_FG_COLOR`: Now uses `$DARK_COLOR`
 - `$BUTTON_PRIMARY_BG_COLOR`: Now uses `$PRIMARY_COLOR`
 - Alert border colors: Now use their respective semantic colors
