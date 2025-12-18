@@ -252,6 +252,25 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
     end
   end
 
+  # Test that locations pattern search help is displayed
+  def test_locations_pattern_search_help
+    login
+    visit("/locations/search")
+
+    # Verify the help partial is rendered
+    assert_selector("p", text: "Locations Searches")
+    # Verify that pattern search help intro is shown
+    assert_text("Your search string may contain terms")
+    assert_text("Recognized variables include:")
+    # Verify that pattern search terms are shown
+    assert_text("region")
+    assert_text("user")
+    assert_text("created")
+    assert_text("modified")
+    assert_text("has_notes")
+    assert_text("has_observations")
+  end
+
   # TODO: Test that selecting an MO location from region autocompleter
   # fills box inputs. Needs manual verification first.
   # def test_region_autocompleter_fills_box_inputs; end

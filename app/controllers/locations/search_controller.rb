@@ -41,10 +41,10 @@ module Locations
     # pairings.
     FIELD_COLUMNS = [
       {
+        pattern: { shown: [:regexp] },
         area: { shown: [:region] }
       },
       {
-        pattern: { shown: [:regexp] },
         dates: { shown: [:created_at, :updated_at] },
         detail: {
           shown: [[:has_notes, :notes_has],

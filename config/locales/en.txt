@@ -1684,7 +1684,7 @@
   form_locations_refs: "[:form_names_refs]"
   form_locations_refs_help: "[:form_names_refs_help]"
   form_locations_help: Here you can define the place where you observed mushrooms, if a matching place doesn't exist in Mushroom Observer already. Please try to define locations that will be reusable by yourself or others. If you have an idea of the location's name, you can start typing and Google will return its best guess of the place you typed, and draw a box of the approximate boundaries on the map. At this point, you can manually edit both the boundaries and the name of the place. <a href="/locations/help" target="_new">More about Locations on MO.</a>
-  form_regions_help: The region for your search. Click "[:form_locations_find_on_map]" to view or modify the boundary area.
+  form_regions_help: Finds locations whose names end with this string. Since location names are hierarchical (e.g., "Howarth Park, Santa Rosa, California, USA"), this effectively searches by geographic region - searching for "California, USA" finds all locations in California. Must include the country. Click "[:form_locations_find_on_map]" to view or modify the boundary area.
   form_locations_find_on_map: Find on Map
   form_locations_get_elevation: Get Elevations
   form_locations_lat_long_help: All values should be in decimal degrees.
@@ -3820,7 +3820,7 @@
   observation_term_location: Mushroom was observed within the the geographic bounds ([:east], [:north], [:south], [:west]) of this Location, regardless of the exact name of the Location of the Observation. Location must be an existing MO Location. Cf. **[:region]**.
   observation_term_locations: "[:observation_term_location]"
   observation_term_within_locations: "[:observation_term_location]"
-  observation_term_region: The Observation's Location name includes this string. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown. Cf. **[:location]**.
+  observation_term_region: The Observation's Location name includes this string. Partial match anchored at end, including country at least, e.g., "California, USA". Cf. **[:location]**.
   observation_term_pattern: "[:pattern]"
   observation_term_project: "[:observation_term_projects]"
   observation_term_projects: "[:query_term_projects(type=:OBSERVATION)]"
@@ -3894,15 +3894,24 @@
   name_term_comments_has: "[:name_term_comments]"
 
   # Help text for search_form_fields
-  location_term_region: The Location is within this Region; its name ends with this string. Must include the country, e.g., "California, USA".
-  location_term_by_users: "[:query_term_by_users(type=:LOCATION)]"
+  location_term_region: The Location's name includes this string. Partial match anchored at end, including country at least, e.g., "California, USA".
   location_term_by_editor: Location edited by this user.
+  location_term_by_users: "[:query_term_by_users(type=:LOCATION)]"
   location_term_pattern: "[:PATTERN]"
   location_term_regexp: "The Location's name includes this string."
-  location_term_created_at: "[:query_term_created_at(type=:LOCATION)]"
-  location_term_updated_at: "[:query_term_updated_at(type=:LOCATION)]"
+  location_term_created: Date location was first posted.
+  location_term_created_at: "[:location_term_created]"
+  location_term_modified: Date location was last modified.
+  location_term_updated_at: "[:location_term_modified]"
+  location_term_editor: "[:location_term_by_editor]"
+  location_term_user: "[:location_term_by_users]"
+  location_term_notes: "[:location_term_notes_has]"
   location_term_has_notes: "[:query_term_has_notes(type=:LOCATION)]"
   location_term_notes_has: "[:query_term_notes_has(type=:LOCATION)]"
+  location_term_east: Longitude of eastern edge of search area.
+  location_term_west: Longitude of western edge of search area.
+  location_term_north: Latitude of northern edge of search area.
+  location_term_south: Latitude of southern edge of search area.
   location_term_has_observations: "[:query_term_has_observations]"
   location_term_has_descriptions: Has a description?
 

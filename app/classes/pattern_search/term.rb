@@ -106,11 +106,11 @@ module PatternSearch
       vals.map do |val|
         # cop gives false positive
         if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
-          Location.safe_find(val) ||
+          ::Location.safe_find(val) ||
             raise(BadLocationError.new(var: var, val: val))
         else
-          Location.find_by_name_with_wildcards(val) ||
-            Location.find_by_scientific_name_with_wildcards(val) ||
+          ::Location.find_by_name_with_wildcards(val) ||
+            ::Location.find_by_scientific_name_with_wildcards(val) ||
             raise(BadLocationError.new(var: var, val: val))
         end
       end.flatten.map(&:id).uniq
@@ -162,6 +162,11 @@ module PatternSearch
           User.find_by_name(val) ||
           raise(BadUserError.new(var: var, val: val))
       end
+    end
+
+    def parse_user
+      val = make_sure_there_is_one_value!
+      parse_one_user(val).id
     end
 
     def parse_list_of_strings
