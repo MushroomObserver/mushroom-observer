@@ -11,13 +11,13 @@ $INFO_COLOR:                        #5BC0DE;
 $WARNING_COLOR:                     #F8CC70;
 $DANGER_COLOR:                      #F07070;
 $LIGHT_COLOR:                       #F8F9FA;
-$DARK_COLOR:                        #212529;
+$DARK_COLOR:                        #000000; # Bootstrap 5 #212529;
 
 // ==================================================
 // Body and Typography
 // ==================================================
 
-$BODY_FG_COLOR:                     #000000;
+$BODY_FG_COLOR:                     $DARK_COLOR; # #000000;
 $BODY_BG_COLOR:                     #F6F6F6;
 
 // ==================================================
