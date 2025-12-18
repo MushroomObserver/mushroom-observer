@@ -50,7 +50,7 @@ Several existing variables now reference the new semantic colors for better main
 - Alert border colors: Now use their respective semantic colors
 
 **Note:** `$LINK_FG_COLOR` is still `#2050E0`; it may be updated to
-use `$PRIMARY_COLOR` respectively in a future phase.
+use `$PRIMARY_COLOR` in a future phase.
 
 ## Verification Results
 
