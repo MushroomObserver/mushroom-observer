@@ -1,3 +1,19 @@
+// ==================================================
+// AMANITA THEME
+// ==================================================
+// Inspired by various Amanita species including:
+// - A. phalloides (Death Cap)
+// - A. calyptroderma (Coccora)
+// - A. muscaria (Fly Agaric)
+// - A. velosa
+// - A. novinupta
+// - A. pachycolea
+// ==================================================
+
+// ==================================================
+// SECTION 1: THEME COLOR PALETTE
+// ==================================================
+
 $phalloides_foreground:           #e6edd5;
 $phalloides_light_cap:            #dfe4bc;
 $phalloides_middle_cap:           #beb977;
@@ -21,69 +37,78 @@ $pachycolea_dark_brown:           #60412d;
 $polyozellus_light:               #a5bffa;
 $polyozellus_dark:                #5167b2;
 
-$BUTTON_FG_COLOR:             $pachycolea_foreground;
-$BUTTON_BG_COLOR:             $pachycolea_background;
-$BUTTON_ACTIVE_FG_COLOR:      $muscaria_background;
+// ==================================================
+// SECTION 2: SEMANTIC COLOR ASSIGNMENTS
+// ==================================================
 
-$BODY_FG_COLOR:               $pachycolea_foreground;
-$BODY_BG_COLOR:               $pachycolea_background;
+$PRIMARY_COLOR:                     $pachycolea_light_stipe;
+$SECONDARY_COLOR:                   $velosa_background;
+$SUCCESS_COLOR:                     #70C070;
+$INFO_COLOR:                        $polyozellus_dark;
+$WARNING_COLOR:                     $calyptroderma_light_cap;
+$DANGER_COLOR:                      $muscaria_background;
+$LIGHT_COLOR:                       $pachycolea_foreground;
+$DARK_COLOR:                        $pachycolea_background;
 
-$LINK_FG_COLOR:               $pachycolea_light_stipe;
-$LINK_VISITED_FG_COLOR:       $muscaria_foreground;
-$LINK_HOVER_FG_COLOR:         $pachycolea_light_stipe;
-$LINK_HOVER_BG_COLOR:         $muscaria_background;
+// ==================================================
+// SECTION 3: UI ELEMENT COLORS
+// ==================================================
 
-$LOGO_BORDER_COLOR:           $velosa_light_veil;
-$LOGO_FG_COLOR:               $muscaria_foreground;
-$LOGO_BG_COLOR:               $muscaria_background;
-$LOGO_HOVER_FG_COLOR:         $muscaria_foreground;
-$LOGO_HOVER_BG_COLOR:         $muscaria_background;
+// --------------------------------------------------
+// Body and Typography
+// --------------------------------------------------
 
-$LEFT_BAR_BORDER_COLOR:       $velosa_background;
-$LEFT_BAR_HEADER_FG_COLOR:    $muscaria_background;
-$LEFT_BAR_HEADER_BG_COLOR:    $velosa_background;
-$LEFT_BAR_FG_COLOR:           $velosa_light_veil;
-$LEFT_BAR_BG_COLOR:           $velosa_background;
-$LEFT_BAR_HOVER_FG_COLOR:     $velosa_light_veil;
-$LEFT_BAR_HOVER_BG_COLOR:     $muscaria_background;
+$BODY_FG_COLOR:                     $pachycolea_foreground;
+$BODY_BG_COLOR:                     $pachycolea_background;
 
-$TOP_BAR_FG_COLOR:            $pachycolea_foreground;
-$TOP_BAR_BG_COLOR:            $pachycolea_background;
-$TOP_BAR_LINK_FG_COLOR:       $pachycolea_light_stipe;
-$TOP_BAR_LINK_HOVER_FG_COLOR: $pachycolea_light_stipe;
-$TOP_BAR_LINK_HOVER_BG_COLOR: $muscaria_background;
+// --------------------------------------------------
+// Links
+// --------------------------------------------------
 
-$LIST_BORDER_COLOR:           transparent;
-$LIST_HEADER_FG_COLOR:        #777777;
-$LIST_HEADER_BG_COLOR:        #EEEEEE;
-$LIST_FG_COLOR:               $pachycolea_foreground;
-$LIST_BG_COLOR:               mix($pachycolea_background, black, 80%);
-$LIST_EVEN_BG_COLOR:          $LIST_BG_COLOR;
-$LIST_ODD_BG_COLOR:           mix($LIST_EVEN_BG_COLOR, black, 25%);
+$LINK_WEIGHT:                       normal;
+$LINK_FG_COLOR:                     $pachycolea_light_stipe;
+$LINK_BG_COLOR:                     transparent;
+$LINK_VISITED_FG_COLOR:             $muscaria_foreground;
+$LINK_VISITED_BG_COLOR:             transparent;
+$LINK_HOVER_FG_COLOR:               $pachycolea_light_stipe;
+$LINK_HOVER_BG_COLOR:               $muscaria_background;
 
-$TOOLTIP_FG_COLOR:            $pachycolea_background;
-$TOOLTIP_BG_COLOR:            $pachycolea_foreground;
+// --------------------------------------------------
+// Buttons
+// --------------------------------------------------
 
-$VOTE_METER_FG_COLOR:         $pachycolea_foreground;
-$VOTE_METER_BG_COLOR:         $pachycolea_background;
+$BUTTON_FG_COLOR:                   $pachycolea_foreground;
+$BUTTON_BG_COLOR:                   $pachycolea_background;
+$BUTTON_BORDER_COLOR:               $velosa_background;
+$BUTTON_HOVER_FG_COLOR:             $pachycolea_foreground;
+$BUTTON_HOVER_BG_COLOR:             $pachycolea_dark_brown;
+$BUTTON_HOVER_BORDER_COLOR:         $velosa_background;
+$BUTTON_ACTIVE_FG_COLOR:            $muscaria_background;
+$BUTTON_ACTIVE_BG_COLOR:            $pachycolea_foreground;
+$BUTTON_PRIMARY_FG_COLOR:           $pachycolea_background;
+$BUTTON_PRIMARY_BG_COLOR:           $velosa_background;
+$BUTTON_PRIMARY_BORDER_COLOR:       $velosa_dark_veil;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     $pachycolea_background;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     $velosa_dark_veil;
+$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $pachycolea_dark_brown;
+$BUTTON_BORDER_WIDTH:               1px;
+$BUTTON_BORDER_STYLE:               solid;
+$BUTTON_BORDER_RADIUS:              5px;
 
-$PROGRESS_BG_COLOR:           $pachycolea_background;
-$PROGRESS_FG_COLOR:           $pachycolea_foreground;
-$PROGRESS_BAR_COLOR:          $phalloides_dark_cap;
+// --------------------------------------------------
+// Form Inputs
+// --------------------------------------------------
 
-$PAGER_FG_COLOR:              $pachycolea_foreground;
-$PAGER_HOVER_FG_COLOR:        $pachycolea_foreground;
-$PAGER_HOVER_BG_COLOR:        $muscaria_background;
-$PAGER_ACTIVE_FG_COLOR:       $pachycolea_background;
-$PAGER_ACTIVE_BG_COLOR:       $pachycolea_foreground;
+$INPUT_FG_COLOR:                    $pachycolea_background;
+$INPUT_BG_COLOR:                    $pachycolea_foreground;
+$INPUT_BORDER_COLOR:                $velosa_background;
+$INPUT_BORDER_WIDTH:                1px;
+$INPUT_BORDER_STYLE:                solid;
+$INPUT_BORDER_RADIUS:               5px;
 
-$MENU_BORDER_COLOR:           $pachycolea_background;
-$MENU_FG_COLOR:               black;
-$MENU_BG_COLOR:               white;
-$MENU_HOT_FG_COLOR:           black;
-$MENU_HOT_BG_COLOR:           $muscaria_background;
-$MENU_WARM_FG_COLOR:          black;
-$MENU_WARM_BG_COLOR:          $velosa_background;
+// --------------------------------------------------
+// Alert States (Info, Success, Warning, Danger)
+// --------------------------------------------------
 
 $INFO_BG_COLOR:                     $polyozellus_dark;
 $INFO_BORDER_COLOR:                 $polyozellus_light;
@@ -98,5 +123,123 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   black;
 
-$WELL_BG_COLOR:                     rgba($pachycolea_light_stipe, 0.45);
+$BANNER_BORDER_WIDTH:               2px;
+$BANNER_BORDER_STYLE:               solid;
+$BANNER_BORDER_RADIUS:              5px;
+
+$ALERT_BORDER_WIDTH:                2px;
+$ALERT_BORDER_STYLE:                solid;
+$ALERT_BORDER_RADIUS:               5px;
+
+// --------------------------------------------------
+// Logo
+// --------------------------------------------------
+
+$LOGO_BORDER_COLOR:                 $velosa_light_veil;
+$LOGO_BORDER_WIDTH:                 1px;
+$LOGO_BORDER_STYLE:                 solid;
+$LOGO_BORDER_RADIUS:                0px;
+$LOGO_FG_COLOR:                     $muscaria_foreground;
+$LOGO_BG_COLOR:                     $muscaria_background;
+$LOGO_HOVER_FG_COLOR:               $muscaria_foreground;
+$LOGO_HOVER_BG_COLOR:               $muscaria_background;
+
+// --------------------------------------------------
+// Left Navigation Bar
+// --------------------------------------------------
+
+$LEFT_BAR_BORDER_COLOR:             $velosa_background;
+$LEFT_BAR_BORDER_WIDTH:             1px;
+$LEFT_BAR_BORDER_STYLE:             solid;
+$LEFT_BAR_BORDER_RADIUS:            5px;
+$LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
+$LEFT_BAR_HEADER_FG_COLOR:          $muscaria_background;
+$LEFT_BAR_HEADER_BG_COLOR:          $velosa_background;
+$LEFT_BAR_FG_COLOR:                 $velosa_light_veil;
+$LEFT_BAR_BG_COLOR:                 $velosa_background;
+$LEFT_BAR_HOVER_FG_COLOR:           $velosa_light_veil;
+$LEFT_BAR_HOVER_BG_COLOR:           $muscaria_background;
+
+// --------------------------------------------------
+// Top Navigation Bar
+// --------------------------------------------------
+
+$TOP_BAR_BORDER_COLOR:              transparent;
+$TOP_BAR_BORDER_WIDTH:              1px;
+$TOP_BAR_BORDER_STYLE:              solid;
+$TOP_BAR_BORDER_RADIUS:             0;
+$TOP_BAR_FG_COLOR:                  $pachycolea_foreground;
+$TOP_BAR_BG_COLOR:                  $pachycolea_background;
+$TOP_BAR_LINK_FG_COLOR:             $pachycolea_light_stipe;
+$TOP_BAR_LINK_BG_COLOR:             transparent;
+$TOP_BAR_LINK_HOVER_FG_COLOR:       $pachycolea_light_stipe;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       $muscaria_background;
+
+// --------------------------------------------------
+// Lists and Tables
+// --------------------------------------------------
+
+$LIST_BORDER_COLOR:                 transparent;
+$LIST_HEADER_FG_COLOR:              #777777;
+$LIST_HEADER_BG_COLOR:              #EEEEEE;
+$LIST_FG_COLOR:                     $pachycolea_foreground;
+$LIST_BG_COLOR:                     mix($pachycolea_background, black, 80%);
+$LIST_EVEN_BG_COLOR:                $LIST_BG_COLOR;
+$LIST_ODD_BG_COLOR:                 mix($LIST_EVEN_BG_COLOR, black, 25%);
+$LIST_HOVER_BG_COLOR:               $pachycolea_dark_brown;
+
+// --------------------------------------------------
+// Menus and Dropdowns
+// --------------------------------------------------
+
+$MENU_BORDER_COLOR:                 $pachycolea_background;
+$MENU_FG_COLOR:                     black;
+$MENU_BG_COLOR:                     white;
+$MENU_HOT_FG_COLOR:                 black;
+$MENU_HOT_BG_COLOR:                 $muscaria_background;
+$MENU_WARM_FG_COLOR:                black;
+$MENU_WARM_BG_COLOR:                $velosa_background;
+
+// --------------------------------------------------
+// Pagination
+// --------------------------------------------------
+
+$PAGER_FG_COLOR:                    $pachycolea_foreground;
+$PAGER_BG_COLOR:                    transparent;
+$PAGER_BORDER_COLOR:                none;
+$PAGER_HOVER_FG_COLOR:              $pachycolea_foreground;
+$PAGER_HOVER_BG_COLOR:              $muscaria_background;
+$PAGER_HOVER_BORDER_COLOR:          none;
+$PAGER_ACTIVE_FG_COLOR:             $pachycolea_background;
+$PAGER_ACTIVE_BG_COLOR:             $pachycolea_foreground;
+$PAGER_ACTIVE_BORDER_COLOR:         none;
+
+// --------------------------------------------------
+// Tooltips
+// --------------------------------------------------
+
+$TOOLTIP_FG_COLOR:                  $pachycolea_background;
+$TOOLTIP_BG_COLOR:                  $pachycolea_foreground;
+
+// --------------------------------------------------
+// Vote Meters
+// --------------------------------------------------
+
+$VOTE_METER_BORDER_COLOR:           none;
+$VOTE_METER_FG_COLOR:               $pachycolea_foreground;
+$VOTE_METER_BG_COLOR:               $pachycolea_background;
+
+// --------------------------------------------------
+// Progress Bars
+// --------------------------------------------------
+
+$PROGRESS_BG_COLOR:                 $pachycolea_background;
+$PROGRESS_FG_COLOR:                 $pachycolea_foreground;
+$PROGRESS_BAR_COLOR:                $phalloides_dark_cap;
+
+// --------------------------------------------------
+// Wells and Panels
+// --------------------------------------------------
+
 $WELL_FG_COLOR:                     $pachycolea_foreground;
+$WELL_BG_COLOR:                     rgba($pachycolea_light_stipe, 0.45);
