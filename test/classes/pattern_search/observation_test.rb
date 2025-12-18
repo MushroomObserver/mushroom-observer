@@ -303,6 +303,15 @@ class PatternSearch::ObservationTest < UnitTestCase
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
+  def test_observation_search_region_smart_quotes
+    expect = Observation.region("California, USA")
+    cal = locations(:california).observations.first
+    assert_not_nil(cal)
+    assert_includes(expect, cal)
+    x = PatternSearch::Observation.new("region:“USA, California”")
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
+  end
+
   def test_observation_search_multiple_regions
     expect = Observation.region(["California, USA", "New York, USA"]).
              reorder(id: :asc).to_a

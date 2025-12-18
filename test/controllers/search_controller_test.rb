@@ -266,4 +266,68 @@ class SearchControllerTest < FunctionalTestCase
     get(:pattern, params:)
     assert_redirected_to(user_path(user.id))
   end
+
+  def test_location_pattern_search_with_keywords
+    login
+    user = users(:rolf)
+
+    # Test that location pattern search with user: keyword uses PatternSearch
+    # and extracts the keyword into query parameters instead of treating it
+    # as a location name pattern
+    params = { pattern_search: { pattern: "user:#{user.login}",
+                                 type: :locations } }
+    get(:pattern, params:)
+
+    # Should redirect to locations index with proper query params
+    assert_redirected_to(/locations/)
+
+    # Parse the redirect URL to extract query parameters
+    redirect_url = URI.parse(redirect_to_url)
+    query_params = CGI.parse(redirect_url.query)
+
+    # Verify that by_users parameter is present (PatternSearch worked)
+    # and pattern parameter is NOT present (raw pattern was used)
+    assert(query_params.key?("q[by_users][]"),
+           "Location pattern search should extract user: keyword into " \
+           "by_users parameter")
+    assert_equal([user.id.to_s], query_params["q[by_users][]"],
+                 "by_users parameter should contain the user ID")
+    assert_predicate(query_params["q[pattern]"], :blank?,
+                     "Location pattern search should not include raw " \
+                     "pattern with keywords")
+
+    # Test with editor: keyword as well
+    params = { pattern_search: { pattern: "editor:#{user.login}",
+                                 type: :locations } }
+    get(:pattern, params:)
+
+    assert_redirected_to(/locations/)
+    redirect_url = URI.parse(redirect_to_url)
+    query_params = CGI.parse(redirect_url.query)
+
+    assert(query_params.key?("q[by_editor][]"),
+           "Location pattern search should extract editor: keyword into " \
+           "by_editor parameter")
+    assert_equal([user.id.to_s], query_params["q[by_editor][]"],
+                 "by_editor parameter should contain the user ID")
+    assert_predicate(query_params["q[pattern]"], :blank?,
+                     "Location pattern search should not include raw " \
+                     "pattern with keywords")
+  end
+
+  def test_pattern_search_rejects_overlong_pattern
+    # Test with pattern exactly at the limit (should work)
+    pattern = "a" * Searchable::MAX_SEARCH_INPUT_LENGTH
+    params = { pattern_search: { pattern:, type: :locations } }
+    get(:pattern, params:)
+    assert_redirected_to(locations_path(q: { model: :Location, pattern: }))
+
+    # Test with pattern over the limit (should fail)
+    # Use a pattern that won't be reduced by strip_squeeze
+    pattern = "abcd" * 2376 # 9504 characters
+    params = { pattern_search: { pattern:, type: :locations } }
+    get(:pattern, params:)
+    assert_response(:redirect)
+    assert_flash_error
+  end
 end
