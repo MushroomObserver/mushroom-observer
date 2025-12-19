@@ -77,12 +77,12 @@ $LINK_HOVER_BG_COLOR:               $muscaria_background;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   $pachycolea_foreground;
-$BUTTON_BG_COLOR:                   $pachycolea_background;
-$BUTTON_BORDER_COLOR:               $velosa_background;
-$BUTTON_HOVER_FG_COLOR:             $pachycolea_foreground;
-$BUTTON_HOVER_BG_COLOR:             $pachycolea_dark_brown;
-$BUTTON_HOVER_BORDER_COLOR:         $velosa_background;
+$BUTTON_FG_COLOR:                   #000000;
+$BUTTON_BG_COLOR:                   #F6F6F6;
+$BUTTON_BORDER_COLOR:               #CCCCCC;
+$BUTTON_HOVER_FG_COLOR:             #000000;
+$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
+$BUTTON_HOVER_BORDER_COLOR:         black;
 $BUTTON_ACTIVE_FG_COLOR:            $muscaria_background;
 $BUTTON_ACTIVE_BG_COLOR:            $pachycolea_foreground;
 $BUTTON_PRIMARY_FG_COLOR:           $pachycolea_background;
@@ -99,9 +99,9 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    $pachycolea_background;
-$INPUT_BG_COLOR:                    $pachycolea_foreground;
-$INPUT_BORDER_COLOR:                $velosa_background;
+$INPUT_FG_COLOR:                    #000000;
+$INPUT_BG_COLOR:                    #FFFFFF;
+$INPUT_BORDER_COLOR:                #CCCCCC;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;

@@ -72,12 +72,12 @@ $LINK_HOVER_BG_COLOR:               $psittacina_gill_color;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   $conica_stain;
-$BUTTON_BG_COLOR:                   $punicea_light_stipe;
-$BUTTON_BORDER_COLOR:               $miniata_cap_yellow;
-$BUTTON_HOVER_FG_COLOR:             $conica_stain;
-$BUTTON_HOVER_BG_COLOR:             $psittacina_gill_color;
-$BUTTON_HOVER_BORDER_COLOR:         $miniata_cap_orange;
+$BUTTON_FG_COLOR:                   #000000;
+$BUTTON_BG_COLOR:                   #F6F6F6;
+$BUTTON_BORDER_COLOR:               #CCCCCC;
+$BUTTON_HOVER_FG_COLOR:             #000000;
+$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
+$BUTTON_HOVER_BORDER_COLOR:         black;
 $BUTTON_ACTIVE_FG_COLOR:            $conica_stain;
 $BUTTON_ACTIVE_BG_COLOR:            $miniata_cap_yellow;
 $BUTTON_PRIMARY_FG_COLOR:           $punicea_light_stipe;
@@ -94,9 +94,9 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    $conica_stain;
+$INPUT_FG_COLOR:                    #000000;
 $INPUT_BG_COLOR:                    #FFFFFF;
-$INPUT_BORDER_COLOR:                $miniata_cap_yellow;
+$INPUT_BORDER_COLOR:                #CCCCCC;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;

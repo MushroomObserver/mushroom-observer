@@ -66,12 +66,12 @@ $LINK_HOVER_BG_COLOR:               $campestris_cap;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   $cupreobrunneus_gills;
-$BUTTON_BG_COLOR:                   $campestris_cap;
-$BUTTON_BORDER_COLOR:               $semotus_cap;
-$BUTTON_HOVER_FG_COLOR:             $cupreobrunneus_gills;
-$BUTTON_HOVER_BG_COLOR:             $augustus_cap;
-$BUTTON_HOVER_BORDER_COLOR:         $brasiliensis_gills_2;
+$BUTTON_FG_COLOR:                   #000000;
+$BUTTON_BG_COLOR:                   #F6F6F6;
+$BUTTON_BORDER_COLOR:               #CCCCCC;
+$BUTTON_HOVER_FG_COLOR:             #000000;
+$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
+$BUTTON_HOVER_BORDER_COLOR:         black;
 $BUTTON_ACTIVE_FG_COLOR:            $campestris_cap;
 $BUTTON_ACTIVE_BG_COLOR:            $brasiliensis_gills_2;
 $BUTTON_PRIMARY_FG_COLOR:           $campestris_cap;
@@ -88,9 +88,9 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    $cupreobrunneus_gills;
+$INPUT_FG_COLOR:                    #000000;
 $INPUT_BG_COLOR:                    #FFFFFF;
-$INPUT_BORDER_COLOR:                $semotus_cap;
+$INPUT_BORDER_COLOR:                #CCCCCC;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
