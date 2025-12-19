@@ -138,12 +138,12 @@ Status: ✅ All variables present
 
 ## Usage Example
 
-To create a new theme called "Amanita Muscaria":
+To create a new theme called "Amanita":
 
 ```bash
 # 1. Copy template
 cp app/assets/stylesheets/variables/_template.scss \
-   app/assets/stylesheets/variables/_amanita_muscaria.scss
+   app/assets/stylesheets/variables/_amanita.scss
 
 # 2. Edit Section 1 - define your mushroom's colors:
 $palette-cap-red:         #CC2616;  // Bright red cap
