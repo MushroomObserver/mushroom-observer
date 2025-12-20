@@ -7,50 +7,45 @@
 // this file instead.
 //
 // USAGE:
-//   1. Set Bootstrap version in mo/_bootstrap_config.scss
-//   2. Toggle $use-bootstrap-3 or $use-bootstrap-4
-//   3. Recompile assets
+//   1. Comment out the Bootstrap version you DON'T want
+//   2. Uncomment the Bootstrap version you DO want
+//   3. Recompile assets: bundle exec rails assets:precompile
 //   4. Test components
 //
-// NOTE: This is a reference implementation. The actual migration will involve
-// replacing mushroom_observer.scss with this pattern.
+// NOTE: Sass doesn't allow @import inside @if blocks, so we use manual
+// commenting to toggle between Bootstrap versions.
 //
 // ==================================================
 
 // ==================================================
-// SECTION 1: BOOTSTRAP VERSION CONFIGURATION
+// SECTION 1: BOOTSTRAP 3 (CURRENT PRODUCTION)
 // ==================================================
+//
+// UNCOMMENT THIS SECTION TO USE BOOTSTRAP 3
+// (This is the default - currently active)
 
-@import "mo/bootstrap_config";
-
-// ==================================================
-// SECTION 2: BOOTSTRAP 3 (CURRENT PRODUCTION)
-// ==================================================
-
-@if $use-bootstrap-3 {
-  // Bootstrap 3 setup
-  @import "bootstrap-sprockets";
-  @import "mo/map_theme_vars_to_bootstrap_vars";
-  @import "bootstrap";
-}
+@import "bootstrap-sprockets";
+@import "mo/map_theme_vars_to_bootstrap_vars";
+@import "bootstrap";
 
 // ==================================================
-// SECTION 3: BOOTSTRAP 4 (MIGRATION TARGET)
+// SECTION 2: BOOTSTRAP 4 (MIGRATION TARGET)
 // ==================================================
+//
+// UNCOMMENT THIS SECTION TO USE BOOTSTRAP 4
+// (COMMENT OUT BOOTSTRAP 3 SECTION ABOVE FIRST)
+//
+// Prerequisites:
+// 1. Add to Gemfile: gem 'bootstrap', '~> 4.6.2'
+// 2. Run: bundle install
+// 3. Uncomment the lines below
+// 4. Comment out Bootstrap 3 section above
 
-@if $use-bootstrap-4 {
-  // Bootstrap 4 setup
-  // Note: When Bootstrap 4 gem is installed, this will import from there
-  @import "mo/map_theme_to_bootstrap4";
-  // @import "bootstrap";  // Uncomment when Bootstrap 4 gem is installed
-
-  // Temporary error to prevent accidental use before BS4 is installed
-  @error "Bootstrap 4 is not yet installed. " +
-         "Install bootstrap gem ~> 4.6 before enabling Bootstrap 4.";
-}
+// @import "mo/map_theme_to_bootstrap4";
+// @import "bootstrap";  // Bootstrap 4 version
 
 // ==================================================
-// SECTION 4: MO CUSTOM STYLES (VERSION-AGNOSTIC)
+// SECTION 3: MO CUSTOM STYLES (VERSION-AGNOSTIC)
 // ==================================================
 //
 // These MO-specific styles should work with both Bootstrap 3 and 4.
@@ -85,21 +80,28 @@
 @import "mo/status_light";
 
 // ==================================================
-// SECTION 5: VERSION-SPECIFIC COMPATIBILITY SHIMS
+// SECTION 4: VERSION-SPECIFIC COMPATIBILITY SHIMS
 // ==================================================
 //
 // Add compatibility fixes here when needed during migration.
+//
+// For Bootstrap 4 compatibility, you can add CSS overrides here.
 // Example:
 //
-// @if $use-bootstrap-4 {
-//   // BS4 changed .panel to .card
-//   .panel {
-//     @extend .card;
-//   }
-//   .panel-heading {
-//     @extend .card-header;
-//   }
-//   .panel-body {
-//     @extend .card-body;
-//   }
+// Remap old Bootstrap 3 classes to Bootstrap 4 equivalents:
+//
+// .panel {
+//   @extend .card;
 // }
+// .panel-heading {
+//   @extend .card-header;
+// }
+// .panel-body {
+//   @extend .card-body;
+// }
+// .panel-footer {
+//   @extend .card-footer;
+// }
+//
+// Note: @extend only works within the same stylesheet compilation,
+// so this works best when both old and new classes are defined.
