@@ -70,11 +70,14 @@ git checkout -b bootstrap4-migration
 ### For Testing Bootstrap 4
 
 ```bash
-# 1. Edit app/assets/stylesheets/mo/_bootstrap_config.scss
-# Set: $use-bootstrap-4: true
+# 1. Edit Gemfile to use Bootstrap 4 gem
+# Comment out: gem 'bootstrap-sass', '~> 3.4.1'
+# Uncomment: gem 'bootstrap', '~> 4.6.2'
+bundle install
 
-# 2. Comment out error in mushroom_observer_migration.scss
-# Uncomment Bootstrap 4 import
+# 2. Edit app/assets/stylesheets/mushroom_observer_migration.scss
+# Comment out Bootstrap 3 imports
+# Uncomment Bootstrap 4 imports
 
 # 3. Compile assets
 bundle exec rails assets:precompile RAILS_ENV=development
@@ -89,13 +92,19 @@ open http://localhost:3000
 ### For Switching Back to Bootstrap 3
 
 ```bash
-# 1. Edit app/assets/stylesheets/mo/_bootstrap_config.scss
-# Set: $use-bootstrap-3: true, $use-bootstrap-4: false
+# 1. Edit Gemfile to use Bootstrap 3 gem
+# Uncomment: gem 'bootstrap-sass', '~> 3.4.1'
+# Comment out: gem 'bootstrap', '~> 4.6.2'
+bundle install
 
-# 2. Recompile
+# 2. Edit app/assets/stylesheets/mushroom_observer_migration.scss
+# Uncomment Bootstrap 3 imports
+# Comment out Bootstrap 4 imports
+
+# 3. Recompile
 bundle exec rails assets:precompile RAILS_ENV=development
 
-# 3. Restart server
+# 4. Restart server
 ```
 
 ## Migration Phases
@@ -121,8 +130,7 @@ The migration is organized into 10 phases that build on each other:
 
 ### Stylesheets
 
-- `app/assets/stylesheets/mo/_bootstrap_config.scss` - Version toggle
-- `app/assets/stylesheets/mushroom_observer_migration.scss` - Parallel system stylesheet
+- `app/assets/stylesheets/mushroom_observer_migration.scss` - Parallel system stylesheet (toggle via manual commenting)
 - `app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss` - BS4 variable mapping
 - `app/assets/stylesheets/mo/_map_theme_vars_to_bootstrap_vars.scss` - BS3 mapping (current)
 
@@ -141,25 +149,26 @@ The migration is organized into 10 phases that build on each other:
 
 ### Parallel Systems Approach
 
-The key innovation is that **both Bootstrap 3 and 4 can coexist**:
+**IMPORTANT:** Bootstrap 3 and 4 gems **cannot be installed simultaneously**. The parallel approach uses:
+1. **Gemfile-level toggling** - Only one Bootstrap gem installed at a time
+2. **Manual stylesheet commenting** - Toggle which Bootstrap imports are active
+3. **Git worktrees for side-by-side testing** - Separate checkouts with different gems
+
+Toggle between versions:
 
 ```scss
-// Configuration file
-$use-bootstrap-3: true !default;
-$use-bootstrap-4: false !default;
+// In mushroom_observer_migration.scss
+// BOOTSTRAP 3 (comment/uncomment these three lines)
+@import "bootstrap-sprockets";
+@import "mo/map_theme_vars_to_bootstrap_vars";
+@import "bootstrap";
 
-// Main stylesheet
-@if $use-bootstrap-3 {
-  @import "bootstrap-sprockets";
-  @import "mo/map_theme_vars_to_bootstrap_vars";
-  @import "bootstrap";
-}
-
-@if $use-bootstrap-4 {
-  @import "mo/map_theme_to_bootstrap4";
-  @import "bootstrap";
-}
+// BOOTSTRAP 4 (comment/uncomment these two lines)
+// @import "mo/map_theme_to_bootstrap4";
+// @import "bootstrap";
 ```
+
+**Note:** Sass doesn't allow `@import` inside `@if` blocks, so manual commenting is required.
 
 ### Benefits
 
@@ -192,15 +201,27 @@ $use-bootstrap-4: false !default;
 
 ### Side-by-Side Testing
 
-Run both Bootstrap versions simultaneously:
+Run both Bootstrap versions simultaneously using git worktrees:
 
 ```bash
+# Create two separate working directories
+git worktree add ../mo-bs3 HEAD
+git worktree add ../mo-bs4 HEAD
+
 # Terminal 1: Bootstrap 3
-$use-bootstrap-3: true
+cd ../mo-bs3
+# Ensure Gemfile has bootstrap-sass active
+bundle install
+# Ensure mushroom_observer_migration.scss has BS3 imports uncommented
+bundle exec rails assets:precompile RAILS_ENV=development
 bundle exec rails server -p 3000
 
 # Terminal 2: Bootstrap 4
-$use-bootstrap-4: true
+cd ../mo-bs4
+# Edit Gemfile to use bootstrap gem
+bundle install
+# Ensure mushroom_observer_migration.scss has BS4 imports uncommented
+bundle exec rails assets:precompile RAILS_ENV=development
 bundle exec rails server -p 3001
 ```
 
@@ -215,15 +236,19 @@ Open both in browser windows and compare.
 git checkout -b bs4-component-name
 
 # 2. Take Bootstrap 3 screenshots
-# Set $use-bootstrap-3: true
+# Ensure Gemfile has bootstrap-sass gem active
+# Ensure mushroom_observer_migration.scss has BS3 imports uncommented
 # Take screenshots, document HTML
 
 # 3. Update component code
 # Edit views, helpers, CSS as needed
 
 # 4. Test with Bootstrap 4
-# Set $use-bootstrap-4: true
-# Recompile, test, take screenshots
+# Edit Gemfile to use bootstrap gem
+# Edit mushroom_observer_migration.scss to use BS4 imports
+bundle install
+bundle exec rails assets:precompile RAILS_ENV=development
+# Test, take screenshots
 
 # 5. Compare and fix issues
 diff screenshots/bs3/ screenshots/bs4/
@@ -239,7 +264,9 @@ git commit -m "Migrate component-name to Bootstrap 4"
 
 ```bash
 # 1. Enable Bootstrap 4
-# Edit mo/_bootstrap_config.scss
+# Edit Gemfile to use bootstrap gem
+bundle install
+# Edit mushroom_observer_migration.scss to use BS4 imports
 
 # 2. Recompile
 bundle exec rails assets:precompile RAILS_ENV=development
@@ -254,9 +281,11 @@ bundle exec rails assets:precompile RAILS_ENV=development
 ### Reverting a Problem
 
 ```bash
-# Quick revert - switch config
-# Edit mo/_bootstrap_config.scss
-$use-bootstrap-3: true
+# Quick revert - switch back to Bootstrap 3
+# Edit Gemfile to use bootstrap-sass gem
+bundle install
+# Edit mushroom_observer_migration.scss to use BS3 imports
+bundle exec rails assets:precompile RAILS_ENV=development
 
 # Or revert code changes
 git revert <commit-hash>
@@ -281,13 +310,18 @@ bundle exec rails assets:precompile RAILS_ENV=development
 bundle exec sass --check app/assets/stylesheets/Agaricus.scss
 ```
 
-### Both Bootstrap Versions Enabled Error
+### Both Bootstrap Gems Installed Error
 
-```scss
-// Fix in mo/_bootstrap_config.scss
-// Only ONE should be true
-$use-bootstrap-3: true !default;
-$use-bootstrap-4: false !default;
+```bash
+# Error: "already initialized constant Bootstrap::VERSION"
+# or "1rem and 12px have incompatible units"
+#
+# Cause: Both bootstrap-sass and bootstrap gems installed simultaneously
+#
+# Fix: Edit Gemfile to have only ONE gem active:
+# Comment out gem 'bootstrap-sass', '~> 3.4.1'
+# OR comment out gem 'bootstrap', '~> 4.6.2'
+bundle install
 ```
 
 ### Missing Bootstrap 4 Gem

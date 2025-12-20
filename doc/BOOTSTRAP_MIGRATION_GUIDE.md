@@ -36,21 +36,57 @@ Instead of a "big bang" migration, we use a **gradual, component-by-component** 
 
 ## Setup Instructions
 
-### 1. Install Bootstrap 4 Gem
+### 1. Understanding Gem Limitations
 
-Add to `Gemfile` after line for `bootstrap-sass`:
+**IMPORTANT:** Bootstrap 3 and Bootstrap 4 gems **cannot be installed simultaneously**. Both gems:
+- Define the same Ruby constants (`Bootstrap::VERSION`)
+- Register the same Sass import paths (`@import "bootstrap"`)
+- Use incompatible units (pixels vs REMs)
 
+This means you must **toggle at the Gemfile level**, not just the stylesheet level.
+
+### 2. Install Bootstrap 4 Gem
+
+**Edit `Gemfile`** to toggle between Bootstrap versions:
+
+**For Bootstrap 3 (current production):**
 ```ruby
-# Bootstrap 4 (migration target)
-gem("bootstrap", "~> 4.6.2")
+gem 'bootstrap-sass', '~> 3.4.1'
+# gem 'bootstrap', '~> 4.6.2'  # Comment out
 ```
 
-Run:
+**For Bootstrap 4 testing:**
+```ruby
+# gem 'bootstrap-sass', '~> 3.4.1'  # Comment out
+gem 'bootstrap', '~> 4.6.2'
+```
+
+Then run:
 ```bash
 bundle install
 ```
 
-### 2. Toggle Bootstrap Version
+**Alternative: Environment Variable Approach (Better for Teams)**
+
+```ruby
+# Gemfile
+if ENV['BOOTSTRAP_VERSION'] == '4'
+  gem 'bootstrap', '~> 4.6.2'
+else
+  gem 'bootstrap-sass', '~> 3.4.1'  # Default
+end
+```
+
+Switch versions:
+```bash
+# Bootstrap 3 (default)
+bundle install
+
+# Bootstrap 4
+BOOTSTRAP_VERSION=4 bundle install
+```
+
+### 3. Toggle Bootstrap Version in Stylesheet
 
 The migration stylesheet uses manual commenting to switch between Bootstrap versions
 (Sass doesn't allow `@import` inside `@if` blocks).
@@ -73,7 +109,7 @@ To switch to Bootstrap 4:
 2. Uncomment the Bootstrap 4 imports
 3. Recompile assets
 
-### 3. Switch to Migration-Ready Stylesheet (Optional for Testing)
+### 4. Switch to Migration-Ready Stylesheet (Optional for Testing)
 
 To test the parallel system:
 
@@ -370,29 +406,38 @@ git branch -D bs4-migrate-component-name
 
 ### Side-by-Side Testing
 
-For critical components, set up side-by-side comparison:
+For critical components, set up side-by-side comparison.
 
-1. Set up two copies of the codebase or use git worktrees:
+**IMPORTANT:** Since Bootstrap 3 and 4 gems cannot coexist, you need **separate codebases** with different gems installed:
+
 ```bash
-# Option A: Use git worktrees
+# Use git worktrees to create two separate working directories
 git worktree add ../mo-bs3 HEAD
 git worktree add ../mo-bs4 HEAD
 
-# Option B: Two terminal tabs in same codebase
-# Edit mushroom_observer_migration.scss between tests
-
-# Terminal 1: Bootstrap 3 (ensure BS3 imports active)
+# Terminal 1: Bootstrap 3
+cd ../mo-bs3
+# Ensure Gemfile has bootstrap-sass gem active
+bundle install
+# Ensure mushroom_observer_migration.scss has BS3 imports uncommented
+bundle exec rails assets:precompile RAILS_ENV=development
 bundle exec rails server -p 3000
 
-# Terminal 2: Bootstrap 4 (switch to BS4 imports, recompile)
-# Edit mushroom_observer_migration.scss for BS4
-# Recompile assets
+# Terminal 2: Bootstrap 4
+cd ../mo-bs4
+# Edit Gemfile to use bootstrap gem instead
+# Uncomment: gem 'bootstrap', '~> 4.6.2'
+# Comment: gem 'bootstrap-sass', '~> 3.4.1'
+bundle install
+# Ensure mushroom_observer_migration.scss has BS4 imports uncommented
+bundle exec rails assets:precompile RAILS_ENV=development
 bundle exec rails server -p 3001
 ```
 
-2. Open both in browser windows side-by-side
-3. Navigate through same pages simultaneously
-4. Document any differences
+Then:
+1. Open both in browser windows side-by-side (localhost:3000 and localhost:3001)
+2. Navigate through same pages simultaneously
+3. Document any differences
 
 ### Automated Testing
 
@@ -443,14 +488,20 @@ git revert <commit-hash>
 
 ```bash
 # Switch back to Bootstrap 3
-# Edit mushroom_observer_migration.scss:
+
+# 1. Edit Gemfile:
+# - Uncomment: gem 'bootstrap-sass', '~> 3.4.1'
+# - Comment out: gem 'bootstrap', '~> 4.6.2'
+bundle install
+
+# 2. Edit mushroom_observer_migration.scss:
 # - Uncomment Bootstrap 3 imports
 # - Comment out Bootstrap 4 imports
 
-# Recompile
+# 3. Recompile
 bundle exec rails assets:precompile
 
-# Deploy
+# 4. Deploy
 ```
 
 ### Emergency Production Rollback
