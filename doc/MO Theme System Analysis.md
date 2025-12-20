@@ -56,17 +56,17 @@ The theme system has significant inconsistencies that will complicate Bootstrap 
   3\. **Orphaned definitions**: Variables defined in themes but not defaults creates fragility
   4\. **No validation**: No way to verify a theme defines all required variables
 
-  **Bootstrap 5 Requirements**
-  Bootstrap 5 expects a **semantic color system**:
-  // What Bootstrap 5 needs:
-  $primary:    \#0d6efd;
+  **Bootstrap 4 Requirements**
+  Bootstrap 4 expects a **semantic color system**:
+  // What Bootstrap 4 needs:
+  $primary:    \#007bff;
   $secondary:  \#6c757d;
-  $success:    \#198754;
-  $info:       \#0dcaf0;
+  $success:    \#28a745;
+  $info:       \#17a2b8;
   $warning:    \#ffc107;
   $danger:     \#dc3545;
   $light:      \#f8f9fa;
-  $dark:       \#212529;
+  $dark:       \#343a40;
   Your current themes don't map cleanly to this.
 
   **Recommended Fix Plan**
@@ -197,11 +197,11 @@ The theme system has significant inconsistencies that will complicate Bootstrap 
     puts
   end
 
-###   **Phase 5: Bootstrap 5 Mapping Layer (1 week)**
+###   **Phase 5: Bootstrap 4 Mapping Layer (1 week)**
 
-  Create new file that maps theme variables to Bootstrap 5:
-  // app/assets/stylesheets/mo/\_map\_theme\_to\_bootstrap5.scss
-  // Bootstrap 5 semantic colors
+  Create new file that maps theme variables to Bootstrap 4:
+  // app/assets/stylesheets/mo/\_map\_theme\_to\_bootstrap4.scss
+  // Bootstrap 4 semantic colors
   $primary:    $PRIMARY\_COLOR;
   $secondary:  $SECONDARY\_COLOR;
   $success:    $SUCCESS\_COLOR;
@@ -210,14 +210,14 @@ The theme system has significant inconsistencies that will complicate Bootstrap 
   $danger:     $DANGER\_COLOR;
   $light:      $LIGHT\_COLOR;
   $dark:       $DARK\_COLOR;
-  // Bootstrap 5 typography
+  // Bootstrap 4 typography
   $body-color: $BODY\_FG\_COLOR;
   $body-bg:    $BODY\_BG\_COLOR;
   $link-color: $LINK\_FG\_COLOR;
-  // Bootstrap 5 components
+  // Bootstrap 4 components
   $btn-font-weight: bold;
   $btn-border-radius: $BUTTON\_BORDER\_RADIUS;
-  // ... map all theme variables to BS5 variables
+  // ... map all theme variables to BS4 variables
 
 ###   **Phase 6: Migration Path (Parallel Systems)**
 
@@ -229,8 +229,8 @@ The theme system has significant inconsistencies that will complicate Bootstrap 
   // @import "bootstrap-sprockets";
   // @import "mo/map\_theme\_vars\_to\_bootstrap\_vars";
   // @import "bootstrap";
-  // NEW: Bootstrap 5 (after migration)
-  @import "mo/map\_theme\_to\_bootstrap5";
+  // NEW: Bootstrap 4 (after migration)
+  @import "mo/map\_theme\_to\_bootstrap4";
   @import "bootstrap";
   @import "mo/elements";
   // ... rest of MO styles
@@ -238,7 +238,7 @@ The theme system has significant inconsistencies that will complicate Bootstrap 
   **Benefits of This Plan**
   1\. **✅ Complete Coverage**: All themes define all variables
   2\. **✅ Semantic System**: Clear primary/secondary/success color hierarchy
-  3\. **✅ Easy Bootstrap Migration**: Clean mapping to BS5 semantic colors
+  3\. **✅ Easy Bootstrap Migration**: Clean mapping to BS4 semantic colors
   4\. **✅ Validation**: Script ensures themes are complete
   5\. **✅ Maintainability**: Template makes creating new themes easy
   6\. **✅ Color Harmony**: Semantic layer ensures consistent color usage
@@ -250,7 +250,7 @@ The theme system has significant inconsistencies that will complicate Bootstrap 
   | 2\. Create template      | 3 days    | Developer            |
   | 3\. Update themes        | 2-3 weeks | Designer \+ Developer |
   | 4\. Validation script    | 2 days    | Developer            |
-  | 5\. BS5 mapping          | 1 week    | Developer            |
+  | 5\. BS4 mapping          | 1 week    | Developer            |
   | 6\. Testing              | 1 week    | QA \+ Designer        |
   | **Total**                   | **6-7 weeks** | Team                 |
 
