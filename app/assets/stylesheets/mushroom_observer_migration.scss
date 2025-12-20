@@ -2,15 +2,19 @@
 // MUSHROOM OBSERVER - MIGRATION-READY STYLESHEET
 // ==================================================
 //
-// This file demonstrates the parallel Bootstrap 3/4 system during migration.
-// To use this file instead of mushroom_observer.scss, theme files would import
-// this file instead.
+// This file provides toggle infrastructure for Bootstrap 3/4 migration.
+// Allows rapid switching between Bootstrap versions for testing.
+//
+// IMPORTANT: Bootstrap 3 and 4 gems cannot be installed simultaneously.
+// You must also toggle the gem in the Gemfile and run `bundle install`.
 //
 // USAGE:
-//   1. Comment out the Bootstrap version you DON'T want
-//   2. Uncomment the Bootstrap version you DO want
-//   3. Recompile assets: bundle exec rails assets:precompile
-//   4. Test components
+//   1. Edit Gemfile to use the Bootstrap version you want
+//   2. Run: bundle install
+//   3. Comment out the Bootstrap version you DON'T want below
+//   4. Uncomment the Bootstrap version you DO want below
+//   5. Recompile assets: bundle exec rails assets:precompile
+//   6. Test components
 //
 // NOTE: Sass doesn't allow @import inside @if blocks, so we use manual
 // commenting to toggle between Bootstrap versions.

@@ -2,7 +2,9 @@
 
 ## Overview
 
-This guide covers the migration from Bootstrap 3 to Bootstrap 4 for Mushroom Observer. The migration uses a **parallel systems approach** that allows both Bootstrap versions to coexist during the transition period.
+This guide covers the migration from Bootstrap 3 to Bootstrap 4 for Mushroom Observer. The migration uses a **staged migration approach** with infrastructure that supports rapid toggling between Bootstrap versions for development and testing.
+
+**Key Constraint:** Bootstrap 3 and 4 gems cannot be installed simultaneously, so the actual production deployment will be a single switchover event after all components are ready.
 
 ## Table of Contents
 
@@ -16,23 +18,38 @@ This guide covers the migration from Bootstrap 3 to Bootstrap 4 for Mushroom Obs
 
 ## Migration Strategy
 
-### Parallel Systems Approach
+### Staged Migration with Rapid Toggle Infrastructure
 
-Instead of a "big bang" migration, we use a **gradual, component-by-component** approach:
+This approach allows **incremental development** while maintaining a **controlled deployment**:
 
-1. **Bootstrap 3 remains the default** until all components are migrated and tested
-2. **Bootstrap 4 can be enabled** for development/testing via configuration flag
-3. **Components are migrated incrementally** with testing after each change
-4. **Theme system remains unchanged** - both Bootstrap versions use the same theme variables
-5. **Final switchover** happens only after all components pass testing
+**Development Phase (Component-by-Component):**
+1. **Update component HTML/views** to use Bootstrap 4 compatible classes
+2. **Add compatibility shims** in custom CSS so components work with both BS3 and BS4
+3. **Test each component** by toggling between BS3 and BS4 gems
+4. **Commit when component works** with both versions (or is BS4-only after all components ready)
+5. **Repeat for all components** until entire application is migration-ready
 
-### Benefits
+**Deployment Phase (Single Switchover):**
+1. All components are BS4-ready and tested
+2. Production deployment switches from bootstrap-sass to bootstrap gem
+3. Remove BS3 compatibility shims in cleanup phase
 
-- ✅ Lower risk - can revert individual components if issues arise
-- ✅ Incremental progress - don't need to fix everything at once
-- ✅ Continuous testing - catch issues early component-by-component
-- ✅ Minimal disruption - production stays on BS3 until ready
-- ✅ Theme compatibility - themes work with both versions
+### What This Approach Enables
+
+- ✅ **Incremental development** - Update components one at a time
+- ✅ **Rapid testing** - Toggle between BS3/BS4 to compare (requires bundle install)
+- ✅ **Lower risk development** - Test each component before moving to next
+- ✅ **Theme compatibility** - Same theme variables work with both versions
+- ✅ **Controlled deployment** - Production switches only when all components ready
+- ✅ **Rollback capability** - Can revert deployment if critical issues found
+
+### What This Approach Does NOT Enable
+
+- ❌ **Gradual production deployment** - Cannot deploy BS4 component-by-component
+- ❌ **Parallel runtime** - Cannot run BS3 and BS4 simultaneously in one installation
+- ❌ **A/B testing in production** - Deployment is all-or-nothing switchover
+
+**Reality Check:** While development is incremental, the production deployment is still a "big bang" event. This infrastructure reduces risk by ensuring everything is tested before that switchover.
 
 ## Setup Instructions
 
@@ -111,7 +128,7 @@ To switch to Bootstrap 4:
 
 ### 4. Switch to Migration-Ready Stylesheet (Optional for Testing)
 
-To test the parallel system:
+To test the toggle infrastructure:
 
 1. Backup current theme file (e.g., `app/assets/stylesheets/Agaricus.scss`)
 2. Modify theme file to import migration stylesheet:

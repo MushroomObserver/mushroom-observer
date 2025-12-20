@@ -2,7 +2,9 @@
 
 ## Overview
 
-This directory contains complete documentation for migrating Mushroom Observer from Bootstrap 3 to Bootstrap 4 using a parallel systems approach.
+This directory contains complete documentation for migrating Mushroom Observer from Bootstrap 3 to Bootstrap 4 using a staged migration approach with rapid toggle infrastructure.
+
+**Key Constraint:** Bootstrap 3 and 4 gems cannot be installed simultaneously. This infrastructure enables incremental component development and testing, but the production deployment is a single switchover event.
 
 ## Documentation Index
 
@@ -147,12 +149,27 @@ The migration is organized into 10 phases that build on each other:
 
 ## Migration Strategy
 
-### Parallel Systems Approach
+### Staged Migration with Rapid Toggle Infrastructure
 
-**IMPORTANT:** Bootstrap 3 and 4 gems **cannot be installed simultaneously**. The parallel approach uses:
-1. **Gemfile-level toggling** - Only one Bootstrap gem installed at a time
-2. **Manual stylesheet commenting** - Toggle which Bootstrap imports are active
-3. **Git worktrees for side-by-side testing** - Separate checkouts with different gems
+This approach separates **incremental development** from **controlled deployment**.
+
+**How It Works:**
+
+1. **Development Phase:**
+   - Update components incrementally to be Bootstrap 4 compatible
+   - Toggle between BS3/BS4 gems for testing each component
+   - Add compatibility shims so components work with both versions (when possible)
+   - Commit component updates progressively
+
+2. **Testing Infrastructure:**
+   - **Gemfile-level toggling** - Switch which Bootstrap gem is installed
+   - **Manual stylesheet commenting** - Toggle which Bootstrap imports are active
+   - **Git worktrees** - Run both versions side-by-side for comparison
+
+3. **Deployment Phase:**
+   - All components tested and BS4-ready
+   - Single production deployment switches gems
+   - Remove compatibility shims in cleanup
 
 Toggle between versions:
 
@@ -170,13 +187,21 @@ Toggle between versions:
 
 **Note:** Sass doesn't allow `@import` inside `@if` blocks, so manual commenting is required.
 
-### Benefits
+### What This Enables
 
-1. **Gradual Migration** - Components can be migrated one at a time
-2. **Easy Testing** - Toggle between versions to compare
-3. **Lower Risk** - Can revert individual components if needed
-4. **Continuous Deployment** - Don't need to wait for complete migration
-5. **Theme Compatibility** - Same theme variables work with both versions
+1. ✅ **Incremental development** - Update and test components one at a time
+2. ✅ **Rapid testing** - Toggle versions to compare (requires `bundle install`)
+3. ✅ **Lower risk** - Thoroughly test before deployment
+4. ✅ **Theme compatibility** - Same theme variables work with both versions
+5. ✅ **Controlled deployment** - Switch only when all components ready
+
+### What This Does NOT Enable
+
+1. ❌ **Gradual production deployment** - Deployment is single switchover event
+2. ❌ **Parallel runtime** - Cannot run both BS versions simultaneously
+3. ❌ **Component-by-component production rollout** - All-or-nothing deployment
+
+**Reality:** Development is incremental, deployment is "big bang". This infrastructure reduces risk by ensuring everything works before switching.
 
 ## Testing Strategy
 
