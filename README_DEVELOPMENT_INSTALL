@@ -203,6 +203,8 @@ jason> mysql -u root -p
   # SET PASSWORD FOR 'mo'@'localhost' = PASSWORD('xxx');
   GRANT ALL PRIVILEGES ON mo_development.* TO 'mo'@'localhost' WITH GRANT OPTION;
   GRANT ALL PRIVILEGES ON mo_test.* TO 'mo'@'localhost' WITH GRANT OPTION;
+  # For parallel testing (creates mo_test-0, mo_test-1, etc.)
+  GRANT ALL PRIVILEGES ON `mo_test-%`.* TO 'mo'@'localhost';
   GRANT ALL PRIVILEGES ON cache_development.* TO 'mo'@'localhost' WITH GRANT OPTION;
 mo> cp config/database.yml-template config/database.yml
 mo> vi config/database.yml

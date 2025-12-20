@@ -58,3 +58,10 @@ public/orig_cache
 checkpoint*
 db/checkpoint*
 
+# Worker-specific test files created during parallel testing
+config/blocked_ips-*.txt
+config/okay_ips-*.txt
+config/ip_stats-*.txt
+config/test_locales-*
+config/mysql-test-*.cnf
+
