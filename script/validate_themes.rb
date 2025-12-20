@@ -2,11 +2,12 @@
 # frozen_string_literal: true
 
 # Theme Validation Script
-# Ensures all themes define all required variables and identifies orphaned variables
+# Ensures all themes define all required variables and identifies
+# orphaned variables
 #
 # Usage:
 #   script/validate_themes.rb           # Validate all themes
-#   script/validate_themes.rb --strict  # Exit with error if any issues found
+#   script/validate_themes.rb --strict  # Exit with error if issues found
 #
 # Exit codes:
 #   0 - All themes are valid
@@ -30,7 +31,7 @@ def load_defaults_variables
   variables = extract_variables_from_file(DEFAULTS_FILE)
 
   if variables.empty?
-    puts "❌ ERROR: Could not find any variables in #{DEFAULTS_FILE}"
+    puts("❌ ERROR: Could not find any variables in #{DEFAULTS_FILE}")
     exit(1)
   end
 
@@ -56,32 +57,37 @@ def coverage_percentage(defined_count, total_count)
   ((defined_count.to_f / total_count) * 100).round(1)
 end
 
+# Display missing variables for a theme
+def display_missing_variables(missing)
+  return if missing.empty?
+
+  puts("  ⚠️  Missing #{missing.size} from defaults:")
+  missing.sort.each { |var| puts("      - $#{var}") }
+end
+
+# Display orphaned variables for a theme
+def display_orphaned_variables(orphaned)
+  return if orphaned.empty?
+
+  puts("  ⚠️  Has #{orphaned.size} orphaned variables " \
+       "(not in defaults):")
+  orphaned.sort.each { |var| puts("      - $#{var}") }
+end
+
 # Display theme validation results
 def display_theme_results(theme_name, theme_vars, defaults_vars)
   missing = defaults_vars - theme_vars
   orphaned = theme_vars - defaults_vars
-
-  puts "#{theme_name}:"
-  puts "  ✓ Defines #{theme_vars.size} variables"
-
   coverage = coverage_percentage(theme_vars.size, defaults_vars.size)
-  puts "  📊 Coverage: #{coverage}%"
 
-  if missing.any?
-    puts "  ⚠️  Missing #{missing.size} from defaults:"
-    missing.sort.each { |var| puts "      - $#{var}" }
-  end
+  puts("#{theme_name}:")
+  puts("  ✓ Defines #{theme_vars.size} variables")
+  puts("  📊 Coverage: #{coverage}%")
 
-  if orphaned.any?
-    puts "  ⚠️  Has #{orphaned.size} orphaned variables " \
-         "(not in defaults):"
-    orphaned.sort.each { |var| puts "      - $#{var}" }
-  end
+  display_missing_variables(missing)
+  display_orphaned_variables(orphaned)
 
-  if missing.empty? && orphaned.empty?
-    puts "  ✅ Theme is complete!"
-  end
-
+  puts("  ✅ Theme is complete!") if missing.empty? && orphaned.empty?
   puts
 
   { missing: missing, orphaned: orphaned, coverage: coverage }
@@ -95,22 +101,32 @@ def validate_theme(theme_file, defaults_vars)
   display_theme_results(theme_name, theme_vars, defaults_vars)
 end
 
+# Count complete themes
+def count_complete_themes(results)
+  results.count { |r| r[:missing].empty? && r[:orphaned].empty? }
+end
+
+# Calculate average coverage across all themes
+def calculate_average_coverage(results)
+  return 0 if results.empty?
+
+  (results.sum { |r| r[:coverage] } / results.size).round(1)
+end
+
 # Display summary statistics
 def display_summary(results, defaults_count)
-  puts "=" * 60
-  puts "SUMMARY"
-  puts "=" * 60
+  puts("=" * 60)
+  puts("SUMMARY")
+  puts("=" * 60)
 
-  complete_themes = results.count { |r| r[:missing].empty? && r[:orphaned].empty? }
+  complete_themes = count_complete_themes(results)
   total_themes = results.size
 
-  puts "Total themes: #{total_themes}"
-  puts "Complete themes: #{complete_themes}"
-  puts "Incomplete themes: #{total_themes - complete_themes}"
-  puts "Required variables per theme: #{defaults_count}"
-
-  avg_coverage = results.sum { |r| r[:coverage] } / results.size
-  puts "Average coverage: #{avg_coverage.round(1)}%"
+  puts("Total themes: #{total_themes}")
+  puts("Complete themes: #{complete_themes}")
+  puts("Incomplete themes: #{total_themes - complete_themes}")
+  puts("Required variables per theme: #{defaults_count}")
+  puts("Average coverage: #{calculate_average_coverage(results)}%")
 
   puts
 end
@@ -120,40 +136,53 @@ def validation_passed?(results)
   results.all? { |r| r[:missing].empty? && r[:orphaned].empty? }
 end
 
-# Main validation logic
-def validate_all_themes(strict_mode: false)
-  puts "=" * 60
-  puts "THEME VALIDATION"
-  puts "=" * 60
+# Display validation header
+def display_validation_header
+  puts("=" * 60)
+  puts("THEME VALIDATION")
+  puts("=" * 60)
   puts
+end
 
-  defaults_vars = load_defaults_variables
-  puts "✓ Loaded #{defaults_vars.size} variables from defaults theme"
-  puts
-
+# Load and validate all theme files
+def load_and_validate_themes(defaults_vars)
   theme_files = find_theme_files
 
   if theme_files.empty?
-    puts "❌ ERROR: No theme files found in #{THEMES_DIR}"
+    puts("❌ ERROR: No theme files found in #{THEMES_DIR}")
     exit(1)
   end
 
-  puts "Found #{theme_files.size} themes to validate"
+  puts("Found #{theme_files.size} themes to validate")
   puts
 
-  results = theme_files.map do |theme_file|
-    validate_theme(theme_file, defaults_vars)
-  end
+  theme_files.map { |theme_file| validate_theme(theme_file, defaults_vars) }
+end
 
-  display_summary(results, defaults_vars.size)
-
+# Handle validation exit based on results
+def handle_validation_exit(results, strict_mode)
   if validation_passed?(results)
-    puts "✅ All themes are valid!"
+    puts("✅ All themes are valid!")
     exit(0)
   else
-    puts "❌ Validation failed: Some themes have missing or orphaned variables"
+    puts("❌ Validation failed: Some themes have missing or " \
+         "orphaned variables")
     exit(strict_mode ? 1 : 0)
   end
+end
+
+# Main validation logic
+def validate_all_themes(strict_mode: false)
+  display_validation_header
+
+  defaults_vars = load_defaults_variables
+  puts("✓ Loaded #{defaults_vars.size} variables from defaults theme")
+  puts
+
+  results = load_and_validate_themes(defaults_vars)
+  display_summary(results, defaults_vars.size)
+
+  handle_validation_exit(results, strict_mode)
 end
 
 # Script entry point
