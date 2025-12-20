@@ -50,18 +50,16 @@ Run:
 bundle install
 ```
 
-### 2. Configure Bootstrap Version
+### 2. Confirm Bootstrap Version Configuration
 
-Edit `app/assets/stylesheets/mo/_bootstrap_config.scss`:
+Look at `app/assets/stylesheets/mo/_bootstrap_config.scss` and confirm that it contains these lines:
 
 ```scss
-// For Bootstrap 3 (production default)
+// Set to true to use Bootstrap 3 (current production version)                                                               
 $use-bootstrap-3: true !default;
-$use-bootstrap-4: false !default;
 
-// For Bootstrap 4 testing
-// $use-bootstrap-3: false !default;
-// $use-bootstrap-4: true !default;
+// Set to true to use Bootstrap 4 (migration target)                                                                         
+$use-bootstrap-4: false !default;
 ```
 
 ### 3. Switch to Migration-Ready Stylesheet (Optional for Testing)
