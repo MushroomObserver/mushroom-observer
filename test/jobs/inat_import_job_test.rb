@@ -4,18 +4,28 @@ require("test_helper")
 require_relative("inat_import_job_test_doubles")
 
 class InatImportJobTest < ActiveJob::TestCase
+  include GeneralExtensions
   include InatImportJobTestDoubles
   include Inat::Constants
 
   def setup
     super
     @user = users(:inat_importer)
-    directory_path = Rails.public_path.join("test_images/orig")
-    FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
+    # Use worker-specific image directories for parallel testing
+    setup_image_dirs
     @external_link_base_url = ExternalSite.find_by(name: "iNaturalist").base_url
-    return unless Rails.root.join("log/job.log").exist?
+    return unless job_log_file.exist?
 
-    Rails.root.join("log/job.log").write("")
+    job_log_file.write("")
+  end
+
+  def job_log_file
+    # Use worker-specific log file for parallel testing
+    if (worker_num = database_worker_number)
+      Rails.root.join("log/job-#{worker_num}.log")
+    else
+      Rails.root.join("log/job.log")
+    end
   end
 
   # Had 1 identification, 0 photos, 0 observation_fields
@@ -654,7 +664,7 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.perform_now(@inat_import)
     end
     # Assert that the job logged the parsed page with iNat observation IDs
-    log_content = Rails.root.join("log/job.log").read
+    log_content = job_log_file.read
     assert_match(
       /Got parsed page with iNat #{first_id}-#{last_id}/, log_content,
       "Log missing parsed page message with iNat 1st and last observation IDs"
@@ -710,7 +720,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to log error for first observation")
 
     # Assert that the second observation was still imported
-    log_content = Rails.root.join("log/job.log").read
+    log_content = job_log_file.read
     assert_match(/Imported iNat #{last_id} as MO \d+/, log_content,
                  "Failed to import second observation after error in first")
 
@@ -960,7 +970,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  payload[:observation_field_value][:observation_field_id],
                  "Incorrect observation_field_id in error payload")
 
-    log_content = Rails.root.join("log/job.log").read
+    log_content = job_log_file.read
     assert_no_match(/Imported iNat #{@parsed_results.first[:id]}/,
                     log_content,
                     "Should not log import success when error occurs")

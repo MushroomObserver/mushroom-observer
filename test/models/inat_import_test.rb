@@ -71,4 +71,23 @@ class InatImportTest < ActiveSupport::TestCase
 
     assert_match(/Exception error message/, import.response_errors)
   end
+
+  def test_response_errors_initialized_on_new_instance
+    import = InatImport.new(user: users(:rolf))
+
+    assert_not_nil(import.response_errors,
+                   "response_errors should be initialized to empty string")
+    assert_equal("", import.response_errors,
+                 "response_errors should be initialized to empty string")
+  end
+
+  def test_add_response_error_without_prior_errors
+    import = InatImport.new(user: users(:rolf))
+    import.save!
+
+    import.add_response_error("Test error message")
+
+    assert_match(/Test error message/, import.response_errors,
+                 "Error message should be added to response_errors")
+  end
 end
