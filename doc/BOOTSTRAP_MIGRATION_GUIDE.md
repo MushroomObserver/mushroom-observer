@@ -53,19 +53,28 @@ Run:
 bundle install
 ```
 
-### 2. Configure Bootstrap Version
+### 2. Toggle Bootstrap Version
 
-Edit `app/assets/stylesheets/mo/_bootstrap_config.scss`:
+The migration stylesheet uses manual commenting to switch between Bootstrap versions
+(Sass doesn't allow `@import` inside `@if` blocks).
+
+Edit `app/assets/stylesheets/mushroom_observer_migration.scss`:
 
 ```scss
-// For Bootstrap 3 (production default)
-$use-bootstrap-3: true !default;
-$use-bootstrap-4: false !default;
+// BOOTSTRAP 3 (active by default)
+@import "bootstrap-sprockets";
+@import "mo/map_theme_vars_to_bootstrap_vars";
+@import "bootstrap";
 
-// For Bootstrap 4 testing
-// $use-bootstrap-3: false !default;
-// $use-bootstrap-4: true !default;
+// BOOTSTRAP 4 (commented out)
+// @import "mo/map_theme_to_bootstrap4";
+// @import "bootstrap";  // BS4 version
 ```
+
+To switch to Bootstrap 4:
+1. Comment out the Bootstrap 3 imports
+2. Uncomment the Bootstrap 4 imports
+3. Recompile assets
 
 ### 3. Switch to Migration-Ready Stylesheet (Optional for Testing)
 
@@ -87,11 +96,14 @@ bundle exec rails assets:precompile RAILS_ENV=development
 
 ### 4. Enable Bootstrap 4 for Testing
 
-1. Set `$use-bootstrap-4: true` in `mo/_bootstrap_config.scss`
-2. Comment out the temporary error in `mushroom_observer_migration.scss`
-3. Uncomment the Bootstrap 4 import line
-4. Recompile assets
-5. Test in browser
+1. Edit `mushroom_observer_migration.scss`:
+   - Comment out Bootstrap 3 imports
+   - Uncomment Bootstrap 4 imports
+2. Recompile assets:
+   ```bash
+   bundle exec rails assets:precompile RAILS_ENV=development
+   ```
+3. Test in browser
 
 ## Component Migration Order
 
@@ -242,7 +254,7 @@ Follow this checklist for every component you migrate:
 
 ```bash
 # Enable Bootstrap 3
-# Set $use-bootstrap-3: true in mo/_bootstrap_config.scss
+# Edit mushroom_observer_migration.scss - ensure BS3 imports uncommented
 
 # Take screenshots
 # Document: screenshots/bs3/component-name/
@@ -285,7 +297,9 @@ git checkout -b bs4-migrate-component-name
 
 ```bash
 # Enable Bootstrap 4
-# Set $use-bootstrap-4: true in mo/_bootstrap_config.scss
+# Edit mushroom_observer_migration.scss:
+# - Comment out Bootstrap 3 imports
+# - Uncomment Bootstrap 4 imports
 
 # Recompile assets
 bundle exec rails assets:precompile RAILS_ENV=development
@@ -361,14 +375,21 @@ git branch -D bs4-migrate-component-name
 
 For critical components, set up side-by-side comparison:
 
-1. Run two local servers:
+1. Set up two copies of the codebase or use git worktrees:
 ```bash
-# Terminal 1: Bootstrap 3
-$use-bootstrap-3: true
+# Option A: Use git worktrees
+git worktree add ../mo-bs3 HEAD
+git worktree add ../mo-bs4 HEAD
+
+# Option B: Two terminal tabs in same codebase
+# Edit mushroom_observer_migration.scss between tests
+
+# Terminal 1: Bootstrap 3 (ensure BS3 imports active)
 bundle exec rails server -p 3000
 
-# Terminal 2: Bootstrap 4
-$use-bootstrap-4: true
+# Terminal 2: Bootstrap 4 (switch to BS4 imports, recompile)
+# Edit mushroom_observer_migration.scss for BS4
+# Recompile assets
 bundle exec rails server -p 3001
 ```
 
@@ -425,9 +446,9 @@ git revert <commit-hash>
 
 ```bash
 # Switch back to Bootstrap 3
-# Edit mo/_bootstrap_config.scss
-$use-bootstrap-3: true
-$use-bootstrap-4: false
+# Edit mushroom_observer_migration.scss:
+# - Uncomment Bootstrap 3 imports
+# - Comment out Bootstrap 4 imports
 
 # Recompile
 bundle exec rails assets:precompile
@@ -539,7 +560,8 @@ bundle exec rails assets:precompile RAILS_ENV=production
 
 - Theme validation script: `script/validate_themes.rb`
 - Theme variables: `app/assets/stylesheets/variables/`
-- Bootstrap config: `app/assets/stylesheets/mo/_bootstrap_config.scss`
+- Migration stylesheet: `app/assets/stylesheets/mushroom_observer_migration.scss`
+- BS3 mapping: `app/assets/stylesheets/mo/_map_theme_vars_to_bootstrap_vars.scss`
 - BS4 mapping: `app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss`
 
 ### Tools
