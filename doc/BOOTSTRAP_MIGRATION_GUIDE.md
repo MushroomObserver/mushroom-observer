@@ -38,14 +38,11 @@ Instead of a "big bang" migration, we use a **gradual, component-by-component** 
 
 ### 1. Install Bootstrap 4 Gem
 
-Add to `Gemfile`:
+Add to `Gemfile` after line for `bootstrap-sass`:
 
 ```ruby
-# Bootstrap 3 (current)
-gem 'bootstrap-sass', '~> 3.4.1'
-
 # Bootstrap 4 (migration target)
-gem 'bootstrap', '~> 4.6.2'
+gem("bootstrap", "~> 4.6.2")
 ```
 
 Run:
