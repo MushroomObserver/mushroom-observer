@@ -1,16 +1,8 @@
 # Theme System Verification Checklist
 
-Run this checklist AFTER completing Phase 1 changes.
-
-## Automated Checks
-
-- [ ] Run: `script/verify_theme_changes.rb extract after`
-- [ ] Run: `rails assets:precompile RAILS_ENV=production`
-- [ ] Check: No new compilation errors or warnings
-
 ## Manual Visual Verification
 
-For EACH theme (agaricus, amanita, cantharellaceae, hygrocybe, admin, sudo, black_on_white, defaults):
+For EACH theme (agaricus, amanita, cantharellaceae, hygrocybe, admin, sudo, black_on_white):
 
 ### Homepage (/)
 - [ ] Menu colors are correct
@@ -45,18 +37,3 @@ For EACH theme (agaricus, amanita, cantharellaceae, hygrocybe, admin, sudo, blac
 - [ ] Check for any color shifts
 - [ ] Verify no layout changes
 - [ ] Check that hover/active states still work
-
-## Variable Comparison
-
-- [ ] Run: `diff -r test/theme-verification/baseline test/theme-verification/after`
-- [ ] Review any differences - should only be ADDITIONS to defaults
-- [ ] Verify individual themes have NOT changed
-
-## Sign-off
-
-- [ ] All visual checks passed
-- [ ] No compilation errors
-- [ ] Variable changes are as expected
-- [ ] Ready for Phase 2
-
-Verified by: __________________  Date: __________
