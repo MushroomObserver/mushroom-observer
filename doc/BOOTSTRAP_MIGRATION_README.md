@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains complete documentation for migrating Mushroom Observer from Bootstrap 3 to Bootstrap 4 using a staged migration approach with rapid toggle infrastructure.
+This directory contains documentation for migrating Mushroom Observer from Bootstrap 3 to Bootstrap 4 using a staged migration approach with rapid toggle infrastructure.
 
 **Key Constraint:** Bootstrap 3 and 4 gems cannot be installed simultaneously. This infrastructure enables incremental component development and testing, but the production deployment is a single switchover event.
 
@@ -46,68 +46,6 @@ This directory contains complete documentation for migrating Mushroom Observer f
    - Original analysis that led to standardization
    - Phases 1-6 descriptions
    - Overall theme system architecture
-
-## Quick Start
-
-### For First-Time Setup
-
-```bash
-# 1. Ensure Phases 1-5 are complete
-script/validate_themes.rb  # Should show 121/121 for all themes
-
-# 2. Read the Migration Guide
-open doc/BOOTSTRAP_MIGRATION_GUIDE.md
-
-# 3. Install Bootstrap 4
-# Add to Gemfile: gem 'bootstrap', '~> 4.6.2'
-bundle install
-
-# 4. Create feature branch
-git checkout -b bootstrap4-migration
-
-# 5. Start with Phase 1 (Foundation)
-# See Migration Guide for details
-```
-
-### For Testing Bootstrap 4
-
-```bash
-# 1. Edit Gemfile to use Bootstrap 4 gem
-# Comment out: gem 'bootstrap-sass', '~> 3.4.1'
-# Uncomment: gem 'bootstrap', '~> 4.6.2'
-bundle install
-
-# 2. Edit app/assets/stylesheets/mushroom_observer_migration.scss
-# Comment out Bootstrap 3 imports
-# Uncomment Bootstrap 4 imports
-
-# 3. Compile assets
-bundle exec rails assets:precompile RAILS_ENV=development
-
-# 4. Start server
-bundle exec rails server
-
-# 5. Test in browser
-open http://localhost:3000
-```
-
-### For Switching Back to Bootstrap 3
-
-```bash
-# 1. Edit Gemfile to use Bootstrap 3 gem
-# Uncomment: gem 'bootstrap-sass', '~> 3.4.1'
-# Comment out: gem 'bootstrap', '~> 4.6.2'
-bundle install
-
-# 2. Edit app/assets/stylesheets/mushroom_observer_migration.scss
-# Uncomment Bootstrap 3 imports
-# Comment out Bootstrap 4 imports
-
-# 3. Recompile
-bundle exec rails assets:precompile RAILS_ENV=development
-
-# 4. Restart server
-```
 
 ## Migration Phases
 
@@ -173,35 +111,7 @@ This approach separates **incremental development** from **controlled deployment
 
 Toggle between versions:
 
-```scss
-// In mushroom_observer_migration.scss
-// BOOTSTRAP 3 (comment/uncomment these three lines)
-@import "bootstrap-sprockets";
-@import "mo/map_theme_vars_to_bootstrap_vars";
-@import "bootstrap";
-
-// BOOTSTRAP 4 (comment/uncomment these two lines)
-// @import "mo/map_theme_to_bootstrap4";
-// @import "bootstrap";
-```
-
-**Note:** Sass doesn't allow `@import` inside `@if` blocks, so manual commenting is required.
-
-### What This Enables
-
-1. ✅ **Incremental development** - Update and test components one at a time
-2. ✅ **Rapid testing** - Toggle versions to compare (requires `bundle install`)
-3. ✅ **Lower risk** - Thoroughly test before deployment
-4. ✅ **Theme compatibility** - Same theme variables work with both versions
-5. ✅ **Controlled deployment** - Switch only when all components ready
-
-### What This Does NOT Enable
-
-1. ❌ **Gradual production deployment** - Deployment is single switchover event
-2. ❌ **Parallel runtime** - Cannot run both BS versions simultaneously
-3. ❌ **Component-by-component production rollout** - All-or-nothing deployment
-
-**Reality:** Development is incremental, deployment is "big bang". This infrastructure reduces risk by ensuring everything works before switching.
+This should generally be handled by switching branches/worktrees.
 
 ## Testing Strategy
 
@@ -238,7 +148,6 @@ cd ../mo-bs3
 # Ensure Gemfile has bootstrap-sass active
 bundle install
 # Ensure mushroom_observer_migration.scss has BS3 imports uncommented
-bundle exec rails assets:precompile RAILS_ENV=development
 bundle exec rails server -p 3000
 
 # Terminal 2: Bootstrap 4
@@ -246,7 +155,6 @@ cd ../mo-bs4
 # Edit Gemfile to use bootstrap gem
 bundle install
 # Ensure mushroom_observer_migration.scss has BS4 imports uncommented
-bundle exec rails assets:precompile RAILS_ENV=development
 bundle exec rails server -p 3001
 ```
 
@@ -272,7 +180,6 @@ git checkout -b bs4-component-name
 # Edit Gemfile to use bootstrap gem
 # Edit mushroom_observer_migration.scss to use BS4 imports
 bundle install
-bundle exec rails assets:precompile RAILS_ENV=development
 # Test, take screenshots
 
 # 5. Compare and fix issues
@@ -293,13 +200,10 @@ git commit -m "Migrate component-name to Bootstrap 4"
 bundle install
 # Edit mushroom_observer_migration.scss to use BS4 imports
 
-# 2. Recompile
-bundle exec rails assets:precompile RAILS_ENV=development
-
-# 3. Navigate to component
+# 2. Navigate to component
 # Test all states, sizes, themes
 
-# 4. Document issues
+# 3. Document issues
 # Fix or create tracking issue
 ```
 
@@ -310,7 +214,6 @@ bundle exec rails assets:precompile RAILS_ENV=development
 # Edit Gemfile to use bootstrap-sass gem
 bundle install
 # Edit mushroom_observer_migration.scss to use BS3 imports
-bundle exec rails assets:precompile RAILS_ENV=development
 
 # Or revert code changes
 git revert <commit-hash>
@@ -327,9 +230,6 @@ git branch -D bs4-component-name
 ```bash
 # Clear cache
 bundle exec rails assets:clobber
-
-# Recompile
-bundle exec rails assets:precompile RAILS_ENV=development
 
 # Check for syntax errors
 bundle exec sass --check app/assets/stylesheets/Agaricus.scss
