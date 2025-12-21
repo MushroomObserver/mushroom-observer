@@ -2,6 +2,9 @@
 // BOOTSTRAP 4 THEME VARIABLE MAPPING
 // ==================================================
 //
+// FUTURE USE: This file will be used during Bootstrap 4 migration
+// (Phase 3 of the comprehensive modernization plan, weeks 8-11).
+//
 // This file maps MO's standardized theme variables to Bootstrap 4's
 // variable system. It should be imported AFTER theme variables but
 // BEFORE Bootstrap 4 itself.
@@ -13,6 +16,8 @@
 //
 // NOTE: This file contains NO hardcoded values. All values come from
 // theme variables defined in app/assets/stylesheets/variables/
+//
+// See: doc/Bootstrap Upgrade Plan for MO.md
 //
 // ==================================================
 
