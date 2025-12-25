@@ -18,7 +18,9 @@
 $pale_gold:   #ECCF95; // augustus_cap
 $dusty_rose:  #A06463; // brasiliensis_gills
 $brick_red:   #743931; // brasiliensis_gills (darker)
-$off_white:   #F6F0F2; // campestris_cap
+$pale_agaricus: #F6F0F2; // campestris_cap
+$button_gray: #F6F6F6; // neutral gray for buttons
+$white:       #FFFFFF; // pure white for inputs
 $dark_brown:  #3B2821; // cupreobrunneus_gills
 $terracotta:  #B4725F; // lilaceps_stain
 $tan:         #BC9D89; // semotus_cap
@@ -27,9 +29,9 @@ $light_blue:  #a5bffa; // polyozellus_light
 $dark_blue:   #5167b2; // polyozellus_dark
 
 // Derived grays (mixed from theme colors)
-$light_gray:   mix($dark_brown, $off_white, 10%);
-$medium_gray:  mix($dark_brown, $off_white, 25%);
-$dark_gray:    mix($dark_brown, $off_white, 50%);
+$light_gray:   mix($dark_brown, $pale_agaricus, 10%);
+$medium_gray:  mix($dark_brown, $pale_agaricus, 25%);
+$dark_gray:    mix($dark_brown, $pale_agaricus, 50%);
 $muted_brown:  scale-color($dark_brown, $lightness: 36%);
 
 // Alert state colors
@@ -50,7 +52,7 @@ $SUCCESS_COLOR:                     $success_green;
 $INFO_COLOR:                        $dark_blue;
 $WARNING_COLOR:                     $mustard;
 $DANGER_COLOR:                      $terracotta;
-$LIGHT_COLOR:                       $off_white;
+$LIGHT_COLOR:                       $pale_agaricus;
 $DARK_COLOR:                        $dark_brown;
 
 // ==================================================
@@ -62,7 +64,7 @@ $DARK_COLOR:                        $dark_brown;
 // --------------------------------------------------
 
 $BODY_FG_COLOR:                     $dark_brown;
-$BODY_BG_COLOR:                     $off_white;
+$BODY_BG_COLOR:                     $pale_agaricus;
 
 // --------------------------------------------------
 // Links
@@ -74,24 +76,24 @@ $LINK_BG_COLOR:                     transparent;
 $LINK_VISITED_FG_COLOR:             $dark_brown;
 $LINK_VISITED_BG_COLOR:             transparent;
 $LINK_HOVER_FG_COLOR:               $brick_red;
-$LINK_HOVER_BG_COLOR:               $off_white;
+$LINK_HOVER_BG_COLOR:               $pale_agaricus;
 
 // --------------------------------------------------
 // Buttons
 // --------------------------------------------------
 
 $BUTTON_FG_COLOR:                   $dark_brown;
-$BUTTON_BG_COLOR:                   $off_white;
+$BUTTON_BG_COLOR:                   $button_gray;
 $BUTTON_BORDER_COLOR:               $medium_gray;
 $BUTTON_HOVER_FG_COLOR:             $dark_brown;
-$BUTTON_HOVER_BG_COLOR:             $off_white;
+$BUTTON_HOVER_BG_COLOR:             $pale_agaricus;
 $BUTTON_HOVER_BORDER_COLOR:         $dark_brown;
-$BUTTON_ACTIVE_FG_COLOR:            $off_white;
+$BUTTON_ACTIVE_FG_COLOR:            $pale_agaricus;
 $BUTTON_ACTIVE_BG_COLOR:            $brick_red;
-$BUTTON_PRIMARY_FG_COLOR:           $off_white;
+$BUTTON_PRIMARY_FG_COLOR:           $pale_agaricus;
 $BUTTON_PRIMARY_BG_COLOR:           $dusty_rose;
 $BUTTON_PRIMARY_BORDER_COLOR:       $brick_red;
-$BUTTON_PRIMARY_HOVER_FG_COLOR:     $off_white;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     $pale_agaricus;
 $BUTTON_PRIMARY_HOVER_BG_COLOR:     $brick_red;
 $BUTTON_PRIMARY_HOVER_BORDER_COLOR: $dark_brown;
 $BUTTON_BORDER_WIDTH:               1px;
@@ -103,7 +105,7 @@ $BUTTON_BORDER_RADIUS:              5px;
 // --------------------------------------------------
 
 $INPUT_FG_COLOR:                    $dark_brown;
-$INPUT_BG_COLOR:                    $off_white;
+$INPUT_BG_COLOR:                    $white;
 $INPUT_BORDER_COLOR:                $medium_gray;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
@@ -145,7 +147,7 @@ $LOGO_BORDER_RADIUS:                0px;
 $LOGO_FG_COLOR:                     $dark_brown;
 $LOGO_BG_COLOR:                     $tan;
 $LOGO_HOVER_FG_COLOR:               $brick_red;
-$LOGO_HOVER_BG_COLOR:               $off_white;
+$LOGO_HOVER_BG_COLOR:               $pale_agaricus;
 
 // --------------------------------------------------
 // Left Navigation Bar
@@ -161,7 +163,7 @@ $LEFT_BAR_HEADER_BG_COLOR:          $pale_gold;
 $LEFT_BAR_FG_COLOR:                 $dusty_rose;
 $LEFT_BAR_BG_COLOR:                 $pale_gold;
 $LEFT_BAR_HOVER_FG_COLOR:           $brick_red;
-$LEFT_BAR_HOVER_BG_COLOR:           $off_white;
+$LEFT_BAR_HOVER_BG_COLOR:           $pale_agaricus;
 
 // --------------------------------------------------
 // Top Navigation Bar
@@ -172,11 +174,11 @@ $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
 $TOP_BAR_FG_COLOR:                  $dark_brown;
-$TOP_BAR_BG_COLOR:                  $off_white;
+$TOP_BAR_BG_COLOR:                  $pale_agaricus;
 $TOP_BAR_LINK_FG_COLOR:             $dusty_rose;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
 $TOP_BAR_LINK_HOVER_FG_COLOR:       $brick_red;
-$TOP_BAR_LINK_HOVER_BG_COLOR:       $off_white;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       $pale_agaricus;
 
 // --------------------------------------------------
 // Lists and Tables
@@ -186,9 +188,9 @@ $LIST_BORDER_COLOR:                 transparent;
 $LIST_HEADER_FG_COLOR:              $dark_gray;
 $LIST_HEADER_BG_COLOR:              $light_gray;
 $LIST_FG_COLOR:                     $dark_brown;
-$LIST_BG_COLOR:                     $off_white;
+$LIST_BG_COLOR:                     $pale_agaricus;
 $LIST_EVEN_BG_COLOR:                $LIST_BG_COLOR;
-$LIST_ODD_BG_COLOR:                 $off_white;
+$LIST_ODD_BG_COLOR:                 $pale_agaricus;
 $LIST_HOVER_BG_COLOR:               $pale_gold;
 
 // --------------------------------------------------
@@ -211,9 +213,9 @@ $PAGER_FG_COLOR:                    $dark_brown;
 $PAGER_BG_COLOR:                    transparent;
 $PAGER_BORDER_COLOR:                none;
 $PAGER_HOVER_FG_COLOR:              $brick_red;
-$PAGER_HOVER_BG_COLOR:              $off_white;
+$PAGER_HOVER_BG_COLOR:              $pale_agaricus;
 $PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_FG_COLOR:             $off_white;
+$PAGER_ACTIVE_FG_COLOR:             $pale_agaricus;
 $PAGER_ACTIVE_BG_COLOR:             $brick_red;
 $PAGER_ACTIVE_BORDER_COLOR:         none;
 
@@ -221,7 +223,7 @@ $PAGER_ACTIVE_BORDER_COLOR:         none;
 // Tooltips
 // --------------------------------------------------
 
-$TOOLTIP_FG_COLOR:                  $off_white;
+$TOOLTIP_FG_COLOR:                  $pale_agaricus;
 $TOOLTIP_BG_COLOR:                  $dark_brown;
 
 // --------------------------------------------------
@@ -230,13 +232,13 @@ $TOOLTIP_BG_COLOR:                  $dark_brown;
 
 $VOTE_METER_BORDER_COLOR:           none;
 $VOTE_METER_FG_COLOR:               $dusty_rose;
-$VOTE_METER_BG_COLOR:               $off_white;
+$VOTE_METER_BG_COLOR:               $pale_agaricus;
 
 // --------------------------------------------------
 // Progress Bars
 // --------------------------------------------------
 
-$PROGRESS_BG_COLOR:                 $off_white;
+$PROGRESS_BG_COLOR:                 $pale_agaricus;
 $PROGRESS_FG_COLOR:                 $dark_brown;
 $PROGRESS_BAR_COLOR:                $dusty_rose;
 
