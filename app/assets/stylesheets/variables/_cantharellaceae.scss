@@ -31,11 +31,13 @@ $straw:         #e6c987; // cornucopioides_bright_margin
 $light_blue:    #a5bffa; // polyozellus_light
 $dark_blue:     #5167b2; // polyozellus_dark
 
-// Derived grays (mixed from theme colors)
+// Derived colors (mixed from theme colors)
 $light_gray:  mix($black, $cream, 10%);
-$medium_gray: mix($black, $cream, 25%);
+$gray_border:       rgba($black, 0.2);
+$input_border:      rgba($black, 0.5);
 $dark_gray:   mix($black, $cream, 50%);
 $muted_black: scale-color($black, $lightness: 27%);
+$light_cream: scale-color($cream, $lightness: 50%);
 
 // Alert state colors
 $success_green:  #70C070;
@@ -74,7 +76,7 @@ $BODY_BG_COLOR:                     $cream;
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_FG_COLOR:                     $bright_orange;
+$LINK_FG_COLOR:                     $vivid_red;
 $LINK_BG_COLOR:                     transparent;
 $LINK_VISITED_FG_COLOR:             $vivid_red;
 $LINK_VISITED_BG_COLOR:             transparent;
@@ -86,8 +88,8 @@ $LINK_HOVER_BG_COLOR:               $orange;
 // --------------------------------------------------
 
 $BUTTON_FG_COLOR:                   $black;
-$BUTTON_BG_COLOR:                   $cream;
-$BUTTON_BORDER_COLOR:               $medium_gray;
+$BUTTON_BG_COLOR:                   $orange;
+$BUTTON_BORDER_COLOR:               transparent;
 $BUTTON_HOVER_FG_COLOR:             $black;
 $BUTTON_HOVER_BG_COLOR:             $cream;
 $BUTTON_HOVER_BORDER_COLOR:         $black;
@@ -108,8 +110,8 @@ $BUTTON_BORDER_RADIUS:              5px;
 // --------------------------------------------------
 
 $INPUT_FG_COLOR:                    $black;
-$INPUT_BG_COLOR:                    $cream;
-$INPUT_BORDER_COLOR:                $medium_gray;
+$INPUT_BG_COLOR:                    scale-color($cream, $lightness: 75%);
+$INPUT_BORDER_COLOR:                $input_border;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
@@ -180,18 +182,18 @@ $TOP_BAR_FG_COLOR:                  $black;
 $TOP_BAR_BG_COLOR:                  $cream;
 $TOP_BAR_LINK_FG_COLOR:             $bright_orange;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_FG_COLOR:       $bright_orange;
-$TOP_BAR_LINK_HOVER_BG_COLOR:       $orange;
+$TOP_BAR_LINK_HOVER_FG_COLOR:       $TOP_BAR_FG_COLOR;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       $light_cream;
 
 // --------------------------------------------------
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 transparent;
+$LIST_BORDER_COLOR:                 $gray_border;
 $LIST_HEADER_FG_COLOR:              $dark_gray;
 $LIST_HEADER_BG_COLOR:              $light_gray;
 $LIST_FG_COLOR:                     $black;
-$LIST_BG_COLOR:                     $cream;
+$LIST_BG_COLOR:                     mix($cream, white, 50%);
 $LIST_EVEN_BG_COLOR:                $cream;
 $LIST_ODD_BG_COLOR:                 $cream;
 $LIST_HOVER_BG_COLOR:               $orange;
@@ -202,7 +204,7 @@ $LIST_HOVER_BG_COLOR:               $orange;
 
 $MENU_BORDER_COLOR:                 $black;
 $MENU_FG_COLOR:                     $black;
-$MENU_BG_COLOR:                     $cream;
+$MENU_BG_COLOR:                     $light_cream;
 $MENU_HOT_FG_COLOR:                 $black;
 $MENU_HOT_BG_COLOR:                 $bright_orange;
 $MENU_WARM_FG_COLOR:                $black;
@@ -249,8 +251,8 @@ $PROGRESS_BAR_COLOR:                $bright_orange;
 // Panels
 // --------------------------------------------------
 
-$PANEL_FG_COLOR:                    $muted_black;
-$PANEL_BG_COLOR:                    $orange;
-$PANEL_BORDER_COLOR:                $medium_gray;
-$PANEL_FOOTER_BG_COLOR:             $PANEL_BG_COLOR;
+$PANEL_FG_COLOR:                    $black;
+$PANEL_BG_COLOR:                    $light_cream;
+$PANEL_BORDER_COLOR:                $gray_border;
+$PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
 $PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;
