@@ -12,38 +12,52 @@
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
 
-$conica_stain:          #37372f;
-$conica_cap_red:        #a31404;
-$conica_cap_orange:     #dd6226;
-$conica_cap_yellow:     #ffbf01;
-$conica_gill_margin:    #ffda84;
-$miniata_gill_margin:   #ebc97f;
-$miniata_cap_red:       #a10200;
-$miniata_cap_orange:    #c83e00;
-$miniata_cap_yellow:    #f19c05;
-$psittacina_cap_green:  #405536;
-$psittacina_cap_orange: #eb9020;
-$psittacina_cap_middle: #a38a3f;
-$psittacina_gill_color: #f2d686;
-$punicea_cap_dark:      #bb2900;
-$punicea_cap_light:     #cc382a;
-$punicea_dark_stipe:    #e7bc3c;
-$punicea_light_stipe:   #e9e3af;
-$polyozellus_light:     #a5bffa;
-$polyozellus_dark:      #5167b2;
+$dark_olive:    #37372f; // conica_stain
+$dark_red:      #a31404; // conica_cap_red
+$orange:        #dd6226; // conica_cap_orange
+$gold:          #ffbf01; // conica_cap_yellow
+$pale_gold:     #ffda84; // conica_gill_margin
+$straw:         #ebc97f; // miniata_gill_margin
+$crimson:       #a10200; // miniata_cap_red
+$red_orange:    #c83e00; // miniata_cap_orange
+$amber:         #f19c05; // miniata_cap_yellow
+$forest_green:  #405536; // psittacina_cap_green
+$tangerine:     #eb9020; // psittacina_cap_orange
+$olive:         #a38a3f; // psittacina_cap_middle
+$custard:       #f2d686; // psittacina_gill_color
+$scarlet:       #bb2900; // punicea_cap_dark
+$red:           #cc382a; // punicea_cap_light
+$mustard:       #e7bc3c; // punicea_dark_stipe
+$pale_cream:    #e9e3af; // punicea_light_stipe
+$light_blue:    #a5bffa; // polyozellus_light
+$dark_blue:     #5167b2; // polyozellus_dark
+
+// Derived grays (mixed from theme colors)
+$light_gray:    mix($dark_olive, $pale_cream, 10%);
+$medium_gray:   mix($dark_olive, $pale_cream, 25%);
+$dark_gray:     mix($dark_olive, $pale_cream, 50%);
+$muted_olive:   adjust-color($dark_olive, $lightness: 30%);
+
+// Alert state colors
+$success_green:  #70C070;
+$success_bg:     #E0FFE0;
+$warning_yellow: #F8CC70;
+$warning_bg:     #FFF8E0;
+$danger_red:     #F07070;
+$danger_bg:      #FFE0E0;
 
 // ==================================================
 // SECTION 2: SEMANTIC COLOR ASSIGNMENTS
 // ==================================================
 
-$PRIMARY_COLOR:                     $psittacina_cap_green;
-$SECONDARY_COLOR:                   $miniata_cap_yellow;
-$SUCCESS_COLOR:                     #70C070;
-$INFO_COLOR:                        $polyozellus_dark;
-$WARNING_COLOR:                     $miniata_cap_orange;
-$DANGER_COLOR:                      $punicea_cap_dark;
-$LIGHT_COLOR:                       $punicea_light_stipe;
-$DARK_COLOR:                        $conica_stain;
+$PRIMARY_COLOR:                     $forest_green;
+$SECONDARY_COLOR:                   $amber;
+$SUCCESS_COLOR:                     $success_green;
+$INFO_COLOR:                        $dark_blue;
+$WARNING_COLOR:                     $red_orange;
+$DANGER_COLOR:                      $scarlet;
+$LIGHT_COLOR:                       $pale_cream;
+$DARK_COLOR:                        $dark_olive;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -53,39 +67,39 @@ $DARK_COLOR:                        $conica_stain;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_FG_COLOR:                     $conica_stain;
-$BODY_BG_COLOR:                     $punicea_light_stipe;
+$BODY_FG_COLOR:                     $dark_olive;
+$BODY_BG_COLOR:                     $pale_cream;
 
 // --------------------------------------------------
 // Links
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_FG_COLOR:                     $psittacina_cap_green;
+$LINK_FG_COLOR:                     $forest_green;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_FG_COLOR:             $psittacina_cap_orange;
+$LINK_VISITED_FG_COLOR:             $tangerine;
 $LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_FG_COLOR:               $psittacina_cap_green;
-$LINK_HOVER_BG_COLOR:               $psittacina_gill_color;
+$LINK_HOVER_FG_COLOR:               $forest_green;
+$LINK_HOVER_BG_COLOR:               $custard;
 
 // --------------------------------------------------
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   #000000;
-$BUTTON_BG_COLOR:                   #F6F6F6;
-$BUTTON_BORDER_COLOR:               #CCCCCC;
-$BUTTON_HOVER_FG_COLOR:             #000000;
-$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
-$BUTTON_HOVER_BORDER_COLOR:         black;
-$BUTTON_ACTIVE_FG_COLOR:            $conica_stain;
-$BUTTON_ACTIVE_BG_COLOR:            $miniata_cap_yellow;
-$BUTTON_PRIMARY_FG_COLOR:           $punicea_light_stipe;
-$BUTTON_PRIMARY_BG_COLOR:           $psittacina_cap_green;
-$BUTTON_PRIMARY_BORDER_COLOR:       $psittacina_cap_middle;
-$BUTTON_PRIMARY_HOVER_FG_COLOR:     $punicea_light_stipe;
-$BUTTON_PRIMARY_HOVER_BG_COLOR:     $psittacina_cap_middle;
-$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $conica_stain;
+$BUTTON_FG_COLOR:                   $dark_olive;
+$BUTTON_BG_COLOR:                   $pale_cream;
+$BUTTON_BORDER_COLOR:               $medium_gray;
+$BUTTON_HOVER_FG_COLOR:             $dark_olive;
+$BUTTON_HOVER_BG_COLOR:             $pale_cream;
+$BUTTON_HOVER_BORDER_COLOR:         $dark_olive;
+$BUTTON_ACTIVE_FG_COLOR:            $dark_olive;
+$BUTTON_ACTIVE_BG_COLOR:            $amber;
+$BUTTON_PRIMARY_FG_COLOR:           $pale_cream;
+$BUTTON_PRIMARY_BG_COLOR:           $forest_green;
+$BUTTON_PRIMARY_BORDER_COLOR:       $olive;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     $pale_cream;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     $olive;
+$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $dark_olive;
 $BUTTON_BORDER_WIDTH:               1px;
 $BUTTON_BORDER_STYLE:               solid;
 $BUTTON_BORDER_RADIUS:              5px;
@@ -94,9 +108,9 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    #000000;
-$INPUT_BG_COLOR:                    #FFFFFF;
-$INPUT_BORDER_COLOR:                #CCCCCC;
+$INPUT_FG_COLOR:                    $dark_olive;
+$INPUT_BG_COLOR:                    $pale_cream;
+$INPUT_BORDER_COLOR:                $medium_gray;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
@@ -105,17 +119,17 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     $polyozellus_light;
-$INFO_BORDER_COLOR:                 $polyozellus_dark;
+$INFO_BG_COLOR:                     $light_blue;
+$INFO_BORDER_COLOR:                 $dark_blue;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  #E0FFE0;
-$SUCCESS_BORDER_COLOR:              #70C070;
+$SUCCESS_BG_COLOR:                  $success_bg;
+$SUCCESS_BORDER_COLOR:              $success_green;
 $SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  #FFF8E0;
-$WARNING_BORDER_COLOR:              #F8CC70;
+$WARNING_BG_COLOR:                  $warning_bg;
+$WARNING_BORDER_COLOR:              $warning_yellow;
 $WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   #FFE0E0;
-$DANGER_BORDER_COLOR:               #F07070;
+$DANGER_BG_COLOR:                   $danger_bg;
+$DANGER_BORDER_COLOR:               $danger_red;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
 $BANNER_BORDER_WIDTH:               2px;
@@ -130,30 +144,30 @@ $ALERT_BORDER_RADIUS:               5px;
 // Logo
 // --------------------------------------------------
 
-$LOGO_BORDER_COLOR:                 $conica_stain;
+$LOGO_BORDER_COLOR:                 $dark_olive;
 $LOGO_BORDER_WIDTH:                 1px;
 $LOGO_BORDER_STYLE:                 solid;
 $LOGO_BORDER_RADIUS:                0px;
-$LOGO_FG_COLOR:                     $conica_stain;
-$LOGO_BG_COLOR:                     $punicea_cap_light;
-$LOGO_HOVER_FG_COLOR:               $conica_stain;
-$LOGO_HOVER_BG_COLOR:               $punicea_cap_light;
+$LOGO_FG_COLOR:                     $dark_olive;
+$LOGO_BG_COLOR:                     $red;
+$LOGO_HOVER_FG_COLOR:               $dark_olive;
+$LOGO_HOVER_BG_COLOR:               $red;
 
 // --------------------------------------------------
 // Left Navigation Bar
 // --------------------------------------------------
 
-$LEFT_BAR_BORDER_COLOR:             $miniata_cap_yellow;
+$LEFT_BAR_BORDER_COLOR:             $amber;
 $LEFT_BAR_BORDER_WIDTH:             1px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            5px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
-$LEFT_BAR_HEADER_FG_COLOR:          $psittacina_cap_green;
-$LEFT_BAR_HEADER_BG_COLOR:          $miniata_cap_yellow;
-$LEFT_BAR_FG_COLOR:                 $miniata_cap_red;
-$LEFT_BAR_BG_COLOR:                 $miniata_cap_yellow;
-$LEFT_BAR_HOVER_FG_COLOR:           $miniata_cap_red;
-$LEFT_BAR_HOVER_BG_COLOR:           $psittacina_gill_color;
+$LEFT_BAR_HEADER_FG_COLOR:          $forest_green;
+$LEFT_BAR_HEADER_BG_COLOR:          $amber;
+$LEFT_BAR_FG_COLOR:                 $crimson;
+$LEFT_BAR_BG_COLOR:                 $amber;
+$LEFT_BAR_HOVER_FG_COLOR:           $crimson;
+$LEFT_BAR_HOVER_BG_COLOR:           $custard;
 
 // --------------------------------------------------
 // Top Navigation Bar
@@ -163,78 +177,78 @@ $TOP_BAR_BORDER_COLOR:              transparent;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
-$TOP_BAR_FG_COLOR:                  $conica_stain;
-$TOP_BAR_BG_COLOR:                  $punicea_light_stipe;
-$TOP_BAR_LINK_FG_COLOR:             $psittacina_cap_green;
+$TOP_BAR_FG_COLOR:                  $dark_olive;
+$TOP_BAR_BG_COLOR:                  $pale_cream;
+$TOP_BAR_LINK_FG_COLOR:             $forest_green;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_FG_COLOR:       $psittacina_cap_green;
-$TOP_BAR_LINK_HOVER_BG_COLOR:       $psittacina_gill_color;
+$TOP_BAR_LINK_HOVER_FG_COLOR:       $forest_green;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       $custard;
 
 // --------------------------------------------------
 // Lists and Tables
 // --------------------------------------------------
 
 $LIST_BORDER_COLOR:                 transparent;
-$LIST_HEADER_FG_COLOR:              #777777;
-$LIST_HEADER_BG_COLOR:              #EEEEEE;
-$LIST_FG_COLOR:                     $conica_stain;
-$LIST_BG_COLOR:                     mix($punicea_light_stipe, white, 50%);
-$LIST_EVEN_BG_COLOR:                $LIST_BG_COLOR;
-$LIST_ODD_BG_COLOR:                 #FFFFFF;
-$LIST_HOVER_BG_COLOR:               $psittacina_gill_color;
+$LIST_HEADER_FG_COLOR:              $dark_gray;
+$LIST_HEADER_BG_COLOR:              $light_gray;
+$LIST_FG_COLOR:                     $dark_olive;
+$LIST_BG_COLOR:                     $pale_cream;
+$LIST_EVEN_BG_COLOR:                $pale_cream;
+$LIST_ODD_BG_COLOR:                 $pale_cream;
+$LIST_HOVER_BG_COLOR:               $custard;
 
 // --------------------------------------------------
 // Menus and Dropdowns
 // --------------------------------------------------
 
-$MENU_BORDER_COLOR:                 $miniata_gill_margin;
-$MENU_FG_COLOR:                     black;
-$MENU_BG_COLOR:                     white;
-$MENU_HOT_FG_COLOR:                 black;
-$MENU_HOT_BG_COLOR:                 $psittacina_cap_middle;
-$MENU_WARM_FG_COLOR:                black;
-$MENU_WARM_BG_COLOR:                $psittacina_cap_middle;
+$MENU_BORDER_COLOR:                 $straw;
+$MENU_FG_COLOR:                     $dark_olive;
+$MENU_BG_COLOR:                     $pale_cream;
+$MENU_HOT_FG_COLOR:                 $dark_olive;
+$MENU_HOT_BG_COLOR:                 $olive;
+$MENU_WARM_FG_COLOR:                $dark_olive;
+$MENU_WARM_BG_COLOR:                $olive;
 
 // --------------------------------------------------
 // Pagination
 // --------------------------------------------------
 
-$PAGER_FG_COLOR:                    $punicea_cap_dark;
+$PAGER_FG_COLOR:                    $scarlet;
 $PAGER_BG_COLOR:                    transparent;
 $PAGER_BORDER_COLOR:                none;
-$PAGER_HOVER_FG_COLOR:              $punicea_light_stipe;
-$PAGER_HOVER_BG_COLOR:              $punicea_cap_light;
+$PAGER_HOVER_FG_COLOR:              $pale_cream;
+$PAGER_HOVER_BG_COLOR:              $red;
 $PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_FG_COLOR:             $punicea_light_stipe;
-$PAGER_ACTIVE_BG_COLOR:             $punicea_cap_dark;
+$PAGER_ACTIVE_FG_COLOR:             $pale_cream;
+$PAGER_ACTIVE_BG_COLOR:             $scarlet;
 $PAGER_ACTIVE_BORDER_COLOR:         none;
 
 // --------------------------------------------------
 // Tooltips
 // --------------------------------------------------
 
-$TOOLTIP_FG_COLOR:                  $punicea_light_stipe;
-$TOOLTIP_BG_COLOR:                  $punicea_cap_light;
+$TOOLTIP_FG_COLOR:                  $pale_cream;
+$TOOLTIP_BG_COLOR:                  $red;
 
 // --------------------------------------------------
 // Vote Meters
 // --------------------------------------------------
 
 $VOTE_METER_BORDER_COLOR:           none;
-$VOTE_METER_FG_COLOR:               $psittacina_cap_green;
-$VOTE_METER_BG_COLOR:               $punicea_light_stipe;
+$VOTE_METER_FG_COLOR:               $forest_green;
+$VOTE_METER_BG_COLOR:               $pale_cream;
 
 // --------------------------------------------------
 // Progress Bars
 // --------------------------------------------------
 
-$PROGRESS_BG_COLOR:                 $punicea_light_stipe;
-$PROGRESS_FG_COLOR:                 $conica_stain;
-$PROGRESS_BAR_COLOR:                $miniata_cap_yellow;
+$PROGRESS_BG_COLOR:                 $pale_cream;
+$PROGRESS_FG_COLOR:                 $dark_olive;
+$PROGRESS_BAR_COLOR:                $amber;
 
 // --------------------------------------------------
 // Wells and Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     lighten($conica_stain, 30%);
-$WELL_BG_COLOR:                     $psittacina_gill_color;
+$WELL_FG_COLOR:                     $muted_olive;
+$WELL_BG_COLOR:                     $custard;
