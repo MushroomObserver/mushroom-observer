@@ -31,7 +31,7 @@ $peach:        #faebd4; // velosa_light_veil
 $apricot:      #f4d5a6; // velosa_dark_veil
 $dusty_pink:   #d1afa5; // novinupta_background
 $dark_brown:   #383138; // pachycolea_background
-$silver:       #bfc0bb; // pachycolea_foreground
+$silver:       #cdcec9; // pachycolea_foreground (lightened)
 $tan:          #aa9a83; // pachycolea_light_stipe
 $chocolate:    #60412d; // pachycolea_dark_brown
 $light_blue:   #a5bffa; // polyozellus_light
@@ -42,6 +42,7 @@ $light_gray:   mix($dark_brown, $silver, 10%);
 $medium_gray:  mix($dark_brown, $silver, 25%);
 $dark_gray:    mix($dark_brown, $silver, 50%);
 $light_silver: mix(white, $silver, 20%); // lighter silver for inputs/buttons
+$light_tan:    scale-color($tan, $lightness: 30%);
 
 // Dark theme list backgrounds
 $deep_dark_brown:    mix($dark_brown, black, 80%);
@@ -90,11 +91,11 @@ $BODY_BG_COLOR:                     $dark_brown;
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_FG_COLOR:                     $tan;
+$LINK_FG_COLOR:                     $light_tan;
 $LINK_BG_COLOR:                     transparent;
 $LINK_VISITED_FG_COLOR:             $pale_yellow;
 $LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_FG_COLOR:               $tan;
+$LINK_HOVER_FG_COLOR:               $beige;
 $LINK_HOVER_BG_COLOR:               $red;
 
 // --------------------------------------------------
@@ -132,15 +133,15 @@ $INPUT_BORDER_RADIUS:               5px;
 $INFO_BG_COLOR:                     $dark_blue;
 $INFO_BORDER_COLOR:                 $light_blue;
 $INFO_FG_COLOR:                     $silver;
-$SUCCESS_BG_COLOR:                  $success_bg;
+$SUCCESS_BG_COLOR:                  mix($success_green, $deep_dark_brown, 30%);
 $SUCCESS_BORDER_COLOR:              $success_green;
-$SUCCESS_FG_COLOR:                  $dark_brown;
-$WARNING_BG_COLOR:                  $warning_bg;
+$SUCCESS_FG_COLOR:                  $silver;
+$WARNING_BG_COLOR:                  mix($warning_yellow, $deep_dark_brown, 30%);
 $WARNING_BORDER_COLOR:              $warning_yellow;
-$WARNING_FG_COLOR:                  $dark_brown;
-$DANGER_BG_COLOR:                   $danger_bg;
+$WARNING_FG_COLOR:                  $silver;
+$DANGER_BG_COLOR:                   mix($danger_red, $deep_dark_brown, 30%);
 $DANGER_BORDER_COLOR:               $danger_red;
-$DANGER_FG_COLOR:                   $dark_brown;
+$DANGER_FG_COLOR:                   $silver;
 
 $BANNER_BORDER_WIDTH:               2px;
 $BANNER_BORDER_STYLE:               solid;
@@ -174,7 +175,7 @@ $LEFT_BAR_BORDER_RADIUS:            5px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
 $LEFT_BAR_HEADER_FG_COLOR:          $red;
 $LEFT_BAR_HEADER_BG_COLOR:          $deep_dark_brown;
-$LEFT_BAR_FG_COLOR:                 $peach;
+$LEFT_BAR_FG_COLOR:                 $silver;
 $LEFT_BAR_BG_COLOR:                 $deep_dark_brown;
 $LEFT_BAR_HOVER_FG_COLOR:           $peach;
 $LEFT_BAR_HOVER_BG_COLOR:           $red;
@@ -260,8 +261,8 @@ $PROGRESS_BAR_COLOR:                $dark_olive;
 // Panels
 // --------------------------------------------------
 
-$PANEL_FG_COLOR:                    scale-color($tan, $lightness: 60%);
+$PANEL_FG_COLOR:                    scale-color($silver, $lightness: 30%);
 $PANEL_BG_COLOR:                    $panel_overlay;
 $PANEL_BORDER_COLOR:                $dark_silver;
 $PANEL_FOOTER_BG_COLOR:             $deeper_dark_brown;
-$PANEL_FOOTER_FG_COLOR:             scale-color($tan, $lightness: 60%);
+$PANEL_FOOTER_FG_COLOR:             scale-color($silver, $lightness: 30%);
