@@ -26,7 +26,7 @@ $amber:        #f5bd5e; // calyptroderma_light_cap
 $copper:       #c18346; // calyptroderma_middle_cap
 $red:          #cc2616; // muscaria_background
 $pale_yellow:  #fff8c6; // muscaria_foreground
-$orange:       #dd9d5f; // velosa_background
+$orange:       #8a5a30; // novinupta_cap
 $peach:        #faebd4; // velosa_light_veil
 $apricot:      #f4d5a6; // velosa_dark_veil
 $dusty_pink:   #d1afa5; // novinupta_background
@@ -167,15 +167,15 @@ $LOGO_HOVER_BG_COLOR:               $red;
 // Left Navigation Bar
 // --------------------------------------------------
 
-$LEFT_BAR_BORDER_COLOR:             $orange;
+$LEFT_BAR_BORDER_COLOR:             transparent;
 $LEFT_BAR_BORDER_WIDTH:             1px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            5px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
 $LEFT_BAR_HEADER_FG_COLOR:          $red;
-$LEFT_BAR_HEADER_BG_COLOR:          $orange;
+$LEFT_BAR_HEADER_BG_COLOR:          $deep_dark_brown;
 $LEFT_BAR_FG_COLOR:                 $peach;
-$LEFT_BAR_BG_COLOR:                 $orange;
+$LEFT_BAR_BG_COLOR:                 $deep_dark_brown;
 $LEFT_BAR_HOVER_FG_COLOR:           $peach;
 $LEFT_BAR_HOVER_BG_COLOR:           $red;
 

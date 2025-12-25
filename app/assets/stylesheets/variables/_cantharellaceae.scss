@@ -12,7 +12,7 @@
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
 
-$orange:        #f6ae4a; // californicus_cap
+$orange:        #f8c880; // californicus_cap (lightened)
 $cream:         #fae8b8; // californicus_stipe
 $vivid_red:     #c12900; // cinnabarinus_dark_cap
 $bright_orange: #ff6524; // cinnabarinus_light_cap
@@ -32,12 +32,12 @@ $light_blue:    #a5bffa; // polyozellus_light
 $dark_blue:     #5167b2; // polyozellus_dark
 
 // Derived colors (mixed from theme colors)
-$light_gray:  mix($black, $cream, 10%);
-$gray_border:       rgba($black, 0.2);
-$input_border:      rgba($black, 0.5);
-$dark_gray:   mix($black, $cream, 50%);
-$muted_black: scale-color($black, $lightness: 27%);
-$light_cream: scale-color($cream, $lightness: 50%);
+$light_gray:    mix($black, $cream, 10%);
+$gray_border:   rgba($black, 0.2);
+$input_border:  rgba($black, 0.5);
+$dark_gray:     mix($black, $cream, 50%);
+$muted_black:   scale-color($black, $lightness: 27%);
+$light_cream:   scale-color($cream, $lightness: 50%);
 
 // Alert state colors
 $success_green:  #70C070;
