@@ -204,4 +204,9 @@ $panel-default-heading-bg: $PANEL_BG_COLOR;
 
 $hr-border: $LIST_BORDER_COLOR;
 
+// Typography - muted/secondary text colors
+$text-muted: rgba($text-color, 0.75);
+$headings-small-color: $text-muted;
+$blockquote-small-color: $text-muted;
+
 $well-bg: $PANEL_BG_COLOR;
