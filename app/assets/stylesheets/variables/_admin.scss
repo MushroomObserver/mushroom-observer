@@ -17,11 +17,11 @@ $gray:          #535354;
 $black:         #000000;
 $white:         #FFFFFF;
 
-// Derived colors (using adjust-color instead of darken/lighten)
-$dark_blue:     adjust-color($blue, $lightness: -10%);
-$light_blue:    adjust-color($blue, $lightness: 10%);
-$lighter_blue:  adjust-color($blue, $lightness: 20%);
-$light_purple:  adjust-color($purple, $lightness: 40%);
+// Derived colors (using scale-color for relative adjustments)
+$dark_blue:     scale-color($blue, $lightness: -20%);
+$light_blue:    scale-color($blue, $lightness: 20%);
+$lighter_blue:  scale-color($blue, $lightness: 40%);
+$light_purple:  scale-color($purple, $lightness: 70%);
 
 // Alert state colors
 $success_green:  #70C070;

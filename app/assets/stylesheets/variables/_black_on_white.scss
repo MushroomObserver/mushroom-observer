@@ -21,9 +21,9 @@ $black:         #000000;
 $blue:          #2050E0;
 $light_blue:    #5BC0DE;
 
-// Derived colors (using adjust-color instead of darken)
-$dark_blue:     adjust-color($blue, $lightness: -10%);
-$darker_blue:   adjust-color($blue, $lightness: -15%);
+// Derived colors (using scale-color for relative adjustments)
+$dark_blue:     scale-color($blue, $lightness: -20%);
+$darker_blue:   scale-color($blue, $lightness: -30%);
 
 // Alert state colors
 $success_green:  #70C070;

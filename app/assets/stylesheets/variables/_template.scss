@@ -9,7 +9,8 @@
 //
 // 2. Choose a mushroom genus/species for inspiration and define your
 //    color palette in Section 1 below. Use descriptive names based on
-//    the mushroom's features (cap, gills, stipe, stain, etc.)
+//    the mushroom's colors (e.g., $pale_gold, $brick_red, $forest_green).
+//    Keep mushroom species as comments for reference.
 //
 // 3. Map your palette colors to semantic meanings in Section 2.
 //    These semantic colors provide meaning (primary, danger, etc.)
@@ -23,34 +24,54 @@
 //
 // THEME STRUCTURE (Three-Tier System):
 //
-//   Palette Colors → Semantic Colors → UI Elements
-//   (mushroom-inspired) (meaning-based) (specific uses)
+//   Palette Colors -> Semantic Colors -> UI Elements
+//   (descriptive names) (meaning-based)   (specific uses)
 //
-// This structure ensures:
-// - Easy customization (just change palette colors)
-// - Consistent meaning (semantic colors stay coherent)
-// - Complete coverage (all UI elements defined)
+// IMPORTANT:
+// - All hex values and color functions go in Section 1 ONLY
+// - Sections 2 and 3 should only reference variables
+// - Use scale-color() for derived colors (not darken/lighten)
+// - Use mix() for grays derived from theme colors
 //
 // ==================================================
 
 // ==================================================
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
-// Define your mushroom-inspired color palette here.
-// Use descriptive names based on the mushroom's features.
+// Define your color palette here with descriptive names.
+// Add mushroom species as comments for reference.
 //
-// Example palette (replace with your mushroom's colors):
+// Example palette (replace with your colors):
 
-$palette-cap-light:       #F6F0F2;  // Light cap color
-$palette-cap-dark:        #BC9D89;  // Dark cap color
-$palette-gill-light:      #A06463;  // Light gill color
-$palette-gill-dark:       #3B2821;  // Dark gill color
-$palette-stipe:           #ECCF95;  // Stipe/stem color
-$palette-stain:           #D4A833;  // Color when bruised/stained
-$palette-accent-1:        #B4725F;  // Additional accent color
-$palette-accent-2:        #5167B2;  // Additional accent color
+$light_cap:       #F6F0F2;  // campestris_cap
+$dark_cap:        #BC9D89;  // semotus_cap
+$light_gill:      #A06463;  // brasiliensis_gills
+$dark_gill:       #3B2821;  // cupreobrunneus_gills
+$stipe:           #ECCF95;  // augustus_cap
+$stain:           #D4A833;  // xanthodermus_stain
+$accent:          #B4725F;  // lilaceps_stain
+$blue_accent:     #5167B2;  // polyozellus_dark
 
-// Add more palette colors as needed for your theme
+// Derived colors (use scale-color for relative adjustments)
+$hover_primary:   scale-color($light_gill, $lightness: -30%);
+$hover_secondary: scale-color($dark_cap, $lightness: -20%);
+$light_secondary: scale-color($dark_cap, $lightness: 60%);
+$muted_dark:      scale-color($dark_gill, $lightness: 36%);
+
+// Derived grays (mix from theme colors for cohesive palette)
+$light_gray:      mix($dark_gill, $light_cap, 10%);
+$medium_gray:     mix($dark_gill, $light_cap, 25%);
+$dark_gray:       mix($dark_gill, $light_cap, 50%);
+
+// Alert state colors
+$success_green:   #70C070;
+$success_bg:      #E0FFE0;
+$info_blue:       #5BC0DE;
+$info_bg:         #E0F8FF;
+$warning_yellow:  #F8CC70;
+$warning_bg:      #FFF8E0;
+$danger_red:      #F07070;
+$danger_bg:       #FFE0E0;
 
 // ==================================================
 // SECTION 2: SEMANTIC COLOR ASSIGNMENTS
@@ -58,14 +79,14 @@ $palette-accent-2:        #5167B2;  // Additional accent color
 // Map your palette colors to semantic meanings.
 // These provide consistent meaning across the application.
 
-$PRIMARY_COLOR:                     $palette-gill-light;
-$SECONDARY_COLOR:                   $palette-cap-dark;
-$SUCCESS_COLOR:                     #70C070;
-$INFO_COLOR:                        $palette-accent-2;
-$WARNING_COLOR:                     $palette-stain;
-$DANGER_COLOR:                      #F07070;
-$LIGHT_COLOR:                       $palette-cap-light;
-$DARK_COLOR:                        $palette-gill-dark;
+$PRIMARY_COLOR:                     $light_gill;
+$SECONDARY_COLOR:                   $dark_cap;
+$SUCCESS_COLOR:                     $success_green;
+$INFO_COLOR:                        $blue_accent;
+$WARNING_COLOR:                     $stain;
+$DANGER_COLOR:                      $danger_red;
+$LIGHT_COLOR:                       $light_cap;
+$DARK_COLOR:                        $dark_gill;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -90,7 +111,7 @@ $LINK_FG_COLOR:                     $PRIMARY_COLOR;
 $LINK_BG_COLOR:                     transparent;
 $LINK_VISITED_FG_COLOR:             $DARK_COLOR;
 $LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_FG_COLOR:               darken($PRIMARY_COLOR, 15%);
+$LINK_HOVER_FG_COLOR:               $hover_primary;
 $LINK_HOVER_BG_COLOR:               transparent;
 
 // --------------------------------------------------
@@ -102,15 +123,15 @@ $BUTTON_BG_COLOR:                   $LIGHT_COLOR;
 $BUTTON_BORDER_COLOR:               $SECONDARY_COLOR;
 $BUTTON_HOVER_FG_COLOR:             $DARK_COLOR;
 $BUTTON_HOVER_BG_COLOR:             $SECONDARY_COLOR;
-$BUTTON_HOVER_BORDER_COLOR:         darken($SECONDARY_COLOR, 10%);
+$BUTTON_HOVER_BORDER_COLOR:         $hover_secondary;
 $BUTTON_ACTIVE_FG_COLOR:            $DARK_COLOR;
 $BUTTON_ACTIVE_BG_COLOR:            $SECONDARY_COLOR;
-$BUTTON_PRIMARY_FG_COLOR:           #FFFFFF;
+$BUTTON_PRIMARY_FG_COLOR:           $LIGHT_COLOR;
 $BUTTON_PRIMARY_BG_COLOR:           $PRIMARY_COLOR;
-$BUTTON_PRIMARY_BORDER_COLOR:       darken($PRIMARY_COLOR, 10%);
-$BUTTON_PRIMARY_HOVER_FG_COLOR:     #FFFFFF;
-$BUTTON_PRIMARY_HOVER_BG_COLOR:     darken($PRIMARY_COLOR, 10%);
-$BUTTON_PRIMARY_HOVER_BORDER_COLOR: darken($PRIMARY_COLOR, 15%);
+$BUTTON_PRIMARY_BORDER_COLOR:       $hover_primary;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     $LIGHT_COLOR;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     $hover_primary;
+$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $DARK_COLOR;
 $BUTTON_BORDER_WIDTH:               1px;
 $BUTTON_BORDER_STYLE:               solid;
 $BUTTON_BORDER_RADIUS:              5px;
@@ -120,7 +141,7 @@ $BUTTON_BORDER_RADIUS:              5px;
 // --------------------------------------------------
 
 $INPUT_FG_COLOR:                    $DARK_COLOR;
-$INPUT_BG_COLOR:                    #FFFFFF;
+$INPUT_BG_COLOR:                    $LIGHT_COLOR;
 $INPUT_BORDER_COLOR:                $SECONDARY_COLOR;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
@@ -130,16 +151,16 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     lighten($INFO_COLOR, 40%);
+$INFO_BG_COLOR:                     $info_bg;
 $INFO_BORDER_COLOR:                 $INFO_COLOR;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  lighten($SUCCESS_COLOR, 40%);
+$SUCCESS_BG_COLOR:                  $success_bg;
 $SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
 $SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  lighten($WARNING_COLOR, 40%);
+$WARNING_BG_COLOR:                  $warning_bg;
 $WARNING_BORDER_COLOR:              $WARNING_COLOR;
 $WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   lighten($DANGER_COLOR, 40%);
+$DANGER_BG_COLOR:                   $danger_bg;
 $DANGER_BORDER_COLOR:               $DANGER_COLOR;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
@@ -177,8 +198,8 @@ $LEFT_BAR_HEADER_FG_COLOR:          $DARK_COLOR;
 $LEFT_BAR_HEADER_BG_COLOR:          $SECONDARY_COLOR;
 $LEFT_BAR_FG_COLOR:                 $PRIMARY_COLOR;
 $LEFT_BAR_BG_COLOR:                 $LIGHT_COLOR;
-$LEFT_BAR_HOVER_FG_COLOR:           darken($PRIMARY_COLOR, 15%);
-$LEFT_BAR_HOVER_BG_COLOR:           lighten($SECONDARY_COLOR, 30%);
+$LEFT_BAR_HOVER_FG_COLOR:           $hover_primary;
+$LEFT_BAR_HOVER_BG_COLOR:           $light_secondary;
 
 // --------------------------------------------------
 // Top Navigation Bar
@@ -192,7 +213,7 @@ $TOP_BAR_FG_COLOR:                  $DARK_COLOR;
 $TOP_BAR_BG_COLOR:                  $LIGHT_COLOR;
 $TOP_BAR_LINK_FG_COLOR:             $PRIMARY_COLOR;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_FG_COLOR:       darken($PRIMARY_COLOR, 15%);
+$TOP_BAR_LINK_HOVER_FG_COLOR:       $hover_primary;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
@@ -203,10 +224,10 @@ $LIST_BORDER_COLOR:                 transparent;
 $LIST_HEADER_FG_COLOR:              $DARK_COLOR;
 $LIST_HEADER_BG_COLOR:              $SECONDARY_COLOR;
 $LIST_FG_COLOR:                     $DARK_COLOR;
-$LIST_BG_COLOR:                     #FFFFFF;
+$LIST_BG_COLOR:                     $LIGHT_COLOR;
 $LIST_EVEN_BG_COLOR:                $LIGHT_COLOR;
 $LIST_ODD_BG_COLOR:                 $LIST_BG_COLOR;
-$LIST_HOVER_BG_COLOR:               lighten($SECONDARY_COLOR, 35%);
+$LIST_HOVER_BG_COLOR:               $light_secondary;
 
 // --------------------------------------------------
 // Menus and Dropdowns
@@ -214,10 +235,10 @@ $LIST_HOVER_BG_COLOR:               lighten($SECONDARY_COLOR, 35%);
 
 $MENU_BORDER_COLOR:                 $SECONDARY_COLOR;
 $MENU_FG_COLOR:                     $DARK_COLOR;
-$MENU_BG_COLOR:                     #FFFFFF;
+$MENU_BG_COLOR:                     $LIGHT_COLOR;
 $MENU_HOT_FG_COLOR:                 $DARK_COLOR;
 $MENU_HOT_BG_COLOR:                 $WARNING_COLOR;
-$MENU_WARM_FG_COLOR:                #FFFFFF;
+$MENU_WARM_FG_COLOR:                $LIGHT_COLOR;
 $MENU_WARM_BG_COLOR:                $DANGER_COLOR;
 
 // --------------------------------------------------
@@ -227,10 +248,10 @@ $MENU_WARM_BG_COLOR:                $DANGER_COLOR;
 $PAGER_FG_COLOR:                    $PRIMARY_COLOR;
 $PAGER_BG_COLOR:                    transparent;
 $PAGER_BORDER_COLOR:                none;
-$PAGER_HOVER_FG_COLOR:              darken($PRIMARY_COLOR, 15%);
+$PAGER_HOVER_FG_COLOR:              $hover_primary;
 $PAGER_HOVER_BG_COLOR:              $LIGHT_COLOR;
 $PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_FG_COLOR:             #FFFFFF;
+$PAGER_ACTIVE_FG_COLOR:             $LIGHT_COLOR;
 $PAGER_ACTIVE_BG_COLOR:             $PRIMARY_COLOR;
 $PAGER_ACTIVE_BORDER_COLOR:         none;
 
@@ -261,15 +282,14 @@ $PROGRESS_BAR_COLOR:                $PRIMARY_COLOR;
 // Wells and Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     lighten($DARK_COLOR, 30%);
+$WELL_FG_COLOR:                     $muted_dark;
 $WELL_BG_COLOR:                     $LIGHT_COLOR;
 
 // ==================================================
 // END OF TEMPLATE
 // ==================================================
 // After customizing this template:
-// 1. Verify all 121 variables are defined
+// 1. Verify all variables are defined
 // 2. Test visually in the browser
-// 3. Run: script/verify_theme_changes.rb check
-// 4. Adjust colors as needed for your aesthetic
+// 3. Adjust colors as needed for your aesthetic
 // ==================================================

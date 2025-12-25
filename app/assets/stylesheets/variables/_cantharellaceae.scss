@@ -35,7 +35,7 @@ $dark_blue:     #5167b2; // polyozellus_dark
 $light_gray:  mix($black, $cream, 10%);
 $medium_gray: mix($black, $cream, 25%);
 $dark_gray:   mix($black, $cream, 50%);
-$muted_black: adjust-color($black, $lightness: 25%);
+$muted_black: scale-color($black, $lightness: 27%);
 
 // Alert state colors
 $success_green:  #70C070;
