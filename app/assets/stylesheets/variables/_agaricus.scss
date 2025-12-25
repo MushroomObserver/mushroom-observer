@@ -34,7 +34,7 @@ $gray_border:     rgba($dark_brown, 0.4);
 $muted_border:    rgba($dark_brown, 0.2);
 $dark_gray:       mix($dark_brown, $pale_agaricus, 50%);
 $muted_brown:     scale-color($dark_brown, $lightness: 36%);
-$palest_agaricus: scale-color($pale_agaricus, $lightness: 50%)
+$palest_agaricus: scale-color($pale_agaricus, $lightness: 50%);
 
 // Alert state colors
 $success_green:  #70C070;
