@@ -14,7 +14,7 @@
 
 $dark_olive:    #37372f; // conica_stain
 $dark_red:      #a31404; // conica_cap_red
-$orange:        #dd6226; // conica_cap_orange
+$orange:        #f0b488; // conica_cap_orange (lightened)
 $gold:          #ffbf01; // conica_cap_yellow
 $pale_gold:     #ffda84; // conica_gill_margin
 $straw:         #ebc97f; // miniata_gill_margin
@@ -34,9 +34,12 @@ $dark_blue:     #5167b2; // polyozellus_dark
 
 // Derived grays (mixed from theme colors)
 $light_gray:    mix($dark_olive, $pale_cream, 10%);
-$medium_gray:   mix($dark_olive, $pale_cream, 25%);
 $dark_gray:     mix($dark_olive, $pale_cream, 50%);
+$gray_border:   rgba($dark_olive, 0.4);
+$muted_border:  rgba($dark_olive, 0.2);
 $muted_olive:   scale-color($dark_olive, $lightness: 38%);
+$light_cream:   scale-color($pale_cream, $lightness: 50%);
+$lighter_cream: scale-color($pale_cream, $lightness: 70%);
 
 // Alert state colors
 $success_green:  #70C070;
@@ -87,13 +90,8 @@ $LINK_HOVER_BG_COLOR:               $custard;
 // --------------------------------------------------
 
 $BUTTON_FG_COLOR:                   $dark_olive;
-$BUTTON_BG_COLOR:                   $pale_cream;
-$BUTTON_BORDER_COLOR:               $medium_gray;
-$BUTTON_HOVER_FG_COLOR:             $dark_olive;
-$BUTTON_HOVER_BG_COLOR:             $pale_cream;
-$BUTTON_HOVER_BORDER_COLOR:         $dark_olive;
-$BUTTON_ACTIVE_FG_COLOR:            $dark_olive;
-$BUTTON_ACTIVE_BG_COLOR:            $amber;
+$BUTTON_BG_COLOR:                   $orange;
+$BUTTON_BORDER_COLOR:               transparent;
 $BUTTON_PRIMARY_FG_COLOR:           $pale_cream;
 $BUTTON_PRIMARY_BG_COLOR:           $forest_green;
 $BUTTON_PRIMARY_BORDER_COLOR:       $olive;
@@ -109,8 +107,8 @@ $BUTTON_BORDER_RADIUS:              5px;
 // --------------------------------------------------
 
 $INPUT_FG_COLOR:                    $dark_olive;
-$INPUT_BG_COLOR:                    $pale_cream;
-$INPUT_BORDER_COLOR:                $medium_gray;
+$INPUT_BG_COLOR:                    $lighter_cream;
+$INPUT_BORDER_COLOR:                $gray_border;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
@@ -182,17 +180,17 @@ $TOP_BAR_BG_COLOR:                  $pale_cream;
 $TOP_BAR_LINK_FG_COLOR:             $forest_green;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
 $TOP_BAR_LINK_HOVER_FG_COLOR:       $forest_green;
-$TOP_BAR_LINK_HOVER_BG_COLOR:       $custard;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 transparent;
+$LIST_BORDER_COLOR:                 $muted_border;
 $LIST_HEADER_FG_COLOR:              $dark_gray;
 $LIST_HEADER_BG_COLOR:              $light_gray;
 $LIST_FG_COLOR:                     $dark_olive;
-$LIST_BG_COLOR:                     $pale_cream;
+$LIST_BG_COLOR:                     mix($pale_cream, white, 50%);
 $LIST_EVEN_BG_COLOR:                $pale_cream;
 $LIST_ODD_BG_COLOR:                 $pale_cream;
 $LIST_HOVER_BG_COLOR:               $custard;
@@ -201,9 +199,9 @@ $LIST_HOVER_BG_COLOR:               $custard;
 // Menus and Dropdowns
 // --------------------------------------------------
 
-$MENU_BORDER_COLOR:                 $straw;
+$MENU_BORDER_COLOR:                 $gray_border;
 $MENU_FG_COLOR:                     $dark_olive;
-$MENU_BG_COLOR:                     $pale_cream;
+$MENU_BG_COLOR:                     $light_cream;
 $MENU_HOT_FG_COLOR:                 $dark_olive;
 $MENU_HOT_BG_COLOR:                 $olive;
 $MENU_WARM_FG_COLOR:                $dark_olive;
@@ -250,8 +248,8 @@ $PROGRESS_BAR_COLOR:                $amber;
 // Panels
 // --------------------------------------------------
 
-$PANEL_FG_COLOR:                    $muted_olive;
-$PANEL_BG_COLOR:                    $custard;
-$PANEL_BORDER_COLOR:                $medium_gray;
-$PANEL_FOOTER_BG_COLOR:             $PANEL_BG_COLOR;
+$PANEL_FG_COLOR:                    $dark_olive;
+$PANEL_BG_COLOR:                    $light_cream;
+$PANEL_BORDER_COLOR:                $muted_border;
+$PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
 $PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;
