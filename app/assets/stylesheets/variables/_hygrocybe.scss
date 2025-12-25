@@ -14,13 +14,13 @@
 
 $dark_olive:    #37372f; // conica_stain
 $dark_red:      #a31404; // conica_cap_red
-$orange:        #f0b488; // conica_cap_orange (lightened)
+$orange:        #dd6226; // conica_cap_orange
 $gold:          #ffbf01; // conica_cap_yellow
 $pale_gold:     #ffda84; // conica_gill_margin
 $straw:         #ebc97f; // miniata_gill_margin
 $crimson:       #a10200; // miniata_cap_red
 $red_orange:    #c83e00; // miniata_cap_orange
-$amber:         #f19c05; // miniata_cap_yellow
+$amber:         #f0b040; // miniata_cap_yellow (lightened)
 $forest_green:  #405536; // psittacina_cap_green
 $tangerine:     #eb9020; // psittacina_cap_orange
 $olive:         #a38a3f; // psittacina_cap_middle
@@ -33,13 +33,14 @@ $light_blue:    #a5bffa; // polyozellus_light
 $dark_blue:     #5167b2; // polyozellus_dark
 
 // Derived grays (mixed from theme colors)
-$light_gray:    mix($dark_olive, $pale_cream, 10%);
-$dark_gray:     mix($dark_olive, $pale_cream, 50%);
-$gray_border:   rgba($dark_olive, 0.4);
-$muted_border:  rgba($dark_olive, 0.2);
-$muted_olive:   scale-color($dark_olive, $lightness: 38%);
-$light_cream:   scale-color($pale_cream, $lightness: 50%);
-$lighter_cream: scale-color($pale_cream, $lightness: 70%);
+$light_gray:     mix($dark_olive, $pale_cream, 10%);
+$dark_gray:      mix($dark_olive, $pale_cream, 50%);
+$gray_border:    rgba($dark_olive, 0.4);
+$muted_border:   rgba($dark_olive, 0.2);
+$muted_olive:    scale-color($dark_olive, $lightness: 38%);
+$lighter_cream:  scale-color($pale_cream, $lightness: 20%);
+$light_cream:    scale-color($pale_cream, $lightness: 50%);
+$lightest_cream: scale-color($pale_cream, $lightness: 70%);
 
 // Alert state colors
 $success_green:  #70C070;
@@ -90,7 +91,7 @@ $LINK_HOVER_BG_COLOR:               $custard;
 // --------------------------------------------------
 
 $BUTTON_FG_COLOR:                   $dark_olive;
-$BUTTON_BG_COLOR:                   $orange;
+$BUTTON_BG_COLOR:                   $tangerine;
 $BUTTON_BORDER_COLOR:               transparent;
 $BUTTON_PRIMARY_FG_COLOR:           $pale_cream;
 $BUTTON_PRIMARY_BG_COLOR:           $forest_green;
@@ -107,7 +108,7 @@ $BUTTON_BORDER_RADIUS:              5px;
 // --------------------------------------------------
 
 $INPUT_FG_COLOR:                    $dark_olive;
-$INPUT_BG_COLOR:                    $lighter_cream;
+$INPUT_BG_COLOR:                    $lightest_cream;
 $INPUT_BORDER_COLOR:                $gray_border;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
@@ -171,7 +172,7 @@ $LEFT_BAR_HOVER_BG_COLOR:           $custard;
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              transparent;
+$TOP_BAR_BORDER_COLOR:              $muted_border;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
@@ -251,5 +252,5 @@ $PROGRESS_BAR_COLOR:                $amber;
 $PANEL_FG_COLOR:                    $dark_olive;
 $PANEL_BG_COLOR:                    $light_cream;
 $PANEL_BORDER_COLOR:                $muted_border;
-$PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
+$PANEL_FOOTER_BG_COLOR:             $lighter_cream;
 $PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;
