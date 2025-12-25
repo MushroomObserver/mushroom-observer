@@ -14,40 +14,40 @@
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
 
-$pale_olive:  #e6edd5; // phalloides_foreground
-$light_olive: #dfe4bc; // phalloides_light_cap
-$olive:       #beb977; // phalloides_middle_cap
-$dark_olive:  #787133; // phalloides_dark_cap
-$gold:        #ebcc79; // calyptroderma_spring_background
-$cream:       #f9f2e0; // calyptroderma_spring_foreground
-$rust:        #954c23; // calyptroderma_fall_dark_cap
-$beige:       #ebe4de; // calyptroderma_volva
-$amber:       #f5bd5e; // calyptroderma_light_cap
-$copper:      #c18346; // calyptroderma_middle_cap
-$red:         #cc2616; // muscaria_background
-$pale_yellow: #fff8c6; // muscaria_foreground
-$orange:      #dd9d5f; // velosa_background
-$peach:       #faebd4; // velosa_light_veil
-$apricot:     #f4d5a6; // velosa_dark_veil
-$dusty_pink:  #d1afa5; // novinupta_background
-$dark_brown:  #383138; // pachycolea_background
+$pale_olive:   #e6edd5; // phalloides_foreground
+$light_olive:  #dfe4bc; // phalloides_light_cap
+$olive:        #beb977; // phalloides_middle_cap
+$dark_olive:   #787133; // phalloides_dark_cap
+$gold:         #ebcc79; // calyptroderma_spring_background
+$cream:        #f9f2e0; // calyptroderma_spring_foreground
+$rust:         #954c23; // calyptroderma_fall_dark_cap
+$beige:        #ebe4de; // calyptroderma_volva
+$amber:        #f5bd5e; // calyptroderma_light_cap
+$copper:       #c18346; // calyptroderma_middle_cap
+$red:          #cc2616; // muscaria_background
+$pale_yellow:  #fff8c6; // muscaria_foreground
+$orange:       #dd9d5f; // velosa_background
+$peach:        #faebd4; // velosa_light_veil
+$apricot:      #f4d5a6; // velosa_dark_veil
+$dusty_pink:   #d1afa5; // novinupta_background
+$dark_brown:   #383138; // pachycolea_background
 $silver:       #bfc0bb; // pachycolea_foreground
-$light_silver: #e8e9e4; // lighter silver for inputs/buttons
-$tan:         #aa9a83; // pachycolea_light_stipe
-$chocolate:   #60412d; // pachycolea_dark_brown
-$light_blue:  #a5bffa; // polyozellus_light
-$dark_blue:   #5167b2; // polyozellus_dark
+$tan:          #aa9a83; // pachycolea_light_stipe
+$chocolate:    #60412d; // pachycolea_dark_brown
+$light_blue:   #a5bffa; // polyozellus_light
+$dark_blue:    #5167b2; // polyozellus_dark
 
 // Derived grays (mixed from theme colors)
-$light_gray:  mix($dark_brown, $silver, 10%);
-$medium_gray: mix($dark_brown, $silver, 25%);
-$dark_gray:   mix($dark_brown, $silver, 50%);
+$light_gray:   mix($dark_brown, $silver, 10%);
+$medium_gray:  mix($dark_brown, $silver, 25%);
+$dark_gray:    mix($dark_brown, $silver, 50%);
+$light_silver: mix(white, $silver, 20%); // lighter silver for inputs/buttons
 
 // Dark theme list backgrounds
 $deep_dark_brown:    mix($dark_brown, black, 80%);
 $deeper_dark_brown:  mix($dark_brown, black, 70%);
 $deepest_dark_brown: mix($dark_brown, black, 20%);
-$dark_silver:       rgba($silver, 0.21); // panel border
+$dark_silver:        rgba($silver, 0.21); // panel border
 
 // Semi-transparent colors
 $muted_tan: rgba($tan, 0.45);
@@ -101,12 +101,12 @@ $LINK_HOVER_BG_COLOR:               $red;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   $light_silver;
-$BUTTON_BG_COLOR:                   $deep_dark_brown;
-$BUTTON_BORDER_COLOR:               $medium_gray;
-$BUTTON_HOVER_FG_COLOR:             $silver;
-$BUTTON_HOVER_BG_COLOR:             $deepest_dark_brown;
-$BUTTON_HOVER_BORDER_COLOR:         $dark_brown;
+$BUTTON_FG_COLOR:                   $deepest_dark_brown;
+$BUTTON_BG_COLOR:                   $amber;
+$BUTTON_BORDER_COLOR:               transparent;
+$BUTTON_HOVER_FG_COLOR:             $deepest_dark_brown;
+$BUTTON_HOVER_BG_COLOR:             $copper;
+$BUTTON_HOVER_BORDER_COLOR:         transparent;
 $BUTTON_ACTIVE_FG_COLOR:            $red;
 $BUTTON_ACTIVE_BG_COLOR:            $silver;
 $BUTTON_PRIMARY_FG_COLOR:           $dark_brown;
@@ -197,7 +197,7 @@ $TOP_BAR_BG_COLOR:                  $panel_overlay;
 $TOP_BAR_LINK_FG_COLOR:             $tan;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
 $TOP_BAR_LINK_HOVER_FG_COLOR:       $tan;
-$TOP_BAR_LINK_HOVER_BG_COLOR:       $red;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
 // Lists and Tables
@@ -216,13 +216,13 @@ $LIST_HOVER_BG_COLOR:               $chocolate;
 // Menus and Dropdowns
 // --------------------------------------------------
 
-$MENU_BORDER_COLOR:                 $dark_brown;
-$MENU_FG_COLOR:                     $dark_brown;
-$MENU_BG_COLOR:                     $silver;
-$MENU_HOT_FG_COLOR:                 $dark_brown;
-$MENU_HOT_BG_COLOR:                 $red;
-$MENU_WARM_FG_COLOR:                $dark_brown;
-$MENU_WARM_BG_COLOR:                $orange;
+$MENU_BORDER_COLOR:                 $deepest_dark_brown;
+$MENU_FG_COLOR:                     $silver;
+$MENU_BG_COLOR:                     $deep_dark_brown;
+$MENU_HOT_FG_COLOR:                 $red;
+$MENU_HOT_BG_COLOR:                 $deep_dark_brown;
+$MENU_WARM_FG_COLOR:                $orange;
+$MENU_WARM_BG_COLOR:                $deep_dark_brown;
 
 // --------------------------------------------------
 // Pagination
