@@ -15,25 +15,26 @@
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
 
-$pale_gold:   #ECCF95; // augustus_cap
-$dusty_rose:  #A06463; // brasiliensis_gills
-$brick_red:   #743931; // brasiliensis_gills (darker)
+$pale_gold:     #ECCF95; // augustus_cap
+$dusty_rose:    #A06463; // brasiliensis_gills
+$brick_red:     #743931; // brasiliensis_gills (darker)
 $pale_agaricus: #F6F0F2; // campestris_cap
-$button_gray: #F6F6F6; // neutral gray for buttons
-$white:       #FFFFFF; // pure white for inputs
-$dark_brown:  #3B2821; // cupreobrunneus_gills
-$terracotta:  #B4725F; // lilaceps_stain
-$tan:         #BC9D89; // semotus_cap
-$mustard:     #D4A833; // xanthodermus_stain
-$light_blue:  #a5bffa; // polyozellus_light
-$dark_blue:   #5167b2; // polyozellus_dark
+$button_gray:   #F6F6F6; // neutral gray for buttons
+$white:         #FFFFFF; // pure white for inputs
+$dark_brown:    #3B2821; // cupreobrunneus_gills
+$terracotta:    #B4725F; // lilaceps_stain
+$tan:           #BC9D89; // semotus_cap
+$mustard:       #D4A833; // xanthodermus_stain
+$light_blue:    #a5bffa; // polyozellus_light
+$dark_blue:     #5167b2; // polyozellus_dark
 
 // Derived grays (mixed from theme colors)
-$light_gray:   mix($dark_brown, $pale_agaricus, 10%);
-$gray_border:  rgba($dark_brown, 0.4);
-$muted_border: rgba($dark_brown, 0.2);
-$dark_gray:    mix($dark_brown, $pale_agaricus, 50%);
-$muted_brown:  scale-color($dark_brown, $lightness: 36%);
+$light_gray:      mix($dark_brown, $pale_agaricus, 10%);
+$gray_border:     rgba($dark_brown, 0.4);
+$muted_border:    rgba($dark_brown, 0.2);
+$dark_gray:       mix($dark_brown, $pale_agaricus, 50%);
+$muted_brown:     scale-color($dark_brown, $lightness: 36%);
+$palest_agaricus: scale-color($pale_agaricus, $lightness: 50%)
 
 // Alert state colors
 $success_green:  #70C070;
@@ -184,7 +185,7 @@ $LIST_BORDER_COLOR:                 $gray_border;
 $LIST_HEADER_FG_COLOR:              $dark_gray;
 $LIST_HEADER_BG_COLOR:              $light_gray;
 $LIST_FG_COLOR:                     $dark_brown;
-$LIST_BG_COLOR:                     mix($pale_agaricus, white, 50%);
+$LIST_BG_COLOR:                     $palest_agaricus;
 $LIST_EVEN_BG_COLOR:                $LIST_BG_COLOR;
 $LIST_ODD_BG_COLOR:                 $pale_agaricus;
 $LIST_HOVER_BG_COLOR:               $pale_gold;
@@ -243,7 +244,7 @@ $PROGRESS_BAR_COLOR:                $dusty_rose;
 // --------------------------------------------------
 
 $PANEL_FG_COLOR:                    $dark_brown;
-$PANEL_BG_COLOR:                    scale-color($pale_agaricus, $lightness: 50%);
+$PANEL_BG_COLOR:                    $palest_agaricus;
 $PANEL_BORDER_COLOR:                $muted_border;
 $PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
 $PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;
