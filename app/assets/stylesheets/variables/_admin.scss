@@ -9,25 +9,46 @@
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
 
-$admin_purple:        #DD00DD;
-$admin_yellow:        yellow;
-$admin_blue:          #2050E0;
-$admin_gray:          #535354;
-$admin_black:         black;
-$admin_white:         white;
+// Core colors
+$purple:        #DD00DD;
+$yellow:        #FFFF00;
+$blue:          #2050E0;
+$gray:          #535354;
+$black:         #000000;
+$white:         #FFFFFF;
+
+// Derived colors (using adjust-color instead of darken/lighten)
+$dark_blue:     adjust-color($blue, $lightness: -10%);
+$light_blue:    adjust-color($blue, $lightness: 10%);
+$lighter_blue:  adjust-color($blue, $lightness: 20%);
+$light_purple:  adjust-color($purple, $lightness: 40%);
+
+// Alert state colors
+$success_green:  #70C070;
+$success_bg:     #E0FFE0;
+$info_blue:      #5BC0DE;
+$info_bg:        #E0F8FF;
+$warning_yellow: #F8CC70;
+$warning_bg:     #FFF8E0;
+$danger_red:     #F07070;
+$danger_bg:      #FFE0E0;
+
+// Accent colors
+$pale_yellow:    #FFFFCC;
+$warm_red:       #FF8888;
 
 // ==================================================
 // SECTION 2: SEMANTIC COLOR ASSIGNMENTS
 // ==================================================
 
-$PRIMARY_COLOR:                     $admin_blue;
-$SECONDARY_COLOR:                   $admin_yellow;
-$SUCCESS_COLOR:                     #70C070;
-$INFO_COLOR:                        #5BC0DE;
-$WARNING_COLOR:                     $admin_yellow;
-$DANGER_COLOR:                      #F07070;
-$LIGHT_COLOR:                       $admin_white;
-$DARK_COLOR:                        $admin_black;
+$PRIMARY_COLOR:                     $blue;
+$SECONDARY_COLOR:                   $yellow;
+$SUCCESS_COLOR:                     $success_green;
+$INFO_COLOR:                        $info_blue;
+$WARNING_COLOR:                     $yellow;
+$DANGER_COLOR:                      $danger_red;
+$LIGHT_COLOR:                       $white;
+$DARK_COLOR:                        $black;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -37,39 +58,39 @@ $DARK_COLOR:                        $admin_black;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_FG_COLOR:                     $admin_black;
-$BODY_BG_COLOR:                     $admin_purple;
+$BODY_FG_COLOR:                     $black;
+$BODY_BG_COLOR:                     $purple;
 
 // --------------------------------------------------
 // Links
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_FG_COLOR:                     $admin_blue;
+$LINK_FG_COLOR:                     $blue;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_FG_COLOR:             darken($admin_blue, 10%);
+$LINK_VISITED_FG_COLOR:             $dark_blue;
 $LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_FG_COLOR:               lighten($admin_blue, 10%);
+$LINK_HOVER_FG_COLOR:               $light_blue;
 $LINK_HOVER_BG_COLOR:               transparent;
 
 // --------------------------------------------------
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   $admin_black;
-$BUTTON_BG_COLOR:                   $admin_yellow;
-$BUTTON_BORDER_COLOR:               $admin_black;
-$BUTTON_HOVER_FG_COLOR:             $admin_yellow;
-$BUTTON_HOVER_BG_COLOR:             $admin_black;
-$BUTTON_HOVER_BORDER_COLOR:         $admin_yellow;
-$BUTTON_ACTIVE_FG_COLOR:            $admin_yellow;
-$BUTTON_ACTIVE_BG_COLOR:            $admin_gray;
-$BUTTON_PRIMARY_FG_COLOR:           $admin_white;
-$BUTTON_PRIMARY_BG_COLOR:           $admin_blue;
-$BUTTON_PRIMARY_BORDER_COLOR:       $admin_black;
-$BUTTON_PRIMARY_HOVER_FG_COLOR:     $admin_white;
-$BUTTON_PRIMARY_HOVER_BG_COLOR:     darken($admin_blue, 10%);
-$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $admin_black;
+$BUTTON_FG_COLOR:                   $black;
+$BUTTON_BG_COLOR:                   $yellow;
+$BUTTON_BORDER_COLOR:               $black;
+$BUTTON_HOVER_FG_COLOR:             $yellow;
+$BUTTON_HOVER_BG_COLOR:             $black;
+$BUTTON_HOVER_BORDER_COLOR:         $yellow;
+$BUTTON_ACTIVE_FG_COLOR:            $yellow;
+$BUTTON_ACTIVE_BG_COLOR:            $gray;
+$BUTTON_PRIMARY_FG_COLOR:           $white;
+$BUTTON_PRIMARY_BG_COLOR:           $blue;
+$BUTTON_PRIMARY_BORDER_COLOR:       $black;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     $white;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     $dark_blue;
+$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $black;
 $BUTTON_BORDER_WIDTH:               2px;
 $BUTTON_BORDER_STYLE:               solid;
 $BUTTON_BORDER_RADIUS:              5px;
@@ -78,9 +99,9 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    $admin_black;
-$INPUT_BG_COLOR:                    $admin_white;
-$INPUT_BORDER_COLOR:                $admin_black;
+$INPUT_FG_COLOR:                    $black;
+$INPUT_BG_COLOR:                    $white;
+$INPUT_BORDER_COLOR:                $black;
 $INPUT_BORDER_WIDTH:                2px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
@@ -89,18 +110,18 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     #E0F8FF;
-$INFO_BORDER_COLOR:                 #5BC0DE;
-$INFO_FG_COLOR:                     $admin_black;
-$SUCCESS_BG_COLOR:                  #E0FFE0;
-$SUCCESS_BORDER_COLOR:              #70C070;
-$SUCCESS_FG_COLOR:                  $admin_black;
-$WARNING_BG_COLOR:                  #FFF8E0;
-$WARNING_BORDER_COLOR:              #F8CC70;
-$WARNING_FG_COLOR:                  $admin_black;
-$DANGER_BG_COLOR:                   #FFE0E0;
-$DANGER_BORDER_COLOR:               #F07070;
-$DANGER_FG_COLOR:                   $admin_black;
+$INFO_BG_COLOR:                     $info_bg;
+$INFO_BORDER_COLOR:                 $info_blue;
+$INFO_FG_COLOR:                     $black;
+$SUCCESS_BG_COLOR:                  $success_bg;
+$SUCCESS_BORDER_COLOR:              $success_green;
+$SUCCESS_FG_COLOR:                  $black;
+$WARNING_BG_COLOR:                  $warning_bg;
+$WARNING_BORDER_COLOR:              $warning_yellow;
+$WARNING_FG_COLOR:                  $black;
+$DANGER_BG_COLOR:                   $danger_bg;
+$DANGER_BORDER_COLOR:               $danger_red;
+$DANGER_FG_COLOR:                   $black;
 
 $BANNER_BORDER_WIDTH:               3px;
 $BANNER_BORDER_STYLE:               solid;
@@ -114,30 +135,30 @@ $ALERT_BORDER_RADIUS:               0px;
 // Logo
 // --------------------------------------------------
 
-$LOGO_BORDER_COLOR:                 $admin_black;
+$LOGO_BORDER_COLOR:                 $black;
 $LOGO_BORDER_WIDTH:                 2px;
 $LOGO_BORDER_STYLE:                 solid;
 $LOGO_BORDER_RADIUS:                0px;
-$LOGO_FG_COLOR:                     $admin_black;
-$LOGO_BG_COLOR:                     $admin_yellow;
-$LOGO_HOVER_FG_COLOR:               $admin_purple;
-$LOGO_HOVER_BG_COLOR:               $admin_yellow;
+$LOGO_FG_COLOR:                     $black;
+$LOGO_BG_COLOR:                     $yellow;
+$LOGO_HOVER_FG_COLOR:               $purple;
+$LOGO_HOVER_BG_COLOR:               $yellow;
 
 // --------------------------------------------------
 // Left Navigation Bar
 // --------------------------------------------------
 
-$LEFT_BAR_BORDER_COLOR:             $admin_gray;
+$LEFT_BAR_BORDER_COLOR:             $gray;
 $LEFT_BAR_BORDER_WIDTH:             2px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            0px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
-$LEFT_BAR_HEADER_FG_COLOR:          $admin_black;
-$LEFT_BAR_HEADER_BG_COLOR:          $admin_yellow;
-$LEFT_BAR_FG_COLOR:                 $admin_blue;
-$LEFT_BAR_BG_COLOR:                 $admin_yellow;
-$LEFT_BAR_HOVER_FG_COLOR:           $admin_yellow;
-$LEFT_BAR_HOVER_BG_COLOR:           $admin_blue;
+$LEFT_BAR_HEADER_FG_COLOR:          $black;
+$LEFT_BAR_HEADER_BG_COLOR:          $yellow;
+$LEFT_BAR_FG_COLOR:                 $blue;
+$LEFT_BAR_BG_COLOR:                 $yellow;
+$LEFT_BAR_HOVER_FG_COLOR:           $yellow;
+$LEFT_BAR_HOVER_BG_COLOR:           $blue;
 
 // --------------------------------------------------
 // Top Navigation Bar
@@ -147,78 +168,78 @@ $TOP_BAR_BORDER_COLOR:              none;
 $TOP_BAR_BORDER_WIDTH:              0;
 $TOP_BAR_BORDER_STYLE:              none;
 $TOP_BAR_BORDER_RADIUS:             0;
-$TOP_BAR_FG_COLOR:                  $admin_black;
-$TOP_BAR_BG_COLOR:                  $admin_purple;
-$TOP_BAR_LINK_FG_COLOR:             $admin_blue;
+$TOP_BAR_FG_COLOR:                  $black;
+$TOP_BAR_BG_COLOR:                  $purple;
+$TOP_BAR_LINK_FG_COLOR:             $blue;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_FG_COLOR:       lighten($admin_blue, 20%);
+$TOP_BAR_LINK_HOVER_FG_COLOR:       $lighter_blue;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 $admin_black;
-$LIST_HEADER_FG_COLOR:              $admin_black;
-$LIST_HEADER_BG_COLOR:              $admin_yellow;
-$LIST_FG_COLOR:                     $admin_black;
-$LIST_BG_COLOR:                     $admin_white;
-$LIST_EVEN_BG_COLOR:                #FFFFCC;
-$LIST_ODD_BG_COLOR:                 $admin_white;
-$LIST_HOVER_BG_COLOR:               $admin_yellow;
+$LIST_BORDER_COLOR:                 $black;
+$LIST_HEADER_FG_COLOR:              $black;
+$LIST_HEADER_BG_COLOR:              $yellow;
+$LIST_FG_COLOR:                     $black;
+$LIST_BG_COLOR:                     $white;
+$LIST_EVEN_BG_COLOR:                $pale_yellow;
+$LIST_ODD_BG_COLOR:                 $white;
+$LIST_HOVER_BG_COLOR:               $yellow;
 
 // --------------------------------------------------
 // Menus and Dropdowns
 // --------------------------------------------------
 
-$MENU_BORDER_COLOR:                 $admin_black;
-$MENU_FG_COLOR:                     $admin_black;
-$MENU_BG_COLOR:                     $admin_white;
-$MENU_HOT_FG_COLOR:                 $admin_black;
-$MENU_HOT_BG_COLOR:                 $admin_yellow;
-$MENU_WARM_FG_COLOR:                $admin_white;
-$MENU_WARM_BG_COLOR:                #FF8888;
+$MENU_BORDER_COLOR:                 $black;
+$MENU_FG_COLOR:                     $black;
+$MENU_BG_COLOR:                     $white;
+$MENU_HOT_FG_COLOR:                 $black;
+$MENU_HOT_BG_COLOR:                 $yellow;
+$MENU_WARM_FG_COLOR:                $white;
+$MENU_WARM_BG_COLOR:                $warm_red;
 
 // --------------------------------------------------
 // Pagination
 // --------------------------------------------------
 
-$PAGER_FG_COLOR:                    $admin_blue;
+$PAGER_FG_COLOR:                    $blue;
 $PAGER_BG_COLOR:                    transparent;
 $PAGER_BORDER_COLOR:                none;
-$PAGER_HOVER_FG_COLOR:              $admin_white;
-$PAGER_HOVER_BG_COLOR:              $admin_blue;
+$PAGER_HOVER_FG_COLOR:              $white;
+$PAGER_HOVER_BG_COLOR:              $blue;
 $PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_FG_COLOR:             $admin_yellow;
-$PAGER_ACTIVE_BG_COLOR:             $admin_black;
+$PAGER_ACTIVE_FG_COLOR:             $yellow;
+$PAGER_ACTIVE_BG_COLOR:             $black;
 $PAGER_ACTIVE_BORDER_COLOR:         none;
 
 // --------------------------------------------------
 // Tooltips
 // --------------------------------------------------
 
-$TOOLTIP_FG_COLOR:                  $admin_yellow;
-$TOOLTIP_BG_COLOR:                  $admin_black;
+$TOOLTIP_FG_COLOR:                  $yellow;
+$TOOLTIP_BG_COLOR:                  $black;
 
 // --------------------------------------------------
 // Vote Meters
 // --------------------------------------------------
 
 $VOTE_METER_BORDER_COLOR:           none;
-$VOTE_METER_FG_COLOR:               $admin_black;
-$VOTE_METER_BG_COLOR:               $admin_yellow;
+$VOTE_METER_FG_COLOR:               $black;
+$VOTE_METER_BG_COLOR:               $yellow;
 
 // --------------------------------------------------
 // Progress Bars
 // --------------------------------------------------
 
-$PROGRESS_BG_COLOR:                 $admin_gray;
-$PROGRESS_FG_COLOR:                 $admin_black;
-$PROGRESS_BAR_COLOR:                $admin_yellow;
+$PROGRESS_BG_COLOR:                 $gray;
+$PROGRESS_FG_COLOR:                 $black;
+$PROGRESS_BAR_COLOR:                $yellow;
 
 // --------------------------------------------------
 // Wells and Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     $admin_black;
-$WELL_BG_COLOR:                     lighten($admin_purple, 40%);
+$WELL_FG_COLOR:                     $black;
+$WELL_BG_COLOR:                     $light_purple;
