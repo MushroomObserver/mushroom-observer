@@ -12,37 +12,51 @@
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
 
-$californicus_cap:              #f6ae4a;
-$californicus_stipe:            #fae8b8;
-$cinnabarinus_dark_cap:         #c12900;
-$cinnabarinus_light_cap:        #ff6524;
-$cinnabarinus_dark_stem:        #6d1900;
-$tubaeformis_dark_cap:          #603b29;
-$tubaeformis_light_cap:         #925c20;
-$tubaeformis_hymenium:          #c2914c;
-$tubaeformis_bright_stipe:      #ffb230;
-$tubaeformis_dark_stipe:        #4b2e0c;
-$tubaeformis_light_stipe:       #e5bb67;
-$cornucopioides_dark_hymenium:  #10110b;
-$cornucopioides_light_hymenium: #9b9690;
-$cornucopioides_dark_cap:       #4f4337;
-$cornucopioides_light_cap:      #826c57;
-$cornucopioides_bright_margin:  #e6c987;
-$polyozellus_light:             #a5bffa;
-$polyozellus_dark:              #5167b2;
+$orange:        #f6ae4a; // californicus_cap
+$cream:         #fae8b8; // californicus_stipe
+$vivid_red:     #c12900; // cinnabarinus_dark_cap
+$bright_orange: #ff6524; // cinnabarinus_light_cap
+$dark_red:      #6d1900; // cinnabarinus_dark_stem
+$brown:         #603b29; // tubaeformis_dark_cap
+$ochre:         #925c20; // tubaeformis_light_cap
+$light_ochre:   #c2914c; // tubaeformis_hymenium
+$gold:          #ffb230; // tubaeformis_bright_stipe
+$deep_brown:    #4b2e0c; // tubaeformis_dark_stipe
+$pale_gold:     #e5bb67; // tubaeformis_light_stipe
+$black:         #10110b; // cornucopioides_dark_hymenium
+$gray:          #9b9690; // cornucopioides_light_hymenium
+$dark_brown:    #4f4337; // cornucopioides_dark_cap
+$light_brown:   #826c57; // cornucopioides_light_cap
+$straw:         #e6c987; // cornucopioides_bright_margin
+$light_blue:    #a5bffa; // polyozellus_light
+$dark_blue:     #5167b2; // polyozellus_dark
+
+// Derived grays (mixed from theme colors)
+$light_gray:  mix($black, $cream, 10%);
+$medium_gray: mix($black, $cream, 25%);
+$dark_gray:   mix($black, $cream, 50%);
+$muted_black: adjust-color($black, $lightness: 25%);
+
+// Alert state colors
+$success_green:  #70C070;
+$success_bg:     #E0FFE0;
+$warning_yellow: #F8CC70;
+$warning_bg:     #FFF8E0;
+$danger_red:     #F07070;
+$danger_bg:      #FFE0E0;
 
 // ==================================================
 // SECTION 2: SEMANTIC COLOR ASSIGNMENTS
 // ==================================================
 
-$PRIMARY_COLOR:                     $cinnabarinus_light_cap;
-$SECONDARY_COLOR:                   $californicus_cap;
-$SUCCESS_COLOR:                     #70C070;
-$INFO_COLOR:                        $polyozellus_dark;
-$WARNING_COLOR:                     $tubaeformis_bright_stipe;
-$DANGER_COLOR:                      $cinnabarinus_dark_cap;
-$LIGHT_COLOR:                       $californicus_stipe;
-$DARK_COLOR:                        $cornucopioides_dark_hymenium;
+$PRIMARY_COLOR:                     $bright_orange;
+$SECONDARY_COLOR:                   $orange;
+$SUCCESS_COLOR:                     $success_green;
+$INFO_COLOR:                        $dark_blue;
+$WARNING_COLOR:                     $gold;
+$DANGER_COLOR:                      $vivid_red;
+$LIGHT_COLOR:                       $cream;
+$DARK_COLOR:                        $black;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -52,39 +66,39 @@ $DARK_COLOR:                        $cornucopioides_dark_hymenium;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_FG_COLOR:                     $cornucopioides_dark_hymenium;
-$BODY_BG_COLOR:                     $californicus_stipe;
+$BODY_FG_COLOR:                     $black;
+$BODY_BG_COLOR:                     $cream;
 
 // --------------------------------------------------
 // Links
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_FG_COLOR:                     $cinnabarinus_light_cap;
+$LINK_FG_COLOR:                     $bright_orange;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_FG_COLOR:             $cinnabarinus_dark_cap;
+$LINK_VISITED_FG_COLOR:             $vivid_red;
 $LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_FG_COLOR:               $cinnabarinus_light_cap;
-$LINK_HOVER_BG_COLOR:               $californicus_cap;
+$LINK_HOVER_FG_COLOR:               $bright_orange;
+$LINK_HOVER_BG_COLOR:               $orange;
 
 // --------------------------------------------------
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   #000000;
-$BUTTON_BG_COLOR:                   #F6F6F6;
-$BUTTON_BORDER_COLOR:               #CCCCCC;
-$BUTTON_HOVER_FG_COLOR:             #000000;
-$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
-$BUTTON_HOVER_BORDER_COLOR:         black;
-$BUTTON_ACTIVE_FG_COLOR:            $californicus_stipe;
-$BUTTON_ACTIVE_BG_COLOR:            $californicus_cap;
-$BUTTON_PRIMARY_FG_COLOR:           $californicus_stipe;
-$BUTTON_PRIMARY_BG_COLOR:           $cinnabarinus_light_cap;
-$BUTTON_PRIMARY_BORDER_COLOR:       $cinnabarinus_dark_cap;
-$BUTTON_PRIMARY_HOVER_FG_COLOR:     $californicus_stipe;
-$BUTTON_PRIMARY_HOVER_BG_COLOR:     $cinnabarinus_dark_cap;
-$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $cinnabarinus_dark_stem;
+$BUTTON_FG_COLOR:                   $black;
+$BUTTON_BG_COLOR:                   $cream;
+$BUTTON_BORDER_COLOR:               $medium_gray;
+$BUTTON_HOVER_FG_COLOR:             $black;
+$BUTTON_HOVER_BG_COLOR:             $cream;
+$BUTTON_HOVER_BORDER_COLOR:         $black;
+$BUTTON_ACTIVE_FG_COLOR:            $cream;
+$BUTTON_ACTIVE_BG_COLOR:            $orange;
+$BUTTON_PRIMARY_FG_COLOR:           $cream;
+$BUTTON_PRIMARY_BG_COLOR:           $bright_orange;
+$BUTTON_PRIMARY_BORDER_COLOR:       $vivid_red;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     $cream;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     $vivid_red;
+$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $dark_red;
 $BUTTON_BORDER_WIDTH:               1px;
 $BUTTON_BORDER_STYLE:               solid;
 $BUTTON_BORDER_RADIUS:              5px;
@@ -93,9 +107,9 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    #000000;
-$INPUT_BG_COLOR:                    #FFFFFF;
-$INPUT_BORDER_COLOR:                #CCCCCC;
+$INPUT_FG_COLOR:                    $black;
+$INPUT_BG_COLOR:                    $cream;
+$INPUT_BORDER_COLOR:                $medium_gray;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
@@ -104,17 +118,17 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     $polyozellus_light;
-$INFO_BORDER_COLOR:                 $polyozellus_dark;
+$INFO_BG_COLOR:                     $light_blue;
+$INFO_BORDER_COLOR:                 $dark_blue;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  #E0FFE0;
-$SUCCESS_BORDER_COLOR:              #70C070;
+$SUCCESS_BG_COLOR:                  $success_bg;
+$SUCCESS_BORDER_COLOR:              $success_green;
 $SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  #FFF8E0;
-$WARNING_BORDER_COLOR:              #F8CC70;
+$WARNING_BG_COLOR:                  $warning_bg;
+$WARNING_BORDER_COLOR:              $warning_yellow;
 $WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   #FFE0E0;
-$DANGER_BORDER_COLOR:               #F07070;
+$DANGER_BG_COLOR:                   $danger_bg;
+$DANGER_BORDER_COLOR:               $danger_red;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
 $BANNER_BORDER_WIDTH:               2px;
@@ -129,30 +143,30 @@ $ALERT_BORDER_RADIUS:               5px;
 // Logo
 // --------------------------------------------------
 
-$LOGO_BORDER_COLOR:                 $cornucopioides_dark_hymenium;
+$LOGO_BORDER_COLOR:                 $black;
 $LOGO_BORDER_WIDTH:                 1px;
 $LOGO_BORDER_STYLE:                 solid;
 $LOGO_BORDER_RADIUS:                0px;
-$LOGO_FG_COLOR:                     $cornucopioides_dark_hymenium;
-$LOGO_BG_COLOR:                     $californicus_cap;
-$LOGO_HOVER_FG_COLOR:               $cornucopioides_dark_hymenium;
-$LOGO_HOVER_BG_COLOR:               $californicus_stipe;
+$LOGO_FG_COLOR:                     $black;
+$LOGO_BG_COLOR:                     $orange;
+$LOGO_HOVER_FG_COLOR:               $black;
+$LOGO_HOVER_BG_COLOR:               $cream;
 
 // --------------------------------------------------
 // Left Navigation Bar
 // --------------------------------------------------
 
-$LEFT_BAR_BORDER_COLOR:             $californicus_cap;
+$LEFT_BAR_BORDER_COLOR:             $orange;
 $LEFT_BAR_BORDER_WIDTH:             1px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            5px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
-$LEFT_BAR_HEADER_FG_COLOR:          $cornucopioides_dark_hymenium;
-$LEFT_BAR_HEADER_BG_COLOR:          $californicus_cap;
-$LEFT_BAR_FG_COLOR:                 $cinnabarinus_dark_cap;
-$LEFT_BAR_BG_COLOR:                 $californicus_cap;
-$LEFT_BAR_HOVER_FG_COLOR:           $cinnabarinus_dark_cap;
-$LEFT_BAR_HOVER_BG_COLOR:           $californicus_stipe;
+$LEFT_BAR_HEADER_FG_COLOR:          $black;
+$LEFT_BAR_HEADER_BG_COLOR:          $orange;
+$LEFT_BAR_FG_COLOR:                 $vivid_red;
+$LEFT_BAR_BG_COLOR:                 $orange;
+$LEFT_BAR_HOVER_FG_COLOR:           $vivid_red;
+$LEFT_BAR_HOVER_BG_COLOR:           $cream;
 
 // --------------------------------------------------
 // Top Navigation Bar
@@ -162,78 +176,78 @@ $TOP_BAR_BORDER_COLOR:              transparent;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
-$TOP_BAR_FG_COLOR:                  $cornucopioides_dark_hymenium;
-$TOP_BAR_BG_COLOR:                  $californicus_stipe;
-$TOP_BAR_LINK_FG_COLOR:             $cinnabarinus_light_cap;
+$TOP_BAR_FG_COLOR:                  $black;
+$TOP_BAR_BG_COLOR:                  $cream;
+$TOP_BAR_LINK_FG_COLOR:             $bright_orange;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_FG_COLOR:       $cinnabarinus_light_cap;
-$TOP_BAR_LINK_HOVER_BG_COLOR:       $californicus_cap;
+$TOP_BAR_LINK_HOVER_FG_COLOR:       $bright_orange;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       $orange;
 
 // --------------------------------------------------
 // Lists and Tables
 // --------------------------------------------------
 
 $LIST_BORDER_COLOR:                 transparent;
-$LIST_HEADER_FG_COLOR:              #777777;
-$LIST_HEADER_BG_COLOR:              #EEEEEE;
-$LIST_FG_COLOR:                     $cornucopioides_dark_hymenium;
-$LIST_BG_COLOR:                     mix($californicus_stipe, white, 50%);
-$LIST_EVEN_BG_COLOR:                $LIST_BG_COLOR;
-$LIST_ODD_BG_COLOR:                 #FFFFFF;
-$LIST_HOVER_BG_COLOR:               $californicus_cap;
+$LIST_HEADER_FG_COLOR:              $dark_gray;
+$LIST_HEADER_BG_COLOR:              $light_gray;
+$LIST_FG_COLOR:                     $black;
+$LIST_BG_COLOR:                     $cream;
+$LIST_EVEN_BG_COLOR:                $cream;
+$LIST_ODD_BG_COLOR:                 $cream;
+$LIST_HOVER_BG_COLOR:               $orange;
 
 // --------------------------------------------------
 // Menus and Dropdowns
 // --------------------------------------------------
 
-$MENU_BORDER_COLOR:                 $cornucopioides_dark_hymenium;
-$MENU_FG_COLOR:                     black;
-$MENU_BG_COLOR:                     white;
-$MENU_HOT_FG_COLOR:                 black;
-$MENU_HOT_BG_COLOR:                 $cinnabarinus_light_cap;
-$MENU_WARM_FG_COLOR:                black;
-$MENU_WARM_BG_COLOR:                $californicus_cap;
+$MENU_BORDER_COLOR:                 $black;
+$MENU_FG_COLOR:                     $black;
+$MENU_BG_COLOR:                     $cream;
+$MENU_HOT_FG_COLOR:                 $black;
+$MENU_HOT_BG_COLOR:                 $bright_orange;
+$MENU_WARM_FG_COLOR:                $black;
+$MENU_WARM_BG_COLOR:                $orange;
 
 // --------------------------------------------------
 // Pagination
 // --------------------------------------------------
 
-$PAGER_FG_COLOR:                    $cornucopioides_dark_hymenium;
+$PAGER_FG_COLOR:                    $black;
 $PAGER_BG_COLOR:                    transparent;
 $PAGER_BORDER_COLOR:                none;
-$PAGER_HOVER_FG_COLOR:              $cornucopioides_dark_hymenium;
-$PAGER_HOVER_BG_COLOR:              $californicus_cap;
+$PAGER_HOVER_FG_COLOR:              $black;
+$PAGER_HOVER_BG_COLOR:              $orange;
 $PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_FG_COLOR:             $californicus_stipe;
-$PAGER_ACTIVE_BG_COLOR:             $cornucopioides_dark_hymenium;
+$PAGER_ACTIVE_FG_COLOR:             $cream;
+$PAGER_ACTIVE_BG_COLOR:             $black;
 $PAGER_ACTIVE_BORDER_COLOR:         none;
 
 // --------------------------------------------------
 // Tooltips
 // --------------------------------------------------
 
-$TOOLTIP_FG_COLOR:                  $californicus_stipe;
-$TOOLTIP_BG_COLOR:                  $cornucopioides_dark_hymenium;
+$TOOLTIP_FG_COLOR:                  $cream;
+$TOOLTIP_BG_COLOR:                  $black;
 
 // --------------------------------------------------
 // Vote Meters
 // --------------------------------------------------
 
 $VOTE_METER_BORDER_COLOR:           none;
-$VOTE_METER_FG_COLOR:               $cornucopioides_dark_hymenium;
-$VOTE_METER_BG_COLOR:               $californicus_cap;
+$VOTE_METER_FG_COLOR:               $black;
+$VOTE_METER_BG_COLOR:               $orange;
 
 // --------------------------------------------------
 // Progress Bars
 // --------------------------------------------------
 
-$PROGRESS_BG_COLOR:                 $californicus_stipe;
-$PROGRESS_FG_COLOR:                 $cornucopioides_dark_hymenium;
-$PROGRESS_BAR_COLOR:                $cinnabarinus_light_cap;
+$PROGRESS_BG_COLOR:                 $cream;
+$PROGRESS_FG_COLOR:                 $black;
+$PROGRESS_BAR_COLOR:                $bright_orange;
 
 // --------------------------------------------------
 // Wells and Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     lighten($cornucopioides_dark_hymenium, 25%);
-$WELL_BG_COLOR:                     $californicus_cap;
+$WELL_FG_COLOR:                     $muted_black;
+$WELL_BG_COLOR:                     $orange;
