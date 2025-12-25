@@ -47,17 +47,17 @@
   border-left-width: 0px;
   padding: 0px;
 
-  a:not(.clear-button),
-  a:visited:not(.clear-button),
-  .btn-link {
-    color: $navbar-default-color;
-    background-color: $navbar-default-link-active-bg;
+  // a:not(.clear-button),
+  // a:visited:not(.clear-button),
+  // .btn-link {
+  //   color: $navbar-default-color;
+  //   background-color: $navbar-default-link-active-bg;
 
-    &:hover {
-      color: $navbar-default-link-hover-color;
-      background-color: $navbar-default-link-hover-bg;
-    }
-  }
+  //   &:hover {
+  //     color: $navbar-default-link-hover-color;
+  //     background-color: $navbar-default-link-hover-bg;
+  //   }
+  // }
 
   .navbar-nav {
     margin-right: 2px;
