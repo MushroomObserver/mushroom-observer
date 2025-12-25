@@ -12,25 +12,25 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid $BODY_BG_COLOR;
+  border: 2px solid $body-bg;
   transition: all 0.3s ease;
   flex-shrink: 0;
 
   &.off {
-    background: $INPUT_BORDER_COLOR;
-    border-color: $INPUT_BORDER_COLOR;
-    box-shadow: 0 0 8px $INPUT_BG_COLOR;
+    background: $input-border;
+    border-color: $input-border;
+    box-shadow: 0 0 8px $input-bg;
   }
 
   &.red {
-    background: $DANGER_BORDER_COLOR;
-    border-color: $DANGER_BORDER_COLOR;
-    box-shadow: 0 0 8px $DANGER_BG_COLOR;
+    background: $alert-danger-border;
+    border-color: $alert-danger-border;
+    box-shadow: 0 0 8px $alert-danger-bg;
   }
 
   &.green {
-    background: $SUCCESS_BORDER_COLOR;
-    border-color: $SUCCESS_BORDER_COLOR;
-    box-shadow: 0 0 8px $SUCCESS_BG_COLOR;
+    background: $alert-success-border;
+    border-color: $alert-success-border;
+    box-shadow: 0 0 8px $alert-success-bg;
   }
 }

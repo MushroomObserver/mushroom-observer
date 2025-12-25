@@ -279,11 +279,14 @@ $PROGRESS_FG_COLOR:                 $DARK_COLOR;
 $PROGRESS_BAR_COLOR:                $PRIMARY_COLOR;
 
 // --------------------------------------------------
-// Wells and Panels
+// Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     $muted_dark;
-$WELL_BG_COLOR:                     $LIGHT_COLOR;
+$PANEL_FG_COLOR:                    $muted_dark;
+$PANEL_BG_COLOR:                    $LIGHT_COLOR;
+$PANEL_BORDER_COLOR:                transparent;
+$PANEL_FOOTER_BG_COLOR:             $PANEL_BG_COLOR;
+$PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;
 
 // ==================================================
 // END OF TEMPLATE

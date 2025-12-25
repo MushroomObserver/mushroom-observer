@@ -31,7 +31,8 @@ $peach:       #faebd4; // velosa_light_veil
 $apricot:     #f4d5a6; // velosa_dark_veil
 $dusty_pink:  #d1afa5; // novinupta_background
 $dark_brown:  #383138; // pachycolea_background
-$silver:      #bfc0bb; // pachycolea_foreground
+$silver:       #bfc0bb; // pachycolea_foreground
+$light_silver: #e8e9e4; // lighter silver for inputs/buttons
 $tan:         #aa9a83; // pachycolea_light_stipe
 $chocolate:   #60412d; // pachycolea_dark_brown
 $light_blue:  #a5bffa; // polyozellus_light
@@ -43,11 +44,14 @@ $medium_gray: mix($dark_brown, $silver, 25%);
 $dark_gray:   mix($dark_brown, $silver, 50%);
 
 // Dark theme list backgrounds
-$deep_dark_brown:   mix($dark_brown, black, 80%);
-$deeper_dark_brown: mix($dark_brown, black, 20%);
+$deep_dark_brown:    mix($dark_brown, black, 80%);
+$deeper_dark_brown:  mix($dark_brown, black, 70%);
+$deepest_dark_brown: mix($dark_brown, black, 20%);
+$dark_silver:       rgba($silver, 0.21); // panel border
 
 // Semi-transparent colors
 $muted_tan: rgba($tan, 0.45);
+$panel_overlay: rgba($deep_dark_brown, 0.45);
 
 // Alert state colors
 $success_green:  #70C070;
@@ -97,11 +101,11 @@ $LINK_HOVER_BG_COLOR:               $red;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   $silver;
-$BUTTON_BG_COLOR:                   $dark_brown;
+$BUTTON_FG_COLOR:                   $light_silver;
+$BUTTON_BG_COLOR:                   $deep_dark_brown;
 $BUTTON_BORDER_COLOR:               $medium_gray;
-$BUTTON_HOVER_FG_COLOR:             $dark_brown;
-$BUTTON_HOVER_BG_COLOR:             $silver;
+$BUTTON_HOVER_FG_COLOR:             $silver;
+$BUTTON_HOVER_BG_COLOR:             $deepest_dark_brown;
 $BUTTON_HOVER_BORDER_COLOR:         $dark_brown;
 $BUTTON_ACTIVE_FG_COLOR:            $red;
 $BUTTON_ACTIVE_BG_COLOR:            $silver;
@@ -119,9 +123,9 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    $silver;
-$INPUT_BG_COLOR:                    $dark_brown;
-$INPUT_BORDER_COLOR:                $medium_gray;
+$INPUT_FG_COLOR:                    $light_silver;
+$INPUT_BG_COLOR:                    $deep_dark_brown;
+$INPUT_BORDER_COLOR:                $tan;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
@@ -184,12 +188,12 @@ $LEFT_BAR_HOVER_BG_COLOR:           $red;
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              transparent;
+$TOP_BAR_BORDER_COLOR:              $dark_silver;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
 $TOP_BAR_FG_COLOR:                  $silver;
-$TOP_BAR_BG_COLOR:                  $dark_brown;
+$TOP_BAR_BG_COLOR:                  $panel_overlay;
 $TOP_BAR_LINK_FG_COLOR:             $tan;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
 $TOP_BAR_LINK_HOVER_FG_COLOR:       $tan;
@@ -199,13 +203,13 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       $red;
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 transparent;
+$LIST_BORDER_COLOR:                 $dark_silver;
 $LIST_HEADER_FG_COLOR:              $dark_gray;
 $LIST_HEADER_BG_COLOR:              $light_gray;
 $LIST_FG_COLOR:                     $silver;
 $LIST_BG_COLOR:                     $deep_dark_brown;
 $LIST_EVEN_BG_COLOR:                $deep_dark_brown;
-$LIST_ODD_BG_COLOR:                 $deeper_dark_brown;
+$LIST_ODD_BG_COLOR:                 $deepest_dark_brown;
 $LIST_HOVER_BG_COLOR:               $chocolate;
 
 // --------------------------------------------------
@@ -258,8 +262,11 @@ $PROGRESS_FG_COLOR:                 $silver;
 $PROGRESS_BAR_COLOR:                $dark_olive;
 
 // --------------------------------------------------
-// Wells and Panels
+// Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     $silver;
-$WELL_BG_COLOR:                     $muted_tan;
+$PANEL_FG_COLOR:                    scale-color($tan, $lightness: 60%);
+$PANEL_BG_COLOR:                    $panel_overlay;
+$PANEL_BORDER_COLOR:                $dark_silver;
+$PANEL_FOOTER_BG_COLOR:             $deeper_dark_brown;
+$PANEL_FOOTER_FG_COLOR:             scale-color($tan, $lightness: 60%);

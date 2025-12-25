@@ -76,6 +76,8 @@ ul.tight-list {
 }
 
 .panel {
+  color: $panel-default-text;
+
   .table-responsive {
     border-color: transparent;
   }
@@ -85,6 +87,10 @@ ul.tight-list {
   .border-bottom {
     border-bottom: 1px solid $panel-inner-border;
   }
+}
+
+.panel-footer {
+  color: $panel-footer-text;
 }
 
 .panel-title {

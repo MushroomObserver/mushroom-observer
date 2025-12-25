@@ -243,8 +243,11 @@ $PROGRESS_FG_COLOR:                 $dark_brown;
 $PROGRESS_BAR_COLOR:                $dusty_rose;
 
 // --------------------------------------------------
-// Wells and Panels
+// Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     $muted_brown;
-$WELL_BG_COLOR:                     $pale_gold;
+$PANEL_FG_COLOR:                    $dark_brown;
+$PANEL_BG_COLOR:                    scale-color($pale_agaricus, $lightness: 50%);
+$PANEL_BORDER_COLOR:                $medium_gray;
+$PANEL_FOOTER_BG_COLOR:             $PANEL_BG_COLOR;
+$PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;

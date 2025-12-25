@@ -247,8 +247,11 @@ $PROGRESS_FG_COLOR:                 $dark_olive;
 $PROGRESS_BAR_COLOR:                $amber;
 
 // --------------------------------------------------
-// Wells and Panels
+// Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     $muted_olive;
-$WELL_BG_COLOR:                     $custard;
+$PANEL_FG_COLOR:                    $muted_olive;
+$PANEL_BG_COLOR:                    $custard;
+$PANEL_BORDER_COLOR:                $medium_gray;
+$PANEL_FOOTER_BG_COLOR:             $PANEL_BG_COLOR;
+$PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;

@@ -61,7 +61,7 @@ $btn-link-disabled-color:                   mix($BUTTON_FG_COLOR, $BUTTON_BG_COL
 $input-bg:                                  $INPUT_BG_COLOR;
 $input-bg-disabled:                         mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
 $input-color:                               $INPUT_FG_COLOR;
-$input-border:                              $BUTTON_FG_COLOR; // INPUT_BORDER_COLOR;
+$input-border:                              $INPUT_BORDER_COLOR;
 $input-color-placeholder:                   mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
 $legend-color:                              $BODY_FG_COLOR;
 $legend-border-color:                       $INPUT_BORDER_COLOR;
@@ -192,15 +192,16 @@ $list-group-disabled-text-color: $LIST_HEADER_FG_COLOR;
 $list-group-link-color: $LINK_FG_COLOR;
 $list-group-link-hover-color: $LINK_HOVER_FG_COLOR;
 
-$panel-bg: $LIST_BG_COLOR;
+$panel-bg: $PANEL_BG_COLOR;
 $panel-body-padding: 12px;
 $panel-heading-padding: 8px 12px;
-$panel-inner-border: $LIST_BORDER_COLOR;
-$panel-footer-bg: darken($LIST_BG_COLOR, 3%);
-$panel-default-text: $LIST_FG_COLOR;
-$panel-default-border: $LIST_BORDER_COLOR;
-$panel-default-heading-bg: darken($LIST_BG_COLOR, 3%);
+$panel-inner-border: $PANEL_BORDER_COLOR;
+$panel-footer-bg: $PANEL_FOOTER_BG_COLOR;
+$panel-footer-text: $PANEL_FOOTER_FG_COLOR;
+$panel-default-text: $PANEL_FG_COLOR;
+$panel-default-border: $PANEL_BORDER_COLOR;
+$panel-default-heading-bg: $PANEL_BG_COLOR;
 
 $hr-border: $LIST_BORDER_COLOR;
 
-$well-bg: $WELL_BG_COLOR;
+$well-bg: $PANEL_BG_COLOR;

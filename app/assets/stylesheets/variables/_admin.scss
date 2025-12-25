@@ -238,8 +238,11 @@ $PROGRESS_FG_COLOR:                 $black;
 $PROGRESS_BAR_COLOR:                $yellow;
 
 // --------------------------------------------------
-// Wells and Panels
+// Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     $black;
-$WELL_BG_COLOR:                     $light_purple;
+$PANEL_FG_COLOR:                    $black;
+$PANEL_BG_COLOR:                    $light_purple;
+$PANEL_BORDER_COLOR:                $black;
+$PANEL_FOOTER_BG_COLOR:             $PANEL_BG_COLOR;
+$PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;

@@ -20,7 +20,7 @@
 .btn-outline-default {
   color: $btn-default-color;
   background-color: $body-bg;
-  border-color: $btn-default-color;
+  border-color: $btn-default-border;
 }
 
 .btn-constraint-warning {
@@ -101,21 +101,21 @@ button:disabled {
 }
 
 .nav-tabs .nav-link {
-  color: $LEFT_BAR_FG_COLOR;
+  color: $navbar-inverse-link-color;
   font-size: 125%;
-  background-color: $LEFT_BAR_BG_COLOR;
+  background-color: $navbar-inverse-bg;
   border: 1px solid #dee2e6;
 }
 
 .nav-tabs .nav-link.active {
-  color: $LINK_FG_COLOR;
-  background-color: $BODY_BG_COLOR;
+  color: $link-color;
+  background-color: $body-bg;
   border-color: #dee2e6 #dee2e6 #fff;
 }
 
 .nav-tabs .nav-link.text-warning {
-  color: $WARNING_FG_COLOR;
-  background-color: $WARNING_BG_COLOR;
+  color: $alert-warning-text;
+  background-color: $alert-warning-bg;
 }
 
 .nav-tabs .nav-link.text-warning:hover {
@@ -123,6 +123,6 @@ button:disabled {
 }
 
 .nav-tabs .nav-link.text-warning.active {
-  color: $WARNING_FG_COLOR;
+  color: $alert-warning-text;
   border-color: #ffc107 #ffc107 #fff;
 }
