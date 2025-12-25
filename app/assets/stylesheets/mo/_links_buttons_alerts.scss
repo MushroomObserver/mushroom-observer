@@ -18,9 +18,13 @@
 }
 
 .btn-outline-default {
-  color: $btn-default-color;
+  color: $input-color;
   background-color: $input-bg;
   border-color: $input-border;
+
+  &:hover {
+    color: inherit;
+  }
 }
 
 .btn-constraint-warning {
