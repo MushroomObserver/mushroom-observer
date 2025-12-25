@@ -11,10 +11,13 @@
 
 // Core grayscale
 $white:         #FFFFFF;
-$light_gray:    #F6F6F6;
+$body_gray:     #F6F6F6;
+$off_white:     #F2F2F2;
+$light_gray:    #EEEEEE;
 $medium_gray:   #DDDDDD;
 $gray:          #CCCCCC;
 $dark_gray:     #888888;
+$medium_dark_gray: #777777;
 $black:         #000000;
 
 // Accent colors
@@ -67,7 +70,7 @@ $DARK_COLOR:                        $black;
 // --------------------------------------------------
 
 $BODY_FG_COLOR:                     $black;
-$BODY_BG_COLOR:                     $light_gray;
+$BODY_BG_COLOR:                     $body_gray;
 
 // --------------------------------------------------
 // Links
@@ -87,7 +90,7 @@ $LINK_HOVER_BG_COLOR:               transparent;
 
 $BUTTON_FG_COLOR:                   $black;
 $BUTTON_BG_COLOR:                   $gray;
-$BUTTON_BORDER_COLOR:               $dark_gray;
+$BUTTON_BORDER_COLOR:               $gray;
 $BUTTON_HOVER_FG_COLOR:             $black;
 $BUTTON_HOVER_BG_COLOR:             $medium_gray;
 $BUTTON_HOVER_BORDER_COLOR:         $gray;
@@ -161,7 +164,7 @@ $LEFT_BAR_BORDER_WIDTH:             1px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            5px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
-$LEFT_BAR_HEADER_FG_COLOR:          $black;
+$LEFT_BAR_HEADER_FG_COLOR:          $medium_dark_gray;
 $LEFT_BAR_HEADER_BG_COLOR:          $light_gray;
 $LEFT_BAR_FG_COLOR:                 $black;
 $LEFT_BAR_BG_COLOR:                 $white;
@@ -177,7 +180,7 @@ $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
 $TOP_BAR_FG_COLOR:                  $black;
-$TOP_BAR_BG_COLOR:                  $white;
+$TOP_BAR_BG_COLOR:                  $off_white;
 $TOP_BAR_LINK_FG_COLOR:             $blue;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
 $TOP_BAR_LINK_HOVER_FG_COLOR:       $darker_blue;
