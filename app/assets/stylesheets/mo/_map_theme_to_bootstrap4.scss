@@ -1,0 +1,368 @@
+// ==================================================
+// BOOTSTRAP 4 THEME VARIABLE MAPPING
+// ==================================================
+//
+// FUTURE USE: This file will be used during Bootstrap 4 migration
+// (Phase 3 of the comprehensive modernization plan, weeks 8-11).
+//
+// This file maps MO's standardized theme variables to Bootstrap 4's
+// variable system. It should be imported AFTER theme variables but
+// BEFORE Bootstrap 4 itself.
+//
+// Import order:
+//   1. app/assets/stylesheets/variables/{theme}.scss
+//   2. app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss  (this file)
+//   3. bootstrap (from gem or node_modules)
+//
+// NOTE: This file contains NO hardcoded values. All values come from
+// theme variables defined in app/assets/stylesheets/variables/
+//
+// See: doc/Bootstrap Upgrade Plan for MO.md
+//
+// ==================================================
+
+// ==================================================
+// SECTION 1: SEMANTIC COLOR SYSTEM
+// ==================================================
+//
+// Bootstrap 4's core semantic colors map directly to our theme's
+// semantic color layer. These are used throughout BS4 components
+// for contextual styling (alerts, buttons, badges, etc.)
+//
+
+$primary:    $PRIMARY_COLOR !default;
+$secondary:  $SECONDARY_COLOR !default;
+$success:    $SUCCESS_COLOR !default;
+$info:       $INFO_COLOR !default;
+$warning:    $WARNING_COLOR !default;
+$danger:     $DANGER_COLOR !default;
+$light:      $LIGHT_COLOR !default;
+$dark:       $DARK_COLOR !default;
+
+// Bootstrap 4 uses a theme-colors map for generating variants
+// This creates .btn-primary, .btn-success, .alert-warning, etc.
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+) !default;
+
+// ==================================================
+// SECTION 2: GRAYSCALE & BASIC COLORS
+// ==================================================
+//
+// Bootstrap 4 provides grayscale utilities and uses these for
+// borders, backgrounds, and text muting
+//
+
+$white:    #fff !default;
+$black:    #000 !default;
+
+// Use theme colors for grays where applicable
+$gray-100: $LIGHT_COLOR !default;
+$gray-600: $SECONDARY_COLOR !default;
+$gray-900: $DARK_COLOR !default;
+
+// ==================================================
+// SECTION 3: TYPOGRAPHY
+// ==================================================
+//
+// Body text and links - the foundation of readable content
+//
+
+$body-color: $BODY_FG_COLOR !default;
+$body-bg:    $BODY_BG_COLOR !default;
+
+$link-color:            $LINK_FG_COLOR !default;
+$link-hover-color:      $LINK_HOVER_FG_COLOR !default;
+$link-decoration:       none !default;
+$link-hover-decoration: underline !default;
+
+// Font settings
+$font-family-sans-serif: Verdana, Arial, Helvetica, sans-serif !default;
+$font-family-base:       $font-family-sans-serif !default;
+$font-size-base:         0.8125rem !default;  // 13px at 16px root
+
+// Headings
+$headings-color: $BODY_FG_COLOR !default;
+
+// ==================================================
+// SECTION 4: SPACING & BORDERS
+// ==================================================
+//
+// Bootstrap 4 uses a consistent spacing scale and border settings
+//
+
+$border-radius:    $BUTTON_BORDER_RADIUS !default;
+$border-radius-sm: $INPUT_BORDER_RADIUS !default;
+$border-radius-lg: $BUTTON_BORDER_RADIUS !default;
+
+// ==================================================
+// SECTION 5: BUTTONS
+// ==================================================
+//
+// Bootstrap 4 generates button variants automatically from $theme-colors
+// but we can customize the base button styling here
+//
+
+$btn-font-weight:     bold !default;
+$btn-border-radius:   $BUTTON_BORDER_RADIUS !default;
+
+// Default/secondary button uses our standard button colors
+$btn-padding-y:       0.3125rem !default;  // ~5px
+$btn-padding-x:       0.625rem !default;   // ~10px
+
+// Link buttons
+$btn-link-color:           $LINK_FG_COLOR !default;
+$btn-link-hover-color:     $LINK_HOVER_FG_COLOR !default;
+$btn-link-disabled-color:  mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR, 75%) !default;
+
+// Active/focus states
+$btn-active-box-shadow: none !default;
+$btn-focus-box-shadow:  none !default;
+
+// ==================================================
+// SECTION 6: FORMS & INPUTS
+// ==================================================
+//
+// Form controls, selects, checkboxes, and validation states
+//
+
+$input-bg:                 $INPUT_BG_COLOR !default;
+$input-color:              $INPUT_FG_COLOR !default;
+$input-border-color:       $INPUT_BORDER_COLOR !default;
+$input-border-width:       $INPUT_BORDER_WIDTH !default;
+$input-border-radius:      $INPUT_BORDER_RADIUS !default;
+
+$input-focus-border-color: $PRIMARY_COLOR !default;
+$input-focus-box-shadow:   none !default;
+
+$input-disabled-bg:        mix($INPUT_FG_COLOR, $INPUT_BG_COLOR) !default;
+
+$input-placeholder-color:  mix($INPUT_FG_COLOR, $INPUT_BG_COLOR) !default;
+
+// Input groups
+$input-group-addon-bg:           $INPUT_BG_COLOR !default;
+$input-group-addon-border-color: $INPUT_BORDER_COLOR !default;
+
+// Form validation states use semantic colors
+$form-feedback-valid-color:   $SUCCESS_COLOR !default;
+$form-feedback-invalid-color: $DANGER_COLOR !default;
+
+// ==================================================
+// SECTION 7: DROPDOWNS & MENUS
+// ==================================================
+//
+// Dropdown menus, popovers, and similar floating UI
+//
+
+$dropdown-bg:               $MENU_BG_COLOR !default;
+$dropdown-border-color:     $MENU_BORDER_COLOR !default;
+$dropdown-divider-bg:       $MENU_BORDER_COLOR !default;
+
+$dropdown-link-color:       $MENU_FG_COLOR !default;
+$dropdown-link-hover-color: $MENU_HOT_FG_COLOR !default;
+$dropdown-link-hover-bg:    $MENU_HOT_BG_COLOR !default;
+
+$dropdown-link-active-color: $MENU_WARM_FG_COLOR !default;
+$dropdown-link-active-bg:    $MENU_WARM_BG_COLOR !default;
+
+$dropdown-link-disabled-color: mix($MENU_FG_COLOR, $MENU_BG_COLOR, 75%) !default;
+
+$dropdown-header-color:     $MENU_FG_COLOR !default;
+
+// ==================================================
+// SECTION 8: NAVIGATION (NAVBAR)
+// ==================================================
+//
+// Top navigation bar and branding
+//
+
+// Navbar dimensions
+$navbar-padding-y: 0.625rem !default;   // ~10px
+$navbar-padding-x: 0.8125rem !default;  // ~13px
+
+// Light navbar (maps to our TOP_BAR variables)
+$navbar-light-color:        $TOP_BAR_FG_COLOR !default;
+$navbar-light-hover-color:  $TOP_BAR_LINK_HOVER_FG_COLOR !default;
+$navbar-light-active-color: $TOP_BAR_LINK_FG_COLOR !default;
+
+// Dark navbar (maps to our LEFT_BAR variables)
+$navbar-dark-color:         $LEFT_BAR_FG_COLOR !default;
+$navbar-dark-hover-color:   $LEFT_BAR_HOVER_FG_COLOR !default;
+$navbar-dark-active-color:  $LEFT_BAR_FG_COLOR !default;
+
+// ==================================================
+// SECTION 9: PAGINATION
+// ==================================================
+//
+// Page navigation controls
+//
+
+$pagination-color:              $PAGER_FG_COLOR !default;
+$pagination-bg:                 $PAGER_BG_COLOR !default;
+$pagination-border-color:       $PAGER_BORDER_COLOR !default;
+
+$pagination-hover-color:        $PAGER_HOVER_FG_COLOR !default;
+$pagination-hover-bg:           $PAGER_HOVER_BG_COLOR !default;
+$pagination-hover-border-color: $PAGER_HOVER_BORDER_COLOR !default;
+
+$pagination-active-color:        $PAGER_ACTIVE_FG_COLOR !default;
+$pagination-active-bg:           $PAGER_ACTIVE_BG_COLOR !default;
+$pagination-active-border-color: $PAGER_ACTIVE_BORDER_COLOR !default;
+
+$pagination-disabled-color:        mix($PAGER_FG_COLOR, $PAGER_BG_COLOR, 75%) !default;
+$pagination-disabled-bg:           $PAGER_BG_COLOR !default;
+$pagination-disabled-border-color: $PAGER_BORDER_COLOR !default;
+
+// ==================================================
+// SECTION 10: TABLES
+// ==================================================
+//
+// Table styling for data display
+//
+
+$table-cell-padding:          0.375rem !default;  // ~6px
+$table-cell-padding-sm:       0.25rem !default;   // ~4px
+
+$table-bg:        $LIST_BG_COLOR !default;
+$table-accent-bg: $LIST_ODD_BG_COLOR !default;
+$table-hover-bg:  $LIST_HOVER_BG_COLOR !default;
+$table-active-bg: $MENU_WARM_BG_COLOR !default;
+
+$table-border-color: $LIST_BORDER_COLOR !default;
+
+$table-head-bg:    $LIST_HEADER_BG_COLOR !default;
+$table-head-color: $LIST_HEADER_FG_COLOR !default;
+
+// ==================================================
+// SECTION 11: ALERTS & BANNERS
+// ==================================================
+//
+// Contextual feedback messages
+//
+
+$alert-border-width:  2px !default;
+$alert-border-radius: $BANNER_BORDER_RADIUS !default;
+
+// Alert colors use our theme's alert variables
+$alert-bg-level:     0 !default;  // Don't darken backgrounds
+$alert-border-level: 0 !default;  // Don't darken borders
+$alert-color-level:  0 !default;  // Don't darken text
+
+// ==================================================
+// SECTION 12: MODALS
+// ==================================================
+//
+// Dialog boxes and overlays
+//
+
+$modal-content-bg:           $MENU_BG_COLOR !default;
+$modal-content-border-color: $MENU_BORDER_COLOR !default;
+
+$modal-header-border-color: $MENU_BORDER_COLOR !default;
+$modal-footer-border-color: $MENU_BORDER_COLOR !default;
+
+// ==================================================
+// SECTION 13: TOOLTIPS & POPOVERS
+// ==================================================
+//
+// Contextual help and additional information
+//
+
+$tooltip-color:      $TOOLTIP_FG_COLOR !default;
+$tooltip-bg:         $TOOLTIP_BG_COLOR !default;
+$tooltip-opacity:    1 !default;
+$tooltip-max-width:  400px !default;
+
+$popover-bg:           $MENU_BG_COLOR !default;
+$popover-border-color: $MENU_BORDER_COLOR !default;
+
+// ==================================================
+// SECTION 14: PROGRESS BARS
+// ==================================================
+//
+// Visual progress indicators
+//
+
+$progress-bg:         $PROGRESS_BG_COLOR !default;
+$progress-bar-color:  $PROGRESS_FG_COLOR !default;
+$progress-bar-bg:     $PROGRESS_BAR_COLOR !default;
+
+// ==================================================
+// SECTION 15: LIST GROUPS
+// ==================================================
+//
+// Flexible component for displaying lists of content
+//
+
+$list-group-bg:           $LIST_BG_COLOR !default;
+$list-group-border-color: $LIST_BORDER_COLOR !default;
+$list-group-hover-bg:     $LIST_HOVER_BG_COLOR !default;
+
+$list-group-disabled-color: $LIST_HEADER_FG_COLOR !default;
+$list-group-disabled-bg:    $LIST_HEADER_BG_COLOR !default;
+
+$list-group-action-color:       $LINK_FG_COLOR !default;
+$list-group-action-hover-color: $LINK_HOVER_FG_COLOR !default;
+
+// ==================================================
+// SECTION 16: CARDS (PANELS IN BS3)
+// ==================================================
+//
+// Bootstrap 4 replaced panels with cards
+//
+
+$card-bg:           $LIST_BG_COLOR !default;
+$card-border-color: $LIST_BORDER_COLOR !default;
+
+$card-cap-bg: darken($LIST_BG_COLOR, 3%) !default;
+
+// ==================================================
+// SECTION 17: MISCELLANEOUS COMPONENTS
+// ==================================================
+
+// Horizontal rule
+$hr-border-color: $LIST_BORDER_COLOR !default;
+
+// Wells (deprecated in BS4, but keep for reference)
+// Note: Wells don't exist in Bootstrap 4, but bg-light utility can be used
+// $well-bg would map to a custom .well class if needed
+
+// Close button (X in modals, alerts, etc.)
+$close-color: $BODY_FG_COLOR !default;
+
+// ==================================================
+// UNMAPPED THEME VARIABLES
+// ==================================================
+//
+// The following MO theme variables don't have direct Bootstrap 4 equivalents:
+//
+// - $LINK_WEIGHT               (use custom CSS)
+// - $LINK_BG_COLOR             (Bootstrap links are always transparent)
+// - $LINK_VISITED_FG_COLOR     (use :visited pseudo-class in custom CSS)
+// - $LINK_VISITED_BG_COLOR     (use :visited pseudo-class in custom CSS)
+// - $LINK_HOVER_BG_COLOR       (Bootstrap links don't typically have bg)
+// - $BUTTON_ACTIVE_FG_COLOR    (use :active pseudo-class)
+// - $BUTTON_ACTIVE_BG_COLOR    (use :active pseudo-class)
+// - $BUTTON_BORDER_STYLE       (always solid in BS4)
+// - $INPUT_BORDER_STYLE        (always solid in BS4)
+// - $BANNER_BORDER_WIDTH       (use $alert-border-width)
+// - $BANNER_BORDER_STYLE       (always solid in BS4)
+// - $ALERT_BORDER_WIDTH        (use $alert-border-width)
+// - $ALERT_BORDER_STYLE        (always solid in BS4)
+// - $LOGO_* variables          (custom component, not part of Bootstrap)
+// - $LEFT_BAR_* variables      (partially mapped to navbar-dark-*)
+// - $TOP_BAR_* variables       (partially mapped to navbar-light-*)
+// - $VOTE_METER_* variables    (custom component)
+// - $WELL_* variables          (wells removed in BS4, use .bg-light utility)
+//
+// These variables can still be used in custom MO stylesheets for
+// components that aren't part of Bootstrap's component library.
+//
+// ==================================================

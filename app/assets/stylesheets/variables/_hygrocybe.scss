@@ -1,3 +1,17 @@
+// ==================================================
+// HYGROCYBE THEME
+// ==================================================
+// Inspired by various Hygrocybe species including:
+// - H. conica (Witch's Hat)
+// - H. miniata (Vermillion Waxcap)
+// - H. psittacina (Parrot Waxcap)
+// - H. punicea (Scarlet Waxcap)
+// ==================================================
+
+// ==================================================
+// SECTION 1: THEME COLOR PALETTE
+// ==================================================
+
 $conica_stain:          #37372f;
 $conica_cap_red:        #a31404;
 $conica_cap_orange:     #dd6226;
@@ -18,59 +32,78 @@ $punicea_light_stipe:   #e9e3af;
 $polyozellus_light:     #a5bffa;
 $polyozellus_dark:      #5167b2;
 
-$BUTTON_FG_COLOR:             $conica_stain;
-$BUTTON_ACTIVE_FG_COLOR:      $conica_stain;
-$BUTTON_ACTIVE_BG_COLOR:      $miniata_cap_yellow;
+// ==================================================
+// SECTION 2: SEMANTIC COLOR ASSIGNMENTS
+// ==================================================
 
-$BODY_FG_COLOR:               $conica_stain;
-$BODY_BG_COLOR:               $punicea_light_stipe;
+$PRIMARY_COLOR:                     $psittacina_cap_green;
+$SECONDARY_COLOR:                   $miniata_cap_yellow;
+$SUCCESS_COLOR:                     #70C070;
+$INFO_COLOR:                        $polyozellus_dark;
+$WARNING_COLOR:                     $miniata_cap_orange;
+$DANGER_COLOR:                      $punicea_cap_dark;
+$LIGHT_COLOR:                       $punicea_light_stipe;
+$DARK_COLOR:                        $conica_stain;
 
-$LINK_FG_COLOR:               $psittacina_cap_green;
-$LINK_VISITED_FG_COLOR:       $psittacina_cap_orange;
-$LINK_HOVER_FG_COLOR:         $psittacina_cap_green;
-$LINK_HOVER_BG_COLOR:         $psittacina_gill_color;
+// ==================================================
+// SECTION 3: UI ELEMENT COLORS
+// ==================================================
 
-$LOGO_BORDER_COLOR:           $conica_stain;
-$LOGO_FG_COLOR:               $conica_stain;
-$LOGO_BG_COLOR:               $punicea_cap_light;
-$LOGO_HOVER_FG_COLOR:         $conica_stain;
-$LOGO_HOVER_BG_COLOR:         $punicea_cap_light;
+// --------------------------------------------------
+// Body and Typography
+// --------------------------------------------------
 
-$LEFT_BAR_BORDER_COLOR:       $miniata_cap_yellow;
-$LEFT_BAR_HEADER_FG_COLOR:    $psittacina_cap_green;
-$LEFT_BAR_HEADER_BG_COLOR:    $miniata_cap_yellow;
-$LEFT_BAR_FG_COLOR:           $miniata_cap_red;
-$LEFT_BAR_BG_COLOR:           $miniata_cap_yellow;
-$LEFT_BAR_HOVER_FG_COLOR:     $miniata_cap_red;
-$LEFT_BAR_HOVER_BG_COLOR:     $psittacina_gill_color;
+$BODY_FG_COLOR:                     $conica_stain;
+$BODY_BG_COLOR:                     $punicea_light_stipe;
 
-$TOP_BAR_FG_COLOR:            $conica_stain;
-$TOP_BAR_BG_COLOR:            $punicea_light_stipe;
-$TOP_BAR_LINK_FG_COLOR:       $psittacina_cap_green;
-$TOP_BAR_LINK_HOVER_FG_COLOR: $psittacina_cap_green;
-$TOP_BAR_LINK_HOVER_BG_COLOR: $psittacina_gill_color;
+// --------------------------------------------------
+// Links
+// --------------------------------------------------
 
-$LIST_BORDER_COLOR:           transparent;
-$LIST_HEADER_FG_COLOR:        #777777;
-$LIST_HEADER_BG_COLOR:        #EEEEEE;
-$LIST_FG_COLOR:               $conica_stain;
-$LIST_BG_COLOR:               mix($punicea_light_stipe, white, 50%);
+$LINK_WEIGHT:                       normal;
+$LINK_FG_COLOR:                     $psittacina_cap_green;
+$LINK_BG_COLOR:                     transparent;
+$LINK_VISITED_FG_COLOR:             $psittacina_cap_orange;
+$LINK_VISITED_BG_COLOR:             transparent;
+$LINK_HOVER_FG_COLOR:               $psittacina_cap_green;
+$LINK_HOVER_BG_COLOR:               $psittacina_gill_color;
 
-$TOOLTIP_BG_COLOR:            $punicea_cap_light;
+// --------------------------------------------------
+// Buttons
+// --------------------------------------------------
 
-$PAGER_FG_COLOR:              $punicea_cap_dark;
-$PAGER_HOVER_FG_COLOR:        $punicea_light_stipe;
-$PAGER_HOVER_BG_COLOR:        $punicea_cap_light;
-$PAGER_ACTIVE_FG_COLOR:       $punicea_light_stipe;
-$PAGER_ACTIVE_BG_COLOR:       $punicea_cap_dark;
+$BUTTON_FG_COLOR:                   #000000;
+$BUTTON_BG_COLOR:                   #F6F6F6;
+$BUTTON_BORDER_COLOR:               #CCCCCC;
+$BUTTON_HOVER_FG_COLOR:             #000000;
+$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
+$BUTTON_HOVER_BORDER_COLOR:         black;
+$BUTTON_ACTIVE_FG_COLOR:            $conica_stain;
+$BUTTON_ACTIVE_BG_COLOR:            $miniata_cap_yellow;
+$BUTTON_PRIMARY_FG_COLOR:           $punicea_light_stipe;
+$BUTTON_PRIMARY_BG_COLOR:           $psittacina_cap_green;
+$BUTTON_PRIMARY_BORDER_COLOR:       $psittacina_cap_middle;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     $punicea_light_stipe;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     $psittacina_cap_middle;
+$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $conica_stain;
+$BUTTON_BORDER_WIDTH:               1px;
+$BUTTON_BORDER_STYLE:               solid;
+$BUTTON_BORDER_RADIUS:              5px;
 
-$MENU_BORDER_COLOR:           $miniata_gill_margin;
-$MENU_FG_COLOR:               black;
-$MENU_BG_COLOR:               white;
-$MENU_HOT_FG_COLOR:           black;
-$MENU_HOT_BG_COLOR:           $psittacina_cap_middle;
-$MENU_WARM_FG_COLOR:          black;
-$MENU_WARM_BG_COLOR:          $psittacina_cap_middle;
+// --------------------------------------------------
+// Form Inputs
+// --------------------------------------------------
+
+$INPUT_FG_COLOR:                    #000000;
+$INPUT_BG_COLOR:                    #FFFFFF;
+$INPUT_BORDER_COLOR:                #CCCCCC;
+$INPUT_BORDER_WIDTH:                1px;
+$INPUT_BORDER_STYLE:                solid;
+$INPUT_BORDER_RADIUS:               5px;
+
+// --------------------------------------------------
+// Alert States (Info, Success, Warning, Danger)
+// --------------------------------------------------
 
 $INFO_BG_COLOR:                     $polyozellus_light;
 $INFO_BORDER_COLOR:                 $polyozellus_dark;
@@ -85,4 +118,123 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
+$BANNER_BORDER_WIDTH:               2px;
+$BANNER_BORDER_STYLE:               solid;
+$BANNER_BORDER_RADIUS:              5px;
+
+$ALERT_BORDER_WIDTH:                2px;
+$ALERT_BORDER_STYLE:                solid;
+$ALERT_BORDER_RADIUS:               5px;
+
+// --------------------------------------------------
+// Logo
+// --------------------------------------------------
+
+$LOGO_BORDER_COLOR:                 $conica_stain;
+$LOGO_BORDER_WIDTH:                 1px;
+$LOGO_BORDER_STYLE:                 solid;
+$LOGO_BORDER_RADIUS:                0px;
+$LOGO_FG_COLOR:                     $conica_stain;
+$LOGO_BG_COLOR:                     $punicea_cap_light;
+$LOGO_HOVER_FG_COLOR:               $conica_stain;
+$LOGO_HOVER_BG_COLOR:               $punicea_cap_light;
+
+// --------------------------------------------------
+// Left Navigation Bar
+// --------------------------------------------------
+
+$LEFT_BAR_BORDER_COLOR:             $miniata_cap_yellow;
+$LEFT_BAR_BORDER_WIDTH:             1px;
+$LEFT_BAR_BORDER_STYLE:             solid;
+$LEFT_BAR_BORDER_RADIUS:            5px;
+$LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
+$LEFT_BAR_HEADER_FG_COLOR:          $psittacina_cap_green;
+$LEFT_BAR_HEADER_BG_COLOR:          $miniata_cap_yellow;
+$LEFT_BAR_FG_COLOR:                 $miniata_cap_red;
+$LEFT_BAR_BG_COLOR:                 $miniata_cap_yellow;
+$LEFT_BAR_HOVER_FG_COLOR:           $miniata_cap_red;
+$LEFT_BAR_HOVER_BG_COLOR:           $psittacina_gill_color;
+
+// --------------------------------------------------
+// Top Navigation Bar
+// --------------------------------------------------
+
+$TOP_BAR_BORDER_COLOR:              transparent;
+$TOP_BAR_BORDER_WIDTH:              1px;
+$TOP_BAR_BORDER_STYLE:              solid;
+$TOP_BAR_BORDER_RADIUS:             0;
+$TOP_BAR_FG_COLOR:                  $conica_stain;
+$TOP_BAR_BG_COLOR:                  $punicea_light_stipe;
+$TOP_BAR_LINK_FG_COLOR:             $psittacina_cap_green;
+$TOP_BAR_LINK_BG_COLOR:             transparent;
+$TOP_BAR_LINK_HOVER_FG_COLOR:       $psittacina_cap_green;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       $psittacina_gill_color;
+
+// --------------------------------------------------
+// Lists and Tables
+// --------------------------------------------------
+
+$LIST_BORDER_COLOR:                 transparent;
+$LIST_HEADER_FG_COLOR:              #777777;
+$LIST_HEADER_BG_COLOR:              #EEEEEE;
+$LIST_FG_COLOR:                     $conica_stain;
+$LIST_BG_COLOR:                     mix($punicea_light_stipe, white, 50%);
+$LIST_EVEN_BG_COLOR:                $LIST_BG_COLOR;
+$LIST_ODD_BG_COLOR:                 #FFFFFF;
+$LIST_HOVER_BG_COLOR:               $psittacina_gill_color;
+
+// --------------------------------------------------
+// Menus and Dropdowns
+// --------------------------------------------------
+
+$MENU_BORDER_COLOR:                 $miniata_gill_margin;
+$MENU_FG_COLOR:                     black;
+$MENU_BG_COLOR:                     white;
+$MENU_HOT_FG_COLOR:                 black;
+$MENU_HOT_BG_COLOR:                 $psittacina_cap_middle;
+$MENU_WARM_FG_COLOR:                black;
+$MENU_WARM_BG_COLOR:                $psittacina_cap_middle;
+
+// --------------------------------------------------
+// Pagination
+// --------------------------------------------------
+
+$PAGER_FG_COLOR:                    $punicea_cap_dark;
+$PAGER_BG_COLOR:                    transparent;
+$PAGER_BORDER_COLOR:                none;
+$PAGER_HOVER_FG_COLOR:              $punicea_light_stipe;
+$PAGER_HOVER_BG_COLOR:              $punicea_cap_light;
+$PAGER_HOVER_BORDER_COLOR:          none;
+$PAGER_ACTIVE_FG_COLOR:             $punicea_light_stipe;
+$PAGER_ACTIVE_BG_COLOR:             $punicea_cap_dark;
+$PAGER_ACTIVE_BORDER_COLOR:         none;
+
+// --------------------------------------------------
+// Tooltips
+// --------------------------------------------------
+
+$TOOLTIP_FG_COLOR:                  $punicea_light_stipe;
+$TOOLTIP_BG_COLOR:                  $punicea_cap_light;
+
+// --------------------------------------------------
+// Vote Meters
+// --------------------------------------------------
+
+$VOTE_METER_BORDER_COLOR:           none;
+$VOTE_METER_FG_COLOR:               $psittacina_cap_green;
+$VOTE_METER_BG_COLOR:               $punicea_light_stipe;
+
+// --------------------------------------------------
+// Progress Bars
+// --------------------------------------------------
+
+$PROGRESS_BG_COLOR:                 $punicea_light_stipe;
+$PROGRESS_FG_COLOR:                 $conica_stain;
+$PROGRESS_BAR_COLOR:                $miniata_cap_yellow;
+
+// --------------------------------------------------
+// Wells and Panels
+// --------------------------------------------------
+
 $WELL_FG_COLOR:                     lighten($conica_stain, 30%);
+$WELL_BG_COLOR:                     $psittacina_gill_color;

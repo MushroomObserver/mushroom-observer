@@ -1,15 +1,29 @@
-$californicus_cap:              #f6ae4a; // image 557
+// ==================================================
+// CANTHARELLACEAE THEME
+// ==================================================
+// Inspired by various Cantharellaceae species including:
+// - Cantharellus californicus (Mudpuppy)
+// - Cantharellus cinnabarinus (Cinnabar Chanterelle)
+// - Craterellus tubaeformis (Yellowfoot)
+// - Craterellus cornucopioides (Black Trumpet)
+// ==================================================
+
+// ==================================================
+// SECTION 1: THEME COLOR PALETTE
+// ==================================================
+
+$californicus_cap:              #f6ae4a;
 $californicus_stipe:            #fae8b8;
-$cinnabarinus_dark_cap:         #c12900; // image 551
+$cinnabarinus_dark_cap:         #c12900;
 $cinnabarinus_light_cap:        #ff6524;
 $cinnabarinus_dark_stem:        #6d1900;
-$tubaeformis_dark_cap:          #603b29; // image 462
+$tubaeformis_dark_cap:          #603b29;
 $tubaeformis_light_cap:         #925c20;
 $tubaeformis_hymenium:          #c2914c;
 $tubaeformis_bright_stipe:      #ffb230;
 $tubaeformis_dark_stipe:        #4b2e0c;
 $tubaeformis_light_stipe:       #e5bb67;
-$cornucopioides_dark_hymenium:  #10110b; // image 465
+$cornucopioides_dark_hymenium:  #10110b;
 $cornucopioides_light_hymenium: #9b9690;
 $cornucopioides_dark_cap:       #4f4337;
 $cornucopioides_light_cap:      #826c57;
@@ -17,67 +31,78 @@ $cornucopioides_bright_margin:  #e6c987;
 $polyozellus_light:             #a5bffa;
 $polyozellus_dark:              #5167b2;
 
-$BUTTON_FG_COLOR:             $cornucopioides_dark_hymenium;
-$BUTTON_ACTIVE_BG_COLOR:      $californicus_cap;
+// ==================================================
+// SECTION 2: SEMANTIC COLOR ASSIGNMENTS
+// ==================================================
 
-$BODY_FG_COLOR:               $cornucopioides_dark_hymenium;
-$BODY_BG_COLOR:               $californicus_stipe;
+$PRIMARY_COLOR:                     $cinnabarinus_light_cap;
+$SECONDARY_COLOR:                   $californicus_cap;
+$SUCCESS_COLOR:                     #70C070;
+$INFO_COLOR:                        $polyozellus_dark;
+$WARNING_COLOR:                     $tubaeformis_bright_stipe;
+$DANGER_COLOR:                      $cinnabarinus_dark_cap;
+$LIGHT_COLOR:                       $californicus_stipe;
+$DARK_COLOR:                        $cornucopioides_dark_hymenium;
 
-$LINK_FG_COLOR:               $cinnabarinus_light_cap;
-$LINK_VISITED_FG_COLOR:       $cinnabarinus_dark_cap;
-$LINK_HOVER_FG_COLOR:         $cinnabarinus_light_cap;
-$LINK_HOVER_BG_COLOR:         $californicus_cap;
+// ==================================================
+// SECTION 3: UI ELEMENT COLORS
+// ==================================================
 
-$LOGO_BORDER_COLOR:           $cornucopioides_dark_hymenium;
-$LOGO_FG_COLOR:               $cornucopioides_dark_hymenium;
-$LOGO_BG_COLOR:               $californicus_cap;
-$LOGO_HOVER_FG_COLOR:         $cornucopioides_dark_hymenium;
-$LOGO_HOVER_BG_COLOR:         $californicus_stipe;
+// --------------------------------------------------
+// Body and Typography
+// --------------------------------------------------
 
-$LEFT_BAR_BORDER_COLOR:       $californicus_cap;
-$LEFT_BAR_HEADER_FG_COLOR:    $cornucopioides_dark_hymenium;
-$LEFT_BAR_HEADER_BG_COLOR:    $californicus_cap;
-$LEFT_BAR_FG_COLOR:           $cinnabarinus_dark_cap;
-$LEFT_BAR_BG_COLOR:           $californicus_cap;
-$LEFT_BAR_HOVER_FG_COLOR:     $cinnabarinus_dark_cap;
-$LEFT_BAR_HOVER_BG_COLOR:     $californicus_stipe;
+$BODY_FG_COLOR:                     $cornucopioides_dark_hymenium;
+$BODY_BG_COLOR:                     $californicus_stipe;
 
-$TOP_BAR_FG_COLOR:            $cornucopioides_dark_hymenium;
-$TOP_BAR_BG_COLOR:            $californicus_stipe;
-$TOP_BAR_LINK_FG_COLOR:       $cinnabarinus_light_cap;
-$TOP_BAR_LINK_HOVER_FG_COLOR: $cinnabarinus_light_cap;
-$TOP_BAR_LINK_HOVER_BG_COLOR: $californicus_cap;
+// --------------------------------------------------
+// Links
+// --------------------------------------------------
 
-//$LIST_BORDER_COLOR:           #DDDDDD;
-$LIST_BORDER_COLOR:           transparent;
-$LIST_HEADER_FG_COLOR:        #777777;
-$LIST_HEADER_BG_COLOR:        #EEEEEE;
-$LIST_FG_COLOR:               $cornucopioides_dark_hymenium;
-$LIST_BG_COLOR:               mix($californicus_stipe, white, 50%);
+$LINK_WEIGHT:                       normal;
+$LINK_FG_COLOR:                     $cinnabarinus_light_cap;
+$LINK_BG_COLOR:                     transparent;
+$LINK_VISITED_FG_COLOR:             $cinnabarinus_dark_cap;
+$LINK_VISITED_BG_COLOR:             transparent;
+$LINK_HOVER_FG_COLOR:               $cinnabarinus_light_cap;
+$LINK_HOVER_BG_COLOR:               $californicus_cap;
 
-$TOOLTIP_FG_COLOR:            $californicus_stipe;
-$TOOLTIP_BG_COLOR:            $cornucopioides_dark_hymenium;
+// --------------------------------------------------
+// Buttons
+// --------------------------------------------------
 
-$VOTE_METER_FG_COLOR:         $cornucopioides_dark_hymenium;
-$VOTE_METER_BG_COLOR:         $californicus_cap;
+$BUTTON_FG_COLOR:                   #000000;
+$BUTTON_BG_COLOR:                   #F6F6F6;
+$BUTTON_BORDER_COLOR:               #CCCCCC;
+$BUTTON_HOVER_FG_COLOR:             #000000;
+$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
+$BUTTON_HOVER_BORDER_COLOR:         black;
+$BUTTON_ACTIVE_FG_COLOR:            $californicus_stipe;
+$BUTTON_ACTIVE_BG_COLOR:            $californicus_cap;
+$BUTTON_PRIMARY_FG_COLOR:           $californicus_stipe;
+$BUTTON_PRIMARY_BG_COLOR:           $cinnabarinus_light_cap;
+$BUTTON_PRIMARY_BORDER_COLOR:       $cinnabarinus_dark_cap;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     $californicus_stipe;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     $cinnabarinus_dark_cap;
+$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $cinnabarinus_dark_stem;
+$BUTTON_BORDER_WIDTH:               1px;
+$BUTTON_BORDER_STYLE:               solid;
+$BUTTON_BORDER_RADIUS:              5px;
 
-$PROGRESS_BG_COLOR:           $californicus_stipe;
-$PROGRESS_FG_COLOR:           $cornucopioides_dark_hymenium;
-$PROGRESS_BAR_COLOR:          $cinnabarinus_light_cap;
+// --------------------------------------------------
+// Form Inputs
+// --------------------------------------------------
 
-$PAGER_FG_COLOR:              $cornucopioides_dark_hymenium;
-$PAGER_HOVER_FG_COLOR:        $cornucopioides_dark_hymenium;
-$PAGER_HOVER_BG_COLOR:        $californicus_cap;
-$PAGER_ACTIVE_FG_COLOR:       $californicus_stipe;
-$PAGER_ACTIVE_BG_COLOR:       $cornucopioides_dark_hymenium;
+$INPUT_FG_COLOR:                    #000000;
+$INPUT_BG_COLOR:                    #FFFFFF;
+$INPUT_BORDER_COLOR:                #CCCCCC;
+$INPUT_BORDER_WIDTH:                1px;
+$INPUT_BORDER_STYLE:                solid;
+$INPUT_BORDER_RADIUS:               5px;
 
-$MENU_BORDER_COLOR:           $cornucopioides_dark_hymenium;
-$MENU_FG_COLOR:               black;
-$MENU_BG_COLOR:               white;
-$MENU_HOT_FG_COLOR:           black;
-$MENU_HOT_BG_COLOR:           $cinnabarinus_light_cap;
-$MENU_WARM_FG_COLOR:          black;
-$MENU_WARM_BG_COLOR:          $californicus_cap;
+// --------------------------------------------------
+// Alert States (Info, Success, Warning, Danger)
+// --------------------------------------------------
 
 $INFO_BG_COLOR:                     $polyozellus_light;
 $INFO_BORDER_COLOR:                 $polyozellus_dark;
@@ -92,4 +117,123 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
-$WELL_FG_COLOR:    lighten($cornucopioides_dark_hymenium, 25%);
+$BANNER_BORDER_WIDTH:               2px;
+$BANNER_BORDER_STYLE:               solid;
+$BANNER_BORDER_RADIUS:              5px;
+
+$ALERT_BORDER_WIDTH:                2px;
+$ALERT_BORDER_STYLE:                solid;
+$ALERT_BORDER_RADIUS:               5px;
+
+// --------------------------------------------------
+// Logo
+// --------------------------------------------------
+
+$LOGO_BORDER_COLOR:                 $cornucopioides_dark_hymenium;
+$LOGO_BORDER_WIDTH:                 1px;
+$LOGO_BORDER_STYLE:                 solid;
+$LOGO_BORDER_RADIUS:                0px;
+$LOGO_FG_COLOR:                     $cornucopioides_dark_hymenium;
+$LOGO_BG_COLOR:                     $californicus_cap;
+$LOGO_HOVER_FG_COLOR:               $cornucopioides_dark_hymenium;
+$LOGO_HOVER_BG_COLOR:               $californicus_stipe;
+
+// --------------------------------------------------
+// Left Navigation Bar
+// --------------------------------------------------
+
+$LEFT_BAR_BORDER_COLOR:             $californicus_cap;
+$LEFT_BAR_BORDER_WIDTH:             1px;
+$LEFT_BAR_BORDER_STYLE:             solid;
+$LEFT_BAR_BORDER_RADIUS:            5px;
+$LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
+$LEFT_BAR_HEADER_FG_COLOR:          $cornucopioides_dark_hymenium;
+$LEFT_BAR_HEADER_BG_COLOR:          $californicus_cap;
+$LEFT_BAR_FG_COLOR:                 $cinnabarinus_dark_cap;
+$LEFT_BAR_BG_COLOR:                 $californicus_cap;
+$LEFT_BAR_HOVER_FG_COLOR:           $cinnabarinus_dark_cap;
+$LEFT_BAR_HOVER_BG_COLOR:           $californicus_stipe;
+
+// --------------------------------------------------
+// Top Navigation Bar
+// --------------------------------------------------
+
+$TOP_BAR_BORDER_COLOR:              transparent;
+$TOP_BAR_BORDER_WIDTH:              1px;
+$TOP_BAR_BORDER_STYLE:              solid;
+$TOP_BAR_BORDER_RADIUS:             0;
+$TOP_BAR_FG_COLOR:                  $cornucopioides_dark_hymenium;
+$TOP_BAR_BG_COLOR:                  $californicus_stipe;
+$TOP_BAR_LINK_FG_COLOR:             $cinnabarinus_light_cap;
+$TOP_BAR_LINK_BG_COLOR:             transparent;
+$TOP_BAR_LINK_HOVER_FG_COLOR:       $cinnabarinus_light_cap;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       $californicus_cap;
+
+// --------------------------------------------------
+// Lists and Tables
+// --------------------------------------------------
+
+$LIST_BORDER_COLOR:                 transparent;
+$LIST_HEADER_FG_COLOR:              #777777;
+$LIST_HEADER_BG_COLOR:              #EEEEEE;
+$LIST_FG_COLOR:                     $cornucopioides_dark_hymenium;
+$LIST_BG_COLOR:                     mix($californicus_stipe, white, 50%);
+$LIST_EVEN_BG_COLOR:                $LIST_BG_COLOR;
+$LIST_ODD_BG_COLOR:                 #FFFFFF;
+$LIST_HOVER_BG_COLOR:               $californicus_cap;
+
+// --------------------------------------------------
+// Menus and Dropdowns
+// --------------------------------------------------
+
+$MENU_BORDER_COLOR:                 $cornucopioides_dark_hymenium;
+$MENU_FG_COLOR:                     black;
+$MENU_BG_COLOR:                     white;
+$MENU_HOT_FG_COLOR:                 black;
+$MENU_HOT_BG_COLOR:                 $cinnabarinus_light_cap;
+$MENU_WARM_FG_COLOR:                black;
+$MENU_WARM_BG_COLOR:                $californicus_cap;
+
+// --------------------------------------------------
+// Pagination
+// --------------------------------------------------
+
+$PAGER_FG_COLOR:                    $cornucopioides_dark_hymenium;
+$PAGER_BG_COLOR:                    transparent;
+$PAGER_BORDER_COLOR:                none;
+$PAGER_HOVER_FG_COLOR:              $cornucopioides_dark_hymenium;
+$PAGER_HOVER_BG_COLOR:              $californicus_cap;
+$PAGER_HOVER_BORDER_COLOR:          none;
+$PAGER_ACTIVE_FG_COLOR:             $californicus_stipe;
+$PAGER_ACTIVE_BG_COLOR:             $cornucopioides_dark_hymenium;
+$PAGER_ACTIVE_BORDER_COLOR:         none;
+
+// --------------------------------------------------
+// Tooltips
+// --------------------------------------------------
+
+$TOOLTIP_FG_COLOR:                  $californicus_stipe;
+$TOOLTIP_BG_COLOR:                  $cornucopioides_dark_hymenium;
+
+// --------------------------------------------------
+// Vote Meters
+// --------------------------------------------------
+
+$VOTE_METER_BORDER_COLOR:           none;
+$VOTE_METER_FG_COLOR:               $cornucopioides_dark_hymenium;
+$VOTE_METER_BG_COLOR:               $californicus_cap;
+
+// --------------------------------------------------
+// Progress Bars
+// --------------------------------------------------
+
+$PROGRESS_BG_COLOR:                 $californicus_stipe;
+$PROGRESS_FG_COLOR:                 $cornucopioides_dark_hymenium;
+$PROGRESS_BAR_COLOR:                $cinnabarinus_light_cap;
+
+// --------------------------------------------------
+// Wells and Panels
+// --------------------------------------------------
+
+$WELL_FG_COLOR:                     lighten($cornucopioides_dark_hymenium, 25%);
+$WELL_BG_COLOR:                     $californicus_cap;
