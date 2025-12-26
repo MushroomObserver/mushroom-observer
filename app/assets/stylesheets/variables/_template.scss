@@ -57,6 +57,7 @@ $hover_primary:   scale-color($light_gill, $lightness: -30%);
 $hover_secondary: scale-color($dark_cap, $lightness: -20%);
 $light_secondary: scale-color($dark_cap, $lightness: 60%);
 $muted_dark:      scale-color($dark_gill, $lightness: 36%);
+$muted_border:    rgba($dark_gill, 0.2);
 
 // Derived grays (mix from theme colors for cohesive palette)
 $light_gray:      mix($dark_gill, $light_cap, 10%);
@@ -64,29 +65,26 @@ $medium_gray:     mix($dark_gill, $light_cap, 25%);
 $dark_gray:       mix($dark_gill, $light_cap, 50%);
 
 // Alert state colors
-$success_green:   #70C070;
-$success_bg:      #E0FFE0;
 $info_blue:       #5BC0DE;
-$info_bg:         #E0F8FF;
+$success_green:   #70C070;
 $warning_yellow:  #F8CC70;
-$warning_bg:      #FFF8E0;
 $danger_red:      #F07070;
-$danger_bg:       #FFE0E0;
 
 // ==================================================
-// SECTION 2: SEMANTIC COLOR ASSIGNMENTS
+// SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
 // ==================================================
 // Map your palette colors to semantic meanings.
 // These provide consistent meaning across the application.
 
 $PRIMARY_COLOR:                     $light_gill;
 $SECONDARY_COLOR:                   $dark_cap;
-$SUCCESS_COLOR:                     $success_green;
-$INFO_COLOR:                        $blue_accent;
-$WARNING_COLOR:                     $stain;
-$DANGER_COLOR:                      $danger_red;
 $LIGHT_COLOR:                       $light_cap;
 $DARK_COLOR:                        $dark_gill;
+
+$INFO_COLOR:                        $blue_accent;
+$SUCCESS_COLOR:                     $success_green;
+$WARNING_COLOR:                     $stain;
+$DANGER_COLOR:                      $danger_red;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -146,18 +144,19 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     rgba($INFO_COLOR, 30%);
+$INFO_BG_COLOR:                     rgba($INFO_COLOR, 20%);
 $INFO_BORDER_COLOR:                 $INFO_COLOR;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 30%);
+$SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 20%);
 $SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
 $SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 30%);
+$WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 20%);
 $WARNING_BORDER_COLOR:              $WARNING_COLOR;
 $WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 30%);
+$DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 20%);
 $DANGER_BORDER_COLOR:               $DANGER_COLOR;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
+
 
 $BANNER_BORDER_WIDTH:               2px;
 $BANNER_BORDER_STYLE:               solid;
@@ -264,11 +263,11 @@ $PROGRESS_BAR_COLOR:                $PRIMARY_COLOR;
 // Panels
 // --------------------------------------------------
 
-$PANEL_FG_COLOR:                    $muted_dark;
+$PANEL_FG_COLOR:                    $BODY_FG_COLOR;
 $PANEL_BG_COLOR:                    $LIGHT_COLOR;
-$PANEL_BORDER_COLOR:                transparent;
+$PANEL_BORDER_COLOR:                $muted_border;
+$PANEL_FOOTER_FG_COLOR:             $BODY_FG_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $PANEL_BG_COLOR;
-$PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;
 
 // ==================================================
 // END OF TEMPLATE

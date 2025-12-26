@@ -109,18 +109,19 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     rgba($INFO_COLOR, 30%);
+$INFO_BG_COLOR:                     rgba($INFO_COLOR, 20%);
 $INFO_BORDER_COLOR:                 $INFO_COLOR;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 30%);
+$SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 20%);
 $SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
 $SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 30%);
+$WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 20%);
 $WARNING_BORDER_COLOR:              $WARNING_COLOR;
 $WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 30%);
+$DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 20%);
 $DANGER_BORDER_COLOR:               $DANGER_COLOR;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
+
 
 $BANNER_BORDER_WIDTH:               2px;
 $BANNER_BORDER_STYLE:               solid;
@@ -227,8 +228,8 @@ $PROGRESS_BAR_COLOR:                $dusty_rose;
 // Panels
 // --------------------------------------------------
 
-$PANEL_FG_COLOR:                    $dark_brown;
+$PANEL_FG_COLOR:                    $BODY_FG_COLOR;
 $PANEL_BG_COLOR:                    $palest_agaricus;
 $PANEL_BORDER_COLOR:                $muted_border;
+$PANEL_FOOTER_FG_COLOR:             $BODY_FG_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
-$PANEL_FOOTER_FG_COLOR:             $PANEL_FG_COLOR;
