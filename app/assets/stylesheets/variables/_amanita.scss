@@ -77,7 +77,7 @@ $LINK_HOVER_BG_COLOR:               $muscaria_background;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   #CCCCCC;
+$BUTTON_FG_COLOR:                   $pachycolea_foreground;
 $BUTTON_BG_COLOR:                   #383138;
 $BUTTON_BORDER_COLOR:               #CCCCCC;
 $BUTTON_HOVER_FG_COLOR:             #000000;
@@ -86,7 +86,7 @@ $BUTTON_HOVER_BORDER_COLOR:         black;
 $BUTTON_ACTIVE_FG_COLOR:            $muscaria_background;
 $BUTTON_ACTIVE_BG_COLOR:            $pachycolea_foreground;
 $BUTTON_PRIMARY_FG_COLOR:           $pachycolea_background;
-$BUTTON_PRIMARY_BG_COLOR:           $velosa_background;
+$BUTTON_PRIMARY_BG_COLOR:           $pachycolea_background;
 $BUTTON_PRIMARY_BORDER_COLOR:       $velosa_dark_veil;
 $BUTTON_PRIMARY_HOVER_FG_COLOR:     $pachycolea_background;
 $BUTTON_PRIMARY_HOVER_BG_COLOR:     $velosa_dark_veil;
