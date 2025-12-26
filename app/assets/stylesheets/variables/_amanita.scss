@@ -36,20 +36,20 @@ $tan:          #aa9a83; // pachycolea_light_stipe
 $chocolate:    #60412d; // pachycolea_dark_brown
 
 // Derived grays (mixed from theme colors)
-$light_gray:   mix($dark_brown, $silver, 10%);
-$medium_gray:  mix($dark_brown, $silver, 25%);
-$dark_gray:    mix($dark_brown, $silver, 50%);
-$light_silver: mix(white, $silver, 20%); // lighter silver for inputs/buttons
-$light_tan:    scale-color($tan, $lightness: 30%);
+$light_silver:  mix($dark_brown, $silver, 10%);
+$medium_silver: mix($dark_brown, $silver, 25%);
+$dark_silver:   mix($dark_brown, $silver, 50%);
+$light_silver:  mix(white, $silver, 20%); // lighter silver for inputs/buttons
+$light_tan:     scale-color($tan, $lightness: 30%);
 
 // Dark theme list backgrounds
 $deep_dark_brown:    mix($dark_brown, black, 80%);
 $deeper_dark_brown:  mix($dark_brown, black, 70%);
 $deepest_dark_brown: mix($dark_brown, black, 20%);
-$dark_silver:        rgba($silver, 0.21); // panel border
 
 // Semi-transparent colors
-$muted_tan: rgba($tan, 0.45);
+$muted_silver:  rgba($silver, 0.21); // panel border
+$muted_tan:     rgba($tan, 0.45);
 $panel_overlay: rgba($deep_dark_brown, 0.45);
 
 // Alert state colors
@@ -118,7 +118,7 @@ $BUTTON_BORDER_RADIUS:              5px;
 
 $INPUT_FG_COLOR:                    $light_silver;
 $INPUT_BG_COLOR:                    $deep_dark_brown;
-$INPUT_BORDER_COLOR:                $tan;
+$INPUT_BORDER_COLOR:                $medium_silver;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
@@ -169,7 +169,7 @@ $LEFT_BAR_HOVER_BG_COLOR:           $red;
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              $dark_silver;
+$TOP_BAR_BORDER_COLOR:              $muted_silver;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
@@ -184,9 +184,9 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 $dark_silver;
-$LIST_HEADER_FG_COLOR:              $dark_gray;
-$LIST_HEADER_BG_COLOR:              $light_gray;
+$LIST_BORDER_COLOR:                 $muted_silver;
+$LIST_HEADER_FG_COLOR:              $dark_silver;
+$LIST_HEADER_BG_COLOR:              $light_silver;
 $LIST_FG_COLOR:                     $silver;
 $LIST_BG_COLOR:                     $deep_dark_brown;
 $LIST_EVEN_BG_COLOR:                $deep_dark_brown;
@@ -248,6 +248,6 @@ $PROGRESS_BAR_COLOR:                $dark_olive;
 
 $PANEL_FG_COLOR:                    $BODY_FG_COLOR;
 $PANEL_BG_COLOR:                    $panel_overlay;
-$PANEL_BORDER_COLOR:                $dark_silver;
+$PANEL_BORDER_COLOR:                $muted_silver;
 $PANEL_FOOTER_FG_COLOR:             $BODY_FG_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
