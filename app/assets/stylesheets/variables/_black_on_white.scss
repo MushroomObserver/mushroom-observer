@@ -10,15 +10,16 @@
 // ==================================================
 
 // Core grayscale
-$white:         #FFFFFF;
-$body_gray:     #F6F6F6;
-$off_white:     #F2F2F2;
-$light_gray:    #EEEEEE;
-$medium_gray:   #DDDDDD;
-$gray:          #CCCCCC;
-$dark_gray:     #888888;
-$medium_dark_gray: #777777;
-$black:         #000000;
+$white:             #FFFFFF;
+$body_gray:         #F6F6F6;
+$off_white:         #F2F2F2;
+$light_gray:        #EEEEEE;
+$border_gray:       #D9D9D9;
+$medium_gray:       #DDDDDD;
+$gray:              #CCCCCC;
+$dark_gray:         #888888;
+$medium_dark_gray:  #777777;
+$black:             #000000;
 
 // Accent colors
 $blue:          #2050E0;
@@ -29,37 +30,28 @@ $dark_blue:     scale-color($blue, $lightness: -20%);
 $darker_blue:   scale-color($blue, $lightness: -30%);
 
 // Alert state colors
+$info_blue:      #5BC0DE;
 $success_green:  #70C070;
-$success_bg:     #E0FFE0;
-$info_bg:        #E0F8FF;
 $warning_yellow: #F8CC70;
-$warning_bg:     #FFF8E0;
 $danger_red:     #F07070;
-$danger_bg:      #FFE0E0;
 
 // Menu highlight colors
 $hot_yellow:     #FFFF88;
 $warm_red:       #FF8888;
 
-// Logo colors
-$logo_cream:     #FAEBD4;
-$logo_red:       #CC2616;
-
-// Border gray (slightly different from medium_gray)
-$border_gray:    #D9D9D9;
-
 // ==================================================
-// SECTION 2: SEMANTIC COLOR ASSIGNMENTS
+// SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
 // ==================================================
 
-$PRIMARY_COLOR:                     $blue;
-$SECONDARY_COLOR:                   $gray;
-$SUCCESS_COLOR:                     $success_green;
-$INFO_COLOR:                        $light_blue;
-$WARNING_COLOR:                     $warning_yellow;
-$DANGER_COLOR:                      $danger_red;
-$LIGHT_COLOR:                       $light_gray;
-$DARK_COLOR:                        $black;
+$PRIMARY_COLOR:   $blue;
+$SECONDARY_COLOR: $gray;
+$LIGHT_COLOR:     $light_gray;
+$DARK_COLOR:      $black;
+
+$INFO_COLOR:      $info_blue;
+$SUCCESS_COLOR:   $success_green;
+$WARNING_COLOR:   $warning_yellow;
+$DANGER_COLOR:    $danger_red;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -116,18 +108,18 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     $info_bg;
+$INFO_BG_COLOR:                     rgba($INFO_COLOR, 30%);
 $INFO_BORDER_COLOR:                 $INFO_COLOR;
-$INFO_FG_COLOR:                     $black;
-$SUCCESS_BG_COLOR:                  $success_bg;
+$INFO_FG_COLOR:                     $BODY_FG_COLOR;
+$SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 30%);
 $SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
-$SUCCESS_FG_COLOR:                  $black;
-$WARNING_BG_COLOR:                  $warning_bg;
+$SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
+$WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 30%);
 $WARNING_BORDER_COLOR:              $WARNING_COLOR;
-$WARNING_FG_COLOR:                  $black;
-$DANGER_BG_COLOR:                   $danger_bg;
+$WARNING_FG_COLOR:                  $BODY_FG_COLOR;
+$DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 30%);
 $DANGER_BORDER_COLOR:               $DANGER_COLOR;
-$DANGER_FG_COLOR:                   $black;
+$DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
 $BANNER_BORDER_WIDTH:               2px;
 $BANNER_BORDER_STYLE:               solid;
@@ -136,19 +128,6 @@ $BANNER_BORDER_RADIUS:              5px;
 $ALERT_BORDER_WIDTH:                2px;
 $ALERT_BORDER_STYLE:                solid;
 $ALERT_BORDER_RADIUS:               5px;
-
-// --------------------------------------------------
-// Logo
-// --------------------------------------------------
-
-$LOGO_BORDER_COLOR:                 $medium_gray;
-$LOGO_BORDER_WIDTH:                 1px;
-$LOGO_BORDER_STYLE:                 solid;
-$LOGO_BORDER_RADIUS:                0px;
-$LOGO_FG_COLOR:                     $logo_cream;
-$LOGO_BG_COLOR:                     $logo_red;
-$LOGO_HOVER_FG_COLOR:               $logo_cream;
-$LOGO_HOVER_BG_COLOR:               $logo_red;
 
 // --------------------------------------------------
 // Left Navigation Bar

@@ -29,8 +29,6 @@ $scarlet:       #bb2900; // punicea_cap_dark
 $red:           #cc382a; // punicea_cap_light
 $mustard:       #e7bc3c; // punicea_dark_stipe
 $pale_cream:    #e9e3af; // punicea_light_stipe
-$light_blue:    #a5bffa; // polyozellus_light
-$dark_blue:     #5167b2; // polyozellus_dark
 
 // Derived grays (mixed from theme colors)
 $light_gray:     mix($dark_olive, $pale_cream, 10%);
@@ -43,25 +41,24 @@ $light_cream:    scale-color($pale_cream, $lightness: 50%);
 $lightest_cream: scale-color($pale_cream, $lightness: 70%);
 
 // Alert state colors
+$info_blue:      #5167b2; // polyozellus_dark
 $success_green:  #70C070;
-$success_bg:     #E0FFE0;
 $warning_yellow: #F8CC70;
-$warning_bg:     #FFF8E0;
 $danger_red:     #F07070;
-$danger_bg:      #FFE0E0;
 
 // ==================================================
-// SECTION 2: SEMANTIC COLOR ASSIGNMENTS
+// SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
 // ==================================================
 
-$PRIMARY_COLOR:                     $forest_green;
-$SECONDARY_COLOR:                   $amber;
-$SUCCESS_COLOR:                     $success_green;
-$INFO_COLOR:                        $dark_blue;
-$WARNING_COLOR:                     $red_orange;
-$DANGER_COLOR:                      $scarlet;
-$LIGHT_COLOR:                       $pale_cream;
-$DARK_COLOR:                        $dark_olive;
+$PRIMARY_COLOR:   $forest_green;
+$SECONDARY_COLOR: $amber;
+$LIGHT_COLOR:     $pale_cream;
+$DARK_COLOR:      $dark_olive;
+
+$INFO_COLOR:      $info_blue;
+$SUCCESS_COLOR:   $success_green;
+$WARNING_COLOR:   $red_orange;
+$DANGER_COLOR:    $scarlet;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -118,17 +115,17 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     $light_blue;
-$INFO_BORDER_COLOR:                 $dark_blue;
+$INFO_BG_COLOR:                     rgba($INFO_COLOR, 30%);
+$INFO_BORDER_COLOR:                 $INFO_COLOR;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  $success_bg;
-$SUCCESS_BORDER_COLOR:              $success_green;
+$SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 30%);
+$SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
 $SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  $warning_bg;
-$WARNING_BORDER_COLOR:              $warning_yellow;
+$WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 30%);
+$WARNING_BORDER_COLOR:              $WARNING_COLOR;
 $WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   $danger_bg;
-$DANGER_BORDER_COLOR:               $danger_red;
+$DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 30%);
+$DANGER_BORDER_COLOR:               $DANGER_COLOR;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
 $BANNER_BORDER_WIDTH:               2px;
@@ -138,19 +135,6 @@ $BANNER_BORDER_RADIUS:              5px;
 $ALERT_BORDER_WIDTH:                2px;
 $ALERT_BORDER_STYLE:                solid;
 $ALERT_BORDER_RADIUS:               5px;
-
-// --------------------------------------------------
-// Logo
-// --------------------------------------------------
-
-$LOGO_BORDER_COLOR:                 $dark_olive;
-$LOGO_BORDER_WIDTH:                 1px;
-$LOGO_BORDER_STYLE:                 solid;
-$LOGO_BORDER_RADIUS:                0px;
-$LOGO_FG_COLOR:                     $dark_olive;
-$LOGO_BG_COLOR:                     $red;
-$LOGO_HOVER_FG_COLOR:               $dark_olive;
-$LOGO_HOVER_BG_COLOR:               $red;
 
 // --------------------------------------------------
 // Left Navigation Bar

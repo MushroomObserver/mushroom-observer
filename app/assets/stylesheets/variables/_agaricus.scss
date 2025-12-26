@@ -25,8 +25,6 @@ $dark_brown:    #3B2821; // cupreobrunneus_gills
 $terracotta:    #B4725F; // lilaceps_stain
 $tan:           #BC9D89; // semotus_cap
 $mustard:       #D4A833; // xanthodermus_stain
-$light_blue:    #a5bffa; // polyozellus_light
-$dark_blue:     #5167b2; // polyozellus_dark
 
 // Derived grays (mixed from theme colors)
 $light_gray:      mix($dark_brown, $pale_agaricus, 10%);
@@ -37,25 +35,24 @@ $muted_brown:     scale-color($dark_brown, $lightness: 36%);
 $palest_agaricus: scale-color($pale_agaricus, $lightness: 50%);
 
 // Alert state colors
+$info_blue:      #5167b2; // polyozellus_dark
 $success_green:  #70C070;
-$success_bg:     #E0FFE0;
 $warning_yellow: #F8CC70;
-$warning_bg:     #FFF8E0;
 $danger_red:     #F07070;
-$danger_bg:      #FFE0E0;
 
 // ==================================================
-// SECTION 2: SEMANTIC COLOR ASSIGNMENTS
+// SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
 // ==================================================
 
-$PRIMARY_COLOR:                     $dusty_rose;
-$SECONDARY_COLOR:                   $pale_gold;
-$SUCCESS_COLOR:                     $success_green;
-$INFO_COLOR:                        $dark_blue;
-$WARNING_COLOR:                     $mustard;
-$DANGER_COLOR:                      $terracotta;
-$LIGHT_COLOR:                       $pale_agaricus;
-$DARK_COLOR:                        $dark_brown;
+$PRIMARY_COLOR:   $dusty_rose;
+$SECONDARY_COLOR: $pale_gold;
+$LIGHT_COLOR:     $pale_agaricus;
+$DARK_COLOR:      $dark_brown;
+
+$INFO_COLOR:      $info_blue;
+$SUCCESS_COLOR:   $success_green;
+$WARNING_COLOR:   $mustard;
+$DANGER_COLOR:    $terracotta;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -112,17 +109,17 @@ $INPUT_BORDER_RADIUS:               5px;
 // Alert States (Info, Success, Warning, Danger)
 // --------------------------------------------------
 
-$INFO_BG_COLOR:                     $light_blue;
-$INFO_BORDER_COLOR:                 $dark_blue;
+$INFO_BG_COLOR:                     rgba($INFO_COLOR, 30%);
+$INFO_BORDER_COLOR:                 $INFO_COLOR;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  $success_bg;
-$SUCCESS_BORDER_COLOR:              $success_green;
+$SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 30%);
+$SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
 $SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  $warning_bg;
-$WARNING_BORDER_COLOR:              $warning_yellow;
+$WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 30%);
+$WARNING_BORDER_COLOR:              $WARNING_COLOR;
 $WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   $danger_bg;
-$DANGER_BORDER_COLOR:               $danger_red;
+$DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 30%);
+$DANGER_BORDER_COLOR:               $DANGER_COLOR;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
 $BANNER_BORDER_WIDTH:               2px;
@@ -132,19 +129,6 @@ $BANNER_BORDER_RADIUS:              5px;
 $ALERT_BORDER_WIDTH:                2px;
 $ALERT_BORDER_STYLE:                solid;
 $ALERT_BORDER_RADIUS:               5px;
-
-// --------------------------------------------------
-// Logo
-// --------------------------------------------------
-
-$LOGO_BORDER_COLOR:                 $dark_brown;
-$LOGO_BORDER_WIDTH:                 1px;
-$LOGO_BORDER_STYLE:                 solid;
-$LOGO_BORDER_RADIUS:                0px;
-$LOGO_FG_COLOR:                     $dark_brown;
-$LOGO_BG_COLOR:                     $tan;
-$LOGO_HOVER_FG_COLOR:               $brick_red;
-$LOGO_HOVER_BG_COLOR:               $pale_agaricus;
 
 // --------------------------------------------------
 // Left Navigation Bar
