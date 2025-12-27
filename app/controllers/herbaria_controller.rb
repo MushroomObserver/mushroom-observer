@@ -141,6 +141,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    return unless in_admin_mode?
+
+    @top_users = User.top_users_for_herbarium(@herbarium)
   end
 
   def render_modal_herbarium_form
