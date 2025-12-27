@@ -19,7 +19,8 @@ module Components
   class ObjectFooter < Base
     prop :user, _Nilable(User)
     prop :obj, _Any # Any versioned or non-versioned object
-    prop :versions, Array, default: -> { [] }
+    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
+         default: -> { [] }
 
     def view_template
       num_versions = @versions.length
