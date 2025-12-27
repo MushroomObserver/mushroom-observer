@@ -140,7 +140,7 @@ $LEFT_BAR_HOVER_BG_COLOR:           $light_secondary;
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              transparent;
+$TOP_BAR_BORDER_COLOR:              $muted_border;
 $TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $TOP_BAR_BG_COLOR:                  $LIGHT_COLOR;
 $TOP_BAR_LINK_TEXT_COLOR:           $PRIMARY_COLOR;

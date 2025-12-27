@@ -14,7 +14,7 @@ $white:             #FFFFFF;
 $body_gray:         #F6F6F6;
 $off_white:         #F2F2F2;
 $light_gray:        #EEEEEE;
-$border_gray:       #D9D9D9;
+$muted_border:      #D9D9D9;
 $medium_gray:       #DDDDDD;
 $gray:              #CCCCCC;
 $dark_gray:         #888888;
@@ -104,7 +104,7 @@ $LEFT_BAR_HOVER_BG_COLOR:           $light_gray;
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              $border_gray;
+$TOP_BAR_BORDER_COLOR:              $muted_border;
 $TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $TOP_BAR_BG_COLOR:                  $off_white;
 $TOP_BAR_LINK_TEXT_COLOR:           $BODY_TEXT_COLOR;
@@ -116,7 +116,7 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 $medium_gray;
+$LIST_BORDER_COLOR:                 $muted_border;
 $LIST_HEADER_TEXT_COLOR:            $black;
 $LIST_HEADER_BG_COLOR:              $light_gray;
 $LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
@@ -157,6 +157,6 @@ $PROGRESS_TEXT_COLOR:               $black;
 
 $PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $white;
-$PANEL_BORDER_COLOR:                $medium_gray;
+$PANEL_BORDER_COLOR:                $muted_border;
 $PANEL_FOOTER_TEXT_COLOR:           $BODY_TEXT_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;

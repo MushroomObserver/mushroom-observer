@@ -31,7 +31,7 @@ $straw:         #e6c987; // cornucopioides_bright_margin
 
 // Derived colors (mixed from theme colors)
 $light_gray:    mix($black, $cream, 10%);
-$gray_border:   rgba($black, 0.2);
+$muted_border:   rgba($black, 0.2);
 $input_border:  rgba($black, 0.5);
 $dark_gray:     mix($black, $cream, 50%);
 $muted_black:   scale-color($black, $lightness: 27%);
@@ -108,7 +108,7 @@ $LEFT_BAR_HOVER_BG_COLOR:           $cream;
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              $gray_border;
+$TOP_BAR_BORDER_COLOR:              $muted_border;
 $TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $TOP_BAR_BG_COLOR:                  $cream;
 $TOP_BAR_LINK_TEXT_COLOR:           $TOP_BAR_TEXT_COLOR;
@@ -120,7 +120,7 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       $light_cream;
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 $gray_border;
+$LIST_BORDER_COLOR:                 $muted_border;
 $LIST_HEADER_TEXT_COLOR:            $dark_gray;
 $LIST_HEADER_BG_COLOR:              $light_gray;
 $LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
@@ -161,6 +161,6 @@ $PROGRESS_TEXT_COLOR:               $black;
 
 $PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $light_cream;
-$PANEL_BORDER_COLOR:                $gray_border;
+$PANEL_BORDER_COLOR:                $muted_border;
 $PANEL_FOOTER_TEXT_COLOR:           $BODY_TEXT_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;

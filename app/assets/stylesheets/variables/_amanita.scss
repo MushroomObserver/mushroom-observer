@@ -48,7 +48,7 @@ $deeper_dark_brown:  mix($dark_brown, black, 70%);
 $deepest_dark_brown: mix($dark_brown, black, 20%);
 
 // Semi-transparent colors
-$muted_silver:  rgba($silver, 0.21); // panel border
+$muted_border:  rgba($silver, 0.21); // panel border
 $muted_tan:     rgba($tan, 0.45);
 $panel_overlay: rgba($deep_dark_brown, 0.45);
 
@@ -123,7 +123,7 @@ $LEFT_BAR_HOVER_BG_COLOR:           $red;
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              $muted_silver;
+$TOP_BAR_BORDER_COLOR:              $muted_border;
 $TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $TOP_BAR_BG_COLOR:                  $panel_overlay;
 $TOP_BAR_LINK_TEXT_COLOR:           $TOP_BAR_TEXT_COLOR;
@@ -135,7 +135,7 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 $muted_silver;
+$LIST_BORDER_COLOR:                 $muted_border;
 $LIST_HEADER_TEXT_COLOR:            $dark_silver;
 $LIST_HEADER_BG_COLOR:              $light_silver;
 $LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
@@ -176,6 +176,6 @@ $PROGRESS_TEXT_COLOR:               $tan;
 
 $PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $panel_overlay;
-$PANEL_BORDER_COLOR:                $muted_silver;
+$PANEL_BORDER_COLOR:                $muted_border;
 $PANEL_FOOTER_TEXT_COLOR:           $BODY_TEXT_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
