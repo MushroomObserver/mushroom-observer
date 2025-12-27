@@ -34,15 +34,15 @@ $padding-xs-horizontal:                     4px;
 
 $border-radius-base:                        5px;
 
-$component-active-color:                    $MENU_HOT_TEXT_COLOR;
-$component-active-bg:                       $MENU_HOT_BG_COLOR;
+$component-active-color:                    $MENU_HOVER_TEXT_COLOR;
+$component-active-bg:                       $MENU_HOVER_BG_COLOR;
 
 $table-cell-padding:                        6px;
 $table-condensed-cell-padding:              4px;
 $table-bg:                                  $LIST_BG_COLOR;
 $table-bg-accent:                           $LIST_ODD_BG_COLOR;
 $table-bg-hover:                            $LIST_HOVER_BG_COLOR;
-$table-bg-active:                           $MENU_WARM_BG_COLOR;
+$table-bg-active:                           $MENU_ACTIVE_BG_COLOR;
 $table-border-color:                        $MENU_BORDER_COLOR;
 
 $btn-font-weight:                           bold;
@@ -74,10 +74,10 @@ $dropdown-border:                           $MENU_BORDER_COLOR;
 $dropdown-fallback-border:                  $MENU_BORDER_COLOR;
 $dropdown-divider-bg:                       $MENU_BG_COLOR;
 $dropdown-link-color:                       $MENU_TEXT_COLOR;
-$dropdown-link-hover-color:                 $MENU_HOT_TEXT_COLOR;
-$dropdown-link-hover-bg:                    $MENU_HOT_BG_COLOR;
-$dropdown-link-active-color:                $MENU_WARM_TEXT_COLOR;
-$dropdown-link-active-bg:                   $MENU_WARM_BG_COLOR;
+$dropdown-link-hover-color:                 $MENU_HOVER_TEXT_COLOR;
+$dropdown-link-hover-bg:                    $MENU_HOVER_BG_COLOR;
+$dropdown-link-active-color:                $MENU_ACTIVE_TEXT_COLOR;
+$dropdown-link-active-bg:                   $MENU_ACTIVE_BG_COLOR;
 $dropdown-link-disabled-color:              mix($MENU_TEXT_COLOR, $MENU_BG_COLOR, 75%);
 $dropdown-header-color:                     $MENU_TEXT_COLOR;
 $dropdown-caret-color:                      $BODY_TEXT_COLOR;

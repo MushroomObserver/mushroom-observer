@@ -166,11 +166,11 @@ $dropdown-border-color:     $MENU_BORDER_COLOR !default;
 $dropdown-divider-bg:       $MENU_BORDER_COLOR !default;
 
 $dropdown-link-color:       $MENU_TEXT_COLOR !default;
-$dropdown-link-hover-color: $MENU_HOT_TEXT_COLOR !default;
-$dropdown-link-hover-bg:    $MENU_HOT_BG_COLOR !default;
+$dropdown-link-hover-color: $MENU_HOVER_TEXT_COLOR !default;
+$dropdown-link-hover-bg:    $MENU_HOVER_BG_COLOR !default;
 
-$dropdown-link-active-color: $MENU_WARM_TEXT_COLOR !default;
-$dropdown-link-active-bg:    $MENU_WARM_BG_COLOR !default;
+$dropdown-link-active-color: $MENU_ACTIVE_TEXT_COLOR !default;
+$dropdown-link-active-bg:    $MENU_ACTIVE_BG_COLOR !default;
 
 $dropdown-link-disabled-color: mix($MENU_TEXT_COLOR, $MENU_BG_COLOR, 75%) !default;
 
@@ -210,7 +210,7 @@ $table-cell-padding-sm:       0.25rem !default;   // ~4px
 $table-bg:        $LIST_BG_COLOR !default;
 $table-accent-bg: $LIST_ODD_BG_COLOR !default;
 $table-hover-bg:  $LIST_HOVER_BG_COLOR !default;
-$table-active-bg: $MENU_WARM_BG_COLOR !default;
+$table-active-bg: $MENU_ACTIVE_BG_COLOR !default;
 
 $table-border-color: $LIST_BORDER_COLOR !default;
 
