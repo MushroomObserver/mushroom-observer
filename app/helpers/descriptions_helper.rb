@@ -249,10 +249,10 @@ module DescriptionsHelper
     tag.div(class: "text-center") do
       concat(
         render(Components::AuthorsAndEditors.new(
-          obj: desc,
-          versions: versions,
-          user: user
-        ))
+                 obj: desc,
+                 versions: versions,
+                 user: user
+               ))
       )
       if desc.license
         concat(render(partial: "shared/form_license_badge",
