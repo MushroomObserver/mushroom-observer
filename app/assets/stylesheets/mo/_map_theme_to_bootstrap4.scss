@@ -98,9 +98,9 @@ $headings-color: $BODY_TEXT_COLOR !default;
 // Bootstrap 4 uses a consistent spacing scale and border settings
 //
 
-$border-radius:    $BUTTON_BORDER_RADIUS !default;
-$border-radius-sm: $INPUT_BORDER_RADIUS !default;
-$border-radius-lg: $BUTTON_BORDER_RADIUS !default;
+$border-radius:    5px !default;
+$border-radius-sm: 5px !default;
+$border-radius-lg: 5px !default;
 
 // ==================================================
 // SECTION 5: BUTTONS
@@ -111,7 +111,7 @@ $border-radius-lg: $BUTTON_BORDER_RADIUS !default;
 //
 
 $btn-font-weight:     bold !default;
-$btn-border-radius:   $BUTTON_BORDER_RADIUS !default;
+$btn-border-radius:   5px !default;
 
 // Default/secondary button uses our standard button colors
 $btn-padding-y:       0.3125rem !default;  // ~5px
@@ -136,8 +136,8 @@ $btn-focus-box-shadow:  none !default;
 $input-bg:                 $INPUT_BG_COLOR !default;
 $input-color:              $INPUT_TEXT_COLOR !default;
 $input-border-color:       $INPUT_BORDER_COLOR !default;
-$input-border-width:       $INPUT_BORDER_WIDTH !default;
-$input-border-radius:      $INPUT_BORDER_RADIUS !default;
+$input-border-width:       1px !default;
+$input-border-radius:      5px !default;
 
 $input-focus-border-color: $PRIMARY_COLOR !default;
 $input-focus-box-shadow:   none !default;
@@ -225,7 +225,7 @@ $table-head-color: $LIST_HEADER_TEXT_COLOR !default;
 //
 
 $alert-border-width:  2px !default;
-$alert-border-radius: $BANNER_BORDER_RADIUS !default;
+$alert-border-radius: 5px !default;
 
 // Alert colors use our theme's alert variables
 $alert-bg-level:     0 !default;  // Don't darken backgrounds
@@ -327,12 +327,6 @@ $close-color: $BODY_TEXT_COLOR !default;
 // - $LINK_HOVER_BG_COLOR       (Bootstrap links don't typically have bg)
 // - $BUTTON_ACTIVE_TEXT_COLOR    (use :active pseudo-class)
 // - $BUTTON_ACTIVE_BG_COLOR    (use :active pseudo-class)
-// - $BUTTON_BORDER_STYLE       (always solid in BS4)
-// - $INPUT_BORDER_STYLE        (always solid in BS4)
-// - $BANNER_BORDER_WIDTH       (use $alert-border-width)
-// - $BANNER_BORDER_STYLE       (always solid in BS4)
-// - $ALERT_BORDER_WIDTH        (use $alert-border-width)
-// - $ALERT_BORDER_STYLE        (always solid in BS4)
 // - $LOGO_* variables          (custom component, not part of Bootstrap)
 // - $LEFT_BAR_* variables      (partially mapped to navbar-dark-*)
 // - $TOP_BAR_* variables       (partially mapped to navbar-light-*)

@@ -47,10 +47,10 @@ $danger_red:     #F07070;
 // SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
 // ==================================================
 
-$PRIMARY_COLOR:   $bright_orange;
-$SECONDARY_COLOR: $orange;
 $LIGHT_COLOR:     $cream;
 $DARK_COLOR:      $black;
+$PRIMARY_COLOR:   $bright_orange;
+$SECONDARY_COLOR: $orange;
 
 $INFO_COLOR:      $info_blue;
 $SUCCESS_COLOR:   $success_green;
@@ -93,9 +93,6 @@ $BUTTON_PRIMARY_BORDER_COLOR:       $vivid_red;
 $BUTTON_PRIMARY_HOVER_TEXT_COLOR:   $cream;
 $BUTTON_PRIMARY_HOVER_BG_COLOR:     $vivid_red;
 $BUTTON_PRIMARY_HOVER_BORDER_COLOR: $dark_red;
-$BUTTON_BORDER_WIDTH:               1px;
-$BUTTON_BORDER_STYLE:               solid;
-$BUTTON_BORDER_RADIUS:              5px;
 
 // --------------------------------------------------
 // Form Inputs
@@ -104,9 +101,6 @@ $BUTTON_BORDER_RADIUS:              5px;
 $INPUT_TEXT_COLOR:                  $black;
 $INPUT_BG_COLOR:                    scale-color($cream, $lightness: 75%);
 $INPUT_BORDER_COLOR:                $input_border;
-$INPUT_BORDER_WIDTH:                1px;
-$INPUT_BORDER_STYLE:                solid;
-$INPUT_BORDER_RADIUS:               5px;
 
 // --------------------------------------------------
 // Alert States (Info, Success, Warning, Danger)
@@ -124,15 +118,6 @@ $WARNING_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 20%);
 $DANGER_BORDER_COLOR:               $DANGER_COLOR;
 $DANGER_TEXT_COLOR:                 $BODY_TEXT_COLOR;
-
-
-$BANNER_BORDER_WIDTH:               2px;
-$BANNER_BORDER_STYLE:               solid;
-$BANNER_BORDER_RADIUS:              5px;
-
-$ALERT_BORDER_WIDTH:                2px;
-$ALERT_BORDER_STYLE:                solid;
-$ALERT_BORDER_RADIUS:               5px;
 
 // --------------------------------------------------
 // Left Navigation Bar
