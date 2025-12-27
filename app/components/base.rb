@@ -16,6 +16,8 @@ class Components::Base < Phlex::HTML
   register_output_helper :propose_naming_link
   register_output_helper :location_link
   register_output_helper :user_link
+  register_output_helper :user_list
+  register_output_helper :safe_nbsp
   register_output_helper :mark_as_reviewed_toggle
   register_output_helper :modal_link_to
   register_output_helper :put_button

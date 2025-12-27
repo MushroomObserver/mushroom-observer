@@ -248,7 +248,11 @@ module DescriptionsHelper
   def show_description_authors_and_editors(desc, versions, user)
     tag.div(class: "text-center") do
       concat(
-        show_authors_and_editors(obj: desc, versions: versions, user: user)
+        render(Components::AuthorsAndEditors.new(
+          obj: desc,
+          versions: versions,
+          user: user
+        ))
       )
       if desc.license
         concat(render(partial: "shared/form_license_badge",
