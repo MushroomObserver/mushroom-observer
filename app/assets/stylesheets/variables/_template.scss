@@ -116,13 +116,6 @@ $BUTTON_TEXT_COLOR:                 $BODY_TEXT_COLOR;
 $BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
 $BUTTON_BORDER_COLOR:               transparent;
 
-$BUTTON_PRIMARY_TEXT_COLOR:         $LIGHT_COLOR;
-$BUTTON_PRIMARY_BG_COLOR:           $PRIMARY_COLOR;
-$BUTTON_PRIMARY_BORDER_COLOR:       $hover_primary;
-$BUTTON_PRIMARY_HOVER_TEXT_COLOR:   $LIGHT_COLOR;
-$BUTTON_PRIMARY_HOVER_BG_COLOR:     $hover_primary;
-$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $DARK_COLOR;
-
 // --------------------------------------------------
 // Form Inputs
 // --------------------------------------------------
@@ -188,7 +181,6 @@ $LIST_HEADER_TEXT_COLOR:            $DARK_COLOR;
 $LIST_HEADER_BG_COLOR:              $SECONDARY_COLOR;
 $LIST_TEXT_COLOR:                   $DARK_COLOR;
 $LIST_BG_COLOR:                     $LIGHT_COLOR;
-$LIST_EVEN_BG_COLOR:                $LIGHT_COLOR;
 $LIST_ODD_BG_COLOR:                 $LIST_BG_COLOR;
 $LIST_HOVER_BG_COLOR:               $light_secondary;
 
