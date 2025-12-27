@@ -80,4 +80,4 @@ column_classes(:seven_five)
 <% end %>
 <!--.row-->
 
-<%= show_object_footer(@user, @name, @versions) %>
+<%= render Components::ObjectFooter.new(user: @user, obj: @name, versions: @versions) %>

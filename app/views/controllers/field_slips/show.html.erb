@@ -8,4 +8,4 @@ container_class(:wide)
 
 <%= content_padded { render(@field_slip) } %>
 
-<%= show_object_footer(@user, @field_slip) %>
+<%= render Components::ObjectFooter.new(user: @user, obj: @field_slip) %>

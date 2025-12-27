@@ -23,4 +23,4 @@ column_classes(:seven_five)
       versions: @versions
     ) %>
 
-<%= show_object_footer(@user, @location, @versions) %>
+<%= render Components::ObjectFooter.new(user: @user, obj: @location, versions: @versions) %>
