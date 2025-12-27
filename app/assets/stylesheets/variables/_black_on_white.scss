@@ -93,11 +93,11 @@ $INPUT_BORDER_COLOR:                $gray;
 // --------------------------------------------------
 
 $LEFT_BAR_BORDER_COLOR:             $medium_gray;
-$LEFT_BAR_HEADER_TEXT_COLOR:        $medium_dark_gray;
+$LEFT_BAR_HEADER_TEXT_COLOR:        $BODY_TEXT_COLOR;
 $LEFT_BAR_HEADER_BG_COLOR:          $light_gray;
-$LEFT_BAR_TEXT_COLOR:               $black;
+$LEFT_BAR_TEXT_COLOR:               $BODY_TEXT_COLOR;
 $LEFT_BAR_BG_COLOR:                 $white;
-$LEFT_BAR_HOVER_TEXT_COLOR:         $black;
+$LEFT_BAR_HOVER_TEXT_COLOR:         $LEFT_BAR_TEXT_COLOR;
 $LEFT_BAR_HOVER_BG_COLOR:           $light_gray;
 
 // --------------------------------------------------
