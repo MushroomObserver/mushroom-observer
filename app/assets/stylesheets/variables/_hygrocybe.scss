@@ -53,7 +53,8 @@ $danger_red:     #F07070;
 $LIGHT_COLOR:     $pale_cream;
 $DARK_COLOR:      $dark_olive;
 $PRIMARY_COLOR:   $forest_green;
-$SECONDARY_COLOR: $amber;
+$SECONDARY_COLOR: $tangerine;
+$LINK_COLOR:      $PRIMARY_COLOR;
 
 $INFO_COLOR:      $info_blue;
 $SUCCESS_COLOR:   $success_green;
@@ -68,8 +69,8 @@ $DANGER_COLOR:    $scarlet;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_TEXT_COLOR:                   $dark_olive;
-$BODY_BG_COLOR:                     $pale_cream;
+$BODY_TEXT_COLOR:                   $DARK_COLOR;
+$BODY_BG_COLOR:                     $LIGHT_COLOR;
 
 // --------------------------------------------------
 // Links
@@ -78,8 +79,6 @@ $BODY_BG_COLOR:                     $pale_cream;
 $LINK_WEIGHT:                       normal;
 $LINK_TEXT_COLOR:                   $forest_green;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_TEXT_COLOR:           $tangerine;
-$LINK_VISITED_BG_COLOR:             transparent;
 $LINK_HOVER_TEXT_COLOR:             $forest_green;
 $LINK_HOVER_BG_COLOR:               $custard;
 
@@ -87,9 +86,10 @@ $LINK_HOVER_BG_COLOR:               $custard;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_TEXT_COLOR:                 $dark_olive;
-$BUTTON_BG_COLOR:                   $tangerine;
+$BUTTON_TEXT_COLOR:                 $BODY_TEXT_COLOR;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
 $BUTTON_BORDER_COLOR:               transparent;
+
 $BUTTON_PRIMARY_TEXT_COLOR:         $pale_cream;
 $BUTTON_PRIMARY_BG_COLOR:           $forest_green;
 $BUTTON_PRIMARY_BORDER_COLOR:       $olive;

@@ -37,10 +37,11 @@ $warm_red:       #FF8888;
 // SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
 // ==================================================
 
-$LIGHT_COLOR:     $white;
+$LIGHT_COLOR:     $purple;
 $DARK_COLOR:      $black;
 $PRIMARY_COLOR:   $blue;
 $SECONDARY_COLOR: $yellow;
+$LINK_COLOR:      $PRIMARY_COLOR;
 
 $INFO_COLOR:      $info_blue;
 $SUCCESS_COLOR:   $success_green;
@@ -55,18 +56,16 @@ $DANGER_COLOR:    $danger_red;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_TEXT_COLOR:                   $black;
-$BODY_BG_COLOR:                     $purple;
+$BODY_TEXT_COLOR:                   $DARK_COLOR;
+$BODY_BG_COLOR:                     $LIGHT_COLOR;
 
 // --------------------------------------------------
 // Links
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_TEXT_COLOR:                   $blue;
+$LINK_TEXT_COLOR:                   $LINK_COLOR;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_TEXT_COLOR:           $dark_blue;
-$LINK_VISITED_BG_COLOR:             transparent;
 $LINK_HOVER_TEXT_COLOR:             $light_blue;
 $LINK_HOVER_BG_COLOR:               transparent;
 
@@ -74,9 +73,10 @@ $LINK_HOVER_BG_COLOR:               transparent;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_TEXT_COLOR:                 $black;
-$BUTTON_BG_COLOR:                   $yellow;
-$BUTTON_BORDER_COLOR:               $black;
+$BUTTON_TEXT_COLOR:                 $BODY_TEXT_COLOR;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
+$BUTTON_BORDER_COLOR:               transparent;
+
 $BUTTON_PRIMARY_TEXT_COLOR:         $white;
 $BUTTON_PRIMARY_BG_COLOR:           $blue;
 $BUTTON_PRIMARY_BORDER_COLOR:       $black;

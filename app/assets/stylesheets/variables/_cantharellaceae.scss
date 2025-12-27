@@ -51,6 +51,7 @@ $LIGHT_COLOR:     $cream;
 $DARK_COLOR:      $black;
 $PRIMARY_COLOR:   $bright_orange;
 $SECONDARY_COLOR: $orange;
+$LINK_COLOR:      $vivid_red;
 
 $INFO_COLOR:      $info_blue;
 $SUCCESS_COLOR:   $success_green;
@@ -65,18 +66,16 @@ $DANGER_COLOR:    $vivid_red;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_TEXT_COLOR:                   $black;
-$BODY_BG_COLOR:                     $cream;
+$BODY_TEXT_COLOR:                   $DARK_COLOR;
+$BODY_BG_COLOR:                     $LIGHT_COLOR;
 
 // --------------------------------------------------
 // Links
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_TEXT_COLOR:                   $vivid_red;
+$LINK_TEXT_COLOR:                   $LINK_COLOR;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_TEXT_COLOR:           $vivid_red;
-$LINK_VISITED_BG_COLOR:             transparent;
 $LINK_HOVER_TEXT_COLOR:             $bright_orange;
 $LINK_HOVER_BG_COLOR:               $orange;
 
@@ -84,9 +83,10 @@ $LINK_HOVER_BG_COLOR:               $orange;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_TEXT_COLOR:                 $black;
-$BUTTON_BG_COLOR:                   $orange;
+$BUTTON_TEXT_COLOR:                 $BODY_TEXT_COLOR;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
 $BUTTON_BORDER_COLOR:               transparent;
+
 $BUTTON_PRIMARY_TEXT_COLOR:         $cream;
 $BUTTON_PRIMARY_BG_COLOR:           $bright_orange;
 $BUTTON_PRIMARY_BORDER_COLOR:       $vivid_red;

@@ -65,7 +65,8 @@ $danger_red:     #F07070;
 $LIGHT_COLOR:     $silver;
 $DARK_COLOR:      $dark_brown;
 $PRIMARY_COLOR:   $tan;
-$SECONDARY_COLOR: $orange;
+$SECONDARY_COLOR: $amber;
+$LINK_COLOR:      $light_tan;
 
 $INFO_COLOR:      $info_blue;
 $SUCCESS_COLOR:   $success_green;
@@ -80,18 +81,16 @@ $DANGER_COLOR:    $red;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_TEXT_COLOR:                   $silver;
-$BODY_BG_COLOR:                     $dark_brown;
+$BODY_TEXT_COLOR:                   $LIGHT_COLOR;
+$BODY_BG_COLOR:                     $DARK_COLOR;
 
 // --------------------------------------------------
 // Links
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_TEXT_COLOR:                   $light_tan;
+$LINK_TEXT_COLOR:                   $LINK_COLOR;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_TEXT_COLOR:           $pale_yellow;
-$LINK_VISITED_BG_COLOR:             transparent;
 $LINK_HOVER_TEXT_COLOR:             $beige;
 $LINK_HOVER_BG_COLOR:               $red;
 
@@ -100,10 +99,11 @@ $LINK_HOVER_BG_COLOR:               $red;
 // --------------------------------------------------
 
 $BUTTON_TEXT_COLOR:                 $deepest_dark_brown;
-$BUTTON_BG_COLOR:                   $amber;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
 $BUTTON_BORDER_COLOR:               transparent;
+
 $BUTTON_PRIMARY_TEXT_COLOR:         $dark_brown;
-$BUTTON_PRIMARY_BG_COLOR:           $orange;
+$BUTTON_PRIMARY_BG_COLOR:           $PRIMARY_COLOR;
 $BUTTON_PRIMARY_BORDER_COLOR:       $apricot;
 $BUTTON_PRIMARY_HOVER_TEXT_COLOR:   $dark_brown;
 $BUTTON_PRIMARY_HOVER_BG_COLOR:     $apricot;

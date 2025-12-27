@@ -48,6 +48,7 @@ $LIGHT_COLOR:     $pale_agaricus;
 $DARK_COLOR:      $dark_brown;
 $PRIMARY_COLOR:   $dusty_rose;
 $SECONDARY_COLOR: $pale_gold;
+$LINK_COLOR:      $PRIMARY_COLOR;
 
 $INFO_COLOR:      $info_blue;
 $SUCCESS_COLOR:   $success_green;
@@ -62,18 +63,16 @@ $DANGER_COLOR:    $terracotta;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_TEXT_COLOR:                   $dark_brown;
-$BODY_BG_COLOR:                     $pale_agaricus;
+$BODY_TEXT_COLOR:                   $DARK_COLOR;
+$BODY_BG_COLOR:                     $LIGHT_COLOR;
 
 // --------------------------------------------------
 // Links
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_TEXT_COLOR:                   $dusty_rose;
+$LINK_TEXT_COLOR:                   $LINK_COLOR;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_TEXT_COLOR:           $dark_brown;
-$LINK_VISITED_BG_COLOR:             transparent;
 $LINK_HOVER_TEXT_COLOR:             $brick_red;
 $LINK_HOVER_BG_COLOR:               $pale_agaricus;
 
@@ -81,9 +80,10 @@ $LINK_HOVER_BG_COLOR:               $pale_agaricus;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_TEXT_COLOR:                 $dark_brown;
-$BUTTON_BG_COLOR:                   $pale_gold;
+$BUTTON_TEXT_COLOR:                 $BODY_TEXT_COLOR;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
 $BUTTON_BORDER_COLOR:               transparent;
+
 $BUTTON_PRIMARY_TEXT_COLOR:         $pale_agaricus;
 $BUTTON_PRIMARY_BG_COLOR:           $dusty_rose;
 $BUTTON_PRIMARY_BORDER_COLOR:       $brick_red;

@@ -80,6 +80,7 @@ $LIGHT_COLOR:                       $light_cap;
 $DARK_COLOR:                        $dark_gill;
 $PRIMARY_COLOR:                     $light_gill;
 $SECONDARY_COLOR:                   $dark_cap;
+$LINK_COLOR:                        $PRIMARY_COLOR;
 
 $INFO_COLOR:                        $blue_accent;
 $SUCCESS_COLOR:                     $success_green;
@@ -105,10 +106,8 @@ $BODY_BG_COLOR:                     $LIGHT_COLOR;
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_TEXT_COLOR:                   $PRIMARY_COLOR;
+$LINK_TEXT_COLOR:                   $LINK_COLOR;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_TEXT_COLOR:           $DARK_COLOR;
-$LINK_VISITED_BG_COLOR:             transparent;
 $LINK_HOVER_TEXT_COLOR:             $hover_primary;
 $LINK_HOVER_BG_COLOR:               transparent;
 
@@ -116,9 +115,10 @@ $LINK_HOVER_BG_COLOR:               transparent;
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_TEXT_COLOR:                 $DARK_COLOR;
-$BUTTON_BG_COLOR:                   $LIGHT_COLOR;
-$BUTTON_BORDER_COLOR:               $SECONDARY_COLOR;
+$BUTTON_TEXT_COLOR:                 $BODY_TEXT_COLOR;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
+$BUTTON_BORDER_COLOR:               transparent;
+
 $BUTTON_PRIMARY_TEXT_COLOR:         $LIGHT_COLOR;
 $BUTTON_PRIMARY_BG_COLOR:           $PRIMARY_COLOR;
 $BUTTON_PRIMARY_BORDER_COLOR:       $hover_primary;
