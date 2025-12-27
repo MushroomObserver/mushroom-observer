@@ -43,11 +43,11 @@ module Components
 
     # Renders metadata for old versions of versioned objects
     def render_old_version_metadata(num_versions)
-      plain :footer_version_out_of.t(num: @obj.version, total: num_versions)
+      unsafe_raw :footer_version_out_of.t(num: @obj.version, total: num_versions)
 
       if @obj.updated_at
         br
-        plain :footer_updated_by.t(
+        unsafe_raw :footer_updated_by.t(
           user: user_link(@obj.user_id),
           date: @obj.updated_at.web_time
         )
@@ -76,13 +76,13 @@ module Components
       if @versions.last.user_id && @obj.updated_at
         latest_user = User.safe_find(@versions.last.user_id)
         br
-        plain :footer_last_updated_by.t(
+        unsafe_raw :footer_last_updated_by.t(
           user: user_link(latest_user),
           date: @obj.updated_at.web_time
         )
       elsif @obj.updated_at
         br
-        plain :footer_last_updated_at.t(date: @obj.updated_at.web_time)
+        unsafe_raw :footer_last_updated_at.t(date: @obj.updated_at.web_time)
       end
     end
 
@@ -90,7 +90,7 @@ module Components
     def render_created_by
       return unless @obj.created_at
 
-      plain :footer_created_by.t(
+      unsafe_raw :footer_created_by.t(
         user: user_link(@obj.user),
         date: @obj.created_at.web_time
       )
@@ -99,12 +99,12 @@ module Components
     # Renders creation and update info for non-versioned objects
     def render_non_versioned_metadata
       if @obj.created_at
-        plain :footer_created_at.t(date: @obj.created_at.web_time)
+        unsafe_raw :footer_created_at.t(date: @obj.created_at.web_time)
       end
 
       if @obj.updated_at
         br
-        plain :footer_last_updated_at.t(date: @obj.updated_at.web_time)
+        unsafe_raw :footer_last_updated_at.t(date: @obj.updated_at.web_time)
       end
     end
 
@@ -118,14 +118,14 @@ module Components
       date = @obj.old_last_view&.web_time || :footer_never.l
 
       br
-      plain :footer_viewed.t(date: date, times: times)
+      unsafe_raw :footer_viewed.t(date: date, times: times)
     end
 
     # Renders last viewed by current user (observations only)
     def render_last_viewed_by
       time = @obj.old_last_viewed_by(@user)&.web_time || :footer_never.l
       br
-      plain :footer_last_you_viewed.t(date: time)
+      unsafe_raw :footer_last_you_viewed.t(date: time)
     end
 
     # Renders link to RSS activity log if available
@@ -133,7 +133,7 @@ module Components
       return unless @obj.respond_to?(:rss_log_id) && @obj.rss_log_id
 
       br
-      plain link_to(:show_object.t(type: :log), activity_log_path(@obj.rss_log_id))
+      unsafe_raw link_to(:show_object.t(type: :log), activity_log_path(@obj.rss_log_id))
     end
   end
 end
