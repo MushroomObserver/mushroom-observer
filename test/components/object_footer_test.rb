@@ -143,7 +143,8 @@ class ObjectFooterTest < UnitTestCase
     assert_match(/Version.*2.*of.*3/, html)
     # Should show modified date and user link
     assert_includes(html, "2024-01-15")
-    assert_includes(html, "user_link")
+    # Should have a user link (verifies user_link was called)
+    assert_includes(html, "Mary")
   end
 
   def test_old_version_without_updated_at
@@ -356,5 +357,33 @@ class ObjectFooterTest < UnitTestCase
     assert_includes(html, "footer-view-stats")
     # Should work without explicitly passing versions
     assert_includes(html, "2024-01-15")
+  end
+
+  def test_created_by_has_correct_order
+    user = users(:rolf)
+    obj = TestObject.new(
+      created_at: Time.zone.parse("2024-01-15 10:00:00"),
+      user: user,
+      version: 1
+    )
+    version1 = TestVersion.new(user_id: user.id)
+    versions = [version1]
+
+    html = render_component(Components::ObjectFooter.new(
+                              user: user,
+                              obj: obj,
+                              versions: versions
+                            ))
+
+    # Verify that "Created:" appears before the username
+    # This is a regression test for the issue where user_link
+    # rendered before the translation string
+    created_index = html.index("Created")
+    user_index = html.index(user.login)
+
+    assert_not_nil(created_index, "Should contain 'Created'")
+    assert_not_nil(user_index, "Should contain username")
+    assert(created_index < user_index,
+           "Created should appear before username, but got:\n#{html}")
   end
 end
