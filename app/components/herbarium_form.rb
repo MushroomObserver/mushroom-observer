@@ -44,7 +44,7 @@ class Components::HerbariumForm < Components::ApplicationForm
   end
 
   def render_name_between
-    span(class: "help-note") { "(#{:required.t})" }
+    span(class: "help-note") { "(#{:required.l})" }
     render_personal_help if personal_herbarium?
   end
 
@@ -82,29 +82,18 @@ class Components::HerbariumForm < Components::ApplicationForm
     if @top_users.empty?
       :edit_herbarium_no_herbarium_records.l
     else
-      # rubocop:disable Rails/OutputSafety
-      AdminHelpContent.new(top_users: @top_users).call.html_safe
-      # rubocop:enable Rails/OutputSafety
+      capture { render_top_users_list }
     end
   end
 
-  # Small component to render admin help content as HTML string
-  class AdminHelpContent < Phlex::HTML
-    def initialize(top_users:)
-      super()
-      @top_users = top_users
-    end
-
-    def view_template
-      @top_users.each_with_index do |(name, login, count), index|
-        br if index.positive?
-        # Translation contains HTML entities, use raw to preserve them
-        # rubocop:disable Rails/OutputSafety
-        raw(:edit_herbarium_user_records.t(
-          name: "#{name} (#{login})", num: count
-        ).html_safe)
-        # rubocop:enable Rails/OutputSafety
-      end
+  def render_top_users_list
+    @top_users.each_with_index do |(name, login, count), index|
+      br if index.positive?
+      # rubocop:disable Rails/OutputSafety
+      raw(:edit_herbarium_user_records.t(
+        name: "#{name} (#{login})", num: count
+      ).html_safe)
+      # rubocop:enable Rails/OutputSafety
     end
   end
 
@@ -161,16 +150,9 @@ class Components::HerbariumForm < Components::ApplicationForm
   end
 
   def location_label
-    # rubocop:disable Rails/OutputSafety
-    LocationLabel.new.call.html_safe
-    # rubocop:enable Rails/OutputSafety
-  end
-
-  # Small component to render location label with CSS-toggled spans
-  class LocationLabel < Phlex::HTML
-    def view_template
+    capture do
       span(class: "unconstrained-label") { "#{:LOCATION.l}:" }
-      plain(" ")
+      whitespace
       span(class: "create-label") { "#{:form_observations_create_locality.l}:" }
     end
   end
@@ -187,23 +169,19 @@ class Components::HerbariumForm < Components::ApplicationForm
   end
 
   def render_contact_fields
-    text_field(:email, label: "#{:create_herbarium_email.l}:") do |f|
-      f.with_between { span(class: "help-note") { "(#{:optional.t})" } }
-    end
-
+    text_field(:email, label: "#{:create_herbarium_email.l}:",
+                       between: :optional)
     textarea_field(
       :mailing_address,
       label: "#{:create_herbarium_mailing_address.l}:",
-      rows: 5
-    ) do |f|
-      f.with_between { span(class: "help-note") { "(#{:optional.t})" } }
-    end
+      rows: 5,
+      between: :optional
+    )
   end
 
   def render_notes_field
-    textarea_field(:description, label: "#{:NOTES.l}:", rows: 10) do |f|
-      f.with_between { span(class: "help-note") { "(#{:optional.t})" } }
-    end
+    textarea_field(:description, label: "#{:NOTES.l}:", rows: 10,
+                                 between: :optional)
   end
 
   def submit_text

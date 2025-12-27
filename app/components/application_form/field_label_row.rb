@@ -13,7 +13,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def simple_label?
       has_label_end = respond_to?(:label_end_slot) && label_end_slot
-      !between_slot && !has_label_end && !wrapper_options[:help]
+      has_between = between_slot || wrapper_options[:between]
+      !has_between && !has_label_end && !wrapper_options[:help]
     end
 
     def render_label_flex_row(label_text, inline)
@@ -28,8 +29,24 @@ class Components::ApplicationForm < Superform::Rails::Form
       div do
         label(for: field.dom.id, class: "mr-3") { label_text }
         render_help_in_label_row
-        render(between_slot) if between_slot
+        render_between_content
       end
+    end
+
+    def render_between_content
+      render_between_option
+      render(between_slot) if between_slot
+    end
+
+    def render_between_option
+      between = wrapper_options[:between]
+      return unless between
+
+      span(class: "help-note") { between_text(between) }
+    end
+
+    def between_text(between)
+      [:optional, :required].include?(between) ? "(#{between.l})" : between
     end
 
     def render_label_end_slot
