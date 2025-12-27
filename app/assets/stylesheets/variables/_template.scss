@@ -97,7 +97,7 @@ $DANGER_COLOR:                      $danger_red;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_FG_COLOR:                     $DARK_COLOR;
+$BODY_TEXT_COLOR:                     $DARK_COLOR;
 $BODY_BG_COLOR:                     $LIGHT_COLOR;
 
 // --------------------------------------------------
@@ -105,24 +105,24 @@ $BODY_BG_COLOR:                     $LIGHT_COLOR;
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_FG_COLOR:                     $PRIMARY_COLOR;
+$LINK_TEXT_COLOR:                     $PRIMARY_COLOR;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_FG_COLOR:             $DARK_COLOR;
+$LINK_VISITED_TEXT_COLOR:             $DARK_COLOR;
 $LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_FG_COLOR:               $hover_primary;
+$LINK_HOVER_TEXT_COLOR:               $hover_primary;
 $LINK_HOVER_BG_COLOR:               transparent;
 
 // --------------------------------------------------
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   $DARK_COLOR;
+$BUTTON_TEXT_COLOR:                   $DARK_COLOR;
 $BUTTON_BG_COLOR:                   $LIGHT_COLOR;
 $BUTTON_BORDER_COLOR:               $SECONDARY_COLOR;
-$BUTTON_PRIMARY_FG_COLOR:           $LIGHT_COLOR;
+$BUTTON_PRIMARY_TEXT_COLOR:           $LIGHT_COLOR;
 $BUTTON_PRIMARY_BG_COLOR:           $PRIMARY_COLOR;
 $BUTTON_PRIMARY_BORDER_COLOR:       $hover_primary;
-$BUTTON_PRIMARY_HOVER_FG_COLOR:     $LIGHT_COLOR;
+$BUTTON_PRIMARY_HOVER_TEXT_COLOR:     $LIGHT_COLOR;
 $BUTTON_PRIMARY_HOVER_BG_COLOR:     $hover_primary;
 $BUTTON_PRIMARY_HOVER_BORDER_COLOR: $DARK_COLOR;
 $BUTTON_BORDER_WIDTH:               1px;
@@ -133,7 +133,7 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    $DARK_COLOR;
+$INPUT_TEXT_COLOR:                    $DARK_COLOR;
 $INPUT_BG_COLOR:                    $LIGHT_COLOR;
 $INPUT_BORDER_COLOR:                $SECONDARY_COLOR;
 $INPUT_BORDER_WIDTH:                1px;
@@ -146,16 +146,16 @@ $INPUT_BORDER_RADIUS:               5px;
 
 $INFO_BG_COLOR:                     rgba($INFO_COLOR, 20%);
 $INFO_BORDER_COLOR:                 $INFO_COLOR;
-$INFO_FG_COLOR:                     $BODY_FG_COLOR;
+$INFO_TEXT_COLOR:                     $BODY_TEXT_COLOR;
 $SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 20%);
 $SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
-$SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
+$SUCCESS_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 20%);
 $WARNING_BORDER_COLOR:              $WARNING_COLOR;
-$WARNING_FG_COLOR:                  $BODY_FG_COLOR;
+$WARNING_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 20%);
 $DANGER_BORDER_COLOR:               $DANGER_COLOR;
-$DANGER_FG_COLOR:                   $BODY_FG_COLOR;
+$DANGER_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 
 
 $BANNER_BORDER_WIDTH:               2px;
@@ -175,11 +175,11 @@ $LEFT_BAR_BORDER_WIDTH:             1px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            5px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
-$LEFT_BAR_HEADER_FG_COLOR:          $DARK_COLOR;
+$LEFT_BAR_HEADER_TEXT_COLOR:          $DARK_COLOR;
 $LEFT_BAR_HEADER_BG_COLOR:          $SECONDARY_COLOR;
-$LEFT_BAR_FG_COLOR:                 $PRIMARY_COLOR;
+$LEFT_BAR_TEXT_COLOR:                 $PRIMARY_COLOR;
 $LEFT_BAR_BG_COLOR:                 $LIGHT_COLOR;
-$LEFT_BAR_HOVER_FG_COLOR:           $hover_primary;
+$LEFT_BAR_HOVER_TEXT_COLOR:           $hover_primary;
 $LEFT_BAR_HOVER_BG_COLOR:           $light_secondary;
 
 // --------------------------------------------------
@@ -190,11 +190,11 @@ $TOP_BAR_BORDER_COLOR:              transparent;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
-$TOP_BAR_FG_COLOR:                  $DARK_COLOR;
+$TOP_BAR_TEXT_COLOR:                  $DARK_COLOR;
 $TOP_BAR_BG_COLOR:                  $LIGHT_COLOR;
-$TOP_BAR_LINK_FG_COLOR:             $PRIMARY_COLOR;
+$TOP_BAR_LINK_TEXT_COLOR:             $PRIMARY_COLOR;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_FG_COLOR:       $hover_primary;
+$TOP_BAR_LINK_HOVER_TEXT_COLOR:       $hover_primary;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
@@ -202,9 +202,9 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 // --------------------------------------------------
 
 $LIST_BORDER_COLOR:                 transparent;
-$LIST_HEADER_FG_COLOR:              $DARK_COLOR;
+$LIST_HEADER_TEXT_COLOR:              $DARK_COLOR;
 $LIST_HEADER_BG_COLOR:              $SECONDARY_COLOR;
-$LIST_FG_COLOR:                     $DARK_COLOR;
+$LIST_TEXT_COLOR:                     $DARK_COLOR;
 $LIST_BG_COLOR:                     $LIGHT_COLOR;
 $LIST_EVEN_BG_COLOR:                $LIGHT_COLOR;
 $LIST_ODD_BG_COLOR:                 $LIST_BG_COLOR;
@@ -215,24 +215,24 @@ $LIST_HOVER_BG_COLOR:               $light_secondary;
 // --------------------------------------------------
 
 $MENU_BORDER_COLOR:                 $SECONDARY_COLOR;
-$MENU_FG_COLOR:                     $DARK_COLOR;
+$MENU_TEXT_COLOR:                     $DARK_COLOR;
 $MENU_BG_COLOR:                     $LIGHT_COLOR;
-$MENU_HOT_FG_COLOR:                 $DARK_COLOR;
+$MENU_HOT_TEXT_COLOR:                 $DARK_COLOR;
 $MENU_HOT_BG_COLOR:                 $WARNING_COLOR;
-$MENU_WARM_FG_COLOR:                $LIGHT_COLOR;
+$MENU_WARM_TEXT_COLOR:                $LIGHT_COLOR;
 $MENU_WARM_BG_COLOR:                $DANGER_COLOR;
 
 // --------------------------------------------------
 // Pagination
 // --------------------------------------------------
 
-$PAGER_FG_COLOR:                    $PRIMARY_COLOR;
+$PAGER_TEXT_COLOR:                    $PRIMARY_COLOR;
 $PAGER_BG_COLOR:                    transparent;
 $PAGER_BORDER_COLOR:                none;
-$PAGER_HOVER_FG_COLOR:              $hover_primary;
+$PAGER_HOVER_TEXT_COLOR:              $hover_primary;
 $PAGER_HOVER_BG_COLOR:              $LIGHT_COLOR;
 $PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_FG_COLOR:             $LIGHT_COLOR;
+$PAGER_ACTIVE_TEXT_COLOR:             $LIGHT_COLOR;
 $PAGER_ACTIVE_BG_COLOR:             $PRIMARY_COLOR;
 $PAGER_ACTIVE_BORDER_COLOR:         none;
 
@@ -240,7 +240,7 @@ $PAGER_ACTIVE_BORDER_COLOR:         none;
 // Tooltips
 // --------------------------------------------------
 
-$TOOLTIP_FG_COLOR:                  $LIGHT_COLOR;
+$TOOLTIP_TEXT_COLOR:                  $LIGHT_COLOR;
 $TOOLTIP_BG_COLOR:                  $DARK_COLOR;
 
 // --------------------------------------------------
@@ -248,7 +248,7 @@ $TOOLTIP_BG_COLOR:                  $DARK_COLOR;
 // --------------------------------------------------
 
 $VOTE_METER_BORDER_COLOR:           none;
-$VOTE_METER_FG_COLOR:               $PRIMARY_COLOR;
+$VOTE_METER_TEXT_COLOR:               $PRIMARY_COLOR;
 $VOTE_METER_BG_COLOR:               $LIGHT_COLOR;
 
 // --------------------------------------------------
@@ -256,17 +256,17 @@ $VOTE_METER_BG_COLOR:               $LIGHT_COLOR;
 // --------------------------------------------------
 
 $PROGRESS_BG_COLOR:                 $LIGHT_COLOR;
-$PROGRESS_FG_COLOR:                 $DARK_COLOR;
+$PROGRESS_TEXT_COLOR:                 $DARK_COLOR;
 $PROGRESS_BAR_COLOR:                $PRIMARY_COLOR;
 
 // --------------------------------------------------
 // Panels
 // --------------------------------------------------
 
-$PANEL_FG_COLOR:                    $BODY_FG_COLOR;
+$PANEL_TEXT_COLOR:                    $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $LIGHT_COLOR;
 $PANEL_BORDER_COLOR:                $muted_border;
-$PANEL_FOOTER_FG_COLOR:             $BODY_FG_COLOR;
+$PANEL_FOOTER_TEXT_COLOR:             $BODY_TEXT_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $PANEL_BG_COLOR;
 
 // ==================================================
