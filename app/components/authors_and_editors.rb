@@ -35,11 +35,7 @@ module Components
                            non_description_authors_and_editors
                          end
 
-      p do
-        trusted_html(authors)
-        br
-        trusted_html(editors)
-      end
+      p { trusted_html((authors || view_context.safe_empty) + view_context.safe_br + (editors || view_context.safe_empty)) }
     end
 
     private
@@ -55,8 +51,8 @@ module Components
       is_admin = @user && @obj.is_admin?(@user)
       is_author = @user && authors_list.include?(@user)
 
-      authors = user_list(:show_name_description_author, authors_list)
-      editors = user_list(:show_name_description_editor, editors_list)
+      authors = view_context.user_list(:show_name_description_author, authors_list)
+      editors = view_context.user_list(:show_name_description_editor, editors_list)
 
       if is_admin
         authors = authors_with_review_link(authors)
@@ -70,7 +66,7 @@ module Components
     def authors_with_review_link(authors)
       return authors if authors.nil? || authors.to_s.empty?
 
-      authors + safe_nbsp + link_to(
+      authors + view_context.safe_nbsp + link_to(
         "(#{:review_authors_review_authors.t})",
         description_authors_path(id: @obj.id, type: @obj.type_tag)
       )
@@ -79,7 +75,7 @@ module Components
     def authors_with_request_link(authors)
       return authors if authors.nil? || authors.to_s.empty?
 
-      authors + safe_nbsp + link_to(
+      authors + view_context.safe_nbsp + link_to(
         "(#{:review_authors_review_authors.t})",
         description_authors_path(id: @obj.id, type: @obj.type_tag)
       )
@@ -93,8 +89,8 @@ module Components
       editor_ids = versions.map(&:user_id).uniq - [@obj.user_id]
       editors_list = User.where(id: editor_ids).to_a
 
-      authors = user_list(:"show_#{type}_creator", [@obj.user])
-      editors = user_list(:"show_#{type}_editor", editors_list)
+      authors = view_context.user_list(:"show_#{type}_creator", [@obj.user])
+      editors = view_context.user_list(:"show_#{type}_editor", editors_list)
 
       [authors, editors]
     end
