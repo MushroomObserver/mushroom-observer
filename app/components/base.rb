@@ -53,7 +53,9 @@ class Components::Base < Phlex::HTML
   # @param content [ActiveSupport::SafeBuffer, String] HTML content
   # @return [void]
   def trusted_html(content)
-    return raw(content) if content.is_a?(ActiveSupport::SafeBuffer) # rubocop:disable Rails/OutputSafety
+    # rubocop:disable Rails/OutputSafety
+    return raw(content) if content.is_a?(ActiveSupport::SafeBuffer)
+    # rubocop:enable Rails/OutputSafety
 
     content
   end
