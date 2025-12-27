@@ -68,7 +68,7 @@ module Components
     end
 
     def authors_with_review_link(authors)
-      return authors unless authors
+      return authors if authors.nil? || authors.to_s.empty?
 
       authors + safe_nbsp + link_to(
         "(#{:review_authors_review_authors.t})",
@@ -77,7 +77,7 @@ module Components
     end
 
     def authors_with_request_link(authors)
-      return authors unless authors
+      return authors if authors.nil? || authors.to_s.empty?
 
       authors + safe_nbsp + link_to(
         "(#{:review_authors_review_authors.t})",
