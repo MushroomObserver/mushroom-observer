@@ -1,14 +1,39 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "ostruct"
 
-# rubocop:disable Style/OpenStructUse
 class ObjectFooterTest < UnitTestCase
   include ComponentTestHelper
 
+  # Test double for objects with footer metadata
+  class TestObject
+    attr_reader :created_at, :updated_at, :user, :user_id, :version,
+                :old_num_views, :old_last_view, :last_view, :rss_log_id
+
+    def initialize(**attrs)
+      attrs.each { |key, value| instance_variable_set("@#{key}", value) }
+    end
+
+    def respond_to?(method, *)
+      instance_variable_defined?("@#{method}") || super
+    end
+
+    def old_last_viewed_by(_user)
+      @last_viewed_by_time
+    end
+  end
+
+  # Test double for version objects
+  class TestVersion
+    attr_reader :user_id
+
+    def initialize(user_id:)
+      @user_id = user_id
+    end
+  end
+
   def test_non_versioned_object_with_created_and_updated
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00"),
       updated_at: Time.zone.parse("2024-01-20 15:30:00")
     )
@@ -24,7 +49,7 @@ class ObjectFooterTest < UnitTestCase
   end
 
   def test_non_versioned_object_without_timestamps
-    obj = OpenStruct.new(created_at: nil, updated_at: nil)
+    obj = TestObject.new(created_at: nil, updated_at: nil)
 
     html = render_component(Components::ObjectFooter.new(
                               user: nil,
@@ -39,15 +64,15 @@ class ObjectFooterTest < UnitTestCase
 
   def test_latest_version_with_user_and_versions
     user = users(:rolf)
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00"),
       updated_at: Time.zone.parse("2024-01-20 15:30:00"),
       user: user,
       version: 3
     )
-    version1 = OpenStruct.new(user_id: users(:mary).id)
-    version2 = OpenStruct.new(user_id: users(:dick).id)
-    version3 = OpenStruct.new(user_id: users(:katrina).id)
+    version1 = TestVersion.new(user_id: users(:mary).id)
+    version2 = TestVersion.new(user_id: users(:dick).id)
+    version3 = TestVersion.new(user_id: users(:katrina).id)
     versions = [version1, version2, version3]
 
     html = render_component(Components::ObjectFooter.new(
@@ -67,14 +92,14 @@ class ObjectFooterTest < UnitTestCase
 
   def test_latest_version_without_last_user_id
     user = users(:rolf)
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00"),
       updated_at: Time.zone.parse("2024-01-20 15:30:00"),
       user: user,
       version: 2
     )
-    version1 = OpenStruct.new(user_id: users(:mary).id)
-    version2 = OpenStruct.new(user_id: nil) # No user_id
+    version1 = TestVersion.new(user_id: users(:mary).id)
+    version2 = TestVersion.new(user_id: nil) # No user_id
     versions = [version1, version2]
 
     html = render_component(Components::ObjectFooter.new(
@@ -97,14 +122,14 @@ class ObjectFooterTest < UnitTestCase
     dick = users(:dick)
     katrina = users(:katrina)
 
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       version: 2,
       updated_at: Time.zone.parse("2024-01-15 10:00:00"),
       user_id: mary.id
     )
-    version1 = OpenStruct.new(user_id: mary.id)
-    version2 = OpenStruct.new(user_id: dick.id)
-    version3 = OpenStruct.new(user_id: katrina.id)
+    version1 = TestVersion.new(user_id: mary.id)
+    version2 = TestVersion.new(user_id: dick.id)
+    version3 = TestVersion.new(user_id: katrina.id)
     versions = [version1, version2, version3]
 
     html = render_component(Components::ObjectFooter.new(
@@ -123,14 +148,14 @@ class ObjectFooterTest < UnitTestCase
 
   def test_old_version_without_updated_at
     user = users(:rolf)
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       version: 1,
       updated_at: nil,
       user_id: users(:mary).id
     )
     versions = [
-      OpenStruct.new(user_id: users(:mary).id),
-      OpenStruct.new(user_id: users(:dick).id)
+      TestVersion.new(user_id: users(:mary).id),
+      TestVersion.new(user_id: users(:dick).id)
     ]
 
     html = render_component(Components::ObjectFooter.new(
@@ -148,17 +173,13 @@ class ObjectFooterTest < UnitTestCase
 
   def test_with_view_counts_single_view
     user = users(:rolf)
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00"),
       old_num_views: 1,
       old_last_view: Time.zone.parse("2024-01-20 10:00:00"),
-      last_view: Time.zone.parse("2024-01-20 10:00:00")
+      last_view: Time.zone.parse("2024-01-20 10:00:00"),
+      num_views: 1
     )
-
-    # Mock the respond_to? method
-    def obj.respond_to?(method)
-      [:num_views, :old_num_views, :old_last_view].include?(method) || super
-    end
 
     html = render_component(Components::ObjectFooter.new(
                               user: user,
@@ -173,16 +194,13 @@ class ObjectFooterTest < UnitTestCase
 
   def test_with_view_counts_multiple_views
     user = users(:rolf)
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00"),
       old_num_views: 42,
       old_last_view: Time.zone.parse("2024-01-20 10:00:00"),
-      last_view: Time.zone.parse("2024-01-20 10:00:00")
+      last_view: Time.zone.parse("2024-01-20 10:00:00"),
+      num_views: 42
     )
-
-    def obj.respond_to?(method)
-      [:num_views, :old_num_views, :old_last_view].include?(method) || super
-    end
 
     html = render_component(Components::ObjectFooter.new(
                               user: user,
@@ -196,18 +214,11 @@ class ObjectFooterTest < UnitTestCase
 
   def test_with_last_viewed_by_user
     user = users(:rolf)
-    Time.zone.parse("2024-01-18 12:00:00")
-    obj = OpenStruct.new(
-      created_at: Time.zone.parse("2024-01-15 10:00:00")
+    obj = TestObject.new(
+      created_at: Time.zone.parse("2024-01-15 10:00:00"),
+      last_viewed_by: true,
+      last_viewed_by_time: Time.zone.parse("2024-01-18 12:00:00")
     )
-
-    def obj.respond_to?(method)
-      method == :last_viewed_by || super
-    end
-
-    def obj.old_last_viewed_by(_user)
-      Time.zone.parse("2024-01-18 12:00:00")
-    end
 
     html = render_component(Components::ObjectFooter.new(
                               user: user,
@@ -221,17 +232,11 @@ class ObjectFooterTest < UnitTestCase
 
   def test_with_last_viewed_by_user_never_viewed
     user = users(:rolf)
-    obj = OpenStruct.new(
-      created_at: Time.zone.parse("2024-01-15 10:00:00")
+    obj = TestObject.new(
+      created_at: Time.zone.parse("2024-01-15 10:00:00"),
+      last_viewed_by: true,
+      last_viewed_by_time: nil
     )
-
-    def obj.respond_to?(method)
-      method == :last_viewed_by || super
-    end
-
-    def obj.old_last_viewed_by(_user)
-      nil
-    end
 
     html = render_component(Components::ObjectFooter.new(
                               user: user,
@@ -244,14 +249,10 @@ class ObjectFooterTest < UnitTestCase
   end
 
   def test_with_rss_log_link
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00"),
       rss_log_id: 123
     )
-
-    def obj.respond_to?(method)
-      method == :rss_log_id || super
-    end
 
     html = render_component(Components::ObjectFooter.new(
                               user: nil,
@@ -265,14 +266,10 @@ class ObjectFooterTest < UnitTestCase
   end
 
   def test_without_rss_log_link
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00"),
       rss_log_id: nil
     )
-
-    def obj.respond_to?(method)
-      method == :rss_log_id || super
-    end
 
     html = render_component(Components::ObjectFooter.new(
                               user: nil,
@@ -330,7 +327,7 @@ class ObjectFooterTest < UnitTestCase
   end
 
   def test_with_empty_versions_array
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00"),
       user: users(:rolf)
     )
@@ -347,7 +344,7 @@ class ObjectFooterTest < UnitTestCase
   end
 
   def test_default_versions_parameter
-    obj = OpenStruct.new(
+    obj = TestObject.new(
       created_at: Time.zone.parse("2024-01-15 10:00:00")
     )
 
@@ -361,4 +358,3 @@ class ObjectFooterTest < UnitTestCase
     assert_includes(html, "2024-01-15")
   end
 end
-# rubocop:enable Style/OpenStructUse
