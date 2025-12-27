@@ -83,23 +83,6 @@ $INPUT_BG_COLOR:                    $white;
 $INPUT_BORDER_COLOR:                $black;
 
 // --------------------------------------------------
-// Alert States (Info, Success, Warning, Danger)
-// --------------------------------------------------
-
-$INFO_BG_COLOR:                     rgba($INFO_COLOR, 20%);
-$INFO_BORDER_COLOR:                 $INFO_COLOR;
-$INFO_TEXT_COLOR:                   $BODY_TEXT_COLOR;
-$SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 20%);
-$SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
-$SUCCESS_TEXT_COLOR:                $BODY_TEXT_COLOR;
-$WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 20%);
-$WARNING_BORDER_COLOR:              $WARNING_COLOR;
-$WARNING_TEXT_COLOR:                $BODY_TEXT_COLOR;
-$DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 20%);
-$DANGER_BORDER_COLOR:               $DANGER_COLOR;
-$DANGER_TEXT_COLOR:                 $BODY_TEXT_COLOR;
-
-// --------------------------------------------------
 // Left Navigation Bar
 // --------------------------------------------------
 

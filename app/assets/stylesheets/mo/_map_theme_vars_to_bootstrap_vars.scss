@@ -153,18 +153,18 @@ $modal-content-border-color:                   $MENU_BORDER_COLOR;
 //** Modal content border color **for IE8**
 $modal-content-fallback-border-color:          $MENU_BORDER_COLOR;
 
-$alert-success-bg: $SUCCESS_BG_COLOR;
-$alert-success-text: $SUCCESS_TEXT_COLOR;
-$alert-success-border: $SUCCESS_BORDER_COLOR;
-$alert-info-bg: $INFO_BG_COLOR;
-$alert-info-text: $INFO_TEXT_COLOR;
-$alert-info-border: $INFO_BORDER_COLOR;
-$alert-warning-bg: $WARNING_BG_COLOR;
-$alert-warning-text: $WARNING_TEXT_COLOR;
-$alert-warning-border: $WARNING_BORDER_COLOR;
-$alert-danger-bg: $DANGER_BG_COLOR;
-$alert-danger-text: $DANGER_TEXT_COLOR;
-$alert-danger-border: $DANGER_BORDER_COLOR;
+$alert-info-bg: rgba($INFO_COLOR, 20%);
+$alert-info-text: $BODY_TEXT_COLOR;
+$alert-info-border: $INFO_COLOR;
+$alert-success-bg: rgba($SUCCESS_COLOR, 20%);
+$alert-success-text: $BODY_TEXT_COLOR;
+$alert-success-border: $SUCCESS_COLOR;
+$alert-warning-bg: rgba($WARNING_COLOR, 20%);
+$alert-warning-text: $BODY_TEXT_COLOR;
+$alert-warning-border: $WARNING_COLOR;
+$alert-danger-bg: rgba($DANGER_COLOR, 20%);
+$alert-danger-text: $BODY_TEXT_COLOR;
+$alert-danger-border: $DANGER_COLOR;
 
 $progress-bg: $PROGRESS_BG_COLOR;
 $progress-bar-bg: $PROGRESS_BAR_COLOR;
