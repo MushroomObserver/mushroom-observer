@@ -109,9 +109,9 @@ $LEFT_BAR_HOVER_BG_COLOR:           $cream;
 // --------------------------------------------------
 
 $TOP_BAR_BORDER_COLOR:              $gray_border;
-$TOP_BAR_TEXT_COLOR:                $black;
+$TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $TOP_BAR_BG_COLOR:                  $cream;
-$TOP_BAR_LINK_TEXT_COLOR:           $bright_orange;
+$TOP_BAR_LINK_TEXT_COLOR:           $TOP_BAR_TEXT_COLOR;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
 $TOP_BAR_LINK_HOVER_TEXT_COLOR:     $TOP_BAR_TEXT_COLOR;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       $light_cream;
@@ -123,7 +123,7 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       $light_cream;
 $LIST_BORDER_COLOR:                 $gray_border;
 $LIST_HEADER_TEXT_COLOR:            $dark_gray;
 $LIST_HEADER_BG_COLOR:              $light_gray;
-$LIST_TEXT_COLOR:                   $black;
+$LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $LIST_BG_COLOR:                     mix($cream, white, 50%);
 $LIST_ODD_BG_COLOR:                 $cream;
 $LIST_HOVER_BG_COLOR:               $orange;
@@ -133,11 +133,11 @@ $LIST_HOVER_BG_COLOR:               $orange;
 // --------------------------------------------------
 
 $MENU_BORDER_COLOR:                 $black;
-$MENU_TEXT_COLOR:                   $black;
+$MENU_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $MENU_BG_COLOR:                     $light_cream;
-$MENU_HOVER_TEXT_COLOR:             $black;
+$MENU_HOVER_TEXT_COLOR:             $MENU_TEXT_COLOR;
 $MENU_HOVER_BG_COLOR:               $bright_orange;
-$MENU_ACTIVE_TEXT_COLOR:            $black;
+$MENU_ACTIVE_TEXT_COLOR:            $MENU_TEXT_COLOR;
 $MENU_ACTIVE_BG_COLOR:              $orange;
 
 // --------------------------------------------------

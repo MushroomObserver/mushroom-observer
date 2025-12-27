@@ -124,11 +124,11 @@ $LEFT_BAR_HOVER_BG_COLOR:           $red;
 // --------------------------------------------------
 
 $TOP_BAR_BORDER_COLOR:              $muted_silver;
-$TOP_BAR_TEXT_COLOR:                $silver;
+$TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $TOP_BAR_BG_COLOR:                  $panel_overlay;
-$TOP_BAR_LINK_TEXT_COLOR:           $tan;
+$TOP_BAR_LINK_TEXT_COLOR:           $TOP_BAR_TEXT_COLOR;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $tan;
+$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $TOP_BAR_TEXT_COLOR;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
@@ -138,7 +138,7 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 $LIST_BORDER_COLOR:                 $muted_silver;
 $LIST_HEADER_TEXT_COLOR:            $dark_silver;
 $LIST_HEADER_BG_COLOR:              $light_silver;
-$LIST_TEXT_COLOR:                   $silver;
+$LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $LIST_BG_COLOR:                     $deep_dark_brown;
 $LIST_ODD_BG_COLOR:                 $deepest_dark_brown;
 $LIST_HOVER_BG_COLOR:               $chocolate;
@@ -148,7 +148,7 @@ $LIST_HOVER_BG_COLOR:               $chocolate;
 // --------------------------------------------------
 
 $MENU_BORDER_COLOR:                 $deepest_dark_brown;
-$MENU_TEXT_COLOR:                   $silver;
+$MENU_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $MENU_BG_COLOR:                     $deep_dark_brown;
 $MENU_HOVER_TEXT_COLOR:             $red;
 $MENU_HOVER_BG_COLOR:               $deep_dark_brown;

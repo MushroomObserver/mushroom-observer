@@ -105,11 +105,11 @@ $LEFT_BAR_HOVER_BG_COLOR:           $light_gray;
 // --------------------------------------------------
 
 $TOP_BAR_BORDER_COLOR:              $border_gray;
-$TOP_BAR_TEXT_COLOR:                $black;
+$TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $TOP_BAR_BG_COLOR:                  $off_white;
-$TOP_BAR_LINK_TEXT_COLOR:           $blue;
+$TOP_BAR_LINK_TEXT_COLOR:           $BODY_TEXT_COLOR;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $darker_blue;
+$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $BODY_TEXT_COLOR;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
@@ -119,7 +119,7 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 $LIST_BORDER_COLOR:                 $medium_gray;
 $LIST_HEADER_TEXT_COLOR:            $black;
 $LIST_HEADER_BG_COLOR:              $light_gray;
-$LIST_TEXT_COLOR:                   $black;
+$LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $LIST_BG_COLOR:                     $white;
 $LIST_ODD_BG_COLOR:                 $white;
 $LIST_HOVER_BG_COLOR:               $medium_gray;
@@ -129,7 +129,7 @@ $LIST_HOVER_BG_COLOR:               $medium_gray;
 // --------------------------------------------------
 
 $MENU_BORDER_COLOR:                 $dark_gray;
-$MENU_TEXT_COLOR:                   $black;
+$MENU_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $MENU_BG_COLOR:                     $white;
 $MENU_HOVER_TEXT_COLOR:             $black;
 $MENU_HOVER_BG_COLOR:               $hot_yellow;

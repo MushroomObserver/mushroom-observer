@@ -2,13 +2,13 @@
 // set bootstrap parameters first
 // --------------------------------------------------
 
-$brand-primary:                             #337AB7;
-$brand-success:                             #70C070;
-$brand-info:                                $INFO_BORDER_COLOR;
-$brand-warning:                             #F8CC70;
-$brand-danger:                              #f07070;
-$black:                  #000;
-$white:                  #fff;
+$brand-primary:                             $PRIMARY_COLOR;
+$brand-success:                             $SUCCESS_COLOR;
+$brand-info:                                $INFO_COLOR;
+$brand-warning:                             $WARNING_COLOR;
+$brand-danger:                              $DANGER_COLOR;
+$black:                                     black;
+$white:                                     white;
 
 $text-color:                                $BODY_TEXT_COLOR;
 $body-bg:                                   $BODY_BG_COLOR;
@@ -128,18 +128,18 @@ $navbar-inverse-toggle-hover-bg:            $LEFT_BAR_BG_COLOR;
 $navbar-inverse-toggle-icon-bar-bg:         $LEFT_BAR_TEXT_COLOR;
 $navbar-inverse-toggle-border-color:        $LEFT_BAR_BORDER_COLOR;
 
-$state-success-text: $SUCCESS_BORDER_COLOR;
-$state-success-bg: $SUCCESS_BG_COLOR;
-$state-success-border: mix($SUCCESS_BORDER_COLOR, $SUCCESS_BG_COLOR);
-$state-info-text: $INFO_BORDER_COLOR;
-$state-info-bg: $INFO_BG_COLOR;
-$state-info-border: mix($INFO_BORDER_COLOR, $INFO_BG_COLOR);
-$state-warning-text: $WARNING_BORDER_COLOR;
-$state-warning-bg: $WARNING_BG_COLOR;
-$state-warning-border: mix($WARNING_BORDER_COLOR, $WARNING_BG_COLOR);
-$state-danger-text: $DANGER_BORDER_COLOR;
-$state-danger-bg: $DANGER_BG_COLOR;
-$state-danger-border: mix($DANGER_BORDER_COLOR, $DANGER_BG_COLOR);
+$state-success-text: $SUCCESS_COLOR;
+$state-success-bg: rgba($SUCCESS_COLOR, 20%);
+$state-success-border: $SUCCESS_COLOR;
+$state-info-text: $INFO_COLOR;
+$state-info-bg: rgba($INFO_COLOR, 20%);
+$state-info-border: $INFO_COLOR;
+$state-warning-text: $WARNING_COLOR;
+$state-warning-bg: rgba($WARNING_COLOR, 20%);
+$state-warning-border: $WARNING_COLOR;
+$state-danger-text: $DANGER_COLOR;
+$state-danger-bg: rgba($DANGER_COLOR, 20%);
+$state-danger-border: $DANGER_COLOR;
 
 $tooltip-opacity: 1;
 $tooltip-max-width: 400px;
