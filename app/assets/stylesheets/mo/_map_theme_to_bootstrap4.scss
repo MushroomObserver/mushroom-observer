@@ -320,10 +320,7 @@ $close-color: $BODY_TEXT_COLOR !default;
 //
 // The following MO theme variables don't have direct Bootstrap 4 equivalents:
 //
-// - $LINK_WEIGHT               (use custom CSS)
 // - $LINK_BG_COLOR             (Bootstrap links are always transparent)
-// - $LINK_VISITED_TEXT_COLOR     (use :visited pseudo-class in custom CSS)
-// - $LINK_VISITED_BG_COLOR     (use :visited pseudo-class in custom CSS)
 // - $LINK_HOVER_BG_COLOR       (Bootstrap links don't typically have bg)
 // - $BUTTON_ACTIVE_TEXT_COLOR    (use :active pseudo-class)
 // - $BUTTON_ACTIVE_BG_COLOR    (use :active pseudo-class)
