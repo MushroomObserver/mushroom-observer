@@ -17,7 +17,7 @@ obs = @sequence.observation
       <%= user_link(@sequence.user) %>
     </div>
 
-    <%= show_object_footer(@user, @sequence) %>
+    <%= render Components::ObjectFooter.new(user: @user, obj: @sequence) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">
