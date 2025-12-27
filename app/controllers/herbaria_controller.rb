@@ -154,7 +154,13 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
         identifier: modal_identifier,
         user: @user,
         form: "herbaria/form",
-        form_locals: { local: false, action: modal_form_action }
+        form_locals: {
+          model: @herbarium,
+          user: @user,
+          local: false,
+          location: @herbarium.location,
+          top_users: @top_users
+        }
       }
     ) and return
   end

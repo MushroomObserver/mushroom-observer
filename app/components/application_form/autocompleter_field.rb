@@ -148,10 +148,22 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Renders all label_after elements (goes in between slot after label)
     def render_label_after
+      render_user_between_content
       render_has_id_indicator
       render_find_button if find_text
       render_keep_box_button if keep_text
       render_edit_box_button if keep_text
+    end
+
+    def render_user_between_content
+      between = wrapper_options[:between]
+      return unless between
+
+      if [:optional, :required].include?(between)
+        span(class: "help-note") { "(#{between.t})" }
+      else
+        between
+      end
     end
 
     # Renders all label_end elements (goes in label_end slot)

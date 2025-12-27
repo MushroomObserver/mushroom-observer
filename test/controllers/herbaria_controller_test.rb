@@ -345,6 +345,16 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
+  def test_new_turbo
+    login("rolf")
+    get(:new, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    # Verify HerbariumForm component rendered
+    assert_select("form#herbarium_form")
+    assert_select("input#herbarium_name")
+    assert_select("input#herbarium_place_name")
+  end
+
   def test_new_no_login
     get(:new)
     assert_redirected_to(new_account_login_path)
@@ -379,6 +389,17 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
     assert_page_title(:EDIT.l)
+  end
+
+  def test_edit_turbo
+    assert(nybg.curator?(rolf))
+    login("rolf")
+    get(:edit, params: { id: nybg.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    # Verify HerbariumForm component rendered
+    assert_select("form#herbarium_form")
+    assert_select("input#herbarium_name[value='#{nybg.name}']")
+    assert_select("input#herbarium_place_name")
   end
 
   def test_edit_with_curators_by_admin

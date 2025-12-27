@@ -116,7 +116,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
   # Wrapper option keys that should not be passed to the field itself
   WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
-                     :button, :button_data, :monospace].freeze
+                     :button, :button_data, :monospace, :between].freeze
 
   # Override the Field class to use our custom components
   class Field < Superform::Rails::Form::Field
