@@ -80,7 +80,7 @@ $DANGER_COLOR:    $red;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_TEXT_COLOR:                     $silver;
+$BODY_TEXT_COLOR:                   $silver;
 $BODY_BG_COLOR:                     $dark_brown;
 
 // --------------------------------------------------
@@ -88,24 +88,24 @@ $BODY_BG_COLOR:                     $dark_brown;
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_TEXT_COLOR:                     $light_tan;
+$LINK_TEXT_COLOR:                   $light_tan;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_TEXT_COLOR:             $pale_yellow;
+$LINK_VISITED_TEXT_COLOR:           $pale_yellow;
 $LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_TEXT_COLOR:               $beige;
+$LINK_HOVER_TEXT_COLOR:             $beige;
 $LINK_HOVER_BG_COLOR:               $red;
 
 // --------------------------------------------------
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_TEXT_COLOR:                   $deepest_dark_brown;
+$BUTTON_TEXT_COLOR:                 $deepest_dark_brown;
 $BUTTON_BG_COLOR:                   $amber;
 $BUTTON_BORDER_COLOR:               transparent;
-$BUTTON_PRIMARY_TEXT_COLOR:           $dark_brown;
+$BUTTON_PRIMARY_TEXT_COLOR:         $dark_brown;
 $BUTTON_PRIMARY_BG_COLOR:           $orange;
 $BUTTON_PRIMARY_BORDER_COLOR:       $apricot;
-$BUTTON_PRIMARY_HOVER_TEXT_COLOR:     $dark_brown;
+$BUTTON_PRIMARY_HOVER_TEXT_COLOR:   $dark_brown;
 $BUTTON_PRIMARY_HOVER_BG_COLOR:     $apricot;
 $BUTTON_PRIMARY_HOVER_BORDER_COLOR: $chocolate;
 $BUTTON_BORDER_WIDTH:               1px;
@@ -116,7 +116,7 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_TEXT_COLOR:                    $light_silver;
+$INPUT_TEXT_COLOR:                  $light_silver;
 $INPUT_BG_COLOR:                    $deep_dark_brown;
 $INPUT_BORDER_COLOR:                $medium_silver;
 $INPUT_BORDER_WIDTH:                1px;
@@ -129,16 +129,16 @@ $INPUT_BORDER_RADIUS:               5px;
 
 $INFO_BG_COLOR:                     rgba($INFO_COLOR, 20%);
 $INFO_BORDER_COLOR:                 $INFO_COLOR;
-$INFO_TEXT_COLOR:                     $BODY_TEXT_COLOR;
+$INFO_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 20%);
 $SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
-$SUCCESS_TEXT_COLOR:                  $BODY_TEXT_COLOR;
+$SUCCESS_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 20%);
 $WARNING_BORDER_COLOR:              $WARNING_COLOR;
-$WARNING_TEXT_COLOR:                  $BODY_TEXT_COLOR;
+$WARNING_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 20%);
 $DANGER_BORDER_COLOR:               $DANGER_COLOR;
-$DANGER_TEXT_COLOR:                   $BODY_TEXT_COLOR;
+$DANGER_TEXT_COLOR:                 $BODY_TEXT_COLOR;
 
 
 $BANNER_BORDER_WIDTH:               2px;
@@ -158,11 +158,11 @@ $LEFT_BAR_BORDER_WIDTH:             1px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            5px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
-$LEFT_BAR_HEADER_TEXT_COLOR:          $red;
+$LEFT_BAR_HEADER_TEXT_COLOR:        $red;
 $LEFT_BAR_HEADER_BG_COLOR:          $deep_dark_brown;
-$LEFT_BAR_TEXT_COLOR:                 $silver;
+$LEFT_BAR_TEXT_COLOR:               $silver;
 $LEFT_BAR_BG_COLOR:                 $deep_dark_brown;
-$LEFT_BAR_HOVER_TEXT_COLOR:           $peach;
+$LEFT_BAR_HOVER_TEXT_COLOR:         $peach;
 $LEFT_BAR_HOVER_BG_COLOR:           $red;
 
 // --------------------------------------------------
@@ -173,11 +173,11 @@ $TOP_BAR_BORDER_COLOR:              $muted_silver;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
-$TOP_BAR_TEXT_COLOR:                  $silver;
+$TOP_BAR_TEXT_COLOR:                $silver;
 $TOP_BAR_BG_COLOR:                  $panel_overlay;
-$TOP_BAR_LINK_TEXT_COLOR:             $tan;
+$TOP_BAR_LINK_TEXT_COLOR:           $tan;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_TEXT_COLOR:       $tan;
+$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $tan;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
@@ -185,9 +185,9 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 // --------------------------------------------------
 
 $LIST_BORDER_COLOR:                 $muted_silver;
-$LIST_HEADER_TEXT_COLOR:              $dark_silver;
+$LIST_HEADER_TEXT_COLOR:            $dark_silver;
 $LIST_HEADER_BG_COLOR:              $light_silver;
-$LIST_TEXT_COLOR:                     $silver;
+$LIST_TEXT_COLOR:                   $silver;
 $LIST_BG_COLOR:                     $deep_dark_brown;
 $LIST_EVEN_BG_COLOR:                $deep_dark_brown;
 $LIST_ODD_BG_COLOR:                 $deepest_dark_brown;
@@ -198,32 +198,18 @@ $LIST_HOVER_BG_COLOR:               $chocolate;
 // --------------------------------------------------
 
 $MENU_BORDER_COLOR:                 $deepest_dark_brown;
-$MENU_TEXT_COLOR:                     $silver;
+$MENU_TEXT_COLOR:                   $silver;
 $MENU_BG_COLOR:                     $deep_dark_brown;
-$MENU_HOT_TEXT_COLOR:                 $red;
+$MENU_HOT_TEXT_COLOR:               $red;
 $MENU_HOT_BG_COLOR:                 $deep_dark_brown;
-$MENU_WARM_TEXT_COLOR:                $orange;
+$MENU_WARM_TEXT_COLOR:              $orange;
 $MENU_WARM_BG_COLOR:                $deep_dark_brown;
-
-// --------------------------------------------------
-// Pagination
-// --------------------------------------------------
-
-$PAGER_TEXT_COLOR:                    $silver;
-$PAGER_BG_COLOR:                    transparent;
-$PAGER_BORDER_COLOR:                none;
-$PAGER_HOVER_TEXT_COLOR:              $silver;
-$PAGER_HOVER_BG_COLOR:              $red;
-$PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_TEXT_COLOR:             $dark_brown;
-$PAGER_ACTIVE_BG_COLOR:             $silver;
-$PAGER_ACTIVE_BORDER_COLOR:         none;
 
 // --------------------------------------------------
 // Tooltips
 // --------------------------------------------------
 
-$TOOLTIP_TEXT_COLOR:                  $dark_brown;
+$TOOLTIP_TEXT_COLOR:                $dark_brown;
 $TOOLTIP_BG_COLOR:                  $silver;
 
 // --------------------------------------------------
@@ -231,7 +217,7 @@ $TOOLTIP_BG_COLOR:                  $silver;
 // --------------------------------------------------
 
 $VOTE_METER_BORDER_COLOR:           none;
-$VOTE_METER_TEXT_COLOR:               $tan;
+$VOTE_METER_TEXT_COLOR:             $tan;
 $VOTE_METER_BG_COLOR:               $dark_brown;
 
 // --------------------------------------------------
@@ -239,15 +225,15 @@ $VOTE_METER_BG_COLOR:               $dark_brown;
 // --------------------------------------------------
 
 $PROGRESS_BG_COLOR:                 $red;
-$PROGRESS_TEXT_COLOR:                 $tan;
+$PROGRESS_TEXT_COLOR:               $tan;
 $PROGRESS_BAR_COLOR:                $dark_olive;
 
 // --------------------------------------------------
 // Panels
 // --------------------------------------------------
 
-$PANEL_TEXT_COLOR:                    $BODY_TEXT_COLOR;
+$PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $panel_overlay;
 $PANEL_BORDER_COLOR:                $muted_silver;
-$PANEL_FOOTER_TEXT_COLOR:             $BODY_TEXT_COLOR;
+$PANEL_FOOTER_TEXT_COLOR:           $BODY_TEXT_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;

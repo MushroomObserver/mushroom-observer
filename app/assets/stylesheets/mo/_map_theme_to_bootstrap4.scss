@@ -198,29 +198,6 @@ $navbar-dark-hover-color:   $LEFT_BAR_HOVER_TEXT_COLOR !default;
 $navbar-dark-active-color:  $LEFT_BAR_TEXT_COLOR !default;
 
 // ==================================================
-// SECTION 9: PAGINATION
-// ==================================================
-//
-// Page navigation controls
-//
-
-$pagination-color:              $PAGER_TEXT_COLOR !default;
-$pagination-bg:                 $PAGER_BG_COLOR !default;
-$pagination-border-color:       $PAGER_BORDER_COLOR !default;
-
-$pagination-hover-color:        $PAGER_HOVER_TEXT_COLOR !default;
-$pagination-hover-bg:           $PAGER_HOVER_BG_COLOR !default;
-$pagination-hover-border-color: $PAGER_HOVER_BORDER_COLOR !default;
-
-$pagination-active-color:        $PAGER_ACTIVE_TEXT_COLOR !default;
-$pagination-active-bg:           $PAGER_ACTIVE_BG_COLOR !default;
-$pagination-active-border-color: $PAGER_ACTIVE_BORDER_COLOR !default;
-
-$pagination-disabled-color:        mix($PAGER_TEXT_COLOR, $PAGER_BG_COLOR, 75%) !default;
-$pagination-disabled-bg:           $PAGER_BG_COLOR !default;
-$pagination-disabled-border-color: $PAGER_BORDER_COLOR !default;
-
-// ==================================================
 // SECTION 10: TABLES
 // ==================================================
 //

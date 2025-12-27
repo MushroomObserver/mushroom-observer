@@ -61,7 +61,7 @@ $DANGER_COLOR:    $danger_red;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_TEXT_COLOR:                     $black;
+$BODY_TEXT_COLOR:                   $black;
 $BODY_BG_COLOR:                     $body_gray;
 
 // --------------------------------------------------
@@ -69,24 +69,24 @@ $BODY_BG_COLOR:                     $body_gray;
 // --------------------------------------------------
 
 $LINK_WEIGHT:                       normal;
-$LINK_TEXT_COLOR:                     $blue;
+$LINK_TEXT_COLOR:                   $blue;
 $LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_TEXT_COLOR:             $blue;
+$LINK_VISITED_TEXT_COLOR:           $blue;
 $LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_TEXT_COLOR:               $dark_blue;
+$LINK_HOVER_TEXT_COLOR:             $dark_blue;
 $LINK_HOVER_BG_COLOR:               transparent;
 
 // --------------------------------------------------
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_TEXT_COLOR:                   $black;
+$BUTTON_TEXT_COLOR:                 $black;
 $BUTTON_BG_COLOR:                   $gray;
 $BUTTON_BORDER_COLOR:               $gray;
-$BUTTON_PRIMARY_TEXT_COLOR:           $white;
+$BUTTON_PRIMARY_TEXT_COLOR:         $white;
 $BUTTON_PRIMARY_BG_COLOR:           $blue;
 $BUTTON_PRIMARY_BORDER_COLOR:       $dark_blue;
-$BUTTON_PRIMARY_HOVER_TEXT_COLOR:     $white;
+$BUTTON_PRIMARY_HOVER_TEXT_COLOR:   $white;
 $BUTTON_PRIMARY_HOVER_BG_COLOR:     $dark_blue;
 $BUTTON_PRIMARY_HOVER_BORDER_COLOR: $darker_blue;
 $BUTTON_BORDER_WIDTH:               1px;
@@ -97,7 +97,7 @@ $BUTTON_BORDER_RADIUS:              5px;
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_TEXT_COLOR:                    $black;
+$INPUT_TEXT_COLOR:                  $black;
 $INPUT_BG_COLOR:                    $white;
 $INPUT_BORDER_COLOR:                $gray;
 $INPUT_BORDER_WIDTH:                1px;
@@ -110,16 +110,16 @@ $INPUT_BORDER_RADIUS:               5px;
 
 $INFO_BG_COLOR:                     rgba($INFO_COLOR, 20%);
 $INFO_BORDER_COLOR:                 $INFO_COLOR;
-$INFO_TEXT_COLOR:                     $BODY_TEXT_COLOR;
+$INFO_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $SUCCESS_BG_COLOR:                  rgba($SUCCESS_COLOR, 20%);
 $SUCCESS_BORDER_COLOR:              $SUCCESS_COLOR;
-$SUCCESS_TEXT_COLOR:                  $BODY_TEXT_COLOR;
+$SUCCESS_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $WARNING_BG_COLOR:                  rgba($WARNING_COLOR, 20%);
 $WARNING_BORDER_COLOR:              $WARNING_COLOR;
-$WARNING_TEXT_COLOR:                  $BODY_TEXT_COLOR;
+$WARNING_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $DANGER_BG_COLOR:                   rgba($DANGER_COLOR, 20%);
 $DANGER_BORDER_COLOR:               $DANGER_COLOR;
-$DANGER_TEXT_COLOR:                   $BODY_TEXT_COLOR;
+$DANGER_TEXT_COLOR:                 $BODY_TEXT_COLOR;
 
 $BANNER_BORDER_WIDTH:               2px;
 $BANNER_BORDER_STYLE:               solid;
@@ -138,11 +138,11 @@ $LEFT_BAR_BORDER_WIDTH:             1px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            5px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
-$LEFT_BAR_HEADER_TEXT_COLOR:          $medium_dark_gray;
+$LEFT_BAR_HEADER_TEXT_COLOR:        $medium_dark_gray;
 $LEFT_BAR_HEADER_BG_COLOR:          $light_gray;
-$LEFT_BAR_TEXT_COLOR:                 $black;
+$LEFT_BAR_TEXT_COLOR:               $black;
 $LEFT_BAR_BG_COLOR:                 $white;
-$LEFT_BAR_HOVER_TEXT_COLOR:           $black;
+$LEFT_BAR_HOVER_TEXT_COLOR:         $black;
 $LEFT_BAR_HOVER_BG_COLOR:           $light_gray;
 
 // --------------------------------------------------
@@ -153,11 +153,11 @@ $TOP_BAR_BORDER_COLOR:              $border_gray;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
-$TOP_BAR_TEXT_COLOR:                  $black;
+$TOP_BAR_TEXT_COLOR:                $black;
 $TOP_BAR_BG_COLOR:                  $off_white;
-$TOP_BAR_LINK_TEXT_COLOR:             $blue;
+$TOP_BAR_LINK_TEXT_COLOR:           $blue;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_TEXT_COLOR:       $darker_blue;
+$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $darker_blue;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 
 // --------------------------------------------------
@@ -165,9 +165,9 @@ $TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
 // --------------------------------------------------
 
 $LIST_BORDER_COLOR:                 $medium_gray;
-$LIST_HEADER_TEXT_COLOR:              $black;
+$LIST_HEADER_TEXT_COLOR:            $black;
 $LIST_HEADER_BG_COLOR:              $light_gray;
-$LIST_TEXT_COLOR:                     $black;
+$LIST_TEXT_COLOR:                   $black;
 $LIST_BG_COLOR:                     $white;
 $LIST_EVEN_BG_COLOR:                $light_gray;
 $LIST_ODD_BG_COLOR:                 $white;
@@ -178,32 +178,18 @@ $LIST_HOVER_BG_COLOR:               $medium_gray;
 // --------------------------------------------------
 
 $MENU_BORDER_COLOR:                 $dark_gray;
-$MENU_TEXT_COLOR:                     $black;
+$MENU_TEXT_COLOR:                   $black;
 $MENU_BG_COLOR:                     $white;
-$MENU_HOT_TEXT_COLOR:                 $black;
+$MENU_HOT_TEXT_COLOR:               $black;
 $MENU_HOT_BG_COLOR:                 $hot_yellow;
-$MENU_WARM_TEXT_COLOR:                $black;
+$MENU_WARM_TEXT_COLOR:              $black;
 $MENU_WARM_BG_COLOR:                $warm_red;
-
-// --------------------------------------------------
-// Pagination
-// --------------------------------------------------
-
-$PAGER_TEXT_COLOR:                    $blue;
-$PAGER_BG_COLOR:                    transparent;
-$PAGER_BORDER_COLOR:                none;
-$PAGER_HOVER_TEXT_COLOR:              $darker_blue;
-$PAGER_HOVER_BG_COLOR:              $light_gray;
-$PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_TEXT_COLOR:             $white;
-$PAGER_ACTIVE_BG_COLOR:             $dark_gray;
-$PAGER_ACTIVE_BORDER_COLOR:         none;
 
 // --------------------------------------------------
 // Tooltips
 // --------------------------------------------------
 
-$TOOLTIP_TEXT_COLOR:                  $white;
+$TOOLTIP_TEXT_COLOR:                $white;
 $TOOLTIP_BG_COLOR:                  $black;
 
 // --------------------------------------------------
@@ -211,7 +197,7 @@ $TOOLTIP_BG_COLOR:                  $black;
 // --------------------------------------------------
 
 $VOTE_METER_BORDER_COLOR:           none;
-$VOTE_METER_TEXT_COLOR:               $blue;
+$VOTE_METER_TEXT_COLOR:             $blue;
 $VOTE_METER_BG_COLOR:               $light_gray;
 
 // --------------------------------------------------
@@ -219,15 +205,15 @@ $VOTE_METER_BG_COLOR:               $light_gray;
 // --------------------------------------------------
 
 $PROGRESS_BG_COLOR:                 $light_gray;
-$PROGRESS_TEXT_COLOR:                 $black;
+$PROGRESS_TEXT_COLOR:               $black;
 $PROGRESS_BAR_COLOR:                $blue;
 
 // --------------------------------------------------
 // Panels
 // --------------------------------------------------
 
-$PANEL_TEXT_COLOR:                    $BODY_TEXT_COLOR;
+$PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $white;
 $PANEL_BORDER_COLOR:                $medium_gray;
-$PANEL_FOOTER_TEXT_COLOR:             $BODY_TEXT_COLOR;
+$PANEL_FOOTER_TEXT_COLOR:           $BODY_TEXT_COLOR;
 $PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
