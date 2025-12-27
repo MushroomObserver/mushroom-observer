@@ -76,6 +76,8 @@ ul.tight-list {
 }
 
 .panel {
+  color: $panel-default-text;
+
   .table-responsive {
     border-color: transparent;
   }

@@ -47,8 +47,8 @@
   border-left-width: 0px;
   padding: 0px;
 
-  a:not(.clear-button),
-  a:visited:not(.clear-button),
+  a:not(.clear-button, .btn),
+  a:visited:not(.clear-button, .btn),
   .btn-link {
     color: $navbar-default-color;
     background-color: $navbar-default-link-active-bg;

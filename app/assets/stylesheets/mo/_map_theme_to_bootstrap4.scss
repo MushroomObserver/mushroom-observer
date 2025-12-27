@@ -75,11 +75,11 @@ $gray-900: $DARK_COLOR !default;
 // Body text and links - the foundation of readable content
 //
 
-$body-color: $BODY_FG_COLOR !default;
+$body-color: $BODY_TEXT_COLOR !default;
 $body-bg:    $BODY_BG_COLOR !default;
 
-$link-color:            $LINK_FG_COLOR !default;
-$link-hover-color:      $LINK_HOVER_FG_COLOR !default;
+$link-color:            $LINK_TEXT_COLOR !default;
+$link-hover-color:      $LINK_HOVER_TEXT_COLOR !default;
 $link-decoration:       none !default;
 $link-hover-decoration: underline !default;
 
@@ -89,7 +89,7 @@ $font-family-base:       $font-family-sans-serif !default;
 $font-size-base:         0.8125rem !default;  // 13px at 16px root
 
 // Headings
-$headings-color: $BODY_FG_COLOR !default;
+$headings-color: $BODY_TEXT_COLOR !default;
 
 // ==================================================
 // SECTION 4: SPACING & BORDERS
@@ -98,9 +98,9 @@ $headings-color: $BODY_FG_COLOR !default;
 // Bootstrap 4 uses a consistent spacing scale and border settings
 //
 
-$border-radius:    $BUTTON_BORDER_RADIUS !default;
-$border-radius-sm: $INPUT_BORDER_RADIUS !default;
-$border-radius-lg: $BUTTON_BORDER_RADIUS !default;
+$border-radius:    5px !default;
+$border-radius-sm: 5px !default;
+$border-radius-lg: 5px !default;
 
 // ==================================================
 // SECTION 5: BUTTONS
@@ -111,16 +111,16 @@ $border-radius-lg: $BUTTON_BORDER_RADIUS !default;
 //
 
 $btn-font-weight:     bold !default;
-$btn-border-radius:   $BUTTON_BORDER_RADIUS !default;
+$btn-border-radius:   5px !default;
 
 // Default/secondary button uses our standard button colors
 $btn-padding-y:       0.3125rem !default;  // ~5px
 $btn-padding-x:       0.625rem !default;   // ~10px
 
 // Link buttons
-$btn-link-color:           $LINK_FG_COLOR !default;
-$btn-link-hover-color:     $LINK_HOVER_FG_COLOR !default;
-$btn-link-disabled-color:  mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR, 75%) !default;
+$btn-link-color:           $LINK_TEXT_COLOR !default;
+$btn-link-hover-color:     $LINK_HOVER_TEXT_COLOR !default;
+$btn-link-disabled-color:  mix($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, 75%) !default;
 
 // Active/focus states
 $btn-active-box-shadow: none !default;
@@ -134,17 +134,17 @@ $btn-focus-box-shadow:  none !default;
 //
 
 $input-bg:                 $INPUT_BG_COLOR !default;
-$input-color:              $INPUT_FG_COLOR !default;
+$input-color:              $INPUT_TEXT_COLOR !default;
 $input-border-color:       $INPUT_BORDER_COLOR !default;
-$input-border-width:       $INPUT_BORDER_WIDTH !default;
-$input-border-radius:      $INPUT_BORDER_RADIUS !default;
+$input-border-width:       1px !default;
+$input-border-radius:      5px !default;
 
 $input-focus-border-color: $PRIMARY_COLOR !default;
 $input-focus-box-shadow:   none !default;
 
-$input-disabled-bg:        mix($INPUT_FG_COLOR, $INPUT_BG_COLOR) !default;
+$input-disabled-bg:        mix($INPUT_TEXT_COLOR, $INPUT_BG_COLOR) !default;
 
-$input-placeholder-color:  mix($INPUT_FG_COLOR, $INPUT_BG_COLOR) !default;
+$input-placeholder-color:  mix($INPUT_TEXT_COLOR, $INPUT_BG_COLOR) !default;
 
 // Input groups
 $input-group-addon-bg:           $INPUT_BG_COLOR !default;
@@ -165,16 +165,16 @@ $dropdown-bg:               $MENU_BG_COLOR !default;
 $dropdown-border-color:     $MENU_BORDER_COLOR !default;
 $dropdown-divider-bg:       $MENU_BORDER_COLOR !default;
 
-$dropdown-link-color:       $MENU_FG_COLOR !default;
-$dropdown-link-hover-color: $MENU_HOT_FG_COLOR !default;
-$dropdown-link-hover-bg:    $MENU_HOT_BG_COLOR !default;
+$dropdown-link-color:       $MENU_TEXT_COLOR !default;
+$dropdown-link-hover-color: $MENU_HOVER_TEXT_COLOR !default;
+$dropdown-link-hover-bg:    $MENU_HOVER_BG_COLOR !default;
 
-$dropdown-link-active-color: $MENU_WARM_FG_COLOR !default;
-$dropdown-link-active-bg:    $MENU_WARM_BG_COLOR !default;
+$dropdown-link-active-color: $MENU_ACTIVE_TEXT_COLOR !default;
+$dropdown-link-active-bg:    $MENU_ACTIVE_BG_COLOR !default;
 
-$dropdown-link-disabled-color: mix($MENU_FG_COLOR, $MENU_BG_COLOR, 75%) !default;
+$dropdown-link-disabled-color: mix($MENU_TEXT_COLOR, $MENU_BG_COLOR, 75%) !default;
 
-$dropdown-header-color:     $MENU_FG_COLOR !default;
+$dropdown-header-color:     $MENU_TEXT_COLOR !default;
 
 // ==================================================
 // SECTION 8: NAVIGATION (NAVBAR)
@@ -188,37 +188,14 @@ $navbar-padding-y: 0.625rem !default;   // ~10px
 $navbar-padding-x: 0.8125rem !default;  // ~13px
 
 // Light navbar (maps to our TOP_BAR variables)
-$navbar-light-color:        $TOP_BAR_FG_COLOR !default;
-$navbar-light-hover-color:  $TOP_BAR_LINK_HOVER_FG_COLOR !default;
-$navbar-light-active-color: $TOP_BAR_LINK_FG_COLOR !default;
+$navbar-light-color:        $TOP_BAR_TEXT_COLOR !default;
+$navbar-light-hover-color:  $TOP_BAR_LINK_HOVER_TEXT_COLOR !default;
+$navbar-light-active-color: $TOP_BAR_LINK_TEXT_COLOR !default;
 
 // Dark navbar (maps to our LEFT_BAR variables)
-$navbar-dark-color:         $LEFT_BAR_FG_COLOR !default;
-$navbar-dark-hover-color:   $LEFT_BAR_HOVER_FG_COLOR !default;
-$navbar-dark-active-color:  $LEFT_BAR_FG_COLOR !default;
-
-// ==================================================
-// SECTION 9: PAGINATION
-// ==================================================
-//
-// Page navigation controls
-//
-
-$pagination-color:              $PAGER_FG_COLOR !default;
-$pagination-bg:                 $PAGER_BG_COLOR !default;
-$pagination-border-color:       $PAGER_BORDER_COLOR !default;
-
-$pagination-hover-color:        $PAGER_HOVER_FG_COLOR !default;
-$pagination-hover-bg:           $PAGER_HOVER_BG_COLOR !default;
-$pagination-hover-border-color: $PAGER_HOVER_BORDER_COLOR !default;
-
-$pagination-active-color:        $PAGER_ACTIVE_FG_COLOR !default;
-$pagination-active-bg:           $PAGER_ACTIVE_BG_COLOR !default;
-$pagination-active-border-color: $PAGER_ACTIVE_BORDER_COLOR !default;
-
-$pagination-disabled-color:        mix($PAGER_FG_COLOR, $PAGER_BG_COLOR, 75%) !default;
-$pagination-disabled-bg:           $PAGER_BG_COLOR !default;
-$pagination-disabled-border-color: $PAGER_BORDER_COLOR !default;
+$navbar-dark-color:         $LEFT_BAR_TEXT_COLOR !default;
+$navbar-dark-hover-color:   $LEFT_BAR_HOVER_TEXT_COLOR !default;
+$navbar-dark-active-color:  $LEFT_BAR_TEXT_COLOR !default;
 
 // ==================================================
 // SECTION 10: TABLES
@@ -233,12 +210,12 @@ $table-cell-padding-sm:       0.25rem !default;   // ~4px
 $table-bg:        $LIST_BG_COLOR !default;
 $table-accent-bg: $LIST_ODD_BG_COLOR !default;
 $table-hover-bg:  $LIST_HOVER_BG_COLOR !default;
-$table-active-bg: $MENU_WARM_BG_COLOR !default;
+$table-active-bg: $MENU_ACTIVE_BG_COLOR !default;
 
 $table-border-color: $LIST_BORDER_COLOR !default;
 
 $table-head-bg:    $LIST_HEADER_BG_COLOR !default;
-$table-head-color: $LIST_HEADER_FG_COLOR !default;
+$table-head-color: $LIST_HEADER_TEXT_COLOR !default;
 
 // ==================================================
 // SECTION 11: ALERTS & BANNERS
@@ -248,7 +225,7 @@ $table-head-color: $LIST_HEADER_FG_COLOR !default;
 //
 
 $alert-border-width:  2px !default;
-$alert-border-radius: $BANNER_BORDER_RADIUS !default;
+$alert-border-radius: 5px !default;
 
 // Alert colors use our theme's alert variables
 $alert-bg-level:     0 !default;  // Don't darken backgrounds
@@ -275,7 +252,7 @@ $modal-footer-border-color: $MENU_BORDER_COLOR !default;
 // Contextual help and additional information
 //
 
-$tooltip-color:      $TOOLTIP_FG_COLOR !default;
+$tooltip-color:      $TOOLTIP_TEXT_COLOR !default;
 $tooltip-bg:         $TOOLTIP_BG_COLOR !default;
 $tooltip-opacity:    1 !default;
 $tooltip-max-width:  400px !default;
@@ -291,7 +268,7 @@ $popover-border-color: $MENU_BORDER_COLOR !default;
 //
 
 $progress-bg:         $PROGRESS_BG_COLOR !default;
-$progress-bar-color:  $PROGRESS_FG_COLOR !default;
+$progress-bar-color:  $PROGRESS_TEXT_COLOR !default;
 $progress-bar-bg:     $PROGRESS_BAR_COLOR !default;
 
 // ==================================================
@@ -305,11 +282,11 @@ $list-group-bg:           $LIST_BG_COLOR !default;
 $list-group-border-color: $LIST_BORDER_COLOR !default;
 $list-group-hover-bg:     $LIST_HOVER_BG_COLOR !default;
 
-$list-group-disabled-color: $LIST_HEADER_FG_COLOR !default;
+$list-group-disabled-color: $LIST_HEADER_TEXT_COLOR !default;
 $list-group-disabled-bg:    $LIST_HEADER_BG_COLOR !default;
 
-$list-group-action-color:       $LINK_FG_COLOR !default;
-$list-group-action-hover-color: $LINK_HOVER_FG_COLOR !default;
+$list-group-action-color:       $LINK_TEXT_COLOR !default;
+$list-group-action-hover-color: $LINK_HOVER_TEXT_COLOR !default;
 
 // ==================================================
 // SECTION 16: CARDS (PANELS IN BS3)
@@ -335,7 +312,7 @@ $hr-border-color: $LIST_BORDER_COLOR !default;
 // $well-bg would map to a custom .well class if needed
 
 // Close button (X in modals, alerts, etc.)
-$close-color: $BODY_FG_COLOR !default;
+$close-color: $BODY_TEXT_COLOR !default;
 
 // ==================================================
 // UNMAPPED THEME VARIABLES
@@ -343,19 +320,10 @@ $close-color: $BODY_FG_COLOR !default;
 //
 // The following MO theme variables don't have direct Bootstrap 4 equivalents:
 //
-// - $LINK_WEIGHT               (use custom CSS)
 // - $LINK_BG_COLOR             (Bootstrap links are always transparent)
-// - $LINK_VISITED_FG_COLOR     (use :visited pseudo-class in custom CSS)
-// - $LINK_VISITED_BG_COLOR     (use :visited pseudo-class in custom CSS)
 // - $LINK_HOVER_BG_COLOR       (Bootstrap links don't typically have bg)
-// - $BUTTON_ACTIVE_FG_COLOR    (use :active pseudo-class)
+// - $BUTTON_ACTIVE_TEXT_COLOR    (use :active pseudo-class)
 // - $BUTTON_ACTIVE_BG_COLOR    (use :active pseudo-class)
-// - $BUTTON_BORDER_STYLE       (always solid in BS4)
-// - $INPUT_BORDER_STYLE        (always solid in BS4)
-// - $BANNER_BORDER_WIDTH       (use $alert-border-width)
-// - $BANNER_BORDER_STYLE       (always solid in BS4)
-// - $ALERT_BORDER_WIDTH        (use $alert-border-width)
-// - $ALERT_BORDER_STYLE        (always solid in BS4)
 // - $LOGO_* variables          (custom component, not part of Bootstrap)
 // - $LEFT_BAR_* variables      (partially mapped to navbar-dark-*)
 // - $TOP_BAR_* variables       (partially mapped to navbar-light-*)
