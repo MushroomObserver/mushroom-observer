@@ -12,7 +12,7 @@ This document describes coding style preferences for the Mushroom Observer codeb
 - Ruby code
 - ERB templates (`.erb` files)
 - Code examples in comments
-- Documentation in model/controller files
+- Documentation in all files
 
 #### Ruby Code
 
