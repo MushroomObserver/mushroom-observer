@@ -292,4 +292,18 @@ class AuthorsAndEditorsTest < UnitTestCase
 
     assert_includes(html, "Rolf")
   end
+
+  def test_default_versions_when_not_provided
+    obj = TestObject.new(user: users(:rolf), type_tag: :name)
+
+    # Don't pass versions parameter - should use default empty array
+    html = render_component(Components::AuthorsAndEditors.new(
+                              obj: obj,
+                              user: nil
+                            ))
+
+    assert_includes(html, "Rolf")
+    # Should show creator but no editors since versions defaults to []
+    assert_not_includes(html, "Editor")
+  end
 end
