@@ -51,25 +51,14 @@ module Components
 
       p do
         render_user_list(:show_name_description_author, authors_list) do
-          if is_admin
-            render_review_link
-          elsif !is_author
-            render_request_link
-          end
+          render_authors_link if is_admin || !is_author
         end
         br
         render_user_list(:show_name_description_editor, editors_list)
       end
     end
 
-    def render_review_link
-      whitespace
-      a(href: description_authors_path(id: @obj.id, type: @obj.type_tag)) do
-        plain("(#{:review_authors_review_authors.t})")
-      end
-    end
-
-    def render_request_link
+    def render_authors_link
       whitespace
       a(href: description_authors_path(id: @obj.id, type: @obj.type_tag)) do
         plain("(#{:review_authors_review_authors.t})")
