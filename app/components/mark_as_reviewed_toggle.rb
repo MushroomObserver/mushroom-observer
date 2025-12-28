@@ -36,7 +36,7 @@ module Components
     prop :obs_id, Integer
     prop :selector, String, default: -> { "caption_reviewed" }
     prop :label_class, String, default: -> { "" }
-    prop :reviewed, _Nilable(_Boolean), default: -> {}
+    prop :reviewed, _Nilable(_Boolean), default: nil
 
     def view_template
       div(class: "d-inline", id: "#{@selector}_toggle_#{@obs_id}") do
