@@ -60,7 +60,7 @@ class Components::LightboxCaption < Components::Base
         btn_class: "btn btn-primary d-inline-block"
       )
       span(class: "mx-2") { whitespace }
-      mark_as_reviewed_toggle(@obs.id)
+      render(Components::MarkAsReviewedToggle.new(obs_id: @obs.id))
     end
   end
 

@@ -229,11 +229,11 @@ class Components::MatrixBox < Components::Base
     return unless @identify
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
-      mark_as_reviewed_toggle(
-        @data[:id],
-        "box_reviewed",
-        "stretched-link"
-      )
+      render(Components::MarkAsReviewedToggle.new(
+               obs_id: @data[:id],
+               selector: "box_reviewed",
+               label_class: "stretched-link"
+             ))
     end
   end
 end
