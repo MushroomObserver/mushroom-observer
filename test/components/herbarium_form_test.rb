@@ -39,7 +39,8 @@ class HerbariumFormTest < UnitTestCase
   def test_renders_form_with_location_autocompleter
     html = render_form
 
-    assert_html(html, "#herbarium_place_name_autocompleter")
+    # Uses custom controller_id for map outlet wiring
+    assert_html(html, "#herbarium_location_autocompleter")
     assert_html(html, "input[name='herbarium[place_name]']")
   end
 
@@ -164,6 +165,33 @@ class HerbariumFormTest < UnitTestCase
     # Boolean false in Phlex doesn't render the attribute or renders empty
     # Check that the form has map controller - the map-open state is optional
     assert(form["data-controller"].include?("map"))
+  end
+
+  def test_autocompleter_hidden_field_attributes
+    phlex_html = render_form
+    phlex_doc = Nokogiri::HTML(phlex_html)
+
+    # Find autocompleter wrapper
+    phlex_ac = phlex_doc.at_css("#herbarium_location_autocompleter")
+    assert(phlex_ac, "Phlex should have autocompleter wrapper")
+
+    # Find hidden field
+    phlex_hidden = phlex_doc.at_css(
+      "#herbarium_location_autocompleter input[type='hidden']"
+    )
+    assert(phlex_hidden, "Phlex should have hidden field in autocompleter")
+
+    # Verify correct data attributes on wrapper
+    assert_equal("autocompleter--location", phlex_ac["data-controller"])
+    assert_equal("location", phlex_ac["data-type"])
+    assert_equal("#herbarium_form",
+                 phlex_ac["data-autocompleter--location-map-outlet"])
+
+    # Verify hidden field attributes use custom hidden_name with model prefix
+    assert_equal("herbarium_location_id", phlex_hidden["id"],
+                 "Hidden field id should be herbarium_location_id")
+    assert_equal("herbarium[location_id]", phlex_hidden["name"],
+                 "Hidden field name should be herbarium[location_id]")
   end
 
   private

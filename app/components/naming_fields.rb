@@ -40,9 +40,8 @@ class Components::NamingFields < Components::Base
       autofocus: focus_on_name?
     )
 
-    render(name_field) do
-      render_vote_reasons_collapse
-    end
+    name_field.with_append { render_vote_reasons_collapse }
+    render(name_field)
   end
 
   def render_vote_reasons_collapse

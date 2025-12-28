@@ -29,6 +29,7 @@ class Components::BoundsHiddenFields < Components::Base
     value = @location&.send(key)
     input(
       type: "hidden",
+      id: "location_#{key}",
       name: "location[#{key}]",
       value: value&.to_s,
       data: { "#{@target_controller}_target": "#{key}Input" }

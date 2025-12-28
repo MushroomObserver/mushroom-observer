@@ -144,9 +144,12 @@ class Components::HerbariumForm < Components::ApplicationForm
       controller_id: "herbarium_location_autocompleter",
       create_text: :form_observations_create_locality.l,
       map_outlet: "#herbarium_form",
+      hidden_name: :location_id,
       hidden_data: { map_target: "locationId" },
       data: { map_target: "placeInput" }
-    ) { render_map_section }
+    ) do |f|
+      f.with_append { render_map_section }
+    end
   end
 
   def location_label

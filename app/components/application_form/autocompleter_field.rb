@@ -6,6 +6,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   class AutocompleterField < Superform::Rails::Components::Input
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Rails::Helpers::LinkTo
+    include Phlex::Slotable
 
     register_output_helper :link_icon
     register_output_helper :icon_link_to
@@ -17,10 +18,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       :clade, :region
     ].freeze
 
+    slot :append
+
+    # Make slot accessor public (Phlex::Slotable makes them private by default)
+    public :append_slot
+
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
                 :create, :create_path, :hidden_name, :hidden_value,
-                :hidden_data, :extra_controller_data
+                :hidden_data, :extra_controller_data, :custom_controller_id,
+                :map_outlet
 
     def initialize(field, type:, textarea: false, **options)
       super(field, attributes: {})
@@ -41,6 +48,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       @hidden_name = options[:hidden_name]
       @hidden_value = options[:hidden_value]
       @hidden_data = options[:hidden_data]
+      @custom_controller_id = options[:controller_id]
+      @map_outlet = options[:map_outlet]
       @extra_controller_data = options[:controller_data] || {}
     end
 
@@ -49,7 +58,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       @field_attributes
     end
 
-    def view_template(&block)
+    def view_template
       div(
         id: controller_id,
         class: "autocompleter",
@@ -59,15 +68,15 @@ class Components::ApplicationForm < Superform::Rails::Form
           render_dropdown
           render_hidden_field
         end
-        # Yield block for additional content (e.g., conditional collapse fields)
-        yield if block
+        # Render append slot content (e.g., map section)
+        render(append_slot) if append_slot
       end
     end
 
     private
 
     def controller_id
-      "#{field.dom.id}_autocompleter"
+      custom_controller_id || "#{field.dom.id}_autocompleter"
     end
 
     def controller_data
@@ -77,7 +86,14 @@ class Components::ApplicationForm < Superform::Rails::Form
       }
       # Textarea autocompleters accept multiple values separated by newlines
       data[:separator] = "\n" if textarea
-      data.merge(extra_controller_data)
+      data.merge(outlet_data).merge(extra_controller_data)
+    end
+
+    def outlet_data
+      return {} unless map_outlet
+
+      prefix = stimulus_controller_name.to_s.tr("-", "_")
+      { :"#{prefix}_map_outlet" => map_outlet }
     end
 
     # Returns the Stimulus controller name for this autocompleter type.
@@ -282,19 +298,30 @@ class Components::ApplicationForm < Superform::Rails::Form
       base_data.merge(hidden_data)
     end
 
-    # Hidden field stores the selected ID. Use field.key (original field name)
-    # so controller gets e.g. by_users_id, not user_id.
+    # Hidden field stores the selected ID.
+    # When hidden_name is provided, use model prefix + hidden_name.
+    # Otherwise, use field's dom.id + "_id".
     def hidden_field_id
-      hidden_name || "#{field.dom.id}_id"
+      if hidden_name
+        # Extract model prefix from field.dom.id (e.g., "herbarium_place_name" -> "herbarium")
+        model_prefix = field.dom.id.to_s.sub(/_#{field.key}$/, "")
+        "#{model_prefix}_#{hidden_name}"
+      else
+        "#{field.dom.id}_id"
+      end
     end
 
     # If field key has brackets (e.g., "writein_name[1]"), convert to
     # underscores to avoid Rails param parsing conflicts.
     def hidden_field_name
-      return hidden_name if hidden_name
-
-      key = field.key.to_s.tr("[]", "_").chomp("_")
-      field.dom.name.sub(/\[#{field.key}\]$/, "[#{key}_id]")
+      if hidden_name
+        # Extract model namespace from field.dom.name (e.g., "herbarium[place_name]" -> "herbarium")
+        model_namespace = field.dom.name.to_s.sub(/\[#{field.key}\]$/, "")
+        "#{model_namespace}[#{hidden_name}]"
+      else
+        key = field.key.to_s.tr("[]", "_").chomp("_")
+        field.dom.name.sub(/\[#{field.key}\]$/, "[#{key}_id]")
+      end
     end
   end
 end

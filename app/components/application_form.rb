@@ -153,8 +153,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Autocompleter-specific options that should NOT go in field attributes
     # Note: :value stays in attributes since it goes to the text/textarea field
     AUTOCOMPLETER_OPTIONS = [:find_text, :keep_text, :edit_text, :create_text,
-                             :create, :create_path, :hidden_value,
-                             :hidden_data, :controller_data].freeze
+                             :create, :create_path, :hidden_name, :hidden_value,
+                             :hidden_data, :controller_data, :controller_id,
+                             :map_outlet].freeze
 
     def autocompleter(type:, textarea: false, wrapper_options: {},
                       **attributes)
