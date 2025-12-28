@@ -26,17 +26,13 @@ module Components
       num_versions = @versions.length
 
       div(class: "p-3 small footer-view-stats") do
-        p do
-          span(class: "Date") do
-            if num_versions.positive? && @obj.version < num_versions
-              render_old_version_metadata(num_versions)
-            else
-              render_latest_or_non_versioned_metadata
-            end
-
-            render_rss_log_link
-          end
+        if num_versions.positive? && @obj.version < num_versions
+          render_old_version_metadata(num_versions)
+        else
+          render_latest_or_non_versioned_metadata
         end
+
+        render_rss_log_link
       end
     end
 
