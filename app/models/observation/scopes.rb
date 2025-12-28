@@ -142,8 +142,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :not_reviewed_by_user, lambda { |user|
       user_id = user.is_a?(Integer) ? user : user&.id
-      where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
-                    select(:observation_id))
+      where.not(
+        id: ObservationView.where(
+          ObservationView.arel_table[:observation_id].eq(
+            Observation.arel_table[:id]
+          )
+        ).where(user_id: user_id, reviewed: 1).select(:observation_id)
+      )
     }
     # Higher taxa: returns narrowed-down group of id'd obs,
     # in higher taxa under the given taxon
