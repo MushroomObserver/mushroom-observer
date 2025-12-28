@@ -306,4 +306,25 @@ class AuthorsAndEditorsTest < UnitTestCase
     # Should show creator but no editors since versions defaults to []
     assert_not_includes(html, "Editor")
   end
+
+  def test_description_with_integer_user_id_in_authors_list
+    # Test case where authors list contains an integer user ID
+    # instead of a User object (edge case for render_user_link)
+    user_id = users(:rolf).id
+
+    desc = TestDescription.new(
+      authors: [user_id],
+      editors: []
+    )
+
+    html = render_component(Components::AuthorsAndEditors.new(
+                              obj: desc,
+                              versions: [],
+                              user: nil
+                            ))
+
+    # Should render "User #<id>" when given an integer
+    assert_includes(html, "User ##{user_id}")
+    assert_includes(html, "user_link_#{user_id}")
+  end
 end

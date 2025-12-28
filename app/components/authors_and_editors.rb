@@ -106,7 +106,8 @@ module Components
 
     def render_user_links(users)
       users.each_with_index do |user, index|
-        render_user_link(user, user&.legal_name)
+        name = user.is_a?(Integer) ? nil : user&.legal_name
+        render_user_link(user, name)
         plain(", ") unless index == users.size - 1
       end
     end
