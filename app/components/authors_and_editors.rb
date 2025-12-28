@@ -35,7 +35,10 @@ module Components
                            non_description_authors_and_editors
                          end
 
-      p { trusted_html((authors || view_context.safe_empty) + view_context.safe_br + (editors || view_context.safe_empty)) }
+      content = (authors || view_context.safe_empty) +
+                view_context.safe_br +
+                (editors || view_context.safe_empty)
+      p { trusted_html(content) }
     end
 
     private
@@ -51,8 +54,10 @@ module Components
       is_admin = @user && @obj.is_admin?(@user)
       is_author = @user && authors_list.include?(@user)
 
-      authors = view_context.user_list(:show_name_description_author, authors_list)
-      editors = view_context.user_list(:show_name_description_editor, editors_list)
+      authors = view_context.user_list(:show_name_description_author,
+                                       authors_list)
+      editors = view_context.user_list(:show_name_description_editor,
+                                       editors_list)
 
       if is_admin
         authors = authors_with_review_link(authors)
