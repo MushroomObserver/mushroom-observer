@@ -474,7 +474,7 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Locations: a lot of actions  ----------------------------
   namespace :locations do
-    resource :search, only: [:new, :create]
+    resource :search, only: [:show, :new, :create]
   end
 
   resources :locations, id: /\d+/, shallow: true do

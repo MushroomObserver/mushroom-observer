@@ -1,88 +1,168 @@
-$conica_stain:          #37372f;
-$conica_cap_red:        #a31404;
-$conica_cap_orange:     #dd6226;
-$conica_cap_yellow:     #ffbf01;
-$conica_gill_margin:    #ffda84;
-$miniata_gill_margin:   #ebc97f;
-$miniata_cap_red:       #a10200;
-$miniata_cap_orange:    #c83e00;
-$miniata_cap_yellow:    #f19c05;
-$psittacina_cap_green:  #405536;
-$psittacina_cap_orange: #eb9020;
-$psittacina_cap_middle: #a38a3f;
-$psittacina_gill_color: #f2d686;
-$punicea_cap_dark:      #bb2900;
-$punicea_cap_light:     #cc382a;
-$punicea_dark_stipe:    #e7bc3c;
-$punicea_light_stipe:   #e9e3af;
-$polyozellus_light:     #a5bffa;
-$polyozellus_dark:      #5167b2;
+// ==================================================
+// HYGROCYBE THEME
+// ==================================================
+// Inspired by various Hygrocybe species including:
+// - H. conica (Witch's Hat)
+// - H. miniata (Vermillion Waxcap)
+// - H. psittacina (Parrot Waxcap)
+// - H. punicea (Scarlet Waxcap)
+// ==================================================
 
-$BUTTON_FG_COLOR:             $conica_stain;
-$BUTTON_ACTIVE_FG_COLOR:      $conica_stain;
-$BUTTON_ACTIVE_BG_COLOR:      $miniata_cap_yellow;
+// ==================================================
+// SECTION 1: THEME COLOR PALETTE
+// ==================================================
 
-$BODY_FG_COLOR:               $conica_stain;
-$BODY_BG_COLOR:               $punicea_light_stipe;
+$dark_olive:    #37372f; // conica_stain
+$dark_red:      #a31404; // conica_cap_red
+$orange:        #dd6226; // conica_cap_orange
+$gold:          #ffbf01; // conica_cap_yellow
+$pale_gold:     #ffda84; // conica_gill_margin
+$straw:         #ebc97f; // miniata_gill_margin
+$crimson:       #a10200; // miniata_cap_red
+$red_orange:    #c83e00; // miniata_cap_orange
+$amber:         #f5c870; // miniata_cap_yellow (lightened)
+$forest_green:  #405536; // psittacina_cap_green
+$tangerine:     #eb9020; // psittacina_cap_orange
+$olive:         #a38a3f; // psittacina_cap_middle
+$custard:       #f2d686; // psittacina_gill_color
+$scarlet:       #bb2900; // punicea_cap_dark
+$red:           #cc382a; // punicea_cap_light
+$mustard:       #e7bc3c; // punicea_dark_stipe
+$pale_cream:    #e9e3af; // punicea_light_stipe
 
-$LINK_FG_COLOR:               $psittacina_cap_green;
-$LINK_VISITED_FG_COLOR:       $psittacina_cap_orange;
-$LINK_HOVER_FG_COLOR:         $psittacina_cap_green;
-$LINK_HOVER_BG_COLOR:         $psittacina_gill_color;
+// Derived grays (mixed from theme colors)
+$light_gray:     mix($dark_olive, $pale_cream, 10%);
+$dark_gray:      mix($dark_olive, $pale_cream, 50%);
+$gray_border:    rgba($dark_olive, 0.4);
+$muted_border:   rgba($dark_olive, 0.2);
+$muted_olive:    scale-color($dark_olive, $lightness: 38%);
+$lighter_cream:  scale-color($pale_cream, $lightness: 20%);
+$light_cream:    scale-color($pale_cream, $lightness: 50%);
+$lightest_cream: scale-color($pale_cream, $lightness: 70%);
 
-$LOGO_BORDER_COLOR:           $conica_stain;
-$LOGO_FG_COLOR:               $conica_stain;
-$LOGO_BG_COLOR:               $punicea_cap_light;
-$LOGO_HOVER_FG_COLOR:         $conica_stain;
-$LOGO_HOVER_BG_COLOR:         $punicea_cap_light;
+// Alert state colors
+$info_blue:      #5167b2; // polyozellus_dark
+$success_green:  #70C070;
+$warning_yellow: #F8CC70;
+$danger_red:     #F07070;
 
-$LEFT_BAR_BORDER_COLOR:       $miniata_cap_yellow;
-$LEFT_BAR_HEADER_FG_COLOR:    $psittacina_cap_green;
-$LEFT_BAR_HEADER_BG_COLOR:    $miniata_cap_yellow;
-$LEFT_BAR_FG_COLOR:           $miniata_cap_red;
-$LEFT_BAR_BG_COLOR:           $miniata_cap_yellow;
-$LEFT_BAR_HOVER_FG_COLOR:     $miniata_cap_red;
-$LEFT_BAR_HOVER_BG_COLOR:     $psittacina_gill_color;
+// ==================================================
+// SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
+// ==================================================
 
-$TOP_BAR_FG_COLOR:            $conica_stain;
-$TOP_BAR_BG_COLOR:            $punicea_light_stipe;
-$TOP_BAR_LINK_FG_COLOR:       $psittacina_cap_green;
-$TOP_BAR_LINK_HOVER_FG_COLOR: $psittacina_cap_green;
-$TOP_BAR_LINK_HOVER_BG_COLOR: $psittacina_gill_color;
+$LIGHT_COLOR:     $pale_cream;
+$DARK_COLOR:      $dark_olive;
+$PRIMARY_COLOR:   $forest_green;
+$SECONDARY_COLOR: $tangerine;
+$LINK_COLOR:      $PRIMARY_COLOR;
 
-$LIST_BORDER_COLOR:           transparent;
-$LIST_HEADER_FG_COLOR:        #777777;
-$LIST_HEADER_BG_COLOR:        #EEEEEE;
-$LIST_FG_COLOR:               $conica_stain;
-$LIST_BG_COLOR:               mix($punicea_light_stipe, white, 50%);
+$INFO_COLOR:      $info_blue;
+$SUCCESS_COLOR:   $success_green;
+$WARNING_COLOR:   $red_orange;
+$DANGER_COLOR:    $scarlet;
 
-$TOOLTIP_BG_COLOR:            $punicea_cap_light;
+// ==================================================
+// SECTION 3: UI ELEMENT COLORS
+// ==================================================
 
-$PAGER_FG_COLOR:              $punicea_cap_dark;
-$PAGER_HOVER_FG_COLOR:        $punicea_light_stipe;
-$PAGER_HOVER_BG_COLOR:        $punicea_cap_light;
-$PAGER_ACTIVE_FG_COLOR:       $punicea_light_stipe;
-$PAGER_ACTIVE_BG_COLOR:       $punicea_cap_dark;
+// --------------------------------------------------
+// Body and Typography
+// --------------------------------------------------
 
-$MENU_BORDER_COLOR:           $miniata_gill_margin;
-$MENU_FG_COLOR:               black;
-$MENU_BG_COLOR:               white;
-$MENU_HOT_FG_COLOR:           black;
-$MENU_HOT_BG_COLOR:           $psittacina_cap_middle;
-$MENU_WARM_FG_COLOR:          black;
-$MENU_WARM_BG_COLOR:          $psittacina_cap_middle;
+$BODY_TEXT_COLOR:                   $DARK_COLOR;
+$BODY_BG_COLOR:                     $LIGHT_COLOR;
 
-$INFO_BG_COLOR:                     $polyozellus_light;
-$INFO_BORDER_COLOR:                 $polyozellus_dark;
-$INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  #E0FFE0;
-$SUCCESS_BORDER_COLOR:              #70C070;
-$SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  #FFF8E0;
-$WARNING_BORDER_COLOR:              #F8CC70;
-$WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   #FFE0E0;
-$DANGER_BORDER_COLOR:               #F07070;
-$DANGER_FG_COLOR:                   $BODY_FG_COLOR;
+// --------------------------------------------------
+// Links
+// --------------------------------------------------
 
-$WELL_FG_COLOR:                     lighten($conica_stain, 30%);
+$LINK_TEXT_COLOR:                   $LINK_COLOR;
+$LINK_HOVER_TEXT_COLOR:             $forest_green;
+
+// --------------------------------------------------
+// Buttons
+// --------------------------------------------------
+
+$BUTTON_TEXT_COLOR:                 $BODY_TEXT_COLOR;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
+$BUTTON_BORDER_COLOR:               transparent;
+
+// --------------------------------------------------
+// Form Inputs
+// --------------------------------------------------
+
+$INPUT_TEXT_COLOR:                  $dark_olive;
+$INPUT_BG_COLOR:                    $lightest_cream;
+$INPUT_BORDER_COLOR:                $gray_border;
+
+// --------------------------------------------------
+// Left Navigation Bar
+// --------------------------------------------------
+
+$LEFT_BAR_BORDER_COLOR:             $amber;
+$LEFT_BAR_HEADER_TEXT_COLOR:        $forest_green;
+$LEFT_BAR_HEADER_BG_COLOR:          $amber;
+$LEFT_BAR_TEXT_COLOR:               $crimson;
+$LEFT_BAR_BG_COLOR:                 $amber;
+$LEFT_BAR_HOVER_TEXT_COLOR:         $crimson;
+$LEFT_BAR_HOVER_BG_COLOR:           $custard;
+
+// --------------------------------------------------
+// Top Navigation Bar
+// --------------------------------------------------
+
+$TOP_BAR_BORDER_COLOR:              $muted_border;
+$TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
+$TOP_BAR_BG_COLOR:                  $pale_cream;
+$TOP_BAR_LINK_TEXT_COLOR:           $TOP_BAR_TEXT_COLOR;
+$TOP_BAR_LINK_BG_COLOR:             transparent;
+$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $TOP_BAR_TEXT_COLOR;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
+
+// --------------------------------------------------
+// Lists and Tables
+// --------------------------------------------------
+
+$LIST_BORDER_COLOR:                 $muted_border;
+$LIST_HEADER_TEXT_COLOR:            $dark_gray;
+$LIST_HEADER_BG_COLOR:              $light_gray;
+$LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
+$LIST_BG_COLOR:                     $light_cream;
+$LIST_ODD_BG_COLOR:                 $pale_cream;
+$LIST_HOVER_BG_COLOR:               $custard;
+
+// --------------------------------------------------
+// Menus and Dropdowns
+// --------------------------------------------------
+
+$MENU_BORDER_COLOR:                 $gray_border;
+$MENU_TEXT_COLOR:                   $BODY_TEXT_COLOR;
+$MENU_BG_COLOR:                     $light_cream;
+$MENU_HOVER_TEXT_COLOR:             $MENU_TEXT_COLOR;
+$MENU_HOVER_BG_COLOR:               $light_cream;
+$MENU_ACTIVE_TEXT_COLOR:            $MENU_TEXT_COLOR;
+$MENU_ACTIVE_BG_COLOR:              $light_cream;
+
+// --------------------------------------------------
+// Tooltips
+// --------------------------------------------------
+
+$TOOLTIP_TEXT_COLOR:                $pale_cream;
+$TOOLTIP_BG_COLOR:                  $red;
+
+// --------------------------------------------------
+// Progress Bars
+// --------------------------------------------------
+
+$PROGRESS_BG_COLOR:                 $pale_cream;
+$PROGRESS_BAR_COLOR:                $forest_green;
+$PROGRESS_TEXT_COLOR:               $dark_olive;
+
+// --------------------------------------------------
+// Panels
+// --------------------------------------------------
+
+$PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
+$PANEL_BG_COLOR:                    $light_cream;
+$PANEL_BORDER_COLOR:                $muted_border;
+$PANEL_FOOTER_BG_COLOR:             $lighter_cream;

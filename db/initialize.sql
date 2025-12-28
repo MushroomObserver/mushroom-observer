@@ -36,3 +36,4 @@ drop database mo_tmp;
 grant all privileges on mo_development.* to 'mo'@'localhost' with grant option;
 grant all privileges on cache_development.* to 'mo'@'localhost' with grant option;
 grant all privileges on mo_test.* to 'mo'@'localhost' with grant option;
+grant all privileges on `mo_test-%`.* to 'mo'@'localhost';

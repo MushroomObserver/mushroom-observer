@@ -154,7 +154,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_user(obs_user)
     if @user
-      user_link(@obs.user)
+      user_link(obs_user)
     else
       plain(obs_user.unique_text_name)
     end

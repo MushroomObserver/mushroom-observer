@@ -60,9 +60,12 @@ module CapybaraSessionExtensions
   # Login the given user, testing to make sure it was successful.
   def login!(user, *, **kwargs)
     login(user, *, **kwargs)
-    kwargs[:session] || self
+    session = kwargs[:session] || self
     user = User.find_by(login: user) if user.is_a?(String)
-    assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
+    # Check page for user's login name in nav (User.current_id is thread-local
+    # and not accessible from test thread with Cuprite/Puma)
+    session.assert_selector("#user_nav_toggle", text: user.login,
+                                                wait: 5)
   end
 
   def logout(session: self)
@@ -72,11 +75,10 @@ module CapybaraSessionExtensions
   def put_user_in_admin_mode(user = :zero_user, session: self)
     user.admin = true
     user.save!
-    login(user.login, session: session)
-    assert_equal(user.id, User.current_id)
+    login!(user, session: session)
 
     session.click_on(id: "user_nav_admin_mode_link")
-    assert_match(/DANGER: You are in administrator mode/, page.html)
+    session.assert_text("DANGER: You are in administrator mode")
   end
 
   # The current_path plus the query, similar to @request.fullpath

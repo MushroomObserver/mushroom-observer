@@ -23,10 +23,25 @@ class SearchController < ApplicationController
       flash_and_redirect_invalid_search(type) and return
     end
 
+    return if pattern_too_long?(pattern)
+
     save_pattern_and_proceed(type, pattern)
   end
 
   private
+
+  def pattern_too_long?(pattern)
+    return false if pattern.length <= Searchable::MAX_SEARCH_INPUT_LENGTH
+
+    flash_error(
+      :runtime_search_string_too_long.t(
+        max: Searchable::MAX_SEARCH_INPUT_LENGTH,
+        length: pattern.length
+      )
+    )
+    redirect_back_or_to(root_path)
+    true
+  end
 
   def save_pattern_and_proceed(type, pattern)
     # Save it so that we can keep it in the search bar in subsequent pages.
@@ -105,9 +120,8 @@ class SearchController < ApplicationController
   end
 
   def build_query_and_redirect(type, model_name, pattern)
-    # :Name and :Observation prevalidate the pattern with a PatternSearch
-    # instance, and check for errors defined by PatternSearch.
-    # :Location checks the user location format of the "pattern".
+    # :Name, :Observation, and :Location prevalidate the pattern with a
+    # PatternSearch instance, and check for errors defined by PatternSearch.
     query = query_from_pattern(model_name, pattern)
 
     # Finally we can redirect.
@@ -130,10 +144,8 @@ class SearchController < ApplicationController
 
   def query_from_pattern(model_name, pattern)
     case model_name
-    when :Observation, :Name
+    when :Observation, :Name, :Location
       pattern_search_query_from_pattern(model_name, pattern)
-    when :Location
-      location_query_from_pattern(pattern)
     else
       create_query(model_name, pattern:)
     end
@@ -150,12 +162,6 @@ class SearchController < ApplicationController
     end
     # This will create a blank query if there are errors.
     create_query(model_name, search.query&.params || {})
-  end
-
-  def location_query_from_pattern(pattern)
-    create_query(
-      :Location, pattern: Location.user_format(@user, pattern)
-    )
   end
 
   def flash_pattern_search_errors(search)
