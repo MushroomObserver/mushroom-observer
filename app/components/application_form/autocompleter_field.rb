@@ -3,6 +3,7 @@
 class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap autocompleter input field component with dropdown suggestions
   # Wraps a text input with Stimulus autocompleter controller
+  # rubocop:disable Metrics/ClassLength
   class AutocompleterField < Superform::Rails::Components::Input
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Rails::Helpers::LinkTo
@@ -37,20 +38,32 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def extract_options(options)
+      extract_field_options(options)
+      extract_button_options(options)
+      extract_hidden_field_options(options)
+    end
+
+    def extract_field_options(options)
       @field_attributes = options.fetch(:attributes, {})
       @wrapper_options = options.fetch(:wrapper_options, {})
+      @custom_controller_id = options[:controller_id]
+      @map_outlet = options[:map_outlet]
+      @extra_controller_data = options[:controller_data] || {}
+    end
+
+    def extract_button_options(options)
       @find_text = options[:find_text]
       @keep_text = options[:keep_text]
       @edit_text = options[:edit_text]
       @create_text = options[:create_text]
       @create = options[:create]
       @create_path = options[:create_path]
+    end
+
+    def extract_hidden_field_options(options)
       @hidden_name = options[:hidden_name]
       @hidden_value = options[:hidden_value]
       @hidden_data = options[:hidden_data]
-      @custom_controller_id = options[:controller_id]
-      @map_outlet = options[:map_outlet]
-      @extra_controller_data = options[:controller_data] || {}
     end
 
     # Override superclass method to use our @field_attributes
@@ -93,7 +106,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return {} unless map_outlet
 
       prefix = stimulus_controller_name.to_s.tr("-", "_")
-      { :"#{prefix}_map_outlet" => map_outlet }
+      { "#{prefix}_map_outlet": map_outlet }
     end
 
     # Returns the Stimulus controller name for this autocompleter type.
@@ -298,30 +311,41 @@ class Components::ApplicationForm < Superform::Rails::Form
       base_data.merge(hidden_data)
     end
 
-    # Hidden field stores the selected ID.
-    # When hidden_name is provided, use model prefix + hidden_name.
-    # Otherwise, use field's dom.id + "_id".
+    # Hidden field stores selected ID. Uses model prefix + hidden_name
+    # if provided, otherwise field's dom.id + "_id".
     def hidden_field_id
-      if hidden_name
-        # Extract model prefix from field.dom.id (e.g., "herbarium_place_name" -> "herbarium")
-        model_prefix = field.dom.id.to_s.sub(/_#{field.key}$/, "")
-        "#{model_prefix}_#{hidden_name}"
-      else
-        "#{field.dom.id}_id"
-      end
+      return "#{field.dom.id}_id" unless hidden_name
+
+      "#{model_prefix}_#{hidden_name}"
     end
 
-    # If field key has brackets (e.g., "writein_name[1]"), convert to
-    # underscores to avoid Rails param parsing conflicts.
-    def hidden_field_name
-      if hidden_name
-        # Extract model namespace from field.dom.name (e.g., "herbarium[place_name]" -> "herbarium")
-        model_namespace = field.dom.name.to_s.sub(/\[#{field.key}\]$/, "")
-        "#{model_namespace}[#{hidden_name}]"
-      else
-        key = field.key.to_s.tr("[]", "_").chomp("_")
-        field.dom.name.sub(/\[#{field.key}\]$/, "[#{key}_id]")
-      end
+    # Strips field key suffix from dom.id to get model prefix
+    # e.g., "herbarium_place_name" -> "herbarium"
+    def model_prefix
+      field.dom.id.to_s.sub(/_#{field.key}$/, "")
     end
+
+    # Converts brackets in field key to underscores for param parsing.
+    def hidden_field_name
+      return custom_hidden_field_name if hidden_name
+
+      default_hidden_field_name
+    end
+
+    def custom_hidden_field_name
+      "#{model_namespace}[#{hidden_name}]"
+    end
+
+    # Strips field key suffix from dom.name to get model namespace
+    # e.g., "herbarium[place_name]" -> "herbarium"
+    def model_namespace
+      field.dom.name.to_s.sub(/\[#{field.key}\]$/, "")
+    end
+
+    def default_hidden_field_name
+      key = field.key.to_s.tr("[]", "_").chomp("_")
+      field.dom.name.sub(/\[#{field.key}\]$/, "[#{key}_id]")
+    end
+    # rubocop:enable Metrics/ClassLength
   end
 end
