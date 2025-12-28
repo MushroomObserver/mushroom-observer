@@ -95,8 +95,8 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    # Need to also stub the lookup field for view_template
-    # invoke_append: true so the collapse content (and thus select field) renders
+    # Need to also stub the lookup field for view_template.
+    # invoke_append: true so collapse content (and select field) renders
     lookup_field_mock = create_lookup_mock(invoke_append: true)
 
     names_ns = Minitest::Mock.new
