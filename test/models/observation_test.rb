@@ -1239,7 +1239,7 @@ class ObservationTest < UnitTestCase
   # Regression test for NOT IN NULL bug
   # When observation_views contains a NULL observation_id, the NOT IN clause
   # in not_reviewed_by_user returns no results due to NULL semantics
-  def test_scope_needs_naming_with_null_observation_view
+  def test_scope_not_reviewed_by_user_with_null_observation_id
     # Create a NULL observation_id record in observation_views for rolf
     # This simulates data corruption or a bug that allowed NULL to be inserted
     ObservationView.create!(
