@@ -29,16 +29,11 @@ module Components
     def view_template
       type = @obj.type_tag
 
-      authors, editors = if description_object?(type)
-                           description_authors_and_editors
-                         else
-                           non_description_authors_and_editors
-                         end
-
-      content = (authors || view_context.safe_empty) +
-                view_context.safe_br +
-                (editors || view_context.safe_empty)
-      p { trusted_html(content) }
+      if description_object?(type)
+        description_authors_and_editors
+      else
+        non_description_authors_and_editors
+      end
     end
 
     private
@@ -54,36 +49,31 @@ module Components
       is_admin = @user && @obj.is_admin?(@user)
       is_author = @user && authors_list.include?(@user)
 
-      authors = view_context.user_list(:show_name_description_author,
-                                       authors_list)
-      editors = view_context.user_list(:show_name_description_editor,
-                                       editors_list)
-
-      if is_admin
-        authors = authors_with_review_link(authors)
-      elsif !is_author
-        authors = authors_with_request_link(authors)
+      p do
+        render_user_list(:show_name_description_author, authors_list) do
+          if is_admin
+            render_review_link
+          elsif !is_author
+            render_request_link
+          end
+        end
+        br
+        render_user_list(:show_name_description_editor, editors_list)
       end
-
-      [authors, editors]
     end
 
-    def authors_with_review_link(authors)
-      return authors if authors.nil? || authors.to_s.empty?
-
-      authors + view_context.safe_nbsp + link_to(
-        "(#{:review_authors_review_authors.t})",
-        description_authors_path(id: @obj.id, type: @obj.type_tag)
-      )
+    def render_review_link
+      whitespace
+      a(href: description_authors_path(id: @obj.id, type: @obj.type_tag)) do
+        plain("(#{:review_authors_review_authors.t})")
+      end
     end
 
-    def authors_with_request_link(authors)
-      return authors if authors.nil? || authors.to_s.empty?
-
-      authors + view_context.safe_nbsp + link_to(
-        "(#{:review_authors_review_authors.t})",
-        description_authors_path(id: @obj.id, type: @obj.type_tag)
-      )
+    def render_request_link
+      whitespace
+      a(href: description_authors_path(id: @obj.id, type: @obj.type_tag)) do
+        plain("(#{:review_authors_review_authors.t})")
+      end
     end
 
     # Renders authors and editors for non-description objects
@@ -94,10 +84,59 @@ module Components
       editor_ids = versions.map(&:user_id).uniq - [@obj.user_id]
       editors_list = User.where(id: editor_ids).to_a
 
-      authors = view_context.user_list(:"show_#{type}_creator", [@obj.user])
-      editors = view_context.user_list(:"show_#{type}_editor", editors_list)
+      p do
+        render_user_list(:"show_#{type}_creator", [@obj.user])
+        br
+        render_user_list(:"show_#{type}_editor", editors_list)
+      end
+    end
 
-      [authors, editors]
+    # Render a list of users on one line. Renders nothing if user list
+    # empty. Accepts optional block to append content after the list.
+    #
+    # Examples:
+    #   render_user_list(:show_name_description_author, authors)
+    #   render_user_list(:show_name_description_editor, editors)
+    #
+    # With block:
+    #   render_user_list(:show_name_description_author, authors) do
+    #     a(href: some_path) { plain "(review)" }
+    #   end
+    def render_user_list(title, users = [])
+      return unless users&.any?
+
+      plain(user_list_title(title, users))
+      render_user_links(users)
+      yield if block_given?
+    end
+
+    def user_list_title(title, users)
+      title_text = users.size > 1 ? title.to_s.pluralize.to_sym.t : title.t
+      "#{title_text}: "
+    end
+
+    def render_user_links(users)
+      users.each_with_index do |user, index|
+        render_user_link(user, user.legal_name)
+        plain(", ") unless index == users.size - 1
+      end
+    end
+
+    # Wrap user name in link to show_user.
+    def render_user_link(user, name = nil)
+      return plain(:unknown_user_name.t) unless user
+
+      if user.is_a?(Integer)
+        name ||= "#{:USER.t} ##{user}"
+        user_id = user
+      else
+        name ||= user.unique_text_name
+        user_id = user.id
+      end
+
+      a(href: user_path(user_id), class: "user_link_#{user_id}") do
+        plain(name)
+      end
     end
   end
 end
