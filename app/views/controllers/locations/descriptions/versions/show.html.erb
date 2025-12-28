@@ -15,4 +15,4 @@ add_context_nav(location_description_version_tabs(description: @description,
 
 <%= render(partial: "descriptions/description_details_and_alts_panel") %>
 
-<%= render Components::ObjectFooter.new(user: @user, obj: @description, versions: @versions) %>
+<%= render(Components::ObjectFooter.new(user: @user, obj: @description, versions: @versions)) %>

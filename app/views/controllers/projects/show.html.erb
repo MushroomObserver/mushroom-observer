@@ -108,4 +108,4 @@ container_class(:wide)
            locals: { object: @project, comments: @comments,
                      controls: @user, limit: nil }) %>
 
-<%= render Components::ObjectFooter.new(user: @user, obj: @project) %>
+<%= render(Components::ObjectFooter.new(user: @user, obj: @project)) %>

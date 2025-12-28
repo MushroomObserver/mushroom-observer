@@ -1,11 +1,11 @@
 <%= render(Components::Panel.new(panel_id: "location_footer")) do |panel| %>
   <%= panel.with_body do %>
     <%= tag.div(id: "location_authors_editors") do %>
-      <%= render Components::AuthorsAndEditors.new(
+      <%= render(Components::AuthorsAndEditors.new(
             obj: @location,
             versions: @versions,
             user: @user
-          ) %>
+          )) %>
     <% end %>
     <%= :show_name_num_notifications.t(num: @location.interests) %>
   <% end %>

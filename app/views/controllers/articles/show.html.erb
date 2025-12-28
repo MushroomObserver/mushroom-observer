@@ -13,4 +13,4 @@ add_edit_icons(@article)
   <%= panel.with_body { @article.body.tpl } %>
 <% end %>
 
-<%= render Components::ObjectFooter.new(user: @user, obj: @article) %>
+<%= render(Components::ObjectFooter.new(user: @user, obj: @article)) %>

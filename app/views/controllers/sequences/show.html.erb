@@ -63,4 +63,4 @@ container_class(:wide)
   <%= user_link(@sequence.user) %>
 </div>
 
-<%= render Components::ObjectFooter.new(user: @user, obj: @sequence) %>
+<%= render(Components::ObjectFooter.new(user: @user, obj: @sequence)) %>

@@ -68,11 +68,11 @@ column_classes(:seven_five)
     <%= render(Components::Panel.new(panel_id: "name_footer")) do |panel| %>
       <%= panel.with_body do %>
         <%= tag.div(id: "name_authors_editors") do %>
-          <%= render Components::AuthorsAndEditors.new(
+          <%= render(Components::AuthorsAndEditors.new(
                 obj: @name,
                 versions: @versions,
                 user: @user
-              ) %>
+              )) %>
         <% end %>
         <%= :show_name_num_notifications.t(num: @name.interests) %>
       <% end %>
@@ -84,4 +84,4 @@ column_classes(:seven_five)
 <% end %>
 <!--.row-->
 
-<%= render Components::ObjectFooter.new(user: @user, obj: @name, versions: @versions) %>
+<%= render(Components::ObjectFooter.new(user: @user, obj: @name, versions: @versions)) %>
