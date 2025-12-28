@@ -60,10 +60,14 @@ module Components
     end
 
     def render_label(form)
-      # Capture the checkbox HTML
-      checkbox_html = form.check_box(
-        :reviewed,
-        {
+      form.label(
+        "#{@selector}_#{@obs_id}",
+        class: "caption-reviewed-link #{@label_class}"
+      ) do
+        plain(reviewed_text)
+        whitespace
+        form.check_box(
+          :reviewed,
           checked: @reviewed,
           class: "mx-3",
           id: "#{@selector}_#{@obs_id}",
@@ -71,17 +75,8 @@ module Components
             reviewed_toggle_target: "toggle",
             action: "reviewed-toggle#submitForm"
           }
-        }
-      )
-
-      # Render label with text and checkbox
-      # rubocop:disable Rails/OutputSafety
-      form.label(
-        "#{@selector}_#{@obs_id}",
-        "#{reviewed_text}#{checkbox_html}".html_safe,
-        class: "caption-reviewed-link #{@label_class}"
-      )
-      # rubocop:enable Rails/OutputSafety
+        )
+      end
     end
 
     def reviewed_text
