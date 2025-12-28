@@ -229,10 +229,15 @@ class Components::MatrixBox < Components::Base
     return unless @identify
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
+      reviewed = ObservationView.find_by(
+        observation_id: @data[:id],
+        user_id: @user&.id
+      )&.reviewed
       mark_as_reviewed_toggle(
         @data[:id],
         "box_reviewed",
-        "stretched-link"
+        "stretched-link",
+        reviewed
       )
     end
   end

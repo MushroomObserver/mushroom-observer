@@ -60,7 +60,11 @@ class Components::LightboxCaption < Components::Base
         btn_class: "btn btn-primary d-inline-block"
       )
       span(class: "mx-2") { whitespace }
-      mark_as_reviewed_toggle(@obs.id)
+      reviewed = ObservationView.find_by(
+        observation_id: @obs.id,
+        user_id: @user&.id
+      )&.reviewed
+      mark_as_reviewed_toggle(@obs.id, "caption_reviewed", "", reviewed)
     end
   end
 
