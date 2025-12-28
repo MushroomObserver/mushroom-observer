@@ -15,29 +15,45 @@
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
 
-$augustus_cap:         #ECCF95;
-$brasiliensis_gills_1: #A06463;
-$brasiliensis_gills_2: #743931;
-$campestris_cap:       #F6F0F2;
-$cupreobrunneus_gills: #3B2821;
-$lilaceps_stain:       #B4725F;
-$semotus_cap:          #BC9D89;
-$xanthodermus_stain:   #D4A833;
-$polyozellus_light:    #a5bffa;
-$polyozellus_dark:     #5167b2;
+$pale_gold:     #ECCF95; // augustus_cap
+$dusty_rose:    #A06463; // brasiliensis_gills
+$brick_red:     #743931; // brasiliensis_gills (darker)
+$pale_agaricus: #F6F0F2; // campestris_cap
+$button_gray:   #F6F6F6; // neutral gray for buttons
+$white:         #FFFFFF; // pure white for inputs
+$dark_brown:    #3B2821; // cupreobrunneus_gills
+$terracotta:    #B4725F; // lilaceps_stain
+$tan:           #BC9D89; // semotus_cap
+$mustard:       #D4A833; // xanthodermus_stain
+
+// Derived grays (mixed from theme colors)
+$light_gray:      mix($dark_brown, $pale_agaricus, 10%);
+$gray_border:     rgba($dark_brown, 0.4);
+$muted_border:    rgba($dark_brown, 0.2);
+$dark_gray:       mix($dark_brown, $pale_agaricus, 50%);
+$muted_brown:     scale-color($dark_brown, $lightness: 36%);
+$palest_agaricus: scale-color($pale_agaricus, $lightness: 50%);
+
+// Alert state colors
+$info_blue:      #5167b2; // polyozellus_dark
+$success_green:  #70C070;
+$warning_yellow: #F8CC70;
+$danger_red:     #F07070;
 
 // ==================================================
-// SECTION 2: SEMANTIC COLOR ASSIGNMENTS
+// SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
 // ==================================================
 
-$PRIMARY_COLOR:                     $brasiliensis_gills_1;
-$SECONDARY_COLOR:                   $augustus_cap;
-$SUCCESS_COLOR:                     #70C070;
-$INFO_COLOR:                        $polyozellus_dark;
-$WARNING_COLOR:                     $xanthodermus_stain;
-$DANGER_COLOR:                      $lilaceps_stain;
-$LIGHT_COLOR:                       $campestris_cap;
-$DARK_COLOR:                        $cupreobrunneus_gills;
+$LIGHT_COLOR:     $pale_agaricus;
+$DARK_COLOR:      $dark_brown;
+$PRIMARY_COLOR:   $dusty_rose;
+$SECONDARY_COLOR: $pale_gold;
+$LINK_COLOR:      $PRIMARY_COLOR;
+
+$INFO_COLOR:      $info_blue;
+$SUCCESS_COLOR:   $success_green;
+$WARNING_COLOR:   $mustard;
+$DANGER_COLOR:    $terracotta;
 
 // ==================================================
 // SECTION 3: UI ELEMENT COLORS
@@ -47,188 +63,100 @@ $DARK_COLOR:                        $cupreobrunneus_gills;
 // Body and Typography
 // --------------------------------------------------
 
-$BODY_FG_COLOR:                     $cupreobrunneus_gills;
-$BODY_BG_COLOR:                     $campestris_cap;
+$BODY_TEXT_COLOR:                   $DARK_COLOR;
+$BODY_BG_COLOR:                     $LIGHT_COLOR;
 
 // --------------------------------------------------
 // Links
 // --------------------------------------------------
 
-$LINK_WEIGHT:                       normal;
-$LINK_FG_COLOR:                     $brasiliensis_gills_1;
-$LINK_BG_COLOR:                     transparent;
-$LINK_VISITED_FG_COLOR:             $cupreobrunneus_gills;
-$LINK_VISITED_BG_COLOR:             transparent;
-$LINK_HOVER_FG_COLOR:               $brasiliensis_gills_2;
-$LINK_HOVER_BG_COLOR:               $campestris_cap;
+$LINK_TEXT_COLOR:                   $LINK_COLOR;
+$LINK_HOVER_TEXT_COLOR:             $brick_red;
 
 // --------------------------------------------------
 // Buttons
 // --------------------------------------------------
 
-$BUTTON_FG_COLOR:                   #000000;
-$BUTTON_BG_COLOR:                   #F6F6F6;
-$BUTTON_BORDER_COLOR:               #CCCCCC;
-$BUTTON_HOVER_FG_COLOR:             #000000;
-$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
-$BUTTON_HOVER_BORDER_COLOR:         black;
-$BUTTON_ACTIVE_FG_COLOR:            $campestris_cap;
-$BUTTON_ACTIVE_BG_COLOR:            $brasiliensis_gills_2;
-$BUTTON_PRIMARY_FG_COLOR:           $campestris_cap;
-$BUTTON_PRIMARY_BG_COLOR:           $brasiliensis_gills_1;
-$BUTTON_PRIMARY_BORDER_COLOR:       $brasiliensis_gills_2;
-$BUTTON_PRIMARY_HOVER_FG_COLOR:     $campestris_cap;
-$BUTTON_PRIMARY_HOVER_BG_COLOR:     $brasiliensis_gills_2;
-$BUTTON_PRIMARY_HOVER_BORDER_COLOR: $cupreobrunneus_gills;
-$BUTTON_BORDER_WIDTH:               1px;
-$BUTTON_BORDER_STYLE:               solid;
-$BUTTON_BORDER_RADIUS:              5px;
+$BUTTON_TEXT_COLOR:                 $BODY_TEXT_COLOR;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
+$BUTTON_BORDER_COLOR:               transparent;
 
 // --------------------------------------------------
 // Form Inputs
 // --------------------------------------------------
 
-$INPUT_FG_COLOR:                    #000000;
-$INPUT_BG_COLOR:                    #FFFFFF;
-$INPUT_BORDER_COLOR:                #CCCCCC;
-$INPUT_BORDER_WIDTH:                1px;
-$INPUT_BORDER_STYLE:                solid;
-$INPUT_BORDER_RADIUS:               5px;
-
-// --------------------------------------------------
-// Alert States (Info, Success, Warning, Danger)
-// --------------------------------------------------
-
-$INFO_BG_COLOR:                     $polyozellus_light;
-$INFO_BORDER_COLOR:                 $polyozellus_dark;
-$INFO_FG_COLOR:                     $BODY_FG_COLOR;
-$SUCCESS_BG_COLOR:                  #E0FFE0;
-$SUCCESS_BORDER_COLOR:              #70C070;
-$SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
-$WARNING_BG_COLOR:                  #FFF8E0;
-$WARNING_BORDER_COLOR:              #F8CC70;
-$WARNING_FG_COLOR:                  $BODY_FG_COLOR;
-$DANGER_BG_COLOR:                   #FFE0E0;
-$DANGER_BORDER_COLOR:               #F07070;
-$DANGER_FG_COLOR:                   $BODY_FG_COLOR;
-
-$BANNER_BORDER_WIDTH:               2px;
-$BANNER_BORDER_STYLE:               solid;
-$BANNER_BORDER_RADIUS:              5px;
-
-$ALERT_BORDER_WIDTH:                2px;
-$ALERT_BORDER_STYLE:                solid;
-$ALERT_BORDER_RADIUS:               5px;
-
-// --------------------------------------------------
-// Logo
-// --------------------------------------------------
-
-$LOGO_BORDER_COLOR:                 $cupreobrunneus_gills;
-$LOGO_BORDER_WIDTH:                 1px;
-$LOGO_BORDER_STYLE:                 solid;
-$LOGO_BORDER_RADIUS:                0px;
-$LOGO_FG_COLOR:                     $cupreobrunneus_gills;
-$LOGO_BG_COLOR:                     $semotus_cap;
-$LOGO_HOVER_FG_COLOR:               $brasiliensis_gills_2;
-$LOGO_HOVER_BG_COLOR:               $campestris_cap;
+$INPUT_TEXT_COLOR:                  $dark_brown;
+$INPUT_BG_COLOR:                    $white;
+$INPUT_BORDER_COLOR:                $gray_border;
 
 // --------------------------------------------------
 // Left Navigation Bar
 // --------------------------------------------------
 
-$LEFT_BAR_BORDER_COLOR:             $augustus_cap;
-$LEFT_BAR_BORDER_WIDTH:             1px;
-$LEFT_BAR_BORDER_STYLE:             solid;
-$LEFT_BAR_BORDER_RADIUS:            5px;
-$LEFT_BAR_ITEM_BORDER_WIDTH:        1px;
-$LEFT_BAR_HEADER_FG_COLOR:          $cupreobrunneus_gills;
-$LEFT_BAR_HEADER_BG_COLOR:          $augustus_cap;
-$LEFT_BAR_FG_COLOR:                 $brasiliensis_gills_1;
-$LEFT_BAR_BG_COLOR:                 $augustus_cap;
-$LEFT_BAR_HOVER_FG_COLOR:           $brasiliensis_gills_2;
-$LEFT_BAR_HOVER_BG_COLOR:           $campestris_cap;
+$LEFT_BAR_BORDER_COLOR:             $pale_gold;
+$LEFT_BAR_HEADER_TEXT_COLOR:        $dark_brown;
+$LEFT_BAR_HEADER_BG_COLOR:          $pale_gold;
+$LEFT_BAR_TEXT_COLOR:               $dusty_rose;
+$LEFT_BAR_BG_COLOR:                 $pale_gold;
+$LEFT_BAR_HOVER_TEXT_COLOR:         $brick_red;
+$LEFT_BAR_HOVER_BG_COLOR:           $pale_agaricus;
 
 // --------------------------------------------------
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              transparent;
-$TOP_BAR_BORDER_WIDTH:              1px;
-$TOP_BAR_BORDER_STYLE:              solid;
-$TOP_BAR_BORDER_RADIUS:             0;
-$TOP_BAR_FG_COLOR:                  $cupreobrunneus_gills;
-$TOP_BAR_BG_COLOR:                  $campestris_cap;
-$TOP_BAR_LINK_FG_COLOR:             $brasiliensis_gills_1;
+$TOP_BAR_BORDER_COLOR:              $muted_border;
+$TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
+$TOP_BAR_BG_COLOR:                  $pale_agaricus;
+$TOP_BAR_LINK_TEXT_COLOR:           $TOP_BAR_TEXT_COLOR;
 $TOP_BAR_LINK_BG_COLOR:             transparent;
-$TOP_BAR_LINK_HOVER_FG_COLOR:       $brasiliensis_gills_2;
-$TOP_BAR_LINK_HOVER_BG_COLOR:       $campestris_cap;
+$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $TOP_BAR_TEXT_COLOR;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       $pale_agaricus;
 
 // --------------------------------------------------
 // Lists and Tables
 // --------------------------------------------------
 
-$LIST_BORDER_COLOR:                 transparent;
-$LIST_HEADER_FG_COLOR:              #777777;
-$LIST_HEADER_BG_COLOR:              #EEEEEE;
-$LIST_FG_COLOR:                     $cupreobrunneus_gills;
-$LIST_BG_COLOR:                     mix($campestris_cap, white, 50%);
-$LIST_EVEN_BG_COLOR:                $LIST_BG_COLOR;
-$LIST_ODD_BG_COLOR:                 #FFFFFF;
-$LIST_HOVER_BG_COLOR:               $augustus_cap;
+$LIST_BORDER_COLOR:                 $gray_border;
+$LIST_HEADER_TEXT_COLOR:            $dark_gray;
+$LIST_HEADER_BG_COLOR:              $light_gray;
+$LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
+$LIST_BG_COLOR:                     $palest_agaricus;
+$LIST_ODD_BG_COLOR:                 $pale_agaricus;
+$LIST_HOVER_BG_COLOR:               $pale_gold;
 
 // --------------------------------------------------
 // Menus and Dropdowns
 // --------------------------------------------------
 
-$MENU_BORDER_COLOR:                 $brasiliensis_gills_2;
-$MENU_FG_COLOR:                     black;
+$MENU_BORDER_COLOR:                 $gray_border;
+$MENU_TEXT_COLOR:                   $BODY_TEXT_COLOR;
 $MENU_BG_COLOR:                     white;
-$MENU_HOT_FG_COLOR:                 black;
-$MENU_HOT_BG_COLOR:                 $xanthodermus_stain;
-$MENU_WARM_FG_COLOR:                black;
-$MENU_WARM_BG_COLOR:                $lilaceps_stain;
-
-// --------------------------------------------------
-// Pagination
-// --------------------------------------------------
-
-$PAGER_FG_COLOR:                    $cupreobrunneus_gills;
-$PAGER_BG_COLOR:                    transparent;
-$PAGER_BORDER_COLOR:                none;
-$PAGER_HOVER_FG_COLOR:              $brasiliensis_gills_2;
-$PAGER_HOVER_BG_COLOR:              $campestris_cap;
-$PAGER_HOVER_BORDER_COLOR:          none;
-$PAGER_ACTIVE_FG_COLOR:             $campestris_cap;
-$PAGER_ACTIVE_BG_COLOR:             $brasiliensis_gills_2;
-$PAGER_ACTIVE_BORDER_COLOR:         none;
+$MENU_HOVER_TEXT_COLOR:             $MENU_TEXT_COLOR;
+$MENU_HOVER_BG_COLOR:               $mustard;
+$MENU_ACTIVE_TEXT_COLOR:            $MENU_TEXT_COLOR;
+$MENU_ACTIVE_BG_COLOR:              $terracotta;
 
 // --------------------------------------------------
 // Tooltips
 // --------------------------------------------------
 
-$TOOLTIP_FG_COLOR:                  $campestris_cap;
-$TOOLTIP_BG_COLOR:                  $cupreobrunneus_gills;
-
-// --------------------------------------------------
-// Vote Meters
-// --------------------------------------------------
-
-$VOTE_METER_BORDER_COLOR:           none;
-$VOTE_METER_FG_COLOR:               $brasiliensis_gills_1;
-$VOTE_METER_BG_COLOR:               $campestris_cap;
+$TOOLTIP_TEXT_COLOR:                $pale_agaricus;
+$TOOLTIP_BG_COLOR:                  $dark_brown;
 
 // --------------------------------------------------
 // Progress Bars
 // --------------------------------------------------
 
-$PROGRESS_BG_COLOR:                 $campestris_cap;
-$PROGRESS_FG_COLOR:                 $cupreobrunneus_gills;
-$PROGRESS_BAR_COLOR:                $brasiliensis_gills_1;
+$PROGRESS_BG_COLOR:                 $pale_agaricus;
+$PROGRESS_BAR_COLOR:                $dusty_rose;
+$PROGRESS_TEXT_COLOR:               $dark_brown;
 
 // --------------------------------------------------
-// Wells and Panels
+// Panels
 // --------------------------------------------------
 
-$WELL_FG_COLOR:                     lighten($cupreobrunneus_gills, 30%);
-$WELL_BG_COLOR:                     $augustus_cap;
+$PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
+$PANEL_BG_COLOR:                    $palest_agaricus;
+$PANEL_BORDER_COLOR:                $muted_border;
+$PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;

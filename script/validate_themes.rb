@@ -15,7 +15,7 @@
 
 require "fileutils"
 
-DEFAULTS_FILE = "app/assets/stylesheets/variables/_defaults.scss"
+DEFAULTS_FILE = "app/assets/stylesheets/variables/_black_on_white.scss"
 THEMES_DIR = "app/assets/stylesheets/variables"
 
 # Extract all variable names from a SCSS file
@@ -38,10 +38,10 @@ def load_defaults_variables
   variables
 end
 
-# Find all theme files (excluding defaults)
+# Find all theme files (excluding black_and_white)
 def find_theme_files
   Dir.glob("#{THEMES_DIR}/_*.scss").reject do |file|
-    file.end_with?("_defaults.scss")
+    file.end_with?("_black_and_white.scss")
   end.sort
 end
 
@@ -61,7 +61,7 @@ end
 def display_missing_variables(missing)
   return if missing.empty?
 
-  puts("  ⚠️  Missing #{missing.size} from defaults:")
+  puts("  ⚠️  Missing #{missing.size} from default theme:")
   missing.sort.each { |var| puts("      - $#{var}") }
 end
 
@@ -70,7 +70,7 @@ def display_orphaned_variables(orphaned)
   return if orphaned.empty?
 
   puts("  ⚠️  Has #{orphaned.size} orphaned variables " \
-       "(not in defaults):")
+       "(not in default theme):")
   orphaned.sort.each { |var| puts("      - $#{var}") }
 end
 
@@ -176,7 +176,7 @@ def validate_all_themes(strict_mode: false)
   display_validation_header
 
   defaults_vars = load_defaults_variables
-  puts("✓ Loaded #{defaults_vars.size} variables from defaults theme")
+  puts("✓ Loaded #{defaults_vars.size} variables from default theme")
   puts
 
   results = load_and_validate_themes(defaults_vars)

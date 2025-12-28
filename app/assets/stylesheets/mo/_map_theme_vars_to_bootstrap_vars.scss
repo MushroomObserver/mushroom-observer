@@ -2,19 +2,19 @@
 // set bootstrap parameters first
 // --------------------------------------------------
 
-$brand-primary:                             #337AB7;
-$brand-success:                             #70C070;
-$brand-info:                                $INFO_BORDER_COLOR;
-$brand-warning:                             #F8CC70;
-$brand-danger:                              #f07070;
-$black:                  #000;
-$white:                  #fff;
+$brand-primary:                             $PRIMARY_COLOR;
+$brand-success:                             $SUCCESS_COLOR;
+$brand-info:                                $INFO_COLOR;
+$brand-warning:                             $WARNING_COLOR;
+$brand-danger:                              $DANGER_COLOR;
+$black:                                     black;
+$white:                                     white;
 
-$text-color:                                $BODY_FG_COLOR;
+$text-color:                                $BODY_TEXT_COLOR;
 $body-bg:                                   $BODY_BG_COLOR;
 
-$link-color:                                $LINK_FG_COLOR;
-$link-hover-color:                          $LINK_HOVER_FG_COLOR;
+$link-color:                                $LINK_TEXT_COLOR;
+$link-hover-color:                          $LINK_HOVER_TEXT_COLOR;
 
 $font-family-sans-serif:                    Verdana, Arial, Helvetica, sans-serif;
 $font-family-base:                          $font-family-sans-serif;
@@ -34,36 +34,36 @@ $padding-xs-horizontal:                     4px;
 
 $border-radius-base:                        5px;
 
-$component-active-color:                    $MENU_HOT_FG_COLOR;
-$component-active-bg:                       $MENU_HOT_BG_COLOR;
+$component-active-color:                    $MENU_HOVER_TEXT_COLOR;
+$component-active-bg:                       $MENU_HOVER_BG_COLOR;
 
 $table-cell-padding:                        6px;
 $table-condensed-cell-padding:              4px;
 $table-bg:                                  $LIST_BG_COLOR;
 $table-bg-accent:                           $LIST_ODD_BG_COLOR;
 $table-bg-hover:                            $LIST_HOVER_BG_COLOR;
-$table-bg-active:                           $MENU_WARM_BG_COLOR;
+$table-bg-active:                           $MENU_ACTIVE_BG_COLOR;
 $table-border-color:                        $MENU_BORDER_COLOR;
 
 $btn-font-weight:                           bold;
 
-$btn-default-color:                         $BUTTON_FG_COLOR;
+$btn-default-color:                         $BUTTON_TEXT_COLOR;
 $btn-default-bg:                            $BUTTON_BG_COLOR;
 $btn-default-border:                        $BUTTON_BORDER_COLOR;
 
-// Currently btn-primary is only used on navbar login, and reverify.
-// $btn-primary-color:                         $BUTTON_PRIMARY_FG_COLOR;
+// Currently btn-primary is not used on navbar login, and reverify.
+// $btn-primary-color:                         $BUTTON_PRIMARY_TEXT_COLOR;
 // $btn-primary-bg:                            $BUTTON_PRIMARY_BG_COLOR;
 // $btn-primary-border:                        $BUTTON_PRIMARY_BORDER_COLOR;
 
-$btn-link-disabled-color:                   mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR, 75%);
+$btn-link-disabled-color:                   mix($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, 75%);
 
 $input-bg:                                  $INPUT_BG_COLOR;
-$input-bg-disabled:                         mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
-$input-color:                               $INPUT_FG_COLOR;
-$input-border:                              $BUTTON_FG_COLOR; // INPUT_BORDER_COLOR;
-$input-color-placeholder:                   mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
-$legend-color:                              $BODY_FG_COLOR;
+$input-bg-disabled:                         mix($INPUT_TEXT_COLOR, $INPUT_BG_COLOR);
+$input-color:                               $INPUT_TEXT_COLOR;
+$input-border:                              $INPUT_BORDER_COLOR;
+$input-color-placeholder:                   mix($INPUT_TEXT_COLOR, $INPUT_BG_COLOR);
+$legend-color:                              $BODY_TEXT_COLOR;
 $legend-border-color:                       $INPUT_BORDER_COLOR;
 $input-group-addon-bg:                      $INPUT_BG_COLOR;
 $input-group-addon-border-color:            $INPUT_BORDER_COLOR;
@@ -73,14 +73,14 @@ $dropdown-bg:                               $MENU_BG_COLOR;
 $dropdown-border:                           $MENU_BORDER_COLOR;
 $dropdown-fallback-border:                  $MENU_BORDER_COLOR;
 $dropdown-divider-bg:                       $MENU_BG_COLOR;
-$dropdown-link-color:                       $MENU_FG_COLOR;
-$dropdown-link-hover-color:                 $MENU_HOT_FG_COLOR;
-$dropdown-link-hover-bg:                    $MENU_HOT_BG_COLOR;
-$dropdown-link-active-color:                $MENU_WARM_FG_COLOR;
-$dropdown-link-active-bg:                   $MENU_WARM_BG_COLOR;
-$dropdown-link-disabled-color:              mix($MENU_FG_COLOR, $MENU_BG_COLOR, 75%);
-$dropdown-header-color:                     $MENU_FG_COLOR;
-$dropdown-caret-color:                      $BODY_FG_COLOR;
+$dropdown-link-color:                       $MENU_TEXT_COLOR;
+$dropdown-link-hover-color:                 $MENU_HOVER_TEXT_COLOR;
+$dropdown-link-hover-bg:                    $MENU_HOVER_BG_COLOR;
+$dropdown-link-active-color:                $MENU_ACTIVE_TEXT_COLOR;
+$dropdown-link-active-bg:                   $MENU_ACTIVE_BG_COLOR;
+$dropdown-link-disabled-color:              mix($MENU_TEXT_COLOR, $MENU_BG_COLOR, 75%);
+$dropdown-header-color:                     $MENU_TEXT_COLOR;
+$dropdown-caret-color:                      $BODY_TEXT_COLOR;
 
 $screen-lg:                                 1320px;
 $screen-lg-min:                             1320px;
@@ -93,70 +93,57 @@ $navbar-border-radius:                      0;
 $navbar-padding-horizontal:                 13px;
 $navbar-padding-vertical:                   10px;
 
-$navbar-default-color:                      $TOP_BAR_FG_COLOR;
+$navbar-default-color:                      $TOP_BAR_TEXT_COLOR;
 $navbar-default-bg:                         $TOP_BAR_BG_COLOR;
 $navbar-default-border:                     $TOP_BAR_BORDER_COLOR;
-$navbar-default-link-color:                 $TOP_BAR_LINK_FG_COLOR;
-$navbar-default-link-hover-color:           $TOP_BAR_LINK_HOVER_FG_COLOR;
+$navbar-default-link-color:                 $TOP_BAR_LINK_TEXT_COLOR;
+$navbar-default-link-hover-color:           $TOP_BAR_LINK_HOVER_TEXT_COLOR;
 $navbar-default-link-hover-bg:              $TOP_BAR_LINK_HOVER_BG_COLOR;
-$navbar-default-link-active-color:          $TOP_BAR_LINK_FG_COLOR;
+$navbar-default-link-active-color:          $TOP_BAR_LINK_TEXT_COLOR;
 $navbar-default-link-active-bg:             $TOP_BAR_LINK_BG_COLOR;
-$navbar-default-link-disabled-color:        mix($TOP_BAR_LINK_FG_COLOR, $TOP_BAR_LINK_BG_COLOR, 75%);
+$navbar-default-link-disabled-color:        mix($TOP_BAR_LINK_TEXT_COLOR, $TOP_BAR_LINK_BG_COLOR, 75%);
 $navbar-default-link-disabled-bg:           $TOP_BAR_LINK_BG_COLOR;
 
 // Reset inverted navbar basics
-$navbar-inverse-color:                      $LEFT_BAR_FG_COLOR;
+$navbar-inverse-color:                      $LEFT_BAR_TEXT_COLOR;
 $navbar-inverse-bg:                         $LEFT_BAR_BG_COLOR;
 $navbar-inverse-border:                     $LEFT_BAR_BORDER_COLOR;
 
 // Inverted navbar links
-$navbar-inverse-link-color:                 $LEFT_BAR_FG_COLOR;
-$navbar-inverse-link-hover-color:           $LEFT_BAR_HOVER_FG_COLOR;
+$navbar-inverse-link-color:                 $LEFT_BAR_TEXT_COLOR;
+$navbar-inverse-link-hover-color:           $LEFT_BAR_HOVER_TEXT_COLOR;
 $navbar-inverse-link-hover-bg:              $LEFT_BAR_HOVER_BG_COLOR;
 $navbar-inverse-link-active-color:          $navbar-inverse-link-hover-color;
 $navbar-inverse-link-active-bg:             darken($navbar-inverse-bg, 10%);
-$navbar-inverse-link-disabled-color:        $LEFT_BAR_HEADER_FG_COLOR;
+$navbar-inverse-link-disabled-color:        $LEFT_BAR_HEADER_TEXT_COLOR;
 $navbar-inverse-link-disabled-bg:           $LEFT_BAR_HEADER_BG_COLOR;
 
 // Inverted navbar brand label
 $navbar-inverse-brand-color:                $navbar-inverse-link-color;
-$navbar-inverse-brand-hover-color:          $LEFT_BAR_HOVER_FG_COLOR;
+$navbar-inverse-brand-hover-color:          $LEFT_BAR_HOVER_TEXT_COLOR;
 $navbar-inverse-brand-hover-bg:             $LEFT_BAR_BG_COLOR;
 
 // Inverted navbar toggle - not used?
 $navbar-inverse-toggle-hover-bg:            $LEFT_BAR_BG_COLOR;
-$navbar-inverse-toggle-icon-bar-bg:         $LEFT_BAR_FG_COLOR;
+$navbar-inverse-toggle-icon-bar-bg:         $LEFT_BAR_TEXT_COLOR;
 $navbar-inverse-toggle-border-color:        $LEFT_BAR_BORDER_COLOR;
 
-$pagination-color: $PAGER_FG_COLOR;
-$pagination-bg: $PAGER_BG_COLOR;
-$pagination-border: $PAGER_BORDER_COLOR;
-$pagination-hover-color: $PAGER_HOVER_FG_COLOR;
-$pagination-hover-bg: $PAGER_HOVER_BG_COLOR;
-$pagination-hover-border: $PAGER_HOVER_BORDER_COLOR;
-$pagination-active-color: $PAGER_ACTIVE_FG_COLOR;
-$pagination-active-bg: $PAGER_ACTIVE_BG_COLOR;
-$pagination-active-border: $PAGER_ACTIVE_BORDER_COLOR;
-$pagination-disabled-color: mix($PAGER_FG_COLOR, $PAGER_BG_COLOR, 75%);
-$pagination-disabled-bg: $PAGER_BG_COLOR;
-$pagination-disabled-border: $PAGER_BORDER_COLOR;
-
-$state-success-text: $SUCCESS_BORDER_COLOR;
-$state-success-bg: $SUCCESS_BG_COLOR;
-$state-success-border: mix($SUCCESS_BORDER_COLOR, $SUCCESS_BG_COLOR);
-$state-info-text: $INFO_BORDER_COLOR;
-$state-info-bg: $INFO_BG_COLOR;
-$state-info-border: mix($INFO_BORDER_COLOR, $INFO_BG_COLOR);
-$state-warning-text: $WARNING_BORDER_COLOR;
-$state-warning-bg: $WARNING_BG_COLOR;
-$state-warning-border: mix($WARNING_BORDER_COLOR, $WARNING_BG_COLOR);
-$state-danger-text: $DANGER_BORDER_COLOR;
-$state-danger-bg: $DANGER_BG_COLOR;
-$state-danger-border: mix($DANGER_BORDER_COLOR, $DANGER_BG_COLOR);
+$state-success-text: $SUCCESS_COLOR;
+$state-success-bg: rgba($SUCCESS_COLOR, 20%);
+$state-success-border: $SUCCESS_COLOR;
+$state-info-text: $INFO_COLOR;
+$state-info-bg: rgba($INFO_COLOR, 20%);
+$state-info-border: $INFO_COLOR;
+$state-warning-text: $WARNING_COLOR;
+$state-warning-bg: rgba($WARNING_COLOR, 20%);
+$state-warning-border: $WARNING_COLOR;
+$state-danger-text: $DANGER_COLOR;
+$state-danger-bg: rgba($DANGER_COLOR, 20%);
+$state-danger-border: $DANGER_COLOR;
 
 $tooltip-opacity: 1;
 $tooltip-max-width: 400px;
-$tooltip-color: $TOOLTIP_FG_COLOR;
+$tooltip-color: $TOOLTIP_TEXT_COLOR;
 $tooltip-bg: $TOOLTIP_BG_COLOR;
 
 //** Background color of modal content area
@@ -166,41 +153,47 @@ $modal-content-border-color:                   $MENU_BORDER_COLOR;
 //** Modal content border color **for IE8**
 $modal-content-fallback-border-color:          $MENU_BORDER_COLOR;
 
-$alert-success-bg: $SUCCESS_BG_COLOR;
-$alert-success-text: $SUCCESS_FG_COLOR;
-$alert-success-border: $SUCCESS_BORDER_COLOR;
-$alert-info-bg: $INFO_BG_COLOR;
-$alert-info-text: $INFO_FG_COLOR;
-$alert-info-border: $INFO_BORDER_COLOR;
-$alert-warning-bg: $WARNING_BG_COLOR;
-$alert-warning-text: $WARNING_FG_COLOR;
-$alert-warning-border: $WARNING_BORDER_COLOR;
-$alert-danger-bg: $DANGER_BG_COLOR;
-$alert-danger-text: $DANGER_FG_COLOR;
-$alert-danger-border: $DANGER_BORDER_COLOR;
+$alert-info-bg: rgba($INFO_COLOR, 20%);
+$alert-info-text: $BODY_TEXT_COLOR;
+$alert-info-border: $INFO_COLOR;
+$alert-success-bg: rgba($SUCCESS_COLOR, 20%);
+$alert-success-text: $BODY_TEXT_COLOR;
+$alert-success-border: $SUCCESS_COLOR;
+$alert-warning-bg: rgba($WARNING_COLOR, 20%);
+$alert-warning-text: $BODY_TEXT_COLOR;
+$alert-warning-border: $WARNING_COLOR;
+$alert-danger-bg: rgba($DANGER_COLOR, 20%);
+$alert-danger-text: $BODY_TEXT_COLOR;
+$alert-danger-border: $DANGER_COLOR;
 
-$progress-bg: $VOTE_METER_BG_COLOR;
-$progress-bar-color: $PROGRESS_BG_COLOR;
-$progress-bar-bg: $VOTE_METER_FG_COLOR;
+$progress-bg: $PROGRESS_BG_COLOR;
+$progress-bar-bg: $PROGRESS_BAR_COLOR;
+$progress-bar-color: $PROGRESS_TEXT_COLOR; // this is text, unused
 
 $list-group-bg: $LIST_BG_COLOR;
 $list-group-border: $LIST_BORDER_COLOR;
 $list-group-hover-bg: $LIST_BG_COLOR;
-$list-group-disabled-color: $LIST_HEADER_FG_COLOR;
+$list-group-disabled-color: $LIST_HEADER_TEXT_COLOR;
 $list-group-disabled-bg: $LIST_HEADER_BG_COLOR;
-$list-group-disabled-text-color: $LIST_HEADER_FG_COLOR;
-$list-group-link-color: $LINK_FG_COLOR;
-$list-group-link-hover-color: $LINK_HOVER_FG_COLOR;
+$list-group-disabled-text-color: $LIST_HEADER_TEXT_COLOR;
+$list-group-link-color: $LINK_TEXT_COLOR;
+$list-group-link-hover-color: $LINK_HOVER_TEXT_COLOR;
 
-$panel-bg: $LIST_BG_COLOR;
+$panel-bg: $PANEL_BG_COLOR;
 $panel-body-padding: 12px;
 $panel-heading-padding: 8px 12px;
-$panel-inner-border: $LIST_BORDER_COLOR;
-$panel-footer-bg: darken($LIST_BG_COLOR, 3%);
-$panel-default-text: $LIST_FG_COLOR;
-$panel-default-border: $LIST_BORDER_COLOR;
-$panel-default-heading-bg: darken($LIST_BG_COLOR, 3%);
+$panel-inner-border: $PANEL_BORDER_COLOR;
+$panel-footer-bg: $PANEL_FOOTER_BG_COLOR;
+$panel-footer-text: $PANEL_TEXT_COLOR;
+$panel-default-text: $PANEL_TEXT_COLOR;
+$panel-default-border: $PANEL_BORDER_COLOR;
+$panel-default-heading-bg: $PANEL_BG_COLOR;
 
 $hr-border: $LIST_BORDER_COLOR;
 
-$well-bg: $WELL_BG_COLOR;
+// Typography - muted/secondary text colors
+$text-muted: rgba($text-color, 0.75);
+$headings-small-color: $text-muted;
+$blockquote-small-color: $text-muted;
+
+$well-bg: $PANEL_BG_COLOR;

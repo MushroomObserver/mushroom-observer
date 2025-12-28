@@ -11,7 +11,7 @@ This document describes how Mushroom Observer's standardized theme variables map
 ## Purpose
 
 The mapping file serves as a translation layer between:
-- **MO Theme System**: Standardized theme variables (e.g., `$PRIMARY_COLOR`, `$BUTTON_FG_COLOR`)
+- **MO Theme System**: Standardized theme variables (e.g., `$PRIMARY_COLOR`, `$BUTTON_TEXT_COLOR`)
 - **Bootstrap 4**: Framework variables (e.g., `$primary`, `$btn-font-weight`)
 
 This allows MO themes to control Bootstrap 4's appearance without modifying theme files when migrating from Bootstrap 3.
@@ -55,18 +55,18 @@ These generate component variants automatically:
 
 | MO Variable | Bootstrap 4 Variable |
 |-------------|---------------------|
-| `$BODY_FG_COLOR` | `$body-color` |
+| `$BODY_TEXT_COLOR` | `$body-color` |
 | `$BODY_BG_COLOR` | `$body-bg` |
-| `$LINK_FG_COLOR` | `$link-color` |
-| `$LINK_HOVER_FG_COLOR` | `$link-hover-color` |
+| `$LINK_TEXT_COLOR` | `$link-color` |
+| `$LINK_HOVER_TEXT_COLOR` | `$link-hover-color` |
 
 ### 3. Buttons
 
 | MO Variable | Bootstrap 4 Variable |
 |-------------|---------------------|
 | `$BUTTON_BORDER_RADIUS` | `$btn-border-radius` |
-| `$LINK_FG_COLOR` | `$btn-link-color` |
-| `$LINK_HOVER_FG_COLOR` | `$btn-link-hover-color` |
+| `$LINK_TEXT_COLOR` | `$btn-link-color` |
+| `$LINK_HOVER_TEXT_COLOR` | `$btn-link-hover-color` |
 
 **Note**: Button color variants (`.btn-primary`, `.btn-success`, etc.) are generated automatically from `$theme-colors` map.
 
@@ -75,7 +75,7 @@ These generate component variants automatically:
 | MO Variable | Bootstrap 4 Variable |
 |-------------|---------------------|
 | `$INPUT_BG_COLOR` | `$input-bg` |
-| `$INPUT_FG_COLOR` | `$input-color` |
+| `$INPUT_TEXT_COLOR` | `$input-color` |
 | `$INPUT_BORDER_COLOR` | `$input-border-color` |
 | `$INPUT_BORDER_WIDTH` | `$input-border-width` |
 | `$INPUT_BORDER_RADIUS` | `$input-border-radius` |
@@ -87,30 +87,30 @@ These generate component variants automatically:
 |-------------|---------------------|
 | `$MENU_BG_COLOR` | `$dropdown-bg` |
 | `$MENU_BORDER_COLOR` | `$dropdown-border-color` |
-| `$MENU_FG_COLOR` | `$dropdown-link-color` |
-| `$MENU_HOT_FG_COLOR` | `$dropdown-link-hover-color` |
+| `$MENU_TEXT_COLOR` | `$dropdown-link-color` |
+| `$MENU_HOT_TEXT_COLOR` | `$dropdown-link-hover-color` |
 | `$MENU_HOT_BG_COLOR` | `$dropdown-link-hover-bg` |
-| `$MENU_WARM_FG_COLOR` | `$dropdown-link-active-color` |
+| `$MENU_WARM_TEXT_COLOR` | `$dropdown-link-active-color` |
 | `$MENU_WARM_BG_COLOR` | `$dropdown-link-active-bg` |
 
 ### 6. Navigation
 
 | MO Variable | Bootstrap 4 Variable | Context |
 |-------------|---------------------|---------|
-| `$TOP_BAR_FG_COLOR` | `$navbar-light-color` | Light navbar |
-| `$TOP_BAR_LINK_HOVER_FG_COLOR` | `$navbar-light-hover-color` | Light navbar hover |
-| `$LEFT_BAR_FG_COLOR` | `$navbar-dark-color` | Dark navbar |
-| `$LEFT_BAR_HOVER_FG_COLOR` | `$navbar-dark-hover-color` | Dark navbar hover |
+| `$TOP_BAR_TEXT_COLOR` | `$navbar-light-color` | Light navbar |
+| `$TOP_BAR_LINK_HOVER_TEXT_COLOR` | `$navbar-light-hover-color` | Light navbar hover |
+| `$LEFT_BAR_TEXT_COLOR` | `$navbar-dark-color` | Dark navbar |
+| `$LEFT_BAR_HOVER_TEXT_COLOR` | `$navbar-dark-hover-color` | Dark navbar hover |
 
 ### 7. Pagination
 
 | MO Variable | Bootstrap 4 Variable |
 |-------------|---------------------|
-| `$PAGER_FG_COLOR` | `$pagination-color` |
+| `$PAGER_TEXT_COLOR` | `$pagination-color` |
 | `$PAGER_BG_COLOR` | `$pagination-bg` |
-| `$PAGER_HOVER_FG_COLOR` | `$pagination-hover-color` |
+| `$PAGER_HOVER_TEXT_COLOR` | `$pagination-hover-color` |
 | `$PAGER_HOVER_BG_COLOR` | `$pagination-hover-bg` |
-| `$PAGER_ACTIVE_FG_COLOR` | `$pagination-active-color` |
+| `$PAGER_ACTIVE_TEXT_COLOR` | `$pagination-active-color` |
 | `$PAGER_ACTIVE_BG_COLOR` | `$pagination-active-bg` |
 
 ### 8. Tables
@@ -122,7 +122,7 @@ These generate component variants automatically:
 | `$LIST_HOVER_BG_COLOR` | `$table-hover-bg` |
 | `$LIST_BORDER_COLOR` | `$table-border-color` |
 | `$LIST_HEADER_BG_COLOR` | `$table-head-bg` |
-| `$LIST_HEADER_FG_COLOR` | `$table-head-color` |
+| `$LIST_HEADER_TEXT_COLOR` | `$table-head-color` |
 
 ### 9. Alerts & Banners
 
@@ -143,7 +143,7 @@ Alert colors are generated from semantic colors (`$success`, `$info`, etc.)
 
 | MO Variable | Bootstrap 4 Variable |
 |-------------|---------------------|
-| `$TOOLTIP_FG_COLOR` | `$tooltip-color` |
+| `$TOOLTIP_TEXT_COLOR` | `$tooltip-color` |
 | `$TOOLTIP_BG_COLOR` | `$tooltip-bg` |
 
 ### 12. Progress Bars
@@ -151,7 +151,7 @@ Alert colors are generated from semantic colors (`$success`, `$info`, etc.)
 | MO Variable | Bootstrap 4 Variable |
 |-------------|---------------------|
 | `$PROGRESS_BG_COLOR` | `$progress-bg` |
-| `$PROGRESS_FG_COLOR` | `$progress-bar-color` |
+| `$PROGRESS_TEXT_COLOR` | `$progress-bar-color` |
 | `$PROGRESS_BAR_COLOR` | `$progress-bar-bg` |
 
 ### 13. List Groups
@@ -161,7 +161,7 @@ Alert colors are generated from semantic colors (`$success`, `$info`, etc.)
 | `$LIST_BG_COLOR` | `$list-group-bg` |
 | `$LIST_BORDER_COLOR` | `$list-group-border-color` |
 | `$LIST_HOVER_BG_COLOR` | `$list-group-hover-bg` |
-| `$LINK_FG_COLOR` | `$list-group-action-color` |
+| `$LINK_TEXT_COLOR` | `$list-group-action-color` |
 
 ### 14. Cards (Panels in BS3)
 
@@ -177,12 +177,12 @@ The following MO theme variables don't have direct Bootstrap 4 equivalents and s
 ### Link Styling
 - `$LINK_WEIGHT` - Use custom CSS for font-weight on links
 - `$LINK_BG_COLOR` - Bootstrap links are transparent by default
-- `$LINK_VISITED_FG_COLOR` - Apply via `:visited` pseudo-class in custom CSS
+- `$LINK_VISITED_TEXT_COLOR` - Apply via `:visited` pseudo-class in custom CSS
 - `$LINK_VISITED_BG_COLOR` - Apply via `:visited` pseudo-class in custom CSS
 - `$LINK_HOVER_BG_COLOR` - Bootstrap links don't use background on hover
 
 ### Button States
-- `$BUTTON_ACTIVE_FG_COLOR` - Use `:active` pseudo-class in custom CSS
+- `$BUTTON_ACTIVE_TEXT_COLOR` - Use `:active` pseudo-class in custom CSS
 - `$BUTTON_ACTIVE_BG_COLOR` - Use `:active` pseudo-class in custom CSS
 - `$BUTTON_BORDER_STYLE` - Bootstrap always uses solid borders
 

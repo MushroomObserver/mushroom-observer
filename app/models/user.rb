@@ -333,6 +333,13 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :verified, -> { where.not(verified: nil) }
   scope :unverified, -> { where(verified: nil) }
 
+  scope :top_users_for_herbarium, lambda { |herbarium|
+    joins(:herbarium_records).
+      where(herbarium_records: { herbarium_id: herbarium.id }).
+      select(:name, :login, User[:id].count).
+      group(:id).order(User[:id].count.desc).take(5)
+  }
+
   # These are used by forms.
   attr_accessor :place_name
   attr_accessor :email_confirmation
