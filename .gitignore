@@ -35,8 +35,10 @@ coverage
 # Ignore VS Code config
 .vscode
 
-# Ignore Claude code config
-.claude/
+# Ignore Claude code local config (but allow shared docs)
+.claude/settings.local.json
+.claude/output-styles/
+CLAUDE.local.md
 
 # Ignore sensitive config stuff.
 /config/master.key
