@@ -113,17 +113,15 @@ class Components::HerbariumForm < Components::ApplicationForm
     text_field(
       :code,
       label: "#{:create_herbarium_code.l}:",
+      help: code_help,
       inline: true
-    ) do |f|
-      f.with_between { render_code_between }
-    end
+    )
   end
 
-  def render_code_between
-    span(class: "help-note") do
-      "(#{:create_herbarium_code_recommended.l}) "
-    end
-    help_block_with_arrow("down") { :create_herbarium_code_help.t }
+  def code_help
+    help = :create_herbarium_code_help.t
+    recommended = :create_herbarium_code_recommended.l
+    "#{help} (#{recommended})".html_safe # rubocop:disable Rails/OutputSafety
   end
 
   def render_location_section
