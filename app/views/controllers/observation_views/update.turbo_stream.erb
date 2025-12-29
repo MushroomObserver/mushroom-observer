@@ -16,3 +16,13 @@ end %>
     reviewed: @reviewed
   ))
 end %>
+
+<%# Update the lightbox data-sub-html attribute for caption persistence %>
+<% caption_html = render(Components::LightboxCaption.new(
+  user: @user,
+  obs: @obs,
+  identify: true
+)) %>
+<turbo-stream action="update_lightbox_caption" obs-id="<%= @obs_id %>">
+  <template><%= caption_html %></template>
+</turbo-stream>
