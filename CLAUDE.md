@@ -48,11 +48,16 @@ See `.claude/rules/testing.md` for detailed Rails testing syntax and conventions
 
 ## Code Style
 
+See `.claude/style_guide.md` for detailed Ruby, ERB, and Phlex component style conventions.
+
+**Quick Reference**:
 - Run RuboCop: `bundle exec rubocop`
-- Avoid over-engineering: only implement requested changes
-- Prefer editing existing files over creating new ones
-- Follow existing patterns in the codebase
-- Migration to Phlex components is ongoing
+- Always use parentheses for method calls (Ruby and ERB)
+- Use full namespaces for components: `Components::ClassName`
+- Prefer Phlex helpers over Rails `tag` helpers in components
+- All new code must pass RuboCop - refactor instead of disabling cops
+
+**Important**: Avoid over-engineering - only implement requested changes. Prefer editing existing files over creating new ones. Migration to Phlex components is ongoing.
 
 ## Common Commands
 
