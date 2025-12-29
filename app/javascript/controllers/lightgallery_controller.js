@@ -28,10 +28,8 @@ export default class extends Controller {
 
   // Refresh the gallery to pick up updated data-sub-html attributes
   refresh() {
-    console.log("lightgallery controller refresh() called");
     if (this.gallery) {
       this.gallery.refresh();
-      console.log("lightgallery instance refreshed");
     }
   }
 }
