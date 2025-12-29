@@ -35,6 +35,16 @@ Turbo.StreamActions.remove_class = function () {
     target.classList.remove(this.templateContent.textContent)
   });
 }
+// Update lightbox caption data-sub-html attribute to keep caption state in sync
+Turbo.StreamActions.update_lightbox_caption = function () {
+  const obsId = this.getAttribute("obs-id");
+  const captionHtml = this.templateContent.textContent;
+
+  const theaterBtn = document.querySelector(`#box_${obsId} .theater-btn`);
+  if (theaterBtn) {
+    theaterBtn.dataset.subHtml = captionHtml;
+  }
+}
 
 import "@rails/request.js"
 
