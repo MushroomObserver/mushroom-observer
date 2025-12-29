@@ -32,7 +32,12 @@ See `.claude/rules/testing.md` for detailed Rails testing syntax and conventions
 ## Git Workflow
 
 - Create feature branches from `main`
-- Use descriptive branch names: `njw-feature-description`
+- **Branch naming convention**: `<prefix>-feature-description`
+  - Prefix is derived from `git config user.name` (converted to lowercase initials)
+  - Can be overridden in `.claude/settings.local.json` with `branchPrefix` setting
+  - Example: "Nathan Wilson" → `nw-fix-bug-123` or `njw-add-dark-mode`
+  - Use kebab-case for feature description
+  - Include issue numbers when applicable: `prefix-fix-1234-description`
 - Commit messages include Claude Code attribution
 - Create PRs via `gh pr create` with detailed descriptions
 - Link PRs to issues with `Fixes #issue_number`
