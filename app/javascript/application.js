@@ -51,6 +51,14 @@ Turbo.StreamActions.update_lightbox_caption = function () {
   if (theaterBtn) {
     theaterBtn.dataset.subHtml = captionHtml;
     console.log("data-sub-html updated");
+
+    // Refresh lightgallery to pick up the updated caption
+    const contentElement = document.querySelector('[data-controller~="lightgallery"]');
+    if (contentElement && contentElement.dataset.lightgallery === "connected") {
+      // Trigger a custom event that the lightgallery controller can listen to
+      contentElement.dispatchEvent(new CustomEvent('lightgallery:refresh'));
+      console.log("lightgallery refresh event dispatched");
+    }
   }
 }
 
