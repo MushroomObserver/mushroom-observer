@@ -76,6 +76,6 @@ obs_locals = { obs: @observation, consensus: @consensus, user: @user }
 <!--.row-->
 
 <% if @user %>
-  <%= show_object_footer(@user, @observation) %>
+  <%= render(Components::ObjectFooter.new(user: @user, obj: @observation)) %>
 <% end %>
 

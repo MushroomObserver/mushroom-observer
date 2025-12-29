@@ -45,7 +45,7 @@ column_classes(:nine_three)
                 controls: @user, limit: nil }
     ) %>
 
-    <%= show_object_footer(@user, @species_list) %>
+    <%= render(Components::ObjectFooter.new(user: @user, obj: @species_list)) %>
 
   <% end %>
 <% end %>
