@@ -27,6 +27,7 @@ class Components::MatrixBox < Components::Base
   include Components::MatrixBox::RenderData
   include Phlex::Rails::Helpers::LinkTo
   include Phlex::Rails::Helpers::ClassNames
+  include ObservationReviewedState
 
   # Properties
   prop :user, _Nilable(User), default: nil
@@ -227,37 +228,15 @@ class Components::MatrixBox < Components::Base
 
   def render_identify_footer(panel)
     return unless @identify
+    return unless @data[:type] == :observation
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
       render(Components::MarkAsReviewedToggle.new(
                obs_id: @data[:id],
                selector: "box_reviewed",
                label_class: "stretched-link",
-               reviewed: obs_reviewed_state
+               reviewed: observation_reviewed_state(@data[:what], @user)
              ))
     end
-  end
-
-  def obs_reviewed_state
-    return nil unless @user
-    return nil unless @data[:type] == :observation
-
-    obs = @data[:what]
-    if obs.respond_to?(:observation_views)
-      return eager_loaded_obs_reviewed_state(obs)
-    end
-
-    # Fallback for contexts where observation_views are not eager-loaded
-    ObservationView.find_by(
-      observation_id: obs.id,
-      user_id: @user.id
-    )&.reviewed
-  end
-
-  def eager_loaded_obs_reviewed_state(obs)
-    observation_view = obs.observation_views.detect do |ov|
-      ov.user_id == @user.id
-    end
-    observation_view&.reviewed
   end
 end

@@ -26,6 +26,7 @@
 #   )
 class Components::LightboxCaption < Components::Base
   include Phlex::Rails::Helpers::LinkTo
+  include ObservationReviewedState
 
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image), default: nil
@@ -62,29 +63,9 @@ class Components::LightboxCaption < Components::Base
       span(class: "mx-2") { whitespace }
       render(Components::MarkAsReviewedToggle.new(
                obs_id: @obs.id,
-               reviewed: obs_reviewed_state
+               reviewed: observation_reviewed_state(@obs, @user)
              ))
     end
-  end
-
-  def obs_reviewed_state
-    return nil unless @user
-    if @obs.respond_to?(:observation_views)
-      return eager_loaded_obs_reviewed_state
-    end
-
-    # Fallback for contexts where observation_views are not eager-loaded
-    ObservationView.find_by(
-      observation_id: @obs.id,
-      user_id: @user.id
-    )&.reviewed
-  end
-
-  def eager_loaded_obs_reviewed_state
-    observation_view = @obs.observation_views.detect do |ov|
-      ov.user_id == @user.id
-    end
-    observation_view&.reviewed
   end
 
   def render_obs_title
