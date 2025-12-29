@@ -2,9 +2,9 @@
 
 ## Session Start Protocol
 
-**REQUIRED**: At the start of each new session, confirm the loaded output style by stating:
+**REQUIRED**: At the start of each new session, read `.claude/settings.local.json` and confirm the loaded output style by stating:
 ```
-Output style: professional-direct
+Output style: <value-from-outputStyle-field>
 ```
 
 This verifies that `.claude/settings.local.json` was loaded correctly and confirms adherence to the style guidelines.
