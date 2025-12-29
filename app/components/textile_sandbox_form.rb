@@ -3,17 +3,15 @@
 # Form for testing Textile markup in a sandbox environment.
 # Users can enter Textile code and see both the rendered output and HTML codes.
 #
-# @example Usage in controller
+# @example Usage in view
 #   render(Components::TextileSandboxForm.new(
 #     textile_sandbox,
 #     show_result: !code.nil?,
 #     submit_type: submit
-#   ), layout: true)
+#   ))
 class Components::TextileSandboxForm < Components::ApplicationForm
   # Register helpers
   register_value_helper :asset_path
-  register_output_helper :help_block
-  register_output_helper :add_page_title
 
   # @param model [TextileSandbox] struct with code attribute
   # @param show_result [Boolean] whether to show the rendered result above form
@@ -25,9 +23,6 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   end
 
   def view_template
-    add_page_title(:sandbox_title.t)
-    help_block(:div, :sandbox_header.tp)
-
     render_result_section if @show_result
 
     super do

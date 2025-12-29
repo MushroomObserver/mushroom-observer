@@ -41,8 +41,8 @@ class InfoController < ApplicationController
     end
     textile_sandbox = TextileSandbox.new(code: code)
 
-    render(Components::TextileSandboxForm.new(
-             textile_sandbox,
+    render(Views::Controllers::Info::TextileSandbox.new(
+             textile_sandbox: textile_sandbox,
              show_result: !code.nil?,
              submit_type: submit
            ), layout: true)

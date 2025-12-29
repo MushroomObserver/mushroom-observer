@@ -9,16 +9,9 @@ class TextileSandboxFormTest < UnitTestCase
     controller.request = ActionDispatch::TestRequest.create
   end
 
-  def test_renders_page_title
-    html = render_initial_form
-    # Page title is added via content_for, check it was called
-    assert_not_nil(html)
-  end
-
-  def test_renders_help_block
-    html = render_initial_form
-    assert_html(html, "body", text: :sandbox_header.tp.as_displayed)
-  end
+  # NOTE: Page title and help block are now rendered by the view template
+  # (Views::Info::TextileSandbox), not the component. Those should be
+  # tested in controller/integration tests.
 
   def test_renders_textarea_field
     html = render_initial_form
