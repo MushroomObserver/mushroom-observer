@@ -31,6 +31,13 @@ module Location::Scopes
     }
     scope :name_has,
           ->(phrase) { search_columns(Location[:name], phrase) }
+    # Used by Lookup::Locations
+    # to match the most general area containing all search terms
+    scope :shortest_names_with, lambda { |pattern|
+      return none if pattern.blank?
+
+      name_has(pattern).order(Location[:name].length)
+    }
 
     scope :has_notes,
           ->(bool = true) { not_blank_condition(Location[:notes], bool:) }
@@ -94,18 +101,25 @@ module Location::Scopes
       box = Mappable::Box.new(**args)
       return none unless box.valid?
 
-      where((Location[:south] >= box.south).and(Location[:north] <= box.north).
+      e = MO.box_epsilon
+      where((Location[:south] >= box.south - e).
+            and(Location[:north] <= box.north + e).
             # Location[:west] between w & 180 OR between 180 and e
-            and((Location[:west] >= box.west).or(Location[:west] <= box.east)).
-            and((Location[:east] >= box.west).or(Location[:east] <= box.east)))
+            and((Location[:west] >= box.west - e).
+                or(Location[:west] <= box.east + e)).
+            and((Location[:east] >= box.west - e).
+                or(Location[:east] <= box.east + e)))
     }
     # mostly a helper for in_box
     scope :in_box_regular, lambda { |**args|
       box = Mappable::Box.new(**args)
       return none unless box.valid?
 
-      where((Location[:south] >= box.south).and(Location[:north] <= box.north).
-            and(Location[:west] >= box.west).and(Location[:east] <= box.east).
+      e = MO.box_epsilon
+      where((Location[:south] >= box.south - e).
+            and(Location[:north] <= box.north + e).
+            and(Location[:west] >= box.west - e).
+            and(Location[:east] <= box.east + e).
             and(Location[:west] <= Location[:east]))
     }
     # Pass kwargs (:north, :south, :east, :west), any order

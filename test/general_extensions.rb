@@ -99,17 +99,50 @@ module GeneralExtensions
     @loaded_fixtures["users"].fixtures.key?(fixture_name.to_s)
   end
 
+  # Delegate to central implementation in ImageConfigData
+  def database_worker_number
+    IMAGE_CONFIG_DATA.database_worker_number
+  end
+
+  # Worker-specific download directory for parallel testing
+  def download_dir
+    @download_dir ||= if (worker_num = database_worker_number)
+                        Rails.root.join("tmp/downloads-#{worker_num}")
+                      else
+                        Rails.root.join("tmp/downloads")
+                      end
+  end
+
   def use_test_locales(&block)
-    Language.alt_locales_path("config/test_locales", &block)
-    FileUtils.remove_dir(Rails.root.join("config/test_locales"), force: true)
+    # Use worker-specific directory in parallel mode to avoid conflicts
+    worker_num = database_worker_number
+    worker_suffix = worker_num ? "-#{worker_num}" : ""
+    locales_dir = "config/test_locales#{worker_suffix}"
+
+    Language.alt_locales_path(locales_dir, &block)
+    FileUtils.remove_dir(Rails.root.join(locales_dir), force: true)
   end
 
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
-    return if FileTest.exist?(MO.local_image_files)
+    image_dir = MO.local_image_files
 
-    setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
-    FileUtils.cp_r(setup_images, MO.local_image_files)
+    # Check if directory exists AND has required subdirectories
+    required_subdirs = %w[orig thumb 640]
+    all_exist = FileTest.exist?(image_dir) &&
+                required_subdirs.all? do |subdir|
+                  FileTest.exist?(File.join(image_dir, subdir))
+                end
+
+    return if all_exist
+
+    # Remove incomplete directory if it exists
+    FileUtils.rm_rf(image_dir) if FileTest.exist?(image_dir)
+
+    # For parallel workers, the path might be test_images-0, test_images-2, etc.
+    # We always copy from setup_images
+    setup_images = image_dir.gsub(/test_images(-\d+)?$/, "setup_images")
+    FileUtils.cp_r(setup_images, image_dir)
   end
 
   # This seems to have disappeared from rails.

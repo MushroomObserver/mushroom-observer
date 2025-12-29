@@ -1,11 +1,6 @@
 <%
-# Form to edit or delete a tracker, via params[:commit]
-
 add_page_title(:email_tracking_title.t(name: @name.display_name))
-
 add_context_nav(name_forms_return_tabs(name: @name))
-
-action = { controller: "/names/trackers", action: :update, id: @name.id }
 %>
 
 <div class="mt-5 mb-5">
@@ -18,5 +13,7 @@ action = { controller: "/names/trackers", action: :update, id: @name.id }
   end %>
 </div>
 
-<%= render(partial: "names/trackers/form", locals: { action: action,
-                                                     method: :put }) %>
+<%= render(Components::NameTrackerForm.new(
+      @name_tracker,
+      note_template: @note_template
+    )) %>

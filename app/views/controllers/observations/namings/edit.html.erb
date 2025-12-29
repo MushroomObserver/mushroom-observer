@@ -12,9 +12,21 @@ add_context_nav(naming_form_edit_tabs(obs: @observation))
     </div>
 
     <div class="mt-3">
-      <%= render(partial: "observations/namings/form",
-                 locals: { local: true,
-                           form_locals: { show_reasons: true } }) %>
+      <%= render(Components::NamingForm.new(
+            @naming,
+            observation: @observation,
+            vote: @vote,
+            given_name: @given_name,
+            reasons: @reasons,
+            feedback: {
+              names: @names,
+              valid_names: @valid_names,
+              suggest_corrections: @suggest_corrections,
+              parent_deprecated: @parent_deprecated
+            },
+            show_reasons: true,
+            local: true
+          )) %>
     </div>
   </div>
   <!--.col-->

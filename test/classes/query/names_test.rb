@@ -26,7 +26,7 @@ class Query::NamesTest < UnitTestCase
     expect_good = expect.with_correct_spelling
     expect_bad  = expect.with_incorrect_spelling
     assert_query(expect_good.to_a, :Name)
-    assert_query(expect.to_a, :Name, misspellings: :either)
+    assert_query(expect.to_a, :Name, misspellings: :include)
     assert_query(expect_good.to_a, :Name, misspellings: :no)
     assert_query(expect_bad.to_a, :Name, misspellings: :only)
   end
@@ -116,17 +116,17 @@ class Query::NamesTest < UnitTestCase
   end
 
   # Takes region strings or ids, but not instances
-  def test_name_locations
+  def test_name_within_locations
     locations = [locations(:salt_point), locations(:gualala)].
                 map { |x| x.id.to_s }
-    expects = Name.locations(locations).order_by_default
-    assert_query(expects, :Name, locations: locations)
+    expects = Name.within_locations(locations).order_by_default
+    assert_query(expects, :Name, within_locations: locations)
     # locations = [locations(:salt_point), locations(:gualala)]
     # assert_query(expects, :Name, locations: locations)
 
     locations = ["Sonoma Co., California, USA"]
-    expects = Name.locations(locations).order_by_default
-    assert_query(expects, :Name, locations: locations)
+    expects = Name.within_locations(locations).order_by_default
+    assert_query(expects, :Name, within_locations: locations)
   end
 
   def test_name_species_lists
@@ -199,15 +199,6 @@ class Query::NamesTest < UnitTestCase
       :Name, names: params
     )
   end
-
-  # def test_name_deprecated_only
-  #   expects = Name.with_correct_spelling.deprecated.order_by_default
-  #   assert_query(expects, :Name, deprecated: :only)
-  #   expects = Name.with_correct_spelling.not_deprecated.order_by_default
-  #   assert_query(expects, :Name, deprecated: :no)
-  #   expects = Name.with_correct_spelling.order_by_default
-  #   assert_query(expects, :Name, deprecated: :either)
-  # end
 
   def test_name_deprecated
     expects = Name.with_correct_spelling.deprecated.order_by_default
@@ -323,9 +314,8 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, has_comments: true)
   end
 
-  # Note that this is NOT a without comments condition
   def test_name_has_comments_false
-    expects = Name.with_correct_spelling.order_by_default
+    expects = Name.with_correct_spelling.has_comments(false).order_by_default
     assert_query(expects, :Name, has_comments: false)
   end
 
@@ -339,10 +329,10 @@ class Query::NamesTest < UnitTestCase
     # search_name
     assert_query([], :Name, pattern: "petigera")
     expects = [names(:petigera).id]
-    scope = Name.pattern("petigera").misspellings(:either)
+    scope = Name.pattern("petigera").misspellings(:include)
     assert_query_scope(
       expects, scope,
-      :Name, pattern: "petigera", misspellings: :either
+      :Name, pattern: "petigera", misspellings: :include
     )
   end
 

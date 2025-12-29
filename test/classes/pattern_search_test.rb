@@ -102,30 +102,32 @@ class PatternSearchTest < UnitTestCase
     assert_raises(PatternSearch::BadYesError) { x.parse_boolean(:only_yes) }
   end
 
-  def test_parse_yes_no_both
+  def test_parse_no_include_only
     x = PatternSearch::Term.new(:xxx)
     x.vals = []
-    assert_raises(PatternSearch::MissingValueError) { x.parse_yes_no_both }
+    assert_raises(PatternSearch::MissingValueError) { x.parse_no_include_only }
     x.vals = [1, 2]
-    assert_raises(PatternSearch::TooManyValuesError) { x.parse_yes_no_both }
+    assert_raises(PatternSearch::TooManyValuesError) { x.parse_no_include_only }
     x.vals = ["blah"]
-    assert_raises(PatternSearch::BadYesNoBothError) { x.parse_yes_no_both }
+    assert_raises(PatternSearch::BadYesNoBothError) { x.parse_no_include_only }
     x.vals = ["yes"]
-    assert_equal("only", x.parse_yes_no_both)
+    assert_equal("only", x.parse_no_include_only)
     x.vals = ["TRUE"]
-    assert_equal("only", x.parse_yes_no_both)
+    assert_equal("only", x.parse_no_include_only)
     x.vals = ["1"]
-    assert_equal("only", x.parse_yes_no_both)
+    assert_equal("only", x.parse_no_include_only)
     x.vals = ["NO"]
-    assert_equal("no", x.parse_yes_no_both)
+    assert_equal("no", x.parse_no_include_only)
     x.vals = ["false"]
-    assert_equal("no", x.parse_yes_no_both)
+    assert_equal("no", x.parse_no_include_only)
     x.vals = ["0"]
-    assert_equal("no", x.parse_yes_no_both)
+    assert_equal("no", x.parse_no_include_only)
+    x.vals = ["include"]
+    assert_equal("include", x.parse_no_include_only)
     x.vals = ["both"]
-    assert_equal("either", x.parse_yes_no_both)
+    assert_equal("include", x.parse_no_include_only)
     x.vals = ["EITHER"]
-    assert_equal("either", x.parse_yes_no_both)
+    assert_equal("include", x.parse_no_include_only)
   end
 
   def test_parse_float
@@ -416,5 +418,190 @@ class PatternSearchTest < UnitTestCase
       assert_equal([:by_users, :parse_list_of_users],
                    x.lookup_param(:utilisateur))
     end
+  end
+
+  # ----- PatternSearch::Location tests -----
+
+  def test_location_pattern_search_params
+    search = PatternSearch::Location.new("")
+    params = search.params
+
+    # Verify key parameters exist
+    assert(params.key?(:region))
+    assert(params.key?(:user))
+    assert(params.key?(:editor))
+    assert(params.key?(:created))
+    assert(params.key?(:modified))
+    assert(params.key?(:has_notes))
+    assert(params.key?(:has_observations))
+    assert(params.key?(:has_descriptions))
+    assert(params.key?(:north))
+    assert(params.key?(:south))
+    assert(params.key?(:east))
+    assert(params.key?(:west))
+  end
+
+  def test_location_pattern_search_model
+    search = PatternSearch::Location.new("")
+    assert_equal(::Location, search.model)
+  end
+
+  def test_location_pattern_search_simple
+    search = PatternSearch::Location.new("burbank")
+    assert_equal("burbank", search.query.params[:pattern])
+  end
+
+  def test_location_pattern_search_with_region
+    search = PatternSearch::Location.new('region:"California, USA"')
+    assert_equal(["California, USA"], search.query.params[:region])
+  end
+
+  def test_location_pattern_search_with_region_smart_quotes
+    search = PatternSearch::Location.new("region:“California, USA”")
+    assert_equal(["California, USA"], search.query.params[:region])
+  end
+
+  def test_location_pattern_search_with_user
+    dick = users(:dick)
+    search = PatternSearch::Location.new("user:dick")
+    assert_equal([dick.id], search.query.params[:by_users])
+  end
+
+  def test_location_pattern_search_with_editor
+    rolf = users(:rolf)
+    search = PatternSearch::Location.new("editor:rolf")
+    assert_equal([rolf.id], search.query.params[:by_editor])
+  end
+
+  def test_location_pattern_search_with_notes
+    search = PatternSearch::Location.new("notes:test")
+    assert_equal("test", search.query.params[:notes_has])
+  end
+
+  def test_location_pattern_search_with_has_notes
+    search = PatternSearch::Location.new("has_notes:yes")
+    assert_equal(true, search.query.params[:has_notes])
+  end
+
+  def test_location_pattern_search_with_has_observations
+    search = PatternSearch::Location.new("has_observations:yes")
+    assert_equal(true, search.query.params[:has_observations])
+  end
+
+  def test_location_pattern_search_with_has_descriptions
+    search = PatternSearch::Location.new("has_descriptions:yes")
+    assert_equal(true, search.query.params[:has_descriptions])
+  end
+
+  def test_location_pattern_search_with_bounding_box
+    search = PatternSearch::Location.new(
+      "north:35 south:34 east:-118 west:-119"
+    )
+    assert_equal(
+      { north: 35.0, south: 34.0, east: -118.0, west: -119.0 },
+      search.query.params[:in_box]
+    )
+  end
+
+  def test_location_pattern_search_with_swapped_north_south
+    # Should auto-correct swapped north/south values
+    search = PatternSearch::Location.new(
+      "north:34 south:35 east:-118 west:-119"
+    )
+    assert_equal(
+      { north: 35.0, south: 34.0, east: -118.0, west: -119.0 },
+      search.query.params[:in_box]
+    )
+  end
+
+  def test_location_pattern_search_with_missing_north
+    search = PatternSearch::Location.new("south:34 east:-118 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
+    assert_equal(:north, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_missing_south
+    search = PatternSearch::Location.new("north:35 east:-118 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
+    assert_equal(:south, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_missing_east
+    search = PatternSearch::Location.new("north:35 south:34 west:-119")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
+    assert_equal(:east, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_missing_west
+    search = PatternSearch::Location.new("north:35 south:34 east:-118")
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::MissingValueError, search.errors.first)
+    assert_equal(:west, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_invalid_north
+    # North latitude must be between -90 and 90
+    spec = "north:95 south:34 east:-118 west:-119"
+    search = PatternSearch::Location.new(spec)
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
+    assert_equal(:north, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_invalid_south
+    # South latitude must be between -90 and 90
+    spec = "north:35 south:-95 east:-118 west:-119"
+    search = PatternSearch::Location.new(spec)
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
+    assert_equal(:south, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_invalid_east
+    # East longitude must be between -180 and 180
+    spec = "north:35 south:34 east:185 west:-119"
+    search = PatternSearch::Location.new(spec)
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
+    assert_equal(:east, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_invalid_west
+    # West longitude must be between -180 and 180
+    spec = "north:35 south:34 east:-118 west:-185"
+    search = PatternSearch::Location.new(spec)
+    assert_equal(1, search.errors.length)
+    assert_instance_of(PatternSearch::BadFloatError, search.errors.first)
+    assert_equal(:west, search.errors.first.args[:var])
+  end
+
+  def test_location_pattern_search_with_dates
+    search = PatternSearch::Location.new("created:2021-01-01")
+    assert_equal(%w[2021-01-01 2021-01-01],
+                 search.query.params[:created_at])
+  end
+
+  def test_location_pattern_search_terms_help
+    help_text = PatternSearch::Location.terms_help
+    assert(help_text.include?("region"))
+    assert(help_text.include?("user"))
+    assert(help_text.include?("editor"))
+    assert(help_text.include?("created"))
+    assert(help_text.include?("modified"))
+    assert(help_text.include?("has_notes"))
+  end
+
+  def test_location_pattern_search_combined_params
+    dick = users(:dick)
+    search = PatternSearch::Location.new(
+      'park region:"California, USA" user:dick has_notes:yes'
+    )
+    assert_equal("park", search.query.params[:pattern])
+    assert_equal(["California, USA"], search.query.params[:region])
+    assert_equal([dick.id], search.query.params[:by_users])
+    assert_equal(true, search.query.params[:has_notes])
   end
 end

@@ -12,39 +12,39 @@ module Names
 
     before_action :login_required
 
-    # Also an index of helper methods to use for each field.
     def permitted_search_params
-      {
-        names: :names_fields_for_names,
-        has_observations: :select_nil_yes, # ignores false
-        deprecated: :select_nil_boolean,
-        has_author: :select_nil_boolean,
-        author_has: :text_field_with_label,
-        has_citation: :select_nil_boolean,
-        citation_has: :text_field_with_label,
-        has_classification: :select_nil_boolean,
-        classification_has: :text_field_with_label,
-        has_notes: :select_nil_boolean,
-        notes_has: :text_field_with_label,
-        has_comments: :select_nil_yes,
-        comments_has: :text_field_with_label,
-        has_default_description: :select_nil_boolean,
-        created_at: :text_field_with_label,
-        updated_at: :text_field_with_label,
-        has_synonyms: :select_nil_boolean,
-        misspellings: :select_misspellings,
-        rank: :select_rank_range,
-        lichen: :select_nil_boolean
-      }.freeze
+      [
+        :names,
+        :has_observations,
+        :deprecated,
+        :has_author,
+        :author_has,
+        :has_citation,
+        :citation_has,
+        :has_classification,
+        :classification_has,
+        :has_notes,
+        :notes_has,
+        :has_comments,
+        :comments_has,
+        :has_default_description,
+        :created_at,
+        :updated_at,
+        :has_synonyms,
+        :misspellings,
+        :rank,
+        :lichen
+      ].freeze
     end
 
     def nested_names_params
-      {
-        include_synonyms: :select_no_eq_nil_or_yes,
-        include_subtaxa: :select_no_eq_nil_or_yes,
-        include_immediate_subtaxa: :select_no_eq_nil_or_yes,
-        exclude_original_names: :select_no_eq_nil_or_yes
-      }.freeze
+      [
+        :lookup,
+        :include_synonyms,
+        :include_subtaxa,
+        :include_immediate_subtaxa,
+        :exclude_original_names
+      ].freeze
     end
 
     def fields_with_range

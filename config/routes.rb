@@ -316,13 +316,12 @@ MushroomObserver::Application.routes.draw do
                        as: "mode"
     get("switch_users", to: "mode#edit") # alternate path
 
-    resource :users, only: [:edit, :update, :destroy]
+    resources :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit") # alternate path
     resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
     namespace :emails do
-      resource :features, only: [:new, :create], controller: "features"
       resource :webmaster_questions, only: [:new, :create],
                                      controller: "webmaster_questions"
       resource :merge_requests, only: [:new, :create],
@@ -475,7 +474,7 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Locations: a lot of actions  ----------------------------
   namespace :locations do
-    resource :search, only: [:new, :create]
+    resource :search, only: [:show, :new, :create]
   end
 
   resources :locations, id: /\d+/, shallow: true do

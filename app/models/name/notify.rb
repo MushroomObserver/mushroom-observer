@@ -8,15 +8,17 @@ module Name::Notify
   end
 
   # Notify webmaster that a new name was created.
+  # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
   def notify_webmaster
     return if skip_notify
 
-    user ||= @current_user || User.admin
-    QueuedEmail::Webmaster.create_email(
-      user,
+    message = WebmasterMailer.prepend_user(user,
+                                           "#{MO.http_domain}/names/#{id}")
+    WebmasterMailer.build(
+      sender_email: user.email,
       subject: "#{user.login} created #{user_real_text_name(user)}",
-      content: "#{MO.http_domain}/names/#{id}"
-    )
+      message:
+    ).deliver_later
   end
 
   # This is called after saving potential changes to a Name.  It will determine
@@ -38,9 +40,21 @@ module Name::Notify
     # Remove users who have opted out of all emails.
     recipients.reject!(&:no_emails)
 
-    # Send notification to all except the person who triggered the change.
+    send_name_change_emails(sender, recipients)
+  end
+
+  def send_name_change_emails(sender, recipients)
+    # Migrated from QueuedEmail::NameChange to deliver_later.
+    # Calculate versions now while saved_changes? is still accurate.
+    old_name_ver = saved_changes? ? version - 1 : version
+
     (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)
+      NameChangeMailer.build(
+        sender:, receiver: recipient, name: self,
+        old_name_ver:, new_name_ver: version,
+        description: nil, old_desc_ver: 0, new_desc_ver: 0,
+        review_status: "no_change"
+      ).deliver_later
     end
   end
 

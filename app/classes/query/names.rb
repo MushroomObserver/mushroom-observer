@@ -21,7 +21,7 @@ class Query::Names < Query
   query_attr(:search_name_has, :string)
   # query_attr(:clade, :string) # content filter
   # query_attr(:lichen, :boolean) # content filter
-  query_attr(:misspellings, { string: [:no, :either, :only] })
+  query_attr(:misspellings, { string: [:no, :include, :only] })
   query_attr(:deprecated, :boolean)
   query_attr(:has_synonyms, :boolean)
   query_attr(:ok_for_export, :boolean)
@@ -41,7 +41,7 @@ class Query::Names < Query
   # query_attr(:search_where, :string) # advanced search
   # query_attr(:search_user, :string) # advanced search
   # query_attr(:search_content, :string) # advanced search
-  query_attr(:locations, [Location])
+  query_attr(:within_locations, [Location])
   query_attr(:species_lists, [SpeciesList])
   query_attr(:needs_description, :boolean)
   query_attr(:has_descriptions, :boolean)

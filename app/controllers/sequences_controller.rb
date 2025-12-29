@@ -270,9 +270,20 @@ class SequencesController < ApplicationController
   end
 
   def render_modal_sequence_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     user: @user, form: "sequences/form" }) and return
+    render(
+      partial: "shared/modal_form",
+      locals: {
+        title: modal_title,
+        identifier: modal_identifier,
+        user: @user,
+        form: "sequences/form",
+        form_locals: {
+          model: @sequence,
+          observation: @observation,
+          back: @back
+        }
+      }
+    ) and return
   end
 
   def modal_identifier

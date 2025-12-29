@@ -6,15 +6,6 @@ add_context_nav(name_forms_return_tabs(name: @name))
 action = { controller: "/names/synonyms/deprecate", action: :create,
            id: @name.id, approved_name: @given_name }
 
-feedback_locals = {
-  button_name: :SUBMIT.l,
-  given_name: @given_name,
-  names: @names,
-  valid_names: @valid_names,
-  suggest_corrections: @suggest_corrections,
-  parent_deprecated: @parent_deprecated
-}
-
 deprecate_comments_help = capture do
   concat(:name_deprecate_comments_help.tp(name: @name.display_name.chomp(".")))
   concat(:field_textile_link.tp)
@@ -25,8 +16,16 @@ end
 
   <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
 
-  <%= render(partial: "shared/form_name_feedback",
-             locals: feedback_locals) if @given_name.present? %>
+  <% if @given_name.present? %>
+    <%= render(Components::FormNameFeedback.new(
+          given_name: @given_name,
+          button_name: :SUBMIT.l,
+          names: @names,
+          valid_names: @valid_names,
+          suggest_corrections: @suggest_corrections || false,
+          parent_deprecated: @parent_deprecated
+        )) %>
+  <% end %>
 
   <%= autocompleter_field(
     form: f, field: :proposed_name, type: :name,

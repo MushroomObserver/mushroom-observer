@@ -15,6 +15,8 @@ module ComponentTestHelper
                       ctrl = ActionView::TestCase::TestController.new
                       # Include Authentication module for permission? method
                       ctrl.class.include(ApplicationController::Authentication)
+                      # Include Queries module for add_q_param method
+                      ctrl.class.include(ApplicationController::Queries)
                       ctrl
                     end
   end
@@ -40,15 +42,61 @@ module ComponentTestHelper
     Nokogiri::HTML5(html)
   end
 
-  # Assert HTML contains a specific CSS selector with optional text
-  def assert_html(html, selector, text: nil)
+  # Assert HTML contains a specific CSS selector with optional checks
+  # @param html [String] The HTML to search
+  # @param selector [String] CSS selector to find the element
+  # @param text [String] Optional text content to find in element.text
+  # @param count [Integer] Optional exact count of matching elements
+  # @param classes [String] Optional CSS class name to check (without dot)
+  # @param attribute [Hash] Optional attribute to check, e.g., { name: "value" }
+  def assert_html(html, selector, **options)
+    text = options[:text]
+    count = options[:count]
+    classes = options[:classes]
+    attribute = options[:attribute]
+
     doc = Nokogiri::HTML(html)
-    element = doc.at_css(selector)
-    assert(element, "Expected to find element matching '#{selector}'")
+
+    if count
+      elements = doc.css(selector)
+      assert_equal(
+        count, elements.size,
+        "Expected #{count} element(s) matching '#{selector}', " \
+        "found #{elements.size}"
+      )
+      return if count.zero?
+
+      element = elements.first
+    else
+      element = doc.at_css(selector)
+      assert(element, "Expected to find element matching '#{selector}'")
+    end
+
     assert_includes(element.text, text) if text
+
+    if classes
+      element_classes = element["class"]&.split || []
+      assert_includes(
+        element_classes, classes,
+        "Expected element to have class '#{classes}'"
+      )
+    end
+
+    return unless attribute
+
+    attribute.each do |attr_name, expected_value|
+      actual_value = element[attr_name.to_s]
+      assert_equal(
+        expected_value, actual_value,
+        "Expected #{attr_name}='#{expected_value}', " \
+        "got #{attr_name}='#{actual_value}'"
+      )
+    end
   end
 
-  # Assert that a child selector is nested within a parent selector
+  # Assert that a child selector is nested within a parent selector.
+  # If text is provided, searches ALL matching children for one containing
+  # that text, not just the first match.
   def assert_nested(html, parent_selector:, child_selector:, text: nil)
     doc = Nokogiri::HTML(html)
     parent = doc.at_css(parent_selector)
@@ -57,15 +105,24 @@ module ComponentTestHelper
       "Expected to find parent element matching '#{parent_selector}'"
     )
 
-    child = parent.at_css(child_selector)
+    children = parent.css(child_selector)
     assert(
-      child,
+      children.any?,
       "Expected to find child element '#{child_selector}' " \
       "within parent '#{parent_selector}'"
     )
 
-    assert_includes(child.text, text) if text
-    child
+    return children.first unless text
+
+    # Find a child that contains the specified text
+    matching_child = children.find { |c| c.text.include?(text) }
+    assert(
+      matching_child,
+      "Expected a '#{child_selector}' within '#{parent_selector}' " \
+      "to contain '#{text}', but none did. " \
+      "Found: #{children.map(&:text).inspect}"
+    )
+    matching_child
   end
 
   # Assert that text content is within a specific nested structure

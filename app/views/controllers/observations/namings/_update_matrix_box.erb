@@ -2,20 +2,20 @@
 
 <%# Replace the title in the lightbox caption %>
 <%= turbo_stream.replace("observation_what_#{obs.id}") do %>
-  <%= Components::LightboxObservationTitle.new(
+  <%= render(Components::LightboxObservationTitle.new(
     obs: obs,
     user: user,
     identify: false
-  ) %>
+  )) %>
 <% end %>
 
 <%# Replace the title in the matrix_box %>
 <%= turbo_stream.replace("box_title_#{obs.id}") do %>
-  <%= Components::MatrixBoxTitle.new(
+  <%= render(Components::MatrixBoxTitle.new(
     id: obs.id,
-    name: obs.format_name,
+    name: obs.user_format_name(user).t.break_name.small_author,
     type: :observation
-  ) %>
+  )) %>
 <% end %>
 
 <%# are not removed via data-controller="section-update" because replaced %>

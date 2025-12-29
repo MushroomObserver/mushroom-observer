@@ -4,14 +4,14 @@
 class ConsensusChangeMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(email)
-    setup_user(email.to_user)
-    @observation = email.observation
-    @old_name = email.old_name
-    @new_name = email.new_name
-    @time = email.queued
+  def build(sender:, receiver:, observation:, old_name:, new_name:)
+    setup_user(receiver)
+    @observation = observation
+    @old_name = old_name
+    @new_name = new_name
+    @time = Time.zone.now
     @title = consensus_change_title(@observation, @old_name, @new_name)
-    @sender = email.user
+    @sender = sender
     debug_log(:consensus_change, @sender, @user, observation: @observation)
     mo_mail(@title, to: @user)
   end

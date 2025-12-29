@@ -6,9 +6,14 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
     include FieldWithHelp
+    include FieldLabelRow
 
     slot :between
+    slot :label_end
     slot :append
+
+    # Make slot accessors public (Phlex::Slotable makes them private by default)
+    public :between_slot, :label_end_slot, :append_slot
 
     attr_reader :wrapper_options
 
@@ -32,61 +37,58 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
-    # rubocop:disable Metrics/AbcSize
     def render_with_wrapper(&field_input)
-      label_option = wrapper_options[:label]
-      show_label = label_option != false
-      label_text = if label_option.is_a?(String)
-                     label_option
-                   else
-                     field.key.to_s.humanize
-                   end
-      inline = wrapper_options[:inline] || false
-      wrap_class = wrapper_options[:wrap_class]
-
-      div(class: form_group_class("form-group", inline, wrap_class)) do
-        render_label_row(label_text, inline) if show_label
+      div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
+        render_label_row(label_text, inline?) if show_label?
         render_field_input(&field_input)
         render_help_after_field
         render(append_slot) if append_slot
       end
     end
-    # rubocop:enable Metrics/AbcSize
 
-    def render_label_row(label_text, inline)
-      display = inline ? "d-inline-flex" : "d-flex"
+    def show_label?
+      wrapper_options[:label] != false
+    end
 
-      div(class: "#{display} justify-content-between") do
-        div do
-          label(for: field.dom.id, class: "mr-3") { label_text }
-          render_help_in_label_row
-          render(between_slot) if between_slot
+    def label_text
+      label_option = wrapper_options[:label]
+      label_option.is_a?(String) ? label_option : field.key.to_s.humanize
+    end
+
+    def inline?
+      wrapper_options[:inline] || false
+    end
+
+    def wrapper_class
+      form_group_class("form-group", inline?, wrapper_options[:wrap_class])
+    end
+
+    def render_field_input(&block)
+      if wrapper_options[:button]
+        render_input_with_button(&block)
+      elsif wrapper_options[:addon]
+        render_input_with_addon(&block)
+      else
+        yield
+      end
+    end
+
+    def render_input_with_button
+      div(class: "input-group") do
+        yield
+        span(class: "input-group-btn") do
+          button(type: "button", class: "btn btn-default",
+                 data: wrapper_options[:button_data] || {}) do
+            wrapper_options[:button]
+          end
         end
       end
     end
 
-    def render_field_input
-      addon = wrapper_options[:addon]
-      button = wrapper_options[:button]
-      button_data = wrapper_options[:button_data] || {}
-
-      if addon.present?
-        div(class: "input-group") do
-          yield
-          span(class: "input-group-addon") { addon }
-        end
-      elsif button.present?
-        div(class: "input-group") do
-          yield
-          span(class: "input-group-btn") do
-            button(type: "button", class: "btn btn-default",
-                   data: button_data) do
-              button
-            end
-          end
-        end
-      else
+    def render_input_with_addon
+      div(class: "input-group") do
         yield
+        span(class: "input-group-addon") { wrapper_options[:addon] }
       end
     end
 

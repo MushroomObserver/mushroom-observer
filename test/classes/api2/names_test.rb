@@ -79,7 +79,11 @@ class API2::NamesTest < UnitTestCase
   end
 
   def test_getting_names_name_includes_subtaxa
+    # classification_has("Fungi") now includes names(:fungi) itself
+    # since text_name starts with "Fungi". Exclude it for children_of test.
+    fungi = names(:fungi)
     names = Name.with_correct_spelling.classification_has("Fungi").
+            reject { |n| n == fungi }.
             map do |n|
       genus = n.text_name.split.first
       Name.where(Name[:text_name].matches("#{genus} %")) + [n]
@@ -88,7 +92,7 @@ class API2::NamesTest < UnitTestCase
     assert_api_pass(params_get(children_of: "Fungi"))
     assert_api_results(names)
     assert_api_pass(params_get(name: "Fungi", include_subtaxa: "yes"))
-    assert_api_results(names << names(:fungi))
+    assert_api_results((names + [fungi]).uniq.sort_by(&:id))
   end
 
   def test_getting_names_is_deprecated
@@ -105,6 +109,8 @@ class API2::NamesTest < UnitTestCase
     assert_not_empty(names)
     assert_not_empty(goods)
     assert_not_empty(bads)
+    assert_api_pass(params_get(updated_at: "20091012", misspellings: :include))
+    assert_api_results(names)
     assert_api_pass(params_get(updated_at: "20091012", misspellings: :either))
     assert_api_results(names)
     assert_api_pass(params_get(updated_at: "20091012", misspellings: :only))
@@ -128,7 +134,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_locations
     loc   = locations(:burbank)
-    names = Name.with_correct_spelling.locations(loc)
+    names = Name.with_correct_spelling.within_locations(loc)
     assert_not_empty(names)
     assert_api_pass(params_get(location: loc.id))
     assert_api_results(names)

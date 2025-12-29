@@ -6,7 +6,7 @@ module Admin
     class WebmasterQuestionsController < ApplicationController
       def new
         @email = params.dig(:user, :email)
-        @content = params.dig(:question, :content)
+        @message = params.dig(:question, :message)
         @email = @user.email if @user
 
         respond_to do |format|
@@ -17,7 +17,16 @@ module Admin
               locals: {
                 title: :ask_webmaster_title.l,
                 identifier: "webmaster_question_email",
-                user: @user, form: "admin/email/webmaster_questions/form"
+                user: @user,
+                form: "admin/emails/webmaster_questions/form",
+                form_locals: {
+                  model: FormObject::WebmasterQuestion.new(
+                    email: @email, message: @message
+                  ),
+                  email: @email,
+                  email_error: false,
+                  message: @message
+                }
               }
             ) and return
           end
@@ -25,8 +34,8 @@ module Admin
       end
 
       def create
-        @email = params.dig(:user, :email)
-        @content = params.dig(:question, :content)
+        @email = params.dig(:webmaster_question, :email)
+        @message = params.dig(:webmaster_question, :message)
         @email_error = false
         create_webmaster_question
       end
@@ -34,26 +43,51 @@ module Admin
       private
 
       def create_webmaster_question
-        if @email.blank? || @email.index("@").nil?
-          flash_error(:runtime_ask_webmaster_need_address.t)
-          @email_error = true
-        elsif @content.blank?
-          flash_error(:runtime_ask_webmaster_need_content.t)
+        if invalid_email?
+          handle_invalid_email
+        elsif @message.blank?
+          handle_missing_content
         elsif non_user_potential_spam?
-          flash_error(:runtime_ask_webmaster_antispam.t)
+          handle_spam
         else
-          QueuedEmail::Webmaster.create_email(@user, sender_email: @email,
-                                                     content: @content)
-          flash_notice(:runtime_ask_webmaster_success.t)
-          redirect_to("/")
+          send_email_and_redirect
         end
+      end
+
+      def invalid_email?
+        @email.blank? || @email.index("@").nil?
+      end
+
+      def handle_invalid_email
+        flash_error(:runtime_ask_webmaster_need_address.t)
+        @email_error = true
+        render(:new)
+      end
+
+      def handle_missing_content
+        flash_error(:runtime_ask_webmaster_need_content.t)
+        render(:new)
+      end
+
+      def handle_spam
+        flash_error(:runtime_ask_webmaster_antispam.t)
+        render(:new)
+      end
+
+      def send_email_and_redirect
+        # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+        message = WebmasterMailer.prepend_user(@user, @message)
+        WebmasterMailer.build(sender_email: @email, message:).
+          deliver_later
+        flash_notice(:runtime_ask_webmaster_success.t)
+        redirect_to("/")
       end
 
       def non_user_potential_spam?
         !@user && (
-          /https?:/.match?(@content) ||
-          %r{<[/a-zA-Z]+>}.match?(@content) ||
-          @content.exclude?(" ")
+          /https?:/.match?(@message) ||
+          %r{<[/a-zA-Z]+>}.match?(@message) ||
+          @message.exclude?(" ")
         )
       end
     end

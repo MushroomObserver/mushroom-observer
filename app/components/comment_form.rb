@@ -2,20 +2,6 @@
 
 # Form for creating/editing comments
 class Components::CommentForm < Components::ApplicationForm
-  def initialize(model, local: false, **)
-    @local = local
-    super(model, id: "comment_form", **)
-  end
-
-  def around_template
-    # Set turbo data attribute only when not local
-    unless @local
-      @attributes[:data] ||= {}
-      @attributes[:data][:turbo] = true
-    end
-    super
-  end
-
   def view_template
     render_summary_field
     render_comment_field

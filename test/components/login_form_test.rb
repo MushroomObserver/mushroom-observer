@@ -8,44 +8,39 @@ class LoginFormTest < UnitTestCase
   def setup
     @model = FormObject::Login.new(login: "testuser", remember_me: true)
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_form_with_login_field
-    form = render_form
-
-    assert_includes(form, :login_user.t)
-    assert_includes(form, 'name="user[login]"')
-    assert_includes(form, "data-autofocus")
+    assert_html(@html, "body", text: :login_user.l)
+    assert_html(@html, "input[name='user[login]']")
+    assert_html(@html, "input[data-autofocus]")
   end
 
   def test_renders_form_with_password_field
-    form = render_form
-
-    assert_includes(form, :login_password.t)
-    assert_includes(form, 'name="user[password]"')
-    assert_includes(form, 'type="password"')
+    assert_html(@html, "body", text: :login_password.l)
+    assert_html(@html, "input[name='user[password]']")
+    assert_html(@html, "input[type='password']")
   end
 
   def test_renders_remember_me_checkbox
-    form = render_form
-
-    assert_includes(form, :login_remember_me.t)
-    assert_includes(form, 'name="user[remember_me]"')
-    assert_includes(form, 'type="checkbox"')
+    assert_html(@html, "body", text: :login_remember_me.l)
+    assert_html(@html, "input[name='user[remember_me]']")
+    assert_html(@html, "input[type='checkbox']")
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :login_login.l)
-    assert_includes(form, "btn btn-default")
-    assert_includes(form, "center-block my-3")
+    assert_html(@html, "input[type='submit'][value='#{:login_login.l}']")
+    assert_html(@html, ".btn.btn-default")
+    assert_html(@html, ".center-block.my-3")
   end
 
   def test_renders_help_text
-    form = render_form
+    assert_html(@html, "body", text: :login_having_problems.tp.as_displayed)
+  end
 
-    assert_includes(form, :login_having_problems.tp)
+  def test_renders_forgot_login_text
+    assert_html(@html, "body", text: :login_forgot_password.tp.as_displayed)
   end
 
   private

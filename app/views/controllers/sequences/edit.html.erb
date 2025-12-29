@@ -10,14 +10,14 @@ obs = @sequence.observation
   <div class="col-xs-12 col-sm-7">
     <%= render(partial: "sequences/observation_title",
                locals: { observation: obs }) %>
-    <%= render(partial: "sequences/form", locals: { local: true }) %>
+    <%= render(Components::SequenceForm.new(@sequence, back: @back)) %>
 
     <div class="small">
       <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
       <%= user_link(@sequence.user) %>
     </div>
 
-    <%= show_object_footer(@user, @sequence) %>
+    <%= render(Components::ObjectFooter.new(user: @user, obj: @sequence)) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

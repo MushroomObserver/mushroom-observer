@@ -6,6 +6,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
     include FieldWithHelp
+    include FieldLabelRow
 
     slot :between
     slot :append
@@ -19,14 +20,35 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def view_template(&options_block)
       render_with_wrapper do
+        # Exclude `selected` from select tag attrs - it's used by options()
+        select_attrs = attributes.except(:selected)
         if options_block
-          select(**attributes, class: select_classes, &options_block)
+          select(**select_attrs, class: select_classes, &options_block)
         else
-          select(**attributes, class: select_classes) do
+          select(**select_attrs, class: select_classes) do
             options(*@collection)
           end
         end
       end
+    end
+
+    # Override to use `selected` attribute if field.value is nil or an array.
+    # Arrays occur with range fields (e.g., confidence: [-3.0, -1.0]) where we
+    # pass individual `selected` values for each select in the range pair.
+    # Compares as strings to handle boolean values (Phlex omits value="false")
+    def options(*collection)
+      map_options(collection).each do |key, value|
+        option(selected: option_selected?(key), value: key) { value }
+      end
+    end
+
+    def option_selected?(key)
+      val = use_selected_attribute? ? attributes[:selected] : field.value
+      val.to_s == key.to_s
+    end
+
+    def use_selected_attribute?
+      field.value.nil? || field.value.is_a?(Array)
     end
 
     private
@@ -55,18 +77,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
     # rubocop:enable Metrics/AbcSize
-
-    def render_label_row(label_text, inline)
-      display = inline ? "d-inline-flex" : "d-flex"
-
-      div(class: "#{display} justify-content-between") do
-        div do
-          label(for: field.dom.id, class: "mr-3") { label_text }
-          render_help_in_label_row
-          render(between_slot) if between_slot
-        end
-      end
-    end
 
     def form_group_class(base, inline, wrap_class)
       classes = base

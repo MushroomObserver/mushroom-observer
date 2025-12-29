@@ -102,6 +102,39 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_equal(rolf, name.user)
   end
 
+  # Regression test for bug where adding an author to a name without one
+  # incorrectly redirected to the approve/deprecate synonyms screen.
+  # The bug was caused by Phlex omitting the value attribute for boolean false,
+  # so params[:name][:deprecated] was empty instead of "false".
+  def test_edit_name_add_author_does_not_redirect_to_synonyms
+    name = names(:conocybe_filaris)
+    assert_equal("Conocybe filaris", name.text_name)
+    assert_blank(name.author)
+    assert_equal(false, name.deprecated)
+
+    params = {
+      id: name.id,
+      name: {
+        text_name: "Conocybe filaris",
+        author: "New Author",
+        rank: "Species",
+        deprecated: "false" # Must be string "false", not empty or boolean
+      }
+    }
+    login("rolf")
+    put(:update, params: params)
+
+    # Should redirect to the name show page, NOT to approve/deprecate synonyms
+    assert_redirected_to(name_path(name.id))
+    assert_no_match(/synonyms/, @response.redirect_url.to_s)
+    assert_flash_success
+
+    # Verify the author was saved
+    assert_equal("New Author", name.reload.author)
+    # Verify deprecated status unchanged
+    assert_equal(false, name.deprecated)
+  end
+
   def test_edit_name_no_changes
     name = names(:conocybe_filaris)
     text_name = name.text_name
@@ -469,7 +502,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
                  name.user_display_name)
 
     get(:edit, params: { id: name.id })
-    assert_input_value("name_text_name", "Xanthoparmelia coloradoensis")
+    assert_textarea_value("name_text_name", "Xanthoparmelia coloradoensis")
     assert_textarea_value("name_author", "")
 
     params = {
@@ -494,7 +527,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
                  name.user_display_name)
 
     get(:edit, params: { id: name.id })
-    assert_input_value("name_text_name", "Xanthoparmelia coloradoënsis")
+    assert_textarea_value("name_text_name", "Xanthoparmelia coloradoënsis")
     assert_textarea_value("name_author", "(Gyelnik) Hale")
 
     params[:name][:text_name] = "Xanthoparmelia coloradoensis"
@@ -665,7 +698,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_select("input[type=text]#name_icn_id", count: 0)
     assert_select("select#name_rank", count: 0)
     assert_select("select#name_deprecated", count: 0)
-    assert_select("input[type=text]#name_text_name", count: 0)
+    assert_select("textarea#name_text_name", count: 0)
     assert_select("textarea#name_author", count: 0)
     assert_select("input[type=checkbox]#name_misspelling", count: 0)
     assert_select("input[type=text]#name_correct_spelling", count: 0)
@@ -689,7 +722,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_select("input[type=text]#name_icn_id", count: 1)
     assert_select("select#name_rank", count: 1)
     assert_select("select#name_deprecated", count: 1)
-    assert_select("input[type=text]#name_text_name", count: 1)
+    assert_select("textarea#name_text_name", count: 1)
     assert_select("textarea#name_author", count: 1)
     assert_select("input[type=checkbox]#name_misspelling", count: 1)
     assert_select("input[type=text]#name_correct_spelling", count: 1)

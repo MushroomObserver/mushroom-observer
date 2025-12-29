@@ -15,14 +15,12 @@
 #     end
 #   end
 #
-# @example Auto-determining action URL (eliminates _form.html.erb partials)
+# @example Deriving action URL from model (eliminates passing action from view)
 #   class LicenseForm < Components::ApplicationForm
 #     def view_template
 #       text_field(:display_name)
 #       submit
 #     end
-#
-#     private
 #
 #     def form_action
 #       model.persisted? ? view_context.license_path(model) :
@@ -32,6 +30,43 @@
 #
 #   # In new.html.erb and edit.html.erb, just render the form directly:
 #   <%= render(Components::LicenseForm.new(@license)) %>
+#
+# @example Deriving action URL from model associations
+#   # For forms where the action depends on an associated model
+#   class NameTrackerForm < Components::ApplicationForm
+#     def view_template
+#       text_field(:note_template)
+#       submit
+#     end
+#
+#     def form_action
+#       # Access model associations to build the URL
+#       url_for(controller: "names/trackers", action: :create,
+#               id: model.name.id, only_path: true)
+#     end
+#   end
+#
+#   # In the view, no need to pass action:
+#   <%= render(Components::NameTrackerForm.new(
+#     @name_tracker || NameTracker.new(name: @name)
+#   )) %>
+#
+# @example Custom form method logic
+#   # Override form_method when you need custom HTTP method logic
+#   class CustomForm < Components::ApplicationForm
+#     def initialize(model, method: nil, **)
+#       @method = method
+#       super(model, **)
+#     end
+#
+#     protected
+#
+#     def form_method
+#       return super unless @method  # IMPORTANT: Always call super as fallback
+#
+#       @method.to_s.downcase == "get" ? "get" : "post"
+#     end
+#   end
 #
 # @example Accessing view helpers (like in_admin_mode?)
 #   class GlossaryTermForm < Components::ApplicationForm
@@ -44,30 +79,43 @@
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
 
-  # Override initialize to store whether we need to auto-determine action
-  # Form subclasses can define private form_action to customize behavior
-  def initialize(model, action: nil, **)
-    @auto_determine_action = action.nil? && respond_to?(:form_action, true)
+  # Automatically set form ID based on class name unless explicitly provided
+  # @param model [ActiveRecord::Base] the model object for the form
+  # @param id [String] optional form ID (auto-generated from class name if nil)
+  # @param local [Boolean] if true, renders non-turbo form (default: true)
+  # @param options [Hash] additional options passed to Superform
+  def initialize(model, id: nil, local: true, **options)
+    # Generate ID from class name: Components::APIKeyForm -> "api_key_form"
+    # For anonymous classes (tests), default to "application_form"
+    auto_id = id || self.class.name&.demodulize&.underscore ||
+              "application_form"
+    @turbo_stream = !local
+    super(model, **options.merge(id: auto_id))
+  end
+
+  def around_template
+    # Set turbo data attribute for turbo_stream forms
+    if @turbo_stream
+      @attributes[:data] ||= {}
+      @attributes[:data][:turbo] = "true"
+    end
     super
   end
 
-  # Override around_template to set action before rendering if needed
-  def around_template
-    # Determine action now that helpers are available
-    @action = form_action if @auto_determine_action && @action.nil?
-    super
-  end
+  # Form subclasses can override form_action to derive action URLs from model
+  # associations or other logic, eliminating the need to pass explicit actions
 
   # Register view helpers that forms might need
   # Use register_value_helper for helpers that return values (not HTML)
   register_value_helper :in_admin_mode?
   register_value_helper :current_user
   register_value_helper :url_for
+  register_value_helper :rank_as_string
 
   # We don't need to register form helpers anymore - using Superform fields
 
   # Wrapper option keys that should not be passed to the field itself
-  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class, :addon,
+  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
                      :button, :button_data, :monospace].freeze
 
   # Override the Field class to use our custom components
@@ -96,6 +144,37 @@ class Components::ApplicationForm < Superform::Rails::Form
       SelectField.new(self, collection: options, attributes: attributes,
                             wrapper_options: wrapper_options)
     end
+
+    def read_only(wrapper_options: {}, **attributes)
+      ReadOnlyField.new(self, attributes: attributes,
+                              wrapper_options: wrapper_options)
+    end
+
+    # Autocompleter-specific options that should NOT go in field attributes
+    # Note: :value stays in attributes since it goes to the text/textarea field
+    AUTOCOMPLETER_OPTIONS = [:find_text, :keep_text, :edit_text, :create_text,
+                             :create, :create_path, :hidden_value,
+                             :hidden_data, :controller_data].freeze
+
+    def autocompleter(type:, textarea: false, wrapper_options: {},
+                      **attributes)
+      # Extract autocompleter-specific options from attributes
+      ac_options = attributes.slice(*AUTOCOMPLETER_OPTIONS)
+      field_attributes = attributes.except(*AUTOCOMPLETER_OPTIONS)
+
+      AutocompleterField.new(self, type: type, textarea: textarea,
+                                   attributes: field_attributes,
+                                   wrapper_options: wrapper_options,
+                                   **ac_options)
+    end
+
+    # Alias for backwards compatibility
+    alias hidden read_only
+
+    def static(wrapper_options: {}, **attributes)
+      StaticTextField.new(self, attributes: attributes,
+                                wrapper_options: wrapper_options)
+    end
   end
 
   # Main field wrapper methods with Bootstrap styling
@@ -111,12 +190,11 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @option options [Boolean] :inline render label and field inline
   # @option options [String] :wrap_class CSS classes for wrapper div
   # @option options [String] :class CSS classes for input element
-  # @option options [String] :addon text addon (static, not interactive)
-  # @option options [String] :button button addon (interactive)
-  # @option options [Hash] :button_data data attributes for button addon
+  # @option options [String] :button button text (renders input-group with btn)
+  # @option options [Hash] :button_data data attributes for button
   # All other options passed to the input element
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append` (after input, end of form-group)
   def text_field(field_name, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
@@ -240,6 +318,30 @@ class Components::ApplicationForm < Superform::Rails::Form
     field_component = field(field_name).text(
       wrapper_options: wrapper_opts,
       type: "number",
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Autocompleter field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param type [Symbol] the autocompleter type (:name, :location, :user, etc.)
+  # @param options [Hash] all field and wrapper options
+  # @option options [Boolean] :textarea use textarea instead of text input
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots with `with_between`
+  #   and `with_append`
+  def autocompleter_field(field_name, type:, textarea: false, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).autocompleter(
+      type: type,
+      textarea: textarea,
+      wrapper_options: wrapper_opts,
       **field_opts
     )
 

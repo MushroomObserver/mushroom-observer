@@ -11,51 +11,53 @@ module Observations
 
     before_action :login_required
 
-    # Also an index of helper methods to use for each field.
     def permitted_search_params
-      {
-        date: :text_field_with_label,
-        created_at: :text_field_with_label,
-        updated_at: :text_field_with_label,
-        names: :names_fields_for_obs,
-        confidence: :select_confidence_range,
-        has_name: :select_nil_boolean,
-        lichen: :select_nil_boolean,
-        within_locations: :multiple_value_autocompleter,
-        has_public_lat_lng: :select_nil_boolean,
-        is_collection_location: :select_nil_boolean,
-        region: :region_with_in_box_fields,
-        in_box: :in_box_fields,
-        has_specimen: :select_nil_boolean,
-        has_sequences: :select_nil_yes, # ignores false
-        has_images: :select_nil_boolean,
-        has_notes: :select_nil_boolean,
-        has_notes_fields: :text_field_with_label,
-        notes_has: :text_field_with_label,
-        has_comments: :select_nil_yes,
-        comments_has: :text_field_with_label,
-        by_users: :multiple_value_autocompleter,
-        projects: :multiple_value_autocompleter,
-        herbaria: :multiple_value_autocompleter,
-        species_lists: :multiple_value_autocompleter,
-        project_lists: :multiple_value_autocompleter,
-        field_slips: :text_field_with_label
-      }.freeze
+      [
+        :date,
+        :created_at,
+        :updated_at,
+        :names,
+        :confidence,
+        :has_name,
+        :lichen,
+        :within_locations,
+        :has_public_lat_lng,
+        :is_collection_location,
+        :region,
+        :in_box,
+        :has_specimen,
+        :has_sequences,
+        :has_images,
+        :has_field_slips,
+        :has_collection_numbers,
+        :has_notes,
+        :has_notes_fields,
+        :notes_has,
+        :has_comments,
+        :comments_has,
+        :by_users,
+        :projects,
+        :herbaria,
+        :species_lists,
+        :project_lists
+      ].freeze
     end
 
     def nested_names_params
-      {
-        include_synonyms: :select_no_eq_nil_or_yes,
-        include_subtaxa: :select_no_eq_nil_or_yes,
-        include_immediate_subtaxa: :select_no_eq_nil_or_yes,
-        exclude_original_names: :select_no_eq_nil_or_yes,
-        include_all_name_proposals: :select_no_eq_nil_or_yes,
-        exclude_consensus: :select_no_eq_nil_or_yes
-      }.freeze
+      [
+        :lookup,
+        :include_synonyms,
+        :include_subtaxa,
+        :include_immediate_subtaxa,
+        :exclude_original_names,
+        :include_all_name_proposals,
+        :exclude_consensus
+      ].freeze
     end
 
     def fields_preferring_ids
-      [:by_users, :projects, :herbaria, :project_lists, :species_lists]
+      [:by_users, :projects, :herbaria, :project_lists, :species_lists,
+       :within_locations]
     end
 
     def fields_with_range
@@ -92,13 +94,14 @@ module Observations
         detail: {
           shown: [],
           collapsed: [[:has_specimen, :has_sequences],
-                      [:has_images, :has_notes],
+                      [:has_images, :has_field_slips],
+                      [:has_collection_numbers, :has_notes],
                       [:has_notes_fields, :notes_has],
                       [:has_comments, :comments_has]]
         },
         connected: {
           shown: [:by_users, :projects],
-          collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
+          collapsed: [:herbaria, :species_lists, :project_lists]
         }
       }
     ].freeze

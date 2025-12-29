@@ -18,32 +18,29 @@ class HerbariumCuratorRequestFormTest < UnitTestCase
   end
 
   def setup
+    super
     @model = TestRequest.new
+    @herbarium = herbaria(:nybg_herbarium)
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_herbarium_name
-    form = render_form
-
-    assert_includes(form, :HERBARIUM.l)
-    assert_includes(form, "Test Herbarium")
+    assert_html(@html, "body", text: :HERBARIUM.l)
+    assert_includes(@html, @herbarium.name)
   end
 
   def test_renders_notes_field
-    form = render_form
-
-    assert_includes(form, :NOTES.l)
-    assert_includes(form, "rows=\"10\"")
-    assert_includes(form, "data-autofocus")
+    assert_html(@html, "body", text: :NOTES.l)
+    assert_html(@html, "textarea[rows='10']")
+    assert_html(@html, "textarea[data-autofocus]")
   end
 
   def test_renders_submit_button
-    form = render_form
-
-    assert_includes(form, :SEND.l)
-    assert_includes(form, "btn btn-default")
-    assert_includes(form, "center-block my-3")
-    assert_includes(form, "data-turbo-submits-with")
+    assert_html(@html, "input[type='submit'][value='#{:SEND.l}']")
+    assert_html(@html, ".btn.btn-default")
+    assert_html(@html, ".center-block.my-3")
+    assert_html(@html, "input[data-turbo-submits-with]")
   end
 
   private
@@ -51,9 +48,7 @@ class HerbariumCuratorRequestFormTest < UnitTestCase
   def render_form
     form = Components::HerbariumCuratorRequestForm.new(
       @model,
-      herbarium_name: "Test Herbarium",
-      action: "/test_action",
-      id: "herbarium_curator_request_form"
+      herbarium: @herbarium
     )
     render(form)
   end

@@ -284,13 +284,47 @@ module ControllerExtensions
   end
 
   # Assert the existence of a given link in the response body, and check
-  # that it points to the right place.
+  # that it points to the right place. Uses order-agnostic URL matching
+  # since query parameter order can vary.
   def assert_link_in_html(label, url, _msg = nil)
     unless url.is_a?(String)
       revised_opts = raise_params(url)
       url = url_for(revised_opts)
     end
-    assert_select("a[href='#{url}']", text: label)
+    assert_link_with_params(label, url)
+  end
+
+  # Find a link matching the label and verify its href contains the same
+  # path and query parameters (in any order) as the expected URL.
+  def assert_link_with_params(label, expected_url)
+    expected_uri = URI.parse(expected_url)
+    expected_path = expected_uri.path
+    expected_params = Rack::Utils.parse_nested_query(expected_uri.query || "")
+    expected_fragment = expected_uri.fragment
+
+    links = css_select("a").select { |a| a.text.strip == label.to_s }
+    matching_link = links.find do |link|
+      href = link[:href]
+      next false unless href
+
+      actual_uri = URI.parse(href)
+      next false unless actual_uri.path == expected_path
+
+      actual_params = Rack::Utils.parse_nested_query(actual_uri.query || "")
+      next false unless actual_params == expected_params
+
+      # Check fragment if expected
+      if expected_fragment && actual_uri.fragment != expected_fragment
+        next false
+      end
+
+      true
+    end
+
+    found_hrefs = links.pluck(:href).inspect
+    assert(matching_link,
+           "Expected link '#{label}' with URL matching #{expected_url}, " \
+           "found #{found_hrefs}")
   end
 
   def assert_image_link_in_html(img_src, url, _msg = nil)
@@ -467,7 +501,13 @@ module ControllerExtensions
   def assert_response(arg, msg = "")
     return unless arg
 
-    if arg == :success || arg == :redirect || arg.is_a?(Integer)
+    rails_response_predicates =
+      ActionDispatch::Assertions::ResponseAssertions::RESPONSE_PREDICATES
+    # Is it a standard Rails HTTP status symbol?
+    if (arg.is_a?(Symbol) && Rack::Utils::SYMBOL_TO_STATUS_CODE.key?(arg)) ||
+       # or Rails response predicate (:success, :missing, :redirect, :error)?
+       (arg.is_a?(Symbol) && rails_response_predicates.key?(arg)) ||
+       arg.is_a?(Integer)
       super
     else
       # Put together good error message telling us exactly what happened.

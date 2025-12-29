@@ -31,4 +31,33 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("a[href*='/locations/#{location.id}']")
     assert_selector("a", class: "show_location_link_#{location.id}", count: 1)
   end
+
+  # Test for issue #3585: Going to observations after location search with
+  # area order should not cause 500 error
+  def test_observations_link_from_location_with_box_area_order
+    Location.update_box_area_and_center_columns
+    login
+
+    # Create a location query with box_area ordering
+    query = Query.lookup(:Location, pattern: "California", order_by: :box_area)
+    query.save
+
+    # Visit locations index with box_area ordering
+    visit(locations_path(q: query.id.alphabetize))
+
+    # Click on a location with observations
+    location = locations(:burbank)
+    click_link(location.display_name)
+
+    # Click on "Observations at this Location" link
+    click_link(text: :show_location_observations.l)
+
+    # Should successfully load observations page without error
+    assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
+    page.find("#filters").assert_text(location.display_name)
+
+    # Verify we got the observations for this location
+    results = find_all("#results .matrix-box")
+    assert_equal(Observation.locations(location).size, results.size)
+  end
 end

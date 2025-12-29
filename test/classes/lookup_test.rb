@@ -33,6 +33,12 @@ class LookupTest < UnitTestCase
   def test_lookup_locations_by_name
     expects = [locations(:salt_point), locations(:burbank)]
     assert_lookup_objects(:Locations, expects, expects.map(&:name))
+    # Make sure this does not return every location in California
+    expects = [locations(:california)]
+    assert_lookup_objects(:Locations, expects, expects.map(&:name))
+    # Make sure a blank line doesn't throw it off
+    assert_lookup_objects(:Locations, expects,
+                          "\n#{locations(:california).name}")
   end
 
   def test_lookup_projects_by_name
@@ -189,7 +195,9 @@ class LookupTest < UnitTestCase
   end
 
   def create_test_name(name)
-    name = Name.new_name(Name.parse_name(name).params)
+    params = Name.parse_name(name).params
+    params[:user] ||= rolf
+    name = Name.new_name(params)
     name.save
     name
   end

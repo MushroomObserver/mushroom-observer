@@ -7,6 +7,18 @@ require("test_helper")
 # ------------------------------------------------------------
 module Locations
   class SearchControllerTest < FunctionalTestCase
+    def test_show_help
+      login
+      get(:show)
+      assert_template("locations/search/_help")
+    end
+
+    def test_show_help_turbo
+      login
+      get(:show, format: :turbo_stream)
+      assert_template("locations/search/_help")
+    end
+
     def test_new_locations_search
       login
       get(:new)
@@ -15,7 +27,7 @@ module Locations
     def test_new_locations_search_turbo
       login
       get(:new, format: :turbo_stream)
-      assert_template("shared/_search_form")
+      assert_select("#locations_search_form")
     end
 
     def test_new_locations_search_form_prefilled_from_existing_query
@@ -28,7 +40,7 @@ module Locations
         has_notes: true,
         notes_has: "Symbiota",
         regexp: "Target",
-        by_editor: users(:rolf).id,
+        by_editor: [users(:rolf).id],
         has_observations: true
       )
       assert(query.id)
@@ -38,7 +50,8 @@ module Locations
       assert_select("select#query_locations_has_notes", selected: "yes")
       assert_select("input#query_locations_notes_has", value: "Symbiota")
       assert_select("input#query_locations_regexp", value: "Target")
-      assert_select("input#query_locations_by_editor", value: "Rolf Singer")
+      assert_select("textarea#query_locations_by_editor",
+                    text: "Rolf Singer (rolf)")
       assert_select("select#query_locations_has_observations",
                     selected: "yes")
       assert_equal(session[:search_type], :locations)

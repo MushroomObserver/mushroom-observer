@@ -24,7 +24,7 @@ class Components::Carousel < Components::Base
     value.respond_to?(:to_a) ? value.to_a : value
   end
   prop :user, _Nilable(User)
-  prop :object, _Nilable(Object), default: nil
+  prop :object, _Nilable(AbstractModel), default: nil
   prop :size, Components::BaseImage::Size, default: :large
   prop :title, String, default: -> { :IMAGES.t }
   prop :links, String, default: ""

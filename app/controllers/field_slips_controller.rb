@@ -52,9 +52,9 @@ class FieldSlipsController < ApplicationController
         end
         format.json { render(:show, status: :created, location: @field_slip) }
       else
-        format.html { render(:new, status: :unprocessable_entity) }
+        format.html { render(:new, status: :unprocessable_content) }
         format.json do
-          render(json: @field_slip.errors, status: :unprocessable_entity)
+          render(json: @field_slip.errors, status: :unprocessable_content)
         end
       end
     end
@@ -83,9 +83,9 @@ class FieldSlipsController < ApplicationController
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
         @field_slip.reload
-        format.html { render(:edit, status: :unprocessable_entity) }
+        format.html { render(:edit, status: :unprocessable_content) }
         format.json do
-          render(json: @field_slip.errors, status: :unprocessable_entity)
+          render(json: @field_slip.errors, status: :unprocessable_content)
         end
       end
     end

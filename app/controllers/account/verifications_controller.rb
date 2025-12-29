@@ -66,26 +66,27 @@ module Account
 
     # Route linked from the "reverify" template. Re-sends verification email.
     def resend_email
-      return unless (user = find_or_goto_index(User, params[:id]))
+      return unless (receiver = find_or_goto_index(User, params[:id]))
 
-      email = QueuedEmail::VerifyAccount.create_email(user)
-      email.destroy if email.send_email
-      self.class.notify_root_of_verification_email(user)
+      # Migrated from QueuedEmail::VerifyAccount to ActionMailer + ActiveJob.
+      # See .claude/deliver_later_migration_plan.md for details.
+      VerifyAccountMailer.build(receiver:).deliver_later
+      self.class.notify_root_of_verification_email(receiver)
       flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
       redirect_back_or_default(account_welcome_path)
     end
 
-    # This method is also called by AccountController, so it's a class method.
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
     def self.notify_root_of_verification_email(user)
       url = "#{MO.http_domain}/account/verify/#{user.id}?" \
             "auth_code=#{user.auth_code}"
-      content = :email_verify_intro.tp(user: user.login, link: url)
-      QueuedEmail::Webmaster.create_email(
-        @user,
+      body = :email_verify_intro.tp(user: user.login, link: url)
+      message = "email: #{user.email}\n\n #{body.html_to_ascii}"
+      WebmasterMailer.build(
         sender_email: user.email,
         subject: :email_subject_verify.l,
-        content: "email: #{user.email}\n\n #{content.html_to_ascii}"
-      )
+        message:
+      ).deliver_later
     end
 
     private

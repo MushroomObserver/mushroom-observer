@@ -28,15 +28,28 @@ module Herbaria
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       return unless @herbarium
 
-      QueuedEmail::Webmaster.create_email(
-        @user,
-        subject: "Herbarium Curator Request",
-        content: "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
-                 "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
-                 "Notes: #{params[:notes]}"
-      )
+      send_curator_request_email
       flash_notice(:show_herbarium_request_sent.t)
       redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
+    end
+
+    private
+
+    def send_curator_request_email
+      # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+      message = WebmasterMailer.prepend_user(@user, curator_request_content)
+      WebmasterMailer.build(
+        sender_email: @user.email,
+        subject: "Herbarium Curator Request",
+        message:
+      ).deliver_later
+    end
+
+    def curator_request_content
+      notes = params.dig(:herbarium_curator_request, :notes)
+      "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
+        "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
+        "Notes: #{notes}"
     end
 
     ############################################################################

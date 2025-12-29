@@ -8,30 +8,28 @@ class QRReaderFormTest < UnitTestCase
   def setup
     @model = FieldSlip.new
     controller.request = ActionDispatch::TestRequest.create
+    @html = render_form
   end
 
   def test_renders_qr_code_field
-    form = render_form
-
-    assert_includes(form, :app_qrcode.t)
-    assert_includes(form, "data-qr-reader-target=\"input\"")
-    assert_includes(form, "data-action=\"qr-reader#handleInput\"")
+    assert_html(@html, "body", text: :app_qrcode.l)
+    assert_html(@html, "input[data-qr-reader-target='input']")
+    assert_html(@html, "input[data-action='qr-reader#handleInput']")
   end
 
   def test_form_has_form_control_class
-    form = render_form
+    assert_html(@html, ".form-control")
+  end
 
-    assert_includes(form, "form-control")
+  def test_form_has_default_id_and_data_controller
+    assert_html(@html, "form#qr_reader_form")
+    assert_html(@html, "form[data-controller='qr-reader']")
   end
 
   private
 
   def render_form
-    form = Components::QRReaderForm.new(
-      @model,
-      action: "/test_action",
-      id: "qr_reader_form"
-    )
+    form = Components::QRReaderForm.new(@model, action: "/test_action")
     render(form)
   end
 end

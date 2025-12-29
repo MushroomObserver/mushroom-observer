@@ -239,7 +239,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     login(rolf.login)
     post(:create, params: params)
     assert_template("names/new")
-    assert_template("names/_form")
+    assert_select("#name_form")
     # Should fail and no name should get created
     assert_nil(Name.find_by(text_name: text_name))
     assert_form_action(action: :create)
@@ -505,7 +505,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     end
 
     assert_response(:redirect)
-    name = Name.order(created_at: :asc).last
+    name = Name.order(id: :desc).first
     assert_equal("Genus", name.rank)
     assert_equal("Gen. 'Hemimycena3'", name.text_name)
     assert_equal("Gen. 'Hemimycena3'", name.search_name)

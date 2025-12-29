@@ -141,14 +141,21 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    return unless in_admin_mode?
+
+    @top_users = User.top_users_for_herbarium(@herbarium)
   end
 
   def render_modal_herbarium_form
     render(
       partial: "shared/modal_form",
-      locals: { title: modal_title, identifier: modal_identifier,
-                user: @user, form: "herbaria/form",
-                form_locals: { local: false, action: modal_form_action } }
+      locals: {
+        title: modal_title,
+        identifier: modal_identifier,
+        user: @user,
+        form: "herbaria/form",
+        form_locals: { local: false, action: modal_form_action }
+      }
     ) and return
   end
 
@@ -352,14 +359,17 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def notify_admins_of_new_herbarium
-    QueuedEmail::Webmaster.create_email(
-      @user,
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    body = "User created a new herbarium:\n" \
+           "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
+           "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
+           "Obj: #{@herbarium.show_url}\n"
+    message = WebmasterMailer.prepend_user(@user, body)
+    WebmasterMailer.build(
+      sender_email: @user.email,
       subject: "New Herbarium",
-      content: "User created a new herbarium:\n" \
-               "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
-               "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
-               "Obj: #{@herbarium.show_url}\n"
-    )
+      message:
+    ).deliver_later
   end
 
   def user_can_destroy_herbarium?

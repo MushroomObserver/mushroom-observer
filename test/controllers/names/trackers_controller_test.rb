@@ -5,6 +5,7 @@ require("test_helper")
 module Names
   class TrackersControllerTest < FunctionalTestCase
     include ObjectLinkHelper
+    include ActiveJob::TestHelper
 
     # ----------------------------
     #  Name Trackers.
@@ -16,6 +17,29 @@ module Names
       requires_login(:new, params)
       assert_template("names/trackers/new")
       assert_form_action(action: :create, id: name.id)
+    end
+
+    def test_email_tracking_edit_with_existing_tracker
+      name = names(:coprinus_comatus)
+      name_tracker = NameTracker.find_by(name: name, user: rolf)
+      assert(name_tracker, "Test needs a fixture with existing tracker")
+
+      login("rolf")
+      get(:edit, params: { id: name.id })
+
+      assert_template("names/trackers/edit")
+      assert_form_action(action: :update, id: name.id)
+    end
+
+    def test_email_tracking_edit_without_existing_tracker_redirects_to_new
+      name = names(:conocybe_filaris)
+      name_tracker = NameTracker.find_by(name: name, user: rolf)
+      assert_nil(name_tracker, "Test needs a name without existing tracker")
+
+      login("rolf")
+      get(:edit, params: { id: name.id })
+
+      assert_redirected_to(new_tracker_of_name_path(name))
     end
 
     def test_email_tracking_enable_no_note
@@ -64,7 +88,15 @@ module Names
         }
       }
       login("rolf")
-      post(:create, params: params)
+      # Should enqueue WebmasterMailer to notify about note_template
+      assert_enqueued_with(
+        job: ActionMailer::MailDeliveryJob,
+        args: lambda { |args|
+          args[0] == "WebmasterMailer" && args[1] == "build"
+        }
+      ) do
+        post(:create, params: params)
+      end
       assert_redirected_to(name_path(name.id))
       # This is needed before the next find for some reason
       count_after = NameTracker.count

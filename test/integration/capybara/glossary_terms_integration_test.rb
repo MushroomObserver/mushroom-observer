@@ -24,6 +24,11 @@ class GlossaryTermsIntegrationTest < CapybaraIntegrationTestCase
 
     # Verify successful creation
     assert_selector("body.glossary_terms__show")
+
+    # Verify database effect
+    term = GlossaryTerm.find_by(name: unique_name)
+    assert(term, "Glossary term should have been created")
+    assert_equal("A test description", term.description)
   end
 
   def test_edit_glossary_term
@@ -46,5 +51,9 @@ class GlossaryTermsIntegrationTest < CapybaraIntegrationTestCase
 
     # Verify successful update
     assert_selector("body.glossary_terms__show")
+
+    # Verify database effect
+    term.reload
+    assert_equal("Updated description for testing", term.description)
   end
 end

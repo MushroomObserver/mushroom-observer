@@ -386,9 +386,20 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_modal_herbarium_record_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     user: @user, form: "herbarium_records/form" }) and return
+    render(
+      partial: "shared/modal_form",
+      locals: {
+        title: modal_title,
+        identifier: modal_identifier,
+        user: @user,
+        form: "herbarium_records/form",
+        form_locals: {
+          model: @herbarium_record,
+          observation: @observation,
+          back: @back
+        }
+      }
+    ) and return
   end
 
   def modal_identifier
@@ -425,7 +436,14 @@ class HerbariumRecordsController < ApplicationController
   def reload_herbarium_record_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: modal_identifier, form: "herbarium_records/form" }
+      locals: {
+        identifier: modal_identifier,
+        form: "herbarium_records/form",
+        form_locals: {
+          model: @herbarium_record,
+          observation: @observation
+        }
+      }
     ) and return true
   end
 end

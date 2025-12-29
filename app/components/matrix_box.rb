@@ -30,7 +30,7 @@ class Components::MatrixBox < Components::Base
 
   # Properties
   prop :user, _Nilable(User), default: nil
-  prop :object, _Nilable(Object), default: nil
+  prop :object, _Nilable(AbstractModel), default: nil
   prop :id, _Nilable(_Union(Integer, String)), default: nil
   prop :columns, String, default: "col-xs-12 col-sm-6 col-md-4 col-lg-3"
   prop :extra_class, String, default: ""
@@ -83,7 +83,8 @@ class Components::MatrixBox < Components::Base
         image_link: @data[:image_link],
         obs: @data[:obs] || {},
         votes: @data.fetch(:votes, true),
-        full_width: @data.fetch(:full_width, true)
+        full_width: @data.fetch(:full_width, true),
+        identify: @identify
       )
     end
   end
@@ -114,13 +115,11 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_title
-    fragment("box_title") do
-      MatrixBoxTitle(
-        id: @data[:id],
-        name: @data[:name],
-        type: @data[:type]
-      )
-    end
+    MatrixBoxTitle(
+      id: @data[:id],
+      name: @data[:name],
+      type: @data[:type]
+    )
   end
 
   def render_id_badge(obj)
@@ -202,7 +201,15 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_footer_time(time)
-    div(class: "rss-what small") { time.display_time } if time
+    return unless time
+
+    div(
+      class: "rss-what rss-updated-at small",
+      data: { controller: "local-time", local_time_utc_value: time.utc.iso8601 }
+    ) do
+      # Server-rendered fallback for no-JS clients; replaced by Stimulus
+      time.display_time
+    end
   end
 
   def render_user_detail(user)
@@ -222,11 +229,35 @@ class Components::MatrixBox < Components::Base
     return unless @identify
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
-      mark_as_reviewed_toggle(
-        @data[:id],
-        "box_reviewed",
-        "stretched-link"
-      )
+      render(Components::MarkAsReviewedToggle.new(
+               obs_id: @data[:id],
+               selector: "box_reviewed",
+               label_class: "stretched-link",
+               reviewed: obs_reviewed_state
+             ))
     end
+  end
+
+  def obs_reviewed_state
+    return nil unless @user
+    return nil unless @data[:type] == :observation
+
+    obs = @data[:what]
+    if obs.respond_to?(:observation_views)
+      return eager_loaded_obs_reviewed_state(obs)
+    end
+
+    # Fallback for contexts where observation_views are not eager-loaded
+    ObservationView.find_by(
+      observation_id: obs.id,
+      user_id: @user.id
+    )&.reviewed
+  end
+
+  def eager_loaded_obs_reviewed_state(obs)
+    observation_view = obs.observation_views.detect do |ov|
+      ov.user_id == @user.id
+    end
+    observation_view&.reviewed
   end
 end

@@ -389,7 +389,7 @@ class LocationsController < ApplicationController
       if (user = User.safe_find(@set_user))
         user.location = @location
         user.save
-        redirect_to(user_path(@set_user.id))
+        redirect_to(user_path(user))
       end
     else
       redirect_to(location_path(@location.id))
@@ -463,13 +463,14 @@ class LocationsController < ApplicationController
   end
 
   def email_admin_location_change
-    content = email_location_change_content
-    QueuedEmail::Webmaster.create_email(
-      @user,
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    message = WebmasterMailer.prepend_user(@user, email_location_change_content)
+    WebmasterMailer.build(
+      sender_email: @user.email,
       subject: "Nontrivial Location Change",
-      content: content
-    )
-    LocationsControllerTest.report_email(content) if Rails.env.test?
+      message:
+    ).deliver_later
+    LocationsControllerTest.report_email(message) if Rails.env.test?
   end
 
   def email_location_change_content

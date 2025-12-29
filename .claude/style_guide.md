@@ -8,6 +8,12 @@ This document describes coding style preferences for the Mushroom Observer codeb
 
 **Always use parentheses for method calls**, even when there are no arguments and even in ERB templates.
 
+**This applies to:**
+- Ruby code
+- ERB templates (`.erb` files)
+- Code examples in comments
+- Documentation in all files
+
 #### Ruby Code
 
 ```ruby
@@ -39,6 +45,20 @@ User.find id
 <%= tag.div class: "container" do %>
   <%= content %>
 <% end %>
+```
+
+#### Comments and Documentation
+
+Even in comments, use parentheses for method calls to maintain consistency:
+
+```ruby
+# Good
+#  5) Add "show log" link at bottom of model's show page:
+#       <%= render(Components::ObjectFooter.new(user: @user, obj: @object)) %>
+
+# Bad
+#  5) Add "show log" link at bottom of model's show page:
+#       <%= render Components::ObjectFooter.new(user: @user, obj: @object) %>
 ```
 
 ### Component Namespacing
@@ -206,6 +226,52 @@ Examples:
 <% end %>
 ```
 
+## Code Quality and Linting
+
+### RuboCop Compliance
+
+**All new code must pass RuboCop without violations.** Disabling RuboCop cops should be avoided.
+
+```ruby
+# Bad - Disabling cops
+# rubocop:disable Metrics/MethodLength
+def long_method
+  # ... many lines of code
+end
+# rubocop:enable Metrics/MethodLength
+
+# Good - Refactor to fix violations
+def long_method
+  prepare_data
+  process_records
+  generate_output
+end
+
+def prepare_data
+  # ... extracted logic
+end
+
+def process_records
+  # ... extracted logic
+end
+
+def generate_output
+  # ... extracted logic
+end
+```
+
+**When RuboCop flags a violation:**
+1. **Refactor the code** to fix the violation properly
+2. Break large methods into smaller, focused helper methods
+3. Simplify complex conditionals
+4. Extract magic numbers into named constants
+5. Only disable cops as an absolute last resort with clear justification
+
+**Exceptions:**
+- Legacy code that hasn't been refactored yet may have disabled cops
+- When updating legacy code, try to improve it toward RuboCop compliance
+- If you must disable a cop, document why in a comment
+
 ## Summary
 
 The key principles are:
@@ -214,3 +280,4 @@ The key principles are:
 3. **Prefer Phlex helpers** over Rails `tag` helpers in components
 4. **Render directly** instead of building arrays and joining
 5. **Internalize logic** into components when possible
+6. **All new code must pass RuboCop** - refactor instead of disabling cops
