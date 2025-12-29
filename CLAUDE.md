@@ -2,12 +2,16 @@
 
 ## Session Start Protocol
 
-**REQUIRED**: At the start of each new session, read `.claude/settings.local.json` and confirm the loaded output style by stating:
-```
-Output style: <value-from-outputStyle-field>
-```
+**REQUIRED**: At the start of each new session:
 
-This verifies that `.claude/settings.local.json` was loaded correctly and confirms adherence to the style guidelines.
+1. Load the default output style from `.claude/output-styles/professional-direct.md`
+2. If `.claude/settings.local.json` exists, read it and override with the `outputStyle` value if present
+3. Confirm the loaded output style by stating:
+   ```
+   Output style: <style-name>
+   ```
+
+This ensures consistent communication style with optional per-developer customization.
 
 ## Project Information
 
