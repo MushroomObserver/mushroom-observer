@@ -20,7 +20,6 @@ class SearchFieldUITest < UnitTestCase
         :in_box,
         :has_comments,
         :include_synonyms,
-        :field_slips,
         :undefined_field
       ]
     end
@@ -112,12 +111,6 @@ class SearchFieldUITest < UnitTestCase
   #   assert_equal(:in_box_fields, ui.ui_type)
   # end
 
-  # Test special case: field_slips
-  def test_field_slips
-    ui = SearchFieldUI.new(controller: @obs_controller, field: :field_slips)
-    assert_equal(:text_field_with_label, ui.ui_type)
-  end
-
   # Test custom select UI: include_synonyms
   def test_include_synonyms
     ui = SearchFieldUI.new(
@@ -154,7 +147,7 @@ class SearchFieldUITest < UnitTestCase
   # Test hash with boolean field
   def test_hash_with_boolean_field
     ui = SearchFieldUI.new(controller: @obs_controller, field: :has_comments)
-    assert_equal(:select_nil_yes, ui.ui_type)
+    assert_equal(:select_nil_boolean, ui.ui_type)
   end
 
   # Test error when field is not permitted

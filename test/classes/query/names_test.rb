@@ -314,9 +314,8 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, has_comments: true)
   end
 
-  # Note that this is NOT a without comments condition
   def test_name_has_comments_false
-    expects = Name.with_correct_spelling.order_by_default
+    expects = Name.with_correct_spelling.has_comments(false).order_by_default
     assert_query(expects, :Name, has_comments: false)
   end
 

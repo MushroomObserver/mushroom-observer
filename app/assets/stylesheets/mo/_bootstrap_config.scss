@@ -1,0 +1,41 @@
+// ==================================================
+// BOOTSTRAP VERSION CONFIGURATION
+// ==================================================
+//
+// This file controls which Bootstrap version is used.
+// During the migration period, you can toggle between Bootstrap 3
+// and Bootstrap 4 to test components incrementally.
+//
+// IMPORTANT: Only ONE of these flags should be true at a time.
+//
+// ==================================================
+
+// Set to true to use Bootstrap 3 (current production version)
+$use-bootstrap-3: true !default;
+
+// Set to true to use Bootstrap 4 (migration target)
+$use-bootstrap-4: false !default;
+
+// ==================================================
+// VALIDATION
+// ==================================================
+// Ensure only one version is enabled
+
+@if $use-bootstrap-3 and $use-bootstrap-4 {
+  @error "Cannot enable both Bootstrap 3 and 4 simultaneously. " +
+         "Set one of $use-bootstrap-3 or $use-bootstrap-4 to false.";
+}
+
+@if not $use-bootstrap-3 and not $use-bootstrap-4 {
+  @error "Must enable either Bootstrap 3 or Bootstrap 4. " +
+         "Set $use-bootstrap-3 or $use-bootstrap-4 to true.";
+}
+
+// ==================================================
+// VERSION INFO (for debugging)
+// ==================================================
+
+$bootstrap-version: if($use-bootstrap-3, "3", "4") !default;
+
+// Debug output (comment out in production)
+// @debug "Bootstrap version: #{$bootstrap-version}";

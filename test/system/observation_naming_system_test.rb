@@ -141,6 +141,11 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     end
     assert_selector("#modal_obs_#{obs.id}_naming_#{nam.id}", wait: 9)
     assert_selector("#obs_#{obs.id}_naming_#{nam.id}_form", wait: 9)
+    # Verify vote and reasons fields are visible (not collapsed)
+    within("#obs_#{obs.id}_naming_#{nam.id}_form") do
+      assert_selector("#naming_vote_value", wait: 4)
+      assert_selector("input[name*='reasons']", wait: 4)
+    end
     within("#modal_obs_#{obs.id}_naming_#{nam.id}") do
       find(:css, ".close").click
     end

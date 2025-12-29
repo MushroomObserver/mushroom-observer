@@ -62,7 +62,7 @@ class API2
         has_images: parse(:boolean, :has_images),
         has_public_lat_lng: parse(:boolean, :has_public_lat_lng),
         has_name: parse(:boolean, :has_name, help: :min_rank),
-        has_comments: parse(:boolean, :has_comments, limit: true),
+        has_comments: parse(:boolean, :has_comments),
         has_specimen: parse(:boolean, :has_specimen),
         has_notes: parse(:boolean, :has_notes),
         has_notes_fields: parse_array(:string, :has_notes_field, help: 1),

@@ -53,7 +53,7 @@ column_classes(:six)
   <% end %>
   <!--.col-->
   <%= tag.div(class: yield(:right_columns)) do %>
-    <%= show_object_footer(@user, @image) %>
+    <%= render(Components::ObjectFooter.new(user: @user, obj: @image)) %>
   <% end %>
   <!--.col-sm-6-->
 <% end %>

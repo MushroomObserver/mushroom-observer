@@ -203,7 +203,8 @@ class SearchFormTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # The collapse div should have class "in" to be expanded
-    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    selector = "[data-autocompleter--name-target='collapseFields']"
+    collapse_div = doc.at_css(selector)
     assert(collapse_div, "Should have collapse div for modifier fields")
     assert_includes(collapse_div["class"], "in",
                     "Collapse div should have 'in' class when modifiers " \
@@ -259,7 +260,8 @@ class SearchFormTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # The collapse div SHOULD have class "in" because lookup has a value
-    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    selector = "[data-autocompleter--name-target='collapseFields']"
+    collapse_div = doc.at_css(selector)
     assert(collapse_div, "Should have collapse div for modifier fields")
     assert_includes(collapse_div["class"], "in",
                     "Collapse div should have 'in' class when lookup " \
@@ -275,7 +277,8 @@ class SearchFormTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # The collapse div should NOT have class "in"
-    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    selector = "[data-autocompleter--name-target='collapseFields']"
+    collapse_div = doc.at_css(selector)
     assert(collapse_div, "Should have collapse div for modifier fields")
     assert_not_includes(collapse_div["class"].to_s, "in",
                         "Collapse div should NOT have 'in' class when " \
@@ -348,11 +351,10 @@ class SearchFormTest < UnitTestCase
     include_synonyms = doc.at_css("#query_observations_names_include_synonyms")
     assert(include_synonyms, "Should have include_synonyms select")
     selected_option = include_synonyms.at_css("option[selected]")
-    # When false, the "no" option (value="") should NOT be selected,
-    # but we need to verify false is handled
-    assert_nil(selected_option,
-               "include_synonyms=false should not select any option " \
-               "(no option has value='false')")
+    # When false, the "no" option (value="false") should be selected
+    assert(selected_option, "include_synonyms=false should select 'no' option")
+    assert_equal("false", selected_option["value"])
+    assert_equal("no", selected_option.text)
   end
 
   # Cover NamesLookupFieldGroup prefill_via_id rescue branch (line 80)
@@ -381,7 +383,8 @@ class SearchFormTest < UnitTestCase
     doc = Nokogiri::HTML(html)
 
     # Collapse should be expanded because modifier has value
-    collapse_div = doc.at_css("[data-autocompleter-target='collapseFields']")
+    selector = "[data-autocompleter--name-target='collapseFields']"
+    collapse_div = doc.at_css(selector)
     assert(collapse_div, "Should have collapse div")
     assert_includes(collapse_div["class"], "in",
                     "Collapse should be expanded when modifier has value")
@@ -596,6 +599,17 @@ class SearchFormTest < UnitTestCase
     assert_equal("40.0", south_input["value"])
   end
 
+  # Test array_to_newlines with array value (line 422)
+  def test_textarea_field_with_array_value_joins_with_newlines
+    query = Query::Observations.new
+    query.has_notes_fields = %w[Substrate Cap_Color]
+
+    html = render_form_with_query(query)
+
+    # The value should be joined with newlines
+    assert_includes(html, "Substrate\nCap_Color")
+  end
+
   private
 
   def render_form(local: true)
@@ -616,5 +630,54 @@ class SearchFormTest < UnitTestCase
       form_action_url: "/observations/search"
     )
     render(form)
+  end
+
+  # ------- Length Validation Infrastructure Tests -------
+
+  def test_form_has_length_validator_stimulus_controller
+    html = render_form
+
+    assert_html(html, "form[data-controller='search-length-validator']")
+  end
+
+  def test_form_has_max_length_value_attribute
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    form = doc.at_css("form#observations_search_form")
+    assert_equal(
+      Searchable::MAX_SEARCH_INPUT_LENGTH.to_s,
+      form["data-search-length-validator-max-length-value"],
+      "Form should have max length value set to " \
+      "#{Searchable::MAX_SEARCH_INPUT_LENGTH}"
+    )
+  end
+
+  def test_form_has_search_type_value_attribute
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    form = doc.at_css("form#observations_search_form")
+    assert_equal(
+      "observations",
+      form["data-search-length-validator-search-type-value"],
+      "Form should have search type value set"
+    )
+  end
+
+  def test_form_has_flash_container_div
+    html = render_form
+
+    assert_html(html, "#search_observations_flash",
+                "Form should have flash container for error messages")
+  end
+
+  def test_form_uses_post_method
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    form = doc.at_css("form#observations_search_form")
+    assert_equal("post", form["method"],
+                 "Form should use POST method to avoid URL length limits")
   end
 end

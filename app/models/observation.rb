@@ -671,6 +671,18 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #                                                  Other: x"
   def self.export_formatted(notes, markup = nil)
     return "" if notes.blank?
+
+    # Defensive check: if notes is not a Hash, it might be misaligned columns
+    # Only reject types that indicate column misalignment (Time/DateTime)
+    # Allow other types to fail naturally with better error messages
+    if notes.is_a?(Time) || notes.is_a?(DateTime)
+      Rails.logger.warn(
+        "export_formatted received #{notes.class} instead of Hash. " \
+        "This may indicate column misalignment. Returning empty string."
+      )
+      return ""
+    end
+
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
     result = notes.each_with_object(+"") do |(key, value), str|

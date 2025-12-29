@@ -81,7 +81,7 @@ class Components::NamesLookupFieldGroup < Components::Base
   end
 
   def render_conditional_collapse
-    div(data: { autocompleter_target: "collapseFields" },
+    div(data: { autocompleter__name_target: "collapseFields" },
         class: class_names("collapse", collapse_class)) do
       render_modifier_rows
     end
@@ -129,8 +129,8 @@ class Components::NamesLookupFieldGroup < Components::Base
 
   def render_select_field(field_name)
     # Superform uses [value, label] order (opposite of Rails)
-    # Use string "true" instead of boolean true for proper HTML rendering
-    options = [["", "no"], ["true", "yes"]]
+    # Use string "false"/"true" instead of booleans for HTML rendering
+    options = [%w[false no], %w[true yes]]
     field_component = @names_namespace.field(field_name).select(
       options,
       wrapper_options: {
@@ -148,9 +148,14 @@ class Components::NamesLookupFieldGroup < Components::Base
 
   def field_selected_value(field_name)
     names = @query.names
-    return nil unless names.is_a?(Hash)
+    return default_value_for(field_name) unless names.is_a?(Hash)
 
-    names[field_name]
+    names[field_name].nil? ? default_value_for(field_name) : names[field_name]
+  end
+
+  # Returns the default value for a field when it's nil/unset
+  def default_value_for(field_name)
+    field_name == :include_subtaxa ? true : nil
   end
 
   # Convert boolean values to strings for select options

@@ -28,6 +28,8 @@ module Observations
         :has_specimen,
         :has_sequences,
         :has_images,
+        :has_field_slips,
+        :has_collection_numbers,
         :has_notes,
         :has_notes_fields,
         :notes_has,
@@ -37,8 +39,7 @@ module Observations
         :projects,
         :herbaria,
         :species_lists,
-        :project_lists,
-        :field_slips
+        :project_lists
       ].freeze
     end
 
@@ -93,13 +94,14 @@ module Observations
         detail: {
           shown: [],
           collapsed: [[:has_specimen, :has_sequences],
-                      [:has_images, :has_notes],
+                      [:has_images, :has_field_slips],
+                      [:has_collection_numbers, :has_notes],
                       [:has_notes_fields, :notes_has],
                       [:has_comments, :comments_has]]
         },
         connected: {
           shown: [:by_users, :projects],
-          collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
+          collapsed: [:herbaria, :species_lists, :project_lists]
         }
       }
     ].freeze

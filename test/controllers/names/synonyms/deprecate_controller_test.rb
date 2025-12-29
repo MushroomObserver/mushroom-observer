@@ -84,7 +84,7 @@ module Names::Synonyms
       login("rolf")
       post(:create, params: params)
       assert_template("names/synonyms/deprecate/new")
-      assert_template("shared/_form_name_feedback")
+      assert_select("#name_messages")
       # Fail since name can't be disambiguated
 
       assert_not(old_name.reload.deprecated)
@@ -150,7 +150,7 @@ module Names::Synonyms
       login("rolf")
       post(:create, params: params)
       assert_template("names/synonyms/deprecate/new")
-      assert_template("shared/_form_name_feedback")
+      assert_select("#name_messages")
       # Fail since new name is not approved
 
       assert_not(old_name.reload.deprecated)

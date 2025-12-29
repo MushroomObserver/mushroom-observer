@@ -12,6 +12,9 @@
 module Searchable
   extend ActiveSupport::Concern
 
+  # Maximum allowed total length of all search input fields
+  MAX_SEARCH_INPUT_LENGTH = 8000
+
   included do
     # Render help for the pattern search bar (if available), for current model
     def show
@@ -27,21 +30,11 @@ module Searchable
     end
 
     def new
+      @local = params[:local] != "false"
       set_up_form_field_groupings
-      @search = if params[:clear].present?
-                  create_query(query_model)
-                else
-                  find_or_create_query(query_model)
-                end
-
+      @search = build_search_query
       respond_to do |format|
-        format.turbo_stream do
-          render(turbo_stream: turbo_stream.update(
-            :search_nav_form, # id of element to update contents of
-            Components::SearchForm.new(@search, search_controller: self,
-                                                local: false)
-          ))
-        end
+        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
         format.html
       end
     end
@@ -51,6 +44,7 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
+
       prepare_raw_params
       redirect_to(action: :new) and return unless validate_search_instance?
 
@@ -89,6 +83,28 @@ module Searchable
 
     private
 
+    def build_search_query
+      return reset_search_query if params[:clear].present?
+
+      find_or_create_query(query_model)
+    end
+
+    def reset_search_query
+      session.delete(:names_preferences)
+      create_query(query_model)
+    end
+
+    def turbo_stream_update
+      turbo_stream.update(
+        :search_nav_form,
+        Components::SearchForm.new(
+          @search,
+          search_controller: self,
+          local: false
+        )
+      )
+    end
+
     def search_object_name = :"query_#{search_type}"
 
     def clear_form?
@@ -115,8 +131,7 @@ module Searchable
     def nested_in_box_params = [:north, :south, :east, :west].freeze
 
     def split_names_lookup_strings
-      # Nested blank values will make for null query results,
-      # so eliminate the whole :names param if it doesn't have a lookup.
+      # If lookup is blank, remove the :names param for the query
       if (vals = @query_params.dig(:names, :lookup)).blank?
         @query_params[:names] = nil
         return

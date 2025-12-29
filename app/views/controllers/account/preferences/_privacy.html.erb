@@ -32,7 +32,7 @@ filename_values = [
 
 <%= select_with_label(form: f, field: :license_id, label: "#{:LICENSE.l}:",
                       options: @licenses, selected: @user.license_id,
-                      between: tag.span(["(", :prefs_license_note.l, ")"].safe_join,
+                      between: tag.span(["(", :prefs_license_note.t, ")"].safe_join,
                                         class: "help-note mr-3"),
                       width: :auto) %>
 

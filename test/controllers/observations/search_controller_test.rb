@@ -95,6 +95,52 @@ module Observations
       )
     end
 
+    def test_new_observations_search_form_prefilled_with_has_field_slips
+      login
+      query = @controller.find_or_create_query(
+        :Observation,
+        has_field_slips: true,
+        has_images: false
+      )
+      assert(query.id)
+      get(:new)
+      assert_select("select#query_observations_has_field_slips",
+                    selected: "yes")
+      assert_select("select#query_observations_has_images",
+                    selected: "no")
+    end
+
+    def test_new_observations_search_form_prefilled_with_has_collection_numbers
+      login
+      query = @controller.find_or_create_query(
+        :Observation,
+        has_collection_numbers: true,
+        has_notes: false
+      )
+      assert(query.id)
+      get(:new)
+      assert_select("select#query_observations_has_collection_numbers",
+                    selected: "yes")
+      assert_select("select#query_observations_has_notes",
+                    selected: "no")
+    end
+
+    def test_new_observations_search_form_retains_include_subtaxa_false
+      login
+      # Create a query with a name lookup and include_subtaxa explicitly false
+      query = @controller.find_or_create_query(
+        :Observation,
+        names: { lookup: "Agaricus", include_subtaxa: false }
+      )
+      assert(query.id)
+      get(:new)
+      # Verify that both the lookup and include_subtaxa are retained
+      assert_select("textarea#query_observations_names_lookup",
+                    text: "Agaricus")
+      assert_select("select#query_observations_names_include_subtaxa",
+                    selected: "no")
+    end
+
     # query_observations is the form object.
     def test_create_observations_search
       login
@@ -110,6 +156,123 @@ module Observations
         by_users: [rolf.id],
         has_notes: true,
         lichen: false # this should be preserved, not "compacted" out.
+      }
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: {
+                             q: { model: :Observation, **validated_params }
+                           })
+    end
+
+    def test_create_observations_search_with_blank_name_and_include_subtaxa
+      login
+      # Simulate form submission with no name but include_subtaxa
+      # defaulted to true
+      params = {
+        names: {
+          lookup: "",
+          include_subtaxa: "true"
+        }
+      }
+      post(:create, params: { query_observations: params })
+      # Should redirect to observations index with no names param
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: { q: { model: :Observation } })
+    end
+
+    # Test reset_search_query creates a new blank query
+    def test_reset_search_query_creates_blank_query
+      login
+
+      # First, create a query with parameters
+      query = @controller.find_or_create_query(
+        :Observation,
+        names: { lookup: "Agaricus" },
+        has_specimen: true
+      )
+      original_query_id = query.id
+      assert(query.params.present?, "Original query should have params")
+
+      # Now load the form with clear=1, which triggers reset_search_query
+      get(:new, params: { clear: "1" })
+
+      # Verify a NEW query was created (different ID)
+      new_query = @controller.instance_variable_get(:@search)
+      assert_not_equal(original_query_id, new_query.id,
+                       "reset_search_query should create a NEW query")
+
+      # Verify the new query is blank (no params)
+      assert(new_query.params.blank? || new_query.params == {},
+             "reset_search_query should create a BLANK query with no params")
+
+      # Verify session[:names_preferences] was deleted
+      assert_nil(session[:names_preferences],
+                 "reset_search_query should delete names_preferences")
+    end
+
+    # Test clear_form? when commit button is "Clear"
+    def test_clear_form_with_clear_button
+      login
+
+      # First, create a query with parameters
+      query = @controller.find_or_create_query(
+        :Observation,
+        names: { lookup: "Coprinus comatus" },
+        has_specimen: true
+      )
+      query.id
+      assert(query.params.present?, "Original query should have params")
+
+      # Post to create with commit="Clear" (the localized CLEAR button value)
+      # This triggers clear_form? which calls clear_relevant_query and redirects
+      post(:create, params: {
+             query_observations: {
+               names: { lookup: "Agaricus" }
+             },
+             commit: :CLEAR.l # This is "Clear" in English
+           })
+
+      # Verify it redirected to :new (not to index with search results)
+      # This proves clear_form? returned true and the early return was triggered
+      assert_redirected_to(action: :new)
+
+      # Now load the form to verify the query was cleared
+      get(:new)
+      cleared_query = @controller.instance_variable_get(:@search)
+
+      # The query should have blank params after being cleared
+      assert(cleared_query.params.blank? || cleared_query.params == {},
+             "clear_form? should result in a blank query")
+    end
+
+    def test_create_observations_search_with_has_field_slips
+      login
+      params = {
+        has_field_slips: true,
+        has_images: false
+      }
+      post(:create, params: { query_observations: params })
+
+      validated_params = {
+        has_field_slips: true,
+        has_images: false
+      }
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: {
+                             q: { model: :Observation, **validated_params }
+                           })
+    end
+
+    def test_create_observations_search_with_has_collection_numbers
+      login
+      params = {
+        has_collection_numbers: true,
+        has_notes: false
+      }
+      post(:create, params: { query_observations: params })
+
+      validated_params = {
+        has_collection_numbers: true,
+        has_notes: false
       }
       assert_redirected_to(controller: "/observations", action: :index,
                            params: {
@@ -507,6 +670,65 @@ module Observations
           }
         }
       )
+    end
+
+    # ------- Server Handling of Long Inputs (POST method) -------
+    # These tests prove that when long inputs reach the server (if JS fails),
+    # the server can handle them without crashing since POST puts data in body
+
+    def test_server_handles_very_long_input_without_error
+      login
+      # Create input that would exceed URL limits but is fine in POST body
+      # Well over MAX_SEARCH_INPUT_LENGTH limit
+      long_text = "x" * 15_000
+      params = {
+        notes_has: long_text,
+        has_specimen: true
+      }
+
+      # Should not raise an error, even though JS validation would prevent this
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      # Should successfully create search and redirect
+      assert_response(:redirect)
+      assert_match(/observations/, response.redirect_url)
+    end
+
+    def test_server_handles_multiple_long_fields
+      login
+      # Multiple long fields that collectively would be problematic in URL
+      long_text1 = "a" * 8000
+      long_text2 = "b" * 8000
+      params = {
+        notes_has: long_text1,
+        comments_has: long_text2
+      }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_response(:redirect)
+    end
+
+    def test_server_handles_long_nested_params
+      login
+      # Test with long names lookup
+      long_names = (1..1000).map { |i| "Species#{i}" }.join("\n")
+      params = {
+        names: {
+          lookup: long_names,
+          include_synonyms: true
+        }
+      }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_response(:redirect)
     end
   end
 end

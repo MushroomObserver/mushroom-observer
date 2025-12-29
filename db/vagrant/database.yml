@@ -27,15 +27,24 @@ shared:
     sql_mode: TRADITIONAL
 
 development:
-  database: mo_development
-  username: mo
-  password: mo
+  primary:
+    database: mo_development
+    username: mo
+    password: mo
+  cache:
+    database: cache_development
+    username: mo
+    password: mo
+    host: localhost
+    migrations_paths: "db/cache/migrate"
 
 # Warning: The database defined as 'test' will be erased and
 # re-generated from your development database when you run 'rake'.
 # Do not set this db to the same as development or production.
 test:
-  database: mo_test
+  # Support worker-specific databases in parallel testing
+  # Set MO_TEST_DATABASE env var to override (e.g., mo_test-0, mo_test-1, etc.)
+  database: <%= ENV.fetch("MO_TEST_DATABASE", "mo_test") %>
   username: mo
   password: mo
 

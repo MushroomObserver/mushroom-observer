@@ -89,9 +89,27 @@ Automated testing is a critical part of developing code for Mushroom
 Observer.  We currently have over 90% test coverage across our codebase
 and our continuous integration system will not approve a PR if it causes a
 drop in our percent of coverage.  Developers should be familiar with the
-[SimpleCov] tool which runs automatically whenever tests are run on local
-systems.  This automatically creates a locally browsable report that
-can be accessed starting with the file `coverage/index.html`.
+[SimpleCov] tool for generating coverage reports.
+
+#### Running Tests
+
+Tests run in parallel by default for better performance:
+
+```bash
+rails test                      # Run all tests in parallel (no coverage)
+rails test path/to/test.rb      # Run specific test in parallel (no coverage)
+```
+
+To generate a coverage report, use the `test:coverage` command which runs tests
+serially with SimpleCov enabled:
+
+```bash
+rails test:coverage                # Run all tests with coverage (serial)
+rails test:coverage path/to/test.rb # Run specific test with coverage (serial)
+```
+
+The coverage report is generated at `coverage/index.html` and can be viewed
+in your browser.
 
 ### Live Website Issues
 

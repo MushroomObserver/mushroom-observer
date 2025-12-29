@@ -33,9 +33,9 @@ image_upload_localization = {
 # Outlets are how the stimulus controllers call each others' methods.
 form_element_data = {
   controller: "form-images form-exif map",
-  map_autocompleter_outlet: "#observation_location_autocompleter",
+  map_autocompleter__location_outlet: "#observation_location_autocompleter",
   map_open: false,
-  form_exif_autocompleter_outlet: "#observation_location_autocompleter",
+  form_exif_autocompleter__location_outlet: "#observation_location_autocompleter",
   form_exif_map_outlet: "#observation_form",
   action: "map:reenableBtns@window->form-exif#reenableButtons",
   upload_max_size: max_size,
@@ -107,9 +107,22 @@ form_element_data = {
       )) do |panel| %>
     <%= panel.with_heading { "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}" } %>
     <%= panel.with_body(collapse: true) do %>
+      <% if create && @given_name.present? %>
+        <%= render(Components::FormNameFeedback.new(
+              button_name: button_name,
+              given_name: @given_name,
+              names: @names,
+              valid_names: @valid_names,
+              suggest_corrections: @suggest_corrections || false,
+              parent_deprecated: @parent_deprecated
+            )) %>
+      <% end %>
       <%= tag.div(class: "row") do
         concat(tag.div(class: "col-xs-12 col-md-6") do
-          render(partial: "observations/namings/fields", locals: naming_locals)
+          render(partial: "observations/namings/fields",
+                 locals: { create:, button_name:, show_reasons: false,
+                           unfocused: true,
+                           name_help: :form_naming_name_help_leave_blank.t })
         end) if create
         concat(tag.div(class: "col-xs-12 col-md-6") do
           render(partial: "observations/form/specimen_section",

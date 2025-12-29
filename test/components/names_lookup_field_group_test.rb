@@ -292,7 +292,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: []
     )
     html = component.stub(:render, nil) { render_component(component) }
-    assert_html(html, 'div[data-autocompleter-target="collapseFields"]',
+    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]',
                 classes: "in")
   end
 
@@ -311,9 +311,9 @@ class NamesLookupFieldGroupTest < UnitTestCase
     )
     html = component.stub(:render, nil) { render_component(component) }
     # Should have collapse container without 'in' class
-    assert_html(html, 'div[data-autocompleter-target="collapseFields"]')
+    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]')
     doc = Nokogiri::HTML(html)
-    el = doc.at_css('div[data-autocompleter-target="collapseFields"]')
+    el = doc.at_css('div[data-autocompleter--name-target="collapseFields"]')
     classes = el["class"]&.split || []
     assert_not(classes.include?("in"))
   end
@@ -339,7 +339,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       modifier_fields: [[:include_synonyms]]
     )
     html = component.stub(:render, nil) { render_component(component) }
-    assert_html(html, 'div[data-autocompleter-target="collapseFields"]',
+    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]',
                 classes: "in")
   end
 
@@ -361,7 +361,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
     )
     html = component.stub(:render, nil) { render_component(component) }
     doc = Nokogiri::HTML(html)
-    el = doc.at_css('div[data-autocompleter-target="collapseFields"]')
+    el = doc.at_css('div[data-autocompleter--name-target="collapseFields"]')
     classes = el["class"]&.split || []
     assert_not(classes.include?("in"))
   end
@@ -390,6 +390,60 @@ class NamesLookupFieldGroupTest < UnitTestCase
     component.stub(:render, nil) { render_component(component) }
 
     assert_equal("true", selected_seen)
+  end
+
+  def test_include_subtaxa_defaults_to_true_when_nil
+    @query.names = {}
+    selected_seen = nil
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **kwargs|
+      selected_seen = kwargs[:selected]
+      true
+    end
+
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_subtaxa])
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [:include_subtaxa]
+    )
+
+    component.stub(:render, nil) { render_component(component) }
+
+    assert_equal("true", selected_seen,
+                 "include_subtaxa should default to 'true' when nil")
+  end
+
+  def test_include_subtaxa_respects_explicit_false
+    @query.names = { include_subtaxa: false }
+    selected_seen = nil
+    select_field_mock = Minitest::Mock.new
+    select_field_mock.expect(:select, select_field_mock) do |*_args, **kwargs|
+      selected_seen = kwargs[:selected]
+      true
+    end
+
+    lookup_field_mock = Minitest::Mock.new
+    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    names_ns = Minitest::Mock.new
+    names_ns.expect(:field, lookup_field_mock, [:lookup])
+    names_ns.expect(:field, select_field_mock, [:include_subtaxa])
+
+    component = Components::NamesLookupFieldGroup.new(
+      names_namespace: names_ns,
+      query: @query,
+      modifier_fields: [:include_subtaxa]
+    )
+
+    component.stub(:render, nil) { render_component(component) }
+
+    assert_equal("false", selected_seen,
+                 "include_subtaxa should respect explicit false value")
   end
 
   private
