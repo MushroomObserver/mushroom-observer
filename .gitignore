@@ -27,6 +27,9 @@ production-logs
 **/*.swp
 dump.rdb
 
+# Ignore development projects folder
+projects/
+
 # Ignore bundler config.
 .bundle
 rubocop.out
@@ -37,7 +40,6 @@ coverage
 
 # Ignore Claude code local config (but allow shared docs)
 .claude/settings.local.json
-.claude/output-styles/
 CLAUDE.local.md
 
 # Ignore sensitive config stuff.
@@ -59,6 +61,8 @@ public/orig_cache
 # DB snapshots are often lying about, don't want them accidentally checked in.
 checkpoint*
 db/checkpoint*
+database-*
+*.sql.gz
 
 # Worker-specific test files created during parallel testing
 config/blocked_ips-*.txt
