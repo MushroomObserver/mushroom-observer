@@ -229,16 +229,32 @@ class Components::MatrixBox < Components::Base
     return unless @identify
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
-      reviewed = ObservationView.find_by(
-        observation_id: @data[:id],
-        user_id: @user&.id
-      )&.reviewed
       mark_as_reviewed_toggle(
         @data[:id],
         "box_reviewed",
         "stretched-link",
-        reviewed
+        observation_reviewed_state
       )
     end
+  end
+
+  def observation_reviewed_state
+    return nil unless @user
+    if @object.respond_to?(:observation_views)
+      return eager_loaded_reviewed_state
+    end
+
+    # Fallback for contexts where observation_views are not eager-loaded
+    ObservationView.find_by(
+      observation_id: @data[:id],
+      user_id: @user.id
+    )&.reviewed
+  end
+
+  def eager_loaded_reviewed_state
+    view_for_user = @object.observation_views.detect do |view|
+      view.user_id == @user.id
+    end
+    view_for_user&.reviewed
   end
 end

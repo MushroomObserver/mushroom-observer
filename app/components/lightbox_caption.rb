@@ -60,12 +60,33 @@ class Components::LightboxCaption < Components::Base
         btn_class: "btn btn-primary d-inline-block"
       )
       span(class: "mx-2") { whitespace }
-      reviewed = ObservationView.find_by(
-        observation_id: @obs.id,
-        user_id: @user&.id
-      )&.reviewed
-      mark_as_reviewed_toggle(@obs.id, "caption_reviewed", "", reviewed)
+      mark_as_reviewed_toggle(
+        @obs.id,
+        "caption_reviewed",
+        "",
+        obs_reviewed_state
+      )
     end
+  end
+
+  def obs_reviewed_state
+    return nil unless @user
+    if @obs.respond_to?(:observation_views)
+      return eager_loaded_obs_reviewed_state
+    end
+
+    # Fallback for contexts where observation_views are not eager-loaded
+    ObservationView.find_by(
+      observation_id: @obs.id,
+      user_id: @user.id
+    )&.reviewed
+  end
+
+  def eager_loaded_obs_reviewed_state
+    observation_view = @obs.observation_views.detect do |ov|
+      ov.user_id == @user.id
+    end
+    observation_view&.reviewed
   end
 
   def render_obs_title
