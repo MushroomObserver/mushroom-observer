@@ -23,7 +23,9 @@ export default class extends Controller {
     if (this.gallery) {
       this.gallery.destroy();
     }
-    this.element.removeEventListener('lightgallery:refresh', this.boundRefresh);
+    if (this.boundRefresh) {
+      this.element.removeEventListener('lightgallery:refresh', this.boundRefresh);
+    }
   }
 
   // Refresh the gallery to pick up updated data-sub-html attributes
