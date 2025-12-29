@@ -38,11 +38,19 @@ Turbo.StreamActions.remove_class = function () {
 // Update lightbox caption data-sub-html attribute to keep caption state in sync
 Turbo.StreamActions.update_lightbox_caption = function () {
   const obsId = this.getAttribute("obs-id");
-  const captionHtml = this.templateContent.textContent;
+  // Use innerHTML to get actual HTML, not textContent which escapes it
+  const template = this.templateElement;
+  const captionHtml = template.innerHTML;
+
+  console.log("update_lightbox_caption called for obs", obsId);
+  console.log("caption HTML length:", captionHtml.length);
 
   const theaterBtn = document.querySelector(`#box_${obsId} .theater-btn`);
+  console.log("theater button found:", theaterBtn);
+
   if (theaterBtn) {
     theaterBtn.dataset.subHtml = captionHtml;
+    console.log("data-sub-html updated");
   }
 }
 

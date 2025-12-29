@@ -15,6 +15,7 @@ class ObservationViewsController < ApplicationController
     # update_view_stats creates an o_v if it doesn't exist
     @obs_id = obs.id # ivar used in the js template
     @obs = obs # needed for rendering caption
+    @user = User.current # needed for rendering caption
     ObservationView.update_view_stats(@obs_id, User.current_id, @reviewed)
 
     respond_to do |format|

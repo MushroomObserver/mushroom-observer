@@ -11,7 +11,7 @@ end %>
 
 <%# Update the lightbox data-sub-html attribute for caption persistence %>
 <% caption_html = render(Components::LightboxCaption.new(
-  user: User.current,
+  user: @user,
   obs: @obs,
   identify: true
 )) %>
