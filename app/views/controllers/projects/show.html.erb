@@ -108,4 +108,4 @@ container_class(:wide)
            locals: { object: @project, comments: @comments,
                      controls: @user, limit: nil }) %>
 
-<%= show_object_footer(@user, @project) %>
+<%= render(Components::ObjectFooter.new(user: @user, obj: @project)) %>

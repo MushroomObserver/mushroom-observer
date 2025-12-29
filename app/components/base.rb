@@ -42,6 +42,24 @@ class Components::Base < Phlex::HTML
     Rails.cache
   end
 
+  # Renders trusted HTML content (I18n translations, Rails helpers,
+  # formatted dates). Use this for content from:
+  # - Translation strings (.t, .l)
+  # - Rails helpers (user_link, link_to, etc.)
+  # - Model methods that return safe HTML
+  #
+  # Do NOT use for user-generated content.
+  #
+  # @param content [ActiveSupport::SafeBuffer, String] HTML content
+  # @return [void]
+  def trusted_html(content)
+    # rubocop:disable Rails/OutputSafety
+    return raw(content) if content.is_a?(ActiveSupport::SafeBuffer)
+    # rubocop:enable Rails/OutputSafety
+
+    content
+  end
+
   if Rails.env.development?
     def before_template
       comment { "Before #{self.class.name}" }
