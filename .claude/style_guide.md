@@ -8,6 +8,12 @@ This document describes coding style preferences for the Mushroom Observer codeb
 
 **Always use parentheses for method calls**, even when there are no arguments and even in ERB templates.
 
+**This applies to:**
+- Ruby code
+- ERB templates (`.erb` files)
+- Code examples in comments
+- Documentation in all files
+
 #### Ruby Code
 
 ```ruby
@@ -39,6 +45,20 @@ User.find id
 <%= tag.div class: "container" do %>
   <%= content %>
 <% end %>
+```
+
+#### Comments and Documentation
+
+Even in comments, use parentheses for method calls to maintain consistency:
+
+```ruby
+# Good
+#  5) Add "show log" link at bottom of model's show page:
+#       <%= render(Components::ObjectFooter.new(user: @user, obj: @object)) %>
+
+# Bad
+#  5) Add "show log" link at bottom of model's show page:
+#       <%= render Components::ObjectFooter.new(user: @user, obj: @object) %>
 ```
 
 ### Component Namespacing

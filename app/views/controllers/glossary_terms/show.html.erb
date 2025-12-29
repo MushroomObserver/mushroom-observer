@@ -66,9 +66,11 @@ column_classes(:eight_four)
 <%= render(Components::Panel.new(
       panel_id: "glossary_term_authors_editors"
     )) do |panel| %>
-  <%= panel.with_body do
-        show_authors_and_editors(
-          obj: @glossary_term, versions: @versions, user: @user
-        )
-      end %>
+  <%= panel.with_body do %>
+    <%= render(Components::AuthorsAndEditors.new(
+          obj: @glossary_term,
+          versions: @versions,
+          user: @user
+        )) %>
+  <% end %>
 <% end %>
