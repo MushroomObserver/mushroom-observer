@@ -10,7 +10,7 @@ class TextileSandboxFormTest < UnitTestCase
   end
 
   # NOTE: Page title and help block are now rendered by the view template
-  # (Views::Info::TextileSandbox), not the component. Those should be
+  # (Views::Controllers::Info::TextileSandbox), not the component. Those should be
   # tested in controller/integration tests.
 
   def test_renders_textarea_field
