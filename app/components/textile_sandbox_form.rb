@@ -13,7 +13,7 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   # Register helpers
   register_value_helper :asset_path
 
-  # @param model [TextileSandbox] struct with code attribute
+  # @param model [FormObject::TextileSandbox] struct with code attribute
   # @param show_result [Boolean] whether to show the rendered result above form
   # @param submit_type [String] the submit button that was clicked
   def initialize(model, show_result: false, submit_type: nil, **)

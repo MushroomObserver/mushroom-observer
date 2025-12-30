@@ -152,7 +152,7 @@ class TextileSandboxFormTest < UnitTestCase
   private
 
   def render_initial_form
-    model = TextileSandbox.new(code: nil)
+    model = FormObject::TextileSandbox.new(code: nil)
     form = Components::TextileSandboxForm.new(
       model,
       show_result: false,
@@ -162,7 +162,7 @@ class TextileSandboxFormTest < UnitTestCase
   end
 
   def render_form_with_result(submit_type)
-    model = TextileSandbox.new(code: "test code")
+    model = FormObject::TextileSandbox.new(code: "test code")
     form = Components::TextileSandboxForm.new(
       model,
       show_result: true,

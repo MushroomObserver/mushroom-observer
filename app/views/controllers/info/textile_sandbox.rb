@@ -17,7 +17,7 @@ module Views
         register_output_helper :help_block
         register_output_helper :add_page_title
 
-        # @param textile_sandbox [TextileSandbox] the model
+        # @param textile_sandbox [FormObject::TextileSandbox] the model
         # @param show_result [Boolean] whether to show rendered result
         # @param submit_type [String] the submit button clicked
         def initialize(textile_sandbox:, show_result:, submit_type:)

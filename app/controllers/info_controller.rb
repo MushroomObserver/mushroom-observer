@@ -39,7 +39,7 @@ class InfoController < ApplicationController
       code = nil
       submit = nil
     end
-    textile_sandbox = TextileSandbox.new(code: code)
+    textile_sandbox = FormObject::TextileSandbox.new(code: code)
 
     render(Views::Controllers::Info::TextileSandbox.new(
              textile_sandbox: textile_sandbox,
