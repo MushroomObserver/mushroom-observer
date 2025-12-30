@@ -41,7 +41,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
           <%= render(partial: "application/content/header") %>
 
           <main id="content" class="<%= content_classes %>"
-              data-controller="lightgallery lightbox-caption-sync">
+              data-controller="lightgallery">
 
             <%# unless @user&.verified? %>
             <%# render(partial: "application/content/login_layout") %>
