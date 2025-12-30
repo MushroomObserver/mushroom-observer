@@ -37,27 +37,33 @@ class MarkAsReviewedToggleTest < UnitTestCase
   end
 
   def test_renders_with_reviewed_true
-    html = render_component(Components::MarkAsReviewedToggle.new(
-                              observation_view: build_obs_view(111, reviewed: true)
-                            ))
+    html = render_component(
+      Components::MarkAsReviewedToggle.new(
+        observation_view: build_obs_view(111, reviewed: true)
+      )
+    )
 
     assert_includes(html, "Marked as reviewed")
     assert_includes(html, "checked")
   end
 
   def test_renders_with_reviewed_false
-    html = render_component(Components::MarkAsReviewedToggle.new(
-                              observation_view: build_obs_view(222, reviewed: false)
-                            ))
+    html = render_component(
+      Components::MarkAsReviewedToggle.new(
+        observation_view: build_obs_view(222, reviewed: false)
+      )
+    )
 
     assert_includes(html, "Mark as reviewed")
     assert_not_includes(html, "checked")
   end
 
   def test_renders_with_reviewed_nil
-    html = render_component(Components::MarkAsReviewedToggle.new(
-                              observation_view: build_obs_view(333, reviewed: nil)
-                            ))
+    html = render_component(
+      Components::MarkAsReviewedToggle.new(
+        observation_view: build_obs_view(333, reviewed: nil)
+      )
+    )
 
     assert_includes(html, "Mark as reviewed")
   end
@@ -85,7 +91,7 @@ class MarkAsReviewedToggleTest < UnitTestCase
 
   def test_checkbox_has_correct_css_classes
     html = render_component(Components::MarkAsReviewedToggle.new(
-                              observation_view: build_obs_view(666)
+                              observation_view: build_obs_view(777)
                             ))
 
     assert_includes(html, "d-inline")
@@ -95,11 +101,13 @@ class MarkAsReviewedToggleTest < UnitTestCase
   end
 
   def test_all_parameters_together
-    html = render_component(Components::MarkAsReviewedToggle.new(
-                              observation_view: build_obs_view(999, reviewed: true),
-                              selector: "custom_selector",
-                              label_class: "custom-class"
-                            ))
+    html = render_component(
+      Components::MarkAsReviewedToggle.new(
+        observation_view: build_obs_view(999, reviewed: true),
+        selector: "custom_selector",
+        label_class: "custom-class"
+      )
+    )
 
     assert_includes(html, "custom_selector_toggle_999")
     assert_includes(html, "custom_selector_999")
