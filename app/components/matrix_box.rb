@@ -231,12 +231,12 @@ class Components::MatrixBox < Components::Base
     return unless @data[:type] == :observation
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
-      render(Components::MarkAsReviewedToggle.new(
-               obs_id: @data[:id],
-               selector: "box_reviewed",
-               label_class: "stretched-link",
-               reviewed: observation_reviewed_state(@data[:what], @user)
-             ))
+      MarkAsReviewedToggle(
+        obs_id: @data[:id],
+        selector: "box_reviewed",
+        label_class: "stretched-link",
+        reviewed: observation_reviewed_state(@data[:what], @user)
+      )
     end
   end
 end
