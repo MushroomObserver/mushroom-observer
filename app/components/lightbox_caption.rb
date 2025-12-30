@@ -61,10 +61,9 @@ class Components::LightboxCaption < Components::Base
         btn_class: "btn btn-primary d-inline-block"
       )
       span(class: "mx-2") { whitespace }
-      render(Components::MarkAsReviewedToggle.new(
-               obs_id: @obs.id,
-               reviewed: observation_reviewed_state(@obs, @user)
-             ))
+      MarkAsReviewedToggle(
+        observation_view: observation_view_for(@obs, @user)
+      )
     end
   end
 
