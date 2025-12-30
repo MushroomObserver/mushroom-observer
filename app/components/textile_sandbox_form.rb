@@ -49,9 +49,9 @@ class Components::TextileSandboxForm < Components::ApplicationForm
           # Render the textile code as HTML
           raw(@model.code.tpl) # rubocop:disable Rails/OutputSafety
         else
-          # Show HTML codes
+          # Show HTML codes (already escaped, use raw to avoid double-escape)
           code do
-            plain(view_context.escape_html(@model.code.tpl))
+            raw(view_context.escape_html(@model.code.tpl)) # rubocop:disable Rails/OutputSafety
           end
         end
       end

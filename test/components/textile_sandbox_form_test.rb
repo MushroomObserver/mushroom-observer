@@ -53,12 +53,56 @@ class TextileSandboxFormTest < UnitTestCase
     assert_html(html, ".sandbox", text: "test code")
   end
 
+  def test_renders_textile_as_actual_html_not_escaped
+    # Verify Textile markup renders as actual HTML elements
+    model = FormObject::TextileSandbox.new(code: "# Woof\n# Bark\n# Meow")
+    form = Components::TextileSandboxForm.new(
+      model,
+      show_result: true,
+      submit_type: :sandbox_test.l
+    )
+    html = render(form)
+
+    # Should contain actual HTML list elements
+    assert_html(html, ".sandbox ol")
+    assert_html(html, ".sandbox li", count: 3)
+
+    # Verify individual list items contain correct text
+    doc = Nokogiri::HTML(html)
+    list_items = doc.css(".sandbox li").map(&:text)
+    assert_equal(%w[Woof Bark Meow], list_items)
+
+    # Should NOT contain escaped HTML in the rendered output
+    sandbox_content = doc.at_css(".sandbox").inner_html
+    assert_no_match(/&lt;/, sandbox_content)
+  end
+
   def test_renders_escaped_html_when_test_codes_button_clicked
     html = render_form_with_result(:sandbox_test_codes.l)
     # Should contain <code> tag with escaped HTML
     assert_html(html, "code")
     # The actual escaped content will be present
     assert_match(/test code/, html)
+  end
+
+  def test_renders_html_codes_with_proper_escaping
+    # Test with actual Textile markup to verify HTML is escaped once
+    model = FormObject::TextileSandbox.new(code: "# Woof\n# Bark\n# Meow")
+    form = Components::TextileSandboxForm.new(
+      model,
+      show_result: true,
+      submit_type: :sandbox_test_codes.l
+    )
+    html = render(form)
+
+    # Should contain HTML tags escaped once (not double-escaped)
+    assert_match(/&lt;div class=&quot;textile&quot;&gt;/, html)
+    assert_match(/&lt;ol&gt;/, html)
+    assert_match(%r{&lt;li&gt;Woof&lt;/li&gt;}, html)
+
+    # Should NOT contain double-escaped HTML
+    assert_no_match(/&amp;lt;/, html)
+    assert_no_match(/&amp;quot;/, html)
   end
 
   def test_renders_up_arrows_when_showing_result
