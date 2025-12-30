@@ -48,6 +48,29 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
+      "fingerprint": "840c66551f2dd1076c9e69bac37c8b464ed7b4887c6a3759c64b9bd8d2478080",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/classes/checklist.rb",
+      "line": 125,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "Name.select(Arel.sql(\"GROUP_CONCAT(names.id)\"), ((((((Name[:deprecated].cast(\"char\") + \",\") + Name[:text_name].cast(\"char\")) + \",\") + Name[:id].cast(\"char\")) + \",\") + Name[:rank].cast(\"char\")).minimum)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Checklist",
+        "method": "s(:self).all_site_taxa_by_user"
+      },
+      "user_input": "Name[:deprecated].cast(\"char\")",
+      "confidence": "High",
+      "cwe_id": [
+        89
+      ],
+      "note": "Safe: hardcoded SQL with no user input"
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
       "fingerprint": "dd5044f522b1b5ab980da2941a14bcb54700f5ec4f307a699a6415e12b8a6f79",
       "check_name": "SQL",
       "message": "Possible SQL injection",
@@ -69,5 +92,5 @@
       "note": ""
     }
   ],
-  "brakeman_version": "7.0.0"
+  "brakeman_version": "7.1.1"
 }
