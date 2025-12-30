@@ -226,6 +226,39 @@ Examples:
 <% end %>
 ```
 
+## Internationalization
+
+### Text Strings and Localization
+
+**Always add text strings to `config/locales/en.txt`, never to `.yml` files.**
+
+The `.yml` locale files are generated from `.txt` files and should never be edited or committed directly.
+
+**Workflow for adding/updating text strings:**
+
+1. Edit `config/locales/en.txt` to add or modify text strings
+2. Run `rails lang:update` to regenerate all `.yml` files
+3. Verify the change appears correctly in `config/locales/en.yml`
+4. **Never commit the `.yml` files** - they are ignored by git
+
+```bash
+# Good workflow
+vim config/locales/en.txt
+rails lang:update
+git add config/locales/en.txt
+git commit -m "Update help text"
+
+# Bad - never do this
+vim config/locales/en.yml  # ❌ Wrong file
+git add config/locales/en.yml  # ❌ Never commit .yml files
+```
+
+**Why this matters:**
+- `.txt` files are the single source of truth for translations
+- The `lang:update` rake task propagates changes to all language `.yml` files
+- Editing `.yml` files directly causes changes to be lost on next update
+- All `.yml` files are in `.gitignore` and should remain uncommitted
+
 ## Code Quality and Linting
 
 ### RuboCop Compliance
@@ -280,4 +313,5 @@ The key principles are:
 3. **Prefer Phlex helpers** over Rails `tag` helpers in components
 4. **Render directly** instead of building arrays and joining
 5. **Internalize logic** into components when possible
-6. **All new code must pass RuboCop** - refactor instead of disabling cops
+6. **Edit `en.txt` for text strings**, run `rails lang:update`, never commit `.yml` files
+7. **All new code must pass RuboCop** - refactor instead of disabling cops
