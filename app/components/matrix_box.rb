@@ -27,7 +27,6 @@ class Components::MatrixBox < Components::Base
   include Components::MatrixBox::RenderData
   include Phlex::Rails::Helpers::LinkTo
   include Phlex::Rails::Helpers::ClassNames
-  include ObservationReviewedState
 
   # Properties
   prop :user, _Nilable(User), default: nil
@@ -51,6 +50,8 @@ class Components::MatrixBox < Components::Base
   def render_object_layout
     # Build render data from object
     @data = build_render_data
+    # Get observation_view from eager-loaded association (nil if not loaded)
+    @observation_view = observation_view_for_identify if @identify
 
     li(
       id: "box_#{@data[:id]}",
@@ -63,6 +64,18 @@ class Components::MatrixBox < Components::Base
         render_identify_footer(panel)
       end
     end
+  end
+
+  # Get or build observation_view from eager-loaded association.
+  # Returns nil if not an observation or association not loaded.
+  def observation_view_for_identify
+    return nil unless @data[:type] == :observation
+
+    obs = @data[:what]
+    return nil unless obs.observation_views.loaded?
+
+    obs.observation_views.find { |ov| ov.user_id == @user&.id } ||
+      ObservationView.new(observation: obs, user: @user)
   end
 
   def render_custom_layout(&block)
@@ -85,7 +98,8 @@ class Components::MatrixBox < Components::Base
         obs: @data[:obs] || {},
         votes: @data.fetch(:votes, true),
         full_width: @data.fetch(:full_width, true),
-        identify: @identify
+        identify: @identify,
+        observation_view: @observation_view
       )
     end
   end
@@ -227,15 +241,13 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_identify_footer(panel)
-    return unless @identify
-    return unless @data[:type] == :observation
+    return unless @observation_view
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
       MarkAsReviewedToggle(
-        obs_id: @data[:id],
+        observation_view: @observation_view,
         selector: "box_reviewed",
-        label_class: "stretched-link",
-        reviewed: observation_reviewed_state(@data[:what], @user)
+        label_class: "stretched-link"
       )
     end
   end
