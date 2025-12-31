@@ -69,7 +69,6 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
   def test_location_autocompleter_mode_switching
     rolf = users("rolf")
     login!(rolf)
-    burbank = locations("burbank")
 
     visit("/herbaria/new")
 
@@ -124,7 +123,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       # Verify location was selected (has-id class and hidden field populated)
       assert_selector(".has-id", wait: 5)
       assert_field("herbarium_location_id", with: burbank.id.to_s,
-                   type: :hidden)
+                                            type: :hidden)
     end
   end
 
