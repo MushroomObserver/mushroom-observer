@@ -9,7 +9,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
   def test_post_textile
     login
     visit("/info/textile_sandbox")
-    fill_in("code", with: "Jabberwocky")
+    fill_in("textile_sandbox_code", with: "Jabberwocky")
     click_button("Test")
     page.assert_text("Jabberwocky", count: 2)
   end

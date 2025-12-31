@@ -90,6 +90,29 @@
         89
       ],
       "note": ""
+    },
+    {
+      "warning_type": "Dynamic Render Path",
+      "warning_code": 15,
+      "fingerprint": "2b4534a5c84b9fbed9d7e4aad36432c3799d38f93c5f09fbeaad4d4e474e06d1",
+      "check_name": "Render",
+      "message": "Render path contains parameter value",
+      "file": "app/controllers/info_controller.rb",
+      "line": 47,
+      "link": "https://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
+      "code": "render(action => Components::TextileSandboxForm.new(TextileSandbox.new(:code => (((params[:code] or params.dig(:textile_sandbox, :code)) or nil))), :show_result => ((not ((params[:code] or params.dig(:textile_sandbox, :code)) or nil).nil?)), :submit_type => ((params[:commit] or nil))), { :layout => true, :locals => ({ :\"components::textilesandboxform\" => Components::TextileSandboxForm.new(TextileSandbox.new(:code => (((params[:code] or params.dig(:textile_sandbox, :code)) or nil))), :show_result => ((not ((params[:code] or params.dig(:textile_sandbox, :code)) or nil).nil?)), :submit_type => ((params[:commit] or nil))) }) })",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "InfoController",
+        "method": "textile_sandbox"
+      },
+      "user_input": "params[:commit]",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: This is not rendering a dynamic template path based on user input. The render() call is rendering a Phlex component instance (Components::TextileSandboxForm), which is a fixed component class. The user parameters (params[:code], params[:commit]) only populate the data inside the component (textarea content and submit button type), not the component class itself. There is no risk of users controlling which view/template gets rendered."
     }
   ],
   "brakeman_version": "7.1.1"
