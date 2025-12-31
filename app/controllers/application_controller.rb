@@ -333,13 +333,8 @@ class ApplicationController < ActionController::Base
   end
 
   def extract_query_projects
-    if params[:q].is_a?(String)
-      # Load the saved query to get its project associations
-      query = Query.safe_find(params[:q])
-      query&.params&.dig(:projects) || []
-    else
-      params.dig(:q, :projects) || []
-    end
+    query = query_from_q_param # includes fallback for old q
+    query&.params&.dig(:projects) || []
   end
   private :extract_query_projects
 

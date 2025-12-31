@@ -274,8 +274,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     # Create a saved query with project associations
     query = Query.lookup(:SpeciesList, projects: [project.id])
-    query.save
-    query_id = query.record.id.to_s
+    assert(query.save)
+    query_id = query.record.id.alphabetize
 
     # This should not raise TypeError when params[:q] is a String
     assert_nothing_raised do
