@@ -89,11 +89,9 @@ class Components::HerbariumForm < Components::ApplicationForm
   def render_top_users_list
     @top_users.each_with_index do |(name, login, count), index|
       br if index.positive?
-      # rubocop:disable Rails/OutputSafety
-      raw(:edit_herbarium_user_records.t(
-        name: "#{name} (#{login})", num: count
-      ).html_safe)
-      # rubocop:enable Rails/OutputSafety
+      trusted_html(:edit_herbarium_user_records.t(
+                     name: "#{name} (#{login})", num: count
+                   ))
     end
   end
 
@@ -121,15 +119,15 @@ class Components::HerbariumForm < Components::ApplicationForm
   def code_help
     help = :create_herbarium_code_help.t
     recommended = :create_herbarium_code_recommended.l
-    "#{help} (#{recommended})".html_safe # rubocop:disable Rails/OutputSafety
+    trusted_html("#{help} (#{recommended})")
   end
 
   def render_location_section
     render_location_autocompleter
-    render(Components::BoundsHiddenFields.new(
-             location: @location,
-             target_controller: :map
-           ))
+    BoundsHiddenFields.new(
+      location: @location,
+      target_controller: :map
+    )
   end
 
   def render_location_autocompleter
@@ -161,11 +159,11 @@ class Components::HerbariumForm < Components::ApplicationForm
   def render_map_section
     div(class: "mb-5 d-none",
         data: { autocompleter__location_target: "mapWrap" }) do
-      render(Components::FormLocationMap.new(
-               id: "herbarium_form_map",
-               map_type: "observation",
-               user: @user
-             ))
+      FormLocationMap.new(
+        id: "herbarium_form_map",
+        map_type: "observation",
+        user: @user
+      )
     end
   end
 
