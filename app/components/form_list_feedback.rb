@@ -56,7 +56,7 @@ class Components::FormListFeedback < Components::Base
 
   def render_deprecated_name_choice(name)
     approved_names = name.approved_synonyms
-    div { raw(name.display_name.t) } # rubocop:disable Rails/OutputSafety
+    div { trusted_html(name.display_name.t) }
 
     return unless approved_names.any?
 
@@ -90,7 +90,7 @@ class Components::FormListFeedback < Components::Base
   end
 
   def render_multiple_name_choice(name, other_authors)
-    div { raw(name.display_name.t) } # rubocop:disable Rails/OutputSafety
+    div { trusted_html(name.display_name.t) }
     fields_for(:chosen_multiple_names) do |f_c|
       other_authors.each do |other_name|
         radio_with_label(
