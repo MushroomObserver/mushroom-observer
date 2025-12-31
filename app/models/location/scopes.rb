@@ -36,7 +36,7 @@ module Location::Scopes
     scope :shortest_names_with, lambda { |pattern|
       return none if pattern.blank?
 
-      name_has(pattern).order(Location[:name].length)
+      name_has(pattern).order(Location[:name].char_length)
     }
 
     scope :has_notes,
