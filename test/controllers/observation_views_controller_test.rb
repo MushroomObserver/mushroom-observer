@@ -13,7 +13,7 @@ class ObservationViewsControllerTest < FunctionalTestCase
 
     # Have to create the o_v, none existing
     obs.take(5).pluck(:id).each do |id|
-      put(:update, params: { id: id, reviewed: "1" })
+      put(:update, params: { id: id, observation_view: { reviewed: "1" } })
       assert_redirected_to(identify_observations_path)
     end
 
@@ -32,7 +32,7 @@ class ObservationViewsControllerTest < FunctionalTestCase
                                        user_id: user.id))
 
     put(:update,
-        params: { id: obs.id, reviewed: "1" },
+        params: { id: obs.id, observation_view: { reviewed: "1" } },
         format: :turbo_stream)
 
     assert_response(:success)
@@ -63,7 +63,7 @@ class ObservationViewsControllerTest < FunctionalTestCase
     )
 
     put(:update,
-        params: { id: obs.id, reviewed: "0" },
+        params: { id: obs.id, observation_view: { reviewed: "0" } },
         format: :turbo_stream)
 
     assert_response(:success)
@@ -86,7 +86,7 @@ class ObservationViewsControllerTest < FunctionalTestCase
     obs = observations(:minimal_unknown_obs)
 
     put(:update,
-        params: { id: obs.id, reviewed: "1" },
+        params: { id: obs.id, observation_view: { reviewed: "1" } },
         format: :turbo_stream)
 
     assert_response(:success)

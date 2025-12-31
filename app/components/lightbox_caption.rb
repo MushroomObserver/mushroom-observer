@@ -18,6 +18,14 @@
 #     identify: true
 #   )
 #
+# @example With observation_view from controller (turbo stream)
+#   render LightboxCaption.new(
+#     user: @user,
+#     obs: @observation,
+#     identify: true,
+#     observation_view: @observation_view
+#   )
+#
 # @example With image only
 #   render LightboxCaption.new(
 #     user: @user,
@@ -26,13 +34,13 @@
 #   )
 class Components::LightboxCaption < Components::Base
   include Phlex::Rails::Helpers::LinkTo
-  include ObservationReviewedState
 
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
   prop :obs, _Union(Observation, Hash), default: -> { {} }
   prop :identify, _Boolean, default: false
+  prop :observation_view, _Nilable(ObservationView), default: nil
 
   def view_template
     if @obs.is_a?(Observation)
@@ -60,12 +68,13 @@ class Components::LightboxCaption < Components::Base
         context: "lightgallery",
         btn_class: "btn btn-primary d-inline-block"
       )
-      span(class: "mx-2") { whitespace }
-      render(Components::MarkAsReviewedToggle.new(
-               obs_id: @obs.id,
-               reviewed: observation_reviewed_state(@obs, @user)
-             ))
+      render_reviewed_toggle if @observation_view
     end
+  end
+
+  def render_reviewed_toggle
+    span(class: "mx-2") { whitespace }
+    MarkAsReviewedToggle(observation_view: @observation_view)
   end
 
   def render_obs_title
