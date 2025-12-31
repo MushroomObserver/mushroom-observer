@@ -48,6 +48,29 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
+      "fingerprint": "840c66551f2dd1076c9e69bac37c8b464ed7b4887c6a3759c64b9bd8d2478080",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/classes/checklist.rb",
+      "line": 125,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "Name.select(Arel.sql(\"GROUP_CONCAT(names.id)\"), ((((((Name[:deprecated].cast(\"char\") + \",\") + Name[:text_name].cast(\"char\")) + \",\") + Name[:id].cast(\"char\")) + \",\") + Name[:rank].cast(\"char\")).minimum)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Checklist",
+        "method": "s(:self).all_site_taxa_by_user"
+      },
+      "user_input": "Name[:deprecated].cast(\"char\")",
+      "confidence": "High",
+      "cwe_id": [
+        89
+      ],
+      "note": "Safe: hardcoded SQL with no user input"
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
       "fingerprint": "dd5044f522b1b5ab980da2941a14bcb54700f5ec4f307a699a6415e12b8a6f79",
       "check_name": "SQL",
       "message": "Possible SQL injection",
@@ -67,7 +90,30 @@
         89
       ],
       "note": ""
+    },
+    {
+      "warning_type": "Dynamic Render Path",
+      "warning_code": 15,
+      "fingerprint": "2b4534a5c84b9fbed9d7e4aad36432c3799d38f93c5f09fbeaad4d4e474e06d1",
+      "check_name": "Render",
+      "message": "Render path contains parameter value",
+      "file": "app/controllers/info_controller.rb",
+      "line": 47,
+      "link": "https://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
+      "code": "render(action => Components::TextileSandboxForm.new(TextileSandbox.new(:code => (((params[:code] or params.dig(:textile_sandbox, :code)) or nil))), :show_result => ((not ((params[:code] or params.dig(:textile_sandbox, :code)) or nil).nil?)), :submit_type => ((params[:commit] or nil))), { :layout => true, :locals => ({ :\"components::textilesandboxform\" => Components::TextileSandboxForm.new(TextileSandbox.new(:code => (((params[:code] or params.dig(:textile_sandbox, :code)) or nil))), :show_result => ((not ((params[:code] or params.dig(:textile_sandbox, :code)) or nil).nil?)), :submit_type => ((params[:commit] or nil))) }) })",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "InfoController",
+        "method": "textile_sandbox"
+      },
+      "user_input": "params[:commit]",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": "False positive: This is not rendering a dynamic template path based on user input. The render() call is rendering a Phlex component instance (Components::TextileSandboxForm), which is a fixed component class. The user parameters (params[:code], params[:commit]) only populate the data inside the component (textarea content and submit button type), not the component class itself. There is no risk of users controlling which view/template gets rendered."
     }
   ],
-  "brakeman_version": "7.0.0"
+  "brakeman_version": "7.1.1"
 }

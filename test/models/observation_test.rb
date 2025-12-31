@@ -1236,6 +1236,30 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  # Regression test for NOT IN NULL bug
+  # When observation_views contains a NULL observation_id, the NOT IN clause
+  # in not_reviewed_by_user returns no results due to NULL semantics
+  def test_scope_not_reviewed_by_user_with_null_observation_id
+    # Create a NULL observation_id record in observation_views for rolf
+    # This simulates data corruption or a bug that allowed NULL to be inserted
+    ObservationView.create!(
+      observation_id: nil,
+      user_id: rolf.id,
+      reviewed: true,
+      last_view: Time.zone.now
+    )
+
+    # fungi_obs needs naming and rolf hasn't reviewed it
+    # This should still be included even with the NULL record
+    result = Observation.needs_naming(rolf)
+    assert_includes(
+      result,
+      observations(:fungi_obs),
+      "needs_naming scope should return observations even when " \
+      "observation_views contains NULL observation_id for the user"
+    )
+  end
+
   def test_scope_names
     assert_includes(Observation.names(lookup: names(:peltigera).id),
                     observations(:peltigera_obs))
