@@ -7,8 +7,6 @@
 # @example Usage in SearchForm
 #   RegionWithBoxFields(query: model, form_namespace: self)
 class Components::RegionWithBoxFields < Components::Base
-  include Phlex::Rails::Helpers::ClassNames
-
   register_output_helper :make_map
 
   prop :query, Query

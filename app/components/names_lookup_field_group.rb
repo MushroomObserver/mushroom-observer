@@ -15,7 +15,6 @@
 #     )
 #   end
 class Components::NamesLookupFieldGroup < Components::Base
-  include Phlex::Rails::Helpers::ClassNames
   include Components::ApplicationForm::AutocompleterPrefill
 
   prop :names_namespace, _Any

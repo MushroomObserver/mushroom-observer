@@ -17,8 +17,6 @@
 #     votes: true
 #   )
 class Components::ImageVoteInterface < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
-
   prop :user, _Nilable(User)
   prop :image, ::Image
   prop :votes, _Boolean, default: true

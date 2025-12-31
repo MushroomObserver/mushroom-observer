@@ -4,8 +4,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap autocompleter input field component with dropdown suggestions
   # Wraps a text input with Stimulus autocompleter controller
   class AutocompleterField < Superform::Rails::Components::Input
-    include Phlex::Rails::Helpers::ClassNames
-    include Phlex::Rails::Helpers::LinkTo
+    include Phlex::Slotable
 
     register_output_helper :link_icon
     register_output_helper :icon_link_to
