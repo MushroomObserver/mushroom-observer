@@ -122,7 +122,7 @@ class Components::HerbariumForm < Components::ApplicationForm
   def code_help
     help = :create_herbarium_code_help.t
     recommended = :create_herbarium_code_recommended.l
-    [help, " (", recommended, ")"].safe_join
+    [help, whitespace, "(", recommended, ")"].safe_join
   end
 
   def render_location_section

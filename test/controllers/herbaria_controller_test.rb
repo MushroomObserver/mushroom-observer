@@ -459,6 +459,19 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success) # Back to form for creating herbarium
   end
 
+  # Turbo stream submissions should reload the modal form with flash errors
+  def test_create_blank_name_turbo_stream
+    herbarium_count = Herbarium.count
+    login("rolf")
+
+    post(:create, params: { herbarium: herbarium_params }, as: :turbo_stream)
+
+    assert_equal(herbarium_count, Herbarium.count)
+    assert_response(:success)
+    # Should render modal_form_reload partial to update modal with flash
+    assert_template("shared/_modal_form_reload")
+  end
+
   def test_create_duplicate_name
     herbarium_count = Herbarium.count
     login("rolf")
@@ -655,6 +668,21 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("All\nNew\nLocation", nybg.mailing_address)
     assert_equal("And  more  stuff.", nybg.description)
     assert_nil(nybg.personal_user)
+  end
+
+  # Turbo stream submissions should reload the modal form with flash errors
+  def test_update_blank_name_turbo_stream
+    last_update = nybg.updated_at
+    login("rolf")
+
+    patch(:update,
+          params: { herbarium: herbarium_params.merge(name: ""), id: nybg.id },
+          as: :turbo_stream)
+
+    assert_equal(last_update, nybg.reload.updated_at)
+    assert_response(:success)
+    # Should render modal_form_reload partial to update modal with flash
+    assert_template("shared/_modal_form_reload")
   end
 
   def test_update_by_non_curator

@@ -197,11 +197,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     normalize_parameters
     create_location_object_if_new(@herbarium)
     try_to_save_location_if_new(@herbarium)
-    return render(:new) unless validate_herbarium! && !@any_errors
+    return reload_form(:new) unless validate_herbarium! && !@any_errors
 
     unless @herbarium.save
       flash_object_errors(@herbarium)
-      return render(:new)
+      return reload_form(:new)
     end
     @herbarium.add_curator(@user) if @herbarium.personal_user
     notify_admins_of_new_herbarium unless @herbarium.personal_user
@@ -216,11 +216,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     normalize_parameters
     create_location_object_if_new(@herbarium)
     try_to_save_location_if_new(@herbarium)
-    return unless validate_herbarium! && !@any_errors
+    return reload_form(:edit) unless validate_herbarium! && !@any_errors
 
     unless @herbarium.save
       flash_object_errors(@herbarium)
-      return render(:edit)
+      return reload_form(:edit)
     end
     redirect_to_create_location_or_referrer_or_show_location
   end
@@ -406,11 +406,31 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     true
   end
 
+  # Handle form reload for both HTML and turbo_stream formats
+  # Skip if a redirect was already performed (e.g., by request_merge)
+  def reload_form(action)
+    return if performed?
+
+    respond_to do |format|
+      format.turbo_stream { reload_herbarium_modal_form_and_flash }
+      format.html { render(action) }
+    end
+  end
+
   # this updates both the form and the flash
   def reload_herbarium_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: modal_identifier, form: "herbaria/form" }
+      locals: {
+        identifier: modal_identifier,
+        form: "herbaria/form",
+        form_locals: {
+          model: @herbarium,
+          user: @user,
+          location: @herbarium.location,
+          top_users: @top_users
+        }
+      }
     ) and return true
   end
 
