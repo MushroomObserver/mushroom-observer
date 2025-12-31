@@ -199,7 +199,10 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     try_to_save_location_if_new(@herbarium)
     return render(:new) unless validate_herbarium! && !@any_errors
 
-    @herbarium.save
+    unless @herbarium.save
+      flash_object_errors(@herbarium)
+      return render(:new)
+    end
     @herbarium.add_curator(@user) if @herbarium.personal_user
     notify_admins_of_new_herbarium unless @herbarium.personal_user
     redirect_to_create_location_or_referrer_or_show_location
@@ -215,7 +218,10 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     try_to_save_location_if_new(@herbarium)
     return unless validate_herbarium! && !@any_errors
 
-    @herbarium.save
+    unless @herbarium.save
+      flash_object_errors(@herbarium)
+      return render(:edit)
+    end
     redirect_to_create_location_or_referrer_or_show_location
   end
 
@@ -252,7 +258,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
         @herbarium.send(:"#{arg}=", val)
       end
     @herbarium.description = @herbarium.description.to_s.strip
-    @herbarium.code = "" if @herbarium.personal_user_id
+    # Use nil instead of empty string for code (DB has partial unique index)
+    @herbarium.code = @herbarium.code.presence
+    @herbarium.code = nil if @herbarium.personal_user_id
   end
 
   def validate_herbarium!

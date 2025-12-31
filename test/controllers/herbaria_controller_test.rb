@@ -500,7 +500,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
     herbarium = Herbarium.last
     assert_equal("New Herbarium", herbarium.name)
-    assert_equal("", herbarium.code)
+    assert_nil(herbarium.code)
     assert_nil(herbarium.location)
     assert_equal("", herbarium.email)
     assert_equal("", herbarium.mailing_address)
@@ -525,7 +525,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
     herbarium = Herbarium.last
     assert_equal("My Herbarium", herbarium.name)
-    assert_equal("", herbarium.code)
+    assert_nil(herbarium.code)
     assert_nil(herbarium.location)
     assert_equal("", herbarium.email)
     assert_equal("", herbarium.mailing_address)
@@ -546,6 +546,48 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_flash_text(/already.*created.*personal herbarium/i)
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:success) # Back to the form
+  end
+
+  # Regression test: blank codes should be stored as nil, not empty string.
+  # This prevents duplicate key errors on the unique index.
+  def test_create_with_blank_code_stores_nil
+    login("rolf")
+    herbarium_count = Herbarium.count
+
+    # First herbarium with blank code
+    post(:create, params: { herbarium: herbarium_params.merge(
+      name: "First Blank Code Herbarium",
+      code: ""
+    ) })
+    assert_equal(herbarium_count + 1, Herbarium.count)
+    first = Herbarium.last
+    assert_nil(first.code, "Blank code should be stored as nil")
+
+    # Second herbarium with blank code should also work (no duplicate key error)
+    post(:create, params: { herbarium: herbarium_params.merge(
+      name: "Second Blank Code Herbarium",
+      code: ""
+    ) })
+    assert_equal(herbarium_count + 2, Herbarium.count)
+    second = Herbarium.last
+    assert_nil(second.code, "Blank code should be stored as nil")
+  end
+
+  # Regression test: save failure should return to form, not redirect.
+  def test_create_save_failure_returns_to_form
+    login("rolf")
+    herbarium_count = Herbarium.count
+
+    # Simulate save failure by creating herbarium with duplicate name
+    existing = herbaria(:nybg_herbarium)
+    post(:create, params: { herbarium: herbarium_params.merge(
+      name: existing.name
+    ) })
+
+    # Should flash error and stay on form (not redirect with nil id)
+    assert_flash_text(/already exists/i)
+    assert_equal(herbarium_count, Herbarium.count)
+    assert_response(:success) # Back to the form, not a redirect
   end
 
   def test_create_second_personal_herbarium_by_admin
