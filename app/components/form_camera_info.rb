@@ -19,9 +19,6 @@
 #     file_size: "2.5 MB"
 #   )
 class Components::FormCameraInfo < Components::Base
-  include Phlex::Rails::Helpers::ClassNames
-  include Phlex::Rails::Helpers::LinkTo
-
   # Properties
   # All props are nilable to handle cases where data may not be available
   prop :img_id, _Nilable(String), &:to_s

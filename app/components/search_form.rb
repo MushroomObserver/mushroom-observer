@@ -16,7 +16,6 @@
 #
 # rubocop:disable Metrics/ClassLength
 class Components::SearchForm < Components::ApplicationForm
-  include Phlex::Rails::Helpers::ClassNames
   include ApplicationForm::AutocompleterPrefill
 
   register_output_helper :search_bar_toggle

@@ -3,7 +3,6 @@
 class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap textarea field component with form-group wrapper and slots
   class TextareaField < Superform::Rails::Components::Textarea
-    include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
     include FieldWithHelp
     include FieldLabelRow

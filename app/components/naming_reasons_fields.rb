@@ -6,8 +6,6 @@
 # @param reasons [Hash] the naming reasons from Naming#init_reasons
 # @param form_namespace [Superform::Namespace] the parent form namespace
 class Components::NamingReasonsFields < Components::Base
-  include Phlex::Rails::Helpers::ClassNames
-
   prop :reasons, Hash
   prop :form_namespace, _Any
 
