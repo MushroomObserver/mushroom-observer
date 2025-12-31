@@ -475,10 +475,10 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
       assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 5)
       @browser.keyboard.type(:down, :tab)
 
-      # Verify location was selected
+      # Verify location was selected (hidden field is place_name_id)
       assert_selector(".has-id", wait: 5)
-      assert_field("herbarium_location_id", with: burbank.id.to_s,
-                                            type: :hidden)
+      assert_field("herbarium_place_name_id", with: burbank.id.to_s,
+                                              type: :hidden)
 
       # Now edit the text by adding a street address at the beginning
       field = find_field("herbarium_place_name")
@@ -490,7 +490,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
       # has-id should be cleared since text no longer matches selected value
       assert_no_selector(".has-id", wait: 5)
       # Hidden field should be empty
-      assert_field("herbarium_location_id", with: "", type: :hidden)
+      assert_field("herbarium_place_name_id", with: "", type: :hidden)
     end
   end
 end
