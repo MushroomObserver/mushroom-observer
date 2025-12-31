@@ -104,16 +104,31 @@ raw(
 **Use Phlex rendering methods** for outputting content:
 - `plain(text)` - for plain text
 - `whitespace` - for spacing between elements
-- `raw(html)` - only when necessary for Rails helpers that return HTML strings
+- `trusted_html(html)` - for HTML-safe strings (ActiveSupport::SafeBuffer) from Rails helpers
+- `raw(html)` - only when necessary for HTML strings that are not already marked safe
 
 ```ruby
-# Good
+# Good - using trusted_html for HTML-safe content
+def view_template
+  div do
+    trusted_html(name.display_name.t)  # .t returns ActiveSupport::SafeBuffer
+  end
+end
+
+# Good - plain content rendering
 def view_template
   div do
     plain("Hello ")
     b("World")
     whitespace
     plain("!")
+  end
+end
+
+# Bad - using raw() for HTML-safe content
+def view_template
+  div do
+    raw(name.display_name.t)  # Use trusted_html instead
   end
 end
 
@@ -124,6 +139,12 @@ def view_template
   end
 end
 ```
+
+**Why trusted_html?**
+- `trusted_html()` is defined in `Components::Base` specifically for HTML-safe content
+- It handles `ActiveSupport::SafeBuffer` correctly without requiring `rubocop:disable`
+- Rails translation methods (`.t`, `.l`) return HTML-safe strings that should use `trusted_html`
+- Only use `raw()` for HTML strings that are not already marked as safe
 
 ### Iteration
 
@@ -311,7 +332,8 @@ The key principles are:
 1. **Always use parentheses** for method calls (Ruby and ERB)
 2. **Use full namespaces** for component references (`Components::ClassName`)
 3. **Prefer Phlex helpers** over Rails `tag` helpers in components
-4. **Render directly** instead of building arrays and joining
-5. **Internalize logic** into components when possible
-6. **Edit `en.txt` for text strings**, run `rails lang:update`, never commit `.yml` files
-7. **All new code must pass RuboCop** - refactor instead of disabling cops
+4. **Use `trusted_html`** for HTML-safe content (from `.t`, `.l`), not `raw()`
+5. **Render directly** instead of building arrays and joining
+6. **Internalize logic** into components when possible
+7. **Edit `en.txt` for text strings**, run `rails lang:update`, never commit `.yml` files
+8. **All new code must pass RuboCop** - refactor instead of disabling cops
