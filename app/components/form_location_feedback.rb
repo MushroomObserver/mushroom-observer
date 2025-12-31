@@ -20,7 +20,7 @@ class Components::FormLocationFeedback < Components::Base
       div do
         @dubious_where_reasons.each_with_index do |reason, index|
           br if index.positive?
-          plain(reason)
+          trusted_html(reason)
         end
       end
       span(class: "help-note") do
