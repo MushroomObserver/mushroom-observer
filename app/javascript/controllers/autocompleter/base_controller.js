@@ -426,6 +426,13 @@ export default class BaseAutocompleterController extends Controller {
       this.cssUncollapseFields();
       if (new_value != old_value) {
         this.old_value = new_value;
+        // Clear hidden ID if value changed from what was selected.
+        // Compare trimmed values since selection may add trailing space.
+        const selectedName = this.hiddenTarget.dataset.name;
+        if (selectedName &&
+            new_value.trim() !== selectedName.trim()) {
+          this.clearHiddenId();
+        }
         if (do_refresh) {
           this.verbose("autocompleter:ourChange()");
           this.scheduleRefresh();
