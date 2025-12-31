@@ -251,6 +251,40 @@ refute_nil(value)
 - RuboCop's `Rails/RefuteMethods` cop enforces this convention
 - Consistent with Rails community practices
 
+### Running Tests Before Creating PRs
+
+**ALWAYS run the full test suite before creating a PR that includes changes to production Rails code.**
+
+```bash
+# Run the full test suite
+bin/rails test
+
+# Or run with coverage
+bin/rails test:coverage
+```
+
+**Why run the full test suite?**
+- Component unit tests may pass but integration tests can fail
+- Changes to shared components (like FormLocationFeedback) are used by multiple controllers and views
+- Type mismatches and parameter issues often only surface in integration tests
+- Prevents breaking production code and having to fix issues after PR creation
+
+**When to run the full suite:**
+- Before creating any PR with changes to:
+  - Components (`app/components/`)
+  - Models (`app/models/`)
+  - Controllers (`app/controllers/`)
+  - Helpers (`app/helpers/`)
+  - Views (`app/views/`)
+- After making changes that affect multiple files
+- When in doubt, always run it - better safe than sorry
+
+**What to check:**
+- All tests pass (0 failures, 0 errors)
+- Pay attention to the error count, not just test count
+- If tests fail, fix the issues before creating the PR
+- Don't create PRs with known failing tests
+
 ## Code Quality and Linting
 
 ### RuboCop Compliance
@@ -306,4 +340,5 @@ The key principles are:
 4. **Render directly** instead of building arrays and joining
 5. **Internalize logic** into components when possible
 6. **Use Rails-preferred assertions** (`assert_no_match`, `assert_not_equal`, etc.) instead of MiniTest refute methods
-7. **All new code must pass RuboCop** - refactor instead of disabling cops
+7. **Run the full test suite** before creating any PR with production Rails code changes
+8. **All new code must pass RuboCop** - refactor instead of disabling cops
