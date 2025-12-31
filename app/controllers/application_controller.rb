@@ -323,13 +323,25 @@ class ApplicationController < ActionController::Base
   # having the project param stored inside the query record, q.
   def set_project_ivar
     # NOTE: Query param projects is always an array of ids.
-    query_projects = params.dig(:q, :projects) || []
-    # If more than one project, it's none. Only want single-project associations
+    query_projects = extract_query_projects
+    # If more than one project, it's none.
+    # Only want single-project associations
     query_project = query_projects.size > 1 ? nil : query_projects.first
     project_id = params[:project] || query_project
     # At this point, we still might not have one. That's fine - just return nil.
     @project = Project.safe_find(project_id)
   end
+
+  def extract_query_projects
+    if params[:q].is_a?(String)
+      # Load the saved query to get its project associations
+      query = Query.safe_find(params[:q])
+      query&.params&.dig(:projects) || []
+    else
+      params.dig(:q, :projects) || []
+    end
+  end
+  private :extract_query_projects
 
   def render_xml(args)
     request.format = "xml"
