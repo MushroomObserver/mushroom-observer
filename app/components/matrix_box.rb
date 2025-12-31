@@ -72,6 +72,7 @@ class Components::MatrixBox < Components::Base
     return nil unless @data[:type] == :observation
 
     obs = @data[:what]
+    # returns true if association was eager loaded, even if no o_v for this obs
     return nil unless obs.observation_views.loaded?
 
     obs.observation_views.find { |ov| ov.user_id == @user&.id } ||
