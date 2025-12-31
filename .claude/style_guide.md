@@ -226,6 +226,31 @@ Examples:
 <% end %>
 ```
 
+## Testing
+
+### Test Assertions
+
+**Use Rails-preferred assertion methods** instead of MiniTest refute methods.
+
+```ruby
+# Good - Rails-preferred assertions
+assert_no_match(/pattern/, string)
+assert_not_equal(expected, actual)
+assert_not_includes(collection, item)
+assert_not_nil(value)
+
+# Bad - MiniTest refute methods
+refute_match(/pattern/, string)
+refute_equal(expected, actual)
+refute_includes(collection, item)
+refute_nil(value)
+```
+
+**Why prefer assert_* over refute_*?**
+- Rails coding standards prefer positive assertions with `assert_not` or `assert_no_*`
+- RuboCop's `Rails/RefuteMethods` cop enforces this convention
+- Consistent with Rails community practices
+
 ## Code Quality and Linting
 
 ### RuboCop Compliance
@@ -280,4 +305,5 @@ The key principles are:
 3. **Prefer Phlex helpers** over Rails `tag` helpers in components
 4. **Render directly** instead of building arrays and joining
 5. **Internalize logic** into components when possible
-6. **All new code must pass RuboCop** - refactor instead of disabling cops
+6. **Use Rails-preferred assertions** (`assert_no_match`, `assert_not_equal`, etc.) instead of MiniTest refute methods
+7. **All new code must pass RuboCop** - refactor instead of disabling cops
