@@ -25,7 +25,6 @@
 #   end
 class Components::MatrixBox < Components::Base
   include Components::MatrixBox::RenderData
-  include Phlex::Rails::Helpers::ClassNames
 
   # Properties
   prop :user, _Nilable(User), default: nil

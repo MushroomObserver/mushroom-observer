@@ -5,7 +5,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Wraps a text input with Stimulus autocompleter controller
   # rubocop:disable Metrics/ClassLength
   class AutocompleterField < Superform::Rails::Components::Input
-    include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
 
     register_output_helper :link_icon
