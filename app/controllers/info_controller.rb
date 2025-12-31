@@ -33,12 +33,19 @@ class InfoController < ApplicationController
   # Simple form letting us test our implementation of Textile.
   def textile_sandbox
     if request.method == "POST"
-      @code = params[:code]
-      @submit = params[:commit]
+      code = params[:code] || params.dig(:textile_sandbox, :code)
+      submit = params[:commit]
     else
-      @code = nil
+      code = nil
+      submit = nil
     end
-    render(action: :textile_sandbox)
+    textile_sandbox = FormObject::TextileSandbox.new(code: code)
+
+    render(Views::Controllers::Info::TextileSandbox.new(
+             textile_sandbox: textile_sandbox,
+             show_result: !code.nil?,
+             submit_type: submit
+           ), layout: true)
   end
 
   # Allow translator to enter a special note linked to from the lower left.
