@@ -86,6 +86,19 @@ class FormLocationFeedbackTest < UnitTestCase
     assert_no_match(/&amp;#8217;/, html)
   end
 
+  def test_accepts_symbol_button_parameter
+    # Test that button can be a Symbol (as passed from some views)
+    html = render_component(
+      dubious_where_reasons: ["Location not found".html_safe],
+      button: :CREATE
+    )
+
+    assert_html(html, ".alert-warning#dubious_location_messages")
+    assert_html(html, ".help-note")
+    # Should contain localized version of CREATE
+    assert_match(/#{:CREATE.l}/, html)
+  end
+
   private
 
   def render_component(dubious_where_reasons:, button:)
