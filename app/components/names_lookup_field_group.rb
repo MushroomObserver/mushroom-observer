@@ -32,13 +32,11 @@ class Components::NamesLookupFieldGroup < Components::Base
     field_component = @names_namespace.field(:lookup).autocompleter(
       type: :name,
       textarea: true,
-      wrapper_options: {
-        label: :NAMES.l,
-        help: field_help
-      },
+      wrapper_options: { label: :NAMES.l },
       value: prefilled_lookup_value,
       hidden_value: prefilled_lookup_ids
     )
+    field_component.with_help { field_help }
     field_component.with_append { render_conditional_collapse }
     render(field_component)
   end

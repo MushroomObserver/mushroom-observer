@@ -3,8 +3,6 @@
 # Form for creating or editing DNA sequences attached to observations.
 # Sequences can contain genetic data (bases) or reference external archives.
 class Components::SequenceForm < Components::ApplicationForm
-  include Phlex::Rails::Helpers::LinkTo
-
   def initialize(model, observation: nil, back: nil, **)
     @observation = observation
     @back = back

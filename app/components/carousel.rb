@@ -17,8 +17,6 @@
 #     thumbnails: true
 #   )
 class Components::Carousel < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
-
   # Properties
   prop :images, Array do |value|
     value.respond_to?(:to_a) ? value.to_a : value

@@ -16,8 +16,6 @@
 #     identify: true
 #   )
 class Components::LightboxObservationTitle < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
-
   prop :obs, Observation
   prop :user, _Nilable(User), default: nil
   prop :identify, _Boolean, default: false

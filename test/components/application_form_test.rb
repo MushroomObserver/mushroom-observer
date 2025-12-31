@@ -260,6 +260,19 @@ class ApplicationFormTest < UnitTestCase
     assert_includes(form, "<select")
   end
 
+  # Test that link_to is available in ApplicationForm
+  # This verifies Phlex::Rails::Helpers::LinkTo works via inheritance
+  def test_link_to_helper_is_available
+    form = render_form do
+      link_to("Test Link", "/test/path", class: "test-class")
+    end
+
+    assert_includes(form, "<a")
+    assert_includes(form, 'href="/test/path"')
+    assert_includes(form, "Test Link")
+    assert_includes(form, 'class="test-class"')
+  end
+
   private
 
   def render_form(&block)

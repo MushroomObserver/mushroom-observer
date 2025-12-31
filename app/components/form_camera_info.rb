@@ -20,7 +20,6 @@
 #   )
 class Components::FormCameraInfo < Components::Base
   include Phlex::Rails::Helpers::ClassNames
-  include Phlex::Rails::Helpers::LinkTo
 
   # Properties
   # All props are nilable to handle cases where data may not be available

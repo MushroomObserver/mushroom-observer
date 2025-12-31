@@ -14,7 +14,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     def simple_label?
       has_label_end = respond_to?(:label_end_slot) && label_end_slot
       has_between = between_slot || wrapper_options[:between]
-      !has_between && !has_label_end && !wrapper_options[:help]
+      has_help = respond_to?(:help_slot) && help_slot
+      !has_between && !has_label_end && !has_help
     end
 
     def render_label_flex_row(label_text, inline)

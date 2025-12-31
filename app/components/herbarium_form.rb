@@ -71,9 +71,10 @@ class Components::HerbariumForm < Components::ApplicationForm
       :personal_user_name,
       type: :user,
       label: :edit_herbarium_admin_make_personal.t,
-      help: admin_help_text,
       inline: true
-    )
+    ) do |f|
+      f.with_help { admin_help_text } if admin_help_text
+    end
   end
 
   def admin_help_text
@@ -98,11 +99,12 @@ class Components::HerbariumForm < Components::ApplicationForm
   def render_personal_checkbox
     checkbox_field(
       :personal,
-      label: :create_herbarium_personal.l,
-      help: :create_herbarium_personal_help.t(
-        name: @user&.personal_herbarium_name
-      )
-    )
+      label: :create_herbarium_personal.l
+    ) do |f|
+      f.with_help do
+        :create_herbarium_personal_help.t(name: @user&.personal_herbarium_name)
+      end
+    end
   end
 
   def render_code_field
@@ -111,23 +113,21 @@ class Components::HerbariumForm < Components::ApplicationForm
     text_field(
       :code,
       label: "#{:create_herbarium_code.l}:",
-      help: code_help,
       inline: true
-    )
+    ) do |f|
+      f.with_help { code_help }
+    end
   end
 
   def code_help
     help = :create_herbarium_code_help.t
     recommended = :create_herbarium_code_recommended.l
-    trusted_html("#{help} (#{recommended})")
+    [help, " (", recommended, ")"].safe_join
   end
 
   def render_location_section
     render_location_autocompleter
-    BoundsHiddenFields.new(
-      location: @location,
-      target_controller: :map
-    )
+    BoundsHiddenFields(location: @location, target_controller: :map)
   end
 
   def render_location_autocompleter
@@ -159,11 +159,8 @@ class Components::HerbariumForm < Components::ApplicationForm
   def render_map_section
     div(class: "mb-5 d-none",
         data: { autocompleter__location_target: "mapWrap" }) do
-      FormLocationMap.new(
-        id: "herbarium_form_map",
-        map_type: "observation",
-        user: @user
-      )
+      FormLocationMap(id: "herbarium_form_map", map_type: "observation",
+                      user: @user)
     end
   end
 

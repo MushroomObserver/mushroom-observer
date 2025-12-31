@@ -399,6 +399,11 @@ class NamesLookupFieldGroupTest < UnitTestCase
       mock
     end
 
+    # Define with_help method
+    mock.define_singleton_method(:with_help) do |&_help_block|
+      nil
+    end
+
     # Define with_append method - optionally invoke the passed block
     mock.define_singleton_method(:with_append) do |&append_block|
       append_block&.call if invoke_append

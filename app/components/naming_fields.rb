@@ -32,14 +32,12 @@ class Components::NamingFields < Components::Base
   def render_name_autocompleter
     name_field = @form_namespace.field(:name).autocompleter(
       type: :name,
-      wrapper_options: {
-        label: "#{:WHAT.t}:",
-        help: @name_help
-      },
+      wrapper_options: { label: "#{:WHAT.t}:" },
       value: @given_name,
       autofocus: focus_on_name?
     )
 
+    name_field.with_help { @name_help }
     name_field.with_append { render_vote_reasons_collapse }
     render(name_field)
   end

@@ -6,7 +6,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # rubocop:disable Metrics/ClassLength
   class AutocompleterField < Superform::Rails::Components::Input
     include Phlex::Rails::Helpers::ClassNames
-    include Phlex::Rails::Helpers::LinkTo
     include Phlex::Slotable
 
     register_output_helper :link_icon
@@ -20,9 +19,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     ].freeze
 
     slot :append
+    slot :help
 
     # Make slot accessor public (Phlex::Slotable makes them private by default)
-    public :append_slot
+    public :append_slot, :help_slot
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
@@ -170,6 +170,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       # Add label_end buttons to label_end slot
       field_component.with_label_end { render_label_end }
+
+      # Pass through help slot to inner field
+      field_component.with_help { render(help_slot) } if help_slot
 
       # Add dropdown and hidden field to append slot
       field_component.with_append(&block) if block

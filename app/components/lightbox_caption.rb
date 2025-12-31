@@ -25,8 +25,6 @@
 #     image_id: @image.id
 #   )
 class Components::LightboxCaption < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
-
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
