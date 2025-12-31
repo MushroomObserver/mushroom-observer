@@ -56,6 +56,7 @@ class Components::BaseImage < Components::Base
   # Lightbox and observation context
   prop :obs, _Union(Observation, Hash), default: -> { {} }
   prop :identify, _Boolean, default: false
+  prop :observation_view, _Nilable(ObservationView), default: nil
 
   # Upload mode (no real image instance)
   prop :upload, _Boolean, default: false
@@ -163,7 +164,8 @@ class Components::BaseImage < Components::Base
       image: img_instance,
       image_id: img_id,
       obs: @obs,
-      identify: @identify
+      identify: @identify,
+      observation_view: @observation_view
     }
   end
 
@@ -192,7 +194,8 @@ class Components::BaseImage < Components::Base
         image: lightbox_data[:image],
         image_id: lightbox_data[:image_id],
         obs: lightbox_data[:obs],
-        identify: lightbox_data[:identify]
+        identify: lightbox_data[:identify],
+        observation_view: lightbox_data[:observation_view]
       )
     end
   end

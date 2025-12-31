@@ -36,34 +36,67 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
-    # rubocop:disable Metrics/AbcSize
-    def render_with_wrapper
-      label_option = wrapper_options[:label]
-      label_text = if label_option.is_a?(String)
-                     label_option
-                   else
-                     field.key.to_s.humanize
-                   end
-      wrap_class = wrapper_options[:wrap_class]
-
-      div(class: checkbox_class(wrap_class)) do
-        label(for: field.dom.id, **label_attributes) do
-          yield
-          plain(" #{label_text}")
+    def render_with_wrapper(&checkbox_block)
+      div(class: checkbox_class) do
+        label(for: checkbox_id, **label_attributes) do
+          render_content(&checkbox_block)
           render_help_in_label_row
-          render_between_slot
         end
         render_help_after_field
         render(append_slot) if append_slot
       end
     end
-    # rubocop:enable Metrics/AbcSize
+
+    # Use custom ID if provided, otherwise use Superform's generated ID
+    def checkbox_id
+      attributes[:id] || field.dom.id
+    end
+
+    # MO's default render order is checkbox-then-label
+    def render_content
+      if label_position_before?
+        plain(label_text)
+        whitespace
+        render_between_slot
+        yield
+      else
+        yield
+        render_between_slot
+        whitespace
+        plain(label_text)
+      end
+    end
+
+    # Pass `label_position: :before` to render label-then-checkbox
+    def label_position_before?
+      wrapper_options[:label_position] == :before
+    end
+
+    def label_text
+      label_option = wrapper_options[:label]
+      label_option.is_a?(String) ? label_option : field.key.to_s.humanize
+    end
+
+    def checkbox_class
+      classes = "checkbox"
+      classes += " #{wrapper_options[:wrap_class]}" if wrap_class?
+      classes
+    end
+
+    def wrap_class?
+      wrapper_options[:wrap_class].present?
+    end
 
     def label_attributes
       {}.tap do |attrs|
+        attrs[:class] = wrapper_options[:label_class] if label_class?
         attrs[:data] = wrapper_options[:label_data] if label_data?
         attrs[:aria] = wrapper_options[:label_aria] if label_aria?
       end
+    end
+
+    def label_class?
+      wrapper_options[:label_class]
     end
 
     def label_data?
@@ -72,12 +105,6 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def label_aria?
       wrapper_options[:label_aria]
-    end
-
-    def checkbox_class(wrap_class)
-      classes = "checkbox"
-      classes += " #{wrap_class}" if wrap_class.present?
-      classes
     end
   end
 end
