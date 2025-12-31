@@ -157,7 +157,7 @@ module Name::Spelling
 
       # Create SQL query out of these patterns.
       Name.with_correct_spelling.
-        where(Name[:text_name].length.between(min_len..max_len)).
+        where(Name[:text_name].char_length.between(min_len..max_len)).
         where(Name[:text_name].matches_any(patterns)).limit(10).to_a
     end
 

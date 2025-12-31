@@ -4,7 +4,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap file input field component with form-group wrapper and slots
   # Matches the markup and behavior of file_field_with_label helper
   class FileField < Superform::Rails::Components::Input
-    include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
 
     slot :between

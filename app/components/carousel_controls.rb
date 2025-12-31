@@ -7,8 +7,6 @@
 # @example
 #   render Components::CarouselControls.new(carousel_id: "my_carousel")
 class Components::CarouselControls < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
-
   prop :carousel_id, String
 
   def view_template

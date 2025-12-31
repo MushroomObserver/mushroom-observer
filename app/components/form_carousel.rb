@@ -13,8 +13,6 @@
 #     exif_data: @exif_data
 #   )
 class Components::FormCarousel < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
-
   # Properties
   prop :images, _Nilable(_Array(Image)), default: nil
   prop :user, _Nilable(User)
