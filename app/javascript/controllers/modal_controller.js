@@ -36,6 +36,6 @@ export default class extends Controller {
 
   // Reset the text within the progress modal, if it exists.
   resetProgress() {
-    document.getElementById('mo_ajax_progress_caption').innerHTML = ""
+    document.getElementById('modal_progress_spinner_caption').innerHTML = ""
   }
 }

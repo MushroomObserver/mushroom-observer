@@ -8,7 +8,7 @@ class ModalProgressSpinnerTest < UnitTestCase
   def test_renders_modal_structure
     html = render(Components::ModalProgressSpinner.new)
 
-    assert_includes(html, 'id="mo_ajax_progress"')
+    assert_includes(html, 'id="modal_progress_spinner"')
     assert_includes(html, 'class="modal"')
     assert_includes(html, 'data-controller="modal"')
   end
@@ -23,7 +23,7 @@ class ModalProgressSpinnerTest < UnitTestCase
   def test_renders_caption_and_spinner
     html = render(Components::ModalProgressSpinner.new)
 
-    assert_includes(html, 'id="mo_ajax_progress_caption"')
+    assert_includes(html, 'id="modal_progress_spinner_caption"')
     assert_includes(html, 'class="spinner-right mx-2"')
   end
 

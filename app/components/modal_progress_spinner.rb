@@ -8,8 +8,8 @@
 #
 class Components::ModalProgressSpinner < Components::Base
   def view_template
-    div(id: "mo_ajax_progress", class: "modal", role: "dialog",
-        aria: { labelledby: "mo_ajax_progress_caption" },
+    div(id: "modal_progress_spinner", class: "modal", role: "dialog",
+        aria: { labelledby: "modal_progress_spinner_caption" },
         data: modal_data) do
       div(class: "modal-dialog modal-sm", role: "document") do
         div(class: "modal-content") do
@@ -31,8 +31,8 @@ class Components::ModalProgressSpinner < Components::Base
   end
 
   def modal_body
-    div(id: "modal_ajax_progress_body", class: "modal-body text-center") do
-      span(id: "mo_ajax_progress_caption")
+    div(id: "modal_progress_spinner_body", class: "modal-body text-center") do
+      span(id: "modal_progress_spinner_caption")
       spinner
     end
   end
