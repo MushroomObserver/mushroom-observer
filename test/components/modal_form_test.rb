@@ -59,23 +59,22 @@ class ModalFormTest < UnitTestCase
     assert_html(html, "#modal_test_form_flash")
   end
 
-  def test_renders_form_content_slot
+  def test_renders_form_component_from_model
     user = users(:rolf)
+    sequence = sequences(:local_sequence)
+    obs = sequence.observation
 
     html = render(Components::ModalForm.new(
-                    identifier: "test_form",
-                    title: "Test",
-                    user: user
-                  )) do |modal|
-      modal.with_form_content do
-        view_context.tag.form(id: "my_form") do
-          view_context.tag.input(type: "text", name: "field")
-        end
-      end
-    end
+                    identifier: "sequence_#{sequence.id}",
+                    title: "Edit Sequence",
+                    user: user,
+                    model: sequence,
+                    observation: obs
+                  ))
 
-    assert_html(html, ".modal-body form#my_form")
-    assert_html(html, ".modal-body input[name='field']")
+    # Should render SequenceForm inside the modal body
+    assert_html(html, ".modal-body form")
+    assert_html(html, "textarea[name='sequence[locus]']")
   end
 
   def test_modal_data_attributes
