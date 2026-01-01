@@ -23,6 +23,12 @@ class ComponentTestCase < UnitTestCase
     controller.request = ActionDispatch::TestRequest.create
   end
 
+  # Stub in_admin_mode? to return true for testing admin-only features.
+  # Sessions are disabled in component tests, so we stub the method directly.
+  def stub_admin_mode!
+    controller.define_singleton_method(:in_admin_mode?) { true }
+  end
+
   # Create a test controller instance with auth methods
   def controller
     @controller ||= begin

@@ -57,19 +57,12 @@ class Components::LocationForm < Components::ApplicationForm
   def render_location_feedback
     return unless @dubious_where_reasons&.any?
 
-    render(Components::Alert.new(
-             level: :warning, class: "my-3", id: "dubious_location_messages"
-           )) do
-      div do
-        @dubious_where_reasons.each_with_index do |reason, idx|
-          br if idx.positive?
-          trusted_html(reason)
-        end
-      end
-      span(class: "help-note") do
-        trusted_html(:form_observations_dubious_help.t(button: submit_text))
-      end
-    end
+    # Set instance variable for the partial and render it
+    view_context.instance_variable_set(
+      :@dubious_where_reasons, @dubious_where_reasons
+    )
+    render(partial("controllers/shared/form_location_feedback",
+                   button: submit_text))
   end
 
   def render_fields

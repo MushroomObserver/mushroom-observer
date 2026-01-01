@@ -2,82 +2,63 @@
 
 require "test_helper"
 
-class LocationFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class LocationFormTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
     @location = Location.new
-    controller.request = ActionDispatch::TestRequest.create
   end
 
-  def test_renders_form_with_display_name_field
+  def test_renders_new_location_form_with_all_fields
     html = render_form
 
+    # Form structure
+    assert_html(html, "form#location_form[action*='/locations'][method='post']")
+    assert_html(
+      html,
+      "form#location_form[data-controller='map'][data-map-open='true']"
+    )
+
+    # All input fields
     assert_html(html, "input[name='location[display_name]']")
-  end
-
-  def test_renders_form_with_compass_inputs
-    html = render_form
-
     %w[north south east west].each do |dir|
       assert_html(html, "input[name='location[#{dir}]']")
     end
-  end
-
-  def test_renders_form_with_elevation_inputs
-    html = render_form
-
     %w[high low].each do |dir|
       assert_html(html, "input[name='location[#{dir}]']")
     end
-  end
-
-  def test_renders_form_with_notes_field
-    html = render_form
-
     assert_html(html, "textarea[name='location[notes]']")
-  end
-
-  def test_renders_form_with_hidden_checkbox_for_new_location
-    html = render_form
-
     assert_html(html, "input[type='checkbox'][name='location[hidden]']")
-  end
 
-  def test_renders_form_with_map_div
-    html = render_form
+    # Map with editable settings
+    assert_html(
+      html, "#map_div[data-editable='true'][data-map-type='location']"
+    )
 
-    assert_html(html, "#map_div")
-  end
+    # Find on map button
+    assert_html(
+      html,
+      "button[data-map-target='showBoxBtn'][data-action='map#showBox']"
+    )
 
-  def test_renders_create_button_for_new_record
-    html = render_form
+    # Display name input group
+    assert_html(html, ".input-group")
+    assert_html(html, ".input-group-btn")
 
+    # Submit button for new record
     assert_html(html, "input[type='submit'][value='#{:CREATE.l}']")
+
+    # No turbo for local form
+    assert_no_html(html, "form[data-turbo]")
+
+    # No locked checkbox for regular users
+    assert_no_html(html, "input[name='location[locked]']")
+
+    # No dubious warning when not provided
+    assert_no_html(html, "#dubious_location_messages")
   end
 
-  def test_renders_update_button_for_existing_record
-    location = locations(:burbank)
-    html = render(Components::LocationForm.new(
-                    location,
-                    display_name: location.display_name,
-                    original_name: location.display_name,
-                    local: true
-                  ))
-
-    assert_html(html, "input[type='submit'][value='#{:UPDATE.l}']")
-  end
-
-  def test_renders_form_with_correct_action_for_create
-    html = render_form
-
-    assert_html(html, "form[action*='/locations']")
-    assert_html(html, "form[method='post']")
-  end
-
-  def test_renders_form_with_correct_action_for_update
+  def test_renders_existing_location_form
     location = locations(:burbank)
     html = render(Components::LocationForm.new(
                     location,
@@ -87,71 +68,18 @@ class LocationFormTest < UnitTestCase
                   ))
 
     assert_html(html, "form[action*='/locations/#{location.id}']")
-  end
-
-  def test_renders_form_with_map_controller
-    html = render_form
-    doc = Nokogiri::HTML(html)
-    form = doc.at_css("form#location_form")
-
-    assert_equal("map", form["data-controller"])
-  end
-
-  def test_renders_form_with_map_open_true
-    html = render_form
-    doc = Nokogiri::HTML(html)
-    form = doc.at_css("form#location_form")
-
-    assert_equal("true", form["data-map-open"])
-  end
-
-  def test_renders_find_on_map_button
-    html = render_form
-
-    assert_html(html, "button[data-map-target='showBoxBtn']")
-    assert_html(html, "button[data-action='map#showBox']")
-    assert_includes(html, :form_locations_find_on_map.l)
-  end
-
-  def test_renders_input_group_for_display_name
-    html = render_form
-
-    assert_html(html, ".input-group")
-    assert_html(html, ".input-group-btn")
-  end
-
-  def test_renders_map_with_editable_true
-    html = render_form
-    doc = Nokogiri::HTML(html)
-    map_div = doc.at_css("#map_div")
-
-    assert_equal("true", map_div["data-editable"])
-  end
-
-  def test_renders_map_with_location_type
-    html = render_form
-    doc = Nokogiri::HTML(html)
-    map_div = doc.at_css("#map_div")
-
-    assert_equal("location", map_div["data-map-type"])
+    assert_html(html, "input[type='submit'][value='#{:UPDATE.l}']")
   end
 
   def test_renders_locked_checkbox_in_admin_mode
     User.current = users(:zero_user)
+    stub_admin_mode!
     html = render_form
 
     assert_html(html, "input[type='checkbox'][name='location[locked]']")
   end
 
-  def test_omits_locked_checkbox_for_regular_users
-    User.current = users(:rolf)
-    html = render_form
-    doc = Nokogiri::HTML(html)
-
-    assert_nil(doc.at_css("input[name='location[locked]']"))
-  end
-
-  def test_renders_dubious_location_warning_when_provided
+  def test_renders_dubious_location_warning_container_when_provided
     html = render(Components::LocationForm.new(
                     @location,
                     display_name: "test",
@@ -160,16 +88,9 @@ class LocationFormTest < UnitTestCase
                     local: true
                   ))
 
-    assert_includes(html, "Reason 1")
-    assert_includes(html, "Reason 2")
-    assert_html(html, "#dubious_location_messages")
-  end
-
-  def test_omits_dubious_warning_when_not_provided
-    html = render_form
-    doc = Nokogiri::HTML(html)
-
-    assert_nil(doc.at_css("#dubious_location_messages"))
+    assert_html(html, "#dubious_location_messages.alert-warning")
+    assert_html(html, "#dubious_location_messages", text: "Reason 1")
+    assert_html(html, "#dubious_location_messages", text: "Reason 2")
   end
 
   def test_renders_locked_display_for_locked_location
@@ -184,7 +105,7 @@ class LocationFormTest < UnitTestCase
                     local: true
                   ))
 
-    assert_includes(html, :show_location_locked.l)
+    assert_html(html, "body", text: :show_location_locked.l)
   end
 
   def test_enables_turbo_for_modal_rendering
@@ -196,14 +117,6 @@ class LocationFormTest < UnitTestCase
                   ))
 
     assert_html(html, "form[data-turbo='true']")
-  end
-
-  def test_disables_turbo_for_local_form
-    html = render_form
-    doc = Nokogiri::HTML(html)
-    form = doc.at_css("form")
-
-    assert_nil(form["data-turbo"])
   end
 
   private
