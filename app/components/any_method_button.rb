@@ -51,10 +51,10 @@ class Components::AnyMethodButton < Components::Base
   def button_content
     capture do
       if @args[:icon]
-        span(class: "sr-only") { @name }
+        span(class: "sr-only") { trusted_html(@name) }
         trusted_html(link_icon(@args[:icon]))
       else
-        plain(@name)
+        trusted_html(@name)
       end
     end
   end
