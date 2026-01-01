@@ -209,10 +209,12 @@ class FormCarouselTest < ComponentTestCase
     )
 
     # Thumbnails at same level as carousel-inner
-    doc = Nokogiri::HTML(html)
-    carousel = doc.at_css(".carousel.image-form-carousel")
-    assert(carousel, "Should have carousel")
-    assert(carousel.at_css(".carousel-inner"), "Should have carousel-inner")
-    assert(carousel.at_css(".carousel-indicators"), "Should have indicators")
+    assert_html(html, ".carousel.image-form-carousel")
+    assert_nested(html,
+                  parent_selector: ".carousel.image-form-carousel",
+                  child_selector: ".carousel-inner")
+    assert_nested(html,
+                  parent_selector: ".carousel.image-form-carousel",
+                  child_selector: ".carousel-indicators")
   end
 end

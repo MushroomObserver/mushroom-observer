@@ -3,7 +3,6 @@
 require "test_helper"
 
 class NamingFormTest < ComponentTestCase
-
   def setup
     super
     @naming = Naming.new
@@ -74,11 +73,11 @@ class NamingFormTest < ComponentTestCase
   def test_no_collapse_class_for_lightbox_context
     html = render_form_with_context("lightbox")
 
-    doc = Nokogiri::HTML(html)
-    collapse_div = doc.at_css(
-      "div[data-autocompleter--name-target='collapseFields']"
+    # Collapse div should exist but NOT have collapse class
+    assert_html(
+      html,
+      "div:not(.collapse)[data-autocompleter--name-target='collapseFields']"
     )
-    assert_not_includes(collapse_div["class"].to_s, "collapse")
   end
 
   def test_includes_blank_option_for_new_naming
@@ -90,10 +89,7 @@ class NamingFormTest < ComponentTestCase
     @vote = votes(:coprinus_comatus_owner_vote)
     html = render_edit_form
 
-    doc = Nokogiri::HTML(html)
-    selector = "select[name='naming[vote][value]'] option[value='']"
-    blank_option = doc.at_css(selector)
-    assert_nil(blank_option)
+    assert_no_html(html, "select[name='naming[vote][value]'] option[value='']")
   end
 
   def test_selects_vote_value_for_existing_naming
@@ -151,9 +147,8 @@ class NamingFormTest < ComponentTestCase
 
   def test_omits_turbo_when_local_true
     html = render_form_with_local(true)
-    doc = Nokogiri::HTML(html)
 
-    assert_nil(doc.at_css("form[data-turbo]"))
+    assert_no_html(html, "form[data-turbo]")
   end
 
   private

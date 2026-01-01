@@ -65,10 +65,10 @@ class TextileSandboxFormTest < ComponentTestCase
     assert_html(html, ".sandbox ol")
     assert_html(html, ".sandbox li", count: 3)
 
-    # Verify individual list items contain correct text
-    assert_html(html, ".sandbox li", text: "Woof")
-    assert_html(html, ".sandbox li", text: "Bark")
-    assert_html(html, ".sandbox li", text: "Meow")
+    # Verify individual list items contain correct text in order
+    assert_html(html, ".sandbox li:nth-child(1)", text: "Woof")
+    assert_html(html, ".sandbox li:nth-child(2)", text: "Bark")
+    assert_html(html, ".sandbox li:nth-child(3)", text: "Meow")
 
     # Should NOT contain escaped HTML in the rendered output
     assert_no_match(/&lt;/, html)

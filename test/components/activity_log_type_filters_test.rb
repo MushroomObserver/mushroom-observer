@@ -61,26 +61,19 @@ class ActivityLogTypeFiltersTest < ComponentTestCase
     # observation should be checked
     assert_html(html, "input[type='checkbox'][value='observation'][checked]")
 
-    # name should NOT be checked (no checked attribute)
-    doc = Nokogiri::HTML(html)
-    name_checkbox = doc.at_css("input[type='checkbox'][value='name']")
-    assert(name_checkbox, "Expected to find name checkbox")
-    assert_not(name_checkbox["checked"], "Name checkbox should not be checked")
+    # name should exist but NOT be checked
+    assert_html(html, "input[type='checkbox'][value='name']")
+    assert_no_html(html, "input[type='checkbox'][value='name'][checked]")
   end
 
   def test_active_class_on_single_selected_type
     html = render_component(nil, ["observation"])
 
     # The observation label should have active class
-    doc = Nokogiri::HTML(html)
-    obs_label = doc.at_css("label:has(input[value='observation'])")
-    assert(obs_label, "Expected to find observation label")
-    assert_includes(obs_label["class"], "active")
+    assert_html(html, "label.active:has(input[value='observation'])")
 
     # The name label should NOT have active class
-    name_label = doc.at_css("label:has(input[value='name'])")
-    assert(name_label, "Expected to find name label")
-    assert_not_includes(name_label["class"], "active")
+    assert_html(html, "label:not(.active):has(input[value='name'])")
   end
 
   def test_type_filter_link_present_when_not_selected
@@ -105,10 +98,7 @@ class ActivityLogTypeFiltersTest < ComponentTestCase
   def test_no_hidden_fields_without_query
     html = render_component(nil, ["all"])
 
-    doc = Nokogiri::HTML(html)
-    hidden_inputs = doc.css("input[type='hidden']")
-    assert_equal(0, hidden_inputs.size,
-                 "Should have no hidden fields without query")
+    assert_html(html, "input[type='hidden']", count: 0)
   end
 
   private

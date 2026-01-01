@@ -6,7 +6,6 @@ require "test_helper"
 # namespace. See test/components/naming_form_test.rb for tests that cover the
 # reasons fields functionality.
 class NamingReasonsFieldsTest < ComponentTestCase
-
   def setup
     super
     @naming = Naming.new
@@ -52,20 +51,18 @@ class NamingReasonsFieldsTest < ComponentTestCase
     reasons[1].notes = "Test notes"
     html = render_form_with_reasons(reasons: reasons)
 
-    doc = Nokogiri::HTML(html)
-    selector = "input[type='checkbox'][name='naming[reasons][1][check]']"
-    checkbox = doc.at_css(selector)
-    container = doc.at_css("div[id='reasons_1_notes']")
-
-    assert(checkbox["checked"], "checkbox should be checked")
-    assert_includes(container["class"], "show")
+    # Checkbox should be checked
+    assert_html(
+      html,
+      "input[type='checkbox'][name='naming[reasons][1][check]'][checked]"
+    )
+    # Container should have "show" class (expanded)
+    assert_html(html, "div#reasons_1_notes.show")
   end
 
   def test_unchecked_reason_has_collapsed_textarea
-    doc = Nokogiri::HTML(@html)
-    container = doc.at_css("div[id='reasons_1_notes']")
-
-    assert_not_includes(container["class"], "show")
+    # Container should NOT have "show" class (collapsed)
+    assert_html(@html, "div#reasons_1_notes:not(.show)")
   end
 
   private
