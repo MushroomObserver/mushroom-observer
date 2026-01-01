@@ -32,7 +32,7 @@ class Components::LocationForm < Components::ApplicationForm
   def around_template
     @attributes[:data] ||= {}
     @attributes[:data][:controller] = "map"
-    @attributes[:data][:map_open] = true
+    @attributes[:data][:map_open] = "true"
     super
   end
 
