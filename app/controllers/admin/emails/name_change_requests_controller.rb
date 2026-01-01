@@ -26,8 +26,10 @@ module Admin
                      title: :email_name_change_request_title.l,
                      user: @user,
                      model: FormObject::NameChangeRequest.new,
-                     form_locals: { name: @name,
-                                    new_name_with_icn_id: @new_name_with_icn_id }
+                     form_locals: {
+                       name: @name,
+                       new_name_with_icn_id: @new_name_with_icn_id
+                     }
                    ))
           end
         end
