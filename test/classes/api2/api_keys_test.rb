@@ -11,9 +11,17 @@ class API2::APIKeysTest < UnitTestCase
   #  :section: APIKey Requests
   # ----------------------------
 
+  def test_page_length_methods
+    api = API2::APIKeyAPI.new
+    assert_equal(1000, api.high_detail_page_length)
+    assert_equal(1000, api.low_detail_page_length)
+    assert_equal(1000, api.put_page_length)
+    assert_equal(1000, api.delete_page_length)
+  end
+
   def test_getting_api_keys
     params = {
-      method: :patch,
+      method: :get,
       action: :api_key,
       api_key: @api_key.key,
       user: rolf.id

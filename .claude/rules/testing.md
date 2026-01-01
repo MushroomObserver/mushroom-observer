@@ -19,6 +19,9 @@ bin/rails test test/models/observation_test.rb
 # Run specific test by name (use -n flag, NOT ::ClassName#method)
 bin/rails test test/models/observation_test.rb -n test_scope_needs_naming
 
+# Run specific system test by name (use -n flag, NOT ::ClassName#method)
+bin/rails test test/system/observation_form_system_test.rb -n test_commit_form
+
 # Run with verbose output
 bin/rails test test/models/observation_test.rb -v
 
@@ -35,8 +38,10 @@ rake test:coverage
 ```bash
 # ❌ WRONG - This is RSpec syntax, not Rails
 bin/rails test test/models/observation_test.rb::ObservationTest#test_name -v
-
 # ❌ This will cause LoadError: cannot load such file
+
+# ❌ WRONG - This will run the whole system test suite, not the file specified
+bin/rails test:system test/system/help_identify_system_test.rb
 ```
 
 ## Test Structure

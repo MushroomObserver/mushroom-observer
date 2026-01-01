@@ -26,7 +26,13 @@ module Admin
               locals: {
                 title: :email_name_change_request_title.l,
                 identifier: "name_change_request_email",
-                user: @user, form: "admin/emails/name_change_requests/form"
+                user: @user,
+                form: "admin/emails/name_change_requests/form",
+                form_locals: {
+                  model: FormObject::NameChangeRequest.new,
+                  name: @name,
+                  new_name_with_icn_id: @new_name_with_icn_id
+                }
               }
             ) and return
           end

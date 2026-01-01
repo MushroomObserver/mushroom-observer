@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class ExternalLinkFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class ExternalLinkFormTest < ComponentTestCase
   def setup
     super
     @external_link = ExternalLink.new
@@ -15,7 +13,6 @@ class ExternalLinkFormTest < UnitTestCase
     @base_urls = @sites.each_with_object({}) do |site, hash|
       hash[site.name] = site.base_url
     end
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 
@@ -61,9 +58,8 @@ class ExternalLinkFormTest < UnitTestCase
 
   def test_omits_turbo_when_local_true
     html = render_form_local
-    doc = Nokogiri::HTML(html)
 
-    assert_nil(doc.at_css("form[data-turbo]"))
+    assert_no_html(html, "form[data-turbo]")
   end
 
   def test_auto_determines_url_for_existing_external_link

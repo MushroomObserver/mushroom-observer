@@ -36,7 +36,6 @@ class Components::RegionWithBoxFields < Components::Base
       :region,
       type: :region,
       label: "#{:REGION.t}:",
-      help: :form_regions_help.t,
       value: @query&.region,
       button: :form_locations_find_on_map.l,
       button_data: { map_target: "showBoxBtn", action: "map#showBox" },
@@ -47,7 +46,9 @@ class Components::RegionWithBoxFields < Components::Base
       data: { map_target: "placeInput" },
       # Make hidden field a locationId target so mapLocationIdData() reads it
       hidden_data: { map_target: "locationId" }
-    )
+    ) do |f|
+      f.with_help { :form_regions_help.t }
+    end
   end
 
   def render_in_box_fields

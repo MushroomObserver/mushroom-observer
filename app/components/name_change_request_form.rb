@@ -3,9 +3,8 @@
 # Form for submitting a name change request email to admins.
 # Allows users to request changing a taxonomic name.
 class Components::NameChangeRequestForm < Components::ApplicationForm
-  def initialize(model, name:, new_name:, new_name_with_icn_id:, **)
+  def initialize(model, name:, new_name_with_icn_id:, **)
     @name = name
-    @new_name = new_name
     @new_name_with_icn_id = new_name_with_icn_id
     super(model, **)
   end

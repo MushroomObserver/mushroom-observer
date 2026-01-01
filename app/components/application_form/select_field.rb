@@ -9,6 +9,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     slot :between
     slot :append
+    slot :help
+
+    public :between_slot, :append_slot, :help_slot
 
     attr_reader :wrapper_options
 
