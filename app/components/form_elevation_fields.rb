@@ -26,13 +26,13 @@ class Components::FormElevationFields < Components::Base
       direction,
       value: @location.send(direction)&.to_s,
       label: :"show_location_#{direction}est".t,
+      addon: "m",
+      wrap_class: "text-left",
       data: {
         map_target: "#{direction}Input",
         action: "map#bufferInputs"
       }
-    ) do |f|
-      f.with_append { "m" }
-    end
+    )
   end
 
   def render_get_elevation_button

@@ -99,7 +99,7 @@ class Components::LocationForm < Components::ApplicationForm
   end
 
   def render_locked_checkbox
-    checkbox_field(:locked, label: :form_locations_locked.t, class: "mt-3")
+    checkbox_field(:locked, label: :form_locations_locked.t, wrap_class: "mt-3")
   end
 
   def render_notes_field
@@ -111,7 +111,8 @@ class Components::LocationForm < Components::ApplicationForm
   end
 
   def render_hidden_checkbox
-    checkbox_field(:hidden, label: :form_locations_hidden.t, class: "mt-3 mr-3",
+    checkbox_field(:hidden, label: :form_locations_hidden.t,
+                            wrap_class: "mt-3 mr-3",
                             help: :form_locations_hidden_doc.t)
   end
 

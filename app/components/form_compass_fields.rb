@@ -50,12 +50,12 @@ class Components::FormCompassFields < Components::Base
       direction,
       value: @location.send(direction).to_s,
       label: "#{direction.upcase.to_sym.t}:",
+      addon: "º",
+      wrap_class: "text-left",
       data: {
         map_target: "#{direction}Input",
         action: "map#bufferInputs"
       }
-    ) do |f|
-      f.with_append { "º" }
-    end
+    )
   end
 end

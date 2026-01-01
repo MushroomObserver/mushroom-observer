@@ -27,6 +27,8 @@ class LocationFormTest < ComponentTestCase
     %w[high low].each do |dir|
       assert_html(html, "input[name='location[#{dir}]']")
     end
+    # Compass inputs have º suffix, elevation inputs have m suffix
+    assert_html(html, ".input-group-addon", count: 6)
     assert_html(html, "textarea[name='location[notes]']")
     assert_html(html, "input[type='checkbox'][name='location[hidden]']")
 
