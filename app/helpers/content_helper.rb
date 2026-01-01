@@ -20,7 +20,7 @@ module ContentHelper
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent
-    tag.span("&nbsp;".html_safe, class: "ml-10px")
+    tag.span("&nbsp;".html_safe, class: "ml-3")
   end
 
   def content_padded(**args, &block)
