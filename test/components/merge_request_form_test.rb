@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class MergeRequestEmailFormTest < UnitTestCase
+class MergeRequestFormTest < UnitTestCase
   include ComponentTestHelper
 
   def setup
@@ -54,7 +54,7 @@ class MergeRequestEmailFormTest < UnitTestCase
   private
 
   def render_form
-    form = Components::MergeRequestEmailForm.new(
+    form = Components::MergeRequestForm.new(
       @email,
       old_obj: @old_name,
       new_obj: @new_name,

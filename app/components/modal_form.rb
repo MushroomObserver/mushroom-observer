@@ -10,14 +10,23 @@
 # If form submit fails, the flash and form are updated via turbo-stream
 # targeting modal_{identifier}_flash and {identifier}_form.
 #
+# Usage:
+#   render(Components::ModalForm.new(
+#     identifier: "sequence",
+#     title: "Add Sequence",
+#     user: @user,
+#     model: @sequence,
+#     observation: @observation
+#   ))
+#
 class Components::ModalForm < Components::Base
-  include Phlex::Slotable
-
   prop :identifier, String
   prop :title, String
   prop :user, User
-
-  slot :form_content
+  prop :model, _Nilable(_Any), default: nil
+  prop :observation, _Nilable(Observation), default: nil
+  prop :back, _Nilable(String), default: nil
+  prop :form_locals, Hash, default: -> { {} }
 
   def view_template
     div(**modal_attributes) do
@@ -72,7 +81,27 @@ class Components::ModalForm < Components::Base
   def render_body
     div(class: "modal-body", id: "modal_#{@identifier}_body") do
       div(id: "modal_#{@identifier}_flash")
-      render(form_content_slot) if form_content_slot?
+      render_form_component if @model
     end
+  end
+
+  def render_form_component
+    component_class = form_component_class
+    return unless component_class
+
+    render(component_class.new(@model, **form_component_params))
+  end
+
+  def form_component_class
+    model_name = @model.class.name.demodulize
+    "Components::#{model_name}Form".constantize
+  end
+
+  def form_component_params
+    params = { local: false } # Modal forms use turbo
+    params[:observation] = @observation if @observation
+    params[:back] = @back if @back
+    params.merge!(@form_locals.except(:model, :local))
+    params
   end
 end

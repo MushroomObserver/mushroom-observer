@@ -9,7 +9,7 @@ module ModalsHelper
     Herbarium: Components::HerbariumForm,
     HerbariumRecord: Components::HerbariumRecordForm,
     CollectionNumber: Components::CollectionNumberForm,
-    MergeRequest: Components::MergeRequestEmailForm,
+    MergeRequest: Components::MergeRequestForm,
     NameChangeRequest: Components::NameChangeRequestForm,
     Sequence: Components::SequenceForm,
     Naming: Components::NamingForm,

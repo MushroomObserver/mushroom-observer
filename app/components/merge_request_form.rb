@@ -2,7 +2,7 @@
 
 # Form for submitting a merge request email to admins.
 # Allows users to request merging two objects (e.g., names or locations).
-class Components::MergeRequestEmailForm < Components::ApplicationForm
+class Components::MergeRequestForm < Components::ApplicationForm
   def initialize(model, old_obj:, new_obj:, model_class:, **)
     @old_obj = old_obj
     @new_obj = new_obj
