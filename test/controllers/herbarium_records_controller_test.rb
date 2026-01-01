@@ -536,4 +536,20 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Should redirect to index since we can't do turbo_stream update
     assert_redirected_to(herbarium_records_path)
   end
+
+  # Destroy with back param pointing to observation should redirect there
+  def test_destroy_herbarium_record_redirect_to_observation
+    login("rolf")
+    herbarium_record = herbarium_records(:coprinus_comatus_rolf_spec)
+    observation = herbarium_record.observations.first
+    herbarium_record_count = HerbariumRecord.count
+
+    delete(:destroy,
+           params: { id: herbarium_record.id, back: observation.id.to_s },
+           format: :turbo_stream)
+
+    # Should successfully destroy and redirect to observation
+    assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
+    assert_redirected_to(observation_path(observation))
+  end
 end

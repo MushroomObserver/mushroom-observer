@@ -99,25 +99,20 @@ class CollectionNumbersController < ApplicationController
     update_collection_number # response handled here
   end
 
+  # Note: This action is called from collection_numbers#show and #index pages,
+  # NOT from observations#show (which only has "remove" to break the association).
   def destroy
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
     return unless make_sure_can_delete!(@collection_number)
 
     figure_out_where_to_go_back_to
-    @observation = @back_object if @back_object.is_a?(Observation)
     @collection_number.destroy
 
-    respond_to do |format|
-      # Only render turbo_stream if we have an observation to update
-      format.turbo_stream do
-        if @observation
-          render_collection_numbers_section_update
-        else
-          redirect_with_query(action: :index)
-        end
-      end
-      format.html { redirect_with_query(action: :index) }
+    if @back_object.is_a?(Observation)
+      redirect_with_query(observation_path(@back_object))
+    else
+      redirect_with_query(action: :index)
     end
   end
 

@@ -127,6 +127,8 @@ class SequencesController < ApplicationController
     save_edits
   end
 
+  # Note: This action is called from sequences#show page,
+  # NOT from observations#show (which only has "remove" to break the association).
   def destroy
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
@@ -134,11 +136,15 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_delete!(@sequence)
 
-    @observation = @sequence.observation # needed for js to update obs page
-
+    @observation = @sequence.observation
     @sequence.destroy
     flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
-    show_flash_and_send_to_back_object
+
+    if @back == "index"
+      redirect_with_query(action: :index)
+    else
+      redirect_to(@observation.show_link_args)
+    end
   end
 
   ##############################################################################

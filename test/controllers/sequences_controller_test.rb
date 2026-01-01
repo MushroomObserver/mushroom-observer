@@ -774,4 +774,18 @@ class SequencesControllerTest < FunctionalTestCase
     # on a non-observation page
     assert_redirected_to(sequence.observation.show_link_args)
   end
+
+  # Destroy from observation page should redirect to observation
+  def test_destroy_redirect_to_observation
+    sequence = sequences(:local_sequence)
+    observation = sequence.observation
+    sequence_count = Sequence.count
+
+    login(sequence.user.login)
+    delete(:destroy, params: { id: sequence.id }, format: :turbo_stream)
+
+    # Should successfully destroy and redirect to observation
+    assert_equal(sequence_count - 1, Sequence.count)
+    assert_redirected_to(observation.show_link_args)
+  end
 end

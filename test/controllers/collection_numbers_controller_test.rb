@@ -515,12 +515,13 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)
 
-    # Prove by default it goes back to index.
+    # With no back param, redirects to observation if CN has exactly one obs.
+    # (Each of these CNs has only one observation)
     delete(:destroy, params: { id: nums[0].id })
-    assert_redirected_to(collection_numbers_path)
+    assert_redirected_to(observation_path(obs))
 
-    # Prove that it keeps query param intact when returning to index.
-    delete(:destroy, params: { id: nums[1].id, q: })
+    # With back: "index", explicitly requests redirect to index.
+    delete(:destroy, params: { id: nums[1].id, back: "index", q: })
     assert_redirected_to(collection_numbers_path(params: { q: }))
   end
 
@@ -540,5 +541,30 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(collection_number_count - 1, CollectionNumber.count)
     # Should redirect to index since we can't do turbo_stream update
     assert_redirected_to(collection_numbers_path)
+  end
+
+  # Destroy from index page (no back param) with a collection_number that
+  # has exactly one observation should redirect to that observation.
+  def test_destroy_collection_number_turbo_from_index_with_single_obs
+    # Create a collection_number with exactly one observation
+    obs = observations(:minimal_unknown_obs)
+    collection_number = CollectionNumber.create!(
+      user: obs.user,
+      name: obs.user.legal_name,
+      number: "test-single",
+      observations: [obs]
+    )
+    assert_equal(1, collection_number.observations.count)
+
+    login(obs.user.login)
+    collection_number_count = CollectionNumber.count
+
+    # Destroy button on index page (no back param) with turbo_stream format
+    delete(:destroy, params: { id: collection_number.id },
+                     format: :turbo_stream)
+
+    # Should successfully destroy and redirect to the observation
+    assert_equal(collection_number_count - 1, CollectionNumber.count)
+    assert_redirected_to(observation_path(obs))
   end
 end
