@@ -23,7 +23,14 @@ module Admin
               locals: {
                 title: :email_merge_request_title.t(type: @model.type_tag),
                 identifier: "merge_request_email",
-                user: @user, form: "admin/emails/merge_requests/form"
+                user: @user,
+                form: "admin/emails/merge_requests/form",
+                form_locals: {
+                  model: FormObject::MergeRequest.new,
+                  old_obj: @old_obj,
+                  new_obj: @new_obj,
+                  model_class: @model
+                }
               }
             ) and return
           end
