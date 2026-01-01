@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Displays feedback about dubious location reasons when creating/editing
-# observations or species lists.
+# observations, species lists, or locations.
 #
 # @param dubious_where_reasons [Array<String>, nil] dubious reasons
 # @param button [String, Symbol] button name for help text
