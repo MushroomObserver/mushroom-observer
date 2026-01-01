@@ -394,20 +394,14 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_modal_herbarium_record_form
-    render(
-      partial: "shared/modal_form",
-      locals: {
-        title: modal_title,
-        identifier: modal_identifier,
-        user: @user,
-        form: "herbarium_records/form",
-        form_locals: {
-          model: @herbarium_record,
-          observation: @observation,
-          back: @back
-        }
-      }
-    ) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @herbarium_record,
+             observation: @observation,
+             back: @back
+           ))
   end
 
   def modal_identifier

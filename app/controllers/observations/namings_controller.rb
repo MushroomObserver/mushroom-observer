@@ -129,14 +129,14 @@ module Observations
     end
 
     def render_modal_naming_form
-      render(
-        partial: "shared/modal_form",
-        locals: {
-          title: modal_title, identifier: modal_identifier,
-          user: @user, form: "observations/namings/form",
-          form_locals: naming_form_locals
-        }
-      ) and return
+      render(Components::ModalForm.new(
+               identifier: modal_identifier,
+               title: modal_title,
+               user: @user,
+               model: @naming,
+               observation: @observation,
+               form_locals: naming_form_locals.except(:model, :observation)
+             ))
     end
 
     def naming_form_locals

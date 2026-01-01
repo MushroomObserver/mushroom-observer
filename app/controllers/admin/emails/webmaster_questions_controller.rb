@@ -12,23 +12,16 @@ module Admin
         respond_to do |format|
           format.html
           format.turbo_stream do
-            render(
-              partial: "shared/modal_form",
-              locals: {
-                title: :ask_webmaster_title.l,
-                identifier: "webmaster_question_email",
-                user: @user,
-                form: "admin/emails/webmaster_questions/form",
-                form_locals: {
-                  model: FormObject::WebmasterQuestion.new(
-                    email: @email, message: @message
-                  ),
-                  email: @email,
-                  email_error: false,
-                  message: @message
-                }
-              }
-            ) and return
+            render(Components::ModalForm.new(
+                     identifier: "webmaster_question_email",
+                     title: :ask_webmaster_title.l,
+                     user: @user,
+                     model: FormObject::WebmasterQuestion.new(
+                       email: @email, message: @message
+                     ),
+                     form_locals: { email: @email, email_error: false,
+                                    message: @message }
+                   ))
           end
         end
       end

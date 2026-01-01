@@ -332,20 +332,14 @@ class CollectionNumbersController < ApplicationController
   end
 
   def render_modal_collection_number_form
-    render(
-      partial: "shared/modal_form",
-      locals: {
-        title: modal_title,
-        identifier: modal_identifier,
-        user: @user,
-        form: "collection_numbers/form",
-        form_locals: {
-          model: @collection_number,
-          observation: @observation,
-          back: @back
-        }
-      }
-    ) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @collection_number,
+             observation: @observation,
+             back: @back
+           ))
   end
 
   def modal_identifier

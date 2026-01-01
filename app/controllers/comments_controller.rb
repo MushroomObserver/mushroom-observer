@@ -253,10 +253,12 @@ class CommentsController < ApplicationController
   # we give users the option to edit any number of their own comments on a
   # show page. "comment" disambiguates :new, because :edit always has id
   def render_modal_comment_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     user: @user, form: "comments/form",
-                     form_locals: { model: @comment } }) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @comment
+           ))
   end
 
   def reload_modal_form

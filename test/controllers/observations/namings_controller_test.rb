@@ -32,7 +32,7 @@ module Observations
       params = { observation_id: obs.id.to_s }
       login
       get(:new, params:, format: :turbo_stream)
-      assert_template("shared/_modal_form")
+      assert_select("#modal_obs_#{obs.id}_naming")
       assert_form_action(action: "create", approved_name: "",
                          observation_id: obs.id.to_s)
     end
@@ -391,8 +391,9 @@ module Observations
 
     def test_edit_form_turbo
       params = edit_form_test_setup
+      nam = namings(:coprinus_comatus_naming)
       get(:edit, params:, format: :turbo_stream)
-      assert_template("shared/_modal_form")
+      assert_select("#modal_obs_#{nam.observation_id}_naming_#{nam.id}")
       assert_no_flash(
         "User should be able to edit his own Naming without warning or error"
       )
