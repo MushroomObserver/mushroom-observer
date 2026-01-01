@@ -84,15 +84,10 @@ class Components::LocationForm < Components::ApplicationForm
   def render_display_name_field
     text_field(:display_name, value: @display_name, label: "#{:WHERE.t}:",
                               data: display_name_data,
-                              help: :form_locations_help.t) do |f|
-      f.with_append do
-        button(type: :button,
-               class: "btn btn-default",
-               data: { map_target: "showBoxBtn", action: "map#showBox" }) do
-          plain(:form_locations_find_on_map.l)
-        end
-      end
-    end
+                              help: :form_locations_help.t,
+                              button: :form_locations_find_on_map.l,
+                              button_data: { map_target: "showBoxBtn",
+                                             action: "map#showBox" })
   end
 
   def display_name_data

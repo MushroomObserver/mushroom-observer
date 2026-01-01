@@ -68,9 +68,9 @@ class Components::Map < Components::Base
     attrs = {
       map_target: @map_target,
       map_type: @map_type,
-      need_elevations_value: @need_elevations_value,
-      map_open: @map_open,
-      editable: @editable,
+      need_elevations_value: @need_elevations_value.to_s,
+      map_open: @map_open.to_s,
+      editable: @editable.to_s,
       controls: @controls.to_json,
       location_format: @location_format || User.current_location_format,
       collection: mappable_collection.to_json,
