@@ -755,4 +755,23 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index, q:)
     assert_session_query_record_is_correct
   end
+
+  # Bug: Destroy button on show page uses turbo_stream format, causing error
+  # because we're not on an observation page. Should redirect instead.
+  def test_destroy_turbo_from_show_page
+    sequence = sequences(:local_sequence)
+    sequence_count = Sequence.count
+
+    login(sequence.user.login)
+    # Simulate clicking Destroy button on the show page (back: "show")
+    # The button incorrectly requests turbo_stream format
+    delete(:destroy, params: { id: sequence.id, back: "show" },
+                     format: :turbo_stream)
+
+    # Should still successfully destroy and redirect (not error)
+    assert_equal(sequence_count - 1, Sequence.count)
+    # Should redirect to observation since we can't do turbo_stream update
+    # on a non-observation page
+    assert_redirected_to(sequence.observation.show_link_args)
+  end
 end
