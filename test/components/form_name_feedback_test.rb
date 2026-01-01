@@ -2,12 +2,10 @@
 
 require "test_helper"
 
-class FormNameFeedbackTest < UnitTestCase
-  include ComponentTestHelper
+class FormNameFeedbackTest < ComponentTestCase
 
   def setup
     super
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   def test_renders_parent_deprecated_warning

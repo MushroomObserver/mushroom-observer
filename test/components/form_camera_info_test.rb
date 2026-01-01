@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class FormCameraInfoTest < UnitTestCase
-  include ComponentTestHelper
+class FormCameraInfoTest < ComponentTestCase
 
   def test_renders_gps_info_with_all_values
     component = Components::FormCameraInfo.new(

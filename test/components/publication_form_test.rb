@@ -2,15 +2,13 @@
 
 require "test_helper"
 
-class PublicationFormTest < UnitTestCase
-  include ComponentTestHelper
+class PublicationFormTest < ComponentTestCase
 
   def setup
     @user = users(:rolf)
     @publication = Publication.new # New publication for create form
 
     # Set up controller request context for form URL generation
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   def test_renders_form_with_all_fields

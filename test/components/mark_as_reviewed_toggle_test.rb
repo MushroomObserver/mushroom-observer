@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class MarkAsReviewedToggleTest < UnitTestCase
-  include ComponentTestHelper
+class MarkAsReviewedToggleTest < ComponentTestCase
 
   def test_renders_with_default_parameters
     html = render_component(Components::MarkAsReviewedToggle.new(

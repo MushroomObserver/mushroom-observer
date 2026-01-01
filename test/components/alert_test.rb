@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class AlertTest < UnitTestCase
-  include ComponentTestHelper
+class AlertTest < ComponentTestCase
 
   def test_renders_basic_alert_with_message
     html = render_component(
@@ -75,11 +74,9 @@ class AlertTest < UnitTestCase
       )
     )
 
-    doc = Nokogiri::HTML(html)
-    div = doc.at_css("div.alert")
-
-    assert_equal("alert", div["data-controller"])
-    assert_equal("message", div["data-target"])
+    assert_html(html, "div.alert",
+                attribute: { "data-controller" => "alert",
+                             "data-target" => "message" })
   end
 
   def test_renders_alert_with_multiple_custom_attributes
@@ -93,14 +90,8 @@ class AlertTest < UnitTestCase
       )
     )
 
-    doc = Nokogiri::HTML(html)
-    div = doc.at_css("div.alert")
-
-    assert_equal("test-alert", div["id"])
-    assert(div["class"].include?("alert"))
-    assert(div["class"].include?("alert-info"))
-    assert(div["class"].include?("custom-class"))
-    assert_equal("123", div["data-value"])
+    assert_html(html, "div#test-alert.alert.alert-info.custom-class",
+                attribute: { "data-value" => "123" })
   end
 
   def test_default_level_is_warning

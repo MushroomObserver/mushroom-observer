@@ -5,14 +5,12 @@ require "test_helper"
 # NamingReasonsFields is tested through NamingForm since it requires a Superform
 # namespace. See test/components/naming_form_test.rb for tests that cover the
 # reasons fields functionality.
-class NamingReasonsFieldsTest < UnitTestCase
-  include ComponentTestHelper
+class NamingReasonsFieldsTest < ComponentTestCase
 
   def setup
     super
     @naming = Naming.new
     @observation = observations(:coprinus_comatus_obs)
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form_with_reasons
   end
 

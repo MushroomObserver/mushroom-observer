@@ -2,8 +2,7 @@
 
 require("test_helper")
 
-class ShowPrevNextNavTest < UnitTestCase
-  include ComponentTestHelper
+class ShowPrevNextNavTest < ComponentTestCase
 
   def setup
     super
@@ -70,10 +69,7 @@ class ShowPrevNextNavTest < UnitTestCase
     assert_html(html, "a.prev_object_link.disabled")
 
     # Next link should NOT have disabled class
-    doc = Nokogiri::HTML(html)
-    next_link = doc.at_css("a.next_object_link")
-    assert(next_link, "Expected next link")
-    assert_not_includes(next_link["class"], "disabled")
+    assert_html(html, "a.next_object_link:not(.disabled)")
   end
 
   def test_next_link_disabled_when_last_item
@@ -88,10 +84,7 @@ class ShowPrevNextNavTest < UnitTestCase
     assert_html(html, "a.next_object_link.disabled")
 
     # Prev link should NOT have disabled class
-    doc = Nokogiri::HTML(html)
-    prev_link = doc.at_css("a.prev_object_link")
-    assert(prev_link, "Expected prev link")
-    assert_not_includes(prev_link["class"], "disabled")
+    assert_html(html, "a.prev_object_link:not(.disabled)")
   end
 
   def test_both_links_enabled_when_middle_item
@@ -102,15 +95,8 @@ class ShowPrevNextNavTest < UnitTestCase
                     query: @query
                   ))
 
-    doc = Nokogiri::HTML(html)
-
-    prev_link = doc.at_css("a.prev_object_link")
-    assert(prev_link, "Expected prev link")
-    assert_not_includes(prev_link["class"], "disabled")
-
-    next_link = doc.at_css("a.next_object_link")
-    assert(next_link, "Expected next link")
-    assert_not_includes(next_link["class"], "disabled")
+    assert_html(html, "a.prev_object_link:not(.disabled)")
+    assert_html(html, "a.next_object_link:not(.disabled)")
   end
 
   def test_prev_link_has_correct_href

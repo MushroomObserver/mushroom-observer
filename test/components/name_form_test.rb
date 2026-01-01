@@ -2,14 +2,12 @@
 
 require "test_helper"
 
-class NameFormTest < UnitTestCase
-  include ComponentTestHelper
+class NameFormTest < ComponentTestCase
 
   def setup
     super
     @user = users(:rolf)
     @name = names(:coprinus_comatus)
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   # --- New record (create mode) ---

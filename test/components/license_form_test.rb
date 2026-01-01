@@ -2,12 +2,10 @@
 
 require "test_helper"
 
-class LicenseFormTest < UnitTestCase
-  include ComponentTestHelper
+class LicenseFormTest < ComponentTestCase
 
   def setup
     @license = License.new
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

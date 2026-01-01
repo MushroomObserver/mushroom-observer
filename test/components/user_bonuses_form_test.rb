@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class UserBonusesFormTest < UnitTestCase
-  include ComponentTestHelper
+class UserBonusesFormTest < ComponentTestCase
 
   def setup
     super
@@ -11,7 +10,6 @@ class UserBonusesFormTest < UnitTestCase
     @user_stats = UserStats.find_or_create_by(user_id: @user.id)
     @user_stats.bonuses = [[10, "Test reason 1"], [20, "Test reason 2"],
                            [30, "Test reason 3"]]
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

@@ -2,12 +2,10 @@
 
 require "test_helper"
 
-class LoginFormTest < UnitTestCase
-  include ComponentTestHelper
+class LoginFormTest < ComponentTestCase
 
   def setup
     @model = FormObject::Login.new(login: "testuser", remember_me: true)
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

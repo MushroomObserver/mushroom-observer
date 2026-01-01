@@ -2,15 +2,13 @@
 
 require "test_helper"
 
-class NamingFormTest < UnitTestCase
-  include ComponentTestHelper
+class NamingFormTest < ComponentTestCase
 
   def setup
     super
     @naming = Naming.new
     @observation = observations(:coprinus_comatus_obs)
     @vote = Vote.new
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_new_form
   end
 

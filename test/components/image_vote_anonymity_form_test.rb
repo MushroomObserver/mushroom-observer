@@ -2,11 +2,9 @@
 
 require "test_helper"
 
-class ImageVoteAnonymityFormTest < UnitTestCase
-  include ComponentTestHelper
+class ImageVoteAnonymityFormTest < ComponentTestCase
 
   def setup
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   def test_renders_vote_counts

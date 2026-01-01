@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class BaseTest < UnitTestCase
-  include ComponentTestHelper
+class BaseTest < ComponentTestCase
 
   # Simple test component to test trusted_html method
   class TestComponent < Components::Base

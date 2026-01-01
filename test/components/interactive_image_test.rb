@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class InteractiveImageTest < UnitTestCase
-  include ComponentTestHelper
+class InteractiveImageTest < ComponentTestCase
 
   def setup
     super

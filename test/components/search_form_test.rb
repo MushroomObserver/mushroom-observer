@@ -2,13 +2,11 @@
 
 require "test_helper"
 
-class SearchFormTest < UnitTestCase
-  include ComponentTestHelper
+class SearchFormTest < ComponentTestCase
 
   def setup
     super
     @query = Query::Observations.new
-    controller.request = ActionDispatch::TestRequest.create
     # Use real search controller from the app
     @search_controller = ::Observations::SearchController.new
   end

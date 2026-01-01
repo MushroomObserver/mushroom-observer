@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class LightboxObservationTitleTest < UnitTestCase
-  include ComponentTestHelper
+class LightboxObservationTitleTest < ComponentTestCase
 
   def setup
     super

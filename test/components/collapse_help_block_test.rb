@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class CollapseHelpBlockTest < UnitTestCase
-  include ComponentTestHelper
+class CollapseHelpBlockTest < ComponentTestCase
 
   def test_renders_basic_collapse_block_with_content
     html = render_component(

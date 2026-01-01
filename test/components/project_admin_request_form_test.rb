@@ -2,14 +2,12 @@
 
 require "test_helper"
 
-class ProjectAdminRequestFormTest < UnitTestCase
-  include ComponentTestHelper
+class ProjectAdminRequestFormTest < ComponentTestCase
 
   def setup
     super
     @model = FormObject::ProjectAdminRequest.new
     @project = projects(:eol_project)
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

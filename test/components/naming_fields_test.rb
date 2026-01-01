@@ -4,15 +4,13 @@ require "test_helper"
 
 # Tests for NamingFields component (Superform mode only).
 # For ERB form tests, see the system tests for observation form.
-class NamingFieldsTest < UnitTestCase
-  include ComponentTestHelper
+class NamingFieldsTest < ComponentTestCase
 
   def setup
     super
     @naming = Naming.new
     @vote = Vote.new
     @reasons = @naming.init_reasons
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   # Test for bug: edit naming form missing vote/confidence and reasons fields

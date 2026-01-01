@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class MatrixBoxTest < UnitTestCase
-  include ComponentTestHelper
+class MatrixBoxTest < ComponentTestCase
 
   def setup
     super

@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class CommercialInquiryFormTest < UnitTestCase
-  include ComponentTestHelper
+class CommercialInquiryFormTest < ComponentTestCase
 
   def setup
     super
@@ -11,7 +10,6 @@ class CommercialInquiryFormTest < UnitTestCase
     @image = images(:commercial_inquiry_image)
     @user = users(:rolf)
     @message = "Test message"
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

@@ -2,13 +2,7 @@
 
 require "test_helper"
 
-class ActivityLogTypeFiltersTest < UnitTestCase
-  include ComponentTestHelper
-
-  def setup
-    controller.request = ActionDispatch::TestRequest.create
-  end
-
+class ActivityLogTypeFiltersTest < ComponentTestCase
   def test_renders_form_with_get_method
     html = render_component(nil, ["all"])
 

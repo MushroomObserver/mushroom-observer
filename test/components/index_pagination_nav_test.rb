@@ -2,8 +2,7 @@
 
 require("test_helper")
 
-class IndexPaginationNavTest < UnitTestCase
-  include ComponentTestHelper
+class IndexPaginationNavTest < ComponentTestCase
 
   def setup
     super

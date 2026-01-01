@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class FormCarouselTest < UnitTestCase
-  include ComponentTestHelper
+class FormCarouselTest < ComponentTestCase
 
   def setup
     super

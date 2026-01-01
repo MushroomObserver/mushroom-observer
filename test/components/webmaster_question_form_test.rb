@@ -2,15 +2,13 @@
 
 require "test_helper"
 
-class WebmasterQuestionFormTest < UnitTestCase
-  include ComponentTestHelper
+class WebmasterQuestionFormTest < ComponentTestCase
 
   def setup
     super
     @email = FormObject::WebmasterQuestion.new
     @user_email = "test@example.com"
     @message = "My question"
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

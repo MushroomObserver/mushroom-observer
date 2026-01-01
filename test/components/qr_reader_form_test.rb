@@ -2,12 +2,10 @@
 
 require "test_helper"
 
-class QRReaderFormTest < UnitTestCase
-  include ComponentTestHelper
+class QRReaderFormTest < ComponentTestCase
 
   def setup
     @model = FieldSlip.new
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

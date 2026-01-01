@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class ObjectFooterTest < UnitTestCase
-  include ComponentTestHelper
+class ObjectFooterTest < ComponentTestCase
 
   # Test double for objects with footer metadata
   class TestObject

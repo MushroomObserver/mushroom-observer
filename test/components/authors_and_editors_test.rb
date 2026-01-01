@@ -2,8 +2,7 @@
 
 require "test_helper"
 
-class AuthorsAndEditorsTest < UnitTestCase
-  include ComponentTestHelper
+class AuthorsAndEditorsTest < ComponentTestCase
 
   # Test double for description objects
   class TestDescription

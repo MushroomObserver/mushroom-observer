@@ -2,14 +2,12 @@
 
 require "test_helper"
 
-class EmailNewPasswordFormTest < UnitTestCase
-  include ComponentTestHelper
+class EmailNewPasswordFormTest < ComponentTestCase
 
   def setup
     @user = User.new
 
     # Set up controller request context for form URL generation
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 
