@@ -99,8 +99,8 @@ class CollectionNumbersController < ApplicationController
     update_collection_number # response handled here
   end
 
-  # Note: This action is called from collection_numbers#show and #index pages,
-  # NOT from observations#show (which only has "remove" to break the association).
+  # NOTE: This action is called from collection_numbers#show and #index pages,
+  # NOT from observations#show (which has "remove" to break the association).
   def destroy
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number

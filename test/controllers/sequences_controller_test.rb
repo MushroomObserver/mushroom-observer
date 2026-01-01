@@ -782,7 +782,6 @@ class SequencesControllerTest < FunctionalTestCase
   # Test permission denied via turbo_stream from observation page
   def test_destroy_permission_denied_turbo_from_observation
     sequence = sequences(:local_sequence)
-    observation = sequence.observation
     sequence_count = Sequence.count
 
     # Login as different user who doesn't own the sequence

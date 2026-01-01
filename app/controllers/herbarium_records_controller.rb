@@ -106,8 +106,8 @@ class HerbariumRecordsController < ApplicationController
     update_herbarium_record # response handled here
   end
 
-  # Note: This action is called from herbarium_records#show and #index pages,
-  # NOT from observations#show (which only has "remove" to break the association).
+  # NOTE: This action is called from herbarium_records#show and #index pages,
+  # NOT from observations#show (which has "remove" to break the association).
   def destroy
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
