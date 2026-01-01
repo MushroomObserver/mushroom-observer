@@ -523,4 +523,22 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     delete(:destroy, params: { id: nums[1].id, q: })
     assert_redirected_to(collection_numbers_path(params: { q: }))
   end
+
+  # Bug: Destroy button on show page uses turbo_stream format, causing error
+  # because @observation is nil. Should redirect with HTML format instead.
+  def test_destroy_collection_number_turbo_from_show_page
+    login("rolf")
+    collection_number = collection_numbers(:coprinus_comatus_coll_num)
+    collection_number_count = CollectionNumber.count
+
+    # Simulate clicking Destroy button on the show page (back: "show")
+    # The button incorrectly requests turbo_stream format
+    delete(:destroy, params: { id: collection_number.id, back: "show" },
+                     format: :turbo_stream)
+
+    # Should still successfully destroy and redirect (not error)
+    assert_equal(collection_number_count - 1, CollectionNumber.count)
+    # Should redirect to index since we can't do turbo_stream update
+    assert_redirected_to(collection_numbers_path)
+  end
 end

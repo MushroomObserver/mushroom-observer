@@ -258,7 +258,16 @@ class SequencesController < ApplicationController
 
   def show_flash_and_send_to_back_object
     respond_to do |format|
-      format.turbo_stream { render_sequences_section_update }
+      # Only render turbo_stream if we came from an observation page
+      format.turbo_stream do
+        if @back_object.is_a?(Observation)
+          render_sequences_section_update
+        elsif @back == "index"
+          redirect_with_query(action: :index)
+        else
+          redirect_to(@observation.show_link_args)
+        end
+      end
       format.html do
         if @back == "index"
           redirect_with_query(action: :index)
