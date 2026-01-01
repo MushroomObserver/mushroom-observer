@@ -2,14 +2,11 @@
 
 require "test_helper"
 
-class HerbariumFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class HerbariumFormTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
     @herbarium = Herbarium.new
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   def test_renders_form_with_name_field
@@ -90,9 +87,8 @@ class HerbariumFormTest < UnitTestCase
                     user: @user,
                     local: true
                   ))
-    doc = Nokogiri::HTML(html)
 
-    assert_nil(doc.at_css("input[name='herbarium[code]']"))
+    assert_no_html(html, "input[name='herbarium[code]']")
   end
 
   def test_renders_code_field_for_institutional_herbarium
@@ -132,9 +128,8 @@ class HerbariumFormTest < UnitTestCase
 
   def test_omits_back_field_when_not_provided
     html = render_form
-    doc = Nokogiri::HTML(html)
 
-    assert_nil(doc.at_css("input[name='herbarium[back]']"))
+    assert_no_html(html, "input[name='herbarium[back]']")
   end
 
   def test_enables_turbo_for_modal_rendering
@@ -149,49 +144,34 @@ class HerbariumFormTest < UnitTestCase
 
   def test_disables_turbo_for_local_form
     html = render_form
-    doc = Nokogiri::HTML(html)
 
     # local: true should not have data-turbo attribute
-    form = doc.at_css("form")
-    assert_nil(form["data-turbo"])
+    assert_no_html(html, "form[data-turbo]")
   end
 
   def test_renders_map_controller_data_attributes
     html = render_form
-    doc = Nokogiri::HTML(html)
-    form = doc.at_css("form#herbarium_form")
 
-    assert_equal("map", form["data-controller"])
-    # Boolean false in Phlex doesn't render the attribute or renders empty
-    # Check that the form has map controller - the map-open state is optional
-    assert(form["data-controller"].include?("map"))
+    assert_html(html, "form#herbarium_form",
+                attribute: { "data-controller" => "map" })
   end
 
   def test_autocompleter_hidden_field_attributes
-    phlex_html = render_form
-    phlex_doc = Nokogiri::HTML(phlex_html)
+    html = render_form
 
-    # Find autocompleter wrapper
-    phlex_ac = phlex_doc.at_css("#herbarium_location_autocompleter")
-    assert(phlex_ac, "Phlex should have autocompleter wrapper")
-
-    # Find hidden field
-    phlex_hidden = phlex_doc.at_css(
-      "#herbarium_location_autocompleter input[type='hidden']"
-    )
-    assert(phlex_hidden, "Phlex should have hidden field in autocompleter")
-
-    # Verify correct data attributes on wrapper
-    assert_equal("autocompleter--location", phlex_ac["data-controller"])
-    assert_equal("location", phlex_ac["data-type"])
-    assert_equal("#herbarium_form",
-                 phlex_ac["data-autocompleter--location-map-outlet"])
+    # Verify autocompleter wrapper with correct data attributes
+    assert_html(html, "#herbarium_location_autocompleter",
+                attribute: { "data-controller" => "autocompleter--location",
+                             "data-type" => "location",
+                             "data-autocompleter--location-map-outlet" =>
+                               "#herbarium_form" })
 
     # Verify hidden field attributes use custom hidden_name with model prefix
-    assert_equal("herbarium_location_id", phlex_hidden["id"],
-                 "Hidden field id should be herbarium_location_id")
-    assert_equal("herbarium[location_id]", phlex_hidden["name"],
-                 "Hidden field name should be herbarium[location_id]")
+    assert_html(
+      html,
+      "#herbarium_location_autocompleter input[type='hidden']" \
+      "#herbarium_location_id[name='herbarium[location_id]']"
+    )
   end
 
   private

@@ -2,18 +2,23 @@
 
 # Helper methods for modal dialogs and forms
 module ModalsHelper
-  NAMING_FORM_KEYS = [:context, :vote, :given_name, :reasons, :feedback].freeze
-
-  # Maps component classes to their parameter handler methods
-  FORM_PARAM_HANDLERS = {
-    "Components::ExternalLinkForm" => :add_external_link_params,
-    "Components::HerbariumForm" => :add_herbarium_params,
-    "Components::NamingForm" => :add_naming_form_params,
-    "Components::WebmasterQuestionForm" => :add_webmaster_question_params,
-    "Components::ObserverQuestionForm" => :add_observer_question_params,
-    "Components::CommercialInquiryForm" => :add_commercial_inquiry_params,
-    "Components::UserQuestionForm" => :add_user_question_params
+  # Map model classes to their corresponding component classes
+  COMPONENT_MAP = {
+    Comment: Components::CommentForm,
+    ExternalLink: Components::ExternalLinkForm,
+    Herbarium: Components::HerbariumForm,
+    HerbariumRecord: Components::HerbariumRecordForm,
+    CollectionNumber: Components::CollectionNumberForm,
+    MergeRequest: Components::MergeRequestEmailForm,
+    NameChangeRequest: Components::NameChangeRequestForm,
+    Sequence: Components::SequenceForm,
+    Naming: Components::NamingForm,
+    WebmasterQuestion: Components::WebmasterQuestionForm,
+    ObserverQuestion: Components::ObserverQuestionForm,
+    CommercialInquiry: Components::CommercialInquiryForm,
+    UserQuestion: Components::UserQuestionForm
   }.freeze
+
   # Renders either a Superform component or a legacy ERB partial for modal
   # forms. This allows gradual migration from ERB partials to Superform.
   #
@@ -25,33 +30,12 @@ module ModalsHelper
   # @return [String] Rendered HTML
   def render_form_or_component(form, model: nil, observation: nil, back: nil,
                                **form_locals)
-    # Map model classes to their corresponding component classes
-    component_map = {
-      Comment: Components::CommentForm,
-      ExternalLink: Components::ExternalLinkForm,
-      Herbarium: Components::HerbariumForm,
-      HerbariumRecord: Components::HerbariumRecordForm,
-      CollectionNumber: Components::CollectionNumberForm,
-      Sequence: Components::SequenceForm,
-      Naming: Components::NamingForm,
-      WebmasterQuestion: Components::WebmasterQuestionForm,
-      ObserverQuestion: Components::ObserverQuestionForm,
-      CommercialInquiry: Components::CommercialInquiryForm,
-      UserQuestion: Components::UserQuestionForm
-    }
-
-    # Use demodulized name to handle both ActiveRecord and FormObject classes
-    model_key = demodulized_class_name(model)
-    component_class = model_key ? component_map[model_key] : nil
+    model_key = model ? model.class.name.demodulize.to_sym : nil
+    component_class = model_key ? COMPONENT_MAP[model_key] : nil
 
     if component_class
-      render_modal_component(
-        component_class,
-        model,
-        observation,
-        back,
-        form_locals
-      )
+      render_modal_component(component_class, model, observation, back,
+                             form_locals)
     else
       render(partial: form, locals: form_locals)
     end
@@ -60,91 +44,11 @@ module ModalsHelper
   private
 
   def render_modal_component(component_class, model, observation, back, locals)
-    params = build_component_params(
-      component_class,
-      model,
-      observation,
-      back,
-      locals
-    )
-    render(component_class.new(model, **params))
-  end
-
-  def build_component_params(component_class, model, observation, back, locals)
-    params = { local: false } # Modal forms are turbo forms
-    add_observation_param(params, model, observation, component_class)
-    add_form_specific_params(params, component_class, observation, locals)
-    params[:back] = back if back
-    params
-  end
-
-  def add_observation_param(params, model, observation, _component_class)
-    case model.class.name.to_sym
-    when :CollectionNumber, :HerbariumRecord, :ExternalLink, :Naming
-      params[:observation] = observation
-    when :Sequence
-      params[:observation] = observation || model&.observation
-    end
-  end
-
-  def add_form_specific_params(params, component_class, observation, locals)
-    handler = FORM_PARAM_HANDLERS[component_class.name]
-    return unless handler
-
-    if handler == :add_observer_question_params
-      send(handler, params, observation, locals)
-    else
-      send(handler, params, locals)
-    end
-  end
-
-  def add_external_link_params(params, locals)
-    params[:user] = locals[:user] if locals[:user]
-    params[:sites] = locals[:sites] if locals[:sites]
-    params[:site] = locals[:site] if locals[:site]
-  end
-
-  def add_herbarium_params(params, locals)
-    params[:user] = locals[:user] if locals[:user]
-    params[:location] = locals[:location] if locals[:location]
-    params[:top_users] = locals[:top_users] if locals[:top_users]
-  end
-
-  def add_naming_form_params(params, locals)
-    params[:show_reasons] = locals[:show_reasons] if locals.key?(:show_reasons)
-    copy_present_keys(params, locals, NAMING_FORM_KEYS)
-  end
-
-  def copy_present_keys(params, locals, keys)
-    keys.each { |key| params[key] = locals[key] if locals[key] }
-  end
-
-  def add_webmaster_question_params(params, locals)
-    params[:email] = locals[:email] if locals[:email]
-    params[:email_error] = locals[:email_error] if locals.key?(:email_error)
-    params[:message] = locals[:message] if locals[:message]
-  end
-
-  def add_observer_question_params(params, observation, locals)
+    params = { local: false } # Modal forms use turbo
     params[:observation] = observation if observation
-    params[:message] = locals[:message] if locals[:message]
-  end
+    params[:back] = back if back
+    params.merge!(locals.except(:model, :local))
 
-  def add_commercial_inquiry_params(params, locals)
-    params[:image] = locals[:image] if locals[:image]
-    params[:user] = locals[:user] if locals[:user]
-    params[:message] = locals[:message] if locals[:message]
-  end
-
-  def add_user_question_params(params, locals)
-    params[:target] = locals[:target] if locals[:target]
-    params[:subject] = locals[:subject] if locals[:subject]
-    params[:message] = locals[:message] if locals[:message]
-  end
-
-  def demodulized_class_name(model)
-    return nil unless model
-
-    model.class.name.demodulize.to_sym
+    render(component_class.new(model, **params))
   end
 end

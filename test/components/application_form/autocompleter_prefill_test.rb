@@ -3,9 +3,7 @@
 require "test_helper"
 require "ostruct"
 
-class ApplicationFormAutocompleterPrefillTest < UnitTestCase
-  include ComponentTestHelper
-
+class ApplicationFormAutocompleterPrefillTest < ComponentTestCase
   # Test form that includes the AutocompleterPrefill module
   class TestForm < Components::ApplicationForm
     include Components::ApplicationForm::AutocompleterPrefill

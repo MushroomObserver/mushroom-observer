@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class ImageCaptionVoteInterfaceTest < UnitTestCase
-  include ComponentTestHelper
-
+class ImageCaptionVoteInterfaceTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
