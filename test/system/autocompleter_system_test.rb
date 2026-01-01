@@ -458,4 +458,39 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Should have selected a species list
     assert_field("species_list", with: /Query/i)
   end
+
+  # Verify editing selected value clears the has-id state
+  def test_autocompleter_clears_id_on_edit
+    rolf = users("rolf")
+    login!(rolf)
+    burbank = locations("burbank")
+
+    visit("/herbaria/new")
+
+    within("#herbarium_form") do
+      # Select an existing location
+      find_field("herbarium_place_name").click
+      @browser.keyboard.type("burbank")
+      assert_selector(".auto_complete", wait: 5)
+      assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 5)
+      @browser.keyboard.type(:down, :tab)
+
+      # Verify location was selected (hidden field is place_name_id)
+      assert_selector(".has-id", wait: 5)
+      assert_field("herbarium_place_name_id", with: burbank.id.to_s,
+                                              type: :hidden)
+
+      # Now edit the text by adding a street address at the beginning
+      field = find_field("herbarium_place_name")
+      field.click
+      # Move to beginning and type prefix
+      @browser.keyboard.type(:home)
+      @browser.keyboard.type("123 Main St, ")
+
+      # has-id should be cleared since text no longer matches selected value
+      assert_no_selector(".has-id", wait: 5)
+      # Hidden field should be empty
+      assert_field("herbarium_place_name_id", with: "", type: :hidden)
+    end
+  end
 end
