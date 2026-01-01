@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_15_233038) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_01_095531) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -140,6 +140,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_233038) do
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
     t.boolean "locked", default: false, null: false
+  end
+
+  create_table "glossary_terms_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "glossary_term_id"
+    t.integer "version"
+    t.integer "user_id"
+    t.datetime "updated_at", precision: nil
+    t.string "name", limit: 1024
+    t.text "description"
   end
 
   create_table "herbaria", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -311,6 +320,20 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_233038) do
     t.integer "project_id"
   end
 
+  create_table "location_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id"
+    t.integer "version"
+    t.datetime "updated_at", precision: nil
+    t.integer "user_id"
+    t.integer "license_id"
+    t.integer "merge_source_id"
+    t.text "gen_desc"
+    t.text "ecology"
+    t.text "species"
+    t.text "notes"
+    t.text "refs"
+  end
+
   create_table "location_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "location_id"
     t.integer "version"
@@ -354,6 +377,22 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_233038) do
     t.decimal "box_area", precision: 21, scale: 10
     t.decimal "center_lat", precision: 15, scale: 10
     t.decimal "center_lng", precision: 15, scale: 10
+  end
+
+  create_table "locations_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.string "location_id"
+    t.integer "version"
+    t.datetime "updated_at", precision: nil
+    t.integer "user_id"
+    t.float "north"
+    t.float "south"
+    t.float "west"
+    t.float "east"
+    t.float "high"
+    t.float "low"
+    t.string "name", limit: 1024
+    t.text "notes"
+    t.string "scientific_name", limit: 1024
   end
 
   create_table "name_description_admins", charset: "utf8mb3", force: :cascade do |t|
@@ -428,6 +467,24 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_233038) do
     t.integer "project_id"
   end
 
+  create_table "name_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id"
+    t.integer "version"
+    t.datetime "updated_at", precision: nil
+    t.integer "user_id"
+    t.integer "license_id"
+    t.integer "merge_source_id"
+    t.text "gen_desc"
+    t.text "diag_desc"
+    t.text "distribution"
+    t.text "habitat"
+    t.text "look_alikes"
+    t.text "uses"
+    t.text "notes"
+    t.text "refs"
+    t.text "classification"
+  end
+
   create_table "name_trackers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "name_id"
@@ -482,6 +539,25 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_233038) do
     t.boolean "locked", default: false, null: false
     t.integer "icn_id"
     t.index ["synonym_id"], name: "synonym_index"
+  end
+
+  create_table "names_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_id"
+    t.integer "version"
+    t.datetime "updated_at", precision: nil
+    t.integer "user_id"
+    t.string "text_name", limit: 100
+    t.string "search_name", limit: 221
+    t.string "display_name", limit: 204
+    t.string "sort_name", limit: 241
+    t.string "author", limit: 100
+    t.text "citation"
+    t.boolean "deprecated", default: false, null: false
+    t.integer "correct_spelling_id"
+    t.text "notes"
+    t.integer "rank"
+    t.string "lifeform", limit: 1024, default: " ", null: false
+    t.integer "icn_id"
   end
 
   create_table "naming_reasons", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -636,31 +712,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_233038) do
     t.integer "access_count"
     t.text "description"
     t.boolean "permalink", default: false
-  end
-
-  create_table "queued_email_integers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.string "key", limit: 100
-    t.integer "value", default: 0, null: false
-  end
-
-  create_table "queued_email_notes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.text "value"
-  end
-
-  create_table "queued_email_strings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.string "key", limit: 100
-    t.string "value", limit: 100
-  end
-
-  create_table "queued_emails", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "user_id"
-    t.datetime "queued", precision: nil
-    t.integer "num_attempts"
-    t.string "flavor", limit: 50
-    t.integer "to_user_id"
   end
 
   create_table "rss_logs", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -852,6 +903,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_233038) do
     t.integer "version"
     t.integer "language_id", null: false
     t.string "tag", limit: 100
+    t.text "text"
+    t.datetime "updated_at", precision: nil
+    t.integer "user_id"
+  end
+
+  create_table "translation_strings_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "version"
+    t.integer "translation_string_id"
     t.text "text"
     t.datetime "updated_at", precision: nil
     t.integer "user_id"

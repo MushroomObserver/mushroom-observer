@@ -161,12 +161,10 @@
 #  name_trackers::      NameTracker's they've requested.
 #  observations::       Observation's they've posted.
 #  projects_created::   Project's they've created.
-#  queued_emails::      QueuedEmail's they're scheduled to receive.
 #  species_lists::      SpeciesList's they've created.
 #  votes::              Vote's they've cast.
 #
 #  ==== Other relationships
-#  to_emails::          QueuedEmail's they've caused to be sent.
 #  user_groups::        UserGroup's they're members of.
 #  in_group?::          Is User in a given UserGroup?
 #  reviewed_images::    Image's they've reviewed.
@@ -239,7 +237,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :projects, through: :project_members, source: :projects
   has_many :project_aliases, as: :target, dependent: :destroy
   has_many :publications
-  has_many :queued_emails
   has_many :sequences
   has_many :species_lists
   has_many :collection_numbers
@@ -252,8 +249,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :reviewed_name_descriptions, class_name: "NameDescription",
                                         foreign_key: "reviewer_id",
                                         inverse_of: :reviewer
-  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id",
-                       inverse_of: :queued_email
 
   has_many :user_group_users, dependent: :destroy
   has_many :user_groups, through: :user_group_users
@@ -894,8 +889,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [:name_trackers,                  :user_id],
     [:observations,                   :user_id],
     [:publications,                   :user_id],
-    [:queued_emails,                  :user_id],
-    [:queued_emails,                  :to_user_id],
     [:sequences,                      :user_id],
     [:species_lists,                  :user_id],
     [:user_group_users,               :user_id],
@@ -943,7 +936,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     delete_api_keys
     delete_interests
     delete_name_trackers
-    delete_queued_emails
     delete_observations
     delete_private_name_descriptions
     delete_private_location_descriptions
@@ -978,11 +970,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def delete_name_trackers
     NameTracker.where(user: self).delete_all
-  end
-
-  def delete_queued_emails
-    QueuedEmail.where(user_id: id).delete_all
-    QueuedEmail.where(to_user_id: id).delete_all
   end
 
   def delete_observations
@@ -1113,8 +1100,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     # Observation,                   (just deleted all of these)
     Project,
     Publication,
-    # QueuedEmail,                   (just deleted all of these)
-    # QueuedEmail, (to_user_id)      (just deleted all of these)
     Sequence,
     SpeciesList,
     TranslationString,

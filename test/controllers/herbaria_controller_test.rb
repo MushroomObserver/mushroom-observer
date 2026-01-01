@@ -432,7 +432,6 @@ class HerbariaControllerTest < FunctionalTestCase
                  herbarium.mailing_address)
     assert_equal(create_params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
-    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
     email = ActionMailer::Base.deliveries.last
     assert_match(/katrina/, email.to_s)

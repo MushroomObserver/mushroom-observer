@@ -136,8 +136,6 @@ class CommentTest < UnitTestCase
     MO.oil_users   = old_oil_users
   end
 
-  # Oil and water emails are now sent via deliver_later instead of QueuedEmail.
-  # Check for enqueued mailer jobs instead of QueuedEmail.count.
   def do_oil_and_water_test
     obs = observations(:minimal_unknown_obs)
 

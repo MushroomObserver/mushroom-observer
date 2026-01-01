@@ -78,7 +78,9 @@ class ApplicationMailer < ActionMailer::Base
       value = v.nil? || v.instance_of?(String) ? v : v.id
       msg << " #{k}=#{value}"
     end
-    QueuedEmail.debug_log(msg)
+    Rails.root.join("log/email-debug.log").open("a:utf-8") do |fh|
+      fh.puts("#{Time.zone.now} #{msg}")
+    end
   end
 
   def calc_content_style(headers)
