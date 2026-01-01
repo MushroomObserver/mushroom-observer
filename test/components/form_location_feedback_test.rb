@@ -14,6 +14,9 @@ class FormLocationFeedbackTest < ComponentTestCase
     assert_html(html, ".alert-warning#dubious_location_messages.my-3")
     assert_html(html, "body", text: "Location not found")
     assert_html(html, ".help-note")
+    # Help note should include the button name
+    help_note = Nokogiri::HTML(html).at_css(".help-note")
+    assert(help_note.text.include?("Save"), "Help note should include button")
   end
 
   def test_renders_multiple_reasons_with_br_tags
