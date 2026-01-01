@@ -80,7 +80,7 @@ class LocationsControllerTest < FunctionalTestCase
       put_requires_login(page, params)
       assert_template("edit")
     end
-    assert_template("locations/_form")
+    assert_select("#location_form")
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -441,9 +441,17 @@ class LocationsControllerTest < FunctionalTestCase
   #
   #    NEW
 
-  def test_create_location
+  def test_new_location
     requires_login(:new)
     assert_form_action(action: :create)
+  end
+
+  def test_new_location_turbo_stream
+    login
+    get(:new, params: { where: "Somewhere, Earth" }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_select("#location_form")
+    assert_select("input[name='location[display_name]']")
   end
 
   # This was causing a crash in live server.
@@ -584,6 +592,16 @@ class LocationsControllerTest < FunctionalTestCase
     assert_form_action({ action: :update, id: loc.id.to_s,
                          approved_where: loc.display_name })
     assert_input_value(:location_display_name, loc.display_name)
+  end
+
+  def test_edit_location_turbo_stream
+    loc = locations(:albion)
+    login
+    get(:edit, params: { id: loc.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_select("#location_form")
+    assert_select("input[name='location[display_name]'][value=?]",
+                  loc.display_name)
   end
 
   def test_edit_locked_location
