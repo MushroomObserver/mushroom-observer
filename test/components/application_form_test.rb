@@ -2,15 +2,12 @@
 
 require "test_helper"
 
-class ApplicationFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class ApplicationFormTest < ComponentTestCase
   def setup
     @user = users(:rolf)
     @collection_number = collection_numbers(:coprinus_comatus_coll_num)
 
     # Set up controller request context for form URL generation
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   # Text field tests

@@ -35,26 +35,6 @@ Turbo.StreamActions.remove_class = function () {
     target.classList.remove(this.templateContent.textContent)
   });
 }
-// Update lightbox caption data-sub-html attribute to keep caption state in sync
-Turbo.StreamActions.update_lightbox_caption = function () {
-  const obsId = this.getAttribute("obs-id");
-  // Use innerHTML to get actual HTML, not textContent which escapes it
-  const template = this.templateElement;
-  const captionHtml = template.innerHTML;
-
-  const theaterBtn = document.querySelector(`#box_${obsId} .theater-btn`);
-
-  if (theaterBtn) {
-    theaterBtn.dataset.subHtml = captionHtml;
-
-    // Refresh lightgallery to pick up the updated caption
-    const contentElement = document.querySelector('[data-controller~="lightgallery"]');
-    if (contentElement && contentElement.dataset.lightgallery === "connected") {
-      // Trigger a custom event that the lightgallery controller can listen to
-      contentElement.dispatchEvent(new CustomEvent('lightgallery:refresh'));
-    }
-  }
-}
 
 import "@rails/request.js"
 

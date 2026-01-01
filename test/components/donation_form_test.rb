@@ -2,13 +2,10 @@
 
 require "test_helper"
 
-class DonationFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class DonationFormTest < ComponentTestCase
   def setup
     super
     @donation = Donation.new
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

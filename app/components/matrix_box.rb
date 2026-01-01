@@ -48,6 +48,8 @@ class Components::MatrixBox < Components::Base
   def render_object_layout
     # Build render data from object
     @data = build_render_data
+    # Get observation_view from eager-loaded association (nil if not loaded)
+    @observation_view = observation_view_for_identify if @identify
 
     li(
       id: "box_#{@data[:id]}",
@@ -60,6 +62,19 @@ class Components::MatrixBox < Components::Base
         render_identify_footer(panel)
       end
     end
+  end
+
+  # Get or build observation_view from eager-loaded association.
+  # Returns nil if not an observation or association not loaded.
+  def observation_view_for_identify
+    return nil unless @data[:type] == :observation
+
+    obs = @data[:what]
+    # returns true if association was eager loaded, even if no o_v for this obs
+    return nil unless obs.observation_views.loaded?
+
+    obs.observation_views.find { |ov| ov.user_id == @user&.id } ||
+      ObservationView.new(observation: obs, user: @user)
   end
 
   def render_custom_layout(&block)
@@ -82,7 +97,8 @@ class Components::MatrixBox < Components::Base
         obs: @data[:obs] || {},
         votes: @data.fetch(:votes, true),
         full_width: @data.fetch(:full_width, true),
-        identify: @identify
+        identify: @identify,
+        observation_view: @observation_view
       )
     end
   end
@@ -224,38 +240,14 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_identify_footer(panel)
-    return unless @identify
+    return unless @observation_view
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
-      render(Components::MarkAsReviewedToggle.new(
-               obs_id: @data[:id],
-               selector: "box_reviewed",
-               label_class: "stretched-link",
-               reviewed: obs_reviewed_state
-             ))
+      MarkAsReviewedToggle(
+        observation_view: @observation_view,
+        selector: "box_reviewed",
+        label_class: "stretched-link"
+      )
     end
-  end
-
-  def obs_reviewed_state
-    return nil unless @user
-    return nil unless @data[:type] == :observation
-
-    obs = @data[:what]
-    if obs.respond_to?(:observation_views)
-      return eager_loaded_obs_reviewed_state(obs)
-    end
-
-    # Fallback for contexts where observation_views are not eager-loaded
-    ObservationView.find_by(
-      observation_id: obs.id,
-      user_id: @user.id
-    )&.reviewed
-  end
-
-  def eager_loaded_obs_reviewed_state(obs)
-    observation_view = obs.observation_views.detect do |ov|
-      ov.user_id == @user.id
-    end
-    observation_view&.reviewed
   end
 end

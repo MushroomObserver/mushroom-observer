@@ -2,14 +2,11 @@
 
 require "test_helper"
 
-class VisualGroupFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class VisualGroupFormTest < ComponentTestCase
   def setup
     super
     @visual_model = visual_models(:visual_model_one)
     @visual_group = VisualGroup.new(visual_model: @visual_model)
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

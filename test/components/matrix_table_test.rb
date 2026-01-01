@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class MatrixTableTest < UnitTestCase
-  include ComponentTestHelper
-
+class MatrixTableTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -151,7 +149,9 @@ class MatrixTableTest < UnitTestCase
   end
 
   def test_renders_identify_ui_and_footer_when_identify_is_true
-    obs = observations(:coprinus_comatus_obs)
+    # Must eager-load observation_views for identify footer to render
+    obs = Observation.includes(:observation_views).
+          find(observations(:coprinus_comatus_obs).id)
     component = Components::MatrixTable.new(
       objects: [obs],
       user: @user,

@@ -6,7 +6,7 @@ This document describes coding style preferences for the Mushroom Observer codeb
 
 ### Method Calls with Parentheses
 
-**Always use parentheses for method calls**, even when there are no arguments and even in ERB templates.
+**Always use parentheses for method calls with arguments**, even in ERB templates.
 
 **This applies to:**
 - Ruby code
@@ -19,13 +19,12 @@ This document describes coding style preferences for the Mushroom Observer codeb
 ```ruby
 # Good
 render(component)
-helper_method()
+no_args_helper_method
 User.find(id)
-@objects.empty?()
+@objects.empty?
 
 # Bad
 render component
-helper_method
 User.find id
 ```
 
@@ -63,7 +62,7 @@ Even in comments, use parentheses for method calls to maintain consistency:
 
 ### Component Namespacing
 
-**Always use the full namespace** when referencing Phlex components.
+**Always use the full namespace** when referencing Phlex components in ERB or Ruby.
 
 ```ruby
 # Good
@@ -73,6 +72,23 @@ render(Components::InteractiveImage.new(...))
 # Bad
 render(MatrixBox.new(...))
 render(InteractiveImage.new(...))
+```
+
+**However, when referencing Phlex components from other components, use "kit" syntax**.
+
+```ruby
+module Components
+  class Panel
+
+    def render_interactive_image
+      # Good
+      InteractiveImage(...)
+
+      # Too verbose
+      render(Components::InteractiveImage.new(...))
+    end
+  end
+end
 ```
 
 ## Phlex Component Style
@@ -145,6 +161,21 @@ end
 - It handles `ActiveSupport::SafeBuffer` correctly without requiring `rubocop:disable`
 - Rails translation methods (`.t`, `.l`) return HTML-safe strings that should use `trusted_html`
 - Only use `raw()` for HTML strings that are not already marked as safe
+
+Calling **view_context** is nearly always a code smell that you should find a
+native Phlex method or include the method as an output_helper or value_helper.
+
+```ruby
+# Good
+def form_action
+  observation_view_path(id: @obs_id)
+end
+
+# Bad - Rails path helpers are already available within Phlex
+def form_action
+  view_context.observation_view_path(id: @obs_id)
+end
+```
 
 ### Iteration
 

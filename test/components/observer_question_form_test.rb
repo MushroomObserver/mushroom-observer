@@ -2,15 +2,12 @@
 
 require "test_helper"
 
-class ObserverQuestionFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class ObserverQuestionFormTest < ComponentTestCase
   def setup
     super
     @model = FormObject::ObserverQuestion.new
     @observation = observations(:minimal_unknown_obs)
     @message = "Where did you find this?"
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

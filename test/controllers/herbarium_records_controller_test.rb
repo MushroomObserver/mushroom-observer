@@ -518,4 +518,22 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(herbarium_records_path(q:))
     assert_session_query_record_is_correct
   end
+
+  # Bug: Destroy button on show page uses turbo_stream format, causing error
+  # because @observation is nil. Should redirect with HTML format instead.
+  def test_destroy_herbarium_record_turbo_from_show_page
+    login("rolf")
+    herbarium_record = herbarium_records(:coprinus_comatus_rolf_spec)
+    herbarium_record_count = HerbariumRecord.count
+
+    # Simulate clicking Destroy button on the show page (back: "show")
+    # The button incorrectly requests turbo_stream format
+    delete(:destroy, params: { id: herbarium_record.id, back: "show" },
+                     format: :turbo_stream)
+
+    # Should still successfully destroy and redirect (not error)
+    assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
+    # Should redirect to index since we can't do turbo_stream update
+    assert_redirected_to(herbarium_records_path)
+  end
 end
