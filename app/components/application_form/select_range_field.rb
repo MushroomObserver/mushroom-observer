@@ -5,31 +5,37 @@ class Components::ApplicationForm < Superform::Rails::Form
   # confidence range). Both selects share the same options list.
   #
   # @example Usage in a form
-  #   render_select_range(
+  #   render(SelectRangeField.new(
+  #     form: f,
   #     field_name: :rank,
   #     options: [nil] + Name.all_ranks,
   #     value: current_rank,
   #     range_value: current_range_rank,
-  #     label: "Rank",
-  #     help: "Select a rank range"
-  #   )
+  #     label: "Rank"
+  #   )) do |field|
+  #     field.with_help { "Select a rank range" }
+  #   end
   class SelectRangeField < Components::Base
+    include Phlex::Slotable
+
     prop :form, _Any
     prop :field_name, Symbol
     prop :options, _Array(Object)
     prop :value, _Nilable(_Any), default: nil
     prop :range_value, _Nilable(_Any), default: nil
     prop :label, String
-    prop :help, _Nilable(String), default: nil
+
+    slot :help
 
     def view_template
       div do
         div(class: "d-inline-block mr-4") do
           @form.select_field(@field_name, @options,
                              label: @label,
-                             help: @help,
                              inline: true,
-                             selected: @value)
+                             selected: @value) do |f|
+            f.with_help { render(help_slot) } if help_slot
+          end
         end
         div(class: "d-inline-block") do
           @form.select_field(:"#{@field_name}_range", @options,

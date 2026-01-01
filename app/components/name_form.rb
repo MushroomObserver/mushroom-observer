@@ -209,27 +209,22 @@ class Components::NameForm < Components::ApplicationForm
         )
       )
 
-      render(
-        field(:correct_spelling).autocompleter(
-          type: :name,
-          value: @correct_spelling,
-          wrapper_options: {
-            label: "#{:form_names_misspelling_it_should_be.l}:",
-            help: :form_names_misspelling_note.l
-          }
-        )
+      correct_spelling_field = field(:correct_spelling).autocompleter(
+        type: :name,
+        value: @correct_spelling,
+        wrapper_options: { label: "#{:form_names_misspelling_it_should_be.l}:" }
       )
+      correct_spelling_field.with_help { :form_names_misspelling_note.l }
+      render(correct_spelling_field)
     end
   end
 
   def render_notes_field
     notes_field = field(:notes).textarea(
-      wrapper_options: {
-        label: "#{:form_names_taxonomic_notes.l}:",
-        help: :shared_textile_help.l
-      },
+      wrapper_options: { label: "#{:form_names_taxonomic_notes.l}:" },
       rows: 6
     )
+    notes_field.with_help { :shared_textile_help.l }
     notes_field.with_between do
       div(class: "mark") { :form_names_taxonomic_notes_warning.l }
     end

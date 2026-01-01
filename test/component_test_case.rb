@@ -1,13 +1,27 @@
 # frozen_string_literal: true
 
-# Helper module for testing Phlex components
+# Base class for component tests that provides common setup and helpers.
 # Based on https://www.phlex.fun/components/testing.html
-module ComponentTestHelper
+#
+# @example Usage
+#   class MyComponentTest < ComponentTestCase
+#     def test_renders_content
+#       html = render(Components::MyComponent.new(title: "Test"))
+#       assert_html(html, "h1", text: "Test")
+#     end
+#   end
+#
+class ComponentTestCase < UnitTestCase
   # Render a Phlex component with proper Rails view context
   delegate :render, to: :view_context
 
   # Get the Rails view context needed for components to access helpers
   delegate :view_context, to: :controller
+
+  def setup
+    super
+    controller.request = ActionDispatch::TestRequest.create
+  end
 
   # Create a test controller instance with auth methods
   def controller
@@ -92,6 +106,17 @@ module ComponentTestHelper
         "got #{attr_name}='#{actual_value}'"
       )
     end
+  end
+
+  # Assert HTML does NOT contain a specific CSS selector
+  # @param html [String] The HTML to search
+  # @param selector [String] CSS selector that should NOT be found
+  # @param message [String] Optional custom failure message
+  def assert_no_html(html, selector, message = nil)
+    doc = Nokogiri::HTML(html)
+    element = doc.at_css(selector)
+    message ||= "Expected NOT to find element matching '#{selector}'"
+    assert_nil(element, message)
   end
 
   # Assert that a child selector is nested within a parent selector.
