@@ -18,7 +18,9 @@ class LocationFormSystemTest < ApplicationSystemTestCase
     fill_in("location_display_name", with: "genohlac gard france")
     click_button(:form_locations_find_on_map.l)
 
-    assert_selector("#location_display_name.geocoded")
+    # Geocoding has 1s buffer + API call time, so allow extra wait.
+    # This test is flaky due to Google Maps API response times.
+    assert_selector("#location_display_name.geocoded", wait: 15)
     assert_field("location_display_name",
                  with: "Génolhac, Gard, Occitanie, France")
 
