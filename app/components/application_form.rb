@@ -8,7 +8,9 @@
 # @example Basic usage
 #   class UserForm < Components::ApplicationForm
 #     def view_template
-#       text_field(:email, label: "Email", help: "We'll never share your email")
+#       text_field(:email, label: "Email") do |f|
+#         f.with_help { "We'll never share your email" }
+#       end
 #       textarea_field(:bio, label: "Bio", rows: 5)
 #       checkbox_field(:terms, label: "I agree to the terms")
 #       submit "Sign up"
@@ -116,7 +118,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
   # Wrapper option keys that should not be passed to the field itself
   WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
-                     :button, :button_data, :monospace].freeze
+                     :button, :button_data, :monospace,
+                     :label_class, :label_data, :label_aria,
+                     :label_position].freeze
 
   # Override the Field class to use our custom components
   class Field < Superform::Rails::Form::Field
@@ -153,8 +157,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Autocompleter-specific options that should NOT go in field attributes
     # Note: :value stays in attributes since it goes to the text/textarea field
     AUTOCOMPLETER_OPTIONS = [:find_text, :keep_text, :edit_text, :create_text,
-                             :create, :create_path, :hidden_value,
-                             :hidden_data, :controller_data].freeze
+                             :create, :create_path, :hidden_name, :hidden_value,
+                             :hidden_data, :controller_data, :controller_id,
+                             :map_outlet].freeze
 
     def autocompleter(type:, textarea: false, wrapper_options: {},
                       **attributes)
@@ -185,7 +190,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param options [Hash] all field and wrapper options
   # @option options [String,false] :label label text (optional, inferred from
   #   field name), or false to omit label
-  # @option options [String] :help help text displayed below field
   # @option options [Boolean] :prefs auto-generate label from prefs translation
   # @option options [Boolean] :inline render label and field inline
   # @option options [String] :wrap_class CSS classes for wrapper div
@@ -194,7 +198,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @option options [Hash] :button_data data attributes for button
   # All other options passed to the input element
   # @yield [field_component] Optional block to set slots: `with_between`,
-  #   `with_append` (after input, end of form-group)
+  #   `with_append` (after input, end of form-group), `with_help`
   def text_field(field_name, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
@@ -214,8 +218,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param options [Hash] all field and wrapper options
   # @option options [Boolean] :monospace add monospace font class
   # All other wrapper options same as text_field
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
   def textarea_field(field_name, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
@@ -238,9 +242,9 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Checkbox field with label and Bootstrap checkbox wrapper
   # @param field_name [Symbol] the field name
   # @param options [Hash] all field and wrapper options
-  # Wrapper options: :label, :help, :prefs, :class_name
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # Wrapper options: :label, :prefs, :class_name
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
   def checkbox_field(field_name, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
@@ -260,8 +264,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param options_list [Array] the select options
   # @param options [Hash] all field and wrapper options
   # All wrapper options same as text_field
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
   def select_field(field_name, options_list, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
@@ -281,8 +285,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param field_name [Symbol] the field name
   # @param options [Hash] all field and wrapper options
   # All wrapper options same as text_field
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
   def password_field(field_name, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
@@ -309,8 +313,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param field_name [Symbol] the field name
   # @param options [Hash] all field and wrapper options
   # All wrapper options same as text_field
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
   def number_field(field_name, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
@@ -332,8 +336,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param options [Hash] all field and wrapper options
   # @option options [Boolean] :textarea use textarea instead of text input
   # All wrapper options same as text_field
-  # @yield [field_component] Optional block to set slots with `with_between`
-  #   and `with_append`
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
   def autocompleter_field(field_name, type:, textarea: false, **options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)

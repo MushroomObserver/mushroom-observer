@@ -112,10 +112,18 @@ class HerbariumRecordsController < ApplicationController
     return unless make_sure_can_delete!(@herbarium_record)
 
     figure_out_where_to_go_back_to
+    @observation = @back_object if @back_object.is_a?(Observation)
     @herbarium_record.destroy
 
     respond_to do |format|
-      format.turbo_stream { render_herbarium_records_section_update }
+      # Only render turbo_stream if we have an observation to update
+      format.turbo_stream do
+        if @observation
+          render_herbarium_records_section_update
+        else
+          redirect_with_query(action: :index)
+        end
+      end
       format.html { redirect_with_query(action: :index) }
     end
   end

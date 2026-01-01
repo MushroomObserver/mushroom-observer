@@ -1,8 +1,0 @@
-<%# locals: (local: false) %>
-<%= render(Components::MergeRequestEmailForm.new(
-  FormObject::MergeRequest.new,
-  old_obj: @old_obj,
-  new_obj: @new_obj,
-  model_class: @model,
-  local: local
-)) %>

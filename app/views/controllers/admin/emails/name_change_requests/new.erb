@@ -3,5 +3,9 @@ add_page_title(:email_name_change_request_title.t)
 add_context_nav(email_name_change_request_tabs(name: @name))
 %>
 
-<%= render(partial: "admin/emails/name_change_requests/form",
-           locals: { local: true }) %>
+<%= render(Components::NameChangeRequestForm.new(
+      FormObject::NameChangeRequest.new,
+      name: @name,
+      new_name_with_icn_id: @new_name_with_icn_id,
+      local: true
+    )) %>

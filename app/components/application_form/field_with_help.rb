@@ -4,11 +4,11 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Shared module for rendering collapsible help blocks on form fields
   module FieldWithHelp
     def render_help_in_label_row
-      render_help_icon if wrapper_options[:help]
+      render_help_icon if help_slot
     end
 
     def render_help_after_field
-      render_help_text if wrapper_options[:help]
+      render_help_text if help_slot
     end
 
     # Renders the between slot with appropriate margin class
@@ -42,7 +42,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       help_id = "#{field.dom.id}_help"
       div(class: "collapse", id: help_id) do
         div(class: "well well-sm mb-3 help-block position-relative") do
-          wrapper_options[:help]
+          render(help_slot)
         end
       end
     end

@@ -3,5 +3,10 @@ add_page_title(:email_merge_request_title.t(type: @model.type_tag))
 add_context_nav(email_merge_request_tabs(old_obj: @old_obj))
 %>
 
-<%= render(partial: "admin/emails/merge_requests/form",
-           locals: { local: true }) %>
+<%= render(Components::MergeRequestEmailForm.new(
+      FormObject::MergeRequest.new,
+      old_obj: @old_obj,
+      new_obj: @new_obj,
+      model_class: @model,
+      local: true
+    )) %>

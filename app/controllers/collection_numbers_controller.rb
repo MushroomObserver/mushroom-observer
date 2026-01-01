@@ -104,9 +104,19 @@ class CollectionNumbersController < ApplicationController
     return unless @collection_number
     return unless make_sure_can_delete!(@collection_number)
 
+    figure_out_where_to_go_back_to
+    @observation = @back_object if @back_object.is_a?(Observation)
     @collection_number.destroy
+
     respond_to do |format|
-      format.turbo_stream { render_collection_numbers_section_update }
+      # Only render turbo_stream if we have an observation to update
+      format.turbo_stream do
+        if @observation
+          render_collection_numbers_section_update
+        else
+          redirect_with_query(action: :index)
+        end
+      end
       format.html { redirect_with_query(action: :index) }
     end
   end

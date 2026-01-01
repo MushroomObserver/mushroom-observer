@@ -37,22 +37,20 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   private
 
   def form_action
-    url_for(controller: "info", action: :textile_sandbox, only_path: true)
+    info_textile_sandbox_path
   end
 
   # Render the Textile input, showing either rendered HTML or HTML codes
   def render_result_section
     div(class: "mb-4") do
-      strong { plain("#{:sandbox_look_like.t}:") }
+      strong { plain("#{:sandbox_look_like.l}:") }
       div(class: "sandbox mt-2") do
         if @submit_type == :sandbox_test.l
           # Render the textile code as HTML
           raw(@model.code.tpl) # rubocop:disable Rails/OutputSafety
         else
-          # Show HTML codes (already escaped, use raw to avoid double-escape)
-          code do
-            raw(view_context.escape_html(@model.code.tpl)) # rubocop:disable Rails/OutputSafety
-          end
+          # Show HTML codes as plain text
+          code { plain(@model.code.tpl) }
         end
       end
     end
@@ -71,7 +69,7 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   end
 
   def render_code_field
-    textarea_field(:code, label: "#{:sandbox_enter.t}:", rows: 8)
+    textarea_field(:code, label: "#{:sandbox_enter.l}:", rows: 8)
   end
 
   def render_submit_buttons
@@ -87,14 +85,14 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   def render_quick_reference
     div(class: "mt-3") do
       p do
-        strong { plain("#{:sandbox_quick_ref.t}:") }
+        strong { plain("#{:sandbox_quick_ref.l}:") }
       end
       pre { raw(:sandbox_sample.l) } # rubocop:disable Rails/OutputSafety
     end
   end
 
   def render_more_help_links
-    strong { plain("#{:sandbox_more_help.t}:") }
+    strong { plain("#{:sandbox_more_help.l}:") }
     div(class: "pl-3") do
       # Translation not needed as document title is static
       a(href: "https://docs.google.com/document/d/" \
@@ -106,24 +104,24 @@ class Components::TextileSandboxForm < Components::ApplicationForm
   end
 
   def render_web_reference_links
-    strong { plain("#{:sandbox_web_refs.t}:") }
+    strong { plain("#{:sandbox_web_refs.l}:") }
     div(class: "pl-3") do
       a(href: "https://hobix.com/textile",
         target: "_blank",
         rel: "noopener noreferrer") do
-        plain(:sandbox_link_hobix_textile_reference.t)
+        plain(:sandbox_link_hobix_textile_reference.l)
       end
       br
       a(href: "https://hobix.com/quick",
         target: "_blank",
         rel: "noopener noreferrer") do
-        plain(:sandbox_link_hobix_textile_cheatsheet.t)
+        plain(:sandbox_link_hobix_textile_cheatsheet.l)
       end
       br
       a(href: "https://textile-lang.com/",
         target: "_blank",
         rel: "noopener noreferrer") do
-        plain(:sandbox_link_textile_language_website.t)
+        plain(:sandbox_link_textile_language_website.l)
       end
       br
     end

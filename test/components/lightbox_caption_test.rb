@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class LightboxCaptionTest < UnitTestCase
-  include ComponentTestHelper
-
+class LightboxCaptionTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
