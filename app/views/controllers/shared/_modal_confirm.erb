@@ -14,16 +14,16 @@ tag.div(
     tag.div(class: "modal-content") do
       [
         tag.div(class: "modal-body py-4") do
-          tag.h4(:are_you_sure.t, class: "modal-title", id: "mo_confirm_title",
+          tag.h4(:are_you_sure.l, class: "modal-title", id: "mo_confirm_title",
                  data: { confirm_modal_target: "title" })
         end,
         tag.div(class: "modal-footer") do
           [
-            tag.button(:CANCEL.t,
+            tag.button(:CANCEL.l,
                        type: "button",
                        class: "btn btn-default",
                        data: { action: "confirm-modal#cancel" }),
-            tag.button(:OK.t,
+            tag.button(:OK.l,
                        type: "button",
                        class: "btn btn-danger",
                        data: { action: "confirm-modal#confirm",
