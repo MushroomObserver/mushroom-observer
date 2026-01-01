@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class HerbariumCuratorRequestFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class HerbariumCuratorRequestFormTest < ComponentTestCase
   # Test model that includes necessary ActiveModel modules
   class TestRequest
     include ActiveModel::Model
@@ -21,7 +19,6 @@ class HerbariumCuratorRequestFormTest < UnitTestCase
     super
     @model = TestRequest.new
     @herbarium = herbaria(:nybg_herbarium)
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

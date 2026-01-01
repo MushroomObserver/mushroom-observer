@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class FormLocationMapTest < UnitTestCase
-  include ComponentTestHelper
-
+class FormLocationMapTest < ComponentTestCase
   def test_renders_map_div_with_default_id
     html = render_component(Components::FormLocationMap.new)
 
@@ -23,30 +21,26 @@ class FormLocationMapTest < UnitTestCase
     html = render_component(
       Components::FormLocationMap.new(id: "test_map")
     )
-    doc = Nokogiri::HTML(html)
-    map_div = doc.at_css("div#test_map")
 
-    # Boolean true renders as empty string in Phlex data attributes
-    assert(map_div.key?("data-editable"))
-    assert_equal("mapDiv", map_div["data-map-target"])
+    # Check editable attribute exists and map-target is set
+    assert_html(html, "div#test_map[data-editable]",
+                attribute: { "data-map-target" => "mapDiv" })
   end
 
   def test_renders_map_with_default_location_type
     html = render_component(Components::FormLocationMap.new)
-    doc = Nokogiri::HTML(html)
-    map_div = doc.at_css("div.form-map")
 
-    assert_equal("location", map_div["data-map-type"])
+    assert_html(html, "div.form-map",
+                attribute: { "data-map-type" => "location" })
   end
 
   def test_renders_map_with_custom_map_type
     html = render_component(
       Components::FormLocationMap.new(map_type: "observation")
     )
-    doc = Nokogiri::HTML(html)
-    map_div = doc.at_css("div.form-map")
 
-    assert_equal("observation", map_div["data-map-type"])
+    assert_html(html, "div.form-map",
+                attribute: { "data-map-type" => "observation" })
   end
 
   def test_renders_button_group
@@ -57,14 +51,11 @@ class FormLocationMapTest < UnitTestCase
 
   def test_renders_toggle_button
     html = render_component(Components::FormLocationMap.new(id: "test_map"))
-    doc = Nokogiri::HTML(html)
 
-    toggle_btn = doc.at_css("button.map-toggle")
-    assert(toggle_btn)
-    assert_equal("button", toggle_btn["type"])
-    assert_equal("toggleMapBtn", toggle_btn["data-map-target"])
-    assert_equal("false", toggle_btn["aria-expanded"])
-    assert_equal("test_map", toggle_btn["aria-controls"])
+    assert_html(html, "button.map-toggle[type='button']",
+                attribute: { "data-map-target" => "toggleMapBtn",
+                             "aria-expanded" => "false",
+                             "aria-controls" => "test_map" })
   end
 
   def test_renders_toggle_button_with_show_and_hide_labels
@@ -76,20 +67,16 @@ class FormLocationMapTest < UnitTestCase
 
   def test_renders_clear_button
     html = render_component(Components::FormLocationMap.new)
-    doc = Nokogiri::HTML(html)
 
-    clear_btn = doc.at_css("button.map-clear")
-    assert(clear_btn)
-    assert_equal("button", clear_btn["type"])
-    assert_equal("mapClearBtn", clear_btn["data-map-target"])
+    assert_html(html, "button.map-clear[type='button']",
+                attribute: { "data-map-target" => "mapClearBtn" })
   end
 
   def test_uses_default_location_format_without_user
     html = render_component(Components::FormLocationMap.new)
-    doc = Nokogiri::HTML(html)
-    map_div = doc.at_css("div.form-map")
 
-    assert_equal("postal", map_div["data-location-format"])
+    assert_html(html, "div.form-map",
+                attribute: { "data-location-format" => "postal" })
   end
 
   def test_uses_user_location_format_when_provided
@@ -99,9 +86,8 @@ class FormLocationMapTest < UnitTestCase
     html = render_component(
       Components::FormLocationMap.new(user: user)
     )
-    doc = Nokogiri::HTML(html)
-    map_div = doc.at_css("div.form-map")
 
-    assert_equal("scientific", map_div["data-location-format"])
+    assert_html(html, "div.form-map",
+                attribute: { "data-location-format" => "scientific" })
   end
 end

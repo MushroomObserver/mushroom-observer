@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class CarouselTest < UnitTestCase
-  include ComponentTestHelper
-
+class CarouselTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
