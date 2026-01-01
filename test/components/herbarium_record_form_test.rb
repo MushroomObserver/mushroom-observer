@@ -2,14 +2,11 @@
 
 require "test_helper"
 
-class HerbariumRecordFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class HerbariumRecordFormTest < ComponentTestCase
   def setup
     super
     @herbarium_record = HerbariumRecord.new
     @observation = observations(:coprinus_comatus_obs)
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 
@@ -63,9 +60,8 @@ class HerbariumRecordFormTest < UnitTestCase
 
   def test_omits_turbo_when_local_true
     html = render_form_local
-    doc = Nokogiri::HTML(html)
 
-    assert_nil(doc.at_css("form[data-turbo]"))
+    assert_no_html(html, "form[data-turbo]")
   end
 
   def test_auto_determines_url_for_existing_herbarium_record

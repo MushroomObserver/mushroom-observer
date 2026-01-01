@@ -2,14 +2,11 @@
 
 require "test_helper"
 
-class NameTrackerFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class NameTrackerFormTest < ComponentTestCase
   def setup
     super
     @name = names(:coprinus_comatus)
     @note_template = "Test template"
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   def test_renders_enable_button_for_new_tracker

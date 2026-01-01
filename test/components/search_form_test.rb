@@ -2,13 +2,10 @@
 
 require "test_helper"
 
-class SearchFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class SearchFormTest < ComponentTestCase
   def setup
     super
     @query = Query::Observations.new
-    controller.request = ActionDispatch::TestRequest.create
     # Use real search controller from the app
     @search_controller = ::Observations::SearchController.new
   end
@@ -29,24 +26,17 @@ class SearchFormTest < UnitTestCase
   # When local (on a search page), form should NOT use turbo_stream
   def test_form_no_turbo_stream_when_local
     html = render_form(local: true)
-    doc = Nokogiri::HTML(html)
 
-    form = doc.at_css("form#observations_search_form")
-    assert(form, "Should have form")
-    assert_nil(form["data-turbo-stream"],
-               "Form should NOT have data-turbo-stream when local")
+    assert_html(html, "form#observations_search_form")
+    assert_no_html(html, "form#observations_search_form[data-turbo-stream]")
   end
 
   # When not local (in nav dropdown), form SHOULD use turbo_stream
   # for future in-place result updates
   def test_form_uses_turbo_stream_when_not_local
     html = render_form(local: false)
-    doc = Nokogiri::HTML(html)
 
-    form = doc.at_css("form#observations_search_form")
-    assert(form, "Should have form")
-    assert_equal("true", form["data-turbo-stream"],
-                 "Form should have data-turbo-stream='true' when not local")
+    assert_html(html, "form#observations_search_form[data-turbo-stream='true']")
   end
 
   def test_renders_panels_for_field_columns
@@ -73,26 +63,19 @@ class SearchFormTest < UnitTestCase
   # because #search_nav_form doesn't exist on search pages
   def test_clear_button_no_turbo_stream_when_local
     html = render_form(local: true)
-    doc = Nokogiri::HTML(html)
 
-    clear_btn = doc.at_css("a.clear-button")
-    assert(clear_btn, "Should have clear button")
-    assert_nil(clear_btn["data-turbo-stream"],
-               "Clear button should NOT have data-turbo-stream when local")
-    assert_match(%r{/search/new\?clear=true}, clear_btn["href"],
-                 "Clear button should link to search/new with clear param")
+    assert_html(html, "a.clear-button")
+    assert_no_html(html, "a.clear-button[data-turbo-stream]")
+    # Clear button should link to search/new with clear param
+    assert_html(html, "a.clear-button[href*='/search/new?clear=true']")
   end
 
   # When not local (in nav dropdown), clear button SHOULD use turbo_stream
   # to update #search_nav_form without full page reload
   def test_clear_button_uses_turbo_stream_when_not_local
     html = render_form(local: false)
-    doc = Nokogiri::HTML(html)
 
-    clear_btn = doc.at_css("a.clear-button")
-    assert(clear_btn, "Should have clear button")
-    assert_equal("true", clear_btn["data-turbo-stream"],
-                 "Clear button needs data-turbo-stream when not local")
+    assert_html(html, "a.clear-button[data-turbo-stream='true']")
   end
 
   def test_renders_header_when_not_local
@@ -105,10 +88,8 @@ class SearchFormTest < UnitTestCase
 
   def test_does_not_render_header_when_local
     html = render_form(local: true)
-    doc = Nokogiri::HTML(html)
 
-    assert_nil(doc.at_css(".navbar-flex"),
-               "Expected NOT to find element matching '.navbar-flex'")
+    assert_no_html(html, ".navbar-flex")
   end
 
   def test_names_search_form_has_correct_field_ids
@@ -200,15 +181,12 @@ class SearchFormTest < UnitTestCase
     }
 
     html = render_form_with_query(query)
-    doc = Nokogiri::HTML(html)
 
     # The collapse div should have class "in" to be expanded
-    selector = "[data-autocompleter--name-target='collapseFields']"
-    collapse_div = doc.at_css(selector)
-    assert(collapse_div, "Should have collapse div for modifier fields")
-    assert_includes(collapse_div["class"], "in",
-                    "Collapse div should have 'in' class when modifiers " \
-                    "have values")
+    assert_html(
+      html,
+      "[data-autocompleter--name-target='collapseFields'].in"
+    )
   end
 
   # TDD test: Panel collapse should be expanded when collapsed field has value
@@ -218,14 +196,9 @@ class SearchFormTest < UnitTestCase
     query.created_at = "2024-01-01"
 
     html = render_form_with_query(query)
-    doc = Nokogiri::HTML(html)
 
     # The dates panel's collapse div should have class "in"
-    collapse_div = doc.at_css("#observations_dates.panel-collapse")
-    assert(collapse_div, "Should have dates panel collapse div")
-    assert_includes(collapse_div["class"], "in",
-                    "Panel collapse should have 'in' class when collapsed " \
-                    "field has value")
+    assert_html(html, "#observations_dates.panel-collapse.in")
   end
 
   # TDD test: Panel collapse should NOT be expanded when no collapsed fields
@@ -236,14 +209,9 @@ class SearchFormTest < UnitTestCase
     query.date = "2024-01-01"
 
     html = render_form_with_query(query)
-    doc = Nokogiri::HTML(html)
 
     # The dates panel's collapse div should NOT have class "in"
-    collapse_div = doc.at_css("#observations_dates.panel-collapse")
-    assert(collapse_div, "Should have dates panel collapse div")
-    assert_not_includes(collapse_div["class"].to_s, "in",
-                        "Panel collapse should NOT have 'in' class when only " \
-                        "shown fields are set")
+    assert_html(html, "#observations_dates.panel-collapse:not(.in)")
   end
 
   # TDD test: Modifier collapse should be expanded when lookup has value
@@ -257,15 +225,12 @@ class SearchFormTest < UnitTestCase
     }
 
     html = render_form_with_query(query)
-    doc = Nokogiri::HTML(html)
 
     # The collapse div SHOULD have class "in" because lookup has a value
-    selector = "[data-autocompleter--name-target='collapseFields']"
-    collapse_div = doc.at_css(selector)
-    assert(collapse_div, "Should have collapse div for modifier fields")
-    assert_includes(collapse_div["class"], "in",
-                    "Collapse div should have 'in' class when lookup " \
-                    "has a value")
+    assert_html(
+      html,
+      "[data-autocompleter--name-target='collapseFields'].in"
+    )
   end
 
   # TDD test: Modifier collapse NOT expanded when names hash is empty
@@ -274,15 +239,12 @@ class SearchFormTest < UnitTestCase
     # Don't set any names at all
 
     html = render_form_with_query(query)
-    doc = Nokogiri::HTML(html)
 
     # The collapse div should NOT have class "in"
-    selector = "[data-autocompleter--name-target='collapseFields']"
-    collapse_div = doc.at_css(selector)
-    assert(collapse_div, "Should have collapse div for modifier fields")
-    assert_not_includes(collapse_div["class"].to_s, "in",
-                        "Collapse div should NOT have 'in' class when " \
-                        "names is empty")
+    assert_html(
+      html,
+      "[data-autocompleter--name-target='collapseFields']:not(.in)"
+    )
   end
 
   # TDD test: by_users hidden field should have correct name for controller
@@ -290,12 +252,7 @@ class SearchFormTest < UnitTestCase
   def test_by_users_hidden_field_has_correct_name
     html = render_form
 
-    doc = Nokogiri::HTML(html)
-    hidden_field = doc.at_css("input[type='hidden'][name*='by_users_id']")
-
-    assert(hidden_field,
-           "by_users autocompleter should have hidden field " \
-           "query_observations[by_users_id], not [user_id]")
+    assert_html(html, "input[type='hidden'][name*='by_users_id']")
   end
 
   # NOTE: render_select_no_eq_nil_or_yes was removed as dead code.
@@ -308,20 +265,22 @@ class SearchFormTest < UnitTestCase
     html = render_form
 
     # Should use :"query_#{field_name}".l.humanize for labels
-    doc = Nokogiri::HTML(html)
-    label = doc.at_css("label[for='query_observations_date']")
-    assert(label, "Should have date label")
-    assert_equal(:query_date.l.humanize, label.text.strip)
+    assert_html(
+      html,
+      "label[for='query_observations_date']",
+      text: :query_date.l.humanize
+    )
   end
 
   def test_date_field_prefills_string_value
     query = Query::Observations.new(date: "2024-01-15")
     html = render_form_with_query(query)
 
-    doc = Nokogiri::HTML(html)
-    input = doc.at_css("#query_observations_date")
-    assert(input, "Should have date input")
-    assert_equal("2024-01-15", input["value"])
+    assert_html(
+      html,
+      "#query_observations_date",
+      attribute: { value: "2024-01-15" }
+    )
   end
 
   def test_date_field_joins_array_for_range
@@ -330,10 +289,11 @@ class SearchFormTest < UnitTestCase
     query.date = %w[2021-01-06 2021-01-15]
     html = render_form_with_query(query)
 
-    doc = Nokogiri::HTML(html)
-    input = doc.at_css("#query_observations_date")
-    assert(input, "Should have date input")
-    assert_equal("2021-01-06-2021-01-15", input["value"])
+    assert_html(
+      html,
+      "#query_observations_date",
+      attribute: { value: "2021-01-06-2021-01-15" }
+    )
   end
 
   # Cover NamesLookupFieldGroup bool_to_string false branch (line 160)
@@ -364,12 +324,13 @@ class SearchFormTest < UnitTestCase
     query.names = { lookup: [unknown_id] }
 
     html = render_form_with_query(query)
-    doc = Nokogiri::HTML(html)
 
-    lookup_input = doc.at_css("#query_observations_names_lookup")
-    assert(lookup_input, "Should have names lookup input")
     # Unknown ID should pass through as-is
-    assert_equal(unknown_id.to_s, lookup_input["value"])
+    assert_html(
+      html,
+      "#query_observations_names_lookup",
+      attribute: { value: unknown_id.to_s }
+    )
   end
 
   # Cover NamesLookupFieldGroup modifiers_have_values? (lines 106-107)
@@ -380,14 +341,12 @@ class SearchFormTest < UnitTestCase
     query.names = { include_synonyms: true }
 
     html = render_form_with_query(query)
-    doc = Nokogiri::HTML(html)
 
     # Collapse should be expanded because modifier has value
-    selector = "[data-autocompleter--name-target='collapseFields']"
-    collapse_div = doc.at_css(selector)
-    assert(collapse_div, "Should have collapse div")
-    assert_includes(collapse_div["class"], "in",
-                    "Collapse should be expanded when modifier has value")
+    assert_html(
+      html,
+      "[data-autocompleter--name-target='collapseFields'].in"
+    )
   end
 
   # Rank range with only the second value set should use minimum as first value
@@ -587,16 +546,10 @@ class SearchFormTest < UnitTestCase
     query.in_box = { north: 45.0, south: 40.0, east: -70.0, west: -80.0 }
 
     html = render_form_with_query(query)
-    doc = Nokogiri::HTML(html)
 
     # Check that box inputs have prefilled values
-    north_input = doc.at_css("input[name*='north']")
-    assert(north_input, "Should have north input")
-    assert_equal("45.0", north_input["value"])
-
-    south_input = doc.at_css("input[name*='south']")
-    assert(south_input, "Should have south input")
-    assert_equal("40.0", south_input["value"])
+    assert_html(html, "input[name*='north']", attribute: { value: "45.0" })
+    assert_html(html, "input[name*='south']", attribute: { value: "40.0" })
   end
 
   # Test array_to_newlines with array value (line 422)
@@ -642,26 +595,22 @@ class SearchFormTest < UnitTestCase
 
   def test_form_has_max_length_value_attribute
     html = render_form
-    doc = Nokogiri::HTML(html)
 
-    form = doc.at_css("form#observations_search_form")
-    assert_equal(
-      Searchable::MAX_SEARCH_INPUT_LENGTH.to_s,
-      form["data-search-length-validator-max-length-value"],
-      "Form should have max length value set to " \
-      "#{Searchable::MAX_SEARCH_INPUT_LENGTH}"
+    assert_html(
+      html,
+      "form#observations_search_form" \
+      "[data-search-length-validator-max-length-value=" \
+      "'#{Searchable::MAX_SEARCH_INPUT_LENGTH}']"
     )
   end
 
   def test_form_has_search_type_value_attribute
     html = render_form
-    doc = Nokogiri::HTML(html)
 
-    form = doc.at_css("form#observations_search_form")
-    assert_equal(
-      "observations",
-      form["data-search-length-validator-search-type-value"],
-      "Form should have search type value set"
+    assert_html(
+      html,
+      "form#observations_search_form" \
+      "[data-search-length-validator-search-type-value='observations']"
     )
   end
 
@@ -674,10 +623,7 @@ class SearchFormTest < UnitTestCase
 
   def test_form_uses_post_method
     html = render_form
-    doc = Nokogiri::HTML(html)
 
-    form = doc.at_css("form#observations_search_form")
-    assert_equal("post", form["method"],
-                 "Form should use POST method to avoid URL length limits")
+    assert_html(html, "form#observations_search_form[method='post']")
   end
 end

@@ -2,16 +2,13 @@
 
 require "test_helper"
 
-class UserQuestionFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class UserQuestionFormTest < ComponentTestCase
   def setup
     super
     @model = FormObject::UserQuestion.new
     @target = users(:mary)
     @subject = "Test subject"
     @message = "Test message"
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

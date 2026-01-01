@@ -2,15 +2,12 @@
 
 require "test_helper"
 
-class MergeRequestFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class MergeRequestFormTest < ComponentTestCase
   def setup
     super
     @email = FormObject::MergeRequest.new
     @old_name = names(:coprinus_comatus)
     @new_name = names(:agaricus_campestris)
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   def test_renders_form_with_help_text

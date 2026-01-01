@@ -2,14 +2,11 @@
 
 require "test_helper"
 
-class NamesLookupFieldGroupTest < UnitTestCase
-  include ComponentTestHelper
-
+class NamesLookupFieldGroupTest < ComponentTestCase
   def setup
     super
     @name = names(:coprinus_comatus)
     @query = Query.lookup(:Observation)
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   # Indirectly covers line 80 by asserting autocompleter value uses display_name
