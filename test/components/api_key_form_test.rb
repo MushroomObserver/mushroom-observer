@@ -2,14 +2,11 @@
 
 require "test_helper"
 
-class APIKeyFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class APIKeyFormTest < ComponentTestCase
   def setup
     @api_key = APIKey.new
 
     # Set up controller request context for form URL generation
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   def test_renders_standalone_layout_without_cancel_button

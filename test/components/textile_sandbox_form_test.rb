@@ -2,13 +2,7 @@
 
 require "test_helper"
 
-class TextileSandboxFormTest < UnitTestCase
-  include ComponentTestHelper
-
-  def setup
-    controller.request = ActionDispatch::TestRequest.create
-  end
-
+class TextileSandboxFormTest < ComponentTestCase
   # NOTE: Page title and help block are now rendered by the view
   # template (Views::Controllers::Info::TextileSandbox), not the
   # component. Those should be tested in controller/integration tests.
@@ -32,14 +26,14 @@ class TextileSandboxFormTest < UnitTestCase
 
   def test_does_not_render_up_arrows_when_no_result
     html = render_initial_form
-    doc = Nokogiri::HTML(html)
-    assert_nil(doc.at_css(".sandbox-up-ptr"))
+
+    assert_no_html(html, ".sandbox-up-ptr")
   end
 
   def test_does_not_render_result_section_when_no_result
     html = render_initial_form
-    doc = Nokogiri::HTML(html)
-    assert_nil(doc.at_css(".sandbox"))
+
+    assert_no_html(html, ".sandbox")
   end
 
   def test_renders_result_section_when_showing_result
@@ -67,14 +61,13 @@ class TextileSandboxFormTest < UnitTestCase
     assert_html(html, ".sandbox ol")
     assert_html(html, ".sandbox li", count: 3)
 
-    # Verify individual list items contain correct text
-    doc = Nokogiri::HTML(html)
-    list_items = doc.css(".sandbox li").map(&:text)
-    assert_equal(%w[Woof Bark Meow], list_items)
+    # Verify individual list items contain correct text in order
+    assert_html(html, ".sandbox li:nth-child(1)", text: "Woof")
+    assert_html(html, ".sandbox li:nth-child(2)", text: "Bark")
+    assert_html(html, ".sandbox li:nth-child(3)", text: "Meow")
 
     # Should NOT contain escaped HTML in the rendered output
-    sandbox_content = doc.at_css(".sandbox").inner_html
-    assert_no_match(/&lt;/, sandbox_content)
+    assert_no_match(/&lt;/, html)
   end
 
   def test_renders_escaped_html_when_test_codes_button_clicked
@@ -120,9 +113,9 @@ class TextileSandboxFormTest < UnitTestCase
 
   def test_does_not_render_submit_button_below_textarea_when_showing_result
     html = render_form_with_result(:sandbox_test.l)
-    doc = Nokogiri::HTML(html)
+
     # Count submit buttons - should be 2 (in up arrows section only)
-    assert_equal(2, doc.css("input[type='submit']").count)
+    assert_html(html, "input[type='submit']", count: 2)
   end
 
   def test_renders_quick_reference_section

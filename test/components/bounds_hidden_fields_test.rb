@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class BoundsHiddenFieldsTest < UnitTestCase
-  include ComponentTestHelper
-
+class BoundsHiddenFieldsTest < ComponentTestCase
   def test_renders_all_six_bound_fields
     html = render_component(Components::BoundsHiddenFields.new)
 
@@ -39,26 +37,20 @@ class BoundsHiddenFieldsTest < UnitTestCase
       Components::BoundsHiddenFields.new(location: location)
     )
 
-    doc = Nokogiri::HTML(html)
-
-    north_input = doc.at_css("input[name='location[north]']")
-    assert_equal(location.north.to_s, north_input["value"])
-
-    south_input = doc.at_css("input[name='location[south]']")
-    assert_equal(location.south.to_s, south_input["value"])
-
-    east_input = doc.at_css("input[name='location[east]']")
-    assert_equal(location.east.to_s, east_input["value"])
-
-    west_input = doc.at_css("input[name='location[west]']")
-    assert_equal(location.west.to_s, west_input["value"])
+    assert_html(html, "input[name='location[north]']",
+                attribute: { value: location.north.to_s })
+    assert_html(html, "input[name='location[south]']",
+                attribute: { value: location.south.to_s })
+    assert_html(html, "input[name='location[east]']",
+                attribute: { value: location.east.to_s })
+    assert_html(html, "input[name='location[west]']",
+                attribute: { value: location.west.to_s })
   end
 
   def test_renders_without_location_with_empty_values
     html = render_component(Components::BoundsHiddenFields.new)
-    doc = Nokogiri::HTML(html)
 
-    north_input = doc.at_css("input[name='location[north]']")
-    assert_nil(north_input["value"])
+    # Hidden fields should have no value attribute when location is nil
+    assert_no_html(html, "input[name='location[north]'][value]")
   end
 end
