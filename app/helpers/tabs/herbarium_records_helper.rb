@@ -74,7 +74,7 @@ module Tabs
     def edit_herbarium_record_tab(h_r, obs = nil)
       back = obs&.id || :show
       InternalLink::Model.new(
-        :edit_herbarium_record.t, h_r,
+        :edit_herbarium_record.l, h_r,
         edit_herbarium_record_path(h_r.id, back: back),
         html_options: { icon: :edit }
       ).tab
@@ -82,22 +82,21 @@ module Tabs
 
     def herbarium_records_index_return_tab
       InternalLink.new(
-        :edit_herbarium_record_back_to_index.t,
+        :edit_herbarium_record_back_to_index.l,
         herbarium_records_path(q: q_param)
       ).tab
     end
 
-    def remove_herbarium_record_tab(h_r, obs)
-      url = edit_herbarium_record_remove_observation_path(
-        herbarium_record_id: h_r.id, observation_id: obs.id
+    def remove_herbarium_record_button(h_r, obs)
+      patch_button(
+        name: :REMOVE.l,
+        path: herbarium_record_remove_observation_path(
+          herbarium_record_id: h_r.id, observation_id: obs.id
+        ),
+        confirm: :show_observation_remove_herbarium_record.l,
+        class: "remove_herbarium_record_link_#{h_r.id} text-danger",
+        icon: :remove
       )
-      InternalLink::Model.new(
-        :REMOVE.t, h_r, url,
-        html_options: {
-          icon: :remove,
-          class: "text-danger"
-        }
-      ).tab
     end
   end
 end

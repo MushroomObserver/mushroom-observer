@@ -33,8 +33,7 @@ can_edit = in_admin_mode? || obs.can_edit?(user)
                 modal_link_to("collection_number_#{number.id}",
                               *edit_collection_number_tab(number, obs)),
                 "|",
-                modal_link_to("collection_number_observation",
-                              *remove_collection_number_tab(number, obs)),
+                remove_collection_number_button(number, obs),
                 "]"
               ].safe_join(" ")
             end

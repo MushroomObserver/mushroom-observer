@@ -9,31 +9,6 @@ module HerbariumRecords
   class RemoveObservationsController < ApplicationController
     before_action :login_required
 
-    # The edit action exists just to present a dialog box explaining
-    # what the action does, with a remove button (to the :update action)
-    # Should only be hit by turbo_stream
-    def edit
-      return unless init_ivars_for_edit
-      return unless make_sure_can_delete!(@herbarium_record)
-
-      @title = :show_observation_remove_herbarium_record.l
-
-      respond_to do |format|
-        format.html
-        format.turbo_stream do
-          render(
-            partial: "shared/modal_form",
-            locals: {
-              title: @title,
-              identifier: "herbarium_record_observation",
-              user: @user,
-              form: "herbarium_records/remove_observations/form"
-            }
-          ) and return
-        end
-      end
-    end
-
     def update
       return unless init_ivars_for_edit
       return unless make_sure_can_delete!(@herbarium_record)

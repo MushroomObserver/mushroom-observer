@@ -1,0 +1,174 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+class AnyMethodButtonTest < UnitTestCase
+  include ComponentTestHelper
+
+  def test_basic_post_button
+    html = render(Components::AnyMethodButton.new(
+                    name: "Submit",
+                    target: "/some/path",
+                    method: :post
+                  ))
+
+    assert_includes(html, 'action="/some/path"')
+    assert_includes(html, "Submit")
+    assert_includes(html, 'data-turbo="true"')
+    assert_not_includes(html, "turbo-confirm")
+  end
+
+  def test_patch_button_with_confirm
+    html = render(Components::AnyMethodButton.new(
+                    name: "Remove",
+                    target: "/items/1/remove",
+                    method: :patch,
+                    confirm: "Are you sure?"
+                  ))
+
+    assert_includes(html, 'action="/items/1/remove"')
+    assert_includes(html, 'name="_method" value="patch"')
+    assert_includes(html, 'data-turbo-confirm="Are you sure?"')
+    assert_includes(html, "Remove")
+  end
+
+  def test_delete_button_with_destroy_action
+    herbarium = herbaria(:nybg_herbarium)
+    html = render(Components::AnyMethodButton.new(
+                    name: "Destroy",
+                    target: herbarium,
+                    method: :delete,
+                    action: :destroy,
+                    confirm: "Are you sure?"
+                  ))
+
+    # Should build path from model
+    assert_includes(html, "action=\"/herbaria/#{herbarium.id}\"")
+    assert_includes(html, 'name="_method" value="delete"')
+    # Should build identifier class from action and model
+    assert_includes(html, "destroy_herbarium_link_#{herbarium.id}")
+    assert_includes(html, 'data-turbo-confirm="Are you sure?"')
+  end
+
+  def test_button_with_icon
+    html = render(Components::AnyMethodButton.new(
+                    name: "Remove",
+                    target: "/items/1",
+                    method: :patch,
+                    icon: :remove
+                  ))
+
+    # Icon should be rendered
+    assert_includes(html, "glyphicon")
+    # Name should be in sr-only span for accessibility
+    assert_includes(html, 'class="sr-only"')
+    assert_includes(html, "Remove")
+  end
+
+  def test_button_with_custom_class
+    html = render(Components::AnyMethodButton.new(
+                    name: "Submit",
+                    target: "/path",
+                    method: :post,
+                    class: "btn btn-primary"
+                  ))
+
+    assert_includes(html, "btn btn-primary")
+  end
+
+  def test_button_with_model_target_builds_path_and_identifier
+    herbarium = herbaria(:nybg_herbarium)
+    html = render(Components::AnyMethodButton.new(
+                    name: "Update",
+                    target: herbarium,
+                    method: :patch
+                  ))
+
+    # Should build path: herbarium_path(herbarium.id) - method is separate
+    assert_includes(html, "action=\"/herbaria/#{herbarium.id}\"")
+    # Should build identifier from method: patch_herbarium_link_123
+    assert_includes(html, "patch_herbarium_link_#{herbarium.id}")
+  end
+
+  def test_button_with_confirm_shows_title_and_button_name
+    html = render(Components::AnyMethodButton.new(
+                    name: "Remove",
+                    target: "/items/1/remove",
+                    method: :patch,
+                    confirm: "Remove this item?"
+                  ))
+
+    # confirm becomes both the turbo-confirm trigger and the dialog title
+    assert_includes(html, 'data-turbo-confirm="Remove this item?"')
+    assert_includes(html, 'data-turbo-confirm-title="Remove this item?"')
+    # button name is passed for the confirm button text
+    assert_includes(html, 'data-turbo-confirm-button="Remove"')
+  end
+end
+
+class LinkHelperButtonTest < UnitTestCase
+  include ComponentTestHelper
+
+  # Test the helper wrappers that delegate to the component
+
+  def test_destroy_button_helper
+    herbarium = herbaria(:nybg_herbarium)
+    html = view_context.destroy_button(target: herbarium)
+
+    assert_includes(html, "action=\"/herbaria/#{herbarium.id}\"")
+    assert_includes(html, 'name="_method" value="delete"')
+    assert_includes(html, "destroy_herbarium_link_#{herbarium.id}")
+    assert_includes(html, "text-danger")
+    assert_includes(html, "data-turbo-confirm")
+  end
+
+  def test_destroy_button_with_custom_name
+    herbarium = herbaria(:nybg_herbarium)
+    html = view_context.destroy_button(target: herbarium, name: "Delete it")
+
+    assert_includes(html, "Delete it")
+  end
+
+  def test_patch_button_helper
+    html = view_context.patch_button(
+      name: "Update",
+      path: "/items/1"
+    )
+
+    assert_includes(html, 'action="/items/1"')
+    assert_includes(html, 'name="_method" value="patch"')
+    assert_includes(html, "Update")
+  end
+
+  def test_patch_button_with_confirm
+    html = view_context.patch_button(
+      name: "Remove",
+      path: "/items/1/remove",
+      confirm: "Are you sure?"
+    )
+
+    assert_includes(html, 'data-turbo-confirm="Are you sure?"')
+  end
+
+  def test_post_button_helper
+    html = view_context.post_button(
+      name: "Create",
+      path: "/items"
+    )
+
+    assert_includes(html, 'action="/items"')
+    assert_not_includes(html, "_method") # POST is default, no hidden field
+    assert_includes(html, "Create")
+  end
+
+  def test_put_button_helper
+    html = view_context.put_button(
+      name: "Replace",
+      path: "/items/1"
+    )
+
+    assert_includes(html, 'action="/items/1"')
+    assert_includes(html, 'name="_method" value="put"')
+    assert_includes(html, "Replace")
+  end
+end
