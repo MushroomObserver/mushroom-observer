@@ -67,13 +67,6 @@ module ContentHelper
 
   # ----------------------------------------------------------------------------
 
-  def safe_spinner(text = "")
-    [
-      text,
-      tag.span("", class: "spinner-right mx-2")
-    ].safe_join
-  end
-
   def content_tag_if(condition, name, content_or_options_with_block = nil,
                      options = nil, escape = true, &block)
     return unless condition
