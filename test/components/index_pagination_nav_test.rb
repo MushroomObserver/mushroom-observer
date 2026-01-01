@@ -2,9 +2,7 @@
 
 require("test_helper")
 
-class IndexPaginationNavTest < UnitTestCase
-  include ComponentTestHelper
-
+class IndexPaginationNavTest < ComponentTestCase
   def setup
     super
     @request_url = "/observations?q%5Bmodel%5D=Observation"
@@ -165,17 +163,11 @@ class IndexPaginationNavTest < UnitTestCase
                     q_params: @q_params
                   ))
 
-    doc = Nokogiri::HTML(html)
-
     # Prev link should NOT have disabled class
-    prev_link = doc.at_css("a.prev_page_link")
-    assert(prev_link, "Expected prev link")
-    assert_not_includes(prev_link["class"], "disabled")
+    assert_html(html, "a.prev_page_link:not(.disabled)")
 
     # Next link should NOT have disabled class
-    next_link = doc.at_css("a.next_page_link")
-    assert(next_link, "Expected next link")
-    assert_not_includes(next_link["class"], "disabled")
+    assert_html(html, "a.next_page_link:not(.disabled)")
   end
 
   def test_page_input_form_has_correct_structure
@@ -364,13 +356,11 @@ class IndexPaginationNavTest < UnitTestCase
                   ))
 
     # The page input form should have a hidden letter field
-    doc = Nokogiri::HTML(html)
-    page_form = doc.at_css("nav.pagination_numbers form.page_input")
-    assert(page_form, "Expected page input form")
-
-    letter_hidden = page_form.at_css("input[type='hidden'][name='letter']")
-    assert(letter_hidden, "Expected hidden letter field in page form")
-    assert_equal("B", letter_hidden["value"])
+    assert_nested(
+      html,
+      parent_selector: "nav.pagination_numbers form.page_input",
+      child_selector: "input[type='hidden'][name='letter'][value='B']"
+    )
   end
 
   def test_renders_nothing_when_pagination_data_nil
@@ -453,22 +443,17 @@ class IndexPaginationNavTest < UnitTestCase
                     args: { anchor: "results" }
                   ))
 
-    doc = Nokogiri::HTML(html)
-
-    # Prev link should have anchor
-    prev_link = doc.at_css("a.prev_page_link")
-    assert(prev_link, "Expected prev link")
-    assert_includes(prev_link["href"], "#results")
+    # Prev link should have anchor (use attribute substring match)
+    assert_html(html, "a.prev_page_link[href*='#results']")
 
     # Next link should have anchor
-    next_link = doc.at_css("a.next_page_link")
-    assert(next_link, "Expected next link")
-    assert_includes(next_link["href"], "#results")
+    assert_html(html, "a.next_page_link[href*='#results']")
 
     # Max page link should have anchor
-    max_link = doc.at_css("nav.pagination_numbers a:not(.prev_page_link)" \
-                          ":not(.next_page_link)")
-    assert(max_link, "Expected max page link")
-    assert_includes(max_link["href"], "#results")
+    assert_html(
+      html,
+      "nav.pagination_numbers " \
+      "a:not(.prev_page_link):not(.next_page_link)[href*='#results']"
+    )
   end
 end

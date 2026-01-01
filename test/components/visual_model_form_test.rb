@@ -2,13 +2,10 @@
 
 require "test_helper"
 
-class VisualModelFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class VisualModelFormTest < ComponentTestCase
   def setup
     super
     @visual_model = VisualModel.new
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 
