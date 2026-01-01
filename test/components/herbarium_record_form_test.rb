@@ -3,7 +3,6 @@
 require "test_helper"
 
 class HerbariumRecordFormTest < ComponentTestCase
-
   def setup
     super
     @herbarium_record = HerbariumRecord.new

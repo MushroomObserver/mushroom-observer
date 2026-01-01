@@ -3,7 +3,6 @@
 require "test_helper"
 
 class NameChangeRequestFormTest < ComponentTestCase
-
   def setup
     super
     @email = FormObject::NameChangeRequest.new

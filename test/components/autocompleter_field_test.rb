@@ -3,7 +3,6 @@
 require "test_helper"
 
 class AutocompleterFieldTest < ComponentTestCase
-
   def setup
     super
     @herbarium_record = HerbariumRecord.new
@@ -121,8 +120,10 @@ class AutocompleterFieldTest < ComponentTestCase
     html = render_with_component
 
     # Text input autocompleters should NOT have separator (single value only)
-    assert_no_html(html, ".autocompleter[data-separator]",
-                   "Text input autocompleter should not have separator attribute")
+    assert_no_html(
+      html, ".autocompleter[data-separator]",
+      "Text input autocompleter should not have separator attribute"
+    )
   end
 
   def test_hidden_field_derives_id_field_name

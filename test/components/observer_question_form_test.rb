@@ -3,7 +3,6 @@
 require "test_helper"
 
 class ObserverQuestionFormTest < ComponentTestCase
-
   def setup
     super
     @model = FormObject::ObserverQuestion.new

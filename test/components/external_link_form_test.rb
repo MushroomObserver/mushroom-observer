@@ -3,7 +3,6 @@
 require "test_helper"
 
 class ExternalLinkFormTest < ComponentTestCase
-
   def setup
     super
     @external_link = ExternalLink.new

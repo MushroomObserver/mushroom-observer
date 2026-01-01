@@ -3,7 +3,6 @@
 require "test_helper"
 
 class SequenceFormTest < ComponentTestCase
-
   def setup
     super
     @observation = observations(:coprinus_comatus_obs)

@@ -3,7 +3,6 @@
 require "test_helper"
 
 class ApplicationFormTest < ComponentTestCase
-
   def setup
     @user = users(:rolf)
     @collection_number = collection_numbers(:coprinus_comatus_coll_num)

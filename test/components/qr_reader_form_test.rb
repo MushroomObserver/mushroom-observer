@@ -3,7 +3,6 @@
 require "test_helper"
 
 class QRReaderFormTest < ComponentTestCase
-
   def setup
     @model = FieldSlip.new
     @html = render_form

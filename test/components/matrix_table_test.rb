@@ -3,7 +3,6 @@
 require "test_helper"
 
 class MatrixTableTest < ComponentTestCase
-
   def setup
     super
     @user = users(:rolf)

@@ -3,7 +3,6 @@
 require "test_helper"
 
 class VisualGroupFormTest < ComponentTestCase
-
   def setup
     super
     @visual_model = visual_models(:visual_model_one)

@@ -3,7 +3,6 @@
 require "test_helper"
 
 class NamesLookupFieldGroupTest < ComponentTestCase
-
   def setup
     super
     @name = names(:coprinus_comatus)

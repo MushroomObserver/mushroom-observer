@@ -3,7 +3,6 @@
 require "test_helper"
 
 class FormLocationMapTest < ComponentTestCase
-
   def test_renders_map_div_with_default_id
     html = render_component(Components::FormLocationMap.new)
 

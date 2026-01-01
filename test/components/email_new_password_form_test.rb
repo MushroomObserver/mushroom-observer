@@ -3,7 +3,6 @@
 require "test_helper"
 
 class EmailNewPasswordFormTest < ComponentTestCase
-
   def setup
     @user = User.new
 

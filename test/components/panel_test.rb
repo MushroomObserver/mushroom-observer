@@ -3,7 +3,6 @@
 require("test_helper")
 
 class PanelTest < ComponentTestCase
-
   def test_panel_with_heading_and_collapsible_content
     edit_link = view_context.link_to("Edit", "/edit", class: "btn btn-sm")
     html = render(Components::Panel.new(

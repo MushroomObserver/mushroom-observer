@@ -3,7 +3,6 @@
 require "test_helper"
 
 class ObjectFooterTest < ComponentTestCase
-
   # Test double for objects with footer metadata
   class TestObject
     attr_reader :created_at, :updated_at, :user, :user_id, :version,

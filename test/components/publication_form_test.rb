@@ -3,7 +3,6 @@
 require "test_helper"
 
 class PublicationFormTest < ComponentTestCase
-
   def setup
     @user = users(:rolf)
     @publication = Publication.new # New publication for create form

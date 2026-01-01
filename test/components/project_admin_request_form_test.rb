@@ -3,7 +3,6 @@
 require "test_helper"
 
 class ProjectAdminRequestFormTest < ComponentTestCase
-
   def setup
     super
     @model = FormObject::ProjectAdminRequest.new

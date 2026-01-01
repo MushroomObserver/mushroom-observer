@@ -3,7 +3,6 @@
 require "test_helper"
 
 class FormCarouselTest < ComponentTestCase
-
   def setup
     super
     @user = users(:rolf)

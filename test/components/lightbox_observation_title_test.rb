@@ -3,7 +3,6 @@
 require "test_helper"
 
 class LightboxObservationTitleTest < ComponentTestCase
-
   def setup
     super
     @user = users(:rolf)

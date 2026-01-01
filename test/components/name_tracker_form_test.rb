@@ -3,7 +3,6 @@
 require "test_helper"
 
 class NameTrackerFormTest < ComponentTestCase
-
   def setup
     super
     @name = names(:coprinus_comatus)

@@ -3,7 +3,6 @@
 require "test_helper"
 
 class CommercialInquiryFormTest < ComponentTestCase
-
   def setup
     super
     @model = FormObject::CommercialInquiry.new

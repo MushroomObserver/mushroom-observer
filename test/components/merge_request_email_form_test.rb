@@ -3,7 +3,6 @@
 require "test_helper"
 
 class MergeRequestEmailFormTest < ComponentTestCase
-
   def setup
     super
     @email = FormObject::MergeRequest.new

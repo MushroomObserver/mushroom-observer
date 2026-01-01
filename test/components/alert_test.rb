@@ -3,7 +3,6 @@
 require "test_helper"
 
 class AlertTest < ComponentTestCase
-
   def test_renders_basic_alert_with_message
     html = render_component(
       Components::Alert.new(message: "Test message")

@@ -3,7 +3,6 @@
 require "test_helper"
 
 class LicenseFormTest < ComponentTestCase
-
   def setup
     @license = License.new
     @html = render_form

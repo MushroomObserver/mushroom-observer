@@ -3,7 +3,6 @@
 require "test_helper"
 
 class ArticleFormTest < ComponentTestCase
-
   def setup
     super
     @article = Article.new

@@ -3,7 +3,6 @@
 require "test_helper"
 
 class CommentFormTest < ComponentTestCase
-
   def setup
     @comment = Comment.new
     @html = render_form

@@ -5,7 +5,6 @@ require "test_helper"
 # Tests for NamingFields component (Superform mode only).
 # For ERB form tests, see the system tests for observation form.
 class NamingFieldsTest < ComponentTestCase
-
   def setup
     super
     @naming = Naming.new

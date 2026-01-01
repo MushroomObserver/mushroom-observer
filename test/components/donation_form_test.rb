@@ -3,7 +3,6 @@
 require "test_helper"
 
 class DonationFormTest < ComponentTestCase
-
   def setup
     super
     @donation = Donation.new

@@ -3,7 +3,6 @@
 require "test_helper"
 
 class WebmasterQuestionFormTest < ComponentTestCase
-
   def setup
     super
     @email = FormObject::WebmasterQuestion.new

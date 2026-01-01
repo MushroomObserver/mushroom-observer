@@ -3,7 +3,6 @@
 require "test_helper"
 
 class APIKeyFormTest < ComponentTestCase
-
   def setup
     @api_key = APIKey.new
 

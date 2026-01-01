@@ -3,7 +3,6 @@
 require "test_helper"
 
 class NameFormTest < ComponentTestCase
-
   def setup
     super
     @user = users(:rolf)

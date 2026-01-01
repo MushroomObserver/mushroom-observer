@@ -3,7 +3,6 @@
 require "test_helper"
 
 class GlossaryTermFormTest < ComponentTestCase
-
   def setup
     @glossary_term = GlossaryTerm.new
     @html = render_form

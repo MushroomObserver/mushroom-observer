@@ -3,7 +3,6 @@
 require "test_helper"
 
 class VisualModelFormTest < ComponentTestCase
-
   def setup
     super
     @visual_model = VisualModel.new

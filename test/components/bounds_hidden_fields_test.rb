@@ -3,7 +3,6 @@
 require "test_helper"
 
 class BoundsHiddenFieldsTest < ComponentTestCase
-
   def test_renders_all_six_bound_fields
     html = render_component(Components::BoundsHiddenFields.new)
 

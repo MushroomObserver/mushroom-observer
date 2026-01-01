@@ -3,11 +3,6 @@
 require "test_helper"
 
 class FormNameFeedbackTest < ComponentTestCase
-
-  def setup
-    super
-  end
-
   def test_renders_parent_deprecated_warning
     parent = names(:lactarius)
     html = render_feedback(

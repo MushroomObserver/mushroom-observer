@@ -3,9 +3,7 @@
 require "test_helper"
 
 class TextileSandboxFormTest < ComponentTestCase
-
-  def setup
-  end
+  def setup; end
 
   # NOTE: Page title and help block are now rendered by the view
   # template (Views::Controllers::Info::TextileSandbox), not the

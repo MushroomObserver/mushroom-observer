@@ -3,7 +3,6 @@
 require "test_helper"
 
 class AuthorsAndEditorsTest < ComponentTestCase
-
   # Test double for description objects
   class TestDescription
     attr_reader :authors, :editors, :id, :type_tag

@@ -3,7 +3,6 @@
 require "test_helper"
 
 class CollectionNumberFormTest < ComponentTestCase
-
   def setup
     super
     @collection_number = CollectionNumber.new

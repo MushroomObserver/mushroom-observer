@@ -3,7 +3,6 @@
 require "test_helper"
 
 class CollapseHelpBlockTest < ComponentTestCase
-
   def test_renders_basic_collapse_block_with_content
     html = render_component(
       Components::CollapseHelpBlock.new(target_id: "help_1")

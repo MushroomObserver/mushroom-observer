@@ -3,7 +3,6 @@
 require "test_helper"
 
 class HerbariumCuratorRequestFormTest < ComponentTestCase
-
   # Test model that includes necessary ActiveModel modules
   class TestRequest
     include ActiveModel::Model

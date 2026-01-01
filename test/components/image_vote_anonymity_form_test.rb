@@ -3,9 +3,7 @@
 require "test_helper"
 
 class ImageVoteAnonymityFormTest < ComponentTestCase
-
-  def setup
-  end
+  def setup; end
 
   def test_renders_vote_counts
     html = render_form(num_anonymous: 5, num_public: 10)
