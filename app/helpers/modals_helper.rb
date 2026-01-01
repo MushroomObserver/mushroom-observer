@@ -3,6 +3,17 @@
 # Helper methods for modal dialogs and forms
 module ModalsHelper
   NAMING_FORM_KEYS = [:context, :vote, :given_name, :reasons, :feedback].freeze
+
+  # Maps component classes to their parameter handler methods
+  FORM_PARAM_HANDLERS = {
+    "Components::ExternalLinkForm" => :add_external_link_params,
+    "Components::HerbariumForm" => :add_herbarium_params,
+    "Components::NamingForm" => :add_naming_form_params,
+    "Components::WebmasterQuestionForm" => :add_webmaster_question_params,
+    "Components::ObserverQuestionForm" => :add_observer_question_params,
+    "Components::CommercialInquiryForm" => :add_commercial_inquiry_params,
+    "Components::UserQuestionForm" => :add_user_question_params
+  }.freeze
   # Renders either a Superform component or a legacy ERB partial for modal
   # forms. This allows gradual migration from ERB partials to Superform.
   #
@@ -18,6 +29,7 @@ module ModalsHelper
     component_map = {
       Comment: Components::CommentForm,
       ExternalLink: Components::ExternalLinkForm,
+      Herbarium: Components::HerbariumForm,
       HerbariumRecord: Components::HerbariumRecordForm,
       CollectionNumber: Components::CollectionNumberForm,
       Sequence: Components::SequenceForm,
@@ -76,19 +88,13 @@ module ModalsHelper
   end
 
   def add_form_specific_params(params, component_class, observation, locals)
-    case component_class.name
-    when "Components::ExternalLinkForm"
-      add_external_link_params(params, locals)
-    when "Components::NamingForm"
-      add_naming_form_params(params, locals)
-    when "Components::WebmasterQuestionForm"
-      add_webmaster_question_params(params, locals)
-    when "Components::ObserverQuestionForm"
-      add_observer_question_params(params, observation, locals)
-    when "Components::CommercialInquiryForm"
-      add_commercial_inquiry_params(params, locals)
-    when "Components::UserQuestionForm"
-      add_user_question_params(params, locals)
+    handler = FORM_PARAM_HANDLERS[component_class.name]
+    return unless handler
+
+    if handler == :add_observer_question_params
+      send(handler, params, observation, locals)
+    else
+      send(handler, params, locals)
     end
   end
 
@@ -96,6 +102,12 @@ module ModalsHelper
     params[:user] = locals[:user] if locals[:user]
     params[:sites] = locals[:sites] if locals[:sites]
     params[:site] = locals[:site] if locals[:site]
+  end
+
+  def add_herbarium_params(params, locals)
+    params[:user] = locals[:user] if locals[:user]
+    params[:location] = locals[:location] if locals[:location]
+    params[:top_users] = locals[:top_users] if locals[:top_users]
   end
 
   def add_naming_form_params(params, locals)

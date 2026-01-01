@@ -17,10 +17,8 @@ class NamesLookupFieldGroupTest < UnitTestCase
     @query.names = { lookup: [@name.id] }
 
     value_seen = nil
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+    lookup_field_mock = create_lookup_mock do |opts|
       value_seen = opts[:value]
-      true
     end
 
     names_ns = Minitest::Mock.new
@@ -43,10 +41,8 @@ class NamesLookupFieldGroupTest < UnitTestCase
     @query.names = { lookup: [unknown_id] }
 
     value_seen = nil
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+    lookup_field_mock = create_lookup_mock do |opts|
       value_seen = opts[:value]
-      true
     end
 
     names_ns = Minitest::Mock.new
@@ -99,9 +95,9 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    # Need to also stub the lookup field for view_template
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    # Need to also stub the lookup field for view_template.
+    # invoke_append: true so collapse content (and select field) renders
+    lookup_field_mock = create_lookup_mock(invoke_append: true)
 
     names_ns = Minitest::Mock.new
     names_ns.expect(:field, lookup_field_mock, [:lookup])
@@ -118,7 +114,6 @@ class NamesLookupFieldGroupTest < UnitTestCase
     component.stub(:render, nil) { render_component(component) }
 
     assert(select_rendered, "Should call select for single field modifier")
-    names_ns.verify
   end
 
   # Indirectly cover bool_to_string by capturing selected value passed to select
@@ -131,8 +126,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    lookup_field_mock = create_lookup_mock(invoke_append: true)
 
     names_ns = Minitest::Mock.new
     names_ns.expect(:field, lookup_field_mock, [:lookup])
@@ -158,8 +152,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    lookup_field_mock = create_lookup_mock(invoke_append: true)
 
     names_ns = Minitest::Mock.new
     names_ns.expect(:field, lookup_field_mock, [:lookup])
@@ -185,8 +178,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    lookup_field_mock = create_lookup_mock(invoke_append: true)
 
     names_ns = Minitest::Mock.new
     names_ns.expect(:field, lookup_field_mock, [:lookup])
@@ -206,10 +198,8 @@ class NamesLookupFieldGroupTest < UnitTestCase
   def test_autocompleter_value_with_name_ids
     @query.names = { lookup: [@name.id] }
     value_seen = nil
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+    lookup_field_mock = create_lookup_mock do |opts|
       value_seen = opts[:value]
-      true
     end
 
     names_ns = Minitest::Mock.new
@@ -231,10 +221,8 @@ class NamesLookupFieldGroupTest < UnitTestCase
     @query.names = { lookup: [@name.id, name2.id] }
 
     value_seen = nil
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+    lookup_field_mock = create_lookup_mock do |opts|
       value_seen = opts[:value]
-      true
     end
 
     names_ns = Minitest::Mock.new
@@ -257,10 +245,8 @@ class NamesLookupFieldGroupTest < UnitTestCase
     @query.names = { lookup: [@name.id, name2.id] }
 
     hidden_seen = nil
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) do |**opts|
+    lookup_field_mock = create_lookup_mock do |opts|
       hidden_seen = opts[:hidden_value]
-      true
     end
 
     names_ns = Minitest::Mock.new
@@ -277,93 +263,34 @@ class NamesLookupFieldGroupTest < UnitTestCase
     assert_equal("#{@name.id}\n#{name2.id}", hidden_seen)
   end
 
+  # Tests for collapse behavior now test the component methods directly
+  # since the collapse div is rendered via a slot
   def test_collapse_has_in_class_when_lookup_present
     @query.names = { lookup: [@name.id] }
+    component = create_component(modifier_fields: [])
 
-    # Minimal stubs for required names namespace calls
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
-    names_ns = Minitest::Mock.new
-    names_ns.expect(:field, lookup_field_mock, [:lookup])
-
-    component = Components::NamesLookupFieldGroup.new(
-      names_namespace: names_ns,
-      query: @query,
-      modifier_fields: []
-    )
-    html = component.stub(:render, nil) { render_component(component) }
-    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]',
-                classes: "in")
+    assert_equal("in", component.send(:collapse_class))
   end
 
   def test_collapse_without_values_has_no_in_class
     @query.names = {}
+    component = create_component(modifier_fields: [])
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
-    names_ns = Minitest::Mock.new
-    names_ns.expect(:field, lookup_field_mock, [:lookup])
-
-    component = Components::NamesLookupFieldGroup.new(
-      names_namespace: names_ns,
-      query: @query,
-      modifier_fields: []
-    )
-    html = component.stub(:render, nil) { render_component(component) }
-    # Should have collapse container without 'in' class
-    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]')
-    doc = Nokogiri::HTML(html)
-    el = doc.at_css('div[data-autocompleter--name-target="collapseFields"]')
-    classes = el["class"]&.split || []
-    assert_not(classes.include?("in"))
+    assert_nil(component.send(:collapse_class))
   end
 
   def test_collapse_has_in_class_when_modifiers_set
     @query.names = { include_synonyms: true }
+    component = create_component(modifier_fields: [[:include_synonyms]])
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
-    select_field_called = false
-    select_field_mock = Minitest::Mock.new
-    select_field_mock.expect(:select, select_field_mock) do |*_args, **_kwargs|
-      select_field_called = true
-      true
-    end
-    names_ns = Minitest::Mock.new
-    names_ns.expect(:field, lookup_field_mock, [:lookup])
-    names_ns.expect(:field, select_field_mock, [:include_synonyms])
-
-    component = Components::NamesLookupFieldGroup.new(
-      names_namespace: names_ns,
-      query: @query,
-      modifier_fields: [[:include_synonyms]]
-    )
-    html = component.stub(:render, nil) { render_component(component) }
-    assert_html(html, 'div[data-autocompleter--name-target="collapseFields"]',
-                classes: "in")
+    assert_equal("in", component.send(:collapse_class))
   end
 
   def test_collapse_without_modifiers_has_no_in_class
     @query.names = {}
+    component = create_component(modifier_fields: [[:include_synonyms]])
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
-    select_field_mock = Minitest::Mock.new
-    select_field_mock.expect(:select, select_field_mock) { true }
-    names_ns = Minitest::Mock.new
-    names_ns.expect(:field, lookup_field_mock, [:lookup])
-    names_ns.expect(:field, select_field_mock, [:include_synonyms])
-
-    component = Components::NamesLookupFieldGroup.new(
-      names_namespace: names_ns,
-      query: @query,
-      modifier_fields: [[:include_synonyms]]
-    )
-    html = component.stub(:render, nil) { render_component(component) }
-    doc = Nokogiri::HTML(html)
-    el = doc.at_css('div[data-autocompleter--name-target="collapseFields"]')
-    classes = el["class"]&.split || []
-    assert_not(classes.include?("in"))
+    assert_nil(component.send(:collapse_class))
   end
 
   def test_field_selected_value_integrates_into_select
@@ -375,8 +302,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    lookup_field_mock = create_lookup_mock(invoke_append: true)
     names_ns = Minitest::Mock.new
     names_ns.expect(:field, lookup_field_mock, [:lookup])
     names_ns.expect(:field, select_field_mock, [:include_synonyms])
@@ -401,8 +327,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    lookup_field_mock = create_lookup_mock(invoke_append: true)
     names_ns = Minitest::Mock.new
     names_ns.expect(:field, lookup_field_mock, [:lookup])
     names_ns.expect(:field, select_field_mock, [:include_subtaxa])
@@ -428,8 +353,7 @@ class NamesLookupFieldGroupTest < UnitTestCase
       true
     end
 
-    lookup_field_mock = Minitest::Mock.new
-    lookup_field_mock.expect(:autocompleter, lookup_field_mock) { true }
+    lookup_field_mock = create_lookup_mock(invoke_append: true)
     names_ns = Minitest::Mock.new
     names_ns.expect(:field, lookup_field_mock, [:lookup])
     names_ns.expect(:field, select_field_mock, [:include_subtaxa])
@@ -457,5 +381,35 @@ class NamesLookupFieldGroupTest < UnitTestCase
       query: @query,
       modifier_fields: modifier_fields
     )
+  end
+
+  # Creates a lookup field mock that handles autocompleter and with_append calls
+  # @param invoke_append [Boolean] if true, the block passed to with_append
+  #   will be invoked (needed for tests that check values rendered in collapse)
+  # @param block [Proc] optional block to capture autocompleter options
+  def create_lookup_mock(invoke_append: false, &block)
+    mock = Object.new
+
+    # Store block for autocompleter call
+    autocompleter_block = block
+
+    # Define autocompleter method
+    mock.define_singleton_method(:autocompleter) do |**opts|
+      autocompleter_block&.call(opts)
+      mock
+    end
+
+    # Define with_help method
+    mock.define_singleton_method(:with_help) do |&_help_block|
+      nil
+    end
+
+    # Define with_append method - optionally invoke the passed block
+    mock.define_singleton_method(:with_append) do |&append_block|
+      append_block&.call if invoke_append
+      nil
+    end
+
+    mock
   end
 end

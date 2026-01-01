@@ -26,8 +26,9 @@ class Components::CommentForm < Components::ApplicationForm
 
   def render_comment_field
     textarea_field(:comment, label: "#{:form_comments_comment.t}:",
-                             rows: 10,
-                             help: :shared_textile_help.l)
+                             rows: 10) do |f|
+      f.with_help { :shared_textile_help.l }
+    end
   end
 
   def submit_text
