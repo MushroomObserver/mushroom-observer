@@ -341,10 +341,7 @@ MushroomObserver::Application.routes.draw do
   get "/checklist", to: "checklists#show"
 
   # ----- Collection Numbers: standard actions --------------------------------
-  resources :collection_numbers do
-    resource :remove_observation, only: [:edit, :update],
-                                  module: :collection_numbers
-  end
+  resources :collection_numbers
 
   # ----- Comments: standard actions --------------------------------------
   resources :comments
@@ -403,10 +400,7 @@ MushroomObserver::Application.routes.draw do
   resources :herbaria, id: /\d+/
 
   # ----- Herbarium Records: standard actions --------------------------------
-  resources :herbarium_records do
-    resource :remove_observation, only: [:edit, :update],
-                                  module: :herbarium_records
-  end
+  resources :herbarium_records
 
   # ----- Images: Namespace differences are for memorable path names
   namespace :images do

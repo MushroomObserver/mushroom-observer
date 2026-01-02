@@ -229,24 +229,21 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   #   )
   #
   def destroy_button(target:, name: nil, **args)
-    # target could just be a path
     name ||= if target.is_a?(String)
                :DESTROY.l
              else
                :destroy_object.t(type: target.type_tag)
              end
-    path, identifier, icon, content = button_atts(:destroy, target, args, name)
+    args[:class] = class_names(args[:class], "text-danger")
 
-    html_options = {
-      method: :delete, title: name,
-      class: class_names(identifier, args[:class], "text-danger"),
-      form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args.except(:class, :back))
-
-    button_to(path, html_options) do
-      [content, icon].safe_join
+    # Add back param for SHOW_OBS_EDITABLES (like edit_button does)
+    unless target.is_a?(String) || target.is_a?(Hash)
+      back_args = add_back_param_to_button_atts(:destroy)
+      args[:back] = back_args[:back] if back_args[:back]
     end
+
+    crud_action_button(method: :delete, name:, target:, action: :destroy,
+                       confirm: :are_you_sure.l, **args)
   end
 
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
@@ -362,37 +359,27 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
 
   # POST to a path; used instead of a link because POST link requires js
   def post_button(name:, path:, **, &block)
-    any_method_button(method: :post, name:, path:, **, &block)
+    crud_action_button(method: :post, name:, target: path, **, &block)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
   def put_button(name:, path:, **, &block)
-    any_method_button(method: :put, name:, path:, **, &block)
+    crud_action_button(method: :put, name:, target: path, **, &block)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
   def patch_button(name:, path:, **, &block)
-    any_method_button(method: :patch, name:, path:, **, &block)
+    crud_action_button(method: :patch, name:, target: path, **, &block)
   end
 
-  # any_method_button(method: :patch,
-  #                   name: herbarium.name.t,
-  #                   path: herbarium_path(id: @herbarium.id),
-  #                   data: { confirm: :are_you_sure.t })
+  # crud_action_button(method: :patch,
+  #                    name: herbarium.name.t,
+  #                    target: @herbarium,  # or a path string
+  #                    confirm: :are_you_sure.t,
+  #                    action: :remove)  # optional, defaults to method
   # Pass a block and a name if you want an icon with tooltip
-  # NOTE: button_to with block generates a button, not an input #quirksmode
-  def any_method_button(name:, path:, method: :post, **args, &block)
-    block ? capture(&block) : name
-    path, identifier, icon, content = button_atts(method, path, args, name)
-
-    html_options = {
-      method: method,
-      class: class_names(identifier, args[:class]), # usually also btn
-      form: { data: { turbo: true } },
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args) # currently don't have to merge class arg upstream
-
-    button_to(path, html_options) { [content, icon].safe_join }
+  def crud_action_button(**, &block)
+    render(Components::CrudActionButton.new(**, &block))
   end
 
   def button_link(title, path, **args)

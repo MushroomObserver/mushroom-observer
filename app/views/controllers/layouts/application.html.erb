@@ -63,6 +63,8 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
 
     <!--PROGRESS SPINNER -->
     <%= render(Components::ModalProgressSpinner.new) %>
+    <!--TURBO CONFIRM MODAL -->
+    <%= render(Components::ModalConfirm.new) %>
     <%= render(partial: "application/app/media_query_tests") %>
     <%= render(partial: "application/app/javascript_footer") %>
   </body>

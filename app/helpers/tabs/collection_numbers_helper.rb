@@ -13,10 +13,10 @@ module Tabs
 
     def collection_numbers_index_sorts
       [
-        ["name",       :sort_by_name.t],
-        ["number",     :sort_by_number.t],
-        ["created_at", :sort_by_created_at.t],
-        ["updated_at", :sort_by_updated_at.t]
+        ["name",       :sort_by_name.l],
+        ["number",     :sort_by_number.l],
+        ["created_at", :sort_by_created_at.l],
+        ["updated_at", :sort_by_updated_at.l]
       ].freeze
     end
 
@@ -35,7 +35,7 @@ module Tabs
 
     def collection_numbers_index_tab(c_n)
       InternalLink::Model.new(
-        :edit_collection_number_back_to_index.t, c_n,
+        :edit_collection_number_back_to_index.l, c_n,
         add_q_param(c_n.index_link_args)
       ).tab
     end
@@ -71,29 +71,19 @@ module Tabs
 
     def destroy_collection_number_tab(c_n)
       InternalLink::Model.new(
-        :delete_collection_number.t, c_n, c_n,
+        :delete_collection_number.l, c_n, c_n,
         html_options: { button: :destroy, icon: :delete }
       ).tab
     end
 
-    # Dead code?
-    # def collection_number_remove_obs_tab(c_n, obs)
-    #   [:REMOVE.t,
-    #    collection_number_remove_observation_path(
-    #      collection_number_id: c_n.id, observation_id: obs.id
-    #    ),
-    #    { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :remove,
-    #      method: :patch, data: { confirm: :are_you_sure.t } }]
-    # end
-
-    def remove_collection_number_tab(c_n, obs)
-      InternalLink::Model.new(
-        :REMOVE.t, c_n,
-        edit_collection_number_remove_observation_path(
-          collection_number_id: c_n.id, observation_id: obs.id
-        ),
-        html_options: { icon: :remove, class: "text-danger" }
-      ).tab
+    def remove_collection_number_button(c_n, obs)
+      destroy_button(
+        name: :REMOVE.l,
+        target: collection_number_path(c_n.id, observation_id: obs.id),
+        confirm: :show_observation_remove_collection_number.l,
+        class: "remove_collection_number_link_#{c_n.id}",
+        icon: :remove
+      )
     end
   end
 end

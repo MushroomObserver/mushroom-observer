@@ -52,10 +52,10 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.observations__show")
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
 
-    # This now opens the modal (or goes to view) with the one-button form.
+    # This opens the confirm modal
     click_on(class: "remove_herbarium_record_link_#{rec.id}")
-    # The remove button is a rails form patch submit input, not a link
-    click_on("Remove")
+    # Click the confirm button in the modal (wait for it to be visible)
+    find("#mo_confirm [data-action='confirm-modal#confirm']", wait: 5).click
 
     assert_selector("body.observations__show")
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
@@ -96,7 +96,8 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.herbarium_records__show")
     click_on(class: "destroy_herbarium_record_link_#{rec.id}")
 
-    assert_selector("body.herbarium_records__index")
+    # After destroying from show page, redirects to the observation
+    assert_selector("body.observations__show")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
 

@@ -94,19 +94,17 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_equal(c_n.reload.number, updated_number)
 
-    # try remove links
-    # collection_number
+    # try remove button (uses turbo_confirm modal)
     within("#observation_collection_numbers") do
-      assert_link(:REMOVE.l)
-      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
-    end
-    # confirm is in modal
-    assert_selector("#modal_collection_number_observation")
-    within("#modal_collection_number_observation") do
       assert_button(:REMOVE.l)
-      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
+      find(:css, ".remove_collection_number_link_#{c_n.id}").click
     end
-    assert_no_selector("#modal_collection_number_observation")
+    # confirm modal appears
+    assert_selector("#mo_confirm", visible: true)
+    within("#mo_confirm") do
+      find("button.btn-danger").click
+    end
+    assert_no_selector("#mo_confirm", visible: true)
     assert_no_link(text: /#{updated_number}/)
   end
 
@@ -153,26 +151,20 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_link(text: /6234234/)
     end
 
-    # Test remove herbarium record
+    # Test remove herbarium record (uses turbo_confirm modal)
     within("#observation_herbarium_records") do
-      # Verify remove link has text-danger class
-      assert_selector("a.text-danger", text: :REMOVE.l)
-      # Click the remove link
-      find("a", text: :REMOVE.l).trigger("click")
+      # Verify remove button has text-danger class
+      assert_selector("button.text-danger", text: :REMOVE.l)
+      find("button", text: :REMOVE.l).click
     end
-
-    # Modal should appear
-    assert_selector("#modal_herbarium_record_observation", wait: 6)
-
-    # Confirm removal in modal
-    within("#modal_herbarium_record_observation") do
-      assert_button(:REMOVE.l)
-      find("button", text: :REMOVE.l).trigger("click")
+    # confirm modal appears
+    assert_selector("#mo_confirm", visible: true)
+    within("#mo_confirm") do
+      find("button.btn-danger").click
     end
-    sleep(1)
+    assert_no_selector("#mo_confirm", visible: true)
 
-    # Modal should close and record should be removed from the list
-    assert_no_selector("#modal_herbarium_record_observation")
+    # Record should be removed from the list
     within("#observation_herbarium_records") do
       assert_no_link(text: /6234234/)
     end
@@ -237,15 +229,18 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_equal(seq.reload.notes, "Oh yea.")
     assert_no_selector("#modal_sequence_#{seq.id}")
 
-    # try remove links
-    # sequence
+    # try remove button (uses turbo_confirm modal)
     within("#observation_sequences") do
       assert_button(:destroy_object.t(type: :sequence))
-      accept_confirm do
-        find(:css, ".destroy_sequence_link_#{seq.id}").trigger("click")
-      end
-      assert_no_link(text: /LSU/)
+      find(:css, ".destroy_sequence_link_#{seq.id}").click
     end
+    # confirm modal appears
+    assert_selector("#mo_confirm", visible: true)
+    within("#mo_confirm") do
+      find("button.btn-danger").click
+    end
+    assert_no_selector("#mo_confirm", visible: true)
+    assert_no_link(text: /LSU/)
   end
 
   def test_add_and_edit_external_links
@@ -303,14 +298,17 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_no_selector("#modal_external_link_#{link.id}")
     assert_equal(link.reload.url, "https://www.mycoportal.org/portal/collections/456")
 
-    # try remove links
-    # external_link
+    # try remove button (uses turbo_confirm modal)
     within("#observation_external_links") do
       assert_button(text: :destroy_object.t(type: :external_link))
-      accept_confirm do
-        find(:css, ".destroy_external_link_link_#{link.id}").trigger("click")
-      end
-      assert_no_link(text: /MycoPortal/)
+      find(:css, ".destroy_external_link_link_#{link.id}").click
     end
+    # confirm modal appears
+    assert_selector("#mo_confirm", visible: true)
+    within("#mo_confirm") do
+      find("button.btn-danger").click
+    end
+    assert_no_selector("#mo_confirm", visible: true)
+    assert_no_link(text: /MycoPortal/)
   end
 end
