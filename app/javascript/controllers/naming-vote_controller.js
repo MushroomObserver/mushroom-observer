@@ -31,11 +31,11 @@ export default class extends Controller {
     };
     // console.log("Sending Vote")
     // console.log("Pausing UI")
-    document.getElementById('mo_ajax_progress_caption').innerHTML =
+    document.getElementById('modal_progress_spinner_caption').innerHTML =
       this.localized_text.saving + "... ";
 
     // Must be in jQuery for Bootstrap 3 and 4
-    $("#mo_ajax_progress").modal('show');
+    $("#modal_progress_spinner").modal('show');
     this.element.requestSubmit();
   }
 }
