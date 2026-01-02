@@ -19,9 +19,7 @@ class Components::ProjectAliasForm < Components::ApplicationForm
 
   def view_template
     render_errors if model.errors.any?
-    render_name_field
-    hidden_field(:project_id)
-    render_target_type_select
+    render_name_and_type_row
     render_user_autocompleter
     render_location_autocompleter
     submit(submit_text, class: "mb-5")
@@ -44,6 +42,16 @@ class Components::ProjectAliasForm < Components::ApplicationForm
     count = model.errors.count
     "#{count} #{count == 1 ? "error" : "errors"} prohibited this " \
       "project alias from being saved:"
+  end
+
+  def render_name_and_type_row
+    div(class: "row") do
+      div(class: "col-12 col-sm-6") do
+        render_name_field
+        hidden_field(:project_id)
+      end
+      div(class: "col-12 col-sm-6") { render_target_type_select }
+    end
   end
 
   def render_name_field
