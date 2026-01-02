@@ -4,8 +4,8 @@ require "test_helper"
 
 class FormLocationFeedbackTest < ComponentTestCase
   def test_renders_nothing_when_no_reasons
-    assert_empty(Nokogiri::HTML(render_feedback(nil)).text.strip)
-    assert_empty(Nokogiri::HTML(render_feedback([])).text.strip)
+    assert_empty(render_feedback(nil))
+    assert_empty(render_feedback([]))
   end
 
   def test_renders_warning_alert_with_reasons
