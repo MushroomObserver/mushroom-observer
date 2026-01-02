@@ -1668,7 +1668,7 @@
 
   # observer/_form_list_feedback
   form_list_feedback_missing_names: The following names could not be found.
-  form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names. If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list. If the names came from an uploaded observation list, create a correct file and select it for upload.
+  form_list_feedback_missing_names_help: Click 'Add' to create these names. If you want to correct any you entered by hand, do so in the area below and click 'Add' to re-evaluate the list. If the names came from an uploaded observation list, create a correct file and select it for upload.
 
   # glossary
   form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use.\nAvoid (a) variations of other Terms, or (b) Names of taxa. Details:"

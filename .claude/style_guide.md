@@ -120,16 +120,31 @@ raw(
 **Use Phlex rendering methods** for outputting content:
 - `plain(text)` - for plain text
 - `whitespace` - for spacing between elements
-- `raw(html)` - only when necessary for Rails helpers that return HTML strings
+- `trusted_html(html)` - for HTML-safe strings (ActiveSupport::SafeBuffer) from Rails helpers
+- `raw(html)` - only when necessary for HTML strings that are not already marked safe
 
 ```ruby
-# Good
+# Good - using trusted_html for HTML-safe content
+def view_template
+  div do
+    trusted_html(name.display_name.t)  # .t returns ActiveSupport::SafeBuffer
+  end
+end
+
+# Good - plain content rendering
 def view_template
   div do
     plain("Hello ")
     b("World")
     whitespace
     plain("!")
+  end
+end
+
+# Bad - using raw() for HTML-safe content
+def view_template
+  div do
+    raw(name.display_name.t)  # Use trusted_html instead
   end
 end
 
@@ -140,6 +155,12 @@ def view_template
   end
 end
 ```
+
+**Why trusted_html?**
+- `trusted_html()` is defined in `Components::Base` specifically for HTML-safe content
+- It handles `ActiveSupport::SafeBuffer` correctly without requiring `rubocop:disable`
+- Rails translation methods (`.t`, `.l`) return HTML-safe strings that should use `trusted_html`
+- Only use `raw()` for HTML strings that are not already marked as safe
 
 Calling **view_context** is nearly always a code smell that you should find a
 native Phlex method or include the method as an output_helper or value_helper.
@@ -257,6 +278,39 @@ Examples:
 <% end %>
 ```
 
+## Internationalization
+
+### Text Strings and Localization
+
+**Always add text strings to `config/locales/en.txt`, never to `.yml` files.**
+
+The `.yml` locale files are generated from `.txt` files and should never be edited or committed directly.
+
+**Workflow for adding/updating text strings:**
+
+1. Edit `config/locales/en.txt` to add or modify text strings
+2. Run `rails lang:update` to regenerate all `.yml` files
+3. Verify the change appears correctly in `config/locales/en.yml`
+4. **Never commit the `.yml` files** - they are ignored by git
+
+```bash
+# Good workflow
+vim config/locales/en.txt
+rails lang:update
+git add config/locales/en.txt
+git commit -m "Update help text"
+
+# Bad - never do this
+vim config/locales/en.yml  # ❌ Wrong file
+git add config/locales/en.yml  # ❌ Never commit .yml files
+```
+
+**Why this matters:**
+- `.txt` files are the single source of truth for translations
+- The `lang:update` rake task propagates changes to all language `.yml` files
+- Editing `.yml` files directly causes changes to be lost on next update
+- All `.yml` files are in `.gitignore` and should remain uncommitted
+
 ## Code Quality and Linting
 
 ### RuboCop Compliance
@@ -309,6 +363,8 @@ The key principles are:
 1. **Always use parentheses** for method calls (Ruby and ERB)
 2. **Use full namespaces** for component references (`Components::ClassName`)
 3. **Prefer Phlex helpers** over Rails `tag` helpers in components
-4. **Render directly** instead of building arrays and joining
-5. **Internalize logic** into components when possible
-6. **All new code must pass RuboCop** - refactor instead of disabling cops
+4. **Use `trusted_html`** for HTML-safe content (from `.t`, `.l`), not `raw()`
+5. **Render directly** instead of building arrays and joining
+6. **Internalize logic** into components when possible
+7. **Edit `en.txt` for text strings**, run `rails lang:update`, never commit `.yml` files
+8. **All new code must pass RuboCop** - refactor instead of disabling cops
