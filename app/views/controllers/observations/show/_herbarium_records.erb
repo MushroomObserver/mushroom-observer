@@ -35,8 +35,7 @@ can_add = in_admin_mode? || obs.can_edit?(user) ||
                     modal_link_to("herbarium_record_#{record.id}",
                                   *edit_herbarium_record_tab(record, obs)),
                     "|",
-                    modal_link_to("herbarium_record_observation",
-                                  *remove_herbarium_record_tab(record, obs)),
+                    remove_herbarium_record_button(record, obs),
                     "]"
                   ].safe_join(" ")
                 )

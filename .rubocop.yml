@@ -146,6 +146,7 @@ Naming/PredicateMethod:
     - delete_vote
     - deprecate_others
     - enforce_default_reasons
+    - execute_destroy!
     - flash_error
     - flash_error_and_reload_if_form_has_errors
     - flash_notice

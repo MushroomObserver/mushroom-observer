@@ -3,6 +3,9 @@
 require("test_helper")
 
 class CollectionNumbersControllerTest < FunctionalTestCase
+  ##############################################################################
+  # INDEX
+  #
   def test_index
     login
     get(:index)
@@ -94,10 +97,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(numbers.count * 2, collection_number_links.count)
   end
 
-  def collection_number_links
-    assert_select("#results a[href ^= '/collection_numbers/']")
-  end
-
+  ##############################################################################
+  # SHOW
+  #
   def test_show_collection_number
     login
     # get(:show)
@@ -124,6 +126,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
                                                 params: { q: q }))
   end
 
+  ##############################################################################
+  # NEW
+  #
   def test_new_collection_number
     get(:new)
     get(:new, params: { observation_id: "bogus" })
@@ -159,22 +164,62 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select("input#collection_number_number")
   end
 
-  def test_create_collection_number_with_turbo
-    obs = observations(:strobilurus_diminutivus_obs)
-    user = obs.user
-    params = {
-      observation_id: obs.id,
-      collection_number: {
-        name: user.login,
-        number: "1234"
-      }
-    }
-    login(user.login)
-    assert_difference("CollectionNumber.count", 1) do
-      post(:create, params: params, format: :turbo_stream)
-    end
+  ##############################################################################
+  # EDIT
+  #
+  def test_edit_collection_number
+    # get(:edit)
+    get(:edit, params: { id: "bogus" })
+
+    number = collection_numbers(:coprinus_comatus_coll_num)
+    get(:edit, params: { id: number.id })
+    assert_response(:redirect)
+
+    login("mary")
+    get(:edit, params: { id: number.id })
+    assert_response(:redirect)
+
+    login("rolf")
+    get(:edit, params: { id: number.id })
+    assert_response(:success)
+    assert_template(:edit, partial: "_rss_log")
+    assert_objs_equal(number, assigns(:collection_number))
+
+    make_admin("mary")
+    get(:edit, params: { id: number.id })
+    assert_response(:success)
   end
 
+  def test_edit_collection_number_turbo
+    number = collection_numbers(:coprinus_comatus_coll_num)
+
+    login("rolf")
+    get(:edit, params: { id: number.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    # Verify CollectionNumberForm component rendered
+    assert_select("form#collection_number_form")
+    assert_select("input#collection_number_name")
+    assert_select("input#collection_number_number")
+  end
+
+  def test_edit_collection_number_multiple_obs
+    # obs1 = observations(:agaricus_campestris_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    num1 = collection_numbers(:agaricus_campestris_coll_num)
+    num1.add_observation(obs2)
+    assert(num1.observations.size > 1)
+
+    login
+    get(:edit, params: { id: num1.id })
+    assert_select(
+      ".multiple-observations-warning",
+      text: :edit_affects_multiple_observations.t(type: :collection_number)
+    )
+  end
+
+  ##############################################################################
+  # CREATE
+  #
   def test_create_collection_number
     collection_number_count = CollectionNumber.count
     obs = observations(:strobilurus_diminutivus_obs)
@@ -221,6 +266,42 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal("71-1234-c", number.number)
     assert_true(obs.reload.specimen)
     assert_includes(obs.collection_numbers, number)
+  end
+
+  def test_create_collection_number_with_turbo
+    obs = observations(:strobilurus_diminutivus_obs)
+    user = obs.user
+    params = {
+      observation_id: obs.id,
+      collection_number: {
+        name: user.login,
+        number: "1234"
+      }
+    }
+    login(user.login)
+    assert_difference("CollectionNumber.count", 1) do
+      post(:create, params: params, format: :turbo_stream)
+    end
+  end
+
+  def test_create_collection_number_turbo_validation_error
+    obs = observations(:strobilurus_diminutivus_obs)
+    login(obs.user.login)
+
+    # Missing number should cause validation error
+    params = {
+      observation_id: obs.id,
+      collection_number: { name: obs.user.legal_name, number: "" }
+    }
+
+    assert_no_difference("CollectionNumber.count") do
+      post(:create, params: params, format: :turbo_stream)
+    end
+
+    # Should render turbo_stream to reload the modal form with errors
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "collection_number_form")
   end
 
   def test_create_collection_number_twice
@@ -294,56 +375,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_session_query_record_is_correct
   end
 
-  def test_edit_collection_number
-    # get(:edit)
-    get(:edit, params: { id: "bogus" })
-
-    number = collection_numbers(:coprinus_comatus_coll_num)
-    get(:edit, params: { id: number.id })
-    assert_response(:redirect)
-
-    login("mary")
-    get(:edit, params: { id: number.id })
-    assert_response(:redirect)
-
-    login("rolf")
-    get(:edit, params: { id: number.id })
-    assert_response(:success)
-    assert_template(:edit, partial: "_rss_log")
-    assert_objs_equal(number, assigns(:collection_number))
-
-    make_admin("mary")
-    get(:edit, params: { id: number.id })
-    assert_response(:success)
-  end
-
-  def test_edit_collection_number_turbo
-    number = collection_numbers(:coprinus_comatus_coll_num)
-
-    login("rolf")
-    get(:edit, params: { id: number.id }, format: :turbo_stream)
-    assert_template("shared/_modal_form")
-    # Verify CollectionNumberForm component rendered
-    assert_select("form#collection_number_form")
-    assert_select("input#collection_number_name")
-    assert_select("input#collection_number_number")
-  end
-
-  def test_edit_collection_number_multiple_obs
-    # obs1 = observations(:agaricus_campestris_obs)
-    obs2 = observations(:coprinus_comatus_obs)
-    num1 = collection_numbers(:agaricus_campestris_coll_num)
-    num1.add_observation(obs2)
-    assert(num1.observations.size > 1)
-
-    login
-    get(:edit, params: { id: num1.id })
-    assert_select(
-      ".multiple-observations-warning",
-      text: :edit_affects_multiple_observations.t(type: :collection_number)
-    )
-  end
-
+  ##############################################################################
+  # UPDATE
+  #
   def test_update_collection_number
     obs = observations(:coprinus_comatus_obs)
     number = collection_numbers(:coprinus_comatus_coll_num)
@@ -402,6 +436,29 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     patch(:update,
           params: { id: number.id, collection_number: params })
     assert_flash_success
+  end
+
+  def test_update_collection_number_turbo_from_observation_page
+    collection_number = collection_numbers(:coprinus_comatus_coll_num)
+    observation = collection_number.observations.first
+    login("rolf")
+
+    params = {
+      id: collection_number.id,
+      back: observation.id.to_s,
+      collection_number: {
+        name: collection_number.name,
+        number: "updated-number"
+      }
+    }
+
+    patch(:update, params: params, format: :turbo_stream)
+
+    assert_equal("updated-number", collection_number.reload.number)
+    # Should render turbo_stream to update the collection_numbers section
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "observation_collection_numbers")
   end
 
   def test_update_collection_number_merge
@@ -469,6 +526,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_session_query_record_is_correct
   end
 
+  ##############################################################################
+  # DESTROY
+  #
   def test_destroy_collection_number
     obs1 = observations(:agaricus_campestris_obs)
     obs2 = observations(:coprinus_comatus_obs)
@@ -515,9 +575,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)
 
-    # With no back param, redirects to observation if CN has exactly one obs.
-    # (Each of these CNs has only one observation)
-    delete(:destroy, params: { id: nums[0].id })
+    # With back param set to observation ID, redirects to that observation.
+    delete(:destroy, params: { id: nums[0].id, back: obs.id.to_s })
     assert_redirected_to(observation_path(obs))
 
     # With back: "index", explicitly requests redirect to index.
@@ -543,9 +602,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_redirected_to(collection_numbers_path)
   end
 
-  # Destroy from index page (no back param) with a collection_number that
-  # has exactly one observation should redirect to that observation.
-  def test_destroy_collection_number_turbo_from_index_with_single_obs
+  # Destroy with back param set to observation ID redirects to that observation.
+  def test_destroy_collection_number_with_back_to_observation
     # Create a collection_number with exactly one observation
     obs = observations(:minimal_unknown_obs)
     collection_number = CollectionNumber.create!(
@@ -559,57 +617,72 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login(obs.user.login)
     collection_number_count = CollectionNumber.count
 
-    # Destroy button on index page (no back param) with turbo_stream format
-    delete(:destroy, params: { id: collection_number.id },
-                     format: :turbo_stream)
+    # Destroy with back param set to observation ID (HTML format)
+    delete(:destroy, params: { id: collection_number.id, back: obs.id.to_s })
 
     # Should successfully destroy and redirect to the observation
     assert_equal(collection_number_count - 1, CollectionNumber.count)
     assert_redirected_to(observation_path(obs))
   end
 
-  # Test create validation error via turbo_stream (modal form reload)
-  def test_create_collection_number_turbo_validation_error
-    obs = observations(:strobilurus_diminutivus_obs)
-    login(obs.user.login)
+  # -------- Remove from observation (destroy with observation_id) ------------
 
-    # Missing number should cause validation error
-    params = {
-      observation_id: obs.id,
-      collection_number: { name: obs.user.legal_name, number: "" }
-    }
+  def test_remove_from_observation_must_be_logged_in
+    obs = observations(:agaricus_campestris_obs)
+    num = collection_numbers(:agaricus_campestris_coll_num)
 
-    assert_no_difference("CollectionNumber.count") do
-      post(:create, params: params, format: :turbo_stream)
-    end
-
-    # Should render turbo_stream to reload the modal form with errors
-    assert_response(:success)
-    assert_select("turbo-stream[action=?][target=?]",
-                  "replace", "collection_number_form")
+    delete(:destroy, params: { id: num.id, observation_id: obs.id })
+    assert_obj_arrays_equal([num], obs.reload.collection_numbers)
   end
 
-  # Test update via turbo_stream from observation page
-  def test_update_collection_number_turbo_from_observation_page
-    collection_number = collection_numbers(:coprinus_comatus_coll_num)
-    observation = collection_number.observations.first
+  def test_remove_from_observation_only_owner_can_remove
+    obs = observations(:agaricus_campestris_obs)
+    num = collection_numbers(:agaricus_campestris_coll_num)
+
+    login("mary") # owner is rolf
+    delete(:destroy, params: { id: num.id, observation_id: obs.id })
+    assert_obj_arrays_equal([num], obs.reload.collection_numbers)
+  end
+
+  def test_remove_from_observation_destroys_when_last_obs
+    obs = observations(:agaricus_campestris_obs)
+    num = collection_numbers(:agaricus_campestris_coll_num)
+
     login("rolf")
+    delete(:destroy, params: { id: num.id, observation_id: obs.id })
+    assert_empty(obs.reload.collection_numbers)
+    assert_nil(CollectionNumber.safe_find(num.id))
+  end
 
-    params = {
-      id: collection_number.id,
-      back: observation.id.to_s,
-      collection_number: {
-        name: collection_number.name,
-        number: "updated-number"
-      }
-    }
+  def test_remove_from_observation_keeps_when_other_obs_remain
+    obs1 = observations(:agaricus_campestris_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    num = collection_numbers(:coprinus_comatus_coll_num)
+    num.add_observation(obs1)
 
-    patch(:update, params: params, format: :turbo_stream)
+    login("rolf")
+    delete(:destroy, params: { id: num.id, observation_id: obs2.id })
+    # num should still exist (attached to obs1) after removal from obs2
+    assert_includes(obs1.reload.collection_numbers, num)
+    assert_empty(obs2.reload.collection_numbers)
+    assert_not_nil(CollectionNumber.safe_find(num.id))
+  end
 
-    assert_equal("updated-number", collection_number.reload.number)
-    # Should render turbo_stream to update the collection_numbers section
-    assert_response(:success)
-    assert_select("turbo-stream[action=?][target=?]",
-                  "replace", "observation_collection_numbers")
+  def test_remove_from_observation_turbo_stream
+    obs = observations(:agaricus_campestris_obs)
+    num = collection_numbers(:agaricus_campestris_coll_num)
+
+    login("rolf")
+    delete(:destroy, params: { id: num.id, observation_id: obs.id },
+                     format: :turbo_stream)
+    assert_empty(obs.reload.collection_numbers)
+  end
+
+  ##############################################################################
+
+  private
+
+  def collection_number_links
+    assert_select("#results a[href ^= '/collection_numbers/']")
   end
 end
