@@ -18,10 +18,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     ].freeze
 
     slot :append
+    slot :between
     slot :help
 
     # Make slot accessor public (Phlex::Slotable makes them private by default)
-    public :append_slot, :help_slot
+    public :append_slot, :between_slot, :help_slot
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
@@ -165,7 +166,11 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def add_slots_to_field(field_component, &block)
       # Add label_after buttons to between slot (after label)
-      field_component.with_between { render_label_after }
+      # Also include user's custom between content if provided
+      field_component.with_between do
+        render(between_slot) if between_slot
+        render_label_after
+      end
 
       # Add label_end buttons to label_end slot
       field_component.with_label_end { render_label_end }

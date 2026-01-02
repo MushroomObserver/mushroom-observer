@@ -21,13 +21,14 @@ class Components::ProjectMemberForm < Components::ApplicationForm
   private
 
   def render_create_form
-    div(class: "container-text mt-4") do
+    div(class: "container-text mt-5 ml-3") do
       div(class: "d-flex align-items-start") do
         autocompleter_field(
           :candidate,
           type: :user,
-          label: "#{:LOGIN_NAME.t}:",
-          inline: true
+          label: "#{:add_object.t(type: :user)}:",
+          inline: true,
+          size: 40
         )
         submit(:ADD.t, class: "ml-3")
       end
