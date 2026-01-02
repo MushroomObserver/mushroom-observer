@@ -44,6 +44,7 @@ export default class extends GeocodeController {
     this.geolocate_buffer = 0
     this.marker_edit_buffer = 0
     this.rectangle_edit_buffer = 0
+    this.elevation_buffer = 0
     this.ignorePlaceInput = false
     this.lastGeocodedLatLng = { lat: null, lng: null }
     this.lastGeolocatedAddress = ""
@@ -221,8 +222,8 @@ export default class extends GeocodeController {
           // Moving the marker means we're no longer on the image lat/lng
           this.dispatch("reenableBtns")
         }
-        // this.sampleElevationCenterOf(newPosition)
-        this.getElevations([newPosition], "point")
+        // Debounce elevation requests to avoid flooding the API
+        this.debouncedGetElevations([newPosition], "point")
         this.map.panTo(newPosition)
       })
     })
@@ -313,7 +314,10 @@ export default class extends GeocodeController {
         const newBounds = this.rectangle.getBounds()?.toJSON() // nsew object
         // this.verbose({ newBounds })
         this.updateBoundsInputs(newBounds)
-        this.getElevations(this.sampleElevationPointsOf(newBounds), "rectangle")
+        // Debounce elevation requests to avoid flooding the API
+        this.debouncedGetElevations(
+          this.sampleElevationPointsOf(newBounds), "rectangle"
+        )
         this.map.fitBounds(newBounds)
       })
     })
@@ -666,6 +670,15 @@ export default class extends GeocodeController {
       }
     }
     return points
+  }
+
+  // Debounce elevation requests to avoid flooding the Open-Elevation API.
+  // Waits 500ms after the last call before actually making the request.
+  debouncedGetElevations(points, type) {
+    clearTimeout(this.elevation_buffer)
+    this.elevation_buffer = setTimeout(() => {
+      this.getElevations(points, type)
+    }, 500)
   }
 
   // ------------------------------- DEBUGGING ------------------------------
