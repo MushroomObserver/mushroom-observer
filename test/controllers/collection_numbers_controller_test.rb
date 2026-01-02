@@ -515,12 +515,13 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)
 
-    # Prove by default it goes back to index.
+    # With no back param, redirects to observation if CN has exactly one obs.
+    # (Each of these CNs has only one observation)
     delete(:destroy, params: { id: nums[0].id })
-    assert_redirected_to(collection_numbers_path)
+    assert_redirected_to(observation_path(obs))
 
-    # Prove that it keeps query param intact when returning to index.
-    delete(:destroy, params: { id: nums[1].id, q: })
+    # With back: "index", explicitly requests redirect to index.
+    delete(:destroy, params: { id: nums[1].id, back: "index", q: })
     assert_redirected_to(collection_numbers_path(params: { q: }))
   end
 
@@ -540,5 +541,75 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(collection_number_count - 1, CollectionNumber.count)
     # Should redirect to index since we can't do turbo_stream update
     assert_redirected_to(collection_numbers_path)
+  end
+
+  # Destroy from index page (no back param) with a collection_number that
+  # has exactly one observation should redirect to that observation.
+  def test_destroy_collection_number_turbo_from_index_with_single_obs
+    # Create a collection_number with exactly one observation
+    obs = observations(:minimal_unknown_obs)
+    collection_number = CollectionNumber.create!(
+      user: obs.user,
+      name: obs.user.legal_name,
+      number: "test-single",
+      observations: [obs]
+    )
+    assert_equal(1, collection_number.observations.count)
+
+    login(obs.user.login)
+    collection_number_count = CollectionNumber.count
+
+    # Destroy button on index page (no back param) with turbo_stream format
+    delete(:destroy, params: { id: collection_number.id },
+                     format: :turbo_stream)
+
+    # Should successfully destroy and redirect to the observation
+    assert_equal(collection_number_count - 1, CollectionNumber.count)
+    assert_redirected_to(observation_path(obs))
+  end
+
+  # Test create validation error via turbo_stream (modal form reload)
+  def test_create_collection_number_turbo_validation_error
+    obs = observations(:strobilurus_diminutivus_obs)
+    login(obs.user.login)
+
+    # Missing number should cause validation error
+    params = {
+      observation_id: obs.id,
+      collection_number: { name: obs.user.legal_name, number: "" }
+    }
+
+    assert_no_difference("CollectionNumber.count") do
+      post(:create, params: params, format: :turbo_stream)
+    end
+
+    # Should render turbo_stream to reload the modal form with errors
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "collection_number_form")
+  end
+
+  # Test update via turbo_stream from observation page
+  def test_update_collection_number_turbo_from_observation_page
+    collection_number = collection_numbers(:coprinus_comatus_coll_num)
+    observation = collection_number.observations.first
+    login("rolf")
+
+    params = {
+      id: collection_number.id,
+      back: observation.id.to_s,
+      collection_number: {
+        name: collection_number.name,
+        number: "updated-number"
+      }
+    }
+
+    patch(:update, params: params, format: :turbo_stream)
+
+    assert_equal("updated-number", collection_number.reload.number)
+    # Should render turbo_stream to update the collection_numbers section
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "observation_collection_numbers")
   end
 end
