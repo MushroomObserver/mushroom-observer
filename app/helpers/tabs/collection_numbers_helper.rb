@@ -76,24 +76,12 @@ module Tabs
       ).tab
     end
 
-    # Dead code?
-    # def collection_number_remove_obs_tab(c_n, obs)
-    #   [:REMOVE.l,
-    #    collection_number_remove_observation_path(
-    #      collection_number_id: c_n.id, observation_id: obs.id
-    #    ),
-    #    { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :remove,
-    #      method: :patch, data: { confirm: :are_you_sure.l } }]
-    # end
-
     def remove_collection_number_button(c_n, obs)
-      patch_button(
+      destroy_button(
         name: :REMOVE.l,
-        path: collection_number_remove_observation_path(
-          collection_number_id: c_n.id, observation_id: obs.id
-        ),
+        target: collection_number_path(c_n.id, observation_id: obs.id),
         confirm: :show_observation_remove_collection_number.l,
-        class: "remove_collection_number_link_#{c_n.id} text-danger",
+        class: "remove_collection_number_link_#{c_n.id}",
         icon: :remove
       )
     end

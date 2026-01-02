@@ -88,13 +88,11 @@ module Tabs
     end
 
     def remove_herbarium_record_button(h_r, obs)
-      patch_button(
+      destroy_button(
         name: :REMOVE.l,
-        path: herbarium_record_remove_observation_path(
-          herbarium_record_id: h_r.id, observation_id: obs.id
-        ),
+        target: herbarium_record_path(h_r.id, observation_id: obs.id),
         confirm: :show_observation_remove_herbarium_record.l,
-        class: "remove_herbarium_record_link_#{h_r.id} text-danger",
+        class: "remove_herbarium_record_link_#{h_r.id}",
         icon: :remove
       )
     end

@@ -536,4 +536,59 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Should redirect to index since we can't do turbo_stream update
     assert_redirected_to(herbarium_records_path)
   end
+
+  # -------- Remove from observation (destroy with observation_id) ------------
+
+  def test_remove_from_observation_must_be_logged_in
+    obs = observations(:agaricus_campestris_obs)
+    rec = obs.herbarium_records.first
+
+    delete(:destroy, params: { id: rec.id, observation_id: obs.id })
+    assert_true(obs.reload.herbarium_records.include?(rec))
+  end
+
+  def test_remove_from_observation_only_owner_can_remove
+    obs = observations(:agaricus_campestris_obs)
+    rec = obs.herbarium_records.first
+
+    login("mary") # owner is rolf
+    delete(:destroy, params: { id: rec.id, observation_id: obs.id })
+    assert_true(obs.reload.herbarium_records.include?(rec))
+  end
+
+  def test_remove_from_observation_destroys_when_last_obs
+    obs = observations(:agaricus_campestris_obs)
+    rec = obs.herbarium_records.first
+
+    login("rolf")
+    delete(:destroy, params: { id: rec.id, observation_id: obs.id })
+    assert_empty(obs.reload.herbarium_records)
+    assert_nil(HerbariumRecord.safe_find(rec.id))
+  end
+
+  def test_remove_from_observation_keeps_when_other_obs_remain
+    obs1 = observations(:agaricus_campestris_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    rec = obs2.herbarium_records.first
+    rec.add_observation(obs1)
+
+    login("rolf")
+    delete(:destroy, params: { id: rec.id, observation_id: obs2.id })
+    assert_true(obs1.reload.herbarium_records.include?(rec))
+    assert_false(obs2.reload.herbarium_records.include?(rec))
+    assert_not_nil(HerbariumRecord.safe_find(rec.id))
+  end
+
+  def test_remove_from_observation_turbo_stream
+    obs = observations(:agaricus_campestris_obs)
+    rec = obs.herbarium_records.first
+
+    login("rolf")
+    delete(:destroy, params: { id: rec.id, observation_id: obs.id },
+                     format: :turbo_stream)
+    assert_empty(obs.reload.herbarium_records)
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "observation_herbarium_records")
+  end
 end

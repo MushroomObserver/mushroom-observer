@@ -541,4 +541,60 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Should redirect to index since we can't do turbo_stream update
     assert_redirected_to(collection_numbers_path)
   end
+
+  # -------- Remove from observation (destroy with observation_id) ------------
+
+  def test_remove_from_observation_must_be_logged_in
+    obs = observations(:agaricus_campestris_obs)
+    num = collection_numbers(:agaricus_campestris_coll_num)
+
+    delete(:destroy, params: { id: num.id, observation_id: obs.id })
+    assert_obj_arrays_equal([num], obs.reload.collection_numbers)
+  end
+
+  def test_remove_from_observation_only_owner_can_remove
+    obs = observations(:agaricus_campestris_obs)
+    num = collection_numbers(:agaricus_campestris_coll_num)
+
+    login("mary") # owner is rolf
+    delete(:destroy, params: { id: num.id, observation_id: obs.id })
+    assert_obj_arrays_equal([num], obs.reload.collection_numbers)
+  end
+
+  def test_remove_from_observation_destroys_when_last_obs
+    obs = observations(:agaricus_campestris_obs)
+    num = collection_numbers(:agaricus_campestris_coll_num)
+
+    login("rolf")
+    delete(:destroy, params: { id: num.id, observation_id: obs.id })
+    assert_empty(obs.reload.collection_numbers)
+    assert_nil(CollectionNumber.safe_find(num.id))
+  end
+
+  def test_remove_from_observation_keeps_when_other_obs_remain
+    obs1 = observations(:agaricus_campestris_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    num = collection_numbers(:coprinus_comatus_coll_num)
+    num.add_observation(obs1)
+
+    login("rolf")
+    delete(:destroy, params: { id: num.id, observation_id: obs2.id })
+    # num should still exist (attached to obs1) after removal from obs2
+    assert_includes(obs1.reload.collection_numbers, num)
+    assert_empty(obs2.reload.collection_numbers)
+    assert_not_nil(CollectionNumber.safe_find(num.id))
+  end
+
+  def test_remove_from_observation_turbo_stream
+    obs = observations(:agaricus_campestris_obs)
+    num = collection_numbers(:agaricus_campestris_coll_num)
+
+    login("rolf")
+    delete(:destroy, params: { id: num.id, observation_id: obs.id },
+                     format: :turbo_stream)
+    assert_empty(obs.reload.collection_numbers)
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "observation_collection_numbers")
+  end
 end
