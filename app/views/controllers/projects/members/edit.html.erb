@@ -1,12 +1,12 @@
 <%
 add_page_title(:change_member_status_title.t(
-  name: @candidate.legal_name,
+  name: @project_member.user.legal_name,
   title: @project.title
 ))
 add_context_nav(project_member_form_edit_tabs(project: @project))
 %>
 
-<%= render(partial: "projects/members/form",
-           locals: { project: @project, candidate: @candidate }) %>
+<%= render(Components::ProjectMemberForm.new(@project_member,
+                                             project: @project)) %>
 
 <%= render(partial: "projects/groups", locals: { project: @project }) %>
