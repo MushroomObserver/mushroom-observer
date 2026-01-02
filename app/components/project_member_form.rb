@@ -21,8 +21,8 @@ class Components::ProjectMemberForm < Components::ApplicationForm
   private
 
   def render_create_form
-    div(class: "container-text mt-3 pb-2") do
-      div(class: "d-flex align-items-end") do
+    div(class: "container-text mt-4") do
+      div(class: "d-flex align-items-start") do
         autocompleter_field(
           :candidate,
           type: :user,
