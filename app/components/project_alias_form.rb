@@ -24,7 +24,7 @@ class Components::ProjectAliasForm < Components::ApplicationForm
     render_target_type_select
     render_user_autocompleter
     render_location_autocompleter
-    submit(submit_text, center: true, class: "mb-5")
+    submit(submit_text, class: "mb-5")
   end
 
   private
