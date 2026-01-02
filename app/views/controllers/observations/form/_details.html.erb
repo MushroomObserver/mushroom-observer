@@ -20,8 +20,10 @@ t_s = {
 
     <%= tag.div(id: "observation_where") do %>
       <!-- WHERE_REASONS -->
-      <%= render(partial: "shared/form_location_feedback",
-                  locals: { button: button_name } ) %>
+      <%= render(Components::FormLocationFeedback.new(
+        dubious_where_reasons: @dubious_where_reasons,
+        button: button_name
+      )) %>
       <!-- /WHERE_REASONS -->
 
       <%= autocompleter_field(
