@@ -106,25 +106,20 @@ class HerbariumRecordsController < ApplicationController
     update_herbarium_record # response handled here
   end
 
+  # NOTE: This action is called from herbarium_records#show and #index pages,
+  # NOT from observations#show (which has "remove" to break the association).
   def destroy
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
     return unless make_sure_can_delete!(@herbarium_record)
 
     figure_out_where_to_go_back_to
-    @observation = @back_object if @back_object.is_a?(Observation)
     @herbarium_record.destroy
 
-    respond_to do |format|
-      # Only render turbo_stream if we have an observation to update
-      format.turbo_stream do
-        if @observation
-          render_herbarium_records_section_update
-        else
-          redirect_with_query(action: :index)
-        end
-      end
-      format.html { redirect_with_query(action: :index) }
+    if @back_object.is_a?(Observation)
+      redirect_with_query(observation_path(@back_object))
+    else
+      redirect_with_query(action: :index)
     end
   end
 

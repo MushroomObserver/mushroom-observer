@@ -43,7 +43,7 @@ flash_error(@error) if @error && @objects.empty?
           <%= if in_admin_mode? || rec.can_edit?
                   destroy_button(
                     name: :destroy_object.t(type: :herbarium_record),
-                    target: herbarium_record_path(rec.id),
+                    target: herbarium_record_path(rec.id, back: :index),
                     class: "btn btn-default btn-sm destroy_herbarium_record_link_#{rec.id}"
                   )
                 end %>

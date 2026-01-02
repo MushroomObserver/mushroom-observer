@@ -536,4 +536,114 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Should redirect to index since we can't do turbo_stream update
     assert_redirected_to(herbarium_records_path)
   end
+
+  # Destroy with back param pointing to observation should redirect there
+  def test_destroy_herbarium_record_redirect_to_observation
+    login("rolf")
+    herbarium_record = herbarium_records(:coprinus_comatus_rolf_spec)
+    observation = herbarium_record.observations.first
+    herbarium_record_count = HerbariumRecord.count
+
+    delete(:destroy,
+           params: { id: herbarium_record.id, back: observation.id.to_s },
+           format: :turbo_stream)
+
+    # Should successfully destroy and redirect to observation
+    assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
+    assert_redirected_to(observation_path(observation))
+  end
+
+  # Test create with accession number already used by someone else (can't edit)
+  def test_create_herbarium_record_already_used_by_someone_else
+    # Use mary's observation - she can't edit rolf's herbarium record
+    obs = observations(:other_user_owns_obs)
+    user = obs.user
+    assert_equal("mary", user.login)
+
+    # Use rolf's herbarium record at NYBG
+    existing = herbarium_records(:interesting_unknown)
+    herbarium = existing.herbarium
+
+    # Ensure mary can't edit the existing record
+    assert_not_equal(user, existing.user)
+    assert_not(herbarium.curator?(user))
+
+    login(user.login)
+
+    params = {
+      observation_id: obs.id,
+      herbarium_record: {
+        herbarium_name: herbarium.name,
+        accession_number: existing.accession_number
+      }
+    }
+
+    assert_no_difference("HerbariumRecord.count") do
+      post(:create, params: params)
+    end
+
+    assert_flash_error
+  end
+
+  # Test create validation error via turbo_stream
+  def test_create_herbarium_record_turbo_validation_error
+    obs = observations(:strobilurus_diminutivus_obs)
+    login(obs.user.login)
+
+    params = {
+      observation_id: obs.id,
+      herbarium_record: { herbarium_name: "", accession_number: "" }
+    }
+
+    assert_no_difference("HerbariumRecord.count") do
+      post(:create, params: params, format: :turbo_stream)
+    end
+
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "herbarium_record_form")
+  end
+
+  # Test update with label already used
+  def test_update_herbarium_record_label_already_used
+    record = herbarium_records(:coprinus_comatus_rolf_spec)
+    existing = herbarium_records(:interesting_unknown)
+    login("rolf")
+
+    params = {
+      id: record.id,
+      herbarium_record: {
+        herbarium_name: existing.herbarium.name,
+        accession_number: existing.accession_number
+      }
+    }
+
+    patch(:update, params: params)
+
+    assert_flash_warning
+    # Record should not have changed
+    record.reload
+    assert_not_equal(existing.accession_number, record.accession_number)
+  end
+
+  # Test create with herbarium name that can't be auto-created
+  def test_create_herbarium_record_cannot_auto_create_herbarium
+    obs = observations(:strobilurus_diminutivus_obs)
+    login(obs.user.login)
+
+    # Use a name that doesn't match the personal herbarium pattern
+    params = {
+      observation_id: obs.id,
+      herbarium_record: {
+        herbarium_name: "Some Random Herbarium",
+        accession_number: "12345"
+      }
+    }
+
+    assert_no_difference("HerbariumRecord.count") do
+      post(:create, params: params)
+    end
+
+    assert_flash_warning
+  end
 end
