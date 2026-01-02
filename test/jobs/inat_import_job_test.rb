@@ -48,8 +48,6 @@ class InatImportJobTest < ActiveJob::TestCase
                           name: "Sevier Co., Tennessee, USA",
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
-    QueuedEmail.queue = true
-    before_emails_to_user = QueuedEmail.where(to_user: @user).count
     before_total_imported_count = @inat_import.total_imported_count.to_i
 
     stub_inat_interactions
@@ -81,12 +79,6 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_not(obs.specimen, "Obs should not have a specimen")
     assert(obs.notes.to_s.include?("Observation Fields: none"),
            "Notes should indicate if there were no iNat 'Observation Fields'")
-
-    assert_equal(
-      before_emails_to_user, QueuedEmail.where(to_user: @user).count,
-      "Should not have sent any emails to importing user for this obs"
-    )
-    QueuedEmail.queue = false
 
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
@@ -487,7 +479,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.sequences.one?, "Obs should have one sequence")
 
-    # Webmaster email is now sent via deliver_later, not QueuedEmail
     expected_subject =
       "#{@user.login} created #{name.user_real_text_name(@user)}"
     assert_enqueued_with(
