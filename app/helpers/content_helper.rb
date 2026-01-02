@@ -40,10 +40,30 @@ module ContentHelper
     h(html.to_str)
   end
 
-  def safe_spinner(text = "")
-    [
-      text,
-      tag.span("", class: "spinner-right mx-2")
-    ].safe_join
+  # Override Rails method of the same name.  Just calls our
+  # Textile#textilize_without_paragraph method on the given string.
+  def textilize_without_paragraph(str, do_object_links = false)
+    Textile.textilize_without_paragraph(str, do_object_links: do_object_links)
+  end
+
+  # Override Rails method of the same name.  Just calls our Textile#textilize
+  # method on the given string.
+  def textilize(str, do_object_links: false)
+    Textile.textilize(str, do_object_links: do_object_links)
+  end
+
+  # ----------------------------------------------------------------------------
+
+  def content_tag_if(condition, name, content_or_options_with_block = nil,
+                     options = nil, escape = true, &block)
+    return unless condition
+
+    content_tag(name, content_or_options_with_block, options, escape, &block)
+  end
+
+  def content_tag_unless(condition, name, content_or_options_with_block = nil,
+                         options = nil, escape = true, &block)
+    content_tag_if(!condition, name, content_or_options_with_block,
+                   options, escape, &block)
   end
 end

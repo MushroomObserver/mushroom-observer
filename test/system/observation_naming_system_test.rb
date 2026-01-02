@@ -86,7 +86,7 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       select("Could Be", from: "vote_value_#{nam.id}")
     end
 
-    assert_no_selector("#mo_ajax_progress")
+    assert_no_selector("#modal_progress_spinner")
     assert_selector("#title", text: /#{obs.text_name}/)
     # sleep(3)
 
@@ -95,11 +95,11 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_vote_form_#{nam.id}")
       select("I'd Call It That", from: "vote_value_#{nam.id}")
     end
-    # assert_selector("#mo_ajax_progress", wait: 4)
-    # assert_selector("#mo_ajax_progress_caption",
-    #                 text: /#{:show_namings_saving.l}/)
+    assert_selector("#modal_progress_spinner", wait: 4)
+    assert_selector("#modal_progress_spinner_caption",
+                    text: /#{:show_namings_saving.l}/)
 
-    assert_no_selector("#mo_ajax_progress")
+    assert_no_selector("#modal_progress_spinner")
     assert_selector("#title", text: /#{nam.text_name}/)
     # sleep(3)
 
