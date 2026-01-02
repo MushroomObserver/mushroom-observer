@@ -273,6 +273,11 @@ MushroomObserver::Application.routes.draw do
   get "obs/:id" => "observations#show", id: /\d+/, as: "permanent_observation"
   get ":id" => "observations#show", id: /\d+/ # , as: "permanent_observation"
 
+  # ----- Geo: internal geographic services (elevation, geocoding) -----------
+  namespace :geo do
+    match "elevation", to: "elevations#show", via: [:get, :post]
+  end
+
   # NOTE: The nesting below is necessary to get nice path helpers
   resource :account, only: [:new, :create], controller: "account"
 

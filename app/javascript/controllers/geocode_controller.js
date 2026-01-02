@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { Loader } from "@googlemaps/js-api-loader"
 import { convert } from "geo-coordinates-parser"
+import { post } from "@rails/request.js"
 
 // Connects to data-controller="geocode"
 // Sort of the "lite" version of the map controller: no map, no markers, but it
@@ -11,7 +12,7 @@ export default class extends Controller {
     "highInput", "lowInput", "placeInput", "locationId",
     "latInput", "lngInput", "altInput", "getElevation"]
   static outlets = ["autocompleter--location"]
-  static values = { needElevations: Boolean, default: true }
+  static values = { needElevations: { type: Boolean, default: true } }
 
   connect() {
     this.element.dataset.geocode = "connected"
@@ -29,8 +30,6 @@ export default class extends Controller {
     this.lastGeolocatedAddress = ""
 
     this.libraries = ["maps", "geocoding", "marker"]
-    if (this.needElevationsValue == true)
-      this.libraries.push("elevation")
 
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
@@ -42,8 +41,6 @@ export default class extends Controller {
       .load()
       .then((google) => {
         this.geocoder = new google.maps.Geocoder()
-        if (this.needElevationsValue == true)
-          this.elevationService = new google.maps.ElevationService()
       })
       .catch((e) => {
         console.error("error loading gmaps: " + e)
@@ -254,22 +251,31 @@ export default class extends Controller {
     // "Get Elevation" button on a form sends this param
     if (this.hasGetElevationTarget &&
       points.hasOwnProperty('params') && points.params?.points === "input") {
+      type = points.params?.type // Get type BEFORE overwriting points
       points = this.sampleElevationPoints() // from marker or rectangle
-      type = points.params?.type
     }
 
-    const locationElevationRequest = { locations: points }
+    // Use MO's backend proxy to Open-Elevation API
+    this.fetchElevations(points, type)
+  }
 
-    this.elevationService.getElevationForLocations(locationElevationRequest,
-      (results, status) => {
-        if (status === google.maps.ElevationStatus.OK) {
-          if (results[0]) {
-            this.updateElevationInputs(results, type)
-          } else {
-            console.log({ status })
-          }
-        }
+  async fetchElevations(points, type) {
+    try {
+      const response = await post("/geo/elevation", {
+        body: JSON.stringify({ locations: points }),
+        responseKind: "json"
       })
+      if (response.ok) {
+        const data = await response.json
+        if (data.results && data.results.length > 0) {
+          this.updateElevationInputs(data.results, type)
+        } else if (data.error) {
+          console.log("Elevation API error:", data.error)
+        }
+      }
+    } catch (e) {
+      console.log("Elevation fetch failed:", e)
+    }
   }
 
   // defined in the map controller

@@ -49,8 +49,6 @@ export default class extends GeocodeController {
     this.lastGeolocatedAddress = ""
 
     this.libraries = ["maps", "geocoding", "marker"]
-    if (this.needElevationsValue == true)
-      this.libraries.push("elevation")
 
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
@@ -84,8 +82,6 @@ export default class extends GeocodeController {
     loader
       .load()
       .then((google) => {
-        if (this.needElevationsValue == true)
-          this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
         // Everything except the obs form map: draw the map.
         if (!(this.map_type === "observation" && this.editable)) {
@@ -652,10 +648,22 @@ export default class extends GeocodeController {
     let points
     if (this.marker) {
       const position = this.marker.getPosition().toJSON()
-      points = [position] // this.sampleElevationCenterOf(position)
+      points = [position]
     } else if (this.rectangle) {
       const bounds = this.rectangle.getBounds().toJSON()
       points = this.sampleElevationPointsOf(bounds)
+    } else if (this.hasNorthInputTarget) {
+      // Fallback: read from input fields if no map objects exist
+      const bounds = {
+        north: parseFloat(this.northInputTarget.value),
+        south: parseFloat(this.southInputTarget.value),
+        east: parseFloat(this.eastInputTarget.value),
+        west: parseFloat(this.westInputTarget.value)
+      }
+      if (!isNaN(bounds.north) && !isNaN(bounds.south) &&
+          !isNaN(bounds.east) && !isNaN(bounds.west)) {
+        points = this.sampleElevationPointsOf(bounds)
+      }
     }
     return points
   }
