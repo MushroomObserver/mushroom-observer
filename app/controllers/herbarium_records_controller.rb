@@ -315,11 +315,27 @@ class HerbariumRecordsController < ApplicationController
       @herbarium_record.remove_observation(@observation)
       flash_notice(:runtime_removed.t(type: :herbarium_record))
     else
-      # Only update observation section if back param is an observation ID
-      @observation = Observation.safe_find(params[:back])
+      # Figure out where to redirect BEFORE destroying the record
+      figure_out_destroy_redirect
       @herbarium_record.destroy
     end
     true
+  end
+
+  # Determine @observation for redirect after destroy.
+  # Must be called before destroy since we need to check observations.
+  def figure_out_destroy_redirect
+    back = params[:back].to_s
+    @observation = nil
+    return if back == "index"
+
+    # If back is an observation ID, use that
+    @observation = Observation.safe_find(back)
+    return if @observation
+
+    # If record has exactly one observation, redirect there
+    @observation = @herbarium_record.observations.first if
+      @herbarium_record.observations.one?
   end
 
   def respond_to_destroy
@@ -330,7 +346,9 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def destroy_turbo_response
-    if @observation
+    # Only render turbo_stream update if we have an observation page to update.
+    # Can't update show page via turbo_stream, so redirect to index.
+    if @observation && params[:back] != "show"
       render_herbarium_records_section_update
     else
       redirect_with_query(action: :index)

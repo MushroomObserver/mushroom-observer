@@ -278,6 +278,65 @@ Examples:
 <% end %>
 ```
 
+## Testing
+
+### Test Assertions
+
+**Use Rails-preferred assertion methods** instead of MiniTest refute methods.
+
+```ruby
+# Good - Rails-preferred assertions
+assert_no_match(/pattern/, string)
+assert_not_equal(expected, actual)
+assert_not_includes(collection, item)
+assert_not_nil(value)
+
+# Bad - MiniTest refute methods
+refute_match(/pattern/, string)
+refute_equal(expected, actual)
+refute_includes(collection, item)
+refute_nil(value)
+```
+
+**Why prefer assert_* over refute_*?**
+- Rails coding standards prefer positive assertions with `assert_not` or `assert_no_*`
+- RuboCop's `Rails/RefuteMethods` cop enforces this convention
+- Consistent with Rails community practices
+
+### Running Tests Before Creating PRs
+
+**ALWAYS run the full test suite before creating a PR that includes changes to production Rails code.**
+
+```bash
+# Run the full test suite
+bin/rails test
+
+# Or run with coverage
+bin/rails test:coverage
+```
+
+**Why run the full test suite?**
+- Component unit tests may pass but integration tests can fail
+- Changes to shared components (like FormLocationFeedback) are used by multiple controllers and views
+- Type mismatches and parameter issues often only surface in integration tests
+- Prevents breaking production code and having to fix issues after PR creation
+
+**When to run the full suite:**
+- Before creating any PR with changes to:
+  - Components (`app/components/`)
+  - Models (`app/models/`)
+  - Controllers (`app/controllers/`)
+  - Helpers (`app/helpers/`)
+  - Views (`app/views/`)
+- After making changes that affect multiple files
+- When in doubt, always run it - better safe than sorry
+
+**What to check:**
+- All tests pass (0 failures, 0 errors)
+- Pay attention to the error count, not just test count
+- If tests fail, fix the issues before creating the PR
+- Don't create PRs with known failing tests
+
 ## Internationalization
 
 ### Text Strings and Localization
@@ -363,8 +422,10 @@ The key principles are:
 1. **Always use parentheses** for method calls (Ruby and ERB)
 2. **Use full namespaces** for component references (`Components::ClassName`)
 3. **Prefer Phlex helpers** over Rails `tag` helpers in components
-4. **Use `trusted_html`** for HTML-safe content (from `.t`, `.l`), not `raw()`
-5. **Render directly** instead of building arrays and joining
-6. **Internalize logic** into components when possible
-7. **Edit `en.txt` for text strings**, run `rails lang:update`, never commit `.yml` files
-8. **All new code must pass RuboCop** - refactor instead of disabling cops
+4. **Render directly** instead of building arrays and joining
+5. **Internalize logic** into components when possible
+6. **Use Rails-preferred assertions** (`assert_no_match`, `assert_not_equal`, etc.) instead of MiniTest refute methods
+7. **Run the full test suite** before creating any PR with production Rails code changes
+8. **Use `trusted_html`** for HTML-safe content (from `.t`, `.l`), not `raw()`
+9. **Edit `en.txt` for text strings**, run `rails lang:update`, never commit `.yml` files
+10. **All new code must pass RuboCop** - refactor instead of disabling cops

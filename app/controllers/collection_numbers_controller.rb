@@ -284,11 +284,27 @@ class CollectionNumbersController < ApplicationController
       @collection_number.remove_observation(@observation)
       flash_notice(:runtime_removed.t(type: :collection_number))
     else
-      # Only update observation section if back param is an observation ID
-      @observation = Observation.safe_find(params[:back])
+      # Figure out where to redirect BEFORE destroying the record
+      figure_out_destroy_redirect
       @collection_number.destroy
     end
     true
+  end
+
+  # Determine @observation for redirect after destroy.
+  # Must be called before destroy since we need to check observations.
+  def figure_out_destroy_redirect
+    back = params[:back].to_s
+    @observation = nil
+    return if back == "index"
+
+    # If back is an observation ID, use that
+    @observation = Observation.safe_find(back)
+    return if @observation
+
+    # If CN has exactly one observation, redirect there
+    @observation = @collection_number.observations.first if
+      @collection_number.observations.one?
   end
 
   def respond_to_destroy
@@ -299,7 +315,9 @@ class CollectionNumbersController < ApplicationController
   end
 
   def destroy_turbo_response
-    if @observation
+    # Only render turbo_stream update if we have an observation page to update.
+    # Can't update show page via turbo_stream, so redirect to index.
+    if @observation && params[:back] != "show"
       render_collection_numbers_section_update
     else
       redirect_with_query(action: :index)

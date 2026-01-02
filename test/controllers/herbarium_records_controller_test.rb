@@ -3,21 +3,9 @@
 require("test_helper")
 
 class HerbariumRecordsControllerTest < FunctionalTestCase
-  def herbarium_record_params
-    {
-      observation_id: observations(:strobilurus_diminutivus_obs).id,
-      herbarium_record: {
-        herbarium_name: rolf.preferred_herbarium.autocomplete_name,
-        initial_det: "Strobilurus diminutivus det. Rolf Singer",
-        accession_number: "1234567",
-        notes: "Some notes about this herbarium record"
-      }
-    }
-  end
-
-  # Test of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  ##############################################################################
+  # INDEX
+  #
   def test_index
     login
     get(:index)
@@ -79,7 +67,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     assert_page_title(:HERBARIUM_RECORDS.l)
     assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
-    #  "Fungarium Records attached to ‘#{obs.unique_text_name}’")
+    #  "Fungarium Records attached to '#{obs.unique_text_name}'")
     assert_select("#results tr", obs.herbarium_records.size)
   end
 
@@ -93,8 +81,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
   end
 
-  #########################################################
-
+  ##############################################################################
+  # SHOW
+  #
   def test_show_herbarium_record_without_notes
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
@@ -162,6 +151,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(herbarium_record_path(id: number1.id, q: q))
   end
 
+  ##############################################################################
+  # NEW
+  #
   def test_new_herbarium_record
     obs_id = observations(:unknown_with_no_naming).id
     get(:new, params: { observation_id: obs_id })
@@ -209,6 +201,55 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
                  obs.field_slips.first.code)
   end
 
+  ##############################################################################
+  # EDIT
+  #
+  def test_edit_herbarium_record
+    nybg = herbarium_records(:coprinus_comatus_nybg_spec)
+    get(:edit, params: { id: nybg.id })
+    assert_response(:redirect)
+
+    login("mary") # Non-curator
+    get(:edit, params: { id: nybg.id })
+    assert_flash_text(/permission denied/i)
+    assert_response(:redirect)
+
+    login("rolf")
+    get(:edit, params: { id: nybg.id })
+    assert_template(:edit)
+
+    make_admin("mary") # Non-curator, but an admin
+    get(:edit, params: { id: nybg.id })
+    assert_template(:edit)
+  end
+
+  def test_edit_herbarium_record_turbo
+    nybg = herbarium_records(:coprinus_comatus_nybg_spec)
+
+    login("rolf")
+    get(:edit, params: { id: nybg.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_select("form#herbarium_record_form")
+  end
+
+  def test_edit_herbarium_record_multiple_obs
+    # obs1 = observations(:coprinus_comatus_obs)
+    obs2 = observations(:agaricus_campestris_obs)
+    hr1 = herbarium_records(:coprinus_comatus_nybg_spec)
+    hr1.add_observation(obs2)
+    assert(hr1.observations.size > 1)
+
+    login
+    get(:edit, params: { id: hr1.id })
+    assert_select(
+      ".multiple-observations-warning",
+      text: :edit_affects_multiple_observations.t(type: :herbarium_record)
+    )
+  end
+
+  ##############################################################################
+  # CREATE
+  #
   def test_create_herbarium_record
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
@@ -235,6 +276,24 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_difference("HerbariumRecord.count", 1) do
       post(:create, params: herbarium_record_params, format: :turbo_stream)
     end
+  end
+
+  def test_create_herbarium_record_turbo_validation_error
+    obs = observations(:strobilurus_diminutivus_obs)
+    login(obs.user.login)
+
+    params = {
+      observation_id: obs.id,
+      herbarium_record: { herbarium_name: "", accession_number: "" }
+    }
+
+    assert_no_difference("HerbariumRecord.count") do
+      post(:create, params: params, format: :turbo_stream)
+    end
+
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "herbarium_record_form")
   end
 
   def test_create_herbarium_record_new_herbarium
@@ -297,6 +356,57 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
+  def test_create_herbarium_record_already_used_by_someone_else
+    # Use mary's observation - she can't edit rolf's herbarium record
+    obs = observations(:other_user_owns_obs)
+    user = obs.user
+    assert_equal("mary", user.login)
+
+    # Use rolf's herbarium record at NYBG
+    existing = herbarium_records(:interesting_unknown)
+    herbarium = existing.herbarium
+
+    # Ensure mary can't edit the existing record
+    assert_not_equal(user, existing.user)
+    assert_not(herbarium.curator?(user))
+
+    login(user.login)
+
+    params = {
+      observation_id: obs.id,
+      herbarium_record: {
+        herbarium_name: herbarium.name,
+        accession_number: existing.accession_number
+      }
+    }
+
+    assert_no_difference("HerbariumRecord.count") do
+      post(:create, params: params)
+    end
+
+    assert_flash_error
+  end
+
+  def test_create_herbarium_record_cannot_auto_create_herbarium
+    obs = observations(:strobilurus_diminutivus_obs)
+    login(obs.user.login)
+
+    # Use a name that doesn't match the personal herbarium pattern
+    params = {
+      observation_id: obs.id,
+      herbarium_record: {
+        herbarium_name: "Some Random Herbarium",
+        accession_number: "12345"
+      }
+    }
+
+    assert_no_difference("HerbariumRecord.count") do
+      post(:create, params: params)
+    end
+
+    assert_flash_warning
+  end
+
   def test_create_herbarium_record_redirect
     obs = observations(:coprinus_comatus_obs)
     @controller.find_or_create_query(:HerbariumRecord)
@@ -320,49 +430,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_session_query_record_is_correct
   end
 
-  def test_edit_herbarium_record
-    nybg = herbarium_records(:coprinus_comatus_nybg_spec)
-    get(:edit, params: { id: nybg.id })
-    assert_response(:redirect)
-
-    login("mary") # Non-curator
-    get(:edit, params: { id: nybg.id })
-    assert_flash_text(/permission denied/i)
-    assert_response(:redirect)
-
-    login("rolf")
-    get(:edit, params: { id: nybg.id })
-    assert_template(:edit)
-
-    make_admin("mary") # Non-curator, but an admin
-    get(:edit, params: { id: nybg.id })
-    assert_template(:edit)
-  end
-
-  def test_edit_herbarium_record_turbo
-    nybg = herbarium_records(:coprinus_comatus_nybg_spec)
-
-    login("rolf")
-    get(:edit, params: { id: nybg.id }, format: :turbo_stream)
-    assert_template("shared/_modal_form")
-    assert_select("form#herbarium_record_form")
-  end
-
-  def test_edit_herbarium_record_multiple_obs
-    # obs1 = observations(:coprinus_comatus_obs)
-    obs2 = observations(:agaricus_campestris_obs)
-    hr1 = herbarium_records(:coprinus_comatus_nybg_spec)
-    hr1.add_observation(obs2)
-    assert(hr1.observations.size > 1)
-
-    login
-    get(:edit, params: { id: hr1.id })
-    assert_select(
-      ".multiple-observations-warning",
-      text: :edit_affects_multiple_observations.t(type: :herbarium_record)
-    )
-  end
-
+  ##############################################################################
+  # UPDATE
+  #
   def test_update_herbarium_record
     herbarium_record_setup => { params:, nybg_rec:, nybg_user:, rolf_herb: }
 
@@ -379,32 +449,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     assert_template("observations/show/_section_update")
     assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)
-  end
-
-  def herbarium_record_setup
-    login("rolf")
-    nybg_rec    = herbarium_records(:coprinus_comatus_nybg_spec)
-    nybg_user   = nybg_rec.user
-    rolf_herb   = rolf.personal_herbarium
-    params      = herbarium_record_params
-    params[:id] = nybg_rec.id
-    params[:herbarium_record][:herbarium_name] = rolf_herb.name
-    assert_not_equal(rolf_herb, nybg_rec.herbarium)
-
-    { params:, nybg_rec:, nybg_user:, rolf_herb: }
-  end
-
-  def assert_record_updated(**args)
-    args => { params:, nybg_rec:, nybg_user:, rolf_herb: }
-
-    nybg_rec.reload
-    assert_equal(rolf_herb, nybg_rec.herbarium)
-    assert_equal(nybg_user, nybg_rec.user)
-    assert_equal(params[:herbarium_record][:initial_det],
-                 nybg_rec.initial_det)
-    assert_equal(params[:herbarium_record][:accession_number],
-                 nybg_rec.accession_number)
-    assert_equal(params[:herbarium_record][:notes], nybg_rec.notes)
   end
 
   def test_update_herbarium_record_no_specimen
@@ -430,6 +474,27 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
     assert_flash_text(/permission denied/i)
     assert_template("shared/_modal_flash_update")
+  end
+
+  def test_update_herbarium_record_label_already_used
+    record = herbarium_records(:coprinus_comatus_rolf_spec)
+    existing = herbarium_records(:interesting_unknown)
+    login("rolf")
+
+    params = {
+      id: record.id,
+      herbarium_record: {
+        herbarium_name: existing.herbarium.name,
+        accession_number: existing.accession_number
+      }
+    }
+
+    patch(:update, params: params)
+
+    assert_flash_warning
+    # Record should not have changed
+    record.reload
+    assert_not_equal(existing.accession_number, record.accession_number)
   end
 
   def test_update_herbarium_record_redirect
@@ -469,6 +534,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_session_query_record_is_correct
   end
 
+  ##############################################################################
+  # DESTROY
+  #
   def test_destroy_herbarium_record
     login("rolf")
     herbarium_record = herbarium_records(:interesting_unknown)
@@ -517,6 +585,21 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     delete(:destroy, params: { id: recs[0].id })
     assert_redirected_to(herbarium_records_path(q:))
     assert_session_query_record_is_correct
+  end
+
+  def test_destroy_herbarium_record_redirect_to_observation
+    login("rolf")
+    herbarium_record = herbarium_records(:coprinus_comatus_rolf_spec)
+    observation = herbarium_record.observations.first
+    herbarium_record_count = HerbariumRecord.count
+
+    # Use HTML format to test redirect behavior
+    delete(:destroy,
+           params: { id: herbarium_record.id, back: observation.id.to_s })
+
+    # Should successfully destroy and redirect to observation
+    assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
+    assert_redirected_to(observation_path(observation))
   end
 
   # Bug: Destroy button on show page uses turbo_stream format, causing error
@@ -590,5 +673,47 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_select("turbo-stream[action=?][target=?]",
                   "replace", "observation_herbarium_records")
+  end
+
+  ##############################################################################
+
+  private
+
+  def herbarium_record_params
+    {
+      observation_id: observations(:strobilurus_diminutivus_obs).id,
+      herbarium_record: {
+        herbarium_name: rolf.preferred_herbarium.autocomplete_name,
+        initial_det: "Strobilurus diminutivus det. Rolf Singer",
+        accession_number: "1234567",
+        notes: "Some notes about this herbarium record"
+      }
+    }
+  end
+
+  def herbarium_record_setup
+    login("rolf")
+    nybg_rec    = herbarium_records(:coprinus_comatus_nybg_spec)
+    nybg_user   = nybg_rec.user
+    rolf_herb   = rolf.personal_herbarium
+    params      = herbarium_record_params
+    params[:id] = nybg_rec.id
+    params[:herbarium_record][:herbarium_name] = rolf_herb.name
+    assert_not_equal(rolf_herb, nybg_rec.herbarium)
+
+    { params:, nybg_rec:, nybg_user:, rolf_herb: }
+  end
+
+  def assert_record_updated(**args)
+    args => { params:, nybg_rec:, nybg_user:, rolf_herb: }
+
+    nybg_rec.reload
+    assert_equal(rolf_herb, nybg_rec.herbarium)
+    assert_equal(nybg_user, nybg_rec.user)
+    assert_equal(params[:herbarium_record][:initial_det],
+                 nybg_rec.initial_det)
+    assert_equal(params[:herbarium_record][:accession_number],
+                 nybg_rec.accession_number)
+    assert_equal(params[:herbarium_record][:notes], nybg_rec.notes)
   end
 end

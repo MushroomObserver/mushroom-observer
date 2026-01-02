@@ -309,7 +309,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   # - returning to the :show page of the observation they're associated with
   # depending on what page the form request originated.
   def add_back_param_to_button_atts(action)
-    return {} unless action == :edit &&
+    return {} unless [:edit, :destroy].include?(action) &&
                      SHOW_OBS_EDITABLES.include?(controller.controller_name)
 
     case action_name
