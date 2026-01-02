@@ -236,7 +236,15 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
              end
     args[:class] = class_names(args[:class], "text-danger")
 
-    crud_action_button(method: :delete, name:, target:, action: :destroy,
+    # Add back param for SHOW_OBS_EDITABLES (like edit_button does)
+    path = if target.is_a?(String) || target.is_a?(Hash)
+             target
+           else
+             path_args = add_back_param_to_button_atts(:destroy)
+             send(:"#{target.type_tag}_path", target.id, **path_args)
+           end
+
+    crud_action_button(method: :delete, name:, target: path, action: :destroy,
                        confirm: :are_you_sure.l, **args)
   end
 
