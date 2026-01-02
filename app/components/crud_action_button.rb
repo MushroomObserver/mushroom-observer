@@ -4,7 +4,7 @@
 # Used as the base for patch_button, post_button, put_button, destroy_button.
 #
 # Usage:
-#   render(Components::AnyMethodButton.new(
+#   render(Components::CrudActionButton.new(
 #     name: :REMOVE.l,
 #     target: @herbarium,  # or a path string
 #     method: :patch,
@@ -13,7 +13,7 @@
 #     icon: :remove
 #   ))
 #
-class Components::AnyMethodButton < Components::Base
+class Components::CrudActionButton < Components::Base
   def initialize(name:, target:, method: :post, confirm: nil, **args, &block)
     super()
     @name = name

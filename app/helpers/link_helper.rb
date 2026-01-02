@@ -236,8 +236,8 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
              end
     args[:class] = class_names(args[:class], "text-danger")
 
-    any_method_button(method: :delete, name:, target:, action: :destroy,
-                      confirm: :are_you_sure.l, **args)
+    crud_action_button(method: :delete, name:, target:, action: :destroy,
+                       confirm: :are_you_sure.l, **args)
   end
 
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
@@ -353,27 +353,27 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
 
   # POST to a path; used instead of a link because POST link requires js
   def post_button(name:, path:, **, &block)
-    any_method_button(method: :post, name:, target: path, **, &block)
+    crud_action_button(method: :post, name:, target: path, **, &block)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
   def put_button(name:, path:, **, &block)
-    any_method_button(method: :put, name:, target: path, **, &block)
+    crud_action_button(method: :put, name:, target: path, **, &block)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
   def patch_button(name:, path:, **, &block)
-    any_method_button(method: :patch, name:, target: path, **, &block)
+    crud_action_button(method: :patch, name:, target: path, **, &block)
   end
 
-  # any_method_button(method: :patch,
-  #                   name: herbarium.name.t,
-  #                   target: @herbarium,  # or a path string
-  #                   confirm: :are_you_sure.t,
-  #                   action: :remove)  # optional, defaults to method
+  # crud_action_button(method: :patch,
+  #                    name: herbarium.name.t,
+  #                    target: @herbarium,  # or a path string
+  #                    confirm: :are_you_sure.t,
+  #                    action: :remove)  # optional, defaults to method
   # Pass a block and a name if you want an icon with tooltip
-  def any_method_button(**, &block)
-    render(Components::AnyMethodButton.new(**, &block))
+  def crud_action_button(**, &block)
+    render(Components::CrudActionButton.new(**, &block))
   end
 
   def button_link(title, path, **args)

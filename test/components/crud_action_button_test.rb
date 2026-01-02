@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-class AnyMethodButtonTest < ComponentTestCase
+class CrudActionButtonTest < ComponentTestCase
   def test_basic_post_button
-    html = render(Components::AnyMethodButton.new(
+    html = render(Components::CrudActionButton.new(
                     name: "Submit",
                     target: "/some/path",
                     method: :post
@@ -16,7 +16,7 @@ class AnyMethodButtonTest < ComponentTestCase
   end
 
   def test_patch_button_with_confirm
-    html = render(Components::AnyMethodButton.new(
+    html = render(Components::CrudActionButton.new(
                     name: "Remove",
                     target: "/items/1/remove",
                     method: :patch,
@@ -31,7 +31,7 @@ class AnyMethodButtonTest < ComponentTestCase
 
   def test_delete_button_with_destroy_action
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::AnyMethodButton.new(
+    html = render(Components::CrudActionButton.new(
                     name: "Destroy",
                     target: herbarium,
                     method: :delete,
@@ -48,7 +48,7 @@ class AnyMethodButtonTest < ComponentTestCase
   end
 
   def test_button_with_icon
-    html = render(Components::AnyMethodButton.new(
+    html = render(Components::CrudActionButton.new(
                     name: "Remove",
                     target: "/items/1",
                     method: :patch,
@@ -62,7 +62,7 @@ class AnyMethodButtonTest < ComponentTestCase
   end
 
   def test_button_with_custom_class
-    html = render(Components::AnyMethodButton.new(
+    html = render(Components::CrudActionButton.new(
                     name: "Submit",
                     target: "/path",
                     method: :post,
@@ -74,7 +74,7 @@ class AnyMethodButtonTest < ComponentTestCase
 
   def test_button_with_model_target_builds_path_and_identifier
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::AnyMethodButton.new(
+    html = render(Components::CrudActionButton.new(
                     name: "Update",
                     target: herbarium,
                     method: :patch
@@ -87,7 +87,7 @@ class AnyMethodButtonTest < ComponentTestCase
   end
 
   def test_button_with_confirm_shows_title_and_button_name
-    html = render(Components::AnyMethodButton.new(
+    html = render(Components::CrudActionButton.new(
                     name: "Remove",
                     target: "/items/1/remove",
                     method: :patch,
