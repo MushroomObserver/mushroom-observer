@@ -57,12 +57,10 @@ class Components::LocationForm < Components::ApplicationForm
   def render_location_feedback
     return unless @dubious_where_reasons&.any?
 
-    # Set instance variable for the partial and render it
-    view_context.instance_variable_set(
-      :@dubious_where_reasons, @dubious_where_reasons
+    FormLocationFeedback(
+      dubious_where_reasons: @dubious_where_reasons,
+      button: submit_text
     )
-    render(partial("controllers/shared/form_location_feedback",
-                   button: submit_text))
   end
 
   def render_fields

@@ -56,7 +56,8 @@ class Components::Base < Phlex::HTML
     return raw(content) if content.is_a?(ActiveSupport::SafeBuffer)
     # rubocop:enable Rails/OutputSafety
 
-    content
+    # Plain strings get escaped and output
+    plain(content.to_s)
   end
 
   if Rails.env.development?
