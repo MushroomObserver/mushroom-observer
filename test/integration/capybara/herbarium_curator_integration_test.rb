@@ -96,7 +96,8 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.herbarium_records__show")
     click_on(class: "destroy_herbarium_record_link_#{rec.id}")
 
-    assert_selector("body.herbarium_records__index")
+    # After destroying from show page, redirects to the observation
+    assert_selector("body.observations__show")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
 

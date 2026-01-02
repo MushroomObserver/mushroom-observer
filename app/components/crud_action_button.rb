@@ -41,7 +41,7 @@ class Components::CrudActionButton < Components::Base
       class: class_names(identifier, @args[:class]),
       form: { data: form_data },
       data: button_data
-    }.merge(@args.except(:class, :icon, :action))
+    }.merge(@args.except(:class, :icon, :action, :back))
 
     button_to(path, html_options) { button_content }
   end
@@ -82,6 +82,7 @@ class Components::CrudActionButton < Components::Base
   def target_path
     # For model targets, just use the resource path (e.g., herbarium_path)
     # The HTTP method (PATCH, DELETE, etc.) is set separately via method:
-    send(:"#{@target.type_tag}_path", @target.id)
+    path_args = @args[:back] ? { back: @args[:back] } : {}
+    send(:"#{@target.type_tag}_path", @target.id, **path_args)
   end
 end
