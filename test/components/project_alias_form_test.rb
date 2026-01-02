@@ -26,8 +26,9 @@ class ProjectAliasFormTest < ComponentTestCase
     assert_html(html, "select[data-type-switch-target='select']")
 
     # Both autocompleter panels present
-    assert_html(html, "[data-type-switch-target='panel'][data-type-switch-type='user']")
-    assert_html(html, "[data-type-switch-target='panel'][data-type-switch-type='location']")
+    panel = "[data-type-switch-target='panel']"
+    assert_html(html, "#{panel}[data-type-switch-type='user']")
+    assert_html(html, "#{panel}[data-type-switch-type='location']")
 
     # User panel hidden by default, location panel visible
     assert_html(html, "[data-type-switch-type='user'].d-none")
