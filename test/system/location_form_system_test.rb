@@ -32,4 +32,30 @@ class LocationFormSystemTest < ApplicationSystemTestCase
     # assert_field("location_high", with: "1388.2098")
     # assert_field("location_low", with: "287.8201")
   end
+
+  def test_edit_location_geocode
+    rolf = users("rolf")
+    location = locations("burbank")
+    login!(rolf)
+
+    visit("/locations/#{location.id}/edit")
+    assert_selector("body.locations__edit")
+    assert_selector("#location_form")
+    assert_selector("#map_div div div")
+
+    # Change location name and geocode
+    fill_in("location_display_name", with: "santa barbara california")
+    click_button(:form_locations_find_on_map.l)
+
+    # Wait for geocoding to complete
+    assert_selector("#location_display_name.geocoded", wait: 15)
+    # Geocoder returns full name with county
+    assert_field("location_display_name",
+                 with: "Santa Barbara, Santa Barbara Co., California, USA")
+
+    # Verify coordinates updated
+    assert_field("location_north")
+    north_value = find_field("location_north").value.to_f
+    assert_in_delta(34.5, north_value, 0.5, "North should be near SB")
+  end
 end

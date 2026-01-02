@@ -998,7 +998,7 @@ class LocationsControllerTest < FunctionalTestCase
                  "Location.notes should include pre-merger notes")
   end
 
-  def test_post_edit_location_locked
+  def test_update_location_locked
     location = locations(:unknown_location)
     params = {
       id: location.id,
