@@ -11,6 +11,7 @@ module ModalsHelper
     CollectionNumber: Components::CollectionNumberForm,
     MergeRequest: Components::MergeRequestEmailForm,
     NameChangeRequest: Components::NameChangeRequestForm,
+    ProjectAlias: Components::ProjectAliasForm,
     Sequence: Components::SequenceForm,
     Naming: Components::NamingForm,
     WebmasterQuestion: Components::WebmasterQuestionForm,

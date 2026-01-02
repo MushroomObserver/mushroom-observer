@@ -113,7 +113,7 @@ module Projects
         locals: { title: modal_title, identifier: modal_identifier,
                   user: @user, form: "projects/aliases/form",
                   form_locals: { model: @project_alias,
-                                 project_alias: @project_alias } }
+                                 user: @user } }
       ) and return
     end
 
@@ -122,7 +122,7 @@ module Projects
         partial: "shared/modal_form_reload",
         locals: { identifier: modal_identifier, form: "projects/aliases/form",
                   form_locals: { model: @project_alias,
-                                 project_alias: @project_alias } }
+                                 user: @user } }
       ) and return true
     end
 

@@ -2,25 +2,10 @@
 add_project_banner(@project)
 
 container_class(:wide)
-
-action = { controller: "/projects/members", action: :create,
-           project_id: @project.id }
 %>
 
-<div class="container-text mt-3 pb-2">
-
-  <%= form_with(url: action, id: "project_member_form") do |f| %>
-
-    <%= autocompleter_field(
-      form: f, field: :candidate, type: :user, value: @candidate,
-      label:"#{:LOGIN_NAME.t }:", size: 42, autofocus: true,
-    ) %>
-
-    <%= submit_button(form: f, button: :ADD.t, class: "ml-3") %>
-
-  <% end %>
-
-</div><!--.container-text-->
+<%= render(Components::ProjectMemberForm.new(@project_member,
+                                             project: @project)) %>
 
 <table class="table table-striped table-project-members mt-3">
   <thead>
