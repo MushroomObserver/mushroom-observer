@@ -156,6 +156,9 @@ module ObservationsController::EditAndUpdate
   def reload_edit_form
     @images         = @bad_images
     @new_image.when = @observation.when
+    @good_images  ||= @observation.images_sorted
+    @exif_data    ||= get_exif_data(@good_images)
+    @location     ||= @observation.location
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload

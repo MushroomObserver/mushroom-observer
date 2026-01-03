@@ -180,6 +180,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       StaticTextField.new(self, attributes: attributes,
                                 wrapper_options: wrapper_options)
     end
+
+    def date(wrapper_options: {}, **attributes)
+      DateField.new(self, attributes: attributes,
+                          wrapper_options: wrapper_options)
+    end
   end
 
   # Main field wrapper methods with Bootstrap styling
@@ -279,6 +284,28 @@ class Components::ApplicationForm < Superform::Rails::Form
       **field_opts
     )
 
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Date field with three selects (year, month, day)
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [Integer] :start_year first year in dropdown
+  # @option options [Integer] :end_year last year in dropdown
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots
+  def date_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).date(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    set_help_slot(field_component, wrapper_opts[:help])
     yield(field_component) if block_given?
 
     render(field_component)

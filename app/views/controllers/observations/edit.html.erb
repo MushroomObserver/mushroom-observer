@@ -4,4 +4,18 @@ add_context_nav(observation_form_edit_tabs(obs: @observation))
 container_class(:wide)
 %>
 
-<%= render(partial: "observations/form", locals: { action: :update }) %>
+<%= render(Components::ObservationForm.new(
+      @observation,
+      mode: :update,
+      user: @user,
+      location: @location,
+      good_images: @good_images || [],
+      exif_data: @exif_data || {},
+      dubious_where_reasons: @dubious_where_reasons,
+      projects: @projects || [],
+      project_checks: @project_checks || {},
+      lists: @lists || [],
+      list_checks: @list_checks || {},
+      error_checked_projects: @error_checked_projects || [],
+      suspect_checked_projects: @suspect_checked_projects || []
+    )) %>

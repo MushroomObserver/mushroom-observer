@@ -5,10 +5,15 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldLabelRow
     def render_label_row(label_text, inline)
       if simple_label?
-        label(for: field.dom.id, class: "mr-3") { label_text }
+        label(for: field.dom.id, class: "mr-3") { render_label_content(label_text) }
       else
         render_label_flex_row(label_text, inline)
       end
+    end
+
+    # Render label text, respecting HTML-safety
+    def render_label_content(text)
+      text.html_safe? ? trusted_html(text) : plain(text)
     end
 
     def simple_label?
@@ -28,7 +33,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_label_with_help(label_text)
       div do
-        label(for: field.dom.id, class: "mr-3") { label_text }
+        label(for: field.dom.id, class: "mr-3") { render_label_content(label_text) }
         render_help_in_label_row
         render_between_content
       end

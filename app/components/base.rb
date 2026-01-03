@@ -25,6 +25,7 @@ class Components::Base < Phlex::HTML
   register_output_helper :link_icon
   register_output_helper :make_table
   register_output_helper :help_block_with_arrow
+  register_output_helper :observation_location_help
 
   # Register custom value helpers (return values)
   register_value_helper :permission?

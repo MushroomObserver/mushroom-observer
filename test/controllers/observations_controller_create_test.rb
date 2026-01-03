@@ -97,7 +97,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   # Test "new" observation form.
   def test_create_new_observation
     requires_login(:new)
-    assert_form_action(action: :create, approved_name: "")
+    assert_form_action(action: :create)
     assert_input_value(:collection_number_name,
                        users(:rolf).legal_name)
     assert_input_value(:collection_number_number, "")

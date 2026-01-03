@@ -3,7 +3,7 @@
 # Renders naming fields (name autocompleter, vote, reasons) for embedding
 # in Superform-based forms. For ERB forms, use the _fields.erb partial.
 #
-# @param form_namespace [Superform::Namespace] the parent form namespace
+# @param form [Components::ApplicationForm] the parent form
 # @param vote [Vote] the vote object
 # @param given_name [String] the name typed by user
 # @param reasons [Hash] the naming reasons from Naming#init_reasons
@@ -13,7 +13,7 @@
 # @param name_help [String] help text for the name field
 # @param unfocused [Boolean] if true, don't autofocus any field
 class Components::NamingFields < Components::Base
-  prop :form_namespace, _Any
+  prop :form, _Any
   prop :vote, _Nilable(Vote), default: -> { Vote.new }
   prop :given_name, String, default: ""
   prop :reasons, _Nilable(Hash), default: nil
@@ -24,13 +24,16 @@ class Components::NamingFields < Components::Base
   prop :unfocused, _Boolean, default: false
 
   def view_template
-    render_name_autocompleter
+    @form.namespace(:naming) do |naming_ns|
+      render_name_autocompleter(naming_ns)
+    end
   end
 
   private
 
-  def render_name_autocompleter
-    name_field = @form_namespace.field(:name).autocompleter(
+  def render_name_autocompleter(naming_ns)
+    @naming_ns = naming_ns
+    name_field = naming_ns.field(:name).autocompleter(
       type: :name,
       wrapper_options: { label: "#{:WHAT.t}:" },
       value: @given_name,
@@ -51,7 +54,7 @@ class Components::NamingFields < Components::Base
   end
 
   def render_vote_field
-    @form_namespace.namespace(:vote) do |vote_ns|
+    @naming_ns.namespace(:vote) do |vote_ns|
       menu = @create ? [["", ""]] + confidence_menu : confidence_menu
       render(vote_ns.field(:value).select(
                menu,
@@ -69,7 +72,7 @@ class Components::NamingFields < Components::Base
 
     render(Components::NamingReasonsFields.new(
              reasons: @reasons,
-             form_namespace: @form_namespace
+             naming_ns: @naming_ns
            ))
   end
 
