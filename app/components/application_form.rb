@@ -118,7 +118,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
   # Wrapper option keys that should not be passed to the field itself
   WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
-                     :button, :button_data, :monospace,
+                     :button, :button_data, :addon, :monospace,
                      :label_class, :label_data, :label_aria,
                      :label_position].freeze
 
@@ -208,6 +208,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       **field_opts
     )
 
+    set_help_slot(field_component, wrapper_opts[:help])
     yield(field_component) if block_given?
 
     render(field_component)
@@ -234,6 +235,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       **field_opts
     )
 
+    set_help_slot(field_component, wrapper_opts[:help])
     yield(field_component) if block_given?
 
     render(field_component)
@@ -254,6 +256,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       **field_opts
     )
 
+    set_help_slot(field_component, wrapper_opts[:help])
     yield(field_component) if block_given?
 
     render(field_component)
@@ -390,6 +393,13 @@ class Components::ApplicationForm < Superform::Rails::Form
   end
 
   private
+
+  # Convert help: option to with_help slot for help icon rendering
+  def set_help_slot(field_component, help_content)
+    return if help_content.blank?
+
+    field_component.with_help { help_content }
+  end
 
   def render_upload_image_field(upload, label, between)
     render(
