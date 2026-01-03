@@ -190,7 +190,7 @@ module ObjectLinkHelper
   #
   def user_link(user, name = nil, args = {})
     if !user
-      return "?"
+      return :unknown_user_name.t
     elsif user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
       user_id = user
@@ -205,25 +205,6 @@ module ObjectLinkHelper
         { class: class_names("user_link_#{user_id}", args[:class]) }
       )
     )
-  end
-
-  # Render a list of users on one line.  (Renders nothing if user list empty.)
-  # This renders the following strings:
-  #
-  #   <%= user_list("Author", name.authors) %>
-  #
-  #   empty:           ""
-  #   [bob]:           "Author: Bob"
-  #   [bob,fred,mary]: "Authors: Bob, Fred, Mary"
-  #
-  def user_list(title, users = [])
-    return safe_empty unless users&.any?
-
-    title = users.size > 1 ? title.to_s.pluralize.to_sym.t : title.t
-    links = users.map { |u| user_link(u, u.legal_name) }
-    # interpolating would require inefficient #sanitize
-    # or dangerous #html_safe
-    title + ": " + links.safe_join(", ") # rubocop:disable Style/StringConcatenation
   end
 
   # Wrap object's name in link to the object, return nil if no object

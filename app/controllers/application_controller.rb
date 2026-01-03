@@ -322,9 +322,11 @@ class ApplicationController < ActionController::Base
   # NOTE: SpeciesList show pages cannot nav prev/next within a project without
   # having the project param stored inside the query record, q.
   def set_project_ivar
+    query = query_from_q_param # includes fallback for old q
     # NOTE: Query param projects is always an array of ids.
-    query_projects = params.dig(:q, :projects) || []
-    # If more than one project, it's none. Only want single-project associations
+    query_projects = query&.params&.dig(:projects) || []
+    # If more than one project, it's none.
+    # Only want single-project associations
     query_project = query_projects.size > 1 ? nil : query_projects.first
     project_id = params[:project] || query_project
     # At this point, we still might not have one. That's fine - just return nil.
@@ -349,6 +351,7 @@ class ApplicationController < ActionController::Base
     create_query(:Image, by_users: user, order_by: :updated_at)
   end
   helper_method :query_images_to_reuse
+  helper_method :q_param
 
   ##############################################################################
 

@@ -16,18 +16,20 @@ module Descriptions
       @object = AbstractModel.find_object(params[:type], params[:id].to_s)
       send_author_emails
       flash_notice(:request_success.t)
-      redirect_to(@object.show_link_args)
+      redirect_to(@object.show_link_args, allow_other_host: false)
     end
 
     private
 
     def send_author_emails
       subject = params.dig(:email, :subject).to_s
-      content = params.dig(:email, :content).to_s
+      message = params.dig(:email, :message).to_s
 
       (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|
-        QueuedEmail::AuthorRequest.create_email(@user, receiver, @object,
-                                                subject, content)
+        # Migrated from QueuedEmail::AuthorRequest to deliver_later.
+        AuthorMailer.build(
+          sender: @user, receiver:, object: @object, subject:, message:
+        ).deliver_later
       end
     end
   end

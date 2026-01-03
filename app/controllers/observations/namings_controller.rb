@@ -129,16 +129,39 @@ module Observations
     end
 
     def render_modal_naming_form
-      render(
-        partial: "shared/modal_form",
-        locals: {
-          title: modal_title, identifier: modal_identifier,
-          user: @user, form: "observations/namings/form",
-          form_locals: {
-            local: false, show_reasons: true, context: params[:context]
-          }
-        }
-      ) and return
+      render(Components::ModalForm.new(
+               identifier: modal_identifier,
+               title: modal_title,
+               user: @user,
+               model: @naming,
+               observation: @observation,
+               form_locals: naming_form_locals.except(:model, :observation)
+             ), layout: false)
+    end
+
+    def naming_form_locals
+      {
+        model: @naming,
+        observation: @observation,
+        local: false,
+        show_reasons: true,
+        context: params[:context],
+        vote: @vote,
+        given_name: @given_name,
+        reasons: @reasons,
+        feedback: naming_feedback
+      }
+    end
+
+    def naming_feedback
+      return {} unless defined?(@names)
+
+      {
+        names: @names,
+        valid_names: @valid_names,
+        suggest_corrections: @suggest_corrections,
+        parent_deprecated: @parent_deprecated
+      }
     end
 
     def modal_identifier
@@ -256,8 +279,8 @@ module Observations
           render(
             partial: "shared/modal_form_reload",
             locals: {
-              identifier: modal_identifier, form: "observations/namings/form",
-              form_locals: { show_reasons: true, context: params[:context] }
+              identifier: modal_identifier,
+              form_locals: naming_form_locals
             }
           ) and return true
         end

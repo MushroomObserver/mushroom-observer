@@ -27,6 +27,11 @@
 # re: custom attribute types - https://stackoverflow.com/a/79417688/3357635
 #                              https://stackoverflow.com/a/78668203/3357635
 #
+# NOTE: to retrieve the :accepts value for an attribute, you can call the
+#       Query method `attribute_types`. Rails `type_for_attribute` doesn't work.
+#
+#       Query::Observations.attribute_types[:has_sequences].accepts
+#
 class QueryParamType < ActiveModel::Type::Value
   attr_reader :accepts
 

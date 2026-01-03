@@ -26,10 +26,7 @@ module Images::Votes
 
     def update
       submit = params[:commit]
-      if submit == :image_vote_anonymity_make_anonymous.l
-        ImageVote.where(user_id: @user.id).update_all(anonymous: true)
-        flash_notice(:image_vote_anonymity_made_anonymous.t)
-      elsif submit == :image_vote_anonymity_make_public.l
+      if submit == :image_vote_anonymity_make_public.l
         ImageVote.where(user_id: @user.id).update_all(anonymous: false)
         flash_notice(:image_vote_anonymity_made_public.t)
       else

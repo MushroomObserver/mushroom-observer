@@ -1,0 +1,43 @@
+# frozen_string_literal: true
+
+# Form for user login
+class Components::LoginForm < Components::ApplicationForm
+  def view_template
+    render_login_field
+    render_password_field
+    render_remember_me_field
+    submit(:login_login.l, center: true)
+    render_forgot_login_text
+    render_help_text
+  end
+
+  private
+
+  def render_login_field
+    text_field(:login, label: "#{:login_user.t}:", wrap_class: "mt-3",
+                       data: { autofocus: @model.login.blank? })
+  end
+
+  def render_password_field
+    password_field(:password, label: "#{:login_password.t}:",
+                              wrap_class: "mt-3",
+                              data: { autofocus: @model.login.present? })
+  end
+
+  def render_remember_me_field
+    checkbox_field(:remember_me, label: :login_remember_me.t,
+                                 wrap_class: "mt-3")
+  end
+
+  def render_forgot_login_text
+    div(class: "form-group mt-3") do
+      raw(:login_forgot_password.tp) # rubocop:disable Rails/OutputSafety
+    end
+  end
+
+  def render_help_text
+    div(class: "form-group mt-3") do
+      raw(:login_having_problems.tp) # rubocop:disable Rails/OutputSafety
+    end
+  end
+end

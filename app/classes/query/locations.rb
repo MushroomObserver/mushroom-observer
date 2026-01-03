@@ -10,7 +10,7 @@ class Query::Locations < Query
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Location])
   query_attr(:by_users, [User])
-  query_attr(:by_editor, User)
+  query_attr(:by_editor, [User])
   query_attr(:in_box, { north: :float, south: :float,
                         east: :float, west: :float })
   # query_attr(:region, :string) # content filter

@@ -18,14 +18,14 @@ module Admin
         respond_to do |format|
           format.html
           format.turbo_stream do
-            render(
-              partial: "shared/modal_form",
-              locals: {
-                title: :email_merge_request_title.t(type: @model.type_tag),
-                identifier: "merge_request_email",
-                user: @user, form: "admin/email/merge_requests/form"
-              }
-            ) and return
+            render(Components::ModalForm.new(
+                     identifier: "merge_request_email",
+                     title: :email_merge_request_title.t(type: @model.type_tag),
+                     user: @user,
+                     model: FormObject::MergeRequest.new,
+                     form_locals: { old_obj: @old_obj, new_obj: @new_obj,
+                                    model_class: @model }
+                   ), layout: false)
           end
         end
       end
@@ -60,25 +60,28 @@ module Admin
         when "Name"
           Name
         else
-          flash_error("Invalid type param: #{val.inspect}.")
+          flash_error(:runtime_invalid.t(type: '"type"', value: val.to_s))
           redirect_back_or_default("/")
           nil
         end
       end
 
       def send_merge_request
+        # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
         temporarily_set_locale(MO.default_locale) do
-          QueuedEmail::Webmaster.create_email(
-            @user,
+          message = WebmasterMailer.prepend_user(@user, merge_request_content)
+          WebmasterMailer.build(
+            sender_email: @user.email,
             subject: "#{@model.name} Merge Request",
-            content: merge_request_content
-          )
+            message:
+          ).deliver_later
         end
         flash_notice(:email_merge_request_success.t)
         redirect_to(@old_obj.show_link_args)
       end
 
       def merge_request_content
+        notes = params.dig(:merge_request, :notes)
         :email_merge_objects.l(
           user: @user.login,
           type: @model.type_tag,
@@ -88,7 +91,7 @@ module Admin
           show_that_url: @new_obj.show_url,
           edit_this_url: @old_obj.edit_url,
           edit_that_url: @new_obj.edit_url,
-          notes: params[:notes].to_s.strip_html.strip_squeeze
+          notes: notes.to_s.strip_html.strip_squeeze
         )
       end
     end

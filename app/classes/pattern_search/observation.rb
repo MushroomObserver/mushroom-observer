@@ -27,7 +27,6 @@ module PatternSearch
       project_lists: [:project_lists, :parse_list_of_projects],
       region: [:region, :parse_list_of_strings],
       user: [:by_users, :parse_list_of_users],
-      field_slip: [:field_slips, :parse_list_of_strings],
 
       # numeric
       confidence: [:confidence, :parse_confidence],
@@ -107,38 +106,6 @@ module PatternSearch
         !query_params[:include_synonyms].nil? ||
         !query_params[:include_all_name_proposals].nil? ||
         !query_params[:exclude_consensus].nil?
-    end
-
-    def put_nsew_params_in_box
-      north, south, east, west = query_params.values_at(:north, :south, :east,
-                                                        :west)
-      box = { north:, south:, east:, west: }
-      return if box.compact.blank?
-
-      box = validate_box(box)
-      query_params[:in_box] = box
-      query_params.except!(:north, :south, :east, :west)
-    end
-
-    def validate_box(box)
-      validator = Mappable::Box.new(**box)
-      return box if validator.valid?
-
-      check_for_missing_box_params
-      # Just fix the box if they've got it swapped
-      if query_params[:south] > query_params[:north]
-        box = box.merge(north: query_params[:south],
-                        south: query_params[:north])
-      end
-      box
-    end
-
-    def check_for_missing_box_params
-      [:north, :south, :east, :west].each do |term|
-        next if query_params[term].present?
-
-        raise(PatternSearch::MissingValueError.new(var: term))
-      end
     end
   end
 end

@@ -195,8 +195,10 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:new, params: { target: obs_id, type: :Observation },
               format: :turbo_stream)
-    assert_template("shared/_modal_form")
-    assert_template("comments/_form")
+    # Assert CommentForm component rendered
+    assert_select("form#comment_form")
+    assert_select("input[name='comment[summary]']")
+    assert_select("textarea[name='comment[comment]']")
     assert_form_action(action: :create, target: obs_id, type: :Observation)
   end
 
@@ -249,8 +251,8 @@ class CommentsControllerTest < FunctionalTestCase
     login
 
     get(:edit, params: { id: comment.id }, format: :turbo_stream)
-    assert_template("shared/_modal_form")
-    assert_template("comments/_form")
+    assert_select("#modal_comment_#{comment.id}")
+    assert_select("form#comment_form")
     assert_form_action(action: :update, id: comment.id.to_s)
   end
 

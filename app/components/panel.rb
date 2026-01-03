@@ -39,6 +39,17 @@
 #   ) do |panel|
 #     panel.with_body { "Content" }
 #   end)
+#
+# @example Panel with unwrapped body (e.g., for list-group)
+#   render(Components::Panel.new do |panel|
+#     panel.with_heading { "Comments" }
+#     panel.with_body(wrapper: false) do
+#       ul(class: "list-group") do
+#         li(class: "list-group-item") { "Comment 1" }
+#         li(class: "list-group-item") { "Comment 2" }
+#       end
+#     end
+#   end)
 class Components::Panel < Components::Base
   include Phlex::Slotable
 
@@ -57,15 +68,16 @@ class Components::Panel < Components::Base
   # Remove this when migrating to Bootstrap >= 4.
   prop :sizing, _Boolean, default: false
 
-  slot :heading, lambda { |classes: nil, &content|
-    render_heading(classes:, &content)
+  slot :heading, lambda { |classes: nil, title: true, &content|
+    render_heading(classes:, title:, &content)
   }
   slot :heading_links
   slot :thumbnail, lambda { |classes: nil, id: nil, data: nil, &content|
     render_thumbnail(classes:, id:, data:, &content)
   }
-  slot :body, lambda { |classes: nil, id: nil, collapse: false, &content|
-    render_body(classes:, collapse:, id:, &content)
+  slot :body, lambda { |classes: nil, id: nil, collapse: false, wrapper: true,
+                       &content|
+    render_body(classes:, collapse:, id:, wrapper:, &content)
   }, collection: true
   slot :footer, lambda { |classes: nil, &content|
     render_footer(classes:, &content)
@@ -95,14 +107,19 @@ class Components::Panel < Components::Base
     end
   end
 
-  def render_heading(classes:, &content)
-    classes = classes.presence || "h4 panel-title"
-
-    div(class: "panel-heading") do
-      div(class: classes) do
-        span(&content)
-        whitespace
-        render_heading_links if heading_links_slot? || @collapsible
+  def render_heading(classes:, title:, &content)
+    if title
+      classes = classes.presence || "h4 panel-title"
+      div(class: "panel-heading") do
+        div(class: classes) do
+          span(&content)
+          whitespace
+          render_heading_links if heading_links_slot? || @collapsible
+        end
+      end
+    else
+      div(class: class_names("panel-heading", classes)) do
+        yield if block_given?
       end
     end
   end
@@ -162,24 +179,26 @@ class Components::Panel < Components::Base
     div(**args, &content)
   end
 
-  def render_body(classes:, id:, collapse:, &content)
-    return render_collapse_body(classes:, id:, &content) if collapse
+  def render_body(classes:, id:, collapse:, wrapper:, &content)
+    return render_collapse_body(classes:, id:, wrapper:, &content) if collapse
 
-    render_plain_body(classes:, id:, &content)
+    render_plain_body(classes:, id:, wrapper:, &content)
   end
 
-  def render_plain_body(classes:, id:, &content)
+  def render_plain_body(classes:, id:, wrapper:, &content)
+    return yield if wrapper == false
+
     classes = class_names("panel-body", classes)
     div(class: classes, id:, &content)
   end
 
-  def render_collapse_body(classes:, id:, &content)
+  def render_collapse_body(classes:, id:, wrapper:, &content)
     expanded = @expanded ? "in" : nil
     args = {
       class: class_names("panel-collapse collapse", expanded, @collapse_class),
       id: @collapse_id
     }.compact
-    div(**args) { render_plain_body(classes:, id:, &content) }
+    div(**args) { render_plain_body(classes:, id:, wrapper:, &content) }
   end
 
   def render_footer(classes:)

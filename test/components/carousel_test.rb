@@ -2,10 +2,9 @@
 
 require "test_helper"
 
-class CarouselTest < UnitTestCase
-  include ComponentTestHelper
-
+class CarouselTest < ComponentTestCase
   def setup
+    super
     @user = users(:rolf)
     @obs = observations(:coprinus_comatus_obs)
     @images = @obs.images.to_a

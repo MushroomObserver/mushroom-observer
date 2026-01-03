@@ -32,26 +32,27 @@ class MockFile
 end
 
 class ImageLoaderJobTest < ActiveJob::TestCase
-  DIR = Rails.root.join("tmp/downloads")
+  include GeneralExtensions
 
   def setup
+    super
     @mock_storage = MockStorage.new
     @test_image = Image.reorder(created_at: :asc).first
-    @test_file = "#{DIR}/#{@test_image.id}.jpg"
-    FileUtils.rm_rf(DIR)
+    @test_file = "#{download_dir}/#{@test_image.id}.jpg"
+    FileUtils.rm_rf(download_dir)
   end
 
   def with_stubs(&block)
     Google::Cloud::Storage.stub(:new, @mock_storage) do
-      MO.stub(:local_original_image_cache_path, DIR, &block)
+      MO.stub(:local_original_image_cache_path, download_dir, &block)
     end
   end
 
   def teardown
-    FileUtils.rm_rf(DIR)
+    FileUtils.rm_rf(download_dir)
   end
 
-  test "image download works" do
+  def test_image_download_works
     rolf_count = users(:rolf).original_image_quota
     admin_count = User.admin.original_image_quota
     with_stubs do
@@ -62,7 +63,7 @@ class ImageLoaderJobTest < ActiveJob::TestCase
     end
   end
 
-  test "image already there" do
+  def test_image_already_there
     FileUtils.mkdir_p(File.dirname(@test_file))
     File.write(@test_file, "already cached")
     with_stubs do
@@ -71,7 +72,7 @@ class ImageLoaderJobTest < ActiveJob::TestCase
     end
   end
 
-  test "image download fails" do
+  def test_image_download_fails
     with_stubs do
       MockBucket.stub(:new, -> { raise("test") }) do
         ImageLoaderJob.perform_now(@test_image.id, users(:rolf).id)

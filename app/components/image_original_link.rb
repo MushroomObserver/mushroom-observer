@@ -18,8 +18,6 @@
 #     link_class: "custom-link-class"
 #   )
 class Components::ImageOriginalLink < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
-
   prop :image, _Nilable(::Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
   prop :link_class, String, default: ""

@@ -4,4 +4,13 @@ add_new_title(:create_object, :LOCATION)
 add_context_nav(location_form_new_tabs(location: @location))
 %>
 
-<%= render(partial: "locations/form", locals: { local: true }) %>
+<%= render(Components::LocationForm.new(
+      @location,
+      display_name: @display_name,
+      original_name: @original_name,
+      set_observation: @set_observation,
+      set_species_list: @set_species_list,
+      set_user: @set_user,
+      set_herbarium: @set_herbarium,
+      dubious_where_reasons: @dubious_where_reasons
+    )) %>

@@ -4,6 +4,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
+  # Confidence levels for vote_cache filtering
+  CONFIDENCE_LEVELS = [3.0, 2.0, 1.0, 0.0, -1.0, -2.0, -3.0].freeze
+
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
@@ -90,14 +93,28 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
+    #
+    # Single value behavior:
+    # - 0.0 (No Opinion): Exact match
+    # - Positive values: Range from (next_lower, value] - e.g., "Promising"
+    #   searches for vote_cache > 1.0 AND <= 2.0
+    # - Negative values: Range from [value, next_higher) - e.g., "Not Likely"
+    #   searches for vote_cache >= -2.0 AND < -1.0
+    #
+    # Range behavior combines the lower bound from min with upper bound
+    # from max:
+    # - "Promising" to "I'd Call It That": vote_cache > 1.0 AND <= 3.0
+    # - "Not Likely" to "Promising": vote_cache >= -2.0 AND <= 2.0
     scope :confidence, lambda { |min, max = nil|
       min, max = min if min.is_a?(Array)
-      if max.nil? || max == min # max may be 0
-        where(Observation[:vote_cache].gteq(min))
+
+      if max.nil? || max == min
+        confidence_single_value(min.to_f)
       else
-        where(Observation[:vote_cache].in(min..max))
+        confidence_range(min.to_f, max.to_f)
       end
     }
+
     scope :needs_naming, lambda { |user|
       needs_naming_generally.not_reviewed_by_user(user).distinct
     }
@@ -125,8 +142,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :not_reviewed_by_user, lambda { |user|
       user_id = user.is_a?(Integer) ? user : user&.id
-      where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
-                    select(:observation_id))
+      where.not(
+        id: ObservationView.where(user_id: user_id, reviewed: 1).
+          where.not(observation_id: nil).
+          select(:observation_id)
+      )
     }
     # Higher taxa: returns narrowed-down group of id'd obs,
     # in higher taxa under the given taxon
@@ -262,9 +282,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # This is the new default search scope for observations by location:
     # returns all observations whose lat/lng or location_lat/lng are
-    # within the box(es) of the given observations.
+    # within the box(es) of the given locations.
     scope :within_locations, lambda { |locations|
       locs = ::Lookup::Locations.new(locations).instances
+      return none if locs.blank?
+
       in_boxes = locs.map! { |location| in_box(**location.bounding_box) }
       or_clause(*in_boxes).distinct
     }
@@ -427,17 +449,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           ->(bool = true) { where(specimen: bool) }
 
     scope :has_sequences, lambda { |bool = true|
-      return all unless bool
-
       joined_relation_condition(:sequences, bool:)
+    }
+
+    scope :has_field_slips, lambda { |bool = true|
+      joined_relation_condition(:field_slips, bool:)
+    }
+
+    scope :has_collection_numbers, lambda { |bool = true|
+      joined_relation_condition(:collection_numbers, bool:)
     }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
-    scope :field_slips, lambda { |codes|
-      fs_ids = Lookup::FieldSlips.new(codes).ids
-      joins(:field_slips).where(field_slips: { id: fs_ids }).distinct
-    }
     scope :herbaria, lambda { |herbaria|
       h_ids = Lookup::Herbaria.new(herbaria).ids
       joins(observation_herbarium_records: :herbarium_record).
@@ -561,6 +585,58 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
               ":#{field}:"
             end
       Observation[:notes].matches("%#{pat}%")
+    end
+
+    def confidence_single_value(value)
+      if value.zero?
+        where(Observation[:vote_cache].eq(0))
+      elsif value.positive?
+        confidence_positive_single(value)
+      else
+        confidence_negative_single(value)
+      end
+    end
+
+    def confidence_positive_single(value)
+      next_lower = CONFIDENCE_LEVELS.select { |v| v < value }.max || 0.0
+      where(Observation[:vote_cache].gt(next_lower).
+            and(Observation[:vote_cache].lteq(value)))
+    end
+
+    def confidence_negative_single(value)
+      next_higher = CONFIDENCE_LEVELS.select { |v| v > value }.min || 0.0
+      where(Observation[:vote_cache].gteq(value).
+            and(Observation[:vote_cache].lt(next_higher)))
+    end
+
+    def confidence_range(min_val, max_val)
+      lower = confidence_lower_bound(min_val)
+      upper = confidence_upper_bound(max_val)
+      where(lower.and(upper))
+    end
+
+    def confidence_lower_bound(value)
+      if value.zero?
+        Observation[:vote_cache].gteq(0)
+      elsif value.positive?
+        next_lower = CONFIDENCE_LEVELS.select { |v| v < value }.max ||
+                     (value - 1.0)
+        Observation[:vote_cache].gt(next_lower)
+      else
+        Observation[:vote_cache].gteq(value)
+      end
+    end
+
+    def confidence_upper_bound(value)
+      if value.zero?
+        Observation[:vote_cache].lteq(0)
+      elsif value.positive?
+        Observation[:vote_cache].lteq(value)
+      else
+        next_higher = CONFIDENCE_LEVELS.select { |v| v > value }.min ||
+                      (value + 1.0)
+        Observation[:vote_cache].lt(next_higher)
+      end
     end
   end
 end

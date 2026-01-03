@@ -4,4 +4,4 @@ add_new_title(:create_object, :PUBLICATION)
 add_context_nav(publication_form_new_tabs)
 %>
 
-<%= render(partial: "publications/form", locals: { action: :create }) %>
+<%= render(Components::PublicationForm.new(@publication)) %>

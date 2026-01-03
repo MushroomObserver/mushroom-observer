@@ -39,18 +39,78 @@ module Report
 
     def initialize(vals)
       @vals = vals
+      validate_column_alignment!
     end
 
+    private
+
+    # Validate that columns are correctly aligned by checking data types
+    # This catches race conditions in parallel testing where columns
+    # get misaligned
+    def validate_column_alignment!
+      return if @vals.empty?
+
+      # Check critical columns that have failed in parallel tests
+      validate_notes_column!
+      validate_updated_at_column!
+      validate_name_text_name_column!
+    end
+
+    def validate_notes_column!
+      return if @vals[9].blank?
+
+      # notes should be a String (YAML), Hash, or nil - never a Time
+      return unless @vals[9].is_a?(Time) || @vals[9].is_a?(DateTime)
+
+      raise_column_misalignment_error(
+        9, "notes", "String/Hash", @vals[9].class
+      )
+    end
+
+    def validate_updated_at_column!
+      return if @vals[10].blank?
+
+      # updated_at should be Time/DateTime/String, not a Hash
+      return unless @vals[10].is_a?(Hash)
+
+      raise_column_misalignment_error(
+        10, "updated_at", "Time/DateTime/String", @vals[10].class
+      )
+    end
+
+    def validate_name_text_name_column!
+      return if @vals[15].blank?
+
+      # name_text_name should be String, not numeric or Time
+      return unless @vals[15].is_a?(Numeric) || @vals[15].is_a?(Time)
+
+      raise_column_misalignment_error(
+        15, "name_text_name", "String", @vals[15].class
+      )
+    end
+
+    def raise_column_misalignment_error(index, column_name, expected, actual)
+      raise(
+        "Column misalignment detected in Report::Row! " \
+        "Expected @vals[#{index}] (#{column_name}) to be #{expected}, " \
+        "but got #{actual}. " \
+        "This indicates a race condition in parallel testing. " \
+        "Row data: #{@vals.first(20).inspect}"
+      )
+    end
+
+    public
+
     def obs_id
-      @vals[0].blank? ? nil : @vals[0].to_i
+      @vals[0].presence&.to_i
     end
 
     def obs_url
-      "#{MO.http_domain}/#{obs_id}"
+      "#{MO.http_domain}/obs/#{obs_id}"
     end
 
     def obs_when
-      @vals[1].blank? ? nil : @vals[1].to_s
+      @vals[1].presence&.to_s
     end
 
     def obs_lat(prec = 4)
@@ -62,7 +122,7 @@ module Report
     end
 
     def obs_alt
-      @vals[4].blank? ? nil : @vals[4].round
+      @vals[4].presence&.round
     end
 
     def obs_specimen
@@ -78,7 +138,7 @@ module Report
     end
 
     def obs_thumb_image_id
-      @vals[8].blank? ? nil : @vals[8].to_i
+      @vals[8].presence&.to_i
     end
 
     def obs_notes
@@ -90,19 +150,19 @@ module Report
     end
 
     def obs_updated_at
-      @vals[10].blank? ? nil : @vals[10].to_s
+      @vals[10].presence&.to_s
     end
 
     def user_id
-      @vals[11].blank? ? nil : @vals[11].to_i
+      @vals[11].presence&.to_i
     end
 
     def user_login
-      @vals[12].blank? ? nil : @vals[12].to_s
+      @vals[12].presence&.to_s
     end
 
     def user_name
-      @vals[13].blank? ? nil : @vals[13].to_s
+      @vals[13].presence&.to_s
     end
 
     def user_name_or_login
@@ -110,15 +170,15 @@ module Report
     end
 
     def name_id
-      @vals[14].blank? ? nil : @vals[14].to_i
+      @vals[14].presence&.to_i
     end
 
     def name_text_name
-      @vals[15].blank? ? nil : @vals[15].to_s
+      @vals[15].presence&.to_s
     end
 
     def name_author
-      @vals[16].blank? ? nil : @vals[16].to_s
+      @vals[16].presence&.to_s
     end
 
     def name_rank
@@ -127,11 +187,11 @@ module Report
     end
 
     def loc_id
-      @vals[18].blank? ? nil : @vals[18].to_i
+      @vals[18].presence&.to_i
     end
 
     def loc_name
-      @vals[19].blank? ? nil : @vals[19].to_s
+      @vals[19].presence&.to_s
     end
 
     def loc_name_sci

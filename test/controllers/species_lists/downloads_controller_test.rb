@@ -16,7 +16,8 @@ module SpeciesLists
         sort_name: "Tapinella atrotomentosa (Batsch) Šutara",
         display_name: "**__Tapinella atrotomentosa__** (Batsch) Šutara",
         deprecated: false,
-        rank: "Species"
+        rank: "Species",
+        user: rolf
       )
 
       list = species_lists(:first_species_list)

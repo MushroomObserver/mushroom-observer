@@ -16,8 +16,10 @@ else
   general_help = tag.p do
     [
       tag.strong("#{:NOTES.t}:", class: "mr-3"),
-      collapse_info_trigger("notes_help"),
-      collapse_help_block(nil, :shared_textile_help.l, id: "notes_help")
+      render(Components::CollapseInfoTrigger.new(target_id: "notes_help")),
+      render(Components::CollapseHelpBlock.new(target_id: "notes_help")) do
+        :shared_textile_help.l
+      end
     ].safe_join
   end
   rows = 1

@@ -12,6 +12,7 @@ class Lookup::Locations < Lookup
     # Downcases and removes all punctuation, so it's a multi-string search
     # e.g. "sonoma co california usa"
     pattern = Location.clean_name(name.to_s).clean_pattern
-    Location.name_has(pattern)
+    # Pick the shortest, most general name that matches everything.
+    Location.shortest_names_with(pattern).limit(1)
   end
 end

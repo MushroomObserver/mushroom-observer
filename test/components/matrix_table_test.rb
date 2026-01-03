@@ -2,10 +2,9 @@
 
 require "test_helper"
 
-class MatrixTableTest < UnitTestCase
-  include ComponentTestHelper
-
+class MatrixTableTest < ComponentTestCase
   def setup
+    super
     @user = users(:rolf)
   end
 
@@ -150,7 +149,9 @@ class MatrixTableTest < UnitTestCase
   end
 
   def test_renders_identify_ui_and_footer_when_identify_is_true
-    obs = observations(:coprinus_comatus_obs)
+    # Must eager-load observation_views for identify footer to render
+    obs = Observation.includes(:observation_views).
+          find(observations(:coprinus_comatus_obs).id)
     component = Components::MatrixTable.new(
       objects: [obs],
       user: @user,
@@ -186,5 +187,62 @@ class MatrixTableTest < UnitTestCase
     assert_includes(html, "box_123")
     assert_includes(html, "block-test")
     assert_includes(html, "Custom content")
+  end
+
+  def test_cache_key_includes_locale
+    obs = observations(:coprinus_comatus_obs)
+    obs.thumb_image.stub(:transferred, true) do
+      component = Components::MatrixTable.new(
+        objects: [obs],
+        user: @user,
+        cached: true
+      )
+
+      # Capture the cache key that gets passed to cache()
+      captured_key = nil
+      component.stub(:cache, lambda { |key, &block|
+        captured_key = key
+        block.call
+      }) do
+        render(component)
+      end
+
+      assert_equal([I18n.locale, obs], captured_key,
+                   "Cache key should include locale and object")
+    end
+  end
+
+  def test_different_locales_use_different_cache_keys
+    obs = observations(:coprinus_comatus_obs)
+    obs.thumb_image.stub(:transferred, true) do
+      keys = []
+
+      # Render with English locale
+      component_en = Components::MatrixTable.new(
+        objects: [obs], user: @user, cached: true
+      )
+      component_en.stub(:cache, lambda { |key, &block|
+        keys << key
+        block.call
+      }) do
+        I18n.with_locale(:en) { render(component_en) }
+      end
+
+      # Render with Spanish locale (new component instance)
+      component_es = Components::MatrixTable.new(
+        objects: [obs], user: @user, cached: true
+      )
+      component_es.stub(:cache, lambda { |key, &block|
+        keys << key
+        block.call
+      }) do
+        I18n.with_locale(:es) { render(component_es) }
+      end
+
+      assert_equal([:en, obs], keys[0], "First key should use :en locale")
+      assert_equal([:es, obs], keys[1], "Second key should use :es locale")
+      assert_not_equal(keys[0], keys[1], "Different locales should have " \
+                                         "different cache keys")
+    end
   end
 end

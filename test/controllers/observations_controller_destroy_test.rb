@@ -23,6 +23,26 @@ class ObservationsControllerDestroyTest < FunctionalTestCase
     end
   end
 
+  def test_destroy_observation_with_query_no_next
+    # Test that destroying an observation when query has no next_id
+    # redirects to index instead of crashing
+    obs = observations(:minimal_unknown_obs)
+    id = obs.id
+    login("mary")
+
+    # Create a query with just this one observation
+    query = Query.lookup_and_save(:Observation, ids: [id])
+    session[:checklist_source] = query.id.alphabetize
+
+    delete(:destroy, params: { id: id })
+
+    # Should redirect to index, not crash trying to show nil observation
+    assert_redirected_to(action: :index)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Observation.find(id)
+    end
+  end
+
   def test_original_filename_visibility
     login("mary")
     obs_id = observations(:agaricus_campestris_obs).id

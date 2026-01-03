@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_11_10_174852) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_01_095531) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -637,31 +637,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_10_174852) do
     t.integer "access_count"
     t.text "description"
     t.boolean "permalink", default: false
-  end
-
-  create_table "queued_email_integers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.string "key", limit: 100
-    t.integer "value", default: 0, null: false
-  end
-
-  create_table "queued_email_notes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.text "value"
-  end
-
-  create_table "queued_email_strings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.string "key", limit: 100
-    t.string "value", limit: 100
-  end
-
-  create_table "queued_emails", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "user_id"
-    t.datetime "queued", precision: nil
-    t.integer "num_attempts"
-    t.string "flavor", limit: 50
-    t.integer "to_user_id"
   end
 
   create_table "rss_logs", id: :integer, charset: "utf8mb3", force: :cascade do |t|

@@ -60,7 +60,7 @@ class API2
 
     def parse_observation_query_parameters
       {
-        locations: parse_array(:string, :location),
+        within_locations: parse_array(:string, :location),
         species_lists: parse_array(:string, :species_list)
       }
     end
@@ -149,8 +149,13 @@ class API2
     private
 
     def parse_misspellings
-      parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only],
-                                  help: 1)
+      result = parse(:enum, :misspellings,
+                     default: :no,
+                     limit: [:no, :include, :either, :only],
+                     help: 1)
+      return :include if result == :either
+
+      result
     end
 
     def validate_classification!(params)

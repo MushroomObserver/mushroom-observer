@@ -84,8 +84,16 @@ function log_cmd {
 
 # Run the given mysql command without logging or anything else.
 function run_mysql {
-  config_file=$app_root/config/mysql-$RAILS_ENV.cnf
-  mysql --defaults-extra-file=$config_file -q -s -e "$*"  
+  # Use MO_MYSQL_CONFIG if set (for parallel testing), otherwise use default
+  if [[ -n "$MO_MYSQL_CONFIG" ]]; then
+    config_file="$MO_MYSQL_CONFIG"
+  else
+    config_file=$app_root/config/mysql-$RAILS_ENV.cnf
+  fi
+  if [[ ! -e "$config_file" ]]; then
+    die "MySQL config file '$config_file' does not exist. Aborting."
+  fi
+  mysql --defaults-extra-file=$config_file -q -s -e "$*"
 }
 
 # Run the given mysql command, logging the command and any errors. Example:

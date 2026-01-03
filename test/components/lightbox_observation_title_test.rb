@@ -2,20 +2,15 @@
 
 require "test_helper"
 
-class LightboxObservationTitleTest < UnitTestCase
-  include ComponentTestHelper
-
+class LightboxObservationTitleTest < ComponentTestCase
   def setup
+    super
     @user = users(:rolf)
     @obs = observations(:coprinus_comatus_obs)
   end
 
   def test_renders_basic_title_structure
-    component = Components::LightboxObservationTitle.new(
-      obs: @obs,
-      user: @user
-    )
-    html = render(component)
+    html = render_title
 
     # Should have heading with proper ID and class
     assert_includes(html, "observation_what_#{@obs.id}")
@@ -27,16 +22,12 @@ class LightboxObservationTitleTest < UnitTestCase
 
     # Should have observation ID link
     assert_includes(html, "caption_obs_link_#{@obs.id}")
+    assert_includes(html, "/obs/#{@obs.id}")
     assert_includes(html, @obs.id.to_s)
   end
 
   def test_renders_with_identify_mode
-    component = Components::LightboxObservationTitle.new(
-      obs: @obs,
-      user: @user,
-      identify: true
-    )
-    html = render(component)
+    html = render_title(identify: true)
 
     # Should have Observation label (localized)
     assert_includes(html, "Observation:")
@@ -47,12 +38,7 @@ class LightboxObservationTitleTest < UnitTestCase
   end
 
   def test_renders_without_identify_mode
-    component = Components::LightboxObservationTitle.new(
-      obs: @obs,
-      user: @user,
-      identify: false
-    )
-    html = render(component)
+    html = render_title(identify: false)
 
     # Should not have OBSERVATION label
     assert_not_includes(html, "OBSERVATION:")
@@ -62,25 +48,8 @@ class LightboxObservationTitleTest < UnitTestCase
     assert_not_includes(html, "text-bold")
   end
 
-  def test_renders_observation_link
-    component = Components::LightboxObservationTitle.new(
-      obs: @obs,
-      user: @user
-    )
-    html = render(component)
-
-    # Should have link to observation
-    assert_includes(html, "caption_obs_link_#{@obs.id}")
-    assert_includes(html, "/obs/#{@obs.id}")
-    assert_includes(html, @obs.id.to_s)
-  end
-
   def test_renders_without_user
-    component = Components::LightboxObservationTitle.new(
-      obs: @obs,
-      user: nil
-    )
-    html = render(component)
+    html = render_title(user: nil)
 
     # Should still render basic structure
     assert_includes(html, "observation_what_#{@obs.id}")
@@ -88,5 +57,15 @@ class LightboxObservationTitleTest < UnitTestCase
 
     # Should not have user value in data attribute
     assert_not_includes(html, "data-section-update-user-value")
+  end
+
+  private
+
+  def render_title(user: @user, identify: false)
+    render(Components::LightboxObservationTitle.new(
+             obs: @obs,
+             user: user,
+             identify: identify
+           ))
   end
 end

@@ -1,8 +1,7 @@
-<%# Display form to creat a new herbarium %>
+<%# Display form to create a new herbarium %>
 <%
 add_new_title(:new_object, :HERBARIUM)
 add_context_nav(herbarium_form_new_tabs)
 %>
 
-<%= render(partial: "herbaria/form",
-           locals: { action: :create, local: true }) %>
+<%= render(Components::HerbariumForm.new(@herbarium, user: @user, local: true)) %>

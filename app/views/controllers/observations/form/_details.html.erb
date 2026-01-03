@@ -14,14 +14,16 @@ t_s = {
   <%= tag.div(class: "col-xs-12 col-md-6") do %>
     <!-- WHEN -->
     <%= date_select_with_label(
-      form: f, field: :when, label: :WHEN.t + ":",
+      form: f, field: :when, label: :WHEN.t + ":", class: "mb-3"
     ) %>
     <!-- /WHEN -->
 
     <%= tag.div(id: "observation_where") do %>
       <!-- WHERE_REASONS -->
-      <%= render(partial: "shared/form_location_feedback",
-                  locals: { button: button_name } ) %>
+      <%= render(Components::FormLocationFeedback.new(
+        dubious_where_reasons: @dubious_where_reasons,
+        button: button_name
+      )) %>
       <!-- /WHERE_REASONS -->
 
       <%= autocompleter_field(
@@ -33,7 +35,7 @@ t_s = {
                           class: "create-label")].safe_join(" "),
         value: @default_place_name || location&.name,
         help: observation_location_help,
-        hidden_value: location&.id,
+        hidden_name: :location_id, hidden_value: location&.id,
         hidden_data: { map_target: "locationId",
                         north: location&.north, south: location&.south,
                         east: location&.east, west: location&.west },
@@ -49,7 +51,7 @@ t_s = {
         # and it should only affect this autocompleter:
         data: {
           map_target: "placeInput",
-          action: "form-exif:pointChanged@window->autocompleter#swap"
+          action: "form-exif:pointChanged@window->autocompleter--location#swap"
         }
       ) %>
 

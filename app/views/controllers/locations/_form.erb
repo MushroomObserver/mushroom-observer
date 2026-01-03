@@ -40,8 +40,10 @@ map_args = { editable: true, map_type: "location" }
 
   <% if !@location.locked || in_admin_mode? %>
 
-    <%= render(partial: "shared/form_location_feedback",
-               locals: { button: } ) %>
+    <%= render(Components::FormLocationFeedback.new(
+      dubious_where_reasons: @dubious_where_reasons,
+      button: button
+    )) %>
 
     <%# NOTE: All other Stimulus data is on the map div, but we need
     the fields inside the controller scope, so map has controller: nil %>

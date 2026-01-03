@@ -25,6 +25,8 @@ module Names
       return unless find_name!
 
       find_name_tracker
+      return redirect_to(new_tracker_of_name_path(@name)) unless @name_tracker
+
       initialize_tracking_form_edit
     end
 
@@ -46,17 +48,21 @@ module Names
     end
 
     def initialize_tracking_form_new
-      @note_template = :email_tracking_note_template.l(
-        species_name: @name.real_text_name,
-        mailing_address: @user.mailing_address_for_tracking_template,
-        users_name: @user.legal_name
-      )
+      @note_template = default_note_template
     end
 
     def initialize_tracking_form_edit
       @note_template = @name_tracker.note_template
       @name_tracker.note_template_enabled = @note_template.present?
       @interest = Interest.find_by(target: @name_tracker)
+    end
+
+    def default_note_template
+      :email_tracking_note_template.l(
+        species_name: @name.real_text_name,
+        mailing_address: @user.mailing_address_for_tracking_template,
+        users_name: @user.legal_name
+      )
     end
 
     def submit_tracking_form_create
@@ -122,17 +128,19 @@ module Names
       return unless name_tracker.new_record? ||
                     name_tracker.note_template_before_last_save.blank?
 
+      # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
       user = name_tracker.user
       name = name_tracker.name
-      QueuedEmail::Webmaster.create_email(
-        @user,
+      body = "User: ##{user.id} / #{user.login} / #{user.email}\n" \
+             "Name: ##{name.id} / #{name.search_name}\n" \
+             "Note: [[#{name_tracker.note_template}]]\n\n" \
+             "#{MO.http_domain}/names/trackers/#{name_tracker.id}/approve"
+      message = WebmasterMailer.prepend_user(@user, body)
+      WebmasterMailer.build(
         sender_email: user.email,
         subject: "New Name Tracker with Template",
-        content: "User: ##{user.id} / #{user.login} / #{user.email}\n" \
-                 "Name: ##{name.id} / #{name.search_name}\n" \
-                 "Note: [[#{name_tracker.note_template}]]\n\n" \
-                 "#{MO.http_domain}/names/trackers/#{name_tracker.id}/approve"
-      )
+        message:
+      ).deliver_later
 
       # Let the user know that the note_template feature requires approval.
       flash_notice(:email_tracking_awaiting_approval.t)

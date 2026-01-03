@@ -12,6 +12,9 @@
 module Searchable
   extend ActiveSupport::Concern
 
+  # Maximum allowed total length of all search input fields
+  MAX_SEARCH_INPUT_LENGTH = 8000
+
   included do
     # Render help for the pattern search bar (if available), for current model
     def show
@@ -19,7 +22,7 @@ module Searchable
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
             :search_bar_help, # id of element to update contents of
-            partial: "#{parent_controller}/search/help"
+            partial: "#{search_type}/search/help"
           ))
         end
         format.html
@@ -27,22 +30,11 @@ module Searchable
     end
 
     def new
+      @local = params[:local] != "false"
       set_up_form_field_groupings
-      @search = if params[:clear].present?
-                  create_query(query_model)
-                else
-                  find_or_create_query(query_model)
-                end
-
+      @search = build_search_query
       respond_to do |format|
-        format.turbo_stream do
-          render(turbo_stream: turbo_stream.update(
-            :search_nav_form, # id of element to update contents of
-            partial: "shared/search_form",
-            locals: { local: false, search: @search,
-                      field_columns: @field_columns }
-          ))
-        end
+        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
         format.html
       end
     end
@@ -52,11 +44,12 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       @query_params = params.require(search_object_name).permit(permittables)
+
       prepare_raw_params
       redirect_to(action: :new) and return unless validate_search_instance?
 
       save_search_query
-      redirect_to(controller: "/#{parent_controller}", action: :index,
+      redirect_to(controller: "/#{search_type}", action: :index,
                   q: @query.q_param)
     end
 
@@ -67,37 +60,52 @@ module Searchable
       autocompleted_strings_to_ids
       range_fields_to_arrays
       parse_date_ranges
+      normalize_notes_fields
     end
 
     # Used by search_helper to prefill nested params
     def nested_field_names
-      nested_names_param_names + nested_in_box_param_names
+      nested_names_params + nested_in_box_params
     end
 
     # Default. Override in controllers
-    def nested_names_params
-      {}
-    end
+    def nested_names_params = []
 
-    # Used by search_form
-    def search_type
-      self.class.name.deconstantize.underscore.to_sym
-    end
+    # e.g. "SpeciesLists"
+    def module_name = self.class.name.deconstantize
 
-    def parent_controller
-      self.class.name.deconstantize.underscore
-    end
+    # e.g. :species_lists - Used by search_form
+    def search_type = module_name.underscore.to_sym
 
-    # Returns the capitalized :Symbol used by Query for the type of query.
-    def query_model
-      self.class.module_parent.name.singularize.to_sym
-    end
+    # e.g. :SpeciesList
+    # Returns the capitalized :ModelSymbol used by Query for the type of query.
+    def query_model = module_name.singularize.to_sym
 
     private
 
-    def search_object_name
-      :"query_#{search_type}"
+    def build_search_query
+      return reset_search_query if params[:clear].present?
+
+      find_or_create_query(query_model)
     end
+
+    def reset_search_query
+      session.delete(:names_preferences)
+      create_query(query_model)
+    end
+
+    def turbo_stream_update
+      turbo_stream.update(
+        :search_nav_form,
+        Components::SearchForm.new(
+          @search,
+          search_controller: self,
+          local: false
+        )
+      )
+    end
+
+    def search_object_name = :"query_#{search_type}"
 
     def clear_form?
       if params[:commit] == :CLEAR.l
@@ -112,34 +120,24 @@ module Searchable
     def permittables
       ranges = fields_with_range.map { |field| :"#{field}_range" }
       ids = fields_preferring_ids.map { |field| :"#{field}_id" }
-      names = { names: nested_names_param_names }
-      in_box = { in_box: nested_in_box_param_names }
-      perm = permitted_search_params.keys + ranges + ids
+      names = { names: nested_names_params }
+      in_box = { in_box: nested_in_box_params }
+      perm = permitted_search_params + ranges + ids
       perm << names
       perm << in_box
       perm
     end
 
-    def nested_names_param_names
-      keys = nested_names_params&.keys || []
-      return keys if keys.blank?
-
-      keys << :lookup
-    end
-
-    def nested_in_box_param_names
-      [:north, :south, :east, :west].freeze
-    end
+    def nested_in_box_params = [:north, :south, :east, :west].freeze
 
     def split_names_lookup_strings
-      # Nested blank values will make for null query results,
-      # so eliminate the whole :names param if it doesn't have a lookup.
+      # If lookup is blank, remove the :names param for the query
       if (vals = @query_params.dig(:names, :lookup)).blank?
         @query_params[:names] = nil
         return
       end
 
-      @query_params[:names][:lookup] = vals.split("\r\n")
+      @query_params[:names][:lookup] = vals.split("\n").map(&:strip)
     end
 
     # Nested blank values will make for null query results,
@@ -177,17 +175,41 @@ module Searchable
       end
     end
 
-    # Check for `fields_with_range`, and join them into array if range present
+    # Check for `fields_with_range`, and join them into array if range present.
+    # Sorts values so the range is in correct order (min, max).
     def range_fields_to_arrays
       return unless respond_to?(:fields_with_range)
 
       fields_with_range.each do |key|
         next if @query_params[:"#{key}_range"].blank?
 
-        @query_params[key] = [@query_params[key],
-                              @query_params[:"#{key}_range"]]
+        range = [@query_params[key], @query_params[:"#{key}_range"]]
+        @query_params[key] = sort_range_values(range)
         @query_params.delete(:"#{key}_range")
       end
+    end
+
+    # Sort range values so min comes first. Works for both numeric values
+    # (confidence) and string values (rank) that have a defined order.
+    # Filters out blank values before sorting to avoid validation errors.
+    def sort_range_values(range)
+      # Filter out blank values before sorting
+      non_blank = range.compact_blank
+      return [] if non_blank.empty?
+      return non_blank if non_blank.size == 1
+
+      sort_rank_range(non_blank) || sort_numeric_range(non_blank)
+    end
+
+    def sort_rank_range(range)
+      str_range = range.map(&:to_s)
+      return unless str_range.all? { |v| Name.all_ranks.include?(v) }
+
+      str_range.sort_by { |v| Name.all_ranks.index(v) }
+    end
+
+    def sort_numeric_range(range)
+      range.map(&:to_f).sort
     end
 
     def parse_date_ranges
@@ -227,26 +249,23 @@ module Searchable
       @query = Query.lookup_and_save(query_model, **@search.params)
     end
 
-    # Gets the query class relevant to each controller, assuming the controller
-    # is namespaced like Observations::SearchController
-    # def query_subclass
-    #   Query.const_get(self.class.module_parent.name)
-    # end
-
-    def escape_location_string(location)
-      "\"#{location.tr(",", "\\,")}\""
-    end
+    def escape_location_string(location) = "\"#{location.tr(",", "\\,")}\""
 
     # def strings_with_commas
     #   [:location, :region].freeze
     # end
 
-    def fields_preferring_ids
-      []
-    end
+    def fields_preferring_ids = []
 
-    def fields_with_range
-      []
+    def fields_with_range = []
+
+    # Convert spaces to underscores in notes field names.
+    # "INat notes field\nOther Field" => ["INat_notes_field", "Other_Field"]
+    def normalize_notes_fields
+      return if (val = @query_params[:has_notes_fields]).blank?
+
+      @query_params[:has_notes_fields] =
+        val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
     end
 
     # Passing some fields will raise an error if the required field is missing,

@@ -12,7 +12,7 @@ module Header
     # Shorthand to render shared context_nav partial for a given set of links.
     # Called in the view, defines `:context_nav` which is rendered in layout.
     def add_context_nav(links)
-      return unless links.compact.length.positive?
+      return unless links.present? && links.compact.length.positive?
 
       add_context_nav_to_top_bar(links)
       add_context_nav_to_sidebar(links)

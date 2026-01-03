@@ -221,7 +221,8 @@ class AbstractModelTest < UnitTestCase
       sort_name: "Test",
       display_name: "**__Test__**",
       rank: "Genus",
-      author: ""
+      author: "",
+      user: rolf
     )
 
     assert_nil(name.rss_log)

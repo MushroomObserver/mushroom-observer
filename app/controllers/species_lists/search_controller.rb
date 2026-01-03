@@ -11,33 +11,33 @@ module SpeciesLists
 
     before_action :login_required
 
-    # Also an index of helper methods to use for each field.
     def permitted_search_params
-      {
-        by_users: :multiple_value_autocompleter,
-        projects: :multiple_value_autocompleter,
-        names: :names_fields_for_obs,
-        region: :text_field_with_label,
-        title_has: :text_field_with_label,
-        has_notes: :select_nil_boolean,
-        notes_has: :text_field_with_label,
-        has_comments: :select_nil_yes, # ignores false
-        comments_has: :text_field_with_label,
-        date: :text_field_with_label,
-        created_at: :text_field_with_label,
-        updated_at: :text_field_with_label
-      }.freeze
+      [
+        :by_users,
+        :projects,
+        :names,
+        :region,
+        :title_has,
+        :has_notes,
+        :notes_has,
+        :has_comments,
+        :comments_has,
+        :date,
+        :created_at,
+        :updated_at
+      ].freeze
     end
 
     def nested_names_params
-      {
-        include_synonyms: :select_no_eq_nil_or_yes,
-        include_subtaxa: :select_no_eq_nil_or_yes,
-        include_immediate_subtaxa: :select_no_eq_nil_or_yes,
-        exclude_original_names: :select_no_eq_nil_or_yes,
-        include_all_name_proposals: :select_no_eq_nil_or_yes,
-        exclude_consensus: :select_no_eq_nil_or_yes
-      }.freeze
+      [
+        :lookup,
+        :include_synonyms,
+        :include_subtaxa,
+        :include_immediate_subtaxa,
+        :exclude_original_names,
+        :include_all_name_proposals,
+        :exclude_consensus
+      ].freeze
     end
 
     def fields_preferring_ids

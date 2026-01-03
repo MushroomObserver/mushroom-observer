@@ -316,15 +316,12 @@ MushroomObserver::Application.routes.draw do
                        as: "mode"
     get("switch_users", to: "mode#edit") # alternate path
 
-    resource :users, only: [:edit, :update, :destroy]
+    resources :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit") # alternate path
     resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
-    resource :add_user_to_group, only: [:new, :create],
-                                 controller: "add_user_to_group"
     namespace :emails do
-      resource :features, only: [:new, :create], controller: "features"
       resource :webmaster_questions, only: [:new, :create],
                                      controller: "webmaster_questions"
       resource :merge_requests, only: [:new, :create],
@@ -344,10 +341,7 @@ MushroomObserver::Application.routes.draw do
   get "/checklist", to: "checklists#show"
 
   # ----- Collection Numbers: standard actions --------------------------------
-  resources :collection_numbers do
-    resource :remove_observation, only: [:edit, :update],
-                                  module: :collection_numbers
-  end
+  resources :collection_numbers
 
   # ----- Comments: standard actions --------------------------------------
   resources :comments
@@ -406,10 +400,7 @@ MushroomObserver::Application.routes.draw do
   resources :herbaria, id: /\d+/
 
   # ----- Herbarium Records: standard actions --------------------------------
-  resources :herbarium_records do
-    resource :remove_observation, only: [:edit, :update],
-                                  module: :herbarium_records
-  end
+  resources :herbarium_records
 
   # ----- Images: Namespace differences are for memorable path names
   namespace :images do
@@ -421,8 +412,9 @@ MushroomObserver::Application.routes.draw do
                      as: "license_updater")
     get("/votes/anonymity", to: "/images/votes/anonymity#edit",
                             as: "edit_vote_anonymity")
-    put("/votes/anonymity", to: "/images/votes/anonymity#update",
-                            as: "bulk_vote_anonymity_updater")
+    match("/votes/anonymity", to: "/images/votes/anonymity#update",
+                              via: [:put, :patch],
+                              as: "bulk_vote_anonymity_updater")
   end
   resources :images, only: [:index, :show, :destroy] do
     member do
@@ -476,7 +468,7 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Locations: a lot of actions  ----------------------------
   namespace :locations do
-    resource :search, only: [:new, :create]
+    resource :search, only: [:show, :new, :create]
   end
 
   resources :locations, id: /\d+/, shallow: true do

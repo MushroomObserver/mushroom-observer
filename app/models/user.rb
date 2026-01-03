@@ -161,12 +161,10 @@
 #  name_trackers::      NameTracker's they've requested.
 #  observations::       Observation's they've posted.
 #  projects_created::   Project's they've created.
-#  queued_emails::      QueuedEmail's they're scheduled to receive.
 #  species_lists::      SpeciesList's they've created.
 #  votes::              Vote's they've cast.
 #
 #  ==== Other relationships
-#  to_emails::          QueuedEmail's they've caused to be sent.
 #  user_groups::        UserGroup's they're members of.
 #  in_group?::          Is User in a given UserGroup?
 #  reviewed_images::    Image's they've reviewed.
@@ -239,7 +237,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :projects, through: :project_members, source: :projects
   has_many :project_aliases, as: :target, dependent: :destroy
   has_many :publications
-  has_many :queued_emails
   has_many :sequences
   has_many :species_lists
   has_many :collection_numbers
@@ -252,8 +249,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :reviewed_name_descriptions, class_name: "NameDescription",
                                         foreign_key: "reviewer_id",
                                         inverse_of: :reviewer
-  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id",
-                       inverse_of: :queued_email
 
   has_many :user_group_users, dependent: :destroy
   has_many :user_groups, through: :user_group_users
@@ -333,6 +328,13 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :verified, -> { where.not(verified: nil) }
   scope :unverified, -> { where(verified: nil) }
 
+  scope :top_users_for_herbarium, lambda { |herbarium|
+    joins(:herbarium_records).
+      where(herbarium_records: { herbarium_id: herbarium.id }).
+      select(:name, :login, User[:id].count).
+      group(:id).order(User[:id].count.desc).take(5)
+  }
+
   # These are used by forms.
   attr_accessor :place_name
   attr_accessor :email_confirmation
@@ -354,13 +356,13 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # Report which User is currently logged in. Returns +nil+ if none.  This is
   # the same instance as is in the controllers' +@user+ instance variable.
   #
+  # Thread-safe: Uses Thread.current to store per-thread user state, allowing
+  # parallel test execution and proper isolation in threaded environments.
+  #
   #   user = User.current
   #
   def self.current
-    # trace_tests
-    # debugger
-    @@user = nil unless defined?(@@user)
-    @@user
+    Thread.current[:mushroom_observer_user]
   end
 
   # Report which User is currently logged in. Returns id, or +nil+ if none.
@@ -368,17 +370,17 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   user_id = User.current_id
   #
   def self.current_id
-    # trace_tests
-    # debugger
-    @@user = nil unless defined?(@@user)
-    @@user&.id
+    current&.id
   end
 
   # Tell User model which User is currently logged in (if any).  This is used
   # by the +autologin+ filter and API authentication.
+  #
+  # Thread-safe: Stores user in thread-local storage for proper isolation.
   def self.current=(val)
-    @@location_format = val ? val.location_format : "postal"
-    @@user = val
+    Thread.current[:mushroom_observer_user] = val
+    Thread.current[:mushroom_observer_location_format] =
+      val ? val.location_format : "postal"
   end
 
   # Report current user's preferred location_format
@@ -386,13 +388,12 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   location_format = User.current_location_format
   #
   def self.current_location_format
-    @@location_format = "postal" unless defined?(@@location_format)
-    @@location_format
+    Thread.current[:mushroom_observer_location_format] || "postal"
   end
 
   # Set the location format to use throughout the site.
   def self.current_location_format=(val)
-    @@location_format = val
+    Thread.current[:mushroom_observer_location_format] = val
   end
 
   # Clear cached data structures when reload.
@@ -888,8 +889,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [:name_trackers,                  :user_id],
     [:observations,                   :user_id],
     [:publications,                   :user_id],
-    [:queued_emails,                  :user_id],
-    [:queued_emails,                  :to_user_id],
     [:sequences,                      :user_id],
     [:species_lists,                  :user_id],
     [:user_group_users,               :user_id],
@@ -937,7 +936,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     delete_api_keys
     delete_interests
     delete_name_trackers
-    delete_queued_emails
     delete_observations
     delete_private_name_descriptions
     delete_private_location_descriptions
@@ -972,11 +970,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def delete_name_trackers
     NameTracker.where(user: self).delete_all
-  end
-
-  def delete_queued_emails
-    QueuedEmail.where(user_id: id).delete_all
-    QueuedEmail.where(to_user_id: id).delete_all
   end
 
   def delete_observations
@@ -1107,8 +1100,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     # Observation,                   (just deleted all of these)
     Project,
     Publication,
-    # QueuedEmail,                   (just deleted all of these)
-    # QueuedEmail, (to_user_id)      (just deleted all of these)
     Sequence,
     SpeciesList,
     TranslationString,

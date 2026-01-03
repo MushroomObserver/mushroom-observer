@@ -3,8 +3,8 @@
 require("test_helper")
 
 class ReportTest < UnitTestCase
-  LAT_INDEX = 17
-  LONG_INDEX = 18
+  LAT_INDEX = 19
+  LONG_INDEX = 20
 
   def test_adolf
     obs = observations(:agaricus_campestris_obs)
@@ -130,9 +130,9 @@ class ReportTest < UnitTestCase
       "5",
       "2006",
       "2006-05-11",
-      "https://mushroomobserver.org/#{obs.id}",
-      "file://#{Rails.root.join("public/test_server1/orig/#{img1.id}.jpg ")}" \
-        "file://#{Rails.root.join("public/test_server1/orig/#{img2.id}.jpg")}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
+      "file://#{test_server_path("test_server1/orig/#{img1.id}.jpg ")}" \
+        "file://#{test_server_path("test_server1/orig/#{img2.id}.jpg")}",
       "FunDiS",
       "",
       "",
@@ -176,7 +176,7 @@ class ReportTest < UnitTestCase
       "7",
       "2010",
       "2010-07-22",
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "",
       "FunDiS",
       "John Doe",
@@ -213,7 +213,7 @@ class ReportTest < UnitTestCase
       "7",
       "2010",
       "2010-07-22",
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "",
       "FunDiS",
       "",
@@ -232,14 +232,19 @@ class ReportTest < UnitTestCase
 
   def test_raw
     obs = observations(:detailed_unknown_obs)
+    cns = obs.collection_numbers.map do |cn|
+      "#{cn.id}\t#{cn.name}\t#{cn.number}"
+    end
     expect = [
       obs.id.to_s,
       obs.user.id.to_s,
       "mary",
       "Mary Newbie",
       "2006-05-11",
+      nil,
       "X",
       "Cortinarius sp.: 1234, Fungi: 314159",
+      cns.join("\n"),
       obs.name.id.to_s,
       "Fungi",
       nil,
@@ -262,7 +267,7 @@ class ReportTest < UnitTestCase
       "X",
       obs.thumb_image.id.to_s,
       "Found in a strange place... & with śtrangè characters™",
-      "https://mushroomobserver.org/#{obs.id}"
+      "https://mushroomobserver.org/obs/#{obs.id}"
     ]
     do_csv_test(Report::Raw, obs, expect, &:id)
   end
@@ -306,7 +311,7 @@ class ReportTest < UnitTestCase
       "Agaricus",
       "Habitat: lawn Other: First line. Second line.",
       obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
@@ -342,7 +347,7 @@ class ReportTest < UnitTestCase
       "",
       "From somewhere else",
       obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}"
+      "https://mushroomobserver.org/obs/#{obs.id}"
     ]
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
@@ -386,7 +391,7 @@ class ReportTest < UnitTestCase
       "Agaricus",
       "Habitat: lawn Other: 1st line. 2nd line. 3rd line.",
       obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}",
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
@@ -919,6 +924,85 @@ class ReportTest < UnitTestCase
     assert_equal(obs.lng.to_s, table[idx + 1][LONG_INDEX])
   end
 
+  # Test column validation for parallel testing race conditions
+  def test_row_detects_notes_column_misalignment
+    # Simulate misaligned columns where notes is Time instead of String/Hash
+    misaligned_vals = Array.new(26)
+    misaligned_vals[0] = 123 # obs_id
+    misaligned_vals[9] = Time.current # Should be notes (String/Hash), not Time
+
+    error = assert_raises(RuntimeError) do
+      Report::Row.new(misaligned_vals)
+    end
+
+    assert_match(/Column misalignment detected/, error.message)
+    assert_match(/Expected @vals\[9\] \(notes\)/, error.message)
+    assert_match(%r{to be String/Hash}, error.message)
+  end
+
+  def test_row_detects_updated_at_column_misalignment
+    # Simulate misaligned columns where updated_at is Hash instead of Time
+    misaligned_vals = Array.new(26)
+    misaligned_vals[0] = 123 # obs_id
+    misaligned_vals[10] = { foo: "bar" } # Should be Time, not Hash
+
+    error = assert_raises(RuntimeError) do
+      Report::Row.new(misaligned_vals)
+    end
+
+    assert_match(/Column misalignment detected/, error.message)
+    assert_match(/Expected @vals\[10\] \(updated_at\)/, error.message)
+    assert_match(%r{to be Time/DateTime/String}, error.message)
+  end
+
+  def test_row_detects_name_text_name_column_misalignment
+    # Simulate misaligned columns where name_text_name is numeric
+    misaligned_vals = Array.new(26)
+    misaligned_vals[0] = 123 # obs_id
+    misaligned_vals[15] = 456 # Should be String, not Numeric
+
+    error = assert_raises(RuntimeError) do
+      Report::Row.new(misaligned_vals)
+    end
+
+    assert_match(/Column misalignment detected/, error.message)
+    assert_match(/Expected @vals\[15\] \(name_text_name\)/, error.message)
+    assert_match(/to be String/, error.message)
+  end
+
+  def test_notes_to_hash_handles_time_gracefully
+    # Simulate a case where column misalignment wasn't caught
+    # and notes_to_hash gets a Time object
+    row = Report::Row.allocate # Skip initialize validation
+    row.instance_variable_set(:@vals, Array.new(26))
+    row.instance_variable_get(:@vals)[9] = Time.current
+
+    # Should return empty hash instead of crashing
+    result = row.send(:notes_to_hash)
+    assert_equal({}, result)
+  end
+
+  def test_notes_to_hash_handles_hash_correctly
+    row = Report::Row.allocate # Skip initialize validation
+    row.instance_variable_set(:@vals, Array.new(26))
+    row.instance_variable_get(:@vals)[9] = { foo: "bar" }
+
+    result = row.send(:notes_to_hash)
+    assert_equal({ foo: "bar" }, result)
+  end
+
+  def test_export_formatted_handles_time_gracefully
+    # Should return empty string instead of crashing
+    result = Observation.export_formatted(Time.current)
+    assert_equal("", result)
+  end
+
+  def test_export_formatted_handles_hash_correctly
+    result = Observation.export_formatted({ cap: "red", stem: "white" })
+    assert_match(/cap: red/, result)
+    assert_match(/stem: white/, result)
+  end
+
   private
 
   def do_csv_test(report_type, obs, expect, user: nil, &block)
@@ -981,5 +1065,19 @@ class ReportTest < UnitTestCase
     assert_equal(expect[:variety_author].to_s, row.variety_author.to_s)
     assert_equal(expect[:form_author].to_s, row.form_author.to_s)
     assert_equal(expect[:cf].to_s, row.cf.to_s)
+  end
+
+  # Generate worker-specific test_server paths for parallel testing
+  def test_server_path(relative_path)
+    if (worker_num = database_worker_number)
+      # Transform test_server1 -> test_server1-12, etc.
+      modified_path = relative_path.gsub(
+        %r{(test_server\d+)(?=/|$)},
+        "\\1-#{worker_num}"
+      )
+      Rails.root.join("public/#{modified_path}")
+    else
+      Rails.root.join("public/#{relative_path}")
+    end
   end
 end

@@ -52,8 +52,7 @@ class InatImport < ApplicationRecord
 
   serialize :log, type: Array, coder: YAML
 
-  # extra safety (ensure non-nil even when loading older DB rows with NULL)
-  after_initialize { self.last_user_inputs ||= {} }
+  after_initialize :ensure_response_errors_initialized
 
   # Expected average import time if no user has ever imported anything
   # (Only gets used once.)
@@ -95,7 +94,7 @@ class InatImport < ApplicationRecord
           else
             error.message
           end
-    response_errors << "#{msg}\n"
+    self.response_errors += "#{msg}\n"
     save
   end
 
@@ -155,5 +154,9 @@ class InatImport < ApplicationRecord
 
   def system_initial_avg_import_seconds
     InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count)
+  end
+
+  def ensure_response_errors_initialized
+    self.response_errors ||= ""
   end
 end

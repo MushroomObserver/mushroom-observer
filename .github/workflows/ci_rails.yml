@@ -66,6 +66,11 @@ jobs:
       - name: Update translation files
         run: bundle exec rake lang:update
 
+      - name: Create log files
+        run: |
+          touch log/test.log
+          touch log/production.log
+
       # And finally we can run the test suite
       - name: Run tests
         env:
@@ -96,16 +101,10 @@ jobs:
       - name: Run RuboCop
         run: bundle exec rubocop --parallel
 
-    # https://github.com/devmasx/brakeman-linter-action
-    # Temporarily disable brakeman in CI because it causes an error
-    # See https://github.com/MushroomObserver/mushroom-observer/issues/1514
-    # Instead use brakeman's plugin. See .codeclimate.yml
-    # JDC 2023-06-05
-    # - name: brakeman report
-    #   run: |
-    #     bundle exec brakeman -f json > brakeman.json || exit 0
-    # - name: Brakeman
-    #   uses: devmasx/brakeman-linter-action@v1.0.0
-    #   env:
-    #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-    #     REPORT_PATH: brakeman.json
+      # https://github.com/reviewdog/action-brakeman
+      - name: Run Brakeman
+        uses: reviewdog/action-brakeman@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-check
+          fail_level: none

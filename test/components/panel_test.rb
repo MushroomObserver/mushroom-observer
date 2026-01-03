@@ -2,9 +2,7 @@
 
 require("test_helper")
 
-class PanelTest < UnitTestCase
-  include ComponentTestHelper
-
+class PanelTest < ComponentTestCase
   def test_panel_with_heading_and_collapsible_content
     edit_link = view_context.link_to("Edit", "/edit", class: "btn btn-sm")
     html = render(Components::Panel.new(
@@ -235,5 +233,23 @@ class PanelTest < UnitTestCase
       parent_selector: "div.thumbnail-container",
       child_selector: "img"
     )
+  end
+
+  def test_panel_with_unwrapped_body_for_list_group
+    html = render(Components::Panel.new) do |panel|
+      panel.with_heading { "Comments" }
+      panel.with_body(wrapper: false) do
+        view_context.tag.ul(class: "list-group") do
+          view_context.tag.li("Comment 1", class: "list-group-item")
+        end
+      end
+    end
+
+    # List group should be direct child of panel, not wrapped in panel-body
+    assert_includes(html, "list-group")
+    assert_no_match(/<div class="panel-body">.*<ul class="list-group">/m, html)
+    # Panel should contain list-group directly
+    pattern = /<div class="panel panel-default">.*<ul class="list-group">/m
+    assert_match(pattern, html)
   end
 end

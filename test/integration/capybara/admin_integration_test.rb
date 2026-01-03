@@ -83,46 +83,6 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
   #   end
   # end
 
-  def test_add_user_to_group
-    refute_selector(id: "nav_admin_add_user_to_group_link")
-
-    put_user_in_admin_mode(rolf)
-    click_on(id: "nav_admin_add_user_to_group_link")
-
-    within("#admin_add_user_to_group_form") do
-      fill_in("user_name", with: "bogus")
-      fill_in("group_name", with: "all users")
-      click_commit
-    end
-    assert_flash_text("Unable to find the user")
-    click_on(id: "nav_admin_add_user_to_group_link")
-
-    within("#admin_add_user_to_group_form") do
-      fill_in("user_name", with: "rolf")
-      fill_in("group_name", with: "bogus")
-      click_commit
-    end
-    assert_flash_text("Unable to find the group")
-    click_on(id: "nav_admin_add_user_to_group_link")
-
-    within("#admin_add_user_to_group_form") do
-      # rolf is already a member of all users. no go
-      fill_in("user_name", with: "rolf")
-      fill_in("group_name", with: "all users")
-      click_commit
-    end
-    assert_flash_text("is already a member of")
-    click_on(id: "nav_admin_add_user_to_group_link")
-
-    within("#admin_add_user_to_group_form") do
-      # rolf is not a member of Bolete Project, so can be added
-      fill_in("user_name", with: "rolf")
-      fill_in("group_name", with: "Bolete Project")
-      click_commit
-    end
-    assert_flash_success
-  end
-
   def test_blocked_ips
     refute_selector(id: "nav_admin_blocked_ips_link")
 

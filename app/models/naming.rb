@@ -188,7 +188,17 @@ class Naming < AbstractModel
                     (!n.require_specimen || observation.specimen)
         next if n.user.no_emails
 
-        QueuedEmail::NameTracking.create_email(n, self)
+        # Migrated from QueuedEmail::NameTracking to deliver_later.
+        # Always notify the tracker.
+        naming = self
+        NamingTrackerMailer.build(receiver: n.user, naming:).deliver_later
+        # Conditionally notify the observer if tracker has note_template.
+        # Don't send if tracker is the observer (they'd get a self-email).
+        if n.note_template.present? && n.approved && n.user != observation.user
+          NamingObserverMailer.build(
+            receiver: observation.user, naming:, name_tracker: n
+          ).deliver_later
+        end
         done_user[n.user_id] = true
       end
     end
@@ -226,8 +236,11 @@ class Naming < AbstractModel
     recipients.reject!(&:no_emails)
 
     # Send to everyone (except the person who created the naming!)
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::NameProposal.create_email(sender, recipient, obs, self)
+    naming = self
+    (recipients.uniq - [sender]).each do |receiver|
+      NameProposalMailer.build(
+        sender:, receiver:, naming:, observation: obs
+      ).deliver_later
     end
   end
 

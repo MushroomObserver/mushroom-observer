@@ -1,0 +1,17 @@
+<%# locals: (user: nil, obs: nil) %>
+
+<%
+buttons = observation_naming_buttons(user, obs)
+help = tag.div(:show_namings_consensus_help.t, class: "card-text small")
+%>
+
+<%=
+tag.div(class: "row") do
+  tag.div(class: "col-sm-11") do
+    tag.div(class: "row") do
+      concat(tag.div(buttons, class: "col col-md-4"))
+      concat(tag.div(help, class: "col col-md-8"))
+    end
+  end
+end
+%>

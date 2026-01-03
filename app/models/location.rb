@@ -282,10 +282,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
     center_lat = (north + south) / 2
     center_lon = (east + west) / 2
-    self.north = center_lat + 0.0001
-    self.south = center_lat - 0.0001
-    self.east = center_lon + 0.0001
-    self.west = center_lon - 0.0001
+    self.north = center_lat + MO.box_epsilon
+    self.south = center_lat - MO.box_epsilon
+    self.east = center_lon + MO.box_epsilon
+    self.west = center_lon - MO.box_epsilon
   end
 
   def found_here?(obs)
@@ -836,8 +836,17 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::LocationChange.create_email(sender, recipient, self)
+    # Migrated from QueuedEmail::LocationChange to deliver_later.
+    # Calculate versions now while saved_changes? is still accurate.
+    old_loc_ver = saved_changes? ? version - 1 : version
+    desc = description
+
+    (recipients.uniq - [sender]).each do |receiver|
+      LocationChangeMailer.build(
+        sender:, receiver:, location: self, old_loc_ver:,
+        new_loc_ver: version, description: desc,
+        old_desc_ver: desc&.version, new_desc_ver: desc&.version
+      ).deliver_later
     end
   end
 

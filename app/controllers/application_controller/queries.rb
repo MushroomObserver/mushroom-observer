@@ -296,7 +296,7 @@ module ApplicationController::Queries
     query ||= current_query
     query&.q_param
   end
-  # helper_method :q_param
+  # helper_method :q_param # defined in application_controller.rb
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
   def redirect_with_query(args, query = nil)
@@ -332,7 +332,7 @@ module ApplicationController::Queries
   def redirect_to(*args)
     flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage?
     if args.member?(:back)
-      redirect_back(fallback_location: "/")
+      redirect_back_or_to("/")
     else
       super
     end

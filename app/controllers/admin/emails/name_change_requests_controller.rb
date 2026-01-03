@@ -8,7 +8,10 @@ module Admin
       before_action :login_required
 
       def new
-        return unless check_both_names!
+        unless check_both_names!
+          redirect_back_or_default("/")
+          return
+        end
 
         unless check_different_icn_ids
           redirect_back_or_default("/")
@@ -18,20 +21,25 @@ module Admin
         respond_to do |format|
           format.html
           format.turbo_stream do
-            render(
-              partial: "shared/modal_form",
-              locals: {
-                title: :email_name_change_request_title.l,
-                identifier: "name_change_request_email",
-                user: @user, form: "admin/email/name_change_requests/form"
-              }
-            ) and return
+            render(Components::ModalForm.new(
+                     identifier: "name_change_request_email",
+                     title: :email_name_change_request_title.l,
+                     user: @user,
+                     model: FormObject::NameChangeRequest.new,
+                     form_locals: {
+                       name: @name,
+                       new_name_with_icn_id: @new_name_with_icn_id
+                     }
+                   ), layout: false)
           end
         end
       end
 
       def create
-        return unless check_both_names!
+        unless check_both_names!
+          redirect_back_or_default("/")
+          return
+        end
 
         unless (name_with_icn_id = check_different_icn_ids)
           redirect_back_or_default("/")
@@ -56,26 +64,31 @@ module Admin
       end
 
       def send_name_change_request(name_with_icn_id, new_name_with_icn_id)
+        # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
         temporarily_set_locale(MO.default_locale) do
-          QueuedEmail::Webmaster.create_email(
-            @user,
-            content: change_request_content(name_with_icn_id,
-                                            new_name_with_icn_id),
-            subject: "Request to change Name having dependents"
+          message = WebmasterMailer.prepend_user(
+            @user, change_request_content(name_with_icn_id,
+                                          new_name_with_icn_id)
           )
+          WebmasterMailer.build(
+            sender_email: @user.email,
+            message:,
+            subject: "Request to change Name having dependents"
+          ).deliver_later
         end
         flash_notice(:email_change_name_request_success.t)
         redirect_to(@name.show_link_args)
       end
 
       def change_request_content(name_with_icn_id, new_name_with_icn_id)
+        notes = params.dig(:name_change_request, :notes) || params[:notes]
         :email_name_change_request.l(
           user: @user.login,
           old_name: name_with_icn_id,
           new_name: new_name_with_icn_id,
           show_url: @name.show_url,
           edit_url: @name.edit_url,
-          notes: params[:notes].to_s.strip_html.strip_squeeze
+          notes: notes.to_s.strip_html.strip_squeeze
         )
       end
     end

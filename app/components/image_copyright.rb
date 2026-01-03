@@ -19,7 +19,7 @@ class Components::ImageCopyright < Components::Base
 
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image)
-  prop :object, _Nilable(Object), default: nil
+  prop :object, _Nilable(AbstractModel), default: nil
 
   def view_template
     return "" unless @image && show_copyright?

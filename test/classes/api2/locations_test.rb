@@ -204,12 +204,12 @@ class API2::LocationsTest < UnitTestCase
 
     albion.reload
     assert_equal("Reno, Nevada, USA", albion.display_name)
-    assert_in_delta(39.64, albion.north, 0.0001)
-    assert_in_delta(39.39, albion.south, 0.0001)
-    assert_in_delta(-119.70, albion.east, 0.0001)
-    assert_in_delta(-119.94, albion.west, 0.0001)
-    assert_in_delta(1700, albion.high, 0.0001)
-    assert_in_delta(1350, albion.low, 0.0001)
+    assert_in_delta(39.64, albion.north, MO.box_epsilon)
+    assert_in_delta(39.39, albion.south, MO.box_epsilon)
+    assert_in_delta(-119.70, albion.east, MO.box_epsilon)
+    assert_in_delta(-119.94, albion.west, MO.box_epsilon)
+    assert_in_delta(1700, albion.high, MO.box_epsilon)
+    assert_in_delta(1350, albion.low, MO.box_epsilon)
     assert_equal("Biggest Little City", albion.notes)
   end
 

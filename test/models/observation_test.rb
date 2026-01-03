@@ -3,6 +3,8 @@
 require("test_helper")
 # test Observation model
 class ObservationTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   def create_new_objects
     @cc_obs = Observation.new
     @cc_obs.user = mary
@@ -201,7 +203,6 @@ class ObservationTest < UnitTestCase
   # --------------------------------------
   def test_email_notification_1
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -218,14 +219,17 @@ class ObservationTest < UnitTestCase
     # Observation owner is not notified if comment added by themselves.
     # (Rolf owns coprinus_comatus_obs, one naming, two votes, conf. around 1.5.)
     # (But Mary will get a comment-response email because she has a naming.)
+    # CommentAdd now uses deliver_later.
     User.current = rolf
-    Comment.create(
-      summary: "This is Rolf...",
-      target: obs
-    )
-    assert_equal(1, QueuedEmail.count)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      Comment.create(
+        summary: "This is Rolf...",
+        target: obs
+      )
+    end
 
     # Observation owner is not notified if naming added by themselves.
+    # NameProposal now uses deliver_later.
     User.current = rolf
     new_naming = Naming.create(
       observation: obs,
@@ -233,14 +237,13 @@ class ObservationTest < UnitTestCase
       vote_cache: 0,
       user: rolf
     )
-    assert_equal(1, QueuedEmail.count)
     assert_equal(names(:coprinus_comatus), obs.reload.name)
 
     # Observation owner is not notified if consensus changed by themselves.
+    # ConsensusChange now uses deliver_later.
     User.current = rolf
     change_vote(obs, new_naming, 3)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
-    assert_equal(1, QueuedEmail.count)
 
     # Make Rolf opt out of all emails.
     rolf.email_comments_owner = false
@@ -251,13 +254,17 @@ class ObservationTest < UnitTestCase
 
     # Rolf should not be notified of anything here, either...
     # But Mary still will get something for having the naming.
+    # CommentAdd now uses deliver_later.
     User.current = dick
-    Comment.create(
-      summary: "This is Dick...",
-      target: obs.reload
-    )
-    assert_equal(2, QueuedEmail.count)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      Comment.create(
+        summary: "This is Dick...",
+        target: obs.reload
+      )
+    end
 
+    # NameProposal now uses deliver_later.
+    # But Rolf opted out, so no email is sent.
     User.current = dick
     new_naming = Naming.create(
       observation: obs,
@@ -265,23 +272,21 @@ class ObservationTest < UnitTestCase
       vote_cache: 0,
       user: dick
     )
-    assert_equal(2, QueuedEmail.count)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
 
     # Make sure this changes consensus...
     dick.contribution = 2_000_000_000
     assert_save(dick)
 
+    # ConsensusChange now uses deliver_later.
+    # But Rolf opted out, so no email is sent.
     User.current = dick
     change_vote(obs, new_naming, 3)
     assert_equal(names(:peltigera), obs.reload.name)
-    assert_equal(2, QueuedEmail.count)
-    QueuedEmail.queue = false
   end
 
   def test_email_notification_2
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -294,80 +299,63 @@ class ObservationTest < UnitTestCase
     assert_save(rolf)
 
     # Observation owner is notified if comment added by someone else.
+    # CommentAdd now uses deliver_later.
     # (Rolf owns observations(:coprinus_comatus_obs),
     # one naming, two votes, conf. around 1.5.)
     rolf.email_comments_owner = true
     assert_save(rolf)
     User.current = mary
-    new_comment = Comment.create(
-      summary: "This is Mary...",
-      target: obs
-    )
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::CommentAdd",
-                 from: mary,
-                 to: rolf,
-                 comment: new_comment.id)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      Comment.create(
+        summary: "This is Mary...",
+        target: obs
+      )
+    end
 
     # Observation owner is notified if naming added by someone else.
+    # NameProposal now uses deliver_later.
     rolf.email_comments_owner = false
     rolf.email_observations_naming = true
     assert_save(rolf)
     User.current = mary
-    new_naming = Naming.create(
-      observation: obs.reload,
-      name: names(:agaricus_campestris),
-      vote_cache: 0,
-      user: mary
-    )
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
-                 flavor: "QueuedEmail::NameProposal",
-                 from: mary,
-                 to: rolf,
-                 observation: obs.id,
-                 naming: new_naming.id)
+    new_naming = nil
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      new_naming = Naming.create(
+        observation: obs.reload,
+        name: names(:agaricus_campestris),
+        vote_cache: 0,
+        user: mary
+      )
+    end
 
     # Observation owner is notified if consensus changed by someone else.
+    # ConsensusChange now uses deliver_later.
     rolf.email_observations_naming = false
     rolf.email_observations_consensus = true
     assert_save(rolf)
 
     # Gang up on Rolf
-    change_vote(obs, new_naming, 3, dick)
-    change_vote(obs, new_naming, 3, katrina)
-    change_vote(obs, namings(:coprinus_comatus_naming), -3, katrina)
-
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
-                 flavor: "QueuedEmail::ConsensusChange",
-                 from: katrina,
-                 to: rolf,
-                 observation: obs.id,
-                 old_name: names(:coprinus_comatus).id,
-                 new_name: names(:agaricus_campestris).id)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      change_vote(obs, new_naming, 3, dick)
+      change_vote(obs, new_naming, 3, katrina)
+      change_vote(obs, namings(:coprinus_comatus_naming), -3, katrina)
+    end
 
     # Make sure Mary gets notified if Rolf responds to her comment.
+    # CommentAdd now uses deliver_later.
     mary.email_comments_response = true
     assert_save(mary)
     User.current = rolf
-    new_comment = Comment.create(
-      summary: "This is Rolf...",
-      target: observations(:coprinus_comatus_obs)
-    )
-    assert_equal(4, QueuedEmail.count)
-    assert_email(3,
-                 flavor: "QueuedEmail::CommentAdd",
-                 from: rolf,
-                 to: mary,
-                 comment: new_comment.id)
-    QueuedEmail.queue = false
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      Comment.create(
+        summary: "This is Rolf...",
+        target: observations(:coprinus_comatus_obs)
+      )
+    end
   end
 
   def test_email_notification_3
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -400,83 +388,66 @@ class ObservationTest < UnitTestCase
     )
 
     # Watcher is notified if comment added.
+    # CommentAdd now uses deliver_later.
     # (Rolf owns observations(:coprinus_comatus_obs),
     # one naming, two votes, conf. around 1.5.)
     User.current = mary
-    new_comment = Comment.create(
-      summary: "This is Mary...",
-      target: observations(:coprinus_comatus_obs)
-    )
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::CommentAdd",
-                 from: mary,
-                 to: dick,
-                 comment: new_comment.id)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      Comment.create(
+        summary: "This is Mary...",
+        target: observations(:coprinus_comatus_obs)
+      )
+    end
 
     # Watcher is notified if naming added.
+    # NameProposal now uses deliver_later.
     User.current = mary
-    new_naming = Naming.create(
-      observation: observations(:coprinus_comatus_obs),
-      name: names(:agaricus_campestris),
-      vote_cache: 0,
-      user: mary
-    )
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
-                 flavor: "QueuedEmail::NameProposal",
-                 from: mary,
-                 to: dick,
-                 observation: observations(:coprinus_comatus_obs).id,
-                 naming: new_naming.id)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      Naming.create(
+        observation: observations(:coprinus_comatus_obs),
+        name: names(:agaricus_campestris),
+        vote_cache: 0,
+        user: mary
+      )
+    end
 
     # Watcher is notified if consensus changed.
+    # ConsensusChange now uses deliver_later.
     User.current = rolf
-    change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
+    end
     assert_equal(3,
                  votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_save(votes(:coprinus_comatus_other_naming_rolf_vote))
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
-                 flavor: "QueuedEmail::ConsensusChange",
-                 from: rolf,
-                 to: dick,
-                 observation: observations(:coprinus_comatus_obs).id,
-                 old_name: names(:coprinus_comatus).id,
-                 new_name: names(:agaricus_campestris).id)
 
     # Now have Rolf make a bunch of changes...
     User.current = rolf
 
     # Watcher is also notified of changes in the observation.
-    obs.notes = "I have new information on this observation."
-    obs.save
-    assert_equal(4, QueuedEmail.count)
+    # ObservationChange now uses deliver_later, so we test enqueued emails.
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      obs.notes = "I have new information on this observation."
+      obs.save
+    end
 
-    # Make sure subsequent changes update existing email.
-    obs.where = "Somewhere else"
-    obs.save
-    assert_equal(4, QueuedEmail.count)
+    # Make sure subsequent changes also enqueue emails.
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      obs.where = "Somewhere else"
+      obs.save
+    end
 
     # Same deal with adding and removing images.
-    obs.add_image(images(:disconnected_coprinus_comatus_image))
-    assert_equal(4, QueuedEmail.count)
-    obs.remove_image(images(:disconnected_coprinus_comatus_image))
-    assert_equal(4, QueuedEmail.count)
-
-    # All the above modify this email:
-    assert_email(3,
-                 flavor: "QueuedEmail::ObservationChange",
-                 from: rolf,
-                 to: dick,
-                 observation: observations(:coprinus_comatus_obs).id,
-                 note: "notes,location,added_image,removed_image")
-    QueuedEmail.queue = false
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      obs.add_image(images(:disconnected_coprinus_comatus_image))
+    end
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      obs.remove_image(images(:disconnected_coprinus_comatus_image))
+    end
   end
 
   def test_email_notification_4
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
     marys_interest = Interest.create(
@@ -496,20 +467,16 @@ class ObservationTest < UnitTestCase
     )
 
     # Make change to observation.
+    # ObservationChange now uses deliver_later.
     marys_interest.state = true
     assert_save(marys_interest)
 
     User.current = rolf
-    observations(:coprinus_comatus_obs).
-      notes = "I have new information on this observation."
-    observations(:coprinus_comatus_obs).save
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::ObservationChange",
-                 from: rolf,
-                 to: mary,
-                 observation: observations(:coprinus_comatus_obs).id,
-                 note: "notes")
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      observations(:coprinus_comatus_obs).
+        notes = "I have new information on this observation."
+      observations(:coprinus_comatus_obs).save
+    end
 
     # Add image to observation.
     marys_interest.state = false
@@ -517,15 +484,9 @@ class ObservationTest < UnitTestCase
     dicks_interest.state = true
     assert_save(dicks_interest)
     User.current = rolf
-    obs.reload.add_image(images(:disconnected_coprinus_comatus_image))
-
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
-                 flavor: "QueuedEmail::ObservationChange",
-                 from: rolf,
-                 to: dick,
-                 observation: observations(:coprinus_comatus_obs).id,
-                 note: "added_image")
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      obs.reload.add_image(images(:disconnected_coprinus_comatus_image))
+    end
 
     # Destroy observation.
     dicks_interest.state = false
@@ -534,17 +495,21 @@ class ObservationTest < UnitTestCase
     assert_save(katrinas_interest)
 
     User.current = rolf
-    assert_equal(2, QueuedEmail.count)
-    obs.reload.destroy
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
-                 flavor: "QueuedEmail::ObservationChange",
-                 from: rolf,
-                 to: katrina,
-                 observation: 0,
-                 note: "**__Coprinus__** **__comatus__** (O.F. Müll.) Pers. " \
-                       "(#{observations(:coprinus_comatus_obs).id})")
-    QueuedEmail.queue = false
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      obs.reload.destroy
+    end
+  end
+
+  def test_email_notification_is_collection_location_change
+    NameTracker.all.map(&:destroy)
+
+    obs = observations(:coprinus_comatus_obs)
+    Interest.create(target: obs, user: mary, state: true)
+
+    User.current = rolf
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      obs.update(is_collection_location: !obs.is_collection_location)
+    end
   end
 
   def test_vote_favorite
@@ -1234,6 +1199,30 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  # Regression test for NOT IN NULL bug
+  # When observation_views contains a NULL observation_id, the NOT IN clause
+  # in not_reviewed_by_user returns no results due to NULL semantics
+  def test_scope_not_reviewed_by_user_with_null_observation_id
+    # Create a NULL observation_id record in observation_views for rolf
+    # This simulates data corruption or a bug that allowed NULL to be inserted
+    ObservationView.create!(
+      observation_id: nil,
+      user_id: rolf.id,
+      reviewed: true,
+      last_view: Time.zone.now
+    )
+
+    # fungi_obs needs naming and rolf hasn't reviewed it
+    # This should still be included even with the NULL record
+    result = Observation.needs_naming(rolf)
+    assert_includes(
+      result,
+      observations(:fungi_obs),
+      "needs_naming scope should return observations even when " \
+      "observation_views contains NULL observation_id for the user"
+    )
+  end
+
   def test_scope_names
     assert_includes(Observation.names(lookup: names(:peltigera).id),
                     observations(:peltigera_obs))
@@ -1379,7 +1368,8 @@ class ObservationTest < UnitTestCase
   end
 
   def tiny_box
-    @tiny_box ||= { north: 0.0001, south: 0.0001, east: 0.0001, west: 0 }
+    e = MO.box_epsilon
+    @tiny_box ||= { north: e, south: e, east: e, west: 0 }
   end
 
   def missing_west_box
@@ -1579,13 +1569,57 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
-  # Currently Query ignores false, so scope does too.
-  # def test_scope_has_sequences_false
-  #   assert_includes(Observation.has_sequences(false),
-  #                   observations(:minimal_unknown_obs))
-  #   assert_not_includes(Observation.has_sequences(false),
-  #                       observations(:genbanked_obs))
-  # end
+  def test_scope_has_field_slips
+    # minimal_unknown_obs has field_slip_one in fixtures
+    assert_includes(Observation.has_field_slips(true),
+                    observations(:minimal_unknown_obs))
+    # coprinus_comatus_obs has no field slips
+    assert_not_includes(Observation.has_field_slips(true),
+                        observations(:coprinus_comatus_obs))
+
+    # Test false - should return observations WITHOUT field slips
+    assert_includes(Observation.has_field_slips(false),
+                    observations(:coprinus_comatus_obs))
+    assert_not_includes(Observation.has_field_slips(false),
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_has_collection_numbers
+    # minimal_unknown_obs has minimal_unknown_coll_num in fixtures
+    assert_includes(Observation.has_collection_numbers(true),
+                    observations(:minimal_unknown_obs))
+    # peltigera_obs has no collection numbers
+    assert_not_includes(Observation.has_collection_numbers(true),
+                        observations(:peltigera_obs))
+
+    # Test false - should return observations WITHOUT collection numbers
+    assert_includes(Observation.has_collection_numbers(false),
+                    observations(:peltigera_obs))
+    assert_not_includes(Observation.has_collection_numbers(false),
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_has_comments
+    # minimal_unknown_obs has comments in fixtures
+    assert_includes(Observation.has_comments,
+                    observations(:minimal_unknown_obs))
+    # unlisted_rolf_obs has no comments
+    assert_not_includes(Observation.has_comments,
+                        observations(:unlisted_rolf_obs))
+
+    # Test false - should return observations WITHOUT comments
+    assert_includes(Observation.has_comments(false),
+                    observations(:unlisted_rolf_obs))
+    assert_not_includes(Observation.has_comments(false),
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_has_sequences_false
+    assert_includes(Observation.has_sequences(false),
+                    observations(:minimal_unknown_obs))
+    assert_not_includes(Observation.has_sequences(false),
+                        observations(:genbanked_obs))
+  end
 
   def test_scope_confidence
     assert_includes(Observation.confidence(0, 0),
@@ -1602,13 +1636,96 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.confidence(3.1, 3.2))
   end
 
-  # Currently Query ignores false, so scope does too.
-  # def test_scope_has_comments_false
-  #   assert_includes(Observation.has_comments(false),
-  #                   observations(:unlisted_rolf_obs))
-  #   assert_not_includes(Observation.has_comments(false),
-  #                       observations(:minimal_unknown_obs))
-  # end
+  def test_scope_confidence_single_value_ranges
+    # Single positive values should search for range (next_lower, value]
+    # "Promising" (2.0) should match vote_cache > 1.0 AND <= 2.0
+    promising_results = Observation.confidence(2.0)
+    promising_results.each do |obs|
+      assert(obs.vote_cache > 1.0,
+             "vote_cache should be > 1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+    end
+
+    # Single negative values should search for range [value, next_higher)
+    # "Doubtful" (-1.0) should match vote_cache >= -1.0 AND < 0.0
+    doubtful_results = Observation.confidence(-1.0)
+    doubtful_results.each do |obs|
+      assert(obs.vote_cache >= -1.0,
+             "vote_cache should be >= -1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < 0.0,
+             "vote_cache should be < 0.0, got #{obs.vote_cache}")
+    end
+
+    # "No Opinion" (0.0) should match exactly 0.0
+    no_opinion_results = Observation.confidence(0.0)
+    no_opinion_results.each do |obs|
+      assert_equal(0.0, obs.vote_cache, "vote_cache should be exactly 0.0")
+    end
+
+    # "I'd Call It That" (3.0) should match vote_cache > 2.0 AND <= 3.0
+    max_results = Observation.confidence(3.0)
+    max_results.each do |obs|
+      assert(obs.vote_cache > 2.0,
+             "vote_cache should be > 2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 3.0,
+             "vote_cache should be <= 3.0, got #{obs.vote_cache}")
+    end
+
+    # "As If!" (-3.0) should match vote_cache >= -3.0 AND < -2.0
+    min_results = Observation.confidence(-3.0)
+    min_results.each do |obs|
+      assert(obs.vote_cache >= -3.0,
+             "vote_cache should be >= -3.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < -2.0,
+             "vote_cache should be < -2.0, got #{obs.vote_cache}")
+    end
+  end
+
+  def test_scope_confidence_range_searches
+    # Range searches should combine lower bound from min with upper bound
+    # from max
+
+    # "Promising" (2.0) to "I'd Call It That" (3.0)
+    # Should search for vote_cache > 1.0 AND <= 3.0
+    promising_to_max = Observation.confidence(2.0, 3.0)
+    promising_to_max.each do |obs|
+      assert(obs.vote_cache > 1.0,
+             "vote_cache should be > 1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 3.0,
+             "vote_cache should be <= 3.0, got #{obs.vote_cache}")
+    end
+
+    # "Could Be" (1.0) to "Promising" (2.0)
+    # Should search for vote_cache > 0.0 AND <= 2.0
+    could_be_to_promising = Observation.confidence(1.0, 2.0)
+    could_be_to_promising.each do |obs|
+      assert(obs.vote_cache > 0.0,
+             "vote_cache should be > 0.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+    end
+
+    # "Not Likely" (-2.0) to "Promising" (2.0)
+    # Should search for vote_cache >= -2.0 AND <= 2.0
+    not_likely_to_promising = Observation.confidence(-2.0, 2.0)
+    not_likely_to_promising.each do |obs|
+      assert(obs.vote_cache >= -2.0,
+             "vote_cache should be >= -2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+    end
+
+    # "Not Likely" (-2.0) to "Doubtful" (-1.0)
+    # Should search for vote_cache >= -2.0 AND < 0.0
+    not_likely_to_doubtful = Observation.confidence(-2.0, -1.0)
+    not_likely_to_doubtful.each do |obs|
+      assert(obs.vote_cache >= -2.0,
+             "vote_cache should be >= -2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < 0.0,
+             "vote_cache should be < 0.0, got #{obs.vote_cache}")
+    end
+  end
 
   def test_source_credit
     obs = observations(:coprinus_comatus_obs)

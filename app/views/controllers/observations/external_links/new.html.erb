@@ -6,8 +6,13 @@ add_new_title(:add_object, :EXTERNAL_LINK)
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(partial: "observations/external_links/form",
-               locals: { local: true }) %>
+    <%= render(Components::ExternalLinkForm.new(
+          @external_link,
+          observation: @observation,
+          sites: @sites,
+          site: @site || @sites&.first,
+          user: @user
+        )) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

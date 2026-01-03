@@ -3,4 +3,4 @@ add_edit_title(@glossary_term.name, @glossary_term)
 add_context_nav(glossary_term_form_edit_tabs(term: @glossary_term))
 %>
 
-<%= render("form") %>
+<%= render(Components::GlossaryTermForm.new(@glossary_term)) %>

@@ -46,7 +46,7 @@ class BoxTest < UnitTestCase
 
   def test_expand
     box = Mappable::Box.new(**valid_args)
-    expanded_box = box.expand(0.0001)
+    expanded_box = box.expand(MO.box_epsilon)
 
     assert_operator(expanded_box.north, :>, box.north)
     assert_operator(expanded_box.south, :<, box.south)

@@ -37,13 +37,14 @@ class Query::Observations < Query
   query_attr(:notes_has, :string)
   query_attr(:has_notes_fields, [:string])
   query_attr(:pattern, :string)
-  query_attr(:has_comments, { boolean: [true] })
+  query_attr(:has_comments, :boolean)
   query_attr(:comments_has, :string)
-  query_attr(:has_sequences, { boolean: [true] })
+  query_attr(:has_sequences, :boolean)
+  query_attr(:has_field_slips, :boolean)
+  query_attr(:has_collection_numbers, :boolean)
   # query_attr(:has_specimen, :boolean) # content filter
   # query_attr(:has_images, :boolean) # content filter
 
-  query_attr(:field_slips, [FieldSlip])
   query_attr(:herbaria, [Herbarium])
   query_attr(:herbarium_records, [HerbariumRecord])
   query_attr(:projects, [Project])

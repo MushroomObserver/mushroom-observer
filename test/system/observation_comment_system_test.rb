@@ -18,7 +18,6 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       login!(rolf)
       assert_link("Your Observations")
       click_on("Your Observations")
-      # obs = observations(:peltigera_obs)
 
       assert_selector("body.observations__index")
       assert_link(text: /#{obs.text_name}/)
@@ -46,22 +45,31 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
         assert_no_link(class: /edit_comment_/)
         assert_no_selector(class: /destroy_comment_/)
         assert_link(:show_comments_add_comment.l)
-        find(:css, ".new_comment_link_#{obs.id}").trigger("click")
+        click_link(:show_comments_add_comment.l)
       end
 
+      # Test validation failure - modal should stay open with error
       assert_selector("#modal_comment")
-      within("#modal_comment") do
+      within("#comment_form") do
         assert_selector("#comment_comment")
         fill_in("comment_comment", with: "What do you mean, Coprinus?")
         click_commit
       end
       # Cannot submit comment without a summary
+      sleep(1) # Give turbo time to process response
+
+      # Modal should still be open with error in flash
+      assert_selector("#modal_comment")
       assert_selector("#modal_comment_flash", text: /Missing/)
-      within("#modal_comment") do
-        assert_selector("#comment_comment", text: "What do you mean, Coprinus?")
+
+      # Now fill in summary and submit successfully
+      within("#comment_form") do
         fill_in("comment_summary", with: "A load of bollocks")
         click_commit
       end
+      sleep(1) # Give turbo time to process response
+
+      # Modal should close after successful submission
       assert_no_selector("#modal_comment")
     end
 
@@ -132,10 +140,8 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
         assert_no_text("A load of bollocks")
         assert_text("Exciting discovery")
         assert_selector(".destroy_comment_link_#{com.id}")
-        accept_confirm do
-          find(:css, ".destroy_comment_link_#{com.id}").trigger("click")
-        end
       end
+      click_and_confirm(find(:css, ".destroy_comment_link_#{com.id}"))
       within("#comments_for_object") do
         assert_no_text("Exciting discovery")
         assert_no_selector(".destroy_comment_link_#{com.id}")

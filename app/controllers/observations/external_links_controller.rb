@@ -11,7 +11,12 @@ module Observations
         user: @user,
         observation: @observation
       )
-      check_external_link_permission!(obs: @observation)
+      if @sites.empty?
+        flash_warning(:permission_denied.t)
+        show_flash_and_send_back
+        return
+      end
+
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
         format.html
@@ -64,7 +69,7 @@ module Observations
       @base_urls = {} # used as placeholders in the url field
       @sites.each { |site| @base_urls[site.name] = site.base_url }
 
-      # @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
+      @site = @sites&.first
       @back_object = @observation
     end
 
@@ -72,6 +77,8 @@ module Observations
       @external_link = ExternalLink.find(params[:id].to_s)
       @observation = Observation.find(@external_link.observation_id)
       @site = ExternalSite.find(@external_link.external_site_id)
+      @sites = [@site]
+      @base_urls = { @site.name => @site.base_url }
       @back_object = @observation
     end
 
@@ -169,11 +176,15 @@ module Observations
     end
 
     def render_modal_external_link_form
-      render(
-        partial: "shared/modal_form",
-        locals: { title: modal_title, identifier: modal_identifier,
-                  user: @user, form: "observations/external_links/form" }
-      ) and return
+      render(Components::ModalForm.new(
+               identifier: modal_identifier,
+               title: modal_title,
+               user: @user,
+               model: @external_link,
+               observation: @observation,
+               back: @back,
+               form_locals: { sites: @sites, site: @site }
+             ), layout: false)
     end
 
     def modal_identifier
@@ -216,8 +227,17 @@ module Observations
     def reload_external_link_modal_form_and_flash
       render(
         partial: "shared/modal_form_reload",
-        locals: { identifier: modal_identifier,
-                  form: "observations/external_links/form" }
+        locals: {
+          identifier: modal_identifier,
+          form_locals: {
+            user: @user,
+            model: @external_link,
+            observation: @observation,
+            back: @back,
+            sites: @sites,
+            site: @site
+          }
+        }
       ) and return true
     end
   end

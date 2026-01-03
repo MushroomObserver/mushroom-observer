@@ -25,12 +25,10 @@
 #   end
 class Components::MatrixBox < Components::Base
   include Components::MatrixBox::RenderData
-  include Phlex::Rails::Helpers::LinkTo
-  include Phlex::Rails::Helpers::ClassNames
 
   # Properties
   prop :user, _Nilable(User), default: nil
-  prop :object, _Nilable(Object), default: nil
+  prop :object, _Nilable(AbstractModel), default: nil
   prop :id, _Nilable(_Union(Integer, String)), default: nil
   prop :columns, String, default: "col-xs-12 col-sm-6 col-md-4 col-lg-3"
   prop :extra_class, String, default: ""
@@ -50,6 +48,8 @@ class Components::MatrixBox < Components::Base
   def render_object_layout
     # Build render data from object
     @data = build_render_data
+    # Get observation_view from eager-loaded association (nil if not loaded)
+    @observation_view = observation_view_for_identify if @identify
 
     li(
       id: "box_#{@data[:id]}",
@@ -62,6 +62,19 @@ class Components::MatrixBox < Components::Base
         render_identify_footer(panel)
       end
     end
+  end
+
+  # Get or build observation_view from eager-loaded association.
+  # Returns nil if not an observation or association not loaded.
+  def observation_view_for_identify
+    return nil unless @data[:type] == :observation
+
+    obs = @data[:what]
+    # returns true if association was eager loaded, even if no o_v for this obs
+    return nil unless obs.observation_views.loaded?
+
+    obs.observation_views.find { |ov| ov.user_id == @user&.id } ||
+      ObservationView.new(observation: obs, user: @user)
   end
 
   def render_custom_layout(&block)
@@ -83,7 +96,9 @@ class Components::MatrixBox < Components::Base
         image_link: @data[:image_link],
         obs: @data[:obs] || {},
         votes: @data.fetch(:votes, true),
-        full_width: @data.fetch(:full_width, true)
+        full_width: @data.fetch(:full_width, true),
+        identify: @identify,
+        observation_view: @observation_view
       )
     end
   end
@@ -114,13 +129,11 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_title
-    fragment("box_title") do
-      MatrixBoxTitle(
-        id: @data[:id],
-        name: @data[:name],
-        type: @data[:type]
-      )
-    end
+    MatrixBoxTitle(
+      id: @data[:id],
+      name: @data[:name],
+      type: @data[:type]
+    )
   end
 
   def render_id_badge(obj)
@@ -202,7 +215,15 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_footer_time(time)
-    div(class: "rss-what small") { time.display_time } if time
+    return unless time
+
+    div(
+      class: "rss-what rss-updated-at small",
+      data: { controller: "local-time", local_time_utc_value: time.utc.iso8601 }
+    ) do
+      # Server-rendered fallback for no-JS clients; replaced by Stimulus
+      time.display_time
+    end
   end
 
   def render_user_detail(user)
@@ -219,13 +240,13 @@ class Components::MatrixBox < Components::Base
   end
 
   def render_identify_footer(panel)
-    return unless @identify
+    return unless @observation_view
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
-      mark_as_reviewed_toggle(
-        @data[:id],
-        "box_reviewed",
-        "stretched-link"
+      MarkAsReviewedToggle(
+        observation_view: @observation_view,
+        selector: "box_reviewed",
+        label_class: "stretched-link"
       )
     end
   end

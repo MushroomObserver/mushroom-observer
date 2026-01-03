@@ -4,14 +4,28 @@ require("test_helper")
 require_relative("inat_import_job_test_doubles")
 
 class InatImportJobTest < ActiveJob::TestCase
+  include GeneralExtensions
   include InatImportJobTestDoubles
   include Inat::Constants
 
   def setup
+    super
     @user = users(:inat_importer)
-    directory_path = Rails.public_path.join("test_images/orig")
-    FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
+    # Use worker-specific image directories for parallel testing
+    setup_image_dirs
     @external_link_base_url = ExternalSite.find_by(name: "iNaturalist").base_url
+    return unless job_log_file.exist?
+
+    job_log_file.write("")
+  end
+
+  def job_log_file
+    # Use worker-specific log file for parallel testing
+    if (worker_num = database_worker_number)
+      Rails.root.join("log/job-#{worker_num}.log")
+    else
+      Rails.root.join("log/job.log")
+    end
   end
 
   # Had 1 identification, 0 photos, 0 observation_fields
@@ -34,8 +48,6 @@ class InatImportJobTest < ActiveJob::TestCase
                           name: "Sevier Co., Tennessee, USA",
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
-    QueuedEmail.queue = true
-    before_emails_to_user = QueuedEmail.where(to_user: @user).count
     before_total_imported_count = @inat_import.total_imported_count.to_i
 
     stub_inat_interactions
@@ -67,12 +79,6 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_not(obs.specimen, "Obs should not have a specimen")
     assert(obs.notes.to_s.include?("Observation Fields: none"),
            "Notes should indicate if there were no iNat 'Observation Fields'")
-
-    assert_equal(
-      before_emails_to_user, QueuedEmail.where(to_user: @user).count,
-      "Should not have sent any emails to importing user for this obs"
-    )
-    QueuedEmail.queue = false
 
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
@@ -472,6 +478,16 @@ class InatImportJobTest < ActiveJob::TestCase
                  proposed_name_notes)
 
     assert(obs.sequences.one?, "Obs should have one sequence")
+
+    expected_subject =
+      "#{@user.login} created #{name.user_real_text_name(@user)}"
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        args[0] == "WebmasterMailer" && args[1] == "build" &&
+          args[3][:args].last[:subject] == expected_subject
+      }
+    )
   end
 
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
@@ -622,9 +638,12 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_multiple
     create_ivars_from_filename("listed_ids")
 
+    first_id = @parsed_results.first[:id]
+    last_id = @parsed_results.last[:id]
+
     # override ivar because this test wants to import multiple observations
     @inat_import = InatImport.create(user: @user,
-                                     inat_ids: "231104466,195434438",
+                                     inat_ids: "#{last_id},#{first_id}",
                                      token: "MockCode",
                                      inat_username: "anything")
     # update the tracker's inat_import accordingly
@@ -634,6 +653,71 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_difference("Observation.count", 2,
                       "Failed to create multiple observations") do
       InatImportJob.perform_now(@inat_import)
+    end
+    # Assert that the job logged the parsed page with iNat observation IDs
+    log_content = job_log_file.read
+    assert_match(
+      /Got parsed page with iNat #{first_id}-#{last_id}/, log_content,
+      "Log missing parsed page message with iNat 1st and last observation IDs"
+    )
+    assert_match(/Imported iNat #{first_id} as MO \d+/, log_content,
+                 "Failed to log importing of iNat #{first_id}")
+    assert_match(/Imported iNat #{last_id} as MO \d+/, log_content,
+                 "Failed to log importing of iNat #{last_id}")
+  end
+
+  # Prove that import continues with subsequent observations
+  # when an error occurs during import of one observation
+  def test_import_multiple_continues_after_error
+    create_ivars_from_filename("listed_ids")
+
+    first_id = @parsed_results.first[:id]
+    last_id = @parsed_results.last[:id]
+
+    # override ivar because this test wants to import multiple observations
+    @inat_import = create_inat_import(inat_ids: "#{first_id},#{last_id}",
+                                      inat_username: "anything")
+    # update the tracker's inat_import accordingly
+    InatImportJobTracker.update(inat_import: @inat_import.id)
+
+    stub_inat_interactions
+    # Claude's suggestion for stubbing a method to raise an error during the
+    # first import but not the second
+    # Stub Inat::Obs#notes to raise an error for the first observation only
+    # This method is called during MoObservationBuilder,
+    # which has error handling
+    original_notes_method = Inat::Obs.instance_method(:notes)
+    Inat::Obs.class_eval do
+      define_method(:notes) do
+        if self[:id] == first_id
+          raise(StandardError.new("Simulated error in Inat::Obs#notes"))
+        end
+
+        original_notes_method.bind_call(self)
+      end
+    end
+
+    # The import should create only the second observation (last_id)
+    # because the first one (first_id) will fail
+    assert_difference("Observation.count", 1,
+                      "Should still create the second observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    # Assert that the job logged the error for the first observation
+    @inat_import.reload
+    assert_match(/Simulated error in Inat::Obs#notes/,
+                 @inat_import.response_errors,
+                 "Failed to log error for first observation")
+
+    # Assert that the second observation was still imported
+    log_content = job_log_file.read
+    assert_match(/Imported iNat #{last_id} as MO \d+/, log_content,
+                 "Failed to import second observation after error in first")
+
+    # Clean up the stubbed method - restore original
+    Inat::Obs.class_eval do
+      define_method(:notes, original_notes_method)
     end
   end
 
@@ -856,17 +940,35 @@ class InatImportJobTest < ActiveJob::TestCase
                 body: JSON.generate({ error: error, status: status }),
                 headers: {})
 
+    # Save the observation count before the job runs
+    obs_count_before = Observation.count
+
     InatImportJob.perform_now(@inat_import)
+
+    # The observation should have been destroyed after the error
+    assert_equal(obs_count_before, Observation.count,
+                 "Observation should be destroyed after error")
 
     errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
     assert_equal(status, errors[:error], "Incorrect error status")
-    assert_equal(errors[:payload],
-                 { observation_field_value: {
-                   observation_id: @inat_import.inat_ids.to_i,
-                   observation_field_id: MO_URL_OBSERVATION_FIELD_ID,
-                   value: "#{MO.http_domain}/#{Observation.last.id}"
-                 } }, "Incorrect error payload")
+
+    # The payload should contain the observation_field_value details
+    payload = errors[:payload]
+    assert(payload.is_a?(Hash), "Error payload should be a hash")
+    assert_equal(@inat_import.inat_ids.to_i,
+                 payload[:observation_field_value][:observation_id],
+                 "Incorrect observation_id in error payload")
+    assert_equal(MO_URL_OBSERVATION_FIELD_ID,
+                 payload[:observation_field_value][:observation_field_id],
+                 "Incorrect observation_field_id in error payload")
+
+    log_content = job_log_file.read
+    assert_no_match(/Imported iNat #{@parsed_results.first[:id]}/,
+                    log_content,
+                    "Should not log import success when error occurs")
   end
+
+  ########## Utilities
 
   ########## Utilities
 

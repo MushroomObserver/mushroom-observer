@@ -171,8 +171,10 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_has_comments
     assert_query(Observation.has_comments(true).order_by_default,
                  :Observation, has_comments: true)
-    assert_query(Observation.order_by_default,
+    assert_query(Observation.has_comments(false).order_by_default,
                  :Observation, has_comments: false)
+    assert_query(Observation.order_by_default,
+                 :Observation, has_comments: nil)
   end
 
   def test_observation_comments_has
@@ -189,8 +191,28 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_has_sequences
     assert_query(Observation.has_sequences(true).order_by_default,
                  :Observation, has_sequences: true)
-    assert_query(Observation.order_by_default,
+    assert_query(Observation.has_sequences(false).order_by_default,
                  :Observation, has_sequences: false)
+    assert_query(Observation.order_by_default,
+                 :Observation, has_sequences: nil)
+  end
+
+  def test_observation_has_field_slips
+    assert_query(Observation.has_field_slips(true).order_by_default,
+                 :Observation, has_field_slips: true)
+    assert_query(Observation.has_field_slips(false).order_by_default,
+                 :Observation, has_field_slips: false)
+    assert_query(Observation.order_by_default,
+                 :Observation, has_field_slips: nil)
+  end
+
+  def test_observation_has_collection_numbers
+    assert_query(Observation.has_collection_numbers(true).order_by_default,
+                 :Observation, has_collection_numbers: true)
+    assert_query(Observation.has_collection_numbers(false).order_by_default,
+                 :Observation, has_collection_numbers: false)
+    assert_query(Observation.order_by_default,
+                 :Observation, has_collection_numbers: nil)
   end
 
   def test_observation_has_images
@@ -205,20 +227,6 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, has_specimen: true)
     assert_query(Observation.has_specimen(false).order_by_default,
                  :Observation, has_specimen: false)
-  end
-
-  def test_observation_field_slips
-    f_s = field_slips(:field_slip_one)
-    assert_query([observations(:minimal_unknown_obs)],
-                 :Observation, field_slips: f_s.code)
-    fs2 = field_slips(:field_slip_falmouth_one)
-    assert_query([observations(:falmouth_2022_obs),
-                  observations(:minimal_unknown_obs)],
-                 :Observation, field_slips: [f_s.id, fs2.id])
-    assert_query(Observation.field_slips([f_s.code, fs2.code]).order_by_default,
-                 :Observation, field_slips: [f_s.code, fs2.code])
-    assert_query(Observation.field_slips([f_s.id, fs2.id]).order_by_default,
-                 :Observation, field_slips: [f_s.id, fs2.id])
   end
 
   def test_observation_herbarium_records

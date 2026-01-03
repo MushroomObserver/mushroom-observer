@@ -29,4 +29,13 @@ module CapybaraMacros
   def maximize_browser_window
     Capybara.current_session.current_window.resize_to(1000, 1000)
   end
+
+  # Click an element that triggers a Turbo confirm dialog, then confirm it.
+  # Turbo uses a custom modal (#mo_confirm) instead of the browser's confirm().
+  def click_and_confirm(element)
+    element.trigger("click")
+    within("#mo_confirm") do
+      find(:css, ".btn-danger").click
+    end
+  end
 end

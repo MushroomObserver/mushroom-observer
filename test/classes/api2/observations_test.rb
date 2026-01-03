@@ -187,11 +187,14 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_getting_observations_has_comments
-    obses = Comment.where(target_type: "Observation").
-            map(&:target).uniq.sort_by(&:id)
-    assert(obses.length > 1)
+    with = Observation.has_comments
+    without = Observation.has_comments(false)
+    assert(with.length > 1)
+    assert(without.length > 1)
     assert_api_pass(params_get(has_comments: "yes"))
-    assert_api_results(obses)
+    assert_api_results(with)
+    assert_api_pass(params_get(has_comments: "no"))
+    assert_api_results(without)
   end
 
   def test_getting_observations_has_specimen
@@ -565,9 +568,9 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_fail(params.except(:set_longitude))
     assert_api_pass(params)
     rolfs_obs.reload
-    assert_in_delta(12.34, rolfs_obs.lat, 0.0001)
-    assert_in_delta(-56.78, rolfs_obs.lng, 0.0001)
-    assert_in_delta(901, rolfs_obs.alt, 0.0001)
+    assert_in_delta(12.34, rolfs_obs.lat, MO.box_epsilon)
+    assert_in_delta(-56.78, rolfs_obs.lng, MO.box_epsilon)
+    assert_in_delta(901, rolfs_obs.alt, MO.box_epsilon)
 
     params = {
       method: :patch,

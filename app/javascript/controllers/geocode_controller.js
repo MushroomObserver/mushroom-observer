@@ -10,7 +10,7 @@ export default class extends Controller {
   static targets = ["southInput", "westInput", "northInput", "eastInput",
     "highInput", "lowInput", "placeInput", "locationId",
     "latInput", "lngInput", "altInput", "getElevation"]
-  static outlets = ["autocompleter"]
+  static outlets = ["autocompleter--location"]
   static values = { needElevations: Boolean, default: true }
 
   connect() {
@@ -151,8 +151,8 @@ export default class extends Controller {
     this.verbose(primer)
 
     // Call autocompleter#refreshGooglePrimer directly
-    if (this.hasAutocompleterOutlet) {
-      this.autocompleterOutlet.refreshGooglePrimer({ primer })
+    if (this.hasAutocompleterLocationOutlet) {
+      this.autocompleterLocationOutlet.refreshGooglePrimer({ primer })
     }
   }
 
@@ -208,8 +208,9 @@ export default class extends Controller {
   // Update the place input target with an MO-formatted version of the Google
   // result, only if we're on a form with a non-autocompleted place input.
   updatePlaceInputTarget(result) {
-    if (!this.hasPlaceInputTarget ||
-      this.placeInputTarget.dataset?.controller == "autocomplete") return false
+    if (!this.hasPlaceInputTarget) return false
+    // Skip autocompleted inputs - their controller manages the value
+    if (this.placeInputTarget.dataset?.autocompleter) return false
 
     this.verbose("geocode:updatePlaceInputTarget")
     this.placeInputTarget.value = this.formatMOPlaceName(result)
@@ -395,8 +396,8 @@ export default class extends Controller {
 
     if (lat && lng) {
       this.autocomplete_buffer = setTimeout(() => {
-        if (this.hasAutocompleterOutlet) {
-          this.autocompleterOutlet.swap({
+        if (this.hasAutocompleterLocationOutlet) {
+          this.autocompleterLocationOutlet.swap({
             detail:
               { type: "location_containing", request_params: { lat, lng } }
           })
@@ -405,8 +406,8 @@ export default class extends Controller {
       }, 1000)
     } else {
       this.autocomplete_buffer = setTimeout(() => {
-        if (this.hasAutocompleterOutlet) {
-          this.autocompleterOutlet.swap({ detail: { type: "location" } })
+        if (this.hasAutocompleterLocationOutlet) {
+          this.autocompleterLocationOutlet.swap({ detail: { type: "location" } })
         }
       }, 1000)
     }

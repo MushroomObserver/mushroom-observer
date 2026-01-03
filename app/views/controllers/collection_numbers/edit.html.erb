@@ -8,7 +8,9 @@ add_context_nav(collection_number_form_edit_tabs(
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(partial: "collection_numbers/form", locals: { local: true }) %>
+    <%= render(Components::CollectionNumberForm.new(
+          @collection_number, back: @back
+        )) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

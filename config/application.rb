@@ -95,7 +95,7 @@ module MushroomObserver
 
     config.solid_cache.connects_to = { database: { writing: :cache } }
     # https://github.com/rails/solid_queue?tab=readme-ov-file#other-configuration-settings
-    config.solid_queue.clear_finished_jobs_after = 1.day
+    config.solid_queue.clear_finished_jobs_after = 1.week
 
     # dartsass-sprockets - sssh! about the bootstrap deprectations
     config.sass.quiet_deps = true

@@ -3,11 +3,12 @@ add_show_title(@herbarium_record.format_name.t, @herbarium_record)
 add_edit_icons(@herbarium_record)
 add_pager_for(@herbarium_record)
 add_context_nav(herbarium_record_show_tabs)
+column_classes(:six)
 
 herbarium = @herbarium_record.herbarium
 %>
 
-<div class="mt-3" id="herbarium_record_details">
+<%= content_padded(id: "herbarium_record_details") do %>
   <p>
     <%= :HERBARIUM.t %>: <%= link_to(herbarium.name.t, herbarium.show_link_args) %><br/>
     <%= :herbarium_record_initial_det.t %>: <i><%= @herbarium_record.initial_det %></i><br/>
@@ -23,7 +24,7 @@ herbarium = @herbarium_record.herbarium
   <% if !@herbarium_record.notes.blank? %>
     <%= ( :NOTES.l + ":\n\n" + @herbarium_record.notes ).tpl %>
   <% end %>
-</div>
+<% end %>
 
 <ul class="row list-unstyled">
   <% @herbarium_record.observations.each do |object| %>

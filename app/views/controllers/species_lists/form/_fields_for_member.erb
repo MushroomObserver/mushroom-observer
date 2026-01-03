@@ -29,17 +29,19 @@
                               value: @member_alt, inline: true,
                               label: :ALTITUDE.t + ":") %>
   </div>
-  <%= help_note(:div, :form_observations_lat_long_help.t) %>
+  <%= tag.div(:form_observations_lat_long_help.t, class: "help-note mr-3") %>
 
   <%= check_box_with_label(form: f_m, field: :is_collection_location,
                            checked: @member_is_collection_location,
                            label: :form_observations_is_collection_location.t)
                            %>
-  <%= help_note(:div, :form_observations_is_collection_location_help.t) %>
+  <%= tag.div(:form_observations_is_collection_location_help.t,
+              class: "help-note mr-3") %>
 
   <%= check_box_with_label(form: f_m, field: :specimen,
                            checked: @member_specimen,
                            label: :form_observations_specimen_available.t) %>
-  <%= help_note(:div, :form_observations_specimen_available_help.t) %>
+  <%= tag.div(:form_observations_specimen_available_help.t,
+              class: "help-note mr-3") %>
 
 <% end %>

@@ -2,7 +2,7 @@
 Textile.user_register_name(@user, @name)
 add_show_title(@name.user_display_name(@user).t.small_author, @name)
 if @user
-  add_edit_icons(@name)
+  # add_edit_icons(@name) edit name link is in nomenclature panel
   add_interest_icons(@user, @name)
   add_pager_for(@name)
 end
@@ -67,9 +67,13 @@ column_classes(:seven_five)
 
     <%= render(Components::Panel.new(panel_id: "name_footer")) do |panel| %>
       <%= panel.with_body do %>
-        <%= tag.div(id: "name_authors_editors") do
-              show_authors_and_editors(obj: @name, versions: @versions, user: @user)
-            end %>
+        <%= tag.div(id: "name_authors_editors") do %>
+          <%= render(Components::AuthorsAndEditors.new(
+                obj: @name,
+                versions: @versions,
+                user: @user
+              )) %>
+        <% end %>
         <%= :show_name_num_notifications.t(num: @name.interests) %>
       <% end %>
       <%= panel.with_footer { footer } %>
@@ -80,4 +84,4 @@ column_classes(:seven_five)
 <% end %>
 <!--.row-->
 
-<%= show_object_footer(@user, @name, @versions) %>
+<%= render(Components::ObjectFooter.new(user: @user, obj: @name, versions: @versions)) %>

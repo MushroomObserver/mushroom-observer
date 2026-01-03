@@ -265,6 +265,28 @@ class SpeciesListsControllerTest < FunctionalTestCase
                   "H1 title element should exist and contain content")
   end
 
+  # Regression test for bug where params[:q] as a String (saved query ID)
+  # caused TypeError: String does not have #dig method in set_project_ivar
+  def test_show_species_list_with_saved_query_string
+    login
+    spl = species_lists(:reused_list)
+    project = spl.projects[0]
+
+    # Create a saved query with project associations
+    query = Query.lookup(:SpeciesList, projects: [project.id])
+    assert(query.save)
+    query_id = query.record.id.alphabetize
+
+    # This should not raise TypeError when params[:q] is a String
+    assert_nothing_raised do
+      get(:show, params: { id: spl.id, q: query_id })
+    end
+
+    assert_response(:success)
+    assert_select("h1#title", /#{spl.title}/,
+                  "H1 title element should exist and contain content")
+  end
+
   def test_show_species_lists_attached_to_projects
     login
     proj1 = projects(:eol_project)

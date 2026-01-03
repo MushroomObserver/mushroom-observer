@@ -3,6 +3,8 @@
 require("test_helper")
 
 class LocationTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   def bad_location(str)
     assert(Location.dubious_name?(str, true) != [])
   end
@@ -167,12 +169,12 @@ class LocationTest < UnitTestCase
   #  Test email notification heuristics.
   # --------------------------------------
 
+  # Tests for location change email notifications migrated to deliver_later.
+  # Uses assert_enqueued_with to verify correct recipients.
   def test_email_notification
     loc  = locations(:albion)
     desc = location_descriptions(:albion_desc)
 
-    QueuedEmail.queue = true
-    QueuedEmail.all.map(&:destroy)
     location_version = loc.version
     description_version = desc.version
 
@@ -203,16 +205,17 @@ class LocationTest < UnitTestCase
     # 2 Mary:       x       .       .
     # 3 Dick:       x       .       .
     # Authors: --   editors: --
-    # Rolf changes notes: notify Dick (all); Rolf becomes editor.
+    # Rolf changes notes: no emails (no authors yet); Rolf becomes editor.
     User.current = rolf
     desc.reload
-    desc.notes = ""
-    desc.save
+    assert_no_enqueued_jobs do
+      desc.notes = ""
+      desc.save
+    end
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(0, QueuedEmail.count)
 
     # email types:  author  editor  interest
     # 1 Rolf:       x       .       .
@@ -222,14 +225,15 @@ class LocationTest < UnitTestCase
     # Mary writes notes: no emails; Mary becomes author.
     User.current = mary
     desc.reload
-    desc.notes = "Mary wrote this."
-    desc.save
+    assert_no_enqueued_jobs do
+      desc.notes = "Mary wrote this."
+      desc.save
+    end
     assert_equal(description_version + 2, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(1, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(0, QueuedEmail.count)
 
     # email types:  author  editor  interest
     # 1 Rolf:       x       .       .
@@ -239,24 +243,29 @@ class LocationTest < UnitTestCase
     # Now when Rolf changes the notes Mary should get notified.
     User.current = rolf
     desc.reload
-    desc.notes = "Rolf changed it to this."
-    desc.save
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        mailer_args = args[3][:args].first
+        args[0] == "LocationChangeMailer" &&
+          mailer_args[:sender] == rolf &&
+          mailer_args[:receiver] == mary &&
+          mailer_args[:location] == loc &&
+          mailer_args[:description] == desc &&
+          mailer_args[:old_loc_ver] == loc.version &&
+          mailer_args[:new_loc_ver] == loc.version &&
+          mailer_args[:old_desc_ver] == description_version + 2 &&
+          mailer_args[:new_desc_ver] == description_version + 3
+      }
+    ) do
+      desc.notes = "Rolf changed it to this."
+      desc.save
+    end
     assert_equal(1, desc.authors.length)
     assert_equal(1, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
     assert_equal(description_version + 3, desc.version)
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::LocationChange",
-                 from: rolf,
-                 to: mary,
-                 location: loc.id,
-                 description: desc.id,
-                 old_location_version: loc.version,
-                 new_location_version: loc.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version)
 
     # Have Mary opt out of author-notifications to make sure that's why she
     # got the last email.
@@ -272,14 +281,15 @@ class LocationTest < UnitTestCase
     # an editor and he has opted out of such notifications.
     User.current = dick
     desc.reload
-    desc.notes = "Dick changed it now."
-    desc.save
+    assert_no_enqueued_jobs do
+      desc.notes = "Dick changed it now."
+      desc.save
+    end
     assert_equal(description_version + 4, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(1, QueuedEmail.count)
 
     # Have everyone request editor-notifications and have Dick change it again.
     # Only Rolf should get notified since Mary is an author, not an editor, and
@@ -298,24 +308,29 @@ class LocationTest < UnitTestCase
     # Authors: Mary   editors: Rolf, Dick
     User.current = dick
     desc.reload
-    desc.notes = "Dick changed it again."
-    desc.save
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        mailer_args = args[3][:args].first
+        args[0] == "LocationChangeMailer" &&
+          mailer_args[:sender] == dick &&
+          mailer_args[:receiver] == rolf &&
+          mailer_args[:location] == loc &&
+          mailer_args[:description] == desc &&
+          mailer_args[:old_loc_ver] == loc.version &&
+          mailer_args[:new_loc_ver] == loc.version &&
+          mailer_args[:old_desc_ver] == description_version + 4 &&
+          mailer_args[:new_desc_ver] == description_version + 5
+      }
+    ) do
+      desc.notes = "Dick changed it again."
+      desc.save
+    end
     assert_equal(description_version + 5, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_user_arrays_equal([rolf, dick], desc.editors)
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
-                 flavor: "QueuedEmail::LocationChange",
-                 from: dick,
-                 to: rolf,
-                 location: loc.id,
-                 description: desc.id,
-                 old_location_version: loc.version,
-                 new_location_version: loc.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version)
 
     # Have Mary and Dick express interest, Rolf express disinterest,
     # then have Dick change it again.  Mary should get an email.
@@ -330,26 +345,30 @@ class LocationTest < UnitTestCase
     # Authors: Mary   editors: Rolf, Dick
     User.current = dick
     loc.reload
-    loc.display_name = "Another Name"
-    loc.save
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: lambda { |args|
+        mailer_args = args[3][:args].first
+        args[0] == "LocationChangeMailer" &&
+          mailer_args[:sender] == dick &&
+          mailer_args[:receiver] == mary &&
+          mailer_args[:location] == loc &&
+          mailer_args[:description] == desc &&
+          mailer_args[:old_loc_ver] == location_version &&
+          mailer_args[:new_loc_ver] == location_version + 1 &&
+          mailer_args[:old_desc_ver] == desc.version &&
+          mailer_args[:new_desc_ver] == desc.version
+      }
+    ) do
+      loc.display_name = "Another Name"
+      loc.save
+    end
     assert_equal(location_version + 1, loc.version)
     assert_equal(description_version + 5, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_user_arrays_equal([rolf, dick], desc.editors)
-    assert_email(2,
-                 flavor: "QueuedEmail::LocationChange",
-                 from: dick,
-                 to: mary,
-                 location: loc.id,
-                 description: desc.id,
-                 old_location_version: loc.version - 1,
-                 new_location_version: loc.version,
-                 old_description_version: desc.version,
-                 new_description_version: desc.version)
-    assert_equal(3, QueuedEmail.count)
-    QueuedEmail.queue = false
   end
 
   def test_parse_latitude
@@ -625,6 +644,25 @@ class LocationTest < UnitTestCase
       Location.in_box(**north_southerthan_south_box),
       "`scope: in_box` should be empty if N < S"
     )
+  end
+
+  # Regression test: searching with a location's own bounding box (rounded to
+  # 4 decimal places as in form inputs) should return that location.
+  def test_scope_in_box_finds_location_with_rounded_coordinates
+    salt_point = locations(:salt_point)
+
+    # Simulate form input rounding (4 decimal places)
+    rounded_box = {
+      north: salt_point.north.round(4),
+      south: salt_point.south.round(4),
+      east: salt_point.east.round(4),
+      west: salt_point.west.round(4)
+    }
+
+    results = Location.in_box(**rounded_box)
+    assert_includes(results, salt_point,
+                    "in_box should find location when searched with its own " \
+                    "rounded bounding box coordinates")
   end
 
   def test_scope_contains_box

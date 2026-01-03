@@ -21,8 +21,8 @@ module Observations
       get(:new, params: { id: obs.id }, format: :turbo_stream)
 
       assert_response(:success)
-      assert_template("shared/_modal_form")
-      assert_template("observations/external_links/_form")
+      assert_select(".modal-form")
+      assert_select("form#external_link_form")
     end
 
     def setup_create_test
@@ -157,8 +157,8 @@ module Observations
       get(:edit, params: { id: link.id }, format: :turbo_stream)
 
       assert_response(:success)
-      assert_template("shared/_modal_form")
-      assert_template("observations/external_links/_form")
+      assert_select(".modal-form")
+      assert_select("form#external_link_form")
     end
 
     def test_update_external_link

@@ -445,25 +445,36 @@ class NamesController < ApplicationController
   end
 
   def perform_change_existing_name
-    update_correct_spelling
+    spelling_changed = update_correct_spelling
     set_name_author_and_rank
     set_unparsed_attrs
-    if !@name.changed?
-      any_changes = false
-    elsif !@name.save_with_log(@user, :log_name_updated)
-      raise(:runtime_unable_to_save_changes.t)
-    else
-      flash_notice(:runtime_edit_name_success.t(
-                     name: @name.user_real_search_name(@user)
-                   ))
-      any_changes = true
-    end
+    any_changes = if @name.changed?
+                    save_name_and_flash_success
+                  else
+                    # Name may have been saved by mark_misspelled/merge_synonyms
+                    flash_success if spelling_changed
+                    spelling_changed
+                  end
     # Update ancestors regardless whether name changed; maybe this will add
     # missing ancestors in case database is messed up. But don't update
     # ancestors if non-admin is changing locked namge because that would create
     # bogus name and ancestors if @parse.search_name differs from @name
     update_ancestors if editable_in_session?
     any_changes
+  end
+
+  def save_name_and_flash_success # rubocop:disable Naming/PredicateMethod
+    raise(:runtime_unable_to_save_changes.t) unless
+      @name.save_with_log(@user, :log_name_updated)
+
+    flash_success
+    true
+  end
+
+  def flash_success
+    flash_notice(:runtime_edit_name_success.t(
+                   name: @name.user_real_search_name(@user)
+                 ))
   end
 
   # Update the misspelling status.
@@ -477,19 +488,24 @@ class NamesController < ApplicationController
   # 2) Otherwise, if the text field is filled in it looks up the name and
   #    sets correct_spelling_id.
   #
-  # All changes are made (but not saved) to +@name+.  It returns true if
-  # everything went well.  If it couldn't recognize the correct name, it
-  # changes nothing and raises a RuntimeError.
+  # All changes are made (but not saved) to +@name+.  If it couldn't recognize
+  # the correct name, it changes nothing and raises a RuntimeError.
   #
-  def update_correct_spelling
-    return unless editable_in_session?
+  # Returns true if changes were made and saved (via mark_misspelled).
+  #
+  def update_correct_spelling # rubocop:disable Naming/PredicateMethod
+    return false unless editable_in_session?
 
     if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
       @name.correct_spelling = nil
       @parse = parse_name # update boldness in @parse.params
+      false # Change tracked via @name.changed?, not saved yet
     elsif @correct_spelling.present?
-      set_correct_spelling
+      set_correct_spelling # This saves the name via mark_misspelled
       @parse = parse_name # update boldness in @parse.params
+      true # Changes were saved, dirty tracking cleared
+    else
+      false
     end
   end
 
@@ -558,13 +574,14 @@ class NamesController < ApplicationController
   end
 
   def email_admin_name_change
-    content = email_name_change_content
-    QueuedEmail::Webmaster.create_email(
-      @user,
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    message = WebmasterMailer.prepend_user(@user, email_name_change_content)
+    WebmasterMailer.build(
+      sender_email: @user.email,
       subject: "Nontrivial Name Change",
-      content: content
-    )
-    NamesControllerUpdateTest.report_email(content) if Rails.env.test?
+      message:
+    ).deliver_later
+    NamesControllerUpdateTest.report_email(message) if Rails.env.test?
   end
 
   def email_name_change_content
@@ -656,7 +673,7 @@ class NamesController < ApplicationController
   end
 
   def email_admin_icn_id_conflict(survivor)
-    content = :email_merger_icn_id_conflict.l(
+    message = :email_merger_icn_id_conflict.l(
       name: survivor.user_real_search_name(@user),
       surviving_icn_id: survivor.icn_id,
       deleted_icn_id: @name.icn_id,
@@ -664,12 +681,14 @@ class NamesController < ApplicationController
       show_url: "#{MO.http_domain}/names/#{@name.id}",
       edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
-    QueuedEmail::Webmaster.create_email(
-      @user,
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    message = WebmasterMailer.prepend_user(@user, message)
+    WebmasterMailer.build(
+      sender_email: @user.email,
       subject: "Merger identifier conflict",
-      content: content
-    )
-    NamesControllerUpdateMergeTest.report_email(content) if Rails.env.test?
+      message:
+    ).deliver_later
+    NamesControllerUpdateMergeTest.report_email(message) if Rails.env.test?
   end
 
   # ----------------------------------------------------------------------------

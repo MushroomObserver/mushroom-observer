@@ -132,8 +132,13 @@ class SequencesControllerTest < FunctionalTestCase
 
     login("zero") # This user has no Observations
     get(:new, params: { observation_id: obs.id }, format: :turbo_stream)
-    assert_template("shared/_modal_form")
-    assert_template("sequences/_form")
+    # Verify ModalForm + SequenceForm components rendered
+    assert_select(".modal-form")
+    assert_select("form#sequence_form")
+    assert_select("textarea#sequence_locus")
+    assert_select("textarea#sequence_bases")
+    assert_select("select#sequence_archive")
+    assert_select("input#sequence_accession")
   end
 
   def test_new_login_required
@@ -355,8 +360,13 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove Observation's creator can edit Sequence
     login(observer.login)
     get(:edit, params: { id: sequence.id }, format: :turbo_stream)
-    assert_template("shared/_modal_form")
-    assert_template("sequences/_form")
+    # Verify ModalForm + SequenceForm components rendered
+    assert_select(".modal-form")
+    assert_select("form#sequence_form")
+    assert_select("textarea#sequence_locus")
+    assert_select("textarea#sequence_bases")
+    assert_select("select#sequence_archive")
+    assert_select("input#sequence_accession")
   end
 
   def test_edit_deposited_sequence
@@ -733,16 +743,72 @@ class SequencesControllerTest < FunctionalTestCase
     assert_session_query_record_is_correct
   end
 
-  def test_destroy_redirect_to_index_with_query
-    obs   = observations(:genbanked_obs)
-    seqs  = obs.sequences
-    query = @controller.find_or_create_query(:Sequence, observations: obs)
-    q     = @controller.q_param(query)
+  # NOTE: No test for back: "index" because there's no destroy button on
+  # sequences index. Destroy is only available on sequences#show and obs#show.
 
-    # Prove that it can return to index, too, with query intact.
-    login(obs.user.login)
-    delete(:destroy, params: { id: seqs[2].id, back: "index" })
-    assert_redirected_to(action: :index, q:)
-    assert_session_query_record_is_correct
+  # Bug: Destroy button on show page uses turbo_stream format, causing error
+  # because we're not on an observation page. Should redirect instead.
+  def test_destroy_turbo_from_show_page
+    sequence = sequences(:local_sequence)
+    sequence_count = Sequence.count
+
+    login(sequence.user.login)
+    # Simulate clicking Destroy button on the show page (back: "show")
+    # The button incorrectly requests turbo_stream format
+    delete(:destroy, params: { id: sequence.id, back: "show" },
+                     format: :turbo_stream)
+
+    # Should still successfully destroy and redirect (not error)
+    assert_equal(sequence_count - 1, Sequence.count)
+    # Should redirect to observation since we can't do turbo_stream update
+    # on a non-observation page
+    assert_redirected_to(sequence.observation.show_link_args)
+  end
+
+  # Destroy from observation page should redirect to observation
+  def test_destroy_redirect_to_observation
+    sequence = sequences(:local_sequence)
+    observation = sequence.observation
+    sequence_count = Sequence.count
+
+    login(sequence.user.login)
+    delete(:destroy, params: { id: sequence.id }, format: :turbo_stream)
+
+    # Should successfully destroy and redirect to observation
+    assert_equal(sequence_count - 1, Sequence.count)
+    assert_redirected_to(observation.show_link_args)
+  end
+
+  # Test permission denied via turbo_stream from observation page
+  def test_destroy_permission_denied_turbo_from_observation
+    sequence = sequences(:local_sequence)
+    sequence_count = Sequence.count
+
+    # Login as different user who doesn't own the sequence
+    login("mary")
+
+    delete(:destroy, params: { id: sequence.id }, format: :turbo_stream)
+
+    # Should not destroy and should render turbo_stream with flash
+    assert_equal(sequence_count, Sequence.count)
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "observation_sequences")
+  end
+
+  # Test permission denied via turbo_stream from show page
+  def test_destroy_permission_denied_turbo_from_show
+    sequence = sequences(:local_sequence)
+    sequence_count = Sequence.count
+
+    login("mary")
+
+    delete(:destroy,
+           params: { id: sequence.id, back: "show" },
+           format: :turbo_stream)
+
+    # Should not destroy and should redirect to observation
+    assert_equal(sequence_count, Sequence.count)
+    assert_redirected_to(sequence.observation.show_link_args)
   end
 end
