@@ -13,7 +13,7 @@ module Components
       def view_template
         div(class: @classes[:heading]) do
           i(class: "glyphicon glyphicon-user")
-          span { plain("#{:app_account.t}:") }
+          span { plain("#{heading_key.t}:") }
         end
 
         tabs.compact.each do |link|

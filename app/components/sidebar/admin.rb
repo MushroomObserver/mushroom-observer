@@ -14,7 +14,7 @@ module Components
 
       def view_template
         div(class: @classes[:heading]) do
-          plain("#{:app_admin.t}:")
+          plain("#{heading_key.t}:")
         end
 
         tabs.compact.each do |link|
