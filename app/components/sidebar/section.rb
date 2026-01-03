@@ -47,15 +47,11 @@ module Components
 
       # Subclasses must implement these methods
       def heading_key
-        raise(
-          NotImplementedError.new("#{self.class} must implement #heading_key")
-        )
+        raise NotImplementedError, "#{self.class} must implement #heading_key"
       end
 
       def tabs_method
-        raise(
-          NotImplementedError.new("#{self.class} must implement #tabs_method")
-        )
+        raise NotImplementedError, "#{self.class} must implement #tabs_method"
       end
     end
   end
