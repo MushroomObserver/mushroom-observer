@@ -32,13 +32,15 @@ class Components::ModalForm < Components::Base
   # Used by both this component and _modal_form_reload.erb partial.
   #
   # These exist so we don't duplicate the logic for:
-  #   1. Deriving the form component class from the model (e.g., Comment -> CommentForm)
+  #   1. Deriving the form component class from the model
+  #      (e.g., Comment -> CommentForm)
   #   2. Rendering the component with the correct params
   #
-  # The reload partial calls these directly since it doesn't have a ModalForm instance.
+  # The reload partial calls these directly since it doesn't have a
+  # ModalForm instance.
 
   # Returns the form component class for a given model.
-  # e.g., Comment -> Components::CommentForm, Naming -> Components::NamingForm
+  # e.g., Comment -> Components::CommentForm
   def self.form_component_class_for(model)
     model_name = model.class.name.demodulize
     "Components::#{model_name}Form".constantize
@@ -46,9 +48,9 @@ class Components::ModalForm < Components::Base
 
   # Renders the form component for a model.
   #
-  # @param view_context [ActionView::Base] The view context from the calling template.
-  #   In ERB, this is `self`. Needed because Phlex components must be rendered
-  #   through Rails' render method, which requires a view context.
+  # @param view_context [ActionView::Base] The view context from the calling
+  #   template. In ERB, this is `self`. Needed because Phlex components must
+  #   be rendered through Rails' render method, which requires a view context.
   # @param model [ActiveRecord::Base] The model instance for the form.
   # @param form_locals [Hash] Additional params to pass to the form component.
   # @return [String] The rendered HTML.
