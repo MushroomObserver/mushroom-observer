@@ -933,6 +933,7 @@
   "no": "no"
   TO: To
   to: to
+  OK: OK
 
   ##############################################################################
 
@@ -1667,7 +1668,7 @@
 
   # observer/_form_list_feedback
   form_list_feedback_missing_names: The following names could not be found.
-  form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names. If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list. If the names came from an uploaded observation list, create a correct file and select it for upload.
+  form_list_feedback_missing_names_help: Click 'Add' to create these names. If you want to correct any you entered by hand, do so in the area below and click 'Add' to re-evaluate the list. If the names came from an uploaded observation list, create a correct file and select it for upload.
 
   # glossary
   form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use.\nAvoid (a) variations of other Terms, or (b) Names of taxa. Details:"
@@ -2381,9 +2382,9 @@
   show_observation_add_link: Add an external link
   show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
   show_observation_no_collection_numbers: No [:collection_numbers]
-  show_observation_remove_collection_number: Remove collection number from this observation
+  show_observation_remove_collection_number: Remove collection number from this observation?
   show_observation_no_herbarium_records: No [:herbarium_records]
-  show_observation_remove_herbarium_record: Remove fungarium record from this observation
+  show_observation_remove_herbarium_record: Remove fungarium record from this observation?
   show_observation_add_sequence: Add [:SEQUENCE]
   show_observation_no_sequences: No [:sequences]
   show_observation_archive_link: Show Archive Record

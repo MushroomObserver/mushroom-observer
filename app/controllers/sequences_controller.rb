@@ -127,18 +127,20 @@ class SequencesController < ApplicationController
     save_edits
   end
 
+  # NOTE: This action is called from both sequences#show and observations#show.
+  # Unlike collection_numbers/herbarium_records, sequences have no "remove".
   def destroy
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
+    @observation = @sequence.observation
     figure_out_where_to_go_back_to
     return unless make_sure_can_delete!(@sequence)
 
-    @observation = @sequence.observation # needed for js to update obs page
-
     @sequence.destroy
     flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
-    show_flash_and_send_to_back_object
+
+    redirect_to(@observation.show_link_args)
   end
 
   ##############################################################################
@@ -258,22 +260,15 @@ class SequencesController < ApplicationController
 
   def show_flash_and_send_to_back_object
     respond_to do |format|
-      # Only render turbo_stream if we came from an observation page
       format.turbo_stream do
         if @back_object.is_a?(Observation)
           render_sequences_section_update
-        elsif @back == "index"
-          redirect_with_query(action: :index)
         else
           redirect_to(@observation.show_link_args)
         end
       end
       format.html do
-        if @back == "index"
-          redirect_with_query(action: :index)
-        else
-          redirect_to(@back_object.show_link_args)
-        end
+        redirect_to(@back_object.show_link_args)
       end
     end
   end

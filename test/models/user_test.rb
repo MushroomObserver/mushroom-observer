@@ -371,17 +371,6 @@ class UserTest < UnitTestCase
     assert_equal(0, NameTracker.where(user: rolf).count)
   end
 
-  def test_delete_queued_emails
-    QueuedEmail.create(rolf, mary)
-    QueuedEmail.create(mary, rolf)
-    assert_operator(0, "<", QueuedEmail.where(user: rolf).count)
-    assert_operator(0, "<", QueuedEmail.where(to_user: rolf).count)
-
-    rolf.delete_queued_emails
-    assert_equal(0, QueuedEmail.where(user: rolf).count)
-    assert_equal(0, QueuedEmail.where(to_user: rolf).count)
-  end
-
   def test_delete_observations
     assert_operator(0, "<", Observation.where(user: rolf).count)
     rolf.delete_observations

@@ -220,6 +220,17 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_html(html, "a.create-link[name='create_location']")
   end
 
+  def test_autocompleter_with_between_slot
+    comment = Comment.new
+    form = TestBetweenSlotAutocompleterForm.new(comment, action: "/test")
+    html = render(form)
+
+    # Between slot content should appear after label
+    assert_includes(html, "(Login Name)")
+    # Has-id indicator should still be present after between content
+    assert_html(html, "span.has-id-indicator")
+  end
+
   private
 
   def render_with_component
@@ -331,6 +342,15 @@ class TestModalCreateAutocompleterForm < Components::ApplicationForm
           wrapper_options: { label: "Location" }
         )
       )
+    end
+  end
+end
+
+# Test form class for between slot
+class TestBetweenSlotAutocompleterForm < Components::ApplicationForm
+  def view_template
+    autocompleter_field(:notes, type: :user, label: "User:") do |f|
+      f.with_between { "(Login Name)" }
     end
   end
 end

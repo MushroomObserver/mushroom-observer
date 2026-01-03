@@ -203,7 +203,6 @@ class ObservationTest < UnitTestCase
   # --------------------------------------
   def test_email_notification_1
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -228,7 +227,6 @@ class ObservationTest < UnitTestCase
         target: obs
       )
     end
-    assert_equal(0, QueuedEmail.count)
 
     # Observation owner is not notified if naming added by themselves.
     # NameProposal now uses deliver_later.
@@ -239,7 +237,6 @@ class ObservationTest < UnitTestCase
       vote_cache: 0,
       user: rolf
     )
-    assert_equal(0, QueuedEmail.count)
     assert_equal(names(:coprinus_comatus), obs.reload.name)
 
     # Observation owner is not notified if consensus changed by themselves.
@@ -247,7 +244,6 @@ class ObservationTest < UnitTestCase
     User.current = rolf
     change_vote(obs, new_naming, 3)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
-    assert_equal(0, QueuedEmail.count)
 
     # Make Rolf opt out of all emails.
     rolf.email_comments_owner = false
@@ -266,7 +262,6 @@ class ObservationTest < UnitTestCase
         target: obs.reload
       )
     end
-    assert_equal(0, QueuedEmail.count)
 
     # NameProposal now uses deliver_later.
     # But Rolf opted out, so no email is sent.
@@ -277,7 +272,6 @@ class ObservationTest < UnitTestCase
       vote_cache: 0,
       user: dick
     )
-    assert_equal(0, QueuedEmail.count)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
 
     # Make sure this changes consensus...
@@ -289,13 +283,10 @@ class ObservationTest < UnitTestCase
     User.current = dick
     change_vote(obs, new_naming, 3)
     assert_equal(names(:peltigera), obs.reload.name)
-    assert_equal(0, QueuedEmail.count)
-    QueuedEmail.queue = false
   end
 
   def test_email_notification_2
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -320,7 +311,6 @@ class ObservationTest < UnitTestCase
         target: obs
       )
     end
-    assert_equal(0, QueuedEmail.count)
 
     # Observation owner is notified if naming added by someone else.
     # NameProposal now uses deliver_later.
@@ -337,8 +327,6 @@ class ObservationTest < UnitTestCase
         user: mary
       )
     end
-    # QueuedEmail stays at 0 (CommentAdd, NameProposal now via deliver_later)
-    assert_equal(0, QueuedEmail.count)
 
     # Observation owner is notified if consensus changed by someone else.
     # ConsensusChange now uses deliver_later.
@@ -352,8 +340,6 @@ class ObservationTest < UnitTestCase
       change_vote(obs, new_naming, 3, katrina)
       change_vote(obs, namings(:coprinus_comatus_naming), -3, katrina)
     end
-    # QueuedEmail count stays at 0 (all via deliver_later)
-    assert_equal(0, QueuedEmail.count)
 
     # Make sure Mary gets notified if Rolf responds to her comment.
     # CommentAdd now uses deliver_later.
@@ -366,13 +352,10 @@ class ObservationTest < UnitTestCase
         target: observations(:coprinus_comatus_obs)
       )
     end
-    assert_equal(0, QueuedEmail.count)
-    QueuedEmail.queue = false
   end
 
   def test_email_notification_3
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -415,7 +398,6 @@ class ObservationTest < UnitTestCase
         target: observations(:coprinus_comatus_obs)
       )
     end
-    assert_equal(0, QueuedEmail.count)
 
     # Watcher is notified if naming added.
     # NameProposal now uses deliver_later.
@@ -428,8 +410,6 @@ class ObservationTest < UnitTestCase
         user: mary
       )
     end
-    # QueuedEmail count stays at 0 (all via deliver_later)
-    assert_equal(0, QueuedEmail.count)
 
     # Watcher is notified if consensus changed.
     # ConsensusChange now uses deliver_later.
@@ -440,8 +420,6 @@ class ObservationTest < UnitTestCase
     assert_equal(3,
                  votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_save(votes(:coprinus_comatus_other_naming_rolf_vote))
-    # QueuedEmail count stays at 0 (all via deliver_later)
-    assert_equal(0, QueuedEmail.count)
 
     # Now have Rolf make a bunch of changes...
     User.current = rolf
@@ -452,31 +430,24 @@ class ObservationTest < UnitTestCase
       obs.notes = "I have new information on this observation."
       obs.save
     end
-    # QueuedEmail count stays at 0 (all via deliver_later)
-    assert_equal(0, QueuedEmail.count)
 
     # Make sure subsequent changes also enqueue emails.
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.where = "Somewhere else"
       obs.save
     end
-    assert_equal(0, QueuedEmail.count)
 
     # Same deal with adding and removing images.
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.add_image(images(:disconnected_coprinus_comatus_image))
     end
-    assert_equal(0, QueuedEmail.count)
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.remove_image(images(:disconnected_coprinus_comatus_image))
     end
-    assert_equal(0, QueuedEmail.count)
-    QueuedEmail.queue = false
   end
 
   def test_email_notification_4
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
     marys_interest = Interest.create(
@@ -506,7 +477,6 @@ class ObservationTest < UnitTestCase
         notes = "I have new information on this observation."
       observations(:coprinus_comatus_obs).save
     end
-    assert_equal(0, QueuedEmail.count)
 
     # Add image to observation.
     marys_interest.state = false
@@ -517,7 +487,6 @@ class ObservationTest < UnitTestCase
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.reload.add_image(images(:disconnected_coprinus_comatus_image))
     end
-    assert_equal(0, QueuedEmail.count)
 
     # Destroy observation.
     dicks_interest.state = false
@@ -526,17 +495,13 @@ class ObservationTest < UnitTestCase
     assert_save(katrinas_interest)
 
     User.current = rolf
-    assert_equal(0, QueuedEmail.count)
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.reload.destroy
     end
-    assert_equal(0, QueuedEmail.count)
-    QueuedEmail.queue = false
   end
 
   def test_email_notification_is_collection_location_change
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
     Interest.create(target: obs, user: mary, state: true)
@@ -545,8 +510,6 @@ class ObservationTest < UnitTestCase
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.update(is_collection_location: !obs.is_collection_location)
     end
-    assert_equal(0, QueuedEmail.count)
-    QueuedEmail.queue = false
   end
 
   def test_vote_favorite

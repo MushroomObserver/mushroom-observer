@@ -15,6 +15,7 @@ module Projects
       return unless find_project!
 
       @users = @project.user_group.users.includes(:image)
+      @project_member = ProjectMember.new(project: @project)
     end
 
     # View that lists all verified users with links to add each as a member.
@@ -23,7 +24,7 @@ module Projects
     #   params[:project_id] (was :id)
     #   params[:candidate]  (when click on user)
     # Outputs:
-    #   @project, @users
+    #   @project, @users, @project_member
     # "Posts" to the same action.  Stays on this view until done.
     def new
       return unless find_project!
@@ -33,17 +34,21 @@ module Projects
 
       @users =
         User.where.not(verified: nil).order(last_login: :desc).limit(100).to_a
+      @project_member = ProjectMember.new(project: @project)
     end
 
     def create
       return unless find_project!
+
+      candidate = params[:candidate] ||
+                  params.dig(:project_member, :candidate)
       unless @project.is_admin?(@user) ||
-             (@project.open_membership && @user.id.to_s == params[:candidate])
+             (@project.open_membership && @user.id.to_s == candidate)
         return must_be_project_admin!(@project.id)
       end
-      return unless (@candidate = params[:candidate])
+      return unless candidate
 
-      add_member(@candidate, @project)
+      add_member(candidate, @project)
     end
 
     # Form to make a given User either a member or an admin.
@@ -52,25 +57,25 @@ module Projects
     #   params[:project_id] (was :id)
     #   params[:candidate]
     #   params[:commit]
-    # Outputs: @project, @candidate
+    # Outputs: @project, @project_member
     # Posts to same action.  Redirects to show_project when done.
     # def change_member_status
     def edit
       return unless find_project!
-      return unless find_candidate!
-      return if @project.is_admin?(@user) || @user == @candidate
+      return unless find_project_member!
+      return if @project.is_admin?(@user) || @user == @project_member.user
 
       must_be_project_admin!(@project.id)
     end
 
     def update
       return unless find_project!
-      return unless find_candidate!
-      unless @project.is_admin?(@user) || @user == @candidate
+      return unless find_project_member!
+      unless @project.is_admin?(@user) || @user == @project_member.user
         return must_be_project_admin!(@project.id)
       end
 
-      update_membership(@project, @candidate)
+      update_membership(@project, @project_member.user)
     end
 
     private
@@ -79,8 +84,12 @@ module Projects
       @project = find_or_goto_index(Project, params[:project_id].to_s)
     end
 
-    def find_candidate!
-      @candidate = find_or_goto_index(User, params[:candidate])
+    def find_project_member!
+      user = find_or_goto_index(User, params[:candidate])
+      return unless user
+
+      @project_member = @project.project_members.find_by(user: user) ||
+                        ProjectMember.new(project: @project, user: user)
     end
 
     # Redirects back to show_project.

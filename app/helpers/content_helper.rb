@@ -1,23 +1,14 @@
 # frozen_string_literal: true
 
 #  safe_br                      # <br/>,html_safe
-#  safe_empty
 #  safe_nbsp
 #  indent
-#  spacer
+#  content_padded
 #  escape_html                  # Return escaped HTML
-#  textilize_without_paragraph  # override Rails method of same name
-#  textilize                    # override Rails method of same name
-#  content_tag_if
-#  content_tag_unless
-#  add content_help             # help text viewable on mouse-over
+#  safe_spinner
 
 # helpers for content tags
 module ContentHelper
-  def safe_empty
-    "".html_safe
-  end
-
   def safe_br
     "<br/>".html_safe
   end
@@ -29,11 +20,7 @@ module ContentHelper
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent
-    tag.span("&nbsp;".html_safe, class: "ml-10px")
-  end
-
-  def spacer
-    tag.span("&nbsp;".html_safe, class: "mx-2")
+    tag.span("&nbsp;".html_safe, class: "ml-3")
   end
 
   def content_padded(**args, &block)
@@ -66,13 +53,6 @@ module ContentHelper
   end
 
   # ----------------------------------------------------------------------------
-
-  def safe_spinner(text = "")
-    [
-      text,
-      tag.span("", class: "spinner-right mx-2")
-    ].safe_join
-  end
 
   def content_tag_if(condition, name, content_or_options_with_block = nil,
                      options = nil, escape = true, &block)

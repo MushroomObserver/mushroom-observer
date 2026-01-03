@@ -25,7 +25,6 @@
 #  assert_user_arrays_equal::     Compare two lists of User's.
 #  assert_name_arrays_equal::     Compare two lists of Name's.
 #  assert_gps_equal::           Compare two latitudes or longitudes.
-#  assert_email::               Check the properties of a QueuedEmail.
 #  assert_save::                Assert ActiveRecord save succeeds.
 #  assert_string_equal_file::   A string is same as contents of a file.
 #
@@ -264,36 +263,6 @@ module GeneralExtensions
   #
   def assert_gps_equal(expected, value)
     assert((expected.to_f - value.to_f).abs < GPS_CLOSE_ENOUGH)
-  end
-
-  # Test whether the n-1st queued email matches.  For example:
-  #
-  #   assert_email(0,
-  #     :flavor  => 'QueuedEmail::CommentAdd',
-  #     :from    => mary,
-  #     :to      => rolf,
-  #     :comment => @comment_on_minmal_unknown.id
-  #   )
-  #
-  def assert_email(offset, args)
-    email = QueuedEmail.offset(offset).first
-    assert(email)
-    args.each_key do |arg|
-      case arg
-      when :flavor
-        assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
-      when :from
-        assert_equal(args[arg].id, email.user_id, "Sender is wrong")
-      when :to
-        assert_equal(args[arg].id, email.to_user_id, "Recipient is wrong")
-      when :note
-        assert_equal(args[arg], email.get_note, "Value of note is wrong")
-      else
-        assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg),
-                     "Value of #{arg} is wrong")
-      end
-    end
-    email
   end
 
   # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.

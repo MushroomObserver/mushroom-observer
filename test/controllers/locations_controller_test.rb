@@ -80,7 +80,7 @@ class LocationsControllerTest < FunctionalTestCase
       put_requires_login(page, params)
       assert_template("edit")
     end
-    assert_template("locations/_form")
+    assert_select("#location_form")
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -129,6 +129,70 @@ class LocationsControllerTest < FunctionalTestCase
     assert_template("locations/show/_notes")
     assert_template("comments/_comments_for_object")
     assert_template("locations/show/_general_description_panel")
+  end
+
+  def test_show_location_next_flow
+    loc = locations(:albion)
+    query = Query.lookup_and_save(:Location, order_by: :name)
+    q = @controller.q_param(query)
+
+    login
+    get(:show, params: { id: loc.id, flow: "next", q: q })
+
+    assert_response(:redirect)
+  end
+
+  def test_show_location_prev_flow
+    loc = locations(:albion)
+    query = Query.lookup_and_save(:Location, order_by: :name)
+    q = @controller.q_param(query)
+
+    login
+    get(:show, params: { id: loc.id, flow: "prev", q: q })
+
+    assert_response(:redirect)
+  end
+
+  def test_show_location_without_description
+    # Use a location that has no description_id to hit the blank desc_id case
+    loc = locations(:burbank)
+    assert_nil(loc.description_id, "Need location without description")
+
+    login
+    get(:show, params: { id: loc.id })
+
+    assert_template("show")
+    assert_nil(assigns(:description))
+  end
+
+  def test_show_location_with_nonexistent_description
+    loc = locations(:albion)
+    bad_desc_id = 999_999
+
+    login
+    get(:show, params: { id: loc.id, desc: bad_desc_id })
+
+    assert_template("show")
+    assert_flash_text(:runtime_object_not_found.t(type: :description,
+                                                  id: bad_desc_id))
+  end
+
+  def test_show_location_with_unreadable_description
+    loc = locations(:albion)
+    # Create a private description that the user can't read
+    desc = LocationDescription.create!(
+      location: loc,
+      user: mary,
+      license: licenses(:ccnc25),
+      public: false
+    )
+
+    login("dick") # Dick is not a reader
+    get(:show, params: { id: loc.id, desc: desc.id })
+
+    assert_template("show")
+    # Description should be nil (not shown) because user can't read it
+    assert_nil(assigns(:description))
   end
 
   def test_interest_in_show_location
@@ -437,13 +501,56 @@ class LocationsControllerTest < FunctionalTestCase
     assert_redirected_to(locations_path)
   end
 
+  def test_index_undefined_locations_letter_filter
+    # Create observations with undefined locations starting with different
+    # letters to test the letter2 filter
+    Observation.create!(
+      user: rolf,
+      when: Time.zone.today,
+      where: "Albuquerque, New Mexico, USA",
+      name: names(:agaricus_campestris)
+    )
+    Observation.create!(
+      user: rolf,
+      when: Time.zone.today,
+      where: "Boulder, Colorado, USA",
+      name: names(:agaricus_campestris)
+    )
+
+    login
+    # First verify that undefined locations appear without letter filter
+    get(:index)
+    assert_template("index")
+    # Check that @undef_data is set (the letter filter applies to this)
+    assert(assigns(:undef_data).present?, "Should have undefined locations")
+
+    # Now request with letter2=a should filter to only "A" locations
+    get(:index, params: { letter2: "a" })
+    assert_template("index")
+    # The letter filter is applied, verify the data is filtered
+    undef_data = assigns(:undef_data)
+    return if undef_data.blank?
+
+    undef_data.each do |obs|
+      assert_match(/^A/i, obs[:where], "Filtered results should start with A")
+    end
+  end
+
   ##############################################################################
   #
   #    NEW
 
-  def test_create_location
+  def test_new_location
     requires_login(:new)
     assert_form_action(action: :create)
+  end
+
+  def test_new_location_turbo_stream
+    login
+    get(:new, params: { where: "Somewhere, Earth" }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_select("#location_form")
+    assert_select("input[name='location[display_name]']")
   end
 
   # This was causing a crash in live server.
@@ -573,6 +680,84 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(loc, user.location)
   end
 
+  def test_create_location_with_set_observation
+    obs = observations(:minimal_unknown_obs)
+    login("mary")
+    params = barton_flats_params
+    params[:set_observation] = obs.id.to_s
+
+    post(:create, params: params)
+
+    assert_redirected_to(observation_path(obs))
+  end
+
+  def test_create_location_already_exists
+    existing_loc = locations(:albion)
+    login("mary")
+
+    post(:create, params: {
+           where: existing_loc.display_name,
+           location: {
+             display_name: existing_loc.display_name,
+             north: 40, south: 39, east: -123, west: -124
+           }
+         })
+
+    assert_flash_warning(:runtime_location_already_exists.t(
+                           name: existing_loc.display_name
+                         ))
+    # Should redirect to observation if set_observation, else to location
+    assert_redirected_to(location_path(existing_loc.id))
+  end
+
+  def test_create_location_defines_observations_at_original_name
+    # Create an observation with an undefined location
+    undefined_where = "Barton Flats, California, USA"
+    obs = Observation.create!(
+      user: rolf,
+      when: Time.zone.today,
+      where: undefined_where,
+      name: names(:agaricus_campestris)
+    )
+    assert_nil(obs.location)
+
+    login("rolf")
+    params = barton_flats_params
+    params[:where] = undefined_where # original_name
+
+    post(:create, params: params)
+
+    # The observation should now be associated with the new location
+    obs.reload
+    assert_not_nil(obs.location)
+    assert_equal(params[:display_name], obs.location.display_name)
+  end
+
+  def test_create_location_with_set_species_list
+    sl = species_lists(:one_genus_three_species_list)
+    login("mary")
+    params = barton_flats_params
+    params[:set_species_list] = sl.id.to_s
+
+    post(:create, params: params)
+
+    assert_redirected_to(species_list_path(sl))
+  end
+
+  def test_create_location_with_set_herbarium
+    herbarium = herbaria(:nybg_herbarium)
+    login("mary")
+    params = barton_flats_params
+    params[:set_herbarium] = herbarium.id.to_s
+
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(herbarium_path(herbarium))
+    herbarium.reload
+    assert_equal(loc, herbarium.location)
+  end
+
   ##############################################################################
   #
   #    EDIT
@@ -584,6 +769,16 @@ class LocationsControllerTest < FunctionalTestCase
     assert_form_action({ action: :update, id: loc.id.to_s,
                          approved_where: loc.display_name })
     assert_input_value(:location_display_name, loc.display_name)
+  end
+
+  def test_edit_location_turbo_stream
+    loc = locations(:albion)
+    login
+    get(:edit, params: { id: loc.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_select("#location_form")
+    assert_select("input[name='location[display_name]'][value=?]",
+                  loc.display_name)
   end
 
   def test_edit_locked_location
@@ -803,7 +998,7 @@ class LocationsControllerTest < FunctionalTestCase
                  "Location.notes should include pre-merger notes")
   end
 
-  def test_post_edit_location_locked
+  def test_update_location_locked
     location = locations(:unknown_location)
     params = {
       id: location.id,
@@ -896,6 +1091,41 @@ class LocationsControllerTest < FunctionalTestCase
     loc.reload
     assert_equal(postal_name, loc.name)
     assert_equal(scientific_name, loc.scientific_name)
+  end
+
+  def test_update_location_no_change_warning
+    loc = locations(:albion)
+    params = update_params_from_loc(loc)
+
+    login("rolf")
+    put(:update, params: params)
+
+    assert_flash_warning(:runtime_edit_location_no_change.t)
+    assert_redirected_to(location_path(loc.id))
+  end
+
+  def test_update_location_merge_request_redirect
+    # Two locations that both have observations - neither is mergeable by user
+    to_go = locations(:falmouth)
+    to_stay = locations(:burbank)
+
+    # Ensure both have observations so neither is mergeable
+    assert(to_go.observations.any?, "falmouth needs observations")
+    assert(to_stay.observations.any?, "burbank needs observations")
+    assert_false(to_go.mergable?, "falmouth should not be mergeable")
+    assert_false(to_stay.mergable?, "burbank should not be mergeable")
+
+    params = update_params_from_loc(to_go)
+    params[:location][:display_name] = to_stay.display_name
+
+    # Login as a user who is NOT an admin
+    login("dick")
+    put(:update, params: params)
+
+    # Should redirect to merge request form
+    assert_redirected_to(new_admin_emails_merge_requests_path(
+                           type: :Location, old_id: to_go.id, new_id: to_stay.id
+                         ))
   end
 
   ##############################################################################

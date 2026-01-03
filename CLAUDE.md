@@ -33,6 +33,20 @@ See `.claude/rules/testing.md` for detailed Rails testing syntax and conventions
 
 **Important**: Use `-n` flag for test names, NOT RSpec-style `::ClassName#method` syntax.
 
+### CRITICAL: System Test Syntax
+
+**NEVER** use `bin/rails test:system test/system/file.rb` - this runs ALL system tests, ignoring the specified file.
+
+**ALWAYS** use: `bin/rails test test/system/file.rb`
+
+```bash
+# ✅ CORRECT - runs only the specified system test file
+bin/rails test test/system/observation_naming_system_test.rb
+
+# ❌ WRONG - runs ALL system tests, ignores the file argument
+bin/rails test:system test/system/observation_naming_system_test.rb
+```
+
 ## Git Workflow
 
 - Create feature branches from `main`

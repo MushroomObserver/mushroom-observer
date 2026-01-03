@@ -502,9 +502,9 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      new_page_title(:create_object, :LOCATION)
+      helpers.new_page_title(:create_object, :LOCATION)
     when "edit", "update"
-      edit_page_title(@location.display_name, @location)
+      helpers.edit_page_title(@location.display_name, @location)
     end
   end
 
