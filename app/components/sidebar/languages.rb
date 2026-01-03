@@ -44,11 +44,9 @@ module Components
           data: { toggle: "dropdown" },
           aria: { expanded: "false" }
         ) do
-          trusted_html(
-            image_tag(
-              "/flags/flag-#{I18n.locale.downcase}.png",
-              class: "lang-flag"
-            )
+          image_tag(
+            "/flags/flag-#{I18n.locale.downcase}.png",
+            class: "lang-flag"
           )
           span(class: "caret")
         end
