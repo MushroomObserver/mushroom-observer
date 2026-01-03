@@ -2,13 +2,10 @@
 
 require "test_helper"
 
-class ArticleFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class ArticleFormTest < ComponentTestCase
   def setup
     super
     @article = Article.new
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

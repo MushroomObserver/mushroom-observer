@@ -3,13 +3,15 @@
 class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap select field component with form-group wrapper and slots
   class SelectField < Superform::Rails::Components::Select
-    include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
     include FieldWithHelp
     include FieldLabelRow
 
     slot :between
     slot :append
+    slot :help
+
+    public :between_slot, :append_slot, :help_slot
 
     attr_reader :wrapper_options
 

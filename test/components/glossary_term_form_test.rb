@@ -2,12 +2,9 @@
 
 require "test_helper"
 
-class GlossaryTermFormTest < UnitTestCase
-  include ComponentTestHelper
-
+class GlossaryTermFormTest < ComponentTestCase
   def setup
     @glossary_term = GlossaryTerm.new
-    controller.request = ActionDispatch::TestRequest.create
     @html = render_form
   end
 

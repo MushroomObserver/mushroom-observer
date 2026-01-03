@@ -2,9 +2,7 @@
 
 require "test_helper"
 
-class LightboxCaptionTest < UnitTestCase
-  include ComponentTestHelper
-
+class LightboxCaptionTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -13,13 +11,7 @@ class LightboxCaptionTest < UnitTestCase
   end
 
   def test_renders_observation_caption_with_when_where_who
-    component = Components::LightboxCaption.new(
-      user: @user,
-      image: @image,
-      image_id: @image.id,
-      obs: @obs
-    )
-    html = render(component)
+    html = render_caption
 
     # Should have when/where/who sections
     assert_includes(html, "obs-when")
@@ -34,14 +26,7 @@ class LightboxCaptionTest < UnitTestCase
   end
 
   def test_renders_identify_ui_when_enabled
-    component = Components::LightboxCaption.new(
-      user: @user,
-      image: @image,
-      image_id: @image.id,
-      obs: @obs,
-      identify: true
-    )
-    html = render(component)
+    html = render_caption(identify: true)
 
     # Should have identify section
     assert_includes(html, "obs-identify")
@@ -51,14 +36,7 @@ class LightboxCaptionTest < UnitTestCase
   end
 
   def test_does_not_render_identify_ui_when_disabled
-    component = Components::LightboxCaption.new(
-      user: @user,
-      image: @image,
-      image_id: @image.id,
-      obs: @obs,
-      identify: false
-    )
-    html = render(component)
+    html = render_caption(identify: false)
 
     # Should not have identify section
     assert_not_includes(html, "obs-identify")
@@ -66,15 +44,8 @@ class LightboxCaptionTest < UnitTestCase
 
   def test_renders_image_only_caption_with_notes
     image = images(:in_situ_image)
-    # Ensure image has notes
     image.update(notes: "Test image notes")
-
-    component = Components::LightboxCaption.new(
-      user: @user,
-      image: image,
-      image_id: image.id
-    )
-    html = render(component)
+    html = render_caption(image: image, obs: {})
 
     # Should have image notes but not observation sections
     assert_includes(html, "image-notes")
@@ -86,17 +57,9 @@ class LightboxCaptionTest < UnitTestCase
   end
 
   def test_renders_gps_location_when_available
-    # Use observation with GPS coordinates
     obs_with_gps = observations(:minimal_unknown_obs)
     obs_with_gps.update(lat: 45.5, lng: -122.6)
-
-    component = Components::LightboxCaption.new(
-      user: @user,
-      image: @image,
-      image_id: @image.id,
-      obs: obs_with_gps
-    )
-    html = render(component)
+    html = render_caption(obs: obs_with_gps)
 
     # Should have GPS section
     assert_includes(html, "obs-where-gps")
@@ -104,13 +67,7 @@ class LightboxCaptionTest < UnitTestCase
   end
 
   def test_always_renders_image_links
-    component = Components::LightboxCaption.new(
-      user: @user,
-      image: @image,
-      image_id: @image.id,
-      obs: @obs
-    )
-    html = render(component)
+    html = render_caption
 
     # Should have image links section
     assert_includes(html, "caption-image-links")
@@ -118,12 +75,7 @@ class LightboxCaptionTest < UnitTestCase
   end
 
   def test_renders_with_image_id_only
-    component = Components::LightboxCaption.new(
-      user: @user,
-      image_id: @image.id,
-      obs: @obs
-    )
-    html = render(component)
+    html = render_caption(image: nil)
 
     # Should still render observation sections
     assert_includes(html, "obs-when")
@@ -133,13 +85,7 @@ class LightboxCaptionTest < UnitTestCase
   end
 
   def test_renders_for_logged_out_user
-    component = Components::LightboxCaption.new(
-      user: nil,
-      image: @image,
-      image_id: @image.id,
-      obs: @obs
-    )
-    html = render(component)
+    html = render_caption(user: nil)
 
     # Should have basic structure
     assert_includes(html, "obs-when")
@@ -157,5 +103,17 @@ class LightboxCaptionTest < UnitTestCase
 
     # Should still have image links
     assert_includes(html, "caption-image-links")
+  end
+
+  private
+
+  def render_caption(user: @user, image: @image, obs: @obs, identify: false)
+    render(Components::LightboxCaption.new(
+             user: user,
+             image: image,
+             image_id: (image || @image).id,
+             obs: obs,
+             identify: identify
+           ))
   end
 end

@@ -12,7 +12,12 @@
 #   )
 class Components::ApplicationForm < Superform::Rails::Form
   class ReadOnlyField < Phlex::HTML
+    include Phlex::Slotable
     include FieldWithHelp
+
+    slot :help
+
+    public :help_slot
 
     attr_reader :wrapper_options, :field, :attributes
 

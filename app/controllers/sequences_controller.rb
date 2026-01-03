@@ -127,18 +127,20 @@ class SequencesController < ApplicationController
     save_edits
   end
 
+  # NOTE: This action is called from both sequences#show and observations#show.
+  # Unlike collection_numbers/herbarium_records, sequences have no "remove".
   def destroy
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
+    @observation = @sequence.observation
     figure_out_where_to_go_back_to
     return unless make_sure_can_delete!(@sequence)
 
-    @observation = @sequence.observation # needed for js to update obs page
-
     @sequence.destroy
     flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
-    show_flash_and_send_to_back_object
+
+    redirect_to(@observation.show_link_args)
   end
 
   ##############################################################################
@@ -258,32 +260,28 @@ class SequencesController < ApplicationController
 
   def show_flash_and_send_to_back_object
     respond_to do |format|
-      format.turbo_stream { render_sequences_section_update }
-      format.html do
-        if @back == "index"
-          redirect_with_query(action: :index)
+      format.turbo_stream do
+        if @back_object.is_a?(Observation)
+          render_sequences_section_update
         else
-          redirect_to(@back_object.show_link_args)
+          redirect_to(@observation.show_link_args)
         end
+      end
+      format.html do
+        redirect_to(@back_object.show_link_args)
       end
     end
   end
 
   def render_modal_sequence_form
-    render(
-      partial: "shared/modal_form",
-      locals: {
-        title: modal_title,
-        identifier: modal_identifier,
-        user: @user,
-        form: "sequences/form",
-        form_locals: {
-          model: @sequence,
-          observation: @observation,
-          back: @back
-        }
-      }
-    ) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @sequence,
+             observation: @observation,
+             back: @back
+           ), layout: false)
   end
 
   def modal_identifier

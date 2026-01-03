@@ -15,7 +15,6 @@
 #     )
 #   end
 class Components::NamesLookupFieldGroup < Components::Base
-  include Phlex::Rails::Helpers::ClassNames
   include Components::ApplicationForm::AutocompleterPrefill
 
   prop :names_namespace, _Any
@@ -23,25 +22,22 @@ class Components::NamesLookupFieldGroup < Components::Base
   prop :modifier_fields, _Array(Object)
 
   def view_template
-    render_lookup_autocompleter do
-      render_conditional_collapse
-    end
+    render_lookup_autocompleter
   end
 
   private
 
-  def render_lookup_autocompleter(&block)
+  def render_lookup_autocompleter
     field_component = @names_namespace.field(:lookup).autocompleter(
       type: :name,
       textarea: true,
-      wrapper_options: {
-        label: :NAMES.l,
-        help: field_help
-      },
+      wrapper_options: { label: :NAMES.l },
       value: prefilled_lookup_value,
       hidden_value: prefilled_lookup_ids
     )
-    render(field_component, &block)
+    field_component.with_help { field_help }
+    field_component.with_append { render_conditional_collapse }
+    render(field_component)
   end
 
   def field_help

@@ -15,8 +15,10 @@
   <%= date_select_with_label(form: f, field: :when,
                              inline: true, label: "#{:WHEN.l}:") %>
 
-  <%= render(partial: "shared/form_location_feedback",
-             locals: { button: button } ) %>
+  <%= render(Components::FormLocationFeedback.new(
+    dubious_where_reasons: @dubious_where_reasons,
+    button: button
+  )) %>
 
   <%= autocompleter_field(form: f, field: :place_name, type: :location,
                           label: "#{:WHERE.l}:") %>

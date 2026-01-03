@@ -4,10 +4,11 @@
 
   <%= submit_button(form: f, button: button.l, center: true) %>
 
-  <%= if !(partial = render(partial: "shared/form_list_feedback",
-                            locals: { f: f })).blank?
-    tag.div(partial)
-  end %>
+  <%= render(Components::FormListFeedback.new(
+    new_names: @new_names,
+    deprecated_names: @deprecated_names,
+    multiple_names: @multiple_names
+  )) %>
 
   <%= if !@new_names.blank?
     hidden_field_tag(:approved_names, @new_names.join("\n"))
@@ -28,8 +29,10 @@
     end %>
   </div>
 
-  <%= render(partial: "shared/form_location_feedback",
-             locals: { button: button } ) %>
+  <%= render(Components::FormLocationFeedback.new(
+    dubious_where_reasons: @dubious_where_reasons,
+    button: button
+  )) %>
 
   <%= autocompleter_field(form: f, field: :place_name, type: :location,
                           label: "#{:WHERE.l}:") %>

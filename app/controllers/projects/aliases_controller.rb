@@ -108,21 +108,21 @@ module Projects
     end
 
     def render_modal_project_alias_form
-      render(
-        partial: "shared/modal_form",
-        locals: { title: modal_title, identifier: modal_identifier,
-                  user: @user, form: "projects/aliases/form",
-                  form_locals: { model: @project_alias,
-                                 project_alias: @project_alias } }
-      ) and return
+      render(Components::ModalForm.new(
+               identifier: modal_identifier,
+               title: modal_title,
+               user: @user,
+               model: @project_alias,
+               form_locals: { user: @user }
+             ), layout: false) and return
     end
 
     def reload_modal_project_alias_form
       render(
         partial: "shared/modal_form_reload",
-        locals: { identifier: modal_identifier, form: "projects/aliases/form",
+        locals: { identifier: modal_identifier,
                   form_locals: { model: @project_alias,
-                                 project_alias: @project_alias } }
+                                 user: @user } }
       ) and return true
     end
 

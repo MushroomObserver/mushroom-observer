@@ -99,16 +99,16 @@ class CollectionNumbersController < ApplicationController
     update_collection_number # response handled here
   end
 
+  # Handles both full destroy and remove-from-observation.
+  # If observation_id param present: removes association (destroys if last obs)
+  # If observation_id param absent: destroys the collection_number directly
   def destroy
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
     return unless make_sure_can_delete!(@collection_number)
+    return unless execute_destroy!
 
-    @collection_number.destroy
-    respond_to do |format|
-      format.turbo_stream { render_collection_numbers_section_update }
-      format.html { redirect_with_query(action: :index) }
-    end
+    respond_to_destroy
   end
 
   private
@@ -275,6 +275,63 @@ class CollectionNumbersController < ApplicationController
     false
   end
 
+  # Returns false if observation lookup fails, halting destroy action
+  def execute_destroy!
+    if params[:observation_id].present?
+      @observation = find_or_goto_index(Observation, params[:observation_id])
+      return false unless @observation
+
+      @collection_number.remove_observation(@observation)
+      flash_notice(:runtime_removed.t(type: :collection_number))
+    else
+      # Figure out where to redirect BEFORE destroying the record
+      figure_out_destroy_redirect
+      @collection_number.destroy
+    end
+    true
+  end
+
+  # Determine @observation for redirect after destroy.
+  # Must be called before destroy since we need to check observations.
+  def figure_out_destroy_redirect
+    back = params[:back].to_s
+    @observation = nil
+    return if back == "index"
+
+    # If back is an observation ID, use that
+    @observation = Observation.safe_find(back)
+    return if @observation
+
+    # If CN has exactly one observation, redirect there
+    @observation = @collection_number.observations.first if
+      @collection_number.observations.one?
+  end
+
+  def respond_to_destroy
+    respond_to do |format|
+      format.turbo_stream { destroy_turbo_response }
+      format.html { destroy_html_response }
+    end
+  end
+
+  def destroy_turbo_response
+    # Only render turbo_stream update if we have an observation page to update.
+    # Can't update show page via turbo_stream, so redirect to index.
+    if @observation && params[:back] != "show"
+      render_collection_numbers_section_update
+    else
+      redirect_with_query(action: :index)
+    end
+  end
+
+  def destroy_html_response
+    if @observation
+      redirect_to(observation_path(@observation.id))
+    else
+      redirect_with_query(action: :index)
+    end
+  end
+
   def normalize_parameters
     [:name, :number].each do |arg|
       val = @collection_number.send(arg).to_s.strip_html.strip_squeeze
@@ -322,20 +379,14 @@ class CollectionNumbersController < ApplicationController
   end
 
   def render_modal_collection_number_form
-    render(
-      partial: "shared/modal_form",
-      locals: {
-        title: modal_title,
-        identifier: modal_identifier,
-        user: @user,
-        form: "collection_numbers/form",
-        form_locals: {
-          model: @collection_number,
-          observation: @observation,
-          back: @back
-        }
-      }
-    ) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @collection_number,
+             observation: @observation,
+             back: @back
+           ), layout: false)
   end
 
   def modal_identifier
@@ -373,7 +424,6 @@ class CollectionNumbersController < ApplicationController
       partial: "shared/modal_form_reload",
       locals: {
         identifier: modal_identifier,
-        form: "collection_numbers/form",
         form_locals: {
           model: @collection_number,
           observation: @observation,

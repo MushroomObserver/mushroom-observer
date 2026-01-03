@@ -16,7 +16,6 @@
 #
 # rubocop:disable Metrics/ClassLength
 class Components::SearchForm < Components::ApplicationForm
-  include Phlex::Rails::Helpers::ClassNames
   include ApplicationForm::AutocompleterPrefill
 
   register_output_helper :search_bar_toggle
@@ -219,8 +218,9 @@ class Components::SearchForm < Components::ApplicationForm
             end
     text_field(field_name,
                label: field_label(field_name),
-               help: field_help(field_name),
-               value: value)
+               value: value) do |f|
+      f.with_help { field_help(field_name) }
+    end
   end
 
   def render_textarea_field_with_label(field_name:)
@@ -229,8 +229,9 @@ class Components::SearchForm < Components::ApplicationForm
                textarea: true,
                rows: 1,
                label: field_label(field_name),
-               help: field_help(field_name),
-               value: value)
+               value: value) do |f|
+      f.with_help { field_help(field_name) }
+    end
   end
 
   def render_select_nil_yes(field_name:)
@@ -244,9 +245,10 @@ class Components::SearchForm < Components::ApplicationForm
   def render_boolean_select(field_name:, style:)
     select_field(field_name, BOOL_OPTIONS[style],
                  label: field_label(field_name),
-                 help: field_help(field_name),
                  inline: true,
-                 selected: bool_to_string(field_value(field_name)))
+                 selected: bool_to_string(field_value(field_name))) do |f|
+      f.with_help { field_help(field_name) }
+    end
   end
 
   def render_select_misspellings(field_name:)
@@ -255,9 +257,10 @@ class Components::SearchForm < Components::ApplicationForm
     options = [%w[no no], %w[include include], %w[only only]]
     select_field(field_name, options,
                  label: field_label(field_name),
-                 help: field_help(field_name),
                  inline: true,
-                 selected: field_value(field_name)&.to_s)
+                 selected: field_value(field_name)&.to_s) do |f|
+      f.with_help { field_help(field_name) }
+    end
   end
 
   def render_select_rank_range(field_name:)
@@ -267,9 +270,10 @@ class Components::SearchForm < Components::ApplicationForm
     render(ApplicationForm::SelectRangeField.new(
              form: self, field_name:, options:,
              value:, range_value:,
-             label: field_label(field_name),
-             help: field_help(field_name)
-           ))
+             label: field_label(field_name)
+           )) do |f|
+      f.with_help { field_help(field_name) }
+    end
   end
 
   # Sort rank range values to [low, high] order for display.
@@ -306,9 +310,10 @@ class Components::SearchForm < Components::ApplicationForm
     render(ApplicationForm::SelectRangeField.new(
              form: self, field_name:, options:,
              value:, range_value:,
-             label: field_label(field_name),
-             help: field_help(field_name)
-           ))
+             label: field_label(field_name)
+           )) do |f|
+      f.with_help { field_help(field_name) }
+    end
   end
 
   # Sort confidence range values to [low, high] order for display.
@@ -349,9 +354,10 @@ class Components::SearchForm < Components::ApplicationForm
     autocompleter_field(field_name,
                         type: type,
                         label: field_label(field_name),
-                        help: field_help(field_name),
                         value: prefilled_autocompleter_value(ids, type),
-                        hidden_value: ids)
+                        hidden_value: ids) do |f|
+      f.with_help { field_help(field_name) }
+    end
   end
 
   def render_multiple_value_autocompleter(field_name:)
@@ -361,9 +367,10 @@ class Components::SearchForm < Components::ApplicationForm
                         type: type,
                         textarea: true,
                         label: field_label(field_name),
-                        help: multiple_help(field_name),
                         value: prefilled_autocompleter_value(ids, type),
-                        hidden_value: ids)
+                        hidden_value: ids) do |f|
+      f.with_help { multiple_help(field_name) }
+    end
   end
 
   def render_names_fields_for_obs(field_name:) # rubocop:disable Lint/UnusedMethodArgument

@@ -485,9 +485,13 @@ class LocationsController < ApplicationController
   end
 
   def render_modal_location_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     user: @user, form: "locations/form" }) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @location,
+             form_locals: { display_name: @display_name }
+           ), layout: false) and return
   end
 
   def modal_identifier
@@ -502,9 +506,9 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      new_page_title(:create_object, :LOCATION)
+      helpers.new_page_title(:create_object, :LOCATION)
     when "edit", "update"
-      edit_page_title(@location.display_name, @location)
+      helpers.edit_page_title(@location.display_name, @location)
     end
   end
 

@@ -8,13 +8,17 @@ class ObservationViewsController < ApplicationController
   # from an observation_id param (confusingly, :id!) and the current user
   def update
     # basic sanitizing of the param. ivars needed in js response
-    # checked is a string!
-    @reviewed = params[:reviewed] == "1"
+    # checked is a string! Superform nests under observation_view
+    @reviewed = params.dig(:observation_view, :reviewed) == "1"
     return unless (obs = Observation.find(params[:id]))
 
-    # update_view_stats creates an o_v if it doesn't exist
+    # update_view_stats creates an o_v if it doesn't exist, returns the record
     @obs_id = obs.id # ivar used in the js template
-    ObservationView.update_view_stats(@obs_id, User.current_id, @reviewed)
+    @obs = obs # needed for lightbox caption rendering
+    @user = User.current
+    @observation_view = ObservationView.update_view_stats(@obs_id,
+                                                          User.current_id,
+                                                          @reviewed)
 
     respond_to do |format|
       format.turbo_stream

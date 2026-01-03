@@ -123,7 +123,6 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
   #  Test signup verify login and logout.
   # ----------------------------
 
-  # This mailer has been converted from QueuedEmail to SolidQueue
   def test_signup_verify_login_and_logout
     # Run jobs synchronously so emails appear in deliveries
     perform_enqueued_jobs do

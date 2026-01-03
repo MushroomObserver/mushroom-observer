@@ -80,7 +80,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check new observation form defaults
     assert_date_is_now
     assert_geolocation_is_empty
-    last_obs = Observation.where(user_id: User.current.id).
+    last_obs = Observation.where(user_id: katrina.id).
                order(:created_at).last
     # This is currently "Falmouth, Massachusetts, USA"
     existing_loc = Location.find(last_obs.location_id)
@@ -136,7 +136,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check new observation form defaults
     assert_date_is_now
     assert_geolocation_is_empty
-    last_obs = Observation.recent_by_user(User.current).last
+    last_obs = Observation.recent_by_user(katrina).last
     assert_selector("#observation_place_name", wait: 6)
     assert_selector("#observation_location_id", visible: :all)
     sleep(0.5)
@@ -169,7 +169,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # PART 2: Create matching location and test again
     # ---------------------------------------------------------
     # Make "University Park" available as a matching location.
-    university_park = Location.new(**UNIVERSITY_PARK)
+    university_park = Location.new(**UNIVERSITY_PARK, user: katrina)
     # Sanity check the lat/lng. `contains?(lat, lng)` is a Mappable::BoxMethod
     assert(university_park.contains?(GEOTAGGED_EXIF[:lat],
                                      GEOTAGGED_EXIF[:lng]))
@@ -183,7 +183,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check new observation form defaults
     assert_date_is_now
     assert_geolocation_is_empty
-    last_obs = Observation.recent_by_user(User.current).last
+    last_obs = Observation.recent_by_user(katrina).last
     # This is currently "Falmouth, Massachusetts, USA"
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: last_obs.location_id,
@@ -318,7 +318,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_date_is_now
     assert_geolocation_is_empty
 
-    last_obs = Observation.recent_by_user(User.current).last
+    last_obs = Observation.recent_by_user(katrina).last
     assert_field("observation_place_name", with: last_obs.where)
 
     # Move to the next step, Identification
@@ -655,9 +655,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     visit(observation_path(obs.id))
     new_obs = Observation.last
     assert_selector("body.observations__show")
-    accept_confirm do
-      find(".destroy_observation_link_#{new_obs.id}").click
-    end
+    click_and_confirm(find(".destroy_observation_link_#{new_obs.id}"))
     assert_flash_for_destroy_observation
     assert_selector("body.observations__index")
 

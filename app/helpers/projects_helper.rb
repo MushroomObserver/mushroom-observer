@@ -91,10 +91,11 @@ module ProjectsHelper
 
   def project_alias_actions(id, project_id)
     capture do
-      concat(link_to(:EDIT.t,
-                     edit_project_alias_path(project_id:, id:)))
-      concat(" ")
-      concat(destroy_button(target: project_alias_path(project_id:, id:)))
+      concat(edit_button(target: edit_project_alias_path(project_id:, id:),
+                         icon: :edit))
+      concat(tag.span(class: "mx-2"))
+      concat(destroy_button(target: project_alias_path(project_id:, id:),
+                            icon: :delete))
     end
   end
 

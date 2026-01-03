@@ -86,7 +86,7 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       select("Could Be", from: "vote_value_#{nam.id}")
     end
 
-    assert_no_selector("#mo_ajax_progress")
+    assert_no_selector("#modal_progress_spinner")
     assert_selector("#title", text: /#{obs.text_name}/)
     # sleep(3)
 
@@ -95,11 +95,11 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_vote_form_#{nam.id}")
       select("I'd Call It That", from: "vote_value_#{nam.id}")
     end
-    # assert_selector("#mo_ajax_progress", wait: 4)
-    # assert_selector("#mo_ajax_progress_caption",
-    #                 text: /#{:show_namings_saving.l}/)
+    assert_selector("#modal_progress_spinner", wait: 4)
+    assert_selector("#modal_progress_spinner_caption",
+                    text: /#{:show_namings_saving.l}/)
 
-    assert_no_selector("#mo_ajax_progress")
+    assert_no_selector("#modal_progress_spinner")
     assert_selector("#title", text: /#{nam.text_name}/)
     # sleep(3)
 
@@ -154,9 +154,9 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
       assert_selector(".destroy_naming_link_#{nam.id}")
-      accept_prompt do
-        find(:css, ".destroy_naming_link_#{nam.id}").trigger("click")
-      end
+    end
+    click_and_confirm(find(:css, ".destroy_naming_link_#{nam.id}"))
+    within("#observation_namings") do
       assert_no_link(text: /#{n_d.text_name}/, wait: 9)
     end
     assert_selector("#title", text: /#{obs.text_name}/)

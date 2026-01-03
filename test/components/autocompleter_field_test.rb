@@ -2,13 +2,10 @@
 
 require "test_helper"
 
-class AutocompleterFieldTest < UnitTestCase
-  include ComponentTestHelper
-
+class AutocompleterFieldTest < ComponentTestCase
   def setup
     super
     @herbarium_record = HerbariumRecord.new
-    controller.request = ActionDispatch::TestRequest.create
   end
 
   def test_component_has_correct_html_structure
@@ -123,10 +120,10 @@ class AutocompleterFieldTest < UnitTestCase
     html = render_with_component
 
     # Text input autocompleters should NOT have separator (single value only)
-    doc = Nokogiri::HTML(html)
-    autocompleter = doc.at_css(".autocompleter")
-    assert_nil(autocompleter["data-separator"],
-               "Text input autocompleter should not have separator attribute")
+    assert_no_html(
+      html, ".autocompleter[data-separator]",
+      "Text input autocompleter should not have separator attribute"
+    )
   end
 
   def test_hidden_field_derives_id_field_name
@@ -157,17 +154,9 @@ class AutocompleterFieldTest < UnitTestCase
     )
 
     # Dropdown items should have click action with namespaced controller
-    doc = Nokogiri::HTML(html)
-    links = doc.css("li.dropdown-item a[data-action]")
-    assert(links.size == 10, "Should have 10 links with click actions")
-    links.each do |link|
-      action = link["data-action"]
-      assert_includes(
-        action,
-        "click->autocompleter--herbarium#selectRow:prevent",
-        "Link should have selectRow action"
-      )
-    end
+    selector = "li.dropdown-item " \
+               "a[data-action*='click->autocompleter--herbarium#selectRow']"
+    assert_html(html, selector, count: 10)
   end
 
   def test_unknown_autocompleter_type_logs_warning
@@ -229,6 +218,17 @@ class AutocompleterFieldTest < UnitTestCase
     html = render(form)
 
     assert_html(html, "a.create-link[name='create_location']")
+  end
+
+  def test_autocompleter_with_between_slot
+    comment = Comment.new
+    form = TestBetweenSlotAutocompleterForm.new(comment, action: "/test")
+    html = render(form)
+
+    # Between slot content should appear after label
+    assert_includes(html, "(Login Name)")
+    # Has-id indicator should still be present after between content
+    assert_html(html, "span.has-id-indicator")
   end
 
   private
@@ -342,6 +342,15 @@ class TestModalCreateAutocompleterForm < Components::ApplicationForm
           wrapper_options: { label: "Location" }
         )
       )
+    end
+  end
+end
+
+# Test form class for between slot
+class TestBetweenSlotAutocompleterForm < Components::ApplicationForm
+  def view_template
+    autocompleter_field(:notes, type: :user, label: "User:") do |f|
+      f.with_between { "(Login Name)" }
     end
   end
 end

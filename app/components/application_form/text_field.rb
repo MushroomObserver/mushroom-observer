@@ -3,7 +3,6 @@
 class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap text input field component with form-group wrapper and slots
   class TextField < Superform::Rails::Components::Input
-    include Phlex::Rails::Helpers::ClassNames
     include Phlex::Slotable
     include FieldWithHelp
     include FieldLabelRow
@@ -11,9 +10,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :between
     slot :label_end
     slot :append
+    slot :help
 
     # Make slot accessors public (Phlex::Slotable makes them private by default)
-    public :between_slot, :label_end_slot, :append_slot
+    public :between_slot, :label_end_slot, :append_slot, :help_slot
 
     attr_reader :wrapper_options
 

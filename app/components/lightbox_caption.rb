@@ -10,28 +10,35 @@
 # Both types include image links (original, EXIF) at the bottom.
 #
 # @example With observation
-#   render LightboxCaption.new(
+#   render(Components::LightboxCaption.new(
 #     user: @user,
 #     image: @image,
 #     image_id: @image.id,
 #     obs: @observation,
 #     identify: true
-#   )
+#   ))
+#
+# @example With observation_view from controller (turbo stream)
+#   render(Components::LightboxCaption.new(
+#     user: @user,
+#     obs: @observation,
+#     identify: true,
+#     observation_view: @observation_view
+#   ))
 #
 # @example With image only
-#   render LightboxCaption.new(
+#   render(Components::LightboxCaption.new(
 #     user: @user,
 #     image: @image,
 #     image_id: @image.id
-#   )
+#   ))
 class Components::LightboxCaption < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
-
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
   prop :obs, _Union(Observation, Hash), default: -> { {} }
   prop :identify, _Boolean, default: false
+  prop :observation_view, _Nilable(ObservationView), default: nil
 
   def view_template
     if @obs.is_a?(Observation)
@@ -59,9 +66,13 @@ class Components::LightboxCaption < Components::Base
         context: "lightgallery",
         btn_class: "btn btn-primary d-inline-block"
       )
-      span(class: "mx-2") { whitespace }
-      mark_as_reviewed_toggle(@obs.id)
+      render_reviewed_toggle if @observation_view
     end
+  end
+
+  def render_reviewed_toggle
+    span(class: "mx-2") { whitespace }
+    MarkAsReviewedToggle(observation_view: @observation_view)
   end
 
   def render_obs_title
@@ -83,7 +94,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_when
     p(class: "obs-when", id: "observation_when") do
-      plain("#{:WHEN.t}: ")
+      plain("#{:WHEN.l}: ")
       b { @obs.when.web_date }
     end
   end
@@ -129,7 +140,7 @@ class Components::LightboxCaption < Components::Base
 
     p(class: "obs-where-gps", id: "observation_where_gps") do
       render_gps_link if @obs.reveal_location?(@user)
-      i { "(#{:show_observation_gps_hidden.t})" } if @obs.gps_hidden
+      i { "(#{:show_observation_gps_hidden.l})" } if @obs.gps_hidden
     end
   end
 
@@ -146,7 +157,7 @@ class Components::LightboxCaption < Components::Base
     obs_user = @obs.user
 
     p(class: "obs-who", id: "observation_who") do
-      plain("#{:WHO.t}: ")
+      plain("#{:WHO.l}: ")
       render_obs_user(obs_user)
       render_contact_link(obs_user) if show_contact_link?(obs_user)
     end
@@ -190,7 +201,7 @@ class Components::LightboxCaption < Components::Base
 
   def formatted_truncated_notes
     @obs.notes_show_formatted.truncate(150, separator: " ").
-      sub(/\A/, "#{:NOTES.t}: ").wring_out_textile.tpl
+      sub(/\A/, "#{:NOTES.l}: ").wring_out_textile.tpl
   end
 
   def render_image_caption
