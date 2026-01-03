@@ -487,7 +487,6 @@ class HerbariumRecordsController < ApplicationController
       partial: "shared/modal_form_reload",
       locals: {
         identifier: modal_identifier,
-        form: "herbarium_records/form",
         form_locals: {
           model: @herbarium_record,
           observation: @observation

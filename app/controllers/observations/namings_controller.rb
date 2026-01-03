@@ -280,8 +280,8 @@ module Observations
             partial: "shared/modal_form_reload",
             locals: {
               identifier: modal_identifier,
-              form: "observations/namings/form",
-              form_locals: { show_reasons: true, context: params[:context] }
+              form_locals: { model: @naming,
+                             show_reasons: true, context: params[:context] }
             }
           ) and return true
         end

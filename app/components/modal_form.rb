@@ -43,7 +43,7 @@ class Components::ModalForm < Components::Base
 
   def modal_attributes
     {
-      class: "modal",
+      class: "modal modal-form",
       id: "modal_#{@identifier}",
       role: "dialog",
       aria: { labelledby: "modal_#{@identifier}_header" },

@@ -485,9 +485,13 @@ class LocationsController < ApplicationController
   end
 
   def render_modal_location_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     user: @user, form: "locations/form" }) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @location,
+             form_locals: { display_name: @display_name }
+           )) and return
   end
 
   def modal_identifier

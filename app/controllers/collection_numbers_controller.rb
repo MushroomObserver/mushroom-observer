@@ -424,7 +424,6 @@ class CollectionNumbersController < ApplicationController
       partial: "shared/modal_form_reload",
       locals: {
         identifier: modal_identifier,
-        form: "collection_numbers/form",
         form_locals: {
           model: @collection_number,
           observation: @observation,

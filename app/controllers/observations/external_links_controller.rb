@@ -229,7 +229,6 @@ module Observations
         partial: "shared/modal_form_reload",
         locals: {
           identifier: modal_identifier,
-          form: "observations/external_links/form",
           form_locals: {
             user: @user,
             model: @external_link,

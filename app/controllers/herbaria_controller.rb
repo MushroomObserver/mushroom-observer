@@ -416,7 +416,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
       partial: "shared/modal_form_reload",
       locals: {
         identifier: modal_identifier,
-        form: "herbaria/form",
         form_locals: {
           model: @herbarium,
           user: @user,
