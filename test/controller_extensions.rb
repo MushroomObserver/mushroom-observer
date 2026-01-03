@@ -690,8 +690,9 @@ module ControllerExtensions
       assert_select("input##{actual_id}[disabled=disabled]", 0)
     when :no_field
       # For :no_field, check that no checkbox matches this ID pattern
-      assert(find_checkbox_id(id) == id.to_s && css_select("input##{id}").empty?,
-             "Expected no checkbox matching '#{id}' but found one")
+      not_found = find_checkbox_id(id) == id.to_s &&
+                  css_select("input##{id}").empty?
+      assert(not_found, "Expected no checkbox matching '#{id}' but found one")
     else
       raise("Invalid state in check_project_checks: #{state.inspect}")
     end

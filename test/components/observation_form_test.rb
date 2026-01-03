@@ -5,7 +5,7 @@ require("test_helper")
 class ObservationFormTest < ComponentTestCase
   def test_new_form_posts_to_observations
     user = users(:rolf)
-    obs = Observation.new(when: Date.today)
+    obs = Observation.new(when: Time.zone.today)
 
     html = render_form(observation: obs, user: user, mode: :create)
 
@@ -15,7 +15,7 @@ class ObservationFormTest < ComponentTestCase
 
   def test_form_includes_approval_params_when_present
     user = users(:rolf)
-    obs = Observation.new(when: Date.today)
+    obs = Observation.new(when: Time.zone.today)
 
     html = render_form(
       observation: obs,
