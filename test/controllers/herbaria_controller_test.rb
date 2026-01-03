@@ -348,7 +348,7 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_new_turbo
     login("rolf")
     get(:new, format: :turbo_stream)
-    assert_select("#modal_herbarium")
+    assert_select(".modal-form")
     # Verify HerbariumForm component rendered
     assert_select("form#herbarium_form")
     assert_select("input#herbarium_name")
@@ -395,7 +395,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert(nybg.curator?(rolf))
     login("rolf")
     get(:edit, params: { id: nybg.id }, format: :turbo_stream)
-    assert_select("#modal_herbarium_#{nybg.id}")
+    assert_select(".modal-form")
     # Verify HerbariumForm component rendered
     assert_select("form#herbarium_form")
     assert_select("input#herbarium_name[value='#{nybg.name}']")

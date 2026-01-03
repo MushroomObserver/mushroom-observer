@@ -170,7 +170,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new, params: { observation_id: obs_id }, format: :turbo_stream)
-    assert_select("#modal_herbarium_record")
+    assert_select(".modal-form")
     assert_select("form#herbarium_record_form")
     assert_equal(assigns(:herbarium_record).accession_number, "MO #{obs_id}")
   end
@@ -228,7 +228,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:edit, params: { id: nybg.id }, format: :turbo_stream)
-    assert_template("shared/_modal_form")
+    assert_select(".modal-form")
     assert_select("form#herbarium_record_form")
   end
 

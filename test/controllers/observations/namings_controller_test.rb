@@ -32,7 +32,7 @@ module Observations
       params = { observation_id: obs.id.to_s }
       login
       get(:new, params:, format: :turbo_stream)
-      assert_select("#modal_obs_#{obs.id}_naming")
+      assert_select(".modal-form")
       assert_form_action(action: "create", approved_name: "",
                          observation_id: obs.id.to_s)
     end

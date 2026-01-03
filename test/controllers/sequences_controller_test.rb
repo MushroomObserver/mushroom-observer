@@ -133,7 +133,7 @@ class SequencesControllerTest < FunctionalTestCase
     login("zero") # This user has no Observations
     get(:new, params: { observation_id: obs.id }, format: :turbo_stream)
     # Verify ModalForm + SequenceForm components rendered
-    assert_select("#modal_sequence")
+    assert_select(".modal-form")
     assert_select("form#sequence_form")
     assert_select("textarea#sequence_locus")
     assert_select("textarea#sequence_bases")
@@ -361,7 +361,7 @@ class SequencesControllerTest < FunctionalTestCase
     login(observer.login)
     get(:edit, params: { id: sequence.id }, format: :turbo_stream)
     # Verify ModalForm + SequenceForm components rendered
-    assert_select("#modal_sequence_#{sequence.id}")
+    assert_select(".modal-form")
     assert_select("form#sequence_form")
     assert_select("textarea#sequence_locus")
     assert_select("textarea#sequence_bases")
