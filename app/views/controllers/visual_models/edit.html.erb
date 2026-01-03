@@ -1,6 +1,6 @@
-<% add_edit_title(@visual_model.name, @visual_model)%>
+<% add_edit_title(@visual_model.name, @visual_model) %>
 
-<%= render 'form', visual_model: @visual_model %>
+<%= render(Components::VisualModelForm.new(@visual_model)) %>
 
-<%= link_to 'Show', @visual_model %> |
-<%= link_to 'Back', visual_models_path %>
+<%= link_to("Show", @visual_model) %> |
+<%= link_to("Back", visual_models_path) %>

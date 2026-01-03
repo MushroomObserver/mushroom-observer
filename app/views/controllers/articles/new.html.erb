@@ -3,4 +3,4 @@ add_new_title(:create_object, :ARTICLE)
 add_context_nav(article_form_new_tabs)
 %>
 
-<%= render(partial: "articles/form") %>
+<%= render(Components::ArticleForm.new(@article)) %>

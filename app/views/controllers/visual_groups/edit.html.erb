@@ -12,7 +12,10 @@ container_class(:full)
                 visual_model_visual_groups_path(@visual_group.visual_model)) %>
   </p>
 
-  <%= render('form', visual_group: @visual_group )%>
+  <%= render(Components::VisualGroupForm.new(
+        @visual_group,
+        visual_model: @visual_model
+      )) %>
 
   <span id="filter_options">
     <hr>

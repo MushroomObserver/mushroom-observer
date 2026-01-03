@@ -1,5 +1,8 @@
 <% add_new_title(:new_object, :VISUAL_GROUP) %>
 
-<%= render("form", visual_group: @visual_group) %>
+<%= render(Components::VisualGroupForm.new(
+      @visual_group,
+      visual_model: @visual_model
+    )) %>
 
 <%= link_to("Back", visual_model_visual_groups_path(@visual_model)) %>

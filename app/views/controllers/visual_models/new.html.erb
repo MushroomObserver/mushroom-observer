@@ -1,5 +1,5 @@
 <% add_new_title(:new_object, :VISUAL_MODEL) %>
 
-<%= render("form", visual_model: @visual_model) %>
+<%= render(Components::VisualModelForm.new(@visual_model)) %>
 
 <%= link_to("Back", visual_models_path) %>
