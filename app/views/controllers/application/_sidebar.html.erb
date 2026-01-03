@@ -31,20 +31,16 @@ classes = sidebar_css_classes
       <%= render(partial: "application/sidebar/user",
                   locals: { classes: classes }) if @user %>
 
-      <%= render(partial: "application/sidebar/observations",
-                  locals: { classes: classes }) %>
+      <%= render(Components::Sidebar::Observations.new(user: @user, classes: classes)) %>
 
-      <%= render(partial: "application/sidebar/species_lists",
-                  locals: { classes: classes }) if @user %>
+      <%= render(Components::Sidebar::SpeciesLists.new(user: @user, classes: classes)) if @user %>
       <%# end %>
 
       <%# This cache depends only on user status (logged-in? admin?) %>
       <% cache([user_status_string(@user), "links"]) do %>
-        <%= render(partial: "application/sidebar/latest",
-                    locals: { classes: classes }) %>
+        <%= render(Components::Sidebar::Latest.new(user: @user, classes: classes)) %>
 
-        <%= render(partial: "application/sidebar/indexes",
-                  locals: { classes: classes }) if @user %>
+        <%= render(Components::Sidebar::Indexes.new(classes: classes)) if @user %>
 
         <%= render(Components::Sidebar::Info.new(classes: classes)) %>
 
