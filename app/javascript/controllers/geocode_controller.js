@@ -286,18 +286,29 @@ export default class extends Controller {
   placeClosestRectangle(viewport, extents) {
   }
 
-  // Computes an array of arrays of [lat, lng] from a set of bounds on the fly
-  // Returns array of Google Map points {lat:, lng:} LatLngLiteral objects
-  // Does not actually get elevations from the API.
-  // Only lat/lng points that can be sent for elevations.
+  // Generates a 9x9 grid of sample points (81 total) within the bounds.
+  // Returns array of Google Map points {lat:, lng:} LatLngLiteral objects.
+  // More points = better min/max elevation estimates for large/mountainous areas.
   sampleElevationPointsOf(bounds) {
-    return [
-      { lat: bounds?.south, lng: bounds?.west },
-      { lat: bounds?.north, lng: bounds?.west },
-      { lat: bounds?.north, lng: bounds?.east },
-      { lat: bounds?.south, lng: bounds?.east },
-      this.centerFromBounds(bounds)
-    ]
+    if (!bounds?.north || !bounds?.south || !bounds?.east || !bounds?.west) {
+      return []
+    }
+
+    const points = []
+    const gridSize = 9
+    const latStep = (bounds.north - bounds.south) / (gridSize - 1)
+    const lngStep = (bounds.east - bounds.west) / (gridSize - 1)
+
+    for (let i = 0; i < gridSize; i++) {
+      for (let j = 0; j < gridSize; j++) {
+        points.push({
+          lat: bounds.south + (i * latStep),
+          lng: bounds.west + (j * lngStep)
+        })
+      }
+    }
+
+    return points
   }
 
   // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
