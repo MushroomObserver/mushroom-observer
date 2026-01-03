@@ -4,9 +4,12 @@ module Components
   module Sidebar
     # Base class for sidebar sections that render a heading and list of links
     #
-    # Subclasses must implement:
+    # The default view_template expects subclasses to implement:
     # - heading_key: returns the translation key for the section heading
     # - tabs_method: returns the method name to call for getting tabs
+    #
+    # Subclasses may override view_template entirely if they need custom
+    # rendering (e.g., Login and Admin components).
     #
     class Section < Components::Base
       prop :user, _Nilable(::User), default: nil
@@ -45,18 +48,12 @@ module Components
         active_link_to(title, url, **html_options)
       end
 
-      # Subclasses must implement these methods
-      def heading_key
-        raise(
-          NotImplementedError.new("#{self.class} must implement #heading_key")
-        )
-      end
-
-      def tabs_method
-        raise(
-          NotImplementedError.new("#{self.class} must implement #tabs_method")
-        )
-      end
+      # NOTE: Subclasses using the default view_template should implement:
+      # - heading_key: returns a translation key symbol (e.g., :app_more)
+      # - tabs_method: returns a method name symbol (e.g., :sidebar_info_tabs)
+      #
+      # If these methods are missing, Ruby will raise NoMethodError when
+      # view_template is called.
     end
   end
 end
