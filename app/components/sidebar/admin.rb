@@ -21,8 +21,7 @@ module Components
           render_nav_link(link, link_class: @classes[:admin])
         end
 
-        # rubocop:disable Rails/OutputSafety
-        raw(
+        trusted_html(
           button_to(
             :app_turn_admin_off.t,
             admin_mode_path(turn_off: true),
@@ -31,7 +30,6 @@ module Components
             method: :post
           )
         )
-        # rubocop:enable Rails/OutputSafety
       end
 
       private
