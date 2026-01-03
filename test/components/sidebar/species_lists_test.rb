@@ -53,7 +53,8 @@ module Sidebar
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent"
       }
-      render(Components::Sidebar::SpeciesLists.new(user: user, classes: classes))
+      render(Components::Sidebar::SpeciesLists.new(user: user,
+                                                   classes: classes))
     end
   end
 end

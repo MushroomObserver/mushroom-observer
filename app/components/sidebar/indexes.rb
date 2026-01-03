@@ -7,35 +7,17 @@ module Components
     # @example Basic usage
     #   render(Components::Sidebar::Indexes.new(classes: sidebar_css_classes))
     #
-    class Indexes < Components::Base
+    class Indexes < Section
       include Tabs::Sidebar::IndexesHelper
-
-      prop :classes, _Hash(Symbol, String)
-
-      # Register the active_link_to helper for navigation links
-      register_output_helper :active_link_to
-
-      def view_template
-        div(class: @classes[:heading]) do
-          plain("#{:INDEXES.t}:")
-        end
-
-        sidebar_indexes_tabs.compact.each do |link|
-          render_nav_link(link)
-        end
-      end
 
       private
 
-      def render_nav_link(link)
-        title, url, html_options = link
-        html_options ||= {}
-        html_options[:class] = class_names(
-          @classes[:indent],
-          html_options[:class]
-        )
+      def heading_key
+        :INDEXES
+      end
 
-        active_link_to(title, url, **html_options)
+      def tabs_method
+        :sidebar_indexes_tabs
       end
     end
   end

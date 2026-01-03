@@ -55,7 +55,8 @@ module Sidebar
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent"
       }
-      render(Components::Sidebar::Observations.new(user: user, classes: classes))
+      render(Components::Sidebar::Observations.new(user: user,
+                                                   classes: classes))
     end
   end
 end
