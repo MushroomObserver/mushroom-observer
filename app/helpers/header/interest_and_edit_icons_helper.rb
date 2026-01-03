@@ -13,15 +13,17 @@
 module Header
   module InterestAndEditIconsHelper
     # Edit and destroy icons for the show page title bar.
+    # Only shows buttons the user has permission to use.
     def add_edit_icons(object)
-      return unless permission?(object)
+      icons = []
+      icons << tag.li { edit_button(target: object, icon: :edit) } if
+        object.can_edit?
+      icons << tag.li { destroy_button(target: object, icon: :delete) } if
+        can_destroy_object?(object)
 
-      content_for(:edit_icons) do
-        [
-          tag.li { edit_button(target: object, icon: :edit) },
-          tag.li { destroy_button(target: object, icon: :delete) }
-        ].safe_join
-      end
+      return if icons.empty?
+
+      content_for(:edit_icons) { icons.safe_join }
     end
 
     # Interest icons for email alerts, for the show page title bar.
@@ -105,6 +107,14 @@ module Header
     # Create small icon image.
     def interest_icon_small(type, alt) # :nodoc:
       image_tag("#{type}3.png", alt: alt, class: "interest_small", title: alt)
+    end
+
+    private
+
+    def can_destroy_object?(object)
+      return in_admin_mode? if object.is_a?(Location)
+
+      object.can_edit?
     end
   end
 end

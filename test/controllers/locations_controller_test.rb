@@ -122,6 +122,22 @@ class LocationsControllerTest < FunctionalTestCase
     make_admin("mary")
     location = locations(:albion)
     get(:show, params: { id: location.id })
+
+    # Admin mode: both edit and destroy links should be present
+    assert_select("a[href='#{edit_location_path(location)}']")
+    assert_select("a[data-turbo-method='delete']" \
+                  "[href='#{location_path(location)}']")
+  end
+
+  def test_show_location_edit_icons_for_non_admin
+    location = locations(:albion)
+    login("rolf") # Owner but not admin
+    get(:show, params: { id: location.id })
+
+    # Non-admin: edit link present, destroy link absent
+    assert_select("a[href='#{edit_location_path(location)}']")
+    assert_select("a[data-turbo-method='delete']" \
+                  "[href='#{location_path(location)}']", count: 0)
   end
 
   def assert_show_location
