@@ -73,8 +73,8 @@ class Components::ProjectAliasForm < Components::ApplicationForm
 
   def target_type_options
     [
-      ["user", :USER.l],
-      ["location", :LOCATION.l]
+      ["location", :LOCATION.l],
+      ["user", :USER.l]
     ]
   end
 

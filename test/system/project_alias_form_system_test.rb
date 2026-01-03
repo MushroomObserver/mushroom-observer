@@ -17,20 +17,20 @@ class ProjectAliasFormSystemTest < ApplicationSystemTestCase
     # is "Location" in our select)
     # Location autocompleter should be visible, user autocompleter hidden
     assert_selector("[data-type-switch-type='location']:not(.d-none)")
-    assert_selector("[data-type-switch-type='user'].d-none")
+    assert_selector("[data-type-switch-type='user'].d-none", visible: :all)
 
     # Switch to User type
     select(:USER.l, from: "project_alias[target_type]")
 
     # Now user autocompleter should be visible, location hidden
     assert_selector("[data-type-switch-type='user']:not(.d-none)")
-    assert_selector("[data-type-switch-type='location'].d-none")
+    assert_selector("[data-type-switch-type='location'].d-none", visible: :all)
 
     # Switch back to Location
     select(:LOCATION.l, from: "project_alias[target_type]")
 
     # Location visible again, user hidden
     assert_selector("[data-type-switch-type='location']:not(.d-none)")
-    assert_selector("[data-type-switch-type='user'].d-none")
+    assert_selector("[data-type-switch-type='user'].d-none", visible: :all)
   end
 end
