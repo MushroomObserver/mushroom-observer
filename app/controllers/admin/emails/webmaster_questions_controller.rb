@@ -21,7 +21,7 @@ module Admin
                      ),
                      form_locals: { email: @email, email_error: false,
                                     message: @message }
-                   ))
+                   ), layout: false)
           end
         end
       end

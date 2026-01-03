@@ -136,7 +136,7 @@ module Observations
                model: @naming,
                observation: @observation,
                form_locals: naming_form_locals.except(:model, :observation)
-             ))
+             ), layout: false)
     end
 
     def naming_form_locals

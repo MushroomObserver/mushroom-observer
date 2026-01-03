@@ -491,7 +491,7 @@ class LocationsController < ApplicationController
              user: @user,
              model: @location,
              form_locals: { display_name: @display_name }
-           )) and return
+           ), layout: false) and return
   end
 
   def modal_identifier

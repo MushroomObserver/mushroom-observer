@@ -30,7 +30,7 @@ module Admin
                        name: @name,
                        new_name_with_icn_id: @new_name_with_icn_id
                      }
-                   ))
+                   ), layout: false)
           end
         end
       end

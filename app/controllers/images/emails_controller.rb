@@ -23,7 +23,7 @@ module Images
                    user: @user,
                    model: FormObject::CommercialInquiry.new,
                    form_locals: { image: @image, user: @user }
-                 ))
+                 ), layout: false)
         end
       end
     end

@@ -184,7 +184,7 @@ module Observations
                observation: @observation,
                back: @back,
                form_locals: { sites: @sites, site: @site }
-             ))
+             ), layout: false)
     end
 
     def modal_identifier

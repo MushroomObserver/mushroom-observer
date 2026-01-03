@@ -22,7 +22,7 @@ module Observations
                    user: @user,
                    model: FormObject::ObserverQuestion.new,
                    observation: @observation
-                 ))
+                 ), layout: false)
         end
       end
     end

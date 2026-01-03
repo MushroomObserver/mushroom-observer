@@ -448,7 +448,7 @@ class HerbariumRecordsController < ApplicationController
              model: @herbarium_record,
              observation: @observation,
              back: @back
-           ))
+           ), layout: false)
   end
 
   def modal_identifier

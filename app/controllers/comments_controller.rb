@@ -258,7 +258,7 @@ class CommentsController < ApplicationController
              title: modal_title,
              user: @user,
              model: @comment
-           ))
+           ), layout: false)
   end
 
   def reload_modal_form

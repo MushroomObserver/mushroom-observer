@@ -114,7 +114,7 @@ module Projects
                user: @user,
                model: @project_alias,
                form_locals: { user: @user }
-             )) and return
+             ), layout: false) and return
     end
 
     def reload_modal_project_alias_form

@@ -20,7 +20,7 @@ module Users
                    user: @user,
                    model: FormObject::UserQuestion.new,
                    form_locals: { target: @target }
-                 ))
+                 ), layout: false)
         end
       end
     end

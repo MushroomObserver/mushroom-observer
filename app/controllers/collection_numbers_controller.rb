@@ -386,7 +386,7 @@ class CollectionNumbersController < ApplicationController
              model: @collection_number,
              observation: @observation,
              back: @back
-           ))
+           ), layout: false)
   end
 
   def modal_identifier

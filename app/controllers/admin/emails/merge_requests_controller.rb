@@ -25,7 +25,7 @@ module Admin
                      model: FormObject::MergeRequest.new,
                      form_locals: { old_obj: @old_obj, new_obj: @new_obj,
                                     model_class: @model }
-                   ))
+                   ), layout: false)
           end
         end
       end

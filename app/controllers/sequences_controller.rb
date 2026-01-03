@@ -281,7 +281,7 @@ class SequencesController < ApplicationController
              model: @sequence,
              observation: @observation,
              back: @back
-           ))
+           ), layout: false)
   end
 
   def modal_identifier
