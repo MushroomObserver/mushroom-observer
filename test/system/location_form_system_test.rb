@@ -31,10 +31,7 @@ class LocationFormSystemTest < ApplicationSystemTestCase
     # assert_field("location_low", with: "287.8201")
   end
 
-  # TODO: Investigate why Open-Elevation API calls fail in Capybara test
-  # environment but work in real browser. The functionality is verified
-  # manually - elevations auto-populate after geocoding a location.
-  def skip_test_elevations_auto_populate_after_geocoding
+  def test_elevations_auto_populate_after_geocoding
     rolf = users("rolf")
     login!(rolf)
 
@@ -49,8 +46,8 @@ class LocationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#location_display_name.geocoded", wait: 10)
 
     # Wait for elevations to populate (async call after geocoding)
-    # The button gets disabled once elevations are fetched
-    assert_selector("#location_get_elevation[disabled]", wait: 15)
+    # The button gets hidden once elevations are fetched
+    assert_selector("#get_elevation_btn.d-none", visible: false, wait: 15)
 
     # Elevations should be populated
     high_value = find("#location_high").value
