@@ -88,7 +88,7 @@ module Components
       end
 
       def show_admin_button?
-        @user.admin && !@in_admin_mode.present?
+        @user.admin && @in_admin_mode.blank?
       end
     end
   end
