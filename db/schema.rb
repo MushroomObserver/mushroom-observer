@@ -224,6 +224,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_01_095531) do
     t.float "avg_import_time"
     t.datetime "last_obs_start"
     t.boolean "cancel"
+    t.json "last_user_inputs"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
