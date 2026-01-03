@@ -15,6 +15,8 @@ class API2Controller < ApplicationController
   require("xmlrpc/client")
   require("api2")
 
+  include CorsHeaders
+
   disable_filters
 
   # wrapped parameters break JSON requests in the unit tests.
@@ -173,12 +175,14 @@ class API2Controller < ApplicationController
     render(layout: false, template: "/api2/results")
   end
 
+  # Only set CORS headers for GET requests, allowing only GET
   def set_cors_headers
     return unless request.method == "GET"
 
-    response.set_header("Access-Control-Allow-Origin", "*")
-    response.set_header("Access-Control-Allow-Headers",
-                        "Origin, X-Requested-With, Content-Type, Accept")
-    response.set_header("Access-Control-Allow-Methods", "GET")
+    super
+  end
+
+  def cors_allowed_methods
+    %w[GET].freeze
   end
 end

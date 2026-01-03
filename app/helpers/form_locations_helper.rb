@@ -111,7 +111,7 @@ module FormLocationsHelper
   def elevation_request_button
     tag.button(
       :form_locations_get_elevation.l,
-      type: :button, class: "btn btn-default",
+      id: "get_elevation_btn", type: :button, class: "btn btn-default",
       data: { map_target: "getElevation", action: "map#getElevations",
               map_points_param: "input", map_type_param: "rectangle" }
     )

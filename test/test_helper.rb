@@ -55,7 +55,9 @@ WebMock.disable_net_connect!(
   allow: [
     "chromedriver.storage.googleapis.com", # in case we install Chrome
     "github.com", # for Firefox
-    "objects.githubusercontent.com" # for Firefox
+    "objects.githubusercontent.com", # for Firefox
+    "api.open-elevation.com", # for elevation lookups in system tests
+    /googleapis\.com/ # for Google Maps in system tests
   ]
 )
 
