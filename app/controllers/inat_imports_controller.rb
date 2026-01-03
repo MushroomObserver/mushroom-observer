@@ -121,10 +121,10 @@ class InatImportsController < ApplicationController
   end
 
   def user_input_unchanged?
-    params[:inat_ids] == @inat_import[:last_user_inputs]["inat_ids"] &&
-      params[:all] == @inat_import[:last_user_inputs]["all"] &&
+    params[:inat_ids] == @inat_import[:last_user_inputs]&.dig("inat_ids") &&
+      params[:all] == @inat_import[:last_user_inputs]&.dig("all") &&
       params[:inat_username].strip ==
-        @inat_import[:last_user_inputs]["inat_username"]
+        @inat_import[:last_user_inputs]&.dig("inat_username")
   end
 
   def truthy?(val)
