@@ -1,16 +1,12 @@
 <%# locals: (identifier:, form_locals: {}) -%>
-<%
-# What to do if a form submit doesn't succeed.
-# Renders the form component directly based on the model class.
-model = form_locals[:model]
-component_class = "Components::#{model.class.name.demodulize}Form".constantize
-component_params = form_locals.except(:model).merge(local: false)
-%>
+<%# What to do if a form submit doesn't succeed. %>
 
 <%= turbo_stream.update("modal_#{identifier}_flash") do
   flash_notices_html
 end %>
 
 <%= turbo_stream.replace("#{identifier}_form") do
-  render(component_class.new(model, **component_params))
+  Components::ModalForm.render_form(self,
+                                    model: form_locals[:model],
+                                    form_locals: form_locals)
 end %>
