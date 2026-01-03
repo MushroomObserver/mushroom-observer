@@ -55,8 +55,9 @@ t_s = {
         }
       ) %>
 
-      <%= render(partial: "locations/form/bounds_hidden_fields",
-                  locals: { location: @location, target_controller: :map }) %>
+      <%= render(Components::BoundsHiddenFields.new(
+            location: @location, target_controller: :map
+          )) %>
       <!-- /WHERE -->
 
       <!-- IS_COLLECTION_LOCATION -->
