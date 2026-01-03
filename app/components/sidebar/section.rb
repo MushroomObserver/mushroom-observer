@@ -34,11 +34,11 @@ module Components
         end
       end
 
-      def render_nav_link(link)
+      def render_nav_link(link, link_class: @classes[:indent])
         title, url, html_options = link
         html_options ||= {}
         html_options[:class] = class_names(
-          @classes[:indent],
+          link_class,
           html_options[:class]
         )
 
