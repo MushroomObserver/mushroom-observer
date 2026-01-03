@@ -68,8 +68,8 @@ class Components::Panel < Components::Base
   # Remove this when migrating to Bootstrap >= 4.
   prop :sizing, _Boolean, default: false
 
-  slot :heading, lambda { |classes: nil, &content|
-    render_heading(classes:, &content)
+  slot :heading, lambda { |classes: nil, title: true, &content|
+    render_heading(classes:, title:, &content)
   }
   slot :heading_links
   slot :thumbnail, lambda { |classes: nil, id: nil, data: nil, &content|
@@ -107,14 +107,19 @@ class Components::Panel < Components::Base
     end
   end
 
-  def render_heading(classes:, &content)
-    classes = classes.presence || "h4 panel-title"
-
-    div(class: "panel-heading") do
-      div(class: classes) do
-        span(&content)
-        whitespace
-        render_heading_links if heading_links_slot? || @collapsible
+  def render_heading(classes:, title:, &content)
+    if title
+      classes = classes.presence || "h4 panel-title"
+      div(class: "panel-heading") do
+        div(class: classes) do
+          span(&content)
+          whitespace
+          render_heading_links if heading_links_slot? || @collapsible
+        end
+      end
+    else
+      div(class: class_names("panel-heading", classes)) do
+        yield if block_given?
       end
     end
   end

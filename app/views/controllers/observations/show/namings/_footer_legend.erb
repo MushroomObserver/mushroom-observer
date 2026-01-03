@@ -1,0 +1,12 @@
+<%=
+tag.div(class: "row") do
+  tag.div(class: "col-sm-11") do
+    tag.div(class: "row") do
+      [
+        tag.div(vote_legend_yours, class: "col-xs-4 col-xs-offset-4"),
+        tag.div(vote_legend_consensus, class: "col-xs-4")
+      ].safe_join
+    end
+  end
+end
+%>
