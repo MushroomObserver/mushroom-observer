@@ -257,6 +257,9 @@ module ObservationsController::Create
   end
 
   def init_location_var_for_reload
+    # Preserve the user's place_name input for form re-render
+    @default_place_name = @observation.place_name
+
     # keep location_id if it's -1 (new)
     if @location || @observation.location_id.nil? ||
        @observation.location_id.zero?

@@ -14,21 +14,15 @@ module Observations
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(
-            partial: "shared/modal_form",
-            locals: {
-              title: :ask_observation_question_title.t(
-                name: @observation.unique_format_name
-              ),
-              identifier: "observation_email",
-              user: @user,
-              form: "observations/emails/form",
-              form_locals: {
-                model: FormObject::ObserverQuestion.new,
-                observation: @observation
-              }
-            }
-          ) and return
+          render(Components::ModalForm.new(
+                   identifier: "observation_email",
+                   title: :ask_observation_question_title.t(
+                     name: @observation.unique_format_name
+                   ),
+                   user: @user,
+                   model: FormObject::ObserverQuestion.new,
+                   observation: @observation
+                 ), layout: false)
         end
       end
     end

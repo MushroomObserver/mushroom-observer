@@ -176,23 +176,15 @@ module Observations
     end
 
     def render_modal_external_link_form
-      render(
-        partial: "shared/modal_form",
-        locals: {
-          title: modal_title,
-          identifier: modal_identifier,
-          user: @user,
-          form: "observations/external_links/form",
-          form_locals: {
-            user: @user,
-            model: @external_link,
-            observation: @observation,
-            back: @back,
-            sites: @sites,
-            site: @site
-          }
-        }
-      ) and return
+      render(Components::ModalForm.new(
+               identifier: modal_identifier,
+               title: modal_title,
+               user: @user,
+               model: @external_link,
+               observation: @observation,
+               back: @back,
+               form_locals: { sites: @sites, site: @site }
+             ), layout: false)
     end
 
     def modal_identifier
@@ -237,7 +229,6 @@ module Observations
         partial: "shared/modal_form_reload",
         locals: {
           identifier: modal_identifier,
-          form: "observations/external_links/form",
           form_locals: {
             user: @user,
             model: @external_link,

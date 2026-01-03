@@ -548,7 +548,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_new_location_turbo_stream
     login
     get(:new, params: { where: "Somewhere, Earth" }, format: :turbo_stream)
-    assert_template("shared/_modal_form")
+    assert_select(".modal-form")
     assert_select("#location_form")
     assert_select("input[name='location[display_name]']")
   end
@@ -775,7 +775,7 @@ class LocationsControllerTest < FunctionalTestCase
     loc = locations(:albion)
     login
     get(:edit, params: { id: loc.id }, format: :turbo_stream)
-    assert_template("shared/_modal_form")
+    assert_select(".modal-form")
     assert_select("#location_form")
     assert_select("input[name='location[display_name]'][value=?]",
                   loc.display_name)

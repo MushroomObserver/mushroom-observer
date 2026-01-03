@@ -56,11 +56,9 @@ class AccountAPIKeysSystemTest < ApplicationSystemTestCase
       assert_selector("#api_key_#{new_api_key.id}")
       assert_selector("#notes_#{new_api_key.id} span.current_notes",
                       text: "Reconsidered key idea")
-      # Remove the first api key
-      accept_confirm do
-        click_button("remove_api_key_#{marys_api_key.id}")
-      end
     end
+    # Remove the first api key
+    click_and_confirm(find("#remove_api_key_#{marys_api_key.id}"))
 
     # Should re-render the index
     assert_selector("body.api_keys__index")

@@ -21,20 +21,16 @@ module Admin
         respond_to do |format|
           format.html
           format.turbo_stream do
-            render(
-              partial: "shared/modal_form",
-              locals: {
-                title: :email_name_change_request_title.l,
-                identifier: "name_change_request_email",
-                user: @user,
-                form: "admin/emails/name_change_requests/form",
-                form_locals: {
-                  model: FormObject::NameChangeRequest.new,
-                  name: @name,
-                  new_name_with_icn_id: @new_name_with_icn_id
-                }
-              }
-            ) and return
+            render(Components::ModalForm.new(
+                     identifier: "name_change_request_email",
+                     title: :email_name_change_request_title.l,
+                     user: @user,
+                     model: FormObject::NameChangeRequest.new,
+                     form_locals: {
+                       name: @name,
+                       new_name_with_icn_id: @new_name_with_icn_id
+                     }
+                   ), layout: false)
           end
         end
       end

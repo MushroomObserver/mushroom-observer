@@ -1,12 +1,12 @@
-<%# locals: (identifier:, form:, form_locals: {}) -%>
-<%
-# What to do if a form submit doesn't succeed
-%>
+<%# locals: (identifier:, form_locals: {}) -%>
+<%# What to do if a form submit doesn't succeed. %>
 
 <%= turbo_stream.update("modal_#{identifier}_flash") do
   flash_notices_html
 end %>
 
 <%= turbo_stream.replace("#{identifier}_form") do
-  render_form_or_component(form, **form_locals.merge(local: false))
+  Components::ModalForm.render_form(self,
+                                    model: form_locals[:model],
+                                    form_locals: form_locals)
 end %>

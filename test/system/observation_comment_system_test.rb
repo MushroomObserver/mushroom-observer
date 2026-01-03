@@ -140,10 +140,8 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
         assert_no_text("A load of bollocks")
         assert_text("Exciting discovery")
         assert_selector(".destroy_comment_link_#{com.id}")
-        accept_confirm do
-          find(:css, ".destroy_comment_link_#{com.id}").trigger("click")
-        end
       end
+      click_and_confirm(find(:css, ".destroy_comment_link_#{com.id}"))
       within("#comments_for_object") do
         assert_no_text("Exciting discovery")
         assert_no_selector(".destroy_comment_link_#{com.id}")
