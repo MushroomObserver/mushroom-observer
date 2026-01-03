@@ -25,7 +25,7 @@ module Components
           button_to(
             :app_turn_admin_off.t,
             admin_mode_path(turn_off: true),
-            class: [@classes[:admin], "btn btn-link"],
+            class: class_names(@classes[:admin], "btn btn-link"),
             id: "nav_admin_off_link",
             method: :post
           )
