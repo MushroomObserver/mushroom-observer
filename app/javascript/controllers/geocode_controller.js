@@ -335,7 +335,7 @@ export default class extends Controller {
         this.roundOff(parseFloat(results[0].elevation))
     }
     if (this.hasGetElevationTarget)
-      this.getElevationTarget.disabled = true
+      this.getElevationTarget.classList.add("d-none")
   }
 
   // Using a regular expression
