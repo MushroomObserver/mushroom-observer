@@ -26,8 +26,9 @@ classes = sidebar_css_classes
       <%# If caching obs/spl, this should be keyed for both User and QueryRecord
           (i.e. cache invalidated if query record updated, or new ID). %>
       <%# cache([@user, current_query_record]) do %>
-      <%= render(partial: "application/sidebar/user",
-                  locals: { classes: classes }) if @user %>
+      <%= render(Components::Sidebar::User.new(
+        user: @user, classes: classes, in_admin_mode: in_admin_mode?
+      )) if @user %>
 
       <%= render(Components::Sidebar::Observations.new(user: @user, classes: classes)) %>
 
@@ -42,8 +43,9 @@ classes = sidebar_css_classes
 
         <%= render(Components::Sidebar::Info.new(classes: classes)) %>
 
-        <%= render(partial: "application/sidebar/languages",
-                    locals: { classes: classes }) %>
+        <%= render(Components::Sidebar::Languages.new(
+          browser: browser, request: request
+        )) %>
       <% end %>
 
     </div><!-- .sidebar-nav -->

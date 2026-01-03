@@ -9,7 +9,7 @@ module Components
     # - tabs_method: returns the method name to call for getting tabs
     #
     class Section < Components::Base
-      prop :user, _Nilable(User), default: nil
+      prop :user, _Nilable(::User), default: nil
       prop :classes, _Hash(Symbol, String)
 
       register_output_helper :active_link_to
