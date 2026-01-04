@@ -260,15 +260,21 @@ export default class extends GeocodeController {
   placeRectangle(extents) {
     this.verbose("map:placeRectangle()")
     this.verbose(extents)
-    if (!this.rectangle) {
-      this.drawRectangle(extents)
-    } else {
-      this.rectangle.setBounds(extents)
-    }
-    const _types = ["location", "hybrid"]
-    if (_types.includes(this.map_type)) { this.rectangle.setEditable(true) }
-    this.rectangle.setVisible(true)
-    this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
+
+    // Fit bounds first, then draw/update rectangle after zoom completes
+    this.map.fitBounds(extents)
+
+    // Wait for the map to finish zooming before drawing/updating rectangle
+    google.maps.event.addListenerOnce(this.map, 'bounds_changed', () => {
+      if (!this.rectangle) {
+        this.drawRectangle(extents)
+      } else {
+        this.rectangle.setBounds(extents)
+      }
+      const _types = ["location", "hybrid"]
+      if (_types.includes(this.map_type)) { this.rectangle.setEditable(true) }
+      this.rectangle.setVisible(true)
+    })
   }
 
   drawRectangle(set) {
@@ -449,10 +455,14 @@ export default class extends GeocodeController {
 
     this.verbose("map:calculateRectangle")
     const bounds = { north: north, south: south, east: east, west: west }
-    if (this.rectangle) {
-      this.rectangle.setBounds(bounds)
-    }
+
+    // Fit bounds first, then update rectangle after zoom completes
     this.map.fitBounds(bounds)
+    google.maps.event.addListenerOnce(this.map, 'bounds_changed', () => {
+      if (this.rectangle) {
+        this.rectangle.setBounds(bounds)
+      }
+    })
   }
 
   // Infers a rectangle from the google place, if found. (could be point/bounds)

@@ -196,8 +196,8 @@ export default class extends Controller {
     const center = results[0].geometry.location.toJSON()
 
     if (this.map) {
-      if (viewport) this.map.fitBounds(viewport)
-      this.placeClosestRectangle(viewport, extents) // viewport is optional
+      // placeClosestRectangle will handle fitBounds after zoom completes
+      this.placeClosestRectangle(viewport, extents)
     }
     this.updateFields(viewport, extents, center)
     // For non-autocompleted place input in the location form
