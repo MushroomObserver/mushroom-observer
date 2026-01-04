@@ -21,7 +21,7 @@ module Projects
         prefix: @project.field_slip_prefix,
         start: @project.next_field_slip,
         title: @project.title,
-        user: User.current,
+        user: @user,
         one_per_page: params[:one_per_page] == "1",
         count: field_slips
       )
@@ -66,9 +66,9 @@ module Projects
     end
 
     def field_slip_max
-      @field_slip_max ||= if @project.is_admin?(User.current)
+      @field_slip_max ||= if @project.is_admin?(@user)
                             12_000
-                          elsif @project.member?(User.current)
+                          elsif @project.member?(@user)
                             60
                           else
                             0

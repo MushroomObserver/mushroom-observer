@@ -51,7 +51,7 @@ module Projects
       return unless @project.observations.include?(obs)
 
       permitted_removers = @project.admin_group_user_ids + [obs.user_id]
-      return unless permitted_removers.include?(User.current.id)
+      return unless permitted_removers.include?(@user.id)
 
       @project.remove_observations([obs])
     end
