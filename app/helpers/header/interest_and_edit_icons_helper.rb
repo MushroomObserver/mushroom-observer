@@ -116,11 +116,7 @@ module Header
     end
 
     def can_destroy_object?(object, user)
-      if object.is_a?(Location)
-        result = in_admin_mode?
-        Rails.logger.debug "DEBUG: can_destroy_object? for Location, in_admin_mode? = #{result.inspect}"
-        return result
-      end
+      return in_admin_mode? if object.is_a?(Location)
 
       can_edit_object?(object, user)
     end
