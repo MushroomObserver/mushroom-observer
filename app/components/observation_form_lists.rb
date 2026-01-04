@@ -56,7 +56,8 @@ class Components::ObservationFormLists < Components::Base
     render(list_ns.field(field_name).checkbox(
              wrapper_options: { label: list.title },
              checked: checked,
-             disabled: disabled
+             disabled: disabled,
+             id: "list_id_#{list.id}"
            ))
   end
 end

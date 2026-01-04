@@ -22,10 +22,15 @@ class Components::NamingFields < Components::Base
   prop :create, _Boolean, default: true
   prop :name_help, String, default: -> { :form_naming_name_help.t }
   prop :unfocused, _Boolean, default: false
+  prop :add_namespace, _Boolean, default: true
 
   def view_template
-    @form.namespace(:naming) do |naming_ns|
-      render_name_autocompleter(naming_ns)
+    if @add_namespace
+      @form.namespace(:naming) do |naming_ns|
+        render_name_autocompleter(naming_ns)
+      end
+    else
+      render_name_autocompleter(@form)
     end
   end
 

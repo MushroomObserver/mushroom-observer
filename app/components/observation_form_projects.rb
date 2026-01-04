@@ -119,7 +119,8 @@ class Components::ObservationFormProjects < Components::Base
     render(project_ns.field(field_name).checkbox(
              wrapper_options: { label: project.title },
              checked: checked,
-             disabled: disabled
+             disabled: disabled,
+             id: "project_id_#{project.id}"
            ))
   end
 end

@@ -93,13 +93,14 @@ class Components::NamingForm < Components::ApplicationForm
 
   def render_naming_fields
     render(Components::NamingFields.new(
-             form_namespace: self,
+             form: self,
              vote: @vote,
              given_name: @given_name,
              reasons: @reasons,
              show_reasons: @show_reasons,
              context: @context,
-             create: @create
+             create: @create,
+             add_namespace: false
            ))
   end
 end
