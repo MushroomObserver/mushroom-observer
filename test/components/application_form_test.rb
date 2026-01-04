@@ -284,6 +284,45 @@ class ApplicationFormTest < ComponentTestCase
     assert_not_includes(form, "disabled")
   end
 
+  # Date field tests
+  def test_date_field_renders_structure
+    form = render_form do
+      date_field(:when, label: "Date")
+    end
+
+    # Wrapper and label
+    assert_html(form, "div.form-group")
+    assert_html(form, "label", text: "Date")
+    assert_html(form, "div.date-selects")
+
+    # Day select (3i) - rendered first
+    assert_html(form, "select#collection_number_when_3i")
+    assert_html(form, "select[name='collection_number[when(3i)]']")
+
+    # Month select (2i) - rendered second
+    assert_html(form, "select#collection_number_when_2i")
+    assert_html(form, "select[name='collection_number[when(2i)]']")
+
+    # Year text input (1i) - rendered last, not a select
+    assert_html(form, "input[type='text']#collection_number_when_1i")
+    assert_html(form, "input[name='collection_number[when(1i)]'][size='4']")
+
+    # Verify order: day, month, year (3i before 2i before 1i)
+    assert_match(/_3i.*_2i.*_1i/m, form)
+  end
+
+  def test_date_field_with_append_slot
+    form = render_form do
+      date_field(:when, label: "Date") do |field|
+        field.with_append do
+          span(class: "help-note") { "(approximate)" }
+        end
+      end
+    end
+
+    assert_html(form, "span.help-note", text: "(approximate)")
+  end
+
   private
 
   def render_form(&block)

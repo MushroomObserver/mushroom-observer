@@ -61,21 +61,20 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_date_selects
-      div(class: "form-inline date-selects",
-          data: { controller: "year-input" }) do
-        render_year_select
-        render_month_select
+      div(class: "form-inline date-selects") do
         render_day_select
+        render_month_select
+        render_year_input
       end
     end
 
-    def render_year_select
-      select(name: date_param_name("1i"), class: "form-control mr-2",
-             id: "#{field_id}_1i") do
-        year_options.each do |year|
-          option(value: year, selected: year == current_year) { year }
-        end
-      end
+    def render_year_input
+      input(type: "text",
+            name: date_param_name("1i"),
+            id: "#{field_id}_1i",
+            class: "form-control",
+            size: 4,
+            value: current_year)
     end
 
     def render_month_select
@@ -88,7 +87,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_day_select
-      select(name: date_param_name("3i"), class: "form-control",
+      select(name: date_param_name("3i"), class: "form-control mr-2",
              id: "#{field_id}_3i") do
         day_options.each do |day|
           option(value: day, selected: day == current_day) { day }
@@ -119,12 +118,6 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def current_day
       current_date.day
-    end
-
-    def year_options
-      start_year = attributes[:start_year] || 20.years.ago.year
-      end_year = attributes[:end_year] || Time.zone.now.year
-      (start_year..end_year).to_a.reverse
     end
 
     def month_options
