@@ -394,7 +394,9 @@ class HerbariumRecordsController < ApplicationController
   def can_add_record_to_herbarium?
     return true if in_admin_mode?
     return true if @observation&.can_edit?(@user)
-    return true if @herbarium_record.observations.any? { |o| o.can_edit?(@user) }
+    return true if @herbarium_record.observations.any? do |o|
+      o.can_edit?(@user)
+    end
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:create_herbarium_record_only_curator_or_owner.t)

@@ -735,19 +735,23 @@ module ControllerExtensions
   def assert_destroy_button(object, msg = nil)
     path = show_path_for(object)
     msg ||= "Expected destroy button for #{object.class.name} ##{object.id}"
-    # Check for either turbo link or button_to form
-    turbo_link = css_select("a[data-turbo-method='delete'][href='#{path}']")
-    button_form = css_select("form[action='#{path}'] input[name='_method'][value='delete']")
-    assert(turbo_link.any? || button_form.any?, msg)
+    assert(destroy_button_present?(path), msg)
   end
 
   # Assert that a destroy button/link does NOT exist for the given object.
   def assert_no_destroy_button(object, msg = nil)
     path = show_path_for(object)
     msg ||= "Expected NO destroy button for #{object.class.name} ##{object.id}"
+    assert_not(destroy_button_present?(path), msg)
+  end
+
+  def destroy_button_present?(path)
+    # Check for either turbo link or button_to form
     turbo_link = css_select("a[data-turbo-method='delete'][href='#{path}']")
-    button_form = css_select("form[action='#{path}'] input[name='_method'][value='delete']")
-    assert(turbo_link.empty? && button_form.empty?, msg)
+    return true if turbo_link.any?
+
+    form = css_select("form[action='#{path}']")
+    form.any? && css_select(form, "input[name='_method'][value='delete']").any?
   end
 
   private
