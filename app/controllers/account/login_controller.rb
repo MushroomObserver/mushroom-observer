@@ -120,6 +120,8 @@ module Account
         session[:real_user_id] = nil
         session[:admin] = true
       end
+      # Update both @user and User.current so views show the correct user.
+      @user = new_user
       User.current = new_user
       session_user_set(new_user)
     end

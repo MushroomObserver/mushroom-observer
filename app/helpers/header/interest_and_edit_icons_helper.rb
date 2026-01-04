@@ -116,9 +116,15 @@ module Header
     end
 
     def can_destroy_object?(object, user)
-      return in_admin_mode? if object.is_a?(Location)
+      return can_destroy_location?(object, user) if object.is_a?(Location)
 
       can_edit_object?(object, user)
+    end
+
+    def can_destroy_location?(location, user)
+      return false unless location.destroyable?
+
+      in_admin_mode? || location.user == user
     end
   end
 end

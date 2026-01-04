@@ -117,23 +117,56 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(log_updated_at, location.rss_log.updated_at)
   end
 
-  def test_show_location_admin_mode
+  # Location destroy button only shows if location is destroyable (no blocking
+  # associations) AND user is either the creator or in admin mode.
+  def test_show_location_destroy_button_for_admin_destroyable
     login("mary")
     make_admin("mary")
-    location = locations(:albion)
+    location = locations(:unused_location)
+    assert(location.destroyable?, "Test requires a destroyable location")
     get(:show, params: { id: location.id })
 
-    # Admin mode: both edit and destroy links should be present
     assert_edit_button(location)
     assert_destroy_button(location)
   end
 
-  def test_show_location_edit_icons_for_non_admin
-    location = locations(:albion)
-    login("rolf") # Owner but not admin
+  def test_show_location_destroy_button_for_owner_destroyable
+    location = locations(:howarth_park) # created by rolf (default)
+    login("rolf")
+    assert(location.destroyable?, "Test requires a destroyable location")
     get(:show, params: { id: location.id })
 
-    # Non-admin: edit link present, destroy link absent
+    assert_edit_button(location)
+    assert_destroy_button(location)
+  end
+
+  def test_show_location_no_destroy_button_for_non_owner
+    location = locations(:howarth_park) # created by rolf
+    login("mary") # not the owner
+    assert(location.destroyable?, "Test requires a destroyable location")
+    get(:show, params: { id: location.id })
+
+    assert_edit_button(location)
+    assert_no_destroy_button(location)
+  end
+
+  def test_show_location_no_destroy_button_when_has_associations
+    location = locations(:albion) # has projects
+    login("rolf") # owner
+    assert_not(location.destroyable?, "Test requires non-destroyable location")
+    get(:show, params: { id: location.id })
+
+    assert_edit_button(location)
+    assert_no_destroy_button(location)
+  end
+
+  def test_show_location_no_destroy_button_for_admin_when_has_associations
+    login("mary")
+    make_admin("mary")
+    location = locations(:albion) # has projects
+    assert_not(location.destroyable?, "Test requires non-destroyable location")
+    get(:show, params: { id: location.id })
+
     assert_edit_button(location)
     assert_no_destroy_button(location)
   end
@@ -1146,20 +1179,56 @@ class LocationsControllerTest < FunctionalTestCase
   #
   #    DESTROY
 
-  def test_destroy_location
-    location = locations(:california)
-    params = { id: location.id }
+  def test_destroy_location_by_owner
+    rolf = users(:rolf)
+    location = Location.create!(
+      name: "Destroyable Location, Oregon, USA",
+      north: 45.0, south: 44.0, east: -122.0, west: -123.0,
+      user: rolf
+    )
+    assert(location.destroyable?, "Fresh location should be destroyable")
 
-    login(location.user.login)
-    delete(:destroy, params: params)
+    # Non-owner cannot destroy
+    login("mary")
+    delete(:destroy, params: { id: location.id })
     assert(Location.exists?(location.id),
-           "Location should be destroyable only if user is in admin mode")
+           "Non-owner should not be able to destroy location")
 
-    make_admin
-    delete(:destroy, params: params)
+    # Owner can destroy
+    login("rolf")
+    delete(:destroy, params: { id: location.id })
     assert_redirected_to(locations_path)
     assert_not(Location.exists?(location.id),
-               "Failed to destroy Location #{location.id}, '#{location.name}'")
+               "Owner should be able to destroy location with no associations")
+  end
+
+  def test_destroy_location_by_admin
+    location = Location.create!(
+      name: "Admin Destroyable Location, Oregon, USA",
+      north: 45.0, south: 44.0, east: -122.0, west: -123.0,
+      user: users(:rolf)
+    )
+    assert(location.destroyable?, "Fresh location should be destroyable")
+
+    login("mary")
+    make_admin
+    delete(:destroy, params: { id: location.id })
+    assert_redirected_to(locations_path)
+    assert_not(Location.exists?(location.id),
+               "Admin should be able to destroy location with no associations")
+  end
+
+  def test_destroy_location_with_associations
+    location = locations(:albion) # has projects
+    assert_not(location.destroyable?, "Test requires non-destroyable location")
+
+    # Even admin cannot destroy location with associations
+    login("mary")
+    make_admin
+    delete(:destroy, params: { id: location.id })
+    assert_redirected_to(location_path(location))
+    assert(Location.exists?(location.id),
+           "Should not be able to destroy location with associations")
   end
 
   def named_obs_query(name)
