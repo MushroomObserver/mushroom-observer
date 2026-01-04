@@ -48,7 +48,7 @@ class PublicationsController < ApplicationController
   # POST /publications
   # POST /publications.xml
   def create
-    params = permitted_publication_params.merge(user: User.current)
+    params = permitted_publication_params.merge(user: @user)
     @publication = Publication.new(params)
     respond_to do |format|
       if @publication.save

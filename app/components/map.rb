@@ -22,6 +22,7 @@ class Components::Map < Components::Base
   include Phlex::Rails::Helpers::LinkTo
 
   prop :objects, _Array(_Any), default: -> { [] }
+  prop :user, _Nilable(User), default: nil
   prop :map_div, String, default: "map_div"
   prop :controller, _Nilable(String), default: "map"
   prop :map_target, String, default: "mapDiv"
@@ -72,7 +73,7 @@ class Components::Map < Components::Base
       map_open: @map_open.to_s,
       editable: @editable.to_s,
       controls: @controls.to_json,
-      location_format: @location_format || User.current_location_format,
+      location_format: @location_format || @user&.location_format || "postal",
       collection: mappable_collection.to_json,
       localization: localization_data.to_json
     }

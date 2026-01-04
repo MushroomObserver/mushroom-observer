@@ -77,6 +77,8 @@ module Admin
       end
       # This happens if an admin already in "switch user mode" switches to yet
       # another user.
+      # Update both @user and User.current so views show the correct user.
+      @user = new_user
       User.current = new_user
       session_user_set(new_user)
     end

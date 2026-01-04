@@ -237,7 +237,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   include Herbaria::SharedPrivateMethods
 
   def make_sure_can_edit!
-    return true if in_admin_mode? || @herbarium.can_edit?
+    return true if in_admin_mode? || @herbarium.can_edit?(@user)
 
     flash_error(:permission_denied.t)
     redirect_to_referrer || redirect_to(herbarium_path(@herbarium))

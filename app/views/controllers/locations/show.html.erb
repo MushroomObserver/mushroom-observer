@@ -1,7 +1,7 @@
 <%
 add_show_title(@location.display_name, @location)
 if @user
-  add_edit_icons(@location)
+  add_edit_icons(@location, @user)
   add_interest_icons(@user, @location)
   add_pager_for(@location)
 end

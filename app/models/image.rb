@@ -1000,7 +1000,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     Project.can_edit?(self, user)
   end
 

@@ -117,9 +117,11 @@ class Herbarium < AbstractModel
   # wrap the class method
   delegate :mcp_collections, to: :class
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
+    return false unless user
+
     if personal_user_id
-      personal_user_id == user.try(&:id)
+      personal_user_id == user.id
     else
       curators.none? || curators.member?(user)
     end

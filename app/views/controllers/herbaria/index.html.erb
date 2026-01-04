@@ -55,7 +55,7 @@ end if @merge %>
                 [<%= tag.i(herbarium.name.t, style: "color:red") %>]
               <% end %>
               <% if @user && !@merge &&
-                      (herbarium.can_edit? || in_admin_mode?) %>
+                      (herbarium.can_edit?(@user) || in_admin_mode?) %>
                 [<%= link_to(:EDIT.t, edit_herbarium_path(herbarium),
                              class: "edit_herbarium_link_#{herbarium.id}") %> |
                 <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id),

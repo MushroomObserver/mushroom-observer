@@ -5,7 +5,7 @@ heading = [
            data: { time: @show_user.verified.strftime("%Y-%m-%dT%H:%M:%S") })
 ].safe_join
 heading_links =
-  if @show_user != User.current && !@show_user.no_emails &&
+  if @show_user != @user && !@show_user.no_emails &&
      @show_user.email_general_question
     modal_link_to("user_question_email", *email_user_question_tab(@show_user))
   else

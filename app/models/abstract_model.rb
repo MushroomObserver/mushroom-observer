@@ -728,8 +728,10 @@ class AbstractModel < ApplicationRecord
     save
   end
 
-  def can_edit?(user = User.current)
-    !respond_to?(:user) || (user && (self.user_id == user.id))
+  def can_edit?(user)
+    return false unless user
+
+    !respond_to?(:user) || self.user_id == user.id
   end
 
   def string_with_id(str)

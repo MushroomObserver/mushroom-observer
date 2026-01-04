@@ -12,7 +12,7 @@ add_owner_naming(show_owner_naming)
 if @user
   add_pager_for(@observation)
   add_interest_icons(@user, @observation)
-  add_edit_icons(@observation)
+  add_edit_icons(@observation, @user)
 end
 
 container_class(:double)

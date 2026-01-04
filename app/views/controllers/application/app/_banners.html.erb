@@ -12,7 +12,7 @@ admin_banner_classes = "h3 text-center font-weight-bold p-2"
     ) %>
   <% elsif session[:real_user_id].present? %>
     <%= tag.div(
-      "DANGER: You are currently logged in as #{User.current.login}.",
+      "DANGER: You are currently logged in as #{@user.login}.",
       id: "admin_banner", class: admin_banner_classes
     ) %>
   <% end %>

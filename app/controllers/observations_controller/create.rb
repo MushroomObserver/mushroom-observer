@@ -147,7 +147,7 @@ module ObservationsController::Create
       herbarium_record = create_herbarium_record(
         herbarium, initial_det, accession_number, herbarium_record_notes
       )
-    elsif herbarium_record.can_edit?
+    elsif herbarium_record.can_edit?(@user)
       flash_warning(:create_herbarium_record_already_used.t) if
         herbarium_record.observations.any?
     else
