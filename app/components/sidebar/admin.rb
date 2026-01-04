@@ -5,19 +5,21 @@ module Components
     # Renders the "Admin" section of the sidebar for admin users in admin mode
     #
     # @example Basic usage
-    #   render(Components::Sidebar::Admin.new(classes: sidebar_css_classes))
+    #   render(Components::Sidebar::Admin.new(
+    #     heading_key: :app_admin,
+    #     tabs: sidebar_admin_tabs,
+    #     classes: sidebar_css_classes
+    #   ))
     #
     class Admin < Section
-      include Tabs::Sidebar::AdminHelper
-
       include Rails.application.routes.url_helpers
 
       def view_template
         div(class: @classes[:heading]) do
-          plain("#{heading_key.t}:")
+          plain("#{@heading_key.t}:")
         end
 
-        tabs.compact.each do |link|
+        tabs_array.compact.each do |link|
           render_nav_link(link, link_class: @classes[:admin])
         end
 
@@ -30,16 +32,6 @@ module Components
             method: :post
           )
         )
-      end
-
-      private
-
-      def heading_key
-        :app_admin
-      end
-
-      def tabs_method
-        :sidebar_admin_tabs
       end
     end
   end

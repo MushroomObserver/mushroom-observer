@@ -13,9 +13,11 @@ module Components
   #
   class ApplicationSidebar < Base
     include SidebarHelper
+    include Tabs::Sidebar::AdminHelper
     include Tabs::Sidebar::IndexesHelper
     include Tabs::Sidebar::InfoHelper
     include Tabs::Sidebar::LatestHelper
+    include Tabs::Sidebar::LoginHelper
     include Tabs::Sidebar::ObservationsHelper
     include Tabs::Sidebar::SpeciesListsHelper
 
@@ -68,9 +70,17 @@ module Components
       # This cache depends only on user status (logged-in? admin?)
       cache([user_status_string(@user), "login"]) do
         if @in_admin_mode
-          render(Components::Sidebar::Admin.new(classes: classes))
+          render(Components::Sidebar::Admin.new(
+                   heading_key: :app_admin,
+                   tabs: sidebar_admin_tabs,
+                   classes: classes
+                 ))
         elsif @user.nil?
-          render(Components::Sidebar::Login.new(classes: classes))
+          render(Components::Sidebar::Login.new(
+                   heading_key: :app_account,
+                   tabs: sidebar_login_tabs,
+                   classes: classes
+                 ))
         end
       end
     end

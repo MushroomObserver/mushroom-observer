@@ -4,6 +4,23 @@ require "test_helper"
 
 module Sidebar
   class AdminTest < ComponentTestCase
+    include Tabs::Sidebar::AdminHelper
+    include Rails.application.routes.url_helpers
+
+    def setup
+      super
+      @original_default_url_options =
+        Rails.application.routes.default_url_options.dup
+      Rails.application.routes.default_url_options[:host] = "test.host"
+    end
+
+    def teardown
+      Rails.application.routes.default_url_options.replace(
+        @original_default_url_options
+      )
+      super
+    end
+
     def test_renders_heading_links_and_button
       html = render_component
 
@@ -54,7 +71,11 @@ module Sidebar
         heading: "list-group-item disabled font-weight-bold",
         admin: "list-group-item admin"
       }
-      render(Components::Sidebar::Admin.new(classes: classes))
+      render(Components::Sidebar::Admin.new(
+               heading_key: :app_admin,
+               tabs: sidebar_admin_tabs,
+               classes: classes
+             ))
     end
   end
 end

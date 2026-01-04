@@ -4,6 +4,23 @@ require "test_helper"
 
 module Sidebar
   class LoginTest < ComponentTestCase
+    include Tabs::Sidebar::LoginHelper
+    include Rails.application.routes.url_helpers
+
+    def setup
+      super
+      @original_default_url_options =
+        Rails.application.routes.default_url_options.dup
+      Rails.application.routes.default_url_options[:host] = "test.host"
+    end
+
+    def teardown
+      Rails.application.routes.default_url_options.replace(
+        @original_default_url_options
+      )
+      super
+    end
+
     def test_renders_heading_with_icon_and_links
       html = render_component
 
@@ -47,7 +64,11 @@ module Sidebar
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent"
       }
-      render(Components::Sidebar::Login.new(classes: classes))
+      render(Components::Sidebar::Login.new(
+               heading_key: :app_account,
+               tabs: sidebar_login_tabs,
+               classes: classes
+             ))
     end
   end
 end
