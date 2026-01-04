@@ -197,7 +197,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member&.trust_level != "no_trust"
   end
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     admin?(user)
   end
 

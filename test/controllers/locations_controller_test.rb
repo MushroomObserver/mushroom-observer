@@ -124,9 +124,8 @@ class LocationsControllerTest < FunctionalTestCase
     get(:show, params: { id: location.id })
 
     # Admin mode: both edit and destroy links should be present
-    assert_select("a[href='#{edit_location_path(location)}']")
-    assert_select("a[data-turbo-method='delete']" \
-                  "[href='#{location_path(location)}']")
+    assert_edit_button(location)
+    assert_destroy_button(location)
   end
 
   def test_show_location_edit_icons_for_non_admin
@@ -135,9 +134,8 @@ class LocationsControllerTest < FunctionalTestCase
     get(:show, params: { id: location.id })
 
     # Non-admin: edit link present, destroy link absent
-    assert_select("a[href='#{edit_location_path(location)}']")
-    assert_select("a[data-turbo-method='delete']" \
-                  "[href='#{location_path(location)}']", count: 0)
+    assert_edit_button(location)
+    assert_no_destroy_button(location)
   end
 
   def assert_show_location

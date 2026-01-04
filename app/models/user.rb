@@ -406,7 +406,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # User is the only one allowed to edit their own account info.
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     user == self
   end
 

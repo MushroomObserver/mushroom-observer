@@ -14,12 +14,12 @@ module Header
   module InterestAndEditIconsHelper
     # Edit and destroy icons for the show page title bar.
     # Only shows buttons the user has permission to use.
-    def add_edit_icons(object)
+    def add_edit_icons(object, user)
       icons = []
       icons << tag.li { edit_button(target: object, icon: :edit) } if
-        object.can_edit?
+        can_edit_object?(object, user)
       icons << tag.li { destroy_button(target: object, icon: :delete) } if
-        can_destroy_object?(object)
+        can_destroy_object?(object, user)
 
       return if icons.empty?
 
@@ -111,10 +111,18 @@ module Header
 
     private
 
-    def can_destroy_object?(object)
-      return in_admin_mode? if object.is_a?(Location)
+    def can_edit_object?(object, user)
+      in_admin_mode? || object.can_edit?(user)
+    end
 
-      object.can_edit?
+    def can_destroy_object?(object, user)
+      if object.is_a?(Location)
+        result = in_admin_mode?
+        Rails.logger.debug "DEBUG: can_destroy_object? for Location, in_admin_mode? = #{result.inspect}"
+        return result
+      end
+
+      can_edit_object?(object, user)
     end
   end
 end

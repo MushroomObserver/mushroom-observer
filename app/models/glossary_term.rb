@@ -97,7 +97,7 @@ class GlossaryTerm < AbstractModel
     "#{name} (#{id})"
   end
 
-  def can_edit?(_user = User.current)
+  def can_edit?(_user)
     true
   end
 

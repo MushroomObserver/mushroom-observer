@@ -175,7 +175,7 @@ class HerbariumRecordsController < ApplicationController
       return
     end
 
-    if @other_record.can_edit?
+    if @other_record.can_edit?(@user)
       flash_herbarium_record_already_used_and_add_observation
     else
       flash_herbarium_record_already_used_by_someone_else
@@ -289,7 +289,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def make_sure_can_edit!
-    return true if in_admin_mode? || @herbarium_record.can_edit?
+    return true if in_admin_mode? || @herbarium_record.can_edit?(@user)
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
@@ -298,7 +298,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def make_sure_can_delete!(herbarium_record)
-    return true if herbarium_record.can_edit? || in_admin_mode?
+    return true if herbarium_record.can_edit?(@user) || in_admin_mode?
     return true if herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
@@ -393,8 +393,8 @@ class HerbariumRecordsController < ApplicationController
 
   def can_add_record_to_herbarium?
     return true if in_admin_mode?
-    return true if @observation&.can_edit?
-    return true if @herbarium_record.observations.any?(&:can_edit?)
+    return true if @observation&.can_edit?(@user)
+    return true if @herbarium_record.observations.any? { |o| o.can_edit?(@user) }
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:create_herbarium_record_only_curator_or_owner.t)
