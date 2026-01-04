@@ -4,6 +4,23 @@ require "test_helper"
 
 module Sidebar
   class LatestTest < ComponentTestCase
+    include Tabs::Sidebar::LatestHelper
+    include Rails.application.routes.url_helpers
+
+    def setup
+      super
+      @original_default_url_options =
+        Rails.application.routes.default_url_options.dup
+      Rails.application.routes.default_url_options[:host] = "test.host"
+    end
+
+    def teardown
+      Rails.application.routes.default_url_options.replace(
+        @original_default_url_options
+      )
+      super
+    end
+
     def test_renders_heading_and_links
       html = render_component
 
@@ -55,7 +72,11 @@ module Sidebar
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent"
       }
-      render(Components::Sidebar::Latest.new(user: user, classes: classes))
+      render(Components::Sidebar::Section.new(
+               heading_key: :app_latest,
+               tabs: sidebar_latest_tabs(user),
+               classes: classes
+             ))
     end
   end
 end

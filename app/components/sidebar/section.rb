@@ -4,30 +4,39 @@ module Components
   module Sidebar
     # Base class for sidebar sections that render a heading and list of links
     #
-    # The default view_template expects subclasses to implement:
-    # - heading_key: returns the translation key for the section heading
-    # - tabs_method: returns the method name to call for getting tabs
+    # Can be used directly by passing heading_key and tabs as props, or
+    # subclassed for more complex rendering (e.g., Login and Admin components).
     #
-    # Subclasses may override view_template entirely if they need custom
-    # rendering (e.g., Login and Admin components).
+    # @example Direct usage
+    #   render(Components::Sidebar::Section.new(
+    #     heading_key: :INDEXES,
+    #     tabs: sidebar_indexes_tabs,
+    #     classes: sidebar_css_classes
+    #   ))
     #
     class Section < Components::Base
       prop :user, _Nilable(::User), default: nil
       prop :classes, _Hash(Symbol, String)
+      prop :heading_key, _Nilable(Symbol), default: nil
+      prop :tabs, _Nilable(_Array(_Nilable(Array))), default: nil
 
       register_output_helper :active_link_to
 
       def view_template
         div(class: @classes[:heading]) do
-          plain("#{heading_key.t}:")
+          plain("#{@heading_key.t}:")
         end
 
-        tabs.compact.each do |link|
+        tabs_array.compact.each do |link|
           render_nav_link(link)
         end
       end
 
       private
+
+      def tabs_array
+        @tabs || tabs
+      end
 
       def tabs
         if method(tabs_method).arity.zero?
@@ -47,13 +56,6 @@ module Components
 
         active_link_to(title, url, **html_options)
       end
-
-      # NOTE: Subclasses using the default view_template should implement:
-      # - heading_key: returns a translation key symbol (e.g., :app_more)
-      # - tabs_method: returns a method name symbol (e.g., :sidebar_info_tabs)
-      #
-      # If these methods are missing, Ruby will raise NoMethodError when
-      # view_template is called.
     end
   end
 end

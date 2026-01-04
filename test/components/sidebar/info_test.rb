@@ -4,6 +4,23 @@ require "test_helper"
 
 module Sidebar
   class InfoTest < ComponentTestCase
+    include Tabs::Sidebar::InfoHelper
+    include Rails.application.routes.url_helpers
+
+    def setup
+      super
+      @original_default_url_options =
+        Rails.application.routes.default_url_options.dup
+      Rails.application.routes.default_url_options[:host] = "test.host"
+    end
+
+    def teardown
+      Rails.application.routes.default_url_options.replace(
+        @original_default_url_options
+      )
+      super
+    end
+
     def test_renders_heading_and_links
       html = render_component
 
@@ -48,7 +65,11 @@ module Sidebar
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent"
       }
-      render(Components::Sidebar::Info.new(classes: classes))
+      render(Components::Sidebar::Section.new(
+               heading_key: :app_more,
+               tabs: sidebar_info_tabs,
+               classes: classes
+             ))
     end
   end
 end

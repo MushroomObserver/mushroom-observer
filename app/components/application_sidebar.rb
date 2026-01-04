@@ -13,6 +13,11 @@ module Components
   #
   class ApplicationSidebar < Base
     include SidebarHelper
+    include Tabs::Sidebar::IndexesHelper
+    include Tabs::Sidebar::InfoHelper
+    include Tabs::Sidebar::LatestHelper
+    include Tabs::Sidebar::ObservationsHelper
+    include Tabs::Sidebar::SpeciesListsHelper
 
     prop :user, _Nilable(::User), default: nil
     prop :browser, _Any
@@ -88,15 +93,17 @@ module Components
                ))
       end
 
-      render(Components::Sidebar::Observations.new(
-               user: @user,
+      render(Components::Sidebar::Section.new(
+               heading_key: :app_observations_left,
+               tabs: sidebar_observations_tabs(@user),
                classes: classes
              ))
 
       return unless @user
 
-      render(Components::Sidebar::SpeciesLists.new(
-               user: @user,
+      render(Components::Sidebar::Section.new(
+               heading_key: :app_species_list,
+               tabs: sidebar_species_lists_tabs(@user),
                classes: classes
              ))
 
@@ -106,11 +113,25 @@ module Components
     def render_info_sections
       # This cache depends only on user status (logged-in? admin?)
       cache([user_status_string(@user), "links"]) do
-        render(Components::Sidebar::Latest.new(user: @user, classes: classes))
+        render(Components::Sidebar::Section.new(
+                 heading_key: :app_latest,
+                 tabs: sidebar_latest_tabs(@user),
+                 classes: classes
+               ))
 
-        render(Components::Sidebar::Indexes.new(classes: classes)) if @user
+        if @user
+          render(Components::Sidebar::Section.new(
+                   heading_key: :INDEXES,
+                   tabs: sidebar_indexes_tabs,
+                   classes: classes
+                 ))
+        end
 
-        render(Components::Sidebar::Info.new(classes: classes))
+        render(Components::Sidebar::Section.new(
+                 heading_key: :app_more,
+                 tabs: sidebar_info_tabs,
+                 classes: classes
+               ))
 
         render(Components::Sidebar::Languages.new(
                  browser: @browser,
