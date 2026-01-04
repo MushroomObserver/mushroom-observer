@@ -70,8 +70,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select(
       "a[href*=?]", new_project_admin_request_path(project_id: p_id)
     )
-    assert_select("a[href*=?]", edit_project_path(p_id), false,
-                  "Non-admin should not see link to edit project")
+    assert_no_edit_button(projects(:eol_project))
     assert_select(
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
@@ -108,8 +107,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_template("show")
-    assert_select("a[href*=?]", edit_project_path(project), true,
-                  "Project owner should see link to edit project")
+    assert_edit_button(project)
   end
 
   def test_show_project_logged_in_admin
@@ -120,8 +118,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_template("show")
-    assert_select("a[href*=?]", edit_project_path(project), true,
-                  "Project admmin should see link to edit project")
+    assert_edit_button(project)
   end
 
   def test_show_project_with_location
