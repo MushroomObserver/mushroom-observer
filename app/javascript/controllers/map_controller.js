@@ -116,23 +116,21 @@ export default class extends GeocodeController {
     }
   }
 
-  // We don't draw the map for the create obs form on load, to save on API
-  // If we only have one marker, don't use fitBounds - it's too zoomed in.
-  // Call setCenter, setZoom with marker position and desired zoom level.
+  // We don't draw the map for the create obs form on load, to save on API.
+  // Always use fitBounds to properly display the location bounds, with a
+  // maxZoom to prevent zooming in too close for small/point locations.
   drawMap() {
     this.verbose("map:drawMap")
     this.map = new google.maps.Map(this.mapDivTarget, this.mapOptions)
     if (this.mapBounds) {
-      if (Object.keys(this.collection.sets).length == 1) {
-        const pt = new google.maps.LatLng(
-          this.collection.extents.lat,
-          this.collection.extents.lng
-        )
-        this.map.setCenter(pt)
-        this.map.setZoom(12)
-      } else {
-        this.map.fitBounds(this.mapBounds)
-      }
+      this.map.fitBounds(this.mapBounds)
+      // Prevent excessive zoom for small locations (points or tiny areas)
+      const maxZoom = 15
+      google.maps.event.addListenerOnce(this.map, 'bounds_changed', () => {
+        if (this.map.getZoom() > maxZoom) {
+          this.map.setZoom(maxZoom)
+        }
+      })
     }
   }
 
