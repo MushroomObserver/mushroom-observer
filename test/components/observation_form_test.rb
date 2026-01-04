@@ -25,13 +25,9 @@ class ObservationFormTest < ComponentTestCase
       place_name: "California"
     )
 
-    # Use negative lookbehind to avoid matching data-action
-    form_match = html.match(/<form[^>]*(?<!data-)action="([^"]*)"[^>]*>/)
-    assert(form_match, "Expected to find a form tag with action")
-
-    # Should include approval query params
-    assert_includes(form_match[1], "approved_name=Agaricus")
-    assert_includes(form_match[1], "approved_where=California")
+    # Form action should include approval query params
+    assert_html(html, "form[action*='approved_name=Agaricus']")
+    assert_html(html, "form[action*='approved_where=California']")
   end
 
   private
