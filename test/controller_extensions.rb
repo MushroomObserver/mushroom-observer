@@ -708,7 +708,7 @@ module ControllerExtensions
     # Look for any input whose ID ends with the given id (model prefix pattern)
     css_select("input[type=checkbox]").each do |elem|
       elem_id = elem["id"].to_s
-      return elem_id if elem_id.end_with?("_#{id_str}") || elem_id == id_str
+      return elem_id if elem_id.end_with?("_#{id_str}")
     end
     id_str # Return original if not found (will fail assertion)
   end
