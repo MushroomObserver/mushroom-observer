@@ -159,7 +159,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     term = glossary_terms(:conic_glossary_term)
 
     login
-    assert(term.can_edit?)
+    assert(term.can_edit?(users(:rolf)))
 
     post(:edit, params: { id: term.id })
 

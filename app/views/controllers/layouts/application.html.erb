@@ -4,7 +4,7 @@
 html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
 ctrlr_action = "#{controller.controller_name}__#{controller.action_name}"
 theme = "theme-#{@css_theme.underscore.dasherize}"
-location_format = "location-format-#{User.current_location_format || "postal"}"
+location_format = "location-format-#{@user&.location_format || "postal"}"
 logged_in = @user ? "logged-in-user" : "no-user"
 body_class = class_names(ctrlr_action, theme, location_format, logged_in)
 # These execute AFTER the template!
@@ -49,7 +49,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
               data-controller="lightgallery">
 
             <%# unless @user&.verified? %>
-            <%# render(partial: "application/content/login_layout") %>
+            <%# render(Components::LoginLayout.new) %>
             <%# end %>
 
             <!--MAIN_PAGE_CONTENT-->

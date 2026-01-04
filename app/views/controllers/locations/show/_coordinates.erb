@@ -1,8 +1,10 @@
 <% heading_links = [
   icon_link_to(*edit_location_tab(@location))
 ]
-if in_admin_mode?
+if @location.destroyable? && (in_admin_mode? || @location.user == @user)
   heading_links << destroy_button(target: @location, icon: :delete)
+end
+if in_admin_mode?
   heading_links << icon_link_with_query(*location_reverse_order_tab(@location))
 end
 footer = icon_link_to(*observations_at_location_tab(@location))

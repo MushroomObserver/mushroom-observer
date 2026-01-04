@@ -11,12 +11,12 @@ module Account::Profile
 
     # was reuse_image params[:mode] = profile
     def reuse
-      nil unless User.safe_find(params[:id]) == User.current
+      nil unless User.safe_find(params[:id]) == @user
     end
 
     # POST action
     def attach
-      return unless User.safe_find(params[:id]) == User.current
+      return unless User.safe_find(params[:id]) == @user
 
       image = Image.safe_find(params[:img_id])
       unless image

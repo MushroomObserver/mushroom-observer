@@ -112,7 +112,9 @@ class HerbariumRecord < AbstractModel
   end
 
   # Can a given user edit this HerbariumRecord?
-  def can_edit?(user = User.current)
+  def can_edit?(user)
+    return false unless user
+
     self.user == user || herbarium&.curator?(user)
   end
 

@@ -15,7 +15,7 @@ flash_error(@error) if @error && @objects.empty?
         herbarium = rec.herbarium %>
       <tr>
         <td>
-          <%= if in_admin_mode? || rec.can_edit?
+          <%= if in_admin_mode? || rec.can_edit?(@user)
                   link_to(
                     :EDIT.t,
                     edit_herbarium_record_path(
@@ -40,7 +40,7 @@ flash_error(@error) if @error && @objects.empty?
                 end.safe_join(", ") %>
         </td>
         <td>
-          <%= if in_admin_mode? || rec.can_edit?
+          <%= if in_admin_mode? || rec.can_edit?(@user)
                   destroy_button(
                     name: :destroy_object.t(type: :herbarium_record),
                     target: herbarium_record_path(rec.id, back: :index),

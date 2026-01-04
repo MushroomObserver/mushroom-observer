@@ -113,8 +113,8 @@ module ObservationsController::New
 
   def add_field_slip_project(code)
     project = FieldSlip.find_by(code: code)&.project
-    return unless project&.current? || project&.admin?(User.current)
-    return unless project&.member?(User.current)
+    return unless project&.current? || project&.admin?(@user)
+    return unless project&.member?(@user)
 
     @projects.append(project) unless @projects.include?(project)
     @projects.each do |proj|
