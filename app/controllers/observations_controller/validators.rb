@@ -53,11 +53,34 @@ module ObservationsController::Validators
   # also used in namings_controller
   def name_params
     {
-      given_name: params.dig(:naming, :name).to_s,
-      # given_id: params.dig(:naming, :name_id).to_i,
+      given_name: naming_params_dig(:name).to_s,
+      # given_id: naming_params_dig(:name_id).to_i,
       approved_name: params[:approved_name].to_s,
       chosen_name: params.dig(:chosen_name, :name_id).to_s
     }
+  end
+
+  # Dig into naming params, checking both old and new param structures
+  # Old: params[:naming][:key], New: params[:observation][:naming][:key]
+  def naming_params_dig(*keys)
+    params.dig(:observation, :naming, *keys) || params.dig(:naming, *keys)
+  end
+
+  # Helper methods for nested form params (Superform nests under :observation)
+  def collection_number_params
+    params.dig(:observation, :collection_number) || params[:collection_number]
+  end
+
+  def herbarium_record_params
+    params.dig(:observation, :herbarium_record) || params[:herbarium_record]
+  end
+
+  def project_params
+    params.dig(:observation, :project) || params[:project]
+  end
+
+  def list_params
+    params.dig(:observation, :list) || params[:list]
   end
 
   # The form may be in a state where it has an existing MO Location name in the
@@ -93,7 +116,8 @@ module ObservationsController::Validators
   end
 
   def validate_projects
-    return true if params[:project].empty?
+    proj_params = project_params
+    return true if proj_params.blank?
 
     conflicting_projects = checked_project_conflicts - @observation.projects
     @error_checked_projects = conflicting_projects.reject do |proj|
@@ -105,7 +129,7 @@ module ObservationsController::Validators
       return false
     end
 
-    return true if params[:project][:ignore_proj_conflicts] == "1"
+    return true if proj_params[:ignore_proj_conflicts] == "1"
 
     @suspect_checked_projects = conflicting_projects - @error_checked_projects
     if @suspect_checked_projects.any?
@@ -118,8 +142,10 @@ module ObservationsController::Validators
   end
 
   def checked_project_conflicts
-    checked_proj_check_boxes =
-      params[:project].select { |_, value| value == "1" }.keys
+    proj_params = project_params
+    return [] unless proj_params
+
+    checked_proj_check_boxes = proj_params.select { |_, v| v == "1" }.keys
     return [] if checked_proj_check_boxes.none?
 
     checked_proj_ids =

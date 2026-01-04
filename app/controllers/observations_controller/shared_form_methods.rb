@@ -83,15 +83,17 @@ module ObservationsController::SharedFormMethods
 
   def init_specimen_vars_for_reload
     init_specimen_vars
-    if params[:collection_number]
-      @collectors_name   = params[:collection_number][:name]
-      @collectors_number = params[:collection_number][:number]
+    col_params = collection_number_params
+    if col_params
+      @collectors_name   = col_params[:name]
+      @collectors_number = col_params[:number]
     end
-    return unless params[:herbarium_record]
+    herb_params = herbarium_record_params
+    return unless herb_params
 
-    @herbarium_name   = params[:herbarium_record][:herbarium_name]
-    @herbarium_id     = params[:herbarium_record][:herbarium_id]
-    @accession_number = params[:herbarium_record][:accession_number]
+    @herbarium_name   = herb_params[:herbarium_name]
+    @herbarium_id     = herb_params[:herbarium_id]
+    @accession_number = herb_params[:accession_number]
   end
 
   def init_project_vars
@@ -104,9 +106,10 @@ module ObservationsController::SharedFormMethods
     @observation.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
+    proj_params = project_params
     @projects.each do |proj|
-      p = params[:project]
-      @project_checks[proj.id] = p.nil? ? false : p["id_#{proj.id}"] == "1"
+      @project_checks[proj.id] =
+        proj_params.nil? ? false : proj_params["id_#{proj.id}"] == "1"
     end
   end
 
@@ -118,8 +121,9 @@ module ObservationsController::SharedFormMethods
   def init_list_vars_for_reload
     init_list_vars
     @lists = @lists.union(@observation.species_lists)
+    lst_params = list_params
     @lists.each do |list|
-      @list_checks[list.id] = params.dig(:list, "id_#{list.id}") == "1"
+      @list_checks[list.id] = lst_params&.dig("id_#{list.id}") == "1"
     end
   end
 
@@ -270,7 +274,7 @@ module ObservationsController::SharedFormMethods
   ##############################################################################
 
   def update_projects
-    return unless (checks = params[:project])
+    return unless (checks = project_params)
 
     @user.projects_member(include: :observations).each do |project|
       before = @observation.projects.include?(project)
@@ -289,7 +293,7 @@ module ObservationsController::SharedFormMethods
   end
 
   def update_species_lists
-    return unless (checks = params[:list])
+    return unless (checks = list_params)
 
     @user.all_editable_species_lists.includes(:observations).
       find_each do |list|

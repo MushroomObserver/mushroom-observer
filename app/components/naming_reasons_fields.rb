@@ -4,13 +4,13 @@
 # Used in naming form to allow users to provide notes for each reason.
 #
 # @param reasons [Hash] the naming reasons from Naming#init_reasons
-# @param form_namespace [Superform::Namespace] the parent form namespace
+# @param naming_ns [Superform::Namespace] the naming namespace
 class Components::NamingReasonsFields < Components::Base
   prop :reasons, Hash
-  prop :form_namespace, _Any
+  prop :naming_ns, _Any
 
   def view_template
-    @form_namespace.namespace(:reasons) do |reasons_ns|
+    @naming_ns.namespace(:reasons) do |reasons_ns|
       @reasons.values.sort_by(&:order).each do |reason|
         render_reason_container(reasons_ns, reason)
       end

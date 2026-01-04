@@ -30,10 +30,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find("#observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    fill_in("naming_name", with: "Elfin saddle")
+    fill_in("observation_naming_name", with: "Elfin saddle")
     # don't wait for the autocompleter - we know it's an elfin saddle!
     browser.keyboard.type(:tab)
-    assert_field("naming_name", with: "Elfin saddle")
+    assert_field("observation_naming_name", with: "Elfin saddle")
 
     within("#observation_form") { click_commit }
 
@@ -53,13 +53,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
-    fill_in("naming_name", with: "Coprinus com")
+    fill_in("observation_naming_name", with: "Coprinus com")
     browser.keyboard.type(:tab)
     # wait for the autocompleter!
     assert_selector(".auto_complete")
     browser.keyboard.type(:down, :tab) # cursor to first match + select row
     browser.keyboard.type(:tab)
-    assert_field("naming_name", with: "Coprinus comatus")
+    assert_field("observation_naming_name", with: "Coprinus comatus")
     # Place name should stay filled
     browser.keyboard.type(:tab)
 
@@ -263,7 +263,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Fill in minimal required fields
     fill_in("observation_place_name", with: "California, USA")
-    fill_in("naming_name", with: "Agaricus")
+    fill_in("observation_naming_name", with: "Agaricus")
 
     # Submit to create observation
     within("#observation_form") { click_commit }
@@ -325,7 +325,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find("#observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    assert_field("naming_name", with: "")
+    assert_field("observation_naming_name", with: "")
     assert(last_obs.is_collection_location)
     assert_checked_field("observation_is_collection_location", visible: :all)
     assert_no_checked_field("observation_specimen", visible: :all)
@@ -482,7 +482,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_lng", with: SO_PASA_EXIF[:lng].to_s)
     # This geolocation is for Pasadena
 
-    assert_field("naming_name", with: "", visible: :all)
+    assert_field("observation_naming_name", with: "", visible: :all)
     assert_no_checked_field("observation_is_collection_location", visible: :all)
     assert_checked_field("observation_specimen", visible: :all)
     assert_field("collection_number_number", with: "17-034a", visible: :all)
@@ -537,8 +537,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     assert_selector("[data-type='name'][data-autocompleter='connected']")
-    fill_in("naming_name", with: "Agaricus campestris")
-    assert_field("naming_name", with: "Agaricus campestris")
+    fill_in("observation_naming_name", with: "Agaricus campestris")
+    assert_field("observation_naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
     assert_select("naming_vote_value",
                   selected: Vote.confidence(Vote.next_best_vote))

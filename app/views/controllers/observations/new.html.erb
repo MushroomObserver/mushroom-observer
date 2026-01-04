@@ -4,4 +4,33 @@ add_context_nav(observation_form_new_tabs)
 container_class(:wide)
 %>
 
-<%= render(partial: "observations/form", locals: { action: :create }) %>
+<%= render(Components::ObservationForm.new(
+      @observation,
+      mode: :create,
+      user: @user,
+      location: @location,
+      good_images: @good_images || [],
+      exif_data: @exif_data || {},
+      given_name: @given_name,
+      place_name: @place_name,
+      default_place_name: @default_place_name,
+      dubious_where_reasons: @dubious_where_reasons,
+      vote: @vote,
+      names: @names || [],
+      valid_names: @valid_names || [],
+      reasons: @reasons,
+      suggest_corrections: @suggest_corrections || false,
+      parent_deprecated: @parent_deprecated || false,
+      collectors_name: @collectors_name,
+      collectors_number: @collectors_number,
+      herbarium_name: @herbarium_name,
+      herbarium_id: @herbarium_id,
+      accession_number: @accession_number,
+      projects: @projects || [],
+      project_checks: @project_checks || {},
+      lists: @lists || [],
+      list_checks: @list_checks || {},
+      error_checked_projects: @error_checked_projects || [],
+      suspect_checked_projects: @suspect_checked_projects || [],
+      field_code: @field_code
+    )) %>
