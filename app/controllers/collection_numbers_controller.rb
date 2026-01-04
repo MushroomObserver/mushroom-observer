@@ -260,7 +260,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def make_sure_can_edit!(obj)
-    return true if in_admin_mode? || obj.can_edit?
+    return true if in_admin_mode? || obj.can_edit?(@user)
 
     flash_error(:permission_denied.t)
     show_flash_and_send_back
@@ -268,7 +268,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def make_sure_can_delete!(collection_number)
-    return true if collection_number.can_edit? || in_admin_mode?
+    return true if collection_number.can_edit?(@user) || in_admin_mode?
 
     flash_error(:permission_denied.t)
     redirect_to(collection_number_path(collection_number.id))

@@ -89,7 +89,9 @@ class CollectionNumber < AbstractModel
     "#{name_was} #{number_was}"
   end
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
+    return false unless user
+
     observations.any? { |obs| obs.user == user }
   end
 

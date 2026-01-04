@@ -1,6 +1,9 @@
 # RuboCop configuration
 # https://docs.rubocop.org/rubocop/configuration.html
 
+require:
+  - ./lib/rubocop/cop/mushroom_observer/no_user_current_in_views
+
 inherit_from: .rubocop_todo.yml
 inherit_mode:
   merge:
@@ -342,3 +345,16 @@ Style/SymbolArray:
 Rails/SkipsModelValidations:
   # We skip validations all the time. I'm tired of disabling this cop.
   Enabled: false
+
+MushroomObserver/NoUserCurrentInViews:
+  # Prevent use of User.current in controllers and components.
+  # Controllers should use @user, components should receive user: prop.
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
+    - "app/components/**/*.rb"
+  Exclude:
+    # Authentication code legitimately sets User.current
+    - "app/controllers/application_controller.rb"
+    - "app/controllers/account/login_controller.rb"
+    - "app/controllers/admin/session_controller.rb"

@@ -15,7 +15,7 @@ flash_error(@error) if @error && @objects.empty?
       <% @objects.each do |collection_number| %>
         <tr>
           <td>
-            <%= if in_admin_mode? || collection_number.can_edit?
+            <%= if in_admin_mode? || collection_number.can_edit?(@user)
               link_to(:EDIT.t,
                 edit_collection_number_path(id: collection_number.id,
                                             params: { back: :index }),
@@ -33,7 +33,7 @@ flash_error(@error) if @error && @objects.empty?
             end.safe_join(", ") %>
           </td>
           <td>
-            <%= if in_admin_mode? || collection_number.can_edit?
+            <%= if in_admin_mode? || collection_number.can_edit?(@user)
               destroy_button(target: collection_number)
             end %>
           </td>

@@ -1,6 +1,6 @@
 <%
 add_show_title(@herbarium_record.format_name.t, @herbarium_record)
-add_edit_icons(@herbarium_record)
+add_edit_icons(@herbarium_record, @user)
 add_pager_for(@herbarium_record)
 add_context_nav(herbarium_record_show_tabs)
 column_classes(:six)

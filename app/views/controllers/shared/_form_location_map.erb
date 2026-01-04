@@ -9,7 +9,7 @@ on an ancestor element that also contains the inputs
   "", id:,
       class: "form-map collapse",
       data: { indicator_url: asset_path('indicator.gif'),
-              location_format: User.current_location_format,
+              location_format: @user&.location_format || "postal",
               map_target: "mapDiv", editable: true,
               map_type: }
 ) %>

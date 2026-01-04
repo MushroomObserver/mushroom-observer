@@ -283,13 +283,27 @@ class LocationsController < ApplicationController
   end
 
   def destroy
-    return unless in_admin_mode?
     return unless find_location!
+    return unless can_destroy_location?
 
     if @location.destroy
       flash_notice(:runtime_destroyed_id.t(type: :location, value: params[:id]))
     end
     redirect_to(locations_path)
+  end
+
+  def can_destroy_location?
+    unless @location.destroyable?
+      flash_error(:destroy_location_has_associations.t)
+      redirect_to(location_path(@location))
+      return false
+    end
+    unless in_admin_mode? || @location.user == @user
+      flash_error(:permission_denied.t)
+      redirect_to(location_path(@location))
+      return false
+    end
+    true
   end
 
   ##############################################################################

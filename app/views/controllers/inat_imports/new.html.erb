@@ -7,7 +7,7 @@
   <%= form_with(url: inat_imports_path, method: :post) do |f| %>
     <%= f.label(:inat_username, "#{:inat_username.l}: ") %>
     <%= f.text_field(:inat_username, size: 10, class: "form-control",
-                     value: User.current.inat_username) %>
+                     value: @user.inat_username) %>
 
     <%= render(Components::Panel.new(panel_id: "choose_observation",
                      panel_class: "name-section")) do |panel| %>
