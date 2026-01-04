@@ -253,7 +253,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     true
   end
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     Project.can_edit?(self, user) || is_collector?(user)
   end
 

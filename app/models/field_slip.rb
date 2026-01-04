@@ -153,8 +153,10 @@ class FieldSlip < AbstractModel
     observation&.other_codes || ""
   end
 
-  def can_edit?(current_user)
-    user.nil? || user == current_user ||
-      (project&.is_admin?(current_user) && project.trusted_by?(user))
+  def can_edit?(editor)
+    return false unless editor
+
+    user.nil? || user == editor ||
+      (project&.is_admin?(editor) && project.trusted_by?(user))
   end
 end

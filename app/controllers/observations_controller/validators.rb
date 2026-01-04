@@ -121,7 +121,7 @@ module ObservationsController::Validators
 
     conflicting_projects = checked_project_conflicts - @observation.projects
     @error_checked_projects = conflicting_projects.reject do |proj|
-      proj.is_admin?(User.current)
+      proj.is_admin?(@user)
     end
     if @error_checked_projects.any?
       flash_error(:form_observations_there_is_a_problem_with_projects.t)

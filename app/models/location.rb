@@ -698,6 +698,18 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     observations.empty?
   end
 
+  # Can this location be destroyed? Only if it has no associations that would
+  # be orphaned. Associations with dependent: :destroy are fine (comments,
+  # interests, project_aliases).
+  def destroyable?
+    observations.empty? &&
+      projects.empty? &&
+      species_lists.empty? &&
+      herbaria.empty? &&
+      users.empty? &&
+      descriptions.empty?
+  end
+
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved.

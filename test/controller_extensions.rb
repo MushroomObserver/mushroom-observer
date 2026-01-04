@@ -740,4 +740,53 @@ module ControllerExtensions
   def assert_session_query_record_is_correct
     assert_equal(QueryRecord.last.id, session[:query_record])
   end
+
+  # Assert that an edit button/link exists for the given object.
+  # Uses the standard edit path helper.
+  def assert_edit_button(object, msg = nil)
+    path = edit_path_for(object)
+    msg ||= "Expected edit button for #{object.class.name} ##{object.id}"
+    assert_select("a[href='#{path}']", { minimum: 1 }, msg)
+  end
+
+  # Assert that an edit button/link does NOT exist for the given object.
+  def assert_no_edit_button(object, msg = nil)
+    path = edit_path_for(object)
+    msg ||= "Expected NO edit button for #{object.class.name} ##{object.id}"
+    assert_select("a[href='#{path}']", { count: 0 }, msg)
+  end
+
+  # Assert that a destroy button/link exists for the given object.
+  # Checks for both turbo link style and button_to form style.
+  def assert_destroy_button(object, msg = nil)
+    path = show_path_for(object)
+    msg ||= "Expected destroy button for #{object.class.name} ##{object.id}"
+    assert(destroy_button_present?(path), msg)
+  end
+
+  # Assert that a destroy button/link does NOT exist for the given object.
+  def assert_no_destroy_button(object, msg = nil)
+    path = show_path_for(object)
+    msg ||= "Expected NO destroy button for #{object.class.name} ##{object.id}"
+    assert_not(destroy_button_present?(path), msg)
+  end
+
+  def destroy_button_present?(path)
+    # Check for either turbo link or button_to form
+    turbo_link = css_select("a[data-turbo-method='delete'][href='#{path}']")
+    return true if turbo_link.any?
+
+    form = css_select("form[action='#{path}']")
+    form.any? && css_select(form, "input[name='_method'][value='delete']").any?
+  end
+
+  private
+
+  def edit_path_for(object)
+    send("edit_#{object.class.name.underscore}_path", object)
+  end
+
+  def show_path_for(object)
+    send("#{object.class.name.underscore}_path", object)
+  end
 end

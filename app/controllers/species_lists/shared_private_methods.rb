@@ -89,8 +89,8 @@ module SpeciesLists
     end
 
     def init_project_vars
-      @projects = User.current.projects_member(order: :title,
-                                               include: { user_group: :users })
+      @projects = @user.projects_member(order: :title,
+                                        include: { user_group: :users })
       @project_checks = {}
     end
 
