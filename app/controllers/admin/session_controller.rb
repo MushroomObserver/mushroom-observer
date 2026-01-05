@@ -22,7 +22,7 @@ module Admin
         session[:admin] = nil
       end
 
-      redirect_back_or_default("/")
+      redirect_back_or_to("/")
     end
 
     # Form for admins to switch users
@@ -43,8 +43,7 @@ module Admin
       new_user = find_user_by_id_login_or_email(@id)
       if new_user.blank? && @id.present?
         flash_error("Couldn't find \"#{@id}\".  Play again?")
-        @form = FormObject::AdminSession.new(user: @id)
-        render(action: :edit)
+        redirect_to(action: :edit)
       # Allow non-admin that's already in "switch user mode" to switch to
       # another user. This is a weird case which only comes up if you switch to
       # another admin user.  But if you do so the Switch User mechanism should
@@ -53,8 +52,7 @@ module Admin
         redirect_back_or_default("/")
       elsif new_user.present?
         switch_to_user_if_verified(new_user)
-        @form = FormObject::AdminSession.new(user: @id)
-        render(action: :edit)
+        redirect_to(action: :edit)
       end
     end
 

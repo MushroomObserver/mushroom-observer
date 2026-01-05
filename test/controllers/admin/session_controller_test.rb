@@ -68,6 +68,7 @@ module Admin
       # Autocompleter submits user_id as hidden field
       put(:update, params: { admin_session: { user_id: mary.id } })
       assert_users_equal(mary, User.current)
+      assert_redirected_to(action: :edit)
     end
 
     # Test "Full Name (login)" format from autocompleter text field
@@ -79,6 +80,19 @@ module Admin
       assert_users_equal(rolf, User.current)
       # Autocompleter shows "Full Name (login)" in text field
       put(:update, params: { admin_session: { user: mary.unique_text_name } })
+      assert_users_equal(mary, User.current)
+    end
+
+    # Test that update redirects to edit (PRG pattern) so browser URL is correct
+    def test_update_redirects_to_edit
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+
+      # Switch to mary - should redirect to edit, not render
+      put(:update, params: { admin_session: { user_id: mary.id } })
+      assert_response(:redirect)
+      assert_redirected_to(action: :edit)
       assert_users_equal(mary, User.current)
     end
   end
