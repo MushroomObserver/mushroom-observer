@@ -101,6 +101,72 @@ class ApplicationSidebarTest < ComponentTestCase
     assert_html(html, "div#navigation")
   end
 
+  def test_cache_key_includes_locale_in_top_section
+    component = Components::ApplicationSidebar.new(
+      user: nil,
+      browser: human_browser,
+      request: mock_request,
+      in_admin_mode: false,
+      languages: mock_languages
+    )
+
+    # Capture the cache key from render_top_section (login section)
+    captured_key = nil
+    component.stub(:cache, lambda { |key, &block|
+      captured_key = key if key.include?("login")
+      block.call
+    }) do
+      render(component)
+    end
+
+    assert_equal([I18n.locale, "guest", "login"], captured_key,
+                 "Cache key should include locale, user status, and section")
+  end
+
+  def test_different_locales_use_different_cache_keys_in_info_sections
+    keys = []
+
+    # Render with English locale
+    component_en = Components::ApplicationSidebar.new(
+      user: @user,
+      browser: human_browser,
+      request: mock_request,
+      in_admin_mode: false,
+      languages: mock_languages
+    )
+
+    # Stub cache to capture all keys
+    component_en.stub(:cache, lambda { |key, &block|
+      keys << key if key.include?("links")
+      block.call
+    }) do
+      I18n.with_locale(:en) { render(component_en) }
+    end
+
+    # Render with German locale (new component instance)
+    component_de = Components::ApplicationSidebar.new(
+      user: @user,
+      browser: human_browser,
+      request: mock_request,
+      in_admin_mode: false,
+      languages: mock_languages
+    )
+
+    component_de.stub(:cache, lambda { |key, &block|
+      keys << key if key.include?("links")
+      block.call
+    }) do
+      I18n.with_locale(:de) { render(component_de) }
+    end
+
+    assert_equal([:en, "user", "links"], keys[0],
+                 "First key should use :en locale")
+    assert_equal([:de, "user", "links"], keys[1],
+                 "Second key should use :de locale")
+    assert_not_equal(keys[0], keys[1],
+                     "Different locales should have different cache keys")
+  end
+
   private
 
   def render_component(user: @user, browser: human_browser,
