@@ -23,38 +23,54 @@ export const MapIntegrationMixin = {
       return;
     }
 
+    // Map controller may not be connected yet if map is collapsed
+    let map;
+    try {
+      map = this.mapOutlet;
+    } catch (e) {
+      this.verbose("MapIntegrationMixin: map outlet not ready");
+      return;
+    }
+
     this.verbose("MapIntegrationMixin:activateMapOutlet()");
     // open the map if not already open
-    if (!this.mapOutlet.opened && this.mapOutlet.hasToggleMapBtnTarget) {
+    if (!map.opened && map.hasToggleMapBtnTarget) {
       this.verbose("MapIntegrationMixin: open map");
-      this.mapOutlet.toggleMapBtnTarget.click();
+      map.toggleMapBtnTarget.click();
     }
     // set the map type so box is editable
-    this.mapOutlet.map_type = "hybrid"; // only if location_google
+    map.map_type = "hybrid"; // only if location_google
     // set the map to stop ignoring place input
-    this.mapOutlet.ignorePlaceInput = false;
+    map.ignorePlaceInput = false;
 
     // Often, this swap to location_google is for geolocating place_names and
     // should pay attention to text only. But in some cases the swap (e.g., from
     // form-exif) sends request_params lat/lng, so geocode when switching.
     if (location) {
-      this.mapOutlet.tryToGeocode();
+      map.tryToGeocode();
     }
   },
 
   deactivateMapOutlet() {
     if (!this.hasMapOutlet) return;
 
-    this.verbose("MapIntegrationMixin: deactivateMapOutlet()");
-    if (this.mapOutlet.rectangle) this.mapOutlet.clearRectangle();
-    this.mapOutlet.map_type = "observation";
+    let map;
+    try {
+      map = this.mapOutlet;
+    } catch (e) {
+      return;
+    }
 
-    this.mapOutlet.northInputTarget.value = '';
-    this.mapOutlet.southInputTarget.value = '';
-    this.mapOutlet.eastInputTarget.value = '';
-    this.mapOutlet.westInputTarget.value = '';
-    this.mapOutlet.highInputTarget.value = '';
-    this.mapOutlet.lowInputTarget.value = '';
+    this.verbose("MapIntegrationMixin: deactivateMapOutlet()");
+    if (map.rectangle) map.clearRectangle();
+    map.map_type = "observation";
+
+    map.northInputTarget.value = '';
+    map.southInputTarget.value = '';
+    map.eastInputTarget.value = '';
+    map.westInputTarget.value = '';
+    map.highInputTarget.value = '';
+    map.lowInputTarget.value = '';
   },
 
   // ---------------------- Create Mode ----------------------
@@ -66,11 +82,18 @@ export const MapIntegrationMixin = {
   leaveCreate() {
     if (!(['location_google'].includes(this.TYPE) && this.hasMapOutlet)) return;
 
+    let map;
+    try {
+      map = this.mapOutlet;
+    } catch (e) {
+      return;
+    }
+
     this.verbose("MapIntegrationMixin: leaveCreate()");
-    const location = this.mapOutlet.validateLatLngInputs(false);
+    const location = map.validateLatLngInputs(false);
     // Will swap to location, or location_containing if lat/lngs are present
-    if (this.mapOutlet.ignorePlaceInput !== true) {
-      this.mapOutlet.sendPointChanged(location);
+    if (map.ignorePlaceInput !== true) {
+      map.sendPointChanged(location);
     }
   },
 
@@ -81,11 +104,18 @@ export const MapIntegrationMixin = {
   // stuck with a single geolocatePlaceName result, which is only ever one.
   // If we don't have lat/lngs, just draw the pulldown.
   scheduleGoogleRefresh() {
-    if (this.hasMapOutlet &&
-      this.mapOutlet.hasLatInputTarget &&
-      this.mapOutlet.hasLngInputTarget &&
-      this.mapOutlet?.latInputTarget.value &&
-      this.mapOutlet?.lngInputTarget.value) {
+    let map;
+    try {
+      map = this.hasMapOutlet ? this.mapOutlet : null;
+    } catch (e) {
+      map = null;
+    }
+
+    if (map &&
+      map.hasLatInputTarget &&
+      map.hasLngInputTarget &&
+      map.latInputTarget.value &&
+      map.lngInputTarget.value) {
       this.drawPulldown();
       return;
     }
@@ -101,8 +131,8 @@ export const MapIntegrationMixin = {
       // STORE AND COMPARE SEARCH STRING. Otherwise we're doing double lookups
       if (this.hasGeocodeOutlet) {
         this.geocodeOutlet.tryToGeolocate(current_input);
-      } else if (this.hasMapOutlet) {
-        this.mapOutlet.tryToGeolocate(current_input);
+      } else if (map) {
+        map.tryToGeolocate(current_input);
       }
     }), this.REFRESH_DELAY * 1000);
   },
@@ -151,8 +181,15 @@ export const MapIntegrationMixin = {
   ignoringTextInput() {
     if (!this.hasMapOutlet) return false;
 
+    let map;
+    try {
+      map = this.mapOutlet;
+    } catch (e) {
+      return false;
+    }
+
     this.verbose("MapIntegrationMixin:ignoringTextInput()");
-    return this.mapOutlet.ignorePlaceInput;
+    return map.ignorePlaceInput;
   }
 };
 
