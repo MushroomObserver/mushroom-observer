@@ -4,14 +4,13 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 
 ## Forms To Convert
 
-### Admin Forms (5)
+### Admin Forms (3)
 
 | File | Form | Status |
 |------|------|--------|
 | `admin/blocked_ips/edit.html.erb` | Block/unblock IPs (2 forms) | |
 | `admin/donations/edit.html.erb` | Donations admin | |
 | `admin/banners/index.html.erb` | Banner management | |
-| `admin/session/edit.html.erb` | Admin mode toggle | |
 
 ### Name Forms (8)
 
@@ -102,6 +101,7 @@ Forms that have been fully converted to Phlex components:
 
 | Component | Replaces | Date |
 |-----------|----------|------|
+| `AdminSessionForm` | `admin/session/edit.html.erb` | 2026-01-05 |
 | `ArticleForm` | `articles/_form.html.erb` | 2026-01-03 |
 | `VisualGroupForm` | `visual_groups/_form.html.erb` | 2026-01-03 |
 | `VisualModelForm` | `visual_models/_form.html.erb` | 2026-01-03 |
