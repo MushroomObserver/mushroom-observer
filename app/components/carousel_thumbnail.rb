@@ -7,7 +7,7 @@
 #
 # @example
 #   render Components::CarouselThumbnail.new(
-#     user: current_user,
+#     user: @user,
 #     image: @image,
 #     index: 0,
 #     carousel_id: "observation_123_carousel"

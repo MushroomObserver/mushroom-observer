@@ -29,18 +29,20 @@ module Admin
     def edit
       redirect_back_or_default("/") if
         !@user&.admin && session[:real_user_id].blank?
+      @form = FormObject::AdminSession.new(id: @id)
     end
 
     # Action to switch the apparent logged-in user, session[:user_id]
     # Stores the admin's session[:user_id] as session[:real_user_id]
     def update
-      @id = params[:id].to_s
+      @id = (params.dig(:form_object_admin_session, :id) || params[:id]).to_s
       # autocomplete returns "nathan <Nathan Wilson>" - we only want the login
       @id = @id.split(" <")[0].strip if @id.is_a?(String) && @id.exclude?("@")
 
       new_user = find_user_by_id_login_or_email(@id)
       if new_user.blank? && @id.present?
         flash_error("Couldn't find \"#{@id}\".  Play again?")
+        @form = FormObject::AdminSession.new(id: @id)
         render(action: :edit)
       # Allow non-admin that's already in "switch user mode" to switch to
       # another user. This is a weird case which only comes up if you switch to
@@ -50,6 +52,7 @@ module Admin
         redirect_back_or_default("/")
       elsif new_user.present?
         switch_to_user_if_verified(new_user)
+        @form = FormObject::AdminSession.new(id: @id)
         render(action: :edit)
       end
     end

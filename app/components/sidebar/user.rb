@@ -6,7 +6,7 @@ module Components
     #
     # @example Basic usage
     #   render(Components::Sidebar::User.new(
-    #     user: current_user,
+    #     user: @user,
     #     classes: sidebar_css_classes,
     #     in_admin_mode: in_admin_mode?
     #   ))
