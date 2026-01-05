@@ -826,7 +826,7 @@ export default class BaseAutocompleterController extends Controller {
       if (this.lastHiddenTargetValue() != perfect_match['id']) {
         this.assignHiddenId(perfect_match);
       }
-    } else if (!this.ignoringTextInput() && this.matches.length > 0) {
+    } else if (!this.ignoringTextInput()) {
       this.clearHiddenId();
     }
   }
@@ -971,15 +971,23 @@ export default class BaseAutocompleterController extends Controller {
         }
         this.inputTarget.focus();
         if (this.hasMapOutlet) {
-          // Fill box inputs from location data if available
-          if (hidden_data.north || hidden_data.south ||
-              hidden_data.east || hidden_data.west) {
-            this.mapOutlet.updateBoundsInputs(hidden_data);
+          let map;
+          try {
+            map = this.mapOutlet;
+          } catch (e) {
+            map = null;
           }
-          // Only trigger map rectangle drawing when a location was selected
-          // (has an ID). Don't trigger Google geocode when ID is cleared.
-          if (hidden_id) {
-            this.mapOutlet.showBox();
+          if (map) {
+            // Fill box inputs from location data if available
+            if (hidden_data.north || hidden_data.south ||
+                hidden_data.east || hidden_data.west) {
+              map.updateBoundsInputs(hidden_data);
+            }
+            // Only trigger map rectangle drawing when a location was selected
+            // (has an ID). Don't trigger Google geocode when ID is cleared.
+            if (hidden_id) {
+              map.showBox();
+            }
           }
         }
       }, 750)
