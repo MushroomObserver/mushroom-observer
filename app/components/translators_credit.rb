@@ -23,7 +23,8 @@ module Components
 
     # rubocop:disable Metrics/AbcSize
     def render_translators_credit(lang)
-      plain(:app_translators_credit.t)
+      # Translation string may contain HTML (e.g., in German)
+      trusted_html(:app_translators_credit.t)
       plain(": ")
 
       ids_and_names = lang.top_contributors(5)
@@ -37,7 +38,7 @@ module Components
 
       if ids_and_names.length == 5
         plain(", ")
-        plain(:app_translators_credit_and_others.t)
+        trusted_html(:app_translators_credit_and_others.t)
       end
 
       br
