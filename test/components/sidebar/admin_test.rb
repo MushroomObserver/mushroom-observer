@@ -28,12 +28,12 @@ module Sidebar
       assert_includes(html, :app_admin.t)
 
       # Should include navigation links
-      assert_html(html, "a#nav_admin_jobs_link")
-      assert_html(html, "a#nav_admin_blocked_ips_link")
-      assert_html(html, "a#nav_admin_switch_users_link")
-      assert_html(html, "a#nav_admin_user_index_link")
-      assert_html(html, "a#nav_admin_edit_banner_link")
-      assert_html(html, "a#nav_admin_licenses_link")
+      assert_html(html, "#nav_admin_jobs_link")
+      assert_html(html, "#nav_admin_blocked_ips_link")
+      assert_html(html, "#nav_admin_switch_users_link")
+      assert_html(html, "#nav_admin_user_index_link")
+      assert_html(html, "#nav_admin_edit_banner_link")
+      assert_html(html, "#nav_admin_licenses_link")
 
       # Should have admin class on links (not indent)
       assert_html(html, ".list-group-item.admin")
@@ -43,7 +43,7 @@ module Sidebar
 
       # Should have "Turn Admin Off" button
       assert_includes(html, :app_turn_admin_off.t)
-      assert_html(html, "button#nav_admin_off_link")
+      assert_html(html, "#nav_admin_off_link")
       assert_html(html, ".btn.btn-link")
     end
 

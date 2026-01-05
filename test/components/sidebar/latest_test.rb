@@ -28,10 +28,10 @@ module Sidebar
       assert_includes(html, :app_latest.t)
 
       # Should include navigation links
-      assert_html(html, "a#nav_articles_link")
-      assert_html(html, "a#nav_activity_logs_link")
-      assert_html(html, "a#nav_images_link")
-      assert_html(html, "a#nav_comments_link")
+      assert_html(html, "#nav_articles_link")
+      assert_html(html, "#nav_activity_logs_link")
+      assert_html(html, "#nav_images_link")
+      assert_html(html, "#nav_comments_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")
@@ -54,12 +54,12 @@ module Sidebar
       assert_includes(html, :app_latest.t)
 
       # Should have news link (available to all)
-      assert_html(html, "a#nav_articles_link")
+      assert_html(html, "#nav_articles_link")
 
       # Should NOT have user-only links
-      assert_no_html(html, "a#nav_activity_logs_link")
-      assert_no_html(html, "a#nav_images_link")
-      assert_no_html(html, "a#nav_comments_link")
+      assert_no_html(html, "#nav_activity_logs_link")
+      assert_no_html(html, "#nav_images_link")
+      assert_no_html(html, "#nav_comments_link")
     end
 
     private

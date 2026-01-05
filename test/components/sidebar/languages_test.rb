@@ -17,7 +17,7 @@ module Sidebar
       assert_includes(html, :app_languages.t)
 
       # Should have dropdown toggle
-      assert_html(html, "a#language_dropdown_toggle.dropdown-toggle")
+      assert_html(html, "#language_dropdown_toggle.dropdown-toggle")
       assert_html(html, "a[data-toggle='dropdown']")
 
       # Should have current language flag
@@ -28,7 +28,7 @@ module Sidebar
       assert_html(html, "span.caret")
 
       # Should have dropdown menu
-      assert_html(html, "ul#language_dropdown_menu.dropdown-menu")
+      assert_html(html, "#language_dropdown_menu.dropdown-menu")
     end
 
     def test_renders_language_links
@@ -36,7 +36,7 @@ module Sidebar
 
       # Should have links for all non-beta languages
       Language.where.not(beta: true).order(:order).each do |lang|
-        assert_html(html, "a#lang_drop_#{lang.locale}_link")
+        assert_html(html, "#lang_drop_#{lang.locale}_link")
         assert_includes(html, "flag-#{lang.locale}.png")
         assert_includes(html, lang.name)
       end

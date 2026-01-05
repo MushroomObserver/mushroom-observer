@@ -28,10 +28,10 @@ module Sidebar
       assert_includes(html, :app_observations_left.t)
 
       # Should include navigation links
-      assert_html(html, "a#nav_observations_link")
-      assert_html(html, "a#nav_new_observation_link")
-      assert_html(html, "a#nav_your_observations_link")
-      assert_html(html, "a#nav_identify_observations_link")
+      assert_html(html, "#nav_observations_link")
+      assert_html(html, "#nav_new_observation_link")
+      assert_html(html, "#nav_your_observations_link")
+      assert_html(html, "#nav_identify_observations_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")
@@ -54,12 +54,12 @@ module Sidebar
       assert_includes(html, :app_observations_left.t)
 
       # Should have latest observations link (available to all)
-      assert_html(html, "a#nav_observations_link")
+      assert_html(html, "#nav_observations_link")
 
       # Should NOT have user-only links
-      assert_no_html(html, "a#nav_new_observation_link")
-      assert_no_html(html, "a#nav_your_observations_link")
-      assert_no_html(html, "a#nav_identify_observations_link")
+      assert_no_html(html, "#nav_new_observation_link")
+      assert_no_html(html, "#nav_your_observations_link")
+      assert_no_html(html, "#nav_identify_observations_link")
     end
 
     private

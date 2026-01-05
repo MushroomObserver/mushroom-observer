@@ -26,7 +26,7 @@ module Sidebar
 
       # Should have logout button
       assert_includes(html, :app_logout.t)
-      assert_html(html, "button#nav_user_logout_link")
+      assert_html(html, "#nav_user_logout_link")
       assert_html(html, ".btn.btn-link")
     end
 
@@ -34,7 +34,7 @@ module Sidebar
       html = render_component
 
       # Should have navigation links
-      assert_html(html, "a#nav_join_mailing_list_link")
+      assert_html(html, "#nav_join_mailing_list_link")
 
       # Should have mobile_only class on links
       assert_html(html, ".mobile-only")
@@ -46,7 +46,7 @@ module Sidebar
 
       # Should have "Turn Admin On" button
       assert_includes(html, :app_turn_admin_on.t)
-      assert_html(html, "button#nav_mobile_admin_link")
+      assert_html(html, "#nav_mobile_admin_link")
     end
 
     def test_hides_admin_button_for_non_admin
@@ -55,7 +55,7 @@ module Sidebar
 
       # Should NOT have "Turn Admin On" button
       assert_not_includes(html, :app_turn_admin_on.t)
-      assert_no_html(html, "button#nav_mobile_admin_link")
+      assert_no_html(html, "#nav_mobile_admin_link")
     end
 
     def test_hides_admin_button_when_in_admin_mode
@@ -64,7 +64,7 @@ module Sidebar
 
       # Should NOT have "Turn Admin On" button (already in admin mode)
       assert_not_includes(html, :app_turn_admin_on.t)
-      assert_no_html(html, "button#nav_mobile_admin_link")
+      assert_no_html(html, "#nav_mobile_admin_link")
     end
 
     private

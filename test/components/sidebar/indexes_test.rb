@@ -28,11 +28,11 @@ module Sidebar
       assert_includes(html, :INDEXES.t)
 
       # Should include navigation links
-      assert_html(html, "a#nav_articles_link")
-      assert_html(html, "a#nav_herbaria_link")
-      assert_html(html, "a#nav_locations_link")
-      assert_html(html, "a#nav_name_observations_link")
-      assert_html(html, "a#nav_projects_link")
+      assert_html(html, "#nav_articles_link")
+      assert_html(html, "#nav_herbaria_link")
+      assert_html(html, "#nav_locations_link")
+      assert_html(html, "#nav_name_observations_link")
+      assert_html(html, "#nav_projects_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")

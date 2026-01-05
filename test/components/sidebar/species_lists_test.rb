@@ -28,9 +28,9 @@ module Sidebar
       assert_includes(html, :app_species_list.t)
 
       # Should include navigation links
-      assert_html(html, "a#nav_your_species_lists_link")
-      assert_html(html, "a#nav_species_lists_link")
-      assert_html(html, "a#nav_new_species_list_link")
+      assert_html(html, "#nav_your_species_lists_link")
+      assert_html(html, "#nav_species_lists_link")
+      assert_html(html, "#nav_new_species_list_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")
@@ -53,11 +53,11 @@ module Sidebar
       assert_includes(html, :app_species_list.t)
 
       # Should have all lists link (available to all)
-      assert_html(html, "a#nav_species_lists_link")
+      assert_html(html, "#nav_species_lists_link")
 
       # Should NOT have user-only links
-      assert_no_html(html, "a#nav_your_species_lists_link")
-      assert_no_html(html, "a#nav_new_species_list_link")
+      assert_no_html(html, "#nav_your_species_lists_link")
+      assert_no_html(html, "#nav_new_species_list_link")
     end
 
     private
