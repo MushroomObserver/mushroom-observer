@@ -53,7 +53,7 @@ module Admin
       rolf.save!
 
       assert_users_equal(rolf, User.current)
-      put(:update, params: { form_object_admin_session: { id: mary.login } })
+      put(:update, params: { admin_session: { id: mary.login } })
       assert_users_equal(mary, User.current)
     end
   end

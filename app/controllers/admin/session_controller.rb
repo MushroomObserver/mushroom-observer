@@ -35,7 +35,7 @@ module Admin
     # Action to switch the apparent logged-in user, session[:user_id]
     # Stores the admin's session[:user_id] as session[:real_user_id]
     def update
-      @id = (params.dig(:form_object_admin_session, :id) || params[:id]).to_s
+      @id = (params.dig(:admin_session, :id) || params[:id]).to_s
       # autocomplete returns "nathan <Nathan Wilson>" - we only want the login
       @id = @id.split(" <")[0].strip if @id.is_a?(String) && @id.exclude?("@")
 
