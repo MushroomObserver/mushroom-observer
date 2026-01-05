@@ -110,9 +110,14 @@ class ApplicationSidebarTest < ComponentTestCase
         user: user,
         browser: browser,
         request: mock_request,
-        in_admin_mode: in_admin_mode
+        in_admin_mode: in_admin_mode,
+        languages: mock_languages
       )
     )
+  end
+
+  def mock_languages
+    Language.where.not(beta: true).order(:order).to_a
   end
 
   def human_browser

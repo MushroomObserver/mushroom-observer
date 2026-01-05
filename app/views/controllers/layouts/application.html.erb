@@ -37,7 +37,8 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
           user: @user,
           browser: browser,
           request: request,
-          in_admin_mode: in_admin_mode?
+          in_admin_mode: in_admin_mode?,
+          languages: @languages
         )) %>
 
         <div id="right_side" class="col-xs-12 col-md-10">

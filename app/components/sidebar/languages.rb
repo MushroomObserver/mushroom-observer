@@ -13,6 +13,7 @@ module Components
     class Languages < Components::Base
       prop :browser, _Any
       prop :request, _Any
+      prop :languages, _Array(Language)
 
       register_value_helper :reload_with_args
 
@@ -56,7 +57,7 @@ module Components
           class: "dropdown-menu",
           role: "menu"
         ) do
-          Language.where.not(beta: true).order(:order).each do |lang|
+          @languages.each do |lang|
             render_language_item(lang)
           end
         end

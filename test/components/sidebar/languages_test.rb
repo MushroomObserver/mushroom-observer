@@ -57,9 +57,14 @@ module Sidebar
       render(
         Components::Sidebar::Languages.new(
           browser: browser,
-          request: mock_request
+          request: mock_request,
+          languages: mock_languages
         )
       )
+    end
+
+    def mock_languages
+      Language.where.not(beta: true).order(:order).to_a
     end
 
     def mock_human_browser

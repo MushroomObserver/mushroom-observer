@@ -50,6 +50,7 @@ class ApplicationController < ActionController::Base
   before_action :set_locale
   before_action :set_timezone
   before_action :track_translations
+  before_action :set_languages
 
   # Make show_name_helper available to nested partials
   helper :names
@@ -356,6 +357,10 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   private
+
+  def set_languages
+    @languages = Language.where.not(beta: true).order(:order).to_a
+  end
 
   # defined here because used by both images_controller and
   # observations_controller

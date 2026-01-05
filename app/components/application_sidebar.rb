@@ -25,6 +25,7 @@ module Components
     prop :browser, _Any
     prop :request, _Any
     prop :in_admin_mode, _Nilable(_Boolean), default: false
+    prop :languages, _Array(Language)
 
     register_value_helper :content_for
 
@@ -152,7 +153,8 @@ module Components
 
       render(Components::Sidebar::Languages.new(
                browser: @browser,
-               request: @request
+               request: @request,
+               languages: @languages
              ))
     end
 
