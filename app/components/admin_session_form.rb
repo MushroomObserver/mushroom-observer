@@ -10,10 +10,10 @@ class Components::AdminSessionForm < Components::ApplicationForm
   def view_template
     super do
       autocompleter_field(
-        :id,
+        :user,
         type: :user,
         label: "#{:LOGIN_NAME.l}:",
-        value: model.id,
+        value: model.user,
         size: 42,
         autofocus: true
       )

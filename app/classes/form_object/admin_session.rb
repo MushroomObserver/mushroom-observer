@@ -2,7 +2,8 @@
 
 # Form object for admin user switching form.
 class FormObject::AdminSession < FormObject::Base
-  attribute :id, :string
+  attribute :user, :string
+  attribute :user_id, :integer
 
   # Force Superform to use PATCH/PUT method (route expects PUT)
   def persisted?

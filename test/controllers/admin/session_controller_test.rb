@@ -53,7 +53,32 @@ module Admin
       rolf.save!
 
       assert_users_equal(rolf, User.current)
-      put(:update, params: { admin_session: { id: mary.login } })
+      # Text input field submits as :user
+      put(:update, params: { admin_session: { user: mary.login } })
+      assert_users_equal(mary, User.current)
+    end
+
+    # Test autocompleter submission with user_id hidden field
+    def test_switch_users_with_autocompleter_user_id
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+
+      assert_users_equal(rolf, User.current)
+      # Autocompleter submits user_id as hidden field
+      put(:update, params: { admin_session: { user_id: mary.id } })
+      assert_users_equal(mary, User.current)
+    end
+
+    # Test "Full Name (login)" format from autocompleter text field
+    def test_switch_users_with_unique_text_name
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+
+      assert_users_equal(rolf, User.current)
+      # Autocompleter shows "Full Name (login)" in text field
+      put(:update, params: { admin_session: { user: mary.unique_text_name } })
       assert_users_equal(mary, User.current)
     end
   end
