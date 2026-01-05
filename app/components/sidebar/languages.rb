@@ -17,6 +17,11 @@ module Components
 
       register_value_helper :reload_with_args
 
+      # Make request available to registered helpers
+      def request
+        @request
+      end
+
       def view_template
         div(class: "list-group-item pl-3 overflow-visible") do
           div(class: "dropdown") do
