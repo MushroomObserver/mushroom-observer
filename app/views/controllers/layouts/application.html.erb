@@ -57,7 +57,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
             <%= yield %>
             <!--/MAIN_PAGE_CONTENT-->
 
-            <%= render(partial: "application/content/translators_credit") %>
+            <%= render(Components::TranslatorsCredit.new) %>
           </main><!-- #content -->
 
         </div>
