@@ -43,7 +43,8 @@ module Components
         ) do
           img(
             src: "/flags/flag-#{I18n.locale.downcase}.png",
-            class: "lang-flag"
+            class: "lang-flag",
+            alt: I18n.locale.downcase
           )
           span(class: "caret")
         end
@@ -69,7 +70,11 @@ module Components
             id: "lang_drop_#{lang.locale}_link",
             data: { locale: lang.locale }
           ) do
-            img(src: "/flags/flag-#{lang.locale}.png", class: "lang-flag")
+            img(
+              src: "/flags/flag-#{lang.locale}.png",
+              class: "lang-flag",
+              alt: lang.locale
+            )
             plain(" ")
             plain(lang.name)
           end
