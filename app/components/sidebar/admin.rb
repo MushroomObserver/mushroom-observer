@@ -19,7 +19,7 @@ module Components
           plain("#{@heading_key.t}:")
         end
 
-        tabs_array.compact.each do |link|
+        @tabs.compact.each do |link|
           render_nav_link(link, link_class: @classes[:admin])
         end
 

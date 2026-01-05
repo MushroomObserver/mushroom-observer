@@ -27,24 +27,12 @@ module Components
           plain("#{@heading_key.t}:")
         end
 
-        tabs_array.compact.each do |link|
+        @tabs.compact.each do |link|
           render_nav_link(link)
         end
       end
 
       private
-
-      def tabs_array
-        @tabs || tabs
-      end
-
-      def tabs
-        if method(tabs_method).arity.zero?
-          send(tabs_method)
-        else
-          send(tabs_method, @user)
-        end
-      end
 
       def render_nav_link(link, link_class: @classes[:indent])
         title, url, html_options = link
