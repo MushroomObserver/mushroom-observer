@@ -143,11 +143,17 @@ module Components
                  classes: classes
                ))
 
-        render(Components::Sidebar::Languages.new(
-                 browser: @browser,
-                 request: @request
-               ))
+        render_languages_section
       end
+    end
+
+    def render_languages_section
+      return if @browser.bot?
+
+      render(Components::Sidebar::Languages.new(
+               browser: @browser,
+               request: @request
+             ))
     end
 
     def user_status_string(user = nil)

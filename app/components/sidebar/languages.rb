@@ -15,11 +15,8 @@ module Components
       prop :request, _Any
 
       register_value_helper :reload_with_args
-      register_output_helper :image_tag
 
       def view_template
-        return if @browser.bot?
-
         div(class: "list-group-item pl-3 overflow-visible") do
           div(class: "dropdown") do
             render_dropdown_label
@@ -44,8 +41,8 @@ module Components
           data: { toggle: "dropdown" },
           aria: { expanded: "false" }
         ) do
-          image_tag(
-            "/flags/flag-#{I18n.locale.downcase}.png",
+          img(
+            src: "/flags/flag-#{I18n.locale.downcase}.png",
             class: "lang-flag"
           )
           span(class: "caret")
@@ -72,7 +69,7 @@ module Components
             id: "lang_drop_#{lang.locale}_link",
             data: { locale: lang.locale }
           ) do
-            image_tag("/flags/flag-#{lang.locale}.png", class: "lang-flag")
+            img(src: "/flags/flag-#{lang.locale}.png", class: "lang-flag")
             plain(" ")
             plain(lang.name)
           end

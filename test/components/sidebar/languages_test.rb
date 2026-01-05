@@ -42,14 +42,6 @@ module Sidebar
       end
     end
 
-    def test_renders_nothing_for_bots
-      browser = mock_bot_browser
-      html = render_component(browser: browser)
-
-      # Should render nothing for bots
-      assert_equal("", html)
-    end
-
     def test_dropdown_has_correct_structure
       html = render_component
 
@@ -72,10 +64,6 @@ module Sidebar
 
     def mock_human_browser
       Browser.new(false)
-    end
-
-    def mock_bot_browser
-      Browser.new(true)
     end
 
     def mock_request
