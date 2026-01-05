@@ -45,5 +45,16 @@ module Admin
       put(:update, params: { id: mary.email })
       assert_users_equal(mary, User.current)
     end
+
+    # Test form submission with namespaced params (from Phlex form)
+    def test_switch_users_with_form_params
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+
+      assert_users_equal(rolf, User.current)
+      put(:update, params: { form_object_admin_session: { id: mary.login } })
+      assert_users_equal(mary, User.current)
+    end
   end
 end

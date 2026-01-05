@@ -24,10 +24,4 @@ class Components::AdminSessionForm < Components::ApplicationForm
   def form_action
     admin_mode_path
   end
-
-  protected
-
-  def form_method
-    "put"
-  end
 end

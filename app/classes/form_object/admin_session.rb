@@ -6,4 +6,9 @@ class FormObject::AdminSession
   include ActiveModel::Attributes
 
   attribute :id, :string
+
+  # Force Superform to use PATCH/PUT method (route expects PUT)
+  def persisted?
+    true
+  end
 end
