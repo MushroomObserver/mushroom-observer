@@ -24,7 +24,9 @@ index_bar =
 <%= tag.header(id: "header") do %>
   <%# Immediately below the top nav: index filters or page title, plus page nav.
       Indexes have no "#title" — `rubric` in top_nav has the model name. %>
-  <%= render(partial: "application/content/project_banner") if has_banner %>
+  <%= render(Components::ProjectBanner.new(
+               is_project: controller.controller_name == "projects"
+             )) if has_banner %>
 
   <%= tag.div(class: "row") do %>
     <%# Project tabs %>
