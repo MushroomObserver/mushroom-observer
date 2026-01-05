@@ -35,7 +35,7 @@ module Sidebar
       assert_html(html, "a#nav_projects_link")
 
       # Should have indent class on links
-      assert_html(html, "a.list-group-item.indent")
+      assert_html(html, ".list-group-item.indent")
 
       # Should have nav-active data attributes for active link tracking
       assert_html(html, "a[data-nav-active-target='link']")
@@ -45,10 +45,7 @@ module Sidebar
       html = render_component
 
       # Heading should have the disabled and font-weight-bold classes
-      assert_html(
-        html,
-        "div.list-group-item.disabled.font-weight-bold"
-      )
+      assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 
     private

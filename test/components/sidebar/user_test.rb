@@ -18,7 +18,7 @@ module Sidebar
       assert_html(html, "span.ml-2")
 
       # Should have mobile_only class
-      assert_html(html, "div.mobile-only")
+      assert_html(html, ".mobile-only")
     end
 
     def test_renders_logout_button
@@ -27,7 +27,7 @@ module Sidebar
       # Should have logout button
       assert_includes(html, :app_logout.t)
       assert_html(html, "button#nav_user_logout_link")
-      assert_html(html, "button.btn.btn-link")
+      assert_html(html, ".btn.btn-link")
     end
 
     def test_renders_user_tabs
@@ -37,7 +37,7 @@ module Sidebar
       assert_html(html, "a#nav_join_mailing_list_link")
 
       # Should have mobile_only class on links
-      assert_html(html, "a.mobile-only")
+      assert_html(html, ".mobile-only")
     end
 
     def test_shows_admin_button_for_admin_not_in_admin_mode

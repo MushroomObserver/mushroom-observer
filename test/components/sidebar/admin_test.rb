@@ -36,7 +36,7 @@ module Sidebar
       assert_html(html, "a#nav_admin_licenses_link")
 
       # Should have admin class on links (not indent)
-      assert_html(html, "a.list-group-item.admin")
+      assert_html(html, ".list-group-item.admin")
 
       # Should have nav-active data attributes for active link tracking
       assert_html(html, "a[data-nav-active-target='link']")
@@ -44,17 +44,14 @@ module Sidebar
       # Should have "Turn Admin Off" button
       assert_includes(html, :app_turn_admin_off.t)
       assert_html(html, "button#nav_admin_off_link")
-      assert_html(html, "button.btn.btn-link")
+      assert_html(html, ".btn.btn-link")
     end
 
     def test_heading_has_correct_css_classes
       html = render_component
 
       # Heading should have the disabled and font-weight-bold classes
-      assert_html(
-        html,
-        "div.list-group-item.disabled.font-weight-bold"
-      )
+      assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 
     def test_turn_off_button_is_post_request

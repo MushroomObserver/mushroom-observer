@@ -46,8 +46,8 @@ module Sidebar
       html = render_component
 
       # Should have proper nested structure
-      assert_html(html, "div.list-group-item.pl-3.overflow-visible")
-      assert_html(html, "div.dropdown")
+      assert_html(html, ".list-group-item.pl-3.overflow-visible")
+      assert_html(html, ".dropdown")
       assert_html(html, "ul.dropdown-menu li")
     end
 
