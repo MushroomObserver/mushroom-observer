@@ -28,23 +28,23 @@ module Sidebar
       assert_includes(html, :app_admin.t)
 
       # Should include navigation links
-      assert_includes(html, "nav_admin_jobs_link")
-      assert_includes(html, "nav_admin_blocked_ips_link")
-      assert_includes(html, "nav_admin_switch_users_link")
-      assert_includes(html, "nav_admin_user_index_link")
-      assert_includes(html, "nav_admin_edit_banner_link")
-      assert_includes(html, "nav_admin_licenses_link")
+      assert_html(html, "a#nav_admin_jobs_link")
+      assert_html(html, "a#nav_admin_blocked_ips_link")
+      assert_html(html, "a#nav_admin_switch_users_link")
+      assert_html(html, "a#nav_admin_user_index_link")
+      assert_html(html, "a#nav_admin_edit_banner_link")
+      assert_html(html, "a#nav_admin_licenses_link")
 
       # Should have admin class on links (not indent)
-      assert_includes(html, "list-group-item admin")
+      assert_html(html, "a.list-group-item.admin")
 
       # Should have nav-active data attributes for active link tracking
-      assert_includes(html, "data-nav-active-target=\"link\"")
+      assert_html(html, "a[data-nav-active-target='link']")
 
       # Should have "Turn Admin Off" button
       assert_includes(html, :app_turn_admin_off.t)
-      assert_includes(html, "nav_admin_off_link")
-      assert_includes(html, "btn btn-link")
+      assert_html(html, "button#nav_admin_off_link")
+      assert_html(html, "button.btn.btn-link")
     end
 
     def test_heading_has_correct_css_classes

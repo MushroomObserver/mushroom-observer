@@ -26,17 +26,17 @@ module Sidebar
 
       # Should have heading with icon and "Account:" text
       assert_includes(html, :app_account.t)
-      assert_includes(html, "glyphicon glyphicon-user")
+      assert_html(html, "i.glyphicon.glyphicon-user")
 
       # Should include navigation links
-      assert_includes(html, "nav_login_link")
-      assert_includes(html, "nav_signup_link")
+      assert_html(html, "a#nav_login_link")
+      assert_html(html, "a#nav_signup_link")
 
       # Should have indent class on links
-      assert_includes(html, "list-group-item indent")
+      assert_html(html, "a.list-group-item.indent")
 
       # Should have nav-active data attributes for active link tracking
-      assert_includes(html, "data-nav-active-target=\"link\"")
+      assert_html(html, "a[data-nav-active-target='link']")
     end
 
     def test_heading_has_correct_css_classes

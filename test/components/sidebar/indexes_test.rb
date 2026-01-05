@@ -28,17 +28,17 @@ module Sidebar
       assert_includes(html, :INDEXES.t)
 
       # Should include navigation links
-      assert_includes(html, "nav_articles_link")
-      assert_includes(html, "nav_herbaria_link")
-      assert_includes(html, "nav_locations_link")
-      assert_includes(html, "nav_name_observations_link")
-      assert_includes(html, "nav_projects_link")
+      assert_html(html, "a#nav_articles_link")
+      assert_html(html, "a#nav_herbaria_link")
+      assert_html(html, "a#nav_locations_link")
+      assert_html(html, "a#nav_name_observations_link")
+      assert_html(html, "a#nav_projects_link")
 
       # Should have indent class on links
-      assert_includes(html, "list-group-item indent")
+      assert_html(html, "a.list-group-item.indent")
 
       # Should have nav-active data attributes for active link tracking
-      assert_includes(html, "data-nav-active-target=\"link\"")
+      assert_html(html, "a[data-nav-active-target='link']")
     end
 
     def test_heading_has_correct_css_classes

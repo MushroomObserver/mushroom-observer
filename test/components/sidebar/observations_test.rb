@@ -28,16 +28,16 @@ module Sidebar
       assert_includes(html, :app_observations_left.t)
 
       # Should include navigation links
-      assert_includes(html, "nav_observations_link")
-      assert_includes(html, "nav_new_observation_link")
-      assert_includes(html, "nav_your_observations_link")
-      assert_includes(html, "nav_identify_observations_link")
+      assert_html(html, "a#nav_observations_link")
+      assert_html(html, "a#nav_new_observation_link")
+      assert_html(html, "a#nav_your_observations_link")
+      assert_html(html, "a#nav_identify_observations_link")
 
       # Should have indent class on links
-      assert_includes(html, "list-group-item indent")
+      assert_html(html, "a.list-group-item.indent")
 
       # Should have nav-active data attributes for active link tracking
-      assert_includes(html, "data-nav-active-target=\"link\"")
+      assert_html(html, "a[data-nav-active-target='link']")
     end
 
     def test_heading_has_correct_css_classes
@@ -57,12 +57,12 @@ module Sidebar
       assert_includes(html, :app_observations_left.t)
 
       # Should have latest observations link (available to all)
-      assert_includes(html, "nav_observations_link")
+      assert_html(html, "a#nav_observations_link")
 
       # Should NOT have user-only links
-      assert_not_includes(html, "nav_new_observation_link")
-      assert_not_includes(html, "nav_your_observations_link")
-      assert_not_includes(html, "nav_identify_observations_link")
+      assert_no_html(html, "a#nav_new_observation_link")
+      assert_no_html(html, "a#nav_your_observations_link")
+      assert_no_html(html, "a#nav_identify_observations_link")
     end
 
     private

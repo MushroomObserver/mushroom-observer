@@ -28,24 +28,24 @@ module Sidebar
       assert_includes(html, :app_more.t)
 
       # Should include navigation links
-      assert_includes(html, "nav_mobile_app_link")
-      assert_includes(html, "nav_intro_link")
-      assert_includes(html, "nav_how_to_use_link")
-      assert_includes(html, "nav_donate_link")
-      assert_includes(html, "nav_how_to_help_link")
-      assert_includes(html, "nav_bug_report_link")
-      assert_includes(html, "nav_ask_webmaster_link")
-      assert_includes(html, "nav_contributors_link")
-      assert_includes(html, "nav_site_stats_link")
-      assert_includes(html, "nav_translators_note_link")
-      assert_includes(html, "nav_publications_link")
-      assert_includes(html, "nav_privacy_policy_link")
+      assert_html(html, "a#nav_mobile_app_link")
+      assert_html(html, "a#nav_intro_link")
+      assert_html(html, "a#nav_how_to_use_link")
+      assert_html(html, "a#nav_donate_link")
+      assert_html(html, "a#nav_how_to_help_link")
+      assert_html(html, "a#nav_bug_report_link")
+      assert_html(html, "a#nav_ask_webmaster_link")
+      assert_html(html, "a#nav_contributors_link")
+      assert_html(html, "a#nav_site_stats_link")
+      assert_html(html, "a#nav_translators_note_link")
+      assert_html(html, "a#nav_publications_link")
+      assert_html(html, "a#nav_privacy_policy_link")
 
       # Should have indent class on links
-      assert_includes(html, "list-group-item indent")
+      assert_html(html, "a.list-group-item.indent")
 
       # Should have nav-active data attributes for active link tracking
-      assert_includes(html, "data-nav-active-target=\"link\"")
+      assert_html(html, "a[data-nav-active-target='link']")
     end
 
     def test_heading_has_correct_css_classes

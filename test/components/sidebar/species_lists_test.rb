@@ -28,15 +28,15 @@ module Sidebar
       assert_includes(html, :app_species_list.t)
 
       # Should include navigation links
-      assert_includes(html, "nav_your_species_lists_link")
-      assert_includes(html, "nav_species_lists_link")
-      assert_includes(html, "nav_new_species_list_link")
+      assert_html(html, "a#nav_your_species_lists_link")
+      assert_html(html, "a#nav_species_lists_link")
+      assert_html(html, "a#nav_new_species_list_link")
 
       # Should have indent class on links
-      assert_includes(html, "list-group-item indent")
+      assert_html(html, "a.list-group-item.indent")
 
       # Should have nav-active data attributes for active link tracking
-      assert_includes(html, "data-nav-active-target=\"link\"")
+      assert_html(html, "a[data-nav-active-target='link']")
     end
 
     def test_heading_has_correct_css_classes
@@ -56,11 +56,11 @@ module Sidebar
       assert_includes(html, :app_species_list.t)
 
       # Should have all lists link (available to all)
-      assert_includes(html, "nav_species_lists_link")
+      assert_html(html, "a#nav_species_lists_link")
 
       # Should NOT have user-only links
-      assert_not_includes(html, "nav_your_species_lists_link")
-      assert_not_includes(html, "nav_new_species_list_link")
+      assert_no_html(html, "a#nav_your_species_lists_link")
+      assert_no_html(html, "a#nav_new_species_list_link")
     end
 
     private
