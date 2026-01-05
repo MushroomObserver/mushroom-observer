@@ -143,8 +143,8 @@ class ApplicationSidebarTest < ComponentTestCase
       I18n.with_locale(:en) { render(component_en) }
     end
 
-    # Render with German locale (new component instance)
-    component_de = Components::ApplicationSidebar.new(
+    # Render with French locale (new component instance)
+    component_fr = Components::ApplicationSidebar.new(
       user: @user,
       browser: human_browser,
       request: mock_request,
@@ -152,17 +152,17 @@ class ApplicationSidebarTest < ComponentTestCase
       languages: mock_languages
     )
 
-    component_de.stub(:cache, lambda { |key, &block|
+    component_fr.stub(:cache, lambda { |key, &block|
       keys << key if key.include?("links")
       block.call
     }) do
-      I18n.with_locale(:de) { render(component_de) }
+      I18n.with_locale(:fr) { render(component_fr) }
     end
 
     assert_equal([:en, "user", "links"], keys[0],
                  "First key should use :en locale")
-    assert_equal([:de, "user", "links"], keys[1],
-                 "Second key should use :de locale")
+    assert_equal([:fr, "user", "links"], keys[1],
+                 "Second key should use :fr locale")
     assert_not_equal(keys[0], keys[1],
                      "Different locales should have different cache keys")
   end
