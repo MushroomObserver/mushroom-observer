@@ -33,7 +33,13 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
       <div class="row row-offcanvas row-offcanvas-left"
          data-nav-target="offcanvas">
 
-        <%= render(partial: "application/sidebar") %>
+        <%= render(Components::ApplicationSidebar.new(
+          user: @user,
+          browser: browser,
+          request: request,
+          in_admin_mode: in_admin_mode?,
+          languages: @languages
+        )) %>
 
         <div id="right_side" class="col-xs-12 col-md-10">
           <%= render(partial: "application/top_nav") %>
