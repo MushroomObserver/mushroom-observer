@@ -448,8 +448,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(specimen_section, align: :center)
     assert_field("observation_specimen")
     check("observation_specimen")
-    assert_field("collection_number_number")
-    fill_in("collection_number_number", with: "17-034a")
+    assert_field("observation_collection_number_number")
+    fill_in("observation_collection_number_number", with: "17-034a")
     fill_in(other_notes_id, with: "Notes for observation", visible: :all)
 
     # Move to the next step, Projects/Lists
@@ -485,7 +485,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_naming_name", with: "", visible: :all)
     assert_no_checked_field("observation_is_collection_location", visible: :all)
     assert_checked_field("observation_specimen", visible: :all)
-    assert_field("collection_number_number", with: "17-034a", visible: :all)
+    assert_field("observation_collection_number_number", with: "17-034a",
+                 visible: :all)
     assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
     # Submit observation form without errors
@@ -539,8 +540,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("[data-type='name'][data-autocompleter='connected']")
     fill_in("observation_naming_name", with: "Agaricus campestris")
     assert_field("observation_naming_name", with: "Agaricus campestris")
-    select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
-    assert_select("naming_vote_value",
+    # Vote/reasons collapse should expand when name is filled
+    assert_selector("[data-autocompleter--name-target='collapseFields'].in")
+    select(Vote.confidence(Vote.next_best_vote),
+           from: "observation_naming_vote_value")
+    assert_select("observation_naming_vote_value",
                   selected: Vote.confidence(Vote.next_best_vote))
 
     within("#observation_form") { click_commit }

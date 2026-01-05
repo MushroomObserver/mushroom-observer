@@ -67,8 +67,7 @@ class Components::ObservationFormDetails < Components::Base
              edit_text: :form_observations_edit_locality.l,
              map_outlet: "#observation_form",
              controller_id: "observation_location_autocompleter",
-             controller_data: { map_target: "placeInput",
-                                action: exif_action }
+             data: { map_target: "placeInput", action: exif_action }
            )) do |field|
       field.with_help { observation_location_help }
     end

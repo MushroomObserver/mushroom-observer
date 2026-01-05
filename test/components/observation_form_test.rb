@@ -30,6 +30,18 @@ class ObservationFormTest < ComponentTestCase
     assert_html(html, "form[action*='approved_where=California']")
   end
 
+  def test_place_name_input_has_map_target
+    user = users(:rolf)
+    obs = Observation.new(when: Time.zone.today)
+
+    html = render_form(observation: obs, user: user, mode: :create)
+
+    # The place_name input should have data-map-target="placeInput"
+    # to enable the map controller to clear it
+    assert_html(html, "input[name='observation[place_name]']" \
+                      "[data-map-target='placeInput']")
+  end
+
   private
 
   def render_form(observation:, user:, mode: :create, given_name: nil,

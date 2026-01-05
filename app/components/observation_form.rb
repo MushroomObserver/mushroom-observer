@@ -111,7 +111,7 @@ class Components::ObservationForm < Components::ApplicationForm
       upload_max_size: MO.image_upload_max_size,
       localization: image_upload_localization.to_json,
       form_images_target: "form",
-      exif_used: !create?
+      exif_used: (!create?).to_s
     }
   end
 

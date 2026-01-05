@@ -61,13 +61,17 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_date_selects
-      div(class: "form-inline date-selects") do
+      # Wrapper needs ID for JS lookups (matches ERB's date_select_div)
+      div(class: "form-inline date-selects", id: field_id) do
         render_day_select
         render_month_select
         render_year_input
       end
     end
 
+    # Year is rendered directly as a text input (not a select).
+    # No need for data-controller="year-input" since that controller's purpose
+    # is to convert SELECT → INPUT, which we don't need.
     def render_year_input
       input(type: "text",
             name: date_param_name("1i"),
@@ -77,9 +81,13 @@ class Components::ApplicationForm < Superform::Rails::Form
             value: current_year)
     end
 
+    # Day/month keep data-controller="year-input" for the "connected" marker
+    # (the controller sets data-year-input="connected" on all elements it
+    # attaches to, but only transforms elements with _1i or _year in their ID).
     def render_month_select
       select(name: date_param_name("2i"), class: "form-control mr-2",
-             id: "#{field_id}_2i") do
+             id: "#{field_id}_2i",
+             data: { controller: "year-input" }) do
         month_options.each do |num, name|
           option(value: num, selected: num == current_month) { name }
         end
@@ -88,7 +96,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_day_select
       select(name: date_param_name("3i"), class: "form-control mr-2",
-             id: "#{field_id}_3i") do
+             id: "#{field_id}_3i",
+             data: { controller: "year-input" }) do
         day_options.each do |day|
           option(value: day, selected: day == current_day) { day }
         end
