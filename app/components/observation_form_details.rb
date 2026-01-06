@@ -89,11 +89,11 @@ class Components::ObservationFormDetails < Components::Base
   def location_hidden_data
     {
       map_target: "locationId",
-      north: @location&.north&.to_f,
-      south: @location&.south&.to_f,
-      east: @location&.east&.to_f,
-      west: @location&.west&.to_f
-    }
+      north: @location&.north&.to_s,
+      south: @location&.south&.to_s,
+      east: @location&.east&.to_s,
+      west: @location&.west&.to_s
+    }.compact_blank
   end
 
   def exif_action

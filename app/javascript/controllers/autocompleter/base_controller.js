@@ -826,7 +826,7 @@ export default class BaseAutocompleterController extends Controller {
       if (this.lastHiddenTargetValue() != perfect_match['id']) {
         this.assignHiddenId(perfect_match);
       }
-    } else if (!this.ignoringTextInput()) {
+    } else if (!this.ignoringTextInput() && this.matches.length > 0) {
       this.clearHiddenId();
     }
   }

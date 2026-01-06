@@ -102,13 +102,13 @@ class Components::ObservationForm < Components::ApplicationForm
   def form_data_attributes
     {
       controller: "form-images form-exif map",
+      action: "map:reenableBtns@window->form-exif#reenableButtons",
       map_autocompleter__location_outlet: "#observation_location_autocompleter",
-      map_open: false,
+      map_open: "false",
       form_exif_autocompleter__location_outlet:
         "#observation_location_autocompleter",
       form_exif_map_outlet: "#observation_form",
-      action: "map:reenableBtns@window->form-exif#reenableButtons",
-      upload_max_size: MO.image_upload_max_size,
+      upload_max_size: MO.image_upload_max_size.to_s,
       localization: image_upload_localization.to_json,
       form_images_target: "form",
       exif_used: (!create?).to_s

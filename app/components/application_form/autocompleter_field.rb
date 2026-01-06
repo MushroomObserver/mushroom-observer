@@ -304,7 +304,8 @@ class Components::ApplicationForm < Superform::Rails::Form
         name: hidden_field_name,
         value: normalized_hidden_value,
         class: "form-control",
-        readonly: true,
+        readonly: "readonly",
+        autocomplete: "off",
         data: hidden_field_data
       )
     end
