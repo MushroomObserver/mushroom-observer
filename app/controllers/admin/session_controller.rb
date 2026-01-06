@@ -22,26 +22,28 @@ module Admin
         session[:admin] = nil
       end
 
-      redirect_back_or_default("/")
+      redirect_back_or_to("/")
     end
 
     # Form for admins to switch users
     def edit
       redirect_back_or_default("/") if
         !@user&.admin && session[:real_user_id].blank?
+      @form = FormObject::AdminSession.new
     end
 
     # Action to switch the apparent logged-in user, session[:user_id]
     # Stores the admin's session[:user_id] as session[:real_user_id]
     def update
-      @id = params[:id].to_s
-      # autocomplete returns "nathan <Nathan Wilson>" - we only want the login
-      @id = @id.split(" <")[0].strip if @id.is_a?(String) && @id.exclude?("@")
+      # Prefer user_id from autocompleter hidden field, fall back to text input
+      @id = params.dig(:admin_session, :user_id).presence ||
+            params.dig(:admin_session, :user).presence ||
+            params[:id].to_s
 
       new_user = find_user_by_id_login_or_email(@id)
       if new_user.blank? && @id.present?
         flash_error("Couldn't find \"#{@id}\".  Play again?")
-        render(action: :edit)
+        redirect_to(action: :edit)
       # Allow non-admin that's already in "switch user mode" to switch to
       # another user. This is a weird case which only comes up if you switch to
       # another admin user.  But if you do so the Switch User mechanism should
@@ -50,7 +52,7 @@ module Admin
         redirect_back_or_default("/")
       elsif new_user.present?
         switch_to_user_if_verified(new_user)
-        render(action: :edit)
+        redirect_to(action: :edit)
       end
     end
 
@@ -89,7 +91,9 @@ module Admin
       elsif str.match?(/^\d+$/)
         User.safe_find(str)
       else
-        User.find_by(login: str) || User.find_by(email: str.sub(/ <.*>$/, ""))
+        # Handles "Full Name (login)" format from autocompleter, plain login,
+        # or email address
+        User.lookup_unique_text_name(str) || User.find_by(email: str)
       end
     end
   end

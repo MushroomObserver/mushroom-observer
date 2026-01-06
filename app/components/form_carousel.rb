@@ -7,7 +7,7 @@
 #
 # @example
 #   render Components::FormCarousel.new(
-#     user: current_user,
+#     user: @user,
 #     images: @good_images,
 #     obs_thumb_id: @observation.thumb_image_id,
 #     exif_data: @exif_data
