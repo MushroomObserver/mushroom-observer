@@ -87,13 +87,18 @@ class Components::ObservationFormDetails < Components::Base
   end
 
   def location_hidden_data
+    { map_target: "locationId" }.merge(location_bounds_data).compact_blank
+  end
+
+  def location_bounds_data
+    return {} unless @location
+
     {
-      map_target: "locationId",
-      north: @location&.north&.to_s,
-      south: @location&.south&.to_s,
-      east: @location&.east&.to_s,
-      west: @location&.west&.to_s
-    }.compact_blank
+      north: @location.north&.to_s,
+      south: @location.south&.to_s,
+      east: @location.east&.to_s,
+      west: @location.west&.to_s
+    }
   end
 
   def exif_action

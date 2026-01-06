@@ -272,38 +272,41 @@ class ComponentTestCase < UnitTestCase
     erb_element = erb_doc.at_css(selector)
     phlex_element = phlex_doc.at_css(selector)
 
-    puts "\n#{'=' * 60}"
-    puts "Comparing: #{label}"
-    puts "Selector: #{selector}"
-    puts "-" * 60
+    puts("\n#{"=" * 60}")
+    puts("Comparing: #{label}")
+    puts("Selector: #{selector}")
+    puts("-" * 60)
 
     if erb_element.nil?
-      puts "ERB: NOT FOUND"
+      puts("ERB: NOT FOUND")
     else
-      puts "ERB:"
-      puts erb_element.to_html
+      puts("ERB:")
+      puts(erb_element.to_html)
     end
 
-    puts "-" * 60
+    puts("-" * 60)
 
     if phlex_element.nil?
-      puts "PHLEX: NOT FOUND"
+      puts("PHLEX: NOT FOUND")
     else
-      puts "PHLEX:"
-      puts phlex_element.to_html
+      puts("PHLEX:")
+      puts(phlex_element.to_html)
     end
 
-    puts "-" * 60
+    puts("-" * 60)
 
     match = erb_element&.to_html == phlex_element&.to_html
     if match
-      puts "✓ MATCH"
+      puts("✓ MATCH")
     else
-      puts "✗ DIFFERENT - See above for details"
-      compare_attributes(erb_element, phlex_element) if erb_element && phlex_element
+      puts("✗ DIFFERENT - See above for details")
+      if erb_element && phlex_element
+        compare_attributes(erb_element,
+                           phlex_element)
+      end
     end
 
-    puts "=" * 60
+    puts("=" * 60)
 
     { erb: erb_element&.to_html, phlex: phlex_element&.to_html, match: match }
   end
@@ -321,16 +324,16 @@ class ComponentTestCase < UnitTestCase
     File.write(erb_path, erb_html)
     File.write(phlex_path, phlex_html)
 
-    puts "\n#{'=' * 60}"
-    puts "HTML saved for manual diff:"
-    puts "  ERB:   #{erb_path}"
-    puts "  Phlex: #{phlex_path}"
-    puts ""
-    puts "To compare, run:"
-    puts "  diff #{erb_path} #{phlex_path}"
-    puts "Or use a visual diff tool:"
-    puts "  code --diff #{erb_path} #{phlex_path}"
-    puts "=" * 60
+    puts("\n#{"=" * 60}")
+    puts("HTML saved for manual diff:")
+    puts("  ERB:   #{erb_path}")
+    puts("  Phlex: #{phlex_path}")
+    puts("")
+    puts("To compare, run:")
+    puts("  diff #{erb_path} #{phlex_path}")
+    puts("Or use a visual diff tool:")
+    puts("  code --diff #{erb_path} #{phlex_path}")
+    puts("=" * 60)
   end
 
   private
@@ -342,19 +345,19 @@ class ComponentTestCase < UnitTestCase
 
     all_keys = (erb_attrs.keys + phlex_attrs.keys).uniq.sort
 
-    puts "\nAttribute comparison:"
+    puts("\nAttribute comparison:")
     all_keys.each do |key|
       erb_val = erb_attrs[key]
       phlex_val = phlex_attrs[key]
 
       if erb_val == phlex_val
-        puts "  #{key}: ✓ (#{erb_val.inspect})"
+        puts("  #{key}: ✓ (#{erb_val.inspect})")
       elsif erb_val.nil?
-        puts "  #{key}: MISSING in ERB, Phlex has #{phlex_val.inspect}"
+        puts("  #{key}: MISSING in ERB, Phlex has #{phlex_val.inspect}")
       elsif phlex_val.nil?
-        puts "  #{key}: ERB has #{erb_val.inspect}, MISSING in Phlex"
+        puts("  #{key}: ERB has #{erb_val.inspect}, MISSING in Phlex")
       else
-        puts "  #{key}: ✗ ERB=#{erb_val.inspect} vs Phlex=#{phlex_val.inspect}"
+        puts("  #{key}: ✗ ERB=#{erb_val.inspect} vs Phlex=#{phlex_val.inspect}")
       end
     end
   end
