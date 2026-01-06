@@ -1,5 +1,5 @@
 <%
-add_project_banner(@project) if @project
+@banner_project = add_project_banner(@project) if @project
 project_observation_buttons(@project, @query)
 container_class(:full)
 add_index_title(@query) # note default above is non-nil

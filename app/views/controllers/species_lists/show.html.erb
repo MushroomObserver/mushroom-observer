@@ -1,5 +1,5 @@
 <%
-add_project_banner(@project) if @project
+@banner_project = add_project_banner(@project) if @project
 add_show_title(@species_list.title, @species_list)
 add_interest_icons(@user, @species_list)
 add_edit_icons(@species_list, @user)

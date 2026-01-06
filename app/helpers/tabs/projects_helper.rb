@@ -79,10 +79,11 @@ module Tabs
               end
 
       content_for(:banner_title) { title }
-      @banner_project = project
 
       add_banner_image(project.image)
       project_tabs(project)
+
+      project
     end
 
     def add_banner_image(image)
