@@ -10,7 +10,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 |------|------|--------|
 | `admin/blocked_ips/edit.html.erb` | Block/unblock IPs (2 forms) | |
 | `admin/donations/edit.html.erb` | Donations admin | |
-| `admin/banners/index.html.erb` | Banner management | |
+| `admin/banners/index.html.erb` | Banner management | 20260106 converted form to `app/components/banner_form.rb` |
 
 ### Name Forms (8)
 
