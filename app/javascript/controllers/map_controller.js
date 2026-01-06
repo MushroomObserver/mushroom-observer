@@ -192,14 +192,13 @@ export default class extends GeocodeController {
       markerOptions.title = set.title
     }
     const marker = new google.maps.Marker(markerOptions)
+    this.marker = marker
 
     if (!this.editable && set != null) {
       this.giveMarkerInfoWindow(marker, set)
     } else {
       this.getElevations([set], "point")
       this.makeMarkerEditable(marker)
-      // Only set this.marker if it's a single-marker UI.
-      this.marker = marker
     }
   }
 
