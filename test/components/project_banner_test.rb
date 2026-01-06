@@ -36,94 +36,51 @@ class ProjectBannerTest < ComponentTestCase
     assert_no_html(html, "h1#title")
   end
 
-  def test_does_not_render_project_location_when_content_not_set
-    html = render_banner
+  def test_does_not_render_project_location_when_project_has_no_location
+    project = projects(:empty_project)
+    html = render_banner(project: project)
 
     assert_no_html(html, ".project_location")
   end
 
-  def test_renders_project_location_when_content_set
+  def test_renders_project_location_when_project_has_location
     project = projects(:albion_project)
-    html = render_banner_with_content(
-      project: project,
-      with_location: true
-    )
+    html = render_banner(project: project)
 
     assert_html(html, ".project_location.banner-image-text")
-    assert_includes(html, project.location.display_name)
+    assert_html(html, "a[href='/locations/#{project.location.id}']")
+    assert_includes(html, project.place_name)
   end
 
-  def test_does_not_render_project_date_range_when_content_not_set
-    html = render_banner
+  def test_does_not_render_project_date_range_when_project_has_no_dates
+    project = projects(:empty_project)
+    html = render_banner(project: project)
 
     assert_no_html(html, ".project_date_range")
   end
 
-  def test_renders_project_date_range_when_content_set
+  def test_renders_project_date_range_when_project_has_dates
     project = projects(:past_project)
-    html = render_banner_with_content(
-      project: project,
-      with_date_range: true
-    )
+    html = render_banner(project: project)
 
     assert_html(html, ".project_date_range.banner-image-text")
     assert_includes(html, project.date_range)
   end
 
-  def test_renders_both_location_and_date_range_when_both_set
+  def test_renders_both_location_and_date_range_when_both_present
     project = projects(:past_project)
-    html = render_banner_with_content(
-      project: project,
-      with_location: true,
-      with_date_range: true
-    )
+    html = render_banner(project: project)
 
     assert_html(html, ".project_location.banner-image-text")
     assert_html(html, ".project_date_range.banner-image-text")
-    assert_includes(html, project.location.display_name)
+    assert_includes(html, project.place_name)
     assert_includes(html, project.date_range)
   end
 
   private
 
-  def render_banner(is_project: false)
-    render(Components::ProjectBanner.new(is_project: is_project))
-  end
-
-  # Helper to render banner with content_for blocks set
-  # (simulates how helpers like add_project_banner set content_for)
-  def render_banner_with_content(project:, with_location: false,
-                                 with_date_range: false,
-                                 is_project: false)
-    wrapper = Class.new(Phlex::HTML) do
-      include Phlex::Rails::Helpers::ContentFor
-
-      # rubocop:disable Lint/MissingSuper
-      def initialize(project, banner, with_location, with_date_range)
-        @project = project
-        @banner = banner
-        @with_location = with_location
-        @with_date_range = with_date_range
-      end
-      # rubocop:enable Lint/MissingSuper
-
-      def view_template
-        if @with_location
-          content_for(:project_location) do
-            b { @project.location.display_name }
-          end
-        end
-        if @with_date_range
-          content_for(:project_date_range) do
-            b { @project.date_range }
-          end
-        end
-        render(@banner)
-      end
-    end
-
-    banner_component = Components::ProjectBanner.new(is_project: is_project)
-    render(wrapper.new(project, banner_component, with_location,
-                       with_date_range))
+  def render_banner(is_project: false, project: nil)
+    render(Components::ProjectBanner.new(is_project: is_project,
+                                         project: project))
   end
 end

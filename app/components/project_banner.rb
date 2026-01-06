@@ -5,19 +5,21 @@ module Components
   # and optional edit icons
   #
   # @example Basic usage in view
-  #   <%= render(Components::ProjectBanner.new(is_project: true)) %>
+  #   <%= render(Components::ProjectBanner.new(
+  #     is_project: true,
+  #     project: @project
+  #   )) %>
   #
   # Uses content_for blocks set by helpers:
   #   - :banner_image
   #   - :banner_title
   #   - :edit_icons
-  #   - :project_location
-  #   - :project_date_range
   #
   class ProjectBanner < Base
     include Phlex::Rails::Helpers::ContentFor
 
     prop :is_project, _Boolean, default: false
+    prop :project, _Nilable(Project), default: nil
 
     def view_template
       div(class: "row") do
@@ -69,18 +71,22 @@ module Components
     end
 
     def render_project_location
-      return unless content_for?(:project_location)
+      return unless @project&.location
 
       div(class: "project_location banner-image-text") do
-        trusted_html(content_for(:project_location))
+        b do
+          a(href: location_path(@project.location.id)) do
+            @project.place_name
+          end
+        end
       end
     end
 
     def render_project_date_range
-      return unless content_for?(:project_date_range)
+      return unless @project&.start_date && @project.end_date
 
       div(class: "project_date_range banner-image-text") do
-        trusted_html(content_for(:project_date_range))
+        b { @project.date_range }
       end
     end
   end

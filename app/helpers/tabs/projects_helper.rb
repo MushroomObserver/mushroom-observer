@@ -79,18 +79,7 @@ module Tabs
               end
 
       content_for(:banner_title) { title }
-
-      if project.location
-        content_for(:project_location) do
-          tag.b(link_to(project.place_name, location_path(project.location.id)))
-        end
-      end
-
-      if project.start_date && project.end_date
-        content_for(:project_date_range) do
-          tag.b(project.date_range)
-        end
-      end
+      content_for(:banner_project) { project }
 
       add_banner_image(project.image)
       project_tabs(project)
