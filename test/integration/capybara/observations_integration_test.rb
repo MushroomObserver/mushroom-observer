@@ -325,7 +325,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # Change the Obs date to be in range - this should do it.
     select(proj.end_date.day, from: "observation_when_3i")
     select(Date::MONTHNAMES[proj.end_date.month], from: "observation_when_2i")
-    select(proj.end_date.year, from: "observation_when_1i")
+    fill_in("observation_when_1i", with: proj.end_date.year)
     # must be re-set, why? Seems @location should be set by previous commit
     find_field(id: "observation_location_id",
                type: :hidden).set(proj.location.id)
@@ -352,7 +352,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     select(Time.zone.today.day, from: "observation_when_3i")
     select(Date::MONTHNAMES[Time.zone.today.month],
            from: "observation_when_2i")
-    select(Time.zone.today.year, from: "observation_when_1i")
+    fill_in("observation_when_1i", with: Time.zone.today.year)
 
     first(:button, "Create").click
     assert_selector(
