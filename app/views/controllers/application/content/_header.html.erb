@@ -25,8 +25,8 @@ index_bar =
   <%# Immediately below the top nav: index filters or page title, plus page nav.
       Indexes have no "#title" — `rubric` in top_nav has the model name. %>
   <%= render(Components::ProjectBanner.new(
-               is_project: controller.controller_name == "projects",
-               project: content_for?(:banner_project) ? content_for(:banner_project) : nil
+               on_project_page: controller.controller_name == "projects",
+               project: @banner_project
              )) if has_banner %>
 
   <%= tag.div(class: "row") do %>

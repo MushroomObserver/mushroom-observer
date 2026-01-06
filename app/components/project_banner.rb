@@ -6,7 +6,7 @@ module Components
   #
   # @example Basic usage in view
   #   <%= render(Components::ProjectBanner.new(
-  #     is_project: true,
+  #     on_project_page: true,
   #     project: @project
   #   )) %>
   #
@@ -18,7 +18,7 @@ module Components
   class ProjectBanner < Base
     include Phlex::Rails::Helpers::ContentFor
 
-    prop :is_project, _Boolean, default: false
+    prop :on_project_page, _Boolean, default: false
     prop :project, _Nilable(Project), default: nil
 
     def view_template
@@ -38,7 +38,7 @@ module Components
     private
 
     def title_id
-      @is_project ? "title" : "banner_title"
+      @on_project_page ? "title" : "banner_title"
     end
 
     def render_banner_image
@@ -63,7 +63,7 @@ module Components
     end
 
     def render_edit_icons
-      return unless @is_project && content_for?(:edit_icons)
+      return unless @on_project_page && content_for?(:edit_icons)
 
       ul(class: "nav navbar-nav object_edit h4") do
         trusted_html(content_for(:edit_icons))

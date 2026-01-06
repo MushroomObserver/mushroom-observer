@@ -22,15 +22,15 @@ class ProjectBannerTest < ComponentTestCase
     assert_html(html, ".d-flex.align-items-center")
   end
 
-  def test_title_id_is_title_when_is_project_true
-    html = render_banner(is_project: true)
+  def test_title_id_is_title_when_on_project_page
+    html = render_banner(on_project_page: true)
 
     assert_html(html, "h1#title")
     assert_no_html(html, "h1#banner_title")
   end
 
-  def test_title_id_is_banner_title_when_is_project_false
-    html = render_banner(is_project: false)
+  def test_title_id_is_banner_title_when_not_on_project_page
+    html = render_banner(on_project_page: false)
 
     assert_html(html, "h1#banner_title")
     assert_no_html(html, "h1#title")
@@ -79,8 +79,8 @@ class ProjectBannerTest < ComponentTestCase
 
   private
 
-  def render_banner(is_project: false, project: nil)
-    render(Components::ProjectBanner.new(is_project: is_project,
+  def render_banner(on_project_page: false, project: nil)
+    render(Components::ProjectBanner.new(on_project_page: on_project_page,
                                          project: project))
   end
 end
