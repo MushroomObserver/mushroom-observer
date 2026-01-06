@@ -4,13 +4,13 @@
 #
 # @example Basic usage
 #   render Components::ImageCopyright.new(
-#     user: current_user,
+#     user: @user,
 #     image: @image
 #   )
 #
 # @example With context object
 #   render Components::ImageCopyright.new(
-#     user: current_user,
+#     user: @user,
 #     image: @image,
 #     object: @observation
 #   )
