@@ -26,8 +26,8 @@ class AdminSessionFormTest < ComponentTestCase
     assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")
   end
 
-  def test_renders_with_prefilled_id
-    @form = FormObject::AdminSession.new(id: "rolf")
+  def test_renders_with_prefilled_user
+    @form = FormObject::AdminSession.new(user: "rolf")
     html = render_form
 
     assert_html(html, "input[value='rolf']")
