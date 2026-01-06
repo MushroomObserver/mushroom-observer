@@ -53,20 +53,16 @@
 #     @name_tracker || NameTracker.new(name: @name)
 #   )) %>
 #
-# @example Custom form method logic
-#   # Override form_method when you need custom HTTP method logic
-#   class CustomForm < Components::ApplicationForm
-#     def initialize(model, method: nil, **)
-#       @method = method
-#       super(model, **)
-#     end
-#
-#     protected
-#
-#     def form_method
-#       return super unless @method  # IMPORTANT: Always call super as fallback
-#
-#       @method.to_s.downcase == "get" ? "get" : "post"
+# @example HTTP method handling
+#   # Superform automatically determines HTTP method based on model.persisted?
+#   # - persisted? == true  → PATCH (updates)
+#   # - persisted? == false → POST (creates)
+#   #
+#   # For FormObject classes (non-persisted by default), if you need to force
+#   # PATCH/PUT, override persisted?:
+#   class FormObject::AdminSession
+#     def persisted?
+#       true  # Forces Superform to use PATCH method
 #     end
 #   end
 #
@@ -110,7 +106,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Register view helpers that forms might need
   # Use register_value_helper for helpers that return values (not HTML)
   register_value_helper :in_admin_mode?
-  register_value_helper :current_user
   register_value_helper :url_for
   register_value_helper :rank_as_string
 

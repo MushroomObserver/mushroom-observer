@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 # Form object for requesting project admin access
-class FormObject::ProjectAdminRequest
-  include ActiveModel::Model
-  include ActiveModel::Attributes
-
+class FormObject::ProjectAdminRequest < FormObject::Base
   attribute :subject, :string
   attribute :content, :string
 
@@ -12,6 +9,7 @@ class FormObject::ProjectAdminRequest
     false
   end
 
+  # Custom model_name to match controller expectations
   def self.model_name
     ActiveModel::Name.new(self, nil, "email")
   end

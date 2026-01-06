@@ -13,7 +13,7 @@
 #
 # @example
 #   render Components::FormCarouselItem.new(
-#     user: current_user,
+#     user: @user,
 #     image: @image,
 #     index: 0,
 #     upload: false,

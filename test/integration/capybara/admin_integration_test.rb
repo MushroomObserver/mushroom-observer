@@ -38,19 +38,19 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
     click_on(id: "nav_admin_switch_users_link")
 
     within("#admin_switch_users_form") do
-      fill_in("id", with: "something unlikely and bogus")
+      fill_in("admin_session_user", with: "something unlikely and bogus")
       click_commit
     end
     assert_flash_text("Play again?")
 
     within("#admin_switch_users_form") do
-      fill_in("id", with: "unverified")
+      fill_in("admin_session_user", with: "unverified")
       click_commit
     end
     assert_flash_text("This user is not verified yet!")
 
     within("#admin_switch_users_form") do
-      fill_in("id", with: "mary")
+      fill_in("admin_session_user", with: "mary")
       click_commit
     end
     assert_equal(mary.id, User.current_id)

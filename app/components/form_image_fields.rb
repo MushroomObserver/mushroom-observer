@@ -13,7 +13,7 @@
 #
 # @example
 #   render Components::FormImageFields.new(
-#     user: current_user,
+#     user: @user,
 #     image: @image,
 #     img_id: 123,
 #     upload: false
