@@ -486,7 +486,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_checked_field("observation_is_collection_location", visible: :all)
     assert_checked_field("observation_specimen", visible: :all)
     assert_field("observation_collection_number_number", with: "17-034a",
-                 visible: :all)
+                                                         visible: :all)
     assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
     # Submit observation form without errors
