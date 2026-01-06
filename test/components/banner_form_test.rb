@@ -20,7 +20,7 @@ class BannerFormTest < ComponentTestCase
     assert_html(html, "textarea[name='banner[message]']")
 
     # Submit button
-    assert_html(html, "input[type='submit'][value='#{:banner_update.t}']")
+    assert_html(html, "input[type='submit'][value='#{:banner_update.l}']")
   end
 
   def test_renders_with_existing_banner
