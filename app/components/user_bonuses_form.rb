@@ -13,15 +13,9 @@ class Components::UserBonusesForm < Components::ApplicationForm
   end
 
   def form_action
-    view_context.admin_user_path(id: model.user_id)
+    admin_user_path(id: model.user_id)
   rescue NoMethodError
     # Fallback for tests where admin routes may not be available
     "/admin/users/#{model.user_id}"
-  end
-
-  protected
-
-  def form_method
-    "patch"
   end
 end
