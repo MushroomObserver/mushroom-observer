@@ -26,7 +26,7 @@ index_bar =
       Indexes have no "#title" — `rubric` in top_nav has the model name. %>
   <%= render(Components::ProjectBanner.new(
                on_project_page: controller.controller_name == "projects",
-               project: @banner_project
+               project: @project
              )) if has_banner %>
 
   <%= tag.div(class: "row") do %>

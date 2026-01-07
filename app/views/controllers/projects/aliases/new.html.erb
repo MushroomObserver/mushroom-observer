@@ -1,5 +1,6 @@
 <%
-@banner_project = add_project_banner(@project_alias.project)
+@project = @project_alias.project
+add_project_banner(@project)
 add_page_title(:project_alias_new.l)
 container_class(:text)
 %>

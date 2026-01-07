@@ -1,5 +1,5 @@
 <%
-@banner_project = add_project_banner(@project) if @project
+add_project_banner(@project) if @project
 add_index_title(@query)
 add_sorter(@query, species_lists_index_sorts(query: @query))
 add_pagination(@pagination_data)
