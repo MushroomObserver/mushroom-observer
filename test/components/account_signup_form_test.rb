@@ -18,22 +18,22 @@ class AccountSignupFormTest < ComponentTestCase
 
     # Login field
     assert_html(html, "input[name='new_user[login]'][type='text']")
-    assert_includes(html, :signup_login.t)
+    assert_includes(html, :signup_login.l)
 
     # Password fields
     assert_html(html, "input[name='new_user[password]'][type='password']")
-    assert_includes(html, :signup_choose_password.t)
+    assert_includes(html, :signup_choose_password.l)
     assert_html(
       html,
       "input[name='new_user[password_confirmation]'][type='password']"
     )
-    assert_includes(html, :signup_confirm_password.t)
+    assert_includes(html, :signup_confirm_password.l)
 
     # Email fields
     assert_html(html, "input[name='new_user[email]'][type='text']")
-    assert_includes(html, :signup_email_address.t)
+    assert_includes(html, :signup_email_address.l)
     assert_html(html, "input[name='new_user[email_confirmation]'][type='text']")
-    assert_includes(html, :signup_email_confirmation.t)
+    assert_includes(html, :signup_email_confirmation.l)
 
     # Email help text
     assert_includes(html, :signup_email_help.tp)
@@ -41,11 +41,11 @@ class AccountSignupFormTest < ComponentTestCase
 
     # Name field
     assert_html(html, "input[name='new_user[name]'][type='text']")
-    assert_includes(html, :signup_name.t)
+    assert_includes(html, :signup_name.l)
 
     # Theme select
     assert_html(html, "select[name='new_user[theme]']")
-    assert_includes(html, :signup_preferred_theme.t)
+    assert_includes(html, :signup_preferred_theme.l)
 
     # Submit button
     assert_html(html, "input[type='submit'][value='#{:signup_button.l}']")
