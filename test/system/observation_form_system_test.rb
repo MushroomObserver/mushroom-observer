@@ -671,6 +671,48 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_link(href: /activity_logs/, text: /Agaricus campestris/)
   end
 
+  def test_map_click_fills_lat_lng_fields
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Verify lat/lng fields are initially empty
+    assert_geolocation_is_empty
+
+    # Open the map
+    click_button(:form_observations_open_map.l)
+    assert_selector("#observation_form_map.in", wait: 10)
+
+    # Wait for Google Maps to load (the map controller sets data-map="connected")
+    assert_selector("[data-map='connected']", wait: 10)
+
+    # Simulate a map click by calling the controller's click handler directly
+    # This bypasses the Google Maps event system but tests our updateFields logic
+    execute_script(<<~JS)
+      const form = document.getElementById('observation_form');
+      const controller = window.Stimulus.getControllerForElementAndIdentifier(
+        form, 'map'
+      );
+      if (controller && controller.map) {
+        // Simulate the click handler logic
+        const location = { lat: 45.5231, lng: -122.6765 };
+        controller.placeMarker(location);
+        controller.marker.setVisible(true);
+        controller.map.panTo(location);
+        controller.updateFields(null, null, location);
+      }
+    JS
+
+    # Verify lat/lng fields are now populated
+    # Using wait because the update might be asynchronous
+    assert_field("observation_lat", wait: 5) do |field|
+      field.value.present? && field.value.to_f.abs > 0
+    end
+    assert_field("observation_lng", wait: 5) do |field|
+      field.value.present? && field.value.to_f.abs > 0
+    end
+  end
+
   ##############################################################################
   #  Helper methods
   #

@@ -260,6 +260,8 @@ export default class extends GeocodeController {
     this.verbose("map:placeRectangle()")
     this.verbose(extents)
 
+    if (!extents) return false
+
     // Fit bounds first, then draw/update rectangle after zoom completes
     this.map.fitBounds(extents)
 
@@ -279,8 +281,10 @@ export default class extends GeocodeController {
   drawRectangle(set) {
     this.verbose("map:drawRectangle()")
     this.verbose(set)
-    const bounds = this.boundsOf(set),
-      clickable = this.map_type === "info",
+    const bounds = this.boundsOf(set)
+    if (!bounds) return false
+
+    const clickable = this.map_type === "info",
       editable = this.editable && this.map_type !== "observation",
       rectangleOptions = {
         strokeColor: this.marker_color,
@@ -429,13 +433,16 @@ export default class extends GeocodeController {
       return false
 
     this.verbose("map:mapLocationIdData")
-    const bounds = {
-      north: parseFloat(this.locationIdTarget.dataset.north),
-      south: parseFloat(this.locationIdTarget.dataset.south),
-      east: parseFloat(this.locationIdTarget.dataset.east),
-      west: parseFloat(this.locationIdTarget.dataset.west)
-    }
+    const north = parseFloat(this.locationIdTarget.dataset.north)
+    const south = parseFloat(this.locationIdTarget.dataset.south)
+    const east = parseFloat(this.locationIdTarget.dataset.east)
+    const west = parseFloat(this.locationIdTarget.dataset.west)
 
+    // Validate all bounds are valid numbers before using
+    if (isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))
+      return false
+
+    const bounds = { north, south, east, west }
     this.placeClosestRectangle(bounds, null)
   }
 
@@ -608,13 +615,21 @@ export default class extends GeocodeController {
 
   // Every MapSet should have properties north, south, east, west (plus corners)
   // Alternatively, just send a simple object (e.g. `extents`) with `nsew` props
+  // Returns valid bounds object or null if any value is missing/invalid
   boundsOf(set) {
-    let bounds = {}
-    if (set?.north) {
-      bounds = {
-        north: set.north, south: set.south, east: set.east, west: set.west
-      }
+    if (!set?.north) return null
+
+    const bounds = {
+      north: set.north, south: set.south, east: set.east, west: set.west
     }
+
+    // Validate all bounds are valid numbers
+    if (isNaN(bounds.north) || isNaN(bounds.south) ||
+        isNaN(bounds.east) || isNaN(bounds.west)) {
+      console.warn("boundsOf: invalid bounds", bounds, "from set", set)
+      return null
+    }
+
     return bounds
   }
 
