@@ -13,6 +13,7 @@ class Admin::BannersController < AdminController
       redirect_to(admin_banners_path)
     else
       flash_error(:banner_update_failure.t)
+      @banner = Banner.current || @banner
       render(:index)
     end
   end
