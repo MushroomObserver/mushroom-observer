@@ -96,9 +96,8 @@ class Components::FormImageFields < Components::Base
   end
 
   def image_field_proxy(field_key, value)
-    image_type = @upload ? :image : :good_image
-    Components::ApplicationForm.image_field_proxy(image_type, @img_id, field_key,
-                                                  value)
+    type = @upload ? :image : :good_image
+    ApplicationForm.image_field_proxy(type, @img_id, field_key, value)
   end
 
   # Superform expects [value, display] but Rails returns [display, value]

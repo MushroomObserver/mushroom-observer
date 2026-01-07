@@ -426,12 +426,12 @@ class Components::ApplicationForm < Superform::Rails::Form
   end
 
   # Lightweight field proxy for use outside of form rendering context.
-  # Provides the same interface as Superform::Field for use with field components.
-  # Unlike Superform fields, these can be created and rendered multiple times.
+  # Provides the same interface as Superform::Field for field components.
+  # Unlike Superform fields, these can be created and rendered many times.
   #
   # @example
-  #   proxy = FieldProxy.new("observation[good_image][123]", :notes, "some notes")
-  #   render(TextField.new(proxy, attributes: {}, wrapper_options: { label: "Notes" }))
+  #   proxy = FieldProxy.new("observation[good_image][123]", :notes, "text")
+  #   render(TextField.new(proxy, attributes: {}, wrapper_options: {}))
   class FieldProxy
     attr_reader :key, :value, :dom
 

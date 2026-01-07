@@ -9,6 +9,7 @@ class Components::Base < Phlex::HTML
   include Phlex::Rails::Helpers::LinkTo
   include Phlex::Rails::Helpers::ButtonTo
   include Phlex::Rails::Helpers::ClassNames
+  include Components::TrustedHtml
 
   # Register custom output helpers (return HTML)
   register_output_helper :show_title_id_badge
@@ -40,25 +41,6 @@ class Components::Base < Phlex::HTML
   # Enable fragment caching
   def cache_store
     Rails.cache
-  end
-
-  # Renders trusted HTML content (I18n translations, Rails helpers,
-  # formatted dates). Use this for content from:
-  # - Translation strings (.t, .l)
-  # - Rails helpers (user_link, link_to, etc.)
-  # - Model methods that return safe HTML
-  #
-  # Do NOT use for user-generated content.
-  #
-  # @param content [ActiveSupport::SafeBuffer, String] HTML content
-  # @return [void]
-  def trusted_html(content)
-    # rubocop:disable Rails/OutputSafety
-    return raw(content) if content.is_a?(ActiveSupport::SafeBuffer)
-    # rubocop:enable Rails/OutputSafety
-
-    # Plain strings get escaped and output
-    plain(content.to_s)
   end
 
   if Rails.env.development?

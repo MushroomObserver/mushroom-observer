@@ -3,10 +3,7 @@
 class Components::ApplicationForm < Superform::Rails::Form
   # Shared label row rendering for form field components
   module FieldLabelRow
-    # Helper to safely render HTML content (matches Components::Base#trusted_html)
-    def trusted_html(content)
-      content.html_safe? ? raw(content) : plain(content)
-    end
+    include Components::TrustedHtml
 
     def render_label_row(label_text, inline)
       if simple_label?
