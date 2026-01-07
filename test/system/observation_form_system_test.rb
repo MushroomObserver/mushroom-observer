@@ -683,34 +683,28 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_button(:form_observations_open_map.l)
     assert_selector("#observation_form_map.in", wait: 10)
 
-    # Wait for Google Maps to load (the map controller sets data-map="connected")
+    # Wait for Google Maps to load (map controller sets data-map="connected")
     assert_selector("[data-map='connected']", wait: 10)
 
-    # Simulate a map click by calling the controller's click handler directly
-    # This bypasses the Google Maps event system but tests our updateFields logic
+    # CRITICAL: Verify the map div has data-editable="true" (not empty string)
+    # This attribute controls whether makeMapClickable() is called
+    assert_selector("#observation_form_map[data-editable='true']")
+
+    # Trigger a Google Maps click event
     execute_script(<<~JS)
       const form = document.getElementById('observation_form');
       const controller = window.Stimulus.getControllerForElementAndIdentifier(
         form, 'map'
       );
       if (controller && controller.map) {
-        // Simulate the click handler logic
-        const location = { lat: 45.5231, lng: -122.6765 };
-        controller.placeMarker(location);
-        controller.marker.setVisible(true);
-        controller.map.panTo(location);
-        controller.updateFields(null, null, location);
+        const location = new google.maps.LatLng(45.5231, -122.6765);
+        google.maps.event.trigger(controller.map, 'click', { latLng: location });
       }
     JS
 
     # Verify lat/lng fields are now populated
-    # Using wait because the update might be asynchronous
-    assert_field("observation_lat", wait: 5) do |field|
-      field.value.present? && field.value.to_f.abs > 0
-    end
-    assert_field("observation_lng", wait: 5) do |field|
-      field.value.present? && field.value.to_f.abs > 0
-    end
+    assert_field("observation_lat", with: "45.5231", wait: 5)
+    assert_field("observation_lng", with: "-122.6765", wait: 5)
   end
 
   ##############################################################################
