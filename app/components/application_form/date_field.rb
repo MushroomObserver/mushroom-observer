@@ -114,7 +114,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def current_date
-      @current_date ||= field.value || Time.zone.today
+      # Check for explicitly passed value first, then fall back to field.value
+      @current_date ||= attributes[:value] || field.value || Time.zone.today
     end
 
     def current_year

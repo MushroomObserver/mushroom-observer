@@ -9,15 +9,15 @@ module ObservationsController::Create
   # Linked from: left panel
   #
   # Inputs:
-  #   params[:observation][...]         observation args
-  #   params[:naming][:name]            name
-  #   params[:approved_name]            old name
-  #   params[:approved_where]           old place name
-  #   params[:chosen_name][:name_id]    name radio boxes
-  #   params[:naming][:vote][...]       vote args
-  #   params[:naming][:reasons][n][...] naming_reasons args
-  #   params[:image][n][...]            image args
-  #   params[:good_image_ids]           images already uploaded
+  #   params[:observation][...]                   observation args
+  #   params[:observation][:naming][:name]        name
+  #   params[:observation][:naming][:vote][...]   vote args
+  #   params[:observation][:naming][:reasons][...] naming_reasons args
+  #   params[:observation][:image][n][...]        image args
+  #   params[:observation][:good_image_ids]       images already uploaded
+  #   params[:approved_name]                      old name
+  #   params[:approved_where]                     old place name
+  #   params[:chosen_name][:name_id]              name radio boxes
   #   params[:was_js_on]                was form javascripty? ("yes" = true)
   #
   # Outputs:

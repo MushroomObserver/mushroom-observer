@@ -1045,16 +1045,16 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           alt: "456",
           specimen: "0",
           thumb_image_id: "0",
-          gps_hidden: "1"
-        },
-        image: {
-          "0" => {
-            image: fixture,
-            copyright_holder: "me",
-            when: Time.zone.now
-          }
-        },
-        good_image_ids: "#{old_img1.id} #{old_img2.id}"
+          gps_hidden: "1",
+          image: {
+            "0" => {
+              image: fixture,
+              copyright_holder: "me",
+              when: Time.zone.now
+            }
+          },
+          good_image_ids: "#{old_img1.id} #{old_img2.id}"
+        }
       }
     )
 
@@ -1170,24 +1170,24 @@ class ObservationsControllerCreateTest < FunctionalTestCase
             place_name: "Zzyzx, Japan",
             when: time0,
             thumb_image_id: 0, # (make new image the thumbnail)
-            notes: { Observation.other_notes_key => "blah" }
-          },
-          image: {
-            "0" => {
-              image: file3,
-              copyright_holder: "holder_3",
-              when: time3,
-              notes: "notes_3"
-            }
-          },
-          good_image: {
-            new_image1.id.to_s => {},
-            new_image2.id.to_s => {
-              notes: "notes_2_new"
-            }
-          },
-          # (attach these two images once observation created)
-          good_image_ids: "#{new_image1.id} #{new_image2.id}"
+            notes: { Observation.other_notes_key => "blah" },
+            image: {
+              "0" => {
+                image: file3,
+                copyright_holder: "holder_3",
+                when: time3,
+                notes: "notes_3"
+              }
+            },
+            good_image: {
+              new_image1.id.to_s => {},
+              new_image2.id.to_s => {
+                notes: "notes_2_new"
+              }
+            },
+            # (attach these two images once observation created)
+            good_image_ids: "#{new_image1.id} #{new_image2.id}"
+          }
         }
       )
     end
@@ -1229,11 +1229,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
         params: {
           observation: {
             place_name: "", # will cause failure
-            when: Time.zone.now
-          },
-          image: { "0": { image: file,
-                          copyright_holder: "zuul",
-                          when: Time.zone.now } }
+            when: Time.zone.now,
+            image: { "0": { image: file,
+                            copyright_holder: "zuul",
+                            when: Time.zone.now } }
+          }
         }
       )
       assert_response(:success) # success = failure, paradoxically
@@ -1256,13 +1256,15 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                          when: Time.current,
                          notes: "stubbed in test")
     params = {
-      observation: { place_name: "USA",
-                     when: Time.current },
-      image: {
-        "0" => {
-          image: file,
-          copyright_holder: "zuul",
-          when: Time.current
+      observation: {
+        place_name: "USA",
+        when: Time.current,
+        image: {
+          "0" => {
+            image: file,
+            copyright_holder: "zuul",
+            when: Time.current
+          }
         }
       }
     }

@@ -145,13 +145,13 @@ module ObservationsController::SharedFormMethods
   # even if observation creation fails.  Keep a list of images we've uploaded
   # successfully in @good_images (stored in hidden form field).
   #
-  # INPUT: params[:image], observation, good_images (and @user)
+  # INPUT: params[:observation][:image], observation, good_images (and @user)
   # OUTPUT: list of images we couldn't create
   #
   def create_image_objects_and_update_bad_images
     @bad_images = []
     # can't do each_with_index here because it's ActionController::Parameters
-    params[:image]&.each do |idx, args|
+    params.dig(:observation, :image)&.each do |idx, args|
       next if (upload = args[:image]).blank?
 
       if upload.respond_to?(:original_filename)
@@ -193,12 +193,14 @@ module ObservationsController::SharedFormMethods
 
   # List of images that we've successfully uploaded, but which haven't been
   # attached to the observation yet.  Also supports some mininal editing.
-  # INPUT: params[:good_images] (also looks at params[:image_<id>_notes])
+  # INPUT: params[:observation][:good_image_ids],
+  #        params[:observation][:good_image]
   # OUTPUT: list of images
 
   def update_good_images
     # Get list of images first.
-    @good_images = (params[:good_image_ids] || "").split.filter_map do |id|
+    good_image_ids = params.dig(:observation, :good_image_ids) || ""
+    @good_images = good_image_ids.split.filter_map do |id|
       Image.safe_find(id.to_i)
     end
 
@@ -206,7 +208,7 @@ module ObservationsController::SharedFormMethods
     @good_images.map do |image|
       next unless permission?(image)
 
-      args = params.dig(:good_image, image.id.to_s)
+      args = params.dig(:observation, :good_image, image.id.to_s)
       next unless args
 
       image.attributes = args.permit(permitted_image_args)

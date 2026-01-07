@@ -414,6 +414,66 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
   end
 
+  # Creates a namespace for image fields indexed by image ID.
+  # Generates params like: observation[good_image][123][notes]
+  # @param type [Symbol] :good_image or :image (for existing vs new uploads)
+  # @param image_id [Integer, String] the image ID
+  # @yield [namespace] the nested namespace for field building
+  def image_namespace(type, image_id, &block)
+    namespace(type) do |type_ns|
+      type_ns.namespace(image_id.to_s, &block)
+    end
+  end
+
+  # Lightweight field proxy for use outside of form rendering context.
+  # Provides the same interface as Superform::Field for use with field components.
+  # Unlike Superform fields, these can be created and rendered multiple times.
+  #
+  # @example
+  #   proxy = FieldProxy.new("observation[good_image][123]", :notes, "some notes")
+  #   render(TextField.new(proxy, attributes: {}, wrapper_options: { label: "Notes" }))
+  class FieldProxy
+    attr_reader :key, :value, :dom
+
+    def initialize(namespace, field_key, field_value = nil)
+      @key = field_key
+      @value = field_value
+      @dom = DOMProxy.new(namespace, field_key, field_value)
+    end
+
+    # Minimal DOM proxy that provides id, name, value for field components
+    class DOMProxy
+      def initialize(namespace, field_key, field_value)
+        @namespace = namespace
+        @field_key = field_key
+        @field_value = field_value
+      end
+
+      def id
+        "#{@namespace}_#{@field_key}".tr("[]", "_").gsub(/__+/, "_")
+      end
+
+      def name
+        "#{@namespace}[#{@field_key}]"
+      end
+
+      def value
+        @field_value.to_s
+      end
+    end
+  end
+
+  # Factory method to create a FieldProxy for image fields
+  # @param type [Symbol] :good_image or :image
+  # @param image_id [Integer, String] the image ID
+  # @param field_key [Symbol] the field name (:notes, :when, etc.)
+  # @param value [Object] the field value
+  # @return [FieldProxy] a field proxy for use with field components
+  def self.image_field_proxy(type, image_id, field_key, value = nil)
+    namespace = "observation[#{type}][#{image_id}]"
+    FieldProxy.new(namespace, field_key, value)
+  end
+
   private
 
   # Convert help: option to with_help slot for help icon rendering

@@ -587,15 +587,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     geo = imgs.find { |img| img[:original_name] == "geotagged_s_pasadena.jpg" }
     img_ids = imgs.map(&:id)
     imgs.each do |img|
-      assert_field("good_image_#{img.id}_when_1i",
+      img_field = "observation_good_image_#{img.id}"
+      assert_field("#{img_field}_when_1i",
                    visible: :all, with: img.when.year.to_s)
-      assert_select("good_image_#{img.id}_when_2i",
+      assert_select("#{img_field}_when_2i",
                     visible: :all, text: Date::MONTHNAMES[img.when.month])
-      assert_select("good_image_#{img.id}_when_3i",
+      assert_select("#{img_field}_when_3i",
                     visible: :all, text: img.when.day.to_s)
-      assert_field("good_image_#{img.id}_copyright_holder",
+      assert_field("#{img_field}_copyright_holder",
                    visible: :all, with: katrina.legal_name)
-      assert_field("good_image_#{img.id}_notes",
+      assert_field("#{img_field}_notes",
                    visible: :all, with: "Notes for image")
     end
     assert_checked_field("thumb_image_id_#{cci.id}", visible: :all)
@@ -621,11 +622,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     check("observation_is_collection_location")
 
     img_ids.each do |img_id|
+      img_field = "observation_good_image_#{img_id}"
       find("#carousel_thumbnail_#{img_id}").click
-      fill_in("good_image_#{img_id}_when_1i", with: "2011")
-      select("April", from: "good_image_#{img_id}_when_2i")
-      select("15", from: "good_image_#{img_id}_when_3i")
-      fill_in("good_image_#{img_id}_notes", with: "New notes for image")
+      fill_in("#{img_field}_when_1i", with: "2011")
+      select("April", from: "#{img_field}_when_2i")
+      select("15", from: "#{img_field}_when_3i")
+      fill_in("#{img_field}_notes", with: "New notes for image")
     end
 
     obs_images = find("#observation_images")

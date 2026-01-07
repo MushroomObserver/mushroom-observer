@@ -33,10 +33,10 @@ class Components::ObservationFormUpload < Components::Base
   end
 
   def render_good_image_ids_field
-    # Not a model attribute, just a standalone hidden field
+    # Nested under observation[] for Superform param consistency
     input(
       type: "hidden",
-      name: "good_image_ids",
+      name: "observation[good_image_ids]",
       value: @good_images.map(&:id).join(" "),
       data: { form_images_target: "goodImageIds" }
     )
