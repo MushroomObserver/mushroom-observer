@@ -613,7 +613,7 @@ module ControllerExtensions
                     check_input_value(elements.first.to_s, expect_val, try_id)
                   end
       end
-      break
+      break if message.nil?
     end
     assert(message.nil?, message)
   end

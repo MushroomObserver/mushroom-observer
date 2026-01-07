@@ -91,9 +91,9 @@ class Components::ObservationForm < Components::ApplicationForm
     params = {
       controller: "observations",
       action: create? ? :create : :update,
-      id: model.id,
       only_path: true
     }
+    params[:id] = model.id if model.persisted?
     params[:approved_name] = @given_name if @given_name.present?
     params[:approved_where] = @place_name if @place_name.present?
     url_for(params)
