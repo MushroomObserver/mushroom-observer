@@ -66,7 +66,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 
 | File | Form | Status |
 |------|------|--------|
-| `account/new.html.erb` | Create account | |
+| `account/new.html.erb` | Create account | 20250106 [Convert account signup form to Phlex component #3720](https://github.com/MushroomObserver/mushroom-observer/pull/3720) |
 | `account/profile/_form.html.erb` | Edit profile | |
 | `account/preferences/edit.html.erb` | Edit preferences | |
 | `account/api_keys/new.html.erb` | Create API key | |
