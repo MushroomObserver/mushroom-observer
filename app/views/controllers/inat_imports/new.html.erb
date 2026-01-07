@@ -18,11 +18,28 @@
                          class: "form-control") %>
         <%= check_box_with_label(form: f, field: :all,
                                  class: "mt-3", label: :inat_import_all.l) %>
+        <%= :inat_import_all_details_intro.tp %>
+        <%= :inat_import_all_details.tp %>
       <% end %>
     <% end %>
 
-    <%= check_box_with_label(form: f, field: :consent,
-                             class: "mt-3", label: :inat_import_consent.l) %>
+    <%= render(Components::Panel.new(panel_id: "preview",
+                     panel_class: "name-section")) do |panel| %>
+      <%= panel.with_heading { :inat_import_preview.l } %>
+      <%= panel.with_body do %>
+        <div>
+          <p>
+            <%= :inat_import_expected_count.l %>:
+            <%= inat_expected_import_count(@inat_import) ||
+                :inat_import_tbd.l %>
+          </p>
+          <p>
+            <%= inat_expected_imports_link(@inat_import) %>
+          </p>
+        </div>
+      <% end %>
+    <% end %>
+
     <%= render(Components::Panel.new) do |panel| %>
       <%= panel.with_body do %>
         <p><b><%= :inat_details_heading.l %></b></p>
@@ -30,7 +47,9 @@
       <% end %>
     <% end %>
 
-    <%= f.submit(:SUBMIT.l, { class: "btn btn-default" }) %>
+  <%= f.submit(:SUBMIT.l, { class: "btn btn-default" }) %>
+  <%= link_to(:CANCEL.l, new_observation_path, name: "cancel",
+        class: "btn btn-default") %>
 
   <% end %>
 </div>
