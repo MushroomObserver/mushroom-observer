@@ -23,6 +23,7 @@ class TranslatorsCreditTest < ComponentTestCase
 
   def test_renders_translators_credit_for_unofficial_language
     I18n.locale = :fr # rubocop:disable Rails/I18nLocaleAssignment
+    I18n.backend.load_translations
     html = render_component
 
     assert_html(html, "#translators_credit.hidden-print")
@@ -46,6 +47,7 @@ class TranslatorsCreditTest < ComponentTestCase
 
   def test_renders_both_credit_and_links_for_unofficial_language_with_tracking
     I18n.locale = :fr # rubocop:disable Rails/I18nLocaleAssignment
+    I18n.backend.load_translations
     Language.track_usage
     html = render_component
 
@@ -58,6 +60,7 @@ class TranslatorsCreditTest < ComponentTestCase
 
   def test_renders_user_links_for_top_contributors
     I18n.locale = :fr # rubocop:disable Rails/I18nLocaleAssignment
+    I18n.backend.load_translations
     html = render_component
 
     # Should have user links in the output (from translation_strings)
@@ -66,6 +69,7 @@ class TranslatorsCreditTest < ComponentTestCase
 
   def test_shows_and_others_when_five_contributors
     I18n.locale = :fr # rubocop:disable Rails/I18nLocaleAssignment
+    I18n.backend.load_translations
     # Stub Language.find_by to return a lang with mocked top_contributors
     lang = languages(:french)
     contributors = [
@@ -85,6 +89,7 @@ class TranslatorsCreditTest < ComponentTestCase
 
   def test_does_not_show_and_others_when_fewer_than_five_contributors
     I18n.locale = :fr # rubocop:disable Rails/I18nLocaleAssignment
+    I18n.backend.load_translations
     # The actual French language fixture likely has fewer than 5 contributors
     html = render_component
 
