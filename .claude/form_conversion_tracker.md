@@ -61,11 +61,10 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `descriptions/_form_move.html.erb` | Move description | |
 | `descriptions/_form_merge.html.erb` | Merge descriptions | |
 
-### Account Forms (5)
+### Account Forms (4)
 
 | File | Form | Status |
-|------|------|--------|
-| `account/new.html.erb` | Create account | 20250106 [Convert account signup form to Phlex component #3720](https://github.com/MushroomObserver/mushroom-observer/pull/3720) |
+| ---- | ---- | ------ |
 | `account/profile/_form.html.erb` | Edit profile | |
 | `account/preferences/edit.html.erb` | Edit preferences | |
 | `account/api_keys/new.html.erb` | Create API key | |
@@ -100,6 +99,7 @@ Forms that have been fully converted to Phlex components:
 
 | Component | Replaces | Date |
 | --------- | -------- | ---- |
+| `AccountSignupForm` | account/new.html.erb` | 20250107 [Convert account signup form to Phlex component #3720](https://github.com/MushroomObserver/mushroom-observer/pull/3720) |
 | `AdminSessionForm` | `admin/session/edit.html.erb` | 2026-01-05 |
 | `BannerForm` | `admin/banners/index.html.erb` | 2026-01-07 |
 | `ArticleForm` | `articles/_form.html.erb` | 2026-01-03 |
