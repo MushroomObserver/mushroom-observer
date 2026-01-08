@@ -2,27 +2,38 @@
 
 module Admin
   class BlockedIpsController < AdminController
+    BLOCKED_IPS_PER_PAGE = 100
+
     # This page allows editing of blocked ips via params
     # params[:add_okay] and params[:add_bad]
     # Using params[:report] will show info about a chosen IP
     def edit
       @ip = params[:report] if validate_ip!(params[:report])
-      @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(do_activity: true)
+      load_paginated_blocked_ips
     end
 
     # Render the page after an update
     def update
       strip_params!
       process_blocked_ips_commands
-      @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(do_activity: true)
+      load_paginated_blocked_ips
       render(action: :edit)
     end
 
     private
+
+    def load_paginated_blocked_ips
+      all_blocked = sort_by_ip(IpStats.read_blocked_ips)
+      @blocked_ips_total = all_blocked.size
+      @blocked_ips_page = (params[:blocked_page].presence || 1).to_i
+      @blocked_ips_pages = (@blocked_ips_total.to_f / BLOCKED_IPS_PER_PAGE).ceil
+      offset = (@blocked_ips_page - 1) * BLOCKED_IPS_PER_PAGE
+      @blocked_ips = all_blocked[offset, BLOCKED_IPS_PER_PAGE] || []
+    end
 
     def strip_params!
       [:add_bad, :remove_bad, :add_okay, :remove_okay].each do |param|

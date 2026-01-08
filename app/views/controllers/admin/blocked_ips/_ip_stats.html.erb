@@ -19,18 +19,18 @@
     <% else %>
       (all of the most recent <%= n %> requests)
     <% end %><br/>
-  <table class="ips ips-lined table table-striped">
-    <tr>
-      <th>time</th>
-      <th>seconds</th>
-      <th>action</th>
-    </tr>
-    <% @stats[@ip][:activity].reverse[0..50].each do |time, load, cont, action| %>
-      <tr>
-        <td><%= time %></td>
-        <td><%= load.to_f.round(2) %></td>
-        <td><%= cont %>/<%= action %></td>
-      </tr>
+  <%= render(Components::Table.new(
+               @stats[@ip][:activity].reverse[0..50],
+               class: "ips ips-lined table-striped"
+             )) do |t| %>
+    <% t.column("time") do |row| %>
+      <%= row[0] %>
     <% end %>
-  </table>
+    <% t.column("seconds") do |row| %>
+      <%= row[1].to_f.round(2) %>
+    <% end %>
+    <% t.column("action") do |row| %>
+      <%= row[2] %>/<%= row[3] %>
+    <% end %>
+  <% end %>
 </section>

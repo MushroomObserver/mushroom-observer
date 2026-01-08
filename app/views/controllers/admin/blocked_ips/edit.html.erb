@@ -30,15 +30,19 @@ container_class(:full)
                        data: { confirm: :are_you_sure.t }
                       ) %>
 
-      <table id="okay_ips" class="ips my-3 table table-striped">
-        <% @okay_ips.each do |ip| %>
-          <tr>
-            <td><%= ip.t %></td>
-            <td>[<%= patch_button(name: :REMOVE.l,
-                       path: admin_blocked_ips_path(remove_okay: ip),
-                       id: "remove_okay_ip_#{ip}",) %>]</td>
+      <%= render(Components::Table.new(@okay_ips,
+                                        id: "okay_ips",
+                                        headers: false,
+                                        class: "ips my-3 table-striped")) do |t| %>
+        <% t.column("ip") do |ip| %>
+          <%= ip.t %>
         <% end %>
-      </table>
+        <% t.column("actions") do |ip| %>
+          [<%= patch_button(name: :REMOVE.l,
+                            path: admin_blocked_ips_path(remove_okay: ip),
+                            id: "remove_okay_ip_#{ip}") %>]
+        <% end %>
+      <% end %>
     </section><!--#okay_ips-->
 
     <%# ----- Blocked IPs ----- %>
@@ -64,16 +68,41 @@ container_class(:full)
                        data: { confirm: :are_you_sure.t }
                       ) %>
 
-      <table id="blocked_ips" class="ips my-3 table table-striped">
-        <% @blocked_ips.each do |ip| %>
-          <tr>
-            <td><%= ip.t %></td>
-            <td>[<%= patch_button(name: :REMOVE.l,
-                     path: admin_blocked_ips_path(remove_bad: ip),
-                     id: "remove_blocked_ip_#{ip}") %>]</td>
-          </tr>
+      <p class="text-muted">
+        Showing <%= @blocked_ips.size %> of <%= @blocked_ips_total %> blocked IPs
+        <% if @blocked_ips_pages > 1 %>
+          (page <%= @blocked_ips_page %> of <%= @blocked_ips_pages %>)
+        <% end %>
+      </p>
+
+      <% if @blocked_ips_pages > 1 %>
+        <nav class="mb-2">
+          <% if @blocked_ips_page > 1 %>
+            <%= link_to("« Prev",
+                        edit_admin_blocked_ips_path(blocked_page: @blocked_ips_page - 1),
+                        class: "btn btn-default btn-sm") %>
+          <% end %>
+          <% if @blocked_ips_page < @blocked_ips_pages %>
+            <%= link_to("Next »",
+                        edit_admin_blocked_ips_path(blocked_page: @blocked_ips_page + 1),
+                        class: "btn btn-default btn-sm") %>
+          <% end %>
+        </nav>
       <% end %>
-      </table>
+
+      <%= render(Components::Table.new(@blocked_ips,
+                                        id: "blocked_ips",
+                                        headers: false,
+                                        class: "ips my-3 table-striped")) do |t| %>
+        <% t.column("ip") do |ip| %>
+          <%= ip.t %>
+        <% end %>
+        <% t.column("actions") do |ip| %>
+          [<%= patch_button(name: :REMOVE.l,
+                            path: admin_blocked_ips_path(remove_bad: ip),
+                            id: "remove_blocked_ip_#{ip}") %>]
+        <% end %>
+      <% end %>
     </section><!--#blocked_ips-->
   </div>
 
