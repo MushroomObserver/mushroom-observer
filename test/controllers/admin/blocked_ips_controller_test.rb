@@ -113,6 +113,57 @@ module Admin
       end
     end
 
+    # Test that turbo_frame responses work for add, remove, and paging
+    def test_turbo_frame_responses
+      login(:rolf)
+      make_admin
+
+      original_blocked = File.read(MO.blocked_ips_file)
+      original_okay = File.read(MO.okay_ips_file)
+
+      begin
+        IpStats.clear_blocked_ips
+        IpStats.clear_okay_ips
+        generate_blocked_ips("10.0.0" => 150) # Enough for multiple pages
+        IpStats.reset!
+
+        # Test both blocked and okay IPs
+        [
+          { type: :blocked, frame: "blocked_ips_list",
+            add_param: :add_bad, remove_param: :remove_bad,
+            form_key: :blocked_ips },
+          { type: :okay, frame: "okay_ips_list",
+            add_param: :add_okay, remove_param: :remove_okay,
+            form_key: :okay_ips }
+        ].each do |config|
+          new_ip = "5.5.5.#{config[:type] == :blocked ? 1 : 2}"
+
+          # Test add returns turbo_frame
+          patch(:update,
+                params: { config[:form_key] => { config[:add_param] => new_ip } })
+          assert_response(:success)
+          assert_select("turbo-frame##{config[:frame]}")
+          assert_includes(@response.body, new_ip,
+                          "#{config[:type]}: should show added IP")
+
+          # Test remove returns turbo_frame
+          patch(:update, params: { config[:remove_param] => new_ip })
+          assert_response(:success)
+          assert_select("turbo-frame##{config[:frame]}")
+        end
+
+        # Test paging returns turbo_frame (blocked only has pagination)
+        get(:edit, params: { page: 2 })
+        assert_response(:success)
+        assert_select("turbo-frame#blocked_ips_list")
+        assert_includes(@response.body, "page 2 of")
+      ensure
+        File.write(MO.blocked_ips_file, original_blocked)
+        File.write(MO.okay_ips_file, original_okay)
+        IpStats.reset!
+      end
+    end
+
     # Test that the Superform-generated nested params work
     # (form submits blocked_ips[add_bad] instead of add_bad)
     def test_blocked_ips_nested_params
