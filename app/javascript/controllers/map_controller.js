@@ -365,9 +365,10 @@ export default class extends GeocodeController {
       // this.verbose("map:pointChanged")
       // If they just cleared the inputs, swap back to a location autocompleter
       const center = this.validateLatLngInputs(false)
-      if (!center) return
 
-      this.sendPointChanged(center)
+      // Always send point changed - even when clearing lat/lng (center is null)
+      // This triggers swap back to 'location' type when lat/lng are cleared
+      this.sendPointChanged(center || { lat: null, lng: null })
 
       if (this.latInputTarget.value === "" ||
         this.lngInputTarget.value === "" && this.marker) {

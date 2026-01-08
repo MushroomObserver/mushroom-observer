@@ -707,6 +707,168 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_lng", with: "-122.6765", wait: 5)
   end
 
+  # Bug fix: After EXIF sets lat/lng and swaps to location_containing mode,
+  # manually entering different coordinates should update the dropdown.
+  def test_manual_lat_lng_overrides_exif_location
+    setup_image_dirs
+    login!(katrina)
+
+    # Create locations so the autocompleter uses location_containing mode
+    university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
+    pasadena = Location.create!(
+      name: "Pasadena, Los Angeles Co., California, USA",
+      north: 34.25, south: 34.12, east: -118.07, west: -118.20,
+      user: katrina
+    )
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Upload geotagged image (Miami/University Park area - 25.7582, -80.3731)
+    click_attach_file("geotagged.jpg")
+
+    # Verify EXIF coordinates were copied
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
+
+    # Autocompleter should be in location_containing mode (MO location exists)
+    assert_selector("[data-type='location_containing']", wait: 10)
+
+    # Wait for dropdown to populate (server request)
+    sleep(2)
+
+    # Verify the place name was auto-filled with University Park
+    place_field = find("#observation_place_name")
+    assert_match(/University Park/, place_field.value,
+                 "Place name should be auto-filled with matching location")
+
+    # Now manually enter Pasadena coordinates (different from Miami)
+    # Use JavaScript to set values and trigger input events
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '34.15';
+      lngField.value = '-118.14';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+    sleep(3)
+
+    # Autocompleter should stay in location_containing mode with new coords
+    assert_selector("[data-type='location_containing']", wait: 10)
+
+    # Verify the new coordinates are set
+    assert_equal("34.15", find("#observation_lat").value)
+    assert_equal("-118.14", find("#observation_lng").value)
+
+    # The place name should update to Pasadena (auto-filled from server)
+    place_field = find("#observation_place_name")
+    assert_match(/Pasadena/, place_field.value, wait: 5)
+
+    university_park.destroy
+    pasadena.destroy
+  end
+
+  # Bug fix: After EXIF populates location, typing a different location name
+  # should work (ignorePlaceInput flag should be reset).
+  def test_typing_location_overrides_exif_location
+    setup_image_dirs
+    login!(katrina)
+
+    # Create matching location so we get location_containing mode
+    university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Upload geotagged image (Miami area)
+    click_attach_file("geotagged.jpg")
+
+    # Verify EXIF was applied
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+
+    # Wait for location_containing mode and server response
+    assert_selector("[data-type='location_containing']", wait: 10)
+    sleep(2)
+
+    # Verify place name was auto-filled
+    place_field = find("#observation_place_name")
+    assert_match(/University Park/, place_field.value,
+                 "Place name should be auto-filled with matching location")
+
+    # Now try to type a completely different location
+    # This tests that ignorePlaceInput gets reset when user types
+    place_field.click
+    place_field.send_keys([:control, "a"], :backspace)
+    place_field.send_keys("Some Random Place")
+    sleep(2)
+
+    # Verify the text was actually typed (ignorePlaceInput was reset)
+    assert_match(/Some Random Place/, place_field.value,
+                 "Should be able to type after EXIF location was set")
+
+    # The autocompleter should offer "New Locality" button since no match found
+    # (This appears when the autocompleter is responsive to text input)
+    assert_selector(".offer-create, [data-type='location_google']", wait: 5)
+
+    university_park.destroy
+  end
+
+  # Bug fix: After EXIF populates location, clearing lat/lng and typing
+  # should show autocomplete suggestions.
+  def test_clearing_exif_lat_lng_allows_location_typing
+    setup_image_dirs
+    login!(katrina)
+
+    # Create matching location so we get location_containing mode
+    university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Upload geotagged image (Miami area)
+    click_attach_file("geotagged.jpg")
+
+    # Verify EXIF was applied
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
+
+    # Wait for location_containing mode
+    assert_selector("[data-type='location_containing']", wait: 10)
+    sleep(2)
+
+    # Verify place name was auto-filled
+    place_field = find("#observation_place_name")
+    assert_match(/University Park/, place_field.value,
+                 "Place name should be auto-filled with matching location")
+
+    # Clear the lat/lng fields to "unconstrain" the autocompleter
+    # Use JavaScript to clear fields and dispatch input events
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '';
+      lngField.value = '';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+    sleep(3)
+
+    # Autocompleter should swap back to regular location mode
+    assert_selector("[data-type='location']", wait: 10)
+
+    # Verify the autocompleter is no longer constrained
+    autocompleter = find("#observation_location_autocompleter")
+    assert_equal("location", autocompleter["data-type"],
+                 "Autocompleter should be in 'location' mode after clearing lat/lng")
+
+    # Verify lat/lng are actually cleared
+    assert_equal("", find("#observation_lat").value)
+    assert_equal("", find("#observation_lng").value)
+
+    university_park.destroy
+  end
+
   ##############################################################################
   #  Helper methods
   #
