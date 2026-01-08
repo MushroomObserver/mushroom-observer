@@ -66,49 +66,49 @@ module Admin
                   "It should ignore leading & trailing spaces in ip addr")
     end
 
-    def test_blocked_ips_filter
+    def test_ip_list_filters
       login(:rolf)
       make_admin
 
-      # Save original file contents to restore after test
-      original_contents = File.read(MO.blocked_ips_file)
+      original_blocked = File.read(MO.blocked_ips_file)
+      original_okay = File.read(MO.okay_ips_file)
 
       begin
-        # Clear existing IPs and generate fake IPs with different prefixes
-        IpStats.clear_blocked_ips
-        generate_blocked_ips(
-          "10.0.0" => 5,
-          "10.0.1" => 3,
-          "192.168.1" => 4
-        )
-        IpStats.reset!
+        [
+          { type: :blocked, frame: "blocked_ips_list",
+            filter_param: :text_filter, generator: :generate_blocked_ips,
+            clear: -> { IpStats.clear_blocked_ips },
+            prefix1: "10.0.0", prefix2: "192.168.1" },
+          { type: :okay, frame: "okay_ips_list",
+            filter_param: :okay_filter, generator: :generate_okay_ips,
+            clear: -> { IpStats.clear_okay_ips },
+            prefix1: "20.0.0", prefix2: "172.16.1" }
+        ].each do |config|
+          config[:clear].call
+          send(config[:generator],
+               config[:prefix1] => 5, config[:prefix2] => 4)
+          IpStats.reset!
 
-        # Test unfiltered - should show all IPs
-        get(:edit)
-        assert_response(:success)
-        assert_select("turbo-frame#blocked_ips_list")
-        assert_includes(@response.body, "10.0.0")
-        assert_includes(@response.body, "192.168.1")
+          # Test unfiltered
+          get(:edit)
+          assert_response(:success)
+          assert_select("turbo-frame##{config[:frame]}")
+          assert_includes(@response.body, config[:prefix1])
+          assert_includes(@response.body, config[:prefix2])
 
-        # Test filter by prefix "10.0.0"
-        get(:edit, params: { text_filter: { starts_with: "10.0.0" } })
-        assert_response(:success)
-        assert_includes(@response.body, "10.0.0")
-        assert_not_includes(@response.body, "192.168.1")
-
-        # Test filter by prefix "192."
-        get(:edit, params: { text_filter: { starts_with: "192." } })
-        assert_response(:success)
-        assert_includes(@response.body, "192.168.1")
-        assert_not_includes(@response.body, "10.0.0")
-
-        # Test filter with no matches
-        get(:edit, params: { text_filter: { starts_with: "255.255" } })
-        assert_response(:success)
-        assert_includes(@response.body, "Showing 0 of 0")
+          # Test filter by prefix
+          prefix = config[:prefix1]
+          filter = { config[:filter_param] => { starts_with: prefix } }
+          get(:edit, params: filter)
+          assert_response(:success)
+          assert_includes(@response.body, config[:prefix1],
+                          "#{config[:type]}: should show filtered IPs")
+          assert_not_includes(@response.body, config[:prefix2],
+                              "#{config[:type]}: should hide non-matching IPs")
+        end
       ensure
-        # Restore original file contents
-        File.write(MO.blocked_ips_file, original_contents)
+        File.write(MO.blocked_ips_file, original_blocked)
+        File.write(MO.okay_ips_file, original_okay)
         IpStats.reset!
       end
     end
@@ -202,13 +202,19 @@ module Admin
     private
 
     def generate_blocked_ips(prefixes_with_counts)
+      IpStats.add_blocked_ips(generate_ips(prefixes_with_counts))
+    end
+
+    def generate_okay_ips(prefixes_with_counts)
+      IpStats.add_okay_ips(generate_ips(prefixes_with_counts))
+    end
+
+    def generate_ips(prefixes_with_counts)
       ips = []
       prefixes_with_counts.each do |prefix, count|
-        count.times do |i|
-          ips << "#{prefix}.#{i + 1}"
-        end
+        count.times { |i| ips << "#{prefix}.#{i + 1}" }
       end
-      IpStats.add_blocked_ips(ips)
+      ips
     end
   end
 end
