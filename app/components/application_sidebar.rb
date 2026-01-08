@@ -69,7 +69,7 @@ module Components
 
     def render_top_section
       # This cache depends on user status and locale
-      cache([user_status_string(@user), I18n.locale, "login"]) do
+      cache([I18n.locale, user_status_string(@user), "login"]) do
         if @in_admin_mode
           render(Components::Sidebar::Admin.new(
                    heading_key: :app_admin,
@@ -123,7 +123,7 @@ module Components
 
     def render_info_sections
       # This cache depends on user status and locale
-      cache([user_status_string(@user), I18n.locale, "links"]) do
+      cache([I18n.locale, user_status_string(@user), "links"]) do
         render(Components::Sidebar::Section.new(
                  heading_key: :app_latest,
                  tabs: sidebar_latest_tabs(@user),

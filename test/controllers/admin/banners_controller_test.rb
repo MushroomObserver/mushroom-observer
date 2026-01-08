@@ -28,5 +28,6 @@ class Admin::BannersControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("div", "Failed to update banner.")
+    assert_select("textarea", banners(:one).message)
   end
 end
