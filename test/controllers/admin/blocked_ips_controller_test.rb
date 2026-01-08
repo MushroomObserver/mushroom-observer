@@ -139,8 +139,9 @@ module Admin
           new_ip = "5.5.5.#{config[:type] == :blocked ? 1 : 2}"
 
           # Test add returns turbo_frame
-          patch(:update,
-                params: { config[:form_key] => { config[:add_param] => new_ip } })
+          patch(:update, params: {
+                  config[:form_key] => { config[:add_param] => new_ip }
+                })
           assert_response(:success)
           assert_select("turbo-frame##{config[:frame]}")
           assert_includes(@response.body, new_ip,

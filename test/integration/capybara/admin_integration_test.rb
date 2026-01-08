@@ -102,75 +102,63 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#okay_ips_manager_form")
     assert_selector("#blocked_ips_manager_form")
 
-    click_on(id: "clear_okay_ips_list")
-
-    # Be sure these are not already in the table
-    within("#okay_ips") do
-      refute_selector("td", text: "3.4.5.6")
-      refute_selector("td", text: "3.14.15.9")
-    end
-
+    # Test invalid IP validation (once is enough)
     within("#okay_ips_manager_form") do
       fill_in("okay_ips[add_okay]", with: "not.an.ip")
       click_commit
     end
     assert_flash_text("Invalid IP address")
 
-    within("#okay_ips_manager_form") do
-      fill_in("okay_ips[add_okay]", with: "3.4.5.6")
-      click_commit
-      fill_in("okay_ips[add_okay]", with: "3.14.15.9")
-      click_commit
-    end
-
-    within("#okay_ips") do
-      assert_selector("td", text: "3.4.5.6")
-      assert_selector("td", text: "3.14.15.9")
-      click_on(id: "remove_okay_ip_3.14.15.9")
-      refute_selector("td", text: "3.14.15.9")
-    end
-
-    click_on(id: "clear_okay_ips_list")
-
-    within("#okay_ips") do
-      refute_selector("td", text: "3.4.5.6")
-      refute_selector("td", text: "3.14.15.9")
-    end
-
-    click_on(id: "clear_blocked_ips_list")
-
-    within("#blocked_ips_manager_form") do
-      fill_in("blocked_ips[add_bad]", with: "3.4.5.6")
-      click_commit
-      fill_in("blocked_ips[add_bad]", with: "3.14.15.9")
-      click_commit
-    end
-
-    within("#blocked_ips") do
-      assert_selector("td", text: "3.4.5.6")
-      assert_selector("td", text: "3.14.15.9")
-      click_on(id: "remove_blocked_ip_3.14.15.9")
-      refute_selector("td", text: "3.14.15.9")
-    end
-
-    click_on(id: "clear_blocked_ips_list")
-
-    within("#blocked_ips") do
-      refute_selector("td", text: "3.4.5.6")
-      refute_selector("td", text: "1.2.3.4")
-    end
-
-    within("#blocked_ips_manager_form") do
-      fill_in("blocked_ips[add_bad]", with: "1.2.3.4")
-      click_commit
-    end
-
-    within("#blocked_ips") do
-      assert_selector("td", text: "1.2.3.4")
+    # Test both IP list types with shared logic
+    [
+      { type: :okay, form_key: "okay_ips", add_field: "add_okay" },
+      { type: :blocked, form_key: "blocked_ips", add_field: "add_bad" }
+    ].each do |config|
+      assert_ip_manager_crud(config)
     end
   end
 
   private
+
+  def assert_ip_manager_crud(config)
+    type = config[:type]
+    form_id = "#{type}_ips_manager_form"
+    table_id = "#{type}_ips"
+    field_name = "#{config[:form_key]}[#{config[:add_field]}]"
+    ip1 = "3.4.5.6"
+    ip2 = "3.14.15.9"
+
+    # Clear list first
+    click_on(id: "clear_#{type}_ips_list")
+
+    # Verify empty
+    within("##{table_id}") do
+      refute_selector("td", text: ip1)
+      refute_selector("td", text: ip2)
+    end
+
+    # Add two IPs
+    within("##{form_id}") do
+      fill_in(field_name, with: ip1)
+      click_commit
+      fill_in(field_name, with: ip2)
+      click_commit
+    end
+
+    # Verify added, then remove one
+    within("##{table_id}") do
+      assert_selector("td", text: ip1)
+      assert_selector("td", text: ip2)
+      click_on(id: "remove_#{type}_ip_#{ip2}")
+      refute_selector("td", text: ip2)
+    end
+
+    # Clear and verify empty
+    click_on(id: "clear_#{type}_ips_list")
+    within("##{table_id}") do
+      refute_selector("td", text: ip1)
+    end
+  end
 
   def backup_ip_files
     @blocked_ips_backup = File.read(MO.blocked_ips_file) if
