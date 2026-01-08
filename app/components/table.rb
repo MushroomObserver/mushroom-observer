@@ -39,7 +39,7 @@ class Components::Table < Components::Base
   def view_template(&block)
     # Capture column definitions without outputting anything.
     # Uses Phlex's `vanish` pattern for tables:
-    # https://www.phlex.fun/templates/#tables
+    # https://www.phlex.fun/components/yielding.html#vanishing-the-yield
     vanish(&block)
 
     table(**table_attributes) do
