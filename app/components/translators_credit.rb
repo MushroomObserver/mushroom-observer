@@ -21,29 +21,33 @@ module Components
 
     private
 
-    # rubocop:disable Metrics/AbcSize
     def render_translators_credit(lang)
       # Translation string may contain HTML (e.g., in German)
       trusted_html(:app_translators_credit.t)
       plain(": ")
 
       ids_and_names = lang.top_contributors(5)
+      render_contributor_links(ids_and_names)
+      render_and_others_suffix(ids_and_names)
 
+      br
+    end
+
+    def render_contributor_links(ids_and_names)
       ids_and_names.each_with_index do |(user_id, name), index|
         a(href: user_path(user_id), class: "user_link_#{user_id}") do
           plain(name)
         end
         plain(", ") if index < ids_and_names.length - 1
       end
-
-      if ids_and_names.length == 5
-        plain(", ")
-        trusted_html(:app_translators_credit_and_others.t)
-      end
-
-      br
     end
-    # rubocop:enable Metrics/AbcSize
+
+    def render_and_others_suffix(ids_and_names)
+      return unless ids_and_names.length == 5
+
+      plain(", ")
+      trusted_html(:app_translators_credit_and_others.t)
+    end
 
     def render_translation_links
       file = Language.save_tags
