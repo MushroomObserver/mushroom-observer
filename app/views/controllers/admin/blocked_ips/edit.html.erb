@@ -11,33 +11,25 @@ container_class(:full)
     end %>
 
     <%# ----- Okay IPs ----- %>
-    <%= render(Components::Panel.new(panel_class: "my-3")) do |panel| %>
-      <% panel.with_body do %>
-        <%= render(Components::OkayIpsManager.new(
-              FormObject::OkayIps.new,
-              okay_ips: @okay_ips,
-              action_path: admin_blocked_ips_path
-            )) %>
-      <% end %>
-    <% end %>
+    <%= render(Components::IpsManager.new(
+          FormObject::OkayIps.new,
+          type: :okay,
+          ips: @okay_ips,
+          action_path: admin_blocked_ips_path
+        )) %>
 
     <%# ----- Blocked IPs ----- %>
-    <%= render(Components::Panel.new(panel_class: "my-3")) do |panel| %>
-      <% panel.with_body do %>
-        <%= turbo_frame_tag("blocked_ips_list") do %>
-          <%= render(Components::BlockedIpsManager.new(
-                FormObject::BlockedIps.new,
-                blocked_ips: @blocked_ips,
-                page: @blocked_ips_page,
-                total_pages: @blocked_ips_pages,
-                total_count: @blocked_ips_total,
-                starts_with: @starts_with,
-                filter_path: edit_admin_blocked_ips_path,
-                action_path: admin_blocked_ips_path
-              )) %>
-        <% end %>
-      <% end %>
-    <% end %>
+    <%= render(Components::IpsManager.new(
+          FormObject::BlockedIps.new,
+          type: :blocked,
+          ips: @blocked_ips,
+          page: @blocked_ips_page,
+          total_pages: @blocked_ips_pages,
+          total_count: @blocked_ips_total,
+          starts_with: @starts_with,
+          filter_path: edit_admin_blocked_ips_path,
+          action_path: admin_blocked_ips_path
+        )) %>
   </div>
 
   <%# ----- Stats / Most Active Users ----- %>

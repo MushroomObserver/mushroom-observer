@@ -9,6 +9,7 @@ class Components::Base < Phlex::HTML
   include Phlex::Rails::Helpers::LinkTo
   include Phlex::Rails::Helpers::ButtonTo
   include Phlex::Rails::Helpers::ClassNames
+  include Phlex::Rails::Helpers::TurboFrameTag
 
   # Register custom output helpers (return HTML)
   register_output_helper :show_title_id_badge

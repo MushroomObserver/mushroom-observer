@@ -76,6 +76,7 @@
 #   end
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
+  include Phlex::Rails::Helpers::TurboFrameTag
 
   # Automatically set form ID based on class name unless explicitly provided
   # @param model [ActiveRecord::Base] the model object for the form

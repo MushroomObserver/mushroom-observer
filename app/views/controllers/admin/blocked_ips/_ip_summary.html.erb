@@ -2,12 +2,12 @@
   <% panel.with_heading do %>
     Most active users: (top 50)
   <% end %>
-  <% panel.with_body do %>
+  <% panel.with_body(wrapper: false) do %>
     <%
       sorted_ips = @stats.keys.sort_by { |ip| @stats[ip][:load] }.reverse[0..50]
     %>
     <%= render(Components::Table.new(sorted_ips,
-                                     class: "ips ips-lined")) do |t| %>
+                                     class: "ips ips-lined align-middle")) do |t| %>
       <% t.column("ip") do |ip| %>
         <%= link_to(ip, edit_admin_blocked_ips_path(report: ip)) %>
       <% end %>
@@ -20,7 +20,8 @@
       <% end %>
       <% t.column("user") do |ip| %>
         <% if (user_id = @stats[ip][:user]) %>
-          User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
+          <% user = User.safe_find(user_id) %>
+          User: <%= user ? user_link(user) : user_id %><br/>
         <% elsif browser.bot? %>
           bot<br/>
         <% end %>

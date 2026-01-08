@@ -35,12 +35,14 @@ class Components::BlockedIpsFilterForm < Components::ApplicationForm
   end
 
   def view_template
-    text_field(:starts_with,
-               label: false,
-               placeholder: "Filter by IP prefix...",
-               class: "form-control form-control-sm",
-               size: 21,
-               data: { action: "input->autosubmit#submit" })
+    div(class: "text-center") do
+      text_field(:starts_with,
+                 label: false,
+                 placeholder: "Filter by IP prefix...",
+                 class: "form-control form-control-sm d-inline-block w-auto",
+                 size: 21,
+                 data: { action: "input->autosubmit#submit" })
+    end
   end
 
   private
