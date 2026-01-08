@@ -87,8 +87,10 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: p_id })
     assert_select("h1#title", /\S/,
                   "H1 title element should exist and contain content")
-    assert_select("div#project_banner", false,
-                  "Project banner div should be absent")
+    assert_select("div#project_banner", true,
+                  "Project banner div should exist")
+    assert_select("img.banner-image", false,
+                  "Banner image should be absent for projects without images")
   end
 
   def test_show_project_nonexistent

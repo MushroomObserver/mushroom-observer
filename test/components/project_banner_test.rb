@@ -6,18 +6,34 @@ require "test_helper"
 # This component now handles all project banner logic internally including
 # banner image, title, location, date range, and tabs.
 class ProjectBannerTest < ComponentTestCase
-  def test_renders_basic_html_structure
-    html = render_banner
+  def test_renders_basic_html_structure_with_banner_image
+    project = projects(:albion_project)
+    html = render_banner(project: project)
 
     # Outer row and container
     assert_html(html, ".row")
     assert_html(html, ".col-xs-12#project_banner")
 
-    # Banner overlay positioning
+    # Banner overlay positioning (only with images)
     assert_html(html, ".bottom-left.ml-3.mb-3.p-2")
 
-    # Title heading structure
+    # Title heading structure with overlay styling
     assert_html(html, "h1.h3.banner-image-text")
+  end
+
+  def test_renders_basic_html_structure_without_banner_image
+    project = projects(:empty_project)
+    html = render_banner(project: project)
+
+    # Outer row and container
+    assert_html(html, ".row")
+    assert_html(html, ".col-xs-12#project_banner")
+
+    # No banner overlay positioning without images
+    assert_no_html(html, ".bottom-left")
+
+    # Title heading structure with regular page title styling
+    assert_html(html, "h1.h3.page-title")
   end
 
   def test_title_id_is_title_when_on_project_page
@@ -42,12 +58,14 @@ class ProjectBannerTest < ComponentTestCase
     assert_no_html(html, ".banner-background")
   end
 
-  def test_renders_banner_background_when_project_has_no_image
+  def test_renders_without_banner_overlay_when_project_has_no_image
     project = projects(:empty_project)
     html = render_banner(project: project)
 
-    assert_html(html, ".banner-background")
+    # No banner image or overlay styling
     assert_no_html(html, "img.banner-image")
+    assert_no_html(html, ".bottom-left")
+    assert_no_html(html, ".banner-image-text")
   end
 
   def test_does_not_render_project_location_when_project_has_no_location
@@ -77,7 +95,9 @@ class ProjectBannerTest < ComponentTestCase
     project = projects(:past_project)
     html = render_banner(project: project)
 
-    assert_html(html, ".project_date_range.banner-image-text")
+    # past_project has no image, so no banner-image-text class
+    assert_html(html, ".project_date_range")
+    assert_no_html(html, ".banner-image-text")
     assert_includes(html, project.date_range)
   end
 
@@ -85,8 +105,10 @@ class ProjectBannerTest < ComponentTestCase
     project = projects(:past_project)
     html = render_banner(project: project)
 
-    assert_html(html, ".project_location.banner-image-text")
-    assert_html(html, ".project_date_range.banner-image-text")
+    # past_project has no image, so no banner-image-text class
+    assert_html(html, ".project_location")
+    assert_html(html, ".project_date_range")
+    assert_no_html(html, ".banner-image-text")
     assert_includes(html, project.place_name)
     assert_includes(html, project.date_range)
   end

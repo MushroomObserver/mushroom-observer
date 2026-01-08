@@ -27,8 +27,8 @@ production-logs
 **/*.swp
 dump.rdb
 
-# Ignore development projects folder
-projects/
+# Ignore development projects folder (only at top level)
+/projects/
 
 # Ignore bundler config.
 .bundle

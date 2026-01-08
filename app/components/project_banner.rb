@@ -15,23 +15,17 @@ module Components
   class ProjectBanner < Base
     include Phlex::Rails::Helpers::ContentFor
     include Rails.application.routes.url_helpers
-    include ActionView::Helpers::UrlHelper
-    include ActionView::Helpers::AssetUrlHelper
-    include ActionView::Helpers::OutputSafetyHelper
-    include ObjectLinkHelper
-    include Header::TitleHelper
 
-    prop :project, Project
+    prop :project, _Nilable(Project)
     prop :on_project_page, _Boolean, default: false
 
     def view_template
       return unless @project
 
-      div(class: "row") do
-        div(class: "col-xs-12", id: "project_banner") do
-          render_banner_image_or_background
-          render_banner_content
-        end
+      if @project.image
+        render_banner_with_image
+      else
+        render_banner_without_image
       end
 
       render_project_tabs if project_has_content?
@@ -39,36 +33,68 @@ module Components
 
     private
 
-    def render_banner_image_or_background
-      if @project.image
-        img(src: @project.image.large_url, class: "banner-image")
-      else
-        # Solid background when no image - styling handled by CSS
-        div(class: "banner-background")
+    def render_banner_with_image
+      div(class: "row") do
+        div(class: "col-xs-12", id: "project_banner") do
+          img(src: @project.image.large_url, class: "banner-image")
+          div(class: "bottom-left ml-3 mb-3 p-2") do
+            render_banner_title_with_icons(with_overlay_styling: true)
+            render_project_location(with_overlay_styling: true)
+            render_project_date_range(with_overlay_styling: true)
+          end
+        end
       end
     end
 
-    def render_banner_content
-      div(class: "bottom-left ml-3 mb-3 p-2") do
-        render_banner_title
-        render_project_location
-        render_project_date_range
+    def render_banner_without_image
+      div(class: "row") do
+        div(class: "col-xs-12", id: "project_banner") do
+          div(class: "pl-3 mt-3") do
+            render_banner_title_with_icons(with_overlay_styling: false)
+          end
+          if project_subtitle?
+            div(class: "pl-3 mb-3") do
+              render_project_location(with_overlay_styling: false)
+              render_project_date_range(with_overlay_styling: false)
+            end
+          end
+        end
       end
     end
 
-    def render_banner_title
-      h1(class: "h3 banner-image-text", id: title_id) do
-        trusted_html(banner_title_html)
-      end
-    end
-
-    def banner_title_html
+    def render_banner_title_with_icons(with_overlay_styling:)
       if @on_project_page
-        safe_join([helpers.show_title_id_badge(@project),
-                   helpers.link_to_object(@project)],
-                  " ")
+        nav_classes = if with_overlay_styling
+                        "show_title_nav d-flex justify-content-between"
+                      else
+                        "show_title_nav d-flex justify-content-between pl-3"
+                      end
+        nav(class: nav_classes) do
+          render_banner_title(with_overlay_styling: with_overlay_styling)
+          trusted_html(show_page_edit_icons)
+        end
       else
-        helpers.link_to_object(@project)
+        render_banner_title(with_overlay_styling: with_overlay_styling)
+      end
+    end
+
+    def project_subtitle?
+      @project.location || (@project.start_date && @project.end_date)
+    end
+
+    def render_banner_title(with_overlay_styling:)
+      title_classes = if with_overlay_styling
+                        "h3 banner-image-text"
+                      else
+                        "h3 page-title mb-4"
+                      end
+
+      h1(class: title_classes, id: title_id) do
+        if @on_project_page
+          trusted_html(show_title_id_badge(@project))
+          plain(" ")
+        end
+        trusted_html(link_to_object(@project))
       end
     end
 
@@ -76,10 +102,16 @@ module Components
       @on_project_page ? "title" : "banner_title"
     end
 
-    def render_project_location
+    def render_project_location(with_overlay_styling:)
       return unless @project.location
 
-      div(class: "project_location banner-image-text") do
+      location_classes = if with_overlay_styling
+                           "project_location banner-image-text"
+                         else
+                           "project_location"
+                         end
+
+      div(class: location_classes) do
         b do
           a(href: location_path(@project.location.id)) do
             @project.place_name
@@ -88,10 +120,16 @@ module Components
       end
     end
 
-    def render_project_date_range
+    def render_project_date_range(with_overlay_styling:)
       return unless @project.start_date && @project.end_date
 
-      div(class: "project_date_range banner-image-text") do
+      date_classes = if with_overlay_styling
+                       "project_date_range banner-image-text"
+                     else
+                       "project_date_range"
+                     end
+
+      div(class: date_classes) do
         b { @project.date_range }
       end
     end
@@ -181,9 +219,9 @@ module Components
     end
 
     def active_tab?(tab_name)
-      current = helpers.controller_name
+      current = controller_name
       current = "locations" if current == "checklists" &&
-                               helpers.params.include?("location_id")
+                               params.include?("location_id")
       current == tab_name
     end
 
