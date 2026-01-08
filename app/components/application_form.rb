@@ -113,7 +113,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
   # Wrapper option keys that should not be passed to the field itself
   WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
-                     :button, :button_data, :addon, :monospace,
+                     :button, :button_data, :button_text, :addon, :monospace,
                      :label_class, :label_data, :label_aria,
                      :label_position].freeze
 
@@ -347,6 +347,31 @@ class Components::ApplicationForm < Superform::Rails::Form
     field_component = field(field_name).text(
       wrapper_options: wrapper_opts,
       type: "number",
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # File field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [String] :accept file type filter (default: "image/*")
+  # @option options [Boolean] :multiple allow multiple file selection
+  # @option options [String] :controller custom Stimulus controller
+  # @option options [String] :action custom Stimulus action
+  # @option options [String] :button_text custom button text
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`
+  def file_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).file(
+      wrapper_options: wrapper_opts,
       **field_opts
     )
 

@@ -42,6 +42,16 @@ class ObservationFormTest < ComponentTestCase
                       "[data-map-target='placeInput']")
   end
 
+  def test_file_input_has_accept_attribute
+    user = users(:rolf)
+    obs = Observation.new(when: Time.zone.today)
+
+    html = render_form(observation: obs, user: user, mode: :create)
+
+    # File input should restrict to images to prevent folder selection errors
+    assert_html(html, "input[type='file'][accept='image/*']")
+  end
+
   private
 
   def render_form(observation:, user:, mode: :create, given_name: nil,
