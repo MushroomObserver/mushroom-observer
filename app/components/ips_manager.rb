@@ -50,15 +50,21 @@ class Components::IpsManager < Components::ApplicationForm
       render(Components::Panel.new(panel_class: "my-3")) do |panel|
         panel.with_heading { title }
         panel.with_heading_links { render_showing_message }
-        panel.with_body { super(&block) }
-        panel.with_body(wrapper: false) { render_ips_table }
+        panel.with_body(wrapper: false) do
+          div(class: "d-flex flex-column") do
+            super(&block)
+            # Filter form rendered outside main form (GET vs PATCH)
+            # CSS order places it visually between controls and table
+            render_filter_form if filterable?
+          end
+        end
       end
     end
   end
 
   def view_template
     render_controls_row
-    render_filter_form if filterable?
+    render_ips_table
   end
 
   private
@@ -67,11 +73,8 @@ class Components::IpsManager < Components::ApplicationForm
     @page.present? && @total_pages.present?
   end
 
-  def form_tag
-    form(action: @action_path, method: :post, **form_attributes) do
-      input(type: "hidden", name: "_method", value: "patch")
-      yield
-    end
+  def form_tag(&block)
+    form(action: @action_path, method: :post, **form_attributes, &block)
   end
 
   def form_attributes
@@ -84,11 +87,15 @@ class Components::IpsManager < Components::ApplicationForm
   end
 
   def render_filter_form
-    render(Components::BlockedIpsFilterForm.new(
+    render(Components::LiveDataFilterForm.new(
              FormObject::TextFilter.new(starts_with: @starts_with),
+             turbo_frame: "#{@type}_ips_list",
              page: @page,
              total_pages: @total_pages,
-             filter_path: @filter_path
+             filter_path: @filter_path,
+             placeholder: "Filter by IP prefix...",
+             page_param: @type == :blocked ? "page" : "okay_page",
+             filter_param: @type == :blocked ? "text_filter" : "okay_filter"
            ))
   end
 
@@ -106,7 +113,8 @@ class Components::IpsManager < Components::ApplicationForm
   end
 
   def render_controls_row
-    div(class: "d-flex justify-content-between align-items-center mb-3") do
+    div(class: "d-flex justify-content-between align-items-center p-3",
+        style: "order: 1") do
       div(class: "form-group form-inline mb-0") do
         render_add_field
         render_add_button
@@ -133,6 +141,7 @@ class Components::IpsManager < Components::ApplicationForm
 
   def render_clear_button
     button(type: "submit",
+           id: "clear_#{@type}_ips_list",
            name: clear_param,
            value: "1",
            class: "btn btn-default ml-auto",
@@ -149,7 +158,8 @@ class Components::IpsManager < Components::ApplicationForm
     render(Components::Table.new(@ips,
                                  id: "#{@type}_ips",
                                  headers: false,
-                                 class: "ips my-3 align-middle")) do |t|
+                                 class: "ips align-middle border-top",
+                                 style: "order: 3")) do |t|
       t.column("ip", &:t)
       t.column("actions", class: "text-right") { |ip| render_remove_button(ip) }
     end
@@ -157,6 +167,7 @@ class Components::IpsManager < Components::ApplicationForm
 
   def render_remove_button(ip)
     button(type: "submit",
+           id: "remove_#{@type}_ip_#{ip}",
            name: remove_param,
            value: ip,
            class: "btn btn-sm btn-link font-weight-bold") do

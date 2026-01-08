@@ -3,6 +3,16 @@
 require("test_helper")
 
 class AdminIntegrationTest < CapybaraIntegrationTestCase
+  def setup
+    super
+    backup_ip_files
+  end
+
+  def teardown
+    restore_ip_files
+    super
+  end
+
   def test_turn_admin_mode_on_and_off
     refute_selector(id: "nav_admin_on_link")
 
@@ -89,8 +99,8 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
     put_user_in_admin_mode(rolf)
     click_on(id: "nav_admin_blocked_ips_link")
 
-    assert_selector("#admin_okay_ips_form")
-    assert_selector("#admin_blocked_ips_form")
+    assert_selector("#okay_ips_manager_form")
+    assert_selector("#blocked_ips_manager_form")
 
     click_on(id: "clear_okay_ips_list")
 
@@ -100,16 +110,16 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
       refute_selector("td", text: "3.14.15.9")
     end
 
-    within("#admin_okay_ips_form") do
-      fill_in("add_okay", with: "not.an.ip")
+    within("#okay_ips_manager_form") do
+      fill_in("okay_ips[add_okay]", with: "not.an.ip")
       click_commit
     end
     assert_flash_text("Invalid IP address")
 
-    within("#admin_okay_ips_form") do
-      fill_in("add_okay", with: "3.4.5.6")
+    within("#okay_ips_manager_form") do
+      fill_in("okay_ips[add_okay]", with: "3.4.5.6")
       click_commit
-      fill_in("add_okay", with: "3.14.15.9")
+      fill_in("okay_ips[add_okay]", with: "3.14.15.9")
       click_commit
     end
 
@@ -129,10 +139,10 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
 
     click_on(id: "clear_blocked_ips_list")
 
-    within("#admin_blocked_ips_form") do
-      fill_in("add_bad", with: "3.4.5.6")
+    within("#blocked_ips_manager_form") do
+      fill_in("blocked_ips[add_bad]", with: "3.4.5.6")
       click_commit
-      fill_in("add_bad", with: "3.14.15.9")
+      fill_in("blocked_ips[add_bad]", with: "3.14.15.9")
       click_commit
     end
 
@@ -150,13 +160,35 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
       refute_selector("td", text: "1.2.3.4")
     end
 
-    within("#admin_blocked_ips_form") do
-      fill_in("add_bad", with: "1.2.3.4")
+    within("#blocked_ips_manager_form") do
+      fill_in("blocked_ips[add_bad]", with: "1.2.3.4")
       click_commit
     end
 
     within("#blocked_ips") do
       assert_selector("td", text: "1.2.3.4")
+    end
+  end
+
+  private
+
+  def backup_ip_files
+    @blocked_ips_backup = File.read(MO.blocked_ips_file) if
+      File.exist?(MO.blocked_ips_file)
+    @okay_ips_backup = File.read(MO.okay_ips_file) if
+      File.exist?(MO.okay_ips_file)
+  end
+
+  def restore_ip_files
+    if @blocked_ips_backup
+      File.write(MO.blocked_ips_file, @blocked_ips_backup)
+    elsif File.exist?(MO.blocked_ips_file)
+      File.delete(MO.blocked_ips_file)
+    end
+    if @okay_ips_backup
+      File.write(MO.okay_ips_file, @okay_ips_backup)
+    elsif File.exist?(MO.okay_ips_file)
+      File.delete(MO.okay_ips_file)
     end
   end
 end

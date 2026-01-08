@@ -15,6 +15,11 @@ container_class(:full)
           FormObject::OkayIps.new,
           type: :okay,
           ips: @okay_ips,
+          page: @okay_ips_page,
+          total_pages: @okay_ips_pages,
+          total_count: @okay_ips_total,
+          starts_with: @okay_ips_starts_with,
+          filter_path: edit_admin_blocked_ips_path,
           action_path: admin_blocked_ips_path
         )) %>
 
