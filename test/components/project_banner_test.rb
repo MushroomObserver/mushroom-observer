@@ -3,9 +3,8 @@
 require "test_helper"
 
 # Tests for ProjectBanner component structure and conditional rendering.
-# Note: This component uses content_for blocks which are set by helpers
-# (see ProjectsHelper#add_project_banner). Content integration is tested
-# in controller/system tests, not component tests.
+# This component now handles all project banner logic internally including
+# banner image, title, location, date range, and tabs.
 class ProjectBannerTest < ComponentTestCase
   def test_renders_basic_html_structure
     html = render_banner
@@ -19,7 +18,6 @@ class ProjectBannerTest < ComponentTestCase
 
     # Title heading structure
     assert_html(html, "h1.h3.banner-image-text")
-    assert_html(html, ".d-flex.align-items-center")
   end
 
   def test_title_id_is_title_when_on_project_page
@@ -34,6 +32,22 @@ class ProjectBannerTest < ComponentTestCase
 
     assert_html(html, "h1#banner_title")
     assert_no_html(html, "h1#title")
+  end
+
+  def test_renders_banner_image_when_project_has_image
+    project = projects(:albion_project)
+    html = render_banner(project: project)
+
+    assert_html(html, "img.banner-image")
+    assert_no_html(html, ".banner-background")
+  end
+
+  def test_renders_banner_background_when_project_has_no_image
+    project = projects(:empty_project)
+    html = render_banner(project: project)
+
+    assert_html(html, ".banner-background")
+    assert_no_html(html, "img.banner-image")
   end
 
   def test_does_not_render_project_location_when_project_has_no_location
@@ -77,9 +91,25 @@ class ProjectBannerTest < ComponentTestCase
     assert_includes(html, project.date_range)
   end
 
+  def test_renders_project_tabs_when_project_has_observations
+    project = projects(:eol_project)
+    html = render_banner(project: project)
+
+    assert_html(html, "#project_tabs")
+    assert_html(html, "ul.nav.nav-tabs")
+    assert_html(html, "a.nav-link[href='/projects/#{project.id}']")
+  end
+
+  def test_does_not_render_tabs_when_project_has_no_content
+    project = projects(:empty_project)
+    html = render_banner(project: project)
+
+    assert_no_html(html, "#project_tabs")
+  end
+
   private
 
-  def render_banner(on_project_page: false, project: nil)
+  def render_banner(on_project_page: false, project: projects(:eol_project))
     render(Components::ProjectBanner.new(on_project_page: on_project_page,
                                          project: project))
   end
