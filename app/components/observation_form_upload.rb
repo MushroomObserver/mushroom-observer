@@ -6,8 +6,6 @@
 # @param form [Components::ApplicationForm] the parent form
 # @param good_images [Array<Image>] already uploaded images
 class Components::ObservationFormUpload < Components::Base
-  include Phlex::Rails::Helpers::FileFieldTag
-
   prop :form, _Any
   prop :good_images, _Array(Image), default: -> { [] }
 
@@ -21,15 +19,20 @@ class Components::ObservationFormUpload < Components::Base
   private
 
   def render_file_select_button
-    label(for: "select_images_button", class: "btn btn-default file-field") do
-      trusted_html(:select_file.l)
-      file_field_tag(
-        :select_images_button,
-        multiple: true,
-        accept: "image/*",
-        data: { action: "change->form-images#addSelectedFiles" }
+    field_proxy = Components::ApplicationForm::FieldProxy.new(
+      "", :select_images_button, nil
+    )
+    render(
+      Components::ApplicationForm::FileField.new(
+        field_proxy,
+        attributes: {
+          multiple: true,
+          controller: "form-images",
+          action: "change->form-images#addSelectedFiles"
+        },
+        wrapper_options: { label: false }
       )
-    end
+    )
   end
 
   def render_good_image_ids_field

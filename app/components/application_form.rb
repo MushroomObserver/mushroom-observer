@@ -475,10 +475,14 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
 
       def id
+        return @field_key.to_s if @namespace.blank?
+
         "#{@namespace}_#{@field_key}".tr("[]", "_").gsub(/__+/, "_")
       end
 
       def name
+        return @field_key.to_s if @namespace.blank?
+
         "#{@namespace}[#{@field_key}]"
       end
 
