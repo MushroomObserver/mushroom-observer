@@ -4,6 +4,11 @@ require "test_helper"
 
 # Tests for TranslatorsCredit component conditional rendering
 class TranslatorsCreditTest < ComponentTestCase
+  def setup
+    super
+    Language.ignore_usage
+  end
+
   def teardown
     Language.ignore_usage
     super
