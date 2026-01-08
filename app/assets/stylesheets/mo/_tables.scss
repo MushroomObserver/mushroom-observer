@@ -161,10 +161,13 @@ thead tr {
   }
 }
 
-table.ips tr td,
-table.ips tr th {
-  background: #f7f;
-  padding: 0 0.5em;
+table.ips {
+  background: none;
+
+  tr td,
+  tr th {
+    padding: 0 0.5em;
+  }
 }
 
 table.ips-lined tr td,
