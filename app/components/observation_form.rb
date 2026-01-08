@@ -15,47 +15,43 @@
 #   ))
 #
 class Components::ObservationForm < Components::ApplicationForm
-  # rubocop:disable Metrics/ParameterLists, Metrics/AbcSize
-  def initialize(model, mode:, user:, location: nil, good_images: [],
-                 exif_data: {}, given_name: nil, place_name: nil,
-                 default_place_name: nil, dubious_where_reasons: nil,
-                 vote: nil, names: [], valid_names: [], reasons: nil,
-                 suggest_corrections: false, parent_deprecated: nil,
-                 collectors_name: nil, collectors_number: nil,
-                 herbarium_name: nil, herbarium_id: nil, accession_number: nil,
-                 projects: [], project_checks: {}, lists: [], list_checks: {},
-                 error_checked_projects: [], suspect_checked_projects: [],
-                 field_code: nil, **)
-    @mode = mode
-    @user = user
-    @location = location
-    @good_images = good_images
-    @exif_data = exif_data
-    @given_name = given_name
-    @place_name = place_name
-    @default_place_name = default_place_name
-    @dubious_where_reasons = dubious_where_reasons
-    @vote = vote
-    @names = names
-    @valid_names = valid_names
-    @reasons = reasons
-    @suggest_corrections = suggest_corrections
-    @parent_deprecated = parent_deprecated
-    @collectors_name = collectors_name
-    @collectors_number = collectors_number
-    @herbarium_name = herbarium_name
-    @herbarium_id = herbarium_id
-    @accession_number = accession_number
-    @projects = projects
-    @project_checks = project_checks
-    @lists = lists
-    @list_checks = list_checks
-    @error_checked_projects = error_checked_projects
-    @suspect_checked_projects = suspect_checked_projects
-    @field_code = field_code
-    super(model, id: "observation_form", **)
+  FORM_ATTR_DEFAULTS = {
+    mode: nil,
+    user: nil,
+    location: nil,
+    good_images: [],
+    exif_data: {},
+    given_name: nil,
+    place_name: nil,
+    default_place_name: nil,
+    dubious_where_reasons: nil,
+    vote: nil,
+    names: [],
+    valid_names: [],
+    reasons: nil,
+    suggest_corrections: false,
+    parent_deprecated: nil,
+    collectors_name: nil,
+    collectors_number: nil,
+    herbarium_name: nil,
+    herbarium_id: nil,
+    accession_number: nil,
+    projects: [],
+    project_checks: {},
+    lists: [],
+    list_checks: {},
+    error_checked_projects: [],
+    suspect_checked_projects: [],
+    field_code: nil
+  }.freeze
+
+  def initialize(model, **attrs)
+    FORM_ATTR_DEFAULTS.each do |attr, default|
+      instance_variable_set(:"@#{attr}", attrs.fetch(attr, default))
+    end
+    remaining = attrs.except(*FORM_ATTR_DEFAULTS.keys)
+    super(model, id: "observation_form", **remaining)
   end
-  # rubocop:enable Metrics/ParameterLists, Metrics/AbcSize
 
   def around_template
     @attributes[:data] = form_data_attributes
