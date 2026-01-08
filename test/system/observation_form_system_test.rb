@@ -860,7 +860,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Verify the autocompleter is no longer constrained
     autocompleter = find("#observation_location_autocompleter")
     assert_equal("location", autocompleter["data-type"],
-                 "Autocompleter should be in 'location' mode after clearing lat/lng")
+                 "Autocompleter should be in 'location' mode")
 
     # Verify lat/lng are actually cleared
     assert_equal("", find("#observation_lat").value)
