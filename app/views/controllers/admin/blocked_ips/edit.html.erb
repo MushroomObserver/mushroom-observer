@@ -5,105 +5,39 @@ container_class(:full)
 
 <div class="row">
   <div class="col-md-6">
-    <p><%= link_to("Refresh Stats", edit_admin_blocked_ips_path) %></p>
+    <%= content_padded do
+      link_to("Refresh Stats", edit_admin_blocked_ips_path,
+              class: "btn btn-default")
+    end %>
 
     <%# ----- Okay IPs ----- %>
-    <section class="m-3 p-3" style="background:#f7f">
-      <%= form_with(url: admin_blocked_ips_path, method: "patch",
-                    class: "d-inline-block",
-                    id: "admin_okay_ips_form") do |f| %>
-        <div class="form-group form-inline d-inline-block">
-          <span class="text-larger">Okay IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
-          <%= f.text_field(:add_okay,
-                           { value: "", size: 20,
-                             data: { autofocus: true },
-                             class: "form-control" }) %>
-          <%= submit_button(form: f, button: :ADD.l, class: "ml-3") %>
-        </div>
+    <%= render(Components::Panel.new(panel_class: "my-3")) do |panel| %>
+      <% panel.with_body do %>
+        <%= render(Components::OkayIpsManager.new(
+              FormObject::OkayIps.new,
+              okay_ips: @okay_ips,
+              action_path: admin_blocked_ips_path
+            )) %>
       <% end %>
-
-      <%= patch_button(name: "Clear List",
-                       path: admin_blocked_ips_path(clear_okay: 1),
-                       class: "btn btn-default",
-                       form_class: "d-inline-block float-right",
-                       id: "clear_okay_ips_list",
-                       data: { confirm: :are_you_sure.t }
-                      ) %>
-
-      <%= render(Components::Table.new(@okay_ips,
-                                        id: "okay_ips",
-                                        headers: false,
-                                        class: "ips my-3 table-striped")) do |t| %>
-        <% t.column("ip") do |ip| %>
-          <%= ip.t %>
-        <% end %>
-        <% t.column("actions") do |ip| %>
-          [<%= patch_button(name: :REMOVE.l,
-                            path: admin_blocked_ips_path(remove_okay: ip),
-                            id: "remove_okay_ip_#{ip}") %>]
-        <% end %>
-      <% end %>
-    </section><!--#okay_ips-->
+    <% end %>
 
     <%# ----- Blocked IPs ----- %>
-    <section class="m-3 p-3" style="background:#f7f">
-
-      <%= form_with(url: admin_blocked_ips_path, class: "d-inline-block",
-                    id: "admin_blocked_ips_form", method: :patch) do |f| %>
-        <div class="form-group form-inline d-inline-block">
-          <span class="text-larger">Blocked IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
-          <%= f.text_field(:add_bad,
-                           { value: "", size: 20,
-                             data: { autofocus: true },
-                             class: "form-control" }) %>
-          <%= submit_button(form: f, button: :ADD.l, class: "ml-3") %>
-        </div>
-      <% end %>
-
-      <%= patch_button(name: "Clear List",
-                       path: admin_blocked_ips_path(clear_bad: 1),
-                       class: "btn btn-default",
-                       form_class: "d-inline-block float-right",
-                       id: "clear_blocked_ips_list",
-                       data: { confirm: :are_you_sure.t }
-                      ) %>
-
-      <p class="text-muted">
-        Showing <%= @blocked_ips.size %> of <%= @blocked_ips_total %> blocked IPs
-        <% if @blocked_ips_pages > 1 %>
-          (page <%= @blocked_ips_page %> of <%= @blocked_ips_pages %>)
-        <% end %>
-      </p>
-
-      <% if @blocked_ips_pages > 1 %>
-        <nav class="mb-2">
-          <% if @blocked_ips_page > 1 %>
-            <%= link_to("« Prev",
-                        edit_admin_blocked_ips_path(blocked_page: @blocked_ips_page - 1),
-                        class: "btn btn-default btn-sm") %>
-          <% end %>
-          <% if @blocked_ips_page < @blocked_ips_pages %>
-            <%= link_to("Next »",
-                        edit_admin_blocked_ips_path(blocked_page: @blocked_ips_page + 1),
-                        class: "btn btn-default btn-sm") %>
-          <% end %>
-        </nav>
-      <% end %>
-
-      <%= render(Components::Table.new(@blocked_ips,
-                                        id: "blocked_ips",
-                                        headers: false,
-                                        class: "ips my-3 table-striped")) do |t| %>
-        <% t.column("ip") do |ip| %>
-          <%= ip.t %>
-        <% end %>
-        <% t.column("actions") do |ip| %>
-          [<%= patch_button(name: :REMOVE.l,
-                            path: admin_blocked_ips_path(remove_bad: ip),
-                            id: "remove_blocked_ip_#{ip}") %>]
+    <%= render(Components::Panel.new(panel_class: "my-3")) do |panel| %>
+      <% panel.with_body do %>
+        <%= turbo_frame_tag("blocked_ips_list") do %>
+          <%= render(Components::BlockedIpsManager.new(
+                FormObject::BlockedIps.new,
+                blocked_ips: @blocked_ips,
+                page: @blocked_ips_page,
+                total_pages: @blocked_ips_pages,
+                total_count: @blocked_ips_total,
+                starts_with: @starts_with,
+                filter_path: edit_admin_blocked_ips_path,
+                action_path: admin_blocked_ips_path
+              )) %>
         <% end %>
       <% end %>
-    </section><!--#blocked_ips-->
+    <% end %>
   </div>
 
   <%# ----- Stats / Most Active Users ----- %>

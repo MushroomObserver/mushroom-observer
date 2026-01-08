@@ -1,36 +1,42 @@
-<section class="my-3" id="ip_stats">
-  <h5 class="text-larger">Stats for <%= @ip %>: &nbsp;&nbsp; <small>
-    <%= link_to("[Close]", edit_admin_blocked_ips_path) %></small></h5>
-  <% if user_id = @stats[@ip][:user] %>
-    User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
+<%= render(Components::Panel.new(panel_class: "my-3", panel_id: "ip_stats")) do |panel| %>
+  <% panel.with_heading do %>
+    Stats for <%= @ip %>:
   <% end %>
-  <% if api_key_str = @stats[@ip][:api_key]
-    api_key = APIKey.find_by_key(api_key_str) %>
-    API key: <%= api_key_str %> (<%= api_key ? user_link(api_key.user) :
-                                              "bogus!" %>)<br/>
+  <% panel.with_heading_links do %>
+    <%= link_to("[Close]", edit_admin_blocked_ips_path) %>
   <% end %>
-  Rate: <%= (@stats[@ip][:rate].to_f * 60).round(2) %> / minute
-        = 1 every <%= (1.0 / @stats[@ip][:rate]).round(2) %> seconds<br/>
-  Load: <%= (@stats[@ip][:load].to_f * 100).round(2) %>% of one worker<br/>
-  Activity:
+  <% panel.with_body do %>
+    <% if (user_id = @stats[@ip][:user]) %>
+      User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
+    <% end %>
+    <% if (api_key_str = @stats[@ip][:api_key]) %>
+      <% api_key = APIKey.find_by_key(api_key_str) %>
+      API key: <%= api_key_str %>
+      (<%= api_key ? user_link(api_key.user) : "bogus!" %>)<br/>
+    <% end %>
+    Rate: <%= (@stats[@ip][:rate].to_f * 60).round(2) %> / minute
+          = 1 every <%= (1.0 / @stats[@ip][:rate]).round(2) %> seconds<br/>
+    Load: <%= (@stats[@ip][:load].to_f * 100).round(2) %>% of one worker<br/>
+    Activity:
     <% n = @stats[@ip][:activity].length %>
     <% if n > 50 %>
       (most recent 50 of <%= n %> requests)
     <% else %>
       (all of the most recent <%= n %> requests)
     <% end %><br/>
-  <%= render(Components::Table.new(
-               @stats[@ip][:activity].reverse[0..50],
-               class: "ips ips-lined table-striped"
-             )) do |t| %>
-    <% t.column("time") do |row| %>
-      <%= row[0] %>
-    <% end %>
-    <% t.column("seconds") do |row| %>
-      <%= row[1].to_f.round(2) %>
-    <% end %>
-    <% t.column("action") do |row| %>
-      <%= row[2] %>/<%= row[3] %>
+    <%= render(Components::Table.new(
+                 @stats[@ip][:activity].reverse[0..50],
+                 class: "ips ips-lined"
+               )) do |t| %>
+      <% t.column("time") do |row| %>
+        <%= row[0] %>
+      <% end %>
+      <% t.column("seconds") do |row| %>
+        <%= row[1].to_f.round(2) %>
+      <% end %>
+      <% t.column("action") do |row| %>
+        <%= row[2] %>/<%= row[3] %>
+      <% end %>
     <% end %>
   <% end %>
-</section>
+<% end %>

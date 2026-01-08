@@ -65,5 +65,98 @@ module Admin
       assert_true(IpStats.blocked?(new_ip),
                   "It should ignore leading & trailing spaces in ip addr")
     end
+
+    def test_blocked_ips_filter
+      login(:rolf)
+      make_admin
+
+      # Save original file contents to restore after test
+      original_contents = File.read(MO.blocked_ips_file)
+
+      begin
+        # Clear existing IPs and generate fake IPs with different prefixes
+        IpStats.clear_blocked_ips
+        generate_blocked_ips(
+          "10.0.0" => 5,
+          "10.0.1" => 3,
+          "192.168.1" => 4
+        )
+        IpStats.reset!
+
+        # Test unfiltered - should show all IPs
+        get(:edit)
+        assert_response(:success)
+        assert_select("turbo-frame#blocked_ips_list")
+        assert_includes(@response.body, "10.0.0")
+        assert_includes(@response.body, "192.168.1")
+
+        # Test filter by prefix "10.0.0"
+        get(:edit, params: { text_filter: { starts_with: "10.0.0" } })
+        assert_response(:success)
+        assert_includes(@response.body, "10.0.0")
+        assert_not_includes(@response.body, "192.168.1")
+
+        # Test filter by prefix "192."
+        get(:edit, params: { text_filter: { starts_with: "192." } })
+        assert_response(:success)
+        assert_includes(@response.body, "192.168.1")
+        assert_not_includes(@response.body, "10.0.0")
+
+        # Test filter with no matches
+        get(:edit, params: { text_filter: { starts_with: "255.255" } })
+        assert_response(:success)
+        assert_includes(@response.body, "Showing 0 of 0")
+      ensure
+        # Restore original file contents
+        File.write(MO.blocked_ips_file, original_contents)
+        IpStats.reset!
+      end
+    end
+
+    # Test that the Superform-generated nested params work
+    # (form submits blocked_ips[add_bad] instead of add_bad)
+    def test_blocked_ips_nested_params
+      login(:rolf)
+      make_admin
+
+      original_contents = File.read(MO.blocked_ips_file)
+
+      begin
+        IpStats.clear_blocked_ips
+        IpStats.reset!
+
+        new_ip = "1.2.3.4"
+        assert_false(IpStats.blocked?(new_ip))
+
+        # Test adding via nested params (how Superform submits)
+        patch(:update, params: { blocked_ips: { add_bad: new_ip } })
+        assert_no_flash
+        IpStats.reset!
+        assert_true(IpStats.blocked?(new_ip),
+                    "Should add IP via nested blocked_ips[add_bad] param")
+
+        # Test removing via flat params (how remove buttons submit)
+        patch(:update, params: { remove_bad: new_ip })
+        assert_no_flash
+        IpStats.reset!
+        assert_false(IpStats.blocked?(new_ip),
+                     "Should remove IP via flat remove_bad param")
+      ensure
+        File.write(MO.blocked_ips_file, original_contents)
+        IpStats.reset!
+      end
+    end
+
+    private
+
+    def generate_blocked_ips(prefixes_with_counts)
+      ips = []
+      prefixes_with_counts.each do |prefix, count|
+        count.times do |i|
+          ips << "#{prefix}.#{i + 1}"
+        end
+      end
+      IpStats.add_blocked_ips(ips)
+    end
   end
 end

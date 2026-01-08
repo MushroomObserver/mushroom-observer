@@ -28,8 +28,12 @@ module Admin
 
     def load_paginated_blocked_ips
       all_blocked = sort_by_ip(IpStats.read_blocked_ips)
+      @starts_with = params.dig(:text_filter, :starts_with).presence
+      if @starts_with
+        all_blocked = all_blocked.select { |ip| ip.start_with?(@starts_with) }
+      end
       @blocked_ips_total = all_blocked.size
-      @blocked_ips_page = (params[:blocked_page].presence || 1).to_i
+      @blocked_ips_page = (params[:page].presence || 1).to_i
       @blocked_ips_pages = (@blocked_ips_total.to_f / BLOCKED_IPS_PER_PAGE).ceil
       offset = (@blocked_ips_page - 1) * BLOCKED_IPS_PER_PAGE
       @blocked_ips = all_blocked[offset, BLOCKED_IPS_PER_PAGE] || []
@@ -39,6 +43,15 @@ module Admin
       [:add_bad, :remove_bad, :add_okay, :remove_okay].each do |param|
         params[param] = params[param].strip if params[param]
       end
+      # Also handle nested params from Superform (blocked_ips[add_bad])
+      normalize_nested_params(:blocked_ips, :add_bad)
+      normalize_nested_params(:okay_ips, :add_okay)
+    end
+
+    # Copy nested param to top level if present (for Superform compatibility)
+    def normalize_nested_params(namespace, param)
+      value = params.dig(namespace, param)
+      params[param] = value.strip if value.present?
     end
 
     def sort_by_ip(ips)

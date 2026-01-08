@@ -50,6 +50,7 @@ class Components::Table < Components::Base
 
   # Define a column with header text and content block or method symbol.
   # @param header [String] the column header text
+  # @param class [String] CSS class for the th/td elements
   # @param method [Symbol] method to call on each row (alternative to block)
   # @yield [row] block that receives each row and returns cell content
   # @return [nil] returns nil to prevent ERB output
@@ -60,8 +61,12 @@ class Components::Table < Components::Base
   # @example With method symbol
   #   t.column("Name", &:name)
   #
-  def column(header, &content)
-    @columns << { header: header, content: content }
+  # @example With class
+  #   t.column("Actions", class: "text-right") { |user| remove_button(user) }
+  #
+  def column(header, class: nil, &content)
+    @columns << { header: header, class: binding.local_variable_get(:class),
+                  content: content }
     nil
   end
 
@@ -81,7 +86,7 @@ class Components::Table < Components::Base
     thead do
       tr do
         @columns.each do |column|
-          th { column[:header] }
+          th(class: column[:class]) { column[:header] }
         end
       end
     end
@@ -92,7 +97,7 @@ class Components::Table < Components::Base
       @rows.each do |row|
         tr do
           @columns.each do |column|
-            td { column[:content].call(row) }
+            td(class: column[:class]) { column[:content].call(row) }
           end
         end
       end
