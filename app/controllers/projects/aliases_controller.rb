@@ -14,6 +14,7 @@ module Projects
     end
 
     def show
+      @project = @project_alias.project
       respond_to do |format|
         format.html
       end
@@ -23,6 +24,7 @@ module Projects
       params.require(:project_id)
       new_params = params.permit(:project_id, :target_type, :target_id)
       @project_alias = ProjectAlias.new(new_params)
+      @project = @project_alias.project
 
       respond_to do |format|
         format.turbo_stream { render_modal_project_alias_form }
@@ -31,6 +33,7 @@ module Projects
     end
 
     def edit
+      @project = @project_alias.project
       respond_to do |format|
         format.turbo_stream { render_modal_project_alias_form }
         format.html
