@@ -157,12 +157,10 @@ module Components
     end
 
     def observation_tabs
-      [
-        observations_tab,
-        species_lists_tab,
-        names_tab,
-        locations_tab
-      ]
+      observations_tab
+      species_lists_tab
+      names_tab
+      locations_tab
     end
 
     def observations_tab
@@ -198,13 +196,11 @@ module Components
     end
 
     def species_list_tabs
-      [
-        tab_item(
-          "#{@project.species_lists.length} #{:SPECIES_LISTS.l}",
-          species_lists_path(project: @project),
-          "species_lists"
-        )
-      ]
+      tab_item(
+        "#{@project.species_lists.length} #{:SPECIES_LISTS.l}",
+        species_lists_path(project: @project),
+        "species_lists"
+      )
     end
 
     def tab_item(text, path, controller_name)
