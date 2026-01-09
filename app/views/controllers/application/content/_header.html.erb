@@ -11,7 +11,6 @@ context_nav
 type_filters
 %>
 <%
-has_banner = content_for?(:banner_image)
 add_filter_help(@any_content_filters_applied)
 title_cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"
 title_cols = content_for?(:interest_icons) ? title_cols : ""
@@ -24,16 +23,7 @@ index_bar =
 <%= tag.header(id: "header") do %>
   <%# Immediately below the top nav: index filters or page title, plus page nav.
       Indexes have no "#title" — `rubric` in top_nav has the model name. %>
-  <%= render(partial: "application/content/project_banner") if has_banner %>
-
-  <%= tag.div(class: "row") do %>
-    <%# Project tabs %>
-    <% if content_for?(:project_tabs) %>
-      <%= tag.div(class: title_cols, id: "project_tabs") do
-        yield(:project_tabs)
-      end %>
-    <% end %>
-  <% end %>
+  <%= content_for(:project_banner) %>
 
   <% if action_name != "index" %>
     <%# Page title, edit icons, interest icons and page nav. %>
