@@ -36,8 +36,10 @@ class Components::LiveDataFilterForm < Components::ApplicationForm
   end
 
   def around_template(&block)
-    nav(class: "d-flex justify-content-between align-items-center p-3",
-        style: "order: 2") do
+    nav(
+      class: "d-flex justify-content-between align-items-center p-3 border-top",
+      style: "order: 2"
+    ) do
       render_prev_button
       super(&block)
       render_next_button
