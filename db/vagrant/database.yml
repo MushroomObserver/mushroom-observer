@@ -45,7 +45,7 @@ development:
 # Parallel testing: TEST_ENV_NUMBER selects mo_test-0, mo_test-1, etc.
 # MO_TEST_DATABASE can override for manual testing.
 test:
-  database: <%= ENV.fetch("MO_TEST_DATABASE") { ENV["TEST_ENV_NUMBER"].to_s.empty? ? "mo_test" : "mo_test-#{ENV['TEST_ENV_NUMBER']}" } %>
+  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? && 'mo_test') || 'mo_test-' + ENV['TEST_ENV_NUMBER'] %>"
   username: mo
   password: mo
 
