@@ -50,7 +50,7 @@ MushroomObserver::Application.configure do
   # Do not eager load code on boot. This avoids loading your whole application
   # just for the purpose of running a single test. If you are using a tool that
   # preloads Rails for running tests, you may have to set it to true.
-  # Enable eager loading in CI for accurate SimpleCov coverage with parallel tests.
+  # Eager load in CI so SimpleCov sees all code before workers fork.
   config.eager_load = ENV["CI"].present?
 
   # Configure static asset server for tests with Cache-Control for performance.
