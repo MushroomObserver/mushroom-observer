@@ -43,8 +43,19 @@ development:
 # Do not set this db to the same as development or production.
 test:
   # Support worker-specific databases in parallel testing
-  # Set MO_TEST_DATABASE env var to override (e.g., mo_test-0, mo_test-1, etc.)
-  database: <%= ENV.fetch("MO_TEST_DATABASE", "mo_test") %>
+  # Rails sets TEST_ENV_NUMBER for each parallel worker (0, 1, 2, etc.)
+  # MO_TEST_DATABASE can override for manual testing
+  <%
+    test_env_num = ENV["TEST_ENV_NUMBER"]
+    db_name = if ENV["MO_TEST_DATABASE"]
+                ENV["MO_TEST_DATABASE"]
+              elsif test_env_num && !test_env_num.empty?
+                "mo_test-#{test_env_num}"
+              else
+                "mo_test"
+              end
+  %>
+  database: <%= db_name %>
   username: mo
   password: mo
 

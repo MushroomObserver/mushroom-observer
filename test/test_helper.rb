@@ -113,17 +113,19 @@ module ActiveSupport
     threshold = ENV["PARALLEL_TEST_THRESHOLD"]&.to_i || 50
     parallelize(workers: :number_of_processors, threshold: threshold)
 
-    # Configure SimpleCov to work with parallel test workers
-    # Each worker gets a unique command_name to prevent result clobbering
-    coverage_mode = ENV["COVERAGE"] == "true" || ENV["CI"] == "true"
-    if coverage_mode
-      parallelize_setup do |worker|
+    # Set up worker-specific database for parallel testing
+    parallelize_setup do |worker|
+      # Set TEST_ENV_NUMBER so database.yml picks the right database
+      ENV["TEST_ENV_NUMBER"] = worker.to_s
+
+      # Configure SimpleCov for this worker
+      if ENV["COVERAGE"] == "true" || ENV["CI"] == "true"
         SimpleCov.command_name("#{SimpleCov.command_name}-#{worker}")
       end
+    end
 
-      parallelize_teardown do |_worker|
-        SimpleCov.result
-      end
+    parallelize_teardown do |_worker|
+      SimpleCov.result if ENV["COVERAGE"] == "true" || ENV["CI"] == "true"
     end
 
     ##########################################################################

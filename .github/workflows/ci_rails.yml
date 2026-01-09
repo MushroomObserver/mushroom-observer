@@ -45,12 +45,6 @@ jobs:
           mysql -u root -proot < db/initialize.sql
           cp db/vagrant/database.yml config
 
-      - name: Create parallel test databases
-        run: |
-          for i in $(seq 0 $((PARALLEL_WORKERS - 1))); do
-            mysql -u root -proot -e "DROP DATABASE IF EXISTS \`mo_test-$i\`; CREATE DATABASE \`mo_test-$i\` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;"
-          done
-
       - name: Create test image directories
         run: |
           for dir in images test_images;
@@ -71,11 +65,11 @@ jobs:
           bundle exec rake db:schema:load
           bundle exec rake db:fixtures:load
 
-      - name: Load fixtures into parallel test databases
+      - name: Create and load parallel test databases
         run: |
           for i in $(seq 0 $((PARALLEL_WORKERS - 1))); do
-            MO_TEST_DATABASE=mo_test-$i bundle exec rake db:schema:load
-            MO_TEST_DATABASE=mo_test-$i bundle exec rake db:fixtures:load
+            mysql -u root -proot -e "DROP DATABASE IF EXISTS \`mo_test-$i\`; CREATE DATABASE \`mo_test-$i\` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;"
+            TEST_ENV_NUMBER=$i bundle exec rake db:schema:load db:fixtures:load
           done
 
       - name: Update translation files
