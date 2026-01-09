@@ -36,10 +36,8 @@ class Components::LiveDataFilterForm < Components::ApplicationForm
   end
 
   def around_template(&block)
-    nav(
-      class: "d-flex justify-content-between align-items-center p-3 border-top",
-      style: "order: 2"
-    ) do
+    nav(class: "d-flex justify-content-between align-items-center p-3",
+        style: "order: 2") do
       render_prev_button
       super(&block)
       render_next_button
@@ -72,6 +70,18 @@ class Components::LiveDataFilterForm < Components::ApplicationForm
         turbo_frame: @turbo_frame
       }
     }
+  end
+
+  # GET forms don't need authenticity tokens or _method fields
+  def authenticity_token_field; end
+  def _method_field; end
+
+  # Override Superform's key to use filter_param for input naming.
+  # This ensures blocked/okay filters have unique param and ID names:
+  # - blocked: name="text_filter[starts_with]" id="text_filter_starts_with"
+  # - okay: name="okay_filter[starts_with]" id="okay_filter_starts_with"
+  def key
+    @filter_param
   end
 
   def render_prev_button

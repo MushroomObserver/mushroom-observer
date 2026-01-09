@@ -118,7 +118,8 @@ class Components::IpsManager < Components::ApplicationForm
   end
 
   def render_controls_row
-    div(class: "d-flex justify-content-between align-items-center p-3",
+    div(class: "d-flex justify-content-between align-items-center " \
+               "p-3 border-bottom",
         style: "order: 1") do
       div(class: "form-group form-inline mb-0") do
         render_add_field

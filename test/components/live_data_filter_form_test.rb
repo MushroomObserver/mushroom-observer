@@ -73,9 +73,9 @@ class LiveDataFilterFormTest < ComponentTestCase
     assert_html(html, "a[href*='okay_page=1']")
     assert_html(html, "a[href*='okay_page=3']")
 
-    # NOTE: Form input name comes from FormObject model, not filter_param.
-    # filter_param is only used for building pagination URLs
-    assert_html(html, "input[name='text_filter[starts_with]']")
+    # Form input name uses filter_param for unique param/ID names
+    assert_html(html, "input[name='okay_filter[starts_with]']")
+    assert_html(html, "input#okay_filter_starts_with")
   end
 
   def test_preserves_filter_value_in_pagination_links
@@ -87,6 +87,13 @@ class LiveDataFilterFormTest < ComponentTestCase
 
     # Pagination links include the filter value
     assert_includes(html, "text_filter%5Bstarts_with%5D=10.0")
+  end
+
+  def test_preserves_filter_value_in_input_field
+    html = render_filter_form(starts_with: "66.249.")
+
+    # Input field should have the filter value populated
+    assert_html(html, "input[name='text_filter[starts_with]'][value='66.249.']")
   end
 
   def test_form_id_derived_from_turbo_frame

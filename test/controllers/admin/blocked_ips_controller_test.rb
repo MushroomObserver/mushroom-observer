@@ -96,15 +96,26 @@ module Admin
           assert_includes(@response.body, config[:prefix1])
           assert_includes(@response.body, config[:prefix2])
 
-          # Test filter by prefix
+          # Test filter by prefix (simulating Turbo frame request)
           prefix = config[:prefix1]
           filter = { config[:filter_param] => { starts_with: prefix } }
+          @request.headers["Turbo-Frame"] = config[:frame]
           get(:edit, params: filter)
           assert_response(:success)
           assert_includes(@response.body, config[:prefix1],
                           "#{config[:type]}: should show filtered IPs")
           assert_not_includes(@response.body, config[:prefix2],
                               "#{config[:type]}: should hide non-matching IPs")
+          # Filter value should be preserved in the input field within the
+          # turbo_frame response. Input ID matches filter_param.
+          input_id = "#{config[:filter_param]}_starts_with"
+          assert_select("turbo-frame##{config[:frame]}") do
+            assert_select(
+              "input##{input_id}[value='#{prefix}']",
+              { count: 1 },
+              "#{config[:type]}: filter value should be preserved in input"
+            )
+          end
         end
       ensure
         File.write(MO.blocked_ips_file, original_blocked)
