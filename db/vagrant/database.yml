@@ -42,19 +42,11 @@ development:
 # re-generated from your development database when you run 'rake'.
 # Do not set this db to the same as development or production.
 test:
-  primary:
-    # Support worker-specific databases in parallel testing
-    # Set MO_TEST_DATABASE env var to override (e.g., mo_test-0, mo_test-1, etc.)
-    database: <%= ENV.fetch("MO_TEST_DATABASE", "mo_test") %>
-    username: mo
-    password: mo
-  # Required for eager loading in CI (SolidCache models need this connection)
-  # Enables accurate SimpleCov coverage with parallel test workers
-  cache:
-    database: cache_test
-    username: mo
-    password: mo
-    migrations_paths: "db/cache/migrate"
+  # Support worker-specific databases in parallel testing
+  # Set MO_TEST_DATABASE env var to override (e.g., mo_test-0, mo_test-1, etc.)
+  database: <%= ENV.fetch("MO_TEST_DATABASE", "mo_test") %>
+  username: mo
+  password: mo
 
 production:
   database: mo_development
