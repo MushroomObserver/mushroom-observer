@@ -3,6 +3,16 @@
 require("test_helper")
 
 class AdminIntegrationTest < CapybaraIntegrationTestCase
+  def setup
+    super
+    backup_ip_files
+  end
+
+  def teardown
+    restore_ip_files
+    super
+  end
+
   def test_turn_admin_mode_on_and_off
     refute_selector(id: "nav_admin_on_link")
 
@@ -89,74 +99,84 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
     put_user_in_admin_mode(rolf)
     click_on(id: "nav_admin_blocked_ips_link")
 
-    assert_selector("#admin_okay_ips_form")
-    assert_selector("#admin_blocked_ips_form")
+    assert_selector("#okay_ips_manager_form")
+    assert_selector("#blocked_ips_manager_form")
 
-    click_on(id: "clear_okay_ips_list")
-
-    # Be sure these are not already in the table
-    within("#okay_ips") do
-      refute_selector("td", text: "3.4.5.6")
-      refute_selector("td", text: "3.14.15.9")
-    end
-
-    within("#admin_okay_ips_form") do
-      fill_in("add_okay", with: "not.an.ip")
+    # Test invalid IP validation (once is enough)
+    within("#okay_ips_manager_form") do
+      fill_in("okay_ips[add_okay]", with: "not.an.ip")
       click_commit
     end
     assert_flash_text("Invalid IP address")
 
-    within("#admin_okay_ips_form") do
-      fill_in("add_okay", with: "3.4.5.6")
+    # Test both IP list types with shared logic
+    [
+      { type: :okay, form_key: "okay_ips", add_field: "add_okay" },
+      { type: :blocked, form_key: "blocked_ips", add_field: "add_bad" }
+    ].each do |config|
+      assert_ip_manager_crud(config)
+    end
+  end
+
+  private
+
+  def assert_ip_manager_crud(config)
+    type = config[:type]
+    form_id = "#{type}_ips_manager_form"
+    table_id = "#{type}_ips"
+    field_name = "#{config[:form_key]}[#{config[:add_field]}]"
+    ip1 = "3.4.5.6"
+    ip2 = "3.14.15.9"
+
+    # Clear list first
+    click_on(id: "clear_#{type}_ips_list")
+
+    # Verify empty
+    within("##{table_id}") do
+      refute_selector("td", text: ip1)
+      refute_selector("td", text: ip2)
+    end
+
+    # Add two IPs
+    within("##{form_id}") do
+      fill_in(field_name, with: ip1)
       click_commit
-      fill_in("add_okay", with: "3.14.15.9")
-      click_commit
-    end
-
-    within("#okay_ips") do
-      assert_selector("td", text: "3.4.5.6")
-      assert_selector("td", text: "3.14.15.9")
-      click_on(id: "remove_okay_ip_3.14.15.9")
-      refute_selector("td", text: "3.14.15.9")
-    end
-
-    click_on(id: "clear_okay_ips_list")
-
-    within("#okay_ips") do
-      refute_selector("td", text: "3.4.5.6")
-      refute_selector("td", text: "3.14.15.9")
-    end
-
-    click_on(id: "clear_blocked_ips_list")
-
-    within("#admin_blocked_ips_form") do
-      fill_in("add_bad", with: "3.4.5.6")
-      click_commit
-      fill_in("add_bad", with: "3.14.15.9")
-      click_commit
-    end
-
-    within("#blocked_ips") do
-      assert_selector("td", text: "3.4.5.6")
-      assert_selector("td", text: "3.14.15.9")
-      click_on(id: "remove_blocked_ip_3.14.15.9")
-      refute_selector("td", text: "3.14.15.9")
-    end
-
-    click_on(id: "clear_blocked_ips_list")
-
-    within("#blocked_ips") do
-      refute_selector("td", text: "3.4.5.6")
-      refute_selector("td", text: "1.2.3.4")
-    end
-
-    within("#admin_blocked_ips_form") do
-      fill_in("add_bad", with: "1.2.3.4")
+      fill_in(field_name, with: ip2)
       click_commit
     end
 
-    within("#blocked_ips") do
-      assert_selector("td", text: "1.2.3.4")
+    # Verify added, then remove one
+    within("##{table_id}") do
+      assert_selector("td", text: ip1)
+      assert_selector("td", text: ip2)
+      click_on(id: "remove_#{type}_ip_#{ip2}")
+      refute_selector("td", text: ip2)
+    end
+
+    # Clear and verify empty
+    click_on(id: "clear_#{type}_ips_list")
+    within("##{table_id}") do
+      refute_selector("td", text: ip1)
+    end
+  end
+
+  def backup_ip_files
+    @blocked_ips_backup = File.read(MO.blocked_ips_file) if
+      File.exist?(MO.blocked_ips_file)
+    @okay_ips_backup = File.read(MO.okay_ips_file) if
+      File.exist?(MO.okay_ips_file)
+  end
+
+  def restore_ip_files
+    if @blocked_ips_backup
+      File.write(MO.blocked_ips_file, @blocked_ips_backup)
+    elsif File.exist?(MO.blocked_ips_file)
+      File.delete(MO.blocked_ips_file)
+    end
+    if @okay_ips_backup
+      File.write(MO.okay_ips_file, @okay_ips_backup)
+    elsif File.exist?(MO.okay_ips_file)
+      File.delete(MO.okay_ips_file)
     end
   end
 end

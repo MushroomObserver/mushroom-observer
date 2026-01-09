@@ -476,9 +476,11 @@ When creating new Phlex components:
 1. **Create the component** with proper structure and type-safe props
 2. **Write the implementation** following the style guide
 3. **Access Literal props as `@instance_variables`** (not method calls)
-4. **Run Rubocop** and fix all violations
-5. **Run tests** if applicable
-6. **Commit** only after Rubocop is clean
+4. **Never call `helpers` or `view_context`** - use registered helpers or include the appropriate Phlex::Rails::Helpers module instead
+5. **Never use `form_with`** - always use Superform (extend `Components::ApplicationForm`)
+6. **Run Rubocop** and fix all violations
+7. **Run tests** if applicable
+8. **Commit** only after Rubocop is clean
 
 ## Debugging ERB to Phlex Conversions
 

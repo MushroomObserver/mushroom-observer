@@ -134,7 +134,7 @@ class Components::Panel < Components::Base
 
   def render_collapse_icons
     classes = class_names(
-      "panel-collapse-trigger", @expanded ? "" : "collapsed"
+      "panel-collapse-trigger ml-3", @expanded ? "" : "collapsed"
     )
     link_to(
       "javascript:void(0)",

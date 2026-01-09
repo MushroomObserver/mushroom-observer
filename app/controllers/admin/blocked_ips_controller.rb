@@ -2,32 +2,72 @@
 
 module Admin
   class BlockedIpsController < AdminController
+    IPS_PER_PAGE = 50
+
     # This page allows editing of blocked ips via params
     # params[:add_okay] and params[:add_bad]
     # Using params[:report] will show info about a chosen IP
     def edit
       @ip = params[:report] if validate_ip!(params[:report])
-      @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
-      @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(do_activity: true)
+      load_paginated_okay_ips
+      load_paginated_blocked_ips
     end
 
     # Render the page after an update
     def update
       strip_params!
       process_blocked_ips_commands
-      @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
-      @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(do_activity: true)
+      load_paginated_okay_ips
+      load_paginated_blocked_ips
       render(action: :edit)
     end
 
     private
 
+    def load_paginated_okay_ips
+      all_okay = sort_by_ip(IpStats.read_okay_ips)
+      @okay_ips_starts_with = params.dig(:okay_filter, :starts_with).presence
+      if @okay_ips_starts_with
+        all_okay = all_okay.select do |ip|
+          ip.start_with?(@okay_ips_starts_with)
+        end
+      end
+      @okay_ips_total = all_okay.size
+      @okay_ips_page = (params[:okay_page].presence || 1).to_i
+      @okay_ips_pages = [(@okay_ips_total.to_f / IPS_PER_PAGE).ceil, 1].max
+      offset = (@okay_ips_page - 1) * IPS_PER_PAGE
+      @okay_ips = all_okay[offset, IPS_PER_PAGE] || []
+    end
+
+    def load_paginated_blocked_ips
+      all_blocked = sort_by_ip(IpStats.read_blocked_ips)
+      @starts_with = params.dig(:text_filter, :starts_with).presence
+      if @starts_with
+        all_blocked = all_blocked.select { |ip| ip.start_with?(@starts_with) }
+      end
+      @blocked_ips_total = all_blocked.size
+      @blocked_ips_page = (params[:page].presence || 1).to_i
+      total_pages = (@blocked_ips_total.to_f / IPS_PER_PAGE).ceil
+      @blocked_ips_pages = [total_pages, 1].max
+      offset = (@blocked_ips_page - 1) * IPS_PER_PAGE
+      @blocked_ips = all_blocked[offset, IPS_PER_PAGE] || []
+    end
+
     def strip_params!
       [:add_bad, :remove_bad, :add_okay, :remove_okay].each do |param|
         params[param] = params[param].strip if params[param]
       end
+      # Also handle nested params from Superform (blocked_ips[add_bad])
+      normalize_nested_params(:blocked_ips, :add_bad)
+      normalize_nested_params(:okay_ips, :add_okay)
+    end
+
+    # Copy nested param to top level if present (for Superform compatibility)
+    def normalize_nested_params(namespace, param)
+      value = params.dig(namespace, param)
+      params[param] = value.strip if value.present?
     end
 
     def sort_by_ip(ips)
