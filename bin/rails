@@ -1,15 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Handle test:coverage command before Rails processes it
-# This allows: rails test:coverage path/to/test.rb
-if ARGV.first == "test:coverage"
-  ENV["COVERAGE"] = "true"
-  puts "Running tests with coverage enabled (serial execution)..."
-  ARGV[0] = "test" # Replace test:coverage with test
-  # Continue to Rails command processing with modified ARGV
-end
-
 APP_PATH = File.expand_path("../config/application", __dir__)
 require_relative("../config/boot")
 require("rails/commands")

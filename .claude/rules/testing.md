@@ -27,12 +27,9 @@ bin/rails test test/models/observation_test.rb -v
 
 # Run controller tests
 bin/rails test:controllers
-
-# Run with coverage
-bin/rails test:coverage
-bundle exec rails test:coverage
-rake test:coverage
 ```
+
+**Note:** Coverage reports are generated automatically by default using SimpleCov.
 
 ### Incorrect Syntax (DO NOT USE)
 ```bash

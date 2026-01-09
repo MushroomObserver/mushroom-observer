@@ -30,9 +30,10 @@ See `.claude/rules/testing.md` for detailed Rails testing syntax and conventions
 - Run specific test: `bin/rails test <file> -n <test_name>`
 - Run test file: `bin/rails test <file>`
 - Run all tests: `bin/rails test`
-- Coverage: `bin/rails test:coverage`
 
 **Important**: Use `-n` flag for test names, NOT RSpec-style `::ClassName#method` syntax.
+
+**Note**: Coverage reports are generated automatically by default using SimpleCov in parallel mode.
 
 ### CRITICAL: System Test Syntax
 
