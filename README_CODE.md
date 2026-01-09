@@ -93,23 +93,16 @@ drop in our percent of coverage.  Developers should be familiar with the
 
 #### Running Tests
 
-Tests run in parallel by default for better performance:
+Tests run in parallel by default with SimpleCov coverage reporting enabled:
 
 ```bash
-rails test                      # Run all tests in parallel (no coverage)
-rails test path/to/test.rb      # Run specific test in parallel (no coverage)
+rails test                      # Run all tests in parallel with coverage
+rails test path/to/test.rb      # Run specific test with coverage
 ```
 
-To generate a coverage report, use the `test:coverage` command which runs tests
-serially with SimpleCov enabled:
-
-```bash
-rails test:coverage                # Run all tests with coverage (serial)
-rails test:coverage path/to/test.rb # Run specific test with coverage (serial)
-```
-
-The coverage report is generated at `coverage/index.html` and can be viewed
-in your browser.
+Coverage reports are automatically generated at `coverage/index.html` and can be
+viewed in your browser. SimpleCov now supports parallel test execution, so there
+is no performance penalty for coverage reporting.
 
 ### Live Website Issues
 

@@ -15,26 +15,24 @@
 # https://github.com/coverallsapp/github-action/issues/29#issuecomment-701934460
 require("rails")
 
-# Only load SimpleCov when explicitly requested or in CI
-if ENV["COVERAGE"] == "true" || ENV["CI"] == "true"
-  require("simplecov")
-  require("simplecov-lcov")
+# SimpleCov runs by default in parallel mode
+require("simplecov")
+require("simplecov-lcov")
 
-  if ENV["CI"] == "true"
-    SimpleCov::Formatter::LcovFormatter.config do |config|
-      config.report_with_single_file = true
-      config.lcov_file_name = "lcov.info"
-    end
-
-    SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
-  else
-    SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+if ENV["CI"] == "true"
+  SimpleCov::Formatter::LcovFormatter.config do |config|
+    config.report_with_single_file = true
+    config.lcov_file_name = "lcov.info"
   end
 
-  SimpleCov.start("rails") do
-    # An always empty file which is always reported as a coverage decrease
-    add_filter("/channels/application_cable/channel.rb")
-  end
+  SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
+else
+  SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+end
+
+SimpleCov.start("rails") do
+  # An always empty file which is always reported as a coverage decrease
+  add_filter("/channels/application_cable/channel.rb")
 end
 
 # Allow test results to be reported back to runner IDEs.
@@ -118,14 +116,15 @@ module ActiveSupport
       # Set TEST_ENV_NUMBER so database.yml picks the right database
       ENV["TEST_ENV_NUMBER"] = worker.to_s
 
-      # Configure SimpleCov for this worker
-      if ENV["COVERAGE"] == "true" || ENV["CI"] == "true"
-        SimpleCov.command_name("#{SimpleCov.command_name}-#{worker}")
-      end
+      # Configure SimpleCov for this worker with unique command name
+      # This allows SimpleCov to merge results from multiple parallel workers
+      SimpleCov.command_name("#{SimpleCov.command_name}-#{worker}")
     end
 
     parallelize_teardown do |_worker|
-      SimpleCov.result if ENV["COVERAGE"] == "true" || ENV["CI"] == "true"
+      # Trigger coverage result generation for this worker
+      # SimpleCov will automatically merge results from all workers
+      SimpleCov.result
     end
 
     ##########################################################################
