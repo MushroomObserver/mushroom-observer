@@ -17,3 +17,12 @@ namespace :parallel do
     end
   end
 end
+
+namespace :db do
+  desc "Load schema with FK checks disabled (for SolidQueue compatibility)"
+  task schema_load_no_fk: :environment do
+    ActiveRecord::Base.connection.execute("SET FOREIGN_KEY_CHECKS=0")
+    Rake::Task["db:schema:load"].invoke
+    ActiveRecord::Base.connection.execute("SET FOREIGN_KEY_CHECKS=1")
+  end
+end

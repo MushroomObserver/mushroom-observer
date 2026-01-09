@@ -69,7 +69,7 @@ jobs:
         run: |
           for i in $(seq 0 $((PARALLEL_WORKERS - 1))); do
             mysql -u root -proot -e "DROP DATABASE IF EXISTS \`mo_test-$i\`; CREATE DATABASE \`mo_test-$i\` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;"
-            TEST_ENV_NUMBER=$i bundle exec rake db:schema:load db:fixtures:load
+            TEST_ENV_NUMBER=$i bundle exec rake db:schema_load_no_fk db:fixtures:load
           done
 
       - name: Update translation files
