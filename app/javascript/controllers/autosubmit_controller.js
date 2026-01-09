@@ -5,7 +5,7 @@ import { Controller } from "@hotwired/stimulus"
 const pendingFocus = new Map()
 
 // Debounces (throttles) form auto-submit on input changes.
-// Restores focus after turbo frame updates.
+// Restores focus and value after turbo frame updates.
 // Usage:
 //   <form data-controller="autosubmit" data-autosubmit-delay-value="500"
 //         data-turbo-frame="my_frame">
@@ -25,21 +25,42 @@ export default class extends Controller {
   submit(event) {
     clearTimeout(this.timeout)
 
-    // Store focus info for restoration after turbo frame update
     const input = event.target
     const frameId = this.element.dataset.turboFrame
 
     if (frameId && (input.tagName === "INPUT" || input.tagName === "TEXTAREA")) {
-      pendingFocus.set(frameId, {
-        inputName: input.name,
-        selectionStart: input.selectionStart,
-        selectionEnd: input.selectionEnd
-      })
+      // Store input name for lookup in captureInputState
+      this.pendingInputName = input.name
+      this.pendingFrameId = frameId
+
+      // Listen for frame update to capture state right before replacement
+      const frame = document.getElementById(frameId)
+      if (frame) {
+        frame.addEventListener(
+          "turbo:before-frame-render",
+          this.captureInputState,
+          { once: true }
+        )
+      }
     }
 
     this.timeout = setTimeout(() => {
       this.element.requestSubmit()
     }, this.delayValue)
+  }
+
+  // Arrow function to preserve `this` binding
+  captureInputState = () => {
+    // Capture current value and cursor right before turbo replaces the frame
+    const input = this.element.querySelector(`[name="${this.pendingInputName}"]`)
+    if (input) {
+      pendingFocus.set(this.pendingFrameId, {
+        inputName: this.pendingInputName,
+        value: input.value,
+        selectionStart: input.selectionStart,
+        selectionEnd: input.selectionEnd
+      })
+    }
   }
 
   restoreFocus() {
@@ -49,12 +70,12 @@ export default class extends Controller {
     const focusData = pendingFocus.get(frameId)
     if (!focusData) return
 
-    // Clear pending focus
     pendingFocus.delete(frameId)
 
-    // Find and focus the input, restoring cursor position
     const input = this.element.querySelector(`[name="${focusData.inputName}"]`)
     if (input) {
+      // Restore value and cursor position
+      input.value = focusData.value
       input.focus()
       if (typeof input.setSelectionRange === "function") {
         input.setSelectionRange(focusData.selectionStart, focusData.selectionEnd)
