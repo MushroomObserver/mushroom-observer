@@ -14,10 +14,10 @@ module Components
   #
   class ProjectBanner < Base
     include Phlex::Rails::Helpers::ContentFor
-    include Rails.application.routes.url_helpers
 
     prop :project, _Nilable(Project)
     prop :on_project_page, _Boolean, default: false
+    prop :current_tab, _Nilable(String), default: nil
 
     def view_template
       return unless @project
@@ -203,22 +203,19 @@ module Components
       )
     end
 
-    def tab_item(text, path, controller_name)
+    def tab_item(text, path, tab_name)
       li(class: "nav-item") do
-        a(href: path, class: tab_classes(controller_name)) { text }
+        a(href: path, class: tab_classes(tab_name)) { text }
       end
     end
 
-    def tab_classes(controller_name)
+    def tab_classes(tab_name)
       base = "mt-3 nav-link"
-      "#{base} #{"active" if active_tab?(controller_name)}"
+      "#{base} #{"active" if active_tab?(tab_name)}"
     end
 
     def active_tab?(tab_name)
-      current = controller_name
-      current = "locations" if current == "checklists" &&
-                               params.include?("location_id")
-      current == tab_name
+      @current_tab == tab_name
     end
 
     def project_has_content?
