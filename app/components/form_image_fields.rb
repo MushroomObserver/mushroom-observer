@@ -9,7 +9,8 @@
 # - License (select)
 # - Original name (text field, existing images only)
 #
-# Handles both upload images (temp_image) and existing images (good_image).
+# Handles both upload images (image) and existing images (good_image).
+# Uses FieldProxy to generate field names/IDs without requiring a form object.
 #
 # @example
 #   render Components::FormImageFields.new(
@@ -19,8 +20,6 @@
 #     upload: false
 #   )
 class Components::FormImageFields < Components::Base
-  include Phlex::Rails::Helpers::FieldsFor
-
   # Properties
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image), default: nil
@@ -28,15 +27,8 @@ class Components::FormImageFields < Components::Base
   prop :upload, _Boolean, default: false
 
   def view_template
-    # Show upload messages for upload images
     upload_messages if @upload
-
-    # Render form fields
-    image_field = @upload ? :temp_image : :good_image
-
-    fields_for(image_field) do |ffi|
-      render_form_fields(ffi)
-    end
+    render_form_fields
   end
 
   private
@@ -49,71 +41,68 @@ class Components::FormImageFields < Components::Base
     end
   end
 
-  def render_form_fields(form)
-    fields = [
-      render_notes_field(form),
-      render_date_field(form),
-      render_copyright_field(form),
-      render_license_field(form)
-    ]
-
-    fields << render_original_name_field(form) unless @upload
-
-    fields.join
+  def render_form_fields
+    render_notes_field
+    render_date_field
+    render_copyright_field
+    render_license_field
+    render_original_name_field unless @upload
   end
 
-  def render_notes_field(form)
-    text_area_with_label(
-      form: form,
-      field: :notes,
-      index: @img_id,
-      rows: 2,
-      value: @image&.notes,
-      label: :form_images_notes.l
-    )
+  def render_notes_field
+    field = image_field_proxy(:notes, @image&.notes)
+    render(Components::ApplicationForm::TextareaField.new(
+             field,
+             attributes: { rows: 2 },
+             wrapper_options: { label: :form_images_notes.l }
+           ))
   end
 
-  def render_date_field(form)
-    date_select_with_label(
-      form: form,
-      field: :when,
-      index: @img_id,
-      value: @image&.when,
-      object: @image,
-      label: :form_images_when_taken.l
-    )
+  def render_date_field
+    field = image_field_proxy(:when, @image&.when)
+    render(Components::ApplicationForm::DateField.new(
+             field,
+             attributes: { value: @image&.when },
+             wrapper_options: { label: :form_images_when_taken.l }
+           ))
   end
 
-  def render_copyright_field(form)
-    text_field_with_label(
-      form: form,
-      field: :copyright_holder,
-      index: @img_id,
-      value: @image&.copyright_holder,
-      label: :form_images_copyright_holder.l
-    )
+  def render_copyright_field
+    field = image_field_proxy(:copyright_holder, @image&.copyright_holder)
+    render(Components::ApplicationForm::TextField.new(
+             field,
+             attributes: {},
+             wrapper_options: { label: :form_images_copyright_holder.l }
+           ))
   end
 
-  def render_license_field(form)
-    select_with_label(
-      form: form,
-      field: :license_id,
-      index: @img_id,
-      label: :form_images_select_license.t.html_safe, # rubocop:disable Rails/OutputSafety
-      options: license_options,
-      selected: selected_license
-    )
+  def render_license_field
+    field = image_field_proxy(:license_id, selected_license)
+    render(Components::ApplicationForm::SelectField.new(
+             field,
+             collection: superform_license_options,
+             attributes: {},
+             wrapper_options: { label: :form_images_select_license.t.html_safe } # rubocop:disable Rails/OutputSafety
+           ))
   end
 
-  def render_original_name_field(form)
-    text_field_with_label(
-      form: form,
-      field: :original_name,
-      index: @img_id,
-      value: @image&.original_name,
-      size: 40,
-      label: :form_images_original_name.l
-    )
+  def render_original_name_field
+    field = image_field_proxy(:original_name, @image&.original_name)
+    render(Components::ApplicationForm::TextField.new(
+             field,
+             attributes: { size: 40 },
+             wrapper_options: { label: :form_images_original_name.l }
+           ))
+  end
+
+  def image_field_proxy(field_key, value)
+    type = @upload ? :image : :good_image
+    ApplicationForm.image_field_proxy(type, @img_id, field_key, value)
+  end
+
+  # Superform expects [value, display] but Rails returns [display, value]
+  def superform_license_options
+    license_options.map { |display, value| [value, display] }
   end
 
   def license_options

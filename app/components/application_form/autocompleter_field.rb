@@ -27,8 +27,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
                 :create, :create_path, :hidden_name, :hidden_value,
-                :hidden_data, :extra_controller_data, :custom_controller_id,
-                :map_outlet
+                :hidden_data, :extra_controller_data, :extra_data,
+                :custom_controller_id, :map_outlet
 
     def initialize(field, type:, textarea: false, **options)
       super(field, attributes: {})
@@ -49,6 +49,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       @custom_controller_id = options[:controller_id]
       @map_outlet = options[:map_outlet]
       @extra_controller_data = options[:controller_data] || {}
+      @extra_data = options[:data] || {}
     end
 
     def extract_button_options(options)
@@ -153,8 +154,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       {
         placeholder: :start_typing.l,
         autocomplete: "off",
-        data: { target_attr_key => "input", autocompleter: true }
+        data: input_data_attributes
       }.deep_merge(attributes)
+    end
+
+    def input_data_attributes
+      { target_attr_key => "input", autocompleter: true }.merge(extra_data)
     end
 
     def autocompleter_wrapper_options
@@ -299,7 +304,8 @@ class Components::ApplicationForm < Superform::Rails::Form
         name: hidden_field_name,
         value: normalized_hidden_value,
         class: "form-control",
-        readonly: true,
+        readonly: "readonly",
+        autocomplete: "off",
         data: hidden_field_data
       )
     end

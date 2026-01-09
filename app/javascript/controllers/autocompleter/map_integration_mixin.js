@@ -190,6 +190,24 @@ export const MapIntegrationMixin = {
 
     this.verbose("MapIntegrationMixin:ignoringTextInput()");
     return map.ignorePlaceInput;
+  },
+
+  // Reset ignorePlaceInput when user manually edits location text.
+  // This allows breaking out of EXIF-constrained mode by typing.
+  resetIgnorePlaceInput() {
+    if (!this.hasMapOutlet) return;
+
+    let map;
+    try {
+      map = this.mapOutlet;
+    } catch (e) {
+      return;
+    }
+
+    if (map.ignorePlaceInput) {
+      this.verbose("MapIntegrationMixin:resetIgnorePlaceInput()");
+      map.ignorePlaceInput = false;
+    }
   }
 };
 

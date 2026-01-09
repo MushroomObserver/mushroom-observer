@@ -284,23 +284,319 @@ class ApplicationFormTest < ComponentTestCase
     assert_not_includes(form, "disabled")
   end
 
-  private
+  # Date field tests
+  def test_date_field_renders_structure
+    form = render_form do
+      date_field(:when, label: "Date")
+    end
 
-  def render_form(&block)
-    # Create a test form class that extends ApplicationForm
-    form_class = Class.new(Components::ApplicationForm) do
-      attr_accessor :field_block
+    # Wrapper and label
+    assert_html(form, "div.form-group")
+    assert_html(form, "label", text: "Date")
+    assert_html(form, "div.date-selects")
 
-      def view_template
-        # Call the block which will invoke field methods
-        instance_eval(&field_block) if field_block
+    # Day select (3i) - rendered first
+    assert_html(form, "select#collection_number_when_3i")
+    assert_html(form, "select[name='collection_number[when(3i)]']")
+
+    # Month select (2i) - rendered second
+    assert_html(form, "select#collection_number_when_2i")
+    assert_html(form, "select[name='collection_number[when(2i)]']")
+
+    # Year text input (1i) - rendered last, not a select
+    assert_html(form, "input[type='text']#collection_number_when_1i")
+    assert_html(form, "input[name='collection_number[when(1i)]'][size='4']")
+
+    # Verify order: day, month, year (3i before 2i before 1i)
+    assert_match(/_3i.*_2i.*_1i/m, form)
+  end
+
+  def test_date_field_with_append_slot
+    form = render_form do
+      date_field(:when, label: "Date") do |field|
+        field.with_append do
+          span(class: "help-note") { "(approximate)" }
+        end
       end
     end
 
-    # Create form instance with explicit action URL
-    form = form_class.new(@collection_number, action: "/test_form_path")
+    assert_html(form, "span.help-note", text: "(approximate)")
+  end
+
+  # File field tests
+  def test_file_field_renders_with_defaults
+    form = render_form do
+      file_field(:image, label: "Upload Image")
+    end
+
+    # Wrapper with file-input controller
+    assert_html(form, "div.form-group[data-controller='file-input']")
+    assert_includes(form, "Upload Image")
+
+    # File input with accept attribute (default: image/*)
+    assert_html(form, "input[type='file']")
+    assert_html(form, "input[accept='image/*']")
+
+    # Validation data attributes
+    assert_includes(form, "file-input#validate")
+    assert_includes(form, "data-file-input-target")
+    assert_includes(form, "data-max-upload-size")
+
+    # Filename display span
+    assert_html(form, "span[data-file-input-target='name']")
+  end
+
+  def test_file_field_with_multiple
+    form = render_form do
+      file_field(:images, label: "Upload Images", multiple: true)
+    end
+
+    assert_html(form, "input[type='file'][multiple]")
+    assert_html(form, "input[accept='image/*']")
+  end
+
+  def test_file_field_with_custom_controller
+    form = render_form do
+      file_field(:images,
+                 label: "Images",
+                 controller: "form-images",
+                 action: "change->form-images#addSelectedFiles")
+    end
+
+    # Should NOT have file-input controller on wrapper
+    assert_no_match(/data-controller=['"]file-input['"]/, form)
+
+    # Should have custom action
+    assert_includes(form, "change->form-images#addSelectedFiles")
+
+    # Should NOT render filename display (that's for file-input controller)
+    assert_not_includes(form, "data-file-input-target=\"name\"")
+  end
+
+  def test_file_field_with_custom_accept
+    form = render_form do
+      file_field(:document, label: "Upload PDF", accept: "application/pdf")
+    end
+
+    assert_html(form, "input[accept='application/pdf']")
+  end
+
+  def test_file_field_with_custom_button_text
+    form = render_form do
+      file_field(:image, label: "Image", button_text: "Choose file...")
+    end
+
+    assert_includes(form, "Choose file...")
+  end
+
+  # Turbo stream form tests (local: false)
+  def test_turbo_stream_form_has_data_turbo_attribute
+    form = render_form(local: false) do
+      text_field(:name, label: "Name")
+    end
+
+    assert_html(form, "form[data-turbo='true']")
+  end
+
+  def test_local_form_does_not_have_data_turbo_attribute
+    form = render_form(local: true) do
+      text_field(:name, label: "Name")
+    end
+
+    assert_no_html(form, "form[data-turbo]")
+  end
+
+  # Submit button tests
+  def test_submit_with_center_option
+    form = render_form do
+      submit("Save", center: true)
+    end
+
+    assert_html(form, "input[type='submit'].center-block")
+    assert_includes(form, "my-3")
+  end
+
+  def test_submit_with_custom_submits_with
+    form = render_form do
+      submit("Save", submits_with: "Saving...")
+    end
+
+    assert_html(form, "input[data-turbo-submits-with='Saving...']")
+  end
+
+  def test_submit_with_custom_data_attributes
+    form = render_form do
+      submit("Save", data: { confirm: "Are you sure?" })
+    end
+
+    assert_html(form, "input[data-confirm='Are you sure?']")
+  end
+
+  # Upload fields tests
+  def test_upload_fields_renders_all_components
+    # Create an observation for testing upload fields
+    observation = observations(:minimal_unknown_obs)
+
+    form = render_upload_form(observation) do
+      upload_fields(
+        copyright_holder: "Test User",
+        copyright_year: 2024,
+        licenses: [["Creative Commons", 1], ["Public Domain", 2]],
+        upload_license_id: 1
+      )
+    end
+
+    # Image file field
+    assert_html(form, "input[type='file']")
+    assert_includes(form, :IMAGE.l)
+
+    # Copyright holder field
+    assert_includes(form, :image_copyright_holder.l)
+    assert_html(form, "input[value='Test User']")
+
+    # Year select
+    assert_includes(form, :WHEN.l)
+    assert_html(form, "select")
+    assert_html(form, "option[value='2024'][selected]")
+
+    # License select
+    assert_includes(form, :LICENSE.l)
+    assert_includes(form, "Creative Commons")
+    assert_includes(form, "Public Domain")
+  end
+
+  def test_upload_fields_with_custom_label
+    observation = observations(:minimal_unknown_obs)
+
+    form = render_upload_form(observation) do
+      upload_fields(
+        file_field_label: "Custom Label:",
+        copyright_holder: "User",
+        copyright_year: 2024,
+        licenses: [["CC", 1]],
+        upload_license_id: 1
+      )
+    end
+
+    assert_includes(form, "Custom Label:")
+  end
+
+  # Image namespace tests
+  def test_image_namespace_creates_nested_fields
+    observation = observations(:minimal_unknown_obs)
+
+    form = render_upload_form(observation) do
+      image_namespace(:good_image, 123) do |ns|
+        render(ns.field(:notes).text(wrapper_options: { label: "Notes" }))
+      end
+    end
+
+    # Should create nested param structure: observation[good_image][123][notes]
+    assert_html(form, "input[name='observation[good_image][123][notes]']")
+    assert_html(form, "input[id='observation_good_image_123_notes']")
+  end
+
+  def test_image_namespace_with_image_type
+    observation = observations(:minimal_unknown_obs)
+
+    form = render_upload_form(observation) do
+      image_namespace(:image, 456) do |ns|
+        render(ns.field(:when).text(wrapper_options: { label: "When" }))
+      end
+    end
+
+    assert_html(form, "input[name='observation[image][456][when]']")
+  end
+
+  # FieldProxy tests
+  def test_field_proxy_generates_correct_dom_attributes
+    proxy = Components::ApplicationForm::FieldProxy.new(
+      "observation[good_image][123]", :notes, "some notes"
+    )
+
+    assert_equal(:notes, proxy.key)
+    assert_equal("some notes", proxy.value)
+    assert_equal("observation_good_image_123_notes", proxy.dom.id)
+    assert_equal("observation[good_image][123][notes]", proxy.dom.name)
+    assert_equal("some notes", proxy.dom.value)
+  end
+
+  def test_field_proxy_with_blank_namespace
+    proxy = Components::ApplicationForm::FieldProxy.new("", :field_name, "val")
+
+    assert_equal("field_name", proxy.dom.id)
+    assert_equal("field_name", proxy.dom.name)
+  end
+
+  def test_field_proxy_with_nil_value
+    proxy = Components::ApplicationForm::FieldProxy.new("ns", :field, nil)
+
+    assert_equal("", proxy.dom.value)
+  end
+
+  # image_field_proxy class method tests
+  def test_image_field_proxy_creates_correct_namespace
+    proxy = Components::ApplicationForm.image_field_proxy(
+      :good_image, 789, :notes, "test notes"
+    )
+
+    assert_equal(:notes, proxy.key)
+    assert_equal("test notes", proxy.value)
+    assert_equal("observation[good_image][789][notes]", proxy.dom.name)
+    assert_equal("observation_good_image_789_notes", proxy.dom.id)
+  end
+
+  def test_image_field_proxy_with_image_type
+    proxy = Components::ApplicationForm.image_field_proxy(
+      :image, 100, :when, "2024-01-01"
+    )
+
+    assert_equal("observation[image][100][when]", proxy.dom.name)
+  end
+
+  # Autocompleter field tests
+  def test_autocompleter_field_renders_structure
+    form = render_form do
+      autocompleter_field(:name, type: :name, label: "Species Name")
+    end
+
+    assert_html(form, "div.form-group")
+    assert_includes(form, "Species Name")
+    assert_html(form, "[data-controller*='autocompleter']")
+  end
+
+  def test_autocompleter_field_with_textarea
+    form = render_form do
+      autocompleter_field(:name, type: :name, textarea: true, label: "Name")
+    end
+
+    assert_html(form, "textarea")
+  end
+
+  private
+
+  def render_form(local: true, &block)
+    form = TestFormClass.new(@collection_number,
+                             action: "/test_form_path",
+                             local: local)
     form.field_block = block
 
     render(form)
+  end
+
+  def render_upload_form(model, &block)
+    form = TestFormClass.new(model, action: "/test_upload_path")
+    form.field_block = block
+
+    render(form)
+  end
+
+  # Single reusable test form class to avoid duplicate view_template methods
+  class TestFormClass < Components::ApplicationForm
+    attr_accessor :field_block
+
+    def view_template
+      instance_eval(&field_block) if field_block
+    end
   end
 end

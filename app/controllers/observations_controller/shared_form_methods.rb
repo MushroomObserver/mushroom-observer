@@ -83,15 +83,17 @@ module ObservationsController::SharedFormMethods
 
   def init_specimen_vars_for_reload
     init_specimen_vars
-    if params[:collection_number]
-      @collectors_name   = params[:collection_number][:name]
-      @collectors_number = params[:collection_number][:number]
+    col_params = collection_number_params
+    if col_params
+      @collectors_name   = col_params[:name]
+      @collectors_number = col_params[:number]
     end
-    return unless params[:herbarium_record]
+    herb_params = herbarium_record_params
+    return unless herb_params
 
-    @herbarium_name   = params[:herbarium_record][:herbarium_name]
-    @herbarium_id     = params[:herbarium_record][:herbarium_id]
-    @accession_number = params[:herbarium_record][:accession_number]
+    @herbarium_name   = herb_params[:herbarium_name]
+    @herbarium_id     = herb_params[:herbarium_id]
+    @accession_number = herb_params[:accession_number]
   end
 
   def init_project_vars
@@ -104,9 +106,10 @@ module ObservationsController::SharedFormMethods
     @observation.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
+    proj_params = project_params
     @projects.each do |proj|
-      p = params[:project]
-      @project_checks[proj.id] = p.nil? ? false : p["id_#{proj.id}"] == "1"
+      @project_checks[proj.id] =
+        proj_params.nil? ? false : proj_params["id_#{proj.id}"] == "1"
     end
   end
 
@@ -118,8 +121,9 @@ module ObservationsController::SharedFormMethods
   def init_list_vars_for_reload
     init_list_vars
     @lists = @lists.union(@observation.species_lists)
+    lst_params = list_params
     @lists.each do |list|
-      @list_checks[list.id] = params.dig(:list, "id_#{list.id}") == "1"
+      @list_checks[list.id] = lst_params&.dig("id_#{list.id}") == "1"
     end
   end
 
@@ -141,13 +145,13 @@ module ObservationsController::SharedFormMethods
   # even if observation creation fails.  Keep a list of images we've uploaded
   # successfully in @good_images (stored in hidden form field).
   #
-  # INPUT: params[:image], observation, good_images (and @user)
+  # INPUT: params[:observation][:image], observation, good_images (and @user)
   # OUTPUT: list of images we couldn't create
   #
   def create_image_objects_and_update_bad_images
     @bad_images = []
     # can't do each_with_index here because it's ActionController::Parameters
-    params[:image]&.each do |idx, args|
+    params.dig(:observation, :image)&.each do |idx, args|
       next if (upload = args[:image]).blank?
 
       if upload.respond_to?(:original_filename)
@@ -189,12 +193,14 @@ module ObservationsController::SharedFormMethods
 
   # List of images that we've successfully uploaded, but which haven't been
   # attached to the observation yet.  Also supports some mininal editing.
-  # INPUT: params[:good_images] (also looks at params[:image_<id>_notes])
+  # INPUT: params[:observation][:good_image_ids],
+  #        params[:observation][:good_image]
   # OUTPUT: list of images
 
   def update_good_images
     # Get list of images first.
-    @good_images = (params[:good_image_ids] || "").split.filter_map do |id|
+    good_image_ids = params.dig(:observation, :good_image_ids) || ""
+    @good_images = good_image_ids.split.filter_map do |id|
       Image.safe_find(id.to_i)
     end
 
@@ -202,7 +208,7 @@ module ObservationsController::SharedFormMethods
     @good_images.map do |image|
       next unless permission?(image)
 
-      args = params.dig(:good_image, image.id.to_s)
+      args = params.dig(:observation, :good_image, image.id.to_s)
       next unless args
 
       image.attributes = args.permit(permitted_image_args)
@@ -270,7 +276,7 @@ module ObservationsController::SharedFormMethods
   ##############################################################################
 
   def update_projects
-    return unless (checks = params[:project])
+    return unless (checks = project_params)
 
     @user.projects_member(include: :observations).each do |project|
       before = @observation.projects.include?(project)
@@ -289,7 +295,7 @@ module ObservationsController::SharedFormMethods
   end
 
   def update_species_lists
-    return unless (checks = params[:list])
+    return unless (checks = list_params)
 
     @user.all_editable_species_lists.includes(:observations).
       find_each do |list|

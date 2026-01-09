@@ -21,7 +21,8 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     # image notes field must be textarea -- not just text -- because text
     # is inline and would drops any newlines in the image notes
-    assert_select("textarea[id = 'good_image_#{obs.images.first.id}_notes']",
+    img_id = obs.images.first.id
+    assert_select("textarea[id = 'observation_good_image_#{img_id}_notes']",
                   count: 1)
   end
 
@@ -74,18 +75,18 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
         "when(2i)" => "2",
         "when(3i)" => "3",
         specimen: new_specimen,
-        thumb_image_id: "0"
-      },
-      good_image_ids: "#{img.id} #{images(:turned_over_image).id}",
-      good_image: {
-        img.id => {
-          notes: "new notes",
-          original_name: "new name",
-          copyright_holder: "someone else",
-          "when(1i)" => "2012",
-          "when(2i)" => "4",
-          "when(3i)" => "6",
-          license_id: licenses(:ccwiki30).id
+        thumb_image_id: "0",
+        good_image_ids: "#{img.id} #{images(:turned_over_image).id}",
+        good_image: {
+          img.id => {
+            notes: "new notes",
+            original_name: "new name",
+            copyright_holder: "someone else",
+            "when(1i)" => "2012",
+            "when(2i)" => "4",
+            "when(3i)" => "6",
+            license_id: licenses(:ccwiki30).id
+          }
         }
       },
       log_change: "1"
@@ -194,12 +195,12 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
         when: obs.when,
         notes: obs.notes.to_h,
         specimen: obs.specimen,
-        thumb_image_id: "0"
-      },
-      good_image_ids: img_ids.map(&:to_s).join(" "),
-      good_image: {
-        img2.id => { notes: "new notes for two" },
-        img3.id => { notes: "new notes for three" }
+        thumb_image_id: "0",
+        good_image_ids: img_ids.map(&:to_s).join(" "),
+        good_image: {
+          img2.id => { notes: "new notes for two" },
+          img3.id => { notes: "new notes for three" }
+        }
       }
     }
     login("mary")
@@ -223,14 +224,14 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
         when: obs.when,
         notes: obs.notes.to_h,
         specimen: obs.specimen,
-        thumb_image_id: "0"
-      },
-      good_image_ids: "",
-      good_image: {},
-      image: {
-        "0" => {
-          image: file,
-          when: Time.zone.now
+        thumb_image_id: "0",
+        good_image_ids: "",
+        good_image: {},
+        image: {
+          "0" => {
+            image: file,
+            when: Time.zone.now
+          }
         }
       }
     }
@@ -268,14 +269,14 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       params: {
         id: obs.id,
         observation: {
-          gps_hidden: "1"
-        },
-        good_image_ids: "#{old_img1.id} #{old_img2.id}",
-        image: {
-          "0" => {
-            image: fixture,
-            copyright_holder: "me",
-            when: Time.zone.now
+          gps_hidden: "1",
+          good_image_ids: "#{old_img1.id} #{old_img2.id}",
+          image: {
+            "0" => {
+              image: fixture,
+              copyright_holder: "me",
+              when: Time.zone.now
+            }
           }
         }
       }
