@@ -5,7 +5,7 @@ container_class(:full)
 
 <div class="row">
   <div class="col-md-6">
-    <%= content_padded do
+    <%= tag.p do
       link_to("Refresh Stats", edit_admin_blocked_ips_path,
               class: "btn btn-default")
     end %>
