@@ -42,12 +42,10 @@ development:
 # re-generated from your development database when you run 'rake'.
 # Do not set this db to the same as development or production.
 #
-# Support worker-specific databases in parallel testing:
-# - TEST_ENV_NUMBER is set by Rails for each parallel worker (0, 1, 2, etc.)
-# - MO_TEST_DATABASE can override for manual testing
-<% test_db = ENV["MO_TEST_DATABASE"] || (ENV["TEST_ENV_NUMBER"].to_s.empty? ? "mo_test" : "mo_test-#{ENV['TEST_ENV_NUMBER']}") %>
+# Parallel testing: TEST_ENV_NUMBER selects mo_test-0, mo_test-1, etc.
+# MO_TEST_DATABASE can override for manual testing.
 test:
-  database: <%= test_db %>
+  database: <%= ENV.fetch("MO_TEST_DATABASE") { ENV["TEST_ENV_NUMBER"].to_s.empty? ? "mo_test" : "mo_test-#{ENV['TEST_ENV_NUMBER']}" } %>
   username: mo
   password: mo
 
