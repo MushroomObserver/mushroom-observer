@@ -47,10 +47,15 @@ class Components::IpsManager < Components::ApplicationForm
 
   def around_template(&block)
     turbo_frame_tag("#{@type}_ips_list") do
-      render(Components::Panel.new(panel_class: "my-3")) do |panel|
+      render(Components::Panel.new(
+               panel_class: "my-3",
+               collapsible: true,
+               collapse_target: "##{@type}_ips_body",
+               expanded: true
+             )) do |panel|
         panel.with_heading { title }
         panel.with_heading_links { render_showing_message }
-        panel.with_body(wrapper: false) do
+        panel.with_body(wrapper: false, collapse: true) do
           div(class: "d-flex flex-column") do
             super(&block)
             # Filter form rendered outside main form (GET vs PATCH)
