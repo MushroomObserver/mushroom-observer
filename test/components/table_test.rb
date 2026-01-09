@@ -106,7 +106,7 @@ class TableTest < ComponentTestCase
   def test_headers_false_skips_thead
     rows = [TestRow.new(name: "Alice")]
 
-    html = render(Components::Table.new(rows, headers: false)) do |t|
+    html = render(Components::Table.new(rows, show_headers: false)) do |t|
       t.column("Name", &:name)
     end
 

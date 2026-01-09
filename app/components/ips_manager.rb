@@ -160,7 +160,7 @@ class Components::IpsManager < Components::ApplicationForm
   def render_ips_table
     render(Components::Table.new(@ips,
                                  id: "#{@type}_ips",
-                                 headers: false,
+                                 show_headers: false,
                                  class: "ips align-middle border-top",
                                  style: "order: 3")) do |t|
       t.column("ip", &:t)

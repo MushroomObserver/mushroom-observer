@@ -28,11 +28,11 @@
 #   <% end %>
 #
 class Components::Table < Components::Base
-  def initialize(rows, headers: true, **options)
+  def initialize(rows, show_headers: true, **options)
     super()
     @rows = rows
     @columns = []
-    @show_headers = headers
+    @show_headers = show_headers
     @options = options
   end
 
