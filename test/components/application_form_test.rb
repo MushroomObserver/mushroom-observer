@@ -576,38 +576,27 @@ class ApplicationFormTest < ComponentTestCase
   private
 
   def render_form(local: true, &block)
-    # Create a test form class that extends ApplicationForm
-    form_class = Class.new(Components::ApplicationForm) do
-      attr_accessor :field_block
-
-      def view_template
-        # Call the block which will invoke field methods
-        instance_eval(&field_block) if field_block
-      end
-    end
-
-    # Create form instance with explicit action URL
-    form = form_class.new(@collection_number,
-                          action: "/test_form_path",
-                          local: local)
+    form = TestFormClass.new(@collection_number,
+                             action: "/test_form_path",
+                             local: local)
     form.field_block = block
 
     render(form)
   end
 
   def render_upload_form(model, &block)
-    # Create a test form class for upload fields testing
-    form_class = Class.new(Components::ApplicationForm) do
-      attr_accessor :field_block
-
-      def view_template
-        instance_eval(&field_block) if field_block
-      end
-    end
-
-    form = form_class.new(model, action: "/test_upload_path")
+    form = TestFormClass.new(model, action: "/test_upload_path")
     form.field_block = block
 
     render(form)
+  end
+
+  # Single reusable test form class to avoid duplicate view_template methods
+  class TestFormClass < Components::ApplicationForm
+    attr_accessor :field_block
+
+    def view_template
+      instance_eval(&field_block) if field_block
+    end
   end
 end
