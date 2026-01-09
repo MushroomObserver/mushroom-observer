@@ -129,10 +129,28 @@ class ProjectBannerTest < ComponentTestCase
     assert_no_html(html, "#project_tabs")
   end
 
+  def test_active_tab_highlights_current_tab
+    project = projects(:eol_project)
+    html = render_banner(project: project, current_tab: "observations")
+
+    # Observations tab should have active class
+    assert_match(/observations.*active/i, html)
+  end
+
+  def test_summary_tab_active_for_projects_controller
+    project = projects(:eol_project)
+    html = render_banner(project: project, current_tab: "projects")
+
+    # Projects tab (summary) should have active class
+    assert_html(html, "a.nav-link.active[href='/projects/#{project.id}']")
+  end
+
   private
 
-  def render_banner(on_project_page: false, project: projects(:eol_project))
+  def render_banner(on_project_page: false, project: projects(:eol_project),
+                    current_tab: nil)
     render(Components::ProjectBanner.new(on_project_page: on_project_page,
-                                         project: project))
+                                         project: project,
+                                         current_tab: current_tab))
   end
 end
