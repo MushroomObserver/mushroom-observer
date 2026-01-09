@@ -29,11 +29,9 @@
 #       )) %>
 #
 class Components::IpsManager < Components::ApplicationForm
-  # rubocop:disable Metrics/ParameterLists
-  def initialize(form, type:, ips:, action_path:,
-                 page: nil, total_pages: nil, total_count: nil,
+  def initialize(form, type:, ips:, # rubocop:disable Metrics/ParameterLists
+                 action_path:, page: nil, total_pages: nil, total_count: nil,
                  starts_with: nil, filter_path: nil, **)
-    # rubocop:enable Metrics/ParameterLists
     @type = type
     @ips = ips
     @action_path = action_path
@@ -109,12 +107,11 @@ class Components::IpsManager < Components::ApplicationForm
   end
 
   def render_showing_message
-    if filterable?
-      plain("Showing #{@ips.size} of #{@total_count}")
-      plain(" (page #{@page} of #{@total_pages})") if @total_pages > 1
-    else
-      plain("Showing #{@ips.size}")
-    end
+    plain("Showing #{@ips.size}")
+    return unless filterable?
+
+    plain(" of #{@total_count}")
+    plain(" (page #{@page} of #{@total_pages})") if @total_pages > 1
   end
 
   def render_controls_row
