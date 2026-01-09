@@ -63,18 +63,25 @@ module Components
     end
 
     def render_banner_title_with_icons(with_overlay_styling:)
-      if @on_project_page
-        nav_classes = if with_overlay_styling
-                        "show_title_nav d-flex justify-content-between"
+      title_classes = if with_overlay_styling
+                        "h3 banner-image-text"
                       else
-                        "show_title_nav d-flex justify-content-between pl-3"
+                        "h3 page-title mb-4"
                       end
-        nav(class: nav_classes) do
-          render_banner_title(with_overlay_styling: with_overlay_styling)
-          trusted_html(show_page_edit_icons)
+
+      h1(class: title_classes, id: title_id) do
+        if @on_project_page
+          div(class: "d-flex align-items-center") do
+            if @on_project_page
+              trusted_html(show_title_id_badge(@project))
+              plain(" ")
+            end
+            trusted_html(link_to_object(@project))
+            trusted_html(show_page_edit_icons)
+          end
+        else
+          trusted_html(link_to_object(@project))
         end
-      else
-        render_banner_title(with_overlay_styling: with_overlay_styling)
       end
     end
 
