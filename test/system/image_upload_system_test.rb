@@ -49,4 +49,31 @@ class ImageUploadSystemTest < ApplicationSystemTestCase
     assert_equal(1, glossary_term.images.count,
                  "Glossary term should have one image")
   end
+
+  # Test that the file input rejects non-image files with an alert
+  def test_file_input_rejects_non_image_files
+    user = users("rolf")
+    login!(user)
+
+    # Use the projects form which has file_field_with_label
+    visit(new_project_path)
+    assert_selector("body.projects__new")
+
+    # Create a temporary text file (non-image)
+    text_file = Tempfile.new(["test", ".txt"])
+    text_file.write("This is not an image")
+    text_file.close
+
+    begin
+      # Attach the non-image file and expect an alert
+      alert_text = accept_alert do
+        attach_file("upload_image", text_file.path, visible: false)
+      end
+
+      assert_equal("Please select an image file (JPG, PNG, GIF, etc.)",
+                   alert_text)
+    ensure
+      text_file.unlink
+    end
+  end
 end

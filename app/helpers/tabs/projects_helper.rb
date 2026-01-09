@@ -70,45 +70,13 @@ module Tabs
     end
 
     def add_project_banner(project)
-      title = if controller.controller_name == "projects" &&
-                 action_name == "show"
-                [show_title_id_badge(project),
-                 link_to_object(project)].safe_join(" ")
-              else
-                link_to_object(project)
-              end
-
-      content_for(:banner_title) { title }
-
-      if project.location
-        content_for(:project_location) do
-          tag.b(link_to(project.place_name, location_path(project.location.id)))
-        end
-      end
-
-      if project.start_date && project.end_date
-        content_for(:project_date_range) do
-          tag.b(project.date_range)
-        end
-      end
-
-      add_banner_image(project.image)
-      project_tabs(project)
-    end
-
-    def add_banner_image(image)
-      return unless image
-
-      content_for(:banner_image) do
-        image_tag(image.large_url, class: "banner-image")
-      end
-    end
-
-    def build_tab(link_text, link, controller)
-      tag.li(class: "nav-item") do
-        classes = "mt-3 nav-link #{"active" if active_tab?(controller)}"
-        link_to(link_text, link,
-                { class: classes })
+      content_for(:project_banner) do
+        render(Components::ProjectBanner.new(
+                 project: project,
+                 on_project_page: controller.controller_name == "projects" &&
+                                  action_name == "show",
+                 current_tab: active_project_tab
+               ))
       end
     end
 
@@ -125,46 +93,6 @@ module Tabs
       link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
               project_violations_path(project_id: project.id),
               { class: classes })
-    end
-
-    def project_tabs(project)
-      tabs = [build_tab(:SUMMARY.t, project_path(id: project.id), "projects")]
-      tabs += observation_tabs(project)
-
-      content_for(:project_tabs) do
-        tag.ul(safe_join(tabs), class: "nav nav-tabs")
-      end
-    end
-
-    def observation_tabs(project)
-      tabs = []
-      if project.observations.any?
-        tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
-                          observations_path(project:),
-                          "observations")
-        tabs << build_tab("#{project.species_lists.length} #{:SPECIES_LISTS.l}",
-                          species_lists_path(project:),
-                          "species_lists")
-        tabs << build_tab("#{project.name_count} #{:NAMES.l}",
-                          checklist_path(project_id: project.id), "checklists")
-        tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
-                          project_locations_path(project_id: project.id),
-                          "locations")
-      elsif project.species_lists.any?
-        tabs << build_tab("#{project.species_lists.length} #{:SPECIES_LISTS.l}",
-                          species_lists_path(project:),
-                          "species_lists")
-      end
-      tabs
-    end
-
-    # Helper method to determine active tab
-    def active_tab?(tab_name)
-      current_tab = controller_name
-      if current_tab == "checklists" && params.include?("location_id")
-        current_tab = "locations"
-      end
-      current_tab == tab_name
     end
 
     def project_species_list_buttons(list, query)

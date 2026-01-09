@@ -13,6 +13,8 @@ class Components::Base < Phlex::HTML
 
   # Register custom output helpers (return HTML)
   register_output_helper :show_title_id_badge
+  register_output_helper :link_to_object
+  register_output_helper :show_page_edit_icons
   register_output_helper :naming_vote_form
   register_output_helper :propose_naming_link
   register_output_helper :location_link
@@ -36,6 +38,8 @@ class Components::Base < Phlex::HTML
   register_value_helper :sequence_archive_options
   register_value_helper :add_q_param
   register_value_helper :add_args_to_url
+  register_value_helper :controller_name
+  register_value_helper :params
 
   # Enable fragment caching
   def cache_store
