@@ -430,6 +430,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     max_size_in_mb = (max_size.to_f / 1024 / 1024).round
     max_upload_msg = :validate_image_file_too_big.l(max: max_size_in_mb)
     opts = opts.merge(
+      accept: "image/*",
       data: {
         action: "change->file-input#validate", file_input_target: "input",
         max_upload_size: max_size, max_upload_msg: max_upload_msg
