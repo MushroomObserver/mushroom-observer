@@ -346,8 +346,8 @@ module ControllerExtensions
     # Find each occurrence of <form action="blah" method="post">.
     found_it = false
     found = {}
-    @response.body.split(/<form [^<>]*action/).each do |str|
-      next unless str =~ /^="([^"]*)" [^>]*method="post"/
+    @response.body.split(/<form [^<>]*?action=/).each do |str|
+      next unless str =~ /^"([^"]*)" [^>]*?method="post"/
 
       url2 = URI.decode_www_form_component(Regexp.last_match(1)).gsub("&amp;",
                                                                       "&")
@@ -596,18 +596,24 @@ module ControllerExtensions
   end
 
   # Check default value of a form field.
+  # Tries both the given ID and with observation_ prefix (for Superform).
   def assert_input_value(id, expect_val)
     message = "Didn't find any inputs '#{id}'."
-    assert_select("input##{id}, select##{id}") do |elements|
+    # Try the given ID first, then try with observation_ prefix (for Superform)
+    [id.to_s, "observation_#{id}"].each do |try_id|
+      elements = css_select("input##{try_id}, select##{try_id}")
+      next if elements.empty?
+
       if elements.length > 1
-        message = "Found more than one input '#{id}'."
+        message = "Found more than one input '#{try_id}'."
       elsif elements.length == 1
         message = if elements.first.to_s.start_with?("<select")
-                    check_select_value(elements.first, expect_val, id)
+                    check_select_value(elements.first, expect_val, try_id)
                   else
-                    check_input_value(elements.first.to_s, expect_val, id)
+                    check_input_value(elements.first.to_s, expect_val, try_id)
                   end
       end
+      break if message.nil?
     end
     assert(message.nil?, message)
   end
@@ -663,28 +669,48 @@ module ControllerExtensions
   #   :unchecked_but_disabled
   #
   def assert_checkbox_state(id, state)
+    # Try both the given ID and observation-prefixed ID (for Superform)
+    actual_id = find_checkbox_id(id)
     case state
     when :checked_but_disabled
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 1)
-      assert_select("input##{id}[disabled=disabled]", 1)
+      assert_select("input##{actual_id}", 1)
+      assert_select("input##{actual_id}[checked=checked]", 1)
+      assert_select("input##{actual_id}[disabled=disabled]", 1)
     when :unchecked_but_disabled
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 0)
-      assert_select("input##{id}[disabled=disabled]", 1)
+      assert_select("input##{actual_id}", 1)
+      assert_select("input##{actual_id}[checked=checked]", 0)
+      assert_select("input##{actual_id}[disabled=disabled]", 1)
     when :checked, true
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 1)
-      assert_select("input##{id}[disabled=disabled]", 0)
+      assert_select("input##{actual_id}", 1)
+      assert_select("input##{actual_id}[checked=checked]", 1)
+      assert_select("input##{actual_id}[disabled=disabled]", 0)
     when :unchecked, false
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 0)
-      assert_select("input##{id}[disabled=disabled]", 0)
+      assert_select("input##{actual_id}", 1)
+      assert_select("input##{actual_id}[checked=checked]", 0)
+      assert_select("input##{actual_id}[disabled=disabled]", 0)
     when :no_field
-      assert_select("input##{id}", 0)
+      # For :no_field, check that no checkbox matches this ID pattern
+      not_found = find_checkbox_id(id) == id.to_s &&
+                  css_select("input##{id}").empty?
+      assert(not_found, "Expected no checkbox matching '#{id}' but found one")
     else
       raise("Invalid state in check_project_checks: #{state.inspect}")
     end
+  end
+
+  # Find checkbox by ID, trying both unprefixed and model-prefixed versions.
+  # Superform prefixes field IDs with the model name (e.g., observation_field).
+  def find_checkbox_id(id)
+    id_str = id.to_s
+    # First try exact match
+    return id_str if css_select("input##{id_str}").any?
+
+    # Look for any input whose ID ends with the given id (model prefix pattern)
+    css_select("input[type=checkbox]").each do |elem|
+      elem_id = elem["id"].to_s
+      return elem_id if elem_id.end_with?("_#{id_str}")
+    end
+    id_str # Return original if not found (will fail assertion)
   end
 
   # Check presence and value of notes textareas.  Example:

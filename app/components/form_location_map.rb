@@ -34,7 +34,7 @@ class Components::FormLocationMap < Components::Base
       indicator_url: asset_path("indicator.gif"),
       location_format: location_format,
       map_target: "mapDiv",
-      editable: true,
+      editable: "true",
       map_type: @map_type
     }
   end

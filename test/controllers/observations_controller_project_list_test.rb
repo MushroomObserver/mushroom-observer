@@ -69,9 +69,11 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: @obs2.id,
-        observation: { place_name: "blah blah blah" }, # (ensures it will fail)
-        project: { "id_#{@proj1.id}" => "1" },
-        good_image_ids: @obs2_img_ids.join(" ") # necessary?
+        observation: {
+          place_name: "blah blah blah", # (ensures it will fail)
+          good_image_ids: @obs2_img_ids.join(" ") # necessary?
+        },
+        project: { "id_#{@proj1.id}" => "1" }
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
@@ -79,8 +81,10 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: @obs2.id,
-        project: { "id_#{@proj1.id}" => "1" },
-        good_image_ids: @obs2_img_ids.join(" ") # necessary?
+        observation: {
+          good_image_ids: @obs2_img_ids.join(" ") # necessary?
+        },
+        project: { "id_#{@proj1.id}" => "1" }
       }
     )
     assert_response(:redirect)
@@ -96,12 +100,14 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: @obs1.id,
-        observation: { place_name: "blah blah blah" }, # (ensures it will fail)
+        observation: {
+          place_name: "blah blah blah", # (ensures it will fail)
+          good_image_ids: @obs1_img_ids.join(" ")
+        },
         project: {
           "id_#{@proj1.id}" => "1",
           "id_#{@proj2.id}" => "0"
-        },
-        good_image_ids: @obs1_img_ids.join(" ")
+        }
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
@@ -109,11 +115,13 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: @obs1.id,
+        observation: {
+          good_image_ids: @obs1_img_ids.join(" ")
+        },
         project: {
           "id_#{@proj1.id}" => "1",
           "id_#{@proj2.id}" => "1"
-        },
-        good_image_ids: @obs1_img_ids.join(" ")
+        }
       }
     )
     assert_response(:redirect)

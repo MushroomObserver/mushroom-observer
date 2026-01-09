@@ -308,11 +308,8 @@ refute_nil(value)
 **ALWAYS run the full test suite before creating a PR that includes changes to production Rails code.**
 
 ```bash
-# Run the full test suite
+# Run the full test suite (coverage reports generated automatically)
 bin/rails test
-
-# Or run with coverage
-bin/rails test:coverage
 ```
 
 **Why run the full test suite?**

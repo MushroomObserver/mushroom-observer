@@ -72,17 +72,14 @@ PARALLEL_TEST_THRESHOLD=999999 rails test # Force all tests serial
 
 ### Coverage Reporting
 
-SimpleCov is disabled during parallel test runs due to incompatibility issues. To generate coverage reports, use the `test:coverage` command which runs tests serially:
+SimpleCov now fully supports parallel test execution and is enabled by default:
 
 ```bash
-rails test:coverage                       # All tests with coverage (serial)
-rails test:coverage test/path/to/test.rb  # Specific test with coverage (serial)
+rails test                       # All tests with coverage (parallel)
+rails test test/path/to/test.rb  # Specific test with coverage (parallel)
 ```
 
-Coverage reports are generated at `coverage/index.html`. Note that coverage runs are slower because they must run serially and include instrumentation overhead.
-
-**Why is coverage disabled for parallel tests?**
-SimpleCov doesn't fully support Rails 7's built-in parallel testing due to process isolation making it difficult to merge coverage data from multiple workers reliably.
+Coverage reports are automatically generated at `coverage/index.html` after each test run. SimpleCov automatically merges coverage data from all parallel workers, so you get accurate coverage metrics without any performance penalty.
 
 ## Common Pitfalls and Solutions
 

@@ -27,12 +27,9 @@ bin/rails test test/models/observation_test.rb -v
 
 # Run controller tests
 bin/rails test:controllers
-
-# Run with coverage
-bin/rails test:coverage
-bundle exec rails test:coverage
-rake test:coverage
 ```
+
+**Note:** Coverage reports are generated automatically by default using SimpleCov.
 
 ### Incorrect Syntax (DO NOT USE)
 ```bash
@@ -179,3 +176,138 @@ See these files for good examples of the pattern:
 - `test/components/sequence_form_test.rb`
 - `test/components/naming_form_test.rb`
 - `test/components/lightbox_caption_test.rb`
+
+## Debugging Phlex Component Conversions
+
+**CRITICAL: This is the FIRST step for ALL Phlex conversion debugging.**
+
+When converting ERB/helpers to Phlex components, the ONLY thing changing is the
+HTML output. Therefore, ALL bugs come from HTML differences. Comparing HTML
+output will eliminate 90% of debugging work.
+
+### The HTML Diff Technique
+
+**Before reading code or guessing at problems, ALWAYS diff the HTML output.**
+
+#### Step 1: Create "Old" Component Versions
+
+Create copies of the original components with `Old` suffix that use the legacy
+implementation. Keep these ON THE SAME BRANCH for easy comparison:
+
+```ruby
+# app/components/my_component_old.rb
+class Components::MyComponentOld < Components::Base
+  # Copy the original implementation exactly
+  # This renders using the old ERB/helper approach
+end
+```
+
+For component hierarchies (parent → child → grandchild), create Old versions
+of ALL components in the chain:
+
+```ruby
+# If refactoring FormCarousel → FormCarouselItem → FormImageFields
+# Create ALL of these:
+app/components/form_carousel_old.rb
+app/components/form_carousel_item_old.rb
+app/components/form_image_fields_old.rb
+```
+
+#### Step 2: Write an HTML Diff Test
+
+Create a test that renders BOTH versions with identical data:
+
+```ruby
+# /tmp/html_diff_test.rb
+require "test_helper"
+
+class HtmlDiffTest < ComponentTestCase
+  def test_diff_component_html
+    # Setup identical test data
+    user = users(:mary)
+    model = models(:example)
+
+    # OLD version
+    old_html = render(Components::MyComponentOld.new(
+      user: user,
+      model: model
+    ))
+    File.write("/tmp/component_old.html", old_html)
+
+    # NEW version
+    new_html = render(Components::MyComponent.new(
+      user: user,
+      model: model
+    ))
+    File.write("/tmp/component_new.html", new_html)
+
+    puts "Old: #{old_html.length} chars, New: #{new_html.length} chars"
+    puts "Diff: diff /tmp/component_old.html /tmp/component_new.html"
+    assert true
+  end
+end
+```
+
+#### Step 3: Run and Diff
+
+```bash
+# Generate the HTML files
+bin/rails test /tmp/html_diff_test.rb
+
+# Format for readable diff (optional)
+python3 -c "
+import re
+for name in ['old', 'new']:
+    with open(f'/tmp/component_{name}.html') as f:
+        html = re.sub(r'><', r'>\n<', f.read())
+    with open(f'/tmp/component_{name}_fmt.html', 'w') as f:
+        f.write(html)
+"
+
+# View the diff
+diff /tmp/component_old_fmt.html /tmp/component_new_fmt.html
+```
+
+#### Step 4: What to Look For in the Diff
+
+**Stimulus/JS-critical differences** (will break functionality silently):
+- `data-controller` - Must match exactly
+- `data-*-target` - Stimulus targets, exact match required
+- `data-action` - Event handlers
+- `data-*` - Any custom data attributes
+- Element `id` attributes - JS uses `getElementById`
+- Form field `name` attributes - Rails param parsing depends on these
+
+**Common causes of "empty" or "missing" content:**
+- Guard clause returning early (`return unless @prop`)
+- Block not yielding content properly
+- Namespace/field not rendering (check length difference)
+
+**Length differences are diagnostic:**
+- Much shorter new HTML = something isn't rendering
+- Much longer new HTML = duplicate rendering or extra wrappers
+
+### Why This Works
+
+1. **JS/Stimulus hasn't changed** - If it worked before, the HTML is the problem
+2. **Visual inspection of code misses subtleties** - A missing `.to_s` or wrong
+   attribute name is easy to overlook in code but obvious in HTML diff
+3. **No JS errors to diagnose** - Stimulus fails silently when targets/data
+   attributes are wrong
+4. **Exact output comparison** - Shows what actually renders, not what you
+   think renders
+
+### Example: Finding a Date Bug
+
+When dates showed "today" instead of the image date:
+
+```html
+<!-- OLD (correct): day 11 selected -->
+<option value="11" selected="selected">11</option>
+
+<!-- NEW (wrong): day 6 selected (today) -->
+<option value="6" selected>6</option>
+```
+
+The diff immediately revealed the bug: DateField wasn't using the passed
+`value:` attribute. Reading the code would have taken much longer to spot.

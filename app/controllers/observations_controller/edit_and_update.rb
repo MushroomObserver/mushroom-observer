@@ -14,7 +14,7 @@ module ObservationsController::EditAndUpdate
   # Inputs:
   #   params[:id]                       observation id
   #   params[:observation][...]         observation args
-  #   params[:image][n][...]            image args
+  #   params[:observation][:image][n][...]       image args
   #   params[:log_change]               log change in RSS feed?
   #
   # Outputs:
@@ -120,7 +120,7 @@ module ObservationsController::EditAndUpdate
 
   # As of 2024-06-01, users can remove images right on the edit obs form.
   def detach_removed_images
-    new_ids = params[:good_image_ids]&.split || []
+    new_ids = params.dig(:observation, :good_image_ids)&.split || []
 
     # If it didn't make the cut, remove it.
     @observation.images.each do |img|
@@ -156,6 +156,9 @@ module ObservationsController::EditAndUpdate
   def reload_edit_form
     @images         = @bad_images
     @new_image.when = @observation.when
+    @good_images  ||= @observation.images_sorted
+    @exif_data    ||= get_exif_data(@good_images)
+    @location     ||= @observation.location
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload

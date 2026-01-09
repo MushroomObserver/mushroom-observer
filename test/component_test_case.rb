@@ -184,4 +184,181 @@ class ComponentTestCase < UnitTestCase
       )
     end
   end
+
+  ##############################################################################
+  #
+  #  ERB vs PHLEX HTML COMPARISON UTILITY
+  #
+  #  IMPORTANT: When converting ERB views/partials to Phlex components, ALWAYS
+  #  use this method to verify the HTML output is equivalent. DO NOT assume
+  #  the HTML is "probably the same" - subtle differences can cause JavaScript
+  #  to behave differently even when the HTML looks visually identical.
+  #
+  #  CRITICAL DIFFERENCES THAT HAVE CAUSED BUGS:
+  #
+  #  1. Boolean attributes: ERB renders `readonly="readonly"`, Phlex renders
+  #     `readonly` or `readonly=""` depending on how you pass the value.
+  #     Fix: Use `readonly: "readonly"` not `readonly: true` in Phlex.
+  #
+  #  2. Numeric data attributes: Phlex silently drops Float/BigDecimal values
+  #     from data hashes. Only strings are rendered.
+  #     Fix: Always use `.to_s` for numeric data attributes in Phlex.
+  #
+  #  3. Attribute ordering: ERB and Phlex may render attributes in different
+  #     order. Usually harmless, but verify with actual testing.
+  #
+  #  4. Whitespace: ERB may include more whitespace than Phlex. Usually
+  #     harmless but can affect text content comparisons.
+  #
+  #  HOW TO USE THIS METHOD:
+  #
+  #  1. Create a controller test that renders both versions:
+  #
+  #     class MyControllerTest < FunctionalTestCase
+  #       def test_erb_vs_phlex_output
+  #         login(:katrina)
+  #
+  #         # Render ERB version (you may need a temporary route/action)
+  #         get(:my_erb_action)
+  #         erb_html = @response.body
+  #
+  #         # Render Phlex version
+  #         get(:my_phlex_action)
+  #         phlex_html = @response.body
+  #
+  #         # Compare specific elements
+  #         compare_html_elements(
+  #           erb_html, phlex_html,
+  #           selector: "#my_hidden_field",
+  #           label: "Hidden field"
+  #         )
+  #       end
+  #     end
+  #
+  #  2. Run the test and examine the output for any differences.
+  #
+  #  3. Fix differences in your Phlex component until the output matches.
+  #
+  #  4. Remove the temporary ERB route/action after migration is complete.
+  #
+  #  DO NOT SKIP THIS STEP. HTML differences can cause:
+  #  - JavaScript controllers failing to find targets
+  #  - Data attributes being empty/missing
+  #  - Forms submitting incorrect values
+  #  - Maps failing to initialize (InvalidValueError: not a number)
+  #
+  ##############################################################################
+
+  # Compare a specific HTML element between ERB and Phlex rendered output.
+  # Outputs detailed comparison for debugging ERB→Phlex migrations.
+  #
+  # @param erb_html [String] Full HTML from ERB rendering
+  # @param phlex_html [String] Full HTML from Phlex rendering
+  # @param selector [String] CSS selector to find the element to compare
+  # @param label [String] Human-readable label for test output
+  # @return [Hash] Comparison result with :erb, :phlex, :match keys
+  #
+  # @example Compare a hidden field
+  #   compare_html_elements(
+  #     erb_html, phlex_html,
+  #     selector: "#observation_location_id",
+  #     label: "Location hidden field"
+  #   )
+  def compare_html_elements(erb_html, phlex_html, selector:, label: nil)
+    label ||= selector
+    erb_doc = Nokogiri::HTML(erb_html)
+    phlex_doc = Nokogiri::HTML(phlex_html)
+
+    erb_element = erb_doc.at_css(selector)
+    phlex_element = phlex_doc.at_css(selector)
+
+    puts("\n#{"=" * 60}")
+    puts("Comparing: #{label}")
+    puts("Selector: #{selector}")
+    puts("-" * 60)
+
+    if erb_element.nil?
+      puts("ERB: NOT FOUND")
+    else
+      puts("ERB:")
+      puts(erb_element.to_html)
+    end
+
+    puts("-" * 60)
+
+    if phlex_element.nil?
+      puts("PHLEX: NOT FOUND")
+    else
+      puts("PHLEX:")
+      puts(phlex_element.to_html)
+    end
+
+    puts("-" * 60)
+
+    match = erb_element&.to_html == phlex_element&.to_html
+    if match
+      puts("✓ MATCH")
+    else
+      puts("✗ DIFFERENT - See above for details")
+      if erb_element && phlex_element
+        compare_attributes(erb_element,
+                           phlex_element)
+      end
+    end
+
+    puts("=" * 60)
+
+    { erb: erb_element&.to_html, phlex: phlex_element&.to_html, match: match }
+  end
+
+  # Save HTML to tmp files for manual inspection.
+  # Useful when you need to compare full page output.
+  #
+  # @param erb_html [String] Full HTML from ERB rendering
+  # @param phlex_html [String] Full HTML from Phlex rendering
+  # @param basename [String] Base filename (without extension)
+  def save_html_for_diff(erb_html, phlex_html, basename: "form")
+    erb_path = Rails.root.join("tmp/#{basename}_erb.html")
+    phlex_path = Rails.root.join("tmp/#{basename}_phlex.html")
+
+    File.write(erb_path, erb_html)
+    File.write(phlex_path, phlex_html)
+
+    puts("\n#{"=" * 60}")
+    puts("HTML saved for manual diff:")
+    puts("  ERB:   #{erb_path}")
+    puts("  Phlex: #{phlex_path}")
+    puts("")
+    puts("To compare, run:")
+    puts("  diff #{erb_path} #{phlex_path}")
+    puts("Or use a visual diff tool:")
+    puts("  code --diff #{erb_path} #{phlex_path}")
+    puts("=" * 60)
+  end
+
+  private
+
+  # Helper to compare attributes between two Nokogiri elements
+  def compare_attributes(erb_el, phlex_el)
+    erb_attrs = erb_el.attributes.transform_values(&:value)
+    phlex_attrs = phlex_el.attributes.transform_values(&:value)
+
+    all_keys = (erb_attrs.keys + phlex_attrs.keys).uniq.sort
+
+    puts("\nAttribute comparison:")
+    all_keys.each do |key|
+      erb_val = erb_attrs[key]
+      phlex_val = phlex_attrs[key]
+
+      if erb_val == phlex_val
+        puts("  #{key}: ✓ (#{erb_val.inspect})")
+      elsif erb_val.nil?
+        puts("  #{key}: MISSING in ERB, Phlex has #{phlex_val.inspect}")
+      elsif phlex_val.nil?
+        puts("  #{key}: ERB has #{erb_val.inspect}, MISSING in Phlex")
+      else
+        puts("  #{key}: ✗ ERB=#{erb_val.inspect} vs Phlex=#{phlex_val.inspect}")
+      end
+    end
+  end
 end
