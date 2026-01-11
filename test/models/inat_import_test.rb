@@ -99,7 +99,11 @@ class InatImportTest < ActiveSupport::TestCase
     assert(import.valid_input?, "Should accept only inat_ids")
 
     # Valid: only inat_search_url
-    import.update(inat_ids: nil, inat_search_url: "https://www.inaturalist.org/observations/123", import_all: false)
+    import.update(
+      inat_ids: nil,
+      inat_search_url: "https://www.inaturalist.org/observations/123",
+      import_all: false
+    )
     assert(import.valid_input?, "Should accept only inat_search_url")
 
     # Valid: only import_all
