@@ -90,4 +90,32 @@ class InatImportTest < ActiveSupport::TestCase
     assert_match(/Test error message/, import.response_errors,
                  "Error message should be added to response_errors")
   end
+
+  def test_mutually_exclusive_inputs
+    import = inat_imports(:rolf_inat_import)
+
+    # Valid: only inat_ids
+    import.update(inat_ids: "123,456", inat_search_url: nil, import_all: false)
+    assert(import.valid_input?, "Should accept only inat_ids")
+
+    # Valid: only inat_search_url
+    import.update(inat_ids: nil, inat_search_url: "https://www.inaturalist.org/observations/123", import_all: false)
+    assert(import.valid_input?, "Should accept only inat_search_url")
+
+    # Valid: only import_all
+    import.update(inat_ids: nil, inat_search_url: nil, import_all: true)
+    assert(import.valid_input?, "Should accept only import_all")
+
+    # Invalid: inat_ids + inat_search_url
+    import.inat_ids = "123"
+    import.inat_search_url = "https://www.inaturalist.org/observations/456"
+    import.import_all = false
+    assert_not(import.valid_input?, "Should reject IDs + URL")
+
+    # Invalid: none specified
+    import.inat_ids = nil
+    import.inat_search_url = nil
+    import.import_all = false
+    assert_not(import.valid_input?, "Should reject no input")
+  end
 end

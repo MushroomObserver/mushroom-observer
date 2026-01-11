@@ -90,6 +90,23 @@ class InatImport < ApplicationRecord
     super_importers.include?(user)
   end
 
+  # Ensure only one input type is specified: inat_ids, inat_search_url, or
+  # import_all
+  def valid_input?
+    inputs_count = [inat_ids.present?, inat_search_url.present?,
+                    import_all?].count(true)
+    inputs_count == 1
+  end
+
+  # Helper to get the source of observations (for display/logging)
+  def import_source
+    return :import_all if import_all?
+    return :inat_search_url if inat_search_url.present?
+    return :inat_ids if inat_ids.present?
+
+    nil
+  end
+
   # Total expected time for associated Job, in seconds.
   # Based on number of importable observations and user's historical
   # average import time.
