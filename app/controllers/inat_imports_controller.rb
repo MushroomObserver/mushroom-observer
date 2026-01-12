@@ -112,6 +112,7 @@ class InatImportsController < ApplicationController
       imported_count: 0,
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_ids: params[:inat_ids],
+      inat_search_url: params[:inat_search_url],
       inat_username: params[:inat_username].strip,
       response_errors: "",
       token: "",
@@ -126,7 +127,7 @@ class InatImportsController < ApplicationController
   # When implementing import_all, we should instead use the iNat API
   # to get the number of observations to be imported.
   def importables_count
-    return nil if importing_all?
+    return nil if importing_all? || params[:inat_ids].nil?
 
     params[:inat_ids].split(",").length
   end

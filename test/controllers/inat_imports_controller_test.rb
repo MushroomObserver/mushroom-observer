@@ -395,6 +395,27 @@ class InatImportsControllerTest < FunctionalTestCase
            "Clicking cancel button should make InatImport.canceled? == true")
   end
 
+  def test_create_stores_url_in_search_url_column
+    import = inat_imports(:mary_inat_import)
+    url = "https://www.inaturalist.org/observations/123456"
+    params = {
+      inat_username: import.user.inat_username,
+      inat_search_url: url,
+      consent: 1
+    }
+
+    stub_request(:any, authorization_url)
+    login(import.user.login)
+    post(:create, params: params)
+
+    import.reload
+    assert_equal(
+      url, import.inat_search_url,
+      "Should store URL in inat_search_url column"
+    )
+    assert_nil(import.inat_ids, "Should not store URL in inat_ids column")
+  end
+
   ########## Utilities
 
   # iNat url where user is sent in order to authorize MO access

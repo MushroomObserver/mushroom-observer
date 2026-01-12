@@ -29,9 +29,8 @@ module InatImportsController::Validators
   end
 
   def imports_unambiguously_designated?
-    if (importing_all? && !listing_ids?) || (listing_ids? && !importing_all?)
-      return true
-    end
+    inputs_count = [importing_all?, listing_ids?, listing_url?].count(true)
+    return true if inputs_count == 1
 
     flash_warning(:inat_list_xor_all.l)
     false
@@ -45,7 +44,12 @@ module InatImportsController::Validators
     params[:inat_ids].present?
   end
 
+  def listing_url?
+    params[:inat_search_url].present?
+  end
+
   def valid_inat_ids_param?
+    return true if params[:inat_ids].nil?
     return true unless contains_illegal_characters?
 
     flash_warning(:runtime_illegal_inat_id.l)
@@ -58,6 +62,7 @@ module InatImportsController::Validators
 
   def list_within_size_limits?
     return true if importing_all? || # ignore list size if importing all
+                   params[:inat_ids].nil? ||
                    params[:inat_ids].length <= 255
 
     flash_warning(:inat_too_many_ids_listed.t)
@@ -66,7 +71,7 @@ module InatImportsController::Validators
 
   # Are the listed iNat IDs fresh (i.e., not already imported)?
   def fresh_import?
-    return true if importing_all?
+    return true if params[:inat_ids].blank?
 
     previous_imports = Observation.where(inat_id: inat_id_list)
     return true if previous_imports.none?
@@ -83,7 +88,7 @@ module InatImportsController::Validators
   end
 
   def unmirrored?
-    return true if importing_all? # cannot test check this if importing all
+    return true if importing_all? || listing_url?
 
     conditions = inat_id_list.map do |inat_id|
       Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
