@@ -1,0 +1,34 @@
+Hello <%= @user.login %>,
+
+Your iNaturalist import batch has completed.
+
+BATCH INFORMATION
+=================
+Batch Number: <%= @batch_info[:batch_number] %>
+File: <%= @batch_info[:file_path] %>
+Started: <%= @batch_info[:started_at].strftime("%Y-%m-%d %H:%M:%S %Z") %>
+Completed: <%= @batch_info[:completed_at].strftime("%Y-%m-%d %H:%M:%S %Z") %>
+Duration: <%= @batch_info[:duration_minutes] %> minutes
+
+IMPORT RESULTS
+==============
+State: <%= @inat_import.state %>
+Total Requested: <%= @batch_info[:total_ids] %>
+Successfully Imported: <%= @inat_import.imported_count %>
+<% if @inat_import.importables.present? -%>
+Total Importable: <%= @inat_import.importables %>
+<% end -%>
+
+<% if @inat_import.response_errors.present? -%>
+ERRORS
+======
+<%= @inat_import.response_errors %>
+<% else -%>
+No errors reported.
+<% end -%>
+
+View your imported observations at:
+<%= observations_url %>
+
+---
+This email was sent by the MO iNaturalist bulk import system.
