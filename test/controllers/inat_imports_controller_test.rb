@@ -156,7 +156,7 @@ class InatImportsControllerTest < FunctionalTestCase
     # generate an id list that's barely too long
     id_list = ""
     id = 1_234_567_890
-    id_list += "#{id += 1}," until id_list.length > 255
+    id_list += "#{id += 1}," until id_list.length > 9984
     params = { inat_username: "anything", inat_ids: id_list, consent: 1 }
 
     login
