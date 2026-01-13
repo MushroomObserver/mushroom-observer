@@ -3098,7 +3098,7 @@
   # observation/inat_imports
   inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
-  inat_import_list: "Comma separated list of up to 10 observation #s"
+  inat_import_list: "Comma separated list of up to 900 observation #s"
   inat_import_all: Import all my iNat observations instead of a list
   inat_import_consent: "(Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos."
   inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
