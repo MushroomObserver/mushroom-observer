@@ -192,39 +192,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_text(/iNat #{inat_id} previously imported/)
   end
 
-  def test_create_previously_mirrored
-    user = users(:rolf)
-    inat_id = "1234567"
-    mirrored_obs = Observation.create(
-      where: "North Falmouth, Massachusetts, USA",
-      user: user,
-      when: "2023-09-08",
-      inat_id: nil,
-      # When Pulk's `mirror`Python script copies an MO Obs to iNat,
-      # it adds a text in this form to the MO Obs notes
-      # See https://github.com/JacobPulk/mirror
-      notes: { Other: "Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">observation #{inat_id}</a> on December 18, 2023" }
-    )
-    params = { inat_username: "anything", inat_ids: inat_id, consent: 1 }
-
-    login
-    assert_no_difference(
-      "Observation.count",
-      "Imported an iNat obs which had been 'mirrored' from MO"
-    ) do
-      post(:create, params: params)
-    end
-
-    # NOTE: 2024-09-04 jdc
-    # I'd prefer that the flash include links to both obss,
-    # and that this (or another) assertion check for that.
-    # At the moment, it's taking too long to figure out how.
-    assert_flash_text(
-      "iNat #{inat_id} is a &#8220;mirror&#8221; of " \
-      "existing MO Observation #{mirrored_obs.id}"
-    )
-  end
-
   def test_create_strip_inat_username
     user = users(:mary)
     assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).none?,

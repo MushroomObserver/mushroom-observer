@@ -24,7 +24,6 @@ module InatImportsController::Validators
       valid_inat_ids_param? &&
       list_within_size_limits? &&
       fresh_import? &&
-      unmirrored? &&
       not_importing_all_anothers?
   end
 
@@ -83,29 +82,6 @@ module InatImportsController::Validators
 
   def inat_id_list
     params[:inat_ids].delete(" ").split(",").map(&:to_i)
-  end
-
-  def unmirrored?
-    return true if importing_all? # cannot test check this if importing all
-
-    conditions = inat_id_list.map do |inat_id|
-      Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
-    end
-    previously_mirrored = Observation.where(conditions.inject(:or)).to_a
-    return true if previously_mirrored.blank?
-
-    previously_mirrored.each do |obs|
-      flash_warning(:inat_previous_mirror.t(inat_id: mirrored_inat_id(obs),
-                                            mo_obs_id: obs.id))
-    end
-    false
-  end
-
-  # When Pulk's `mirror`Python script copies an MO Obs to iNat,
-  # it adds a link to the iNat obs in the MO Observation notes
-  def mirrored_inat_id(obs)
-    match = %r{#{SITE}/observations/(?'inat_id'\d+)}o.match(obs.notes.to_s)
-    match[:inat_id]
   end
 
   # Block importing **all** of another user's iNat observations
