@@ -317,6 +317,38 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  def test_allows_maximum_ids_listed
+    user = users(:rolf)
+    inat_username = "rolf" # use different inat_username to test if it's updated
+    inat_import = inat_imports(:rolf_inat_import)
+    assert_equal("Unstarted", inat_import.state,
+                 "Need a Unstarted inat_import fixture")
+    assert_equal(0, inat_import.total_imported_count.to_i,
+                 "Test needs InatImport fixture without prior imports")
+
+    id = 1_234_567_890
+    # default max characters in a Puma query, minus some for other params
+    limit = 9984
+    reps = limit / id.to_s.length
+    id_list = (id.to_s * reps).chop
+
+    stub_request(:any, authorization_url)
+    login(user.login)
+
+    assert_no_difference(
+      "Observation.count",
+      "Authorization request to iNat shouldn't create MO Observation(s)"
+    ) do
+      post(:create,
+           params: { inat_ids: id_list, inat_username: inat_username,
+                     consent: 1 })
+    end
+
+    assert_response(:redirect)
+    assert_equal(id_list, inat_import.reload.inat_ids,
+                 "Failed to save inat_ids at maximum length1")
+  end
+
   def test_import_authorized
     user = users(:rolf)
     assert_blank(user.inat_username,
