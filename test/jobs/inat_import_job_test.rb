@@ -946,7 +946,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # The observation should have been destroyed after the error
     assert_equal(obs_count_before, Observation.count,
-                 "Observation should be destroyed after error")
+                 "MO Observation should be destroyed after iNat API error")
 
     errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
     assert_equal(status, errors[:error], "Incorrect error status")
