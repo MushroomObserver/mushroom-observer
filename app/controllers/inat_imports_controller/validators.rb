@@ -23,7 +23,6 @@ module InatImportsController::Validators
     imports_unambiguously_designated? &&
       valid_inat_ids_param? &&
       list_within_size_limits? &&
-      fresh_import? &&
       not_importing_all_anothers?
   end
 
@@ -63,20 +62,6 @@ module InatImportsController::Validators
                    params[:inat_ids].length <= 9984
 
     flash_warning(:inat_too_many_ids_listed.t)
-    false
-  end
-
-  # Are the listed iNat IDs fresh (i.e., not already imported)?
-  def fresh_import?
-    return true if importing_all?
-
-    previous_imports = Observation.where(inat_id: inat_id_list)
-    return true if previous_imports.none?
-
-    previous_imports.each do |import|
-      flash_warning(:inat_previous_import.t(inat_id: import.inat_id,
-                                            mo_obs_id: import.id))
-    end
     false
   end
 

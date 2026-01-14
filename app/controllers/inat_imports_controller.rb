@@ -82,6 +82,7 @@ class InatImportsController < ApplicationController
   def create
     return reload_form unless params_valid?
 
+    warn_about_listed_previous_imports
     assure_user_has_inat_import_api_key
     init_ivars
     request_inat_user_authorization
@@ -95,6 +96,19 @@ class InatImportsController < ApplicationController
     @inat_ids = params[:inat_ids]
     @inat_username = params[:inat_username]
     render(:new)
+  end
+
+  # Were any listed iNat IDs previously imported?
+  def warn_about_listed_previous_imports
+    return if importing_all? || !listing_ids?
+
+    previous_imports = Observation.where(inat_id: inat_id_list)
+    return true if previous_imports.none?
+
+    previous_imports.each do |import|
+      flash_warning(:inat_previous_import.t(inat_id: import.inat_id,
+                                            mo_obs_id: import.id))
+    end
   end
 
   def assure_user_has_inat_import_api_key
