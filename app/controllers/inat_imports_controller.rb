@@ -128,7 +128,7 @@ class InatImportsController < ApplicationController
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_username: params[:inat_username].strip,
       # clean trailing commas and whitespace
-      inat_ids: params[:inat_ids].sub(/[,\s]+\z/, ""),
+      inat_ids: params[:inat_ids]&.sub(/[,\s]+\z/, ""),
       response_errors: "",
       token: "",
       log: [],
