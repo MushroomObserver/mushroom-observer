@@ -3,7 +3,6 @@
 module InatImportsController::Validators
   SITE = "https://www.inaturalist.org"
 
-
   # Maximum size of id list param, based on
   #  Puma max query string size (1024 * 10)
   #  MAX_COOKIE_SIZE
