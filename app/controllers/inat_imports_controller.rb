@@ -104,12 +104,9 @@ class InatImportsController < ApplicationController
     return if importing_all? || !listing_ids?
 
     previous_imports = Observation.where(inat_id: inat_id_list)
-    return true if previous_imports.none?
+    return if previous_imports.none?
 
-    previous_imports.each do |import|
-      flash_warning(:inat_previous_import.t(inat_id: import.inat_id,
-                                            mo_obs_id: import.id))
-    end
+    flash_warning(:inat_previous_import.t(count: previous_imports.count))
   end
 
   def assure_user_has_inat_import_api_key
@@ -127,8 +124,7 @@ class InatImportsController < ApplicationController
       imported_count: 0,
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_username: params[:inat_username].strip,
-      # clean trailing commas and whitespace
-      inat_ids: params[:inat_ids]&.sub(/[,\s]+\z/, ""),
+      inat_ids: clean_inat_ids,
       response_errors: "",
       token: "",
       log: [],
@@ -145,6 +141,22 @@ class InatImportsController < ApplicationController
     return nil if importing_all?
 
     params[:inat_ids].split(",").length
+  end
+
+  def clean_inat_ids
+    # clean trailing commas and whitespace
+    inat_ids = params[:inat_ids]&.sub(/[,\s]+\z/, "")
+    previous_imports = Observation.where(inat_id: inat_id_list)
+    return inat_ids if previous_imports.none?
+
+    # remove previously imported ids
+    # just in case the iNat user deleted the Mushroom_Observer_URL field
+    # NOTE: Also useful in manual testing when writes of iNat obss are
+    # commented out temporarily. jdc 2026-01-15
+    previous_ids = previous_imports.pluck(:inat_id).map(&:to_s)
+    remaining_ids =
+      inat_ids.split(",").map(&:strip).reject { |id| previous_ids.include?(id) }
+    remaining_ids.join(",")
   end
 
   def request_inat_user_authorization

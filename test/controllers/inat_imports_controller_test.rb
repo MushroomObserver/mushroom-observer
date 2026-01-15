@@ -240,13 +240,10 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    # NOTE: 2024-09-04 jdc
-    # I'd prefer to assert that the flash include links to both obss,
-    # At the moment, it's taking too long to figure out how.
-    assert_flash_text(/iNat #{inat_id} previously imported/)
+    assert_flash_text(/#{:inat_previous_import.l(count: 1)}/)
     # It should continue even if some ids were previously imported
     # The job will exclude privious imports via the iNat API
-    # without_field: "Mushroom Observer URL" param.
+    # `without_field: "Mushroom Observer URL"` param.
     assert_redirected_to(INAT_AUTHORIZATION_URL)
   end
 

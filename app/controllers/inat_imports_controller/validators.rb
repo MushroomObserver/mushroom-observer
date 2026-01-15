@@ -71,6 +71,8 @@ module InatImportsController::Validators
   end
 
   def inat_id_list
+    return [] unless listing_ids?
+
     params[:inat_ids].delete(" ").split(",").map(&:to_i)
   end
 
