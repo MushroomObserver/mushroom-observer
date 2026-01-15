@@ -3,6 +3,15 @@
 module InatImportsController::Validators
   SITE = "https://www.inaturalist.org"
 
+
+  # Maximum size of id list param, based on
+  #  Puma max query string size (1024 * 10)
+  #  MAX_COOKIE_SIZE
+  #  - ~256 to allow for other stuff
+  # divide by 10
+  MAX_ID_LIST_SIZE =
+    [1024 * 10, ActionDispatch::Cookies::MAX_COOKIE_SIZE].min - 256
+
   private
 
   def params_valid?
@@ -55,11 +64,8 @@ module InatImportsController::Validators
   end
 
   def list_within_size_limits?
-    # Limit based on Puma max query string (10,240 chars)
-    # Subtract ~256 for other params = 9,984 chars available
-    # This allows ~900 iNat IDs (9 digits + separator = 10 chars each)
     return true if importing_all? || # ignore list size if importing all
-                   params[:inat_ids].length <= 9984
+                   params[:inat_ids].length <= MAX_ID_LIST_SIZE
 
     flash_warning(:inat_too_many_ids_listed.t)
     false

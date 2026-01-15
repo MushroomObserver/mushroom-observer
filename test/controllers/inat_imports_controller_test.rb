@@ -156,7 +156,10 @@ class InatImportsControllerTest < FunctionalTestCase
     # generate an id list that's barely too long
     id_list = ""
     id = 1_234_567_890
-    id_list += "#{id += 1}," until id_list.length > 9984
+    until id_list.length > InatImportsController::Validators::MAX_ID_LIST_SIZE
+      id_list += "#{id += 1},"
+    end
+
     params = { inat_username: "anything", inat_ids: id_list, consent: 1 }
 
     login
