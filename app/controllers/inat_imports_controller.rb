@@ -93,7 +93,8 @@ class InatImportsController < ApplicationController
   private
 
   def reload_form
-    @inat_ids = params[:inat_ids]
+    # clean trailing commas and whitespace
+    @inat_ids = params[:inat_ids].sub(/[,\s]+\z/, "")
     @inat_username = params[:inat_username]
     render(:new)
   end
@@ -125,8 +126,9 @@ class InatImportsController < ApplicationController
       importables: importables_count,
       imported_count: 0,
       avg_import_time: @inat_import.initial_avg_import_seconds,
-      inat_ids: params[:inat_ids],
       inat_username: params[:inat_username].strip,
+      # clean trailing commas and whitespace
+      inat_ids: params[:inat_ids].sub(/[,\s]+\z/, ""),
       response_errors: "",
       token: "",
       log: [],
