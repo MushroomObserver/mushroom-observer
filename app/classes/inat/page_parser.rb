@@ -58,7 +58,7 @@ class Inat
         user_login: @import.inat_username,
         # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
-        # and which haven't been exported from or inported to MO
+        # and which haven't been exported from or imported to MO
         # This field was written by iNat's defunct Import from MO feature
         # is written by Pulk's mirror script, and by
         # ObservationImporter#update_mushroom_observer_url_field
