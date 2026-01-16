@@ -194,7 +194,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     post(:create,
          params: { inat_ids: id_list,
-                   inat_username: "", # omit this to force form reloadd
+                   inat_username: "", # omit this to force form reload
                    consent: 1 })
 
     assert_form_action(action: :create)
