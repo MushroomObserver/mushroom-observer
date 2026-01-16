@@ -242,7 +242,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash_text(/#{:inat_previous_import.l(count: 1)}/)
     # It should continue even if some ids were previously imported
-    # The job will exclude privious imports via the iNat API
+    # The job will exclude previous imports via the iNat API
     # `without_field: "Mushroom Observer URL"` param.
     assert_redirected_to(INAT_AUTHORIZATION_URL)
   end
