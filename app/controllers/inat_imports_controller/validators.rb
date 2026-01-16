@@ -7,7 +7,6 @@ module InatImportsController::Validators
   #  Puma max query string size (1024 * 10)
   #  MAX_COOKIE_SIZE
   #  - ~256 to allow for other stuff
-  # divide by 10
   MAX_ID_LIST_SIZE =
     [1024 * 10, ActionDispatch::Cookies::MAX_COOKIE_SIZE].min - 256
 
