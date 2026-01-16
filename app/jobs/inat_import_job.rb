@@ -112,7 +112,7 @@ class InatImportJob < ApplicationJob
     log_new_page(parsed_page)
     # NOTE: for reasons I don't understand, this fixes a bug where
     # the tracker used the number of observations on the current page
-    # as the total number of obervations. jdc20260115
+    # as the total number of observations. jdc20260115
     if parsed_page["page"].to_i == 1
       inat_import.update(importables: parsed_page["total_results"])
     end
