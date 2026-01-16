@@ -179,7 +179,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:redirect)
     assert_equal(id_list, inat_import.reload.inat_ids,
-                 "Failed to save inat_ids at maximum length1")
+                 "Failed to save inat_ids at maximum length")
   end
 
   def test_strips_trailing_commas_and_space_chars_from_id_list
