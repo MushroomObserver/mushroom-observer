@@ -35,8 +35,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action(action: :create)
-    assert_select("input#inat_ids", true,
-                  "Form needs a field for inputting iNat ids")
+    assert_select("textarea#inat_ids", true,
+                  "Form needs a textarea for inputting iNat ids")
     assert_select("input#inat_username", true,
                   "Form needs a field for inputting iNat username")
     assert_select("input[type=checkbox][id=consent]", true,
@@ -152,11 +152,66 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_text(:inat_consent_required.l)
   end
 
+  def test_allows_maximum_ids
+    user = users(:rolf)
+    inat_username = "rolf" # use different inat_username to test if it's updated
+    inat_import = inat_imports(:rolf_inat_import)
+    assert_equal("Unstarted", inat_import.state,
+                 "Need a Unstarted inat_import fixture")
+    assert_equal(0, inat_import.total_imported_count.to_i,
+                 "Test needs InatImport fixture without prior imports")
+
+    id = 1_234_567_890
+    reps = InatImportsController::Validators::MAX_ID_LIST_SIZE / id.to_s.length
+    id_list = (id.to_s * reps).chop
+
+    stub_request(:any, authorization_url)
+    login(user.login)
+
+    assert_no_difference(
+      "Observation.count",
+      "Authorization request to iNat shouldn't create MO Observation(s)"
+    ) do
+      post(:create,
+           params: { inat_ids: id_list, inat_username: inat_username,
+                     consent: 1 })
+    end
+
+    assert_response(:redirect)
+    assert_equal(id_list, inat_import.reload.inat_ids,
+                 "Failed to save inat_ids at maximum length")
+  end
+
+  def test_strips_trailing_commas_and_space_chars_from_id_list
+    inat_import = inat_imports(:rolf_inat_import)
+    user = inat_import.user
+    assert_equal("Unstarted", inat_import.state,
+                 "Need a Unstarted inat_import fixture")
+    id_list = "123,456,789, \n"
+    expected_saved_id_list = "123,456,789"
+    stub_request(:any, authorization_url)
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: id_list,
+                   inat_username: "", # omit this to force form reload
+                   consent: 1 })
+
+    assert_form_action(action: :create)
+    assert_select(
+      "textarea#inat_ids", { text: expected_saved_id_list, count: 1 },
+      "inat_ids textarea should have trailing commas and whitespace stripped"
+    )
+  end
+
   def test_create_too_many_ids_listed
     # generate an id list that's barely too long
     id_list = ""
     id = 1_234_567_890
-    id_list += "#{id += 1}," until id_list.length > 255
+    until id_list.length > InatImportsController::Validators::MAX_ID_LIST_SIZE
+      id_list += "#{id += 1},"
+    end
+
     params = { inat_username: "anything", inat_ids: id_list, consent: 1 }
 
     login
@@ -185,44 +240,11 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    # NOTE: 2024-09-04 jdc
-    # I'd prefer that the flash include links to both obss,
-    # and that this (or another) assertion check for that.
-    # At the moment, it's taking too long to figure out how.
-    assert_flash_text(/iNat #{inat_id} previously imported/)
-  end
-
-  def test_create_previously_mirrored
-    user = users(:rolf)
-    inat_id = "1234567"
-    mirrored_obs = Observation.create(
-      where: "North Falmouth, Massachusetts, USA",
-      user: user,
-      when: "2023-09-08",
-      inat_id: nil,
-      # When Pulk's `mirror`Python script copies an MO Obs to iNat,
-      # it adds a text in this form to the MO Obs notes
-      # See https://github.com/JacobPulk/mirror
-      notes: { Other: "Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">observation #{inat_id}</a> on December 18, 2023" }
-    )
-    params = { inat_username: "anything", inat_ids: inat_id, consent: 1 }
-
-    login
-    assert_no_difference(
-      "Observation.count",
-      "Imported an iNat obs which had been 'mirrored' from MO"
-    ) do
-      post(:create, params: params)
-    end
-
-    # NOTE: 2024-09-04 jdc
-    # I'd prefer that the flash include links to both obss,
-    # and that this (or another) assertion check for that.
-    # At the moment, it's taking too long to figure out how.
-    assert_flash_text(
-      "iNat #{inat_id} is a &#8220;mirror&#8221; of " \
-      "existing MO Observation #{mirrored_obs.id}"
-    )
+    assert_flash_text(/#{:inat_previous_import.l(count: 1)}/)
+    # It should continue even if some ids were previously imported
+    # The job will exclude previous imports via the iNat API
+    # `without_field: "Mushroom Observer URL"` param.
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
   end
 
   def test_create_strip_inat_username
@@ -280,7 +302,7 @@ class InatImportsControllerTest < FunctionalTestCase
                      consent: 1 })
     end
 
-    assert_response(:redirect)
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
     assert_equal(inat_ids.split(",").length, inat_import.reload.importables,
                  "Failed to save InatImport.importables")
     assert_equal("Authorizing", inat_import.reload.state,
