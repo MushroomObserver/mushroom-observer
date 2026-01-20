@@ -163,7 +163,7 @@ class API2::FieldSlipsTest < UnitTestCase
   def test_xml_field_slip_inline_helper
     slip = field_slips(:field_slip_one)
     helper = Object.new
-    helper.extend(API2InlineHelper)
+    helper.extend(API2Helper)
 
     xml = Builder::XmlMarkup.new(indent: 2)
     helper.xml_field_slip(xml, slip)
@@ -194,7 +194,7 @@ class API2::FieldSlipsTest < UnitTestCase
   def test_patching_someone_elses_field_slip
     slip = field_slips(:field_slip_one)
     other_user = users(:katrina)
-    other_key = ApiKey.create!(user: other_user)
+    other_key = APIKey.create!(user: other_user)
 
     params = {
       method: :patch,
