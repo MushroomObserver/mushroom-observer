@@ -22,6 +22,31 @@ class FieldSlip < AbstractModel
   scope :order_by_default,
         -> { order_by(::Query::FieldSlips.default_order) }
 
+  scope :code, lambda { |codes|
+    codes = [codes] unless codes.is_a?(Array)
+    where(code: codes.map(&:upcase))
+  }
+
+  scope :code_has, lambda { |code_patterns|
+    code_patterns = [code_patterns] unless code_patterns.is_a?(Array)
+    sanitized = code_patterns.map do |pattern|
+      sanitize_sql_like(pattern.upcase, "\\")
+    end
+    conditions = sanitized.map { |pattern| "UPPER(code) LIKE '%#{pattern}%'" }.
+                 join(" OR ")
+    where(conditions)
+  }
+
+  scope :observation, lambda { |observation|
+    observation_ids = Lookup::Observations.new(observation).ids
+    where(observation: observation_ids)
+  }
+
+  scope :project, lambda { |project|
+    project_ids = Lookup::Projects.new(project).ids
+    where(project: project_ids)
+  }
+
   scope :projects, lambda { |projects|
     project_ids = Lookup::Projects.new(projects).ids
     where(project: project_ids).distinct
