@@ -2,6 +2,7 @@
 
 require("test_helper")
 require("api2_extensions")
+require("builder")
 
 class API2::FieldSlipsTest < UnitTestCase
   include API2Extensions
@@ -157,5 +158,62 @@ class API2::FieldSlipsTest < UnitTestCase
     # Verify the API returns the slip without errors
     assert_equal(1, @api.results.length)
     assert_equal(slip.id, @api.results.first.id)
+  end
+
+  def test_xml_field_slip_inline_helper
+    slip = field_slips(:field_slip_one)
+    helper = Object.new
+    helper.extend(API2Helper)
+
+    xml = Builder::XmlMarkup.new(indent: 2)
+    helper.xml_field_slip(xml, slip)
+
+    # Verify the XML contains the code
+    assert(xml.target!.include?(slip.code),
+           "XML output should contain field slip code")
+  end
+
+  def test_page_length_methods
+    api = API2::FieldSlipAPI.new
+    assert_equal(1000, api.put_page_length)
+    assert_equal(1000, api.delete_page_length)
+  end
+
+  def test_patching_field_slip_without_params
+    slip = field_slips(:field_slip_one)
+    params = {
+      method: :patch,
+      action: :field_slip,
+      api_key: @api_key.key,
+      id: slip.id
+    }
+    # Should fail because no set_* parameters provided
+    assert_api_fail(params)
+  end
+
+  def test_patching_someone_elses_field_slip
+    slip = field_slips(:field_slip_one)
+    other_user = users(:katrina)
+    other_key = APIKey.create!(
+      user: other_user,
+      notes: "Test API key for permission check"
+    )
+
+    params = {
+      method: :patch,
+      action: :field_slip,
+      api_key: other_key.key,
+      id: slip.id,
+      set_code: "NEW-CODE"
+    }
+    # Should fail because user doesn't have edit permission
+    assert_api_fail(params)
+  end
+
+  def test_code_already_used_error_message
+    slip = field_slips(:field_slip_one)
+    error = API2::FieldSlipAPI::CodeAlreadyUsed.new(slip.code)
+    assert_equal("Field slip code '#{slip.code}' is already in use.",
+                 error.to_s)
   end
 end
