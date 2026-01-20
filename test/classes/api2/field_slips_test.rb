@@ -194,7 +194,10 @@ class API2::FieldSlipsTest < UnitTestCase
   def test_patching_someone_elses_field_slip
     slip = field_slips(:field_slip_one)
     other_user = users(:katrina)
-    other_key = APIKey.create!(user: other_user)
+    other_key = APIKey.create!(
+      user: other_user,
+      notes: "Test API key for permission check"
+    )
 
     params = {
       method: :patch,
