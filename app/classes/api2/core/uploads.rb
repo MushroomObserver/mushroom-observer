@@ -52,7 +52,7 @@ module API2::Uploads
       super()
       fetch(url)
     rescue StandardError => e
-      raise(CouldntDownloadURL.new(url, e))
+      raise(API2::CouldntDownloadURL.new(url, e))
     end
 
     def fetch(url, limit = 10)
