@@ -72,6 +72,10 @@ class API2ControllerTest < FunctionalTestCase
     do_basic_get_request_for_model(ExternalSite)
   end
 
+  def test_basic_field_slip_get_request
+    do_basic_get_request_for_model(FieldSlip)
+  end
+
   def test_basic_herbarium_get_request
     do_basic_get_request_for_model(Herbarium)
   end
