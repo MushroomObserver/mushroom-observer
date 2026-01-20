@@ -32,9 +32,10 @@ class FieldSlip < AbstractModel
     sanitized = code_patterns.map do |pattern|
       sanitize_sql_like(pattern.upcase, "\\")
     end
-    conditions = sanitized.map { |pattern| "UPPER(code) LIKE '%#{pattern}%'" }.
-                 join(" OR ")
-    where(conditions)
+    arel = arel_table
+    upper_code = Arel::Nodes::NamedFunction.new("UPPER", [arel[:code]])
+    predicates = sanitized.map { |pattern| upper_code.matches("%#{pattern}%") }
+    where(predicates.reduce(:or))
   }
 
   scope :observation, lambda { |observation|
