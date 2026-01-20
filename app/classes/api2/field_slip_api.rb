@@ -73,11 +73,6 @@ class API2
       raise(MissingSetParameters.new)
     end
 
-    def before_create(params)
-      # Check if field slip with this code already exists
-      FieldSlip.find_by(code: params[:code])
-    end
-
     def after_create(obj)
       # Set current_user for permission checks in model
       obj.current_user = @user if obj.respond_to?(:current_user=)
