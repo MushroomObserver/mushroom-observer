@@ -52,7 +52,7 @@ module API2::Uploads
       super()
       fetch(url)
     rescue StandardError => e
-      raise(CouldntDownloadURL.new(url, e))
+      raise(API2::CouldntDownloadURL.new(url, e))
     end
 
     def fetch(url, limit = 10)
@@ -102,7 +102,7 @@ module API2::Uploads
   # Class encapsulating an upload from a file stored locally on the server
   class UploadFromFile < Upload
     def initialize(file)
-      raise(FileMissing.new(file)) unless File.exist?(file)
+      raise(API2::FileMissing.new(file)) unless File.exist?(file)
 
       super()
       self.content = File.open(file, "rb")

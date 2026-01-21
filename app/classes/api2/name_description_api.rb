@@ -7,20 +7,8 @@ class API2
       NameDescription
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      100
-    end
-
-    def put_page_length
-      100
-    end
-
-    def delete_page_length
-      100
+    def page_length_level
+      :heavyweight
     end
 
     def low_detail_includes

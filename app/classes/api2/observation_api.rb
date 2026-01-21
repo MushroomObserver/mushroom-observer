@@ -8,22 +8,6 @@ class API2
       Observation
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
-    end
-
     def high_detail_includes
       [
         :collection_numbers,
