@@ -150,20 +150,43 @@ class API2
     []
   end
 
+  # Page length levels define how many results to return per page for
+  # different API operations and detail levels.
+  #
+  # :lightweight - Simple objects (api_keys, comments, external_sites)
+  #                High detail: 1000, Low detail: 1000, PUT/DELETE: 1000
+  #
+  # :standard - Normal objects (observations, images, names, etc.)
+  #             High detail: 100, Low detail: 1000, PUT/DELETE: 1000
+  #
+  # :heavyweight - Dense objects (descriptions)
+  #                High detail: 100, Low detail: 100, PUT/DELETE: 100
+  PAGE_LENGTH_LEVELS = {
+    lightweight: { high: 1000, low: 1000, put: 1000, delete: 1000 },
+    standard: { high: 100, low: 1000, put: 1000, delete: 1000 },
+    heavyweight: { high: 100, low: 100, put: 100, delete: 100 }
+  }.freeze
+
+  # Override this method to select a page length level.
+  # Returns :standard by default.
+  def page_length_level
+    :standard
+  end
+
   def high_detail_page_length
-    10
+    PAGE_LENGTH_LEVELS[page_length_level][:high]
   end
 
   def low_detail_page_length
-    100
+    PAGE_LENGTH_LEVELS[page_length_level][:low]
   end
 
   def put_page_length
-    1000
+    PAGE_LENGTH_LEVELS[page_length_level][:put]
   end
 
   def delete_page_length
-    1000
+    PAGE_LENGTH_LEVELS[page_length_level][:delete]
   end
 
   attr_accessor :query, :detail, :page_number

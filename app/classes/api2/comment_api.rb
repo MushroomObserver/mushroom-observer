@@ -7,20 +7,8 @@ class API2
       Comment
     end
 
-    def high_detail_page_length
-      1000
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
+    def page_length_level
+      :lightweight
     end
 
     def high_detail_includes
