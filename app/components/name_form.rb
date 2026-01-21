@@ -37,11 +37,13 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_admin_locked_checkbox
-    field(:locked).checkbox(
-      wrapper_options: {
-        label: :form_names_locked.l,
-        wrap_class: "mt-3"
-      }
+    render(
+      field(:locked).checkbox(
+        wrapper_options: {
+          label: :form_names_locked.l,
+          wrap_class: "mt-3"
+        }
+      )
     )
   end
 
