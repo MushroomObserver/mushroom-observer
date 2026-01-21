@@ -41,6 +41,10 @@ class API2Controller < ApplicationController
     rest_query(:external_site)
   end
 
+  def field_slips
+    rest_query(:field_slip)
+  end
+
   def herbaria
     rest_query(:herbarium)
   end

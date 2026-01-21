@@ -76,6 +76,15 @@ module API2InlineHelper
     xml_string(xml, :name, external_site.name)
   end
 
+  def json_field_slip(field_slip)
+    strip_hash(id: field_slip.id,
+               code: field_slip.code.to_s)
+  end
+
+  def xml_field_slip(xml, field_slip)
+    xml_string(xml, :code, field_slip.code)
+  end
+
   def json_herbarium(herbarium)
     strip_hash(id: herbarium.id,
                code: herbarium.code.to_s,
