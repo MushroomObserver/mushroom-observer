@@ -10,7 +10,11 @@ column_classes(:eight_four)
 
     <%= tag.div(class: "content-block") do %>
       <%= @glossary_term.description.tpl %>
-      <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
+      <%= tag.br %>
+      <%= tag.div(class: "external_searches") do %>
+        <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
+      <% end %>
+
     <% end %>
 
   <% end %>
