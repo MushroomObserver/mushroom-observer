@@ -13,7 +13,7 @@ column_classes(:eight_four)
         <%= tag.p(@glossary_term.description.tpl) %>
       <% end %>
 
-      <%= tag.div(class: "external_searches") do %>
+      <%= tag.div(id: "external_searches") do %>
         <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
       <% end %>
     <% end %>
