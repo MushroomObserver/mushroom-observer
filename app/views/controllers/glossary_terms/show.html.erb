@@ -9,12 +9,13 @@ column_classes(:eight_four)
   <%= tag.div(class: yield(:left_columns)) do %>
 
     <%= tag.div(class: "content-block") do %>
-      <%= @glossary_term.description.tpl %>
-      <%= tag.br %>
+      <%= tag.div(class: "description") do %>
+        <%= tag.p(@glossary_term.description.tpl) %>
+      <% end %>
+
       <%= tag.div(class: "external_searches") do %>
         <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
       <% end %>
-
     <% end %>
 
   <% end %>
