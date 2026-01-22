@@ -31,7 +31,8 @@ class Components::NamingReasonsFields < Components::Base
   def container_data
     {
       controller: "naming-reason",
-      action: "$shown.bs.collapse->naming-reason#focusInput"
+      action: "$shown.bs.collapse->naming-reason#focusInput " \
+              "$hidden.bs.collapse->naming-reason#clearInput"
     }
   end
 
@@ -54,14 +55,14 @@ class Components::NamingReasonsFields < Components::Base
   def checkbox_label_data(reason)
     {
       toggle: "collapse",
-      target: "#reasons_#{reason.num}_notes"
+      target: "#naming_reasons_#{reason.num}_notes"
     }
   end
 
   def checkbox_label_aria(reason)
     {
       expanded: reason.used?.to_s,
-      controls: "reasons_#{reason.num}_notes"
+      controls: "naming_reasons_#{reason.num}_notes"
     }
   end
 
@@ -69,7 +70,7 @@ class Components::NamingReasonsFields < Components::Base
     # Bootstrap 3: "collapse" when hidden, "collapse in" when visible
     collapse_class = reason.used? ? "collapse in" : "collapse"
 
-    div(id: "reasons_#{reason.num}_notes",
+    div(id: "naming_reasons_#{reason.num}_notes",
         class: class_names("form-group mb-3", collapse_class),
         data: { naming_reason_target: "collapse" }) do
       render(reason_ns.field(:notes).textarea(
