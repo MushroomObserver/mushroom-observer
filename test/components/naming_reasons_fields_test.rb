@@ -56,13 +56,13 @@ class NamingReasonsFieldsTest < ComponentTestCase
       html,
       "input[type='checkbox'][name='naming[reasons][1][check]'][checked]"
     )
-    # Container should have "show" class (expanded)
-    assert_html(html, "div#reasons_1_notes.show")
+    # Container should have "collapse in" classes (Bootstrap 3 expanded)
+    assert_html(html, "div#reasons_1_notes.collapse.in")
   end
 
   def test_unchecked_reason_has_collapsed_textarea
-    # Container should NOT have "show" class (collapsed)
-    assert_html(@html, "div#reasons_1_notes:not(.show)")
+    # Container should have "collapse" but NOT "in" class (collapsed)
+    assert_html(@html, "div#reasons_1_notes.collapse:not(.in)")
   end
 
   private
