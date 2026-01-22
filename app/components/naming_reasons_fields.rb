@@ -66,7 +66,8 @@ class Components::NamingReasonsFields < Components::Base
   end
 
   def render_textarea(reason_ns, reason)
-    collapse_class = reason.used? ? "show" : "collapse"
+    # Bootstrap 3: "collapse" when hidden, "collapse in" when visible
+    collapse_class = reason.used? ? "collapse in" : "collapse"
 
     div(id: "reasons_#{reason.num}_notes",
         class: class_names("form-group mb-3", collapse_class),

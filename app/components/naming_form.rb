@@ -25,7 +25,6 @@ class Components::NamingForm < Components::ApplicationForm
   def view_template
     render_name_feedback if @given_name.present?
     render_naming_fields
-    input(type: "hidden", name: "context", value: @context)
     submit(button_name, center: true)
   end
 

@@ -32,6 +32,8 @@ class Components::NamingFields < Components::Base
     else
       render_name_autocompleter(@form)
     end
+    # Hidden field tells controller where form was submitted from
+    input(type: "hidden", name: "context", value: @context) if @context
   end
 
   private
@@ -54,7 +56,7 @@ class Components::NamingFields < Components::Base
     div(data: { autocompleter__name_target: "collapseFields" },
         class: collapse_class) do
       render_vote_field
-      render_reasons_field if @show_reasons
+      render_reasons_field
     end
   end
 
@@ -64,7 +66,8 @@ class Components::NamingFields < Components::Base
       render(vote_ns.field(:value).select(
                menu,
                wrapper_options: {
-                 label: "#{:form_naming_confidence.t}:"
+                 label: "#{:form_naming_confidence.t}:",
+                 wrap_class: "mt-3"
                },
                selected: @vote&.value,
                autofocus: focus_on_vote?
