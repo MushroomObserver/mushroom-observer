@@ -107,6 +107,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_true(@response.body.include?("Albion, Mendocino Co., California"))
     assert_link_in_html(:create_observation_inat_import_link.l,
                         new_inat_import_path)
+    # Naming reasons fields should be present (collapsed until name entered)
+    assert_select("input[id^='naming_reasons_'][id$='_check']")
 
     users(:rolf).update(location_format: "scientific")
     get(:new)
