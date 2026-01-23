@@ -63,10 +63,55 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Place name should stay filled
     browser.keyboard.type(:tab)
 
+    # Test naming reason checkbox/textarea interaction
+    # The Vote/Reasons collapse should have expanded when valid name was entered
+    assert_selector(
+      "[data-autocompleter--name-target='collapseFields'].in", wait: 4
+    )
+
+    # Find reason 2 checkbox ("Used references") and check it
+    # (Reason 1 is added by default, so we test reason 2 to verify unchecking)
+    reason_checkbox_label = find("label[for='naming_reasons_2_check']")
+    scroll_to(reason_checkbox_label, align: :center)
+
+    # Check the reason checkbox (click the label to toggle collapse)
+    reason_checkbox_label.click
+    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+
+    # Fill in the reason notes textarea
+    reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
+    reason_notes.fill_in(with: "Wikipedia")
+    assert_equal("Wikipedia", reason_notes.value)
+
+    # Uncheck the reason checkbox - should collapse and clear the input
+    reason_checkbox_label.click
+    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    # Wait for the collapse animation to complete and trigger clearInput
+    sleep(0.5)
+
+    # Re-check the reason checkbox - should expand but be empty
+    reason_checkbox_label.click
+    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+    reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
+    assert_equal("", reason_notes.value,
+                 "Textarea should be empty after toggle")
+
+    # Uncheck again before submitting (we want no reason 2 stored)
+    reason_checkbox_label.click
+    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    sleep(0.5)
+
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
     assert_flash_success(/created observation/i)
+
+    # Verify reason 2 was NOT stored (checkbox was unchecked before submit)
+    new_obs = Observation.last
+    new_naming = new_obs.namings.last
+    assert_not_nil(new_naming, "Observation should have a naming")
+    assert_not(new_naming.reasons.key?(2),
+               "Naming should not have reason 2 (was unchecked before submit)")
   end
 
   def test_trying_to_create_duplicate_location_just_uses_existing_location
