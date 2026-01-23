@@ -123,37 +123,18 @@ class Inat
       taxon = ident[:taxon]
       return unless taxon
 
-      # FIXME: This needs a ton of help
-      # inat taxon names are not like MO names
-      # Check ::Inat::Obs
-      taxon_name = taxon[:name]
-      return unless taxon_name
+      # Use Inat::Taxon to translate iNat taxon to MO Name
+      # Handles complexes, infrageneric/infraspecific ranks, etc.
+      name = Inat::Taxon.new(taxon).name
 
-      # Find or create Name in MO
-      name = find_or_skip_name(taxon_name)
-      return unless name
+      # Skip if no match found (returns Name.unknown)
+      return if name == Name.unknown
 
       # Check if this name or a synonym has already been proposed
       return if name_already_proposed?(obs, name)
 
       # Create the naming
       create_naming(obs, name, ident)
-    end
-
-    def find_or_skip_name(taxon_name)
-      # Try to find exact match
-      # FIXME: Try complexes first.
-      name = Name.find_by(text_name: taxon_name)
-      return name if name
-
-      # FIXME: Huh???
-      # Try search_name (normalized version)
-      search_name = taxon_name.tr(" ", "_").downcase
-      name = Name.find_by(search_name: search_name)
-      return name if name
-
-      @stats.add_error("Name '#{taxon_name}' not found in MO database")
-      nil
     end
 
     def name_already_proposed?(obs, name)
@@ -188,7 +169,7 @@ class Inat
         observation_id: obs.id,
         name_id: name.id,
         user_id: @user.id,
-        reasons: build_naming_reason(ident).to_yaml
+        reasons: build_naming_reason(ident)
       )
     end
 

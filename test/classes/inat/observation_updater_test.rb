@@ -17,29 +17,44 @@ class Inat
       assert_equal(0, updater.stats.error_count)
     end
 
-    def test_find_or_skip_name_with_existing_name
+    def test_process_identification_with_existing_name
       obs = observations(:minimal_unknown_obs)
       user = users(:rolf)
       updater = ObservationUpdater.new([obs], user)
 
-      # Test with existing name
+      # Create an iNat identification with a taxon that exists in MO
       name = names(:coprinus_comatus)
-      result = updater.send(:find_or_skip_name, name.text_name)
+      ident = {
+        taxon: { name: name.text_name, rank: "species" },
+        user: { login: "test_user" },
+        created_at_details: { date: "2024-01-15" }
+      }
 
-      assert_equal(name, result)
+      initial_naming_count = obs.namings.count
+      updater.send(:process_identification, obs, ident)
+
+      assert_equal(initial_naming_count + 1, obs.namings.reload.count)
+      assert_equal(1, updater.stats.namings_added)
     end
 
-    def test_find_or_skip_name_with_nonexistent_name
+    def test_process_identification_skips_unknown_name
       obs = observations(:minimal_unknown_obs)
       user = users(:rolf)
       updater = ObservationUpdater.new([obs], user)
 
-      # Test with non-existent name
-      result = updater.send(:find_or_skip_name, "Nonexistent mushroom")
+      # Create an iNat identification with a taxon that doesn't exist in MO
+      ident = {
+        taxon: { name: "Nonexistent mushroom", rank: "species" },
+        user: { login: "test_user" },
+        created_at_details: { date: "2024-01-15" }
+      }
 
-      assert_nil(result)
-      assert_equal(1, updater.stats.error_count)
-      assert_match(/not found in MO database/, updater.stats.errors.first)
+      initial_naming_count = obs.namings.count
+      updater.send(:process_identification, obs, ident)
+
+      # Should not add a naming for unknown names
+      assert_equal(initial_naming_count, obs.namings.reload.count)
+      assert_equal(0, updater.stats.namings_added)
     end
 
     def test_name_already_proposed_returns_true_when_proposed
@@ -83,10 +98,9 @@ class Inat
       assert_equal(name.id, naming.name_id)
       assert_equal(user.id, naming.user_id)
 
-      # Reasons are YAML-serialized
-      reasons = YAML.safe_load(naming.reasons, permitted_classes: [Symbol])
-      assert_match(/test_user/, reasons[1])
-      assert_match(/2024-01-15/, reasons[1])
+      # Reasons is a Hash (serialized automatically by Naming model)
+      assert_match(/test_user/, naming.reasons[1])
+      assert_match(/2024-01-15/, naming.reasons[1])
     end
 
     def test_build_sequence_creates_sequence_with_correct_attributes
