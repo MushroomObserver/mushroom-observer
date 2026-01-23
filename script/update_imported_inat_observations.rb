@@ -52,18 +52,16 @@ puts "Executing search: #{search_string}"
 puts "Using user_id: #{user_id}"
 puts ""
 
-# rubocop:disable Security/Eval
-observations = eval(search_string).to_a
-# rubocop:enable Security/Eval
+observations = eval(search_string).to_a # rubocop:disable Security/Eval
 
 puts "Found #{observations.count} MO observations"
 
 # Filter to only those with inat_id
 observations_with_inat = observations.select(&:inat_id)
-puts "#{observations_with_inat.count} have inat_id values"
+puts "#{observations_with_inat.count} have inat_id's"
 
 if observations_with_inat.empty?
-  puts "No observations with inat_id found. Exiting."
+  puts "Exiting."
   exit(0)
 end
 
@@ -75,15 +73,15 @@ if user.nil?
   exit(1)
 end
 
-puts "Updates will be attributed to: #{user.login} (id: #{user.id})"
+puts "Updates will be attributed to #{user.unique_text_name}"
 puts ""
 
 # Set User.current for Naming.construct
+# FIXME: This is not thread-safe; consider refactoring if using threads
 User.current = user
 
 inat_ids = observations_with_inat.map(&:inat_id)
-puts "Fetching iNat observation data (this may take a while due to rate " \
-     "limiting)..."
+puts "Fetching iNat obs data (may take a while due to rate limiting)..."
 
 inat_data = fetch_inat_observations(inat_ids)
 puts "Retrieved data for #{inat_data.count} iNat observations"
@@ -192,6 +190,9 @@ def process_identification(obs, ident)
   taxon = ident[:taxon]
   return unless taxon
 
+  # FIXME: This needs a ton of help
+  # inat taxon names are not like MO names
+  # Check ::Inat::Obs
   taxon_name = taxon[:name]
   return unless taxon_name
 
@@ -206,66 +207,13 @@ def process_identification(obs, ident)
   create_naming(obs, name, ident)
 end
 
-def process_provisional_name(obs, inat_obs_data)
-  ofvs = inat_obs_data[:ofvs]
-  return unless ofvs&.any?
-
-  prov_field = find_provisional_name_field(ofvs)
-  return unless prov_field
-
-  prov_name = prov_field[:value]
-  return if prov_name.blank?
-  return if skip_provisional_name?(obs, prov_name)
-
-  add_provisional_name_to_notes(obs, prov_name)
-end
-
-def find_provisional_name_field(ofvs)
-  ofvs.find { |field| field[:name] =~ /^Provisional Species Name/ }
-end
-
-def skip_provisional_name?(obs, prov_name)
-  # Check if already proposed or already in notes
-  return true if provisional_name_is_proposed?(obs, prov_name)
-
-  if provisional_name_in_notes?(obs, prov_name)
-    puts("  - Provisional name '#{prov_name}' already in notes")
-    return true
-  end
-
-  false
-end
-
-def provisional_name_in_notes?(obs, prov_name)
-  obs.notes && obs.notes[:Other]&.include?(prov_name)
-end
-
-def process_sequences(obs, ofvs)
-  return unless ofvs&.any?
-
-  sequence_fields = ofvs.select { |f| sequence_field?(f) }
-  return unless sequence_fields.any?
-
-  sequence_fields.each do |field|
-    process_sequence_field(obs, field)
-  end
-end
-
-def process_sequence_field(obs, field)
-  locus = field[:name]
-  bases = field[:value]
-
-  return if bases.blank?
-  return if sequence_already_exists?(obs, locus, bases)
-
-  create_sequence(obs, locus, bases)
-end
-
 def find_or_skip_name(taxon_name)
   # Try to find exact match
+  # FIXME: Try complexes first.
   name = Name.find_by(text_name: taxon_name)
   return name if name
 
+  # FIXME: Huh???
   # Try search_name (normalized version)
   search_name = taxon_name.tr(" ", "_").downcase
   name = Name.find_by(search_name: search_name)
@@ -279,19 +227,13 @@ def name_already_proposed?(obs, name)
   # Check if the name itself has been proposed
   return true if obs.namings.exists?(name_id: name.id)
 
+  # FIXME: Probably don't want to do this.
   # Check if a synonym has been proposed
   name.synonyms.each do |synonym|
     return true if obs.namings.exists?(name_id: synonym.id)
   end
 
   false
-end
-
-def provisional_name_is_proposed?(obs, prov_name)
-  # Check if provisional name matches any proposed name's text_name
-  obs.namings.includes(:name).any? do |naming|
-    naming.name.text_name.casecmp?(prov_name)
-  end
 end
 
 def create_naming(obs, name, ident)
@@ -335,6 +277,48 @@ def record_naming_failure(obs, naming)
   @stats[:errors] << "Naming for observation #{obs.id}: #{error_msg}"
 end
 
+def process_provisional_name(obs, inat_obs_data)
+  ofvs = inat_obs_data[:ofvs]
+  return unless ofvs&.any?
+
+  prov_field = find_provisional_name_field(ofvs)
+  return unless prov_field
+
+  prov_name = prov_field[:value]
+  return if prov_name.blank?
+  return if skip_provisional_name?(obs, prov_name)
+
+  add_provisional_name_to_notes(obs, prov_name)
+  # FIXME: Create a Naming
+end
+
+def find_provisional_name_field(ofvs)
+  ofvs.find { |field| field[:name] =~ /^Provisional Species Name/ }
+end
+
+def skip_provisional_name?(obs, prov_name)
+  # Check if already proposed or already in notes
+  return true if provisional_name_is_proposed?(obs, prov_name)
+
+  if provisional_name_in_notes?(obs, prov_name)
+    puts("  - Provisional name '#{prov_name}' already in notes")
+    return true
+  end
+
+  false
+end
+
+def provisional_name_in_notes?(obs, prov_name)
+  obs.notes && obs.notes[:Other]&.include?(prov_name)
+end
+
+def provisional_name_is_proposed?(obs, prov_name)
+  # Check if provisional name matches any proposed name's text_name
+  obs.namings.includes(:name).any? do |naming|
+    naming.name.text_name.casecmp?(prov_name)
+  end
+end
+
 def add_provisional_name_to_notes(obs, prov_name)
   update_observation_notes(obs, prov_name)
 
@@ -363,9 +347,32 @@ def record_provisional_name_failure(obs)
   @stats[:errors] << "Provisional name for observation #{obs.id}: #{error_msg}"
 end
 
+def process_sequences(obs, ofvs)
+  return unless ofvs&.any?
+
+  sequence_fields = ofvs.select { |f| sequence_field?(f) }
+  return unless sequence_fields.any?
+
+  sequence_fields.each do |field|
+    process_sequence_field(obs, field)
+  end
+end
+
 def sequence_field?(field)
+  # FIXME: double-check
+  # Proabaly want to do same as iNat importer
   field[:datatype] == "dna" ||
     field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{1,}/
+end
+
+def process_sequence_field(obs, field)
+  locus = field[:name]
+  bases = field[:value]
+
+  return if bases.blank?
+  return if sequence_already_exists?(obs, locus, bases)
+
+  create_sequence(obs, locus, bases)
 end
 
 def sequence_already_exists?(obs, locus, bases)
@@ -410,6 +417,8 @@ def record_sequence_failure(obs, sequence)
   puts("  - Failed to add sequence: #{error_msg}")
   @stats[:errors] << "Sequence for observation #{obs.id}: #{error_msg}"
 end
+
+#####
 
 def print_summary
   puts("")
