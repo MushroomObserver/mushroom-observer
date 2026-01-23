@@ -162,15 +162,12 @@ class Inat
     end
 
     def sequences
-      obs_sequence_fields = inat_obs_fields.select { |f| sequence_field?(f) }
-      obs_sequence_fields.each_with_object([]) do |field, ary|
-        # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
-        # field[:value] blank or not a (pure) lists of bases
-        # https://github.com/MushroomObserver/mushroom-observer/issues/2232
-        ary << { locus: field[:name], bases: field[:value],
-                 # NTOE: 2024-06-19 jdc. Can we figure out the following?
-                 archive: nil, accession: "", notes: "" }
-      end
+      # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
+      # field[:value] blank or not a (pure) lists of bases
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2232
+      # NTOE: 2024-06-19 jdc. Can we figure out the following?
+      # archive, accession fields
+      Inat::SequenceFieldDetector.extract_sequences(inat_obs_fields)
     end
 
     def specimen?
@@ -336,11 +333,6 @@ class Inat
     # ----- Other
 
     def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
-
-    def sequence_field?(field)
-      field[:datatype] == "dna" ||
-        field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
-    end
 
     # NOTE: 2024-06-01 jdc
     # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold

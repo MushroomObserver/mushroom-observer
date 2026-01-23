@@ -263,29 +263,12 @@ class Inat
     def process_sequences(obs, ofvs)
       return unless ofvs&.any?
 
-      sequence_fields = ofvs.select { |f| sequence_field?(f) }
-      return unless sequence_fields.any?
+      sequences = Inat::SequenceFieldDetector.extract_sequences(ofvs)
+      sequences.each do |seq|
+        next if sequence_already_exists?(obs, seq[:locus], seq[:bases])
 
-      sequence_fields.each do |field|
-        process_sequence_field(obs, field)
+        create_sequence(obs, seq[:locus], seq[:bases])
       end
-    end
-
-    def sequence_field?(field)
-      # FIXME: double-check
-      # Proabaly want to do same as iNat importer
-      field[:datatype] == "dna" ||
-        field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{1,}/
-    end
-
-    def process_sequence_field(obs, field)
-      locus = field[:name]
-      bases = field[:value]
-
-      return if bases.blank?
-      return if sequence_already_exists?(obs, locus, bases)
-
-      create_sequence(obs, locus, bases)
     end
 
     def sequence_already_exists?(obs, locus, bases)
