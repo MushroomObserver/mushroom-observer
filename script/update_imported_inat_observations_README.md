@@ -2,7 +2,9 @@
 
 ## Overview
 
-This Rails runner script updates key data in imported MO observations based on their corresponding iNaturalist observations. It's designed to sync changes from iNat that occurred after the initial import.
+This Rails runner script updates key data in imported MO observations
+based on their corresponding iNaturalist observations.
+It's designed to sync changes from iNat that occurred after the initial import.
 
 ## What It Updates
 
@@ -34,24 +36,28 @@ bin/rails runner script/update_imported_inat_observations.rb 'AR_SEARCH_STRING' 
 ### Examples
 
 Update 10 observations with inat_id:
+
 ```bash
 bin/rails runner script/update_imported_inat_observations.rb \
   'Observation.where.not(inat_id: nil).limit(10)' 0
 ```
 
 Update observations from a specific project:
+
 ```bash
 bin/rails runner script/update_imported_inat_observations.rb \
   'Observation.projects(389).where.not(inat_id: nil)' 123
 ```
 
 Update observations with notes containing specific text:
+
 ```bash
 bin/rails runner script/update_imported_inat_observations.rb \
   'Observation.where.not(inat_id: nil).notes_has("User: johnplischke")' 0
 ```
 
 Update recently created observations:
+
 ```bash
 bin/rails runner script/update_imported_inat_observations.rb \
   'Observation.where.not(inat_id: nil).where("created_at > ?", 1.week.ago)' 0
@@ -102,6 +108,7 @@ For each MO observation:
 ### 3. Report Results
 
 Prints a summary showing:
+
 - Observations processed
 - Namings added
 - Provisional names added
@@ -113,10 +120,12 @@ Prints a summary showing:
 ### Name Matching
 
 The script will **skip** iNat identifications if:
+
 - The taxon name doesn't exist in MO's database
 - The name (or a synonym) has already been proposed for the observation
 
 This is intentional to avoid:
+
 - Creating invalid names
 - Duplicate proposals
 - Cluttering observations with redundant identifications
@@ -125,11 +134,15 @@ This is intentional to avoid:
 
 All new records (Namings, Sequences) are attributed to the user specified by `USER_ID`.
 
-**Important:** Use user ID `0` (admin) or a dedicated "bot" user for automated imports. This makes it clear these are automated additions, not manual identifications.
+**Important:** Use user ID `0` (admin) or dedicated "bot" user
+for automated imports.
+This makes it clear these are automated additions, not manual identifications.
 
 ### Provisional Names
 
-Provisional names are added to the `notes[:Other]` field, not as regular proposed names. This is because:
+Provisional names are added to the `notes[:Other]` field,
+not as regular proposed names. This is because:
+
 - MO doesn't have a dedicated provisional name field
 - Provisional names are often informal or temporary
 - They should be visible but distinct from formal identifications
@@ -137,15 +150,18 @@ Provisional names are added to the `notes[:Other]` field, not as regular propose
 ### Sequences
 
 The script only handles sequences from observation fields. It does **not**:
+
 - Parse GenBank/NCBI accession numbers from notes
 - Fetch sequence data from external repositories
 - Handle linked sequences (archive + accession without bases)
 
-If iNat has sequences with only accession numbers, you'll need to enhance the script or handle those manually.
+If iNat has sequences with only accession numbers,
+you'll need to enhance the script or handle those manually.
 
 ### Rate Limiting
 
 The script includes delays between API requests to respect iNat's rate limits:
+
 - 1 second between batches
 - 1 second between paginated requests
 
@@ -154,6 +170,7 @@ For large datasets, this can take considerable time. Plan accordingly.
 ## Error Handling
 
 The script:
+
 - Continues processing if one observation fails
 - Collects all errors for the summary report
 - Prints detailed error messages
@@ -168,6 +185,7 @@ Before running on production data, test with:
 3. **Dry-run check**: Review the summary to ensure expected behavior
 
 Example test run:
+
 ```bash
 bin/rails runner script/update_imported_inat_observations.rb \
   'Observation.where(id: [123, 456, 789])' 0
@@ -207,6 +225,7 @@ bin/rails runner script/update_imported_inat_observations.rb \
 If updating many observations (>1000):
 
 1. **Run in batches**: Break query into smaller chunks
+
    ```bash
    bin/rails runner script/update_imported_inat_observations.rb \
      'Observation.where.not(inat_id: nil).limit(100).offset(0)' 0
@@ -217,11 +236,14 @@ If updating many observations (>1000):
 
 2. **Use background job**: Consider wrapping in a job for better monitoring
 
-3. **Monitor database**: Watch for slow queries, especially on observations with many namings
+3. **Monitor database**: Watch for slow queries,
+especially on observations with many namings
 
 ### Database Queries
 
-The script preloads associations where possible, but may still generate N+1 queries for:
+Script preloads associations where possible,
+but may still generate N+1 queries for:
+
 - Name lookups
 - Synonym checks
 - Existing naming/sequence checks
@@ -230,18 +252,16 @@ For very large datasets, consider adding database indices or optimizing these ch
 
 ## Related Scripts
 
-- `tmp/find_modified_inat_observations.rb` - Reports which observations have been modified on iNat (this script's companion)
+- `script/find_modified_inat_observations.rb` -
+Reports which observations have been modified on iNat (this script's companion)
 
 ## Future Enhancements
 
 Possible improvements:
+
 - Parse GenBank accession numbers from observation field values
 - Handle external repository links (archive + accession)
 - Add option to create votes for new namings
 - Add option to update observation notes/location if changed on iNat
 - Progress bar for long-running operations
 - Export detailed log to file
-
-## Contact
-
-For issues or questions, file an issue on GitHub or contact the Mushroom Observer development team.
