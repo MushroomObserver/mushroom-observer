@@ -195,7 +195,8 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_in_box
-    expect = Observation.where(lat: 34.1622, lng: -118.3521)
+    box = { west: -118.4, east: -118.3, north: 34.2, south: 34.1 }
+    expect = Observation.in_box(**box)
     assert(expect.any?)
     x = PatternSearch::Observation.new(
       "west:-118.4 east:-118.3 north:34.2 south:34.1"
