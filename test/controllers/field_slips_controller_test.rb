@@ -595,8 +595,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
           })
     assert_redirected_to(field_slip_url(fs1))
     # Check that a naming was created for this name
-    assert(fs1.observation.reload.namings.exists?(name: names(:coprinus_comatus)),
-           "Should create naming for '_name Xxx yyy_' format")
+    naming_exists = fs1.observation.reload.namings.exists?(
+      name: names(:coprinus_comatus)
+    )
+    assert(naming_exists, "Should create naming for '_name Xxx yyy_' format")
 
     # Test "_Xxx yyy_" format (without "name" prefix)
     fs2 = field_slips(:field_slip_two)
@@ -612,8 +614,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
             }
           })
     assert_redirected_to(field_slip_url(fs2))
-    assert(fs2.observation.reload.namings.exists?(name: names(:agaricus_campestris)),
-           "Should create naming for '_Xxx yyy_' format")
+    naming_exists = fs2.observation.reload.namings.exists?(
+      name: names(:agaricus_campestris)
+    )
+    assert(naming_exists, "Should create naming for '_Xxx yyy_' format")
 
     # Test plain format (no underscores)
     fs3 = field_slips(:field_slip_previous)
@@ -629,8 +633,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
             }
           })
     assert_redirected_to(field_slip_url(fs3))
-    assert(fs3.observation.reload.namings.exists?(name: names(:boletus_edulis)),
-           "Should create naming for plain 'Xxx yyy' format")
+    naming_exists = fs3.observation.reload.namings.exists?(
+      name: names(:boletus_edulis)
+    )
+    assert(naming_exists, "Should create naming for plain 'Xxx yyy' format")
   end
 
   def test_should_update_field_slip_and_merge_notes
