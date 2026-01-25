@@ -280,11 +280,25 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       self.text_name = name.text_name
       self.classification = name.classification
     end
-    return unless location && location_id_changed?
+    return unless location_id_changed?
 
-    self.where = location.name
-    self.location_lat = location.center_lat
-    self.location_lng = location.center_lng
+    if location
+      self.where = location.name
+      # Only cache coordinates for locations within the box_area threshold
+      if location.box_area <= MO.obs_location_max_area
+        self.location_lat = location.center_lat
+        self.location_lng = location.center_lng
+      else
+        self.location_lat = nil
+        self.location_lng = nil
+      end
+    else
+      # Clear cached coordinates when location is removed
+      # Don't clear where if it was explicitly set by the user
+      self.where = nil unless where_changed?
+      self.location_lat = nil
+      self.location_lng = nil
+    end
   end
 
   # This is meant to be run nightly to ensure that the cached name
