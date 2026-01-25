@@ -48,7 +48,7 @@ class Checklist
       @project = project
       @location = location
       @observations = if location.present?
-                        project.observations.where(location: location)
+                        project.observations.within_locations([location])
                       else
                         project.observations
                       end
