@@ -542,6 +542,97 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_equal(@field_slip.observation.notes[:Other], notes)
   end
 
+  def test_should_preserve_underscores_in_id_when_editing_other_fields
+    login
+    obs = @field_slip.observation
+    # Set ID field with underscores (textile italic format)
+    id_with_underscores = "_name Agaricus campestris_"
+    obs.notes[:Field_Slip_ID] = id_with_underscores
+    obs.save!
+
+    # Update a different field (not the ID field)
+    new_notes = "Additional notes"
+    patch(:update,
+          params: {
+            id: @field_slip.id,
+            commit: :field_slip_keep_obs.t,
+            field_slip: {
+              code: @field_slip.code,
+              observation_id: @field_slip.observation_id,
+              project_id: @field_slip.project_id,
+              field_slip_name: id_with_underscores,
+              notes: { Other: new_notes }
+            }
+          })
+
+    assert_redirected_to(field_slip_url(@field_slip))
+    obs.reload
+
+    # Verify ID field still has underscores (not stripped to "name Agaricus...")
+    assert_equal(
+      id_with_underscores,
+      obs.notes[:Field_Slip_ID],
+      "ID field should preserve underscores when editing other fields"
+    )
+    assert_equal(new_notes, obs.notes[:Other])
+  end
+
+  def test_check_name_handles_textile_formats
+    login
+
+    # Test "_name Xxx yyy_" format - should create naming with correct name
+    fs1 = field_slips(:field_slip_one)
+    patch(:update,
+          params: {
+            id: fs1.id,
+            commit: :field_slip_keep_obs.t,
+            field_slip: {
+              code: fs1.code,
+              observation_id: fs1.observation_id,
+              project_id: fs1.project_id,
+              field_slip_name: "_name #{names(:coprinus_comatus).text_name}_"
+            }
+          })
+    assert_redirected_to(field_slip_url(fs1))
+    # Check that a naming was created for this name
+    assert(fs1.observation.reload.namings.exists?(name: names(:coprinus_comatus)),
+           "Should create naming for '_name Xxx yyy_' format")
+
+    # Test "_Xxx yyy_" format (without "name" prefix)
+    fs2 = field_slips(:field_slip_two)
+    patch(:update,
+          params: {
+            id: fs2.id,
+            commit: :field_slip_keep_obs.t,
+            field_slip: {
+              code: fs2.code,
+              observation_id: fs2.observation_id,
+              project_id: fs2.project_id,
+              field_slip_name: "_#{names(:agaricus_campestris).text_name}_"
+            }
+          })
+    assert_redirected_to(field_slip_url(fs2))
+    assert(fs2.observation.reload.namings.exists?(name: names(:agaricus_campestris)),
+           "Should create naming for '_Xxx yyy_' format")
+
+    # Test plain format (no underscores)
+    fs3 = field_slips(:field_slip_previous)
+    patch(:update,
+          params: {
+            id: fs3.id,
+            commit: :field_slip_keep_obs.t,
+            field_slip: {
+              code: fs3.code,
+              observation_id: fs3.observation_id,
+              project_id: fs3.project_id,
+              field_slip_name: names(:boletus_edulis).text_name
+            }
+          })
+    assert_redirected_to(field_slip_url(fs3))
+    assert(fs3.observation.reload.namings.exists?(name: names(:boletus_edulis)),
+           "Should create naming for plain 'Xxx yyy' format")
+  end
+
   def test_should_update_field_slip_and_merge_notes
     field_slip = field_slips(:field_slip_falmouth_one)
     old_note = field_slip.observation.notes[:Other]

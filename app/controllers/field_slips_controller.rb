@@ -210,7 +210,19 @@ class FieldSlipsController < ApplicationController
     id_str = params[:field_slip][:field_slip_name]
     return unless id_str
 
-    id_str.tr!("_", "")
+    # Handle textile formatted IDs defensively
+    # "_name Xxx yyy_" -> "Xxx yyy"
+    # "_Xxx yyy_" -> "Xxx yyy"
+    # "Xxx yyy" -> "Xxx yyy"
+    # "_Weird_name_" -> "Weird_name" (preserves internal underscores)
+    if id_str.match?(/\A_name\s+.*_\z/)
+      # Strip "_name " prefix and trailing "_"
+      id_str = id_str[6..-2]
+    elsif id_str.match?(/\A_.*_\z/)
+      # Strip leading and trailing underscores only
+      id_str = id_str[1..-2]
+    end
+
     names = Name.find_names(@user, id_str)
     return if names.blank?
 
