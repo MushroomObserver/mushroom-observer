@@ -1753,4 +1753,66 @@ class ObservationTest < UnitTestCase
     @cc_obs.reload
     assert(@cc_obs.gps_hidden)
   end
+
+  # Test for issue #3770 - cache location center coordinates on observations
+  def test_cache_location_center_coordinates
+    create_new_objects
+
+    # Test small location (box_area <= threshold): coordinates should be cached
+    small_loc = locations(:albion)
+    assert(small_loc.box_area <= MO.obs_location_max_area,
+           "Test location should be small (box_area <= threshold)")
+    assert_not_nil(small_loc.center_lat)
+    assert_not_nil(small_loc.center_lng)
+
+    @cc_obs.location = small_loc
+    @cc_obs.save!
+    @cc_obs.reload
+
+    assert_equal(small_loc.center_lat, @cc_obs.location_lat,
+                 "Small location: coordinates should be cached")
+    assert_equal(small_loc.center_lng, @cc_obs.location_lng,
+                 "Small location: coordinates should be cached")
+  end
+
+  def test_cache_location_coordinates_large_location
+    create_new_objects
+
+    # Test large location (box_area > threshold): coordinates should be nil
+    large_loc = locations(:unknown_location)
+    assert(large_loc.box_area > MO.obs_location_max_area,
+           "Test location should be large (box_area > threshold)")
+
+    @cc_obs.location = large_loc
+    @cc_obs.save!
+    @cc_obs.reload
+
+    assert_nil(@cc_obs.location_lat,
+               "Large location: coordinates should be nil")
+    assert_nil(@cc_obs.location_lng,
+               "Large location: coordinates should be nil")
+  end
+
+  def test_cache_location_coordinates_clears_when_removed
+    create_new_objects
+
+    # First assign a location
+    loc = locations(:albion)
+    @cc_obs.location = loc
+    @cc_obs.save!
+    @cc_obs.reload
+
+    assert_equal(loc.center_lat, @cc_obs.location_lat)
+    assert_equal(loc.center_lng, @cc_obs.location_lng)
+
+    # Then remove the location
+    @cc_obs.location = nil
+    @cc_obs.save!
+    @cc_obs.reload
+
+    assert_nil(@cc_obs.location_lat,
+               "Removing location should clear cached coordinates")
+    assert_nil(@cc_obs.location_lng,
+               "Removing location should clear cached coordinates")
+  end
 end
