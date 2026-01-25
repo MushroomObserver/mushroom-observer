@@ -293,8 +293,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         self.location_lng = nil
       end
     else
-      # Clear cached data when location is removed
-      self.where = nil
+      # Clear cached coordinates when location is removed
+      # Don't clear where if it was explicitly set by the user
+      self.where = nil unless where_changed?
       self.location_lat = nil
       self.location_lng = nil
     end
