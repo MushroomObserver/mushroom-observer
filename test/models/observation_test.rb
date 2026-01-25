@@ -1753,4 +1753,29 @@ class ObservationTest < UnitTestCase
     @cc_obs.reload
     assert(@cc_obs.gps_hidden)
   end
+
+  # Test for issue #3770 - cache location center coordinates on observations
+  def test_cache_location_center_coordinates
+    create_new_objects
+
+    # Use albion location which has center coordinates
+    loc = locations(:albion)
+    assert_not_nil(loc.center_lat, "Fixture location should have center_lat")
+    assert_not_nil(loc.center_lng, "Fixture location should have center_lng")
+
+    # Assign location and save
+    @cc_obs.location = loc
+    @cc_obs.save!
+    @cc_obs.reload
+
+    # Verify location coordinates are cached on observation
+    assert_equal(
+      loc.center_lat, @cc_obs.location_lat,
+      "Observation should cache location center_lat as location_lat"
+    )
+    assert_equal(
+      loc.center_lng, @cc_obs.location_lng,
+      "Observation should cache location center_lng as location_lng"
+    )
+  end
 end

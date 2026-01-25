@@ -280,7 +280,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       self.text_name = name.text_name
       self.classification = name.classification
     end
-    self.where = location.name if location && location_id_changed?
+    return unless location && location_id_changed?
+
+    self.where = location.name
+    self.location_lat = location.center_lat
+    self.location_lng = location.center_lng
   end
 
   # This is meant to be run nightly to ensure that the cached name
