@@ -340,10 +340,11 @@ GEM
       ast (~> 2.4.1)
       racc
     pdf-core (0.10.0)
-    phlex (2.3.1)
+    phlex (2.4.0)
+      refract (~> 1.0)
       zeitwerk (~> 2.7)
-    phlex-rails (2.3.1)
-      phlex (~> 2.3.0)
+    phlex-rails (2.4.0)
+      phlex (~> 2.4.0)
       railties (>= 7.1, < 9)
       zeitwerk (~> 2.7)
     phlex-slotable (1.0.0)
@@ -405,6 +406,9 @@ GEM
       erb
       psych (>= 4.0.0)
       tsort
+    refract (1.1.0)
+      prism
+      zeitwerk
     regexp_parser (2.11.3)
     reline (0.6.3)
       io-console (~> 0.5)
