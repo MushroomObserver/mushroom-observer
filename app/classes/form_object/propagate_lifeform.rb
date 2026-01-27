@@ -9,4 +9,9 @@ class FormObject::PropagateLifeform < FormObject::Base
     attribute :"add_#{word}", :boolean, default: false
     attribute :"remove_#{word}", :boolean, default: false
   end
+
+  # Tell Superform to use PUT method (this is an update action)
+  def persisted?
+    true
+  end
 end

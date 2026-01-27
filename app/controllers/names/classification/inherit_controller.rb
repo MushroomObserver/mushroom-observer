@@ -18,9 +18,8 @@ module Names::Classification
       return unless find_name!
       return unless make_sure_name_is_at_or_above_genus!(@name)
 
-      @parent_text_name =
-        params.dig(:inherit_classification, :parent).to_s.
-          strip_html.strip_squeeze
+      @parent_text_name = params.dig(:inherit_classification, :parent).
+                          to_s.strip_html.strip_squeeze
       parent = resolve_name!(
         @parent_text_name,
         params.dig(:inherit_classification, :options)

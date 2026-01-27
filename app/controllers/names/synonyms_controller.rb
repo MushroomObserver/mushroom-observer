@@ -89,9 +89,7 @@ module Names
       sorter.all_synonyms.each do |n|
         # It is possible these names may be changed by transfer_synonym,
         # but these *instances* will not reflect those changes, so reload.
-        if proposed_ids[n.id.to_s] != "0"
-          @name.transfer_synonym(n.reload)
-        end
+        @name.transfer_synonym(n.reload) unless proposed_ids[n.id.to_s] == "0"
       end
 
       # De-synonymize any old synonyms in the "existing synonyms" list that

@@ -8,6 +8,11 @@ class FormObject::Lifeform < FormObject::Base
     attribute word.to_sym, :boolean, default: false
   end
 
+  # Tell Superform to use PATCH method (this is an edit form)
+  def persisted?
+    true
+  end
+
   # Initialize from a Name's lifeform string
   def self.from_name(name)
     attrs = {}

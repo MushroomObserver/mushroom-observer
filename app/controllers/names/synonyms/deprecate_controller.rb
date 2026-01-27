@@ -66,9 +66,9 @@ module Names::Synonyms
 
     def init_ivars_for_new
       @given_name       = params.dig(:deprecate_synonym, :proposed_name).
-                            to_s.strip_squeeze
+                          to_s.strip_squeeze
       @comment          = params.dig(:deprecate_synonym, :comment).
-                            to_s.strip_squeeze
+                          to_s.strip_squeeze
       @list_members     = nil
       @new_names        = []
       @synonym_name_ids = []

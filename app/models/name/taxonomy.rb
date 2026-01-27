@@ -311,6 +311,8 @@ module Name::Taxonomy
   # genus, too, if below genus.  Propagate to subtaxa if at or below genus.
   def change_classification(new_str)
     root = below_genus? && accepted_genus || self
+    # Eager load synonym association to avoid N+1 query in synonyms method
+    root = Name.includes(synonym: :names).find(root.id)
     root.synonyms.each do |name|
       name.update(classification: new_str)
       name.description.update(classification: new_str) if name.description_id
