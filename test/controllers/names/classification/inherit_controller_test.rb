@@ -42,45 +42,51 @@ module Names::Classification
       name = names(:boletus)
 
       # Make sure user has to be logged in.
-      post(:create, params: { id: name.id, parent: "Agaricales" })
+      post(:create,
+           params: { id: name.id,
+                     inherit_classification: { parent: "Agaricales" } })
       assert_redirected_to(new_account_login_path)
       login("rolf")
 
       # Make sure it doesn't crash if id is missing.
-      # post(:create, params: { parent: "Agaricales" })
+      # post(:create, params: { inherit_classification: { parent: "Agaricales" } })
       # assert_flash_error
       # assert_response(:redirect)
 
       # Make sure it doesn't crash if id is bogus.
       # Does not work, Rails enforces id
-      # post(:create, params: { id: "bogus", parent: "Agaricales" })
+      # post(:create, params: { id: "bogus",
+      #                         inherit_classification: { parent: "Agaricales" } })
       # assert_flash_error
       # assert_response(:redirect)
 
       # Test reload if parent field missing.
-      post(:create, params: { id: name.id, parent: "" })
+      post(:create,
+           params: { id: name.id, inherit_classification: { parent: "" } })
       assert_flash_error
       assert_response(:success)
       assert_template("names/classification/inherit/new")
 
       # Test reload if parent field has no match and no alternate spellings.
       post(:create,
-           params: { id: name.id, parent: "cakjdncaksdbcsdkn" })
+           params: { id: name.id,
+                     inherit_classification: { parent: "cakjdncaksdbcsdkn" } })
       assert_flash_error
       assert_response(:success)
       assert_template("names/classification/inherit/new")
-      assert_input_value("parent", "cakjdncaksdbcsdkn")
+      assert_input_value("inherit_classification_parent", "cakjdncaksdbcsdkn")
 
       # Test reload if parent field misspelled.
       post(:create,
-           params: { id: name.id, parent: "Agariclaes" })
+           params: { id: name.id,
+                     inherit_classification: { parent: "Agariclaes" } })
       assert_no_flash
       assert_response(:success)
       assert_template("names/classification/inherit/new")
       assert_not_blank(assigns(:message))
       assert_not_empty(assigns(:options))
       assert_select("label", text: "Agaricales")
-      assert_input_value("parent", "Agariclaes")
+      assert_input_value("inherit_classification_parent", "Agariclaes")
 
       # Test ambiguity: three names all accepted and with classifications.
       parent1 = names(:agaricaceae)
@@ -93,7 +99,8 @@ module Names::Classification
       parent3.classification = "Domain: _Eukarya_"
       parent3.save
       post(:create,
-           params: { id: name.id, parent: "Agaricaceae" })
+           params: { id: name.id,
+                     inherit_classification: { parent: "Agaricaceae" } })
       assert_no_flash
       assert_response(:success)
       assert_template("names/classification/inherit/new")
@@ -102,13 +109,15 @@ module Names::Classification
       assert_select("input[type=radio][value='#{parent1.id}']", count: 1)
       assert_select("input[type=radio][value='#{parent2.id}']", count: 1)
       assert_select("input[type=radio][value='#{parent3.id}']", count: 1)
-      assert_input_value("parent", "Agaricaceae")
+      assert_input_value("inherit_classification_parent", "Agaricaceae")
 
       # Have it select a bogus name (rank wrong in this case).
       post(:create,
            params: { id: name.id,
-                     parent: "Agaricaceae",
-                     options: names(:coprinus_comatus).id })
+                     inherit_classification: {
+                       parent: "Agaricaceae",
+                       options: names(:coprinus_comatus).id
+                     } })
       assert_flash_error
       assert_response(:success)
       assert_template("names/classification/inherit/new")
@@ -118,7 +127,8 @@ module Names::Classification
       Name.update(parent3.id, deprecated: true)
       assert_blank(name.reload.classification)
       post(:create,
-           params: { id: name.id, parent: "Agaricaceae" })
+           params: { id: name.id,
+                     inherit_classification: { parent: "Agaricaceae" } })
       assert_no_flash
       assert_name_arrays_equal([], assigns(:options))
       assert_blank(assigns(:message))
