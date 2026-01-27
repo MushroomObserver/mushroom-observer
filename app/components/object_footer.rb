@@ -38,6 +38,11 @@ module Components
 
     private
 
+    # NOTE: We use view_context.user_link() instead of the registered output
+    # helper user_link() because we need the return value for interpolation
+    # into translation strings. Registered output helpers write directly to the
+    # Phlex buffer rather than returning a value.
+
     # Renders metadata for old versions of versioned objects
     def render_old_version_metadata(num_versions)
       trusted_html(:footer_version_out_of.t(num: @obj.version,
@@ -48,7 +53,7 @@ module Components
       user = User.safe_find(@obj.user_id)
       br
       trusted_html(:footer_updated_by.t(
-                     user: user_link(user),
+                     user: view_context.user_link(user),
                      date: @obj.updated_at.web_time
                    ))
     end
@@ -83,7 +88,7 @@ module Components
       latest_user = User.safe_find(@versions.last.user_id)
       br
       trusted_html(:footer_last_updated_by.t(
-                     user: user_link(latest_user),
+                     user: view_context.user_link(latest_user),
                      date: @obj.updated_at.web_time
                    ))
     end
@@ -98,7 +103,7 @@ module Components
       return unless @obj.created_at
 
       trusted_html(:footer_created_by.t(
-                     user: user_link(@obj.user),
+                     user: view_context.user_link(@obj.user),
                      date: @obj.created_at.web_time
                    ))
     end
