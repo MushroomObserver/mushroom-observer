@@ -15,7 +15,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 
 | File | Form | Status |
 | ---- | ---- | ------ |
-| `names/classification/inherit/new.html.erb` | Inherit classification | |
+| `names/classification/inherit/new.html.erb` | Inherit classification | Done |
 | `names/classification/edit.html.erb` | Edit classification | Done |
 | `names/lifeforms/propagate/edit.html.erb` | Propagate lifeform | |
 | `names/lifeforms/edit.html.erb` | Edit lifeform | |
@@ -118,6 +118,7 @@ Forms that have been fully converted to Phlex components:
 | `ProjectMemberForm` | `projects/members/_form.html.erb` | |
 | `ProjectAliasForm` | Modal project alias | |
 | `NameClassificationForm` | `names/classification/edit.html.erb` | 2026-01-27 |
+| `NameInheritClassificationForm` | `names/classification/inherit/new.html.erb` | 2026-01-27 |
 | ... and 17 modal forms | | |
 
 ## Notes
