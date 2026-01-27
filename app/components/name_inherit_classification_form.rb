@@ -34,20 +34,8 @@ class Components::NameInheritClassificationForm < Components::ApplicationForm
   def render_options_alert
     render(Components::Alert.new(level: :warning)) do
       trusted_html(@message.tp)
-      render_radio_options
-    end
-  end
-
-  def render_radio_options
-    @options.each do |opt|
-      label do
-        input(type: "radio",
-              name: "inherit_classification[options]",
-              id: "inherit_classification_options_#{opt.id}",
-              value: opt.id)
-        whitespace
-        trusted_html(opt.display_name.t)
-      end
+      options = @options.map { |opt| [opt.id, opt.display_name.t] }
+      radio_field(:options, *options)
     end
   end
 
