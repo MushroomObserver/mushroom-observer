@@ -360,11 +360,14 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Static field - displays a value as plain text (not editable)
   # @param field_name [Symbol] the field name
   # @param options [Hash] all field and wrapper options
+  # @option options [String] :value the text to display
   # All wrapper options same as text_field
   # @yield [field_component] Optional block to set slots
   def static_field(field_name, **options)
-    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
-    field_opts = options.except(*WRAPPER_OPTIONS)
+    # For static fields, :value is a wrapper option (displayed text)
+    static_wrapper_opts = WRAPPER_OPTIONS + [:value]
+    wrapper_opts = options.slice(*static_wrapper_opts)
+    field_opts = options.except(*static_wrapper_opts)
 
     field_component = field(field_name).static(
       wrapper_options: wrapper_opts,
@@ -379,11 +382,14 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Read-only field - displays value with hidden input for form submission
   # @param field_name [Symbol] the field name
   # @param options [Hash] all field and wrapper options
+  # @option options [String] :value the text to display (also submitted)
   # All wrapper options same as text_field
   # @yield [field_component] Optional block to set slots
   def read_only_field(field_name, **options)
-    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
-    field_opts = options.except(*WRAPPER_OPTIONS)
+    # For read_only fields, :value is a wrapper option (displayed text)
+    read_only_wrapper_opts = WRAPPER_OPTIONS + [:value]
+    wrapper_opts = options.slice(*read_only_wrapper_opts)
+    field_opts = options.except(*read_only_wrapper_opts)
 
     field_component = field(field_name).read_only(
       wrapper_options: wrapper_opts,
