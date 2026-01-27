@@ -248,9 +248,9 @@ class Components::NameForm < Components::ApplicationForm
 
   def form_action
     if @model.new_record?
-      view_context.names_path
+      names_path
     else
-      view_context.name_path(@model)
+      name_path(@model)
     end
   end
 end

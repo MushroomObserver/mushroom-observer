@@ -107,6 +107,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Register view helpers that forms might need
   # Use register_value_helper for helpers that return values (not HTML)
   register_value_helper :in_admin_mode?
+  register_value_helper :pluralize
   register_value_helper :url_for
   register_value_helper :rank_as_string
 
@@ -348,6 +349,50 @@ class Components::ApplicationForm < Superform::Rails::Form
     field_component = field(field_name).text(
       wrapper_options: wrapper_opts,
       type: "number",
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Static field - displays a value as plain text (not editable)
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [String] :value the text to display
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots
+  def static_field(field_name, **options)
+    # For static fields, :value is a wrapper option (displayed text)
+    static_wrapper_opts = WRAPPER_OPTIONS + [:value]
+    wrapper_opts = options.slice(*static_wrapper_opts)
+    field_opts = options.except(*static_wrapper_opts)
+
+    field_component = field(field_name).static(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Read-only field - displays value with hidden input for form submission
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [String] :value the text to display (also submitted)
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots
+  def read_only_field(field_name, **options)
+    # For read_only fields, :value is a wrapper option (displayed text)
+    read_only_wrapper_opts = WRAPPER_OPTIONS + [:value]
+    wrapper_opts = options.slice(*read_only_wrapper_opts)
+    field_opts = options.except(*read_only_wrapper_opts)
+
+    field_component = field(field_name).read_only(
+      wrapper_options: wrapper_opts,
       **field_opts
     )
 

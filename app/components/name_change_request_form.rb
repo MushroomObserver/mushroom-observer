@@ -22,34 +22,20 @@ class Components::NameChangeRequestForm < Components::ApplicationForm
   private
 
   def render_name_field
-    render(field(:name).static(
-             wrapper_options: {
-               label: "#{:NAME.t}:",
-               value: "#{@name.unique_search_name}[##{@name.icn_id}]",
-               inline: true
-             }
-           ))
+    static_field(:name, label: "#{:NAME.t}:",
+                        value: "#{@name.unique_search_name}[##{@name.icn_id}]",
+                        inline: true)
   end
 
   def render_new_name_field
-    render(field(:new_name_with_icn_id).read_only(
-             wrapper_options: {
-               label: "#{:new_name.t}:",
-               value: @new_name_with_icn_id,
-               inline: true
-             }
-           ))
+    read_only_field(:new_name_with_icn_id, label: "#{:new_name.t}:",
+                                           value: @new_name_with_icn_id,
+                                           inline: true)
   end
 
   def render_notes_field
-    render(field(:notes).textarea(
-             wrapper_options: {
-               label: "#{:Notes.t}:"
-             },
-             rows: 10,
-             value: "",
-             data: { autofocus: true }
-           ))
+    textarea_field(:notes, label: "#{:Notes.t}:", rows: 10,
+                           value: "", data: { autofocus: true })
   end
 
   def form_action

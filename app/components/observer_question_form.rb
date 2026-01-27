@@ -24,13 +24,9 @@ class Components::ObserverQuestionForm < Components::ApplicationForm
   end
 
   def render_message_field
-    label = "#{:ask_user_question_message.t}:"
-    render(field(:message).textarea(
-             wrapper_options: { label: label },
-             value: @message,
-             rows: 6,
-             data: { autofocus: true }
-           ))
+    textarea_field(:message, label: "#{:ask_user_question_message.t}:",
+                             value: @message, rows: 6,
+                             data: { autofocus: true })
   end
 
   def form_action

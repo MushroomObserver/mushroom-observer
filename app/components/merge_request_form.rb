@@ -22,32 +22,15 @@ class Components::MergeRequestForm < Components::ApplicationForm
   private
 
   def render_object_fields
-    render(field(:old_obj).static(
-             wrapper_options: {
-               label: "#{type_label}:",
-               value: @old_obj.unique_format_name.t,
-               inline: true
-             }
-           ))
-
-    render(field(:new_obj).static(
-             wrapper_options: {
-               label: "#{type_label}:",
-               value: @new_obj.unique_format_name.t,
-               inline: true
-             }
-           ))
+    static_field(:old_obj, label: "#{type_label}:",
+                           value: @old_obj.unique_format_name.t, inline: true)
+    static_field(:new_obj, label: "#{type_label}:",
+                           value: @new_obj.unique_format_name.t, inline: true)
   end
 
   def render_notes_field
-    render(field(:notes).textarea(
-             wrapper_options: {
-               label: "#{:Notes.t}:"
-             },
-             rows: 10,
-             value: "",
-             data: { autofocus: true }
-           ))
+    textarea_field(:notes, label: "#{:Notes.t}:", rows: 10,
+                           value: "", data: { autofocus: true })
   end
 
   def type_label
