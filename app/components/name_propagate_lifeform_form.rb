@@ -18,16 +18,16 @@ class Components::NamePropagateLifeformForm < Components::ApplicationForm
     render_add_section
     br
     render_remove_section
-    submit(:APPLY.t, center: true)
+    submit(:APPLY.l, center: true)
   end
 
   private
 
   def render_add_section
     p do
-      b { :ADD.t }
+      b { :ADD.l }
       plain(": ")
-      plain(:propagate_lifeform_add.t)
+      plain(:propagate_lifeform_add.l)
     end
 
     table(class: "table table-lifeform table-striped") do
@@ -37,9 +37,9 @@ class Components::NamePropagateLifeformForm < Components::ApplicationForm
 
   def render_remove_section
     p do
-      b { :REMOVE.t }
+      b { :REMOVE.l }
       plain(": ")
-      plain(:propagate_lifeform_remove.t)
+      plain(:propagate_lifeform_remove.l)
     end
 
     table(class: "table table-lifeform table-striped") do
@@ -51,7 +51,7 @@ class Components::NamePropagateLifeformForm < Components::ApplicationForm
 
   def render_lifeform_row(field_name, word)
     tr do
-      td { checkbox_field(field_name.to_sym, label: :"lifeform_#{word}".t) }
+      td { checkbox_field(field_name.to_sym, label: :"lifeform_#{word}".l) }
       td(class: "container-text") { :"lifeform_help_#{word}".t }
     end
   end

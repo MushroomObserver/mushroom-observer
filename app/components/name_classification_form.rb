@@ -12,12 +12,12 @@ class Components::NameClassificationForm < Components::ApplicationForm
   end
 
   def view_template
-    textarea_field(:classification, label: "#{:form_names_classification.t}:",
+    textarea_field(:classification, label: "#{:form_names_classification.l}:",
                                     rows: 10,
                                     between: classification_help,
                                     data: { autofocus: true })
 
-    submit(:SAVE.t, center: true)
+    submit(:SAVE.l, center: true)
   end
 
   private

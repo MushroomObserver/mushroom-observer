@@ -25,7 +25,7 @@ class Components::NameApproveSynonymForm < Components::ApplicationForm
       trusted_html(:name_approve_deprecate_help.tp)
     end
 
-    textarea_field(:comment, label: "#{:name_approve_comments.t}:",
+    textarea_field(:comment, label: "#{:name_approve_comments.l}:",
                              cols: 80, rows: 5, inline: true,
                              data: { autofocus: true })
     div(class: "help-note mr-3") do
@@ -36,7 +36,7 @@ class Components::NameApproveSynonymForm < Components::ApplicationForm
   private
 
   def render_approved_names_section
-    checkbox_field(:deprecate_others, label: :name_approve_deprecate.t)
+    checkbox_field(:deprecate_others, label: :name_approve_deprecate.l)
     p do
       @approved_names.each do |n|
         trusted_html(n.display_name.t)

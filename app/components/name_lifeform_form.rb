@@ -28,7 +28,7 @@ class Components::NameLifeformForm < Components::ApplicationForm
 
   def render_lifeform_row(word)
     tr do
-      td { checkbox_field(word.to_sym, label: :"lifeform_#{word}".t) }
+      td { checkbox_field(word.to_sym, label: :"lifeform_#{word}".l) }
       td(class: "container-text") { :"lifeform_help_#{word}".t }
     end
   end

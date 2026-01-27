@@ -22,11 +22,11 @@ class Components::NameInheritClassificationForm < Components::ApplicationForm
   def view_template
     render_options_alert if @options
 
-    text_field(:parent, label: "#{:inherit_classification_parent_name.t}:",
+    text_field(:parent, label: "#{:inherit_classification_parent_name.l}:",
                         value: @parent_text_name,
                         data: { autofocus: true }, inline: true)
 
-    submit(:SUBMIT.t, center: true)
+    submit(:SUBMIT.l, center: true)
   end
 
   private

@@ -78,22 +78,24 @@ class Components::NameEditSynonymForm < Components::ApplicationForm
   end
 
   def render_synonym_checkbox(namespace, name_obj)
-    render(namespace.field(name_obj.id.to_s).checkbox(
-             wrapper_options: {
-               label: link_to(name_obj.display_name.t, name_path(name_obj.id))
-             },
-             value: "1", checked: false
-           ))
+    render(
+      namespace.field(name_obj.id.to_s).checkbox(
+        wrapper_options: {
+          label: link_to(name_obj.display_name.t, name_path(name_obj.id))
+        },
+        value: "1", checked: false
+      )
+    )
   end
 
   def render_members_section
     render_new_names_alert if @new_names.present?
 
-    checkbox_field(:deprecate_all, label: :form_synonyms_deprecate_synonyms.t)
+    checkbox_field(:deprecate_all, label: :form_synonyms_deprecate_synonyms.l)
     help_block(:form_synonyms_deprecate_synonyms_help.t)
 
     textarea_field(:synonym_members,
-                   label: "#{:form_synonyms_names.t}:",
+                   label: "#{:form_synonyms_names.l}:",
                    value: @list_members,
                    data: { autofocus: true }) do |f|
       f.with_between { help_block(members_help) }
@@ -102,7 +104,7 @@ class Components::NameEditSynonymForm < Components::ApplicationForm
 
   def render_new_names_alert
     render(Components::Alert.new(level: :danger)) do
-      div { :form_synonyms_missing_names.t }
+      div { :form_synonyms_missing_names.l }
       div(class: "pl-3") do
         @new_names.each { |n| div { n } }
       end

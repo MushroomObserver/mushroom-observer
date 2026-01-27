@@ -27,7 +27,7 @@ class Components::NameDeprecateSynonymForm < Components::ApplicationForm
 
     render_name_feedback if @given_name.present?
 
-    proposed_label = "#{:name_deprecate_preferred.t}:"
+    proposed_label = "#{:name_deprecate_preferred.l}:"
     autocompleter_field(:proposed_name,
                         type: :name, label: proposed_label,
                         value: @given_name, inline: true,
@@ -36,9 +36,9 @@ class Components::NameDeprecateSynonymForm < Components::ApplicationForm
       trusted_html(:name_deprecate_preferred_help.tp)
     end
 
-    checkbox_field(:is_misspelling, label: :form_names_misspelling.t)
+    checkbox_field(:is_misspelling, label: :form_names_misspelling.l)
 
-    textarea_field(:comment, label: "#{:name_deprecate_comments.t}:",
+    textarea_field(:comment, label: "#{:name_deprecate_comments.l}:",
                              value: @comment, cols: 80, rows: 5, inline: true)
     div(class: "help-note mr-3") { trusted_html(deprecate_comments_help) }
   end
