@@ -65,15 +65,17 @@ module Names::Synonyms
     end
 
     def init_ivars_for_new
-      @given_name       = params[:proposed_name].to_s.strip_squeeze
-      @comment          = params[:comment].to_s.strip_squeeze
+      @given_name       = params.dig(:deprecate_synonym, :proposed_name).
+                            to_s.strip_squeeze
+      @comment          = params.dig(:deprecate_synonym, :comment).
+                            to_s.strip_squeeze
       @list_members     = nil
       @new_names        = []
       @synonym_name_ids = []
       @synonym_names    = []
       @deprecate_all    = "1"
       @names            = []
-      @misspelling      = (params.dig(:is, :misspelling) == "1")
+      @misspelling      = params.dig(:deprecate_synonym, :is_misspelling) == "1"
     end
 
     def try_to_set_names_from_chosen_name
