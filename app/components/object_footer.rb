@@ -48,7 +48,7 @@ module Components
       user = User.safe_find(@obj.user_id)
       br
       trusted_html(:footer_updated_by.t(
-                     user: view_context.user_link(user),
+                     user: user_link(user),
                      date: @obj.updated_at.web_time
                    ))
     end
@@ -83,7 +83,7 @@ module Components
       latest_user = User.safe_find(@versions.last.user_id)
       br
       trusted_html(:footer_last_updated_by.t(
-                     user: view_context.user_link(latest_user),
+                     user: user_link(latest_user),
                      date: @obj.updated_at.web_time
                    ))
     end
@@ -98,7 +98,7 @@ module Components
       return unless @obj.created_at
 
       trusted_html(:footer_created_by.t(
-                     user: view_context.user_link(@obj.user),
+                     user: user_link(@obj.user),
                      date: @obj.created_at.web_time
                    ))
     end
