@@ -23,24 +23,14 @@ class Components::UserQuestionForm < Components::ApplicationForm
   private
 
   def render_subject_field
-    render(field(:subject).text(
-             wrapper_options: {
-               label: "#{:ask_user_question_subject.t}:"
-             },
-             value: @subject,
-             size: 70,
-             data: { autofocus: true }
-           ))
+    text_field(:subject, label: "#{:ask_user_question_subject.t}:",
+                         value: @subject, size: 70,
+                         data: { autofocus: true })
   end
 
   def render_message_field
-    render(field(:message).textarea(
-             wrapper_options: {
-               label: "#{:ask_user_question_message.t}:"
-             },
-             value: @message,
-             rows: 10
-           ))
+    textarea_field(:message, label: "#{:ask_user_question_message.t}:",
+                             value: @message, rows: 10)
   end
 
   def form_action

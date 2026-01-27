@@ -357,6 +357,44 @@ class Components::ApplicationForm < Superform::Rails::Form
     render(field_component)
   end
 
+  # Static field - displays a value as plain text (not editable)
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots
+  def static_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).static(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Read-only field - displays value with hidden input for form submission
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots
+  def read_only_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).read_only(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
   # File field with label and Bootstrap form-group wrapper
   # @param field_name [Symbol] the field name
   # @param options [Hash] all field and wrapper options

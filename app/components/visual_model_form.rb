@@ -28,7 +28,7 @@ class Components::VisualModelForm < Components::ApplicationForm
 
   def render_name_field
     div(class: "form-group field") do
-      render(field(:name).text(class: "form-control"))
+      text_field(:name, class: "form-control", label: false)
       whitespace
       plain(:VISUAL_MODEL.t)
     end
