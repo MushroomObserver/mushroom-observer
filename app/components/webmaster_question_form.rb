@@ -31,7 +31,8 @@ class Components::WebmasterQuestionForm < Components::ApplicationForm
   def render_question_field
     textarea_field(:message, label: "#{:ask_webmaster_question.t}:",
                              value: @message, rows: 10,
-                             data: { autofocus: @email.present? && !@email_error })
+                             data: { autofocus: @email.present? &&
+                                                !@email_error })
   end
 
   def form_action

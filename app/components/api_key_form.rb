@@ -24,7 +24,8 @@ class Components::APIKeyForm < Components::ApplicationForm
     div(class: "input-group") do
       render_cancel_button if @cancel_target
 
-      text_field(:notes, label: false, size: 40, class: "form-control border-none")
+      text_field(:notes, label: false, size: 40,
+                         class: "form-control border-none")
 
       span(class: "input-group-btn") do
         submit(:CREATE.l, submits_with: submits_text)
