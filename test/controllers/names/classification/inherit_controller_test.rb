@@ -21,16 +21,6 @@ module Names::Classification
       assert_redirected_to(new_account_login_path)
       login("rolf")
 
-      # Make sure it doesn't crash if id is missing.
-      # get(:new)
-      # assert_flash_error
-      # assert_response(:redirect)
-
-      # Make sure it doesn't crash if id is bogus.
-      # get(:new, params: { id: "bogus" }) # Does not work, Rails enforces id
-      # assert_flash_error
-      # assert_response(:redirect)
-
       # Make sure it doesn't crash if id is bogus.
       get(:new, params: { id: name.id })
       assert_no_flash
@@ -47,18 +37,6 @@ module Names::Classification
                      inherit_classification: { parent: "Agaricales" } })
       assert_redirected_to(new_account_login_path)
       login("rolf")
-
-      # Make sure it doesn't crash if id is missing.
-      # post(:create, params: { inherit_classification: { parent: "Agaricales" } })
-      # assert_flash_error
-      # assert_response(:redirect)
-
-      # Make sure it doesn't crash if id is bogus.
-      # Does not work, Rails enforces id
-      # post(:create, params: { id: "bogus",
-      #                         inherit_classification: { parent: "Agaricales" } })
-      # assert_flash_error
-      # assert_response(:redirect)
 
       # Test reload if parent field missing.
       post(:create,
