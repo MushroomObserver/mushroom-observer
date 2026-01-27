@@ -14,21 +14,14 @@ class Components::VisualModelForm < Components::ApplicationForm
   private
 
   def render_errors
+    count = pluralize(model.errors.count, :error.l, plural: :errors.l)
+
     Alert(level: :danger, id: "error_explanation") do
-      [error_header, error_list].join.html_safe # rubocop:disable Rails/OutputSafety
-    end
-  end
-
-  def error_header
-    count = view_context.pluralize(model.errors.count, :error.t,
-                                   plural: :errors.t)
-    view_context.tag.h2("#{count} #{:visual_model_errors.t}:")
-  end
-
-  def error_list
-    view_context.tag.ul do
-      model.errors.each do |error|
-        view_context.concat(view_context.tag.li(error.full_message))
+      h2 { "#{count} #{:visual_model_errors.l}:" }
+      ul do
+        model.errors.each do |error|
+          li { error.full_message }
+        end
       end
     end
   end
