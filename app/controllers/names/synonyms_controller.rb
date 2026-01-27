@@ -45,8 +45,8 @@ module Names
     end
 
     def prepare_name_sorter
-      list = params[:synonym_members].strip_squeeze
-      @deprecate_all = (params[:deprecate_all] == "1")
+      list = params.dig(:edit_synonym, :synonym_members).to_s.strip_squeeze
+      @deprecate_all = (params.dig(:edit_synonym, :deprecate_all) == "1")
 
       # Create any new names that have been approved.
       construct_approved_names(list, params[:approved_names],
@@ -85,11 +85,11 @@ module Names
       # names will not have a check-box yet, names written-in in previous
       # attempt to submit this form will have checkboxes and therefore must
       # be checked to proceed -- the default initial state.
-      proposed_synonym_ids = params[:proposed_synonyms] || {}
+      proposed_ids = params.dig(:edit_synonym, :proposed_synonyms) || {}
       sorter.all_synonyms.each do |n|
         # It is possible these names may be changed by transfer_synonym,
         # but these *instances* will not reflect those changes, so reload.
-        if proposed_synonym_ids[n.id.to_s] != "0"
+        if proposed_ids[n.id.to_s] != "0"
           @name.transfer_synonym(n.reload)
         end
       end
@@ -99,7 +99,8 @@ module Names
       # there are multiple unchecked names -- that is, it splits this
       # synonym into two synonyms, with checked names staying in this one,
       # and unchecked names moving to the new one.
-      split_off_desynonymized_names(@name, params[:existing_synonyms] || {})
+      existing_ids = params.dig(:edit_synonym, :existing_synonyms) || {}
+      split_off_desynonymized_names(@name, existing_ids)
 
       # Deprecate everything if that check-box has been marked.
       success = true

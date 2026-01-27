@@ -22,7 +22,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `names/descriptions/_form.html.erb` | Name description | |
 | `names/synonyms/deprecate/new.html.erb` | Deprecate name | Done |
 | `names/synonyms/approve/new.html.erb` | Approve name | Done |
-| `names/synonyms/edit.html.erb` | Edit synonyms | |
+| `names/synonyms/edit.html.erb` | Edit synonyms | Done |
 
 ### Observation Forms (5)
 
@@ -123,6 +123,7 @@ Forms that have been fully converted to Phlex components:
 | `NamePropagateLifeformForm` | `names/lifeforms/propagate/edit.html.erb` | 2026-01-27 |
 | `NameApproveSynonymForm` | `names/synonyms/approve/new.html.erb` | 2026-01-27 |
 | `NameDeprecateSynonymForm` | `names/synonyms/deprecate/new.html.erb` | 2026-01-27 |
+| `NameEditSynonymForm` | `names/synonyms/edit.html.erb` | 2026-01-27 |
 | ... and 17 modal forms | | |
 
 ## Notes
