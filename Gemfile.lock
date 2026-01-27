@@ -5,6 +5,15 @@ GIT
     mo_acts_as_versioned (0.6.6)
       activerecord (>= 3.0.9)
 
+GIT
+  remote: https://github.com/nimmolo/superform.git
+  revision: b719c83c8091d1c867382be80712aa32081ee749
+  branch: nimmo-add-radio-fields
+  specs:
+    superform (0.6.1)
+      phlex-rails (~> 2.0)
+      zeitwerk (~> 2.6)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -527,9 +536,6 @@ GEM
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     stringio (3.2.0)
-    superform (0.6.1)
-      phlex-rails (~> 2.0)
-      zeitwerk (~> 2.6)
     terser (1.2.6)
       execjs (>= 0.3.0, < 3)
     thor (1.5.0)
@@ -654,7 +660,7 @@ DEPENDENCIES
   sprockets (~> 4.2.1)
   sprockets-rails
   stimulus-rails
-  superform
+  superform!
   terser
   trilogy
   turbo-rails

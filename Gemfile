@@ -70,7 +70,7 @@ gem("literal")
 # Enable Slot API for Phlex
 gem("phlex-slotable")
 # Superform for type-safe forms with Phlex
-gem("superform")
+gem("superform", github: "nimmolo/superform", branch: "nimmo-add-radio-fields")
 # Strict ivars: raises a NameError if an ivar is nil (undefined). Must be
 # required in config/boot.rb to work: https://github.com/yippee-fun/strict_ivars
 # gem("strict_ivars", require: false)

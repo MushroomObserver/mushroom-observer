@@ -3,28 +3,12 @@ add_page_title(:inherit_classification_title.t(name: @name.display_name))
 
 add_context_nav(name_forms_return_tabs(name: @name))
 
-action = { controller: "/names/classification/inherit", action: :create,
-            id: @name.id }
 container_class(:text)
 %>
 
-<%= form_with(url: action) do |f| %>
-
-  <%= render(Components::Alert.new(level: :warning)) do
-    concat(@message.tp)
-    @options.each do |name|
-      concat(radio_with_label(
-        form: f, field: :options, value: name.id, label: name.display_name.t
-      ))
-    end
-  end if @options %>
-
-  <%= text_field_with_label(
-    form: f, field: :parent, value: @parent_text_name,
-    label: "#{:inherit_classification_parent_name.t}:",
-    data: { autofocus: true }, inline: true
-  ) %>
-
-  <%= submit_button(form: f, button: :SUBMIT.t, center: true) %>
-
-<% end %>
+<%= render(Components::NameInheritClassificationForm.new(
+      FormObject::InheritClassification.new(parent: @parent_text_name),
+      name: @name,
+      context: { parent_text_name: @parent_text_name,
+                 options: @options, message: @message }
+    )) %>
