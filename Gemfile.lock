@@ -629,7 +629,7 @@ DEPENDENCIES
   literal
   mimemagic
   mini_racer (~> 0.18.1)
-  minitest (~> 5.27)
+  minitest (< 6)
   minitest-reporters
   mission_control-jobs
   mo_acts_as_versioned (>= 0.6.6)!
