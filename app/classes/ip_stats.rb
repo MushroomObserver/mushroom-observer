@@ -158,6 +158,8 @@ class IpStats
     def blocked_ips_current?
       defined?(@blocked_ips_time) &&
         @blocked_ips_time.to_s != "" &&
+        File.exist?(MO.blocked_ips_file) &&
+        File.exist?(MO.okay_ips_file) &&
         @blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
         @blocked_ips_time >= File.mtime(MO.okay_ips_file)
     end
