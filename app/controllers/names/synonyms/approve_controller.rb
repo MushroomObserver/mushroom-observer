@@ -28,12 +28,8 @@ module Names::Synonyms
 
     private
 
-    def render_new
-      render(:new, location: form_to_approve_synonym_of_name_path)
-    end
-
     def deprecate_others
-      return false unless params[:deprecate_others] == "1"
+      return false unless params.dig(:approve_synonym, :deprecate_others) == "1"
 
       @others = []
       @name.approved_synonyms.each do |n|
@@ -57,10 +53,8 @@ module Names::Synonyms
     end
 
     def post_approval_comment
-      return unless params[:comment]
-
-      comment = params[:comment].to_s.strip_squeeze
-      return unless comment != ""
+      comment = params.dig(:approve_synonym, :comment).to_s.strip_squeeze
+      return if comment.blank?
 
       post_comment(:approve, @name, comment)
     end

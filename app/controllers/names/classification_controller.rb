@@ -15,8 +15,8 @@ module Names
     def update
       return unless find_name!
 
-      @name.classification = params[:classification].to_s.strip_html.
-                             strip_squeeze
+      @name.classification =
+        params.dig(:name, :classification).to_s.strip_html.strip_squeeze
       return render_edit unless validate_classification!
 
       @name.change_classification(@name.classification)

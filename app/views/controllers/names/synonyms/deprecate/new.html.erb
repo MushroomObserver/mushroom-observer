@@ -2,46 +2,22 @@
 add_page_title(:name_deprecate_title.t(name: @name.display_name))
 
 add_context_nav(name_forms_return_tabs(name: @name))
-
-action = { controller: "/names/synonyms/deprecate", action: :create,
-           id: @name.id, approved_name: @given_name }
-
-deprecate_comments_help = capture do
-  concat(:name_deprecate_comments_help.tp(name: @name.display_name.chomp(".")))
-  concat(:field_textile_link.tp)
-end
 %>
 
-<%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>
-
-  <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
-
-  <% if @given_name.present? %>
-    <%= render(Components::FormNameFeedback.new(
-          given_name: @given_name,
-          button_name: :SUBMIT.l,
-          names: @names,
-          valid_names: @valid_names,
-          suggest_corrections: @suggest_corrections || false,
-          parent_deprecated: @parent_deprecated
-        )) %>
-  <% end %>
-
-  <%= autocompleter_field(
-    form: f, field: :proposed_name, type: :name,
-    value: @given_name, label: "#{:name_deprecate_preferred.t}:", autofocus: true,
-    append: tag.div(:name_deprecate_preferred_help.tp, class: "help-note mr-3"),
-    inline: true
-  ) %>
-
-  <%= check_box_with_label(form: f, field: :is_misspelling,
-                           checked: @misspelling,
-                           label: :form_names_misspelling.t) %>
-
-  <%= text_area_with_label(form: f, field: :comment, inline: true,
-                           value: @comment, cols: 80, rows: 5,
-                           label: "#{:name_deprecate_comments.t}:",
-                           append: tag.div(deprecate_comments_help,
-                                           class: "help-note mr-3")) %>
-
-<% end %>
+<%= render(Components::NameDeprecateSynonymForm.new(
+      FormObject::DeprecateSynonym.new(
+        proposed_name: @given_name,
+        is_misspelling: @misspelling,
+        comment: @comment
+      ),
+      name: @name,
+      context: {
+        given_name: @given_name,
+        names: @names,
+        valid_names: @valid_names,
+        suggest_corrections: @suggest_corrections,
+        parent_deprecated: @parent_deprecated,
+        misspelling: @misspelling,
+        comment: @comment
+      }
+    )) %>

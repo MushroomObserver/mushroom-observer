@@ -264,6 +264,16 @@ class Components::ApplicationForm < Superform::Rails::Form
     render(field_component)
   end
 
+  # Radio button group with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Array<Array>] list of [value, label] pairs
+  # @param wrapper_options [Hash] wrapper options (label, etc.)
+  # @example
+  #   radio_field(:options, [1, "Option 1"], [2, "Option 2"])
+  def radio_field(field_name, *options, **wrapper_options)
+    render(field(field_name).radio(*options, **wrapper_options))
+  end
+
   # Select field with label and Bootstrap form-group wrapper
   # @param field_name [Symbol] the field name
   # @param options_list [Array] the select options

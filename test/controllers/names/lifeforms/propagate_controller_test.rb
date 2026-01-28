@@ -17,14 +17,15 @@ module Names::Lifeforms
       assert_template("names/lifeforms/propagate/edit")
       Name.all_lifeforms.each do |word|
         if word == "lichen"
-          assert_input_value("add_#{word}", "")
+          assert_input_value("propagate_lifeform_add_#{word}", "")
         else
-          assert_input_value("remove_#{word}", "")
+          assert_input_value("propagate_lifeform_remove_#{word}", "")
         end
       end
 
       # Make sure we can add "lichen" to all children.
-      put(:update, params: { id: name.id, add_lichen: "1" })
+      put(:update,
+          params: { id: name.id, propagate_lifeform: { add_lichen: "1" } })
       assert_redirected_to(name.show_link_args)
       children.each do |child|
         assert(child.reload.lifeform.include?(" lichen "),
@@ -32,7 +33,8 @@ module Names::Lifeforms
       end
 
       # Make sure we can remove "lichen" from all children, too.
-      put(:update, params: { id: name.id, remove_lichen: "1" })
+      put(:update,
+          params: { id: name.id, propagate_lifeform: { remove_lichen: "1" } })
       assert_redirected_to(name.show_link_args)
       children.each do |child|
         assert_not(child.reload.lifeform.include?(" lichen "),

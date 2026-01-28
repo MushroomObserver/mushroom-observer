@@ -113,8 +113,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     # First deprecate bad_name.
     within("#nomenclature") { click_link(text: "Deprecate") }
-    fill_in("proposed_name", with: good_name.text_name)
-    fill_in("comment", with: "bad name")
+    fill_in("deprecate_synonym[proposed_name]", with: good_name.text_name)
+    fill_in("deprecate_synonym[comment]", with: "bad name")
     click_on("Submit")
 
     assert(bad_name.reload.deprecated)
@@ -127,8 +127,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     # Then undo it and approve it.
     within("#nomenclature") { click_link(text: "Approve") }
-    page.uncheck("deprecate_others")
-    fill_in("comment", with: "my bad")
+    page.uncheck("approve_synonym[deprecate_others]")
+    fill_in("approve_synonym[comment]", with: "my bad")
     click_on("Approve")
 
     assert_not(bad_name.reload.deprecated)
@@ -203,7 +203,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     login
     visit(edit_lifeform_of_name_path(name))
 
-    check("lifeform_lichenicolous")
+    check("lifeform[lichenicolous]")
     click_on(:SAVE.l)
 
     assert_equal(" lichenicolous ", name.reload.lifeform,
@@ -275,10 +275,39 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
       click_on(:show_name_propagate_lifeform.l)
     end
 
-    check("add_lichenicolous")
+    check("propagate_lifeform[add_lichenicolous]")
     click_on(:APPLY.l)
 
     assert_equal(genus.lifeform, species.reload.lifeform,
                  "Failed to propogate lifeform to subtaxon")
+  end
+
+  def test_classification_edit
+    name = names(:coprinus_comatus)
+
+    login
+    visit(edit_classification_of_name_path(name))
+
+    fill_in("name[classification]", with: "Kingdom: _Fungi_")
+    click_on(:SAVE.l)
+
+    assert_match(/Fungi/, name.reload.classification)
+  end
+
+  def test_classification_inherit
+    # Need a Genus or higher rank for inherit classification
+    name = names(:coprinus)
+    parent = names(:agaricales)
+
+    # Ensure parent has a classification to inherit
+    parent.update!(classification: "Kingdom: _Fungi_\nPhylum: _Basidiomycota_")
+
+    login
+    visit(form_to_inherit_classification_of_name_path(name))
+
+    fill_in("inherit_classification[parent]", with: parent.text_name)
+    click_on(:SUBMIT.l)
+
+    assert_match(/Basidiomycota/, name.reload.classification)
   end
 end

@@ -23,17 +23,17 @@ module Names
       get(:edit, params: { id: name.id })
       assert_response(:success)
       assert_template("names/classification/edit")
-      assert_textarea_value(:classification, "")
+      assert_textarea_value(:name_classification, "")
       assert_select("form[action = '#{classification_of_name_path(name)}']") do
-        assert_select("input[value = 'put']", { count: 1 },
-                      "Form should submit via PUT")
+        assert_select("input[value = 'patch']", { count: 1 },
+                      "Form should submit via PATCH")
       end
 
       name = names(:agaricus_campestris)
       get(:edit, params: { id: name.id })
       assert_response(:success)
       assert_template("names/classification/edit")
-      assert_textarea_value(:classification, name.classification)
+      assert_textarea_value(:name_classification, name.classification)
     end
 
     def test_update_classification
@@ -54,17 +54,17 @@ module Names
 
       # Make sure it is validating the classification.
       put(:update,
-          params: { id: name.id, classification: "bogus" })
+          params: { id: name.id, name: { classification: "bogus" } })
       assert_flash_error
       assert_response(:success)
       assert_template("names/classification/edit")
-      assert_textarea_value(:classification, "bogus")
+      assert_textarea_value(:name_classification, "bogus")
 
       # Make sure we can do simple case.
       name = names(:agaricales)
       new_str = "Kingdom: _Fungi_"
       put(:update,
-          params: { id: name.id, classification: new_str })
+          params: { id: name.id, name: { classification: new_str } })
       assert_no_flash
       assert_redirected_to(name.show_link_args)
       assert_equal(new_str, name.reload.classification)
@@ -73,7 +73,7 @@ module Names
       name = names(:agaricus_campestris)
       new_str = "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_"
       put(:update,
-          params: { id: name.id, classification: new_str })
+          params: { id: name.id, name: { classification: new_str } })
       assert_no_flash
       assert_redirected_to(name.show_link_args)
       assert_equal(new_str, name.reload.classification)

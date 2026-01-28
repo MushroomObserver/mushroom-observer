@@ -13,9 +13,9 @@ module Names::Lifeforms
       @name = find_or_goto_index(Name, params[:id])
 
       Name.all_lifeforms.each do |word|
-        if params["add_#{word}"] == "1"
+        if params.dig(:propagate_lifeform, :"add_#{word}")&.to_s == "1"
           @name.propagate_add_lifeform(word)
-        elsif params["remove_#{word}"] == "1"
+        elsif params.dig(:propagate_lifeform, :"remove_#{word}")&.to_s == "1"
           @name.propagate_remove_lifeform(word)
         end
       end
