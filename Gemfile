@@ -202,8 +202,8 @@ group :test do
   gem("database_cleaner-active_record")
 
   # allows test results to be reported back to test runner IDE's
-  # Pin to 5.x - minitest 6.0 is incompatible with Rails 7.2
-  gem("minitest", "~> 5.27")
+  # minitest 6.0 is incompatible with Rails 7.2
+  gem("minitest", "< 6")
   gem("minitest-reporters")
 
   # restore `assigns` and `assert_template` to tests
