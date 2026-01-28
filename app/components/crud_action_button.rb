@@ -52,7 +52,7 @@ class Components::CrudActionButton < Components::Base
     capture do
       if @args[:icon]
         span(class: "sr-only") { trusted_html(@name) }
-        trusted_html(link_icon(@args[:icon]))
+        link_icon(@args[:icon])
       else
         trusted_html(@name)
       end
