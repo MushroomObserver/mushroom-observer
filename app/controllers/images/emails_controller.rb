@@ -21,7 +21,8 @@ module Images
                      name: @image.unique_format_name
                    ),
                    user: @user,
-                   model: FormObject::CommercialInquiry.new,
+                   model: FormObject::EmailRequest.new,
+                   form_class: Components::CommercialInquiryForm,
                    form_locals: { image: @image, user: @user }
                  ), layout: false)
         end
@@ -36,7 +37,7 @@ module Images
       return unless message_present?(image)
 
       # Migrated from QueuedEmail::CommercialInquiry to deliver_later.
-      message = params.dig(:commercial_inquiry, :message)
+      message = params.dig(:email, :message)
       CommercialInquiryMailer.build(
         sender: @user, image:, message:
       ).deliver_later
@@ -48,7 +49,7 @@ module Images
     private
 
     def message_present?(image)
-      return true if params.dig(:commercial_inquiry, :message).present?
+      return true if params.dig(:email, :message).present?
 
       flash_error(:runtime_missing.t(field: :message.l))
       @image = image

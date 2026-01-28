@@ -23,7 +23,7 @@ module Projects
       return unless find_project!
 
       subject = params[:email][:subject]
-      message = params[:email][:content]
+      message = params[:email][:message]
 
       if message.blank?
         flash_error(:runtime_missing.t(field: :request_message.l))

@@ -22,7 +22,8 @@ module Admin
                      identifier: "merge_request_email",
                      title: :email_merge_request_title.t(type: @model.type_tag),
                      user: @user,
-                     model: FormObject::MergeRequest.new,
+                     model: FormObject::EmailRequest.new,
+                     form_class: Components::MergeRequestForm,
                      form_locals: { old_obj: @old_obj, new_obj: @new_obj,
                                     model_class: @model }
                    ), layout: false)
@@ -81,7 +82,7 @@ module Admin
       end
 
       def merge_request_content
-        notes = params.dig(:merge_request, :notes)
+        notes = params.dig(:email, :message)
         :email_merge_objects.l(
           user: @user.login,
           type: @model.type_tag,

@@ -27,6 +27,7 @@ class Components::ModalForm < Components::Base
   prop :observation, _Nilable(Observation), default: nil
   prop :back, _Nilable(String), default: nil
   prop :form_locals, Hash, default: -> { {} }
+  prop :form_class, _Nilable(Class), default: nil
 
   # Class methods for rendering form components.
   # Used by both this component and _modal_form_reload.erb partial.
@@ -118,7 +119,12 @@ class Components::ModalForm < Components::Base
   end
 
   def render_form_component
-    self.class.render_form(self, model: @model, form_locals: merged_locals)
+    if @form_class
+      params = merged_locals.except(:model).merge(local: false)
+      render(@form_class.new(@model, **params))
+    else
+      self.class.render_form(self, model: @model, form_locals: merged_locals)
+    end
   end
 
   def merged_locals

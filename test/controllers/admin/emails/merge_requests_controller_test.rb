@@ -59,7 +59,7 @@ module Admin
           type: :Name,
           old_id: name1.id,
           new_id: name2.id,
-          merge_request: { notes: "SHAZAM" }
+          email: { message: "SHAZAM" }
         }
 
         # Test 1: Not logged in - should redirect and not send email
@@ -108,7 +108,7 @@ module Admin
           type: :Name,
           old_id: name1.id,
           new_id: -999,
-          merge_request: { notes: "test" }
+          email: { message: "test" }
         }
 
         # Test create with invalid new_id redirects

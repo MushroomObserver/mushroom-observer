@@ -14,7 +14,7 @@ class Components::MergeRequestForm < Components::ApplicationForm
     super do
       p { :email_merge_request_help.tp(type: @model_class.type_tag) }
       render_object_fields
-      render_notes_field
+      render_message_field
       submit(:SEND.l, center: true)
     end
   end
@@ -28,9 +28,9 @@ class Components::MergeRequestForm < Components::ApplicationForm
                            value: @new_obj.unique_format_name.t, inline: true)
   end
 
-  def render_notes_field
-    textarea_field(:notes, label: "#{:Notes.t}:", rows: 10,
-                           value: "", data: { autofocus: true })
+  def render_message_field
+    textarea_field(:message, label: "#{:Notes.t}:", rows: 10,
+                             value: "", data: { autofocus: true })
   end
 
   def type_label

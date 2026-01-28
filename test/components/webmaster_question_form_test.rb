@@ -5,9 +5,9 @@ require "test_helper"
 class WebmasterQuestionFormTest < ComponentTestCase
   def setup
     super
-    @email = FormObject::WebmasterQuestion.new
     @user_email = "test@example.com"
     @message = "My question"
+    @model = FormObject::EmailRequest.new(email: @user_email, message: @message)
     @html = render_form
   end
 
@@ -17,14 +17,14 @@ class WebmasterQuestionFormTest < ComponentTestCase
 
   def test_renders_form_with_email_field
     assert_html(@html, "body", text: :ask_webmaster_your_email.l)
-    assert_html(@html, "input[name='webmaster_question[email]']")
+    assert_html(@html, "input[name='email[email]']")
     assert_html(@html, "input[size='60']")
     assert_includes(@html, @user_email)
   end
 
   def test_renders_form_with_question_field
     assert_html(@html, "body", text: :ask_webmaster_question.l)
-    assert_html(@html, "textarea[name='webmaster_question[message]']")
+    assert_html(@html, "textarea[name='email[message]']")
     assert_html(@html, "textarea[rows='10']")
     assert_includes(@html, @message)
   end
@@ -37,11 +37,7 @@ class WebmasterQuestionFormTest < ComponentTestCase
   private
 
   def render_form
-    form = Components::WebmasterQuestionForm.new(
-      @email,
-      email: @user_email,
-      message: @message
-    )
+    form = Components::WebmasterQuestionForm.new(@model)
     # Stub url_for to avoid routing errors in test environment
     form.stub(:url_for, "/test_action") do
       render(form)

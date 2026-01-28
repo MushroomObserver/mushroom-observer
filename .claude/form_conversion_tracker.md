@@ -52,11 +52,10 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | ---- | ---- | ------ |
 | `locations/descriptions/_form.html.erb` | Location description | |
 
-### Description Forms (4)
+### Description Forms (3)
 
 | File | Form | Status |
 | ---- | ---- | ------ |
-| `descriptions/author_requests/new.html.erb` | Request authorship | |
 | `descriptions/_form_permissions.html.erb` | Edit permissions | |
 | `descriptions/_form_move.html.erb` | Move description | |
 | `descriptions/_form_merge.html.erb` | Merge descriptions | |
@@ -117,7 +116,16 @@ Forms that have been fully converted to Phlex components:
 | `GlossaryTermForm` | Modal glossary term | |
 | `ProjectMemberForm` | `projects/members/_form.html.erb` | |
 | `ProjectAliasForm` | Modal project alias | |
+| `Descriptions::AuthorRequestForm` | `descriptions/author_requests/new.html.erb` | 2026-01-28 |
 | ... and 17 modal forms | | |
+
+### Email Form Object Consolidation (2026-01-28)
+
+Consolidated 5 email form objects into single `FormObject::EmailRequest`:
+- Deleted: `CommercialInquiry`, `MergeRequest`, `NameChangeRequest`, `ProjectAdminRequest`, `WebmasterQuestion`
+- All email forms now use `params[:email][:message]` consistently
+- Added `form_class` prop to `ModalForm` for explicit form component lookup
+- Standardized field names: `notes`/`content` → `message`
 
 ## Notes
 
