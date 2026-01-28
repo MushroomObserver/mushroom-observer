@@ -72,13 +72,13 @@ module Components
       h1(class: title_classes, id: title_id) do
         if @on_project_page
           div(class: "d-flex align-items-center") do
-            trusted_html(show_title_id_badge(@project))
+            show_title_id_badge(@project)
             plain(" ")
-            trusted_html(link_to_object(@project))
-            trusted_html(show_page_edit_icons)
+            link_to_object(@project)
+            show_page_edit_icons
           end
         else
-          trusted_html(link_to_object(@project))
+          link_to_object(@project)
         end
       end
     end
