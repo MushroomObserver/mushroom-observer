@@ -17,7 +17,7 @@ module Admin
                      title: :ask_webmaster_title.l,
                      user: @user,
                      model: FormObject::EmailRequest.new(
-                       email: @email, message: @message
+                       reply_to: @email, message: @message
                      ),
                      form_class: Components::WebmasterQuestionForm,
                      form_locals: { email_error: false }
@@ -27,7 +27,7 @@ module Admin
       end
 
       def create
-        @email = params.dig(:email, :email)
+        @email = params.dig(:email, :reply_to)
         @message = params.dig(:email, :message)
         @email_error = false
         create_webmaster_question

@@ -106,7 +106,7 @@ module Admin
         post(:create,
              params: {
                email: {
-                 email: email,
+                 reply_to: email,
                  message: args[:message] || "Some message"
                }
              })

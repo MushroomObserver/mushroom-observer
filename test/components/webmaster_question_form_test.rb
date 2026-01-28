@@ -7,7 +7,7 @@ class WebmasterQuestionFormTest < ComponentTestCase
     super
     @user_email = "test@example.com"
     @message = "My question"
-    @model = FormObject::EmailRequest.new(email: @user_email, message: @message)
+    @model = FormObject::EmailRequest.new(reply_to: @user_email, message: @message)
     @html = render_form
   end
 
@@ -17,7 +17,7 @@ class WebmasterQuestionFormTest < ComponentTestCase
 
   def test_renders_form_with_email_field
     assert_html(@html, "body", text: :ask_webmaster_your_email.l)
-    assert_html(@html, "input[name='email[email]']")
+    assert_html(@html, "input[name='email[reply_to]']")
     assert_html(@html, "input[size='60']")
     assert_includes(@html, @user_email)
   end

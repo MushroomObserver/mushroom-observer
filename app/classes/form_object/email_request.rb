@@ -5,7 +5,7 @@
 class FormObject::EmailRequest < FormObject::Base
   attribute :subject, :string
   attribute :message, :string
-  attribute :email, :string # Optional: sender's email (for anonymous forms)
+  attribute :reply_to, :string # Optional: sender's email for replies
 
   def persisted?
     false

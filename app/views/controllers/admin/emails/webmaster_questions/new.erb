@@ -3,7 +3,7 @@ add_page_title(:ask_webmaster_title.t)
 %>
 
 <%= render(Components::WebmasterQuestionForm.new(
-      FormObject::EmailRequest.new(email: @email, message: @message),
+      FormObject::EmailRequest.new(reply_to: @email, message: @message),
       email_error: @email_error,
       local: true
     )) %>
