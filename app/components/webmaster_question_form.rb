@@ -19,14 +19,15 @@ class Components::WebmasterQuestionForm < Components::ApplicationForm
   private
 
   def render_email_field
+    autofocus = model.reply_to.blank? || @email_error
     text_field(:reply_to, label: "#{:ask_webmaster_your_email.t}:", size: 60,
-                          data: { autofocus: model.reply_to.blank? || @email_error })
+                          data: { autofocus: autofocus })
   end
 
   def render_message_field
+    autofocus = model.reply_to.present? && !@email_error
     textarea_field(:message, label: "#{:ask_webmaster_question.t}:", rows: 10,
-                             data: { autofocus: model.reply_to.present? &&
-                                                !@email_error })
+                             data: { autofocus: autofocus })
   end
 
   def form_action
