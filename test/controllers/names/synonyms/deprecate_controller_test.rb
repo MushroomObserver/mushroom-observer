@@ -201,6 +201,27 @@ module Names::Synonyms
       assert_equal(2, new_synonym.names.size)
     end
 
+    # Test that submitting without a proposed name shows an error
+    def test_do_deprecation_blank_proposed_name
+      old_name = names(:lepiota_rachodes)
+      assert_not(old_name.deprecated)
+
+      params = {
+        id: old_name.id,
+        deprecate_synonym: {
+          proposed_name: "",
+          comment: ""
+        }
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_template("names/synonyms/deprecate/new")
+      assert_flash_error(:runtime_name_deprecate_must_choose.t)
+
+      # Name should remain unchanged
+      assert_not(old_name.reload.deprecated)
+    end
+
     def test_deprecate_name_locked
       name = Name.where(locked: true).first
       name2 = names(:agaricus_campestris)

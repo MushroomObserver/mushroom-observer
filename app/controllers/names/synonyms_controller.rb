@@ -69,11 +69,8 @@ module Names
       elsif !sorter.only_approved_synonyms
         flash_notice(:name_change_synonyms_confirm.t)
       else
-        success = deprecate_other_names(sorter)
-        return redirect_to(name_path(@name.id)) if success
-
-        flash_object_errors(@name)
-        flash_object_errors(@name.synonym)
+        deprecate_other_names(sorter)
+        return redirect_to(name_path(@name.id))
       end
 
       re_render_edit_form(sorter)
@@ -122,19 +119,13 @@ module Names
       render(:edit, location: edit_synonyms_of_name_path(@name.id))
     end
 
-    # Helper used by change_synonyms.  Deprecates a single name.  Returns true
-    # if it worked.  Flashes an error and returns false if it fails for whatever
-    # reason.
+    # Helper used by change_synonyms. Deprecates a single name. Returns true
+    # if it worked, false if save failed.
     def deprecate_synonym(name)
       return true if name.deprecated
 
-      begin
-        name.change_deprecated(true)
-        name.save_with_log(@user, :log_deprecated_by)
-      rescue RuntimeError => e
-        flash_error(e.to_s) if e.present?
-        false
-      end
+      name.change_deprecated(true)
+      name.save_with_log(@user, :log_deprecated_by)
     end
 
     # If changing the synonyms of a name that already has synonyms, the user is
@@ -170,12 +161,6 @@ module Names
       logger.warn("\nMultiple names:")
       sorter.multiple_line_strs.each do |n|
         logger.warn(n)
-      end
-      if sorter.chosen_names
-        logger.warn("\nChosen names:")
-        sorter.chosen_names.each do |n|
-          logger.warn(n)
-        end
       end
       logger.warn("\nSynonym names:")
       sorter.all_synonyms.map(&:id).each do |n|

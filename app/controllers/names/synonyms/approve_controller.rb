@@ -28,10 +28,6 @@ module Names::Synonyms
 
     private
 
-    def render_new
-      render(:new, location: form_to_approve_synonym_of_name_path)
-    end
-
     def deprecate_others
       return false unless params.dig(:approve_synonym, :deprecate_others) == "1"
 

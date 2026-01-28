@@ -729,6 +729,61 @@ module Names
       assert_equal(selected_start_size - 1, split_synonym.names.size)
     end
 
+    # Test dump_sorter with multiple ambiguous names (multiple_line_strs)
+    # and a single recognized name (single_line_strs)
+    def test_transfer_synonyms_with_ambiguous_and_single_names
+      selected_name = names(:lepiota_rachodes)
+      assert_not(selected_name.deprecated)
+      assert_nil(selected_name.synonym_id)
+
+      # "Amanita baccata" has two names with different authors in fixtures
+      # "Agaricus campestris" is a single unique name
+      ambiguous_name = "Amanita baccata"
+      single_name = names(:agaricus_campestris).text_name
+
+      params = {
+        id: selected_name.id,
+        edit_synonym: {
+          synonym_members: "#{single_name}\r\n#{ambiguous_name}",
+          deprecate_all: "1"
+        }
+      }
+      login("rolf")
+      put(:update, params: params)
+      # Should re-render with ambiguous name message
+      assert_template("names/synonyms/edit")
+
+      # Name should remain unchanged
+      assert_not(selected_name.reload.deprecated)
+      assert_nil(selected_name.synonym_id)
+    end
+
+    # Test dump_sorter with single recognized name that has synonyms
+    # (all_synonyms populated)
+    def test_transfer_synonyms_single_with_synonyms_unapproved
+      selected_name = names(:lepiota_rachodes)
+      add_name = names(:chlorophyllum_rachodes)
+      assert_not(selected_name.deprecated)
+      assert_nil(selected_name.synonym_id)
+      assert_not_nil(add_name.synonym)
+
+      params = {
+        id: selected_name.id,
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          deprecate_all: "1"
+        }
+      }
+      login("rolf")
+      put(:update, params: params)
+      # Should show confirmation for unapproved synonyms
+      assert_template("names/synonyms/edit")
+
+      # Name should remain unchanged until synonyms are approved
+      assert_not(selected_name.reload.deprecated)
+      assert_nil(selected_name.synonym_id)
+    end
+
     def test_change_synonyms_locked
       name = Name.where(locked: true).first
       name2 = names(:agaricus_campestris)
