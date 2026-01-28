@@ -7,7 +7,9 @@ class WebmasterQuestionFormTest < ComponentTestCase
     super
     @user_email = "test@example.com"
     @message = "My question"
-    @model = FormObject::EmailRequest.new(reply_to: @user_email, message: @message)
+    @model = FormObject::EmailRequest.new(
+      reply_to: @user_email, message: @message
+    )
     @html = render_form
   end
 
