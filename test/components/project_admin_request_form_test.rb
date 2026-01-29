@@ -5,7 +5,7 @@ require "test_helper"
 class ProjectAdminRequestFormTest < ComponentTestCase
   def setup
     super
-    @model = FormObject::ProjectAdminRequest.new
+    @model = FormObject::EmailRequest.new
     @project = projects(:eol_project)
     @html = render_form
   end
@@ -16,9 +16,9 @@ class ProjectAdminRequestFormTest < ComponentTestCase
     assert_html(@html, "input[data-autofocus]")
   end
 
-  def test_renders_form_with_content_field
+  def test_renders_form_with_message_field
     assert_html(@html, "body", text: :request_message.l)
-    assert_html(@html, "textarea[name='email[content]']")
+    assert_html(@html, "textarea[name='email[message]']")
     assert_html(@html, "textarea[rows='5']")
   end
 

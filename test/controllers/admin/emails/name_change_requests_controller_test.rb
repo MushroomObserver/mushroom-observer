@@ -93,7 +93,7 @@ module Admin
         params = {
           name_id: name.id,
           new_name_with_icn_id: "#{name.search_name} [#777]",
-          name_change_request: { notes: "Please change this" }
+          email: { message: "Please change this" }
         }
         login("mary")
         email_count = ActionMailer::Base.deliveries.count

@@ -4,7 +4,7 @@ add_context_nav(email_merge_request_tabs(old_obj: @old_obj))
 %>
 
 <%= render(Components::MergeRequestForm.new(
-      FormObject::MergeRequest.new,
+      FormObject::EmailRequest.new,
       old_obj: @old_obj,
       new_obj: @new_obj,
       model_class: @model,

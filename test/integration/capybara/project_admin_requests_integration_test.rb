@@ -19,7 +19,7 @@ class ProjectAdminRequestsIntegrationTest < CapybaraIntegrationTestCase
 
     # Fill in the form with valid data
     fill_in("email_subject", with: "Request to admin project")
-    fill_in("email_content", with: "I would like to help admin this project")
+    fill_in("email_message", with: "I would like to help admin this project")
 
     # Submit the form - should enqueue one email per admin
     assert_enqueued_jobs(admin_count, only: ActionMailer::MailDeliveryJob) do
@@ -43,7 +43,7 @@ class ProjectAdminRequestsIntegrationTest < CapybaraIntegrationTestCase
 
     # Fill in subject but leave content blank
     fill_in("email_subject", with: "Request to admin project")
-    fill_in("email_content", with: "")
+    fill_in("email_message", with: "")
 
     # Submit the form - should NOT enqueue any emails
     assert_no_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do

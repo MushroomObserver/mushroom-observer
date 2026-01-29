@@ -5,7 +5,7 @@ require "test_helper"
 class CommercialInquiryFormTest < ComponentTestCase
   def setup
     super
-    @model = FormObject::CommercialInquiry.new
+    @model = FormObject::EmailRequest.new
     @image = images(:commercial_inquiry_image)
     @user = users(:rolf)
     @message = "Test message"
@@ -26,7 +26,7 @@ class CommercialInquiryFormTest < ComponentTestCase
   def test_renders_form_with_message_field
     expected_label = "#{:ask_user_question_message.t}:"
     assert_html(@html, "body", text: expected_label)
-    assert_html(@html, "textarea[name='commercial_inquiry[message]']")
+    assert_html(@html, "textarea[name='email[message]']")
     assert_html(@html, "textarea[rows='10']")
     assert_includes(@html, @message)
   end
