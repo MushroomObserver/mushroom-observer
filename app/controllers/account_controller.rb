@@ -145,21 +145,27 @@ class AccountController < ApplicationController
     theme = @new_user.theme
     login = @new_user.login
     valid_themes = MO.themes + ["NULL"]
-    return true if valid_themes.member?(theme) && login != "test_denied"
 
-    if theme.present?
-      # I'm guessing this has something to do with spammer/hacker trying
-      # to automate creation of accounts?
+    # Block known test denial login
+    return false if login == "test_denied"
 
-      # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
-      message = WebmasterMailer.prepend_user(@user, denied_message(@new_user))
-      WebmasterMailer.build(
-        sender_email: MO.accounts_email_address,
-        subject: "Account Denied",
-        message:
-      ).deliver_later
-    end
-    false
+    # If theme is valid, proceed
+    return true if valid_themes.member?(theme)
+
+    # Invalid theme - assign default and notify webmaster if suspicious
+    @new_user.theme = MO.default_theme
+    notify_suspicious_theme(theme) if theme.present?
+    true
+  end
+
+  def notify_suspicious_theme(theme)
+    # Suspicious theme value may indicate spammer/hacker automating signups
+    message = WebmasterMailer.prepend_user(@user, denied_message(@new_user))
+    WebmasterMailer.build(
+      sender_email: MO.accounts_email_address,
+      subject: "Suspicious Signup Theme: #{theme}",
+      message:
+    ).deliver_later
   end
 
   def denied_message(new_user)
