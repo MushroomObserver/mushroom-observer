@@ -248,7 +248,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       assert_equal("Dumbledore", wizard.login, "Login should match form input")
       assert_equal("webmaster@hogwarts.org", wizard.email,
                    "Email should match form input")
-      # Theme was selected by label "Black on White", should save as "BlackOnWhite"
+      # "Black on White" label should save as "BlackOnWhite" value
       assert_equal("BlackOnWhite", wizard.theme,
                    "Theme should match selected value")
       assert_false(wizard.verified, "User should not be verified yet")
