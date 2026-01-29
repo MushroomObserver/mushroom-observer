@@ -31,7 +31,7 @@ class Components::DescriptionForm < Components::ApplicationForm
 
   def render_source_fields
     div(class: "form-group mt-3") do
-      label(for: "description_source") { "#{:form_description_source.t}:" }
+      label(for: "description_source") { "#{:form_description_source.l}:" }
       render_source_type_field
       render_source_name_field
       hidden_field(:project_id)
@@ -55,7 +55,7 @@ class Components::DescriptionForm < Components::ApplicationForm
   def render_source_name_field
     if !root? && locked_source_type?
       hidden_field(:source_name)
-      plain(" #{@description.source_name.t}")
+      plain(" #{@description.source_name.l}")
     else
       text_field(:source_name, class: "form-control")
     end
@@ -69,10 +69,10 @@ class Components::DescriptionForm < Components::ApplicationForm
 
   def render_permissions_fields
     div(class: "form-group") do
-      b { "#{:form_description_permissions.t}:" }
-      checkbox_field(:public_write, label: :form_description_public_writable.t,
+      b { "#{:form_description_permissions.l}:" }
+      checkbox_field(:public_write, label: :form_description_public_writable.l,
                                     disabled: permissions_disabled?)
-      checkbox_field(:public, label: :form_description_public_readable.t,
+      checkbox_field(:public, label: :form_description_public_readable.l,
                               disabled: permissions_disabled?)
       help_block(:p, :form_description_permissions_help.t)
     end
@@ -81,7 +81,7 @@ class Components::DescriptionForm < Components::ApplicationForm
   # --- License field ---
 
   def render_license_field
-    select_field(:license_id, license_options, label: "#{:License.t}:") do
+    select_field(:license_id, license_options, label: "#{:License.l}:") do
       help_block(:p, :form_description_license_help.t)
     end
   end
@@ -111,18 +111,18 @@ class Components::DescriptionForm < Components::ApplicationForm
     end
     return if name_description?
 
-    help_block(:div, :shared_textile_help.l, id: "textilize_note")
+    help_block(:div, :shared_textile_help.t, id: "textilize_note")
   end
 
   def field_label(field)
-    "#{:"form_#{model_prefix}_#{field}".t}:"
+    "#{:"form_#{model_prefix}_#{field}".l}:"
   end
 
   def field_help(field)
     if name_description?
-      :"form_names_#{field}_help".l(rank: rank_string)
+      :"form_names_#{field}_help".t(rank: rank_string)
     else
-      :"form_locations_#{field}_help".l
+      :"form_locations_#{field}_help".t
     end
   end
 
