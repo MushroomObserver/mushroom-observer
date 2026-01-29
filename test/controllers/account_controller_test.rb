@@ -41,6 +41,8 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("webmaster@mushroomobserver.org", user.email)
     assert_nil(user.verified)
     assert_equal(false, user.admin)
+    # RANDOM theme stores nil so css_theme picks random theme on each page load
+    assert_nil(user.theme, "RANDOM should store nil for random theme per page")
 
     # Make sure user groups are updated correctly.
     assert(UserGroup.all_users.users.include?(user))

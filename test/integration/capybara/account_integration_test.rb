@@ -123,6 +123,42 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
   #  Test signup verify login and logout.
   # ----------------------------
 
+  # Test that RANDOM theme selection assigns a valid theme from MO.themes
+  # and that verification email is sent
+  def test_signup_random_theme_selection
+    perform_enqueued_jobs do
+      mail_count_before = ActionMailer::Base.deliveries.size
+
+      visit(account_signup_path)
+      within("#account_signup_form") do
+        fill_in("new_user_login", with: "RandomThemeUser")
+        fill_in("new_user_password", with: "TestPass123!")
+        fill_in("new_user_password_confirmation", with: "TestPass123!")
+        fill_in("new_user_email", with: "random_theme@test.org")
+        fill_in("new_user_email_confirmation", with: "random_theme@test.org")
+        # Select "Random" by visible text - this tests the option label
+        select("Random", from: "new_user_theme")
+        click_commit
+      end
+
+      random_user = User.find_by(login: "RandomThemeUser")
+      assert_not_nil(random_user, "User with RANDOM theme should be created")
+      # RANDOM stores nil so css_theme picks random theme on each page load
+      assert_nil(random_user.theme,
+                 "RANDOM should store nil for random theme per page")
+
+      # Verify verification email was sent
+      assert_operator(ActionMailer::Base.deliveries.size, :>, mail_count_before,
+                      "Verification email should have been sent")
+      verify_email = ActionMailer::Base.deliveries.last
+      assert(verify_email.subject.downcase.include?("verif"),
+             "Email should be verification, got: #{verify_email.subject}")
+      assert_includes(verify_email.to, "random_theme@test.org",
+                      "Email should be sent to the user's address")
+    end
+  end
+
+  # Tests BlackOnWhite theme persistence via "Black on White" label selection
   def test_signup_verify_login_and_logout
     # Run jobs synchronously so emails appear in deliveries
     perform_enqueued_jobs do
@@ -203,6 +239,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       verify_email = ActionMailer::Base.deliveries.last
       assert(verify_email.subject.downcase.include?("verif"),
              "Last email should be verification, got: #{verify_email.subject}")
+      assert_includes(verify_email.to, "webmaster@hogwarts.org",
+                      "Email should be sent to the user's address")
 
       # At this point there should be an unverified account for Dumbledore.
       wizard = User.find_by(email: "webmaster@hogwarts.org")
