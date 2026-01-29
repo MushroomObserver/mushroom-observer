@@ -1,10 +1,6 @@
 <%
 add_page_title(:create_name_description_title.t(name: @name.display_name))
 add_context_nav(name_description_form_new_tabs(description: @description))
-
-action = { controller: "/names/descriptions", action: :create,
-           name_id: @description.name_id }
 %>
 
-<%= render(partial: "names/descriptions/form",
-           locals: { action: action, button: :CREATE, method: :post }) %>
+<%= render(Components::DescriptionForm.new(@description, licenses: @licenses)) %>

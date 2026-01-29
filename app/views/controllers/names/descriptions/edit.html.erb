@@ -1,11 +1,12 @@
 <%
 add_page_title(:edit_name_description_title.t(name: @description.format_name))
 add_context_nav(name_description_form_edit_tabs(description: @description,
-                                             user: @user))
-
-action = { controller: "/names/descriptions", action: :update,
-           id: @description.id }
+                                                user: @user))
 %>
 
-<%= render(partial: "names/descriptions/form",
-           locals: { action: action, button: :SAVE_EDITS, method: :put }) %>
+<%= render(Components::DescriptionForm.new(
+             @description,
+             licenses: @licenses,
+             merge_opts: { merge: @merge, old_desc_id: @old_desc_id,
+                           delete_after: @delete_after }
+           )) %>
