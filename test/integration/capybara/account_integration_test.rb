@@ -185,6 +185,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
         fill_in("new_user_password_confirmation", with: "Hagrid_24!")
         fill_in("new_user_email", with: "webmaster@hogwarts.org")
         fill_in("new_user_email_confirmation", with: "webmaster@hogwarts.org")
+        # Select theme by visible label text (not value) to test select works
+        select("Black on White", from: "new_user_theme")
         click_commit
       end
 
@@ -208,7 +210,9 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       assert_equal("Dumbledore", wizard.login, "Login should match form input")
       assert_equal("webmaster@hogwarts.org", wizard.email,
                    "Email should match form input")
-      assert_not_nil(wizard.theme, "Theme should be assigned")
+      # Theme was selected by label "Black on White", should save as "BlackOnWhite"
+      assert_equal("BlackOnWhite", wizard.theme,
+                   "Theme should match selected value")
       assert_false(wizard.verified, "User should not be verified yet")
       assert_not_nil(wizard.auth_code, "Auth code should be generated")
 
