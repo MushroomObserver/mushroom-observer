@@ -176,6 +176,9 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       # That's still not an email address.
       assert_flash_error
       assert_flash_text(:validate_user_email_missing.t)
+      user_count_before = User.count
+      mail_count_before = ActionMailer::Base.deliveries.size
+
       within("#account_signup_form") do
         fill_in("new_user_login", with: "Dumbledore")
         fill_in("new_user_password", with: "Hagrid_24!")
@@ -188,9 +191,26 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       # Redirected to the Welcome page, but email not verified.
       assert_selector("body.info__how_to_use")
 
+      # CRITICAL: Verify user was actually created
+      assert_equal(user_count_before + 1, User.count,
+                   "User should have been created in database")
+
+      # CRITICAL: Verify verification email was sent
+      assert_operator(ActionMailer::Base.deliveries.size, :>, mail_count_before,
+                      "Verification email should have been sent")
+      verify_email = ActionMailer::Base.deliveries.last
+      assert(verify_email.subject.downcase.include?("verif"),
+             "Last email should be verification email, got: #{verify_email.subject}")
+
       # At this point there should be an unverified account for Dumbledore.
       wizard = User.find_by(email: "webmaster@hogwarts.org")
-      assert_false(wizard.verified)
+      assert_not_nil(wizard, "User record should exist in database")
+      assert_equal("Dumbledore", wizard.login, "Login should match form input")
+      assert_equal("webmaster@hogwarts.org", wizard.email,
+                   "Email should match form input")
+      assert_not_nil(wizard.theme, "Theme should be assigned (default if empty)")
+      assert_false(wizard.verified, "User should not be verified yet")
+      assert_not_nil(wizard.auth_code, "Auth code should be generated")
 
       # Actually happens: User tries to sign in immediately, without verifying
       click_link(id: "nav_login_link")
