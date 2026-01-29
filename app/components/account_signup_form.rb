@@ -76,6 +76,7 @@ class Components::AccountSignupForm < Components::ApplicationForm
 
   def theme_options
     # Superform expects [value, display] format (opposite of Rails)
-    [["NULL", :theme_random.l]] + MO.themes.map { |t| [t, t] }
+    # "RANDOM" is a sentinel value that triggers random theme selection
+    [["RANDOM", :theme_random.l]] + MO.themes.map { |t| [t, t] }
   end
 end

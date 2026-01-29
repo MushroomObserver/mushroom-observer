@@ -9,7 +9,7 @@ location_formats = [
   [:prefs_location_format_postal.l, "postal"],
   [:prefs_location_format_scientific.l, "scientific"]
 ]
-themes = [[:theme_random.l, "NULL"]] + MO.themes.map { |t| [t.to_sym.l, t] }
+themes = [[:theme_random.l, "RANDOM"]] + MO.themes.map { |t| [t.to_sym.l, t] }
 locales = Language.all.map do |lang|
             name = lang.name
             name += " (beta)" if lang.beta

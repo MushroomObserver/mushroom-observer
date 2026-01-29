@@ -144,7 +144,7 @@ class AccountController < ApplicationController
   def make_sure_theme_is_valid!
     theme = @new_user.theme
     login = @new_user.login
-    valid_themes = MO.themes + ["NULL"]
+    valid_themes = MO.themes + ["RANDOM"]
 
     # Block known test denial login
     return false if login == "test_denied"

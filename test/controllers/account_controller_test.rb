@@ -29,7 +29,7 @@ class AccountControllerTest < FunctionalTestCase
              email: " webmaster@mushroomobserver.org ",
              email_confirmation: "  webmaster@mushroomobserver.org  ",
              name: " needs a name! ",
-             theme: "NULL"
+             theme: "RANDOM"
            } })
     end
 
@@ -61,7 +61,7 @@ class AccountControllerTest < FunctionalTestCase
       email: "blah@somewhere.org",
       email_confirmation: "blah@somewhere.org",
       mailing_address: "",
-      theme: "NULL",
+      theme: "RANDOM",
       notes: ""
     }
 
@@ -156,7 +156,7 @@ class AccountControllerTest < FunctionalTestCase
     @request.session["return-to"] = referrer
     assert_no_enqueued_jobs do
       post(:create, params: { new_user: params.merge(login: "test_denied",
-                                                     theme: "NULL") })
+                                                     theme: "RANDOM") })
     end
     assert_nil(User.find_by(login: "test_denied"))
   end
@@ -183,7 +183,7 @@ class AccountControllerTest < FunctionalTestCase
       email: "blah@somewhere.org",
       email_confirmation: "blah@somewhere.org",
       mailing_address: "",
-      theme: "NULL",
+      theme: "RANDOM",
       notes: ""
     }
     html_client_error = 400..499
