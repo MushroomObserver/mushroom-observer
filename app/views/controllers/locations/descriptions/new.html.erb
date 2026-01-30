@@ -5,4 +5,5 @@ add_page_title(
 add_context_nav(location_description_form_new_tabs(description: @description))
 %>
 
-<%= render(Components::DescriptionForm.new(@description, licenses: @licenses)) %>
+<%= render(Components::DescriptionForm.new(@description, licenses: @licenses,
+                                            user: @user)) %>

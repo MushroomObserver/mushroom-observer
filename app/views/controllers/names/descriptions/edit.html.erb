@@ -7,6 +7,7 @@ add_context_nav(name_description_form_edit_tabs(description: @description,
 <%= render(Components::DescriptionForm.new(
              @description,
              licenses: @licenses,
+             user: @user,
              merge_opts: { merge: @merge, old_desc_id: @old_desc_id,
                            delete_after: @delete_after }
            )) %>

@@ -85,7 +85,7 @@ module Names::Descriptions
       end
       if conflict
         assert_template("names/descriptions/edit")
-        assert_select("#description_form")
+        assert_select("#name_description_form")
         assert(assigns(:description).gen_desc.index(draft_gen_desc))
         assert(assigns(:description).gen_desc.index(name_gen_desc))
       else

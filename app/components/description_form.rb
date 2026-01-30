@@ -3,9 +3,10 @@
 # Polymorphic form for creating/editing Name and Location descriptions.
 # Handles source type, permissions, license, and model-specific note fields.
 class Components::DescriptionForm < Components::ApplicationForm
-  def initialize(description, licenses:, merge_opts: {}, **)
+  def initialize(description, licenses:, user:, merge_opts: {}, **)
     @description = description
     @licenses = licenses
+    @user = user
     @merge = merge_opts[:merge] || false
     @old_desc_id = merge_opts[:old_desc_id]
     @delete_after = merge_opts[:delete_after]
@@ -68,7 +69,11 @@ class Components::DescriptionForm < Components::ApplicationForm
 
   # --- Permissions fields ---
 
+  # Only admins and authors can see the permission checkboxes.
+  # Regular writers (who can edit text) don't see these fields at all.
   def render_permissions_fields
+    return unless show_permissions?
+
     div(class: "form-group") do
       b { "#{:form_description_permissions.l}:" }
       checkbox_field(:public_write, label: :form_description_public_writable.l,
@@ -77,6 +82,10 @@ class Components::DescriptionForm < Components::ApplicationForm
                               disabled: permissions_disabled?)
       help_block(:p, :form_description_permissions_help.t)
     end
+  end
+
+  def show_permissions?
+    root? || admin? || author? || owner?
   end
 
   # --- License field ---
@@ -135,6 +144,13 @@ class Components::DescriptionForm < Components::ApplicationForm
   end
 
   # --- Helper methods ---
+
+  # Override Superform's key method to use a common namespace for all
+  # description types. This ensures field names like "description[source_type]"
+  # and IDs like "description_source_type" regardless of model type.
+  def key
+    "description"
+  end
 
   def name_description?
     @description.is_a?(NameDescription)
@@ -200,13 +216,13 @@ class Components::DescriptionForm < Components::ApplicationForm
   end
 
   def source_type_options_all
-    Description.all_source_types.map do |type|
+    Description::ALL_SOURCE_TYPES.map do |type|
       [type, :"form_description_source_#{type}".l]
     end
   end
 
   def source_type_options_basic
-    [:public, :source, :user].map do |type|
+    Description::BASIC_SOURCE_TYPES.map do |type|
       [type, :"form_description_source_#{type}".l]
     end
   end
