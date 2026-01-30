@@ -209,7 +209,7 @@ module Names
       requires_login(:new, params, user.login)
       if success
         assert_template("names/descriptions/new")
-        assert_select("#description_form")
+        assert_select("#name_description_form")
       else
         assert_redirected_to(project_path(project.id))
       end
@@ -229,7 +229,7 @@ module Names
       requires_login(:edit, params, user.login)
       if success
         assert_template("names/descriptions/edit")
-        assert_select("#description_form")
+        assert_select("#name_description_form")
       elsif reader
         assert_redirected_to(name_description_path(draft.id))
       else
@@ -257,7 +257,7 @@ module Names
       put_requires_login(:update, params, user.login)
       if permission && !success
         assert_template("names/descriptions/edit")
-        assert_select("#description_form")
+        assert_select("#name_description_form")
       elsif draft.is_reader?(user)
         assert_redirected_to(name_description_path(draft.id))
       else
@@ -428,7 +428,7 @@ module Names
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
       assert_template("names/descriptions/new")
-      assert_select("#description_form")
+      assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
@@ -460,7 +460,7 @@ module Names
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
       assert_template("names/descriptions/new")
-      assert_select("#description_form")
+      assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
@@ -484,7 +484,7 @@ module Names
       login("dick") # reader
       get(:new, params: params.merge(clone: other.id))
       assert_template("names/descriptions/new")
-      assert_select("#description_form")
+      assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("user", desc.source_type)
       assert_equal("", desc.source_name.to_s)
@@ -576,7 +576,7 @@ module Names
       post(:create, params: params)
       assert_flash_error
       assert_template("names/descriptions/new")
-      assert_select("#description_form")
+      assert_select("#name_description_form")
 
       params[:description][:classification] = good_class
       post(:create, params: params)

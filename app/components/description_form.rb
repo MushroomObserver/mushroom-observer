@@ -9,7 +9,8 @@ class Components::DescriptionForm < Components::ApplicationForm
     @merge = merge_opts[:merge] || false
     @old_desc_id = merge_opts[:old_desc_id]
     @delete_after = merge_opts[:delete_after]
-    super(description, **)
+    # Pass type-specific form ID (e.g., "name_description_form")
+    super(description, id: "#{model_type}_description_form", **)
   end
 
   def view_template
@@ -139,8 +140,12 @@ class Components::DescriptionForm < Components::ApplicationForm
     @description.is_a?(NameDescription)
   end
 
+  def model_type
+    name_description? ? "name" : "location"
+  end
+
   def model_prefix
-    name_description? ? "names" : "locations"
+    "#{model_type}s"
   end
 
   def rank_string
