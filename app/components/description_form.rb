@@ -55,7 +55,7 @@ class Components::DescriptionForm < Components::ApplicationForm
   def render_source_name_field
     if !root? && locked_source_type?
       hidden_field(:source_name)
-      plain(" #{@description.source_name.l}")
+      plain(" #{@description.source_name.t}")
     else
       text_field(:source_name, class: "form-control")
     end
