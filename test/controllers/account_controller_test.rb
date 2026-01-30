@@ -29,7 +29,7 @@ class AccountControllerTest < FunctionalTestCase
              email: " webmaster@mushroomobserver.org ",
              email_confirmation: "  webmaster@mushroomobserver.org  ",
              name: " needs a name! ",
-             theme: "NULL"
+             theme: "RANDOM"
            } })
     end
 
@@ -41,6 +41,8 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("webmaster@mushroomobserver.org", user.email)
     assert_nil(user.verified)
     assert_equal(false, user.admin)
+    # RANDOM theme stores nil so css_theme picks random theme on each page load
+    assert_nil(user.theme, "RANDOM should store nil for random theme per page")
 
     # Make sure user groups are updated correctly.
     assert(UserGroup.all_users.users.include?(user))
@@ -61,7 +63,7 @@ class AccountControllerTest < FunctionalTestCase
       email: "blah@somewhere.org",
       email_confirmation: "blah@somewhere.org",
       mailing_address: "",
-      theme: "NULL",
+      theme: "RANDOM",
       notes: ""
     }
 
@@ -156,7 +158,7 @@ class AccountControllerTest < FunctionalTestCase
     @request.session["return-to"] = referrer
     assert_no_enqueued_jobs do
       post(:create, params: { new_user: params.merge(login: "test_denied",
-                                                     theme: "NULL") })
+                                                     theme: "RANDOM") })
     end
     assert_nil(User.find_by(login: "test_denied"))
   end
@@ -183,7 +185,7 @@ class AccountControllerTest < FunctionalTestCase
       email: "blah@somewhere.org",
       email_confirmation: "blah@somewhere.org",
       mailing_address: "",
-      theme: "NULL",
+      theme: "RANDOM",
       notes: ""
     }
     html_client_error = 400..499

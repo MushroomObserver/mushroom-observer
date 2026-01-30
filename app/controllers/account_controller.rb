@@ -144,13 +144,19 @@ class AccountController < ApplicationController
   def make_sure_theme_is_valid!
     theme = @new_user.theme
     login = @new_user.login
-    valid_themes = MO.themes + ["NULL"]
 
     # Block known test denial login
     return false if login == "test_denied"
 
+    # RANDOM means user wants a different theme on each page load
+    # Store nil so css_theme helper will call MO.themes.sample
+    if theme == "RANDOM"
+      @new_user.theme = nil
+      return true
+    end
+
     # If theme is valid, proceed
-    return true if valid_themes.member?(theme)
+    return true if MO.themes.member?(theme)
 
     # Invalid theme - assign default and notify webmaster if suspicious
     @new_user.theme = MO.default_theme
