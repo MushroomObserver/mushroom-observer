@@ -25,7 +25,8 @@ module Admin
                      identifier: "name_change_request_email",
                      title: :email_name_change_request_title.l,
                      user: @user,
-                     model: FormObject::NameChangeRequest.new,
+                     model: FormObject::EmailRequest.new,
+                     form_class: Components::NameChangeRequestForm,
                      form_locals: {
                        name: @name,
                        new_name_with_icn_id: @new_name_with_icn_id
@@ -81,7 +82,7 @@ module Admin
       end
 
       def change_request_content(name_with_icn_id, new_name_with_icn_id)
-        notes = params.dig(:name_change_request, :notes) || params[:notes]
+        notes = params.dig(:email, :message)
         :email_name_change_request.l(
           user: @user.login,
           old_name: name_with_icn_id,

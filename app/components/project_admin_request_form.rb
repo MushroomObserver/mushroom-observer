@@ -10,7 +10,7 @@ class Components::ProjectAdminRequestForm < Components::ApplicationForm
   def view_template
     raw(:admin_request_note.tp) # rubocop:disable Rails/OutputSafety
     render_subject_field
-    render_content_field
+    render_message_field
     submit(:SEND.l, center: true)
   end
 
@@ -26,8 +26,8 @@ class Components::ProjectAdminRequestForm < Components::ApplicationForm
                          data: { autofocus: true })
   end
 
-  def render_content_field
-    textarea_field(:content, label: "#{:request_message.t}:", rows: 5)
+  def render_message_field
+    textarea_field(:message, label: "#{:request_message.t}:", rows: 5)
   end
 
   def form_action

@@ -28,7 +28,7 @@ class NameChangeRequestsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.name_change_requests__new")
 
     # Fill in the notes field
-    fill_in("name_change_request_notes", with: "Test name change request")
+    fill_in("email_message", with: "Test name change request")
 
     # Submit the form - verify email is enqueued
     assert_enqueued_with(

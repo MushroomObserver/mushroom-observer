@@ -105,8 +105,8 @@ module Admin
         flash = args[:flash]
         post(:create,
              params: {
-               webmaster_question: {
-                 email: email,
+               email: {
+                 reply_to: email,
                  message: args[:message] || "Some message"
                }
              })

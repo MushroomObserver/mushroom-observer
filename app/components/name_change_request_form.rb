@@ -14,7 +14,7 @@ class Components::NameChangeRequestForm < Components::ApplicationForm
       p { :email_name_change_request_help.tp }
       render_name_field
       render_new_name_field
-      render_notes_field
+      render_message_field
       submit(:SEND.l, center: true)
     end
   end
@@ -33,9 +33,9 @@ class Components::NameChangeRequestForm < Components::ApplicationForm
                                            inline: true)
   end
 
-  def render_notes_field
-    textarea_field(:notes, label: "#{:Notes.t}:", rows: 10,
-                           value: "", data: { autofocus: true })
+  def render_message_field
+    textarea_field(:message, label: "#{:Notes.t}:", rows: 10,
+                             value: "", data: { autofocus: true })
   end
 
   def form_action

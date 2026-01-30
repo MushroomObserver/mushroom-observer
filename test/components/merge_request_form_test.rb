@@ -5,7 +5,7 @@ require "test_helper"
 class MergeRequestFormTest < ComponentTestCase
   def setup
     super
-    @email = FormObject::MergeRequest.new
+    @email = FormObject::EmailRequest.new
     @old_name = names(:coprinus_comatus)
     @new_name = names(:agaricus_campestris)
   end
@@ -32,11 +32,11 @@ class MergeRequestFormTest < ComponentTestCase
     assert_includes(html, @new_name.unique_format_name.t)
   end
 
-  def test_renders_notes_field
+  def test_renders_message_field
     html = render_form
 
     assert_html(html, "body", text: :Notes.l)
-    assert_html(html, "textarea[name='merge_request[notes]']")
+    assert_html(html, "textarea[name='email[message]']")
     assert_html(html, "textarea[rows='10']")
     assert_html(html, "textarea[data-autofocus]")
   end
