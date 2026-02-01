@@ -320,7 +320,7 @@ class UserTest < UnitTestCase
     u = User.new(
       login: "nonexistingbob",
       email: "nonexistingbob@collectivesource.com",
-      theme: "NULL",
+      theme: "RANDOM",
       notes: "",
       mailing_address: "",
       password: "bobs_secure_password",

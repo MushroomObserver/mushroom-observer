@@ -10,7 +10,7 @@ module Projects
         project_id: eol_project.id,
         email: {
           subject: "Admin request subject",
-          content: "Message for admins"
+          message: "Message for admins"
         }
       }
       post_requires_login(:create, params)
@@ -30,7 +30,7 @@ module Projects
         project_id: eol_project.id,
         email: {
           subject: "Admin request subject",
-          content: ""
+          message: ""
         }
       }
       login("rolf")

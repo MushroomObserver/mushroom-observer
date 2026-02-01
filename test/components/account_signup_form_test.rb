@@ -56,7 +56,7 @@ class AccountSignupFormTest < ComponentTestCase
 
     # Random theme option
     assert_includes(html, :theme_random.l)
-    assert_includes(html, 'value="NULL"')
+    assert_includes(html, 'value="RANDOM"')
 
     # All available themes
     MO.themes.each do |theme|

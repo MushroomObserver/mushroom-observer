@@ -29,7 +29,7 @@ class AccountControllerTest < FunctionalTestCase
              email: " webmaster@mushroomobserver.org ",
              email_confirmation: "  webmaster@mushroomobserver.org  ",
              name: " needs a name! ",
-             theme: "NULL"
+             theme: "RANDOM"
            } })
     end
 
@@ -41,6 +41,8 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("webmaster@mushroomobserver.org", user.email)
     assert_nil(user.verified)
     assert_equal(false, user.admin)
+    # RANDOM theme stores nil so css_theme picks random theme on each page load
+    assert_nil(user.theme, "RANDOM should store nil for random theme per page")
 
     # Make sure user groups are updated correctly.
     assert(UserGroup.all_users.users.include?(user))
@@ -61,7 +63,7 @@ class AccountControllerTest < FunctionalTestCase
       email: "blah@somewhere.org",
       email_confirmation: "blah@somewhere.org",
       mailing_address: "",
-      theme: "NULL",
+      theme: "RANDOM",
       notes: ""
     }
 
@@ -113,37 +115,52 @@ class AccountControllerTest < FunctionalTestCase
     assert_not_nil(UserStats.find_by(user_id: user_id))
   end
 
-  def test_signup_theme_errors
+  def test_signup_theme_handling
     referrer = "http://localhost/bogus/location"
 
     params = {
-      login: "spammer",
-      password: "spammer",
-      password_confirmation: "spammer",
-      email: "spam@spam.spam",
+      login: "newuser_theme_test",
+      password: "password123",
+      password_confirmation: "password123",
+      email: "theme_test@example.org",
+      email_confirmation: "theme_test@example.org",
       mailing_address: "",
       notes: ""
     }
 
-    # Empty theme doesn't send email (theme.present? is false)
+    # Empty theme assigns default, no webmaster email, user created
     @request.session["return-to"] = referrer
-    assert_no_enqueued_jobs do
+    assert_enqueued_with(
+      job: ActionMailer::MailDeliveryJob,
+      args: ->(args) { args[0] == "VerifyAccountMailer" }
+    ) do
       post(:create, params: { new_user: params.merge(theme: "") })
     end
-    assert_no_flash
-    assert_nil(User.find_by(login: "spammer"))
-    assert_nil(@request.session["user_id"])
-    assert_redirected_to(referrer)
+    user = User.find_by(login: "newuser_theme_test")
+    assert_not_nil(user)
+    assert_equal(MO.default_theme, user.theme)
+    user.destroy!
 
-    # Invalid theme sends "Account Denied" email to webmaster
+    # Invalid theme assigns default AND notifies webmaster
     @request.session["return-to"] = referrer
-    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
-      post(:create, params: { new_user: params.merge(theme: "spammer") })
+    # Expect both VerifyAccount and Webmaster emails
+    assert_enqueued_jobs(2, only: ActionMailer::MailDeliveryJob) do
+      post(:create,
+           params: { new_user: params.merge(login: "newuser_theme_test2",
+                                            theme: "bogus_theme") })
     end
-    assert_no_flash
-    assert_nil(User.find_by(login: "spammer"))
-    assert_nil(@request.session["user_id"])
-    assert_redirected_to(referrer)
+    user = User.find_by(login: "newuser_theme_test2")
+    assert_not_nil(user)
+    assert_equal(MO.default_theme, user.theme)
+    user.destroy!
+
+    # "test_denied" login is still blocked
+    @request.session["return-to"] = referrer
+    assert_no_enqueued_jobs do
+      post(:create, params: { new_user: params.merge(login: "test_denied",
+                                                     theme: "RANDOM") })
+    end
+    assert_nil(User.find_by(login: "test_denied"))
   end
 
   def test_anon_user_signup
@@ -168,7 +185,7 @@ class AccountControllerTest < FunctionalTestCase
       email: "blah@somewhere.org",
       email_confirmation: "blah@somewhere.org",
       mailing_address: "",
-      theme: "NULL",
+      theme: "RANDOM",
       notes: ""
     }
     html_client_error = 400..499
