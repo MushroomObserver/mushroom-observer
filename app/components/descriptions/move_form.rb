@@ -61,11 +61,12 @@ class Components::Descriptions::MoveForm < Components::Base
   end
 
   def moves
-    @moves ||= begin
-      result = @description.parent.synonyms - [@description.parent]
-      result.reject!(&:is_misspelling?)
-      result
-    end
+    @moves ||=
+      begin
+        result = @description.parent.synonyms - [@description.parent]
+        result.reject!(&:is_misspelling?)
+        result
+      end
   end
 
   def sorted_moves

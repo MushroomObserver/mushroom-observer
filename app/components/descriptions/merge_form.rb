@@ -25,7 +25,7 @@ class Components::Descriptions::MergeForm < Components::ApplicationForm
     if merges.any?
       merges.each_with_index do |desc, idx|
         radio_field(:target, value: desc.id, label: description_title(desc),
-                    checked: idx.zero? && default_checked?)
+                             checked: idx.zero? && default_checked?)
       end
     else
       p { :merge_descriptions_no_others.t }
@@ -46,11 +46,12 @@ class Components::Descriptions::MergeForm < Components::ApplicationForm
   end
 
   def moves
-    @moves ||= begin
-      result = @description.parent.synonyms - [@description.parent]
-      result.reject!(&:is_misspelling?)
-      result
-    end
+    @moves ||=
+      begin
+        result = @description.parent.synonyms - [@description.parent]
+        result.reject!(&:is_misspelling?)
+        result
+      end
   end
 
   def default_checked?
