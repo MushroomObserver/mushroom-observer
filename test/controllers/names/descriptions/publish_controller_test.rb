@@ -53,6 +53,21 @@ module Names::Descriptions
       publish_draft_helper(draft.reload, nil, merged: true, conflict: false)
     end
 
+    # Cover the case where draft is already the default description
+    def test_publish_draft_already_default
+      draft = name_descriptions(:draft_coprinus_comatus)
+      name = draft.name
+      # Make the draft the default
+      name.description = draft
+      name.save!
+
+      login(draft.user.login)
+      put(:update, params: { id: draft.id })
+
+      assert_flash_error(:runtime_description_already_default.t)
+      assert_redirected_to(name_description_path(draft.id))
+    end
+
     def publish_draft_helper(draft, user = nil, merged: true, conflict: false)
       if user
         assert_not_equal(draft.user, user)

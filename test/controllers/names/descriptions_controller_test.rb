@@ -667,5 +667,104 @@ module Names
         name_descriptions(:draft_agaricus_campestris), dick, success: false
       )
     end
+
+    # Cover update_classification_cache_and_save_name
+    def test_update_description_changes_classification_cache
+      desc = name_descriptions(:peltigera_desc)
+      name = desc.name
+      name.update(description: desc) # ensure it's the default
+      old_class = name.classification
+
+      # Use the correct format - Rails will reorder as Order before Family
+      new_class = "Order: _Peltigerales_\r\nFamily: _Peltigeraceae_"
+      assert_not_equal(new_class, old_class)
+
+      login("rolf")
+      params = {
+        id: desc.id,
+        description: {
+          classification: new_class,
+          gen_desc: desc.gen_desc,
+          diag_desc: desc.diag_desc
+        }
+      }
+      put(:update, params: params)
+
+      name.reload
+      desc.reload
+      assert_equal(new_class, desc.classification)
+      assert_equal(new_class, name.classification)
+    end
+
+    # Cover save_updated_description_if_changed_or_flash no changes
+    def test_update_description_no_changes
+      desc = name_descriptions(:peltigera_desc)
+      login("rolf")
+      params = {
+        id: desc.id,
+        description: {
+          gen_desc: desc.gen_desc,
+          diag_desc: desc.diag_desc,
+          classification: desc.classification
+        }
+      }
+      put(:update, params: params)
+      assert_flash_warning(:runtime_edit_name_description_no_change.t)
+    end
+
+    # Cover resolve_merge_conflicts_and_delete_old_description
+    def test_update_description_with_merge_delete
+      # Create two descriptions on the same name
+      name = names(:coprinus_comatus)
+      old_desc = NameDescription.create!(
+        name: name, user: rolf, source_type: "user", gen_desc: "Old notes"
+      )
+      old_desc.admin_groups << UserGroup.one_user(rolf)
+
+      dest_desc = NameDescription.create!(
+        name: name, user: rolf, source_type: "user", gen_desc: "Dest notes"
+      )
+      dest_desc.admin_groups << UserGroup.one_user(rolf)
+      dest_desc.writer_groups << UserGroup.one_user(rolf)
+
+      login("rolf")
+      params = {
+        id: dest_desc.id,
+        description: { gen_desc: "Merged notes" },
+        delete_after: "true",
+        old_desc_id: old_desc.id
+      }
+      put(:update, params: params)
+
+      assert_flash_success
+      assert_nil(NameDescription.safe_find(old_desc.id))
+    end
+
+    # Cover resolve_merge_conflicts delete denied when not admin
+    def test_update_description_merge_delete_denied
+      name = names(:coprinus_comatus)
+      old_desc = NameDescription.create!(
+        name: name, user: mary, source_type: "user", gen_desc: "Old notes"
+      )
+      old_desc.admin_groups << UserGroup.one_user(mary)
+
+      dest_desc = NameDescription.create!(
+        name: name, user: rolf, source_type: "user", gen_desc: "Dest notes"
+      )
+      dest_desc.admin_groups << UserGroup.one_user(rolf)
+      dest_desc.writer_groups << UserGroup.one_user(rolf)
+
+      login("rolf")
+      params = {
+        id: dest_desc.id,
+        description: { gen_desc: "Merged notes" },
+        delete_after: "true",
+        old_desc_id: old_desc.id
+      }
+      put(:update, params: params)
+
+      assert_flash(/permission to delete/)
+      assert(NameDescription.safe_find(old_desc.id))
+    end
   end
 end

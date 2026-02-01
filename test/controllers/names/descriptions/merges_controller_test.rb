@@ -122,5 +122,46 @@ module Names::Descriptions
       post(:create, params: params)
       assert_flash_text(/Sorry, the name description you tried to display/)
     end
+
+    # Cover delete_src_description_and_update_parent when src was default
+    def test_merge_and_delete_default_description
+      name = names(:conocybe_filaris)
+      # Create two user descriptions
+      src_desc = NameDescription.create!(
+        name: name, user: rolf, source_type: "user", gen_desc: nil, public: true
+      )
+      src_desc.admin_groups << UserGroup.one_user(rolf)
+      src_desc.writer_groups << UserGroup.all_users
+      src_desc.reader_groups << UserGroup.all_users
+
+      dest_desc = NameDescription.create!(
+        name: name, user: rolf, source_type: "user",
+        gen_desc: "Destination notes", public: true
+      )
+      dest_desc.admin_groups << UserGroup.one_user(rolf)
+      dest_desc.writer_groups << UserGroup.all_users
+      dest_desc.reader_groups << UserGroup.all_users
+      # Make dest fully_public (public + public_write)
+      dest_desc.public_write = true
+
+      # Make src the default
+      name.description = src_desc
+      name.save!
+
+      login("rolf")
+      params = {
+        id: src_desc.id,
+        target: dest_desc.id,
+        delete: "1"
+      }
+      post(:create, params: params)
+
+      assert_flash(/Successfully merged/)
+      # Source should be deleted
+      assert_nil(NameDescription.safe_find(src_desc.id))
+      # Destination should be the new default
+      name.reload
+      assert_equal(dest_desc.id, name.description_id)
+    end
   end
 end
