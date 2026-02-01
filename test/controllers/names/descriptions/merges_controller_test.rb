@@ -126,7 +126,7 @@ module Names::Descriptions
     # Cover delete_src_description_and_update_parent when src was default
     def test_merge_and_delete_default_description
       name = names(:conocybe_filaris)
-      # Create two user descriptions
+      # Create two descriptions - src with no notes (mergeable), dest fully public
       src_desc = NameDescription.create!(
         name: name, user: rolf, source_type: "user", gen_desc: nil, public: true
       )
@@ -134,15 +134,16 @@ module Names::Descriptions
       src_desc.writer_groups << UserGroup.all_users
       src_desc.reader_groups << UserGroup.all_users
 
+      # Dest must be fully_public: public=true and writer_groups == [all_users]
       dest_desc = NameDescription.create!(
         name: name, user: rolf, source_type: "user",
         gen_desc: "Destination notes", public: true
       )
       dest_desc.admin_groups << UserGroup.one_user(rolf)
+      # Only all_users in writer_groups makes public_write_was return true
+      dest_desc.writer_groups.clear
       dest_desc.writer_groups << UserGroup.all_users
       dest_desc.reader_groups << UserGroup.all_users
-      # Make dest fully_public (public + public_write)
-      dest_desc.public_write = true
 
       # Make src the default
       name.description = src_desc

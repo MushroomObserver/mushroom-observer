@@ -133,7 +133,7 @@ module Descriptions::Permissions
         redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
-        render("new")
+        render("edit")
       end
     end
 

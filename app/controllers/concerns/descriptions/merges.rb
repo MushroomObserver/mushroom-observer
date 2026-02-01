@@ -160,12 +160,14 @@ module Descriptions::Merges
       if !in_admin_mode? && !@src.is_admin?(@user)
         flash_warning(:runtime_description_merge_delete_denied.t)
       else
+        # Check if src is the default BEFORE destroying (destroy nullifies it)
+        src_was_default = (@src.parent.description_id == @src.id)
+
         flash_notice(:runtime_description_merge_deleted.
                        t(old: @src.unique_partial_format_name))
         @src.destroy
 
         # Make destination the default if source used to be the default.
-        src_was_default = (@src.parent.description_id == @src.id)
         if src_was_default && @dest.fully_public?
           @dest.parent.description = @dest
           @dest.parent.save

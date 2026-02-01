@@ -109,9 +109,7 @@ module Names::Descriptions
       assert_flash(/Gave view permission to Tricky Dick/)
     end
 
-    # Cover writein with invalid user - should flash error
-    # Note: Controller has a bug - renders "new" but only "edit" exists.
-    # This test just verifies the error is caught and flashed.
+    # Cover writein with invalid user - should flash error and re-render form
     def test_change_permissions_writein_invalid_user
       desc = draft_cc_desc
       login("rolf")
@@ -126,12 +124,9 @@ module Names::Descriptions
         writein_writer: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
         writein_admin: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
       }
-      # The flash is set before the template error, so check session
-      assert_raises(ActionView::MissingTemplate) do
-        put(:update, params: params)
-      end
-      # Flash was set before the error
-      assert_match(/not found/, session[:notice].to_s)
+      put(:update, params: params)
+      assert_flash(/not found/)
+      assert_template("edit")
     end
 
     # Cover no changes made
