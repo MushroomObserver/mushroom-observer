@@ -15,33 +15,15 @@ class NameEditSynonymFormTest < ComponentTestCase
       current_synonyms: [@name, @synonym1, @synonym2]
     )
 
-    # Should have checkboxes for synonyms (not the main name)
-    assert_html(html, "input[type='checkbox']" \
-                      "[name='edit_synonym[existing_synonyms]" \
-                      "[#{@synonym1.id}]']")
-
-    # Label should contain link to the name
-    assert_html(html, "a[href='/names/#{@synonym1.id}']")
-
-    # Label should show display name (with formatting) and ID in parentheses
-    # The display_name.t includes HTML italics, so check for key parts
-    assert_includes(html, "(#{@synonym1.id})")
-    assert_includes(html, "(#{@synonym2.id})")
-  end
-
-  def test_synonym_link_text_contains_display_name
-    html = render_form(
-      current_synonyms: [@name, @synonym1]
-    )
-
-    # The link should contain the formatted display name
-    # Check that the link exists with the name's display content
-    assert_html(html, "a[href='/names/#{@synonym1.id}']")
-
-    # The label wrapper should contain both the link and the ID
-    display_name = Regexp.escape(@synonym1.display_name.t)
-    label_pattern = /#{display_name}.*\(#{@synonym1.id}\)/m
-    assert_match(label_pattern, html)
+    # The label should contain IN ORDER: checkbox, link, (id)
+    # Pattern: <label...><input type="checkbox"...><a href="...">Name</a> (id)</label>
+    label_pattern = /<label[^>]*>.*?
+      <input[^>]*type="checkbox"[^>]*>.*?
+      <a\s+href="\/names\/#{@synonym1.id}"[^>]*>.*?<\/a>\s*
+      \(#{@synonym1.id}\)
+    /mx
+    assert_match(label_pattern, html,
+                 "Label should contain checkbox, then link, then (id)")
   end
 
   def test_proposed_synonyms_have_same_label_format

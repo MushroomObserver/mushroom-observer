@@ -10,8 +10,6 @@
 #   ))
 #
 class Components::NameEditSynonymForm < Components::ApplicationForm
-  include Phlex::Rails::Helpers::LinkTo
-
   def initialize(model, name:, context: {}, **)
     @name = name
     @current_synonyms = context[:current_synonyms] || []
@@ -87,10 +85,11 @@ class Components::NameEditSynonymForm < Components::ApplicationForm
   end
 
   def synonym_checkbox_label(name_obj)
-    [
-      link_to(name_obj.display_name.t, name_path(name_obj.id)),
-      "(#{name_obj.id})"
-    ].safe_join(" ")
+    link = capture do
+      a(href: name_path(name_obj.id)) { trusted_html(name_obj.display_name.t) }
+    end
+    badge = view_context.show_title_id_badge(name_obj, "")
+    [link, badge].safe_join(" ")
   end
 
   def render_members_section
