@@ -15,15 +15,15 @@ class NameEditSynonymFormTest < ComponentTestCase
       current_synonyms: [@name, @synonym1, @synonym2]
     )
 
-    # The label should contain IN ORDER: checkbox, link, (id)
-    # Pattern: <label...><input type="checkbox"...><a href="...">Name</a> (id)</label>
+    # The label should contain IN ORDER: checkbox, link, id badge
+    # Pattern: <label...><input type="checkbox"...><a href="...">Name</a> <button...>id</button></label>
     label_pattern = /<label[^>]*>.*?
       <input[^>]*type="checkbox"[^>]*>.*?
       <a\s+href="\/names\/#{@synonym1.id}"[^>]*>.*?<\/a>\s*
-      \(#{@synonym1.id}\)
+      <button[^>]*class="[^"]*badge[^"]*"[^>]*>#{@synonym1.id}<\/button>
     /mx
     assert_match(label_pattern, html,
-                 "Label should contain checkbox, then link, then (id)")
+                 "Label should contain checkbox, then link, then id badge")
   end
 
   def test_proposed_synonyms_have_same_label_format
