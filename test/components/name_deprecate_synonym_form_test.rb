@@ -28,18 +28,12 @@ class NameDeprecateSynonymFormTest < ComponentTestCase
 
   private
 
-  def render_form(name:, proposed_name: nil, is_misspelling: false,
-                  comment: nil, names: [], valid_names: [],
-                  suggest_corrections: false, parent_deprecated: nil)
+  def render_form(name:, **options)
+    defaults = { proposed_name: nil, is_misspelling: false, comment: nil,
+                 names: [], valid_names: [], suggest_corrections: false,
+                 parent_deprecated: nil }
     render(Components::NameDeprecateSynonymForm.new(
-             name: name,
-             proposed_name: proposed_name,
-             is_misspelling: is_misspelling,
-             comment: comment,
-             names: names,
-             valid_names: valid_names,
-             suggest_corrections: suggest_corrections,
-             parent_deprecated: parent_deprecated
+             name: name, **defaults.merge(options)
            ))
   end
 end
