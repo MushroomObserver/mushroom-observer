@@ -32,9 +32,9 @@ class NameEditSynonymFormTest < ComponentTestCase
       proposed_synonyms: [proposed]
     )
 
-    # Proposed synonym should have link and ID
+    # Proposed synonym should have link and ID badge
     assert_html(html, "a[href='/names/#{proposed.id}']")
-    assert_includes(html, "(#{proposed.id})")
+    assert_html(html, "button.badge-id", text: proposed.id.to_s)
   end
 
   private
