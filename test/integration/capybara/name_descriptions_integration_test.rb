@@ -634,19 +634,21 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
       assert(has_field?("group_admin[#{UserGroup.all_users.id}]",
                         type: :checkbox))
 
-      # Should have write-in fields for adding new users
-      # This is the critical test - verifies autocompleter_field is working
-      assert(has_field?("writein_name[1]", type: :text))
-      assert(has_field?("writein_reader[1]", type: :checkbox))
-      assert(has_field?("writein_writer[1]", type: :checkbox))
-      assert(has_field?("writein_admin[1]", type: :checkbox))
+      # Should have write-in fields for adding new users (now namespaced)
+      assert(has_field?("description_permissions[writein_name_1]", type: :text))
+      assert(has_field?("description_permissions[writein_reader_1]",
+                        type: :checkbox))
+      assert(has_field?("description_permissions[writein_writer_1]",
+                        type: :checkbox))
+      assert(has_field?("description_permissions[writein_admin_1]",
+                        type: :checkbox))
     end
 
     # Now test that we can actually submit changes
     within("form#description_permissions_form") do
       # Add katrina as a writer using the write-in field
-      fill_in("writein_name[1]", with: "katrina")
-      check("writein_writer[1]")
+      fill_in("description_permissions[writein_name_1]", with: "katrina")
+      check("description_permissions[writein_writer_1]")
 
       # Submit the form
       first(:button, type: "submit").click

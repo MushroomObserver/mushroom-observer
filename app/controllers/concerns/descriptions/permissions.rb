@@ -126,6 +126,7 @@ module Descriptions::Permissions
 
       # We're on.
       else
+        gather_list_of_groups
         done = change_group_permissions
       end
 
@@ -155,9 +156,10 @@ module Descriptions::Permissions
       old_admins  = @description.admin_groups.sort_by(&:id)
 
       # Update permissions on list of users and groups at the top.
-      update_groups(@description, :readers, params[:group_reader])
-      update_groups(@description, :writers, params[:group_writer])
-      update_groups(@description, :admins,  params[:group_admin])
+      fp = params[:description_permissions] || {}
+      update_groups(@description, :readers, fp[:group_reader])
+      update_groups(@description, :writers, fp[:group_writer])
+      update_groups(@description, :admins,  fp[:group_admin])
 
       # Look up write-ins and adjust their permissions.
       done = assemble_data
@@ -223,7 +225,7 @@ module Descriptions::Permissions
     def assemble_data
       @data = [nil]
       done = true
-      params[:writein_name].keys.sort.each do |n|
+      (1..6).each do |n|
         name, reader, writer, admin = writein_params(n)
         next if name.blank? ||
                 update_writein(@description, name, reader, writer, admin)
@@ -237,26 +239,11 @@ module Descriptions::Permissions
     end
 
     def writein_params(index)
-      name   = begin
-                 params[:writein_name][index].to_s
-               rescue StandardError
-                 ""
-               end
-      reader = begin
-                 params[:writein_reader][index] == "1"
-               rescue StandardError
-                 false
-               end
-      writer = begin
-                 params[:writein_writer][index] == "1"
-               rescue StandardError
-                 false
-               end
-      admin  = begin
-                 params[:writein_admin][index] == "1"
-               rescue StandardError
-                 false
-               end
+      fp = params[:description_permissions] || {}
+      name   = fp[:"writein_name_#{index}"].to_s
+      reader = fp[:"writein_reader_#{index}"] == "1"
+      writer = fp[:"writein_writer_#{index}"] == "1"
+      admin  = fp[:"writein_admin_#{index}"] == "1"
       [name, reader, writer, admin]
     end
 
@@ -294,14 +281,11 @@ module Descriptions::Permissions
     end
 
     # Update the permissions of a given type for the list of pre-filled-in
-    # groups.
-    def update_groups(desc, type, groups)
-      groups.each do |id, val|
-        if (group = UserGroup.safe_find(id))
-          update_group(desc, type, group, val == "1")
-        else
-          flash_error(:runtime_description_user_not_found.t(name: id))
-        end
+    # groups. selected_ids is an array of group IDs that should have permission.
+    def update_groups(desc, type, selected_ids)
+      selected_ids = Array(selected_ids).map(&:to_i)
+      @groups.each do |group|
+        update_group(desc, type, group, selected_ids.include?(group.id))
       end
     end
 

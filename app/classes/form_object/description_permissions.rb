@@ -5,6 +5,11 @@
 class FormObject::DescriptionPermissions < FormObject::Base
   WRITEIN_COUNT = 6
 
+  # Group permission arrays (selected group IDs)
+  attribute :group_reader, default: -> { [] }
+  attribute :group_writer, default: -> { [] }
+  attribute :group_admin, default: -> { [] }
+
   # Writein user name fields (autocomplete)
   WRITEIN_COUNT.times do |i|
     attribute :"writein_name_#{i + 1}", :string

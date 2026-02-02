@@ -39,10 +39,6 @@ module Names::Descriptions
       get(:edit, params: { id: draft_cc_desc.id })
       assert_response(:success)
 
-      # Debug: print the first autocompleter HTML block
-      match = @response.body.match(/<div[^>]*class="autocompleter"[^>]*>.*?<\/div>\s*<\/div>\s*<\/div>/m)
-      puts match[0] if match
-
       # rolf is also in reviewers. and they are admins of this desc.
       # but access denied, because this description is public!
       get(:edit, params: { id: peltigera_desc.id })
@@ -62,14 +58,13 @@ module Names::Descriptions
                    [user_groups(:eol_admins).id, user_groups(:katrina_only).id])
       params = {
         id: draft_cc_desc.id,
-        group_reader: { user_groups(:eol_admins).id => 1 },
-        group_writer: { user_groups(:eol_admins).id => 0 },
-        group_admin: { user_groups(:eol_admins).id => 1 },
-        writein_name: { 1 => "dick", 2 => "", 3 => "",
-                        4 => "", 5 => "", 6 => "" },
-        writein_reader: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_writer: { 1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_admin: { 1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
+        description_permissions: writein_params(
+          name_1: "dick", writer_1: "1", admin_1: "1"
+        ).merge(
+          group_reader: [user_groups(:eol_admins).id],
+          group_writer: [],
+          group_admin: [user_groups(:eol_admins).id]
+        )
       }
 
       # Dick is not permitted to edit.
@@ -99,14 +94,13 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: desc.id,
-        group_reader: desc.reader_group_ids.index_with { 1 },
-        group_writer: desc.writer_group_ids.index_with { 1 },
-        group_admin: desc.admin_group_ids.index_with { 1 },
-        writein_name: { 1 => "dick <dick@email.com>", 2 => "", 3 => "",
-                        4 => "", 5 => "", 6 => "" },
-        writein_reader: { 1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_writer: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_admin: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
+        description_permissions: writein_params(
+          name_1: "dick <dick@email.com>", reader_1: "1"
+        ).merge(
+          group_reader: desc.reader_group_ids,
+          group_writer: desc.writer_group_ids,
+          group_admin: desc.admin_group_ids
+        )
       }
       put(:update, params: params)
       assert_redirected_to(name_description_path(desc.id))
@@ -119,14 +113,13 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: desc.id,
-        group_reader: desc.reader_group_ids.index_with { 1 },
-        group_writer: desc.writer_group_ids.index_with { 1 },
-        group_admin: desc.admin_group_ids.index_with { 1 },
-        writein_name: { 1 => "nonexistent_user_xyz", 2 => "", 3 => "",
-                        4 => "", 5 => "", 6 => "" },
-        writein_reader: { 1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_writer: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_admin: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
+        description_permissions: writein_params(
+          name_1: "nonexistent_user_xyz", reader_1: "1"
+        ).merge(
+          group_reader: desc.reader_group_ids,
+          group_writer: desc.writer_group_ids,
+          group_admin: desc.admin_group_ids
+        )
       }
       put(:update, params: params)
       assert_flash(/not found/)
@@ -139,35 +132,32 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: desc.id,
-        group_reader: desc.reader_group_ids.index_with { 1 },
-        group_writer: desc.writer_group_ids.index_with { 1 },
-        group_admin: desc.admin_group_ids.index_with { 1 },
-        writein_name: { 1 => "", 2 => "", 3 => "", 4 => "", 5 => "", 6 => "" },
-        writein_reader: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_writer: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_admin: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
+        description_permissions: writein_params.merge(
+          group_reader: desc.reader_group_ids,
+          group_writer: desc.writer_group_ids,
+          group_admin: desc.admin_group_ids
+        )
       }
       put(:update, params: params)
       assert_redirected_to(name_description_path(desc.id))
       assert_flash(/No changes/)
     end
 
-    # Cover update_groups with invalid group id
-    def test_change_permissions_invalid_group_id
+    # With array format, invalid group IDs are simply ignored (not in @groups)
+    def test_change_permissions_invalid_group_id_ignored
       desc = draft_cc_desc
       login("rolf")
       params = {
         id: desc.id,
-        group_reader: { 999999 => 1 },
-        group_writer: { 999999 => 0 },
-        group_admin: { 999999 => 0 },
-        writein_name: { 1 => "", 2 => "", 3 => "", 4 => "", 5 => "", 6 => "" },
-        writein_reader: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_writer: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_admin: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
+        description_permissions: writein_params.merge(
+          group_reader: [999999],
+          group_writer: [],
+          group_admin: []
+        )
       }
       put(:update, params: params)
-      assert_flash(/not found/)
+      # Invalid IDs are ignored since they're not in @groups
+      assert_redirected_to(name_description_path(desc.id))
     end
 
     # Cover changing public flag via reader_groups
@@ -178,18 +168,30 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: desc.id,
-        group_reader: { user_groups(:all_users).id => 1 },
-        group_writer: { user_groups(:all_users).id => 0 },
-        group_admin: { user_groups(:all_users).id => 0 },
-        writein_name: { 1 => "", 2 => "", 3 => "", 4 => "", 5 => "", 6 => "" },
-        writein_reader: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_writer: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
-        writein_admin: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
+        description_permissions: writein_params.merge(
+          group_reader: [user_groups(:all_users).id],
+          group_writer: [],
+          group_admin: []
+        )
       }
       put(:update, params: params)
       assert_redirected_to(name_description_path(desc.id))
       desc.reload
       assert_true(desc.public)
+    end
+
+    private
+
+    # Generate writein params with defaults, allowing overrides
+    def writein_params(**overrides)
+      result = {}
+      (1..6).each do |i|
+        result[:"writein_name_#{i}"] = overrides[:"name_#{i}"] || ""
+        result[:"writein_reader_#{i}"] = overrides[:"reader_#{i}"] || "0"
+        result[:"writein_writer_#{i}"] = overrides[:"writer_#{i}"] || "0"
+        result[:"writein_admin_#{i}"] = overrides[:"admin_#{i}"] || "0"
+      end
+      result
     end
   end
 end

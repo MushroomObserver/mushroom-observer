@@ -9,8 +9,6 @@
 # and ApplicationForm's autocompleter_field for the writeins.
 #
 class Components::Descriptions::PermissionsForm < Components::ApplicationForm
-  include Phlex::Rails::Helpers::CheckBoxTag
-
   register_value_helper :in_admin_mode?
   register_output_helper :user_link, mark_safe: true
 
@@ -19,7 +17,11 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   def initialize(description:, groups:, data:)
     @description = description
     @groups = groups
-    form_object = FormObject::DescriptionPermissions.new
+    form_object = FormObject::DescriptionPermissions.new(
+      group_reader: description.reader_group_ids,
+      group_writer: description.writer_group_ids,
+      group_admin: description.admin_group_ids
+    )
     form_object.load_writein_data(data) if data
     super(form_object, id: "description_permissions_form")
   end
@@ -56,39 +58,32 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   end
 
   def render_group_row(group)
-    args = checkbox_args_for_group(group)
-
     tr do
       td { render_group_name(group) }
-      td { check_box_tag("group_reader[#{group.id}]", *args[:reader]) }
-      td { check_box_tag("group_writer[#{group.id}]", *args[:writer]) }
-      td { check_box_tag("group_admin[#{group.id}]", *args[:admin]) }
+      td { render_group_checkbox(:group_reader, group) }
+      td { render_group_checkbox(:group_writer, group) }
+      td { render_group_checkbox(:group_admin, group) }
     end
   end
 
-  def checkbox_args_for_group(group)
-    if locked_all_users_group?(group)
-      {
-        reader: ["1", true, { disabled: "disabled", class: "form-control" }],
-        writer: ["1", true, { disabled: "disabled", class: "form-control" }],
-        admin: ["1", false, { disabled: "disabled", class: "form-control" }]
-      }
-    elsif locked_reviewers_group?(group)
-      {
-        reader: ["1", false, { disabled: "disabled", class: "form-control" }],
-        writer: ["1", false, { disabled: "disabled", class: "form-control" }],
-        admin: ["1", true, { disabled: "disabled", class: "form-control" }]
-      }
-    else
-      {
-        reader: ["1", @description.reader_groups.include?(group),
-                 { class: "form-control" }],
-        writer: ["1", @description.writer_groups.include?(group),
-                 { class: "form-control" }],
-        admin: ["1", @description.admin_groups.include?(group),
-                { class: "form-control" }]
-      }
+  def render_group_checkbox(field_name, group)
+    render(field(field_name).checkbox(wrapper_options: { label: false })) do |cb|
+      cb.option(group.id)
     end
+  end
+
+  def group_checked?(group, type)
+    if locked_all_users_group?(group)
+      type != :admin
+    elsif locked_reviewers_group?(group)
+      type == :admin
+    else
+      @description.send(:"#{type}_groups").include?(group)
+    end
+  end
+
+  def group_locked?(group)
+    locked_all_users_group?(group) || locked_reviewers_group?(group)
   end
 
   def locked_all_users_group?(group)
@@ -173,30 +168,15 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
 
   def render_writein_row(row_num)
     tr do
-      td do
-        autocompleter_field(
-          :"writein_name_#{row_num}",
-          type: :user,
-          placeholder: :start_typing.l,
-          attributes: { name: "writein_name[#{row_num}]" }
-        )
-      end
-      td do
-        check_box_tag("writein_reader[#{row_num}]", "1",
-                      model.send(:"writein_reader_#{row_num}"),
-                      class: "form-control")
-      end
-      td do
-        check_box_tag("writein_writer[#{row_num}]", "1",
-                      model.send(:"writein_writer_#{row_num}"),
-                      class: "form-control")
-      end
-      td do
-        check_box_tag("writein_admin[#{row_num}]", "1",
-                      model.send(:"writein_admin_#{row_num}"),
-                      class: "form-control")
-      end
+      td { autocompleter_field(:"writein_name_#{row_num}", type: :user) }
+      td { render_checkbox_field(:"writein_reader_#{row_num}") }
+      td { render_checkbox_field(:"writein_writer_#{row_num}") }
+      td { render_checkbox_field(:"writein_admin_#{row_num}") }
     end
+  end
+
+  def render_checkbox_field(field_name)
+    render(field(field_name).checkbox(class: "form-control"))
   end
 
   def name_description?
@@ -204,15 +184,10 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   end
 
   def form_action
-    url_for(controller: permissions_controller, action: :update,
-            id: @description.id, only_path: true)
-  end
-
-  def permissions_controller
     if name_description?
-      "/names/descriptions/permissions"
+      permissions_name_description_path(@description.id)
     else
-      "/locations/descriptions/permissions"
+      permissions_location_description_path(@description.id)
     end
   end
 
