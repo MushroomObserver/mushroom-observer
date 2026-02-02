@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Form for moving a description to a synonym of its parent.
-# Used for both NameDescription and LocationDescription.
+# Only meaningful for NameDescription since Location has no synonyms.
+# For LocationDescription, moves will be empty and only the header shows.
 class Components::Descriptions::MoveForm < Components::ApplicationForm
   def initialize(description, user:)
     @description = description
@@ -47,12 +48,16 @@ class Components::Descriptions::MoveForm < Components::ApplicationForm
   end
 
   def moves
-    @moves ||=
-      begin
-        result = @description.parent.synonyms - [@description.parent]
-        result.reject!(&:is_misspelling?)
-        result
-      end
+    @moves ||= compute_moves
+  end
+
+  def compute_moves
+    # Location doesn't have synonyms, only Name does
+    return [] unless @description.parent.respond_to?(:synonyms)
+
+    result = @description.parent.synonyms - [@description.parent]
+    result.reject!(&:is_misspelling?)
+    result
   end
 
   def sorted_moves
