@@ -32,12 +32,12 @@ module Components
         assert_includes(html, :merge_descriptions_move_help.t)
 
         # Radio buttons for move targets
-        assert_html(html,
-                    "input[type='radio'][name='description_action[target]']")
+        assert_html(html, "input[type='radio']" \
+                          "[name='description_move_or_merge[target]']")
 
         # Delete checkbox
-        assert_html(html,
-                    "input[type='checkbox'][name='description_action[delete]']")
+        assert_html(html, "input[type='checkbox']" \
+                          "[name='description_move_or_merge[delete]']")
         assert_includes(html, :merge_descriptions_delete_after.t)
 
         # Submit button
