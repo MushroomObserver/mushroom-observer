@@ -80,12 +80,17 @@ class Components::NameEditSynonymForm < Components::ApplicationForm
   def render_synonym_checkbox(namespace, name_obj)
     render(
       namespace.field(name_obj.id.to_s).checkbox(
-        wrapper_options: {
-          label: link_to(name_obj.display_name.t, name_path(name_obj.id))
-        },
+        wrapper_options: { label: synonym_checkbox_label(name_obj) },
         value: "1", checked: false
       )
     )
+  end
+
+  def synonym_checkbox_label(name_obj)
+    [
+      link_to(name_obj.display_name.t, name_path(name_obj.id)),
+      "(#{name_obj.id})"
+    ].safe_join(" ")
   end
 
   def render_members_section
