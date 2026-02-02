@@ -32,10 +32,12 @@ module Components
         assert_includes(html, :merge_descriptions_move_help.t)
 
         # Radio buttons for move targets
-        assert_html(html, "input[type='radio'][name='description_action[target]']")
+        assert_html(html,
+                    "input[type='radio'][name='description_action[target]']")
 
         # Delete checkbox
-        assert_html(html, "input[type='checkbox'][name='description_action[delete]']")
+        assert_html(html,
+                    "input[type='checkbox'][name='description_action[delete]']")
         assert_includes(html, :merge_descriptions_delete_after.t)
 
         # Submit button
@@ -54,7 +56,7 @@ module Components
         assert_includes(html, :merge_descriptions_move_header.t)
 
         # No radio buttons when no synonyms
-        refute_includes(html, "input[type='radio']")
+        assert_not_includes(html, "input[type='radio']")
 
         # No submit button when nothing to move to
         assert_no_match(/type=['"]submit['"]/, html)

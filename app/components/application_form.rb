@@ -138,7 +138,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def checkbox(*options, wrapper_options: {}, **attributes)
       CheckboxField.new(self, *options, attributes: attributes,
-                              wrapper_options: wrapper_options)
+                                        wrapper_options: wrapper_options)
     end
 
     def select(options, wrapper_options: {}, **attributes)

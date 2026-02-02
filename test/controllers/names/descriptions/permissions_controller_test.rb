@@ -150,7 +150,7 @@ module Names::Descriptions
       params = {
         id: desc.id,
         description_permissions: writein_params.merge(
-          group_reader: [999999],
+          group_reader: [999_999],
           group_writer: [],
           group_admin: []
         )

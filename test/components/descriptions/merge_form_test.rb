@@ -26,10 +26,12 @@ module Components
         assert_includes(html, :merge_descriptions_merge_help.t)
 
         # Radio buttons for merge targets
-        assert_html(html, "input[type='radio'][name='description_action[target]']")
+        assert_html(html,
+                    "input[type='radio'][name='description_action[target]']")
 
         # Delete checkbox (admin can delete)
-        assert_html(html, "input[type='checkbox'][name='description_action[delete]']")
+        assert_html(html,
+                    "input[type='checkbox'][name='description_action[delete]']")
         assert_includes(html, :merge_descriptions_delete_after.t)
 
         # Submit button
@@ -38,7 +40,9 @@ module Components
 
       def test_name_description_without_merge_targets
         # Find a description that has no other descriptions to merge with
-        desc = NameDescription.all.find { |d| (d.parent.descriptions - [d]).empty? }
+        desc = NameDescription.all.find do |d|
+          (d.parent.descriptions - [d]).empty?
+        end
         skip("No description without merge targets found") unless desc
 
         html = render_form(desc)
@@ -64,7 +68,8 @@ module Components
       private
 
       def render_form(description)
-        render(Components::Descriptions::MergeForm.new(description, user: @user))
+        render(Components::Descriptions::MergeForm.new(description,
+                                                       user: @user))
       end
     end
   end

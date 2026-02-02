@@ -23,7 +23,7 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
       group_admin: description.admin_group_ids
     )
     form_object.load_writein_data(data) if data
-    super(form_object, id: "description_permissions_form")
+    super(form_object, id: "description_permissions_form", method: :put)
   end
 
   def view_template
@@ -67,7 +67,9 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   end
 
   def render_group_checkbox(field_name, group)
-    render(field(field_name).checkbox(wrapper_options: { label: false })) do |cb|
+    render(
+      field(field_name).checkbox(wrapper_options: { label: false })
+    ) do |cb|
       cb.option(group.id)
     end
   end
@@ -189,9 +191,5 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
     else
       permissions_location_description_path(@description.id)
     end
-  end
-
-  def form_method
-    :put
   end
 end

@@ -626,13 +626,17 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
 
     # Verify the form loads correctly
     within("form#description_permissions_form") do
-      # Should have checkboxes for existing groups
-      assert(has_field?("group_reader[#{UserGroup.all_users.id}]",
-                        type: :checkbox))
-      assert(has_field?("group_writer[#{UserGroup.all_users.id}]",
-                        type: :checkbox))
-      assert(has_field?("group_admin[#{UserGroup.all_users.id}]",
-                        type: :checkbox))
+      # Should have checkboxes for existing groups (namespaced array fields)
+      all_users_id = UserGroup.all_users.id
+      assert(has_css?("input[type='checkbox']" \
+                      "[name='description_permissions[group_reader][]']" \
+                      "[value='#{all_users_id}']"))
+      assert(has_css?("input[type='checkbox']" \
+                      "[name='description_permissions[group_writer][]']" \
+                      "[value='#{all_users_id}']"))
+      assert(has_css?("input[type='checkbox']" \
+                      "[name='description_permissions[group_admin][]']" \
+                      "[value='#{all_users_id}']"))
 
       # Should have write-in fields for adding new users (now namespaced)
       assert(has_field?("description_permissions[writein_name_1]", type: :text))

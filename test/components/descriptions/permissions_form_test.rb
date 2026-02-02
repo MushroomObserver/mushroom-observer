@@ -56,7 +56,8 @@ module Components
         (1..6).each do |i|
           # User autocompleter
           assert_html(html,
-                      "input[name='description_permissions[writein_name_#{i}]']")
+                      "input[name='description_permissions" \
+                      "[writein_name_#{i}]']")
           assert_html(html, "[data-controller='autocompleter--user']")
 
           # Permission checkboxes for each writein
