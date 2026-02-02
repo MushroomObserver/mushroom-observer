@@ -7,10 +7,7 @@ class WebmasterQuestionFormTest < ComponentTestCase
     super
     @user_email = "test@example.com"
     @message = "My question"
-    @model = FormObject::EmailRequest.new(
-      reply_to: @user_email, message: @message
-    )
-    @html = render_form
+    @html = render_form(reply_to: @user_email, message: @message)
   end
 
   def test_renders_form_with_help_note
@@ -38,8 +35,12 @@ class WebmasterQuestionFormTest < ComponentTestCase
 
   private
 
-  def render_form
-    form = Components::WebmasterQuestionForm.new(@model)
+  def render_form(reply_to: nil, message: nil, email_error: false)
+    form = Components::WebmasterQuestionForm.new(
+      reply_to: reply_to,
+      message: message,
+      email_error: email_error
+    )
     # Stub url_for to avoid routing errors in test environment
     form.stub(:url_for, "/test_action") do
       render(form)

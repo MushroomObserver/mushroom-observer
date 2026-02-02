@@ -519,28 +519,39 @@ See `.claude/style_guide.md` for additional coding style requirements.
 
 ### Including Rails Built-in Helpers
 
-Rails helpers are available as Phlex modules under `Phlex::Rails::Helpers`. The module name matches the helper method name in PascalCase.
+Rails helpers are available as Phlex modules under `Phlex::Rails::Helpers`. The module name matches the helper method name in PascalCase. **Only use these when Phlex has no native equivalent.**
 
 #### Examples:
 ```ruby
 class Components::MyComponent < Components::Base
-  include Phlex::Rails::Helpers::LinkTo      # for link_to
-  include Phlex::Rails::Helpers::ButtonTo    # for button_to
+  include Phlex::Rails::Helpers::ButtonTo    # for button_to (no Phlex equivalent)
   include Phlex::Rails::Helpers::FieldsFor   # for fields_for
-  include Phlex::Rails::Helpers::SafeJoin    # for safe_join
-  include Phlex::Rails::Helpers::ImageTag    # for image_tag
   include Phlex::Rails::Helpers::ClassNames  # for class_names
 end
 ```
 
 After including the module, call the helper directly without any prefix:
 ```ruby
-link_to("Click me", some_path)
 button_to(some_path, method: :delete)
 fields_for(:user) do |f|
   # field rendering
 end
 ```
+
+**Prefer Phlex native helpers when possible:**
+```ruby
+# Good ✓ - Use Phlex's native helpers
+a(href: some_path) { "Click me" }       # instead of link_to
+img(src: image_url, alt: "Photo")       # instead of image_tag
+
+# Avoid ✗ - Don't use Rails helpers when Phlex has equivalents
+link_to("Click me", some_path)
+image_tag("photo.jpg", alt: "Photo")
+```
+
+**NEVER use these helpers** (they have better alternatives):
+- `form_with` - Use Superform instead
+- `safe_join` - Use MO's `array.safe_join("joiner")` extension instead
 
 ### Registering Custom Application Helpers
 
@@ -564,7 +575,7 @@ register_value_helper :image_vote_as_short_string
 
 #### Important Rules:
 
-1. **DO NOT register Rails built-in helpers** like `fields_for`, `safe_join`, `link_to`, etc. Use `include` instead.
+1. **DO NOT register Rails built-in helpers** - use `include Phlex::Rails::Helpers::HelperName` instead.
 
 2. **DO NOT register helpers that accept blocks** - these need special handling and may not work correctly with `register_output_helper`.
 
@@ -579,31 +590,28 @@ helpers.propose_naming_link(...)
 helpers.location_link(...)
 ```
 
-4. Use `raw()` sparingly - only for HTML strings that are already marked safe. Registered output helpers don't need `raw()` wrapping.
+4. **NEVER use `raw()`** - use MO's `trusted_html()` method instead for HTML strings that need to be rendered unescaped.
 
-### Using `raw()` for HTML Strings
+### Using `trusted_html()` for HTML Strings
 
-**IMPORTANT**: Phlex's `raw()` method only accepts content that has been explicitly marked as safe with `.html_safe`.
+**NEVER use Phlex's `raw()`** - use MO's `trusted_html()` method instead.
 
 #### Examples:
 ```ruby
-# Bad ✗ - will raise "You passed an unsafe object to raw"
-raw("<strong>#{label}: </strong>")
-raw(parts.join(", "))
-raw(@links)
+# Good ✓ - use trusted_html for HTML that needs to be rendered unescaped
+trusted_html("<strong>#{label}: </strong>")
+trusted_html(parts.safe_join(", "))
 
-# Good ✓ - mark content as safe first
+# Bad ✗ - never use raw()
 raw("<strong>#{label}: </strong>".html_safe)
-raw(parts.join(", ").html_safe)
-raw(@links.html_safe)
 ```
 
-#### When to use `raw()`:
+#### When to use `trusted_html()`:
 - For HTML strings you've built manually that need to be rendered
 - For string properties that contain HTML markup
 - Only when you trust the content (never for user input)
 
-#### When NOT to use `raw()`:
+#### When NOT to use `trusted_html()`:
 - For rendering components - use `render(component)` instead
 - For registered output helpers - they already return safe HTML
 - For Phlex HTML methods - they handle safety automatically
@@ -638,8 +646,8 @@ plain(@obs.user_format_name(@user).t.small_author)  # Produces &lt;b&gt;&lt;i&gt
 - For user-generated content that must be sanitized
 
 #### When to output directly (no `plain()`):
-- For registered output helpers (they return `html_safe` strings)
-- For Rails helper methods that return HTML (`link_to`, `button_to`, etc.)
+- For registered output helpers (must be registered with `mark_safe: true`)
+- For Rails helper methods that return HTML (`button_to`, etc.)
 - For formatted text methods that return HTML (`.t`, `.tpl`, etc.)
 - For any string already marked `.html_safe`
 
@@ -678,8 +686,8 @@ p(class: "text") { "Paragraph" }
 ```
 
 #### When to use Rails helpers:
-- For form helpers like `fields_for`, `form_with`, etc.
-- For specialized helpers like `link_to`, `image_tag` that have complex behavior
+- For form helpers like `fields_for` (but never `form_with` - use Superform)
+- For `button_to` (has complex behavior with no Phlex equivalent)
 - For helpers that don't have Phlex equivalents
 
 ### Common Patterns
@@ -703,32 +711,29 @@ class MyFormComponent < Components::Base
       email_field_with_label(form: form, field: :email) # custom registered helper
     ]
 
-    # Use array.join.html_safe instead of safe_join
-    fields.join.html_safe
+    # Use MO's safe_join extension
+    fields.safe_join
   end
 end
 ```
 
 #### Joining HTML strings:
-Instead of using `safe_join`, use `array.join.html_safe`:
+Use MO's `array.safe_join("joiner")` extension:
 ```ruby
 # Good ✓
 fields = [helper1(...), helper2(...), helper3(...)]
-fields.join.html_safe
-
-# Avoid (safe_join is not a standard Phlex helper)
-safe_join(fields)
+fields.safe_join           # joins with empty string
+fields.safe_join(", ")     # joins with separator
 ```
 
-#### Link helpers:
+#### Links:
+Use Phlex's native `a` helper instead of `link_to`:
 ```ruby
-class MyComponent < Components::Base
-  include Phlex::Rails::Helpers::LinkTo
+# Good ✓ - native Phlex
+a(href: user_path(@user)) { "View User" }
 
-  def view_template
-    link_to("View User", user_path(@user))
-  end
-end
+# Avoid ✗ - Rails helper
+link_to("View User", user_path(@user))
 ```
 
 #### Converting Hash to URL:

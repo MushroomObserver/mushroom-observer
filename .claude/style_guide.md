@@ -113,6 +113,38 @@ render(field(:name).text(wrapper_options: { label: "Name:" }, size: 40))
 render(field(:notes).textarea(wrapper_options: { label: "Notes:" }, rows: 6))
 ```
 
+#### Pattern B Forms: Internal FormObject Creation
+
+For non-CRUD forms (email forms, action forms), prefer **Pattern B**: the form
+component creates its own FormObject internally rather than receiving one.
+
+```ruby
+class Components::UserQuestionForm < Components::ApplicationForm
+  # Accept optional model arg for ModalForm compatibility (ignored - we create
+  # our own FormObject). This is Pattern B: form creates FormObject internally.
+  def initialize(_model = nil, target:, subject: nil, message: nil, **)
+    @target = target
+    form_object = FormObject::UserQuestion.new(
+      subject: subject,
+      message: message
+    )
+    super(form_object, **)
+  end
+end
+
+# View usage - clean kwargs only
+render(Components::UserQuestionForm.new(target: @target))
+```
+
+**Why `_model = nil`?** ModalForm calls `component_class.new(model, **params)`
+with model as the first positional argument. Pattern B forms ignore this model
+(they create their own) but accept it for ModalForm compatibility.
+
+**Benefits**:
+- Views are clean - just pass domain objects as kwargs
+- Form owns its FormObject creation logic
+- Works with both direct rendering and ModalForm turbo_stream responses
+
 ### HTML Helpers
 
 **Use Phlex's native HTML helpers** instead of Rails `tag` helpers wrapped in `unsafe_raw`.
