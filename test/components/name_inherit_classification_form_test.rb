@@ -23,10 +23,8 @@ class NameInheritClassificationFormTest < ComponentTestCase
     options = [names(:agaricus_campestris), names(:boletus_edulis)]
     html = render_form(
       name: name,
-      context: {
-        options: options,
-        message: :inherit_classification_multiple_matches
-      }
+      options: options,
+      message: :inherit_classification_multiple_matches
     )
 
     # Warning alert with radio options
@@ -38,10 +36,12 @@ class NameInheritClassificationFormTest < ComponentTestCase
 
   private
 
-  def render_form(name:, context: {})
-    model = FormObject::InheritClassification.new
+  def render_form(name:, parent: nil, options: nil, message: nil)
     render(Components::NameInheritClassificationForm.new(
-             model, name: name, context: context
+             name: name,
+             parent: parent,
+             options: options,
+             message: message
            ))
   end
 end

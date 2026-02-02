@@ -7,7 +7,8 @@ container_class(:text)
 %>
 
 <%= render(Components::NameInheritClassificationForm.new(
-      FormObject::InheritClassification.new(parent: @parent_text_name),
       name: @name,
-      context: { options: @options, message: @message }
+      parent: @parent_text_name,
+      options: @options,
+      message: @message
     )) %>

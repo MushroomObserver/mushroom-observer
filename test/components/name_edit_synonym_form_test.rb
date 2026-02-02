@@ -40,21 +40,14 @@ class NameEditSynonymFormTest < ComponentTestCase
   private
 
   def render_form(current_synonyms: [], proposed_synonyms: [], new_names: [],
-                  list_members: "", deprecate_all: true)
-    model = FormObject::EditSynonym.new(
-      synonym_members: list_members,
-      deprecate_all: deprecate_all
-    )
+                  synonym_members: "", deprecate_all: true)
     render(Components::NameEditSynonymForm.new(
-             model,
              name: @name,
-             context: {
-               current_synonyms: current_synonyms,
-               proposed_synonyms: proposed_synonyms,
-               new_names: new_names,
-               list_members: list_members,
-               deprecate_all: deprecate_all
-             }
+             synonym_members: synonym_members,
+             deprecate_all: deprecate_all,
+             current_synonyms: current_synonyms,
+             proposed_synonyms: proposed_synonyms,
+             new_names: new_names
            ))
   end
 end

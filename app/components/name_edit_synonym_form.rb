@@ -1,22 +1,33 @@
 # frozen_string_literal: true
 
-# Form for editing name synonyms
+# Form for editing name synonyms.
+# Creates its own FormObject internally from the provided kwargs.
 #
 # @example
 #   render(Components::NameEditSynonymForm.new(
-#     FormObject::EditSynonym.new(synonym_members: @list_members),
 #     name: @name,
-#     context: { ... }
+#     synonym_members: @list_members,
+#     deprecate_all: @deprecate_all,
+#     current_synonyms: @name.synonyms,
+#     proposed_synonyms: @proposed_synonyms
 #   ))
 #
 class Components::NameEditSynonymForm < Components::ApplicationForm
-  def initialize(model, name:, context: {}, **)
+  # rubocop:disable Metrics/ParameterLists
+  def initialize(name:, synonym_members: nil, deprecate_all: true,
+                 current_synonyms: [], proposed_synonyms: [], new_names: [], **)
     @name = name
-    @current_synonyms = context[:current_synonyms] || []
-    @proposed_synonyms = context[:proposed_synonyms] || []
-    @new_names = context[:new_names] || []
-    super(model, **)
+    @current_synonyms = current_synonyms
+    @proposed_synonyms = proposed_synonyms
+    @new_names = new_names
+
+    form_object = FormObject::EditSynonym.new(
+      synonym_members: synonym_members,
+      deprecate_all: deprecate_all
+    )
+    super(form_object, **)
   end
+  # rubocop:enable Metrics/ParameterLists
 
   def view_template
     div(class: "row") do

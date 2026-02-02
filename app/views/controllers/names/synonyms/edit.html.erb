@@ -2,19 +2,13 @@
 add_page_title(:name_change_synonyms_title.t(name: @name.display_name))
 add_context_nav(name_forms_return_tabs(name: @name))
 container_class(:text_image)
-
-current_synonyms = @name.synonyms
 %>
 
 <%= render(Components::NameEditSynonymForm.new(
-      FormObject::EditSynonym.new(
-        synonym_members: @list_members,
-        deprecate_all: @deprecate_all
-      ),
       name: @name,
-      context: {
-        current_synonyms: current_synonyms,
-        proposed_synonyms: @proposed_synonyms,
-        new_names: @new_names
-      }
+      synonym_members: @list_members,
+      deprecate_all: @deprecate_all,
+      current_synonyms: @name.synonyms,
+      proposed_synonyms: @proposed_synonyms,
+      new_names: @new_names
     )) %>

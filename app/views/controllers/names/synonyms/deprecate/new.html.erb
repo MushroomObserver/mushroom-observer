@@ -5,16 +5,12 @@ add_context_nav(name_forms_return_tabs(name: @name))
 %>
 
 <%= render(Components::NameDeprecateSynonymForm.new(
-      FormObject::DeprecateSynonym.new(
-        proposed_name: @given_name,
-        is_misspelling: @misspelling,
-        comment: @comment
-      ),
       name: @name,
-      context: {
-        names: @names,
-        valid_names: @valid_names,
-        suggest_corrections: @suggest_corrections,
-        parent_deprecated: @parent_deprecated
-      }
+      proposed_name: @given_name,
+      is_misspelling: @misspelling,
+      comment: @comment,
+      names: @names,
+      valid_names: @valid_names,
+      suggest_corrections: @suggest_corrections,
+      parent_deprecated: @parent_deprecated
     )) %>

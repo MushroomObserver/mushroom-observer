@@ -1,23 +1,37 @@
 # frozen_string_literal: true
 
-# Form for deprecating a name in favor of another
+# Form for deprecating a name in favor of another.
+# Creates its own FormObject internally from the provided kwargs.
 #
 # @example
 #   render(Components::NameDeprecateSynonymForm.new(
-#     FormObject::DeprecateSynonym.new(proposed_name: @given_name),
 #     name: @name,
-#     context: { names: @names, valid_names: @valid_names, ... }
+#     proposed_name: @given_name,
+#     is_misspelling: @misspelling,
+#     comment: @comment,
+#     names: @names,
+#     valid_names: @valid_names
 #   ))
 #
 class Components::NameDeprecateSynonymForm < Components::ApplicationForm
-  def initialize(model, name:, context: {}, **)
+  # rubocop:disable Metrics/ParameterLists
+  def initialize(name:, proposed_name: nil, is_misspelling: false, comment: nil,
+                 names: [], valid_names: [], suggest_corrections: false,
+                 parent_deprecated: nil, **)
     @name = name
-    @names = context[:names]
-    @valid_names = context[:valid_names]
-    @suggest_corrections = context[:suggest_corrections]
-    @parent_deprecated = context[:parent_deprecated]
-    super(model, **)
+    @names = names
+    @valid_names = valid_names
+    @suggest_corrections = suggest_corrections
+    @parent_deprecated = parent_deprecated
+
+    form_object = FormObject::DeprecateSynonym.new(
+      proposed_name: proposed_name,
+      is_misspelling: is_misspelling,
+      comment: comment
+    )
+    super(form_object, **)
   end
+  # rubocop:enable Metrics/ParameterLists
 
   def view_template
     submit(:SUBMIT.l, center: true)

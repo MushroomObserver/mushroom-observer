@@ -1,20 +1,24 @@
 # frozen_string_literal: true
 
-# Form for inheriting classification from a parent name
+# Form for inheriting classification from a parent name.
+# Creates its own FormObject internally from the provided kwargs.
 #
 # @example
 #   render(Components::NameInheritClassificationForm.new(
-#     FormObject::InheritClassification.new(parent: @parent_text_name),
 #     name: @name,
-#     context: { options: @options, message: @message }
+#     parent: @parent_text_name,
+#     options: @options,
+#     message: @message
 #   ))
 #
 class Components::NameInheritClassificationForm < Components::ApplicationForm
-  def initialize(model, name:, context: {}, **)
+  def initialize(name:, parent: nil, options: nil, message: nil, **)
     @name = name
-    @options = context[:options]
-    @message = context[:message]
-    super(model, **)
+    @options = options
+    @message = message
+
+    form_object = FormObject::InheritClassification.new(parent: parent)
+    super(form_object, **)
   end
 
   def view_template
