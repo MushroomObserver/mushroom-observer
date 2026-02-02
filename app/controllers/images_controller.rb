@@ -50,7 +50,7 @@ class ImagesController < ApplicationController
     render(
       status: :too_many_requests,
       content_type: "text/plain",
-      plain: <<-TOO_MANY_RESULTS.squish
+      plain: <<~TOO_MANY_RESULTS.squish
         Your queries are killing our server.
         There are much better ways to scrape the images
         from our site.
