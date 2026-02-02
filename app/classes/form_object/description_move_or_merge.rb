@@ -2,7 +2,7 @@
 
 # Form object for description move/merge actions.
 # Provides attributes for target and delete-after option.
-class FormObject::DescriptionAction < FormObject::Base
+class FormObject::DescriptionMoveOrMerge < FormObject::Base
   attribute :target, :integer
   attribute :delete, :boolean, default: false
 

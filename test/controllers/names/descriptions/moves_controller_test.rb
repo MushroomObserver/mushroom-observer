@@ -67,8 +67,7 @@ module Names::Descriptions
 
       params = {
         id: rolf_desc.id,
-        target: coprinus_name.id,
-        delete: 0
+        description_move_or_merge: { target: coprinus_name.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_success
@@ -77,8 +76,7 @@ module Names::Descriptions
 
       params = {
         id: mary_desc.id,
-        target: coprinus_name.id,
-        delete: 0
+        description_move_or_merge: { target: coprinus_name.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error
@@ -93,8 +91,7 @@ module Names::Descriptions
       # Try with delete
       params = {
         id: mary_desc.id,
-        target: coprinus_name.id,
-        delete: 1
+        description_move_or_merge: { target: coprinus_name.id, delete: 1 }
       }
       post(:create, params: params)
       assert_flash_success
@@ -104,8 +101,8 @@ module Names::Descriptions
       login("dick")
       params = {
         id: peltigera_desc.id,
-        target: names(:basidiomycota).id,
-        delete: 0
+        description_move_or_merge: { target: names(:basidiomycota).id,
+                                     delete: 0 }
       }
       post(:create, params: params)
       assert_flash_text(/The classification has incorrect syntax/)
@@ -113,8 +110,7 @@ module Names::Descriptions
       # Now try compatible classification
       params = {
         id: peltigera_desc.id,
-        target: coprinus_name.id,
-        delete: 0
+        description_move_or_merge: { target: coprinus_name.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_success
@@ -125,8 +121,7 @@ module Names::Descriptions
       login("dick")
       params = {
         id: peltigera_desc.id,
-        target: "bogus",
-        delete: 0
+        description_move_or_merge: { target: "bogus", delete: 0 }
       }
       post(:create, params: params)
       assert_flash_text(/Sorry, the name you tried to display/)
@@ -137,8 +132,7 @@ module Names::Descriptions
       login("dick")
       params = {
         id: peltigera_desc.id,
-        target: stereum_name.id,
-        delete: 1
+        description_move_or_merge: { target: stereum_name.id, delete: 1 }
       }
 
       post(:create, params: params)
@@ -153,8 +147,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: mary_desc.id,
-        target: coprinus_name.id,
-        delete: 0
+        description_move_or_merge: { target: coprinus_name.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error(:runtime_description_private.t)
@@ -166,8 +159,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: 999_999,
-        target: coprinus_name.id,
-        delete: 0
+        description_move_or_merge: { target: coprinus_name.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error
@@ -180,8 +172,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: rolf_desc.id,
-        target: coprinus_name.id,
-        delete: 0
+        description_move_or_merge: { target: coprinus_name.id, delete: 0 }
       }
 
       # Create a mock description that fails save

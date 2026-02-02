@@ -47,8 +47,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: rolf_desc.id,
-        target: mary_desc.id,
-        delete: 0
+        description_move_or_merge: { target: mary_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_text(/You have not been given permission/)
@@ -58,8 +57,7 @@ module Names::Descriptions
       login("dick")
       params = {
         id: rolf_desc.id,
-        target: mary_desc.id,
-        delete: 0
+        description_move_or_merge: { target: mary_desc.id, delete: 0 }
       }
       post(:create, params: params)
       # shouldn't work, there is a conflict. requires manual resolution
@@ -70,8 +68,7 @@ module Names::Descriptions
       # now try with delete. Also shouldn't work, there is a conflict
       params = {
         id: rolf_desc.id,
-        target: mary_desc.id,
-        delete: 1
+        description_move_or_merge: { target: mary_desc.id, delete: 1 }
       }
       post(:create, params: params)
       assert_flash_text(/Please merge the two descriptions/)
@@ -86,8 +83,7 @@ module Names::Descriptions
       # Merge should work, no delete.
       params = {
         id: rolf_desc.id,
-        target: mary_desc.id,
-        delete: 0
+        description_move_or_merge: { target: mary_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_text(/Successfully merged the descriptions/)
@@ -96,8 +92,7 @@ module Names::Descriptions
       # Delete after merge will not work even if specified. dick is not an admin
       params = {
         id: rolf_desc.id,
-        target: mary_desc.id,
-        delete: 1
+        description_move_or_merge: { target: mary_desc.id, delete: 1 }
       }
       post(:create, params: params)
       assert_flash_text(/Successfully merged the descriptions/)
@@ -116,8 +111,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: rolf_desc.id,
-        target: "bogus",
-        delete: 0
+        description_move_or_merge: { target: "bogus", delete: 0 }
       }
       post(:create, params: params)
       assert_flash_text(/Sorry, the name description you tried to display/)
@@ -153,8 +147,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: src_desc.id,
-        target: dest_desc.id,
-        delete: "1"
+        description_move_or_merge: { target: dest_desc.id, delete: "1" }
       }
       post(:create, params: params)
 
@@ -174,8 +167,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: mary_desc.id,
-        target: rolf_desc.id,
-        delete: 0
+        description_move_or_merge: { target: rolf_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error(:runtime_description_private.t)
@@ -187,8 +179,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: 999_999,
-        target: rolf_desc.id,
-        delete: 0
+        description_move_or_merge: { target: rolf_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error

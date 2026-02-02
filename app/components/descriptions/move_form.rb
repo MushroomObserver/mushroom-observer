@@ -6,7 +6,7 @@ class Components::Descriptions::MoveForm < Components::ApplicationForm
   def initialize(description, user:)
     @description = description
     @user = user
-    form_object = FormObject::DescriptionAction.new
+    form_object = FormObject::DescriptionMoveOrMerge.new
     form_object.target = default_target_id if default_checked?
     form_object.delete = description.is_admin?(user)
     super(form_object, id: "move_descriptions_form")

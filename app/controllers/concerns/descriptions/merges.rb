@@ -32,7 +32,7 @@ module Descriptions::Merges
       return unless check_dest_exists!
 
       @description = @src
-      @delete_after = (params[:delete] == "1")
+      @delete_after = params.dig(:description_move_or_merge, :delete) == "1"
       merge_descriptions
     end
 
@@ -53,7 +53,7 @@ module Descriptions::Merges
     end
 
     def check_dest_exists!
-      target = params[:target].to_s
+      target = params.dig(:description_move_or_merge, :target).to_s
       return true if (@dest = find_description!(target))
 
       flash_error(:runtime_invalid.t(type: '"target"', value: target))
