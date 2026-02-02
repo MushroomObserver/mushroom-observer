@@ -21,16 +21,12 @@ class Components::NameApproveSynonymForm < Components::ApplicationForm
 
     render_approved_names_section if @approved_names.present?
 
-    div(class: "help-note mr-3") do
-      trusted_html(:name_approve_deprecate_help.tp)
-    end
+    help_note(:div, :name_approve_deprecate_help.tp)
 
     textarea_field(:comment, label: "#{:name_approve_comments.l}:",
                              cols: 80, rows: 5, inline: true,
                              data: { autofocus: true })
-    div(class: "help-note mr-3") do
-      trusted_html(:name_approve_comments_help.tp(name: @name.display_name))
-    end
+    help_note(:div, :name_approve_comments_help.tp(name: @name.display_name))
   end
 
   private
