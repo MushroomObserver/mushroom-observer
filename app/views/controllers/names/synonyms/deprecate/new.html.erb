@@ -12,12 +12,9 @@ add_context_nav(name_forms_return_tabs(name: @name))
       ),
       name: @name,
       context: {
-        given_name: @given_name,
         names: @names,
         valid_names: @valid_names,
         suggest_corrections: @suggest_corrections,
-        parent_deprecated: @parent_deprecated,
-        misspelling: @misspelling,
-        comment: @comment
+        parent_deprecated: @parent_deprecated
       }
     )) %>

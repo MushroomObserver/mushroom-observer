@@ -15,8 +15,6 @@ class Components::NameEditSynonymForm < Components::ApplicationForm
     @current_synonyms = context[:current_synonyms] || []
     @proposed_synonyms = context[:proposed_synonyms] || []
     @new_names = context[:new_names] || []
-    @list_members = context[:list_members]
-    @deprecate_all = context[:deprecate_all]
     super(model, **)
   end
 
@@ -100,7 +98,6 @@ class Components::NameEditSynonymForm < Components::ApplicationForm
 
     textarea_field(:synonym_members,
                    label: "#{:form_synonyms_names.l}:",
-                   value: @list_members,
                    data: { autofocus: true }) do |f|
       f.with_between { help_block(members_help) }
     end

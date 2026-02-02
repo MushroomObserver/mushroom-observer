@@ -4,16 +4,14 @@
 #
 # @example
 #   render(Components::NameInheritClassificationForm.new(
-#     form_object,
+#     FormObject::InheritClassification.new(parent: @parent_text_name),
 #     name: @name,
-#     context: { parent_text_name: @parent_text_name,
-#                options: @options, message: @message }
+#     context: { options: @options, message: @message }
 #   ))
 #
 class Components::NameInheritClassificationForm < Components::ApplicationForm
   def initialize(model, name:, context: {}, **)
     @name = name
-    @parent_text_name = context[:parent_text_name]
     @options = context[:options]
     @message = context[:message]
     super(model, **)
@@ -23,7 +21,6 @@ class Components::NameInheritClassificationForm < Components::ApplicationForm
     render_options_alert if @options
 
     text_field(:parent, label: "#{:inherit_classification_parent_name.l}:",
-                        value: @parent_text_name,
                         data: { autofocus: true }, inline: true)
 
     submit(:SUBMIT.l, center: true)

@@ -6,38 +6,34 @@
 #   render(Components::NameDeprecateSynonymForm.new(
 #     FormObject::DeprecateSynonym.new(proposed_name: @given_name),
 #     name: @name,
-#     context: { given_name: @given_name, names: @names, ... }
+#     context: { names: @names, valid_names: @valid_names, ... }
 #   ))
 #
 class Components::NameDeprecateSynonymForm < Components::ApplicationForm
   def initialize(model, name:, context: {}, **)
     @name = name
-    @given_name = context[:given_name]
     @names = context[:names]
     @valid_names = context[:valid_names]
     @suggest_corrections = context[:suggest_corrections]
     @parent_deprecated = context[:parent_deprecated]
-    @misspelling = context[:misspelling]
-    @comment = context[:comment]
     super(model, **)
   end
 
   def view_template
     submit(:SUBMIT.l, center: true)
 
-    render_name_feedback if @given_name.present?
+    render_name_feedback if model.proposed_name.present?
 
     proposed_label = "#{:name_deprecate_preferred.l}:"
     autocompleter_field(:proposed_name,
                         type: :name, label: proposed_label,
-                        value: @given_name, inline: true,
-                        data: { autofocus: true })
+                        inline: true, data: { autofocus: true })
     help_note(:div, :name_deprecate_preferred_help.tp)
 
     checkbox_field(:is_misspelling, label: :form_names_misspelling.l)
 
     textarea_field(:comment, label: "#{:name_deprecate_comments.l}:",
-                             value: @comment, cols: 80, rows: 5, inline: true)
+                             cols: 80, rows: 5, inline: true)
     help_note(:div, deprecate_comments_help)
   end
 
@@ -45,7 +41,7 @@ class Components::NameDeprecateSynonymForm < Components::ApplicationForm
 
   def render_name_feedback
     render(Components::FormNameFeedback.new(
-             given_name: @given_name,
+             given_name: model.proposed_name,
              button_name: :SUBMIT.l,
              names: @names,
              valid_names: @valid_names,
@@ -62,6 +58,6 @@ class Components::NameDeprecateSynonymForm < Components::ApplicationForm
   end
 
   def form_action
-    deprecate_synonym_of_name_path(@name.id, approved_name: @given_name)
+    deprecate_synonym_of_name_path(@name.id, approved_name: model.proposed_name)
   end
 end
