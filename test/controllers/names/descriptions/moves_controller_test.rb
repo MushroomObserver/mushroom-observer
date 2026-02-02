@@ -165,7 +165,7 @@ module Names::Descriptions
     def test_move_nonexistent_source_description
       login("rolf")
       params = {
-        id: 999999,
+        id: 999_999,
         target: coprinus_name.id,
         delete: 0
       }
@@ -174,7 +174,8 @@ module Names::Descriptions
       assert_redirected_to(name_descriptions_index_path)
     end
 
-    # Cover flash_object_errors when cloned description fails validation (line 148)
+    # Cover flash_object_errors when cloned description fails validation
+    # (line 148)
     def test_move_description_clone_fails_validation
       login("rolf")
       params = {

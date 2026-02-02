@@ -286,11 +286,11 @@ module Locations
       login
       get(:show, params: { flow: :next, id: })
       next_data = @controller.find_query_and_next_object(object, :next, id)
-      if next_data
-        params = { id: next_data[:id],
-                   q: @controller.q_param(next_data[:query]) }
-        assert_redirected_to(location_description_path(**params))
-      end
+      return unless next_data
+
+      params = { id: next_data[:id],
+                 q: @controller.q_param(next_data[:query]) }
+      assert_redirected_to(location_description_path(**params))
     end
 
     def test_prev_description
@@ -300,11 +300,11 @@ module Locations
       login
       get(:show, params: { flow: :prev, id: })
       prev_data = @controller.find_query_and_next_object(object, :prev, id)
-      if prev_data
-        params = { id: prev_data[:id],
-                   q: @controller.q_param(prev_data[:query]) }
-        assert_redirected_to(location_description_path(**params))
-      end
+      return unless prev_data
+
+      params = { id: prev_data[:id],
+                 q: @controller.q_param(prev_data[:query]) }
+      assert_redirected_to(location_description_path(**params))
     end
 
     def test_destroy_location_description

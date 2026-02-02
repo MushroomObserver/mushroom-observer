@@ -126,7 +126,8 @@ module Names::Descriptions
     # Cover delete_src_description_and_update_parent when src was default
     def test_merge_and_delete_default_description
       name = names(:conocybe_filaris)
-      # Create two descriptions - src with no notes (mergeable), dest fully public
+      # Create two descriptions - src with no notes (mergeable),
+      # dest fully public
       src_desc = NameDescription.create!(
         name: name, user: rolf, source_type: "user", gen_desc: nil, public: true
       )
@@ -168,7 +169,8 @@ module Names::Descriptions
     # Cover check_src_permission! method (lines 50-52) - POST create on private
     def test_merge_private_description_no_read_permission
       # Rolf tries to merge mary's private description via POST create
-      # mary_desc reader_groups are mary_only and dick_only, so rolf can't read it
+      # mary_desc reader_groups are mary_only and dick_only,
+      # so rolf can't read it
       login("rolf")
       params = {
         id: mary_desc.id,
@@ -184,7 +186,7 @@ module Names::Descriptions
     def test_merge_nonexistent_source_description
       login("rolf")
       params = {
-        id: 999999,
+        id: 999_999,
         target: rolf_desc.id,
         delete: 0
       }
