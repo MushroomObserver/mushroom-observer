@@ -690,6 +690,48 @@ p(class: "text") { "Paragraph" }
 - For `button_to` (has complex behavior with no Phlex equivalent)
 - For helpers that don't have Phlex equivalents
 
+### Phlex Built-in Helpers
+
+Phlex provides useful helper methods for common patterns.
+
+#### `mix` - Merge attribute hashes intelligently
+
+Combines multiple attribute hashes, treating class values as token lists rather
+than replacing them. Useful for components that accept user-provided attributes.
+
+```ruby
+# Component that accepts additional classes/attributes
+def initialize(**attributes)
+  @attributes = attributes
+end
+
+def view_template
+  # User's classes get combined with component's classes
+  div(**mix({ class: "card border" }, @attributes)) { yield }
+end
+
+# Usage - classes combine: "card border purple-card"
+render(Card.new(class: "purple-card"))
+```
+
+Use `class!:` (with bang) to override instead of merge:
+```ruby
+div(**mix({ class: "default" }, { class!: "override" }))
+# Result: class="override"
+```
+
+#### `grab` - Access reserved Ruby keywords
+
+Extracts keyword arguments whose names are reserved Ruby keywords like `class`,
+`if`, `for`, etc.
+
+```ruby
+def initialize(class:, if:)
+  @class = grab(class:)           # Single value
+  @class, @if = grab(class:, if:) # Multiple values as array
+end
+```
+
 ### Common Patterns
 
 #### Using fields_for:
