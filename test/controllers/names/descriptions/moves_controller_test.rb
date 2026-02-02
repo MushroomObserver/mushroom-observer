@@ -146,5 +146,54 @@ module Names::Descriptions
       assert_redirected_to(name_description_path(peltigera_desc.id))
       assert_equal(stereum_name.reload.description_id, peltigera_desc.id)
     end
+
+    # Cover check_src_permission! method - POST create on private desc
+    def test_move_private_description_no_read_permission
+      # Rolf tries to move mary's private description via POST create
+      login("rolf")
+      params = {
+        id: mary_desc.id,
+        target: coprinus_name.id,
+        delete: 0
+      }
+      post(:create, params: params)
+      assert_flash_error(:runtime_description_private.t)
+      assert_redirected_to(name_path(mary_desc.parent_id))
+    end
+
+    # Cover check_src_exists! returning false (line 43)
+    def test_move_nonexistent_source_description
+      login("rolf")
+      params = {
+        id: 999999,
+        target: coprinus_name.id,
+        delete: 0
+      }
+      post(:create, params: params)
+      assert_flash_error
+      assert_redirected_to(name_descriptions_index_path)
+    end
+
+    # Cover flash_object_errors when cloned description fails validation (line 148)
+    def test_move_description_clone_fails_validation
+      login("rolf")
+      params = {
+        id: rolf_desc.id,
+        target: coprinus_name.id,
+        delete: 0
+      }
+
+      # Create a mock description that fails save
+      desc = NameDescription.new(name: names(:coprinus), user: rolf)
+      desc.errors.add(:base, "Test validation error")
+
+      desc.stub(:save, false) do
+        NameDescription.stub(:new, desc) do
+          post(:create, params: params)
+        end
+      end
+
+      assert_flash_error
+    end
   end
 end

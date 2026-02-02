@@ -6,7 +6,7 @@ class Components::Descriptions::MergeForm < Components::ApplicationForm
   def initialize(description, user:)
     @description = description
     @user = user
-    form_object = FormObject::DescriptionMerge.new
+    form_object = FormObject::DescriptionAction.new
     form_object.target = default_target_id if default_checked?
     form_object.delete = description.is_admin?(user)
     super(form_object, id: "merge_descriptions_form")

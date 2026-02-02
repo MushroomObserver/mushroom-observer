@@ -39,6 +39,10 @@ module Names::Descriptions
       get(:edit, params: { id: draft_cc_desc.id })
       assert_response(:success)
 
+      # Debug: print the first autocompleter HTML block
+      match = @response.body.match(/<div[^>]*class="autocompleter"[^>]*>.*?<\/div>\s*<\/div>\s*<\/div>/m)
+      puts match[0] if match
+
       # rolf is also in reviewers. and they are admins of this desc.
       # but access denied, because this description is public!
       get(:edit, params: { id: peltigera_desc.id })

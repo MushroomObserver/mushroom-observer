@@ -2,58 +2,44 @@
 
 # Form for moving a description to a synonym of its parent.
 # Used for both NameDescription and LocationDescription.
-class Components::Descriptions::MoveForm < Components::Base
-  include Phlex::Rails::Helpers::FormWith
-
-  register_output_helper :radio_with_label, mark_safe: true
-  register_value_helper :url_for
-
+class Components::Descriptions::MoveForm < Components::ApplicationForm
   def initialize(description, user:)
-    super()
     @description = description
     @user = user
+    form_object = FormObject::DescriptionAction.new
+    form_object.target = default_target_id if default_checked?
+    form_object.delete = description.is_admin?(user)
+    super(form_object, id: "move_descriptions_form")
   end
 
   def view_template
-    form_with(url: form_action, id: "move_descriptions_form") do |f|
-      @form = f
-      h4 { "#{:merge_descriptions_move_header.t}:" }
-      p(class: "help-note") { :merge_descriptions_move_help.t }
+    h4 { "#{:merge_descriptions_move_header.t}:" }
+    p(class: "help-note") { :merge_descriptions_move_help.t }
 
-      render_move_options if moves.any?
-      render_delete_checkbox if moves.any?
-      render_submit if moves.any?
-    end
+    return unless moves.any?
+
+    div(class: "form-group") { render_move_options }
+    render_delete_checkbox
+    render_submit
   end
 
   private
 
   def render_move_options
-    div(class: "form-group") do
-      sorted_moves.each do |name|
-        radio_with_label(form: @form, field: :target, value: name.id,
-                         label: name.display_name.t,
-                         checked: default_checked?)
-      end
-    end
+    options = sorted_moves.map { |name| [name.id, name.display_name.t] }
+    radio_field(:target, *options)
+  end
+
+  def default_target_id
+    sorted_moves.first&.id
   end
 
   def render_delete_checkbox
-    div(class: "form-check") do
-      input(type: "checkbox", name: "delete", value: "1",
-            id: "delete", class: "form-check-input",
-            checked: @description.is_admin?(@user))
-      label(for: "delete", class: "form-check-label") do
-        :merge_descriptions_delete_after.t
-      end
-    end
+    checkbox_field(:delete, label: :merge_descriptions_delete_after.t)
   end
 
   def render_submit
-    div(class: "text-center my-3") do
-      input(type: "submit", value: :SUBMIT.l, class: "btn btn-default",
-            data: { turbo_submits_with: :SUBMITTING.l })
-    end
+    submit(:SUBMIT.l, center: true)
   end
 
   def merges
@@ -89,5 +75,9 @@ class Components::Descriptions::MoveForm < Components::Base
       url_for(controller: "/locations/descriptions/moves", action: :create,
               id: @description.id, only_path: true)
     end
+  end
+
+  def form_method
+    :post
   end
 end

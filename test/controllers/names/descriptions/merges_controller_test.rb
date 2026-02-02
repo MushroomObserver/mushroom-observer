@@ -164,5 +164,33 @@ module Names::Descriptions
       name.reload
       assert_equal(dest_desc.id, name.description_id)
     end
+
+    # Cover check_src_permission! method (lines 50-52) - POST create on private
+    def test_merge_private_description_no_read_permission
+      # Rolf tries to merge mary's private description via POST create
+      # mary_desc reader_groups are mary_only and dick_only, so rolf can't read it
+      login("rolf")
+      params = {
+        id: mary_desc.id,
+        target: rolf_desc.id,
+        delete: 0
+      }
+      post(:create, params: params)
+      assert_flash_error(:runtime_description_private.t)
+      assert_redirected_to(name_path(mary_desc.parent_id))
+    end
+
+    # Cover check_src_exists! returning false (line 44)
+    def test_merge_nonexistent_source_description
+      login("rolf")
+      params = {
+        id: 999999,
+        target: rolf_desc.id,
+        delete: 0
+      }
+      post(:create, params: params)
+      assert_flash_error
+      assert_redirected_to(name_descriptions_index_path)
+    end
   end
 end

@@ -4,42 +4,33 @@
 # Allows setting reader/writer/admin permissions for groups and users.
 # Used for both NameDescription and LocationDescription.
 #
-class Components::Descriptions::PermissionsForm < Components::Base
-  include Phlex::Rails::Helpers::FormWith
+# Note: This form uses dynamic field names (group_reader[14], writein_name[1])
+# that don't map to model attributes. We use check_box_tag for the checkboxes
+# and ApplicationForm's autocompleter_field for the writeins.
+#
+class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   include Phlex::Rails::Helpers::CheckBoxTag
 
   register_value_helper :in_admin_mode?
   register_output_helper :user_link, mark_safe: true
-  register_output_helper :autocompleter_field, mark_safe: true
 
   WRITEIN_ROWS = 6
 
   def initialize(description:, groups:, data:)
-    super()
     @description = description
     @groups = groups
-    @data = data || {}
+    form_object = FormObject::DescriptionPermissions.new
+    form_object.load_writein_data(data) if data
+    super(form_object, id: "description_permissions_form")
   end
 
   def view_template
-    form_with(url: form_action, method: :put,
-              id: "description_permissions_form") do |f|
-      @form = f
-      render_submit_button
-      render_permissions_table
-      render_submit_button
-    end
+    submit(:SUBMIT.l, center: true)
+    render_permissions_table
+    submit(:SUBMIT.l, center: true)
   end
 
   private
-
-  def render_submit_button
-    div(class: "text-center my-3") do
-      input(type: "submit", value: :SUBMIT.l,
-            class: "btn btn-default",
-            data: { turbo_submits_with: :SUBMITTING.l })
-    end
-  end
 
   def render_permissions_table
     table(class: "w-100 table-striped table-description-permissions") do
@@ -181,28 +172,28 @@ class Components::Descriptions::PermissionsForm < Components::Base
   end
 
   def render_writein_row(row_num)
-    datum = @data[row_num] || {}
-
     tr do
       td do
         autocompleter_field(
-          form: @form,
-          field: "writein_name[#{row_num}]",
+          :"writein_name_#{row_num}",
           type: :user,
           placeholder: :start_typing.l,
-          value: datum[:name]
+          attributes: { name: "writein_name[#{row_num}]" }
         )
       end
       td do
-        check_box_tag("writein_reader[#{row_num}]", "1", datum[:reader],
+        check_box_tag("writein_reader[#{row_num}]", "1",
+                      model.send(:"writein_reader_#{row_num}"),
                       class: "form-control")
       end
       td do
-        check_box_tag("writein_writer[#{row_num}]", "1", datum[:writer],
+        check_box_tag("writein_writer[#{row_num}]", "1",
+                      model.send(:"writein_writer_#{row_num}"),
                       class: "form-control")
       end
       td do
-        check_box_tag("writein_admin[#{row_num}]", "1", datum[:admin],
+        check_box_tag("writein_admin[#{row_num}]", "1",
+                      model.send(:"writein_admin_#{row_num}"),
                       class: "form-control")
       end
     end
@@ -223,5 +214,9 @@ class Components::Descriptions::PermissionsForm < Components::Base
     else
       "/locations/descriptions/permissions"
     end
+  end
+
+  def form_method
+    :put
   end
 end

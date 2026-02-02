@@ -393,5 +393,56 @@ module Locations
       assert_equal("Local Guidebook", desc.source_name)
       assert_false(desc.public)
     end
+
+    # Test create validation failure - covers lines 118-119
+    def test_create_description_validation_failure
+      loc = locations(:nybg_location)
+      login("dick")
+
+      # Create a description object that fails validation
+      desc = LocationDescription.new(location: loc, user: users(:dick))
+      desc.errors.add(:base, "Test error")
+
+      params = {
+        location_id: loc.id,
+        description: {
+          source_type: "public",
+          gen_desc: "test"
+        }
+      }
+
+      desc.stub(:valid?, false) do
+        LocationDescription.stub(:new, desc) do
+          post(:create, params: params)
+        end
+      end
+
+      assert_flash_error
+      assert_template("new")
+    end
+
+    # Test update with save validation failure - covers lines 191-193
+    def test_update_description_save_failure
+      desc = location_descriptions(:albion_desc)
+      login("rolf")
+
+      params = {
+        id: desc.id,
+        description: {
+          gen_desc: "New description content that is different"
+        }
+      }
+
+      desc.errors.add(:base, "Save error")
+
+      desc.stub(:save, false) do
+        LocationDescription.stub(:safe_find, desc) do
+          put(:update, params: params)
+        end
+      end
+
+      assert_flash_error
+      assert_template("edit")
+    end
   end
 end
