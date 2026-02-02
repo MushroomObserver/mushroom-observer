@@ -16,12 +16,11 @@ class NameEditSynonymFormTest < ComponentTestCase
     )
 
     # The label should contain IN ORDER: checkbox, link, id badge
-    # Pattern: <label...><input type="checkbox"...><a href="...">Name</a> <button...>id</button></label>
-    label_pattern = /<label[^>]*>.*?
+    label_pattern = %r{<label[^>]*>.*?
       <input[^>]*type="checkbox"[^>]*>.*?
-      <a\s+href="\/names\/#{@synonym1.id}"[^>]*>.*?<\/a>\s*
-      <button[^>]*class="[^"]*badge[^"]*"[^>]*>#{@synonym1.id}<\/button>
-    /mx
+      <a\s+href="/names/#{@synonym1.id}"[^>]*>.*?</a>\s*
+      <button[^>]*class="[^"]*badge[^"]*"[^>]*>#{@synonym1.id}</button>
+    }mx
     assert_match(label_pattern, html,
                  "Label should contain checkbox, then link, then id badge")
   end
