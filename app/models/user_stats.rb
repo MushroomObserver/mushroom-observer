@@ -320,15 +320,15 @@ class UserStats < ApplicationRecord
       # JSON_OBJECTAGG returns a suitable object for this column, after parsing.
       # Note selecting/grouping :language_id gives a separate AR record per lang
       # but then you need to aggregate those by user_id
-      statement = <<-SQL.squish
-      SELECT user_id, JSON_OBJECTAGG(language_id, n)
-      FROM (
-        SELECT user_id, language_id, COUNT(DISTINCT translation_string_id) as n
-        FROM translation_string_versions
-        WHERE language_id IS NOT NULL
-        GROUP BY user_id, language_id
-      ) x
-      GROUP BY user_id
+      statement = <<~SQL.squish
+        SELECT user_id, JSON_OBJECTAGG(language_id, n)
+        FROM (
+          SELECT user_id, language_id, COUNT(DISTINCT translation_string_id) as n
+          FROM translation_string_versions
+          WHERE language_id IS NOT NULL
+          GROUP BY user_id, language_id
+        ) x
+        GROUP BY user_id
       SQL
       by_lang = TranslationString::Version.connection.execute(statement)
 
