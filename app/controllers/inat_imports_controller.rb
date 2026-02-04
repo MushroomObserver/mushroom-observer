@@ -94,7 +94,7 @@ class InatImportsController < ApplicationController
 
   def reload_form
     # clean trailing commas and whitespace
-    @inat_ids = params[:inat_ids].sub(/[,\s]+\z/, "")
+    @inat_ids = params[:inat_ids]&.sub(/[,\s]+\z/, "")
     @inat_username = params[:inat_username]
     render(:new)
   end

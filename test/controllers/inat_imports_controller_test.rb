@@ -324,6 +324,27 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  def test_import_all
+    user = users(:mary)
+    params = { inat_username: user.inat_username, all: 1, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+  end
+
+  def test_allow_first_time_import_all
+    user = users(:rolf)
+    assert_nil(user.inat_username, "Test needs fixture without inat_username")
+    params = { inat_username: "anything", all: 1, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+  end
+
   def test_import_all_anothers_observations
     user = users(:dick) # Dick is a iNat superimporter
     params = { inat_username: "anything", inat_ids: nil,
@@ -370,16 +391,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_redirected_to(
       inat_import_path(inat_import, params: { tracker_id: tracker.id })
     )
-  end
-
-  def test_import_all
-    user = users(:mary)
-    params = { inat_username: user.inat_username, all: 1, consent: 1 }
-
-    login(user.login)
-    post(:create, params: params)
-
-    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
   def test_inat_username_unchanged_if_authorization_denied
