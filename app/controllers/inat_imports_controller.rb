@@ -93,10 +93,16 @@ class InatImportsController < ApplicationController
   private
 
   def reload_form
-    # clean trailing commas and whitespace
-    @inat_ids = params[:inat_ids]&.sub(/[,\s]+\z/, "")
+    @inat_ids = sanitize_inat_ids(params[:inat_ids])
     @inat_username = params[:inat_username]
     render(:new)
+  end
+
+  # Sanitize to only digits, commas, and whitespace, then trim
+  def sanitize_inat_ids(ids)
+    return nil if ids.nil?
+
+    ids.gsub(/[^\d,\s]/, "").strip.chomp(",").strip
   end
 
   # Were any listed iNat IDs previously imported?
@@ -144,15 +150,18 @@ class InatImportsController < ApplicationController
   end
 
   def clean_inat_ids
-    # clean trailing commas and whitespace
-    inat_ids = params[:inat_ids]&.sub(/[,\s]+\z/, "")
+    inat_ids = sanitize_inat_ids(params[:inat_ids])
     previous_imports = Observation.where(inat_id: inat_id_list)
     return inat_ids if previous_imports.none?
 
-    # remove previously imported ids
-    # just in case the iNat user deleted the Mushroom_Observer_URL field
-    # NOTE: Also useful in manual testing when writes of iNat obss are
-    # commented out temporarily. jdc 2026-01-15
+    remove_previously_imported_ids(inat_ids, previous_imports)
+  end
+
+  # Remove previously imported ids in case the iNat user deleted the
+  # Mushroom_Observer_URL field.
+  # NOTE: Also useful in manual testing when writes of iNat obss are
+  # commented out temporarily. jdc 2026-01-15
+  def remove_previously_imported_ids(inat_ids, previous_imports)
     previous_ids = previous_imports.pluck(:inat_id).map(&:to_s)
     remaining_ids =
       inat_ids.split(",").map(&:strip).reject { |id| previous_ids.include?(id) }
