@@ -10,6 +10,8 @@ class Observation
       @name_ages   = {}  # Oldest date that a name was proposed.
       @taxon_ages  = {}  # Oldest date that a taxon was proposed.
       @user_wgts   = {}  # Caches user rankings.
+      @user_max_votes = {} # Each user's max vote across all namings.
+      @naming_max_votes = {} # Max vote per naming.
     end
 
     # Get the community consensus on what the name should be.  It just
@@ -30,6 +32,7 @@ class Observation
       # times.  Thus a user can potentially vote for a given *name*
       # (not naming) multiple times.  Likewise, of course, for
       # synonyms.  I choose the strongest vote in such cases.
+      precompute_user_max_votes
       @namings.each do |naming|
         process_naming(user, naming)
       end
@@ -69,9 +72,16 @@ class Observation
       wgt = user_weight(user_id, vote)
       return [0, 0] unless wgt.positive?
 
-      update_user_votes(name_id, user_id, val, wgt)
-      update_taxon_votes(naming, name_id, user_id, val, wgt)
-      [val * wgt, wgt]
+      eff_wgt = effective_weight(user_id, val, wgt, naming.id)
+      weights = [wgt, eff_wgt]
+      update_user_votes(name_id, user_id, val, weights)
+      update_taxon_votes(naming, name_id, user_id, val, weights)
+      # Numerator uses val * wgt (not eff_wgt). This is equivalent
+      # to naming_max * eff_wgt: the vote is conceptually elevated
+      # to the naming's max value at reduced weight, but the scaling
+      # factors cancel (naming_max * val/naming_max * wgt = val*wgt).
+      # See doc/consensus_algorithm.md for the full explanation.
+      [val * wgt, eff_wgt]
     end
 
     def user_weight(user_id, vote)
@@ -79,31 +89,76 @@ class Observation
       @user_wgts[user_id]
     end
 
-    # Record best vote for this user for this name.  This will be used
-    # later to determine which name wins in the case of the winning taxon
-    # (see below) having multiple accepted names.
-    def update_user_votes(name_id, user_id, val, weight)
-      @name_votes[name_id] ||= {}
-      if !@name_votes[name_id][user_id] ||
-         @name_votes[name_id][user_id][0] < val
-        @name_votes[name_id][user_id] = [val, weight]
+    # Scan all votes to find each user's max vote value
+    # and each naming's max vote value.
+    # Must be called before processing individual votes.
+    def precompute_user_max_votes
+      @namings.each do |naming|
+        naming_max = 0
+        naming.votes.each do |vote|
+          uid = vote.user_id
+          val = vote.value
+          naming_max = val if val > naming_max
+          next if @user_max_votes[uid] &&
+                  @user_max_votes[uid] >= val
+
+          @user_max_votes[uid] = val
+        end
+        @naming_max_votes[naming.id] = naming_max
       end
     end
 
-    def update_taxon_votes(naming, name_id, user_id, val, wgt)
-      # Record best vote for this user for this group of synonyms.  (Since
-      # not all taxa have synonyms, I've got to create a "fake" id that
-      # uses the synonym id if it exists, else uses the name id, but still
-      # keeps them separate.)
+    # When a user's highest vote is positive but below
+    # MAXIMUM_VOTE, equals their max across all namings,
+    # and the naming has a higher vote from someone else,
+    # reduce the weight proportionally. This treats the
+    # sub-max vote as diluted agreement at the naming's
+    # highest level rather than penalizing it.
+    def effective_weight(user_id, val, wgt, naming_id)
+      return wgt unless boost_vote?(user_id, val, naming_id)
+
+      naming_max = @naming_max_votes[naming_id]
+      (val.abs / naming_max.to_f) * wgt
+    end
+
+    def boost_vote?(user_id, val, naming_id)
+      user_max = @user_max_votes[user_id]
+      naming_max = @naming_max_votes[naming_id]
+      user_max&.positive? &&
+        user_max < Vote::MAXIMUM_VOTE &&
+        val == user_max &&
+        naming_max > val
+    end
+
+    # Record best vote for this user for this name.  This will
+    # be used later to determine which name wins in the case of
+    # the winning taxon having multiple accepted names.
+    # Stores [val, weight, effective_weight].
+    def update_user_votes(name_id, user_id, val, weights)
+      @name_votes[name_id] ||= {}
+      if !@name_votes[name_id][user_id] ||
+         @name_votes[name_id][user_id][0] < val
+        @name_votes[name_id][user_id] =
+          [val, weights[0], weights[1]]
+      end
+    end
+
+    # Record best vote for this user for this synonym group.
+    # (Since not all taxa have synonyms, we create a "fake" id
+    # using synonym id if it exists, else name id.)
+    # Stores [val, wgt, effective_wgt].
+    def update_taxon_votes(naming, name_id, user_id, val,
+                           weights)
       taxon_id = taxon_identifier(naming, name_id)
       if !@taxon_ages[taxon_id] ||
          naming.created_at < @taxon_ages[taxon_id]
         @taxon_ages[taxon_id] = naming.created_at
       end
-      @taxon_votes[taxon_id] = {} unless @taxon_votes[taxon_id]
+      @taxon_votes[taxon_id] ||= {}
       if !@taxon_votes[taxon_id][user_id] ||
          @taxon_votes[taxon_id][user_id][0] < val
-        @taxon_votes[taxon_id][user_id] = [val, wgt]
+        @taxon_votes[taxon_id][user_id] =
+          [val, weights[0], weights[1]]
       end
     end
 
@@ -123,17 +178,17 @@ class Observation
     end
 
     def find_taxon_votes
-      # Now that we've weeded out potential duplicate votes, we can
-      # combine them safely.
+      # Now that we've weeded out potential duplicate votes, we
+      # can combine them safely.
       votes = {}
       @taxon_votes.each_key do |taxon_id|
         vote = votes[taxon_id] = [0, 0]
-        @taxon_votes[taxon_id].each_key do |user_id|
-          user_vote = @taxon_votes[taxon_id][user_id]
+        @taxon_votes[taxon_id].each_value do |user_vote|
           val = user_vote[0]
           wgt = user_vote[1]
+          eff_wgt = user_vote[2]
           vote[0] += val * wgt
-          vote[1] += wgt
+          vote[1] += eff_wgt
         end
       end
       votes
@@ -235,18 +290,18 @@ class Observation
       name ? name.real_text_name : "nil"
     end
 
-    # First combine votes for each name; exactly analagous to what we did
-    # with taxa
+    # First combine votes for each name; exactly analogous to
+    # what we did with taxa.
     def process_votes_for_synonyms
       votes = {}
       @name_votes.each_key do |name_id|
         vote = votes[name_id] = [0, 0]
-        @name_votes[name_id].each_key do |user_id|
-          user_vote = @name_votes[name_id][user_id]
+        @name_votes[name_id].each_value do |user_vote|
           val = user_vote[0]
           wgt = user_vote[1]
+          eff_wgt = user_vote[2]
           vote[0] += val * wgt
-          vote[1] += wgt
+          vote[1] += eff_wgt
         end
       end
       votes
