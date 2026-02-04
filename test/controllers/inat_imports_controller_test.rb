@@ -360,6 +360,20 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  def test_super_importer_can_import_specific_ids_from_another_user
+    user = users(:dick) # Dick is a super_importer
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    params = { inat_username: "other_inat_user", inat_ids: "12345",
+               consent: 1 }
+
+    stub_request(:any, authorization_url)
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
+  end
+
   def test_import_authorized
     user = users(:rolf)
     assert_blank(user.inat_username,
