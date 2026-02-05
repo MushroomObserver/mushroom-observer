@@ -540,8 +540,9 @@ MushroomObserver::Application.routes.draw do
                          as: "lifeform_of")
       get("lifeforms/propagate/edit", to: "names/lifeforms/propagate#edit",
                                       as: "form_to_propagate_lifeform_of")
-      put("lifeforms/propagate", to: "names/lifeforms/propagate#update",
-                                 as: "propagate_lifeform_of")
+      match("lifeforms/propagate", to: "names/lifeforms/propagate#update",
+                                   via: [:put, :patch],
+                                   as: "propagate_lifeform_of")
       # map
       get("map", to: "names/maps#show")
       # synonyms

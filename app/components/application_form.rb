@@ -110,6 +110,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   register_value_helper :pluralize
   register_value_helper :url_for
   register_value_helper :rank_as_string
+  register_output_helper :help_note, mark_safe: true
 
   # We don't need to register form helpers anymore - using Superform fields
 

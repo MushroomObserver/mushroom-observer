@@ -17,6 +17,14 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `descriptions/_form_permissions.html.erb` | Edit permissions | |
 | `descriptions/_form_move.html.erb` | Move description | |
 | `descriptions/_form_merge.html.erb` | Merge descriptions | |
+| `names/classification/inherit/new.html.erb` | Inherit classification | Done |
+| `names/classification/edit.html.erb` | Edit classification | Done |
+| `names/lifeforms/propagate/edit.html.erb` | Propagate lifeform | Done |
+| `names/lifeforms/edit.html.erb` | Edit lifeform | Done |
+| `names/descriptions/_form.html.erb` | Name description | |
+| `names/synonyms/deprecate/new.html.erb` | Deprecate name | Done |
+| `names/synonyms/approve/new.html.erb` | Approve name | Done |
+| `names/synonyms/edit.html.erb` | Edit synonyms | Done |
 
 ### Observation Forms (4)
 
@@ -128,6 +136,13 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `GlossaryTermForm` | Modal glossary term | |
 | `ProjectMemberForm` | `projects/members/_form.html.erb` | |
 | `ProjectAliasForm` | Modal project alias | |
+| `NameClassificationForm` | `names/classification/edit.html.erb` | 2026-01-27 |
+| `NameInheritClassificationForm` | `names/classification/inherit/new.html.erb` | 2026-01-27 |
+| `NameLifeformForm` | `names/lifeforms/edit.html.erb` | 2026-01-27 |
+| `NamePropagateLifeformForm` | `names/lifeforms/propagate/edit.html.erb` | 2026-01-27 |
+| `NameApproveSynonymForm` | `names/synonyms/approve/new.html.erb` | 2026-01-27 |
+| `NameDeprecateSynonymForm` | `names/synonyms/deprecate/new.html.erb` | 2026-01-27 |
+| `NameEditSynonymForm` | `names/synonyms/edit.html.erb` | 2026-01-27 |
 | `Descriptions::AuthorRequestForm` | `descriptions/author_requests/new.html.erb` | 2026-01-28 |
 | Email forms (5) | Various email request forms | 2026-01-28 |
 | `DescriptionForm` | `names/descriptions/_form.html.erb`, `locations/descriptions/_form.html.erb`, `descriptions/_fields_for_description.html.erb` | 2026-01-28 |

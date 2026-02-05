@@ -156,8 +156,8 @@ thead tr {
 }
 
 .table-lifeform {
-  tr td {
-    padding: .1em 1em;
+  > tbody > tr > td {
+    vertical-align: middle;
   }
 }
 

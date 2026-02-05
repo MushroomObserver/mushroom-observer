@@ -54,8 +54,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # MO's default render order is checkbox-then-label
     def render_content
+      text = label_text
       if label_position_before?
-        plain(label_text)
+        trusted_html(text)
         whitespace
         render_between_slot
         yield
@@ -63,7 +64,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         yield
         render_between_slot
         whitespace
-        plain(label_text)
+        trusted_html(text)
       end
     end
 
