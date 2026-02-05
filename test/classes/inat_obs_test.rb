@@ -188,8 +188,10 @@ class InatObsTest < UnitTestCase
   end
 
   def test_specimen
-    assert(mock_observation("arrhenia_sp_NY02").specimen?)
     assert_not(mock_observation("somion_unicolor").specimen?)
+    # See comment in Inat::Obs#specimen? about disabling specimen detection
+    # assert(mock_observation("arrhenia_sp_NY02").specimen?)
+    assert_not(mock_observation("arrhenia_sp_NY02").specimen?)
   end
 
   def test_collector

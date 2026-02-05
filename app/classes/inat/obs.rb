@@ -171,9 +171,15 @@ class Inat
     end
 
     def specimen?
-      # used by iNat NEMF projects and some others
-      field = inat_obs_field("Voucher Specimen Taken")
-      field.present? && field[:value] == "Yes"
+      false
+
+      # Disable specimen detection until I can find a better algorithm
+      # the Inat Observation Field "Voucher Specimen Taken" is not reliable
+      # because the iNat practice is to use this field to mean other things
+      # like "sampled for DNA analysis" rather than "collected as a specimen"
+
+      # field = inat_obs_field("Voucher Specimen Taken")
+      # field.present? && field[:value] == "Yes"
     end
 
     def source = "mo_inat_import"

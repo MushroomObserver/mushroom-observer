@@ -15,14 +15,14 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 
 | File | Form | Status |
 | ---- | ---- | ------ |
-| `names/classification/inherit/new.html.erb` | Inherit classification | |
-| `names/classification/edit.html.erb` | Edit classification | |
-| `names/lifeforms/propagate/edit.html.erb` | Propagate lifeform | |
-| `names/lifeforms/edit.html.erb` | Edit lifeform | |
+| `names/classification/inherit/new.html.erb` | Inherit classification | Done |
+| `names/classification/edit.html.erb` | Edit classification | Done |
+| `names/lifeforms/propagate/edit.html.erb` | Propagate lifeform | Done |
+| `names/lifeforms/edit.html.erb` | Edit lifeform | Done |
 | `names/descriptions/_form.html.erb` | Name description | |
-| `names/synonyms/deprecate/new.html.erb` | Deprecate name | |
-| `names/synonyms/approve/new.html.erb` | Approve name | |
-| `names/synonyms/edit.html.erb` | Edit synonyms | |
+| `names/synonyms/deprecate/new.html.erb` | Deprecate name | Done |
+| `names/synonyms/approve/new.html.erb` | Approve name | Done |
+| `names/synonyms/edit.html.erb` | Edit synonyms | Done |
 
 ### Observation Forms (5)
 
@@ -116,6 +116,13 @@ Forms that have been fully converted to Phlex components:
 | `GlossaryTermForm` | Modal glossary term | |
 | `ProjectMemberForm` | `projects/members/_form.html.erb` | |
 | `ProjectAliasForm` | Modal project alias | |
+| `NameClassificationForm` | `names/classification/edit.html.erb` | 2026-01-27 |
+| `NameInheritClassificationForm` | `names/classification/inherit/new.html.erb` | 2026-01-27 |
+| `NameLifeformForm` | `names/lifeforms/edit.html.erb` | 2026-01-27 |
+| `NamePropagateLifeformForm` | `names/lifeforms/propagate/edit.html.erb` | 2026-01-27 |
+| `NameApproveSynonymForm` | `names/synonyms/approve/new.html.erb` | 2026-01-27 |
+| `NameDeprecateSynonymForm` | `names/synonyms/deprecate/new.html.erb` | 2026-01-27 |
+| `NameEditSynonymForm` | `names/synonyms/edit.html.erb` | 2026-01-27 |
 | `Descriptions::AuthorRequestForm` | `descriptions/author_requests/new.html.erb` | 2026-01-28 |
 | ... and 17 modal forms | | |
 

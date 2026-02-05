@@ -145,6 +145,33 @@ with model as the first positional argument. Pattern B forms ignore this model
 - Form owns its FormObject creation logic
 - Works with both direct rendering and ModalForm turbo_stream responses
 
+
+### Form Objects
+
+When a form doesn't map directly to an ActiveRecord model (e.g., action forms,
+multi-step forms, or forms with custom param structures), create a **FormObject**.
+
+**Location:** `app/classes/form_object/`
+
+**Naming:** Use the concept name without "Form" suffix. The class is namespaced
+under `FormObject::`.
+
+```ruby
+# Good - app/classes/form_object/inherit_classification.rb
+class FormObject::InheritClassification < FormObject::Base
+  attribute :parent, :string
+  attribute :options, :integer
+end
+
+# Usage in view
+render(Components::MyForm.new(
+  FormObject::InheritClassification.new(parent: @parent_text_name),
+  name: @name
+))
+
+# Params will be namespaced as: inherit_classification[parent]
+```
+
 ### HTML Helpers
 
 **Use Phlex's native HTML helpers** instead of Rails `tag` helpers wrapped in `unsafe_raw`.
