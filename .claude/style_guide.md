@@ -113,6 +113,32 @@ render(field(:name).text(wrapper_options: { label: "Name:" }, size: 40))
 render(field(:notes).textarea(wrapper_options: { label: "Notes:" }, rows: 6))
 ```
 
+### Form Objects
+
+When a form doesn't map directly to an ActiveRecord model (e.g., action forms,
+multi-step forms, or forms with custom param structures), create a **FormObject**.
+
+**Location:** `app/classes/form_object/`
+
+**Naming:** Use the concept name without "Form" suffix. The class is namespaced
+under `FormObject::`.
+
+```ruby
+# Good - app/classes/form_object/inherit_classification.rb
+class FormObject::InheritClassification < FormObject::Base
+  attribute :parent, :string
+  attribute :options, :integer
+end
+
+# Usage in view
+render(Components::MyForm.new(
+  FormObject::InheritClassification.new(parent: @parent_text_name),
+  name: @name
+))
+
+# Params will be namespaced as: inherit_classification[parent]
+```
+
 ### HTML Helpers
 
 **Use Phlex's native HTML helpers** instead of Rails `tag` helpers wrapped in `unsafe_raw`.

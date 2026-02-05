@@ -110,6 +110,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   register_value_helper :pluralize
   register_value_helper :url_for
   register_value_helper :rank_as_string
+  register_output_helper :help_note, mark_safe: true
 
   # We don't need to register form helpers anymore - using Superform fields
 
@@ -262,6 +263,16 @@ class Components::ApplicationForm < Superform::Rails::Form
     yield(field_component) if block_given?
 
     render(field_component)
+  end
+
+  # Radio button group with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Array<Array>] list of [value, label] pairs
+  # @param wrapper_options [Hash] wrapper options (label, etc.)
+  # @example
+  #   radio_field(:options, [1, "Option 1"], [2, "Option 2"])
+  def radio_field(field_name, *options, **wrapper_options)
+    render(field(field_name).radio(*options, **wrapper_options))
   end
 
   # Select field with label and Bootstrap form-group wrapper
