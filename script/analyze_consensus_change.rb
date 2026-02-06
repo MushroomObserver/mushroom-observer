@@ -61,25 +61,67 @@ def obs_scope
   )
 end
 
-def print_progress(processed, total, change_count)
+def format_time(time)
+  time.strftime("%Y-%m-%d %H:%M:%S")
+end
+
+def estimate_end_time(start_time, processed, total)
+  return nil if processed.zero?
+
+  elapsed = Time.zone.now - start_time
+  rate = processed.to_f / elapsed
+  remaining = (total - processed) / rate
+  Time.zone.now + remaining
+end
+
+def print_progress(processed, total, change_count, start_time)
   return unless (processed % 5000).zero?
 
+  eta = estimate_end_time(start_time, processed, total)
+  eta_str = eta ? " | ETA: #{format_time(eta)}" : ""
   $stdout.print(
     "\r  #{processed}/#{total} processed, " \
-    "#{change_count} changed..."
+    "#{change_count} would change#{eta_str}".ljust(72)
   )
   $stdout.flush
 end
 
-def print_summary(processed, changes, errors, updated: 0)
-  puts("\r#{" " * 60}\r")
-  puts("Processed: #{processed}")
-  puts("Would change consensus name: #{changes.count}")
-  puts("Updated (vote_cache only): #{updated}") if updated.positive?
-  puts("Unchanged: #{processed - changes.count - updated - errors}")
-  puts("Errors: #{errors}")
+def format_duration(seconds)
+  hours = (seconds / 3600).to_i
+  minutes = ((seconds % 3600) / 60).to_i
+  secs = (seconds % 60).to_i
+  format("%<h>02d:%<m>02d:%<s>02d", h: hours, m: minutes, s: secs)
+end
+
+def print_timing(start_time, end_time)
+  return unless start_time && end_time
+
+  elapsed = end_time - start_time
+  puts("Finished at: #{format_time(end_time)}")
+  puts("Elapsed: #{format_duration(elapsed)}")
   puts
-  print_changes(changes)
+end
+
+def count_unchanged(stats)
+  stats[:processed] - stats[:changes].count - stats[:updated] - stats[:errors]
+end
+
+def print_counts(stats)
+  puts("Processed: #{stats[:processed]}")
+  puts("Would change consensus name: #{stats[:changes].count}")
+  if stats[:updated].positive?
+    puts("Updated (vote_cache only): #{stats[:updated]}")
+  end
+  puts("Unchanged: #{count_unchanged(stats)}")
+  puts("Errors: #{stats[:errors]}")
+end
+
+def print_summary(stats)
+  puts("\r#{" " * 80}\r")
+  print_timing(stats[:start_time], stats[:end_time])
+  print_counts(stats)
+  puts
+  print_changes(stats[:changes])
 end
 
 def print_changes(changes)
@@ -131,10 +173,29 @@ def record_change(obs_id, old_name, new_name)
   }
 end
 
+def print_start_time
+  start_time = Time.zone.now
+  puts("Started at: #{format_time(start_time)}")
+  puts
+  start_time
+end
+
+def build_stats(result, processed, errors, start_time)
+  {
+    changes: result[:changes],
+    updated: result[:updated],
+    processed: processed,
+    errors: errors,
+    start_time: start_time,
+    end_time: Time.zone.now
+  }
+end
+
 # Shared processing loop for both modes.
 # Yields each observation and a result hash to the block.
 # Result hash has :changes (name would change) and :updated (vote_cache updated)
 def process_observations(scope, total, limit: nil, output_file: nil)
+  start_time = print_start_time
   result = { changes: [], updated: 0 }
   processed = 0
   errors = 0
@@ -145,14 +206,15 @@ def process_observations(scope, total, limit: nil, output_file: nil)
     yield(obs, result)
 
     processed += 1
-    print_progress(processed, total, result[:changes].count)
+    print_progress(processed, total, result[:changes].count, start_time)
   rescue StandardError => e
     errors += 1
     warn("Error on obs ##{obs.id}: #{e.message}")
   end
 
-  print_summary(processed, result[:changes], errors, updated: result[:updated])
-  write_changes_to_file(result[:changes], output_file)
+  stats = build_stats(result, processed, errors, start_time)
+  print_summary(stats)
+  write_changes_to_file(stats[:changes], output_file)
 end
 
 def find_candidate_ids
