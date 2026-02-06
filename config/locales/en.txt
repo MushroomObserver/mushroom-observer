@@ -3124,8 +3124,8 @@
   inat_not_imported: Not Imported
 
   inat_import_confirm_title: Confirm iNat Import
-  inat_import_confirm_estimate: "Estimated number of observations to import: [count]"
-  inat_import_confirm_estimate_unavailable: Unable to estimate the number of observations to import.
+  inat_import_confirm_estimate_caption: Estimated number of imports
+  inat_import_confirm_estimate_unavailable: Unavailable
   inat_import_confirm_prompt: Would you like to proceed with the import?
   inat_import_confirm_proceed: Proceed
   inat_import_confirm_go_back: Go Back

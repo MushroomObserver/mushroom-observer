@@ -23,15 +23,17 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
   private
 
   def render_estimate
-    if @estimate
-      p do
-        trusted_html(
-          :inat_import_confirm_estimate.t(count: @estimate)
-        )
+    render(Components::Panel.new) do |panel|
+      panel.with_body do
+        b { plain(:inat_import_confirm_estimate_caption.l) }
+        plain(": ")
+        plain(estimated_count)
       end
-    else
-      p { plain(:inat_import_confirm_estimate_unavailable.l) }
     end
+  end
+
+  def estimated_count
+    @estimate&.to_s || :inat_import_confirm_estimate_unavailable.l
   end
 
   def render_hidden_fields
