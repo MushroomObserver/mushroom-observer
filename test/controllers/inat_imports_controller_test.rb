@@ -334,6 +334,53 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_template(:confirm)
   end
 
+  def test_create_confirmed_with_superform_params
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    inat_username = "rolf"
+    inat_ids = "123,456"
+
+    stub_request(:any, authorization_url)
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: inat_username,
+             inat_ids: inat_ids,
+             import_all: "",
+             consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_equal(inat_username, inat_import.reload.inat_username,
+                 "Should flatten inat_username from namespaced params")
+  end
+
+  def test_create_go_back_with_superform_params
+    login(users(:rolf).login)
+
+    post(:create,
+         params: {
+           go_back: 1,
+           inat_import_confirm: {
+             inat_username: "rolf",
+             inat_ids: "123",
+             import_all: "",
+             consent: "1"
+           }
+         })
+
+    assert_response(:success)
+    assert_template(:new)
+    assert_select(
+      "textarea#inat_ids", { text: "123", count: 1 },
+      "Form should preserve inat_ids from namespaced params"
+    )
+  end
+
   def test_create_confirmation_go_back
     user = users(:rolf)
     inat_username = "rolf"
