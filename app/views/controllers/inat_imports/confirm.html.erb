@@ -1,0 +1,36 @@
+<%
+  add_page_title(:inat_import_confirm_title.l)
+  add_context_nav(inat_import_form_new_tabs)
+%>
+
+<div>
+  <% if @estimate %>
+    <p><%= :inat_import_confirm_estimate.t(count: @estimate) %></p>
+  <% else %>
+    <p><%= :inat_import_confirm_estimate_unavailable.l %></p>
+  <% end %>
+
+  <p><%= :inat_import_confirm_prompt.l %></p>
+
+  <div class="mt-3">
+    <%= form_with(url: inat_imports_path, method: :post) do |f| %>
+      <%= hidden_field_tag(:inat_username, @inat_username) %>
+      <%= hidden_field_tag(:inat_ids, @inat_ids) %>
+      <%= hidden_field_tag(:all, @import_all) %>
+      <%= hidden_field_tag(:consent, @consent) %>
+      <%= hidden_field_tag(:confirmed, "1") %>
+      <%= f.submit(:inat_import_confirm_proceed.l,
+                   class: "btn btn-default") %>
+    <% end %>
+
+    <%= form_with(url: inat_imports_path, method: :post) do |f| %>
+      <%= hidden_field_tag(:inat_username, @inat_username) %>
+      <%= hidden_field_tag(:inat_ids, @inat_ids) %>
+      <%= hidden_field_tag(:all, @import_all) %>
+      <%= hidden_field_tag(:consent, @consent) %>
+      <%= hidden_field_tag(:go_back, "1") %>
+      <%= f.submit(:inat_import_confirm_go_back.l,
+                   class: "btn btn-default mt-2") %>
+    <% end %>
+  </div>
+</div>

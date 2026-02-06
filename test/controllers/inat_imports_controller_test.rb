@@ -78,7 +78,8 @@ class InatImportsControllerTest < FunctionalTestCase
     import = inat_imports(:ollie_inat_import)
     assert(import.canceled?, "Test needs a canceled InatImport fixture")
     id = "123"
-    params = { inat_ids: id, inat_username: user.inat_username, consent: 1 }
+    params = { inat_ids: id, inat_username: user.inat_username,
+               consent: 1, confirmed: 1 }
 
     login(user.login)
     post(:create, params: params)
@@ -174,7 +175,7 @@ class InatImportsControllerTest < FunctionalTestCase
     ) do
       post(:create,
            params: { inat_ids: id_list, inat_username: inat_username,
-                     consent: 1 })
+                     consent: 1, confirmed: 1 })
     end
 
     assert_response(:redirect)
@@ -233,7 +234,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
 
     params = { inat_username: "anything", inat_ids: inat_id,
-               consent: 1 }
+               consent: 1, confirmed: 1 }
     login
     assert_no_difference("Observation.count",
                          "Imported a previously imported iNat obs") do
@@ -265,7 +266,7 @@ class InatImportsControllerTest < FunctionalTestCase
     ) do
       post(:create,
            params: { inat_ids: 123_456_789, inat_username: inat_username,
-                     consent: 1 })
+                     consent: 1, confirmed: 1 })
     end
 
     assert(
@@ -299,7 +300,7 @@ class InatImportsControllerTest < FunctionalTestCase
     ) do
       post(:create,
            params: { inat_ids: inat_ids, inat_username: inat_username,
-                     consent: 1 })
+                     consent: 1, confirmed: 1 })
     end
 
     assert_redirected_to(INAT_AUTHORIZATION_URL)
@@ -313,6 +314,60 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_equal(inat_username, inat_import.inat_username,
                  "Failed to save InatImport.inat_username")
+  end
+
+  def test_create_shows_confirmation_with_estimate
+    user = users(:rolf)
+    inat_username = "rolf"
+    inat_ids = "123,456"
+    estimate_response = { total_results: 2 }.to_json
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: estimate_response)
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: inat_ids, inat_username: inat_username,
+                   consent: 1 })
+
+    assert_response(:success)
+    assert_template(:confirm)
+  end
+
+  def test_create_confirmation_go_back
+    user = users(:rolf)
+    inat_username = "rolf"
+    inat_ids = "123,456"
+
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: inat_ids, inat_username: inat_username,
+                   consent: 1, go_back: 1 })
+
+    assert_response(:success)
+    assert_template(:new)
+    assert_select(
+      "textarea#inat_ids", { text: inat_ids, count: 1 },
+      "Form should preserve inat_ids when going back"
+    )
+  end
+
+  def test_create_confirmation_estimate_unavailable
+    user = users(:rolf)
+    inat_username = "rolf"
+    inat_ids = "123"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 500, body: "error")
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: inat_ids, inat_username: inat_username,
+                   consent: 1 })
+
+    assert_response(:success)
+    assert_template(:confirm)
   end
 
   def test_authorization_response_denied
@@ -374,7 +429,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_import_all
     user = users(:mary)
-    params = { inat_username: user.inat_username, all: 1, consent: 1 }
+    params = { inat_username: user.inat_username, all: 1,
+               consent: 1, confirmed: 1 }
 
     login(user.login)
     post(:create, params: params)

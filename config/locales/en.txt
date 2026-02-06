@@ -3123,6 +3123,13 @@
   inat_dqa_research: Research Grade
   inat_not_imported: Not Imported
 
+  inat_import_confirm_title: Confirm iNat Import
+  inat_import_confirm_estimate: "Estimated number of observations to import: [count]"
+  inat_import_confirm_estimate_unavailable: Unable to estimate the number of observations to import.
+  inat_import_confirm_prompt: Would you like to proceed with the import?
+  inat_import_confirm_proceed: Proceed
+  inat_import_confirm_go_back: Go Back
+
   inat_details_heading: Details/Caveats
   inat_details_list: "* Excludes Observations previously imported from/exported to iNat.\n* MO imports only fungal observations.\n* MO lists most iNat data and/or maps it to analogous MO fields.\n* MO hides coordinates from the public if iNat obscured them.\n* The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
 

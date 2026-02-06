@@ -80,7 +80,9 @@ class InatImportsController < ApplicationController
   end
 
   def create
+    return reload_form if params[:go_back] == "1"
     return reload_form unless params_valid?
+    return confirm_import unless params[:confirmed] == "1"
 
     warn_about_listed_previous_imports
     assure_user_has_inat_import_api_key
@@ -91,6 +93,15 @@ class InatImportsController < ApplicationController
   # ---------------------------------
 
   private
+
+  def confirm_import
+    @estimate = fetch_import_estimate
+    @inat_username = params[:inat_username]
+    @inat_ids = params[:inat_ids]
+    @import_all = params[:all]
+    @consent = params[:consent]
+    render(:confirm)
+  end
 
   def reload_form
     # clean trailing commas and whitespace
@@ -133,14 +144,28 @@ class InatImportsController < ApplicationController
     )
   end
 
-  # NOTE: jdc 2024-06-15 This method is a quick & dirty way to get
-  # an initial estimate when the user provides a list of iNat ids.
-  # When implementing import_all, we should instead use the iNat API
-  # to get the number of observations to be imported.
   def importables_count
     return nil if importing_all?
 
     params[:inat_ids].split(",").length
+  end
+
+  def fetch_import_estimate
+    query_args = {
+      iconic_taxa: ICONIC_TAXA,
+      only_id: true,
+      without_field: "Mushroom Observer URL",
+      user_login: params[:inat_username].strip
+    }
+    query_args[:id] = params[:inat_ids] if listing_ids?
+
+    response = RestClient.get(
+      "#{API_BASE}/observations?#{query_args.to_query}",
+      { accept: :json }
+    )
+    JSON.parse(response.body)["total_results"]
+  rescue RestClient::ExceptionWithResponse
+    nil
   end
 
   def clean_inat_ids
