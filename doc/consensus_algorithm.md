@@ -281,6 +281,44 @@ When two taxa or names have the same weighted score, ties are broken by:
 1. **Total weight.** The name with more total vote weight wins.
 2. **Age.** The name that was proposed first wins.
 
+### Rollout Strategy
+
+The updated algorithm has been deployed with a conservative rollout approach:
+
+1. **New observations use the updated algorithm immediately.** Any observation
+   created or voted on after the update benefits from the improved handling
+   of sub-maximum votes.
+
+2. **Existing observations are updated selectively.** For historical
+   observations, we only apply the recalculation when the consensus *name*
+   would remain unchanged. This updates the `vote_cache` value (the
+   confidence score) without changing which name is displayed.
+
+3. **Name changes require human review.** Observations where the new
+   algorithm would select a different consensus name are flagged for
+   community review rather than being updated automatically. This respects
+   the historical record and allows users with relevant knowledge to
+   examine these edge cases.
+
+**Why update vote_cache even when the name stays the same?**
+
+The `vote_cache` value represents our confidence in the consensus name.
+While it doesn't change which name is displayed, it affects:
+
+- **Ordering on the Show Name page.** Observations are sorted by confidence,
+  so more confident identifications appear first.
+
+- **Data exports.** When Mushroom Observer shares data with external systems
+  (research databases, biodiversity portals), the confidence score helps
+  recipients assess data quality.
+
+- **Needs Naming flag.** Low-confidence observations may be flagged as
+  needing additional identification help.
+
+By updating these values, we ensure the confidence scores accurately reflect
+community agreement, even for observations where the winning name doesn't
+change.
+
 ### Implementation Reference
 
 The algorithm is implemented in these files:
@@ -289,3 +327,5 @@ The algorithm is implemented in these files:
 - `app/models/observation/naming_consensus.rb` — Integration with the
   Observation model; handles vote changes and triggers recalculation
 - `app/models/vote.rb` — Vote values, labels, and user weight calculation
+- `script/analyze_consensus_change.rb` — Migration script for applying
+  the update to historical observations
