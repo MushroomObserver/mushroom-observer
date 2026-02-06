@@ -12,7 +12,8 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
 
   def view_template
     render_estimate
-    p { plain(:inat_import_confirm_prompt.l) }
+    render_explanation
+    render_prompt
     render_hidden_fields
     render_buttons
   end
@@ -26,14 +27,14 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
   def render_estimate
     render(Components::Panel.new) do |panel|
       panel.with_body do
-        estimate_line
+        count_estimate_line
         br
         time_estimate_line
       end
     end
   end
 
-  def estimate_line
+  def count_estimate_line
     b { plain(:inat_import_confirm_estimate_caption.l) }
     plain(": ")
     plain(estimated_count)
@@ -67,6 +68,14 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
     minutes = (seconds % 3600) / 60
     remaining = seconds % 60
     Kernel.format("%02d:%02d:%02d", hours, minutes, remaining)
+  end
+
+  def render_explanation
+    p { plain(:inat_import_confirm_explanation.l) }
+  end
+
+  def render_prompt
+    p { plain(:inat_import_confirm_prompt.l) }
   end
 
   def render_hidden_fields
