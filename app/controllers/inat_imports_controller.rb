@@ -61,6 +61,7 @@ class InatImportsController < ApplicationController
   include Inat::Constants
 
   before_action :login_required
+  before_action :flatten_confirm_params, only: :create
 
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])
@@ -96,11 +97,29 @@ class InatImportsController < ApplicationController
 
   def confirm_import
     @estimate = fetch_import_estimate
-    @inat_username = params[:inat_username]
-    @inat_ids = params[:inat_ids]
-    @import_all = params[:all]
-    @consent = params[:consent]
+    @confirm_form = FormObject::InatImportConfirm.new(
+      inat_username: params[:inat_username],
+      inat_ids: params[:inat_ids],
+      import_all: params[:all],
+      consent: params[:consent]
+    )
     render(:confirm)
+  end
+
+  # Superform namespaces hidden fields under the model key.
+  # Flatten them to top-level so the rest of the controller works unchanged.
+  def flatten_confirm_params
+    confirm = params[:inat_import_confirm]
+    return unless confirm
+
+    merge_confirm_param(confirm, :inat_username)
+    merge_confirm_param(confirm, :inat_ids)
+    merge_confirm_param(confirm, :consent)
+    params[:all] ||= confirm[:import_all]
+  end
+
+  def merge_confirm_param(confirm, key)
+    params[key] ||= confirm[key]
   end
 
   def reload_form
