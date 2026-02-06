@@ -97,6 +97,7 @@ class InatImportsController < ApplicationController
 
   def confirm_import
     @estimate = fetch_import_estimate
+    @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = FormObject::InatImportConfirm.new(
       inat_username: params[:inat_username],
       inat_ids: params[:inat_ids],

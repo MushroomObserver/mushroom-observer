@@ -4,8 +4,9 @@
 # Shows estimated import count and Proceed/Go Back buttons.
 # Hidden fields carry form data through the confirmation step.
 class Components::InatImportConfirmForm < Components::ApplicationForm
-  def initialize(model, estimate: nil, **)
+  def initialize(model, estimate: nil, inat_import: nil, **)
     @estimate = estimate
+    @inat_import = inat_import
     super(model, **)
   end
 
@@ -25,15 +26,47 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
   def render_estimate
     render(Components::Panel.new) do |panel|
       panel.with_body do
-        b { plain(:inat_import_confirm_estimate_caption.l) }
-        plain(": ")
-        plain(estimated_count)
+        estimate_line
+        br
+        time_estimate_line
       end
     end
   end
 
+  def estimate_line
+    b { plain(:inat_import_confirm_estimate_caption.l) }
+    plain(": ")
+    plain(estimated_count)
+  end
+
   def estimated_count
-    @estimate&.to_s || :inat_import_confirm_estimate_unavailable.l
+    @estimate&.to_s ||
+      :inat_import_confirm_estimate_unavailable.l
+  end
+
+  def time_estimate_line
+    b { plain(:inat_import_confirm_time_estimate_caption.l) }
+    plain(": ")
+    plain(estimated_time)
+  end
+
+  def estimated_time
+    return :inat_import_confirm_time_estimate_unavailable.l unless @estimate
+
+    seconds = @estimate * avg_import_seconds
+    format_hms(seconds)
+  end
+
+  def avg_import_seconds
+    @inat_import&.initial_avg_import_seconds ||
+      InatImport::BASE_AVG_IMPORT_SECONDS
+  end
+
+  def format_hms(seconds)
+    hours = seconds / 3600
+    minutes = (seconds % 3600) / 60
+    remaining = seconds % 60
+    Kernel.format("%02d:%02d:%02d", hours, minutes, remaining)
   end
 
   def render_hidden_fields
