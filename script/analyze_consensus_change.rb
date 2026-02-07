@@ -12,12 +12,12 @@
 #  observations (those with multiple namings and sub-max voters).
 #  Makes NO changes to the database.
 #
-#  With --update, recalculates consensus for all observations using
-#  the new algorithm, but ONLY saves updates that do NOT change the
-#  consensus name. This updates vote_cache values (which affect
-#  confidence ordering) while preserving existing consensus names.
-#  Observations that would have their names changed are listed for
-#  manual review.
+#  With --update, recalculates consensus for boost-affected
+#  observations using the new algorithm, but ONLY saves updates that
+#  do NOT change the consensus name. This updates vote_cache values
+#  (which affect confidence ordering) while preserving existing
+#  consensus names. Observations that would have their names changed
+#  are listed for manual review.
 #
 #  Options:
 #    --limit N    Only process the first N observations
@@ -77,13 +77,14 @@ end
 def print_progress(processed, total, change_count, start_time)
   return unless (processed % 5000).zero?
 
+  now = Time.zone.now
+  elapsed = format_duration(now - start_time)
   eta = estimate_end_time(start_time, processed, total)
   eta_str = eta ? " | ETA: #{format_time(eta)}" : ""
-  $stdout.print(
-    "\r  #{processed}/#{total} processed, " \
-    "#{change_count} would change#{eta_str}".ljust(72)
+  puts(
+    "[#{format_time(now)}] #{processed}/#{total} processed, " \
+    "#{change_count} would change | elapsed: #{elapsed}#{eta_str}"
   )
-  $stdout.flush
 end
 
 def format_duration(seconds)
@@ -117,7 +118,7 @@ def print_counts(stats)
 end
 
 def print_summary(stats)
-  puts("\r#{" " * 80}\r")
+  puts
   print_timing(stats[:start_time], stats[:end_time])
   print_counts(stats)
   puts
@@ -217,20 +218,50 @@ def process_observations(scope, total, limit: nil, output_file: nil)
   write_changes_to_file(stats[:changes], output_file)
 end
 
-def find_candidate_ids
+# Find observations where the boost actually applies.
+# Encodes all 4 conditions from boost_vote?:
+#   1. User's max vote across all namings is positive
+#   2. User's max vote < MAXIMUM_VOTE
+#   3. The vote equals the user's max
+#   4. The naming has a higher vote from someone else
+def find_boost_affected_ids
   Vote.connection.select_values(<<~SQL.squish)
-    SELECT DISTINCT sub.observation_id
-    FROM (
-      SELECT observation_id, user_id, MAX(value) AS max_val
+    SELECT DISTINCT v.observation_id
+    FROM votes v
+    INNER JOIN (
+      SELECT observation_id, user_id,
+             MAX(value) AS user_max
       FROM votes
       GROUP BY observation_id, user_id
-      HAVING max_val > 0 AND max_val < #{Vote::MAXIMUM_VOTE}
-    ) sub
-    INNER JOIN namings n1
-      ON n1.observation_id = sub.observation_id
+      HAVING user_max > 0
+        AND user_max < #{Vote::MAXIMUM_VOTE}
+    ) user_maxes
+      ON v.observation_id = user_maxes.observation_id
+      AND v.user_id = user_maxes.user_id
+      AND v.value = user_maxes.user_max
+    INNER JOIN (
+      SELECT naming_id, MAX(value) AS naming_max
+      FROM votes
+      GROUP BY naming_id
+    ) naming_maxes
+      ON v.naming_id = naming_maxes.naming_id
+      AND naming_maxes.naming_max > v.value
+  SQL
+end
+
+# For analysis mode, also require multiple namings since
+# single-naming observations can't change consensus name.
+def find_candidate_ids
+  ids = find_boost_affected_ids
+  return [] if ids.empty?
+
+  Vote.connection.select_values(<<~SQL.squish)
+    SELECT DISTINCT n1.observation_id
+    FROM namings n1
     INNER JOIN namings n2
-      ON n2.observation_id = sub.observation_id
+      ON n2.observation_id = n1.observation_id
       AND n2.id != n1.id
+    WHERE n1.observation_id IN (#{ids.join(',')})
   SQL
 end
 
@@ -294,19 +325,22 @@ def recalculate_observation(obs, result)
   end
 end
 
-def print_update_counts(limit)
-  total = Observation.count
-  processing = limit || total
-  puts("Total observations: #{total}")
-  puts("Processing: #{processing}")
+def prepared_boost_ids(limit)
+  ids = find_boost_affected_ids
+  total = ids.count
+  ids = ids.first(limit) if limit
+  puts("Boost-affected observations: #{total}")
+  puts("Processing: #{ids.count}")
   puts("Mode: Update vote_cache only where consensus name unchanged")
-  processing
+  ids
 end
 
 def update_all_observations(limit, output_file)
-  processing = print_update_counts(limit)
-  process_observations(obs_scope, processing,
-                       limit: limit, output_file: output_file) do |obs, result|
+  ids = prepared_boost_ids(limit)
+  scope = obs_scope.where(id: ids)
+  process_observations(scope, ids.count,
+                       limit: nil,
+                       output_file: output_file) do |obs, result|
     recalculate_observation(obs, result)
   end
 end
