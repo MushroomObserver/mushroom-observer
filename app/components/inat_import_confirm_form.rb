@@ -41,8 +41,7 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
   end
 
   def estimated_count
-    @estimate&.to_s ||
-      :inat_import_confirm_estimate_unavailable.l
+    @estimate.to_s
   end
 
   def time_estimate_line
@@ -52,8 +51,6 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
   end
 
   def estimated_time
-    return :inat_import_confirm_time_estimate_unavailable.l unless @estimate
-
     seconds = @estimate * avg_import_seconds
     format_hms(seconds)
   end

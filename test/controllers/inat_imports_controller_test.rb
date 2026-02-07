@@ -409,8 +409,9 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: inat_username,
                    consent: 1 })
 
+    assert_flash_error
     assert_response(:success)
-    assert_template(:confirm)
+    assert_template(:new)
   end
 
   def test_authorization_response_denied

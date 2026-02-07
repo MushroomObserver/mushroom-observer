@@ -97,6 +97,8 @@ class InatImportsController < ApplicationController
 
   def confirm_import
     @estimate = fetch_import_estimate
+    return inat_unreachable if @estimate.nil?
+
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = FormObject::InatImportConfirm.new(
       inat_username: params[:inat_username],
@@ -105,6 +107,11 @@ class InatImportsController < ApplicationController
       consent: params[:consent]
     )
     render(:confirm)
+  end
+
+  def inat_unreachable
+    flash_error(:inat_cannot_communicate.l)
+    reload_form
   end
 
   # Superform namespaces hidden fields under the model key.
