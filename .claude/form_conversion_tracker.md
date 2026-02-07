@@ -81,7 +81,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `visual_groups/edit.html.erb` | Visual group image filter | |
 | `support/donate.html.erb` | Donation form | |
 | `translations/_form.erb` | Translation edit | |
-| `inat_imports/new.html.erb` | iNat import | |
+| `inat_imports/new.html.erb` | iNat import | Done |
 
 ### Shared Partials (4)
 
