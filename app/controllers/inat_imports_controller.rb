@@ -190,7 +190,8 @@ class InatImportsController < ApplicationController
       { accept: :json }
     )
     JSON.parse(response.body)["total_results"]
-  rescue RestClient::ExceptionWithResponse
+  rescue RestClient::Exception, JSON::ParserError => e
+    Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
     nil
   end
 
