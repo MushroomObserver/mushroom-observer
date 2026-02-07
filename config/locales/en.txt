@@ -3127,7 +3127,7 @@
   inat_import_confirm_title: Confirm iNat Import
   inat_import_confirm_estimate_caption: Estimated number of imports
   inat_import_confirm_time_estimate_caption: Estimated time
-  inat_import_confirm_explanation: "MO will import iNat observations which: you created, whose iNat identity is a fungus or slime mold, and which was neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script.\n (You can work on other things while the import is proceeding.)"
+  inat_import_confirm_explanation: "MO will import iNat observations which: you created, whose iNat identity is a fungus or slime mold, and which were neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script.\n (You can work on other things while the import is proceeding.)"
   inat_import_confirm_prompt: Would you like to proceed with the import?
   inat_import_confirm_proceed: Proceed
   inat_import_confirm_go_back: Go Back
