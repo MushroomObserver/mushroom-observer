@@ -61,6 +61,7 @@ class InatImportsController < ApplicationController
   include Inat::Constants
 
   before_action :login_required
+  before_action :flatten_confirm_params, only: :create
 
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])
@@ -80,7 +81,9 @@ class InatImportsController < ApplicationController
   end
 
   def create
+    return reload_form if params[:go_back] == "1"
     return reload_form unless params_valid?
+    return confirm_import unless params[:confirmed] == "1"
 
     warn_about_listed_previous_imports
     assure_user_has_inat_import_api_key
@@ -91,6 +94,41 @@ class InatImportsController < ApplicationController
   # ---------------------------------
 
   private
+
+  def confirm_import
+    @estimate = fetch_import_estimate
+    return inat_unreachable if @estimate.nil?
+
+    @inat_import = InatImport.find_or_create_by(user: @user)
+    @confirm_form = FormObject::InatImportConfirm.new(
+      inat_username: params[:inat_username],
+      inat_ids: params[:inat_ids],
+      import_all: params[:all],
+      consent: params[:consent]
+    )
+    render(:confirm)
+  end
+
+  def inat_unreachable
+    flash_error(:inat_cannot_communicate.l)
+    reload_form
+  end
+
+  # Superform namespaces hidden fields under the model key.
+  # Flatten them to top-level so the rest of the controller works unchanged.
+  def flatten_confirm_params
+    confirm = params[:inat_import_confirm]
+    return unless confirm
+
+    merge_confirm_param(confirm, :inat_username)
+    merge_confirm_param(confirm, :inat_ids)
+    merge_confirm_param(confirm, :consent)
+    params[:all] ||= confirm[:import_all]
+  end
+
+  def merge_confirm_param(confirm, key)
+    params[key] ||= confirm[key]
+  end
 
   def reload_form
     @inat_ids = sanitize_inat_ids(params[:inat_ids])
@@ -139,14 +177,29 @@ class InatImportsController < ApplicationController
     )
   end
 
-  # NOTE: jdc 2024-06-15 This method is a quick & dirty way to get
-  # an initial estimate when the user provides a list of iNat ids.
-  # When implementing import_all, we should instead use the iNat API
-  # to get the number of observations to be imported.
   def importables_count
     return nil if importing_all?
 
     params[:inat_ids].split(",").length
+  end
+
+  def fetch_import_estimate
+    query_args = {
+      iconic_taxa: ICONIC_TAXA,
+      only_id: true,
+      without_field: "Mushroom Observer URL",
+      user_login: params[:inat_username].strip
+    }
+    query_args[:id] = params[:inat_ids] if listing_ids?
+
+    response = RestClient.get(
+      "#{API_BASE}/observations?#{query_args.to_query}",
+      { accept: :json }
+    )
+    JSON.parse(response.body)["total_results"]
+  rescue RestClient::Exception, JSON::ParserError => e
+    Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
+    nil
   end
 
   def clean_inat_ids
