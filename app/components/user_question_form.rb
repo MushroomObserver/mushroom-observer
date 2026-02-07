@@ -1,13 +1,18 @@
 # frozen_string_literal: true
 
 # Form for sending a question to another user.
-# Allows users to contact each other through the site.
+# Creates its own FormObject internally from the provided kwargs.
 class Components::UserQuestionForm < Components::ApplicationForm
-  def initialize(model, target:, subject: nil, message: nil, **)
+  # Accept optional model arg for ModalForm compatibility (ignored - we create
+  # our own FormObject). This is Pattern B: form creates FormObject internally.
+  def initialize(_model = nil, target:, subject: nil, message: nil, **)
     @target = target
-    @subject = subject
-    @message = message
-    super(model, **)
+
+    form_object = FormObject::UserQuestion.new(
+      subject: subject,
+      message: message
+    )
+    super(form_object, **)
   end
 
   def view_template
@@ -24,13 +29,12 @@ class Components::UserQuestionForm < Components::ApplicationForm
 
   def render_subject_field
     text_field(:subject, label: "#{:ask_user_question_subject.t}:",
-                         value: @subject, size: 70,
-                         data: { autofocus: true })
+                         size: 70, data: { autofocus: true })
   end
 
   def render_message_field
     textarea_field(:message, label: "#{:ask_user_question_message.t}:",
-                             value: @message, rows: 10)
+                             rows: 10)
   end
 
   def form_action

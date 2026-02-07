@@ -75,10 +75,14 @@ module InatImportsController::Validators
     params[:inat_ids].delete(" ").split(",").map(&:to_i)
   end
 
-  # Block importing **all** of another user's iNat observations
+  # Block superimporter from importing **all** another user's iNat observations
   # Seems so hard to reverse if done accidentally that we should prevent it,
   # at least for now.
   def not_importing_all_anothers?
+    # At this stage we care only about superimporters because
+    # other users are limited to importing their own observations
+    # by InatImportJob#ensure_importing_own_observations
+    return true unless InatImport.super_importer?(@user)
     unless importing_all? &&
            (params[:inat_username] != @user.inat_username)
       return true
