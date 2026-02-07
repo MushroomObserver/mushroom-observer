@@ -324,6 +324,27 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  def test_import_all
+    user = users(:mary)
+    params = { inat_username: user.inat_username, all: 1, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+  end
+
+  def test_allow_first_time_import_all
+    user = users(:rolf)
+    assert_nil(user.inat_username, "Test needs fixture without inat_username")
+    params = { inat_username: "anything", all: 1, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+  end
+
   def test_import_all_anothers_observations
     user = users(:dick) # Dick is a iNat superimporter
     params = { inat_username: "anything", inat_ids: nil,
@@ -337,6 +358,20 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash_text(:inat_importing_all_anothers.t)
     assert_form_action(action: :create)
+  end
+
+  def test_super_importer_can_import_specific_ids_from_another_user
+    user = users(:dick) # Dick is a super_importer
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    params = { inat_username: "other_inat_user", inat_ids: "12345",
+               consent: 1 }
+
+    stub_request(:any, authorization_url)
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
   end
 
   def test_import_authorized
@@ -370,16 +405,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_redirected_to(
       inat_import_path(inat_import, params: { tracker_id: tracker.id })
     )
-  end
-
-  def test_import_all
-    user = users(:mary)
-    params = { inat_username: user.inat_username, all: 1, consent: 1 }
-
-    login(user.login)
-    post(:create, params: params)
-
-    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
   def test_inat_username_unchanged_if_authorization_denied
