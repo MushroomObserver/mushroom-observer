@@ -712,6 +712,214 @@ class ObservationTest < UnitTestCase
     assert_equal(true, mov.reviewed)
   end
 
+  # -------------------------------------------------------
+  #  Test consensus boost for sub-max votes (Issue #3815)
+  # -------------------------------------------------------
+
+  # Test that a "Promising" vote boosts consensus when it's
+  # the user's highest vote (no "I'd Call It That" elsewhere).
+  def test_consensus_boost_promising_increases_consensus
+    User.current = rolf
+    obs = Observation.create!(
+      when: Time.zone.today, where: "anywhere",
+      name_id: names(:fungi).id, needs_naming: true, user: rolf
+    )
+    namg = Naming.create!(
+      observation_id: obs.id, name_id: names(:agaricus_campestris).id,
+      user: rolf
+    )
+    consensus = Observation::NamingConsensus.new(obs)
+
+    # Rolf votes "I'd Call It That" (3.0)
+    consensus.change_vote(namg, 3, rolf)
+    obs.reload
+    namg.reload
+    cache_with_one_vote = namg.vote_cache
+
+    # Mary votes "Promising" (2.0) - should boost, not penalize
+    User.current = mary
+    consensus.change_vote(namg, 2, mary)
+    obs.reload
+    namg.reload
+    cache_with_boost = namg.vote_cache
+
+    assert(cache_with_boost > cache_with_one_vote,
+           "Promising vote should increase consensus, not " \
+           "decrease it. Before: #{cache_with_one_vote}, " \
+           "After: #{cache_with_boost}")
+  end
+
+  # Test that boost does NOT apply when user has a higher vote
+  # on another naming (regular algorithm should penalize).
+  def test_consensus_no_boost_when_higher_vote_elsewhere
+    User.current = rolf
+    obs = Observation.create!(
+      when: Time.zone.today, where: "anywhere",
+      name_id: names(:fungi).id, needs_naming: true, user: rolf
+    )
+    name1 = names(:agaricus_campestris)
+    name2 = names(:coprinus_comatus)
+    namg1 = Naming.create!(
+      observation_id: obs.id, name_id: name1.id, user: rolf
+    )
+    namg2 = Naming.create!(
+      observation_id: obs.id, name_id: name2.id, user: rolf
+    )
+    consensus = Observation::NamingConsensus.new(obs)
+
+    # Rolf votes "I'd Call It That" on namg1
+    consensus.change_vote(namg1, 3, rolf)
+    obs.reload
+    namg1.reload
+    cache_before = namg1.vote_cache
+
+    # Mary votes "I'd Call It That" on namg2, then
+    # "Promising" on namg1. Since her max is 3.0,
+    # her "Promising" on namg1 should use regular algorithm.
+    User.current = mary
+    consensus.change_vote(namg2, 3, mary)
+    consensus.change_vote(namg1, 2, mary)
+    obs.reload
+    namg1.reload
+    cache_after = namg1.vote_cache
+
+    assert(cache_after < cache_before,
+           "Promising vote should penalize when user has " \
+           "'I'd Call It That' elsewhere. Before: " \
+           "#{cache_before}, After: #{cache_after}")
+  end
+
+  # Test that "Could Be" also boosts when it's the user's max.
+  def test_consensus_boost_could_be
+    User.current = rolf
+    obs = Observation.create!(
+      when: Time.zone.today, where: "anywhere",
+      name_id: names(:fungi).id, needs_naming: true, user: rolf
+    )
+    namg = Naming.create!(
+      observation_id: obs.id, name_id: names(:agaricus_campestris).id,
+      user: rolf
+    )
+    consensus = Observation::NamingConsensus.new(obs)
+
+    # Rolf votes "I'd Call It That"
+    consensus.change_vote(namg, 3, rolf)
+    obs.reload
+    namg.reload
+    cache_before = namg.vote_cache
+
+    # Mary votes "Could Be" (1.0) as her only vote
+    User.current = mary
+    consensus.change_vote(namg, 1, mary)
+    obs.reload
+    namg.reload
+
+    assert(namg.vote_cache > cache_before,
+           "Could Be vote should increase consensus when " \
+           "it's user's max. Before: #{cache_before}, " \
+           "After: #{namg.vote_cache}")
+  end
+
+  # Test that when user's max is "Promising" and they also
+  # vote "Could Be" on another name, only "Promising" gets
+  # the boost - "Could Be" uses regular algorithm.
+  def test_consensus_boost_only_applies_to_max_vote
+    User.current = rolf
+    obs = Observation.create!(
+      when: Time.zone.today, where: "anywhere",
+      name_id: names(:fungi).id, needs_naming: true, user: rolf
+    )
+    name1 = names(:agaricus_campestris)
+    name2 = names(:coprinus_comatus)
+    namg1 = Naming.create!(
+      observation_id: obs.id, name_id: name1.id, user: rolf
+    )
+    namg2 = Naming.create!(
+      observation_id: obs.id, name_id: name2.id, user: rolf
+    )
+    consensus = Observation::NamingConsensus.new(obs)
+
+    # Rolf votes "I'd Call It That" on both
+    consensus.change_vote(namg1, 3, rolf)
+    consensus.change_vote(namg2, 3, rolf)
+    obs.reload
+    namg2.reload
+    cache_namg2_before = namg2.vote_cache
+
+    # Mary votes "Promising" on namg1 (boosted), and
+    # "Could Be" on namg2 (regular - not her max).
+    User.current = mary
+    consensus.change_vote(namg1, 2, mary)
+    consensus.change_vote(namg2, 1, mary)
+    obs.reload
+    namg2.reload
+
+    # namg2 should be penalized because Mary's max vote
+    # is "Promising" (on namg1), and her "Could Be" on
+    # namg2 is not her max.
+    assert(namg2.vote_cache < cache_namg2_before,
+           "Could Be should penalize when user's max is " \
+           "Promising elsewhere. Before: " \
+           "#{cache_namg2_before}, After: #{namg2.vote_cache}")
+  end
+
+  # Test that a single "Promising" vote with no higher vote
+  # on the naming uses the regular algorithm (no boost).
+  def test_consensus_no_boost_without_higher_vote_on_naming
+    User.current = mary
+    obs = Observation.create!(
+      when: Time.zone.today, where: "anywhere",
+      name_id: names(:fungi).id, needs_naming: true, user: mary
+    )
+    namg = Naming.create!(
+      observation_id: obs.id,
+      name_id: names(:agaricus_campestris).id, user: mary
+    )
+    consensus = Observation::NamingConsensus.new(obs)
+
+    # Mary votes "Promising" (2.0) - only vote on this naming.
+    # Without a higher vote on the naming, regular algorithm
+    # applies. vote_cache = 2.0*w/(w+1) which is always < 2.0.
+    consensus.change_vote(namg, 2, mary)
+    obs.reload
+    namg.reload
+
+    assert(namg.vote_cache.positive?,
+           "Single Promising vote should produce positive cache")
+    assert(namg.vote_cache < 2.0,
+           "Single Promising vote should stay below 2.0 " \
+           "(regular algorithm). Got: #{namg.vote_cache}")
+  end
+
+  # Test that negative-only voters use regular algorithm.
+  def test_consensus_no_boost_for_negative_only_voter
+    User.current = rolf
+    obs = Observation.create!(
+      when: Time.zone.today, where: "anywhere",
+      name_id: names(:fungi).id, needs_naming: true, user: rolf
+    )
+    namg = Naming.create!(
+      observation_id: obs.id, name_id: names(:agaricus_campestris).id,
+      user: rolf
+    )
+    consensus = Observation::NamingConsensus.new(obs)
+
+    # Rolf votes "I'd Call It That"
+    consensus.change_vote(namg, 3, rolf)
+    obs.reload
+    namg.reload
+    cache_before = namg.vote_cache
+
+    # Mary votes "Doubtful" (-1.0) - negative vote, no boost
+    User.current = mary
+    consensus.change_vote(namg, -1, mary)
+    obs.reload
+    namg.reload
+
+    assert(namg.vote_cache < cache_before,
+           "Negative vote should always decrease consensus")
+  end
+
   def test_refresh_needs_naming_column
     Observation.update_all(needs_naming: 0)
     Observation.refresh_needs_naming_column
