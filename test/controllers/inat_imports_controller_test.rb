@@ -330,9 +330,9 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template(:confirm)
     body = @response.body
-    assert_match("Estimated number of imports", body)
+    assert_match(:inat_import_confirm_estimate_caption.l, body)
     assert_select("#estimated_count", "2")
-    assert_match("Estimated time", body)
+    assert_match(:inat_import_confirm_time_estimate_caption.l, body)
     assert_select("#estimated_time", "00:00:24")
   end
 
