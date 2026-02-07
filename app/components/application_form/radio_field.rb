@@ -8,11 +8,17 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     <label><input type="radio" ...> label text</label>
   #   </div>
   #
-  # @example
+  # Accepts a Superform field or a FieldProxy for standalone use.
+  #
+  # @example Superform field
   #   field(:target).radio(
   #     [1, "Option 1"], [2, "Option 2"],
   #     wrapper_options: { wrap_class: "mt-3" }
   #   )
+  #
+  # @example Standalone with FieldProxy
+  #   proxy = FieldProxy.new("chosen_name", :name_id)
+  #   RadioField.new(proxy, [1, "Opt 1"], [2, "Opt 2"])
   class RadioField < Phlex::HTML
     include Components::TrustedHtml
 
