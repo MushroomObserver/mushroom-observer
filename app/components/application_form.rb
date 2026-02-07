@@ -250,7 +250,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Wrapper options: :label, :prefs, :class_name
   # @yield [field_component] Optional block to set slots: `with_between`,
   #   `with_append`, `with_help`
-  def checkbox_field(field_name, **options)
+  def checkbox_field(field_name, **options, &block)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -260,9 +260,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     )
 
     set_help_slot(field_component, wrapper_opts[:help])
-    yield(field_component) if block_given?
 
-    render(field_component)
+    render(field_component, &block)
   end
 
   # Radio button group with label and Bootstrap form-group wrapper

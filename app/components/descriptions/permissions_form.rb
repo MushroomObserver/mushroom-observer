@@ -44,10 +44,10 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   def render_table_header
     thead do
       tr do
-        th(style: "mr-4") { :adjust_permissions_user_header.t }
-        th(width: "50") { :adjust_permissions_reader_header.t }
-        th(width: "50") { :adjust_permissions_writer_header.t }
-        th(width: "50") { :adjust_permissions_admin_header.t }
+        th(style: "mr-4") { :adjust_permissions_user_header.l }
+        th(width: "50") { :adjust_permissions_reader_header.l }
+        th(width: "50") { :adjust_permissions_writer_header.l }
+        th(width: "50") { :adjust_permissions_admin_header.l }
       end
     end
   end
@@ -67,9 +67,7 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   end
 
   def render_group_checkbox(field_name, group)
-    render(
-      field(field_name).checkbox(wrapper_options: { label: false })
-    ) do |cb|
+    checkbox_field(field_name, label: false, class: "form-control") do |cb|
       cb.option(group.id)
     end
   end
@@ -115,9 +113,9 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   def render_standard_group_name(group)
     case group.name
     when "all users"
-      plain(:adjust_permissions_all_users.t)
+      plain(:adjust_permissions_all_users.l)
     when "reviewers"
-      plain(:REVIEWERS.t)
+      plain(:REVIEWERS.l)
     else
       plain(group.name)
     end
@@ -144,16 +142,16 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
 
   def description_roles(user)
     roles = []
-    roles << :author.t if @description.author?(user)
-    roles << :editor.t if @description.editor?(user)
-    roles << :owner.t if @description.user == user
+    roles << :author.l if @description.author?(user)
+    roles << :editor.l if @description.editor?(user)
+    roles << :owner.l if @description.user == user
     roles
   end
 
   def site_roles(user)
     roles = []
-    roles << :adjust_permissions_site_admin.t if user.admin
-    roles << :reviewer.t if user.in_group?("reviewers")
+    roles << :adjust_permissions_site_admin.l if user.admin
+    roles << :reviewer.l if user.in_group?("reviewers")
     roles
   end
 
@@ -178,7 +176,7 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   end
 
   def render_checkbox_field(field_name)
-    render(field(field_name).checkbox(class: "form-control"))
+    checkbox_field(field_name, label: false, class: "form-control")
   end
 
   def name_description?
