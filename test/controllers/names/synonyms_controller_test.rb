@@ -35,8 +35,10 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: add_name.text_name,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: add_name.text_name,
+          deprecate_all: "1"
+        }
       }
       put_requires_login(:update, params)
       assert_redirected_to(name_path(selected_name.id))
@@ -73,8 +75,10 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: add_name.text_name,
-        deprecate_all: "0"
+        edit_synonym: {
+          synonym_members: add_name.text_name,
+          deprecate_all: "0"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -99,13 +103,14 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: "Lepiota rachodes var. rachodes",
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: "Lepiota rachodes var. rachodes",
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
       assert_template("names/synonyms/edit")
-      assert_template("names/synonyms/_fields_proposed")
       assert_nil(selected_name.reload.synonym_id)
       assert_not(selected_name.deprecated)
     end
@@ -119,9 +124,11 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: "Lepiota rachodes var. rachodes",
         approved_names: "Lepiota rachodes var. rachodes",
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: "Lepiota rachodes var. rachodes",
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -145,15 +152,17 @@ module Names
 
       params = {
         id: page_name.id,
-        synonym_members: [
-          "Lepiota rachodes var. rachodes",
-          "Lepiota rhacodes var. rhacodes"
-        ].join("\r\n"),
         approved_names: [
           "Lepiota rachodes var. rachodes",
           "Lepiota rhacodes var. rhacodes"
         ].join("\r\n"),
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: [
+            "Lepiota rachodes var. rachodes",
+            "Lepiota rhacodes var. rhacodes"
+          ].join("\r\n"),
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -185,8 +194,10 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: add_name.search_name,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -235,9 +246,11 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: add_name.search_name,
-        existing_synonyms: existing_synonyms,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          existing_synonyms: existing_synonyms,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -290,9 +303,11 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: add_name.search_name,
-        existing_synonyms: existing_synonyms,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          existing_synonyms: existing_synonyms,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -333,13 +348,14 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: add_name.search_name,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
       assert_template("names/synonyms/edit")
-      assert_template("names/synonyms/_fields_proposed")
 
       assert_not(add_name.reload.deprecated)
       assert_equal(add_version, add_name.version)
@@ -374,9 +390,11 @@ module Names
       synonym_ids = add_synonym.names.map(&:id).join("/")
       params = {
         id: selected_name.id,
-        synonym_members: add_name.search_name,
         approved_synonyms: synonym_ids,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -416,8 +434,10 @@ module Names
       synonym_names = add_synonym.names.map(&:search_name).join("\r\n")
       params = {
         id: selected_name.id,
-        synonym_members: synonym_names,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: synonym_names,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -456,13 +476,14 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: add_name.search_name,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
       assert_template("names/synonyms/edit")
-      assert_template("names/synonyms/_fields_proposed")
 
       assert_not(add_name.reload.deprecated)
       assert_not_nil(add_synonym = add_name.synonym)
@@ -494,9 +515,11 @@ module Names
       synonym_ids = add_synonym.names.map(&:id).join("/")
       params = {
         id: selected_name.id,
-        synonym_members: add_name.search_name,
         approved_synonyms: synonym_ids,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -536,8 +559,10 @@ module Names
       synonym_names = add_synonym.names.map(&:search_name).join("\r\n")
       params = {
         id: selected_name.id,
-        synonym_members: synonym_names,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: synonym_names,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -585,9 +610,11 @@ module Names
       kept_version = kept_name.version
       params = {
         id: selected_name.id,
-        synonym_members: "",
-        existing_synonyms: existing_synonyms,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: "",
+          existing_synonyms: existing_synonyms,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -635,9 +662,11 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: "",
-        existing_synonyms: existing_synonyms,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: "",
+          existing_synonyms: existing_synonyms,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -680,9 +709,11 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym_members: "",
-        existing_synonyms: existing_synonyms,
-        deprecate_all: "1"
+        edit_synonym: {
+          synonym_members: "",
+          existing_synonyms: existing_synonyms,
+          deprecate_all: "1"
+        }
       }
       login("rolf")
       put(:update, params: params)
@@ -698,6 +729,61 @@ module Names
       assert_equal(selected_start_size - 1, split_synonym.names.size)
     end
 
+    # Test dump_sorter with multiple ambiguous names (multiple_line_strs)
+    # and a single recognized name (single_line_strs)
+    def test_transfer_synonyms_with_ambiguous_and_single_names
+      selected_name = names(:lepiota_rachodes)
+      assert_not(selected_name.deprecated)
+      assert_nil(selected_name.synonym_id)
+
+      # "Amanita baccata" has two names with different authors in fixtures
+      # "Agaricus campestris" is a single unique name
+      ambiguous_name = "Amanita baccata"
+      single_name = names(:agaricus_campestris).text_name
+
+      params = {
+        id: selected_name.id,
+        edit_synonym: {
+          synonym_members: "#{single_name}\r\n#{ambiguous_name}",
+          deprecate_all: "1"
+        }
+      }
+      login("rolf")
+      put(:update, params: params)
+      # Should re-render with ambiguous name message
+      assert_template("names/synonyms/edit")
+
+      # Name should remain unchanged
+      assert_not(selected_name.reload.deprecated)
+      assert_nil(selected_name.synonym_id)
+    end
+
+    # Test dump_sorter with single recognized name that has synonyms
+    # (all_synonyms populated)
+    def test_transfer_synonyms_single_with_synonyms_unapproved
+      selected_name = names(:lepiota_rachodes)
+      add_name = names(:chlorophyllum_rachodes)
+      assert_not(selected_name.deprecated)
+      assert_nil(selected_name.synonym_id)
+      assert_not_nil(add_name.synonym)
+
+      params = {
+        id: selected_name.id,
+        edit_synonym: {
+          synonym_members: add_name.search_name,
+          deprecate_all: "1"
+        }
+      }
+      login("rolf")
+      put(:update, params: params)
+      # Should show confirmation for unapproved synonyms
+      assert_template("names/synonyms/edit")
+
+      # Name should remain unchanged until synonyms are approved
+      assert_not(selected_name.reload.deprecated)
+      assert_nil(selected_name.synonym_id)
+    end
+
     def test_change_synonyms_locked
       name = Name.where(locked: true).first
       name2 = names(:agaricus_campestris)
@@ -710,9 +796,11 @@ module Names
       end
       params = {
         id: name.id,
-        synonym_members: "",
-        existing_synonyms: existing_synonyms,
-        deprecate_all: ""
+        edit_synonym: {
+          synonym_members: "",
+          existing_synonyms: existing_synonyms,
+          deprecate_all: ""
+        }
       }
 
       login("rolf")

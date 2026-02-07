@@ -29,8 +29,7 @@ module Names::Synonyms
 
       params = {
         id: old_name.id,
-        deprecate_others: "1",
-        comment: "Prefer this name"
+        approve_synonym: { deprecate_others: "1", comment: "Prefer this name" }
       }
       post_requires_login(:create, params)
       assert_redirected_to(name_path(old_name.id))
@@ -61,8 +60,7 @@ module Names::Synonyms
 
       params = {
         id: old_name.id,
-        deprecate_others: "0",
-        comment: ""
+        approve_synonym: { deprecate_others: "0", comment: "" }
       }
       login("rolf")
       post(:create, params: params)
@@ -82,8 +80,7 @@ module Names::Synonyms
       name.save
       params = {
         id: name.id,
-        deprecate_others: "0",
-        comment: ""
+        approve_synonym: { deprecate_others: "0", comment: "" }
       }
 
       login("rolf")
