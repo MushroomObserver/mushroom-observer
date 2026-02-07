@@ -349,7 +349,7 @@ GEM
       ast (~> 2.4.1)
       racc
     pdf-core (0.10.0)
-    phlex (2.4.0)
+    phlex (2.4.1)
       refract (~> 1.0)
       zeitwerk (~> 2.7)
     phlex-rails (2.4.0)
