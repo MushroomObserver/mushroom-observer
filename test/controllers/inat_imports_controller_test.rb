@@ -166,7 +166,6 @@ class InatImportsControllerTest < FunctionalTestCase
     reps = InatImportsController::Validators::MAX_ID_LIST_SIZE / id.to_s.length
     id_list = (id.to_s * reps).chop
 
-    stub_request(:any, authorization_url)
     login(user.login)
 
     assert_no_difference(
@@ -190,7 +189,7 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Need a Unstarted inat_import fixture")
     id_list = "123,456,789, \n"
     expected_saved_id_list = "123,456,789"
-    stub_request(:any, authorization_url)
+
     login(user.login)
 
     post(:create,
@@ -257,7 +256,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
 
-    stub_request(:any, authorization_url)
     login(user.login)
 
     assert_no_difference(
@@ -291,7 +289,6 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Test needs InatImport fixture without prior imports")
     inat_ids = "123,456,789"
 
-    stub_request(:any, authorization_url)
     login(user.login)
 
     assert_no_difference(
@@ -340,7 +337,6 @@ class InatImportsControllerTest < FunctionalTestCase
     inat_username = "rolf"
     inat_ids = "123,456"
 
-    stub_request(:any, authorization_url)
     login(user.login)
 
     post(:create,
@@ -428,7 +424,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_import_all
     user = users(:mary)
-    params = { inat_username: user.inat_username, all: 1, consent: 1 }
+    params = { inat_username: user.inat_username, all: 1,
+               consent: 1, confirmed: 1 }
 
     login(user.login)
     post(:create, params: params)
@@ -439,7 +436,7 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_allow_first_time_import_all
     user = users(:rolf)
     assert_nil(user.inat_username, "Test needs fixture without inat_username")
-    params = { inat_username: "anything", all: 1, consent: 1 }
+    params = { inat_username: "anything", all: 1, consent: 1, confirmed: 1 }
 
     login(user.login)
     post(:create, params: params)
@@ -467,9 +464,8 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
     params = { inat_username: "other_inat_user", inat_ids: "12345",
-               consent: 1 }
+               consent: 1, confirmed: 1 }
 
-    stub_request(:any, authorization_url)
     login(user.login)
     post(:create, params: params)
 
@@ -507,17 +503,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_redirected_to(
       inat_import_path(inat_import, params: { tracker_id: tracker.id })
     )
-  end
-
-  def test_import_all
-    user = users(:mary)
-    params = { inat_username: user.inat_username, all: 1,
-               consent: 1, confirmed: 1 }
-
-    login(user.login)
-    post(:create, params: params)
-
-    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
   def test_inat_username_unchanged_if_authorization_denied
