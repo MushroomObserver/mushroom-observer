@@ -329,6 +329,11 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_template(:confirm)
+    body = @response.body
+    assert_match("Estimated number of imports", body)
+    assert_select("#estimated_count", "2")
+    assert_match("Estimated time", body)
+    assert_select("#estimated_time", "00:00:24")
   end
 
   def test_create_confirmed_with_superform_params

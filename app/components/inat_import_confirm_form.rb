@@ -37,7 +37,7 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
   def count_estimate_line
     b { plain(:inat_import_confirm_estimate_caption.l) }
     plain(": ")
-    plain(estimated_count)
+    span(id: "estimated_count") { plain(estimated_count) }
   end
 
   def estimated_count
@@ -47,7 +47,7 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
   def time_estimate_line
     b { plain(:inat_import_confirm_time_estimate_caption.l) }
     plain(": ")
-    plain(estimated_time)
+    span(id: "estimated_time") { plain(estimated_time) }
   end
 
   def estimated_time
