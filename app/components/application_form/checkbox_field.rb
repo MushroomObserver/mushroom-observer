@@ -14,23 +14,16 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options
 
-    def initialize(field, attributes:, wrapper_options: {})
-      super(field, attributes: attributes)
+    def initialize(field, *options, attributes: {}, wrapper_options: {})
+      super(field, *options, attributes: attributes)
       @wrapper_options = wrapper_options
     end
 
     def view_template
-      label_option = wrapper_options[:label]
-
-      if label_option == false
-        # Render checkbox without label wrapper
+      render_with_wrapper do
+        # Inherits proper checkbox behavior from Superform
+        # (hidden input + checked)
         super
-      else
-        render_with_wrapper do
-          # Inherits proper checkbox behavior from Superform
-          # (hidden input + checked)
-          super
-        end
       end
     end
 
@@ -56,15 +49,19 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_content
       text = label_text
       if label_position_before?
-        trusted_html(text)
-        whitespace
+        if text
+          trusted_html(text)
+          whitespace
+        end
         render_between_slot
         yield
       else
         yield
         render_between_slot
-        whitespace
-        trusted_html(text)
+        if text
+          whitespace
+          trusted_html(text)
+        end
       end
     end
 
