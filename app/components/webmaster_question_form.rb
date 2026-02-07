@@ -1,11 +1,19 @@
 # frozen_string_literal: true
 
 # Form for submitting a question to the webmaster.
-# Allows users to ask questions about the site.
+# Creates its own FormObject internally from the provided kwargs.
 class Components::WebmasterQuestionForm < Components::ApplicationForm
-  def initialize(model, email_error: false, **)
+  # Accept optional model arg for ModalForm compatibility (ignored - we create
+  # our own FormObject). This is Pattern B: form creates FormObject internally.
+  def initialize(_model = nil, reply_to: nil, message: nil, email_error: false,
+                 **)
     @email_error = email_error
-    super(model, **)
+
+    form_object = FormObject::EmailRequest.new(
+      reply_to: reply_to,
+      message: message
+    )
+    super(form_object, **)
   end
 
   def view_template

@@ -5,7 +5,6 @@ add_page_title(:ask_observation_question_title.t(
 %>
 
 <%= render(Components::ObserverQuestionForm.new(
-      FormObject::ObserverQuestion.new,
       observation: @observation,
       local: true
     )) %>
