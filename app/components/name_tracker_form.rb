@@ -31,14 +31,9 @@ class Components::NameTrackerForm < Components::ApplicationForm
   end
 
   def render_tracker_fields
-    render(
-      field(:note_template_enabled).checkbox(
-        wrapper_options: {
-          label: :email_tracking_note.t,
-          wrap_class: "mt-5"
-        }
-      )
-    )
+    checkbox_field(:note_template_enabled,
+                   label: :email_tracking_note.t,
+                   wrap_class: "mt-5")
 
     div(class: "help-note mt-2 mb-5") do
       :email_tracking_note_help.t

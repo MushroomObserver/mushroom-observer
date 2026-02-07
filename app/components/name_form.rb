@@ -195,14 +195,9 @@ class Components::NameForm < Components::ApplicationForm
 
   def render_misspelling_fields
     div(class: "my-4 mx-0") do
-      render(
-        field(:misspelling).checkbox(
-          wrapper_options: {
-            label: :form_names_misspelling.l
-          },
-          checked: @misspelling
-        )
-      )
+      checkbox_field(:misspelling,
+                     label: :form_names_misspelling.l,
+                     checked: @misspelling)
 
       correct_spelling_field = field(:correct_spelling).autocompleter(
         type: :name,
