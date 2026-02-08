@@ -72,6 +72,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def label_text
       label_option = wrapper_options[:label]
+      return if label_option == false
+
       label_option.is_a?(String) ? label_option : field.key.to_s.humanize
     end
 
