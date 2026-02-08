@@ -27,6 +27,22 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
+    # Override Superform's option to skip its label wrapper, since
+    # render_with_wrapper already provides one. Avoids invalid nested labels.
+    def option(value)
+      input(
+        **attributes,
+        type: :checkbox,
+        id: "#{dom.id}_#{value}",
+        name: "#{dom.name}[]",
+        value: value.to_s,
+        checked: checked_in_array?(value)
+      )
+      return unless block_given?
+
+      trusted_html(yield)
+    end
+
     private
 
     def render_with_wrapper(&checkbox_block)
