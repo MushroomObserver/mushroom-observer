@@ -40,6 +40,9 @@
 class InatImport < ApplicationRecord
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
 
+  # Virtual attribute for form consent checkbox (not persisted)
+  attr_accessor :consent
+
   enum :state, {
     Unstarted: 0,
     # waiting for User to authorize MO to access iNat data

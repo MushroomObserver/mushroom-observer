@@ -20,7 +20,7 @@ module InatImportsController::Validators
 
   # See InatImport.adequate_constraints?
   def import_adequately_constrained?
-    return true if params[:inat_username].present?
+    return true if import_params[:inat_username].present?
 
     flash_warning(:inat_missing_username.l)
     false
@@ -34,7 +34,8 @@ module InatImportsController::Validators
   end
 
   def imports_unambiguously_designated?
-    if (importing_all? && !listing_ids?) || (listing_ids? && !importing_all?)
+    if (importing_all? && !listing_ids?) ||
+       (listing_ids? && !importing_all?)
       return true
     end
 
@@ -43,11 +44,11 @@ module InatImportsController::Validators
   end
 
   def importing_all?
-    params[:all] == "1"
+    import_params[:import_all] == "1"
   end
 
   def listing_ids?
-    params[:inat_ids].present?
+    import_params[:inat_ids].present?
   end
 
   def valid_inat_ids_param?
@@ -58,12 +59,13 @@ module InatImportsController::Validators
   end
 
   def contains_illegal_characters?
-    /[^\d ,]/.match?(params[:inat_ids])
+    /[^\d ,]/.match?(import_params[:inat_ids])
   end
 
   def list_within_size_limits?
-    return true if importing_all? || # ignore list size if importing all
-                   params[:inat_ids].length <= MAX_ID_LIST_SIZE
+    return true if importing_all? ||
+                   import_params[:inat_ids].length <=
+                   MAX_ID_LIST_SIZE
 
     flash_warning(:inat_too_many_ids_listed.t)
     false
@@ -72,19 +74,22 @@ module InatImportsController::Validators
   def inat_id_list
     return [] unless listing_ids?
 
-    params[:inat_ids].delete(" ").split(",").map(&:to_i)
+    import_params[:inat_ids].delete(" ").split(",").
+      map(&:to_i)
   end
 
-  # Block superimporter from importing **all** another user's iNat observations
-  # Seems so hard to reverse if done accidentally that we should prevent it,
-  # at least for now.
+  # Block superimporter from importing **all** another
+  # user's iNat observations.
+  # Seems so hard to reverse if done accidentally that we
+  # should prevent it, at least for now.
   def not_importing_all_anothers?
     # At this stage we care only about superimporters because
     # other users are limited to importing their own observations
     # by InatImportJob#ensure_importing_own_observations
     return true unless InatImport.super_importer?(@user)
     unless importing_all? &&
-           (params[:inat_username] != @user.inat_username)
+           (import_params[:inat_username] !=
+            @user.inat_username)
       return true
     end
 
@@ -93,7 +98,7 @@ module InatImportsController::Validators
   end
 
   def consented?
-    return true if params[:consent] == "1"
+    return true if import_params[:consent] == "1"
 
     flash_warning(:inat_consent_required.t)
     false

@@ -68,14 +68,21 @@ class InatImportsController < ApplicationController
   end
 
   def new
-    @inat_import = InatImport.find_or_create_by(user: @user)
-    return unless @inat_import.job_pending?
+    inat_import = InatImport.find_or_create_by(user: @user)
+    if inat_import.job_pending?
+      tracker = InatImportJobTracker.where(
+        inat_import: inat_import
+      ).order(:created_at).last
+      flash_warning(:inat_import_tracker_pending.l)
+      redirect_to(
+        inat_import_path(inat_import,
+                         params: { tracker_id: tracker.id })
+      )
+      return
+    end
 
-    tracker = InatImportJobTracker.where(inat_import: @inat_import).
-              order(:created_at).last
-    flash_warning(:inat_import_tracker_pending.l)
-    redirect_to(
-      inat_import_path(@inat_import, params: { tracker_id: tracker.id })
+    @inat_import = InatImport.new(
+      inat_username: @user.inat_username
     )
   end
 
@@ -93,8 +100,10 @@ class InatImportsController < ApplicationController
   private
 
   def reload_form
-    @inat_ids = sanitize_inat_ids(params[:inat_ids])
-    @inat_username = params[:inat_username]
+    @inat_import = InatImport.new(
+      inat_ids: sanitize_inat_ids(import_params[:inat_ids]),
+      inat_username: import_params[:inat_username]
+    )
     render(:new)
   end
 
@@ -125,11 +134,11 @@ class InatImportsController < ApplicationController
     @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(
       state: "Authorizing",
-      import_all: params[:all],
+      import_all: import_params[:import_all],
       importables: importables_count,
       imported_count: 0,
       avg_import_time: @inat_import.initial_avg_import_seconds,
-      inat_username: params[:inat_username].strip,
+      inat_username: import_params[:inat_username].strip,
       inat_ids: clean_inat_ids,
       response_errors: "",
       token: "",
@@ -146,11 +155,11 @@ class InatImportsController < ApplicationController
   def importables_count
     return nil if importing_all?
 
-    params[:inat_ids].split(",").length
+    import_params[:inat_ids].split(",").length
   end
 
   def clean_inat_ids
-    inat_ids = sanitize_inat_ids(params[:inat_ids])
+    inat_ids = sanitize_inat_ids(import_params[:inat_ids])
     previous_imports = Observation.where(inat_id: inat_id_list)
     return inat_ids if previous_imports.none?
 
@@ -166,6 +175,12 @@ class InatImportsController < ApplicationController
     remaining_ids =
       inat_ids.split(",").map(&:strip).reject { |id| previous_ids.include?(id) }
     remaining_ids.join(",")
+  end
+
+  def import_params
+    params.require(:inat_import).permit(
+      :inat_username, :inat_ids, :import_all, :consent
+    )
   end
 
   def request_inat_user_authorization
