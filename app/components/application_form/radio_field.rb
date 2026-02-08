@@ -56,7 +56,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         type: :radio,
         name: field.dom.name,
         id: radio_id(value),
-        value: value,
+        value: value.to_s,
         checked: option_checked?(value)
       }.merge(@attributes)
     end
