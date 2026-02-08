@@ -22,19 +22,15 @@ class Components::ExternalLinkForm < Components::ApplicationForm
 
   def render_url_field
     selected_site = @site || @sites&.first
-    render(
-      field(:url).text(
-        size: 40,
-        placeholder: selected_site.base_url,
-        wrapper_options: {
-          label: :URL.l,
-          between: :required,
-          wrap_class: "w-100",
-          append: :show_observation_add_link_dialog.l
-        },
-        data: { placeholder_target: "textField" }
-      )
-    )
+    text_field(:url,
+               size: 40,
+               placeholder: selected_site.base_url,
+               label: :URL.l,
+               between: :required,
+               wrap_class: "w-100",
+               data: { placeholder_target: "textField" }) do |f|
+      f.with_append { :show_observation_add_link_dialog.l }
+    end
   end
 
   def render_hidden_fields
@@ -54,21 +50,15 @@ class Components::ExternalLinkForm < Components::ApplicationForm
                 @sites.sort_by(&:name).map { |site| [site.id, site.name] }
               end
 
-    render(
-      field(:external_site_id).select(
-        options,
-        wrapper_options: {
-          label: :EXTERNAL_SITE.l,
-          inline: true
-        },
-        selected: selected_site.id,
-        data: {
-          placeholder_target: "select",
-          action: "placeholder#update",
-          placeholder_text: selected_site.base_url
-        }
-      )
-    )
+    select_field(:external_site_id, options,
+                 label: :EXTERNAL_SITE.l,
+                 inline: true,
+                 selected: selected_site.id,
+                 data: {
+                   placeholder_target: "select",
+                   action: "placeholder#update",
+                   placeholder_text: selected_site.base_url
+                 })
   end
 
   def base_urls

@@ -39,15 +39,12 @@ class Components::NameTrackerForm < Components::ApplicationForm
       :email_tracking_note_help.t
     end
 
-    render(
-      field(:note_template).textarea(
-        rows: 16,
-        cols: 80,
-        value: @note_template,
-        data: { autofocus: true },
-        id: "name_tracker_note_template"
-      )
-    )
+    textarea_field(:note_template,
+                   rows: 16,
+                   cols: 80,
+                   value: @note_template,
+                   data: { autofocus: true },
+                   id: "name_tracker_note_template")
     br
   end
 

@@ -568,6 +568,61 @@ class ApplicationFormTest < ComponentTestCase
     assert_equal("observation[image][100][when]", proxy.dom.name)
   end
 
+  # Radio field tests (via Superform)
+  def test_radio_field_renders_options
+    form = render_form do
+      radio_field(:number, [1, "Option 1"], [2, "Option 2"])
+    end
+
+    assert_html(form, "div.radio")
+    assert_html(form, "input[type='radio'][name='collection_number[number]']",
+                count: 2)
+    assert_html(form, "input[value='1']")
+    assert_html(form, "input[value='2']")
+    assert_includes(form, "Option 1")
+    assert_includes(form, "Option 2")
+  end
+
+  def test_radio_field_with_wrap_class
+    form = render_form do
+      radio_field(:number, [1, "A"], [2, "B"], wrap_class: "ml-4")
+    end
+
+    assert_html(form, "div.radio.ml-4", count: 2)
+  end
+
+  # RadioField standalone tests (via FieldProxy)
+  def test_radio_field_with_field_proxy
+    proxy = Components::ApplicationForm::FieldProxy.new(
+      "chosen_name", :name_id
+    )
+    html = render(Components::ApplicationForm::RadioField.new(
+                    proxy, [10, "Alpha"], [20, "Beta"],
+                    wrapper_options: { wrap_class: "ml-4" }
+                  ))
+
+    assert_html(html, "div.radio.ml-4", count: 2)
+    assert_html(html,
+                "input[type='radio'][name='chosen_name[name_id]']",
+                count: 2)
+    assert_html(html, "input[id='chosen_name_name_id_10'][value='10']")
+    assert_html(html, "input[id='chosen_name_name_id_20'][value='20']")
+    assert_includes(html, "Alpha")
+    assert_includes(html, "Beta")
+  end
+
+  def test_radio_field_proxy_with_checked_value
+    proxy = Components::ApplicationForm::FieldProxy.new(
+      "chosen_name", :name_id, "20"
+    )
+    html = render(Components::ApplicationForm::RadioField.new(
+                    proxy, [10, "Alpha"], [20, "Beta"]
+                  ))
+
+    assert_html(html, "input[value='10']:not([checked])")
+    assert_html(html, "input[value='20'][checked]")
+  end
+
   # Autocompleter field tests
   def test_autocompleter_field_renders_structure
     form = render_form do
