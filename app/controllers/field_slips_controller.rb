@@ -210,19 +210,39 @@ class FieldSlipsController < ApplicationController
     id_str = params[:field_slip][:field_slip_name]
     return unless id_str
 
-    id_str.tr!("_", "")
+    id_str = strip_textile_formatting(id_str)
     names = Name.find_names(@user, id_str)
     return if names.blank?
 
     name = names[0]
+    create_naming_and_vote(name)
+  end
+
+  def strip_textile_formatting(id_str)
+    # Handle textile formatted IDs defensively
+    # "_name Xxx yyy_" -> "Xxx yyy"
+    # "_Xxx yyy_" -> "Xxx yyy"
+    # "Xxx yyy" -> "Xxx yyy"
+    # "_Weird_name_" -> "Weird_name" (preserves internal underscores)
+    if id_str.start_with?("_name ") && id_str.end_with?("_")
+      # Strip "_name " prefix and trailing "_"
+      id_str[6..-2]
+    elsif id_str.start_with?("_") && id_str.end_with?("_")
+      # Strip leading and trailing underscores only
+      id_str[1..-2]
+    else
+      id_str
+    end
+  end
+
+  def create_naming_and_vote(name)
     naming = @field_slip.observation.namings.find_by(name:)
     unless naming
       naming = Naming.user_construct({}, @field_slip.observation, @user)
       naming.name = name
       naming.save!
     end
-    vote = Vote.find_by(user: @user, naming:)
-    return if vote
+    return if Vote.find_by(user: @user, naming:)
 
     Vote.create!(favorite: true, value: Vote.maximum_vote, naming:, user: @user)
     Observation::NamingConsensus.new(@field_slip.observation).

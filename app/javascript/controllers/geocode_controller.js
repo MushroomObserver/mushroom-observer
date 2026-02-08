@@ -196,8 +196,8 @@ export default class extends Controller {
     const center = results[0].geometry.location.toJSON()
 
     if (this.map) {
-      if (viewport) this.map.fitBounds(viewport)
-      this.placeClosestRectangle(viewport, extents) // viewport is optional
+      // placeClosestRectangle will handle fitBounds after zoom completes
+      this.placeClosestRectangle(viewport, extents)
     }
     this.updateFields(viewport, extents, center)
     // For non-autocompleted place input in the location form
@@ -217,29 +217,39 @@ export default class extends Controller {
     this.placeInputTarget.classList.add("geocoded")
   }
 
-  // NOTE: Second branch of conditional is for map controller
+  // NOTE: For observation/hybrid maps, update lat/lng when clicking the map
+  // (center only, no viewport/extents). When geocoding returns results
+  // (viewport/extents present), update bounds but don't overwrite lat/lng.
   updateFields(viewport, extents, center) {
     this.verbose("geocode:updateFields")
     let points = [], type = "" // for elevation
-    if (this.hasNorthInputTarget) {
-      // Prefer extents for rectangle, fallback to viewport
+
+    // Map click on observation form: only center is passed (no viewport/extents)
+    // Update lat/lng inputs directly
+    if (["observation", "hybrid"].includes(this.map_type) &&
+        this.hasLatInputTarget && !viewport && !extents) {
+      if (center != undefined && center?.lat) {
+        this.updateLatLngInputs(center)
+        points = [center]
+      }
+      type = "point"
+    } else if (this.hasNorthInputTarget) {
+      // Location form or geocoding result - update bounds
       let bounds = extents || viewport
       if (bounds != undefined && bounds?.north) {
         this.updateBoundsInputs(bounds)
         points = this.sampleElevationPointsOf(bounds)
       }
-      // else if (center) {
-      //   this.updateBoundsInputs(this.boundsOfPoint(center))
-      //   points = [center] // this.sampleElevationCenterOf(center)
-      // }
       type = "rectangle"
     } else if (this.hasLatInputTarget) {
+      // Fallback for non-map geocode with lat/lng
       if (center != undefined && center?.lat) {
         this.updateLatLngInputs(center)
-        points = [center] // this.sampleElevationCenterOf(center)
+        points = [center]
       }
       type = "point"
     }
+
     if (points && type)
       this.getElevations(points, type) // updates inputs
   }

@@ -16,19 +16,19 @@ module Admin
                      identifier: "webmaster_question_email",
                      title: :ask_webmaster_title.l,
                      user: @user,
-                     model: FormObject::WebmasterQuestion.new(
-                       email: @email, message: @message
+                     model: FormObject::EmailRequest.new(
+                       reply_to: @email, message: @message
                      ),
-                     form_locals: { email: @email, email_error: false,
-                                    message: @message }
+                     form_class: Components::WebmasterQuestionForm,
+                     form_locals: { email_error: false }
                    ), layout: false)
           end
         end
       end
 
       def create
-        @email = params.dig(:webmaster_question, :email)
-        @message = params.dig(:webmaster_question, :message)
+        @email = params.dig(:email, :reply_to)
+        @message = params.dig(:email, :message)
         @email_error = false
         create_webmaster_question
       end

@@ -4,7 +4,7 @@
 html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
 ctrlr_action = "#{controller.controller_name}__#{controller.action_name}"
 theme = "theme-#{@css_theme.underscore.dasherize}"
-location_format = "location-format-#{User.current_location_format || "postal"}"
+location_format = "location-format-#{@user&.location_format || "postal"}"
 logged_in = @user ? "logged-in-user" : "no-user"
 body_class = class_names(ctrlr_action, theme, location_format, logged_in)
 # These execute AFTER the template!
@@ -33,7 +33,13 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
       <div class="row row-offcanvas row-offcanvas-left"
          data-nav-target="offcanvas">
 
-        <%= render(partial: "application/sidebar") %>
+        <%= render(Components::ApplicationSidebar.new(
+          user: @user,
+          browser: browser,
+          request: request,
+          in_admin_mode: in_admin_mode?,
+          languages: @languages
+        )) %>
 
         <div id="right_side" class="col-xs-12 col-md-10">
           <%= render(partial: "application/top_nav") %>
@@ -44,14 +50,14 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
               data-controller="lightgallery">
 
             <%# unless @user&.verified? %>
-            <%# render(partial: "application/content/login_layout") %>
+            <%# render(Components::LoginLayout.new) %>
             <%# end %>
 
             <!--MAIN_PAGE_CONTENT-->
             <%= yield %>
             <!--/MAIN_PAGE_CONTENT-->
 
-            <%= render(partial: "application/content/translators_credit") %>
+            <%= render(Components::TranslatorsCredit.new) %>
           </main><!-- #content -->
 
         </div>

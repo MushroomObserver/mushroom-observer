@@ -5,7 +5,7 @@ require "test_helper"
 class NameChangeRequestFormTest < ComponentTestCase
   def setup
     super
-    @email = FormObject::NameChangeRequest.new
+    @email = FormObject::EmailRequest.new
     @name = names(:coprinus_comatus)
     @new_name = "Agaricus foo"
     @new_name_with_icn_id = "#{@new_name}[#123456]"
@@ -35,11 +35,11 @@ class NameChangeRequestFormTest < ComponentTestCase
     assert_includes(html, @new_name_with_icn_id)
   end
 
-  def test_renders_notes_field
+  def test_renders_message_field
     html = render_form
 
     assert_html(html, "body", text: :Notes.l)
-    assert_html(html, "textarea[name='name_change_request[notes]']")
+    assert_html(html, "textarea[name='email[message]']")
     assert_html(html, "textarea[rows='10']")
     assert_html(html, "textarea[data-autofocus]")
   end

@@ -105,6 +105,8 @@ agaricus_campestris_obs:
   log_updated_at: 2007-03-19 20:21:00
   when: 2007-03-19
   location: burbank
+  location_lat: 34.185
+  location_lng: -118.33
   where: Burbank, California, USA
   user: rolf
   name: agaricus_campestris

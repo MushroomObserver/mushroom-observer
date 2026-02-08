@@ -13,9 +13,9 @@ class Components::LicenseForm < Components::ApplicationForm
 
   # Automatically determine action URL based on whether record is persisted
   def form_action
-    return view_context.licenses_path if model.nil? || !model.persisted?
+    return licenses_path if model.nil? || !model.persisted?
 
-    view_context.license_path(model)
+    license_path(model)
   end
 
   def render_display_name_field

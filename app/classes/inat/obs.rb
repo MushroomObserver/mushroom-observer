@@ -162,21 +162,24 @@ class Inat
     end
 
     def sequences
-      obs_sequence_fields = inat_obs_fields.select { |f| sequence_field?(f) }
-      obs_sequence_fields.each_with_object([]) do |field, ary|
-        # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
-        # field[:value] blank or not a (pure) lists of bases
-        # https://github.com/MushroomObserver/mushroom-observer/issues/2232
-        ary << { locus: field[:name], bases: field[:value],
-                 # NTOE: 2024-06-19 jdc. Can we figure out the following?
-                 archive: nil, accession: "", notes: "" }
-      end
+      # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
+      # field[:value] blank or not a (pure) lists of bases
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2232
+      # NTOE: 2024-06-19 jdc. Can we figure out the following?
+      # archive, accession fields
+      Inat::SequenceFieldDetector.extract_sequences(inat_obs_fields)
     end
 
     def specimen?
-      # used by iNat NEMF projects and some others
-      field = inat_obs_field("Voucher Specimen Taken")
-      field.present? && field[:value] == "Yes"
+      false
+
+      # Disable specimen detection until I can find a better algorithm
+      # the Inat Observation Field "Voucher Specimen Taken" is not reliable
+      # because the iNat practice is to use this field to mean other things
+      # like "sampled for DNA analysis" rather than "collected as a specimen"
+
+      # field = inat_obs_field("Voucher Specimen Taken")
+      # field.present? && field[:value] == "Yes"
     end
 
     def source = "mo_inat_import"
@@ -336,11 +339,6 @@ class Inat
     # ----- Other
 
     def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
-
-    def sequence_field?(field)
-      field[:datatype] == "dna" ||
-        field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
-    end
 
     # NOTE: 2024-06-01 jdc
     # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold

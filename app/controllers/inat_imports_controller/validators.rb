@@ -3,6 +3,13 @@
 module InatImportsController::Validators
   SITE = "https://www.inaturalist.org"
 
+  # Maximum size of id list param, based on
+  #  Puma max query string size (1024 * 10)
+  #  MAX_COOKIE_SIZE
+  #  - ~256 to allow for other stuff
+  MAX_ID_LIST_SIZE =
+    [1024 * 10, ActionDispatch::Cookies::MAX_COOKIE_SIZE].min - 256
+
   private
 
   def params_valid?
@@ -23,8 +30,6 @@ module InatImportsController::Validators
     imports_unambiguously_designated? &&
       valid_inat_ids_param? &&
       list_within_size_limits? &&
-      fresh_import? &&
-      unmirrored? &&
       not_importing_all_anothers?
   end
 
@@ -58,57 +63,26 @@ module InatImportsController::Validators
 
   def list_within_size_limits?
     return true if importing_all? || # ignore list size if importing all
-                   params[:inat_ids].length <= 255
+                   params[:inat_ids].length <= MAX_ID_LIST_SIZE
 
     flash_warning(:inat_too_many_ids_listed.t)
     false
   end
 
-  # Are the listed iNat IDs fresh (i.e., not already imported)?
-  def fresh_import?
-    return true if importing_all?
-
-    previous_imports = Observation.where(inat_id: inat_id_list)
-    return true if previous_imports.none?
-
-    previous_imports.each do |import|
-      flash_warning(:inat_previous_import.t(inat_id: import.inat_id,
-                                            mo_obs_id: import.id))
-    end
-    false
-  end
-
   def inat_id_list
+    return [] unless listing_ids?
+
     params[:inat_ids].delete(" ").split(",").map(&:to_i)
   end
 
-  def unmirrored?
-    return true if importing_all? # cannot test check this if importing all
-
-    conditions = inat_id_list.map do |inat_id|
-      Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
-    end
-    previously_mirrored = Observation.where(conditions.inject(:or)).to_a
-    return true if previously_mirrored.blank?
-
-    previously_mirrored.each do |obs|
-      flash_warning(:inat_previous_mirror.t(inat_id: mirrored_inat_id(obs),
-                                            mo_obs_id: obs.id))
-    end
-    false
-  end
-
-  # When Pulk's `mirror`Python script copies an MO Obs to iNat,
-  # it adds a link to the iNat obs in the MO Observation notes
-  def mirrored_inat_id(obs)
-    match = %r{#{SITE}/observations/(?'inat_id'\d+)}o.match(obs.notes.to_s)
-    match[:inat_id]
-  end
-
-  # Block importing **all** of another user's iNat observations
+  # Block superimporter from importing **all** another user's iNat observations
   # Seems so hard to reverse if done accidentally that we should prevent it,
   # at least for now.
   def not_importing_all_anothers?
+    # At this stage we care only about superimporters because
+    # other users are limited to importing their own observations
+    # by InatImportJob#ensure_importing_own_observations
+    return true unless InatImport.super_importer?(@user)
     unless importing_all? &&
            (params[:inat_username] != @user.inat_username)
       return true

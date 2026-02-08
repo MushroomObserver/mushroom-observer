@@ -4,7 +4,7 @@ add_context_nav(email_name_change_request_tabs(name: @name))
 %>
 
 <%= render(Components::NameChangeRequestForm.new(
-      FormObject::NameChangeRequest.new,
+      FormObject::EmailRequest.new,
       name: @name,
       new_name_with_icn_id: @new_name_with_icn_id,
       local: true

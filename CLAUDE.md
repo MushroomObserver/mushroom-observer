@@ -6,7 +6,8 @@
 
 1. Load the default output style from `.claude/output-styles/professional-direct.md`
 2. If `.claude/settings.local.json` exists, read it and override with the `outputStyle` value if present
-3. Confirm the loaded output style by stating:
+3. If `.claude/developer.json` exists, read the `branchPrefix` value for git branch naming
+4. Confirm the loaded output style by stating:
    ```
    Output style: <style-name>
    ```
@@ -29,9 +30,10 @@ See `.claude/rules/testing.md` for detailed Rails testing syntax and conventions
 - Run specific test: `bin/rails test <file> -n <test_name>`
 - Run test file: `bin/rails test <file>`
 - Run all tests: `bin/rails test`
-- Coverage: `bin/rails test:coverage`
 
 **Important**: Use `-n` flag for test names, NOT RSpec-style `::ClassName#method` syntax.
+
+**Note**: Coverage reports are generated automatically by default using SimpleCov in parallel mode.
 
 ### CRITICAL: System Test Syntax
 
@@ -51,11 +53,12 @@ bin/rails test:system test/system/observation_naming_system_test.rb
 
 - Create feature branches from `main`
 - **Branch naming convention**: `<prefix>-feature-description`
-  - Prefix is derived from `git config user.name` (converted to lowercase initials)
-  - Can be overridden in `.claude/settings.local.json` with `branchPrefix` setting
+  - Prefix is read from `.claude/developer.json` (`branchPrefix` field) if it exists
+  - Falls back to deriving from `git config user.name` (converted to lowercase initials)
   - Example: "Nathan Wilson" → `nw-fix-bug-123` or `njw-add-dark-mode`
   - Use kebab-case for feature description
   - Include issue numbers when applicable: `prefix-fix-1234-description`
+  - **Setup**: Create `.claude/developer.json` with `{"branchPrefix": "your-initials"}` (git-ignored)
 - Commit messages include Claude Code attribution
 - Create PRs via `gh pr create` with detailed descriptions
 - Link PRs to issues with `Fixes #issue_number`

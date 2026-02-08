@@ -94,7 +94,7 @@ module Report
         "Column misalignment detected in Report::Row! " \
         "Expected @vals[#{index}] (#{column_name}) to be #{expected}, " \
         "but got #{actual}. " \
-        "This indicates a race condition in parallel testing. " \
+        "Column count: #{@vals.size}. " \
         "Row data: #{@vals.first(20).inspect}"
       )
     end

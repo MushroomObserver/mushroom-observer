@@ -1,6 +1,6 @@
 <%
 add_show_title(@sequence.format_name, @sequence)
-add_edit_icons(@sequence)
+add_edit_icons(@sequence, @user)
 add_pager_for(@sequence)
 add_context_nav(sequence_show_tabs(seq: @sequence))
 container_class(:wide)

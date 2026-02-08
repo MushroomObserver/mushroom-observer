@@ -156,18 +156,31 @@ thead tr {
 }
 
 .table-lifeform {
-  tr td {
-    padding: .1em 1em;
+  > tbody > tr > td {
+    vertical-align: middle;
   }
 }
 
-table.ips tr td,
-table.ips tr th {
-  background: #f7f;
-  padding: 0 0.5em;
+table.ips {
+  background: none;
+
+  tr td,
+  tr th {
+    padding: 0 0.5em;
+  }
 }
 
-table.ips-lined tr td,
-table.ips-lined tr th {
-  border-left: 2px solid #d0d;
+// Interior borders only (between cells, not on outer edges)
+table.ips-lined {
+  border-collapse: collapse;
+
+  tr td,
+  tr th {
+    padding: 0.25em 0.5em !important;
+
+    // Vertical borders between columns (not on first column)
+    &:not(:first-child) {
+      border-left: 2px solid #d0d;
+    }
+  }
 }

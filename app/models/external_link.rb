@@ -67,7 +67,7 @@ class ExternalLink < AbstractModel
     external_site.name
   end
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     return false unless user
 
     user.id == observation.user_id ||

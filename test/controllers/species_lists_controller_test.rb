@@ -319,7 +319,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:show, params: { id: spl.id })
-    assert_select("a[href*=?]", edit_species_list_path(spl.id), count: 0)
+    assert_no_edit_button(spl)
     assert_select("form[action=?]", add_dispatch_path, count: 1)
     get(:edit, params: { id: spl.id })
     assert_response(:redirect)
@@ -328,15 +328,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("mary")
     get(:show, params: { id: spl.id })
-    assert_select("a[href*=?]", edit_species_list_path(spl.id), minimum: 1)
-    assert_select("form[action=?]", species_list_path(spl.id), minimum: 1)
+    assert_edit_button(spl)
+    assert_destroy_button(spl)
     get(:edit, params: { id: spl.id })
     assert_response(:success)
 
     login("dick")
     get(:show, params: { id: spl.id })
-    assert_select("a[href*=?]", edit_species_list_path(spl.id), minimum: 1)
-    assert_select("form[action=?]", species_list_path(spl.id), minimum: 1)
+    assert_edit_button(spl)
+    assert_destroy_button(spl)
     get(:edit, params: { id: spl.id })
     assert_response(:success)
     delete(:destroy, params: { id: spl.id })

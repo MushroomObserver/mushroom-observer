@@ -2,18 +2,8 @@
 add_page_title(:author_request_title.t(title: @object.format_name))
 %>
 
-<%= form_with(url: { action: :create, id: @object.id, type: @object.type_tag },
-              scope: :email, id: "authors_email_requests_form") do |f| %>
-
-  <%= :author_request_note.tp %>
-
-  <%= text_field_with_label(form: f, field: :subject,
-                            label: :request_subject.t + ":",
-                            data: { autofocus: true }) %>
-
-  <%= text_area_with_label(form: f, field: :message, rows: 10,
-                            label: :request_message.t + ":") %>
-
-  <%= submit_button(form: f, button: :SEND.l, center: true) %>
-
-<% end %>
+<%= render(Components::Descriptions::AuthorRequestForm.new(
+      FormObject::EmailRequest.new,
+      object: @object,
+      action: description_author_requests_path(id: @object.id, type: @object.type_tag)
+    )) %>

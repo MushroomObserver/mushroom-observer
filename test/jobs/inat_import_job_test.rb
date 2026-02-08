@@ -434,7 +434,9 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name)
 
     assert(obs.sequences.one?, "Obs should have one Sequence")
-    assert(obs.specimen, "Obs should show that a Specimen is available")
+    # See comment in Inat::Obs#specimen? about disabling specimen detection
+    # assert(obs.specimen, "Obs should show that a Specimen is available")
+    assert_not(obs.specimen, "Obs should not show that a Specimen is available")
   end
 
   # Prove that Namings, Votes, Identification are correct
@@ -946,7 +948,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # The observation should have been destroyed after the error
     assert_equal(obs_count_before, Observation.count,
-                 "Observation should be destroyed after error")
+                 "MO Observation should be destroyed after iNat API error")
 
     errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
     assert_equal(status, errors[:error], "Incorrect error status")

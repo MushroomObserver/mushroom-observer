@@ -50,6 +50,7 @@ class ApplicationController < ActionController::Base
   before_action :set_locale
   before_action :set_timezone
   before_action :track_translations
+  before_action :set_languages
 
   # Make show_name_helper available to nested partials
   helper :names
@@ -333,6 +334,16 @@ class ApplicationController < ActionController::Base
     @project = Project.safe_find(project_id)
   end
 
+  # Determines the active project tab based on current controller/params.
+  # Used by ProjectBanner component to highlight the active navigation tab.
+  def active_project_tab
+    tab = controller_name
+    # Checklist page with location_id is really a locations tab
+    tab = "locations" if tab == "checklists" && params.include?("location_id")
+    tab
+  end
+  helper_method :active_project_tab
+
   def render_xml(args)
     request.format = "xml"
     respond_to do |format|
@@ -356,6 +367,10 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   private
+
+  def set_languages
+    @languages = Language.where.not(beta: true).order(:order).to_a
+  end
 
   # defined here because used by both images_controller and
   # observations_controller

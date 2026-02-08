@@ -23,24 +23,14 @@ class Components::VisualGroupForm < Components::ApplicationForm
   private
 
   def render_errors
-    count = view_context.pluralize(model.errors.count, :error.t,
-                                   plural: :errors.t)
+    count = pluralize(model.errors.count, :error.l, plural: :errors.l)
 
     Alert(level: :danger, id: "error_explanation") do
-      [error_header(count), error_list].join.html_safe # rubocop:disable Rails/OutputSafety
-    end
-  end
-
-  def error_header(count)
-    view_context.tag.h2(
-      "#{count} prohibited this visual_group from being saved:"
-    )
-  end
-
-  def error_list
-    view_context.tag.ul do
-      model.errors.each do |error|
-        view_context.concat(view_context.tag.li(error.full_message))
+      h2 { "#{count} prohibited this visual_group from being saved:" }
+      ul do
+        model.errors.each do |error|
+          li { error.full_message }
+        end
       end
     end
   end
@@ -48,7 +38,7 @@ class Components::VisualGroupForm < Components::ApplicationForm
   def render_name_field
     div(class: "form-group") do
       div(class: "form-inline") do
-        render(field(:name).text(size: 40, class: "form-control"))
+        text_field(:name, size: 40, class: "form-control", label: false)
         span(class: "ml-3") { :VISUAL_GROUP.t }
       end
     end
@@ -56,9 +46,9 @@ class Components::VisualGroupForm < Components::ApplicationForm
 
   def form_action
     if model.persisted?
-      view_context.visual_group_path(model)
+      visual_group_path(model)
     else
-      view_context.visual_model_visual_groups_path(@visual_model)
+      visual_model_visual_groups_path(@visual_model)
     end
   end
 end

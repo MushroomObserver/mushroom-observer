@@ -45,8 +45,8 @@ module Names
     end
 
     def prepare_name_sorter
-      list = params[:synonym_members].strip_squeeze
-      @deprecate_all = (params[:deprecate_all] == "1")
+      list = params.dig(:edit_synonym, :synonym_members).to_s.strip_squeeze
+      @deprecate_all = (params.dig(:edit_synonym, :deprecate_all) == "1")
 
       # Create any new names that have been approved.
       construct_approved_names(list, params[:approved_names],
@@ -69,11 +69,8 @@ module Names
       elsif !sorter.only_approved_synonyms
         flash_notice(:name_change_synonyms_confirm.t)
       else
-        success = deprecate_other_names(sorter)
-        return redirect_to(name_path(@name.id)) if success
-
-        flash_object_errors(@name)
-        flash_object_errors(@name.synonym)
+        deprecate_other_names(sorter)
+        return redirect_to(name_path(@name.id))
       end
 
       re_render_edit_form(sorter)
@@ -85,13 +82,11 @@ module Names
       # names will not have a check-box yet, names written-in in previous
       # attempt to submit this form will have checkboxes and therefore must
       # be checked to proceed -- the default initial state.
-      proposed_synonym_ids = params[:proposed_synonyms] || {}
+      proposed_ids = params.dig(:edit_synonym, :proposed_synonyms) || {}
       sorter.all_synonyms.each do |n|
         # It is possible these names may be changed by transfer_synonym,
         # but these *instances* will not reflect those changes, so reload.
-        if proposed_synonym_ids[n.id.to_s] != "0"
-          @name.transfer_synonym(n.reload)
-        end
+        @name.transfer_synonym(n.reload) unless proposed_ids[n.id.to_s] == "0"
       end
 
       # De-synonymize any old synonyms in the "existing synonyms" list that
@@ -99,7 +94,8 @@ module Names
       # there are multiple unchecked names -- that is, it splits this
       # synonym into two synonyms, with checked names staying in this one,
       # and unchecked names moving to the new one.
-      split_off_desynonymized_names(@name, params[:existing_synonyms] || {})
+      existing_ids = params.dig(:edit_synonym, :existing_synonyms) || {}
+      split_off_desynonymized_names(@name, existing_ids)
 
       # Deprecate everything if that check-box has been marked.
       success = true
@@ -123,19 +119,13 @@ module Names
       render(:edit, location: edit_synonyms_of_name_path(@name.id))
     end
 
-    # Helper used by change_synonyms.  Deprecates a single name.  Returns true
-    # if it worked.  Flashes an error and returns false if it fails for whatever
-    # reason.
+    # Helper used by change_synonyms. Deprecates a single name. Returns true
+    # if it worked, false if save failed.
     def deprecate_synonym(name)
       return true if name.deprecated
 
-      begin
-        name.change_deprecated(true)
-        name.save_with_log(@user, :log_deprecated_by)
-      rescue RuntimeError => e
-        flash_error(e.to_s) if e.present?
-        false
-      end
+      name.change_deprecated(true)
+      name.save_with_log(@user, :log_deprecated_by)
     end
 
     # If changing the synonyms of a name that already has synonyms, the user is
@@ -171,12 +161,6 @@ module Names
       logger.warn("\nMultiple names:")
       sorter.multiple_line_strs.each do |n|
         logger.warn(n)
-      end
-      if sorter.chosen_names
-        logger.warn("\nChosen names:")
-        sorter.chosen_names.each do |n|
-          logger.warn(n)
-        end
       end
       logger.warn("\nSynonym names:")
       sorter.all_synonyms.map(&:id).each do |n|

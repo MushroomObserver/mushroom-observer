@@ -211,7 +211,15 @@ export default class BaseAutocompleterController extends Controller {
     } else if (detail?.hasOwnProperty("type")) {
       type = detail.type;
     }
-    if (type == undefined || type === this.TYPE) { return; }
+    if (type == undefined) { return; }
+
+    // If same type but different lat/lng params, still update the location
+    const hasNewParams = detail?.request_params?.lat && detail?.request_params?.lng;
+    const paramsChanged = hasNewParams &&
+      (detail.request_params.lat !== this.request_params?.lat ||
+       detail.request_params.lng !== this.request_params?.lng);
+
+    if (type === this.TYPE && !paramsChanged) { return; }
 
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
       console.warn("BaseAutocompleter: Invalid type: \"" + type + "\"");
@@ -249,6 +257,8 @@ export default class BaseAutocompleterController extends Controller {
     this.stored_data = { id: 0 };
     this.keepers = [];
     this.last_fetch_params = '';
+    // Clear or update request_params (prevents stale lat/lng from constraining)
+    this.request_params = detail.request_params || {};
     // Re-prepare inputs
     this.prepareInputElement();
     this.prepareHiddenInput();
@@ -432,6 +442,10 @@ export default class BaseAutocompleterController extends Controller {
         if (selectedName &&
             new_value.trim() !== selectedName.trim()) {
           this.clearHiddenId();
+          // Allow breaking out of EXIF-constrained mode by typing
+          if (this.resetIgnorePlaceInput) {
+            this.resetIgnorePlaceInput();
+          }
         }
         if (do_refresh) {
           this.verbose("autocompleter:ourChange()");
@@ -971,15 +985,23 @@ export default class BaseAutocompleterController extends Controller {
         }
         this.inputTarget.focus();
         if (this.hasMapOutlet) {
-          // Fill box inputs from location data if available
-          if (hidden_data.north || hidden_data.south ||
-              hidden_data.east || hidden_data.west) {
-            this.mapOutlet.updateBoundsInputs(hidden_data);
+          let map;
+          try {
+            map = this.mapOutlet;
+          } catch (e) {
+            map = null;
           }
-          // Only trigger map rectangle drawing when a location was selected
-          // (has an ID). Don't trigger Google geocode when ID is cleared.
-          if (hidden_id) {
-            this.mapOutlet.showBox();
+          if (map) {
+            // Fill box inputs from location data if available
+            if (hidden_data.north || hidden_data.south ||
+                hidden_data.east || hidden_data.west) {
+              map.updateBoundsInputs(hidden_data);
+            }
+            // Only trigger map rectangle drawing when a location was selected
+            // (has an ID). Don't trigger Google geocode when ID is cleared.
+            if (hidden_id) {
+              map.showBox();
+            }
           }
         }
       }, 750)

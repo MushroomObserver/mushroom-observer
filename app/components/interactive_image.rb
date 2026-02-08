@@ -8,7 +8,7 @@
 #
 # @example
 #   render Components::InteractiveImage.new(
-#     user: current_user,
+#     user: @user,
 #     image: @image,
 #     size: :thumbnail,
 #     votes: true

@@ -124,9 +124,50 @@ class ChecklistTest < UnitTestCase
     proj = projects(:bolete_project)
     proj.observations << observations(:trusted_hidden)
     obs = observations(:minimal_unknown_obs)
+    # Ensure location coordinates are cached for bounding box matching
+    obs.update_columns(
+      location_lat: obs.location.center_lat,
+      location_lng: obs.location.center_lng
+    )
     proj.observations << obs
     data = Checklist::ForProject.new(proj, obs.location)
     assert_equal(1, data.num_taxa)
+  end
+
+  # Test that checklist uses bounding box matching, not exact location match
+  def test_checklist_for_project_uses_bounding_box_matching
+    proj = projects(:bolete_project)
+    target_location = locations(:albion)
+
+    # Create observation with exact location match
+    obs_exact = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: mary,
+      location: target_location,
+      when: Time.zone.now
+    )
+    proj.observations << obs_exact
+
+    # Create observation with GPS coords inside bounding box but different
+    # location_id
+    obs_gps_inside = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: mary,
+      location: locations(:burbank), # Different location
+      lat: target_location.center_lat, # But GPS inside albion's box
+      lng: target_location.center_lng,
+      when: Time.zone.now
+    )
+    proj.observations << obs_gps_inside
+
+    data = Checklist::ForProject.new(proj, target_location)
+
+    # Both observations should be counted (bounding box matching)
+    assert_equal(
+      2, data.counts["Coprinus comatus"],
+      "Checklist should count observations with GPS coords inside bounding " \
+      "box, not just exact location matches"
+    )
   end
 
   def test_checklist_for_species_lists

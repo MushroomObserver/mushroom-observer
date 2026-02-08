@@ -38,6 +38,11 @@ module Components
 
     private
 
+    # NOTE: We use view_context.user_link() instead of the registered output
+    # helper user_link() because we need the return value for interpolation
+    # into translation strings. Registered output helpers write directly to the
+    # Phlex buffer rather than returning a value.
+
     # Renders metadata for old versions of versioned objects
     def render_old_version_metadata(num_versions)
       trusted_html(:footer_version_out_of.t(num: @obj.version,

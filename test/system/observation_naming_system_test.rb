@@ -144,7 +144,9 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     # Verify vote and reasons fields are visible (not collapsed)
     within("#obs_#{obs.id}_naming_#{nam.id}_form") do
       assert_selector("#naming_vote_value", wait: 4)
-      assert_selector("input[name*='reasons']", wait: 4)
+      # Reasons textareas should be expanded (have "in" class for Bootstrap 3)
+      # when editing an existing naming that has reasons checked
+      assert_selector("[id^='reasons_'][id$='_notes'].in", wait: 4)
     end
     within("#modal_obs_#{obs.id}_naming_#{nam.id}") do
       find(:css, ".close").click

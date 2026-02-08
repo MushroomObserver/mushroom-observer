@@ -22,6 +22,32 @@ class FieldSlip < AbstractModel
   scope :order_by_default,
         -> { order_by(::Query::FieldSlips.default_order) }
 
+  scope :code, lambda { |codes|
+    codes = [codes] unless codes.is_a?(Array)
+    where(code: codes.map(&:upcase))
+  }
+
+  scope :code_has, lambda { |code_patterns|
+    code_patterns = [code_patterns] unless code_patterns.is_a?(Array)
+    sanitized = code_patterns.map do |pattern|
+      sanitize_sql_like(pattern.upcase, "\\")
+    end
+    arel = arel_table
+    upper_code = Arel::Nodes::NamedFunction.new("UPPER", [arel[:code]])
+    predicates = sanitized.map { |pattern| upper_code.matches("%#{pattern}%") }
+    where(predicates.reduce(:or))
+  }
+
+  scope :observation, lambda { |observation|
+    observation_ids = Lookup::Observations.new(observation).ids
+    where(observation: observation_ids)
+  }
+
+  scope :project, lambda { |project|
+    project_ids = Lookup::Projects.new(project).ids
+    where(project: project_ids)
+  }
+
   scope :projects, lambda { |projects|
     project_ids = Lookup::Projects.new(projects).ids
     where(project: project_ids).distinct
@@ -153,8 +179,10 @@ class FieldSlip < AbstractModel
     observation&.other_codes || ""
   end
 
-  def can_edit?(current_user)
-    user.nil? || user == current_user ||
-      (project&.is_admin?(current_user) && project.trusted_by?(user))
+  def can_edit?(editor)
+    return false unless editor
+
+    user.nil? || user == editor ||
+      (project&.is_admin?(editor) && project.trusted_by?(user))
   end
 end

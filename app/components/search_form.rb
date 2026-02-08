@@ -61,7 +61,7 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def form_action
-    @form_action_url || view_context.url_for(action: :create)
+    @form_action_url || url_for(action: :create)
   end
 
   def form_attributes
@@ -463,7 +463,7 @@ class Components::SearchForm < Components::ApplicationForm
       # Derive clear URL from action URL (replace /search with /search/new)
       "#{@form_action_url.sub(%r{/search$}, "/search/new")}?clear=true"
     else
-      view_context.url_for(action: :new, clear: true)
+      url_for(action: :new, clear: true)
     end
   end
 end

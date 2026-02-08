@@ -65,6 +65,9 @@ MushroomObserver::Application.configure do
   # Use a different cache store in test.
   config.cache_store = :null_store
 
+  # Use primary database for SolidCache (avoids needing separate cache db)
+  config.solid_cache.connects_to = { database: { writing: :primary } }
+
   # Render exception templates for rescuable exceptions and raise for other
   # exceptions.
   # config.action_dispatch.show_exceptions = :rescuable

@@ -25,6 +25,8 @@ module Observations
       requires_login(:new, params)
       assert_form_action(action: "create", approved_name: "",
                          observation_id: obs.id.to_s)
+      # Naming reasons fields should be present
+      assert_select("input[id^='naming_reasons_'][id$='_check']")
     end
 
     def test_new_form_turbo
@@ -387,6 +389,8 @@ module Observations
       assert_no_flash(
         "User should be able to edit his own Naming without warning or error"
       )
+      # Naming reasons fields should be present
+      assert_select("input[id^='naming_reasons_'][id$='_check']")
     end
 
     def test_edit_form_turbo

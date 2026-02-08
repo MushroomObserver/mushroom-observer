@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
 # Form for sending a commercial inquiry about an image.
-# Allows users to contact image owners about licensing.
+# Creates its own FormObject internally from the provided kwargs.
 class Components::CommercialInquiryForm < Components::ApplicationForm
-  def initialize(model, image:, user: nil, message: nil, **)
+  # Accept optional model arg for ModalForm compatibility (ignored - we create
+  # our own FormObject). This is Pattern B: form creates FormObject internally.
+  def initialize(_model = nil, image:, user: nil, message: nil, **)
     @image = image
     @user = user
-    @message = message
-    super(model, **)
+
+    form_object = FormObject::EmailRequest.new(message: message)
+    super(form_object, **)
   end
 
   def view_template
@@ -38,12 +41,8 @@ class Components::CommercialInquiryForm < Components::ApplicationForm
   end
 
   def render_message_field
-    label = "#{:ask_user_question_message.t}:"
-    render(field(:message).textarea(
-             wrapper_options: { label: label },
-             value: @message,
-             rows: 10
-           ))
+    textarea_field(:message, label: "#{:ask_user_question_message.t}:",
+                             rows: 10)
   end
 
   def form_action

@@ -20,9 +20,9 @@ class Components::GlossaryTermForm < Components::ApplicationForm
 
   # Automatically determine action URL based on whether record is persisted
   def form_action
-    return view_context.glossary_terms_path if model.nil? || !model.persisted?
+    return glossary_terms_path if model.nil? || !model.persisted?
 
-    view_context.glossary_term_path(model)
+    glossary_term_path(model)
   end
 
   def render_locked_checkbox

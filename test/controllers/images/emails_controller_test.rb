@@ -21,7 +21,7 @@ module Images
       image = images(:commercial_inquiry_image)
       params = {
         id: image.id,
-        commercial_inquiry: {
+        email: {
           message: "Testing commercial_inquiry"
         }
       }
@@ -38,7 +38,7 @@ module Images
 
       assert_no_enqueued_jobs do
         post(:create,
-             params: { id: image.id, commercial_inquiry: { message: "" } })
+             params: { id: image.id, email: { message: "" } })
       end
       assert_flash_error
       assert_template(:new)
@@ -57,7 +57,7 @@ module Images
       image = images(:commercial_inquiry_image)
       params = {
         id: image.id,
-        commercial_inquiry: { message: "Testing commercial_inquiry" }
+        email: { message: "Testing commercial_inquiry" }
       }
       login("rolf")
 

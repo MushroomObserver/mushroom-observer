@@ -15,6 +15,6 @@ class Components::DonationForm < Components::ApplicationForm
   end
 
   def form_action
-    view_context.admin_donations_path
+    admin_donations_path
   end
 end

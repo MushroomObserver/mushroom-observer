@@ -3,7 +3,7 @@
 # Renders naming fields (name autocompleter, vote, reasons) for embedding
 # in Superform-based forms. For ERB forms, use the _fields.erb partial.
 #
-# @param form_namespace [Superform::Namespace] the parent form namespace
+# @param form [Components::ApplicationForm] the parent form
 # @param vote [Vote] the vote object
 # @param given_name [String] the name typed by user
 # @param reasons [Hash] the naming reasons from Naming#init_reasons
@@ -13,7 +13,7 @@
 # @param name_help [String] help text for the name field
 # @param unfocused [Boolean] if true, don't autofocus any field
 class Components::NamingFields < Components::Base
-  prop :form_namespace, _Any
+  prop :form, _Any
   prop :vote, _Nilable(Vote), default: -> { Vote.new }
   prop :given_name, String, default: ""
   prop :reasons, _Nilable(Hash), default: nil
@@ -22,15 +22,25 @@ class Components::NamingFields < Components::Base
   prop :create, _Boolean, default: true
   prop :name_help, String, default: -> { :form_naming_name_help.t }
   prop :unfocused, _Boolean, default: false
+  prop :add_namespace, _Boolean, default: true
 
   def view_template
-    render_name_autocompleter
+    if @add_namespace
+      @form.namespace(:naming) do |naming_ns|
+        render_name_autocompleter(naming_ns)
+      end
+    else
+      render_name_autocompleter(@form)
+    end
+    # Hidden field tells controller where form was submitted from
+    input(type: "hidden", name: "context", value: @context) if @context
   end
 
   private
 
-  def render_name_autocompleter
-    name_field = @form_namespace.field(:name).autocompleter(
+  def render_name_autocompleter(naming_ns)
+    @naming_ns = naming_ns
+    name_field = naming_ns.field(:name).autocompleter(
       type: :name,
       wrapper_options: { label: "#{:WHAT.t}:" },
       value: @given_name,
@@ -46,17 +56,18 @@ class Components::NamingFields < Components::Base
     div(data: { autocompleter__name_target: "collapseFields" },
         class: collapse_class) do
       render_vote_field
-      render_reasons_field if @show_reasons
+      render_reasons_field
     end
   end
 
   def render_vote_field
-    @form_namespace.namespace(:vote) do |vote_ns|
+    @naming_ns.namespace(:vote) do |vote_ns|
       menu = @create ? [["", ""]] + confidence_menu : confidence_menu
       render(vote_ns.field(:value).select(
                menu,
                wrapper_options: {
-                 label: "#{:form_naming_confidence.t}:"
+                 label: "#{:form_naming_confidence.t}:",
+                 wrap_class: "mt-3"
                },
                selected: @vote&.value,
                autofocus: focus_on_vote?
@@ -69,7 +80,7 @@ class Components::NamingFields < Components::Base
 
     render(Components::NamingReasonsFields.new(
              reasons: @reasons,
-             form_namespace: @form_namespace
+             naming_ns: @naming_ns
            ))
   end
 

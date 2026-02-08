@@ -3884,9 +3884,10 @@ class NameTest < UnitTestCase
                           lat: cal.north,
                           lng: cal.east,
                           user: rolf)
+    # Use a large location (box_area > threshold) so coordinates aren't cached
     obs_in_cal_without_lat_lng =
       Observation.create!(name: names_without_observations.second,
-                          location: locations(:burbank),
+                          location: locations(:california),
                           lat: nil,
                           lng: nil,
                           user: rolf)
@@ -3895,7 +3896,8 @@ class NameTest < UnitTestCase
     assert_not_includes(
       names_in_cal_box,
       obs_in_cal_without_lat_lng.name,
-      "Name.in_box should exclude Names whose only Observations lack lat/long"
+      "Name.in_box should exclude Names whose Observations have " \
+      "large locations (box_area > threshold) with no GPS coordinates"
     )
     e = MO.box_epsilon
     box = { north: e, south: 0, east: e, west: 0 }

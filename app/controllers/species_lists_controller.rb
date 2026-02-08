@@ -317,7 +317,7 @@ class SpeciesListsController < ApplicationController
     return unless checks
 
     any_changes = false
-    Project.where(id: User.current.projects_member.map(&:id)).
+    Project.where(id: @user.projects_member.map(&:id)).
       includes(:species_lists).find_each do |project|
       before = spl.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"

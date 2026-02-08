@@ -138,6 +138,16 @@
 
 .align-middle {
   vertical-align: middle !important;
+
+  // Override Bootstrap 3's table cell vertical-align: top
+  &.table > thead > tr > th,
+  &.table > thead > tr > td,
+  &.table > tbody > tr > th,
+  &.table > tbody > tr > td,
+  &.table > tfoot > tr > th,
+  &.table > tfoot > tr > td {
+    vertical-align: middle !important;
+  }
 }
 
 .align-bottom {

@@ -1,7 +1,6 @@
 <% add_page_title(:commercial_inquiry_title.t(name: @image.unique_format_name)) %>
 
 <%= render(Components::CommercialInquiryForm.new(
-      FormObject::CommercialInquiry.new,
       image: @image,
       user: @user,
       message: @message,

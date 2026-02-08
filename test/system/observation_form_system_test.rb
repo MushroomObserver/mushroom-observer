@@ -30,10 +30,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find("#observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    fill_in("naming_name", with: "Elfin saddle")
+    fill_in("observation_naming_name", with: "Elfin saddle")
     # don't wait for the autocompleter - we know it's an elfin saddle!
     browser.keyboard.type(:tab)
-    assert_field("naming_name", with: "Elfin saddle")
+    assert_field("observation_naming_name", with: "Elfin saddle")
 
     within("#observation_form") { click_commit }
 
@@ -53,20 +53,65 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
-    fill_in("naming_name", with: "Coprinus com")
+    fill_in("observation_naming_name", with: "Coprinus com")
     browser.keyboard.type(:tab)
     # wait for the autocompleter!
     assert_selector(".auto_complete")
     browser.keyboard.type(:down, :tab) # cursor to first match + select row
     browser.keyboard.type(:tab)
-    assert_field("naming_name", with: "Coprinus comatus")
+    assert_field("observation_naming_name", with: "Coprinus comatus")
     # Place name should stay filled
     browser.keyboard.type(:tab)
+
+    # Test naming reason checkbox/textarea interaction
+    # The Vote/Reasons collapse should have expanded when valid name was entered
+    assert_selector(
+      "[data-autocompleter--name-target='collapseFields'].in", wait: 4
+    )
+
+    # Find reason 2 checkbox ("Used references") and check it
+    # (Reason 1 is added by default, so we test reason 2 to verify unchecking)
+    reason_checkbox_label = find("label[for='naming_reasons_2_check']")
+    scroll_to(reason_checkbox_label, align: :center)
+
+    # Check the reason checkbox (click the label to toggle collapse)
+    reason_checkbox_label.click
+    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+
+    # Fill in the reason notes textarea
+    reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
+    reason_notes.fill_in(with: "Wikipedia")
+    assert_equal("Wikipedia", reason_notes.value)
+
+    # Uncheck the reason checkbox - should collapse and clear the input
+    reason_checkbox_label.click
+    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    # Wait for the collapse animation to complete and trigger clearInput
+    sleep(0.5)
+
+    # Re-check the reason checkbox - should expand but be empty
+    reason_checkbox_label.click
+    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+    reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
+    assert_equal("", reason_notes.value,
+                 "Textarea should be empty after toggle")
+
+    # Uncheck again before submitting (we want no reason 2 stored)
+    reason_checkbox_label.click
+    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    sleep(0.5)
 
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
     assert_flash_success(/created observation/i)
+
+    # Verify reason 2 was NOT stored (checkbox was unchecked before submit)
+    new_obs = Observation.last
+    new_naming = new_obs.namings.last
+    assert_not_nil(new_naming, "Observation should have a naming")
+    assert_not(new_naming.reasons.key?(2),
+               "Naming should not have reason 2 (was unchecked before submit)")
   end
 
   def test_trying_to_create_duplicate_location_just_uses_existing_location
@@ -263,7 +308,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Fill in minimal required fields
     fill_in("observation_place_name", with: "California, USA")
-    fill_in("naming_name", with: "Agaricus")
+    fill_in("observation_naming_name", with: "Agaricus")
 
     # Submit to create observation
     within("#observation_form") { click_commit }
@@ -325,7 +370,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find("#observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    assert_field("naming_name", with: "")
+    assert_field("observation_naming_name", with: "")
     assert(last_obs.is_collection_location)
     assert_checked_field("observation_is_collection_location", visible: :all)
     assert_no_checked_field("observation_specimen", visible: :all)
@@ -448,8 +493,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(specimen_section, align: :center)
     assert_field("observation_specimen")
     check("observation_specimen")
-    assert_field("collection_number_number")
-    fill_in("collection_number_number", with: "17-034a")
+    assert_field("observation_collection_number_number")
+    fill_in("observation_collection_number_number", with: "17-034a")
     fill_in(other_notes_id, with: "Notes for observation", visible: :all)
 
     # Move to the next step, Projects/Lists
@@ -482,10 +527,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_lng", with: SO_PASA_EXIF[:lng].to_s)
     # This geolocation is for Pasadena
 
-    assert_field("naming_name", with: "", visible: :all)
+    assert_field("observation_naming_name", with: "", visible: :all)
     assert_no_checked_field("observation_is_collection_location", visible: :all)
     assert_checked_field("observation_specimen", visible: :all)
-    assert_field("collection_number_number", with: "17-034a", visible: :all)
+    assert_field("observation_collection_number_number", with: "17-034a",
+                                                         visible: :all)
     assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
     # Submit observation form without errors
@@ -537,10 +583,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     assert_selector("[data-type='name'][data-autocompleter='connected']")
-    fill_in("naming_name", with: "Agaricus campestris")
-    assert_field("naming_name", with: "Agaricus campestris")
-    select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
-    assert_select("naming_vote_value",
+    fill_in("observation_naming_name", with: "Agaricus campestris")
+    assert_field("observation_naming_name", with: "Agaricus campestris")
+    # Vote/reasons collapse should expand when name is filled
+    assert_selector("[data-autocompleter--name-target='collapseFields'].in")
+    select(Vote.confidence(Vote.next_best_vote),
+           from: "observation_naming_vote_value")
+    assert_select("observation_naming_vote_value",
                   selected: Vote.confidence(Vote.next_best_vote))
 
     within("#observation_form") { click_commit }
@@ -583,15 +632,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     geo = imgs.find { |img| img[:original_name] == "geotagged_s_pasadena.jpg" }
     img_ids = imgs.map(&:id)
     imgs.each do |img|
-      assert_field("good_image_#{img.id}_when_1i",
+      img_field = "observation_good_image_#{img.id}"
+      assert_field("#{img_field}_when_1i",
                    visible: :all, with: img.when.year.to_s)
-      assert_select("good_image_#{img.id}_when_2i",
+      assert_select("#{img_field}_when_2i",
                     visible: :all, text: Date::MONTHNAMES[img.when.month])
-      assert_select("good_image_#{img.id}_when_3i",
+      assert_select("#{img_field}_when_3i",
                     visible: :all, text: img.when.day.to_s)
-      assert_field("good_image_#{img.id}_copyright_holder",
+      assert_field("#{img_field}_copyright_holder",
                    visible: :all, with: katrina.legal_name)
-      assert_field("good_image_#{img.id}_notes",
+      assert_field("#{img_field}_notes",
                    visible: :all, with: "Notes for image")
     end
     assert_checked_field("thumb_image_id_#{cci.id}", visible: :all)
@@ -617,11 +667,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     check("observation_is_collection_location")
 
     img_ids.each do |img_id|
+      img_field = "observation_good_image_#{img_id}"
       find("#carousel_thumbnail_#{img_id}").click
-      fill_in("good_image_#{img_id}_when_1i", with: "2011")
-      select("April", from: "good_image_#{img_id}_when_2i")
-      select("15", from: "good_image_#{img_id}_when_3i")
-      fill_in("good_image_#{img_id}_notes", with: "New notes for image")
+      fill_in("#{img_field}_when_1i", with: "2011")
+      select("April", from: "#{img_field}_when_2i")
+      select("15", from: "#{img_field}_when_3i")
+      fill_in("#{img_field}_notes", with: "New notes for image")
     end
 
     obs_images = find("#observation_images")
@@ -663,6 +714,204 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     visit(activity_logs_path)
     assert_no_link(href: %r{/#{obs.id}/})
     assert_link(href: /activity_logs/, text: /Agaricus campestris/)
+  end
+
+  def test_map_click_fills_lat_lng_fields
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Verify lat/lng fields are initially empty
+    assert_geolocation_is_empty
+
+    # Open the map
+    click_button(:form_observations_open_map.l)
+    assert_selector("#observation_form_map.in", wait: 10)
+
+    # Wait for Google Maps to load (map controller sets data-map="connected")
+    assert_selector("[data-map='connected']", wait: 10)
+
+    # CRITICAL: Verify the map div has data-editable="true" (not empty string)
+    # This attribute controls whether makeMapClickable() is called
+    assert_selector("#observation_form_map[data-editable='true']")
+
+    # Trigger a Google Maps click event
+    execute_script(<<~JS)
+      const form = document.getElementById('observation_form');
+      const controller = window.Stimulus.getControllerForElementAndIdentifier(
+        form, 'map'
+      );
+      if (controller && controller.map) {
+        const location = new google.maps.LatLng(45.5231, -122.6765);
+        google.maps.event.trigger(controller.map, 'click', { latLng: location });
+      }
+    JS
+
+    # Verify lat/lng fields are now populated
+    assert_field("observation_lat", with: "45.5231", wait: 5)
+    assert_field("observation_lng", with: "-122.6765", wait: 5)
+  end
+
+  # Bug fix: After EXIF sets lat/lng and swaps to location_containing mode,
+  # manually entering different coordinates should update the dropdown.
+  def test_manual_lat_lng_overrides_exif_location
+    setup_image_dirs
+    login!(katrina)
+
+    # Create locations so the autocompleter uses location_containing mode
+    university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
+    pasadena = Location.create!(
+      name: "Pasadena, Los Angeles Co., California, USA",
+      north: 34.25, south: 34.12, east: -118.07, west: -118.20,
+      user: katrina
+    )
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Upload geotagged image (Miami/University Park area - 25.7582, -80.3731)
+    click_attach_file("geotagged.jpg")
+
+    # Verify EXIF coordinates were copied
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
+
+    # Autocompleter should be in location_containing mode (MO location exists)
+    assert_selector("[data-type='location_containing']", wait: 10)
+
+    # Wait for dropdown to populate (server request)
+    sleep(2)
+
+    # Verify the place name was auto-filled with University Park
+    place_field = find("#observation_place_name")
+    assert_match(/University Park/, place_field.value,
+                 "Place name should be auto-filled with matching location")
+
+    # Now manually enter Pasadena coordinates (different from Miami)
+    # Use JavaScript to set values and trigger input events
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '34.15';
+      lngField.value = '-118.14';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+    sleep(3)
+
+    # Autocompleter should stay in location_containing mode with new coords
+    assert_selector("[data-type='location_containing']", wait: 10)
+
+    # Verify the new coordinates are set
+    assert_equal("34.15", find("#observation_lat").value)
+    assert_equal("-118.14", find("#observation_lng").value)
+
+    # The place name should update to Pasadena (auto-filled from server)
+    place_field = find("#observation_place_name")
+    assert_match(/Pasadena/, place_field.value, wait: 5)
+
+    university_park.destroy
+    pasadena.destroy
+  end
+
+  # Bug fix: After EXIF populates location, typing a different location name
+  # should work (ignorePlaceInput flag should be reset).
+  def test_typing_location_overrides_exif_location
+    setup_image_dirs
+    login!(katrina)
+
+    # Create matching location so we get location_containing mode
+    university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Upload geotagged image (Miami area)
+    click_attach_file("geotagged.jpg")
+
+    # Verify EXIF was applied
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+
+    # Wait for location_containing mode and server response
+    assert_selector("[data-type='location_containing']", wait: 10)
+    sleep(2)
+
+    # Verify place name was auto-filled
+    place_field = find("#observation_place_name")
+    assert_match(/University Park/, place_field.value,
+                 "Place name should be auto-filled with matching location")
+
+    # Now try to type a completely different location
+    # This tests that ignorePlaceInput gets reset when user types
+    place_field.click
+    place_field.send_keys([:control, "a"], :backspace)
+    place_field.send_keys("Some Random Place")
+    sleep(2)
+
+    # Verify the text was actually typed (ignorePlaceInput was reset)
+    assert_match(/Some Random Place/, place_field.value,
+                 "Should be able to type after EXIF location was set")
+
+    # The autocompleter should offer "New Locality" button since no match found
+    # (This appears when the autocompleter is responsive to text input)
+    assert_selector(".offer-create, [data-type='location_google']", wait: 5)
+
+    university_park.destroy
+  end
+
+  # Bug fix: After EXIF populates location, clearing lat/lng and typing
+  # should show autocomplete suggestions.
+  def test_clearing_exif_lat_lng_allows_location_typing
+    setup_image_dirs
+    login!(katrina)
+
+    # Create matching location so we get location_containing mode
+    university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # Upload geotagged image (Miami area)
+    click_attach_file("geotagged.jpg")
+
+    # Verify EXIF was applied
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
+
+    # Wait for location_containing mode
+    assert_selector("[data-type='location_containing']", wait: 10)
+    sleep(2)
+
+    # Verify place name was auto-filled
+    place_field = find("#observation_place_name")
+    assert_match(/University Park/, place_field.value,
+                 "Place name should be auto-filled with matching location")
+
+    # Clear the lat/lng fields to "unconstrain" the autocompleter
+    # Use JavaScript to clear fields and dispatch input events
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '';
+      lngField.value = '';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+    sleep(3)
+
+    # Autocompleter should swap back to regular location mode
+    assert_selector("[data-type='location']", wait: 10)
+
+    # Verify the autocompleter is no longer constrained
+    autocompleter = find("#observation_location_autocompleter")
+    assert_equal("location", autocompleter["data-type"],
+                 "Autocompleter should be in 'location' mode")
+
+    # Verify lat/lng are actually cleared
+    assert_equal("", find("#observation_lat").value)
+    assert_equal("", find("#observation_lng").value)
+
+    university_park.destroy
   end
 
   ##############################################################################

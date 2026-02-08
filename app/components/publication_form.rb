@@ -15,9 +15,9 @@ class Components::PublicationForm < Components::ApplicationForm
 
   # Automatically determine action URL based on whether record is persisted
   def form_action
-    return view_context.publications_path if model.nil? || !model.persisted?
+    return publications_path if model.nil? || !model.persisted?
 
-    view_context.publication_path(model)
+    publication_path(model)
   end
 
   def render_full_field

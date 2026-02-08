@@ -1,6 +1,6 @@
 <%
 add_show_title(@glossary_term.name, @glossary_term)
-add_edit_icons(@glossary_term)
+add_edit_icons(@glossary_term, @user)
 container_class(:wide)
 column_classes(:eight_four)
 %>
@@ -9,8 +9,13 @@ column_classes(:eight_four)
   <%= tag.div(class: yield(:left_columns)) do %>
 
     <%= tag.div(class: "content-block") do %>
-      <%= @glossary_term.description.tpl %>
-      <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
+      <%= tag.div(class: "description") do %>
+        <%= tag.p(@glossary_term.description.tpl) %>
+      <% end %>
+
+      <%= tag.div(id: "external_searches") do %>
+        <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
+      <% end %>
     <% end %>
 
   <% end %>

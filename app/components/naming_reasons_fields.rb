@@ -4,13 +4,13 @@
 # Used in naming form to allow users to provide notes for each reason.
 #
 # @param reasons [Hash] the naming reasons from Naming#init_reasons
-# @param form_namespace [Superform::Namespace] the parent form namespace
+# @param naming_ns [Superform::Namespace] the naming namespace
 class Components::NamingReasonsFields < Components::Base
   prop :reasons, Hash
-  prop :form_namespace, _Any
+  prop :naming_ns, _Any
 
   def view_template
-    @form_namespace.namespace(:reasons) do |reasons_ns|
+    @naming_ns.namespace(:reasons) do |reasons_ns|
       @reasons.values.sort_by(&:order).each do |reason|
         render_reason_container(reasons_ns, reason)
       end
@@ -31,7 +31,8 @@ class Components::NamingReasonsFields < Components::Base
   def container_data
     {
       controller: "naming-reason",
-      action: "$shown.bs.collapse->naming-reason#focusInput"
+      action: "$shown.bs.collapse->naming-reason#focusInput " \
+              "$hidden.bs.collapse->naming-reason#clearInput"
     }
   end
 
@@ -54,21 +55,22 @@ class Components::NamingReasonsFields < Components::Base
   def checkbox_label_data(reason)
     {
       toggle: "collapse",
-      target: "#reasons_#{reason.num}_notes"
+      target: "#naming_reasons_#{reason.num}_notes"
     }
   end
 
   def checkbox_label_aria(reason)
     {
       expanded: reason.used?.to_s,
-      controls: "reasons_#{reason.num}_notes"
+      controls: "naming_reasons_#{reason.num}_notes"
     }
   end
 
   def render_textarea(reason_ns, reason)
-    collapse_class = reason.used? ? "show" : "collapse"
+    # Bootstrap 3: "collapse" when hidden, "collapse in" when visible
+    collapse_class = reason.used? ? "collapse in" : "collapse"
 
-    div(id: "reasons_#{reason.num}_notes",
+    div(id: "naming_reasons_#{reason.num}_notes",
         class: class_names("form-group mb-3", collapse_class),
         data: { naming_reason_target: "collapse" }) do
       render(reason_ns.field(:notes).textarea(

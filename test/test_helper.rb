@@ -15,27 +15,24 @@
 # https://github.com/coverallsapp/github-action/issues/29#issuecomment-701934460
 require("rails")
 
-# Only load SimpleCov when explicitly requested or in CI
-# Parallel testing has issues with SimpleCov, so disable it by default
-if ENV["COVERAGE"] == "true" || ENV["CI"] == "true"
-  require("simplecov")
-  require("simplecov-lcov")
+# SimpleCov runs by default in parallel mode
+require("simplecov")
+require("simplecov-lcov")
 
-  if ENV["CI"] == "true"
-    SimpleCov::Formatter::LcovFormatter.config do |config|
-      config.report_with_single_file = true
-      config.lcov_file_name = "lcov.info"
-    end
-
-    SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
-  else
-    SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+if ENV["CI"] == "true"
+  SimpleCov::Formatter::LcovFormatter.config do |config|
+    config.report_with_single_file = true
+    config.lcov_file_name = "lcov.info"
   end
 
-  SimpleCov.start("rails") do
-    # An always empty file which is always reported as a coverage decrease
-    add_filter("/channels/application_cable/channel.rb")
-  end
+  SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
+else
+  SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+end
+
+SimpleCov.start("rails") do
+  # An always empty file which is always reported as a coverage decrease
+  add_filter("/channels/application_cable/channel.rb")
 end
 
 # Allow test results to be reported back to runner IDEs.
@@ -111,12 +108,24 @@ module ActiveSupport
     # Run tests in parallel with specified workers
     # Threshold can be set via PARALLEL_TEST_THRESHOLD environment variable
     # Default is 50 (Rails default) if not set
-    # Note: Disable parallel testing when collecting coverage because
-    # SimpleCov doesn't fully support Rails 7's built-in parallel testing
     threshold = ENV["PARALLEL_TEST_THRESHOLD"]&.to_i || 50
-    coverage_mode = ENV["COVERAGE"] == "true" || ENV["CI"] == "true"
-    workers = coverage_mode ? 1 : :number_of_processors
-    parallelize(workers: workers, threshold: threshold)
+    parallelize(workers: :number_of_processors, threshold: threshold)
+
+    # Set up worker-specific database for parallel testing
+    parallelize_setup do |worker|
+      # Set TEST_ENV_NUMBER so database.yml picks the right database
+      ENV["TEST_ENV_NUMBER"] = worker.to_s
+
+      # Configure SimpleCov for this worker with unique command name
+      # This allows SimpleCov to merge results from multiple parallel workers
+      SimpleCov.command_name("#{SimpleCov.command_name}-#{worker}")
+    end
+
+    parallelize_teardown do |_worker|
+      # Trigger coverage result generation for this worker
+      # SimpleCov will automatically merge results from all workers
+      SimpleCov.result
+    end
 
     ##########################################################################
     #  Transactional fixtures

@@ -719,6 +719,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
 
     make_admin(rolf.login)
     get(:edit, params: { id: name.id })
+    assert_select("input[type=checkbox]#name_locked", count: 1)
     assert_select("input[type=text]#name_icn_id", count: 1)
     assert_select("select#name_rank", count: 1)
     assert_select("select#name_deprecated", count: 1)

@@ -2250,6 +2250,7 @@
   show_location_reverse: Reverse Location
   show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead. Changing a location name or coordinates implicitly changes all the observations at that location, too.
   show_location_hidden: This location is considered hidden either because it is private property whose owners do not want the location revealed or because it contains sensitive habitat. Its coordinates are intentionally imprecise and all associated observations have hidden GPS coordinates.
+  destroy_location_has_associations: This location cannot be destroyed because it has associated observations, projects, species lists, herbaria, users, or descriptions.
 
   # names
   show_name_add_name: "[:add_object(type=:name)]"
@@ -3097,7 +3098,7 @@
   # observation/inat_imports
   inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
-  inat_import_list: "Comma separated list of up to 10 observation #s"
+  inat_import_list: "Comma separated list of up to about 384 observation #s"
   inat_import_all: Import all my iNat observations instead of a list
   inat_import_consent: "(Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos."
   inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
@@ -3106,8 +3107,7 @@
   inat_missing_username: Missing your iNat Username
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_list_xor_all: "Either (a) list the iNat observation(s), or (b) check \"Import all ...\" (not both)"
-  inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
-  inat_previous_mirror: iNat [inat_id] is a "mirror" of existing MO Observation [mo_obs_id]
+  inat_previous_import: "[count] listed ids previously imported and will not be re-imported"
   inat_too_many_ids_listed: Too many ids listed
   inat_importing_all_anothers: You cannot import all observations of another person
   inat_observed_missing_date: Observed Missing Date

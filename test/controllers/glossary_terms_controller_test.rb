@@ -91,8 +91,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def test_show_logged_in
     term = glossary_terms(:square_glossary_term)
-    assert_operator(term.version, :>, 1,
-                    "Test needs a GlossaryTerm fixture with multiple versions")
+    assert_operator(
+      term.version, :>, 1,
+      "Test needs a GlossaryTerm fixture with multiple versions"
+    )
     prior_version_path =
       version_of_glossary_term_path(term.id, version: term.version - 1)
 
@@ -113,11 +115,13 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       { count: 1,
         text: /Creator.*: #{rolf.name}Editors: #{mary.name}, #{katrina.name}/ }
     )
-    assert_select(
-      "a[href='https://en.wikipedia.org/w/index.php?search=#{term.name}']",
-      true,
-      "Glossary Term page should have link to Wikipedia search for the Term"
-    )
+    assert_select("#external_searches") do
+      assert_select(
+        "a[href='https://en.wikipedia.org/w/index.php?search=#{term.name}']",
+        true,
+        "Glossary Term missing an external search for Wikipedia"
+      )
+    end
   end
 
   def test_show_admin_delete
@@ -159,7 +163,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     term = glossary_terms(:conic_glossary_term)
 
     login
-    assert(term.can_edit?)
+    assert(term.can_edit?(users(:rolf)))
 
     post(:edit, params: { id: term.id })
 

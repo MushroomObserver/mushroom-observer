@@ -116,23 +116,21 @@ export default class extends GeocodeController {
     }
   }
 
-  // We don't draw the map for the create obs form on load, to save on API
-  // If we only have one marker, don't use fitBounds - it's too zoomed in.
-  // Call setCenter, setZoom with marker position and desired zoom level.
+  // We don't draw the map for the create obs form on load, to save on API.
+  // Always use fitBounds to properly display the location bounds, with a
+  // maxZoom to prevent zooming in too close for small/point locations.
   drawMap() {
     this.verbose("map:drawMap")
     this.map = new google.maps.Map(this.mapDivTarget, this.mapOptions)
     if (this.mapBounds) {
-      if (Object.keys(this.collection.sets).length == 1) {
-        const pt = new google.maps.LatLng(
-          this.collection.extents.lat,
-          this.collection.extents.lng
-        )
-        this.map.setCenter(pt)
-        this.map.setZoom(12)
-      } else {
-        this.map.fitBounds(this.mapBounds)
-      }
+      this.map.fitBounds(this.mapBounds)
+      // Prevent excessive zoom for small locations (points or tiny areas)
+      const maxZoom = 15
+      google.maps.event.addListenerOnce(this.map, 'bounds_changed', () => {
+        if (this.map.getZoom() > maxZoom) {
+          this.map.setZoom(maxZoom)
+        }
+      })
     }
   }
 
@@ -194,14 +192,13 @@ export default class extends GeocodeController {
       markerOptions.title = set.title
     }
     const marker = new google.maps.Marker(markerOptions)
+    this.marker = marker
 
     if (!this.editable && set != null) {
       this.giveMarkerInfoWindow(marker, set)
     } else {
       this.getElevations([set], "point")
       this.makeMarkerEditable(marker)
-      // Only set this.marker if it's a single-marker UI.
-      this.marker = marker
     }
   }
 
@@ -262,22 +259,32 @@ export default class extends GeocodeController {
   placeRectangle(extents) {
     this.verbose("map:placeRectangle()")
     this.verbose(extents)
-    if (!this.rectangle) {
-      this.drawRectangle(extents)
-    } else {
-      this.rectangle.setBounds(extents)
-    }
-    const _types = ["location", "hybrid"]
-    if (_types.includes(this.map_type)) { this.rectangle.setEditable(true) }
-    this.rectangle.setVisible(true)
-    this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
+
+    if (!extents) return false
+
+    // Fit bounds first, then draw/update rectangle after zoom completes
+    this.map.fitBounds(extents)
+
+    // Wait for the map to finish zooming before drawing/updating rectangle
+    google.maps.event.addListenerOnce(this.map, 'bounds_changed', () => {
+      if (!this.rectangle) {
+        this.drawRectangle(extents)
+      } else {
+        this.rectangle.setBounds(extents)
+      }
+      const _types = ["location", "hybrid"]
+      if (_types.includes(this.map_type)) { this.rectangle.setEditable(true) }
+      this.rectangle.setVisible(true)
+    })
   }
 
   drawRectangle(set) {
     this.verbose("map:drawRectangle()")
     this.verbose(set)
-    const bounds = this.boundsOf(set),
-      clickable = this.map_type === "info",
+    const bounds = this.boundsOf(set)
+    if (!bounds) return false
+
+    const clickable = this.map_type === "info",
       editable = this.editable && this.map_type !== "observation",
       rectangleOptions = {
         strokeColor: this.marker_color,
@@ -358,9 +365,10 @@ export default class extends GeocodeController {
       // this.verbose("map:pointChanged")
       // If they just cleared the inputs, swap back to a location autocompleter
       const center = this.validateLatLngInputs(false)
-      if (!center) return
 
-      this.sendPointChanged(center)
+      // Always send point changed - even when clearing lat/lng (center is null)
+      // This triggers swap back to 'location' type when lat/lng are cleared
+      this.sendPointChanged(center || { lat: null, lng: null })
 
       if (this.latInputTarget.value === "" ||
         this.lngInputTarget.value === "" && this.marker) {
@@ -426,13 +434,16 @@ export default class extends GeocodeController {
       return false
 
     this.verbose("map:mapLocationIdData")
-    const bounds = {
-      north: parseFloat(this.locationIdTarget.dataset.north),
-      south: parseFloat(this.locationIdTarget.dataset.south),
-      east: parseFloat(this.locationIdTarget.dataset.east),
-      west: parseFloat(this.locationIdTarget.dataset.west)
-    }
+    const north = parseFloat(this.locationIdTarget.dataset.north)
+    const south = parseFloat(this.locationIdTarget.dataset.south)
+    const east = parseFloat(this.locationIdTarget.dataset.east)
+    const west = parseFloat(this.locationIdTarget.dataset.west)
 
+    // Validate all bounds are valid numbers before using
+    if (isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))
+      return false
+
+    const bounds = { north, south, east, west }
     this.placeClosestRectangle(bounds, null)
   }
 
@@ -451,10 +462,14 @@ export default class extends GeocodeController {
 
     this.verbose("map:calculateRectangle")
     const bounds = { north: north, south: south, east: east, west: west }
-    if (this.rectangle) {
-      this.rectangle.setBounds(bounds)
-    }
+
+    // Fit bounds first, then update rectangle after zoom completes
     this.map.fitBounds(bounds)
+    google.maps.event.addListenerOnce(this.map, 'bounds_changed', () => {
+      if (this.rectangle) {
+        this.rectangle.setBounds(bounds)
+      }
+    })
   }
 
   // Infers a rectangle from the google place, if found. (could be point/bounds)
@@ -601,13 +616,21 @@ export default class extends GeocodeController {
 
   // Every MapSet should have properties north, south, east, west (plus corners)
   // Alternatively, just send a simple object (e.g. `extents`) with `nsew` props
+  // Returns valid bounds object or null if any value is missing/invalid
   boundsOf(set) {
-    let bounds = {}
-    if (set?.north) {
-      bounds = {
-        north: set.north, south: set.south, east: set.east, west: set.west
-      }
+    if (!set?.north) return null
+
+    const bounds = {
+      north: set.north, south: set.south, east: set.east, west: set.west
     }
+
+    // Validate all bounds are valid numbers
+    if (isNaN(bounds.north) || isNaN(bounds.south) ||
+        isNaN(bounds.east) || isNaN(bounds.west)) {
+      console.warn("boundsOf: invalid bounds", bounds, "from set", set)
+      return null
+    }
+
     return bounds
   }
 

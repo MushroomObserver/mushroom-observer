@@ -10,7 +10,7 @@
 #
 # @example
 #   render Components::CarouselItem.new(
-#     user: current_user,
+#     user: @user,
 #     image: @image,
 #     object: @observation,
 #     index: 0

@@ -37,12 +37,7 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_admin_locked_checkbox
-    field(:locked).checkbox(
-      wrapper_options: {
-        label: :form_names_locked.l,
-        wrap_class: "mt-3"
-      }
-    )
+    checkbox_field(:locked, label: :form_names_locked.l, wrap_class: "mt-3")
   end
 
   def render_editable_fields
@@ -248,9 +243,9 @@ class Components::NameForm < Components::ApplicationForm
 
   def form_action
     if @model.new_record?
-      view_context.names_path
+      names_path
     else
-      view_context.name_path(@model)
+      name_path(@model)
     end
   end
 end

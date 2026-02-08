@@ -41,7 +41,7 @@ module Account
          (new_user = User.safe_find(session[:real_user_id])) &&
          new_user.admin
         switch_to_user(new_user)
-        redirect_back_or_default("/")
+        redirect_back_or_to("/")
       else
         @user = nil
         User.current = nil
@@ -120,6 +120,8 @@ module Account
         session[:real_user_id] = nil
         session[:admin] = true
       end
+      # Update both @user and User.current so views show the correct user.
+      @user = new_user
       User.current = new_user
       session_user_set(new_user)
     end

@@ -9,15 +9,15 @@ module ObservationsController::Create
   # Linked from: left panel
   #
   # Inputs:
-  #   params[:observation][...]         observation args
-  #   params[:naming][:name]            name
-  #   params[:approved_name]            old name
-  #   params[:approved_where]           old place name
-  #   params[:chosen_name][:name_id]    name radio boxes
-  #   params[:naming][:vote][...]       vote args
-  #   params[:naming][:reasons][n][...] naming_reasons args
-  #   params[:image][n][...]            image args
-  #   params[:good_image_ids]           images already uploaded
+  #   params[:observation][...]                   observation args
+  #   params[:observation][:naming][:name]        name
+  #   params[:observation][:naming][:vote][...]   vote args
+  #   params[:observation][:naming][:reasons][...] naming_reasons args
+  #   params[:observation][:image][n][...]        image args
+  #   params[:observation][:good_image_ids]       images already uploaded
+  #   params[:approved_name]                      old name
+  #   params[:approved_where]                     old place name
+  #   params[:chosen_name][:name_id]              name radio boxes
   #   params[:was_js_on]                was form javascripty? ("yes" = true)
   #
   # Outputs:
@@ -50,11 +50,11 @@ module ObservationsController::Create
     validate_images
     try_to_save_location_if_new(@observation)
     try_to_save_new_observation
-    return reload_new_form(params.dig(:naming, :reasons)) if @any_errors
+    return reload_new_form(naming_params_dig(:reasons)) if @any_errors
 
     @observation.log(:log_observation_created)
 
-    update_naming(params.dig(:naming, :reasons))
+    update_naming(naming_params_dig(:reasons))
     attach_good_images
     update_projects
     update_species_lists
@@ -89,7 +89,7 @@ module ObservationsController::Create
   def rough_cut
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct({}, @observation)
-    @vote = Vote.construct(params.dig(:naming, :vote), @naming)
+    @vote = Vote.construct(naming_params_dig(:vote), @naming)
     update_good_images
     @exif_data = get_exif_data(@good_images) # in case of form reload
     create_image_objects_and_update_bad_images
@@ -130,7 +130,7 @@ module ObservationsController::Create
   end
 
   def normalize_collection_number_params
-    params2 = params[:collection_number] || return
+    params2 = collection_number_params || return
     name    = params2[:name].to_s.strip_html.strip_squeeze
     number  = params2[:number].to_s.strip_html.strip_squeeze
     name    = @user.legal_name if name.blank?
@@ -147,7 +147,7 @@ module ObservationsController::Create
       herbarium_record = create_herbarium_record(
         herbarium, initial_det, accession_number, herbarium_record_notes
       )
-    elsif herbarium_record.can_edit?
+    elsif herbarium_record.can_edit?(@user)
       flash_warning(:create_herbarium_record_already_used.t) if
         herbarium_record.observations.any?
     else
@@ -162,7 +162,7 @@ module ObservationsController::Create
   end
 
   def normalize_herbarium_record_params
-    params2   = params[:herbarium_record] || return
+    params2   = herbarium_record_params || return
     herbarium = params2[:herbarium_name].to_s.strip_html.strip_squeeze
     herbarium = lookup_herbarium(herbarium)
     init_det  = initial_determination
@@ -222,7 +222,7 @@ module ObservationsController::Create
     # If user checks specimen box and nothing else, do not create record.
     @observation.collection_numbers.empty? &&
       herbarium == @user.preferred_herbarium &&
-      params[:herbarium_record][:accession_number].blank?
+      herbarium_record_params&.dig(:accession_number).blank?
   end
 
   def redirect_to_next_page
