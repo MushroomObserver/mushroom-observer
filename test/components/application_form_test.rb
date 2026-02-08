@@ -583,9 +583,9 @@ class ApplicationFormTest < ComponentTestCase
       "chosen_name", :name_id
     )
     html = render(Components::ApplicationForm::RadioField.new(
-      proxy, [10, "Alpha"], [20, "Beta"],
-      wrapper_options: { wrap_class: "ml-4" }
-    ))
+                    proxy, [10, "Alpha"], [20, "Beta"],
+                    wrapper_options: { wrap_class: "ml-4" }
+                  ))
 
     assert_html(html, "div.radio.ml-4", count: 2)
     assert_html(html,
@@ -602,8 +602,8 @@ class ApplicationFormTest < ComponentTestCase
       "chosen_name", :name_id, "20"
     )
     html = render(Components::ApplicationForm::RadioField.new(
-      proxy, [10, "Alpha"], [20, "Beta"]
-    ))
+                    proxy, [10, "Alpha"], [20, "Beta"]
+                  ))
 
     assert_html(html, "input[value='10']:not([checked])")
     assert_html(html, "input[value='20'][checked]")
