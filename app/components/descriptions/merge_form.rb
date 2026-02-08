@@ -50,12 +50,13 @@ class Components::Descriptions::MergeForm < Components::ApplicationForm
   end
 
   def moves
-    @moves ||=
-      begin
-        result = @description.parent.synonyms - [@description.parent]
-        result.reject!(&:is_misspelling?)
-        result
-      end
+    return @moves ||= [] unless name_description?
+
+    @moves ||= begin
+                 result = @description.parent.synonyms - [@description.parent]
+                 result.reject!(&:is_misspelling?)
+                 result
+               end
   end
 
   def default_checked?
