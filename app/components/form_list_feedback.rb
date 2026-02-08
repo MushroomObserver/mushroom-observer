@@ -10,6 +10,10 @@
 # @param multiple_names [Array<Array>, Hash, nil] ambiguous names
 #   Array: [[name, other_authors], ...] or Hash: {name => other_authors}
 class Components::FormListFeedback < Components::Base
+  include Phlex::Rails::Helpers::FieldsFor
+
+  register_output_helper :radio_with_label
+
   prop :new_names, _Nilable(Array), default: nil
   prop :deprecated_names, _Nilable(Array), default: nil
   prop :multiple_names, _Nilable(_Union(Array, Hash)), default: nil
@@ -56,10 +60,17 @@ class Components::FormListFeedback < Components::Base
 
     return unless approved_names.any?
 
-    options = approved_names.map { |n| [n.id, n.display_name.t] }
-    render(name_choice_radio_field(
-             "chosen_approved_names", name.id, options
-           ))
+    fields_for(:chosen_approved_names) do |f_c|
+      approved_names.each do |other_name|
+        radio_with_label(
+          form: f_c,
+          field: name.id,
+          value: other_name.id,
+          class: "my-1 mr-4 d-inline-block",
+          label: other_name.display_name.t
+        )
+      end
+    end
   end
 
   def render_multiple_names
@@ -80,22 +91,18 @@ class Components::FormListFeedback < Components::Base
 
   def render_multiple_name_choice(name, other_authors)
     div { trusted_html(name.display_name.t) }
-    options = other_authors.map do |n|
-      count = n.observations.count
-      [n.id, [n.display_name.t, " (#{count})"].safe_join]
+    fields_for(:chosen_multiple_names) do |f_c|
+      other_authors.each do |other_name|
+        radio_with_label(
+          form: f_c,
+          field: name.id,
+          value: other_name.id,
+          class: "my-1 mr-4 d-inline-block",
+          label: other_name.display_name.t
+        )
+        plain(" (#{other_name.observations.count})")
+        br
+      end
     end
-    render(name_choice_radio_field(
-             "chosen_multiple_names", name.id, options
-           ))
-  end
-
-  def name_choice_radio_field(namespace, field_id, options)
-    proxy = Components::ApplicationForm::FieldProxy.new(
-      namespace, field_id
-    )
-    Components::ApplicationForm::RadioField.new(
-      proxy, *options,
-      wrapper_options: { wrap_class: "my-1 mr-4 d-inline-block" }
-    )
   end
 end

@@ -31,20 +31,28 @@ class Components::NameTrackerForm < Components::ApplicationForm
   end
 
   def render_tracker_fields
-    checkbox_field(:note_template_enabled,
-                   label: :email_tracking_note.t,
-                   wrap_class: "mt-5")
+    render(
+      field(:note_template_enabled).checkbox(
+        wrapper_options: {
+          label: :email_tracking_note.t,
+          wrap_class: "mt-5"
+        }
+      )
+    )
 
     div(class: "help-note mt-2 mb-5") do
       :email_tracking_note_help.t
     end
 
-    textarea_field(:note_template,
-                   rows: 16,
-                   cols: 80,
-                   value: @note_template,
-                   data: { autofocus: true },
-                   id: "name_tracker_note_template")
+    render(
+      field(:note_template).textarea(
+        rows: 16,
+        cols: 80,
+        value: @note_template,
+        data: { autofocus: true },
+        id: "name_tracker_note_template"
+      )
+    )
     br
   end
 

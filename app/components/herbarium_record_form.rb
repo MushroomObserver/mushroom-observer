@@ -31,22 +31,37 @@ class Components::HerbariumRecordForm < Components::ApplicationForm
   end
 
   def render_herbarium_name_field
-    autocompleter_field(:herbarium_name,
-                        type: :herbarium,
-                        label: :NAME.l,
-                        between: :required)
+    render(
+      field(:herbarium_name).autocompleter(
+        type: :herbarium,
+        wrapper_options: {
+          label: :NAME.l,
+          between: :required
+        }
+      )
+    )
   end
 
   def render_initial_det_field
-    text_field(:initial_det,
-               label: :herbarium_record_initial_det.l,
-               between: :optional)
+    render(
+      field(:initial_det).text(
+        wrapper_options: {
+          label: :herbarium_record_initial_det.l,
+          between: :optional
+        }
+      )
+    )
   end
 
   def render_accession_number_field
-    text_field(:accession_number,
-               label: :herbarium_record_accession_number.l,
-               between: :required)
+    render(
+      field(:accession_number).text(
+        wrapper_options: {
+          label: :herbarium_record_accession_number.l,
+          between: :required
+        }
+      )
+    )
   end
 
   def render_accession_help
@@ -56,10 +71,15 @@ class Components::HerbariumRecordForm < Components::ApplicationForm
   end
 
   def render_notes_field
-    textarea_field(:notes,
-                   rows: 6,
-                   label: :NOTES.l,
-                   between: :optional)
+    render(
+      field(:notes).textarea(
+        rows: 6,
+        wrapper_options: {
+          label: :NOTES.l,
+          between: :optional
+        }
+      )
+    )
   end
 
   def submit_text
