@@ -623,6 +623,23 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(html, "input[value='20'][checked]")
   end
 
+  # Regression test: Symbol option values should be converted to strings
+  def test_radio_field_with_symbol_values
+    proxy = Components::ApplicationForm::FieldProxy.new(
+      "chosen_name", :status, :active
+    )
+    html = render(Components::ApplicationForm::RadioField.new(
+                    proxy, [:active, "Active"], [:inactive, "Inactive"]
+                  ))
+
+    # Symbol values should be rendered as strings
+    assert_html(html, "input[value='active']")
+    assert_html(html, "input[value='inactive']")
+    # The active option should be checked (matching Symbol :active)
+    assert_html(html, "input[value='active'][checked]")
+    assert_html(html, "input[value='inactive']:not([checked])")
+  end
+
   # Autocompleter field tests
   def test_autocompleter_field_renders_structure
     form = render_form do
