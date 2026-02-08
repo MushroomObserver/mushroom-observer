@@ -51,65 +51,50 @@ class Components::NameForm < Components::ApplicationForm
 
   def render_icn_id_field
     div(class: "form-inline my-3") do
-      icn_field = field(:icn_id).text(
-        wrapper_options: {
-          label: "#{:form_names_icn_id.l}:",
-          inline: true
-        },
-        size: 8
-      )
-      icn_field.with_append do
-        p(class: "help-block") { :form_names_identifier_help.l }
+      text_field(:icn_id,
+                 label: "#{:form_names_icn_id.l}:",
+                 inline: true,
+                 size: 8) do |f|
+        f.with_append do
+          p(class: "help-block") { :form_names_identifier_help.l }
+        end
       end
-      render(icn_field)
     end
   end
 
   def render_rank_and_status_fields
     div(class: "form-inline my-3") do
-      render(
-        field(:rank).select(
-          rank_options,
-          wrapper_options: {
-            label: "#{:Rank.l}:",
-            wrap_class: "mr-4"
-          },
-          selected: @model.rank
-        )
-      )
+      select_field(:rank, rank_options,
+                   label: "#{:Rank.l}:",
+                   wrap_class: "mr-4",
+                   selected: @model.rank)
 
-      render(
-        field(:deprecated).select(
-          status_options,
-          wrapper_options: { label: "#{:Status.l}:" },
-          selected: (@model.deprecated || false).to_s
-        )
-      )
+      select_field(:deprecated, status_options,
+                   label: "#{:Status.l}:",
+                   selected: (@model.deprecated || false).to_s)
     end
   end
 
   def render_text_name_field
-    text_name_field = field(:text_name).textarea(
-      wrapper_options: { label: "#{:form_names_text_name.l}:" },
-      value: @name_string,
-      rows: 1,
-      data: { autofocus: true }
-    )
-    text_name_field.with_append do
-      p(class: "help-block") { :form_names_text_name_help.l }
+    textarea_field(:text_name,
+                   label: "#{:form_names_text_name.l}:",
+                   value: @name_string,
+                   rows: 1,
+                   data: { autofocus: true }) do |f|
+      f.with_append do
+        p(class: "help-block") { :form_names_text_name_help.l }
+      end
     end
-    render(text_name_field)
   end
 
   def render_author_field
-    author_field = field(:author).textarea(
-      wrapper_options: { label: "#{:Authority.l}:" },
-      rows: 2
-    )
-    author_field.with_append do
-      p(class: "help-block") { :form_names_author_help.l }
+    textarea_field(:author,
+                   label: "#{:Authority.l}:",
+                   rows: 2) do |f|
+      f.with_append do
+        p(class: "help-block") { :form_names_author_help.l }
+      end
     end
-    render(author_field)
   end
 
   def render_locked_fields
@@ -125,72 +110,51 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   def render_locked_rank_field
-    render(
-      field(:rank).hidden(
-        wrapper_options: {
-          label: "#{:Rank.l}:",
-          inline: true,
-          wrap_class: "mb-0",
-          text: :"Rank_#{@model.rank.to_s.downcase}".l
-        }
-      )
-    )
+    read_only_field(:rank,
+                    label: "#{:Rank.l}:",
+                    inline: true,
+                    wrap_class: "mb-0",
+                    text: :"Rank_#{@model.rank.to_s.downcase}".l)
   end
 
   def render_locked_status_field
-    render(
-      field(:deprecated).hidden(
-        wrapper_options: {
-          label: "#{:Status.l}:",
-          inline: true,
-          wrap_class: "mb-0",
-          text: @model.deprecated ? :DEPRECATED.l : :ACCEPTED.l
-        }
-      )
-    )
+    read_only_field(:deprecated,
+                    label: "#{:Status.l}:",
+                    inline: true,
+                    wrap_class: "mb-0",
+                    text: @model.deprecated ? :DEPRECATED.l : :ACCEPTED.l)
   end
 
   def render_locked_text_name_field
-    render(
-      field(:text_name).hidden(
-        wrapper_options: {
-          label: "#{:Name.l}:",
-          inline: true,
-          wrap_class: "mb-0",
-          text: @name_string
-        },
-        value: @name_string
-      )
-    )
+    read_only_field(:text_name,
+                    label: "#{:Name.l}:",
+                    inline: true,
+                    wrap_class: "mb-0",
+                    text: @name_string,
+                    value: @name_string)
   end
 
   def render_locked_author_field
-    render(
-      field(:author).hidden(
-        wrapper_options: {
-          label: "#{:Authority.l}:",
-          inline: true,
-          wrap_class: "mb-0",
-          text: @model.author
-        }
-      )
-    )
+    read_only_field(:author,
+                    label: "#{:Authority.l}:",
+                    inline: true,
+                    wrap_class: "mb-0",
+                    text: @model.author)
   end
 
   def render_citation_field
-    citation_field = field(:citation).textarea(
-      wrapper_options: { label: "#{:Citation.l}:" },
-      rows: 3
-    )
-    citation_field.with_append do
-      # rubocop:disable Rails/OutputSafety
-      p(class: "help-block") do
-        raw(:form_names_citation_help.l)
-        raw(:form_names_citation_textilize_note.l)
+    textarea_field(:citation,
+                   label: "#{:Citation.l}:",
+                   rows: 3) do |f|
+      f.with_append do
+        # rubocop:disable Rails/OutputSafety
+        p(class: "help-block") do
+          raw(:form_names_citation_help.l)
+          raw(:form_names_citation_textilize_note.l)
+        end
+        # rubocop:enable Rails/OutputSafety
       end
-      # rubocop:enable Rails/OutputSafety
     end
-    render(citation_field)
   end
 
   def render_misspelling_fields
@@ -199,26 +163,25 @@ class Components::NameForm < Components::ApplicationForm
                      label: :form_names_misspelling.l,
                      checked: @misspelling)
 
-      correct_spelling_field = field(:correct_spelling).autocompleter(
+      autocompleter_field(
+        :correct_spelling,
         type: :name,
         value: @correct_spelling,
-        wrapper_options: { label: "#{:form_names_misspelling_it_should_be.l}:" }
+        label: "#{:form_names_misspelling_it_should_be.l}:",
+        help: :form_names_misspelling_note.l
       )
-      correct_spelling_field.with_help { :form_names_misspelling_note.l }
-      render(correct_spelling_field)
     end
   end
 
   def render_notes_field
-    notes_field = field(:notes).textarea(
-      wrapper_options: { label: "#{:form_names_taxonomic_notes.l}:" },
-      rows: 6
-    )
-    notes_field.with_help { :shared_textile_help.l }
-    notes_field.with_between do
-      div(class: "mark") { :form_names_taxonomic_notes_warning.l }
+    textarea_field(:notes,
+                   label: "#{:form_names_taxonomic_notes.l}:",
+                   rows: 6,
+                   help: :shared_textile_help.l) do |f|
+      f.with_between do
+        div(class: "mark") { :form_names_taxonomic_notes_warning.l }
+      end
     end
-    render(notes_field)
   end
 
   def rank_options
