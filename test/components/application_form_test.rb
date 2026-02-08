@@ -95,7 +95,7 @@ class ApplicationFormTest < ComponentTestCase
   def test_checkbox_field_with_label_false_still_renders_wrapper
     form = render_form do
       checkbox_field(:placeholder, label: false,
-                     wrap_class: "m-0", label_class: "p-0")
+                                   wrap_class: "m-0", label_class: "p-0")
     end
 
     # Should still have Bootstrap checkbox wrapper and label element
