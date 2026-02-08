@@ -52,13 +52,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def radio_attributes(value)
-      {
+      @attributes.merge(
         type: :radio,
         name: field.dom.name,
         id: radio_id(value),
         value: value.to_s,
         checked: option_checked?(value)
-      }.merge(@attributes)
+      )
     end
 
     def radio_id(value)
