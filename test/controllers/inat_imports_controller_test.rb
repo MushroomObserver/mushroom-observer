@@ -35,12 +35,14 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action(action: :create)
-    assert_select("textarea#inat_ids", true,
+    assert_select("textarea#inat_import_new_inat_ids", true,
                   "Form needs a textarea for inputting iNat ids")
-    assert_select("input#inat_username", true,
+    assert_select("input#inat_import_new_inat_username", true,
                   "Form needs a field for inputting iNat username")
-    assert_select("input[type=checkbox][id=consent]", true,
-                  "Form needs checkbox requiring consent")
+    assert_select(
+      "input[type=checkbox][id=inat_import_new_consent]", true,
+      "Form needs checkbox requiring consent"
+    )
   end
 
   def test_new_inat_import_already_importing
@@ -68,8 +70,11 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_select(
-      "input[name=?][value=?]", "inat_username", user.inat_username, true,
-      "InatImport should pre-fill `inat_username` with user's inat_username"
+      "input[name=?][value=?]",
+      "inat_import_new[inat_username]",
+      user.inat_username, true,
+      "InatImport should pre-fill `inat_username` " \
+      "with user's inat_username"
     )
   end
 
@@ -199,7 +204,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_form_action(action: :create)
     assert_select(
-      "textarea#inat_ids", { text: expected_saved_id_list, count: 1 },
+      "textarea#inat_import_new_inat_ids",
+      { text: expected_saved_id_list, count: 1 },
       "inat_ids textarea should have trailing commas and whitespace stripped"
     )
   end
@@ -375,9 +381,10 @@ class InatImportsControllerTest < FunctionalTestCase
          })
 
     assert_response(:success)
-    assert_template(:new)
+    assert_select("form#inat_import_new_form")
     assert_select(
-      "textarea#inat_ids", { text: "123", count: 1 },
+      "textarea#inat_import_new_inat_ids",
+      { text: "123", count: 1 },
       "Form should preserve inat_ids from namespaced params"
     )
   end
@@ -390,13 +397,15 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
 
     post(:create,
-         params: { inat_ids: inat_ids, inat_username: inat_username,
+         params: { inat_ids: inat_ids,
+                   inat_username: inat_username,
                    consent: 1, go_back: 1 })
 
     assert_response(:success)
-    assert_template(:new)
+    assert_select("form#inat_import_new_form")
     assert_select(
-      "textarea#inat_ids", { text: inat_ids, count: 1 },
+      "textarea#inat_import_new_inat_ids",
+      { text: inat_ids, count: 1 },
       "Form should preserve inat_ids when going back"
     )
   end
@@ -416,7 +425,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash_error
     assert_response(:success)
-    assert_template(:new)
+    assert_select("form#inat_import_new_form")
   end
 
   def test_authorization_response_denied

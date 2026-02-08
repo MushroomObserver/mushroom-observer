@@ -8,8 +8,8 @@ class InatImportsTest < CapybaraIntegrationTestCase
     login(mary)
     visit(new_inat_import_path)
 
-    fill_in("inat_username", with: "anything")
-    page.check("consent")
+    fill_in("inat_import_new_inat_username", with: "anything")
+    page.check("inat_import_new_consent")
     click_on("Submit")
 
     assert_flash_text(:inat_list_xor_all.l)
