@@ -99,12 +99,15 @@ class Components::HerbariumForm < Components::ApplicationForm
   def render_personal_checkbox
     checkbox_field(
       :personal,
-      label: :create_herbarium_personal.l
-    ) do |f|
-      f.with_help do
-        :create_herbarium_personal_help.t(name: @user&.personal_herbarium_name)
-      end
-    end
+      label: :create_herbarium_personal.l,
+      help: personal_checkbox_help
+    )
+  end
+
+  def personal_checkbox_help
+    :create_herbarium_personal_help.t(
+      name: @user&.personal_herbarium_name
+    )
   end
 
   def render_code_field
