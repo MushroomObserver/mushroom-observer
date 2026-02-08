@@ -21,8 +21,6 @@
 #     camera_info: { lat: "45.5", lng: "-122.6", ... }
 #   )
 class Components::FormCarouselItem < Components::BaseImage
-  include Phlex::Rails::Helpers::RadioButtonTag
-
   # Additional form carousel-specific properties
   prop :index, Integer, default: 0
   prop :upload, _Boolean, default: false
@@ -149,15 +147,12 @@ class Components::FormCarouselItem < Components::BaseImage
       data: { form_images_target: "thumbImgBtn",
               action: "click->form-images#setObsThumbnail" }
     ) do
-      [
-        radio_button_tag(
-          :thumb_image_id, value,
-          class: "mr-3", checked: checked,
-          data: { form_images_target: "thumbImgRadio" }
-        ),
-        span(class: "set_thumb_img_text") { :image_set_default.l },
-        span(class: "is_thumb_img_text") { :image_add_default.l }
-      ].safe_join
+      input(type: :radio, name: "thumb_image_id",
+            id: "thumb_image_id_#{value}", value: value,
+            class: "mr-3", checked: checked,
+            data: { form_images_target: "thumbImgRadio" })
+      span(class: "set_thumb_img_text") { :image_set_default.l }
+      span(class: "is_thumb_img_text") { :image_add_default.l }
     end
   end
 

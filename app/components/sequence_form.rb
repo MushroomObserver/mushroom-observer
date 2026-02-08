@@ -22,16 +22,11 @@ class Components::SequenceForm < Components::ApplicationForm
   private
 
   def render_locus_field
-    render(
-      field(:locus).textarea(
-        rows: 1,
-        wrapper_options: {
-          label: :LOCUS.l,
-          between: :required,
-          class: "w-100"
-        }
-      )
-    )
+    textarea_field(:locus,
+                   rows: 1,
+                   label: :LOCUS.l,
+                   between: :required,
+                   wrap_class: "w-100")
   end
 
   def render_locus_help
@@ -53,17 +48,12 @@ class Components::SequenceForm < Components::ApplicationForm
       )
     ].join.html_safe # rubocop:disable Rails/OutputSafety
 
-    render(
-      field(:bases).textarea(
-        cols: 80,
-        rows: 5,
-        wrapper_options: {
-          label: :BASES.l,
-          between: raw(between_content), # rubocop:disable Rails/OutputSafety
-          class: "font-monospace"
-        }
-      )
-    )
+    textarea_field(:bases,
+                   cols: 80,
+                   rows: 5,
+                   label: :BASES.l,
+                   between: raw(between_content), # rubocop:disable Rails/OutputSafety
+                   class: "font-monospace")
   end
 
   def render_deposit_info
@@ -81,28 +71,17 @@ class Components::SequenceForm < Components::ApplicationForm
   end
 
   def render_archive_select
-    render(
-      field(:archive).select(
-        [nil] + sequence_archive_options,
-        wrapper_options: {
-          label: :ARCHIVE.l,
-          inline: true,
-          class: "ml-5"
-        }
-      )
-    )
+    select_field(:archive, [nil] + sequence_archive_options,
+                 label: :ARCHIVE.l,
+                 inline: true,
+                 wrap_class: "ml-5")
   end
 
   def render_accession_field
-    render(
-      field(:accession).text(
-        wrapper_options: {
-          label: :form_sequence_accession.l,
-          inline: true,
-          class: "ml-5"
-        }
-      )
-    )
+    text_field(:accession,
+               label: :form_sequence_accession.l,
+               inline: true,
+               wrap_class: "ml-5")
   end
 
   def render_accession_help
@@ -116,15 +95,10 @@ class Components::SequenceForm < Components::ApplicationForm
   end
 
   def render_notes_field
-    render(
-      field(:notes).textarea(
-        rows: 3,
-        wrapper_options: {
-          label: :NOTES.l,
-          between: :optional
-        }
-      )
-    )
+    textarea_field(:notes,
+                   rows: 3,
+                   label: :NOTES.l,
+                   between: :optional)
   end
 
   def render_notes_help
