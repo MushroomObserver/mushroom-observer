@@ -67,7 +67,10 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   end
 
   def render_group_checkbox(field_name, group)
-    checkbox_field(field_name, label: false, class: "form-control") do |cb|
+    checkbox_field(field_name,
+                   label: false, wrap_class: "m-0",
+                   label_class: "p-0",
+                   class: "form-control") do |cb|
       cb.option(group.id)
     end
   end
@@ -176,7 +179,10 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   end
 
   def render_checkbox_field(field_name)
-    checkbox_field(field_name, label: false, class: "form-control")
+    checkbox_field(field_name,
+                   label: false, wrap_class: "m-0",
+                   label_class: "p-0",
+                   class: "form-control")
   end
 
   def name_description?

@@ -94,12 +94,13 @@ class ApplicationFormTest < ComponentTestCase
 
   def test_checkbox_field_with_label_false_still_renders_wrapper
     form = render_form do
-      checkbox_field(:placeholder, label: false)
+      checkbox_field(:placeholder, label: false,
+                     wrap_class: "m-0", label_class: "p-0")
     end
 
     # Should still have Bootstrap checkbox wrapper and label element
-    assert_match(/<div class="checkbox">/, form)
-    assert_includes(form, "<label")
+    assert_match(/<div class="checkbox m-0">/, form)
+    assert_html(form, "label.p-0")
     assert_includes(form, 'type="checkbox"')
     # But should NOT have label text
     assert_not_includes(form, "Placeholder")
