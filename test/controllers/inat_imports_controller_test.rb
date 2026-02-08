@@ -105,26 +105,6 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
-  def test_reload_preserves_checkbox_state
-    user = users(:rolf)
-    params = { inat_ids: "123", consent: "1", all: "1" }
-
-    login(user.login)
-    post(:create, params: params)
-
-    assert_form_action(action: :create)
-    assert_select(
-      "input[type=checkbox]" \
-      "[id=inat_import_new_consent][checked]", true,
-      "Consent checkbox should remain checked on reload"
-    )
-    assert_select(
-      "input[type=checkbox]" \
-      "[id=inat_import_new_all][checked]", true,
-      "Import All checkbox should remain checked on reload"
-    )
-  end
-
   def test_create_no_observations_designated
     params = { inat_username: "anything", inat_ids: "",
                consent: 1 }

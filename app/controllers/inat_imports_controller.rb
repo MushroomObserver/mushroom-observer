@@ -137,20 +137,15 @@ class InatImportsController < ApplicationController
   def reload_form
     render_new_form(
       username: params[:inat_username],
-      inat_ids: sanitize_inat_ids(params[:inat_ids]),
-      all: params[:all],
-      consent: params[:consent]
+      inat_ids: sanitize_inat_ids(params[:inat_ids])
     )
   end
 
   def render_new_form(username: @user.inat_username,
-                      inat_ids: nil, all: nil,
-                      consent: nil)
+                      inat_ids: nil)
     form = FormObject::InatImportNew.new(
       inat_username: username,
-      inat_ids: inat_ids,
-      all: all,
-      consent: consent
+      inat_ids: inat_ids
     )
     render(
       Views::Controllers::InatImports::New.new(
