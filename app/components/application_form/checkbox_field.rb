@@ -14,24 +14,33 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options
 
-    def initialize(field, attributes:, wrapper_options: {})
-      super(field, attributes: attributes)
+    def initialize(field, *options, attributes: {}, wrapper_options: {})
+      super(field, *options, attributes: attributes)
       @wrapper_options = wrapper_options
     end
 
     def view_template
-      label_option = wrapper_options[:label]
-
-      if label_option == false
-        # Render checkbox without label wrapper
+      render_with_wrapper do
+        # Inherits proper checkbox behavior from Superform
+        # (hidden input + checked)
         super
-      else
-        render_with_wrapper do
-          # Inherits proper checkbox behavior from Superform
-          # (hidden input + checked)
-          super
-        end
       end
+    end
+
+    # Override Superform's option to skip its label wrapper, since
+    # render_with_wrapper already provides one. Avoids invalid nested labels.
+    def option(value)
+      input(
+        **attributes,
+        type: :checkbox,
+        id: "#{dom.id}_#{value}",
+        name: "#{dom.name}[]",
+        value: value.to_s,
+        checked: checked_in_array?(value)
+      )
+      return unless block_given?
+
+      trusted_html(yield)
     end
 
     private
@@ -56,15 +65,19 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_content
       text = label_text
       if label_position_before?
-        trusted_html(text)
-        whitespace
+        if text
+          trusted_html(text)
+          whitespace
+        end
         render_between_slot
         yield
       else
         yield
         render_between_slot
-        whitespace
-        trusted_html(text)
+        if text
+          whitespace
+          trusted_html(text)
+        end
       end
     end
 
@@ -75,6 +88,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def label_text
       label_option = wrapper_options[:label]
+      return if label_option == false
+
       label_option.is_a?(String) ? label_option : field.key.to_s.humanize
     end
 
