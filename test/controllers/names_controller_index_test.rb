@@ -77,7 +77,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{search_string}/i).
-                    with_correct_spelling.count },
+               with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
     )
     assert_page_title(:NAMES.l)
@@ -167,7 +167,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{pattern}/i).
-                    with_correct_spelling.count },
+               with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
     )
   end
@@ -182,8 +182,8 @@ class NamesControllerIndexTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.joins(:observations).
-                    with_correct_spelling.
-                    distinct.count },
+               with_correct_spelling.
+               distinct.count },
       "Wrong number of (correctly spelled) Names"
     )
     assert_select("#context_nav a[href='#{names_path}']", { count: 1 },
@@ -221,8 +221,8 @@ class NamesControllerIndexTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.joins(:descriptions).
-                    with_correct_spelling.
-                    distinct.count },
+               with_correct_spelling.
+               distinct.count },
       "Wrong number of (correctly spelled) Names"
     )
   end
