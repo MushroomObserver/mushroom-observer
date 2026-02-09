@@ -103,6 +103,7 @@ class InatImportsController < ApplicationController
     @estimate = fetch_import_estimate
     return inat_unreachable if @estimate.nil?
 
+    warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = FormObject::InatImportConfirm.new(
       inat_username: params[:inat_username],

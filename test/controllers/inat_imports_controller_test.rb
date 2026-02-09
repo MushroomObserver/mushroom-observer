@@ -227,6 +227,36 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_text(:inat_too_many_ids_listed.l)
   end
 
+  def test_confirm_warns_about_previously_imported
+    user = users(:rolf)
+    inat_id = "1123456"
+    Observation.create(
+      where: "North Falmouth, Massachusetts, USA",
+      user: user,
+      when: "2024-09-08",
+      source: Observation.sources[:mo_inat_import],
+      inat_id: inat_id
+    )
+    estimate_response = { total_results: 1 }.to_json
+
+    stub_request(
+      :get, %r{api\.inaturalist\.org/v1/observations}
+    ).to_return(status: 200, body: estimate_response)
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: inat_id,
+                   inat_username: "anything",
+                   consent: 1 })
+
+    assert_response(:success)
+    assert_flash_text(
+      /#{:inat_previous_import.l(count: 1)}/,
+      "Confirmation page should warn about " \
+      "previously imported IDs"
+    )
+  end
+
   def test_create_previously_imported
     user = users(:rolf)
     inat_id = "1123456"
