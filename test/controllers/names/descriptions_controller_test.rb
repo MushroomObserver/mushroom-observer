@@ -209,7 +209,7 @@ module Names
       requires_login(:new, params, user.login)
       if success
         assert_template("names/descriptions/new")
-        assert_template("names/descriptions/_form")
+        assert_select("#name_description_form")
       else
         assert_redirected_to(project_path(project.id))
       end
@@ -229,7 +229,7 @@ module Names
       requires_login(:edit, params, user.login)
       if success
         assert_template("names/descriptions/edit")
-        assert_template("names/descriptions/_form")
+        assert_select("#name_description_form")
       elsif reader
         assert_redirected_to(name_description_path(draft.id))
       else
@@ -257,7 +257,7 @@ module Names
       put_requires_login(:update, params, user.login)
       if permission && !success
         assert_template("names/descriptions/edit")
-        assert_template("names/descriptions/_form")
+        assert_select("#name_description_form")
       elsif draft.is_reader?(user)
         assert_redirected_to(name_description_path(draft.id))
       else
@@ -303,7 +303,8 @@ module Names
       assert_template("descriptions/_description_details_and_alts_panel")
     end
 
-    # Ensure that an admin can see a draft they don't own
+    # Ensure that an admin can see a draft they don't own,
+    # and gets all the admin UI buttons
     def test_show_draft_admin
       draft = name_descriptions(:draft_coprinus_comatus)
       assert_not_equal(draft.user, mary)
@@ -311,6 +312,18 @@ module Names
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
       assert_template("descriptions/_description_details_and_alts_panel")
+
+      # Admin should see all description_change_links buttons
+      did = draft.id
+      assert_select("a[href*='descriptions/#{did}/edit']")
+      assert_select("a[href*='descriptions/#{did}/moves/new']")
+      assert_select("a[href*='descriptions/#{did}/merges/new']")
+      assert_select("a[href*='descriptions/#{did}/permissions']")
+      assert_select("a[href*='descriptions/new?clone=#{did}']")
+      assert_select("a[href*='descriptions/#{did}/publish']")
+      assert_select(
+        "form[action*='descriptions/#{did}'] input[value='delete']"
+      )
     end
 
     # Ensure that an member can see a draft they don't own
@@ -428,7 +441,7 @@ module Names
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
       assert_template("names/descriptions/new")
-      assert_template("names/descriptions/_form")
+      assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
@@ -460,7 +473,7 @@ module Names
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
       assert_template("names/descriptions/new")
-      assert_template("names/descriptions/_form")
+      assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
@@ -484,7 +497,7 @@ module Names
       login("dick") # reader
       get(:new, params: params.merge(clone: other.id))
       assert_template("names/descriptions/new")
-      assert_template("names/descriptions/_form")
+      assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("user", desc.source_type)
       assert_equal("", desc.source_name.to_s)
@@ -576,7 +589,7 @@ module Names
       post(:create, params: params)
       assert_flash_error
       assert_template("names/descriptions/new")
-      assert_template("names/descriptions/_form")
+      assert_select("#name_description_form")
 
       params[:description][:classification] = good_class
       post(:create, params: params)
@@ -666,6 +679,105 @@ module Names
       destroy_draft_helper(
         name_descriptions(:draft_agaricus_campestris), dick, success: false
       )
+    end
+
+    # Cover update_classification_cache_and_save_name
+    def test_update_description_changes_classification_cache
+      desc = name_descriptions(:peltigera_desc)
+      name = desc.name
+      name.update(description: desc) # ensure it's the default
+      old_class = name.classification
+
+      # Use the correct format - Rails will reorder as Order before Family
+      new_class = "Order: _Peltigerales_\r\nFamily: _Peltigeraceae_"
+      assert_not_equal(new_class, old_class)
+
+      login("rolf")
+      params = {
+        id: desc.id,
+        description: {
+          classification: new_class,
+          gen_desc: desc.gen_desc,
+          diag_desc: desc.diag_desc
+        }
+      }
+      put(:update, params: params)
+
+      name.reload
+      desc.reload
+      assert_equal(new_class, desc.classification)
+      assert_equal(new_class, name.classification)
+    end
+
+    # Cover save_updated_description_if_changed_or_flash no changes
+    def test_update_description_no_changes
+      desc = name_descriptions(:peltigera_desc)
+      login("rolf")
+      params = {
+        id: desc.id,
+        description: {
+          gen_desc: desc.gen_desc,
+          diag_desc: desc.diag_desc,
+          classification: desc.classification
+        }
+      }
+      put(:update, params: params)
+      assert_flash_warning(:runtime_edit_name_description_no_change.t)
+    end
+
+    # Cover resolve_merge_conflicts_and_delete_old_description
+    def test_update_description_with_merge_delete
+      # Create two descriptions on the same name
+      name = names(:coprinus_comatus)
+      old_desc = NameDescription.create!(
+        name: name, user: rolf, source_type: "user", gen_desc: "Old notes"
+      )
+      old_desc.admin_groups << UserGroup.one_user(rolf)
+
+      dest_desc = NameDescription.create!(
+        name: name, user: rolf, source_type: "user", gen_desc: "Dest notes"
+      )
+      dest_desc.admin_groups << UserGroup.one_user(rolf)
+      dest_desc.writer_groups << UserGroup.one_user(rolf)
+
+      login("rolf")
+      params = {
+        id: dest_desc.id,
+        description: { gen_desc: "Merged notes" },
+        delete_after: "true",
+        old_desc_id: old_desc.id
+      }
+      put(:update, params: params)
+
+      assert_flash_success
+      assert_nil(NameDescription.safe_find(old_desc.id))
+    end
+
+    # Cover resolve_merge_conflicts delete denied when not admin
+    def test_update_description_merge_delete_denied
+      name = names(:coprinus_comatus)
+      old_desc = NameDescription.create!(
+        name: name, user: mary, source_type: "user", gen_desc: "Old notes"
+      )
+      old_desc.admin_groups << UserGroup.one_user(mary)
+
+      dest_desc = NameDescription.create!(
+        name: name, user: rolf, source_type: "user", gen_desc: "Dest notes"
+      )
+      dest_desc.admin_groups << UserGroup.one_user(rolf)
+      dest_desc.writer_groups << UserGroup.one_user(rolf)
+
+      login("rolf")
+      params = {
+        id: dest_desc.id,
+        description: { gen_desc: "Merged notes" },
+        delete_after: "true",
+        old_desc_id: old_desc.id
+      }
+      put(:update, params: params)
+
+      assert_flash(/permission to delete/)
+      assert(NameDescription.safe_find(old_desc.id))
     end
   end
 end
