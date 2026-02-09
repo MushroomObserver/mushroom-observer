@@ -2,7 +2,7 @@
 
 # Form for creating a new iNat import.
 # Renders username, observation IDs, consent, and details.
-class Components::InatImportNewForm < Components::ApplicationForm
+class Components::InatImportForm < Components::ApplicationForm
   def view_template
     text_field(:inat_username,
                label: "#{:inat_username.l}: ", size: 10)

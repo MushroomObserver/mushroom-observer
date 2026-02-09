@@ -138,15 +138,20 @@ class InatImportsController < ApplicationController
   def reload_form
     render_new_form(
       username: params[:inat_username],
-      inat_ids: sanitize_inat_ids(params[:inat_ids])
+      inat_ids: sanitize_inat_ids(params[:inat_ids]),
+      all: params[:all],
+      consent: params[:consent]
     )
   end
 
   def render_new_form(username: @user.inat_username,
-                      inat_ids: nil)
-    form = FormObject::InatImportNew.new(
+                      inat_ids: nil, all: nil,
+                      consent: nil)
+    form = FormObject::InatImport.new(
       inat_username: username,
-      inat_ids: inat_ids
+      inat_ids: inat_ids,
+      all: ("1" if all == "1"),
+      consent: ("1" if consent == "1")
     )
     render(
       Views::Controllers::InatImports::New.new(
@@ -160,7 +165,7 @@ class InatImportsController < ApplicationController
   # Flatten them to top-level so the controller works
   # unchanged.
   def flatten_new_form_params
-    new_form = params[:inat_import_new]
+    new_form = params[:inat_import]
     return unless new_form
 
     merge_form_param(new_form, :inat_username)

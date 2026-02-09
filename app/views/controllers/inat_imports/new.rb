@@ -19,7 +19,7 @@ module Views
         def view_template
           add_page_title(:inat_import_create_title.l)
           add_context_nav(inat_import_form_new_tabs)
-          render(Components::InatImportNewForm.new(@form))
+          render(Components::InatImportForm.new(@form))
         end
       end
     end

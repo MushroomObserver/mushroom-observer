@@ -2,7 +2,7 @@
 
 # Form object for iNat import new/create form.
 # Provides model for Superform field rendering and namespacing.
-class FormObject::InatImportNew < FormObject::Base
+class FormObject::InatImport < FormObject::Base
   attribute :inat_username, :string
   attribute :inat_ids, :string
   attribute :all, :string

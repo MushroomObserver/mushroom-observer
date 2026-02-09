@@ -35,12 +35,12 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action(action: :create)
-    assert_select("textarea#inat_import_new_inat_ids", true,
+    assert_select("textarea#inat_import_inat_ids", true,
                   "Form needs a textarea for inputting iNat ids")
-    assert_select("input#inat_import_new_inat_username", true,
+    assert_select("input#inat_import_inat_username", true,
                   "Form needs a field for inputting iNat username")
     assert_select(
-      "input[type=checkbox][id=inat_import_new_consent]", true,
+      "input[type=checkbox][id=inat_import_consent]", true,
       "Form needs checkbox requiring consent"
     )
   end
@@ -71,7 +71,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_select(
       "input[name=?][value=?]",
-      "inat_import_new[inat_username]",
+      "inat_import[inat_username]",
       user.inat_username, true,
       "InatImport should pre-fill `inat_username` " \
       "with user's inat_username"
@@ -103,6 +103,26 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash_text(:inat_missing_username.l)
     assert_form_action(action: :create)
+  end
+
+  def test_reload_preserves_checkbox_state
+    user = users(:rolf)
+    params = { inat_ids: "123", consent: "1", all: "1" }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_form_action(action: :create)
+    assert_select(
+      "input[type=checkbox]" \
+      "[id=inat_import_consent][checked]", true,
+      "Consent checkbox should remain checked on reload"
+    )
+    assert_select(
+      "input[type=checkbox]" \
+      "[id=inat_import_all][checked]", true,
+      "Import All checkbox should remain checked on reload"
+    )
   end
 
   def test_create_no_observations_designated
@@ -204,7 +224,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_form_action(action: :create)
     assert_select(
-      "textarea#inat_import_new_inat_ids",
+      "textarea#inat_import_inat_ids",
       { text: expected_saved_id_list, count: 1 },
       "inat_ids textarea should have trailing commas and whitespace stripped"
     )
@@ -411,11 +431,17 @@ class InatImportsControllerTest < FunctionalTestCase
          })
 
     assert_response(:success)
-    assert_select("form#inat_import_new_form")
+    assert_select("form#inat_import_form")
     assert_select(
-      "textarea#inat_import_new_inat_ids",
+      "textarea#inat_import_inat_ids",
       { text: "123", count: 1 },
       "Form should preserve inat_ids from namespaced params"
+    )
+    assert_select(
+      "input[type=checkbox][id=inat_import_all][checked]",
+      false,
+      "Import All should not be checked when it was not " \
+      "checked before confirmation"
     )
   end
 
@@ -432,9 +458,9 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, go_back: 1 })
 
     assert_response(:success)
-    assert_select("form#inat_import_new_form")
+    assert_select("form#inat_import_form")
     assert_select(
-      "textarea#inat_import_new_inat_ids",
+      "textarea#inat_import_inat_ids",
       { text: inat_ids, count: 1 },
       "Form should preserve inat_ids when going back"
     )
@@ -455,7 +481,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash_error
     assert_response(:success)
-    assert_select("form#inat_import_new_form")
+    assert_select("form#inat_import_form")
   end
 
   def test_authorization_response_denied
