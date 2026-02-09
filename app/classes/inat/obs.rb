@@ -102,14 +102,16 @@ class Inat
       { Collector: collector,
         snapshot_key => snapshot,
         Other: self[:description]&.
-          # strip p tags to avoid messing up textile and keep notes source clean
-          gsub(%r{</?p>}, "")&.
-          # compress newlines/returns to single newline, leaving an html comment
-          # because our textiling won't render text after consecutive newlines:
-          #   manually typed blank lines appear as `\r\n\r\n` in iNat notes
-          #   Pulk's mirror script inserts `\n\n` in iNat notes
-          gsub(/(\r?\n){2,}/, "<!--- blank line(s) removed --->\n").
-          to_s }
+               # strip p tags to avoid messing up textile and keep
+               # notes source clean
+               gsub(%r{</?p>}, "")&.
+               # compress newlines/returns to single newline, leaving
+               # an html comment because our textiling won't render
+               # text after consecutive newlines:
+               #   manually typed blank lines appear as `\r\n\r\n` in iNat notes
+               #   Pulk's mirror script inserts `\n\n` in iNat notes
+               gsub(/(\r?\n){2,}/, "<!--- blank line(s) removed --->\n").
+               to_s }
     end
 
     # MO Location with min bounding rectangle
