@@ -35,7 +35,7 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   private
 
   def render_permissions_table
-    table(class: "w-100 table-striped table-description-permissions") do
+    table(class: "w-100 table table-description-permissions") do
       render_table_header
       tbody { render_table_body }
     end
@@ -69,8 +69,7 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   def render_group_checkbox(field_name, group)
     checkbox_field(field_name,
                    label: false, wrap_class: "m-0",
-                   label_class: "p-0",
-                   class: "form-control") do |cb|
+                   label_class: "p-0") do |cb|
       cb.option(group.id)
     end
   end
@@ -181,8 +180,7 @@ class Components::Descriptions::PermissionsForm < Components::ApplicationForm
   def render_checkbox_field(field_name)
     checkbox_field(field_name,
                    label: false, wrap_class: "m-0",
-                   label_class: "p-0",
-                   class: "form-control")
+                   label_class: "p-0")
   end
 
   def name_description?

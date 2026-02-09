@@ -78,7 +78,7 @@ class Components::Descriptions::MergeForm < Components::ApplicationForm
              end
     result += " (#{permit})" unless /(^| )#{permit}( |$)/i.match?(result)
 
-    t(result)
+    result
   end
 
   def user_reader?(user, desc)
