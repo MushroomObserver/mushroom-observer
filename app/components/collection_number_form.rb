@@ -33,26 +33,16 @@ class Components::CollectionNumberForm < Components::ApplicationForm
   end
 
   def render_name_field
-    render(
-      field(:name).text(
-        wrapper_options: {
-          label: :collection_number_name.l,
-          between: :required,
-          data: { autofocus: true }
-        }
-      )
-    )
+    text_field(:name,
+               label: :collection_number_name.l,
+               between: :required,
+               data: { autofocus: true })
   end
 
   def render_number_field
-    render(
-      field(:number).text(
-        wrapper_options: {
-          label: :collection_number_number.l,
-          between: :required
-        }
-      )
-    )
+    text_field(:number,
+               label: :collection_number_number.l,
+               between: :required)
   end
 
   def submit_text
