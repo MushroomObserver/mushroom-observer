@@ -10,29 +10,12 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | ---- | ---- | ------ |
 | `admin/donations/edit.html.erb` | Donations admin | |
 
-### Description Forms (3)
-
-| File | Form | Status |
-| ---- | ---- | ------ |
-| `descriptions/_form_permissions.html.erb` | Edit permissions | |
-| `descriptions/_form_move.html.erb` | Move description | |
-| `descriptions/_form_merge.html.erb` | Merge descriptions | |
-| `names/classification/inherit/new.html.erb` | Inherit classification | Done |
-| `names/classification/edit.html.erb` | Edit classification | Done |
-| `names/lifeforms/propagate/edit.html.erb` | Propagate lifeform | Done |
-| `names/lifeforms/edit.html.erb` | Edit lifeform | Done |
-| `names/descriptions/_form.html.erb` | Name description | |
-| `names/synonyms/deprecate/new.html.erb` | Deprecate name | Done |
-| `names/synonyms/approve/new.html.erb` | Approve name | Done |
-| `names/synonyms/edit.html.erb` | Edit synonyms | Done |
-
 ### Observation Forms (4)
 
 | File | Form | Status |
 | ---- | ---- | ------ |
 | `observations/images/edit.html.erb` | Edit image metadata | |
 | `observations/downloads/_form.html.erb` | Download observations | |
-| `observations/namings/_form.erb` | Propose naming | |
 | `observations/identify/_form_identify_filter.html.erb` | Identify filter | |
 
 ### Species List Forms (8)
@@ -55,14 +38,6 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `projects/_form.html.erb` | Create/edit project | |
 | `projects/violations/index.html.erb` | Violations form | |
 | `projects/field_slips/new.html.erb` | Project field slips | |
-
-### Description Forms (3)
-
-| File | Form | Status |
-| ---- | ---- | ------ |
-| `descriptions/_form_permissions.html.erb` | Edit permissions | |
-| `descriptions/_form_move.html.erb` | Move description | |
-| `descriptions/_form_merge.html.erb` | Merge descriptions | |
 
 ### Account Forms (4)
 
@@ -94,19 +69,6 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `shared/_images_to_reuse.erb` | Reuse images | |
 | `shared/_list_search.html.erb` | Search dispatch | |
 | `application/top_nav/_search_bar.html.erb` | Top nav search | |
-
-## In Progress / Other PRs
-
-| File | Form | PR/Status |
-| ---- | ---- | --------- |
-| `observations/_form.html.erb` | Main observation form | In progress PR |
-| `names/synonyms/approve/new.html.erb` | Approve name | nimmo-phlex-name-classification-forms |
-| `names/synonyms/deprecate/new.html.erb` | Deprecate name | nimmo-phlex-name-classification-forms |
-| `names/synonyms/edit.html.erb` | Edit synonyms | nimmo-phlex-name-classification-forms |
-| `names/lifeforms/edit.html.erb` | Edit lifeform | nimmo-phlex-name-classification-forms |
-| `names/lifeforms/propagate/edit.html.erb` | Propagate lifeform | nimmo-phlex-name-classification-forms |
-| `names/classification/inherit/new.html.erb` | Inherit classification | nimmo-phlex-name-classification-forms |
-| `names/classification/edit.html.erb` | Edit classification | nimmo-phlex-name-classification-forms |
 
 ## To Be Deleted
 
@@ -146,6 +108,11 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `Descriptions::AuthorRequestForm` | `descriptions/author_requests/new.html.erb` | 2026-01-28 |
 | Email forms (5) | Various email request forms | 2026-01-28 |
 | `DescriptionForm` | `names/descriptions/_form.html.erb`, `locations/descriptions/_form.html.erb`, `descriptions/_fields_for_description.html.erb` | 2026-01-28 |
+| `Descriptions::PermissionsForm` | `descriptions/_form_permissions.html.erb` | 2026-02-08 |
+| `Descriptions::MoveForm` | `descriptions/_form_move.html.erb` | 2026-02-08 |
+| `Descriptions::MergeForm` | `descriptions/_form_merge.html.erb` | 2026-02-08 |
+| `NamingForm` | `observations/namings/_form.erb` | |
+| `ObservationForm` | `observations/_form.html.erb` | |
 
 ### Email Form Object Consolidation (2026-01-28)
 
@@ -154,14 +121,6 @@ Consolidated 5 email form objects into single `FormObject::EmailRequest`:
 - All email forms now use `params[:email][:message]` consistently
 - Added `form_class` prop to `ModalForm` for explicit form component lookup
 - Standardized field names: `notes`/`content` → `message`, `email` → `reply_to`
-
-### Email Form Object Consolidation (2026-01-28)
-
-Consolidated 5 email form objects into single `FormObject::EmailRequest`:
-- Deleted: `CommercialInquiry`, `MergeRequest`, `NameChangeRequest`, `ProjectAdminRequest`, `WebmasterQuestion`
-- All email forms now use `params[:email][:message]` consistently
-- Added `form_class` prop to `ModalForm` for explicit form component lookup
-- Standardized field names: `notes`/`content` → `message`
 
 ## Notes
 
