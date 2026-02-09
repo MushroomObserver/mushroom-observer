@@ -303,7 +303,8 @@ module Names
       assert_template("descriptions/_description_details_and_alts_panel")
     end
 
-    # Ensure that an admin can see a draft they don't own
+    # Ensure that an admin can see a draft they don't own,
+    # and gets all the admin UI buttons
     def test_show_draft_admin
       draft = name_descriptions(:draft_coprinus_comatus)
       assert_not_equal(draft.user, mary)
@@ -311,6 +312,18 @@ module Names
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
       assert_template("descriptions/_description_details_and_alts_panel")
+
+      # Admin should see all description_change_links buttons
+      did = draft.id
+      assert_select("a[href*='descriptions/#{did}/edit']")
+      assert_select("a[href*='descriptions/#{did}/moves/new']")
+      assert_select("a[href*='descriptions/#{did}/merges/new']")
+      assert_select("a[href*='descriptions/#{did}/permissions']")
+      assert_select("a[href*='descriptions/new?clone=#{did}']")
+      assert_select("a[href*='descriptions/#{did}/publish']")
+      assert_select(
+        "form[action*='descriptions/#{did}'] input[value='delete']"
+      )
     end
 
     # Ensure that an member can see a draft they don't own

@@ -36,6 +36,11 @@ module Components
 
         # Submit button
         assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")
+
+        # Permission labels: peltigera_alt_desc is public, not default
+        assert_includes(html, "(#{:public.l})")
+        # peltigera_user_desc is private; rolf is not in reader_groups
+        assert_includes(html, "(#{:private.l})")
       end
 
       def test_name_description_without_merge_targets
@@ -57,6 +62,16 @@ module Components
         assert_no_match(/type=['"]submit['"]/, html)
       end
 
+      def test_description_title_default_and_restricted
+        # Merge from alt_desc: targets include peltigera_desc (default)
+        # and peltigera_user_desc (restricted for dick, who can read it)
+        alt_desc = name_descriptions(:peltigera_alt_desc)
+        html = render_form(alt_desc, user: users(:dick))
+
+        assert_includes(html, "(#{:default.l})")
+        assert_includes(html, "(#{:restricted.l})")
+      end
+
       def test_location_description_form_action
         desc = location_descriptions(:albion_desc)
         html = render_form(desc)
@@ -67,9 +82,9 @@ module Components
 
       private
 
-      def render_form(description)
+      def render_form(description, user: @user)
         render(Components::Descriptions::MergeForm.new(description,
-                                                       user: @user))
+                                                       user: user))
       end
     end
   end

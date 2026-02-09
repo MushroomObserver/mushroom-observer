@@ -26,7 +26,7 @@ class Components::Descriptions::MergeForm < Components::ApplicationForm
 
   def render_merge_options
     if merges.any?
-      options = merges.map { |desc| [desc.id, description_title(desc)] }
+      options = merges.map { |desc| [desc.id, description_title(@user, desc)] }
       radio_field(:target, *options)
     else
       p { :merge_descriptions_no_others.t }
@@ -63,8 +63,26 @@ class Components::Descriptions::MergeForm < Components::ApplicationForm
     merges.length == 1 && moves.empty?
   end
 
-  def description_title(desc)
-    desc.partial_format_name
+  def description_title(user, desc)
+    result = desc.partial_format_name
+
+    # Indicate rough permissions.
+    permit = if desc.parent.description_id == desc.id
+               :default.l
+             elsif desc.public
+               :public.l
+             elsif user_reader?(user, desc)
+               :restricted.l
+             else
+               :private.l
+             end
+    result += " (#{permit})" unless /(^| )#{permit}( |$)/i.match?(result)
+
+    t(result)
+  end
+
+  def user_reader?(user, desc)
+    desc.is_reader?(user) || in_admin_mode?
   end
 
   def name_description?
