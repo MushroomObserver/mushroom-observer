@@ -17,7 +17,7 @@ module Observations
 
       update_stored_query(@query) # also stores query in session
       download = params.fetch(:download, ActionController::Parameters.new).
-        permit(:format, :encoding)
+                 permit(:format, :encoding)
       @format = download[:format] || "raw"
       @encoding = download[:encoding] || "UTF-8"
       download_observations_switch
