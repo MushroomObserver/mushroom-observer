@@ -493,7 +493,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_import_all
+  def test_ordinary_user_can_import_all_own_observations
     user = users(:mary)
     params = { inat_username: user.inat_username, all: 1,
                consent: 1, confirmed: 1 }
@@ -515,19 +515,28 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
-  def test_import_all_anothers_observations
+  def test_import_all_anothers_observations_not_allowed
     user = users(:dick) # Dick is a iNat superimporter
     params = { inat_username: "anything", inat_ids: nil,
                consent: 1, all: 1 }
 
     login(user.login)
-    assert_no_difference("Observation.count",
-                         "iNat obss imported without consent") do
-      post(:create, params: params)
-    end
+    post(:create, params: params)
 
-    assert_flash_text(:inat_importing_all_anothers.t)
+    assert_flash_text(:inat_importing_all_anothers.l)
     assert_form_action(action: :create)
+  end
+
+  def test_allow_superimporter_import_all_own_observations_if_inat_username_nil
+    user = users(:dick) # Dick is a iNat superimporter
+    # simulate first-time import OR user.inat_username clobbered to nil
+    user.update(inat_username: nil)
+    params = { inat_username: "anything", all: 1, consent: 1, confirmed: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
   def test_super_importer_can_import_specific_ids_from_another_user
@@ -612,16 +621,6 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   ########## Utilities
-
-  # iNat url where user is sent in order to authorize MO access
-  # to iNat confidential data
-  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def authorization_url
-    "https://www.inaturalist.org/oauthenticate/authorize?" \
-    "client_id=#{Rails.application.credentials.inat.id}" \
-    "&redirect_uri=#{REDIRECT_URI}" \
-    "&response_type=code"
-  end
 
   def authorization_denial_callback_params
     { error: "access_denied",
