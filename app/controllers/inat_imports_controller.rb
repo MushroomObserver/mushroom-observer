@@ -131,8 +131,8 @@ class InatImportsController < ApplicationController
     params[:all] ||= confirm[:import_all]
   end
 
-  def merge_form_param(confirm, key)
-    params[key] ||= confirm[key]
+  def merge_form_param(form_params, key)
+    params[key] ||= form_params[key]
   end
 
   def reload_form
