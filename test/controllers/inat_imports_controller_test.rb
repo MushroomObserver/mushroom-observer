@@ -271,7 +271,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_flash_text(
-      /#{:inat_previous_import.l(count: 1)}/,
+      /#{Regexp.escape(:inat_previous_import.l(count: 1))}/,
       "Confirmation page should warn about " \
       "previously imported IDs"
     )
@@ -296,7 +296,7 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_flash_text(/#{:inat_previous_import.l(count: 1)}/)
+    assert_flash_text(/#{Regexp.escape(:inat_previous_import.l(count: 1))}/)
     # It should continue even if some ids were previously imported
     # The job will exclude previous imports via the iNat API
     # `without_field: "Mushroom Observer URL"` param.
