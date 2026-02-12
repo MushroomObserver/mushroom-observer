@@ -13,5 +13,7 @@ query_param = q_param(@query)
            locals: { query_param: query_param }) %>
 
 <%= render(Components::ObservationsDownloadForm.new(
-      query_param: query_param
+      query_param: query_param,
+      format: @format,
+      encoding: @encoding
     )) %>
