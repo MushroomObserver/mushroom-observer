@@ -29,6 +29,21 @@
   // background-color: $modal-content-bg !important;
 }
 
+// Override Bootstrap 3's .close opacity (0.2) which makes the X nearly
+// invisible in dark themes like Amanita. Use the theme's danger color for a
+// clear dismiss button visible regardless of theme background.
+.modal-header .close {
+  opacity: 0.8;
+  color: $DANGER_COLOR;
+  text-shadow: none;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+    color: $DANGER_COLOR;
+  }
+}
+
 //
 // popup dialogs
 // --------------------------------------------------
