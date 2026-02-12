@@ -34,13 +34,13 @@
 // clear dismiss button visible regardless of theme background.
 .modal-header .close {
   opacity: 0.8;
-  color: $DANGER_COLOR;
+  color: $brand-danger;
   text-shadow: none;
 
   &:hover,
   &:focus {
     opacity: 1;
-    color: $DANGER_COLOR;
+    color: $brand-danger;
   }
 }
 
