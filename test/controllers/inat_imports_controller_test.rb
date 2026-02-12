@@ -35,12 +35,14 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action(action: :create)
-    assert_select("textarea#inat_ids", true,
+    assert_select("textarea#inat_import_inat_ids", true,
                   "Form needs a textarea for inputting iNat ids")
-    assert_select("input#inat_username", true,
+    assert_select("input#inat_import_inat_username", true,
                   "Form needs a field for inputting iNat username")
-    assert_select("input[type=checkbox][id=consent]", true,
-                  "Form needs checkbox requiring consent")
+    assert_select(
+      "input[type=checkbox][id=inat_import_consent]", true,
+      "Form needs checkbox requiring consent"
+    )
   end
 
   def test_new_inat_import_already_importing
@@ -68,8 +70,11 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_select(
-      "input[name=?][value=?]", "inat_username", user.inat_username, true,
-      "InatImport should pre-fill `inat_username` with user's inat_username"
+      "input[name=?][value=?]",
+      "inat_import[inat_username]",
+      user.inat_username, true,
+      "InatImport should pre-fill `inat_username` " \
+      "with user's inat_username"
     )
   end
 
@@ -98,6 +103,26 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash_text(:inat_missing_username.l)
     assert_form_action(action: :create)
+  end
+
+  def test_reload_preserves_checkbox_state
+    user = users(:rolf)
+    params = { inat_ids: "123", consent: "1", all: "1" }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_form_action(action: :create)
+    assert_select(
+      "input[type=checkbox]" \
+      "[id=inat_import_consent][checked]", true,
+      "Consent checkbox should remain checked on reload"
+    )
+    assert_select(
+      "input[type=checkbox]" \
+      "[id=inat_import_all][checked]", true,
+      "Import All checkbox should remain checked on reload"
+    )
   end
 
   def test_create_no_observations_designated
@@ -199,7 +224,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_form_action(action: :create)
     assert_select(
-      "textarea#inat_ids", { text: expected_saved_id_list, count: 1 },
+      "textarea#inat_import_inat_ids",
+      { text: expected_saved_id_list, count: 1 },
       "inat_ids textarea should have trailing commas and whitespace stripped"
     )
   end
@@ -221,6 +247,36 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_text(:inat_too_many_ids_listed.l)
   end
 
+  def test_confirm_warns_about_previously_imported
+    user = users(:rolf)
+    inat_id = "1123456"
+    Observation.create(
+      where: "North Falmouth, Massachusetts, USA",
+      user: user,
+      when: "2024-09-08",
+      source: Observation.sources[:mo_inat_import],
+      inat_id: inat_id
+    )
+    estimate_response = { total_results: 1 }.to_json
+
+    stub_request(
+      :get, %r{api\.inaturalist\.org/v1/observations}
+    ).to_return(status: 200, body: estimate_response)
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: inat_id,
+                   inat_username: "anything",
+                   consent: 1 })
+
+    assert_response(:success)
+    assert_flash_text(
+      /#{Regexp.escape(:inat_previous_import.l(count: 1))}/,
+      "Confirmation page should warn about " \
+      "previously imported IDs"
+    )
+  end
+
   def test_create_previously_imported
     user = users(:rolf)
     inat_id = "1123456"
@@ -240,7 +296,7 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_flash_text(/#{:inat_previous_import.l(count: 1)}/)
+    assert_flash_text(/#{Regexp.escape(:inat_previous_import.l(count: 1))}/)
     # It should continue even if some ids were previously imported
     # The job will exclude previous imports via the iNat API
     # `without_field: "Mushroom Observer URL"` param.
@@ -375,10 +431,17 @@ class InatImportsControllerTest < FunctionalTestCase
          })
 
     assert_response(:success)
-    assert_template(:new)
+    assert_select("form#inat_import_form")
     assert_select(
-      "textarea#inat_ids", { text: "123", count: 1 },
+      "textarea#inat_import_inat_ids",
+      { text: "123", count: 1 },
       "Form should preserve inat_ids from namespaced params"
+    )
+    assert_select(
+      "input[type=checkbox][id=inat_import_all][checked]",
+      false,
+      "Import All should not be checked when it was not " \
+      "checked before confirmation"
     )
   end
 
@@ -390,13 +453,15 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
 
     post(:create,
-         params: { inat_ids: inat_ids, inat_username: inat_username,
+         params: { inat_ids: inat_ids,
+                   inat_username: inat_username,
                    consent: 1, go_back: 1 })
 
     assert_response(:success)
-    assert_template(:new)
+    assert_select("form#inat_import_form")
     assert_select(
-      "textarea#inat_ids", { text: inat_ids, count: 1 },
+      "textarea#inat_import_inat_ids",
+      { text: inat_ids, count: 1 },
       "Form should preserve inat_ids when going back"
     )
   end
@@ -416,7 +481,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash_error
     assert_response(:success)
-    assert_template(:new)
+    assert_select("form#inat_import_form")
   end
 
   def test_authorization_response_denied
@@ -428,7 +493,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_import_all
+  def test_ordinary_user_can_import_all_own_observations
     user = users(:mary)
     params = { inat_username: user.inat_username, all: 1,
                consent: 1, confirmed: 1 }
@@ -450,19 +515,28 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
-  def test_import_all_anothers_observations
+  def test_import_all_anothers_observations_not_allowed
     user = users(:dick) # Dick is a iNat superimporter
     params = { inat_username: "anything", inat_ids: nil,
                consent: 1, all: 1 }
 
     login(user.login)
-    assert_no_difference("Observation.count",
-                         "iNat obss imported without consent") do
-      post(:create, params: params)
-    end
+    post(:create, params: params)
 
-    assert_flash_text(:inat_importing_all_anothers.t)
+    assert_flash_text(:inat_importing_all_anothers.l)
     assert_form_action(action: :create)
+  end
+
+  def test_allow_superimporter_import_all_own_observations_if_inat_username_nil
+    user = users(:dick) # Dick is a iNat superimporter
+    # simulate first-time import OR user.inat_username clobbered to nil
+    user.update(inat_username: nil)
+    params = { inat_username: "anything", all: 1, consent: 1, confirmed: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
   def test_super_importer_can_import_specific_ids_from_another_user
@@ -547,16 +621,6 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   ########## Utilities
-
-  # iNat url where user is sent in order to authorize MO access
-  # to iNat confidential data
-  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def authorization_url
-    "https://www.inaturalist.org/oauthenticate/authorize?" \
-    "client_id=#{Rails.application.credentials.inat.id}" \
-    "&redirect_uri=#{REDIRECT_URI}" \
-    "&response_type=code"
-  end
 
   def authorization_denial_callback_params
     { error: "access_denied",

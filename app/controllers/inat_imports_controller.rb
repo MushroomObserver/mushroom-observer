@@ -62,6 +62,7 @@ class InatImportsController < ApplicationController
 
   before_action :login_required
   before_action :flatten_confirm_params, only: :create
+  before_action :flatten_new_form_params, only: :create
 
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])
@@ -70,13 +71,16 @@ class InatImportsController < ApplicationController
 
   def new
     @inat_import = InatImport.find_or_create_by(user: @user)
-    return unless @inat_import.job_pending?
+    return render_new_form unless @inat_import.job_pending?
 
-    tracker = InatImportJobTracker.where(inat_import: @inat_import).
-              order(:created_at).last
+    tracker = InatImportJobTracker.where(
+      inat_import: @inat_import
+    ).order(:created_at).last
     flash_warning(:inat_import_tracker_pending.l)
     redirect_to(
-      inat_import_path(@inat_import, params: { tracker_id: tracker.id })
+      inat_import_path(
+        @inat_import, params: { tracker_id: tracker.id }
+      )
     )
   end
 
@@ -99,6 +103,7 @@ class InatImportsController < ApplicationController
     @estimate = fetch_import_estimate
     return inat_unreachable if @estimate.nil?
 
+    warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = FormObject::InatImportConfirm.new(
       inat_username: params[:inat_username],
@@ -120,20 +125,53 @@ class InatImportsController < ApplicationController
     confirm = params[:inat_import_confirm]
     return unless confirm
 
-    merge_confirm_param(confirm, :inat_username)
-    merge_confirm_param(confirm, :inat_ids)
-    merge_confirm_param(confirm, :consent)
+    merge_form_param(confirm, :inat_username)
+    merge_form_param(confirm, :inat_ids)
+    merge_form_param(confirm, :consent)
     params[:all] ||= confirm[:import_all]
   end
 
-  def merge_confirm_param(confirm, key)
-    params[key] ||= confirm[key]
+  def merge_form_param(form_params, key)
+    params[key] ||= form_params[key]
   end
 
   def reload_form
-    @inat_ids = sanitize_inat_ids(params[:inat_ids])
-    @inat_username = params[:inat_username]
-    render(:new)
+    render_new_form(
+      username: params[:inat_username],
+      inat_ids: sanitize_inat_ids(params[:inat_ids]),
+      all: params[:all],
+      consent: params[:consent]
+    )
+  end
+
+  def render_new_form(username: @user.inat_username,
+                      inat_ids: nil, all: nil,
+                      consent: nil)
+    form = FormObject::InatImport.new(
+      inat_username: username,
+      inat_ids: inat_ids,
+      all: ("1" if all == "1"),
+      consent: ("1" if consent == "1")
+    )
+    render(
+      Views::Controllers::InatImports::New.new(
+        form: form
+      ),
+      layout: true
+    )
+  end
+
+  # Superform namespaces fields under the model key.
+  # Flatten them to top-level so the controller works
+  # unchanged.
+  def flatten_new_form_params
+    new_form = params[:inat_import]
+    return unless new_form
+
+    merge_form_param(new_form, :inat_username)
+    merge_form_param(new_form, :inat_ids)
+    merge_form_param(new_form, :consent)
+    params[:all] ||= new_form[:all]
   end
 
   # Sanitize to only digits, commas, and whitespace, then trim
