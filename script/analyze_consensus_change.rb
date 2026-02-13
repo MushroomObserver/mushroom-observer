@@ -261,7 +261,7 @@ def find_candidate_ids
     INNER JOIN namings n2
       ON n2.observation_id = n1.observation_id
       AND n2.id != n1.id
-    WHERE n1.observation_id IN (#{ids.join(',')})
+    WHERE n1.observation_id IN (#{ids.join(",")})
   SQL
 end
 
