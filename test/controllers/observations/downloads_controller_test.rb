@@ -13,10 +13,15 @@ module Observations
 
       assert_no_flash
       assert_response(:success)
-      assert_select("input[type=radio][id=format_mycoportal]", false,
-                    "Missing a MyCoPortal radio button")
-      assert_select("input[type=radio][id=format_mycoportal_image_list]", false,
-                    "Missing a MyCoPortal Images radio button")
+      assert_select(
+        "input[type=radio][id=download_format_mycoportal]", false,
+        "Missing a MyCoPortal radio button"
+      )
+      assert_select(
+        "input[type=radio]" \
+        "[id=download_format_mycoportal_image_list]", false,
+        "Missing a MyCoPortal Images radio button"
+      )
     end
 
     def test_new_admin
@@ -29,10 +34,15 @@ module Observations
 
       assert_no_flash
       assert_response(:success)
-      assert_select("input[type=radio][id=format_mycoportal]", true,
-                    "Missing a MyCoPortal radio button")
-      assert_select("input[type=radio][id=format_mycoportal_image_list]", true,
-                    "Missing a MyCoPortal Images radio button")
+      assert_select(
+        "input[type=radio][id=download_format_mycoportal]", true,
+        "Missing a MyCoPortal radio button"
+      )
+      assert_select(
+        "input[type=radio]" \
+        "[id=download_format_mycoportal_image_list]", true,
+        "Missing a MyCoPortal Images radio button"
+      )
     end
 
     def test_download_observation_index
@@ -60,8 +70,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: :raw,
-          encoding: "UTF-8",
+          download: { format: :raw, encoding: "UTF-8" },
           commit: "Cancel"
         }
       )
@@ -73,8 +82,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: :raw,
-          encoding: "UTF-8",
+          download: { format: :raw, encoding: "UTF-8" },
           commit: "Download"
         }
       )
@@ -118,8 +126,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: "raw",
-          encoding: "ASCII",
+          download: { format: "raw", encoding: "ASCII" },
           commit: "Download"
         }
       )
@@ -130,8 +137,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: "raw",
-          encoding: "UTF-16",
+          download: { format: "raw", encoding: "UTF-16" },
           commit: "Download"
         }
       )
@@ -142,8 +148,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: "adolf",
-          encoding: "UTF-8",
+          download: { format: "adolf", encoding: "UTF-8" },
           commit: "Download"
         }
       )
@@ -154,8 +159,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: "dwca",
-          encoding: "UTF-8",
+          download: { format: "dwca", encoding: "UTF-8" },
           commit: "Download"
         }
       )
@@ -166,8 +170,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: "symbiota",
-          encoding: "UTF-8",
+          download: { format: "symbiota", encoding: "UTF-8" },
           commit: "Download"
         }
       )
@@ -178,8 +181,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: "fundis",
-          encoding: "UTF-8",
+          download: { format: "fundis", encoding: "UTF-8" },
           commit: "Download"
         }
       )
@@ -190,8 +192,7 @@ module Observations
         :create,
         params: {
           q:,
-          format: "mycoportal",
-          encoding: "UTF-8",
+          download: { format: "mycoportal", encoding: "UTF-8" },
           commit: "Download"
         }
       )
@@ -203,7 +204,7 @@ module Observations
         post(:create,
              params: {
                q:,
-               format: format,
+               download: { format: format },
                commit: "Download"
              })
       end
@@ -371,10 +372,13 @@ module Observations
       end
 
       login
-      post(:create, params: { q: @controller.q_param(query),
-                              format: :mycoportal_image_list,
-                              encoding: "UTF-8",
-                              commit: "Download" })
+      post(:create,
+           params: {
+             q: @controller.q_param(query),
+             download: { format: :mycoportal_image_list,
+                         encoding: "UTF-8" },
+             commit: "Download"
+           })
 
       assert_response(:success)
       rows = @response.body.split("\n")

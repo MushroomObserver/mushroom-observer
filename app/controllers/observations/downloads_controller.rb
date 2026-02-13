@@ -16,8 +16,10 @@ module Observations
       raise("no robots!") if browser.bot? # failsafe only!
 
       update_stored_query(@query) # also stores query in session
-      @format = params[:format] || "raw"
-      @encoding = params[:encoding] || "UTF-8"
+      download = params.fetch(:download, ActionController::Parameters.new).
+                 permit(:format, :encoding)
+      @format = download[:format] || "raw"
+      @encoding = download[:encoding] || "UTF-8"
       download_observations_switch
     end
 
