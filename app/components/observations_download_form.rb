@@ -48,6 +48,7 @@ class Components::ObservationsDownloadForm < Components::ApplicationForm
 
   def render_submit_buttons
     submit(:DOWNLOAD.l)
+    whitespace
     submit(:CANCEL.l)
   end
 
