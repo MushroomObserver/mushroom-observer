@@ -64,7 +64,7 @@ class Components::DonationsReviewForm < Components::ApplicationForm
   def define_donor_columns(tbl)
     tbl.column(:review_id.t) { |d| d.id.to_s }
     tbl.column(:review_who.t, class: "text-left") do |d|
-      d.who.truncate(30)
+      d.who.to_s.truncate(30)
     end
     tbl.column(:review_anon.t) { |d| d.anonymous.to_s }
   end
