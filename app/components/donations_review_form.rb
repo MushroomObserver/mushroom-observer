@@ -57,15 +57,26 @@ class Components::DonationsReviewForm < Components::ApplicationForm
     tbl.column(:review_reviewed.t) do |donation|
       render_checkbox(donation)
     end
-    define_data_columns(tbl)
+    define_donor_columns(tbl)
+    define_detail_columns(tbl)
   end
 
-  def define_data_columns(tbl)
+  def define_donor_columns(tbl)
     tbl.column(:review_id.t) { |d| d.id.to_s }
-    tbl.column(:review_who.t, &:who)
+    tbl.column(:review_who.t, class: "text-left") do |d|
+      d.who.truncate(30)
+    end
     tbl.column(:review_anon.t) { |d| d.anonymous.to_s }
+  end
+
+  def define_detail_columns(tbl)
     tbl.column(:review_amount.t) { |d| d.amount.to_s }
-    tbl.column(:review_email.t, &:email)
+    tbl.column(:review_email.t, class: "text-left") do |d|
+      d.email.to_s.truncate(50)
+    end
+    tbl.column(:review_date.t) do |d|
+      d.created_at.strftime("%Y-%m-%d")
+    end
   end
 
   def render_checkbox(donation)
@@ -80,8 +91,7 @@ class Components::DonationsReviewForm < Components::ApplicationForm
       name: "reviewed[#{donation.id}]",
       id: "reviewed_#{donation.id}",
       value: "1",
-      checked: donation.reviewed,
-      class: "form-control"
+      checked: donation.reviewed
     )
   end
 end
