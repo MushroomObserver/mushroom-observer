@@ -115,10 +115,10 @@ class Components::ApplicationForm < Superform::Rails::Form
   # We don't need to register form helpers anymore - using Superform fields
 
   # Wrapper option keys that should not be passed to the field itself
-  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
-                     :button, :button_data, :button_text, :addon, :monospace,
-                     :label_class, :label_data, :label_aria,
-                     :label_position].freeze
+  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class, :wrap_data,
+                     :between, :button, :button_data, :button_text,
+                     :addon, :monospace, :label_class, :label_data,
+                     :label_aria, :label_position].freeze
 
   # Override the Field class to use our custom components
   class Field < Superform::Rails::Form::Field
@@ -137,9 +137,14 @@ class Components::ApplicationForm < Superform::Rails::Form
                           wrapper_options: wrapper_options)
     end
 
-    def checkbox(wrapper_options: {}, **attributes)
-      CheckboxField.new(self, attributes: attributes,
-                              wrapper_options: wrapper_options)
+    def checkbox(*options, wrapper_options: {}, **attributes)
+      CheckboxField.new(self, *options, attributes: attributes,
+                                        wrapper_options: wrapper_options)
+    end
+
+    def radio(*options, wrapper_options: {}, **attributes)
+      RadioField.new(self, *options, attributes: attributes,
+                                     wrapper_options: wrapper_options)
     end
 
     def select(options, wrapper_options: {}, **attributes)
@@ -250,7 +255,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Wrapper options: :label, :prefs, :class_name
   # @yield [field_component] Optional block to set slots: `with_between`,
   #   `with_append`, `with_help`
-  def checkbox_field(field_name, **options)
+  def checkbox_field(field_name, **options, &block)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -260,19 +265,25 @@ class Components::ApplicationForm < Superform::Rails::Form
     )
 
     set_help_slot(field_component, wrapper_opts[:help])
-    yield(field_component) if block_given?
 
-    render(field_component)
+    render(field_component, &block)
   end
 
-  # Radio button group with label and Bootstrap form-group wrapper
+  # Radio button group with Bootstrap radio wrapper per option
   # @param field_name [Symbol] the field name
   # @param options [Array<Array>] list of [value, label] pairs
-  # @param wrapper_options [Hash] wrapper options (label, etc.)
+  # @param wrapper_options [Hash] wrapper options (wrap_class, etc.)
   # @example
-  #   radio_field(:options, [1, "Option 1"], [2, "Option 2"])
-  def radio_field(field_name, *options, **wrapper_options)
-    render(field(field_name).radio(*options, **wrapper_options))
+  #   radio_field(:target, [1, "Option 1"], [2, "Option 2"])
+  def radio_field(field_name, *options, **kwargs)
+    wrapper_opts = kwargs.slice(*WRAPPER_OPTIONS)
+    field_opts = kwargs.except(*WRAPPER_OPTIONS)
+
+    render(field(field_name).radio(
+             *options,
+             wrapper_options: wrapper_opts,
+             **field_opts
+           ))
   end
 
   # Select field with label and Bootstrap form-group wrapper
@@ -398,7 +409,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @yield [field_component] Optional block to set slots
   def read_only_field(field_name, **options)
     # For read_only fields, :value is a wrapper option (displayed text)
-    read_only_wrapper_opts = WRAPPER_OPTIONS + [:value]
+    read_only_wrapper_opts = WRAPPER_OPTIONS + [:value, :text]
     wrapper_opts = options.slice(*read_only_wrapper_opts)
     field_opts = options.except(*read_only_wrapper_opts)
 

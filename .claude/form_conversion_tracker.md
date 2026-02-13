@@ -4,37 +4,21 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 
 ## Forms To Convert
 
-### Admin Forms (2)
+### Admin Forms (1)
 
 | File | Form | Status |
 | ---- | ---- | ------ |
-| `admin/blocked_ips/edit.html.erb` | Block/unblock IPs (2 forms) | |
 | `admin/donations/edit.html.erb` | Donations admin | |
 
-### Name Forms (8)
+### Observation Forms (4)
 
 | File | Form | Status |
 | ---- | ---- | ------ |
-| `names/classification/inherit/new.html.erb` | Inherit classification | Done |
-| `names/classification/edit.html.erb` | Edit classification | Done |
-| `names/lifeforms/propagate/edit.html.erb` | Propagate lifeform | Done |
-| `names/lifeforms/edit.html.erb` | Edit lifeform | Done |
-| `names/descriptions/_form.html.erb` | Name description | |
-| `names/synonyms/deprecate/new.html.erb` | Deprecate name | Done |
-| `names/synonyms/approve/new.html.erb` | Approve name | Done |
-| `names/synonyms/edit.html.erb` | Edit synonyms | Done |
-
-### Observation Forms (5)
-
-| File | Form | Status |
-| ---- | ---- | ------ |
-| `observations/_form.html.erb` | Main observation form | |
 | `observations/images/edit.html.erb` | Edit image metadata | |
 | `observations/downloads/_form.html.erb` | Download observations | |
-| `observations/namings/_form.erb` | Propose naming | |
 | `observations/identify/_form_identify_filter.html.erb` | Identify filter | |
 
-### Species List Forms (7)
+### Species List Forms (8)
 
 | File | Form | Status |
 | ---- | ---- | ------ |
@@ -45,20 +29,15 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `species_lists/write_in/_form.html.erb` | Write-in form | |
 | `species_lists/downloads/_form_print_labels.html.erb` | Print labels | |
 | `species_lists/downloads/_form_species_list_report.html.erb` | Export report | |
+| `species_lists/projects/edit.html.erb` | Edit project membership | |
 
-### Location Forms (1)
-
-| File | Form | Status |
-| ---- | ---- | ------ |
-| `locations/descriptions/_form.html.erb` | Location description | |
-
-### Description Forms (3)
+### Project Forms (3)
 
 | File | Form | Status |
 | ---- | ---- | ------ |
-| `descriptions/_form_permissions.html.erb` | Edit permissions | |
-| `descriptions/_form_move.html.erb` | Move description | |
-| `descriptions/_form_merge.html.erb` | Merge descriptions | |
+| `projects/_form.html.erb` | Create/edit project | |
+| `projects/violations/index.html.erb` | Violations form | |
+| `projects/field_slips/new.html.erb` | Project field slips | |
 
 ### Account Forms (4)
 
@@ -69,7 +48,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `account/api_keys/new.html.erb` | Create API key | |
 | `account/api_keys/edit.html.erb` | Edit API key | |
 
-### Other Forms (10)
+### Other Forms (7)
 
 | File | Form | Status |
 | ---- | ---- | ------ |
@@ -77,7 +56,6 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `images/licenses/edit.html.erb` | Bulk update licenses | |
 | `field_slips/_form.html.erb` | Field slip (2 forms) | |
 | `field_slips/index.html.erb` | Field slip search | |
-| `search/advanced.html.erb` | Advanced search | |
 | `visual_groups/edit.html.erb` | Visual group image filter | |
 | `support/donate.html.erb` | Donation form | |
 | `translations/_form.erb` | Translation edit | |
@@ -92,20 +70,24 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `shared/_list_search.html.erb` | Search dispatch | |
 | `application/top_nav/_search_bar.html.erb` | Top nav search | |
 
-## Completed Conversions
+## To Be Deleted
 
-Forms that have been fully converted to Phlex components:
+| File | Reason |
+| ---- | ------ |
+| `search/advanced.html.erb` | Feature being removed |
+
+## Completed Conversions
 
 | Component | Replaces | Date |
 | --------- | -------- | ---- |
-| `AccountSignupForm` | account/new.html.erb` | 20250107 [Convert account signup form to Phlex component #3720](https://github.com/MushroomObserver/mushroom-observer/pull/3720) |
+| `NameForm` | `names/_form.html.erb` | |
+| `AccountSignupForm` | `account/new.html.erb` | 2025-01-07 |
 | `AdminSessionForm` | `admin/session/edit.html.erb` | 2026-01-05 |
 | `BannerForm` | `admin/banners/index.html.erb` | 2026-01-07 |
 | `ArticleForm` | `articles/_form.html.erb` | 2026-01-03 |
 | `VisualGroupForm` | `visual_groups/_form.html.erb` | 2026-01-03 |
 | `VisualModelForm` | `visual_models/_form.html.erb` | 2026-01-03 |
 | `LocationForm` | `locations/_form.erb` | 2026-01-03 |
-| `NameForm` | `names/_form.html.erb` | |
 | `HerbariumRecordForm` | `herbarium_records/_form.erb` | |
 | `CommentForm` | `comments/_form.erb` | |
 | `NamingForm` | Modal naming form | |
@@ -124,7 +106,13 @@ Forms that have been fully converted to Phlex components:
 | `NameDeprecateSynonymForm` | `names/synonyms/deprecate/new.html.erb` | 2026-01-27 |
 | `NameEditSynonymForm` | `names/synonyms/edit.html.erb` | 2026-01-27 |
 | `Descriptions::AuthorRequestForm` | `descriptions/author_requests/new.html.erb` | 2026-01-28 |
-| ... and 17 modal forms | | |
+| Email forms (5) | Various email request forms | 2026-01-28 |
+| `DescriptionForm` | `names/descriptions/_form.html.erb`, `locations/descriptions/_form.html.erb`, `descriptions/_fields_for_description.html.erb` | 2026-01-28 |
+| `Descriptions::PermissionsForm` | `descriptions/_form_permissions.html.erb` | 2026-02-08 |
+| `Descriptions::MoveForm` | `descriptions/_form_move.html.erb` | 2026-02-08 |
+| `Descriptions::MergeForm` | `descriptions/_form_merge.html.erb` | 2026-02-08 |
+| `NamingForm` | `observations/namings/_form.erb` | |
+| `ObservationForm` | `observations/_form.html.erb` | |
 
 ### Email Form Object Consolidation (2026-01-28)
 
@@ -132,10 +120,11 @@ Consolidated 5 email form objects into single `FormObject::EmailRequest`:
 - Deleted: `CommercialInquiry`, `MergeRequest`, `NameChangeRequest`, `ProjectAdminRequest`, `WebmasterQuestion`
 - All email forms now use `params[:email][:message]` consistently
 - Added `form_class` prop to `ModalForm` for explicit form component lookup
-- Standardized field names: `notes`/`content` → `message`
+- Standardized field names: `notes`/`content` → `message`, `email` → `reply_to`
 
 ## Notes
 
 - All paths are relative to `app/views/controllers/`
 - Modal forms were converted as part of the modal form conversion project
 - Some forms may have multiple `form_with` calls (e.g., field_slips has 2)
+- Total: 46 ERB files with forms found

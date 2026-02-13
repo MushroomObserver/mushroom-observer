@@ -144,8 +144,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       user_id = user.is_a?(Integer) ? user : user&.id
       where.not(
         id: ObservationView.where(user_id: user_id, reviewed: 1).
-          where.not(observation_id: nil).
-          select(:observation_id)
+            where.not(observation_id: nil).
+            select(:observation_id)
       )
     }
     # Higher taxa: returns narrowed-down group of id'd obs,
