@@ -61,9 +61,10 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
   end
 
   def format_hms(seconds)
-    hours = seconds / 3600
-    minutes = (seconds % 3600) / 60
-    remaining = seconds % 60
+    total_seconds = seconds.to_i
+    hours = total_seconds / 3600
+    minutes = (total_seconds % 3600) / 60
+    remaining = total_seconds % 60
     Kernel.format("%02d:%02d:%02d", hours, minutes, remaining)
   end
 
