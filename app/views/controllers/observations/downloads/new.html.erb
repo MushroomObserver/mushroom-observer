@@ -5,5 +5,6 @@ add_page_title(:download_observations_title.t)
 # add_context_nav(observation_download_tabs)
 %>
 
-<%= render(partial: "observations/downloads/form",
-           locals: { query_param: q_param }) %>
+<%= render(Components::ObservationsDownloadForm.new(
+      query_param: q_param
+    )) %>

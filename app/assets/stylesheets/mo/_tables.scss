@@ -37,15 +37,38 @@ thead tr {
 }
 
 .table-description-permissions {
-  th, td {
-    padding: 0.1em 0;
-    text-align: center;
+  > tbody {
+
+    > tr {
+      border: none;
+
+      > th,
+      > td {
+        padding: 0.25rem 0;
+        text-align: center;
+        vertical-align: middle;
+
+        &:first-child {
+          padding: 0.25rem 0.5em;
+          text-align: left;
+        }
+      }
+    }
   }
 
-  th:first-child,
-  td:first-child {
-    padding: 0.1em 0.5em;
-    text-align: left;
+  // Override Bootstrap 3 absolute-positioned checkbox layout
+  // so checkboxes center naturally in table cells.
+  .checkbox {
+    margin: 0;
+
+    label {
+      padding-left: 0;
+    }
+
+    input[type="checkbox"] {
+      position: static;
+      margin-left: 0;
+    }
   }
 }
 

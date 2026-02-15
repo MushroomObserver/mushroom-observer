@@ -13,10 +13,6 @@
 # @param suggest_corrections [Boolean] whether to suggest corrections
 # @param parent_deprecated [Name, nil] deprecated parent Name
 class Components::FormNameFeedback < Components::Base
-  include Phlex::Rails::Helpers::FieldsFor
-
-  register_output_helper :radio_with_label
-
   prop :given_name, String
   prop :button_name, String
   prop :names, _Nilable(_Array(Name)), default: nil
@@ -105,25 +101,27 @@ class Components::FormNameFeedback < Components::Base
   # ----- Radio button helpers -----
 
   def render_name_radio_buttons(names)
-    fields_for(:chosen_name) do |f_c|
-      names.each do |n|
-        radio_with_label(
-          form: f_c, field: :name_id, value: n.id,
-          label: n.display_name.t, class: "ml-4"
-        )
-      end
-    end
+    render(name_radio_field(names, wrap_class: "ml-4"))
   end
 
   def render_name_radio_buttons_with_counts(names)
-    fields_for(:chosen_name) do |f_c|
-      names.each do |n|
-        radio_with_label(
-          form: f_c, field: :name_id, value: n.id,
-          label: n.display_name.t, class: "ml-4 name-radio",
-          append: span { " (#{n.observations.size})" }
-        )
-      end
+    options = names.map do |n|
+      count = n.observations.size
+      [n.id, [n.display_name.t, " (#{count})"].safe_join]
     end
+    render(name_radio_field(options, wrap_class: "ml-4 name-radio"))
+  end
+
+  def name_radio_field(options, wrap_class:)
+    options = options.map { |n| [n.id, n.display_name.t] } if
+      options.first.is_a?(Name)
+
+    proxy = Components::ApplicationForm::FieldProxy.new(
+      "chosen_name", :name_id
+    )
+    Components::ApplicationForm::RadioField.new(
+      proxy, *options,
+      wrapper_options: { wrap_class: wrap_class }
+    )
   end
 end

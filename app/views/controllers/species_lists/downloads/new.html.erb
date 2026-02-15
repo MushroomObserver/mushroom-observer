@@ -12,5 +12,8 @@ query_param = q_param(@query)
 <%= render(partial: "species_lists/downloads/form_species_list_report",
            locals: { query_param: query_param }) %>
 
-<%= render(partial: "observations/downloads/form",
-           locals: { query_param: query_param }) %>
+<%= render(Components::ObservationsDownloadForm.new(
+      query_param: query_param,
+      format: @format,
+      encoding: @encoding
+    )) %>
