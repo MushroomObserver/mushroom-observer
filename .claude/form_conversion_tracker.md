@@ -36,7 +36,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | File | Form | Status |
 | ---- | ---- | ------ |
 | `projects/_form.html.erb` | Create/edit project | |
-| `projects/violations/index.html.erb` | Violations form | |
+| `projects/violations/index.html.erb` | Violations form | Done |
 | `projects/field_slips/new.html.erb` | Project field slips | |
 
 ### Account Forms (4)
@@ -113,6 +113,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `Descriptions::MoveForm` | `descriptions/_form_move.html.erb` | 2026-02-08 |
 | `Descriptions::MergeForm` | `descriptions/_form_merge.html.erb` | 2026-02-08 |
 | `DonationsReviewForm` | `admin/donations/edit.html.erb` | 2026-02-13 |
+| `ProjectViolationsForm` | `projects/violations/index.html.erb` | 2026-02-16 |
 | `NamingForm` | `observations/namings/_form.erb` | |
 | `ObservationForm` | `observations/_form.html.erb` | |
 
