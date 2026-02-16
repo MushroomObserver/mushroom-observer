@@ -769,6 +769,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def test_super_importer_anothers_observation
     @user = users(:dick)
+    inat_username = @user.inat_username
     assert(InatImport.super_importers.include?(@user),
            "Test needs User fixture that's SuperImporter")
 
@@ -783,8 +784,8 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_empty(@inat_import.response_errors, "There should be no errors")
-    assert_nil(@user.reload.inat_username,
-               "SuperImporter's inat_username should not change")
+    assert_equal(inat_username, @user.reload.inat_username,
+                 "SuperImporter's inat_username should not change")
   end
 
   def test_super_importer_all_inat_fungal_observations
@@ -796,7 +797,7 @@ class InatImportJobTest < ActiveJob::TestCase
                                      inat_ids: "",
                                      import_all: true,
                                      token: "MockCode",
-                                     inat_username: "anything")
+                                     inat_username: @user.inat_username)
     InatImportJobTracker.create(inat_import: @inat_import.id)
     # limit it to one page to avoid complications of stubbing multiple
     # inat api requests with multiple files

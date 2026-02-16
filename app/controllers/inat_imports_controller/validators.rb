@@ -81,12 +81,16 @@ module InatImportsController::Validators
   def not_importing_all_anothers?
     # At this stage we care only about superimporters because
     # other users are limited to importing their own observations
-    # by InatImportJob#ensure_importing_own_observations
-    return true unless InatImport.super_importer?(@user)
-    unless importing_all? &&
-           (params[:inat_username] != @user.inat_username)
-      return true
-    end
+    # by a combination of iNat authentication, which requires them to
+    # login to iNat as the user who has the iNat username from the import form
+    # and InatImportJob#ensure_importing_own_observations
+    return true unless InatImport.super_importer?(@user) && importing_all?
+    # user.inat_username can be nil if they've never done an iNat import or
+    # if it got clobbered. We have no way to check if the iNat username they
+    # entered is their actual iNat username. However, iNat authentication
+    # requires them to know the password for that iNat username.
+    return true if @user.inat_username.nil? ||
+                   params[:inat_username] == @user.inat_username
 
     flash_warning(:inat_importing_all_anothers.t)
     false

@@ -59,7 +59,6 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `visual_groups/edit.html.erb` | Visual group image filter | |
 | `support/donate.html.erb` | Donation form | |
 | `translations/_form.erb` | Translation edit | |
-| `inat_imports/new.html.erb` | iNat import | |
 
 ### Shared Partials (4)
 
@@ -88,6 +87,8 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `VisualGroupForm` | `visual_groups/_form.html.erb` | 2026-01-03 |
 | `VisualModelForm` | `visual_models/_form.html.erb` | 2026-01-03 |
 | `LocationForm` | `locations/_form.erb` | 2026-01-03 |
+| `InatImportForm` | `inat_imports/new.html.erb` | 2026-02-12 |
+| `NameForm` | `names/_form.html.erb` | |
 | `HerbariumRecordForm` | `herbarium_records/_form.erb` | |
 | `CommentForm` | `comments/_form.erb` | |
 | `NamingForm` | Modal naming form | |
