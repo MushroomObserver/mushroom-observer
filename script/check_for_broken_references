@@ -158,8 +158,6 @@ end
   [ProjectSpeciesList,           :project,              :delete],
   [ProjectSpeciesList,           :species_list,         :delete],
   [Publication,                  :user,                 :alert],
-  [QueuedEmail,                  :to_user,              :delete],
-  [QueuedEmail,                  :user,                 :delete],
   [RssLog,                       :article,              :delete],
   [RssLog,                       :glossary_term,        :delete],
   [RssLog,                       :location,             :delete],
