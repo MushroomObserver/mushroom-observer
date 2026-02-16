@@ -3566,6 +3566,7 @@
   review_anon: Anon
   review_amount: Amount
   review_email: Email
+  review_date: Date
 
   user_add_tool: User Creation Tool
   user_add_email_prompt: Enter email

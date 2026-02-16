@@ -8,7 +8,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 
 | File | Form | Status |
 | ---- | ---- | ------ |
-| `admin/donations/edit.html.erb` | Donations admin | |
+| `admin/donations/edit.html.erb` | Donations admin | Done |
 
 ### Observation Forms (4)
 
@@ -112,6 +112,7 @@ Track progress converting ERB forms (`form_with`/`form_for`) to Phlex Superform 
 | `Descriptions::PermissionsForm` | `descriptions/_form_permissions.html.erb` | 2026-02-08 |
 | `Descriptions::MoveForm` | `descriptions/_form_move.html.erb` | 2026-02-08 |
 | `Descriptions::MergeForm` | `descriptions/_form_merge.html.erb` | 2026-02-08 |
+| `DonationsReviewForm` | `admin/donations/edit.html.erb` | 2026-02-13 |
 | `NamingForm` | `observations/namings/_form.erb` | |
 | `ObservationForm` | `observations/_form.html.erb` | |
 
