@@ -7,7 +7,7 @@ class Components::ProjectViolationsForm < Components::ApplicationForm
   def initialize(model, violations:, user:, **)
     @violations = violations
     @user = user
-    super(model, id: "project_violations_form", **)
+    super(model, id: "project_violations_form", method: :put, **)
   end
 
   def view_template
