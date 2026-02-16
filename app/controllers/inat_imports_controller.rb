@@ -232,7 +232,11 @@ class InatImportsController < ApplicationController
 
     response = RestClient.get(
       "#{API_BASE}/observations?#{query_args.to_query}",
-      { accept: :json }
+      {
+        accept: :json,
+        open_timeout: 5,
+        timeout: 10
+      }
     )
     JSON.parse(response.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
