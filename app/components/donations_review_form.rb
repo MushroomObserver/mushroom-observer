@@ -6,17 +6,16 @@
 class Components::DonationsReviewForm < Components::ApplicationForm
   def initialize(form, donations:, **)
     @donations = donations
-    super(form, **)
+    super(form, id: "admin_review_donations_form",
+                style: "display: contents", **)
   end
 
   def view_template
-    submit(
-      :review_donations_update.l, center: true
-    )
-    render_donations_table
-    submit(
-      :review_donations_update.l, center: true
-    )
+    super do
+      submit(:review_donations_update.l, center: true)
+      render_donations_table
+      submit(:review_donations_update.l, center: true)
+    end
   end
 
   def form_action
@@ -25,31 +24,15 @@ class Components::DonationsReviewForm < Components::ApplicationForm
 
   private
 
-  def form_tag(&block)
-    form(
-      action: form_action, method: :post,
-      **form_attributes, &block
-    )
-  end
-
-  def form_attributes
-    {
-      id: "admin_review_donations_form",
-      style: "display: contents"
-    }
-  end
-
   def render_donations_table
-    div(class: "text-center") do
-      render(
-        Components::Table.new(
-          @donations,
-          class: "table-striped " \
-                 "table-review-donations mb-3 mt-3"
-        )
-      ) do |t|
-        define_columns(t)
-      end
+    render(
+      Components::Table.new(
+        @donations,
+        class: "table-striped " \
+               "table-review-donations mb-3 mt-3"
+      )
+    ) do |t|
+      define_columns(t)
     end
   end
 
@@ -80,18 +63,10 @@ class Components::DonationsReviewForm < Components::ApplicationForm
   end
 
   def render_checkbox(donation)
-    input(
-      type: "hidden",
-      name: "reviewed[#{donation.id}]",
-      value: "0",
-      autocomplete: "off"
-    )
-    input(
-      type: "checkbox",
-      name: "reviewed[#{donation.id}]",
-      id: "reviewed_#{donation.id}",
-      value: "1",
-      checked: donation.reviewed
+    checkbox_field(
+      donation.id.to_s,
+      checked: donation.reviewed,
+      label: false
     )
   end
 end
