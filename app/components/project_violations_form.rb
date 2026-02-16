@@ -105,9 +105,14 @@ class Components::ProjectViolationsForm < Components::ApplicationForm
   def location_header
     return :form_violations_location_none.t unless model.location
 
-    location_link(
-      model.location.display_name, model.location, nil, false
-    )
+    # Capture output helper result as string (location_link
+    # is an output helper that writes directly to buffer).
+    capture do
+      location_link(
+        model.location.display_name, model.location,
+        nil, false
+      )
+    end
   end
 
   # Styled cell methods
@@ -159,13 +164,17 @@ class Components::ProjectViolationsForm < Components::ApplicationForm
   end
 
   def styled_obs_where(obs)
-    loc_link = location_link(
-      obs.place_name, obs.location, nil, false
-    )
+    # Capture output helper result as string (location_link
+    # is an output helper that writes directly to buffer).
+    loc_html = capture do
+      location_link(obs.place_name, obs.location, nil, false)
+    end
     if obs.lat.present? || model&.location&.found_here?(obs)
-      loc_link
+      trusted_html(loc_html)
     else
-      span(class: "violation-highlight") { loc_link }
+      span(class: "violation-highlight") do
+        trusted_html(loc_html)
+      end
     end
   end
 end

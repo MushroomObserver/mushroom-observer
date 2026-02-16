@@ -67,6 +67,18 @@ module Projects
         "#project_violations_form", { text: /#{hidden_obs.lat}/, count: 1 },
         "Violation list should display hidden geoloc to trusted user"
       )
+
+      # Obs outside project location with no lat/lng should have
+      # location wrapped in violation-highlight
+      loc_violator = observations(:nybg_2023_09_obs)
+      assert(loc_violator.lat.blank? &&
+             !project.location.found_here?(loc_violator),
+             "Test needs obs without lat/lng, outside project location")
+      assert_select(
+        "#project_violations_form td span.violation-highlight",
+        { text: /#{Regexp.escape(loc_violator.place_name)}/ },
+        "Location should be highlighted for obs outside project location"
+      )
     end
 
     def test_index_by_member
