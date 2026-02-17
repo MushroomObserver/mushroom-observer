@@ -52,8 +52,18 @@ end %>
 
   <%= tag.div(class: "col-xs-6 translation_container") do
     tag.div(id: "translation_ui") do
-      concat(render(partial: "translations/form")) if @edit_tags.any?
-      concat(render(partial: "translations/versions"))
+      if @edit_tags.any?
+        concat(render(Components::TranslationForm.new(
+          lang: @lang, tag: @tag,
+          edit_tags: @edit_tags,
+          strings: @strings,
+          for_page: @for_page,
+          official_records: @official_records
+        )))
+      end
+      concat(render(
+        partial: "translations/versions"
+      ))
     end
   end %>
 <% end %>
