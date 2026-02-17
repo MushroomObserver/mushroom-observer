@@ -65,7 +65,8 @@ bin/rails test:system test/system/observation_naming_system_test.rb
 
 ## Code Style
 
-See `.claude/style_guide.md` for detailed Ruby, ERB, and Phlex component style conventions.
+See `.claude/ruby_style_guide.md` for general Ruby and ERB style conventions,
+and `.claude/phlex_style_guide.md` for Phlex component conventions.
 
 **Quick Reference**:
 - Run RuboCop: `bundle exec rubocop`
