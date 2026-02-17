@@ -27,50 +27,49 @@ count = 0
 
 def process_log_lines(lines, source)
   entries = []
-  i = 0
-  while i < lines.size
-    line = lines[i]
+  lines.each_with_index do |line, i|
+    next unless line.include?('POST "/admin/emails/webmaster_questions"')
 
-    # Look for the POST to webmaster_questions
-    if line.include?('POST "/admin/emails/webmaster_questions"')
-      # Extract timestamp from this line
-      timestamp = line[/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/]
-
-      # Scan ahead for the Parameters line (usually 2 lines later)
-      search_end = [i + 5, lines.size].min
-      (i + 1...search_end).each do |j|
-        next unless lines[j].include?("Parameters:")
-
-        params_line = lines[j]
-
-        reply_to = params_line[/"reply_to"=>"([^"]*)"/, 1]
-        # Message sits between "message"=>" and the closing ", "commit"
-        # or "}} at end of params
-        message = params_line[/"message"=>"(.*?)",\s*"commit"/, 1] ||
-                  params_line[/"message"=>"(.*?)"\}\}/, 1] ||
-                  params_line[/"message"=>"(.*?)"/, 1]
-
-        next unless reply_to
-
-        # Unescape \r\n to actual newlines for readability
-        message = message.to_s
-                         .gsub('\r\n', "\n")
-                         .gsub('\n', "\n")
-                         .gsub('\r', "")
-
-        entries << {
-          timestamp: timestamp || "unknown",
-          source: source,
-          reply_to: reply_to,
-          message: message
-        }
-        break
-      end
-    end
-
-    i += 1
+    entry = extract_entry(lines, i, source)
+    entries << entry if entry
   end
   entries
+end
+
+def extract_entry(lines, post_index, source)
+  timestamp = lines[post_index][/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/]
+  params_line = find_params_line(lines, post_index)
+  return unless params_line
+
+  reply_to, message = parse_params(params_line)
+  return unless reply_to
+
+  { timestamp: timestamp || "unknown", source: source,
+    reply_to: reply_to, message: message }
+end
+
+def find_params_line(lines, post_index)
+  search_end = [post_index + 5, lines.size].min
+  ((post_index + 1)...search_end).each do |j|
+    return lines[j] if lines[j].include?("Parameters:")
+  end
+  nil
+end
+
+def parse_params(params_line)
+  reply_to = params_line[/"reply_to"=>"([^"]*)"/, 1]
+  message = params_line[/"message"=>"(.*?)",\s*"commit"/, 1] ||
+            params_line[/"message"=>"(.*?)"\}\}/, 1] ||
+            params_line[/"message"=>"(.*?)"/, 1]
+  message = unescape_message(message)
+  [reply_to, message]
+end
+
+def unescape_message(message)
+  message.to_s.
+    gsub('\r\n', "\n").
+    gsub('\n', "\n").
+    gsub('\r', "")
 end
 
 # Collect relevant gzipped log files
@@ -82,14 +81,14 @@ end.sort
 OUTPUT.puts("=" * 60)
 OUTPUT.puts("Webmaster Questions During Email Outage")
 OUTPUT.puts("Period: #{START_DATE} - #{END_DATE}")
-OUTPUT.puts("Extracted: #{Time.now.utc.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+OUTPUT.puts("Extracted: #{Time.now.utc.strftime("%Y-%m-%d %H:%M:%S UTC")}")
 OUTPUT.puts("=" * 60)
 OUTPUT.puts
 
 # Process gzipped log files
 gz_files.each do |gz_file|
   date = gz_file[/(\d{8})\.gz$/, 1]
-  $stderr.puts("Scanning #{File.basename(gz_file)}...")
+  warn("Scanning #{File.basename(gz_file)}...")
 
   lines = []
   Zlib::GzipReader.open(gz_file) do |gz|
@@ -112,7 +111,7 @@ end
 # Also check current production.log
 current_log = "#{LOG_DIR}/production.log"
 if File.exist?(current_log)
-  $stderr.puts("Scanning production.log (current)...")
+  warn("Scanning production.log (current)...")
   lines = File.readlines(current_log)
   entries = process_log_lines(lines, "current")
   entries.each do |entry|
@@ -132,4 +131,4 @@ OUTPUT.puts("Total: #{count} webmaster question(s) found")
 OUTPUT.puts("=" * 60)
 
 OUTPUT.close if ARGV[1]
-$stderr.puts("Done. Found #{count} webmaster question(s).")
+warn("Done. Found #{count} webmaster question(s).")

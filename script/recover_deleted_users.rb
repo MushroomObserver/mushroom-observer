@@ -82,8 +82,8 @@ def fetch_backup_users
   puts("Found #{rows.count} user(s) to restore:")
   puts
   rows.each do |u|
-    puts("  ID: #{u['id']}, Login: #{u['login']}, " \
-         "Email: #{u['email']}, Created: #{u['created_at']}")
+    puts("  ID: #{u["id"]}, Login: #{u["login"]}, " \
+         "Email: #{u["email"]}, Created: #{u["created_at"]}")
   end
   puts
   rows
@@ -91,11 +91,11 @@ end
 
 def remove_already_existing(backup_users)
   existing_ids = User.where(
-    id: backup_users.map { |u| u["id"] }
+    id: backup_users.pluck("id")
   ).pluck(:id)
 
   if existing_ids.any?
-    puts("WARNING: Users #{existing_ids.join(', ')} already exist " \
+    puts("WARNING: Users #{existing_ids.join(", ")} already exist " \
          "in production. Skipping those.")
     backup_users = backup_users.reject do |u|
       existing_ids.include?(u["id"])
@@ -111,53 +111,48 @@ def remove_already_existing(backup_users)
 end
 
 def find_multi_account_emails(backup_users)
-  emails = backup_users.map { |u| u["email"] }
-  email_counts = emails.tally.select { |_email, count| count > 1 }
-  multi = email_counts.keys
-
-  if multi.any?
-    puts("Users with multiple accounts (same email):")
-    multi.each do |email|
-      logins = backup_users.select { |u| u["email"] == email }
-                           .map { |u| u["login"] }
-      puts("  #{email}: #{logins.join(', ')}")
-    end
-    puts
-  end
-
+  emails = backup_users.pluck("email")
+  multi = emails.tally.select { |_email, count| count > 1 }.keys
+  print_multi_accounts(backup_users, multi) if multi.any?
   multi
 end
 
+def print_multi_accounts(backup_users, multi)
+  puts("Users with multiple accounts (same email):")
+  multi.each do |email|
+    logins = backup_users.select { |u| u["email"] == email }.
+             map { |u| u["login"] }
+    puts("  #{email}: #{logins.join(", ")}")
+  end
+  puts
+end
+
 def restore_user(attrs, all_users_group)
-  # Use INSERT INTO ... SELECT FROM backup to preserve exact data
-  # including the original ID
+  insert_user_record(attrs)
+  create_user_groups(attrs, all_users_group)
+end
+
+def insert_user_record(attrs)
   user_columns = CONN.columns("users").map(&:name)
   filtered = attrs.to_h.slice(*user_columns)
-
   cols = filtered.keys.map { |c| "`#{c}`" }.join(", ")
   vals = filtered.values.map { |v| CONN.quote(v) }.join(", ")
+  CONN.execute("INSERT INTO users (#{cols}) VALUES (#{vals})")
+  puts("  Restored User ##{attrs["id"]} (#{attrs["login"]})")
+end
 
-  CONN.execute(
-    "INSERT INTO users (#{cols}) VALUES (#{vals})"
-  )
-  puts("  Restored User ##{attrs['id']} (#{attrs['login']})")
-
-  # Re-create single-user meta-group
+def create_user_groups(attrs, all_users_group)
+  user_id = attrs["id"]
   one_user_group = UserGroup.create!(
-    name: "user #{attrs['id']}",
-    meta: true
+    name: "user #{user_id}", meta: true
   )
   puts("    Created UserGroup '#{one_user_group.name}' " \
        "(ID: #{one_user_group.id})")
-
-  # Create UserGroupUser associations
   UserGroupUser.create!(
-    user_id: attrs["id"],
-    user_group_id: one_user_group.id
+    user_id: user_id, user_group_id: one_user_group.id
   )
   UserGroupUser.create!(
-    user_id: attrs["id"],
-    user_group_id: all_users_group.id
+    user_id: user_id, user_group_id: all_users_group.id
   )
   puts("    Added to 'all users' group")
 end
@@ -170,27 +165,34 @@ def print_report(backup_users, multi_account_emails, dry_run:)
   puts("Total users: #{backup_users.count}")
   puts("Multi-account emails: #{multi_account_emails.size}")
   puts
+  print_all_users(backup_users, multi_account_emails)
+  print_multi_report(backup_users, multi_account_emails)
+  print_next_steps(dry_run)
+end
 
+def print_all_users(backup_users, multi_account_emails)
   puts("--- All Users ---")
   backup_users.each do |u|
     flag = multi_account_emails.include?(u["email"]) ? " [MULTI]" : ""
-    puts("  ID=#{u['id']} login=#{u['login']} " \
-         "email=#{u['email']} created=#{u['created_at']}#{flag}")
+    puts("  ID=#{u["id"]} login=#{u["login"]} " \
+         "email=#{u["email"]} created=#{u["created_at"]}#{flag}")
   end
   puts
+end
 
-  if multi_account_emails.any?
-    puts("--- Multi-Account Users ---")
-    multi_account_emails.each do |email|
-      users = backup_users.select { |u| u["email"] == email }
-      puts("  #{email}:")
-      users.each do |u|
-        puts("    - #{u['login']} (ID: #{u['id']})")
-      end
-    end
-    puts
+def print_multi_report(backup_users, multi_account_emails)
+  return unless multi_account_emails.any?
+
+  puts("--- Multi-Account Users ---")
+  multi_account_emails.each do |email|
+    users = backup_users.select { |u| u["email"] == email }
+    puts("  #{email}:")
+    users.each { |u| puts("    - #{u["login"]} (ID: #{u["id"]})") }
   end
+  puts
+end
 
+def print_next_steps(dry_run)
   if dry_run
     puts("(Dry run - no changes were made)")
   else

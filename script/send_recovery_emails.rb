@@ -34,8 +34,7 @@
 DRY_RUN = ENV["SEND_FOR_REAL"] != "1"
 
 puts("=" * 60)
-puts(DRY_RUN ? "DRY RUN - No emails will be sent" :
-               "LIVE RUN - Sending emails")
+puts(DRY_RUN ? "DRY RUN - No emails will be sent" : "LIVE RUN - Sending emails")
 puts("=" * 60)
 puts
 
@@ -49,9 +48,9 @@ restored_end = Time.zone.parse(
   ENV.fetch("CREATED_BEFORE", "2026-01-17 05:13:00 UTC")
 )
 
-restored_users = User.where(verified: nil)
-                     .where(created_at: restored_start..restored_end)
-                     .order(:created_at)
+restored_users = User.where(verified: nil).
+                 where(created_at: restored_start..restored_end).
+                 order(:created_at)
 
 puts("Found #{restored_users.count} restored user(s).")
 puts
@@ -69,7 +68,7 @@ end
 
 # Split restored users into Group A (unique email) and Group B (shared)
 multi_emails_set = multi_account_emails.keys.to_set
-group_a = restored_users.select { |u| !multi_emails_set.include?(u.email) }
+group_a = restored_users.reject { |u| multi_emails_set.include?(u.email) }
 group_b_emails = multi_account_emails
 
 puts("Group A (restored, unique email): #{group_a.size}")
@@ -84,6 +83,68 @@ def send_email(user, subject, body)
     subject: subject,
     body: body
   ).deliver_now
+end
+
+def send_multi_account_email(email, users, domain,
+                             restored_start, restored_end)
+  receiver = users.last
+  account_list = build_account_list(
+    users, domain, restored_start, restored_end
+  )
+  body = multi_account_body(email, account_list)
+  subject = "Mushroom Observer - Your Accounts Are Ready to Verify"
+
+  logins = users.map(&:login).join(", ")
+  puts("  #{email} (logins: #{logins})")
+  return if DRY_RUN
+
+  send_email(receiver, subject, body)
+  puts("    SENT")
+end
+
+def build_account_list(users, domain, restored_start, restored_end)
+  users.map do |u|
+    verify_url = "#{domain}/account/verify/#{u.id}" \
+                 "?auth_code=#{u.auth_code}"
+    restored = u.created_at.between?(restored_start, restored_end)
+    status = restored ? " (restored)" : ""
+    "<li>Login: <strong>#{ERB::Util.html_escape(u.login)}</strong> " \
+      "(Account ##{u.id})#{status} &mdash; " \
+      "<a href=\"#{verify_url}\">Verify this account</a></li>"
+  end.join("\n")
+end
+
+def multi_account_body(email, account_list)
+  <<~HTML
+    <p>Dear Mushroom Observer user,</p>
+
+    <p>We recently experienced a technical issue with our email system
+    that prevented verification emails from being delivered between
+    January 14 and February 17, 2026. We apologize for the
+    inconvenience.</p>
+
+    <p>We noticed that you created multiple accounts with this email
+    address. Thank you for your persistence! Here are the accounts
+    associated with #{ERB::Util.html_escape(email)}:</p>
+
+    <ul>
+    #{account_list}
+    </ul>
+
+    <p><strong>Important: Please verify only one of these
+    accounts.</strong> Choose the login name you prefer and click its
+    verification link. Do not verify more than one &mdash; having
+    multiple active accounts with the same email can cause confusion,
+    such as observations and other data being split across accounts
+    in ways that are difficult to fix later. Any accounts you leave
+    unverified will be automatically removed after 30 days.</p>
+
+    <p>If you have any questions, please contact us at
+    webmaster@mushroomobserver.org.</p>
+
+    <p>Thank you for your patience,<br/>
+    The Mushroom Observer Team</p>
+  HTML
 end
 
 # --- Group A: Restored users with unique email ---
@@ -126,60 +187,8 @@ puts
 # --- Group B: Shared-email users ---
 puts("--- Group B: Multi-Account Users ---")
 group_b_emails.each do |email, users|
-  # Use the most recently created account as the receiver
-  # (for email_html preference), since that's likely the one
-  # they intended to use
-  receiver = users.last
-
-  account_list = users.map do |u|
-    verify_url = "#{domain}/account/verify/#{u.id}" \
-                 "?auth_code=#{u.auth_code}"
-    status = u.created_at.between?(restored_start, restored_end) ?
-               " (restored)" : ""
-    "<li>Login: <strong>#{ERB::Util.html_escape(u.login)}</strong>" \
-      " (Account ##{u.id})#{status} &mdash; " \
-      "<a href=\"#{verify_url}\">Verify this account</a></li>"
-  end.join("\n")
-
-  body = <<~HTML
-    <p>Dear Mushroom Observer user,</p>
-
-    <p>We recently experienced a technical issue with our email system
-    that prevented verification emails from being delivered between
-    January 14 and February 17, 2026. We apologize for the
-    inconvenience.</p>
-
-    <p>We noticed that you created multiple accounts with this email
-    address. Thank you for your persistence! Here are the accounts
-    associated with #{ERB::Util.html_escape(email)}:</p>
-
-    <ul>
-    #{account_list}
-    </ul>
-
-    <p><strong>Important: Please verify only one of these
-    accounts.</strong> Choose the login name you prefer and click its
-    verification link. Do not verify more than one &mdash; having
-    multiple active accounts with the same email can cause confusion,
-    such as observations and other data being split across accounts
-    in ways that are difficult to fix later. Any accounts you leave
-    unverified will be automatically removed after 30 days.</p>
-
-    <p>If you have any questions, please contact us at
-    webmaster@mushroomobserver.org.</p>
-
-    <p>Thank you for your patience,<br/>
-    The Mushroom Observer Team</p>
-  HTML
-
-  subject = "Mushroom Observer - Your Accounts Are Ready to Verify"
-
-  logins = users.map(&:login).join(", ")
-  puts("  #{email} (logins: #{logins})")
-  unless DRY_RUN
-    send_email(receiver, subject, body)
-    puts("    SENT")
-  end
+  send_multi_account_email(email, users, domain,
+                           restored_start, restored_end)
 end
 puts
 
