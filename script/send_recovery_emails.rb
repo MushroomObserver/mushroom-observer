@@ -164,7 +164,7 @@ def build_account_list(users, opts)
     )
     status = restored ? " (restored)" : ""
     "<li>Login: <strong>#{ERB::Util.html_escape(u.login)}</strong>" \
-      "#{status}<br/>" \
+      "#{status}<br/> " \
       "<a href=\"#{verify_url}\">#{verify_url}</a></li>"
   end.join("\n")
 end
