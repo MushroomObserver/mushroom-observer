@@ -230,9 +230,9 @@ link_to("View User", user_path(@user))
 ```
 
 #### When to use Rails helpers:
-- For form helpers like `fields_for` (but never `form_with` - use Superform)
 - For `button_to` (has complex behavior with no Phlex equivalent)
 - For helpers that don't have Phlex equivalents
+- Never use `form_with` or `fields_for` — use Superform and FieldProxy instead
 
 ### Rendering Content
 
@@ -345,7 +345,6 @@ Rails helpers are available as Phlex modules under `Phlex::Rails::Helpers`. The 
 ```ruby
 class Components::MyComponent < Components::Base
   include Phlex::Rails::Helpers::ButtonTo    # for button_to (no Phlex equivalent)
-  include Phlex::Rails::Helpers::FieldsFor   # for fields_for
   include Phlex::Rails::Helpers::ClassNames  # for class_names
 end
 ```
@@ -353,9 +352,6 @@ end
 After including the module, call the helper directly without any prefix:
 ```ruby
 button_to(some_path, method: :delete)
-fields_for(:user) do |f|
-  # field rendering
-end
 ```
 
 **Prefer Phlex native helpers when possible:**
@@ -371,6 +367,7 @@ image_tag("photo.jpg", alt: "Photo")
 
 **NEVER use these helpers** (they have better alternatives):
 - `form_with` - Use Superform instead
+- `fields_for` - Use Superform's `namespace` or `FieldProxy` instead
 - `safe_join` - Use MO's `array.safe_join("joiner")` extension instead
 
 ### Registering Custom Application Helpers
@@ -436,31 +433,42 @@ def normalize_link(link)
 end
 ```
 
-### Using fields_for
+### FieldProxy: Form Fields Outside a Form Context
+
+When you need to render Superform field components (e.g., `TextField`,
+`RadioField`) **outside** of a `Superform::Rails::Form`, use `FieldProxy`.
+This is common in feedback components and image field editors that render
+form inputs without owning the `<form>` tag.
+
+`FieldProxy` provides the same interface as `Superform::Field` (`key`, `value`,
+`dom.id`, `dom.name`, `dom.value`) so field components work identically.
 
 ```ruby
-class MyFormComponent < Components::Base
-  include Phlex::Rails::Helpers::FieldsFor
+# Create a proxy for a namespaced field
+proxy = Components::ApplicationForm::FieldProxy.new(
+  "chosen_multiple_names", name.id
+)
+render(Components::ApplicationForm::RadioField.new(
+  proxy, *options,
+  wrapper_options: { wrap_class: "my-1 mr-4 d-inline-block" }
+))
 
-  def view_template
-    fields_for(:user) do |f|
-      render_form_fields(f)
-    end
-  end
-
-  private
-
-  def render_form_fields(form)
-    fields = [
-      text_field_with_label(form: form, field: :name),  # custom registered helper
-      email_field_with_label(form: form, field: :email) # custom registered helper
-    ]
-
-    # Use MO's safe_join extension
-    fields.safe_join
-  end
-end
+# For image fields, use the factory method
+proxy = ApplicationForm.image_field_proxy(:good_image, 123, :notes, "text")
+render(Components::ApplicationForm::TextField.new(
+  proxy,
+  attributes: { rows: 2 },
+  wrapper_options: { label: "Notes:" }
+))
 ```
+
+**When to use FieldProxy:**
+- Components that render form inputs but don't own the `<form>` tag
+  (e.g., `FormImageFields`, `FormListFeedback`, `FormNameFeedback`)
+- Standalone radio groups or other inputs outside a Superform form
+
+**Never use `fields_for`** — use `FieldProxy` or Superform's `namespace`
+method instead.
 
 ### Phlex Built-in Helpers
 
