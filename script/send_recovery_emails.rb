@@ -49,7 +49,7 @@ restored_end = Time.zone.parse(
 )
 
 restored_users = User.where(verified: nil).
-                 where(created_at: restored_start..restored_end).
+                 where(created_at: restored_start...restored_end).
                  order(:created_at)
 
 puts("Found #{restored_users.count} restored user(s).")
@@ -58,12 +58,13 @@ puts
 # Collect emails from restored users
 restored_emails = restored_users.map(&:email).uniq
 
-# For each restored email, find ALL unverified accounts with that email
+# Find ALL unverified accounts for those emails in a single query
 # (includes both restored users and later accounts that weren't deleted)
-multi_account_emails = {}
-restored_emails.each do |email|
-  all_accounts = User.where(verified: nil, email: email).order(:created_at)
-  multi_account_emails[email] = all_accounts if all_accounts.size > 1
+all_unverified = User.where(verified: nil, email: restored_emails).
+                 order(:email, :created_at)
+grouped = all_unverified.group_by(&:email)
+multi_account_emails = grouped.select do |_email, accounts|
+  accounts.size > 1
 end
 
 # Split restored users into Group A (unique email) and Group B (shared)
@@ -78,11 +79,16 @@ puts
 domain = MO.http_domain
 
 def send_email(user, subject, body)
-  AccountRecoveryMailer.build(
+  mail = AccountRecoveryMailer.build(
     receiver: user,
     subject: subject,
     body: body
-  ).deliver_now
+  )
+  unless mail
+    puts("    SKIPPED (no email generated for #{user.email})")
+    return
+  end
+  mail.deliver_now
 end
 
 def send_multi_account_email(email, users, domain,
@@ -119,13 +125,14 @@ def multi_account_body(email, account_list)
     <p>Dear Mushroom Observer user,</p>
 
     <p>We recently experienced a technical issue with our email system
-    that prevented verification emails from being delivered between
-    January 14 and February 17, 2026. We apologize for the
-    inconvenience.</p>
+    that may have prevented some verification emails from being
+    delivered between January 14 and February 17, 2026. We apologize
+    for the inconvenience.</p>
 
-    <p>We noticed that you created multiple accounts with this email
-    address. Thank you for your persistence! Here are the accounts
-    associated with #{ERB::Util.html_escape(email)}:</p>
+    <p>We noticed that you have multiple accounts associated with
+    this email address. Thank you for your persistence! Here are the
+    accounts currently associated with
+    #{ERB::Util.html_escape(email)}:</p>
 
     <ul>
     #{account_list}

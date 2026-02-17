@@ -64,15 +64,7 @@ end
 
 def fetch_backup_users
   puts("Querying backup database '#{BACKUP_DB}' for deleted users...")
-
-  quoted_db = CONN.quote_table_name(BACKUP_DB)
-  rows = CONN.select_all(
-    "SELECT * FROM #{quoted_db}.users " \
-    "WHERE verified IS NULL " \
-    "AND created_at >= '#{CREATED_AFTER}' " \
-    "AND created_at < '#{CREATED_BEFORE}' " \
-    "ORDER BY id"
-  )
+  rows = query_backup_users
 
   if rows.empty?
     puts("No users found in backup matching criteria. Exiting.")
@@ -87,6 +79,19 @@ def fetch_backup_users
   end
   puts
   rows
+end
+
+def query_backup_users
+  quoted_db = CONN.quote_table_name(BACKUP_DB)
+  quoted_after = CONN.quote(CREATED_AFTER)
+  quoted_before = CONN.quote(CREATED_BEFORE)
+  CONN.select_all(
+    "SELECT * FROM #{quoted_db}.users " \
+    "WHERE verified IS NULL " \
+    "AND created_at >= #{quoted_after} " \
+    "AND created_at < #{quoted_before} " \
+    "ORDER BY id"
+  )
 end
 
 def remove_already_existing(backup_users)

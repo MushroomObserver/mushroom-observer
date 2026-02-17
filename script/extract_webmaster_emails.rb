@@ -19,41 +19,49 @@ require "zlib"
 LOG_DIR = ARGV[0] || "/var/web/mo/log"
 OUTPUT = ARGV[1] ? File.open(ARGV[1], "w") : $stdout
 
-# Outage period: Jan 14 00:00 UTC through Feb 17 (when creds were fixed)
+# Outage period: Jan 14 00:00 UTC through Feb 17 (when creds fixed)
 START_DATE = "20260114"
 END_DATE = "20260217"
+# Lines to search after a POST for the Parameters line
+LOOKAHEAD = 5
 
 count = 0
 
-def process_log_lines(lines, source)
+# Stream log lines and extract webmaster question entries.
+# Uses a small lookahead buffer instead of loading the entire file.
+def scan_lines(enumerable, source)
   entries = []
-  lines.each_with_index do |line, i|
-    next unless line.include?('POST "/admin/emails/webmaster_questions"')
+  post_timestamp = nil
+  lines_remaining = 0
 
-    entry = extract_entry(lines, i, source)
-    entries << entry if entry
+  enumerable.each do |line|
+    if lines_remaining.positive?
+      lines_remaining -= 1
+      entry = try_parse_params(line, post_timestamp, source)
+      if entry
+        entries << entry
+        lines_remaining = 0
+      end
+    end
+
+    next unless line.include?(
+      'POST "/admin/emails/webmaster_questions"'
+    )
+
+    post_timestamp = line[/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/]
+    lines_remaining = LOOKAHEAD
   end
   entries
 end
 
-def extract_entry(lines, post_index, source)
-  timestamp = lines[post_index][/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/]
-  params_line = find_params_line(lines, post_index)
-  return unless params_line
+def try_parse_params(line, timestamp, source)
+  return unless line.include?("Parameters:")
 
-  reply_to, message = parse_params(params_line)
+  reply_to, message = parse_params(line)
   return unless reply_to
 
   { timestamp: timestamp || "unknown", source: source,
     reply_to: reply_to, message: message }
-end
-
-def find_params_line(lines, post_index)
-  search_end = [post_index + 5, lines.size].min
-  ((post_index + 1)...search_end).each do |j|
-    return lines[j] if lines[j].include?("Parameters:")
-  end
-  nil
 end
 
 def parse_params(params_line)
@@ -72,6 +80,16 @@ def unescape_message(message)
     gsub('\r', "")
 end
 
+def print_entry(entry, count)
+  OUTPUT.puts("--- ##{count} ---")
+  OUTPUT.puts("Date:  #{entry[:timestamp]} UTC")
+  OUTPUT.puts("From:  #{entry[:reply_to]}")
+  OUTPUT.puts("Log:   #{entry[:source]}")
+  OUTPUT.puts
+  OUTPUT.puts(entry[:message])
+  OUTPUT.puts
+end
+
 # Collect relevant gzipped log files
 gz_files = Dir.glob("#{LOG_DIR}/old/production.log-*.gz").select do |f|
   date = f[/(\d{8})\.gz$/, 1]
@@ -85,44 +103,31 @@ OUTPUT.puts("Extracted: #{Time.now.utc.strftime("%Y-%m-%d %H:%M:%S UTC")}")
 OUTPUT.puts("=" * 60)
 OUTPUT.puts
 
-# Process gzipped log files
+# Process gzipped log files (streamed)
 gz_files.each do |gz_file|
-  date = gz_file[/(\d{8})\.gz$/, 1]
-  warn("Scanning #{File.basename(gz_file)}...")
+  basename = File.basename(gz_file)
+  warn("Scanning #{basename}...")
 
-  lines = []
-  Zlib::GzipReader.open(gz_file) do |gz|
-    gz.each_line { |line| lines << line }
+  entries = Zlib::GzipReader.open(gz_file) do |gz|
+    scan_lines(gz.each_line, basename)
   end
 
-  entries = process_log_lines(lines, date)
   entries.each do |entry|
     count += 1
-    OUTPUT.puts("--- ##{count} ---")
-    OUTPUT.puts("Date:  #{entry[:timestamp]} UTC")
-    OUTPUT.puts("From:  #{entry[:reply_to]}")
-    OUTPUT.puts("Log:   production.log-#{entry[:source]}.gz")
-    OUTPUT.puts
-    OUTPUT.puts(entry[:message])
-    OUTPUT.puts
+    print_entry(entry, count)
   end
 end
 
-# Also check current production.log
+# Also check current production.log (streamed)
 current_log = "#{LOG_DIR}/production.log"
 if File.exist?(current_log)
   warn("Scanning production.log (current)...")
-  lines = File.readlines(current_log)
-  entries = process_log_lines(lines, "current")
+  entries = scan_lines(
+    File.foreach(current_log), "production.log (current)"
+  )
   entries.each do |entry|
     count += 1
-    OUTPUT.puts("--- ##{count} ---")
-    OUTPUT.puts("Date:  #{entry[:timestamp]} UTC")
-    OUTPUT.puts("From:  #{entry[:reply_to]}")
-    OUTPUT.puts("Log:   production.log (current)")
-    OUTPUT.puts
-    OUTPUT.puts(entry[:message])
-    OUTPUT.puts
+    print_entry(entry, count)
   end
 end
 
