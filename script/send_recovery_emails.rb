@@ -142,7 +142,7 @@ def send_multi_account_email(email, users, opts)
   receiver = users.last
   account_list = build_account_list(users, opts)
   body = multi_account_body(email, account_list)
-  subject = "Mushroom Observer - Your Accounts Are Ready to Verify"
+  subject = "Mushroom Observer - Account Verification Followup"
 
   logins = users.map(&:login).join(", ")
   puts("  #{email} (logins: #{logins})")
@@ -163,9 +163,9 @@ def build_account_list(users, opts)
       opts[:restored_start], opts[:restored_end]
     )
     status = restored ? " (restored)" : ""
-    "<li>Login: <strong>#{ERB::Util.html_escape(u.login)}</strong> " \
-      "(Account ##{u.id})#{status} &mdash; " \
-      "<a href=\"#{verify_url}\">Verify this account</a></li>"
+    "<li>Login: <strong>#{ERB::Util.html_escape(u.login)}</strong>" \
+      "#{status}<br/>" \
+      "<a href=\"#{verify_url}\">#{verify_url}</a></li>"
   end.join("\n")
 end
 
@@ -195,7 +195,12 @@ def multi_account_body(email, account_list)
     in ways that are difficult to fix later. Any accounts you leave
     unverified will be automatically removed after 30 days.</p>
 
-    <p>If you have any questions, please contact us at
+    <p>If you have already verified more than one of these accounts,
+    please contact us at webmaster@mushroomobserver.org and let us
+    know which account you would like to keep. We can help merge or
+    remove the extra account(s).</p>
+
+    <p>If you have any other questions, please contact us at
     webmaster@mushroomobserver.org.</p>
 
     <p>Thank you for your patience,<br/>
