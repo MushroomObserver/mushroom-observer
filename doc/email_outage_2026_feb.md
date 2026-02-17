@@ -81,19 +81,30 @@ swallowing all SMTP authentication errors.
   `script/extract_webmaster_emails.rb` to extract them.
 
 ### Recoverable from Database Backups
-- **~20 deleted user accounts**: Users deleted by `cull_unverified_users`
-  on Feb 17 05:13 UTC. These can be restored from database backups.
-  The condition for affected users:
+- **Deleted user accounts**: `cull_unverified_users` runs daily at
+  05:13 UTC and deletes users where `created_at <= 1.month.ago`.
+  Users created during the outage were deleted in nightly runs:
+  - **Feb 14 05:13**: deleted users created <= Jan 14 05:13
+  - **Feb 15 05:13**: deleted users created <= Jan 15 05:13
+  - **Feb 16 05:13**: deleted users created <= Jan 16 05:13
+  - **Feb 17 05:13**: deleted users created <= Jan 17 05:13
+
+  Use backup `database-20260213.gz` (Feb 13 05:44 UTC) — this
+  predates the first deletion on Feb 14 05:13 and contains all
+  affected users. The query condition:
   ```sql
   verified IS NULL
-  AND created_at >= '2026-01-16 05:13:00'
+  AND created_at >= '2026-01-14 00:00:00'
   AND created_at < '2026-01-17 05:13:00'
   ```
+  Note: backups are taken at 05:44 UTC, so `database-20260214.gz`
+  is AFTER the Feb 14 05:13 deletion and should NOT be used.
 
 ### Still in Production Database
 - **Other unverified users**: Users created after Jan 17 05:13 UTC who
   haven't been culled yet. These users exist in production but never
-  received working verification emails.
+  received working verification emails. They can be sent a standard
+  `VerifyAccountMailer` email now that credentials are fixed.
 
 ## Recovery Plan
 
@@ -107,19 +118,25 @@ recovery.
 
 ### Step 3: Restore Deleted Users from Backup
 
-Load the most recent backup before Feb 17 05:13 UTC into a temporary
-database, then run the recovery script:
+Use `database-20260213.gz` (Feb 13 05:44 UTC). This predates the
+first outage-related deletion on Feb 14 05:13 UTC and contains all
+affected users.
 
 ```bash
 # Load backup into temporary database
+gunzip -k database-20260213.gz
 mysql -u root -p -e "CREATE DATABASE mo_backup"
-mysql -u root -p mo_backup < /path/to/backup_before_feb17.sql
+mysql -u root -p mo_backup < database-20260213
 
 # Dry run first
 BACKUP_DB=mo_backup bin/rails runner script/recover_deleted_users.rb
 
 # If dry run looks correct, run for real
-BACKUP_DB=mo_backup RECOVER_FOR_REAL=1 bin/rails runner script/recover_deleted_users.rb
+BACKUP_DB=mo_backup RECOVER_FOR_REAL=1 \
+  bin/rails runner script/recover_deleted_users.rb
+
+# Clean up
+mysql -u root -p -e "DROP DATABASE mo_backup"
 ```
 
 The script:
@@ -136,9 +153,9 @@ Two groups of restored users receive customized emails via
 credentials):
 
 **Group A — Restored users with unique email**:
-- Explains their account was temporarily removed by maintenance
-- Notes the verification link from the earlier email should work again
-- Provides a fresh verification link as a fallback
+- Explains the email outage and that their account was removed by
+  routine maintenance
+- Provides a verification link
 
 **Group B — Restored users with shared email** (same email appears on
 another unverified account — either another restored user, or a later

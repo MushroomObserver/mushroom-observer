@@ -39,9 +39,15 @@ puts(DRY_RUN ? "DRY RUN - No emails will be sent" :
 puts("=" * 60)
 puts
 
-# Restored users: unverified, created in the deletion window
-restored_start = Time.zone.parse("2026-01-16 05:13:00 UTC")
-restored_end = Time.zone.parse("2026-01-17 05:13:00 UTC")
+# Restored users: unverified, created during the outage and deleted
+# by nightly refresh_caches runs from Feb 14-17.
+# This must match the range used in recover_deleted_users.rb.
+restored_start = Time.zone.parse(
+  ENV.fetch("CREATED_AFTER", "2026-01-14 00:00:00 UTC")
+)
+restored_end = Time.zone.parse(
+  ENV.fetch("CREATED_BEFORE", "2026-01-17 05:13:00 UTC")
+)
 
 restored_users = User.where(verified: nil)
                      .where(created_at: restored_start..restored_end)
@@ -89,15 +95,14 @@ group_a.each do |user|
   body = <<~HTML
     <p>Dear #{ERB::Util.html_escape(user.login)},</p>
 
-    <p>You recently received a verification email from Mushroom
-    Observer. Unfortunately, a routine maintenance process
-    temporarily removed your account before you had a chance to
-    verify it, which caused that verification link to stop
-    working. We apologize for the confusion.</p>
+    <p>We recently experienced a technical issue with our email system
+    at Mushroom Observer that prevented verification emails from being
+    delivered for several weeks. As a result, your account was
+    removed by a routine maintenance process before you had a chance
+    to verify it. We apologize for the inconvenience.</p>
 
-    <p>Your account has been restored. The verification link from
-    the earlier email should now work again. If you no longer have
-    that email, you can use the link below:</p>
+    <p>Your account has been restored. Please use the link below to
+    verify your account:</p>
 
     <p><a href="#{verify_url}">#{verify_url}</a></p>
 

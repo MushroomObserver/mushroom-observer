@@ -1,11 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Recovery script for users deleted by refresh_caches on Feb 17, 2026
-# at 05:13 UTC.
+# Recovery script for users deleted by refresh_caches between
+# Feb 14-17, 2026 at 05:13 UTC each day.
 #
-# These users were unverified and created between Jan 16 05:13 UTC and
-# Jan 17 05:13 UTC (i.e., exactly 1 month old at deletion time).
+# These users were unverified, created during the email outage
+# (starting ~Jan 14), and never received verification emails.
+# cull_unverified_users deleted them in nightly runs once they
+# were 1 month old.
 #
 # The cull_unverified_users method deleted:
 #   1. UserGroup named "user {id}" for each user
@@ -30,15 +32,24 @@
 #   # Actually restore users
 #   BACKUP_DB=mo_backup RECOVER_FOR_REAL=1 \
 #     bin/rails runner script/recover_deleted_users.rb
+#
+#   # Custom date range (if using a backup that only covers a subset)
+#   BACKUP_DB=mo_backup \
+#     CREATED_AFTER="2026-01-16 05:13:00" \
+#     CREATED_BEFORE="2026-01-17 05:13:00" \
+#     bin/rails runner script/recover_deleted_users.rb
 
 BACKUP_DB = ENV.fetch("BACKUP_DB", "mo_backup")
 DRY_RUN = ENV["RECOVER_FOR_REAL"] != "1"
 CONN = ActiveRecord::Base.connection
 
-# Time window: users created between these times were deleted by
-# cull_unverified_users at 05:13 UTC on Feb 17, 2026
-CREATED_AFTER = "2026-01-16 05:13:00"
-CREATED_BEFORE = "2026-01-17 05:13:00"
+# Time window for affected users. cull_unverified_users runs daily at
+# 05:13 UTC and deletes users where created_at <= 1.month.ago.
+# The outage started ~Jan 14, so users created from Jan 14 onward
+# never received verification emails and were deleted in nightly runs
+# from Feb 14-17. Adjust CREATED_AFTER based on the backup available.
+CREATED_AFTER = ENV.fetch("CREATED_AFTER", "2026-01-14 00:00:00")
+CREATED_BEFORE = ENV.fetch("CREATED_BEFORE", "2026-01-17 05:13:00")
 
 def print_header
   puts("=" * 60)
