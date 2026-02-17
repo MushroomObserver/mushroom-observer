@@ -48,7 +48,7 @@ class Components::ProjectViolationsForm < Components::ApplicationForm
   end
 
   def render_violations_table
-    render(Components::Table.new(@violations)) do |t|
+    Table(@violations) do |t|
       define_columns(t)
     end
   end
