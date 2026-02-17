@@ -30,7 +30,7 @@ class Components::ProjectViolationsForm < Components::ApplicationForm
 
   def violations_removable?
     @violations_removable ||=
-      model.violations_removable_by_current_user?
+      model.violations_removable_by_current_user?(@user)
   end
 
   def render_help_text
