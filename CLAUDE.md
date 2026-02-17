@@ -86,6 +86,7 @@ See `.claude/style_guide.md` for detailed Ruby, ERB, and Phlex component style c
 ## Architecture Notes
 
 - **Models**: `app/models/` - ActiveRecord models
+- **Classes**: `app/classes/` - Ruby POROs, including FormObject for Phlex form components
 - **Controllers**: `app/controllers/` - Rails controllers
 - **Components**: `app/components/` - Phlex components (migration in progress)
 - **Views**: `app/views/` - ERB templates (being replaced by components)
