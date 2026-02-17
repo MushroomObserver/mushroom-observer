@@ -25,12 +25,9 @@ class Components::DonationsReviewForm < Components::ApplicationForm
   private
 
   def render_donations_table
-    render(
-      Components::Table.new(
-        @donations,
-        class: "table-striped " \
-               "table-review-donations mb-3 mt-3"
-      )
+    Table(
+      @donations,
+      class: "table-striped table-review-donations my-3"
     ) do |t|
       define_columns(t)
     end
