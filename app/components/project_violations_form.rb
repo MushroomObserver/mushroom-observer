@@ -28,14 +28,19 @@ class Components::ProjectViolationsForm < Components::ApplicationForm
 
   private
 
+  def violations_removable?
+    @violations_removable ||=
+      model.violations_removable_by_current_user?
+  end
+
   def render_help_text
-    return unless model.violations_removable_by_current_user?
+    return unless violations_removable?
 
     help_block(:div, :form_violations_help.l)
   end
 
   def submit_text
-    if model.violations_removable_by_current_user?
+    if violations_removable?
       :form_violations_remove_selected.l
     else
       :form_violations_show_project.l
