@@ -91,28 +91,77 @@ def send_email(user, subject, body)
   mail.deliver_now
 end
 
-def send_multi_account_email(email, users, domain,
-                             restored_start, restored_end)
+def preview_email(subject, body, label)
+  puts
+  puts("  --- #{label} EMAIL PREVIEW ---")
+  puts("  Subject: #{subject}")
+  puts
+  puts(html_to_plaintext(body))
+  puts
+  path = "/tmp/recovery_email_#{label}.html"
+  File.write(path, body)
+  puts("  HTML preview written to: #{path}")
+  puts("  --- END PREVIEW ---")
+  puts
+end
+
+def html_to_plaintext(html)
+  html.gsub(/<[^>]+>/, "").gsub("&mdash;", "—").
+    gsub("&nbsp;", " ").gsub(/\n{3,}/, "\n\n").
+    lines.map { |l| "    #{l.strip}" }.join("\n")
+end
+
+def group_a_email(user, domain)
+  verify_url = "#{domain}/account/verify/#{user.id}" \
+               "?auth_code=#{user.auth_code}"
+  subject = "Mushroom Observer - Account Restored, Please Verify"
+  body = <<~HTML
+    <p>Dear #{ERB::Util.html_escape(user.login)},</p>
+
+    <p>We recently experienced a technical issue with our email system
+    at Mushroom Observer that prevented verification emails from being
+    delivered for several weeks. As a result, your account was
+    removed by a routine maintenance process before you had a chance
+    to verify it. We apologize for the inconvenience.</p>
+
+    <p>Your account has been restored. Please use the link below to
+    verify your account:</p>
+
+    <p><a href="#{verify_url}">#{verify_url}</a></p>
+
+    <p>If you have any questions, please contact us at
+    webmaster@mushroomobserver.org.</p>
+
+    <p>Thank you for your patience,<br/>
+    The Mushroom Observer Team</p>
+  HTML
+  [subject, body]
+end
+
+def send_multi_account_email(email, users, opts)
   receiver = users.last
-  account_list = build_account_list(
-    users, domain, restored_start, restored_end
-  )
+  account_list = build_account_list(users, opts)
   body = multi_account_body(email, account_list)
   subject = "Mushroom Observer - Your Accounts Are Ready to Verify"
 
   logins = users.map(&:login).join(", ")
   puts("  #{email} (logins: #{logins})")
-  return if DRY_RUN
+  if DRY_RUN
+    preview_email(subject, body, "group_b") if opts[:show_preview]
+    return
+  end
 
   send_email(receiver, subject, body)
   puts("    SENT")
 end
 
-def build_account_list(users, domain, restored_start, restored_end)
+def build_account_list(users, opts)
   users.map do |u|
-    verify_url = "#{domain}/account/verify/#{u.id}" \
+    verify_url = "#{opts[:domain]}/account/verify/#{u.id}" \
                  "?auth_code=#{u.auth_code}"
-    restored = u.created_at.between?(restored_start, restored_end)
+    restored = u.created_at.between?(
+      opts[:restored_start], opts[:restored_end]
+    )
     status = restored ? " (restored)" : ""
     "<li>Login: <strong>#{ERB::Util.html_escape(u.login)}</strong> " \
       "(Account ##{u.id})#{status} &mdash; " \
@@ -156,35 +205,16 @@ end
 
 # --- Group A: Restored users with unique email ---
 puts("--- Group A: Restored Users (unique email) ---")
+group_a_preview_shown = false
 group_a.each do |user|
-  verify_url = "#{domain}/account/verify/#{user.id}" \
-               "?auth_code=#{user.auth_code}"
-
-  body = <<~HTML
-    <p>Dear #{ERB::Util.html_escape(user.login)},</p>
-
-    <p>We recently experienced a technical issue with our email system
-    at Mushroom Observer that prevented verification emails from being
-    delivered for several weeks. As a result, your account was
-    removed by a routine maintenance process before you had a chance
-    to verify it. We apologize for the inconvenience.</p>
-
-    <p>Your account has been restored. Please use the link below to
-    verify your account:</p>
-
-    <p><a href="#{verify_url}">#{verify_url}</a></p>
-
-    <p>If you have any questions, please contact us at
-    webmaster@mushroomobserver.org.</p>
-
-    <p>Thank you for your patience,<br/>
-    The Mushroom Observer Team</p>
-  HTML
-
-  subject = "Mushroom Observer - Account Restored, Please Verify"
-
+  subject, body = group_a_email(user, domain)
   puts("  #{user.email} (#{user.login}, ID: #{user.id})")
-  unless DRY_RUN
+  if DRY_RUN
+    unless group_a_preview_shown
+      preview_email(subject, body, "group_a")
+      group_a_preview_shown = true
+    end
+  else
     send_email(user, subject, body)
     puts("    SENT")
   end
@@ -193,9 +223,13 @@ puts
 
 # --- Group B: Shared-email users ---
 puts("--- Group B: Multi-Account Users ---")
+group_b_preview_shown = false
 group_b_emails.each do |email, users|
-  send_multi_account_email(email, users, domain,
-                           restored_start, restored_end)
+  opts = { domain: domain, restored_start: restored_start,
+           restored_end: restored_end,
+           show_preview: !group_b_preview_shown }
+  send_multi_account_email(email, users, opts)
+  group_b_preview_shown = true
 end
 puts
 
