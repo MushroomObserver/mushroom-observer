@@ -26,8 +26,8 @@ User.find id
 link_to text, path
 ```
 
-See `.claude/style_guide.md` for comprehensive style examples including Phlex
-component style, ERB templates, component architecture, and more.
+See `.claude/ruby_style_guide.md` for general Ruby and ERB style conventions,
+and `.claude/phlex_style_guide.md` for Phlex component conventions.
 
 ### Tag Helpers in ERB
 
@@ -246,6 +246,6 @@ See these files for good examples of refactored code:
 - **Use extraction methods** to break up complex code
 - **Verify clean Rubocop** before considering work complete
 
-See `.claude/style_guide.md` for detailed coding style requirements including
-Phlex component conventions, ERB template style, testing guidelines, component
-architecture, internationalization, and more.
+See `.claude/ruby_style_guide.md` for general Ruby/ERB style, testing, i18n,
+and RuboCop guidelines. See `.claude/phlex_style_guide.md` for Phlex component
+conventions, Superform usage, and component architecture.
