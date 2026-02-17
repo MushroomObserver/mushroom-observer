@@ -157,9 +157,13 @@ group_b_emails.each do |email, users|
     #{account_list}
     </ul>
 
-    <p>Please click the verification link for the account you would
-    like to use. You only need to verify one account. Any unverified
-    accounts will be automatically removed after 30 days.</p>
+    <p><strong>Important: Please verify only one of these
+    accounts.</strong> Choose the login name you prefer and click its
+    verification link. Do not verify more than one &mdash; having
+    multiple active accounts with the same email can cause confusion,
+    such as observations and other data being split across accounts
+    in ways that are difficult to fix later. Any accounts you leave
+    unverified will be automatically removed after 30 days.</p>
 
     <p>If you have any questions, please contact us at
     webmaster@mushroomobserver.org.</p>
