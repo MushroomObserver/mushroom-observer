@@ -161,7 +161,7 @@ class Components::TranslationForm < Components::ApplicationForm
 
   def plurality_note(ttag)
     if ttag.match(/s$/i) &&
-       @edit_tags.include?(ttag.sub(/.$/i, ""))
+       @edit_tags.include?(ttag.sub(/.$/, ""))
       :edit_translations_plural.t
     elsif @edit_tags.intersect?(["#{ttag}s", "#{ttag}S"])
       :edit_translations_singular.t
