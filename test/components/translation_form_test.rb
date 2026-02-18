@@ -10,6 +10,7 @@ class TranslationFormTest < ComponentTestCase
     @tag = "two"
     @edit_tags = %w[two twos TWO TWOS]
     @official_records = build_record_map(@lang)
+    @other_locales = [languages(:french), languages(:greek)]
   end
 
   # --- Form structure ---
@@ -20,7 +21,7 @@ class TranslationFormTest < ComponentTestCase
   end
 
   def test_renders_form_with_correct_action
-    assert_html(html, "form[action='/translations/two']")
+    assert_html(html, "form[action='/translations/#{@tag}']")
   end
 
   def test_renders_form_with_translation_form_id
@@ -38,13 +39,13 @@ class TranslationFormTest < ComponentTestCase
   end
 
   def test_renders_form_with_locale_data
-    assert_html(html, "form[data-locale='en']")
+    assert_html(html, "form[data-locale='#{@lang.locale}']")
   end
 
   def test_renders_hidden_tag_field
     assert_html(
       html,
-      "input[type='hidden'][name='tag'][value='two']"
+      "input[type='hidden'][name='tag'][value='#{@tag}']"
     )
   end
 
@@ -58,20 +59,21 @@ class TranslationFormTest < ComponentTestCase
   # --- Language header ---
 
   def test_renders_language_header
-    assert_html(html, "h4.font-weight-bold", text: "English:")
+    assert_html(
+      html, "h4.font-weight-bold", text: "#{@lang.name}:"
+    )
   end
 
   # --- Textarea fields ---
 
   def test_renders_textarea_for_each_edit_tag
-    assert_html(html, "textarea[name='tag_two']")
-    assert_html(html, "textarea[name='tag_twos']")
-    assert_html(html, "textarea[name='tag_TWO']")
-    assert_html(html, "textarea[name='tag_TWOS']")
+    @edit_tags.each do |t|
+      assert_html(html, "textarea[name='tag_#{t}']")
+    end
   end
 
   def test_textarea_has_correct_value
-    assert_includes(html, ">two</textarea>")
+    assert_includes(html, ">#{@strings[@tag]}</textarea>")
   end
 
   def test_textarea_has_stimulus_target
@@ -91,13 +93,19 @@ class TranslationFormTest < ComponentTestCase
   end
 
   def test_textarea_has_label
-    assert_html(html, "label[for='tag_two']", text: "two")
-    assert_html(html, "label[for='tag_TWO']", text: "TWO")
+    assert_html(
+      html, "label[for='tag_#{@edit_tags[0]}']",
+      text: @edit_tags[0]
+    )
+    assert_html(
+      html, "label[for='tag_#{@edit_tags[2]}']",
+      text: @edit_tags[2]
+    )
   end
 
   def test_textarea_has_form_control_class
     assert_html(
-      html, "textarea.form-control[name='tag_two']"
+      html, "textarea.form-control[name='tag_#{@edit_tags[0]}']"
     )
   end
 
@@ -178,7 +186,7 @@ class TranslationFormTest < ComponentTestCase
   def test_reload_link_has_correct_href
     assert_html(
       html,
-      "a#reload_button[href*='/translations/two/edit']"
+      "a#reload_button[href*='/translations/#{@tag}/edit']"
     )
   end
 
@@ -210,12 +218,15 @@ class TranslationFormTest < ComponentTestCase
   end
 
   def test_locale_select_has_selected_option
-    assert_html(html, "option[value='en'][selected]")
+    assert_html(
+      html, "option[value='#{@lang.locale}'][selected]"
+    )
   end
 
   def test_locale_select_includes_other_locales
-    assert_html(html, "option[value='fr']")
-    assert_html(html, "option[value='el']")
+    @other_locales.each do |lang|
+      assert_html(html, "option[value='#{lang.locale}']")
+    end
   end
 
   # --- Official section ---
@@ -233,7 +244,7 @@ class TranslationFormTest < ComponentTestCase
     assert_html(
       non_official_html,
       "#translation_official h4",
-      text: "English:"
+      text: "#{Language.official.name}:"
     )
   end
 
@@ -241,7 +252,7 @@ class TranslationFormTest < ComponentTestCase
     non_official_html = render_form_for_lang(:french)
 
     # Official section contains tag labels and text values
-    assert_includes(non_official_html, "two:")
+    assert_includes(non_official_html, "#{@tag}:")
     assert_html(
       non_official_html,
       "#translation_official span.underline"
@@ -294,7 +305,7 @@ class TranslationFormTest < ComponentTestCase
 
   def test_multiple_tags_textarea_has_minimum_2_rows
     assert_html(
-      html, "textarea[name='tag_two'][rows='2']"
+      html, "textarea[name='tag_#{@edit_tags[0]}'][rows='2']"
     )
   end
 
@@ -305,7 +316,7 @@ class TranslationFormTest < ComponentTestCase
 
     assert_html(
       page_html,
-      "form[action='/translations/two?for_page=general']"
+      "form[action='/translations/#{@tag}?for_page=general']"
     )
   end
 
@@ -329,13 +340,13 @@ class TranslationFormTest < ComponentTestCase
     lang = languages(lang_fixture)
     strings = lang.localization_strings
     official = build_record_map(Language.official)
-    two_tags = %w[two TWO]
+    two_tags = [@tag, @tag.upcase]
     edit_tags = strings.keys.select { |t| two_tags.include?(t) }
     edit_tags = two_tags if edit_tags.empty?
 
     render(Components::TranslationForm.new(
              lang: lang,
-             tag: "two",
+             tag: @tag,
              edit_tags: edit_tags,
              strings: strings,
              official_records: official
