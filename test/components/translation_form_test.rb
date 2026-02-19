@@ -263,6 +263,23 @@ class TranslationFormTest < ComponentTestCase
     )
   end
 
+  def test_official_text_with_trailing_newline_preserves_trailing_br
+    # text stored as "line1\nline2\n" (literal \n) becomes "line1\nline2\n"
+    # (actual newlines) after gsub. The trailing newline should produce a
+    # trailing <br> in the rendered output.
+    stub_record = Struct.new(:text).new("line1\\nline2\\n")
+    official_with_trailing = @official_records.merge(@tag => stub_record)
+    non_official_html = render(Components::TranslationForm.new(
+                                 lang: languages(:french),
+                                 tag: @tag,
+                                 edit_tags: [@tag],
+                                 strings: languages(:french).localization_strings,
+                                 official_records: official_with_trailing
+                               ))
+
+    assert_includes(non_official_html, "line2<br>")
+  end
+
   # --- Single tag form ---
 
   def test_single_tag_renders_one_textarea

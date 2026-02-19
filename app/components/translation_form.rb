@@ -82,7 +82,7 @@ class Components::TranslationForm < Components::ApplicationForm
   end
 
   def render_multiline_text(str)
-    str.split("\n").each_with_index do |line, i|
+    str.split("\n", -1).each_with_index do |line, i|
       br if i.positive?
       plain(line)
     end
