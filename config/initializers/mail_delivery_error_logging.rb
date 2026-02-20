@@ -8,9 +8,9 @@ Rails.application.config.after_initialize do
     StandardError
   ) do |exception|
     mailer, action = arguments[0..1]
-    args = arguments[3..] || []
+    params = arguments[3] || {}
     msg = "DELIVERY FAILED #{mailer}##{action}"
-    msg << " args=#{args.inspect}" if args.any?
+    msg << " params=#{params.inspect}" if params.present?
     msg << " error=#{exception.class}: " \
            "#{exception.message}"
     Rails.root.join("log/email-debug.log").

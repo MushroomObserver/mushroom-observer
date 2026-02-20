@@ -3,16 +3,21 @@
 require("test_helper")
 require("net/smtp")
 
-class ApplicationJobTest < ActiveJob::TestCase
+class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
   def setup
     super
     @log_path = Rails.root.join("log/email-debug.log")
+    @log_existed = File.exist?(@log_path)
     @original_content =
-      File.exist?(@log_path) ? File.read(@log_path) : ""
+      @log_existed ? File.read(@log_path) : ""
   end
 
   def teardown
-    File.write(@log_path, @original_content)
+    if @log_existed
+      File.write(@log_path, @original_content)
+    elsif File.exist?(@log_path)
+      File.delete(@log_path)
+    end
     super
   end
 
