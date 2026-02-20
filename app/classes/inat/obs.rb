@@ -350,6 +350,10 @@ class Inat
     # I.e., is there A combination (ANDs) of higher ranks (>= Class)
     # that's monophyletic for slime molds?
     # Another solution: use IF API to see if IF includes the name.
-    def slime_mold? = (@obs.dig(:taxon, :iconic_taxon_name) == "Protozoa")
+    def slime_mold?
+      @obs.dig(:taxon, :ancestor_ids)&.include?(
+        Inat::Constants::MYCETOZOA_TAXON_ID
+      )
+    end
   end
 end

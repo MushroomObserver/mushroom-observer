@@ -33,6 +33,9 @@ class Inat
     # Used to limit results of iNat API requests to mushrooms & slime molds,
     # (Protozoa serves as a proxy for slime molds.)
     ICONIC_TAXA = "Fungi,Protozoa"
+    # disable cop to make it easier to compare to iNat url's & documentation
+    FUNGI_TAXON_ID = 47170 # rubocop:disable Style/NumericLiterals
+    MYCETOZOA_TAXON_ID = 47685 # rubocop:disable Style/NumericLiterals
     # base url for iNat CC-licensed and public domain photos
     LICENSED_PHOTO_BASE =
       "https://inaturalist-open-data.s3.amazonaws.com/photos"
