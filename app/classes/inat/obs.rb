@@ -340,16 +340,12 @@ class Inat
 
     # ----- Other
 
-    def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
+    def fungi?
+      @obs.dig(:taxon, :ancestor_ids)&.include?(
+        Inat::Constants::FUNGI_TAXON_ID
+      )
+    end
 
-    # NOTE: 2024-06-01 jdc
-    # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
-    # Protoza is paraphyletic for slime molds,
-    # but it's how they are classified in MO and MB
-    # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
-    # I.e., is there A combination (ANDs) of higher ranks (>= Class)
-    # that's monophyletic for slime molds?
-    # Another solution: use IF API to see if IF includes the name.
     def slime_mold?
       @obs.dig(:taxon, :ancestor_ids)&.include?(
         Inat::Constants::MYCETOZOA_TAXON_ID

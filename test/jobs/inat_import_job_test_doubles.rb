@@ -72,7 +72,7 @@ module InatImportJobTestDoubles
 
   def stub_inat_observation_request(id_above: 0, body_nil: false)
     query_args = {
-      iconic_taxa: ICONIC_TAXA,
+      taxon_id: [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].join(","),
       id: @inat_import.inat_ids,
       id_above: id_above,
       per_page: 200,
