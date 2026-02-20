@@ -397,7 +397,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
     other_inat_username = "some_other_inat_user"
-    # Any id will work if it hasn't already be imported
+    # Any id will work if it hasn't already been imported
     inat_ids = "339315928"
     assert_nil(Observation.find_by(inat_id: inat_ids.to_i))
 
