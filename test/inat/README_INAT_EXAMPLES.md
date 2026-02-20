@@ -24,6 +24,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | coprinus | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | Needs ID |
 | distantes | [215996396](https://www.inaturalist.org/observations/215996396) | 1 | `jdcohenesq` **obscured, includes confidential gps** | Needs ID, jdc Obs, taxon[:name]: "Distantes" rank:"section", rank_level:13 |
 | donadinia_PNW01 | [212320801](https://www.inaturalist.org/observations/212320801) | 1 | public | `danmorton` **non-mo-style Provisional Species Name (PNW)**, **DNA sequence** |
+| euglena | [216357655](https://www.inaturalist.org/observations/339412090) | 1 | public | user `valentin74494` non-myxomycetozoa protozoan |
 | evernia | [216357655](https://www.inaturalist.org/observations/216357655) | 1 | public | user `jgerend` Casual, lichen, no fields, place: Troutdale, 1 Project |
 | fuligo_septica | [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** Richmond, CA |
 | gyromitra_ancilis | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects**, **suggested Inactive Taxon** US 20, Linn Co.|
