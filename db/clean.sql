@@ -71,11 +71,6 @@ delete from name_descriptions where public = false;
 
 delete from query_records;
 
-delete from queued_email_integers;
-delete from queued_email_notes;
-delete from queued_email_strings;
-delete from queued_emails;
-
 update users set email = 'webmaster@mushroomobserver.org';
 # Set all passwords to just "password".
 update users set password = 'ae98587c6f1599fbdcc800e66db6874a8fa0e713';
