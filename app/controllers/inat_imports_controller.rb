@@ -222,26 +222,27 @@ class InatImportsController < ApplicationController
   end
 
   def fetch_import_estimate
-    query_args = {
-      iconic_taxa: ICONIC_TAXA,
-      only_id: true,
-      without_field: "Mushroom Observer URL",
-      user_login: params[:inat_username].strip
-    }
-    query_args[:id] = params[:inat_ids] if listing_ids?
-
     response = RestClient.get(
-      "#{API_BASE}/observations?#{query_args.to_query}",
-      {
-        accept: :json,
-        open_timeout: 5,
-        timeout: 10
-      }
+      "#{API_BASE}/observations?#{estimate_query_args.to_query}",
+      { accept: :json, open_timeout: 5, timeout: 10 }
     )
     JSON.parse(response.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
     Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
     nil
+  end
+
+  def estimate_query_args
+    args = {
+      iconic_taxa: ICONIC_TAXA,
+      only_id: true,
+      without_field: "Mushroom Observer URL"
+    }
+    unless InatImport.super_importer?(@user)
+      args[:user_login] = params[:inat_username].strip
+    end
+    args[:id] = params[:inat_ids] if listing_ids?
+    args
   end
 
   def clean_inat_ids
