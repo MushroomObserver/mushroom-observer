@@ -62,7 +62,7 @@ class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
       job.perform_now
     end
 
-    log_entries = File.read(@log_path)
+    log_entries = File.exist?(@log_path) ? File.read(@log_path) : ""
     new_entries = log_entries.sub(@original_content, "")
     assert_empty(
       new_entries,
