@@ -7,9 +7,13 @@ class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
   def setup
     super
     @log_path = Rails.root.join("log/email-debug.log")
-    @log_existed = File.exist?(@log_path)
-    @original_content =
-      @log_existed ? File.read(@log_path) : ""
+    begin
+      @original_content = File.read(@log_path)
+      @log_existed = true
+    rescue Errno::ENOENT
+      @original_content = ""
+      @log_existed = false
+    end
   end
 
   def teardown
@@ -62,7 +66,11 @@ class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
       job.perform_now
     end
 
-    log_entries = File.exist?(@log_path) ? File.read(@log_path) : ""
+    begin
+      log_entries = File.read(@log_path)
+    rescue Errno::ENOENT
+      log_entries = ""
+    end
     new_entries = log_entries.sub(@original_content, "")
     assert_empty(
       new_entries,
