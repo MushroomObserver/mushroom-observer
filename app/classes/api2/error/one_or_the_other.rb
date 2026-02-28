@@ -3,9 +3,9 @@
 class API2
   # Tried to both clear synonyms and add synonyms at the same time.
   class OneOrTheOther < FatalError
-    def initialize(args)
+    def initialize(fields)
       super()
-      args.merge!(args: args.join(", "))
+      self.args.merge!(args: fields.join(", "))
     end
   end
 end
