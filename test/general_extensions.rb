@@ -576,7 +576,7 @@ module GeneralExtensions
     files.each do |file|
       filename = Array(file).first
       format = file.is_a?(Array) ? "r:#{file[1]}" : "r"
-      template = File.open(filename, format).read
+      template = File.open(filename, format, &:read)
       template = enforce_encoding(encoding, template)
       template = ERB.new(template).result # interpolate variables
       template = yield(template) if block_given?

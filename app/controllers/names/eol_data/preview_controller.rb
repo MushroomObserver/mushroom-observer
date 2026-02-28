@@ -41,7 +41,7 @@ module Names::EolData
       end
 
       # Get corresponding names.
-      name_ids = @descs.keys.map(&:to_s).join(",")
+      name_ids = @descs.keys.join(",")
       @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
       # Get corresponding images.

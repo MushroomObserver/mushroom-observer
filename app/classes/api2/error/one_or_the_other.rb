@@ -5,7 +5,7 @@ class API2
   class OneOrTheOther < FatalError
     def initialize(args)
       super()
-      args.merge!(args: args.map(&:to_s).join(", "))
+      args.merge!(args: args.join(", "))
     end
   end
 end

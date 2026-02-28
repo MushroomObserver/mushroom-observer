@@ -10,8 +10,8 @@ class ExternalLinkFormTest < ComponentTestCase
     @user = users(:rolf)
     @sites = ExternalSite.all
     @site = @sites.first
-    @base_urls = @sites.each_with_object({}) do |site, hash|
-      hash[site.name] = site.base_url
+    @base_urls = @sites.to_h do |site|
+      [site.name, site.base_url]
     end
     @html = render_form
   end

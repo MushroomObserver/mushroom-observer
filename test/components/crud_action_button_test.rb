@@ -101,7 +101,7 @@ class CrudActionButtonTest < ComponentTestCase
   end
 end
 
-class LinkHelperButtonTest < ComponentTestCase
+class LinkHelperButtonTest < ComponentTestCase # rubocop:disable Style/OneClassPerFile
   # Test the helper wrappers that delegate to the component
 
   def test_destroy_button_helper

@@ -60,8 +60,7 @@ module Name::Synonymy
   #
   def sort_synonyms
     all = synonyms - [self]
-    accepted_synonyms = all.reject(&:deprecated)
-    deprecated_synonyms = all.select(&:deprecated)
+    deprecated_synonyms, accepted_synonyms = all.partition(&:deprecated)
     [accepted_synonyms, deprecated_synonyms]
   end
 
