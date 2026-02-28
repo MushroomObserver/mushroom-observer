@@ -4,6 +4,7 @@ require "test_helper"
 
 class LoginFormTest < ComponentTestCase
   def setup
+    super
     @model = FormObject::Login.new(login: "testuser", remember_me: true)
     @html = render_form
   end

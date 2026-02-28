@@ -1,18 +1,5 @@
 # frozen_string_literal: true
 
-# I would rather do error handling in mo_mail() instead of having to catch a
-# bunch of errors everywhere we call deliver_now.  The problem is build returns
-# an instance of Mail::Message, and there doesn't seem to be any easy or safe
-# way to validate email addresses or anything at that point.  If the user were
-# initiating the mail message, that would be a different matter maybe, because
-# then we could actually do something with the error messages.  But mostly the
-# webmaster gets these error messages asynchronously from the rake email:send
-# task, and at that point there's nothing anyone can do, so the error messages
-# are just annoying and useless.  In the few cases where emails are sent
-# immediately and not queued, I recommend explicitly checking for correctable
-# errors *before* building and attempting to deliver the message. -JPH 20221108
-ActionMailer::Base.raise_delivery_errors = false
-
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
   # Allow folder organization in the app/views folder
@@ -33,18 +20,17 @@ class ApplicationMailer < ActionMailer::Base
   private
 
   def webmaster_delivery
+    return if message.to.blank?
+
     mail.delivery_method.settings =
       Rails.application.credentials.gmail_smtp_settings_webmaster
   end
 
   def news_delivery
+    return if message.to.blank?
+
     mail.delivery_method.settings =
       Rails.application.credentials.gmail_smtp_settings_news
-  end
-
-  def noreply_delivery
-    mail.delivery_method.settings =
-      Rails.application.credentials.gmail_smtp_settings_noreply
   end
 
   def setup_user(user)

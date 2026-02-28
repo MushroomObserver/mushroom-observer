@@ -1,4 +1,8 @@
 <%= turbo_stream.update("translation_ui") do
-  concat(render(partial: "translations/form"))
+  concat(render(Components::TranslationForm.new(
+    lang: @lang, tag: @tag, edit_tags: @edit_tags,
+    strings: @strings, for_page: @for_page,
+    official_records: @official_records
+  )))
   concat(render(partial: "translations/versions"))
 end %>

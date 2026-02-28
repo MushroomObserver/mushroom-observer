@@ -222,16 +222,9 @@ class InatImportsController < ApplicationController
   end
 
   def fetch_import_estimate
-    query_args = import_estimate_query_args
-    query_args[:id] = params[:inat_ids] if listing_ids?
-
     response = RestClient.get(
-      "#{API_BASE}/observations?#{query_args.to_query}",
-      {
-        accept: :json,
-        open_timeout: 5,
-        timeout: 10
-      }
+      "#{API_BASE}/observations?#{import_estimate_query_args.to_query}",
+      { accept: :json, open_timeout: 5, timeout: 10 }
     )
     JSON.parse(response.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
@@ -240,10 +233,14 @@ class InatImportsController < ApplicationController
   end
 
   def import_estimate_query_args
-    { taxon_id: [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].join(","),
-      only_id: true,
-      without_field: "Mushroom Observer URL",
-      user_login: params[:inat_username].strip }
+    args = { taxon_id: [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].join(","),
+             only_id: true,
+             without_field: "Mushroom Observer URL" }
+    unless InatImport.super_importer?(@user)
+      args[:user_login] = params[:inat_username].strip
+    end
+    args[:id] = params[:inat_ids] if listing_ids?
+    args
   end
 
   def clean_inat_ids
