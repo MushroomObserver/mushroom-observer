@@ -105,10 +105,13 @@ module API2::Uploads
       raise(API2::FileMissing.new(file)) unless File.exist?(file)
 
       super()
-      # File handle stored in content attribute; caller manages lifecycle
       self.content = File.open(file, "rb") # rubocop:disable Style/FileOpen
       self.content_length = File.size(file)
       self.content_type = `file --mime -b #{file}`.sub(/[;\s].*/, "")
+    end
+
+    def clean_up
+      content&.close
     end
   end
 
