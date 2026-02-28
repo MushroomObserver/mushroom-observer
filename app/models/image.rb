@@ -632,8 +632,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     if save_to_temp_file
       # Override whatever user gave us with result of "file --mime".
       self.upload_type =
-        # Handle passed directly to MimeMagic; block form not applicable here
-        MimeMagic.by_magic(File.open(upload_temp_file)).try(&:type) # rubocop:disable Style/FileOpen
+        File.open(upload_temp_file) { |file| MimeMagic.by_magic(file) }.try(&:type)
       if upload_type&.start_with?("image")
         result = true
       else
