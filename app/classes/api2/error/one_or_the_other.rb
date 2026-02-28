@@ -5,7 +5,7 @@ class API2
   class OneOrTheOther < FatalError
     def initialize(fields)
       super()
-      self.args.merge!(args: fields.join(", "))
+      args.merge!(args: fields.join(", "))
     end
   end
 end
