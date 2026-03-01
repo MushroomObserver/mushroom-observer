@@ -148,7 +148,7 @@ module SessionExtensions
             inputs << field
 
           when "textarea"
-            field.value = CGI.unescapeHTML(elem.children.to_s)
+            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join) # rubocop:disable Style/MapJoin
             inputs << field
 
           when "file"
@@ -167,7 +167,7 @@ module SessionExtensions
               elements.each do |e|
                 opt = Field::Option.new
                 opt.value = CGI.unescapeHTML(e["value"])
-                opt.label = CGI.unescapeHTML(e.children.to_s)
+                opt.label = CGI.unescapeHTML(e.children.map(&:to_s).join) # rubocop:disable Style/MapJoin
                 opts << opt
                 val = opt.value \
                   if e["selected"] == "selected"
