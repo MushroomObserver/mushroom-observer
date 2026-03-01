@@ -59,9 +59,9 @@ class Components::MatrixTable < Components::Base
 
   def render_cached_boxes
     @objects.each do |object|
-      if should_cache_object?(object)
+      if !@identify && should_cache_object?(object)
         cache([I18n.locale, object]) do
-          MatrixBox(user: @user, object: object, identify: @identify)
+          MatrixBox(user: @user, object: object)
         end
       else
         MatrixBox(user: @user, object: object, identify: @identify)
