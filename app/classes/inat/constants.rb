@@ -31,12 +31,14 @@ class Inat
     # The APIKey#notes for the user's MO API Key used for iNat imports
     MO_API_KEY_NOTES = "inat import"
 
-    # Limit results of iNat API requests to mushrooms & slime molds,
-    # disable cop to make it easier to compare to iNat url's & documentation
+    # Limit results of iNat API requests to mushrooms & slime molds.
+    # disable cop to facilitate comparing numbers to iNat url's & documentation
     FUNGI_TAXON_ID = 47170 # rubocop:disable Style/NumericLiterals
     MYCETOZOA_TAXON_ID = 47685 # rubocop:disable Style/NumericLiterals
-    # base url for iNat CC-licensed and public domain photos
+    IMPORTABLE_TAXON_IDS_ARG = [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].join(",").
+                               freeze
 
+    # base url for iNat CC-licensed and public domain photos
     LICENSED_PHOTO_BASE =
       "https://inaturalist-open-data.s3.amazonaws.com/photos"
     # base url for iNat unlicensed photos

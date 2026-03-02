@@ -233,7 +233,7 @@ class InatImportsController < ApplicationController
   end
 
   def import_estimate_query_args
-    args = { taxon_id: [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].join(","),
+    args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG,
              only_id: true,
              without_field: "Mushroom Observer URL" }
     unless InatImport.super_importer?(@user)

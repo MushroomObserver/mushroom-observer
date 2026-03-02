@@ -899,7 +899,7 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions
     # override the normal iNat API observation request to return an error
     query_args = {
-      taxon_id: [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].join(","),
+      taxon_id: IMPORTABLE_TAXON_IDS_ARG,
       id: @inat_import.inat_ids,
       id_above: 0,
       per_page: 200,
