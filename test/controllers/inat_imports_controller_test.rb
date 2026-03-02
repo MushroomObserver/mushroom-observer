@@ -456,7 +456,7 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Test requires super_importer fixture with an inat_username")
 
     # If user_login is excluded from the estimate query, then iNat returns
-    # all iNat fungal observations of all users(a huge number).
+    # all iNat fungal observations of all users (a huge number).
     # Register generic stub first (lower priority).
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 19_591_724 }.to_json)
