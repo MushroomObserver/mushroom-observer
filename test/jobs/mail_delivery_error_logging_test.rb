@@ -88,6 +88,11 @@ class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
   def new_log_entries
     return "" unless File.exist?(@log_path)
 
+    # If another parallel worker truncated the log (via clear_logs),
+    # the file may be smaller than our saved offset. Reset to read
+    # from the beginning in that case.
+    @log_offset = 0 if File.size(@log_path) < @log_offset
+
     File.open(@log_path) do |f|
       f.seek(@log_offset)
       f.read
