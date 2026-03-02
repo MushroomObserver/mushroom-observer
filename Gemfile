@@ -203,7 +203,7 @@ group :test do
 
   # allows test results to be reported back to test runner IDE's
   # minitest 6.0 is incompatible with Rails 7.2
-  gem("minitest", "< 6")
+  gem("minitest", "< 7")
   gem("minitest-reporters")
 
   # restore `assigns` and `assert_template` to tests
