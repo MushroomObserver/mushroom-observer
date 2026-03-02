@@ -212,6 +212,32 @@ class MatrixTableTest < ComponentTestCase
     end
   end
 
+  def test_does_not_cache_when_identify_is_true
+    obs = observations(:coprinus_comatus_obs)
+    obs.thumb_image.stub(:transferred, true) do
+      component = Components::MatrixTable.new(
+        objects: [obs],
+        user: @user,
+        cached: true,
+        identify: true
+      )
+
+      cache_called = false
+      component.stub(:cache, lambda { |_key, &block|
+        cache_called = true
+        block.call
+      }) do
+        html = render(component)
+        assert_includes(html, "box_#{obs.id}")
+      end
+
+      assert_not(
+        cache_called,
+        "Expected cache NOT to be called in identify mode"
+      )
+    end
+  end
+
   def test_different_locales_use_different_cache_keys
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.stub(:transferred, true) do
