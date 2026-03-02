@@ -174,7 +174,7 @@ class IpStats
 
     def parse_ip_list(file)
       FileUtils.touch(file) unless File.exist?(file)
-      File.open(file).readlines.map do |line|
+      File.readlines(file).map do |line|
         line.chomp.split(",").first
       end
     end

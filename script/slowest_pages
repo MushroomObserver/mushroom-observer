@@ -23,7 +23,7 @@ FILE = ARGV[0] || File.expand_path("../log/production.log", __dir__)
 NUM  = ARGV[1].to_i
 
 data = {}
-File.open(FILE).readlines.each do |line|
+File.foreach(FILE) do |line|
   next unless line.start_with?("TIME:")
 
   _, time, status, controller, action, robot = line.split

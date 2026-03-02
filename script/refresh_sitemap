@@ -248,7 +248,7 @@ def read_old_files(table)
   pat = Regexp.new("<loc>.*/(\\d+)</loc><lastmod>(.*)</lastmod>")
   wildcard = SITEMAP_FILE.sub("NAME", "#{table}-*")
   Dir.glob(wildcard).each do |file|
-    File.open(file).readlines.each do |line|
+    File.foreach(file) do |line|
       if (match = pat.match(line))
         result[match[1].to_i] = match[2]
       end

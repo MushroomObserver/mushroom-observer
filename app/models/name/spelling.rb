@@ -166,7 +166,7 @@ module Name::Spelling
     # String words together replacing the one at +index+ with +sub+.
     def guess_pattern(words, index, sub) # :nodoc:
       result = (0..(words.length - 1)).map do |j|
-        (index == j ? sub : words[j])
+        index == j ? sub : words[j]
       end
       result.join(" ")
     end

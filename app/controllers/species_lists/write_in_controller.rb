@@ -25,8 +25,8 @@ module SpeciesLists
     def init_member_vars_for_create
       @member_vote = Vote.maximum_vote
       @member_notes_parts = @species_list.form_notes_parts(@user)
-      @member_notes = @member_notes_parts.each_with_object({}) do |part, h|
-        h[part.to_sym] = ""
+      @member_notes = @member_notes_parts.to_h do |part|
+        [part.to_sym, ""]
       end
       @member_lat = nil
       @member_lng = nil

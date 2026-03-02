@@ -56,7 +56,7 @@ class ActiveSupport::TimeWithZone
 end
 
 # Make MO date and time formats available to Time, just in case.
-class Time
+class Time # rubocop:disable Style/OneClassPerFile
   delegate :web_date, to: :in_time_zone
 
   delegate :web_time, to: :in_time_zone
@@ -76,7 +76,7 @@ class Time
 end
 
 # Make MO date formats available to Date, just in case.
-class Date
+class Date # rubocop:disable Style/OneClassPerFile
   def web_date
     strftime(MO.web_date_format)
   end
@@ -92,7 +92,7 @@ end
 
 # Make MO Time formats available to DateTime, just in case.
 # DateTime inherits MO Date formats from Date, its superclass.
-class DateTime
+class DateTime # rubocop:disable Style/OneClassPerFile
   delegate :web_time, to: :in_time_zone
 
   delegate :api_time, to: :in_time_zone

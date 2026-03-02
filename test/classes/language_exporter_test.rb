@@ -185,7 +185,7 @@ class LanguageExporterTest < UnitTestCase
     use_test_locales do
       file = @official.export_file
       FileUtils.copy(template, file)
-      @official.write_export_file_lines(File.open(file, "r:utf-8").readlines)
+      @official.write_export_file_lines(File.readlines(file, encoding: "utf-8"))
       data = File.open(file, "r:utf-8") { |fh| YAML.safe_load(fh) }
       assert(data, "File read failed for #{file}")
 

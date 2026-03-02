@@ -3,7 +3,8 @@
 module Views
 end
 
-module Components
+# Views and Components namespaces bootstrapped together in this initializer
+module Components # rubocop:disable Style/OneClassPerFile
   extend Phlex::Kit
 end
 

@@ -4,7 +4,7 @@ require("test_helper")
 
 class TableTest < ComponentTestCase
   # Simple test struct for table rows
-  TestRow = Struct.new(:name, :age, :url, keyword_init: true)
+  TestRow = Struct.new(:name, :age, :url)
 
   def test_renders_table_with_columns
     rows = [

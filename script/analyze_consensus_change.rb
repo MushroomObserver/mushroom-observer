@@ -34,7 +34,7 @@ class ReadOnlyCalculator < Observation::ConsensusCalculator
 end
 
 # Old algorithm: effective_weight always returns full weight.
-class OldCalculator < ReadOnlyCalculator
+class OldCalculator < ReadOnlyCalculator # rubocop:disable Style/OneClassPerFile
   private
 
   def effective_weight(_user_id, _val, wgt, _naming_id)

@@ -25,7 +25,7 @@ class Robots
       results = {}
       if File.exist?(file)
         pat = Regexp.new('Allow: /(\w+)/(\w+)')
-        File.open(file).readlines.each do |line|
+        File.foreach(file) do |line|
           match = line.match(pat)
           next unless match
 
