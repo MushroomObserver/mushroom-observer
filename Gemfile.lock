@@ -264,7 +264,7 @@ GEM
     libv8-node (23.6.1.0-x86_64-linux)
     libv8-node (23.6.1.0-x86_64-linux-musl)
     lint_roller (1.1.0)
-    literal (1.8.1)
+    literal (1.9.0)
       zeitwerk
     logger (1.7.0)
     loofah (2.25.0)
