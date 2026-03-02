@@ -392,7 +392,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_select("#estimated_time", "00:00:24")
   end
 
-  def test_superimporter_estimate_excludes_user_login
+  def test_superimporter_import_listed_observations_estimate_excludes_user_login
     user = users(:dick) # Dick is a super_importer
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
@@ -419,7 +419,8 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_template(:confirm)
     assert_select(
       "#estimated_count", "1",
-      "Estimate should not filter by user_login if user is a super_importer"
+      "Estimate should not filter by user_login if a super_importer " \
+      "imports listed observations"
     )
   end
 
@@ -445,6 +446,37 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_redirected_to(INAT_AUTHORIZATION_URL)
     assert_equal(inat_username, inat_import.reload.inat_username,
                  "Should flatten inat_username from namespaced params")
+  end
+
+  def test_superimporter_import_all_own_observations_estimate_filters_by_user
+    user = users(:dick) # Dick is a super_importer with inat_username "dick"
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    assert_equal("dick", user.inat_username,
+                 "Test requires super_importer fixture with an inat_username")
+
+    # If user_login is excluded from the estimate query, then iNat returns
+    # all iNat fungal observations of all users(a huge number).
+    # Register generic stub first (lower priority).
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 19_591_724 }.to_json)
+    # Register specific stub last (higher priority) to return a small count
+    # when user_login is correctly included in the estimate query.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("user_login" => user.inat_username)).
+      to_return(status: 200, body: { total_results: 1 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_username: user.inat_username, all: 1, consent: 1 })
+
+    assert_response(:success)
+    assert_template(:confirm)
+    assert_select(
+      "#estimated_count", "1",
+      "Estimate for a super_importer's own import-all should filter " \
+      "by user_login, not return a global count"
+    )
   end
 
   def test_create_go_back_with_superform_params

@@ -238,11 +238,17 @@ class InatImportsController < ApplicationController
       only_id: true,
       without_field: "Mushroom Observer URL"
     }
-    unless InatImport.super_importer?(@user)
+    unless super_importing_anothers?
       args[:user_login] = params[:inat_username].strip
     end
     args[:id] = params[:inat_ids] if listing_ids?
     args
+  end
+
+  def super_importing_anothers?
+    InatImport.super_importer?(@user) &&
+      @user.inat_username.present? &&
+      params[:inat_username].strip != @user.inat_username
   end
 
   def clean_inat_ids
