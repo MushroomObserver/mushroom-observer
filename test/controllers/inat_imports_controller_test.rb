@@ -404,8 +404,8 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
 
-    # But it will return 0 results if filtered by user_login, which is a bug.
-    # Register this stub last so it takes priority when user_login is present.
+    # This stub intentionally returns 0 results when user_login is present,
+    # acting as a sentinel to detect an undesired user_login filter.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       with(query: hash_including("user_login" => user.inat_username)).
       to_return(status: 200, body: { total_results: 0 }.to_json)
