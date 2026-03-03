@@ -41,7 +41,7 @@ module LanguageExporter
     def locales_path=(path)
       @locales_path = path
       FileUtils.mkdir_p(locales_dir) unless File.directory?(locales_dir)
-      File.open("#{locales_dir}/en.txt", "a").close
+      FileUtils.touch("#{locales_dir}/en.txt")
     end
 
     def alt_locales_path(path, &block)
@@ -190,7 +190,7 @@ module LanguageExporter
   end
 
   def read_export_file_lines
-    File.open(export_file, "r:utf-8").readlines
+    File.readlines(export_file, encoding: "utf-8")
   end
 
   def write_export_file_lines(output_lines)

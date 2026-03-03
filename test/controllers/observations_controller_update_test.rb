@@ -196,7 +196,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
         notes: obs.notes.to_h,
         specimen: obs.specimen,
         thumb_image_id: "0",
-        good_image_ids: img_ids.map(&:to_s).join(" "),
+        good_image_ids: img_ids.join(" "),
         good_image: {
           img2.id => { notes: "new notes for two" },
           img3.id => { notes: "new notes for three" }

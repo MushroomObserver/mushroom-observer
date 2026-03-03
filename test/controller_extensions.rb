@@ -648,7 +648,8 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).
+        # NodeSet has no #join; map(&:to_s) converts to String array first
+        actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s). # rubocop:disable Style/MapJoin
                          join).strip
         message = if actual_val != expect_val.to_s
                     "Input '#{id}' has wrong value, " \

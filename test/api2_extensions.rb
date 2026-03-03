@@ -28,7 +28,7 @@ module API2Extensions
   end
 
   def assert_no_errors(api, msg = "API2 errors")
-    msg = "#{msg}: <\n#{api.errors.map(&:to_s).join("\n")}\n>"
+    msg = "#{msg}: <\n#{api.errors.join("\n")}\n>"
     assert(api.errors.empty?, msg)
   end
 

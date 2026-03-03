@@ -20,7 +20,7 @@ def config
   MO
 end
 
-module MushroomObserver
+module MushroomObserver # rubocop:disable Style/OneClassPerFile
   class Application
     def self.configure
       yield if block_given?
@@ -56,7 +56,7 @@ HELP
 
 def check_file(file)
   ips = {}
-  File.open(file).readlines.each do |line|
+  File.foreach(file) do |line|
     match = line.match(/^W.*TIME:.*\srobot\s(\d+\.\d+\.\d+\.\d+).*Googlebot/)
     ips[match[1]] = 1 if match
   end

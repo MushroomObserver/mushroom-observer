@@ -99,7 +99,7 @@ class DateRangeParser
       date  = Date.current - num2.send(:"#{unit}s")
       left  = format_date(date.send(:"beginning_of_#{unit}")) unless last
       right = format_date(date.send(:"end_of_#{unit}")) unless first
-      [left, right].map(&:to_s).join("-")
+      [left, right].join("-")
     end
   end
   # rubocop:enable Metrics/AbcSize

@@ -9,8 +9,8 @@ module Query::Params::Filters
     # Get all param keys with `Query::Filter.all.map(&:sym)`.
     # Current params [:has_images, :has_specimens, :lichen, :region, :clade]
     def content_filter_parameter_declarations(model)
-      Query::Filter.by_model(model).each_with_object({}) do |fltr, decs|
-        decs[fltr.sym] = fltr.type
+      Query::Filter.by_model(model).to_h do |fltr|
+        [fltr.sym, fltr.type]
       end.merge(preference_filter: { boolean: [true] })
     end
   end

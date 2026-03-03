@@ -236,7 +236,7 @@ class Textile < String
   }.freeze
   # case-insenstive match any of the non-Name markup tags
   NON_NAME_LINK_PATTERN =
-    /#{(MARKUP_TO_TAG.keys - [:name]).map(&:to_s).join("|")}/i
+    /#{(MARKUP_TO_TAG.keys - [:name]).join("|")}/i
   NAME_LINK_PATTERN = %r{
     (?<prefix> ^|\W) # capture start of string or non-word character
     (?: \**_+) # any asterisks then at least one underscore

@@ -464,9 +464,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "when(2i)" => "3",
         "when(3i)" => "14"
       },
-      project: rolf.projects_member.each_with_object({}) do |obj, result|
-        result["id_#{obj.id}"] = "1"
-      end
+      project: rolf.projects_member.to_h do |obj|
+                 ["id_#{obj.id}", "1"]
+               end
     }
     login("rolf")
     post(:create, params: params)
@@ -493,9 +493,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     count = spl.projects.count
     login(spl.user.login)
     params = { id: spl.id,
-               project: spl.projects.each_with_object({}) do |obj, result|
-                 result["id_#{obj.id}"] = "0"
-               end,
+               project: spl.projects.to_h do |obj|
+                          ["id_#{obj.id}", "0"]
+                        end,
                species_list: { title: spl.title } }
     put(:update, params:)
     spl.reload
