@@ -396,23 +396,23 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     user = users(:dick) # Dick is a super_importer
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
-    other_inat_username = "some_other_inat_user"
     # Any id will work if it hasn't already been imported
     inat_ids = "339315928"
     assert_nil(Observation.find_by(inat_id: inat_ids.to_i))
 
-    # If the bug is present, the request includes user_login, which returns
-    # 0 results.
-    # Register this stub last so it takes priority when user_login is present.
+    # Make the request for estimated # of imports return one result
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
+
+    # But it will return 0 results if filtered by user_login, which is a bug.
+    # Register this stub last so it takes priority when user_login is present.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("user_login" => other_inat_username)).
+      with(query: hash_including("user_login" => user.inat_username)).
       to_return(status: 200, body: { total_results: 0 }.to_json)
 
     login(user.login)
     post(:create,
-         params: { inat_ids: inat_ids, inat_username: other_inat_username,
+         params: { inat_ids: inat_ids, inat_username: user.inat_username,
                    consent: 1 })
 
     assert_response(:success)
