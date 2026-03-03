@@ -341,13 +341,14 @@ class Inat
     # ----- Other
 
     def fungi?
-      @obs.dig(:taxon, :ancestor_ids)&.include?(
+      # !! makes it return a boolean
+      !!@obs.dig(:taxon, :ancestor_ids)&.include?(
         Inat::Constants::FUNGI_TAXON_ID
       )
     end
 
     def slime_mold?
-      @obs.dig(:taxon, :ancestor_ids)&.include?(
+      !!@obs.dig(:taxon, :ancestor_ids)&.include?(
         Inat::Constants::MYCETOZOA_TAXON_ID
       )
     end
