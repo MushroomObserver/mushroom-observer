@@ -26,9 +26,6 @@ bin/rails server
 # Rails console
 bin/rails console
 
-# Precompile assets
-bundle exec rails assets:precompile
-
 # View routes
 bin/rails routes
 ```
@@ -53,8 +50,6 @@ bin/rails test test/components/
 # Run with verbose output
 bin/rails test test/models/observation_test.rb -v
 
-# Coverage report (generated automatically by SimpleCov)
-bin/rails test:coverage
 ```
 
 ### CRITICAL: System Test Syntax
@@ -127,7 +122,7 @@ test/              # MiniTest suite
 importmap, GitHub Actions CI (4 parallel workers)
 
 **Key patterns**:
-- `User.current` for current user tracking (being phased out)
+- `User.current` for current user tracking when @user is not available
 - `observation_views` table for view stats
 - Custom i18n system: `en.txt` -> `en.yml` translation files
 - Avoid over-engineering — only implement requested changes
