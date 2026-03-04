@@ -49,7 +49,9 @@ class Inat
         else
           matching_names_at_regular_ranks
         end
-      best_mo_name(names) || create_mo_name
+      best_mo_name(names) ||
+        create_mo_name ||
+        ::Name.unknown
     end
 
     #########
@@ -142,8 +144,9 @@ class Inat
 
     # Create a new Name with the iNat taxon's name string as the text_name,
     # and the MO equivalent of iNat taxon's rank as the Name's rank.
-    # The new Name has no author or ICN ID because iNat taxa lack those.
+    # Return nil if unable to create the name.
     def create_mo_name
+      # There's no author or ICN ID because iNat taxa lack those.
       api = API2.execute(
         method: :post,
         action: :name,
@@ -152,7 +155,8 @@ class Inat
         rank: @taxon[:rank].titleize
       )
       if api.errors.any?
-        log_with_response_error(api.errors.join(", "))
+        # TODO: add logging
+        nil
       else
         new_name = api.results.first
         new_name.log(:log_name_created)
