@@ -146,22 +146,30 @@ class Inat
     # and the MO equivalent of iNat taxon's rank as the Name's rank.
     # Return nil if unable to create the name.
     def create_mo_name
-      # There's no author or ICN ID because iNat taxa lack those.
-      api = API2.execute(
-        method: :post,
-        action: :name,
-        api_key: @user.api_keys.first.key,
-        name: full_name_string,
-        rank: @taxon[:rank].titleize
-      )
+      api = API2.execute(name_params)
       if api.errors.any?
         # TODO: add logging
-        nil
-      else
-        new_name = api.results.first
-        new_name.log(:log_name_created)
-        new_name
+        return nil
       end
+
+      new_name = api.results.first
+      new_name.log(:log_name_created)
+      new_name
+    end
+
+    # There's no author or ICN ID because iNat taxa lack those.
+    def name_params
+      params = { method: :post,
+                 action: :name,
+                 api_key: @user.api_keys.first.key,
+                 name: full_name_string,
+                 rank: @taxon[:rank].titleize }
+      return params unless complex?
+
+      # "Group" is the MO rank equivalent to iNat "complex"
+      # Append "complex" to name, else the Name.parser parses it as a species
+      # and the API gives the error "NameWrongForRank"
+      params.merge(rank: "Group", name: "#{full_name_string} complex")
     end
   end
 end

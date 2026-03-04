@@ -210,13 +210,24 @@ class InatTaxonTest < UnitTestCase
                  "MO '<Genus> <species> group' if MO Name exists.")
   end
 
-  def test_maps_unmatched_inat_complex_to_mo_unknown_name
+  def test_creates_mo_complex_with_rank_group_for_unmatched_inat_complex
+    user = users(:rolf)
+    expected_text_name = "Xeromphalina campanella complex"
+    assert_not(Name.exists?(text_name: expected_text_name),
+               "Test needs iNat taxon without an MO matching Name")
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
 
+    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+
     assert_equal(
-      Name.unknown, inat_taxon.name,
-      "iNat complex without MO name match should map to the Unknown name"
+      [expected_text_name, "Group"],
+      [mo_name.text_name, mo_name.rank],
+      "Failed to create MO Group for unmatched iNat taxon"
+    )
+    assert_equal(
+      user, mo_name.user,
+      "Wrong user associated with MO Name created for unmatched iNat taxon"
     )
   end
 
