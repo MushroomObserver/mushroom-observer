@@ -151,7 +151,7 @@ class Inat
         method: :post,
         action: :name,
         api_key: @user.api_keys.first.key,
-        name: taxon_name,
+        name: full_name_string,
         rank: @taxon[:rank].titleize
       )
       if api.errors.any?

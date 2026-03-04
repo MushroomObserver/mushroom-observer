@@ -78,6 +78,32 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
+  def test_create_unmatched_infrageneric_name
+    user = users(:rolf)
+    expected_text_name = "Morchella sect. Distantes"
+    assert_not(Name.exists?(text_name: expected_text_name),
+               "Test needs iNat taxon without an MO matching Name")
+    mock_inat_obs = mock_observation("distantes")
+
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], user)
+    # Need to lookup the genus of infrageneric taxa because
+    # the iNat API returns only epithet and rank, not the genus
+    stub_genus_lookup(
+      ancestor_ids: inat_taxon[:ancestor_ids].join(","),
+      body: { results: [{ name: "Morchella" }] }
+    )
+
+    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+
+    assert_equal([expected_text_name, "Section"],
+                 [mo_name.text_name, mo_name.rank],
+                 "Failed to create MO Section for unmatched iNat taxon")
+    assert_equal(
+      user, mo_name.user,
+      "Wrong user associated with MO Name created for unmatched iNat taxon"
+    )
+  end
+
   def test_infrageneric_identification_name
     name = Name.create(
       user: rolf,
@@ -152,15 +178,25 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
-  def test_create_species_if_no_mo_match
-    mock_inat_obs = mock_observation("calostoma_lutescens")
-    assert_not(Name.exists?(text_name: "Calostoma lutescens"),
+  def test_create_unmatched_species_name
+    user = users(:rolf)
+    expected_text_name = "Calostoma lutescens"
+    assert_not(Name.exists?(text_name: expected_text_name),
                "Test needs iNat taxon without an MO matching Name")
-
+    mock_inat_obs = mock_observation("calostoma_lutescens")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
 
-    assert(Name.exists?(text_name: inat_taxon.name.text_name, rank: "Species"),
-           "Failed to create MO Species for iNat taxon without an MO match")
+    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+
+    assert_equal(
+      [expected_text_name, "Species"],
+      [mo_name.text_name, mo_name.rank],
+      "Failed to create MO Species for unmatched iNat taxon"
+    )
+    assert_equal(
+      user, mo_name.user,
+      "Wrong user associated with MO Name created for unmatched iNat taxon"
+    )
   end
 
   def mock_observation(filename)
