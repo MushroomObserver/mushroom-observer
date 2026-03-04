@@ -494,8 +494,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
-    assert(Name.where(Name[:text_name] =~ /Donadinia/).none?,
-           "Test requires that MO not yet have `Donadinia` Names")
+    assert_not(Name.exists?(Name[:text_name] =~ /Donadinia/),
+               "Test requires that MO not yet have `Donadinia` Names")
 
     create_ivars_from_filename("donadinia_PNW01")
     stub_inat_interactions
@@ -506,19 +506,27 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
-
+    expected_consensus = Name.find_by(text_name: "Donadinia sp. 'PNW01'",
+                                      rank: "Species",
+                                      user: @user)
     new_names = Name.where(Name[:text_name] =~ /Donadinia/)
-    assert_equal(2, new_names.count,
-                 "Failed to create new sp. (nom. prov.) and its genus")
-    new_names.each do |new_name|
-      assert_equal(
-        @user, new_name.user,
-        "#{new_name.text_name} owner should be #{@user.login}"
-      )
-    end
-    name = new_names.find_by(rank: "Species")
+    assert(new_names.include?(expected_consensus),
+           "Failed to create MO provisional name corresponding to " \
+           "iNat `Provisional Species Name` Observation Field")
+    assert(new_names.include?(Name.find_by(text_name: "Donadinia",
+                                           rank: "Genus",
+                                           user: @user)),
+           "Failed to create MO genus for new provisional species name")
+    assert(new_names.include?(Name.find_by(text_name: "Donadinia nigrella",
+                                           rank: "Species",
+                                           user: @user)),
+           "Failed to create MO species corresponding to iNat suggested ID")
+    assert_equal(
+      3, new_names.count,
+      "It should create only 3 names: provisional, its genus, suggested ID"
+    )
 
-    standard_assertions(obs: obs, name: name)
+    standard_assertions(obs: obs, name: expected_consensus)
 
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
