@@ -144,12 +144,23 @@ class InatTaxonTest < UnitTestCase
 
   def test_complex_without_mo_match
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
 
     assert_equal(
       Name.unknown, inat_taxon.name,
       "iNat complex without MO name match should map to the Unknown name"
     )
+  end
+
+  def test_create_species_if_no_mo_match
+    mock_inat_obs = mock_observation("calostoma_lutescens")
+    assert_not(Name.exists?(text_name: "Calostoma lutescens"),
+               "Test needs iNat taxon without an MO matching Name")
+
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
+
+    assert(Name.exists?(text_name: inat_taxon.name.text_name, rank: "Species"),
+           "Failed to create MO Species for iNat taxon without an MO match")
   end
 
   def mock_observation(filename)

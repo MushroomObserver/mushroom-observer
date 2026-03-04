@@ -24,7 +24,7 @@ class Inat
     end
 
     def import_one_result(result)
-      @inat_obs = Inat::Obs.new(result)
+      @inat_obs = Inat::Obs.new(result, user)
       return if unimportable?
       return if date_missing?
 

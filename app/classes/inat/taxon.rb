@@ -35,8 +35,9 @@ class Inat
     # Allow hash key access to the iNat observation data
     delegate :[], to: :@taxon
 
-    def initialize(taxon)
+    def initialize(taxon, user = nil)
       @taxon = taxon
+      @user = user
     end
 
     def name
@@ -48,7 +49,7 @@ class Inat
         else
           matching_names_at_regular_ranks
         end
-      best_mo_name(names)
+      best_mo_name(names) || create_mo_name
     end
 
     #########
@@ -135,7 +136,28 @@ class Inat
       # (They've already been sorted)
       return names.first if names.any?
 
-      ::Name.unknown
+      # ::Name.unknown
+      nil
+    end
+
+    # Create a new Name with the iNat taxon's name string as the text_name,
+    # and the MO equivalent of iNat taxon's rank as the Name's rank.
+    # The new Name has no author or ICN ID because iNat taxa lack those.
+    def create_mo_name
+      api = API2.execute(
+        method: :post,
+        action: :name,
+        api_key: @user.api_keys.first.key,
+        name: taxon_name,
+        rank: @taxon[:rank].titleize
+      )
+      if api.errors.any?
+        log_with_response_error(api.errors.join(", "))
+      else
+        new_name = api.results.first
+        new_name.log(:log_name_created)
+        new_name
+      end
     end
   end
 end
