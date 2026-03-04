@@ -6,7 +6,7 @@ require("test_helper")
 class InatTaxonTest < UnitTestCase
   include InatStubHelpers
 
-  def test_name_basic
+  def test_maps_inat_species_to_mo_species
     mock_inat_obs = mock_observation("somion_unicolor")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
@@ -20,7 +20,28 @@ class InatTaxonTest < UnitTestCase
                  "Incorrect MO Name for iNat suggested ID")
   end
 
-  def test_names_approved_vs_deprecated
+  def test_creates_mo_species_for_unmatched_inat_species
+    user = users(:rolf)
+    expected_text_name = "Calostoma lutescens"
+    assert_not(Name.exists?(text_name: expected_text_name),
+               "Test needs iNat taxon without an MO matching Name")
+    mock_inat_obs = mock_observation("calostoma_lutescens")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
+
+    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+
+    assert_equal(
+      [expected_text_name, "Species"],
+      [mo_name.text_name, mo_name.rank],
+      "Failed to create MO Species for unmatched iNat taxon"
+    )
+    assert_equal(
+      user, mo_name.user,
+      "Wrong user associated with MO Name created for unmatched iNat taxon"
+    )
+  end
+
+  def test_maps_inat_name_to_approved_mo_name
     # Make sure fixtures still OK
     names = Name.reorder(id: :asc).
             where(text_name: "Agrocybe arvalis", rank: "Species",
@@ -37,7 +58,7 @@ class InatTaxonTest < UnitTestCase
                  "Prefer non-deprecated Name when mapping iNat id to MO Name")
   end
 
-  def test_name_sensu
+  def test_maps_inat_name_to_non_sensu_mo_name
     names = Name.where(text_name: "Coprinus", rank: "Genus", deprecated: false)
     assert(names.any? { |name| name.author.start_with?("sensu ") },
            "Test needs a Name fixture matching >= 1 MO `sensu` Name ")
@@ -51,7 +72,7 @@ class InatTaxonTest < UnitTestCase
                  "Prefer non-sensu Name when mapping iNat id to MO Name")
   end
 
-  def test_infrageneric_observation_name
+  def test_maps_inat_infrageneric_to_mo_infrageneric_scientific_name
     name = Name.create(
       user: rolf,
       rank: "Section",
@@ -78,7 +99,7 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
-  def test_create_unmatched_infrageneric_name
+  def test_creates_mo_infrageneric_name_for_unmatched_inat_infrageneric_name
     user = users(:rolf)
     expected_text_name = "Morchella sect. Distantes"
     assert_not(Name.exists?(text_name: expected_text_name),
@@ -104,7 +125,7 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
-  def test_infrageneric_identification_name
+  def test_maps_inat_infrageneric_suggest_id_to_mo_scientific_name
     name = Name.create(
       user: rolf,
       rank: "Section",
@@ -129,7 +150,7 @@ class InatTaxonTest < UnitTestCase
                  "MO Name which includes genus")
   end
 
-  def test_infraspecific_name
+  def test_maps_inat_infraspecific_to_mo_infraspecific_scientific_name
     name = Name.create(
       user: rolf,
       rank: "Form",
@@ -152,7 +173,7 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
-  def test_complex_with_mo_match
+  def test_maps_inat_complex_to_existing_mo_group
     name = Name.create(
       text_name: "Xeromphalina campanella group", author: "",
       search_name: "Xeromphalina campanella group",
@@ -168,34 +189,13 @@ class InatTaxonTest < UnitTestCase
                  "MO '<Genus> <species> group' if MO Name exists.")
   end
 
-  def test_complex_without_mo_match
+  def test_maps_unmatched_inat_complex_to_mo_unknown_name
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
 
     assert_equal(
       Name.unknown, inat_taxon.name,
       "iNat complex without MO name match should map to the Unknown name"
-    )
-  end
-
-  def test_create_unmatched_species_name
-    user = users(:rolf)
-    expected_text_name = "Calostoma lutescens"
-    assert_not(Name.exists?(text_name: expected_text_name),
-               "Test needs iNat taxon without an MO matching Name")
-    mock_inat_obs = mock_observation("calostoma_lutescens")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
-
-    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
-
-    assert_equal(
-      [expected_text_name, "Species"],
-      [mo_name.text_name, mo_name.rank],
-      "Failed to create MO Species for unmatched iNat taxon"
-    )
-    assert_equal(
-      user, mo_name.user,
-      "Wrong user associated with MO Name created for unmatched iNat taxon"
     )
   end
 
