@@ -147,10 +147,7 @@ class Inat
     # Return nil if unable to create the name.
     def create_mo_name
       api = API2.execute(name_params)
-      if api.errors.any?
-        # TODO: add logging
-        return nil
-      end
+      return nil if api.errors.any? # TODO: add logging
 
       new_name = api.results.first
       new_name.log(:log_name_created)
