@@ -1,4 +1,6 @@
-# Mushroom Observer Project Configuration
+# Mushroom Observer
+
+Community science platform for mushroom identification and observation.
 
 ## Session Start Protocol
 
@@ -12,91 +14,121 @@
    Output style: <style-name>
    ```
 
-This ensures consistent communication style with optional per-developer customization.
+## Build & Run
 
-## Project Information
+```bash
+# Install dependencies
+bundle install
 
-**Project**: Mushroom Observer - Community science platform for mushroom identification and observation
-**Framework**: Ruby on Rails 7.2
-**Testing**: MiniTest (not RSpec)
-**Main Branch**: `main`
-**Component System**: Migrating from Rails view helpers to Phlex components
+# Start development server
+bin/rails server
 
-## Testing Conventions
+# Rails console
+bin/rails console
 
-See `.claude/rules/testing.md` for detailed Rails testing syntax and conventions.
+# Precompile assets
+bundle exec rails assets:precompile
 
-**Quick Reference**:
-- Run specific test: `bin/rails test <file> -n <test_name>`
-- Run test file: `bin/rails test <file>`
-- Run all tests: `bin/rails test`
+# View routes
+bin/rails routes
+```
 
-**Important**: Use `-n` flag for test names, NOT RSpec-style `::ClassName#method` syntax.
+## Test
 
-**Note**: Coverage reports are generated automatically by default using SimpleCov in parallel mode.
+Framework: **MiniTest** (not RSpec). System tests use **Capybara + Cuprite**.
+
+```bash
+# Run all tests
+bin/rails test
+
+# Run specific test file
+bin/rails test test/models/observation_test.rb
+
+# Run single test by name (use -n flag, NOT RSpec-style syntax)
+bin/rails test test/models/observation_test.rb -n test_scope_needs_naming
+
+# Run tests in a directory
+bin/rails test test/components/
+
+# Run with verbose output
+bin/rails test test/models/observation_test.rb -v
+
+# Coverage report (generated automatically by SimpleCov)
+bin/rails test:coverage
+```
 
 ### CRITICAL: System Test Syntax
 
-**NEVER** use `bin/rails test:system test/system/file.rb` - this runs ALL system tests, ignoring the specified file.
-
-**ALWAYS** use: `bin/rails test test/system/file.rb`
-
 ```bash
-# ✅ CORRECT - runs only the specified system test file
+# CORRECT - runs only the specified system test file
 bin/rails test test/system/observation_naming_system_test.rb
 
-# ❌ WRONG - runs ALL system tests, ignores the file argument
+# WRONG - runs ALL system tests, ignores the file argument
 bin/rails test:system test/system/observation_naming_system_test.rb
 ```
+
+## Lint
+
+```bash
+# Check for violations
+bundle exec rubocop path/to/file.rb --format simple
+
+# Auto-correct
+bundle exec rubocop path/to/file.rb --autocorrect-all
+```
+
+All new code must pass RuboCop. Always refactor Metrics violations — do not
+disable cops.
+
+## Code Style
+
+- **80 character line limit** in both Ruby and ERB files
+- **Always use parentheses** for method calls with arguments (Ruby and ERB)
+- **Use `tag.element_name`** in ERB templates, never `content_tag`
+- **Use full namespaces** for components: `Components::ClassName`
+- **Prefer Phlex helpers** over Rails `tag` helpers in components
+- **Double-quoted strings** (enforced by RuboCop)
+
+See `.claude/ruby_style_guide.md` for detailed Ruby and ERB conventions.
+See `.claude/phlex_style_guide.md` for Phlex component conventions.
+See `.claude/rules/testing.md` for test structure and component test patterns.
 
 ## Git Workflow
 
 - Create feature branches from `main`
-- **Branch naming convention**: `<prefix>-feature-description`
-  - Prefix is read from `.claude/developer.json` (`branchPrefix` field) if it exists
-  - Falls back to deriving from `git config user.name` (converted to lowercase initials)
-  - Example: "Nathan Wilson" → `nw-fix-bug-123` or `njw-add-dark-mode`
-  - Use kebab-case for feature description
-  - Include issue numbers when applicable: `prefix-fix-1234-description`
-  - **Setup**: Create `.claude/developer.json` with `{"branchPrefix": "your-initials"}` (git-ignored)
+- **Branch naming**: `<prefix>-feature-description`
+  - Prefix from `.claude/developer.json` (`branchPrefix` field), or derived
+    from `git config user.name` (e.g., "Nathan Wilson" -> `nw`)
+  - Use kebab-case: `njw-fix-1234-description`
+  - **Setup**: Create `.claude/developer.json` with
+    `{"branchPrefix": "your-initials"}` (git-ignored)
 - Commit messages include Claude Code attribution
 - Create PRs via `gh pr create` with detailed descriptions
 - Link PRs to issues with `Fixes #issue_number`
 
-## Code Style
+## Architecture
 
-See `.claude/ruby_style_guide.md` for general Ruby and ERB style conventions,
-and `.claude/phlex_style_guide.md` for Phlex component conventions.
+```
+app/
+  models/          # ActiveRecord models (MySQL via Trilogy)
+  classes/         # Ruby POROs, including FormObject for Phlex forms
+  controllers/     # Rails controllers
+  components/      # Phlex components (migration from ERB in progress)
+  views/           # ERB templates (being replaced by components)
+  javascript/      # Stimulus controllers, Turbo, importmap
+  helpers/         # View helpers (being migrated to components)
+test/              # MiniTest suite
+  fixtures/        # Test fixtures
+  system/          # Capybara system tests (Cuprite driver)
+  components/      # Phlex component tests
+```
 
-**Quick Reference**:
-- Run RuboCop: `bundle exec rubocop`
-- Always use parentheses for method calls (Ruby and ERB)
-- Use full namespaces for components: `Components::ClassName`
-- Prefer Phlex helpers over Rails `tag` helpers in components
-- All new code must pass RuboCop - refactor instead of disabling cops
+**Stack**: Ruby 3.3, Rails 7.2, MySQL, Phlex 2.0+, Stimulus + Turbo,
+importmap, GitHub Actions CI (4 parallel workers)
 
-**Important**: Avoid over-engineering - only implement requested changes. Prefer editing existing files over creating new ones. Migration to Phlex components is ongoing.
-
-## Common Commands
-
-- Rails console: `bin/rails console`
-- Routes: `bin/rails routes`
-- Database: Rails migrations in `db/migrate/`
-- Assets: `bundle exec rails assets:precompile`
-
-## Architecture Notes
-
-- **Models**: `app/models/` - ActiveRecord models
-- **Classes**: `app/classes/` - Ruby POROs, including FormObject for Phlex form components
-- **Controllers**: `app/controllers/` - Rails controllers
-- **Components**: `app/components/` - Phlex components (migration in progress)
-- **Views**: `app/views/` - ERB templates (being replaced by components)
-- **JavaScript**: `app/javascript/` - Stimulus controllers, importmap
-- **Helpers**: `app/helpers/` - View helpers (being migrated to components)
-- **Tests**: `test/` - MiniTest suite
-
-## Database
-
-- Primary: MySQL
-- View stats tracked in `observation_views` table
-- Users tracked with `User.current` (being phased out)
+**Key patterns**:
+- `User.current` for current user tracking (being phased out)
+- `observation_views` table for view stats
+- Custom i18n system: `en.txt` -> `en.yml` translation files
+- Avoid over-engineering — only implement requested changes
+- Prefer editing existing files over creating new ones
