@@ -133,6 +133,7 @@ app/
   classes/         # Ruby POROs, including FormObject for Phlex forms
   controllers/     # Rails controllers
   components/      # Phlex components (migration from ERB in progress)
+  jobs/            # ActiveJobs
   views/           # ERB templates (being replaced by components)
   javascript/      # Stimulus controllers, Turbo, importmap
   helpers/         # View helpers (being migrated to components)
