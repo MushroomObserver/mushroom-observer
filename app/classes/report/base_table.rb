@@ -168,9 +168,9 @@ module Report
     end
 
     def add_field_slips!(rows, col)
-      vals = FieldSlip.joins(:observation).
+      vals = Observation.joins(:field_slip).
              merge(plain_query).
-             select(FieldSlip[:observation_id], FieldSlip[:code]).
+             select(Observation[:id], FieldSlip[:code]).
              map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, col)
     end

@@ -156,7 +156,8 @@ class FieldSlipsController < ApplicationController
     obs = Observation.build_observation(location, name, notes, date, @user)
     if obs
       assign_project(obs)
-      @field_slip.update!(observation: obs)
+      obs.update!(field_slip: @field_slip)
+      @field_slip.adopt_user_from(obs)
       check_for_species_list(obs, params[:species_list])
       name_flash_for_project(name, @field_slip.project)
       redirect_to(observation_url(obs.id))
@@ -255,7 +256,7 @@ class FieldSlipsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def field_slip_params
-    params.require(:field_slip).permit(:observation_id, :project_id, :code)
+    params.require(:field_slip).permit(:project_id, :code)
   end
 
   def check_project_membership
@@ -277,7 +278,7 @@ class FieldSlipsController < ApplicationController
 
     proj = @field_slip.project
     return unless proj && obs
-    return if FieldSlip.find_by(observation: obs, project: proj)
+    return if obs.field_slip&.project == proj
 
     flash_warning(:field_slip_remove_observation.t(
                     observation: obs.user_unique_format_name(@user),
@@ -291,18 +292,25 @@ class FieldSlipsController < ApplicationController
 
     obs = ObservationView.previous(@user, @field_slip.observation)
     return false unless obs # This should not ever happen
+    return false unless last_obs_project_ok?(obs)
 
+    old_obs = @field_slip.observation
+    old_obs&.update(field_slip: nil) if old_obs != obs
+    obs.update(field_slip: @field_slip)
+    @field_slip.adopt_user_from(obs)
+    true
+  end
+
+  def last_obs_project_ok?(obs)
     project = @field_slip.project
-    if project
-      return false unless project.user_can_add_observation?(obs, @user)
+    return true unless project
+    return false unless project.user_can_add_observation?(obs, @user)
 
-      if project.violates_constraints?(obs)
-        flash_error(:field_slip_constraint_violation.t)
-        return false
-      end
-      project.add_observation(obs)
+    if project.violates_constraints?(obs)
+      flash_error(:field_slip_constraint_violation.t)
+      return false
     end
-    @field_slip.observation = obs
+    project.add_observation(obs)
     true
   end
 end

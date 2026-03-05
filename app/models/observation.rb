@@ -191,7 +191,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :collection_numbers, through: :observation_collection_numbers
-  has_many :field_slips, dependent: :destroy
+  belongs_to :field_slip, optional: true
 
   has_many :observation_herbarium_records, dependent: :destroy
   has_many :herbarium_records, through: :observation_herbarium_records
@@ -860,7 +860,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless collection_numbers.empty?
     return unless herbarium_records.empty?
     return unless sequences.empty?
-    return unless field_slips.empty?
+    return if field_slip
 
     update(specimen: false)
   end

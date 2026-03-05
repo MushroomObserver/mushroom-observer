@@ -157,14 +157,13 @@ class API2
       field_slip = FieldSlip.find_by(code: @code)
       if field_slip
         raise(FieldSlipInUse.new(field_slip)) if field_slip.observation
-
-        field_slip.update!(observation:)
       else
-        field_slip = FieldSlip.create!(observation:, code: @code, user: @user)
+        field_slip = FieldSlip.create!(code: @code, user: @user)
         field_slip.current_user = @user
         field_slip.update_project
         field_slip.save!
       end
+      observation.update!(field_slip: field_slip)
       update_project(field_slip.project, observation)
     end
 

@@ -36,9 +36,9 @@ class API2::FieldSlipsTest < UnitTestCase
     obs = observations(:detailed_unknown_obs)
     slip = FieldSlip.create!(
       code: "TEST-#{rand(10_000)}",
-      observation: obs,
       user: rolf
     )
+    obs.update!(field_slip: slip)
     assert_api_pass(params_get(observation: obs.id))
     assert_api_results([slip])
   end
@@ -74,7 +74,7 @@ class API2::FieldSlipsTest < UnitTestCase
     slip = FieldSlip.find_by(code: code)
     assert_not_nil(slip, "Field slip was not created")
     assert_equal(code.upcase, slip.code)
-    assert_equal(obs.id, slip.observation_id)
+    assert_equal(obs.id, slip.observation&.id)
   end
 
   def test_posting_field_slip_duplicate_code
@@ -115,8 +115,8 @@ class API2::FieldSlipsTest < UnitTestCase
       set_observation: obs.id
     }
     assert_api_pass(params)
-    slip.reload
-    assert_equal(obs.id, slip.observation_id)
+    obs.reload
+    assert_equal(slip.id, obs.field_slip_id)
   end
 
   def test_field_slip_json_inline_helper

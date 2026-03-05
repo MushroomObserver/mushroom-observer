@@ -63,7 +63,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   def test_should_create_field_slip_with_last_viewed_obs
     login(@field_slip.user.login)
-    ObservationView.update_view_stats(@field_slip.observation_id,
+    ObservationView.update_view_stats(@field_slip.observation&.id,
                                       @field_slip.user_id)
     code = "Y#{@field_slip.code}"
     assert_difference("FieldSlip.count") do
@@ -80,7 +80,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   def test_should_change_collector_of_last_viewed_obs_if_owner
     login(@field_slip.user.login)
-    ObservationView.update_view_stats(@field_slip.observation_id,
+    ObservationView.update_view_stats(@field_slip.observation&.id,
                                       @field_slip.user_id)
     code = "Y#{@field_slip.code}"
     assert_difference("FieldSlip.count") do
@@ -103,7 +103,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   def test_should_not_change_collector_of_last_viewed_obs_if_not_owner
     login(rolf.login)
-    ObservationView.update_view_stats(@field_slip.observation_id,
+    ObservationView.update_view_stats(@field_slip.observation&.id,
                                       rolf.id)
     collector = @field_slip.collector
     code = "Y#{@field_slip.code}"
@@ -128,7 +128,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_disallow_admin_to_create_field_slip_with_constraint_violation
     user = users(:dick)
     login(user.login) # Admin of :falmouth_2023_09_project
-    ObservationView.update_view_stats(@field_slip.observation_id,
+    ObservationView.update_view_stats(@field_slip.observation&.id,
                                       user.id)
     proj = projects(:falmouth_2023_09_project)
     code = "#{proj.field_slip_prefix}-1234"
@@ -149,7 +149,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   def test_should_not_create_field_slip_with_last_viewed_obs_due_to_constraints
     login(@field_slip.user.login)
-    ObservationView.update_view_stats(@field_slip.observation_id,
+    ObservationView.update_view_stats(@field_slip.observation&.id,
                                       @field_slip.user_id)
     proj = projects(:falmouth_2023_09_project)
     code = "#{proj.field_slip_prefix}-1234"
@@ -175,7 +175,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     project = projects(:open_membership_project)
     species_list = project.species_lists.first
     assert_not(project.member?(user))
-    ObservationView.update_view_stats(@field_slip.observation_id,
+    ObservationView.update_view_stats(@field_slip.observation&.id,
                                       @field_slip.user_id)
     code = "#{project.field_slip_prefix}-0001"
     assert_difference("FieldSlip.count") do
@@ -472,9 +472,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
       where: "Test Location",
       name: names(:fungi)
     )
-    fs.observation = obs
-    fs.save!
-    assert_equal(obs.user, fs.user)
+    obs.update!(field_slip: fs)
+    fs.adopt_user_from(obs)
+    assert_equal(obs.user, fs.reload.user)
   end
 
   def test_admin_should_get_edit
@@ -498,7 +498,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   def test_should_update_field_slip
     login
-    initial = @field_slip.observation_id
+    initial = @field_slip.observation&.id
     obs = Observation.find(initial)
     notes = "Some notes"
     obs_date = obs.when
@@ -510,11 +510,11 @@ class FieldSlipsControllerTest < FunctionalTestCase
                                   "date(1i)" => date.year.to_s,
                                   "date(2i)" => date.month.to_s,
                                   "date(3i)" => date.day.to_s,
-                                  observation_id: @field_slip.observation_id,
+                                  observation_id: @field_slip.observation&.id,
                                   project_id: @field_slip.project_id,
                                   notes: { Other: notes } } })
     assert_redirected_to(field_slip_url(@field_slip))
-    assert_equal(@field_slip.observation_id, initial)
+    assert_equal(@field_slip.observation&.id, initial)
     obs.reload
     assert(obs.notes[:Other].include?(notes))
     assert_equal(obs_date, obs.when) # Observation wins
@@ -523,21 +523,21 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_should_update_field_slip_with_new_name
     login
     user = users(:rolf)
-    initial = @field_slip.observation_id
+    initial = @field_slip.observation&.id
     notes = "New notes"
     patch(:update,
           params: { id: @field_slip.id,
                     commit: :field_slip_keep_obs.t,
                     field_slip: {
                       code: @field_slip.code,
-                      observation_id: @field_slip.observation_id,
+                      observation_id: @field_slip.observation&.id,
                       field_slip_name: names(:coprinus_comatus).text_name,
                       field_slip_id_by: "#{user.name} (#{user.login})",
                       project_id: @field_slip.project_id,
                       notes: { Other: notes }
                     } })
     assert_redirected_to(field_slip_url(@field_slip))
-    assert_equal(@field_slip.observation_id, initial)
+    assert_equal(@field_slip.observation&.id, initial)
     assert_equal(@field_slip.observation.name, names(:coprinus_comatus))
     assert_equal(@field_slip.observation.notes[:Other], notes)
   end
@@ -558,7 +558,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
             commit: :field_slip_keep_obs.t,
             field_slip: {
               code: @field_slip.code,
-              observation_id: @field_slip.observation_id,
+              observation_id: @field_slip.observation&.id,
               project_id: @field_slip.project_id,
               field_slip_name: id_with_underscores,
               notes: { Other: new_notes }
@@ -588,7 +588,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
             commit: :field_slip_keep_obs.t,
             field_slip: {
               code: fs1.code,
-              observation_id: fs1.observation_id,
+              observation_id: fs1.observation&.id,
               project_id: fs1.project_id,
               field_slip_name: "_name #{names(:coprinus_comatus).text_name}_"
             }
@@ -608,7 +608,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
             commit: :field_slip_keep_obs.t,
             field_slip: {
               code: fs2.code,
-              observation_id: fs2.observation_id,
+              observation_id: fs2.observation&.id,
               project_id: fs2.project_id,
               field_slip_name: "_#{names(:agaricus_campestris).text_name}_"
             }
@@ -627,7 +627,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
             commit: :field_slip_keep_obs.t,
             field_slip: {
               code: fs3.code,
-              observation_id: fs3.observation_id,
+              observation_id: fs3.observation&.id,
               project_id: fs3.project_id,
               field_slip_name: names(:boletus_edulis).text_name
             }
@@ -648,7 +648,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
           params: { id: field_slip.id,
                     commit: :field_slip_keep_obs.t,
                     field_slip: { code: field_slip.code,
-                                  observation_id: field_slip.observation_id,
+                                  observation_id: field_slip.observation&.id,
                                   project_id: field_slip.project_id,
                                   notes: { Other: new_note } } })
     assert_redirected_to(field_slip_url(field_slip))
@@ -665,7 +665,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
           params: { id: field_slip.id,
                     commit: :field_slip_keep_obs.t,
                     field_slip: { code: field_slip.code,
-                                  observation_id: field_slip.observation_id,
+                                  observation_id: field_slip.observation&.id,
                                   project_id: field_slip.project_id,
                                   notes: { Other: old_note } } })
     assert_redirected_to(field_slip_url(field_slip))
@@ -682,7 +682,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
           params: { id: field_slip.id,
                     commit: :field_slip_keep_obs.t,
                     field_slip: { code: field_slip.code,
-                                  observation_id: field_slip.observation_id,
+                                  observation_id: field_slip.observation&.id,
                                   project_id: field_slip.project_id,
                                   notes: { Other: new_note } } })
     assert_redirected_to(field_slip_url(field_slip))
@@ -708,21 +708,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not(@field_slip.project.observations.include?(orig_obs))
   end
 
-  def test_should_not_remove_obs_from_project_when_multiple_reasons
-    field_slip = field_slips(:field_slip_nowhere_one)
-    field_slips(:field_slip_nowhere_dup)
-    login(field_slip.user.login)
-    orig_obs = field_slip.observation
-    obs = observations(:detailed_unknown_obs)
-    ObservationView.update_view_stats(obs.id, field_slip.user_id)
-    patch(:update,
-          params: { id: field_slip.id,
-                    commit: :field_slip_last_obs.t,
-                    field_slip: { code: field_slip.code,
-                                  project_id: field_slip.project_id } })
-    assert_redirected_to(field_slip_url(field_slip))
-    assert(field_slip.project.observations.include?(orig_obs))
-  end
+  # Removed: test_should_not_remove_obs_from_project_when_multiple_reasons
+  # This scenario (multiple field_slips for the same observation) is no longer
+  # possible after reversing the relationship to observations.field_slip_id.
 
   def test_should_update_field_slip_and_redirect_to_create_obs
     login
@@ -730,7 +718,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
           params: { id: @field_slip.id,
                     commit: :field_slip_create_obs.t,
                     field_slip: { code: @field_slip.code,
-                                  observation_id: @field_slip.observation_id,
+                                  observation_id: @field_slip.observation&.id,
                                   project_id: @field_slip.project_id } })
     assert_redirected_to(new_observation_url(field_code: @field_slip.code))
   end
@@ -740,7 +728,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     patch(:update,
           params: { id: @field_slip.id,
                     field_slip: { code: "-3.14",
-                                  observation_id: @field_slip.observation_id,
+                                  observation_id: @field_slip.observation&.id,
                                   project_id: @field_slip.project_id } })
     assert_equal(response.status, 422)
   end
@@ -751,7 +739,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
           format: :json,
           params: { id: @field_slip.id,
                     field_slip: { code: "-3.14",
-                                  observation_id: @field_slip.observation_id,
+                                  observation_id: @field_slip.observation&.id,
                                   project_id: @field_slip.project_id } })
     assert_equal(response.status, 422)
   end

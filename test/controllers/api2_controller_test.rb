@@ -181,7 +181,7 @@ class API2ControllerTest < FunctionalTestCase
     post(:observations, params: params)
     assert_no_api_errors
     obs = Observation.last
-    assert(obs.field_slips[0].project.observations.include?(obs))
+    assert(obs.field_slip.project.observations.include?(obs))
   end
 
   def test_post_observation_joins_project
