@@ -231,6 +231,21 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
+  def test_falls_back_to_unknown_name_when_no_user_and_no_mo_match
+    assert_not(Name.exists?(text_name: "Calostoma lutescens"),
+               "Test needs iNat taxon without an MO matching Name")
+    mock_inat_obs = mock_observation("calostoma_lutescens")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon]) # no user
+
+    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+
+    assert_equal(
+      Name.unknown, mo_name,
+      "Should return Name.unknown (Fungi) when no user and " \
+      "no MO Name matches iNat taxon"
+    )
+  end
+
   def mock_observation(filename)
     mock_search = File.read("test/inat/#{filename}.txt")
     # Inat::Obs.new(File.read("test/inat/#{filename}.txt"))
