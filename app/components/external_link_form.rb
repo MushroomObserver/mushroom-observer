@@ -62,8 +62,8 @@ class Components::ExternalLinkForm < Components::ApplicationForm
   end
 
   def base_urls
-    @base_urls ||= @sites.each_with_object({}) do |site, hash|
-      hash[site.name] = site.base_url
+    @base_urls ||= @sites.to_h do |site|
+      [site.name, site.base_url]
     end
   end
 

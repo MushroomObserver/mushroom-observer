@@ -538,6 +538,6 @@ class API2ControllerTest < FunctionalTestCase
   end
 end
 
-class UploadedFileWithChecksum < Rack::Test::UploadedFile
+class UploadedFileWithChecksum < Rack::Test::UploadedFile # rubocop:disable Style/OneClassPerFile
   attr_accessor :checksum
 end

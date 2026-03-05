@@ -18,7 +18,7 @@ class AutocompleteMock < Autocomplete::ByString
   end
 end
 
-class Autocomplete::ForMock < Autocomplete::ByWord
+class Autocomplete::ForMock < Autocomplete::ByWord # rubocop:disable Style/OneClassPerFile
   attr_accessor :rough_matches, :limit
 
   def truncate_matches
@@ -31,7 +31,7 @@ class Autocomplete::ForMock < Autocomplete::ByWord
 end
 # rubocop:enable Lint/UselessMethodDefinition
 
-class AutocompleteTest < UnitTestCase
+class AutocompleteTest < UnitTestCase # rubocop:disable Style/OneClassPerFile
   def test_subclass
     assert_equal("Autocomplete::ForName", Autocomplete.subclass("name").name)
     assert_equal("Autocomplete::ForMock",

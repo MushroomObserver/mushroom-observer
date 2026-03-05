@@ -433,20 +433,12 @@ class TranslationsControllerTest < FunctionalTestCase
     # "unknown_tag" is not in the template file
     tags = hashify("unknown_tag")
     form = @controller.build_index(lang, tags, file)
-    major_headers = form.select do |item|
-      item.is_a?(
-        TranslationsController::TranslationsUIMajorHeader
-      )
-    end
+    major_headers = form.grep(TranslationsController::TranslationsUIMajorHeader)
     unlisted_header = major_headers.find do |h|
       h.string.include?("UNLISTED")
     end
     assert_not_nil(unlisted_header)
-    tag_fields = form.select do |item|
-      item.is_a?(
-        TranslationsController::TranslationsUITagField
-      )
-    end
+    tag_fields = form.grep(TranslationsController::TranslationsUITagField)
     assert(tag_fields.any? { |tf| tf.ttag == "unknown_tag" })
   end
 

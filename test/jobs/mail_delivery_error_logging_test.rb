@@ -7,22 +7,7 @@ class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
   def setup
     super
     @log_path = Rails.root.join("log/email-debug.log")
-    begin
-      @original_content = File.read(@log_path)
-      @log_existed = true
-    rescue Errno::ENOENT
-      @original_content = ""
-      @log_existed = false
-    end
-  end
-
-  def teardown
-    if @log_existed
-      File.write(@log_path, @original_content)
-    elsif File.exist?(@log_path)
-      File.delete(@log_path)
-    end
-    super
+    @log_offset = File.exist?(@log_path) ? File.size(@log_path) : 0
   end
 
   def test_mail_delivery_failure_logged_to_email_debug_log
@@ -45,8 +30,7 @@ class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
       end
     end
 
-    log_entries = File.read(@log_path)
-    new_entries = log_entries.sub(@original_content, "")
+    new_entries = new_log_entries
     assert_match(/DELIVERY FAILED/, new_entries)
     assert_match(/UserQuestionMailer/, new_entries)
     assert_match(/Net::SMTPAuthenticationError/, new_entries)
@@ -66,13 +50,9 @@ class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
       job.perform_now
     end
 
-    begin
-      log_entries = File.read(@log_path)
-    rescue Errno::ENOENT
-      log_entries = ""
-    end
-    new_entries = log_entries.sub(@original_content, "")
-    assert_empty(
+    new_entries = new_log_entries
+    assert_no_match(
+      /DELIVERY FAILED/,
       new_entries,
       "Non-mail job errors should not be logged " \
       "to email-debug.log"
@@ -100,6 +80,22 @@ class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
       assert_equal(
         "450 Too many connections", raised.message
       )
+    end
+  end
+
+  private
+
+  def new_log_entries
+    return "" unless File.exist?(@log_path)
+
+    # If another parallel worker truncated the log (via clear_logs),
+    # the file may be smaller than our saved offset. Reset to read
+    # from the beginning in that case.
+    @log_offset = 0 if File.size(@log_path) < @log_offset
+
+    File.open(@log_path) do |f|
+      f.seek(@log_offset)
+      f.read
     end
   end
 end

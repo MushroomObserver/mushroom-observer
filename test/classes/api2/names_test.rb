@@ -104,8 +104,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_misspellings
     names = Name.updated_on("2009-10-12")
-    goods = names.reject(&:correct_spelling_id)
-    bads  = names.select(&:correct_spelling_id)
+    bads, goods = names.partition(&:correct_spelling_id)
     assert_not_empty(names)
     assert_not_empty(goods)
     assert_not_empty(bads)

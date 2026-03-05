@@ -5,7 +5,7 @@ class API2
   class CreateFailed < ObjectError
     def initialize(obj)
       super
-      args.merge!(error: obj.formatted_errors.map(&:to_s).join("; "))
+      args.merge!(error: obj.formatted_errors.join("; "))
     end
   end
 end
