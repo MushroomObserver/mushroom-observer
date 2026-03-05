@@ -145,6 +145,8 @@ class Inat
     # and the MO equivalent of iNat taxon's rank as the Name's rank.
     # Return nil if unable to create the name.
     def create_mo_name
+      return nil unless @user
+
       api = API2.execute(name_params)
       return nil if api.errors.any? # TODO: add logging
 
