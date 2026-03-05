@@ -47,6 +47,9 @@ bin/rails test test/models/observation_test.rb -n test_scope_needs_naming
 # Run tests in a directory
 bin/rails test test/components/
 
+# Run test methods which match regexp
+bin/rails test r test/controllers/observations_controller_show_test.rb -n /login/
+
 # Run with verbose output
 bin/rails test test/models/observation_test.rb -v
 
@@ -130,6 +133,7 @@ app/
   classes/         # Ruby POROs, including FormObject for Phlex forms
   controllers/     # Rails controllers
   components/      # Phlex components (migration from ERB in progress)
+  jobs/            # ActiveJobs
   views/           # ERB templates (being replaced by components)
   javascript/      # Stimulus controllers, Turbo, importmap
   helpers/         # View helpers (being migrated to components)
