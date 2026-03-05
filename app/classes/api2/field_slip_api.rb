@@ -75,9 +75,12 @@ class API2
 
         obj.current_user = @user if obj.respond_to?(:current_user=)
         obj.attributes = params
-        obj.save
+        obj.save!
 
-        @update_observation&.update!(field_slip: obj)
+        if @update_observation
+          @update_observation.update!(field_slip: obj)
+          obj.adopt_user_from(@update_observation)
+        end
 
         obj
       end

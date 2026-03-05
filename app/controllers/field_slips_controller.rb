@@ -294,16 +294,17 @@ class FieldSlipsController < ApplicationController
     return false unless obs # This should not ever happen
     return false unless last_obs_project_ok?(obs)
 
-    old_obs = @field_slip.observation
-    old_obs&.update(field_slip: nil) if old_obs != obs
-    obs.update(field_slip: @field_slip)
-    @field_slip.adopt_user_from(obs)
+    Observation.transaction do
+      old_obs = @field_slip.observation
+      old_obs&.update!(field_slip: nil) if old_obs != obs
+      obs.update!(field_slip: @field_slip)
+      @field_slip.adopt_user_from(obs)
+    end
     true
   end
 
   def last_obs_project_ok?(obs)
-    project = @field_slip.project
-    return true unless project
+    return true unless (project = @field_slip.project)
     return false unless project.user_can_add_observation?(obs, @user)
 
     if project.violates_constraints?(obs)

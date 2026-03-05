@@ -70,7 +70,12 @@ class FieldSlip < AbstractModel
 
   # The oldest observation, used as the primary/default reference.
   def observation
-    observations.order(:created_at).first
+    @observation ||= observations.order(:created_at).first
+  end
+
+  def reload(*)
+    @observation = nil
+    super
   end
 
   # Adopt the observation's user if we don't already have one.

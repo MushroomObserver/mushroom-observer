@@ -537,6 +537,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                       notes: { Other: notes }
                     } })
     assert_redirected_to(field_slip_url(@field_slip))
+    @field_slip.reload
     assert_equal(@field_slip.observation&.id, initial)
     assert_equal(@field_slip.observation.name, names(:coprinus_comatus))
     assert_equal(@field_slip.observation.notes[:Other], notes)
