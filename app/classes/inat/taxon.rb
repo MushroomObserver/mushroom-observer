@@ -138,7 +138,6 @@ class Inat
       # (They've already been sorted)
       return names.first if names.any?
 
-      # ::Name.unknown
       nil
     end
 
