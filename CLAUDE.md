@@ -47,6 +47,9 @@ bin/rails test test/models/observation_test.rb -n test_scope_needs_naming
 # Run tests in a directory
 bin/rails test test/components/
 
+# Run test methods which match regexp
+bin/rails test r test/controllers/observations_controller_show_test.rb -n /login/
+
 # Run with verbose output
 bin/rails test test/models/observation_test.rb -v
 
