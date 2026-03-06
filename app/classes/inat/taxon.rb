@@ -35,8 +35,9 @@ class Inat
     # Allow hash key access to the iNat observation data
     delegate :[], to: :@taxon
 
-    def initialize(taxon)
+    def initialize(taxon, user = nil)
       @taxon = taxon
+      @user = user
     end
 
     def name
@@ -48,7 +49,9 @@ class Inat
         else
           matching_names_at_regular_ranks
         end
-      best_mo_name(names)
+      best_mo_name(names) ||
+        create_mo_name ||
+        ::Name.unknown
     end
 
     #########
@@ -135,7 +138,36 @@ class Inat
       # (They've already been sorted)
       return names.first if names.any?
 
-      ::Name.unknown
+      nil
+    end
+
+    # Create a new Name with the iNat taxon's name string as the text_name,
+    # and the MO equivalent of iNat taxon's rank as the Name's rank.
+    # Return nil if unable to create the name.
+    def create_mo_name
+      return nil unless @user
+
+      api = API2.execute(name_params)
+      return nil if api.errors.any? # TODO: add logging
+
+      new_name = api.results.first
+      new_name.log(:log_name_created)
+      new_name
+    end
+
+    # There's no author or ICN ID because iNat taxa lack those.
+    def name_params
+      params = { method: :post,
+                 action: :name,
+                 api_key: @user.api_keys.first.key,
+                 name: full_name_string,
+                 rank: @taxon[:rank].titleize }
+      return params unless complex?
+
+      # "Group" is the MO rank equivalent to iNat "complex"
+      # Append "complex" to name, else the Name.parser parses it as a species
+      # and the API gives the error "NameWrongForRank"
+      params.merge(rank: "Group", name: "#{full_name_string} complex")
     end
   end
 end
