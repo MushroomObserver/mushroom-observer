@@ -25,6 +25,7 @@ AllCops:
     - app/assets/javascripts/lightbox.js
     - "db/**/*"
     - "log/**/*"
+    - "projects/**/*"
     - public/design_test/jquery-1.5.2.min.js
     # We need not check these scripts, and some of them cause Rubocop errors
     - "script/old/**/*"
