@@ -24,10 +24,12 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   end
 
   def view_template
-    render_autocompleter_wrap
-    render_type_select
-    submit(:SEARCH.l)
-    submit(:CLEAR.l)
+    super do
+      render_autocompleter_wrap
+      render_type_select
+      submit(:SEARCH.l)
+      submit(:CLEAR.l)
+    end
   end
 
   def form_action
