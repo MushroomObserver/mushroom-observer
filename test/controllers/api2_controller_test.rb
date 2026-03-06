@@ -448,6 +448,50 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("sequence notes", sequence.notes)
   end
 
+  def test_get_observation_with_field_slip
+    obs = observations(:minimal_unknown_obs)
+    assert(obs.field_slip.present?, "Test needs obs with field_slip")
+
+    # JSON detail=high should include field_slip
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_equal(obs.field_slip.id, result["field_slip"]["id"])
+    assert_equal(obs.field_slip.code, result["field_slip"]["code"])
+
+    # XML detail=high should include field_slip
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    field_slip = doc.root.elements["results/result/field_slip"]
+    assert_not_nil(field_slip)
+    assert_equal(obs.field_slip.id.to_s,
+                 field_slip.attributes["id"])
+    assert_equal(obs.field_slip.code,
+                 field_slip.elements["code"].get_text.to_s)
+  end
+
+  def test_get_observation_without_field_slip
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.field_slip, "Test needs obs without field_slip")
+
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_nil(result["field_slip"])
+
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    assert_nil(doc.root.elements["results/result/field_slip"])
+  end
+
   def test_get_observation_with_gps_hidden
     obs = observations(:unknown_with_lat_lng)
     get(:observations, params: { id: obs.id, detail: :high, format: :json })

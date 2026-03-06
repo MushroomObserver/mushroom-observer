@@ -13,6 +13,7 @@ class API2
         :collection_numbers,
         { comments: :user },
         :external_links,
+        :field_slip,
         { herbarium_records: :herbarium },
         { images: [:license, :user] },
         :location,
