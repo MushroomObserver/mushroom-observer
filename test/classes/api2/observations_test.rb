@@ -427,15 +427,19 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_post_observation_with_used_field_slip
+    fs = field_slips(:field_slip_one)
+    assert(fs.observations.any?, "Test needs field_slip with observation")
     params = {
       method: :post,
       action: :observation,
       api_key: @api_key.key,
       location: "Anywhere",
       name: "Agaricus campestris",
-      code: field_slips(:field_slip_one).code
+      code: fs.code
     }
-    assert_api_fail(params)
+    assert_api_pass(params)
+    obs = Observation.last
+    assert_equal(fs, obs.field_slip)
   end
 
   def test_post_observation_with_free_field_slip
