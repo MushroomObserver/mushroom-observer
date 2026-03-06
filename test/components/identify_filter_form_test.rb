@@ -24,12 +24,14 @@ class IdentifyFilterFormTest < ComponentTestCase
     assert_html(html, "span.glyphicon.glyphicon-search")
 
     # Hidden field for term_id
-    assert_html(html, "input[type='hidden'][name='filter[term_id]']" \
+    assert_html(html, "input[type='hidden']#filter_term_id" \
+                       "[name='filter[term_id]']" \
                        "[data-autocompleter--clade-target='hidden']" \
                        "[data-autocompleter--region-target='hidden']")
 
     # Text input with dual targets
-    assert_html(html, "input[type='text'][name='filter[term]']" \
+    assert_html(html, "input[type='text']#filter_term" \
+                       "[name='filter[term]']" \
                        "[data-autocompleter--clade-target='input']" \
                        "[data-autocompleter--region-target='input']")
 
@@ -43,7 +45,7 @@ class IdentifyFilterFormTest < ComponentTestCase
     assert_html(html, "li.dropdown-item", count: 10)
 
     # Type select with dual targets and swap actions
-    assert_html(html, "select[name='filter[type]']" \
+    assert_html(html, "select#filter_type[name='filter[type]']" \
                        "[data-autocompleter--clade-target='select']")
 
     # Default clade selected

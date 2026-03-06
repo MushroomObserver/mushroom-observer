@@ -75,6 +75,7 @@ class Components::IdentifyFilterForm < Components::Base
   def render_hidden_field
     input(
       type: "hidden",
+      id: "filter_term_id",
       name: "filter[term_id]",
       value: "",
       data: {
@@ -87,6 +88,7 @@ class Components::IdentifyFilterForm < Components::Base
   def render_text_field
     input(
       type: "text",
+      id: "filter_term",
       name: "filter[term]",
       value: value,
       placeholder: :filter_by.l,
@@ -154,6 +156,7 @@ class Components::IdentifyFilterForm < Components::Base
   def render_type_select
     options = type_options
     select(
+      id: "filter_type",
       name: "filter[type]",
       class: "form-control",
       data: {
