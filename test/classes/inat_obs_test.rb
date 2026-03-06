@@ -358,12 +358,14 @@ class InatObsTest < UnitTestCase
   def test_taxon_importable
     assert(mock_observation("somion_unicolor").taxon_importable?,
            "iNat Fungi observations should be importable")
-
     assert(mock_observation("fuligo_septica").taxon_importable?,
            "iNat Slime mold (Protozoa) observations should be importable")
-
     assert_not(mock_observation("ceanothus_cordulatus").taxon_importable?,
                "iNat Plant observations should not be importable")
+    assert_not(
+      mock_observation("euglena").taxon_importable?,
+      "iNat non-mycetozoa protozoa observations should not be importable"
+    )
   end
 
   def test_inat_obs_photos
