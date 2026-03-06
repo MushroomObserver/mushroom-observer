@@ -9,7 +9,14 @@ xml.tag!(
   xml_string(xml, :code, object.code)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
-  xml_minimal_object(xml, :observation, :observation, object.observation&.id)
+  if object.observations.any?
+    xml.observations(number: object.observations.length) do
+      object.observations.each do |observation|
+        xml_minimal_object(xml, :observation, :observation,
+                           observation.id)
+      end
+    end
+  end
   if detail
     xml_detailed_object(xml, :project, object.project)
     xml_detailed_object(xml, :user, object.user)

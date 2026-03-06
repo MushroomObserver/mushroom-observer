@@ -448,6 +448,51 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("sequence notes", sequence.notes)
   end
 
+  def test_get_field_slip_observation_ids
+    fs = field_slips(:field_slip_one)
+    assert(fs.observations.any?, "Test needs field_slip with observations")
+    expected_ids = fs.observation_ids.sort
+
+    # JSON
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_equal(expected_ids, result["observation_ids"].sort)
+
+    # XML
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    obs_elem = doc.root.elements["results/result/observations"]
+    assert_not_nil(obs_elem)
+    xml_ids = []
+    obs_elem.each_element("observation") do |e|
+      xml_ids << e.attributes["id"].to_i
+    end
+    assert_equal(expected_ids, xml_ids.sort)
+  end
+
+  def test_get_field_slip_without_observations
+    fs = field_slips(:field_slip_no_obs)
+    assert(fs.observations.empty?, "Test needs field_slip without obs")
+
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_nil(result["observation_ids"])
+
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    assert_nil(doc.root.elements["results/result/observations"])
+  end
+
   def test_get_observation_with_field_slip
     obs = observations(:minimal_unknown_obs)
     assert(obs.field_slip.present?, "Test needs obs with field_slip")
