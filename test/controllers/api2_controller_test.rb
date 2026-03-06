@@ -493,6 +493,32 @@ class API2ControllerTest < FunctionalTestCase
     assert_nil(doc.root.elements["results/result/observations"])
   end
 
+  def test_field_slip_observation_scope_distinct
+    fs = field_slips(:field_slip_one)
+    obs1 = fs.observations.first
+    # Add a second observation to the same field slip
+    obs2 = observations(:coprinus_comatus_obs)
+    obs2.update!(field_slip: fs)
+    assert_equal(2, fs.observations.count)
+
+    results = FieldSlip.observation([obs1.id, obs2.id])
+    assert_equal(1, results.length, "Scope should return distinct results")
+    assert_equal(fs, results.first)
+  end
+
+  def test_post_observation_with_existing_field_slip_code
+    # field_slip_one already has an observation; creating another obs
+    # with the same code should succeed (not raise FieldSlipInUse)
+    fs = field_slips(:field_slip_one)
+    assert(fs.observations.any?, "Test needs field_slip with observation")
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: fs.code }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    assert_equal(fs, obs.field_slip)
+  end
+
   def test_get_observation_with_field_slip
     obs = observations(:minimal_unknown_obs)
     assert(obs.field_slip.present?, "Test needs obs with field_slip")

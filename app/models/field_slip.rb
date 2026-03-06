@@ -40,7 +40,7 @@ class FieldSlip < AbstractModel
 
   scope :observation, lambda { |observation|
     observation_ids = Lookup::Observations.new(observation).ids
-    joins(:observations).where(observations: { id: observation_ids })
+    joins(:observations).where(observations: { id: observation_ids }).distinct
   }
 
   scope :project, lambda { |project|
