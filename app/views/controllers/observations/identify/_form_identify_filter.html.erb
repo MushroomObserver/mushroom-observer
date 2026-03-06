@@ -1,4 +1,6 @@
 <%= render(Components::IdentifyFilterForm.new(
-      filter_type: params.dig(:filter, :type),
-      filter_term: params.dig(:filter, :term)
+      FormObject::IdentifyFilter.new(
+        type: params.dig(:filter, :type),
+        term: params.dig(:filter, :term)
+      )
     )) %>

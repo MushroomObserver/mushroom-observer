@@ -1,70 +1,78 @@
 # frozen_string_literal: true
 
-# Phlex component for the identify observations filter form.
+# Superform component for the identify observations filter form.
 # Renders a navbar search form with a swappable autocompleter
 # (clade/region) for filtering observations that need identification.
 #
+# Uses dual Stimulus autocompleter targets (clade + region) on all
+# elements so the swap mechanism can find them regardless of which
+# controller is active.
+#
 # @example Usage in ERB
 #   <%= render(Components::IdentifyFilterForm.new(
-#         filter_type: params.dig(:filter, :type),
-#         filter_term: params.dig(:filter, :term)
+#         FormObject::IdentifyFilter.new(
+#           type: params.dig(:filter, :type),
+#           term: params.dig(:filter, :term)
+#         )
 #       )) %>
 #
-class Components::IdentifyFilterForm < Components::Base
+class Components::IdentifyFilterForm < Components::ApplicationForm
   include Phlex::Rails::Helpers::LinkTo
 
-  prop :filter_type, _Nilable(String), default: nil
-  prop :filter_term, _Nilable(String), default: nil
+  def initialize(model, **)
+    super(model, id: "identify_filter", **)
+  end
 
   def view_template
-    form(**form_attributes) do
-      render_autocompleter_wrap
-      render_type_select
-      render_buttons
-    end
+    render_autocompleter_wrap
+    render_type_select
+    submit(:SEARCH.l)
+    submit(:CLEAR.l)
+  end
+
+  def form_action
+    identify_observations_path
   end
 
   private
 
-  def selected
-    @filter_type ? @filter_type.to_sym : :clade
+  def form_tag(&block)
+    form(action: form_action, method: :get,
+         **form_attributes, &block)
   end
 
-  def value
-    @filter_type ? @filter_term : ""
+  def form_attributes
+    {
+      id: @attributes[:id],
+      class: "navbar-form navbar-left",
+      data: { controller: initial_controller,
+              type: selected }
+    }
+  end
+
+  # GET forms don't need authenticity tokens or _method fields
+  def authenticity_token_field; end
+  def _method_field; end
+
+  def selected
+    type = model.type
+    type.present? ? type.to_sym : :clade
   end
 
   def initial_controller
     "autocompleter--#{selected}"
   end
 
-  def form_attributes
-    {
-      action: identify_observations_path,
-      method: :get,
-      class: "navbar-form navbar-left",
-      id: "identify_filter",
-      data: { controller: initial_controller, type: selected }
-    }
-  end
+  # --- Autocompleter section ---
 
   def render_autocompleter_wrap
-    div(**autocompleter_wrap_attributes) do
+    div(class: "form-group has-feedback has-search dropdown",
+        data: dual_target("wrap")) do
       render_search_icon
       render_hidden_field
-      render_text_field
+      render_term_field
       render_dropdown
     end
-  end
-
-  def autocompleter_wrap_attributes
-    {
-      class: "form-group has-feedback has-search dropdown",
-      data: {
-        autocompleter__clade_target: "wrap",
-        autocompleter__region_target: "wrap"
-      }
-    }
   end
 
   def render_search_icon
@@ -73,62 +81,27 @@ class Components::IdentifyFilterForm < Components::Base
   end
 
   def render_hidden_field
-    input(
-      type: "hidden",
-      id: "filter_term_id",
-      name: "filter[term_id]",
-      value: "",
-      data: {
-        autocompleter__clade_target: "hidden",
-        autocompleter__region_target: "hidden"
-      }
-    )
+    hidden_field(:term_id, data: dual_target("hidden"))
   end
 
-  def render_text_field
-    input(
-      type: "text",
-      id: "filter_term",
-      name: "filter[term]",
-      value: value,
-      placeholder: :filter_by.l,
-      class: "form-control",
-      size: 42,
-      autocomplete: "one-time-code",
-      data: {
-        autocompleter__clade_target: "input",
-        autocompleter__region_target: "input"
-      }
-    )
+  def render_term_field
+    text_field(:term, label: false,
+                      placeholder: :filter_by.l,
+                      size: 42,
+                      autocomplete: "one-time-code",
+                      data: dual_target("input"))
   end
 
   def render_dropdown
-    div(**dropdown_attributes) do
-      ul(**list_attributes) do
+    div(class: "auto_complete dropdown-menu",
+        data: dual_target("pulldown").merge(
+          action: scroll_actions
+        )) do
+      ul(class: "virtual_list",
+         data: dual_target("list")) do
         10.times { |i| render_dropdown_item(i) }
       end
     end
-  end
-
-  def dropdown_attributes
-    {
-      class: "auto_complete dropdown-menu",
-      data: {
-        autocompleter__clade_target: "pulldown",
-        autocompleter__region_target: "pulldown",
-        action: scroll_actions
-      }
-    }
-  end
-
-  def list_attributes
-    {
-      class: "virtual_list",
-      data: {
-        autocompleter__clade_target: "list",
-        autocompleter__region_target: "list"
-      }
-    }
   end
 
   def render_dropdown_item(index)
@@ -139,39 +112,17 @@ class Components::IdentifyFilterForm < Components::Base
     end
   end
 
-  def scroll_actions
-    [
-      "scroll->autocompleter--clade#scrollList:passive",
-      "scroll->autocompleter--region#scrollList:passive"
-    ].join(" ")
-  end
-
-  def click_actions
-    [
-      "click->autocompleter--clade#selectRow:prevent",
-      "click->autocompleter--region#selectRow:prevent"
-    ].join(" ")
-  end
+  # --- Type select (bare, no form-group wrapper) ---
 
   def render_type_select
-    options = type_options
-    select(
-      id: "filter_type",
-      name: "filter[type]",
-      class: "form-control",
-      data: {
-        autocompleter__clade_target: "select",
-        autocompleter__region_target: "select",
-        action: "autocompleter--clade#swap " \
-                "autocompleter--region#swap"
-      }
-    ) do
-      options.each do |label, val|
-        if val == selected
-          option(value: val, selected: true) { label }
-        else
-          option(value: val) { label }
-        end
+    select(name: "filter[type]", id: "filter_type",
+           class: "form-control",
+           data: dual_target("select").merge(
+             action: "autocompleter--clade#swap " \
+                     "autocompleter--region#swap"
+           )) do
+      type_options.each do |label, val|
+        option(value: val, selected: val == selected) { label }
       end
     end
   end
@@ -180,10 +131,22 @@ class Components::IdentifyFilterForm < Components::Base
     [[:CLADE.l, :clade], [:REGION.l, :region]]
   end
 
-  def render_buttons
-    input(type: "submit", value: :SEARCH.l,
-          class: "btn btn-default")
-    input(type: "submit", value: :CLEAR.l,
-          class: "btn btn-default")
+  # --- Dual-target helpers ---
+
+  def dual_target(target_name)
+    {
+      autocompleter__clade_target: target_name,
+      autocompleter__region_target: target_name
+    }
+  end
+
+  def scroll_actions
+    "scroll->autocompleter--clade#scrollList:passive " \
+      "scroll->autocompleter--region#scrollList:passive"
+  end
+
+  def click_actions
+    "click->autocompleter--clade#selectRow:prevent " \
+      "click->autocompleter--region#selectRow:prevent"
   end
 end
