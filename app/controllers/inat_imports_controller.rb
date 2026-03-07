@@ -223,7 +223,7 @@ class InatImportsController < ApplicationController
 
   def fetch_import_estimate
     response = RestClient.get(
-      "#{API_BASE}/observations?#{estimate_query_args.to_query}",
+      "#{API_BASE}/observations?#{import_estimate_query_args.to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
     JSON.parse(response.body)["total_results"]
@@ -232,23 +232,31 @@ class InatImportsController < ApplicationController
     nil
   end
 
-  def estimate_query_args
-    args = {
-      iconic_taxa: ICONIC_TAXA,
-      only_id: true,
-      without_field: "Mushroom Observer URL"
-    }
-    unless super_importing_anothers?
+  def import_estimate_query_args
+    args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG,
+             only_id: true,
+             without_field: "Mushroom Observer URL" }
+    if limit_to_observations_of_listed_inat_user?
       args[:user_login] = params[:inat_username].strip
     end
     args[:id] = params[:inat_ids] if listing_ids?
     args
   end
 
-  def super_importing_anothers?
-    InatImport.super_importer?(@user) &&
-      @user.inat_username.present? &&
-      params[:inat_username].strip != @user.inat_username
+  def limit_to_observations_of_listed_inat_user?
+    # Always filter by inat_username if importing all,
+    # else it will try to import every obs of every iNat user.
+    return true if importing_all?
+
+    # If importing a list, filter by the listed inat_username
+    # unless the user is a super_importer.
+    # super_importers should be able to import other users' listed obss
+    # while logged into iNat as the super_importer.
+    return false if InatImport.super_importer?(@user)
+
+    # Else limit to iNat obss of the listed iNat user in order to
+    # prevent regular users from importing others' iNat obss.
+    true
   end
 
   def clean_inat_ids

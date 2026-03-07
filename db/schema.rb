@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_14_002432) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_05_000000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -107,7 +107,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_14_002432) do
   end
 
   create_table "field_slips", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.integer "observation_id"
     t.integer "project_id"
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -556,6 +555,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_14_002432) do
     t.integer "inat_id"
     t.decimal "location_lat", precision: 15, scale: 10
     t.decimal "location_lng", precision: 15, scale: 10
+    t.integer "field_slip_id"
+    t.index ["field_slip_id"], name: "index_observations_on_field_slip_id"
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 

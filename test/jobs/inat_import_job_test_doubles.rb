@@ -72,7 +72,7 @@ module InatImportJobTestDoubles
 
   def stub_inat_observation_request(id_above: 0, body_nil: false)
     query_args = {
-      iconic_taxa: ICONIC_TAXA,
+      taxon_id: IMPORTABLE_TAXON_IDS_ARG,
       id: @inat_import.inat_ids,
       id_above: id_above,
       per_page: 200,

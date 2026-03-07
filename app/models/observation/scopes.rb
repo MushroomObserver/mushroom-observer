@@ -452,9 +452,12 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joined_relation_condition(:sequences, bool:)
     }
 
-    scope :has_field_slips, lambda { |bool = true|
-      joined_relation_condition(:field_slips, bool:)
+    scope :has_field_slip, lambda { |bool = true|
+      presence_condition(Observation[:field_slip_id], bool:)
     }
+    # Deprecated: use has_field_slip. Kept for backwards compatibility
+    # with existing bookmarked searches and URLs.
+    scope :has_field_slips, ->(bool = true) { has_field_slip(bool) }
 
     scope :has_collection_numbers, lambda { |bool = true|
       joined_relation_condition(:collection_numbers, bool:)
@@ -505,7 +508,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :show_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
-        :field_slips,
+        :field_slip,
         { comments: :user },
         { external_links: { external_site: { project: :user_group } } },
         { herbarium_records: [{ herbarium: :curators }, :user] },
@@ -549,7 +552,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :edit_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
-        :field_slips,
+        :field_slip,
         { external_links: { external_site: { project: :user_group } } },
         { herbarium_records: [{ herbarium: :curators }, :user] },
         { images: [:image_votes, :license, :projects, :user] },

@@ -24,7 +24,7 @@ class ObservationLabels::Fields
   end
 
   def mo_url(observation)
-    field_slip = observation.field_slips.first
+    field_slip = observation.field_slip
     if field_slip
       code = field_slip.code
       [code, "https://mushroomobserver.org/qr/#{code}"]
