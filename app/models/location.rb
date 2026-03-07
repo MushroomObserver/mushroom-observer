@@ -722,6 +722,22 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     log_and_destroy_location(user, old_loc)
   end
 
+  ##############################################################################
+  #
+  #  :section: Callbacks
+  #
+  ##############################################################################
+
+  # This is called after saving potential changes to a Location.  It will
+  # determine if the changes are important enough to notify people, and do so.
+  def notify_users
+    return unless saved_version_changes?
+
+    sender = User.current
+    recipients = notification_recipients
+    send_location_change_emails(sender, recipients)
+  end
+
   private
 
   def move_observations(old_loc)
@@ -815,26 +831,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     self.east = center_lon + MO.box_epsilon
     self.west = center_lon - MO.box_epsilon
   end
-
-  public
-
-  ##############################################################################
-  #
-  #  :section: Callbacks
-  #
-  ##############################################################################
-
-  # This is called after saving potential changes to a Location.  It will
-  # determine if the changes are important enough to notify people, and do so.
-  def notify_users
-    return unless saved_version_changes?
-
-    sender = User.current
-    recipients = notification_recipients
-    send_location_change_emails(sender, recipients)
-  end
-
-  private
 
   def notification_recipients
     recipients = collect_description_subscribers
