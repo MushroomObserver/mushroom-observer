@@ -79,7 +79,7 @@ module InatImportJobTestDoubles
       only_id: false,
       order: "asc",
       order_by: "id",
-      without_field: "Mushroom Observer URL",
+      **IMPORT_FILTER_PARAMS,
       user_login: @inat_import.inat_username
     }
     if InatImport.super_importer?(@user) && @inat_import.import_all == false

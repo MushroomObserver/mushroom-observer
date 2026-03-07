@@ -494,6 +494,10 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
+    # NOTE: This is an all-rights-reserved observation, so it will not
+    # actually import. It is included here to prove that the Job would create
+    # the correct Name and Namings if it did import, and that the Job would
+    # skip the photos because they are also unlicensed. jdc 2026-03-17
     assert(Name.where(Name[:text_name] =~ /Donadinia/).none?,
            "Test requires that MO not yet have `Donadinia` Names")
 
@@ -906,7 +910,7 @@ class InatImportJobTest < ActiveJob::TestCase
       only_id: false,
       order: "asc",
       order_by: "id",
-      without_field: "Mushroom Observer URL",
+      **IMPORT_FILTER_PARAMS,
       user_login: @inat_import.inat_username
     }
     error = "Unauthorized"
@@ -1013,9 +1017,10 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
 
-    photo_count = @parsed_results.first[:observation_photos].length
-    assert_equal(photo_count, obs.images.length,
-                 "Observation should have #{photo_count} image(s)")
+    licensed_photo_count = @parsed_results.first[:observation_photos].
+                           count { |p| p[:photo][:license_code].present? }
+    assert_equal(licensed_photo_count, obs.images.length,
+                 "Observation should have #{licensed_photo_count} image(s)")
 
     assert_equal(1, obs.namings.length,
                  "iNatImport should create exactly one Naming")

@@ -57,13 +57,9 @@ class Inat
         # Prevents accidentally importing observations of multiple users
         user_login: @import.inat_username,
         # only fungi and slime molds
-        taxon_id: IMPORTABLE_TAXON_IDS_ARG,
-        # and which haven't been exported from or imported to MO
-        # This field was written by iNat's defunct Import from MO feature
-        # is written by Pulk's mirror script, and by
-        # ObservationImporter#update_mushroom_observer_url_field
-        without_field: "Mushroom Observer URL"
-      }.merge(args)
+        taxon_id: IMPORTABLE_TAXON_IDS_ARG
+        # and which haven't been imported to/from MO, and are licensed
+      }.merge(IMPORT_FILTER_PARAMS).merge(args)
       # super_importers can import observations of other users.
       # In order to do that, we must remove the user_login param
       # But we shouldn't remove that param unless there are other constraints

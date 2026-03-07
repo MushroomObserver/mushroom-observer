@@ -46,6 +46,18 @@ class Inat
     # id of iNat's "Mushroom Observer URL" observation field
     MO_URL_OBSERVATION_FIELD_ID = 5005
 
+    # Filter params added to every iNat observation API request
+    # to restrict results to observations eligible for import:
+    IMPORT_FILTER_PARAMS = {
+      # not already exported from or imported to MO
+      # (field written by iNat's defunct Import from MO feature,
+      # Pulk's mirror script, and ObservationImporter)
+      without_field: "Mushroom Observer URL",
+      # have an observation license (avoids arguments about copyrightability,
+      # fair use, etc.)
+      licensed: "true"
+    }.freeze
+
     # MO adds this string + date to the description of iNat observation
     IMPORTED_BY_MO = "Imported by Mushroom Observer"
   end

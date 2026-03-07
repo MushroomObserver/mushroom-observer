@@ -479,6 +479,31 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     )
   end
 
+  def test_estimate_excludes_unlicensed_observations
+    user = users(:rolf)
+    inat_ids = "12345"
+
+    # Without the licensed filter, an unlicensed obs returns 1 result
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 1 }.to_json)
+    # With licensed=true, the unlicensed obs is excluded, returning 0
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "true")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_ids: inat_ids, inat_username: "rolf",
+                   consent: 1 })
+
+    assert_response(:success)
+    assert_template(:confirm)
+    assert_select(
+      "#estimated_count", "0",
+      "Estimate should be 0 for an iNat observation lacking a license"
+    )
+  end
+
   def test_create_go_back_with_superform_params
     login(users(:rolf).login)
 
