@@ -252,8 +252,8 @@ module ObservationsController::Create
     field_slip = FieldSlip.find_by(code: field_code)
     return unless field_slip
 
-    field_slip.observation = @observation
-    field_slip.save
+    @observation.update(field_slip: field_slip)
+    field_slip.adopt_user_from(@observation)
   end
 
   def init_location_var_for_reload

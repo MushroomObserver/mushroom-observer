@@ -6,7 +6,7 @@
 class FieldSlip < AbstractModel
   attr_reader :current_user
 
-  belongs_to :observation
+  has_many :observations, dependent: :nullify
   belongs_to :project
   belongs_to :user
 
@@ -40,7 +40,7 @@ class FieldSlip < AbstractModel
 
   scope :observation, lambda { |observation|
     observation_ids = Lookup::Observations.new(observation).ids
-    where(observation: observation_ids)
+    joins(:observations).where(observations: { id: observation_ids }).distinct
   }
 
   scope :project, lambda { |project|
@@ -68,11 +68,22 @@ class FieldSlip < AbstractModel
     update_project
   end
 
-  def observation=(val)
-    # Adopt the observation's user if we don't already have one
-    self.user = val.user unless user
+  # The oldest observation, used as the primary/default reference.
+  def observation
+    @observation ||= observations.order(:created_at).first
+  end
 
-    self[:observation_id] = val.id
+  def reload(*)
+    @observation = nil
+    super
+  end
+
+  # Adopt the observation's user if we don't already have one.
+  # Call this after associating an observation with this field slip.
+  def adopt_user_from(obs)
+    return if user
+
+    update(user: obs.user)
   end
 
   def update_project
@@ -121,9 +132,10 @@ class FieldSlip < AbstractModel
   end
 
   def field_value(field)
-    return "" unless observation
+    obs = observation
+    return "" unless obs
 
-    observation.notes[field] || ""
+    obs.notes[field] || ""
   end
 
   def location

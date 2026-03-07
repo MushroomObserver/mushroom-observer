@@ -61,6 +61,8 @@ if detail
     if object.sequences.any?
   json.external_links(object.external_links.map { |x| json_external_link(x) }) \
     if object.external_links.any?
+  json.field_slip(json_field_slip(object.field_slip)) \
+    if object.field_slip
 else
   json.owner_id(object.user_id)
   json.consensus_id(object.name_id) if object.name_id

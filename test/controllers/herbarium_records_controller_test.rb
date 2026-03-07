@@ -198,7 +198,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template("new")
     assert(assigns(:herbarium_record))
     assert_equal(assigns(:herbarium_record).accession_number,
-                 obs.field_slips.first.code)
+                 obs.field_slip.code)
   end
 
   ##############################################################################

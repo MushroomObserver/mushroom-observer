@@ -5,7 +5,8 @@ json.type("field_slip")
 json.code(object.code.to_s)
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
-json.observation_id(object.observation_id)
+json.observation_ids(object.observation_ids) \
+  if object.observations.any?
 if detail
   json.project(json_project(object.project)) if object.project
   json.user(json_user(object.user)) if object.user

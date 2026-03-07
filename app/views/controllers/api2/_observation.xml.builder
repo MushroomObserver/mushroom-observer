@@ -99,6 +99,8 @@ xml.tag!(
         end
       end
     end
+    xml_detailed_object(xml, :field_slip, object.field_slip) \
+      if object.field_slip
   else
     xml_minimal_object(xml, :owner, :user, object.user_id)
     xml_minimal_object(xml, :consensus_id, :name, object.name_id)

@@ -52,6 +52,7 @@ minimal_unknown_obs:
   species_lists: unknown_species_list
   herbarium_records: interesting_unknown
   collection_numbers: minimal_unknown_coll_num
+  field_slip: field_slip_one
   source: <%= Observation.sources[:mo_website] %>
 
 detailed_unknown_obs:
@@ -297,6 +298,7 @@ untrusted_hidden:
   user: katrina
   name: fungi
   text_name: Fungi
+  field_slip: field_slip_no_trust
   gps_hidden: true
   lat: 41.6055
   lng: -70.5055
@@ -439,6 +441,7 @@ owner_accepts_general_questions:
   log_updated_at: 2020-07-08 04:06:04
   when: 2020-07-08
   user: roy # roy has email_general_questions == true
+  field_slip: field_slip_two
 
 owner_refuses_general_questions:
   <<: *DEFAULTS
@@ -798,6 +801,7 @@ falmouth_2022_obs:
   when: 2022-09-15 # outside of dates of falmouth_2023_09_project
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   location: falmouth
+  field_slip: field_slip_falmouth_one
   lat: 41.5862
   lng: -70.5976
   gps_hidden: false
@@ -816,6 +820,7 @@ current_obs:
   user: katrina
   where: Salt Point State Park, Sonoma Co., California, USA
   location: salt_point
+  field_slip: field_slip_previous
   notes:
     :Collector: _user katrina_
 
@@ -826,6 +831,7 @@ newbie_obs:
 
 recorder_obs:
   <<: *DEFAULTS
+  field_slip: field_slip_by_recorder
   notes:
     :Collector: Foray Collector
 

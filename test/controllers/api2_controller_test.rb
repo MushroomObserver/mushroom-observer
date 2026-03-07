@@ -181,7 +181,7 @@ class API2ControllerTest < FunctionalTestCase
     post(:observations, params: params)
     assert_no_api_errors
     obs = Observation.last
-    assert(obs.field_slips[0].project.observations.include?(obs))
+    assert(obs.field_slip.project.observations.include?(obs))
   end
 
   def test_post_observation_joins_project
@@ -446,6 +446,121 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("GenBank", sequence.archive)
     assert_equal("KT1234", sequence.accession)
     assert_equal("sequence notes", sequence.notes)
+  end
+
+  def test_get_field_slip_observation_ids
+    fs = field_slips(:field_slip_one)
+    assert(fs.observations.any?, "Test needs field_slip with observations")
+    expected_ids = fs.observation_ids.sort
+
+    # JSON
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_equal(expected_ids, result["observation_ids"].sort)
+
+    # XML
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    obs_elem = doc.root.elements["results/result/observations"]
+    assert_not_nil(obs_elem)
+    xml_ids = []
+    obs_elem.each_element("observation") do |e|
+      xml_ids << e.attributes["id"].to_i
+    end
+    assert_equal(expected_ids, xml_ids.sort)
+  end
+
+  def test_get_field_slip_without_observations
+    fs = field_slips(:field_slip_no_obs)
+    assert(fs.observations.empty?, "Test needs field_slip without obs")
+
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_nil(result["observation_ids"])
+
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    assert_nil(doc.root.elements["results/result/observations"])
+  end
+
+  def test_field_slip_observation_scope_distinct
+    fs = field_slips(:field_slip_one)
+    obs1 = fs.observations.first
+    # Add a second observation to the same field slip
+    obs2 = observations(:coprinus_comatus_obs)
+    obs2.update!(field_slip: fs)
+    assert_equal(2, fs.observations.count)
+
+    results = FieldSlip.observation([obs1.id, obs2.id])
+    assert_equal(1, results.length, "Scope should return distinct results")
+    assert_equal(fs, results.first)
+  end
+
+  def test_post_observation_with_existing_field_slip_code
+    # field_slip_one already has an observation; creating another obs
+    # with the same code should succeed (not raise FieldSlipInUse)
+    fs = field_slips(:field_slip_one)
+    assert(fs.observations.any?, "Test needs field_slip with observation")
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: fs.code }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    assert_equal(fs, obs.field_slip)
+  end
+
+  def test_get_observation_with_field_slip
+    obs = observations(:minimal_unknown_obs)
+    assert(obs.field_slip.present?, "Test needs obs with field_slip")
+
+    # JSON detail=high should include field_slip
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_equal(obs.field_slip.id, result["field_slip"]["id"])
+    assert_equal(obs.field_slip.code, result["field_slip"]["code"])
+
+    # XML detail=high should include field_slip
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    field_slip = doc.root.elements["results/result/field_slip"]
+    assert_not_nil(field_slip)
+    assert_equal(obs.field_slip.id.to_s,
+                 field_slip.attributes["id"])
+    assert_equal(obs.field_slip.code,
+                 field_slip.elements["code"].get_text.to_s)
+  end
+
+  def test_get_observation_without_field_slip
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.field_slip, "Test needs obs without field_slip")
+
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_nil(result["field_slip"])
+
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    assert_nil(doc.root.elements["results/result/field_slip"])
   end
 
   def test_get_observation_with_gps_hidden

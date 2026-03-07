@@ -185,7 +185,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.field_slips.one?)
+    assert(obs.field_slip.present?)
   end
 
   def test_create_observation_with_collection_number
