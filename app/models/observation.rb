@@ -192,6 +192,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :collection_numbers, through: :observation_collection_numbers
   belongs_to :field_slip, optional: true
+  belongs_to :occurrence, optional: true
 
   has_many :observation_herbarium_records, dependent: :destroy
   has_many :herbarium_records, through: :observation_herbarium_records
