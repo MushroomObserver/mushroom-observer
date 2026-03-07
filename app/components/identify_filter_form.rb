@@ -17,7 +17,7 @@
 #       )) %>
 #
 class Components::IdentifyFilterForm < Components::ApplicationForm
-  include Phlex::Rails::Helpers::LinkTo
+  VALID_TYPES = [:clade, :region].freeze
 
   def initialize(model, **)
     super(model, id: "identify_filter", **)
@@ -57,8 +57,8 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def _method_field; end
 
   def selected
-    type = model.type
-    type.present? ? type.to_sym : :clade
+    type = model.type&.to_sym
+    VALID_TYPES.include?(type) ? type : :clade
   end
 
   def initial_controller
