@@ -494,7 +494,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
-    # NOTE: This is an all-rights-reserved obbservation, so it will not
+    # NOTE: This is an all-rights-reserved observation, so it will not
     # actually import. It is included here to prove that the Job would create
     # the correct Name and Namings if it did import, and that the Job would
     # skip the photos because they are also unlicensed. jdc 2026-03-17
