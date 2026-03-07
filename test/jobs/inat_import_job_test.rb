@@ -906,8 +906,7 @@ class InatImportJobTest < ActiveJob::TestCase
       only_id: false,
       order: "asc",
       order_by: "id",
-      without_field: "Mushroom Observer URL",
-      licensed: "true",
+      **IMPORT_FILTER_PARAMS,
       user_login: @inat_import.inat_username
     }
     error = "Unauthorized"
