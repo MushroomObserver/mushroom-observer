@@ -115,6 +115,8 @@ class Inat
 
     def add_inat_images(inat_obs_photos)
       inat_obs_photos.each do |obs_photo|
+        next if obs_photo[:photo][:license_code].blank?
+
         photo = Inat::ObsPhoto.new(obs_photo)
         params = post_photo_params(photo)
         API2.execute(params)
