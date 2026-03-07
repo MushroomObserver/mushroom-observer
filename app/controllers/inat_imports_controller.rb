@@ -235,7 +235,8 @@ class InatImportsController < ApplicationController
   def import_estimate_query_args
     args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG,
              only_id: true,
-             without_field: "Mushroom Observer URL" }
+             without_field: "Mushroom Observer URL",
+             licensed: "true" }
     if limit_to_observations_of_listed_inat_user?
       args[:user_login] = params[:inat_username].strip
     end

@@ -80,6 +80,7 @@ module InatImportJobTestDoubles
       order: "asc",
       order_by: "id",
       without_field: "Mushroom Observer URL",
+      licensed: "true",
       user_login: @inat_import.inat_username
     }
     if InatImport.super_importer?(@user) && @inat_import.import_all == false

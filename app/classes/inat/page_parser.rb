@@ -62,7 +62,10 @@ class Inat
         # This field was written by iNat's defunct Import from MO feature
         # is written by Pulk's mirror script, and by
         # ObservationImporter#update_mushroom_observer_url_field
-        without_field: "Mushroom Observer URL"
+        without_field: "Mushroom Observer URL",
+        # Only ones which have an observation license, in order to avoid
+        # arguments about copyrightabiity, infringement, fair use, etc.
+        licensed: "true"
       }.merge(args)
       # super_importers can import observations of other users.
       # In order to do that, we must remove the user_login param
