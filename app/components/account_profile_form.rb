@@ -19,7 +19,7 @@ class Components::AccountProfileForm < Components::ApplicationForm
   # rubocop:enable Metrics/ParameterLists
 
   def around_template
-    @attributes[:multipart] = true
+    @attributes[:enctype] = "multipart/form-data"
     super
   end
 
