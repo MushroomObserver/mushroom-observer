@@ -23,7 +23,7 @@ module Account
 
       [:name, :notes, :mailing_address].each do |arg|
         val = params[:user][arg].to_s
-        @user.send(:"#{arg}=", val) if @user.send(arg) != val
+        @user.send(:"#{arg}=", val) if @user.send(arg).to_s != val
       end
 
       check_and_maybe_update_user_place_name
@@ -63,7 +63,7 @@ module Account
     end
 
     def deal_with_possible_profile_changes
-      if !@user.changed
+      if !@user.changed?
         flash_notice(:runtime_no_changes.t)
         redirect_to(user_path(@user.id))
       elsif !@user.save
