@@ -254,6 +254,9 @@ module ObservationsController::Create
 
     @observation.update(field_slip: field_slip)
     field_slip.adopt_user_from(@observation)
+    Occurrence.find_or_create_for_field_slip(
+      field_slip, @observation, @user
+    )
   end
 
   def init_location_var_for_reload

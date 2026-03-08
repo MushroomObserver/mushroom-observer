@@ -365,6 +365,10 @@
   OBSERVATIONS: Observations
   observations: observations
   OBSERVATION_FIELDS: Observation Fields
+  OCCURRENCE: Occurrence
+  occurrence: occurrence
+  OCCURRENCES: Occurrences
+  occurrences: occurrences
   of: of
   PAST_LOCATION: Location Change
   past_location: location change
@@ -2933,6 +2937,15 @@
   field_slip_welcome: Welcome to the [TITLE] Project!
   field_slips_max_for_project: You may create up to [MAX] slips for this project.
   field_slips_for_project_title: Create Field Slips for the
+
+  occurrence_already_exists: This observation already belongs to an occurrence.
+  occurrence_created: "Occurrence #[ID] created."
+  occurrence_need_two: You must include at least one additional observation to create an occurrence.
+  occurrence_observation_not_found: Observation not found.
+  create_occurrence_title: Create Occurrence
+  create_occurrence_source: Source Observation
+  create_occurrence_primary: Primary
+  create_occurrence_submit: Create Occurrence
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
   field_slips_project_update_fail: Unable to update [TITLE] Project

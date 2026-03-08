@@ -75,6 +75,125 @@ class OccurrenceTest < UnitTestCase
     assert_nil(@obs2.occurrence_id)
   end
 
+  # -- find_or_create_for_field_slip tests --
+
+  def test_find_or_create_for_field_slip_creates_new
+    fs = field_slips(:field_slip_no_obs)
+    @obs1.update!(field_slip: fs)
+    @obs2.update!(field_slip: fs)
+
+    occ = Occurrence.find_or_create_for_field_slip(fs, @obs2, rolf)
+    assert(occ.persisted?)
+    assert_equal(2, occ.observations.count)
+    assert_includes(occ.observations, @obs1)
+    assert_includes(occ.observations, @obs2)
+    # Default should be oldest by created_at
+    oldest = [@obs1, @obs2].min_by(&:created_at)
+    assert_equal(oldest, occ.default_observation)
+  end
+
+  def test_find_or_create_for_field_slip_no_op_for_single_obs
+    fs = field_slips(:field_slip_no_obs)
+    @obs1.update!(field_slip: fs)
+
+    result = Occurrence.find_or_create_for_field_slip(fs, @obs1, rolf)
+    assert_nil(result)
+    @obs1.reload
+    assert_nil(@obs1.occurrence_id)
+  end
+
+  def test_find_or_create_for_field_slip_adds_to_existing
+    fs = field_slips(:field_slip_no_obs)
+    @obs1.update!(field_slip: fs)
+    @obs2.update!(field_slip: fs)
+    occ = create_occurrence(@obs1, @obs2)
+
+    @obs3.update!(field_slip: fs)
+    result = Occurrence.find_or_create_for_field_slip(fs, @obs3, rolf)
+    assert_equal(occ, result)
+    assert_equal(3, result.observations.count)
+    # Default unchanged
+    assert_equal(@obs1, result.default_observation)
+  end
+
+  def test_find_or_create_for_field_slip_merges_occurrences
+    fs = field_slips(:field_slip_no_obs)
+    @obs1.update!(field_slip: fs)
+    @obs2.update!(field_slip: fs)
+    occ_a = create_occurrence(@obs1, @obs2)
+
+    obs4 = observations(:amateur_obs)
+    obs5 = observations(:peltigera_obs)
+    occ_b = create_occurrence(obs4, obs5)
+    obs4.update!(field_slip: fs)
+
+    result = Occurrence.find_or_create_for_field_slip(fs, obs4, rolf)
+    assert_equal(occ_a.id, result.id)
+    assert_equal(4, result.observations.count)
+    assert(Occurrence.where(id: occ_b.id).none?,
+           "Absorbed occurrence should be destroyed")
+  end
+
+  # -- create_manual tests --
+
+  def test_create_manual
+    selected = [@obs1, @obs2]
+    occ = Occurrence.create_manual(@obs1, selected, rolf)
+    assert(occ.persisted?)
+    assert_equal(@obs1, occ.default_observation)
+    assert_equal(2, occ.observations.count)
+  end
+
+  def test_create_manual_merges_existing
+    occ_existing = create_occurrence(@obs2, @obs3)
+    selected = [@obs1, @obs2, @obs3]
+    result = Occurrence.create_manual(@obs1, selected, rolf)
+    assert_equal(occ_existing.id, result.id)
+    assert_equal(@obs1, result.default_observation)
+    assert_equal(3, result.observations.count)
+  end
+
+  def test_create_manual_field_slip_conflict
+    fs1 = field_slips(:field_slip_one)
+    fs2 = field_slips(:field_slip_two)
+    @obs1.update!(field_slip: fs1)
+    @obs2.update!(field_slip: fs2)
+
+    assert_raises(ActiveRecord::RecordInvalid) do
+      Occurrence.create_manual(@obs1, [@obs1, @obs2], rolf)
+    end
+  end
+
+  # -- merge! tests --
+
+  def test_merge_occurrences
+    occ_a = create_occurrence(@obs1, @obs2)
+    occ_b = create_occurrence(@obs3, observations(:amateur_obs))
+
+    result = Occurrence.merge!(occ_a, occ_b)
+    assert_equal(occ_a, result)
+    assert_equal(4, result.observations.count)
+    assert(Occurrence.where(id: occ_b.id).none?)
+  end
+
+  # -- check_field_slip_conflicts! tests --
+
+  def test_check_field_slip_conflicts_passes_with_one_code
+    fs = field_slips(:field_slip_one)
+    @obs1.update!(field_slip: fs)
+    @obs2.update!(field_slip: fs)
+    # Should not raise
+    Occurrence.check_field_slip_conflicts!([@obs1, @obs2])
+  end
+
+  def test_check_field_slip_conflicts_raises_with_two_codes
+    @obs1.update!(field_slip: field_slips(:field_slip_one))
+    @obs2.update!(field_slip: field_slips(:field_slip_two))
+    assert_raises(ActiveRecord::RecordInvalid) do
+      Occurrence.check_field_slip_conflicts!([@obs1, @obs2])
+    end
+  end
+
   private
 
   def create_occurrence(default_obs, *other_obs)
