@@ -29,26 +29,25 @@ module Account
       assert_equal(locations(:burbank), user.location)
     end
 
+    # Submitting with no meaningful changes shows "no changes" flash.
+    # Guards against nil text fields (notes, mailing_address) being submitted
+    # as "" and triggering a false dirty-record detection via nil != "".
+    def test_no_changes_flash
+      login("rolf", "testpassword")
 
-# Submitting with no meaningful changes shows "no changes" flash.
-# Guards against nil text fields (notes, mailing_address) being submitted
-# as "" and triggering a false dirty-record detection via nil != "".
-def test_no_changes_flash
-  login("rolf", "testpassword")
+      # rolf has nil notes and nil mailing_address in fixtures —
+      # the exact case the bug was: nil != "" tripped @user.changed.
+      patch(:update, params: {
+              user: {
+                name: rolf.name,
+                notes: "",
+                mailing_address: "",
+                place_name: ""
+              }
+            })
 
-  # rolf has nil notes and nil mailing_address in fixtures —
-  # the exact case the bug was: nil != "" tripped @user.changed.
-  patch(:update, params: {
-          user: {
-            name: rolf.name,
-            notes: "",
-            mailing_address: "",
-            place_name: ""
-          }
-        })
-
-  assert_flash_text(:runtime_no_changes.t)
-end
+      assert_flash_text(:runtime_no_changes.t)
+    end
 
     # Test uploading mugshot for user profile.
     def test_add_mugshot
