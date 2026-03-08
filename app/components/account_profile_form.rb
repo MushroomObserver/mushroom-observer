@@ -103,7 +103,7 @@ class Components::AccountProfileForm < Components::ApplicationForm
     render(SelectField.new(
              upload_proxy(:copyright_year, @copyright_year),
              collection: year_options,
-             attributes: { selected: @copyright_year },
+             attributes: {},
              wrapper_options: { label: "#{:WHEN.l}:", inline: true }
            ))
   end
