@@ -36,7 +36,7 @@ module Account
       login("rolf", "testpassword")
 
       # rolf has nil notes and nil mailing_address in fixtures —
-      # the exact case the bug was: nil != "" tripped @user.changed.
+      # the exact case the bug was: nil != "" tripped @user.changed?.
       patch(:update, params: {
               user: {
                 name: rolf.name,
