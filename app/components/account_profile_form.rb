@@ -100,7 +100,7 @@ class Components::AccountProfileForm < Components::ApplicationForm
   def render_upload_year
     render(SelectField.new(
              upload_proxy(:copyright_year, @copyright_year),
-             collection: year_options,
+             collection: upload_year_options,
              attributes: {},
              wrapper_options: { label: "#{:WHEN.l}:", inline: true }
            ))
@@ -110,27 +110,15 @@ class Components::AccountProfileForm < Components::ApplicationForm
     license_select = SelectField.new(
       upload_proxy(:license_id, @upload_license_id),
       collection: license_options,
-      attributes: { selected: @upload_license_id },
+      attributes: {},
       wrapper_options: { label: "#{:LICENSE.l}:", inline: true }
     )
-    license_select.with_append { render_license_warning }
+    license_select.with_append { render_copyright_warning }
     render(license_select)
-  end
-
-  def render_license_warning
-    div(class: "help-block") do
-      plain("(")
-      plain(:image_copyright_warning.t)
-      plain(")")
-    end
   end
 
   def upload_proxy(key, value = nil)
     FieldProxy.new("upload", key, value)
-  end
-
-  def year_options
-    (1980..Time.zone.now.year).to_a.reverse.map { |y| [y.to_s, y] }
   end
 
   def license_options

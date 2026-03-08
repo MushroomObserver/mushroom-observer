@@ -619,15 +619,17 @@ class Components::ApplicationForm < Superform::Rails::Form
       selected: selected_id
     )
 
-    license_select.with_append do
-      div(class: "help-block") do
-        plain("(")
-        plain(:image_copyright_warning.t)
-        plain(")")
-      end
-    end
+    license_select.with_append { render_copyright_warning }
 
     render(license_select)
+  end
+
+  def render_copyright_warning
+    div(class: "help-block") do
+      plain("(")
+      plain(:image_copyright_warning.t)
+      plain(")")
+    end
   end
 
   def upload_year_options
