@@ -140,7 +140,14 @@ module ObservationsController::EditAndUpdate
     return if @observation.thumb_image_id.present? &&
               @observation.image_ids.include?(@observation.thumb_image_id)
 
-    @observation.thumb_image = @observation.images.first
+    new_thumb = @observation.images.first
+    @observation.thumb_image = new_thumb
+    # Persist immediately so the fix survives even if the rest of the
+    # update bails out, matching how remove_image persists detachments.
+    return unless @observation.persisted? &&
+                  @observation.thumb_image_id_changed?
+
+    @observation.update_column(:thumb_image_id, new_thumb&.id)
   end
 
   def try_to_upload_images
