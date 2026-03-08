@@ -8,8 +8,6 @@ class Components::AccountProfileForm < Components::ApplicationForm
   # rubocop:disable Metrics/ParameterLists
   def initialize(model, copyright_holder:, copyright_year:,
                  licenses:, upload_license_id:, **)
-    # Pre-populate place_name from the user's saved location display name
-    model.place_name ||= model.location&.display_name
     @copyright_holder = copyright_holder
     @copyright_year = copyright_year
     @licenses = licenses

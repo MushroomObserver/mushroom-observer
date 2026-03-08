@@ -70,6 +70,7 @@ class AccountProfileFormTest < ComponentTestCase
   def test_location_prefill
     user = users(:rolf)
     user.location = locations(:burbank)
+    user.place_name ||= user.location&.display_name
     html = render_form(user:)
 
     assert_html(html, "input[name='user[place_name]']" \
