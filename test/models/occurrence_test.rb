@@ -61,8 +61,9 @@ class OccurrenceTest < UnitTestCase
 
   def test_default_observation_must_belong
     occ = create_occurrence(@obs1, @obs2)
+    occ.observations.load # preload so loaded? branch is covered
     occ.default_observation = @obs3
-    assert_not(occ.valid?)
+    assert_not(occ.valid?(:update))
     assert(occ.errors[:default_observation].any?)
   end
 
@@ -191,6 +192,20 @@ class OccurrenceTest < UnitTestCase
     @obs2.update!(field_slip: field_slips(:field_slip_two))
     assert_raises(ActiveRecord::RecordInvalid) do
       Occurrence.check_field_slip_conflicts!([@obs1, @obs2])
+    end
+  end
+
+  # -- check_max_observations! tests --
+
+  def test_check_max_observations_passes_within_limit
+    obs_list = [@obs1, @obs2]
+    Occurrence.check_max_observations!(obs_list)
+  end
+
+  def test_check_max_observations_raises_over_limit
+    obs_list = Observation.limit(Occurrence::MAX_OBSERVATIONS + 1).to_a
+    assert_raises(ActiveRecord::RecordInvalid) do
+      Occurrence.check_max_observations!(obs_list)
     end
   end
 

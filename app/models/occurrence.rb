@@ -179,14 +179,9 @@ class Occurrence < AbstractModel
   end
 
   def observation_count_within_limits
-    count = observations.count
-    return if count.between?(2, MAX_OBSERVATIONS)
+    return if observations.count <= MAX_OBSERVATIONS
 
-    if count < 2
-      errors.add(:observations, "must have at least 2 observations")
-    else
-      errors.add(:observations,
-                 "must have at most #{MAX_OBSERVATIONS} observations")
-    end
+    errors.add(:observations,
+               "must have at most #{MAX_OBSERVATIONS} observations")
   end
 end
