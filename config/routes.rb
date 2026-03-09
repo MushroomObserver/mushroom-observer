@@ -385,7 +385,7 @@ MushroomObserver::Application.routes.draw do
   end
   resources :field_slips
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
-  resources :occurrences, only: [:new, :create]
+  resources :occurrences, only: [:new, :create, :show, :destroy]
 
   # ----- Field Slip Job Trackers: show for json -------------------------------
   resources :field_slip_job_trackers, only: [:show]

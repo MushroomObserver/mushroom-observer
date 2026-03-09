@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
-# Controls creating Occurrences (groups of Observations of the same
-# specimen). Show/Edit are handled in later phases.
+# Controls creating and viewing Occurrences (groups of Observations
+# of the same specimen).
 class OccurrencesController < ApplicationController
+  include Show
+
   before_action :login_required
 
   def new
@@ -25,12 +27,7 @@ class OccurrencesController < ApplicationController
     selected = build_selected_observations
     return unless selected
 
-    default_obs = resolve_default_observation(selected)
-    occurrence = Occurrence.create_manual(
-      default_obs, selected, @user
-    )
-    flash_notice(:occurrence_created.t(id: occurrence.id))
-    redirect_to(permanent_observation_path(@source_obs.id))
+    create_occurrence(selected)
   rescue ActiveRecord::RecordInvalid => e
     flash_error(e.message)
     redirect_to(new_occurrence_path(observation_id: @source_obs.id))
@@ -75,10 +72,24 @@ class OccurrencesController < ApplicationController
     obs
   end
 
+  def create_occurrence(selected)
+    default_obs = resolve_default_observation(selected)
+    occ = Occurrence.create_manual(default_obs, selected, @user)
+    warn_if_locations_differ(selected)
+    flash_notice(:occurrence_created.t(id: occ.id))
+    redirect_to(permanent_observation_path(@source_obs.id))
+  end
+
   def resolve_default_observation(selected)
     default_id = params.dig(:occurrence,
                             :default_observation_id).to_i
     selected.find { |o| o.id == default_id } || @source_obs
+  end
+
+  def warn_if_locations_differ(observations)
+    return if observations.map(&:place_name).uniq.size <= 1
+
+    flash_warning(:occurrence_locations_differ.t)
   end
 
   def render_new_form(source_obs)

@@ -2940,12 +2940,20 @@
 
   occurrence_already_exists: This observation already belongs to an occurrence.
   occurrence_created: "Occurrence #[ID] created."
+  occurrence_locations_differ: >
+    Note: The observations in this occurrence have different locations.
   occurrence_need_two: You must include at least one additional observation to create an occurrence.
   occurrence_observation_not_found: Observation not found.
   create_occurrence_title: Create Occurrence
   create_occurrence_source: Source Observation
   create_occurrence_primary: Primary
   create_occurrence_submit: Create Occurrence
+  show_occurrence_title: Occurrence
+  show_occurrence_location_differs: >
+    Location information differs across observations in this occurrence.
+  show_occurrence_default: Default
+  occurrence_destroyed: Occurrence destroyed.
+  occurrence_not_found: Occurrence not found.
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
   field_slips_project_update_fail: Unable to update [TITLE] Project

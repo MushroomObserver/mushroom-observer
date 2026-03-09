@@ -6,7 +6,6 @@ class OccurrencesControllerTest < FunctionalTestCase
   def setup
     @obs1 = observations(:minimal_unknown_obs)
     @obs2 = observations(:coprinus_comatus_obs)
-    @obs3 = observations(:detailed_unknown_obs)
   end
 
   # ---------- new action ----------
@@ -54,8 +53,9 @@ class OccurrencesControllerTest < FunctionalTestCase
 
   def test_create_success
     login("rolf")
+    obs3 = observations(:detailed_unknown_obs) # same location as obs1
     assert_difference("Occurrence.count", 1) do
-      post(:create, params: create_params(@obs1, [@obs1, @obs2]))
+      post(:create, params: create_params(@obs1, [@obs1, obs3]))
     end
     occ = Occurrence.last
     assert_equal(@obs1, occ.default_observation)
@@ -147,6 +147,17 @@ class OccurrencesControllerTest < FunctionalTestCase
 
   # Verify the form generates correct field names for the
   # controller to parse.
+  def test_new_form_stimulus_controller
+    login("rolf")
+    get(:new, params: { observation_id: @obs1.id })
+    assert_response(:success)
+    body = @response.body
+    assert_match(/data-controller=".*occurrence-form.*"/, body)
+    assert_match(
+      /data-occurrence-form-target="sourceRadio"/, body
+    )
+  end
+
   def test_new_form_field_names
     login("rolf")
     get(:new, params: { observation_id: @obs1.id })
@@ -162,6 +173,19 @@ class OccurrencesControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_warns_if_locations_differ
+    login("rolf")
+    post(:create, params: create_params(@obs1, [@obs1, @obs2]))
+    assert_flash_warning
+  end
+
+  def test_create_no_warning_if_locations_match
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs) # same location as obs1
+    post(:create, params: create_params(@obs1, [@obs1, obs3]))
+    assert_flash_success
+  end
+
   def test_create_source_always_included
     login("rolf")
     # Don't include source in observation_ids — it should be added
@@ -169,6 +193,68 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = Occurrence.last
     assert_includes(occ.observations, @obs1)
     assert_includes(occ.observations, @obs2)
+  end
+
+  # ---------- show action ----------
+
+  def test_show_requires_login
+    occ = create_occurrence(@obs1, @obs2)
+    requires_login(:show, id: occ.id)
+    assert_response(:success)
+  end
+
+  def test_show_displays_occurrence
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    get(:show, params: { id: occ.id })
+    assert_response(:success)
+    assert_match(@obs1.format_name.t, @response.body)
+  end
+
+  def test_show_missing_occurrence
+    login("rolf")
+    get(:show, params: { id: -1 })
+    assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  def test_show_location_conflict
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    get(:show, params: { id: occ.id })
+    assert_response(:success)
+    assert_match(:show_occurrence_location_differs.l, @response.body)
+  end
+
+  # ---------- destroy action ----------
+
+  def test_destroy_by_creator
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    assert_difference("Occurrence.count", -1) do
+      delete(:destroy, params: { id: occ.id })
+    end
+    assert_flash_success
+    @obs1.reload
+    @obs2.reload
+    assert_nil(@obs1.occurrence_id)
+    assert_nil(@obs2.occurrence_id)
+  end
+
+  def test_destroy_by_non_creator
+    login("mary")
+    occ = create_occurrence(@obs1, @obs2)
+    assert_no_difference("Occurrence.count") do
+      delete(:destroy, params: { id: occ.id })
+    end
+    assert_flash_error
+  end
+
+  def test_destroy_redirects_to_default_obs
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    delete(:destroy, params: { id: occ.id })
+    assert_redirected_to(permanent_observation_path(@obs1.id))
   end
 
   private
@@ -184,5 +270,15 @@ class OccurrencesControllerTest < FunctionalTestCase
         default_observation_id: default.id
       }
     }
+  end
+
+  def create_occurrence(default_obs, *other_obs)
+    occ = Occurrence.create!(
+      user: rolf,
+      default_observation: default_obs
+    )
+    default_obs.update!(occurrence: occ)
+    other_obs.each { |obs| obs.update!(occurrence: occ) }
+    occ
   end
 end

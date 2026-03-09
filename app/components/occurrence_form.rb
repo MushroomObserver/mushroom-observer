@@ -36,7 +36,7 @@ class Components::OccurrenceForm < Components::ApplicationForm
     ul(
       class: "row list-unstyled mt-3",
       data: {
-        controller: "matrix-table",
+        controller: "matrix-table occurrence-form",
         action: "resize@window->matrix-table#rearrange"
       }
     ) do
@@ -134,7 +134,10 @@ class Components::OccurrenceForm < Components::ApplicationForm
   def render_include_checkbox(obs)
     label do
       input(type: "checkbox", name: "observation_ids[]",
-            value: obs.id)
+            value: obs.id,
+            data: {
+              action: "occurrence-form#includeToggled"
+            })
       whitespace
       plain("Include")
     end
@@ -145,10 +148,19 @@ class Components::OccurrenceForm < Components::ApplicationForm
       input(type: "radio",
             name: "occurrence[default_observation_id]",
             value: obs.id,
-            checked: checked || nil)
+            checked: checked || nil,
+            data: primary_radio_data(obs, checked))
       whitespace
       plain(:create_occurrence_primary.l)
     end
+  end
+
+  def primary_radio_data(obs, checked)
+    data = { action: "occurrence-form#primarySelected" }
+    if obs == @source_obs && checked
+      data[:"occurrence-form-target"] = "sourceRadio"
+    end
+    data
   end
 
   def render_occurrence_warning(obs)
