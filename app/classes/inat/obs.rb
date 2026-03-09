@@ -66,9 +66,8 @@ class Inat
     delegate :name, to: :@obs_taxon
     delegate :text_name, to: :name, allow_nil: true
 
-    def initialize(imported_inat_obs_data, user = nil)
+    def initialize(imported_inat_obs_data)
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
-      @user = user
       @obs_taxon = Inat::Taxon.new(@obs[:taxon])
     end
 
