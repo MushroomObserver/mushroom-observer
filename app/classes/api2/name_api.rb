@@ -77,7 +77,12 @@ class API2
       make_sure_name_doesnt_exist!(parse)
       name = create_name(parse, params)
       save_parents(parse)
+      after_create(name)
       name
+    end
+
+    def after_create(name)
+      name.user_log(user, :log_name_created) if @log
     end
 
     def build_setter(params)
@@ -158,6 +163,7 @@ class API2
       @author     = parse(:string, :author, limit: 100)
       @rank       = parse(:enum, :rank, limit: Name.all_ranks)
       @deprecated = parse(:boolean, :deprecated, default: false)
+      @log        = parse(:boolean, :log, default: true, help: 1)
     end
 
     def make_sure_name_parses!
@@ -190,7 +196,12 @@ class API2
       return unless parse.parent_name
 
       parents = Name.find_or_create_name_and_parents(@user, parse.parent_name)
-      parents.each { |n| n.save if n&.new_record? }
+      parents.each do |n|
+        next unless n&.new_record?
+
+        n.save
+        n.user_log(user, :log_name_created) if @log
+      end
     end
 
     # ----------------------------------------

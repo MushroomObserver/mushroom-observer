@@ -324,6 +324,50 @@ class API2::NamesTest < UnitTestCase
     assert_not_empty(Name.where(text_name: "Anzia"))
   end
 
+  def test_post_name_logs_creation
+    params = {
+      method: :post,
+      action: :name,
+      api_key: @api_key.key,
+      name: "Lactarius indigo",
+      rank: "Species"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting name")
+    name = Name.find_by(text_name: "Lactarius indigo")
+    assert_not_nil(name.rss_log_id)
+  end
+
+  def test_post_name_with_no_log
+    params = {
+      method: :post,
+      action: :name,
+      api_key: @api_key.key,
+      name: "Lactarius indigo",
+      rank: "Species",
+      log: "no"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting name")
+    name = Name.find_by(text_name: "Lactarius indigo")
+    assert_nil(name.rss_log_id)
+  end
+
+  def test_post_name_logs_new_parent_creation
+    params = {
+      method: :post,
+      action: :name,
+      api_key: @api_key.key,
+      name: "Anzia ornata",
+      rank: "Species"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting name")
+    parent = Name.find_by(text_name: "Anzia")
+    assert_not_nil(parent, "Expected parent genus Anzia to be created")
+    assert_not_nil(parent.rss_log_id)
+  end
+
   def test_patching_name_attributes
     agaricus = names(:agaricus)
     lepiota  = names(:lepiota)

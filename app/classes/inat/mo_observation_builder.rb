@@ -104,9 +104,7 @@ class Inat
                  name: parsed_prov_name.search_name,
                  rank: parsed_prov_name.rank }
       api = API2.execute(params)
-      new_name = api.results.first
-      new_name.log(:log_name_created)
-      new_name
+      api.results.first
     end
 
     def user_api_key
