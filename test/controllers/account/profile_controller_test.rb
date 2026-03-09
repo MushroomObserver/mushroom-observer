@@ -68,14 +68,13 @@ module Account
           name: rolf.name,
           place_name: "",
           notes: "",
-          upload_image: file,
-          mailing_address: rolf.mailing_address
-        },
-        upload: {
-          license_id: licenses(:ccnc25).id,
-          copyright_holder: "Someone Else",
-          copyright_year: "2003",
-          image: file
+          mailing_address: rolf.mailing_address,
+          upload: {
+            license_id: licenses(:ccnc25).id,
+            copyright_holder: "Someone Else",
+            copyright_year: "2003",
+            image: file
+          }
         }
       }
       File.stub(:rename, false) do

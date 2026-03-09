@@ -493,14 +493,14 @@ class Components::ApplicationForm < Superform::Rails::Form
 
   # Renders image upload fields in a :upload namespace
   # Creates params[:model][:upload][image], etc. (nested under form model)
-  def upload_fields(file_field_label: "#{:IMAGE.l}:",
-                    file_field_between: nil, **args)
+  # Pass a block to render content in the file field's between slot.
+  def upload_fields(file_field_label: "#{:IMAGE.l}:", **args, &between_block)
     args => {
       copyright_holder:, copyright_year:, licenses:, upload_license_id:
     }
 
     namespace(:upload) do |upload|
-      render_upload_image_field(upload, file_field_label, file_field_between)
+      render_upload_image_field(upload, file_field_label, &between_block)
       render_upload_copyright_holder(upload, copyright_holder)
       render_upload_year(upload, copyright_year)
       render_upload_license(upload, licenses, upload_license_id)
@@ -580,12 +580,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     field_component.with_help { help_content }
   end
 
-  def render_upload_image_field(upload, label, between)
-    render(
-      upload.field(:image).file(
-        wrapper_options: { label: label, between: between }
-      )
+  def render_upload_image_field(upload, label, &between_block)
+    file_component = upload.field(:image).file(
+      wrapper_options: { label: label }
     )
+    file_component.with_between(&between_block) if between_block
+    render(file_component)
   end
 
   def render_upload_copyright_holder(upload, holder)

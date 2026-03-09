@@ -2,8 +2,8 @@
 
 # Form for editing a user's profile.
 # Renders name, location, notes, image upload, and mailing address fields.
-# Upload fields use top-level `upload[...]` params (not nested under `user`)
-# to match what the controller expects via params.dig(:upload, ...).
+# Upload fields are nested under user[upload][...] via ApplicationForm's
+# upload_fields helper (namespace(:upload) inside the user form).
 class Components::AccountProfileForm < Components::ApplicationForm
   # rubocop:disable Metrics/ParameterLists
   def initialize(model, copyright_holder:, copyright_year:,
@@ -55,25 +55,18 @@ class Components::AccountProfileForm < Components::ApplicationForm
   end
 
   def render_upload_fields
-    render_upload_image_field
-    render_upload_copyright_holder
-    render_upload_year
-    render_upload_license
+    upload_fields(
+      file_field_label: image_file_label,
+      copyright_holder: @copyright_holder,
+      copyright_year: @copyright_year,
+      licenses: @licenses,
+      upload_license_id: @upload_license_id
+    ) { render_file_field_between }
   end
 
   def render_mailing_address_field
     textarea_field(:mailing_address,
                    label: "#{:profile_mailing_address.t}:", rows: 5)
-  end
-
-  def render_upload_image_field
-    file_component = FileField.new(
-      upload_proxy(:image),
-      attributes: {},
-      wrapper_options: { label: image_file_label }
-    )
-    file_component.with_between { render_file_field_between }
-    render(file_component)
   end
 
   def render_file_field_between
@@ -86,44 +79,5 @@ class Components::AccountProfileForm < Components::ApplicationForm
   def image_file_label
     key = model.image_id ? :profile_image_change : :profile_image_create
     "#{key.t}:"
-  end
-
-  def render_upload_copyright_holder
-    render(TextField.new(
-             upload_proxy(:copyright_holder, @copyright_holder),
-             attributes: {},
-             wrapper_options: { label: "#{:image_copyright_holder.l}:",
-                                inline: true }
-           ))
-  end
-
-  def render_upload_year
-    render(SelectField.new(
-             upload_proxy(:copyright_year, @copyright_year),
-             collection: upload_year_options,
-             attributes: {},
-             wrapper_options: { label: "#{:WHEN.l}:", inline: true }
-           ))
-  end
-
-  def render_upload_license
-    license_select = SelectField.new(
-      upload_proxy(:license_id, @upload_license_id),
-      collection: license_options,
-      attributes: {},
-      wrapper_options: { label: "#{:LICENSE.l}:", inline: true }
-    )
-    license_select.with_append { render_copyright_warning }
-    render(license_select)
-  end
-
-  def upload_proxy(key, value = nil)
-    FieldProxy.new("upload", key, value)
-  end
-
-  def license_options
-    # Superform SelectField expects [value, display] — License returns
-    # [display, id], so swap to [id, display]
-    @licenses.map { |display, value| [value, display] }
   end
 end

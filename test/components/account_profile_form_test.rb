@@ -10,7 +10,7 @@ class AccountProfileFormTest < ComponentTestCase
   end
 
   # User without a profile image: upload section uses "Upload photo:" label
-  # and all upload fields submit under the top-level upload[] namespace.
+  # and all upload fields submit under user[upload][].
   def test_user_without_image
     user = users(:mary)
     html = render_form(user:)
@@ -27,11 +27,11 @@ class AccountProfileFormTest < ComponentTestCase
     assert_html(html, "textarea[name='user[notes]']")
     assert_html(html, "textarea[name='user[mailing_address]']")
 
-    # Upload fields submit under top-level upload[] (not user[upload][])
-    assert_html(html, "input[type='file'][name='upload[image]']")
-    assert_html(html, "input[name='upload[copyright_holder]']")
-    assert_html(html, "select[name='upload[copyright_year]']")
-    assert_html(html, "select[name='upload[license_id]']")
+    # Upload fields submit under user[upload][]
+    assert_html(html, "input[type='file'][name='user[upload][image]']")
+    assert_html(html, "input[name='user[upload][copyright_holder]']")
+    assert_html(html, "select[name='user[upload][copyright_year]']")
+    assert_html(html, "select[name='user[upload][license_id]']")
 
     # "Upload photo:" label (no existing image)
     assert_includes(html, "#{:profile_image_create.t}:")
@@ -59,10 +59,10 @@ class AccountProfileFormTest < ComponentTestCase
     assert_includes(html, "#{:profile_image_change.t}:")
     assert_not_includes(html, "#{:profile_image_create.t}:")
 
-    assert_html(html, "input[name='upload[copyright_holder]']" \
+    assert_html(html, "input[name='user[upload][copyright_holder]']" \
                       "[value='#{image.copyright_holder}']")
     assert_html(html,
-                "select[name='upload[copyright_year]'] " \
+                "select[name='user[upload][copyright_year]'] " \
                 "option[value='#{image.when.year}'][selected]")
   end
 
