@@ -320,8 +320,13 @@ class InatImportJobTest < ActiveJob::TestCase
   # 3 comments, everyone has MO account;
   # obs fields(include("Voucher Number(s)", "Voucher Specimen Taken"))
   def test_import_job_create_prov_name
-    assert_nil(Name.find_by(text_name: 'Arrhenia "sp-NY02"'),
+    # Guard the iNat input format and the MO output format separately:
+    # the input format is what iNat stores; the output is what MO creates.
+    # Both guards are needed to prove the job created the name, not fixtures.
+    assert_not(Name.exists?(text_name: 'Arrhenia "sp-NY02"'),
                "Test requires that MO not yet have provisional name")
+    assert_not(Name.exists?(text_name: "Arrhenia sp. 'NY02'"),
+               "Test requires MO not yet have the target provisional name")
     create_ivars_from_filename("arrhenia_sp_NY02")
     stub_inat_interactions
 
