@@ -373,6 +373,39 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
+  # Prove that a name creation API failure skips the observation and logs the
+  # error (rather than crashing on nil.id as it did before this fix).
+  def test_import_job_prov_name_creation_failure_skips_observation
+    assert_not(Name.exists?(text_name: 'Arrhenia "sp-NY02"'),
+               "Test requires that MO not yet have provisional name")
+    create_ivars_from_filename("arrhenia_sp_NY02")
+    stub_inat_interactions
+
+    # Simulate API2.execute returning errors when creating a Name
+    original_execute = API2.method(:execute)
+    API2.singleton_class.define_method(:execute) do |params|
+      if params[:action] == :name && params[:method] == :post
+        api = API2.new(params)
+        api.errors << API2::MissingParameter.new(:name)
+        api
+      else
+        original_execute.call(params)
+      end
+    end
+
+    assert_no_difference("Observation.count",
+                         "Should skip observation when name creation fails") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    @inat_import.reload
+    assert_match(/Failed to create name/,
+                 @inat_import.response_errors,
+                 "Should log name creation failure in response_errors")
+  ensure
+    API2.singleton_class.define_method(:execute, original_execute)
+  end
+
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
     assert_not(Name.exists?(Name[:text_name] =~ /Donadinia/),
@@ -827,8 +860,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(obs_count_before, Observation.count,
                  "MO Observation should be destroyed after iNat API error")
 
-    errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
+    http_error_line = @inat_import.response_errors.lines.first
+    errors = JSON.parse(http_error_line, symbolize_names: true)
     assert_equal(status, errors[:error], "Incorrect error status")
+    assert_match(/Failed to finalize import of iNat/,
+                 @inat_import.response_errors,
+                 "Should also log finalize failure context")
 
     # The payload should contain the observation_field_value details
     payload = errors[:payload]

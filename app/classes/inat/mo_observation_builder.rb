@@ -139,7 +139,10 @@ class Inat
                  name: name,
                  rank: rank }
       api = API2.execute(params)
-      return nil if api.errors.any? # TODO: add logging
+      if api.errors.any?
+        raise("Failed to create name #{name.inspect}: " \
+              "#{api.errors.join(", ")}")
+      end
 
       new_name = api.results.first
       new_name.log(:log_name_created)
