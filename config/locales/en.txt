@@ -2151,8 +2151,6 @@
   # account/profile
   profile_title: "[:edit_object(type=:profile)]"
   profile_link: "[:edit_object(type=:profile)]"
-  profile_button: "[:SAVE_CHANGES]"
-  profile_name: "[:Name]"
   profile_notes: About yourself
   profile_location: Primary location
   profile_mailing_address: Mailing Address for Collections

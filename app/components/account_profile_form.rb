@@ -27,20 +27,20 @@ class Components::AccountProfileForm < Components::ApplicationForm
 
   def view_template
     super do
-      submit(:profile_button.l, center: true)
+      submit(:UPDATE.l, center: true)
       render_name_field
       render_place_name_field
       render_notes_field
       render_upload_fields
       render_mailing_address_field
-      submit(:profile_button.l, center: true)
+      submit(:UPDATE.l, center: true)
     end
   end
 
   private
 
   def render_name_field
-    text_field(:name, label: "#{:profile_name.t}:")
+    text_field(:name, label: "#{:Name.l}:")
   end
 
   def render_place_name_field
