@@ -125,24 +125,22 @@ class Inat
                  else
                    taxon.full_name_string
                  end
-      params = { method: :post, action: :name,
-                 api_key: user_api_key,
-                 name: name_str,
-                 rank: complex ? "Group" : taxon[:rank].titleize }
-      api = API2.execute(params)
-      return nil if api.errors.any? # TODO: add logging
-
-      new_name = api.results.first
-      new_name.log(:log_name_created)
-      new_name
+      rank_str = complex ? "Group" : taxon[:rank].titleize
+      post_name(name: name_str, rank: rank_str)
     end
 
     def add_provisional_name(parsed_prov_name)
+      post_name(name: parsed_prov_name.search_name, rank: parsed_prov_name.rank)
+    end
+
+    def post_name(name:, rank:)
       params = { method: :post, action: :name,
                  api_key: user_api_key,
-                 name: parsed_prov_name.search_name,
-                 rank: parsed_prov_name.rank }
+                 name: name,
+                 rank: rank }
       api = API2.execute(params)
+      return nil if api.errors.any? # TODO: add logging
+
       new_name = api.results.first
       new_name.log(:log_name_created)
       new_name

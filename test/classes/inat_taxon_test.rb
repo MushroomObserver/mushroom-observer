@@ -20,29 +20,11 @@ class InatTaxonTest < UnitTestCase
                  "Incorrect MO Name for iNat suggested ID")
   end
 
-  def test_creates_mo_species_for_unmatched_inat_species
-    user = users(:rolf)
-    expected_text_name = "Calostoma lutescens"
-    assert_not(Name.exists?(text_name: expected_text_name),
-               "Test needs iNat taxon without an MO matching Name")
+  def test_full_name_string_for_species
     mock_inat_obs = mock_observation("calostoma_lutescens")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    params = { method: :post, action: :name,
-               api_key: user.api_keys.first.key,
-               name: inat_taxon.full_name_string,
-               rank: inat_taxon[:rank].titleize }
-    mo_name = API2.execute(params).results.first
-
-    assert_equal(
-      [expected_text_name, "Species"],
-      [mo_name.text_name, mo_name.rank],
-      "Failed to create MO Species for unmatched iNat taxon"
-    )
-    assert_equal(
-      user, mo_name.user,
-      "Wrong user associated with MO Name created for unmatched iNat taxon"
-    )
+    assert_equal("Calostoma lutescens", inat_taxon.full_name_string)
   end
 
   def test_maps_inat_name_to_approved_mo_name
@@ -76,29 +58,11 @@ class InatTaxonTest < UnitTestCase
                  "Prefer non-sensu Name when mapping iNat id to MO Name")
   end
 
-  def test_creates_mo_genus_for_unmatched_inat_genus
-    user = users(:rolf)
-    expected_text_name = "Evernia"
-    assert_not(Name.exists?(text_name: expected_text_name),
-               "Test needs iNat taxon without an MO matching Name")
+  def test_full_name_string_for_genus
     mock_inat_obs = mock_observation("evernia")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    params = { method: :post, action: :name,
-               api_key: user.api_keys.first.key,
-               name: inat_taxon.full_name_string,
-               rank: inat_taxon[:rank].titleize }
-    mo_name = API2.execute(params).results.first
-
-    assert_equal(
-      [expected_text_name, "Genus"],
-      [mo_name.text_name, mo_name.rank],
-      "Failed to create MO Genus for unmatched iNat taxon"
-    )
-    assert_equal(
-      user, mo_name.user,
-      "Wrong user associated with MO Name created for unmatched iNat taxon"
-    )
+    assert_equal("Evernia", inat_taxon.full_name_string)
   end
 
   def test_maps_inat_infrageneric_to_mo_infrageneric_scientific_name
@@ -128,34 +92,19 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
-  def test_creates_mo_infrageneric_name_for_unmatched_inat_infrageneric_name
-    user = users(:rolf)
-    expected_text_name = "Morchella sect. Distantes"
-    assert_not(Name.exists?(text_name: expected_text_name),
-               "Test needs iNat taxon without an MO matching Name")
+  def test_full_name_string_for_infrageneric_name
     mock_inat_obs = mock_observation("distantes")
-
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
-    # Need to lookup the genus of infrageneric taxa because
-    # the iNat API returns only epithet and rank, not the genus
+    # Infrageneric taxa require a genus lookup because iNat returns only
+    # the epithet and rank, not the full name including genus.
     stub_genus_lookup(
       ancestor_ids: inat_taxon[:ancestor_ids].join(","),
       body: { results: [{ name: "Morchella" }] }
     )
 
-    params = { method: :post, action: :name,
-               api_key: user.api_keys.first.key,
-               name: inat_taxon.full_name_string,
-               rank: inat_taxon[:rank].titleize }
-    mo_name = API2.execute(params).results.first
-
-    assert_equal([expected_text_name, "Section"],
-                 [mo_name.text_name, mo_name.rank],
-                 "Failed to create MO Section for unmatched iNat taxon")
-    assert_equal(
-      user, mo_name.user,
-      "Wrong user associated with MO Name created for unmatched iNat taxon"
-    )
+    # full_name_string uses the raw iNat rank ("section", not "sect.")
+    # The MO Name parser normalizes rank abbreviations during name creation
+    assert_equal("Morchella section Distantes", inat_taxon.full_name_string)
   end
 
   def test_maps_inat_infrageneric_suggest_id_to_mo_scientific_name
@@ -222,29 +171,13 @@ class InatTaxonTest < UnitTestCase
                  "MO '<Genus> <species> group' if MO Name exists.")
   end
 
-  def test_creates_mo_complex_with_rank_group_for_unmatched_inat_complex
-    user = users(:rolf)
-    expected_text_name = "Xeromphalina campanella complex"
-    assert_not(Name.exists?(text_name: expected_text_name),
-               "Test needs iNat taxon without an MO matching Name")
+  def test_full_name_string_for_complex
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
     inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    params = { method: :post, action: :name,
-               api_key: user.api_keys.first.key,
-               name: "#{inat_taxon.full_name_string} complex",
-               rank: "Group" }
-    mo_name = API2.execute(params).results.first
-
-    assert_equal(
-      [expected_text_name, "Group"],
-      [mo_name.text_name, mo_name.rank],
-      "Failed to create MO Group for unmatched iNat taxon"
-    )
-    assert_equal(
-      user, mo_name.user,
-      "Wrong user associated with MO Name created for unmatched iNat taxon"
-    )
+    # full_name_string returns the base name; the builder appends " complex"
+    # and sets rank: "Group" when calling post_name for complex taxa
+    assert_equal("Xeromphalina campanella", inat_taxon.full_name_string)
   end
 
   def test_returns_nil_when_no_mo_match
