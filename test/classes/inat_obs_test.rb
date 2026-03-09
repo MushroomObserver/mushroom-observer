@@ -376,8 +376,7 @@ class InatObsTest < UnitTestCase
   def mock_observation(filename)
     mock_search = File.read("test/inat/#{filename}.txt")
     Inat::Obs.new(
-      JSON.generate(JSON.parse(mock_search)["results"].first),
-      users(:rolf) # pass a user with API key to test API calls in Inat::Taxon
+      JSON.generate(JSON.parse(mock_search)["results"].first)
     )
   end
 end
