@@ -114,6 +114,44 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_equal(licenses(:ccwiki30), img.license)
   end
 
+  # Regression test for issue #3995:
+  # Removing the thumbnail image via edit form leaves thumb_image_id nil
+  # even when other images remain on the observation.
+  def test_update_observation_remove_thumbnail_reassigns
+    obs = observations(:detailed_unknown_obs)
+    thumb = images(:in_situ_image)
+    other = images(:turned_over_image)
+    assert_equal(thumb.id, obs.thumb_image_id,
+                 "Fixture should have in_situ_image as thumbnail")
+    assert_includes(obs.image_ids, other.id,
+                    "Fixture should have turned_over_image attached")
+
+    login("mary")
+    # Simulate what the JS does: remove the thumbnail image from
+    # good_image_ids and clear thumb_image_id (set to empty string).
+    put(:update, params: {
+          id: obs.id,
+          observation: {
+            place_name: obs.place_name,
+            when: obs.when,
+            notes: obs.notes.to_h,
+            specimen: obs.specimen,
+            thumb_image_id: "",
+            good_image_ids: other.id.to_s
+          }
+        })
+
+    obs.reload
+    assert_not_includes(obs.image_ids, thumb.id,
+                        "Thumbnail image should have been detached")
+    assert_includes(obs.image_ids, other.id,
+                    "Other image should still be attached")
+    assert_not_nil(obs.thumb_image_id,
+                   "thumb_image_id should be reassigned, not nil")
+    assert_equal(other.id, obs.thumb_image_id,
+                 "thumb_image_id should be the remaining image")
+  end
+
   def test_update_observation_no_logging
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at

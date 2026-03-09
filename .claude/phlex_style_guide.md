@@ -6,8 +6,13 @@ component architecture. For general Ruby and ERB style, see
 
 ## Form Components (Superform)
 
-Form components extend `Components::ApplicationForm`. Read this file, as well as
-the `superform` gem, before beginning a conversion.
+**Every form component must extend `Components::ApplicationForm`.** This rule
+has no exceptions — it applies to all forms regardless of HTTP method (GET,
+POST, PATCH), layout context (navbar, modal, page), or whether the form maps
+to a model. Never use `Components::Base` with the raw Phlex `form()` method
+for form conversions.
+
+Read `ApplicationForm` and the `superform` gem before beginning a conversion.
 
 `ApplicationForm` inherits from `Superform::Rails::Form`, which creates a
 Rails-compliant form tag implicitly via the `around_template` hook. Form
@@ -89,6 +94,76 @@ render(Components::MyForm.new(
 ))
 
 # Params will be namespaced as: inherit_classification[parent]
+```
+
+### GET Forms (Search Filters, Index Filters)
+
+GET forms (search bars, index filters) still extend `ApplicationForm` with a
+FormObject. Override `form_tag` to use GET method, and suppress CSRF tokens
+since GET forms don't need them.
+
+```ruby
+# app/classes/form_object/my_filter.rb
+class FormObject::MyFilter < FormObject::Base
+  attribute :query, :string
+end
+
+# app/components/my_filter_form.rb
+class Components::MyFilterForm < Components::ApplicationForm
+  def initialize(model, **)
+    super(model, id: "my_filter", **)
+  end
+
+  def view_template
+    super do
+      text_field(:query, label: false, placeholder: "Search...")
+      submit(:SEARCH.l)
+    end
+  end
+
+  def form_action
+    my_index_path
+  end
+
+  private
+
+  def form_tag(&block)
+    form(action: form_action, method: :get,
+         **form_attributes, &block)
+  end
+
+  def form_attributes
+    {
+      id: @attributes[:id],
+      class: "my-form",
+      data: { controller: "my-controller" }
+    }
+  end
+
+  # GET forms don't need authenticity tokens or _method fields
+  def authenticity_token_field; end
+  def _method_field; end
+end
+```
+
+See `LiveDataFilterForm` and `IdentifyFilterForm` for real examples.
+
+### Custom Param Namespacing with model_name
+
+`FormObject::Base#model_name` returns the demodulized class name, which
+Superform uses for field `name` attributes. Override `self.model_name` when
+params need a different namespace than the class name implies.
+
+```ruby
+# Default: FormObject::IdentifyFilter → identify_filter[term]
+# Override to get: filter[term]
+class FormObject::IdentifyFilter < FormObject::Base
+  attribute :term, :string
+
+  def self.model_name
+    ActiveModel::Name.new(self, nil, "Filter")
+  end
+end
 ```
 
 ## Component Style
@@ -186,6 +261,19 @@ span(class: "badge")
 # Bad
 div("", class: "clearfix")
 span("", class: "badge")
+```
+
+### Phlex `option()` Element
+
+Phlex's `option()` does not accept a positional text argument. Use the block
+form to set the display text.
+
+```ruby
+# Good
+option(value: "clade") { "Clade" }
+
+# Bad - wrong number of arguments error
+option("Clade", value: "clade")
 ```
 
 ### Prefer Phlex Methods Over ActionView Helpers
