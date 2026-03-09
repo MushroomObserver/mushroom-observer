@@ -19,6 +19,7 @@ module Views
           container_class(:wide)
           view_context.add_show_title(:show_occurrence_title.t,
                                       @occurrence)
+          add_destroy_icon
           render_location_warning
           render_observation_grid
           render(Components::ObjectFooter.new(
@@ -27,6 +28,17 @@ module Views
         end
 
         private
+
+        def add_destroy_icon
+          return unless @occurrence.can_edit?(@user)
+
+          icon = view_context.tag.li do
+            view_context.destroy_button(
+              target: @occurrence, icon: :delete
+            )
+          end
+          view_context.content_for(:edit_icons, icon)
+        end
 
         def render_location_warning
           return unless locations_differ?
