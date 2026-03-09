@@ -893,6 +893,94 @@ is the cause of any new bugs.
 
 The test environment has been configured to suppress these errors via a custom logger formatter in `config/environments/test.rb`.
 
+## Phlex Views (Full-Page Rendering)
+
+Phlex views live in `app/views/controllers/` and are rendered from
+controllers with `render(ViewClass.new(...), layout: true)`.
+
+### Server Restart Required for Changes
+
+Unlike ERB templates, Phlex view files are not always hot-reloaded in
+development mode. If changes to a Phlex view aren't appearing in the
+browser, **restart the Rails server** before further debugging.
+
+### Using `content_for` from Phlex Views
+
+`content_for` works from Phlex views via `view_context`. Use the
+**value form** (passing content directly) rather than the block form:
+
+```ruby
+# Good — value form
+html = view_context.tag.li { view_context.some_helper(...) }
+view_context.content_for(:edit_icons, html)
+
+# Also works — calling a helper that internally uses content_for
+view_context.add_show_title(:show_thing_title.t, @thing)
+```
+
+**Do NOT use `helpers.content_for` from controllers.** The `helpers`
+proxy creates a separate context that does not share `@view_flow` with
+the layout. Content stored there will not be visible to the layout.
+
+### Adding Title Bar Icons from Phlex Show Pages
+
+ERB show pages use `add_edit_icons(@object, @user)` to add edit and
+destroy icons to the title bar. This helper generates links for both
+edit and destroy routes.
+
+When a model has a destroy route but no edit route, render the destroy
+icon directly from the Phlex view:
+
+```ruby
+def add_destroy_icon
+  return unless @occurrence.can_edit?(@user)
+
+  icon = view_context.tag.li do
+    view_context.destroy_button(
+      target: @occurrence, icon: :delete
+    )
+  end
+  view_context.content_for(:edit_icons, icon)
+end
+```
+
+Once an edit route exists, switch to
+`view_context.add_edit_icons(@object, @user)` which handles both icons.
+
+## Form Gotchas
+
+### Nested `<form>` Elements Break Form Submission
+
+HTML does not allow nested `<form>` elements. When a browser encounters
+`<form>` inside `<form>`, it implicitly closes the outer form. Any
+elements after the inner form (like the submit button) end up outside
+the outer form.
+
+**Symptom**: Clicking a submit button does nothing — no server request
+at all. Controller tests pass fine (they bypass the browser DOM parser).
+
+**Common source in MO**: `InteractiveImage` with `votes: true` renders
+`button_to` helpers, which generate `<form>` elements. If rendered
+inside a Superform component, the vote button forms nest inside it and
+break it.
+
+**Rule**: Always pass `votes: false` to `InteractiveImage` inside any
+form context. Any component that generates `<form>` tags (`button_to`,
+turbo form helpers) must not be nested inside another form.
+
+**Detection**: Only system tests (Capybara/Cuprite) or manual browser
+testing will reveal this. Controller tests do NOT catch it. Assert no
+nested `<form>` elements in rendered HTML as a regression guard.
+
+### Turbo Forms in MO
+
+- `Turbo.config.forms.mode = "optin"` — only forms (or ancestors) with
+  `data-turbo="true"` use Turbo submission.
+- `ApplicationForm` defaults to `local: true` (no Turbo). Pass
+  `local: false` to enable Turbo on a form.
+- Rails UJS is commented out — `data-disable-with` has no effect
+  without UJS or Turbo.
+
 ## Summary
 
 The key principles are:
