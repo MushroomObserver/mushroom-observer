@@ -64,13 +64,12 @@ class Inat
     delegate :[]=, to: :@obs
 
     delegate :name, to: :@obs_taxon
-    delegate :id, to: :name, prefix: true
-    delegate :text_name, to: :name
+    delegate :text_name, to: :name, allow_nil: true
 
     def initialize(imported_inat_obs_data, user = nil)
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
       @user = user
-      @obs_taxon = Inat::Taxon.new(@obs[:taxon], user)
+      @obs_taxon = Inat::Taxon.new(@obs[:taxon])
     end
 
     ########## iNat attributes
@@ -294,8 +293,9 @@ class Inat
       # (iNat allows multiple suggestions for a single observation)
       "\n#{
         self[:identifications].each_with_object([]) do |ident, ary|
-          ident_taxon = Inat::Taxon.new(ident[:taxon], @user)
-          ary << "&nbsp;&nbsp;_#{ident_taxon.name.text_name}_ " \
+          ident_taxon = Inat::Taxon.new(ident[:taxon])
+          display_name = ident_taxon.name&.text_name || ident[:taxon][:name]
+          ary << "&nbsp;&nbsp;_#{display_name}_ " \
                  "by #{ident[:user][:login]} " \
                  "#{ident[:created_at_details][:date]}"
         end.join("\n")

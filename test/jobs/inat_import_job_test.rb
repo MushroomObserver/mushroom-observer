@@ -955,15 +955,16 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def assert_snapshot_suggested_ids(obs)
     idents = @parsed_results.first[:identifications]
-    # Get the MO Names corresponding to the iNat suggested taxon names
-    # Because iNat names may not be ICN-compliant, e.g. infrageneric names
-    unique_suggested_taxon_names = idents.each_with_object([]) do |ident, ary|
+    # Get the display name for each suggested iNat id.
+    # Matches what obs.rb uses in the snapshot: MO text_name if found, else
+    # the raw iNat taxon name.
+    suggested_display_names = idents.each_with_object([]) do |ident, ary|
       ident_taxon = ::Inat::Taxon.new(ident[:taxon])
-      ary << ident_taxon.name
+      ary << (ident_taxon.name&.text_name || ident[:taxon][:name])
     end
-    unique_suggested_taxon_names.each do |name|
-      assert_match(name.text_name, obs.notes.to_s,
-                   "Notes Snapshot missing suggested name #{name.text_name}")
+    suggested_display_names.each do |name_text|
+      assert_match(name_text, obs.notes.to_s,
+                   "Notes Snapshot missing suggested name #{name_text}")
     end
   end
 

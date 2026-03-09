@@ -26,9 +26,13 @@ class InatTaxonTest < UnitTestCase
     assert_not(Name.exists?(text_name: expected_text_name),
                "Test needs iNat taxon without an MO matching Name")
     mock_inat_obs = mock_observation("calostoma_lutescens")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+    params = { method: :post, action: :name,
+               api_key: user.api_keys.first.key,
+               name: inat_taxon.full_name_string,
+               rank: inat_taxon[:rank].titleize }
+    mo_name = API2.execute(params).results.first
 
     assert_equal(
       [expected_text_name, "Species"],
@@ -78,9 +82,13 @@ class InatTaxonTest < UnitTestCase
     assert_not(Name.exists?(text_name: expected_text_name),
                "Test needs iNat taxon without an MO matching Name")
     mock_inat_obs = mock_observation("evernia")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+    params = { method: :post, action: :name,
+               api_key: user.api_keys.first.key,
+               name: inat_taxon.full_name_string,
+               rank: inat_taxon[:rank].titleize }
+    mo_name = API2.execute(params).results.first
 
     assert_equal(
       [expected_text_name, "Genus"],
@@ -127,7 +135,7 @@ class InatTaxonTest < UnitTestCase
                "Test needs iNat taxon without an MO matching Name")
     mock_inat_obs = mock_observation("distantes")
 
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], user)
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
     # Need to lookup the genus of infrageneric taxa because
     # the iNat API returns only epithet and rank, not the genus
     stub_genus_lookup(
@@ -135,7 +143,11 @@ class InatTaxonTest < UnitTestCase
       body: { results: [{ name: "Morchella" }] }
     )
 
-    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+    params = { method: :post, action: :name,
+               api_key: user.api_keys.first.key,
+               name: inat_taxon.full_name_string,
+               rank: inat_taxon[:rank].titleize }
+    mo_name = API2.execute(params).results.first
 
     assert_equal([expected_text_name, "Section"],
                  [mo_name.text_name, mo_name.rank],
@@ -216,9 +228,13 @@ class InatTaxonTest < UnitTestCase
     assert_not(Name.exists?(text_name: expected_text_name),
                "Test needs iNat taxon without an MO matching Name")
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon], users(:rolf))
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
+    params = { method: :post, action: :name,
+               api_key: user.api_keys.first.key,
+               name: "#{inat_taxon.full_name_string} complex",
+               rank: "Group" }
+    mo_name = API2.execute(params).results.first
 
     assert_equal(
       [expected_text_name, "Group"],
@@ -231,19 +247,14 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
-  def test_falls_back_to_unknown_name_when_no_user_and_no_mo_match
+  def test_returns_nil_when_no_mo_match
     assert_not(Name.exists?(text_name: "Calostoma lutescens"),
                "Test needs iNat taxon without an MO matching Name")
     mock_inat_obs = mock_observation("calostoma_lutescens")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon]) # no user
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
-    mo_name = inat_taxon.name # The call to `name` is what creates the MO Name
-
-    assert_equal(
-      Name.unknown, mo_name,
-      "Should return Name.unknown (Fungi) when no user and " \
-      "no MO Name matches iNat taxon"
-    )
+    assert_nil(inat_taxon.name,
+               "Inat::Taxon#name should return nil when no MO Name matches")
   end
 
   def mock_observation(filename)

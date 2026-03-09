@@ -14,6 +14,7 @@ class Inat
     end
 
     def mo_observation
+      create_missing_identification_names
       create_observation
       add_external_link
       add_inat_images(inat_obs[:observation_photos])
@@ -68,7 +69,7 @@ class Inat
     #   add an MO provisional name if none exists, and
     #   treat the provisional name as the MO consensus.
     def id_or_provisional_or_species_name
-      return inat_obs.name_id if inat_obs.provisional_name.blank?
+      return resolved_obs_name.id if inat_obs.provisional_name.blank?
 
       parsed_prov_name = Name.parse_name(inat_obs.provisional_name)
 
@@ -96,6 +97,44 @@ class Inat
         external_site: external_site,
         url: "#{external_site.base_url}#{inat_obs[:id]}"
       )
+    end
+
+    def create_missing_identification_names
+      inat_obs[:identifications].each do |ident|
+        taxon = Inat::Taxon.new(ident[:taxon])
+        next if taxon.name.present?
+
+        create_mo_name(taxon)
+      end
+    end
+
+    def resolved_obs_name
+      @resolved_obs_name ||=
+        inat_obs.name ||
+        create_mo_name(Inat::Taxon.new(inat_obs[:taxon])) ||
+        Name.unknown
+    end
+
+    def create_mo_name(taxon)
+      # There's no author or ICN ID because iNat taxa lack those.
+      # iNat "complex" rank maps to MO "Group"; name needs "complex" appended
+      # so the Name parser doesn't treat it as a species.
+      complex = taxon[:rank] == "complex"
+      name_str = if complex
+                   "#{taxon.full_name_string} complex"
+                 else
+                   taxon.full_name_string
+                 end
+      params = { method: :post, action: :name,
+                 api_key: user_api_key,
+                 name: name_str,
+                 rank: complex ? "Group" : taxon[:rank].titleize }
+      api = API2.execute(params)
+      return nil if api.errors.any? # TODO: add logging
+
+      new_name = api.results.first
+      new_name.log(:log_name_created)
+      new_name
     end
 
     def add_provisional_name(parsed_prov_name)

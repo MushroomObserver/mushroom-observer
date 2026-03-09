@@ -26,7 +26,8 @@
 #
 #  == Instance methods
 #
-#  name:: MO Name object corresponding to the iNat taxon
+#  name::             MO Name matching the iNat taxon, or nil if none found
+#  full_name_string:: ICN-format name string, used by callers to create MO Names
 #
 class Inat
   class Taxon
@@ -35,11 +36,11 @@ class Inat
     # Allow hash key access to the iNat observation data
     delegate :[], to: :@taxon
 
-    def initialize(taxon, user = nil)
+    def initialize(taxon)
       @taxon = taxon
-      @user = user
     end
 
+    # Returns the matching MO Name, or nil if none found.
     def name
       names =
         # iNat "Complex" definition
@@ -49,9 +50,22 @@ class Inat
         else
           matching_names_at_regular_ranks
         end
-      best_mo_name(names) ||
-        create_mo_name ||
-        ::Name.unknown
+      best_mo_name(names)
+    end
+
+    # The ICN-format name string for this taxon.
+    # Handles special cases: infrageneric names (which need the genus prepended)
+    # and infraspecific names (which need the rank inserted).
+    def full_name_string
+      # iNat infrageneric Observation ID's need special handling because
+      # iNat does not provide a name string which includes the genus.
+      return infrageneric_name_string if infrageneric?
+
+      # iNat infraspecific :name strings omits the rank.
+      # Ex: "Inonotus obliquus sterilis"
+      return insert_rank_between_species_and_final_epithet if infraspecific?
+
+      @taxon[:name]
     end
 
     #########
@@ -78,18 +92,6 @@ class Inat
         # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
         where.not(::Name[:author] =~ /^sensu /).
         order(deprecated: :asc)
-    end
-
-    def full_name_string
-      # iNat infrageneric Observation ID's need special handling because
-      # iNat does not provide a name string which includes the genus.
-      return infrageneric_name_string if infrageneric?
-
-      # iNat infraspecific :name strings omits the rank.
-      # Ex: "Inonotus obliquus sterilis"
-      return insert_rank_between_species_and_final_epithet if infraspecific?
-
-      @taxon[:name]
     end
 
     # Get the genus of an iNat infrageneric taxon via an API query
@@ -139,35 +141,6 @@ class Inat
       return names.first if names.any?
 
       nil
-    end
-
-    # Create a new Name with the iNat taxon's name string as the text_name,
-    # and the MO equivalent of iNat taxon's rank as the Name's rank.
-    # Return nil if unable to create the name.
-    def create_mo_name
-      return nil unless @user
-
-      api = API2.execute(name_params)
-      return nil if api.errors.any? # TODO: add logging
-
-      new_name = api.results.first
-      new_name.log(:log_name_created)
-      new_name
-    end
-
-    # There's no author or ICN ID because iNat taxa lack those.
-    def name_params
-      params = { method: :post,
-                 action: :name,
-                 api_key: @user.api_keys.first.key,
-                 name: full_name_string,
-                 rank: @taxon[:rank].titleize }
-      return params unless complex?
-
-      # "Group" is the MO rank equivalent to iNat "complex"
-      # Append "complex" to name, else the Name.parser parses it as a species
-      # and the API gives the error "NameWrongForRank"
-      params.merge(rank: "Group", name: "#{full_name_string} complex")
     end
   end
 end
