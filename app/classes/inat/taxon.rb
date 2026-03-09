@@ -61,7 +61,7 @@ class Inat
       # iNat does not provide a name string which includes the genus.
       return infrageneric_name_string if infrageneric?
 
-      # iNat infraspecific :name strings omits the rank.
+      # iNat infraspecific :name strings omit the rank.
       # Ex: "Inonotus obliquus sterilis"
       return insert_rank_between_species_and_final_epithet if infraspecific?
 
