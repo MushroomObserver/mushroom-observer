@@ -71,13 +71,11 @@ class API2
     def build_object
       params = create_params
       parse_name_author_rank_deprecated
-      @log = parse(:boolean, :log, default: true)
       done_parsing_parameters!
       validate_create_parameters!(params)
       parse = make_sure_name_parses!
       make_sure_name_doesnt_exist!(parse)
       name = create_name(parse, params)
-      name.user_log(@user, :log_name_created) if @log
       save_parents(parse)
       name
     end
@@ -192,12 +190,7 @@ class API2
       return unless parse.parent_name
 
       parents = Name.find_or_create_name_and_parents(@user, parse.parent_name)
-      parents.each do |n|
-        next unless n&.new_record?
-
-        n.save || raise(CreateFailed.new(n))
-        n.user_log(@user, :log_name_created) if @log
-      end
+      parents.each { |n| n.save if n&.new_record? }
     end
 
     # ----------------------------------------
