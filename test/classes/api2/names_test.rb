@@ -324,41 +324,43 @@ class API2::NamesTest < UnitTestCase
     assert_not_empty(Name.where(text_name: "Anzia"))
   end
 
-  def test_post_name_logs_creation
+  def test_post_name_created_with_logs
+    text_name = "Anzia ornata"
+    assert_not(Name.exists?(text_name: text_name))
     params = {
       method: :post,
       action: :name,
       api_key: @api_key.key,
-      name: "Anzia ornata",
-      author: "(Zahlbr.) Asahina",
+      name: text_name,
       rank: "Species"
     }
     assert_api_pass(params)
-    name = Name.find_by(text_name: "Anzia ornata")
-    assert_not_nil(name, "Name 'Anzia ornata' was not created")
+    name = Name.find_by(text_name: text_name)
+    assert_not_nil(name, "Name '#{text_name}' was not created")
     assert_not_nil(name.rss_log_id,
-                   "Name 'Anzia ornata' was created but not logged")
+                   "Name '#{text_name}' was created but not logged")
     parent = Name.find_by(text_name: "Anzia")
     assert_not_nil(parent, "Parent name 'Anzia' was not created")
     assert_not_nil(parent.rss_log_id,
                    "Parent name 'Anzia' was created but not logged")
   end
 
-  def test_post_name_with_no_log
+  def test_post_name_created_with_no_log
+    text_name = "Anzia ornata"
+    assert_not(Name.exists?(text_name: text_name))
     params = {
       method: :post,
       action: :name,
       api_key: @api_key.key,
-      name: "Anzia ornata",
-      author: "(Zahlbr.) Asahina",
+      name: text_name,
       rank: "Species",
       log: "no"
     }
     assert_api_pass(params)
-    name = Name.find_by(text_name: "Anzia ornata")
-    assert_not_nil(name, "Name 'Anzia ornata' was not created")
+    name = Name.find_by(text_name: text_name)
+    assert_not_nil(name, "Failed to create Name '#{text_name}'")
     assert_nil(name.rss_log_id,
-               "Name 'Anzia ornata' was created with a log despite log: no")
+               "Name '#{text_name}' was created with a log despite log: no")
   end
 
   def test_patching_name_attributes
