@@ -226,6 +226,93 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_match(:show_occurrence_location_differs.l, @response.body)
   end
 
+  # ---------- edit action ----------
+
+  def test_edit_requires_login
+    occ = create_occurrence(@obs1, @obs2)
+    requires_login(:edit, id: occ.id)
+    assert_response(:success)
+  end
+
+  def test_edit_displays_form
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    get(:edit, params: { id: occ.id })
+    assert_response(:success)
+    body = @response.body
+    assert_match(/occurrence\[default_observation_id\]/, body)
+    assert_match(/remove_observation_ids/, body)
+  end
+
+  def test_edit_denied_for_non_creator
+    login("mary")
+    occ = create_occurrence(@obs1, @obs2)
+    get(:edit, params: { id: occ.id })
+    assert_redirected_to(occurrence_path(occ))
+    assert_flash_error
+  end
+
+  def test_edit_missing_occurrence
+    login("rolf")
+    get(:edit, params: { id: -1 })
+    assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  # ---------- update action ----------
+
+  def test_update_changes_default
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { default_observation_id: @obs2.id }
+          })
+    occ.reload
+    assert_equal(@obs2, occ.default_observation)
+    assert_redirected_to(occurrence_path(occ))
+    assert_flash_success
+  end
+
+  def test_update_removes_observation
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    occ = create_occurrence(@obs1, @obs2, obs3)
+    patch(:update, params: {
+            id: occ.id,
+            remove_observation_ids: [@obs2.id],
+            occurrence: { default_observation_id: @obs1.id }
+          })
+    occ.reload
+    assert_equal(2, occ.observations.count)
+    refute_includes(occ.observations, @obs2)
+    @obs2.reload
+    assert_nil(@obs2.occurrence_id)
+  end
+
+  def test_update_destroys_occurrence_if_too_few_remain
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    patch(:update, params: {
+            id: occ.id,
+            remove_observation_ids: [@obs2.id],
+            occurrence: { default_observation_id: @obs1.id }
+          })
+    assert_not(Occurrence.exists?(occ.id))
+  end
+
+  def test_update_denied_for_non_creator
+    login("mary")
+    occ = create_occurrence(@obs1, @obs2)
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { default_observation_id: @obs2.id }
+          })
+    occ.reload
+    assert_equal(@obs1, occ.default_observation)
+    assert_flash_error
+  end
+
   # ---------- destroy action ----------
 
   def test_destroy_by_creator

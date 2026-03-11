@@ -4,6 +4,7 @@
 # of the same specimen).
 class OccurrencesController < ApplicationController
   include Show
+  include Edit
 
   before_action :login_required
 
