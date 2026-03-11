@@ -116,16 +116,18 @@ class Inat
     end
 
     def create_mo_name(taxon)
-      # There's no author or ICN ID because iNat taxa lack those.
-      # iNat "complex" rank maps to MO "Group"; name needs "complex" appended
-      # so the Name parser doesn't treat it as a species.
+      # iNat "complex" rank needs special treatment because
+      # The equivalent MO rank is a one-off, requiring special handling
       complex = taxon[:rank] == "complex"
+      rank_str = complex ? "Group" : taxon[:rank].titleize
       name_str = if complex
+                   # append "complex" to prevent parsing it as a Species
                    "#{taxon.full_name_string} complex"
                  else
                    taxon.full_name_string
                  end
-      rank_str = complex ? "Group" : taxon[:rank].titleize
+
+      # There's no author or ICN ID because iNat taxa lack those.
       post_name(name: name_str, rank: rank_str)
     end
 
