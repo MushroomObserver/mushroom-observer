@@ -13,6 +13,7 @@ class API2
         :collection_numbers,
         { comments: :user },
         :external_links,
+        :field_slip,
         { herbarium_records: :herbarium },
         { images: [:license, :user] },
         :location,
@@ -155,16 +156,13 @@ class API2
       return unless @code
 
       field_slip = FieldSlip.find_by(code: @code)
-      if field_slip
-        raise(FieldSlipInUse.new(field_slip)) if field_slip.observation
-
-        field_slip.update!(observation:)
-      else
-        field_slip = FieldSlip.create!(observation:, code: @code, user: @user)
+      unless field_slip
+        field_slip = FieldSlip.create!(code: @code, user: @user)
         field_slip.current_user = @user
         field_slip.update_project
         field_slip.save!
       end
+      observation.update!(field_slip: field_slip)
       update_project(field_slip.project, observation)
     end
 

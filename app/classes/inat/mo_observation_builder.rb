@@ -144,9 +144,7 @@ class Inat
               "#{api.errors.join(", ")}")
       end
 
-      new_name = api.results.first
-      new_name.log(:log_name_created)
-      new_name
+      api.results.first
     end
 
     def user_api_key
