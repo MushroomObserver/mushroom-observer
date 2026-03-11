@@ -2952,6 +2952,9 @@
   show_occurrence_location_differs: >
     Location information differs across observations in this occurrence.
   show_occurrence_default: Default
+  edit_occurrence_submit: Save Changes
+  edit_occurrence_remove: Remove
+  occurrence_updated: Occurrence updated.
   occurrence_destroyed: Occurrence destroyed.
   occurrence_not_found: Occurrence not found.
   field_slips_created_job: Created job for [filename]
