@@ -285,6 +285,9 @@ class API2::ImagesTest < UnitTestCase
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
         assert_equal(1, api.results.length)
+        result = api.results.first
+        assert_not_nil(result, "API did not return the created image")
+        assert_equal(Image.last.id, result["id"].to_i)
       end
     end
     assert_last_image_correct
@@ -323,6 +326,9 @@ class API2::ImagesTest < UnitTestCase
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
         assert_equal(1, api.results.length)
+        result = api.results.first
+        assert_not_nil(result, "API did not return the created image")
+        assert_equal(Image.last.id, result["id"].to_i)
       end
     end
     assert_last_image_correct
