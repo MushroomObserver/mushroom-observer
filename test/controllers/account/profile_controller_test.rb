@@ -29,6 +29,26 @@ module Account
       assert_equal(locations(:burbank), user.location)
     end
 
+    # Submitting with no meaningful changes shows "no changes" flash.
+    # Guards against nil text fields (notes, mailing_address) being submitted
+    # as "" and triggering a false dirty-record detection via nil != "".
+    def test_no_changes_flash
+      login("rolf", "testpassword")
+
+      # rolf has nil notes and nil mailing_address in fixtures —
+      # the exact case the bug was: nil != "" tripped @user.changed?.
+      patch(:update, params: {
+              user: {
+                name: rolf.name,
+                notes: "",
+                mailing_address: "",
+                place_name: ""
+              }
+            })
+
+      assert_flash_text(:runtime_no_changes.t)
+    end
+
     # Test uploading mugshot for user profile.
     def test_add_mugshot
       # Create image directory and populate with test images.
@@ -48,14 +68,13 @@ module Account
           name: rolf.name,
           place_name: "",
           notes: "",
-          upload_image: file,
-          mailing_address: rolf.mailing_address
-        },
-        upload: {
-          license_id: licenses(:ccnc25).id,
-          copyright_holder: "Someone Else",
-          copyright_year: "2003",
-          image: file
+          mailing_address: rolf.mailing_address,
+          upload: {
+            license_id: licenses(:ccnc25).id,
+            copyright_holder: "Someone Else",
+            copyright_year: "2003",
+            image: file
+          }
         }
       }
       File.stub(:rename, false) do
