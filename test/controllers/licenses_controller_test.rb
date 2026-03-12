@@ -143,6 +143,10 @@ class LicensesControllerTest < FunctionalTestCase
     end
 
     license = License.find_by(display_name: display_name)
+    assert_not_nil(
+      license,
+      "Expected License to be created with display_name #{display_name.inspect}"
+    )
     assert_equal(display_name, license.display_name)
     assert_equal(url, license.url)
     assert_false(license.deprecated)
