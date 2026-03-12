@@ -152,5 +152,5 @@ importmap, GitHub Actions CI (4 parallel workers)
 - Custom i18n system: `en.txt` -> `en.yml` translation files.
   **NEVER edit `config/locales/en.yml` directly.** Edit `en.txt` then
   run `rails lang:update`.
-- Avoid over-engineering — only implement requested changes
+- Avoid over-engineering — implement only requested changes
 - Prefer editing existing files over creating new ones

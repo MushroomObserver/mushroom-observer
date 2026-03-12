@@ -6,7 +6,7 @@ module Account
 
     def edit
       @licenses = License.available_names_and_ids(@user.license)
-      @place_name = @user.location ? @user.location.display_name : ""
+      @user.place_name ||= @user.location&.display_name
       if @user.image
         @copyright_holder  = @user.image.copyright_holder
         @copyright_year    = @user.image.when.year
@@ -23,7 +23,7 @@ module Account
 
       [:name, :notes, :mailing_address].each do |arg|
         val = params[:user][arg].to_s
-        @user.send(:"#{arg}=", val) if @user.send(arg) != val
+        @user.send(:"#{arg}=", val) if @user.send(arg).to_s != val
       end
 
       check_and_maybe_update_user_place_name
@@ -51,19 +51,19 @@ module Account
 
     def upload_image_if_present
       # Check if we need to upload an image.
-      upload = params.dig(:upload, :image)
+      upload = params.dig(:user, :upload, :image)
       return if upload.blank?
 
-      image = upload_image(upload, params[:upload][:copyright_holder],
-                           params[:upload][:license_id],
-                           params[:upload][:copyright_year])
+      image = upload_image(upload, params[:user][:upload][:copyright_holder],
+                           params[:user][:upload][:license_id],
+                           params[:user][:upload][:copyright_year])
       return unless image
 
       @user.image = image
     end
 
     def deal_with_possible_profile_changes
-      if !@user.changed
+      if !@user.changed?
         flash_notice(:runtime_no_changes.t)
         redirect_to(user_path(@user.id))
       elsif !@user.save
