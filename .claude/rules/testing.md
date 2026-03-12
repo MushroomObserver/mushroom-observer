@@ -177,6 +177,33 @@ See these files for good examples of the pattern:
 - `test/components/naming_form_test.rb`
 - `test/components/lightbox_caption_test.rb`
 
+## Debugging "Form Does Nothing"
+
+When a form renders correctly but doesn't submit in the browser:
+
+1. **Write a system test first** — controller tests bypass JS and DOM
+   parsing, so they won't reproduce browser-only issues.
+2. **Check for nested forms** — inspect rendered HTML for `<form>`
+   inside `<form>`. This is the #1 cause. See "Nested `<form>` Elements"
+   in `.claude/phlex_style_guide.md`.
+3. **Check Turbo interference** — MO uses `Turbo.config.forms.mode =
+   "optin"`. Forms without `data-turbo="true"` should submit normally.
+   Forms with `data-turbo="true"` need a Turbo-compatible server
+   response. `ApplicationForm` defaults to `local: true` (no Turbo).
+4. **Check for JS errors** — Cuprite can capture console errors.
+5. **Try `form.submit()` via JS** — if programmatic submit works but
+   button click doesn't, the button is likely outside the form in the
+   DOM tree (nested form issue).
+
+## Bullet N+1 Detection in System Tests
+
+System tests run through the full Rails stack with Bullet enabled.
+Bullet raises `UnoptimizedQueryError` for N+1 queries. When adding
+`.includes()` to fix these, add all associations that will be accessed
+during the request (including the redirect target page). Common
+observation associations: `:field_slip, :occurrence, :user, :location,
+:name, :thumb_image`.
+
 ## Debugging Phlex Component Conversions
 
 **CRITICAL: This is the FIRST step for ALL Phlex conversion debugging.**
