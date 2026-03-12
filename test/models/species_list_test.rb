@@ -60,9 +60,12 @@ class SpeciesListTest < UnitTestCase
     # Test defaults first.
     now = Time.zone.now
     spl.construct_observation(name)
-    o = Observation.last
-    n = Naming.last
-    v = Vote.last
+    o = spl.observations.order(:id).last
+    assert_not_nil(o, "Cannot find Observation")
+    n = o.namings.order(:id).last
+    assert_not_nil(n, "Cannot find Naming")
+    v = n.votes.order(:id).last
+    assert_not_nil(v, "Cannot find Vote")
     assert_objs_equal(o, spl.observations.last)
     assert(o.created_at >= 1.minute.ago)
     assert(o.updated_at >= 1.minute.ago)
@@ -104,9 +107,12 @@ class SpeciesListTest < UnitTestCase
       specimen: true,
       vote: Vote.next_best_vote
     )
-    o = Observation.last
-    n = Naming.last
-    v = Vote.last
+    o = spl.observations.order(:id).last
+    assert_not_nil(o, "Cannot find Observation")
+    n = o.namings.order(:id).last
+    assert_not_nil(n, "Cannot find Naming")
+    v = n.votes.order(:id).last
+    assert_not_nil(v, "Cannot find Vote")
     assert_objs_equal(o, spl.observations.last)
     assert_users_equal(mary, o.user)
     assert_obj_arrays_equal([], o.projects)

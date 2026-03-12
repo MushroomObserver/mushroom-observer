@@ -423,8 +423,10 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
-    herbarium = Herbarium.last
-    assert_equal("Burbank Herbarium", herbarium.name)
+    herbarium = Herbarium.find_by(
+      name: create_params[:name].strip_html.strip_squeeze
+    )
+    assert_not_nil(herbarium, "Cannot find Herbarium")
     assert_equal("BH", herbarium.code)
     assert_objs_equal(locations(:burbank), herbarium.location)
     assert_equal("curator@bh.org", herbarium.email)
@@ -510,7 +512,8 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_flash_text(/must define this location/i)
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
-    herbarium = Herbarium.last
+    herbarium = Herbarium.find_by(name: "New Herbarium")
+    assert_not_nil(herbarium, "Cannot find Herbarium")
     assert_equal("New Herbarium", herbarium.name)
     assert_nil(herbarium.code)
     assert_nil(herbarium.location)
@@ -535,7 +538,8 @@ class HerbariaControllerTest < FunctionalTestCase
     post(:create, params: { herbarium: params })
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
-    herbarium = Herbarium.last
+    herbarium = Herbarium.find_by(name: "My Herbarium")
+    assert_not_nil(herbarium, "Cannot find Herbarium")
     assert_equal("My Herbarium", herbarium.name)
     assert_nil(herbarium.code)
     assert_nil(herbarium.location)
@@ -572,7 +576,8 @@ class HerbariaControllerTest < FunctionalTestCase
       code: ""
     ) })
     assert_equal(herbarium_count + 1, Herbarium.count)
-    first = Herbarium.last
+    first = Herbarium.find_by(name: "First Blank Code Herbarium")
+    assert_not_nil(first, "Cannot find first Herbarium")
     assert_nil(first.code, "Blank code should be stored as nil")
 
     # Second herbarium with blank code should also work (no duplicate key error)
@@ -581,7 +586,8 @@ class HerbariaControllerTest < FunctionalTestCase
       code: ""
     ) })
     assert_equal(herbarium_count + 2, Herbarium.count)
-    second = Herbarium.last
+    second = Herbarium.find_by(name: "Second Blank Code Herbarium")
+    assert_not_nil(second, "Cannot find second Herbarium")
     assert_nil(second.code, "Blank code should be stored as nil")
   end
 

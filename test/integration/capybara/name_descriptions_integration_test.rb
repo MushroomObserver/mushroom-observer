@@ -49,12 +49,13 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     assert_not_equal(mary_session.driver.request.cookies["mo_user"],
                      dick_session.driver.request.cookies["mo_user"])
 
-    url = create_draft(name, gen_desc, project, session: mary_session)
-    check_admin(name, url, gen_desc, project, session: rolf_session)
-    check_another_student(url, session: katrina_session)
-    check_another_user(url, session: dick_session)
+    url, marys_draft = create_draft(name, gen_desc, project,
+                                    session: mary_session)
+    check_admin(url, marys_draft:, session: rolf_session)
+    check_another_student(url, marys_draft:, session: katrina_session)
+    check_another_user(url, marys_draft:, session: dick_session)
     login(session: lurker_session)
-    check_another_user(url, session: lurker_session)
+    check_another_user(url, marys_draft:, session: lurker_session)
   end
 
   def create_draft(name, gen_desc, project, session:)
@@ -87,7 +88,8 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     end
     assert_flash_success(session: session)
     # assert_template("name/show_name_description")
-    marys_draft = NameDescription.last
+    marys_draft = NameDescription.find_by(name: name, source_type: :project)
+    assert_not_nil(marys_draft, "Cannot find NameDescription")
 
     # Make sure it shows up on main show_name page and can edit it.
     session.visit("/names/#{name.id}")
@@ -114,20 +116,21 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     end
     assert_flash_success(session: session)
     assert_not_nil(NameDescription.find_by(gen_desc: gen_desc))
-    url
+    [url, marys_draft]
   end
 
   # Navigate to show name (no descriptions) and create draft.
-  def check_admin(name, url, gen_desc, project, session:)
+  def check_admin(url, marys_draft:, session:)
+    marys_draft.reload
     session.visit(url)
-    # The latest ND should be Mary's draft
-    marys_draft = NameDescription.last
     # show n.d link should be restricted
     assert(session.has_link?(href: name_description_path(marys_draft.id),
                              text: /Restricted/))
     assert(session.has_link?(href: edit_name_description_path(marys_draft.id)))
-    session.assert_no_text(/#{gen_desc}/)
-    assert(session.has_link?(href: new_name_description_path(name.id)))
+    session.assert_no_text(/#{marys_draft.gen_desc}/)
+    assert(session.has_link?(
+             href: new_name_description_path(marys_draft.name.id)
+           ))
     session.click_link(href: name_description_path(marys_draft.id))
     assert(session.has_link?(href: edit_name_description_path(marys_draft.id)))
     session.assert_selector(
@@ -138,19 +141,19 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
       assert(form.has_field?("description_source_type",
                              type: :hidden, with: :project))
       assert(form.has_field?("description_source_name",
-                             type: :hidden, with: project.title))
+                             type: :hidden, with: marys_draft.source_name))
       assert(form.has_unchecked_field?("description_public_write",
                                        disabled: false))
       assert(form.has_unchecked_field?("description_public",
                                        disabled: false))
-      assert(form.has_field?("description_gen_desc", with: gen_desc))
+      assert(form.has_field?("description_gen_desc",
+                             with: marys_draft.gen_desc))
     end
   end
 
   # Can view but not edit.
-  def check_another_student(url, session:)
+  def check_another_student(url, marys_draft:, session:)
     session.visit(url)
-    marys_draft = NameDescription.last
     session.first(:link, href: name_description_path(marys_draft.id)).click
     assert(
       session.has_no_link?(href: edit_name_description_path(marys_draft.id))
@@ -161,9 +164,8 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
   end
 
   # Knows it exists but can't even view it.
-  def check_another_user(url, session:)
+  def check_another_user(url, marys_draft:, session:)
     session.visit(url)
-    marys_draft = NameDescription.last
     assert(session.has_link?(href: name_description_path(marys_draft.id)))
     session.first(:link, href: name_description_path(marys_draft.id)).click
     assert_flash_error(session: session)
@@ -433,7 +435,12 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     end
 
     def name_description
-      @name_description ||= NameDescription.last
+      data = name_description_data
+      NameDescription.find_by(
+        name: name_we_are_working_on,
+        source_type: data[:source_type],
+        source_name: data[:source_name].to_s
+      )
     end
 
     def show_name_uri
