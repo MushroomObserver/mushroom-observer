@@ -895,14 +895,18 @@ The test environment has been configured to suppress these errors via a custom l
 
 ## Phlex Views (Full-Page Rendering)
 
-Phlex views live in `app/views/controllers/` and are rendered from
-controllers with `render(ViewClass.new(...), layout: true)`.
+Full-page Phlex views live in `app/views/controllers/` and are
+rendered from controllers with `render(ViewClass.new(...), layout: true)`.
+The `layout: true` is required so Rails wraps the output in the
+application layout. Phlex components rendered as fragments (e.g.,
+`ModalForm` in turbo_stream responses) do not use `layout: true`.
 
 ### Server Restart Required for Changes
 
-Unlike ERB templates, Phlex view files are not always hot-reloaded in
-development mode. If changes to a Phlex view aren't appearing in the
-browser, **restart the Rails server** before further debugging.
+Phlex view files are eagerly loaded via `require` in
+`config/initializers/phlex.rb`, bypassing Zeitwerk's reload mechanism.
+Unlike ERB templates, changes to these files are **not hot-reloaded** —
+**restart the Rails server** before further debugging.
 
 ### Using `content_for` from Phlex Views
 
