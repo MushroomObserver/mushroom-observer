@@ -285,7 +285,7 @@ class OccurrencesControllerTest < FunctionalTestCase
           })
     occ.reload
     assert_equal(2, occ.observations.count)
-    refute_includes(occ.observations, @obs2)
+    assert_not_includes(occ.observations, @obs2)
     @obs2.reload
     assert_nil(@obs2.occurrence_id)
   end
@@ -311,6 +311,74 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ.reload
     assert_equal(@obs1, occ.default_observation)
     assert_flash_error
+  end
+
+  # ---------- update: add observations ----------
+
+  def test_update_adds_observation
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    occ = create_occurrence(@obs1, @obs2)
+    patch(:update, params: {
+            id: occ.id,
+            add_observation_ids: [obs3.id],
+            occurrence: { default_observation_id: @obs1.id }
+          })
+    occ.reload
+    assert_equal(3, occ.observations.count)
+    assert_includes(occ.observations, obs3)
+    assert_redirected_to(occurrence_path(occ))
+    assert_flash_success
+  end
+
+  def test_update_add_merges_other_occurrence
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    obs4 = observations(:amateur_obs)
+    occ1 = create_occurrence(@obs1, @obs2)
+    occ2 = create_occurrence(obs3, obs4)
+    patch(:update, params: {
+            id: occ1.id,
+            add_observation_ids: [obs3.id],
+            occurrence: { default_observation_id: @obs1.id }
+          })
+    occ1.reload
+    assert_equal(4, occ1.observations.count)
+    assert_includes(occ1.observations, obs3)
+    assert_includes(occ1.observations, obs4)
+    assert_not(Occurrence.exists?(occ2.id))
+  end
+
+  def test_update_add_field_slip_conflict
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    fs1 = field_slips(:field_slip_one)
+    fs2 = field_slips(:field_slip_two)
+    @obs1.update!(field_slip: fs1)
+    obs3.update!(field_slip: fs2)
+    occ = create_occurrence(@obs1, @obs2)
+    patch(:update, params: {
+            id: occ.id,
+            add_observation_ids: [obs3.id],
+            occurrence: { default_observation_id: @obs1.id }
+          })
+    occ.reload
+    assert_equal(2, occ.observations.count)
+    assert_not_includes(occ.observations, obs3)
+    assert_flash_error
+  end
+
+  def test_edit_shows_candidate_observations
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    # Create a recent view so candidates appear
+    obs3 = observations(:detailed_unknown_obs)
+    ObservationView.create!(
+      user: rolf, observation: obs3, last_view: Time.zone.now
+    )
+    get(:edit, params: { id: occ.id })
+    assert_response(:success)
+    assert_match(/add_observation_ids/, @response.body)
   end
 
   # ---------- destroy action ----------

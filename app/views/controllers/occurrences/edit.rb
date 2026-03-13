@@ -7,10 +7,12 @@ module Views
       class Edit < Views::Base
         register_output_helper :container_class
 
-        def initialize(occurrence:, observations:, user:)
+        def initialize(occurrence:, observations:, candidates:,
+                       user:)
           super()
           @occurrence = occurrence
           @observations = observations
+          @candidates = candidates
           @user = user
         end
 
@@ -22,6 +24,7 @@ module Views
           render(Components::OccurrenceEditForm.new(
                    occurrence: @occurrence,
                    observations: @observations,
+                   candidates: @candidates,
                    user: @user
                  ))
         end

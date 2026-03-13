@@ -7,9 +7,11 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   register_output_helper :location_link, mark_safe: true
   register_output_helper :user_link, mark_safe: true
 
-  def initialize(occurrence:, observations:, user:, **)
+  def initialize(occurrence:, observations:, candidates:,
+                 user:, **)
     @occurrence = occurrence
     @observations = observations
+    @candidates = candidates
     @user = user
     form_object = FormObject::Occurrence.new(
       observation_id: occurrence.default_observation_id,
@@ -21,6 +23,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   def view_template
     super do
       render_observation_grid
+      render_candidate_section if @candidates.any?
       render_submit
     end
   end
@@ -37,7 +40,10 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def form_attributes
-    { id: "occurrence_edit_form" }
+    {
+      id: "occurrence_edit_form",
+      data: { controller: "occurrence-edit-form" }
+    }
   end
 
   def hidden_method_field
@@ -131,37 +137,108 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     default = obs.id == @occurrence.default_observation_id
     render_primary_radio(obs, checked: default)
     br
-    if default
-      render_default_label
-    else
-      render_remove_checkbox(obs)
-    end
+    render_remove_checkbox(obs)
   end
 
   def render_primary_radio(obs, checked:)
     label do
-      input(type: "radio",
-            name: "occurrence[default_observation_id]",
-            value: obs.id,
-            checked: checked || nil)
+      input(
+        type: "radio",
+        name: "occurrence[default_observation_id]",
+        value: obs.id,
+        checked: checked || nil,
+        data: {
+          action: "occurrence-edit-form#primarySelected"
+        }
+      )
       whitespace
       plain(:create_occurrence_primary.l)
     end
   end
 
-  def render_default_label
-    small(class: "text-muted") do
-      plain(:show_occurrence_default.l)
+  def render_remove_checkbox(obs)
+    label(class: "text-danger") do
+      input(
+        type: "checkbox",
+        name: "remove_observation_ids[]",
+        value: obs.id,
+        data: {
+          action: "occurrence-edit-form#removeToggled"
+        }
+      )
+      whitespace
+      plain(:edit_occurrence_remove.l)
     end
   end
 
-  def render_remove_checkbox(obs)
-    label(class: "text-danger") do
-      input(type: "checkbox",
-            name: "remove_observation_ids[]",
-            value: obs.id)
+  def render_candidate_section
+    h4(class: "mt-4") { plain(:edit_occurrence_add_heading.l) }
+    ul(
+      class: "row list-unstyled mt-3",
+      data: {
+        controller: "matrix-table",
+        action: "resize@window->matrix-table#rearrange"
+      }
+    ) do
+      @candidates.each { |obs| render_candidate_box(obs) }
+    end
+  end
+
+  def render_candidate_box(obs)
+    li(class: "matrix-box col-xs-12 col-sm-6 col-md-4 col-lg-3") do
+      render(Components::Panel.new(sizing: true)) do |panel|
+        render_obs_thumbnail(panel, obs)
+        render_obs_details(panel, obs)
+        panel.with_footer(classes: "text-center") do
+          render_add_controls(obs)
+        end
+      end
+    end
+  end
+
+  def render_add_controls(obs)
+    render_candidate_primary_radio(obs)
+    br
+    render_add_checkbox(obs)
+    render_occurrence_warning(obs)
+  end
+
+  def render_candidate_primary_radio(obs)
+    label do
+      input(
+        type: "radio",
+        name: "occurrence[default_observation_id]",
+        value: obs.id,
+        data: {
+          action: "occurrence-edit-form#primarySelected"
+        }
+      )
       whitespace
-      plain(:edit_occurrence_remove.l)
+      plain(:create_occurrence_primary.l)
+    end
+  end
+
+  def render_add_checkbox(obs)
+    label do
+      input(
+        type: "checkbox",
+        name: "add_observation_ids[]",
+        value: obs.id,
+        data: {
+          action: "occurrence-edit-form#addToggled"
+        }
+      )
+      whitespace
+      plain(:edit_occurrence_add.l)
+    end
+  end
+
+  def render_occurrence_warning(obs)
+    return unless obs.occurrence
+
+    br
+    span(class: "text-warning") do
+      plain("(in Occurrence ##{obs.occurrence_id})")
     end
   end
 end

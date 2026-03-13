@@ -2952,6 +2952,8 @@
   show_occurrence_default: Default
   edit_occurrence_submit: Save Changes
   edit_occurrence_remove: Remove
+  edit_occurrence_add_heading: Add Recently Viewed Observations
+  edit_occurrence_add: Add
   occurrence_updated: Occurrence updated.
   occurrence_destroyed: Occurrence destroyed.
   occurrence_not_found: Occurrence not found.
