@@ -49,13 +49,13 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     assert_not_equal(mary_session.driver.request.cookies["mo_user"],
                      dick_session.driver.request.cookies["mo_user"])
 
-    url, marys_draft = create_draft(name, gen_desc, project,
-                                    session: mary_session)
-    check_admin(url, marys_draft:, session: rolf_session)
-    check_another_student(url, marys_draft:, session: katrina_session)
-    check_another_user(url, marys_draft:, session: dick_session)
+    url, draft = create_draft(name, gen_desc, project,
+                              session: mary_session)
+    check_admin(url, draft:, session: rolf_session)
+    check_another_student(url, draft:, session: katrina_session)
+    check_another_user(url, draft:, session: dick_session)
     login(session: lurker_session)
-    check_another_user(url, marys_draft:, session: lurker_session)
+    check_another_user(url, draft:, session: lurker_session)
   end
 
   def create_draft(name, gen_desc, project, session:)
@@ -88,20 +88,20 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     end
     assert_flash_success(session: session)
     # assert_template("name/show_name_description")
-    marys_draft = NameDescription.find_by(name: name, source_type: :project)
-    assert_not_nil(marys_draft, "Cannot find NameDescription")
+    draft = NameDescription.find_by(name: name, source_type: :project)
+    assert_not_nil(draft, "Cannot find NameDescription")
 
     # Make sure it shows up on main show_name page and can edit it.
     session.visit("/names/#{name.id}")
-    assert(session.has_link?(href: edit_name_description_path(marys_draft.id)))
+    assert(session.has_link?(href: edit_name_description_path(draft.id)))
     # test for a destroy button:
     session.assert_selector(
-      class: "destroy_name_description_link_#{marys_draft.id}"
+      class: "destroy_name_description_link_#{draft.id}"
     )
 
     # Now give it some text to make sure it *can* (but doesn't) actually get
     # displayed (content, that is) on main show_name page.
-    session.click_link(href: edit_name_description_path(marys_draft.id))
+    session.click_link(href: edit_name_description_path(draft.id))
     session.within("#name_description_form") do |form|
       assert(form.has_field?("description_source_type",
                              type: :hidden, with: :project))
@@ -116,58 +116,58 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     end
     assert_flash_success(session: session)
     assert_not_nil(NameDescription.find_by(gen_desc: gen_desc))
-    [url, marys_draft]
+    [url, draft]
   end
 
   # Navigate to show name (no descriptions) and create draft.
-  def check_admin(url, marys_draft:, session:)
-    marys_draft.reload
+  def check_admin(url, draft:, session:)
+    draft.reload
     session.visit(url)
     # show n.d link should be restricted
-    assert(session.has_link?(href: name_description_path(marys_draft.id),
+    assert(session.has_link?(href: name_description_path(draft.id),
                              text: /Restricted/))
-    assert(session.has_link?(href: edit_name_description_path(marys_draft.id)))
-    session.assert_no_text(/#{marys_draft.gen_desc}/)
+    assert(session.has_link?(href: edit_name_description_path(draft.id)))
+    session.assert_no_text(/#{draft.gen_desc}/)
     assert(session.has_link?(
-             href: new_name_description_path(marys_draft.name.id)
+             href: new_name_description_path(draft.name.id)
            ))
-    session.click_link(href: name_description_path(marys_draft.id))
-    assert(session.has_link?(href: edit_name_description_path(marys_draft.id)))
+    session.click_link(href: name_description_path(draft.id))
+    assert(session.has_link?(href: edit_name_description_path(draft.id)))
     session.assert_selector(
-      class: "destroy_name_description_link_#{marys_draft.id}"
+      class: "destroy_name_description_link_#{draft.id}"
     )
-    session.first(:link, href: edit_name_description_path(marys_draft.id)).click
+    session.first(:link, href: edit_name_description_path(draft.id)).click
     session.within("#name_description_form") do |form|
       assert(form.has_field?("description_source_type",
                              type: :hidden, with: :project))
       assert(form.has_field?("description_source_name",
-                             type: :hidden, with: marys_draft.source_name))
+                             type: :hidden, with: draft.source_name))
       assert(form.has_unchecked_field?("description_public_write",
                                        disabled: false))
       assert(form.has_unchecked_field?("description_public",
                                        disabled: false))
       assert(form.has_field?("description_gen_desc",
-                             with: marys_draft.gen_desc))
+                             with: draft.gen_desc))
     end
   end
 
   # Can view but not edit.
-  def check_another_student(url, marys_draft:, session:)
+  def check_another_student(url, draft:, session:)
     session.visit(url)
-    session.first(:link, href: name_description_path(marys_draft.id)).click
+    session.first(:link, href: name_description_path(draft.id)).click
     assert(
-      session.has_no_link?(href: edit_name_description_path(marys_draft.id))
+      session.has_no_link?(href: edit_name_description_path(draft.id))
     )
     session.assert_no_selector(
-      class: "destroy_name_description_link_#{marys_draft.id}"
+      class: "destroy_name_description_link_#{draft.id}"
     )
   end
 
   # Knows it exists but can't even view it.
-  def check_another_user(url, marys_draft:, session:)
+  def check_another_user(url, draft:, session:)
     session.visit(url)
-    assert(session.has_link?(href: name_description_path(marys_draft.id)))
-    session.first(:link, href: name_description_path(marys_draft.id)).click
+    assert(session.has_link?(href: name_description_path(draft.id)))
+    session.first(:link, href: name_description_path(draft.id)).click
     assert_flash_error(session: session)
   end
 
