@@ -41,6 +41,34 @@ bin/rails test test/models/observation_test.rb::ObservationTest#test_name -v
 bin/rails test:system test/system/help_identify_system_test.rb
 ```
 
+## Finding Records After Creation
+
+**Never use `Model.last` (or `Model.order(...).last`) to find a record just
+created by a test.** In parallel test runs, another worker may insert a record
+with a higher ID between the creation and the lookup, returning the wrong object
+and causing a silent, flaky failure.
+
+**Instead, look up by known attributes:**
+
+```ruby
+# ❌ Wrong — races with parallel workers
+herbarium = Herbarium.last
+comment   = Comment.last
+
+# ✅ Correct — find by attributes the test controls
+herbarium = Herbarium.find_by(name: params[:herbarium][:name].strip_html.strip)
+comment   = Comment.find_by(summary: "Known Summary", target: obs)
+```
+
+Always add `assert_not_nil(record, "Cannot find ModelName")` immediately after
+the lookup so a nil return fails with a clear message instead of a cryptic
+`NoMethodError`.
+
+**Safe uses of `.last`** (not a race condition):
+- Association-scoped: `obs.namings.order(:id).last` — scoped to a specific parent
+- In-process queues: `ActionMailer::Base.deliveries.last`
+- Fixture lookups where no record is being created (though a fixture name is clearer)
+
 ## Test Structure
 - Framework: MiniTest (not RSpec)
 - Test files: `test/**/*_test.rb`
