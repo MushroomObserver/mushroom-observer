@@ -1,27 +1,34 @@
 <%
-id = @show_user.id
-complete_name = @show_user.unique_text_name
-name = @show_user.login
-add_page_title(:show_user_about.t(user: complete_name))
+add_show_title(
+  :show_user_about.t(user: @show_user.unique_text_name), @show_user
+)
 add_pager_for(@show_user)
-add_tab_set(user_show_tabs)
-
-@container = :full
+add_context_nav(user_show_tabs)
+container_class(:full)
+column_classes(:six_even)
+id = @show_user.id
+name = @show_user.login
 %>
 
-<div class="row">
+<%= tag.div(class: "row") do %>
 
-  <div class="col-xs-12 col-lg-5">
+  <%= tag.div(class: yield(:left_columns)) do %>
     <%= render(partial: "users/show/profile") %>
     <% if @show_user.contribution > 0 %>
       <%= render(partial: "users/show/user_stats", locals: { name: name }) %>
     <% end %>
-  </div>
+  <% end %>
 
-  <div class="col-xs-12 col-lg-7">
-    <%= render(partial: "users/show/best_images", locals: { name: name }) %>
-  </div>
+  <%= tag.div(class: yield(:right_columns)) do %>
+    <%= if @best_images&.length&.positive?
+      render(Components::Carousel.new(
+        object: @show_user,
+        images: @best_images,
+        title: :show_user_observations_by.t(name: name),
+        panel_id: "user_best_images"
+      ))
+    end %>
+  <% end %>
 
-</div><!--.row-->
-
-
+<% end %>
+<!--.row-->

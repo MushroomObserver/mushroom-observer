@@ -42,7 +42,7 @@ module Herbaria
     end
 
     def request_merge(src, dest)
-      redirect_with_query(
+      redirect_to(
         new_admin_emails_merge_requests_path(
           type: :Herbarium, old_id: src.id, new_id: dest.id
         )

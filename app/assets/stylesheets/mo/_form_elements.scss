@@ -4,6 +4,14 @@
 .radio {
   label {
     font-weight: $btn-font-weight;
+
+    // Because it's within the label, it doesn't get the label's margin.
+    .form-between {
+      margin-left: 1rem;
+    }
+    .badge-id {
+      font-size: 90% !important
+    }
   }
 }
 
@@ -12,6 +20,18 @@
   input[type=checkbox] {
     vertical-align: text-top;
   }
+}
+
+// Remove browser default gradients on select elements
+select.form-control {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 8px 10px;
+  padding-right: 1.75rem;
 }
 
 input.has-error,
@@ -179,4 +199,19 @@ form {
 .overflow-scroll-checklist {
   max-height: 30rem;
   overflow-y: auto;
+}
+
+.panel-body {
+  .row:last-child .form-group,
+  > .autocompleter:last-child .form-group.dropdown:last-child,
+  > .form-group:last-child
+  {
+    margin-bottom: 0.25rem;
+  }
+
+  + .panel-collapse {
+    .panel-body {
+      padding-top: 0 !important;
+    }
+  }
 }

@@ -27,9 +27,9 @@
 class NameTracker < AbstractModel
   belongs_to :user
   belongs_to :name
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
-  scope :for_user,
-        ->(user) { where(user: user) }
+  scope :for_user, ->(user) { where(user: user) }
 
   # Used as an "opt-in" check-box in the UI form.
   attr_accessor :note_template_enabled
@@ -54,7 +54,7 @@ class NameTracker < AbstractModel
       gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
       gsub(":mailing_address", tracker.mailing_address || "").
       gsub(":location", naming.observation.place_name).
-      gsub(":name", naming.format_name)
+      gsub(":name", naming.user_format_name(tracker))
   end
 
   # Return a string summarizing what this NameTracker is about.

@@ -20,7 +20,7 @@ class ObservationView < AbstractModel
 
     args = { observation_id: obs_id, user_id: user_id,
              last_view: Time.zone.now }
-    args[:reviewed] = reviewed if reviewed.present?
+    args[:reviewed] = reviewed unless reviewed.nil?
 
     # Either way, this returns the observation view instance
     if (view = find_by(observation_id: obs_id, user_id: user_id))

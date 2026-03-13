@@ -79,50 +79,35 @@
 #
 #  ==== Scopes
 #
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
 #  found_on("yyyymmdd")
 #  found_after("yyyymmdd")
 #  found_before("yyyymmdd")
 #  found_between(start, end)
-#  of_name(name)
-#  of_name_like(string)
-#  with_name
-#  without_name
+#  names(name)
+#  names_like(string)
+#  has_name
 #  by_user(user)
-#  with_location
-#  without_location
-#  at_location(location)
-#  in_region(where)
+#  has_location
+#  locations(location)
+#  region(where)
 #  in_box(north:, south:, east:, west:) geoloc is in the box
 #  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
-#  not_collection_location
-#  with_images
-#  without_images
-#  with_notes
-#  without_notes
+#  has_images
+#  has_notes
 #  has_notes_field(field)
-#  notes_include(note)
-#  with_specimen
-#  without_specimen
-#  with_sequences
-#  without_sequences
+#  notes_has(note)
+#  has_specimen
+#  has_sequences
 #  confidence (min %, max %)
-#  with_comments
-#  without_comments
-#  comments_include(summary)
-#  for_project(project)
-#  in_herbarium(herbarium)
-#  herbarium_record_notes_include(notes)
-#  on_species_list(species_list)
-#  on_species_list_of_project(project)
+#  has_comments
+#  comments_has(summary)
+#  projects(project)
+#  herbaria(herbaria)
+#  species_lists(species_list)
+#  project_lists(project)
 #
 #  == Instance methods
 #
@@ -168,6 +153,10 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
+  attr_accessor :current_user
+
+  include Scopes
+
   belongs_to :thumb_image, class_name: "Image",
                            inverse_of: :thumb_glossary_terms
   belongs_to :name # (used to cache consensus name)
@@ -202,7 +191,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :collection_numbers, through: :observation_collection_numbers
-  has_many :field_slips, dependent: :destroy
+  belongs_to :field_slip, optional: true
 
   has_many :observation_herbarium_records, dependent: :destroy
   has_many :herbarium_records, through: :observation_herbarium_records
@@ -223,453 +212,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
+  after_commit :flush_observation_change_emails, on: [:create, :update]
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
-  # Extra timestamp scopes for when Observation found:
-  scope :found_on, lambda { |ymd_string|
-    where(arel_table[:when].format("%Y-%m-%d").eq(ymd_string))
-  }
-  scope :found_after, lambda { |ymd_string|
-    where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
-  }
-  scope :found_before, lambda { |ymd_string|
-    where(arel_table[:when].format("%Y-%m-%d") <= ymd_string)
-  }
-  scope :found_between, lambda { |earliest, latest|
-    where(arel_table[:when].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:when].format("%Y-%m-%d") <= latest)
-  }
+  SEARCHABLE_FIELDS = [
+    :where, :text_name, :notes
+  ].freeze
 
-  # For activerecord subqueries, DON'T pre-map the primary key (id)
-  scope :with_name,
-        -> { where.not(name: Name.unknown) }
-  scope :without_name,
-        -> { where(name: Name.unknown) }
-  scope :with_name_above_genus,
-        -> { where(name_id: Name.with_rank_above_genus) }
-  scope :without_confident_name,
-        -> { where(vote_cache: ..0) }
-  # Use this definition when running script to populate the column:
-  # scope :needs_naming, lambda {
-  #   with_name_above_genus.or(without_confident_name)
-  # }
-  scope :needs_naming, -> { where(needs_naming: true) }
-  scope :with_name_correctly_spelled,
-        -> { joins({ namings: :name }).where(names: { correct_spelling: nil }) }
-
-  scope :with_vote_by_user, lambda { |user|
-    user_id = user.is_a?(Integer) ? user : user&.id
-    joins(:votes).where(votes: { user_id: user_id })
-  }
-  scope :without_vote_by_user, lambda { |user|
-    user_id = user.is_a?(Integer) ? user : user&.id
-    where.not(id: Vote.where(user_id: user_id))
-  }
-  scope :reviewed_by_user, lambda { |user|
-    user_id = user.is_a?(Integer) ? user : user&.id
-    joins(:observation_views).
-      where(observation_views: { user_id: user_id, reviewed: 1 })
-  }
-  scope :not_reviewed_by_user, lambda { |user|
-    user_id = user.is_a?(Integer) ? user : user&.id
-    where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
-                  select(:observation_id))
-  }
-  scope :needs_naming_and_not_reviewed_by_user, lambda { |user|
-    needs_naming.not_reviewed_by_user(user).distinct
-  }
-  # Higher taxa: returns narrowed-down group of id'd obs,
-  # in higher taxa under the given taxon
-  # scope :needs_naming_by_taxon, lambda { |user, name|
-  #   name_plus_subtaxa = Name.include_subtaxa_of(name)
-  #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus
-  #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus
-
-  #   where(name_id: subtaxa_above_genus).or(
-  #     Observation.where(name_id: lower_subtaxa).and(
-  #       Observation.where(vote_cache: ..0)
-  #     )
-  #   ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
-  # }
-
-  # scope :of_name(name, **args)
-  #
-  # Accepts either a Name instance, a string, or an id as the first argument.
-  #  Other args:
-  #  - include_synonyms: boolean
-  #  - include_subtaxa: boolean
-  #  - include_all_name_proposals: boolean
-  #  - of_look_alikes: boolean
-  #
-  scope :of_name, lambda { |name, **args|
-    # First, get a name record if string or id submitted
-    case name
-    when String
-      name = Name.find_by(text_name: name)
-    when Integer
-      name = Name.find_by(id: name)
-    end
-    return Observation.none unless name.is_a?(Name)
-
-    # Filter args may add to an array of names to collect Observations
-    names_array = [name]
-    # Maybe add synonyms (Name#synonyms includes original name)
-    names_array = name.synonyms if args[:include_synonyms]
-    # Keep names_array intact as is; maybe add more to its clone name_ids.
-    # (I'm thinking it's easier to pass name ids to the Observation query)
-    name_ids = names_array
-
-    # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
-    # (don't modify the names_array we're iterating over)
-    if args[:include_subtaxa]
-      names_array.each do |n|
-        # |= don't add duplicates
-        name_ids |= Name.subtaxa_of(n)
-      end
-    end
-
-    # Query, with possible join to Naming. Mutually exclusive options:
-    if args[:include_all_name_proposals]
-      joins(:namings).where(namings: { name_id: name_ids })
-    elsif args[:of_look_alikes]
-      joins(:namings).where(namings: { name_id: name_ids }).
-        where.not(name: name_ids)
-    else
-      where(name_id: name_ids)
-    end
-  }
-
-  scope :of_name_like,
-        ->(name) { where(name: Name.text_name_includes(name)) }
-
-  scope :in_clade, lambda { |val|
-    if val.is_a?(Name)
-      name = val
-      text_name = name.text_name
-      rank = name.rank
-    elsif val.is_a?(String) && (name = Name.best_match(val))
-      text_name = name.text_name
-      rank = name.rank
-    else
-      text_name = val
-      rank = "Genus"
-    end
-
-    if Name.ranks_above_genus.include?(rank)
-      where(text_name: text_name).or(
-        where(Observation[:classification].matches("%#{rank}: _#{text_name}_%"))
-      )
-    else
-      where(text_name: text_name).or(
-        where(Observation[:text_name].matches("#{text_name} %"))
-      )
-    end
-  }
-
-  scope :by_user,
-        ->(user) { where(user: user) }
-  # used for preloading values in the create obs form. call with `.last`
-  scope :recent_by_user,
-        lambda { |user|
-          includes(:location, :projects, :species_lists).
-            where(user_id: user.id).order(:created_at)
-        }
-  scope :mappable,
-        -> { where.not(location: nil).or(where.not(lat: nil)) }
-  scope :unmappable,
-        -> { where(location: nil).and(where(lat: nil)) }
-  scope :with_location,
-        -> { where.not(location: nil) }
-  scope :without_location,
-        -> { where(location: nil) }
-  scope :with_geolocation,
-        -> { where.not(lat: nil) }
-  scope :without_geolocation,
-        -> { where(lat: nil) }
-  scope :with_public_geolocation,
-        -> { where(gps_hidden: false).where.not(lat: nil) }
-  scope :without_public_geolocation,
-        -> { where(gps_hidden: true).or(where(lat: nil)) }
-  scope :at_location,
-        ->(location) { where(location: location) }
-  scope :in_region,
-        lambda { |region|
-          region = Location.reverse_name_if_necessary(region)
-          if Location.understood_continent?(region)
-            countries = Location.countries_in_continent(region).join("|")
-            where(Observation[:where].matches(", (#{countries})$"))
-          else
-            where(Observation[:where].matches("%#{region}"))
-          end
-        }
-  # Pass kwargs (:north, :south, :east, :west), any order
-  # Pass mappable: false to include all obs, including with vague locations.
-  scope :in_box,
-        lambda { |**args|
-          args[:mappable] ||= false
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          if box.straddles_180_deg?
-            in_box_straddling_dateline(**args)
-          else
-            in_box_regular(**args)
-          end
-        }
-  scope :in_box_straddling_dateline, # mostly a helper for in_box
-        lambda { |**args|
-          args[:mappable] ||= true
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          where(
-            (Observation[:lat] >= box.south).
-            and(Observation[:lat] <= box.north).
-            and(Observation[:lng] >= box.west).
-            or(Observation[:lng] <= box.east)
-          ).or(Observation.location_straddling_dateline(**args))
-        }
-  scope :location_straddling_dateline,
-        lambda { |**args|
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          if args[:mappable]
-            where(
-              Observation[:lat].eq(nil).
-              and(Observation[:location_lat] >= box.south).
-              and(Observation[:location_lat] <= box.north).
-              and(Observation[:location_lng] >= box.west).
-              or(Observation[:location_lng] <= box.east)
-            )
-          else
-            joins(:location).
-              where(
-                Observation[:lat].eq(nil).
-                and(Location[:center_lat] >= box.south).
-                and(Location[:center_lat] <= box.north).
-                and(Location[:center_lng] <= box.east).
-                and(Location[:center_lng] >= box.west)
-              )
-          end
-        }
-  scope :in_box_regular, # mostly a helper for in_box
-        lambda { |**args|
-          args[:mappable] ||= true
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          where(
-            (Observation[:lat] >= box.south).
-            and(Observation[:lat] <= box.north).
-            and(Observation[:lng] >= box.west).
-            and(Observation[:lng] <= box.east)
-          ).or(Observation.location_center_in_box(**args))
-        }
-  scope :location_center_in_box,
-        lambda { |**args|
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          # odd! will toss entire condition if below order is west, east
-          if args[:mappable]
-            where(
-              Observation[:lat].eq(nil).
-              and(Observation[:location_lat] >= box.south).
-              and(Observation[:location_lat] <= box.north).
-              and(Observation[:location_lng] <= box.east).
-              and(Observation[:location_lng] >= box.west)
-            )
-          else
-            joins(:location).
-              where(
-                Observation[:lat].eq(nil).
-                and(Location[:center_lat] >= box.south).
-                and(Location[:center_lat] <= box.north).
-                and(Location[:center_lng] <= box.east).
-                and(Location[:center_lng] >= box.west)
-              )
-          end
-        }
-
-  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
-        lambda { |**args|
-          args[:mappable] ||= false
-          box = Mappable::Box.new(**args.except(:mappable))
-          return Observation.all unless box.valid?
-
-          # should be in_box(**args).invert_where
-          if box.straddles_180_deg?
-            not_in_box_straddling_dateline(**args)
-          else
-            not_in_box_regular(**args)
-          end
-        }
-  scope :not_in_box_straddling_dateline, # helper for not_in_box
-        lambda { |**args|
-          args[:mappable] ||= false
-          box = Mappable::Box.new(**args.except(:mappable))
-          return Observation.all unless box.valid?
-
-          where(
-            Observation[:lat].eq(nil).
-            or(Observation[:lat] < box.south).
-            or(Observation[:lat] > box.north).
-            or((Observation[:lng] < box.west).
-                and(Observation[:lng] > box.east))
-          )
-        }
-  scope :not_in_box_regular, # helper for not_in_box
-        lambda { |**args|
-          args[:mappable] ||= false
-          box = Mappable::Box.new(**args.except(:mappable))
-          return Observation.all unless box.valid?
-
-          where(
-            Observation[:lat].eq(nil).
-            or(Observation[:lat] < box.south).
-            or(Observation[:lat] > box.north).
-            or(Observation[:lng] < box.west).
-            or(Observation[:lng] > box.east)
-          )
-        }
-
-  scope :is_collection_location,
-        -> { where(is_collection_location: true) }
-  scope :not_collection_location,
-        -> { where(is_collection_location: false) }
-  scope :with_images,
-        -> { where.not(thumb_image: nil) }
-  scope :without_images,
-        -> { where(thumb_image: nil) }
-  scope :with_notes,
-        -> { where.not(notes: no_notes) }
-  scope :without_notes,
-        -> { where(notes: no_notes) }
-  scope :with_notes_field,
-        ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
-  scope :notes_include,
-        ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
-  scope :with_specimen,
-        -> { where(specimen: true) }
-  scope :without_specimen,
-        -> { where(specimen: false) }
-  scope :with_sequences,
-        -> { joins(:sequences).distinct }
-  scope :without_sequences, lambda {
-    # much faster than `missing(:sequences)` which uses left outer join.
-    where.not(id: with_sequences)
-  }
-  scope :confidence, lambda { |min, max = min| # confidence between min & max %
-    where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
-  }
-  scope :with_comments,
-        -> { joins(:comments).distinct }
-  scope :without_comments,
-        -> { where.not(id: Observation.with_comments) }
-  scope :comments_include, lambda { |summary|
-    joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
-  }
-  scope :for_project, lambda { |project|
-    joins(:project_observations).
-      where(ProjectObservation[:project_id].eq(project.id)).distinct
-  }
-  scope :in_herbarium, lambda { |herbarium|
-    joins(:herbarium_records).
-      where(HerbariumRecord[:herbarium_id].eq(herbarium.id)).distinct
-  }
-  scope :herbarium_record_notes_include, lambda { |notes|
-    joins(:herbarium_records).
-      where(HerbariumRecord[:notes].matches("%#{notes}%")).distinct
-  }
-  scope :on_species_list, lambda { |species_list|
-    joins(:species_list_observations).
-      where(SpeciesListObservation[:species_list_id].eq(species_list.id)).
-      distinct
-  }
-  scope :on_species_list_of_project, lambda { |project|
-    joins(species_lists: :project_species_lists).
-      where(ProjectSpeciesList[:project_id].eq(project.id)).distinct
-  }
-  scope :show_includes, lambda {
-    strict_loading.includes(
-      :collection_numbers,
-      :field_slips,
-      { comments: :user },
-      { external_links: { external_site: { project: :user_group } } },
-      { herbarium_records: [{ herbarium: :curators }, :user] },
-      { images: [:image_votes, :license, :projects, :user] },
-      { interests: :user },
-      :location,
-      { name: { synonym: :names } },
-      { namings: [:name, :user, { votes: [:observation, :user] }] },
-      { projects: :admin_group },
-      :rss_log,
-      :sequences,
-      { species_lists: [:projects, :user] },
-      :thumb_image,
-      :user
-    )
-  }
-  scope :not_logged_in_show_includes, lambda {
-    strict_loading.includes(
-      { comments: :user },
-      { images: [:image_votes, :license, :user] },
-      :location,
-      { name: { synonym: :names } },
-      { namings: [:name, :user, { votes: [:observation, :user] }] },
-      :projects,
-      :thumb_image,
-      :user
-    )
-  }
-  scope :naming_includes, lambda {
-    includes(
-      { herbarium_records: [:herbarium] }, # in case naming is "Imageless"
-      :location, # ugh. worth it because of cache_content_filter_data
-      :name,
-      # Observation#find_matches complains synonym is not eager-loaded. TBD
-      { namings: [{ name: { synonym: :names } }, :user,
-                  { votes: [:observation, :user] }] },
-      :species_lists, # in case naming is "Imageless"
-      :user
-    )
-  }
-  scope :edit_includes, lambda {
-    strict_loading.includes(
-      :collection_numbers,
-      :field_slips,
-      { external_links: { external_site: { project: :user_group } } },
-      { herbarium_records: [{ herbarium: :curators }, :user] },
-      { images: [:image_votes, :license, :projects, :user] },
-      { interests: :user },
-      :location,
-      { name: { synonym: :names } },
-      { projects: :admin_group },
-      :rss_log,
-      :sequences,
-      { species_lists: [:projects, :user] },
-      :thumb_image,
-      :user
-    )
-  }
-
-  def self.build_observation(location, name, notes, date)
+  def self.build_observation(location, name, notes, date, current_user = nil)
     return nil unless location
 
     name ||= Name.find_by(text_name: "Fungi")
     now = Time.zone.now
-    user = User.current
+    user = current_user || User.current
     obs = new({ created_at: now, updated_at: now, source: "mo_website",
                 when: date,
                 user:, location:, name:, notes: })
     return nil unless obs
 
-    obs.log(:log_observation_created)
-    naming = Naming.construct({ name: }, obs)
+    obs.user_log(user, :log_observation_created)
+    naming = Naming.user_construct({ name: }, obs, user)
     naming.save!
     naming.votes.create!(
       user:,
@@ -677,7 +241,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       value: Vote.maximum_vote,
       favorite: true
     )
-    Observation::NamingConsensus.new(obs).calc_consensus
+    Observation::NamingConsensus.new(obs).user_calc_consensus(user)
     obs
   end
 
@@ -689,12 +253,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     true
   end
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     Project.can_edit?(self, user) || is_collector?(user)
   end
 
   def is_collector?(user)
-    user && notes[:Collector] == "_user #{user.login}_"
+    user && notes[:Collector]&.include?("_user #{user.login}_")
   end
 
   def project_admin?(user = User.current)
@@ -716,7 +280,25 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       self.text_name = name.text_name
       self.classification = name.classification
     end
-    self.where = location.name if location && location_id_changed?
+    return unless location_id_changed?
+
+    if location
+      self.where = location.name
+      # Only cache coordinates for locations within the box_area threshold
+      if location.box_area <= MO.obs_location_max_area
+        self.location_lat = location.center_lat
+        self.location_lng = location.center_lng
+      else
+        self.location_lat = nil
+        self.location_lng = nil
+      end
+    else
+      # Clear cached coordinates when location is removed
+      # Don't clear where if it was explicitly set by the user
+      self.where = nil unless where_changed?
+      self.location_lat = nil
+      self.location_lng = nil
+    end
   end
 
   # This is meant to be run nightly to ensure that the cached name
@@ -776,7 +358,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.refresh_needs_naming_column(dry_run: false)
     # Need to repeat `needs_naming:false` even though AR will optimize it out
     # and it'll only appear once in the resulting WHERE condition. Go figure.
-    query = Observation.where(needs_naming: false).without_confident_name.
+    query = Observation.
+            where(needs_naming: false).has_no_confident_name.
             or(where(needs_naming: false).with_name_above_genus)
     msgs = query.map do |obs|
       "Observation #{obs.id}, #{obs.text_name}, needs a name."
@@ -785,13 +368,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     msgs
   end
 
-  def update_view_stats
+  def update_view_stats(current_user = User.current)
     super
-    return if User.current.blank?
+    return if current_user.blank?
 
     @old_last_viewed_by ||= {}
-    @old_last_viewed_by[User.current_id] = last_viewed_by(User.current)
-    ObservationView.update_view_stats(id, User.current_id)
+    @old_last_viewed_by[current_user.id] = last_viewed_by(current_user)
+    ObservationView.update_view_stats(id, current_user.id)
   end
 
   def last_viewed_by(user)
@@ -860,7 +443,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       self.when = val if Date.parse(val)
     rescue ArgumentError
     end
-    val
   end
 
   def lat=(val)
@@ -907,15 +489,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # or they are members of a project that the observation belongs to, but
   # those are harder to determine. This catches the majority of cases.
   def public_lat
-    gps_hidden && user_id != User.current_id ? nil : lat
+    gps_hidden && user_id != @current_user&.id ? nil : lat
   end
 
   def public_lng
-    gps_hidden && user_id != User.current_id ? nil : lng
+    gps_hidden && user_id != @current_user&.id ? nil : lng
   end
 
-  def reveal_location?
-    !gps_hidden || can_edit? || project_admin?
+  def reveal_location?(user)
+    !gps_hidden || can_edit?(user) || project_admin?(user)
   end
 
   def display_lat_lng
@@ -978,7 +560,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #     First user key: value
   #     Second user key: value
   #     ...
-  #   both user-supplied  and general Other keys:
+  #   both user-supplied and general Other keys:
   #     Notes:
   #     First user key: value
   #     Second user key: value
@@ -990,7 +572,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Notes are exported as shown, except that the intial "Notes:" caption is
   # omitted, and any markup is stripped from the keys.
 
-  serialize :notes
+  serialize :notes, coder: YAML
 
   # value of observation.notes if there are no notes
   def self.no_notes
@@ -998,14 +580,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def notes
-    return self[:notes] if self[:notes].is_a?(Hash)
+    value = read_attribute(:notes)
+    return Observation.no_notes unless value.is_a?(Hash)
 
-    Observation.no_notes
-  end
-
-  # no_notes persisted in the db
-  def self.no_notes_persisted
-    no_notes.to_yaml
+    NormalizedHash.new(value)
   end
 
   # Key used for general Observation.notes
@@ -1015,9 +593,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # convenience wrapper around class method of same name
-  def other_notes_key
-    Observation.other_notes_key
-  end
+  delegate :other_notes_key, to: :Observation
 
   # other_notes_key as a String
   # Makes it easy to combine with notes_template
@@ -1025,9 +601,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     other_notes_key.to_s
   end
 
-  def other_notes_part
-    Observation.other_notes_part
-  end
+  delegate :other_notes_part, to: :Observation
 
   def other_notes
     notes ? notes[other_notes_key] : nil
@@ -1043,9 +617,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
 
-  def notes_part_id(part)
-    Observation.notes_part_id(part)
-  end
+  delegate :notes_part_id, to: :Observation
 
   # prefix for id of textarea
   def self.notes_area_id_prefix
@@ -1063,9 +635,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Change spaces to underscores in keys
   #   notes_normalized_key("Nearby trees") #=> :Nearby_trees
   #   notes_normalized_key(:Other)         #=> :Other
-  def notes_normalized_key(part)
+  def self.notes_normalized_key(part)
     part.to_s.tr(" ", "_").to_sym
   end
+
+  delegate :notes_normalized_key, to: :Observation
 
   # Array of note parts (Strings) to display in create & edit form,
   # in following (display) order. Used by views.
@@ -1090,10 +664,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def notes_orphaned_parts(user)
     return [] if notes.blank?
 
-    notes_keys = notes.keys.map(&:to_s).each do |key|
-      key.tr!("_", " ")
+    # Normalization for comparison (lowercase)
+    normalize_for_comparison = ->(key) { normalize_for_display(key).downcase }
+
+    known_keys = (user.notes_template_parts + [other_notes_part]).
+                 map(&normalize_for_comparison).
+                 to_set
+    notes.keys.each_with_object([]) do |key, result|
+      normalized_key = normalize_for_comparison.call(key)
+      next if known_keys.include?(normalized_key)
+
+      result << normalize_for_display(key)
+      known_keys << normalized_key
     end
-    notes_keys - user.notes_template_parts - [other_notes_part]
   end
 
   # notes as a String, captions (keys) without added formstting,
@@ -1106,10 +689,22 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #                                                  Other: x"
   def self.export_formatted(notes, markup = nil)
     return "" if notes.blank?
+
+    # Defensive check: if notes is not a Hash, it might be misaligned columns
+    # Only reject types that indicate column misalignment (Time/DateTime)
+    # Allow other types to fail naturally with better error messages
+    if notes.is_a?(Time) || notes.is_a?(DateTime)
+      Rails.logger.warn(
+        "export_formatted received #{notes.class} instead of Hash. " \
+        "This may indicate column misalignment. Returning empty string."
+      )
+      return ""
+    end
+
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
     result = notes.each_with_object(+"") do |(key, value), str|
-      str << "#{markup}#{key}#{markup}: #{value}\n"
+      str << "#{markup}#{key.to_s.tr("_", " ")}#{markup}: #{value}\n"
     end
     result.chomp
   end
@@ -1149,14 +744,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     string_with_id(name.real_search_name)
   end
 
+  def user_unique_text_name(user)
+    string_with_id(name.user_real_search_name(user))
+  end
+
   # Textile-marked-up name, never nil.
   def format_name
-    name.observation_name
+    name.user_observation_name(User.current)
+  end
+
+  def user_format_name(user)
+    name.user_observation_name(user)
   end
 
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
     string_with_id(name.observation_name)
+  rescue StandardError
+    ""
+  end
+
+  def user_unique_format_name(user)
+    string_with_id(name.user_observation_name(user))
   rescue StandardError
     ""
   end
@@ -1197,8 +806,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       images << img
       self.thumb_image = img unless thumb_image
       self.updated_at = Time.zone.now
+      track_change(:added_image)
       save
-      notify_users(:added_image)
       reload
     end
     img
@@ -1218,10 +827,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def remove_image(img)
     if images.include?(img) || thumb_image_id == img.id
       images.delete(img)
+      track_change(:removed_image)
       if thumb_image_id == img.id
         update(thumb_image: images.empty? ? nil : images.first)
+      else
+        # Touch to trigger after_commit within proper transaction flow
+        touch
       end
-      notify_users(:removed_image)
     end
     img
   end
@@ -1231,8 +843,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add species_lists and herbarium_records to naming_includes
   def has_backup_data?
     !thumb_image_id.nil? ||
-      species_lists.count.positive? ||
-      herbarium_records.count.positive? ||
+      species_lists.any? ||
+      herbarium_records.any? ||
       specimen ||
       notes.length >= 100
   end
@@ -1248,7 +860,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless collection_numbers.empty?
     return unless herbarium_records.empty?
     return unless sequences.empty?
-    return unless field_slips.empty?
+    return if field_slip
 
     update(specimen: false)
   end
@@ -1288,21 +900,25 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.
-  def add_spl_callback(_obs)
-    UserStats.update_contribution(:add, :species_list_entries, user_id)
+  def add_spl_callback(spl)
+    tmp_id = user_id
+    tmp_id ||= spl.user_id if spl.respond_to?(:user_id)
+    UserStats.update_contribution(:add, :species_list_entries, tmp_id)
   end
 
   # Callback that updates a User's contribution after removing an Observation
   # from a SpeciesList.
-  def remove_spl_callback(_obs)
-    UserStats.update_contribution(:del, :species_list_entries, user_id)
+  def remove_spl_callback(spl)
+    tmp_id = user_id
+    tmp_id ||= spl.user_id if spl.respond_to?(:user_id)
+    UserStats.update_contribution(:del, :species_list_entries, tmp_id)
   end
 
   # Callback that logs an Observation's destruction on all of its
   # SpeciesList's.  (Also saves list of Namings so they can be destroyed
   # by hand afterword without causing superfluous calc_consensuses.)
   def notify_species_lists
-    # Tell all the species lists it belonged to.
+    # Tell all the species_lists it belonged to.
     species_lists.each do |spl|
       spl.log(:log_observation_destroyed2, name: unique_format_name,
                                            touch: false)
@@ -1316,71 +932,90 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Observation is destroyed.
   def destroy_dependents
     @old_namings.each do |naming|
+      naming.current_user = naming.observation.current_user
       naming.observation = nil # (tells it not to recalc consensus)
       naming.destroy
     end
   end
 
-  # Callback that sends email notifications after save.
+  # Callback that tracks which fields changed for email notifications.
   def notify_users_after_change
-    if !id ||
-       saved_change_to_when? ||
-       saved_change_to_where? ||
-       saved_change_to_location_id? ||
-       saved_change_to_notes? ||
-       saved_change_to_specimen? ||
-       saved_change_to_is_collection_location? ||
-       saved_change_to_thumb_image_id?
-      notify_users(:change)
-    end
+    track_change(:date) if saved_change_to_when?
+    track_change(:location) if saved_change_to_place?
+    track_change(:notes) if saved_change_to_notes?
+    track_change(:specimen) if saved_change_to_specimen?
+    track_change(:thumb_image_id) if saved_change_to_thumb_image_id?
+    return unless saved_change_to_is_collection_location?
+
+    track_change(:is_collection_location)
   end
 
-  # Callback that sends email notifications after destroy.
+  # Callback that sends destroy notification before observation is destroyed.
+  # This must be sent immediately since the observation won't exist after.
   def notify_users_before_destroy
-    notify_users(:destroy)
+    send_observation_destroyed_emails
   end
 
-  # Send email notifications upon change to Observation.  Several actions are
-  # possible:
-  #
-  # added_image::   Image was added.
-  # removed_image:: Image was removed.
-  # change::        Other changes (e.g. to notes).
-  # destroy::       Observation destroyed.
-  #
-  #   obs.images << Image.create
-  #   obs.notify_users(:added_image)
-  #
-  def notify_users(action)
+  # Track a pending change for email notification batching.
+  # Uses Thread.current for thread safety across concurrent requests.
+  def track_change(change_type)
+    key = pending_changes_key
+    Thread.current[key] ||= []
+    return if Thread.current[key].include?(change_type)
+
+    Thread.current[key] << change_type
+  end
+
+  # Returns and clears the list of pending changes.
+  def pending_changes
+    key = pending_changes_key
+    changes = Thread.current[key] || []
+    Thread.current[key] = nil
+    changes
+  end
+
+  # Unique key per observation instance for thread-local storage.
+  def pending_changes_key
+    :"observation_#{id}_pending_changes"
+  end
+
+  # Send batched observation change emails. Called after all changes are made.
+  # Migrated from QueuedEmail::ObservationChange to deliver_later.
+  def flush_observation_change_emails
+    changes = pending_changes
+    return if changes.empty?
+
     sender = user
-    recipients = []
+    recipients = interested_users - [sender]
+    note = changes.join(",")
 
-    # Send to people who have registered interest.
-    interests.each do |interest|
-      recipients.push(interest.user) if interest.state
+    recipients.each do |receiver|
+      next if receiver.no_emails
+
+      ObservationChangeMailer.build(
+        sender:, receiver:, observation: self, note:, time: updated_at
+      ).deliver_later
     end
+  end
 
-    # Tell masochists who want to know about all observation changes.
-    User.where(email_observations_all: true).find_each do |user|
-      recipients.push(user)
+  # Send immediate destroy notification (can't batch - obs is being deleted).
+  def send_observation_destroyed_emails
+    sender = user
+    recipients = interested_users - [sender]
+    note = user_unique_format_name(User.current)
+
+    recipients.each do |receiver|
+      next if receiver.no_emails
+
+      ObservationChangeMailer.build(
+        sender:, receiver:, observation: nil, note:, time: Time.zone.now
+      ).deliver_later
     end
+  end
 
-    # Send notification to all except the person who triggered the change.
-    recipients.uniq.each do |recipient|
-      next if !recipient || recipient == sender || recipient.no_emails
-
-      case action
-      when :destroy
-        QueuedEmail::ObservationChange.destroy_observation(sender, recipient,
-                                                           self)
-      when :change
-        QueuedEmail::ObservationChange.change_observation(sender, recipient,
-                                                          self)
-      else
-        QueuedEmail::ObservationChange.change_images(sender, recipient, self,
-                                                     action)
-      end
-    end
+  # Get list of users interested in this observation (for email notifications).
+  def interested_users
+    interests.select(&:state).filter_map(&:user).uniq
   end
 
   # Send email notifications upon change to consensus.
@@ -1414,9 +1049,42 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::ConsensusChange.create_email(sender, recipient, self,
-                                                old_name, new_name)
+    (recipients.uniq - [sender]).each do |receiver|
+      ConsensusChangeMailer.build(
+        sender:, receiver:, observation: self, old_name:, new_name:
+      ).deliver_later
+    end
+  end
+
+  def user_announce_consensus_change(old_name, new_name, current_user)
+    user_log_consensus_change(old_name, new_name, current_user)
+
+    # Change can trigger emails.
+    owner  = user
+    sender = current_user
+    recipients = []
+
+    # Tell owner of observation if they want.
+    recipients.push(owner) if owner&.email_observations_consensus
+
+    # Send to people who have registered interest.
+    # Also remove everyone who has explicitly said they are NOT interested.
+    interests.each do |interest|
+      if interest.state
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
+      end
+    end
+
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
+
+    # Send notification to all except the person who triggered the change.
+    (recipients.uniq - [sender]).each do |receiver|
+      ConsensusChangeMailer.build(
+        sender:, receiver:, observation: self, old_name:, new_name:
+      ).deliver_later
     end
   end
 
@@ -1426,6 +1094,17 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
                                   new: new_name.display_name)
     else
       log(:log_consensus_created, name: new_name.display_name)
+    end
+  end
+
+  def user_log_consensus_change(old_name, new_name, current_user)
+    if old_name
+      user_log(current_user, :log_consensus_changed,
+               { old: old_name.user_display_name(current_user),
+                 new: new_name.user_display_name(current_user) })
+    else
+      user_log(current_user, :log_consensus_created,
+               { name: new_name.user_display_name(current_user) })
     end
   end
 
@@ -1453,7 +1132,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return notes[:"Collector's_name"] if notes.include?(:"Collector's_name")
     return notes[:"Collector(s)"] if notes.include?(:"Collector(s)")
 
-    "_user #{user.login}_"
+    user.textile_name
   end
 
   def field_slip_name
@@ -1466,7 +1145,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return notes[:Field_Slip_ID_By] if notes.include?(:Field_Slip_ID_By)
 
     naming = namings.find_by(name:)
-    return "_user #{naming.user.login}_" if naming
+    return naming.user.textile_name if naming
 
     ""
   end
@@ -1518,7 +1197,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def check_user
-    return if user || User.current
+    return if user || @current_user
 
     errors.add(:user, :validate_observation_user_missing.t)
   end
@@ -1563,6 +1242,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   private
+
+  def normalize_for_display(key)
+    key.to_s.tr("_", " ")
+  end
 
   def prefer_minimum_bounding_box_to_earth
     return unless location && Location.is_unknown?(location.name) &&

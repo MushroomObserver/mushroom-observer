@@ -14,6 +14,9 @@ module Locations::Descriptions
 
     def test_make_description_default
       desc = location_descriptions(:user_public_location_desc)
+      loc = desc.parent
+      loc.description_id = nil
+      loc.save
       assert_not_equal(desc, desc.parent.description)
       make_description_default_helper(desc)
       desc.parent.reload
@@ -22,6 +25,9 @@ module Locations::Descriptions
 
     def test_non_public_description_cannot_be_default
       desc = location_descriptions(:user_private_location_desc)
+      loc = desc.parent
+      loc.description_id = nil
+      loc.save
       assert_nil(desc.parent.description)
       make_description_default_helper(desc)
       desc.parent.reload

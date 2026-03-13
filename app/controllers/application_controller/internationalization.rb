@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
-# see application_controller.rb
+#  ==== Internationalization
+#  all_locales::            Array of available locales for which we have
+#                           translations.
+#  set_locale::             (filter: determine which locale is requested)
+#  set_timezone::           (filter: Set timezone from cookie set by client's
+#                            browser.)
+#  sorted_locales_from_request_header::
+#                           (parse locale preferences from request header)
+#  valid_locale_from_request_header::
+#                           (choose locale that best matches request header)
+#
 module ApplicationController::Internationalization
   ##############################################################################
   #
@@ -89,7 +99,7 @@ module ApplicationController::Internationalization
   # Until we get rid of reliance on @js, this is a surrogate for
   # testing if the client's JS is enabled and sufficiently fully-featured.
   def js_enabled?(time_zone)
-    time_zone.present? ? true : Rails.env.test?
+    time_zone.present? || Rails.env.test?
   end
 
   # Return Array of the browser's requested locales (HTTP_ACCEPT_LANGUAGE).

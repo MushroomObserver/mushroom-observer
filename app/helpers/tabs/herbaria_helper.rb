@@ -4,17 +4,20 @@
 # NOTE: this uses ids not classes for identifiers, change this
 module Tabs
   module HerbariaHelper
-    def herbaria_index_tabs(query:)
+    def herbaria_index_tabs(query: nil)
       links ||= []
-      links << herbaria_index_tab unless query&.flavor == :all
-      unless query&.flavor == :nonpersonal
-        links << labeled_nonpersonal_herbaria_index_tab
-      end
+      links << if query&.params&.dig(:nonpersonal)
+                 herbaria_index_tab
+               else
+                 labeled_nonpersonal_herbaria_index_tab
+               end
       links << new_herbarium_tab
     end
 
-    def herbaria_index_sorts(query:)
-      return nonpersonal_herbaria_index_sorts if query&.flavor == :nonpersonal
+    def herbaria_index_sorts(query: nil)
+      if query&.params&.dig(:nonpersonal)
+        return nonpersonal_herbaria_index_sorts
+      end
 
       full_herbaria_index_sorts
     end
@@ -22,7 +25,7 @@ module Tabs
     def full_herbaria_index_sorts
       [
         ["records",     :sort_by_records.t],
-        ["user",        :sort_by_user.t],
+        ["curator",     :sort_by_curator.t],
         ["code",        :sort_by_code.t],
         ["name",        :sort_by_name.t],
         ["created_at",  :sort_by_created_at.t],
@@ -36,20 +39,8 @@ module Tabs
       sorts.reject! { |x| x[0] == "user" }
     end
 
-    def herbarium_show_tabs(herbarium:, user:)
-      tabs = []
-      if herbarium.curators.empty? ||
-         herbarium.curator?(user) || in_admin_mode?
-        tabs += [
-          edit_herbarium_tab(herbarium),
-          destroy_herbarium_tab(herbarium)
-        ]
-      end
-      tabs += [
-        new_herbarium_tab,
-        nonpersonal_herbaria_index_tab
-      ]
-      tabs
+    def herbarium_show_tabs
+      [nonpersonal_herbaria_index_tab]
     end
 
     def herbarium_form_new_tabs
@@ -71,44 +62,38 @@ module Tabs
     end
 
     def new_herbarium_tab
-      [:create_herbarium.l, add_query_param(new_herbarium_path),
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def edit_herbarium_tab(herbarium)
-      [:edit_herbarium.l,
-       add_query_param(edit_herbarium_path(herbarium.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def destroy_herbarium_tab(herbarium)
-      [:destroy_object.t(type: :herbarium),
-       herbarium,
-       { button: :destroy, back: url_after_delete(herbarium) }]
+      InternalLink::Model.new(
+        :create_herbarium.l, Herbarium,
+        new_herbarium_path, alt_title: "new_herbarium"
+      ).tab
     end
 
     def herbaria_index_tab
-      [:herbarium_index_list_all_herbaria.l,
-       herbaria_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :herbarium_index_list_all_herbaria.l, Herbarium, herbaria_path
+      ).tab
     end
 
     def herbarium_return_tab(herbarium)
-      [:cancel_and_show.t(type: :herbarium),
-       add_query_param(herbarium_path(herbarium)),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :cancel_and_show.t(type: :herbarium), herbarium,
+        herbarium_path(herbarium)
+      ).tab
     end
 
     def nonpersonal_herbaria_index_tab
-      [:herbarium_index.t,
-       add_query_param(herbaria_path(nonpersonal: true)),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :herbarium_index.t,
+        add_q_param(herbaria_path(nonpersonal: true)),
+        alt_title: "nonpersonal_herbaria_index"
+      ).tab
     end
 
     def labeled_nonpersonal_herbaria_index_tab
-      [:herbarium_index_nonpersonal_herbaria.l,
-       herbaria_path(nonpersonal: true),
-       { class: "nonpersonal_herbaria_index_link" }]
+      InternalLink.new(
+        :herbarium_index_nonpersonal_herbaria.l,
+        herbaria_path(nonpersonal: true)
+      ).tab
     end
   end
 end

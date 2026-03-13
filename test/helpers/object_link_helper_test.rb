@@ -29,11 +29,11 @@ class ObjectLinkHelperTest < ActionView::TestCase
     link_text = "BP"
     assert_equal(expected_link(path, html_class, link_text),
                  link_to_object(projects(:bolete_project), "BP"))
-    # link to species list
+    # link to species_list
     spl = species_lists(:first_species_list)
     path = species_list_path(spl.id)
     html_class = "species_list_link_#{spl.id}"
-    link_text = "A Species List"
+    link_text = "An Observation List"
     assert_equal(expected_link(path, html_class, link_text),
                  link_to_object(species_lists(:first_species_list)))
     # link to non-existent object, name not supplied
@@ -41,6 +41,20 @@ class ObjectLinkHelperTest < ActionView::TestCase
     # link to non-existent object, name supplied
     assert_nil(link_to_object(nil, "Nada"),
                "Non-existent object should lack link.")
+  end
+
+  def test_user_link_with_nil
+    result = user_link(nil)
+    assert_equal(:unknown_user_name.l, result)
+  end
+
+  def test_user_link_with_user
+    user = users(:rolf)
+    result = user_link(user)
+    path = user_path(user.id)
+    html_class = "user_link_#{user.id}"
+    link_text = user.unique_text_name
+    assert_equal(expected_link(path, html_class, link_text), result)
   end
 
   # - Helper Methods -----------------------------------------------------------

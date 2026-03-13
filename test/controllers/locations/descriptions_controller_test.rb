@@ -49,14 +49,11 @@ module Locations
       login
       get(:index)
 
-      assert_displayed_title("Location Descriptions by Name")
+      assert_page_title(:LOCATION_DESCRIPTIONS.l)
     end
 
-    def test_index_sorted_by_user
-      login
-      get(:index, params: { by: "user" })
-
-      assert_displayed_title("Location Descriptions by User")
+    def test_index_with_non_default_sort
+      check_index_sorting
     end
 
     def test_index_with_id
@@ -65,7 +62,7 @@ module Locations
       login
       get(:index, params: { id: desc.id })
 
-      # assert_displayed_title("Location Description Index")
+      assert_page_title(:LOCATION_DESCRIPTIONS.l)
       assert_select("body.descriptions__index", true)
     end
 
@@ -109,10 +106,11 @@ module Locations
       get(:index, params: { by_author: user.id })
 
       assert_template("index")
-      assert_displayed_title("Location Descriptions Authored by #{user.name}")
+      assert_page_title(:LOCATION_DESCRIPTIONS.l)
+      assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_equal(
-        assert_select("#results").children.count,
-        LocationDescription.joins(:authors).where(user: user).count
+        assert_select("#results .list-group-item").count,
+        descs_authored_by_user_count
       )
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
                     { count: descs_authored_by_user_count },
@@ -174,7 +172,8 @@ module Locations
       get(:index, params: { by_editor: user.id })
 
       assert_template("index")
-      assert_displayed_title("Location Descriptions Edited by #{user.name}")
+      assert_page_title(:LOCATION_DESCRIPTIONS.l)
+      assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
                     { count: descs_edited_by_user_count },
                     "Wrong number of results")
@@ -278,6 +277,172 @@ module Locations
       assert_redirected_to(location_description_path(loc.descriptions.last.id))
       assert_not_empty(loc.descriptions)
       assert_equal(params[:description][:notes], loc.descriptions.last.notes)
+    end
+
+    def test_next_description
+      description = location_descriptions(:albion_desc)
+      id = description.id
+      object = LocationDescription.find(id)
+      login
+      get(:show, params: { flow: :next, id: })
+      next_data = @controller.find_query_and_next_object(object, :next, id)
+      return unless next_data
+
+      params = { id: next_data[:id],
+                 q: @controller.q_param(next_data[:query]) }
+      assert_redirected_to(location_description_path(**params))
+    end
+
+    def test_prev_description
+      description = location_descriptions(:albion_desc)
+      id = description.id
+      object = LocationDescription.find(id)
+      login
+      get(:show, params: { flow: :prev, id: })
+      prev_data = @controller.find_query_and_next_object(object, :prev, id)
+      return unless prev_data
+
+      params = { id: prev_data[:id],
+                 q: @controller.q_param(prev_data[:query]) }
+      assert_redirected_to(location_description_path(**params))
+    end
+
+    def test_destroy_location_description
+      desc = location_descriptions(:albion_desc)
+      loc = desc.location
+      login("rolf")
+
+      delete(:destroy, params: { id: desc.id })
+
+      assert_flash_success
+      assert_redirected_to(location_path(loc.id))
+      assert_nil(LocationDescription.safe_find(desc.id))
+    end
+
+    def test_destroy_location_description_not_admin
+      desc = location_descriptions(:albion_desc)
+      login("dick")
+
+      delete(:destroy, params: { id: desc.id })
+
+      assert_flash_error(:runtime_destroy_description_not_admin.t)
+      assert(LocationDescription.safe_find(desc.id))
+    end
+
+    def test_update_description_no_changes
+      desc = location_descriptions(:albion_desc)
+      login("rolf")
+      params = {
+        id: desc.id,
+        description: {
+          gen_desc: desc.gen_desc,
+          ecology: desc.ecology,
+          species: desc.species
+        }
+      }
+      put(:update, params: params)
+      assert_flash_warning(:runtime_edit_location_description_no_change.t)
+    end
+
+    # Cover create with project source type
+    def test_create_description_for_project
+      loc = locations(:nybg_location)
+      project = projects(:eol_project)
+
+      login("mary") # project admin
+      get(:new, params: { location_id: loc.id, project: project.id })
+
+      assert_template("new")
+      desc = assigns(:description)
+      assert_equal("project", desc.source_type)
+      assert_equal(project.title, desc.source_name)
+    end
+
+    # Cover create with project when not a member
+    def test_create_description_for_project_not_member
+      loc = locations(:nybg_location)
+      project = projects(:eol_project)
+
+      login("dick") # not a member
+      get(:new, params: { location_id: loc.id, project: project.id })
+
+      assert_flash_error
+      assert_redirected_to(project_path(project.id))
+    end
+
+    # Cover create with source type
+    def test_create_description_source_type
+      loc = locations(:nybg_location)
+      login("dick")
+
+      params = {
+        location_id: loc.id,
+        description: {
+          source_type: "source",
+          source_name: "Local Guidebook",
+          public: "0",
+          public_write: "0",
+          gen_desc: "Nice area"
+        }
+      }
+      post(:create, params: params)
+
+      assert_flash_success
+      desc = LocationDescription.last
+      assert_equal("source", desc.source_type)
+      assert_equal("Local Guidebook", desc.source_name)
+      assert_false(desc.public)
+    end
+
+    # Test create validation failure - covers lines 118-119
+    def test_create_description_validation_failure
+      loc = locations(:nybg_location)
+      login("dick")
+
+      # Create a description object that fails validation
+      desc = LocationDescription.new(location: loc, user: users(:dick))
+      desc.errors.add(:base, "Test error")
+
+      params = {
+        location_id: loc.id,
+        description: {
+          source_type: "public",
+          gen_desc: "test"
+        }
+      }
+
+      desc.stub(:valid?, false) do
+        LocationDescription.stub(:new, desc) do
+          post(:create, params: params)
+        end
+      end
+
+      assert_flash_error
+      assert_template("new")
+    end
+
+    # Test update with save validation failure - covers lines 191-193
+    def test_update_description_save_failure
+      desc = location_descriptions(:albion_desc)
+      login("rolf")
+
+      params = {
+        id: desc.id,
+        description: {
+          gen_desc: "New description content that is different"
+        }
+      }
+
+      desc.errors.add(:base, "Save error")
+
+      desc.stub(:save, false) do
+        LocationDescription.stub(:safe_find, desc) do
+          put(:update, params: params)
+        end
+      end
+
+      assert_flash_error
+      assert_template("edit")
     end
   end
 end

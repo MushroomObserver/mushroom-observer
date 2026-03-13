@@ -17,7 +17,7 @@ class API2
     end
 
     def include?(val)
-      val >= @begin && val <= @end
+      val.between?(@begin, @end)
     end
 
     def inspect

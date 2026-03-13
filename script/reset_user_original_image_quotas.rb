@@ -11,8 +11,8 @@
 #
 ################################################################################
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
 
 User.update_all(original_image_quota: 0)
 

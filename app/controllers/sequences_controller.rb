@@ -8,7 +8,7 @@
 #    destroy::  Destroy sequence
 #    edit::     Show form to edit a Sequence
 #    new::      Show form to create new Sequence for an Observation
-#    index::    List selected Sequences, based on index flavor and current Query
+#    index::    List selected Sequences, based on index and current Query
 #    show::     Display Sequence details
 #    update::   Update a Sequence
 #
@@ -22,7 +22,7 @@
 # edit_sequence (get)               edit (get)
 # *edit_sequence (post)             update (patch)
 # index_sequence (get)              index (get) -- lists query results
-# list_sequences (get)              index (get, flavor: all) -- all Sequences
+# list_sequences (get)              index (get) -- all Sequences
 # *next_sequence (get)              show { flow: :next } (get))
 # *prev_sequence (get)              show { flow: :prev } (get)
 # *observation_index (get)          n.a (unused, listed Seqs for one Obs)
@@ -31,10 +31,7 @@
 #
 class SequencesController < ApplicationController
   before_action :login_required
-  before_action :store_location, only: [:create, :edit, :new, :show, :update]
-  before_action :pass_query_params, only: [
-    :create, :destroy, :edit, :new, :show, :update
-  ]
+  before_action :store_location, except: :destroy
 
   ################# Actions that show data without modifying it
 
@@ -44,17 +41,16 @@ class SequencesController < ApplicationController
   #    => displays a list of all sequences in MO
   #
   # NOTE: #index does not handle params[:pattern] or params[:ids] because
-  # we don't offer sequence pattern search. However, the Query::SequenceBase
+  # we don't offer sequence pattern search. However, the Query::Sequences
   # class can handle a pattern param.
   def index
-    store_location
     build_index_with_query
   end
 
   private
 
   def default_sort_order
-    :created_at
+    ::Query::Sequences.default_order # :created_at
   end
 
   def index_active_params
@@ -68,8 +64,8 @@ class SequencesController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    { include: [{ observation: :name }, :user],
-      letters: "sequences.locus",
+    { letters: true,
+      include: [{ observation: :name }, :user],
       num_per_page: 50 }.merge(opts)
   end
 
@@ -131,18 +127,20 @@ class SequencesController < ApplicationController
     save_edits
   end
 
+  # NOTE: This action is called from both sequences#show and observations#show.
+  # Unlike collection_numbers/herbarium_records, sequences have no "remove".
   def destroy
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
+    @observation = @sequence.observation
     figure_out_where_to_go_back_to
     return unless make_sure_can_delete!(@sequence)
 
-    @observation = @sequence.observation # needed for js to update obs page
-
     @sequence.destroy
     flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
-    show_flash_and_send_to_back_object
+
+    redirect_to(@observation.show_link_args)
   end
 
   ##############################################################################
@@ -182,7 +180,7 @@ class SequencesController < ApplicationController
   # ---------- Create, Edit ----------------------------------------------------
 
   def make_sure_can_edit!(obj)
-    return true if check_permission(obj)
+    return true if permission?(obj)
 
     flash_warning(:permission_denied.t)
     show_flash_and_send_back
@@ -190,7 +188,7 @@ class SequencesController < ApplicationController
   end
 
   def make_sure_can_delete!(sequence)
-    return true if check_permission(sequence)
+    return true if permission?(sequence)
 
     flash_error(:permission_denied.t)
     show_flash_and_send_to_back_object
@@ -234,7 +232,7 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_sequences_section_update }
-      format.html { redirect_with_query(redirect_to) }
+      format.html { redirect_to(redirect_to) }
     end
   end
 
@@ -255,29 +253,35 @@ class SequencesController < ApplicationController
     respond_to do |format|
       format.turbo_stream { render_modal_flash_update }
       format.html do
-        redirect_with_query(@sequence.observation.show_link_args) and
-          return
+        redirect_to(@sequence.observation.show_link_args) and return
       end
     end
   end
 
   def show_flash_and_send_to_back_object
     respond_to do |format|
-      format.turbo_stream { render_sequences_section_update }
-      format.html do
-        if @back == "index"
-          redirect_with_query(action: :index)
+      format.turbo_stream do
+        if @back_object.is_a?(Observation)
+          render_sequences_section_update
         else
-          redirect_with_query(@back_object.show_link_args)
+          redirect_to(@observation.show_link_args)
         end
+      end
+      format.html do
+        redirect_to(@back_object.show_link_args)
       end
     end
   end
 
   def render_modal_sequence_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     form: "sequences/form" }) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @sequence,
+             observation: @observation,
+             back: @back
+           ), layout: false)
   end
 
   def modal_identifier
@@ -292,16 +296,16 @@ class SequencesController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.sequence_form_new_title
+      helpers.new_page_title(:add_object, :SEQUENCE)
     when "edit", "update"
-      helpers.sequence_form_edit_title(seq: @sequence)
+      helpers.edit_page_title(@sequence.unique_format_name, @sequence)
     end
   end
 
   def render_sequences_section_update
     render(
       partial: "observations/show/section_update",
-      locals: { identifier: "sequences" }
+      locals: { identifier: "sequences", obs: @observation, user: @user }
     ) and return
   end
 

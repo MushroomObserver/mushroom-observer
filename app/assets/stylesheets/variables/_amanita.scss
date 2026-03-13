@@ -1,0 +1,180 @@
+// ==================================================
+// AMANITA THEME
+// ==================================================
+// Inspired by various Amanita species including:
+// - A. phalloides (Death Cap)
+// - A. calyptroderma (Coccora)
+// - A. muscaria (Fly Agaric)
+// - A. velosa
+// - A. novinupta
+// - A. pachycolea
+// ==================================================
+
+// ==================================================
+// SECTION 1: THEME COLOR PALETTE
+// ==================================================
+
+$pale_olive:   #e6edd5; // phalloides_foreground
+$light_olive:  #dfe4bc; // phalloides_light_cap
+$olive:        #beb977; // phalloides_middle_cap
+$dark_olive:   #787133; // phalloides_dark_cap
+$gold:         #ebcc79; // calyptroderma_spring_background
+$cream:        #f9f2e0; // calyptroderma_spring_foreground
+$rust:         #954c23; // calyptroderma_fall_dark_cap
+$beige:        #ebe4de; // calyptroderma_volva
+$amber:        #f5bd5e; // calyptroderma_light_cap
+$copper:       #c18346; // calyptroderma_middle_cap
+$red:          #cc2616; // muscaria_background
+$pale_yellow:  #fff8c6; // muscaria_foreground
+$orange:       #8a5a30; // novinupta_cap
+$peach:        #faebd4; // velosa_light_veil
+$apricot:      #f4d5a6; // velosa_dark_veil
+$dusty_pink:   #d1afa5; // novinupta_background
+$dark_brown:   #383138; // pachycolea_background
+$silver:       #cdcec9; // pachycolea_foreground (lightened)
+$tan:          #aa9a83; // pachycolea_light_stipe
+$chocolate:    #60412d; // pachycolea_dark_brown
+
+// Derived grays (mixed from theme colors)
+$light_silver:  mix($dark_brown, $silver, 10%);
+$medium_silver: mix($dark_brown, $silver, 25%);
+$dark_silver:   mix($dark_brown, $silver, 50%);
+$light_silver:  mix(white, $silver, 20%); // lighter silver for inputs/buttons
+$light_tan:     scale-color($tan, $lightness: 30%);
+
+// Dark theme list backgrounds
+$deep_dark_brown:    mix($dark_brown, black, 80%);
+$deeper_dark_brown:  mix($dark_brown, black, 70%);
+$deepest_dark_brown: mix($dark_brown, black, 20%);
+
+// Semi-transparent colors
+$muted_border:  rgba($silver, 0.21); // panel border
+$muted_tan:     rgba($tan, 0.45);
+$panel_overlay: rgba($deep_dark_brown, 0.45);
+
+// Alert state colors
+$info_blue:      #5167b2; // polyozellus_dark
+$success_green:  #70C070;
+$warning_yellow: #F8CC70;
+$danger_red:     #F07070;
+
+// ==================================================
+// SECTION 2: BOOTSTRAP CORE COLOR ASSIGNMENTS
+// ==================================================
+
+$LIGHT_COLOR:     $silver;
+$DARK_COLOR:      $dark_brown;
+$PRIMARY_COLOR:   $tan;
+$SECONDARY_COLOR: $amber;
+$LINK_COLOR:      $light_tan;
+
+$INFO_COLOR:      $info_blue;
+$SUCCESS_COLOR:   $success_green;
+$WARNING_COLOR:   $amber;
+$DANGER_COLOR:    $red;
+
+// ==================================================
+// SECTION 3: UI ELEMENT COLORS
+// ==================================================
+
+// --------------------------------------------------
+// Body and Typography
+// --------------------------------------------------
+
+$BODY_TEXT_COLOR:                   $LIGHT_COLOR;
+$BODY_BG_COLOR:                     $DARK_COLOR;
+
+// --------------------------------------------------
+// Links
+// --------------------------------------------------
+
+$LINK_TEXT_COLOR:                   $LINK_COLOR;
+$LINK_HOVER_TEXT_COLOR:             $beige;
+
+// --------------------------------------------------
+// Buttons
+// --------------------------------------------------
+
+$BUTTON_TEXT_COLOR:                 $deepest_dark_brown;
+$BUTTON_BG_COLOR:                   $SECONDARY_COLOR;
+$BUTTON_BORDER_COLOR:               transparent;
+
+// --------------------------------------------------
+// Form Inputs
+// --------------------------------------------------
+
+$INPUT_TEXT_COLOR:                  $light_silver;
+$INPUT_BG_COLOR:                    $deep_dark_brown;
+$INPUT_BORDER_COLOR:                $medium_silver;
+
+// --------------------------------------------------
+// Left Navigation Bar
+// --------------------------------------------------
+
+$LEFT_BAR_BORDER_COLOR:             transparent;
+$LEFT_BAR_HEADER_TEXT_COLOR:        $red;
+$LEFT_BAR_HEADER_BG_COLOR:          $deep_dark_brown;
+$LEFT_BAR_TEXT_COLOR:               $silver;
+$LEFT_BAR_BG_COLOR:                 $deep_dark_brown;
+$LEFT_BAR_HOVER_TEXT_COLOR:         $peach;
+$LEFT_BAR_HOVER_BG_COLOR:           $red;
+
+// --------------------------------------------------
+// Top Navigation Bar
+// --------------------------------------------------
+
+$TOP_BAR_BORDER_COLOR:              $muted_border;
+$TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
+$TOP_BAR_BG_COLOR:                  $panel_overlay;
+$TOP_BAR_LINK_TEXT_COLOR:           $TOP_BAR_TEXT_COLOR;
+$TOP_BAR_LINK_BG_COLOR:             transparent;
+$TOP_BAR_LINK_HOVER_TEXT_COLOR:     $TOP_BAR_TEXT_COLOR;
+$TOP_BAR_LINK_HOVER_BG_COLOR:       transparent;
+
+// --------------------------------------------------
+// Lists and Tables
+// --------------------------------------------------
+
+$LIST_BORDER_COLOR:                 $muted_border;
+$LIST_HEADER_TEXT_COLOR:            $dark_silver;
+$LIST_HEADER_BG_COLOR:              $light_silver;
+$LIST_TEXT_COLOR:                   $BODY_TEXT_COLOR;
+$LIST_BG_COLOR:                     $deep_dark_brown;
+$LIST_ODD_BG_COLOR:                 $deepest_dark_brown;
+$LIST_HOVER_BG_COLOR:               $chocolate;
+
+// --------------------------------------------------
+// Menus and Dropdowns
+// --------------------------------------------------
+
+$MENU_BORDER_COLOR:                 $deepest_dark_brown;
+$MENU_TEXT_COLOR:                   $BODY_TEXT_COLOR;
+$MENU_BG_COLOR:                     $deep_dark_brown;
+$MENU_HOVER_TEXT_COLOR:             $red;
+$MENU_HOVER_BG_COLOR:               $deeper_dark_brown;
+$MENU_ACTIVE_TEXT_COLOR:            $orange;
+$MENU_ACTIVE_BG_COLOR:              $deepest_dark_brown;
+
+// --------------------------------------------------
+// Tooltips
+// --------------------------------------------------
+
+$TOOLTIP_TEXT_COLOR:                $dark_brown;
+$TOOLTIP_BG_COLOR:                  $silver;
+
+// --------------------------------------------------
+// Progress Bars
+// --------------------------------------------------
+
+$PROGRESS_BG_COLOR:                 $dark_brown;
+$PROGRESS_BAR_COLOR:                $tan;
+$PROGRESS_TEXT_COLOR:               $tan;
+
+// --------------------------------------------------
+// Panels
+// --------------------------------------------------
+
+$PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
+$PANEL_BG_COLOR:                    $panel_overlay;
+$PANEL_BORDER_COLOR:                $muted_border;
+$PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;

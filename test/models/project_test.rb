@@ -145,7 +145,7 @@ class ProjectTest < UnitTestCase
   def assert_out_of_range_observations(project,
                                        expect: project.observations.count)
     assert(
-      project.observations.count.positive?,
+      project.observations.any?,
       "Test needs fixture with some Observations; #{project.title} has none"
     )
     assert_equal(expect, project.out_of_range_observations.count)
@@ -154,7 +154,7 @@ class ProjectTest < UnitTestCase
   def assert_in_range_observations(project,
                                    expect: project.observations.count)
     assert(
-      project.observations.count.positive?,
+      project.observations.any?,
       "Test needs fixture with some Observations; #{project.title} has none"
     )
     assert_equal(expect, project.in_range_observations.count)

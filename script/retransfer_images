@@ -21,7 +21,7 @@ DESCRIPTION
 
 END
 
-ids=$( run_mysql "SELECT id FROM images WHERE transferred=FALSE" )
+ids=$( run_mysql "SELECT id FROM images WHERE transferred=FALSE AND created_at <= NOW() - INTERVAL 10 MINUTE" )
 
 for id in $ids; do
   for subdir in thumb 320 640 960 1280 orig; do

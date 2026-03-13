@@ -1,13 +1,14 @@
 <%
-@container = :full
+container_class(:full)
 add_page_title(comment_form_new_title(target: @target))
-add_tab_set(comment_form_new_tabs(target: @target))
+add_context_nav(comment_form_new_tabs(target: @target))
 %>
 
 <div class="row">
   <div class="col-xs-12 col-sm-8">
-    <%= render(partial: "comments/form",
-               locals: { action: :create, local: true }) %>
+    <!--[form:comment]-->
+    <%= render(Components::CommentForm.new(@comment, local: true)) %>
+    <!--[eoform:comment]-->
     <%= render(partial: "comments/object", object: @target) %>
   </div>
 
@@ -17,4 +18,5 @@ add_tab_set(comment_form_new_tabs(target: @target))
                  locals: { obs: @target, thumb_size_control: false }) %>
     </div>
   <% end %>
-</div><!--.row-->
+</div>
+<!--.row-->

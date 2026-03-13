@@ -4,6 +4,7 @@
 class ObservationsController
   module Index
     def index
+      make_name_suggestions
       build_index_with_query
     end
 
@@ -14,12 +15,12 @@ class ObservationsController
     # Then we could use default_sort_order above.
     # Or, set an "unfiltered sort order" method that defaults to this.
     def default_sort_order
-      ::Query::ObservationBase.default_order # :date
+      ::Query::Observations.default_order # :date
     end
 
     # Note all other filters of the obs index are sorted by date.
     def unfiltered_index_opts
-      super.merge(query_args: { by: :rss_log })
+      super.merge(query_args: { order_by: :rss_log })
     end
 
     # Searches come 1st because they may have the other params
@@ -33,19 +34,19 @@ class ObservationsController
     def advanced_search
       query = advanced_search_query
       # Have to check this here because we're not running the query yet.
-      raise(:runtime_no_conditions.l) unless query.params.any?
+      raise(:runtime_no_conditions.l) unless query&.params&.any?
 
       [query, {}]
     rescue StandardError => e
       flash_error(e.to_s) if e.present?
       redirect_to(search_advanced_path)
+      [nil, {}]
     end
 
     def advanced_search_query
       if any_advanced_search_params_present?
-        params_plus_flags = advanced_search_params << :search_location_notes
-        search = params.permit(*params_plus_flags).to_h
-        create_query(:Observation, :all, search)
+        search = params.permit(*advanced_search_params).to_h
+        create_query(:Observation, search)
       elsif handle_advanced_search_invalid_q_param?
         nil
       else
@@ -58,70 +59,56 @@ class ObservationsController
     end
 
     def advanced_search_params
-      Query::Initializers::AdvancedSearch.advanced_search_params
+      params = Query::Observations.advanced_search_params
+      return params if params.present?
+
+      raise("Query::Observations.advanced_search_params is undefined.")
     end
 
-    # Display matrix of Observations whose notes, etc. match a string pattern.
-    def pattern
-      pattern = params[:pattern].to_s
-      if pattern.match?(/^\d+$/) &&
-         (observation = Observation.safe_find(pattern))
-        redirect_to(permanent_observation_path(observation.id))
-      else
-        return_pattern_search_results(pattern)
-      end
-    end
+    # Different from NamesController. Returns arrays of [name, count]
+    def make_name_suggestions
+      return unless @objects.empty? &&
+                    params[:q].is_a?(ActionController::Parameters) &&
+                    (original_spelling = params.dig(:q, :pattern))
 
-    def return_pattern_search_results(pattern)
-      search = PatternSearch::Observation.new(pattern)
-      return render_pattern_search_error(search) if search.errors.any?
-
-      @suggest_alternate_spellings = search.query.params[:pattern]
-      if params[:needs_naming]
-        redirect_to(
-          identify_observations_path(q: get_query_param(search.query))
-        )
-        [nil, {}]
-      else
-        [search.query, {}]
+      names = Name.suggest_alternate_spellings(original_spelling)
+      @name_suggestions = names.sort_by(&:sort_name).map do |name|
+        query = Query.create_query(:Observation, pattern: name.text_name)
+        count = query.num_results
+        [name, count]
       end
-    end
-
-    def render_pattern_search_error(search)
-      search.errors.each { |error| flash_error(error.to_s) }
-      if params[:needs_naming]
-        redirect_to(identify_observations_path(q: get_query_param))
-      end
-      [nil, {}]
     end
 
     # Displays matrix of Observations with the given name proposed but not
     # actually that name.
     def look_alikes
-      query = create_query(:Observation, :all,
-                           names: [params[:name]],
-                           include_synonyms: true,
-                           include_all_name_proposals: true,
-                           exclude_consensus: true,
-                           by: :confidence)
+      query = create_query(
+        :Observation, names: { lookup: [params[:name]],
+                               include_synonyms: true,
+                               include_all_name_proposals: true,
+                               exclude_consensus: true },
+                      order_by: :confidence
+      )
       [query, {}]
     end
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
     def related_taxa
-      query = create_query(:Observation, :all,
-                           names: parents(params[:name]),
-                           include_subtaxa: true,
-                           by: :confidence)
+      query = create_query(
+        :Observation, names: { lookup: parents(params[:name]),
+                               include_subtaxa: true },
+                      order_by: :confidence
+      )
       [query, {}]
     end
 
     # Displays matrix of Observations with the given text_name (or search_name).
     def name
-      query = create_query(:Observation, :all,
-                           names: [params[:name]],
-                           include_synonyms: true,
-                           by: :confidence)
+      query = create_query(
+        :Observation, names: { lookup: [params[:name]],
+                               include_synonyms: true },
+                      order_by: :confidence
+      )
       [query, {}]
     end
 
@@ -136,7 +123,7 @@ class ObservationsController
     def by_user
       return unless (user = find_or_goto_index(User, params[:by_user]))
 
-      query = create_query(:Observation, :all, by_user: user)
+      query = create_query(:Observation, by_users: user)
       [query, {}]
     end
 
@@ -146,24 +133,17 @@ class ObservationsController
         location = find_or_goto_index(Location, params[:location].to_s)
       )
 
-      query = create_query(:Observation, :all, location: location)
+      query = create_query(:Observation, within_locations: location)
       [query, {}]
     end
 
     # Display matrix of Observations whose "where" matches a string.
-    # NOTE: To consolidate flavors in Query, we're passing the possible
-    # `user_where` param from the advanced search form straight through to
-    # Query's obs advanced search class, which searches two tables (obs and
-    # loc) for the fuzzy match.
-    # Here we are passing the front end's `where` to the similar Query
-    # `locations` string handling param of Query::ObservationBase. If the param
-    # names in ObservationBase were the same, with ObservationAdvancedSearch,
-    # because of inheritance, query would use it first for AdvancedSearch's
-    # table-join search, but then Base would add an extra AND clause to search
-    # observations, that will preclude getting results.
+    # NOTE: We're passing the `search_where` param from advanced search to
+    # AbstractModel's scope `search_where`, which searches two tables
+    # (obs and loc) for the fuzzy match.
     def where
       where = params[:where].to_s
-      query = create_query(:Observation, :all, locations: where)
+      query = create_query(:Observation, search_where: where)
       [query, { always_index: true }]
     end
 
@@ -173,27 +153,26 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, :all, project:)
+      query = create_query(:Observation, projects: project,
+                                         order_by: "thumbnail_quality")
       @project = project
       [query, { always_index: true }]
     end
 
-    # Display matrix of Observations attached to a given species list.
+    # Display matrix of Observations attached to a given species_list.
     def species_list
       return unless (
         spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)
       )
 
-      query = create_query(:Observation, :all, species_list: spl)
+      query = create_query(:Observation, species_lists: spl)
       [query, { always_index: true }]
     end
 
     # Hook runs before template displayed. Must return query.
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
-      # Restrict to subset within a geographical region (used by map
-      # if it needed to stuff multiple locations into a single marker).
-      restrict_query_to_box(query) # returns this query
+      query
     end
 
     def index_display_opts(opts, query)
@@ -204,19 +183,19 @@ class ObservationsController
         include: observation_index_includes
       }.merge(opts)
 
-      # Paginate by letter if sorting by user.
-      case query.params[:by]
-      when "user", "reverse_user"
-        opts[:letters] = "users.login"
-      # Paginate by letter if sorting by name.
-      when "name", "reverse_name"
-        opts[:letters] = "names.sort_name"
+      # Offer pagination by letter only if the index has been filtered
+      # and we're sorting by user or name.
+      if query.params.except(:order_by).present? &&
+         %w[user reverse_user name reverse_name].include?(
+           query.params[:order_by]
+         )
+        opts[:letters] = true
       end
 
       opts
     end
 
-    # The { images: } hash is necessary for the index carousels.
+    # An { images: } hash is necessary if we're adding the index carousels.
     # :projects required by Bullet because it's needed to compute
     # `can_edit?` for an image.
     def observation_index_includes

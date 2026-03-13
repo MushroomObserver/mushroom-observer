@@ -44,12 +44,14 @@
 #
 ################################################################################
 class Naming < AbstractModel
+  attr_accessor :current_user
+
   belongs_to :observation
   belongs_to :name
   belongs_to :user
   has_many :votes, dependent: :destroy
 
-  serialize :reasons
+  serialize :reasons, coder: YAML
 
   before_save :did_name_change?
   before_save :enforce_default_reasons
@@ -67,12 +69,23 @@ class Naming < AbstractModel
     false
   end
 
+  def self.user_construct(args, observation, user)
+    now = Time.zone.now
+    naming = Naming.new(args)
+    naming.created_at = now
+    naming.updated_at = now
+    naming.user = user
+    naming.observation = observation
+    naming
+  end
+
   def self.construct(args, observation)
     now = Time.zone.now
     naming = Naming.new(args)
     naming.created_at = now
     naming.updated_at = now
-    naming.user = User.current
+    naming.current_user = observation.current_user
+    naming.user = naming.current_user || User.current
     naming.observation = observation
     naming
   end
@@ -109,6 +122,11 @@ class Naming < AbstractModel
   end
 
   # Return name in plain text.
+  def user_text_name(user)
+    name ? name.user_real_search_name(user) : ""
+  end
+
+  # Return name in plain text.
   def text_name
     name ? name.real_search_name : ""
   end
@@ -123,8 +141,12 @@ class Naming < AbstractModel
     name ? name.observation_name : ""
   end
 
-  def display_name_brief_authors
-    name ? name.display_name_brief_authors : ""
+  def user_format_name(user)
+    name ? name.user_observation_name(user) : ""
+  end
+
+  def display_name_brief_authors(user = User.current)
+    name ? name.display_name_brief_authors(user) : ""
   end
 
   # Return name in Textile format (with id tacked on to make unique).
@@ -166,7 +188,17 @@ class Naming < AbstractModel
                     (!n.require_specimen || observation.specimen)
         next if n.user.no_emails
 
-        QueuedEmail::NameTracking.create_email(n, self)
+        # Migrated from QueuedEmail::NameTracking to deliver_later.
+        # Always notify the tracker.
+        naming = self
+        NamingTrackerMailer.build(receiver: n.user, naming:).deliver_later
+        # Conditionally notify the observer if tracker has note_template.
+        # Don't send if tracker is the observer (they'd get a self-email).
+        if n.note_template.present? && n.approved && n.user != observation.user
+          NamingObserverMailer.build(
+            receiver: observation.user, naming:, name_tracker: n
+          ).deliver_later
+        end
         done_user[n.user_id] = true
       end
     end
@@ -204,8 +236,11 @@ class Naming < AbstractModel
     recipients.reject!(&:no_emails)
 
     # Send to everyone (except the person who created the naming!)
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::NameProposal.create_email(sender, recipient, obs, self)
+    naming = self
+    (recipients.uniq - [sender]).each do |receiver|
+      NameProposalMailer.build(
+        sender:, receiver:, naming:, observation: obs
+      ).deliver_later
     end
   end
 
@@ -214,7 +249,7 @@ class Naming < AbstractModel
   # clear naming.observation -- otherwise it will recalculate the consensus for
   # each deleted naming, and send a bunch of bogus emails.)
   def log_destruction
-    if User.current &&
+    if (@current_user || User.current) &&
        (obs = observation)
       obs.log(:log_naming_destroyed, name: format_name)
       obs = Observation.naming_includes.find(obs.id) # get a fresh eager-load
@@ -422,6 +457,6 @@ class Naming < AbstractModel
     end
     errors.add(:name, :validate_naming_name_missing.t) unless name
     errors.add(:user, :validate_naming_user_missing.t) if !user_id &&
-                                                          !User.current
+                                                          !@current_user
   end
 end

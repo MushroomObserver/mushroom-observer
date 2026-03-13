@@ -5,17 +5,15 @@ module Descriptions
   class AuthorsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params
 
     def show
       set_object_and_authors
       if @authors.member?(@user) || @user.in_group?("reviewers")
-        @users = User.order("login, name").to_a
+        @users = [] # User.order("login, name").to_a
       else
         parent = @object.parent
         flash_error(:review_authors_denied.t)
-        redirect_with_query(controller: parent.show_controller,
-                            action: parent.show_action, id: parent.id)
+        redirect_to(parent.show_link_args)
       end
     end
 

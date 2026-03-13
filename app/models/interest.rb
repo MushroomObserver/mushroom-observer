@@ -50,34 +50,31 @@
 ################################################################################
 #
 class Interest < AbstractModel
-  belongs_to :target, polymorphic: true
   belongs_to :user
+  belongs_to :target, polymorphic: true
 
-  scope :for_user,
-        ->(user) { where(user: user) }
-
-  ALL_INTEREST_TYPES = %w[
-    Location
-    Name
-    NameTracker
-    Observation
-    Project
-    SpeciesList
+  # Maintain this Array of all models (targets) which take interests.
+  ALL_TYPES = [
+    Location, LocationDescription, Name, NameDescription, NameTracker,
+    Observation, Project, SpeciesList
   ].freeze
 
-  validates :target_type, inclusion: { in: ALL_INTEREST_TYPES }
+  # Returns Array of all valid +target_type+ values (Symbols).
+  ALL_TYPE_TAGS = ALL_TYPES.map { |type| type.to_s.underscore.to_sym }.freeze
 
-  # Returns Array of all models (Classes) which take interests.
-  def self.all_types
-    types = ALL_INTEREST_TYPES.dup
-    types.map(&:constantize)
+  # Allow explicit joining for all polymorphic associations,
+  # e.g. `Interest.joins(:location).where(target_id: 29513)`,
+  # by restating the association below with a scope.
+  # https://veelenga.github.io/joining-polymorphic-associations/
+  ALL_TYPE_TAGS.each do |model_tag|
+    belongs_to model_tag, lambda {
+      where(interests: { target_type: model_tag.to_s.camelize })
+    }, foreign_key: "target_id", inverse_of: :interests
   end
 
-  # Returns Array of all valid +target_type+ values (Symbol's).
-  def self.all_type_tags
-    types = ALL_INTEREST_TYPES.dup
-    types.map { |t| t.underscore.to_sym }
-  end
+  scope :for_user, ->(user) { where(user: user) }
+
+  validates :target_type, inclusion: { in: ALL_TYPES.map(&:to_s) }
 
   # Find all Interests associated with a given object.  This should really be
   # created magically like all the other find_all_by_xxx methods, but the
@@ -98,9 +95,9 @@ class Interest < AbstractModel
   def summary
     return target.summary if target && (target_type == "NameTracker")
 
-    (state ? :WATCHING.l : :IGNORING.l) + " " +
-      target_type.underscore.to_sym.l + ": " +
-      (target ? target.unique_format_name : "--")
+    "#{state ? :WATCHING.l : :IGNORING.l} " \
+    "#{target_type.underscore.to_sym.l}: " \
+    "#{target ? target.unique_format_name : "--"}"
   end
   alias text_name summary
 

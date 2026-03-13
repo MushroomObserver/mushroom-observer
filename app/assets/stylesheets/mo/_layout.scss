@@ -12,7 +12,7 @@ $sidebar-max-width: 18rem;
 }
 
 // https://stackoverflow.com/questions/17982111/sass-variable-in-css-calc-function
-@media screen and (min-width: 768px) {
+@media screen and (min-width: $screen-md-min) {
   .sidebar-offcanvas {
     width: $sidebar-max-width !important;
   }
@@ -36,7 +36,7 @@ $sidebar-max-width: 18rem;
 // small devices, tablets
 // --------------------------------------------------
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: $screen-sm-max) {
 
   .row-offcanvas {
     position: relative;

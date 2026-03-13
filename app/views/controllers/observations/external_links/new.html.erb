@@ -1,0 +1,27 @@
+<%
+container_class(:full)
+add_new_title(:add_object, :EXTERNAL_LINK)
+# add_context_nav(external_link_form_new_tabs(obs: @observation))
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-7">
+    <%= render(Components::ExternalLinkForm.new(
+          @external_link,
+          observation: @observation,
+          sites: @sites,
+          site: @site || @sites&.first,
+          user: @user
+        )) %>
+  </div>
+
+  <div class="col-xs-12 col-sm-5">
+    <ul class="row list-unstyled">
+      <%= render(::Components::MatrixBox.new(
+                   user: @user,
+                   object: @observation.rss_log || @observation,
+                   columns: "col-xs-12")) %>
+    </ul>
+  </div>
+</div>
+<!--.row-->

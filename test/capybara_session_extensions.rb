@@ -43,7 +43,7 @@ module CapybaraSessionExtensions
 
   # Login the given user in the current session.
   def login(login = users(:zero_user).login, password = "testpassword",
-            remember_me = true, session: self)
+            remember_me: true, session: self)
     login = login.login if login.is_a?(User) # get the right user field
     session.visit("/account/login/new")
     session.assert_selector("body.login__new")
@@ -61,9 +61,11 @@ module CapybaraSessionExtensions
   def login!(user, *, **kwargs)
     login(user, *, **kwargs)
     session = kwargs[:session] || self
-    assert_flash_success(session: session)
     user = User.find_by(login: user) if user.is_a?(String)
-    assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
+    # Check page for user's login name in nav (User.current_id is thread-local
+    # and not accessible from test thread with Cuprite/Puma)
+    session.assert_selector("#user_nav_toggle", text: user.login,
+                                                wait: 5)
   end
 
   def logout(session: self)
@@ -73,11 +75,10 @@ module CapybaraSessionExtensions
   def put_user_in_admin_mode(user = :zero_user, session: self)
     user.admin = true
     user.save!
-    login(user.login, session: session)
-    assert_equal(user.id, User.current_id)
+    login!(user, session: session)
 
     session.click_on(id: "user_nav_admin_mode_link")
-    assert_match(/DANGER: You are in administrator mode/, page.html)
+    session.assert_text("DANGER: You are in administrator mode")
   end
 
   # The current_path plus the query, similar to @request.fullpath
@@ -90,11 +91,11 @@ module CapybaraSessionExtensions
     session.current_path.split("/").last
   end
 
-  # Get string representing (our) query from the given URL.  Defaults to the
+  # Get hash representing (our) query from the given URL.  Defaults to the
   # current page's URL.  (In practice, for now, this is just the Query id.)
   def parse_query_params(url = current_fullpath)
-    _path, query = url.split("?")
-    params = CGI.parse(query)
+    uri = URI.parse(url)
+    params = Rack::Utils.parse_nested_query(uri.query)
     params["q"]
   end
 

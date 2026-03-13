@@ -81,6 +81,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
 
+  has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
+
   before_destroy :orphan_drafts
   validates :field_slip_prefix, uniqueness: true, allow_blank: true
   validates :field_slip_prefix,
@@ -88,10 +90,68 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
                       message: proc { :alphanumerics_only.t } }
 
+  scope :order_by_default,
+        -> { order_by(::Query::Projects.default_order) }
+
+  scope :members, lambda { |members|
+    ids = Lookup::Users.new(members).ids # User lookup only takes logins or ids
+    joins(user_group: :user_group_users).
+      merge(UserGroupUser.where(user: ids))
+  }
+  # Takes multiple name strings or ids, passes include_synonyms
+  scope :names, lambda { |lookup:, **args|
+    joins(:observations).merge(Observation.names(lookup:, **args))
+  }
+  scope :title_has,
+        ->(phrase) { search_columns(Project[:title], phrase) }
+  scope :has_summary,
+        ->(bool = true) { not_blank_condition(Project[:summary], bool:) }
+  scope :summary_has,
+        ->(phrase) { search_columns(Project[:summary], phrase) }
+  scope :field_slip_prefix_has,
+        ->(phrase) { search_columns(Project[:field_slip_prefix], phrase) }
+
+  scope :has_images,
+        ->(bool = true) { joined_relation_condition(:project_images, bool:) }
+  scope :has_observations, lambda { |bool = true|
+    joined_relation_condition(:project_observations, bool:)
+  }
+  scope :has_species_lists, lambda { |bool = true|
+    joined_relation_condition(:project_species_lists, bool:)
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = (Project[:title] + Project[:summary].coalesce("") +
+            Project[:field_slip_prefix].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
+  # Accepts multiple regions, see Observation.region for why this is singular
+  scope :region, lambda { |place_names|
+    where(location: Location.region(place_names))
+  }
+
+  scope :user_is_member, lambda { |user|
+    user = User.safe_find(user)
+    return all unless user
+
+    where(user_group: user.user_groups)
+  }
+
+  scope :user_is_admin, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+
+    joins(:admin_group_users).where(user: user_id)
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
       :location
+    )
+  }
+  scope :violations_includes, lambda {
+    strict_loading.includes(
+      { observations: [:location, :user] }
     )
   }
 
@@ -137,7 +197,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member&.trust_level != "no_trust"
   end
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     admin?(user)
   end
 
@@ -424,12 +484,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     out_of_range_observations.to_a.union(out_of_area_observations)
   end
 
-  # Is at least one violation removable by the current user?
-  def violations_removable_by_current_user?
+  # Is at least one violation removable by the given user?
+  def violations_removable_by_current_user?(user)
     user_ids = violations.map(&:user_id)
     return false unless user_ids.any?
 
-    admin_group_user_ids.union(user_ids).include?(User.current_id)
+    admin_group_user_ids.union(user_ids).include?(user.id)
   end
 
   ##############################################################################
@@ -494,11 +554,33 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     FieldSlipJobTracker.where(prefix: field_slip_prefix)
   end
 
-  def can_add_field_slip(user)
+  def can_add_field_slip?(user)
     member?(user) || can_join?(user)
   end
 
+  def alias_data(target)
+    @target_alias_details ||= target_alias_details(target.class)
+    @target_alias_details[target.id] || []
+  end
+
+  def check_for_alias(str, target_type)
+    project_alias = aliases.find_by(name: str, target_type:)
+    return str unless project_alias
+
+    project_alias.target.format_name
+  end
+
   private ###############################
+
+  def target_alias_details(target_type)
+    aliases.
+      where(target_type:).
+      order(:name).
+      group_by(&:target_id).
+      transform_values do |aliases|
+        aliases.map { |project_alias| [project_alias.name, project_alias.id] }
+      end
+  end
 
   def obs_geoloc_outside_project_location
     observations.

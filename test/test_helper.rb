@@ -14,6 +14,8 @@
 # Code to allow Coveralls exor local coverage reports.  See:
 # https://github.com/coverallsapp/github-action/issues/29#issuecomment-701934460
 require("rails")
+
+# SimpleCov runs by default in parallel mode
 require("simplecov")
 require("simplecov-lcov")
 
@@ -28,7 +30,10 @@ else
   SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 end
 
-SimpleCov.start("rails")
+SimpleCov.start("rails") do
+  # An always empty file which is always reported as a coverage decrease
+  add_filter("/channels/application_cable/channel.rb")
+end
 
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
@@ -52,7 +57,7 @@ WebMock.disable_net_connect!(
 )
 
 ENV["RAILS_ENV"] ||= "test"
-require(File.expand_path("../config/environment", __dir__))
+require_relative("../config/environment")
 require("rails/test_help")
 
 %w[
@@ -71,6 +76,7 @@ require("rails/test_help")
   uploaded_string
 
   unit_test_case
+  component_test_case
   functional_test_case
   integration_test_case
   capybara_integration_test_case
@@ -78,12 +84,48 @@ require("rails/test_help")
   require_relative(file)
 end
 
+# Load any custom test support helpers (e.g. test/support/*.rb)
+Dir[File.join(__dir__, "support", "*.rb")].each { |f| require f }
+
 I18n.enforce_available_locales = true
+
+# Function for creating a log (trace_tests.out) of the tests called
+# that somehow call this function.
+def trace_tests
+  regex = %r{/test/}
+  matches = caller.grep(regex)
+  return unless matches
+
+  last_match = matches.last
+  trim = last_match[(last_match.index(regex) + 1)..]
+  open("trace_tests.out", "a") do |f|
+    f.write("#{trim}\n")
+  end
+end
 
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers
-    # parallelize(workers: :number_of_processors)
+    # Threshold can be set via PARALLEL_TEST_THRESHOLD environment variable
+    # Default is 50 (Rails default) if not set
+    threshold = ENV["PARALLEL_TEST_THRESHOLD"]&.to_i || 50
+    parallelize(workers: :number_of_processors, threshold: threshold)
+
+    # Set up worker-specific database for parallel testing
+    parallelize_setup do |worker|
+      # Set TEST_ENV_NUMBER so database.yml picks the right database
+      ENV["TEST_ENV_NUMBER"] = worker.to_s
+
+      # Configure SimpleCov for this worker with unique command name
+      # This allows SimpleCov to merge results from multiple parallel workers
+      SimpleCov.command_name("#{SimpleCov.command_name}-#{worker}")
+    end
+
+    parallelize_teardown do |_worker|
+      # Trigger coverage result generation for this worker
+      # SimpleCov will automatically merge results from all workers
+      SimpleCov.result
+    end
 
     ##########################################################################
     #  Transactional fixtures
@@ -124,6 +166,20 @@ module ActiveSupport
     # in integration tests -- they do not yet inherit this setting
     fixtures :all
 
+    # Clean up thread-local storage before each test to ensure isolation
+    # in parallel test execution. This prevents User.current from leaking
+    # between tests running in the same thread.
+    setup do
+      Thread.current[:mushroom_observer_user] = nil
+      Thread.current[:mushroom_observer_location_format] = nil
+    end
+
+    # Clean up thread-local storage after each test
+    teardown do
+      Thread.current[:mushroom_observer_user] = nil
+      Thread.current[:mushroom_observer_location_format] = nil
+    end
+
     # Add more helper methods to be used by all tests here...
 
     # Standard setup to run before every test.  Sets the locale, timezone,
@@ -134,7 +190,6 @@ module ActiveSupport
       # Disable cop; there's no block in which to limit the time zone change
       Time.zone = "America/New_York" # rubocop:disable Rails/TimeZoneAssignment
       User.current = nil
-      start_timer if false
       clear_logs unless defined?(@@cleared_logs)
       Symbol.missing_tags = []
     end
@@ -145,7 +200,6 @@ module ActiveSupport
       assert_equal([], Symbol.missing_tags, "Language tag(s) are missing.")
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
-      stop_timer if false
     end
 
     # Record time this test started to run.

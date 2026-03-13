@@ -24,7 +24,6 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups/1/edit
   def edit
-    pass_query_params
     @visual_group = VisualGroup.find(params[:id])
     @filter = params[:filter]
     @filter = @visual_group.name unless @filter && @filter != ""
@@ -34,10 +33,13 @@ class VisualGroupsController < ApplicationController
   end
 
   def setup_pagination
-    @pages = MOPaginator.new(number_arg: :page, number: params[:page],
-                             num_per_page: calc_layout_params["count"])
-    @pages.num_total = @vals.length
-    @subset = @vals[@pages.from..@pages.to]
+    @pagination_data = PaginationData.new(
+      number_arg: :page,
+      number: params[:page],
+      num_per_page: calc_layout_params["count"]
+    )
+    @pagination_data.num_total = @vals.length
+    @subset = @vals[@pagination_data.from..@pagination_data.to]
   end
 
   def status_from_params(params)
@@ -93,20 +95,44 @@ class VisualGroupsController < ApplicationController
   end
 
   def calc_show_vals
-    if !@filter || @filter == ""
-      return @visual_group.visual_group_images.where(included: true).
-             pluck(:image_id, :included)
-    end
-    VisualGroupImages.new(@visual_group, @filter, :included).vals
+    return unfiltered_images if !@filter || @filter == ""
+
+    # For filtered results, get raw arrays then eager-load images
+    raw_vals = VisualGroupImages.new(@visual_group, @filter, :included).vals
+
+    # Extract image IDs and eager-load images
+    image_ids = raw_vals.map(&:first)
+    images_by_id = Image.where(id: image_ids).index_by(&:id)
+
+    # Map back to [image, included] format
+    raw_vals.map { |row| [images_by_id[row[0]], row[1]] }
+  end
+
+  def unfiltered_images
+    @visual_group.visual_group_images.
+      where(included: true).includes(:image).
+      map { |vgi| [vgi.image, vgi.included] }
   end
 
   def calc_edit_vals
-    if @status != "needs_review"
-      return @visual_group.visual_group_images.
-             where(included: @status != "excluded").pluck(:image_id, :included)
-    end
-    VisualGroupImages.new(@visual_group, @filter, :any).vals -
-      VisualGroupImages.new(@visual_group, @filter, :reviewed).vals
+    return relevant_images if @status != "needs_review"
+
+    # For "needs_review" status, get raw arrays then eager-load images
+    raw_vals = VisualGroupImages.new(@visual_group, @filter, :any).vals -
+               VisualGroupImages.new(@visual_group, @filter, :reviewed).vals
+
+    # Extract image IDs and eager-load images
+    image_ids = raw_vals.map(&:first)
+    images_by_id = Image.where(id: image_ids).index_by(&:id)
+
+    # Map back to [image, included] format
+    raw_vals.map { |row| [images_by_id[row[0]], row[1]] }
+  end
+
+  def relevant_images
+    @visual_group.visual_group_images.
+      where(included: @status != "excluded").includes(:image).
+      map { |vgi| [vgi.image, vgi.included] }
   end
 
   def save_visual_group

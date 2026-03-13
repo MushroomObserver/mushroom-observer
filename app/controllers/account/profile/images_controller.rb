@@ -1,23 +1,22 @@
 # frozen_string_literal: true
 
 # Clicking on an image currently fires a GET to these actions... because it
-# comes from a link made by ImagesHelper#interactive_image(link: url_args)
-# with CRUD refactor, change ImagesHelper helper to fire a POST somehow?
+# comes from a link made by Components::InteractiveImage(link: url_args)
+# with CRUD refactor, change component link to fire a POST somehow?
 
 # No need to remove_images from Account profile: reuse_image removes image
 module Account::Profile
   class ImagesController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # was reuse_image params[:mode] = profile
     def reuse
-      nil unless User.safe_find(params[:id]) == User.current
+      nil unless User.safe_find(params[:id]) == @user
     end
 
     # POST action
     def attach
-      return unless User.safe_find(params[:id]) == User.current
+      return unless User.safe_find(params[:id]) == @user
 
       image = Image.safe_find(params[:img_id])
       unless image

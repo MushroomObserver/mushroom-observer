@@ -9,7 +9,7 @@ gem("sorted_set")
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-# gem("rails", "~> 7.1.5.1")
+# gem("rails", "~> 7.2.2.1")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
 # NOTE: Remember to require the classes also, in config/application.rb
@@ -19,19 +19,19 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable", "~> 7.1.5.1")
-  # gem("actionmailbox", "~> 7.1.5.1")
-  gem("actionmailer", "~> 7.1.5.1")
-  gem("actionpack", "~> 7.1.5.1")
-  # gem("actiontext", "~> 7.1.5.1")
-  gem("actionview", "~> 7.1.5.1")
-  gem("activejob", "~> 7.1.5.1")
-  gem("activemodel", "~> 7.1.5.1")
-  gem("activerecord", "~> 7.1.5.1")
-  # gem("activestorage", "~> 7.1.5.1")
-  gem("activesupport", "~> 7.1.5.1")
+  gem("actioncable", "~> 7.2.2.1")
+  # gem("actionmailbox", "~> 7.2.2.1")
+  gem("actionmailer", "~> 7.2.2.1")
+  gem("actionpack", "~> 7.2.2.1")
+  # gem("actiontext", "~> 7.2.2.1")
+  gem("actionview", "~> 7.2.2.1")
+  gem("activejob", "~> 7.2.2.1")
+  gem("activemodel", "~> 7.2.2.1")
+  gem("activerecord", "~> 7.2.2.2")
+  # gem("activestorage", "~> 7.2.2.1")
+  gem("activesupport", "~> 7.2.2.1")
   gem("bundler")
-  gem("railties", "~> 7.1.5.1")
+  gem("railties", "~> 7.2.2.1")
 end
 
 # Use trilogy as db connector
@@ -47,6 +47,8 @@ gem("solid_queue")
 # https://github.com/rails/mission_control-jobs
 # Rails-based frontend to Active Job adapters for monitoring jobs
 gem("mission_control-jobs")
+# solid_cable for ActionCable without Redis
+gem("solid_cable")
 
 # sprockets for asset compilation and versioning
 gem("sprockets-rails")
@@ -61,6 +63,18 @@ gem("bootstrap-sass")
 # Use Terser as compressor for JavaScript assets
 gem("terser")
 
+# Phlex view components
+gem("phlex-rails")
+# Use `prop` keyword to define object arguments and their types, and set ivars.
+gem("literal")
+# Enable Slot API for Phlex
+gem("phlex-slotable")
+# Superform for type-safe forms with Phlex
+gem("superform", github: "nimmolo/superform", branch: "nimmo-add-radio-fields")
+# Strict ivars: raises a NameError if an ivar is nil (undefined). Must be
+# required in config/boot.rb to work: https://github.com/yippee-fun/strict_ivars
+# gem("strict_ivars", require: false)
+
 # importmap for js module handling
 gem("importmap-rails")
 # stimulus for simpler, more maintainable js
@@ -69,10 +83,9 @@ gem("stimulus-rails")
 gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
-# redis for combining actioncable broadcasts with turbo_stream
-gem("redis", "~> 4.0")
 # minimal two way bridge between the V8 JavaScript engine and Ruby
-gem("mini_racer")
+# Locked here at "0.18.1" because "0.19.0" will not compile for nimmolo
+gem("mini_racer", "~> 0.18.1")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
@@ -121,12 +134,9 @@ gem("oauth2")
 gem("rest-client")
 
 # Read original images from google cloud storage
-gem "google-cloud-storage"
+gem("google-cloud-storage")
 
 # for creating zip files
-# RubyZip 3.0 is coming!
-# **********************
-
 # The public API of some Rubyzip classes has been modernized to use named
 # parameters for optional arguments. Please check your usage of the
 # following classes:
@@ -134,13 +144,7 @@ gem "google-cloud-storage"
 #   * `Zip::Entry`
 #   * `Zip::InputStream`
 #   * `Zip::OutputStream`
-
-# Please ensure that your Gemfiles and .gemspecs are suitably restrictive
-# to avoid an unexpected breakage when 3.0 is released (e.g. ~> 2.3.0).
-# See https://github.com/rubyzip/rubyzip for details. The Changelog also
-# lists other enhancements and bugfixes that have been implemented since
-# version 2.3.0.
-gem("rubyzip", "~> 2.3.0")
+gem("rubyzip", "~> 3.2.2")
 
 # QR code generator
 gem("rqrcode")
@@ -151,6 +155,13 @@ gem("prawn-svg")
 # And now prawn in a separate 'section' to make rubocop happy.
 gem("prawn")
 gem("prawn-manual_builder")
+
+# csv generation support
+gem("csv")
+
+# calculate the Haversine distance between two points given their lat/lng
+# https://github.com/kristianmandrup/haversine
+gem("haversine")
 
 # Use puma as the app server, also available for system tests
 # To use Webrick locally, run `bundle config set --local without 'production'`
@@ -173,10 +184,6 @@ group :test, :development do
 
   # Use rubocop and extensions for code quality control
   # https://docs.rubocop.org/rubocop/extensions.html#cop-extensions
-  # NOTE: If updating RuboCop:
-  #  - Update any extension used here
-  #  - Use highest available .codeclimate.yml rubocop channel
-  #    https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
   gem("rubocop", require: false)
   gem("rubocop-performance")
   gem("rubocop-rails")
@@ -195,7 +202,8 @@ group :test do
   gem("database_cleaner-active_record")
 
   # allows test results to be reported back to test runner IDE's
-  gem("minitest")
+  # minitest 6.0 is incompatible with Rails 7.2
+  gem("minitest", "< 6")
   gem("minitest-reporters")
 
   # restore `assigns` and `assert_template` to tests

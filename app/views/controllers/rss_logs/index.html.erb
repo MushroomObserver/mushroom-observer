@@ -1,13 +1,18 @@
 <%
-add_page_title(tag.span(:rss_log_title.t, class: "text-nowrap"))
-add_tab_set(rss_logs_index_tabs(user: @user, types: @types))
-add_type_filters
+add_index_title(@query)
+add_context_nav(rss_logs_index_tabs(user: @user, types: @types))
+add_type_filters(@query, @types)
+add_pagination(@pagination_data)
 
-@container = :full
+container_class(:full)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
-  <%= matrix_table(objects: @objects, cached: true) %>
+<%= paginated_results do %>
+  <%= render(Components::MatrixTable.new(
+    objects: @objects,
+    user: @user,
+    cached: true
+  )) %>
 <% end %>

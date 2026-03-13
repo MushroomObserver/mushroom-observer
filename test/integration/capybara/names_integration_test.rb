@@ -20,7 +20,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: title.as_displayed)
     # go back to the name page
     click_on(class: "latest_version_link")
-    title = :show_name_title.t(name: name.display_name)
+    title = name.display_name.t
     assert_selector("#title", text: title.as_displayed)
   end
 
@@ -33,6 +33,71 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit("/names/#{names(:boletus_edulis).id}/trackers/new")
     template = find("#name_tracker_note_template")
     template.assert_no_text(":mailing_address")
+  end
+
+  def test_create_name_tracker
+    name = names(:boletus_edulis)
+    login(rolf)
+
+    # Visit the new name tracker page
+    visit("/names/#{name.id}/trackers/new")
+    assert_selector("body.trackers__new")
+
+    # Fill in the note template
+    fill_in("name_tracker_note_template",
+            with: "Test note about :observation")
+
+    # Check the checkbox to enable note template
+    page.check("name_tracker[note_template_enabled]")
+
+    # Submit the form to the correct action
+    within("form[action='/names/#{name.id}/trackers']") do
+      click_button("Enable")
+    end
+
+    # Verify successful creation (redirects to name page)
+    assert_selector("body.names__show")
+    assert_current_path(name_path(name))
+
+    # Verify database effect
+    tracker = NameTracker.find_by(name: name, user: rolf)
+    assert(tracker, "Tracker should have been created")
+    assert_equal(
+      "Test note about :observation", tracker.note_template,
+      "Note template should be saved. Got: #{tracker.note_template.inspect}"
+    )
+  end
+
+  def test_update_name_tracker
+    name = names(:coprinus_comatus)
+    login(rolf)
+
+    # Ensure tracker exists in fixtures or create it
+    tracker = NameTracker.find_by(name: name, user: rolf)
+    assert(tracker, "Tracker should exist for this test")
+
+    # Visit the edit name tracker page
+    visit("/names/#{name.id}/trackers/edit")
+    assert_selector("body.trackers__edit")
+
+    # Update the form
+    fill_in("name_tracker_note_template", with: "Updated note about :observer")
+
+    # Ensure checkbox is checked
+    page.check("name_tracker[note_template_enabled]")
+
+    # Submit the form to the correct action
+    within("form[action='/names/#{name.id}/trackers']") do
+      click_button("Update")
+    end
+
+    # Verify successful update
+    assert_selector("body.names__show")
+    assert_current_path(name_path(name))
+
+    # Verify database effect
+    tracker.reload
+    assert_equal("Updated note about :observer", tracker.note_template)
   end
 
   def test_name_deprecation
@@ -48,8 +113,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     # First deprecate bad_name.
     within("#nomenclature") { click_link(text: "Deprecate") }
-    fill_in("proposed_name", with: good_name.text_name)
-    fill_in("comment", with: "bad name")
+    fill_in("deprecate_synonym[proposed_name]", with: good_name.text_name)
+    fill_in("deprecate_synonym[comment]", with: "bad name")
     click_on("Submit")
 
     assert(bad_name.reload.deprecated)
@@ -62,8 +127,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     # Then undo it and approve it.
     within("#nomenclature") { click_link(text: "Approve") }
-    page.uncheck("deprecate_others")
-    fill_in("comment", with: "my bad")
+    page.uncheck("approve_synonym[deprecate_others]")
+    fill_in("approve_synonym[comment]", with: "my bad")
     click_on("Approve")
 
     assert_not(bad_name.reload.deprecated)
@@ -84,26 +149,48 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_nil(good_name.synonym_id)
   end
 
-  def test_name_pattern_search_with_near_miss_corrected
-    near_miss_pattern = "agaricis campestrus"
+  def test_name_pattern_search_with_correctable_pattern
+    correctable_pattern = "agaricis campestrus"
 
     login
     visit("/")
-    fill_in("search_pattern", with: near_miss_pattern)
-    page.select("Names", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: correctable_pattern)
+    page.select("Names", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#content div.alert-warning",
                     text: "Maybe you meant one of the following names?")
 
     corrected_pattern = "Agaricus"
+    name = names(:agaricus_campestris)
+    assert_selector("#content a[href *= 'names/#{name.id}']",
+                    text: name.search_name)
+    assert_selector("#content div.alert-warning", text: corrected_pattern)
 
-    fill_in("search_pattern", with: corrected_pattern)
-    page.select("Names", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: corrected_pattern)
+    page.select("Names", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title", text: "Names Matching ‘#{corrected_pattern}’")
+    # assert_selector("#title", text: :NAMES.l)
+    assert_selector("#filters", text: corrected_pattern)
+  end
+
+  def test_name_pattern_search_with_old_provisional
+    old_provisional = 'Cortinarius "sp-IN34"'
+    name = names(:provisional_name)
+    login
+    visit("/")
+    fill_in("pattern_search_pattern", with: old_provisional)
+    page.select("Names", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
+
+    assert_no_selector("#content div.alert-warning")
+    title =
+      "Mushroom Observer: Name #{name.id}: #{name.user_display_name(rolf)}".
+      t.as_displayed
+
+    assert_title(title)
   end
 
   def test_lifeform_edit
@@ -116,11 +203,60 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     login
     visit(edit_lifeform_of_name_path(name))
 
-    check("lifeform_lichenicolous")
+    check("lifeform[lichenicolous]")
     click_on(:SAVE.l)
 
     assert_equal(" lichenicolous ", name.reload.lifeform,
                  "Failed to update lifeform")
+  end
+
+  # REGRESSION TEST for bug: When marking a name as misspelt via the edit form,
+  # the flash incorrectly said "No changes made" even though changes were made.
+  # Root cause: merge_synonyms (in Name::Synonymy) calls self.save, which clears
+  # the dirty tracking. Then perform_change_existing_name saw @name.changed?
+  # is false and set any_changes = false, triggering the incorrect flash.
+  # Fix: update_correct_spelling now returns true when changes were saved via
+  # mark_misspelled, and perform_change_existing_name uses this return value.
+  def test_mark_name_as_misspelt_via_edit_form
+    bad_name = names(:agaricus_campestros)
+    good_name = names(:agaricus_campestris)
+
+    # Verify initial state
+    assert_not(bad_name.deprecated, "bad_name should not be deprecated")
+    assert_not(bad_name.is_misspelling?, "bad_name should not be misspelling")
+    assert_nil(bad_name.correct_spelling_id, "bad_name should have no spelling")
+
+    login(rolf)
+    visit(edit_name_path(bad_name))
+
+    # Check the misspelling checkbox
+    check("name_misspelling")
+
+    # Fill in the correct spelling (autocompleter field)
+    fill_in("name_correct_spelling", with: good_name.search_name)
+
+    # Submit the form (click first submit button)
+    first("input[type='submit']").click
+
+    # Reload to get current state
+    bad_name.reload
+    good_name.reload
+
+    # Verify the name was correctly marked as misspelt
+    assert(bad_name.deprecated,
+           "Name should be deprecated after marking as misspelt")
+    assert(bad_name.is_misspelling?,
+           "Name should be marked as misspelling")
+    assert_equal(good_name.id, bad_name.correct_spelling_id,
+                 "Correct spelling should be set to good_name")
+
+    # Verify synonymy was created
+    assert_not_nil(bad_name.synonym_id, "Synonym should be created")
+    assert_equal(bad_name.synonym_id, good_name.synonym_id,
+                 "Both names should share the same synonym")
+
+    # Verify flash does NOT show "No changes made"
+    page.assert_no_text("No changes made")
   end
 
   def test_lifeform_propagate
@@ -139,10 +275,39 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
       click_on(:show_name_propagate_lifeform.l)
     end
 
-    check("add_lichenicolous")
+    check("propagate_lifeform[add_lichenicolous]")
     click_on(:APPLY.l)
 
     assert_equal(genus.lifeform, species.reload.lifeform,
                  "Failed to propogate lifeform to subtaxon")
+  end
+
+  def test_classification_edit
+    name = names(:coprinus_comatus)
+
+    login
+    visit(edit_classification_of_name_path(name))
+
+    fill_in("name[classification]", with: "Kingdom: _Fungi_")
+    click_on(:SAVE.l)
+
+    assert_match(/Fungi/, name.reload.classification)
+  end
+
+  def test_classification_inherit
+    # Need a Genus or higher rank for inherit classification
+    name = names(:coprinus)
+    parent = names(:agaricales)
+
+    # Ensure parent has a classification to inherit
+    parent.update!(classification: "Kingdom: _Fungi_\nPhylum: _Basidiomycota_")
+
+    login
+    visit(form_to_inherit_classification_of_name_path(name))
+
+    fill_in("inherit_classification[parent]", with: parent.text_name)
+    click_on(:SUBMIT.l)
+
+    assert_match(/Basidiomycota/, name.reload.classification)
   end
 end

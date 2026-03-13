@@ -11,6 +11,6 @@ module SuggestionsHelper
               else
                 :suggestions_poor.t
               end
-    "#{val.round(2)}% (" + english + ")"
+    "#{val.round(2)}% (#{english})"
   end
 end

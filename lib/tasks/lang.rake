@@ -15,22 +15,22 @@ def define_tasks(action, verbose, verbose_method, description)
   desc(description.gsub("XXX", "official").gsub("(S)", ""))
   task(official: :setup) do
     lang = Language.official
-    lang.verbose(verbose + " " + lang.send(verbose_method))
+    lang.verbose("#{verbose} #{lang.send(verbose_method)}")
     lang.send(action)
   end
 
   desc(description.gsub("XXX", "unofficial").gsub("(S)", "s"))
   task(unofficial: :setup) do
-    Language.unofficial.each do |lang|
-      lang.verbose(verbose + " " + lang.send(verbose_method))
+    Language.unofficial.find_each do |lang|
+      lang.verbose("#{verbose} #{lang.send(verbose_method)}")
       lang.send(action)
     end
   end
 
   desc(description.gsub("XXX", "all").gsub("(S)", "s"))
   task(all: :setup) do
-    Language.all.each do |lang|
-      lang.verbose(verbose + " " + lang.send(verbose_method))
+    Language.find_each do |lang|
+      lang.verbose("#{verbose} #{lang.send(verbose_method)}")
       lang.send(action)
     end
   end
@@ -39,7 +39,7 @@ def define_tasks(action, verbose, verbose_method, description)
     desc(description.gsub("XXX", locale).gsub("(S)", ""))
     task(locale => :setup) do |task|
       lang = Language.find_by(locale: task.name.sub(/.*:/, ""))
-      lang.verbose(verbose + " " + lang.send(verbose_method))
+      lang.verbose("#{verbose} #{lang.send(verbose_method)}")
       lang.send(action)
     end
   end
@@ -77,6 +77,9 @@ namespace :lang do
   desc "Setup environment for language tasks."
   task setup: [:environment, :login, :verbose, :safe_mode]
 
+  # Disable cop out of caution; our translation stuff is kind of wonky
+  # See https://github.com/MushroomObserver/mushroom-observer/pull/2838/commits/fcf75b4c57ac7c6f0a3046c870236ceeda50e50f#r2011104991
+  # rubocop:disable Rails/RakeEnvironment
   desc "Log in user for import tasks."
   task(:login) do
     User.current = if ENV.include?("user_name")
@@ -103,4 +106,5 @@ namespace :lang do
       puts("*** SAFE MODE ***")
     end
   end
+  # rubocop:enable Rails/RakeEnvironment
 end

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class BannerTest < ActiveSupport::TestCase
-  test "current" do
+  def test_current
     assert_equal(Banner.current, Banner.order(version: :desc).first)
   end
 end

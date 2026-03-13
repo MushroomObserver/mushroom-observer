@@ -66,7 +66,13 @@ class ChecklistsControllerTest < FunctionalTestCase
     get(:show, params: { project_id: project.id, location_id: location.id })
     assert_match(/\(1\)/, @response.body)
     assert_match("location%3A#{location.id}", @response.body)
-
+    assert_match(/#{:checklist_for.t}/, @response.body)
+    assert_select("li.nav-item") do
+      assert_select(
+        "a.nav-link.active[href='/projects/#{project.id}/locations']",
+        text: /Locations/
+      )
+    end
     prove_checklist_content(expect)
   end
 
@@ -84,13 +90,11 @@ class ChecklistsControllerTest < FunctionalTestCase
 
   def prove_checklist_content(expect)
     # Get expected names not included in the displayed checklist links.
-    missing_names = (
-      expect.each_with_object([]) do |taxon, missing|
-        next if /#{taxon.text_name}/.match?(css_select(".checklist a").text)
+    missing_names = expect.each_with_object([]) do |taxon, missing|
+      next if /#{taxon.text_name}/.match?(css_select(".checklist a").text)
 
-        missing << taxon.text_name
-      end
-    )
+      missing << taxon.text_name
+    end
 
     assert_select(".checklist a", count: expect.size)
     assert(missing_names.empty?, "Species List missing #{missing_names}")

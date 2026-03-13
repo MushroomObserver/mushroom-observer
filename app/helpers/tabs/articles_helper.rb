@@ -23,16 +23,6 @@ module Tabs
       ].freeze
     end
 
-    def article_show_tabs(article:, user:)
-      links = [articles_index_tab]
-      # Can user modify all articles
-      return links unless Article.can_edit?(user)
-
-      links.push(new_article_tab,
-                 edit_article_tab(article),
-                 destroy_article_tab(article))
-    end
-
     def article_form_new_tabs
       [articles_index_tab]
     end
@@ -45,37 +35,14 @@ module Tabs
     end
 
     def new_article_tab
-      [:create_article_title.t, new_article_path,
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def edit_article_tab(article)
-      [:EDIT.t, edit_article_path(article.id),
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def destroy_article_tab(article)
-      [nil, article, { button: :destroy }]
+      InternalLink::Model.new(
+        new_page_title(:create_object, :ARTICLE), Article,
+        new_article_path
+      ).tab
     end
 
     def articles_index_tab
-      [:index_article.t, articles_path, { class: tab_id(__method__.to_s) }]
-    end
-
-    # "Title (#nnn)" textilized
-    def article_show_title(article)
-      capture do
-        concat(article.display_title.t)
-        concat(" (##{article.id || "?"})")
-      end
-    end
-
-    # "Editing: Title (#nnn)"  textilized
-    def article_edit_title(article)
-      capture do
-        concat("#{:EDITING.l}: ")
-        concat(article_show_title(article))
-      end
+      InternalLink::Model.new(:index_article.t, Article, articles_path).tab
     end
   end
 end

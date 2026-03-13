@@ -137,8 +137,10 @@ class GlossaryTermTest < UnitTestCase
     term = GlossaryTerm.new(name: nil, description: "xxx")
     assert(term.invalid?, "GlossaryTerm must have a name")
 
-    term = GlossaryTerm.new(name: GlossaryTerm.first.name,
-                            description: "xxx")
+    term = GlossaryTerm.new(
+      name: GlossaryTerm.reorder(created_at: :asc).first.name,
+      description: "xxx"
+    )
     assert(term.invalid?, "GlossaryTerm name must be unique")
 
     term = GlossaryTerm.new(name: "xxx", description: nil, thumb_image: nil)

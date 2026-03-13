@@ -7,13 +7,15 @@ module Tabs
     end
 
     def info_site_stats_tab
-      [:app_site_stats.t, info_site_stats_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :app_site_stats.t, info_site_stats_path
+      ).tab
     end
 
     def site_contributors_tab
-      [:app_contributors.t, contributors_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :app_contributors.t, contributors_path
+      ).tab
     end
   end
 end

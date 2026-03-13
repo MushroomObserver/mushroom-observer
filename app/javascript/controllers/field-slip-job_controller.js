@@ -16,7 +16,7 @@ export default class extends Controller {
 
   connect() {
     // Just a "sanity check" convention, so you can tell "is this thing on?"
-    this.element.dataset.stimulus = "field-slip-job-connected";
+    this.element.dataset.fieldSlipJob = "connected";
     this.status_id = this.element.dataset.status
 
     this.start_timer_sending_requests()
@@ -24,12 +24,7 @@ export default class extends Controller {
 
   // Clear any intervals when the controller is disconnected
   disconnect() {
-    const stimulus = this.element.dataset.stimulus.split(" ")
-    if (stimulus.includes("field-slip-job-connected")) {
-      const idx = stimulus.indexOf("field-slip-job-connected")
-      stimulus.splice(idx, 1)
-      this.element.setAttribute("data-stimulus", stimulus.join(" "))
-    }
+    this.element.removeAttribute("data-field-slip-job")
     if (this.intervalId != null) {
       clearInterval(this.intervalId)
     }

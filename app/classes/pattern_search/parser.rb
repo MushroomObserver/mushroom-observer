@@ -12,7 +12,7 @@ module PatternSearch
     /x
 
     def initialize(string)
-      self.incoming_string = string
+      self.incoming_string = string.gsub(/[“”]/, '"')
       self.terms = parse_incoming_string
     end
 

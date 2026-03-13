@@ -5,15 +5,19 @@ module Names
   class MapsController < ApplicationController
     before_action :login_required
 
+    def controller_model_name
+      "Name"
+    end
+
     # Draw a map of all the locations where this name has been observed.
     def show
-      pass_query_params
       @name = find_or_goto_index(Name, params[:id].to_s)
       return unless @name
 
-      @query = create_query(:Observation, :all, names: @name.id)
-      apply_content_filters(@query)
-      @observations = @query.results(include: :location, limit: 10_000).
+      @query = find_or_create_query(:Observation, names: { lookup: @name.id })
+      @any_content_filters_applied = check_if_preference_filters_applied
+      @observations = @query.scope.limit(MO.query_max_array).
+                      includes(:location).
                       select { |o| o.lat || o.location }
     end
   end

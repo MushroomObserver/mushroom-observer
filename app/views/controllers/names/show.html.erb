@@ -1,20 +1,27 @@
 <%
-add_page_title(:show_name_title.t(name: @name.display_name))
-
-Textile.register_name(@name)
-add_pager_for(@name)
-add_interest_icons(@user, @name)
-add_tab_set(name_show_tabs(name: @name))
-
-@container = :full
+Textile.user_register_name(@user, @name)
+add_show_title(@name.user_display_name(@user).t.small_author, @name)
+if @user
+  # add_edit_icons(@name) edit name link is in nomenclature panel
+  add_interest_icons(@user, @name)
+  add_pager_for(@name)
+end
+container_class(:full)
+column_classes(:seven_five)
 %>
 
-<div class="row">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
 
-  <!--LEFT COLUMN-->
-  <div class="col-xs-12 col-md-7">
-
-    <%= render(partial: "names/show/confident_observations_panel") %>
+    <%= if @best_images&.length&.positive?
+      render(Components::Carousel.new(
+        object: @name,
+        images: @best_images,
+        title: :show_name_most_confident.l,
+        links: "",
+        panel_id: "name_confident_observations"
+      ))
+    end %>
 
     <% if @best_description.present? %>
       <%= render(partial: "names/show/best_description_panel") %>
@@ -24,10 +31,10 @@ add_tab_set(name_show_tabs(name: @name))
                locals: { object: @name, comments: @comments,
                          controls: @user, limit: nil }) %>
 
-  </div><!--LEFT COLUMN-->
+  <% end %>
 
   <!--RIGHT COLUMN-->
-  <div class="col-xs-12 col-md-5">
+  <%= tag.div(class: yield(:right_columns)) do %>
 
     <%= render(partial: "names/show/observations_menu") %>
 
@@ -58,16 +65,23 @@ add_tab_set(name_show_tabs(name: @name))
       concat(export_status_controls(@name))
     end %>
 
-    <%= panel_block(id: "name_footer", footer: footer) do
-      concat(tag.div(id: "name_authors_editors") do
-        show_authors_and_editors(obj: @name, versions: @versions, user: @user)
-      end)
-      concat(:show_name_num_notifications.t(num: @name.interests))
-    end %>
+    <%= render(Components::Panel.new(panel_id: "name_footer")) do |panel| %>
+      <%= panel.with_body do %>
+        <%= tag.div(id: "name_authors_editors") do %>
+          <%= render(Components::AuthorsAndEditors.new(
+                obj: @name,
+                versions: @versions,
+                user: @user
+              )) %>
+        <% end %>
+        <%= :show_name_num_notifications.t(num: @name.interests) %>
+      <% end %>
+      <%= panel.with_footer { footer } %>
+    <% end %>
 
-  </div><!--RIGHT COLUMN-->
-</div><!--.row-->
+  <% end %>
+  <!--RIGHT COLUMN-->
+<% end %>
+<!--.row-->
 
-<%=
-show_object_footer(@name, @versions)
-%>
+<%= render(Components::ObjectFooter.new(user: @user, obj: @name, versions: @versions)) %>

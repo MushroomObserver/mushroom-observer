@@ -3,6 +3,8 @@
 require("test_helper")
 
 class AccountIntegrationTest < CapybaraIntegrationTestCase
+  include ActiveJob::TestHelper
+
   # -------------------------------
   #  Test basic login.
   # -------------------------------
@@ -121,144 +123,197 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
   #  Test signup verify login and logout.
   # ----------------------------
 
+  # Test that RANDOM theme selection assigns a valid theme from MO.themes
+  # and that verification email is sent
+  def test_signup_random_theme_selection
+    perform_enqueued_jobs do
+      mail_count_before = ActionMailer::Base.deliveries.size
+
+      visit(account_signup_path)
+      within("#account_signup_form") do
+        fill_in("new_user_login", with: "RandomThemeUser")
+        fill_in("new_user_password", with: "TestPass123!")
+        fill_in("new_user_password_confirmation", with: "TestPass123!")
+        fill_in("new_user_email", with: "random_theme@test.org")
+        fill_in("new_user_email_confirmation", with: "random_theme@test.org")
+        # Select "Random" by visible text - this tests the option label
+        select("Random", from: "new_user_theme")
+        click_commit
+      end
+
+      random_user = User.find_by(login: "RandomThemeUser")
+      assert_not_nil(random_user, "User with RANDOM theme should be created")
+      # RANDOM stores nil so css_theme picks random theme on each page load
+      assert_nil(random_user.theme,
+                 "RANDOM should store nil for random theme per page")
+
+      # Verify verification email was sent
+      assert_operator(ActionMailer::Base.deliveries.size, :>, mail_count_before,
+                      "Verification email should have been sent")
+      verify_email = ActionMailer::Base.deliveries.last
+      assert(verify_email.subject.downcase.include?("verif"),
+             "Email should be verification, got: #{verify_email.subject}")
+      assert_includes(verify_email.to, "random_theme@test.org",
+                      "Email should be sent to the user's address")
+    end
+  end
+
+  # Tests BlackOnWhite theme persistence via "Black on White" label selection
   def test_signup_verify_login_and_logout
-    visit(account_signup_path)
-    assert_selector("body.account__new")
-    # Make a mistake with the password confirmation
-    within("#account_signup_form") do
-      assert_field("new_user_login")
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24?")
-      click_commit
+    # Run jobs synchronously so emails appear in deliveries
+    perform_enqueued_jobs do
+      visit(account_signup_path)
+      assert_selector("body.account__new")
+      # Make a mistake with the password confirmation
+      within("#account_signup_form") do
+        assert_field("new_user_login")
+        fill_in("new_user_login", with: "Dumbledore")
+        fill_in("new_user_password", with: "Hagrid_24!")
+        fill_in("new_user_password_confirmation", with: "Hagrid_24?")
+        click_commit
+      end
+
+      # We ought to be back at the form
+      assert_flash_error
+      assert_flash_text(:validate_user_password_no_match.t.as_displayed)
+      assert_flash_text(:validate_user_email_missing.t)
+      # This time, do it right
+      within("#account_signup_form") do
+        fill_in("new_user_login", with: "Dumbledore")
+        fill_in("new_user_password", with: "Hagrid_24!")
+        fill_in("new_user_password_confirmation", with: "Hagrid_24!")
+        click_commit
+      end
+
+      # Ah, but we didn't give an email address.
+      assert_flash_error
+      assert_no_flash_text(:validate_user_password_no_match.t.as_displayed)
+      assert_flash_text(:validate_user_email_missing.t)
+      within("#account_signup_form") do
+        fill_in("new_user_login", with: "Dumbledore")
+        fill_in("new_user_password", with: "Hagrid_24!")
+        fill_in("new_user_password_confirmation", with: "Hagrid_24!")
+        fill_in("new_user_email", with: "Hagrid_24!")
+        click_commit
+      end
+
+      # That's not an email address.
+      assert_flash_error
+      assert_flash_text(:validate_user_email_confirmation_missing.t)
+      within("#account_signup_form") do
+        fill_in("new_user_login", with: "Dumbledore")
+        fill_in("new_user_password", with: "Hagrid_24!")
+        fill_in("new_user_password_confirmation", with: "Hagrid_24!")
+        fill_in("new_user_email", with: "Hagrid_24!")
+        fill_in("new_user_email_confirmation", with: "Hagrid_24!")
+        click_commit
+      end
+
+      # That's still not an email address.
+      assert_flash_error
+      assert_flash_text(:validate_user_email_missing.t)
+      user_count_before = User.count
+      mail_count_before = ActionMailer::Base.deliveries.size
+
+      within("#account_signup_form") do
+        fill_in("new_user_login", with: "Dumbledore")
+        fill_in("new_user_password", with: "Hagrid_24!")
+        fill_in("new_user_password_confirmation", with: "Hagrid_24!")
+        fill_in("new_user_email", with: "webmaster@hogwarts.org")
+        fill_in("new_user_email_confirmation", with: "webmaster@hogwarts.org")
+        # Select theme by visible label text (not value) to test select works
+        select("Black on White", from: "new_user_theme")
+        click_commit
+      end
+
+      # Redirected to the Welcome page, but email not verified.
+      assert_selector("body.info__how_to_use")
+
+      # CRITICAL: Verify user was actually created
+      assert_equal(user_count_before + 1, User.count,
+                   "User should have been created in database")
+
+      # CRITICAL: Verify verification email was sent
+      assert_operator(ActionMailer::Base.deliveries.size, :>, mail_count_before,
+                      "Verification email should have been sent")
+      verify_email = ActionMailer::Base.deliveries.last
+      assert(verify_email.subject.downcase.include?("verif"),
+             "Last email should be verification, got: #{verify_email.subject}")
+      assert_includes(verify_email.to, "webmaster@hogwarts.org",
+                      "Email should be sent to the user's address")
+
+      # At this point there should be an unverified account for Dumbledore.
+      wizard = User.find_by(email: "webmaster@hogwarts.org")
+      assert_not_nil(wizard, "User record should exist in database")
+      assert_equal("Dumbledore", wizard.login, "Login should match form input")
+      assert_equal("webmaster@hogwarts.org", wizard.email,
+                   "Email should match form input")
+      # "Black on White" label should save as "BlackOnWhite" value
+      assert_equal("BlackOnWhite", wizard.theme,
+                   "Theme should match selected value")
+      assert_false(wizard.verified, "User should not be verified yet")
+      assert_not_nil(wizard.auth_code, "Auth code should be generated")
+
+      # Actually happens: User tries to sign in immediately, without verifying
+      click_link(id: "nav_login_link")
+      assert_selector("body.login__new")
+
+      within("#account_login_form") do
+        fill_in("user_login", with: wizard.login)
+        fill_in("user_password", with: "Hagrid_24!")
+        click_commit
+      end
+
+      # Rails should send another email with this link.
+      verify_mail_content = delivered_mail_html
+      assert(verify_mail_content.include?(wizard.login))
+      assert(verify_mail_content.include?("verify"))
+      # Store the link in that mail, so we can test the reverify link.
+      verify_link = first_link_in_mail
+
+      # Should render reverify where they can get another email link. Try it
+      click_on("account_reverify_link")
+      assert_flash_success(:runtime_reverify_sent.t.strip_squeeze)
+      # GOTCHA: last email sent is the webmaster notification for reverify.
+      # So check the second to last delivery: delivered_mail_html(2)
+      reverify_mail_content = delivered_mail_html(2)
+      assert(reverify_mail_content.include?(wizard.login))
+      assert(reverify_mail_content.include?("verify"))
+      reverify_link = first_link_in_mail(2)
+
+      assert_equal(verify_link, reverify_link)
+
+      # A GET to the verify_link should verify Dumbledore
+      visit(verify_link)
+      assert_true(wizard.reload.verified)
+      # ...and send them to the "new" verifications page
+      assert_selector("body.verifications__new")
+
+      # They should be logged in now.
+      assert_button(:app_logout.t)
+      # Log out. (must use id, there are multiple links)
+      click_button(id: "nav_user_logout_link")
+      assert_no_link(:app_logout.t)
+
+      # Try to use that verification code again. No can do
+      visit(account_verify_email_path(id: wizard.id,
+                                      auth_code: wizard.auth_code))
+      assert_flash_warning(:runtime_reverify_already_verified.t.strip_squeeze)
+      assert_selector("body.login__new")
+
+      within("#account_login_form") do
+        fill_in("user_login", with: "Dumbledore")
+        fill_in("user_password", with: "Hagrid_24!")
+        click_commit
+      end
+
+      # They should still be able to login (with a button, not a link)
+      assert_button(:app_logout.l)
+      assert_no_link(:app_logout.l)
     end
-
-    # We ought to be back at the form
-    assert_flash_error
-    assert_flash_text(:validate_user_password_no_match.t.as_displayed)
-    assert_flash_text(:validate_user_email_missing.t)
-    # This time, do it right
-    within("#account_signup_form") do
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
-      click_commit
-    end
-
-    # Ah, but we didn't give an email address.
-    assert_flash_error
-    assert_no_flash_text(:validate_user_password_no_match.t.as_displayed)
-    assert_flash_text(:validate_user_email_missing.t)
-    within("#account_signup_form") do
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
-      fill_in("new_user_email", with: "Hagrid_24!")
-      click_commit
-    end
-
-    # That's not an email address.
-    assert_flash_error
-    assert_flash_text(:validate_user_email_confirmation_missing.t)
-    within("#account_signup_form") do
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
-      fill_in("new_user_email", with: "Hagrid_24!")
-      fill_in("new_user_email_confirmation", with: "Hagrid_24!")
-      click_commit
-    end
-
-    # That's still not an email address.
-    assert_flash_error
-    assert_flash_text(:validate_user_email_missing.t)
-    within("#account_signup_form") do
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
-      fill_in("new_user_email", with: "webmaster@hogwarts.org")
-      fill_in("new_user_email_confirmation", with: "webmaster@hogwarts.org")
-      click_commit
-    end
-
-    # Redirected to the Welcome page, but email not verified.
-    assert_selector("body.observations__index")
-
-    # At this point there should be an unverified account for Dumbledore.
-    wizard = User.find_by(email: "webmaster@hogwarts.org")
-    assert_false(wizard.verified)
-
-    # Actually happens: User tries to sign in immediately, without verifying
-    click_link(id: "nav_login_link")
-    assert_selector("body.login__new")
-
-    within("#account_login_form") do
-      fill_in("user_login", with: wizard.login)
-      fill_in("user_password", with: "Hagrid_24!")
-      click_commit
-    end
-
-    # Rails should send another email with this link.
-    verify_mail_content = delivered_mail_html
-    assert(verify_mail_content.include?(wizard.login))
-    assert(verify_mail_content.include?("verify"))
-    # Store the link in that mail, so we can test the reverify link.
-    verify_link = first_link_in_mail
-
-    # Should render reverify where they can get another email link. Try it
-    click_on("account_reverify_link")
-    assert_flash_success(:runtime_reverify_sent.t.strip_squeeze)
-    # GOTCHA: last email sent is the webmaster notification for reverify.
-    # So check the second to last delivery: delivered_mail_html(2)
-    reverify_mail_content = delivered_mail_html(2)
-    assert(reverify_mail_content.include?(wizard.login))
-    assert(reverify_mail_content.include?("verify"))
-    reverify_link = first_link_in_mail(2)
-
-    assert_equal(verify_link, reverify_link)
-
-    # A GET to the verify_link should verify Dumbledore
-    visit(verify_link)
-    assert_true(wizard.reload.verified)
-    # ...and send them to the "new" verifications page
-    assert_selector("body.verifications__new")
-
-    # They should be logged in now.
-    assert_button(:app_logout.t)
-    # Log out. (must use id, there are multiple links)
-    click_button(id: "nav_user_logout_link")
-    assert_no_link(:app_logout.t)
-
-    # Try to use that verification code again. No can do
-    visit(account_verify_email_path(id: wizard.id, auth_code: wizard.auth_code))
-    assert_flash_warning(:runtime_reverify_already_verified.t.strip_squeeze)
-    assert_selector("body.login__new")
-
-    within("#account_login_form") do
-      fill_in("user_login", with: "Dumbledore")
-      fill_in("user_password", with: "Hagrid_24!")
-      click_commit
-    end
-
-    # They should still be able to login (with a button, not a link)
-    assert_button(:app_logout.l)
-    assert_no_link(:app_logout.l)
   end
 
   def test_correct_invalid_preferences
-    flintstone = users("flintstone")
-    login!(flintstone)
-
-    visit(edit_account_preferences_path)
-    assert_selector("body.preferences__edit")
-    within("#account_preferences_form") do
-      fill_in("user_email", with: "valid@seemingly.com")
-      click_commit
-    end
-
-    assert_no_flash_errors
-    assert_selector("body.preferences__edit")
-
     # This user has an invalid region AND a bogus email
     nonregional = users("nonregional")
     login!(nonregional)
@@ -370,8 +425,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Content filters
     within("#account_preferences_form") do
-      check("user_with_images")
-      check("user_with_specimen")
+      check("user_has_images")
+      check("user_has_specimen")
       select(:prefs_filters_lichen_yes.l, from: "user_lichen")
       click_commit
     end
@@ -428,22 +483,18 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       uncheck("user_email_comments_owner")
       uncheck("user_email_comments_response")
-      check("user_email_comments_all")
 
       uncheck("user_email_observations_consensus")
       uncheck("user_email_observations_naming")
-      check("user_email_observations_all")
 
       uncheck("user_email_names_admin")
       uncheck("user_email_names_author")
       uncheck("user_email_names_editor")
       uncheck("user_email_names_reviewer")
-      check("user_email_names_all")
 
       uncheck("user_email_locations_admin")
       uncheck("user_email_locations_author")
       uncheck("user_email_locations_editor")
-      check("user_email_locations_all")
 
       uncheck("user_email_general_commercial")
       uncheck("user_email_general_feature")
@@ -456,10 +507,6 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     mary.reload
     assert_equal(mary.email_html, false)
     assert_equal(mary.email_comments_owner, false)
-    assert_equal(mary.email_comments_all, true)
-    assert_equal(mary.email_observations_all, true)
-    assert_equal(mary.email_locations_all, true)
-    assert_equal(mary.email_names_all, true)
     assert_equal(mary.email_general_question, false)
     assert_equal(mary.email_general_feature, false)
   end

@@ -7,20 +7,8 @@ class API2
       ExternalSite
     end
 
-    def high_detail_page_length
-      1000
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
+    def page_length_level
+      :lightweight
     end
 
     def high_detail_includes
@@ -29,8 +17,8 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
-        name: parse(:string, :name)
+        id_in_set: parse_array(:external_site, :id, as: :id),
+        name_has: parse(:string, :name)
       }
     end
 

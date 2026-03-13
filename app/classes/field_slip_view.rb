@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "prawn/measurement_extensions"
+require("prawn/measurement_extensions")
 
 class FieldSlipView
   include Prawn::View
@@ -66,7 +66,7 @@ class FieldSlipView
   end
 
   def build_slips
-    (0..@tracker.count - 1).each do |i|
+    (0..(@tracker.count - 1)).each do |i|
       num = (i + @tracker.start).to_s.rjust(5, "0")
       slip_at(slip_left(i), slip_bottom(i), "#{@tracker.prefix}-#{num}")
       new_page_check(i)

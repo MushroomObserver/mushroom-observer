@@ -12,7 +12,6 @@ module SpeciesLists
     # :add_remove_observations
     # Form to add or remove the current *query* of observations
     def edit
-      pass_query_params
       @id = params[:species_list].to_s
       @query = find_obs_query_or_redirect
     end
@@ -21,7 +20,6 @@ module SpeciesLists
     # PUT endpoint — via params[:commit], either add or remove a
     #                *query* of observations from a species_list
     def update
-      pass_query_params
       id = params[:species_list].to_s
       return unless (spl = find_list_or_reload_form!(id))
 
@@ -53,7 +51,7 @@ module SpeciesLists
 
       flash_error(:species_list_add_remove_bad_name.t(name: id.inspect))
       # id is guaranteed by .to_s not to be nil, but may be a blank string
-      redirect_to(edit_species_list_observations_path(species_list: id))
+      redirect_to(species_lists_edit_observations_path(species_list: id))
       nil
     end
 
@@ -66,7 +64,7 @@ module SpeciesLists
     end
 
     def do_add_remove_observations_by_query(spl, query)
-      return unless check_permission!(spl)
+      return unless permission!(spl)
 
       if params[:commit] == :ADD.l
         do_add_observations_by_query(spl, query)

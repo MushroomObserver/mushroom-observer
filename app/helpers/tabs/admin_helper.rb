@@ -15,14 +15,17 @@ module Tabs
     end
 
     def admin_create_donation_tab
-      [:create_donation_tab.t, new_admin_donations_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :create_donation_tab.t, Donation, new_admin_donations_path
+      ).tab
     end
 
-    def admin_review_donations_tab
-      [:review_donations_tab.t, edit_admin_donations_path,
-       { class: tab_id(__method__.to_s) }]
-    end
+    # Overridden by SupportHelper#admin_review_donations_tab
+    # def admin_review_donations_tab
+    #   InternalLink::Model.new(
+    #     :review_donations_tab.t, Donation, edit_admin_donations_path
+    #   ).tab
+    # end
 
     def admin_test_tabs
       [

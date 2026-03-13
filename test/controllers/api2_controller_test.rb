@@ -4,6 +4,8 @@ require("test_helper")
 require("rexml/document")
 
 class API2ControllerTest < FunctionalTestCase
+  include ActiveJob::TestHelper
+
   def assert_api_failed
     @api = assigns(:api)
     assert_not(@api.errors.empty?, "Expected API to fail with errors.")
@@ -70,6 +72,10 @@ class API2ControllerTest < FunctionalTestCase
     do_basic_get_request_for_model(ExternalSite)
   end
 
+  def test_basic_field_slip_get_request
+    do_basic_get_request_for_model(FieldSlip)
+  end
+
   def test_basic_herbarium_get_request
     do_basic_get_request_for_model(Herbarium)
   end
@@ -119,7 +125,13 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def do_basic_get_request_for_model(model, *args)
-    expected_object = args.empty? ? model.first : model.where(*args).first
+    # Some models have a default_scope sort order applied.
+    # Reorder our expects preventatively to match API2's order.
+    expected_object = if args.empty?
+                        model.reorder(id: :asc).first
+                      else
+                        model.reorder(id: :asc).where(*args).first
+                      end
     response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
       response_formats.each do |format|
@@ -132,7 +144,7 @@ class API2ControllerTest < FunctionalTestCase
 
   def test_num_of_pages
     get(:observations, params: { detail: :high, format: :json })
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     assert_equal((Observation.count / 100.0).ceil, json["number_of_pages"],
                  "Number of pages was not correctly calculated.")
   end
@@ -169,7 +181,7 @@ class API2ControllerTest < FunctionalTestCase
     post(:observations, params: params)
     assert_no_api_errors
     obs = Observation.last
-    assert(obs.field_slips[0].project.observations.include?(obs))
+    assert(obs.field_slip.project.observations.include?(obs))
   end
 
   def test_post_observation_joins_project
@@ -199,7 +211,7 @@ class API2ControllerTest < FunctionalTestCase
       thumbnail: images(:turned_over_image).id.to_s,
       projects: "EOL Project",
       code: "EOL-13579",
-      species_lists: "Another Species List"
+      species_lists: "Another Observation List"
     }
     post(:observations, params: params)
     assert_no_api_errors
@@ -220,7 +232,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal({ Observation.other_notes_key =>
                    "These are notes.\nThey look like this." }, obs.notes)
     assert_obj_arrays_equal([images(:in_situ_image),
-                             images(:turned_over_image)], obs.images)
+                             images(:turned_over_image)],
+                            obs.images.reorder(id: :asc))
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_arrays_equal([projects(:eol_project)], obs.projects)
     assert_obj_arrays_equal([species_lists(:another_species_list)],
@@ -275,7 +288,7 @@ class API2ControllerTest < FunctionalTestCase
     end
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     checksum_returned = json["results"][0]["md5sum"].to_s
     assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
   end
@@ -374,11 +387,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(CGI.escapeHTML("New API2 Key"), notes.to_s)
   end
 
-  # NOTE: Checking ActionMailer::Base.deliveries works here only because
-  #       QueuedEmail.queue == false.
-  #       The mail is sent via QueuedEmail but delivered immediately.
   def test_post_api_key
-    QueuedEmail.queue = false
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)
@@ -392,6 +401,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(rolf, api_key.user)
     assert_not_nil(api_key.verified)
+    # No email sent when key is verified (user creating key for themselves)
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
     params = {
@@ -399,7 +409,10 @@ class API2ControllerTest < FunctionalTestCase
       app: "Mushroom Mapper",
       for_user: mary.id
     }
-    post(:api_keys, params: params)
+    # Use perform_enqueued_jobs to execute deliver_later immediately
+    perform_enqueued_jobs do
+      post(:api_keys, params: params)
+    end
     assert_no_api_errors
     api_key = APIKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
@@ -433,6 +446,121 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("GenBank", sequence.archive)
     assert_equal("KT1234", sequence.accession)
     assert_equal("sequence notes", sequence.notes)
+  end
+
+  def test_get_field_slip_observation_ids
+    fs = field_slips(:field_slip_one)
+    assert(fs.observations.any?, "Test needs field_slip with observations")
+    expected_ids = fs.observation_ids.sort
+
+    # JSON
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_equal(expected_ids, result["observation_ids"].sort)
+
+    # XML
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    obs_elem = doc.root.elements["results/result/observations"]
+    assert_not_nil(obs_elem)
+    xml_ids = []
+    obs_elem.each_element("observation") do |e|
+      xml_ids << e.attributes["id"].to_i
+    end
+    assert_equal(expected_ids, xml_ids.sort)
+  end
+
+  def test_get_field_slip_without_observations
+    fs = field_slips(:field_slip_no_obs)
+    assert(fs.observations.empty?, "Test needs field_slip without obs")
+
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_nil(result["observation_ids"])
+
+    get(:field_slips,
+        params: { id: fs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    assert_nil(doc.root.elements["results/result/observations"])
+  end
+
+  def test_field_slip_observation_scope_distinct
+    fs = field_slips(:field_slip_one)
+    obs1 = fs.observations.first
+    # Add a second observation to the same field slip
+    obs2 = observations(:coprinus_comatus_obs)
+    obs2.update!(field_slip: fs)
+    assert_equal(2, fs.observations.count)
+
+    results = FieldSlip.observation([obs1.id, obs2.id])
+    assert_equal(1, results.length, "Scope should return distinct results")
+    assert_equal(fs, results.first)
+  end
+
+  def test_post_observation_with_existing_field_slip_code
+    # field_slip_one already has an observation; creating another obs
+    # with the same code should succeed (not raise FieldSlipInUse)
+    fs = field_slips(:field_slip_one)
+    assert(fs.observations.any?, "Test needs field_slip with observation")
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: fs.code }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    assert_equal(fs, obs.field_slip)
+  end
+
+  def test_get_observation_with_field_slip
+    obs = observations(:minimal_unknown_obs)
+    assert(obs.field_slip.present?, "Test needs obs with field_slip")
+
+    # JSON detail=high should include field_slip
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_equal(obs.field_slip.id, result["field_slip"]["id"])
+    assert_equal(obs.field_slip.code, result["field_slip"]["code"])
+
+    # XML detail=high should include field_slip
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    field_slip = doc.root.elements["results/result/field_slip"]
+    assert_not_nil(field_slip)
+    assert_equal(obs.field_slip.id.to_s,
+                 field_slip.attributes["id"])
+    assert_equal(obs.field_slip.code,
+                 field_slip.elements["code"].get_text.to_s)
+  end
+
+  def test_get_observation_without_field_slip
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.field_slip, "Test needs obs without field_slip")
+
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :json })
+    assert_no_api_errors
+    json = response.parsed_body
+    result = json["results"][0]
+    assert_nil(result["field_slip"])
+
+    get(:observations,
+        params: { id: obs.id, detail: :high, format: :xml })
+    assert_no_api_errors
+    doc = REXML::Document.new(response.body)
+    assert_nil(doc.root.elements["results/result/field_slip"])
   end
 
   def test_get_observation_with_gps_hidden
@@ -477,11 +605,11 @@ class API2ControllerTest < FunctionalTestCase
 
     params[:format] = :json
     get(:observations, params: params.merge(api_key: rolfs_key.key))
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     votes = json["results"][0]["votes"]
     assert_equal(
-      "rolf",
-      votes.find { |v| v["id"] == rolfs_vote.id }["owner"]["login_name"]
+      :anonymous.l,
+      votes.find { |v| v["id"] == rolfs_vote.id }["owner"]
     )
     assert_equal(
       "mary",
@@ -489,7 +617,7 @@ class API2ControllerTest < FunctionalTestCase
     )
 
     get(:observations, params: params.merge(api_key: marys_key.key))
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     votes = json["results"][0]["votes"]
     assert_equal(
       :anonymous.l,
@@ -504,7 +632,7 @@ class API2ControllerTest < FunctionalTestCase
     get(:observations, params: params.merge(api_key: rolfs_key.key))
     doc = REXML::Document.new(response.body)
     votes = doc.root.elements["results/result/votes"]
-    check_anonymity(votes, rolfs_vote, false)
+    check_anonymity(votes, rolfs_vote, true)
     check_anonymity(votes, marys_vote, false)
 
     get(:observations, params: params.merge(api_key: marys_key.key))
@@ -525,6 +653,6 @@ class API2ControllerTest < FunctionalTestCase
   end
 end
 
-class UploadedFileWithChecksum < Rack::Test::UploadedFile
+class UploadedFileWithChecksum < Rack::Test::UploadedFile # rubocop:disable Style/OneClassPerFile
   attr_accessor :checksum
 end

@@ -1,16 +1,16 @@
 <%
-add_index_title(@query, no_hits: :list_projects_title.t)
-add_tab_set(projects_index_tabs)
+add_index_title(@query)
+add_context_nav(projects_index_tabs)
 add_sorter(@query, projects_index_sorts)
+add_pagination(@pagination_data)
+container_class(:text_image)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
 <!-- list the projects -->
-<%= paginate_block(@pages) do %>
-  <div class="list-group">
-    <%= render(partial: "projects/object", collection: @objects) %>
-  </div>
+<%= paginated_results do %>
+  <%= tag.div(class: "list-group") do %>
+    <%= render(partial: "project", collection: @objects, as: :project) %>
+  <% end %>
 <% end %>
-
-

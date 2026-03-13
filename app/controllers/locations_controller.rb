@@ -19,7 +19,6 @@
 # rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
   before_action :store_location, except: [:index, :destroy]
-  before_action :pass_query_params, except: [:index]
   before_action :login_required
 
   ##############################################################################
@@ -32,7 +31,7 @@ class LocationsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::LocationBase.default_order # :name
+    ::Query::Locations.default_order # :name
   end
 
   def unfiltered_index_opts
@@ -51,41 +50,26 @@ class LocationsController < ApplicationController
 
     query = find_query(:Location)
     # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query.params.any?
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
 
     [query, { link_all_sorts: true }]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
-  end
-
-  # Displays a list of locations matching a given string.
-  def pattern
-    pattern = params[:pattern].to_s
-    loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if loc
-      redirect_to(location_path(loc.id))
-      [nil, {}]
-    else
-      query = create_query(
-        :Location, :all, pattern: Location.user_format(@user, pattern)
-      )
-      [query, { link_all_sorts: true }]
-    end
+    [nil, {}]
   end
 
   # Displays a list of all locations whose country matches the param.
   def country
-    query = create_query(:Location, :all, regexp: "#{params[:country]}$")
+    query = create_query(:Location, regexp: "#{params[:country]}$")
     [query, { link_all_sorts: true }]
   end
 
-  # Displays a list of all locations whose country matches the id param.
+  # Displays a list of locations of obs whose project matches the param.
   def project
-    query = create_query(
-      :Location, :all,
-      with_observations: true, project: Project.find(params[:project])
-    )
+    obs_query = create_query(:Observation,
+                             projects: Project.find(params[:project]))
+    query = create_query(:Location, observation_query: obs_query.params)
     [query, { link_all_sorts: true }]
   end
 
@@ -97,7 +81,7 @@ class LocationsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Location, :all, by_user: user)
+    query = create_query(:Location, by_users: user)
     [query, { link_all_sorts: true }]
   end
 
@@ -109,15 +93,16 @@ class LocationsController < ApplicationController
     )
     return unless editor
 
-    query = create_query(:Location, :all, by_editor: editor)
+    query = create_query(:Location, by_editor: editor)
     [query, {}]
   end
 
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, display_opts)
-    # Restrict to subset within a geographical region (used by map
-    # if it needed to stuff multiple locations into a single marker).
-    query = restrict_query_to_box(query)
+    # Matching undefined locations is meaningless in a box.
+    # (Undefined locations don't have a box!)
+    return query if query.params[:in_box].present?
+
     # Get matching *undefined* locations.
     set_matching_undefined_location_ivars(query, display_opts)
     query
@@ -129,30 +114,25 @@ class LocationsController < ApplicationController
   end
 
   def set_matching_undefined_location_ivars(query, display_opts)
-    unless (query2 = coerce_query_for_undefined_locations(query))
+    unless (query2 = create_query_for_obs_undefined_where_strings(query))
       @undef_pages = nil
       @undef_data = nil
       return false
     end
 
-    @undef_location_format = User.current_location_format
-    select_args = {
-      group: "observations.where",
-      select: "observations.where AS w, COUNT(observations.id) AS c"
-    }
+    @undef_location_format = @user.location_format
     if display_opts[:link_all_sorts]
-      select_args[:order] = "c DESC"
       # (This tells it to say "by name" and "by frequency" by the subtitles.
       # If user has explicitly selected the order, then this is disabled.)
       @default_orders = true
     end
-    @undef_pages = paginate_letters(:letter2, :page2,
-                                    display_opts[:num_per_page] || 50)
-    @undef_data = query2.select_rows(select_args)
-    @undef_pages.used_letters = @undef_data.map { |row| row[0][0, 1] }.uniq
+    @undef_pages = letter_pagination_data(:letter2, :page2,
+                                          display_opts[:num_per_page] || 50)
+    @undef_data = query2.paginate(@undef_pages)
+    @undef_pages.used_letters = @undef_data.map { |obs| obs[:where][0, 1] }.uniq
     if (letter = params[:letter2].to_s.downcase) != ""
-      @undef_data = @undef_data.select do |row|
-        row[0][0, 1].downcase == letter
+      @undef_data = @undef_data.select do |obs|
+        obs[:where][0, 1].downcase == letter
       end
     end
     @undef_pages.num_total = @undef_data.length
@@ -165,42 +145,31 @@ class LocationsController < ApplicationController
 
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
-  def coerce_query_for_undefined_locations(query)
-    args   = query.params.dup.except(:with_observations)
+  def create_query_for_obs_undefined_where_strings(query)
+    args   = query.params.dup.except(:observation_query)
     # Location params not handled by Observation. (does handle :by_user)
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }
 
-    model  = :Observation
-    flavor = :all
-    result = nil
-
-    # Select only observations with undefined location.
-    args[:where] = [args[:where]].compact unless args[:where].is_a?(Array)
-    args[:where] << "observations.location_id IS NULL"
+    # # Select only observations with undefined location.
+    # args[:where] = [args[:where]].flatten.compact
 
     # "By name" means something different to observation.
-    args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
+    nosorts = ["name", "box_area", "reverse_name", "reverse_box_area", ""]
+    args[:order_by] = "where" if nosorts.include?(args[:order_by])
 
+    args[:search_where] ||= ""
     if args[:pattern]
-      search = query.google_parse(args[:pattern])
-      args[:where] += query.google_conditions(search, "observations.where")
+      args[:search_where] += args[:pattern]
       args.delete(:pattern)
     end
 
-    # These are only used to create title, which isn't used,
-    # they just get in the way.
-    args.delete(:old_title)
-    args.delete(:old_by)
-
     # Create query if okay.  (Still need to tweak select and group clauses.)
-    if flavor
-      result = create_query(model, flavor, args)
+    result = create_query(:Observation, args.merge(location_undefined: true))
 
-      # Also make sure it doesn't reference locations anywhere.  This would
-      # presumably be the result of customization of one of the above flavors.
-      result = nil if /\Wlocations\./.match?(result.query)
-    end
+    # Also make sure the sql doesn't reference locations anywhere.  This would
+    # presumably be the result of customization of one of the above.
+    result = nil if /\Wlocations\./.match?(result.sql)
 
     result
   end
@@ -209,7 +178,6 @@ class LocationsController < ApplicationController
 
   # Show a Location and one of its LocationDescription's, including a map.
   def show
-    clear_query_in_session
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, Location, params[:id].to_s)
@@ -315,13 +283,27 @@ class LocationsController < ApplicationController
   end
 
   def destroy
-    return unless in_admin_mode?
     return unless find_location!
+    return unless can_destroy_location?
 
     if @location.destroy
       flash_notice(:runtime_destroyed_id.t(type: :location, value: params[:id]))
     end
     redirect_to(locations_path)
+  end
+
+  def can_destroy_location?
+    unless @location.destroyable?
+      flash_error(:destroy_location_has_associations.t)
+      redirect_to(location_path(@location))
+      return false
+    end
+    unless in_admin_mode? || @location.user == @user
+      flash_error(:permission_denied.t)
+      redirect_to(location_path(@location))
+      return false
+    end
+    true
   end
 
   ##############################################################################
@@ -421,7 +403,7 @@ class LocationsController < ApplicationController
       if (user = User.safe_find(@set_user))
         user.location = @location
         user.save
-        redirect_to(user_path(@set_user.id))
+        redirect_to(user_path(user))
       end
     else
       redirect_to(location_path(@location.id))
@@ -436,17 +418,18 @@ class LocationsController < ApplicationController
     if in_admin_mode? || @location.mergable?
       old_name = @location.display_name
       new_name = merge.display_name
-      merge.merge(@location)
+      merge.merge(@user, @location)
       merge.save if merge.changed?
       @location = merge
       flash_notice(:runtime_location_merge_success.t(this: old_name,
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(new_admin_emails_merge_requests_path(
-                            type: :Location, old_id: @location.id,
-                            new_id: merge.id
-                          ))
+      redirect_to(
+        new_admin_emails_merge_requests_path(
+          type: :Location, old_id: @location.id, new_id: merge.id
+        )
+      )
     end
   end
 
@@ -494,13 +477,14 @@ class LocationsController < ApplicationController
   end
 
   def email_admin_location_change
-    content = email_location_change_content
-    QueuedEmail::Webmaster.create_email(
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    message = WebmasterMailer.prepend_user(@user, email_location_change_content)
+    WebmasterMailer.build(
       sender_email: @user.email,
       subject: "Nontrivial Location Change",
-      content: content
-    )
-    LocationsControllerTest.report_email(content) if Rails.env.test?
+      message:
+    ).deliver_later
+    LocationsControllerTest.report_email(message) if Rails.env.test?
   end
 
   def email_location_change_content
@@ -515,9 +499,13 @@ class LocationsController < ApplicationController
   end
 
   def render_modal_location_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     form: "locations/form" }) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @location,
+             form_locals: { display_name: @display_name }
+           ), layout: false) and return
   end
 
   def modal_identifier
@@ -532,9 +520,9 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :create_location_title.t
+      helpers.new_page_title(:create_object, :LOCATION)
     when "edit", "update"
-      :edit_location_title.t(name: @location.display_name)
+      helpers.edit_page_title(@location.display_name, @location)
     end
   end
 

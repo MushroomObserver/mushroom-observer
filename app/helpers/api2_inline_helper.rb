@@ -76,6 +76,15 @@ module API2InlineHelper
     xml_string(xml, :name, external_site.name)
   end
 
+  def json_field_slip(field_slip)
+    strip_hash(id: field_slip.id,
+               code: field_slip.code.to_s)
+  end
+
+  def xml_field_slip(xml, field_slip)
+    xml_string(xml, :code, field_slip.code)
+  end
+
   def json_herbarium(herbarium)
     strip_hash(id: herbarium.id,
                code: herbarium.code.to_s,
@@ -142,7 +151,7 @@ module API2InlineHelper
 
   def json_name(name)
     strip_hash(id: name.id,
-               name: name.real_text_name.to_s,
+               name: name.user_real_text_name(nil).to_s,
                author: name.author.to_s,
                rank: name.rank.to_s.downcase,
                deprecated: name.deprecated ? true : false,
@@ -151,7 +160,7 @@ module API2InlineHelper
   end
 
   def xml_name(xml, name)
-    xml_string(xml, :name, name.real_text_name)
+    xml_string(xml, :name, name.user_real_text_name(nil))
     xml_string(xml, :author, name.author)
     xml_string(xml, :rank, name.rank.to_s.downcase)
     xml_boolean(xml, :deprecated, name.deprecated)
@@ -233,7 +242,7 @@ module API2InlineHelper
   end
 
   def json_vote(vote)
-    show_vote = vote.user == User.current || !vote.anonymous?
+    show_vote = !vote.anonymous?
     strip_hash(id: vote.id,
                confidence: vote.value,
                naming_id: vote.naming_id,
@@ -243,10 +252,10 @@ module API2InlineHelper
   def xml_vote(xml, vote)
     xml_confidence_level(xml, :confidence, vote.value)
     xml_integer(xml, :naming_id, vote.naming_id)
-    if vote.user == User.current || !vote.anonymous?
-      xml_detailed_object(xml, :owner, vote.user)
-    else
+    if vote.anonymous?
       xml_string(xml, :owner, :anonymous.l)
+    else
+      xml_detailed_object(xml, :owner, vote.user)
     end
   end
 

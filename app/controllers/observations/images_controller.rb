@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 # Clicking on an image currently fires a GET to these actions... because it
-# comes from a link made by ImagesHelper#interactive_image(link: url_args)
-# with CRUD refactor, change ImagesHelper helper to fire a POST somehow?
+# comes from a link made by Components::InteractiveImage(link: url_args)
+# with CRUD refactor, change component link to fire a POST somehow?
 
 module Observations
   # Upload, attach, detach, edit Observation Images
   class ImagesController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     ###########################################################################
 
@@ -35,9 +34,8 @@ module Observations
       @image.attributes = permitted_image_params
 
       if image_or_projects_updated
-        # redirect_with_query(image_path(@image.id))
-        render("images/show",
-               location: image_path(@image.id, q: get_query_param))
+        # redirect_to(image_path(@image.id))
+        render("images/show", location: image_path(@image.id))
       else
         init_project_vars_for_reload(@image)
         render(:edit, location: edit_image_path(@image.id))
@@ -55,8 +53,8 @@ module Observations
     end
 
     def init_project_vars_for_add_or_edit(obs_or_img)
-      @projects = User.current.projects_member(order: :title,
-                                               include: :user_group)
+      @projects = @user.projects_member(order: :title,
+                                        include: :user_group)
       @project_checks = {}
       obs_or_img.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
@@ -65,9 +63,9 @@ module Observations
     end
 
     def check_image_permission!
-      return if check_permission!(@image)
+      return if permission!(@image)
 
-      redirect_with_query(image_path(@image))
+      redirect_to(image_path(@image))
     end
 
     def permitted_image_params
@@ -158,8 +156,8 @@ module Observations
     def init_project_vars_for_reload(obs_or_img)
       # (Note: In practice, this is never called for add_image,
       # so obs_or_img is always an image.)
-      @projects = User.current.projects_member(order: :title,
-                                               include: :user_group)
+      @projects = @user.projects_member(order: :title,
+                                        include: :user_group)
       @project_checks = {}
       obs_or_img.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
@@ -206,9 +204,9 @@ module Observations
     end
 
     def check_observation_permission!
-      return true if check_permission!(@observation)
+      return true if permission!(@observation)
 
-      redirect_with_query(permanent_observation_path(id: @observation.id))
+      redirect_to(permanent_observation_path(id: @observation.id))
       false
     end
 
@@ -220,10 +218,9 @@ module Observations
         error = image.strip_gps!
         flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
       end
-      redirect_with_query(permanent_observation_path(id: @observation.id))
+      redirect_to(permanent_observation_path(id: @observation.id))
       # render("observations/show",
-      #        location: permanent_observation_path(id: @observation.id,
-      #                                             q: get_query_param))
+      #        location: permanent_observation_path(id: @observation.id))
     end
   end
 end

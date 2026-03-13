@@ -26,6 +26,13 @@ class Article < AbstractModel
   belongs_to :user
   belongs_to :rss_log
 
+  scope :order_by_default,
+        -> { order_by(::Query::Articles.default_order) }
+  scope :title_has,
+        ->(phrase) { search_columns(Article[:title], phrase) }
+  scope :body_has,
+        ->(phrase) { search_columns(Article[:body], phrase) }
+
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed!]
 
@@ -60,12 +67,11 @@ class Article < AbstractModel
   end
 
   # wrapper around class method of same name
-  def can_edit?(user)
-    Article.can_edit?(user)
-  end
+  delegate :can_edit?, to: :Article
 
   # Can the user create, edit, or delete Articles?
   def self.can_edit?(user)
+    return false unless user
     # To avoid throwing errors, deny permission if the Project which controls
     #   Article write permission does not yet exist or was deleted.
     return false unless news_articles_project

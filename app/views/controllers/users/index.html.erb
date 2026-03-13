@@ -1,8 +1,8 @@
 <%
-@container = :full
-no_hits = in_admin_mode? ? :users_by_name_title.t : :title_for_user_search.t
-add_index_title(@query, no_hits: no_hits)
-add_sorter(@query, users_index_sorts(in_admin_mode?))
+container_class(:full)
+add_index_title(@query)
+add_sorter(@query, users_index_sorts(admin: in_admin_mode?))
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
@@ -17,7 +17,7 @@ flash_error(@error) if @error && @objects.empty?
         padding: 3px 5px 3px 5px
       }
     </style>
-    <%= paginate_block(@pages) do %>
+    <%= paginated_results do %>
       <table align="center" class="table table-striped permissions" cellspacing="2">
         <thead>
           <tr>
@@ -54,8 +54,8 @@ flash_error(@error) if @error && @objects.empty?
   #  Normal version.
   # ----------------------------
   else %>
-    <%= paginate_block(@pages) do %>
-      <%= matrix_table(objects: @objects) %>
+    <%= paginated_results do %>
+      <%= render(Components::MatrixTable.new(objects: @objects)) %>
     <% end %>
 <% end %>
 

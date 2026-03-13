@@ -69,8 +69,8 @@ class VoteTest < UnitTestCase
     assert_raise(ActiveRecord::RecordNotFound) { Vote.find(id) }
   end
 
-  def test_scope_by_user
-    votes_by_rolf = Vote.by_user(users(:rolf))
+  def test_scope_by_users
+    votes_by_rolf = Vote.by_users(users(:rolf))
     assert_includes(votes_by_rolf, votes(:coprinus_comatus_owner_vote))
     assert_includes(votes_by_rolf,
                     votes(:coprinus_comatus_other_naming_rolf_vote))
@@ -84,5 +84,17 @@ class VoteTest < UnitTestCase
     ObservationView.find_each do |ov|
       assert_equal(true, ov.reviewed)
     end
+  end
+
+  def test_confidence_returns_no_opinion_for_zero
+    # Bug: Vote.confidence(0) was returning "Doubtful" instead of "No Opinion"
+    assert_equal("No Opinion", Vote.confidence(0))
+    assert_equal("No Opinion", Vote.confidence(0.0))
+  end
+
+  def test_confidence_returns_labels_for_nonzero_values
+    assert_equal("I'd Call It That", Vote.confidence(3.0))
+    assert_equal("Doubtful", Vote.confidence(-1.0))
+    assert_equal("As If!", Vote.confidence(-3.0))
   end
 end

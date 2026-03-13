@@ -56,7 +56,6 @@ module SpeciesLists
 
     def assert_create_species_list
       assert_template("species_lists/new")
-      assert_template("shared/_form_list_feedback")
       assert_template("species_lists/_form")
     end
   end

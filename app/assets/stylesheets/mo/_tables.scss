@@ -37,15 +37,38 @@ thead tr {
 }
 
 .table-description-permissions {
-  th, td {
-    padding: 0.1em 0;
-    text-align: center;
+  > tbody {
+
+    > tr {
+      border: none;
+
+      > th,
+      > td {
+        padding: 0.25rem 0;
+        text-align: center;
+        vertical-align: middle;
+
+        &:first-child {
+          padding: 0.25rem 0.5em;
+          text-align: left;
+        }
+      }
+    }
   }
 
-  th:first-child,
-  td:first-child {
-    padding: 0.1em 0.5em;
-    text-align: left;
+  // Override Bootstrap 3 absolute-positioned checkbox layout
+  // so checkboxes center naturally in table cells.
+  .checkbox {
+    margin: 0;
+
+    label {
+      padding-left: 0;
+    }
+
+    input[type="checkbox"] {
+      position: static;
+      margin-left: 0;
+    }
   }
 }
 
@@ -58,17 +81,26 @@ thead tr {
 }
 
 .table-herbarium {
+  table-layout: fixed;
+
+  th:nth-child(1),
+  td:nth-child(1),
+  th:nth-child(2),
+  td:nth-child(2) {
+    width: 7.5rem;
+    text-align: center;
+  }
+
   th:nth-child(1),
   td:nth-child(1) {
     text-align: center;
   }
 
-  td:nth-child(2),
-  td:nth-child(3) {
+  td:nth-child(3),
+  td:nth-child(4) {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 10em;
   }
 }
 
@@ -129,7 +161,7 @@ thead tr {
 
   th:last-child,
   td:last-child {
-    border: 0;
+    border-right: 0;
   }
 }
 
@@ -147,18 +179,31 @@ thead tr {
 }
 
 .table-lifeform {
-  tr td {
-    padding: .1em 1em;
+  > tbody > tr > td {
+    vertical-align: middle;
   }
 }
 
-table.ips tr td,
-table.ips tr th {
-  background: #f7f;
-  padding: 0 0.5em;
+table.ips {
+  background: none;
+
+  tr td,
+  tr th {
+    padding: 0 0.5em;
+  }
 }
 
-table.ips-lined tr td,
-table.ips-lined tr th {
-  border-left: 2px solid #d0d;
+// Interior borders only (between cells, not on outer edges)
+table.ips-lined {
+  border-collapse: collapse;
+
+  tr td,
+  tr th {
+    padding: 0.25em 0.5em !important;
+
+    // Vertical borders between columns (not on first column)
+    &:not(:first-child) {
+      border-left: 2px solid #d0d;
+    }
+  }
 }

@@ -9,7 +9,8 @@ module FieldSlipsController::Show
     else
       handle_by_code
     end
-    redirect_to(new_field_slip_url(code: params[:id].upcase)) unless @field_slip
+    params[:code] = params[:id].upcase
+    redirect_to(new_field_slip_url(show_params)) unless @field_slip
   end
 
   private
@@ -22,5 +23,10 @@ module FieldSlipsController::Show
 
   def field_slip_redirect(obs_id)
     redirect_to(observation_url(id: obs_id))
+  end
+
+  # Only allow a list of trusted parameters through.
+  def show_params
+    params.permit(:name, :name_id, :species_list, :code, :id, :project)
   end
 end

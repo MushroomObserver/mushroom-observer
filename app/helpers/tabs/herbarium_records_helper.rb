@@ -5,12 +5,12 @@
 module Tabs
   module HerbariumRecordsHelper
     include HerbariaHelper
+
     def herbarium_records_index_tabs(obs:)
       links = []
       if obs.present?
         links = [
-          object_return_tab(obs),
-          new_herbarium_record_tab(obs)
+          object_return_tab(obs)
         ]
       end
       links << new_herbarium_tab
@@ -19,27 +19,17 @@ module Tabs
 
     def herbarium_records_index_sorts
       [
-        ["herbarium_name",  :sort_by_herbarium_name.t],
-        ["herbarium_label", :sort_by_herbarium_label.t],
-        ["created_at",      :sort_by_created_at.t],
-        ["updated_at",      :sort_by_updated_at.t]
+        ["herbarium_name",    :sort_by_herbarium_name.t],
+        ["herbarium_label",   :sort_by_herbarium_label.t],
+        ["initial_det",       :sort_by_initial_det.t],
+        ["accession_number",  :sort_by_accession_number.t],
+        ["created_at",        :sort_by_created_at.t],
+        ["updated_at",        :sort_by_updated_at.t]
       ].freeze
     end
 
-    def herbarium_record_show_tabs(h_r:)
-      links = []
-      if in_admin_mode? || h_r.can_edit?
-        links.push(
-          edit_herbarium_record_tab(h_r),
-          destroy_herbarium_record_tab(h_r)
-        )
-      end
-      links << nonpersonal_herbaria_index_tab
-      links
-    end
-
-    def herbarium_record_form_new_title
-      :create_herbarium_record_title.l
+    def herbarium_record_show_tabs
+      [nonpersonal_herbaria_index_tab]
     end
 
     def herbarium_record_form_new_tabs(obs:)
@@ -48,12 +38,6 @@ module Tabs
         new_herbarium_tab,
         nonpersonal_herbaria_index_tab
       ]
-    end
-
-    def herbarium_record_form_edit_title(h_r:)
-      :edit_herbarium_record_title.l(
-        herbarium_label: h_r.herbarium_label
-      )
     end
 
     def herbarium_record_form_edit_tabs(back:, back_object:)
@@ -70,43 +54,47 @@ module Tabs
     def herbarium_record_tab(h_r, obs)
       # This is passed in to show_herbarium_record, allowing users to do prev,
       # next and index from there to navigate through all the rest for this obs.
-      hr_query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
+      hr_query = Query.lookup(:HerbariumRecord, observations: obs.id)
 
-      [h_r.accession_at_herbarium.t,
-       add_query_param(h_r.show_link_args, hr_query),
-       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}" }]
+      InternalLink::Model.new(
+        h_r.accession_at_herbarium.t, h_r,
+        add_q_param(h_r.show_link_args, hr_query),
+        alt_title: "herbarium_record"
+      ).tab
     end
 
     def new_herbarium_record_tab(obs)
-      [:create_herbarium_record.l,
-       add_query_param(new_herbarium_record_path(observation_id: obs.id)),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(
+        :create_herbarium_record.l, Herbarium,
+        new_herbarium_record_path(observation_id: obs.id),
+        html_options: { icon: :add }
+      ).tab
     end
 
     def edit_herbarium_record_tab(h_r, obs = nil)
       back = obs&.id || :show
-      [:edit_herbarium_record.t,
-       add_query_param(edit_herbarium_record_path(h_r.id, back: back)),
-       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}", icon: :edit }]
-    end
-
-    def destroy_herbarium_record_tab(h_r)
-      [:destroy_object.t(type: :herbarium_record), h_r,
-       { button: :destroy, icon: :delete }]
+      InternalLink::Model.new(
+        :edit_herbarium_record.l, h_r,
+        edit_herbarium_record_path(h_r.id, back: back),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def herbarium_records_index_return_tab
-      [:edit_herbarium_record_back_to_index.t,
-       herbarium_records_path(q: get_query_param),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :edit_herbarium_record_back_to_index.l,
+        herbarium_records_path(q: q_param)
+      ).tab
     end
 
-    def remove_herbarium_record_tab(h_r, obs)
-      [:REMOVE.t,
-       add_query_param(edit_herbarium_record_remove_observation_path(
-                         herbarium_record_id: h_r.id, observation_id: obs.id
-                       )),
-       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}", icon: :remove }]
+    def remove_herbarium_record_button(h_r, obs)
+      destroy_button(
+        name: :REMOVE.l,
+        target: herbarium_record_path(h_r.id, observation_id: obs.id),
+        confirm: :show_observation_remove_herbarium_record.l,
+        class: "remove_herbarium_record_link_#{h_r.id}",
+        icon: :remove
+      )
     end
   end
 end

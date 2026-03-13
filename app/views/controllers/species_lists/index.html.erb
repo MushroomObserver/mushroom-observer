@@ -1,25 +1,20 @@
 <%
-add_index_title(@query, no_hits: "")
+add_project_banner(@project) if @project
+add_index_title(@query)
 add_sorter(@query, species_lists_index_sorts(query: @query))
+add_pagination(@pagination_data)
+container_class(:wide)
+
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
-    <div class="list-group">
-      <% @objects.each do |species_list| %>
-        <div class="list-group-item">
-          <span class="text-larger">
-            <%=
-              when_span = content_tag(:span, species_list.when.to_s, class: "ListWhen")
-              what_span = content_tag(:span, species_list.unique_text_name.t, class: "ListWhat")
-              link_to(when_span + ": " + what_span, species_list.show_link_args)
-            %>
-          </span><!-- .text-larger --><br/>
-          <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
-          <span><%= user_link(species_list.user) %></span>
-        </div>
-      <% end %>
-    </div>
+    <%= tag.div(class: "list-group") do %>
+      <%= render(partial: "species_list",
+          collection: @objects, as: :species_list,
+	  project: @project) %>
+    <% end %>
   <% end %>
 <% end %>
+

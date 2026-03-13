@@ -15,14 +15,14 @@ class IpStats
     #   controller:: Controller (string).
     #   action::     Action (string).
     #   api_key::    API key (string).
-    def log_stats(stats)
+    def log_stats(stats, user_id)
       file = MO.ip_stats_file
       now = Time.now.utc
       File.open(file, "a") do |fh|
         fh.puts([
           stats[:time].utc,
           stats[:ip],
-          User.current_id,
+          user_id,
           now - stats[:time].utc,
           stats[:controller],
           stats[:action],
@@ -158,6 +158,8 @@ class IpStats
     def blocked_ips_current?
       defined?(@blocked_ips_time) &&
         @blocked_ips_time.to_s != "" &&
+        File.exist?(MO.blocked_ips_file) &&
+        File.exist?(MO.okay_ips_file) &&
         @blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
         @blocked_ips_time >= File.mtime(MO.okay_ips_file)
     end
@@ -172,7 +174,7 @@ class IpStats
 
     def parse_ip_list(file)
       FileUtils.touch(file) unless File.exist?(file)
-      File.open(file).readlines.map do |line|
+      File.readlines(file).map do |line|
         line.chomp.split(",").first
       end
     end

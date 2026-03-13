@@ -8,7 +8,6 @@ module Names::Synonyms
     # Form accessible from show_name that lets a user make call this an accepted
     # name, possibly deprecating its synonyms at the same time.
     def new
-      pass_query_params
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -16,7 +15,6 @@ module Names::Synonyms
     end
 
     def create
-      pass_query_params
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -25,22 +23,19 @@ module Names::Synonyms
       deprecate_others
       approve_this_one
       post_approval_comment
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private
 
-    def render_new
-      render(:new, location: form_to_approve_synonym_of_name_path)
-    end
-
     def deprecate_others
-      return false unless params[:deprecate_others] == "1"
+      return false unless params.dig(:approve_synonym, :deprecate_others) == "1"
 
       @others = []
       @name.approved_synonyms.each do |n|
         n.change_deprecated(true)
-        n.save_with_log(:log_name_deprecated, other: @name.real_search_name)
+        n.save_with_log(@user, :log_name_deprecated,
+                        other: @name.real_search_name)
         @others << n.real_search_name
       end
       true
@@ -54,14 +49,12 @@ module Names::Synonyms
         tag = :log_name_approved
         args[:other] = @others.join(", ")
       end
-      @name.save_with_log(tag, args)
+      @name.save_with_log(@user, tag, args)
     end
 
     def post_approval_comment
-      return unless params[:comment]
-
-      comment = params[:comment].to_s.strip_squeeze
-      return unless comment != ""
+      comment = params.dig(:approve_synonym, :comment).to_s.strip_squeeze
+      return if comment.blank?
 
       post_comment(:approve, @name, comment)
     end

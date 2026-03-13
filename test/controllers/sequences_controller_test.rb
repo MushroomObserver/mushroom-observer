@@ -4,7 +4,7 @@ require("test_helper")
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
-  ITS_BASES = \
+  ITS_BASES =
     "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
     "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
     "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
@@ -23,12 +23,12 @@ class SequencesControllerTest < FunctionalTestCase
   def test_index
     login
     obs = observations(:genbanked_obs)
-    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
+    query = Query.lookup_and_save(:Sequence, observations: obs)
     results = query.results
     assert_operator(results.count, :>, 3)
-    q = query.id.alphabetize
+    q = @controller.q_param(query)
 
-    get(:index, params: { q: q, id: results[2].id })
+    get(:index, params: { q:, id: results[2].id })
     assert_response(:success)
   end
 
@@ -48,12 +48,19 @@ class SequencesControllerTest < FunctionalTestCase
     end
   end
 
+  def test_index_with_non_default_sort
+    check_index_sorting
+  end
+
   def test_index_by_observation
     login
-    get(:index, params: { by: "observation" })
+
+    by = "observation"
+    get(:index, params: { by: })
 
     assert_response(:success)
-    assert_displayed_title("Sequences by Observation")
+    assert_page_title(:SEQUENCES.l)
+    assert_sorted_by(by)
 
     Sequence.find_each do |sequence|
       assert_select(
@@ -79,11 +86,11 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_show_next
-    query = Query.lookup_and_save(:Sequence, :all)
+    query = Query.lookup_and_save(:Sequence)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number1.id, q: q, flow: "next" })
@@ -91,26 +98,24 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_show_prev
-    query = Query.lookup_and_save(:Sequence, :all)
+    query = Query.lookup_and_save(:Sequence)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number2.id, q: q, flow: "prev" })
-    assert_redirected_to(sequence_path(number1, q: q))
+    assert_redirected_to(sequence_path(number1, q:))
   end
 
   def test_new
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs = observations(:minimal_unknown_obs)
-    query = Query.lookup_and_save(:Sequence, :all)
-    q = query.id.alphabetize
-    params = { observation_id: obs.id, q: q }
+    params = { observation_id: obs.id }
 
     login("zero") # This user has no Observations
-    get(:new, params: params)
+    get(:new, params:)
 
     assert_response(:success,
                     "A user should be able to get form to add Sequence " \
@@ -120,10 +125,20 @@ class SequencesControllerTest < FunctionalTestCase
       true,
       "Sequence form has missing/incorrect `observation_id`` query param"
     )
-    assert_select(
-      "form[action*='q=#{q}']", true,
-      "Sequence form submit action missing/incorrect 'q' query param"
-    )
+  end
+
+  def test_new_turbo
+    obs = observations(:minimal_unknown_obs)
+
+    login("zero") # This user has no Observations
+    get(:new, params: { observation_id: obs.id }, format: :turbo_stream)
+    # Verify ModalForm + SequenceForm components rendered
+    assert_select(".modal-form")
+    assert_select("form#sequence_form")
+    assert_select("textarea#sequence_locus")
+    assert_select("textarea#sequence_bases")
+    assert_select("select#sequence_archive")
+    assert_select("input#sequence_accession")
   end
 
   def test_new_login_required
@@ -163,6 +178,19 @@ class SequencesControllerTest < FunctionalTestCase
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_added"),
            "Failed to include Sequence added in RssLog for Observation")
+  end
+
+  def test_turbo_create
+    params = {
+      observation_id: observations(:detailed_unknown_obs).id,
+      sequence: { locus: "ITS",
+                  bases: ITS_BASES }
+    }
+    login
+    assert_difference("Sequence.count", 1) do
+      post(:create, params: params,
+                    format: :turbo_stream)
+    end
   end
 
   def test_create_non_repo_sequence
@@ -279,18 +307,17 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_create_redirect
     obs = observations(:genbanked_obs)
-    query = Query.lookup_and_save(:Sequence, :all)
-    q = query.id.alphabetize
+    @controller.find_or_create_query(:Sequence, observations: obs)
     params = { observation_id: obs.id,
-               sequence: { locus: "ITS", bases: "atgc" },
-               q: q }
+               sequence: { locus: "ITS", bases: "atgc" } }
 
     login(obs.user.login)
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
-    assert_redirected_to(obs.show_link_args.merge(q: q),
+    assert_redirected_to(obs.show_link_args,
                          "User should go to last query after creating Sequence")
+    assert_session_query_record_is_correct
   end
 
   # See https://github.com/MushroomObserver/mushroom-observer/issues/1808
@@ -325,6 +352,39 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_edit_turbo
+    sequence = sequences(:local_sequence)
+    obs      = sequence.observation
+    observer = obs.user
+
+    # Prove Observation's creator can edit Sequence
+    login(observer.login)
+    get(:edit, params: { id: sequence.id }, format: :turbo_stream)
+    # Verify ModalForm + SequenceForm components rendered
+    assert_select(".modal-form")
+    assert_select("form#sequence_form")
+    assert_select("textarea#sequence_locus")
+    assert_select("textarea#sequence_bases")
+    assert_select("select#sequence_archive")
+    assert_select("input#sequence_accession")
+  end
+
+  def test_edit_deposited_sequence
+    sequence = sequences(:deposited_sequence)
+    obs      = sequence.observation
+    observer = obs.user
+
+    # Prove Observation's creator can edit Sequence
+    login(observer.login)
+    get(:edit, params: { id: sequence.id })
+
+    assert_response(:success)
+    assert_select("select#sequence_archive", true,
+                  "Edit form is missing the selected Archive") do
+      assert_select("option[selected]", text: sequence.archive)
+    end
+  end
+
   def test_edit_by_admin
     sequence = sequences(:local_sequence)
 
@@ -353,14 +413,18 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove user cannot edit Sequence he didn't create for Obs he didn't create
     get(:edit, params: { id: sequence.id })
     assert_redirected_to(obs.show_link_args)
+
+    # Test turbo shows flash warning
+    get(:edit, params: { id: sequence.id }, format: :turbo_stream)
+    assert_flash_warning
+    assert_template("shared/_modal_flash_update")
   end
 
   def test_edit_redirect
     obs      = observations(:genbanked_obs)
     sequence = obs.sequences[2]
     assert_operator(obs.sequences.count, :>, 3)
-    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
-    q     = query.id.alphabetize
+    @controller.find_or_create_query(:Sequence, observations: obs)
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
                            bases: sequence.bases,
@@ -369,17 +433,16 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that GET passes "back" and query param through to form.
     login(obs.user.login)
-    get(:edit, params: params.merge(back: obs.id, q: q))
+    get(:edit, params: params.merge(back: obs.id))
 
-    assert_select("form:match('action', ?)", %r{^/sequences/226969185}, true,
+    assert_select("form:match('action', ?)",
+                  %r{^/sequences/#{sequence.id}}, true,
                   "submit action for edit Sequence form should start with " \
                   "`/sequences/<sequence.id>`")
     assert_select("form:match('action', ?)", /back=#{obs.id}/, true,
                   "submit action for edit Sequence form should include " \
                   "param to go back to Observation (back=#{obs.id})")
-    assert_select("form[action*='q=#{q}']", true,
-                  "submit action for edit Sequence form should include " \
-                  "query param (q=#{q})")
+    assert_session_query_record_is_correct
   end
 
   def test_update
@@ -573,8 +636,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     assert_operator(obs.sequences.count, :>, 3)
     sequence = obs.sequences[2]
-    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
-    q     = query.id.alphabetize
+    @controller.find_or_create_query(:Sequence, observations: obs)
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
                            bases: sequence.bases,
@@ -582,16 +644,16 @@ class SequencesControllerTest < FunctionalTestCase
                            accession: sequence.accession } }
     # Prove that POST keeps query param when returning to observation.
     login(obs.user.login)
-    patch(:update, params: params.merge(q: q))
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    patch(:update, params: params)
+    assert_redirected_to(obs.show_link_args)
+    assert_session_query_record_is_correct
   end
 
   def test_update_redirect_to_sequence_keeps_params
     obs = observations(:genbanked_obs)
     assert_operator(obs.sequences.count, :>, 3)
     sequence = obs.sequences[2]
-    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
-    q     = query.id.alphabetize
+    @controller.find_or_create_query(:Sequence, observations: obs)
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
                            bases: sequence.bases,
@@ -600,8 +662,9 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that POST keeps query param when returning to sequence.
     login(obs.user.login)
-    patch(:update, params: params.merge(back: "show", q: q))
-    assert_redirected_to(sequence.show_link_args.merge(q: q))
+    patch(:update, params: params.merge(back: "show"))
+    assert_redirected_to(sequence.show_link_args)
+    assert_session_query_record_is_correct
   end
 
   def test_destroy
@@ -671,24 +734,81 @@ class SequencesControllerTest < FunctionalTestCase
   def test_destroy_redirect_to_observation_with_query
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
-    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
-    q     = query.id.alphabetize
+    @controller.find_or_create_query(:Sequence, observations: obs)
 
-    # Prove that it keeps query param intact when returning to observation.
+    # Prove that it keeps track of query when returning to observation.
     login(obs.user.login)
-    delete(:destroy, params: { id: seqs[1].id, q: q })
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    delete(:destroy, params: { id: seqs[1].id })
+    assert_redirected_to(obs.show_link_args)
+    assert_session_query_record_is_correct
   end
 
-  def test_destroy_redirect_to_index_with_query
-    obs   = observations(:genbanked_obs)
-    seqs  = obs.sequences
-    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
-    q     = query.id.alphabetize
+  # NOTE: No test for back: "index" because there's no destroy button on
+  # sequences index. Destroy is only available on sequences#show and obs#show.
 
-    # Prove that it can return to index, too, with query intact.
-    login(obs.user.login)
-    delete(:destroy, params: { id: seqs[2].id, q: q, back: "index" })
-    assert_redirected_to(action: :index, q: q)
+  # Bug: Destroy button on show page uses turbo_stream format, causing error
+  # because we're not on an observation page. Should redirect instead.
+  def test_destroy_turbo_from_show_page
+    sequence = sequences(:local_sequence)
+    sequence_count = Sequence.count
+
+    login(sequence.user.login)
+    # Simulate clicking Destroy button on the show page (back: "show")
+    # The button incorrectly requests turbo_stream format
+    delete(:destroy, params: { id: sequence.id, back: "show" },
+                     format: :turbo_stream)
+
+    # Should still successfully destroy and redirect (not error)
+    assert_equal(sequence_count - 1, Sequence.count)
+    # Should redirect to observation since we can't do turbo_stream update
+    # on a non-observation page
+    assert_redirected_to(sequence.observation.show_link_args)
+  end
+
+  # Destroy from observation page should redirect to observation
+  def test_destroy_redirect_to_observation
+    sequence = sequences(:local_sequence)
+    observation = sequence.observation
+    sequence_count = Sequence.count
+
+    login(sequence.user.login)
+    delete(:destroy, params: { id: sequence.id }, format: :turbo_stream)
+
+    # Should successfully destroy and redirect to observation
+    assert_equal(sequence_count - 1, Sequence.count)
+    assert_redirected_to(observation.show_link_args)
+  end
+
+  # Test permission denied via turbo_stream from observation page
+  def test_destroy_permission_denied_turbo_from_observation
+    sequence = sequences(:local_sequence)
+    sequence_count = Sequence.count
+
+    # Login as different user who doesn't own the sequence
+    login("mary")
+
+    delete(:destroy, params: { id: sequence.id }, format: :turbo_stream)
+
+    # Should not destroy and should render turbo_stream with flash
+    assert_equal(sequence_count, Sequence.count)
+    assert_response(:success)
+    assert_select("turbo-stream[action=?][target=?]",
+                  "replace", "observation_sequences")
+  end
+
+  # Test permission denied via turbo_stream from show page
+  def test_destroy_permission_denied_turbo_from_show
+    sequence = sequences(:local_sequence)
+    sequence_count = Sequence.count
+
+    login("mary")
+
+    delete(:destroy,
+           params: { id: sequence.id, back: "show" },
+           format: :turbo_stream)
+
+    # Should not destroy and should redirect to observation
+    assert_equal(sequence_count, Sequence.count)
+    assert_redirected_to(sequence.observation.show_link_args)
   end
 end

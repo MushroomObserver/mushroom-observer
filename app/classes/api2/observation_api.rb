@@ -8,27 +8,12 @@ class API2
       Observation
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
-    end
-
     def high_detail_includes
       [
         :collection_numbers,
         { comments: :user },
         :external_links,
+        :field_slip,
         { herbarium_records: :herbarium },
         { images: [:license, :user] },
         :location,
@@ -40,17 +25,16 @@ class API2
       ]
     end
 
-    # rubocop:disable Metrics/MethodLength
     def query_params
-      n, s, e, w = parse_bounding_box!
+      box = parse_bounding_box!
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:observation, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         date: parse_range(:date, :date, help: :when_seen),
-        users: parse_array(:user, :user, help: :observer),
+        by_users: parse_array(:user, :user, help: :observer),
         names: parse_array(:name, :name, as: :id),
-        locations: parse_array(:location, :location, as: :id),
+        within_locations: parse_array(:location, :location, as: :id),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
         herbarium_records: parse_array(:herbarium_record, :herbarium_record,
                                        as: :id),
@@ -60,23 +44,19 @@ class API2
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
         gps_hidden: parse(:boolean, :gps_hidden, help: 1),
-        with_images: parse(:boolean, :has_images),
-        with_public_lat_lng: parse(:boolean, :has_public_lat_lng),
-        with_name: parse(:boolean, :has_name, help: :min_rank),
-        with_comments: parse(:boolean, :has_comments, limit: true),
-        with_specimen: parse(:boolean, :has_specimen),
-        with_notes: parse(:boolean, :has_notes),
-        with_notes_fields: parse_array(:string, :has_notes_field, help: 1),
+        has_images: parse(:boolean, :has_images),
+        has_public_lat_lng: parse(:boolean, :has_public_lat_lng),
+        has_name: parse(:boolean, :has_name, help: :min_rank),
+        has_comments: parse(:boolean, :has_comments),
+        has_specimen: parse(:boolean, :has_specimen),
+        has_notes: parse(:boolean, :has_notes),
+        has_notes_fields: parse_array(:string, :has_notes_field, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
-        north: n,
-        south: s,
-        east: e,
-        west: w,
+        in_box: box,
         region: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
-    # rubocop:enable Metrics/MethodLength
 
     def create_params
       parse_create_params!
@@ -129,7 +109,7 @@ class API2
     end
 
     def after_create(obs)
-      obs.log(:log_observation_created) if @log
+      obs.user_log(user, :log_observation_created) if @log
       create_specimen_records(obs) if obs.specimen
       create_naming(obs)
       add_field_slip_code(obs)
@@ -166,6 +146,7 @@ class API2
           reason.notes = @reasons[reason.num]
         end
       end
+      naming.user ||= @user
       naming.save!
       consensus = ::Observation::NamingConsensus.new(obs)
       consensus.change_vote(naming, @vote, user)
@@ -175,13 +156,13 @@ class API2
       return unless @code
 
       field_slip = FieldSlip.find_by(code: @code)
-      if field_slip
-        raise(FieldSlipInUse.new(field_slip)) if field_slip.observation
-
-        field_slip.update!(observation:)
-      else
-        field_slip = FieldSlip.create!(observation:, code: @code)
+      unless field_slip
+        field_slip = FieldSlip.create!(code: @code, user: @user)
+        field_slip.current_user = @user
+        field_slip.update_project
+        field_slip.save!
       end
+      observation.update!(field_slip: field_slip)
       update_project(field_slip.project, observation)
     end
 
@@ -298,25 +279,24 @@ class API2
 
     def parse_notes_fields!(set: false)
       prefix = set ? "set_" : ""
-      notes = look_for_note_field_parameters(prefix)
-      other = parse(:string, :"#{prefix}notes")
-      notes[Observation.other_notes_key] = other unless other.nil?
-      declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
+      notes = structure_notes(params[:"#{prefix}notes"])
+      declare_parameter(:"#{prefix}notes", :string, help: :notes_field)
       return notes if set
 
       notes.compact_blank!
     end
 
-    def look_for_note_field_parameters(prefix)
-      notes = Observation.no_notes
-      params.each do |key, val|
-        next unless (match = key.to_s.match(/^#{prefix}notes\[(.*)\]$/))
+    def structure_notes(notes)
+      return {} if notes.nil?
 
-        field = parse_notes_field_parameter!(match[1])
-        notes[field] = val.to_s.strip
-        ignore_parameter(key)
+      if notes.is_a?(Hash)
+        notes.transform_values! do |value|
+          value.is_a?(String) ? value.strip : value
+        end
+        notes
+      else
+        { Observation.other_notes_key => notes.to_s.strip }
       end
-      notes
     end
 
     def parse_notes_field_parameter!(str)

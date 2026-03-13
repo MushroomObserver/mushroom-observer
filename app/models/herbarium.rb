@@ -50,6 +50,9 @@
 ################################################################################
 
 class Herbarium < AbstractModel
+  # Used by create/edit form.
+  attr_accessor :place_name, :personal, :personal_user_name
+
   has_many :herbarium_records, dependent: :destroy
   belongs_to :location
 
@@ -60,8 +63,40 @@ class Herbarium < AbstractModel
   # personal_user_id is set to mark whose personal herbarium it is.
   belongs_to :personal_user, class_name: "User"
 
-  # Used by create/edit form.
-  attr_accessor :place_name, :personal, :personal_user_name
+  # Was unable to create an appropriate index that made Trilogy happy.
+  validates :code, uniqueness: true, allow_blank: true
+
+  scope :order_by_default,
+        -> { order_by(::Query::Herbaria.default_order) }
+
+  scope :nonpersonal, lambda { |bool = true|
+    if bool.to_s.to_boolean == true
+      where(personal_user_id: nil)
+      # Currently `false` is not parsed by Query, possibly intentionally.
+      # else
+      #   where.not(personal_user_id: nil)
+    end
+  }
+
+  scope :code_has,
+        ->(str) { search_columns(Herbarium[:code], str) }
+  scope :name_has,
+        ->(str) { search_columns(Herbarium[:name], str) }
+  scope :description_has,
+        ->(str) { search_columns(Herbarium[:description], str) }
+  scope :mailing_address_has,
+        ->(str) { search_columns(Herbarium[:mailing_address], str) }
+  scope :by_users, lambda { |users|
+    ids = Lookup::Users.new(users).ids
+    where(personal_user_id: ids)
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = (Herbarium[:code].coalesce("") + Herbarium[:name] +
+            Herbarium[:description].coalesce("") +
+            Herbarium[:mailing_address].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
 
   def self.mcp_collections
     @mcp_collections ||=
@@ -80,13 +115,13 @@ class Herbarium < AbstractModel
   end
 
   # wrap the class method
-  def mcp_collections
-    self.class.mcp_collections
-  end
+  delegate :mcp_collections, to: :class
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
+    return false unless user
+
     if personal_user_id
-      personal_user_id == user.try(&:id)
+      personal_user_id == user.id
     else
       curators.none? || curators.member?(user)
     end
@@ -116,7 +151,7 @@ class Herbarium < AbstractModel
     name.t.html_to_ascii.gsub(/\W+/, " ").strip_squeeze.downcase
   end
 
-  def auto_complete_name
+  def autocomplete_name
     code.blank? ? name : "#{code} - #{name}"
   end
 

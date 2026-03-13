@@ -70,12 +70,36 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select(
       "a[href*=?]", new_project_admin_request_path(project_id: p_id)
     )
-    assert_select("a[href*=?]", edit_project_path(p_id), false,
-                  "Non-admin should not see link to edit project")
+    assert_no_edit_button(projects(:eol_project))
     assert_select(
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
-    assert_select("form[action=?]", project_path(p_id), count: 0)
+    assert_select("form[action=?]", add_dispatch_path, count: 1)
+    assert_select("h1#title", /\S/,
+                  "H1 title element should exist and contain content")
+    assert_select("div#project_banner", true,
+                  "Project banner div should be present")
+  end
+
+  def test_show_project_without_banner
+    login("zero") # Not the owner of eol_project
+    p_id = projects(:empty_project).id
+    get(:show, params: { id: p_id })
+    assert_select("h1#title", /\S/,
+                  "H1 title element should exist and contain content")
+    assert_select("div#project_banner", true,
+                  "Project banner div should exist")
+    assert_select("img.banner-image", false,
+                  "Banner image should be absent for projects without images")
+  end
+
+  def test_show_project_nonexistent
+    p_id = -1
+
+    login("zero")
+    get(:show, params: { id: p_id })
+
+    assert_redirected_to(projects_path)
   end
 
   def test_show_project_logged_in_owner
@@ -85,8 +109,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_template("show")
-    assert_select("a[href*=?]", edit_project_path(project), true,
-                  "Project owner should see link to edit project")
+    assert_edit_button(project)
   end
 
   def test_show_project_logged_in_admin
@@ -97,8 +120,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_template("show")
-    assert_select("a[href*=?]", edit_project_path(project), true,
-                  "Project admmin should see link to edit project")
+    assert_edit_button(project)
   end
 
   def test_show_project_with_location
@@ -107,6 +129,22 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_select("a[href*=?]", location_path(project.location.id))
+  end
+
+  def test_show_project_with_empty_list
+    project = projects(:empty_list_project)
+    login
+    get(:show, params: { id: project.id })
+
+    assert(project.species_lists.any?)
+    assert_match(species_lists_path(project:),
+                 @response.body,
+                 "Page is missing a link to observation list")
+
+    assert_not(project.observations.any?)
+    assert_no_match(observations_path(project:),
+                    @response.body,
+                    "The project should not have any observations")
   end
 
   # exposes bug found ruing development
@@ -123,7 +161,8 @@ class ProjectsControllerTest < FunctionalTestCase
     project = projects(:pinned_date_range_project)
     login
     get(:show, params: { id: project.id })
-
+    assert_template("show")
+    # NOTE: this project has no banner_image
     assert_select("#header", { text: /#{project.date_range}/ },
                   "Date range missing from Project header")
   end
@@ -147,17 +186,12 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Projects by Time Last Modified")
+    assert_page_title(:PROJECTS.l)
     assert_template("index")
   end
 
   def test_index_with_non_default_sort
-    login
-
-    get(:index, params: { by: "created_at" })
-
-    assert_template("index")
-    assert_displayed_title("Projects by Date Created")
+    check_index_sorting
   end
 
   def test_index_member
@@ -166,43 +200,17 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { member: dick.id })
 
     assert_template("index")
-    assert_displayed_title("Project Index")
-  end
-
-  def test_index_by_summary
-    login
-
-    get(:index, params: { by: "summary" })
-
-    assert_template("index")
-    assert_displayed_title("Projects by Summary")
+    assert_page_title(:PROJECTS.l)
   end
 
   def test_index_pattern_search_multiple_hits
     pattern = "Project"
 
     login
-    get(:index, params: { pattern: "Project" })
+    get(:index, params: { q: { model: :Project, pattern: } })
 
-    assert_displayed_title("Projects Matching ‘#{pattern}’")
-  end
-
-  def test_index_pattern_search_by_name_one_hit
-    project = projects(:bolete_project)
-
-    login
-    get(:index, params: { pattern: "Bolete Project" })
-
-    q = QueryRecord.last.id.alphabetize
-    assert_redirected_to(project_path(project.id, q: q))
-  end
-
-  def test_index_pattern_search_by_id
-    project = projects(:bolete_project)
-
-    login
-    get(:index, params: { pattern: project.id.to_s })
-    assert_redirected_to(project_path(project.id))
+    assert_page_title(:PROJECTS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_add_project
@@ -561,13 +569,13 @@ class ProjectsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_add_background_image
+  def test_add_banner_image
     file = image_setup
     num_images = Image.count
     params = build_params("With background", "With background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     File.stub(:rename, false) do
       login("rolf", "testpassword")
       put(:update, params: params)
@@ -584,13 +592,13 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(params[:upload][:license_id], project.image.license_id)
   end
 
-  def test_bad_background_image
+  def test_bad_banner_image
     file = image_setup
     num_images = Image.count
-    params = build_params("Bad background", "Bad background")
+    params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:process_image, false) do
       File.stub(:rename, false) do
@@ -605,13 +613,13 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(num_images, Image.count)
   end
 
-  def test_fail_save_background_image
+  def test_fail_save_banner_image
     file = image_setup
     num_images = Image.count
-    params = build_params("Bad background", "Bad background")
+    params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:save, false) do
       File.stub(:rename, false) do

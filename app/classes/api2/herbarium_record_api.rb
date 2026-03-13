@@ -7,22 +7,6 @@ class API2
       HerbariumRecord
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
-    end
-
     def high_detail_includes
       [
         :observations,
@@ -33,18 +17,18 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:herbarium_record, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :creator),
+        by_users: parse_array(:user, :user, help: :creator),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
         observations: parse_array(:observation, :observation, as: :id),
-        with_notes: parse(:boolean, :has_notes),
+        has_notes: parse(:boolean, :has_notes),
         initial_det: parse(:string, :initial_det, help: 1),
-        accession_number: parse(:string, :accession_number, help: 1),
+        accession: parse(:string, :accession_number, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         initial_det_has: parse(:string, :initial_det_has, help: 1),
-        accession_number_has: parse(:string, :accession_number_has, help: 1)
+        accession_has: parse(:string, :accession_number_has, help: 1)
       }
     end
 

@@ -6,7 +6,6 @@ module Locations
     include ::Locations::Descriptions::SharedPrivateMethods
 
     before_action :store_location, except: [:index, :destroy]
-    before_action :pass_query_params, except: [:index]
     before_action :login_required
     before_action :require_successful_user, only: [
       :new, :create
@@ -19,15 +18,15 @@ module Locations
       build_index_with_query
     end
 
+    def controller_model_name
+      "LocationDescription"
+    end
+
     private
 
     # Is :name
     def default_sort_order
-      ::Query::LocationDescriptionBase.default_order # :name
-    end
-
-    def controller_model_name
-      "LocationDescription"
+      ::Query::LocationDescriptions.default_order # :name
     end
 
     # Used by ApplicationController to dispatch #index to a private method
@@ -43,7 +42,7 @@ module Locations
       )
       return unless user
 
-      query = create_query(:LocationDescription, :all, by_author: user)
+      query = create_query(:LocationDescription, by_author: user)
       [query, {}]
     end
 
@@ -55,7 +54,7 @@ module Locations
       )
       return unless user
 
-      query = create_query(:LocationDescription, :all, by_editor: user)
+      query = create_query(:LocationDescription, by_editor: user)
       [query, {}]
     end
 
@@ -144,7 +143,6 @@ module Locations
     end
 
     def destroy
-      pass_query_params
       return unless find_description!
 
       check_delete_permission_flash_and_redirect

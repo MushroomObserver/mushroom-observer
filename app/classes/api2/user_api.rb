@@ -7,22 +7,6 @@ class API2
       User
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
-    end
-
     def high_detail_includes
       [
         :api_keys,
@@ -33,7 +17,7 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:user, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at)
       }
@@ -93,8 +77,9 @@ class API2
       key.verified = nil
       key.save
       user.reload
-      email = QueuedEmail::VerifyAccount.create_email(user)
-      email.destroy if email.send_email
+      # Migrated from QueuedEmail::VerifyAccount to ActionMailer + ActiveJob.
+      # See .claude/deliver_later_migration_plan.md for details.
+      VerifyAccountMailer.build(receiver: user).deliver_later
     end
 
     def build_deleter

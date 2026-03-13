@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class LookupsController < ApplicationController
-  # These need to be moved into the files where they are actually used.
-  require "find"
-
   before_action :login_required, except: [
     :lookup_observation
   ]
@@ -65,7 +62,7 @@ class LookupsController < ApplicationController
   # controller/action after looking up the object.
   # inputs: model Class, true/false
   def lookup_general(model, accepted: false)
-    id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
+    id = params[:id].to_s.tr("+", " ").strip_squeeze
 
     matches, suggestions = find_matches_and_suggestions(model, id, accepted)
     return if /^\d+$/.match?(id) && !matches
@@ -252,9 +249,8 @@ class LookupsController < ApplicationController
     model:, id:, matches:, suggestions:
   )
     obj = matches.first || suggestions.first
-    flavor = :all
 
-    query = Query.lookup(model, flavor, ids: matches + suggestions)
+    query = Query.lookup(model, id_in_set: matches + suggestions)
     if suggestions.any?
       flash_warning(
         :runtime_suggest_multiple_alternates.t(match: id, type: model.type_tag)
@@ -264,8 +260,6 @@ class LookupsController < ApplicationController
         :runtime_object_multiple_matches.t(match: id, type: model.type_tag)
       )
     end
-    redirect_to(add_query_param({ controller: obj.show_controller,
-                                  action: obj.index_action },
-                                query))
+    redirect_to(add_q_param(obj.index_link_args, query))
   end
 end

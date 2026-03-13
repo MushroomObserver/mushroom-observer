@@ -34,7 +34,7 @@ module Tabs
       links = [
         show_object_tab(list)
       ]
-      if check_permission(list)
+      if permission?(list)
         links += [
           edit_species_list_tab(list)
         ]
@@ -50,8 +50,9 @@ module Tabs
     end
 
     def site_checklist_tab
-      [:site_stats_observed_taxa.t, checklist_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :site_stats_observed_taxa.t, checklist_path
+      ).tab
     end
   end
 end

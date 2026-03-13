@@ -80,7 +80,7 @@ class LocationsControllerTest < FunctionalTestCase
       put_requires_login(page, params)
       assert_template("edit")
     end
-    assert_template("locations/_form")
+    assert_select("#location_form")
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -117,11 +117,58 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(log_updated_at, location.rss_log.updated_at)
   end
 
-  def test_show_location_admin_mode
+  # Location destroy button only shows if location is destroyable (no blocking
+  # associations) AND user is either the creator or in admin mode.
+  def test_show_location_destroy_button_for_admin_destroyable
     login("mary")
     make_admin("mary")
-    location = locations(:albion)
+    location = locations(:unused_location)
+    assert(location.destroyable?, "Test requires a destroyable location")
     get(:show, params: { id: location.id })
+
+    assert_edit_button(location)
+    assert_destroy_button(location)
+  end
+
+  def test_show_location_destroy_button_for_owner_destroyable
+    location = locations(:howarth_park) # created by rolf (default)
+    login("rolf")
+    assert(location.destroyable?, "Test requires a destroyable location")
+    get(:show, params: { id: location.id })
+
+    assert_edit_button(location)
+    assert_destroy_button(location)
+  end
+
+  def test_show_location_no_destroy_button_for_non_owner
+    location = locations(:howarth_park) # created by rolf
+    login("mary") # not the owner
+    assert(location.destroyable?, "Test requires a destroyable location")
+    get(:show, params: { id: location.id })
+
+    assert_edit_button(location)
+    assert_no_destroy_button(location)
+  end
+
+  def test_show_location_no_destroy_button_when_has_associations
+    location = locations(:albion) # has projects
+    login("rolf") # owner
+    assert_not(location.destroyable?, "Test requires non-destroyable location")
+    get(:show, params: { id: location.id })
+
+    assert_edit_button(location)
+    assert_no_destroy_button(location)
+  end
+
+  def test_show_location_no_destroy_button_for_admin_when_has_associations
+    login("mary")
+    make_admin("mary")
+    location = locations(:albion) # has projects
+    assert_not(location.destroyable?, "Test requires non-destroyable location")
+    get(:show, params: { id: location.id })
+
+    assert_edit_button(location)
+    assert_no_destroy_button(location)
   end
 
   def assert_show_location
@@ -129,6 +176,70 @@ class LocationsControllerTest < FunctionalTestCase
     assert_template("locations/show/_notes")
     assert_template("comments/_comments_for_object")
     assert_template("locations/show/_general_description_panel")
+  end
+
+  def test_show_location_next_flow
+    loc = locations(:albion)
+    query = Query.lookup_and_save(:Location, order_by: :name)
+    q = @controller.q_param(query)
+
+    login
+    get(:show, params: { id: loc.id, flow: "next", q: q })
+
+    assert_response(:redirect)
+  end
+
+  def test_show_location_prev_flow
+    loc = locations(:albion)
+    query = Query.lookup_and_save(:Location, order_by: :name)
+    q = @controller.q_param(query)
+
+    login
+    get(:show, params: { id: loc.id, flow: "prev", q: q })
+
+    assert_response(:redirect)
+  end
+
+  def test_show_location_without_description
+    # Use a location that has no description_id to hit the blank desc_id case
+    loc = locations(:burbank)
+    assert_nil(loc.description_id, "Need location without description")
+
+    login
+    get(:show, params: { id: loc.id })
+
+    assert_template("show")
+    assert_nil(assigns(:description))
+  end
+
+  def test_show_location_with_nonexistent_description
+    loc = locations(:albion)
+    bad_desc_id = 999_999
+
+    login
+    get(:show, params: { id: loc.id, desc: bad_desc_id })
+
+    assert_template("show")
+    assert_flash_text(:runtime_object_not_found.t(type: :description,
+                                                  id: bad_desc_id))
+  end
+
+  def test_show_location_with_unreadable_description
+    loc = locations(:albion)
+    # Create a private description that the user can't read
+    desc = LocationDescription.create!(
+      location: loc,
+      user: mary,
+      license: licenses(:ccnc25),
+      public: false
+    )
+
+    login("dick") # Dick is not a reader
+    get(:show, params: { id: loc.id, desc: desc.id })
+
+    assert_template("show")
+    # Description should be nil (not shown) because user can't read it
+    assert_nil(assigns(:description))
   end
 
   def test_interest_in_show_location
@@ -180,7 +291,21 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Locations by Name")
+    assert_page_title(:LOCATIONS.l)
+  end
+
+  def test_index_with_non_default_sort
+    check_index_sorting
+  end
+
+  def test_index_sorted_by_box_area
+    check_index_sorted_by(:reverse_box_area, do_login: true)
+  end
+
+  def test_index_sorted_by_scientific_name
+    login("roy")
+
+    check_index_sorted_by(:name, do_login: false)
   end
 
   def test_index_project
@@ -193,45 +318,26 @@ class LocationsControllerTest < FunctionalTestCase
     assert_match(location.display_name, @response.body)
   end
 
-  def test_index_with_non_default_sort
+  def test_index_species_list
+    sl = species_lists(:one_genus_three_species_list)
+    query = Query.lookup_and_save(:Location,
+                                  observation_query: { species_lists: [sl] })
+
     login
+    get(:index, params: { q: @controller.q_param(query) })
 
-    sort_orders = %w[num_views box_area]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title("Locations by #{:"sort_by_#{order}".l}")
-    end
-  end
-
-  def test_index_bounding_box
-    north = south = east = west = 0
-    delta = 0.001
-    login
-    get(:index,
-        params: { north: north, south: south, east: east, west: west })
-    query = Query.find(QueryRecord.last.id)
-
-    assert_equal(north + delta, query.params[:north])
-    assert_equal(south - delta, query.params[:south])
-    assert_equal(east + delta, query.params[:east])
-    assert_equal(west - delta, query.params[:west])
-
-    get(:index,
-        params: { north: 90, south: -90, east: 180, west: -180 })
-    query = Query.find(QueryRecord.last.id)
-    assert_equal(90, query.params[:north])
-    assert_equal(-90, query.params[:south])
-    assert_equal(180, query.params[:east])
-    assert_equal(-180, query.params[:west])
+    location = sl.observations.joins(:location).first&.location
+    assert_match(location.display_name, @response.body)
   end
 
   def test_index_advanced_search
-    query = Query.lookup_and_save(:Location, :all, user_where: "California")
-    matches = Location.name_includes("California")
+    where = "California"
+    query = Query.lookup_and_save(:Location, search_where: where)
+    matches = Location.name_has(where)
+    params = { q: @controller.q_param(query), advanced_search: true }
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge(advanced_search: true))
+    get(:index, params:)
 
     assert_response(:success)
     assert_template("index")
@@ -239,42 +345,35 @@ class LocationsControllerTest < FunctionalTestCase
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
     )
-    # Don't care what the title is, but good to know if it changes.
-    assert_displayed_title("Matching Locations")
+    assert_page_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_search_where.l}: #{where}")
   end
 
   def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Location, :all)
+    query_no_conditions = Query.lookup_and_save(:Location)
 
     login
-    params = @controller.query_params(query_no_conditions).
-             merge(advanced_search: true)
+    params = { q: @controller.q_param(query_no_conditions),
+               advanced_search: true }
     get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_index_pattern
+  def test_index_pattern_multiple_hits
     search_str = "California"
     matches = Location.where(Location[:name].matches("%#{search_str}%"))
 
     login
-    get(:index, params: { pattern: search_str })
+    get(:index, params: { q: { model: :Location, pattern: search_str } })
 
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
     )
-    assert_displayed_title("Locations Matching ‘#{search_str}’")
-  end
-
-  def test_index_pattern_id
-    loc = locations(:salt_point)
-
-    login
-    get(:index, params: { pattern: loc.id.to_s })
-    assert_redirected_to(location_path(loc.id))
+    assert_page_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{search_str}")
   end
 
   def test_index_country
@@ -284,9 +383,8 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    # Use a regexp because the title is buggy and may change. jdc 2023-02-23.
-    # https://www.pivotaltracker.com/story/show/184554008
-    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
+    assert_page_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_regexp.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
@@ -300,7 +398,8 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
+    assert_page_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_regexp.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
       true, "USA page should include New Mexico"
@@ -353,7 +452,8 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_displayed_title("Locations created by #{user.name}")
+    assert_page_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(user: user).count },
@@ -405,7 +505,8 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user.id })
 
-    assert_displayed_title("Locations Edited by #{user.name}")
+    assert_page_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
     assert_select("a:match('href',?)", %r{^/locations/\d+},
                   { count: locs_edited_by_user.count },
                   "Wrong number of results")
@@ -447,13 +548,56 @@ class LocationsControllerTest < FunctionalTestCase
     assert_redirected_to(locations_path)
   end
 
+  def test_index_undefined_locations_letter_filter
+    # Create observations with undefined locations starting with different
+    # letters to test the letter2 filter
+    Observation.create!(
+      user: rolf,
+      when: Time.zone.today,
+      where: "Albuquerque, New Mexico, USA",
+      name: names(:agaricus_campestris)
+    )
+    Observation.create!(
+      user: rolf,
+      when: Time.zone.today,
+      where: "Boulder, Colorado, USA",
+      name: names(:agaricus_campestris)
+    )
+
+    login
+    # First verify that undefined locations appear without letter filter
+    get(:index)
+    assert_template("index")
+    # Check that @undef_data is set (the letter filter applies to this)
+    assert(assigns(:undef_data).present?, "Should have undefined locations")
+
+    # Now request with letter2=a should filter to only "A" locations
+    get(:index, params: { letter2: "a" })
+    assert_template("index")
+    # The letter filter is applied, verify the data is filtered
+    undef_data = assigns(:undef_data)
+    return if undef_data.blank?
+
+    undef_data.each do |obs|
+      assert_match(/^A/i, obs[:where], "Filtered results should start with A")
+    end
+  end
+
   ##############################################################################
   #
   #    NEW
 
-  def test_create_location
+  def test_new_location
     requires_login(:new)
     assert_form_action(action: :create)
+  end
+
+  def test_new_location_turbo_stream
+    login
+    get(:new, params: { where: "Somewhere, Earth" }, format: :turbo_stream)
+    assert_select(".modal-form")
+    assert_select("#location_form")
+    assert_select("input[name='location[display_name]']")
   end
 
   # This was causing a crash in live server.
@@ -516,7 +660,8 @@ class LocationsControllerTest < FunctionalTestCase
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)
     assert_response(:redirect)
-    assert_equal("Strip This, Maine, USA", Location.last.display_name)
+    assert_equal("Strip This, Maine, USA",
+                 Location.last.display_name)
   end
 
   def test_construct_location_errors
@@ -565,6 +710,101 @@ class LocationsControllerTest < FunctionalTestCase
     construct_location_error(params)
   end
 
+  # Regression test for bug where @set_user.id was called on a String,
+  # causing NoMethodError: undefined method `id' for an instance of String
+  def test_create_location_with_set_user
+    user = users(:mary)
+    login(user.login)
+    params = barton_flats_params
+    params[:set_user] = user.id.to_s
+
+    assert_nil(user.location)
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(user_path(user))
+    user.reload
+    assert_equal(loc, user.location)
+  end
+
+  def test_create_location_with_set_observation
+    obs = observations(:minimal_unknown_obs)
+    login("mary")
+    params = barton_flats_params
+    params[:set_observation] = obs.id.to_s
+
+    post(:create, params: params)
+
+    assert_redirected_to(observation_path(obs))
+  end
+
+  def test_create_location_already_exists
+    existing_loc = locations(:albion)
+    login("mary")
+
+    post(:create, params: {
+           where: existing_loc.display_name,
+           location: {
+             display_name: existing_loc.display_name,
+             north: 40, south: 39, east: -123, west: -124
+           }
+         })
+
+    assert_flash_warning(:runtime_location_already_exists.t(
+                           name: existing_loc.display_name
+                         ))
+    # Should redirect to observation if set_observation, else to location
+    assert_redirected_to(location_path(existing_loc.id))
+  end
+
+  def test_create_location_defines_observations_at_original_name
+    # Create an observation with an undefined location
+    undefined_where = "Barton Flats, California, USA"
+    obs = Observation.create!(
+      user: rolf,
+      when: Time.zone.today,
+      where: undefined_where,
+      name: names(:agaricus_campestris)
+    )
+    assert_nil(obs.location)
+
+    login("rolf")
+    params = barton_flats_params
+    params[:where] = undefined_where # original_name
+
+    post(:create, params: params)
+
+    # The observation should now be associated with the new location
+    obs.reload
+    assert_not_nil(obs.location)
+    assert_equal(params[:display_name], obs.location.display_name)
+  end
+
+  def test_create_location_with_set_species_list
+    sl = species_lists(:one_genus_three_species_list)
+    login("mary")
+    params = barton_flats_params
+    params[:set_species_list] = sl.id.to_s
+
+    post(:create, params: params)
+
+    assert_redirected_to(species_list_path(sl))
+  end
+
+  def test_create_location_with_set_herbarium
+    herbarium = herbaria(:nybg_herbarium)
+    login("mary")
+    params = barton_flats_params
+    params[:set_herbarium] = herbarium.id.to_s
+
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(herbarium_path(herbarium))
+    herbarium.reload
+    assert_equal(loc, herbarium.location)
+  end
+
   ##############################################################################
   #
   #    EDIT
@@ -576,6 +816,16 @@ class LocationsControllerTest < FunctionalTestCase
     assert_form_action({ action: :update, id: loc.id.to_s,
                          approved_where: loc.display_name })
     assert_input_value(:location_display_name, loc.display_name)
+  end
+
+  def test_edit_location_turbo_stream
+    loc = locations(:albion)
+    login
+    get(:edit, params: { id: loc.id }, format: :turbo_stream)
+    assert_select(".modal-form")
+    assert_select("#location_form")
+    assert_select("input[name='location[display_name]'][value=?]",
+                  loc.display_name)
   end
 
   def test_edit_locked_location
@@ -772,9 +1022,11 @@ class LocationsControllerTest < FunctionalTestCase
     past_descs_to_go = 0
 
     # Cannot use fixture here -- in these classes
-    # fixtures with location `alibion` break API2Test#test_patching_locations
+    # fixtures with location `albion` break API2Test#test_patching_locations
     herbarium = Herbarium.create(name: "Herbarium to move", location: to_go)
     project = Project.create(title: "Project to move", location: to_go)
+    project_alias = ProjectAlias.create(project:, name: "ALB", target: to_go,
+                                        target_type: "Location")
 
     make_admin("rolf")
     put(:update, params: params)
@@ -788,11 +1040,12 @@ class LocationsControllerTest < FunctionalTestCase
                  LocationDescription::Version.count)
     assert_equal(to_stay, herbarium.reload.location)
     assert_equal(to_stay, project.reload.location)
+    assert_equal(to_stay, project_alias.reload.target)
     assert_match(old_notes, to_stay.reload.notes,
                  "Location.notes should include pre-merger notes")
   end
 
-  def test_post_edit_location_locked
+  def test_update_location_locked
     location = locations(:unknown_location)
     params = {
       id: location.id,
@@ -887,33 +1140,98 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(scientific_name, loc.scientific_name)
   end
 
+  def test_update_location_no_change_warning
+    loc = locations(:albion)
+    params = update_params_from_loc(loc)
+
+    login("rolf")
+    put(:update, params: params)
+
+    assert_flash_warning(:runtime_edit_location_no_change.t)
+    assert_redirected_to(location_path(loc.id))
+  end
+
+  def test_update_location_merge_request_redirect
+    # Two locations that both have observations - neither is mergeable by user
+    to_go = locations(:falmouth)
+    to_stay = locations(:burbank)
+
+    # Ensure both have observations so neither is mergeable
+    assert(to_go.observations.any?, "falmouth needs observations")
+    assert(to_stay.observations.any?, "burbank needs observations")
+    assert_false(to_go.mergable?, "falmouth should not be mergeable")
+    assert_false(to_stay.mergable?, "burbank should not be mergeable")
+
+    params = update_params_from_loc(to_go)
+    params[:location][:display_name] = to_stay.display_name
+
+    # Login as a user who is NOT an admin
+    login("dick")
+    put(:update, params: params)
+
+    # Should redirect to merge request form
+    assert_redirected_to(new_admin_emails_merge_requests_path(
+                           type: :Location, old_id: to_go.id, new_id: to_stay.id
+                         ))
+  end
+
   ##############################################################################
   #
   #    DESTROY
 
-  def test_destroy_location
-    location = locations(:california)
-    params = { id: location.id }
+  def test_destroy_location_by_owner
+    rolf = users(:rolf)
+    location = Location.create!(
+      name: "Destroyable Location, Oregon, USA",
+      north: 45.0, south: 44.0, east: -122.0, west: -123.0,
+      user: rolf
+    )
+    assert(location.destroyable?, "Fresh location should be destroyable")
 
-    login(location.user.login)
-    delete(:destroy, params: params)
+    # Non-owner cannot destroy
+    login("mary")
+    delete(:destroy, params: { id: location.id })
     assert(Location.exists?(location.id),
-           "Location should be destroyable only if user is in admin mode")
+           "Non-owner should not be able to destroy location")
 
-    make_admin
-    delete(:destroy, params: params)
+    # Owner can destroy
+    login("rolf")
+    delete(:destroy, params: { id: location.id })
     assert_redirected_to(locations_path)
     assert_not(Location.exists?(location.id),
-               "Failed to destroy Location #{location.id}, '#{location.name}'")
+               "Owner should be able to destroy location with no associations")
+  end
+
+  def test_destroy_location_by_admin
+    location = Location.create!(
+      name: "Admin Destroyable Location, Oregon, USA",
+      north: 45.0, south: 44.0, east: -122.0, west: -123.0,
+      user: users(:rolf)
+    )
+    assert(location.destroyable?, "Fresh location should be destroyable")
+
+    login("mary")
+    make_admin
+    delete(:destroy, params: { id: location.id })
+    assert_redirected_to(locations_path)
+    assert_not(Location.exists?(location.id),
+               "Admin should be able to destroy location with no associations")
+  end
+
+  def test_destroy_location_with_associations
+    location = locations(:albion) # has projects
+    assert_not(location.destroyable?, "Test requires non-destroyable location")
+
+    # Even admin cannot destroy location with associations
+    login("mary")
+    make_admin
+    delete(:destroy, params: { id: location.id })
+    assert_redirected_to(location_path(location))
+    assert(Location.exists?(location.id),
+           "Should not be able to destroy location with associations")
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, :all, pattern: name, by: :name)
-  end
-
-  def test_coercing_sorted_observation_query_into_location_query
-    @controller.
-      coerce_query_for_undefined_locations(named_obs_query("Pasadena").
-      coerce(:Location))
+    Query.lookup(:Observation, pattern: name, order_by: :name)
   end
 end

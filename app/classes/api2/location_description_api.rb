@@ -7,20 +7,8 @@ class API2
       LocationDescription
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      100
-    end
-
-    def put_page_length
-      100
-    end
-
-    def delete_page_length
-      100
+    def page_length_level
+      :heavyweight
     end
 
     def low_detail_includes
@@ -33,12 +21,12 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:location_description, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :first_user),
+        by_users: parse_array(:user, :user, help: :first_user),
         locations: parse_array(:location, :location),
-        public: true
+        is_public: true
       }
     end
 

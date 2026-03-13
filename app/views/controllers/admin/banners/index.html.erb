@@ -1,6 +1,3 @@
 <h1><%= :change_banner_title.t %></h1>
 
-<%= form_with model: @banner, url: admin_banners_path, local: true, method: :post do |f| %>
-  <%= text_area_with_label(form: f, field: :message, rows: 5) %>
-  <%= submit_button(form: f, button: :banner_update.t) %>
-<% end %>
+<%= render(Components::BannerForm.new(@banner)) %>

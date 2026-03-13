@@ -63,25 +63,16 @@
 ############################################################################
 
 class NameDescription < Description
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
-  # enum definitions for use by simple_enum gem
+  include Description::Scopes
+
   # Do not change the integer associated with a value
-  enum review_status:
-        {
-          unreviewed: 1,
-          unvetted: 2,
-          vetted: 3,
-          inaccurate: 4
-        }
-  enum source_type:
-        {
-          public: 1,
-          foreign: 2,
-          project: 3,
-          source: 4,
-          user: 5
-        }, _suffix: :source
+  enum :review_status, { unreviewed: 1, unvetted: 2, vetted: 3, inaccurate: 4 }
+
+  enum :source_type, { public: 1, foreign: 2, project: 3, source: 4, user: 5 },
+       suffix: :source, instance_methods: false
+
   belongs_to :license
   belongs_to :name
   belongs_to :project
@@ -111,15 +102,52 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
-  scope :for_eol_export,
-        lambda {
-          where(review_status: review_statuses.values_at(
-            "unvetted", "vetted"
-          )).
-            where(NameDescription[:gen_desc].not_blank).
-            where(ok_for_export: true).
-            where(public: true)
-        }
+  scope :order_by_default,
+        -> { order_by(::Query::NameDescriptions.default_order) }
+
+  scope :by_author, lambda { |user|
+    ids = Lookup::Users.new(user).ids
+    joins(:name_description_authors).distinct.
+      where(name_description_authors: { user_id: ids })
+  }
+  scope :by_editor, lambda { |user|
+    ids = Lookup::Users.new(user).ids
+    joins(:name_description_editors).distinct.
+      where(name_description_editors: { user_id: ids })
+  }
+
+  scope :is_public,
+        ->(bool = true) { where(public: bool) }
+  scope :sources,
+        ->(types) { where(source_type: types) }
+  scope :ok_for_export,
+        ->(bool = true) { where(ok_for_export: bool) }
+
+  scope :names, lambda { |lookup:, **related_name_args|
+    ids = Lookup::Names.new(lookup, related_name_args.compact).ids
+    return none unless ids
+
+    where(name_id: ids).distinct
+  }
+
+  scope :projects, lambda { |projects|
+    ids = Lookup::Projects.new(projects).ids
+    where(project: ids)
+  }
+
+  scope :for_eol_export, lambda {
+    where(review_status: review_statuses.values_at(
+      "unvetted", "vetted"
+    )).
+      where(NameDescription[:gen_desc].not_blank).
+      where(ok_for_export: true).
+      where(public: true)
+  }
+
+  scope :name_query, lambda { |hash|
+    joins(:name).subquery(:Name, hash)
+  }
+
   scope :show_includes, lambda {
     strict_loading
   }
@@ -130,6 +158,7 @@ class NameDescription < Description
   ALL_NOTE_FIELDS = (
     [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
   ).freeze
+  SEARCHABLE_FIELDS = ALL_NOTE_FIELDS
 
   acts_as_versioned(
     if_changed: ALL_NOTE_FIELDS,
@@ -169,11 +198,6 @@ class NameDescription < Description
   def self.show_controller
     # Not the generated default in AbstractModel, because controller namespaced.
     "/names/descriptions"
-  end
-
-  # Eliminate when controller_normalized? goes.
-  def self.show_action
-    :show
   end
 
   # Returns an Array of all the descriptive text fields that don't require any
@@ -254,7 +278,6 @@ class NameDescription < Description
 
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
-  # rubocop:disable Metrics/MethodLength
   def notify_users
     # Even though changing review_status doesn't cause a new version to be
     # created, I want to notify authors of that change.
@@ -282,11 +305,6 @@ class NameDescription < Description
       reviewer ||= @old_reviewer
       recipients.push(reviewer) if reviewer&.email_names_reviewer
 
-      # Tell masochists who want to know about all name changes.
-      User.where(email_names_all: true).find_each do |user|
-        recipients.push(user)
-      end
-
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
       name.interests.each do |interest|
@@ -300,17 +318,31 @@ class NameDescription < Description
       # Remove users who have opted out of all emails.
       recipients.reject!(&:no_emails)
 
-      # Send notification to all except the person who triggered the change.
-      (recipients.uniq - [sender]).each do |recipient|
-        QueuedEmail::NameChange.create_email(sender, recipient, name, self,
-                                             saved_change_to_review_status?)
-      end
+      send_name_change_emails(sender, recipients)
     end
 
     # No longer need this.
     @old_reviewer = nil
   end
-  # rubocop:enable Metrics/MethodLength
+
+  def send_name_change_emails(sender, recipients)
+    # Migrated from QueuedEmail::NameChange to deliver_later.
+    # Calculate versions now while saved_version_changes? is still accurate.
+    # Use saved_version_changes? (not saved_changes?) because review_status
+    # changes don't create new versions.
+    n = name
+    old_desc_ver = saved_version_changes? ? version - 1 : version
+    review = saved_change_to_review_status? ? review_status : "no_change"
+
+    (recipients.uniq - [sender]).each do |recipient|
+      NameChangeMailer.build(
+        sender:, receiver: recipient, name: n,
+        old_name_ver: n.version, new_name_ver: n.version,
+        description: self, old_desc_ver:, new_desc_ver: version,
+        review_status: review
+      ).deliver_later
+    end
+  end
 
   ##############################################################################
 

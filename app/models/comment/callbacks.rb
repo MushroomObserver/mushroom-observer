@@ -16,7 +16,6 @@ module Comment::Callbacks
 
     recipients = []
     add_owners_and_authors!(recipients)
-    add_users_interested_in_all_comments!(recipients)
     add_users_with_other_comments!(recipients)
     add_users_with_namings!(recipients)
     add_highlighted_users!(recipients, "#{summary}\n#{comment}")
@@ -34,11 +33,15 @@ module Comment::Callbacks
     return unless user_ids.intersect?(::MO.water_users)
     return unless user_ids.intersect?(::MO.oil_users)
 
-    QueuedEmail::Webmaster.create_email(
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    message = WebmasterMailer.prepend_user(
+      User.admin, oil_and_water_content(user_ids)
+    )
+    WebmasterMailer.build(
       sender_email: MO.noreply_email_address,
       subject: oil_and_water_subject,
-      content: oil_and_water_content(user_ids)
-    )
+      message:
+    ).deliver_later
   end
 
   ##########################################################################
@@ -48,10 +51,6 @@ module Comment::Callbacks
   def add_owners_and_authors!(users)
     users.concat(owners_and_authors.
                  select(&:email_comments_owner))
-  end
-
-  def add_users_interested_in_all_comments!(users)
-    users.concat(User.where(email_comments_all: true))
   end
 
   def add_users_with_other_comments!(users)
@@ -82,8 +81,11 @@ module Comment::Callbacks
   end
 
   def send_comment_notifications(users)
-    users.each do |recipient|
-      QueuedEmail::CommentAdd.find_or_create_email(user, recipient, self)
+    comment = self
+    users.each do |receiver|
+      CommentMailer.build(
+        sender: user, receiver:, target:, comment:
+      ).deliver_later
     end
   end
 
@@ -117,7 +119,7 @@ module Comment::Callbacks
   def search_for_highlighted_users(str, regex)
     users = []
     while str.match(regex)
-      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
+      str = "#{Regexp.last_match.pre_match}\n#{Regexp.last_match.post_match}"
       users << lookup_user(Regexp.last_match(1))
     end
     users

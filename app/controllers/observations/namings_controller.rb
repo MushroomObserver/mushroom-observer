@@ -7,7 +7,6 @@ module Observations
     include ObservationsController::Validators
 
     before_action :login_required
-    before_action :pass_query_params
 
     # Bullet wants us to eager load interests on taxa, which is loaded in
     # Naming#create_emails
@@ -54,12 +53,12 @@ module Observations
       init_ivars
       @observation = Observation.show_includes.find(params[:observation_id])
       @naming = naming_from_params
-      # N+1: What is this doing? Watch out for check_permission!
-      return redirect_to_obs(@observation) unless check_permission!(@naming)
+      # N+1: What is this doing? Watch out for permission!
+      return redirect_to_obs(@observation) unless permission!(@naming)
 
       init_edit_ivars
       @consensus = Observation::NamingConsensus.new(@observation)
-      @vote = @consensus.owners_vote(@naming)
+      @vote = @consensus.users_vote(@naming, @user)
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
@@ -71,11 +70,11 @@ module Observations
       init_ivars
       @observation = Observation.show_includes.find(params[:observation_id])
       @naming = naming_from_params
-      # N+1: What is this doing? Watch out for check_permission!
-      return redirect_to_obs(@observation) unless check_permission!(@naming)
+      # N+1: What is this doing? Watch out for permission!
+      return redirect_to_obs(@observation) unless permission!(@naming)
 
       @consensus = Observation::NamingConsensus.new(@observation)
-      @vote = @consensus.owners_vote(@naming)
+      @vote = @consensus.users_vote(@naming, @user)
 
       if can_update?
         need_new_naming? ? create_new_naming : change_naming
@@ -130,14 +129,39 @@ module Observations
     end
 
     def render_modal_naming_form
-      render(partial: "shared/modal_form",
-             locals: {
-               title: modal_title, local: false,
+      render(Components::ModalForm.new(
                identifier: modal_identifier,
-               form: "observations/namings/form",
-               form_locals: { show_reasons: true,
-                              context: params[:context] }
-             }) and return
+               title: modal_title,
+               user: @user,
+               model: @naming,
+               observation: @observation,
+               form_locals: naming_form_locals.except(:model, :observation)
+             ), layout: false)
+    end
+
+    def naming_form_locals
+      {
+        model: @naming,
+        observation: @observation,
+        local: false,
+        show_reasons: true,
+        context: params[:context],
+        vote: @vote,
+        given_name: @given_name,
+        reasons: @reasons,
+        feedback: naming_feedback
+      }
+    end
+
+    def naming_feedback
+      return {} unless defined?(@names)
+
+      {
+        names: @names,
+        valid_names: @valid_names,
+        suggest_corrections: @suggest_corrections,
+        parent_deprecated: @parent_deprecated
+      }
     end
 
     def modal_identifier
@@ -159,7 +183,7 @@ module Observations
     end
 
     def redirect_to_obs(obs)
-      redirect_with_query(obs.show_link_args)
+      redirect_to(obs.show_link_args)
     end
 
     ##########################################################################
@@ -206,7 +230,7 @@ module Observations
 
     def save_changes
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
-      save_with_log(@naming)
+      save_with_log(@user, @naming)
       change_vote_with_log unless @vote.value.nil?
     end
 
@@ -216,7 +240,7 @@ module Observations
           case params[:context]
           when "lightgallery", "matrix_box"
             render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: @observation })
+                   locals: { obs: @observation, user: @user })
           else
             redirect_to_obs(@observation)
           end
@@ -252,13 +276,13 @@ module Observations
       respond_to do |format|
         format.html { render(action: redo_action) and return }
         format.turbo_stream do
-          render(partial: "shared/modal_form_reload",
-                 locals: {
-                   identifier: modal_identifier,
-                   form: "observations/namings/form",
-                   form_locals: { show_reasons: true,
-                                  context: params[:context] }
-                 }) and return true
+          render(
+            partial: "shared/modal_form_reload",
+            locals: {
+              identifier: modal_identifier,
+              form_locals: naming_form_locals
+            }
+          ) and return true
         end
       end
     end
@@ -297,18 +321,6 @@ module Observations
       @reasons = @naming.init_reasons(reasons)
     end
 
-    # Define local_assigns for the update_observation partial
-    # @observation.reload doesn't do the includes
-    # This is a reload of all the naming table associations, after update
-    # The destroy action already preloads the obs, however.
-    def locals_for_update_observation(preloaded_obs = nil)
-      obs = preloaded_obs || Observation.naming_includes.find(@observation.id)
-      consensus = Observation::NamingConsensus.new(obs)
-      owner_name = consensus.owner_preference
-
-      [obs, consensus, owner_name]
-    end
-
     # Use case: user changes their mind on a name they've proposed, but it's
     # already been upvoted by others. We don't let them change this naming,
     # because that would bring the other people's votes along with it.
@@ -319,7 +331,7 @@ module Observations
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
       # need to save the naming before we can move this user's vote
-      save_with_log(@naming)
+      save_with_log(@user, @naming)
       change_vote_with_log
       flash_warning(:create_new_naming_warn.l)
     end
@@ -357,7 +369,7 @@ module Observations
     end
 
     def destroy_if_we_can(naming)
-      if !check_permission!(naming)
+      if !permission!(naming)
         flash_error(:runtime_destroy_naming_denied.t(id: naming.id))
       elsif !in_admin_mode? && !@consensus.deletable?(naming)
         flash_warning(:runtime_destroy_naming_someone_else.t)

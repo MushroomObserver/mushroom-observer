@@ -4,7 +4,6 @@
 module Names::Synonyms
   class DeprecateController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # Form accessible from show_name that lets the user deprecate a name
     # in favor of another name.
@@ -36,7 +35,7 @@ module Names::Synonyms
       # If written-in name matches uniquely an existing name:
       elsif target_name && @names.length == 1
         deprecate_and_post_comment(target_name)
-        redirect_to(name_path(@name.id, q: get_query_param))
+        redirect_to(name_path(@name.id))
       else
         # TODO: Flash a custom message about ambiguous name?
         # :api_ambiguous_name.l is kind of similar
@@ -66,15 +65,17 @@ module Names::Synonyms
     end
 
     def init_ivars_for_new
-      @given_name       = params[:proposed_name].to_s.strip_squeeze
-      @comment          = params[:comment].to_s.strip_squeeze
+      @given_name       = params.dig(:deprecate_synonym, :proposed_name).
+                          to_s.strip_squeeze
+      @comment          = params.dig(:deprecate_synonym, :comment).
+                          to_s.strip_squeeze
       @list_members     = nil
       @new_names        = []
       @synonym_name_ids = []
       @synonym_names    = []
       @deprecate_all    = "1"
       @names            = []
-      @misspelling      = (params.dig(:is, :misspelling) == "1")
+      @misspelling      = params.dig(:deprecate_synonym, :is_misspelling) == "1"
     end
 
     def try_to_set_names_from_chosen_name
@@ -82,14 +83,15 @@ module Names::Synonyms
                   (name = Name.safe_find(chosen_id))
                  [name]
                else
-                 Name.find_names_filling_in_authors(@given_name)
+                 Name.find_names_filling_in_authors(@user, @given_name)
                end
     end
 
     def try_to_set_names_from_approved_name
       approved_name = params[:approved_name].to_s.strip_squeeze
       if @names.empty? &&
-         (new_name = Name.create_needed_names(approved_name, @given_name))
+         (new_name = Name.create_needed_names(@user, approved_name,
+                                              @given_name))
         @names = [new_name]
       end
     end
@@ -100,13 +102,13 @@ module Names::Synonyms
 
       # Change target name to "undeprecated".
       target_name.change_deprecated(false)
-      target_name.save_with_log(:log_name_approved,
+      target_name.save_with_log(@user, :log_name_approved,
                                 other: @name.real_search_name)
 
       # Change this name to "deprecated", set correct spelling, add note.
       @name.change_deprecated(true)
-      @name.mark_misspelled(target_name) if @misspelling
-      @name.save_with_log(:log_name_deprecated,
+      @name.mark_misspelled(@user, target_name) if @misspelling
+      @name.save_with_log(@user, :log_name_deprecated,
                           other: target_name.real_search_name)
       post_comment(:deprecate, @name, @comment) if @comment.present?
     end

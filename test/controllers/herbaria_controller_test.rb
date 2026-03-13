@@ -4,6 +4,8 @@ require("test_helper")
 
 # tests of Herbarium controller
 class HerbariaControllerTest < FunctionalTestCase
+  include ActiveJob::TestHelper
+
   # ---------- Helpers ----------
 
   def nybg
@@ -53,7 +55,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: herbarium.id })
 
-    assert_displayed_title(herbarium.format_name)
+    assert_page_title(herbarium.format_name)
     assert_select(
       "a[href^='#{new_herbaria_curator_request_path(id: herbarium)}']",
       { text: :show_herbarium_curator_request.l },
@@ -90,7 +92,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: herbarium.id })
 
-    assert_displayed_title(herbarium.format_name)
+    assert_page_title(herbarium.format_name)
     assert_select("form[action^='#{herbarium_path(herbarium)}']") do
       assert_select("input[value='delete']", true,
                     "Show Herbarium page is missing a destroy herbarium button")
@@ -106,11 +108,11 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_show_next
-    query = Query.lookup_and_save(:Herbarium, :all)
+    query = Query.lookup_and_save(:Herbarium)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number1.id, q: q, flow: "next" })
@@ -118,11 +120,11 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_show_prev
-    query = Query.lookup_and_save(:Herbarium, :all)
+    query = Query.lookup_and_save(:Herbarium)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number2.id, q: q, flow: "prev" })
@@ -131,11 +133,12 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
-    query = Query.lookup_and_save(:Herbarium, :all, by: :name, ids: set)
+    query = Query.lookup_and_save(:Herbarium, order_by: :name, id_in_set: set)
     login("zero") # Does not own any herbarium in set
-    get(:index, params: { q: query.record.id.alphabetize })
+    get(:index, params: { q: @controller.q_param(query) })
 
     assert_response(:success)
+    assert_page_title(:HERBARIA.l)
     assert_select(
       "a:match('href', ?)", %r{^#{herbaria_path}/(\d+)}, { count: set.size },
       "Filtered index should list the results of the latest Herbaria query"
@@ -147,8 +150,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_select("#title", { text: "#{:HERBARIA.l} by Name" },
-                  "index should display #{:HERBARIA.l} by Name")
+    assert_page_title(:HERBARIA.l)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -157,14 +159,8 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_by_code
-    by = "code"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_response(:success)
-    assert_displayed_title("Fungaria by Code")
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_all_merge_source_links_presence_rolf
@@ -280,7 +276,8 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { nonpersonal: true })
 
-    assert_displayed_title(:query_title_nonpersonal.l)
+    assert_page_title(:HERBARIA.l)
+    assert_displayed_filters(:query_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
@@ -297,15 +294,14 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_pattern_text
+  def test_index_pattern_text_personal
     pattern = "Personal Herbarium"
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params: { q: { model: Herbarium, pattern: pattern } })
 
-    assert_select("#title").text.start_with?(
-      :query_title_pattern_search.l(types: :HERBARIA.l, pattern: pattern)
-    )
+    assert_page_title(:HERBARIA.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
@@ -322,30 +318,14 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_pattern_integer
-    login
-    get(:index, params: { pattern: nybg.id })
-
-    assert_redirected_to(
-      herbarium_path(nybg),
-      "Herbarium search for ##{nybg.id} should show #{nybg.name} herbarium"
-    )
-  end
-
   def test_index_reverse_records
     login
-    get(:index, params: { by: "reverse_records" })
+    by = "reverse_records"
+    get(:index, params: { by: })
 
     assert_response(:success)
-    assert_select(
-      "#title",
-      { text: "#{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}" },
-      "Displayed title should be #{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}"
-    )
-    assert_select(
-      "#sorts", true,
-      "Fungaria by #Records Reversed is missing sort tabs"
-    )
+    assert_page_title(:HERBARIA.l)
+    assert_sorted_by(by)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -365,6 +345,16 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
+  def test_new_turbo
+    login("rolf")
+    get(:new, format: :turbo_stream)
+    assert_select(".modal-form")
+    # Verify HerbariumForm component rendered
+    assert_select("form#herbarium_form")
+    assert_select("input#herbarium_name")
+    assert_select("input#herbarium_place_name")
+  end
+
   def test_new_no_login
     get(:new)
     assert_redirected_to(new_account_login_path)
@@ -381,7 +371,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
   end
 
   def test_edit_with_curators_by_non_curator
@@ -398,7 +388,18 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
+  end
+
+  def test_edit_turbo
+    assert(nybg.curator?(rolf))
+    login("rolf")
+    get(:edit, params: { id: nybg.id }, format: :turbo_stream)
+    assert_select(".modal-form")
+    # Verify HerbariumForm component rendered
+    assert_select("form#herbarium_form")
+    assert_select("input#herbarium_name[value='#{nybg.name}']")
+    assert_select("input#herbarium_place_name")
   end
 
   def test_edit_with_curators_by_admin
@@ -407,17 +408,18 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
 
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def test_create
-    QueuedEmail.queue = true
-    count_before = QueuedEmail.count
+    email_count = ActionMailer::Base.deliveries.count
     herbarium_count = Herbarium.count
     login("katrina")
-    post(:create, params: { herbarium: create_params })
+    perform_enqueued_jobs do
+      post(:create, params: { herbarium: create_params })
+    end
 
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
@@ -430,13 +432,11 @@ class HerbariaControllerTest < FunctionalTestCase
                  herbarium.mailing_address)
     assert_equal(create_params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
-    assert_equal(count_before + 1, QueuedEmail.count)
-    email = QueuedEmail.last
-    assert_equal(katrina.id, email.user_id)
-    assert_equal(katrina.email, email.get_string(:sender_email))
-    assert_match(/new herbarium/i, email.get_string(:subject))
-    assert_includes(email.get_note, "Burbank Herbarium")
-    QueuedEmail.queue = false
+    assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
+    email = ActionMailer::Base.deliveries.last
+    assert_match(/katrina/, email.to_s)
+    assert_match(/new herbarium/i, email.to_s)
+    assert_match(/Burbank Herbarium/, email.to_s)
   end
 
   def test_create_no_login
@@ -456,6 +456,19 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal(herbarium_count, Herbarium.count)
     assert_flash_text(:create_herbarium_name_blank.t)
     assert_response(:success) # Back to form for creating herbarium
+  end
+
+  # Turbo stream submissions should reload the modal form with flash errors
+  def test_create_blank_name_turbo_stream
+    herbarium_count = Herbarium.count
+    login("rolf")
+
+    post(:create, params: { herbarium: herbarium_params }, as: :turbo_stream)
+
+    assert_equal(herbarium_count, Herbarium.count)
+    assert_response(:success)
+    # Should render modal_form_reload partial to update modal with flash
+    assert_template("shared/_modal_form_reload")
   end
 
   def test_create_duplicate_name
@@ -499,7 +512,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
     herbarium = Herbarium.last
     assert_equal("New Herbarium", herbarium.name)
-    assert_equal("", herbarium.code)
+    assert_nil(herbarium.code)
     assert_nil(herbarium.location)
     assert_equal("", herbarium.email)
     assert_equal("", herbarium.mailing_address)
@@ -524,7 +537,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
     herbarium = Herbarium.last
     assert_equal("My Herbarium", herbarium.name)
-    assert_equal("", herbarium.code)
+    assert_nil(herbarium.code)
     assert_nil(herbarium.location)
     assert_equal("", herbarium.email)
     assert_equal("", herbarium.mailing_address)
@@ -545,6 +558,48 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_flash_text(/already.*created.*personal herbarium/i)
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:success) # Back to the form
+  end
+
+  # Regression test: blank codes should be stored as nil, not empty string.
+  # This prevents duplicate key errors on the unique index.
+  def test_create_with_blank_code_stores_nil
+    login("rolf")
+    herbarium_count = Herbarium.count
+
+    # First herbarium with blank code
+    post(:create, params: { herbarium: herbarium_params.merge(
+      name: "First Blank Code Herbarium",
+      code: ""
+    ) })
+    assert_equal(herbarium_count + 1, Herbarium.count)
+    first = Herbarium.last
+    assert_nil(first.code, "Blank code should be stored as nil")
+
+    # Second herbarium with blank code should also work (no duplicate key error)
+    post(:create, params: { herbarium: herbarium_params.merge(
+      name: "Second Blank Code Herbarium",
+      code: ""
+    ) })
+    assert_equal(herbarium_count + 2, Herbarium.count)
+    second = Herbarium.last
+    assert_nil(second.code, "Blank code should be stored as nil")
+  end
+
+  # Regression test: save failure should return to form, not redirect.
+  def test_create_save_failure_returns_to_form
+    login("rolf")
+    herbarium_count = Herbarium.count
+
+    # Simulate save failure by creating herbarium with duplicate name
+    existing = herbaria(:nybg_herbarium)
+    post(:create, params: { herbarium: herbarium_params.merge(
+      name: existing.name
+    ) })
+
+    # Should flash error and stay on form (not redirect with nil id)
+    assert_flash_text(/already exists/i)
+    assert_equal(herbarium_count, Herbarium.count)
+    assert_response(:success) # Back to the form, not a redirect
   end
 
   def test_create_second_personal_herbarium_by_admin
@@ -612,6 +667,21 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("All\nNew\nLocation", nybg.mailing_address)
     assert_equal("And  more  stuff.", nybg.description)
     assert_nil(nybg.personal_user)
+  end
+
+  # Turbo stream submissions should reload the modal form with flash errors
+  def test_update_blank_name_turbo_stream
+    last_update = nybg.updated_at
+    login("rolf")
+
+    patch(:update,
+          params: { herbarium: herbarium_params.merge(name: ""), id: nybg.id },
+          as: :turbo_stream)
+
+    assert_equal(last_update, nybg.reload.updated_at)
+    assert_response(:success)
+    # Should render modal_form_reload partial to update modal with flash
+    assert_template("shared/_modal_form_reload")
   end
 
   def test_update_by_non_curator

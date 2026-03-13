@@ -12,8 +12,8 @@
 ################################################################################
 #
 class API2Controller < ApplicationController
-  require "xmlrpc/client"
-  require "api2"
+  require("xmlrpc/client")
+  require("api2")
 
   disable_filters
 
@@ -39,6 +39,10 @@ class API2Controller < ApplicationController
 
   def external_sites
     rest_query(:external_site)
+  end
+
+  def field_slips
+    rest_query(:field_slip)
   end
 
   def herbaria
@@ -126,11 +130,11 @@ class API2Controller < ApplicationController
   end
 
   def is_request_body_an_upload?
-    (request.content_length.positive? &&
-     request.media_type.present? &&
-     request.media_type != "application/x-www-form-urlencoded" &&
-     request.media_type != "multipart/form-data" &&
-     request.body.present?)
+    request.content_length.positive? &&
+      request.media_type.present? &&
+      request.media_type != "application/x-www-form-urlencoded" &&
+      request.media_type != "multipart/form-data" &&
+      request.body.present?
   end
 
   def upload_from_request_body
@@ -143,13 +147,17 @@ class API2Controller < ApplicationController
   end
 
   def render_api_results(args)
+    @user = user_from_key(args[:api_key])
     @api = API2.execute(args)
-    User.current = @user = @api.user
     do_render
   rescue StandardError => e
     @api ||= API2.new
     @api.errors << API2::RenderFailed.new(e)
     do_render
+  end
+
+  def user_from_key(key)
+    APIKey.find_by(key: key)&.user
   end
 
   def do_render

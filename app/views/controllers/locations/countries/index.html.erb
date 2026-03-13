@@ -1,8 +1,8 @@
 <%
 add_page_title(:list_countries_title.t)
 
-add_tab_set(location_countries_tabs)
-@container = :wide
+add_context_nav(location_countries_tabs)
+container_class(:wide)
 %>
 
 <div class="row">
@@ -29,4 +29,5 @@ add_tab_set(location_countries_tabs)
       <%= country_link(country, count) %><br/>
     <% end %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->

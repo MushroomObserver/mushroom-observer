@@ -77,7 +77,12 @@ module LoginSystem
   # store current uri in the session.
   # we can return to this location by calling redirect_back_or_default
   def store_location
-    session["return-to"] = request.fullpath
+    # guard against overlong query strings
+    session["return-to"] = if request.fullpath.length > 512
+                             nil
+                           else
+                             request.fullpath
+                           end
   end
 
   # move to the last store_location call or to the passed default one

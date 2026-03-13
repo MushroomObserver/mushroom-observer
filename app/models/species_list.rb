@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-#  = Species List Model
+#  = Observation List Model (were originally called Species Lists)
 #
 #  A SpeciesList is a list of Observations (*not* Names's).  Various User's
 #  have used them -- among other things -- to:
@@ -61,7 +61,7 @@
 #  ---
 #  observations::          List of Observation's attached to it.
 #  names::                 Get sorted list of Names used by its Observation's.
-#  name_included::         Does this list include the given Name?
+#  name_included?::         Does this list include the given Name?
 #  ---
 #  form_notes_parts::      Array of member note parts for create & edit form
 #  notes_part_id::         id of textarea for a member notes heading
@@ -81,7 +81,7 @@
 #
 ################################################################################
 #
-class SpeciesList < AbstractModel
+class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
@@ -98,6 +98,67 @@ class SpeciesList < AbstractModel
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   attr_accessor :data
+
+  scope :order_by_default,
+        -> { order_by(::Query::SpeciesLists.default_order) }
+
+  scope :title_has,
+        ->(phrase) { search_columns(SpeciesList[:title], phrase) }
+  scope :has_notes,
+        ->(bool = true) { not_blank_condition(SpeciesList[:notes], bool:) }
+  scope :notes_has,
+        ->(phrase) { search_columns(SpeciesList[:notes], phrase) }
+  scope :search_where,
+        ->(phrase) { search_columns(SpeciesList[:where], phrase) }
+
+  # Accepts multiple regions, see Observation.region for why this is singular
+  # This is different from Project.region because we allow undefined locations
+  # (`where` strings) for SpeciesList.
+  scope :region, lambda { |place_names|
+    place_names = [place_names].flatten
+    place_names.map! { |val| search_where(val) }
+    or_clause(*place_names).distinct
+  }
+  scope :locations, lambda { |locations|
+    ids = Lookup::Locations.new(locations).ids
+    where(location_id: ids).distinct
+  }
+  # Takes multiple name strings or ids, passes include_synonyms
+  scope :names, lambda { |lookup:, **args|
+    joins(:observations).merge(Observation.names(lookup:, **args))
+  }
+  scope :projects, lambda { |projects|
+    ids = Lookup::Projects.new(projects).ids
+    joins(:project_species_lists).
+      where(project_species_lists: { project_id: ids }).distinct
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
+           Location[:name].coalesce(SpeciesList[:where])
+    left_outer_joins(:location).search_columns(cols, phrase)
+  }
+
+  scope :editable_by_user, lambda { |user|
+    user = User.safe_find(user)
+    return all unless user
+
+    if (member_projects = Project.user_is_member(user.id)).any?
+      project_species_list_ids =
+        ProjectSpeciesList.where(project: member_projects).distinct.
+        pluck(:species_list_id)
+
+      scope = all
+      scope.where(user: user.id).
+        or(scope.where(id: project_species_list_ids)).distinct
+    else
+      where(user: user.id)
+    end
+  }
+
+  scope :observation_query, lambda { |hash|
+    joins(:observations).subquery(:Observation, hash)
+  }
 
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -117,6 +178,10 @@ class SpeciesList < AbstractModel
   # Callback that updates User contribution when removing Observation's.
   def remove_obs_callback(_obs)
     UserStats.update_contribution(:del, :species_list_entries, user_id)
+  end
+
+  def show_link_with_project(project)
+    show_link_args.tap { |result| result[:project] = project.id if project }
   end
 
   def self.find_by_title_with_wildcards(str)
@@ -201,9 +266,9 @@ class SpeciesList < AbstractModel
     Name.where(id: observations.map(&:name_id).uniq).order(sort_name: :asc)
   end
 
-  # Tests to see if the species list includes an Observation with the given
+  # Tests to see if the species_list includes an Observation with the given
   # Name (checks consensus only).  Primarily used by functional tests.
-  def name_included(name)
+  def name_included?(name)
     observations.map(&:name_id).include?(name.id)
   end
 
@@ -267,24 +332,24 @@ class SpeciesList < AbstractModel
   #   spl.process_file_data(sorter = NameSorter.new)
   #   names = sorter.xxx
   #
-  def process_file_data(sorter)
+  def process_file_data(user, sorter)
     return unless data
 
     if data[0] == 91 # '[' character
       process_name_list(sorter)
     else
-      process_simple_list(sorter)
+      process_simple_list(user, sorter)
     end
   end
 
   # Process simple list: one Name per line.
-  def process_simple_list(sorter)
+  def process_simple_list(user, sorter)
     data.split(/\s*[\n\r]+\s*/).each do |name|
-      sorter.add_name(name.strip_squeeze)
+      sorter.add_name(user, name.strip_squeeze)
     end
   end
 
-  # Process species lists that get generated by the Name species listing
+  # Process species_lists that get generated by the Name species listing
   # program(??)  I think this was some external script Nathan wrote for Darvin.
   def process_name_list(sorter)
     entry_text = data.delete("[").split(/\s*\r\]\r\s*/)
@@ -397,9 +462,7 @@ class SpeciesList < AbstractModel
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
 
-  def notes_part_id(part)
-    SpeciesList.notes_part_id(part)
-  end
+  delegate :notes_part_id, to: :SpeciesList
 
   # prefix for id of textarea
   def self.notes_area_id_prefix
@@ -424,7 +487,7 @@ class SpeciesList < AbstractModel
   #
   ##############################################################################
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     Project.can_edit?(self, user)
   end
 

@@ -61,12 +61,13 @@ class AccountController < ApplicationController
 
       UserGroup.create_user(@new_user)
       flash_notice("#{:runtime_signup_success.tp} #{:email_spam_notice.tp}")
-      email = QueuedEmail::VerifyAccount.create_email(@new_user)
-      email.destroy if email.send_email
+      # Migrated from QueuedEmail::VerifyAccount to ActionMailer + ActiveJob.
+      # See .claude/deliver_later_migration_plan.md for details.
+      VerifyAccountMailer.build(receiver: @new_user).deliver_later
       UserStats.create({ user_id: @new_user.id })
     end
 
-    redirect_back_or_default("/")
+    redirect_back_or_default(info_how_to_use_path)
   end
 
   # This is the welcome page for new users who just verified an account.
@@ -112,16 +113,18 @@ class AccountController < ApplicationController
   end
 
   # Some recurring patterns we've noticed
-  BOGUS_EMAILS = / namnerbca\.com |
-                   0mg0mg0mg |
-                   yourmail@gmail\.com |
-                   @mnawl.sibicomail\.com
-                   /ix
-
-  # Some recurring patterns we've noticed
-  BOGUS_LOGINS = / houghgype |
-                   uplilla |
-                   vemslons /ix
+  BOGUS_EMAILS = /
+    namnerbca\.com |
+    0mg0mg0mg |
+    yourmail@gmail\.com |
+    @mnawl.sibicomail\.com
+  /ix
+  BOGUS_LOGINS = /
+    houghgype |
+    uplilla |
+    vemslons
+  /ix
+  private_constant(:BOGUS_EMAILS, :BOGUS_LOGINS)
 
   def evil_signup_credentials?
     bogus_email? || bogus_login?
@@ -141,20 +144,34 @@ class AccountController < ApplicationController
   def make_sure_theme_is_valid!
     theme = @new_user.theme
     login = @new_user.login
-    valid_themes = MO.themes + ["NULL"]
-    return true if valid_themes.member?(theme) && login != "test_denied"
 
-    if theme.present?
-      # I'm guessing this has something to do with spammer/hacker trying
-      # to automate creation of accounts?
+    # Block known test denial login
+    return false if login == "test_denied"
 
-      QueuedEmail::Webmaster.create_email(
-        sender_email: MO.accounts_email_address,
-        subject: "Account Denied",
-        content: denied_message(@new_user)
-      )
+    # RANDOM means user wants a different theme on each page load
+    # Store nil so css_theme helper will call MO.themes.sample
+    if theme == "RANDOM"
+      @new_user.theme = nil
+      return true
     end
-    false
+
+    # If theme is valid, proceed
+    return true if MO.themes.member?(theme)
+
+    # Invalid theme - assign default and notify webmaster if suspicious
+    @new_user.theme = MO.default_theme
+    notify_suspicious_theme(theme) if theme.present?
+    true
+  end
+
+  def notify_suspicious_theme(theme)
+    # Suspicious theme value may indicate spammer/hacker automating signups
+    message = WebmasterMailer.prepend_user(@user, denied_message(@new_user))
+    WebmasterMailer.build(
+      sender_email: MO.accounts_email_address,
+      subject: "Suspicious Signup Theme: #{theme}",
+      message:
+    ).deliver_later
   end
 
   def denied_message(new_user)

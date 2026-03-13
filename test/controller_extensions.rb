@@ -51,6 +51,16 @@ module ControllerExtensions
   #
   ##############################################################################
 
+  NAME_SCORE = 10
+  SPECIES_LIST_SCORE = 5
+
+  # Score for one observation:
+  #   species_list entry  1
+  #   observation         1
+  #   naming              1
+  #   vote                1
+  OBSERVATION_SCORE = 4
+
   # Second "get" won't update fullpath, so we must reset the request.
   def reget(action, **args)
     @request = @request.class.new
@@ -202,14 +212,14 @@ module ControllerExtensions
   #     {controller: controller1, action: :access_denied, ...},
   #     {controller: controller2, action: :succeeded, ...})
   #
-  def either_requires_either(method, page, altpage, params = {},
+  def either_requires_either(method, action, altpage, params = {},
                              username = "rolf", password = "testpassword")
     assert_request(
       method: method,
-      action: page,
+      action: action,
       params: params,
-      user: (params[:username] || username),
-      password: (params[:password] || password),
+      user: params[:username] || username,
+      password: params[:password] || password,
       require_login: :login,
       require_user: altpage ? [altpage].flatten : nil
     )
@@ -226,7 +236,7 @@ module ControllerExtensions
     # By default expect relative links.  Allow caller to override by
     # explicitly setting only_path: false.
     args[:only_path] = true unless args.key?(:only_path)
-    URI.decode_www_form_component(@controller.url_for(args))
+    @controller.url_for(args)
   end
 
   # Extract error message and backtrace from Rails's 500 response.  This should
@@ -274,13 +284,47 @@ module ControllerExtensions
   end
 
   # Assert the existence of a given link in the response body, and check
-  # that it points to the right place.
+  # that it points to the right place. Uses order-agnostic URL matching
+  # since query parameter order can vary.
   def assert_link_in_html(label, url, _msg = nil)
     unless url.is_a?(String)
       revised_opts = raise_params(url)
       url = url_for(revised_opts)
     end
-    assert_select("a[href='#{url}']", text: label)
+    assert_link_with_params(label, url)
+  end
+
+  # Find a link matching the label and verify its href contains the same
+  # path and query parameters (in any order) as the expected URL.
+  def assert_link_with_params(label, expected_url)
+    expected_uri = URI.parse(expected_url)
+    expected_path = expected_uri.path
+    expected_params = Rack::Utils.parse_nested_query(expected_uri.query || "")
+    expected_fragment = expected_uri.fragment
+
+    links = css_select("a").select { |a| a.text.strip == label.to_s }
+    matching_link = links.find do |link|
+      href = link[:href]
+      next false unless href
+
+      actual_uri = URI.parse(href)
+      next false unless actual_uri.path == expected_path
+
+      actual_params = Rack::Utils.parse_nested_query(actual_uri.query || "")
+      next false unless actual_params == expected_params
+
+      # Check fragment if expected
+      if expected_fragment && actual_uri.fragment != expected_fragment
+        next false
+      end
+
+      true
+    end
+
+    found_hrefs = links.pluck(:href).inspect
+    assert(matching_link,
+           "Expected link '#{label}' with URL matching #{expected_url}, " \
+           "found #{found_hrefs}")
   end
 
   def assert_image_link_in_html(img_src, url, _msg = nil)
@@ -302,8 +346,8 @@ module ControllerExtensions
     # Find each occurrence of <form action="blah" method="post">.
     found_it = false
     found = {}
-    @response.body.split(/<form [^<>]*action/).each do |str|
-      next unless str =~ /^="([^"]*)" [^>]*method="post"/
+    @response.body.split(/<form [^<>]*?action=/).each do |str|
+      next unless str =~ /^"([^"]*)" [^>]*?method="post"/
 
       url2 = URI.decode_www_form_component(Regexp.last_match(1)).gsub("&amp;",
                                                                       "&")
@@ -457,7 +501,13 @@ module ControllerExtensions
   def assert_response(arg, msg = "")
     return unless arg
 
-    if arg == :success || arg == :redirect || arg.is_a?(Integer)
+    rails_response_predicates =
+      ActionDispatch::Assertions::ResponseAssertions::RESPONSE_PREDICATES
+    # Is it a standard Rails HTTP status symbol?
+    if (arg.is_a?(Symbol) && Rack::Utils::SYMBOL_TO_STATUS_CODE.key?(arg)) ||
+       # or Rails response predicate (:success, :missing, :redirect, :error)?
+       (arg.is_a?(Symbol) && rails_response_predicates.key?(arg)) ||
+       arg.is_a?(Integer)
       super
     else
       # Put together good error message telling us exactly what happened.
@@ -546,18 +596,24 @@ module ControllerExtensions
   end
 
   # Check default value of a form field.
+  # Tries both the given ID and with observation_ prefix (for Superform).
   def assert_input_value(id, expect_val)
     message = "Didn't find any inputs '#{id}'."
-    assert_select("input##{id}, select##{id}") do |elements|
+    # Try the given ID first, then try with observation_ prefix (for Superform)
+    [id.to_s, "observation_#{id}"].each do |try_id|
+      elements = css_select("input##{try_id}, select##{try_id}")
+      next if elements.empty?
+
       if elements.length > 1
-        message = "Found more than one input '#{id}'."
+        message = "Found more than one input '#{try_id}'."
       elsif elements.length == 1
         message = if elements.first.to_s.start_with?("<select")
-                    check_select_value(elements.first, expect_val, id)
+                    check_select_value(elements.first, expect_val, try_id)
                   else
-                    check_input_value(elements.first.to_s, expect_val, id)
+                    check_input_value(elements.first.to_s, expect_val, try_id)
                   end
       end
+      break if message.nil?
     end
     assert(message.nil?, message)
   end
@@ -592,7 +648,8 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).
+        # NodeSet has no #join; map(&:to_s) converts to String array first
+        actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s). # rubocop:disable Style/MapJoin
                          join).strip
         message = if actual_val != expect_val.to_s
                     "Input '#{id}' has wrong value, " \
@@ -613,28 +670,48 @@ module ControllerExtensions
   #   :unchecked_but_disabled
   #
   def assert_checkbox_state(id, state)
+    # Try both the given ID and observation-prefixed ID (for Superform)
+    actual_id = find_checkbox_id(id)
     case state
     when :checked_but_disabled
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 1)
-      assert_select("input##{id}[disabled=disabled]", 1)
+      assert_select("input##{actual_id}", 1)
+      assert_select("input##{actual_id}[checked=checked]", 1)
+      assert_select("input##{actual_id}[disabled=disabled]", 1)
     when :unchecked_but_disabled
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 0)
-      assert_select("input##{id}[disabled=disabled]", 1)
+      assert_select("input##{actual_id}", 1)
+      assert_select("input##{actual_id}[checked=checked]", 0)
+      assert_select("input##{actual_id}[disabled=disabled]", 1)
     when :checked, true
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 1)
-      assert_select("input##{id}[disabled=disabled]", 0)
+      assert_select("input##{actual_id}", 1)
+      assert_select("input##{actual_id}[checked=checked]", 1)
+      assert_select("input##{actual_id}[disabled=disabled]", 0)
     when :unchecked, false
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 0)
-      assert_select("input##{id}[disabled=disabled]", 0)
+      assert_select("input##{actual_id}", 1)
+      assert_select("input##{actual_id}[checked=checked]", 0)
+      assert_select("input##{actual_id}[disabled=disabled]", 0)
     when :no_field
-      assert_select("input##{id}", 0)
+      # For :no_field, check that no checkbox matches this ID pattern
+      not_found = find_checkbox_id(id) == id.to_s &&
+                  css_select("input##{id}").empty?
+      assert(not_found, "Expected no checkbox matching '#{id}' but found one")
     else
       raise("Invalid state in check_project_checks: #{state.inspect}")
     end
+  end
+
+  # Find checkbox by ID, trying both unprefixed and model-prefixed versions.
+  # Superform prefixes field IDs with the model name (e.g., observation_field).
+  def find_checkbox_id(id)
+    id_str = id.to_s
+    # First try exact match
+    return id_str if css_select("input##{id_str}").any?
+
+    # Look for any input whose ID ends with the given id (model prefix pattern)
+    css_select("input[type=checkbox]").each do |elem|
+      elem_id = elem["id"].to_s
+      return elem_id if elem_id.end_with?("_#{id_str}")
+    end
+    id_str # Return original if not found (will fail assertion)
   end
 
   # Check presence and value of notes textareas.  Example:
@@ -646,5 +723,71 @@ module ControllerExtensions
       id = klass.notes_part_id(key.to_s.tr(" ", "_"))
       assert_textarea_value(id, val)
     end
+  end
+
+  # Assert index results. This measures <a> tags that link to an obs ID
+  def assert_results(**attributes)
+    assert_select(
+      "#results .rss-what a:match('href', ?)", %r{^/obs/\d+}, attributes,
+      "Wrong number of results displayed"
+    )
+  end
+
+  # Get the query_params encoded as a query string. Hard to reproduce otherwise
+  def query_string(q_param)
+    observations_path(q: q_param).split("?")[1]
+  end
+
+  def assert_session_query_record_is_correct
+    assert_equal(QueryRecord.last.id, session[:query_record])
+  end
+
+  # Assert that an edit button/link exists for the given object.
+  # Uses the standard edit path helper.
+  def assert_edit_button(object, msg = nil)
+    path = edit_path_for(object)
+    msg ||= "Expected edit button for #{object.class.name} ##{object.id}"
+    assert_select("a[href='#{path}']", { minimum: 1 }, msg)
+  end
+
+  # Assert that an edit button/link does NOT exist for the given object.
+  def assert_no_edit_button(object, msg = nil)
+    path = edit_path_for(object)
+    msg ||= "Expected NO edit button for #{object.class.name} ##{object.id}"
+    assert_select("a[href='#{path}']", { count: 0 }, msg)
+  end
+
+  # Assert that a destroy button/link exists for the given object.
+  # Checks for both turbo link style and button_to form style.
+  def assert_destroy_button(object, msg = nil)
+    path = show_path_for(object)
+    msg ||= "Expected destroy button for #{object.class.name} ##{object.id}"
+    assert(destroy_button_present?(path), msg)
+  end
+
+  # Assert that a destroy button/link does NOT exist for the given object.
+  def assert_no_destroy_button(object, msg = nil)
+    path = show_path_for(object)
+    msg ||= "Expected NO destroy button for #{object.class.name} ##{object.id}"
+    assert_not(destroy_button_present?(path), msg)
+  end
+
+  def destroy_button_present?(path)
+    # Check for either turbo link or button_to form
+    turbo_link = css_select("a[data-turbo-method='delete'][href='#{path}']")
+    return true if turbo_link.any?
+
+    form = css_select("form[action='#{path}']")
+    form.any? && css_select(form, "input[name='_method'][value='delete']").any?
+  end
+
+  private
+
+  def edit_path_for(object)
+    send("edit_#{object.class.name.underscore}_path", object)
+  end
+
+  def show_path_for(object)
+    send("#{object.class.name.underscore}_path", object)
   end
 end

@@ -11,7 +11,7 @@
 #
 class CommentsController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  before_action :store_location, only: [:show]
 
   # Bullet doesn't seem to be able to figure out that we cannot eager load
   # through polymorphic relations, so I'm just disabling it for these actions.
@@ -27,20 +27,12 @@ class CommentsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::CommentBase.default_order # :created_at
+    ::Query::Comments.default_order # :created_at
   end
 
   # ApplicationController uses this table to dispatch #index to a private method
   def index_active_params
-    [:target, :pattern, :by_user, :for_user, :by].freeze
-  end
-
-  # Show selected list of comments, based on current Query.
-  # (Linked from show_comment, next to "prev" and "next"... or will be.)
-  # Passes explicit :by param to affect title (only).
-  def sorted_index_opts
-    sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { by: sorted_by })
+    [:target, :pattern, :by_user, :for_user, :by, :q].freeze
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
@@ -51,7 +43,7 @@ class CommentsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Comment, :all, by_user: user)
+    query = create_query(:Comment, by_users: user)
     [query, {}]
   end
 
@@ -64,7 +56,7 @@ class CommentsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Comment, :all, for_user: user)
+    query = create_query(:Comment, for_user: user)
     [query, {}]
   end
 
@@ -74,8 +66,8 @@ class CommentsController < ApplicationController
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
     return unless (target = find_or_goto_index(model, params[:target].to_s))
 
-    query = create_query(:Comment, :all, target: target.id,
-                                         type: target.class.name)
+    query = create_query(:Comment, target: { type: target.class.name,
+                                             id: target.id })
     [query, {}]
   end
 
@@ -94,11 +86,11 @@ class CommentsController < ApplicationController
     }.merge(opts)
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") || (query.params[:by] == "reverse_user")
-      opts[:letters] = "users.login"
+    if %w[user reverse_user].include?(query.params[:order_by])
+      opts[:letters] = true
     end
 
-    @full_detail = query.params[:for_target].present?
+    @full_detail = query.params[:target].present?
 
     opts
   end
@@ -116,7 +108,6 @@ class CommentsController < ApplicationController
   # Inputs: params[:id] (comment)
   # Outputs: @comment, @object
   def show
-    store_location
     return unless (@comment = find_comment!)
 
     case params[:flow]
@@ -144,9 +135,7 @@ class CommentsController < ApplicationController
                        !in_admin_mode?
 
     flash_error(:runtime_show_description_denied.t)
-    parent = object.parent
-    redirect_to(controller: parent.show_controller,
-                action: parent.show_action, id: parent.id)
+    show_flash_and_send_back(object.parent)
     false
   end
 
@@ -246,7 +235,7 @@ class CommentsController < ApplicationController
     return unless (@comment = find_comment!)
 
     @target = @comment.target
-    if !check_permission!(@comment)
+    if !permission!(@comment)
       # all html requests redirect to object show page
     elsif !@comment.destroy
       flash_error(:runtime_form_comments_destroy_failed.t(id: params[:id]))
@@ -255,15 +244,7 @@ class CommentsController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
 
-    respond_to do |format|
-      # format.turbo_stream do
-      # helpers.render_turbo_stream_flash_messages
-      # end
-      format.html do
-        redirect_with_query(controller: @target.show_controller,
-                            action: @target.show_action, id: @target.id)
-      end
-    end
+    refresh_comments_or_redirect_to_show
   end
 
   private
@@ -272,15 +253,18 @@ class CommentsController < ApplicationController
   # we give users the option to edit any number of their own comments on a
   # show page. "comment" disambiguates :new, because :edit always has id
   def render_modal_comment_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     form: "comments/form" }) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @comment
+           ), layout: false)
   end
 
   def reload_modal_form
     render(partial: "shared/modal_form_reload",
            locals: { identifier: modal_identifier,
-                     form: "comments/form" })
+                     form_locals: { model: @comment } })
   end
 
   def modal_identifier
@@ -315,12 +299,10 @@ class CommentsController < ApplicationController
   def refresh_comments_or_redirect_to_show
     # Comment broadcasts are sent from the model
     respond_to do |format|
-      # format.turbo_stream do
-      # helpers.render_turbo_stream_flash_messages
-      # end
+      # Simply send a head response for turbo here.
+      format.turbo_stream { head(:ok) }
       format.html do
-        redirect_with_query(controller: @target.show_controller,
-                            action: @target.show_action, id: @target.id)
+        redirect_to(@target.show_link_args)
       end
     end
   end
@@ -341,10 +323,9 @@ class CommentsController < ApplicationController
   end
 
   def check_permission_or_redirect!(comment, target)
-    return true if check_permission!(comment)
+    return true if permission!(comment)
 
-    redirect_with_query(controller: target.show_controller,
-                        action: target.show_action, id: target.id)
+    show_flash_and_send_back(target)
     false
   end
 
@@ -361,6 +342,19 @@ class CommentsController < ApplicationController
       @comment.log_update
       flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
       true
+    end
+  end
+
+  def show_flash_and_send_back(target)
+    respond_to do |format|
+      format.html do
+        redirect_to(target.show_link_args) and return
+      end
+      # renders the flash in the modal
+      format.turbo_stream do
+        render(partial: "shared/modal_flash_update",
+               locals: { identifier: modal_identifier }) and return
+      end
     end
   end
 end

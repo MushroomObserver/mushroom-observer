@@ -10,10 +10,10 @@ export default class extends Controller {
   }
 
   connect() {
-    this.element.dataset.stimulus = "suggestions-connected";
+    this.element.dataset.suggestions = "connected";
 
-    this.progressModal = document.getElementById("mo_ajax_progress")
-    this.progressCaption = document.getElementById("mo_ajax_progress_caption")
+    this.progressModal = document.getElementById("modal_progress_spinner")
+    this.progressCaption = document.getElementById("modal_progress_spinner_caption")
     Object.assign(this.localized_text,
       JSON.parse(this.element.dataset.localization));
     this.results_url = this.element.dataset.resultsUrl;

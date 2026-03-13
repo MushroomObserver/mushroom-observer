@@ -1,0 +1,33 @@
+import BaseAutocompleterController, {
+  AUTOCOMPLETER_TARGETS, AUTOCOMPLETER_OUTLETS
+} from "controllers/autocompleter/base_controller"
+
+/**
+ * SpeciesListController - Autocompleter for SpeciesList records
+ *
+ * Uses unordered matching (words can appear in any order).
+ * Example: typing "2024 foray" matches "NAMA Foray 2024"
+ */
+export default class SpeciesListController extends BaseAutocompleterController {
+  // Must redeclare static properties - JavaScript doesn't inherit them
+  static targets = AUTOCOMPLETER_TARGETS
+  static outlets = AUTOCOMPLETER_OUTLETS
+
+  /**
+   * Type-specific configuration for species_list autocompleters.
+   */
+  getTypeConfig() {
+    return {
+      TYPE: "species_list",
+      model: "species_list",
+      UNORDERED: true
+    }
+  }
+
+  /**
+   * Uses unordered matching - words can appear in any order.
+   */
+  populateMatchesForType() {
+    this.populateUnordered()
+  }
+}

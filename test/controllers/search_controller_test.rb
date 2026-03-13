@@ -6,23 +6,23 @@ require("test_helper")
 class SearchControllerTest < FunctionalTestCase
   def test_advanced
     login
-    [Name, Image, Observation].each do |model|
+    # Image advanced search retired 2021
+    [Name, Observation].each do |model|
       get(
         :advanced,
         params: {
           search: {
-            name: "Don't know",
-            user: "myself",
+            search_name: "Don't know",
+            search_user: "myself",
             model: model.name.underscore,
-            content: "Long pink stem and small pink cap",
-            user_where: "Eastern Oklahoma"
+            search_content: "Long pink stem and small pink cap",
+            search_where: "Eastern Oklahoma"
           },
           commit: "Search"
         }
       )
       assert_response(:redirect)
-      # Account for Observations being the home page
-      route = model == Observation ? "" : model.to_s.downcase.pluralize
+      route = model.to_s.downcase.pluralize
       assert_match(
         "http://test.host/#{route}?advanced_search=1",
         redirect_to_url
@@ -30,16 +30,36 @@ class SearchControllerTest < FunctionalTestCase
     end
   end
 
+  def test_advanced_provisional_name
+    login
+    get(:advanced,
+        params: {
+          search: {
+            search_name: 'Cortinarius "sp-IN34"',
+            search_user: "",
+            model: "name",
+            search_content: "",
+            search_where: ""
+          },
+          commit: "Search"
+        })
+    assert_response(:redirect)
+    # query = QueryRecord.find(redirect_to_url.split("=")[-1].dealphabetize)
+    query_string = redirect_to_url.split("advanced_search=1&")[1]
+    assert_match("Cortinarius", query_string)
+    assert_match("IN34", query_string)
+  end
+
   def test_advanced_search_content_filters
     login
     # Make sure all the right buttons and fields are present.
     get(:advanced)
-    assert_select("input[type=radio]#content_filter_with_images_yes")
-    assert_select("input[type=radio]#content_filter_with_images_no")
-    assert_select("input[type=radio]#content_filter_with_images_")
-    assert_select("input[type=radio]#content_filter_with_specimen_yes")
-    assert_select("input[type=radio]#content_filter_with_specimen_no")
-    assert_select("input[type=radio]#content_filter_with_specimen_")
+    assert_select("input[type=radio]#content_filter_has_images_yes")
+    assert_select("input[type=radio]#content_filter_has_images_no")
+    assert_select("input[type=radio]#content_filter_has_images_")
+    assert_select("input[type=radio]#content_filter_has_specimen_yes")
+    assert_select("input[type=radio]#content_filter_has_specimen_no")
+    assert_select("input[type=radio]#content_filter_has_specimen_")
     assert_select("input[type=radio]#content_filter_lichen_yes")
     assert_select("input[type=radio]#content_filter_lichen_no")
     assert_select("input[type=radio]#content_filter_lichen_")
@@ -49,11 +69,12 @@ class SearchControllerTest < FunctionalTestCase
     params = {
       search: {
         model: "observation",
-        user: "rolf"
+        search_user: users(:rolf).unique_text_name,
+        search_user_id: users(:rolf).id
       },
       content_filter: {
-        with_images: "",
-        with_specimen: "yes",
+        has_images: "",
+        has_specimen: "yes",
         lichen: "no",
         region: "California",
         clade: ""
@@ -61,75 +82,252 @@ class SearchControllerTest < FunctionalTestCase
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
-    assert_equal("", query.params[:with_images])
-    assert_true(query.params[:with_specimen])
+    q = @controller.q_param(query)
+    assert_redirected_to(observations_path(advanced_search: 1, q:))
+    assert_true(query.num_results.positive?)
+    assert_equal("", query.params[:has_images])
+    assert_true(query.params[:has_specimen])
     assert_false(query.params[:lichen])
     assert_equal(["California"], query.params[:region])
     assert_equal("", query.params[:clade])
   end
 
-  def test_pattern_search
+  # This permalink caused a server error when setting session[:pattern] without
+  # checking bytesize.
+  def test_pattern_search_long_permalink_pattern
+    pattern = "created%3A2006-2024+has_observations%3A1+" \
+              "has_classification%3A1+has_notes%3A%22yes%22+has_comments%3A1"
+    params = { pattern_search: { pattern:, type: :names } }
+
+    get(:pattern, params:)
+    assert_redirected_to(names_path(q: { model: :Name, pattern: }))
+  end
+
+  def test_pattern_search_redirects_to_controllers_with_q
     login
-    params = { search: { pattern: "12", type: :observation } }
-    get(:pattern, params: params)
-    assert_redirected_to(observations_path(pattern: "12"))
 
-    params = { search: { pattern: "34", type: :image } }
-    get(:pattern, params: params)
-    assert_redirected_to(images_path(pattern: "34"))
+    pattern = "12"
 
-    params = { search: { pattern: "56", type: :name } }
-    get(:pattern, params: params)
-    assert_redirected_to(names_path(pattern: "56"))
+    # Test basic pattern for all the models with pattern queries/scopes.
+    SearchController::PATTERN_SEARCHABLE_MODELS.each do |model|
+      model_name = model.to_s.singularize.camelize.to_sym
+      params = { pattern_search: { pattern:, type: model } }
+      get(:pattern, params:)
 
-    params = { search: { pattern: "78", type: :location } }
-    get(:pattern, params: params)
-    assert_redirected_to(locations_path(pattern: "78"))
+      assert_redirected_to(
+        send(:"#{model}_path", q: { model: model_name, pattern: })
+      )
 
-    params = { search: { pattern: "90", type: :comment } }
-    get(:pattern, params: params)
-    assert_redirected_to(comments_path(pattern: "90"))
+      assert_equal(model, @request.session[:search_type])
+      assert_equal(pattern, @request.session[:pattern])
 
-    params = { search: { pattern: "21", type: :project } }
-    get(:pattern, params: params)
-    assert_redirected_to(projects_path(pattern: "21"))
+      # Increment to keep this unpredictable
+      pattern = (pattern.to_i + 9).to_s
+    end
+  end
 
-    params = { search: { pattern: "12", type: :species_list } }
-    get(:pattern, params: params)
-    assert_redirected_to(species_lists_path(pattern: "12"))
-
-    params = { search: { pattern: "34", type: :user } }
-    get(:pattern, params: params)
-    assert_redirected_to(users_path(pattern: "34"))
-
-    params = { search: { pattern: "34", type: :glossary_term } }
-    get(:pattern, params: params)
-    assert_redirected_to(glossary_terms_path(pattern: "34"))
-
-    stub_request(:any, /google.com/)
-    pattern =  "hexiexiva"
-    params = { search: { pattern: pattern, type: :google } }
-    target =
-      "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
-    get(:pattern, params: params)
-    assert_redirected_to(target)
-
-    params = { search: { pattern: "", type: :google } }
-    get(:pattern, params: params)
+  def test_pattern_search_invalid_redirects_to_indexes
+    params = { pattern_search: { pattern: "x", type: :nonexistent_type } }
+    get(:pattern, params:)
     assert_redirected_to("/")
 
-    params = { search: { pattern: "x", type: :nonexistent_type } }
-    get(:pattern, params: params)
+    params = { pattern_search: { pattern: "x", type: nil } }
+    get(:pattern, params:)
     assert_redirected_to("/")
 
-    params = { search: { pattern: "", type: :observation } }
-    get(:pattern, params: params)
+    params = { pattern_search: { pattern: "", type: :observations } }
+    get(:pattern, params:)
     assert_redirected_to(observations_path)
 
     # Make sure this redirects to the index that lists all herbaria,
     # rather than the index that lists query results.
-    params = { search: { pattern: "", type: :herbarium } }
-    get(:pattern, params: params)
+    params = { pattern_search: { pattern: "", type: :herbaria } }
+    get(:pattern, params:)
     assert_redirected_to(herbaria_path)
+  end
+
+  def test_pattern_search_matching_an_id_redirects_to_show
+    login
+
+    SearchController::PATTERN_SEARCHABLE_MODELS.each do |model|
+      model_name = model.to_s.singularize.camelize.to_sym
+      id = model_name.to_s.constantize.last.id
+      params = { pattern_search: { pattern: id, type: model } }
+      get(:pattern, params:)
+
+      show_path = :"#{model.to_s.singularize}_path"
+      assert_redirected_to(
+        send(show_path, id:)
+      )
+    end
+  end
+
+  def test_pattern_search_matching_title_redirects_to_show
+    login
+
+    models = SearchController::PATTERN_SEARCHABLE_MODELS.dup
+    models.each do |model|
+      model_name = model.to_s.singularize.camelize.to_sym
+      last = model_name.to_s.constantize.last
+      next unless last.respond_to?(:title)
+
+      title = last.title
+      id = last.id
+      params = { pattern_search: { pattern: title, type: model } }
+      get(:pattern, params:)
+
+      show_path = :"#{model.to_s.singularize}_path"
+      assert_redirected_to(send(show_path, id:))
+    end
+  end
+
+  def test_pattern_search_flashes_term_errors
+    login
+    params = { pattern_search: { pattern: "help:me", type: :names } }
+    get(:pattern, params:)
+    assert_redirected_to(names_path(q: { model: :Name }))
+    assert_flash_error("Unexpected term")
+  end
+
+  def test_index_pattern_bad_pattern
+    pattern = { error: "" }
+
+    login
+    get(:pattern, params: { pattern_search: { pattern:, type: :observations } })
+
+    assert_redirected_to(
+      observations_path(q: { model: :Observation }),
+      "Bad pattern in obs search should render blank obs index"
+    )
+  end
+
+  def test_pattern_search_from_needs_naming
+    pattern = "Briceland"
+    params = { pattern_search: { pattern:, type: :observations },
+               needs_naming: rolf }
+
+    login
+    get(:pattern, params:)
+
+    assert_redirected_to(
+      identify_observations_path(q: { model: :Observation, pattern: }),
+      "Pattern in search from obs_needing_ids should render " \
+      "obs_needing_ids"
+    )
+  end
+
+  def test_pattern_search_from_needs_naming_bad_pattern
+    pattern = { error: "" }
+    params = { pattern_search: { pattern:, type: :observations },
+               needs_naming: rolf }
+
+    login
+    get(:pattern, params:)
+
+    assert_redirected_to(
+      identify_observations_path(q: { model: :Observation }),
+      "Bad pattern in search from obs_needing_ids should render " \
+      "obs_needing_ids"
+    )
+  end
+
+  def test_pattern_search_redirects_to_google
+    login
+    stub_request(:any, /google.com/)
+    pattern =  "hexiexiva"
+    params = { pattern_search: { pattern: pattern, type: :google } }
+    target =
+      "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
+    get(:pattern, params:)
+    assert_redirected_to(target)
+
+    params = { pattern_search: { pattern: "", type: :google } }
+    get(:pattern, params:)
+    assert_redirected_to("/")
+  end
+
+  def test_id_pattern_redirects_to_show_page
+    obs = Observation.first
+    params = { pattern_search: { pattern: obs.id, type: :observations } }
+    get(:pattern, params:)
+    assert_redirected_to(observation_path(obs.id))
+
+    name = names(:agaricus)
+    params = { pattern_search: { pattern: name.id, type: :names } }
+    get(:pattern, params:)
+    assert_redirected_to(name_path(name.id))
+
+    user = users(:rolf)
+    params = { pattern_search: { pattern: user.id, type: :users } }
+    get(:pattern, params:)
+    assert_redirected_to(user_path(user.id))
+    # User email should work too
+    params = { pattern_search: { pattern: user.email, type: :users } }
+    get(:pattern, params:)
+    assert_redirected_to(user_path(user.id))
+  end
+
+  def test_location_pattern_search_with_keywords
+    login
+    user = users(:rolf)
+
+    # Test that location pattern search with user: keyword uses PatternSearch
+    # and extracts the keyword into query parameters instead of treating it
+    # as a location name pattern
+    params = { pattern_search: { pattern: "user:#{user.login}",
+                                 type: :locations } }
+    get(:pattern, params:)
+
+    # Should redirect to locations index with proper query params
+    assert_redirected_to(/locations/)
+
+    # Parse the redirect URL to extract query parameters
+    redirect_url = URI.parse(redirect_to_url)
+    query_params = CGI.parse(redirect_url.query)
+
+    # Verify that by_users parameter is present (PatternSearch worked)
+    # and pattern parameter is NOT present (raw pattern was used)
+    assert(query_params.key?("q[by_users][]"),
+           "Location pattern search should extract user: keyword into " \
+           "by_users parameter")
+    assert_equal([user.id.to_s], query_params["q[by_users][]"],
+                 "by_users parameter should contain the user ID")
+    assert_predicate(query_params["q[pattern]"], :blank?,
+                     "Location pattern search should not include raw " \
+                     "pattern with keywords")
+
+    # Test with editor: keyword as well
+    params = { pattern_search: { pattern: "editor:#{user.login}",
+                                 type: :locations } }
+    get(:pattern, params:)
+
+    assert_redirected_to(/locations/)
+    redirect_url = URI.parse(redirect_to_url)
+    query_params = CGI.parse(redirect_url.query)
+
+    assert(query_params.key?("q[by_editor][]"),
+           "Location pattern search should extract editor: keyword into " \
+           "by_editor parameter")
+    assert_equal([user.id.to_s], query_params["q[by_editor][]"],
+                 "by_editor parameter should contain the user ID")
+    assert_predicate(query_params["q[pattern]"], :blank?,
+                     "Location pattern search should not include raw " \
+                     "pattern with keywords")
+  end
+
+  def test_pattern_search_rejects_overlong_pattern
+    # Test with pattern exactly at the limit (should work)
+    pattern = "a" * Searchable::MAX_SEARCH_INPUT_LENGTH
+    params = { pattern_search: { pattern:, type: :locations } }
+    get(:pattern, params:)
+    assert_redirected_to(locations_path(q: { model: :Location, pattern: }))
+
+    # Test with pattern over the limit (should fail)
+    # Use a pattern that won't be reduced by strip_squeeze
+    pattern = "abcd" * 2376 # 9504 characters
+    params = { pattern_search: { pattern:, type: :locations } }
+    get(:pattern, params:)
+    assert_response(:redirect)
+    assert_flash_error
   end
 end

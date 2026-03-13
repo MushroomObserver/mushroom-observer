@@ -1,13 +1,8 @@
 <%
-@container = :full
-if @project
-  add_project_banner(@project)
-else
-  add_page_title(checklist_show_title(user: @show_user,
-                                      list: @species_list))
-  add_tab_set(checklist_show_tabs(user: @show_user,
-                                  list: @species_list))
-end
+container_class(:full)
+add_project_banner(@project) if @project
+add_page_title(checklist_show_title(user: @show_user, list: @species_list))
+add_context_nav(checklist_show_tabs(user: @show_user, list: @species_list))
 %>
 
 <div class="my-4">
@@ -16,13 +11,22 @@ end
                            names: @data.num_taxa) %>
 </div>
 
-<%= panel_block(inner_class: "checklist") do %>
-  <ul class="list-unstyled">
-    <% @data.taxa.each do |taxon| %>
-      <%= checklist_name_link(taxon:, data: @data,
-                              params: [@show_user, @project, @location, @species_list]) %>
-    <% end %>
-  </ul>
+<% if @location %>
+  <h4>
+    <%= :checklist_for.t %>
+    <%= location_link(nil, @location) %>
+  </h4>
+<% end %>
+
+<%= render(Components::Panel.new(panel_class: "checklist")) do |panel| %>
+  <%= panel.with_body do %>
+    <ul class="list-unstyled">
+      <% @data.taxa.each do |taxon| %>
+        <%= checklist_name_link(taxon:, data: @data,
+                                params: [@show_user, @project, @location, @species_list]) %>
+      <% end %>
+    </ul>
+  <% end %>
 <% end %>
 
 <div>

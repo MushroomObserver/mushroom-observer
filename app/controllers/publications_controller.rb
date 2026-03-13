@@ -4,13 +4,12 @@
 class PublicationsController < ApplicationController
   before_action :login_required, except: [:index, :show]
   before_action :require_successful_user, only: [:create]
+  before_action :store_location, only: [:index, :show]
 
   # GET /publications
   # GET /publications.xml
   def index
-    store_location
-    # @publications = Publication.find(:all, order: 'full') # Rails 3
-    @publications = Publication.order("full")
+    @publications = Publication.order(:full)
     @full_count = @publications.length
     @peer_count = @publications.count(&:peer_reviewed)
     @mo_count   = @publications.count(&:mo_mentioned)
@@ -23,7 +22,6 @@ class PublicationsController < ApplicationController
   # GET /publications/1
   # GET /publications/1.xml
   def show
-    store_location
     @publication = Publication.find(params[:id])
     respond_to do |format|
       format.html # show.html.erb
@@ -50,7 +48,7 @@ class PublicationsController < ApplicationController
   # POST /publications
   # POST /publications.xml
   def create
-    params = permitted_publication_params.merge(user: User.current)
+    params = permitted_publication_params.merge(user: @user)
     @publication = Publication.new(params)
     respond_to do |format|
       if @publication.save
@@ -65,7 +63,7 @@ class PublicationsController < ApplicationController
         format.html { render(action: :new) }
         format.xml  do
           render(xml: @publication.errors,
-                 status: :unprocessable_entity)
+                 status: :unprocessable_content)
         end
       end
     end
@@ -78,7 +76,9 @@ class PublicationsController < ApplicationController
     respond_to do |format|
       if !can_edit?(@publication)
         format.html { redirect_to(publications_url) }
-        format.xml  { render(xml: "can't edit", status: :unprocessable_entity) }
+        format.xml  do
+          render(xml: "can't edit", status: :unprocessable_content)
+        end
       elsif @publication.update(permitted_publication_params)
         flash_notice(:runtime_updated_at.t(type: :publication))
         format.html { redirect_to(@publication) }
@@ -88,7 +88,7 @@ class PublicationsController < ApplicationController
         format.html { render(action: :edit) }
         format.xml  do
           render(xml: @publication.errors,
-                 status: :unprocessable_entity)
+                 status: :unprocessable_content)
         end
       end
     end
@@ -107,7 +107,7 @@ class PublicationsController < ApplicationController
         format.html { redirect_to(publications_url) }
         format.xml  do
           render(xml: "can't delete",
-                 status: :unprocessable_entity)
+                 status: :unprocessable_content)
         end
       end
     end

@@ -22,42 +22,23 @@ module VersionsHelper
     end
   end
 
-  # Show list of past versions for show_past_object pages.
-  #
-  #   <%= show_past_versions(name) %>
-  #
-  #   # Renders something like this:
-  #   <p>
-  #     Other Versions:<br/>
-  #       N: Latest Name<br/>
-  #       N-1: Previous Name<br/>
-  #       ...
-  #       1: Original Name<br/>
-  #   </p>
-  #
-  def show_past_versions(obj, versions, args = {})
-    panel_block(heading: :VERSIONS.t, id: "#{obj.type_tag}_versions") do
-      make_table(rows: build_version_table(obj, versions, args),
-                 table_opts: { class: "table-hover mb-0" })
-    end
-  end
-
   private
 
   def previous_version_link(previous_version, obj)
     str = "#{:show_name_previous_version.t} #{previous_version.version}"
     current_version_html(obj) +
       # FIX THIS: Send the path helper the id and version param.
-      link_with_query(str,
-                      { controller: "#{obj.show_controller}/versions",
-                        action: :show, id: obj.id,
-                        version: previous_version.version },
-                      class: "previous_version_link") +
+      link_to(str,
+              { controller: "#{obj.show_controller}/versions",
+                action: :show, id: obj.id,
+                version: previous_version.version },
+              class: "previous_version_link") +
       safe_br
   end
 
   def current_version_html(obj)
-    :VERSION.t + ": " + obj.version.to_s + safe_br
+    # disable cop because interpolation outputs a string, not a safe_buffer
+    :VERSION.t + ": " + obj.version.to_s + safe_br # rubocop:disable Style/StringConcatenation
   end
 
   def build_version_table(obj, versions, args)
@@ -85,14 +66,13 @@ module VersionsHelper
 
   def link_to_version(text, ver, obj, versions)
     if ver == versions.last
-      link_with_query(text, obj.show_link_args, class: "latest_version_link")
+      link_to(text, obj.show_link_args, class: "latest_version_link")
     else
-      link_with_query(text,
-                      # FIX THIS: url helper
-                      { controller: "#{obj.show_controller}/versions",
-                        action: :show, id: obj.id,
-                        version: ver.version },
-                      class: "initial_version_link")
+      link_to(text,
+              { controller: "#{obj.show_controller}/versions",
+                action: :show, id: obj.id,
+                version: ver.version },
+              class: "initial_version_link")
     end
   end
 

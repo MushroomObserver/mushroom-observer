@@ -1,4 +1,5 @@
-<%= form_with(model: @project, id: "project_form") do |f| %>
+<%= form_with(model: @project,
+              html: { multipart: true }, id: "project_form") do |f| %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 
@@ -17,7 +18,7 @@
                             label: :FIELD_SLIP_PREFIX.t + ":") %>
 
   <%= autocompleter_field(form: f, field: :place_name, type: :location,
-                          label: "#{:WHERE.t}:", between: :required) %>
+                          label: "#{:WHERE.t}:") %>
 
   <%= tag.div(
     tag.p("*#{:form_projects_date_range.t}*".t) +

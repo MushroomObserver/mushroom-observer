@@ -4,16 +4,20 @@
 class LocationChangeMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(sender, receiver, time, loc_change, desc_change)
+  # Refactored to accept serializable arguments for deliver_later compatibility.
+  # ObjectChange instances are constructed here from the IDs and versions.
+  def build(**args)
+    args => { sender:, receiver:, location:, old_loc_ver:, new_loc_ver:,
+              description:, old_desc_ver:, new_desc_ver: }
     setup_user(receiver)
-    name = loc_change.old_clone.display_name
+    @loc_change = ObjectChange.new(location, old_loc_ver, new_loc_ver)
+    @desc_change = ObjectChange.new(description, old_desc_ver, new_desc_ver)
+    name = @loc_change.old_clone&.display_name || location&.display_name
     @title = :email_subject_location_change.l(name: name)
     @sender = sender
-    @time = time
-    @loc_change = loc_change
-    @desc_change = desc_change
+    @time = location&.updated_at || Time.zone.now
     debug_log(:location_change, sender, receiver,
-              location: loc_change.object, description: desc_change.object)
+              location: location, description: description)
     mo_mail(@title, to: receiver)
   end
 end

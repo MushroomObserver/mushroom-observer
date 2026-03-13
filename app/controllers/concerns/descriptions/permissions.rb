@@ -83,7 +83,6 @@
 module Descriptions::Permissions
   extend ActiveSupport::Concern
 
-  # rubocop:disable Metrics/BlockLength
   included do
     # Form to adjust permissions on a description.
     def edit
@@ -104,7 +103,7 @@ module Descriptions::Permissions
       @data = nil
 
       if done
-        redirect_to(object_path_with_query(@description))
+        redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
       end
@@ -127,22 +126,23 @@ module Descriptions::Permissions
 
       # We're on.
       else
+        gather_list_of_groups
         done = change_group_permissions
       end
 
       if done
-        redirect_to(object_path_with_query(@description))
+        redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
-        render("new")
+        render("edit")
       end
     end
 
     # Return name of group or user if it's a one-user group.
     def group_name(group)
-      return(:adjust_permissions_all_users.t) if group.name == "all users"
-      return(:REVIEWERS.t) if group.name == "reviewers"
-      return(group.users.first.legal_name) if /^user \d+$/.match?(group.name)
+      return :adjust_permissions_all_users.t if group.name == "all users"
+      return :REVIEWERS.t if group.name == "reviewers"
+      return group.users.first.legal_name if /^user \d+$/.match?(group.name)
 
       group.name
     end
@@ -156,9 +156,10 @@ module Descriptions::Permissions
       old_admins  = @description.admin_groups.sort_by(&:id)
 
       # Update permissions on list of users and groups at the top.
-      update_groups(@description, :readers, params[:group_reader])
-      update_groups(@description, :writers, params[:group_writer])
-      update_groups(@description, :admins,  params[:group_admin])
+      fp = params[:description_permissions] || {}
+      update_groups(@description, :readers, fp[:group_reader])
+      update_groups(@description, :writers, fp[:group_writer])
+      update_groups(@description, :admins,  fp[:group_admin])
 
       # Look up write-ins and adjust their permissions.
       done = assemble_data
@@ -167,9 +168,9 @@ module Descriptions::Permissions
       new_readers = @description.reader_groups.sort_by(&:id)
       new_writers = @description.writer_groups.sort_by(&:id)
       new_admins  = @description.admin_groups.sort_by(&:id)
-      changes_made = ((old_readers != new_readers) ||
-                      (old_writers != new_writers) ||
-                      (old_admins != new_admins))
+      changes_made = (old_readers != new_readers) ||
+                     (old_writers != new_writers) ||
+                     (old_admins != new_admins)
 
       if changes_made
         # Give feedback to assure user that their changes were made.
@@ -210,8 +211,8 @@ module Descriptions::Permissions
         @description.authors.sort_by(&:login) +
         @description.editors.sort_by(&:login) +
         [@user]
-      ).map { |user| UserGroup.one_user(user) }
-      @groups.uniq!
+      ).compact.map { |user| UserGroup.one_user(user) }
+      @groups = @groups.compact.uniq
       @groups = @groups.reject { |g| g.name.match(/^user \d+$/) } +
                 @groups.select { |g| g.name.match(/^user \d+$/) }
     end
@@ -224,31 +225,10 @@ module Descriptions::Permissions
     def assemble_data
       @data = [nil]
       done = true
-      params[:writein_name].keys.sort.each do |n|
-        name   = begin
-                   params[:writein_name][n].to_s
-                 rescue StandardError
-                   ""
-                 end
-        reader = begin
-                   params[:writein_reader][n] == "1"
-                 rescue StandardError
-                   false
-                 end
-        writer = begin
-                   params[:writein_writer][n] == "1"
-                 rescue StandardError
-                   false
-                 end
-        admin  = begin
-                   params[:writein_admin][n] == "1"
-                 rescue StandardError
-                   false
-                 end
-
-        next unless name.present? &&
-                    !update_writein(@description, name, reader, writer,
-                                    admin)
+      (1..6).each do |n|
+        name, reader, writer, admin = writein_params(n)
+        next if name.blank? ||
+                update_writein(@description, name, reader, writer, admin)
 
         @data << { name: name, reader: reader, writer: writer,
                    admin: admin }
@@ -256,6 +236,15 @@ module Descriptions::Permissions
         done = false
       end
       done
+    end
+
+    def writein_params(index)
+      fp = params[:description_permissions] || {}
+      name   = fp[:"writein_name_#{index}"].to_s
+      reader = fp[:"writein_reader_#{index}"] == "1"
+      writer = fp[:"writein_writer_#{index}"] == "1"
+      admin  = fp[:"writein_admin_#{index}"] == "1"
+      [name, reader, writer, admin]
     end
 
     # Throw up some flash notices to reassure user that we did in fact make the
@@ -292,14 +281,11 @@ module Descriptions::Permissions
     end
 
     # Update the permissions of a given type for the list of pre-filled-in
-    # groups.
-    def update_groups(desc, type, groups)
-      groups.each do |id, val|
-        if (group = UserGroup.safe_find(id))
-          update_group(desc, type, group, (val == "1"))
-        else
-          flash_error(:runtime_description_user_not_found.t(name: id))
-        end
+    # groups. selected_ids is an array of group IDs that should have permission.
+    def update_groups(desc, type, selected_ids)
+      selected_ids = Array(selected_ids).map(&:to_i)
+      @groups.each do |group|
+        update_group(desc, type, group, selected_ids.include?(group.id))
       end
     end
 
@@ -316,5 +302,4 @@ module Descriptions::Permissions
 
     include ::Descriptions
   end
-  # rubocop:enable Metrics/BlockLength
 end

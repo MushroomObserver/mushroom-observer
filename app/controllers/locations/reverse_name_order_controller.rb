@@ -7,9 +7,9 @@ module Locations
 
     # Callback for :show
     def update
-      if (location = Location.safe_find(params[:id].to_s))
-        location.name = Location.reverse_name(location.name)
-        location.save
+      if (loc = Location.safe_find(params[:id].to_s))
+        loc.name, loc.scientific_name = loc.scientific_name, loc.name
+        loc.save
       end
       redirect_to(location_path(params[:id].to_s))
     end

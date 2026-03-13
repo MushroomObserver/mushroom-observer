@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-#  link_to_coerced_query        # link to query coerced into different model
 #  link_with_query              # link_to with query params
 #  destroy_button               # button to destroy object
 #  post_button                  # button to post to a path
@@ -12,7 +11,7 @@
 #  heads up about button_to input vs button
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
-module LinkHelper
+module LinkHelper # rubocop:disable Metrics/ModuleLength
   # Call `link_to` with query params added.
   # Should now take exactly the same args as `link_to`.
   # You can pass a hash to `path`, but not separate args. Can take a block.
@@ -20,7 +19,7 @@ module LinkHelper
     link = block ? text : path # first two positional, if block then path first
     content = block ? capture(&block) : text
 
-    link_to(add_query_param(link), opts) { content }
+    link_to(add_q_param(link), opts) { content }
   end
 
   # https://stackoverflow.com/questions/18642001/add-an-active-class-to-all-active-links-in-rails
@@ -43,16 +42,7 @@ module LinkHelper
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
 
-    active_link_to(add_query_param(link), **) { content }
-  end
-
-  # Take a query which can be coerced into a different model, and create a link
-  # to the results of that coerced query.  Return +nil+ if not coercable.
-  def link_to_coerced_query(query, model)
-    tab = coerced_query_tab(query, model)
-    return nil unless tab
-
-    link_to(*tab)
+    active_link_to(add_q_param(link), **) { content }
   end
 
   # Link should be to a controller action that renders the form in the modal.
@@ -80,7 +70,7 @@ module LinkHelper
 
   # Icon link with optional active state. (Tooltip title must be swapped in JS.)
   # Now also accepts active state options: active_icon, active_content
-  # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
+  # NOTE: Takes same args as link_to, e.g.
   # icon_link_to(text, path, **args). Can also print a button_to.
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text
@@ -91,9 +81,9 @@ module LinkHelper
     icon_type = opts[:icon]
     return link_to(link, opts) { content } if icon_type.blank?
 
-    # method = opts[:button] ? :button_to : :link_to
+    opts[:role] = "button" if opts[:button_to]
     active_icon = opts[:active_icon]
-    active_content = options[:active_content]
+    active_content = opts[:active_content]
     stateful = active_icon && active_content
     icon_class = class_names(opts[:icon_class], "px-2")
     icon_active_class = class_names(icon_class, "active-icon")
@@ -102,23 +92,23 @@ module LinkHelper
     label_active_class = class_names(label_class, "active-label")
 
     link_opts = {
-      role: "button", title: content, # title is what shows up in tooltip
+      title: content, # title is what shows up in tooltip
       class: class_names("icon-link", opts[:class]),
       data: { toggle: "tooltip", title: content, # needed for swapping only
               active_title: opts[:active_content] }
     }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
                              :active_icon, :active_content, :button_to))
 
-    html = capture do
+    inner_html = capture do
       concat(link_icon(icon_type, class: icon_class))
       concat(link_icon(active_icon, class: icon_active_class)) if stateful
       concat(tag.span(content, class: label_class))
       concat(tag.span(active_content, class: label_active_class)) if stateful
     end
     if opts[:button_to]
-      button_to(html, link_path, **link_opts)
+      button_to(inner_html, link_path, **link_opts)
     else
-      link_to(html, link_path, **link_opts)
+      link_to(inner_html, link_path, **link_opts)
     end
   end
 
@@ -130,7 +120,7 @@ module LinkHelper
     content = block ? capture(&block) : text
     opts = block ? path : options
 
-    icon_link_to(add_query_param(link), opts) { content }
+    icon_link_to(add_q_param(link), opts) { content }
   end
 
   # pass title if it's a plain button (say for collapse) but you want a tooltip
@@ -148,6 +138,20 @@ module LinkHelper
     end
 
     tag.span(text, **args)
+  end
+
+  def external_link(link)
+    case link.external_site.name
+    when "iNaturalist"
+      concat(
+        link_to(
+          "iNat ##{link.url.sub(link.external_site.base_url, "")}", link.url
+        )
+      )
+    else
+      concat(link_to(:on_site.t(site: link.external_site.name), link.url))
+      concat(tag.small(" #{link.created_at.web_date}"))
+    end
   end
 
   # NOTE: Specific to glyphicons
@@ -177,6 +181,7 @@ module LinkHelper
     question: "question-sign",
     alert: "alert",
     list: "list",
+    copy: "copy",
     clone: "duplicate",
     merge: "transfer",
     move: "random",
@@ -199,7 +204,16 @@ module LinkHelper
     chevron_left: "chevron-left",
     chevron_right: "chevron-right",
     qrcode: "qrcode",
-    mobile: "phone"
+    mobile: "phone",
+    project: "th-list",
+    download: "download-alt",
+    search: "search",
+    prev: "triangle-left",
+    next: "triangle-right",
+    goto: "share-alt",
+    grid: "th",
+    menu: "align-justify",
+    info: "question-sign"
   }.freeze
 
   # button to destroy object
@@ -210,31 +224,56 @@ module LinkHelper
   #                  target: term)
   #   destroy_button(
   #     name: :destroy_object.t(type: :herbarium),
-  #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
+  #     target: herbarium_path(@herbarium,
+  #     back: herbaria_path(@herbarium.try(&:id)))
   #   )
   #
-  def destroy_button(target:, name: :DESTROY.t, **args)
-    # necessary if nil/empty string passed
-    name = :DESTROY.t if name.blank?
-    path, identifier, icon, content = button_atts(:destroy, target, args, name)
+  def destroy_button(target:, name: nil, **args)
+    name ||= if target.is_a?(String)
+               :DESTROY.l
+             else
+               :destroy_object.t(type: target.type_tag)
+             end
+    args[:class] = class_names(args[:class], "text-danger")
+
+    # Add back param for SHOW_OBS_EDITABLES (like edit_button does)
+    unless target.is_a?(String) || target.is_a?(Hash)
+      back_args = add_back_param_to_button_atts(:destroy)
+      args[:back] = back_args[:back] if back_args[:back]
+    end
+
+    crud_action_button(method: :delete, name:, target:, action: :destroy,
+                       confirm: :are_you_sure.l, **args)
+  end
+
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  def edit_button(target:, name: nil, **args)
+    # target could just be a path
+    name ||= if target.is_a?(String)
+               :EDIT.l
+             else
+               :edit_object.t(type: target.type_tag)
+             end
+    path, identifier, icon, content = button_atts(:edit, target, args, name)
 
     html_options = {
-      method: :delete, title: name,
-      class: class_names(identifier, args[:class], "text-danger"),
-      form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
-      data: { toggle: "tooltip", placement: "top", title: name }
+      class: class_names(identifier, args[:class]), # usually also btn
+      title: name, data: { toggle: "tooltip", placement: "top", title: name }
     }.deep_merge(args.except(:class, :back))
 
-    button_to(path, html_options) do
+    link_to(path, html_options) do
       [content, icon].safe_join
     end
   end
 
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
-  def edit_button(target:, name: :EDIT.t, **args)
+  def download_button(target:, name: :DOWNLOAD.t, **args)
     # necessary if nil/empty string passed
-    name = :EDIT.t if name.blank?
-    path, identifier, icon, content = button_atts(:edit, target, args, name)
+    name = :DOWNLOAD.t if name.blank?
+    path, identifier, icon, content = button_atts(
+      :download,
+      new_download_species_list_path(id: target.id), args, name
+    )
 
     html_options = {
       class: class_names(identifier, args[:class]), # usually also btn
@@ -253,10 +292,8 @@ module LinkHelper
       identifier = "" # can send one via args[:class]
     else
       prefix = action == :destroy ? "" : "#{action}_"
-      path_args = args.slice(:back) # adds back arg, or empty hash if blank
-      path = add_query_param(
-        send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
-      )
+      path_args = add_back_param_to_button_atts(action)
+      path = send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
       identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
     end
     if args[:icon]
@@ -267,6 +304,26 @@ module LinkHelper
       content = name
     end
     [path, identifier, icon, content]
+  end
+
+  SHOW_OBS_EDITABLES = %w[
+    collection_numbers herbarium_records sequences external_links
+  ].freeze
+
+  # This allows expected and tested behavior of either
+  # - returning to :show or :index of these types of records
+  # - returning to the :show page of the observation they're associated with
+  # depending on what page the form request originated.
+  def add_back_param_to_button_atts(action)
+    return {} unless [:edit, :destroy].include?(action) &&
+                     SHOW_OBS_EDITABLES.include?(controller.controller_name)
+
+    case action_name
+    when "show"
+      { back: :show }
+    when "index"
+      { back: :index }
+    end
   end
 
   # Refactor to accept a tab array
@@ -302,36 +359,33 @@ module LinkHelper
 
   # POST to a path; used instead of a link because POST link requires js
   def post_button(name:, path:, **, &block)
-    any_method_button(method: :post, name:, path:, **, &block)
+    crud_action_button(method: :post, name:, target: path, **, &block)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
   def put_button(name:, path:, **, &block)
-    any_method_button(method: :put, name:, path:, **, &block)
+    crud_action_button(method: :put, name:, target: path, **, &block)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
   def patch_button(name:, path:, **, &block)
-    any_method_button(method: :patch, name:, path:, **, &block)
+    crud_action_button(method: :patch, name:, target: path, **, &block)
   end
 
-  # any_method_button(method: :patch,
-  #                   name: herbarium.name.t,
-  #                   path: herbarium_path(id: @herbarium.id),
-  #                   data: { confirm: :are_you_sure.t })
+  # crud_action_button(method: :patch,
+  #                    name: herbarium.name.t,
+  #                    target: @herbarium,  # or a path string
+  #                    confirm: :are_you_sure.t,
+  #                    action: :remove)  # optional, defaults to method
   # Pass a block and a name if you want an icon with tooltip
-  # NOTE: button_to with block generates a button, not an input #quirksmode
-  def any_method_button(name:, path:, method: :post, **args, &block)
-    content = block ? capture(&block) : name
-    path, identifier, icon, content = button_atts(method, path, args, name)
+  def crud_action_button(**, &block)
+    render(Components::CrudActionButton.new(**, &block))
+  end
 
-    html_options = {
-      method: method,
-      class: class_names(identifier, args[:class]), # usually also btn
-      form: { data: { turbo: true } },
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args) # currently don't have to merge class arg upstream
+  def button_link(title, path, **args)
+    classes = %w[btn btn-default]
+    args[:class] = class_names(classes, args[:class])
 
-    button_to(path, html_options) { [content, icon].safe_join }
+    link_to(title, path, **args)
   end
 end

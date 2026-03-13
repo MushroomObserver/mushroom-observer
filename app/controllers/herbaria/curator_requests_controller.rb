@@ -5,7 +5,6 @@ module Herbaria
   class CuratorRequestsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params
     before_action :keep_track_of_referrer
 
     # Old MO Action (method)        New "Normalized" Action (method)
@@ -29,16 +28,28 @@ module Herbaria
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       return unless @herbarium
 
-      QueuedEmail::Webmaster.create_email(
+      send_curator_request_email
+      flash_notice(:show_herbarium_request_sent.t)
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
+    end
+
+    private
+
+    def send_curator_request_email
+      # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+      message = WebmasterMailer.prepend_user(@user, curator_request_content)
+      WebmasterMailer.build(
         sender_email: @user.email,
         subject: "Herbarium Curator Request",
-        content: "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
-                 "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
-                 "Notes: #{params[:notes]}"
-      )
-      flash_notice(:show_herbarium_request_sent.t)
-      redirect_to_referrer ||
-        redirect_with_query(herbarium_path(@herbarium))
+        message:
+      ).deliver_later
+    end
+
+    def curator_request_content
+      notes = params.dig(:herbarium_curator_request, :notes)
+      "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
+        "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
+        "Notes: #{notes}"
     end
 
     ############################################################################

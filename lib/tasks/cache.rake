@@ -16,7 +16,7 @@ namespace :cache do
   desc "Recalculate vote caches for observations and namings"
   task(refresh_votes: :environment) do
     print "Refreshing naming.vote_cache...\n"
-    Naming.all.each do |n|
+    Naming.find_each do |n|
       print "##{n.id}\r"
       o = Observation.naming_includes.find(n.observation_id)
       Observation::NamingConsensus.new(o).calc_vote_table
@@ -27,23 +27,6 @@ namespace :cache do
       Observation::NamingConsensus.new(o).calc_consensus
     end
     print "Done.    \n"
-  end
-
-  desc "Reset the queued_emails flavor enum"
-  task(refresh_queued_emails: :environment) do
-    print "Refreshing flavor enum for queued_emails...\n"
-    ActiveRecord::Migration.add_column(
-      :queued_emails, :flavor_tmp, :enum, limit: QueuedEmail.all_flavors
-    )
-    QueuedEmail.connection.update(
-      "update queued_emails set flavor_tmp=flavor+0"
-    )
-    ActiveRecord::Migration.remove_column(:queued_emails, :flavor)
-    ActiveRecord::Migration.add_column(
-      :queued_emails, :flavor, :enum, limit: QueuedEmail.all_flavors
-    )
-    QueuedEmail.connection.update("update queued_emails set flavor=flavor_tmp")
-    ActiveRecord::Migration.remove_column(:queued_emails, :flavor_tmp)
   end
 
   desc "Reset the ranks"
@@ -141,7 +124,7 @@ namespace :cache do
 
     users = {}
     # for n in Name.find(:all) # Rails 3
-    Name.all.each do |n|
+    Name.find_each do |n|
       user_ids = []
       author_id = nil
       last_version = 0

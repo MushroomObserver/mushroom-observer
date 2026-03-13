@@ -10,7 +10,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
 
     # ----- Add project, default dates
     visit(projects_path)
-    click_on(:list_projects_add_project.l)
+    click_on(:list_projects_add_project.l, match: :first)
     fill_in("project_title", with: title)
     fill_in(:WHERE.l, with: locations(:unknown_location).name)
     assert_selector(
@@ -30,7 +30,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     # ----- Add project, specified date range
     title = "Super International Fungal Foray"
     visit(projects_path)
-    click_on(:list_projects_add_project.l)
+    click_on(:list_projects_add_project.l, match: :first)
     fill_in("project_title", with: title)
     fill_in(:WHERE.l, with: locations(:unknown_location).name)
     choose("project_dates_any_false")

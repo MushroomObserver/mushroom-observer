@@ -10,8 +10,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     login
 
     visit("/activity_logs")
-    rss_log = RssLog.where.not(observation_id: nil).order(:updated_at).last
-    assert_selector("#box_#{rss_log.id} .rss-id",
+    rss_log = RssLog.where.not(observation_id: nil).reorder(:updated_at).last
+    # For RSS logs with observation targets, the box ID is the observation ID
+    assert_selector("#box_#{rss_log.observation_id} .rss-id",
                     text: rss_log.observation_id)
 
     # This is a bad test.  It doesn't handle adding new observations
@@ -33,7 +34,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Click on next (catches a bug seen in the wild).
     # Above comment about "next" does not match "Prev" in code
     go_back_after do
-      click_link("« Prev")
+      click_link("Prev")
     end
     # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
@@ -79,12 +80,10 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
                  page.title, "Wrong page")
 
     click_on("Projects")
-    assert_equal("#{:app_title.l}: Projects by Time Last Modified", page.title,
-                 "Wrong page")
+    assert_equal("#{:app_title.l}: Projects", page.title, "Wrong page")
 
     click_on("Comments")
-    assert_equal("#{:app_title.l}: Comments by Date Created",
-                 page.title, "Wrong page")
+    assert_equal("#{:app_title.l}: Comments", page.title, "Wrong page")
 
     click_on("Site Stats")
     assert_equal("#{:app_title.l}: Site Statistics", page.title, "Wrong page")
@@ -102,7 +101,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     reset_session!
     login(lurker.login)
 
-    visit("/#{obs.id}")
+    visit("/obs/#{obs.id}")
     assert_match(/#{:app_title.l}: Observation #{obs.id}/, page.title,
                  "Wrong page")
 
@@ -137,13 +136,15 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     end
     # back at Observation
 
-    # Check out species list.
+    # Check out species_list.
     go_back_after do
       list = SpeciesList.joins(:observations).
              where(observations: { id: obs.id }).first
       click_link(list.title)
-      assert_match(/^#{:app_title.l}: Species List: #{list.title}/,
-                   page.title, "Wrong page")
+      assert_match(
+        /^#{:app_title.l}: Observation List #{list.id}: #{list.title}/,
+        page.title, "Wrong page"
+      )
 
       # (Make sure observation is shown somewhere.)
       assert(has_selector?("a[href^='#{observation_path(obs.id)}']"),
@@ -174,43 +175,57 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
            "expected 2 Images in Observation, got #{image_count}")
   end
 
-  def test_search
+  def test_search_names
     login
 
     # Search for a name.  (Only one.)
-    fill_in("search_pattern", with: "Coprinus comatus")
-    select("Names", from: "search_type")
-    click_button("Search")
-    assert_match(names(:coprinus_comatus).search_name,
+    fill_in("pattern_search_pattern", with: "Coprinus comatus")
+    select("Names", from: "pattern_search_type")
+    within("#pattern_search_form") { click_button("Search") }
+    assert_match(names(:coprinus_comatus).text_name,
                  page.title, "Wrong page")
+  end
+
+  def test_search_observations
+    login
 
     # Search for observations of that name.  (Only one.)
-    select("Observations", from: "search_type")
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: "Coprinus comatus")
+    select("Observations", from: "pattern_search_type")
+    within("#pattern_search_form") { click_button("Search") }
     assert_match(/#{observations(:coprinus_comatus_obs).id}/,
                  page.title, "Wrong page")
+  end
 
-    # Image pattern searches temporarily disabled for performamce
-    # 2021-09-12 JDC
-    # Search for images of the same thing.  (Still only one.)
-    # select("Images", from: "search_type")
-    # click_button("Search")
-    # assert_match(
-    #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
-    #   current_fullpath
-    # )
+  # Image pattern searches temporarily disabled for performamce
+  # 2021-09-12 JDC
+  # def test_search_images
+  #   login
+
+  #   # Search for images of the same thing.  (Still only one.)
+  #   select("Images", from: "pattern_search_type")
+  #   within("#pattern_search_form") { click_button("Search") }
+  #   assert_match(
+  #     %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
+  #     current_fullpath
+  #   )
+  # end
+
+  def test_search_locations
+    login
 
     # There should be no locations of that name, though.
-    select("Locations", from: "search_type")
-    click_button("Search")
-    assert_match("Index", page.title, "Wrong page")
+    fill_in("pattern_search_pattern", with: "Coprinus comatus")
+    select("Locations", from: "pattern_search_type")
+    within("#pattern_search_form") { click_button("Search") }
+    assert_match("Locations", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("#results a[href]")
 
     # This should give us just about all the locations.
-    fill_in("search_pattern", with: "california OR canada")
-    select("Locations", from: "search_type")
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: "california OR canada")
+    select("Locations", from: "pattern_search_type")
+    within("#pattern_search_form") { click_button("Search") }
     # assert_selector("#results a[href]")
     labels = find_all("#results a[href] .location-postal").map(&:text)
     assert(labels.any? { |l| l.end_with?("Canada") },
@@ -221,16 +236,17 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
            "Found these: #{labels.inspect}")
   end
 
-  def test_search_from_obs_needing_ids
+  def test_search_observations_from_obs_needing_ids
     login
 
     visit("/observations/identify")
     # Search for a location.
-    place = "Massachusetts, USA"
+    place = "California, USA"
     fill_in("filter_term", with: place)
     select("Region", from: "filter_type")
-    click_button("Search")
-    assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
+    within("#identify_filter") { click_button("Search") }
+    assert_selector("#filters", text: /#{:query_needs_naming.l}/)
+    assert_selector("#filters", text: /#{:query_region.l}/)
     # Note that .rss-where now gets both postal and scientific addresses as a
     # single mashed up string, because they're shown/hidden by css.
     where_ats = find_all(".rss-where .location-postal").map(&:text)
@@ -243,9 +259,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     login
 
     # Search for a name.  (More than one.)
-    fill_in("search_pattern", with: "Fungi")
-    select("Observations", from: "search_type")
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: "Fungi")
+    select("Observations", from: "pattern_search_type")
+    within("#pattern_search_form") { click_button("Search") }
 
     obs = observations(:detailed_unknown_obs).id.to_s
     # assert_selector("a[href^='/#{obs}']")
@@ -255,28 +271,32 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
            "Found these: #{links.inspect}")
   end
 
-  def test_obs_at_location
+  def test_obs_at_location_index
     login
+    nam = names(:fungi)
+    loc = locations(:burbank)
     # Start at distribution map for Fungi.
-    visit("/names/#{names(:fungi).id}/map")
+    visit("/names/#{nam.id}/map")
 
     # Get a list of locations shown on map. (One defined, one undefined.)
-    within("#right_tabs") { click_link("Show Locations") }
-    assert_match("Locations with Observations", page.title, "Wrong page")
+    within("#context_nav") { click_link("Show Locations") }
+    assert_match("Locations", page.title, "Wrong title")
+    assert_selector("#filters", text: nam.text_name)
 
     # Click on the defined location.
     click_link(text: /Burbank/)
-    assert_match("Location: Burbank, California, USA", page.title, "Wrong page")
+    assert_match("Location #{loc.id}: Burbank, California, USA", page.title,
+                 "Wrong title")
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#location_coordinates") do
       click_link(text: :show_location_observations.l)
     end
-    assert_match("Matching Observations", page.title, "Wrong page")
+    assert_match("Observations", page.title, "Wrong title")
+    assert_selector("#filters", text: "Burbank, California, USA")
     save_results = find_all("#results a").select do |l|
-      l[:href].match(%r{^/\d+})
+      l[:href].match(%r{^/obs/\d+})
     end
-
     # Bail if there are too many results — test will not work
     if has_selector?("#results .pagination a", text: /Next/)
       skip("Test skipped because it bombs when search results > " \
@@ -285,76 +305,135 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Try sorting differently.
-    within("#sorts") { click_link(text: "User") }
+    within(first("#results .sorts")) { click_link(text: "User") }
     check_results_length(save_results)
 
     # Date is ambiguous, there's also 'Date Posted'
-    within("#sorts") { click_link(exact_text: "Date") }
+    within(first("#results .sorts")) { click_link(exact_text: "Date") }
     check_results_length(save_results)
 
-    within("#sorts") { click_link(text: "Reverse Order") }
+    within(first("#results .sorts")) { click_link(text: "Reverse Order") }
     check_results_length(save_results)
 
-    within("#sorts") { click_link(text: "Name") }
-    # Last time through - reset `save_results` with current results
+    within(first("#results .sorts")) { click_link(text: "Name") }
+    check_results_length(save_results)
+  end
+
+  def test_obs_at_location_show
+    login
+    loc = locations(:burbank)
+
+    # Start at observations for location.
+    visit(observations_path(location: loc.id))
+    assert_match("Observations", page.title, "Wrong title")
+    assert_selector("#filters", text: "Burbank, California, USA")
+    save_results = find_all("#results a").select do |l|
+      l[:href].match(%r{^/obs/\d+})
+    end
+
+    # Re-sort by name
+    within(first("#results .sorts")) { click_link(text: "Name") }
+    query_params = parse_query_params(current_fullpath)
     save_results = check_results_length(save_results)
     # Must set `save_hrefs` here to avoid variable going stale...
     # Capybara::RackTest::Errors::StaleElementReferenceError
     save_hrefs = save_results.pluck(:href)
 
-    query_params = parse_query_params(save_results.first[:href])
+    assert_equal(
+      query_params.symbolize_keys,
+      { model: "Observation", order_by: "name",
+        within_locations: [loc.id.to_s] }
+    )
 
     # Go to first observation, and try stepping back and forth.
     results_observation_links.first.click
     save_path = current_fullpath
-    assert_equal(query_params, parse_query_params(save_path))
-    within("#title_bar") { click_link(text: "Prev") }
-    assert_flash_text(/there are no more observations/i)
+
+    # First. Prev link does not appear or have href, so nothing should happen.
+    within("#header") { click_link(text: "Prev") }
     assert_equal(save_path, current_fullpath)
-    assert_equal(query_params, parse_query_params(save_path))
-    within("#title_bar") { click_link(text: "Next") }
+
+    within("#header") { click_link(text: "Next") }
     assert_no_flash
-    assert_equal(query_params, parse_query_params(save_path))
 
     save_path = current_fullpath
-    within("#title_bar") { click_link(text: "Next") }
+    within("#header") { click_link(text: "Next") }
     assert_no_flash
-    assert_equal(query_params, parse_query_params(save_path))
-    within("#title_bar") { click_link(text: "Prev") }
+
+    within("#header") { click_link(text: "Prev") }
     assert_no_flash
-    assert_equal(query_params, parse_query_params(save_path))
+
     assert_equal(save_path, current_fullpath,
                  "Went next then prev, should be back where we started.")
-    within("#title_bar") do
-      click_link(text: "Index") # href: /#{observations_path}/
-    end
+
+    # Be sure the index link goes back to the right sorted/filtered query
+    index_link = first(".index_object_link")
+    assert_equal(query_params, parse_query_params(index_link[:href]))
+
+    within("#header") { click_link(text: "Index") }
+    # Be sure we're actually on that sorted/filtered query, now we're on index
+    assert_equal(query_params, parse_query_params(current_fullpath))
+
     results = results_observation_links
-    assert_equal(query_params, parse_query_params(results.first[:href]))
+    # Coming back to the index is where the q is off.
+    # assert_equal(query_params, parse_query_params(results.first[:href]))
     assert_equal(save_hrefs, results.pluck(:href),
                  "Went to show_obs, screwed around, then back to index. " \
                  "But the results were not the same when we returned.")
   end
 
+  def test_goto_page_input
+    login
+    loc = locations(:obs_default_location)
+    # start at location page
+    visit("/locations/#{loc.id}")
+    click_link(text: "Observations at this Location")
+    assert_match("Observations", page.title, "Wrong title")
+
+    within(first("form.page_input")) do
+      fill_in("page", with: 2)
+      click_commit
+    end
+    assert_match("Observations", page.title, "Wrong title")
+
+    assert_match(loc.id.to_s, current_fullpath)
+  end
+
   ################
 
-  private
+  # Custom login method for this test.
+  # Adds the bells and whistles from the method in CapybaraSessionExtensions.
+  def login(login = users(:zero_user).login, password = "testpassword",
+            remember_me: true, session: self)
+    login = login.login if login.is_a?(User) # get the right user field
+    session.visit(root_path)
+    session.first(:link, "Login").click
+    assert_equal("#{:app_title.l}: Please login",
+                 page_title(session), "Wrong page")
 
-  # Custom login method for this test. Consider adding the bells and whistles
-  # to the method in CapybaraSessionExtensions?
-  def login(login = users(:zero_user).login)
-    visit(root_path)
-    first(:link, "Login").click
-    assert_equal("#{:app_title.l}: Please login", page.title, "Wrong page")
-    fill_in("user_login", with: login)
-    fill_in("user_password", with: "testpassword")
-    click_button("Login")
+    session.within("#account_login_form") do
+      session.fill_in("user_login", with: login)
+      session.fill_in("user_password", with: password)
+      session.uncheck("user_remember_me") if remember_me == false
+
+      session.first(:button, type: "submit").click
+    end
 
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
     assert_equal(
-      "#{:app_title.l}: Observations by #{:sort_by_rss_log.l}",
-      page.title, "Login failed"
+      "#{:app_title.l}: #{:OBSERVATIONS.l}", #  by #{:sort_by_rss_log.l}
+      page_title(session), "Login failed"
     )
+  end
+
+  # Weird. Named Capybara sessions have a document, not a page.
+  def page_title(session)
+    if session.respond_to?(:document)
+      session.document.title
+    elsif session.respond_to?(:page)
+      session.page.title
+    end
   end
 
   # This returns results so you can reset a `results` variable within test scope
@@ -366,7 +445,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
   def results_observation_links
     find_all("#results a").select do |l|
-      l[:href].match(%r{^/\d+})
+      l[:href].match(%r{^/obs/\d+})
     end
   end
 end

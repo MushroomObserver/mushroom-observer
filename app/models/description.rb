@@ -108,6 +108,10 @@ class Description < AbstractModel
     type_tag.to_s.sub("_description", "")
   end
 
+  def self.parent_type
+    type_tag.to_s.sub("_description", "")
+  end
+
   # Shorthand for "public && public_write"
   def fully_public?
     public && public_write
@@ -233,6 +237,10 @@ class Description < AbstractModel
   #
   ##############################################################################
 
+  # Return an Array of source type Strings, e.g. "public", "project", etc.
+  # as would `NameDescription.source_types.keys`. However, the below order is
+  # different. It is a preferred order, and is how these will be listed in
+  # the show_name descriptions panel, list_descriptions.
   ALL_SOURCE_TYPES = [
     "public",    # Public ones created by any user.
     "foreign",   # Foreign "public" description(s) written on another server.
@@ -246,21 +254,6 @@ class Description < AbstractModel
     "source",    # Derived from another source, e.g. another website or book.
     "user"       # Created by an individual user.
   ].freeze
-
-  # Return an Array of source type Strings, e.g. "public", "project", etc.
-  # Note, this is the order they will be listed in show_name descriptions
-  # panel, list_descriptions.
-  def self.all_source_types
-    ALL_SOURCE_TYPES
-    # NOTE: Why not keep this simple and just load them in order of the enums?
-    # source_types.map do |name, _integer|
-    #   name
-    # end
-  end
-
-  def self.basic_source_types
-    BASIC_SOURCE_TYPES
-  end
 
   # Retreive object representing the source (if applicable).  Presently, this
   # only works for Project drafts and User's personal descriptions.  All others
@@ -276,8 +269,7 @@ class Description < AbstractModel
 
   # Does this Description belong to a given Project?
   def belongs_to_project?(project)
-    (source_type == "project") &&
-      (project_id == project.id)
+    (source_type == "project") && (project_id == project.id)
   end
 
   ##############################################################################
@@ -292,9 +284,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def admins_join_table
-    self.class.admins_join_table
-  end
+  delegate :admins_join_table, to: :class
 
   # Name of the join table used to keep writer groups.
   def self.writers_join_table
@@ -302,9 +292,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def writers_join_table
-    self.class.writers_join_table
-  end
+  delegate :writers_join_table, to: :class
 
   # Name of the join table used to keep reader groups.
   def self.readers_join_table
@@ -312,9 +300,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def readers_join_table
-    self.class.readers_join_table
-  end
+  delegate :readers_join_table, to: :class
 
   # List of all the admins for this description
   def admins
@@ -450,9 +436,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def authors_join_table
-    self.class.authors_join_table
-  end
+  delegate :authors_join_table, to: :class
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
@@ -460,9 +444,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def editors_join_table
-    self.class.editors_join_table
-  end
+  delegate :editors_join_table, to: :class
 
   # Is the given User an author?
   def author?(user)
@@ -547,6 +529,7 @@ class Description < AbstractModel
   # include the title of the parent object), in plain text.  [I'm not sure
   # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
   def put_together_name(full_or_part)
+    source_type ||= :public
     tag = :"description_#{full_or_part}_title_#{source_type}"
     user_name = begin
                   user.legal_name

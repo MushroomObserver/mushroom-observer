@@ -9,7 +9,7 @@ module FieldSlipsController::Index
   private
 
   def default_sort_order
-    :date
+    ::Query::FieldSlips.default_order # :date
   end
 
   def index_active_params
@@ -22,7 +22,7 @@ module FieldSlipsController::Index
       project = find_or_goto_index(Project, params[:project].to_s)
     )
 
-    query = create_query(:FieldSlip, :all, project:)
+    query = create_query(:FieldSlip, projects: project)
     @project = project
     [query, { always_index: true }]
   end
@@ -31,7 +31,7 @@ module FieldSlipsController::Index
   def by_user
     return unless (user = find_or_goto_index(User, params[:by_user]))
 
-    query = create_query(:FieldSlip, :all, by_user: user)
+    query = create_query(:FieldSlip, by_users: user)
     [query, {}]
   end
 
@@ -42,7 +42,7 @@ module FieldSlipsController::Index
 
   # Used on index, but could be used on show, edit? update? as well.
   def field_slip_includes
-    [{ observation: [:location, :name, :namings, :rss_log, :user] },
+    [{ observations: [:location, :name, :namings, :rss_log, :user] },
      :project, :user]
   end
 end

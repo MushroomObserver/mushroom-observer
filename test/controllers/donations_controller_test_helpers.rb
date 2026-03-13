@@ -9,7 +9,7 @@
 #    include ::DonationsControllerTestHelpers
 module DonationsControllerTestHelpers
   def assert_donations(count, final_amount, reviewed, params)
-    donation = Donation.order("created_at DESC")[0]
+    donation = Donation.order(created_at: :desc)[0]
     assert_equal([count, final_amount, reviewed],
                  [Donation.count, donation.amount, donation.reviewed])
     assert_donation_params(params, donation)

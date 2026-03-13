@@ -10,12 +10,12 @@ module Projects
   # CRUD for project members
   class MembersController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def index
       return unless find_project!
 
-      @users = @project.user_group.users
+      @users = @project.user_group.users.includes(:image)
+      @project_member = ProjectMember.new(project: @project)
     end
 
     # View that lists all verified users with links to add each as a member.
@@ -24,7 +24,7 @@ module Projects
     #   params[:project_id] (was :id)
     #   params[:candidate]  (when click on user)
     # Outputs:
-    #   @project, @users
+    #   @project, @users, @project_member
     # "Posts" to the same action.  Stays on this view until done.
     def new
       return unless find_project!
@@ -34,17 +34,21 @@ module Projects
 
       @users =
         User.where.not(verified: nil).order(last_login: :desc).limit(100).to_a
+      @project_member = ProjectMember.new(project: @project)
     end
 
     def create
       return unless find_project!
+
+      candidate = params[:candidate] ||
+                  params.dig(:project_member, :candidate)
       unless @project.is_admin?(@user) ||
-             (@project.open_membership && @user.id.to_s == params[:candidate])
+             (@project.open_membership && @user.id.to_s == candidate)
         return must_be_project_admin!(@project.id)
       end
-      return unless (@candidate = params[:candidate])
+      return unless candidate
 
-      add_member(@candidate, @project)
+      add_member(candidate, @project)
     end
 
     # Form to make a given User either a member or an admin.
@@ -53,25 +57,25 @@ module Projects
     #   params[:project_id] (was :id)
     #   params[:candidate]
     #   params[:commit]
-    # Outputs: @project, @candidate
+    # Outputs: @project, @project_member
     # Posts to same action.  Redirects to show_project when done.
     # def change_member_status
     def edit
       return unless find_project!
-      return unless find_candidate!
-      return if @project.is_admin?(@user) || @user == @candidate
+      return unless find_project_member!
+      return if @project.is_admin?(@user) || @user == @project_member.user
 
       must_be_project_admin!(@project.id)
     end
 
     def update
       return unless find_project!
-      return unless find_candidate!
-      unless @project.is_admin?(@user) || @user == @candidate
+      return unless find_project_member!
+      unless @project.is_admin?(@user) || @user == @project_member.user
         return must_be_project_admin!(@project.id)
       end
 
-      update_membership(@project, @candidate)
+      update_membership(@project, @project_member.user)
     end
 
     private
@@ -80,8 +84,12 @@ module Projects
       @project = find_or_goto_index(Project, params[:project_id].to_s)
     end
 
-    def find_candidate!
-      @candidate = find_or_goto_index(User, params[:candidate])
+    def find_project_member!
+      user = find_or_goto_index(User, params[:candidate])
+      return unless user
+
+      @project_member = @project.project_members.find_by(user: user) ||
+                        ProjectMember.new(project: @project, user: user)
     end
 
     # Redirects back to show_project.
@@ -97,16 +105,16 @@ module Projects
 
     def return_to_caller(project, target)
       if target == "project_index"
-        redirect_to(project_path(project.id, q: get_query_param))
+        redirect_to(project_path(project.id))
       else
-        redirect_to(project_members_path(project.id, q: get_query_param))
+        redirect_to(project_members_path(project.id, q: q_param))
       end
     end
 
     def find_member(str)
       return User.safe_find(str) if str.to_s.match?(/^\d+$/)
 
-      User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
+      User.lookup_unique_text_name(str)
     end
 
     def update_membership(project, candidate)
@@ -133,9 +141,36 @@ module Projects
         flash_notice(:change_member_editing_trust_flash.l)
         set_trust(project, candidate, "editing")
         true
+      elsif params[:commit] == :change_member_add_obs.l
+        count = add_observations(project, candidate)
+        flash_notice(:change_member_add_obs_flash.t(count: count))
+        true
       else
         false
       end
+    end
+
+    def add_observations(project, candidate)
+      # Returns the count of observations added.
+      #
+      # Can't use candidate.observations due to a bug in in_box.
+      # Specifially, candidate.observations.in_box doesn't return
+      # the right thing because it incorrectly adds observations not
+      # from the candidate if they have no lat/long data.
+      obs = Observation.all
+      loc = project.location
+      if loc
+        obs = obs.in_box(north: loc.north, south: loc.south,
+                         east: loc.east, west: loc.west)
+      end
+      if project.start_date && project.end_date
+        obs = obs.found_between(project.start_date.strftime("%Y-%m,-%d"),
+                                project.end_date.strftime("%Y-%m,-%d"))
+      end
+      obs = obs.where(user: candidate)
+      before = project.observations.count
+      project.add_observations(obs)
+      project.observations.count - before
     end
 
     def set_trust(project, user, trust_level)
@@ -163,7 +198,7 @@ module Projects
 
     def must_be_project_admin!(id)
       flash_error(:change_member_status_denied.t)
-      redirect_to(project_members_path(id, q: get_query_param))
+      redirect_to(project_members_path(id, q: q_param))
     end
 
     # Add/remove a given User to/from a given UserGroup.
@@ -182,8 +217,8 @@ module Projects
       project_member = ProjectMember.find_by(project:, user:)
       unless project_member
         project_member = ProjectMember.create(project:, user:,
-                                              trust_level: "hidden_gps")
-        flash_notice(:add_members_with_gps_trust.l)
+                                              trust_level: "editing")
+        flash_notice(:add_members_with_editing.l)
       end
       return unless project_member
       return if type == :admin || add

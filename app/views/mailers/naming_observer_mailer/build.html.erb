@@ -6,7 +6,7 @@
     user:  @name_tracker.user.legal_name,
     email: @name_tracker.user.email,
     type:  type,
-    name:  obs.unique_format_name
+    name:  obs.user_unique_format_name(@user)
   )
 
   message = @name_tracker.calc_note(

@@ -24,12 +24,21 @@ module Observations
       # Shouldn't match anything.
       requires_login(:edit, where: "Somewhere out there")
       assert_empty(assigns(:matches))
+
+      # Case seen in the wild that causes error
+      requires_login(:edit, where: "")
+      assert(assigns(:matches).include?(albion))
+
+      # Another case that caused an error
+      requires_login(:edit, where: "CA")
+      assert(assigns(:matches).include?(albion))
     end
 
     def test_add_to_location
-      User.current = rolf
+      # User.current = rolf
       albion = locations(:albion)
       obs = Observation.create!(
+        user: rolf,
         when: Time.zone.now,
         where: "undefined location",
         notes: "new observation"
@@ -50,6 +59,7 @@ module Observations
       login("roy")
       albion = locations(:albion)
       obs = Observation.create!(
+        user: roy,
         when: Time.zone.now,
         where: (where = "Albion, Mendocino Co., California, USA"),
         notes: "new observation"

@@ -2,10 +2,8 @@
 
 # display information about, and edit, users
 class UsersController < ApplicationController
-  # These need to be moved into the files where they are actually used.
-  require "find"
-
   before_action :login_required
+  before_action :store_location, only: [:show]
 
   ##############################################################################
   # INDEX
@@ -37,7 +35,7 @@ class UsersController < ApplicationController
   end
 
   def default_sort_order
-    :name
+    ::Query::Users.default_order # :name
   end
 
   # Used by ApplicationController to dispatch #index to a private method
@@ -56,7 +54,7 @@ class UsersController < ApplicationController
       redirect_to(user_path(user.id))
       [nil, {}]
     else
-      query = create_query(:User, :all, pattern: pattern)
+      query = create_query(:User, pattern: pattern)
       [query, {}]
     end
   end
@@ -79,20 +77,12 @@ class UsersController < ApplicationController
     query
   end
 
-  def index_display_opts(opts, query)
-    opts = {
-      include: :user_groups,
+  def index_display_opts(opts, _query)
+    {
+      letters: true,
+      include: [:user_groups, :image, :location],
       matrix: !in_admin_mode?
     }.merge(opts)
-
-    # Paginate by "correct" letter.
-    opts[:letters] = if %w[login reverse_login].include?(query.params[:by])
-                       "users.login"
-                     else
-                       "users.name"
-                     end
-
-    opts
   end
 
   public
@@ -100,7 +90,6 @@ class UsersController < ApplicationController
   #############################################################################
 
   def show
-    store_location
     id = params[:id].to_s
     return unless find_user!
 
@@ -130,6 +119,7 @@ class UsersController < ApplicationController
 
   # User's best images for #show
   MAX_THUMBS = 6
+  private_constant(:MAX_THUMBS)
 
   # set @observations whose thumbnails will display in user summary
   def define_instance_vars_for_summary!
@@ -138,14 +128,14 @@ class UsersController < ApplicationController
     # NOTE: This query is pretty well optimized.
     # First check the user's observation thumbnails for their own favorites
     image_includes = { thumb_image: [:image_votes, :projects, :license, :user] }
-    @query = Query.lookup(:Observation, :all, by_user: @show_user,
-                                              by: :owners_thumbnail_quality)
+    @query = Query.lookup(:Observation, by_users: @show_user,
+                                        order_by: :owners_thumbnail_quality)
     observations = @query.results(limit: 6, include: image_includes)
 
     # If not enough, check for other people's favorites
     if (MAX_THUMBS - observations.length).positive?
-      @query = Query.lookup(:Observation, :all, by_user: @show_user,
-                                                by: :thumbnail_quality)
+      @query = Query.lookup(:Observation, by_users: @show_user,
+                                          order_by: :thumbnail_quality)
       other_users_favorites = @query.results(limit: MAX_THUMBS,
                                              include: image_includes)
       observations = observations.union(other_users_favorites).take(MAX_THUMBS)

@@ -1,9 +1,28 @@
-<%
-@query ||= nil # tbd what this was ever used for in the table
-%>
+<%# locals: (obs: nil, user: nil, consensus: nil) %>
 
 <!--OBSERVATION_NAMINGS / TABLE REFRESHED BY TURBO -->
-<%= tag.div(id: "observation_namings") do
-  observation_namings_table(obs, consensus)
-end %>
+<%= render(Components::Panel.new(
+      panel_id: "observation_namings",
+      panel_class: "namings-table mb-4",
+      attributes: {
+        data: { controller: "section-update",
+                section_update_user_value: user.id }
+      }
+    )) do |panel| %>
+  <%= panel.with_heading(title: false, classes: "namings-table-header") do %>
+    <%= render(partial: "observations/show/namings/header",
+               locals: { obs:, **naming_header_row_content }) %>
+  <% end %>
+  <%= panel.with_body(wrapper: false) do %>
+    <%= render(partial: "observations/show/namings/rows",
+               locals: { user:, obs:, consensus: }) %>
+  <% end %>
+  <%= panel.with_footer do %>
+    <%= render(partial: "observations/show/namings/footer_buttons",
+               locals: { user:, obs: }) %>
+  <% end %>
+  <%= panel.with_footer(classes: "d-none d-sm-block py-2") do %>
+    <%= render(partial: "observations/show/namings/footer_legend") %>
+  <% end %>
+<% end %>
 <!--/OBSERVATION_NAMINGS -->

@@ -14,7 +14,7 @@ module ObservationsController::EditAndUpdate
   # Inputs:
   #   params[:id]                       observation id
   #   params[:observation][...]         observation args
-  #   params[:image][n][...]            image args
+  #   params[:observation][:image][n][...]       image args
   #   params[:log_change]               log change in RSS feed?
   #
   # Outputs:
@@ -28,8 +28,8 @@ module ObservationsController::EditAndUpdate
     return unless find_observation!
 
     # Make sure user owns this observation!
-    unless check_permission!(@observation)
-      redirect_with_query(action: :show, id: @observation.id) and return
+    unless permission!(@observation)
+      redirect_to(action: :show, id: @observation.id) and return
     end
 
     init_license_var
@@ -75,8 +75,8 @@ module ObservationsController::EditAndUpdate
     return unless find_observation!
 
     # Make sure user owns this observation!
-    unless check_permission!(@observation)
-      redirect_with_query(action: :show, id: @observation.id) and return
+    unless permission!(@observation)
+      redirect_to(action: :show, id: @observation.id) and return
     end
 
     init_license_var
@@ -120,7 +120,7 @@ module ObservationsController::EditAndUpdate
 
   # As of 2024-06-01, users can remove images right on the edit obs form.
   def detach_removed_images
-    new_ids = params[:good_image_ids]&.split || []
+    new_ids = params.dig(:observation, :good_image_ids)&.split || []
 
     # If it didn't make the cut, remove it.
     @observation.images.each do |img|
@@ -130,6 +130,24 @@ module ObservationsController::EditAndUpdate
       img.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: img.id))
     end
+    ensure_thumb_image
+  end
+
+  # Fix for issue #3995: update_permitted_observation_attributes runs before
+  # detach_removed_images, so the form's blank thumb_image_id overwrites the
+  # real value before remove_image can detect it needs reassignment.
+  def ensure_thumb_image
+    return if @observation.thumb_image_id.present? &&
+              @observation.image_ids.include?(@observation.thumb_image_id)
+
+    new_thumb = @observation.images.first
+    @observation.thumb_image = new_thumb
+    # Persist immediately so the fix survives even if the rest of the
+    # update bails out, matching how remove_image persists detachments.
+    return unless @observation.persisted? &&
+                  @observation.thumb_image_id_changed?
+
+    @observation.update_column(:thumb_image_id, new_thumb&.id)
   end
 
   def try_to_upload_images
@@ -156,6 +174,9 @@ module ObservationsController::EditAndUpdate
   def reload_edit_form
     @images         = @bad_images
     @new_image.when = @observation.when
+    @good_images  ||= @observation.images_sorted
+    @exif_data    ||= get_exif_data(@good_images)
+    @location     ||= @observation.location
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
@@ -166,10 +187,10 @@ module ObservationsController::EditAndUpdate
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?
-      redirect_with_query(new_location_path(where: @observation.place_name,
-                                            set_observation: @observation.id))
+      redirect_to(new_location_path(where: @observation.place_name,
+                                    set_observation: @observation.id))
     else
-      redirect_with_query(permanent_observation_path(@observation.id))
+      redirect_to(permanent_observation_path(@observation.id))
     end
   end
 end

@@ -1,0 +1,13 @@
+<%
+add_project_banner(@project)
+add_page_title(:project_alias_edit.l(name: @project_alias.name))
+container_class(:text)
+project_id = @project_alias.project_id
+%>
+
+<%= render(Components::ProjectAliasForm.new(
+      @project_alias, user: @user, local: true
+    )) %>
+
+<%= link_to("Show", project_alias_path(project_id:, id: @project_alias.id)) %> |
+<%= link_to("Back", project_aliases_path(project_id:)) %>

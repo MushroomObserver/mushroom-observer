@@ -1,18 +1,5 @@
 # frozen_string_literal: true
 
-# I would rather do error handling in mo_mail() instead of having to catch a
-# bunch of errors everywhere we call deliver_now.  The problem is build returns
-# an instance of Mail::Message, and there doesn't seem to be any easy or safe
-# way to validate email addresses or anything at that point.  If the user were
-# initiating the mail message, that would be a different matter maybe, because
-# then we could actually do something with the error messages.  But mostly the
-# webmaster gets these error messages asynchronously from the rake email:send
-# task, and at that point there's nothing anyone can do, so the error messages
-# are just annoying and useless.  In the few cases where emails are sent
-# immediately and not queued, I recommend explicitly checking for correctable
-# errors *before* building and attempting to deliver the message. -JPH 20221108
-ActionMailer::Base.raise_delivery_errors = false
-
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
   # Allow folder organization in the app/views folder
@@ -23,21 +10,27 @@ class ApplicationMailer < ActionMailer::Base
     address.to_s.match?(URI::MailTo::EMAIL_REGEXP)
   end
 
+  # Prepend user info to content for context in emails to webmaster/admins.
+  def self.prepend_user(user, content)
+    return content if user.blank?
+
+    "(from User ##{user.id} #{user.name}(#{user.login}))\n#{content}"
+  end
+
   private
 
   def webmaster_delivery
+    return if message.to.blank?
+
     mail.delivery_method.settings =
       Rails.application.credentials.gmail_smtp_settings_webmaster
   end
 
   def news_delivery
+    return if message.to.blank?
+
     mail.delivery_method.settings =
       Rails.application.credentials.gmail_smtp_settings_news
-  end
-
-  def noreply_delivery
-    mail.delivery_method.settings =
-      Rails.application.credentials.gmail_smtp_settings_noreply
   end
 
   def setup_user(user)
@@ -55,7 +48,7 @@ class ApplicationMailer < ActionMailer::Base
     content_style = calc_content_style(headers)
     from = calc_email(headers[:from]) || MO.news_email_address
     reply_to = calc_email(headers[:reply_to]) || MO.noreply_email_address
-    mail(subject: "[MO] #{title.to_ascii}",
+    mail(subject: "[MO] #{title}",
          to: to,
          from: from,
          reply_to: reply_to,
@@ -64,14 +57,16 @@ class ApplicationMailer < ActionMailer::Base
   end
 
   def debug_log(template, from, to, objects = {})
-    msg = + "MAIL #{template}" # create mutable string
+    msg =  "MAIL #{template}" # create mutable string
     msg << " from=#{from.id}" if from
     msg << " to=#{to.id}" if to
     objects.each do |k, v|
       value = v.nil? || v.instance_of?(String) ? v : v.id
       msg << " #{k}=#{value}"
     end
-    QueuedEmail.debug_log(msg)
+    Rails.root.join("log/email-debug.log").open("a:utf-8") do |fh|
+      fh.puts("#{Time.zone.now} #{msg}")
+    end
   end
 
   def calc_content_style(headers)

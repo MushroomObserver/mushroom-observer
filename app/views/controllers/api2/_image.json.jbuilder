@@ -9,7 +9,7 @@ json.quality(object.vote_cache) if object.vote_cache.present?
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
 json.original_name(object.original_name.to_s) \
-  if check_permission(object) && object.original_name.present?
+  if permission?(object) && object.original_name.present?
 json.number_of_views(object.num_views) if object.num_views.present?
 json.last_viewed(object.last_view.try(&:utc)) if object.last_view.present?
 json.ok_for_export(object.ok_for_export ? true : false)

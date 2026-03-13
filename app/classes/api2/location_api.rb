@@ -7,22 +7,6 @@ class API2
       Location
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
-    end
-
     def high_detail_includes
       [
         { comments: :user }
@@ -30,16 +14,13 @@ class API2
     end
 
     def query_params
-      n, s, e, w = parse_bounding_box!
+      box = parse_bounding_box!
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:location, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :first_user),
-        north: n,
-        south: s,
-        east: e,
-        west: w
+        by_users: parse_array(:user, :user, help: :first_user),
+        in_box: box
       }
     end
 
@@ -98,7 +79,7 @@ class API2
     # Our restrictions on edit permissions for the API are much more strict
     # than on the website.  Revoke permission if anyone other than the creator
     # owns any attached objects: location versions, descriptions, observations,
-    # species lists, users (i.e. profile location), or herbaria.
+    # species_lists, users (i.e. profile location), or herbaria.
     def must_have_edit_permission!(loc)
       must_be_creator!(loc)
       must_be_only_editor!(loc)

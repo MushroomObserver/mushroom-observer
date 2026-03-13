@@ -7,8 +7,8 @@ module Observations::Namings
     def test_suggestions
       obs = observations(:detailed_unknown_obs)
       name1 = names(:coprinus_comatus)
-      name2a = names(:lentinellus_ursinus_author1)
-      name2b = names(:lentinellus_ursinus_author2)
+      name2a = names(:dup_name_author1)
+      name2b = names(:dup_name_author2)
       obs.name = name2b
       obs.vote_cache = 2.0
       obs.save
@@ -16,7 +16,7 @@ module Observations::Namings
       assert_obj_arrays_equal([], name2a.reload.observations)
       assert_obj_arrays_equal([obs], name2b.reload.observations)
       suggestions = '[[["Coprinus comatus",0.7654],' \
-                      '["Lentinellus ursinus",0.321]]]'
+                      '["Agrocybe arvalis",0.321]]]'
 
       requires_login(:show, id: obs.id, names: suggestions)
 

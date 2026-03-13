@@ -14,16 +14,25 @@ export default class extends Controller {
   static targets = ['collapse', 'input']
 
   connect() {
-    this.element.dataset.stimulus = "naming-reason-connected";
-    this.delegate = delegate('shown.bs.collapse')
+    this.element.dataset.namingReason = "connected";
+    this.delegateShown = delegate('shown.bs.collapse')
+    this.delegateHidden = delegate('hidden.bs.collapse')
   }
 
   disconnect() {
-    abnegate('shown.bs.collapse', this.delegate)
+    abnegate('shown.bs.collapse', this.delegateShown)
+    abnegate('hidden.bs.collapse', this.delegateHidden)
   }
 
+  // Focuses the input within, when a collapsed reason panel is shown
   focusInput(event) {
     // console.log('Event fired on #' + event.currentTarget.id);
     this.inputTarget.focus()
+  }
+
+  // Clear the input within, when a reason panel is unchecked
+  clearInput(event) {
+    // console.log('Event fired on #' + event.currentTarget.id);
+    this.inputTarget.value = ""
   }
 }

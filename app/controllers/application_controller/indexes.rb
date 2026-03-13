@@ -1,27 +1,61 @@
 # frozen_string_literal: true
 
-##############################################################################
+#  ==== Indexes
+#  show_index_of_objects::  Show paginated set of Query results as a list.
+#  add_sorting_links::      Create sorting links for index pages.
+#  find_or_goto_index::     Look up object by id, displaying error and
+#                           redirecting on failure.
+#  goto_index::             Redirect to a reasonable fallback (index) page
+#                           in case of error.
+#  letter_pagination_data::       Paginate an Array by letter.
+#  number_pagination_data::       Paginate an Array normally.
 #
-#  :section: Indexes
-#
-##############################################################################
-# see application_controller.rb
-# rubocop:disable Metrics/ModuleLength
-module ApplicationController::Indexes
+module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def self.included(base)
-    base.helper_method(:paginate_numbers)
+    base.helper_method(:number_pagination_data)
   end
 
-  # Get args from a param subaction, or if none given, the unfiltered_index.
+  ##############################################################################
+  #
+  #  :section: Filterable Indexes
+  #
+  #  These methods help to assemble filtered index results (from the query) and
+  #  render the interface for the index pagination with info returned by Query.
+  #
+  #  Each controller's index may have "subactions". These are params that
+  #  trigger a method by the same name, applying a single filter to the results.
+  #  Subactions are not combinable - they all immediately execute their queries
+  #  and render, so if you want to combine params, call `create_query`.
+  #
+  #  The shared "index_active_params" are similar to subactions but handle:
+  #  (`q`) - parsing forwarded queries
+  #  (`by`) - ordering results
+  #  (`id`) - indexing at the current cursor when returning from :show
+  #  All three params can be mutually combined, but with at most one subaction.
+  #
+  #  NOTE: The current plan is to phase subactions out and make all incoming
+  #  links create a query, sent through `q`, to eliminate conflicting param
+  #  directives so we can prepare for a simple standard for permalinks.
+  #  When that's resolved, we can then expose the query params in the URL,
+  #  enabling permalinks for filtered queries. Eventually it should be easy
+  #  for developers to combine filters with Query. - AN 2025-FEB
+  #
+  ##############################################################################
+  #
+  # Assemble query and display_args from a param subaction, or unfiltered_index.
+  # All subactions call `create_query` to generate paginated results.
   def build_index_with_query
-    index_active_params.each do |subaction|
+    current_params = index_active_params.intersection(params.keys.map(&:to_sym))
+    current_params.each do |subaction|
       next if params[subaction].blank?
 
+      # May go through #sorted_index to create the query, before #filtered_index
       query, display_opts = send(index_param_method_or_default(subaction))
+
       # Some actions may redirect instead of returning a query, such as pattern
-      # searches that resolve to a single object or get no results. So if we
-      # had the param, but got a blank query, we should bail to allow the
-      # redirect without rendering a blank index.
+      # searches when they resolve to a single object or get no results.
+      # So if we had the param, but got a blank query, we should bail to allow
+      # the redirect without rendering a blank index.
       return nil if query.blank?
 
       # If we have a query, display it.
@@ -35,6 +69,22 @@ module ApplicationController::Indexes
     filtered_index(new_query, display_opts)
   end
 
+  def check_for_spider_block(request, params)
+    return false if @user
+
+    begin
+      if request.url.include?(permanent_observation_path(id: params[:id]))
+        return false
+      end
+    rescue ActionController::UrlGenerationError
+      # Still a spider...
+    end
+
+    Rails.logger.warn(:runtime_spiders_begone.t)
+    render(json: :runtime_spiders_begone.t,
+           status: :forbidden)
+  end
+
   # It's not always the controller_name, e.g. ContributorsController -> User
   def controller_model_name
     controller_name.classify
@@ -45,12 +95,13 @@ module ApplicationController::Indexes
   # means the index is titled "____ Index", rather than "____ by ____".
   # NOTE: Could be standardized.
   def default_sort_order
-    # query_base = "::Query::#{controller_model_name}Base".constantize
+    # query_base = "::Query::#{controller_model_name.pluralize}".constantize
     # query_base.send(:default_order) || nil
     nil
   end
 
   # Provide defaults for the params an index can handle.
+  # Note the order of this array governs logic in build_index_with_query.
   INDEX_BASIC_PARAMS = [:by, :q, :id].freeze
 
   # Overrides should include any of the above basics, if relevant.
@@ -64,7 +115,8 @@ module ApplicationController::Indexes
     index_active_params.intersection(INDEX_BASIC_PARAMS)
   end
 
-  # Should this param be handled by :sorted_index or a named method?
+  # If param is [:by, :q, :id] it's handled by :sorted_index.
+  # Other params are handled by a named method in the downstream controller.
   def index_param_method_or_default(subaction)
     index_basic_params.include?(subaction) ? :sorted_index : subaction
   end
@@ -74,11 +126,12 @@ module ApplicationController::Indexes
   def unfiltered_index
     return unless unfiltered_index_permitted?
 
-    args = { by: default_sort_order }.merge(unfiltered_index_opts[:query_args])
-    query = create_query(controller_model_name.to_sym,
-                         unfiltered_index_opts[:query_flavor], **args)
+    # Get once, otherwise accessing the hash may rerun some logic twice.
+    index_opts = unfiltered_index_opts
+    args = { order_by: default_sort_order }.merge(index_opts[:query_args])
+    query = create_query(controller_model_name.to_sym, **args)
 
-    [query, unfiltered_index_opts[:display_opts]]
+    [query, index_opts[:display_opts]]
   end
 
   # Can be overridden to prevent the unfiltered index from being called.
@@ -86,27 +139,55 @@ module ApplicationController::Indexes
     true
   end
 
-  # Defaults for the unfiltered index. Controllers may pass their own opts.
+  # Defaults for the unfiltered index; controllers may override with other opts.
   def unfiltered_index_opts
-    { query_flavor: :all, query_args: {}, display_opts: {} }
+    { query_args: {}, display_opts: {} }.freeze
   end
 
-  # This handles the index if you pass any of the basic params.
+  # This handles the index if you pass any of the basic params, and runs before
+  # #filtered_index. The big difference from #unfiltered_index is that it runs
+  # #find_or_create_query instead of #create_query
   def sorted_index
     return unless sorted_index_permitted?
 
+    # Get once, otherwise accessing the hash reruns logic and may flash twice.
+    index_opts = sorted_index_opts
     query = find_or_create_query(controller_model_name.to_sym,
-                                 **sorted_index_opts[:query_args])
+                                 **index_opts[:query_args])
 
-    [query, sorted_index_opts[:display_opts]]
+    [query, index_opts[:display_opts]]
   end
 
   def sorted_index_permitted?
     true
   end
 
+  # This only deals with :by, :id, and :type passed in url params.
   def sorted_index_opts
-    { query_args: { by: params[:by] }, display_opts: index_display_at_id_opts }
+    { query_args: {
+        order_by: order_by_or_flash_if_unknown
+        # id: params.dig(:q, :id)
+      },
+      display_opts: index_display_at_id_opts }.freeze
+  end
+
+  def order_by_or_flash_if_unknown
+    # `query_from_q_param` is able to handle alphabetized :q params
+    order_by = if (query = query_from_q_param)
+                 query.params[:order_by]
+               else
+                 params[:by]
+               end
+    return nil if order_by.blank?
+
+    scope = :"order_by_#{order_by.to_s.sub(/^reverse_/, "")}"
+    return order_by if AbstractModel.private_methods(false).include?(scope)
+
+    flash_error(
+      "Can't figure out how to sort #{controller_model_name.pluralize} " \
+      "by :#{order_by}."
+    )
+    default_sort_order
   end
 
   # The filtered index.
@@ -136,25 +217,13 @@ module ApplicationController::Indexes
     { id: params[:id].to_s, always_index: true }
   end
 
-  # Most pattern searches follow this, um, pattern.
+  # Pattern searches should now hit each controller with a :q param,
+  # after the search is parsed in `SearchController#pattern`.
+  # This is for backwards compatibility with old bookmarks.
   def pattern
     pattern = params[:pattern].to_s
-    if (obj = maybe_pattern_is_an_id(pattern))
-      redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
-      [nil, {}]
-    else
-      query = create_query(controller_model_name.to_sym, :all, pattern:)
-      [query, {}]
-    end
-  end
-
-  # If so, redirect to the show page for that object.
-  def maybe_pattern_is_an_id(pattern)
-    if /^\d+$/.match?(pattern)
-      return controller_model_name.constantize.safe_find(pattern)
-    end
-
-    false
+    type = controller_model_name.pluralize.underscore.to_sym
+    redirect_to(search_pattern_path(pattern_search: { pattern:, type: }))
   end
 
   # Render an index or set of search results as a list or matrix. Arguments:
@@ -172,17 +241,17 @@ module ApplicationController::Indexes
   # always_index::  Always show index, even if only one result.
   #
   # Side-effects: (sets/uses the following instance variables for the view)
-  # @title::        Provides default title.
+  # @title::                  Provides default title.
   # @layout::
-  # @pages::        Paginator instance.
-  # @objects::      Array of objects to be shown.
+  # @pagination_data::        PaginationData instance.
+  # @objects::                Array of objects to be shown.
   #
   # Other side-effects:
   # store_location::          Sets this as the +redirect_back_or_default+
   #                           location.
   # clear_query_in_session::  Clears the query from the "clipboard"
   #                           (if you didn't just store this query on it!).
-  # query_params_set::        Tells +query_params+ to pass this query on
+  # update_stored_query::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
   def show_index_of_objects(query, display_opts = {})
@@ -198,42 +267,23 @@ module ApplicationController::Indexes
   private ##########
 
   def show_index_setup(query, display_opts)
-    apply_content_filters(query)
     store_location
-    clear_query_in_session if session[:checklist_source] != query.id
-    query_params_set(query)
+    # clear_query_in_session if session[:query_record] != query.id
+    update_stored_query(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
-  end
-
-  def apply_content_filters(query)
-    filters = users_content_filters || {}
-    @any_content_filters_applied = false
-    # disable cop because ContentFilter is not an ActiveRecord model
-    ContentFilter.all.each do |fltr| # rubocop:disable Rails/FindEach
-      apply_one_content_filter(fltr, query, filters[fltr.sym])
-    end
-  end
-
-  def apply_one_content_filter(fltr, query, user_filter)
-    key = fltr.sym
-    return unless query.takes_parameter?(key)
-    return if query.params.key?(key)
-    return unless fltr.on?(user_filter)
-
-    # This is a "private" method used by Query#validate_params.
-    # It would be better to add these parameters before the query is
-    # instantiated. Or alternatively, make query validation lazy so
-    # we can continue to add parameters up until we first ask it to
-    # execute the query.
-    query.params[key] = query.validate_value(fltr.type, fltr.sym,
-                                             user_filter.to_s)
-    @any_content_filters_applied = true
+    flash_query_validation_errors(query)
   end
 
   ###########################################################################
   #
   # INDEX VIEW METHODS - MOVE VIEW CODE TO HELPERS
+
+  def flash_query_validation_errors(query)
+    return if query.valid || query.validation_errors.empty?
+
+    flash_warning(query.validation_errors.join("\n"))
+  end
 
   # Set some ivars used in all index views.
   # Makes @query available to the :index template for query-dependent tabs
@@ -243,24 +293,33 @@ module ApplicationController::Indexes
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
     @layout = calc_layout_params if display_opts[:matrix]
     @num_results = query.num_results
+    @any_content_filters_applied = check_if_preference_filters_applied
+  end
+
+  def check_if_preference_filters_applied
+    current_params = @query.params.flatten.compact_blank.keys
+    return false unless current_params.include?(:preference_filter)
+
+    true
   end
 
   ###########################################################################
 
   def show_action_redirect(query)
-    redirect_with_query(controller: query.model.show_controller,
-                        action: query.model.show_action,
-                        id: query.result_ids.first)
+    redirect_to(controller: query.model.show_controller,
+                action: query.model.show_action,
+                id: query.result_ids.first)
   end
 
   def calc_pages_and_objects(query, display_opts)
     number_arg = display_opts[:number_arg] || :page
-    @pages = if display_opts[:letters]
-               paginate_letters(display_opts[:letter_arg] || :letter,
-                                number_arg, num_per_page(display_opts))
-             else
-               paginate_numbers(number_arg, num_per_page(display_opts))
-             end
+    @pagination_data =
+      if display_opts[:letters]
+        letter_pagination_data(display_opts[:letter_arg] || :letter,
+                               number_arg, num_per_page(display_opts))
+      else
+        number_pagination_data(number_arg, num_per_page(display_opts))
+      end
     skip_if_coming_back(query, display_opts)
     find_objects(query, display_opts)
   end
@@ -273,9 +332,9 @@ module ApplicationController::Indexes
 
   def skip_if_coming_back(query, display_opts)
     if display_opts[:id].present? &&
-       params[@pages.letter_arg].blank? &&
-       params[@pages.number_arg].blank?
-      @pages.show_index(query.index(display_opts[:id]))
+       params[@pagination_data.letter_arg].blank? &&
+       params[@pagination_data.number_arg].blank?
+      @pagination_data.index_at(query.index(display_opts[:id]))
     end
   end
 
@@ -285,7 +344,7 @@ module ApplicationController::Indexes
   # (The other place is from the template to the `matrix_box` helper, which
   # actually caches the HTML.)
   def find_objects(query, display_opts)
-    logger.warn("QUERY starting: #{query.query.inspect}")
+    logger.warn("QUERY starting: #{query.sql.inspect}")
     @timer_start = Time.current
 
     # Instantiate correct subset, with or without includes.
@@ -293,7 +352,7 @@ module ApplicationController::Indexes
 
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
-                "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
+                "params=#{query.params.inspect}, " \
                 "time=#{(@timer_end - @timer_start).to_f}")
   end
 
@@ -304,7 +363,7 @@ module ApplicationController::Indexes
     if caching
       objects_with_only_needed_eager_loads(query, include)
     else
-      query.paginate(@pages, include: include)
+      query.paginate(@pagination_data, include: include)
     end
   end
 
@@ -313,7 +372,7 @@ module ApplicationController::Indexes
     # Not currently caching on user.
     # user = User.current ? "logged_in" : "no_user"
     locale = I18n.locale
-    objects_simple = query.paginate(@pages)
+    objects_simple = query.paginate(@pagination_data)
 
     # If temporarily disabling cached matrix boxes: eager load everything
     # ids_to_eager_load = objects_simple
@@ -417,26 +476,28 @@ module ApplicationController::Indexes
     user: RssLog,
     vote: Observation
   }.freeze
+  private_constant(:REDIRECT_FALLBACK_MODELS)
 
   public ##########
 
-  # Initialize Paginator object.  This now does very little thanks to the new
-  # Query model.
+  # Initialize PaginationData object for pagination by letter.
+  # This now does very little thanks to the new Query model.
   # arg::    Name of parameter to use.  (default is 'letter')
   #
   #   # In controller:
-  #   query  = create_query(:Name, :by_user, :user => params[:id].to_s)
-  #   query.need_letters('names.display_name')
-  #   @pages = paginate_letters(:letter, :page, 50)
-  #   @names = query.paginate(@pages)
+  #   query  = create_query(:Name, :by_users => params[:id].to_s)
+  #   query.need_letters(true)
+  #   @pagination_data = letter_pagination_data(:letter, :page, 50)
+  #   @names = query.paginate(@pagination_data)
   #
   #   # In view:
-  #   <%= pagination_letters(@pages) %>
-  #   <%= pagination_numbers(@pages) %>
+  #   <%= letter_pagination_nav(@pagination_data) %>
+  #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def paginate_letters(letter_arg = :letter, number_arg = :page,
-                       num_per_page = 50)
-    MOPaginator.new(
+  def letter_pagination_data(letter_arg = :letter,
+                             number_arg = :page,
+                             num_per_page = 50)
+    PaginationData.new(
       letter_arg: letter_arg,
       number_arg: number_arg,
       letter: paginator_letter(letter_arg),
@@ -445,27 +506,28 @@ module ApplicationController::Indexes
     )
   end
 
-  # Initialize Paginator object.  This now does very little thanks to
-  # the new Query model.
+  # Initialize regular PaginationData object.
+  # This now does very little thanks to the new Query model.
+  #
   # arg::           Name of parameter to use.  (default is 'page')
   # num_per_page::  Number of results per page.  (default is 50)
   #
   #   # In controller:
-  #   query    = create_query(:Name, :by_user, :user => params[:id].to_s)
-  #   @numbers = paginate_numbers(:page, 50)
+  #   query    = create_query(:Name, :by_users => params[:id].to_s)
+  #   @numbers = number_pagination_data(:page, 50)
   #   @names   = query.paginate(@numbers)
   #
   #   # In view:
-  #   <%= pagination_numbers(@numbers) %>
+  #   <%= number_pagination_nav(@numbers) %>
   #
-  def paginate_numbers(arg = :page, num_per_page = 50)
-    MOPaginator.new(
+  def number_pagination_data(arg = :page, num_per_page = 50)
+    PaginationData.new(
       number_arg: arg,
       number: paginator_number(arg),
       num_per_page: num_per_page
     )
   end
-  # helper_method :paginate_numbers
+  # helper_method :number_pagination_data
 
   private ##########
 
@@ -481,4 +543,3 @@ module ApplicationController::Indexes
     1
   end
 end
-# rubocop:enable Metrics/ModuleLength

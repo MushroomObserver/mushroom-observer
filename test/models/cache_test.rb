@@ -31,7 +31,7 @@ class CacheTest < UnitTestCase
     name = names(:stereum_hirsutum)
     assert_not_empty(name.observations)
     first_updated_at = name.observations.first.updated_at
-    name.change_text_name("Stereum blah", "Foo", "Species")
+    name.change_text_name(rolf, "Stereum blah", "Foo", "Species")
     name.save
     assert(name.observations.all? { |o| o.text_name == name.text_name })
     assert_not_equal(first_updated_at, name.observations.first.updated_at)
@@ -80,18 +80,20 @@ class CacheTest < UnitTestCase
   def test_propagate_classification
     name = names(:agaricus)
     saved_obs_updated_ats =
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.names(lookup: "Agaricus", include_subtaxa: 1).
+      map(&:updated_at)
     new_classification = names(:peltigera).classification
 
     name.update(classification: new_classification)
     name.propagate_classification
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.names(lookup: "Agaricus", include_subtaxa: 1).each do |obs|
       assert_equal(new_classification, obs.classification)
     end
     assert_equal(
       saved_obs_updated_ats,
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.names(lookup: "Agaricus", include_subtaxa: 1).
+      map(&:updated_at)
     )
   end
 
@@ -102,11 +104,12 @@ class CacheTest < UnitTestCase
     saved_name_updated_ats = Name.subtaxa_of_genus_or_below("Agaricus").
                              map(&:updated_at)
     saved_obs_updated_ats =
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.names(lookup: "Agaricus", include_subtaxa: 1).
+      map(&:updated_at)
 
     name.propagate_add_lifeform("lichen")
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.names(lookup: "Agaricus", include_subtaxa: 1).each do |obs|
       assert_true(obs.lifeform.include?(" lichen "))
     end
     assert_equal(
@@ -124,12 +127,13 @@ class CacheTest < UnitTestCase
 
     name.propagate_remove_lifeform("lichen")
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.names(lookup: "Agaricus", include_subtaxa: 1).each do |obs|
       assert_false(obs.lifeform.include?(" lichen "))
     end
     assert_equal(
       saved_obs_updated_ats,
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.names(lookup: "Agaricus", include_subtaxa: 1).
+      map(&:updated_at)
     )
 
     Name.subtaxa_of_genus_or_below("Agaricus").each do |nam|

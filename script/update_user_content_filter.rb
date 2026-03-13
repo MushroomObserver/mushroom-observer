@@ -4,9 +4,9 @@
 # This is a one-time script, i'm just making it nice for practice
 # call with `script/update_user_content_filter.rb "true"`
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
-require(File.expand_path("../app/extensions/extensions.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
+require_relative("../config/initializers/extensions")
 
 abort(<<HELP) if ARGV.length != 1
 
@@ -17,7 +17,7 @@ abort(<<HELP) if ARGV.length != 1
   DESCRIPTION::
 
     Updates the keys of the serialized hash in `user`.`content_filter`
-    to match the new keys in the `ContentFilter` class.
+    to match the new keys in the `Query::Filter` class.
 
   PARAMETERS::
 
@@ -42,8 +42,10 @@ class UpdateUserContentFilter
       next if content_filter.blank?
 
       hsh = content_filter # the value is a serialized hash, already parsed here
-      hsh[:with_images] = hsh.delete(:has_images) if hsh.key?(:has_images)
-      hsh[:with_specimen] = hsh.delete(:has_specimen) if hsh.key?(:has_specimen)
+      hsh[:has_images] = hsh.delete(:with_images) if hsh.key?(:with_images)
+      if hsh.key?(:with_specimen)
+        hsh[:has_specimen] = hsh.delete(:with_specimen)
+      end
       entries << { id: user_id, content_filter: hsh }
     end
     entries

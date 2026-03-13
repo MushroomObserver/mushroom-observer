@@ -1,75 +1,78 @@
 <%
-@css_theme = css_theme
+@css_theme = css_theme(@user)
 
 html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
 ctrlr_action = "#{controller.controller_name}__#{controller.action_name}"
 theme = "theme-#{@css_theme.underscore.dasherize}"
-location_format = "location-format-#{User.current_location_format}"
-logged_in = User.current ? "logged-in-user" : "no-user"
+location_format = "location-format-#{@user&.location_format || "postal"}"
+logged_in = @user ? "logged-in-user" : "no-user"
 body_class = class_names(ctrlr_action, theme, location_format, logged_in)
+# These execute AFTER the template!
+default_container_class
+default_column_classes
+default_content_padding
+content_classes = class_names(yield(:container_class), yield(:content_padding))
 %>
 <!DOCTYPE html>
 <html class="<%= html_class %>">
-<head>
-  <%= render(partial: "application/app/head") %>
-</head>
 
-<body class="<%= body_class %>" data-controller="lazyload tooltip">
-  <% if Rails.env == "production" %>
-    <%= render(partial: "application/app/gtm_iframe") %>
-  <% end %>
+  <head>
+    <%= render(partial: "application/app/head") %>
+  </head>
 
-<div id="main_container" class="container-fluid"
-     data-controller="nav links" data-nav-target="container">
+  <body class="<%= body_class %>" data-controller="lazyload tooltip">
+    <% if Rails.env == "production" %>
+      <%= render(partial: "application/app/gtm_iframe") %>
+    <% end %>
 
-  <%= render(partial: "application/app/banners") %>
+    <div id="main_container" class="px-sm-3"
+       data-controller="nav links" data-nav-target="container">
 
-  <div class="row row-offcanvas row-offcanvas-left"
-       data-nav-target="offcanvas">
+      <%= render(partial: "application/app/banners") %>
 
-    <nav id="sidebar" class="sidebar-offcanvas col-xs-8 col-sm-2 hidden-print">
-      <%= render(partial: "application/sidebar") %>
-    </nav><!-- #sidebar -->
+      <div class="row row-offcanvas row-offcanvas-left"
+         data-nav-target="offcanvas">
 
-    <div id="right_side" class="col-xs-12 col-sm-10">
+        <%= render(Components::ApplicationSidebar.new(
+          user: @user,
+          browser: browser,
+          request: request,
+          in_admin_mode: in_admin_mode?,
+          languages: @languages
+        )) %>
 
-      <%= render(partial: "application/app/hamburger") %>
+        <div id="right_side" class="col-xs-12 col-md-10">
+          <%= render(partial: "application/top_nav") %>
+          <%= render(partial: "application/app/page_flash") %>
+          <%= render(partial: "application/content/header") %>
 
-      <%= render(partial: "application/top_nav") %>
+          <main id="content" class="<%= content_classes %>"
+              data-controller="lightgallery">
 
-      <%# need to print a `#page_flash` div no matter what, so js can add %>
-      <div class="container-full hidden-print" id="page_flash">
-        <%= flash_notices_html %><%# calls flash_clear %>
-      </div><!--.container-text-->
+            <%# unless @user&.verified? %>
+            <%# render(Components::LoginLayout.new) %>
+            <%# end %>
 
-      <header id="header">
-        <%= render(partial: "application/content/title_and_tab_sets") %>
-      </header>
+            <!--MAIN_PAGE_CONTENT-->
+            <%= yield %>
+            <!--/MAIN_PAGE_CONTENT-->
 
-      <main id="content" class="<%= container_class %>"
-            data-controller="lightgallery">
+            <%= render(Components::TranslatorsCredit.new) %>
+          </main><!-- #content -->
 
-        <%# unless @user&.verified? %>
-          <%# render(partial: "application/content/login_layout") %>
-        <%# end %>
+        </div>
+        <!-- #right_side -->
+      </div>
+      <!-- .row-offcanvas -->
+    </div>
+    <!-- #main_container -->
 
-        <!--MAIN_PAGE_CONTENT-->
-        <%= yield %>
-        <!--/MAIN_PAGE_CONTENT-->
+    <!--PROGRESS SPINNER -->
+    <%= render(Components::ModalProgressSpinner.new) %>
+    <!--TURBO CONFIRM MODAL -->
+    <%= render(Components::ModalConfirm.new) %>
+    <%= render(partial: "application/app/media_query_tests") %>
+    <%= render(partial: "application/app/javascript_footer") %>
+  </body>
 
-        <%= render(partial: "application/content/translators_credit") %>
-      </main><!-- #content -->
-
-    </div><!-- #right_side -->
-  </div><!-- .row-offcanvas -->
-</div><!-- #main_container -->
-
-<!--AJAX PROGRESS WHIRLY -->
-<%= render(partial: "shared/modal_ajax_progress") %>
-
-<%= render(partial: "application/app/media_query_tests") %>
-
-<%= render(partial: "application/app/javascript_footer") %>
-
-</body>
 </html>

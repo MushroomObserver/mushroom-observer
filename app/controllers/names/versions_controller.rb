@@ -4,11 +4,10 @@
 module Names
   class VersionsController < ApplicationController
     before_action :login_required
+    before_action :store_location
 
     # Show past version of Name.  Accessible only from show_name page.
     def show
-      pass_query_params
-      store_location
       return unless find_name!
 
       @name.revert_to(params[:version].to_i)
@@ -22,15 +21,17 @@ module Names
                           pluck(:display_name)
     end
 
-    def find_name!
-      @name = Name.show_includes.safe_find(params[:id]) ||
-              flash_error_and_goto_index(Name, params[:id])
-    end
-
     def show_includes
       [:correct_spelling,
        { observations: :user },
        :user, :versions]
+    end
+
+    private
+
+    def find_name!
+      @name = Name.show_includes.safe_find(params[:id]) ||
+              flash_error_and_goto_index(Name, params[:id])
     end
   end
 end

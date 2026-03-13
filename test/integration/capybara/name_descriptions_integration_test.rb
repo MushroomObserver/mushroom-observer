@@ -3,7 +3,27 @@
 require("test_helper")
 
 class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
+  def test_general_description_editable_by_permitted_user
+    name = names(:peltigera) # needs to have gen_desc
+
+    login!(katrina) # not permitted to edit description of above
+    visit("/names/#{name.id}")
+    within("#name_general_description") do
+      assert_no_link(text: "Edit")
+    end
+
+    # Log out and try again.
+    first(:button, text: :app_logout.l).click
+
+    login!(dick) # description owner
+    visit("/names/#{name.id}")
+    within("#name_general_description") do
+      click_on("Edit")
+    end
+    assert_selector("body.descriptions__edit")
+  end
   # -----------------------------------
+  #
   #  Test student creating draft for project.
   #  This could be refactored to use the methods from the second test?
   # -----------------------------------
@@ -293,6 +313,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     include Minitest::Assertions
     include CapybaraSessionExtensions
     include GeneralExtensions
+
     attr_accessor :user, :abilities, :name_we_are_working_on,
                   :name_description_data, :group_expectations,
                   :assertions # needed by Minitest::Assertions
@@ -573,5 +594,81 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
         assert_no_selector("form[action*='#{uri}']")
       end
     end
+  end
+
+  # Test that admins can access and use the "Adjust permissions" page
+  # for public descriptions
+  def test_admin_can_adjust_permissions_on_public_description
+    # Use peltigera_desc which has a proper user (dick) and is public
+    desc = name_descriptions(:peltigera_desc)
+    assert_equal("public", desc.source_type)
+
+    # Login as admin and enter admin mode
+    login!(users(:admin))
+    visit("/names/descriptions/#{desc.id}")
+
+    # Enter admin mode
+    first(:button, id: "user_nav_admin_mode_link").click
+
+    # Should be able to see the "Adjust permissions" link in admin mode
+    # Try different possible link texts
+    if has_link?(text: /Adjust permissions/i)
+      click_link(text: /Adjust permissions/i)
+    elsif has_link?(href: %r{permissions/edit})
+      first(:link, href: %r{permissions/edit}).click
+    else
+      # Direct navigation as fallback
+      visit("/names/descriptions/#{desc.id}/permissions/edit")
+    end
+
+    # Should be on the permissions edit page
+    assert_selector("body.permissions__edit")
+
+    # Verify the form loads correctly
+    within("form#description_permissions_form") do
+      # Should have checkboxes for existing groups (namespaced array fields)
+      all_users_id = UserGroup.all_users.id
+      assert(has_css?("input[type='checkbox']" \
+                      "[name='description_permissions[group_reader][]']" \
+                      "[value='#{all_users_id}']"))
+      assert(has_css?("input[type='checkbox']" \
+                      "[name='description_permissions[group_writer][]']" \
+                      "[value='#{all_users_id}']"))
+      assert(has_css?("input[type='checkbox']" \
+                      "[name='description_permissions[group_admin][]']" \
+                      "[value='#{all_users_id}']"))
+
+      # Should have write-in fields for adding new users (now namespaced)
+      assert(has_field?("description_permissions[writein_name_1]", type: :text))
+      assert(has_field?("description_permissions[writein_reader_1]",
+                        type: :checkbox))
+      assert(has_field?("description_permissions[writein_writer_1]",
+                        type: :checkbox))
+      assert(has_field?("description_permissions[writein_admin_1]",
+                        type: :checkbox))
+    end
+
+    # Now test that we can actually submit changes
+    within("form#description_permissions_form") do
+      # Add katrina as a writer using the write-in field
+      fill_in("description_permissions[writein_name_1]", with: "katrina")
+      check("description_permissions[writein_writer_1]")
+
+      # Submit the form
+      first(:button, type: "submit").click
+    end
+
+    # Should redirect back to description show page
+    assert_selector("body.descriptions__show")
+
+    # Verify the permission was actually added
+    desc.reload
+    katrina_group = UserGroup.one_user(users(:katrina))
+    assert_includes(desc.writer_groups, katrina_group,
+                    "Katrina should be added to writer groups")
+
+    # Should see a flash notice about the change
+    # The system says "Gave edit permission to Katrina"
+    assert_flash_text(/edit.*katrina/i)
   end
 end

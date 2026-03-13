@@ -28,8 +28,10 @@ MushroomObserver::Application.configure do
 
   # REDIRECT_URI (Callback URL)
   # iNat calls this after iNat user authorizes MO to access their data.
+  # Must match the redirect_uri in the iNat application settings for iNat's
+  # MushroomObserver Test app https://www.inaturalist.org/oauth/applications/851
   config.redirect_uri =
-    "http://localhost:3000/observations/inat_imports/authorization_response"
+    "http://localhost:3000/inat_imports/authorization_response"
 
   # ----------------------------
   #  Rails configuration.
@@ -62,6 +64,9 @@ MushroomObserver::Application.configure do
 
   # Use a different cache store in test.
   config.cache_store = :null_store
+
+  # Use primary database for SolidCache (avoids needing separate cache db)
+  config.solid_cache.connects_to = { database: { writing: :primary } }
 
   # Render exception templates for rescuable exceptions and raise for other
   # exceptions.
@@ -113,6 +118,22 @@ MushroomObserver::Application.configure do
   # Set log level.
   config.log_level = :ERROR
 
+  # Suppress template digesting errors for Phlex components
+  # (Phlex components don't have ERB templates to digest)
+  config.action_view.logger = Logger.new($stdout).tap do |logger|
+    logger.level = Logger::ERROR
+
+    # Filter out the Phlex component template errors
+    original_formatter = Logger::Formatter.new
+    logger.formatter = proc do |severity, datetime, progname, msg|
+      if msg.to_s.include?("Couldn't find template for digesting: Components/")
+        next
+      end
+
+      original_formatter.call(severity, datetime, progname, msg)
+    end
+  end
+
   # Raise error when a before_action's only/except options reference missing
   # actions
   config.action_controller.raise_on_missing_callback_actions = true
@@ -123,6 +144,9 @@ MushroomObserver::Application.configure do
 
   config.bot_enabled = true
 
+  # Use :test adapter so we can assert on enqueued jobs.
+  # Tests that need deliver_later to run synchronously should use
+  # perform_enqueued_jobs { ... } block.
   config.active_job.queue_adapter = :test
 
   # ----------------------------

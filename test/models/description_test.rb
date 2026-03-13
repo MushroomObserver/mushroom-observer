@@ -204,9 +204,9 @@ class DescriptionTest < UnitTestCase
     desc = name_descriptions(:peltigera_user_desc)
     desc.update(user_id: nil)
 
-    assert(desc.text_name.start_with?("?'s "),
+    assert(desc.text_name.start_with?("Public"),
            "text_name of user sourced Description with unknown user should " \
-           "start_with \"?'s\" ")
+           "start_with Public ")
   end
 
   def test_source_object

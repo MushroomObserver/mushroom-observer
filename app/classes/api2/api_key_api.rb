@@ -7,20 +7,8 @@ class API2
       APIKey
     end
 
-    def high_detail_page_length
-      1000
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
+    def page_length_level
+      :lightweight
     end
 
     # the :user may be the mobile app. the :for_user is the user the key is for
@@ -56,7 +44,10 @@ class API2
     def after_create(api_key)
       return if api_key.verified
 
-      QueuedEmail::VerifyAPIKey.create_email(@for_user, @user, api_key)
+      # Migrated from QueuedEmail::VerifyAPIKey to deliver_later.
+      VerifyAPIKeyMailer.build(
+        receiver: @for_user, app_user: @user, api_key:
+      ).deliver_later
     end
 
     def get

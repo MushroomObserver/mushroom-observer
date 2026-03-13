@@ -48,18 +48,14 @@
 ############################################################################
 
 class LocationDescription < Description
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
-  # enum definitions for use by simple_enum gem
+  include Description::Scopes
+
   # Do not change the integer associated with a value
-  enum source_type:
-       {
-         public: 1,
-         foreign: 2,
-         project: 3,
-         source: 4,
-         user: 5
-       }, _suffix: :source
+  enum :source_type,
+       { public: 1, foreign: 2, project: 3, source: 4, user: 5 },
+       suffix: :source, instance_methods: false
 
   belongs_to :license
   belongs_to :location
@@ -89,6 +85,31 @@ class LocationDescription < Description
   has_many :editors, through: :location_description_editors,
                      source: :user
 
+  scope :order_by_default,
+        -> { order_by(::Query::LocationDescriptions.default_order) }
+
+  scope :is_public, lambda { |bool = true|
+    where(public: bool)
+  }
+  scope :by_author, lambda { |user|
+    ids = Lookup::Users.new(user).ids
+    joins(:location_description_authors).distinct.
+      where(location_description_authors: { user_id: ids })
+  }
+  scope :by_editor, lambda { |user|
+    ids = Lookup::Users.new(user).ids
+    joins(:location_description_editors).distinct.
+      where(location_description_editors: { user_id: ids })
+  }
+  scope :locations, lambda { |locations|
+    ids = Lookup::Locations.new(locations).ids
+    where(location: ids)
+  }
+
+  scope :location_query, lambda { |hash|
+    joins(:location).subquery(:Location, hash)
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       :authors,
@@ -103,6 +124,7 @@ class LocationDescription < Description
   }
 
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
+  SEARCHABLE_FIELDS = ALL_NOTE_FIELDS
 
   acts_as_versioned(
     if_changed: ALL_NOTE_FIELDS,
@@ -135,11 +157,6 @@ class LocationDescription < Description
     "/locations/descriptions"
   end
 
-  # Eliminate when controller_normalized? goes.
-  def self.show_action
-    :show
-  end
-
   # Returns an Array of all the descriptive text fields (Symbol's).
   def self.all_note_fields
     ALL_NOTE_FIELDS
@@ -168,11 +185,6 @@ class LocationDescription < Description
       recipients.push(user) if user.email_locations_editor
     end
 
-    # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).find_each do |user|
-      recipients.push(user)
-    end
-
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.
     location.interests.each do |interest|
@@ -186,11 +198,23 @@ class LocationDescription < Description
     # Remove users who have opted out of all emails.
     recipients.reject!(&:no_emails)
 
-    # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::LocationChange.create_email(
-        sender, recipient, location, self
-      )
+    send_location_change_emails(sender, recipients)
+  end
+
+  private
+
+  def send_location_change_emails(sender, recipients)
+    # Migrated from QueuedEmail::LocationChange to deliver_later.
+    # Calculate versions now while saved_changes? is still accurate.
+    loc = location
+    old_desc_ver = saved_changes? ? version - 1 : version
+
+    (recipients.uniq - [sender]).each do |receiver|
+      LocationChangeMailer.build(
+        sender:, receiver:, location: loc, old_loc_ver: loc.version,
+        new_loc_ver: loc.version, description: self, old_desc_ver:,
+        new_desc_ver: version
+      ).deliver_later
     end
   end
 end

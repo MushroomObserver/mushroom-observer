@@ -9,7 +9,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
   def test_post_textile
     login
     visit("/info/textile_sandbox")
-    fill_in("code", with: "Jabberwocky")
+    fill_in("textile_sandbox_code", with: "Jabberwocky")
     click_button("Test")
     page.assert_text("Jabberwocky", count: 2)
   end
@@ -19,13 +19,15 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     login
     name = names(:boletus_edulis)
     visit("/names/#{name.id}/map")
-    click_link("Show Observations")
-    title = page.find_by_id("title")
-    title.assert_text("Observations of #{name.text_name}")
+    click_on("Show Observations", match: :first)
+    assert_match("Observations", page.title)
+    filters = page.find_by_id("filters")
+    filters.assert_text(name.text_name)
 
-    click_link("Show Map")
-    title = page.find("#title")
-    title.assert_text("Map of Observations of #{name.text_name}")
+    click_on("Show Map", match: :first)
+    assert_match("Map of Observations", page.title)
+    filters = page.find_by_id("filters")
+    filters.assert_text(name.text_name)
   end
 
   # Prove that if a user clicks an Observation in Observation search results
@@ -45,30 +47,13 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     next_obs = observations.second
 
     # Show first Observation from Your Observations search.
-    click_link(first_obs.id.to_s)
+    click_link(first_obs.text_name)
     # Destroy it.
     click_button(class: "destroy_observation_link_#{first_obs.id}")
 
     # MO should show next Observation.
-    page.find("#title")
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
-  end
-
-  # Prevent reversion of the bug that was fixed in PR #1479
-  # https://github.com/MushroomObserver/mushroom-observer/pull/1479
-  def test_edit_observation_with_query
-    user = users(:dick)
-    obs = observations(:collected_at_obs)
-    assert_equal(user, obs.user,
-                 "Test needs an Observation fixture owned by user")
-    q_id = "123abc" # Can be anything, but is need to expose the bug
-
-    login(user)
-    # Throws an error pre-PR #1479
-    visit(edit_observation_path(obs.id, params: { q: q_id }))
-
-    assert_current_path(edit_observation_path(obs.id, params: { q: q_id }))
   end
 
   # Prove that unchecking a Project as part of editing an Observation
@@ -110,19 +95,19 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_not_includes(species_list.observations, observation)
   end
 
-  def test_observation_remove_collection_number
-    obs = observations(:minimal_unknown_obs)
-    assert_not_empty(obs.collection_numbers,
-                     "Test needs a fixture with a collection number(s)")
-    user = obs.user
+  def test_observation_label_download_not_logged_in
+    visit(observations_downloads_path)
+    assert_equal(403, page.status_code) # forbidden
+  end
 
-    login(user)
-    visit(observation_path(obs.id))
-    assert_difference("obs.collection_numbers.count", -1) do
-      page.find("#observation_collection_numbers").click_on("Remove")
-      # new edit form (appears in modal)
-      page.find("#content").click_on("Remove")
-    end
+  def test_old_observation_path_not_logged_in
+    visit(observation_path(Observation.first.id))
+    assert_equal(403, page.status_code) # forbidden
+  end
+
+  def test_raw_id_path_not_logged_in
+    visit("/#{Observation.first.id}")
+    assert_equal(403, page.status_code) # forbidden
   end
 
   def test_locales_when_sending_email_question
@@ -157,34 +142,51 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     end
   end
 
+  def test_observation_pattern_search_with_bad_keyword
+    correctable_pattern = "foo:campestrus"
+
+    login
+    visit("/")
+    fill_in("pattern_search_pattern", with: correctable_pattern)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
+    assert_match("Observations", page.title)
+    assert_selector(
+      "#flash_notices",
+      text: :pattern_search_bad_term_error.tp(
+        type: :observation, help: "", term: "\"foo\""
+      ).as_displayed
+    )
+  end
+
   def test_observation_pattern_search_with_correctable_pattern
     correctable_pattern = "agaricis campestrus"
 
     login
     visit("/")
-    fill_in("search_pattern", with: correctable_pattern)
-    page.select("Observations", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: correctable_pattern)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#flash_notices",
                     text: :runtime_no_matches.l(type: :observations.l))
-    assert_selector("#title", text: "Observation Search")
+    assert_match("Observations", page.title)
     assert_selector("#results", text: "")
+
+    corrected_pattern = "Agaricus campestris"
     assert_selector(
       "#content a[href *= 'observations?pattern=Agaricus+campestris']",
       text: names(:agaricus_campestris).search_name
     )
-
-    corrected_pattern = "Agaricus campestris"
+    assert_selector("#content div.alert-warning", text: corrected_pattern)
     obs = observations(:agaricus_campestris_obs)
 
-    fill_in("search_pattern", with: corrected_pattern)
-    page.select("Observations", from: :search_type)
-    click_button("Search")
+    fill_in("pattern_search_pattern", with: corrected_pattern)
+    page.select("Observations", from: :pattern_search_type)
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title",
-                    text: "Observation #{obs.id}: #{obs.name.search_name}")
+    assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}")
   end
 
   # Tests of show_name_helper module
@@ -229,7 +231,6 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     proj.save
 
     # Prove that Project is not re-checked for the next Observation
-    login(:katrina)
     visit(new_observation_path)
     assert(
       has_unchecked_field?(proj_checkbox),
@@ -301,7 +302,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click
     end
     assert(
-      proj.observations.exclude?(Observation.order(created_at: :asc).last),
+      proj.observations.exclude?(Observation.last),
       "Observation should not be added to Project if user unchecks Project"
     )
 
@@ -324,7 +325,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # Change the Obs date to be in range - this should do it.
     select(proj.end_date.day, from: "observation_when_3i")
     select(Date::MONTHNAMES[proj.end_date.month], from: "observation_when_2i")
-    select(proj.end_date.year, from: "observation_when_1i")
+    fill_in("observation_when_1i", with: proj.end_date.year)
     # must be re-set, why? Seems @location should be set by previous commit
     find_field(id: "observation_location_id",
                type: :hidden).set(proj.location.id)
@@ -335,7 +336,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click
     end
     assert(
-      proj.observations.include?(Observation.order(created_at: :asc).last),
+      proj.observations.include?(Observation.last),
       "Failed to include Obs in Project when user fixes Observation When"
     )
 
@@ -351,7 +352,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     select(Time.zone.today.day, from: "observation_when_3i")
     select(Date::MONTHNAMES[Time.zone.today.month],
            from: "observation_when_2i")
-    select(Time.zone.today.year, from: "observation_when_1i")
+    fill_in("observation_when_1i", with: Time.zone.today.year)
 
     first(:button, "Create").click
     assert_selector(
@@ -367,7 +368,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click # override warning by clicking button
     end
     assert(
-      proj.observations.include?(Observation.order(created_at: :asc).last),
+      proj.observations.include?(Observation.last),
       "Failed to include Obs in Project when user overrides warning"
     )
   end

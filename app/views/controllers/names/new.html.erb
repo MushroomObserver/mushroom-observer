@@ -1,8 +1,7 @@
 <%
-add_page_title(:create_name_title.t)
-add_tab_set(name_form_new_tabs)
-action = add_query_param({ controller: "/names", action: :create })
+add_new_title(:create_object, :NAME)
+add_context_nav(name_form_new_tabs)
 %>
 
-<%= render(partial: "names/form",
-           locals: { action: action, button: :CREATE.l }) %>
+<%= render(Components::NameForm.new(@name, user: @user,
+                                    name_string: @name_string)) %>

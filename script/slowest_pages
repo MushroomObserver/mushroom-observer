@@ -20,10 +20,10 @@
 ################################################################################
 
 FILE = ARGV[0] || File.expand_path("../log/production.log", __dir__)
-NUM  = ARGV[1].to_i || 10
+NUM  = ARGV[1].to_i
 
 data = {}
-File.open(FILE).readlines.each do |line|
+File.foreach(FILE) do |line|
   next unless line.start_with?("TIME:")
 
   _, time, status, controller, action, robot = line.split
@@ -38,7 +38,7 @@ File.open(FILE).readlines.each do |line|
   rec[3] += 1 if robot
 end
 
-data.each do |_path, rec|
+data.each_value do |rec|
   sum, ssq, num = *rec
   rec[0] = avg = sum / num
   rec[1] = Math.sqrt(ssq / num - avg * avg)

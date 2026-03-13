@@ -1,0 +1,1083 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+class ReportTest < UnitTestCase
+  LAT_INDEX = 19
+  LONG_INDEX = 20
+
+  def test_adolf
+    obs = observations(:agaricus_campestris_obs)
+    expect = [
+      nil,
+      nil,
+      nil,
+      "Agaricus",
+      nil,
+      "campestris",
+      "L.",
+      nil,
+      nil,
+      nil,
+      nil,
+      "USA",
+      "California",
+      "Burbank",
+      "34.15",
+      "-118.37",
+      "34.22",
+      "-118.29",
+      nil,
+      nil,
+      nil,
+      nil,
+      "2007-03-19",
+      "Rolf Singer",
+      nil,
+      nil,
+      nil,
+      "From the lawn next door",
+      nil,
+      nil,
+      nil,
+      nil,
+      nil,
+      nil,
+      nil,
+      nil,
+      nil,
+      nil,
+      obs.id.to_s,
+      nil
+    ]
+    do_csv_test(Report::Adolf, obs, expect, &:text_name)
+  end
+
+  def test_darwin_observations
+    obs = observations(:detailed_unknown_obs)
+    expect = [
+      obs.id.to_s,
+      "#{MO.http_domain}/#{obs.id}",
+      "HumanObservation",
+      "#{obs.updated_at.api_time} UTC",
+      "MushroomObserver",
+      nil,
+      "Fungi",
+      nil,
+      "Kingdom",
+      "Fungi",
+      nil,
+      nil,
+      "Mary Newbie",
+      "2006-05-11",
+      "2006",
+      "5",
+      "11",
+      "USA",
+      "California",
+      nil,
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "Found in a strange place... & with śtrangè characters™"
+    ]
+    do_csv_test(Report::Darwin::Observations, obs, expect, &:id)
+  end
+
+  def test_dwca
+    expect = ["meta.xml", "observations.csv", "multimedia.csv"]
+    do_zip_test(Report::Dwca, expect)
+  end
+
+  def test_taxa_report
+    taxa_report = build_taxa_report
+    report_content = taxa_report.body
+    assert_not_empty(report_content)
+    table = CSV.parse(report_content, col_sep: taxa_report.separator)
+    assert_equal(Observation.select(:name_id).distinct.count + 1, table.count)
+    obs = Observation.first
+    assert(table.include?([obs.name_id.to_s, obs.text_name]))
+  end
+
+  def test_fundis_no_exact_lat_lng
+    # There are two collection numbers for this observation.  I can't think of
+    # any good way to ensure the order that these are rendered in the report be
+    # consistent.  So I'm just going to delete one of the numbers.
+    collection_numbers(:detailed_unknown_coll_num_two).destroy
+
+    obs = observations(:detailed_unknown_obs)
+    img1, img2 = obs.images.sort_by(&:id)
+    expect = [
+      "Fungi",
+      nil,
+      "Mary Newbie",
+      "MO#{obs.id}; Mary Newbie 174",
+      "MO#{obs.id}",
+      "",
+      "1",
+      "Burbank",
+      nil,
+      "California",
+      "USA",
+      "34.185",
+      "-118.33",
+      "3892",
+      "148",
+      "294",
+      "11",
+      "5",
+      "2006",
+      "2006-05-11",
+      "https://mushroomobserver.org/obs/#{obs.id}",
+      "file://#{test_server_path("test_server1/orig/#{img1.id}.jpg ")}" \
+        "file://#{test_server_path("test_server1/orig/#{img2.id}.jpg")}",
+      "FunDiS",
+      "",
+      "",
+      "",
+      "",
+      "Found in a strange place... & with śtrangè characters™"
+    ]
+    do_csv_test(Report::Fundis, obs, expect, &:id)
+  end
+
+  def test_fundis_with_exact_lat_lng
+    obs = observations(:unknown_with_lat_lng)
+    obs.notes = {
+      "Collector's_Name": "John Doe",
+      Substrate: "wood chips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Foo: "Bar",
+      Other: "Things"
+    }
+    obs.save!
+
+    expect = [
+      "Fungi",
+      nil,
+      "Mary Newbie",
+      "MO#{obs.id}",
+      "MO#{obs.id}",
+      "",
+      "0",
+      "Burbank",
+      nil,
+      "California",
+      "USA",
+      "34.1622",
+      "-118.3521",
+      nil,
+      "148",
+      "294",
+      "22",
+      "7",
+      "2010",
+      "2010-07-22",
+      "https://mushroomobserver.org/obs/#{obs.id}",
+      "",
+      "FunDiS",
+      "John Doe",
+      "wood chips",
+      "lawn",
+      "Agaricus",
+      "Foo: Bar\nOther: Things"
+    ]
+    do_csv_test(Report::Fundis, obs, expect, &:id)
+  end
+
+  def test_fundis_with_hidden_gps
+    obs = observations(:unknown_with_lat_lng)
+    obs.update_attribute(:gps_hidden, true)
+
+    expect = [
+      "Fungi",
+      nil,
+      "Mary Newbie",
+      "MO#{obs.id}",
+      "MO#{obs.id}",
+      "",
+      "0",
+      "Burbank",
+      nil,
+      "California",
+      "USA",
+      "34.185",
+      "-118.33",
+      "3892",
+      "148",
+      "294",
+      "22",
+      "7",
+      "2010",
+      "2010-07-22",
+      "https://mushroomobserver.org/obs/#{obs.id}",
+      "",
+      "FunDiS",
+      "",
+      "",
+      "",
+      "",
+      "unknown_with_lat_lng"
+    ]
+    do_csv_test(Report::Fundis, obs, expect, &:id)
+
+    expect[11] = "34.1622"
+    expect[12] = "-118.3521"
+    expect[13] = nil
+    do_csv_test(Report::Fundis, obs, expect, user: users(:mary), &:id)
+  end
+
+  def test_raw
+    obs = observations(:detailed_unknown_obs)
+    cns = obs.collection_numbers.map do |cn|
+      "#{cn.id}\t#{cn.name}\t#{cn.number}"
+    end
+    expect = [
+      obs.id.to_s,
+      obs.user.id.to_s,
+      "mary",
+      "Mary Newbie",
+      "2006-05-11",
+      nil,
+      "X",
+      "Cortinarius sp.: 1234, Fungi: 314159",
+      cns.join("\n"),
+      obs.name.id.to_s,
+      "Fungi",
+      nil,
+      "Kingdom",
+      "0.0",
+      "547147019",
+      "USA",
+      "California",
+      nil,
+      "Burbank",
+      nil,
+      nil,
+      nil,
+      "34.22",
+      "34.15",
+      "-118.29",
+      "-118.37",
+      "294",
+      "148",
+      "X",
+      obs.thumb_image.id.to_s,
+      "Found in a strange place... & with śtrangè characters™",
+      "https://mushroomobserver.org/obs/#{obs.id}"
+    ]
+    do_csv_test(Report::Raw, obs, expect, &:id)
+  end
+
+  def test_symbiota1
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "First\tline.\nSecond\tline."
+    }
+    obs.save!
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    expect = [
+      "Fungi",
+      "",
+      "Kingdom",
+      "Fungi",
+      "",
+      "",
+      "Mary Newbie",
+      "174",
+      "NY",
+      "2006-05-11",
+      "2006",
+      "5",
+      "11",
+      "USA",
+      "California",
+      "",
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      "wood chips",
+      "Agaricus",
+      "Habitat: lawn Other: First line. Second line.",
+      obs.id.to_s,
+      "https://mushroomobserver.org/obs/#{obs.id}",
+      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
+    ]
+    do_tsv_test(Report::Symbiota, obs, expect, &:id)
+  end
+
+  def test_symbiota2
+    obs = observations(:agaricus_campestrus_obs)
+    expect = [
+      "Agaricus campestrus",
+      "L.",
+      "Species",
+      "Agaricus",
+      "campestrus",
+      "",
+      "Rolf Singer",
+      "MUOB #{obs.id}",
+      "",
+      "2007-06-23",
+      "2007",
+      "6",
+      "23",
+      "USA",
+      "California",
+      "",
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      "",
+      "",
+      "From somewhere else",
+      obs.id.to_s,
+      "https://mushroomobserver.org/obs/#{obs.id}"
+    ]
+    do_tsv_test(Report::Symbiota, obs, expect, &:id)
+  end
+
+  def test_symbiota_compress_consecutive_whitespace
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "1st line.\r\n\r\n2nd line.\r\n \r\n3rd line."
+    }
+    obs.save!
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    expect = [
+      "Fungi",
+      "",
+      "Kingdom",
+      "Fungi",
+      "",
+      "",
+      "Mary Newbie",
+      "174",
+      "NY",
+      "2006-05-11",
+      "2006",
+      "5",
+      "11",
+      "USA",
+      "California",
+      "",
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      "wood chips",
+      "Agaricus",
+      "Habitat: lawn Other: 1st line. 2nd line. 3rd line.",
+      obs.id.to_s,
+      "https://mushroomobserver.org/obs/#{obs.id}",
+      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
+    ]
+    do_tsv_test(Report::Symbiota, obs, expect, &:id)
+  end
+
+  # test bare-bones obs to differentiate from other tests
+  def test_mycoportal_minimal
+    obs = observations(:minimal_unknown_obs)
+    expect = hashed_expect(obs).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_notes_and_images
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "First\tline.\nSecond\tline."
+    }
+    obs.save!
+
+    expect = hashed_expect(obs).merge(
+      disposition: "NY",
+      substrate: "wood chips",
+      associatedTaxa: "host: Agaricus",
+      occurrenceRemarks: "Habitat: lawn Other: First line. Second line."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_sequence
+    obs = observations(:locally_sequenced_obs)
+
+    expect = hashed_expect(obs).merge(
+      occurrenceRemarks: "Sequenced; ",
+      locality: "North Falmouth, 68 Bay Rd., MO Inc."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_agaricus_campestrus_obs
+    obs = observations(:agaricus_campestrus_obs)
+    expect = hashed_expect(obs).merge(
+      occurrenceRemarks: "From somewhere else"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_compress_consecutive_whitespace
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "1st line.\r\n\r\n2nd line.\r\n \r\n3rd line."
+    }
+    obs.save!
+
+    expect = hashed_expect(obs).merge(
+      disposition: "NY",
+      substrate: "wood chips",
+      associatedTaxa: "host: Agaricus",
+      occurrenceRemarks: "Habitat: lawn Other: 1st line. 2nd line. 3rd line."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_associated_taxa_trees_shrubs_host
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      FieldSlip::TREES_SHRUBS => "oak, pine",
+      Host: "Pinus contorta",
+      Other: "other remarks"
+    }
+    obs.save!
+
+    expect = hashed_expect(obs).merge(
+      disposition: "NY",
+      # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
+      associatedTaxa: "oak, pine; host: Pinus contorta",
+      occurrenceRemarks: "other remarks"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_group
+    location = locations(:burbank)
+    name = names(:boletus_edulis_group)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Boletus edulis",
+      identificationQualifier: "group"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_group_sensu
+    name = Name.create!(
+      user: rolf,
+      rank: "Group",
+      text_name: "Tricholoma caligatum group",
+      author: "sensu Besette et al.",
+      search_name: "Tricholoma caligatum group sensu Besette et al.",
+      display_name: "**__Tricholoma__** **__caligatum__** group " \
+                    "sensu Besette et al."
+    )
+    unqualified_name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Tricholoma caligatum",
+      author: "(Viv.) Ricken",
+      search_name: "Tricholoma caligatum (Viv.) Ricken",
+      display_name: "**__Tricholoma__** **__caligatum__** (Viv.) Ricken"
+    )
+
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: unqualified_name.text_name,
+      identificationQualifier: "group sensu Besette et al."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_standard_provisional
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Geoglossum sp. 'MI01'",
+      author: "",
+      search_name: "Geoglossum sp. 'MI01'",
+      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Geoglossum sp. 'MI01'",
+      identificationQualifier: "nom. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_standard_provisional_authored
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Geoglossum sp. 'MI01'",
+      author: "S.D. Russell",
+      search_name: "Geoglossum sp. 'MI01'",
+      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Geoglossum sp. 'MI01'",
+      identificationQualifier: "S.D. Russell nom. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_standard_provisional_authored_crypt
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Agaricus sp. 'IN01'",
+      author: "S.D. Russell crypt. temp.",
+      search_name: "Agaricus sp. 'IN01' S.D. Russell crypt. temp.",
+      display_name: "**__Agaricus__** sp. **__'IN01'__** " \
+                    "S.D. Russell crypt. temp."
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Agaricus sp. 'IN01'",
+      identificationQualifier: "S.D. Russell crypt. temp."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_explicit_provisional
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Gymnopus bakerensis",
+      author: "(A.H. Sm.) auct. comb. prov.",
+      search_name: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov.",
+      display_name: "__Gymnopus__ __bakerensis__ (A.H. Sm.) auct. comb. prov."
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Gymnopus bakerensis",
+      identificationQualifier: "(A.H. Sm.) auct. comb. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_identification_qualifier_sensu_non_stricto
+    name = names(:coprinus_sensu_lato)
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      identificationQualifier: "sensu lato"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_coordinate_uncertainty_no_lat_lng
+    obs = observations(:minimal_unknown_obs)
+    expect = hashed_expect(obs).merge.values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_coordinate_uncertainty_lat_lng_public
+    obs = observations(:falmouth_2022_obs)
+
+    # Obs has lat/lng & they are public,
+    # We don't know coordinate uncertainty; leave it blank.
+    expect =
+      hashed_expect(obs).merge(
+        decimalLatitude: obs.lat.to_s,
+        decimalLongitude: obs.lng.to_s
+      )
+    expect[:coordinateUncertaintyInMeters] = nil
+    expect = expect.values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_coordinate_uncertainty_lat_lng_hidden
+    obs = observations(:trusted_hidden)
+    loc = obs.location
+
+    # obs lat/lng is in the NE quadrant of loc; so SE corner is the furthest
+    uncertainty = Haversine.distance(loc.center_lat, loc.center_lng,
+                                     loc.south, loc.west).
+                  to_meters.round.to_s
+
+    # public lat/lng is the loc center because obs coordinates are hidden.
+    expect = hashed_expect(obs).merge(
+      decimalLatitude: loc.center_lat.round(4).to_s,
+      decimalLongitude: loc.center_lng.round(4).to_s,
+      minimumElevationInMeters: obs.alt.to_s,
+      maximumElevationInMeters: obs.alt.to_s,
+      coordinateUncertaintyInMeters: uncertainty
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_coordinate_uncertainty_nil_lat_lng_hidden
+    obs = observations(:trusted_hidden)
+    loc = locations(:pretoria)
+    # There are many (5,285) Obss with gps hidden, but no lat/lng
+    obs.update!(location_id: loc.id, where: loc.name,
+                lat: nil, lng: nil)
+    loc = obs.location
+    uncertainty = Haversine.distance(
+      loc.center_lat, loc.center_lng, loc.north, loc.east
+    ).to_meters.round.to_s
+
+    expect = hashed_expect(obs).merge(
+      country: "South Africa",
+      stateProvince: "Gauteng",
+      county: nil,
+      locality: "City of Tshwane Metropolitan Municipality, Pretoria",
+      decimalLatitude: loc.center_lat.round(4).to_s,
+      decimalLongitude: loc.center_lng.round(4).to_s,
+      minimumElevationInMeters: obs.alt.to_s,
+      maximumElevationInMeters: obs.alt.to_s,
+      coordinateUncertaintyInMeters: uncertainty
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_coordinate_uncertainty_lat_lng_hidden_nil_location
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(
+      # actually found in the wild
+      location_id: nil,
+      lat: 18.0949,
+      lng: -65.8014,
+      where: "-65.801449, Humacao18.094914, Puerto Rico, USA",
+      gps_hidden: true,
+      location_lat: nil,
+      location_lng: nil
+    )
+    expect = hashed_expect(obs).merge(
+      stateProvince: "Puerto Rico",
+      locality: "Humacao18.094914, -65.801449"
+    )
+    [:decimalLatitude,
+     :decimalLongitude,
+     :coordinateUncertaintyInMeters,
+     :minimumElevationInMeters,
+     :maximumElevationInMeters].each { |key| expect[key] = nil }
+    expect = expect.values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def hashed_expect(obs)
+    obs_location = obs.location
+    obs_when = obs.when
+    obs_where = obs.where
+    default_uncertainty =
+      if obs.location
+        Haversine.distance(obs_location.center_lat, obs_location.center_lng,
+                           obs_location.south, obs_location.east).
+          to_meters.round.to_s
+      end
+    low = obs_location&.low
+    minimum_elevation = low.to_i.to_s if low.present?
+    high = obs_location&.high
+    maximum_elevation = high.to_i.to_s if high.present?
+
+    {
+      dbpk: obs.id.to_s,
+      basisOfRecord: "HumanObservation",
+      catalogNumber: "MUOB #{obs.id}",
+      sciname: obs.text_name,
+      identificationQualifier: nil,
+      recordedBy: obs.user.legal_name,
+      recordNumber: obs.collection_numbers.first&.number || nil,
+      eventDate: obs_when.strftime("%Y-%m-%d"),
+      substrate: "",
+      occurrenceRemarks: obs.notes[:Other] || "",
+      associatedTaxa: nil,
+      verbatimAttributes: verbatim_attributes(obs),
+      # where is assumed to have just city, state/province, country
+      country: obs_where.split.last,
+      stateProvince: obs_where.split[-2]&.delete_suffix(",") || nil,
+      county: nil,
+      locality: obs_where.split[-3]&.delete_suffix(",") || nil,
+      decimalLatitude: obs_location&.center_lat&.to_s,
+      decimalLongitude: obs_location&.center_lng&.to_s,
+      coordinateUncertaintyInMeters: default_uncertainty || nil,
+      # if low/high are nil, value must be empty string, not zero
+      minimumElevationInMeters: minimum_elevation,
+      maximumElevationInMeters: maximum_elevation,
+      disposition: nil
+    }
+  end
+
+  def verbatim_attributes(obs)
+    "<a href='#{Report::Mycoportal::HTTP_DOMAIN}/#{obs.id}' " \
+    "target='_blank' style='color: blue;'>" \
+    "Original observation ##{obs.id} (Mushroom Observer)" \
+    "</a>"
+  end
+
+  def test_rounding_of_latitudes_etc
+    row = Report::Row.new(vals = [])
+    vals[2] = 1.20456
+    assert_equal(1.2, row.obs_lat(2))
+    assert_equal(1.205, row.obs_lat(3))
+    assert_equal(1.2046, row.obs_lat(4))
+    vals[2] = -123.00045
+    assert_equal(-123, row.obs_lat(3))
+    assert_equal(-123.0005, row.obs_lat(4))
+    assert_equal(-123.00045, row.obs_lat(5))
+    vals[4] = 123.4999
+    assert_equal(123, row.obs_alt)
+    vals[4] = -123.5000
+    assert_equal(-124, row.obs_alt)
+  end
+
+  def test_cleaning_of_notes
+    row = Report::Row.new(vals = [])
+    vals[9] = { Observation.other_notes_key => " abc  def " }.to_yaml
+    assert_equal("abc  def", row.obs_notes)
+  end
+
+  def test_split_date
+    row = Report::Row.new(vals = [])
+    vals[1] = "2017-01-03"
+    assert_equal("2017", row.year)
+    assert_equal("1", row.month)
+    assert_equal("3", row.day)
+  end
+
+  def test_loc_name_sci
+    row = Report::Row.new(vals = [])
+    vals[19] = "Park, Random, Some, Alameda Co., California, USA"
+    assert_equal("USA, California, Alameda Co., Some, Random, Park",
+                 row.loc_name_sci)
+  end
+
+  def test_split_location
+    row = Report::Row.new(vals = [])
+    vals[19] = "Park, Random, Some, Alameda Co., California, USA"
+    assert_equal("USA", row.country)
+    assert_equal("California", row.state)
+    assert_equal("Alameda", row.county)
+    assert_equal("Some, Random, Park", row.locality)
+    assert_equal("Alameda Co., Some, Random, Park", row.locality_with_county)
+
+    row = Report::Row.new(vals = [])
+    vals[19] = "Big Branch, Saint Tammany Parish, Louisiana, USA"
+    assert_equal("USA", row.country)
+    assert_equal("Louisiana", row.state)
+    assert_equal("Saint Tammany", row.county)
+    assert_equal("Big Branch", row.locality)
+    assert_equal("Saint Tammany Parish, Big Branch", row.locality_with_county)
+
+    row = Report::Row.new(vals = [])
+    vals[19] = "Central Park, Los Angeles, California, USA"
+    assert_equal("USA", row.country)
+    assert_equal("California", row.state)
+    assert_nil(row.county)
+    assert_equal("Los Angeles, Central Park", row.locality)
+    assert_equal("Los Angeles, Central Park", row.locality_with_county)
+  end
+
+  def test_split_name
+    do_split_test("Fungi", "Bartl.", "Kingdom", genus: "Fungi")
+    do_split_test("Agaricus", "L.", "Genus", genus: "Agaricus")
+    do_split_test("Rhizocarpon geographicum group", "", "Group",
+                  genus: "Rhizocarpon",
+                  species: "geographicum group")
+    do_split_test("Rhizocarpon geographicum group", "sensu MO", "Group",
+                  genus: "Rhizocarpon",
+                  species: "geographicum group",
+                  species_author: "sensu MO")
+    do_split_test("Rhizocarpon geographicum", "", "Species",
+                  genus: "Rhizocarpon",
+                  species: "geographicum")
+    do_split_test("Rhizocarpon geographicum", "(L.) DC.", "Species",
+                  genus: "Rhizocarpon",
+                  species: "geographicum",
+                  species_author: "(L.) DC.")
+    do_split_test("Some thing ssp. else", "", "Subspecies",
+                  genus: "Some",
+                  species: "thing",
+                  subspecies: "else")
+    do_split_test("Some thing ssp. else", "Seuss", "Subspecies",
+                  genus: "Some",
+                  species: "thing",
+                  subspecies: "else",
+                  subspecies_author: "Seuss")
+    do_split_test("Some thing var. else", "Seuss", "Variety",
+                  genus: "Some",
+                  species: "thing",
+                  variety: "else",
+                  variety_author: "Seuss")
+    do_split_test("Some thing f. else", "Seuss", "Form",
+                  genus: "Some",
+                  species: "thing",
+                  form: "else",
+                  form_author: "Seuss")
+    do_split_test("Some thing ssp. else var. or f. other cfr.", "Seuss", "Form",
+                  genus: "Some",
+                  species: "thing",
+                  subspecies: "else",
+                  variety: "or",
+                  form: "other",
+                  form_author: "Seuss",
+                  cf: "cf.")
+  end
+
+  def test_ascii_encoding
+    query = Query.lookup(:Observation)
+    report = Report::Raw.new(query: query)
+    report.encoding = "ASCII"
+    body = report.body
+    assert_not_empty(body)
+  end
+
+  def test_utf_16_encoding
+    query = Query.lookup(:Observation)
+    report = Report::Raw.new(query: query)
+    report.encoding = "UTF-16"
+    body = report.body
+    assert_not_empty(body)
+  end
+
+  def test_project_tweaker_report
+    obs = observations(:trusted_hidden)
+    query = Query.lookup(:Observation)
+    report_type = Report::Raw
+    body = report_body(report_type, query)
+    table = CSV.parse(body, col_sep: report_type.separator)
+    idx = query.results.sort_by(&:id).index(obs)
+    assert_nil(table[idx + 1][LAT_INDEX])
+    assert_nil(table[idx + 1][LONG_INDEX])
+
+    # user must be project admin for query to work.
+    body = report_body(report_type, query, user: users(:roy))
+    table = CSV.parse(body, col_sep: report_type.separator)
+    idx = query.results.sort_by(&:id).index(obs)
+    assert_equal(obs.lat.to_s, table[idx + 1][LAT_INDEX])
+    assert_equal(obs.lng.to_s, table[idx + 1][LONG_INDEX])
+  end
+
+  # Test column validation for parallel testing race conditions
+  def test_row_detects_notes_column_misalignment
+    # Simulate misaligned columns where notes is Time instead of String/Hash
+    misaligned_vals = Array.new(26)
+    misaligned_vals[0] = 123 # obs_id
+    misaligned_vals[9] = Time.current # Should be notes (String/Hash), not Time
+
+    error = assert_raises(RuntimeError) do
+      Report::Row.new(misaligned_vals)
+    end
+
+    assert_match(/Column misalignment detected/, error.message)
+    assert_match(/Expected @vals\[9\] \(notes\)/, error.message)
+    assert_match(%r{to be String/Hash}, error.message)
+  end
+
+  def test_row_detects_updated_at_column_misalignment
+    # Simulate misaligned columns where updated_at is Hash instead of Time
+    misaligned_vals = Array.new(26)
+    misaligned_vals[0] = 123 # obs_id
+    misaligned_vals[10] = { foo: "bar" } # Should be Time, not Hash
+
+    error = assert_raises(RuntimeError) do
+      Report::Row.new(misaligned_vals)
+    end
+
+    assert_match(/Column misalignment detected/, error.message)
+    assert_match(/Expected @vals\[10\] \(updated_at\)/, error.message)
+    assert_match(%r{to be Time/DateTime/String}, error.message)
+  end
+
+  def test_row_detects_name_text_name_column_misalignment
+    # Simulate misaligned columns where name_text_name is numeric
+    misaligned_vals = Array.new(26)
+    misaligned_vals[0] = 123 # obs_id
+    misaligned_vals[15] = 456 # Should be String, not Numeric
+
+    error = assert_raises(RuntimeError) do
+      Report::Row.new(misaligned_vals)
+    end
+
+    assert_match(/Column misalignment detected/, error.message)
+    assert_match(/Expected @vals\[15\] \(name_text_name\)/, error.message)
+    assert_match(/to be String/, error.message)
+  end
+
+  def test_notes_to_hash_handles_time_gracefully
+    # Simulate a case where column misalignment wasn't caught
+    # and notes_to_hash gets a Time object
+    row = Report::Row.allocate # Skip initialize validation
+    row.instance_variable_set(:@vals, Array.new(26))
+    row.instance_variable_get(:@vals)[9] = Time.current
+
+    # Should return empty hash instead of crashing
+    result = row.send(:notes_to_hash)
+    assert_equal({}, result)
+  end
+
+  def test_notes_to_hash_handles_hash_correctly
+    row = Report::Row.allocate # Skip initialize validation
+    row.instance_variable_set(:@vals, Array.new(26))
+    row.instance_variable_get(:@vals)[9] = { foo: "bar" }
+
+    result = row.send(:notes_to_hash)
+    assert_equal({ foo: "bar" }, result)
+  end
+
+  def test_export_formatted_handles_time_gracefully
+    # Should return empty string instead of crashing
+    result = Observation.export_formatted(Time.current)
+    assert_equal("", result)
+  end
+
+  def test_export_formatted_handles_hash_correctly
+    result = Observation.export_formatted({ cap: "red", stem: "white" })
+    assert_match(/cap: red/, result)
+    assert_match(/stem: white/, result)
+  end
+
+  private
+
+  def do_csv_test(report_type, obs, expect, user: nil, &block)
+    query = Query.lookup(:Observation)
+    body = report_body(report_type, query, user:)
+    table = CSV.parse(body, col_sep: report_type.separator)
+    assert_equal(query.num_results + 1, table.count)
+    idx = query.results.sort_by(&block).index(obs)
+    assert_equal(expect, table[idx + 1])
+  end
+
+  def report_body(report_type, query, user: nil)
+    report = report_type.new(query:, user:)
+    assert_not_empty(report.filename)
+    body = report.body
+    assert_not_empty(body)
+    body
+  end
+
+  def do_tsv_test(report_type, obs, expect, &block)
+    query = Query.lookup(:Observation)
+    body = report_body(report_type, query)
+    rows = body.split("\n")
+    assert_equal(query.num_results + 1, rows.length)
+    idx = query.results.sort_by(&block).index(obs)
+    assert_equal(expect, rows[idx + 1].split("\t"))
+  end
+
+  def do_zip_test(report_type, expect)
+    body = report_body(report_type, Query.lookup(:Observation))
+    zio = Zip::InputStream.new(StringIO.new(body))
+    contents = []
+    while (entry = zio.get_next_entry)
+      contents << entry.name
+    end
+    assert_equal(expect, contents)
+  end
+
+  def build_taxa_report
+    query = Query.lookup(:Observation)
+    observations = Report::Darwin::Observations.new(query: query)
+    return if observations.body.empty?
+
+    report_type = Report::Darwin::Taxa
+    report_type.new(query: query, observations: observations)
+  end
+
+  def do_split_test(name, author, rank, expect)
+    row = Report::Row.new(vals = [])
+    vals[15] = name
+    vals[16] = author
+    vals[17] = Name.ranks[rank]
+    assert_equal(expect[:genus].to_s, row.genus.to_s)
+    assert_equal(expect[:species].to_s, row.species.to_s)
+    assert_equal(expect[:subspecies].to_s, row.subspecies.to_s)
+    assert_equal(expect[:variety].to_s, row.variety.to_s)
+    assert_equal(expect[:form].to_s, row.form.to_s)
+    assert_equal(expect[:species_author].to_s, row.species_author.to_s)
+    assert_equal(expect[:subspecies_author].to_s, row.subspecies_author.to_s)
+    assert_equal(expect[:variety_author].to_s, row.variety_author.to_s)
+    assert_equal(expect[:form_author].to_s, row.form_author.to_s)
+    assert_equal(expect[:cf].to_s, row.cf.to_s)
+  end
+
+  # Generate worker-specific test_server paths for parallel testing
+  def test_server_path(relative_path)
+    if (worker_num = database_worker_number)
+      # Transform test_server1 -> test_server1-12, etc.
+      modified_path = relative_path.gsub(
+        %r{(test_server\d+)(?=/|$)},
+        "\\1-#{worker_num}"
+      )
+      Rails.root.join("public/#{modified_path}")
+    else
+      Rails.root.join("public/#{relative_path}")
+    end
+  end
+end

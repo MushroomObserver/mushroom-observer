@@ -8,4 +8,24 @@ module InatImportJobTrackersHelper
   def import_incomplete?(inat_import)
     inat_import.state != "Done"
   end
+
+  def remaining_time_in_hours_minutes_seconds(tracker)
+    # force remaining time to be 0 if the Job is done
+    # prevents displaying :inat_import_tracker_calculating_time.l
+    time = if tracker.status == "Done"
+             0
+           else
+             tracker.estimated_remaining_time
+           end
+    time_in_hours_minutes_seconds(time)
+  end
+
+  def time_in_hours_minutes_seconds(seconds)
+    return :inat_import_tracker_calculating_time.l if seconds.nil?
+
+    hours = seconds / 3600
+    minutes = (seconds % 3600) / 60
+    seconds %= 60
+    format("%02d:%02d:%02d", hours, minutes, seconds)
+  end
 end

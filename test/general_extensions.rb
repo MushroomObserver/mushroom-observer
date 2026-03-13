@@ -15,7 +15,6 @@
 #  assert_false::               Make sure something is false.
 #  assert_blank::               Make sure something is blank.
 #  assert_not_blank::           Make sure something is not blank.
-#  assert_not_match::           Make sure a string does NOT match.
 #  assert_dates_equal::         Compare two Date/Time/DateTime/TimeWithZone
 #                               instances as dates.
 #  assert_objs_equal::          Compare two model instances.
@@ -26,7 +25,6 @@
 #  assert_user_arrays_equal::     Compare two lists of User's.
 #  assert_name_arrays_equal::     Compare two lists of Name's.
 #  assert_gps_equal::           Compare two latitudes or longitudes.
-#  assert_email::               Check the properties of a QueuedEmail.
 #  assert_save::                Assert ActiveRecord save succeeds.
 #  assert_string_equal_file::   A string is same as contents of a file.
 #
@@ -45,6 +43,17 @@ module GeneralExtensions
   # Useful to test that an object doesn't include or isn't equal to something
   ARBITRARY_SHA = "7b2d0b50147a2a6497236a722c9c7a9136d2879c"
 
+  GPS_CLOSE_ENOUGH = 0.001
+
+  # These used to be automatically instantiated fixtures, e.g., @dick, etc.
+  # Now we dynamically provide helper methods for all user fixtures.
+  # This allows tests to write `rolf` instead of `users(:rolf)`.
+  #
+  # To add support for other fixture types, add them to FIXTURE_ACCESSORS.
+  FIXTURE_ACCESSORS = {
+    users: :user
+  }.freeze
+
   ##############################################################################
   #
   #  :section: Test unit helpers
@@ -61,46 +70,78 @@ module GeneralExtensions
     APIKey.select(:notes).where(key: "sort_test").order(:notes).to_a
   end
 
-  # These used to be automatically instantiated fixtures, e.g., @dick, etc.
-  def rolf
-    users(:rolf)
+  # Dynamically provide fixture accessor methods
+  def method_missing(method_name, *args, **kwargs, &block)
+    # Only handle zero-argument method calls
+    return super unless args.empty? && kwargs.empty? && block.nil?
+
+    # Check if this is a user fixture
+    if user_fixture_exists?(method_name)
+      users(method_name)
+    else
+      # Not a fixture accessor, use normal method_missing behavior
+      super
+    end
   end
 
-  def mary
-    users(:mary)
+  def respond_to_missing?(method_name, include_private = false)
+    user_fixture_exists?(method_name) || super
   end
 
-  def junk
-    users(:junk)
+  private
+
+  # Check if a user fixture with the given name exists
+  def user_fixture_exists?(fixture_name)
+    return false unless defined?(@loaded_fixtures)
+    return false unless @loaded_fixtures["users"]
+
+    @loaded_fixtures["users"].fixtures.key?(fixture_name.to_s)
   end
 
-  def dick
-    users(:dick)
+  # Delegate to central implementation in ImageConfigData
+  def database_worker_number
+    IMAGE_CONFIG_DATA.database_worker_number
   end
 
-  def katrina
-    users(:katrina)
-  end
-
-  def roy
-    users(:roy)
-  end
-
-  def lone_wolf
-    users(:lone_wolf)
+  # Worker-specific download directory for parallel testing
+  def download_dir
+    @download_dir ||= if (worker_num = database_worker_number)
+                        Rails.root.join("tmp/downloads-#{worker_num}")
+                      else
+                        Rails.root.join("tmp/downloads")
+                      end
   end
 
   def use_test_locales(&block)
-    Language.alt_locales_path("config/test_locales", &block)
-    FileUtils.remove_dir(Rails.root.join("config/test_locales"), force: true)
+    # Use worker-specific directory in parallel mode to avoid conflicts
+    worker_num = database_worker_number
+    worker_suffix = worker_num ? "-#{worker_num}" : ""
+    locales_dir = "config/test_locales#{worker_suffix}"
+
+    Language.alt_locales_path(locales_dir, &block)
+    FileUtils.remove_dir(Rails.root.join(locales_dir), force: true)
   end
 
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
-    return if FileTest.exist?(MO.local_image_files)
+    image_dir = MO.local_image_files
 
-    setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
-    FileUtils.cp_r(setup_images, MO.local_image_files)
+    # Check if directory exists AND has required subdirectories
+    required_subdirs = %w[orig thumb 640]
+    all_exist = FileTest.exist?(image_dir) &&
+                required_subdirs.all? do |subdir|
+                  FileTest.exist?(File.join(image_dir, subdir))
+                end
+
+    return if all_exist
+
+    # Remove incomplete directory if it exists
+    FileUtils.rm_rf(image_dir) if FileTest.exist?(image_dir)
+
+    # For parallel workers, the path might be test_images-0, test_images-2, etc.
+    # We always copy from setup_images
+    setup_images = image_dir.gsub(/test_images(-\d+)?$/, "setup_images")
+    FileUtils.cp_r(setup_images, image_dir)
   end
 
   # This seems to have disappeared from rails.
@@ -152,7 +193,7 @@ module GeneralExtensions
     assert(expect == actual, msg)
   end
 
-  # Assert that two User instances are equal.
+  # Assert that two instances are equal.
   def assert_objs_equal(expect, got, *msg)
     assert_equal(fixture_label(expect), fixture_label(got), *msg)
   end
@@ -216,45 +257,12 @@ module GeneralExtensions
     assert_arrays_equal(expect, got, *, &:search_name)
   end
 
-  GPS_CLOSE_ENOUGH = 0.001
-
   # Compare two latitudes or longitudes.
   #
   #   assert_gps_equal(-123.4567, location.west)
   #
   def assert_gps_equal(expected, value)
     assert((expected.to_f - value.to_f).abs < GPS_CLOSE_ENOUGH)
-  end
-
-  # Test whether the n-1st queued email matches.  For example:
-  #
-  #   assert_email(0,
-  #     :flavor  => 'QueuedEmail::CommentAdd',
-  #     :from    => mary,
-  #     :to      => rolf,
-  #     :comment => @comment_on_minmal_unknown.id
-  #   )
-  #
-  def assert_email(offset, args)
-    # email = QueuedEmail.find(:first, :offset => n)
-    email = QueuedEmail.offset(offset).first
-    assert(email)
-    args.each_key do |arg|
-      case arg
-      when :flavor
-        assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
-      when :from
-        assert_equal(args[arg].id, email.user_id, "Sender is wrong")
-      when :to
-        assert_equal(args[arg].id, email.to_user_id, "Recipient is wrong")
-      when :note
-        assert_equal(args[arg], email.get_note, "Value of note is wrong")
-      else
-        assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg),
-                     "Value of #{arg} is wrong")
-      end
-    end
-    email
   end
 
   # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.
@@ -418,9 +426,8 @@ module GeneralExtensions
   def dump_xml(exp, indent = "")
     print("#{indent}#{e.name}")
     if exp.has_attributes?
-      attrs = []
-      exp.attributes.each do |a, v|
-        attrs << "#{a}=#{v}"
+      attrs = exp.attributes.map do |a, v|
+        "#{a}=#{v}"
       end
       print("(#{attrs.join(" ")})")
     end
@@ -451,6 +458,97 @@ module GeneralExtensions
     end
   end
 
+  # for indexes: title is not displayed
+  def assert_page_title(expect, msg = "Wrong page or page.title")
+    assert_match(expect, css_select("title").text, msg)
+  end
+
+  def assert_banner_title(expect, msg = "Wrong banner title")
+    assert_match(expect, css_select("#banner_title").text, msg)
+  end
+
+  def assert_displayed_filters(expect, msg = "Wrong filters")
+    assert_match(expect, css_select("#filters").text, msg)
+  end
+
+  ######################################################################
+  #
+  #  INDEX SORTING
+  #  Tests loading index with all available sort orders
+  #  Checks that the relevant sort button is active
+  #
+  def check_index_sorting
+    login
+    index_sorts.each do |sort_order|
+      check_index_sorted_by(sort_order, do_login: false)
+    end
+  end
+
+  # Can be called independently to test a single sort order
+  def check_index_sorted_by(sort_order, do_login: true)
+    login if do_login
+    get(:index, params: { by: sort_order })
+
+    assert_template("index")
+    assert_sorted_by(sort_order.to_s)
+  end
+
+  # Checks for a consistently named helper method like "users_index_sorts"
+  # otherwise returns empty array.
+  def index_sorts
+    helpers_defined = @controller.helpers.respond_to?(sorts_helper_method)
+    assert(helpers_defined, "#{sorts_helper_method} not defined in helpers")
+    return [] unless helpers_defined
+
+    originals = @controller.helpers.send(sorts_helper_method).dup
+    originals.map! { |key, _label| key.to_sym }
+    originals.delete(:id)
+    reverses = originals.dup.map! { |key| :"reverse_#{key}" }
+    originals + reverses
+  end
+
+  def sorts_helper_method
+    @sorts_helper_method ||= :"#{helper_class}_index_sorts"
+  end
+
+  # Contributors index uses the same sorts as Users
+  def helper_class
+    @helper_class ||= case (name = @controller.controller_name)
+                      when "contributors"
+                        "users"
+                      else
+                        name
+                      end
+  end
+
+  def assert_sorted_by(by, text = /.*/,
+                       msg = "Wrong index sort, or sort by #{by} not available")
+    order_by = by.dup
+    reverse = order_by.sub!(/^reverse_/, "") # changes by and returns boolean
+    class_name = "#{adjusted_controller_class_name}_by_#{order_by}_link"
+    assert_select(".sorts a.#{class_name}[disabled=disabled]", text, msg)
+    return unless reverse
+
+    assert_select(".sorts a.#{class_name}[disabled=disabled]",
+                  :sort_by_reverse.l, msg)
+  end
+
+  # The controller class name for e.g. Locations::DescriptionsController is
+  # "locations/descriptions". Need to adjust these to "location_descriptions".
+  def adjusted_controller_class_name
+    return controller_class_name unless controller_class_name.include?("/")
+
+    names = controller_class_name.split("/")
+    names.map!.with_index do |namespace, idx|
+      if idx < names.size - 1
+        namespace.singularize
+      else
+        namespace
+      end
+    end
+    names.join("_")
+  end
+
   ##############################################################################
   #
   #  :section:  File contents assertions
@@ -478,7 +576,7 @@ module GeneralExtensions
     files.each do |file|
       filename = Array(file).first
       format = file.is_a?(Array) ? "r:#{file[1]}" : "r"
-      template = File.open(filename, format).read
+      template = File.open(filename, format, &:read)
       template = enforce_encoding(encoding, template)
       template = ERB.new(template).result # interpolate variables
       template = yield(template) if block_given?
@@ -532,5 +630,18 @@ module GeneralExtensions
       str.sub!(/^#{pattern}$/, line)
     end
     str == template
+  end
+
+  def with_captured_logger
+    log_output = StringIO.new
+    old_logger = Rails.logger
+    Rails.logger = Logger.new(log_output)
+
+    yield
+
+    log_output.rewind
+    log_output.string
+  ensure
+    Rails.logger = old_logger
   end
 end

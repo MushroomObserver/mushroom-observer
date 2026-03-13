@@ -3,22 +3,24 @@
 module Observations
   class IdentifyController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def index
       build_index_with_query
     end
 
-    private
-
     def controller_model_name
       "Observation"
     end
 
-    # override the default Query flavor :all
+    private
+
+    # override the default? maybe no longer necessary
     def unfiltered_index_opts
-      super.merge(query_flavor: :all,
-                  query_args: { needs_naming: true, by: :rss_log })
+      super.merge(query_args: { needs_naming: @user, order_by: :rss_log })
+    end
+
+    def default_sort_order
+      :rss_log
     end
 
     def index_active_params
@@ -49,21 +51,20 @@ module Observations
     def clade(term)
       # return unless (clade = Name.find_by(text_name: term))
 
-      query = create_query(:Observation, :all,
-                           needs_naming: true, by: :rss_log, in_clade: term)
+      query = create_query(:Observation, needs_naming: @user, clade: term,
+                                         order_by: :rss_log)
       [query, {}]
     end
 
     def region(term)
-      query = create_query(:Observation, :all,
-                           needs_naming: true, by: :rss_log, in_region: term)
+      query = create_query(:Observation, needs_naming: @user, region: term,
+                                         order_by: :rss_log)
       [query, {}]
     end
 
     # def user_filter(term)
-    #   query = create_query(:Observation, :all,
-    #                        needs_naming: true, by: :rss_log,
-    #                        by_user: params[:user])
+    #   query = create_query(:Observation, needs_naming: @user, by_users: term,
+    #                                      order_by: :rss_log)
     #   [query, {}]
     # end
 
@@ -75,6 +76,7 @@ module Observations
     def observation_identify_index_includes
       [observation_matrix_box_image_includes,
        :location,
+       :observation_views,
        { name: :synonym },
        { namings: [:name, :votes] },
        :rss_log, :user]

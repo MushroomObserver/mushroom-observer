@@ -16,7 +16,9 @@ module Images
       log_request(@user, @image)
 
       respond_to do |format|
-        format.html { redirect_to(@image.cached_original_url) }
+        format.html do
+          redirect_to(@image.cached_original_url, allow_other_host: false)
+        end
         format.json { cache_original_image }
       end
     end
@@ -43,7 +45,7 @@ module Images
         render(json: { status: "maxed_out" })
       else
         # Save job for tester.
-        @job = ImageLoaderJob.perform_later(@image.id, User.current_id)
+        @job = ImageLoaderJob.perform_later(@image.id, @user.id)
         render(json: { status: "loading" })
       end
     end
@@ -62,7 +64,7 @@ module Images
     end
 
     def user_maxed_out?
-      User.current.original_image_quota >= MO.original_image_user_quota
+      @user.original_image_quota >= MO.original_image_user_quota
     end
 
     def site_maxed_out?

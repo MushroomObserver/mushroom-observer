@@ -5,7 +5,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
 
   connect() {
-    this.element.dataset.stimulus = "tooltip-connected";
+    this.element.dataset.tooltip = "connected";
     this.activateTooltips();
   }
 

@@ -17,6 +17,7 @@ module MapHelper
       controller: "map",
       map_target: "mapDiv",
       map_type: "info",
+      need_elevations_value: true,
       map_open: true,
       editable: false,
       controls: [:large_map, :map_type].to_json,
@@ -107,8 +108,8 @@ module MapHelper
     lines = []
     observations = set.observations
     locations = set.underlying_locations
-    lines << mapset_observation_header(set, args) if observations.length > 1
-    lines << mapset_location_header(set, args) if locations.length > 1
+    lines << mapset_observation_header(set) if observations.length > 1
+    lines << mapset_location_header(set) if locations.length > 1
     if observations.length == 1 && observations.first&.id
       lines << mapset_observation_link(observations.first, args)
     end
@@ -119,13 +120,13 @@ module MapHelper
     lines.safe_join(safe_br)
   end
 
-  def mapset_observation_header(set, args)
-    show, map = mapset_submap_links(set, args, :observation)
+  def mapset_observation_header(set)
+    show, map = mapset_associated_links(set, :observation)
     map_point_text(:Observations.t, set.observations.length, show, map)
   end
 
-  def mapset_location_header(set, args)
-    show, map = mapset_submap_links(set, args, :location)
+  def mapset_location_header(set)
+    show, map = mapset_associated_links(set, :location)
     map_point_text(:Locations.t, set.underlying_locations.length, show, map)
   end
 
@@ -133,41 +134,54 @@ module MapHelper
     label.html_safe << ": " << count.to_s << " (" << show << " | " << map << ")"
   end
 
-  def mapset_submap_links(set, args, type)
-    params = args[:query_params] || {}
-    params = params.merge(mapset_box_params(set))
-    case type.to_s
-    when "observation"
-      [link_to(:show_all.t, observations_path(params: params)),
-       link_to(:map_all.t, map_observations_path(params: params))]
-    when "location"
-      [link_to(:show_all.t, locations_path(params: params)),
-       link_to(:map_all.t, map_locations_path(params: params))]
-    when "name"
-      [link_to(:show_all.t, names_path(params: params)),
-       link_to(:map_all.t, map_names_path(params: params))]
-    end
+  # Links to obs, locs or names within the current mapset, or maps of these
+  def mapset_associated_links(set, type)
+    return unless [:observation, :location, :name].include?(type)
+
+    mapset_associated_links_for_type(set, type)
+  end
+
+  # Helper for the above
+  def mapset_associated_links_for_type(set, type)
+    query_type = type.to_s.camelize.to_sym
+    path_helper = :"#{type.to_s.pluralize}_path"
+    # We probably already have a query, from the index that got us here.
+    # This will correctly merge the in_box param into the query.
+    query = controller.
+            find_or_create_query(query_type, in_box: mapset_box_params(set))
+    # Add the query params to the link data for debugging.
+    # Can remove when we start splatting query params in the URL.
+    [link_to(:show_all.t, add_q_param(send(path_helper), query),
+             data: query.params),
+     link_to(:map_all.t, add_q_param(send(:"map_#{path_helper}"), query),
+             data: query.params)]
   end
 
   def mapset_observation_link(obs, args)
-    params = args[:query_params] || {}
+    params = args[:query_param] ? { q: args[:query_param] } : {}
     link_to("#{:Observation.t} ##{obs.id}",
             observation_path(id: obs.id, params: params))
   end
 
   def mapset_location_link(loc, args)
-    params = args[:query_params] || {}
+    params = args[:query_param] ? { q: args[:query_param] } : {}
     link_to(loc.display_name.t, location_path(id: loc.id, params: params))
   end
 
-  # These are query params for the links back to MO indexes!
+  # These are query params for the links back to MO indexes, slightly enlarged
   def mapset_box_params(set)
-    {
-      north: set.north,
-      south: set.south,
-      east: set.east,
-      west: set.west
-    }
+    { north: tweak_up(set.north, 0.001, 90),
+      south: tweak_down(set.south, 0.001, -90),
+      east: tweak_up(set.east, 0.001, 180),
+      west: tweak_down(set.west, 0.001, -180) }
+  end
+
+  def tweak_up(value, amount, max)
+    [max, value.to_f + amount].min
+  end
+
+  def tweak_down(value, amount, min)
+    [min, value.to_f - amount].max
   end
 
   # These are coords printed in text

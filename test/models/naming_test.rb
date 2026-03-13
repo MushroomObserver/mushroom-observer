@@ -34,13 +34,11 @@ class NamingTest < UnitTestCase
     assert(ncc.save)
 
     assert(ncc.errors.full_messages.join("; "))
-    ncc.reload
-    obs.reload
     User.current = rolf
     consensus = Observation::NamingConsensus.new(obs)
     consensus.calc_consensus
-    assert_equal(names(:agaricus_campestris), ncc.name)
-    assert_equal(names(:agaricus_campestris), obs.name)
+    assert_equal(names(:agaricus_campestris), ncc.reload.name)
+    assert_equal(names(:agaricus_campestris), obs.reload.name)
   end
 
   # Make sure it fails if we screw up.

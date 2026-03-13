@@ -67,8 +67,6 @@
 #
 #  These are some useful callbacks to fine-tune things:
 #
-#    query_flavor     Allows you to choose a Query flavor other than "all".
-#
 #    validate_create_params!(params) Called in POST after query_params.
 #    validate_update_params!(params) Called in PATCH after update_params.
 #

@@ -38,14 +38,10 @@ class API2
     def build_query
       params = query_params
       params.remove_nils!
-      params[:by] = :id
-      Query.lookup(model.name.to_sym, query_flavor, params)
+      params[:order_by] = :id
+      Query.lookup(model.name.to_sym, params)
     rescue RuntimeError => e
       raise(QueryError.new(e))
-    end
-
-    def query_flavor
-      :all
     end
 
     # Stub for parsing and validating params passed to Query.
@@ -159,22 +155,6 @@ class API2
 
     def must_have_delete_permission!(obj)
       must_have_edit_permission!(obj)
-    end
-
-    # This is just here until the new version of Query comes on-line.
-    # I don't see any reason for API to know anything about SQL or tables.
-    def sql_id_condition
-      ids = parse_ranges(:integer, :id)
-      return nil unless ids
-
-      ids.map do |term|
-        if term.is_a?(Range)
-          "#{model.table_name}.id >= #{term.begin} AND " \
-          "#{model.table_name}.id <= #{term.end}"
-        else
-          "#{model.table_name}.id = #{term}"
-        end
-      end.join(" OR ")
     end
   end
 end

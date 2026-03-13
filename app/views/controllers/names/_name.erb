@@ -1,0 +1,31 @@
+<%= tag.div(class: "list-group-item") do %>
+  <%= tag.span(show_title_id_badge(name, "rss-id mr-4")) %>
+  <%= tag.span(
+    data: { controller: "clipboard", clipboard_copied_value: :COPIED.l }
+  ) do %>
+    <%= link_to(name.show_link_args) do
+      tag.span(name.user_display_name(@user).html_safe.t,
+              class: "display-name",
+              data: { clipboard_target: "source" })
+    end %>
+    <%= tag.button(
+          link_icon(:copy, text: :COPY_THIS_NAME.l),
+          role: "button",
+          class: "btn btn-link py-0 link-normal opacity-75",
+          data: {
+            toggle: "tooltip", placement: "bottom", title: :COPY_THIS_NAME.l,
+            action: "clipboard#copy"
+          }
+        ) %>
+  <% end %>
+  <%= tag.span(counts[name.id], class: "badge") if counts[name.id] %>
+<% end %>
+<% if @has_descriptions %>
+  <% if (desc = name.description)%>
+    <%= tag.span(desc.authors.map(&:login).join(", ")) %>
+    <%= tag.span(desc.note_status.map(&:to_s).join("/")) %>
+    <%= tag.span(:"review_#{desc.review_status}".l) %>
+  <% else %>
+    <%= tag.span("--- not the default ---") %>
+  <% end %>
+<% end %>

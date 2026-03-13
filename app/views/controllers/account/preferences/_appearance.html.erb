@@ -9,7 +9,7 @@ location_formats = [
   [:prefs_location_format_postal.l, "postal"],
   [:prefs_location_format_scientific.l, "scientific"]
 ]
-themes = [[:theme_random.l, "NULL"]] + MO.themes.map { |t| [t.to_sym.l, t] }
+themes = [[:theme_random.l, "RANDOM"]] + MO.themes.map { |t| [t.to_sym.l, t] }
 locales = Language.all.map do |lang|
             name = lang.name
             name += " (beta)" if lang.beta
@@ -22,6 +22,10 @@ image_sizes = options_for_select(
                    end
                  }, @user.image_size
                )
+label_formats = [
+  [:prefs_label_format_pdf.l, "pdf"],
+  [:prefs_label_format_rtf.l, "rtf"]
+]
 %>
 
 <%= tag.div(:prefs_appearance.t, class: "form-group mt-3 font-weight-bold") %>
@@ -50,5 +54,9 @@ image_sizes = options_for_select(
 
 <%= select_with_label(form: f, field: :image_size, prefs: true, inline: true,
                       options: image_sizes, selected: @user.image_size) %>
+
+<%= select_with_label(form: f, field: :label_format, prefs: true,
+                      inline: true, options: label_formats,
+                      selected: @user.label_format) %>
 
 <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

@@ -7,22 +7,6 @@ class API2
       ExternalLink
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
-    end
-
     def high_detail_includes
       [
         :external_site,
@@ -32,13 +16,13 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:external_link, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :creator),
+        by_users: parse_array(:user, :user, help: :creator),
         observations: parse_array(:observation, :observation),
         external_sites: parse_array(:external_site, :external_site),
-        url: parse(:string, :url)
+        url_has: parse(:string, :url)
       }
     end
 

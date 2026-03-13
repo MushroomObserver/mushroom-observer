@@ -35,6 +35,7 @@ DEFAULTS: &DEFAULTS
   classification: ""
   rss_log: $LABEL_rss_log
   needs_naming: 1
+  source: nil
 
 minimal_unknown_obs:
   <<: *DEFAULTS
@@ -51,6 +52,7 @@ minimal_unknown_obs:
   species_lists: unknown_species_list
   herbarium_records: interesting_unknown
   collection_numbers: minimal_unknown_coll_num
+  field_slip: field_slip_one
   source: <%= Observation.sources[:mo_website] %>
 
 detailed_unknown_obs:
@@ -104,6 +106,8 @@ agaricus_campestris_obs:
   log_updated_at: 2007-03-19 20:21:00
   when: 2007-03-19
   location: burbank
+  location_lat: 34.185
+  location_lng: -118.33
   where: Burbank, California, USA
   user: rolf
   name: agaricus_campestris
@@ -249,9 +253,23 @@ unknown_with_lat_lng:
   text_name: Fungi
   lat: 34.1622
   lng: -118.3521
-  alt: 123
   notes:
     :Other: "unknown_with_lat_lng"
+
+unknown_with_alt:
+  <<: *DEFAULTS
+  created_at: 2025-10-15 09:20:00
+  updated_at: 2025-10-15 09:21:00
+  log_updated_at: 2025-10-15 09:21:00
+  when: 2025-10-15
+  location: burbank
+  where: Burbank, California, USA
+  user: mary
+  name: fungi
+  text_name: Fungi
+  alt: 123
+  notes:
+    :Other: "unknown_with_alt"
 
 trusted_hidden:
   <<: *DEFAULTS
@@ -280,6 +298,7 @@ untrusted_hidden:
   user: katrina
   name: fungi
   text_name: Fungi
+  field_slip: field_slip_no_trust
   gps_hidden: true
   lat: 41.6055
   lng: -70.5055
@@ -422,6 +441,7 @@ owner_accepts_general_questions:
   log_updated_at: 2020-07-08 04:06:04
   when: 2020-07-08
   user: roy # roy has email_general_questions == true
+  field_slip: field_slip_two
 
 owner_refuses_general_questions:
   <<: *DEFAULTS
@@ -781,8 +801,10 @@ falmouth_2022_obs:
   when: 2022-09-15 # outside of dates of falmouth_2023_09_project
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   location: falmouth
+  field_slip: field_slip_falmouth_one
   lat: 41.5862
   lng: -70.5976
+  gps_hidden: false
   notes:
     :Other: Some notes
 
@@ -798,6 +820,9 @@ current_obs:
   user: katrina
   where: Salt Point State Park, Sonoma Co., California, USA
   location: salt_point
+  field_slip: field_slip_previous
+  notes:
+    :Collector: _user katrina_
 
 newbie_obs:
   <<: *DEFAULTS
@@ -806,12 +831,122 @@ newbie_obs:
 
 recorder_obs:
   <<: *DEFAULTS
+  field_slip: field_slip_by_recorder
   notes:
     :Collector: Foray Collector
 
 imported_inat_obs:
   <<: *DEFAULTS
+  user: dick
+  created_at: 2025-08-01 04:05:03
+  updated_at: 2025-08-01 04:05:03
+  log_updated_at: 2025-08-01 04:05:03
   inat_id: 12345
+  source: <%= Observation.sources[:mo_inat_import] %>
+
+provisional_obs:
+  <<: *DEFAULTS
+  name: provisional_name
+
+old_name_obs:
+  <<: *DEFAULTS
+  name: lactifluus_subalpinus
+  text_name: Lactifluus subalpinus
+
+low_alt_obs:
+  <<: *DEFAULTS
+  location: low_alt_only
+
+low_alt_obs_with_lat_lng:
+  <<: *DEFAULTS
+  lat: 41.6592
+  lng: -70.6975
+  location: low_alt_only
+
+high_alt_obs:
+  <<: *DEFAULTS
+  location: high_alt_only
+
+longest_obs:
+  <<: *DEFAULTS
+  location: longest_location_name
+  where: "Pacific Crest Trail on Mount Hood from Timberline Lodge to Cascade Locks, Zigzag Ranger District & Hood River Ranger District, Mount Hood National Forest, Clackamas Co. & Multnomah Co., Oregon, USA"
+  name: longest_name
+  text_name: Singerocybe alboinfundibuliformis
+
+even_longer_obs:
+  <<: *DEFAULTS
+  name: even_longer_name
+  location: even_longer_location_name
+  text_name: <%= "B#{'a'*80}" %>
+  where: <%= "Sh#{'e'*200}pland" %>
+
+megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  when: 2025-09-01
+  created_at: 2025-09-01 04:05:03
+  updated_at: 2025-09-01 04:05:03
+
+dup_megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  when: 2025-09-01
+  created_at: 2025-09-01 04:05:03
+  updated_at: 2025-09-01 04:05:03
+
+nearby_megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  lat: 41.6592
+  lng: -70.6975
+  location: falmouth
+  where: Falmouth, Massachusetts, USA
+  when: 2025-09-08
+  created_at: 2025-09-08 04:05:03
+  updated_at: 2025-09-08 04:05:03
+
+faraway_megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  lat: 40.867
+  lng: -73.879
+  location: nybg_location
+  where: The New York Botanical Garden, Bronx, New York, USA
+  when: 2025-09-01
+  created_at: 2025-09-08 04:05:03
+  updated_at: 2025-09-08 04:05:03
+
+older_megacollybia_rodmanii_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  when: 2025-08-01
+  created_at: 2025-08-01 04:05:03
+  updated_at: 2025-08-01 04:05:03
+
+megacollybia_platyphylla_obs:
+  <<: *DEFAULTS
+  user: foray_recorder
+  name: megacollybia_platyphylla
+  text_name: Megacollybia platyphylla
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  when: 2025-09-01
+  created_at: 2025-09-01 04:05:03
+  updated_at: 2025-09-01 04:05:03
+
 #
 #
 # IMPORTANT - AVOID CREATING FUTURE TEST ERRORS

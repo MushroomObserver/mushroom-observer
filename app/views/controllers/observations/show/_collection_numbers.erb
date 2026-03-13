@@ -1,14 +1,14 @@
+<%# locals: (obs: nil, user: nil) %>
+
 <%
 numbers  = obs.collection_numbers
-can_edit = in_admin_mode? || obs.can_edit?
+can_edit = in_admin_mode? || obs.can_edit?(user)
 %>
 
 <%=
   tag.div(
-    id: "observation_collection_numbers",
-    class: "obs-collection",
-    data: { controller: "section-update",
-            updated_by: "modal_collection_number" }
+    id: "observation_collection_numbers", class: "obs-collection",
+    data: { controller: "section-update", section_update_user_value: user.id }
   ) do
 
     if numbers.any? && can_edit
@@ -33,8 +33,7 @@ can_edit = in_admin_mode? || obs.can_edit?
                 modal_link_to("collection_number_#{number.id}",
                               *edit_collection_number_tab(number, obs)),
                 "|",
-                modal_link_to("collection_number_observation",
-                              *remove_collection_number_tab(number, obs)),
+                remove_collection_number_button(number, obs),
                 "]"
               ].safe_join(" ")
             end

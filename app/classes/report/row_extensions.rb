@@ -205,7 +205,22 @@ module Report
     def notes_to_hash
       # prefer safe_load to load for safety & to make RuboCop happy
       # 2nd argument whitelists Symbols, needed because notes have symbol keys
-      YAML.safe_load(@vals[9], permitted_classes: [Symbol])
+      val = @vals[9]
+
+      # Defensive check: if val is already a Hash, return it
+      return val if val.is_a?(Hash)
+
+      # Defensive check: if val is not parseable (e.g., Time object from
+      # column misalignment), return empty hash to prevent crashes
+      unless val.is_a?(String) || val.is_a?(Symbol)
+        Rails.logger.warn(
+          "notes_to_hash expected String/Symbol but got #{val.class}. " \
+          "Returning empty hash. This may indicate column misalignment."
+        )
+        return {}
+      end
+
+      YAML.safe_load(val, permitted_classes: [Symbol])
     end
   end
 end

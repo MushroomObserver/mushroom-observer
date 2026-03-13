@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class LicensesControllerTest < FunctionalTestCase
   def test_index
@@ -128,8 +128,8 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_create
     display_name = "Creative Commons Non-commercial v4.0"
-    assert_blank(License.where(display_name: display_name),
-                 "License already exists")
+    assert_not(License.exists?(display_name: display_name),
+               "Test needs a non-existent License")
     url = "http://creativecommons.org/licenses/by-nc-sa/4.0/"
     params = { license: { display_name: display_name,
                           url: url },
@@ -142,8 +142,11 @@ class LicensesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    # Licenses lack created_at column; use updated_at instead
-    license = License.order(updated_at: :asc).last
+    license = License.find_by(display_name: display_name)
+    assert_not_nil(
+      license,
+      "Expected License to be created with display_name #{display_name.inspect}"
+    )
     assert_equal(display_name, license.display_name)
     assert_equal(url, license.url)
     assert_false(license.deprecated)
@@ -219,7 +222,7 @@ class LicensesControllerTest < FunctionalTestCase
       "License edit page missing link to Index"
     )
     assert_select(
-      "input[type=checkbox][name='deprecated'][checked='checked']", true,
+      "input[type=checkbox][name='license[deprecated]'][checked]", true,
       "License form `Deprecated` checkbox should be checked"
     )
   end
@@ -242,7 +245,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_equal(params.dig(:license, :display_name), license.display_name)
     assert_equal(params.dig(:license, :url), license.url)
-    assert_equal((params[:deprecated] == "1"), license.deprecated)
+    assert_equal(params[:deprecated] == "1", license.deprecated)
   end
 
   def test_update_no_changes

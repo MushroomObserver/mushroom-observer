@@ -20,9 +20,8 @@ module UserStatsHelper
     # Show a breakdown of translations
     if user_stats[:languages]
       lang_name_by_locale = Language.pluck(:locale, :name).to_h
-      lang_summary = []
-      user_stats[:languages].each do |locale, count|
-        lang_summary << tag.span(class: "ml-3 text-nowrap") do
+      lang_summary = user_stats[:languages].map do |locale, count|
+        tag.span(class: "ml-3 text-nowrap") do
           ["[", lang_name_by_locale[locale], ": ", count, "]"].safe_join
         end
       end
@@ -44,8 +43,8 @@ module UserStatsHelper
 
   # NOTE: This just helps create a keyed hash to access the paths.
   def user_stats_link_paths(user)
-    user_stats_links_table(user).each_with_object({}) do |row, links|
-      links[row[0]] = row[1]
+    user_stats_links_table(user).to_h do |row|
+      [row[0], row[1]]
     end
   end
 

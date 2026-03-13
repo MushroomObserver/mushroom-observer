@@ -10,10 +10,11 @@ export default class extends Controller {
   static targets = ["southInput", "westInput", "northInput", "eastInput",
     "highInput", "lowInput", "placeInput", "locationId",
     "latInput", "lngInput", "altInput", "getElevation"]
-  static outlets = ["autocompleter"]
+  static outlets = ["autocompleter--location"]
+  static values = { needElevations: Boolean, default: true }
 
   connect() {
-    this.element.dataset.stimulus = "geocode-connected"
+    this.element.dataset.geocode = "connected"
 
     // These private vars are for keeping track of user inputs to a form
     // that should update the form after a timeout.
@@ -27,17 +28,22 @@ export default class extends Controller {
     this.lastGeocodedLatLng = { lat: null, lng: null }
     this.lastGeolocatedAddress = ""
 
+    this.libraries = ["maps", "geocoding", "marker"]
+    if (this.needElevationsValue == true)
+      this.libraries.push("elevation")
+
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
       version: "quarterly",
-      libraries: ["maps", "geocoding", "marker", "elevation"]
+      libraries: this.libraries
     })
 
     loader
       .load()
       .then((google) => {
-        this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
+        if (this.needElevationsValue == true)
+          this.elevationService = new google.maps.ElevationService()
       })
       .catch((e) => {
         console.error("error loading gmaps: " + e)
@@ -145,8 +151,8 @@ export default class extends Controller {
     this.verbose(primer)
 
     // Call autocompleter#refreshGooglePrimer directly
-    if (this.hasAutocompleterOutlet) {
-      this.autocompleterOutlet.refreshGooglePrimer({ primer })
+    if (this.hasAutocompleterLocationOutlet) {
+      this.autocompleterLocationOutlet.refreshGooglePrimer({ primer })
     }
   }
 
@@ -190,8 +196,8 @@ export default class extends Controller {
     const center = results[0].geometry.location.toJSON()
 
     if (this.map) {
-      if (viewport) this.map.fitBounds(viewport)
-      this.placeClosestRectangle(viewport, extents) // viewport is optional
+      // placeClosestRectangle will handle fitBounds after zoom completes
+      this.placeClosestRectangle(viewport, extents)
     }
     this.updateFields(viewport, extents, center)
     // For non-autocompleted place input in the location form
@@ -202,37 +208,48 @@ export default class extends Controller {
   // Update the place input target with an MO-formatted version of the Google
   // result, only if we're on a form with a non-autocompleted place input.
   updatePlaceInputTarget(result) {
-    if (!this.hasPlaceInputTarget ||
-      this.placeInputTarget.dataset?.controller == "autocomplete") return false
+    if (!this.hasPlaceInputTarget) return false
+    // Skip autocompleted inputs - their controller manages the value
+    if (this.placeInputTarget.dataset?.autocompleter) return false
 
     this.verbose("geocode:updatePlaceInputTarget")
     this.placeInputTarget.value = this.formatMOPlaceName(result)
     this.placeInputTarget.classList.add("geocoded")
   }
 
-  // NOTE: Second branch of conditional is for map controller
+  // NOTE: For observation/hybrid maps, update lat/lng when clicking the map
+  // (center only, no viewport/extents). When geocoding returns results
+  // (viewport/extents present), update bounds but don't overwrite lat/lng.
   updateFields(viewport, extents, center) {
     this.verbose("geocode:updateFields")
     let points = [], type = "" // for elevation
-    if (this.hasNorthInputTarget) {
-      // Prefer extents for rectangle, fallback to viewport
+
+    // Map click on observation form: only center is passed (no viewport/extents)
+    // Update lat/lng inputs directly
+    if (["observation", "hybrid"].includes(this.map_type) &&
+        this.hasLatInputTarget && !viewport && !extents) {
+      if (center != undefined && center?.lat) {
+        this.updateLatLngInputs(center)
+        points = [center]
+      }
+      type = "point"
+    } else if (this.hasNorthInputTarget) {
+      // Location form or geocoding result - update bounds
       let bounds = extents || viewport
       if (bounds != undefined && bounds?.north) {
         this.updateBoundsInputs(bounds)
         points = this.sampleElevationPointsOf(bounds)
       }
-      // else if (center) {
-      //   this.updateBoundsInputs(this.boundsOfPoint(center))
-      //   points = [center] // this.sampleElevationCenterOf(center)
-      // }
       type = "rectangle"
     } else if (this.hasLatInputTarget) {
+      // Fallback for non-map geocode with lat/lng
       if (center != undefined && center?.lat) {
         this.updateLatLngInputs(center)
-        points = [center] // this.sampleElevationCenterOf(center)
+        points = [center]
       }
       type = "point"
     }
+
     if (points && type)
       this.getElevations(points, type) // updates inputs
   }
@@ -240,6 +257,9 @@ export default class extends Controller {
   // Action can be attached to the "Get Elevation" button.
   // `points` is then the event
   getElevations(points, type = "") {
+    // Return if controller property needElevations is false
+    if (!this.needElevationsValue) return false
+
     this.verbose("geocode:getElevations")
     // "Get Elevation" button on a form sends this param
     if (this.hasGetElevationTarget &&
@@ -272,6 +292,8 @@ export default class extends Controller {
 
   // Computes an array of arrays of [lat, lng] from a set of bounds on the fly
   // Returns array of Google Map points {lat:, lng:} LatLngLiteral objects
+  // Does not actually get elevations from the API.
+  // Only lat/lng points that can be sent for elevations.
   sampleElevationPointsOf(bounds) {
     return [
       { lat: bounds?.south, lng: bounds?.west },
@@ -384,8 +406,8 @@ export default class extends Controller {
 
     if (lat && lng) {
       this.autocomplete_buffer = setTimeout(() => {
-        if (this.hasAutocompleterOutlet) {
-          this.autocompleterOutlet.swap({
+        if (this.hasAutocompleterLocationOutlet) {
+          this.autocompleterLocationOutlet.swap({
             detail:
               { type: "location_containing", request_params: { lat, lng } }
           })
@@ -394,8 +416,8 @@ export default class extends Controller {
       }, 1000)
     } else {
       this.autocomplete_buffer = setTimeout(() => {
-        if (this.hasAutocompleterOutlet) {
-          this.autocompleterOutlet.swap({ detail: { type: "location" } })
+        if (this.hasAutocompleterLocationOutlet) {
+          this.autocompleterLocationOutlet.swap({ detail: { type: "location" } })
         }
       }, 1000)
     }

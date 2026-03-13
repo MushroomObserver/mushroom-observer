@@ -1,3 +1,5 @@
+use mo_development;
+
 update api_keys set `key` = 'cahja4s81achfojjlqzgkt16qgkl2hira';
 
 update donations set email = 'webmaster@mushroomobserver.org';
@@ -68,11 +70,6 @@ delete from name_descriptions where public = false;
 # delete from name_trackers;
 
 delete from query_records;
-
-delete from queued_email_integers;
-delete from queued_email_notes;
-delete from queued_email_strings;
-delete from queued_emails;
 
 update users set email = 'webmaster@mushroomobserver.org';
 # Set all passwords to just "password".

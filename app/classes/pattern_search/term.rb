@@ -4,7 +4,7 @@ module PatternSearch
   # Parse PatternSearch parameter terms
   # Sample use:
   #   elsif term.var == :specimen
-  #     args[:with_specimen] = term.parse_boolean_string
+  #     query_params[:has_specimen] = term.parse_boolean_string
   class Term
     include Dates
 
@@ -21,7 +21,7 @@ module PatternSearch
     def <<(val)
       while val.to_s =~ CONTAINS_QUOTES
         vals << dequote(Regexp.last_match(1))
-        val = val.to_s[Regexp.last_match(0).length..-1]
+        val = val.to_s[Regexp.last_match(0).length..]
         break if val.blank?
       end
     end
@@ -61,11 +61,13 @@ module PatternSearch
       parse_boolean(:only_yes) && "yes"
     end
 
-    def parse_yes_no_both
+    def parse_no_include_only
       val = make_sure_there_is_one_value!
-      return "only"   if /^(1|yes|true|#{:search_value_true.l})$/i.match?(val)
+      if /^(include|both|either|#{:search_value_include.l})$/i.match?(val)
+        return "include"
+      end
       return "no"     if /^(0|no|false|#{:search_value_false.l})$/i.match?(val)
-      return "either" if /^(both|either|#{:search_value_both.l})$/i.match?(val)
+      return "only"   if /^(1|yes|true|#{:search_value_true.l})$/i.match?(val)
 
       raise(BadYesNoBothError.new(var: var, val: val))
     end
@@ -104,11 +106,11 @@ module PatternSearch
       vals.map do |val|
         # cop gives false positive
         if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
-          Location.safe_find(val) ||
+          ::Location.safe_find(val) ||
             raise(BadLocationError.new(var: var, val: val))
         else
-          Location.find_by_name_with_wildcards(val) ||
-            Location.find_by_scientific_name_with_wildcards(val) ||
+          ::Location.find_by_name_with_wildcards(val) ||
+            ::Location.find_by_scientific_name_with_wildcards(val) ||
             raise(BadLocationError.new(var: var, val: val))
         end
       end.flatten.map(&:id).uniq
@@ -162,6 +164,11 @@ module PatternSearch
       end
     end
 
+    def parse_user
+      val = make_sure_there_is_one_value!
+      parse_one_user(val).id
+    end
+
     def parse_list_of_strings
       vals
     end
@@ -175,7 +182,7 @@ module PatternSearch
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
         unless /^-?(\d+(\.\d+)?|\.\d+)$/.match?(val.to_s)
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
-        unless val.to_f >= min && val.to_f <= max
+        unless val.to_f.between?(min, max)
 
       val.to_f
     end
@@ -218,14 +225,14 @@ module PatternSearch
       val = val.downcase
       ::Name.all_ranks.each do |rank|
         if val == rank.to_s.downcase ||
-           val == :"rank_#{rank.to_s.downcase}".l || alt_rank_check(rank, val)
+           val == :"rank_#{rank.to_s.downcase}".l || alt_rank_check?(rank, val)
           return rank
         end
       end
       nil
     end
 
-    def alt_rank_check(rank, val)
+    def alt_rank_check?(rank, val)
       if %w[Phylum Group].include?(rank)
         ranks = :"rank_alt_#{rank.to_s.downcase}".l.split(",")
         ranks.map(&:strip).include?(val)

@@ -5,6 +5,54 @@ require("test_helper")
 # tests of Votes (Confidence levels) of Proposed Names
 module Observations::Namings
   class VotesControllerTest < FunctionalTestCase
+    # --------------------------------------------------------
+    #  Test showing the votes for a naming of an obs (:index).
+    # --------------------------------------------------------
+
+    def test_votes_index
+      nam = namings(:coprinus_comatus_naming)
+      params = { naming_id: nam.id, observation_id: nam.observation_id }
+
+      login
+      # First just make sure the page displays.
+      get(:index, params:)
+      assert_template("observations/namings/votes/index")
+
+      votes_index_assertions(nam)
+    end
+
+    # Tests that the table is rendered in a modal for a Turbo request
+    def test_votes_index_turbo
+      nam = namings(:coprinus_comatus_naming)
+      params = { naming_id: nam.id, observation_id: nam.observation_id }
+
+      login
+      # First just make sure the page displays.
+      get(:index, params:, format: :turbo_stream)
+      assert_template("shared/_modal")
+      assert_template("observations/namings/votes/_table")
+
+      votes_index_assertions(nam)
+    end
+
+    def votes_index_assertions(nam)
+      # Now try to make somewhat sure the content is right.
+      obs = Observation.naming_includes.find(nam.observation_id)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      table = consensus.calc_vote_table(nam)
+      str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
+      str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
+      table.each_key do |str|
+        if str == str1 && str1 == str2
+          assert_equal(2, table[str][:num])
+        elsif str == str1 || str == str2
+          assert_equal(1, table[str][:num])
+        else
+          assert_equal(0, table[str][:num])
+        end
+      end
+    end
+
     # ----------------------------
     #  Test voting.
     # ----------------------------
@@ -51,44 +99,130 @@ module Observations::Namings
 
     # Now have Rolf change his vote on his own naming. (no change in prefs)
     # Votes: rolf=3->2/-3, mary=1/3, dick=x/x
-    def test_cast_vote_rolf_change
-      obs  = observations(:coprinus_comatus_obs)
-      nam1 = namings(:coprinus_comatus_naming)
+    def test_rolf_vote_change
+      args = vote_change_basic_setup
+      args => { obs:, nam:, params: }
+
+      put(:update, params:)
+
+      post_vote_change_basic_assertions(obs:, nam:)
+    end
+
+    # Just like the last test, but test Turbo response
+    def test_rolf_vote_change_turbo
+      args = vote_change_basic_setup
+      args => { obs:, nam:, params: }
+
+      put(:update, params:, format: :turbo_stream)
+
+      post_vote_change_basic_assertions(obs:, nam:)
+    end
+
+    # Just like the last test, but test Turbo response
+    def test_rolf_vote_change_turbo_from_namings_table
+      args = vote_change_basic_setup
+      args => { obs:, nam:, params: }
+      params = params.merge(context: "namings_table")
+
+      put(:update, params:, format: :turbo_stream)
+      assert_template("observations/show/_section_update")
+      assert_template("observations/show/_namings")
+
+      post_vote_change_basic_assertions(obs:, nam:)
+    end
+
+    # Just like the last test, but test Turbo response
+    def test_rolf_vote_change_turbo_from_identify_ui
+      args = vote_change_basic_setup
+      args => { obs:, nam:, params: }
+      params = params.merge(context: "matrix_box")
+
+      put(:update, params:, format: :turbo_stream)
+      assert_template("observations/namings/_update_matrix_box")
+
+      post_vote_change_basic_assertions(obs:, nam:)
+    end
+
+    def vote_change_basic_setup
+      obs = observations(:coprinus_comatus_obs)
+      nam = namings(:coprinus_comatus_naming)
 
       login("rolf")
       consensus = ::Observation::NamingConsensus.new(obs)
-      vote = consensus.users_vote(nam1, rolf)
-      put(:update, params: { vote: { value: "2" }, id: vote.id,
-                             naming_id: nam1.id, observation_id: obs.id })
+      vote = consensus.users_vote(nam, rolf)
+
+      params = {
+        vote: { value: "2" },
+        id: vote.id,
+        naming_id: nam.id,
+        observation_id: obs.id
+      }
+
+      { obs:, nam:, params: }
+    end
+
+    def post_vote_change_basic_assertions(obs:, nam:)
+      # Now check that rolf's contribution is adjusted, as with the above test.
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
       assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
 
       # Check vote.
-      assert_equal(3, nam1.reload.vote_sum)
-      assert_equal(2, nam1.votes.length)
+      assert_equal(3, nam.vote_sum)
+      assert_equal(2, nam.votes.length)
     end
 
     # Now have Rolf increase his vote for Mary's. (changes consensus)
     # Votes: rolf=2/-3->3, mary=1/3, dick=x/x
-    def test_cast_vote_rolf_second_greater
-      obs  = observations(:coprinus_comatus_obs)
-      nam2 = namings(:coprinus_comatus_other_naming)
+    def test_cast_vote_rolf_changes_consensus
+      args = vote_changes_consensus_setup
+      args => { obs:, nam:, params: }
+
+      put(:update, params:)
+
+      post_vote_changes_consensus_assertions(obs:, nam:)
+    end
+
+    def test_cast_vote_rolf_changes_consensus_turbo
+      args = vote_changes_consensus_setup
+      args => { obs:, nam:, params: }
+      params = params.merge(context: "namings_table")
+
+      put(:update, params:, format: :turbo_stream)
+      assert_response(:redirect) # renders whole page, because title has changed
+
+      post_vote_changes_consensus_assertions(obs:, nam:)
+    end
+
+    def vote_changes_consensus_setup
+      obs = observations(:coprinus_comatus_obs)
+      nam = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
       consensus = ::Observation::NamingConsensus.new(obs)
-      vote = consensus.users_vote(nam2, rolf)
-      put(:update, params: { vote: { value: "3" }, id: vote.id,
-                             naming_id: nam2.id, observation_id: obs.id })
+      vote = consensus.users_vote(nam, rolf)
+
+      params = {
+        vote: { value: "3" },
+        id: vote.id,
+        naming_id: nam.id,
+        observation_id: obs.id
+      }
+
+      { obs:, nam:, params: }
+    end
+
+    def post_vote_changes_consensus_assertions(obs:, nam:)
+      # Now check that rolf's contribution is adjusted, as with the above test.
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
       assert_equal(names(:agaricus_campestris).id, obs.reload.name_id)
 
       # Check vote.
-      assert_equal(6, nam2.reload.vote_sum)
-      assert_equal(2, nam2.votes.length)
+      assert_equal(6, nam.reload.vote_sum)
+      assert_equal(2, nam.votes.length)
     end
 
     # Now have Rolf increase his vote for Mary's insufficiently. (no change)
@@ -154,68 +288,33 @@ module Observations::Namings
                    "Cache for 3: #{nam1.vote_cache}, 9: #{nam2.vote_cache}")
     end
 
-    def test_show_votes
-      nam = namings(:coprinus_comatus_naming)
-
-      login
-      # First just make sure the page displays.
-      get(
-        :index, params: { naming_id: nam.id,
-                          observation_id: nam.observation_id }
-      )
-      assert_template("observations/namings/votes/index")
-
-      # Now try to make somewhat sure the content is right.
-      obs = Observation.naming_includes.find(nam.observation_id)
-      consensus = ::Observation::NamingConsensus.new(obs)
-      table = consensus.calc_vote_table(nam)
-      str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
-      str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
-      table.each_key do |str|
-        if str == str1 && str1 == str2
-          assert_equal(2, table[str][:num])
-        elsif str == str1 || str == str2
-          assert_equal(1, table[str][:num])
-        else
-          assert_equal(0, table[str][:num])
-        end
-      end
-    end
-
-    def test_ajax_vote
+    def test_create_and_update_same_vote
       naming = namings(:minimal_unknown_naming)
       consensus = ::Observation::NamingConsensus.new(naming.observation)
       assert_nil(consensus.users_vote(naming, dick))
+      params = { naming_id: naming.id, observation_id: naming.observation_id }
 
-      post(:create, params: { vote: { value: 3 },
-                              naming_id: naming.id,
-                              observation_id: naming.observation_id })
+      post(:create, params: params.merge(vote: { value: 3 }))
       assert_redirected_to(new_account_login_path)
 
       login("dick")
-      post(:create, params: { vote: { value: 3 }, naming_id: naming.id,
-                              observation_id: naming.observation_id })
+      post(:create, params: params.merge(vote: { value: 3 }))
       naming.reload
       consensus.reload_namings_and_votes!
       assert_equal(3, consensus.users_vote(naming, dick).value)
 
-      put(:update, params: { vote: { value: 0 },
-                             id: consensus.users_vote(naming, dick).id,
-                             naming_id: naming.id,
-                             observation_id: naming.observation_id })
+      # Now update the same user's vote
+      update_params = params.merge(
+        vote: { value: 0 }, id: consensus.users_vote(naming, dick).id
+      )
+      put(:update, params: update_params)
       naming.reload
       consensus.reload_namings_and_votes!
       assert_nil(consensus.users_vote(naming, dick))
 
       assert_raises(RuntimeError) do
-        post(:create, params: { vote: { value: 99 }, naming_id: naming.id,
-                                observation_id: naming.observation_id })
+        post(:create, params: params.merge(vote: { value: 99 }))
       end
-
-      # assert_raises(ActiveRecord::RecordNotFound) do
-      #   get(:update, xhr: true,
-      #                params: { naming_id: 99, vote: { value: 0 } })
-      # end
     end
   end
 end

@@ -2,9 +2,9 @@
 # http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 DEFAULTS: &DEFAULTS
-  title:      $LABEL
-  body:       Body of $LABEL article
-  user:       rolf
+  title: $LABEL
+  body: Body of $LABEL article
+  user: rolf
   rss_log_id:
 
 premier_article:
@@ -12,4 +12,5 @@ premier_article:
   rss_log: article_rss_log
 
 second_article:
-  <<:  *DEFAULTS
+  <<: *DEFAULTS
+  user: mary

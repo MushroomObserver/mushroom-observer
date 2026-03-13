@@ -36,8 +36,10 @@ module Names::Synonyms
 
       params = {
         id: old_name.id,
-        proposed_name: new_name.text_name,
-        comment: "Don't like this name"
+        deprecate_synonym: {
+          proposed_name: new_name.text_name,
+          comment: "Don't like this name"
+        }
       }
       post_requires_login(:create, params)
       assert_redirected_to(name_path(old_name.id))
@@ -78,13 +80,15 @@ module Names::Synonyms
 
       params = {
         id: old_name.id,
-        proposed_name: new_name.text_name,
-        comment: ""
+        deprecate_synonym: {
+          proposed_name: new_name.text_name,
+          comment: ""
+        }
       }
       login("rolf")
       post(:create, params: params)
       assert_template("names/synonyms/deprecate/new")
-      assert_template("shared/_form_name_feedback")
+      assert_select("#name_messages")
       # Fail since name can't be disambiguated
 
       assert_not(old_name.reload.deprecated)
@@ -113,9 +117,11 @@ module Names::Synonyms
 
       params = {
         id: old_name.id,
-        proposed_name: new_name.text_name,
-        chosen_name: { name_id: new_name.id },
-        comment: "Don't like this name"
+        deprecate_synonym: {
+          proposed_name: new_name.text_name,
+          comment: "Don't like this name"
+        },
+        chosen_name: { name_id: new_name.id }
       }
       login("rolf")
       post(:create, params: params)
@@ -144,13 +150,15 @@ module Names::Synonyms
 
       params = {
         id: old_name.id,
-        proposed_name: new_name_str,
-        comment: "Don't like this name"
+        deprecate_synonym: {
+          proposed_name: new_name_str,
+          comment: "Don't like this name"
+        }
       }
       login("rolf")
       post(:create, params: params)
       assert_template("names/synonyms/deprecate/new")
-      assert_template("shared/_form_name_feedback")
+      assert_select("#name_messages")
       # Fail since new name is not approved
 
       assert_not(old_name.reload.deprecated)
@@ -170,9 +178,11 @@ module Names::Synonyms
 
       params = {
         id: old_name.id,
-        proposed_name: new_name_str,
-        approved_name: new_name_str,
-        comment: "Don't like this name"
+        deprecate_synonym: {
+          proposed_name: new_name_str,
+          comment: "Don't like this name"
+        },
+        approved_name: new_name_str
       }
       login("rolf")
       post(:create, params: params)
@@ -191,6 +201,27 @@ module Names::Synonyms
       assert_equal(2, new_synonym.names.size)
     end
 
+    # Test that submitting without a proposed name shows an error
+    def test_do_deprecation_blank_proposed_name
+      old_name = names(:lepiota_rachodes)
+      assert_not(old_name.deprecated)
+
+      params = {
+        id: old_name.id,
+        deprecate_synonym: {
+          proposed_name: "",
+          comment: ""
+        }
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_template("names/synonyms/deprecate/new")
+      assert_flash_error(:runtime_name_deprecate_must_choose.t)
+
+      # Name should remain unchanged
+      assert_not(old_name.reload.deprecated)
+    end
+
     def test_deprecate_name_locked
       name = Name.where(locked: true).first
       name2 = names(:agaricus_campestris)
@@ -198,9 +229,11 @@ module Names::Synonyms
       name.save
       params = {
         id: name.id,
-        proposed_name: name2.search_name,
-        approved_name: name2.search_name,
-        comment: ""
+        deprecate_synonym: {
+          proposed_name: name2.search_name,
+          comment: ""
+        },
+        approved_name: name2.search_name
       }
 
       login("rolf")

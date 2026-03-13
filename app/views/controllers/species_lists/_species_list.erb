@@ -1,0 +1,43 @@
+<%# locals: (species_list:, observation: nil, remove: false, add: false, project: nil) %>
+
+<%#
+Each listing in the index, or
+each listing on the "Manage species lists" edit page
+%>
+<%
+place = species_list.place_name.t rescue :UNKNOWN.l
+%>
+
+<%= tag.div(
+  class: "list-group-item d-flex justify-content-between align-items-start"
+) do %>
+
+  <%= tag.div(class: "list_info d-flex align-items-start") do %>
+    <%= tag.div(show_title_id_badge(species_list, "rss-id mr-4"),
+                class: "text-larger") %>
+    <%= tag.div do %>
+      <%= tag.div do
+        [
+          link_to(species_list.show_link_with_project(@project)) do
+            tag.span(species_list.text_name.t, class: "list_what h4")
+          end,
+          tag.span("(#{species_list.when.to_s})", class: "list_when ml-4")
+        ].safe_join(" ")
+      end %>
+      <%= tag.div do
+        [tag.span(place), "|", user_link(species_list.user)].safe_join(" ")
+      end %>
+    <% end %>
+  <% end %>
+
+  <% if remove || add %>
+    <%= tag.div(class: "list_manage") do
+      if remove
+        species_list_remove_obs_button(species_list:, observation:)
+      elsif add
+        species_list_add_obs_button(species_list:, observation:)
+      end
+    end %>
+  <% end %>
+
+<% end %>

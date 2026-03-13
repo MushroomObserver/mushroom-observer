@@ -1,0 +1,61 @@
+<%=
+  tag.div(id: "current_status_#{tracker.id}",
+          data: { inat_import_job_target: "current",
+                  status: tracker.status }) do
+    [
+      tag.p do
+        [
+          # Status: <status>
+          tag.span(class: "font-weight-bold") do
+            "#{:STATUS.l}: "
+          end,
+          tag.span(tracker.status),
+          tag.br,
+          # Imported n of m observations
+          tag.span(class: "font-weight-bold") do
+                   "#{:inat_import_imported.t}: "
+          end,
+          tag.span(tracker.imported_count),
+          tag.span(class: "mr-2") { " #{:of.t}" },
+          tag.span(tracker.importables),
+          tag.span(" #{:observations.t}")
+        ].safe_join
+      end,
+
+      # Timings
+      # Started: yyyy-mm-dd hh:mm:ss -nnnn
+      tag.span(class: "font-weight-bold") do
+        "#{:inat_import_tracker_started.l}: "
+      end,
+      tag.span(tracker.created_at&.strftime("%Y-%m-%d %H:%M:%S %z")),
+      tag.br,
+
+      tag.span(class: "font-weight-bold") do
+        "#{:inat_import_tracker_elapsed_time.l}: "
+      end,
+      tag.span(time_in_hours_minutes_seconds(tracker.elapsed_time)),
+      tag.br,
+
+      tag.span(class: "font-weight-bold") do
+        "#{:inat_import_tracker_estimated_remaining_time.l}: "
+      end,
+      tag.span(remaining_time_in_hours_minutes_seconds(tracker)),
+      tag.br,
+
+      tag.span(class: "font-weight-bold") do
+        "#{:inat_import_tracker_ended.l}: "
+      end,
+      tag.span(tracker.ended_at),
+      tag.br,
+
+      tag.span(tracker.error_caption, class: "font-weight-bold"),
+      tag.span(tracker.response_errors, class: "violation-highlight"),
+      tag.br,
+
+      render(Components::Alert.new(
+        message: tracker.help, level: :warning, class: "mt-3"
+      )),
+      tag.br
+    ].safe_join
+  end
+%>

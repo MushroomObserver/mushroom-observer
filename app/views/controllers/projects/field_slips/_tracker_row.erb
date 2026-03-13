@@ -6,7 +6,7 @@ tag.tr(id: dom_id(tracker),
   [
     tag.td(data: { field_slip_job_target: "link" }) do
       # returns link to file or filename, depending on status
-      field_slip_link(tracker)
+      field_slip_link(tracker, @user)
     end,
     tag.td(data: { field_slip_job_target: "link" }) do
       user_link(tracker.user_id, tracker.user.login) if tracker.user

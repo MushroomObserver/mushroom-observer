@@ -4,10 +4,12 @@ paths = user_stats_link_paths(@show_user)
 total = 0
 %>
 
-<%= panel_block(heading: :show_user_title.t(user: name),
-                id: "user_stats") do %>
-
-  <table class="table table-condensed bg-none mb-0">
+<%= render(Components::Panel.new(
+      panel_id: "user_stats"
+    )) do |panel| %>
+  <%= panel.with_heading { :show_user_title.t(user: name) } %>
+  <%= panel.with_body do %>
+    <table class="table table-condensed bg-none mb-0">
     <% rows.each do |row|
       field = row[:field]
       label = row[:label]
@@ -47,6 +49,6 @@ total = 0
         <td align="right"><%= total %></td>
       </tr>
     <% end %>
-  </table>
-
+    </table>
+  <% end %>
 <% end %>

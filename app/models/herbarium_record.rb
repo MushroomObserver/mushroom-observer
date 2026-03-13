@@ -57,6 +57,40 @@ class HerbariumRecord < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
+  scope :order_by_default,
+        -> { order_by(::Query::HerbariumRecords.default_order) }
+
+  scope :observations, lambda { |obs|
+    joins(:observation_herbarium_records).
+      where(observation_herbarium_records: { observation: obs })
+  }
+  scope :herbaria,
+        ->(herbaria) { where(herbarium: herbaria) }
+
+  scope :has_notes,
+        ->(bool = true) { not_blank_condition(HerbariumRecord[:notes], bool:) }
+  scope :notes_has,
+        ->(str) { search_columns(HerbariumRecord[:notes], str) }
+
+  scope :initial_det, lambda { |val|
+    exact_match_condition(HerbariumRecord[:initial_det], val)
+  }
+  scope :initial_det_has,
+        ->(str) { search_columns(HerbariumRecord[:initial_det], str) }
+
+  scope :accession, lambda { |val|
+    exact_match_condition(HerbariumRecord[:accession_number], val)
+  }
+  scope :accession_has,
+        ->(str) { search_columns(HerbariumRecord[:accession_number], str) }
+
+  scope :pattern, lambda { |phrase|
+    cols = (HerbariumRecord[:initial_det] +
+            HerbariumRecord[:accession_number] +
+            HerbariumRecord[:notes].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
+
   def herbarium_label
     if initial_det.blank?
       accession_number
@@ -78,20 +112,25 @@ class HerbariumRecord < AbstractModel
   end
 
   # Can a given user edit this HerbariumRecord?
-  def can_edit?(user = User.current)
+  def can_edit?(user)
+    return false unless user
+
     self.user == user || herbarium&.curator?(user)
   end
 
   # Send email notifications when herbarium_record created by non-curator.
+  # Migrated from QueuedEmail::AddRecordToHerbarium to ActionMailer + ActiveJob.
   def notify_curators
-    sender = User.current
+    sender = user
     recipients = herbarium.try(&:curators) || []
     return if recipients.member?(sender)
 
-    recipients.each do |recipient|
-      next if recipient.no_emails
+    recipients.each do |receiver|
+      next if receiver.no_emails
 
-      QueuedEmail::AddRecordToHerbarium.create_email(sender, recipient, self)
+      AddHerbariumRecordMailer.build(
+        sender:, receiver:, herbarium_record: self
+      ).deliver_later
     end
   end
 
@@ -102,9 +141,9 @@ class HerbariumRecord < AbstractModel
 
     observations.push(obs)
     obs.update(specimen: true) unless obs.specimen
-    obs.log(:log_herbarium_record_added,
-            name: accession_at_herbarium,
-            touch: true)
+    obs.user_log(user, :log_herbarium_record_added,
+                 name: accession_at_herbarium,
+                 touch: true)
   end
 
   # Remove this HerbariumRecord from an Observation and log the action.

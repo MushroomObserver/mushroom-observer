@@ -6,7 +6,7 @@ json.user(@api.user.id) if @api.user
 
 unless @api.errors.any?(&:fatal)
   if @api.query
-    json.query(@api.query.query.gsub(/\s*\n\s*/, " ").strip)
+    json.query(@api.query.sql.gsub(/\s*\n\s*/, " ").strip)
     json.number_of_records(@api.num_results)
     json.number_of_pages(@api.num_pages)
     json.page_number(@api.page_number)

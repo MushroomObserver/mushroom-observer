@@ -8,7 +8,7 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
 
   unless @api.errors.any?(&:fatal)
     if @api.query
-      xml_sql_string(xml, :query, @api.query.query.gsub(/\s*\n\s*/, " ").strip)
+      xml_sql_string(xml, :query, @api.query.sql.gsub(/\s*\n\s*/, " ").strip)
       xml_integer(xml, :number_of_records, @api.num_results)
       xml_integer(xml, :number_of_pages, @api.num_pages)
       xml_integer(xml, :page_number, @api.page_number)

@@ -38,16 +38,10 @@
 #
 #  == Scopes
 #
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
-#  name_includes(place_name)
-#  in_region(place_name)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  name_has(place_name)
+#  region(place_name)
 #  in_box(north:, south:, east:, west:)
 #
 #  == Instance methods
@@ -92,7 +86,9 @@
 #
 ################################################################################
 class Location < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "acts_as_versioned"
+  require("acts_as_versioned")
+
+  include Scopes
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
@@ -105,6 +101,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
   has_many :projects
+  has_many :project_aliases, as: :target, dependent: :destroy
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
@@ -140,6 +137,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   before_update :update_observation_cache
   after_update :notify_users
 
+  SEARCHABLE_FIELDS = [
+    :name, :notes
+  ].freeze
+
   # Automatically log standard events.  Merge will already log the destruction
   # as a merge and orphan the log.
   self.autolog_events = [:created!, :updated!, :destroyed]
@@ -150,136 +151,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     if (ver.version != 1) &&
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
-       ).count.zero?
+       ).none?
       UserStats.update_contribution(:add, :location_versions)
     end
   end
-
-  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
-  scope :name_includes,
-        ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
-  scope :in_region,
-        ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  # This returns locations whose bounding box is entirely within the given box.
-  # Pass kwargs (:north, :south, :east, :west), any order
-  scope :in_box,
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          if box.straddles_180_deg?
-            in_box_straddling_dateline(**args)
-          else
-            in_box_regular(**args)
-          end
-        }
-  scope :in_box_straddling_dateline, # mostly a helper for in_box
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          where(
-            (Location[:south] >= box.south).
-              and(Location[:north] <= box.north).
-            # Location[:west] between w & 180 OR between 180 and e
-            and((Location[:west] >= box.west).
-              or(Location[:west] <= box.east)).
-            and((Location[:east] >= box.west).
-              or(Location[:east] <= box.east))
-          )
-        }
-  scope :in_box_regular, # mostly a helper for in_box
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          where(
-            (Location[:south] >= box.south).
-              and(Location[:north] <= box.north).
-            and(Location[:west] >= box.west).
-              and(Location[:east] <= box.east).
-            and(Location[:west] <= Location[:east])
-          )
-        }
-  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          in_box(**args).invert_where
-        }
-  scope :contains_point, # Use named parameters (lat:, lng:), any order
-        lambda { |**args|
-          args => {lat:, lng:}
-          where(
-            (Location[:south]).lteq(lat).and((Location[:north]).gteq(lat)).
-            and(
-              Location[:west].lteq(lng).and(Location[:east].gteq(lng)).
-              or(
-                Location[:west].gteq(lng).and(Location[:east].lteq(lng))
-              )
-            )
-          )
-        }
-  scope :with_minimum_bounding_box_containing_point,
-        lambda { |**args|
-          args => {lat:, lng:}
-          containers = contains_point(lat: lat, lng: lng)
-          # prevents returning all containers if contaimers empty
-          return none if containers.empty?
-
-          containers.min_by(&:box_area)
-        }
-  scope :contains_box, # Use named parameters, north:, south:, east:, west:
-        lambda { |**args|
-          args => { north:, south:, east:, west: }
-
-          # w/e    | Location     | Location contains w/e
-          # ______ | ____________ | ______________________
-          # w <= e | west <= east | west <= w && e <= east
-          # w <= e | west > east  | west <= w || e <= east
-          # w > e  | west <= east | none
-          # w > e  | west > east  | west <= w && e <= east
-
-          if west <= east # w / e don't straddle 180
-            where(
-              Location[:south].lteq(south).and(Location[:north].gteq(north)).
-              # Location doesn't straddle 180
-              and(Location[:west].lteq(Location[:east]).
-              and(Location[:west] <= west).and(Location[:east] >= east).
-              # Location straddles 180
-              or(
-                Location[:west].gt(Location[:east]).
-                and((Location[:west] <= west).or(Location[:east] >= east))
-              ))
-            )
-          else # Location straddles 180
-            where(
-              Location[:south].lteq(south).and(Location[:north].gteq(north)).
-              # Location 100% wrap; necessarily straddles w/e
-              and(Location[:west].eq(Location[:east] - 360)).
-              # Location < 100% wrap-around
-              or(
-                Location[:west].gt(Location[:east]).
-                and(Location[:west] <= west).and(Location[:east] >= east)
-              )
-            )
-          end
-        }
-  scope :with_observations, -> { joins(:observations).distinct }
-
-  scope :show_includes,
-        lambda {
-          strict_loading.includes(
-            { comments: :user },
-            { description: { comments: :user } },
-            { descriptions: [:authors, :editors] },
-            :interests,
-            :observations,
-            :rss_log,
-            :versions
-          )
-        }
 
   # On save, calculate bounding box area for the `box_area` column, plus the
   # `center_lat` and `center_lng` values. If box_area is below a threshold, also
@@ -309,19 +184,20 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Can populate columns after migration, or be run as part of a recurring job.
   def self.update_box_area_and_center_columns
     # update the locations
-    update_all(update_center_and_area_sql)
-    # give center points to associated observations in batches
-    Observation.joins(:location).
-      where(Location[:box_area].lteq(MO.obs_location_max_area)).
-      group(:location_id).update_all(
-        location_lat: Location[:center_lat], location_lng: Location[:center_lng]
-      )
+    loc_updated = update_all(update_center_and_area_sql)
+    # give center points to associated observations in batches by location_id
+    obs_centered = Observation.
+                   in_box_of_max_area.group(:location_id).update_all(
+                     location_lat: Location[:center_lat],
+                     location_lng: Location[:center_lng]
+                   )
     # null center points where area is above the threshold
-    Observation.joins(:location).
-      where(Location[:box_area].gt(MO.obs_location_max_area)).
-      group(:location_id).update_all(
-        location_lat: nil, location_lng: nil
-      )
+    obs_center_nulled = Observation.
+                        in_box_gt_max_area.group(:location_id).update_all(
+                          location_lat: nil, location_lng: nil
+                        )
+    # Return counts
+    [loc_updated, obs_centered, obs_center_nulled]
   end
 
   # Let attached observations update their cache if these fields changed.
@@ -355,18 +231,25 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Shared logic between latitude and longitude
   def self.parse_lxxxitude(value, direction1, direction2, max_degrees)
-    result = nil
     match = value.to_s.match(LXXXITUDE_REGEX)
-    if match && (match[4].blank? || [direction1, direction2].member?(match[4]))
-      val = if match[1].to_f.positive?
-              match[1].to_f + match[2].to_f / 60 + match[3].to_f / 3600
-            else
-              match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
-            end
-      val = -val if match[4] == direction2
-      result = val.round(4) if val >= -max_degrees && val <= max_degrees
+    return unless match
+    return unless lxxxitude_direction_valid?(match[4], direction1, direction2)
+
+    val = lxxxitude_degrees(match)
+    val = -val if match[4] == direction2
+    val.round(4) if val.between?(-max_degrees, max_degrees)
+  end
+
+  def self.lxxxitude_direction_valid?(dir, direction1, direction2)
+    dir.blank? || [direction1, direction2].member?(dir)
+  end
+
+  def self.lxxxitude_degrees(match)
+    if match[1].to_f.positive?
+      match[1].to_f + match[2].to_f / 60 + match[3].to_f / 3600
+    else
+      match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
     end
-    result
   end
 
   # Convert latitude string to standard decimal form with 4 places of precision.
@@ -398,18 +281,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Useful if invalid lat/longs cause crash, e.g., in mapping code.
   # New: Ensure box has nonzero size or make_editable_map fails.
   def force_valid_lat_lngs!
-    self.north = Location.parse_latitude(north) || 45
-    self.south = Location.parse_latitude(south) || -45
-    self.east = Location.parse_longitude(east) || 90
-    self.west = Location.parse_longitude(west) || -90
-    return if north > south
-
-    center_lat = (north + south) / 2
-    center_lon = (east + west) / 2
-    self.north = center_lat + 0.0001
-    self.south = center_lat - 0.0001
-    self.east = center_lon + 0.0001
-    self.west = center_lon - 0.0001
+    parse_lat_lngs!
+    fix_zero_size_box! unless north > south
   end
 
   def found_here?(obs)
@@ -499,6 +372,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     display_name
   end
 
+  def textile_name
+    display_name
+  end
+
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
     text_name + " (#{id || "?"})"
@@ -582,7 +459,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    Location.where(name: name).or(Location.where(scientific_name: name)).first
+    Location.where(name: name).
+      or(Location.where(scientific_name: name)).first
   end
 
   def self.user_format(user, name)
@@ -630,7 +508,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       if OK_PREFIXES.member?(s)
         count += 1
       else
-        trimmed = tokens[count..-1].join(" ")
+        trimmed = tokens[count..].join(" ")
         return trimmed if understood_places.member?(trimmed)
       end
     end
@@ -670,7 +548,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Check if a given place name (postal order) already exists,
   # defined as a Location or undefined as a saved `where` string.
-  def self.location_name_exists(name)
+  def self.location_name_exists?(name)
     return false unless name
 
     location_name_cache.member?(name)
@@ -679,7 +557,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Decide if the given name is dubious for any reason
   def self.dubious_name?(name, provide_reasons = false, check_db = true)
     reasons = []
-    unless check_db && location_name_exists(name)
+    unless check_db && location_name_exists?(name)
       reasons += check_for_empty_name(name)
       reasons += check_for_dubious_commas(name)
       reasons += check_for_bad_country_or_state(name)
@@ -702,45 +580,46 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def self.check_for_bad_country_or_state(name)
-    reasons = []
     return [] if name.blank?
 
     this_country = country(name)
     this_state = state(name)
     real_country = understood_country?(this_country)
-    if real_country.nil?
-      reasons << :location_dubious_unknown_country.t(country: this_country)
-    end
+    check_country_validity(real_country, this_country) +
+      check_state_validity(real_country, this_country, this_state)
+  end
+
+  def self.check_country_validity(real_country, this_country)
+    return [] if real_country
+
+    [:location_dubious_unknown_country.t(country: this_country)]
+  end
+
+  def self.check_state_validity(real_country, this_country, this_state)
     if real_country && has_known_states?(real_country)
-      if this_state
-        if understood_state?(this_state, real_country).nil?
-          reasons << :location_dubious_unknown_state.t(country: real_country,
-                                                       state: this_state)
-        end
-      elsif this_country != real_country
-        # Note that we accept things like "Western Mexico" as a valid country
-        # modified by "Western".  However, in the case of Australia, this could
-        # be ambiguous because there is also a state "Western Australia".
-        # But note that Mexico has a state also called Mexico.  We want to
-        # complain if the user enters "Western Australia" bare because they
-        # may have just forgotten to include the country.  But we do not want
-        # to complain if the user enters "Mexico" bare because that is fine.
-        # If the user also entered a state, say "Perth, Western Australia",
-        # then it will complain above because "Perth" is not a valid state of
-        # Australia.  The use case that prompted this subtle change in logic
-        # was that it was impossible to enter *any* location in Mexico because
-        # Mexico was an ambiguous state/country!  Now this code only applies
-        # to a bare country which may be ambiguous.
-        if understood_state?(this_country, real_country)
-          reasons << :location_dubious_ambiguous_country.
-                     t(country: this_country)
-        end
-      end
+      check_known_state_validity(real_country, this_country, this_state)
     elsif this_state && understood_country?(this_state)
-      reasons << :location_dubious_redundant_state.t(country: real_country,
-                                                     state: this_state)
+      [:location_dubious_redundant_state.t(country: real_country,
+                                           state: this_state)]
+    else
+      []
     end
-    reasons
+  end
+
+  # Accepts "Western Mexico" as a valid country modified by "Western",
+  # but complains about "Western Australia" bare (ambiguous state/country).
+  def self.check_known_state_validity(real_country, this_country, this_state)
+    if this_state
+      return [] unless understood_state?(this_state, real_country).nil?
+
+      [:location_dubious_unknown_state.t(country: real_country,
+                                         state: this_state)]
+    elsif this_country != real_country &&
+          understood_state?(this_country, real_country)
+      [:location_dubious_ambiguous_country.t(country: this_country)]
+    else
+      []
+    end
   end
 
   def self.check_for_bad_terms(name)
@@ -817,92 +696,31 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     observations.empty?
   end
 
+  # Can this location be destroyed? Only if it has no associations that would
+  # be orphaned. Associations with dependent: :destroy are fine (comments,
+  # interests, project_aliases).
+  def destroyable?
+    observations.empty? &&
+      projects.empty? &&
+      species_lists.empty? &&
+      herbaria.empty? &&
+      users.empty? &&
+      descriptions.empty?
+  end
+
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved.
-  def merge(old_loc, _log = true)
+  def merge(user, old_loc, _log = true)
     return if old_loc == self
 
-    # Move observations over first.
-    old_loc.observations.each do |obs|
-      obs.location = self
-      obs.save
-    end
-
-    # change object.location without verification
-    [Herbarium, Project, SpeciesList, User].each do |klass|
-      klass.where(location_id: old_loc.id).find_each do |obj|
-        obj.update_attribute(:location, self)
-      end
-    end
-
-    # Move over any interest in the old name.
-    Interest.where(target_type: "Location",
-                   target_id: old_loc.id).find_each do |int|
-      int.target = self
-      int.save
-    end
-
+    move_observations(old_loc)
+    move_location_associations(old_loc)
+    move_interests_and_aliases(old_loc)
     add_note(explain_merge(old_loc))
-
     update_location_descriptions(old_loc)
-
-    # Log the action.
-    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
-                            this: old_loc.name, that: name)
-    old_loc.rss_log = nil
-
-    # Destroy past versions.
-    editors = []
-    old_loc.versions.each do |ver|
-      editors << ver.user_id
-      ver.destroy
-    end
-
-    # Update contributions for editors.
-    editors.delete(old_loc.user_id)
-    editors.uniq.each do |user_id|
-      UserStats.update_contribution(:del, :location_versions, user_id)
-    end
-
-    # Finally destroy the location.
-    old_loc.destroy
+    log_and_destroy_location(user, old_loc)
   end
-
-  private
-
-  def explain_merge(old_loc)
-    # Intentionally not translated
-    <<~EXPLANATION.tr("\n", " ")
-      [admin - #{Time.zone.now}]: Merged with #{old_loc.name}
-      (was Location ##{old_loc.id}):
-      North: #{old_loc.north}, South: #{old_loc.south},
-      West: #{old_loc.west}, East: #{old_loc.east}
-    EXPLANATION
-  end
-
-  def update_location_descriptions(old_loc)
-    # Merge the two "main" descriptions if it can.
-    if description && old_loc.description &&
-       (description.source_type == :public) &&
-       (old_loc.description.source_type == :public)
-      description.merge(old_loc.description)
-    end
-
-    # If this one doesn't have a primary description and the other does,
-    # then make it this one's.
-    if !description && old_loc.description
-      self.description = old_loc.description
-    end
-
-    # Move over any remaining descriptions.
-    old_loc.descriptions.each do |desc|
-      desc.location_id = id
-      desc.save
-    end
-  end
-
-  public
 
   ##############################################################################
   #
@@ -916,36 +734,126 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless saved_version_changes?
 
     sender = User.current
+    recipients = notification_recipients
+    send_location_change_emails(sender, recipients)
+  end
+
+  private
+
+  def move_observations(old_loc)
+    old_loc.observations.each do |obs|
+      obs.location = self
+      obs.save
+    end
+  end
+
+  def move_location_associations(old_loc)
+    [Herbarium, Project, SpeciesList, User].each do |klass|
+      klass.where(location_id: old_loc.id).find_each do |obj|
+        obj.update_attribute(:location, self)
+      end
+    end
+  end
+
+  def move_interests_and_aliases(old_loc)
+    [Interest, ProjectAlias].each do |klass|
+      klass.where(target_type: "Location",
+                  target_id: old_loc.id).find_each do |obj|
+        obj.target = self
+        obj.save
+      end
+    end
+  end
+
+  def log_and_destroy_location(user, old_loc)
+    old_loc.rss_log&.orphan(user, old_loc.name, :log_location_merged,
+                            this: old_loc.name, that: name)
+    old_loc.rss_log = nil
+    remove_old_location_versions(old_loc)
+    old_loc.destroy
+  end
+
+  def remove_old_location_versions(old_loc)
+    editors = []
+    old_loc.versions.each do |ver|
+      editors << ver.user_id
+      ver.destroy
+    end
+    editors.delete(old_loc.user_id)
+    editors.uniq.each do |user_id|
+      UserStats.update_contribution(:del, :location_versions, user_id)
+    end
+  end
+
+  def explain_merge(old_loc)
+    # Intentionally not translated
+    <<~EXPLANATION.tr("\n", " ")
+      [admin - #{Time.zone.now}]: Merged with #{old_loc.name}
+      (was Location ##{old_loc.id}):
+      North: #{old_loc.north}, South: #{old_loc.south},
+      West: #{old_loc.west}, East: #{old_loc.east}
+    EXPLANATION
+  end
+
+  def update_location_descriptions(old_loc)
+    merge_primary_descriptions(old_loc)
+    self.description ||= old_loc.description
+    move_remaining_descriptions(old_loc)
+  end
+
+  def merge_primary_descriptions(old_loc)
+    return unless description && old_loc.description
+    return unless description.source_type == :public
+    return unless old_loc.description.source_type == :public
+
+    description.merge(old_loc.description)
+  end
+
+  def move_remaining_descriptions(old_loc)
+    old_loc.descriptions.each do |desc|
+      desc.location_id = id
+      desc.save
+    end
+  end
+
+  def parse_lat_lngs!
+    self.north = Location.parse_latitude(north) || 45
+    self.south = Location.parse_latitude(south) || -45
+    self.east = Location.parse_longitude(east) || 90
+    self.west = Location.parse_longitude(west) || -90
+  end
+
+  def fix_zero_size_box!
+    center_lat = (north + south) / 2
+    center_lon = (east + west) / 2
+    self.north = center_lat + MO.box_epsilon
+    self.south = center_lat - MO.box_epsilon
+    self.east = center_lon + MO.box_epsilon
+    self.west = center_lon - MO.box_epsilon
+  end
+
+  def notification_recipients
+    recipients = collect_description_subscribers
+    collect_interested_users(recipients)
+    recipients.reject!(&:no_emails)
+    recipients
+  end
+
+  def collect_description_subscribers
     recipients = []
-
-    # Tell admins of the change.
-    descriptions.map(&:admins).each do |user_list|
-      user_list.each do |user|
-        recipients.push(user) if user.email_locations_admin
+    { admins: :email_locations_admin,
+      authors: :email_locations_author,
+      editors: :email_locations_editor }.each do |role, pref|
+      descriptions.map(&role).each do |user_list|
+        user_list.each do |user|
+          recipients.push(user) if user.public_send(pref)
+        end
       end
     end
+    recipients
+  end
 
-    # Tell authors of the change.
-    descriptions.map(&:authors).each do |user_list|
-      user_list.each do |user|
-        recipients.push(user) if user.email_locations_author
-      end
-    end
-
-    # Tell editors of the change.
-    descriptions.map(&:editors).each do |user_list|
-      user_list.each do |user|
-        recipients.push(user) if user.email_locations_editor
-      end
-    end
-
-    # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).find_each do |user|
-      recipients.push(user)
-    end
-
-    # Send to people who have registered interest.
-    # Also remove everyone who has explicitly said they are NOT interested.
+  def collect_interested_users(recipients)
     interests.each do |interest|
       if interest.state
         recipients.push(interest.user)
@@ -953,13 +861,18 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
         recipients.delete(interest.user)
       end
     end
+  end
 
-    # Remove users who have opted out of all emails.
-    recipients.reject!(&:no_emails)
-
-    # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |recipient|
-      QueuedEmail::LocationChange.create_email(sender, recipient, self)
+  # Calculate versions now while saved_changes? is still accurate.
+  def send_location_change_emails(sender, recipients)
+    old_loc_ver = saved_changes? ? version - 1 : version
+    desc = description
+    (recipients.uniq - [sender]).each do |receiver|
+      LocationChangeMailer.build(
+        sender:, receiver:, location: self, old_loc_ver:,
+        new_loc_ver: version, description: desc,
+        old_desc_ver: desc&.version, new_desc_ver: desc&.version
+      ).deliver_later
     end
   end
 
@@ -970,37 +883,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   validate :check_requirements
   def check_requirements
     check_hidden
-
-    if !north || (north > 90)
-      errors.add(:north, :validate_location_north_too_high.t)
-    end
-    if !south || (south < -90)
-      errors.add(:south, :validate_location_south_too_low.t)
-    end
-    if north && south && (north < south)
-      errors.add(:north, :validate_location_north_less_than_south.t)
-    end
-
-    if !east || (east < -180) || (east > 180)
-      errors.add(:east, :validate_location_east_out_of_bounds.t)
-    end
-    if !west || (west < -180) || (west > 180)
-      errors.add(:west, :validate_location_west_out_of_bounds.t)
-    end
-
-    if high && low && (high < low)
-      errors.add(:high, :validate_location_high_less_than_low.t)
-    end
-
-    if !user && !User.current
-      errors.add(:user, :validate_location_user_missing.t)
-    end
-
-    if name.to_s.size > 1024
-      errors.add(:name, :validate_location_name_too_long.t)
-    elsif name.empty?
-      errors.add(:name, :validate_missing.t(field: :name))
-    end
+    validate_latitude
+    validate_longitude
+    validate_elevation
+    validate_user
+    validate_name
   end
 
   def check_hidden
@@ -1010,5 +897,46 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     self.south = south.floor(1)
     self.east = east.ceil(1)
     self.west = west.floor(1)
+  end
+
+  def validate_latitude
+    if !north || north > 90
+      errors.add(:north, :validate_location_north_too_high.t)
+    end
+    if !south || south < -90
+      errors.add(:south, :validate_location_south_too_low.t)
+    end
+    return unless north && south && north < south
+
+    errors.add(:north, :validate_location_north_less_than_south.t)
+  end
+
+  def validate_longitude
+    if !east || east < -180 || east > 180
+      errors.add(:east, :validate_location_east_out_of_bounds.t)
+    end
+    return unless !west || west < -180 || west > 180
+
+    errors.add(:west, :validate_location_west_out_of_bounds.t)
+  end
+
+  def validate_elevation
+    return unless high && low && high < low
+
+    errors.add(:high, :validate_location_high_less_than_low.t)
+  end
+
+  def validate_user
+    return if user || User.current
+
+    errors.add(:user, :validate_location_user_missing.t)
+  end
+
+  def validate_name
+    if name.to_s.size > 1024
+      errors.add(:name, :validate_location_name_too_long.t)
+    elsif name.empty?
+      errors.add(:name, :validate_missing.t(field: :name))
+    end
   end
 end

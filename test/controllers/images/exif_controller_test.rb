@@ -17,11 +17,12 @@ module Images
 
       login
       get(:show, params: { id: image.id })
-      assert_match(/latitude|longitude/i, @response.body)
+      assert_match(/latitude|longitude/i, css_select("#exif_data_table").text)
 
       image.observations.first.update_attribute(:gps_hidden, true)
       get(:show, params: { id: image.id })
-      assert_no_match(/latitude|longitude/i, @response.body)
+      assert_no_match(/latitude|longitude/i,
+                      css_select("#exif_data_table").text)
     end
 
     def test_exif_parser

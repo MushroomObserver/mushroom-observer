@@ -103,8 +103,8 @@ Organize a way to add edibility info
 Need to review recent log for errors
 
 Advanced search ideas:
-  Store the result of a search as a regular species list
-  Create 'smart' species lists that are based on a stored advanced search.
+  Store the result of a search as a regular observation list
+  Create 'smart' observation lists that are based on a stored advanced search.
 
 Figure out a way to support authors with leading lower case (e.g., van Tiegham)
 
@@ -193,7 +193,7 @@ Knowledgeable
 Learning [Has herbarium, has microscope...]
 Newbie - Default
 
-Rod: Summarize species list changes
+Rod: Summarize observation list changes
 Tom Volk:
   Wants to have students make observations as part of course.
   Encourages idea of rating observations and images
@@ -292,7 +292,7 @@ Potentially interesting features for improving amateur/professional communicatio
     Users could register interest in a particular species, genus or user and get email when one shows up.
     Add RSS feeds for searches, names, higher level taxa (16)
     Add more events to the feed (Locations, Votes, New Users), but add filters for the main page.
-      E.g., Observations, Observations with Images, Species Lists, Locations, Votes, Consensus Changing Votes etc.
+      E.g., Observations, Observations with Images, Observation Lists, Locations, Votes, Consensus Changing Votes etc.
       The filters would be controllable in the user preferences and would default to "Observations with Images" (24)
     Let collector know if someone has asked for collections (call for specimens) (8)
 
@@ -300,7 +300,7 @@ Potentially interesting features for improving amateur/professional communicatio
 
 % Projects - Create a pages for describing proposed research projects.  Projects will have a public page
     and a private page.  Each will have a principle investigator (PI) who controls who can see the private page.
-    The project pages will have an associated Species List (of Observations relevant to the project) and an
+    The project pages will have an associated Observation List (of Observations relevant to the project) and an
     associated Checklist (of Names relevant to the project).  In addition there will be a set of documents
     associated with the project that can be marked as either public or private.  Only people approved by the
     PI are allowed to see the private documents, but anyone can see the public ones as well as the list of
@@ -346,14 +346,14 @@ Organize user preferences into logical groups (8)
 Featured Mushroom pages (8)
 
 Checklists - Lists of Names that have a Title and Purpose/notes, but no associated Observations. (40)
-    Can be used to create species lists, or simply displayed and copied for publication somewhere else.
+    Can be used to create observation lists, or simply displayed and copied for publication somewhere else.
     Use to create observations
     Dynamic checklists based on location or user or the result of a search
 
-    Feedback from Doug Smith on species lists:
+    Feedback from Doug Smith on observation lists:
     Mostly the feature I need to be able to make 20-100 observations
     all with the same location and date info., based on an existing
-    species list that I have.
+    observation list that I have.
 
     One thing is that after that to apply photos to the list there
     is a lot of check back and forth, and that takes awhile.  And
@@ -377,7 +377,7 @@ interactive map for edit_location and create_location (24)
 
 map search results (16)
 
-map species list (16)
+map observation list (16)
 
 altitude as ft or meters? (8)
 

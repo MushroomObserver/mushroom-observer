@@ -105,23 +105,19 @@
 #  view_owner_id::      View Observation author's ID on Obs page
 #
 #  ==== Content filter options
-#  content_filter::     Serialized Hash of ContentFilter parameters.
+#  content_filter::     Serialized Hash of Query::Filter parameters.
 #
 #  ==== Email options
 #  Send notifications if...
 #  email_comments_owner::         ...someone comments on object I own.
 #  email_comments_response::      ...someone responds to my Comment.
-#  email_comments_all::           ...anyone comments on anything.
 #  email_observations_consensus:: ...consensus changes on my Observation.
 #  email_observations_naming::    ...someone proposes a Name for my Observation.
-#  email_observations_all::       ...anyone changes an Observation.
 #  email_names_author::           ...someone changes a Name I've authored.
 #  email_names_editor::           ...someone changes a Name I've edited.
 #  email_names_reviewer::         ...someone changes a Name I've reviewed.
-#  email_names_all::              ...anyone changes a Name.
 #  email_locations_author::       ...someone changes a Location I've authored.
 #  email_locations_editor::       ...someone changes a Location I've edited.
-#  email_locations_all::          ...anyone changes a Location.
 #  email_general_feature::        ...you announce new features.
 #  email_general_commercial::     ...someone sends me a commercial inquiry.
 #  email_general_question::       ...someone sends me a general question.
@@ -138,7 +134,7 @@
 #  notes_template_parts:: Array of notes_template headings
 #
 #  ==== Names
-#  text_name::          User name as: "loging" (for debugging)
+#  text_name::          User name as: "login" (for debugging)
 #  legal_name::         User name as: "First Last" or "login"
 #  unique_text_name::   User name as: "First Last (login)" or "login"
 #
@@ -165,12 +161,10 @@
 #  name_trackers::      NameTracker's they've requested.
 #  observations::       Observation's they've posted.
 #  projects_created::   Project's they've created.
-#  queued_emails::      QueuedEmail's they're scheduled to receive.
 #  species_lists::      SpeciesList's they've created.
 #  votes::              Vote's they've cast.
 #
 #  ==== Other relationships
-#  to_emails::          QueuedEmail's they've caused to be sent.
 #  user_groups::        UserGroup's they're members of.
 #  in_group?::          Is User in a given UserGroup?
 #  reviewed_images::    Image's they've reviewed.
@@ -185,7 +179,7 @@
 #                       (defaults to personal_herbarium).
 #  personal_herbarium:: User's private herbarium:
 #                       "Name (login): Personal Herbarium".
-#  all_editable_species_lists:: Species Lists they own
+#  all_editable_species_lists:: Observation Lists they own
 #                       or that are attached to projects they're on.
 #
 #  ==== Other Stuff
@@ -197,64 +191,29 @@
 #                       before object is created.
 #
 class User < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "digest/sha1"
+  # Enums: Do not change the integer associated with a value
+  # First value is the default
+  enum :thumbnail_size, { thumbnail: 1, small: 2 },
+       prefix: :thumb_size, default: :thumbnail, instance_methods: false
 
-  # enum definitions for use by simple_enum gem
-  # Do not change the integer associated with a value
-  # first value is the default
-  enum thumbnail_size:
-       {
-         thumbnail: 1,
-         small: 2
-       },
-       _prefix: :thumb_size,
-       _default: "thumbnail"
+  enum :image_size,
+       { thumbnail: 1, small: 2, medium: 3, large: 4, huge: 5, full_size: 6 },
+       prefix: true, default: :medium, instance_methods: false
 
-  enum image_size:
-       {
-         thumbnail: 1,
-         small: 2,
-         medium: 3,
-         large: 4,
-         huge: 5,
-         full_size: 6
-       },
-       _prefix: true,
-       _default: "medium"
+  enum :votes_anonymous, { no: 1, yes: 2, old: 3 },
+       prefix: :votes_anon, default: :no, instance_methods: false
 
-  enum votes_anonymous:
-       {
-         no: 1,
-         yes: 2,
-         old: 3
-       },
-       _prefix: :votes_anon,
-       _default: "no"
+  enum :location_format, { postal: 1, scientific: 2 },
+       prefix: true, default: :postal, instance_methods: false
 
-  enum location_format:
-       {
-         postal: 1,
-         scientific: 2
-       },
-       _prefix: true,
-       _default: "postal"
+  enum :label_format, { pdf: 1, rtf: 2 },
+       prefix: true, default: :pdf, instance_methods: false
 
-  enum hide_authors:
-       {
-         none: 1,
-         above_species: 2
-       },
-       _prefix: true,
-       _default: "none"
+  enum :hide_authors, { none: 1, above_species: 2 },
+       prefix: true, default: :none, instance_methods: false
 
-  enum keep_filenames:
-       {
-         toss: 1,
-         keep_but_hide: 2,
-         keep_and_show: 3
-       },
-       _suffix: :filenames,
-       _default: "toss"
+  enum :keep_filenames, { toss: 1, keep_but_hide: 2, keep_and_show: 3 },
+       suffix: :filenames, default: :toss, instance_methods: false
 
   has_one :user_stats, dependent: :destroy
 
@@ -276,8 +235,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :projects_created, class_name: "Project"
   has_many :project_members, dependent: :destroy
   has_many :projects, through: :project_members, source: :projects
+  has_many :project_aliases, as: :target, dependent: :destroy
   has_many :publications
-  has_many :queued_emails
   has_many :sequences
   has_many :species_lists
   has_many :collection_numbers
@@ -290,8 +249,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :reviewed_name_descriptions, class_name: "NameDescription",
                                         foreign_key: "reviewer_id",
                                         inverse_of: :reviewer
-  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id",
-                       inverse_of: :queued_email
 
   has_many :user_group_users, dependent: :destroy
   has_many :user_groups, through: :user_group_users
@@ -319,7 +276,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
-  serialize :content_filter, type: Hash
+  serialize :content_filter, type: Hash, coder: YAML
 
   ##############################################################################
   #
@@ -344,11 +301,21 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
-  serialize :bonuses
-  serialize :alert
+  serialize :bonuses, coder: YAML
+  serialize :alert, coder: YAML
 
-  scope :by_contribution, lambda {
-    order(contribution: :desc, name: :asc, login: :asc)
+  scope :order_by_default,
+        -> { order_by(::Query::Users.default_order) }
+
+  scope :has_contribution, lambda { |bool = true|
+    return all unless bool
+
+    where(User[:contribution].gt(0))
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = User[:login] + User[:name]
+    search_columns(cols, phrase)
   }
 
   # NOTE: the obs images are a separate optimized query
@@ -357,6 +324,15 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
       :location,
       :user_stats
     )
+  }
+  scope :verified, -> { where.not(verified: nil) }
+  scope :unverified, -> { where(verified: nil) }
+
+  scope :top_users_for_herbarium, lambda { |herbarium|
+    joins(:herbarium_records).
+      where(herbarium_records: { herbarium_id: herbarium.id }).
+      select(:name, :login, User[:id].count).
+      group(:id).order(User[:id].count.desc).take(5)
   }
 
   # These are used by forms.
@@ -380,11 +356,13 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # Report which User is currently logged in. Returns +nil+ if none.  This is
   # the same instance as is in the controllers' +@user+ instance variable.
   #
+  # Thread-safe: Uses Thread.current to store per-thread user state, allowing
+  # parallel test execution and proper isolation in threaded environments.
+  #
   #   user = User.current
   #
   def self.current
-    @@user = nil unless defined?(@@user)
-    @@user
+    Thread.current[:mushroom_observer_user]
   end
 
   # Report which User is currently logged in. Returns id, or +nil+ if none.
@@ -392,15 +370,17 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   user_id = User.current_id
   #
   def self.current_id
-    @@user = nil unless defined?(@@user)
-    @@user&.id
+    current&.id
   end
 
   # Tell User model which User is currently logged in (if any).  This is used
   # by the +autologin+ filter and API authentication.
+  #
+  # Thread-safe: Stores user in thread-local storage for proper isolation.
   def self.current=(val)
-    @@location_format = val ? val.location_format : "postal"
-    @@user = val
+    Thread.current[:mushroom_observer_user] = val
+    Thread.current[:mushroom_observer_location_format] =
+      val ? val.location_format : "postal"
   end
 
   # Report current user's preferred location_format
@@ -408,13 +388,12 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   location_format = User.current_location_format
   #
   def self.current_location_format
-    @@location_format = "postal" unless defined?(@@location_format)
-    @@location_format
+    Thread.current[:mushroom_observer_location_format] || "postal"
   end
 
   # Set the location format to use throughout the site.
   def self.current_location_format=(val)
-    @@location_format = val
+    Thread.current[:mushroom_observer_location_format] = val
   end
 
   # Clear cached data structures when reload.
@@ -427,7 +406,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # User is the only one allowed to edit their own account info.
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     user == self
   end
 
@@ -465,6 +444,39 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     unique_text_name
   end
 
+  def textile_name
+    if name.blank?
+      "_user #{login}_"
+    else
+      "#{name} (_user #{login}_)"
+    end
+  end
+
+  def self.lookup_unique_text_name(str)
+    return nil unless str
+
+    user = nil
+    login = nil
+    if (match = str.match(/\(([^(]+)\)$/))
+      login = match[1]
+      user = find_name_match(User.where(login:), str)
+    end
+    user ||= find_name_match(User.where(login: str), str)
+    if login && !user
+      pattern = "%#{ActiveRecord::Base.sanitize_sql(login)}%"
+      user = find_name_match(User.where("login like ?", pattern), str)
+    end
+    user
+  end
+
+  def self.find_name_match(users, str)
+    return users.first if users.one?
+
+    users.find_each do |user|
+      return user if user.unique_text_name == str
+    end
+  end
+
   # Return User's full name if present, else return login.
   #
   #   name present:  "Fred Flintstone"
@@ -478,10 +490,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def legal_name_changed?
-    !legal_name_change.nil?
-  end
-
   def legal_name_change
     old_name = name_change ? name_change[0] : name
     old_login = login_change ? login_change[0] : login
@@ -490,6 +498,16 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     return nil if old_legal_name == new_legal_name
 
     [old_legal_name, new_legal_name]
+  end
+
+  # remove <user.name> from search string "#{user[:login]} <#{user[:name]}>"
+  def self.remove_bracketed_name(input)
+    previous = nil
+    while input != previous
+      previous = input
+      input = input.sub(/ *<.*>/, "")
+    end
+    input
   end
 
   # TODO: Move this to an ActiveJob, once we get jobs going - AN 20240220
@@ -568,19 +586,19 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    Project.joins(:admin_group_users).where(user_id: id)
+    Project.user_is_admin(id)
   end
 
   # Return an Array of Project's that this User is a member of.
   def projects_member(order: :created_at, include: nil)
-    @projects_member ||= Project.where(user_group: user_groups.ids).
+    @projects_member ||= Project.user_is_member(id).
                          includes(include).order(order).to_a
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
   # links for.
   def external_sites
-    @external_sites ||= ExternalSite.where(project: projects_member)
+    @external_sites ||= ExternalSite.user_is_site_project_member(id)
   end
 
   def preferred_herbarium_name
@@ -614,37 +632,24 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def personal_herbarium
-    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id)
+    # disable cop because RuboCop's suggested fix creates test failures
+    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id) # rubocop:disable Rails/FindByOrAssignmentMemoization
   end
 
   def create_personal_herbarium
-    # rubocop:disable Naming/MemoizedInstanceVariableName
-    @personal_herbarium ||= Herbarium.create(
+    # cop gives false positive
+    @personal_herbarium ||= Herbarium.create( # rubocop:disable Naming/MemoizedInstanceVariableName
       name: personal_herbarium_name,
       email: email,
       personal_user: self,
       curators: [self]
     )
-    # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
   # Return an ActiveRecord::Association of SpeciesList's that User created or
   # that are attached to a Project that the User is a member of.
   def all_editable_species_lists
-    @all_editable_species_lists ||=
-      if projects_member.any?
-        SpeciesList.
-          where(SpeciesList[:user_id].eq(id).
-          or(SpeciesList[:id].in(species_lists_in_users_projects))).distinct
-      else
-        species_lists
-      end
-  end
-
-  def species_lists_in_users_projects
-    project_ids = projects_member.map(&:id)
-    ProjectSpeciesList.where(project_id: project_ids).distinct.
-      pluck(:species_list_id)
+    @all_editable_species_lists ||= SpeciesList.editable_by_user(id)
   end
 
   ##############################################################################
@@ -663,7 +668,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   def interest_in(object)
     @interests ||= {}
-    @interests["#{object.class.name} #{object.id}"] ||= \
+    @interests["#{object.class.name} #{object.id}"] ||=
       begin
         i = Interest.where(
           user_id: id, target_type: object.class.name, target_id: object.id
@@ -884,8 +889,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [:name_trackers,                  :user_id],
     [:observations,                   :user_id],
     [:publications,                   :user_id],
-    [:queued_emails,                  :user_id],
-    [:queued_emails,                  :to_user_id],
     [:sequences,                      :user_id],
     [:species_lists,                  :user_id],
     [:user_group_users,               :user_id],
@@ -933,7 +936,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     delete_api_keys
     delete_interests
     delete_name_trackers
-    delete_queued_emails
     delete_observations
     delete_private_name_descriptions
     delete_private_location_descriptions
@@ -968,11 +970,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def delete_name_trackers
     NameTracker.where(user: self).delete_all
-  end
-
-  def delete_queued_emails
-    QueuedEmail.where(user_id: id).delete_all
-    QueuedEmail.where(to_user_id: id).delete_all
   end
 
   def delete_observations
@@ -1030,14 +1027,15 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.where(id: ids).delete_all
   end
 
-  # Delete all species lists the user created unless they belong to a project.
-  # (Private projects should already have been deleted by this point, so this
-  # in effect, really should read "unless they belong to a public project".)
-  # I think it's okay to delete observations even if they are attached to a
-  # project.  But species_lists are potentially a much more collaborative
-  # effort, so I don't think it's okay to delete lists that are attached to
-  # public projects just because the user happened to originally create them.
-  # -JPH 20220916
+  # Delete all species_lists the user created unless they belong
+  # to a project.  (Private projects should already have been deleted
+  # by this point, so this in effect, really should read "unless they
+  # belong to a public project".)  I think it's okay to delete
+  # observations even if they are attached to a project.  But
+  # species_lists are potentially a much more collaborative effort, so
+  # I don't think it's okay to delete lists that are attached to
+  # public projects just because the user happened to originally
+  # create them.  -JPH 20220916
   def delete_private_species_lists
     ids = (species_lists - species_lists.joins(:project_species_lists)).
           map(&:id)
@@ -1102,8 +1100,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     # Observation,                   (just deleted all of these)
     Project,
     Publication,
-    # QueuedEmail,                   (just deleted all of these)
-    # QueuedEmail, (to_user_id)      (just deleted all of these)
     Sequence,
     SpeciesList,
     TranslationString,
@@ -1213,7 +1209,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   def notes_template_forbid_duplicates
     return if notes_template.blank?
 
-    squished = notes_template.split(",").map(&:squish)
+    squished = notes_template.split(",").map { |s| s.squish.downcase }
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
     dups.each do |dup|
       errors.add(:notes_template, :prefs_notes_template_no_dups.t(part: dup))
@@ -1248,7 +1244,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # i.e. the end of a location name string
   def check_content_filter_region
     return if content_filter[:region].blank?
-    return if Location.in_region(content_filter[:region]).any?
+    return if Location.region(content_filter[:region]).any?
 
     # If we're here, there are no MO locations in that region.
     errors.add(:region, :advanced_search_filter_region.t)

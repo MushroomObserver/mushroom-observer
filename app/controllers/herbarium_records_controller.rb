@@ -4,21 +4,19 @@
 # rubocop:disable Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: :index
-  before_action :store_location, except: [:index, :destroy]
+  before_action :store_location, except: [:destroy]
 
   ##############################################################################
   # INDEX
   #
   def index
-    store_location
     build_index_with_query
   end
 
   private
 
   def default_sort_order
-    ::Query::HerbariumBase.default_order # :name
+    ::Query::Herbaria.default_order # :name
   end
 
   # ApplicationController uses this table to dispatch #index to a private method
@@ -27,25 +25,23 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def herbarium
-    store_location
-    query = create_query(:HerbariumRecord, :all,
-                         herbarium: params[:herbarium].to_s,
-                         by: :herbarium_label)
+    query = create_query(:HerbariumRecord,
+                         herbaria: params[:herbarium].to_s,
+                         order_by: :herbarium_label)
     [query, { always_index: true }]
   end
 
   def observation
     @observation = Observation.find(params[:observation])
-    store_location
-    query = create_query(:HerbariumRecord, :all,
-                         observation: params[:observation].to_s,
-                         by: :herbarium_label)
+    query = create_query(:HerbariumRecord,
+                         observations: params[:observation].to_s,
+                         order_by: :herbarium_label)
     [query, { always_index: true }]
   end
 
   def index_display_opts(opts, _query)
     {
-      letters: "herbarium_records.initial_det",
+      letters: true,
       num_per_page: 100,
       include: [{ herbarium: :curators }, { observations: :name }, :user]
     }.merge(opts)
@@ -110,18 +106,16 @@ class HerbariumRecordsController < ApplicationController
     update_herbarium_record # response handled here
   end
 
+  # Handles both full destroy and remove-from-observation.
+  # If observation_id param present: removes association (destroys if last obs)
+  # If observation_id param absent: destroys the herbarium_record directly
   def destroy
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
     return unless make_sure_can_delete!(@herbarium_record)
+    return unless execute_destroy!
 
-    figure_out_where_to_go_back_to
-    @herbarium_record.destroy
-
-    respond_to do |format|
-      format.turbo_stream { render_herbarium_records_section_update }
-      format.html { redirect_with_query(action: :index) }
-    end
+    respond_to_destroy
   end
 
   ##############################################################################
@@ -160,8 +154,8 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def default_accession_number
-    if @observation.field_slips.length == 1
-      @observation.field_slips.first.code
+    if @observation.field_slip
+      @observation.field_slip.code
     elsif @observation.collection_numbers.length == 1
       @observation.collection_numbers.first.format_name
     else
@@ -174,14 +168,14 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record =
       HerbariumRecord.new(permitted_herbarium_record_params)
     normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
+    return if form_has_errors?
 
     if herbarium_label_free?
       save_herbarium_record_and_update_associations
       return
     end
 
-    if @other_record.can_edit?
+    if @other_record.can_edit?(@user)
       flash_herbarium_record_already_used_and_add_observation
     else
       flash_herbarium_record_already_used_by_someone_else
@@ -225,7 +219,7 @@ class HerbariumRecordsController < ApplicationController
     old_herbarium = @herbarium_record.herbarium
     @herbarium_record.attributes = permitted_herbarium_record_params
     normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
+    return if form_has_errors?
 
     if herbarium_label_free?
       update_herbarium_record_and_notify_curators(old_herbarium)
@@ -254,24 +248,10 @@ class HerbariumRecordsController < ApplicationController
   end
 
   # create, update
-  def flash_error_and_reload_if_form_has_errors
-    redirect_params = case action_name # this is a rails var
-                      when "create"
-                        { action: :new }
-                      when "update"
-                        { action: :edit }
-                      end
-    redirect_params = redirect_params.merge({ back: @back }) if @back.present?
-
+  def form_has_errors?
     unless validate_herbarium_name! # may add flashes
-      respond_to do |format|
-        format.html do
-          redirect_to(redirect_params) and return true
-        end
-        format.turbo_stream do
-          reload_herbarium_record_modal_form_and_flash
-        end
-      end
+      flash_and_reload_form
+      return true
     end
 
     unless can_add_record_to_herbarium?
@@ -282,6 +262,25 @@ class HerbariumRecordsController < ApplicationController
     false
   end
 
+  def flash_and_reload_form
+    redirect_params = case action_name # this is a rails var
+                      when "create"
+                        { action: :new }
+                      when "update"
+                        { action: :edit }
+                      end
+    redirect_params[:back] = @back if @back.present?
+
+    respond_to do |format|
+      format.html do
+        redirect_to(redirect_params)
+      end
+      format.turbo_stream do
+        reload_herbarium_record_modal_form_and_flash
+      end
+    end
+  end
+
   def permitted_herbarium_record_params
     return {} unless params[:herbarium_record]
 
@@ -290,21 +289,78 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def make_sure_can_edit!
-    return true if in_admin_mode? || @herbarium_record.can_edit?
+    return true if in_admin_mode? || @herbarium_record.can_edit?(@user)
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
-    redirect_to_back_object_or_object(@back_object, @herbarium_record)
+    show_flash_and_send_back
     false
   end
 
   def make_sure_can_delete!(herbarium_record)
-    return true if herbarium_record.can_edit? || in_admin_mode?
+    return true if herbarium_record.can_edit?(@user) || in_admin_mode?
     return true if herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
     redirect_to(herbarium_record_path(herbarium_record))
     false
+  end
+
+  # Returns false if observation lookup fails, halting destroy action
+  def execute_destroy!
+    if params[:observation_id].present?
+      @observation = find_or_goto_index(Observation, params[:observation_id])
+      return false unless @observation
+
+      @herbarium_record.remove_observation(@observation)
+      flash_notice(:runtime_removed.t(type: :herbarium_record))
+    else
+      # Figure out where to redirect BEFORE destroying the record
+      figure_out_destroy_redirect
+      @herbarium_record.destroy
+    end
+    true
+  end
+
+  # Determine @observation for redirect after destroy.
+  # Must be called before destroy since we need to check observations.
+  def figure_out_destroy_redirect
+    back = params[:back].to_s
+    @observation = nil
+    return if back == "index"
+
+    # If back is an observation ID, use that
+    @observation = Observation.safe_find(back)
+    return if @observation
+
+    # If record has exactly one observation, redirect there
+    @observation = @herbarium_record.observations.first if
+      @herbarium_record.observations.one?
+  end
+
+  def respond_to_destroy
+    respond_to do |format|
+      format.turbo_stream { destroy_turbo_response }
+      format.html { destroy_html_response }
+    end
+  end
+
+  def destroy_turbo_response
+    # Only render turbo_stream update if we have an observation page to update.
+    # Can't update show page via turbo_stream, so redirect to index.
+    if @observation && params[:back] != "show"
+      render_herbarium_records_section_update
+    else
+      redirect_with_query(action: :index)
+    end
+  end
+
+  def destroy_html_response
+    if @observation
+      redirect_to(observation_path(@observation.id))
+    else
+      redirect_with_query(action: :index)
+    end
   end
 
   def normalize_parameters
@@ -337,8 +393,10 @@ class HerbariumRecordsController < ApplicationController
 
   def can_add_record_to_herbarium?
     return true if in_admin_mode?
-    return true if @observation&.can_edit?
-    return true if @herbarium_record.observations.any?(&:can_edit?)
+    return true if @observation&.can_edit?(@user)
+    return true if @herbarium_record.observations.any? do |o|
+      o.can_edit?(@user)
+    end
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:create_herbarium_record_only_curator_or_owner.t)
@@ -385,9 +443,14 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_modal_herbarium_record_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
-                     form: "herbarium_records/form" }) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @herbarium_record,
+             observation: @observation,
+             back: @back
+           ), layout: false)
   end
 
   def modal_identifier
@@ -402,16 +465,21 @@ class HerbariumRecordsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.herbarium_record_form_new_title
+      helpers.new_page_title(:add_object, :HERBARIUM_RECORD)
     when "edit", "update"
-      helpers.herbarium_record_form_edit_title(h_r: @herbarium_record)
+      helpers.edit_page_title(
+        [@herbarium_record.format_name.t,
+         @herbarium_record.herbarium_label].safe_join(" "),
+        @herbarium_record
+      )
     end
   end
 
   def render_herbarium_records_section_update
     render(
       partial: "observations/show/section_update",
-      locals: { identifier: "herbarium_records" }
+      locals: { identifier: "herbarium_records",
+                obs: @observation, user: @user }
     ) and return
   end
 
@@ -419,7 +487,13 @@ class HerbariumRecordsController < ApplicationController
   def reload_herbarium_record_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: modal_identifier, form: "herbarium_records/form" }
+      locals: {
+        identifier: modal_identifier,
+        form_locals: {
+          model: @herbarium_record,
+          observation: @observation
+        }
+      }
     ) and return true
   end
 end

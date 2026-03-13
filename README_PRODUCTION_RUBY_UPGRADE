@@ -1,0 +1,23 @@
+Install the new version of Ruby as root into /opt/rubies/ruby-<version>:
+
+  ssh mushroomobserver.org
+  sudo su -
+  ruby-install ruby <version> -i /opt/rubies/ruby-<version>
+
+The above takes a while and can be done prior to commiting to doing
+the deploy.
+
+Once the new version of Ruby is tested and working for the development
+team and the PR is merged:
+
+  sudo su mo
+  cd /var/web/mo
+  chruby ruby-3.3.6
+  git stash
+  git pull
+  git stash pop
+  bundle install
+
+Make sure there are no errors or important warnings.
+    
+  deploy

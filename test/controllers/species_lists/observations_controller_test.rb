@@ -5,9 +5,9 @@ require("test_helper")
 module SpeciesLists
   class ObservationsControllerTest < FunctionalTestCase
     def test_add_remove_observations
-      query = Query.lookup(:Observation, :all, users: users(:mary))
+      query = Query.lookup(:Observation, by_users: users(:mary))
       assert(query.num_results > 1)
-      params = @controller.query_params(query) ## .merge(species_list: "")
+      params = { q: @controller.q_param(query) }
 
       requires_login(:edit)
       assert_response(:redirect)
@@ -24,9 +24,9 @@ module SpeciesLists
     end
 
     def test_post_add_remove_observations
-      query = Query.lookup(:Observation, :all, users: users(:mary))
+      query = Query.lookup(:Observation, by_users: users(:mary))
       assert(query.num_results > 1)
-      params = @controller.query_params(query)
+      params = { q: @controller.q_param(query) }
 
       spl = species_lists(:unknown_species_list)
       old_count = spl.observations.size
@@ -43,7 +43,7 @@ module SpeciesLists
       put_requires_login(:update)
       assert_response(:redirect)
       assert_redirected_to(
-        edit_species_list_observations_path(species_list: "")
+        species_lists_edit_observations_path(species_list: "")
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
@@ -51,7 +51,7 @@ module SpeciesLists
       put(:update, params: params)
       assert_response(:redirect)
       assert_redirected_to(
-        edit_species_list_observations_path(species_list: "")
+        species_lists_edit_observations_path(species_list: "")
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
@@ -59,7 +59,7 @@ module SpeciesLists
       put(:update, params: params.merge(species_list: "blah"))
       assert_response(:redirect)
       assert_redirected_to(
-        edit_species_list_observations_path(species_list: "blah")
+        species_lists_edit_observations_path(species_list: "blah")
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
@@ -110,27 +110,28 @@ module SpeciesLists
     def test_post_add_remove_double_observations
       spl = species_lists(:unknown_species_list)
       old_obs_list =
-        SpeciesListObservation.select(:observation_id).
+        SpeciesListObservation.
         where(species_list: spl.id).
         order(observation_id: :asc).
-        map(&:observation_id)
+        pluck(:observation_id)
       dup_obs = spl.observations.first
       new_obs = (Observation.all - spl.observations).first
       ids = [dup_obs.id, new_obs.id]
-      query = Query.lookup(:Observation, :all, ids: ids)
-      params = @controller.query_params(query).merge(
+      query = Query.lookup(:Observation, id_in_set: ids)
+      params = {
+        q: @controller.q_param(query),
         commit: :ADD.l,
         species_list: spl.title
-      )
+      }
       login(spl.user.login)
-      put(:update, params: params)
+      put(:update, params:)
       assert_response(:redirect)
       assert_flash_success
       new_obs_list =
-        SpeciesListObservation.select(:observation_id).
+        SpeciesListObservation.
         where(species_list: spl.id).
         order(observation_id: :asc).
-        map(&:observation_id)
+        pluck(:observation_id)
       assert_equal(new_obs_list.length, old_obs_list.length + 1)
       assert_equal((new_obs_list - old_obs_list).first, new_obs.id)
     end

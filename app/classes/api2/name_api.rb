@@ -7,22 +7,6 @@ class API2
       Name
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
-    end
-
     def high_detail_includes
       [
         { comments: :user },
@@ -32,31 +16,37 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:name, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :first_user),
+        by_users: parse_array(:user, :user, help: :first_user),
         names: parse_array(:name, :name, as: :id),
-        is_deprecated: parse(:boolean, :is_deprecated),
+        deprecated: parse(:boolean, :is_deprecated),
         misspellings: parse_misspellings,
-        with_synonyms: parse(:boolean, :has_synonyms),
-        locations: parse_array(:string, :location),
-        species_lists: parse_array(:string, :species_list),
+        has_synonyms: parse(:boolean, :has_synonyms),
         rank: parse(:enum, :rank, limit: Name.all_ranks),
-        with_author: parse(:boolean, :has_author),
-        with_citation: parse(:boolean, :has_citation),
-        with_classification: parse(:boolean, :has_classification),
-        with_notes: parse(:boolean, :has_notes),
-        with_comments: parse(:boolean, :has_comments, limit: true),
-        with_default_desc: parse(:boolean, :has_description),
+        has_author: parse(:boolean, :has_author),
+        has_citation: parse(:boolean, :has_citation),
+        has_classification: parse(:boolean, :has_classification),
+        has_notes: parse(:boolean, :has_notes),
+        has_comments: parse(:boolean, :has_comments, limit: true),
+        has_default_description: parse(:boolean, :has_description),
         text_name_has: parse(:string, :text_name_has, help: 1),
         author_has: parse(:string, :author_has, help: 1),
         citation_has: parse(:string, :citation_has, help: 1),
         classification_has: parse(:string, :classification_has, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
-        ok_for_export: parse(:boolean, :ok_for_export)
+        ok_for_export: parse(:boolean, :ok_for_export),
+        observation_query: parse_observation_query_parameters.compact
       }.merge(parse_names_parameters)
+    end
+
+    def parse_observation_query_parameters
+      {
+        within_locations: parse_array(:string, :location),
+        species_lists: parse_array(:string, :species_list)
+      }
     end
 
     def create_params
@@ -81,13 +71,20 @@ class API2
     def build_object
       params = create_params
       parse_name_author_rank_deprecated
+      @log = parse(:boolean, :log, default: true)
       done_parsing_parameters!
       validate_create_parameters!(params)
       parse = make_sure_name_parses!
       make_sure_name_doesnt_exist!(parse)
       name = create_name(parse, params)
+      name.user_log(@user, :log_name_created) if @log
       save_parents(parse)
+      after_create(name)
       name
+    end
+
+    def after_create(name)
+      name.user_log(user, :log_name_created) if @log
     end
 
     def build_setter(params)
@@ -143,8 +140,13 @@ class API2
     private
 
     def parse_misspellings
-      parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only],
-                                  help: 1)
+      result = parse(:enum, :misspellings,
+                     default: :no,
+                     limit: [:no, :include, :either, :only],
+                     help: 1)
+      return :include if result == :either
+
+      result
     end
 
     def validate_classification!(params)
@@ -163,6 +165,7 @@ class API2
       @author     = parse(:string, :author, limit: 100)
       @rank       = parse(:enum, :rank, limit: Name.all_ranks)
       @deprecated = parse(:boolean, :deprecated, default: false)
+      @log        = parse(:boolean, :log, default: true, help: 1)
     end
 
     def make_sure_name_parses!
@@ -194,8 +197,13 @@ class API2
     def save_parents(parse)
       return unless parse.parent_name
 
-      parents = Name.find_or_create_name_and_parents(parse.parent_name)
-      parents.each { |n| n.save if n&.new_record? }
+      parents = Name.find_or_create_name_and_parents(@user, parse.parent_name)
+      parents.each do |n|
+        next unless n&.new_record?
+
+        n.save || raise(CreateFailed.new(n))
+        n.user_log(@user, :log_name_created) if @log
+      end
     end
 
     # ----------------------------------------
@@ -265,7 +273,7 @@ class API2
       @name   ||= name.text_name
       @author ||= name.author
       @rank   ||= name.rank
-      name.change_text_name(@name, @author, @rank, :save_parents)
+      name.change_text_name(@user, @name, @author, @rank, :save_parents)
     end
 
     def change_deprecated(name)

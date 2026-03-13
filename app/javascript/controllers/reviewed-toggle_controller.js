@@ -6,7 +6,7 @@ export default class extends Controller {
   static targets = ['toggle']
 
   connect() {
-    this.element.dataset.stimulus = "reviewed-toggle-connected";
+    this.element.dataset.reviewedToggle = "connected";
   }
 
   // https://stackoverflow.com/questions/68624668/how-can-i-submit-a-form-on-input-change-with-turbo-streams

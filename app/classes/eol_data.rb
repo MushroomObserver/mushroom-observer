@@ -111,7 +111,7 @@ class EolData
       synonyms[name.synonym_id] << name if name.synonym_id
     end
     names_to_keep = {}
-    synonyms.each do |_synonym_id, name_list|
+    synonyms.each_value do |name_list|
       name = most_desirable_name(name_list)
       names_to_keep[name.id] = true
     end
@@ -123,23 +123,23 @@ class EolData
 
   def most_desirable_name(names)
     most_desirable = names[0]
-    (names[1..]).each do |new_name|
+    names[1..].each do |new_name|
       most_desirable = most_desirable.more_popular(new_name)
     end
     most_desirable
   end
 
   DESCRIPTION_CONDITIONS = %(FROM name_descriptions, names
-    WHERE name_descriptions.name_id = names.id
-    AND names.ok_for_export
-    AND NOT names.deprecated
-    AND name_descriptions.review_status in (
-      #{NameDescription.review_statuses["vetted"]},
-      #{NameDescription.review_statuses["unvetted"]}
-    )
-    AND name_descriptions.ok_for_export
-    AND name_descriptions.public
-  ).freeze
+                             WHERE name_descriptions.name_id = names.id
+                             AND names.ok_for_export
+                             AND NOT names.deprecated
+                             AND name_descriptions.review_status in (
+                              #{NameDescription.review_statuses["vetted"]},
+                              #{NameDescription.review_statuses["unvetted"]}
+                             )
+                             AND name_descriptions.ok_for_export
+                             AND name_descriptions.public).freeze
+  private_constant(:DESCRIPTION_CONDITIONS)
 
   def description_names
     get_sorted_names(DESCRIPTION_CONDITIONS)
@@ -163,7 +163,8 @@ class EolData
     )
   end
 
-  IMAGE_CONDITIONS = %(FROM observations, observation_images, images, names
+  IMAGE_CONDITIONS = %(
+    FROM observations, observation_images, images, names
     WHERE observations.name_id = names.id
     AND observations.vote_cache >= 2.4
     AND observations.id = observation_images.observation_id
@@ -176,6 +177,8 @@ class EolData
       "Form", "Variety", "Subspecies", "Species", "Genus"
     ).join(",")})
   ).freeze
+  private_constant(:IMAGE_CONDITIONS)
+
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
   end
@@ -195,6 +198,7 @@ class EolData
     AND names.ok_for_export
     AND NOT names.deprecated
   )
+  private_constant(:GLOSSARY_TERM_CONDITIONS)
 
   def glossary_term_names
     get_sorted_names(GLOSSARY_TERM_CONDITIONS)

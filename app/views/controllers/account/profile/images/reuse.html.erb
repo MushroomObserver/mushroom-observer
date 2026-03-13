@@ -1,10 +1,9 @@
 <%
-@container = :full
+container_class(:full)
 add_page_title(:image_reuse_title.t(name: @user.legal_name))
 form_action = { controller: "/account/profile/images",
                 action: :attach,
-                id: @user.id,
-                q: get_query_param }
+                id: @user.id }
 %>
 
 <%= render(partial: "shared/images_to_reuse",

@@ -16,8 +16,10 @@ else
   general_help = tag.p do
     [
       tag.strong("#{:NOTES.t}:", class: "mr-3"),
-      collapse_info_trigger("notes_help"),
-      collapse_help_block(nil, :shared_textile_help.l, id: "notes_help")
+      render(Components::CollapseInfoTrigger.new(target_id: "notes_help")),
+      render(Components::CollapseHelpBlock.new(target_id: "notes_help")) do
+        :shared_textile_help.l
+      end
     ].safe_join
   end
   rows = 1
@@ -33,7 +35,7 @@ indent = form.object_name == "observation" ? "" : "ml-5"
         <% if form.object_name == "observation"
           field = @observation.notes_normalized_key(part)
           value = @observation.notes_part_value(part)
-          label = other ? "#{:NOTES.t}:" : "#{part.to_s.humanize}:"
+          label = other ? "#{:NOTES.t}:" : "#{part.to_s}:"
         else
           field = part.name
           value = part.value

@@ -8,15 +8,15 @@ module ObservationsController::New
   # Linked from: left panel
   #
   # Inputs:
-  #   params[:observation][...]         observation args
-  #   params[:naming][:name]            name
-  #   params[:approved_name]            old name
-  #   params[:approved_where]           old place name
-  #   params[:chosen_name][:name_id]    name radio boxes
-  #   params[:naming][:vote][...]       vote args
-  #   params[:naming][:reasons][n][...] naming_reasons args
-  #   params[:image][n][...]            image args
-  #   params[:good_image_ids]           images already uploaded
+  #   params[:observation][...]                   observation args
+  #   params[:observation][:naming][:name]        name
+  #   params[:observation][:naming][:vote][...]   vote args
+  #   params[:observation][:naming][:reasons][...] naming_reasons args
+  #   params[:observation][:image][n][...]        image args
+  #   params[:observation][:good_image_ids]       images already uploaded
+  #   params[:approved_name]                      old name
+  #   params[:approved_where]                     old place name
+  #   params[:chosen_name][:name_id]              name radio boxes
   #   params[:was_js_on]                was form javascripty? ("yes" = true)
   #
   # Outputs:
@@ -34,9 +34,6 @@ module ObservationsController::New
     init_license_var
     init_new_image_var(Time.zone.now)
 
-    # Clear search list. [Huh? -JPH 20120513]
-    clear_query_in_session
-
     @observation = Observation.new
     if params[:notes]
       @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
@@ -53,8 +50,10 @@ module ObservationsController::New
     init_project_vars_for_new
     init_list_vars
     defaults_from_last_observation_created
+    add_list(SpeciesList.safe_find(params[:species_list]))
     @observation.when = params[:date] if params[:date]
     add_field_slip_project(@field_code)
+    check_location
   end
 
   ##############################################################################
@@ -64,7 +63,7 @@ module ObservationsController::New
   def init_naming_and_vote
     @naming      = Naming.new
     @vote        = Vote.new
-    @given_name  = "" # can't be nil else rails tries to call @name.name
+    @given_name = params[:name] || ""
     return unless params[:notes] && params[:notes][:Field_Slip_ID]
 
     @given_name = params[:notes][:Field_Slip_ID].tr("_", "")
@@ -101,23 +100,38 @@ module ObservationsController::New
     end
 
     last_observation.species_lists.each do |list|
-      if check_permission(list)
-        @lists << list unless @lists.include?(list)
-        @list_checks[list.id] = true
-      end
+      add_list(list)
     end
+  end
+
+  def add_list(list)
+    return unless list && permission?(list)
+
+    @lists << list unless @lists.include?(list)
+    @list_checks[list.id] = true
   end
 
   def add_field_slip_project(code)
     project = FieldSlip.find_by(code: code)&.project
-    return unless project&.current? || project&.admin?(User.current)
-    return unless project&.member?(User.current)
+    return unless project&.current? || project&.admin?(@user)
+    return unless project&.member?(@user)
 
     @projects.append(project) unless @projects.include?(project)
     @projects.each do |proj|
       @project_checks[proj.id] = (proj == project) ||
                                  (@project_checks[proj.id] &&
                                   proj.field_slip_prefix.nil?)
+    end
+  end
+
+  def check_location
+    if params[:place_name]
+      # Cannot use @place_name since that's being used for approved_where
+      @default_place_name = params[:place_name]
+      loc = Location.place_name_to_location(@default_place_name)
+      @location = loc if loc
+    else
+      @default_place_name = @observation.place_name
     end
   end
 end

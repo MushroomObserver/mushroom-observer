@@ -22,7 +22,7 @@ module Names::Classification
       return true unless name.below_genus?
 
       flash_error("only works at or above genera!")
-      redirect_with_query(name.show_link_args)
+      redirect_to(name.show_link_args)
       false
     end
 
@@ -30,7 +30,7 @@ module Names::Classification
       return true if name.rank == "Genus"
 
       flash_error("only works on genera!")
-      redirect_with_query(name.show_link_args)
+      redirect_to(name.show_link_args)
       false
     end
 
@@ -38,7 +38,7 @@ module Names::Classification
       return true if name.below_genus?
 
       flash_error("only works on taxa below genus!")
-      redirect_with_query(name.show_link_args)
+      redirect_to(name.show_link_args)
       false
     end
 
@@ -46,7 +46,7 @@ module Names::Classification
       return true if name.accepted_genus&.classification.present?
 
       flash_error(:edit_name_fill_in_classification_for_genus_first.t)
-      redirect_with_query(name.show_link_args)
+      redirect_to(name.show_link_args)
       false
     end
 

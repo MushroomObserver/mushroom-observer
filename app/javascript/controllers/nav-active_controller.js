@@ -6,7 +6,7 @@ export default class extends Controller {
   static targets = ['link']
 
   connect() {
-    this.element.dataset.stimulus = "nav-active-connected";
+    this.element.dataset.navActive = "connected";
     this.pickActive();
   }
 

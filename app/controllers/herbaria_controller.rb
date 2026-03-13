@@ -33,7 +33,7 @@
 # herbarium_search (get)            index (get, pattern: present)
 # index (get)                       index (get, nonpersonal: true)
 # index_herbarium (get)             index (get) - lists query results
-# list_herbaria (get)               index (get, flavor: all) - all herbaria
+# list_herbaria (get)               index (get) - all herbaria
 # *merge_herbaria (get)             Herbaria::Merges#create (post)
 # *next_herbarium (get)             show { flow: :next } (get))
 # *prev_herbarium (get)             show { flow: :prev } (get)
@@ -51,9 +51,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   before_action :login_required
   # only: [:create, :destroy, :edit, :new, :update]
   before_action :store_location, only: [:create, :edit, :new, :show, :update]
-  before_action :pass_query_params, only: [
-    :create, :destroy, :edit, :new, :show, :update
-  ]
   before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
   ##############################################################################
@@ -80,30 +77,23 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def default_sort_order
-    :name
+    ::Query::Herbaria.default_order # :records
   end
 
   def index_active_params
     [:pattern, :nonpersonal, :by, :q, :id].freeze
   end
 
-  # Show selected list, based on current Query.
-  # (Linked from show template, next to "prev" and "next"... or will be.)
-  # Passes explicit :by param to affect title (only).
-  def sorted_index_opts
-    sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { by: sorted_by })
-  end
-
   def nonpersonal
     store_location
-    query = create_query(:Herbarium, :all, nonpersonal: true,
-                                           by: :code_then_name)
+    query = create_query(
+      :Herbarium, nonpersonal: true, order_by: :code_then_name
+    )
     [query, { always_index: true }]
   end
 
   def index_display_opts(opts, _query)
-    { letters: "herbaria.name",
+    { letters: true,
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user] }.merge(opts)
   end
@@ -151,13 +141,21 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    return unless in_admin_mode?
+
+    @top_users = User.top_users_for_herbarium(@herbarium)
   end
 
   def render_modal_herbarium_form
-    render(partial: "shared/modal_form",
-           locals: { title: modal_title, action: modal_form_action,
-                     identifier: modal_identifier, local: false,
-                     form: "herbaria/form" }) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @herbarium,
+             form_locals: { user: @user,
+                            location: @herbarium.location,
+                            top_users: @top_users }
+           ), layout: false)
   end
 
   def modal_identifier
@@ -172,9 +170,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def modal_title
     case action_name
     when "new", "create"
-      :create_herbarium_title.l
+      helpers.new_page_title(:new_object, :HERBARIUM)
     when "edit", "update"
-      :edit_herbarium_title.l
+      helpers.edit_page_title(:HERBARIUM_RECORD.l, @herbarium)
     end
   end
 
@@ -192,9 +190,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     normalize_parameters
     create_location_object_if_new(@herbarium)
     try_to_save_location_if_new(@herbarium)
-    return render(:new) unless validate_herbarium! && !@any_errors
+    return reload_form(:new) unless validate_herbarium! && !@any_errors
 
-    @herbarium.save
+    unless @herbarium.save
+      flash_object_errors(@herbarium)
+      return reload_form(:new)
+    end
     @herbarium.add_curator(@user) if @herbarium.personal_user
     notify_admins_of_new_herbarium unless @herbarium.personal_user
     redirect_to_create_location_or_referrer_or_show_location
@@ -208,9 +209,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     normalize_parameters
     create_location_object_if_new(@herbarium)
     try_to_save_location_if_new(@herbarium)
-    return unless validate_herbarium! && !@any_errors
+    return reload_form(:edit) unless validate_herbarium! && !@any_errors
 
-    @herbarium.save
+    unless @herbarium.save
+      flash_object_errors(@herbarium)
+      return reload_form(:edit)
+    end
     redirect_to_create_location_or_referrer_or_show_location
   end
 
@@ -219,11 +223,10 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
     if user_can_destroy_herbarium?
       @herbarium.destroy
-      redirect_to_referrer ||
-        redirect_with_query(herbarium_path(@herbarium.try(&:id)))
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium.try(&:id)))
     else
       flash_error(:permission_denied.t)
-      redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
     end
   end
 
@@ -234,10 +237,10 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   include Herbaria::SharedPrivateMethods
 
   def make_sure_can_edit!
-    return true if in_admin_mode? || @herbarium.can_edit?
+    return true if in_admin_mode? || @herbarium.can_edit?(@user)
 
     flash_error(:permission_denied.t)
-    redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
+    redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
     false
   end
 
@@ -248,7 +251,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
         @herbarium.send(:"#{arg}=", val)
       end
     @herbarium.description = @herbarium.description.to_s.strip
-    @herbarium.code = "" if @herbarium.personal_user_id
+    # Use nil instead of empty string for code (DB has partial unique index)
+    @herbarium.code = @herbarium.code.presence
+    @herbarium.code = nil if @herbarium.personal_user_id
   end
 
   def validate_herbarium!
@@ -361,14 +366,17 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def notify_admins_of_new_herbarium
-    QueuedEmail::Webmaster.create_email(
+    # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
+    body = "User created a new herbarium:\n" \
+           "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
+           "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
+           "Obj: #{@herbarium.show_url}\n"
+    message = WebmasterMailer.prepend_user(@user, body)
+    WebmasterMailer.build(
       sender_email: @user.email,
       subject: "New Herbarium",
-      content: "User created a new herbarium:\n" \
-               "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
-               "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
-               "Obj: #{@herbarium.show_url}\n"
-    )
+      message:
+    ).deliver_later
   end
 
   def user_can_destroy_herbarium?
@@ -391,11 +399,30 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     true
   end
 
+  # Handle form reload for both HTML and turbo_stream formats
+  # Skip if a redirect was already performed (e.g., by request_merge)
+  def reload_form(action)
+    return if performed?
+
+    respond_to do |format|
+      format.turbo_stream { reload_herbarium_modal_form_and_flash }
+      format.html { render(action) }
+    end
+  end
+
   # this updates both the form and the flash
   def reload_herbarium_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: modal_identifier, form: "herbaria/form" }
+      locals: {
+        identifier: modal_identifier,
+        form_locals: {
+          model: @herbarium,
+          user: @user,
+          location: @herbarium.location,
+          top_users: @top_users
+        }
+      }
     ) and return true
   end
 
@@ -403,7 +430,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def show_modal_flash_or_show_herbarium
     respond_to do |format|
       format.html do
-        redirect_with_query(herbarium_path(@herbarium)) and return
+        redirect_to(herbarium_path(@herbarium)) and return
       end
       format.turbo_stream do
         # Context here is the obs form.

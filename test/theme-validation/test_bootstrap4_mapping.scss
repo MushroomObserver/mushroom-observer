@@ -1,0 +1,51 @@
+// Test file for Bootstrap 4 mapping validation
+// This file imports a theme and the BS4 mapping to verify:
+// 1. No syntax errors in mapping file
+// 2. All referenced theme variables exist
+// 3. No undefined variables
+
+@import "../../app/assets/stylesheets/variables/defaults";
+@import "../../app/assets/stylesheets/variables/agaricus";
+@import "../../app/assets/stylesheets/mo/map_theme_to_bootstrap4";
+
+// Output a test rule to verify compilation
+.test-bootstrap4-mapping {
+  // Semantic colors
+  primary: $primary;
+  secondary: $secondary;
+  success: $success;
+  info: $info;
+  warning: $warning;
+  danger: $danger;
+  light: $light;
+  dark: $dark;
+
+  // Typography
+  body-color: $body-color;
+  body-bg: $body-bg;
+  link-color: $link-color;
+
+  // Buttons
+  btn-border-radius: $btn-border-radius;
+  btn-font-weight: $btn-font-weight;
+
+  // Forms
+  input-bg: $input-bg;
+  input-color: $input-color;
+  input-border-color: $input-border-color;
+
+  // Navigation
+  navbar-light-color: $navbar-light-color;
+  navbar-dark-color: $navbar-dark-color;
+
+  // Components
+  dropdown-bg: $dropdown-bg;
+  table-bg: $table-bg;
+  pagination-color: $pagination-color;
+  modal-content-bg: $modal-content-bg;
+  tooltip-bg: $tooltip-bg;
+  alert-border-radius: $alert-border-radius;
+
+  // Verify theme colors map exists
+  theme-colors-count: length($theme-colors);
+}

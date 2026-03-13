@@ -20,8 +20,8 @@ module ObservationsController::Show
   #   @other_sites
   #   @votes
   def show
-    pass_query_params
-    store_location
+    return if check_for_spider_block(request, params)
+
     if params[:flow].present?
       redirect_to_next_object(params[:flow].to_sym, Observation, params[:id])
       return
@@ -34,13 +34,23 @@ module ObservationsController::Show
     update_view_stats(@observation)
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
-    @other_sites   = helpers.external_sites_user_can_add_links_to(@observation)
+    @other_sites   = ExternalSite.sites_user_can_add_links_to_for_obs(
+      @user, @observation, admin: in_admin_mode?
+    )
     @consensus     = Observation::NamingConsensus.new(@observation)
     @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
     @comments      = @observation.comments&.sort_by(&:created_at)&.reverse
     @images        = @observation.images_sorted
   end
+
+  # Tell search engines what the "correct" URL is for this page.
+  # Used in application/app/head
+  def canonical_url(obs)
+    observation_url(obs.id)
+  end
+
+  private
 
   def load_observation_for_show_observation_page
     includes = @user ? "show_includes" : "not_logged_in_show_includes" # scopes
@@ -68,16 +78,10 @@ module ObservationsController::Show
     default_thumbnail_size_set(params[:set_thumbnail_size])
   end
 
-  # Tell search engines what the "correct" URL is for this page.
-  # Used in application/app/head
-  def canonical_url(obs)
-    observation_url(obs.id)
-  end
-
   # Decide if the current query can be used to create a map.
   def check_if_query_is_mappable
     query = find_query(:Observation)
-    query&.coercable?(:Location)
+    query&.params&.dig(:location_query)
   end
 
   # Incurs a costly namings lookup if called in the partial outside show_obs

@@ -8,10 +8,9 @@ module Descriptions::Defaults
     # PUT callback to make a description the default one.
     # Description must be publically readable and writable.
     def update
-      pass_query_params
       return unless (desc = find_description!)
 
-      redirect_to(object_path_with_query(desc))
+      redirect_to(desc.show_link_args)
       unless desc.fully_public?
         flash_error(:runtime_description_make_default_only_public.t)
         return

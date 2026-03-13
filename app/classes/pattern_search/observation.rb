@@ -18,16 +18,15 @@ module PatternSearch
 
       # strings / lists
       comments: [:comments_has, :parse_string],
-      has_field: [:with_notes_fields, :parse_string],
+      has_field: [:has_notes_fields, :parse_string],
       herbarium: [:herbaria, :parse_list_of_herbaria],
       list: [:species_lists, :parse_list_of_species_lists],
-      location: [:locations, :parse_list_of_locations],
+      location: [:within_locations, :parse_list_of_locations],
       notes: [:notes_has, :parse_string],
       project: [:projects, :parse_list_of_projects],
       project_lists: [:project_lists, :parse_list_of_projects],
       region: [:region, :parse_list_of_strings],
-      user: [:users, :parse_list_of_users],
-      field_slip: [:field_slips, :parse_list_of_strings],
+      user: [:by_users, :parse_list_of_users],
 
       # numeric
       confidence: [:confidence, :parse_confidence],
@@ -38,37 +37,35 @@ module PatternSearch
       west: [:west, :parse_longitude],
 
       # booleanish
-      has_comments: [:with_comments, :parse_yes],
-      has_public_lat_lng: [:with_public_lat_lng, :parse_boolean],
-      has_name: [:with_name, :parse_boolean],
-      has_notes: [:with_notes, :parse_boolean],
-      has_images: [:with_images, :parse_boolean],
+      has_comments: [:has_comments, :parse_yes],
+      has_public_lat_lng: [:has_public_lat_lng, :parse_boolean],
+      has_name: [:has_name, :parse_boolean],
+      has_notes: [:has_notes, :parse_boolean],
+      has_images: [:has_images, :parse_boolean],
       is_collection_location: [:is_collection_location, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
-      has_sequence: [:with_sequences, :parse_yes],
-      has_specimen: [:with_specimen, :parse_boolean]
+      has_sequence: [:has_sequences, :parse_yes],
+      has_specimen: [:has_specimen, :parse_boolean]
     }.freeze
 
     def self.params
       PARAMS
     end
 
-    def params
-      self.class.params
-    end
+    delegate :params, to: :class
 
     def self.model
       ::Observation
     end
 
-    def model
-      self.class.model
-    end
+    delegate :model, to: :class
 
     def build_query
       super
       hack_name_query
       default_to_including_synonyms_and_subtaxa
+      put_nsew_params_in_box
+      put_names_and_modifiers_in_hash
     end
 
     private
@@ -77,31 +74,38 @@ module PatternSearch
     # This converts any search that *looks like* a name search into
     # an actual name search. NOTE: This affects the index title.
     def hack_name_query
-      return unless args[:pattern].present? && args[:names].empty? &&
+      return unless query_params[:pattern].present? &&
+                    query_params[:names].empty? &&
                     (is_pattern_a_name? || any_taxa_modifiers_present?)
 
-      self.flavor = :all
-      args[:names] = args[:pattern]
-      args.delete(:pattern)
+      query_params[:names] = query_params[:pattern]
+      query_params.delete(:pattern)
     end
 
     def default_to_including_synonyms_and_subtaxa
-      return if args[:names].empty?
+      return if query_params[:names].empty?
 
-      args[:include_subtaxa] = true if args[:include_subtaxa].nil?
-      args[:include_synonyms] = true if args[:include_synonyms].nil?
+      if query_params[:include_subtaxa].nil?
+        query_params[:include_subtaxa] =
+          true
+      end
+      return unless query_params[:include_synonyms].nil?
+
+      query_params[:include_synonyms] =
+        true
     end
 
     def is_pattern_a_name?
-      ::Name.where("text_name = ? OR search_name = ?",
-                   args[:pattern].to_s, args[:pattern].to_s).any?
+      pat = ::Name.parse_name(query_params[:pattern])&.search_name ||
+            query_params[:pattern]
+      ::Name.where(text_name: pat).or(::Name.where(search_name: pat)).any?
     end
 
     def any_taxa_modifiers_present?
-      !args[:include_subtaxa].nil? ||
-        !args[:include_synonyms].nil? ||
-        !args[:include_all_name_proposals].nil? ||
-        !args[:exclude_consensus].nil?
+      !query_params[:include_subtaxa].nil? ||
+        !query_params[:include_synonyms].nil? ||
+        !query_params[:include_all_name_proposals].nil? ||
+        !query_params[:exclude_consensus].nil?
     end
   end
 end

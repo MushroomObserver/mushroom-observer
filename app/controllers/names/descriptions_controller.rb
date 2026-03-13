@@ -21,7 +21,6 @@ module Names
     include ::Names::Descriptions::SharedPrivateMethods
 
     before_action :store_location, except: [:index, :destroy]
-    before_action :pass_query_params, except: [:index]
     before_action :login_required
 
     ############################################################################
@@ -31,14 +30,14 @@ module Names
       build_index_with_query
     end
 
+    def controller_model_name
+      "NameDescription"
+    end
+
     private
 
     def default_sort_order
-      ::Query::NameDescriptionBase.default_order # :name
-    end
-
-    def controller_model_name
-      "NameDescription"
+      ::Query::NameDescriptions.default_order # :name
     end
 
     # Used by ApplicationController to dispatch #index to a private method
@@ -54,7 +53,7 @@ module Names
       )
       return unless user
 
-      query = create_query(:NameDescription, :all, by_author: user)
+      query = create_query(:NameDescription, by_author: user)
       [query, {}]
     end
 
@@ -66,7 +65,7 @@ module Names
       )
       return unless user
 
-      query = create_query(:NameDescription, :all, by_editor: user)
+      query = create_query(:NameDescription, by_editor: user)
       [query, {}]
     end
 

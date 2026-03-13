@@ -22,7 +22,7 @@ convex_glossary_term:
   <<: *DEFAULTS
   name: Convex
   description: Boring old Convex
-  thumb_image:  # Expected to not have an image initially
+  thumb_image: # Expected to not have an image initially
 
 plane_glossary_term:
   <<: *DEFAULTS
@@ -49,6 +49,7 @@ unused_thumb_and_used_image_glossary_term:
 multiple_word_glossary_term:
   <<: *DEFAULTS
   name: Emarginate Gills
+  user: mary
 
 fungi_glossary_term:
   <<: *DEFAULTS

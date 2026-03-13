@@ -1,0 +1,18 @@
+<%= tag.div(class: "list-group-item d-flex align-items-start") do %>
+  <%= tag.div(show_title_id_badge(project, "rss-id mr-4"),
+              class: "text-larger") %>
+  <%= tag.div do %>
+    <%= tag.div do
+      [
+        link_to(project.show_link_args) do
+          tag.span(project.title.t, class: "h4")
+        end,
+        tag.span(project.open_membership ? "(#{:OPEN.t})" : "", class: "ml-4")
+      ].safe_join(" ")
+    end %>
+    <%= tag.div do
+      [tag.small("#{project.created_at.web_time}:"),
+       user_link(project.user)].safe_join(" ")
+    end %>
+  <% end %>
+<% end %>

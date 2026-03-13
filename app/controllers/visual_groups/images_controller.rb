@@ -5,7 +5,6 @@ module VisualGroups
     before_action :login_required
 
     def update
-      @user = User.current
       image_id = params[:id]
       status = params[:status]
       status = "" unless Image.find_by(id: image_id)

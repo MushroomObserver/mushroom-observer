@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class API2
-  # Cannot update location unless you own all its species lists.
+  # Cannot update location unless you own all its species_lists.
   class MustOwnAllSpeciesLists < FatalError
     def initialize(type)
       super()

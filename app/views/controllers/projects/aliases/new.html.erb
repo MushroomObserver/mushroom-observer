@@ -1,0 +1,11 @@
+<%
+add_project_banner(@project)
+add_page_title(:project_alias_new.l)
+container_class(:text)
+%>
+
+<%= render(Components::ProjectAliasForm.new(
+      @project_alias, user: @user, local: true
+    )) %>
+
+<%= link_to("Back", project_aliases_path(project_id: @project_alias.project_id)) %>

@@ -9,16 +9,17 @@ const internalConfig = {
   }
 }
 
-// This controller needs to be on the whole form, to enable the large drop area.
-// (formerly "observation_images" section of the form)
-// Connects to data-controller="form-exif"
+// The "form-exif" controller works together with the "form-images" controller
+// to read the EXIF image data from an uploaded image during record creation UX.
+// This controller needs to be on the whole form, to enable the large drop area
+// (formerly the "observation_images" section of the form).
 export default class extends Controller {
   static targets = ["carousel", "item", "useExifBtn",
     "collapseFields", "collapseCheck"]
-  static outlets = ["autocompleter", "map"]
+  static outlets = ["autocompleter--location", "map"]
 
   connect() {
-    this.element.dataset.stimulus = "form-exif-connected";
+    this.element.dataset.formExif = "connected";
 
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,
@@ -31,7 +32,15 @@ export default class extends Controller {
   itemTargetConnected(itemElement) {
     // console.log("itemTargetConnected")
     // console.log(itemElement);
+    // Skip if already initialized to avoid re-extracting EXIF data
+    if (itemElement.dataset.initialized == "true") return;
+
+    // For saved "good" images, the server has already extracted EXIF data
+    // from the original files and passed it via camera_info props.
+    // We only need to extract EXIF in the browser for "upload" images.
     if (itemElement.dataset.imageStatus == "good") return;
+
+    // Initialize geocode for uploads
     itemElement.dataset.geocode = "";
 
     // extract the EXIF data (async) and populate the item and element
@@ -43,10 +52,23 @@ export default class extends Controller {
   getExifData(itemElement) {
     const _image = itemElement.querySelector('.carousel-image');
 
-    _image.onload = async () => {
-      const _exif_data = await ExifReader.load(_image.src);
-      this.populateExifData(itemElement, _exif_data);
+    const loadExifData = async () => {
+      try {
+        const _exif_data = await ExifReader.load(_image.src);
+        this.populateExifData(itemElement, _exif_data);
+      } catch (error) {
+        console.log("Could not load EXIF data:", error);
+      }
     };
+
+    // If image is already loaded (e.g., from cache or saved image),
+    // extract EXIF data immediately
+    if (_image.complete && _image.naturalHeight !== 0) {
+      loadExifData();
+    } else {
+      // Otherwise, wait for image to load
+      _image.onload = loadExifData;
+    }
   }
 
   // Now that we've read the data from the loaded file, populate carousel-item
@@ -74,6 +96,9 @@ export default class extends Controller {
       _exif_lat = itemElement.querySelector(".exif_lat"),
       _exif_lng = itemElement.querySelector(".exif_lng"),
       _exif_alt = itemElement.querySelector(".exif_alt"),
+      _exif_lat_wrapper = itemElement.querySelector(".exif_lat_wrapper"),
+      _exif_lng_wrapper = itemElement.querySelector(".exif_lng_wrapper"),
+      _exif_alt_wrapper = itemElement.querySelector(".exif_alt_wrapper"),
       _use_exif_button = itemElement.querySelector('.use_exif_btn');
 
     // Geocode Logic
@@ -90,6 +115,18 @@ export default class extends Controller {
       _exif_lat.innerText = lat == null ? lat : lat.toFixed(4);
       _exif_lng.innerText = lng == null ? lng : lng.toFixed(4);
       _exif_alt.innerText = alt == null ? alt : alt.toFixed(0);
+
+      // Show the wrapper spans by removing d-none class
+      if (_exif_lat_wrapper && lat != null) {
+        _exif_lat_wrapper.classList.remove('d-none');
+      }
+      if (_exif_lng_wrapper && lng != null) {
+        _exif_lng_wrapper.classList.remove('d-none');
+      }
+      if (_exif_alt_wrapper && alt != null) {
+        _exif_alt_wrapper.classList.remove('d-none');
+      }
+
       _use_exif_button.classList.remove('d-none');
     } else {
       // Show the "no GPS" message
@@ -119,15 +156,8 @@ export default class extends Controller {
       _use_exif_button = itemElement.querySelector('.use_exif_btn');
     _exif_date.dataset.found = 'false';
 
-    // Image Date Logic
-    if (exif_data.DateTimeOriginal) {
-      // we found the date taken, let's parse it down.
-      // returns an array of [YYYY,MM,DD]
-      const _date_taken_array =
-        exif_data.DateTimeOriginal.description.substring(' ', 10).
-          split(':').reverse(),
-        _exifSimpleDate = this.SimpleDate(..._date_taken_array);
-
+    const _exifSimpleDate = this.parseExifDate(exif_data);
+    if (_exifSimpleDate) {
       this.imageDate(itemElement, _exifSimpleDate);
 
       // shows the exif date by the photo
@@ -141,6 +171,62 @@ export default class extends Controller {
       // Use observation date
       this.imageDate(itemElement, this.observationDate());
     }
+  }
+
+  // EXIF date parsing logic
+  // Confusingly, some cameras seem to incorrectly implement the EXIF standard,
+  // either storing other datetime formats or misusing field name conventions.
+  // So we can't be too sure what we'll get.
+  // For example, note the difference in date/time separators for EXIF and ISO:
+  //   {description: "2025:03:09 16:46:41.560", correct for EXIF
+  //    value: "2025-03-09T16:46:41.560"}, ISO, incorrect for EXIF
+  parseExifDate(exif_data) {
+    const _known_field_names = ["DateTimeDigitized", "DateTimeOriginal"];
+    const _fieldName = _known_field_names.find((fieldName) =>
+      exif_data?.hasOwnProperty(fieldName) &&
+      exif_data[fieldName].hasOwnProperty("description")
+    );
+    if (!_fieldName) {
+      console.log(
+        "Couldn't recognize a dateTime field in the EXIF data: " +
+        JSON.stringify(exif_data)
+      );
+      return false;
+    }
+    const _dateTime = exif_data[_fieldName]["description"]
+    if (!_dateTime) {
+      console.log(
+        "Couldn't find a recognizable EXIF date field: " +
+        JSON.stringify(exif_data)
+      );
+      return false;
+    }
+    const _separator = _dateTime.includes(" ") ? " " : "T";
+    if (!_separator) {
+      console.log(
+        "Couldn't recognize a date/time separator in the EXIF date field: " +
+        _dateTime
+      );
+      return false;
+    }
+    const _date = _dateTime.substring(_separator, 10),
+      _date_separator = _date.includes(":") ? ":" : "-";
+    if (!_date_separator) {
+      console.log(
+        "Didn't recognize the date digit separator in the EXIF date field: " +
+        _dateTime
+      );
+      return false;
+    }
+    const _date_taken_array = _date.split(_date_separator).reverse();
+    if (_date_taken_array.length !== 3) {
+      console.log(
+        "The EXIF date field: doesn't seem to have a year, month and day: " +
+        _dateTime
+      );
+      return false
+    }
+    return this.SimpleDate(..._date_taken_array);
   }
 
   // Click callback so .exif_date will set the image date if clicked
@@ -176,8 +262,8 @@ export default class extends Controller {
       _obs_alt.value = alt == null ? alt : alt.toFixed(0);
 
       // should trigger change to update the autocompleter and the map
-      if (this.hasAutocompleterOutlet) {
-        this.autocompleterOutlet.swap({
+      if (this.hasAutocompleterLocationOutlet) {
+        this.autocompleterLocationOutlet.swap({
           detail: { type: "location_containing", request_params: { lat, lng } }
         });
       }

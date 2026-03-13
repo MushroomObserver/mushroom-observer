@@ -8,8 +8,7 @@ module Tabs
     end
 
     def theme_list_tab
-      [:theme_list.t, theme_color_themes_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:theme_list.t, theme_color_themes_path).tab
     end
   end
 end

@@ -4,6 +4,7 @@ export default class extends Controller {
   static targets = ["link"]
 
   connect() {
+    this.element.dataset.imageLoader = "connected"
     this.dots = ""
     this.isPolling = false
     this.originalText = null

@@ -66,14 +66,19 @@ li.dropdown-item {
     color: $dropdown-link-color;
     text-decoration: none;
 
-    // &[data-deprecated="true"] {
-    //   opacity: 0.81;
-    //   font-style: italic;
-    // }
+    &[data-deprecated="false"] {
+      font-weight: bold;
+      font-style: italic;
+    }
+
+    &[data-deprecated="true"] {
+      font-style: italic;
+      opacity: 0.81;
+    }
 
     &:hover {
       color: $dropdown-link-color;
-      background-color: $dropdown-link-hover-bg;
+      background-color: $dropdown-link-hover-bg !important;
       text-decoration: none;
     }
   }
@@ -81,7 +86,7 @@ li.dropdown-item {
   &.active {
     a {
       color: $dropdown-link-color;
-      background-color: $dropdown-link-hover-bg;
+      background-color: $dropdown-link-hover-bg !important;
     }
   }
 }

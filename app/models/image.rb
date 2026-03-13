@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-# require("open3")
-# require("mimemagic")
-# require("fastimage")
-#
 #  = Image Model
 #
 #  Most images are, of course, mushrooms, but mugshots use this class, as well.
@@ -227,12 +223,10 @@
 ################################################################################
 #
 class Image < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "fileutils"
-  require "net/http"
-  require "English"
-  require "open3"
-  require "mimemagic"
-  require "fastimage"
+  require("mimemagic")
+  require("fastimage")
+
+  include Scopes
 
   has_many :glossary_term_images, dependent: :destroy
   has_many :glossary_terms, through: :glossary_term_images
@@ -266,12 +260,6 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  scope :interactive_includes, lambda {
-    strict_loading.includes(
-      :image_votes, :license, :projects, :user
-    )
-  }
-
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
     observations + profile_users + glossary_terms
@@ -282,6 +270,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     (all_subjects - [obj]).present?
   end
 
+  def title_subjects(format_method = :format_name)
+    all_subjects.map(&:"#{format_method}").uniq.sort.join(" & ")
+  end
+
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
   #
@@ -290,7 +282,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "Agaricus campestris L. & Agaricus californicus Peck. (3)"
   #
   def unique_text_name
-    title = all_subjects.map(&:text_name).uniq.sort.join(" & ")
+    title = title_subjects(:text_name)
     if title.blank?
       :image.l + " ##{id || "?"}"
     else
@@ -306,12 +298,18 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    title = all_subjects.map(&:format_name).uniq.sort.join(" & ")
-    if title.blank?
-      :image.l + " ##{id || "?"}"
-    else
-      title + " (#{id || "?"})"
-    end
+    title = format_name
+    id_format = if title == :image.l
+                  "##{id || "?"}"
+                else
+                  "(#{id || "?"})"
+                end
+    [title, id_format].safe_join(" ")
+  end
+
+  # Do the same without the ID, for new page titles that generate an ID UI
+  def format_name
+    title_subjects || :image.l
   end
 
   # How this image is refered to in the rss logs.
@@ -352,6 +350,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # in the image.  It's just that we haven't seen any other types yet.)
   ALL_CONTENT_TYPES = ["image/jpeg", "image/gif", "image/png", "image/tiff",
                        "image/x-ms-bmp", "image/bmp", nil].freeze
+
+  SEARCHABLE_FIELDS = [
+    :original_name, :copyright_holder, :notes
+  ].freeze
 
   def image_url(size)
     Image::URL.new(
@@ -396,7 +398,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def full_filepath(size)
-    image_url(size).full_filepath(MO.local_image_files)
+    standard_path = image_url(size).full_filepath(MO.local_image_files)
+
+    # In test environment, if the standard path doesn't exist and this is the
+    # original size, fall back to test fixtures. This allows EXIF extraction
+    # to work in tests without running the full image processing pipeline.
+    if Rails.env.test? &&
+       ["orig", :original].include?(size) &&
+       !File.exist?(standard_path) &&
+       original_name.present?
+      fixture_path = Rails.root.join("test/images", original_name)
+      return fixture_path.to_s if File.exist?(fixture_path)
+    end
+
+    standard_path
   end
 
   # Defines methods for each size. e.g. `{size}_url`
@@ -617,7 +632,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     if save_to_temp_file
       # Override whatever user gave us with result of "file --mime".
       self.upload_type =
-        MimeMagic.by_magic(File.open(upload_temp_file)).try(&:type)
+        File.open(upload_temp_file) { |file| MimeMagic.by_magic(file) }.
+        try(&:type)
       if upload_type&.start_with?("image")
         result = true
       else
@@ -660,8 +676,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     name = name.sub(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
-    return unless name.present? && User.current &&
-                  User.current.keep_filenames != "toss"
+    return unless name.present? && user&.keep_filenames != "toss"
 
     self.original_name = name
   end
@@ -670,7 +685,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # to the :image field.  Returns true if the file is successfully saved.
   def save_to_temp_file
     result = true
-    unless upload_temp_file.present?
+    if upload_temp_file.blank?
 
       # Image is supplied in a input stream.  This can happen in a variety of
       # cases, including during testing, and also when the image comes in as
@@ -792,7 +807,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def strip_gps!
     return nil if gps_stripped
 
-    output, status = Open3.capture2e("script/strip_exif", id.to_s,
+    # Pass the worker-specific image root for parallel testing
+    env = { "MO_IMAGE_ROOT" => MO.local_image_files }
+    output, status = Open3.capture2e(env, "script/strip_exif", id.to_s,
                                      transferred ? "1" : "0")
     return output unless status.success?
 
@@ -802,8 +819,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Get exif data from image by reading the header straight off the file,
   # remotely. Returns nil if it fails. Costly.
-  def read_exif_data(flags = [])
-    hide_gps = observations.any?(&:gps_hidden)
+  # @param hide_gps [Boolean, nil] Override GPS hiding. If nil, checks
+  #   observations to determine whether to hide GPS.
+  def read_exif_data(flags = [], hide_gps: nil)
+    hide_gps = observations.any?(&:gps_hidden) if hide_gps.nil?
 
     if transferred
       cmd = Shellwords.escape("script/exiftool_remote")
@@ -822,11 +841,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # This returns a { lat:, lng:, ... } hash if the image has GPS data in EXIF.
   # Returns nil if it fails. Note that it only reads these fields.
   # Used for edit obs, to allow re-syncing image data to obs.
-  def read_exif_geocode
+  def read_exif_geocode(hide_gps: nil)
     # flag -n means numerical format, rather than degrees/minutes/seconds.
     flags = %w[-n -GPSLatitude -GPSLongitude -GPSAltitude -filesize
                -DateTimeOriginal]
-    data = read_exif_data(flags)[0]
+    data = read_exif_data(flags, hide_gps: hide_gps)[0]
     return nil unless data
 
     lat = lng = alt = date = file_size = nil
@@ -973,7 +992,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def reload(*args)
     @vote_hash = nil
-    super(*args)
+    super
   end
 
   ##############################################################################
@@ -982,7 +1001,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
-  def can_edit?(user = User.current)
+  def can_edit?(user)
     Project.can_edit?(self, user)
   end
 
@@ -1015,7 +1034,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Log adding new image to an associated observation, glossary term, etc.
   def log_create_for(object)
-    object.log(:log_image_created, name: log_name, touch: true)
+    object.user_log(user, :log_image_created, name: log_name, touch: true)
   end
 
   # Log adding existing image to an associated observation, glossary term, etc.
@@ -1150,7 +1169,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   private_class_method def self.row_changed?(row)
     row[:old_id] != row[:new_id] ||
-    row[:old_holder] != row[:new_holder]
+      row[:old_holder] != row[:new_holder]
   end
 
   # Add license change records with a single insert to the db.

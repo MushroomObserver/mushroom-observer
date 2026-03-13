@@ -1,14 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 // connects to a TRANSLATION EDIT FORM == this.element
-// Connects to data-controller="translate"
+// Connects to data-controller="translation"
 export default class extends Controller {
   static targets = [
     "textarea", "saveButton", "cancelButton", "reloadButton", "localeSelect"
   ]
 
   connect() {
-    this.element.dataset.stimulus = "translate-connected";
+    this.element.dataset.translation = "connected";
 
     this.LOCALE = this.element.dataset.locale;
     this.CONFIRM_STRING = this.element.dataset.confirmString;

@@ -13,7 +13,7 @@ module Names
 
     # Send stuff to eol.
     def show
-      @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
+      @max_secs = params[:max_secs]&.to_i
       @timer_start = Time.current
       @data = ::EolData.new
       render_xml(layout: false)

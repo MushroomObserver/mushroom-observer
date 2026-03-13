@@ -19,7 +19,7 @@
 #
 class ImagesController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  before_action :store_location, only: [:show]
 
   ##############################################################################
   # INDEX
@@ -28,17 +28,21 @@ class ImagesController < ApplicationController
     build_index_with_query
   end
 
+  def default_sort_order
+    ::Query::Images.default_order # :created_at
+  end
+
   private
 
   # Don't show the index if they're asking too much.
   def unfiltered_index_permitted?
-    return true unless too_many_results
+    return true unless too_many_results?
 
     render_too_many_results
     false
   end
 
-  def too_many_results
+  def too_many_results?
     params[:page].to_s.to_i > 1000
   end
 
@@ -46,7 +50,7 @@ class ImagesController < ApplicationController
     render(
       status: :too_many_requests,
       content_type: "text/plain",
-      plain: <<-TOO_MANY_RESULTS.squish
+      plain: <<~TOO_MANY_RESULTS.squish
         Your queries are killing our server.
         There are much better ways to scrape the images
         from our site.
@@ -54,10 +58,6 @@ class ImagesController < ApplicationController
         And please stop hammering our server!
       TOO_MANY_RESULTS
     )
-  end
-
-  def default_sort_order
-    ::Query::ImageBase.default_order # :created_at
   end
 
   # ApplicationController uses this table to dispatch #index to a private method
@@ -73,7 +73,7 @@ class ImagesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Image, :all, by_user: user)
+    query = create_query(:Image, by_users: user)
     [query, {}]
   end
 
@@ -82,7 +82,7 @@ class ImagesController < ApplicationController
     project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
-    query = create_query(:Image, :all, project: project)
+    query = create_query(:Image, projects: project)
     [query, { always_index: true }]
   end
 
@@ -92,12 +92,13 @@ class ImagesController < ApplicationController
 
     query = find_query(:Image)
     # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query.params.any?
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
 
     [query, {}]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
+    [nil, {}]
   end
 
   # Hook runs before template displayed. Must return query.
@@ -117,13 +118,9 @@ class ImagesController < ApplicationController
                 :projects, :thumb_glossary_terms, :glossary_terms, :image_votes]
     }.merge(opts)
 
-    # Paginate by letter if sorting by user.
-    case query.params[:by]
-    when "user", "reverse_user"
-      opts[:letters] = "users.login"
-    # Paginate by letter if sorting by name.
-    when "name", "reverse_name"
-      opts[:letters] = "names.sort_name"
+    # Paginate by letter if sorting by user or name.
+    if %w[user reverse_user name reverse_name].include?(query.params[:order_by])
+      opts[:letters] = true
     end
 
     opts
@@ -142,7 +139,6 @@ class ImagesController < ApplicationController
   # Inputs: params[:id] (image)
   # Outputs: @image
   def show
-    store_location
     return false unless find_image!
 
     case params[:flow]
@@ -194,14 +190,14 @@ class ImagesController < ApplicationController
 
   def set_image_query_params
     obs = params[:obs]
-    # The outer search on observation won't be saved for robots, so no sense
-    # in bothering with any of this.
     return unless obs.present? && obs.to_s.match(/^\d+$/) && !browser.bot?
 
-    obs_query = find_or_create_query(:Observation)
-    obs_query.current = obs
-    img_query = create_query(:Image, :all, observation: obs, outer: obs_query)
-    query_params_set(img_query)
+    # This is for setting up images within the current obs query.
+    # May try this after switch to AR, it's too hard to do with SQL. - AN 202502
+    # obs_query = find_or_create_query(:Observation)
+    # img_query = create_query(:Image, observation_query: obs_query.params)
+    img_query = create_query(:Image, observations: obs)
+    update_stored_query(img_query) # also stores query in session
   end
 
   # change_vote directly, does not call public cast_vote below
@@ -222,7 +218,7 @@ class ImagesController < ApplicationController
   end
 
   def goto_next_image
-    query = find_or_create_query(Image)
+    query = find_or_create_query(:Image)
     query.current = @image
     @image = query.current if query.index(@image) && (query = query.next)
   end
@@ -242,7 +238,7 @@ class ImagesController < ApplicationController
     next_state = nil
     # decide where to redirect after deleting image
     if (this_state = find_query(:Image))
-      query_params_set(this_state)
+      update_stored_query(this_state) # also stores query in session
       this_state.current = @image
       next_state = this_state.next
     end
@@ -252,15 +248,15 @@ class ImagesController < ApplicationController
   private
 
   def delete_and_redirect(next_state = nil)
-    return redirect_with_query(action: "show", id: @image.id) unless
-      check_permission!(@image)
+    return redirect_to(action: :show, id: @image.id) unless
+      permission!(@image)
 
     @image.log_destroy
     @image.destroy
     flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
-    return redirect_to(action: "index") unless next_state
+    return redirect_to(action: :index) unless next_state
 
-    query_params_set(next_state)
-    redirect_with_query(action: "show", id: next_state.current_id)
+    update_stored_query(next_state) # also stores query in session
+    redirect_to(action: :show, id: next_state.current_id)
   end
 end

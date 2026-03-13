@@ -8,17 +8,6 @@ module Admin
 
       @user_stats = UserStats.find_by(user_id: @user2.id) ||
                     UserStats.create(user_id: @user2.id)
-
-      # Reformat bonuses as string for editing, one entry per line.
-      @val = if @user_stats.bonuses
-               vals = @user_stats.bonuses.map do |points, reason|
-                 format("%<points>-6d %<reason>s",
-                        points: points, reason: reason.gsub(/\s+/, " "))
-               end
-               vals.join("\n")
-             else
-               ""
-             end
     end
 
     def update

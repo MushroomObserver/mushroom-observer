@@ -1,0 +1,638 @@
+# frozen_string_literal: true
+
+# Base form component for all Superform forms in the application.
+#
+# Provides custom Bootstrap-styled field components and shared helper methods
+# for building consistent form layouts with labels, help text, validation, etc.
+#
+# @example Basic usage
+#   class UserForm < Components::ApplicationForm
+#     def view_template
+#       text_field(:email, label: "Email") do |f|
+#         f.with_help { "We'll never share your email" }
+#       end
+#       textarea_field(:bio, label: "Bio", rows: 5)
+#       checkbox_field(:terms, label: "I agree to the terms")
+#       submit "Sign up"
+#     end
+#   end
+#
+# @example Deriving action URL from model (eliminates passing action from view)
+#   class LicenseForm < Components::ApplicationForm
+#     def view_template
+#       text_field(:display_name)
+#       submit
+#     end
+#
+#     def form_action
+#       model.persisted? ? view_context.license_path(model) :
+#                          view_context.licenses_path
+#     end
+#   end
+#
+#   # In new.html.erb and edit.html.erb, just render the form directly:
+#   <%= render(Components::LicenseForm.new(@license)) %>
+#
+# @example Deriving action URL from model associations
+#   # For forms where the action depends on an associated model
+#   class NameTrackerForm < Components::ApplicationForm
+#     def view_template
+#       text_field(:note_template)
+#       submit
+#     end
+#
+#     def form_action
+#       # Access model associations to build the URL
+#       url_for(controller: "names/trackers", action: :create,
+#               id: model.name.id, only_path: true)
+#     end
+#   end
+#
+#   # In the view, no need to pass action:
+#   <%= render(Components::NameTrackerForm.new(
+#     @name_tracker || NameTracker.new(name: @name)
+#   )) %>
+#
+# @example HTTP method handling
+#   # Superform automatically determines HTTP method based on model.persisted?
+#   # - persisted? == true  → PATCH (updates)
+#   # - persisted? == false → POST (creates)
+#   #
+#   # For FormObject classes (non-persisted by default), if you need to force
+#   # PATCH/PUT, override persisted?:
+#   class FormObject::AdminSession
+#     def persisted?
+#       true  # Forces Superform to use PATCH method
+#     end
+#   end
+#
+# @example Accessing view helpers (like in_admin_mode?)
+#   class GlossaryTermForm < Components::ApplicationForm
+#     def view_template
+#       text_field(:name)
+#       checkbox_field(:locked) if in_admin_mode?
+#       submit
+#     end
+#   end
+class Components::ApplicationForm < Superform::Rails::Form
+  include Phlex::Slotable
+  include Phlex::Rails::Helpers::TurboFrameTag
+
+  # Automatically set form ID based on class name unless explicitly provided
+  # @param model [ActiveRecord::Base] the model object for the form
+  # @param id [String] optional form ID (auto-generated from class name if nil)
+  # @param local [Boolean] if true, renders non-turbo form (default: true)
+  # @param options [Hash] additional options passed to Superform
+  def initialize(model, id: nil, local: true, **options)
+    # Generate ID from class name: Components::APIKeyForm -> "api_key_form"
+    # For anonymous classes (tests), default to "application_form"
+    auto_id = id || self.class.name&.demodulize&.underscore ||
+              "application_form"
+    @turbo_stream = !local
+    super(model, **options.merge(id: auto_id))
+  end
+
+  def around_template
+    # Set turbo data attribute for turbo_stream forms
+    if @turbo_stream
+      @attributes[:data] ||= {}
+      @attributes[:data][:turbo] = "true"
+    end
+    super
+  end
+
+  # Form subclasses can override form_action to derive action URLs from model
+  # associations or other logic, eliminating the need to pass explicit actions
+
+  # Register view helpers that forms might need
+  # Use register_value_helper for helpers that return values (not HTML)
+  register_value_helper :in_admin_mode?
+  register_value_helper :pluralize
+  register_value_helper :url_for
+  register_value_helper :rank_as_string
+  register_output_helper :help_note, mark_safe: true
+
+  # We don't need to register form helpers anymore - using Superform fields
+
+  # Wrapper option keys that should not be passed to the field itself
+  WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class, :wrap_data,
+                     :between, :button, :button_data, :button_text,
+                     :addon, :monospace, :label_class, :label_data,
+                     :label_aria, :label_position].freeze
+
+  # Override the Field class to use our custom components
+  class Field < Superform::Rails::Form::Field
+    def text(wrapper_options: {}, **attributes)
+      TextField.new(self, attributes: attributes,
+                          wrapper_options: wrapper_options)
+    end
+
+    def textarea(wrapper_options: {}, **attributes)
+      TextareaField.new(self, attributes: attributes,
+                              wrapper_options: wrapper_options)
+    end
+
+    def file(wrapper_options: {}, **attributes)
+      FileField.new(self, attributes: attributes,
+                          wrapper_options: wrapper_options)
+    end
+
+    def checkbox(*options, wrapper_options: {}, **attributes)
+      CheckboxField.new(self, *options, attributes: attributes,
+                                        wrapper_options: wrapper_options)
+    end
+
+    def radio(*options, wrapper_options: {}, **attributes)
+      RadioField.new(self, *options, attributes: attributes,
+                                     wrapper_options: wrapper_options)
+    end
+
+    def select(options, wrapper_options: {}, **attributes)
+      SelectField.new(self, collection: options, attributes: attributes,
+                            wrapper_options: wrapper_options)
+    end
+
+    def read_only(wrapper_options: {}, **attributes)
+      ReadOnlyField.new(self, attributes: attributes,
+                              wrapper_options: wrapper_options)
+    end
+
+    # Autocompleter-specific options that should NOT go in field attributes
+    # Note: :value stays in attributes since it goes to the text/textarea field
+    AUTOCOMPLETER_OPTIONS = [:find_text, :keep_text, :edit_text, :create_text,
+                             :create, :create_path, :hidden_name, :hidden_value,
+                             :hidden_data, :controller_data, :controller_id,
+                             :map_outlet].freeze
+
+    def autocompleter(type:, textarea: false, wrapper_options: {},
+                      **attributes)
+      # Extract autocompleter-specific options from attributes
+      ac_options = attributes.slice(*AUTOCOMPLETER_OPTIONS)
+      field_attributes = attributes.except(*AUTOCOMPLETER_OPTIONS)
+
+      AutocompleterField.new(self, type: type, textarea: textarea,
+                                   attributes: field_attributes,
+                                   wrapper_options: wrapper_options,
+                                   **ac_options)
+    end
+
+    # Alias for backwards compatibility
+    alias hidden read_only
+
+    def static(wrapper_options: {}, **attributes)
+      StaticTextField.new(self, attributes: attributes,
+                                wrapper_options: wrapper_options)
+    end
+
+    def date(wrapper_options: {}, **attributes)
+      DateField.new(self, attributes: attributes,
+                          wrapper_options: wrapper_options)
+    end
+  end
+
+  # Main field wrapper methods with Bootstrap styling
+  # Replicates the API of the original form helpers
+
+  # Text field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [String,false] :label label text (optional, inferred from
+  #   field name), or false to omit label
+  # @option options [Boolean] :prefs auto-generate label from prefs translation
+  # @option options [Boolean] :inline render label and field inline
+  # @option options [String] :wrap_class CSS classes for wrapper div
+  # @option options [String] :class CSS classes for input element
+  # @option options [String] :button button text (renders input-group with btn)
+  # @option options [Hash] :button_data data attributes for button
+  # All other options passed to the input element
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append` (after input, end of form-group), `with_help`
+  def text_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).text(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    set_help_slot(field_component, wrapper_opts[:help])
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Textarea field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [Boolean] :monospace add monospace font class
+  # All other wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
+  def textarea_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    # Handle monospace option
+    if wrapper_opts.delete(:monospace)
+      field_opts[:class] = class_names(field_opts[:class], "text-monospace")
+    end
+
+    field_component = field(field_name).textarea(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    set_help_slot(field_component, wrapper_opts[:help])
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Checkbox field with label and Bootstrap checkbox wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # Wrapper options: :label, :prefs, :class_name
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
+  def checkbox_field(field_name, **options, &block)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).checkbox(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    set_help_slot(field_component, wrapper_opts[:help])
+
+    render(field_component, &block)
+  end
+
+  # Radio button group with Bootstrap radio wrapper per option
+  # @param field_name [Symbol] the field name
+  # @param options [Array<Array>] list of [value, label] pairs
+  # @param wrapper_options [Hash] wrapper options (wrap_class, etc.)
+  # @example
+  #   radio_field(:target, [1, "Option 1"], [2, "Option 2"])
+  def radio_field(field_name, *options, **kwargs)
+    wrapper_opts = kwargs.slice(*WRAPPER_OPTIONS)
+    field_opts = kwargs.except(*WRAPPER_OPTIONS)
+
+    render(field(field_name).radio(
+             *options,
+             wrapper_options: wrapper_opts,
+             **field_opts
+           ))
+  end
+
+  # Select field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options_list [Array] the select options
+  # @param options [Hash] all field and wrapper options
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
+  def select_field(field_name, options_list, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).select(
+      options_list,
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Date field with three selects (year, month, day)
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [Integer] :start_year first year in dropdown
+  # @option options [Integer] :end_year last year in dropdown
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots
+  def date_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).date(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    set_help_slot(field_component, wrapper_opts[:help])
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Password field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
+  def password_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).text(
+      wrapper_options: wrapper_opts,
+      type: "password",
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Hidden field (no label or wrapper)
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field options
+  def hidden_field(field_name, **)
+    render(field(field_name).text(**, type: "hidden"))
+  end
+
+  # Number field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
+  def number_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).text(
+      wrapper_options: wrapper_opts,
+      type: "number",
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Static field - displays a value as plain text (not editable)
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [String] :value the text to display
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots
+  def static_field(field_name, **options)
+    # For static fields, :value is a wrapper option (displayed text)
+    static_wrapper_opts = WRAPPER_OPTIONS + [:value]
+    wrapper_opts = options.slice(*static_wrapper_opts)
+    field_opts = options.except(*static_wrapper_opts)
+
+    field_component = field(field_name).static(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Read-only field - displays value with hidden input for form submission
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [String] :value the text to display (also submitted)
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots
+  def read_only_field(field_name, **options)
+    # For read_only fields, :value is a wrapper option (displayed text)
+    read_only_wrapper_opts = WRAPPER_OPTIONS + [:value, :text]
+    wrapper_opts = options.slice(*read_only_wrapper_opts)
+    field_opts = options.except(*read_only_wrapper_opts)
+
+    field_component = field(field_name).read_only(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # File field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param options [Hash] all field and wrapper options
+  # @option options [String] :accept file type filter (default: "image/*")
+  # @option options [Boolean] :multiple allow multiple file selection
+  # @option options [String] :controller custom Stimulus controller
+  # @option options [String] :action custom Stimulus action
+  # @option options [String] :button_text custom button text
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`
+  def file_field(field_name, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).file(
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Autocompleter field with label and Bootstrap form-group wrapper
+  # @param field_name [Symbol] the field name
+  # @param type [Symbol] the autocompleter type (:name, :location, :user, etc.)
+  # @param options [Hash] all field and wrapper options
+  # @option options [Boolean] :textarea use textarea instead of text input
+  # All wrapper options same as text_field
+  # @yield [field_component] Optional block to set slots: `with_between`,
+  #   `with_append`, `with_help`
+  def autocompleter_field(field_name, type:, textarea: false, **options)
+    wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+    field_opts = options.except(*WRAPPER_OPTIONS)
+
+    field_component = field(field_name).autocompleter(
+      type: type,
+      textarea: textarea,
+      wrapper_options: wrapper_opts,
+      **field_opts
+    )
+
+    yield(field_component) if block_given?
+
+    render(field_component)
+  end
+
+  # Override Superform's submit to add Bootstrap styling and turbo support
+  # @param value [String] the button text (defaults to submit_value from model)
+  # @param options [Hash] submit button options
+  # @option options [Boolean] :center center the button (default false)
+  # @option options [String] :submits_with text shown while submitting
+  # @option options [String] :class additional CSS classes
+  # @option options [Hash] :data additional data attributes
+  def submit(value = submit_value, center: false, submits_with: nil, **options)
+    submits_with ||= :SUBMITTING.l
+    classes = %w[btn btn-default]
+    classes << "center-block my-3" if center
+    classes << options[:class] if options[:class].present?
+
+    data = { turbo_submits_with: submits_with,
+             disable_with: value }.merge(options[:data] || {})
+
+    super(value, **options.merge(class: classes.join(" "), data: data))
+  end
+
+  # Renders image upload fields in a :upload namespace
+  # Creates params[:model][:upload][image], etc. (nested under form model)
+  # Pass a block to render content in the file field's between slot.
+  def upload_fields(file_field_label: "#{:IMAGE.l}:", **args, &between_block)
+    args => {
+      copyright_holder:, copyright_year:, licenses:, upload_license_id:
+    }
+
+    namespace(:upload) do |upload|
+      render_upload_image_field(upload, file_field_label, &between_block)
+      render_upload_copyright_holder(upload, copyright_holder)
+      render_upload_year(upload, copyright_year)
+      render_upload_license(upload, licenses, upload_license_id)
+    end
+  end
+
+  # Creates a namespace for image fields indexed by image ID.
+  # Generates params like: observation[good_image][123][notes]
+  # @param type [Symbol] :good_image or :image (for existing vs new uploads)
+  # @param image_id [Integer, String] the image ID
+  # @yield [namespace] the nested namespace for field building
+  def image_namespace(type, image_id, &block)
+    namespace(type) do |type_ns|
+      type_ns.namespace(image_id.to_s, &block)
+    end
+  end
+
+  # Lightweight field proxy for use outside of form rendering context.
+  # Provides the same interface as Superform::Field for field components.
+  # Unlike Superform fields, these can be created and rendered many times.
+  #
+  # @example
+  #   proxy = FieldProxy.new("observation[good_image][123]", :notes, "text")
+  #   render(TextField.new(proxy, attributes: {}, wrapper_options: {}))
+  class FieldProxy
+    attr_reader :key, :value, :dom
+
+    def initialize(namespace, field_key, field_value = nil)
+      @key = field_key
+      @value = field_value
+      @dom = DOMProxy.new(namespace, field_key, field_value)
+    end
+
+    # Minimal DOM proxy that provides id, name, value for field components
+    class DOMProxy
+      def initialize(namespace, field_key, field_value)
+        @namespace = namespace
+        @field_key = field_key
+        @field_value = field_value
+      end
+
+      def id
+        return @field_key.to_s if @namespace.blank?
+
+        "#{@namespace}_#{@field_key}".tr("[]", "_").gsub(/__+/, "_")
+      end
+
+      def name
+        return @field_key.to_s if @namespace.blank?
+
+        "#{@namespace}[#{@field_key}]"
+      end
+
+      def value
+        @field_value.to_s
+      end
+    end
+  end
+
+  # Factory method to create a FieldProxy for image fields
+  # @param type [Symbol] :good_image or :image
+  # @param image_id [Integer, String] the image ID
+  # @param field_key [Symbol] the field name (:notes, :when, etc.)
+  # @param value [Object] the field value
+  # @return [FieldProxy] a field proxy for use with field components
+  def self.image_field_proxy(type, image_id, field_key, value = nil)
+    namespace = "observation[#{type}][#{image_id}]"
+    FieldProxy.new(namespace, field_key, value)
+  end
+
+  private
+
+  # Convert help: option to with_help slot for help icon rendering
+  def set_help_slot(field_component, help_content)
+    return if help_content.blank?
+
+    field_component.with_help { help_content }
+  end
+
+  def render_upload_image_field(upload, label, &between_block)
+    file_component = upload.field(:image).file(
+      wrapper_options: { label: label }
+    )
+    file_component.with_between(&between_block) if between_block
+    render(file_component)
+  end
+
+  def render_upload_copyright_holder(upload, holder)
+    render(
+      upload.field(:copyright_holder).text(
+        wrapper_options: { label: "#{:image_copyright_holder.l}:",
+                           inline: true },
+        value: holder
+      )
+    )
+  end
+
+  def render_upload_year(upload, year)
+    render(
+      upload.field(:copyright_year).select(
+        upload_year_options,
+        wrapper_options: { label: "#{:WHEN.l}:", inline: true },
+        selected: year
+      )
+    )
+  end
+
+  def render_upload_license(upload, licenses, selected_id)
+    # Superform expects [value, display] but Rails returns [display, value]
+    # So we need to swap them
+    swapped_licenses = licenses.map { |display, value| [value, display] }
+
+    license_select = upload.field(:license_id).select(
+      swapped_licenses,
+      wrapper_options: { label: "#{:LICENSE.l}:", inline: true },
+      selected: selected_id
+    )
+
+    license_select.with_append { render_copyright_warning }
+
+    render(license_select)
+  end
+
+  def render_copyright_warning
+    div(class: "help-block") do
+      plain("(")
+      plain(:image_copyright_warning.t)
+      plain(")")
+    end
+  end
+
+  def upload_year_options
+    (1980..Time.zone.now.year).to_a.reverse.map { |y| [y.to_s, y] }
+  end
+end

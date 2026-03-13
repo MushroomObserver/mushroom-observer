@@ -99,6 +99,9 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
     # The requester looks like a bot to the `browser` gem because the User Agent
     # in the request is blank. I don't see an easy way to change that. -JDC
     MO.bot_enabled = false
+    # Must do this for location scopes to work as expected, without explicitly
+    # adding location_lat/location_lng to observation fixtures.
+    Location.update_box_area_and_center_columns
   end
 
   def teardown

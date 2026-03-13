@@ -7,22 +7,6 @@ class API2
       CollectionNumber
     end
 
-    def high_detail_page_length
-      100
-    end
-
-    def low_detail_page_length
-      1000
-    end
-
-    def put_page_length
-      1000
-    end
-
-    def delete_page_length
-      1000
-    end
-
     def high_detail_includes
       [
         :observations,
@@ -32,14 +16,14 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:collection_number, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :creator),
+        by_users: parse_array(:user, :user, help: :creator),
         observations: parse_array(:observation, :observation, as: :id),
-        name: parse(:string, :collector, help: 1),
-        number: parse(:string, :number, help: 1),
-        name_has: parse(:string, :collector_has, help: 1),
+        collectors: parse(:string, :collector, help: 1),
+        numbers: parse(:string, :number, help: 1),
+        collector_has: parse(:string, :collector_has, help: 1),
         number_has: parse(:string, :number_has, help: 1)
       }
     end

@@ -2,7 +2,7 @@
 
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
-  require "arel-helpers"
+  require("arel-helpers")
   include ArelHelpers::ArelTable
   include ArelHelpers::JoinAssociation
 end

@@ -3,8 +3,6 @@
 require("test_helper")
 
 class AbstractModelTest < UnitTestCase
-  require "extensions"
-
   # Make sure update_view_stats updated stuff correctly (and did nothing else).
   def assert_same_but_view_stats(old_attrs, new_attrs, msg = "")
     (old_attrs.keys + new_attrs.keys).map(&:to_s).uniq.sort.each do |key|
@@ -65,8 +63,8 @@ class AbstractModelTest < UnitTestCase
     assert_equal(1, obs.errors.size, "Should not have saved without login.")
     assert_equal(:validate_observation_user_missing.t, obs.dump_errors)
 
-    # Log Rolf in ang try again.
-    User.current = rolf
+    # Assign obs to rolf and try again
+    obs.user = rolf
     obs.save
     assert_equal(0, obs.errors.size, "Could not save even when logged in.")
 
@@ -203,7 +201,7 @@ class AbstractModelTest < UnitTestCase
     location_with_notes = locations(:albion)
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
-    location_with_notes.merge(loc)
+    location_with_notes.merge(rolf, loc)
     rss_log.reload
     # (extra line for orphan title)
     assert_rss_log_lines(5, rss_log)
@@ -223,7 +221,8 @@ class AbstractModelTest < UnitTestCase
       sort_name: "Test",
       display_name: "**__Test__**",
       rank: "Genus",
-      author: ""
+      author: "",
+      user: rolf
     )
 
     assert_nil(name.rss_log)
@@ -250,7 +249,7 @@ class AbstractModelTest < UnitTestCase
 
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
-    Name.first.merge(name)
+    Name.first.merge(rolf, name)
     rss_log.reload
     # (extra line for orphan title)
     assert_rss_log_lines(4, rss_log)
@@ -261,9 +260,8 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_observation_rss_log_life_cycle
-    User.current = rolf
-
     obs = Observation.new(
+      user: rolf,
       when: Time.now.getlocal,
       where: "Anywhere",
       name_id: names(:fungi).id
@@ -308,10 +306,10 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_project_rss_log_life_cycle
-    User.current = rolf
     time = 1.minute.ago
 
     proj = Project.new(
+      user: rolf,
       title: "New Project",
       summary: "Old Summary"
     )
@@ -360,9 +358,8 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_species_list_rss_log_life_cycle
-    User.current = rolf
-
     spl = SpeciesList.new(
+      user: rolf,
       title: "New List",
       when: Time.now.getlocal,
       where: "Anywhere"
@@ -479,59 +476,107 @@ class AbstractModelTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def start_of_time
-    Date.jd(0).strftime("%Y, %m, %d")
+  def improbably_early
+    "1600-01-01"
   end
 
   def a_century_from_now
-    (Time.zone.today + 100.years).strftime("%Y, %m, %d")
+    (Time.zone.today + 100.years).strftime("%Y-%m-%d")
   end
 
   def two_centuries_from_now
-    (Time.zone.today + 200.years).strftime("%Y, %m, %d")
+    (Time.zone.today + 200.years).strftime("%Y-%m-%d")
   end
 
   def test_scope_created_after
-    assert_equal(Observation.count,
-                 Observation.created_after(start_of_time).count)
-    assert_empty(Observation.created_after(a_century_from_now))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_after(improbably_early, col: :created_at).count
+    )
+    assert_empty(
+      Observation.datetime_after(a_century_from_now, col: :created_at)
+    )
   end
 
   def test_scope_created_before
-    assert_equal(Observation.count,
-                 Observation.created_before(a_century_from_now).count)
-    assert_empty(Observation.created_before(start_of_time))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_before(a_century_from_now, col: :created_at).count
+    )
+    assert_empty(
+      Observation.datetime_before(improbably_early, col: :created_at)
+    )
   end
 
   def test_scope_created_between
     assert_equal(
       Observation.count,
-      Observation.created_between(start_of_time, a_century_from_now).count
+      Observation.datetime_between(improbably_early, a_century_from_now,
+                                   col: :created_at).count
     )
     assert_empty(
-      Observation.created_between(a_century_from_now, two_centuries_from_now)
+      Observation.datetime_between(a_century_from_now, two_centuries_from_now,
+                                   col: :created_at)
     )
   end
 
   def test_scope_updated_after
-    assert_equal(Observation.count,
-                 Observation.updated_after(start_of_time).count)
-    assert_empty(Observation.updated_after(a_century_from_now))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_after(improbably_early, col: :updated_at).count
+    )
+    assert_empty(
+      Observation.datetime_after(a_century_from_now, col: :updated_at)
+    )
   end
 
   def test_scope_updated_before
-    assert_equal(Observation.count,
-                 Observation.updated_before(a_century_from_now).count)
-    assert_empty(Observation.updated_before(start_of_time))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_before(a_century_from_now, col: :updated_at).count
+    )
+    assert_empty(
+      Observation.datetime_before(improbably_early, col: :updated_at)
+    )
   end
 
   def test_scope_updated_between
     assert_equal(
       Observation.count,
-      Observation.updated_between(start_of_time, a_century_from_now).count
+      Observation.datetime_between(improbably_early, a_century_from_now,
+                                   col: :updated_at).count
     )
     assert_empty(
-      Observation.updated_between(a_century_from_now, two_centuries_from_now)
+      Observation.datetime_between(a_century_from_now, two_centuries_from_now,
+                                   col: :updated_at)
+    )
+  end
+
+  # the scope enables this parsing of "within the year".
+  def test_scope_created_in_year
+    expects = Observation.where(Observation[:created_at].year.eq("2007")).
+              order_by_default
+    assert_equal(expects,
+                 Observation.order_by_default.created_at("2007", "2007"))
+  end
+
+  # Ditto for month.
+  def test_scope_created_in_month
+    expects = Observation.
+              where(Observation[:created_at].year.eq("2007").
+                    and(Observation[:created_at].month.eq("08"))).
+              order_by_default
+    assert_equal(expects,
+                 Observation.order_by_default.created_at("2007-08", "2007-08"))
+  end
+
+  def test_scope_by_editor
+    # if no version table, should return all
+    assert_equal(
+      Observation.count, Observation.by_editor(rolf).count
+    )
+    assert_not_equal(
+      Name.by_users(rolf).count, Name.by_editor(rolf).count
     )
   end
 end

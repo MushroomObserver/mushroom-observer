@@ -4,6 +4,7 @@ export default class extends Controller {
   static targets = ["banner", "container", "dismissButton", "showButton"];
 
   connect() {
+    this.element.dataset.banner = "connected";
     this.dismissButtonTarget.addEventListener("click", this.dismiss.bind(this));
     this.showButtonTarget.addEventListener("click", this.show.bind(this));
 

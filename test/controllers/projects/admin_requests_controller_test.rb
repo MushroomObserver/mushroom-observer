@@ -10,7 +10,7 @@ module Projects
         project_id: eol_project.id,
         email: {
           subject: "Admin request subject",
-          content: "Message for admins"
+          message: "Message for admins"
         }
       }
       post_requires_login(:create, params)
@@ -22,6 +22,21 @@ module Projects
       id = projects(:eol_project).id
       requires_login(:new, project_id: id)
       assert_form_action(action: :create, project_id: id)
+    end
+
+    def test_post_admin_request_requires_message
+      eol_project = projects(:eol_project)
+      params = {
+        project_id: eol_project.id,
+        email: {
+          subject: "Admin request subject",
+          message: ""
+        }
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_flash_error
+      assert_template(:new)
     end
   end
 end

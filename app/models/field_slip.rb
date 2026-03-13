@@ -4,18 +4,13 @@
 # code:    string, unique code for field slip, starts with project prefix
 
 class FieldSlip < AbstractModel
-  belongs_to :observation
+  attr_reader :current_user
+
+  has_many :observations, dependent: :nullify
   belongs_to :project
   belongs_to :user
-  default_scope { order(:code) }
 
-  scope :by_user, lambda { |user|
-    where(user_id: user.id).distinct
-  }
-  scope :for_project, lambda { |project|
-    where(project_id: project.id).distinct
-  }
-
+  validates :user_id, presence: true
   validates :code, uniqueness: true
   validates :code, presence: true
   validate do |field_slip|
@@ -24,23 +19,86 @@ class FieldSlip < AbstractModel
     end
   end
 
+  scope :order_by_default,
+        -> { order_by(::Query::FieldSlips.default_order) }
+
+  scope :code, lambda { |codes|
+    codes = [codes] unless codes.is_a?(Array)
+    where(code: codes.map(&:upcase))
+  }
+
+  scope :code_has, lambda { |code_patterns|
+    code_patterns = [code_patterns] unless code_patterns.is_a?(Array)
+    sanitized = code_patterns.map do |pattern|
+      sanitize_sql_like(pattern.upcase, "\\")
+    end
+    arel = arel_table
+    upper_code = Arel::Nodes::NamedFunction.new("UPPER", [arel[:code]])
+    predicates = sanitized.map { |pattern| upper_code.matches("%#{pattern}%") }
+    where(predicates.reduce(:or))
+  }
+
+  scope :observation, lambda { |observation|
+    observation_ids = Lookup::Observations.new(observation).ids
+    joins(:observations).where(observations: { id: observation_ids }).distinct
+  }
+
+  scope :project, lambda { |project|
+    project_ids = Lookup::Projects.new(project).ids
+    where(project: project_ids)
+  }
+
+  scope :projects, lambda { |projects|
+    project_ids = Lookup::Projects.new(projects).ids
+    where(project: project_ids).distinct
+  }
+
+  def current_user=(a_user)
+    @current_user = a_user
+    return if user
+
+    self.user = a_user
+  end
+
   def code=(val)
     code = val.upcase
     return unless self[:code] != code
 
     self[:code] = code
+    update_project
+  end
+
+  # The oldest observation, used as the primary/default reference.
+  def observation
+    @observation ||= observations.order(:created_at).first
+  end
+
+  def reload(*)
+    @observation = nil
+    super
+  end
+
+  # Adopt the observation's user if we don't already have one.
+  # Call this after associating an observation with this field slip.
+  def adopt_user_from(obs)
+    return if user
+
+    update(user: obs.user)
+  end
+
+  def update_project
     prefix_match = code.match(/(^.+)[ -]\d+$/)
     return unless prefix_match
 
     # Needs to get updated when Projects can share a field_slip_prefix
     candidate = Project.find_by(field_slip_prefix: prefix_match[1])
-    self.project = candidate if candidate&.can_add_field_slip(User.current)
+    self.project = candidate if candidate&.can_add_field_slip?(@current_user)
   end
 
   def project=(project)
     return unless project != self.project
 
-    self[:project_id] = if project&.can_add_field_slip(User.current)
+    self[:project_id] = if project&.can_add_field_slip?(@current_user)
                           project.id
                         end
   end
@@ -55,7 +113,7 @@ class FieldSlip < AbstractModel
 
   def find_projects
     result = Project.includes(:project_members).where(
-      project_members: { user: User.current }
+      project_members: { user: @current_user }
     ).order(:title).pluck(:title, :id)
     if project && result.exclude?([project.title, project.id])
       result.unshift([project.title, project.id])
@@ -63,17 +121,21 @@ class FieldSlip < AbstractModel
     result.unshift([:field_slip_nil_project.t, nil])
   end
 
+  # Used by Mycoportal report
+  TREES_SHRUBS = :"Trees/Shrubs"
+
   def notes_fields
     # Should we figure out a way to internationalize these tags?
-    [:"Odor/Taste", :"Trees/Shrubs", :Substrate, :Habit, :Other].map do |field|
+    [:"Odor/Taste", TREES_SHRUBS, :Substrate, :Habit, :Other].map do |field|
       NoteField.new(name: field, value: field_value(field))
     end
   end
 
   def field_value(field)
-    return "" unless observation
+    obs = observation
+    return "" unless obs
 
-    observation.notes[field] || ""
+    obs.notes[field] || ""
   end
 
   def location
@@ -96,7 +158,7 @@ class FieldSlip < AbstractModel
   end
 
   def users_last_location
-    user = User.current
+    user = @current_user
     return nil unless user
 
     field_slip = user.field_slips.where(project:).
@@ -106,9 +168,7 @@ class FieldSlip < AbstractModel
   end
 
   def collector
-    return observation.collector if observation&.collector
-
-    "_user #{(user || User.current).login}_"
+    observation&.collector
   end
 
   def date
@@ -116,7 +176,11 @@ class FieldSlip < AbstractModel
   end
 
   def field_slip_name
-    observation&.field_slip_name || ""
+    observation&.field_slip_name || @default_field_slip_name || ""
+  end
+
+  def field_slip_name=(value)
+    @default_field_slip_name = value
   end
 
   def field_slip_id_by
@@ -127,8 +191,10 @@ class FieldSlip < AbstractModel
     observation&.other_codes || ""
   end
 
-  def can_edit?
-    user == User.current ||
-      (project&.is_admin?(User.current) && project&.trusted_by?(user))
+  def can_edit?(editor)
+    return false unless editor
+
+    user.nil? || user == editor ||
+      (project&.is_admin?(editor) && project.trusted_by?(user))
   end
 end

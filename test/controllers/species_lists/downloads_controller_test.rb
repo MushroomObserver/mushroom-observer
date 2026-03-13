@@ -16,7 +16,8 @@ module SpeciesLists
         sort_name: "Tapinella atrotomentosa (Batsch) Šutara",
         display_name: "**__Tapinella atrotomentosa__** (Batsch) Šutara",
         deprecated: false,
-        rank: "Species"
+        rank: "Species",
+        user: rolf
       )
 
       list = species_lists(:first_species_list)
@@ -55,27 +56,27 @@ module SpeciesLists
     def test_print_labels
       login
       spl = species_lists(:one_genus_three_species_list)
-      query = Query.lookup_and_save(:Observation, :all, species_list: spl)
-      query_params = @controller.query_params(query)
+      query = Query.lookup_and_save(:Observation, species_lists: spl)
+      params = { q: @controller.q_param(query) }
       get(:print_labels, params: { id: spl.id })
       assert_redirected_to(
-        print_labels_for_observations_path(params: query_params)
+        print_labels_for_observations_path(params:)
       )
     end
 
     def test_download
       login
       spl = species_lists(:one_genus_three_species_list)
-      query = Query.lookup_and_save(:Observation, :all, species_list: spl)
-      query_params = @controller.query_params(query)
+      query = Query.lookup_and_save(:Observation, species_lists: spl)
+      params = { q: @controller.q_param(query) }
       get(:new, params: { id: spl.id })
-      url = print_labels_for_observations_path(params: query_params)
+      url = print_labels_for_observations_path(params:)
       assert_select("form[action='#{url}']")
 
-      url = species_list_downloads_path(spl.id, params: query_params)
+      url = download_species_list_path(spl.id, params:)
       assert_select("form[action='#{url}']")
 
-      url = observations_downloads_path(params: query_params)
+      url = observations_downloads_path(params:)
       assert_select("form[action='#{url}']")
     end
   end

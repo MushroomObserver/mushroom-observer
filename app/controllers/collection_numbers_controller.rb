@@ -4,25 +4,19 @@
 # rubocop:disable Metrics/ClassLength
 class CollectionNumbersController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, only: [
-    :show, :new, :create, :edit, :update, :destroy
-  ]
-  before_action :store_location, only: [
-    :show, :new, :create, :edit, :update
-  ]
+  before_action :store_location, except: [:destroy]
 
   ##############################################################################
   # INDEX
   #
   def index
-    store_location
     build_index_with_query
   end
 
   private
 
   def default_sort_order
-    nil # [:name, :number]
+    nil # Query::CollectionNumbers.default_order
   end
 
   def index_active_params
@@ -32,15 +26,15 @@ class CollectionNumbersController < ApplicationController
   # Display list of CollectionNumbers for an Observation
   def observation
     @observation = Observation.find(params[:observation])
-    store_location
-    query = create_query(:CollectionNumber, :all,
-                         observation: params[:observation].to_s)
+    query = create_query(
+      :CollectionNumber, observations: params[:observation].to_s
+    )
     [query, { always_index: true }]
   end
 
   def index_display_opts(opts, _query)
     {
-      letters: "collection_numbers.name",
+      letters: true,
       num_per_page: 100
     }.merge(opts)
   end
@@ -64,8 +58,6 @@ class CollectionNumbersController < ApplicationController
   def new
     set_ivars_for_new
     return unless @observation
-
-    @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
     @collection_number = CollectionNumber.new(name: @user.legal_name)
@@ -79,8 +71,6 @@ class CollectionNumbersController < ApplicationController
   def create
     set_ivars_for_new
     return unless @observation
-
-    @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
     create_collection_number # response handled here
@@ -109,16 +99,16 @@ class CollectionNumbersController < ApplicationController
     update_collection_number # response handled here
   end
 
+  # Handles both full destroy and remove-from-observation.
+  # If observation_id param present: removes association (destroys if last obs)
+  # If observation_id param absent: destroys the collection_number directly
   def destroy
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
     return unless make_sure_can_delete!(@collection_number)
+    return unless execute_destroy!
 
-    @collection_number.destroy
-    respond_to do |format|
-      format.turbo_stream { render_collection_numbers_section_update }
-      format.html { redirect_with_query(action: :index) }
-    end
+    respond_to_destroy
   end
 
   private
@@ -126,6 +116,7 @@ class CollectionNumbersController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
+    @back_object = @observation
   end
 
   def set_ivars_for_edit
@@ -138,7 +129,7 @@ class CollectionNumbersController < ApplicationController
     @collection_number =
       CollectionNumber.new(permitted_collection_number_params)
     normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
+    return if form_has_errors?
 
     if name_and_number_free?
       save_collection_number_and_update_associations
@@ -148,31 +139,42 @@ class CollectionNumbersController < ApplicationController
   end
 
   # create, update
-  def flash_error_and_reload_if_form_has_errors
+  def form_has_errors?
+    unless validate_collection_number?
+      flash_and_reload_form
+      return true
+    end
+    false
+  end
+
+  def validate_collection_number?
+    if @collection_number.name.blank?
+      flash_error(:create_collection_number_missing_name.t)
+      return false
+    elsif @collection_number.number.blank?
+      flash_error(:create_collection_number_missing_number.t)
+      return false
+    end
+    true
+  end
+
+  def flash_and_reload_form
     redirect_params = case action_name # this is a rails var
                       when "create"
                         { action: :new }
                       when "update"
                         { action: :edit }
                       end
-    redirect_params = redirect_params.merge({ back: @back }) if @back.present?
+    redirect_params[:back] = @back if @back.present?
 
-    if @collection_number.name.blank? || @collection_number.number.blank?
-      if @collection_number.name.blank?
-        flash_error(:create_collection_number_missing_name.t)
-      elsif @collection_number.number.blank?
-        flash_error(:create_collection_number_missing_number.t)
+    respond_to do |format|
+      format.html do
+        redirect_to(redirect_params)
       end
-      respond_to do |format|
-        format.html do
-          redirect_to(redirect_params) and return true
-        end
-        format.turbo_stream do
-          reload_collection_number_modal_form_and_flash
-        end
+      format.turbo_stream do
+        reload_collection_number_modal_form_and_flash
       end
     end
-    false
   end
 
   # create
@@ -206,7 +208,7 @@ class CollectionNumbersController < ApplicationController
     old_format_name = @collection_number.format_name
     @collection_number.attributes = permitted_collection_number_params
     normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
+    return if form_has_errors?
 
     if name_and_number_free?
       update_collection_number_and_associations(old_format_name)
@@ -258,7 +260,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def make_sure_can_edit!(obj)
-    return true if in_admin_mode? || obj.can_edit?
+    return true if in_admin_mode? || obj.can_edit?(@user)
 
     flash_error(:permission_denied.t)
     show_flash_and_send_back
@@ -266,11 +268,68 @@ class CollectionNumbersController < ApplicationController
   end
 
   def make_sure_can_delete!(collection_number)
-    return true if collection_number.can_edit? || in_admin_mode?
+    return true if collection_number.can_edit?(@user) || in_admin_mode?
 
     flash_error(:permission_denied.t)
     redirect_to(collection_number_path(collection_number.id))
     false
+  end
+
+  # Returns false if observation lookup fails, halting destroy action
+  def execute_destroy!
+    if params[:observation_id].present?
+      @observation = find_or_goto_index(Observation, params[:observation_id])
+      return false unless @observation
+
+      @collection_number.remove_observation(@observation)
+      flash_notice(:runtime_removed.t(type: :collection_number))
+    else
+      # Figure out where to redirect BEFORE destroying the record
+      figure_out_destroy_redirect
+      @collection_number.destroy
+    end
+    true
+  end
+
+  # Determine @observation for redirect after destroy.
+  # Must be called before destroy since we need to check observations.
+  def figure_out_destroy_redirect
+    back = params[:back].to_s
+    @observation = nil
+    return if back == "index"
+
+    # If back is an observation ID, use that
+    @observation = Observation.safe_find(back)
+    return if @observation
+
+    # If CN has exactly one observation, redirect there
+    @observation = @collection_number.observations.first if
+      @collection_number.observations.one?
+  end
+
+  def respond_to_destroy
+    respond_to do |format|
+      format.turbo_stream { destroy_turbo_response }
+      format.html { destroy_html_response }
+    end
+  end
+
+  def destroy_turbo_response
+    # Only render turbo_stream update if we have an observation page to update.
+    # Can't update show page via turbo_stream, so redirect to index.
+    if @observation && params[:back] != "show"
+      render_collection_numbers_section_update
+    else
+      redirect_with_query(action: :index)
+    end
+  end
+
+  def destroy_html_response
+    if @observation
+      redirect_to(observation_path(@observation.id))
+    else
+      redirect_with_query(action: :index)
+    end
   end
 
   def normalize_parameters
@@ -311,8 +370,7 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number) and
           return
       end
-      # renders the flash in the modal, but not sure it's necessary
-      # to have a response here. are they getting sent back?
+      # renders the flash in the modal
       format.turbo_stream do
         render(partial: "shared/modal_flash_update",
                locals: { identifier: modal_identifier }) and return
@@ -321,11 +379,14 @@ class CollectionNumbersController < ApplicationController
   end
 
   def render_modal_collection_number_form
-    render(
-      partial: "shared/modal_form",
-      locals: { title: modal_title, identifier: modal_identifier,
-                form: "collection_numbers/form" }
-    ) and return
+    render(Components::ModalForm.new(
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @collection_number,
+             observation: @observation,
+             back: @back
+           ), layout: false)
   end
 
   def modal_identifier
@@ -340,9 +401,11 @@ class CollectionNumbersController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.collection_number_form_new_title
+      helpers.new_page_title(:add_object, :COLLECTION_NUMBER)
     when "edit", "update"
-      helpers.collection_number_form_edit_title(c_n: @collection_number)
+      helpers.edit_page_title(
+        @collection_number.format_name.t, @collection_number
+      )
     end
   end
 
@@ -350,7 +413,8 @@ class CollectionNumbersController < ApplicationController
   def render_collection_numbers_section_update
     render(
       partial: "observations/show/section_update",
-      locals: { identifier: "collection_numbers" }
+      locals: { identifier: "collection_numbers",
+                obs: @observation, user: @user }
     ) and return
   end
 
@@ -358,8 +422,14 @@ class CollectionNumbersController < ApplicationController
   def reload_collection_number_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: modal_identifier,
-                form: "collection_numbers/form" }
+      locals: {
+        identifier: modal_identifier,
+        form_locals: {
+          model: @collection_number,
+          observation: @observation,
+          back: @back
+        }
+      }
     ) and return true
   end
 end

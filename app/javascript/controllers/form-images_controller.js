@@ -54,7 +54,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.element.dataset.stimulus = "form-images-connected";
+    this.element.dataset.formImages = "connected";
 
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,
@@ -309,7 +309,7 @@ export default class extends Controller {
   // - re-sort the carousel
   // - read the file with FileReader to display the image
   itemTargetConnected(itemElement) {
-    itemElement.dataset.stimulus = "connected";
+    itemElement.dataset.formImagesItem = "connected";
     // console.log("itemTargetConnected")
     // console.log(itemElement);
     if (itemElement.dataset.imageStatus == "good") return;
@@ -318,6 +318,13 @@ export default class extends Controller {
     // Attach a reference to the dom element to the item object so we can
     // populate the item object as well as the element
     const item = this.findFileStoreItem(itemElement);
+    if (!item) {
+      console.error("Could not find FileStore item for carousel item", {
+        uuid: itemElement.dataset.imageUuid,
+        fileStore: this.fileStore
+      });
+      return;
+    }
     item.dom_element = itemElement;
 
     if (item.file_size > this.max_image_size)
@@ -329,11 +336,18 @@ export default class extends Controller {
   }
 
   thumbnailTargetConnected(thumbElement) {
-    thumbElement.dataset.stimulus = "connected";
+    thumbElement.dataset.formImagesThumbnail = "connected";
     if (thumbElement.dataset.imageStatus == "good") return;
 
     // Attach it to the FileStore item if there is one,
     const item = this.findFileStoreItem(thumbElement);
+    if (!item) {
+      console.error("Could not find FileStore item for thumbnail", {
+        uuid: thumbElement.dataset.imageUuid,
+        fileStore: this.fileStore
+      });
+      return;
+    }
     item.thumbnail_element = thumbElement;
     this.setImgSrc(item, thumbElement);
     this.sortCarousel();
@@ -360,16 +374,16 @@ export default class extends Controller {
   // Show or hide the controls, depending on the total.
   showOrHideCarouselControls() {
     const _items = this.carouselTarget.querySelectorAll('.carousel-item'),
-      _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
+      _indicontrols = this.carouselTarget.querySelector('#added_thumbnails'),
       _controls = this.carouselTarget.querySelector('.carousel-control'),
       _count = _items.length;
 
     if (_count > 1) {
-      _indicontrols.classList.remove('d-none');
-      _controls.classList.remove('d-none');
+      _indicontrols?.classList.remove('d-none');
+      _controls?.classList.remove('d-none');
     } else {
-      _indicontrols.classList.add('d-none');
-      _controls.classList.add('d-none');
+      _indicontrols?.classList.add('d-none');
+      _controls?.classList.add('d-none');
     }
   }
 
@@ -409,13 +423,15 @@ export default class extends Controller {
   removeAttachedItem(event) {
     const _good_images = this.goodImageIdsTarget.value,
       _good_image_vals = _good_images.split(" "),
-      // event.target may be a nested span without data, so get data directly
-      _image_id = this.removeImgTarget.dataset.imageId,
+      // event.target may be a nested span without data, so get data from button
+      _image_id = event.target.closest("button").dataset.imageId,
+      // This is the observation's designated thumbnail id
       _thumb_id = this.thumbImageIdTarget.value;
 
     const _new = _good_image_vals.filter(item => item !== _image_id).join(" ");
     this.goodImageIdsTarget.value = _new;
 
+    // clear hidden_field value for observation thumbnail_id
     if (_thumb_id == _image_id) {
       this.thumbImageIdTarget.value = "";
     }

@@ -10,13 +10,13 @@ class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
 
     visit(search_advanced_path)
     assert_match(:app_advanced_search.l, page.title, "Wrong page")
-    assert_field("search_name")
-    assert_field("search_user_where")
-    fill_in("search_name", with: names(:fungi).text_name)
-    fill_in("search_user_where",
+    assert_field("search_search_name")
+    assert_field("search_search_where")
+    fill_in("search_search_name", with: names(:fungi).text_name)
+    fill_in("search_search_where",
             with: locations(:falmouth).display_name)
-    assert_checked_field("content_filter_with_images_")
-    assert_checked_field("content_filter_with_specimen_")
+    assert_checked_field("content_filter_has_images_") # i.e. "either"
+    assert_checked_field("content_filter_has_specimen_") # i.e. "either"
     within("#advanced_search_form") do
       click_commit
     end
@@ -25,7 +25,8 @@ class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
     total_hits = all(".matrix-box", visible: :any).count
 
     assert_equal(expected_hits.count, total_hits)
-    assert_match(:query_title_all_filtered.t(type: :observation), page.title,
-                 "Wrong page")
+    assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
+    page.find("#filters").assert_text(names(:fungi).text_name)
+    page.find("#filters").assert_text(locations(:falmouth).display_name)
   end
 end

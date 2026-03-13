@@ -4,8 +4,8 @@ class API2
   # POST request couldn't create object.
   class CreateFailed < ObjectError
     def initialize(obj)
-      super(obj)
-      args.merge!(error: obj.formatted_errors.map(&:to_s).join("; "))
+      super
+      args.merge!(error: obj.formatted_errors.join("; "))
     end
   end
 end

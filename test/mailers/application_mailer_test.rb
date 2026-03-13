@@ -71,80 +71,85 @@ class ApplicationMailerTest < UnitTestCase
   def test_add_herbarium_record_email
     herbarium_record = herbarium_records(:interesting_unknown)
     run_mail_test("add_herbarium_record_not_curator", rolf) do
-      AddHerbariumRecordMailer.build(mary, rolf, herbarium_record).deliver_now
+      AddHerbariumRecordMailer.build(
+        sender: mary, receiver: rolf, herbarium_record:
+      ).deliver_now
     end
   end
 
   def test_admin_email
     project = projects(:eol_project)
+    subject = "Please do something or other"
+    message = "and this is why..."
+
     run_mail_test("admin_request", rolf) do
       ProjectAdminRequestMailer.build(
-        katrina, rolf, project,
-        "Please do something or other", "and this is why..."
+        sender: katrina, receiver: rolf, project:, subject:, message:
       ).deliver_now
     end
   end
 
   def test_approval_email
+    subject = "test subject"
+    message = "test content"
+
     run_mail_test("approval", rolf) do
-      ApprovalMailer.build(katrina, "test subject", "test content").
-        deliver_now
+      ApprovalMailer.build(receiver: katrina, subject:, message:).deliver_now
     end
   end
 
   def test_author_email
-    obj = names(:coprinus_comatus)
+    object = names(:coprinus_comatus).description
+    subject = "Please do something or other"
+    message = "and this is why..."
+
     run_mail_test("author_request", rolf) do
-      AuthorMailer.build(katrina, rolf, obj.description,
-                         "Please do something or other", "and this is why...").
-        deliver_now
+      AuthorMailer.build(
+        sender: katrina, receiver: rolf, object:, subject:, message:
+      ).deliver_now
     end
   end
 
   def test_comment_email
-    obs = observations(:minimal_unknown_obs)
+    target = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_2)
+
     run_mail_test("comment_response", rolf) do
-      CommentMailer.build(dick, rolf, obs, comment).deliver_now
+      CommentMailer.build(
+        sender: dick, receiver: rolf, target:, comment:
+      ).deliver_now
     end
   end
 
   def test_comment_email2
-    obs = observations(:minimal_unknown_obs)
+    target = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_1)
+
     run_mail_test("comment", mary) do
-      CommentMailer.build(rolf, mary, obs, comment).deliver_now
+      CommentMailer.build(
+        sender: rolf, receiver: mary, target:, comment:
+      ).deliver_now
     end
   end
 
   def test_commercial_email
     image = images(:commercial_inquiry_image)
+    message = "Did test_commercial_inquiry work?"
+
     run_mail_test("commercial_inquiry", image.user) do
-      CommercialInquiryMailer.build(
-        mary, image, "Did test_commercial_inquiry work?"
-      ).deliver_now
+      CommercialInquiryMailer.build(sender: mary, image:, message:).deliver_now
     end
   end
 
   def test_consensus_change_email
-    obs = observations(:coprinus_comatus_obs)
-    name1 = names(:agaricus_campestris)
-    name2 = obs.name
-
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name2.search_name = name2.search_name.to_ascii
-    name2.display_name = name2.display_name.to_ascii
+    observation = observations(:coprinus_comatus_obs)
+    old_name = names(:agaricus_campestris)
+    new_name = observation.name
 
     run_mail_test("consensus_change", mary) do
-      email = QueuedEmail::ConsensusChange.create_email(dick, mary, obs,
-                                                        name1, name2)
-      ConsensusChangeMailer.build(email).deliver_now
-    end
-  end
-
-  def test_features_email
-    run_mail_test("email_features", rolf) do
-      FeaturesMailer.build(rolf, "A feature").deliver_now
+      ConsensusChangeMailer.build(
+        sender: dick, receiver: mary, observation:, old_name:, new_name:
+      ).deliver_now
     end
   end
 
@@ -152,9 +157,11 @@ class ApplicationMailerTest < UnitTestCase
     loc = locations(:albion)
     desc = loc.description
     run_mail_test("location_change", mary) do
-      LocationChangeMailer.build(dick, mary, loc.updated_at,
-                                 ObjectChange.new(loc, 1, 2),
-                                 ObjectChange.new(desc, 1, 2)).deliver_now
+      LocationChangeMailer.build(
+        sender: dick, receiver: mary, location: loc,
+        old_loc_ver: 1, new_loc_ver: 2,
+        description: desc, old_desc_ver: 1, new_desc_ver: 2
+      ).deliver_now
     end
   end
 
@@ -162,9 +169,12 @@ class ApplicationMailerTest < UnitTestCase
     name = names(:peltigera)
     desc = name.description
     run_mail_test("name_change", mary) do
-      email = QueuedEmail::NameChange.create_email(dick, mary,
-                                                   name, desc, true, true)
-      NameChangeMailer.build(email).deliver_now
+      NameChangeMailer.build(
+        sender: dick, receiver: mary, name: name,
+        old_name_ver: name.version - 1, new_name_ver: name.version,
+        description: desc, old_desc_ver: desc.version - 1,
+        new_desc_ver: desc.version, review_status: desc.review_status.to_s
+      ).deliver_now
     end
   end
 
@@ -173,21 +183,23 @@ class ApplicationMailerTest < UnitTestCase
     name = names(:peltigera)
     desc = name.description
     run_mail_test("name_change2", mary) do
-      name.version = 1
-      desc.version = 1
-      email = QueuedEmail::NameChange.create_email(dick, mary,
-                                                   name, desc, false, true)
-      assert(email.old_name_version.zero?)
-      assert(email.old_description_version.zero?)
-      NameChangeMailer.build(email).deliver_now
+      NameChangeMailer.build(
+        sender: dick, receiver: mary, name: name,
+        old_name_ver: 0, new_name_ver: 1,
+        description: desc, old_desc_ver: 0, new_desc_ver: 1,
+        review_status: "no_change"
+      ).deliver_now
     end
   end
 
   def test_name_proposal_email
     naming = namings(:coprinus_comatus_other_naming)
-    obs = observations(:coprinus_comatus_obs)
+    observation = observations(:coprinus_comatus_obs)
+
     run_mail_test("name_proposal", rolf) do
-      NameProposalMailer.build(mary, rolf, naming, obs).deliver_now
+      NameProposalMailer.build(
+        sender: mary, receiver: rolf, naming:, observation:
+      ).deliver_now
     end
   end
 
@@ -195,82 +207,77 @@ class ApplicationMailerTest < UnitTestCase
     naming = namings(:agaricus_campestris_naming)
     notification = name_trackers(:agaricus_campestris_name_tracker_with_note)
     run_mail_test("naming_for_observer", rolf) do
-      NamingObserverMailer.build(rolf, naming, notification).deliver_now
+      NamingObserverMailer.build(
+        receiver: rolf, naming:, name_tracker: notification
+      ).deliver_now
     end
   end
 
   def test_naming_tracker_email
     naming = namings(:agaricus_campestris_naming)
     run_mail_test("naming_for_tracker", mary) do
-      NamingTrackerMailer.build(mary, naming).deliver_now
+      NamingTrackerMailer.build(receiver: mary, naming:).deliver_now
     end
   end
 
   def test_password_email
+    password = "A password"
+
     run_mail_test("new_password", rolf) do
-      PasswordMailer.build(rolf, "A password").deliver_now
+      PasswordMailer.build(receiver: rolf, password:).deliver_now
     end
   end
 
   def test_observation_change_email
-    obs = observations(:coprinus_comatus_obs)
-    name = obs.name
-
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name.search_name = name.search_name.to_ascii
-    name.display_name = name.display_name.to_ascii
+    observation = observations(:coprinus_comatus_obs)
+    note = "date,location,specimen,is_collection_location,notes," \
+           "thumb_image_id,added_image,removed_image"
 
     run_mail_test("observation_change", mary) do
       ObservationChangeMailer.build(
-        dick, mary, obs,
-        "date,location,specimen,is_collection_location,notes," \
-        "thumb_image_id,added_image,removed_image",
-        obs.created_at
+        sender: dick, receiver: mary, observation:, note:,
+        time: observation.created_at
       ).deliver_now
     end
   end
 
   def test_observation_destroy_email
-    obs = observations(:coprinus_comatus_obs)
-    name = obs.name
-
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    name.search_name = name.search_name.to_ascii
-    name.display_name = name.display_name.to_ascii
+    observation = observations(:coprinus_comatus_obs)
+    note = "**__Coprinus comatus__** L. (123)"
 
     run_mail_test("observation_destroy", mary) do
       ObservationChangeMailer.build(
-        dick, mary, nil, "**__Coprinus comatus__** L. (123)", obs.created_at
+        sender: dick, receiver: mary, observation: nil, note:,
+        time: observation.created_at
       ).deliver_now
     end
   end
 
   def test_observer_question_email
-    obs = observations(:detailed_unknown_obs)
-    run_mail_test("observation_question", obs.user) do
-      ObserverQuestionMailer.build(rolf, obs, "Where did you find it?").
-        deliver_now
-    end
-  end
+    observation = observations(:detailed_unknown_obs)
+    message = "Where did you find it?"
 
-  def test_publish_name_question
-    name = names(:agaricus_campestris)
-    run_mail_test("publish_name", rolf) do
-      PublishNameMailer.build(mary, rolf, name).deliver_now
+    run_mail_test("observation_question", observation.user) do
+      ObserverQuestionMailer.build(
+        sender: rolf, observation:, message:
+      ).deliver_now
     end
   end
 
   def test_user_email
+    subject = "Interesting idea"
+    message = "Shall we discuss it in email?"
+
     run_mail_test("user_question", mary) do
       UserQuestionMailer.build(
-        rolf, mary, "Interesting idea", "Shall we discuss it in email?"
+        sender: rolf, receiver: mary, subject:, message:
       ).deliver_now
     end
   end
 
   def test_verify_email
     run_mail_test("verify", mary) do
-      VerifyAccountMailer.build(mary).deliver_now
+      VerifyAccountMailer.build(receiver: mary).deliver_now
     end
   end
 
@@ -278,14 +285,18 @@ class ApplicationMailerTest < UnitTestCase
     run_mail_test("webmaster_question") do
       WebmasterMailer.build(
         sender_email: mary.email,
-        content: "A question"
+        message: "A question"
       ).deliver_now
     end
   end
 
   def test_verify_api_key_email
+    api_key = api_keys(:rolfs_api_key)
+
     run_mail_test("verify_api_key", rolf) do
-      VerifyAPIKeyMailer.build(rolf, dick, api_keys(:rolfs_api_key)).deliver_now
+      VerifyAPIKeyMailer.build(
+        receiver: rolf, app_user: dick, api_key:
+      ).deliver_now
     end
   end
 
@@ -297,14 +308,18 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_undeliverable_email
     mary.update(email: "bogus.address")
-    UserQuestionMailer.build(rolf, mary, "subject", "body").deliver_now
+    UserQuestionMailer.build(
+      sender: rolf, receiver: mary, subject: "subject", message: "body"
+    ).deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not have delivered an email to 'bogus.address'.")
   end
 
   def test_opt_out
     mary.update(no_emails: true)
-    UserQuestionMailer.build(rolf, mary, "subject", "body").deliver_now
+    UserQuestionMailer.build(
+      sender: rolf, receiver: mary, subject: "subject", message: "body"
+    ).deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not deliver email if recipient has opted out.")
   end

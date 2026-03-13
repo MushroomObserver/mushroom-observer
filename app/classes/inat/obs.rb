@@ -27,18 +27,19 @@
 #  [:quality_grade]        casual, needs id, research
 #  [:tags]                 array of tags
 #  [:taxon]                taxon hash
-#  inat_taxon_name::       scientific name
-#  inat_taxon_rank::       rank (can be secondary)
+#  inat_taxon_name::       iNat's name for the observation [:taxon]
+#  inat_taxon_rank::       iNat's rank for the observation [:taxon]
 #  [:user][:login]         username
 #
 #  == MO attributes
 #  gps_hidden
 #  license::
-#  name_id
-#  notes
 #  lat
 #  lng
 #  location
+#  name
+#  name_id
+#  notes
 #  text_name
 #  when
 #  where
@@ -56,15 +57,18 @@
 #
 class Inat
   class Obs
-    def initialize(imported_inat_obs_data)
-      @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
-    end
+    include Inat::Constants
 
     # Allow hash key access to the iNat observation data
-    def [](key) = @obs[key]
+    delegate :[], to: :@obs
+    delegate :[]=, to: :@obs
 
-    def []=(key, value)
-      @obs[key] = value
+    delegate :name, to: :@obs_taxon
+    delegate :text_name, to: :name, allow_nil: true
+
+    def initialize(imported_inat_obs_data)
+      @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
+      @obs_taxon = Inat::Taxon.new(@obs[:taxon])
     end
 
     ########## iNat attributes
@@ -79,36 +83,41 @@ class Inat
 
     # NOTE: Fixes ABC count of `snapshot` because
     # inat_taxon_name is one fewer Branch than self[:taxon][:name]
-    def inat_taxon_name = self[:taxon][:name]
+    def inat_taxon_name = @obs_taxon[:name]
 
-    def inat_taxon_rank = self[:taxon][:rank]
+    def inat_taxon_rank = @obs_taxon[:rank]
 
     ########## MO attributes
 
-    def gps_hidden = @obs[:geoprivacy].present?
+    # disable cop because gps_hidden is a pseudo-attribute
+    def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
 
-    def name_id
-      names =
-        # iNat "Complex" definition
-        # https://www.inaturalist.org/pages/curator+guide#complexes
-        if complex?
-          matching_group_names
-        else
-          matching_names_at_regular_ranks
-        end
-      best_mo_name(names)
-    end
-
     def notes
-      return { Collector: collector } if self[:description].empty?
+      # Observation form requires a "normalized" key (no spaces) for Notes parts
+      snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
 
-      { Collector: collector, Other: self[:description].gsub(%r{</?p>}, "") }
+      { Collector: collector,
+        snapshot_key => snapshot,
+        Other: self[:description]&.
+               # strip p tags to avoid messing up textile and keep
+               # notes source clean
+               gsub(%r{</?p>}, "")&.
+               # compress newlines/returns to single newline, leaving
+               # an html comment because our textiling won't render
+               # text after consecutive newlines:
+               #   manually typed blank lines appear as `\r\n\r\n` in iNat notes
+               #   Pulk's mirror script inserts `\n\n` in iNat notes
+               gsub(/(\r?\n){2,}/, "<!--- blank line(s) removed --->\n").
+               to_s }
     end
 
-    # min bounding rectangle of iNat location blurred by public accuracy
+    # MO Location with min bounding rectangle
+    # of iNat location blurred by public accuracy
     def location
+      return nil if self[:location].blank?
+
       ::Location.contains_box(north: blurred_north,
                               south: blurred_south,
                               east: blurred_east,
@@ -116,42 +125,70 @@ class Inat
         min_by { |loc| location_box(loc).calculate_area }
     end
 
-    # location seems simplest source for lat/lng
-    # But :geojason might be possible.
+    private
+
+    # These give a good approximation of the iNat blurred bounding box
+    def blurred_north = [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
+
+    def blurred_south = [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
+
+    def blurred_east
+      ((lng + public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
+    end
+
+    def blurred_west
+      ((lng - public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
+    end
+
+    # copied from Autocomplete::ForLocationContaining
+    def location_box(loc)
+      Mappable::Box.new(north: loc[:north], south: loc[:south],
+                        east: loc[:east], west: loc[:west])
+    end
+
+    public
+
     def lat
+      return nil if self[:location].blank?
+
       location = self[:private_location] || self[:location]
       location.split(",").first.to_f
     end
 
     def lng
+      return nil if self[:location].blank?
+
       location = self[:private_location] || self[:location]
       location.split(",").second.to_f
     end
 
     def sequences
-      obs_sequence_fields = inat_obs_fields.select { |f| sequence_field?(f) }
-      obs_sequence_fields.each_with_object([]) do |field, ary|
-        # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
-        # field[:value] blank or not a (pure) lists of bases
-        # https://github.com/MushroomObserver/mushroom-observer/issues/2232
-        ary << { locus: field[:name], bases: field[:value],
-                 # NTOE: 2024-06-19 jdc. Can we figure out the following?
-                 archive: nil, accession: "", notes: "" }
-      end
+      # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
+      # field[:value] blank or not a (pure) lists of bases
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2232
+      # NTOE: 2024-06-19 jdc. Can we figure out the following?
+      # archive, accession fields
+      Inat::SequenceFieldDetector.extract_sequences(inat_obs_fields)
     end
 
     def specimen?
-      # used by iNat NEMF projects and some others
-      field = inat_obs_field("Voucher Specimen Taken")
-      field.present? && field[:value] == "Yes"
+      false
+
+      # Disable specimen detection until I can find a better algorithm
+      # the Inat Observation Field "Voucher Specimen Taken" is not reliable
+      # because the iNat practice is to use this field to mean other things
+      # like "sampled for DNA analysis" rather than "collected as a specimen"
+
+      # field = inat_obs_field("Voucher Specimen Taken")
+      # field.present? && field[:value] == "Yes"
     end
 
     def source = "mo_inat_import"
 
-    def text_name = ::Name.find(name_id).text_name
-
     def when
       observed_on = @obs[:observed_on_details]
+      return nil if observed_on.nil?
+
       ::Date.new(observed_on[:year], observed_on[:month], observed_on[:day])
     end
 
@@ -159,13 +196,31 @@ class Inat
 
     ########## Other mappings used in MO Observations
 
+    # some iNat Observation Fields used for the collector(s) name
+    # https://www.inaturalist.org/observation_fields?commit=Search&page=1&q=collector&utf8=%E2%9C%93
+    # iNat Observation fields are a mess, with lots of duplication
+    INAT_COLLECTOR_FIELDS = [ # rubocop:disable Lint/UselessConstantScoping
+      "Collector's name", # 2025 Continental MycoBlitz
+      "Collector’s Name", # right single quote
+      "Collector Names",
+      "Names of Collectors",
+      "Collector's Full Name",
+      "Collector",
+      "Name of collector",
+      "Original Collector/Observer",
+      "Collector name",
+      "Collectors Name",
+      "Original Collector/ Observer"
+    ].freeze
     # This will get put into MO Observation's Notes Collector:
     def collector
-      if inat_obs_field("Collector").present?
-        inat_obs_field("Collector")[:value]
-      else
-        self[:user][:login]
+      INAT_COLLECTOR_FIELDS.each do |field_name|
+        if inat_obs_field(field_name).present?
+          return inat_obs_field(field_name)[:value]
+        end
       end
+
+      self[:user][:login]
     end
 
     def dqa
@@ -181,22 +236,17 @@ class Inat
 
     # The MO text_name for an iNat provisional species name
     def provisional_name
-      prov_sp_name = inat_prov_name
-      return nil if prov_sp_name.blank?
-      return prov_sp_name if in_mo_format?(prov_sp_name)
+      return nil if inat_prov_name.blank?
 
-      # prepend the epithet with "sp-"
-      # epithet must start with lower case letter, else MO thinks it's an author
-      # quote the epithet by convention to indicate it will be replaced
-      # by a ICN style published or provisional name.
-      # Ex: Donadinia PNW01 => Donadinia "sp-PNW01"
-      prov_sp_name.sub(/ (.*)/, ' "sp-\1"')
+      inat_prov_name
     end
 
     # derive a provisional name from some specific Observation Fields
     # NOTE: iNat does not allow provisional names as identifications.
-    # Also, iNat allows only 1 obs field with a given :name per obs.
-    # I assume iNat users will add only 1 provisional name per obs.
+    # Also, iNat allows only 1 obs field with a given :name per obs,
+    # so there can be only 1 Provisional Species Name per obs.
+    # NOTE: Edge case -- obs also has Provisional Genus Name, etc.
+    # NOTE: I assume iNat users will add only 1 provisional name per obs.
     def inat_prov_name
       prov_name_field = inat_prov_name_field
       return nil if prov_name_field.blank?
@@ -213,10 +263,12 @@ class Inat
     end
 
     def snapshot
-      snapshop_raw_str.gsub(/^\s+/, "")
+      # add a newline to separate snapshot caption from its subparts
+      "\n#{snapshot_raw_str.gsub(/^\s+/, "")}".
+        chomp # revent extra blank line before Other part
     end
 
-    def snapshop_raw_str
+    def snapshot_raw_str
       result = ""
       {
         USER: self[:user][:login],
@@ -226,23 +278,25 @@ class Inat
         ID: inat_taxon_name,
         DQA: dqa,
         show_observation_inat_suggested_ids: suggested_id_names,
-        OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
-        PROJECTS: :inat_not_imported.t,
-        ANNOTATIONS: :inat_not_imported.t,
-        TAGS: :inat_not_imported.t
+        OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
       }.each do |label, value|
-        result += "#{label.to_sym.t}: #{value}\n"
+        result += "#{label.to_sym.l}: #{value}\n"
       end
-      result
+      result.
+        chomp # prevent blank line between Snapshot and :Other Notes fields
     end
+    private :snapshot_raw_str
 
     def suggested_id_names
       # Get unique suggested taxon ids
       # (iNat allows multiple suggestions for a single observation)
       "\n#{
-        self[:identifications].each_with_object([]) do |id, ary|
-          ary << "&nbsp;&nbsp;_#{id[:taxon][:name]}_ by #{id[:user][:login]} " \
-          "#{id[:created_at_details][:date]}"
+        self[:identifications].each_with_object([]) do |ident, ary|
+          ident_taxon = Inat::Taxon.new(ident[:taxon])
+          display_name = ident_taxon.name&.text_name || ident[:taxon][:name]
+          ary << "&nbsp;&nbsp;_#{display_name}_ " \
+                 "by #{ident[:user][:login]} " \
+                 "#{ident[:created_at_details][:date]}"
         end.join("\n")
       }"
     end
@@ -271,139 +325,32 @@ class Inat
         lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
     end
 
-    def importable? = taxon_importable?
+    def to_rad(degrees) = degrees * Math::PI / 180.0
+    private :to_rad
+
+    def importable? = taxon_importable? && observed_on_present?
 
     def taxon_importable? = fungi? || slime_mold?
+    def observed_on_present? = !observed_on_missing?
+    def observed_on_missing? = self.when.nil?
 
     ##########
 
     private
 
-    # ----- location-related
-
-    # These give a good approximation of the iNat blurred bounding box
-    def blurred_north = [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
-
-    def blurred_south = [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
-
-    def blurred_east
-      ((lng + public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
-    end
-
-    def blurred_west
-      ((lng - public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
-    end
-
-    def to_rad(degrees) = degrees * Math::PI / 180.0
-
-    # copied from AutoComplete::ForLocationContaining
-    def location_box(loc)
-      Mappable::Box.new(north: loc[:north], south: loc[:south],
-                        east: loc[:east], west: loc[:west])
-    end
-
-    # ---- name-related
-
-    def full_name
-      if infrageneric?
-        # iNat :name string is only the epithet. Ex: "Distantes"
-        prepend_genus_and_rank
-      elsif infraspecific?
-        # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
-        insert_rank_between_species_and_final_epithet
-      elsif complex?
-        # iNat doesn't include "complex" in the name, MO does
-        "#{inat_taxon_name} complex"
-      else
-        inat_taxon_name
-      end
-    end
-
-    def infrageneric?
-      %w[subgenus section subsection stirps series subseries].
-        include?(inat_taxon_rank)
-    end
-
-    def prepend_genus_and_rank
-      # Search the identifications of this iNat observation
-      # for an identification of the inat_taxon[:id]
-      self[:identifications].each do |identification|
-        next unless identifies_this_obs?(identification)
-
-        # search the identification's ancestors to find the genus
-        identification[:taxon][:ancestors].each do |ancestor|
-          next unless ancestor[:rank] == "genus"
-
-          #  return a string comprising Genus rank epithet
-          #  ex: "Morchella section Distantes"
-          return "#{ancestor[:name]} #{inat_taxon_rank} #{inat_taxon_name}"
-        end
-      end
-    end
-
-    def infraspecific? = %w[subspecies variety form].include?(inat_taxon_rank)
-
-    def insert_rank_between_species_and_final_epithet
-      words = inat_taxon_name.split
-      "#{words[0..1].join(" ")} #{inat_taxon_rank} #{words[2]}"
-    end
-
-    def identifies_this_obs?(identification)
-      identification[:taxon][:id] == self[:taxon][:id]
-    end
-
-    def matching_group_names
-      # MO equivalent could be "group", "clade", or "complex"
-      ::Name.where(::Name[:text_name] =~ /^#{inat_taxon_name}/).
-        where(rank: "Group", correct_spelling_id: nil).
-        order(deprecated: :asc)
-    end
-
-    def matching_names_at_regular_ranks
-      ::Name.where(
-        # parse it to get MO's text_name rank abbreviation
-        # E.g. "sect." instead of "section"
-        text_name: ::Name.parse_name(full_name).text_name,
-        rank: inat_taxon_rank.titleize,
-        correct_spelling_id: nil
-      ).
-        # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
-        where.not(::Name[:author] =~ /^sensu /).
-        order(deprecated: :asc)
-    end
-
-    def best_mo_name(names)
-      # It's simplest to pick the 1st one if there are any
-      # (They've already been sorted)
-      return names.first.id if names.any?
-
-      ::Name.unknown.id
-    end
-
-    def in_mo_format?(prov_sp_name)
-      # Genus followed by quoted epithet starting with a lower-case letter
-      prov_sp_name =~ /[A-Z][a-z]+ "[a-z]\S+"/
-    end
-
     # ----- Other
 
-    def complex? = (inat_taxon_rank == "complex")
-
-    def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
-
-    def sequence_field?(field)
-      field[:datatype] == "dna" ||
-        field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
+    def fungi?
+      # !! makes it return a boolean
+      !!@obs.dig(:taxon, :ancestor_ids)&.include?(
+        Inat::Constants::FUNGI_TAXON_ID
+      )
     end
 
-    # NOTE: 2024-06-01 jdc
-    # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
-    # Protoza is paraphyletic for slime molds,
-    # but it's how they are classified in MO and MB
-    # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
-    # I.e., is there A combination (ANDs) of higher ranks (>= Class)
-    # that's monophyletic for slime molds?
-    # Another solution: use IF API to see if IF includes the name.
-    def slime_mold? = (@obs.dig(:taxon, :iconic_taxon_name) == "Protozoa")
+    def slime_mold?
+      !!@obs.dig(:taxon, :ancestor_ids)&.include?(
+        Inat::Constants::MYCETOZOA_TAXON_ID
+      )
+    end
   end
 end

@@ -1,6 +1,15 @@
 # frozen_string_literal: true
 
-# see application_controller.rb
+#  ==== Flash notices
+#  flash_notices?::         Are there any errors pending?
+#  flash_get_notices::      Get list of errors.
+#  flash_notice_level::     Get current notice level.
+#  flash_clear::            Clear error messages.
+#  flash_notice::           Add a success message.
+#  flash_warning::          Add a warning message.
+#  flash_error::            Add an error message.
+#  flash_object_errors::    Add all errors for a given instance.
+#
 module ApplicationController::FlashNotices
   def self.included(base)
     base.helper_method(
@@ -108,8 +117,9 @@ module ApplicationController::FlashNotices
     false
   end
 
-  def save_with_log(obj)
+  def save_with_log(user, obj)
     type_sym = obj.class.to_s.underscore.to_sym
+    obj.current_user = user if obj.respond_to?(:current_user)
     if obj.save
       notice = if obj.respond_to?(:text_name) && (name = obj.text_name)
                  :runtime_created_name.t(type: type_sym, value: name)

@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ["searchModel", "filter"]
 
   connect() {
-    this.element.dataset.stimulus = "advanced-search-connected";
+    this.element.dataset.advancedSearch = "connected";
     this.disableUnusedFilters();
   }
 

@@ -12,8 +12,12 @@ module Account
 
     # the login form
     def new
-      @login = ""
-      @remember = true
+      if @user
+        redirect_to(observations_path)
+      else
+        @login = ""
+        @remember = true
+      end
     end
 
     # login post action
@@ -37,7 +41,7 @@ module Account
          (new_user = User.safe_find(session[:real_user_id])) &&
          new_user.admin
         switch_to_user(new_user)
-        redirect_back_or_default("/")
+        redirect_back_or_to("/")
       else
         @user = nil
         User.current = nil
@@ -85,7 +89,7 @@ module Account
       User.current = @user
       session_user_set(@user)
       @remember ? autologin_cookie_set(@user) : clear_autologin_cookie
-      redirect_back_or_default("/account/welcome")
+      redirect_back_or_default(observations_path)
     end
 
     def login_unverified(user)
@@ -99,7 +103,9 @@ module Account
       if @new_user.save
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
-        QueuedEmail::Password.create_email(@new_user, password)
+        # Migrated from QueuedEmail::Password to ActionMailer + ActiveJob.
+        # See .claude/deliver_later_migration_plan.md for details.
+        PasswordMailer.build(receiver: @new_user, password:).deliver_later
         render("account/login/new")
       else
         flash_object_errors(@new_user)
@@ -114,6 +120,8 @@ module Account
         session[:real_user_id] = nil
         session[:admin] = true
       end
+      # Update both @user and User.current so views show the correct user.
+      @user = new_user
       User.current = new_user
       session_user_set(new_user)
     end

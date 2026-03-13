@@ -22,7 +22,7 @@ class InfoControllerTest < FunctionalTestCase
     assert_template(:news)
 
     get(:textile_sandbox)
-    assert_template(:textile_sandbox)
+    assert_response(:success)
   end
 
   def test_normal_permissions

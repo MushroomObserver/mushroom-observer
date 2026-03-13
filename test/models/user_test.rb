@@ -320,7 +320,7 @@ class UserTest < UnitTestCase
     u = User.new(
       login: "nonexistingbob",
       email: "nonexistingbob@collectivesource.com",
-      theme: "NULL",
+      theme: "RANDOM",
       notes: "",
       mailing_address: "",
       password: "bobs_secure_password",
@@ -369,17 +369,6 @@ class UserTest < UnitTestCase
 
     rolf.delete_name_trackers
     assert_equal(0, NameTracker.where(user: rolf).count)
-  end
-
-  def test_delete_queued_emails
-    QueuedEmail.create(rolf, mary)
-    QueuedEmail.create(mary, rolf)
-    assert_operator(0, "<", QueuedEmail.where(user: rolf).count)
-    assert_operator(0, "<", QueuedEmail.where(to_user: rolf).count)
-
-    rolf.delete_queued_emails
-    assert_equal(0, QueuedEmail.where(user: rolf).count)
-    assert_equal(0, QueuedEmail.where(to_user: rolf).count)
   end
 
   def test_delete_observations
@@ -495,7 +484,7 @@ class UserTest < UnitTestCase
     # Delete all of Mary's many lists except those in projects
     mary_lists = SpeciesList.where(user: mary)
     before_count = mary_lists.count
-    proj_lists = mary_lists.select { |list| list.projects.count.positive? }
+    proj_lists = mary_lists.select { |list| list.projects.any? }
     proj_count = proj_lists.count
     assert_operator(proj_count, ">", 0)
     assert_operator(before_count, ">", proj_count)
@@ -592,5 +581,60 @@ class UserTest < UnitTestCase
     msgs = User.cull_unverified_users(dry_run: false)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     assert_nil(User.find_by(id: unverified.id))
+  end
+
+  def test_lookup_unique_text_name
+    User.find_each do |user|
+      assert_equal(user, User.lookup_unique_text_name(user.unique_text_name))
+    end
+  end
+
+  def test_nihilist
+    user = users(:nihilist_user)
+    assert(user.textile_name.include?(user.login))
+  end
+
+  def test_user_with_underscore
+    user = users(:lone_wolf)
+    assert_match(/lookup_user/, user.textile_name.tl)
+  end
+
+  def test_top_users_for_herbarium
+    # This herbarium has two curators: rolf and roy
+    # But only rolf has used it
+    nybg_h_top_users = User.top_users_for_herbarium(herbaria(:nybg_herbarium))
+    assert_equal(1, nybg_h_top_users.count)
+    assert_equal("rolf", nybg_h_top_users[0].login)
+
+    # Dick has not used his herbarium
+    dick_h_top_users = User.top_users_for_herbarium(herbaria(:dick_herbarium))
+    assert_equal(0, dick_h_top_users.count)
+
+    # Mary's the top user of fundis herbarium
+    fundis_h_top_users = User.top_users_for_herbarium(
+      herbaria(:fundis_herbarium)
+    )
+    assert_equal(1, fundis_h_top_users.count)
+    assert_equal("mary", fundis_h_top_users[0].login)
+    # Now move all rolf's records to this herbarium
+    HerbariumRecord.where(user_id: users(:rolf).id).
+      update_all(herbarium_id: herbaria(:fundis_herbarium).id)
+    fundis_h_top_users = User.top_users_for_herbarium(
+      herbaria(:fundis_herbarium)
+    )
+    assert_equal(2, fundis_h_top_users.count)
+    assert_equal("rolf", fundis_h_top_users[0].login)
+    assert_equal("mary", fundis_h_top_users[1].login)
+
+    # Thorsten's the top user of fundis herbarium
+    field_h_top_users = User.top_users_for_herbarium(herbaria(:field_museum))
+    assert_equal(1, field_h_top_users.count)
+    assert_equal("thorsten", field_h_top_users[0].login)
+    # Now change the attribution of thorsten's herbarium record
+    HerbariumRecord.find(herbarium_records(:field_museum_record).id).
+      update(user_id: users(:katrina).id)
+    field_h_top_users = User.top_users_for_herbarium(herbaria(:field_museum))
+    assert_equal(1, field_h_top_users.count)
+    assert_equal("katrina", field_h_top_users[0].login)
   end
 end

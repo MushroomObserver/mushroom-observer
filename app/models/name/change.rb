@@ -7,7 +7,8 @@ module Name::Change
   # *NOTE*: It does not save the changes to itself, but if it has to create or
   # update any parents (and caller has requested it), _those_ do get saved.
   #
-  def change_text_name(in_text_name, in_author, in_rank, save_parents = false)
+  def change_text_name(user, in_text_name, in_author, in_rank,
+                       save_parents = false)
     in_str = Name.clean_incoming_string("#{in_text_name} #{in_author}")
     parse = Name.parse_name(in_str, rank: in_rank, deprecated: deprecated)
     if !parse || parse.rank != in_rank
@@ -16,7 +17,7 @@ module Name::Change
     end
     if parse.parent_name &&
        !Name.find_by(text_name: parse.parent_name)
-      parents = Name.find_or_create_name_and_parents(parse.parent_name)
+      parents = Name.find_or_create_name_and_parents(user, parse.parent_name)
       if parents.last.nil?
         raise(:runtime_unable_to_create_name.t(name: parse.parent_name))
       end
@@ -49,7 +50,7 @@ module Name::Change
   #
   def change_deprecated(deprecated)
     # remove existing boldness
-    name = display_name.gsub(/\*\*([^*]+)\*\*/, '\1')
+    name = self[:display_name].gsub(/\*\*([^*]+)\*\*/, '\1')
     unless deprecated
       # add new boldness
       name.gsub!(/(__[^_]+__)/, '**\1**')
@@ -64,27 +65,27 @@ module Name::Change
   # correct spelling should be, make sure it is NOT deprecated, and make sure
   # it is a synonym of this name.  Saves any changes it needs to make to the
   # correct spelling, but only saves the changes to this name if you ask it to.
-  def mark_misspelled(target_name, save = false)
+  def mark_misspelled(user, target_name, save = false)
     return if deprecated && misspelling && correct_spelling == target_name
 
     self.misspelling = true
     self.correct_spelling = target_name
     change_deprecated(true)
     merge_synonyms(target_name)
-    target_name.clear_misspelled(:save) if target_name.is_misspelling?
-    save_with_log(:log_name_deprecated, other: target_name.display_name) \
+    target_name.clear_misspelled(user, :save) if target_name.is_misspelling?
+    save_with_log(user, :log_name_deprecated, other: target_name.display_name) \
       if save
     change_misspelled_consensus_names
   end
 
   # Mark this name as "not misspelled", and saves the changes if you ask it to.
-  def clear_misspelled(save = false)
+  def clear_misspelled(user, save = false)
     return unless misspelling || correct_spelling
 
-    was = correct_spelling.display_name
+    was = correct_spelling.user_display_name(user)
     self.misspelling = false
     self.correct_spelling = nil
-    save_with_log(:log_name_unmisspelled, other: was) if save
+    save_with_log(user, :log_name_unmisspelled, other: was) if save
   end
 
   # Super quick and low-level update to make sure no observation names are

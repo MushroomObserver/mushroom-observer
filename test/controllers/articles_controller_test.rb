@@ -17,11 +17,16 @@ class ArticlesControllerTest < FunctionalTestCase
     end
   end
 
+  def test_index_with_non_default_sort
+    check_index_sorting
+  end
+
   def test_index_filtered
-    article = Article.first
-    query = Query.lookup(:Article, :all, ids: [article.id])
-    params = @controller.query_params(query)
-    get(:index, params: params)
+    article = Article.reorder(created_at: :asc).first # oldest
+    query = Query.lookup(:Article, id_in_set: [article.id])
+    params = { q: @controller.q_param(query) }
+    get(:index, params:)
+    assert_no_flash
 
     assert_select("#content a:match('href',?)", %r{/articles/\d+},
                   { count: 1 },
@@ -32,10 +37,17 @@ class ArticlesControllerTest < FunctionalTestCase
     )
   end
 
+  def test_index_query_no_matches
+    query = Query.lookup(:Article, id_in_set: "one")
+    params = { q: @controller.q_param(query) }
+    get(:index, params:)
+    assert_flash_error(:runtime_no_matches.t(type: :article))
+  end
+
   def test_index_links_to_create
     login(users(:article_writer).login)
     get(:index)
-    assert_select("a", { text: :create_article_title.l },
+    assert_select("a", { text: "Create Article" },
                   "Privileged user should get link to Create Article")
   end
 
@@ -51,8 +63,8 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
     get(:show, params: { id: article.id })
-    assert_select("a", text: :create_article_title.l)
-    assert_select("a", text: :EDIT.l)
+    assert_select("a", text: "New Article")
+    assert_select("a", text: :edit_object.t(type: :article))
     assert_select(".destroy_article_link_#{article.id}", true,
                   "Page is missing Destroy button")
 
@@ -62,21 +74,22 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # Partly duplicates the title_and_tabset_helper_test `test_create_links_to`.
+  # Partly duplicates title_and_tabset_helper_test `test_context_nav_dropdown`.
   # But we want to test a `destroy_button` tab too.
-  # That method calls `add_query_param` and others unavailable to helper tests
-  def test_create_links_to_helper
+  # That helper calls `add_q_param` and others.
+  # NOTE: we can actually call @controller.add_q_param here, fwiw.
+  def test_context_nav_dropdown_helper
     article = Article.last
-    links = [[:create_article_title.t, new_article_path,
+    links = [["Create Article", new_article_path,
               { class: "new_article_link" }],
              [:EDIT.t, edit_article_path(article.id),
               { class: "edit_article_link" }],
              [nil, article, { button: :destroy }]]
 
-    tabs = @controller.helpers.create_links_to(links)
+    tabs = @controller.helpers.context_nav_links(links)
 
     tab1 = @controller.helpers.link_to(
-      :create_article_title.t, new_article_path, { class: "new_article_link" }
+      "Create Article", new_article_path, { class: "new_article_link" }
     )
     tab2 = @controller.helpers.link_to(
       :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }

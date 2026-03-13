@@ -1,1 +1,10 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+katrina_tracker:
+  inat_import: <%= ActiveRecord::FixtureSet.identify(:katrina_inat_import) %>
+
+lone_wolf_tracker:
+  inat_import: <%= ActiveRecord::FixtureSet.identify(:lone_wolf_import) %>
+
+ollie_tracker:
+  inat_import: <%= ActiveRecord::FixtureSet.identify(:ollie_inat_import) %>

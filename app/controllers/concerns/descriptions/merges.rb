@@ -22,7 +22,7 @@ module Descriptions::Merges
 
       # Doesn't have permission to see source.
       flash_error(:runtime_description_private.t)
-      redirect_to(object_path_with_query(@src.parent))
+      redirect_to(@src.parent.show_link_args)
     end
 
     # POST method. Either merges descriptions, or tries to facilitate a merge.
@@ -32,7 +32,7 @@ module Descriptions::Merges
       return unless check_dest_exists!
 
       @description = @src
-      @delete_after = (params[:delete] == "1")
+      @delete_after = params.dig(:description_move_or_merge, :delete) == "1"
       merge_descriptions
     end
 
@@ -48,12 +48,12 @@ module Descriptions::Merges
       return true if in_admin_mode? || @src.is_reader?(@user)
 
       flash_error(:runtime_description_private.t)
-      redirect_to(object_path_with_query(@src.parent))
+      redirect_to(@src.parent.show_link_args)
       false
     end
 
     def check_dest_exists!
-      target = params[:target].to_s
+      target = params.dig(:description_move_or_merge, :target).to_s
       return true if (@dest = find_description!(target))
 
       flash_error(:runtime_invalid.t(type: '"target"', value: target))
@@ -127,7 +127,7 @@ module Descriptions::Merges
                        to: @dest.unique_partial_format_name)
       flash_notice(:runtime_description_merge_success.
            t(old: @src.format_name, new: @dest.format_name))
-      redirect_to(object_path_with_query(@dest))
+      redirect_to(@dest.show_link_args)
     end
 
     def warn_and_render_edit_description_form
@@ -160,12 +160,14 @@ module Descriptions::Merges
       if !in_admin_mode? && !@src.is_admin?(@user)
         flash_warning(:runtime_description_merge_delete_denied.t)
       else
+        # Check if src is the default BEFORE destroying (destroy nullifies it)
+        src_was_default = (@src.parent.description_id == @src.id)
+
         flash_notice(:runtime_description_merge_deleted.
                        t(old: @src.unique_partial_format_name))
         @src.destroy
 
         # Make destination the default if source used to be the default.
-        src_was_default = (@src.parent.description_id == @src.id)
         if src_was_default && @dest.fully_public?
           @dest.parent.description = @dest
           @dest.parent.save
