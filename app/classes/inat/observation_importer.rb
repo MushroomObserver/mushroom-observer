@@ -72,8 +72,10 @@ class Inat
       log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
       increment_imported_counts
       update_timings
-    rescue StandardError
-      # Error already logged by the method that raised it
+    rescue StandardError => e
+      log_with_response_error(
+        "Failed to finalize import of iNat #{@inat_obs[:id]}: #{e.message}"
+      )
       @observation&.destroy
       nil
     end

@@ -26,7 +26,8 @@
 #
 #  == Instance methods
 #
-#  name:: MO Name object corresponding to the iNat taxon
+#  name::             MO Name matching the iNat taxon, or nil if none found
+#  full_name_string:: ICN-format name string, used by callers to create MO Names
 #
 class Inat
   class Taxon
@@ -39,6 +40,7 @@ class Inat
       @taxon = taxon
     end
 
+    # Returns the matching MO Name, or nil if none found.
     def name
       names =
         # iNat "Complex" definition
@@ -49,6 +51,21 @@ class Inat
           matching_names_at_regular_ranks
         end
       best_mo_name(names)
+    end
+
+    # The ICN-format name string for this taxon.
+    # Handles special cases: infrageneric names (which need the genus prepended)
+    # and infraspecific names (which need the rank inserted).
+    def full_name_string
+      # iNat infrageneric Observation ID's need special handling because
+      # iNat does not provide a name string which includes the genus.
+      return infrageneric_name_string if infrageneric?
+
+      # iNat infraspecific :name strings omit the rank.
+      # Ex: "Inonotus obliquus sterilis"
+      return insert_rank_between_species_and_final_epithet if infraspecific?
+
+      @taxon[:name]
     end
 
     #########
@@ -75,18 +92,6 @@ class Inat
         # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
         where.not(::Name[:author] =~ /^sensu /).
         order(deprecated: :asc)
-    end
-
-    def full_name_string
-      # iNat infrageneric Observation ID's need special handling because
-      # iNat does not provide a name string which includes the genus.
-      return infrageneric_name_string if infrageneric?
-
-      # iNat infraspecific :name strings omits the rank.
-      # Ex: "Inonotus obliquus sterilis"
-      return insert_rank_between_species_and_final_epithet if infraspecific?
-
-      @taxon[:name]
     end
 
     # Get the genus of an iNat infrageneric taxon via an API query
@@ -135,7 +140,7 @@ class Inat
       # (They've already been sorted)
       return names.first if names.any?
 
-      ::Name.unknown
+      nil
     end
   end
 end
