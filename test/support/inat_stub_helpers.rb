@@ -3,7 +3,9 @@
 module InatStubHelpers
   include Inat::Constants
 
-  # Stub iNat API genera lookup (based on ancestor ids)
+  # Stub iNat API genus lookup (based on ancestor ids)
+  # Need to lookup the genus of infrageneric taxa because
+  # the iNat API returns only epithet and rank, not the genus
   def stub_genus_lookup(ancestor_ids:, body:)
     stub_request(:get, "#{API_BASE}/taxa?id=#{ancestor_ids}&rank=genus").
       with(

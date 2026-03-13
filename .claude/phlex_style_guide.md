@@ -6,8 +6,13 @@ component architecture. For general Ruby and ERB style, see
 
 ## Form Components (Superform)
 
-Form components extend `Components::ApplicationForm`. Read this file, as well as
-the `superform` gem, before beginning a conversion.
+**Every form component must extend `Components::ApplicationForm`.** This rule
+has no exceptions — it applies to all forms regardless of HTTP method (GET,
+POST, PATCH), layout context (navbar, modal, page), or whether the form maps
+to a model. Never use `Components::Base` with the raw Phlex `form()` method
+for form conversions.
+
+Read `ApplicationForm` and the `superform` gem before beginning a conversion.
 
 `ApplicationForm` inherits from `Superform::Rails::Form`, which creates a
 Rails-compliant form tag implicitly via the `around_template` hook. Form
@@ -89,6 +94,76 @@ render(Components::MyForm.new(
 ))
 
 # Params will be namespaced as: inherit_classification[parent]
+```
+
+### GET Forms (Search Filters, Index Filters)
+
+GET forms (search bars, index filters) still extend `ApplicationForm` with a
+FormObject. Override `form_tag` to use GET method, and suppress CSRF tokens
+since GET forms don't need them.
+
+```ruby
+# app/classes/form_object/my_filter.rb
+class FormObject::MyFilter < FormObject::Base
+  attribute :query, :string
+end
+
+# app/components/my_filter_form.rb
+class Components::MyFilterForm < Components::ApplicationForm
+  def initialize(model, **)
+    super(model, id: "my_filter", **)
+  end
+
+  def view_template
+    super do
+      text_field(:query, label: false, placeholder: "Search...")
+      submit(:SEARCH.l)
+    end
+  end
+
+  def form_action
+    my_index_path
+  end
+
+  private
+
+  def form_tag(&block)
+    form(action: form_action, method: :get,
+         **form_attributes, &block)
+  end
+
+  def form_attributes
+    {
+      id: @attributes[:id],
+      class: "my-form",
+      data: { controller: "my-controller" }
+    }
+  end
+
+  # GET forms don't need authenticity tokens or _method fields
+  def authenticity_token_field; end
+  def _method_field; end
+end
+```
+
+See `LiveDataFilterForm` and `IdentifyFilterForm` for real examples.
+
+### Custom Param Namespacing with model_name
+
+`FormObject::Base#model_name` returns the demodulized class name, which
+Superform uses for field `name` attributes. Override `self.model_name` when
+params need a different namespace than the class name implies.
+
+```ruby
+# Default: FormObject::IdentifyFilter → identify_filter[term]
+# Override to get: filter[term]
+class FormObject::IdentifyFilter < FormObject::Base
+  attribute :term, :string
+
+  def self.model_name
+    ActiveModel::Name.new(self, nil, "Filter")
+  end
+end
 ```
 
 ## Component Style
@@ -186,6 +261,19 @@ span(class: "badge")
 # Bad
 div("", class: "clearfix")
 span("", class: "badge")
+```
+
+### Phlex `option()` Element
+
+Phlex's `option()` does not accept a positional text argument. Use the block
+form to set the display text.
+
+```ruby
+# Good
+option(value: "clade") { "Clade" }
+
+# Bad - wrong number of arguments error
+option("Clade", value: "clade")
 ```
 
 ### Prefer Phlex Methods Over ActionView Helpers
@@ -804,6 +892,98 @@ is the cause of any new bugs.
 **Note**: You may see errors like "Couldn't find template for digesting: Components/Component" in test logs. This is harmless - Phlex components are pure Ruby and don't have ERB templates to digest.
 
 The test environment has been configured to suppress these errors via a custom logger formatter in `config/environments/test.rb`.
+
+## Phlex Views (Full-Page Rendering)
+
+Full-page Phlex views live in `app/views/controllers/` and are
+rendered from controllers with `render(ViewClass.new(...), layout: true)`.
+The `layout: true` is required so Rails wraps the output in the
+application layout. Phlex components rendered as fragments (e.g.,
+`ModalForm` in turbo_stream responses) do not use `layout: true`.
+
+### Server Restart Required for Changes
+
+Phlex view files are eagerly loaded via `require` in
+`config/initializers/phlex.rb`, bypassing Zeitwerk's reload mechanism.
+Unlike ERB templates, changes to these files are **not hot-reloaded** —
+**restart the Rails server** before further debugging.
+
+### Using `content_for` from Phlex Views
+
+`content_for` works from Phlex views via `view_context`. Use the
+**value form** (passing content directly) rather than the block form:
+
+```ruby
+# Good — value form
+html = view_context.tag.li { view_context.some_helper(...) }
+view_context.content_for(:edit_icons, html)
+
+# Also works — calling a helper that internally uses content_for
+view_context.add_show_title(:show_thing_title.t, @thing)
+```
+
+**Do NOT use `helpers.content_for` from controllers.** The `helpers`
+proxy creates a separate context that does not share `@view_flow` with
+the layout. Content stored there will not be visible to the layout.
+
+### Adding Title Bar Icons from Phlex Show Pages
+
+ERB show pages use `add_edit_icons(@object, @user)` to add edit and
+destroy icons to the title bar. This helper generates links for both
+edit and destroy routes.
+
+When a model has a destroy route but no edit route, render the destroy
+icon directly from the Phlex view:
+
+```ruby
+def add_destroy_icon
+  return unless @occurrence.can_edit?(@user)
+
+  icon = view_context.tag.li do
+    view_context.destroy_button(
+      target: @occurrence, icon: :delete
+    )
+  end
+  view_context.content_for(:edit_icons, icon)
+end
+```
+
+Once an edit route exists, switch to
+`view_context.add_edit_icons(@object, @user)` which handles both icons.
+
+## Form Gotchas
+
+### Nested `<form>` Elements Break Form Submission
+
+HTML does not allow nested `<form>` elements. When a browser encounters
+`<form>` inside `<form>`, it implicitly closes the outer form. Any
+elements after the inner form (like the submit button) end up outside
+the outer form.
+
+**Symptom**: Clicking a submit button does nothing — no server request
+at all. Controller tests pass fine (they bypass the browser DOM parser).
+
+**Common source in MO**: `InteractiveImage` with `votes: true` renders
+`button_to` helpers, which generate `<form>` elements. If rendered
+inside a Superform component, the vote button forms nest inside it and
+break it.
+
+**Rule**: Always pass `votes: false` to `InteractiveImage` inside any
+form context. Any component that generates `<form>` tags (`button_to`,
+turbo form helpers) must not be nested inside another form.
+
+**Detection**: Only system tests (Capybara/Cuprite) or manual browser
+testing will reveal this. Controller tests do NOT catch it. Assert no
+nested `<form>` elements in rendered HTML as a regression guard.
+
+### Turbo Forms in MO
+
+- `Turbo.config.forms.mode = "optin"` — only forms (or ancestors) with
+  `data-turbo="true"` use Turbo submission.
+- `ApplicationForm` defaults to `local: true` (no Turbo). Pass
+  `local: false` to enable Turbo on a form.
+- Rails UJS is commented out — `data-disable-with` has no effect
+  without UJS or Turbo.
 
 ## Summary
 

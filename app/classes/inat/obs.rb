@@ -64,8 +64,7 @@ class Inat
     delegate :[]=, to: :@obs
 
     delegate :name, to: :@obs_taxon
-    delegate :id, to: :name, prefix: true
-    delegate :text_name, to: :name
+    delegate :text_name, to: :name, allow_nil: true
 
     def initialize(imported_inat_obs_data)
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
@@ -303,7 +302,8 @@ class Inat
       "\n#{
         self[:identifications].each_with_object([]) do |ident, ary|
           ident_taxon = Inat::Taxon.new(ident[:taxon])
-          ary << "&nbsp;&nbsp;_#{ident_taxon.name.text_name}_ " \
+          display_name = ident_taxon.name&.text_name || ident[:taxon][:name]
+          ary << "&nbsp;&nbsp;_#{display_name}_ " \
                  "by #{ident[:user][:login]} " \
                  "#{ident[:created_at_details][:date]}"
         end.join("\n")

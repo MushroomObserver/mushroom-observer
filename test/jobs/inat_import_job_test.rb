@@ -37,13 +37,6 @@ class InatImportJobTest < ActiveJob::TestCase
     @user.update(inat_username: @inat_import.inat_username)
 
     # Add objects which are not included in fixtures
-    name = Name.create(
-      text_name: "Calostoma lutescens", author: "(Schweinitz) Burnap",
-      search_name: "Calostoma lutescens (Schweinitz) Burnap",
-      display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
-      rank: "Species",
-      user: @user
-    )
     loc = Location.create(user: @user,
                           name: "Sevier Co., Tennessee, USA",
                           north: 36.043571, south: 35.561849,
@@ -57,6 +50,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+    name = Name.find_by(text_name: "Calostoma lutescens", rank: "Species")
     standard_assertions(obs: obs, name: name, loc: loc)
 
     # This iNat obs has only 1 suggested ID.
@@ -110,13 +104,6 @@ class InatImportJobTest < ActiveJob::TestCase
     InatImportJobTracker.create(inat_import: @inat_import.id)
 
     # Add objects which are not included in fixtures
-    Name.create(
-      text_name: "Calostoma lutescens", author: "(Schweinitz) Burnap",
-      search_name: "Calostoma lutescens (Schweinitz) Burnap",
-      display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
-      rank: "Species",
-      user: user
-    )
     Location.create(user: user,
                     name: "Sevier Co., Tennessee, USA",
                     north: 36.043571, south: 35.561849,
@@ -153,11 +140,6 @@ class InatImportJobTest < ActiveJob::TestCase
     create_ivars_from_filename("evernia")
 
     # Add objects which are not included in fixtures
-    name = Name.create(
-      text_name: "Evernia", author: "Ach.", search_name: "Evernia Ach.",
-      display_name: "**__Evernia__** Ach.",
-      rank: "Genus", user: @user
-    )
     loc = Location.create(
       user: @user,
       name: "Troutdale, Multnomah Co., Oregon, USA",
@@ -173,6 +155,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+    name = Name.find_by(text_name: "Evernia", rank: "Genus")
     standard_assertions(obs: obs, name: name, loc: loc)
 
     inat_photo = @parsed_results.
@@ -192,14 +175,6 @@ class InatImportJobTest < ActiveJob::TestCase
   # Had 1 photo; 2 identifications, 1 not by user.
   def test_import_job_obs_with_many_namings
     create_ivars_from_filename("tremella_mesenterica")
-
-    name = Name.find_or_create_by(text_name: "Tremellales",
-                                  author: "Fr.",
-                                  search_name: "Tremellales Fr.",
-                                  display_name: "Tremellales",
-                                  rank: "Order",
-                                  user: @user)
-
     stub_inat_interactions
 
     assert_difference("Observation.count", 1,
@@ -208,6 +183,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+    name = Name.find_by(text_name: "Tremellales", rank: "Order")
     standard_assertions(obs: obs, name: name)
     assert(obs.sequences.none?)
   end
@@ -241,39 +217,6 @@ class InatImportJobTest < ActiveJob::TestCase
   # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
   def test_import_job_obs_with_sequence_and_multiple_ids
     create_ivars_from_filename("lycoperdon")
-
-    # create objects which are not included in fixtures:
-    # the iNat observation name
-    name = Name.create(
-      text_name: "Lycoperdon", author: "Pers.",
-      search_name: "Lycoperdon Pers.",
-      display_name: "**__Lycoperdon__** Pers.",
-      rank: "Genus",
-      user: @user
-    )
-    # add suggested IDs so that we can test Notes snapshot
-    Name.create(
-      text_name: "Calvatia", author: "Fr.",
-      search_name: "Calvatia Fr.",
-      display_name: "**__Calvatia__** Fr.",
-      rank: "Genus",
-      user: @user
-    )
-    Name.create(
-      text_name: "Lycoperdon subumbrinum", author: "Jeppson & E. Larsson",
-      search_name: "Lycoperdon subumbrinum Jeppson & E. Larsson",
-      display_name: "**__Lycoperdon subumbrinum__** Jeppson & E. Larsson",
-      rank: "Species",
-      user: @user
-    )
-    Name.create(
-      text_name: "Lycoperdon umbrinum", author: "Pers.",
-      search_name: "Lycoperdon umbrinum Pers.",
-      display_name: "**__Lycoperdon umbrinum__** Pers.",
-      rank: "Species",
-      user: @user
-    )
-
     stub_inat_interactions
 
     assert_difference("Observation.count", 1,
@@ -282,6 +225,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+    name = Name.find_by(text_name: "Lycoperdon", rank: "Genus")
     standard_assertions(obs: obs, name: name)
     assert_snapshot_suggested_ids(obs)
     assert(obs.sequences.one?, "Obs should have a sequence")
@@ -292,15 +236,6 @@ class InatImportJobTest < ActiveJob::TestCase
   # iNat Observation ID is an infrageneric name which was suggested by a user
   def test_import_job_suggested_infrageneric_name
     create_ivars_from_filename("distantes")
-    # Add objects which are not included in fixtures
-    name = Name.create(
-      text_name: "Morchella sect. Distantes",
-      author: "Boud.",
-      search_name: "Morchella sect. Distantes Boud.",
-      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
-      rank: "Section",
-      user: @user
-    )
     stub_inat_interactions
     # stub the Observation taxon genus lookup
     ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
@@ -322,6 +257,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+    name = Name.find_by(text_name: "Morchella sect. Distantes", rank: "Section")
     standard_assertions(obs: obs, name: name)
     assert_snapshot_suggested_ids(obs)
   end
@@ -329,17 +265,6 @@ class InatImportJobTest < ActiveJob::TestCase
   # iNat Observation ID is an infrageneric name not suggested by any user
   def test_import_job_unsuggested_infrageneric_name
     create_ivars_from_filename("validae")
-
-    # Add objects which are not included in fixtures
-    name = Name.create(
-      text_name: "Amanita sect. Validae",
-      author: "((Fr.) Quél.",
-      search_name: "Amanita sect. Validae ((Fr.) Quél.",
-      display_name: "**__Amanita__** sect. **__Validae__** ((Fr.) Quél.",
-      rank: "Section",
-      user: @user
-    )
-
     stub_inat_interactions
     ancestor_ids = @parsed_results.first[:taxon][:ancestor_ids].join(",")
     stub_genus_lookup(
@@ -353,23 +278,12 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+    name = Name.find_by(text_name: "Amanita sect. Validae", rank: "Section")
     standard_assertions(obs: obs, name: name)
   end
 
   def test_import_job_infra_specific_name
     create_ivars_from_filename("i_obliquus_f_sterilis")
-
-    # Add objects which are not included in fixtures
-    name = Name.create(
-      text_name: "Inonotus obliquus f. sterilis",
-      author: "(Vanin) Balandaykin & Zmitr",
-      search_name: "Inonotus obliquus f. sterilis (Vanin) Balandaykin & Zmitr",
-      display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
-                    "(Vanin) Balandaykin & Zmitr.",
-      rank: "Form",
-      user: @user
-    )
-
     stub_inat_interactions
 
     assert_difference("Observation.count", 1,
@@ -378,22 +292,14 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+    name = Name.find_by(text_name: "Inonotus obliquus f. sterilis",
+                        rank: "Form")
     standard_assertions(obs: obs, name: name)
     assert(obs.sequences.none?)
   end
 
   def test_import_job_complex
     create_ivars_from_filename("xeromphalina_campanella_complex")
-
-    # Add objects which are not included in fixtures
-    name = Name.create(
-      text_name: "Xeromphalina campanella group", author: "",
-      search_name: "Xeromphalina campanella group",
-      display_name: "**__Xeromphalina campanella__** group",
-      rank: "Group",
-      user: @user
-    )
-
     stub_inat_interactions
 
     assert_difference("Observation.count", 1,
@@ -402,51 +308,26 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+    name = Name.find_by(text_name: "Xeromphalina campanella complex",
+                        rank: "Group")
     standard_assertions(obs: obs, name: name)
     assert(obs.sequences.none?)
   end
 
   # Prove that Namings, Votes, Identification are correct
-  # When iNat obs has provisional name that's already in MO
+  # when iNat obs has provisional name that wasn't in MO
   # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;
   # 3 comments, everyone has MO account;
   # obs fields(include("Voucher Number(s)", "Voucher Specimen Taken"))
-  def test_import_job_nemf_plischke
-    create_ivars_from_filename("arrhenia_sp_NY02")
-
-    parsed_inat_prov = Name.parse_name('Arrhenia "sp-NY02"')
-    name = Name.create(
-      text_name: parsed_inat_prov.text_name,
-      search_name: parsed_inat_prov.search_name,
-      display_name: parsed_inat_prov.display_name,
-      rank: parsed_inat_prov.rank,
-      user: @user
-    )
-
-    stub_inat_interactions
-
-    assert_difference("Observation.count", 1,
-                      "Failed to create observation") do
-      InatImportJob.perform_now(@inat_import)
-    end
-
-    obs = Observation.last
-    standard_assertions(obs: obs, name: name)
-
-    assert(obs.sequences.one?, "Obs should have one Sequence")
-    # See comment in Inat::Obs#specimen? about disabling specimen detection
-    # assert(obs.specimen, "Obs should show that a Specimen is available")
-    assert_not(obs.specimen, "Obs should not show that a Specimen is available")
-  end
-
-  # Prove that Namings, Votes, Identification are correct
-  # when iNat obs has provisional name that wasn't in MO
-  # see test above for iNat obs details
   def test_import_job_create_prov_name
-    assert_nil(Name.find_by(text_name: 'Arrhenia "sp-NY02"'),
+    # Guard the iNat input format and the MO output format separately:
+    # the input format is what iNat stores; the output is what MO creates.
+    # Both guards are needed to prove the job created the name, not fixtures.
+    assert_not(Name.exists?(text_name: 'Arrhenia "sp-NY02"'),
                "Test requires that MO not yet have provisional name")
+    assert_not(Name.exists?(text_name: "Arrhenia sp. 'NY02'"),
+               "Test requires MO not yet have the target provisional name")
     create_ivars_from_filename("arrhenia_sp_NY02")
-
     stub_inat_interactions
 
     assert_difference("Observation.count", 1,
@@ -492,14 +373,47 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
+  # Prove that a name creation API failure skips the observation and logs the
+  # error (rather than crashing on nil.id as it did before this fix).
+  def test_import_job_prov_name_creation_failure_skips_observation
+    assert_not(Name.exists?(text_name: 'Arrhenia "sp-NY02"'),
+               "Test requires that MO not yet have provisional name")
+    create_ivars_from_filename("arrhenia_sp_NY02")
+    stub_inat_interactions
+
+    # Simulate API2.execute returning errors when creating a Name
+    original_execute = API2.method(:execute)
+    API2.singleton_class.define_method(:execute) do |params|
+      if params[:action] == :name && params[:method] == :post
+        api = API2.new(params)
+        api.errors << API2::MissingParameter.new(:name)
+        api
+      else
+        original_execute.call(params)
+      end
+    end
+
+    assert_no_difference("Observation.count",
+                         "Should skip observation when name creation fails") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    @inat_import.reload
+    assert_match(/Failed to create name/,
+                 @inat_import.response_errors,
+                 "Should log name creation failure in response_errors")
+  ensure
+    API2.singleton_class.define_method(:execute, original_execute)
+  end
+
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
     # NOTE: This is an all-rights-reserved observation, so it will not
     # actually import. It is included here to prove that the Job would create
     # the correct Name and Namings if it did import, and that the Job would
     # skip the photos because they are also unlicensed. jdc 2026-03-17
-    assert(Name.where(Name[:text_name] =~ /Donadinia/).none?,
-           "Test requires that MO not yet have `Donadinia` Names")
+    assert_not(Name.exists?(Name[:text_name] =~ /Donadinia/),
+               "Test requires that MO not yet have `Donadinia` Names")
 
     create_ivars_from_filename("donadinia_PNW01")
     stub_inat_interactions
@@ -510,19 +424,27 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
-
+    expected_consensus = Name.find_by(text_name: "Donadinia sp. 'PNW01'",
+                                      rank: "Species",
+                                      user: @user)
     new_names = Name.where(Name[:text_name] =~ /Donadinia/)
-    assert_equal(2, new_names.count,
-                 "Failed to create new sp. (nom. prov.) and its genus")
-    new_names.each do |new_name|
-      assert_equal(
-        @user, new_name.user,
-        "#{new_name.text_name} owner should be #{@user.login}"
-      )
-    end
-    name = new_names.find_by(rank: "Species")
+    assert(new_names.include?(expected_consensus),
+           "Failed to create MO provisional name corresponding to " \
+           "iNat `Provisional Species Name` Observation Field")
+    assert(new_names.include?(Name.find_by(text_name: "Donadinia",
+                                           rank: "Genus",
+                                           user: @user)),
+           "Failed to create MO genus for new provisional species name")
+    assert(new_names.include?(Name.find_by(text_name: "Donadinia nigrella",
+                                           rank: "Species",
+                                           user: @user)),
+           "Failed to create MO species corresponding to iNat suggested ID")
+    assert_equal(
+      3, new_names.count,
+      "It should create only 3 names: provisional, its genus, suggested ID"
+    )
 
-    standard_assertions(obs: obs, name: name)
+    standard_assertions(obs: obs, name: expected_consensus)
 
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
@@ -594,19 +516,6 @@ class InatImportJobTest < ActiveJob::TestCase
     @parsed_results = parsed_response[:results]
     @inat_import = create_inat_import
     InatImportJobTracker.create(inat_import: @inat_import.id)
-
-    # Add objects which are not included in fixtures
-    Name.create(
-      text_name: "Calostoma lutescens", author: "(Schweinitz) Burnap",
-      search_name: "Calostoma lutescens (Schweinitz) Burnap",
-      display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
-      rank: "Species",
-      user: user
-    )
-    Location.create(user: user,
-                    name: "Sevier Co., Tennessee, USA",
-                    north: 36.043571, south: 35.561849,
-                    east: -83.253046, west: -83.794123)
 
     stub_inat_interactions
 
@@ -955,8 +864,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(obs_count_before, Observation.count,
                  "MO Observation should be destroyed after iNat API error")
 
-    errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
+    http_error_line = @inat_import.response_errors.lines.first
+    errors = JSON.parse(http_error_line, symbolize_names: true)
     assert_equal(status, errors[:error], "Incorrect error status")
+    assert_match(/Failed to finalize import of iNat/,
+                 @inat_import.response_errors,
+                 "Should also log finalize failure context")
 
     # The payload should contain the observation_field_value details
     payload = errors[:payload]
@@ -1031,21 +944,19 @@ class InatImportJobTest < ActiveJob::TestCase
       )
     end
 
-    if name
-      assert_equal(name, obs.name, "Wrong consensus id")
+    assert_equal(name, obs.name, "Wrong consensus id")
 
-      namings = obs.namings
-      naming = namings.find_by(name: name)
-      assert(naming.present?, "Missing Naming for MO consensus ID")
-      assert_equal(
-        user, naming.user,
-        "Consensus Naming for this MO obs should be by #{user.login}"
-      )
-      vote = Vote.find_by(naming: naming, user: naming.user)
-      assert(vote.present?, "Naming is missing a Vote")
-      assert_equal(Vote::MAXIMUM_VOTE, vote.value,
-                   "Vote for MO consensus should be highest possible vote")
-    end
+    namings = obs.namings
+    naming = namings.find_by(name: name)
+    assert(naming.present?, "Missing Naming for MO consensus ID")
+    assert_equal(
+      user, naming.user,
+      "Consensus Naming for this MO obs should be by #{user.login}"
+    )
+    vote = Vote.find_by(naming: naming, user: naming.user)
+    assert(vote.present?, "Naming is missing a Vote")
+    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
+                 "Vote for MO consensus should be highest possible vote")
 
     view = ObservationView.
            find_by(observation_id: obs.id, user_id: user.id)
@@ -1091,15 +1002,16 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def assert_snapshot_suggested_ids(obs)
     idents = @parsed_results.first[:identifications]
-    # Get the MO Names corresponding to the iNat suggested taxon names
-    # Because iNat names may not be ICN-compliant, e.g. infrageneric names
-    unique_suggested_taxon_names = idents.each_with_object([]) do |ident, ary|
+    # Get the display name for each suggested iNat id.
+    # Matches what obs.rb uses in the snapshot: MO text_name if found, else
+    # the raw iNat taxon name.
+    suggested_display_names = idents.each_with_object([]) do |ident, ary|
       ident_taxon = ::Inat::Taxon.new(ident[:taxon])
-      ary << ident_taxon.name
+      ary << (ident_taxon.name&.text_name || ident[:taxon][:name])
     end
-    unique_suggested_taxon_names.each do |name|
-      assert_match(name.text_name, obs.notes.to_s,
-                   "Notes Snapshot missing suggested name #{name.text_name}")
+    suggested_display_names.each do |name_text|
+      assert_match(name_text, obs.notes.to_s,
+                   "Notes Snapshot missing suggested name #{name_text}")
     end
   end
 
