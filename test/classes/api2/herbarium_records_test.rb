@@ -134,7 +134,9 @@ class API2::HerbariumRecordsTest < UnitTestCase
     assert_api_pass(params)
     assert_last_herbarium_record_correct
 
-    last_h_r = HerbariumRecord.last
+    last_h_r = HerbariumRecord.find_by(herbarium: @herbarium,
+                                       accession_number: @accession_number)
+    assert_not_nil(last_h_r, "Cannot find HerbariumRecord")
     herbarium_record_count = HerbariumRecord.count
     rolfs_other_obs = observations(:stereum_hirsutum_1)
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
@@ -144,12 +146,16 @@ class API2::HerbariumRecordsTest < UnitTestCase
 
     # Make sure it gives correct default for initial_det.
     assert_api_pass(params.except(:initial_det).merge(accession_number: "2"))
-    last_h_r = HerbariumRecord.last
+    last_h_r = HerbariumRecord.find_by(herbarium: @herbarium,
+                                       accession_number: "2")
+    assert_not_nil(last_h_r, "Cannot find HerbariumRecord")
     assert_equal(rolfs_obs.name.text_name, last_h_r.initial_det)
 
     # Check default accession number if obs has no collection number.
     assert_api_pass(params.except(:accession_number))
-    last_h_r = HerbariumRecord.last
+    last_h_r = HerbariumRecord.find_by(herbarium: @herbarium,
+                                       accession_number: "MO #{rolfs_obs.id}")
+    assert_not_nil(last_h_r, "Cannot find HerbariumRecord")
     assert_equal("MO #{rolfs_obs.id}", last_h_r.accession_number)
 
     # Check default accession number if obs has one collection number.
@@ -158,7 +164,9 @@ class API2::HerbariumRecordsTest < UnitTestCase
     assert_operator(obs.collection_numbers.count, :==, 1)
     assert_api_pass(params.except(:accession_number).
                            merge(observation: obs.id))
-    last_h_r = HerbariumRecord.last
+    last_h_r = HerbariumRecord.find_by(herbarium: @herbarium,
+                                       accession_number: num.format_name)
+    assert_not_nil(last_h_r, "Cannot find HerbariumRecord")
     assert_equal(num.format_name, last_h_r.accession_number)
 
     # Check default accession number if obs has two collection numbers.
@@ -168,7 +176,9 @@ class API2::HerbariumRecordsTest < UnitTestCase
     assert_operator(marys_obs.collection_numbers.count, :>, 1)
     assert_api_pass(params.except(:accession_number).
                       merge(observation: marys_obs.id, herbarium: nybg.id))
-    last_h_r = HerbariumRecord.last
+    last_h_r = HerbariumRecord.find_by(herbarium: nybg,
+                                       accession_number: "MO #{marys_obs.id}")
+    assert_not_nil(last_h_r, "Cannot find HerbariumRecord")
     assert_equal("MO #{marys_obs.id}", last_h_r.accession_number)
   end
 

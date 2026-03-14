@@ -255,7 +255,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    field_slip = FieldSlip.find_by(code: code)
+    assert_not_nil(field_slip, "Cannot find FieldSlip with code #{code}")
+    obs = field_slip.observation
+    assert_not_nil(obs, "Cannot find Observation for FieldSlip")
     assert_equal(date, obs.when)
     assert_redirected_to(observation_url(obs.id))
   end
@@ -277,7 +280,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    field_slip = FieldSlip.find_by(code: code)
+    assert_not_nil(field_slip, "Cannot find FieldSlip with code #{code}")
+    obs = field_slip.observation
+    assert_not_nil(obs, "Cannot find Observation for FieldSlip")
     assert_match("https://www.inaturalist.org/observations",
                  obs.notes[:Other_Codes])
   end
@@ -313,7 +319,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    field_slip = FieldSlip.find_by(code: code)
+    assert_not_nil(field_slip, "Cannot find FieldSlip for code #{code}")
+    obs = field_slip.observation
+    assert_not_nil(obs, "Cannot find Observation for FieldSlip")
     assert_redirected_to(observation_url(obs.id))
     assert_equal(obs.text_name, "Fungi")
   end
@@ -333,7 +342,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    field_slip = FieldSlip.find_by(code: code)
+    assert_not_nil(field_slip, "Cannot find FieldSlip for code #{code}")
+    obs = field_slip.observation
+    assert_not_nil(obs, "Cannot find Observation for FieldSlip")
     assert_redirected_to(observation_url(obs.id))
   end
 

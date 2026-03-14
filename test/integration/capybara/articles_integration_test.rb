@@ -26,7 +26,8 @@ class ArticlesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.articles__show")
 
     # Verify database effect
-    article = Article.last
+    article = Article.find_by(title: "Test Article")
+    assert_not_nil(article, "Cannot find Article")
     assert_equal("Test Article", article.title)
     assert_equal("This is a test article body.", article.body)
   end

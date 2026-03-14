@@ -282,7 +282,8 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal(11, rolf.reload.contribution)
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)
-    comment = Comment.last
+    comment = Comment.find_by(summary: "A Summary", target: obs)
+    assert_not_nil(comment, "Cannot find Comment")
     assert_equal("A Summary", comment.summary)
     assert_equal("Some text.", comment.comment)
   end

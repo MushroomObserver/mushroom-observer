@@ -41,7 +41,8 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_flash_success
     assert_selector("body.species_lists__show")
 
-    spl = SpeciesList.last
+    spl = SpeciesList.find_by(title: "List Title")
+    assert_not_nil(spl, "Cannot find SpeciesList")
     assert_equal("List Title", spl.title)
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
@@ -84,7 +85,8 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: /#{spl.title}/)
     assert_link(href: edit_species_list_path(spl.id))
 
-    loc = Location.last
+    loc = Location.find_by(name: newer_location)
+    assert_not_nil(loc, "Cannot find Location")
     assert_equal(newer_location, loc.name)
     assert_equal(dick, User.current)
     assert_equal(newer_location_reverse, loc.display_name)

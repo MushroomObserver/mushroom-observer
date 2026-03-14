@@ -290,7 +290,8 @@ class LanguageExporterTest < UnitTestCase
     User.current = dick
     @official.send_private(:create_string, "number", "uno", "one")
 
-    str = TranslationString.last
+    str = TranslationString.find_by(tag: "number", language: @official)
+    assert_not_nil(str, "Cannot find TranslationString")
     assert_equal(1, str.version)
     assert_objs_equal(@official, str.language)
     assert_equal("number", str.tag)
