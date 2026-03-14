@@ -30,7 +30,12 @@ module OccurrencesController::Edit
     default_obs = @occurrence.default_observation
     handle_additions
     handle_removals
-    update_default
+    if params[:create_observation]
+      handle_create_observation
+    else
+      update_default
+      update_default_obs_attributes
+    end
     redirect_after_update(default_obs)
   rescue ActiveRecord::RecordInvalid => e
     flash_error(e.message)
@@ -91,11 +96,16 @@ module OccurrencesController::Edit
     remove_ids.each do |obs_id|
       obs = @occurrence.observations.find_by(id: obs_id)
       next unless obs
+      next unless can_remove_observation?(obs)
 
       obs.update!(occurrence: nil)
     end
     @occurrence.reload
     @occurrence.destroy_if_incomplete!
+  end
+
+  def can_remove_observation?(obs)
+    @occurrence.user == @user || obs.can_edit?(@user)
   end
 
   def update_default
@@ -110,6 +120,69 @@ module OccurrencesController::Edit
     return unless new_default
 
     @occurrence.update!(default_observation: new_default)
+  end
+
+  def update_default_obs_attributes
+    return unless @occurrence.persisted? && !@occurrence.destroyed?
+
+    obs = @occurrence.default_observation
+    obs_params = params[:default_obs]
+    return unless obs_params
+
+    unless obs.can_edit?(@user)
+      flash_error(:edit_occurrence_no_edit_permission.t)
+      return
+    end
+
+    update_obs_location(obs, obs_params)
+    update_obs_date(obs, obs_params)
+    obs.save! if obs.changed?
+  end
+
+  def update_obs_location(obs, obs_params)
+    new_loc_id = obs_params[:location_id]&.to_i
+    return unless new_loc_id&.positive?
+    return if new_loc_id == obs.location_id
+
+    location = Location.find_by(id: new_loc_id)
+    return unless location
+
+    obs.location = location
+    obs.where = location.name
+  end
+
+  def update_obs_date(obs, obs_params)
+    new_when = obs_params[:when]
+    return if new_when.blank?
+
+    parsed = Date.parse(new_when)
+    obs.when = parsed if parsed != obs.when
+  rescue Date::Error
+    nil
+  end
+
+  def handle_create_observation
+    return unless @occurrence.persisted? && !@occurrence.destroyed?
+
+    source = find_source_observation
+    notes = source.notes.to_h
+    new_obs = Observation.build_observation(
+      source.location, source.name, notes,
+      source.when, @user
+    )
+    new_obs.where = source.where
+    new_obs.save!
+    new_obs.update!(occurrence: @occurrence)
+    @occurrence.update!(default_observation: new_obs)
+    @occurrence.recompute_has_specimen!
+  end
+
+  def find_source_observation
+    source_id = params.dig(
+      :occurrence, :default_observation_id
+    )&.to_i
+    @occurrence.observations.find_by(id: source_id) ||
+      @occurrence.default_observation
   end
 
   def candidate_observations

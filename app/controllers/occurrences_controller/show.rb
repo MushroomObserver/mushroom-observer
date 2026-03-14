@@ -11,7 +11,7 @@ module OccurrencesController::Show
   def destroy
     return unless find_occurrence!
 
-    unless @occurrence.can_edit?(@user)
+    unless @occurrence.user == @user
       flash_error(:permission_denied.t)
       redirect_to(occurrence_path(@occurrence))
       return

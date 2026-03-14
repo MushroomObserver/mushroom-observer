@@ -23,6 +23,11 @@ class Occurrence < AbstractModel
   belongs_to :default_observation, class_name: "Observation"
   has_many :observations, dependent: :nullify
 
+  # Any logged-in user can edit an occurrence.
+  def can_edit?(_user)
+    true
+  end
+
   validates :default_observation, presence: true
   validate :default_observation_must_belong_to_occurrence, on: :update
   validate :observation_count_within_limits, on: :update

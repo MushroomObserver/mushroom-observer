@@ -244,12 +244,11 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_match(/remove_observation_ids/, body)
   end
 
-  def test_edit_denied_for_non_creator
+  def test_edit_allowed_for_non_creator
     login("mary")
     occ = create_occurrence(@obs1, @obs2)
     get(:edit, params: { id: occ.id })
-    assert_redirected_to(occurrence_path(occ))
-    assert_flash_error
+    assert_response(:success)
   end
 
   def test_edit_missing_occurrence
@@ -301,7 +300,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_not(Occurrence.exists?(occ.id))
   end
 
-  def test_update_denied_for_non_creator
+  def test_update_allowed_for_non_creator
     login("mary")
     occ = create_occurrence(@obs1, @obs2)
     patch(:update, params: {
@@ -309,8 +308,38 @@ class OccurrencesControllerTest < FunctionalTestCase
             occurrence: { default_observation_id: @obs2.id }
           })
     occ.reload
-    assert_equal(@obs1, occ.default_observation)
-    assert_flash_error
+    assert_equal(@obs2, occ.default_observation)
+    assert_flash_success
+  end
+
+  # ---------- update: removal permissions ----------
+
+  def test_non_creator_can_remove_own_observation
+    login("mary")
+    # @obs1 is owned by mary
+    obs3 = observations(:detailed_unknown_obs) # owned by mary
+    occ = create_occurrence(@obs1, @obs2, obs3)
+    patch(:update, params: {
+            id: occ.id,
+            remove_observation_ids: [@obs1.id],
+            occurrence: { default_observation_id: @obs2.id }
+          })
+    occ.reload
+    assert_not_includes(occ.observations, @obs1)
+  end
+
+  def test_non_creator_cannot_remove_others_observation
+    login("mary")
+    # @obs2 (coprinus_comatus_obs) is owned by rolf
+    obs3 = observations(:detailed_unknown_obs)
+    occ = create_occurrence(@obs1, @obs2, obs3)
+    patch(:update, params: {
+            id: occ.id,
+            remove_observation_ids: [@obs2.id],
+            occurrence: { default_observation_id: @obs1.id }
+          })
+    occ.reload
+    assert_includes(occ.observations, @obs2)
   end
 
   # ---------- update: add observations ----------
@@ -381,6 +410,100 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_match(/add_observation_ids/, @response.body)
   end
 
+  # ---------- update: location/date/create obs ----------
+
+  def test_update_changes_default_obs_location
+    login("rolf")
+    loc2 = locations(:falmouth)
+    obs_a = create_obs_with_location(rolf, locations(:burbank))
+    obs_b = create_obs_with_location(rolf, loc2)
+    occ = create_occurrence(obs_a, obs_b)
+
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { default_observation_id: obs_a.id },
+            default_obs: { location_id: loc2.id }
+          })
+    obs_a.reload
+    assert_equal(loc2, obs_a.location)
+    assert_equal(loc2.name, obs_a.where)
+  end
+
+  def test_update_changes_default_obs_date
+    login("rolf")
+    obs_a = create_obs_with_location(rolf, locations(:burbank))
+    obs_b = create_obs_with_location(rolf, locations(:falmouth))
+    occ = create_occurrence(obs_a, obs_b)
+    new_date = "2025-06-15"
+
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { default_observation_id: obs_a.id },
+            default_obs: { when: new_date }
+          })
+    obs_a.reload
+    assert_equal(Date.parse(new_date), obs_a.when)
+  end
+
+  def test_update_denied_obs_edit_without_permission
+    obs_mary = create_obs_with_location(mary, locations(:burbank))
+    obs_rolf = create_obs_with_location(rolf, locations(:falmouth))
+    occ = Occurrence.create!(
+      user: rolf, default_observation: obs_mary
+    )
+    obs_mary.update!(occurrence: occ)
+    obs_rolf.update!(occurrence: occ)
+    login("rolf")
+
+    original_loc = obs_mary.location_id
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { default_observation_id: obs_mary.id },
+            default_obs: { location_id: locations(:falmouth).id }
+          })
+    obs_mary.reload
+    assert_equal(original_loc, obs_mary.location_id)
+    assert_flash_error
+  end
+
+  def test_update_creates_observation
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    original_count = occ.observations.count
+
+    assert_difference("Observation.count", 1) do
+      patch(:update, params: {
+              id: occ.id,
+              occurrence: { default_observation_id: @obs1.id },
+              create_observation: "Create New Observation"
+            })
+    end
+    occ.reload
+    new_obs = occ.default_observation
+    assert_not_equal(@obs1, new_obs)
+    assert_equal(@obs1.location, new_obs.location)
+    assert_equal(@obs1.when, new_obs.when)
+    assert_equal(rolf, new_obs.user)
+    assert_equal(original_count + 1, occ.observations.count)
+  end
+
+  def test_edit_shows_details_section
+    login("rolf")
+    obs_a = create_obs_with_location(rolf, locations(:burbank))
+    obs_b = create_obs_with_location(rolf, locations(:falmouth))
+    occ = create_occurrence(obs_a, obs_b)
+
+    get(:edit, params: { id: occ.id })
+    assert_response(:success)
+    body = @response.body
+    # Location dropdown present when locations differ
+    assert_match(/default_obs\[location_id\]/, body)
+    # Date and create button always present
+    assert_match(/default_obs\[when\]/, body)
+    assert_match(/create_observation/, body)
+    assert_match(/data-editable/, body)
+  end
+
   # ---------- destroy action ----------
 
   def test_destroy_by_creator
@@ -396,7 +519,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_nil(@obs2.occurrence_id)
   end
 
-  def test_destroy_by_non_creator
+  def test_destroy_denied_for_non_creator
     login("mary")
     occ = create_occurrence(@obs1, @obs2)
     assert_no_difference("Occurrence.count") do
@@ -425,6 +548,16 @@ class OccurrencesControllerTest < FunctionalTestCase
         default_observation_id: default.id
       }
     }
+  end
+
+  def create_obs_with_location(user, location)
+    Observation.create!(
+      user: user,
+      name: names(:fungi),
+      when: Time.zone.today,
+      where: location.name,
+      location: location
+    )
   end
 
   def create_occurrence(default_obs, *other_obs)

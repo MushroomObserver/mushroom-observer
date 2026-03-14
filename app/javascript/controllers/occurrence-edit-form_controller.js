@@ -6,7 +6,10 @@ import { Controller } from "@hotwired/stimulus"
 // - Clicking Primary on a candidate auto-checks Add
 // - Clicking Primary on a removed obs unchecks Remove
 // - Unchecking Add on the Primary candidate reassigns Primary
+// - Create Observation button enabled only when primary is not editable
 export default class extends Controller {
+  static targets = ["createObsButton"]
+
   removeToggled(event) {
     const checkbox = event.currentTarget
     if (!checkbox.checked) return
@@ -33,7 +36,6 @@ export default class extends Controller {
     )
     if (addCheckbox && !addCheckbox.checked) {
       addCheckbox.checked = true
-      return
     }
 
     const removeCheckbox = li.querySelector(
@@ -42,6 +44,8 @@ export default class extends Controller {
     if (removeCheckbox && removeCheckbox.checked) {
       removeCheckbox.checked = false
     }
+
+    this.#toggleCreateButton(radio)
   }
 
   // -- private helpers --
@@ -66,7 +70,17 @@ export default class extends Controller {
     })
 
     const target = eligible[0] || radios[0]
-    if (target) target.checked = true
+    if (target) {
+      target.checked = true
+      this.#toggleCreateButton(target)
+    }
+  }
+
+  #toggleCreateButton(radio) {
+    if (!this.hasCreateObsButtonTarget) return
+
+    const editable = radio.dataset.editable === "true"
+    this.createObsButtonTarget.disabled = editable
   }
 
   #findRadio(element) {

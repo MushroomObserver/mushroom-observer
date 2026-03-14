@@ -2938,8 +2938,7 @@
 
   occurrence_already_exists: This observation already belongs to an occurrence.
   occurrence_created: "Occurrence #[ID] created."
-  occurrence_locations_differ: >
-    Note: The observations in this occurrence have different locations.
+  occurrence_locations_differ: "Note: The observations in this occurrence have different locations."
   occurrence_need_two: You must include at least one additional observation to create an occurrence.
   occurrence_observation_not_found: Observation not found.
   create_occurrence_title: Create Occurrence
@@ -2947,13 +2946,17 @@
   create_occurrence_primary: Primary
   create_occurrence_submit: Create Occurrence
   show_occurrence_title: Occurrence
-  show_occurrence_location_differs: >
-    Location information differs across observations in this occurrence.
+  show_occurrence_location_differs: Location information differs across observations in this occurrence.
   show_occurrence_default: Default
   edit_occurrence_submit: Save Changes
   edit_occurrence_remove: Remove
   edit_occurrence_add_heading: Add Recently Viewed Observations
   edit_occurrence_add: Add
+  edit_occurrence_location: "Location:"
+  edit_occurrence_create_obs: Create New Observation
+  edit_occurrence_create_obs_help: Creates a new observation you can edit, based on the currently selected primary observation.
+  edit_occurrence_details_heading: Primary Observation Details
+  edit_occurrence_no_edit_permission: You don't have permission to edit this observation's details.
   occurrence_updated: Occurrence updated.
   occurrence_destroyed: Occurrence destroyed.
   occurrence_not_found: Occurrence not found.
