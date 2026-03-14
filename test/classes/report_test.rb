@@ -731,6 +731,23 @@ class ReportTest < UnitTestCase
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_link_backs_minimal
+    obs = observations(:minimal_unknown_obs)
+    expect = [
+      "MUOB #{obs.id}",
+      "https://mushroomobserver.org/obs/#{obs.id}"
+    ]
+
+    do_csv_test(Report::MycoportalLinkBacks, obs, expect, &:id)
+  end
+
+  def test_mycoportal_link_backs_labels
+    query = Query.lookup(:Observation)
+    body = report_body(Report::MycoportalLinkBacks, query)
+    header = ::CSV.parse(body, col_sep: ",").first
+    assert_equal(%w[subjectCatalogNumber resourceUrl], header)
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when

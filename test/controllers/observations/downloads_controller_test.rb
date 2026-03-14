@@ -22,6 +22,11 @@ module Observations
         "[id=download_format_mycoportal_image_list]", false,
         "Missing a MyCoPortal Images radio button"
       )
+      assert_select(
+        "input[type=radio]" \
+        "[id=download_format_mycoportal_link_backs]", false,
+        "MyCoPortal LinkBacks radio button should not appear for non-admin"
+      )
     end
 
     def test_new_admin
@@ -42,6 +47,11 @@ module Observations
         "input[type=radio]" \
         "[id=download_format_mycoportal_image_list]", true,
         "Missing a MyCoPortal Images radio button"
+      )
+      assert_select(
+        "input[type=radio]" \
+        "[id=download_format_mycoportal_link_backs]", true,
+        "Missing a MyCoPortal LinkBacks radio button"
       )
     end
 
@@ -193,6 +203,17 @@ module Observations
         params: {
           q:,
           download: { format: "mycoportal", encoding: "UTF-8" },
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q:,
+          download: { format: "mycoportal_link_backs", encoding: "UTF-8" },
           commit: "Download"
         }
       )

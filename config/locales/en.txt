@@ -1588,6 +1588,7 @@
   download_observations_fundis: FunDiS
   download_observations_mycoportal: MyCoPortal
   download_observations_mycoportal_images: Images for MyCoPortal
+  download_observations_mycoportal_link_backs: MyCoPortal LinkBacks
   download_observations_symbiota: Symbiota
   download_observations_encoding: Choose character encoding
   download_observations_ascii: ASCII (no accents)

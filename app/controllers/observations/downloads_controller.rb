@@ -69,6 +69,7 @@ module Observations
       fundis
       mycoportal
       mycoportal_image_list
+      mycoportal_link_backs
     ].freeze
     private_constant :FORMATS
 
