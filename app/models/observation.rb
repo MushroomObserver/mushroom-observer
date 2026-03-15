@@ -213,6 +213,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
+  after_destroy :cleanup_occurrence
   after_commit :flush_observation_change_emails, on: [:create, :update]
 
   # Automatically (but silently) log destruction.
@@ -955,6 +956,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # This must be sent immediately since the observation won't exist after.
   def notify_users_before_destroy
     send_observation_destroyed_emails
+  end
+
+  # Clean up occurrence after an observation is destroyed.
+  # Reassigns default if needed, then destroys if < 2 obs remain.
+  def cleanup_occurrence
+    return unless occurrence_id
+
+    occ = Occurrence.find_by(id: occurrence_id)
+    return unless occ
+
+    reassign_occurrence_default(occ) if occ.default_observation_id == id
+    occ.reload
+    occ.destroy_if_incomplete!
+  end
+
+  def reassign_occurrence_default(occ)
+    next_obs = occ.observations.order(:created_at).first
+    if next_obs
+      occ.update!(default_observation: next_obs)
+    else
+      occ.destroy!
+    end
   end
 
   # Track a pending change for email notification batching.

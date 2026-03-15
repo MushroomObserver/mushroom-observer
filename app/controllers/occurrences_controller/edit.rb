@@ -45,10 +45,18 @@ module OccurrencesController::Edit
   def redirect_after_update(default_obs)
     if @occurrence.destroyed?
       flash_notice(:occurrence_destroyed.t)
-      redirect_to(permanent_observation_path(default_obs.id))
+      redirect_to_observation_or_index(default_obs)
     else
       flash_notice(:occurrence_updated.t)
       redirect_to(occurrence_path(@occurrence))
+    end
+  end
+
+  def redirect_to_observation_or_index(obs)
+    if obs
+      redirect_to(permanent_observation_path(obs.id))
+    else
+      redirect_to(observations_path)
     end
   end
 
@@ -126,17 +134,22 @@ module OccurrencesController::Edit
     return unless @occurrence.persisted? && !@occurrence.destroyed?
 
     obs = @occurrence.default_observation
+    return unless obs
+
     obs_params = params[:default_obs]
     return unless obs_params
 
+    update_obs_location(obs, obs_params)
+    update_obs_date(obs, obs_params)
+    return unless obs.changed?
+
     unless obs.can_edit?(@user)
       flash_error(:edit_occurrence_no_edit_permission.t)
+      obs.reload
       return
     end
 
-    update_obs_location(obs, obs_params)
-    update_obs_date(obs, obs_params)
-    obs.save! if obs.changed?
+    obs.save!
   end
 
   def update_obs_location(obs, obs_params)

@@ -209,6 +209,37 @@ class OccurrenceTest < UnitTestCase
     end
   end
 
+  # -- observation destroy cleans up occurrence --
+
+  def test_destroying_default_obs_reassigns_default
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs1.destroy!
+    occ.reload
+    assert(occ.persisted?)
+    assert_equal(2, occ.observations.count)
+    assert_not_equal(@obs1.id, occ.default_observation_id)
+    # Should pick oldest remaining by created_at
+    oldest = [@obs2, @obs3].min_by(&:created_at)
+    assert_equal(oldest, occ.default_observation)
+  end
+
+  def test_destroying_obs_auto_destroys_occurrence_if_too_few
+    occ = create_occurrence(@obs1, @obs2)
+    occ_id = occ.id
+    @obs2.destroy!
+    assert_not(Occurrence.exists?(occ_id))
+    @obs1.reload
+    assert_nil(@obs1.occurrence_id)
+  end
+
+  def test_destroying_non_default_obs_keeps_default
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs3.destroy!
+    occ.reload
+    assert_equal(@obs1, occ.default_observation)
+    assert_equal(2, occ.observations.count)
+  end
+
   private
 
   def create_occurrence(default_obs, *other_obs)
