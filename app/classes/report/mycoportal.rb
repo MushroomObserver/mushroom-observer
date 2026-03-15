@@ -31,7 +31,6 @@ module Report
         "substrate",
         "occurrenceRemarks", # MO observation.notes; was fieldNotes
         "associatedTaxa", # was "host"
-        "verbatimAttributes", # anchored link to obs; was observationUrl
         "country",
         "stateProvince",
         "county",
