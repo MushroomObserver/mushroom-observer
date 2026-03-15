@@ -12,6 +12,7 @@ require "haversine"
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
+    MO_PERMALINK_DOMAIN = "https://mushroomobserver.org"
     # Label names for the columns in the report.
     # Some Symbiota Standard Fields
     # https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/
@@ -20,6 +21,7 @@ module Report
     # MyCoPortal fills in other fields automatically.
     def labels
       [
+        "occurrenceID", # URL of MO Observation page
         "basisOfRecord", # : "HumanObservation",
         "catalogNumber", # "MUOB" + space + observation.id"
         "sciname",
@@ -45,6 +47,7 @@ module Report
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
+        "#{MO_PERMALINK_DOMAIN}/obs/#{row.obs_id}", # occurrenceID
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
         sciname(row), # (mono- or binomial without author)
