@@ -20,7 +20,6 @@ module Report
     # MyCoPortal fills in other fields automatically.
     def labels
       [
-        "dbpk", # MCP-specific; MO observation.id; was "mushroomObserverId",
         "basisOfRecord", # : "HumanObservation",
         "catalogNumber", # "MUOB" + space + observation.id"
         "sciname",
@@ -46,7 +45,6 @@ module Report
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
-        row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
         sciname(row), # (mono- or binomial without author)

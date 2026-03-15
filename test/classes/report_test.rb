@@ -764,7 +764,6 @@ class ReportTest < UnitTestCase
     maximum_elevation = high.to_i.to_s if high.present?
 
     {
-      dbpk: obs.id.to_s,
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
       sciname: obs.text_name,
