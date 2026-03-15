@@ -8,13 +8,13 @@ require "haversine"
 
 # MyCoPortal is built on Symbiota
 # https://symbiota.org/
-# https://biokic.github.io/symbiota-docs/
+# https://docs.symbiota.org/
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
     # Label names for the columns in the report.
     # Some Symbiota Standard Fields
-    # https://biokic.github.io/symbiota-docs/editor/edit/fields/#standard-fields
+    # https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/
     # plus some MyCoPortal-specific fields
     # Includes only fields needed for upload to MyCoPortal.
     # MyCoPortal fills in other fields automatically.
@@ -107,7 +107,7 @@ module Report
     end
 
     # host plus associates
-    # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
+    # https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/#associated-taxa
     def associated_taxa(row)
       host = explode_notes(row)[:host]
       trees_shrubs = explode_notes(row)[:trees_shrubs]
