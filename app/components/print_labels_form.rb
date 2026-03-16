@@ -13,8 +13,10 @@ class Components::PrintLabelsForm < Components::ApplicationForm
   end
 
   def view_template
-    h3(class: "mt-5") { "#{:species_list_labels_header.l}:" }
-    submit(:species_list_labels_button.l, center: true)
+    super do
+      h3(class: "mt-5") { "#{:species_list_labels_header.l}:" }
+      submit(:species_list_labels_button.l, center: true)
+    end
   end
 
   private
