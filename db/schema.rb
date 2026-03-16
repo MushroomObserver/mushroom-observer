@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_06_194750) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_16_133012) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -564,11 +564,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_06_194750) do
 
   create_table "occurrences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "user_id"
-    t.integer "default_observation_id"
+    t.integer "primary_observation_id"
     t.boolean "has_specimen", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["default_observation_id"], name: "index_occurrences_on_default_observation_id"
+    t.index ["primary_observation_id"], name: "index_occurrences_on_primary_observation_id"
     t.index ["user_id"], name: "index_occurrences_on_user_id"
   end
 

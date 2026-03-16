@@ -52,7 +52,7 @@ export default class extends Controller {
 
   #reassignPrimary() {
     const radios = this.element.querySelectorAll(
-      "input[type='radio'][name='occurrence[default_observation_id]']"
+      "input[type='radio'][name='occurrence[primary_observation_id]']"
     )
     const eligible = Array.from(radios).filter((r) => {
       const li = r.closest("li")
@@ -85,7 +85,7 @@ export default class extends Controller {
 
   #findRadio(element) {
     return element.closest("li")?.querySelector(
-      "input[type='radio'][name='occurrence[default_observation_id]']"
+      "input[type='radio'][name='occurrence[primary_observation_id]']"
     )
   }
 }

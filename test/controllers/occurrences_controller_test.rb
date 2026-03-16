@@ -32,7 +32,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_new_redirects_if_occurrence_exists
     login("rolf")
     occ = Occurrence.create!(user: rolf,
-                             default_observation: @obs1)
+                             primary_observation: @obs1)
     @obs1.update!(occurrence: occ)
 
     get(:new, params: { observation_id: @obs1.id })
@@ -47,7 +47,7 @@ class OccurrencesControllerTest < FunctionalTestCase
       :create,
       observation_ids: [@obs1.id, @obs2.id],
       occurrence: { observation_id: @obs1.id,
-                    default_observation_id: @obs1.id }
+                    primary_observation_id: @obs1.id }
     )
   end
 
@@ -58,18 +58,18 @@ class OccurrencesControllerTest < FunctionalTestCase
       post(:create, params: create_params(@obs1, [@obs1, obs3]))
     end
     occ = Occurrence.last
-    assert_equal(@obs1, occ.default_observation)
+    assert_equal(@obs1, occ.primary_observation)
     assert_equal(2, occ.observations.count)
     assert_redirected_to(permanent_observation_path(@obs1.id))
     assert_flash_success
   end
 
-  def test_create_with_different_default
+  def test_create_with_different_primary
     login("rolf")
     post(:create, params: create_params(@obs1, [@obs1, @obs2],
-                                        default: @obs2))
+                                        primary: @obs2))
     occ = Occurrence.last
-    assert_equal(@obs2, occ.default_observation)
+    assert_equal(@obs2, occ.primary_observation)
   end
 
   def test_create_needs_at_least_two
@@ -88,7 +88,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     post(:create, params: {
            observation_ids: [-1, @obs2.id],
            occurrence: { observation_id: -1,
-                         default_observation_id: -1 }
+                         primary_observation_id: -1 }
          })
     assert_redirected_to(observations_path)
     assert_flash_error
@@ -136,7 +136,7 @@ class OccurrencesControllerTest < FunctionalTestCase
              observation_ids: [@obs1.id.to_s, @obs2.id.to_s],
              occurrence: {
                observation_id: @obs1.id.to_s,
-               default_observation_id: @obs1.id.to_s
+               primary_observation_id: @obs1.id.to_s
              }
            })
     end
@@ -167,9 +167,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_match(/name="occurrence\[observation_id\]"/, body)
     # observation_ids[] at top level
     assert_match(/name="observation_ids\[\]"/, body)
-    # default_observation_id nested under occurrence[]
+    # primary_observation_id nested under occurrence[]
     assert_match(
-      /name="occurrence\[default_observation_id\]"/, body
+      /name="occurrence\[primary_observation_id\]"/, body
     )
   end
 
@@ -240,7 +240,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     get(:edit, params: { id: occ.id })
     assert_response(:success)
     body = @response.body
-    assert_match(/occurrence\[default_observation_id\]/, body)
+    assert_match(/occurrence\[primary_observation_id\]/, body)
     assert_match(/remove_observation_ids/, body)
   end
 
@@ -260,15 +260,15 @@ class OccurrencesControllerTest < FunctionalTestCase
 
   # ---------- update action ----------
 
-  def test_update_changes_default
+  def test_update_changes_primary
     login("rolf")
     occ = create_occurrence(@obs1, @obs2)
     patch(:update, params: {
             id: occ.id,
-            occurrence: { default_observation_id: @obs2.id }
+            occurrence: { primary_observation_id: @obs2.id }
           })
     occ.reload
-    assert_equal(@obs2, occ.default_observation)
+    assert_equal(@obs2, occ.primary_observation)
     assert_redirected_to(occurrence_path(occ))
     assert_flash_success
   end
@@ -280,7 +280,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: occ.id,
             remove_observation_ids: [@obs2.id],
-            occurrence: { default_observation_id: @obs1.id }
+            occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_equal(2, occ.observations.count)
@@ -295,7 +295,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: occ.id,
             remove_observation_ids: [@obs2.id],
-            occurrence: { default_observation_id: @obs1.id }
+            occurrence: { primary_observation_id: @obs1.id }
           })
     assert_not(Occurrence.exists?(occ.id))
   end
@@ -305,10 +305,10 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = create_occurrence(@obs1, @obs2)
     patch(:update, params: {
             id: occ.id,
-            occurrence: { default_observation_id: @obs2.id }
+            occurrence: { primary_observation_id: @obs2.id }
           })
     occ.reload
-    assert_equal(@obs2, occ.default_observation)
+    assert_equal(@obs2, occ.primary_observation)
     assert_flash_success
   end
 
@@ -322,7 +322,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: occ.id,
             remove_observation_ids: [@obs1.id],
-            occurrence: { default_observation_id: @obs2.id }
+            occurrence: { primary_observation_id: @obs2.id }
           })
     occ.reload
     assert_not_includes(occ.observations, @obs1)
@@ -336,7 +336,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: occ.id,
             remove_observation_ids: [@obs2.id],
-            occurrence: { default_observation_id: @obs1.id }
+            occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_includes(occ.observations, @obs2)
@@ -351,7 +351,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: occ.id,
             add_observation_ids: [obs3.id],
-            occurrence: { default_observation_id: @obs1.id }
+            occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_equal(3, occ.observations.count)
@@ -369,7 +369,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: occ1.id,
             add_observation_ids: [obs3.id],
-            occurrence: { default_observation_id: @obs1.id }
+            occurrence: { primary_observation_id: @obs1.id }
           })
     occ1.reload
     assert_equal(4, occ1.observations.count)
@@ -389,7 +389,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: occ.id,
             add_observation_ids: [obs3.id],
-            occurrence: { default_observation_id: @obs1.id }
+            occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_equal(2, occ.observations.count)
@@ -412,7 +412,7 @@ class OccurrencesControllerTest < FunctionalTestCase
 
   # ---------- update: location/date/create obs ----------
 
-  def test_update_changes_default_obs_location
+  def test_update_changes_primary_location
     login("rolf")
     loc2 = locations(:falmouth)
     obs_a = create_obs_with_location(rolf, locations(:burbank))
@@ -421,15 +421,15 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     patch(:update, params: {
             id: occ.id,
-            occurrence: { default_observation_id: obs_a.id },
-            default_obs: { location_id: loc2.id }
+            occurrence: { primary_observation_id: obs_a.id },
+            primary_obs: { location_id: loc2.id }
           })
     obs_a.reload
     assert_equal(loc2, obs_a.location)
     assert_equal(loc2.name, obs_a.where)
   end
 
-  def test_update_changes_default_obs_date
+  def test_update_changes_primary_date
     login("rolf")
     obs_a = create_obs_with_location(rolf, locations(:burbank))
     obs_b = create_obs_with_location(rolf, locations(:falmouth))
@@ -438,8 +438,8 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     patch(:update, params: {
             id: occ.id,
-            occurrence: { default_observation_id: obs_a.id },
-            default_obs: { when: new_date }
+            occurrence: { primary_observation_id: obs_a.id },
+            primary_obs: { when: new_date }
           })
     obs_a.reload
     assert_equal(Date.parse(new_date), obs_a.when)
@@ -449,7 +449,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     obs_mary = create_obs_with_location(mary, locations(:burbank))
     obs_rolf = create_obs_with_location(rolf, locations(:falmouth))
     occ = Occurrence.create!(
-      user: rolf, default_observation: obs_mary
+      user: rolf, primary_observation: obs_mary
     )
     obs_mary.update!(occurrence: occ)
     obs_rolf.update!(occurrence: occ)
@@ -458,8 +458,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     original_loc = obs_mary.location_id
     patch(:update, params: {
             id: occ.id,
-            occurrence: { default_observation_id: obs_mary.id },
-            default_obs: { location_id: locations(:falmouth).id }
+            occurrence: { primary_observation_id: obs_mary.id },
+            primary_obs: { location_id: locations(:falmouth).id }
           })
     obs_mary.reload
     assert_equal(original_loc, obs_mary.location_id)
@@ -474,12 +474,12 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_difference("Observation.count", 1) do
       patch(:update, params: {
               id: occ.id,
-              occurrence: { default_observation_id: @obs1.id },
+              occurrence: { primary_observation_id: @obs1.id },
               create_observation: "Create New Observation"
             })
     end
     occ.reload
-    new_obs = occ.default_observation
+    new_obs = occ.primary_observation
     assert_not_equal(@obs1, new_obs)
     assert_equal(@obs1.location, new_obs.location)
     assert_equal(@obs1.when, new_obs.when)
@@ -497,9 +497,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_response(:success)
     body = @response.body
     # Location dropdown present when locations differ
-    assert_match(/default_obs\[location_id\]/, body)
+    assert_match(/primary_obs\[location_id\]/, body)
     # Date and create button always present
-    assert_match(/default_obs\[when\]/, body)
+    assert_match(/primary_obs\[when\]/, body)
     assert_match(/create_observation/, body)
     assert_match(/data-editable/, body)
   end
@@ -528,7 +528,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_destroy_redirects_to_default_obs
+  def test_destroy_redirects_to_primary_obs
     login("rolf")
     occ = create_occurrence(@obs1, @obs2)
     delete(:destroy, params: { id: occ.id })
@@ -538,14 +538,14 @@ class OccurrencesControllerTest < FunctionalTestCase
   private
 
   # Mirrors actual Superform output: observation_id and
-  # default_observation_id nested under occurrence[],
+  # primary_observation_id nested under occurrence[],
   # observation_ids[] at top level (raw input elements).
-  def create_params(source, obs_list, default: source)
+  def create_params(source, obs_list, primary: source)
     {
       observation_ids: obs_list.map(&:id),
       occurrence: {
         observation_id: source.id,
-        default_observation_id: default.id
+        primary_observation_id: primary.id
       }
     }
   end
@@ -560,12 +560,12 @@ class OccurrencesControllerTest < FunctionalTestCase
     )
   end
 
-  def create_occurrence(default_obs, *other_obs)
+  def create_occurrence(primary_obs, *other_obs)
     occ = Occurrence.create!(
       user: rolf,
-      default_observation: default_obs
+      primary_observation: primary_obs
     )
-    default_obs.update!(occurrence: occ)
+    primary_obs.update!(occurrence: occ)
     other_obs.each { |obs| obs.update!(occurrence: occ) }
     occ
   end

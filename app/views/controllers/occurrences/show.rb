@@ -4,7 +4,7 @@ module Views
   module Controllers
     module Occurrences
       # Phlex view for the occurrence show page.
-      # Displays observations in matrix boxes with the default first.
+      # Displays observations in matrix boxes with the primary first.
       class Show < Views::Base
         register_output_helper :container_class
 

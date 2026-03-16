@@ -41,7 +41,7 @@ class OccurrenceFormTest < ComponentTestCase
 
     # Source obs primary radio is checked
     assert_html(html, "input[type='radio']" \
-                      "[name='occurrence[default_observation_id]']" \
+                      "[name='occurrence[primary_observation_id]']" \
                       "[value='#{@source.id}'][checked]")
   end
 
@@ -57,7 +57,7 @@ class OccurrenceFormTest < ComponentTestCase
     doc = Nokogiri::HTML(html)
     radio = doc.at_css(
       "input[type='radio']" \
-      "[name='occurrence[default_observation_id]']" \
+      "[name='occurrence[primary_observation_id]']" \
       "[value='#{@recent.id}']"
     )
     assert(radio, "Expected primary radio for recent obs")
@@ -94,7 +94,7 @@ class OccurrenceFormTest < ComponentTestCase
 
   def test_occurrence_warning_shown
     occ = Occurrence.create!(user: @user,
-                             default_observation: @recent)
+                             primary_observation: @recent)
     @recent.update!(occurrence: occ)
 
     html = render_form

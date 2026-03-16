@@ -74,17 +74,17 @@ class OccurrencesController < ApplicationController
   end
 
   def create_occurrence(selected)
-    default_obs = resolve_default_observation(selected)
-    occ = Occurrence.create_manual(default_obs, selected, @user)
+    primary_obs = resolve_primary_observation(selected)
+    occ = Occurrence.create_manual(primary_obs, selected, @user)
     warn_if_locations_differ(selected)
     flash_notice(:occurrence_created.t(id: occ.id))
     redirect_to(permanent_observation_path(@source_obs.id))
   end
 
-  def resolve_default_observation(selected)
-    default_id = params.dig(:occurrence,
-                            :default_observation_id).to_i
-    selected.find { |o| o.id == default_id } || @source_obs
+  def resolve_primary_observation(selected)
+    primary_id = params.dig(:occurrence,
+                            :primary_observation_id).to_i
+    selected.find { |o| o.id == primary_id } || @source_obs
   end
 
   def warn_if_locations_differ(observations)

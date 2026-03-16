@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Form for editing an Occurrence: change default observation and
+# Form for editing an Occurrence: change primary observation and
 # remove observations. Renders a grid of observation boxes with
 # Primary radio buttons and Remove checkboxes.
 class Components::OccurrenceEditForm < Components::ApplicationForm
@@ -14,8 +14,8 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     @candidates = candidates
     @user = user
     form_object = FormObject::Occurrence.new(
-      observation_id: occurrence.default_observation_id,
-      default_observation_id: occurrence.default_observation_id
+      observation_id: occurrence.primary_observation_id,
+      primary_observation_id: occurrence.primary_observation_id
     )
     super(form_object, **)
   end
@@ -137,7 +137,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
 
   def render_obs_controls(obs)
     render_primary_radio(
-      obs, checked: obs.id == @occurrence.default_observation_id
+      obs, checked: obs.id == @occurrence.primary_observation_id
     )
     br
     render_remove_checkbox(obs)
@@ -147,7 +147,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     label do
       input(
         type: "radio",
-        name: "occurrence[default_observation_id]",
+        name: "occurrence[primary_observation_id]",
         value: obs.id,
         checked: checked || nil,
         data: {
@@ -183,10 +183,10 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_location_select(locations)
-    current_loc = default_obs.location_id
-    label(for: "default_obs_location_id") { plain(:edit_occurrence_location.l) }
-    select(name: "default_obs[location_id]",
-           id: "default_obs_location_id",
+    current_loc = primary_obs.location_id
+    label(for: "primary_obs_location_id") { plain(:edit_occurrence_location.l) }
+    select(name: "primary_obs[location_id]",
+           id: "primary_obs_location_id",
            class: "form-control") do
       locations.each do |name, id|
         option(value: id,
@@ -196,12 +196,12 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_date_input
-    label(for: "default_obs_when", class: "mt-2") { plain("#{:WHEN.l}:") }
+    label(for: "primary_obs_when", class: "mt-2") { plain("#{:WHEN.l}:") }
     input(
       type: "date",
-      name: "default_obs[when]",
-      id: "default_obs_when",
-      value: default_obs.when.to_s,
+      name: "primary_obs[when]",
+      id: "primary_obs_when",
+      value: primary_obs.when.to_s,
       class: "form-control"
     )
   end
@@ -211,7 +211,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
       type: "submit", name: "create_observation",
       value: :edit_occurrence_create_obs.l,
       class: "btn btn-default center-block my-3",
-      disabled: default_obs.can_edit?(@user) || nil,
+      disabled: primary_obs.can_edit?(@user) || nil,
       data: { occurrence_edit_form_target: "createObsButton" }
     )
     p(class: "help-block") { plain(:edit_occurrence_create_obs_help.l) }
@@ -228,8 +228,8 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     end
   end
 
-  def default_obs
-    default_id = @occurrence.default_observation_id
+  def primary_obs
+    default_id = @occurrence.primary_observation_id
     @observations.find { |o| o.id == default_id } ||
       @observations.first
   end

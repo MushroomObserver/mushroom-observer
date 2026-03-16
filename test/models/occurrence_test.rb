@@ -13,7 +13,7 @@ class OccurrenceTest < UnitTestCase
     occ = create_occurrence(@obs1, @obs2)
     assert(occ.persisted?)
     assert_equal(2, occ.observations.count)
-    assert_equal(@obs1, occ.default_observation)
+    assert_equal(@obs1, occ.primary_observation)
     assert_users_equal(rolf, occ.user)
   end
 
@@ -52,19 +52,19 @@ class OccurrenceTest < UnitTestCase
 
     occ = Occurrence.create!(
       user: rolf,
-      default_observation: obs_list.first
+      primary_observation: obs_list.first
     )
     obs_list.each { |obs| obs.update!(occurrence: occ) }
     assert_not(occ.valid?)
     assert(occ.errors[:observations].any?)
   end
 
-  def test_default_observation_must_belong
+  def test_primary_observation_must_belong
     occ = create_occurrence(@obs1, @obs2)
     occ.observations.load # preload so loaded? branch is covered
-    occ.default_observation = @obs3
+    occ.primary_observation = @obs3
     assert_not(occ.valid?(:update))
-    assert(occ.errors[:default_observation].any?)
+    assert(occ.errors[:primary_observation].any?)
   end
 
   def test_nullifies_observations_on_destroy
@@ -90,7 +90,7 @@ class OccurrenceTest < UnitTestCase
     assert_includes(occ.observations, @obs2)
     # Default should be oldest by created_at
     oldest = [@obs1, @obs2].min_by(&:created_at)
-    assert_equal(oldest, occ.default_observation)
+    assert_equal(oldest, occ.primary_observation)
   end
 
   def test_find_or_create_for_field_slip_no_op_for_single_obs
@@ -114,7 +114,7 @@ class OccurrenceTest < UnitTestCase
     assert_equal(occ, result)
     assert_equal(3, result.observations.count)
     # Default unchanged
-    assert_equal(@obs1, result.default_observation)
+    assert_equal(@obs1, result.primary_observation)
   end
 
   def test_find_or_create_for_field_slip_merges_occurrences
@@ -141,7 +141,7 @@ class OccurrenceTest < UnitTestCase
     selected = [@obs1, @obs2]
     occ = Occurrence.create_manual(@obs1, selected, rolf)
     assert(occ.persisted?)
-    assert_equal(@obs1, occ.default_observation)
+    assert_equal(@obs1, occ.primary_observation)
     assert_equal(2, occ.observations.count)
   end
 
@@ -150,7 +150,7 @@ class OccurrenceTest < UnitTestCase
     selected = [@obs1, @obs2, @obs3]
     result = Occurrence.create_manual(@obs1, selected, rolf)
     assert_equal(occ_existing.id, result.id)
-    assert_equal(@obs1, result.default_observation)
+    assert_equal(@obs1, result.primary_observation)
     assert_equal(3, result.observations.count)
   end
 
@@ -211,16 +211,16 @@ class OccurrenceTest < UnitTestCase
 
   # -- observation destroy cleans up occurrence --
 
-  def test_destroying_default_obs_reassigns_default
+  def test_destroying_primary_obs_reassigns_primary
     occ = create_occurrence(@obs1, @obs2, @obs3)
     @obs1.destroy!
     occ.reload
     assert(occ.persisted?)
     assert_equal(2, occ.observations.count)
-    assert_not_equal(@obs1.id, occ.default_observation_id)
+    assert_not_equal(@obs1.id, occ.primary_observation_id)
     # Should pick oldest remaining by created_at
     oldest = [@obs2, @obs3].min_by(&:created_at)
-    assert_equal(oldest, occ.default_observation)
+    assert_equal(oldest, occ.primary_observation)
   end
 
   def test_destroying_obs_auto_destroys_occurrence_if_too_few
@@ -232,22 +232,22 @@ class OccurrenceTest < UnitTestCase
     assert_nil(@obs1.occurrence_id)
   end
 
-  def test_destroying_non_default_obs_keeps_default
+  def test_destroying_non_primary_obs_keeps_primary
     occ = create_occurrence(@obs1, @obs2, @obs3)
     @obs3.destroy!
     occ.reload
-    assert_equal(@obs1, occ.default_observation)
+    assert_equal(@obs1, occ.primary_observation)
     assert_equal(2, occ.observations.count)
   end
 
   private
 
-  def create_occurrence(default_obs, *other_obs)
+  def create_occurrence(primary_obs, *other_obs)
     occ = Occurrence.create!(
       user: rolf,
-      default_observation: default_obs
+      primary_observation: primary_obs
     )
-    default_obs.update!(occurrence: occ)
+    primary_obs.update!(occurrence: occ)
     other_obs.each { |obs| obs.update!(occurrence: occ) }
     occ
   end

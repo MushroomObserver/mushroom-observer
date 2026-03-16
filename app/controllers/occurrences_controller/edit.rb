@@ -27,25 +27,25 @@ module OccurrencesController::Edit
   end
 
   def process_update
-    default_obs = @occurrence.default_observation
+    primary_obs = @occurrence.primary_observation
     handle_additions
     handle_removals
     if params[:create_observation]
       handle_create_observation
     else
-      update_default
-      update_default_obs_attributes
+      update_primary
+      update_primary_obs_attributes
     end
-    redirect_after_update(default_obs)
+    redirect_after_update(primary_obs)
   rescue ActiveRecord::RecordInvalid => e
     flash_error(e.message)
     redirect_to(edit_occurrence_path(@occurrence))
   end
 
-  def redirect_after_update(default_obs)
+  def redirect_after_update(primary_obs)
     if @occurrence.destroyed?
       flash_notice(:occurrence_destroyed.t)
-      redirect_to_observation_or_index(default_obs)
+      redirect_to_observation_or_index(primary_obs)
     else
       flash_notice(:occurrence_updated.t)
       redirect_to(occurrence_path(@occurrence))
@@ -116,27 +116,27 @@ module OccurrencesController::Edit
     @occurrence.user == @user || obs.can_edit?(@user)
   end
 
-  def update_default
+  def update_primary
     return unless @occurrence.persisted? && !@occurrence.destroyed?
 
-    new_default_id = params.dig(:occurrence, :default_observation_id)
-    return unless new_default_id
+    new_primary_id = params.dig(:occurrence, :primary_observation_id)
+    return unless new_primary_id
 
-    new_default = @occurrence.observations.find_by(
-      id: new_default_id.to_i
+    new_primary = @occurrence.observations.find_by(
+      id: new_primary_id.to_i
     )
-    return unless new_default
+    return unless new_primary
 
-    @occurrence.update!(default_observation: new_default)
+    @occurrence.update!(primary_observation: new_primary)
   end
 
-  def update_default_obs_attributes
+  def update_primary_obs_attributes
     return unless @occurrence.persisted? && !@occurrence.destroyed?
 
-    obs = @occurrence.default_observation
+    obs = @occurrence.primary_observation
     return unless obs
 
-    obs_params = params[:default_obs]
+    obs_params = params[:primary_obs]
     return unless obs_params
 
     update_obs_location(obs, obs_params)
@@ -186,16 +186,16 @@ module OccurrencesController::Edit
     new_obs.where = source.where
     new_obs.save!
     new_obs.update!(occurrence: @occurrence)
-    @occurrence.update!(default_observation: new_obs)
+    @occurrence.update!(primary_observation: new_obs)
     @occurrence.recompute_has_specimen!
   end
 
   def find_source_observation
     source_id = params.dig(
-      :occurrence, :default_observation_id
+      :occurrence, :primary_observation_id
     )&.to_i
     @occurrence.observations.find_by(id: source_id) ||
-      @occurrence.default_observation
+      @occurrence.primary_observation
   end
 
   def candidate_observations

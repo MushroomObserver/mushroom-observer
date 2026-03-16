@@ -966,15 +966,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     occ = Occurrence.find_by(id: occurrence_id)
     return unless occ
 
-    reassign_occurrence_default(occ) if occ.default_observation_id == id
+    reassign_occurrence_primary(occ) if occ.primary_observation_id == id
     occ.reload
     occ.destroy_if_incomplete!
   end
 
-  def reassign_occurrence_default(occ)
+  def reassign_occurrence_primary(occ)
     next_obs = occ.observations.order(:created_at).first
     if next_obs
-      occ.update!(default_observation: next_obs)
+      occ.update!(primary_observation: next_obs)
     else
       occ.destroy!
     end

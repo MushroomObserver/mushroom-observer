@@ -13,7 +13,7 @@ class Components::OccurrenceForm < Components::ApplicationForm
     @user = user
     form_object = FormObject::Occurrence.new(
       observation_id: source_obs.id,
-      default_observation_id: source_obs.id
+      primary_observation_id: source_obs.id
     )
     super(form_object, **)
   end
@@ -146,7 +146,7 @@ class Components::OccurrenceForm < Components::ApplicationForm
   def render_primary_radio(obs, checked:)
     label do
       input(type: "radio",
-            name: "occurrence[default_observation_id]",
+            name: "occurrence[primary_observation_id]",
             value: obs.id,
             checked: checked || nil,
             data: primary_radio_data(obs, checked))

@@ -17,8 +17,8 @@ module OccurrencesController::Show
       return
     end
 
-    default_obs = @occurrence.default_observation
-    obs_id = default_obs&.id
+    primary_obs = @occurrence.primary_observation
+    obs_id = primary_obs&.id
     destroy_occurrence!
     flash_notice(:occurrence_destroyed.t)
     path = obs_id ? permanent_observation_path(obs_id) : observations_path
@@ -46,7 +46,7 @@ module OccurrencesController::Show
   end
 
   def ordered_observations
-    default = @occurrence.default_observation
+    default = @occurrence.primary_observation
     return @occurrence.observations.order(:created_at).to_a unless default
 
     others = @occurrence.observations.

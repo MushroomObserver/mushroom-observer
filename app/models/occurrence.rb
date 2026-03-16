@@ -11,7 +11,7 @@
 #
 #  id::                       unique numerical id
 #  user_id::                  creator of the Occurrence
-#  default_observation_id::   FK to the default Observation
+#  primary_observation_id::   FK to the default Observation
 #  has_specimen::             cached: true if any observation has specimen
 #  created_at::               timestamp
 #  updated_at::               timestamp
@@ -20,7 +20,7 @@ class Occurrence < AbstractModel
   MAX_OBSERVATIONS = 10
 
   belongs_to :user
-  belongs_to :default_observation, class_name: "Observation"
+  belongs_to :primary_observation, class_name: "Observation"
   has_many :observations, dependent: :nullify
 
   # Any logged-in user can edit an occurrence.
@@ -28,8 +28,8 @@ class Occurrence < AbstractModel
     true
   end
 
-  validates :default_observation, presence: true
-  validate :default_observation_must_belong_to_occurrence, on: :update
+  validates :primary_observation, presence: true
+  validate :primary_observation_must_belong_to_occurrence, on: :update
   validate :observation_count_within_limits, on: :update
 
   # Recompute cached has_specimen from associated observations.
@@ -58,15 +58,15 @@ class Occurrence < AbstractModel
 
   # Create an occurrence manually from a set of observations.
   # The caller picks the default; selected_obs must include it.
-  def self.create_manual(default_obs, selected_obs, user)
+  def self.create_manual(primary_obs, selected_obs, user)
     check_field_slip_conflicts!(selected_obs)
     check_max_observations!(selected_obs)
 
     occurrences = selected_obs.filter_map(&:occurrence).uniq
     if occurrences.any?
-      merge_into_manual(occurrences, default_obs, selected_obs, user)
+      merge_into_manual(occurrences, primary_obs, selected_obs, user)
     else
-      build_new(default_obs, selected_obs, user)
+      build_new(primary_obs, selected_obs, user)
     end
   end
 
@@ -139,7 +139,7 @@ class Occurrence < AbstractModel
   private_class_method :create_from_field_slip
 
   # Merge existing occurrences and add remaining observations.
-  def self.merge_into_manual(occurrences, default_obs, all_obs, _user)
+  def self.merge_into_manual(occurrences, primary_obs, all_obs, _user)
     keeper = occurrences.shift
     occurrences.each { |occ| merge!(keeper, occ) }
     all_obs.each do |obs|
@@ -147,7 +147,7 @@ class Occurrence < AbstractModel
 
       obs.update!(occurrence: keeper)
     end
-    keeper.update!(default_observation: default_obs)
+    keeper.update!(primary_observation: primary_obs)
     keeper.recompute_has_specimen!
     keeper
   end
@@ -155,9 +155,9 @@ class Occurrence < AbstractModel
 
   # Build and persist a brand-new occurrence with the given
   # observations.
-  def self.build_new(default_obs, all_obs, user)
+  def self.build_new(primary_obs, all_obs, user)
     transaction do
-      occ = create!(user: user, default_observation: default_obs)
+      occ = create!(user: user, primary_observation: primary_obs)
       all_obs.each { |obs| obs.update!(occurrence: occ) }
       occ.recompute_has_specimen!
       occ
@@ -167,19 +167,19 @@ class Occurrence < AbstractModel
 
   private
 
-  def default_observation_must_belong_to_occurrence
-    return if default_observation_id.blank?
-    return if default_observation_belongs?
+  def primary_observation_must_belong_to_occurrence
+    return if primary_observation_id.blank?
+    return if primary_observation_belongs?
 
-    errors.add(:default_observation,
+    errors.add(:primary_observation,
                "must belong to this occurrence")
   end
 
-  def default_observation_belongs?
+  def primary_observation_belongs?
     if observations.loaded?
-      observations.any? { |o| o.id == default_observation_id }
+      observations.any? { |o| o.id == primary_observation_id }
     else
-      observations.where(id: default_observation_id).exists?
+      observations.where(id: primary_observation_id).exists?
     end
   end
 

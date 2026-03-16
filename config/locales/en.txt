@@ -2947,7 +2947,7 @@
   create_occurrence_submit: Create Occurrence
   show_occurrence_title: Occurrence
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
-  show_occurrence_default: Default
+  show_occurrence_primary: Primary
   edit_occurrence_submit: Save Changes
   edit_occurrence_remove: Remove
   edit_occurrence_add_heading: Add Recently Viewed Observations
