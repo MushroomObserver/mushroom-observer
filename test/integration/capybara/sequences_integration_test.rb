@@ -22,7 +22,8 @@ class SequencesIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(sequence_original_count + 1, Sequence.count,
                  "Sequence should have been created")
 
-    new_sequence = Sequence.last
+    new_sequence = Sequence.find_by(observation: obs, locus: "New locus")
+    assert_not_nil(new_sequence, "Cannot find Sequence")
     new_locus = "Edited Locus"
     find("#observation_sequences").click_link("Edit")
     fill_in("sequence[locus]", with: new_locus)

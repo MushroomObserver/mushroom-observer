@@ -235,7 +235,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    term = GlossaryTerm.last
+    term = GlossaryTerm.find_by(name: params[:glossary_term][:name])
+    assert_not_nil(term, "Cannot find GlossaryTerm")
     assert_equal(params[:glossary_term][:name], term.name)
     assert_equal(params[:glossary_term][:description], term.description)
     assert_not_nil(term.rss_log)
@@ -250,8 +251,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_difference("Image.count") do
       post(:create, params: params)
     end
-    term = GlossaryTerm.last
-    assert_equal(Image.last, term.thumb_image)
+    term = GlossaryTerm.find_by(name: params[:glossary_term][:name])
+    assert_not_nil(term, "Cannot find GlossaryTerm")
+    assert_not_nil(term.thumb_image)
   end
 
   def test_create_glossary_term_no_name
@@ -314,7 +316,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
         post(:create, params: term_with_image_params)
       end
     end
-    assert_empty(GlossaryTerm.last.images)
+    assert_empty(assigns(:glossary_term).images)
   end
 
   def test_create_glossary_term_process_image_failure

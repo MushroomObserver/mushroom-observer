@@ -14,6 +14,7 @@ class Inat
     end
 
     def mo_observation
+      create_missing_identification_names
       create_observation
       add_external_link
       add_inat_images(inat_obs[:observation_photos])
@@ -68,7 +69,7 @@ class Inat
     #   add an MO provisional name if none exists, and
     #   treat the provisional name as the MO consensus.
     def id_or_provisional_or_species_name
-      return inat_obs.name_id if inat_obs.provisional_name.blank?
+      return resolved_obs_name.id if inat_obs.provisional_name.blank?
 
       parsed_prov_name = Name.parse_name(inat_obs.provisional_name)
 
@@ -98,12 +99,53 @@ class Inat
       )
     end
 
+    def create_missing_identification_names
+      inat_obs[:identifications].each do |ident|
+        taxon = Inat::Taxon.new(ident[:taxon])
+        next if taxon.name.present?
+
+        create_mo_name(taxon)
+      end
+    end
+
+    def resolved_obs_name
+      @resolved_obs_name ||=
+        inat_obs.name ||
+        create_mo_name(Inat::Taxon.new(inat_obs[:taxon])) ||
+        Name.unknown
+    end
+
+    def create_mo_name(taxon)
+      # iNat "complex" rank needs special treatment because
+      # The equivalent MO rank is a one-off, requiring special handling
+      complex = taxon[:rank] == "complex"
+      rank_str = complex ? "Group" : taxon[:rank].titleize
+      name_str = if complex
+                   # append "complex" to prevent parsing it as a Species
+                   "#{taxon.full_name_string} complex"
+                 else
+                   taxon.full_name_string
+                 end
+
+      # There's no author or ICN ID because iNat taxa lack those.
+      post_name(name: name_str, rank: rank_str)
+    end
+
     def add_provisional_name(parsed_prov_name)
+      post_name(name: parsed_prov_name.search_name, rank: parsed_prov_name.rank)
+    end
+
+    def post_name(name:, rank:)
       params = { method: :post, action: :name,
                  api_key: user_api_key,
-                 name: parsed_prov_name.search_name,
-                 rank: parsed_prov_name.rank }
+                 name: name,
+                 rank: rank }
       api = API2.execute(params)
+      if api.errors.any?
+        raise("Failed to create name #{name.inspect}: " \
+              "#{api.errors.join(", ")}")
+      end
+
       api.results.first
     end
 

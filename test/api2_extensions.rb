@@ -97,7 +97,8 @@ module API2Extensions
   end
 
   def assert_last_api_key_correct
-    api_key = APIKey.last
+    api_key = APIKey.find_by(notes: @app.strip, user: @for_user)
+    assert_not_nil(api_key, "Cannot find APIKey")
     assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
     if @verified
       assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
@@ -111,7 +112,10 @@ module API2Extensions
   end
 
   def assert_last_collection_number_correct
-    num = CollectionNumber.last
+    num = CollectionNumber.find_by(
+      name: @name.strip, number: @number.strip
+    )
+    assert_not_nil(num, "Cannot find CollectionNumber")
     assert_users_equal(@user, num.user)
     assert_in_delta(Time.zone.now, num.created_at, 1.minute)
     assert_in_delta(Time.zone.now, num.updated_at, 1.minute)
@@ -121,7 +125,8 @@ module API2Extensions
   end
 
   def assert_last_comment_correct
-    com = Comment.last
+    com = Comment.find_by(target: @target, summary: @summary.strip)
+    assert_not_nil(com, "Cannot find Comment")
     assert_users_equal(@user, com.user)
     assert_in_delta(Time.zone.now, com.created_at, 1.minute)
     assert_in_delta(Time.zone.now, com.updated_at, 1.minute)
@@ -131,7 +136,11 @@ module API2Extensions
   end
 
   def assert_last_herbarium_record_correct
-    rec = HerbariumRecord.last
+    rec = HerbariumRecord.find_by(
+      herbarium: @herbarium,
+      accession_number: @accession_number.strip
+    )
+    assert_not_nil(rec, "Cannot find HerbariumRecord")
     assert_users_equal(@user, rec.user)
     assert_in_delta(Time.zone.now, rec.created_at, 1.minute)
     assert_in_delta(Time.zone.now, rec.updated_at, 1.minute)
@@ -143,7 +152,10 @@ module API2Extensions
   end
 
   def assert_last_image_correct
-    img = Image.last
+    img = Image.find_by(
+      user: @user, copyright_holder: @copy.strip, when: @date
+    )
+    assert_not_nil(img, "Cannot find Image")
     assert_users_equal(@user, img.user)
     assert_in_delta(Time.zone.now, img.created_at, 1.minute)
     assert_in_delta(Time.zone.now, img.updated_at, 1.minute)
@@ -166,7 +178,8 @@ module API2Extensions
   end
 
   def assert_last_location_correct
-    loc = Location.last
+    loc = Location.find_by(name: @name)
+    assert_not_nil(loc, "Cannot find Location")
     assert_in_delta(Time.zone.now, loc.created_at, 1.minute)
     assert_in_delta(Time.zone.now, loc.updated_at, 1.minute)
     assert_users_equal(@user, loc.user)
@@ -183,7 +196,10 @@ module API2Extensions
     assert_nil(loc.notes) unless @notes
   end
 
-  def assert_last_name_correct(name = Name.last)
+  def assert_last_name_correct(
+    name = Name.find_by(text_name: @name, author: @author)
+  )
+    assert_not_nil(name, "Cannot find Name")
     assert_in_delta(Time.zone.now, name.created_at, 1.minute)
     assert_in_delta(Time.zone.now, name.updated_at, 1.minute)
     assert_users_equal(@user, name.user)
@@ -196,10 +212,16 @@ module API2Extensions
     assert_equal(@notes, name.notes)
   end
 
+  # called only from ObservationsTest
   def assert_last_naming_correct
-    obs = Observation.last
-    naming = Naming.last
-    vote = Vote.last
+    obs = Observation.where(
+      user: @user, when: @date, where: @loc.name
+    ).order(:id).last
+    assert_not_nil(obs, "Cannot find Observation for Naming")
+    naming = obs.namings.find_by(name: @name)
+    assert_not_nil(naming, "Cannot find Naming")
+    vote = naming.votes.find_by(user: @user)
+    assert_not_nil(vote, "Cannot find Vote for Naming")
     assert_names_equal(@name, naming.name)
     assert_objs_equal(obs, naming.observation)
     assert_users_equal(@user, naming.user)
@@ -224,7 +246,10 @@ module API2Extensions
   end
 
   def assert_last_observation_correct
-    obs = Observation.last
+    obs = Observation.where(
+      user: @user, when: @date, where: @loc.name
+    ).order(:id).last
+    assert_not_nil(obs, "Cannot find Observation")
     assert_in_delta(Time.zone.now, obs.created_at, 1.minute)
     assert_in_delta(Time.zone.now, obs.updated_at, 1.minute)
     assert_equal(@date.web_date, obs.when.web_date)
@@ -252,9 +277,9 @@ module API2Extensions
     assert_in_delta(@vote, obs.vote_cache, 1) # vote_cache is weird
     if @name
       assert_equal(1, obs.namings.length)
-      assert_objs_equal(Naming.last, obs.namings.first)
+      assert_objs_equal(obs.namings.order(:id).last, obs.namings.first)
       assert_equal(1, obs.votes.length)
-      assert_objs_equal(Vote.last, obs.votes.first)
+      assert_objs_equal(obs.votes.order(:id).last, obs.votes.first)
     else
       assert_equal(0, obs.namings.length)
       assert_equal(0, obs.votes.length)
@@ -262,7 +287,8 @@ module API2Extensions
   end
 
   def assert_last_project_correct
-    proj = Project.last
+    proj = Project.find_by(title: @title)
+    assert_not_nil(proj, "Cannot find Project")
     assert_in_delta(Time.zone.now, proj.created_at, 1.minute)
     assert_in_delta(Time.zone.now, proj.updated_at, 1.minute)
     assert_users_equal(@user, proj.user)
@@ -272,9 +298,14 @@ module API2Extensions
     assert_user_arrays_equal(@members, proj.user_group.users)
   end
 
-  def assert_last_sequence_correct(seq = Sequence.last)
-    assert_in_delta(Time.zone.now, seq.created_at, 1.minute) \
-      unless seq != Sequence.last
+  def assert_last_sequence_correct(seq = nil)
+    created_now = seq.nil?
+    seq ||= Sequence.find_by(
+      observation: @obs, locus: @locus,
+      archive: @archive, accession: @accession
+    )
+    assert_not_nil(seq, "Cannot find Sequence")
+    assert_in_delta(Time.zone.now, seq.created_at, 1.minute) if created_now
     assert_in_delta(Time.zone.now, seq.updated_at, 1.minute)
     assert_users_equal(@user, seq.user)
     assert_objs_equal(@obs, seq.observation)
@@ -285,9 +316,11 @@ module API2Extensions
     assert_equal(@notes.to_s, seq.notes.to_s)
   end
 
-  def assert_last_species_list_correct(spl = SpeciesList.last)
-    assert_in_delta(Time.zone.now, spl.created_at, 1.minute) \
-      unless spl != SpeciesList.last
+  def assert_last_species_list_correct(spl = nil)
+    created_now = spl.nil?
+    spl ||= SpeciesList.find_by(title: @title, user: @user)
+    assert_not_nil(spl, "Cannot find SpeciesList")
+    assert_in_delta(Time.zone.now, spl.created_at, 1.minute) if created_now
     assert_in_delta(Time.zone.now, spl.updated_at, 1.minute)
     assert_users_equal(@user, spl.user)
     assert_equal(@title, spl.title)
@@ -298,7 +331,8 @@ module API2Extensions
   end
 
   def assert_last_user_correct
-    user = User.last
+    user = User.find_by(login: @login)
+    assert_not_nil(user, "Cannot find User")
     assert_equal(@login, user.login)
     assert_equal(@name, user.name)
     assert_equal(@email, user.email)
@@ -326,10 +360,16 @@ module API2Extensions
     end
   end
 
+  # called only from ObservationsTest
   def assert_last_vote_correct
-    obs = Observation.last
-    naming = Naming.last
-    vote = Vote.last
+    obs = Observation.where(
+      user: @user, when: @date, where: @loc.name
+    ).order(:id).last
+    assert_not_nil(obs, "Failed to find Observation for Vote")
+    naming = obs.namings.find_by(name: @name)
+    assert_not_nil(naming, "Failed to find Naming for Vote")
+    vote = naming.votes.find_by(user: @user)
+    assert_not_nil(vote, "Cannot find Vote")
     assert_objs_equal(naming, vote.naming)
     assert_objs_equal(obs, vote.observation)
     assert_users_equal(@user, vote.user)

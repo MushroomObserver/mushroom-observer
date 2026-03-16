@@ -258,7 +258,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_not(obs.specimen)
     post(:create, params:)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
-    herbarium_record = HerbariumRecord.last
+    herbarium_record = HerbariumRecord.find_by(
+      herbarium: rolf.preferred_herbarium,
+      accession_number: params[:herbarium_record][:accession_number]
+    )
+    assert_not_nil(herbarium_record, "Cannot find HerbariumRecord")
     assert_equal("The New York Botanical Garden",
                  herbarium_record.herbarium.name)
     assert_equal(params[:herbarium_record][:initial_det],
