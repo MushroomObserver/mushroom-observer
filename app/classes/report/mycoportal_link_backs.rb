@@ -27,7 +27,7 @@ module Report
     private
 
     def resource_url(row)
-      "#{Mycoportal::MO_PERMALINK_DOMAIN}/obs/#{row.obs_id}"
+      "#{MO.http_domain}/obs/#{row.obs_id}"
     end
   end
 end

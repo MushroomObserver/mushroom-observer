@@ -764,7 +764,6 @@ class ReportTest < UnitTestCase
     maximum_elevation = high.to_i.to_s if high.present?
 
     {
-      occurrenceID: "#{Report::Mycoportal::MO_PERMALINK_DOMAIN}/obs/#{obs.id}",
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
       sciname: obs.text_name,
