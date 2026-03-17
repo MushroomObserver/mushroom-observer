@@ -351,7 +351,7 @@ class Query::LocationsTest < UnitTestCase
     ]
     expects = Location.region(region).
               joins(:observations).distinct.order_by_default
-    scope = Location.observation_query(region:)
+    scope = Location.observation_query(region:).order_by_default
     assert_query_scope(
       expects, scope, :Location, observation_query: { region: }
     )
