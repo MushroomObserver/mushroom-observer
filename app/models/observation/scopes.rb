@@ -452,6 +452,16 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joined_relation_condition(:sequences, bool:)
     }
 
+    # Exclude observations that belong to an occurrence but are not the
+    # primary.  Used by reports/exports to avoid double-counting.
+    scope :exclude_non_primary, lambda {
+      left_outer_joins(:occurrence).where(
+        Observation[:occurrence_id].eq(nil).or(
+          Occurrence[:primary_observation_id].eq(Observation[:id])
+        )
+      )
+    }
+
     scope :has_field_slip, lambda { |bool = true|
       presence_condition(Observation[:field_slip_id], bool:)
     }
@@ -571,6 +581,25 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
   module ClassMethods
     # class methods here, `self` included
+
+    # Given an array of observation IDs, return a hash mapping each
+    # non-primary observation ID to its occurrence's primary observation
+    # ID.  Used by Query::Modules::Results to substitute non-primary
+    # observations with their primary representative.
+    def occurrence_substitutions(ids)
+      return {} if ids.empty?
+
+      Observation.
+        where(id: ids).
+        where.not(occurrence_id: nil).
+        joins(:occurrence).
+        where.not(
+          Observation[:id].eq(Occurrence[:primary_observation_id])
+        ).
+        pluck(Observation[:id], Occurrence[:primary_observation_id]).
+        to_h
+    end
+
     def parse_name_and_rank(val)
       return [val.text_name, val.rank] if val.is_a?(Name)
 

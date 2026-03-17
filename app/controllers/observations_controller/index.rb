@@ -202,7 +202,7 @@ class ObservationsController
       [observation_matrix_box_image_includes,
        :location, :name,
        { namings: :votes },
-       :projects, :rss_log, :user]
+       :occurrence, :projects, :rss_log, :user]
     end
   end
 end

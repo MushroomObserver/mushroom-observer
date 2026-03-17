@@ -110,6 +110,7 @@ class Components::MatrixBox < Components::Base
       render_where_section
       render_when_who_section
       render_source_credit
+      render_occurrence_link
     end
   end
 
@@ -139,6 +140,18 @@ class Components::MatrixBox < Components::Base
   def render_id_badge(obj)
     whitespace
     show_title_id_badge(obj, "rss-id")
+  end
+
+  def render_occurrence_link
+    return unless (occ = @data[:occurrence])
+
+    div(class: "small mt-3") do
+      a(href: occurrence_path(occ), class: "occurrence-link") do
+        span(class: "glyphicon glyphicon-th-large")
+        plain(" ")
+        plain(:matrix_box_occurrence.l)
+      end
+    end
   end
 
   def render_identify_ui

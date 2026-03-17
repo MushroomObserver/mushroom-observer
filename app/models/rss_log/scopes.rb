@@ -22,6 +22,18 @@ module RssLog::Scopes
       where(or_clause(*types)).distinct
     }
 
+    # Exclude RssLog entries for observations that belong to an occurrence
+    # but are not the primary observation.  Keeps all non-observation logs.
+    scope :exclude_non_primary_observations, lambda {
+      left_outer_joins(observation: :occurrence).where(
+        RssLog[:observation_id].eq(nil).or(
+          Observation[:occurrence_id].eq(nil)
+        ).or(
+          Occurrence[:primary_observation_id].eq(Observation[:id])
+        )
+      )
+    }
+
     # Apply content filters to all types of RssLog requested in the current
     # Query. NOTE: One content filter may apply to two or more types (e.g.
     # `:region` applies to both Observations and Locations), so we need to

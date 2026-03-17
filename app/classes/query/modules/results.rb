@@ -54,12 +54,7 @@ module Query::Modules::Results
     initialize_query unless initialized?
     expect_args(:result_ids, args, RESULTS_ARGS)
     # includes = args[:include] || []
-    @result_ids ||=
-      if need_letters
-        ids_by_letter
-      else
-        @scopes.ids
-      end
+    @result_ids ||= compute_result_ids
   end
 
   # Returns an array of ids for each letter that has a record present.
@@ -207,6 +202,29 @@ module Query::Modules::Results
   ##############################################################################
 
   private
+
+  def compute_result_ids
+    ids = need_letters ? ids_by_letter : @scopes.ids
+    apply_occurrence_substitution(ids)
+  end
+
+  # For Observation queries, replace non-primary occurrence member IDs
+  # with the primary observation ID and deduplicate, preserving order.
+  def apply_occurrence_substitution(ids)
+    return ids unless model == Observation
+
+    subs = Observation.occurrence_substitutions(ids)
+    return ids if subs.empty?
+
+    seen = Set.new
+    ids.filter_map do |id|
+      effective_id = subs[id] || id
+      next if seen.include?(effective_id)
+
+      seen << effective_id
+      effective_id
+    end
+  end
 
   def add_needed_to_results(needed:, args:)
     includes = args[:include] || []

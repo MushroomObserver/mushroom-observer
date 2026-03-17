@@ -2945,6 +2945,8 @@
   create_occurrence_source: Source Observation
   create_occurrence_primary: Primary
   create_occurrence_submit: Create Occurrence
+  in_existing_occurrence: In existing occurrence
+  matrix_box_occurrence: See matching observations
   show_occurrence_title: Occurrence
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
   show_occurrence_primary: Primary

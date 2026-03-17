@@ -99,8 +99,8 @@ class OccurrenceFormTest < ComponentTestCase
 
     html = render_form
 
-    assert_includes(html, "Occurrence ##{occ.id}")
-    assert_html(html, "span.text-warning")
+    assert_includes(html, :in_existing_occurrence.l)
+    assert_html(html, "a[href='/occurrences/#{occ.id}']")
   end
 
   private

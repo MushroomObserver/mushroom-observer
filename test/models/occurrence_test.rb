@@ -240,6 +240,45 @@ class OccurrenceTest < UnitTestCase
     assert_equal(2, occ.observations.count)
   end
 
+  # == Phase 4: Visibility Rule Tests ==
+
+  def test_occurrence_substitutions_returns_non_primary_mapping
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    ids = [@obs1.id, @obs2.id, @obs3.id]
+    subs = Observation.occurrence_substitutions(ids)
+
+    # obs1 is primary, so it should NOT appear in the substitution map
+    assert_not_includes(subs.keys, @obs1.id)
+    # obs2 and obs3 are non-primary, so they should map to obs1
+    assert_equal(occ.primary_observation_id, subs[@obs2.id])
+    assert_equal(occ.primary_observation_id, subs[@obs3.id])
+  end
+
+  def test_occurrence_substitutions_ignores_obs_without_occurrence
+    ids = [@obs1.id, @obs2.id]
+    subs = Observation.occurrence_substitutions(ids)
+    assert_empty(subs)
+  end
+
+  def test_occurrence_substitutions_empty_input
+    assert_empty(Observation.occurrence_substitutions([]))
+  end
+
+  def test_exclude_non_primary_scope
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    result = Observation.where(id: occ.observations.pluck(:id)).
+             exclude_non_primary
+    assert_includes(result, @obs1)
+    assert_not_includes(result, @obs2)
+    assert_not_includes(result, @obs3)
+  end
+
+  def test_exclude_non_primary_scope_includes_obs_without_occurrence
+    obs_no_occ = observations(:strobilurus_diminutivus_obs)
+    result = Observation.where(id: obs_no_occ.id).exclude_non_primary
+    assert_includes(result, obs_no_occ)
+  end
+
   private
 
   def create_occurrence(primary_obs, *other_obs)

@@ -75,7 +75,7 @@ module Observations
 
     def observation_identify_index_includes
       [observation_matrix_box_image_includes,
-       :location,
+       :location, :occurrence,
        :observation_views,
        { name: :synonym },
        { namings: [:name, :votes] },

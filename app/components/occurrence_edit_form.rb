@@ -275,6 +275,10 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     return unless obs.occurrence
 
     br
-    span { plain("(in Occurrence ##{obs.occurrence_id})") }
+    a(href: occurrence_path(obs.occurrence_id)) do
+      span(class: "glyphicon glyphicon-th-large")
+      plain(" ")
+      plain(:in_existing_occurrence.l)
+    end
   end
 end

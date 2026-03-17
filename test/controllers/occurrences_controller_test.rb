@@ -60,7 +60,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = Occurrence.last
     assert_equal(@obs1, occ.primary_observation)
     assert_equal(2, occ.observations.count)
-    assert_redirected_to(permanent_observation_path(@obs1.id))
+    assert_redirected_to(occurrence_path(occ.id))
     assert_flash_success
   end
 
@@ -142,7 +142,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     end
     occ = Occurrence.last
     assert_equal(2, occ.observations.count)
-    assert_redirected_to(permanent_observation_path(@obs1.id))
+    assert_redirected_to(occurrence_path(occ.id))
   end
 
   # Verify the form generates correct field names for the
