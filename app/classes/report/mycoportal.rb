@@ -20,8 +20,11 @@ module Report
     # MyCoPortal fills in other fields automatically.
     def labels
       [
-        "dbpk", # MCP-specific; MO observation.id; was "mushroomObserverId",
-        "basisOfRecord", # : "HumanObservation",
+        # dbpk (database primary key) is required for snapshot collections.
+        # It is not a DwC standard field.
+        # https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/data_import_fields/
+        "dbpk", # "MUOB" + space + observation.id"
+        "basisOfRecord", # : "HumanObservation"
         "catalogNumber", # "MUOB" + space + observation.id"
         "sciname",
         "identificationQualifier",
