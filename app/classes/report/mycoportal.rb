@@ -12,21 +12,20 @@ require "haversine"
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
+    # MCP uses Symbiota, which is largelybased on Darwin Core (DwC).
     # Label names for the columns in the report.
-    # Some Symbiota Standard Fields
-    # https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/
-    # plus some MyCoPortal-specific fields
+    # https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/data_import_fields/
+    # See also https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/
     # Includes only fields needed for upload to MyCoPortal.
     # MyCoPortal fills in other fields automatically.
     def labels
       [
-        # dbpk (database primary key) is required for snapshot collections.
-        # It is not a DwC standard field.
-        # https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/data_import_fields/
+        # dbpk (database primary key); required for snapshot collections;
+        # Not a DwC standard field
         "dbpk", # "MUOB" + space + observation.id"
         "basisOfRecord", # : "HumanObservation"
         "catalogNumber", # "MUOB" + space + observation.id"
-        "sciname",
+        "sciname", # scientific name without author; not a DwC standard field
         "identificationQualifier",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
