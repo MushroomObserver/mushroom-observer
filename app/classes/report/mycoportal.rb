@@ -22,7 +22,7 @@ module Report
       [
         # dbpk (database primary key); required for snapshot collections;
         # Not a DwC standard field
-        "dbpk", # "MUOB" + space + observation.id"
+        "dbpk", # observation.id
         "basisOfRecord", # : "HumanObservation"
         "catalogNumber", # "MUOB" + space + observation.id"
         "sciname", # scientific name without author; not a DwC standard field
@@ -48,7 +48,7 @@ module Report
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
-        row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
+        row.obs_id, # (dbpk database primary key)
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
         sciname(row), # (mono- or binomial without author)
