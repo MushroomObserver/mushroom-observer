@@ -1,0 +1,27 @@
+<%# locals: (obs: nil, occurrence: nil, siblings: [], user: nil) %>
+
+<%
+return unless occurrence && siblings.any?
+%>
+
+<%= render(Components::Panel.new(
+      panel_id: "associated_observations",
+      panel_class: "name-section"
+    )) do |panel| %>
+  <%= panel.with_heading do %>
+    <a href="<%= occurrence_path(occurrence) %>">
+      <span class="glyphicon glyphicon-th-large"></span>
+      <%= :show_observation_matching_observations.l %>
+    </a>
+  <% end %>
+  <%= panel.with_body do %>
+    <ul class="tight-list">
+      <% siblings.each do |sibling| %>
+        <li>
+          <%= link_to(sibling.unique_format_name.t,
+                      permanent_observation_path(sibling.id)) %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

@@ -527,6 +527,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         :location,
         { name: { synonym: :names } },
         { namings: [:name, :user, { votes: [:observation, :user] }] },
+        :occurrence,
         { projects: :admin_group },
         :rss_log,
         :sequences,

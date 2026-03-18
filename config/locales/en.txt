@@ -2389,7 +2389,8 @@
   show_observation_no_herbarium_records: No [:herbarium_records]
   show_observation_remove_herbarium_record: Remove fungarium record from this observation?
   show_observation_add_sequence: Add [:SEQUENCE]
-  show_observation_no_sequences: No [:sequences]
+  show_observation_dna_sequences: DNA sequences
+  show_observation_no_sequences: No DNA sequences
   show_observation_archive_link: Show Archive Record
   show_observation_blast_link: Run BLAST®
   show_observation_more_like_this: More like this
@@ -2748,7 +2749,7 @@
   herbarium_record_user: Record Creator
   herbarium_record_notes: Fungarium Record Notes
 
-  herbarium_record_collection: Collection Record
+  herbarium_record_collection: Find in MyCoPortal
 
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record
@@ -2947,6 +2948,8 @@
   create_occurrence_submit: Create Occurrence
   in_existing_occurrence: In existing occurrence
   matrix_box_occurrence: See matching observations
+  show_observation_matching_observations: Matching Observations
+  show_observation_from_sibling: "(MO [id])"
   show_occurrence_title: Occurrence
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
   show_occurrence_primary: Primary
