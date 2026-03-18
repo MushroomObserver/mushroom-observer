@@ -114,7 +114,7 @@ class CacheTest < UnitTestCase
     end
     assert_equal(
       saved_obs_updated_ats,
-      Observation.where(Observation[:text_name].matches("Agaricus %")).
+      Observation.names(lookup: "Agaricus", include_subtaxa: 1).
         map(&:updated_at)
     )
     Name.subtaxa_of_genus_or_below("Agaricus").each do |nam|
