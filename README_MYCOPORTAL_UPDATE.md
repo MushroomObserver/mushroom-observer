@@ -94,7 +94,7 @@ I think that avoids the problem of hidden location lat/lng downloading as unfund
 
 (The initial steps are the same as for [Determine the starting date](#determine-the-starting-date).)
 
-* Goto [MyCoPortal][]
+* Go to [MyCoPortal][]
 * Login using an MCP account which has privileges to update the MUOB collection
 
 #### Import the data
