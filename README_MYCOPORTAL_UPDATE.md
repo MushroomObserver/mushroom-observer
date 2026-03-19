@@ -116,10 +116,12 @@ For more information: [Importing & Uploading Data,Initiating the Upload](https:/
 * Review the `Pending Data Transfer Report`.
 * If the report is error free and has the correct number of records,
   click "**Transfer Records to Central Specimen Table**".
-    > [!CAUTION]
+
+> [!CAUTION]
   This overwrites all **data** fields of the Records to be updated.
   (It does not update Images.)
   This step is final and is impossible to undo!
+
 * If anything is incorrect, do not Transfer Records;
   instead, fix the CSV file and re-upload it using the steps above.
 * Wait until the Transfer finishes.
