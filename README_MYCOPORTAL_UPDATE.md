@@ -53,8 +53,9 @@ The list will begin like this:
 **Do this locally** (not on the webserver) because:
 It assures that the created files are based on the same Observations; and
 it avoids taxing the webserver.
-**Do it as webmaster**
-I think that avoids the problem of hidden location lat/lng downloading as unfundged.
+
+**Do it as webmaster** in order to keep your hidden lat/lng
+out of the data import file.
 
 * Download the latest db snapshot.
 * Find the `created_at` of the most-recent Observation imported to MCP in the
