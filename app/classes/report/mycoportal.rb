@@ -12,7 +12,7 @@ require "haversine"
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
-    # MCP uses Symbiota, which is largelybased on Darwin Core (DwC).
+    # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
     # Label names for the columns in the report.
     # https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/data_import_fields/
     # See also https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/
