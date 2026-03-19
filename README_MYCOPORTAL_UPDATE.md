@@ -100,7 +100,7 @@ out of the data import file.
 
 #### Import the data
 
-For more information: [Importing & Uploading Data,Initiating the Upload](https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/#initiating-the-upload)
+For more information: [Importing & Uploading Data, Initiating the Upload](https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/#initiating-the-upload)
 
 * Go to the [MUOB Collection Profile]
 * Toggle "**Manager's Control Panel**" to reveal `Administration Control Panel`.
