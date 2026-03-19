@@ -39,7 +39,35 @@ class Occurrence < AbstractModel
 
   # Auto-destroy if reduced to fewer than 2 observations.
   def destroy_if_incomplete!
-    destroy! if observations.count < 2
+    return unless observations.count < 2
+
+    reset_cross_observation_thumbnails
+    destroy!
+  end
+
+  # Reset any thumbnail that points to an image belonging to a
+  # different observation.  Called before destroying or dissolving.
+  def reset_cross_observation_thumbnails
+    observations.includes(:images).find_each do |obs|
+      next if obs.thumb_image_id.nil?
+      next if obs.image_ids.include?(obs.thumb_image_id)
+
+      new_thumb = obs.images.order(:id).first
+      obs.update!(thumb_image: new_thumb)
+    end
+  end
+
+  # When an observation is removed from an occurrence, any sibling
+  # whose thumbnail came from the departing observation needs a new one.
+  def reassign_thumbnails_from(departing_obs)
+    departing_image_ids = departing_obs.image_ids
+    return if departing_image_ids.empty?
+
+    observations.where.not(id: departing_obs.id).
+      where(thumb_image_id: departing_image_ids).find_each do |obs|
+        new_thumb = obs.images.order(:id).first
+        obs.update!(thumb_image: new_thumb)
+      end
   end
 
   # When a new observation is assigned to a field slip that already has

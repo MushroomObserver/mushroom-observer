@@ -273,6 +273,68 @@ class OccurrenceTest < UnitTestCase
     assert_not_includes(result, @obs3)
   end
 
+  # == Phase 5: Thumbnail Tests ==
+
+  def test_reassign_thumbnails_from_departing_observation
+    occ = create_occurrence(@obs1, @obs2)
+    img = images(:turned_over_image)
+    @obs1.images << img
+    # Set obs2's thumbnail to obs1's image
+    @obs2.update_column(:thumb_image_id, img.id)
+
+    occ.reassign_thumbnails_from(@obs1)
+    @obs2.reload
+
+    # obs2's thumbnail should have been reassigned
+    assert_not_equal(img.id, @obs2.thumb_image_id)
+  end
+
+  def test_reset_cross_observation_thumbnails
+    occ = create_occurrence(@obs1, @obs2)
+    img = images(:turned_over_image)
+    @obs1.images << img
+    # Set obs2's thumbnail to obs1's image (cross-observation)
+    @obs2.update_column(:thumb_image_id, img.id)
+
+    occ.reset_cross_observation_thumbnails
+    @obs2.reload
+
+    # obs2's thumbnail should have been reset to its own image
+    assert_not_equal(img.id, @obs2.thumb_image_id)
+    if @obs2.images.any?
+      assert_includes(@obs2.image_ids, @obs2.thumb_image_id)
+    else
+      assert_nil(@obs2.thumb_image_id)
+    end
+  end
+
+  def test_reset_cross_observation_thumbnails_keeps_own
+    occ = create_occurrence(@obs1, @obs2)
+    img = images(:turned_over_image)
+    @obs2.images << img
+    @obs2.update_column(:thumb_image_id, img.id)
+
+    occ.reset_cross_observation_thumbnails
+    @obs2.reload
+
+    # obs2's thumbnail is its own image, should remain
+    assert_equal(img.id, @obs2.thumb_image_id)
+  end
+
+  def test_reassign_thumbnails_noop_when_no_shared_thumbnails
+    occ = create_occurrence(@obs1, @obs2)
+    img1 = images(:turned_over_image)
+    img2 = images(:in_situ_image)
+    @obs1.images << img1
+    @obs2.images << img2
+    @obs2.update_column(:thumb_image_id, img2.id)
+
+    occ.reassign_thumbnails_from(@obs1)
+    @obs2.reload
+
+    assert_equal(img2.id, @obs2.thumb_image_id)
+  end
+
   def test_exclude_non_primary_scope_includes_obs_without_occurrence
     obs_no_occ = observations(:strobilurus_diminutivus_obs)
     result = Observation.where(id: obs_no_occ.id).exclude_non_primary

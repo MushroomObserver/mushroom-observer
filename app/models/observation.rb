@@ -831,13 +831,25 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       images.delete(img)
       track_change(:removed_image)
       if thumb_image_id == img.id
-        update(thumb_image: images.empty? ? nil : images.first)
+        update(thumb_image: next_thumb_image)
       else
         # Touch to trigger after_commit within proper transaction flow
         touch
       end
     end
     img
+  end
+
+  # Next thumbnail candidate: oldest own image first, then occurrence
+  def next_thumb_image
+    own = images.loaded? ? images.min_by(&:id) : images.order(:id).first
+    return own if own
+    return nil unless occurrence
+
+    Image.joins(:observations).
+      where(observations: { occurrence_id: occurrence_id }).
+      where.not(images_observations: { observation_id: id }).
+      order(:id).first
   end
 
   # Determines if an obs can have the Naming "_Imageless_"

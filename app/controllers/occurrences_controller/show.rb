@@ -38,6 +38,7 @@ module OccurrencesController::Show
 
   def destroy_occurrence!
     Occurrence.transaction do
+      @occurrence.reset_cross_observation_thumbnails
       @occurrence.observations.each do |obs|
         obs.update!(occurrence: nil)
       end

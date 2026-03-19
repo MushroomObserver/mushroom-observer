@@ -65,21 +65,20 @@ class ObservationTest < UnitTestCase
   end
 
   def test_remove_image_twice
-    observations(:minimal_unknown_obs).images = [
-      images(:commercial_inquiry_image),
-      images(:disconnected_coprinus_comatus_image),
-      images(:connected_coprinus_comatus_image)
-    ]
-    observations(:minimal_unknown_obs).
-      thumb_image = images(:commercial_inquiry_image)
-    observations(:minimal_unknown_obs).
-      remove_image(images(:commercial_inquiry_image))
-    assert_equal(observations(:minimal_unknown_obs).thumb_image,
-                 images(:disconnected_coprinus_comatus_image))
-    observations(:minimal_unknown_obs).
-      remove_image(images(:disconnected_coprinus_comatus_image))
-    assert_equal(observations(:minimal_unknown_obs).thumb_image,
-                 images(:connected_coprinus_comatus_image))
+    img1 = images(:commercial_inquiry_image)
+    img2 = images(:disconnected_coprinus_comatus_image)
+    img3 = images(:connected_coprinus_comatus_image)
+    obs = observations(:minimal_unknown_obs)
+    obs.images = [img1, img2, img3]
+    obs.thumb_image = img1
+
+    obs.remove_image(img1)
+    remaining = [img2, img3].min_by(&:id)
+    assert_equal(remaining, obs.thumb_image)
+
+    obs.remove_image(remaining)
+    last = ([img2, img3] - [remaining]).first
+    assert_equal(last, obs.thumb_image)
   end
 
   # ------------------------------------------

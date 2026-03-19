@@ -106,6 +106,7 @@ module OccurrencesController::Edit
       next unless obs
       next unless can_remove_observation?(obs)
 
+      @occurrence.reassign_thumbnails_from(obs)
       obs.update!(occurrence: nil)
     end
     @occurrence.reload

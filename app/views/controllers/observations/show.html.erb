@@ -50,12 +50,10 @@ obs_locals = { obs: @observation, consensus: @consensus, user: @user }
                    locals: obs_locals) %>
       <% end %>
 
-      <% if @occurrence %>
-        <%= render(partial: "observations/show/associated_observations",
-                   locals: { obs: @observation, occurrence: @occurrence,
-                             siblings: @sibling_observations,
-                             user: @user }) %>
-      <% end %>
+      <%= render(partial: "observations/show/associated_observations",
+                 locals: { obs: @observation, occurrence: @occurrence,
+                           siblings: @sibling_observations || [],
+                           user: @user }) %>
     <% end %>
   <% end %>
 <% end %>
