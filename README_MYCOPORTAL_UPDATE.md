@@ -133,7 +133,7 @@ For more information: [Image/Media URL Upload](https://docs.symbiota.org/Collect
 > [!CAUTION]
   Symbiota chokes on imagae CSV files with more than about 19,099 rows.
   If your `MyCoPortal Images` CSV report has more than 19,000 rows,
-  divide it into CSV's of 19,000 or fewer rows
+  divide it into CSVs of 19,000 or fewer rows
   and repeat the following procedure for each of those files.
 
 * Go back to the [MUOB Collection Profile]
