@@ -72,8 +72,6 @@ class Components::ObservationsDownloadForm < Components::ApplicationForm
                   :download_observations_mycoportal.l]
       options << [:mycoportal_image_list,
                   :download_observations_mycoportal_images.l]
-      options << [:mycoportal_link_backs,
-                  :download_observations_mycoportal_link_backs.l]
     end
     options
   end
