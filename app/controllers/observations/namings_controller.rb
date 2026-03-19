@@ -376,8 +376,19 @@ module Observations
       elsif !naming.destroy
         flash_error(:runtime_destroy_naming_failed.t(id: naming.id))
       else
+        destroy_sibling_namings(naming)
         true
       end
+    end
+
+    def destroy_sibling_namings(naming)
+      return unless @observation.occurrence_id
+
+      Naming.where(
+        name_id: naming.name_id,
+        user_id: naming.user_id,
+        observation_id: @observation.occurrence.observation_ids
+      ).where.not(id: naming.id).destroy_all
     end
   end
 end

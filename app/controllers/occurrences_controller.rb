@@ -76,6 +76,7 @@ class OccurrencesController < ApplicationController
   def create_occurrence(selected)
     primary_obs = resolve_primary_observation(selected)
     occ = Occurrence.create_manual(primary_obs, selected, @user)
+    occ.recalculate_consensus!
     warn_if_locations_differ(selected)
     flash_notice(:occurrence_created.t(id: occ.id))
     redirect_to(occurrence_path(occ.id))

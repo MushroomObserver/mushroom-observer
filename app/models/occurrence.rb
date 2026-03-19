@@ -37,6 +37,14 @@ class Occurrence < AbstractModel
     update!(has_specimen: observations.where(specimen: true).exists?)
   end
 
+  # Recalculate shared consensus across all observations.
+  def recalculate_consensus!
+    obs = observations.naming_includes.first
+    return unless obs
+
+    Observation::NamingConsensus.new(obs).calc_consensus
+  end
+
   # Auto-destroy if reduced to fewer than 2 observations.
   def destroy_if_incomplete!
     return unless observations.count < 2

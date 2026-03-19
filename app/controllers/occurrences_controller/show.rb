@@ -37,12 +37,17 @@ module OccurrencesController::Show
   end
 
   def destroy_occurrence!
+    detached_obs = []
     Occurrence.transaction do
       @occurrence.reset_cross_observation_thumbnails
       @occurrence.observations.each do |obs|
         obs.update!(occurrence: nil)
+        detached_obs << obs
       end
       @occurrence.reload.destroy!
+    end
+    detached_obs.each do |obs|
+      Observation::NamingConsensus.new(obs).calc_consensus
     end
   end
 

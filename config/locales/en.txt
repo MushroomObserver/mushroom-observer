@@ -2948,6 +2948,7 @@
   create_occurrence_submit: Create Occurrence
   in_existing_occurrence: In existing occurrence
   matrix_box_occurrence: See matching observations
+  naming_see_matching_observations_reasons: See Matching Observations to Edit Other Reasons
   show_observation_add_matching_observations: Add Matching Observations
   show_observation_matching_observations: Matching Observations
   show_observation_from_sibling: "(MO [id])"

@@ -36,6 +36,7 @@ module OccurrencesController::Edit
       update_primary
       update_primary_obs_attributes
     end
+    recalculate_occurrence_consensus
     redirect_after_update(primary_obs)
   rescue ActiveRecord::RecordInvalid => e
     flash_error(e.message)
@@ -108,6 +109,7 @@ module OccurrencesController::Edit
 
       @occurrence.reassign_thumbnails_from(obs)
       obs.update!(occurrence: nil)
+      recalculate_standalone_consensus(obs)
     end
     @occurrence.reload
     @occurrence.destroy_if_incomplete!
@@ -221,5 +223,16 @@ module OccurrencesController::Edit
       ),
       layout: true
     )
+  end
+
+  def recalculate_occurrence_consensus
+    return if @occurrence.destroyed?
+
+    @occurrence.recalculate_consensus!
+  end
+
+  # Recalculate consensus for an observation removed from an occurrence
+  def recalculate_standalone_consensus(obs)
+    Observation::NamingConsensus.new(obs).calc_consensus
   end
 end

@@ -341,6 +341,69 @@ class OccurrenceTest < UnitTestCase
     assert_includes(result, obs_no_occ)
   end
 
+  # == Phase 6: Shared Consensus Tests ==
+
+  def test_shared_consensus_across_occurrence
+    occ = create_occurrence(@obs1, @obs2)
+    # Propose a name on obs1 and vote
+    name = names(:agaricus_campestris)
+    naming = Naming.create!(observation: @obs1, name: name, user: rolf)
+    consensus = Observation::NamingConsensus.new(@obs1)
+    consensus.change_vote(naming, Vote::MAXIMUM_VOTE, rolf)
+
+    # obs2 should now share the consensus
+    @obs2.reload
+    assert_equal(name.id, @obs2.name_id,
+                 "Sibling should share consensus name")
+  end
+
+  def test_consensus_reverts_on_removal_from_occurrence
+    occ = create_occurrence(@obs1, @obs2)
+    name = names(:agaricus_campestris)
+    naming = Naming.create!(observation: @obs1, name: name, user: rolf)
+    consensus = Observation::NamingConsensus.new(@obs1)
+    consensus.change_vote(naming, Vote::MAXIMUM_VOTE, rolf)
+
+    # Both should share the occurrence consensus
+    @obs2.reload
+    shared_name_id = @obs2.name_id
+    assert_equal(name.id, shared_name_id)
+
+    # Remove obs2 from occurrence and recalculate standalone
+    @obs2.update!(occurrence: nil)
+    Observation::NamingConsensus.new(@obs2).calc_consensus
+    @obs2.reload
+
+    # obs2 should revert to its own local consensus (not the shared one)
+    assert_not_equal(name.id, @obs2.name_id,
+                     "Removed obs should not keep shared consensus")
+  end
+
+  def test_recalculate_consensus_on_occurrence
+    occ = create_occurrence(@obs1, @obs2)
+    name = names(:agaricus_campestris)
+    Naming.create!(observation: @obs2, name: name, user: rolf).tap do |n|
+      Vote.create!(naming: n, observation: @obs2, user: rolf,
+                   value: Vote::MAXIMUM_VOTE, favorite: true)
+    end
+
+    occ.recalculate_consensus!
+    @obs1.reload
+
+    assert_equal(name.id, @obs1.name_id,
+                 "Primary should get sibling's consensus")
+  end
+
+  def test_namings_panel_shows_occurrence_namings
+    occ = create_occurrence(@obs1, @obs2)
+    name = names(:agaricus_campestris)
+    naming = Naming.create!(observation: @obs2, name: name, user: rolf)
+
+    consensus = Observation::NamingConsensus.new(@obs1)
+    assert_includes(consensus.namings.map(&:id), naming.id,
+                    "Consensus should include sibling's naming")
+  end
+
   private
 
   def create_occurrence(primary_obs, *other_obs)

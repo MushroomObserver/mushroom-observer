@@ -25,6 +25,7 @@ class Components::NamingForm < Components::ApplicationForm
   def view_template
     render_name_feedback if @given_name.present?
     render_naming_fields
+    render_sibling_reasons_note unless @create
     submit(button_name, center: true)
   end
 
@@ -88,6 +89,24 @@ class Components::NamingForm < Components::ApplicationForm
              suggest_corrections: @feedback[:suggest_corrections] || false,
              parent_deprecated: @feedback[:parent_deprecated]
            ))
+  end
+
+  def render_sibling_reasons_note
+    return unless @observation.occurrence_id
+
+    occ = @observation.occurrence
+    name_id = model.name_id
+    has_sibling_reasons = occ.observations.
+                          where.not(id: @observation.id).
+                          joins(:namings).
+                          where(namings: { name_id: name_id }).any?
+    return unless has_sibling_reasons
+
+    p(class: "text-center text-muted mt-3") do
+      a(href: occurrence_path(occ)) do
+        plain(:naming_see_matching_observations_reasons.l)
+      end
+    end
   end
 
   def render_naming_fields
