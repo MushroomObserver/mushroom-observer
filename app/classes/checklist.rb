@@ -231,8 +231,9 @@ class Checklist
   end
 
   def query(_args = {})
-    Name.where(id: @observations.select(:name_id)).
+    Name.joins(:observations).merge(@observations).
       select(Name[:deprecated], Name[:text_name],
-             Name[:id], Name[:rank], Name[:synonym_id])
+             Name[:id], Name[:rank], Name[:synonym_id]).
+      distinct
   end
 end
