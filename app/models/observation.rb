@@ -209,17 +209,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       # Detach: handled by clearing occurrence
       return
     end
+
     occ = slip.occurrence
-    if occ
-      self.occurrence = occ
-    else
-      occ = Occurrence.create!(
-        user: user || User.current,
-        primary_observation: self,
-        field_slip: slip
-      )
-      self.occurrence = occ
-    end
+    occ ||= Occurrence.create!(
+      user: user || User.current,
+      primary_observation: self,
+      field_slip: slip
+    )
+    self.occurrence = occ
   end
 
   has_many :observation_herbarium_records, dependent: :destroy

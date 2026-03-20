@@ -399,10 +399,21 @@ class Observation
     end
 
     def load_namings_and_votes
-      if @observation.occurrence_id
+      if multi_observation_occurrence?
         load_occurrence_namings
       else
         load_single_observation_namings
+      end
+    end
+
+    def multi_observation_occurrence?
+      return false unless @observation.occurrence_id
+
+      occ = @observation.occurrence
+      if occ.observations.loaded?
+        occ.observations.size > 1
+      else
+        occ.observations.many?
       end
     end
 
