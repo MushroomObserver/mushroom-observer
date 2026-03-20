@@ -2921,6 +2921,7 @@
   field_slip_new: Record Field Slip
   field_slip_no_observation: No Observation found
   field_slip_select_observations: Select Observations to Associate
+  field_slip_save_with_observations: Save with Selected Observations
   field_slip_via_occurrence: via occurrence
   field_slip_no_project: No Project found
   field_slip_nil_project: "(No Project)"

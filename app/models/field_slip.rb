@@ -80,9 +80,20 @@ class FieldSlip < AbstractModel
   end
 
   # The primary observation, used as the default reference.
+  # Only returns observations that actually belong to the occurrence.
   def observation
-    @observation ||= occurrence&.primary_observation ||
-                     observations.order(:created_at).first
+    @observation ||= find_primary_observation
+  end
+
+  def find_primary_observation
+    occ = occurrence
+    return nil unless occ
+
+    obs = observations.to_a
+    return nil if obs.empty?
+
+    primary = occ.primary_observation
+    obs.include?(primary) ? primary : obs.first
   end
 
   def reload(*)

@@ -210,6 +210,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       return
     end
 
+    old_occ = occurrence
     occ = slip.occurrence
     occ ||= Occurrence.create!(
       user: user || User.current,
@@ -217,6 +218,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       field_slip: slip
     )
     self.occurrence = occ
+    cleanup_old_occurrence(old_occ, occ)
   end
 
   has_many :observation_herbarium_records, dependent: :destroy
@@ -1008,6 +1010,18 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     occ.reload
     occ.destroy_if_incomplete!
+  end
+
+  # When an observation moves to a new occurrence, clean up the old one.
+  def cleanup_old_occurrence(old_occ, new_occ)
+    return unless old_occ && old_occ.id != new_occ.id
+
+    old_occ.reload
+    reassign_occurrence_primary(old_occ) if old_occ.primary_observation_id == id
+    return unless Occurrence.exists?(old_occ.id)
+
+    old_occ.reload
+    old_occ.destroy_if_incomplete!
   end
 
   def reassign_occurrence_primary(occ)
