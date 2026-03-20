@@ -42,8 +42,9 @@ module FieldSlipsController::Index
 
   # Used on index, but could be used on show, edit? update? as well.
   def field_slip_includes
-    [{ occurrence: { observations: [:location, :name, :namings,
-                                    :rss_log, :user] } },
+    [{ occurrence: [:primary_observation,
+                    { observations: [:location, :name, :namings,
+                                     :rss_log, :user] }] },
      :project, :user]
   end
 end

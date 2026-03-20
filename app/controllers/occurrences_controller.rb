@@ -12,7 +12,7 @@ class OccurrencesController < ApplicationController
     @source_obs = find_source_observation!
     return unless @source_obs
 
-    if @source_obs.occurrence
+    if @source_obs.occurrence&.observations&.many?
       flash_warning(:occurrence_already_exists.t)
       redirect_to(permanent_observation_path(@source_obs.id))
       return

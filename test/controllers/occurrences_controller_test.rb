@@ -6,6 +6,8 @@ class OccurrencesControllerTest < FunctionalTestCase
   def setup
     @obs1 = observations(:minimal_unknown_obs)
     @obs2 = observations(:coprinus_comatus_obs)
+    # Clear any occurrence from field slip fixture
+    @obs1.update_column(:occurrence_id, nil)
   end
 
   # ---------- new action ----------
@@ -34,6 +36,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = Occurrence.create!(user: rolf,
                              primary_observation: @obs1)
     @obs1.update!(occurrence: occ)
+    @obs2.update!(occurrence: occ)
 
     get(:new, params: { observation_id: @obs1.id })
     assert_redirected_to(permanent_observation_path(@obs1.id))
@@ -383,9 +386,12 @@ class OccurrencesControllerTest < FunctionalTestCase
     obs3 = observations(:detailed_unknown_obs)
     fs1 = field_slips(:field_slip_one)
     fs2 = field_slips(:field_slip_two)
-    @obs1.update!(field_slip: fs1)
-    obs3.update!(field_slip: fs2)
     occ = create_occurrence(@obs1, @obs2)
+    occ.update!(field_slip: fs1)
+    obs3_occ = Occurrence.create!(user: rolf,
+                                  primary_observation: obs3,
+                                  field_slip: fs2)
+    obs3.update!(occurrence: obs3_occ)
     patch(:update, params: {
             id: occ.id,
             add_observation_ids: [obs3.id],

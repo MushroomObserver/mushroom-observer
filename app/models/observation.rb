@@ -1004,6 +1004,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless occ
 
     reassign_occurrence_primary(occ) if occ.primary_observation_id == id
+    return unless Occurrence.exists?(occ.id)
+
     occ.reload
     occ.destroy_if_incomplete!
   end

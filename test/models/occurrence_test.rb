@@ -78,59 +78,47 @@ class OccurrenceTest < UnitTestCase
 
   # -- find_or_create_for_field_slip tests --
 
-  def test_find_or_create_for_field_slip_creates_new
-    fs = field_slips(:field_slip_no_obs)
-    @obs1.update!(field_slip: fs)
-    @obs2.update!(field_slip: fs)
-
-    occ = Occurrence.find_or_create_for_field_slip(fs, @obs2, rolf)
-    assert(occ.persisted?)
-    assert_equal(2, occ.observations.count)
-    assert_includes(occ.observations, @obs1)
-    assert_includes(occ.observations, @obs2)
-    # Default should be oldest by created_at
-    oldest = [@obs1, @obs2].min_by(&:created_at)
-    assert_equal(oldest, occ.primary_observation)
-  end
-
-  def test_find_or_create_for_field_slip_no_op_for_single_obs
+  def test_field_slip_writer_creates_occurrence
     fs = field_slips(:field_slip_no_obs)
     @obs1.update!(field_slip: fs)
 
-    result = Occurrence.find_or_create_for_field_slip(fs, @obs1, rolf)
-    assert_nil(result)
     @obs1.reload
-    assert_nil(@obs1.occurrence_id)
+    assert_not_nil(@obs1.occurrence_id)
+    assert_equal(fs.id, @obs1.occurrence.field_slip_id)
   end
 
-  def test_find_or_create_for_field_slip_adds_to_existing
+  def test_field_slip_writer_reuses_occurrence
     fs = field_slips(:field_slip_no_obs)
     @obs1.update!(field_slip: fs)
-    @obs2.update!(field_slip: fs)
-    occ = create_occurrence(@obs1, @obs2)
+    occ = @obs1.reload.occurrence
 
-    @obs3.update!(field_slip: fs)
-    result = Occurrence.find_or_create_for_field_slip(fs, @obs3, rolf)
-    assert_equal(occ, result)
-    assert_equal(3, result.observations.count)
-    # Default unchanged
-    assert_equal(@obs1, result.primary_observation)
+    @obs2.update!(field_slip: fs)
+    @obs2.reload
+    assert_equal(occ.id, @obs2.occurrence_id)
+    assert_equal(2, occ.reload.observations.count)
   end
 
-  def test_find_or_create_for_field_slip_merges_occurrences
+  def test_single_obs_occurrence_not_destroyed
     fs = field_slips(:field_slip_no_obs)
     @obs1.update!(field_slip: fs)
-    @obs2.update!(field_slip: fs)
+    occ = @obs1.reload.occurrence
+
+    # Single-obs occurrence with field slip should survive
+    occ.destroy_if_incomplete!
+    assert(Occurrence.exists?(occ.id))
+  end
+
+  def test_create_manual_merges_existing_occurrences
     occ_a = create_occurrence(@obs1, @obs2)
-
     obs4 = observations(:amateur_obs)
     obs5 = observations(:peltigera_obs)
     occ_b = create_occurrence(obs4, obs5)
-    obs4.update!(field_slip: fs)
 
-    result = Occurrence.find_or_create_for_field_slip(fs, obs4, rolf)
-    assert_equal(occ_a.id, result.id)
-    assert_equal(4, result.observations.count)
+    all = [@obs1, @obs2, obs4, obs5]
+    Occurrence.create_manual(@obs1, all, rolf)
+
+    obs4.reload
+    assert_equal(occ_a.id, obs4.occurrence_id)
     assert(Occurrence.where(id: occ_b.id).none?,
            "Absorbed occurrence should be destroyed")
   end
