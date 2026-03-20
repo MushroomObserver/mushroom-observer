@@ -602,29 +602,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # non-primary observation ID to its occurrence's primary observation
     # ID.  Used by Query::Modules::Results to substitute non-primary
     # observations with their primary representative.
-    # Only substitute for multi-observation occurrences.
-    # Single-observation occurrences (field slip links) pass through.
-    def occurrence_substitutions(ids)
-      return {} if ids.empty?
-
-      non_primary_in_multi_occ(ids).
-        pluck(Observation[:id], Occurrence[:primary_observation_id]).
-        to_h
-    end
-
-    def non_primary_in_multi_occ(ids)
-      multi_occ = Occurrence.where(
-        id: Observation.group(:occurrence_id).
-            having("COUNT(*) > 1").select(:occurrence_id)
-      )
-      Observation.where(id: ids).
-        where(occurrence_id: multi_occ.select(:id)).
-        joins(:occurrence).
-        where.not(
-          Observation[:id].eq(Occurrence[:primary_observation_id])
-        )
-    end
-
     def parse_name_and_rank(val)
       return [val.text_name, val.rank] if val.is_a?(Name)
 

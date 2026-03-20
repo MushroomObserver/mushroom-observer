@@ -94,6 +94,7 @@ module Query::Modules::Initialization
     filter_misspellings_for_name_queries
     apply_rss_log_content_filters
     exclude_non_primary_from_rss_logs
+    exclude_non_primary_observations
     add_default_order_if_none_specified
   end
 
@@ -159,6 +160,14 @@ module Query::Modules::Initialization
     return unless model == RssLog
 
     @scopes = @scopes.exclude_non_primary_observations
+  end
+
+  # For Observation queries, exclude non-primary members of
+  # multi-observation occurrences at the scope level.
+  def exclude_non_primary_observations
+    return unless model == Observation
+
+    @scopes = @scopes.exclude_non_primary
   end
 
   ##############################################################################

@@ -40,7 +40,7 @@ module Report
 
     def rows_without_location
       Observation.connection.select_rows(
-        query.scope.exclude_non_primary.joins(:user, :name).
+        query.scope.joins(:user, :name).
         where(location_id: nil).select(without_location_selects).
         reorder(Observation[:id].asc)
       )
@@ -52,7 +52,7 @@ module Report
 
     def rows_with_location
       Observation.connection.select_rows(
-        query.scope.exclude_non_primary.joins(:user, :location, :name).
+        query.scope.joins(:user, :location, :name).
         select(with_location_selects).
         reorder(Observation[:id].asc)
       )
@@ -194,8 +194,8 @@ module Report
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      # Exclude non-primary occurrence members to avoid double-counting.
-      query.scope.exclude_non_primary.reorder("")
+      # Non-primary observations already excluded by query scope.
+      query.scope.reorder("")
     end
 
     def add_column!(rows, vals, col)

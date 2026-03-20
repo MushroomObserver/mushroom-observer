@@ -232,28 +232,6 @@ class OccurrenceTest < UnitTestCase
 
   # == Phase 4: Visibility Rule Tests ==
 
-  def test_occurrence_substitutions_returns_non_primary_mapping
-    occ = create_occurrence(@obs1, @obs2, @obs3)
-    ids = [@obs1.id, @obs2.id, @obs3.id]
-    subs = Observation.occurrence_substitutions(ids)
-
-    # obs1 is primary, so it should NOT appear in the substitution map
-    assert_not_includes(subs.keys, @obs1.id)
-    # obs2 and obs3 are non-primary, so they should map to obs1
-    assert_equal(occ.primary_observation_id, subs[@obs2.id])
-    assert_equal(occ.primary_observation_id, subs[@obs3.id])
-  end
-
-  def test_occurrence_substitutions_ignores_obs_without_occurrence
-    ids = [@obs1.id, @obs2.id]
-    subs = Observation.occurrence_substitutions(ids)
-    assert_empty(subs)
-  end
-
-  def test_occurrence_substitutions_empty_input
-    assert_empty(Observation.occurrence_substitutions([]))
-  end
-
   def test_exclude_non_primary_scope
     occ = create_occurrence(@obs1, @obs2, @obs3)
     result = Observation.where(id: occ.observations.pluck(:id)).
