@@ -65,7 +65,14 @@ class Observation
     end
 
     def reload_namings_and_votes!
-      load_namings_and_votes
+      @merged_namings = nil
+      if multi_observation_occurrence?
+        load_occurrence_namings
+      else
+        obs = ::Observation.naming_includes.find(@observation.id)
+        @namings = obs.namings
+        @votes = @namings.flat_map(&:votes)
+      end
     end
 
     # Namings deduplicated by name_id, wrapped in MergedNaming
@@ -402,7 +409,7 @@ class Observation
       if multi_observation_occurrence?
         load_occurrence_namings
       else
-        load_single_observation_namings
+        use_local_namings
       end
     end
 
@@ -417,9 +424,15 @@ class Observation
       end
     end
 
-    def load_single_observation_namings
-      obs = ::Observation.naming_includes.find(@observation.id)
-      @namings = obs.namings
+    # Use the observation's already-loaded namings when available.
+    # Only query the DB when namings aren't eager-loaded.
+    def use_local_namings
+      if @observation.namings.loaded?
+        @namings = @observation.namings
+      else
+        obs = ::Observation.naming_includes.find(@observation.id)
+        @namings = obs.namings
+      end
       @votes = @namings.flat_map(&:votes)
     end
 
