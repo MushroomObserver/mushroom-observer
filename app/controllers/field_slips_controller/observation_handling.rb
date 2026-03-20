@@ -124,6 +124,8 @@ module FieldSlipsController::ObservationHandling
 
     Observation.transaction do
       link_obs_to_field_slip(obs)
+      @field_slip.reload
+      @field_slip.occurrence&.update!(primary_observation: obs)
       @field_slip.adopt_user_from(obs)
     end
     true

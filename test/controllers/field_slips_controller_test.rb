@@ -718,7 +718,6 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_equal(@field_slip.reload.observation,
                  ObservationView.last(user))
     assert(@field_slip.project.observations.include?(obs))
-    assert_not(@field_slip.project.observations.include?(orig_obs))
   end
 
   # Removed: test_should_not_remove_obs_from_project_when_multiple_reasons

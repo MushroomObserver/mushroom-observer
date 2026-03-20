@@ -7,6 +7,8 @@ class OccurrenceTest < UnitTestCase
     @obs1 = observations(:minimal_unknown_obs)
     @obs2 = observations(:coprinus_comatus_obs)
     @obs3 = observations(:detailed_unknown_obs)
+    # Clear occurrence from field slip fixture
+    @obs1.update_column(:occurrence_id, nil)
   end
 
   def test_create_occurrence
