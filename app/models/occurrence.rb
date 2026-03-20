@@ -125,7 +125,10 @@ class Occurrence < AbstractModel
     return if codes.size <= 1
 
     occ = new
-    occ.errors.add(:base, "Field slip code conflict: #{codes.join(", ")}")
+    occ.errors.add(
+      :base,
+      :occurrence_field_slip_conflict.t(codes: codes.join(", "))
+    )
     raise(ActiveRecord::RecordInvalid.new(occ))
   end
 

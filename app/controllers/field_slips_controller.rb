@@ -25,6 +25,7 @@ class FieldSlipsController < ApplicationController
     @species_list = params[:species_list]
     @field_slip.project = Project.safe_find(params[:project]) ||
                           @field_slip.project
+    @recent_observations = recent_observations_for_field_slip
     project = @field_slip.project
     if project
       flash_notice(:field_slip_project_success.t(title: project.title))
@@ -35,9 +36,11 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips/1/edit
   def edit
-    return if @field_slip.can_edit?(@user)
+    unless @field_slip.can_edit?(@user)
+      return redirect_to(field_slip_url(id: @field_slip.id))
+    end
 
-    redirect_to(field_slip_url(id: @field_slip.id))
+    @recent_observations = recent_edit_observations
   end
 
   # POST /field_slips or /field_slips.json
@@ -76,6 +79,7 @@ class FieldSlipsController < ApplicationController
                           notes: field_slip_notes.compact_blank!
                         ))
           else
+            sync_selected_observations
             update_observation_fields
             redirect_to(field_slip_url(@field_slip),
                         notice: :field_slip_updated.t)
@@ -131,6 +135,7 @@ class FieldSlipsController < ApplicationController
                     species_list: params[:species_list]
                   ))
     else
+      attach_selected_observations
       update_observation_fields
       obs = @field_slip.observation
       if obs
@@ -162,6 +167,124 @@ class FieldSlipsController < ApplicationController
 
   def field_slip_notes
     FieldSlipNotesBuilder.new(params, @field_slip).assemble
+  end
+
+  def recent_edit_observations
+    current_ids = @field_slip.observation_ids
+    ObservationView.where(user: @user).
+      where.not(observation_id: current_ids).
+      order(last_view: :desc).limit(4).
+      includes(observation: [:name, :user, :location,
+                             :thumb_image, :field_slip,
+                             :occurrence]).
+      filter_map(&:observation)
+  end
+
+  def recent_observations_for_field_slip
+    ObservationView.where(user: @user).
+      order(last_view: :desc).limit(4).
+      includes(observation: [:name, :user, :location,
+                             :thumb_image, :field_slip,
+                             :occurrence]).
+      filter_map(&:observation)
+  end
+
+  def attach_selected_observations
+    obs_ids = Array(params[:observation_ids]).map(&:to_i)
+    return if obs_ids.empty?
+
+    selected = Observation.where(id: obs_ids).
+               includes(:field_slip, :occurrence).to_a
+    selected.each { |obs| obs.update!(field_slip: @field_slip) }
+
+    create_occurrence_from_selected(selected) if selected.size >= 2
+  end
+
+  def sync_selected_observations
+    return unless params.key?(:observation_ids)
+
+    selected_ids = Array(params[:observation_ids]).to_set(&:to_i)
+    current_ids = @field_slip.observation_ids.to_set
+
+    # Detach unchecked observations
+    (current_ids - selected_ids).each do |obs_id|
+      obs = Observation.find_by(id: obs_id)
+      obs&.update!(field_slip: nil)
+    end
+
+    # Attach newly checked observations
+    (selected_ids - current_ids).each do |obs_id|
+      obs = Observation.find_by(id: obs_id)
+      obs&.update!(field_slip: @field_slip)
+    end
+
+    @field_slip.reload
+    sync_occurrence
+  end
+
+  def sync_occurrence
+    obs_list = @field_slip.observations.
+               includes(:field_slip, :occurrence).to_a
+    if obs_list.size >= 2
+      create_or_update_occurrence(obs_list)
+    elsif obs_list.size <= 1
+      destroy_field_slip_occurrence(obs_list)
+    end
+  end
+
+  def create_or_update_occurrence(obs_list)
+    primary = resolve_primary(obs_list)
+    occ = find_or_build_occurrence(obs_list, primary)
+    occ.recalculate_consensus!
+  rescue ActiveRecord::RecordInvalid => e
+    flash_error(e.message)
+  end
+
+  def resolve_primary(obs_list)
+    primary_id = params.dig(:field_slip,
+                            :primary_observation_id).to_i
+    obs_list.find { |o| o.id == primary_id } || obs_list.first
+  end
+
+  def find_or_build_occurrence(obs_list, primary)
+    existing = obs_list.filter_map(&:occurrence).uniq
+    if existing.any?
+      update_existing_occurrence(existing, obs_list, primary)
+    else
+      Occurrence.create_manual(primary, obs_list, @user)
+    end
+  end
+
+  def update_existing_occurrence(existing, obs_list, primary)
+    occ = existing.first
+    existing[1..].each { |other| Occurrence.merge!(occ, other) }
+    obs_list.each do |obs|
+      obs.update!(occurrence: occ) unless obs.occurrence_id == occ.id
+    end
+    occ.update!(primary_observation: primary)
+    occ.recompute_has_specimen!
+    occ
+  end
+
+  def destroy_field_slip_occurrence(obs_list)
+    obs_list.each do |obs|
+      next unless obs.occurrence
+
+      occ = obs.occurrence
+      occ.reset_cross_observation_thumbnails
+      occ.observations.each { |o| o.update!(occurrence: nil) }
+      occ.reload.destroy!
+      Observation::NamingConsensus.new(obs.reload).calc_consensus
+    end
+  end
+
+  def create_occurrence_from_selected(selected)
+    primary_id = params.dig(:field_slip, :primary_observation_id)
+    primary = selected.find { |o| o.id == primary_id.to_i } ||
+              selected.first
+    Occurrence.create_manual(primary, selected, @user)
+  rescue ActiveRecord::RecordInvalid => e
+    flash_error(e.message)
   end
 
   # Only allow a list of trusted parameters through.

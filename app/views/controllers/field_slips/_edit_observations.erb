@@ -1,0 +1,156 @@
+<%# locals: (field_slip: nil, recent: [], form: nil) %>
+
+<%
+current_obs = field_slip.observations.
+              includes(:name, :user, :location, :thumb_image,
+                       :field_slip, :occurrence).
+              order(:created_at).to_a
+current_ids = current_obs.map(&:id).to_set
+
+# Determine which observation is primary
+primary_id = if field_slip.observation&.occurrence
+               field_slip.observation.occurrence.primary_observation_id
+             elsif current_obs.one?
+               current_obs.first.id
+             end
+%>
+
+<div class="mt-5"
+     data-controller="field-slip-form">
+  <% if current_obs.any? %>
+    <strong><%= :OBSERVATIONS.t %>:</strong>
+    <ul class="row list-unstyled mt-3"
+        data-controller="matrix-table"
+        data-action="resize@window->matrix-table#rearrange">
+      <% current_obs.each do |obs| %>
+        <%= render(Components::MatrixBox.new(id: obs.id)) do %>
+          <%= render(Components::Panel.new(sizing: true)) do |panel| %>
+            <% if obs.thumb_image %>
+              <%= panel.with_thumbnail do
+                render(Components::InteractiveImage.new(
+                  user: @user,
+                  image: obs.thumb_image,
+                  image_link: observation_path(obs),
+                  obs: { id: obs.id, name: obs.name },
+                  votes: false,
+                  full_width: true
+                ))
+              end %>
+            <% end %>
+            <%= panel.with_body(classes: "rss-box-details") do %>
+              <div class="rss-what">
+                <h5 class="mt-0 rss-heading h5">
+                  <%= link_to(observation_path(obs)) do %>
+                    <%= obs.format_name.t.break_name.small_author %>
+                  <% end %>
+                </h5>
+              </div>
+              <div class="rss-where">
+                <small><%= location_link(obs.place_name,
+                                         obs.location) %></small>
+              </div>
+              <div class="rss-what">
+                <small class="nowrap-ellipsis">
+                  <span class="rss-when"><%= obs.when %></span>:
+                  <%= user_link(obs.user, nil, class: "rss-who") %>
+                </small>
+              </div>
+            <% end %>
+            <%= panel.with_footer(classes: "text-center") do %>
+              <label>
+                <%= check_box_tag("observation_ids[]", obs.id,
+                                  true,
+                                  id: "obs_include_#{obs.id}",
+                                  data: { action:
+                                    "field-slip-form#includeToggled" }) %>
+                Include
+              </label>
+              <br>
+              <label>
+                <%= radio_button_tag(
+                      "field_slip[primary_observation_id]",
+                      obs.id, obs.id == primary_id,
+                      id: "obs_primary_#{obs.id}",
+                      data: { action:
+                        "field-slip-form#primarySelected" }) %>
+                <%= :create_occurrence_primary.t %>
+              </label>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% if recent.any? %>
+    <strong><%= :field_slip_select_observations.t %>:</strong>
+    <ul class="row list-unstyled mt-3"
+        data-controller="matrix-table"
+        data-action="resize@window->matrix-table#rearrange">
+      <% recent.each do |obs| %>
+        <%= render(Components::MatrixBox.new(id: obs.id)) do %>
+          <%= render(Components::Panel.new(sizing: true)) do |panel| %>
+            <% if obs.thumb_image %>
+              <%= panel.with_thumbnail do
+                render(Components::InteractiveImage.new(
+                  user: @user,
+                  image: obs.thumb_image,
+                  image_link: observation_path(obs),
+                  obs: { id: obs.id, name: obs.name },
+                  votes: false,
+                  full_width: true
+                ))
+              end %>
+            <% end %>
+            <%= panel.with_body(classes: "rss-box-details") do %>
+              <div class="rss-what">
+                <h5 class="mt-0 rss-heading h5">
+                  <%= link_to(observation_path(obs)) do %>
+                    <%= obs.format_name.t.break_name.small_author %>
+                  <% end %>
+                </h5>
+              </div>
+              <div class="rss-where">
+                <small><%= location_link(obs.place_name,
+                                         obs.location) %></small>
+              </div>
+              <div class="rss-what">
+                <small class="nowrap-ellipsis">
+                  <span class="rss-when"><%= obs.when %></span>:
+                  <%= user_link(obs.user, nil, class: "rss-who") %>
+                </small>
+              </div>
+            <% end %>
+            <%= panel.with_footer(classes: "text-center") do %>
+              <label>
+                <%= check_box_tag("observation_ids[]", obs.id,
+                                  false,
+                                  id: "obs_include_#{obs.id}",
+                                  data: { action:
+                                    "field-slip-form#includeToggled" }) %>
+                Include
+              </label>
+              <br>
+              <label>
+                <%= radio_button_tag(
+                      "field_slip[primary_observation_id]",
+                      obs.id, false,
+                      id: "obs_primary_#{obs.id}",
+                      data: { action:
+                        "field-slip-form#primarySelected" }) %>
+                <%= :create_occurrence_primary.t %>
+              </label>
+              <% if obs.field_slip %>
+                <br>
+                <small>
+                  <%= link_to("Field Slip: #{obs.field_slip.code}",
+                              field_slip_path(obs.field_slip)) %>
+                </small>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

@@ -1,6 +1,7 @@
 <%
   add_page_title("#{:field_slip_new.t}: #{@field_slip.code}")
   add_context_nav([field_slips_index_tab])
+  container_class(:full)
 %>
 
 <%= render("form", field_slip: @field_slip, species_list: @species_list) %>

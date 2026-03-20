@@ -1,0 +1,73 @@
+<%# locals: (observations: [], form: nil) %>
+
+<div class="mt-5">
+  <strong><%= :field_slip_select_observations.t %>:</strong>
+  <ul class="row list-unstyled mt-3"
+      data-controller="matrix-table field-slip-form"
+      data-action="resize@window->matrix-table#rearrange">
+    <% observations.each_with_index do |obs, index| %>
+      <%= render(Components::MatrixBox.new(id: obs.id)) do %>
+        <%= render(Components::Panel.new(sizing: true)) do |panel| %>
+          <% if obs.thumb_image %>
+            <%= panel.with_thumbnail do
+              render(Components::InteractiveImage.new(
+                user: @user,
+                image: obs.thumb_image,
+                image_link: observation_path(obs),
+                obs: { id: obs.id, name: obs.name },
+                votes: false,
+                full_width: true
+              ))
+            end %>
+          <% end %>
+          <%= panel.with_body(classes: "rss-box-details") do %>
+            <div class="rss-what">
+              <h5 class="mt-0 rss-heading h5">
+                <%= link_to(observation_path(obs)) do %>
+                  <%= obs.format_name.t.break_name.small_author %>
+                <% end %>
+              </h5>
+            </div>
+            <div class="rss-where">
+              <small><%= location_link(obs.place_name,
+                                       obs.location) %></small>
+            </div>
+            <div class="rss-what">
+              <small class="nowrap-ellipsis">
+                <span class="rss-when"><%= obs.when %></span>:
+                <%= user_link(obs.user, nil, class: "rss-who") %>
+              </small>
+            </div>
+          <% end %>
+          <%= panel.with_footer(classes: "text-center") do %>
+            <label>
+              <%= check_box_tag("observation_ids[]", obs.id,
+                                false,
+                                id: "obs_include_#{obs.id}",
+                                data: { action:
+                                  "field-slip-form#includeToggled" }) %>
+              Include
+            </label>
+            <br>
+            <label>
+              <%= radio_button_tag(
+                    "field_slip[primary_observation_id]",
+                    obs.id, false,
+                    id: "obs_primary_#{obs.id}",
+                    data: { action:
+                      "field-slip-form#primarySelected" }) %>
+              <%= :create_occurrence_primary.t %>
+            </label>
+            <% if obs.field_slip %>
+              <br>
+              <small>
+                <%= link_to("Field Slip: #{obs.field_slip.code}",
+                            field_slip_path(obs.field_slip)) %>
+              </small>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </ul>
+</div>

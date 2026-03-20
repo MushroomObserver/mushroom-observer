@@ -2920,6 +2920,8 @@
   field_slip_last_obs: Switch to Last Observation
   field_slip_new: Record Field Slip
   field_slip_no_observation: No Observation found
+  field_slip_select_observations: Select Observations to Associate
+  field_slip_via_occurrence: via occurrence
   field_slip_no_project: No Project found
   field_slip_nil_project: "(No Project)"
   field_slip_other_codes: Other Codes
@@ -2947,6 +2949,7 @@
   create_occurrence_primary: Primary
   create_occurrence_submit: Create Occurrence
   in_existing_occurrence: In existing occurrence
+  occurrence_field_slip_conflict: "Field slip code conflict: [codes]"
   matrix_box_occurrence: See matching observations
   naming_see_matching_observations_reasons: See Matching Observations to Edit Other Reasons
   show_observation_add_matching_observations: Add Matching Observations
