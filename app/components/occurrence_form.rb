@@ -5,6 +5,7 @@
 # checkboxes and Primary radio buttons.
 class Components::OccurrenceForm < Components::ApplicationForm
   register_output_helper :location_link, mark_safe: true
+  register_output_helper :show_title_id_badge, mark_safe: true
   register_output_helper :user_link, mark_safe: true
 
   def initialize(source_obs:, recent_observations:, user:, **)
@@ -88,6 +89,8 @@ class Components::OccurrenceForm < Components::ApplicationForm
             obs.format_name.t.break_name.small_author
           )
         end
+        whitespace
+        show_title_id_badge(obs, "rss-id")
       end
     end
   end

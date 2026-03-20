@@ -28,8 +28,7 @@ module OccurrencesController::Edit
 
   def process_update
     primary_obs = @occurrence.primary_observation
-    handle_additions
-    handle_removals
+    sync_observations if params.key?(:observation_ids)
     if params[:create_observation]
       handle_create_observation
     else
@@ -61,47 +60,21 @@ module OccurrencesController::Edit
     end
   end
 
-  def handle_additions
-    add_ids = Array(params[:add_observation_ids]).map(&:to_i)
-    return if add_ids.empty?
+  def sync_observations
+    selected_ids = Array(params[:observation_ids]).to_set(&:to_i)
+    current_ids = @occurrence.observation_ids.to_set
 
-    new_obs = load_additions(add_ids)
-    return if new_obs.empty?
+    remove_unchecked_observations(current_ids - selected_ids)
+    return if @occurrence.destroyed?
 
-    validate_additions(new_obs)
-    add_observations_to_occurrence(new_obs)
-  end
+    add_checked_observations(selected_ids - current_ids)
+    return unless Occurrence.exists?(@occurrence.id)
 
-  def load_additions(add_ids)
-    Observation.where(id: add_ids).
-      includes({ occurrence: :field_slip }).to_a
-  end
-
-  def validate_additions(new_obs)
-    all_obs = @occurrence.observations.to_a +
-              new_obs
-    Occurrence.check_field_slip_conflicts!(all_obs)
-    Occurrence.check_max_observations!(all_obs)
-  end
-
-  def add_observations_to_occurrence(new_obs)
-    new_obs.each { |obs| add_single_observation(obs) }
     @occurrence.reload
     @occurrence.recompute_has_specimen!
   end
 
-  def add_single_observation(obs)
-    if obs.occurrence && obs.occurrence != @occurrence
-      Occurrence.merge!(@occurrence, obs.occurrence)
-    else
-      obs.update!(occurrence: @occurrence)
-    end
-  end
-
-  def handle_removals
-    remove_ids = Array(params[:remove_observation_ids]).map(&:to_i)
-    return if remove_ids.empty?
-
+  def remove_unchecked_observations(remove_ids)
     remove_ids.each do |obs_id|
       obs = @occurrence.observations.find_by(id: obs_id)
       next unless obs
@@ -113,6 +86,31 @@ module OccurrencesController::Edit
     end
     @occurrence.reload
     @occurrence.destroy_if_incomplete!
+  end
+
+  def add_checked_observations(add_ids)
+    return if add_ids.empty?
+
+    new_obs = Observation.where(id: add_ids).
+              includes({ occurrence: :field_slip }).to_a
+    validate_additions(new_obs)
+    new_obs.each { |obs| add_single_observation(obs) }
+    @occurrence.reload
+    @occurrence.recompute_has_specimen!
+  end
+
+  def validate_additions(new_obs)
+    all_obs = @occurrence.observations.to_a + new_obs
+    Occurrence.check_field_slip_conflicts!(all_obs)
+    Occurrence.check_max_observations!(all_obs)
+  end
+
+  def add_single_observation(obs)
+    if obs.occurrence && obs.occurrence != @occurrence
+      Occurrence.merge!(@occurrence, obs.occurrence)
+    else
+      obs.update!(occurrence: @occurrence)
+    end
   end
 
   def can_remove_observation?(obs)

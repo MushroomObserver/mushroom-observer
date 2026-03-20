@@ -5,6 +5,7 @@
 # Primary radio buttons and Remove checkboxes.
 class Components::OccurrenceEditForm < Components::ApplicationForm
   register_output_helper :location_link, mark_safe: true
+  register_output_helper :show_title_id_badge, mark_safe: true
   register_output_helper :user_link, mark_safe: true
 
   def initialize(occurrence:, observations:, candidates:,
@@ -115,6 +116,8 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
             obs.format_name.t.break_name.small_author
           )
         end
+        whitespace
+        show_title_id_badge(obs, "rss-id")
       end
     end
   end
@@ -136,11 +139,11 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_obs_controls(obs)
+    render_include_checkbox(obs, checked: true)
+    br
     render_primary_radio(
       obs, checked: obs.id == @occurrence.primary_observation_id
     )
-    br
-    render_remove_checkbox(obs)
   end
 
   def render_primary_radio(obs, checked:)
@@ -160,18 +163,19 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     end
   end
 
-  def render_remove_checkbox(obs)
-    label(class: "text-danger") do
+  def render_include_checkbox(obs, checked:)
+    label do
       input(
         type: "checkbox",
-        name: "remove_observation_ids[]",
+        name: "observation_ids[]",
         value: obs.id,
+        checked: checked || nil,
         data: {
-          action: "occurrence-edit-form#removeToggled"
+          action: "occurrence-edit-form#includeToggled"
         }
       )
       whitespace
-      plain(:edit_occurrence_remove.l)
+      plain("Include")
     end
   end
 
@@ -249,25 +253,10 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
 
   def render_candidate_box(obs)
     render_obs_box(obs) do
-      render_primary_radio(obs, checked: false)
+      render_include_checkbox(obs, checked: false)
       br
-      render_add_checkbox(obs)
+      render_primary_radio(obs, checked: false)
       render_occurrence_warning(obs)
-    end
-  end
-
-  def render_add_checkbox(obs)
-    label do
-      input(
-        type: "checkbox",
-        name: "add_observation_ids[]",
-        value: obs.id,
-        data: {
-          action: "occurrence-edit-form#addToggled"
-        }
-      )
-      whitespace
-      plain(:edit_occurrence_add.l)
     end
   end
 

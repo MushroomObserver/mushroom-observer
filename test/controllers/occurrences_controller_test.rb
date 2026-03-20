@@ -244,7 +244,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_response(:success)
     body = @response.body
     assert_match(/occurrence\[primary_observation_id\]/, body)
-    assert_match(/remove_observation_ids/, body)
+    assert_match(/observation_ids/, body)
   end
 
   def test_edit_allowed_for_non_creator
@@ -280,9 +280,10 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     obs3 = observations(:detailed_unknown_obs)
     occ = create_occurrence(@obs1, @obs2, obs3)
+    # Include only obs1 and obs3 (exclude obs2)
     patch(:update, params: {
             id: occ.id,
-            remove_observation_ids: [@obs2.id],
+            observation_ids: [@obs1.id, obs3.id],
             occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
@@ -295,9 +296,10 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_update_destroys_occurrence_if_too_few_remain
     login("rolf")
     occ = create_occurrence(@obs1, @obs2)
+    # Include only obs1 (exclude obs2)
     patch(:update, params: {
             id: occ.id,
-            remove_observation_ids: [@obs2.id],
+            observation_ids: [@obs1.id],
             occurrence: { primary_observation_id: @obs1.id }
           })
     assert_not(Occurrence.exists?(occ.id))
@@ -319,12 +321,12 @@ class OccurrencesControllerTest < FunctionalTestCase
 
   def test_non_creator_can_remove_own_observation
     login("mary")
-    # @obs1 is owned by mary
-    obs3 = observations(:detailed_unknown_obs) # owned by mary
+    obs3 = observations(:detailed_unknown_obs)
     occ = create_occurrence(@obs1, @obs2, obs3)
+    # Include obs2 and obs3, exclude obs1 (mary's obs)
     patch(:update, params: {
             id: occ.id,
-            remove_observation_ids: [@obs1.id],
+            observation_ids: [@obs2.id, obs3.id],
             occurrence: { primary_observation_id: @obs2.id }
           })
     occ.reload
@@ -333,12 +335,12 @@ class OccurrencesControllerTest < FunctionalTestCase
 
   def test_non_creator_cannot_remove_others_observation
     login("mary")
-    # @obs2 (coprinus_comatus_obs) is owned by rolf
     obs3 = observations(:detailed_unknown_obs)
     occ = create_occurrence(@obs1, @obs2, obs3)
+    # Try to exclude obs2 (rolf's) — should be denied
     patch(:update, params: {
             id: occ.id,
-            remove_observation_ids: [@obs2.id],
+            observation_ids: [@obs1.id, obs3.id],
             occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
@@ -351,9 +353,10 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     obs3 = observations(:detailed_unknown_obs)
     occ = create_occurrence(@obs1, @obs2)
+    # Include all existing + obs3
     patch(:update, params: {
             id: occ.id,
-            add_observation_ids: [obs3.id],
+            observation_ids: [@obs1.id, @obs2.id, obs3.id],
             occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
@@ -369,9 +372,10 @@ class OccurrencesControllerTest < FunctionalTestCase
     obs4 = observations(:amateur_obs)
     occ1 = create_occurrence(@obs1, @obs2)
     occ2 = create_occurrence(obs3, obs4)
+    # Include all existing + obs3 (which brings obs4 via merge)
     patch(:update, params: {
             id: occ1.id,
-            add_observation_ids: [obs3.id],
+            observation_ids: [@obs1.id, @obs2.id, obs3.id],
             occurrence: { primary_observation_id: @obs1.id }
           })
     occ1.reload
@@ -392,9 +396,10 @@ class OccurrencesControllerTest < FunctionalTestCase
                                   primary_observation: obs3,
                                   field_slip: fs2)
     obs3.update!(occurrence: obs3_occ)
+    # Include all existing + obs3 (should fail: conflict)
     patch(:update, params: {
             id: occ.id,
-            add_observation_ids: [obs3.id],
+            observation_ids: [@obs1.id, @obs2.id, obs3.id],
             occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
@@ -413,7 +418,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     )
     get(:edit, params: { id: occ.id })
     assert_response(:success)
-    assert_match(/add_observation_ids/, @response.body)
+    assert_match(/observation_ids/, @response.body)
   end
 
   # ---------- update: location/date/create obs ----------

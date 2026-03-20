@@ -1,78 +1,44 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Couples Primary radios, Remove checkboxes, and Add checkboxes
-// on the occurrence edit form:
-// - Checking Remove on the Primary obs reassigns Primary
-// - Clicking Primary on a candidate auto-checks Add
-// - Clicking Primary on a removed obs unchecks Remove
-// - Unchecking Add on the Primary candidate reassigns Primary
+// Couples Include checkboxes and Primary radios on the occurrence
+// edit form:
+// - Selecting Primary auto-checks Include
+// - Unchecking Include on the Primary obs reassigns Primary
 // - Create Observation button enabled only when primary is not editable
 export default class extends Controller {
   static targets = ["createObsButton"]
 
-  removeToggled(event) {
-    const checkbox = event.currentTarget
-    if (!checkbox.checked) return
-
-    const radio = this.#findRadio(checkbox)
-    if (radio && radio.checked) this.#reassignPrimary()
-  }
-
-  addToggled(event) {
+  includeToggled(event) {
     const checkbox = event.currentTarget
     if (checkbox.checked) return
 
     const radio = this.#findRadio(checkbox)
-    if (radio && radio.checked) this.#reassignPrimary()
+    if (radio && radio.checked) {
+      radio.checked = false
+      this.#selectFirstIncludedPrimary()
+    }
   }
 
   primarySelected(event) {
     const radio = event.currentTarget
-    const li = radio.closest("li")
-    if (!li) return
-
-    const addCheckbox = li.querySelector(
-      "input[name='add_observation_ids[]']"
-    )
-    if (addCheckbox && !addCheckbox.checked) {
-      addCheckbox.checked = true
-    }
-
-    const removeCheckbox = li.querySelector(
-      "input[name='remove_observation_ids[]']"
-    )
-    if (removeCheckbox && removeCheckbox.checked) {
-      removeCheckbox.checked = false
-    }
+    const checkbox = this.#findCheckbox(radio)
+    if (checkbox && !checkbox.checked) checkbox.checked = true
 
     this.#toggleCreateButton(radio)
   }
 
   // -- private helpers --
 
-  #reassignPrimary() {
-    const radios = this.element.querySelectorAll(
-      "input[type='radio'][name='occurrence[primary_observation_id]']"
-    )
-    const eligible = Array.from(radios).filter((r) => {
-      const li = r.closest("li")
-      if (!li) return false
-
-      const remove = li.querySelector(
-        "input[name='remove_observation_ids[]']"
-      )
-      if (remove && remove.checked) return false
-
-      const add = li.querySelector("input[name='add_observation_ids[]']")
-      if (add && !add.checked) return false
-
-      return true
-    })
-
-    const target = eligible[0] || radios[0]
-    if (target) {
-      target.checked = true
-      this.#toggleCreateButton(target)
+  #selectFirstIncludedPrimary() {
+    const items = this.element.querySelectorAll("li")
+    for (const item of items) {
+      const cb = item.querySelector("input[name='observation_ids[]']")
+      const radio = item.querySelector("input[type='radio']")
+      if (cb?.checked && radio) {
+        radio.checked = true
+        this.#toggleCreateButton(radio)
+        return
+      }
     }
   }
 
@@ -86,6 +52,12 @@ export default class extends Controller {
   #findRadio(element) {
     return element.closest("li")?.querySelector(
       "input[type='radio'][name='occurrence[primary_observation_id]']"
+    )
+  }
+
+  #findCheckbox(element) {
+    return element.closest("li")?.querySelector(
+      "input[name='observation_ids[]']"
     )
   }
 }
