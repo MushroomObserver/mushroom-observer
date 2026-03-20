@@ -21,6 +21,7 @@ class Occurrence < AbstractModel
 
   belongs_to :user
   belongs_to :primary_observation, class_name: "Observation"
+  belongs_to :field_slip, optional: true
   has_many :observations, dependent: :nullify
 
   # Any logged-in user can edit an occurrence.
@@ -45,9 +46,11 @@ class Occurrence < AbstractModel
     Observation::NamingConsensus.new(obs).calc_consensus
   end
 
-  # Auto-destroy if reduced to fewer than 2 observations.
+  # Auto-destroy if reduced to fewer than 2 observations,
+  # unless linked to a field slip (which needs the occurrence).
   def destroy_if_incomplete!
     return unless observations.count < 2
+    return if field_slip_id.present?
 
     reset_cross_observation_thumbnails
     destroy!
@@ -168,12 +171,14 @@ class Occurrence < AbstractModel
   private_class_method :add_to_existing
 
   # Create a new occurrence from all observations on a field slip.
-  def self.create_from_field_slip(_field_slip, new_obs, other_obs, user)
+  def self.create_from_field_slip(field_slip, new_obs, other_obs, user)
     all_obs = (other_obs + [new_obs]).uniq
     check_field_slip_conflicts!(all_obs)
     check_max_observations!(all_obs)
     default = all_obs.min_by(&:created_at)
-    build_new(default, all_obs, user)
+    occ = build_new(default, all_obs, user)
+    occ.update!(field_slip: field_slip)
+    occ
   end
   private_class_method :create_from_field_slip
 

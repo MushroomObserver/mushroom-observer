@@ -144,6 +144,7 @@ class Components::MatrixBox < Components::Base
 
   def render_occurrence_link
     return unless (occ = @data[:occurrence])
+    return unless occ.observations.size > 1
 
     div(class: "small mt-3") do
       a(href: occurrence_path(occ), class: "occurrence-link") do

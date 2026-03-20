@@ -175,8 +175,8 @@ class FieldSlipsController < ApplicationController
       where.not(observation_id: current_ids).
       order(last_view: :desc).limit(4).
       includes(observation: [:name, :user, :location,
-                             :thumb_image, :field_slip,
-                             :occurrence]).
+                             :thumb_image,
+                             { occurrence: :field_slip }]).
       filter_map(&:observation)
   end
 
@@ -184,8 +184,8 @@ class FieldSlipsController < ApplicationController
     ObservationView.where(user: @user).
       order(last_view: :desc).limit(4).
       includes(observation: [:name, :user, :location,
-                             :thumb_image, :field_slip,
-                             :occurrence]).
+                             :thumb_image,
+                             { occurrence: :field_slip }]).
       filter_map(&:observation)
   end
 
@@ -194,50 +194,55 @@ class FieldSlipsController < ApplicationController
     return if obs_ids.empty?
 
     selected = Observation.where(id: obs_ids).
-               includes(:field_slip, :occurrence).to_a
-    selected.each { |obs| obs.update!(field_slip: @field_slip) }
-
-    create_occurrence_from_selected(selected) if selected.size >= 2
+               includes({ occurrence: :field_slip }).to_a
+    ensure_occurrence_for_field_slip(selected)
   end
 
   def sync_selected_observations
     return unless params.key?(:observation_ids)
 
     selected_ids = Array(params[:observation_ids]).to_set(&:to_i)
-    current_ids = @field_slip.observation_ids.to_set
+    occ = @field_slip.occurrence
+    return create_new_field_slip_occurrence(selected_ids) unless occ
+
+    sync_occurrence_observations(occ, selected_ids)
+  end
+
+  def create_new_field_slip_occurrence(selected_ids)
+    return if selected_ids.empty?
+
+    selected = Observation.where(id: selected_ids).to_a
+    ensure_occurrence_for_field_slip(selected)
+  end
+
+  def sync_occurrence_observations(occ, selected_ids)
+    current_ids = occ.observation_ids.to_set
 
     # Detach unchecked observations
     (current_ids - selected_ids).each do |obs_id|
       obs = Observation.find_by(id: obs_id)
-      obs&.update!(field_slip: nil)
+      next unless obs
+
+      occ.reassign_thumbnails_from(obs)
+      obs.update!(occurrence: nil)
+      Observation::NamingConsensus.new(obs).calc_consensus
     end
 
     # Attach newly checked observations
     (selected_ids - current_ids).each do |obs_id|
       obs = Observation.find_by(id: obs_id)
-      obs&.update!(field_slip: @field_slip)
+      obs&.update!(occurrence: occ)
     end
 
-    @field_slip.reload
-    sync_occurrence
+    occ.reload
+    update_occurrence_primary(occ)
+    occ.recompute_has_specimen!
+    occ.recalculate_consensus! unless occ.destroyed?
   end
 
-  def sync_occurrence
-    obs_list = @field_slip.observations.
-               includes(:field_slip, :occurrence).to_a
-    if obs_list.size >= 2
-      create_or_update_occurrence(obs_list)
-    elsif obs_list.size <= 1
-      destroy_field_slip_occurrence(obs_list)
-    end
-  end
-
-  def create_or_update_occurrence(obs_list)
-    primary = resolve_primary(obs_list)
-    occ = find_or_build_occurrence(obs_list, primary)
-    occ.recalculate_consensus!
-  rescue ActiveRecord::RecordInvalid => e
-    flash_error(e.message)
+  def update_occurrence_primary(occ)
+    primary = resolve_primary(occ.observations.to_a)
+    occ.update!(primary_observation: primary)
   end
 
   def resolve_primary(obs_list)
@@ -246,43 +251,22 @@ class FieldSlipsController < ApplicationController
     obs_list.find { |o| o.id == primary_id } || obs_list.first
   end
 
-  def find_or_build_occurrence(obs_list, primary)
-    existing = obs_list.filter_map(&:occurrence).uniq
-    if existing.any?
-      update_existing_occurrence(existing, obs_list, primary)
+  def ensure_occurrence_for_field_slip(selected)
+    primary = resolve_primary(selected)
+    occ = @field_slip.occurrence
+    if occ
+      selected.each do |obs|
+        obs.update!(occurrence: occ) unless obs.occurrence_id == occ.id
+      end
+      occ.update!(primary_observation: primary)
     else
-      Occurrence.create_manual(primary, obs_list, @user)
+      occ = Occurrence.create!(user: @user,
+                               primary_observation: primary,
+                               field_slip: @field_slip)
+      selected.each { |obs| obs.update!(occurrence: occ) }
     end
-  end
-
-  def update_existing_occurrence(existing, obs_list, primary)
-    occ = existing.first
-    existing[1..].each { |other| Occurrence.merge!(occ, other) }
-    obs_list.each do |obs|
-      obs.update!(occurrence: occ) unless obs.occurrence_id == occ.id
-    end
-    occ.update!(primary_observation: primary)
     occ.recompute_has_specimen!
-    occ
-  end
-
-  def destroy_field_slip_occurrence(obs_list)
-    obs_list.each do |obs|
-      next unless obs.occurrence
-
-      occ = obs.occurrence
-      occ.reset_cross_observation_thumbnails
-      occ.observations.each { |o| o.update!(occurrence: nil) }
-      occ.reload.destroy!
-      Observation::NamingConsensus.new(obs.reload).calc_consensus
-    end
-  end
-
-  def create_occurrence_from_selected(selected)
-    primary_id = params.dig(:field_slip, :primary_observation_id)
-    primary = selected.find { |o| o.id == primary_id.to_i } ||
-              selected.first
-    Occurrence.create_manual(primary, selected, @user)
+    occ.recalculate_consensus!
   rescue ActiveRecord::RecordInvalid => e
     flash_error(e.message)
   end

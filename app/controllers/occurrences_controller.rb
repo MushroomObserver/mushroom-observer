@@ -60,7 +60,7 @@ class OccurrencesController < ApplicationController
     ids = Array(params[:observation_ids]).map(&:to_i)
     ids |= [@source_obs.id] # always include source
     obs = Observation.where(id: ids).
-          includes(:field_slip, :occurrence, :user,
+          includes({ occurrence: :field_slip }, :user,
                    :location, :name, :thumb_image).to_a
 
     if obs.size < 2

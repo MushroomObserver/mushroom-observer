@@ -2,16 +2,16 @@
 
 <%
 current_obs = field_slip.observations.
-              includes(:name, :user, :location, :thumb_image,
-                       :field_slip, :occurrence).
+              includes(:name, :user, :location, :thumb_image).
               order(:created_at).to_a
 current_ids = current_obs.map(&:id).to_set
 
 # Determine which observation is primary
-primary_id = if field_slip.observation&.occurrence
-               field_slip.observation.occurrence.primary_observation_id
+occ = field_slip.occurrence
+primary_id = if occ
+               occ.primary_observation_id
              elsif current_obs.one?
-               current_obs.first.id
+               current_obs.first&.id
              end
 %>
 

@@ -252,11 +252,13 @@ module ObservationsController::Create
     field_slip = FieldSlip.find_by(code: field_code)
     return unless field_slip
 
-    @observation.update(field_slip: field_slip)
-    field_slip.adopt_user_from(@observation)
-    Occurrence.find_or_create_for_field_slip(
-      field_slip, @observation, @user
+    occ = field_slip.occurrence
+    occ ||= Occurrence.create!(
+      user: @user, primary_observation: @observation,
+      field_slip: field_slip
     )
+    @observation.update!(occurrence: occ)
+    field_slip.adopt_user_from(@observation)
   end
 
   def init_location_var_for_reload

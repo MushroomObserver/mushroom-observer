@@ -5,7 +5,7 @@
       panel_class: "name-section"
     )) do |panel| %>
   <%= panel.with_heading do %>
-    <% if occurrence %>
+    <% if occurrence && siblings.any? %>
       <a href="<%= occurrence_path(occurrence) %>">
         <span class="glyphicon glyphicon-th-large"></span>
         <%= :show_observation_matching_observations.l %>

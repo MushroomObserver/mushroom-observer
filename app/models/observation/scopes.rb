@@ -454,16 +454,33 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # Exclude observations that belong to an occurrence but are not the
     # primary.  Used by reports/exports to avoid double-counting.
+    # Exclude observations that are non-primary members of a
+    # multi-observation occurrence. Single-observation occurrences
+    # (used for field slip linking) are not filtered.
     scope :exclude_non_primary, lambda {
+      multi_occ = Occurrence.where(
+        id: Observation.group(:occurrence_id).
+            having("COUNT(*) > 1").select(:occurrence_id)
+      )
       left_outer_joins(:occurrence).where(
         Observation[:occurrence_id].eq(nil).or(
           Occurrence[:primary_observation_id].eq(Observation[:id])
+        ).or(
+          Observation[:occurrence_id].not_in(multi_occ.select(:id))
         )
       )
     }
 
     scope :has_field_slip, lambda { |bool = true|
-      presence_condition(Observation[:field_slip_id], bool:)
+      if bool
+        joins(:occurrence).where.not(occurrences: { field_slip_id: nil })
+      else
+        left_outer_joins(:occurrence).where(
+          Observation[:occurrence_id].eq(nil).or(
+            Occurrence[:field_slip_id].eq(nil)
+          )
+        )
+      end
     }
     # Deprecated: use has_field_slip. Kept for backwards compatibility
     # with existing bookmarked searches and URLs.
@@ -518,7 +535,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :show_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
-        :field_slip,
         { comments: :user },
         { external_links: { external_site: { project: :user_group } } },
         { herbarium_records: [{ herbarium: :curators }, :user] },
@@ -527,7 +543,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         :location,
         { name: { synonym: :names } },
         { namings: [:name, :user, { votes: [:observation, :user] }] },
-        :occurrence,
+        { occurrence: :field_slip },
         { projects: :admin_group },
         :rss_log,
         :sequences,
@@ -563,7 +579,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :edit_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
-        :field_slip,
         { external_links: { external_site: { project: :user_group } } },
         { herbarium_records: [{ herbarium: :curators }, :user] },
         { images: [:image_votes, :license, :projects, :user] },
@@ -587,18 +602,27 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # non-primary observation ID to its occurrence's primary observation
     # ID.  Used by Query::Modules::Results to substitute non-primary
     # observations with their primary representative.
+    # Only substitute for multi-observation occurrences.
+    # Single-observation occurrences (field slip links) pass through.
     def occurrence_substitutions(ids)
       return {} if ids.empty?
 
-      Observation.
-        where(id: ids).
-        where.not(occurrence_id: nil).
+      non_primary_in_multi_occ(ids).
+        pluck(Observation[:id], Occurrence[:primary_observation_id]).
+        to_h
+    end
+
+    def non_primary_in_multi_occ(ids)
+      multi_occ = Occurrence.where(
+        id: Observation.group(:occurrence_id).
+            having("COUNT(*) > 1").select(:occurrence_id)
+      )
+      Observation.where(id: ids).
+        where(occurrence_id: multi_occ.select(:id)).
         joins(:occurrence).
         where.not(
           Observation[:id].eq(Occurrence[:primary_observation_id])
-        ).
-        pluck(Observation[:id], Occurrence[:primary_observation_id]).
-        to_h
+        )
     end
 
     def parse_name_and_rank(val)

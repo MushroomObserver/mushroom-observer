@@ -191,8 +191,36 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :collection_numbers, through: :observation_collection_numbers
-  belongs_to :field_slip, optional: true
   belongs_to :occurrence, optional: true
+
+  # Field slip reached through occurrence (no longer a direct FK)
+  def field_slip
+    occurrence&.field_slip
+  end
+
+  def field_slip_id
+    occurrence&.field_slip_id
+  end
+
+  # Backward-compatible writer: creates/reuses an occurrence to
+  # link this observation to the given field slip.
+  def field_slip=(slip)
+    if slip.nil?
+      # Detach: handled by clearing occurrence
+      return
+    end
+    occ = slip.occurrence
+    if occ
+      self.occurrence = occ
+    else
+      occ = Occurrence.create!(
+        user: user || User.current,
+        primary_observation: self,
+        field_slip: slip
+      )
+      self.occurrence = occ
+    end
+  end
 
   has_many :observation_herbarium_records, dependent: :destroy
   has_many :herbarium_records, through: :observation_herbarium_records

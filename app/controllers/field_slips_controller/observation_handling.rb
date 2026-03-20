@@ -16,9 +16,8 @@ module FieldSlipsController::ObservationHandling
     obs = Observation.build_observation(location, name, notes, date, @user)
     if obs
       assign_project(obs)
-      obs.update!(field_slip: @field_slip)
+      link_obs_to_field_slip(obs)
       @field_slip.adopt_user_from(obs)
-      auto_create_occurrence(@field_slip, obs)
       check_for_species_list(obs, params[:species_list])
       name_flash_for_project(name, @field_slip.project)
       redirect_to(observation_url(obs.id))
@@ -102,6 +101,20 @@ module FieldSlipsController::ObservationHandling
     proj.remove_observation(obs)
   end
 
+  # Link an observation to a field slip via an occurrence.
+  def link_obs_to_field_slip(obs)
+    occ = @field_slip.occurrence
+    if occ
+      obs.update!(occurrence: occ) unless obs.occurrence_id == occ.id
+    else
+      occ = Occurrence.create!(
+        user: @user, primary_observation: obs,
+        field_slip: @field_slip
+      )
+      obs.update!(occurrence: occ)
+    end
+  end
+
   def check_last_obs
     return true unless params[:commit] == :field_slip_last_obs.t
 
@@ -110,11 +123,8 @@ module FieldSlipsController::ObservationHandling
     return false unless last_obs_project_ok?(obs)
 
     Observation.transaction do
-      old_obs = @field_slip.observation
-      old_obs&.update!(field_slip: nil) if old_obs != obs
-      obs.update!(field_slip: @field_slip)
+      link_obs_to_field_slip(obs)
       @field_slip.adopt_user_from(obs)
-      auto_create_occurrence(@field_slip, obs)
     end
     true
   end
@@ -129,9 +139,5 @@ module FieldSlipsController::ObservationHandling
     end
     project.add_observation(obs)
     true
-  end
-
-  def auto_create_occurrence(field_slip, obs)
-    Occurrence.find_or_create_for_field_slip(field_slip, obs, @user)
   end
 end

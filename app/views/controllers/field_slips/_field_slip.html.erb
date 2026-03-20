@@ -48,10 +48,10 @@ all_obs = field_slip_all_observations(field_slip)
     <ul class="row list-unstyled mt-3"
         data-controller="matrix-table"
         data-action="resize@window->matrix-table#rearrange">
-      <% all_obs.each do |fso| %>
+      <% all_obs.each do |obs_item| %>
         <%= render(::Components::MatrixBox.new(
                      user: @user,
-                     object: fso[:obs])) %>
+                     object: obs_item)) %>
       <% end %>
     </ul>
   <% else %>

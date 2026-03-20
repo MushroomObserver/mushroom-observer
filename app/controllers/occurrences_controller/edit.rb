@@ -74,11 +74,11 @@ module OccurrencesController::Edit
 
   def load_additions(add_ids)
     Observation.where(id: add_ids).
-      includes(:field_slip, :occurrence).to_a
+      includes({ occurrence: :field_slip }).to_a
   end
 
   def validate_additions(new_obs)
-    all_obs = @occurrence.observations.includes(:field_slip).to_a +
+    all_obs = @occurrence.observations.to_a +
               new_obs
     Occurrence.check_field_slip_conflicts!(all_obs)
     Occurrence.check_max_observations!(all_obs)
@@ -208,8 +208,8 @@ module OccurrencesController::Edit
       order(last_view: :desc).
       limit(3).
       includes(observation: [:name, :user, :location,
-                             :thumb_image, :field_slip,
-                             :occurrence]).
+                             :thumb_image,
+                             { occurrence: :field_slip }]).
       filter_map(&:observation)
   end
 
