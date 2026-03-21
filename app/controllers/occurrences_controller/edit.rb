@@ -61,7 +61,7 @@ module OccurrencesController::Edit
   end
 
   def sync_observations
-    selected_ids = Array(params[:observation_ids]).to_set(&:to_i)
+    selected_ids = parse_selected_ids
     current_ids = @occurrence.observation_ids.to_set
 
     remove_unchecked_observations(current_ids - selected_ids)
@@ -72,6 +72,11 @@ module OccurrencesController::Edit
 
     @occurrence.reload
     @occurrence.recompute_has_specimen!
+  end
+
+  def parse_selected_ids
+    Array(params[:observation_ids]).
+      map(&:to_i).reject(&:zero?).to_set
   end
 
   def remove_unchecked_observations(remove_ids)
@@ -113,8 +118,8 @@ module OccurrencesController::Edit
     end
   end
 
-  def can_remove_observation?(obs)
-    @occurrence.user == @user || obs.can_edit?(@user)
+  def can_remove_observation?(_obs)
+    @occurrence.can_edit?(@user)
   end
 
   def update_primary

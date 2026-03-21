@@ -333,18 +333,18 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_not_includes(occ.observations, @obs1)
   end
 
-  def test_non_creator_cannot_remove_others_observation
+  def test_non_creator_can_remove_others_observation
     login("mary")
     obs3 = observations(:detailed_unknown_obs)
     occ = create_occurrence(@obs1, @obs2, obs3)
-    # Try to exclude obs2 (rolf's) — should be denied
+    # Any logged-in user can edit occurrences
     patch(:update, params: {
             id: occ.id,
             observation_ids: [@obs1.id, obs3.id],
             occurrence: { primary_observation_id: @obs1.id }
           })
     occ.reload
-    assert_includes(occ.observations, @obs2)
+    assert_not_includes(occ.observations, @obs2)
   end
 
   # ---------- update: add observations ----------

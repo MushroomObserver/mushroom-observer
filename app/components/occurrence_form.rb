@@ -167,8 +167,24 @@ class Components::OccurrenceForm < Components::ApplicationForm
   end
 
   def render_occurrence_warning(obs)
-    return unless obs.occurrence
+    fs = obs.field_slip
+    if fs
+      render_field_slip_link(fs)
+    elsif obs.occurrence&.observations&.many?
+      render_multi_occurrence_link(obs)
+    end
+  end
 
+  def render_field_slip_link(field_slip)
+    br
+    small do
+      a(href: field_slip_path(field_slip)) do
+        plain("Field Slip: #{field_slip.code}")
+      end
+    end
+  end
+
+  def render_multi_occurrence_link(obs)
     br
     a(href: occurrence_path(obs.occurrence_id)) do
       span(class: "glyphicon glyphicon-th-large")

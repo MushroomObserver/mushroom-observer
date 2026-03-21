@@ -55,6 +55,8 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
 
   def render_observation_grid
     hidden_method_field
+    # Ensure observation_ids param exists even when all unchecked
+    input(type: "hidden", name: "observation_ids[]", value: "")
     ul(
       class: "row list-unstyled mt-3",
       data: {
@@ -67,8 +69,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_submit
-    input(type: "submit",
-          value: :edit_occurrence_submit.l,
+    input(type: "submit", value: :edit_occurrence_submit.l,
           class: "btn btn-default center-block my-3")
   end
 
@@ -139,11 +140,11 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_obs_controls(obs)
+    is_primary = obs.id == @occurrence.primary_observation_id
     render_include_checkbox(obs, checked: true)
     br
-    render_primary_radio(
-      obs, checked: obs.id == @occurrence.primary_observation_id
-    )
+    render_primary_radio(obs, checked: is_primary)
+    render_occurrence_warning(obs)
   end
 
   def render_primary_radio(obs, checked:)
@@ -247,22 +248,36 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
         action: "resize@window->matrix-table#rearrange"
       }
     ) do
-      @candidates.each { |obs| render_candidate_box(obs) }
-    end
-  end
-
-  def render_candidate_box(obs)
-    render_obs_box(obs) do
-      render_include_checkbox(obs, checked: false)
-      br
-      render_primary_radio(obs, checked: false)
-      render_occurrence_warning(obs)
+      @candidates.each do |obs|
+        render_obs_box(obs) do
+          render_include_checkbox(obs, checked: false)
+          br
+          render_primary_radio(obs, checked: false)
+          render_occurrence_warning(obs)
+        end
+      end
     end
   end
 
   def render_occurrence_warning(obs)
-    return unless obs.occurrence
+    fs = obs.field_slip
+    if fs
+      render_field_slip_link(fs)
+    elsif obs.occurrence&.observations&.many?
+      render_occurrence_link(obs)
+    end
+  end
 
+  def render_field_slip_link(field_slip)
+    br
+    small do
+      a(href: field_slip_path(field_slip)) do
+        plain("Field Slip: #{field_slip.code}")
+      end
+    end
+  end
+
+  def render_occurrence_link(obs)
     br
     a(href: occurrence_path(obs.occurrence_id)) do
       span(class: "glyphicon glyphicon-th-large")
