@@ -4,10 +4,6 @@
 # Renders a grid of observation matrix boxes with Include
 # checkboxes and Primary radio buttons.
 class Components::OccurrenceForm < Components::ApplicationForm
-  register_output_helper :location_link, mark_safe: true
-  register_output_helper :show_title_id_badge, mark_safe: true
-  register_output_helper :user_link, mark_safe: true
-
   def initialize(source_obs:, recent_observations:, user:, **)
     @source_obs = source_obs
     @recent_observations = recent_observations
@@ -46,68 +42,8 @@ class Components::OccurrenceForm < Components::ApplicationForm
   end
 
   def render_obs_box(obs)
-    li(class: "matrix-box col-xs-12 col-sm-6 col-md-4 col-lg-3") do
-      render(Components::Panel.new(sizing: true)) do |panel|
-        render_obs_thumbnail(panel, obs)
-        render_obs_details(panel, obs)
-        panel.with_footer(classes: "text-center") do
-          render_obs_controls(obs)
-        end
-      end
-    end
-  end
-
-  def render_obs_thumbnail(panel, obs)
-    return unless obs.thumb_image
-
-    panel.with_thumbnail do
-      InteractiveImage(
-        user: @user,
-        image: obs.thumb_image,
-        image_link: { controller: :observations,
-                      action: :show, id: obs.id },
-        obs: { id: obs.id, name: obs.name },
-        votes: false,
-        full_width: true
-      )
-    end
-  end
-
-  def render_obs_details(panel, obs)
-    panel.with_body(classes: "rss-box-details") do
-      render_obs_name(obs)
-      render_obs_location(obs)
-      render_obs_when_who(obs)
-    end
-  end
-
-  def render_obs_name(obs)
-    div(class: "rss-what") do
-      h5(class: "mt-0 rss-heading h5") do
-        a(href: observation_path(obs)) do
-          trusted_html(
-            obs.format_name.t.break_name.small_author
-          )
-        end
-        whitespace
-        show_title_id_badge(obs, "rss-id")
-      end
-    end
-  end
-
-  def render_obs_location(obs)
-    div(class: "rss-where") do
-      small { location_link(obs.place_name, obs.location) }
-    end
-  end
-
-  def render_obs_when_who(obs)
-    div(class: "rss-what") do
-      small(class: "nowrap-ellipsis") do
-        span(class: "rss-when") { plain(obs.when.to_s) }
-        plain(": ")
-        user_link(obs.user, nil, class: "rss-who")
-      end
+    MatrixBox(user: @user, object: obs) do
+      render_obs_controls(obs)
     end
   end
 

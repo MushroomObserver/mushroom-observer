@@ -37,7 +37,7 @@ class Components::MatrixBox < Components::Base
 
   def view_template(&block)
     if @object
-      render_object_layout
+      render_object_layout(&block)
     elsif block
       render_custom_layout(&block)
     end
@@ -45,7 +45,7 @@ class Components::MatrixBox < Components::Base
 
   private
 
-  def render_object_layout
+  def render_object_layout(&custom_footer)
     # Build render data from object
     @data = build_render_data
     # Get observation_view from eager-loaded association (nil if not loaded)
@@ -60,6 +60,7 @@ class Components::MatrixBox < Components::Base
         render_details_section(panel)
         render_log_footer(panel)
         render_identify_footer(panel)
+        render_custom_footer(panel, &custom_footer) if custom_footer
       end
     end
   end
@@ -269,5 +270,9 @@ class Components::MatrixBox < Components::Base
         label_class: "stretched-link"
       )
     end
+  end
+
+  def render_custom_footer(panel, &block)
+    panel.with_footer(classes: "text-center", &block)
   end
 end

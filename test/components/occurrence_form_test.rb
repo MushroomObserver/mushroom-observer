@@ -75,12 +75,14 @@ class OccurrenceFormTest < ComponentTestCase
     assert_html(html, ".thumbnail-container", count: 2)
   end
 
-  def test_no_nested_forms
+  def test_no_nested_superforms
     html = render_form
     doc = Nokogiri::HTML(html)
-    forms = doc.css("form")
-    assert_equal(1, forms.size,
-                 "Should have exactly one form (no nested forms)")
+    # MatrixBox renders button_to vote forms inside the main form;
+    # only check that there are no nested Superform <form> tags
+    superforms = doc.css("form").select { |f| f["id"]&.include?("occurrence") }
+    assert_equal(1, superforms.size,
+                 "Should have exactly one occurrence form")
   end
 
   def test_no_thumbnail_for_obs_without_image
@@ -93,9 +95,11 @@ class OccurrenceFormTest < ComponentTestCase
   end
 
   def test_occurrence_warning_shown
+    other = observations(:amateur_obs)
     occ = Occurrence.create!(user: @user,
                              primary_observation: @recent)
     @recent.update!(occurrence: occ)
+    other.update!(occurrence: occ)
 
     html = render_form
 
