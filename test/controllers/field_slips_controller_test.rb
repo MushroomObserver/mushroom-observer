@@ -706,7 +706,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_should_update_field_slip_with_last_viewed_obs
     user = @field_slip.user
     login(user.login)
-    orig_obs = @field_slip.observation
+    @field_slip.observation
     obs = observations(:detailed_unknown_obs)
     ObservationView.update_view_stats(obs.id, user.id)
     patch(:update,
