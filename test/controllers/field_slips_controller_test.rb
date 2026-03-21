@@ -782,4 +782,118 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
     assert_redirected_to(field_slip_url(@field_slip))
   end
+
+  # ---------- attach_selected_observations ----------
+
+  def test_create_with_selected_observations
+    login("mary")
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
+    obs1.update_column(:occurrence_id, nil)
+    code = "EOL-9001"
+
+    assert_difference("FieldSlip.count", 1) do
+      post(:create,
+           params: {
+             observation_ids: [obs1.id.to_s, obs2.id.to_s],
+             field_slip: {
+               code: code,
+               project_id: projects(:eol_project).id
+             }
+           })
+    end
+    fs = FieldSlip.find_by(code: code)
+    assert_not_nil(fs, "Cannot find FieldSlip with code #{code}")
+    occ = fs.occurrence
+    assert_not_nil(occ, "Occurrence should be created")
+    assert_includes(occ.observation_ids, obs1.id)
+    assert_includes(occ.observation_ids, obs2.id)
+  end
+
+  def test_create_with_multiple_obs_creates_occurrence
+    login("mary")
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
+    obs1.update_column(:occurrence_id, nil)
+    code = "EOL-9002"
+
+    assert_difference("Occurrence.count", 1) do
+      post(:create,
+           params: {
+             observation_ids: [obs1.id.to_s, obs2.id.to_s],
+             field_slip: {
+               code: code,
+               project_id: projects(:eol_project).id
+             }
+           })
+    end
+  end
+
+  # ---------- sync_selected_observations on update ----------
+
+  def test_update_sync_adds_observation
+    login("mary")
+    fs = field_slips(:field_slip_no_obs)
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
+    obs1.update_column(:occurrence_id, nil)
+
+    # First create an occurrence for the field slip
+    occ = Occurrence.create!(
+      user: mary, primary_observation: obs1,
+      field_slip: fs
+    )
+    obs1.update!(occurrence: occ)
+
+    # Now sync to add obs2
+    patch(:update,
+          params: {
+            id: fs.id,
+            commit: :field_slip_keep_obs.t,
+            observation_ids: [obs1.id.to_s, obs2.id.to_s],
+            field_slip: {
+              code: fs.code,
+              project_id: fs.project_id,
+              primary_observation_id: obs1.id.to_s
+            }
+          })
+    occ.reload
+    assert_includes(occ.observation_ids, obs2.id,
+                    "obs2 should be added to the occurrence")
+  end
+
+  def test_update_sync_removes_observation
+    login("mary")
+    fs = field_slips(:field_slip_no_obs)
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
+    obs3 = observations(:coprinus_comatus_obs)
+    obs1.update_column(:occurrence_id, nil)
+
+    occ = Occurrence.create!(
+      user: mary, primary_observation: obs1,
+      field_slip: fs
+    )
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+    obs3.update!(occurrence: occ)
+
+    # Sync: keep obs1 and obs3, remove obs2
+    patch(:update,
+          params: {
+            id: fs.id,
+            commit: :field_slip_keep_obs.t,
+            observation_ids: [obs1.id.to_s, obs3.id.to_s],
+            field_slip: {
+              code: fs.code,
+              project_id: fs.project_id,
+              primary_observation_id: obs1.id.to_s
+            }
+          })
+    occ.reload
+    assert_not_includes(occ.observation_ids, obs2.id,
+                        "obs2 should be removed")
+    assert_includes(occ.observation_ids, obs1.id)
+    assert_includes(occ.observation_ids, obs3.id)
+  end
 end

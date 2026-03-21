@@ -312,7 +312,7 @@ class OccurrenceTest < UnitTestCase
   # == Phase 6: Shared Consensus Tests ==
 
   def test_shared_consensus_across_occurrence
-    occ = create_occurrence(@obs1, @obs2)
+    create_occurrence(@obs1, @obs2)
     # Propose a name on obs1 and vote
     name = names(:agaricus_campestris)
     naming = Naming.create!(observation: @obs1, name: name, user: rolf)
@@ -326,7 +326,7 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_consensus_reverts_on_removal_from_occurrence
-    occ = create_occurrence(@obs1, @obs2)
+    create_occurrence(@obs1, @obs2)
     name = names(:agaricus_campestris)
     naming = Naming.create!(observation: @obs1, name: name, user: rolf)
     consensus = Observation::NamingConsensus.new(@obs1)
@@ -363,13 +363,66 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_namings_panel_shows_occurrence_namings
-    occ = create_occurrence(@obs1, @obs2)
+    create_occurrence(@obs1, @obs2)
     name = names(:agaricus_campestris)
     naming = Naming.create!(observation: @obs2, name: name, user: rolf)
 
     consensus = Observation::NamingConsensus.new(@obs1)
     assert_includes(consensus.namings.map(&:id), naming.id,
                     "Consensus should include sibling's naming")
+  end
+
+  # -- destroy_if_incomplete! preserves occurrence with field_slip --
+
+  def test_destroy_if_incomplete_preserves_with_field_slip
+    fs = field_slips(:field_slip_no_obs)
+    occ = create_occurrence(@obs1, @obs2)
+    occ.update!(field_slip: fs)
+    @obs2.update!(occurrence: nil)
+
+    occ.destroy_if_incomplete!
+    assert(Occurrence.exists?(occ.id),
+           "Occurrence with field_slip should survive even with < 2 obs")
+  end
+
+  # -- recalculate_consensus! with no observations --
+
+  def test_recalculate_consensus_noop_with_empty_occurrence
+    occ = create_occurrence(@obs1, @obs2)
+    @obs1.update!(occurrence: nil)
+    @obs2.update!(occurrence: nil)
+    occ.reload
+
+    # Should not raise
+    occ.recalculate_consensus!
+  end
+
+  # -- reassign_thumbnails_from departing obs with no images --
+
+  def test_reassign_thumbnails_from_noop_when_departing_has_no_images
+    occ = create_occurrence(@obs1, @obs2)
+    # obs1 has no images, so nothing should change
+    occ.reassign_thumbnails_from(@obs1)
+    # No error raised means success
+  end
+
+  # -- FieldSlip#find_primary_observation --
+
+  def test_field_slip_find_primary_observation
+    fs = field_slips(:field_slip_no_obs)
+    occ = create_occurrence(@obs1, @obs2)
+    occ.update!(field_slip: fs)
+
+    result = fs.find_primary_observation
+    assert_equal(@obs1, result,
+                 "Should return the primary observation")
+  end
+
+  def test_field_slip_find_primary_observation_without_occurrence
+    fs = field_slips(:field_slip_no_obs)
+    result = fs.find_primary_observation
+    assert_nil(result,
+               "Should return nil when no occurrence exists")
   end
 
   private

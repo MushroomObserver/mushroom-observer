@@ -546,6 +546,86 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_redirected_to(permanent_observation_path(@obs1.id))
   end
 
+  def test_destroy_resets_cross_observation_thumbnails
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    img = images(:turned_over_image)
+    @obs1.images << img
+    # Set obs2's thumbnail to obs1's image (cross-obs)
+    @obs2.update_column(:thumb_image_id, img.id)
+
+    delete(:destroy, params: { id: occ.id })
+    @obs2.reload
+
+    # After destroy, obs2's thumbnail should be reset
+    assert_not_equal(img.id, @obs2.thumb_image_id,
+                     "Cross-obs thumbnail should be reset on destroy")
+  end
+
+  def test_destroy_recalculates_standalone_consensus
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+
+    # Propose a name on obs1 and vote it up
+    name = names(:agaricus_campestris)
+    naming = Naming.create!(
+      observation: @obs1, name: name, user: rolf
+    )
+    consensus = Observation::NamingConsensus.new(@obs1)
+    consensus.change_vote(naming, Vote::MAXIMUM_VOTE, rolf)
+    @obs2.reload
+    shared_name_id = @obs2.name_id
+
+    # obs2 should have the shared consensus
+    assert_equal(name.id, shared_name_id)
+
+    delete(:destroy, params: { id: occ.id })
+    @obs2.reload
+
+    # After destroy, obs2 should revert to its own consensus
+    assert_not_equal(name.id, @obs2.name_id,
+                     "Detached obs should revert to standalone consensus")
+  end
+
+  # ---------- update: sync_observations ----------
+
+  def test_update_sync_adds_and_removes_observations
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    obs4 = observations(:amateur_obs)
+    occ = create_occurrence(@obs1, @obs2, obs3)
+
+    # Remove obs2, add obs4
+    patch(:update, params: {
+            id: occ.id,
+            observation_ids: [@obs1.id, obs3.id, obs4.id],
+            occurrence: { primary_observation_id: @obs1.id }
+          })
+    occ.reload
+    assert_includes(occ.observations, obs4,
+                    "obs4 should be added")
+    assert_not_includes(occ.observations, @obs2,
+                        "obs2 should be removed")
+    assert_equal(3, occ.observations.count)
+  end
+
+  def test_update_parse_selected_ids_filters_zeros
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    occ = create_occurrence(@obs1, @obs2, obs3)
+
+    # Include a "0" id (empty checkbox) - should be ignored
+    patch(:update, params: {
+            id: occ.id,
+            observation_ids: ["0", @obs1.id.to_s, @obs2.id.to_s],
+            occurrence: { primary_observation_id: @obs1.id }
+          })
+    occ.reload
+    # obs3 was excluded, but the "0" should not cause issues
+    assert_equal(2, occ.observations.count)
+    assert_not_includes(occ.observations, obs3)
+  end
+
   private
 
   # Mirrors actual Superform output: observation_id and
