@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_05_000000) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_22_000000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -223,6 +223,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_05_000000) do
     t.float "avg_import_time"
     t.datetime "last_obs_start"
     t.boolean "cancel"
+    t.boolean "own_observations", default: true, null: false
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -557,6 +558,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_05_000000) do
     t.decimal "location_lng", precision: 15, scale: 10
     t.integer "field_slip_id"
     t.index ["field_slip_id"], name: "index_observations_on_field_slip_id"
+    t.index ["location_id"], name: "index_observations_on_location_id"
+    t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 
@@ -595,6 +598,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_05_000000) do
   create_table "project_observations", charset: "utf8mb3", force: :cascade do |t|
     t.integer "observation_id", null: false
     t.integer "project_id", null: false
+    t.index ["observation_id"], name: "index_project_observations_on_observation_id"
+    t.index ["project_id"], name: "index_project_observations_on_project_id"
   end
 
   create_table "project_species_lists", charset: "utf8mb3", force: :cascade do |t|

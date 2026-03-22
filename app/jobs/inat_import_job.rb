@@ -85,6 +85,7 @@ class InatImportJob < ApplicationJob
     # (or canceled).
     parser = Inat::PageParser.new(inat_import)
     while parsing?(parser); end
+    log_unlicensed_summary
   end
 
   def inat_id_list
@@ -130,6 +131,27 @@ class InatImportJob < ApplicationJob
   def observation_importer
     @observation_importer ||=
       ::Inat::ObservationImporter.new(inat_import, user, self)
+  end
+
+  def log_unlicensed_summary
+    unlicensed_obs = observation_importer.unlicensed_obs_count
+    skipped_images = observation_importer.skipped_images_count
+
+    if inat_import.own_observations
+      log_own_unlicensed_summary(unlicensed_obs)
+    elsif skipped_images.positive?
+      inat_import.add_response_error(
+        :inat_skipped_images_summary.t(count: skipped_images)
+      )
+    end
+  end
+
+  def log_own_unlicensed_summary(unlicensed_obs)
+    return unless unlicensed_obs.positive?
+
+    inat_import.add_response_error(
+      :inat_unlicensed_obs_summary.t(count: unlicensed_obs)
+    )
   end
 
   def done

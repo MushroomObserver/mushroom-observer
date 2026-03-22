@@ -3,9 +3,15 @@
 # Form for creating a new iNat import.
 # Renders username, observation IDs, consent, and details.
 class Components::InatImportForm < Components::ApplicationForm
+  def initialize(model, super_importer: false, **)
+    @super_importer = super_importer
+    super(model, **)
+  end
+
   def view_template
     text_field(:inat_username,
                label: "#{:inat_username.l}: ", size: 10)
+    render_own_observations_field if @super_importer
     render_choose_observations_panel
     checkbox_field(:consent,
                    label: :inat_import_consent.l,
@@ -19,6 +25,12 @@ class Components::InatImportForm < Components::ApplicationForm
   end
 
   private
+
+  def render_own_observations_field
+    checkbox_field(:own_observations,
+                   label: :inat_own_observations.l,
+                   wrap_class: "mt-3")
+  end
 
   def render_choose_observations_panel
     render(Components::Panel.new(

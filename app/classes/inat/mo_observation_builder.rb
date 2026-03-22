@@ -3,14 +3,17 @@
 class Inat
   # builds an MO Observation from an ::Inat::Obs
   class MoObservationBuilder
-    attr_reader :inat_obs, :user
+    attr_reader :inat_obs, :user, :skipped_images, :unlicensed_obs
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
     NAMING_VOTE = Vote::MAXIMUM_VOTE
 
-    def initialize(inat_obs:, user:)
+    def initialize(inat_obs:, user:, own_observations: true)
       @inat_obs = inat_obs
       @user = user
+      @own_observations = own_observations
+      @skipped_images = 0
+      @unlicensed_obs = inat_obs[:license_code].blank? ? 1 : 0
     end
 
     def mo_observation
@@ -155,15 +158,26 @@ class Inat
 
     def add_inat_images(inat_obs_photos)
       inat_obs_photos.each do |obs_photo|
-        next if obs_photo[:photo][:license_code].blank?
-
         photo = Inat::ObsPhoto.new(obs_photo)
-        params = post_photo_params(photo)
-        API2.execute(params)
+        if photo.license_code.blank?
+          handle_unlicensed_image(photo)
+        else
+          API2.execute(post_photo_params(photo))
+        end
       end
     end
 
-    def post_photo_params(photo)
+    # Own-observation imports: apply user's default MO license.
+    # Others' observations: skip and count for end-of-import reporting.
+    def handle_unlicensed_image(photo)
+      if @own_observations
+        API2.execute(post_photo_params(photo, license: @user.license_id))
+      else
+        @skipped_images += 1
+      end
+    end
+
+    def post_photo_params(photo, license: photo.license_id)
       {
         method: :post,
         action: :image,
@@ -171,7 +185,7 @@ class Inat
         upload_url: photo.url,
         notes: photo.notes,
         copyright_holder: photo.copyright_holder,
-        license: photo.license_id,
+        license: license,
         original_name: photo.original_name,
         observations: @observation.id
       }
