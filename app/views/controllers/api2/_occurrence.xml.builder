@@ -23,7 +23,9 @@ xml.tag!(
       if object.field_slip
   else
     xml_minimal_object(xml, :owner, :user, object.user_id)
-    xml_minimal_object(xml, :field_slip, :field_slip,
-                       object.field_slip_id) if object.field_slip_id
+    if object.field_slip_id
+      xml_minimal_object(xml, :field_slip, :field_slip,
+                         object.field_slip_id)
+    end
   end
 end
