@@ -47,6 +47,7 @@ module OccurrencesController::Show
       @occurrence.reload.destroy!
     end
     detached_obs.each do |obs|
+      Occurrence.log_observation_removed(obs)
       Observation::NamingConsensus.new(obs).calc_consensus
     end
   end

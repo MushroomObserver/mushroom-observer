@@ -3,6 +3,8 @@
 require("test_helper")
 
 class OccurrenceTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   def setup
     @obs1 = observations(:minimal_unknown_obs)
     @obs2 = observations(:coprinus_comatus_obs)
@@ -423,6 +425,40 @@ class OccurrenceTest < UnitTestCase
     result = fs.find_primary_observation
     assert_nil(result,
                "Should return nil when no occurrence exists")
+  end
+
+  # == Phase 10: Logging and Notifications ==
+
+  def test_create_manual_logs_observations
+    User.current = rolf
+    all_obs = [@obs1, @obs2]
+    occ = Occurrence.create_manual(@obs1, all_obs, rolf)
+
+    all_obs.each do |obs|
+      obs.reload
+      assert(obs.rss_log, "Obs #{obs.id} should have an rss_log")
+      assert_match(/log_occurrence_added/, obs.rss_log.notes,
+                   "Obs #{obs.id} rss_log should mention occurrence added")
+    end
+    occ.destroy!
+  end
+
+  def test_create_manual_notifies_other_owner
+    User.current = rolf
+    # obs3 is owned by mary, not rolf
+    all_obs = [@obs1, @obs3]
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      Occurrence.create_manual(@obs1, all_obs, rolf)
+    end
+  end
+
+  def test_log_observation_removed
+    User.current = rolf
+    create_occurrence(@obs1, @obs2, @obs3)
+    Occurrence.log_observation_removed(@obs3)
+    @obs3.reload
+    assert_match(/log_occurrence_removed/, @obs3.rss_log.notes,
+                 "Removed obs should have removal logged")
   end
 
   private

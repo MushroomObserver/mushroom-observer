@@ -44,6 +44,8 @@ class API2
     def before_create(_params)
       selected = Observation.where(id: @observation_ids).
                  includes({ occurrence: :field_slip }).to_a
+      existing = selected.filter_map(&:occurrence).uniq
+      Occurrence.check_multiple_occurrences!(existing)
       primary = resolve_primary(selected)
       Occurrence.create_manual(primary, selected, @user)
     end
@@ -79,9 +81,11 @@ class API2
     def build_deleter
       lambda do |occ|
         must_have_edit_permission!(occ)
+        detached = occ.observations.to_a
         occ.reset_cross_observation_thumbnails
         occ.observations.update_all(occurrence_id: nil)
         occ.destroy!
+        detached.each { |obs| Occurrence.log_observation_removed(obs) }
       end
     end
 
@@ -116,6 +120,7 @@ class API2
         Occurrence.merge!(occ, obs.occurrence)
       elsif obs.occurrence_id != occ.id
         obs.update!(occurrence: occ)
+        Occurrence.log_observation_added([obs])
       end
     end
 
@@ -128,6 +133,7 @@ class API2
 
         occ.reassign_thumbnails_from(obs)
         obs.update!(occurrence: nil)
+        Occurrence.log_observation_removed(obs, occ)
       end
       occ.reload
       occ.destroy_if_incomplete!

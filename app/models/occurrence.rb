@@ -118,16 +118,31 @@ class Occurrence < AbstractModel
     end
   end
 
+  # Reject if observations belong to more than one existing occurrence.
+  def self.check_multiple_occurrences!(occurrences)
+    return if occurrences.size <= 1
+
+    occ = new
+    occ.errors.add(
+      :base,
+      "Cannot combine observations from multiple existing " \
+      "occurrences (IDs: #{occurrences.map(&:id).join(", ")})"
+    )
+    raise(ActiveRecord::RecordInvalid.new(occ))
+  end
+
   # Merge +absorbed+ occurrence into +keeper+. All observations from
   # +absorbed+ move to +keeper+, then +absorbed+ is destroyed.
   def self.merge!(keeper, absorbed)
+    merged_obs = absorbed.observations.to_a
     transaction do
-      absorbed.observations.each do |obs|
+      merged_obs.each do |obs|
         obs.update!(occurrence: keeper)
       end
       absorbed.reload.destroy!
       keeper.recompute_has_specimen!
     end
+    log_observation_added(merged_obs)
     keeper
   end
 
@@ -174,6 +189,7 @@ class Occurrence < AbstractModel
         new_obs.update!(occurrence: occurrence)
         occurrence.recompute_has_specimen!
       end
+      log_observation_added([new_obs])
     end
     occurrence
   end
@@ -195,11 +211,14 @@ class Occurrence < AbstractModel
   def self.merge_into_manual(occurrences, primary_obs, all_obs, _user)
     keeper = occurrences.shift
     occurrences.each { |occ| merge!(keeper, occ) }
+    newly_added = []
     all_obs.each do |obs|
       next if obs.occurrence_id == keeper.id
 
       obs.update!(occurrence: keeper)
+      newly_added << obs
     end
+    log_observation_added(newly_added) if newly_added.any?
     keeper.update!(primary_observation: primary_obs)
     keeper.recompute_has_specimen!
     keeper
@@ -213,10 +232,60 @@ class Occurrence < AbstractModel
       occ = create!(user: user, primary_observation: primary_obs)
       all_obs.each { |obs| obs.update!(occurrence: occ) }
       occ.recompute_has_specimen!
+      log_observation_added(all_obs, user)
       occ
     end
   end
   private_class_method :build_new
+
+  # Log and notify when observations are added to an occurrence.
+  # Also touches the primary observation so it surfaces in
+  # Activity-sorted views (non-primary obs are hidden by
+  # exclude_non_primary).
+  def self.log_observation_added(obs_list, user = User.current)
+    occ = nil
+    obs_list.each do |obs|
+      obs.log(:log_occurrence_added, touch: true)
+      notify_observation_owner(obs, :added, user)
+      occ ||= obs.occurrence
+    end
+    touch_primary(occ, exclude: obs_list)
+  end
+
+  # Log and notify when an observation is removed from an occurrence.
+  # Touches the primary so the occurrence surfaces in Activity views.
+  # Pass +occ+ explicitly since the obs may already be unlinked.
+  def self.log_observation_removed(obs, occ = nil, user = User.current)
+    occ ||= obs.occurrence
+    obs.log(:log_occurrence_removed, touch: true)
+    notify_observation_owner(obs, :removed, user)
+    touch_primary(occ)
+  end
+
+  # Update the primary observation's log_updated_at so it appears
+  # at the top of Activity-sorted indexes and RSS feeds.
+  # Skip if the primary was already logged (e.g., it was in obs_list).
+  def self.touch_primary(occ, exclude: [])
+    return unless occ&.persisted?
+
+    primary = occ.primary_observation
+    return unless primary
+    return if exclude.any? { |obs| obs.id == primary.id }
+
+    primary.log(:log_occurrence_updated, touch: true)
+  end
+
+  # Notify observation owner that their obs was added/removed.
+  def self.notify_observation_owner(obs, action, user)
+    owner = obs.user
+    return if owner == user || owner.no_emails
+
+    OccurrenceChangeMailer.build(
+      sender: user, receiver: owner,
+      observation: obs, action: action
+    ).deliver_later
+  end
+  private_class_method :notify_observation_owner
 
   private
 

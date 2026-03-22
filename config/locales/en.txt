@@ -1340,6 +1340,9 @@
   log_herbarium_record_updated: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_updated_at: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
+  log_occurrence_added: "Added to occurrence by [user]."
+  log_occurrence_removed: "Removed from occurrence by [user]."
+  log_occurrence_updated: "Occurrence updated by [user]."
   log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
@@ -3663,6 +3666,10 @@
   email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
   email_subject_name_tracker_approval: Research Request Emails Approved for [name]
   email_subject_new_password: New Password
+  email_subject_occurrence_added: "[:OBSERVATION] Added to [:OCCURRENCE], [name]"
+  email_subject_occurrence_removed: "[:OBSERVATION] Removed from [:OCCURRENCE], [name]"
+  email_occurrence_added_intro: "Your observation [name] has been added to an [:OCCURRENCE] by [user]."
+  email_occurrence_removed_intro: "Your observation [name] has been removed from an [:OCCURRENCE] by [user]."
   email_subject_observation_change: "[:OBSERVATION] Changed, [name]"
   email_subject_observation_destroy: "[:OBSERVATION] Destroyed, [name]"
   email_subject_observation_question: Question About [name]
