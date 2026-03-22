@@ -24,6 +24,15 @@ class Occurrence < AbstractModel
   belongs_to :field_slip, optional: true
   has_many :observations, dependent: :nullify
 
+  scope :observations, lambda { |obs|
+    obs_ids = obs.is_a?(Array) ? obs.map(&:to_i) : [obs.to_i]
+    joins(:observations).where(observations: { id: obs_ids }).distinct
+  }
+  scope :field_slips, lambda { |slips|
+    slip_ids = slips.is_a?(Array) ? slips.map(&:to_i) : [slips.to_i]
+    where(field_slip_id: slip_ids)
+  }
+
   # Any logged-in user can edit an occurrence.
   def can_edit?(_user)
     true

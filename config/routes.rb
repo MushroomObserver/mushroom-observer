@@ -50,6 +50,7 @@ ACTIONS = {
     names: {},
     name_descriptions: {},
     observations: {},
+    occurrences: {},
     projects: {},
     sequences: {},
     species_lists: {},
