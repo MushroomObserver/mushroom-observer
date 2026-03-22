@@ -1214,6 +1214,7 @@
   search_term_has_name: has_name
   search_term_has_notes: has_notes
   search_term_has_observations: has_observations
+  search_term_has_occurrence: has_occurrence
   search_term_has_public_lat_lng: has_public_lat_lng
   search_term_has_sequence: has_sequence
   search_term_has_specimen: has_specimen
@@ -3044,6 +3045,10 @@
   advanced_search_filter_has_specimen_off: Include both observations with and without specimens
   advanced_search_filter_has_specimen_yes: Exclude observations without specimens
   advanced_search_filter_has_specimen_no: Exclude observations with specimens
+  advanced_search_filter_has_occurrence: Filter observations based on whether they belong to an occurrence
+  advanced_search_filter_has_occurrence_off: Include all observations regardless of occurrence status
+  advanced_search_filter_has_occurrence_yes: Only observations that belong to an occurrence
+  advanced_search_filter_has_occurrence_no: Exclude observations that belong to an occurrence
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
@@ -3895,6 +3900,7 @@
   observation_term_has_field_slips: "[:query_term_has_field_slips]"
   observation_term_has_collection_numbers: "[:query_term_has_collection_numbers]"
   observation_term_has_specimen: Has a specimen?
+  observation_term_has_occurrence: Belongs to an occurrence? ("yes" or "no")
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: "[:query_term_has_notes]"
@@ -4686,6 +4692,7 @@
   query_has_images: has images
   query_has_name: has name
   query_has_notes: has notes
+  query_has_occurrence: has occurrence
   query_has_notes_fields: has notes fields
   query_has_observations: has observations
   query_has_public_lat_lng: public geolocation

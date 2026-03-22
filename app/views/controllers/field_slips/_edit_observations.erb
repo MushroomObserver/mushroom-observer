@@ -23,7 +23,7 @@ primary_id = if occ
         data-action="resize@window->matrix-table#rearrange">
       <% current_obs.each do |obs| %>
         <%= render(Components::MatrixBox.new(
-                     user: @user, object: obs)) do %>
+                     user: @user, object: obs, votes: false)) do %>
           <label>
             <%= check_box_tag("observation_ids[]", obs.id,
                               true,
@@ -54,7 +54,7 @@ primary_id = if occ
         data-action="resize@window->matrix-table#rearrange">
       <% recent.each do |obs| %>
         <%= render(Components::MatrixBox.new(
-                     user: @user, object: obs)) do %>
+                     user: @user, object: obs, votes: false)) do %>
           <label>
             <%= check_box_tag("observation_ids[]", obs.id,
                               false,

@@ -70,7 +70,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_obs_box(obs)
-    MatrixBox(user: @user, object: obs) do
+    MatrixBox(user: @user, object: obs, votes: false) do
       block_given? ? yield : render_obs_controls(obs)
     end
   end

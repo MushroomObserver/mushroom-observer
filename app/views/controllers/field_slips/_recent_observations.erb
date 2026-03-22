@@ -7,7 +7,7 @@
       data-action="resize@window->matrix-table#rearrange">
     <% observations.each do |obs| %>
       <%= render(Components::MatrixBox.new(
-                   user: @user, object: obs)) do %>
+                   user: @user, object: obs, votes: false)) do %>
         <label>
           <%= check_box_tag("observation_ids[]", obs.id,
                             false,

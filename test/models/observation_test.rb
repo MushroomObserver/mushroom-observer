@@ -1791,6 +1791,59 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
+  def test_scope_has_occurrence
+    obs1 = observations(:detailed_unknown_obs)
+    obs2 = observations(:amateur_obs)
+    non_occ_obs = observations(:coprinus_comatus_obs)
+    single_occ_obs = observations(:minimal_unknown_obs)
+
+    # Create a multi-observation occurrence
+    occ = Occurrence.create!(user: obs1.user,
+                             primary_observation: obs1,
+                             has_specimen: true)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    results = Observation.has_occurrence
+    assert_includes(results, obs1,
+                    "Primary in multi-obs occurrence should be included")
+    assert_includes(results, obs2,
+                    "Non-primary in multi-obs occurrence should be included")
+    assert_not_includes(results, non_occ_obs,
+                        "Obs without occurrence should not be included")
+    assert_not_includes(results, single_occ_obs,
+                        "Single-obs occurrence should not count")
+
+    results_no = Observation.has_occurrence(false)
+    assert_includes(results_no, non_occ_obs)
+    assert_includes(results_no, single_occ_obs,
+                    "Single-obs occurrence should be in 'no' results")
+    assert_not_includes(results_no, obs1)
+    assert_not_includes(results_no, obs2)
+  end
+
+  def test_scope_has_specimen_coalesce
+    # Create occurrence with has_specimen: true for obs without specimen
+    obs1 = observations(:peltigera_obs) # specimen: false
+    obs2 = observations(:peltigera_mary_obs) # specimen: false
+    occ = Occurrence.create!(user: obs1.user,
+                             primary_observation: obs1,
+                             has_specimen: true)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    # Occurrence has_specimen overrides individual specimen flag
+    assert_includes(Observation.has_specimen, obs1,
+                    "COALESCE should use occurrence has_specimen")
+    assert_includes(Observation.has_specimen, obs2,
+                    "COALESCE should use occurrence has_specimen")
+
+    # Obs without occurrence uses its own specimen flag
+    coprinus = observations(:coprinus_comatus_obs)
+    assert_includes(Observation.has_specimen, coprinus)
+    assert_not_includes(Observation.has_specimen(false), coprinus)
+  end
+
   def test_scope_has_collection_numbers
     # minimal_unknown_obs has minimal_unknown_coll_num in fixtures
     assert_includes(Observation.has_collection_numbers(true),

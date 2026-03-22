@@ -26,17 +26,16 @@ module RssLog::Scopes
     # multi-observation occurrence but are not the primary.
     # Single-observation occurrences (field slip links) are kept.
     scope :exclude_non_primary_observations, lambda {
-      multi_occ = Occurrence.where(
-        id: Observation.group(:occurrence_id).
-            having("COUNT(*) > 1").select(:occurrence_id)
-      )
+      multi_occ_ids = Observation.where.not(occurrence_id: nil).
+                      group(:occurrence_id).
+                      having("COUNT(*) > 1").select(:occurrence_id)
       left_outer_joins(observation: :occurrence).where(
         RssLog[:observation_id].eq(nil).or(
           Observation[:occurrence_id].eq(nil)
         ).or(
           Occurrence[:primary_observation_id].eq(Observation[:id])
         ).or(
-          Observation[:occurrence_id].not_in(multi_occ.select(:id))
+          Observation[:occurrence_id].not_in(multi_occ_ids.arel)
         )
       )
     }

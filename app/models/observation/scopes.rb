@@ -444,9 +444,34 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_images, lambda { |bool = true|
       presence_condition(Observation[:thumb_image_id], bool:)
     }
-    # content filter
-    scope :has_specimen,
-          ->(bool = true) { where(specimen: bool) }
+    # content filter — uses occurrence-level has_specimen when available
+    scope :has_specimen, lambda { |bool = true|
+      occ_specimen = Occurrence.where(
+        Occurrence[:id].eq(Observation[:occurrence_id])
+      ).select(:has_specimen).arel
+      coalesce = Arel::Nodes::NamedFunction.new(
+        "COALESCE", [Arel.sql("(#{occ_specimen.to_sql})"),
+                     Observation[:specimen]]
+      )
+      where(coalesce.eq(bool))
+    }
+
+    # content filter — true if observation belongs to a
+    # multi-observation occurrence (not just a field slip link)
+    scope :has_occurrence, lambda { |bool = true|
+      multi_occ_ids = Observation.where.not(occurrence_id: nil).
+                      group(:occurrence_id).
+                      having("COUNT(*) > 1").select(:occurrence_id)
+      if bool
+        where(Observation[:occurrence_id].in(multi_occ_ids.arel))
+      else
+        where(
+          Observation[:occurrence_id].eq(nil).or(
+            Observation[:occurrence_id].not_in(multi_occ_ids.arel)
+          )
+        )
+      end
+    }
 
     scope :has_sequences, lambda { |bool = true|
       joined_relation_condition(:sequences, bool:)
@@ -458,15 +483,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # multi-observation occurrence. Single-observation occurrences
     # (used for field slip linking) are not filtered.
     scope :exclude_non_primary, lambda {
-      multi_occ = Occurrence.where(
-        id: Observation.group(:occurrence_id).
-            having("COUNT(*) > 1").select(:occurrence_id)
-      )
+      multi_occ_ids = Observation.where.not(occurrence_id: nil).
+                      group(:occurrence_id).
+                      having("COUNT(*) > 1").select(:occurrence_id)
       left_outer_joins(:occurrence).where(
         Observation[:occurrence_id].eq(nil).or(
           Occurrence[:primary_observation_id].eq(Observation[:id])
         ).or(
-          Observation[:occurrence_id].not_in(multi_occ.select(:id))
+          Observation[:occurrence_id].not_in(multi_occ_ids.arel)
         )
       )
     }

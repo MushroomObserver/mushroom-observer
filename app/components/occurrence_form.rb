@@ -42,7 +42,7 @@ class Components::OccurrenceForm < Components::ApplicationForm
   end
 
   def render_obs_box(obs)
-    MatrixBox(user: @user, object: obs) do
+    MatrixBox(user: @user, object: obs, votes: false) do
       render_obs_controls(obs)
     end
   end
