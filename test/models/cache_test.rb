@@ -113,9 +113,9 @@ class CacheTest < UnitTestCase
       assert_true(obs.lifeform.include?(" lichen "))
     end
     assert_equal(
-      saved_obs_updated_ats,
+      saved_obs_updated_ats.sort,
       Observation.where(Observation[:text_name].matches("Agaricus %")).
-        map(&:updated_at)
+        map(&:updated_at).sort
     )
     Name.subtaxa_of_genus_or_below("Agaricus").each do |nam|
       assert_true(nam.lifeform.include?(" lichen "))

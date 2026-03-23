@@ -79,6 +79,7 @@ class ArticlesControllerTest < FunctionalTestCase
   # That helper calls `add_q_param` and others.
   # NOTE: we can actually call @controller.add_q_param here, fwiw.
   def test_context_nav_dropdown_helper
+    # any Article will do
     article = Article.last
     links = [["Create Article", new_article_path,
               { class: "new_article_link" }],
@@ -178,7 +179,8 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_difference("Article.count", 1) do
       post(:create, params: params)
     end
-    article = Article.last
+    article = Article.find_by(title: title)
+    assert_not_nil(article, "Cannot find Article")
     assert_equal(body, article.body)
     assert_equal(title, article.title)
     assert_redirected_to(article_path(article.id))

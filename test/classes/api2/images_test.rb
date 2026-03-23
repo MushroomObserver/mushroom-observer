@@ -284,8 +284,10 @@ class API2::ImagesTest < UnitTestCase
       File.stub(:chmod, true) do
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
-        assert_obj_arrays_equal([Image.last],
-                                api.results)
+        assert_equal(1, api.results.length)
+        result = api.results.first
+        assert_not_nil(result, "API did not return the created image")
+        assert_equal(Image.last.id, result["id"].to_i)
       end
     end
     assert_last_image_correct
@@ -323,8 +325,10 @@ class API2::ImagesTest < UnitTestCase
       File.stub(:chmod, true) do
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
-        assert_obj_arrays_equal([Image.last],
-                                api.results)
+        assert_equal(1, api.results.length)
+        result = api.results.first
+        assert_not_nil(result, "API did not return the created image")
+        assert_equal(Image.last.id, result["id"].to_i)
       end
     end
     assert_last_image_correct
@@ -353,8 +357,8 @@ class API2::ImagesTest < UnitTestCase
     File.stub(:rename, false) do
       api = API2.execute(params)
       assert_no_errors(api, "Errors while posting image")
-      img = Image.last
-      assert_obj_arrays_equal([img], api.results)
+      assert_equal(1, api.results.length)
+      img = api.results.first
       actual = File.read(img.full_filepath(:full_size))
       expect = Rails.root.join("test/images/test_image.jpg").read
       assert_equal(expect, actual, "Uploaded image differs from original!")
