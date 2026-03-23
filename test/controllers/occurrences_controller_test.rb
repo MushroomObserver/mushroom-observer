@@ -230,6 +230,44 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_redirected_to(occurrence_path(occ))
   end
 
+  # ---------- resolve_projects action ----------
+
+  def test_resolve_projects_get_with_gaps
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    occ = create_occurrence(@obs1, obs3)
+    get(:resolve_projects, params: { id: occ.id })
+    assert_response(:success)
+  end
+
+  def test_resolve_projects_get_no_gaps
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    get(:resolve_projects, params: { id: occ.id })
+    assert_redirected_to(occurrence_path(occ))
+  end
+
+  def test_resolve_projects_post_add_all
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    project = projects(:bolete_project)
+    occ = create_occurrence(@obs1, obs3)
+    post(:resolve_projects,
+         params: { id: occ.id, resolution: "add_all" })
+    assert_includes(@obs1.reload.projects, project)
+    assert_redirected_to(occurrence_path(occ))
+  end
+
+  def test_resolve_projects_post_cancel
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    project = projects(:bolete_project)
+    occ = create_occurrence(@obs1, obs3)
+    post(:resolve_projects, params: { id: occ.id })
+    assert_not_includes(@obs1.reload.projects, project)
+    assert_redirected_to(occurrence_path(occ))
+  end
+
   # ---------- show action ----------
 
   def test_show_requires_login
