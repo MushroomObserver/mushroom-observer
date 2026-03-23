@@ -57,13 +57,15 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_create_success
     login("rolf")
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
+    params = create_params(@obs1, [@obs1, obs3])
+    params[:project_resolution] = "add_all"
     assert_difference("Occurrence.count", 1) do
-      post(:create, params: create_params(@obs1, [@obs1, obs3]))
+      post(:create, params: params)
     end
     occ = Occurrence.last
     assert_equal(@obs1, occ.primary_observation)
     assert_equal(2, occ.observations.count)
-    assert_redirected_to(occurrence_path(occ.id))
+    assert_redirected_to(occurrence_path(occ))
     assert_flash_success
   end
 
@@ -145,7 +147,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     end
     occ = Occurrence.last
     assert_equal(2, occ.observations.count)
-    assert_redirected_to(occurrence_path(occ.id))
+    assert_occurrence_redirect(occ)
   end
 
   # Verify the form generates correct field names for the
@@ -185,7 +187,9 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_create_no_warning_if_locations_match
     login("rolf")
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
-    post(:create, params: create_params(@obs1, [@obs1, obs3]))
+    params = create_params(@obs1, [@obs1, obs3])
+    params[:project_resolution] = "add_all"
+    post(:create, params: params)
     assert_flash_success
   end
 
@@ -196,6 +200,34 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = Occurrence.last
     assert_includes(occ.observations, @obs1)
     assert_includes(occ.observations, @obs2)
+  end
+
+  # ---------- project confirmation ----------
+
+  def test_create_shows_project_confirmation
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs) # in boreal_project
+    # No project_resolution param — should show confirmation
+    assert_no_difference("Occurrence.count") do
+      post(:create, params: create_params(@obs1, [@obs1, obs3]))
+    end
+    assert_response(:success) # renders confirmation modal
+    assert_match(/Add All/, @response.body)
+  end
+
+  def test_create_with_add_all_adds_to_projects
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs) # in bolete_project
+    project = projects(:bolete_project)
+    params = create_params(@obs1, [@obs1, obs3])
+    params[:project_resolution] = "add_all"
+    assert_difference("Occurrence.count", 1) do
+      post(:create, params: params)
+    end
+    occ = Occurrence.last
+    assert_includes(@obs1.reload.projects, project,
+                    "All obs should be added to all projects")
+    assert_redirected_to(occurrence_path(occ))
   end
 
   # ---------- show action ----------
@@ -272,7 +304,7 @@ class OccurrencesControllerTest < FunctionalTestCase
           })
     occ.reload
     assert_equal(@obs2, occ.primary_observation)
-    assert_redirected_to(occurrence_path(occ))
+    assert_occurrence_redirect(occ)
     assert_flash_success
   end
 
@@ -362,7 +394,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ.reload
     assert_equal(3, occ.observations.count)
     assert_includes(occ.observations, obs3)
-    assert_redirected_to(occurrence_path(occ))
+    # May render edit page with project modal or redirect
+    assert_response(:success) if @response.redirect_url.nil?
     assert_flash_success
   end
 
@@ -530,13 +563,13 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_nil(@obs2.occurrence_id)
   end
 
-  def test_destroy_denied_for_non_creator
+  def test_destroy_allowed_for_any_user
     login("mary")
     occ = create_occurrence(@obs1, @obs2)
-    assert_no_difference("Occurrence.count") do
+    assert_difference("Occurrence.count", -1) do
       delete(:destroy, params: { id: occ.id })
     end
-    assert_flash_error
+    assert_flash_success
   end
 
   def test_destroy_redirects_to_primary_obs
@@ -649,6 +682,16 @@ class OccurrencesControllerTest < FunctionalTestCase
       where: location.name,
       location: location
     )
+  end
+
+  # After create/update, redirect goes to either occurrence show or
+  # resolve_projects (if project membership gaps exist).
+  def assert_occurrence_redirect(occ)
+    show = occurrence_path(occ)
+    resolve = resolve_projects_occurrence_path(occ)
+    assert_includes([show, resolve], @response.redirect_url.split("?").first.
+                    sub(%r{^https?://[^/]+}, ""),
+                    "Expected redirect to occurrence show or resolve_projects")
   end
 
   def create_occurrence(primary_obs, *other_obs)

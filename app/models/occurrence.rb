@@ -17,6 +17,9 @@
 #  updated_at::               timestamp
 #
 class Occurrence < AbstractModel
+  include Occurrence::ProjectGaps
+  include Occurrence::Logging
+
   MAX_OBSERVATIONS = 10
 
   belongs_to :user
@@ -47,6 +50,20 @@ class Occurrence < AbstractModel
     update!(has_specimen: observations.where(specimen: true).exists?)
   end
 
+  # Nightly safety net: recompute has_specimen on all occurrences.
+  def self.refresh_has_specimen_cache(dry_run: false)
+    msgs = []
+    find_each do |occ|
+      correct = occ.observations.where(specimen: true).exists?
+      next if occ.has_specimen == correct
+
+      msgs << "Occurrence ##{occ.id}: has_specimen " \
+              "#{occ.has_specimen} -> #{correct}"
+      occ.update!(has_specimen: correct) unless dry_run
+    end
+    msgs
+  end
+
   # Recalculate shared consensus across all observations.
   def recalculate_consensus!
     obs = observations.naming_includes.first
@@ -63,6 +80,16 @@ class Occurrence < AbstractModel
 
     reset_cross_observation_thumbnails
     destroy!
+  end
+
+  # Dissolve the occurrence: detach all non-primary observations.
+  # If a field slip is linked, keep the occurrence with just the
+  # primary. Otherwise destroy it entirely.
+  def dissolve!
+    non_primary = observations.where.not(id: primary_observation_id).to_a
+    reset_cross_observation_thumbnails
+    dissolve_transaction(non_primary)
+    dissolve_log_and_recalculate(non_primary)
   end
 
   # Reset any thumbnail that points to an image belonging to a
@@ -238,55 +265,6 @@ class Occurrence < AbstractModel
   end
   private_class_method :build_new
 
-  # Log and notify when observations are added to an occurrence.
-  # Also touches the primary observation so it surfaces in
-  # Activity-sorted views (non-primary obs are hidden by
-  # exclude_non_primary).
-  def self.log_observation_added(obs_list, user = User.current)
-    occ = nil
-    obs_list.each do |obs|
-      obs.log(:log_occurrence_added, touch: true)
-      notify_observation_owner(obs, :added, user)
-      occ ||= obs.occurrence
-    end
-    touch_primary(occ, exclude: obs_list)
-  end
-
-  # Log and notify when an observation is removed from an occurrence.
-  # Touches the primary so the occurrence surfaces in Activity views.
-  # Pass +occ+ explicitly since the obs may already be unlinked.
-  def self.log_observation_removed(obs, occ = nil, user = User.current)
-    occ ||= obs.occurrence
-    obs.log(:log_occurrence_removed, touch: true)
-    notify_observation_owner(obs, :removed, user)
-    touch_primary(occ)
-  end
-
-  # Update the primary observation's log_updated_at so it appears
-  # at the top of Activity-sorted indexes and RSS feeds.
-  # Skip if the primary was already logged (e.g., it was in obs_list).
-  def self.touch_primary(occ, exclude: [])
-    return unless occ&.persisted?
-
-    primary = occ.primary_observation
-    return unless primary
-    return if exclude.any? { |obs| obs.id == primary.id }
-
-    primary.log(:log_occurrence_updated, touch: true)
-  end
-
-  # Notify observation owner that their obs was added/removed.
-  def self.notify_observation_owner(obs, action, user)
-    owner = obs.user
-    return if owner == user || owner.no_emails
-
-    OccurrenceChangeMailer.build(
-      sender: user, receiver: owner,
-      observation: obs, action: action
-    ).deliver_later
-  end
-  private_class_method :notify_observation_owner
-
   private
 
   def primary_observation_must_belong_to_occurrence
@@ -310,5 +288,26 @@ class Occurrence < AbstractModel
 
     errors.add(:observations,
                "must have at most #{MAX_OBSERVATIONS} observations")
+  end
+
+  def dissolve_transaction(non_primary)
+    transaction do
+      non_primary.each { |obs| obs.update!(occurrence: nil) }
+      if field_slip_id.present?
+        reload
+      else
+        primary_observation.update!(occurrence: nil)
+        reload.destroy!
+      end
+    end
+  end
+
+  def dissolve_log_and_recalculate(non_primary)
+    detached = non_primary
+    detached += [primary_observation] if field_slip_id.blank?
+    detached.each do |obs|
+      Occurrence.log_observation_removed(obs)
+      Observation::NamingConsensus.new(obs).calc_consensus
+    end
   end
 end

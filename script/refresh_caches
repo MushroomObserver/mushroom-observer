@@ -18,6 +18,7 @@
 #    Observation.make_sure_no_observations_are_misspelled
 #    Observation.refresh_content_filter_caches
 #    Observation.refresh_needs_naming_column
+#    Occurrence.refresh_has_specimen_cache
 #    Vote.update_observation_views_reviewed_column
 #    User.cull_unverified_users
 #
@@ -69,6 +70,8 @@ msgs = progress("unused or missing synonyms...",
                 Observation, :make_sure_no_observations_are_misspelled) +
        progress("content filter caches...",
                 Observation, :refresh_content_filter_caches) +
+       progress("occurrence has_specimen cache...",
+                Occurrence, :refresh_has_specimen_cache) +
        progress("observations needing naming...",
                 Observation, :refresh_needs_naming_column) +
        progress("observations reviewed...",

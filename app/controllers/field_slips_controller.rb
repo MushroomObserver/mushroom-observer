@@ -69,22 +69,7 @@ class FieldSlipsController < ApplicationController
     old_obs = @field_slip.observation
     respond_to do |format|
       if check_last_obs && @field_slip.update(field_slip_params)
-        format.html do
-          disconnect_observation(old_obs)
-          if params[:commit] == :field_slip_create_obs.t
-            redirect_to(new_observation_url(
-                          field_code: @field_slip.code,
-                          place_name: place_name,
-                          date: extract_date,
-                          notes: field_slip_notes.compact_blank!
-                        ))
-          else
-            sync_selected_observations
-            update_observation_fields
-            redirect_to(field_slip_url(@field_slip),
-                        notice: :field_slip_updated.t)
-          end
-        end
+        format.html { html_update(old_obs) }
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
         @field_slip.reload
@@ -114,6 +99,32 @@ class FieldSlipsController < ApplicationController
 
   private
 
+  def html_update(old_obs)
+    disconnect_observation(old_obs)
+    if params[:commit] == :field_slip_create_obs.t
+      redirect_to(new_observation_url(
+                    field_code: @field_slip.code,
+                    place_name: place_name,
+                    date: extract_date,
+                    notes: field_slip_notes.compact_blank!
+                  ))
+    else
+      sync_selected_observations
+      update_observation_fields
+      redirect_or_render_field_slip_update
+    end
+  end
+
+  def redirect_or_render_field_slip_update
+    if @field_slip_project_gaps
+      flash_notice(:field_slip_updated.t)
+      render(:edit, status: :ok)
+    else
+      redirect_to(field_slip_url(@field_slip),
+                  notice: :field_slip_updated.t)
+    end
+  end
+
   def place_name
     str = params[:field_slip][:location]
     @place_name ||= @field_slip.project&.check_for_alias(str, Location) || str
@@ -138,8 +149,11 @@ class FieldSlipsController < ApplicationController
       attach_selected_observations
       update_observation_fields
       obs = @field_slip.observation
-      if obs
-        check_for_species_list(obs, params[:species_list])
+      check_for_species_list(obs, params[:species_list]) if obs
+      if @field_slip_project_gaps
+        flash_notice(:field_slip_created.t)
+        render(:new, status: :ok)
+      elsif obs
         redirect_to(observation_url(obs),
                     notice: :field_slip_created.t)
       else
@@ -187,88 +201,6 @@ class FieldSlipsController < ApplicationController
                              :thumb_image,
                              { occurrence: :field_slip }]).
       filter_map(&:observation)
-  end
-
-  def attach_selected_observations
-    obs_ids = Array(params[:observation_ids]).map(&:to_i)
-    return if obs_ids.empty?
-
-    selected = Observation.where(id: obs_ids).
-               includes({ occurrence: :field_slip }).to_a
-    ensure_occurrence_for_field_slip(selected)
-  end
-
-  def sync_selected_observations
-    return unless params.key?(:observation_ids)
-
-    selected_ids = Array(params[:observation_ids]).to_set(&:to_i)
-    occ = @field_slip.occurrence
-    return create_new_field_slip_occurrence(selected_ids) unless occ
-
-    sync_occurrence_observations(occ, selected_ids)
-  end
-
-  def create_new_field_slip_occurrence(selected_ids)
-    return if selected_ids.empty?
-
-    selected = Observation.where(id: selected_ids).to_a
-    ensure_occurrence_for_field_slip(selected)
-  end
-
-  def sync_occurrence_observations(occ, selected_ids)
-    current_ids = occ.observation_ids.to_set
-
-    # Detach unchecked observations
-    (current_ids - selected_ids).each do |obs_id|
-      obs = Observation.find_by(id: obs_id)
-      next unless obs
-
-      occ.reassign_thumbnails_from(obs)
-      obs.update!(occurrence: nil)
-      Observation::NamingConsensus.new(obs).calc_consensus
-    end
-
-    # Attach newly checked observations
-    (selected_ids - current_ids).each do |obs_id|
-      obs = Observation.find_by(id: obs_id)
-      obs&.update!(occurrence: occ)
-    end
-
-    occ.reload
-    update_occurrence_primary(occ)
-    occ.recompute_has_specimen!
-    occ.recalculate_consensus! unless occ.destroyed?
-  end
-
-  def update_occurrence_primary(occ)
-    primary = resolve_primary(occ.observations.to_a)
-    occ.update!(primary_observation: primary)
-  end
-
-  def resolve_primary(obs_list)
-    primary_id = params.dig(:field_slip,
-                            :primary_observation_id).to_i
-    obs_list.find { |o| o.id == primary_id } || obs_list.first
-  end
-
-  def ensure_occurrence_for_field_slip(selected)
-    primary = resolve_primary(selected)
-    occ = @field_slip.occurrence
-    if occ
-      selected.each do |obs|
-        obs.update!(occurrence: occ) unless obs.occurrence_id == occ.id
-      end
-      occ.update!(primary_observation: primary)
-    else
-      occ = Occurrence.create!(user: @user,
-                               primary_observation: primary,
-                               field_slip: @field_slip)
-      selected.each { |obs| obs.update!(occurrence: occ) }
-    end
-    occ.recompute_has_specimen!
-    occ.recalculate_consensus!
-  rescue ActiveRecord::RecordInvalid => e
-    flash_error(e.message)
   end
 
   # Only allow a list of trusted parameters through.

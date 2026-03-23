@@ -5,6 +5,7 @@
 class OccurrencesController < ApplicationController
   include Show
   include Edit
+  include ResolveProjects
 
   before_action :login_required
 
@@ -75,8 +76,19 @@ class OccurrencesController < ApplicationController
 
   def create_occurrence(selected)
     primary_obs = resolve_primary_observation(selected)
+    gaps = preview_project_gaps(primary_obs, selected)
+    if gaps.any? && !params[:project_resolution]
+      render_project_confirmation(gaps, selected, primary_obs)
+      return
+    end
+
+    commit_occurrence(primary_obs, selected, gaps)
+  end
+
+  def commit_occurrence(primary_obs, selected, gaps)
     occ = Occurrence.create_manual(primary_obs, selected, @user)
     occ.recalculate_consensus!
+    apply_project_resolution(occ, gaps)
     warn_if_locations_differ(selected)
     flash_notice(:occurrence_created.t(id: occ.id))
     redirect_to(occurrence_path(occ.id))
@@ -96,13 +108,66 @@ class OccurrencesController < ApplicationController
 
   def render_new_form(source_obs)
     recent = recent_observations(source_obs)
+    confirm = {}
+    if @project_gaps&.any?
+      confirm = { gaps: @project_gaps, primary: @project_primary,
+                  selected: @project_selected }
+    end
     render(
       Views::Controllers::Occurrences::New.new(
         source_obs: source_obs,
         recent_observations: recent,
-        user: @user
+        user: @user,
+        project_confirm: confirm
       ),
       layout: true
     )
+  end
+
+  # Check for project membership gaps before creating the occurrence.
+  # Returns {} if all observations are in all the same projects,
+  # otherwise returns { projects: [Project, ...], has_non_primary_gaps: bool }
+  def preview_project_gaps(primary_obs, selected)
+    all_projects = all_selected_projects(selected)
+    return {} if all_projects.empty?
+
+    primary_missing = all_projects - primary_obs.projects.to_a
+    non_primary_gaps = any_non_primary_gaps?(
+      primary_obs, selected, all_projects
+    )
+    return {} if primary_missing.empty? && !non_primary_gaps
+
+    { projects: all_projects,
+      primary_missing: primary_missing,
+      has_non_primary_gaps: non_primary_gaps }
+  end
+
+  def all_selected_projects(selected)
+    Project.joins(:project_observations).
+      where(project_observations: {
+              observation_id: selected.map(&:id)
+            }).distinct.to_a
+  end
+
+  def any_non_primary_gaps?(primary_obs, selected, all_projects)
+    selected.any? do |obs|
+      next if obs.id == primary_obs.id
+
+      (all_projects - obs.projects.to_a).any?
+    end
+  end
+
+  def render_project_confirmation(gaps, selected, primary_obs)
+    @project_gaps = gaps
+    @project_primary = primary_obs
+    @project_selected = selected
+    render_new_form(@source_obs)
+  end
+
+  def apply_project_resolution(occ, gaps)
+    return if gaps.empty?
+    return unless params[:project_resolution] == "add_all"
+
+    occ.add_all_to_collections(projects: gaps[:projects] || [])
   end
 end

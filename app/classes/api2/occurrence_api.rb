@@ -81,11 +81,8 @@ class API2
     def build_deleter
       lambda do |occ|
         must_have_edit_permission!(occ)
-        detached = occ.observations.to_a
-        occ.reset_cross_observation_thumbnails
-        occ.observations.update_all(occurrence_id: nil)
-        occ.destroy!
-        detached.each { |obs| Occurrence.log_observation_removed(obs) }
+        occ.dissolve!
+        occ.destroyed? ? nil : occ
       end
     end
 

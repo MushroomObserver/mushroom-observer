@@ -1343,6 +1343,9 @@
   log_occurrence_added: "Added to occurrence by [user]."
   log_occurrence_removed: "Removed from occurrence by [user]."
   log_occurrence_updated: "Occurrence updated by [user]."
+  log_field_slip_added: "Added to field slip [name] by [user]."
+  log_field_slip_removed: "Removed from field slip [name] by [user]."
+  log_field_slip_updated: "Field slip [name] updated by [user]."
   log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
@@ -2975,6 +2978,15 @@
   occurrence_updated: Occurrence updated.
   occurrence_destroyed: Occurrence destroyed.
   occurrence_not_found: Occurrence not found.
+  occurrence_resolve_projects_title: "Add Observations to Projects"
+  occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
+  occurrence_resolve_projects_projects: "Projects:"
+  occurrence_resolve_projects_species_lists: "Species Lists:"
+  occurrence_resolve_projects_cancel: Cancel
+  occurrence_resolve_projects_add_primary: Add Primary
+  occurrence_resolve_projects_add_all: Add All
+  occurrence_resolve_projects_done: "Primary observation added to [count] projects/lists."
+  occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
   field_slips_project_update_fail: Unable to update [TITLE] Project

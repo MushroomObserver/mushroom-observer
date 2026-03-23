@@ -11,18 +11,15 @@ module OccurrencesController::Show
   def destroy
     return unless find_occurrence!
 
-    unless @occurrence.user == @user
+    unless @occurrence.can_edit?(@user)
       flash_error(:permission_denied.t)
       redirect_to(occurrence_path(@occurrence))
       return
     end
 
-    primary_obs = @occurrence.primary_observation
-    obs_id = primary_obs&.id
+    obs_id = @occurrence.primary_observation&.id
     destroy_occurrence!
-    flash_notice(:occurrence_destroyed.t)
-    path = obs_id ? permanent_observation_path(obs_id) : observations_path
-    redirect_to(path)
+    redirect_after_dissolve(obs_id)
   end
 
   private
@@ -37,19 +34,18 @@ module OccurrencesController::Show
   end
 
   def destroy_occurrence!
-    detached_obs = []
-    Occurrence.transaction do
-      @occurrence.reset_cross_observation_thumbnails
-      @occurrence.observations.each do |obs|
-        obs.update!(occurrence: nil)
-        detached_obs << obs
-      end
-      @occurrence.reload.destroy!
+    @occurrence.dissolve!
+  end
+
+  def redirect_after_dissolve(obs_id)
+    if @occurrence.destroyed?
+      flash_notice(:occurrence_destroyed.t)
+      path = obs_id ? permanent_observation_path(obs_id) : observations_path
+    else
+      flash_notice(:occurrence_updated.t)
+      path = occurrence_path(@occurrence)
     end
-    detached_obs.each do |obs|
-      Occurrence.log_observation_removed(obs)
-      Observation::NamingConsensus.new(obs).calc_consensus
-    end
+    redirect_to(path)
   end
 
   def ordered_observations
