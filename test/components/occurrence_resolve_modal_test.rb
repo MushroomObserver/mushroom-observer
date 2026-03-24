@@ -71,6 +71,39 @@ class OccurrenceResolveModalTest < ComponentTestCase
     )
   end
 
+  def test_modal_close_button
+    gaps = { projects: [@project] }
+    html = render_modal(
+      gaps: gaps, primary: @obs1,
+      selected: [@obs1, @obs2]
+    )
+
+    doc = Nokogiri::HTML(html)
+    close_btn = doc.at_css("button.close")
+    assert(close_btn, "Expected close button")
+    assert_equal("modal", close_btn["data-dismiss"])
+
+    # Close button contains times symbol
+    span = close_btn.at_css("span[aria-hidden='true']")
+    assert(span, "Expected times symbol span")
+  end
+
+  def test_modal_nil_user
+    gaps = { projects: [@project] }
+    html = render(Components::OccurrenceResolveModal.new(
+                    gaps: gaps, primary: @obs1,
+                    user: nil,
+                    selected: [@obs1, @obs2],
+                    occurrence: nil
+                  ))
+
+    doc = Nokogiri::HTML(html)
+    modal = doc.at_css("#modal_resolve_projects")
+    assert(modal, "Modal should render with nil user")
+    # data-modal-user-value should be nil (not set)
+    assert_nil(modal["data-modal-user-value"])
+  end
+
   private
 
   def render_modal(gaps:, primary:, selected: nil,

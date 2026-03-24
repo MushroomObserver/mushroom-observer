@@ -199,6 +199,83 @@ class OccurrenceEditFormTest < ComponentTestCase
     )
   end
 
+  def test_location_select_options_populated
+    loc1 = @obs1.location
+    loc2 = locations(:salt_point)
+    @obs2.update!(location: loc2)
+    html = render_edit_form
+
+    doc = Nokogiri::HTML(html)
+    sel = doc.at_css(
+      "select[name='primary_obs[location_id]']"
+    )
+    assert(sel, "Expected location select element")
+    opts = sel.css("option")
+    assert_operator(opts.size, :>=, 2,
+                    "Should have at least two location options")
+
+    vals = opts.map { |o| o["value"].to_i }
+    assert_includes(vals, loc1.id)
+    assert_includes(vals, loc2.id)
+
+    # Current primary location should be selected
+    selected = sel.at_css("option[selected]")
+    assert(selected, "One option should be selected")
+  end
+
+  def test_candidate_controls_unchecked
+    candidate = observations(:amateur_obs)
+    html = render_edit_form(candidates: [candidate])
+
+    doc = Nokogiri::HTML(html)
+    # Candidate checkbox: unchecked
+    cb = doc.at_css(
+      "input[type='checkbox']" \
+      "[value='#{candidate.id}']"
+    )
+    assert(cb, "Expected candidate checkbox")
+    assert_nil(cb["checked"],
+               "Candidate checkbox should be unchecked")
+
+    # Candidate radio: unchecked, has stimulus action
+    radio = doc.at_css(
+      "input[type='radio']" \
+      "[value='#{candidate.id}']"
+    )
+    assert(radio, "Expected candidate primary radio")
+    assert_nil(radio["checked"],
+               "Candidate radio should be unchecked")
+    assert_equal(
+      "occurrence-edit-form#primarySelected",
+      radio["data-action"]
+    )
+  end
+
+  def test_obs_controls_stimulus_actions
+    html = render_edit_form
+    doc = Nokogiri::HTML(html)
+
+    # Include checkbox has stimulus action
+    cb = doc.at_css(
+      "input[type='checkbox']" \
+      "[value='#{@obs1.id}']"
+    )
+    assert(cb, "Expected include checkbox")
+    assert_equal(
+      "occurrence-edit-form#includeToggled",
+      cb["data-action"]
+    )
+
+    # Primary radio has editable data attribute
+    radio = doc.at_css(
+      "input[type='radio']" \
+      "[value='#{@obs1.id}']"
+    )
+    assert(radio, "Expected primary radio")
+    assert(radio["data-editable"],
+           "Radio should have data-editable attribute")
+  end
+
   private
 
   def render_edit_form(occurrence: @occurrence,

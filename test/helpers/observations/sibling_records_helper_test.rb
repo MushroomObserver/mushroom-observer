@@ -75,4 +75,38 @@ class SiblingRecordsHelperTest < ActionView::TestCase
     assert_match("MO #{obs.id}", html)
     assert_match("text-muted", html)
   end
+
+  def test_sibling_external_link_items_with_inat
+    el = external_links(:coprinus_comatus_obs_inaturalist_link)
+    sibling = el.observation
+    html = sibling_external_link_items([sibling])
+
+    assert_match("<li>", html)
+    assert_match("iNat", html)
+    assert_match("MO #{sibling.id}", html)
+  end
+
+  def test_sibling_herbarium_records_accession
+    hr = herbarium_records(:coprinus_comatus_rolf_spec)
+    sibling = hr.observations.first
+    html = sibling_herbarium_records([sibling])
+
+    assert_match("tight-list", html)
+    assert_match(
+      herbarium_record_path(hr.id).to_s, html
+    )
+  end
+
+  def test_multiple_siblings_aggregate_records
+    # Two siblings with collection numbers
+    cn1 = collection_numbers(:coprinus_comatus_coll_num)
+    sib1 = cn1.observations.first
+    cn2 = collection_numbers(:agaricus_campestris_coll_num)
+    sib2 = cn2.observations.first
+    html = sibling_collection_numbers([sib1, sib2])
+
+    assert_match("tight-list", html)
+    assert_match(cn1.format_name, html)
+    assert_match(cn2.format_name, html)
+  end
 end

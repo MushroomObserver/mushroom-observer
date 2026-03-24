@@ -412,4 +412,46 @@ class API2::OccurrencesTest < UnitTestCase
     }
     assert_api_fail(params)
   end
+
+  # == Coverage: GET with detail: :high ==
+
+  def test_getting_occurrence_with_high_detail
+    assert_api_pass(params_get(id: @occ.id, detail: :high))
+    assert_api_results([@occ])
+    result = @api.results.first
+    assert_equal(@occ.id, result.id)
+    # high_detail_includes loads observations, field_slip, user
+    assert(result.association(:observations).loaded?,
+           "Observations should be eager-loaded")
+    assert(result.association(:user).loaded?,
+           "User should be eager-loaded")
+  end
+
+  # == Coverage: GET filtering by created_at range ==
+
+  def test_getting_occurrences_by_created_at
+    @occ.update!(created_at: Time.zone.parse("2024-06-15"))
+    params = params_get(
+      created_at: "2024-06-01-2024-06-30"
+    )
+    assert_api_pass(params)
+    assert_includes(@api.results, @occ)
+  end
+
+  # == Coverage: POST single observation error message ==
+
+  def test_posting_single_observation_error_message
+    obs1 = observations(:peltigera_obs)
+    params = {
+      method: :post,
+      action: :occurrence,
+      api_key: @api_key.key,
+      observation: obs1.id.to_s
+    }
+    api = API2.execute(params)
+    assert(api.errors.any?,
+           "Should fail with only one observation")
+    err = api.errors.first
+    assert_kind_of(API2::BadParameterValue, err)
+  end
 end

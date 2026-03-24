@@ -118,6 +118,58 @@ class OccurrenceFormTest < ComponentTestCase
     assert_html(html, "a[href='/field_slips/#{field_slip.id}']")
   end
 
+  def test_recent_controls_include_checkbox_label
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    # Include checkbox has stimulus action
+    cb = doc.at_css(
+      "input[type='checkbox']" \
+      "[name='observation_ids[]']" \
+      "[value='#{@recent.id}']"
+    )
+    assert(cb, "Expected include checkbox for recent obs")
+    assert_equal("occurrence-form#includeToggled",
+                 cb["data-action"])
+    # Label wraps checkbox with "Include" text
+    label = cb.parent
+    assert_equal("label", label.name)
+    assert_includes(label.text, "Include")
+  end
+
+  def test_primary_radio_stimulus_data
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    # Source radio has sourceRadio target
+    src_radio = doc.at_css(
+      "input[type='radio']" \
+      "[value='#{@source.id}']"
+    )
+    assert(src_radio, "Expected source primary radio")
+    assert_equal("sourceRadio",
+                 src_radio["data-occurrence-form-target"])
+
+    # Recent radio has primarySelected action
+    rec_radio = doc.at_css(
+      "input[type='radio']" \
+      "[value='#{@recent.id}']"
+    )
+    assert(rec_radio, "Expected recent primary radio")
+    assert_equal("occurrence-form#primarySelected",
+                 rec_radio["data-action"])
+  end
+
+  def test_no_occurrence_warning_for_unlinked_obs
+    # Recent obs with no occurrence shows no warning
+    plain_obs = observations(:amateur_obs)
+    plain_obs.update!(occurrence: nil)
+    html = render_form(source_obs: @source,
+                       recent: [plain_obs])
+
+    assert_not_includes(html, :in_existing_occurrence.l)
+  end
+
   private
 
   def render_form(source_obs: @source, recent: [@recent])

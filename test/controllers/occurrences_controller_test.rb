@@ -991,6 +991,88 @@ class OccurrencesControllerTest < FunctionalTestCase
     end
   end
 
+  # == Coverage: destroy action (Show module) ==
+
+  def test_destroy_with_field_slip_keeps_occurrence
+    login("rolf")
+    fs = field_slips(:field_slip_no_obs)
+    occ = create_occurrence(@obs1, @obs2)
+    occ.update!(field_slip: fs)
+
+    delete(:destroy, params: { id: occ.id })
+
+    assert(Occurrence.exists?(occ.id),
+           "Occurrence with field_slip should survive")
+    occ.reload
+    assert_equal(1, occ.observations.count)
+    # redirect_after_dissolve field_slip path
+    assert_redirected_to(occurrence_path(occ))
+    assert_flash(/updated/i)
+  end
+
+  def test_destroy_missing_occurrence
+    login("rolf")
+    delete(:destroy, params: { id: -1 })
+    assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  # == Coverage: create rescue path (lines 33-35) ==
+
+  def test_create_rescue_field_slip_conflict
+    login("rolf")
+    fs1 = field_slips(:field_slip_one)
+    fs2 = field_slips(:field_slip_two)
+    @obs1.update!(field_slip: fs1)
+    @obs2.update!(field_slip: fs2)
+
+    post(:create, params: {
+           observation_ids: [@obs1.id, @obs2.id],
+           occurrence: {
+             observation_id: @obs1.id,
+             primary_observation_id: @obs1.id
+           }
+         })
+    assert_redirected_to(
+      new_occurrence_path(observation_id: @obs1.id)
+    )
+    assert_flash_error
+  end
+
+  # == Coverage: find_source_observation! not found
+  # via create path (line 46-47) ==
+
+  def test_create_source_observation_not_found
+    login("rolf")
+    post(:create, params: {
+           observation_ids: [@obs2.id],
+           occurrence: {
+             observation_id: 0,
+             primary_observation_id: 0
+           }
+         })
+    assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  # == Coverage: build_selected_observations <2
+  # (lines 68-72) ==
+
+  def test_create_build_selected_under_two
+    login("rolf")
+    post(:create, params: {
+           observation_ids: [],
+           occurrence: {
+             observation_id: @obs1.id,
+             primary_observation_id: @obs1.id
+           }
+         })
+    assert_redirected_to(
+      new_occurrence_path(observation_id: @obs1.id)
+    )
+    assert_flash_error
+  end
+
   private
 
   # Mirrors actual Superform output: observation_id and

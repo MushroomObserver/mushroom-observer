@@ -109,6 +109,81 @@ class OccurrenceResolveFormTest < ComponentTestCase
     )
   end
 
+  def test_create_flow_hidden_fields_and_buttons
+    gaps = { projects: [@project] }
+    html = render_resolve_form(
+      gaps: gaps, primary: @obs1,
+      selected: [@obs1, @obs2]
+    )
+
+    doc = Nokogiri::HTML(html)
+    # Authenticity token present
+    token = doc.at_css(
+      "input[type='hidden']" \
+      "[name='authenticity_token']"
+    )
+    assert(token, "Expected authenticity token field")
+
+    # Primary observation hidden field
+    primary_field = doc.at_css(
+      "input[type='hidden']" \
+      "[name='occurrence[primary_observation_id]']"
+    )
+    assert(primary_field,
+           "Expected primary observation hidden field")
+    assert_equal(@obs1.id.to_s, primary_field["value"])
+
+    # observation_id hidden field
+    obs_id_field = doc.at_css(
+      "input[type='hidden']" \
+      "[name='occurrence[observation_id]']"
+    )
+    assert(obs_id_field,
+           "Expected observation_id hidden field")
+    assert_equal(@obs1.id.to_s, obs_id_field["value"])
+  end
+
+  def test_edit_flow_authenticity_token
+    occ = Occurrence.create!(
+      user: @user, primary_observation: @obs1
+    )
+    @obs1.update!(occurrence: occ)
+    gaps = { projects: [@project] }
+    html = render_resolve_form(
+      gaps: gaps, primary: @obs1, occurrence: occ
+    )
+
+    doc = Nokogiri::HTML(html)
+    token = doc.at_css(
+      "input[type='hidden']" \
+      "[name='authenticity_token']"
+    )
+    assert(token, "Expected authenticity token field")
+
+    # No observation_ids hidden fields in edit flow
+    obs_ids = doc.css(
+      "input[type='hidden']" \
+      "[name='observation_ids[]']"
+    )
+    assert_equal(0, obs_ids.size,
+                 "Edit flow should not have obs hidden fields")
+  end
+
+  def test_multiple_projects_listed
+    proj2 = projects(:bolete_project)
+    gaps = { projects: [@project, proj2] }
+    html = render_resolve_form(
+      gaps: gaps, primary: @obs1, selected: [@obs1]
+    )
+
+    assert_html(
+      html, "a[href='/projects/#{@project.id}']"
+    )
+    assert_html(
+      html, "a[href='/projects/#{proj2.id}']"
+    )
+  end
+
   private
 
   def render_resolve_form(gaps:, primary:, selected: nil,

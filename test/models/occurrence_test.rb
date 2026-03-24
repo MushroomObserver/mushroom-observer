@@ -1055,6 +1055,140 @@ class OccurrenceTest < UnitTestCase
     assert_equal({}, gaps)
   end
 
+  # == Coverage: create_from_field_slip (lines 227-233) ==
+
+  def test_create_from_field_slip_creates_new_occurrence
+    User.current = rolf
+    fs = field_slips(:field_slip_no_obs)
+    # Put obs1 on the slip. The writer creates an occurrence.
+    @obs1.update!(field_slip: fs)
+    occ = @obs1.reload.occurrence
+    assert_not_nil(occ)
+
+    # Now call find_or_create for obs2 on the same slip.
+    # obs1 already has an occurrence, so obs2 gets added.
+    Occurrence.find_or_create_for_field_slip(
+      fs, @obs2, rolf
+    )
+    @obs2.reload
+    assert_not_nil(@obs2.occurrence_id,
+                   "obs2 should be in an occurrence")
+    assert_equal(occ.id, @obs2.occurrence_id,
+                 "obs2 should join the existing occ")
+  end
+
+  # == Coverage: add_to_existing merge path (line 213) ==
+
+  def test_add_to_existing_merges_different_occurrence
+    User.current = rolf
+    fs = field_slips(:field_slip_no_obs)
+    # obs1 has occurrence A on the field slip
+    occ_a = Occurrence.create!(
+      user: rolf, primary_observation: @obs1,
+      field_slip: fs
+    )
+    @obs1.update!(occurrence: occ_a)
+
+    # obs2 has its own separate occurrence B
+    occ_b = Occurrence.create!(
+      user: rolf, primary_observation: @obs2
+    )
+    @obs2.update!(occurrence: occ_b)
+
+    # Adding obs2 to the field slip should merge occ_b
+    # into occ_a
+    Occurrence.find_or_create_for_field_slip(
+      fs, @obs2, rolf
+    )
+    @obs2.reload
+    assert_equal(occ_a.id, @obs2.occurrence_id,
+                 "obs2 should be merged into occ_a")
+    assert_not(Occurrence.exists?(occ_b.id),
+               "occ_b should be destroyed after merge")
+  end
+
+  # == Coverage: observation_count_within_limits (289-290) ==
+
+  def test_observation_count_within_limits_validation
+    User.current = rolf
+    occ = create_occurrence(@obs1, @obs2)
+    # Attach more observations to exceed limit
+    extras = Observation.where.not(
+      id: [@obs1.id, @obs2.id]
+    ).limit(Occurrence::MAX_OBSERVATIONS).to_a
+    extras.each { |obs| obs.update_columns(occurrence_id: occ.id) }
+    occ.reload
+    assert(occ.observations.count > Occurrence::MAX_OBSERVATIONS)
+    assert_not(occ.valid?(:update),
+               "Should be invalid with too many observations")
+    assert(occ.errors[:observations].any?)
+  end
+
+  # == Coverage: dissolve_transaction field_slip branch ==
+
+  def test_dissolve_field_slip_reloads_and_keeps_occ
+    User.current = rolf
+    fs = field_slips(:field_slip_no_obs)
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    occ.update!(field_slip: fs)
+
+    occ.dissolve!
+    occ.reload
+
+    # With field slip: occurrence survives, only primary
+    assert(occ.persisted?)
+    assert_equal(1, occ.observations.count)
+    assert_equal(@obs1.id, occ.primary_observation_id)
+  end
+
+  # == Coverage: dissolve_log_and_recalculate (306-310) ==
+
+  def test_dissolve_recalculates_consensus_for_detached
+    User.current = rolf
+    # Create occurrence first, then add a naming
+    occ = create_occurrence(@obs1, @obs2)
+    name = names(:agaricus_campestris)
+    naming = Naming.create!(
+      observation: @obs1, name: name, user: rolf
+    )
+    consensus = Observation::NamingConsensus.new(@obs1)
+    consensus.change_vote(naming, Vote::MAXIMUM_VOTE, rolf)
+
+    # obs2 should have shared consensus
+    @obs2.reload
+    assert_equal(name.id, @obs2.name_id)
+
+    occ.dissolve!
+
+    # dissolve_log_and_recalculate should have run
+    # calc_consensus on each detached obs
+    @obs2.reload
+    # obs2 has no namings of its own for agaricus, so
+    # it should revert to its original name
+    assert_not_equal(name.id, @obs2.name_id,
+                     "Detached obs should revert consensus")
+  end
+
+  def test_dissolve_without_field_slip_logs_all
+    User.current = rolf
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    clear_logs(@obs1, @obs2, @obs3)
+
+    occ.dissolve!
+
+    # All observations (including primary) should be logged
+    [@obs1, @obs2, @obs3].each do |obs|
+      obs.reload
+      assert(obs.rss_log,
+             "Obs #{obs.id} should have rss_log")
+      assert_match(
+        /log_occurrence_removed/,
+        obs.rss_log.notes.to_s,
+        "Obs #{obs.id} should have removal logged"
+      )
+    end
+  end
+
   private
 
   def create_occurrence(primary_obs, *other_obs)
