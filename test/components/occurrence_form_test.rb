@@ -107,6 +107,17 @@ class OccurrenceFormTest < ComponentTestCase
     assert_html(html, "a[href='/occurrences/#{occ.id}']")
   end
 
+  def test_field_slip_link_shown
+    # minimal_unknown_obs has occ_field_slip_one with field_slip_one
+    obs_with_slip = observations(:minimal_unknown_obs)
+    field_slip = field_slips(:field_slip_one)
+    html = render_form(source_obs: @source,
+                       recent: [obs_with_slip])
+
+    assert_includes(html, "Field Slip: #{field_slip.code}")
+    assert_html(html, "a[href='/field_slips/#{field_slip.id}']")
+  end
+
   private
 
   def render_form(source_obs: @source, recent: [@recent])

@@ -186,6 +186,106 @@ class Observation::MergedNamingTest < UnitTestCase
     assert_nil(best)
   end
 
+  # == Coverage: user, can_edit?, vote_percent, etc. ==
+
+  def test_user_returns_local_naming_user
+    occ = create_occurrence(@obs1, @obs2)
+    Naming.create!(observation: @obs1, name: @name, user: rolf)
+    Naming.create!(observation: @obs2, name: @name, user: mary)
+    merged = build_merged_naming(occ, @obs1)
+    assert_equal(rolf, merged.user)
+  end
+
+  def test_user_returns_single_sibling_user
+    occ = create_occurrence(@obs1, @obs2)
+    Naming.create!(observation: @obs2, name: @name, user: mary)
+    merged = build_merged_naming(occ, @obs1)
+    assert_equal(mary, merged.user)
+  end
+
+  def test_user_returns_nil_for_multiple_sibling_users
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    Naming.create!(observation: @obs2, name: @name, user: rolf)
+    Naming.create!(observation: @obs3, name: @name, user: mary)
+    merged = build_merged_naming(occ, @obs1)
+    assert_nil(merged.user)
+  end
+
+  def test_can_edit_true_for_local_naming_owner
+    occ = create_occurrence(@obs1, @obs2)
+    Naming.create!(observation: @obs1, name: @name, user: rolf)
+    merged = build_merged_naming(occ, @obs1)
+    assert(merged.can_edit?(rolf))
+  end
+
+  def test_can_edit_nil_without_local_naming
+    occ = create_occurrence(@obs1, @obs2)
+    Naming.create!(observation: @obs2, name: @name, user: mary)
+    merged = build_merged_naming(occ, @obs1)
+    assert_nil(merged.can_edit?(rolf))
+  end
+
+  def test_vote_percent
+    occ = create_occurrence(@obs1, @obs2)
+    naming = Naming.create!(
+      observation: @obs1, name: @name, user: rolf
+    )
+    Vote.create!(naming: naming, observation: @obs1,
+                 user: rolf, value: Vote::MAXIMUM_VOTE,
+                 favorite: true)
+    merged = build_merged_naming(occ, @obs1)
+    pct = merged.vote_percent
+    assert_operator(pct, :>, 0)
+    assert_operator(pct, :<=, 100)
+  end
+
+  def test_vote_cache_zero_without_votes
+    occ = create_occurrence(@obs1, @obs2)
+    Naming.create!(observation: @obs1, name: @name, user: rolf)
+    merged = build_merged_naming(occ, @obs1)
+    assert_in_delta(0.0, merged.vote_cache, 0.001)
+  end
+
+  def test_created_at_returns_earliest
+    occ = create_occurrence(@obs1, @obs2)
+    n1 = Naming.create!(
+      observation: @obs1, name: @name, user: rolf
+    )
+    sleep(0.01)
+    n2 = Naming.create!(
+      observation: @obs2, name: @name, user: mary
+    )
+    merged = build_merged_naming(occ, @obs1)
+    assert_equal([n1, n2].map(&:created_at).min,
+                 merged.created_at)
+  end
+
+  def test_primary_naming_returns_local_when_present
+    occ = create_occurrence(@obs1, @obs2)
+    local = Naming.create!(
+      observation: @obs1, name: @name, user: rolf
+    )
+    Naming.create!(observation: @obs2, name: @name, user: mary)
+    merged = build_merged_naming(occ, @obs1)
+    assert_equal(local, merged.primary_naming)
+  end
+
+  def test_primary_naming_returns_first_sibling_no_local
+    occ = create_occurrence(@obs1, @obs2)
+    sibling = Naming.create!(
+      observation: @obs2, name: @name, user: mary
+    )
+    merged = build_merged_naming(occ, @obs1)
+    assert_equal(sibling, merged.primary_naming)
+  end
+
+  def test_grouped_reasons_includes_default_reason
+    occ = create_occurrence(@obs1, @obs2)
+    Naming.create!(observation: @obs1, name: @name, user: rolf)
+    merged = build_merged_naming(occ, @obs1)
+    assert_kind_of(Array, merged.grouped_reasons)
+  end
+
   private
 
   def create_occurrence(primary_obs, *other_obs)

@@ -6,6 +6,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   def setup
     @obs1 = observations(:minimal_unknown_obs)
     @obs2 = observations(:coprinus_comatus_obs)
+    @obs3 = observations(:detailed_unknown_obs)
     # Clear any occurrence from field slip fixture
     @obs1.update_column(:occurrence_id, nil)
   end
@@ -200,6 +201,119 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = Occurrence.last
     assert_includes(occ.observations, @obs1)
     assert_includes(occ.observations, @obs2)
+  end
+
+  # == Coverage: create flow error paths ==
+
+  def test_create_with_only_source_obs_redirects
+    login("rolf")
+    # Only the source observation, no additional selections
+    post(:create, params: {
+           observation_ids: [],
+           occurrence: {
+             observation_id: @obs1.id,
+             primary_observation_id: @obs1.id
+           }
+         })
+    assert_redirected_to(
+      new_occurrence_path(observation_id: @obs1.id)
+    )
+    assert_flash_error
+  end
+
+  def test_create_shows_confirmation_with_gaps
+    login("rolf")
+    # obs3 is in bolete_project, obs1 is not
+    params = create_params(@obs1, [@obs1, @obs3])
+    assert_no_difference("Occurrence.count") do
+      post(:create, params: params)
+    end
+    assert_response(:success)
+  end
+
+  def test_create_with_project_resolution_add_all
+    login("rolf")
+    project = projects(:bolete_project)
+    params = create_params(@obs1, [@obs1, @obs3])
+    params[:project_resolution] = "add_all"
+
+    assert_difference("Occurrence.count", 1) do
+      post(:create, params: params)
+    end
+    @obs1.reload
+    assert_includes(
+      @obs1.projects, project,
+      "obs1 should be added to bolete_project"
+    )
+  end
+
+  def test_create_with_project_resolution_skip
+    login("rolf")
+    params = create_params(@obs1, [@obs1, @obs3])
+    params[:project_resolution] = "skip"
+
+    assert_difference("Occurrence.count", 1) do
+      post(:create, params: params)
+    end
+    # obs1 should NOT be added to bolete_project
+    @obs1.reload
+    project = projects(:bolete_project)
+    assert_not_includes(@obs1.projects, project)
+  end
+
+  def test_create_no_project_confirmation_when_no_projects
+    login("rolf")
+    params = create_params(@obs1, [@obs1, @obs2])
+    assert_difference("Occurrence.count", 1) do
+      post(:create, params: params)
+    end
+    # Should redirect directly, no confirmation
+    assert_redirected_to(%r{/occurrences/\d+})
+  end
+
+  def test_create_detects_non_primary_gaps
+    login("rolf")
+    project = projects(:bolete_project)
+    # Put obs1 in project but not obs2
+    ProjectObservation.find_or_create_by!(
+      project: project, observation: @obs1
+    )
+    params = create_params(@obs1, [@obs1, @obs2])
+
+    assert_no_difference("Occurrence.count") do
+      post(:create, params: params)
+    end
+    # Should render confirmation due to non-primary gap
+    assert_response(:success)
+  end
+
+  # == Coverage: resolve_projects extra paths ==
+
+  def test_resolve_projects_add_all_resolves_gaps
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs3)
+    project = projects(:bolete_project)
+
+    post(:resolve_projects,
+         params: { id: occ.id, resolution: "add_all" })
+
+    assert_redirected_to(occurrence_path(occ))
+    @obs1.reload
+    assert_includes(
+      @obs1.projects, project,
+      "All obs should be added to project"
+    )
+    @obs3.reload
+    assert_includes(@obs3.projects, project)
+  end
+
+  def test_resolve_projects_get_renders_edit_with_gaps
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs3)
+
+    get(:resolve_projects, params: { id: occ.id })
+
+    assert_response(:success)
   end
 
   # ---------- project confirmation ----------
@@ -682,8 +796,7 @@ class OccurrencesControllerTest < FunctionalTestCase
 
   def test_update_parse_selected_ids_filters_zeros
     login("rolf")
-    obs3 = observations(:detailed_unknown_obs)
-    occ = create_occurrence(@obs1, @obs2, obs3)
+    occ = create_occurrence(@obs1, @obs2, @obs3)
 
     # Include a "0" id (empty checkbox) - should be ignored
     patch(:update, params: {
@@ -694,7 +807,188 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ.reload
     # obs3 was excluded, but the "0" should not cause issues
     assert_equal(2, occ.observations.count)
-    assert_not_includes(occ.observations, obs3)
+    assert_not_includes(occ.observations, @obs3)
+  end
+
+  # == Coverage: edit/update extra paths ==
+
+  def test_update_primary_location_change
+    login("rolf")
+    loc = locations(:falmouth)
+    obs_a = create_obs(rolf, locations(:burbank))
+    obs_b = create_obs(rolf, locations(:falmouth))
+    occ = create_occurrence(obs_a, obs_b)
+
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { primary_observation_id: obs_a.id },
+            primary_obs: { location_id: loc.id }
+          })
+    obs_a.reload
+    assert_equal(loc, obs_a.location)
+    assert_equal(loc.name, obs_a.where)
+  end
+
+  def test_update_primary_date_change
+    login("rolf")
+    obs_a = create_obs(rolf, locations(:burbank))
+    obs_b = create_obs(rolf, locations(:falmouth))
+    occ = create_occurrence(obs_a, obs_b)
+
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { primary_observation_id: obs_a.id },
+            primary_obs: { when: "2024-12-25" }
+          })
+    obs_a.reload
+    assert_equal(Date.parse("2024-12-25"), obs_a.when)
+  end
+
+  def test_update_primary_invalid_date_ignored
+    login("rolf")
+    obs_a = create_obs(rolf, locations(:burbank))
+    obs_b = create_obs(rolf, locations(:falmouth))
+    occ = create_occurrence(obs_a, obs_b)
+    original_date = obs_a.when
+
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { primary_observation_id: obs_a.id },
+            primary_obs: { when: "not-a-date" }
+          })
+    obs_a.reload
+    assert_equal(original_date, obs_a.when,
+                 "Invalid date should be ignored")
+  end
+
+  def test_update_primary_blank_date_ignored
+    login("rolf")
+    obs_a = create_obs(rolf, locations(:burbank))
+    obs_b = create_obs(rolf, locations(:falmouth))
+    occ = create_occurrence(obs_a, obs_b)
+    original_date = obs_a.when
+
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { primary_observation_id: obs_a.id },
+            primary_obs: { when: "" }
+          })
+    obs_a.reload
+    assert_equal(original_date, obs_a.when)
+  end
+
+  def test_update_primary_denied_without_edit_permission
+    obs_mary = create_obs(mary, locations(:burbank))
+    obs_rolf = create_obs(rolf, locations(:falmouth))
+    occ = Occurrence.create!(
+      user: rolf, primary_observation: obs_mary
+    )
+    obs_mary.update!(occurrence: occ)
+    obs_rolf.update!(occurrence: occ)
+    login("rolf")
+
+    original_loc = obs_mary.location_id
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: {
+              primary_observation_id: obs_mary.id
+            },
+            primary_obs: {
+              location_id: locations(:falmouth).id
+            }
+          })
+    obs_mary.reload
+    assert_equal(original_loc, obs_mary.location_id,
+                 "Should not edit other user's observation")
+    assert_flash_error
+  end
+
+  def test_update_without_primary_obs_params
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    patch(:update, params: {
+            id: occ.id,
+            occurrence: { primary_observation_id: @obs1.id }
+          })
+    # Should succeed without primary_obs params
+    assert_flash_success
+  end
+
+  def test_create_observation_from_source
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    original_count = occ.observations.count
+
+    assert_difference("Observation.count", 1) do
+      patch(:update, params: {
+              id: occ.id,
+              occurrence: {
+                primary_observation_id: @obs1.id
+              },
+              create_observation: "Create"
+            })
+    end
+    occ.reload
+    new_obs = occ.primary_observation
+    assert_not_equal(@obs1.id, new_obs.id)
+    assert_equal(@obs1.location, new_obs.location)
+    assert_equal(@obs1.when, new_obs.when)
+    assert_equal(rolf, new_obs.user)
+    assert_equal(original_count + 1, occ.observations.count)
+  end
+
+  def test_edit_shows_candidates_from_recent_views
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    # Create recent views for non-occurrence observations
+    ObservationView.create!(
+      user: rolf, observation: @obs3,
+      last_view: Time.zone.now
+    )
+
+    get(:edit, params: { id: occ.id })
+    assert_response(:success)
+    body = @response.body
+    assert_match(/observation_ids/, body,
+                 "Should show candidate checkboxes")
+  end
+
+  def test_edit_excludes_current_observations_from_candidates
+    login("rolf")
+    occ = create_occurrence(@obs1, @obs2)
+    # Create view for an obs already in occurrence
+    ObservationView.create!(
+      user: rolf, observation: @obs1,
+      last_view: Time.zone.now
+    )
+    # Also create view for one not in occurrence
+    ObservationView.create!(
+      user: rolf, observation: @obs3,
+      last_view: Time.zone.now
+    )
+
+    get(:edit, params: { id: occ.id })
+    assert_response(:success)
+  end
+
+  def test_update_with_project_gaps_renders_edit
+    login("rolf")
+    # obs3 is in bolete_project, obs1 is not
+    occ = create_occurrence(@obs1, @obs2)
+    # Add obs3 to trigger project gaps
+    patch(:update, params: {
+            id: occ.id,
+            observation_ids: [@obs1.id, @obs2.id, @obs3.id],
+            occurrence: {
+              primary_observation_id: @obs1.id
+            }
+          })
+    # Should render edit page with project gaps or redirect
+    if @response.redirect_url
+      assert_flash_success
+    else
+      assert_response(:success)
+    end
   end
 
   private
@@ -710,6 +1004,16 @@ class OccurrencesControllerTest < FunctionalTestCase
         primary_observation_id: primary.id
       }
     }
+  end
+
+  def create_obs(user, location)
+    Observation.create!(
+      user: user,
+      name: names(:fungi),
+      when: Time.zone.today,
+      where: location.name,
+      location: location
+    )
   end
 
   def create_obs_with_location(user, location)

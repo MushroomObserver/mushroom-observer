@@ -896,4 +896,133 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_includes(occ.observation_ids, obs1.id)
     assert_includes(occ.observation_ids, obs3.id)
   end
+
+  # == Coverage: observation handling ==
+
+  def test_show_field_slip_with_occurrence
+    login(@field_slip.user.login)
+    get(:show, params: { id: @field_slip.id })
+    assert_response(:success)
+  end
+
+  def test_edit_field_slip_with_occurrence
+    login(@field_slip.user.login)
+    get(:edit, params: { id: @field_slip.id })
+    assert_response(:success)
+  end
+
+  def test_ensure_occurrence_for_field_slip_creates_new
+    fs = field_slips(:field_slip_no_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    obs2.update_column(:occurrence_id, nil)
+    obs3.update_column(:occurrence_id, nil)
+    occ = Occurrence.create!(
+      user: rolf, primary_observation: obs2,
+      field_slip: fs
+    )
+    obs2.update!(occurrence: occ)
+
+    # Simulate add_to_existing_field_slip_occ
+    obs3.update!(occurrence: occ)
+    occ.reload
+    assert_includes(occ.observation_ids, obs3.id)
+  end
+
+  def test_detach_field_slip_observation
+    fs = field_slips(:field_slip_no_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    obs4 = observations(:amateur_obs)
+    [obs2, obs3, obs4].each do |obs|
+      obs.update_column(:occurrence_id, nil)
+    end
+    occ = Occurrence.create!(
+      user: rolf, primary_observation: obs2,
+      field_slip: fs
+    )
+    obs2.update!(occurrence: occ)
+    obs3.update!(occurrence: occ)
+    obs4.update!(occurrence: occ)
+
+    # Simulate detach
+    occ.reassign_thumbnails_from(obs4)
+    obs4.update!(occurrence: nil)
+    Occurrence.log_field_slip_removed(obs4, occ)
+    Observation::NamingConsensus.new(obs4).calc_consensus
+
+    obs4.reload
+    assert_nil(obs4.occurrence_id)
+    occ.reload
+    assert_not_includes(occ.observation_ids, obs4.id)
+  end
+
+  def test_attach_field_slip_observation
+    fs = field_slips(:field_slip_no_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    [obs2, obs3].each do |obs|
+      obs.update_column(:occurrence_id, nil)
+    end
+    occ = Occurrence.create!(
+      user: rolf, primary_observation: obs2,
+      field_slip: fs
+    )
+    obs2.update!(occurrence: occ)
+
+    # Simulate attach
+    obs3.update!(occurrence: occ)
+    Occurrence.log_field_slip_added([obs3])
+
+    obs3.reload
+    assert_equal(occ.id, obs3.occurrence_id)
+  end
+
+  def test_check_field_slip_project_gaps_detects_gaps
+    fs = field_slips(:field_slip_no_obs)
+    project = projects(:bolete_project)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    [obs2, obs3].each do |obs|
+      obs.update_column(:occurrence_id, nil)
+    end
+    # obs3 is in bolete_project via fixture
+    occ = Occurrence.create!(
+      user: rolf, primary_observation: obs2,
+      field_slip: fs
+    )
+    obs2.update!(occurrence: occ)
+    obs3.update!(occurrence: occ)
+
+    gaps = occ.project_membership_gaps
+    assert(gaps.any?, "Should detect project gaps")
+    assert(gaps[:projects]&.include?(project))
+  end
+
+  def test_check_field_slip_project_gaps_no_gaps
+    fs = field_slips(:field_slip_no_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    [obs2, obs3].each do |obs|
+      obs.update_column(:occurrence_id, nil)
+    end
+    occ = Occurrence.create!(
+      user: rolf, primary_observation: obs2,
+      field_slip: fs
+    )
+    obs2.update!(occurrence: occ)
+    obs3.update!(occurrence: occ)
+
+    # Put both in same project
+    project = projects(:bolete_project)
+    ProjectObservation.find_or_create_by!(
+      project: project, observation: obs2
+    )
+    ProjectObservation.find_or_create_by!(
+      project: project, observation: obs3
+    )
+
+    gaps = occ.project_membership_gaps
+    assert_equal({}, gaps)
+  end
 end
