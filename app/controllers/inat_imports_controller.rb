@@ -284,14 +284,6 @@ class InatImportsController < ApplicationController
     import_estimate_query_args.merge(LICENSED_FILTER)
   end
 
-  def limit_to_observations_of_listed_inat_user?
-    # Always filter by inat_username if importing own observations.
-    return true if own_observations?
-
-    # Superimporters not importing own use the licensed filter instead.
-    false
-  end
-
   def clean_inat_ids
     inat_ids = sanitize_inat_ids(params[:inat_ids])
     previous_imports = Observation.where(inat_id: inat_id_list)

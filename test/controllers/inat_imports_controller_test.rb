@@ -509,6 +509,25 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     )
   end
 
+  def test_confirm_renders_gracefully_when_licensed_estimate_fails
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "true")).
+      to_return(status: 500, body: "error")
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
+
+    assert_response(:success)
+    assert_template(:confirm)
+    assert_select(
+      "#unlicensed_obs_count", "",
+      "Unlicensed count should be blank when licensed estimate fails"
+    )
+  end
+
   def test_create_go_back_with_superform_params
     login(users(:rolf).login)
 
@@ -638,6 +657,21 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
 
     assert_response(:success)
     assert_template(:confirm)
+  end
+
+  def test_superimporter_not_own_import_all_without_username_blocked
+    user = users(:dick) # Dick is a iNat superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    # No username, no IDs, import_all — would fetch every fungal obs on iNat.
+    # Must be blocked even though own_observations is unchecked.
+    login(user.login)
+    post(:create,
+         params: { inat_username: nil, inat_ids: nil,
+                   consent: 1, all: 1 })
+
+    assert_flash_text(:inat_missing_username.l)
+    assert_form_action(action: :create)
   end
 
   def test_allow_superimporter_import_all_own_observations_if_inat_username_nil

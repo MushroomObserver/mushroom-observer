@@ -67,11 +67,12 @@ class InatImport < ApplicationRecord
   # that we don't import too many observations or, even worse,
   # all observations of all users.
   def adequate_constraints?
-    # When a superimporter imports others' observations, the licensed and
-    # taxon filters (applied by PageParser) are the safety constraints.
-    return true unless own_observations
+    return inat_username.present? if own_observations
 
-    inat_username.present?
+    # Not-own superimporter: safe only if scoped to a username or a
+    # specific ID list. Without either, import_all would fetch all
+    # fungal/slime-mold observations across all iNat users.
+    inat_username.present? || inat_ids.present?
   end
 
   def job_pending?
@@ -79,10 +80,10 @@ class InatImport < ApplicationRecord
   end
 
   def add_response_error(error)
-    msg = if error.is_a?(String)
-            error
-          elsif error.is_a?(::RestClient::Response)
+    msg = if error.is_a?(::RestClient::Response)
             error.body
+          elsif error.is_a?(String)
+            error
           else
             error.message
           end
