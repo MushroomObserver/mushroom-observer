@@ -640,6 +640,21 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     assert_template(:confirm)
   end
 
+  def test_superimporter_not_own_import_all_without_username_blocked
+    user = users(:dick) # Dick is a iNat superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    # No username, no IDs, import_all — would fetch every fungal obs on iNat.
+    # Must be blocked even though own_observations is unchecked.
+    login(user.login)
+    post(:create,
+         params: { inat_username: nil, inat_ids: nil,
+                   consent: 1, all: 1 })
+
+    assert_flash_text(:inat_missing_username.l)
+    assert_form_action(action: :create)
+  end
+
   def test_allow_superimporter_import_all_own_observations_if_inat_username_nil
     user = users(:dick) # Dick is a iNat superimporter
     # simulate first-time import OR user.inat_username clobbered to nil

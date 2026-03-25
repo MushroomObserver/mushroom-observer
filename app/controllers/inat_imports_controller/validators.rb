@@ -21,9 +21,9 @@ module InatImportsController::Validators
   # See InatImport.adequate_constraints?
   def import_adequately_constrained?
     return true if params[:inat_username].present?
-    # Superimporters not importing own observations don't need a username;
-    # the licensed + taxon filters in PageParser constrain the query.
-    return true if superimporter_not_own?
+    # Superimporters importing by specific ID list don't need a username;
+    # the ID list + licensed + taxon filters constrain the query adequately.
+    return true if superimporter_not_own? && listing_ids?
 
     flash_warning(:inat_missing_username.l)
     false
