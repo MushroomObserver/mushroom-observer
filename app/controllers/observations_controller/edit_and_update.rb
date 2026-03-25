@@ -141,7 +141,7 @@ module ObservationsController::EditAndUpdate
     return if @observation.thumb_image_id.present? &&
               valid_thumb_image_ids.include?(@observation.thumb_image_id)
 
-    new_thumb = @observation.images.order(:id).first
+    new_thumb = @observation.next_thumb_image
     @observation.thumb_image = new_thumb
     # Persist immediately so the fix survives even if the rest of the
     # update bails out, matching how remove_image persists detachments.

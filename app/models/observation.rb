@@ -873,9 +873,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return own if own
     return nil unless occurrence
 
-    Image.joins(:observations).
-      where(observations: { occurrence_id: occurrence_id }).
-      where.not(images_observations: { observation_id: id }).
+    Image.joins(:observation_images).
+      where(observation_images: {
+              observation_id: Observation.where(occurrence_id: occurrence_id).
+                              where.not(id: id).select(:id)
+            }).
       order(:id).first
   end
 

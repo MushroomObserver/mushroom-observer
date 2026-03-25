@@ -29,7 +29,7 @@ module FieldSlipsController::ObservationHandling
 
   def assign_project(obs)
     project = Project.safe_find(params[:field_slip][:project_id])
-    project ||= @filed_slip&.project
+    project ||= @field_slip&.project
     return if project.nil? || project.violates_constraints?(obs)
 
     project.add_observation(obs)

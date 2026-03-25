@@ -1180,4 +1180,29 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_nil(fs.occurrence, "No occurrence should be created")
     assert_flash_error
   end
+
+  # Covers assign_project fallback to @field_slip.project when
+  # project_id param is absent (was broken by @filed_slip typo).
+  def test_quick_create_assigns_project_from_field_slip
+    login("mary")
+    project = projects(:eol_project)
+    code = "#{project.field_slip_prefix}-5555"
+
+    post(:create,
+         params: {
+           commit: :field_slip_quick_create_obs.t,
+           field_slip: {
+             code: code,
+             # No project_id param — fallback to @field_slip.project
+             location: locations(:albion).name,
+             field_slip_name: names(:fungi).text_name
+           }
+         })
+    fs = FieldSlip.find_by(code: code)
+    assert_not_nil(fs, "FieldSlip not found")
+    obs = fs.observation
+    assert_not_nil(obs, "Observation should have been created")
+    assert_includes(project.observation_ids, obs.id,
+                    "Obs should be added to the field slip's project")
+  end
 end
