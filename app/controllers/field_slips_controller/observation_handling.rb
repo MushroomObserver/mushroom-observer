@@ -88,19 +88,6 @@ module FieldSlipsController::ObservationHandling
       user_calc_consensus(@user)
   end
 
-  def disconnect_observation(obs)
-    return if params[:commit] == :field_slip_keep_obs.t
-
-    proj = @field_slip.project
-    return unless proj && obs && obs.field_slip&.project != proj
-
-    flash_warning(:field_slip_remove_observation.t(
-                    observation: obs.user_unique_format_name(@user),
-                    title: proj.title
-                  ))
-    proj.remove_observation(obs)
-  end
-
   # Link an observation to a field slip via an occurrence.
   def link_obs_to_field_slip(obs)
     occ = @field_slip.occurrence

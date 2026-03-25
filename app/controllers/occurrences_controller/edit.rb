@@ -4,27 +4,17 @@
 module OccurrencesController::Edit
   def edit
     return unless find_occurrence!
-    return unless permitted?
 
     render_edit_page
   end
 
   def update
     return unless find_occurrence!
-    return unless permitted?
 
     process_update
   end
 
   private
-
-  def permitted?
-    return true if @occurrence.can_edit?(@user)
-
-    flash_error(:permission_denied.t)
-    redirect_to(occurrence_path(@occurrence))
-    false
-  end
 
   def process_update
     primary_obs = @occurrence.primary_observation
@@ -58,11 +48,9 @@ module OccurrencesController::Edit
   end
 
   def redirect_to_observation_or_index(obs)
-    if obs
-      redirect_to(permanent_observation_path(obs.id))
-    else
-      redirect_to(observations_path)
-    end
+    return redirect_to(observations_path) unless obs
+
+    redirect_to(permanent_observation_path(obs.id))
   end
 
   def sync_observations

@@ -117,20 +117,6 @@ class Occurrence < AbstractModel
       end
   end
 
-  # When a new observation is assigned to a field slip that already has
-  # other observations, auto-create or extend an occurrence.
-  def self.find_or_create_for_field_slip(field_slip, new_obs, user)
-    other_obs = field_slip.observations.where.not(id: new_obs.id).to_a
-    return if other_obs.empty?
-
-    existing = existing_occurrence_for(other_obs, new_obs)
-    if existing
-      add_to_existing(existing, new_obs)
-    else
-      create_from_field_slip(field_slip, new_obs, other_obs, user)
-    end
-  end
-
   # Create an occurrence manually from a set of observations.
   # The caller picks the default; selected_obs must include it.
   def self.create_manual(primary_obs, selected_obs, user)
@@ -194,45 +180,6 @@ class Occurrence < AbstractModel
     occ.errors.add(:base, "Cannot exceed #{MAX_OBSERVATIONS} observations")
     raise(ActiveRecord::RecordInvalid.new(occ))
   end
-
-  # -------------------------------------------------------------------
-  #  Private class methods
-  # -------------------------------------------------------------------
-
-  # Find the existing occurrence (if any) among the other observations
-  # on the field slip or on the new observation itself.
-  def self.existing_occurrence_for(other_obs, new_obs)
-    occs = (other_obs + [new_obs]).filter_map(&:occurrence).uniq
-    occs.first
-  end
-  private_class_method :existing_occurrence_for
-
-  # Add an observation to an existing occurrence, merging if necessary.
-  def self.add_to_existing(occurrence, new_obs)
-    if new_obs.occurrence && new_obs.occurrence != occurrence
-      merge!(occurrence, new_obs.occurrence)
-    elsif new_obs.occurrence_id != occurrence.id
-      transaction do
-        new_obs.update!(occurrence: occurrence)
-        occurrence.recompute_has_specimen!
-      end
-      log_observation_added([new_obs])
-    end
-    occurrence
-  end
-  private_class_method :add_to_existing
-
-  # Create a new occurrence from all observations on a field slip.
-  def self.create_from_field_slip(field_slip, new_obs, other_obs, user)
-    all_obs = (other_obs + [new_obs]).uniq
-    check_field_slip_conflicts!(all_obs)
-    check_max_observations!(all_obs)
-    default = all_obs.min_by(&:created_at)
-    occ = build_new(default, all_obs, user)
-    occ.update!(field_slip: field_slip)
-    occ
-  end
-  private_class_method :create_from_field_slip
 
   # Merge existing occurrences and add remaining observations.
   def self.merge_into_manual(occurrences, primary_obs, all_obs, _user)

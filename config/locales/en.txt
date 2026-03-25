@@ -2940,7 +2940,6 @@
   field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
 
-  field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
   field_slip_show: Show [:FIELD_SLIP]
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: Welcome to the [TITLE] Project!

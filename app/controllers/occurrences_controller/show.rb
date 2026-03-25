@@ -11,12 +11,6 @@ module OccurrencesController::Show
   def destroy
     return unless find_occurrence!
 
-    unless @occurrence.can_edit?(@user)
-      flash_error(:permission_denied.t)
-      redirect_to(occurrence_path(@occurrence))
-      return
-    end
-
     obs_id = @occurrence.primary_observation&.id
     destroy_occurrence!
     redirect_after_dissolve(obs_id)

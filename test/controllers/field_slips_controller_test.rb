@@ -1126,4 +1126,58 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_includes(occ.observation_ids, obs1.id)
     assert_includes(occ.observation_ids, obs2.id)
   end
+
+  # Covers ensure_occurrence_for_field_slip `if occ` branch (lines
+  # 224-225) and add_to_existing_field_slip_occ (lines 242-249).
+  # check_last_obs creates an occurrence first, then
+  # attach_selected_observations adds obs to the existing occurrence.
+  def test_create_last_obs_with_obs_ids_adds_to_existing_occ
+    login("mary")
+    prev_obs = observations(:coprinus_comatus_obs)
+    ObservationView.update_view_stats(prev_obs.id, mary.id)
+
+    extra_obs = observations(:detailed_unknown_obs)
+    extra_obs.update_column(:occurrence_id, nil)
+
+    code = "EOL-9030"
+    post(:create,
+         params: {
+           commit: :field_slip_last_obs.t,
+           observation_ids: [extra_obs.id.to_s],
+           field_slip: {
+             code: code,
+             project_id: projects(:eol_project).id
+           }
+         })
+    fs = FieldSlip.find_by(code: code)
+    assert_not_nil(fs, "FieldSlip not found")
+    occ = fs.occurrence
+    assert_not_nil(occ, "Occurrence should exist from check_last_obs")
+    assert_includes(occ.observation_ids, extra_obs.id,
+                    "extra_obs should be added to existing occurrence")
+  end
+
+  # Covers ensure_occurrence_for_field_slip rescue (line 238).
+  # Nonexistent observation_ids yield an empty selection, so
+  # resolve_primary returns nil and Occurrence.create! fails
+  # with a validation error that is rescued.
+  def test_create_with_invalid_obs_ids_rescues_record_invalid
+    login("mary")
+    code = "EOL-9031"
+
+    assert_no_difference("Occurrence.count") do
+      post(:create,
+           params: {
+             observation_ids: ["999999"],
+             field_slip: {
+               code: code,
+               project_id: projects(:eol_project).id
+             }
+           })
+    end
+    fs = FieldSlip.find_by(code: code)
+    assert_not_nil(fs, "FieldSlip should still be created")
+    assert_nil(fs.occurrence, "No occurrence should be created")
+    assert_flash_error
+  end
 end

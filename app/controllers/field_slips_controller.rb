@@ -100,7 +100,6 @@ class FieldSlipsController < ApplicationController
   private
 
   def html_update(old_obs)
-    disconnect_observation(old_obs)
     if params[:commit] == :field_slip_create_obs.t
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,

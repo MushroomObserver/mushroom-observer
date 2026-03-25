@@ -84,7 +84,7 @@ class OccurrenceTest < UnitTestCase
     assert_nil(@obs2.occurrence_id)
   end
 
-  # -- find_or_create_for_field_slip tests --
+  # -- field_slip writer tests --
 
   def test_field_slip_writer_creates_occurrence
     fs = field_slips(:field_slip_no_obs)
@@ -104,6 +104,31 @@ class OccurrenceTest < UnitTestCase
     @obs2.reload
     assert_equal(occ.id, @obs2.occurrence_id)
     assert_equal(2, occ.reload.observations.count)
+  end
+
+  def test_field_slip_writer_cleans_up_old_occurrence
+    fs1 = field_slips(:field_slip_no_obs)
+    fs2 = field_slips(:field_slip_two)
+
+    # Give obs1 an occurrence via fs1
+    @obs1.update!(field_slip: fs1)
+    old_occ = @obs1.reload.occurrence
+    assert_not_nil(old_occ)
+
+    # Give obs2 a separate occurrence via fs2
+    @obs2.update!(field_slip: fs2)
+    new_occ = @obs2.reload.occurrence
+    assert_not_equal(old_occ.id, new_occ.id)
+
+    # Move obs1 to fs2 — triggers cleanup_old_occurrence
+    @obs1.update!(field_slip: fs2)
+    @obs1.reload
+    assert_equal(new_occ.id, @obs1.occurrence_id,
+                 "obs1 should now belong to new occurrence")
+    # Old occurrence retains field_slip link, so destroy_if_incomplete!
+    # preserves it; but cleanup_old_occurrence still ran (coverage).
+    assert(Occurrence.exists?(old_occ.id),
+           "Old occurrence with field_slip should survive")
   end
 
   def test_single_obs_occurrence_not_destroyed
@@ -600,54 +625,6 @@ class OccurrenceTest < UnitTestCase
     assert_match(/multiple existing occurrences/, err.message)
   end
 
-  # == Coverage: find_or_create_for_field_slip ==
-
-  def test_find_or_create_for_field_slip_noop_no_others
-    User.current = rolf
-    fs = field_slips(:field_slip_no_obs)
-    # Only one obs on the slip; method returns early
-    Occurrence.find_or_create_for_field_slip(
-      fs, @obs1, rolf
-    )
-    @obs1.reload
-    assert_nil(@obs1.occurrence_id,
-               "Single obs should not create occurrence")
-  end
-
-  def test_find_or_create_extends_existing_occurrence
-    User.current = rolf
-    fs = field_slips(:field_slip_no_obs)
-    # Build an occurrence for obs1 on the slip
-    occ = Occurrence.create!(
-      user: rolf, primary_observation: @obs1,
-      field_slip: fs
-    )
-    @obs1.update!(occurrence: occ)
-
-    Occurrence.find_or_create_for_field_slip(
-      fs, @obs2, rolf
-    )
-    @obs2.reload
-    assert_equal(occ.id, @obs2.occurrence_id,
-                 "Should extend existing occurrence")
-  end
-
-  def test_find_or_create_creates_new_when_no_occurrence
-    User.current = rolf
-    fs = field_slips(:field_slip_no_obs)
-    @obs1.update!(field_slip: fs)
-    @obs1.reload
-    occ = @obs1.occurrence
-    assert_not_nil(occ, "Should have occurrence from writer")
-
-    # Now add obs2 via find_or_create
-    Occurrence.find_or_create_for_field_slip(
-      fs, @obs2, rolf
-    )
-    @obs2.reload
-    assert_equal(occ.id, @obs2.occurrence_id)
-  end
-
   # == Coverage: merge_into_manual ==
 
   def test_merge_into_manual_with_additional_obs
@@ -755,20 +732,6 @@ class OccurrenceTest < UnitTestCase
     Occurrence.merge!(occ, @obs3.reload.occurrence)
     assert_log_entry(@obs3, "log_occurrence_added")
     assert_log_entry(@obs4, "log_occurrence_added")
-    assert_activity_updated(@obs1)
-  end
-
-  def test_field_slip_auto_add
-    slip = field_slips(:field_slip_one)
-    fs_occ = Occurrence.create!(
-      user: rolf, primary_observation: @obs1, field_slip: slip
-    )
-    @obs1.update!(occurrence: fs_occ)
-    clear_logs(@obs1)
-    Occurrence.find_or_create_for_field_slip(slip, @obs2, rolf)
-    @obs2.reload
-    assert_equal(fs_occ.id, @obs2.occurrence_id)
-    assert_log_entry(@obs2, "log_occurrence_added")
     assert_activity_updated(@obs1)
   end
 
@@ -1053,58 +1016,6 @@ class OccurrenceTest < UnitTestCase
     occ = create_occurrence(@obs1, @obs2)
     gaps = occ.project_membership_gaps
     assert_equal({}, gaps)
-  end
-
-  # == Coverage: create_from_field_slip (lines 227-233) ==
-
-  def test_create_from_field_slip_creates_new_occurrence
-    User.current = rolf
-    fs = field_slips(:field_slip_no_obs)
-    # Put obs1 on the slip. The writer creates an occurrence.
-    @obs1.update!(field_slip: fs)
-    occ = @obs1.reload.occurrence
-    assert_not_nil(occ)
-
-    # Now call find_or_create for obs2 on the same slip.
-    # obs1 already has an occurrence, so obs2 gets added.
-    Occurrence.find_or_create_for_field_slip(
-      fs, @obs2, rolf
-    )
-    @obs2.reload
-    assert_not_nil(@obs2.occurrence_id,
-                   "obs2 should be in an occurrence")
-    assert_equal(occ.id, @obs2.occurrence_id,
-                 "obs2 should join the existing occ")
-  end
-
-  # == Coverage: add_to_existing merge path (line 213) ==
-
-  def test_add_to_existing_merges_different_occurrence
-    User.current = rolf
-    fs = field_slips(:field_slip_no_obs)
-    # obs1 has occurrence A on the field slip
-    occ_a = Occurrence.create!(
-      user: rolf, primary_observation: @obs1,
-      field_slip: fs
-    )
-    @obs1.update!(occurrence: occ_a)
-
-    # obs2 has its own separate occurrence B
-    occ_b = Occurrence.create!(
-      user: rolf, primary_observation: @obs2
-    )
-    @obs2.update!(occurrence: occ_b)
-
-    # Adding obs2 to the field slip should merge occ_b
-    # into occ_a
-    Occurrence.find_or_create_for_field_slip(
-      fs, @obs2, rolf
-    )
-    @obs2.reload
-    assert_equal(occ_a.id, @obs2.occurrence_id,
-                 "obs2 should be merged into occ_a")
-    assert_not(Occurrence.exists?(occ_b.id),
-               "occ_b should be destroyed after merge")
   end
 
   # == Coverage: observation_count_within_limits (289-290) ==
