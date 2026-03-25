@@ -66,10 +66,9 @@ class FieldSlipsController < ApplicationController
 
   # PATCH/PUT /field_slips/1 or /field_slips/1.json
   def update
-    old_obs = @field_slip.observation
     respond_to do |format|
       if check_last_obs && @field_slip.update(field_slip_params)
-        format.html { html_update(old_obs) }
+        format.html { html_update }
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
         @field_slip.reload
@@ -99,7 +98,7 @@ class FieldSlipsController < ApplicationController
 
   private
 
-  def html_update(old_obs)
+  def html_update
     if params[:commit] == :field_slip_create_obs.t
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
