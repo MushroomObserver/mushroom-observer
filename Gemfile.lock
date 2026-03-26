@@ -546,7 +546,7 @@ GEM
     tilt (2.6.1)
     timeout (0.6.1)
     trailblazer-option (0.1.2)
-    trilogy (2.11.0)
+    trilogy (2.11.1)
       bigdecimal
     tsort (0.2.0)
     ttfunk (1.8.0)
