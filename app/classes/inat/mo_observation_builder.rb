@@ -91,27 +91,15 @@ class Inat
 
     def add_external_link
       external_site = ExternalSite.find_by(name: "iNaturalist")
-      link = ExternalLink.new(
+      ExternalLink.create!(
         user: user,
         observation: @observation,
         external_site: external_site,
         url: "#{external_site.base_url}#{inat_obs[:id]}"
       )
-      # FIXME: 2026-03-27 jdc: We cannot validate the external link because
-      # inat is blocking our request to validate the URL because
-      # Cloudflare returns 403 for HEAD and GET requests
-      # to www.inaturalist.org (but not api.inaturalist.org)
-      # from both the webserver (64.225.31.18) and http://localhost:3000/
-      # Therefore skip validation. We know the URL is valid because
-      # it's based on the iNat observation ID, and we can confirm that it
-      # works when we visit it in a browser.
-      # The reasons for the block are unclear. Could be one or more of:
-      # No browser headers Net::HTTP doesn't send User-Agent, Accept, or
-      #  the Sec-CH-UA-* Client Hints headers Cloudflare demandsvia critical-ch
-      # IP reputation — the server's IP may have been flagged
-      # Rate limiting — the MO server may be making enough requests to iNat
-      # (during imports) that Cloudflare started treating it as a bot
-      link.save!(validate: false)
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.warn("InatImport: failed to create ExternalLink " \
+                        "for iNat obs #{inat_obs[:id]}: #{e.message}")
     end
 
     def create_missing_identification_names
