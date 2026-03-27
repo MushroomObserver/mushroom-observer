@@ -57,7 +57,7 @@ class ExternalLink < AbstractModel
 
     # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
     # causing FormatURL#url_exists? to fail. Skip the reachability check for
-    # iNat URLs constructed from base_url — format is guaranteed by construction.
+    # iNat URLs constructed from base_url — format guaranteed by construction.
     return url if external_site.name == "iNaturalist" &&
                   url.to_s.start_with?(base_url)
 
