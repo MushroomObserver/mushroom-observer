@@ -489,7 +489,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
       to_return(status: 200, body: { total_results: 1 }.to_json)
     # Licensed query returns 0 (unlicensed obs excluded)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "true")).
+      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
       to_return(status: 200, body: { total_results: 0 }.to_json)
 
     login(user.login)
@@ -513,7 +513,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "true")).
+      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
       to_return(status: 500, body: "error")
 
     login(users(:rolf).login)
