@@ -41,6 +41,23 @@ class ExternalLinkTest < UnitTestCase
     assert_empty(link.errors[:url])
   end
 
+  # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
+  # causing FormatURL#url_exists? to return false and silently drop the link.
+  # For iNat URLs constructed from base_url, skip FormatURL entirely.
+  def test_inaturalist_link_skips_format_url
+    site = external_sites(:inaturalist)
+    obs = observations(:minimal_unknown_obs)
+    url = "#{site.base_url}253297232"
+
+    FormatURL.stub(:new, ->(*) { raise("FormatURL should not be called") }) do
+      link = ExternalLink.create!(
+        user: dick, observation: obs, external_site: site, url: url
+      )
+      assert_empty(link.errors)
+      assert_equal(url, link.url)
+    end
+  end
+
   def test_uniqueness
     link1 = ExternalLink.first
     site = link1.external_site

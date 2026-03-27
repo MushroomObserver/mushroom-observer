@@ -55,6 +55,12 @@ class ExternalLink < AbstractModel
   def format_url_for_external_site
     return false unless (base_url = external_site&.base_url)
 
+    # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
+    # causing FormatURL#url_exists? to fail. Skip the reachability check for
+    # iNat URLs constructed from base_url — format guaranteed by construction.
+    return url if external_site.name == "iNaturalist" &&
+                  url.to_s.start_with?(base_url)
+
     test_url = FormatURL.new(url, base_url)
     return false unless test_url.valid?
 
