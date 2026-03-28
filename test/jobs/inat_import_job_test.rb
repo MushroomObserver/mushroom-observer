@@ -895,11 +895,11 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions
 
     warnings = []
-    stubbed_error = ->(*) {
+    stubbed_error = lambda do |*|
       link = ExternalLink.new
       link.errors.add(:base, "stubbed failure")
       raise(ActiveRecord::RecordInvalid.new(link))
-    }
+    end
     Rails.logger.stub(:warn, ->(msg) { warnings << msg }) do
       ExternalLink.stub(:create!, stubbed_error) do
         assert_difference("Observation.count", 1,
@@ -916,10 +916,10 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.external_links.none?,
            "Observation should have no ExternalLink when creation fails")
     assert(
-      warnings.any? { |w|
+      warnings.any? do |w|
         w.include?("InatImport: failed to create ExternalLink") &&
           w.include?(inat_id.to_s)
-      },
+      end,
       "Should log a warning including the iNat obs ID when ExternalLink fails"
     )
   end
