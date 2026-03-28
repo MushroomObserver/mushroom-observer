@@ -62,7 +62,7 @@ class ExternalLinkTest < UnitTestCase
     end
   end
 
-  # iNat URLs must be only the basse url plus an observation numberic id,
+  # iNat URLs must be only the base url plus an observation numberic id,
   # e.g. /observations/12345.
   # A URL like /observations/abc should be invalid.
   def test_inaturalist_link_requires_numeric_id
