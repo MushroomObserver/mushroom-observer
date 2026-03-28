@@ -164,11 +164,8 @@ module Observations
     def test_update_external_link
       # obs owned by rolf, mary created link and is member of site's project
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
-      new_url = "#{link.external_site.base_url}different_number"
-      params = {
-        id: link.id,
-        external_link: { url: new_url }
-      }
+      new_url = "#{link.external_site.base_url}999999"
+      params = { id: link.id, external_link: { url: new_url } }
 
       # not logged in
       put(:update, params:)

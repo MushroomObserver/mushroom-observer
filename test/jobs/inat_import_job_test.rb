@@ -883,6 +883,47 @@ class InatImportJobTest < ActiveJob::TestCase
                     "Should not log import success when error occurs")
   end
 
+  # Prove that the import continues (observation created, warning logged)
+  # when ExternalLink creation fails with RecordInvalid.
+  # Covers MoObservationBuilder#add_external_link rescue block.
+  def test_import_job_external_link_creation_failure
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    Location.create(user: @user, name: "Sevier Co., Tennessee, USA",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+    stub_inat_interactions
+
+    warnings = []
+    stubbed_error = lambda do |*|
+      link = ExternalLink.new
+      link.errors.add(:base, "stubbed failure")
+      raise(ActiveRecord::RecordInvalid.new(link))
+    end
+    Rails.logger.stub(:warn, ->(msg) { warnings << msg }) do
+      ExternalLink.stub(:create!, stubbed_error) do
+        assert_difference("Observation.count", 1,
+                          "Observation should be created even if " \
+                          "ExternalLink.create! fails") do
+          InatImportJob.perform_now(@inat_import)
+        end
+      end
+    end
+
+    inat_id = @parsed_results.first[:id]
+    obs = Observation.find_by(inat_id: inat_id)
+    assert_not_nil(obs, "Cannot find imported Observation")
+    assert(obs.external_links.none?,
+           "Observation should have no ExternalLink when creation fails")
+    assert(
+      warnings.any? do |w|
+        w.include?("InatImport: failed to create ExternalLink") &&
+          w.include?(inat_id.to_s)
+      end,
+      "Should log a warning including the iNat obs ID when ExternalLink fails"
+    )
+  end
+
   ########## Utilities
 
   ########## Utilities
