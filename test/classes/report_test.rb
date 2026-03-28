@@ -477,7 +477,7 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       disposition: "NY",
-      # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
+      # https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/#associated-taxa
       associatedTaxa: "oak, pine; host: Pinus contorta",
       occurrenceRemarks: "other remarks"
     ).values
@@ -758,7 +758,6 @@ class ReportTest < UnitTestCase
       substrate: "",
       occurrenceRemarks: obs.notes[:Other] || "",
       associatedTaxa: nil,
-      verbatimAttributes: verbatim_attributes(obs),
       # where is assumed to have just city, state/province, country
       country: obs_where.split.last,
       stateProvince: obs_where.split[-2]&.delete_suffix(",") || nil,
@@ -772,13 +771,6 @@ class ReportTest < UnitTestCase
       maximumElevationInMeters: maximum_elevation,
       disposition: nil
     }
-  end
-
-  def verbatim_attributes(obs)
-    "<a href='#{Report::Mycoportal::HTTP_DOMAIN}/#{obs.id}' " \
-    "target='_blank' style='color: blue;'>" \
-    "Original observation ##{obs.id} (Mushroom Observer)" \
-    "</a>"
   end
 
   def test_rounding_of_latitudes_etc
