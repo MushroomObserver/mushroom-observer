@@ -81,7 +81,7 @@ class ExternalLinkTest < UnitTestCase
   end
 
   def test_uniqueness
-    link1 = ExternalLink.first
+    link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
     site = link1.external_site
     base_url = site.base_url
 
