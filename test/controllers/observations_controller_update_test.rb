@@ -565,4 +565,50 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: obs.id)
     assert_equal(notes, obs.reload.notes)
   end
+
+  # Covers ensure_thumb_image falling back to sibling occurrence images
+  # when all own images are removed.
+  def test_update_observation_thumb_falls_back_to_sibling_image
+    obs = observations(:detailed_unknown_obs)
+    sibling = observations(:minimal_unknown_obs)
+    sibling_img = images(:in_situ_image)
+
+    # Build an occurrence linking obs and sibling
+    occ = Occurrence.create!(
+      user: obs.user, primary_observation: obs
+    )
+    obs.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+
+    # Attach sibling_img to sibling (ensure it's there)
+    unless sibling.image_ids.include?(sibling_img.id)
+      sibling.images << sibling_img
+    end
+
+    # Remove all of obs's own images
+    own_ids = obs.image_ids
+    login(obs.user.login)
+    put(:update, params: {
+          id: obs.id,
+          observation: {
+            place_name: obs.place_name,
+            when: obs.when,
+            notes: obs.notes.to_h,
+            specimen: obs.specimen,
+            thumb_image_id: "",
+            good_image_ids: ""
+          }
+        })
+
+    obs.reload
+    assert_empty(obs.image_ids & own_ids,
+                 "Own images should have been removed")
+    assert_not_nil(obs.thumb_image_id,
+                   "thumb should fall back to sibling image")
+    assert_includes(
+      occ.observations.joins(:images).pluck("images.id"),
+      obs.thumb_image_id,
+      "thumb should be a sibling occurrence image"
+    )
+  end
 end

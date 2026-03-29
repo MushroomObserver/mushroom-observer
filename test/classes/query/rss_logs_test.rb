@@ -76,4 +76,42 @@ class Query::RssLogsTest < UnitTestCase
     assert_equal(expect,
                  scope.where(Observation[:lifeform].matches("%lichen%")).count)
   end
+
+  # == Phase 4: Occurrence Visibility Rule ==
+
+  def test_rss_log_excludes_non_primary_observation_logs
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: obs1)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    # Both observations have rss_logs
+    rss1 = rss_logs(:minimal_unknown_obs_rss_log)
+    rss2 = rss_logs(:coprinus_comatus_obs_rss_log)
+    assert_not_nil(rss1)
+    assert_not_nil(rss2)
+
+    query = Query.lookup(:RssLog)
+    ids = query.result_ids
+
+    # Primary obs log should be included; non-primary excluded
+    assert_includes(ids, rss1.id)
+    assert_not_includes(ids, rss2.id)
+  end
+
+  def test_rss_log_keeps_non_observation_logs
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    Occurrence.create!(user: rolf, primary_observation: obs1).tap do |occ|
+      obs1.update!(occurrence: occ)
+      obs2.update!(occurrence: occ)
+    end
+
+    # Non-observation logs should be unaffected
+    name_log = rss_logs(:name_rss_log)
+    query = Query.lookup(:RssLog)
+    ids = query.result_ids
+    assert_includes(ids, name_log.id)
+  end
 end

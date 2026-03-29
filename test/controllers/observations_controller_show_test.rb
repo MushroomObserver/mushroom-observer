@@ -46,6 +46,20 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_show_observation_with_occurrence
+    login("rolf")
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: obs1)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    get(:show, params: { id: obs1.id })
+    assert_response(:success)
+    assert_select("#associated_observations")
+    assert_select("a[href*='occurrences/#{occ.id}']")
+  end
+
   def test_show_observation_noteless_image
     obs = observations(:peltigera_mary_obs)
     img = images(:rolf_profile_image)
@@ -275,7 +289,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   # Refactored for CRUD routes in :collection_numbers or :herbarium_records
   def assert_show_obs(types, _id, items, can_add)
     type = types.to_s.chop
-    selector = types == :collection_numbers && !can_add ? "i" : "li"
+    selector = types == :collection_numbers && !can_add ? "a" : "li"
     assert_select("#observation_#{types} #{selector}",
                   items.count,
                   "Wrong number of #{types} shown.")

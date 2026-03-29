@@ -20,6 +20,7 @@ class Components::ObservationForm < Components::ApplicationForm
     user: nil,
     location: nil,
     good_images: [],
+    sibling_images: [],
     exif_data: {},
     given_name: nil,
     place_name: nil,
@@ -162,6 +163,7 @@ class Components::ObservationForm < Components::ApplicationForm
                     id: "observation_images") do
       FormCarousel(
         images: @good_images,
+        sibling_images: @sibling_images,
         exif_data: @exif_data,
         obs_thumb_id: model.thumb_image_id,
         user: @user

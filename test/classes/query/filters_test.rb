@@ -8,8 +8,10 @@ class Query::FiltersTest < UnitTestCase
   include QueryExtensions
 
   def test_filters
-    assert_equal([:has_images, :has_specimen, :lichen, :region, :clade],
-                 Query::Filter.all.map(&:sym))
+    assert_equal(
+      [:has_images, :has_specimen, :has_occurrence, :lichen, :region, :clade],
+      Query::Filter.all.map(&:sym)
+    )
     assert_equal([:region],
                  Query::Filter.by_model(Location).map(&:sym))
     assert_equal([:lichen, :clade],
@@ -80,10 +82,39 @@ class Query::FiltersTest < UnitTestCase
     assert_query(obs, :Observation, clade: "Agaricales")
   end
 
+  def test_filtering_content_has_occurrence
+    obs1, obs2 = create_multi_obs_occurrence
+    query = Query.lookup(:Observation, has_occurrence: "yes")
+    ids = query.result_ids
+    assert_includes(ids, obs1.id,
+                    "Primary in multi-obs occurrence should be included")
+    assert_not_includes(ids, obs2.id,
+                        "Non-primary should be excluded by visibility rule")
+
+    query_no = Query.lookup(:Observation, has_occurrence: "no")
+    ids_no = query_no.result_ids
+    assert_not_includes(ids_no, obs1.id)
+    assert_not_includes(ids_no, obs2.id,
+                        "Non-primary excluded regardless of filter value")
+  end
+
   def test_filtering_content_with_subquery
     expects_names = Name.joins(:observations).distinct.
                     merge(Observation.has_specimen).order_by_default
     assert_query(expects_names,
                  :Name, observation_query: { has_specimen: "yes" })
+  end
+
+  private
+
+  def create_multi_obs_occurrence
+    obs1 = observations(:detailed_unknown_obs)
+    obs2 = observations(:amateur_obs)
+    occ = Occurrence.create!(user: obs1.user,
+                             primary_observation: obs1,
+                             has_specimen: true)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+    [obs1, obs2]
   end
 end

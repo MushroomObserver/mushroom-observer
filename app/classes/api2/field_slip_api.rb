@@ -9,7 +9,7 @@ class API2
 
     def high_detail_includes
       [
-        :observations,
+        { occurrence: :observations },
         :project,
         :user
       ]
@@ -61,7 +61,7 @@ class API2
       obj.current_user = @user if obj.respond_to?(:current_user=)
       return unless @create_observation
 
-      @create_observation.update!(field_slip: obj)
+      link_observation_to_field_slip(@create_observation, obj)
       obj.adopt_user_from(@create_observation)
     end
 
@@ -78,12 +78,21 @@ class API2
         obj.save!
 
         if @update_observation
-          @update_observation.update!(field_slip: obj)
+          link_observation_to_field_slip(@update_observation, obj)
           obj.adopt_user_from(@update_observation)
         end
 
         obj
       end
+    end
+
+    def link_observation_to_field_slip(obs, field_slip)
+      occ = field_slip.occurrence
+      occ ||= Occurrence.create!(
+        user: @user, primary_observation: obs,
+        field_slip: field_slip
+      )
+      obs.update!(occurrence: occ)
     end
 
     def must_have_edit_permission!(obj)

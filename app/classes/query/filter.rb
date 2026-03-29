@@ -45,6 +45,7 @@ class Query::Filter
     [
       WithImages.new,
       WithSpecimen.new,
+      WithOccurrence.new,
       Lichen.new,
       Region.new,
       Clade.new

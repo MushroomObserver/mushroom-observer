@@ -6,7 +6,7 @@
 class FieldSlip < AbstractModel
   attr_reader :current_user
 
-  has_many :observations, dependent: :nullify
+  has_one :occurrence, dependent: :nullify
   belongs_to :project
   belongs_to :user
 
@@ -40,7 +40,8 @@ class FieldSlip < AbstractModel
 
   scope :observation, lambda { |observation|
     observation_ids = Lookup::Observations.new(observation).ids
-    joins(:observations).where(observations: { id: observation_ids }).distinct
+    joins(occurrence: :observations).
+      where(observations: { id: observation_ids }).distinct
   }
 
   scope :project, lambda { |project|
@@ -68,9 +69,31 @@ class FieldSlip < AbstractModel
     update_project
   end
 
-  # The oldest observation, used as the primary/default reference.
+  # All observations through the occurrence.
+  def observations
+    occurrence&.observations || Observation.none
+  end
+
+  # Observation IDs through the occurrence.
+  def observation_ids
+    occurrence&.observation_ids || []
+  end
+
+  # The primary observation, used as the default reference.
+  # Only returns observations that actually belong to the occurrence.
   def observation
-    @observation ||= observations.order(:created_at).first
+    @observation ||= find_primary_observation
+  end
+
+  def find_primary_observation
+    occ = occurrence
+    return nil unless occ
+
+    obs = observations.to_a
+    return nil if obs.empty?
+
+    primary = occ.primary_observation
+    obs.include?(primary) ? primary : obs.first
   end
 
   def reload(*)

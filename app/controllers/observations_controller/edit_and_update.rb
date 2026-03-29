@@ -38,6 +38,7 @@ module ObservationsController::EditAndUpdate
     # Initialize form. Put the thumb image first.
     @images      = []
     @good_images = @observation.images_sorted
+    @sibling_images = occurrence_sibling_images
     @exif_data = get_exif_data(@good_images)
     @location = @observation.location
     init_project_vars_for_edit(@observation)
@@ -138,16 +139,36 @@ module ObservationsController::EditAndUpdate
   # real value before remove_image can detect it needs reassignment.
   def ensure_thumb_image
     return if @observation.thumb_image_id.present? &&
-              @observation.image_ids.include?(@observation.thumb_image_id)
+              valid_thumb_image_ids.include?(@observation.thumb_image_id)
 
-    new_thumb = @observation.images.first
+    new_thumb = @observation.next_thumb_image
     @observation.thumb_image = new_thumb
     # Persist immediately so the fix survives even if the rest of the
     # update bails out, matching how remove_image persists detachments.
     return unless @observation.persisted? &&
                   @observation.thumb_image_id_changed?
 
-    @observation.update_column(:thumb_image_id, new_thumb&.id)
+    @observation.update_columns(thumb_image_id: new_thumb&.id,
+                                updated_at: Time.zone.now)
+  end
+
+  def occurrence_sibling_images
+    return [] unless @observation.occurrence
+
+    @observation.occurrence.observations.
+      where.not(id: @observation.id).
+      includes(:images).flat_map(&:images).uniq -
+      @observation.images
+  end
+
+  # Image IDs valid for thumbnail: own images + occurrence sibling images
+  def valid_thumb_image_ids
+    ids = @observation.image_ids
+    if @observation.occurrence
+      ids |= @observation.occurrence.observations.
+             joins(:images).pluck("images.id")
+    end
+    ids
   end
 
   def try_to_upload_images
