@@ -50,28 +50,8 @@ class Inat
     end
 
     def next_request(**args)
-      query_args = {
-        id: nil, id_above: nil, only_id: false, per_page: 200,
-        order: "asc", order_by: "id",
-        # obss of only the iNat user with iNat login @inat_import.inat_username
-        # Prevents accidentally importing observations of multiple users
-        user_login: @import.inat_username,
-        # only fungi and slime molds
-        taxon_id: IMPORTABLE_TAXON_IDS_ARG,
-        # and which haven't been exported from or imported to MO
-        # This field was written by iNat's defunct Import from MO feature
-        # is written by Pulk's mirror script, and by
-        # ObservationImporter#update_mushroom_observer_url_field
-        without_field: "Mushroom Observer URL"
-      }.merge(args)
-      # super_importers can import observations of other users.
-      # In order to do that, we must remove the user_login param
-      # But we shouldn't remove that param unless there are other constraints
-      # on which observations are imported,
-      # else it will import all fungal observations on iNat!
-      if super_importing_selected_observations_of_single_user?
-        query_args.delete(:user_login)
-      end
+      query_args = base_query_args.merge(args)
+      add_ownership_filter(query_args)
       headers = { authorization: "Bearer #{@import.token}", accept: :json }
 
       Inat::APIRequest.new(@import.token).
@@ -82,8 +62,23 @@ class Inat
       e.response
     end
 
-    def super_importing_selected_observations_of_single_user?
-      InatImport.super_importer?(user) && @import.import_all == false
+    def base_query_args
+      {
+        id: nil, id_above: nil, only_id: false, per_page: 200,
+        order: "asc", order_by: "id",
+        taxon_id: IMPORTABLE_TAXON_IDS_ARG
+      }.merge(BASE_FILTER_PARAMS)
+    end
+
+    # When importing own observations: scope by user_login, no licensed filter.
+    # When importing others' observations (superimporter): require licensed,
+    # no user_login — the licensed + taxon filters are the safety constraints.
+    def add_ownership_filter(query_args)
+      if @import.own_observations
+        query_args[:user_login] = @import.inat_username
+      else
+        query_args.merge!(LICENSED_FILTER)
+      end
     end
   end
 end

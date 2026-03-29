@@ -32,9 +32,10 @@ class Inat
       "licenses/#{license_code.sub(/^cc-/, "")}/"
     end
 
-    # iNat API returns "license_code"=>nil, rather than "C" for unlicensed works
+    # license_code: nil if neither obs nor photos are licensed.
+    # license_code: "" if obs lacks license but >=1 photo is licensed.
     def unlicensed?
-      @license_code.nil?
+      @license_code.blank?
     end
 
     def current_public_domain

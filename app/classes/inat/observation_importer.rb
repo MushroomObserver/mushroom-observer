@@ -7,12 +7,15 @@ class Inat
   class ObservationImporter
     include Inat::Constants
 
-    attr_reader :inat_import, :user, :job
+    attr_reader :inat_import, :user, :job,
+                :unlicensed_obs_count, :skipped_images_count
 
     def initialize(inat_import, user, job = nil)
       @inat_import = inat_import
       @user = user
       @job = job
+      @unlicensed_obs_count = 0
+      @skipped_images_count = 0
     end
 
     def import_page(page)
@@ -28,9 +31,10 @@ class Inat
       return if unimportable?
       return if date_missing?
 
-      create_mo_observation
+      builder = create_mo_observation
       return unless @observation
 
+      accumulate_counts(builder)
       finalize_import
     end
 
@@ -58,13 +62,22 @@ class Inat
     end
 
     def create_mo_observation
-      builder = Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
+      builder = Inat::MoObservationBuilder.new(
+        inat_obs: @inat_obs, user: @user,
+        own_observations: @inat_import.own_observations
+      )
       @observation = builder.mo_observation
+      builder
     rescue StandardError => e
       log_with_response_error(
         "Failed to import iNat #{@inat_obs[:id]}: #{e.message}"
       )
       nil
+    end
+
+    def accumulate_counts(builder)
+      @unlicensed_obs_count += builder.unlicensed_obs
+      @skipped_images_count += builder.skipped_images
     end
 
     def finalize_import

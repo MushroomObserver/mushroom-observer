@@ -21,6 +21,9 @@ module InatImportsController::Validators
   # See InatImport.adequate_constraints?
   def import_adequately_constrained?
     return true if params[:inat_username].present?
+    # Superimporters importing by specific ID list don't need a username;
+    # the ID list + licensed + taxon filters constrain the query adequately.
+    return true if superimporter_not_own? && listing_ids?
 
     flash_warning(:inat_missing_username.l)
     false
@@ -76,15 +79,14 @@ module InatImportsController::Validators
   end
 
   # Block superimporter from importing **all** another user's iNat observations
-  # Seems so hard to reverse if done accidentally that we should prevent it,
-  # at least for now.
+  # when they have checked "Importing only my own". When the checkbox is
+  # unchecked the query uses the licensed filter with no user_login, so
+  # there is no "other user" to protect against.
   def not_importing_all_anothers?
-    # At this stage we care only about superimporters because
-    # other users are limited to importing their own observations
-    # by a combination of iNat authentication, which requires them to
-    # login to iNat as the user who has the iNat username from the import form
-    # and InatImportJob#ensure_importing_own_observations
     return true unless InatImport.super_importer?(@user) && importing_all?
+    # Superimporter explicitly opted out of own-only: licensed filter applies.
+    return true if superimporter_not_own?
+
     # user.inat_username can be nil if they've never done an iNat import or
     # if it got clobbered. We have no way to check if the iNat username they
     # entered is their actual iNat username. However, iNat authentication
@@ -94,6 +96,10 @@ module InatImportsController::Validators
 
     flash_warning(:inat_importing_all_anothers.t)
     false
+  end
+
+  def superimporter_not_own?
+    InatImport.super_importer?(@user) && params[:own_observations] != "1"
   end
 
   def consented?

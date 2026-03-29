@@ -40,6 +40,8 @@ class Inat
       @photo = inat_obs_photo_data
     end
 
+    def license_code = @photo[:photo][:license_code]
+
     def copyright_holder = @photo[:photo][:attribution]
 
     # https://www.iana.org/assignments/media-types/media-types.xhtml#image

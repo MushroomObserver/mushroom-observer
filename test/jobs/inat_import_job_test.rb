@@ -408,6 +408,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
+    # NOTE: This observation has no iNat license (all rights reserved).
+    # For own-obs imports (default), unlicensed obs are still imported and
+    # their unlicensed photos are imported using the user's default MO license.
     assert_not(Name.exists?(Name[:text_name] =~ /Donadinia/),
                "Test requires that MO not yet have `Donadinia` Names")
 
@@ -443,6 +446,48 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: expected_consensus)
 
     assert(obs.sequences.one?, "Obs should have one sequence")
+  end
+
+  # Own-obs import: unlicensed obs (no iNat license) are still imported, and
+  # response_errors includes a summary message counting unlicensed obs.
+  def test_job_logs_unlicensed_obs_summary
+    create_ivars_from_filename("donadinia_PNW01")
+    stub_inat_interactions
+
+    InatImportJob.perform_now(@inat_import)
+
+    @inat_import.reload
+    assert_match(
+      :inat_unlicensed_obs_summary.t(count: 1),
+      @inat_import.response_errors,
+      "Should log unlicensed obs summary when own_observations=true"
+    )
+  end
+
+  # Not-own superimporter import: unlicensed images are skipped and counted;
+  # response_errors includes a summary message.
+  def test_job_skips_unlicensed_images_for_not_own_obs
+    @user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(@user),
+           "Test requires user to be a super_importer")
+
+    create_ivars_from_filename("donadinia_PNW01")
+    @inat_import.update(own_observations: false)
+
+    stub_inat_interactions
+    stub_inat_photo_requests # stubs download URLs (won't be called for skipped)
+
+    InatImportJob.perform_now(@inat_import)
+
+    obs = Observation.last
+    assert_equal(0, obs.images.length,
+                 "Unlicensed images should be skipped for not-own imports")
+    @inat_import.reload
+    assert_match(
+      :inat_skipped_images_summary.t(count: 3),
+      @inat_import.response_errors,
+      "Should log skipped images summary for not-own superimporter import"
+    )
   end
 
   # Inat Prov Species Name "Hygrocybe sp. 'conica-CA06'" (epithet single-quoted)
@@ -815,7 +860,7 @@ class InatImportJobTest < ActiveJob::TestCase
       only_id: false,
       order: "asc",
       order_by: "id",
-      without_field: "Mushroom Observer URL",
+      **BASE_FILTER_PARAMS,
       user_login: @inat_import.inat_username
     }
     error = "Unauthorized"
@@ -967,9 +1012,9 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
 
-    photo_count = @parsed_results.first[:observation_photos].length
-    assert_equal(photo_count, obs.images.length,
-                 "Observation should have #{photo_count} image(s)")
+    expected_photo_count = expected_imported_photo_count
+    assert_equal(expected_photo_count, obs.images.length,
+                 "Observation should have #{expected_photo_count} image(s)")
 
     assert_equal(1, obs.namings.length,
                  "iNatImport should create exactly one Naming")
@@ -1026,6 +1071,16 @@ class InatImportJobTest < ActiveJob::TestCase
         "Observation notes are missing #{caption}"
       )
     end
+  end
+
+  # For own-obs imports (default), all photos are imported (unlicensed ones
+  # use the user's default license). For not-own superimporter imports, only
+  # licensed photos are imported.
+  def expected_imported_photo_count
+    obs_photos = @parsed_results.first[:observation_photos]
+    return obs_photos.length if @inat_import.own_observations
+
+    obs_photos.count { |p| p[:photo][:license_code].present? }
   end
 
   def assert_naming(obs:, name:, user:)
