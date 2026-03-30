@@ -105,7 +105,7 @@ module API2::Uploads
       raise(API2::FileMissing.new(file)) unless File.exist?(file)
 
       super()
-      self.content = File.open(file, "rb") # rubocop:disable Style/FileOpen
+      self.content = File.open(file, "rb")
       self.content_length = File.size(file)
       self.content_type = `file --mime -b #{file}`.sub(/[;\s].*/, "")
     end

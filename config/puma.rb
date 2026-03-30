@@ -35,14 +35,13 @@ activate_control_app
 
 if rails_env == "production"
   on_worker_boot do
-    require("active_record")
-    begin
-      ActiveRecord::Base.connection.disconnect!
-    rescue StandardError
-      ActiveRecord::ConnectionNotEstablished
-    end
-    ActiveRecord::Base.establish_connection(
-      YAML.load_file("#{app_path}/config/database.yml")[rails_env]["primary"]
-    )
+    # Clear ALL connection pools (primary, cache, etc.) after fork.
+    # Without this, forked workers inherit connections whose Trilogy
+    # @owner thread no longer matches Thread.current, causing
+    # Trilogy::SynchronizationError when SolidCache's background
+    # expiry thread tries to use the inherited cache connection.
+    # Surfaced by Trilogy 2.11.0 which now raises explicitly on
+    # concurrent connection use (previously silent/undefined behavior).
+    ActiveRecord::Base.clear_all_connections!
   end
 end
