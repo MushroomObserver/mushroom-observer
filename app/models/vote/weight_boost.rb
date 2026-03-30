@@ -13,46 +13,44 @@
 # Used by ConsensusCalculator, MergedNaming, and NamingConsensus
 # to ensure consistent vote_cache calculations.
 #
-class Vote
-  class WeightBoost
-    def initialize(namings)
-      @user_max_votes = {}
-      @naming_max_votes = {}
-      precompute(namings)
-    end
+class Vote::WeightBoost
+  def initialize(namings)
+    @user_max_votes = {}
+    @naming_max_votes = {}
+    precompute(namings)
+  end
 
-    def effective_weight(user_id, val, wgt, naming_id)
-      return wgt unless boost_vote?(user_id, val, naming_id)
+  def effective_weight(user_id, val, wgt, naming_id)
+    return wgt unless boost_vote?(user_id, val, naming_id)
 
-      naming_max = @naming_max_votes[naming_id]
-      (val.abs / naming_max.to_f) * wgt
-    end
+    naming_max = @naming_max_votes[naming_id]
+    (val.abs / naming_max.to_f) * wgt
+  end
 
-    private
+  private
 
-    def precompute(namings)
-      namings.each do |naming|
-        naming_max = 0
-        naming.votes.each do |vote|
-          uid = vote.user_id
-          val = vote.value
-          naming_max = val if val > naming_max
-          next if @user_max_votes[uid] &&
-                  @user_max_votes[uid] >= val
+  def precompute(namings)
+    namings.each do |naming|
+      naming_max = 0
+      naming.votes.each do |vote|
+        uid = vote.user_id
+        val = vote.value
+        naming_max = val if val > naming_max
+        next if @user_max_votes[uid] &&
+                @user_max_votes[uid] >= val
 
-          @user_max_votes[uid] = val
-        end
-        @naming_max_votes[naming.id] = naming_max
+        @user_max_votes[uid] = val
       end
+      @naming_max_votes[naming.id] = naming_max
     end
+  end
 
-    def boost_vote?(user_id, val, naming_id)
-      user_max = @user_max_votes[user_id]
-      naming_max = @naming_max_votes[naming_id]
-      user_max&.positive? &&
-        user_max < Vote::MAXIMUM_VOTE &&
-        val == user_max &&
-        naming_max > val
-    end
+  def boost_vote?(user_id, val, naming_id)
+    user_max = @user_max_votes[user_id]
+    naming_max = @naming_max_votes[naming_id]
+    user_max&.positive? &&
+      user_max < Vote::MAXIMUM_VOTE &&
+      val == user_max &&
+      naming_max > val
   end
 end
