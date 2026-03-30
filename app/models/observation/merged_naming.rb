@@ -11,10 +11,11 @@ class Observation::MergedNaming
 
   delegate :display_name_brief_authors, :format_name, to: :name
 
-  def initialize(namings, observation:, occurrence: nil)
+  def initialize(namings, observation:, occurrence: nil, boost: nil)
     @namings = namings
     @observation = observation
     @occurrence = occurrence
+    @boost = boost
     @name_id = namings.first.name_id
     @name = namings.first.name
     @primary = pick_primary
@@ -121,7 +122,9 @@ class Observation::MergedNaming
     end
   end
 
-  # Weighted vote cache: sum(val * wgt) / (sum(wgt) + 1)
+  # Weighted vote cache: sum(val * wgt) / (sum(eff_wgt) + 1)
+  # Uses effective_weight from Vote::WeightBoost to apply the
+  # sub-max vote boost consistently with ConsensusCalculator.
   def compute_vote_cache
     total_val = 0.0
     total_wgt = 0.0
@@ -129,9 +132,18 @@ class Observation::MergedNaming
       wgt = vote.user_weight
       next unless wgt.positive?
 
+      naming_id = vote.naming_id
+      eff_wgt = boosted_weight(vote.user_id, vote.value,
+                               wgt, naming_id)
       total_val += vote.value * wgt
-      total_wgt += wgt
+      total_wgt += eff_wgt
     end
     total_wgt.positive? ? total_val / (total_wgt + 1.0) : 0.0
+  end
+
+  def boosted_weight(user_id, val, wgt, naming_id)
+    return wgt unless @boost
+
+    @boost.effective_weight(user_id, val, wgt, naming_id)
   end
 end
