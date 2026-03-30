@@ -49,6 +49,17 @@ class FieldSlipJobTest < ActiveJob::TestCase
     end
   end
 
+  def test_no_prawn_svg_warnings
+    job = FieldSlipJob.new
+    tracker = field_slip_job_trackers(:fsjt_page_two)
+    FieldSlipJobTracker.stub(:pdf_directory, @pdf_dir) do
+      warnings = capture_io { job.perform(tracker.id) }[1]
+      File.delete(tracker.filepath)
+      assert_empty(warnings.scan(/prawn-svg.*WARNING/),
+                   "Expected no prawn-svg warnings, got: #{warnings}")
+    end
+  end
+
   def test_deletes_old_tracker_files
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_page_two)
