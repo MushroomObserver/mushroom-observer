@@ -218,12 +218,20 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_form_action(action: :create)
     assert_select(
-      'select[id ^= "project_start_date"]', { count: 3 },
-      "Form should have fields to select starting month, day, year"
+      'select[id ^= "project_start_date"]', { count: 2 },
+      "Form should have selects for starting month and day"
     )
     assert_select(
-      'select[id ^= "project_end_date"]', { count: 3 },
-      "Form should have fields to select ending month, day, year"
+      'input[id ^= "project_start_date"]', { count: 1 },
+      "Form should have text input for starting year"
+    )
+    assert_select(
+      'select[id ^= "project_end_date"]', { count: 2 },
+      "Form should have selects for ending month and day"
+    )
+    assert_select(
+      'input[id ^= "project_end_date"]', { count: 1 },
+      "Form should have text input for ending year"
     )
 
     assert_select(
