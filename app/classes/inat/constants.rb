@@ -73,5 +73,9 @@ class Inat
 
     # MO adds this string + date to the description of iNat observation
     IMPORTED_BY_MO = "Imported by Mushroom Observer"
+
+    # Used in the copyright line of the iNat snapshot
+    OBS_COPYRIGHT_LABEL = "Observation ©"
+    ALL_RIGHTS_RESERVED = "all rights reserved"
   end
 end

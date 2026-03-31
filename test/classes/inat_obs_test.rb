@@ -374,6 +374,38 @@ class InatObsTest < UnitTestCase
     assert(mock_observation("coprinus")[:observation_photos].one?)
   end
 
+  def test_copyright
+    unlicensed_suffix =
+      "#{OBS_COPYRIGHT_LABEL} Devin Welsh - #{ALL_RIGHTS_RESERVED}"
+
+    # nil license_code: obs is unlicensed, no photos
+    obs_no_license = mock_observation("amanita_flavorubens")
+    assert_equal(
+      unlicensed_suffix,
+      obs_no_license.send(:copyright),
+      "Unlicensed obs (nil license_code) should show 'all rights reserved'"
+    )
+
+    # "" license_code: obs is unlicensed but has >=1 licensed photo
+    obs_empty_license = mock_observation("amanita_flavorubens")
+    obs_empty_license[:license_code] = ""
+    assert_equal(
+      unlicensed_suffix,
+      obs_empty_license.send(:copyright),
+      "Unlicensed obs (empty string license_code) should show " \
+      "'all rights reserved'"
+    )
+
+    # licensed obs
+    obs_licensed = mock_observation("somion_unicolor")
+    copyright = obs_licensed.send(:copyright)
+    assert_match(
+      %r{\A#{OBS_COPYRIGHT_LABEL} .+ \("cc-by-nc":https?://.+\)\z}o,
+      copyright,
+      "Licensed obs should include license code and URL"
+    )
+  end
+
   def mock_observation(filename)
     mock_search = File.read("test/inat/#{filename}.txt")
     Inat::Obs.new(

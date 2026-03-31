@@ -290,9 +290,11 @@ class Inat
     def copyright
       name = self[:user][:name].presence || self[:user][:login]
       code = self[:license_code]
-      return "Observation © #{name}" unless code
+      if code.blank?
+        return "#{OBS_COPYRIGHT_LABEL} #{name} - #{ALL_RIGHTS_RESERVED}"
+      end
 
-      "Observation © #{name} (\"#{code}\":#{license.url})"
+      "#{OBS_COPYRIGHT_LABEL} #{name} (\"#{code}\":#{license.url})"
     end
     private :copyright
 
