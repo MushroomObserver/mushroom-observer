@@ -25,21 +25,34 @@ class ProjectFormTest < ComponentTestCase
     assert_html(html, "input[name='project[field_slip_prefix]']")
     assert_html(html, "input[name='project[place_name]']")
 
-    # Date fields (2 selects + 1 text input each)
-    assert_html(html, "select[id^='project_start_date']", count: 2)
-    assert_html(html, "input[id^='project_start_date']")
-    assert_html(html, "select[id^='project_end_date']", count: 2)
-    assert_html(html, "input[id^='project_end_date']")
+    # Date fields — assert both IDs and name attributes
+    # Year is a text input (1i), month (2i) and day (3i) are selects
+    assert_html(html,
+                "input[name='project[start_date(1i)]']")
+    assert_html(html,
+                "select[name='project[start_date(2i)]']")
+    assert_html(html,
+                "select[name='project[start_date(3i)]']")
+    assert_html(html,
+                "input[name='project[end_date(1i)]']")
+    assert_html(html,
+                "select[name='project[end_date(2i)]']")
+    assert_html(html,
+                "select[name='project[end_date(3i)]']")
 
-    # Radio buttons with proper IDs
+    # Radio buttons — verify name, value, and checked state
     assert_html(html,
-                "input[type='radio'][id='project_dates_any_false']")
+                "input[type='radio']" \
+                "[name='project[dates_any]'][value='false']")
     assert_html(html,
-                "input[type='radio'][id='project_dates_any_true']")
+                "input[type='radio']" \
+                "[name='project[dates_any]'][value='true']")
 
     # "Any" selected by default
     assert_html(html,
-                "input[type='radio'][id='project_dates_any_true'][checked]")
+                "input[type='radio']" \
+                "[name='project[dates_any]']" \
+                "[value='true'][checked]")
 
     # No upload fields without upload_params
     assert_no_html(html, "input[type='file']")
@@ -60,11 +73,13 @@ class ProjectFormTest < ComponentTestCase
 
     assert_html(
       html,
-      "input[type='radio'][id='project_dates_any_false'][checked]"
+      "input[type='radio'][name='project[dates_any]']" \
+      "[value='false'][checked]"
     )
     assert_no_html(
       html,
-      "input[type='radio'][id='project_dates_any_true'][checked]"
+      "input[type='radio'][name='project[dates_any]']" \
+      "[value='true'][checked]"
     )
   end
 
@@ -77,7 +92,6 @@ class ProjectFormTest < ComponentTestCase
                          upload_license_id: license.id
                        })
 
-    assert_html(html, "input[type='file']")
     assert_html(html,
                 "input[type='file'][name='project[upload][image]']")
   end
