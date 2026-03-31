@@ -212,7 +212,7 @@ class TranslationsController < ApplicationController
     @tags = tags
     @tags_used = {}
     # Caller may pass an existing handle; method closes it at line 223
-    file_handle ||= File.open(lang.export_file, "r:utf-8") # rubocop:disable Style/FileOpen
+    file_handle ||= File.open(lang.export_file, "r:utf-8")
     reset_everything
     file_handle.each_line do |line|
       line.force_encoding("utf-8")

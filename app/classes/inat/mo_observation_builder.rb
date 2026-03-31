@@ -94,12 +94,15 @@ class Inat
 
     def add_external_link
       external_site = ExternalSite.find_by(name: "iNaturalist")
-      ExternalLink.create(
+      ExternalLink.create!(
         user: user,
         observation: @observation,
         external_site: external_site,
         url: "#{external_site.base_url}#{inat_obs[:id]}"
       )
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.warn("InatImport: failed to create ExternalLink " \
+                        "for iNat obs #{inat_obs[:id]}: #{e.message}")
     end
 
     def create_missing_identification_names
