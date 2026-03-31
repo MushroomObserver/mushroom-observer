@@ -78,6 +78,8 @@ class ProjectFormTest < ComponentTestCase
                        })
 
     assert_html(html, "input[type='file']")
+    assert_html(html,
+                "input[type='file'][name='project[upload][image]']")
   end
 
   private

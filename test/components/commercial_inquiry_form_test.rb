@@ -26,8 +26,7 @@ class CommercialInquiryFormTest < ComponentTestCase
   def test_renders_form_with_message_field
     expected_label = "#{:ask_user_question_message.t}:"
     assert_html(@html, "body", text: expected_label)
-    assert_html(@html, "textarea[name='email[message]']")
-    assert_html(@html, "textarea[rows='10']")
+    assert_html(@html, "textarea[name='email[message]'][rows='10']")
     assert_includes(@html, @message)
   end
 

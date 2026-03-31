@@ -21,8 +21,8 @@ class ObserverQuestionFormTest < ComponentTestCase
   def test_renders_form_with_message_field
     expected_label = "#{:ask_user_question_message.t}:"
     assert_html(@html, "body", text: expected_label)
-    assert_html(@html, "textarea[name='observer_question[message]']")
-    assert_html(@html, "textarea[rows='6']")
+    assert_html(@html,
+                "textarea[name='observer_question[message]'][rows='6']")
     assert_includes(@html, @message)
   end
 

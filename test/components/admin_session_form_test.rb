@@ -30,7 +30,8 @@ class AdminSessionFormTest < ComponentTestCase
     @form = FormObject::AdminSession.new(user: "rolf")
     html = render_form
 
-    assert_html(html, "input[value='rolf']")
+    assert_html(html,
+                "input[name='admin_session[user]'][value='rolf']")
   end
 
   private
