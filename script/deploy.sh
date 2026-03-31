@@ -20,6 +20,23 @@ if [ "$(git branch | grep '^\*')" != "* main" ]; then
     exit 1
 fi
 
+echo Fetching latest from origin... && git fetch origin
+if [ $? -ne 0 ]; then
+    echo git fetch failed.
+    exit 1
+fi
+
+EXPECTED_RUBY=$(git show origin/main:.ruby-version | tr -d '[:space:]')
+CURRENT_RUBY=$(ruby -e 'puts RUBY_VERSION')
+if [ "$EXPECTED_RUBY" != "$CURRENT_RUBY" ]; then
+    echo "Ruby version mismatch!"
+    echo "  Running:  $CURRENT_RUBY"
+    echo "  Expected: $EXPECTED_RUBY (from origin/main)"
+    echo "Please install and activate Ruby $EXPECTED_RUBY before deploying."
+    echo "See README_RUBY_34_UPGRADE.md for instructions."
+    exit 1
+fi
+
 tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
 

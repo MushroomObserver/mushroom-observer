@@ -190,13 +190,13 @@ class SearchControllerTest < FunctionalTestCase
   end
 
   def test_index_pattern_bad_pattern
-    pattern = { error: "" }
+    pattern = ""
 
     login
     get(:pattern, params: { pattern_search: { pattern:, type: :observations } })
 
     assert_redirected_to(
-      observations_path(q: { model: :Observation }),
+      observations_path,
       "Bad pattern in obs search should render blank obs index"
     )
   end
@@ -217,7 +217,7 @@ class SearchControllerTest < FunctionalTestCase
   end
 
   def test_pattern_search_from_needs_naming_bad_pattern
-    pattern = { error: "" }
+    pattern = ""
     params = { pattern_search: { pattern:, type: :observations },
                needs_naming: rolf }
 
@@ -225,9 +225,9 @@ class SearchControllerTest < FunctionalTestCase
     get(:pattern, params:)
 
     assert_redirected_to(
-      identify_observations_path(q: { model: :Observation }),
-      "Bad pattern in search from obs_needing_ids should render " \
-      "obs_needing_ids"
+      observations_path,
+      "Blank pattern in search from obs_needing_ids should render " \
+      "blank obs index"
     )
   end
 
