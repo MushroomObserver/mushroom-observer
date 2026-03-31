@@ -54,7 +54,7 @@ class InatImportTest < ActiveSupport::TestCase
     superimporter_import = inat_imports(:dick_inat_import)
 
     not_own_with_username_import = superimporter_import.dup.tap do |i|
-      i.own_observations = false
+      i.import_others = true
       i.inat_username = "some_user"
       i.inat_ids = ""
     end
@@ -62,7 +62,7 @@ class InatImportTest < ActiveSupport::TestCase
            "Not-own import with username should be adequately constrained")
 
     not_own_with_ids_import = superimporter_import.dup.tap do |i|
-      i.own_observations = false
+      i.import_others = true
       i.inat_username = ""
       i.inat_ids = "123,456"
     end
@@ -70,7 +70,7 @@ class InatImportTest < ActiveSupport::TestCase
            "Not-own import with specific IDs should be adequately constrained")
 
     not_own_no_constraints_import = superimporter_import.dup.tap do |i|
-      i.own_observations = false
+      i.import_others = true
       i.inat_username = ""
       i.inat_ids = ""
     end

@@ -3098,7 +3098,7 @@
   inat_choose_observations: "Inat Observations to Import:"
   inat_import_list: "Comma separated list of up to about 384 observation #s"
   inat_import_all: Import all my iNat observations instead of a list
-  inat_own_observations: Importing only my own iNat observations
+  inat_import_others: Import other users' observations
   inat_import_consent: "(Required) I consent to importing my iNaturalist observations into Mushroom Observer, including any unlicensed observations and images, with my default MO license applied to any unlicensed images."
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)

@@ -64,7 +64,7 @@ class Inat
     def create_mo_observation
       builder = Inat::MoObservationBuilder.new(
         inat_obs: @inat_obs, user: @user,
-        own_observations: @inat_import.own_observations
+        import_others: @inat_import.import_others
       )
       @observation = builder.mo_observation
       builder

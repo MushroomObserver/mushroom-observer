@@ -103,7 +103,7 @@ class InatImportsController < ApplicationController
     @estimate = fetch_import_estimate
     return inat_unreachable if @estimate.nil?
 
-    @unlicensed_obs = fetch_unlicensed_obs_count if own_observations?
+    @unlicensed_obs = fetch_unlicensed_obs_count unless import_others?
     warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = build_confirm_form
@@ -116,7 +116,7 @@ class InatImportsController < ApplicationController
       inat_ids: params[:inat_ids],
       import_all: params[:all],
       consent: params[:consent],
-      own_observations: (own_observations? ? "1" : nil)
+      import_others: (import_others? ? "1" : nil)
     )
   end
 
@@ -134,7 +134,7 @@ class InatImportsController < ApplicationController
     merge_form_param(confirm, :inat_username)
     merge_form_param(confirm, :inat_ids)
     merge_form_param(confirm, :consent)
-    merge_form_param(confirm, :own_observations)
+    merge_form_param(confirm, :import_others)
     params[:all] ||= confirm[:import_all]
   end
 
@@ -148,19 +148,19 @@ class InatImportsController < ApplicationController
       inat_ids: sanitize_inat_ids(params[:inat_ids]),
       all: params[:all],
       consent: params[:consent],
-      own_observations: params[:own_observations]
+      import_others: params[:import_others]
     )
   end
 
   def render_new_form(username: @user.inat_username,
                       inat_ids: nil, all: nil,
-                      consent: nil, own_observations: nil)
+                      consent: nil, import_others: nil)
     form = FormObject::InatImport.new(
       inat_username: username,
       inat_ids: inat_ids,
       all: ("1" if all == "1"),
       consent: ("1" if consent == "1"),
-      own_observations: ("1" if own_observations == "1")
+      import_others: ("1" if import_others == "1")
     )
     render(
       Views::Controllers::InatImports::New.new(
@@ -181,7 +181,7 @@ class InatImportsController < ApplicationController
     merge_form_param(new_form, :inat_username)
     merge_form_param(new_form, :inat_ids)
     merge_form_param(new_form, :consent)
-    merge_form_param(new_form, :own_observations)
+    merge_form_param(new_form, :import_others)
     params[:all] ||= new_form[:all]
   end
 
@@ -218,7 +218,7 @@ class InatImportsController < ApplicationController
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
-      own_observations: own_observations?,
+      import_others: import_others?,
       response_errors: "",
       token: "",
       log: [],
@@ -233,12 +233,12 @@ class InatImportsController < ApplicationController
     params[:inat_ids].split(",").length
   end
 
-  # Returns whether this import is scoped to the user's own observations.
-  # Always true for regular users; determined by checkbox for superimporters.
-  def own_observations?
-    return true unless InatImport.super_importer?(@user)
+  # Returns whether this import covers other users' observations.
+  # Always false for regular users; determined by checkbox for superimporters.
+  def import_others?
+    return false unless InatImport.super_importer?(@user)
 
-    params[:own_observations] == "1"
+    params[:import_others] == "1"
   end
 
   def fetch_import_estimate
@@ -271,10 +271,10 @@ class InatImportsController < ApplicationController
   def import_estimate_query_args
     args = BASE_FILTER_PARAMS.merge(taxon_id: IMPORTABLE_TAXON_IDS_ARG,
                                     only_id: true)
-    if own_observations?
-      args[:user_login] = params[:inat_username]&.strip
-    else
+    if import_others?
       args.merge!(LICENSED_FILTER)
+    else
+      args[:user_login] = params[:inat_username]&.strip
     end
     args[:id] = params[:inat_ids] if listing_ids?
     args

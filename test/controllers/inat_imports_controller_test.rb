@@ -413,7 +413,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     login(user.login)
     post(:create,
          params: { inat_ids: inat_ids, inat_username: user.inat_username,
-                   consent: 1 })
+                   consent: 1, import_others: "1" })
 
     assert_response(:success)
     assert_template(:confirm)
@@ -448,7 +448,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
                  "Should flatten inat_username from namespaced params")
   end
 
-  def test_superimporter_import_all_own_observations_estimate_filters_by_user
+  def test_superimporter_own_import_all_estimate_filters_by_user
     user = users(:dick) # Dick is a super_importer with inat_username "dick"
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
@@ -468,8 +468,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
 
     login(user.login)
     post(:create,
-         params: { inat_username: user.inat_username, all: 1, consent: 1,
-                   own_observations: "1" })
+         params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
     assert_response(:success)
     assert_template(:confirm)
@@ -605,7 +604,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     assert_flash_error
   end
 
-  def test_ordinary_user_can_import_all_own_observations
+  def test_ordinary_user_can_import_all
     user = users(:mary)
     params = { inat_username: user.inat_username, all: 1,
                consent: 1, confirmed: 1 }
@@ -629,10 +628,10 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
 
   def test_import_all_anothers_observations_not_allowed
     user = users(:dick) # Dick is a iNat superimporter
-    # own_observations: "1" means superimporter chose to import own obs,
+    # no import_others param means superimporter chose to import own obs,
     # so "import all" for another username is blocked.
     params = { inat_username: "anything", inat_ids: nil,
-               consent: 1, all: 1, own_observations: "1" }
+               consent: 1, all: 1 }
 
     login(user.login)
     post(:create, params: params)
@@ -645,7 +644,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     user = users(:dick) # Dick is a iNat superimporter
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
-    # No own_observations param → not-own path; licensed filter replaces
+    # import_others: "1" → not-own path; licensed filter replaces
     # username constraint, so import-all is allowed even for any username.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 5 }.to_json)
@@ -653,7 +652,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     login(user.login)
     post(:create,
          params: { inat_username: "anyone", inat_ids: nil,
-                   consent: 1, all: 1 })
+                   consent: 1, all: 1, import_others: "1" })
 
     assert_response(:success)
     assert_template(:confirm)
@@ -664,7 +663,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
     # No username, no IDs, import_all — would fetch every fungal obs on iNat.
-    # Must be blocked even though own_observations is unchecked.
+    # Must be blocked even though import_others is unchecked.
     login(user.login)
     post(:create,
          params: { inat_username: nil, inat_ids: nil,
@@ -674,7 +673,7 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     assert_form_action(action: :create)
   end
 
-  def test_allow_superimporter_import_all_own_observations_if_inat_username_nil
+  def test_allow_superimporter_own_import_all_if_inat_username_nil
     user = users(:dick) # Dick is a iNat superimporter
     # simulate first-time import OR user.inat_username clobbered to nil
     user.update(inat_username: nil)

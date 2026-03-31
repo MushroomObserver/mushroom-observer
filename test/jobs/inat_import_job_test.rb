@@ -460,7 +460,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(
       :inat_unlicensed_obs_summary.t(count: 1),
       @inat_import.response_errors,
-      "Should log unlicensed obs summary when own_observations=true"
+      "Should log unlicensed obs summary when import_others=false"
     )
   end
 
@@ -472,7 +472,7 @@ class InatImportJobTest < ActiveJob::TestCase
            "Test requires user to be a super_importer")
 
     create_ivars_from_filename("donadinia_PNW01")
-    @inat_import.update(own_observations: false)
+    @inat_import.update(import_others: true)
 
     stub_inat_interactions
     stub_inat_photo_requests # stubs download URLs (won't be called for skipped)
@@ -1078,7 +1078,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # licensed photos are imported.
   def expected_imported_photo_count
     obs_photos = @parsed_results.first[:observation_photos]
-    return obs_photos.length if @inat_import.own_observations
+    return obs_photos.length unless @inat_import.import_others
 
     obs_photos.count { |p| p[:photo][:license_code].present? }
   end

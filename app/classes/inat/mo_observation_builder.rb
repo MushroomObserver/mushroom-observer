@@ -8,10 +8,10 @@ class Inat
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
     NAMING_VOTE = Vote::MAXIMUM_VOTE
 
-    def initialize(inat_obs:, user:, own_observations: true)
+    def initialize(inat_obs:, user:, import_others: false)
       @inat_obs = inat_obs
       @user = user
-      @own_observations = own_observations
+      @import_others = import_others
       @skipped_images = 0
       @unlicensed_obs = inat_obs[:license_code].blank? ? 1 : 0
     end
@@ -173,10 +173,10 @@ class Inat
     # Own-observation imports: apply user's default MO license.
     # Others' observations: skip and count for end-of-import reporting.
     def handle_unlicensed_image(photo)
-      if @own_observations
-        API2.execute(post_photo_params(photo, license: @user.license_id))
-      else
+      if @import_others
         @skipped_images += 1
+      else
+        API2.execute(post_photo_params(photo, license: @user.license_id))
       end
     end
 

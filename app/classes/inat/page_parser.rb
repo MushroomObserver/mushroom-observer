@@ -74,10 +74,10 @@ class Inat
     # When importing others' observations (superimporter): require licensed,
     # no user_login — the licensed + taxon filters are the safety constraints.
     def add_ownership_filter(query_args)
-      if @import.own_observations
-        query_args[:user_login] = @import.inat_username
-      else
+      if @import.import_others
         query_args.merge!(LICENSED_FILTER)
+      else
+        query_args[:user_login] = @import.inat_username
       end
     end
   end

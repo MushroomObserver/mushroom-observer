@@ -31,7 +31,7 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
       panel.with_body do
         count_estimate_line
         br
-        unlicensed_obs_line if own_observations?
+        unlicensed_obs_line unless import_others?
         br
         time_estimate_line
       end
@@ -93,7 +93,7 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
     hidden_field(:inat_ids)
     hidden_field(:import_all)
     hidden_field(:consent)
-    hidden_field(:own_observations)
+    hidden_field(:import_others)
   end
 
   def render_buttons
@@ -118,7 +118,7 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
     end
   end
 
-  def own_observations?
-    model.own_observations == "1"
+  def import_others?
+    model.import_others == "1"
   end
 end

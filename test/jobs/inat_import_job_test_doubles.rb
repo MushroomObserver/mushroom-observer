@@ -81,10 +81,10 @@ module InatImportJobTestDoubles
       order_by: "id",
       **BASE_FILTER_PARAMS
     }
-    if @inat_import.own_observations
-      query_args[:user_login] = @inat_import.inat_username
-    else
+    if @inat_import.import_others
       query_args.merge!(LICENSED_FILTER)
+    else
+      query_args[:user_login] = @inat_import.inat_username
     end
 
     body = if body_nil

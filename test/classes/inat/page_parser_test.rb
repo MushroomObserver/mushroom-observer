@@ -6,7 +6,7 @@ class Inat
   class PageParserTest < UnitTestCase
     def test_raises_if_not_own_import_has_no_username_or_ids
       import = inat_imports(:dick_inat_import).tap do |i|
-        i.own_observations = false
+        i.import_others = true
         i.inat_username = ""
         i.inat_ids = ""
       end
@@ -16,7 +16,7 @@ class Inat
 
     def test_does_not_raise_if_not_own_import_has_username
       import = inat_imports(:dick_inat_import).tap do |i|
-        i.own_observations = false
+        i.import_others = true
         i.inat_username = "some_user"
         i.inat_ids = ""
       end
@@ -26,7 +26,7 @@ class Inat
 
     def test_does_not_raise_if_not_own_import_has_ids
       import = inat_imports(:dick_inat_import).tap do |i|
-        i.own_observations = false
+        i.import_others = true
         i.inat_username = ""
         i.inat_ids = "123,456"
       end

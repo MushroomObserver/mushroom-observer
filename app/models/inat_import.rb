@@ -67,7 +67,7 @@ class InatImport < ApplicationRecord
   # that we don't import too many observations or, even worse,
   # all observations of all users.
   def adequate_constraints?
-    return inat_username.present? if own_observations
+    return inat_username.present? unless import_others
 
     # Not-own superimporter: safe only if scoped to a username or a
     # specific ID list. Without either, import_all would fetch all

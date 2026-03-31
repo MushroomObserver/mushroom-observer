@@ -17,7 +17,7 @@ class InatImportJob < ApplicationJob
   def perform(inat_import)
     create_ivars(inat_import)
     authenticate
-    ensure_importing_own_observations
+    ensure_not_importing_others
     import_requested_observations
   rescue StandardError => e
     log("Error occurred: #{e.message}")
@@ -48,7 +48,7 @@ class InatImportJob < ApplicationJob
 
   # Prevent MO users from importing other users' iNat observations,
   # unless they are super importers.
-  def ensure_importing_own_observations
+  def ensure_not_importing_others
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
     begin
@@ -137,12 +137,14 @@ class InatImportJob < ApplicationJob
     unlicensed_obs = observation_importer.unlicensed_obs_count
     skipped_images = observation_importer.skipped_images_count
 
-    if inat_import.own_observations
+    if inat_import.import_others
+      if skipped_images.positive?
+        inat_import.add_response_error(
+          :inat_skipped_images_summary.t(count: skipped_images)
+        )
+      end
+    else
       log_own_unlicensed_summary(unlicensed_obs)
-    elsif skipped_images.positive?
-      inat_import.add_response_error(
-        :inat_skipped_images_summary.t(count: skipped_images)
-      )
     end
   end
 

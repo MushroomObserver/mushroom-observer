@@ -99,7 +99,7 @@ module InatImportsController::Validators
   end
 
   def superimporter_not_own?
-    InatImport.super_importer?(@user) && params[:own_observations] != "1"
+    InatImport.super_importer?(@user) && params[:import_others] == "1"
   end
 
   def consented?

@@ -7,5 +7,5 @@ class FormObject::InatImportConfirm < FormObject::Base
   attribute :inat_ids, :string
   attribute :import_all, :string
   attribute :consent, :string
-  attribute :own_observations, :string
+  attribute :import_others, :string
 end
