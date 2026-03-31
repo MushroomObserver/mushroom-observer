@@ -66,6 +66,7 @@ class Observation
 
     def reload_namings_and_votes!
       @merged_namings = nil
+      @weight_boost = nil
       if multi_observation_occurrence?
         load_occurrence_namings
       else
@@ -380,14 +381,21 @@ class Observation
       end
     end
 
+    def weight_boost
+      @weight_boost ||= Vote::WeightBoost.new(@namings)
+    end
+
     def update_naming_vote_cache(naming, table)
       tot_sum = 0.0
       tot_wgt = 0.0
       table.each_value do |row|
         row[:votes].each do |v|
           wgt = v.user_weight
+          eff_wgt = weight_boost.effective_weight(
+            v.user_id, v.value, wgt, v.naming_id
+          )
           tot_sum += v.value * wgt
-          tot_wgt += wgt
+          tot_wgt += eff_wgt
         end
       end
       val = tot_wgt.positive? ? tot_sum / (tot_wgt + 1.0) : 0.0
@@ -400,7 +408,8 @@ class Observation
       grouped.map do |_name_id, group|
         ::Observation::MergedNaming.new(
           group, observation: @observation,
-                 occurrence: @observation.occurrence
+                 occurrence: @observation.occurrence,
+                 boost: weight_boost
         )
       end.sort_by(&:created_at)
     end

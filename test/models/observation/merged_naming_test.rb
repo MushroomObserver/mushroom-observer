@@ -239,6 +239,71 @@ class Observation::MergedNamingTest < UnitTestCase
     assert_operator(pct, :<=, 100)
   end
 
+  # Verify MergedNaming applies the sub-max vote boost the same
+  # way ConsensusCalculator does. Without the boost, the
+  # denominator uses raw weight, inflating the denominator and
+  # producing a lower percentage than the consensus score.
+  def test_vote_cache_applies_sub_max_boost
+    occ = create_occurrence(@obs1, @obs2)
+    naming = Naming.create!(
+      observation: @obs1, name: @name, user: rolf
+    )
+    # Rolf votes "I'd Call It That" (3.0)
+    Vote.create!(naming: naming, observation: @obs1,
+                 user: rolf, value: 3, favorite: true)
+    # Mary votes "Promising" (2.0) — triggers the boost
+    Vote.create!(naming: naming, observation: @obs1,
+                 user: mary, value: 2, favorite: true)
+
+    merged = build_merged_naming(occ, @obs1)
+    merged_cache = merged.vote_cache
+
+    # Recalculate via ConsensusCalculator for comparison
+    namings = Naming.where(observation_id: occ.observation_ids).
+              includes(:name, votes: [:observation, :user])
+    calc = Observation::ConsensusCalculator.new(namings)
+    calc.calc(nil)
+    naming.reload
+    calc_cache = naming.vote_cache
+
+    assert_in_delta(calc_cache, merged_cache, 0.001,
+                    "MergedNaming vote_cache should match " \
+                    "ConsensusCalculator when boost applies")
+  end
+
+  # Verify calc_vote_table (the VotesController#index path) also
+  # applies the sub-max boost when updating naming.vote_cache.
+  def test_calc_vote_table_applies_sub_max_boost
+    naming = Naming.create!(
+      observation: @obs1, name: @name, user: rolf
+    )
+    # Rolf votes "I'd Call It That" (3.0)
+    Vote.create!(naming: naming, observation: @obs1,
+                 user: rolf, value: 3, favorite: true)
+    # Mary votes "Promising" (2.0) — triggers the boost
+    Vote.create!(naming: naming, observation: @obs1,
+                 user: mary, value: 2, favorite: true)
+
+    # calc_vote_table updates naming.vote_cache as a side effect
+    obs = Observation.naming_includes.find(@obs1.id)
+    consensus = Observation::NamingConsensus.new(obs)
+    consensus.calc_vote_table(naming)
+    naming.reload
+    table_cache = naming.vote_cache
+
+    # Compare with ConsensusCalculator
+    namings = Naming.where(observation_id: @obs1.id).
+              includes(:name, votes: [:observation, :user])
+    calc = Observation::ConsensusCalculator.new(namings)
+    calc.calc(nil)
+    naming.reload
+    calc_cache = naming.vote_cache
+
+    assert_in_delta(calc_cache, table_cache, 0.001,
+                    "calc_vote_table vote_cache should match " \
+                    "ConsensusCalculator when boost applies")
+  end
+
   def test_vote_cache_zero_without_votes
     occ = create_occurrence(@obs1, @obs2)
     Naming.create!(observation: @obs1, name: @name, user: rolf)
