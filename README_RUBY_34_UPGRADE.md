@@ -201,7 +201,7 @@ If you see errors referencing
 is using macOS system Ruby instead of the chruby/rbenv-managed version.
 
 - **chruby:** Make sure `chruby.sh` and `auto.sh` are sourced in your
-  shell profile (see step 8 under chruby above). Then open a new shell
+  shell profile (as described in the chruby section above). Then open a new shell
   and `cd` to the project directory.
 - **rbenv:** Make sure `eval "$(rbenv init -)"` is in your shell
   profile. Then open a new shell.
