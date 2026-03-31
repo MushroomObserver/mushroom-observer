@@ -3135,7 +3135,7 @@
 
   inat_details_heading: Details/Caveats
   inat_details_list: "* Excludes observations previously imported from/exported to iNat.\n* Includes all your observations (any unlicensed images will use your default MO license).\n* Includes only observations identified as fungi or mycetozoa.\n* MO lists most iNat data and/or maps it to analogous MO fields.\n* MO hides coordinates from the public if iNat obscured them.\n* The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
-  inat_unlicensed_obs_summary: "[count] observation(s) had no iNat license; their images were imported with your default MO license."
+  inat_unlicensed_obs_summary: "[count] observation(s) had no iNat license; images were imported with your default MO license."
   inat_skipped_images_summary: "[count] image(s) skipped: no iNat license."
 
   # /inat_import_job_tracker
