@@ -118,7 +118,8 @@ module Prawn
       title_width = 5.cm
       svg(qr_svg("https://mushroomobserver.org/qr/#{code}"),
           at: [QR_LEFT, QR_TOP],
-          width: QR_SIZE)
+          width: QR_SIZE,
+          enable_web_requests: false)
       font("#{Prawn::ManualBuilder::DATADIR}/fonts/DejaVuSans.ttf") do
         text_box("#{@tracker.title} Field Slip:",
                  at: [QR_RIGHT + QR_MARGIN, QR_TOP],
