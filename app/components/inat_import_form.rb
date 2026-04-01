@@ -9,15 +9,17 @@ class Components::InatImportForm < Components::ApplicationForm
   end
 
   def view_template
-    text_field(:inat_username,
-               label: "#{:inat_username.l}: ", size: 10)
-    render_import_others_field if @super_importer
-    render_choose_observations_panel
-    checkbox_field(:consent,
-                   label: :inat_import_consent.l,
-                   wrap_class: "mt-3")
-    render_details_panel
-    submit(:SUBMIT.l)
+    super do
+      text_field(:inat_username,
+                 label: "#{:inat_username.l}: ", size: 10)
+      render_import_others_field if @super_importer
+      render_choose_observations_panel
+      checkbox_field(:consent,
+                     label: :inat_import_consent.l,
+                     wrap_class: "mt-3")
+      render_details_panel
+      submit(:SUBMIT.l)
+    end
   end
 
   def form_action
