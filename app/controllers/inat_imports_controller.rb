@@ -58,6 +58,7 @@
 #
 class InatImportsController < ApplicationController
   include Validators
+  include Estimators
   include Inat::Constants
 
   before_action :login_required
@@ -103,15 +104,25 @@ class InatImportsController < ApplicationController
     @estimate = fetch_import_estimate
     return inat_unreachable if @estimate.nil?
 
+    @unlicensed_obs = if import_others?
+                        fetch_unlicensed_others_count
+                      else
+                        fetch_unlicensed_obs_count
+                      end
     warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
-    @confirm_form = FormObject::InatImportConfirm.new(
+    @confirm_form = build_confirm_form
+    render(:confirm)
+  end
+
+  def build_confirm_form
+    FormObject::InatImportConfirm.new(
       inat_username: params[:inat_username],
       inat_ids: params[:inat_ids],
       import_all: params[:all],
-      consent: params[:consent]
+      consent: params[:consent],
+      import_others: (import_others? ? "1" : nil)
     )
-    render(:confirm)
   end
 
   def inat_unreachable
@@ -128,6 +139,7 @@ class InatImportsController < ApplicationController
     merge_form_param(confirm, :inat_username)
     merge_form_param(confirm, :inat_ids)
     merge_form_param(confirm, :consent)
+    merge_form_param(confirm, :import_others)
     params[:all] ||= confirm[:import_all]
   end
 
@@ -140,22 +152,25 @@ class InatImportsController < ApplicationController
       username: params[:inat_username],
       inat_ids: sanitize_inat_ids(params[:inat_ids]),
       all: params[:all],
-      consent: params[:consent]
+      consent: params[:consent],
+      import_others: params[:import_others]
     )
   end
 
   def render_new_form(username: @user.inat_username,
                       inat_ids: nil, all: nil,
-                      consent: nil)
+                      consent: nil, import_others: nil)
     form = FormObject::InatImport.new(
       inat_username: username,
       inat_ids: inat_ids,
       all: ("1" if all == "1"),
-      consent: ("1" if consent == "1")
+      consent: ("1" if consent == "1"),
+      import_others: ("1" if import_others == "1")
     )
     render(
       Views::Controllers::InatImports::New.new(
-        form: form
+        form: form,
+        super_importer: InatImport.super_importer?(@user)
       ),
       layout: true
     )
@@ -171,6 +186,7 @@ class InatImportsController < ApplicationController
     merge_form_param(new_form, :inat_username)
     merge_form_param(new_form, :inat_ids)
     merge_form_param(new_form, :consent)
+    merge_form_param(new_form, :import_others)
     params[:all] ||= new_form[:all]
   end
 
@@ -205,8 +221,9 @@ class InatImportsController < ApplicationController
       importables: importables_count,
       imported_count: 0,
       avg_import_time: @inat_import.initial_avg_import_seconds,
-      inat_username: params[:inat_username].strip,
+      inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
+      import_others: import_others?,
       response_errors: "",
       token: "",
       log: [],
@@ -221,42 +238,12 @@ class InatImportsController < ApplicationController
     params[:inat_ids].split(",").length
   end
 
-  def fetch_import_estimate
-    response = RestClient.get(
-      "#{API_BASE}/observations?#{import_estimate_query_args.to_query}",
-      { accept: :json, open_timeout: 5, timeout: 10 }
-    )
-    JSON.parse(response.body)["total_results"]
-  rescue RestClient::Exception, JSON::ParserError => e
-    Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
-    nil
-  end
+  # Returns whether this import covers other users' observations.
+  # Always false for regular users; determined by checkbox for superimporters.
+  def import_others?
+    return false unless InatImport.super_importer?(@user)
 
-  def import_estimate_query_args
-    args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG,
-             only_id: true,
-             without_field: "Mushroom Observer URL" }
-    if limit_to_observations_of_listed_inat_user?
-      args[:user_login] = params[:inat_username].strip
-    end
-    args[:id] = params[:inat_ids] if listing_ids?
-    args
-  end
-
-  def limit_to_observations_of_listed_inat_user?
-    # Always filter by inat_username if importing all,
-    # else it will try to import every obs of every iNat user.
-    return true if importing_all?
-
-    # If importing a list, filter by the listed inat_username
-    # unless the user is a super_importer.
-    # super_importers should be able to import other users' listed obss
-    # while logged into iNat as the super_importer.
-    return false if InatImport.super_importer?(@user)
-
-    # Else limit to iNat obss of the listed iNat user in order to
-    # prevent regular users from importing others' iNat obss.
-    true
+    params[:import_others] == "1"
   end
 
   def clean_inat_ids

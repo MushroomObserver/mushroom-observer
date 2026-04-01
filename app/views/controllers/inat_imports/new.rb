@@ -11,15 +11,18 @@ module Views
         register_output_helper :add_context_nav
         register_value_helper :inat_import_form_new_tabs
 
-        def initialize(form:)
+        def initialize(form:, super_importer: false)
           super()
           @form = form
+          @super_importer = super_importer
         end
 
         def view_template
           add_page_title(:inat_import_create_title.l)
           add_context_nav(inat_import_form_new_tabs)
-          render(Components::InatImportForm.new(@form))
+          render(Components::InatImportForm.new(
+                   @form, super_importer: @super_importer
+                 ))
         end
       end
     end

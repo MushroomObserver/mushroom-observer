@@ -4,8 +4,10 @@
 # Shows estimated import count and Proceed/Go Back buttons.
 # Hidden fields carry form data through the confirmation step.
 class Components::InatImportConfirmForm < Components::ApplicationForm
-  def initialize(model, estimate: nil, inat_import: nil, **)
+  def initialize(model, estimate: nil, unlicensed_obs: nil,
+                 inat_import: nil, **)
     @estimate = estimate
+    @unlicensed_obs = unlicensed_obs
     @inat_import = inat_import
     super(model, **)
   end
@@ -29,6 +31,8 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
       panel.with_body do
         count_estimate_line
         br
+        unlicensed_obs_line
+        br
         time_estimate_line
       end
     end
@@ -42,6 +46,22 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
 
   def estimated_count
     @estimate.to_s
+  end
+
+  def unlicensed_obs_line
+    b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
+    plain(": ")
+    span(id: "unlicensed_obs_count") { plain(@unlicensed_obs.to_s) }
+    plain(" ")
+    plain(unlicensed_obs_note)
+  end
+
+  def unlicensed_obs_note
+    if import_others?
+      :inat_import_confirm_unlicensed_others_note.l
+    else
+      :inat_import_confirm_unlicensed_obs_note.l
+    end
   end
 
   def time_estimate_line
@@ -81,6 +101,7 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
     hidden_field(:inat_ids)
     hidden_field(:import_all)
     hidden_field(:consent)
+    hidden_field(:import_others)
   end
 
   def render_buttons
@@ -103,5 +124,9 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
            type: "submit", class: "btn btn-default") do
       plain(:inat_import_confirm_go_back.l)
     end
+  end
+
+  def import_others?
+    model.import_others == "1"
   end
 end
