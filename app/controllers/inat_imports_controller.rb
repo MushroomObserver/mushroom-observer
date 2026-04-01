@@ -58,6 +58,7 @@
 #
 class InatImportsController < ApplicationController
   include Validators
+  include Estimators
   include Inat::Constants
 
   before_action :login_required
@@ -103,7 +104,11 @@ class InatImportsController < ApplicationController
     @estimate = fetch_import_estimate
     return inat_unreachable if @estimate.nil?
 
-    @unlicensed_obs = fetch_unlicensed_obs_count unless import_others?
+    @unlicensed_obs = if import_others?
+                        fetch_unlicensed_others_count
+                      else
+                        fetch_unlicensed_obs_count
+                      end
     warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = build_confirm_form
@@ -239,49 +244,6 @@ class InatImportsController < ApplicationController
     return false unless InatImport.super_importer?(@user)
 
     params[:import_others] == "1"
-  end
-
-  def fetch_import_estimate
-    response = RestClient.get(
-      "#{API_BASE}/observations?#{import_estimate_query_args.to_query}",
-      { accept: :json, open_timeout: 5, timeout: 10 }
-    )
-    JSON.parse(response.body)["total_results"]
-  rescue RestClient::Exception, JSON::ParserError => e
-    Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
-    nil
-  end
-
-  # Counts unlicensed observations for the own-observations case.
-  # Total minus licensed gives the unlicensed count via two fast
-  # only_id queries.
-  def fetch_unlicensed_obs_count
-    licensed = RestClient.get(
-      "#{API_BASE}/observations?#{licensed_estimate_query_args.to_query}",
-      { accept: :json, open_timeout: 5, timeout: 10 }
-    )
-    @estimate - JSON.parse(licensed.body)["total_results"]
-  rescue RestClient::Exception, JSON::ParserError => e
-    Rails.logger.warn(
-      "iNat licensed estimate request failed: #{e.class}: #{e.message}"
-    )
-    nil
-  end
-
-  def import_estimate_query_args
-    args = BASE_FILTER_PARAMS.merge(taxon_id: IMPORTABLE_TAXON_IDS_ARG,
-                                    only_id: true)
-    if import_others?
-      args.merge!(LICENSED_FILTER)
-    else
-      args[:user_login] = params[:inat_username]&.strip
-    end
-    args[:id] = params[:inat_ids] if listing_ids?
-    args
-  end
-
-  def licensed_estimate_query_args
-    import_estimate_query_args.merge(LICENSED_FILTER)
   end
 
   def clean_inat_ids

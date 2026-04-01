@@ -31,7 +31,7 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
       panel.with_body do
         count_estimate_line
         br
-        unlicensed_obs_line unless import_others?
+        unlicensed_obs_line
         br
         time_estimate_line
       end
@@ -53,7 +53,15 @@ class Components::InatImportConfirmForm < Components::ApplicationForm
     plain(": ")
     span(id: "unlicensed_obs_count") { plain(@unlicensed_obs.to_s) }
     plain(" ")
-    plain(:inat_import_confirm_unlicensed_obs_note.l)
+    plain(unlicensed_obs_note)
+  end
+
+  def unlicensed_obs_note
+    if import_others?
+      :inat_import_confirm_unlicensed_others_note.l
+    else
+      :inat_import_confirm_unlicensed_obs_note.l
+    end
   end
 
   def time_estimate_line

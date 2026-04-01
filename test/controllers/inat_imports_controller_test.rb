@@ -508,6 +508,36 @@ class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/One
     )
   end
 
+  def test_confirm_shows_unlicensed_obs_count_for_import_others
+    user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+
+    # Total (no license filter) returns 5: 2 unlicensed will be skipped
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+    # Licensed query (the estimate) returns 3 — registered last, matched first
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_ids: "1,2,3,4,5", inat_username: "anyone",
+                   consent: 1, import_others: "1" })
+
+    assert_response(:success)
+    assert_template(:confirm)
+    assert_select(
+      "#estimated_count", "3",
+      "Estimate for import-others should be licensed obs count"
+    )
+    assert_select(
+      "#unlicensed_obs_count", "2",
+      "Confirm form should report unlicensed obs that will be skipped"
+    )
+  end
+
   def test_confirm_renders_gracefully_when_licensed_estimate_fails
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
