@@ -8,17 +8,10 @@ module Components # rubocop:disable Style/OneClassPerFile
   extend Phlex::Kit
 end
 
-Rails.autoloaders.main.push_dir(
-  Rails.root.join("app/views"), namespace: Views
-)
-
+# The Views push_dir is in config/application.rb so it runs before
+# Zeitwerk setup (push_dir after setup is a no-op).
+# Components is already in Rails' default autoload paths (app/*),
+# so push_dir here works fine for adding the namespace.
 Rails.autoloaders.main.push_dir(
   Rails.root.join("app/components"), namespace: Components
 )
-
-# Eagerly load all views to ensure nested modules are available
-Rails.application.config.after_initialize do
-  Rails.root.glob("app/views/**/*.rb").each do |file|
-    require file
-  end
-end

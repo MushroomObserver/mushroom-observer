@@ -8,8 +8,7 @@ Rails.autoloaders.main.inflector.inflect(
 Rails.autoloaders.main.ignore(
   "app/assets",
   "app/classes/api",
-  "app/javascripts",
-  "app/views"
+  "app/javascripts"
 )
 
 # These subdirs are for organization only, should not create new namespaces
