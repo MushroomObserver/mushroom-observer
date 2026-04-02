@@ -517,6 +517,6 @@ class Textile < String
   # Without this, clicking "#section" triggers a Turbo visit instead
   # of a native in-page scroll.
   def disable_turbo_for_anchor_links!
-    gsub!(/(<a\s)([^>]*href="#)/, '\1data-turbo="false" \2')
+    gsub!('<a href="#', '<a data-turbo="false" href="#')
   end
 end
