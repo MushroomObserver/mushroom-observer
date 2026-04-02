@@ -1348,4 +1348,32 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: obs.id)
     assert_equal(expected_notes, obs.notes)
   end
+
+  # --- Field Slip "Add Images or Other Data" workflow ---
+
+  def test_new_from_field_slip_no_false_name_warning
+    login("rolf")
+    name = names(:agaricus_campestris)
+    get(:new, params: {
+          field_code: "TEST-001",
+          notes: { Field_Slip_ID: "_#{name.text_name}_" }
+        })
+    assert_response(:success)
+    body = @response.body
+
+    # Name should be pre-filled
+    assert_match(/#{name.text_name}/, body)
+
+    # Should NOT show "not recognized" or "deprecated" warnings
+    assert_no_match(/does not recognize/, body)
+    assert_no_match(/is deprecated/, body)
+  end
+
+  def test_new_from_field_slip_no_warning_without_name
+    login("rolf")
+    get(:new, params: { field_code: "TEST-001" })
+    assert_response(:success)
+
+    assert_no_match(/name_messages/, @response.body)
+  end
 end
