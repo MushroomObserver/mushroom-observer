@@ -413,14 +413,14 @@ Hopefully this is not necessary on a fresh clean system, but
 - Install the selected version.
 
 ```sh
-  ruby-install ruby 3.3.6
+  ruby-install ruby 3.4.9
 ```
 
 - Once that succeeds, update Ruby versions in `.ruby-version` and `Gemfile.lock`.
 - In a new shell run:
 
 ```sh
-  chruby ruby-3.3.6
+  chruby ruby-3.4.9
   bundle install
   gem pristine --all
 ```
