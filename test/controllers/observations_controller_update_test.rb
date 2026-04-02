@@ -611,4 +611,77 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       "thumb should be a sibling occurrence image"
     )
   end
+
+  # ---------- field slip code on update ----------
+
+  def test_update_adds_field_slip_code
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    fs = field_slips(:field_slip_no_obs)
+    # Detach from any existing occurrence
+    obs.update!(occurrence: nil)
+
+    put(:update, params: {
+          id: obs.id,
+          observation: obs_params(obs),
+          field_code: fs.code
+        })
+    obs.reload
+    assert_not_nil(obs.occurrence,
+                   "Observation should have an occurrence")
+    assert_equal(fs.id, obs.occurrence.field_slip_id,
+                 "Occurrence should link to the field slip")
+  end
+
+  def test_update_clears_field_slip_code
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    fs = field_slips(:field_slip_no_obs)
+
+    # Assign a field slip (detach from old occurrence first)
+    obs.update!(occurrence: nil)
+    obs.field_slip = fs
+    obs.save!
+    assert_not_nil(obs.reload.occurrence_id)
+
+    put(:update, params: {
+          id: obs.id,
+          observation: obs_params(obs),
+          field_code: ""
+        })
+    obs.reload
+    assert_nil(obs.occurrence_id,
+               "Observation should have no occurrence")
+  end
+
+  def test_update_invalid_field_slip_code
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    original_occ_id = obs.occurrence_id
+
+    # Code with only digits fails FieldSlip validation
+    put(:update, params: {
+          id: obs.id,
+          observation: obs_params(obs),
+          field_code: "12345"
+        })
+    assert_flash_error
+    obs.reload
+    assert_equal(original_occ_id, obs.occurrence_id,
+                 "Observation should remain unchanged")
+  end
+
+  private
+
+  def obs_params(obs)
+    {
+      place_name: obs.place_name,
+      "when(1i)" => obs.when.year.to_s,
+      "when(2i)" => obs.when.month.to_s,
+      "when(3i)" => obs.when.day.to_s,
+      specimen: obs.specimen,
+      thumb_image_id: obs.thumb_image_id.to_s,
+      good_image_ids: obs.image_ids.join(" ")
+    }
+  end
 end

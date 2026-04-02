@@ -148,15 +148,14 @@ class FieldSlipsController < ApplicationController
       update_observation_fields
       obs = @field_slip.observation
       check_for_species_list(obs, params[:species_list]) if obs
+      msg = :field_slip_created.t(code: @field_slip.code)
       if @field_slip_project_gaps
-        flash_notice(:field_slip_created.t)
+        flash_notice(msg)
         render(:new, status: :ok)
       elsif obs
-        redirect_to(observation_url(obs),
-                    notice: :field_slip_created.t)
+        redirect_to(observation_url(obs), notice: msg)
       else
-        redirect_to(field_slip_url(@field_slip),
-                    notice: :field_slip_created.t)
+        redirect_to(field_slip_url(@field_slip), notice: msg)
       end
     end
   end

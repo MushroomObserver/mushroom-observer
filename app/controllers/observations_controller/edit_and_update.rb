@@ -74,17 +74,33 @@ module ObservationsController::EditAndUpdate
 
   def update
     return unless find_observation!
+    return redirect_to(action: :show, id: @observation.id) \
+      unless permission!(@observation)
 
-    # Make sure user owns this observation!
-    unless permission!(@observation)
-      redirect_to(action: :show, id: @observation.id) and return
-    end
+    init_update
+    apply_observation_changes
+    reload_edit_form and return if @any_errors
 
+    update_field_slip
+    reload_edit_form and return if @any_errors
+
+    update_projects
+    update_species_lists
+    redirect_to_observation_or_create_location
+  end
+
+  ##############################################################################
+
+  private
+
+  def init_update
     init_license_var
     init_new_image_var(@observation.when)
     @any_errors = false
+  end
 
-    update_permitted_observation_attributes # may set a new location_id
+  def apply_observation_changes
+    update_permitted_observation_attributes
     create_location_object_if_new(@observation)
     @observation.notes = notes_to_sym_and_compact
     warn_if_unchecking_specimen_with_records_present!
@@ -96,17 +112,7 @@ module ObservationsController::EditAndUpdate
     try_to_upload_images
     try_to_save_location_if_new(@observation)
     try_to_update_observation_if_there_are_changes
-
-    reload_edit_form and return if @any_errors
-
-    update_projects
-    update_species_lists
-    redirect_to_observation_or_create_location
   end
-
-  ##############################################################################
-
-  private
 
   def warn_if_unchecking_specimen_with_records_present!
     return if @observation.specimen
@@ -192,12 +198,59 @@ module ObservationsController::EditAndUpdate
     end
   end
 
+  def update_field_slip
+    return unless params.key?(:field_code)
+
+    new_code = params[:field_code].to_s.strip.upcase
+    current_code = @observation.field_slip&.code.to_s
+
+    return if new_code == current_code
+
+    if new_code.blank?
+      clear_field_slip
+    else
+      assign_field_slip(new_code)
+    end
+  end
+
+  def clear_field_slip
+    occ = @observation.occurrence
+    return unless occ
+
+    if occ.primary_observation_id == @observation.id
+      @observation.send(:reassign_occurrence_primary, occ)
+    end
+    @observation.update!(occurrence: nil)
+    return unless Occurrence.exists?(occ.id)
+
+    occ.reload
+    occ.destroy_if_incomplete!
+  end
+
+  def assign_field_slip(code)
+    existed = FieldSlip.exists?(code: code)
+    field_slip = FieldSlip.find_or_create_by_code(code, @user)
+    unless field_slip
+      flash_error(
+        :edit_observation_field_slip_invalid.t(code: code)
+      )
+      @any_errors = true
+      return
+    end
+
+    flash_notice(:field_slip_created.t(code: field_slip.code)) unless existed
+    @observation.field_slip = field_slip
+    @observation.save!
+    field_slip.adopt_user_from(@observation)
+  end
+
   def reload_edit_form
     @images         = @bad_images
     @new_image.when = @observation.when
     @good_images  ||= @observation.images_sorted
     @exif_data    ||= get_exif_data(@good_images)
     @location     ||= @observation.location
+    @field_code     = params[:field_code]
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload

@@ -238,7 +238,8 @@ module ObservationsController::Create
     @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    @field_code      = params[:field_code]
+    @field_code        = params[:field_code]
+    @field_code_locked = params[:field_code_locked] == "1"
     init_location_var_for_reload
     init_specimen_vars_for_reload
     init_project_vars
@@ -249,8 +250,13 @@ module ObservationsController::Create
 
   def update_field_slip
     field_code = params[:field_code]
-    field_slip = FieldSlip.find_by(code: field_code)
+    return if field_code.blank?
+
+    existed = FieldSlip.exists?(code: field_code.strip.upcase)
+    field_slip = FieldSlip.find_or_create_by_code(field_code, @user)
     return unless field_slip
+
+    flash_notice(:field_slip_created.t(code: field_slip.code)) unless existed
 
     occ = field_slip.occurrence
     occ ||= Occurrence.create!(

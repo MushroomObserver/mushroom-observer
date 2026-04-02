@@ -19,6 +19,19 @@ class FieldSlip < AbstractModel
     end
   end
 
+  # Find an existing field slip by code, or create a new one.
+  # Returns nil if the code is invalid (fails validation).
+  def self.find_or_create_by_code(code, user)
+    code = code.to_s.strip.upcase
+    slip = find_by(code: code)
+    return slip if slip
+
+    slip = new
+    slip.current_user = user
+    slip.code = code
+    slip.save ? slip : nil
+  end
+
   scope :order_by_default,
         -> { order_by(::Query::FieldSlips.default_order) }
 

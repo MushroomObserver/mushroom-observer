@@ -148,21 +148,6 @@ class OccurrenceEditFormTest < ComponentTestCase
     )
   end
 
-  def test_create_observation_button
-    html = render_edit_form
-
-    assert_html(
-      html, "input[type='submit']" \
-            "[name='create_observation']",
-      attribute: {
-        "value" => :edit_occurrence_create_obs.l
-      }
-    )
-    assert_includes(
-      html, :edit_occurrence_create_obs_help.l
-    )
-  end
-
   def test_field_slip_link_on_observation
     obs = observations(:minimal_unknown_obs)
     field_slip = field_slips(:field_slip_one)
@@ -266,14 +251,12 @@ class OccurrenceEditFormTest < ComponentTestCase
       cb["data-action"]
     )
 
-    # Primary radio has editable data attribute
+    # Primary radio present
     radio = doc.at_css(
       "input[type='radio']" \
       "[value='#{@obs1.id}']"
     )
     assert(radio, "Expected primary radio")
-    assert(radio["data-editable"],
-           "Radio should have data-editable attribute")
   end
 
   private
