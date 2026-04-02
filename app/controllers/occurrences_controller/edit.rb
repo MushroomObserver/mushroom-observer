@@ -19,12 +19,8 @@ module OccurrencesController::Edit
   def process_update
     primary_obs = @occurrence.primary_observation
     sync_observations if params.key?(:observation_ids)
-    if params[:create_observation]
-      handle_create_observation
-    else
-      update_primary
-      update_primary_obs_attributes
-    end
+    update_primary
+    update_primary_obs_attributes
     recalculate_occurrence_consensus
     redirect_after_update(primary_obs)
   rescue ActiveRecord::RecordInvalid => e
@@ -173,30 +169,6 @@ module OccurrencesController::Edit
     obs.when = parsed if parsed != obs.when
   rescue Date::Error
     nil
-  end
-
-  def handle_create_observation
-    return unless @occurrence.persisted? && !@occurrence.destroyed?
-
-    source = find_source_observation
-    notes = source.notes.to_h
-    new_obs = Observation.build_observation(
-      source.location, source.name, notes,
-      source.when, @user
-    )
-    new_obs.where = source.where
-    new_obs.save!
-    new_obs.update!(occurrence: @occurrence)
-    @occurrence.update!(primary_observation: new_obs)
-    @occurrence.recompute_has_specimen!
-  end
-
-  def find_source_observation
-    source_id = params.dig(
-      :occurrence, :primary_observation_id
-    )&.to_i
-    @occurrence.observations.find_by(id: source_id) ||
-      @occurrence.primary_observation
   end
 
   def candidate_observations

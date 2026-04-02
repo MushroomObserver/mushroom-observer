@@ -662,27 +662,6 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_update_creates_observation
-    login("rolf")
-    occ = create_occurrence(@obs1, @obs2)
-    original_count = occ.observations.count
-
-    assert_difference("Observation.count", 1) do
-      patch(:update, params: {
-              id: occ.id,
-              occurrence: { primary_observation_id: @obs1.id },
-              create_observation: "Create New Observation"
-            })
-    end
-    occ.reload
-    new_obs = occ.primary_observation
-    assert_not_equal(@obs1, new_obs)
-    assert_equal(@obs1.location, new_obs.location)
-    assert_equal(@obs1.when, new_obs.when)
-    assert_equal(rolf, new_obs.user)
-    assert_equal(original_count + 1, occ.observations.count)
-  end
-
   def test_edit_shows_details_section
     login("rolf")
     obs_a = create_obs_with_location(rolf, locations(:burbank))
@@ -696,8 +675,6 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_match(/primary_obs\[location_id\]/, body)
     # Date and create button always present
     assert_match(/primary_obs\[when\]/, body)
-    assert_match(/create_observation/, body)
-    assert_match(/data-editable/, body)
   end
 
   # ---------- destroy action ----------
@@ -912,29 +889,6 @@ class OccurrencesControllerTest < FunctionalTestCase
           })
     # Should succeed without primary_obs params
     assert_flash_success
-  end
-
-  def test_create_observation_from_source
-    login("rolf")
-    occ = create_occurrence(@obs1, @obs2)
-    original_count = occ.observations.count
-
-    assert_difference("Observation.count", 1) do
-      patch(:update, params: {
-              id: occ.id,
-              occurrence: {
-                primary_observation_id: @obs1.id
-              },
-              create_observation: "Create"
-            })
-    end
-    occ.reload
-    new_obs = occ.primary_observation
-    assert_not_equal(@obs1.id, new_obs.id)
-    assert_equal(@obs1.location, new_obs.location)
-    assert_equal(@obs1.when, new_obs.when)
-    assert_equal(rolf, new_obs.user)
-    assert_equal(original_count + 1, occ.observations.count)
   end
 
   def test_edit_shows_candidates_from_recent_views

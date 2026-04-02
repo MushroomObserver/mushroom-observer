@@ -23,7 +23,6 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
       render_submit
       render_observation_grid
       render_candidate_section if @candidates.any?
-      render_create_observation_button
     end
   end
 
@@ -91,8 +90,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
         value: obs.id,
         checked: checked || nil,
         data: {
-          action: "occurrence-edit-form#primarySelected",
-          editable: obs.can_edit?(@user) ? "true" : "false"
+          action: "occurrence-edit-form#primarySelected"
         }
       )
       whitespace
@@ -145,17 +143,6 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
       value: primary_obs.when.to_s,
       class: "form-control"
     )
-  end
-
-  def render_create_observation_button
-    input(
-      type: "submit", name: "create_observation",
-      value: :edit_occurrence_create_obs.l,
-      class: "btn btn-default center-block my-3",
-      disabled: primary_obs.can_edit?(@user) || nil,
-      data: { occurrence_edit_form_target: "createObsButton" }
-    )
-    p(class: "help-block") { plain(:edit_occurrence_create_obs_help.l) }
   end
 
   def distinct_locations

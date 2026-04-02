@@ -1763,6 +1763,8 @@
 
   # observations/_form_observations
   form_observations_field_code: for field slip
+  form_observations_field_slip_code: Field Slip Code
+  edit_observation_field_slip_not_found: 'No field slip found with code "[code]".'
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
@@ -2970,8 +2972,6 @@
   edit_occurrence_add_heading: Add Recently Viewed Observations
   edit_occurrence_add: Add
   edit_occurrence_location: "Location:"
-  edit_occurrence_create_obs: Create New Observation
-  edit_occurrence_create_obs_help: Creates a new observation you can edit, based on the currently selected primary observation.
   edit_occurrence_details_heading: Primary Observation Details
   edit_occurrence_no_edit_permission: You don't have permission to edit this observation's details.
   occurrence_updated: Occurrence updated.
