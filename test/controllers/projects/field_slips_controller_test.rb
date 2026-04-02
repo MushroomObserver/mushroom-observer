@@ -84,7 +84,7 @@ module Projects
       project = projects(:eol_project)
       params = {
         project_id: project.id,
-        field_slips: 12_001,
+        project_field_slip: { field_slips: 12_001 },
         commit: "Create"
       }
       post_requires_login(:create, params, rolf.login)

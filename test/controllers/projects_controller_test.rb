@@ -20,12 +20,12 @@ class ProjectsControllerTest < FunctionalTestCase
         "end_date(1i)" => end_date&.year,
         "end_date(2i)" => end_date&.month,
         "end_date(3i)" => end_date&.day,
-        dates_any: dates_any
-      },
-      upload: {
-        license_id: licenses(:ccnc25).id,
-        copyright_holder: User.current&.name || "Someone Else",
-        copyright_year: 2023
+        dates_any: dates_any,
+        upload: {
+          license_id: licenses(:ccnc25).id,
+          copyright_holder: User.current&.name || "Someone Else",
+          copyright_year: 2023
+        }
       }
     }
   end
@@ -218,12 +218,20 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_form_action(action: :create)
     assert_select(
-      'select[id ^= "project_start_date"]', { count: 3 },
-      "Form should have fields to select starting month, day, year"
+      'select[id ^= "project_start_date"]', { count: 2 },
+      "Form should have selects for starting month and day"
     )
     assert_select(
-      'select[id ^= "project_end_date"]', { count: 3 },
-      "Form should have fields to select ending month, day, year"
+      'input[id ^= "project_start_date"]', { count: 1 },
+      "Form should have text input for starting year"
+    )
+    assert_select(
+      'select[id ^= "project_end_date"]', { count: 2 },
+      "Form should have selects for ending month and day"
+    )
+    assert_select(
+      'input[id ^= "project_end_date"]', { count: 1 },
+      "Form should have text input for ending year"
     )
 
     assert_select(
@@ -575,7 +583,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("With background", "With background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:upload][:image] = file
+    params[:project][:upload][:image] = file
     File.stub(:rename, false) do
       login("rolf", "testpassword")
       put(:update, params: params)
@@ -586,10 +594,11 @@ class ProjectsControllerTest < FunctionalTestCase
     project.reload
     assert_equal(num_images + 1, Image.count)
     assert_equal(Image.last.id, project.image_id)
-    assert_equal(params[:upload][:copyright_holder],
+    upload = params[:project][:upload]
+    assert_equal(upload[:copyright_holder],
                  project.image.copyright_holder)
-    assert_equal(params[:upload][:copyright_year], project.image.when.year)
-    assert_equal(params[:upload][:license_id], project.image.license_id)
+    assert_equal(upload[:copyright_year], project.image.when.year)
+    assert_equal(upload[:license_id], project.image.license_id)
   end
 
   def test_bad_banner_image
@@ -598,7 +607,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:upload][:image] = file
+    params[:project][:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:process_image, false) do
       File.stub(:rename, false) do
@@ -619,7 +628,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:upload][:image] = file
+    params[:project][:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:save, false) do
       File.stub(:rename, false) do

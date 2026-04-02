@@ -1,8 +1,16 @@
 <%
 add_edit_title(@project.title, @project)
 add_context_nav(project_form_edit_tabs(project: @project))
-
-button = :SAVE_EDITS.l
 %>
 
-<%= render(partial: "projects/form", locals: { button: button }) %>
+<%= render(Components::ProjectForm.new(
+  @project,
+  enctype: "multipart/form-data",
+  dates_any: @project_dates_any,
+  upload_params: {
+    copyright_holder: @copyright_holder,
+    copyright_year: @copyright_year,
+    licenses: @licenses,
+    upload_license_id: @upload_license_id
+  }
+)) %>

@@ -323,7 +323,7 @@ class TextileTest < UnitTestCase # rubocop:disable Style/OneClassPerFile
     fn = "45"
     assert_equal(
       "<sup class=\"footnote\" id=\"fnr#{fn}\">" \
-        "<a href=\"#fn#{fn}\">#{fn}</a></sup>",
+        "<a data-turbo=\"false\" href=\"#fn#{fn}\">#{fn}</a></sup>",
       "[#{fn}]".tl,
       "Textilized non-year integers should render as footnote calls"
     )

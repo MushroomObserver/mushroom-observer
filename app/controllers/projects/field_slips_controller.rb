@@ -22,7 +22,7 @@ module Projects
         start: @project.next_field_slip,
         title: @project.title,
         user: @user,
-        one_per_page: params[:one_per_page] == "1",
+        one_per_page: field_slip_params[:one_per_page] == "1",
         count: field_slips
       )
       if tracker
@@ -61,8 +61,13 @@ module Projects
       @project = find_or_goto_index(Project, params[:project_id].to_s)
     end
 
+    def field_slip_params
+      @field_slip_params ||=
+        params[:project_field_slip] || params
+    end
+
     def field_slips
-      @field_slips ||= params[:field_slips].to_i
+      @field_slips ||= field_slip_params[:field_slips].to_i
     end
 
     def field_slip_max

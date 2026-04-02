@@ -3,21 +3,9 @@
 require "test_helper"
 
 class HerbariumCuratorRequestFormTest < ComponentTestCase
-  # Test model that includes necessary ActiveModel modules
-  class TestRequest
-    include ActiveModel::Model
-    include ActiveModel::Attributes
-
-    attribute :notes, :string
-
-    def persisted?
-      false
-    end
-  end
-
   def setup
     super
-    @model = TestRequest.new
+    @model = FormObject::HerbariumCuratorRequest.new
     @herbarium = herbaria(:nybg_herbarium)
     @html = render_form
   end
@@ -29,8 +17,11 @@ class HerbariumCuratorRequestFormTest < ComponentTestCase
 
   def test_renders_notes_field
     assert_html(@html, "body", text: :NOTES.l)
-    assert_html(@html, "textarea[rows='10']")
-    assert_html(@html, "textarea[data-autofocus]")
+    assert_html(@html,
+                "textarea[name='herbarium_curator_request[notes]']" \
+                "[rows='10']")
+    assert_html(@html, "textarea[name='herbarium_curator_request[notes]']" \
+                       "[data-autofocus]")
   end
 
   def test_renders_submit_button
