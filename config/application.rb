@@ -100,18 +100,6 @@ module MushroomObserver
     # dartsass-sprockets - sssh! about the bootstrap deprectations
     config.sass.quiet_deps = true
     config.sass.silence_deprecations = ["import"]
-
-    # Register Phlex views directory with Zeitwerk before autoloader
-    # setup. push_dir with a namespace must run before setup (it's a
-    # no-op after). We hook into the :setup_main_autoloader initializer
-    # via before: to ensure correct timing.
-    initializer "phlex.views_autoloading",
-                before: :setup_main_autoloader do
-      ::Views = Module.new unless defined?(::Views)
-      Rails.autoloaders.main.push_dir(
-        root.join("app/views"), namespace: ::Views
-      )
-    end
   end
 end
 
