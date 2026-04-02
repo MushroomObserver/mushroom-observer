@@ -37,6 +37,21 @@ class OccurrenceTest < UnitTestCase
     assert_not(occ.has_specimen)
   end
 
+  def test_has_specimen_updated_on_observation_save
+    @obs1.update!(specimen: false)
+    @obs2.update!(specimen: false)
+    occ = create_occurrence(@obs1, @obs2)
+    assert_not(occ.reload.has_specimen)
+
+    # Toggling specimen on a member should update the cache
+    @obs2.update!(specimen: true)
+    assert(occ.reload.has_specimen)
+
+    # Toggling it back should clear the cache
+    @obs2.update!(specimen: false)
+    assert_not(occ.reload.has_specimen)
+  end
+
   def test_destroy_if_incomplete
     occ = create_occurrence(@obs1, @obs2)
     @obs2.update!(occurrence: nil)

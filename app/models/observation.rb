@@ -237,6 +237,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
+  after_update :update_occurrence_specimen_cache
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
@@ -997,6 +998,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # This must be sent immediately since the observation won't exist after.
   def notify_users_before_destroy
     send_observation_destroyed_emails
+  end
+
+  # Update occurrence's cached has_specimen when specimen changes.
+  def update_occurrence_specimen_cache
+    return unless saved_change_to_specimen? && occurrence
+
+    occurrence.recompute_has_specimen!
   end
 
   # Clean up occurrence after an observation is destroyed.
