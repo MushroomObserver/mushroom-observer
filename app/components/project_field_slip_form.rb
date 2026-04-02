@@ -13,7 +13,7 @@ class Components::ProjectFieldSlipForm < Components::ApplicationForm
   def view_template
     super do
       number_field(:field_slips, label: :field_slips.l,
-                                 inline: true, min: 1)
+                                 inline: true, min: 0)
       checkbox_field(:one_per_page,
                      label: :field_slips_one_per_page.t)
       submit(:CREATE.l, class: "ml-3")
