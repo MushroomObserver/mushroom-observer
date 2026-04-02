@@ -269,7 +269,7 @@ class Inat
     end
 
     def snapshot_raw_str
-      result = ""
+      result = "#{copyright}\n"
       {
         USER: self[:user][:login],
         OBSERVED: self.when,
@@ -286,6 +286,17 @@ class Inat
         chomp # prevent blank line between Snapshot and :Other Notes fields
     end
     private :snapshot_raw_str
+
+    def copyright
+      name = self[:user][:name].presence || self[:user][:login]
+      code = self[:license_code]
+      if code.blank?
+        return "#{OBS_COPYRIGHT_LABEL} #{name} - #{ALL_RIGHTS_RESERVED}"
+      end
+
+      "#{OBS_COPYRIGHT_LABEL} #{name} (\"#{code}\":#{license.url})"
+    end
+    private :copyright
 
     def suggested_id_names
       # Get unique suggested taxon ids

@@ -67,7 +67,12 @@ class InatImport < ApplicationRecord
   # that we don't import too many observations or, even worse,
   # all observations of all users.
   def adequate_constraints?
-    inat_username.present?
+    return inat_username.present? unless import_others
+
+    # Not-own superimporter: safe only if scoped to a username or a
+    # specific ID list. Without either, import_all would fetch all
+    # fungal/slime-mold observations across all iNat users.
+    inat_username.present? || inat_ids.present?
   end
 
   def job_pending?
@@ -75,10 +80,10 @@ class InatImport < ApplicationRecord
   end
 
   def add_response_error(error)
-    msg = if error.is_a?(String)
-            error
-          elsif error.is_a?(::RestClient::Response)
+    msg = if error.is_a?(::RestClient::Response)
             error.body
+          elsif error.is_a?(String)
+            error
           else
             error.message
           end
