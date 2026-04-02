@@ -189,16 +189,28 @@ class SearchControllerTest < FunctionalTestCase
     assert_flash_error("Unexpected term")
   end
 
-  def test_index_pattern_bad_pattern
-    pattern = { error: "" }
-
+  def test_index_pattern_blank_pattern
     login
-    get(:pattern, params: { pattern_search: { pattern:, type: :observations } })
+    get(:pattern,
+        params: { pattern_search: { pattern: "", type: :observations } })
+
+    assert_redirected_to(
+      observations_path,
+      "Blank pattern in obs search should render blank obs index"
+    )
+  end
+
+  def test_index_pattern_bad_pattern
+    login
+    get(:pattern,
+        params: { pattern_search: { pattern: "help:me",
+                                    type: :observations } })
 
     assert_redirected_to(
       observations_path(q: { model: :Observation }),
-      "Bad pattern in obs search should render blank obs index"
+      "Bad pattern in obs search should render obs index with query"
     )
+    assert_flash_error("Unexpected term")
   end
 
   def test_pattern_search_from_needs_naming
@@ -216,19 +228,31 @@ class SearchControllerTest < FunctionalTestCase
     )
   end
 
-  def test_pattern_search_from_needs_naming_bad_pattern
-    pattern = { error: "" }
-    params = { pattern_search: { pattern:, type: :observations },
-               needs_naming: rolf }
-
+  def test_pattern_search_from_needs_naming_blank_pattern
     login
-    get(:pattern, params:)
+    get(:pattern,
+        params: { pattern_search: { pattern: "", type: :observations },
+                  needs_naming: rolf })
+
+    assert_redirected_to(
+      observations_path,
+      "Blank pattern from obs_needing_ids should render blank obs index"
+    )
+  end
+
+  def test_pattern_search_from_needs_naming_bad_pattern
+    login
+    get(:pattern,
+        params: { pattern_search: { pattern: "help:me",
+                                    type: :observations },
+                  needs_naming: rolf })
 
     assert_redirected_to(
       identify_observations_path(q: { model: :Observation }),
-      "Bad pattern in search from obs_needing_ids should render " \
-      "obs_needing_ids"
+      "Bad pattern from obs_needing_ids should render " \
+      "obs_needing_ids with query"
     )
+    assert_flash_error("Unexpected term")
   end
 
   def test_pattern_search_redirects_to_google

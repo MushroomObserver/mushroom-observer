@@ -12,7 +12,7 @@ team and the PR is merged:
 
   sudo su mo
   cd /var/web/mo
-  chruby ruby-3.3.6
+  chruby ruby-3.4.9
   git stash
   git pull
   git stash pop

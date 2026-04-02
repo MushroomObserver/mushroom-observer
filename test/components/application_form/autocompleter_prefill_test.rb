@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "ostruct"
 
 class ApplicationFormAutocompleterPrefillTest < ComponentTestCase
   # Test form that includes the AutocompleterPrefill module
