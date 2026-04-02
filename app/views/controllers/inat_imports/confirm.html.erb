@@ -5,5 +5,6 @@
 
 <%= render(Components::InatImportConfirmForm.new(
       @confirm_form, estimate: @estimate,
+      unlicensed_obs: @unlicensed_obs,
       inat_import: @inat_import
     )) %>
