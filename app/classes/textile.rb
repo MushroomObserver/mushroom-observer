@@ -132,6 +132,7 @@ class Textile < String
     convert_tagged_objects_to_proper_links!
     fully_qualify_links!
     restore_pre_existing_links!(saved_links)
+    disable_turbo_for_anchor_links!
 
     self
   end
@@ -510,5 +511,12 @@ class Textile < String
 
   def fully_qualify_links!
     gsub!(%r{href="/}, "href=\"#{MO.http_domain}/")
+  end
+
+  # Prevent Turbo Drive from intercepting anchor-only links.
+  # Without this, clicking "#section" triggers a Turbo visit instead
+  # of a native in-page scroll.
+  def disable_turbo_for_anchor_links!
+    gsub!(/(<a\s)([^>]*href="#)/, '\1data-turbo="false" \2')
   end
 end
