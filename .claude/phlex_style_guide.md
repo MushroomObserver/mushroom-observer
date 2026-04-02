@@ -901,12 +901,10 @@ The `layout: true` is required so Rails wraps the output in the
 application layout. Phlex components rendered as fragments (e.g.,
 `ModalForm` in turbo_stream responses) do not use `layout: true`.
 
-### Server Restart Required for Changes
+### Hot-Reloading
 
-Phlex view files are eagerly loaded via `require` in
-`config/initializers/phlex.rb`, bypassing Zeitwerk's reload mechanism.
-Unlike ERB templates, changes to these files are **not hot-reloaded** —
-**restart the Rails server** before further debugging.
+Phlex view files are autoloaded by Zeitwerk like any other Ruby file.
+Changes are hot-reloaded in development — no server restart needed.
 
 ### Using `content_for` from Phlex Views
 
