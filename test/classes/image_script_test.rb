@@ -151,7 +151,9 @@ class ImageScriptTest < UnitTestCase
     FileUtils.cp(original_image, "#{local_root}/orig/#{in_situ_id}.tiff")
     errors, status = Open3.capture2e(script_env, script, in_situ_id.to_s,
                                      "tiff", "1", "2")
-    # Filter out ImageMagick 7 deprecation warnings for `convert`
+    # ImageMagick 7 deprecated the `convert` command in favor of `magick`.
+    # Our image scripts still use `convert`, which works but emits a
+    # deprecation warning. Filter it so the test only fails on real errors.
     errors = errors.each_line.reject do |line|
       line.include?("convert command is deprecated")
     end.join

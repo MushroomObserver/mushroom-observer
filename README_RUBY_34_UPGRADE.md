@@ -83,7 +83,13 @@ that shipped with Ruby 3.3 having extensions compiled for that version.
 bundle install
 ```
 
-7. Open a **new shell**, `cd` to the project directory, and verify
+7. Regenerate locale files:
+
+```sh
+bin/rails lang:update
+```
+
+8. Open a **new shell**, `cd` to the project directory, and verify
    the test suite passes:
 
 ```sh
@@ -129,7 +135,13 @@ gem pristine --all
 bundle install
 ```
 
-6. Open a **new shell** and verify the test suite passes:
+6. Regenerate locale files:
+
+```sh
+bin/rails lang:update
+```
+
+7. Open a **new shell** and verify the test suite passes:
 
 ```sh
 cd ~/src/mushroom-observer
