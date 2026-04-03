@@ -11,6 +11,10 @@ module Projects
     def new
       flash_error(:field_slip_no_project.t) unless find_project!
       @field_slip_max = field_slip_max
+      render(Views::Controllers::Projects::FieldSlips::New.new(
+               project: @project, user: @user,
+               field_slip_max: @field_slip_max
+             ), layout: true)
     end
 
     def create
@@ -48,10 +52,12 @@ module Projects
         # Append a new row to the table of field slip jobs
         format.turbo_stream do
           render(turbo_stream: turbo_stream.prepend(
-            :field_slip_job_trackers, # the id of the div to append to
-            partial: "projects/field_slips/tracker_row",
-            locals: { tracker: tracker }
-          ))
+            :field_slip_job_trackers # the id of the div to append to
+          ) do
+            helpers.render(Components::ProjectFieldSlipTrackerRow.new(
+                             tracker: tracker, user: @user
+                           ))
+          end)
         end
         format.html
       end

@@ -350,7 +350,7 @@ module Projects
 
       member = eol_project.project_members.first
       assert_match(member.user.name, @response.body)
-      assert_template("index")
+      assert_response(:success)
     end
   end
 end

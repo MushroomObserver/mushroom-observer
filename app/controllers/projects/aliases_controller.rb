@@ -9,14 +9,24 @@ module Projects
       @project = Project.find(params[:project_id])
       @project_aliases = ProjectAlias.where(project: @project).order(name: :asc)
       respond_to do |format|
-        format.html
+        format.html do
+          render(Views::Controllers::Projects::Aliases::Index.new(
+                   project: @project,
+                   project_aliases: @project_aliases
+                 ), layout: true)
+        end
       end
     end
 
     def show
       @project = @project_alias.project
       respond_to do |format|
-        format.html
+        format.html do
+          render(Views::Controllers::Projects::Aliases::Show.new(
+                   project: @project,
+                   project_alias: @project_alias
+                 ), layout: true)
+        end
       end
     end
 
@@ -28,7 +38,7 @@ module Projects
 
       respond_to do |format|
         format.turbo_stream { render_modal_project_alias_form }
-        format.html
+        format.html { render_alias_new }
       end
     end
 
@@ -36,7 +46,7 @@ module Projects
       @project = @project_alias.project
       respond_to do |format|
         format.turbo_stream { render_modal_project_alias_form }
-        format.html
+        format.html { render_alias_edit }
       end
     end
 
@@ -61,7 +71,7 @@ module Projects
       flash_error(error) if error
       @project_alias.errors.each { |err| flash_error(err.full_message) }
       format.turbo_stream { reload_modal_project_alias_form }
-      format.html { render(action) }
+      format.html { send(:"render_alias_#{action}") }
     end
 
     def update
@@ -94,6 +104,20 @@ module Projects
     end
 
     private
+
+    def render_alias_new
+      render(Views::Controllers::Projects::Aliases::New.new(
+               project_alias: @project_alias,
+               project: @project, user: @user
+             ), layout: true)
+    end
+
+    def render_alias_edit
+      render(Views::Controllers::Projects::Aliases::Edit.new(
+               project_alias: @project_alias,
+               project: @project, user: @user
+             ), layout: true)
+    end
 
     def redirect_to_project_aliases
       redirect_to(project_aliases_path(

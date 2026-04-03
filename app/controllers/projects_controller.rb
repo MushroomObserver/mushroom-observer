@@ -49,9 +49,14 @@ class ProjectsController < ApplicationController
   # Inputs: params[:id] (project)
   # Outputs: @project
   def show
-    return if find_project_and_where!.blank?
+    return unless find_project!
 
     set_ivars_for_show
+    render(Views::Controllers::Projects::Show.new(
+             project: @project, user: @user,
+             drafts: @drafts, comments: @comments,
+             object_names: @object_names
+           ), layout: true)
   end
 
   ##############################################################################
@@ -72,6 +77,7 @@ class ProjectsController < ApplicationController
     image_ivars
     @project = Project.new
     @project_dates_any = true
+    render_new_form
   end
 
   # Form to edit a project
@@ -93,7 +99,7 @@ class ProjectsController < ApplicationController
     @start_date_fixed = @project.start_date.present?
     @end_date_fixed = @project.end_date.present?
     @project_dates_any = !@start_date_fixed && !@end_date_fixed
-    return if permission!(@project)
+    return render_edit_form if permission!(@project)
 
     redirect_to(project_path(@project.id))
   end
@@ -120,7 +126,7 @@ class ProjectsController < ApplicationController
     @project = Project.new(project_params)
     @project_dates_any = params[:project][:dates_any].downcase == "true"
     image_ivars
-    render(:new, location: new_project_path)
+    render_new_form
   end
 
   def update
@@ -143,7 +149,7 @@ class ProjectsController < ApplicationController
       end
     end
     image_ivars
-    render(:edit, location: edit_project_path(@project.id))
+    render_edit_form
   end
 
   # Callback to destroy a project.
@@ -176,6 +182,29 @@ class ProjectsController < ApplicationController
       :"start_date(1i)", :"start_date(2i)", :"start_date(3i)",
       :"end_date(1i)", :"end_date(2i)", :"end_date(3i)"
     )
+  end
+
+  def render_new_form
+    render(Views::Controllers::Projects::New.new(
+             project: @project, dates_any: @project_dates_any,
+             upload_params: upload_params_hash
+           ), layout: true)
+  end
+
+  def render_edit_form
+    render(Views::Controllers::Projects::Edit.new(
+             project: @project, dates_any: @project_dates_any,
+             upload_params: upload_params_hash
+           ), layout: true)
+  end
+
+  def upload_params_hash
+    {
+      copyright_holder: @copyright_holder,
+      copyright_year: @copyright_year,
+      licenses: @licenses,
+      upload_license_id: @upload_license_id
+    }
   end
 
   def image_ivars
@@ -233,10 +262,13 @@ class ProjectsController < ApplicationController
              "end_date(1i)", "end_date(2i)", "end_date(3i)")
   end
 
-  def find_project_and_where!
+  def find_project!
     @project = Project.show_includes.safe_find(params[:id].to_s) ||
                flash_error_and_goto_index(Project, params[:id].to_s)
+  end
 
+  def find_project_and_where!
+    find_project!
     @where = @project&.location&.display_name || ""
   end
 
@@ -297,7 +329,7 @@ class ProjectsController < ApplicationController
     user_group&.destroy
     @project = Project.new
     image_ivars
-    render(:new, location: new_project_path)
+    render_new_form
   end
 
   def override_fixed_dates
