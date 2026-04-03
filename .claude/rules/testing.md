@@ -106,7 +106,7 @@ def test_new_form
   assert_html(html, "form[action='/path']")
   assert_html(html, "input[type='submit']")
 
-  # Fields
+  # Fields — ALWAYS include [name='...'] to verify param structure
   assert_html(html, "input[name='model[field1]']")
   assert_html(html, "textarea[name='model[field2]']")
 
@@ -170,6 +170,24 @@ class MyFormTest < ComponentTestCase
            ))
   end
 end
+```
+
+### Always Assert Field `name` Attributes
+
+**REQUIRED**: Every form field assertion must include the `name` attribute.
+The `name` is the contract between the form and the controller's `params`
+parsing. Asserting only element existence (e.g., `input[type='file']`)
+will not catch param namespace mismatches that silently break form
+submission.
+
+```ruby
+# ❌ Bad - won't catch param structure bugs
+assert_html(html, "input[type='file']")
+assert_html(html, "textarea[rows='10']")
+
+# ✅ Good - verifies the form-to-controller contract
+assert_html(html, "input[type='file'][name='project[upload][image]']")
+assert_html(html, "textarea[name='email[message]'][rows='10']")
 ```
 
 ### When to Create Separate Tests

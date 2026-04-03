@@ -29,6 +29,7 @@ class IdentifyFilterFormTest < ComponentTestCase
 
     # Hidden field for term_id with dual targets
     assert_html(html, "input[type='hidden']" \
+                       "[name='filter[term_id]']" \
                        "[data-autocompleter--clade-target='hidden']" \
                        "[data-autocompleter--region-target='hidden']")
 

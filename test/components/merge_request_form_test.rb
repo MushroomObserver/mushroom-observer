@@ -36,9 +36,9 @@ class MergeRequestFormTest < ComponentTestCase
     html = render_form
 
     assert_html(html, "body", text: :Notes.l)
-    assert_html(html, "textarea[name='email[message]']")
-    assert_html(html, "textarea[rows='10']")
-    assert_html(html, "textarea[data-autofocus]")
+    assert_html(html, "textarea[name='email[message]'][rows='10']")
+    assert_html(html, "textarea[name='email[message]']" \
+                      "[data-autofocus]")
   end
 
   def test_renders_submit_button

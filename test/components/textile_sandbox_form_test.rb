@@ -11,9 +11,9 @@ class TextileSandboxFormTest < ComponentTestCase
     html = render_form(code: nil, show_result: false)
 
     # Textarea field
-    assert_html(html, "textarea[name='textile_sandbox[code]']")
+    assert_html(html,
+                "textarea[name='textile_sandbox[code]'][rows='8']")
     assert_html(html, "textarea[id='textile_sandbox_code']")
-    assert_html(html, "textarea[rows='8']")
     assert_html(html, "body", text: "#{:sandbox_enter.t}:")
 
     # Submit button (only Test button when no result)

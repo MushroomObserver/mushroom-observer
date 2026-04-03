@@ -208,12 +208,13 @@ class ProjectsController < ApplicationController
 
   def upload_image_if_present
     # Check if we need to upload an image.
-    upload = params.dig(:upload, :image)
+    upload = params.dig(:project, :upload, :image)
     return if upload.blank?
 
-    image = upload_image(upload, params[:upload][:copyright_holder],
-                         params[:upload][:license_id],
-                         params[:upload][:copyright_year])
+    image = upload_image(upload,
+                         params[:project][:upload][:copyright_holder],
+                         params[:project][:upload][:license_id],
+                         params[:project][:upload][:copyright_year])
     return unless image
 
     @project.image = image

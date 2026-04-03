@@ -32,7 +32,7 @@ module AbstractModel::OrderingScopes
       return all if method.to_sym == :none
 
       method ||= :default # :order_by_default must be defined for each model
-      method = method.dup.to_s
+      method = method.to_s.dup
       reverse = method.sub!(/^reverse_/, "") # sub! returns boolean
       scope = :"order_by_#{method}"
       return all unless model.private_methods(false).include?(scope)
