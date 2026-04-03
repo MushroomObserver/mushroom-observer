@@ -8,9 +8,10 @@ container_class(:text_image)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<!-- list the projects -->
 <%= paginated_results do %>
   <%= tag.div(class: "list-group") do %>
-    <%= render(partial: "project", collection: @objects, as: :project) %>
+    <% @objects.each do |project| %>
+      <%= render(Components::ProjectListItem.new(project: project)) %>
+    <% end %>
   <% end %>
 <% end %>

@@ -11,7 +11,7 @@ module Projects
 
       loc = eol_project.locations.first
       assert_match(loc.display_name, @response.body)
-      assert_template("index")
+      assert_response(:success)
     end
 
     def test_index_scientific
@@ -21,7 +21,7 @@ module Projects
 
       loc = eol_project.locations.first
       assert_match(loc.display_name, @response.body)
-      assert_template("index")
+      assert_response(:success)
     end
   end
 end

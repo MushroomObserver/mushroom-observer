@@ -13,7 +13,7 @@ module Projects
         project_id: project.id
       }
       requires_login(:new, params)
-      assert_template("new")
+      assert_response(:success)
     end
 
     def test_create

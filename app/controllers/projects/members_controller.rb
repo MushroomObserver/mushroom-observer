@@ -14,8 +14,12 @@ module Projects
     def index
       return unless find_project!
 
-      @users = @project.user_group.users.includes(:image)
-      @project_member = ProjectMember.new(project: @project)
+      users = @project.user_group.users.includes(:image)
+      project_member = ProjectMember.new(project: @project)
+      render(Views::Controllers::Projects::Members::Index.new(
+               project: @project, users: users,
+               project_member: project_member, user: @user
+             ), layout: true)
     end
 
     # View that lists all verified users with links to add each as a member.
@@ -32,9 +36,13 @@ module Projects
         return must_be_project_admin!(@project.id)
       end
 
-      @users =
+      users =
         User.where.not(verified: nil).order(last_login: :desc).limit(100).to_a
-      @project_member = ProjectMember.new(project: @project)
+      project_member = ProjectMember.new(project: @project)
+      render(Views::Controllers::Projects::Members::New.new(
+               project: @project, users: users,
+               project_member: project_member, user: @user
+             ), layout: true)
     end
 
     def create
@@ -63,7 +71,9 @@ module Projects
     def edit
       return unless find_project!
       return unless find_project_member!
-      return if @project.is_admin?(@user) || @user == @project_member.user
+      if @project.is_admin?(@user) || @user == @project_member.user
+        return render_member_edit_form
+      end
 
       must_be_project_admin!(@project.id)
     end
@@ -79,6 +89,14 @@ module Projects
     end
 
     private
+
+    def render_member_edit_form
+      render(Views::Controllers::Projects::Members::Edit.new(
+               project: @project,
+               project_member: @project_member,
+               user: @user
+             ), layout: true)
+    end
 
     def find_project!
       @project = find_or_goto_index(Project, params[:project_id].to_s)
