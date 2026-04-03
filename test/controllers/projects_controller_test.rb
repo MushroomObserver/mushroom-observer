@@ -81,6 +81,20 @@ class ProjectsControllerTest < FunctionalTestCase
                   "Project banner div should be present")
   end
 
+  def test_show_project_with_join_button
+    project = projects(:open_membership_project)
+    login("rolf") # not a member of open_membership_project
+    assert(project.open_membership)
+    assert_not(project.member?(rolf))
+
+    get(:show, params: { id: project.id })
+
+    assert_response(:success)
+    assert_match(:show_project_join.t, @response.body,
+                 "Join button should be present for non-member " \
+                 "on open project")
+  end
+
   def test_show_project_without_banner
     login("zero") # Not the owner of eol_project
     p_id = projects(:empty_project).id
