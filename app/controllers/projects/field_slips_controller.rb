@@ -9,7 +9,8 @@ module Projects
     before_action :login_required
 
     def new
-      flash_error(:field_slip_no_project.t) unless find_project!
+      return unless find_project!
+
       @field_slip_max = field_slip_max
       render(Views::Controllers::Projects::FieldSlips::New.new(
                project: @project, user: @user,

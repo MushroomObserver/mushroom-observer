@@ -14,14 +14,12 @@ module Views
         register_value_helper :permission!
         register_value_helper :container_class
 
-        def initialize(project:, user:, drafts:, comments:,
-                       object_names:)
+        def initialize(project:, user:, drafts:, comments:)
           super()
           @project = project
           @user = user
           @drafts = drafts
           @comments = comments
-          @object_names = object_names
         end
 
         def view_template
