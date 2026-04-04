@@ -700,7 +700,7 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_create_new_source_has_field_slip_occurrence
-    slip = field_slips(:field_slip_one)
+    slip = field_slips(:field_slip_no_obs)
     fs_occ = Occurrence.create!(
       user: rolf, primary_observation: @obs1, field_slip: slip
     )
@@ -806,7 +806,7 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_log_field_slip_added
-    fs = field_slips(:field_slip_one)
+    fs = field_slips(:field_slip_no_obs)
     occ = create_occurrence(@obs1, @obs2)
     occ.update!(field_slip: fs)
     clear_logs(@obs1, @obs2)
@@ -817,7 +817,7 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_log_field_slip_added_touches_primary
-    fs = field_slips(:field_slip_one)
+    fs = field_slips(:field_slip_no_obs)
     occ = create_occurrence(@obs1, @obs2)
     occ.update!(field_slip: fs)
     clear_logs(@obs1, @obs2)
@@ -828,7 +828,7 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_log_field_slip_removed
-    fs = field_slips(:field_slip_one)
+    fs = field_slips(:field_slip_no_obs)
     occ = create_occurrence(@obs1, @obs2, @obs3)
     occ.update!(field_slip: fs)
     clear_logs(@obs1, @obs2, @obs3)
@@ -840,7 +840,7 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_log_field_slip_removed_touches_primary
-    fs = field_slips(:field_slip_one)
+    fs = field_slips(:field_slip_no_obs)
     occ = create_occurrence(@obs1, @obs2, @obs3)
     occ.update!(field_slip: fs)
     clear_logs(@obs1, @obs2, @obs3)
@@ -876,7 +876,7 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_field_slip_removed_without_occ_arg
-    fs = field_slips(:field_slip_one)
+    fs = field_slips(:field_slip_no_obs)
     occ = create_occurrence(@obs1, @obs2)
     occ.update!(field_slip: fs)
     clear_logs(@obs1, @obs2)

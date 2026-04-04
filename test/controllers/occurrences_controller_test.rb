@@ -573,8 +573,8 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_update_add_field_slip_conflict
     login("rolf")
     obs3 = observations(:detailed_unknown_obs)
-    fs1 = field_slips(:field_slip_one)
-    fs2 = field_slips(:field_slip_two)
+    fs1 = field_slips(:field_slip_no_obs)
+    fs2 = field_slips(:field_slip_nowhere_one)
     occ = create_occurrence(@obs1, @obs2)
     occ.update!(field_slip: fs1)
     obs3_occ = Occurrence.create!(user: rolf,

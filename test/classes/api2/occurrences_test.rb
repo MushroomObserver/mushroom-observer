@@ -324,8 +324,8 @@ class API2::OccurrencesTest < UnitTestCase
   # == Coverage: PATCH field_slip conflict ==
 
   def test_patch_add_field_slip_conflict
-    fs1 = field_slips(:field_slip_one)
-    fs2 = field_slips(:field_slip_two)
+    fs1 = field_slips(:field_slip_no_obs)
+    fs2 = field_slips(:field_slip_nowhere_one)
     @occ.update!(field_slip: fs1)
 
     obs_other = observations(:peltigera_obs)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_04_172939) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -570,7 +570,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "field_slip_id"
-    t.index ["field_slip_id"], name: "index_occurrences_on_field_slip_id"
+    t.index ["field_slip_id"], name: "index_occurrences_on_field_slip_id", unique: true
     t.index ["primary_observation_id"], name: "index_occurrences_on_primary_observation_id"
     t.index ["user_id"], name: "index_occurrences_on_user_id"
   end

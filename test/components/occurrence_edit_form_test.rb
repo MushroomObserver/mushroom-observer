@@ -151,11 +151,7 @@ class OccurrenceEditFormTest < ComponentTestCase
   def test_field_slip_link_on_observation
     obs = observations(:minimal_unknown_obs)
     field_slip = field_slips(:field_slip_one)
-    occ = Occurrence.create!(
-      user: @user, primary_observation: obs,
-      field_slip: field_slip
-    )
-    obs.update!(occurrence: occ)
+    occ = occurrences(:occ_field_slip_one)
     html = render_edit_form(
       occurrence: occ, observations: [obs], candidates: []
     )

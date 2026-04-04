@@ -27,6 +27,8 @@ class Occurrence < AbstractModel
   belongs_to :field_slip, optional: true
   has_many :observations, dependent: :nullify
 
+  validates :field_slip_id, uniqueness: true, allow_nil: true
+
   scope :observations, lambda { |obs|
     obs_ids = obs.is_a?(Array) ? obs.map(&:to_i) : [obs.to_i]
     joins(:observations).where(observations: { id: obs_ids }).distinct
