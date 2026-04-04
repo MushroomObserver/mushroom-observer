@@ -25,21 +25,6 @@ module Occurrence::ProjectGaps
       has_non_primary_gaps: non_primary_gaps }
   end
 
-  # Add primary to the given projects and species lists.
-  def add_primary_to_collections(projects: [], species_lists: [])
-    primary = primary_observation
-    projects.each do |project|
-      ProjectObservation.find_or_create_by!(
-        project: project, observation: primary
-      )
-    end
-    species_lists.each do |list|
-      SpeciesListObservation.find_or_create_by!(
-        species_list: list, observation: primary
-      )
-    end
-  end
-
   # Add all occurrence observations to the given projects/lists.
   def add_all_to_collections(projects: [], species_lists: [])
     observations.each do |obs|

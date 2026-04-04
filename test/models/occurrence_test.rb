@@ -932,13 +932,6 @@ class OccurrenceTest < UnitTestCase
     assert_equal({}, occ.project_membership_gaps)
   end
 
-  def test_add_primary_to_collections
-    project = projects(:bolete_project)
-    occ = create_occurrence(@obs1, @obs3)
-    occ.add_primary_to_collections(projects: [project])
-    assert_includes(@obs1.reload.projects, project)
-  end
-
   def test_add_all_to_collections
     project = projects(:bolete_project)
     occ = create_occurrence(@obs1, @obs2, @obs3)
@@ -946,39 +939,6 @@ class OccurrenceTest < UnitTestCase
     assert_includes(@obs1.reload.projects, project)
     assert_includes(@obs2.reload.projects, project)
     assert_includes(@obs3.reload.projects, project)
-  end
-
-  def test_add_primary_to_species_list
-    spl = species_lists(:first_species_list)
-    occ = create_occurrence(@obs1, @obs2)
-    occ.add_primary_to_collections(species_lists: [spl])
-    assert_includes(@obs1.reload.species_lists, spl)
-  end
-
-  def test_add_primary_to_projects_and_species_lists
-    project = projects(:bolete_project)
-    spl = species_lists(:first_species_list)
-    occ = create_occurrence(@obs1, @obs2)
-    occ.add_primary_to_collections(
-      projects: [project], species_lists: [spl]
-    )
-    assert_includes(@obs1.reload.projects, project)
-    assert_includes(@obs1.reload.species_lists, spl)
-  end
-
-  def test_add_primary_idempotent
-    project = projects(:bolete_project)
-    occ = create_occurrence(@obs1, @obs2)
-    ProjectObservation.find_or_create_by!(
-      project: project, observation: @obs1
-    )
-    occ.add_primary_to_collections(projects: [project])
-    assert_equal(
-      1,
-      ProjectObservation.where(
-        project: project, observation: @obs1
-      ).count
-    )
   end
 
   def test_add_all_to_species_list

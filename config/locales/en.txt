@@ -2982,7 +2982,6 @@
   occurrence_resolve_projects_projects: "Projects:"
   occurrence_resolve_projects_species_lists: "Species Lists:"
   occurrence_resolve_projects_cancel: Cancel
-  occurrence_resolve_projects_add_primary: Add Primary
   occurrence_resolve_projects_add_all: Add All
   occurrence_resolve_projects_done: "Primary observation added to [count] projects/lists."
   occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
