@@ -52,16 +52,83 @@ class ObservationFormTest < ComponentTestCase
     assert_html(html, "input[type='file'][accept='image/*']")
   end
 
+  # --- Field Slip Code ---
+
+  def test_new_form_shows_editable_field_slip_code
+    user = users(:rolf)
+    obs = Observation.new(when: Time.zone.today)
+
+    html = render_form(observation: obs, user: user, mode: :create)
+
+    assert_html(html, "input[name='field_code'][type='text']")
+    assert_no_html(html, "input[name='field_code'][type='hidden']")
+  end
+
+  def test_new_form_locked_field_code_shows_static_display
+    user = users(:rolf)
+    obs = Observation.new(when: Time.zone.today)
+
+    html = render_form(observation: obs, user: user, mode: :create,
+                       field_code: "NEMF-1234",
+                       field_code_locked: true)
+
+    # Static display + hidden inputs
+    assert_includes(html, "NEMF-1234")
+    assert_html(html, "input[name='field_code'][type='hidden']" \
+                      "[value='NEMF-1234']")
+    assert_html(html, "input[name='field_code_locked']" \
+                      "[value='1']")
+    # No editable text input for field_code
+    assert_no_html(html, "input[name='field_code'][type='text']")
+  end
+
+  def test_new_form_preserves_user_entered_field_code
+    user = users(:rolf)
+    obs = Observation.new(when: Time.zone.today)
+
+    html = render_form(observation: obs, user: user, mode: :create,
+                       field_code: "NEMF-5678",
+                       field_code_locked: false)
+
+    # Editable input pre-populated
+    assert_html(html, "input[name='field_code'][type='text']" \
+                      "[value='NEMF-5678']")
+    # No locked display
+    assert_no_html(html, "input[name='field_code_locked']")
+  end
+
+  def test_edit_form_shows_field_slip_code_from_model
+    user = users(:rolf)
+    obs = observations(:minimal_unknown_obs)
+    fs = field_slips(:field_slip_no_obs)
+    obs.update!(occurrence: nil)
+    obs.field_slip = fs
+    obs.save!
+
+    html = render_form(observation: obs, user: user, mode: :update)
+
+    assert_html(html, "input[name='field_code'][type='text']" \
+                      "[value='#{fs.code}']")
+  end
+
+  def test_edit_form_shows_empty_field_code_without_slip
+    user = users(:rolf)
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(occurrence: nil)
+
+    html = render_form(observation: obs, user: user, mode: :update)
+
+    assert_html(html, "input[name='field_code'][type='text']")
+  end
+
   private
 
-  def render_form(observation:, user:, mode: :create, given_name: nil,
-                  place_name: nil)
+  def render_form(observation:, user:, mode: :create, **extras)
+    User.current = user
     render(Components::ObservationForm.new(
              observation,
              mode: mode,
              user: user,
-             given_name: given_name,
-             place_name: place_name,
              good_images: [],
              exif_data: {},
              projects: [],
@@ -69,7 +136,8 @@ class ObservationFormTest < ComponentTestCase
              lists: [],
              list_checks: {},
              error_checked_projects: [],
-             suspect_checked_projects: []
+             suspect_checked_projects: [],
+             **extras
            ))
   end
 end

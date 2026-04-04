@@ -31,6 +31,7 @@ module Header
     def show_title_id_badge(object, classes = "mr-4")
       tag.button(
         object.id || "?",
+        type: "button",
         class: class_names("badge badge-id", classes), role: "button",
         data: {
           toggle: "tooltip", placement: "bottom", title: :COPY_THIS_ID.l,

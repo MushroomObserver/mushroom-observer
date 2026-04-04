@@ -1,0 +1,38 @@
+# Occurrences linking field slips to observations.
+# Each observation that had a field_slip now gets an occurrence.
+
+occ_field_slip_one:
+  user: rolf
+  primary_observation: minimal_unknown_obs
+  field_slip: field_slip_one
+  has_specimen: false
+
+occ_field_slip_no_trust:
+  user: rolf
+  primary_observation: observation_with_no_naming
+  field_slip: field_slip_no_trust
+  has_specimen: false
+
+occ_field_slip_two:
+  user: roy
+  primary_observation: roys_obs
+  field_slip: field_slip_two
+  has_specimen: false
+
+occ_field_slip_falmouth_one:
+  user: rolf
+  primary_observation: falmouth_obs_one
+  field_slip: field_slip_falmouth_one
+  has_specimen: false
+
+occ_field_slip_previous:
+  user: rolf
+  primary_observation: owner_accepts_general_questions
+  field_slip: field_slip_previous
+  has_specimen: false
+
+occ_field_slip_by_recorder:
+  user: rolf
+  primary_observation: recorder_obs
+  field_slip: field_slip_by_recorder
+  has_specimen: false

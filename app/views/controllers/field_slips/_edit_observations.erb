@@ -1,0 +1,87 @@
+<%# locals: (field_slip: nil, recent: [], form: nil) %>
+
+<%
+current_obs = field_slip.observations.
+              includes(:name, :user, :location, :thumb_image).
+              order(:created_at).to_a
+
+# Determine which observation is primary
+occ = field_slip.occurrence
+primary_id = if occ
+               occ.primary_observation_id
+             elsif current_obs.one?
+               current_obs.first&.id
+             end
+%>
+
+<div class="mt-5"
+     data-controller="field-slip-form">
+  <% if current_obs.any? %>
+    <strong><%= :OBSERVATIONS.t %>:</strong>
+    <ul class="row list-unstyled mt-3"
+        data-controller="matrix-table"
+        data-action="resize@window->matrix-table#rearrange">
+      <% current_obs.each do |obs| %>
+        <%= render(Components::MatrixBox.new(
+                     user: @user, object: obs, votes: false)) do %>
+          <label>
+            <%= check_box_tag("observation_ids[]", obs.id,
+                              true,
+                              id: "obs_include_#{obs.id}",
+                              data: { action:
+                                "field-slip-form#includeToggled" }) %>
+            Include
+          </label>
+          <br>
+          <label>
+            <%= radio_button_tag(
+                  "field_slip[primary_observation_id]",
+                  obs.id, obs.id == primary_id,
+                  id: "obs_primary_#{obs.id}",
+                  data: { action:
+                    "field-slip-form#primarySelected" }) %>
+            <%= :create_occurrence_primary.t %>
+          </label>
+        <% end %>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% if recent.any? %>
+    <strong><%= :field_slip_select_observations.t %>:</strong>
+    <ul class="row list-unstyled mt-3"
+        data-controller="matrix-table"
+        data-action="resize@window->matrix-table#rearrange">
+      <% recent.each do |obs| %>
+        <%= render(Components::MatrixBox.new(
+                     user: @user, object: obs, votes: false)) do %>
+          <label>
+            <%= check_box_tag("observation_ids[]", obs.id,
+                              false,
+                              id: "obs_include_#{obs.id}",
+                              data: { action:
+                                "field-slip-form#includeToggled" }) %>
+            Include
+          </label>
+          <br>
+          <label>
+            <%= radio_button_tag(
+                  "field_slip[primary_observation_id]",
+                  obs.id, false,
+                  id: "obs_primary_#{obs.id}",
+                  data: { action:
+                    "field-slip-form#primarySelected" }) %>
+            <%= :create_occurrence_primary.t %>
+          </label>
+          <% if obs.field_slip %>
+            <br>
+            <small>
+              <%= link_to("Field Slip: #{obs.field_slip.code}",
+                          field_slip_path(obs.field_slip)) %>
+            </small>
+          <% end %>
+        <% end %>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

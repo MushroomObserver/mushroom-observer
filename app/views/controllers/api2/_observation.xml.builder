@@ -11,7 +11,10 @@ xml.tag!(
   xml_longitude(xml, :longitude, object.public_lng)
   xml_altitude(xml, :altitude, object.alt)
   xml_boolean(xml, :gps_hidden, object.gps_hidden)
-  xml_boolean(xml, :specimen_available, object.specimen)
+  xml_boolean(xml, :specimen_available,
+              object.occurrence&.has_specimen || object.specimen)
+  xml_integer(xml, :occurrence_id, object.occurrence_id) \
+    if object.occurrence_id
   xml_boolean(xml, :is_collection_location, object.is_collection_location)
   xml_confidence_level(xml, :confidence, object.vote_cache)
   xml_datetime(xml, :created_at, object.created_at)
@@ -101,6 +104,8 @@ xml.tag!(
     end
     xml_detailed_object(xml, :field_slip, object.field_slip) \
       if object.field_slip
+    xml_detailed_object(xml, :occurrence, object.occurrence) \
+      if object.occurrence
   else
     xml_minimal_object(xml, :owner, :user, object.user_id)
     xml_minimal_object(xml, :consensus_id, :name, object.name_id)

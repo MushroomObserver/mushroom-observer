@@ -33,11 +33,12 @@ class Components::MatrixBox < Components::Base
   prop :columns, String, default: "col-xs-12 col-sm-6 col-md-4 col-lg-3"
   prop :extra_class, String, default: ""
   prop :identify, _Boolean, default: false
+  prop :votes, _Boolean, default: true
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
 
   def view_template(&block)
     if @object
-      render_object_layout
+      render_object_layout(&block)
     elsif block
       render_custom_layout(&block)
     end
@@ -45,7 +46,7 @@ class Components::MatrixBox < Components::Base
 
   private
 
-  def render_object_layout
+  def render_object_layout(&custom_footer)
     # Build render data from object
     @data = build_render_data
     # Get observation_view from eager-loaded association (nil if not loaded)
@@ -60,6 +61,7 @@ class Components::MatrixBox < Components::Base
         render_details_section(panel)
         render_log_footer(panel)
         render_identify_footer(panel)
+        render_custom_footer(panel, &custom_footer) if custom_footer
       end
     end
   end
@@ -95,7 +97,7 @@ class Components::MatrixBox < Components::Base
         image: @data[:image],
         image_link: @data[:image_link],
         obs: @data[:obs] || {},
-        votes: @data.fetch(:votes, true),
+        votes: @votes && @data.fetch(:votes, true),
         full_width: @data.fetch(:full_width, true),
         identify: @identify,
         observation_view: @observation_view
@@ -110,6 +112,7 @@ class Components::MatrixBox < Components::Base
       render_where_section
       render_when_who_section
       render_source_credit
+      render_occurrence_link
     end
   end
 
@@ -139,6 +142,25 @@ class Components::MatrixBox < Components::Base
   def render_id_badge(obj)
     whitespace
     show_title_id_badge(obj, "rss-id")
+  end
+
+  def render_occurrence_link
+    return unless (occ = @data[:occurrence])
+
+    obs_count = if occ.observations.loaded?
+                  occ.observations.size
+                else
+                  occ.observations.count
+                end
+    return unless obs_count > 1
+
+    div(class: "small mt-3") do
+      a(href: occurrence_path(occ), class: "occurrence-link") do
+        span(class: "glyphicon glyphicon-th-large")
+        plain(" ")
+        plain(:matrix_box_occurrence.l)
+      end
+    end
   end
 
   def render_identify_ui
@@ -249,5 +271,9 @@ class Components::MatrixBox < Components::Base
         label_class: "stretched-link"
       )
     end
+  end
+
+  def render_custom_footer(panel, &block)
+    panel.with_footer(classes: "text-center", &block)
   end
 end

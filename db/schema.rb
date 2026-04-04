@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_04_172939) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -556,11 +556,23 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.integer "inat_id"
     t.decimal "location_lat", precision: 15, scale: 10
     t.decimal "location_lng", precision: 15, scale: 10
-    t.integer "field_slip_id"
-    t.index ["field_slip_id"], name: "index_observations_on_field_slip_id"
+    t.integer "occurrence_id"
     t.index ["location_id"], name: "index_observations_on_location_id"
     t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"
+    t.index ["occurrence_id"], name: "index_observations_on_occurrence_id"
+  end
+
+  create_table "occurrences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "primary_observation_id"
+    t.boolean "has_specimen", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "field_slip_id"
+    t.index ["field_slip_id"], name: "index_occurrences_on_field_slip_id", unique: true
+    t.index ["primary_observation_id"], name: "index_occurrences_on_primary_observation_id"
+    t.index ["user_id"], name: "index_occurrences_on_user_id"
   end
 
   create_table "original_image_requests", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

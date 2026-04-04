@@ -6,7 +6,7 @@
 class FieldSlip < AbstractModel
   attr_reader :current_user
 
-  has_many :observations, dependent: :nullify
+  has_one :occurrence, dependent: :nullify
   belongs_to :project
   belongs_to :user
 
@@ -17,6 +17,19 @@ class FieldSlip < AbstractModel
     unless field_slip.code.match?(/[^\d.-]/)
       errors.add(:code, :format, message: :field_slip_code_format_error.t)
     end
+  end
+
+  # Find an existing field slip by code, or create a new one.
+  # Returns nil if the code is invalid (fails validation).
+  def self.find_or_create_by_code(code, user)
+    code = code.to_s.strip.upcase
+    slip = find_by(code: code)
+    return slip if slip
+
+    slip = new
+    slip.current_user = user
+    slip.code = code
+    slip.save ? slip : nil
   end
 
   scope :order_by_default,
@@ -40,7 +53,8 @@ class FieldSlip < AbstractModel
 
   scope :observation, lambda { |observation|
     observation_ids = Lookup::Observations.new(observation).ids
-    joins(:observations).where(observations: { id: observation_ids }).distinct
+    joins(occurrence: :observations).
+      where(observations: { id: observation_ids }).distinct
   }
 
   scope :project, lambda { |project|
@@ -68,9 +82,31 @@ class FieldSlip < AbstractModel
     update_project
   end
 
-  # The oldest observation, used as the primary/default reference.
+  # All observations through the occurrence.
+  def observations
+    occurrence&.observations || Observation.none
+  end
+
+  # Observation IDs through the occurrence.
+  def observation_ids
+    occurrence&.observation_ids || []
+  end
+
+  # The primary observation, used as the default reference.
+  # Only returns observations that actually belong to the occurrence.
   def observation
-    @observation ||= observations.order(:created_at).first
+    @observation ||= find_primary_observation
+  end
+
+  def find_primary_observation
+    occ = occurrence
+    return nil unless occ
+
+    obs = observations.to_a
+    return nil if obs.empty?
+
+    primary = occ.primary_observation
+    obs.include?(primary) ? primary : obs.first
   end
 
   def reload(*)
