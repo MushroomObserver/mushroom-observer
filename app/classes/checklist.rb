@@ -144,6 +144,7 @@ class Checklist
     taxa = {}
     genera = {}
     species = {}
+    genus_ranks = Name.rank_range("Stirps", "Genus")
     Observation.select(:user_id, :name_id).each do |row|
       user_id = row[:user_id]
       name_id = row[:name_id]
@@ -153,7 +154,7 @@ class Checklist
       genera[user_id] ||= {}
       species[user_id] ||= {}
       taxa[user_id][text_name] = true
-      genera[user_id][g] = true if rank.to_i <= Name.ranks[:Genus]
+      genera[user_id][g] = true if genus_ranks.include?(rank.to_i)
       if rank.to_i <= Name.ranks[:Species]
         species[user_id][[g, s].join(" ")] = true
       end
