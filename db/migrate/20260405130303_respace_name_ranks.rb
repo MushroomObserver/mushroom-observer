@@ -27,8 +27,8 @@ class RespaceNameRanks < ActiveRecord::Migration[7.2]
 
   def down
     OLD_TO_NEW.each do |old_val, new_val|
-      execute("UPDATE names SET rank = #{old_val} WHERE rank = #{new_val}")
-      execute("UPDATE name_versions SET rank = #{old_val} WHERE rank = #{new_val}")
+      execute("UPDATE names SET `rank` = #{old_val} WHERE `rank` = #{new_val}")
+      execute("UPDATE name_versions SET `rank` = #{old_val} WHERE `rank` = #{new_val}")
     end
   end
 end
