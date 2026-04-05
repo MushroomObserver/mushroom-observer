@@ -144,6 +144,7 @@ class Checklist
     taxa = {}
     genera = {}
     species = {}
+    genus_ranks = Name.rank_range("Stirps", "Genus")
     Observation.select(:user_id, :name_id).each do |row|
       user_id = row[:user_id]
       name_id = row[:name_id]
@@ -153,7 +154,7 @@ class Checklist
       genera[user_id] ||= {}
       species[user_id] ||= {}
       taxa[user_id][text_name] = true
-      genera[user_id][g] = true if rank.to_i <= Name.ranks[:Genus]
+      genera[user_id][g] = true if genus_ranks.include?(rank.to_i)
       if rank.to_i <= Name.ranks[:Species]
         species[user_id][[g, s].join(" ")] = true
       end
@@ -184,7 +185,7 @@ class Checklist
     @any_deprecated = results.any? { |result| result[:deprecated] }
 
     # For Genus results, we're taking everything above Species up to Genus
-    relevant_ranks = ((Name.ranks[:Species] + 1)..Name.ranks[:Genus]).to_a
+    relevant_ranks = Name.rank_range("Stirps", "Genus")
     g_results = results.select do |result|
       rank = Name.ranks[result[:rank]]
       relevant_ranks.include?(rank)
