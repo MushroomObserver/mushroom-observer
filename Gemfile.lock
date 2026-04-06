@@ -71,7 +71,7 @@ GEM
       tzinfo (~> 2.0, >= 2.0.5)
     addressable (2.8.9)
       public_suffix (>= 2.0.2, < 8.0)
-    ansi (1.5.0)
+    ansi (1.6.0)
     arel-helpers (2.17.0)
       activerecord (>= 3.1.0)
     arel_extensions (2.4.0)
@@ -288,10 +288,10 @@ GEM
     mini_racer (0.18.1)
       libv8-node (~> 23.6.1.0)
     minitest (5.27.0)
-    minitest-reporters (1.7.1)
+    minitest-reporters (1.8.0)
       ansi
       builder
-      minitest (>= 5.0)
+      minitest (>= 5.0, < 7)
       ruby-progressbar
     mission_control-jobs (1.1.0)
       actioncable (>= 7.1)
