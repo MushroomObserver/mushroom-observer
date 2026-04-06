@@ -144,7 +144,7 @@ class Checklist
     taxa = {}
     genera = {}
     species = {}
-    genus_ranks = Name.rank_range("Stirps", "Genus")
+    genus_ranks = Name.genus_display_ranks
     Observation.select(:user_id, :name_id).each do |row|
       user_id = row[:user_id]
       name_id = row[:name_id]
@@ -184,8 +184,7 @@ class Checklist
     @duplicate_synonyms = calc_duplicate_synonyms(results)
     @any_deprecated = results.any? { |result| result[:deprecated] }
 
-    # For Genus results, we're taking everything above Species up to Genus
-    relevant_ranks = Name.rank_range("Stirps", "Genus")
+    relevant_ranks = Name.genus_display_ranks
     g_results = results.select do |result|
       rank = Name.ranks[result[:rank]]
       relevant_ranks.include?(rank)
