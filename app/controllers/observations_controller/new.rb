@@ -45,7 +45,8 @@ module ObservationsController::New
     @reasons     = @naming.init_reasons
     @images      = []
     @good_images = []
-    @field_code  = params[:field_code]
+    @field_code        = params[:field_code]
+    @field_code_locked = @field_code.present?
     init_specimen_vars
     init_project_vars_for_new
     init_list_vars

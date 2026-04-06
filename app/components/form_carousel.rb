@@ -15,6 +15,7 @@
 class Components::FormCarousel < Components::Base
   # Properties
   prop :images, _Nilable(_Array(Image)), default: nil
+  prop :sibling_images, _Array(Image), default: -> { [] }
   prop :user, _Nilable(User)
   prop :carousel_id, String, default: "observation_upload_images_carousel"
   prop :obs_thumb_id, _Nilable(Integer), default: nil
@@ -59,7 +60,7 @@ class Components::FormCarousel < Components::Base
 
   def thumbnail_classes
     base_classes = "carousel-indicators panel-footer py-2 px-0 mb-0"
-    image_count = @images&.length || 0
+    image_count = (@images&.length || 0) + @sibling_images.length
     return "#{base_classes} d-none" if image_count <= 1
 
     base_classes
@@ -78,6 +79,22 @@ class Components::FormCarousel < Components::Base
         camera_info: @exif_data[image&.id] || {}
       )
     end
+    render_sibling_items
+  end
+
+  def render_sibling_items
+    offset = @images&.length || 0
+    @sibling_images.each_with_index do |image, index|
+      FormCarouselItem(
+        user: @user,
+        image: image,
+        index: offset + index,
+        upload: false,
+        obs_thumb_id: @obs_thumb_id,
+        camera_info: {},
+        sibling: true
+      )
+    end
   end
 
   def render_thumbnails
@@ -86,6 +103,15 @@ class Components::FormCarousel < Components::Base
         user: @user,
         image: image,
         index: index,
+        carousel_id: @carousel_id
+      )
+    end
+    offset = @images&.length || 0
+    @sibling_images.each_with_index do |image, index|
+      CarouselThumbnail(
+        user: @user,
+        image: image,
+        index: offset + index,
         carousel_id: @carousel_id
       )
     end

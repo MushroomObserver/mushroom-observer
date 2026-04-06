@@ -47,10 +47,11 @@ class Checklist
     def initialize(project, location = nil)
       @project = project
       @location = location
+      base = project.visible_observations
       @observations = if location.present?
-                        project.observations.within_locations([location])
+                        base.within_locations([location])
                       else
-                        project.observations
+                        base
                       end
     end
   end

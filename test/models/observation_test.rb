@@ -65,21 +65,20 @@ class ObservationTest < UnitTestCase
   end
 
   def test_remove_image_twice
-    observations(:minimal_unknown_obs).images = [
-      images(:commercial_inquiry_image),
-      images(:disconnected_coprinus_comatus_image),
-      images(:connected_coprinus_comatus_image)
-    ]
-    observations(:minimal_unknown_obs).
-      thumb_image = images(:commercial_inquiry_image)
-    observations(:minimal_unknown_obs).
-      remove_image(images(:commercial_inquiry_image))
-    assert_equal(observations(:minimal_unknown_obs).thumb_image,
-                 images(:disconnected_coprinus_comatus_image))
-    observations(:minimal_unknown_obs).
-      remove_image(images(:disconnected_coprinus_comatus_image))
-    assert_equal(observations(:minimal_unknown_obs).thumb_image,
-                 images(:connected_coprinus_comatus_image))
+    img1 = images(:commercial_inquiry_image)
+    img2 = images(:disconnected_coprinus_comatus_image)
+    img3 = images(:connected_coprinus_comatus_image)
+    obs = observations(:minimal_unknown_obs)
+    obs.images = [img1, img2, img3]
+    obs.thumb_image = img1
+
+    obs.remove_image(img1)
+    remaining = [img2, img3].min_by(&:id)
+    assert_equal(remaining, obs.thumb_image)
+
+    obs.remove_image(remaining)
+    last = ([img2, img3] - [remaining]).first
+    assert_equal(last, obs.thumb_image)
   end
 
   # ------------------------------------------
@@ -1790,6 +1789,59 @@ class ObservationTest < UnitTestCase
                     observations(:coprinus_comatus_obs))
     assert_not_includes(Observation.has_field_slips(false),
                         observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_has_occurrence
+    obs1 = observations(:detailed_unknown_obs)
+    obs2 = observations(:amateur_obs)
+    non_occ_obs = observations(:coprinus_comatus_obs)
+    single_occ_obs = observations(:minimal_unknown_obs)
+
+    # Create a multi-observation occurrence
+    occ = Occurrence.create!(user: obs1.user,
+                             primary_observation: obs1,
+                             has_specimen: true)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    results = Observation.has_occurrence
+    assert_includes(results, obs1,
+                    "Primary in multi-obs occurrence should be included")
+    assert_includes(results, obs2,
+                    "Non-primary in multi-obs occurrence should be included")
+    assert_not_includes(results, non_occ_obs,
+                        "Obs without occurrence should not be included")
+    assert_not_includes(results, single_occ_obs,
+                        "Single-obs occurrence should not count")
+
+    results_no = Observation.has_occurrence(false)
+    assert_includes(results_no, non_occ_obs)
+    assert_includes(results_no, single_occ_obs,
+                    "Single-obs occurrence should be in 'no' results")
+    assert_not_includes(results_no, obs1)
+    assert_not_includes(results_no, obs2)
+  end
+
+  def test_scope_has_specimen_coalesce
+    # Create occurrence with has_specimen: true for obs without specimen
+    obs1 = observations(:peltigera_obs) # specimen: false
+    obs2 = observations(:peltigera_mary_obs) # specimen: false
+    occ = Occurrence.create!(user: obs1.user,
+                             primary_observation: obs1,
+                             has_specimen: true)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    # Occurrence has_specimen overrides individual specimen flag
+    assert_includes(Observation.has_specimen, obs1,
+                    "COALESCE should use occurrence has_specimen")
+    assert_includes(Observation.has_specimen, obs2,
+                    "COALESCE should use occurrence has_specimen")
+
+    # Obs without occurrence uses its own specimen flag
+    coprinus = observations(:coprinus_comatus_obs)
+    assert_includes(Observation.has_specimen, coprinus)
+    assert_not_includes(Observation.has_specimen(false), coprinus)
   end
 
   def test_scope_has_collection_numbers

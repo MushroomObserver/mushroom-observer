@@ -145,7 +145,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     when "iNaturalist"
       concat(
         link_to(
-          "iNat ##{link.url.sub(link.external_site.base_url, "")}", link.url
+          "iNat #{link.url.sub(link.external_site.base_url, "")}", link.url
         )
       )
     else

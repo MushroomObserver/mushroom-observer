@@ -13,7 +13,7 @@ class API2
         :collection_numbers,
         { comments: :user },
         :external_links,
-        :field_slip,
+        { occurrence: :field_slip },
         { herbarium_records: :herbarium },
         { images: [:license, :user] },
         :location,
@@ -162,7 +162,12 @@ class API2
         field_slip.update_project
         field_slip.save!
       end
-      observation.update!(field_slip: field_slip)
+      occ = field_slip.occurrence
+      occ ||= Occurrence.create!(
+        user: @user, primary_observation: observation,
+        field_slip: field_slip
+      )
+      observation.update!(occurrence: occ)
       update_project(field_slip.project, observation)
     end
 
