@@ -19,16 +19,20 @@ class RespaceNameRanks < ActiveRecord::Migration[7.2]
   }.freeze
 
   def up
-    OLD_TO_NEW.each do |old_val, new_val|
-      execute("UPDATE names SET `rank` = #{new_val} WHERE `rank` = #{old_val}")
-      execute("UPDATE name_versions SET `rank` = #{new_val} WHERE `rank` = #{old_val}")
+    ActiveRecord::Base.transaction do
+      OLD_TO_NEW.each do |old_val, new_val|
+        execute("UPDATE names SET `rank` = #{new_val} WHERE `rank` = #{old_val}")
+        execute("UPDATE name_versions SET `rank` = #{new_val} WHERE `rank` = #{old_val}")
+      end
     end
   end
 
   def down
-    OLD_TO_NEW.each do |old_val, new_val|
-      execute("UPDATE names SET `rank` = #{old_val} WHERE `rank` = #{new_val}")
-      execute("UPDATE name_versions SET `rank` = #{old_val} WHERE `rank` = #{new_val}")
+    ActiveRecord::Base.transaction do
+      OLD_TO_NEW.each do |old_val, new_val|
+        execute("UPDATE names SET `rank` = #{old_val} WHERE `rank` = #{new_val}")
+        execute("UPDATE name_versions SET `rank` = #{old_val} WHERE `rank` = #{new_val}")
+      end
     end
   end
 end
