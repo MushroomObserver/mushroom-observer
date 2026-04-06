@@ -32,13 +32,15 @@ if [ "$EXPECTED_RUBY" != "$CURRENT_RUBY" ]; then
     echo "Ruby version mismatch!"
     echo "  Running:  $CURRENT_RUBY"
     echo "  Expected: $EXPECTED_RUBY (from origin/main)"
-    echo "Please install and activate Ruby $EXPECTED_RUBY before deploying."
+    echo "Please install and activate Ruby $EXPECTED_RUBY before  ing."
     echo "See README_RUBY_34_UPGRADE.md for instructions."
     exit 1
 fi
 
 tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
+
+echo Stopping ... && sudo service puma stop
 
 STASH_RESULT=`git stash`
 if [ $? -ne 0 ]; then
@@ -71,7 +73,7 @@ echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
 echo Precompiling assets... && rake assets:precompile && \
-echo Reloading puma... && sudo service puma restart && \
+echo Starting puma... && sudo service puma start && \
 echo Reloading solidqueue... && sudo service solidqueue restart && \
 echo Tagging repo with $tag... && git tag $tag && \
 echo Pushing new tag... && git push --tags && \
