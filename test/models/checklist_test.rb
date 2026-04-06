@@ -170,6 +170,19 @@ class ChecklistTest < UnitTestCase
     )
   end
 
+  def test_all_site_taxa_by_user
+    result = Checklist.all_site_taxa_by_user
+    assert_equal([:genera, :species, :taxa, :users], result.keys.sort,
+                 "all_site_taxa_by_user should return " \
+                 ":users, :taxa, :genera, :species keys")
+    assert_kind_of(Array, result[:users],
+                   "all_site_taxa_by_user :users should be an Array")
+    assert_kind_of(Hash, result[:genera],
+                   "all_site_taxa_by_user :genera should be a Hash")
+    assert_kind_of(Hash, result[:species],
+                   "all_site_taxa_by_user :species should be a Hash")
+  end
+
   def test_checklist_for_species_lists
     list = species_lists(:unknown_species_list)
     data = Checklist::ForSpeciesList.new(list)

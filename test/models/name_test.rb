@@ -1795,6 +1795,22 @@ class NameTest < UnitTestCase
     assert(name.at_or_below_species?)
   end
 
+  def test_genus_display_ranks
+    ranks = Name.genus_display_ranks
+    Name.ranks.each do |rank_name, rank_val|
+      if rank_val.between?(Name.ranks[:Stirps], Name.ranks[:Genus])
+        assert_includes(ranks, rank_val,
+                        "genus_display_ranks should include #{rank_name}")
+      end
+    end
+    assert_not_includes(ranks, Name.ranks[:Species],
+                        "genus_display_ranks should not include Species")
+    assert_not_includes(ranks, Name.ranks[:Group],
+                        "genus_display_ranks should not include Group")
+    assert_not_includes(ranks, Name.ranks[:Family],
+                        "genus_display_ranks should not include Family")
+  end
+
   # ------------------------------
   #  Test ancestors and parents.
   # ------------------------------
@@ -3740,6 +3756,18 @@ class NameTest < UnitTestCase
     assert_not_includes(
       subtaxa_of_amanita, mispelled_name,
       "`subtaxa_of` should not include misspellings"
+    )
+
+    # Above-genus: immediate subtaxa of an Order should be Families only
+    immediate_subtaxa_of_agaricales =
+      Name.immediate_subtaxa_of(names(:agaricales))
+    assert_includes(
+      immediate_subtaxa_of_agaricales, names(:agaricaceae),
+      "`immediate_subtaxa_of` an Order should return immediate Family subtaxa"
+    )
+    assert_not_includes(
+      immediate_subtaxa_of_agaricales, names(:amanita),
+      "`immediate_subtaxa_of` an Order should not include Genus-ranked names"
     )
   end
 
