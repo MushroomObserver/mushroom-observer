@@ -48,6 +48,7 @@ class Components::MatrixBox
         what: @object,
         where: @object.where,
         location: @object.location,
+        occurrence: @object.occurrence,
         consensus: Observation::NamingConsensus.new(@object),
         detail: @object.rss_log&.detail,
         time: @object.rss_log&.updated_at

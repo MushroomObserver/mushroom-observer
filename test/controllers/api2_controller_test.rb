@@ -108,6 +108,10 @@ class API2ControllerTest < FunctionalTestCase
     do_basic_get_request_for_model(Observation)
   end
 
+  def test_basic_occurrence_get_request
+    do_basic_get_request_for_model(Occurrence)
+  end
+
   def test_basic_project_get_request
     do_basic_get_request_for_model(Project)
   end

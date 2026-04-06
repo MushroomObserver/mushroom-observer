@@ -44,6 +44,7 @@ module PatternSearch
       has_images: [:has_images, :parse_boolean],
       is_collection_location: [:is_collection_location, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
+      has_occurrence: [:has_occurrence, :parse_boolean],
       has_sequence: [:has_sequences, :parse_yes],
       has_specimen: [:has_specimen, :parse_boolean]
     }.freeze

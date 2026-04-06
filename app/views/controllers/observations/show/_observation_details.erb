@@ -1,7 +1,8 @@
-<%# locals: (obs: nil, consensus: nil, user: nil, sites: nil) %>
+<%# locals: (obs: nil, consensus: nil, user: nil, sites: nil, siblings: []) %>
 
 <%
 # The basic info of the observation. Sections get updated by JS
+siblings ||= []
 %>
 
 <%= render(Components::Panel.new(
@@ -15,7 +16,7 @@
 
     <% if user %>
       <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
-        if obs.specimen
+        if obs.occurrence&.has_specimen || obs.specimen
           :show_observation_specimen_available.t
         else
           :show_observation_specimen_not_available.t
@@ -42,20 +43,33 @@
       end %>
     <% end %>
 
+    <%
+    has_sib_cns = siblings.any? { |s| s.collection_numbers.any? }
+    has_sib_hrs = siblings.any? { |s| s.herbarium_records.any? }
+    has_sib_seqs = siblings.any? { |s| s.sequences.any? }
+    has_sib_els = siblings.any? { |s| s.external_links.any? }
+    %>
     <% if user %>
       <%= render(partial: "observations/show/collection_numbers",
-                locals: { obs:, user: }) %>
+                locals: { obs:, user:,
+                          has_sibling_records: has_sib_cns }) %>
+      <%= sibling_collection_numbers(siblings) %>
 
       <%= render(partial: "observations/show/herbarium_records",
-                locals: { obs:, user: }) %>
+                locals: { obs:, user:,
+                          has_sibling_records: has_sib_hrs }) %>
+      <%= sibling_herbarium_records(siblings) %>
 
       <%= render(partial: "observations/show/sequences",
-                locals: { obs:, user: }) %>
+                locals: { obs:, user:,
+                          has_sibling_records: has_sib_seqs }) %>
+      <%= sibling_sequences(siblings) %>
     <% end %>
 
-    <% if user && (obs.external_links.any? || sites.any?) %>
+    <% if user && (obs.external_links.any? || sites.any? ||
+                   has_sib_els) %>
       <%= render(partial: "observations/show/external_links",
-                locals: { obs:, user:, sites: }) %>
+                locals: { obs:, user:, sites:, siblings: }) %>
     <% end %>
   <% end %>
 <% end %>

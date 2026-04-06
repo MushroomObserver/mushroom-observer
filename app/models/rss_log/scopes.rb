@@ -22,6 +22,24 @@ module RssLog::Scopes
       where(or_clause(*types)).distinct
     }
 
+    # Exclude RssLog entries for observations that belong to a
+    # multi-observation occurrence but are not the primary.
+    # Single-observation occurrences (field slip links) are kept.
+    scope :exclude_non_primary_observations, lambda {
+      multi_occ_ids = Observation.where.not(occurrence_id: nil).
+                      group(:occurrence_id).
+                      having("COUNT(*) > 1").select(:occurrence_id)
+      left_outer_joins(observation: :occurrence).where(
+        RssLog[:observation_id].eq(nil).or(
+          Observation[:occurrence_id].eq(nil)
+        ).or(
+          Occurrence[:primary_observation_id].eq(Observation[:id])
+        ).or(
+          Observation[:occurrence_id].not_in(multi_occ_ids.arel)
+        )
+      )
+    }
+
     # Apply content filters to all types of RssLog requested in the current
     # Query. NOTE: One content filter may apply to two or more types (e.g.
     # `:region` applies to both Observations and Locations), so we need to

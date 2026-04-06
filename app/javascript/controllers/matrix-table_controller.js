@@ -5,9 +5,12 @@ export default class extends Controller {
   connect() {
     this.element.dataset.matrixTable = "connected";
 
-    this.matrixBoxes = document.querySelectorAll('.matrix-box')
-    this.boxes = document.querySelectorAll('.matrix-box .panel-sizing')
-    this.footers = document.querySelectorAll('.matrix-box .log-footer')
+    this.matrixBoxes =
+      this.element.querySelectorAll('.matrix-box')
+    this.boxes =
+      this.element.querySelectorAll('.matrix-box .panel-sizing')
+    this.footers =
+      this.element.querySelectorAll('.matrix-box .log-footer')
 
     this.add_spacers()
     this.rearrange()

@@ -1,4 +1,4 @@
-<%# locals: (obs: nil, consensus: nil, user: nil, sites: nil) %>
+<%# locals: (obs: nil, consensus: nil, user: nil, sites: nil, has_sibling_records: false) %>
 
 <%
 sequences = obs.sequences
@@ -12,8 +12,11 @@ tag.div(
 ) do
 
   concat(tag.div do
-    concat(sequences.any? ? "#{:Sequences.l}: " :
-            "#{:show_observation_no_sequences.l} ")
+    no_seq_label = has_sibling_records ?
+                     "#{:show_observation_dna_sequences.l}: " :
+                     "#{:show_observation_no_sequences.l} "
+    concat(sequences.any? ? "#{:show_observation_dna_sequences.l}: " :
+                            no_seq_label)
     concat(
       ["[", modal_link_to("sequence", *new_sequence_tab(obs)), "]"].safe_join
     ) if user
@@ -38,9 +41,6 @@ tag.div(
             icon: :remove,
             class: "destroy_sequence_link_#{sequence.id}"
           )
-        end
-        if sequence.blastable?
-          links << link_to(*sequence_blast_tab(sequence))
         end
         concat(" [#{links.safe_join(' | ')}]".html_safe) if links.any?
       end)

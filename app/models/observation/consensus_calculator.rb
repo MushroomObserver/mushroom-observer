@@ -10,8 +10,6 @@ class Observation
       @name_ages   = {}  # Oldest date that a name was proposed.
       @taxon_ages  = {}  # Oldest date that a taxon was proposed.
       @user_wgts   = {}  # Caches user rankings.
-      @user_max_votes = {} # Each user's max vote across all namings.
-      @naming_max_votes = {} # Max vote per naming.
     end
 
     # Get the community consensus on what the name should be.  It just
@@ -32,7 +30,7 @@ class Observation
       # times.  Thus a user can potentially vote for a given *name*
       # (not naming) multiple times.  Likewise, of course, for
       # synonyms.  I choose the strongest vote in such cases.
-      precompute_user_max_votes
+      @boost = Vote::WeightBoost.new(@namings)
       @namings.each do |naming|
         process_naming(user, naming)
       end
@@ -72,7 +70,7 @@ class Observation
       wgt = user_weight(user_id, vote)
       return [0, 0] unless wgt.positive?
 
-      eff_wgt = effective_weight(user_id, val, wgt, naming.id)
+      eff_wgt = @boost.effective_weight(user_id, val, wgt, naming.id)
       weights = [wgt, eff_wgt]
       update_user_votes(name_id, user_id, val, weights)
       update_taxon_votes(naming, name_id, user_id, val, weights)
@@ -87,47 +85,6 @@ class Observation
     def user_weight(user_id, vote)
       @user_wgts[user_id] ||= vote.user_weight
       @user_wgts[user_id]
-    end
-
-    # Scan all votes to find each user's max vote value
-    # and each naming's max vote value.
-    # Must be called before processing individual votes.
-    def precompute_user_max_votes
-      @namings.each do |naming|
-        naming_max = 0
-        naming.votes.each do |vote|
-          uid = vote.user_id
-          val = vote.value
-          naming_max = val if val > naming_max
-          next if @user_max_votes[uid] &&
-                  @user_max_votes[uid] >= val
-
-          @user_max_votes[uid] = val
-        end
-        @naming_max_votes[naming.id] = naming_max
-      end
-    end
-
-    # When a user's highest vote is positive but below
-    # MAXIMUM_VOTE, equals their max across all namings,
-    # and the naming has a higher vote from someone else,
-    # reduce the weight proportionally. This treats the
-    # sub-max vote as diluted agreement at the naming's
-    # highest level rather than penalizing it.
-    def effective_weight(user_id, val, wgt, naming_id)
-      return wgt unless boost_vote?(user_id, val, naming_id)
-
-      naming_max = @naming_max_votes[naming_id]
-      (val.abs / naming_max.to_f) * wgt
-    end
-
-    def boost_vote?(user_id, val, naming_id)
-      user_max = @user_max_votes[user_id]
-      naming_max = @naming_max_votes[naming_id]
-      user_max&.positive? &&
-        user_max < Vote::MAXIMUM_VOTE &&
-        val == user_max &&
-        naming_max > val
     end
 
     # Record best vote for this user for this name.  This will

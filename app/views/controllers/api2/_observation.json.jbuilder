@@ -7,7 +7,9 @@ json.latitude(object.public_lat) if object.lat.present?
 json.longitude(object.public_lng) if object.lng.present?
 json.altitude(object.alt) if object.alt.present?
 json.gps_hidden(object.gps_hidden ? true : false)
-json.specimen_available(object.specimen ? true : false)
+specimen = object.occurrence&.has_specimen || object.specimen
+json.specimen_available(specimen ? true : false)
+json.occurrence_id(object.occurrence_id) if object.occurrence_id
 json.is_collection_location(object.is_collection_location ? true : false)
 json.confidence(object.vote_cache) if object.vote_cache.present?
 json.created_at(object.created_at.try(&:utc))
@@ -63,6 +65,8 @@ if detail
     if object.external_links.any?
   json.field_slip(json_field_slip(object.field_slip)) \
     if object.field_slip
+  json.occurrence(json_occurrence(object.occurrence)) \
+    if object.occurrence
 else
   json.owner_id(object.user_id)
   json.consensus_id(object.name_id) if object.name_id

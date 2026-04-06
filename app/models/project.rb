@@ -473,7 +473,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def location_count
-    locations.distinct.count
+    Location.joins(:observations).
+      merge(visible_observations).distinct.count
   end
 
   def count_collections(name)
@@ -498,31 +499,36 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
+  # Observations excluding non-primary members of multi-obs occurrences.
+  def visible_observations
+    observations.exclude_non_primary
+  end
+
   def out_of_range_observations
     if start_date.nil? && end_date.nil?
       # performant query that returns empty ActiveRecord_Relation
       # (gps_hidden column has null: false)
-      observations.where(gps_hidden: nil)
+      visible_observations.where(gps_hidden: nil)
     elsif start_date.nil?
-      observations.where(Observation[:when] > end_date)
+      visible_observations.where(Observation[:when] > end_date)
     elsif end_date.nil?
-      observations.where(Observation[:when] < start_date)
+      visible_observations.where(Observation[:when] < start_date)
     else
-      observations.where(Observation[:when] > end_date).
-        or(observations.where(Observation[:when] < start_date))
+      visible_observations.where(Observation[:when] > end_date).
+        or(visible_observations.where(Observation[:when] < start_date))
     end
   end
 
   def in_range_observations
     if start_date.nil? && end_date.nil?
-      observations
+      visible_observations
     elsif start_date.nil?
-      observations.where(Observation[:when] <= end_date)
+      visible_observations.where(Observation[:when] <= end_date)
     elsif end_date.nil?
-      observations.where(Observation[:when] >= start_date)
+      visible_observations.where(Observation[:when] >= start_date)
     else
-      observations.where(Observation[:when] <= end_date).
-        and(observations.where(Observation[:when] >= start_date))
+      visible_observations.where(Observation[:when] <= end_date).
+        and(visible_observations.where(Observation[:when] >= start_date))
     end
   end
 
@@ -583,12 +589,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def obs_geoloc_outside_project_location
-    observations.
+    visible_observations.
       where.not(observations: { lat: nil }).not_in_box(**location.bounding_box)
   end
 
   def obs_without_geoloc_location_not_contained_in_location
-    observations.where(lat: nil).joins(:location).
+    visible_observations.where(lat: nil).joins(:location).
       merge(
         # invert_where is safe (doesn't invert observations.where(lat: nil))
         Location.not_in_box(**location.bounding_box)

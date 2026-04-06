@@ -168,7 +168,7 @@ module Report
     end
 
     def add_field_slips!(rows, col)
-      vals = Observation.joins(:field_slip).
+      vals = Observation.joins(occurrence: :field_slip).
              merge(plain_query).
              select(Observation[:id], FieldSlip[:code]).
              map { |rec| rec.attributes.values[0..1] }
@@ -194,6 +194,7 @@ module Report
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
+      # Non-primary observations already excluded by query scope.
       query.scope.reorder("")
     end
 

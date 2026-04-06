@@ -54,12 +54,7 @@ module Query::Modules::Results
     initialize_query unless initialized?
     expect_args(:result_ids, args, RESULTS_ARGS)
     # includes = args[:include] || []
-    @result_ids ||=
-      if need_letters
-        ids_by_letter
-      else
-        @scopes.ids
-      end
+    @result_ids ||= compute_result_ids
   end
 
   # Returns an array of ids for each letter that has a record present.
@@ -207,6 +202,10 @@ module Query::Modules::Results
   ##############################################################################
 
   private
+
+  def compute_result_ids
+    need_letters ? ids_by_letter : @scopes.ids
+  end
 
   def add_needed_to_results(needed:, args:)
     includes = args[:include] || []

@@ -50,6 +50,7 @@ ACTIONS = {
     names: {},
     name_descriptions: {},
     observations: {},
+    occurrences: {},
     projects: {},
     sequences: {},
     species_lists: {},
@@ -385,6 +386,13 @@ MushroomObserver::Application.routes.draw do
   end
   resources :field_slips
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
+  resources :occurrences, only: [:new, :create, :show, :edit, :update,
+                                 :destroy] do
+    member do
+      get :resolve_projects
+      post :resolve_projects
+    end
+  end
 
   # ----- Field Slip Job Trackers: show for json -------------------------------
   resources :field_slip_job_trackers, only: [:show]

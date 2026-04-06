@@ -288,6 +288,64 @@ module Observations::Namings
                    "Cache for 3: #{nam1.vote_cache}, 9: #{nam2.vote_cache}")
     end
 
+    # ---------- vote propagation to siblings ----------
+
+    def test_vote_propagates_to_sibling_naming
+      obs1 = observations(:minimal_unknown_obs)
+      obs2 = observations(:detailed_unknown_obs)
+      obs1.update_column(:occurrence_id, nil)
+
+      occ = Occurrence.create!(
+        user: rolf, primary_observation: obs1
+      )
+      obs1.update!(occurrence: occ)
+      obs2.update!(occurrence: occ)
+
+      # Propose same name on both observations
+      name = names(:agaricus_campestris)
+      naming1 = Naming.create!(
+        observation: obs1, name: name, user: rolf
+      )
+      naming2 = Naming.create!(
+        observation: obs2, name: name, user: mary
+      )
+
+      # Mary votes on naming2
+      login("mary")
+      post(:create, params: {
+             vote: { value: "3" },
+             naming_id: naming2.id,
+             observation_id: obs2.id
+           })
+
+      # Mary's vote should propagate to naming1
+      naming1.reload
+      vote_on_1 = Vote.find_by(user: mary, naming: naming1)
+      assert_not_nil(vote_on_1,
+                     "Vote should propagate to sibling naming")
+      assert_equal(3, vote_on_1.value)
+    end
+
+    def test_vote_does_not_propagate_without_occurrence
+      obs = observations(:coprinus_comatus_obs)
+      # Ensure no occurrence
+      obs.update_column(:occurrence_id, nil)
+      nam = namings(:coprinus_comatus_naming)
+
+      login("rolf")
+      consensus = ::Observation::NamingConsensus.new(obs)
+      vote = consensus.users_vote(nam, rolf)
+      put(:update, params: {
+            vote: { value: "2" }, id: vote.id,
+            naming_id: nam.id, observation_id: obs.id
+          })
+
+      # Should complete without error
+      assert_equal(
+        names(:coprinus_comatus).id, obs.reload.name_id
+      )
+    end
+
     def test_create_and_update_same_vote
       naming = namings(:minimal_unknown_naming)
       consensus = ::Observation::NamingConsensus.new(naming.observation)
