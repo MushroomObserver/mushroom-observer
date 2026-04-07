@@ -1,0 +1,14 @@
+<div id="target_names_widget">
+  <%= form_with(url: project_target_names_path(project_id: project.id),
+                method: :post,
+                class: "form-inline mb-3",
+                data: { turbo: true }) do |f| %>
+    <%= autocompleter_field(form: f, field: :names,
+                            type: :name,
+                            textarea: true,
+                            separator: "\n",
+                            label: "#{:NAMES.t}:") %>
+    <%= f.submit(:project_target_name_add.t,
+                 class: "btn btn-default ml-2") %>
+  <% end %>
+</div>

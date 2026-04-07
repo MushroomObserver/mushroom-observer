@@ -1,0 +1,10 @@
+<%= turbo_stream.replace("target_names_widget") do %>
+  <%= render(partial: "projects/target_names/widget",
+             locals: { project: project }) %>
+<% end %>
+<%= turbo_stream.replace("checklist_panel") do %>
+  <%= render(partial: "checklists/checklist_panel",
+             locals: { project: project, data: data,
+                       user: user }) %>
+<% end %>
+<%= render_turbo_stream_flash_messages %>

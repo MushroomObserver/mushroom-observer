@@ -681,6 +681,10 @@ MushroomObserver::Application.routes.draw do
     resources :members, only: [:new, :create, :edit, :update, :index],
                         controller: "projects/members", param: :candidate
     resources :aliases, controller: "projects/aliases"
+    resources :target_names, only: [:create, :destroy],
+                             controller: "projects/target_names"
+    resources :target_locations, only: [:create, :destroy],
+                                 controller: "projects/target_locations"
     resources :violations, only: [:index], controller: "projects/violations"
   end
   # resourceful route won't work because it requires an additional id
