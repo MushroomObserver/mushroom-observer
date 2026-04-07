@@ -224,4 +224,62 @@ class ProjectTest < UnitTestCase
       "whose Loc is contained in Proj location"
     )
   end
+
+  def test_add_and_remove_target_names
+    proj = projects(:rare_fungi_project)
+    coprinus = names(:coprinus_comatus)
+    agaricus = names(:agaricus_campestris)
+    peltigera = names(:peltigera)
+
+    assert_includes(proj.target_names, coprinus)
+    assert_includes(proj.target_names, agaricus)
+
+    # Add new target name
+    proj.add_target_name(peltigera)
+    assert_includes(proj.target_names.reload, peltigera)
+
+    # Idempotent — adding again does nothing
+    proj.add_target_name(peltigera)
+    assert_equal(1, proj.target_names.where(id: peltigera.id).count)
+
+    # Remove target name
+    proj.remove_target_name(peltigera)
+    assert_not_includes(proj.target_names.reload, peltigera)
+
+    # Removing non-member does nothing
+    proj.remove_target_name(peltigera)
+    assert_not_includes(proj.target_names, peltigera)
+  end
+
+  def test_add_and_remove_target_locations
+    proj = projects(:rare_fungi_project)
+    burbank = locations(:burbank)
+    albion = locations(:albion)
+
+    assert_includes(proj.target_locations, burbank)
+
+    # Add new target location
+    proj.add_target_location(albion)
+    assert_includes(proj.target_locations.reload, albion)
+
+    # Idempotent
+    proj.add_target_location(albion)
+    assert_equal(1, proj.target_locations.where(id: albion.id).count)
+
+    # Remove target location
+    proj.remove_target_location(albion)
+    assert_not_includes(proj.target_locations.reload, albion)
+
+    # Removing non-member does nothing
+    proj.remove_target_location(albion)
+    assert_not_includes(proj.target_locations, albion)
+  end
+
+  def test_has_targets
+    proj = projects(:rare_fungi_project)
+    assert(proj.has_targets?)
+
+    empty = projects(:empty_project)
+    assert_not(empty.has_targets?)
+  end
 end

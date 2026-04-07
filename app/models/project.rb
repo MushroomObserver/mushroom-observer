@@ -81,6 +81,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
 
+  has_many :project_target_names, dependent: :destroy
+  has_many :target_names, through: :project_target_names, source: :name
+
+  has_many :project_target_locations, dependent: :destroy
+  has_many :target_locations, through: :project_target_locations,
+                              source: :location
+
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
   before_destroy :orphan_drafts
@@ -374,6 +381,35 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     species_lists.delete(spl)
     touch
+  end
+
+  # Add target name to this project if not already present.
+  def add_target_name(name)
+    target_names.push(name) unless target_names.include?(name)
+  end
+
+  # Remove target name from this project.
+  def remove_target_name(name)
+    target_names.delete(name) if target_names.include?(name)
+  end
+
+  # Add target location to this project if not already present.
+  def add_target_location(location)
+    return if target_locations.include?(location)
+
+    target_locations.push(location)
+  end
+
+  # Remove target location from this project.
+  def remove_target_location(location)
+    return unless target_locations.include?(location)
+
+    target_locations.delete(location)
+  end
+
+  # Does this project have any target names or target locations?
+  def has_targets?
+    project_target_names.any? || project_target_locations.any?
   end
 
   def self.find_by_title_with_wildcards(str)
