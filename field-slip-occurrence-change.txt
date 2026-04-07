@@ -1,0 +1,55 @@
+Data Model Change: Unifying Field Slip and Occurrence Relationships
+
+Problem
+
+Currently, observations maintain two separate foreign keys:
+field_slip_id and occurrence_id. Both represent grouping
+relationships, and when a field slip has multiple observations, those
+observations should also be in an occurrence. This creates sync issues
+which needs custom logic to keep both relationships consistent, and bugs
+can arise if/when they get out of sync.
+
+New Design
+
+Consolidating to a single chain: Field Slip → Occurrence → Observations
+
+- A new field_slip_id column will be added to the occurrences table
+  (nullable)
+- The field_slip_id column on the observations table will be removed
+- Every observation associated with a field slip will have an
+  occurrence (even single-observation field slips)
+- Not all occurrences will have field slips — manually created
+  occurrences remain unchanged
+
+Key Behavioral Changes
+
+- Single-observation occurrences will now exist (for field slip
+  associations). These are "transparent" — they won't trigger the
+  visibility rules that collapse multiple observations into one on
+  index pages, and they won't show "See matching observations" or
+  "Matching Observations" with sibling links. The UI will show "Add
+  Matching Observations" in these cases, just as it does at the moment
+  for observations without an occurrence.
+- observation.field_slip will be accessed via
+  observation.occurrence&.field_slip instead of directly. A
+  convenience delegation method will maintain backward compatibility
+  where needed.
+- Occurrence destruction will no longer auto-destroy when reduced to 1
+  observation if that occurrence has a field slip association.
+
+Why Now
+
+I'm in the middle of Phase 7 (Field Slip UI updates) and the sync
+logic between the two relationships is becoming increasingly
+complex. Making this change now avoids building more code on top of a
+design that will need to change anyway.
+
+Migration
+
+The migration will:
+1. Add field_slip_id to occurrences
+2. For each observation with a field_slip_id but no occurrence_id,
+   create an occurrence and link it
+3. For each observation with both, copy the field_slip_id to the
+   occurrence
+4. Remove field_slip_id from observations

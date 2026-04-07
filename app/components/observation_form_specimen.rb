@@ -15,6 +15,8 @@ class Components::ObservationFormSpecimen < Components::Base
   prop :form, _Any
   prop :observation, Observation
   prop :mode, _Nilable(Symbol), default: :create
+  prop :field_code, _Nilable(String), default: nil
+  prop :field_code_locked, _Boolean, default: false
   prop :collectors_name, _Nilable(String), default: nil
   prop :collectors_number, _Nilable(String), default: nil
   prop :herbarium_name, _Nilable(String), default: nil
@@ -23,6 +25,11 @@ class Components::ObservationFormSpecimen < Components::Base
 
   def view_template
     div(id: "observation_specimen_section") do
+      if @field_code_locked
+        render_locked_field_code
+      else
+        render_field_slip_code
+      end
       render_specimen_checkbox
       render_edit_help if update?
       render_specimen_fields if create?
@@ -124,6 +131,24 @@ class Components::ObservationFormSpecimen < Components::Base
              wrapper_options: { label: "#{:herbarium_record_notes.l}:" },
              value: ""
            ))
+  end
+
+  def render_locked_field_code
+    p { "#{:form_observations_field_code.t} #{@field_code}" }
+    input(type: "hidden", name: "field_code",
+          value: @field_code)
+    input(type: "hidden", name: "field_code_locked",
+          value: "1")
+  end
+
+  def render_field_slip_code
+    div(class: "form-group") do
+      label(for: "field_code") do
+        plain("#{:form_observations_field_slip_code.l}:")
+      end
+      input(type: "text", name: "field_code", id: "field_code",
+            value: @field_code, class: "form-control")
+    end
   end
 
   def create?

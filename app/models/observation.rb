@@ -191,7 +191,35 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :collection_numbers, through: :observation_collection_numbers
-  belongs_to :field_slip, optional: true
+  belongs_to :occurrence, optional: true
+
+  # Field slip reached through occurrence (no longer a direct FK)
+  def field_slip
+    occurrence&.field_slip
+  end
+
+  def field_slip_id
+    occurrence&.field_slip_id
+  end
+
+  # Backward-compatible writer: creates/reuses an occurrence to
+  # link this observation to the given field slip.
+  def field_slip=(slip)
+    if slip.nil?
+      # Detach: handled by clearing occurrence
+      return
+    end
+
+    old_occ = occurrence
+    occ = slip.occurrence
+    occ ||= Occurrence.create!(
+      user: user || User.current,
+      primary_observation: self,
+      field_slip: slip
+    )
+    self.occurrence = occ
+    cleanup_old_occurrence(old_occ, occ)
+  end
 
   has_many :observation_herbarium_records, dependent: :destroy
   has_many :herbarium_records, through: :observation_herbarium_records
@@ -209,9 +237,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
+  after_update :update_occurrence_specimen_cache
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
+  after_destroy :cleanup_occurrence
   after_commit :flush_observation_change_emails, on: [:create, :update]
 
   # Automatically (but silently) log destruction.
@@ -829,13 +859,27 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       images.delete(img)
       track_change(:removed_image)
       if thumb_image_id == img.id
-        update(thumb_image: images.empty? ? nil : images.first)
+        update(thumb_image: next_thumb_image)
       else
         # Touch to trigger after_commit within proper transaction flow
         touch
       end
     end
     img
+  end
+
+  # Next thumbnail candidate: oldest own image first, then occurrence
+  def next_thumb_image
+    own = images.loaded? ? images.min_by(&:id) : images.order(:id).first
+    return own if own
+    return nil unless occurrence
+
+    Image.joins(:observation_images).
+      where(observation_images: {
+              observation_id: Observation.where(occurrence_id: occurrence_id).
+                              where.not(id: id).select(:id)
+            }).
+      order(:id).first
   end
 
   # Determines if an obs can have the Naming "_Imageless_"
@@ -954,6 +998,49 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # This must be sent immediately since the observation won't exist after.
   def notify_users_before_destroy
     send_observation_destroyed_emails
+  end
+
+  # Update occurrence's cached has_specimen when specimen changes.
+  def update_occurrence_specimen_cache
+    return unless saved_change_to_specimen? && occurrence
+
+    occurrence.recompute_has_specimen!
+  end
+
+  # Clean up occurrence after an observation is destroyed.
+  # Reassigns default if needed, then destroys if < 2 obs remain.
+  def cleanup_occurrence
+    return unless occurrence_id
+
+    occ = Occurrence.find_by(id: occurrence_id)
+    return unless occ
+
+    reassign_occurrence_primary(occ) if occ.primary_observation_id == id
+    return unless Occurrence.exists?(occ.id)
+
+    occ.reload
+    occ.destroy_if_incomplete!
+  end
+
+  # When an observation moves to a new occurrence, clean up the old one.
+  def cleanup_old_occurrence(old_occ, new_occ)
+    return unless old_occ && old_occ.id != new_occ.id
+
+    old_occ.reload
+    reassign_occurrence_primary(old_occ) if old_occ.primary_observation_id == id
+    return unless Occurrence.exists?(old_occ.id)
+
+    old_occ.reload
+    old_occ.destroy_if_incomplete!
+  end
+
+  def reassign_occurrence_primary(occ)
+    next_obs = occ.observations.order(:created_at).first
+    if next_obs
+      occ.update!(primary_observation: next_obs)
+    else
+      occ.destroy!
+    end
   end
 
   # Track a pending change for email notification batching.

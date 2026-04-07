@@ -1,4 +1,4 @@
-<%# locals: (obs: nil, consensus: nil, user: nil, sites: []) %>
+<%# locals: (obs: nil, consensus: nil, user: nil, sites: [], siblings: []) %>
 
 <%=
 tag.div(
@@ -17,9 +17,9 @@ tag.div(
       ) if sites.any?
     end,
 
-    if obs.external_links.any?
+    if obs.external_links.any? || siblings.any? { |s| s.external_links.any? }
       tag.ul(class: "tight-list") do
-        obs.external_links.sort_by(&:site_name).map do |link|
+        own_items = obs.external_links.sort_by(&:site_name).map do |link|
           tag.li(id: "external_link_#{link.id}") do
             (external_link(link))
             concat(
@@ -37,7 +37,9 @@ tag.div(
               ].safe_join(" ")
             ) if link.can_edit?(user) || in_admin_mode?
           end
-        end.safe_join
+        end
+        (own_items.safe_join +
+         sibling_external_link_items(siblings)).html_safe
       end
     end
 

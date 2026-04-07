@@ -8,25 +8,24 @@ require "haversine"
 
 # MyCoPortal is built on Symbiota
 # https://symbiota.org/
-# https://biokic.github.io/symbiota-docs/
+# https://docs.symbiota.org/
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
-    # http_domain for links to Observations
-    HTTP_DOMAIN = "https://mushroomobserver.org"
-
+    # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
     # Label names for the columns in the report.
-    # Some Symbiota Standard Fields
-    # https://biokic.github.io/symbiota-docs/editor/edit/fields/#standard-fields
-    # plus some MyCoPortal-specific fields
+    # https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/data_import_fields/
+    # See also https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/
     # Includes only fields needed for upload to MyCoPortal.
     # MyCoPortal fills in other fields automatically.
     def labels
       [
-        "dbpk", # MCP-specific; MO observation.id; was "mushroomObserverId",
-        "basisOfRecord", # : "HumanObservation",
+        # dbpk (database primary key); required for snapshot collections;
+        # Not a DwC standard field
+        "dbpk", # observation.id
+        "basisOfRecord", # : "HumanObservation"
         "catalogNumber", # "MUOB" + space + observation.id"
-        "sciname",
+        "sciname", # scientific name without author; not a DwC standard field
         "identificationQualifier",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
@@ -34,7 +33,6 @@ module Report
         "substrate",
         "occurrenceRemarks", # MO observation.notes; was fieldNotes
         "associatedTaxa", # was "host"
-        "verbatimAttributes", # anchored link to obs; was observationUrl
         "country",
         "stateProvince",
         "county",
@@ -50,7 +48,7 @@ module Report
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
-        row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
+        row.obs_id, # (dbpk database primary key)
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
         sciname(row), # (mono- or binomial without author)
@@ -61,7 +59,6 @@ module Report
         substrate(row),
         occurence_remarks(row), # notes minus substrate and associatedTaxa
         associated_taxa(row), # was`host`
-        verbatim_attributes(row), # anchored link to MO observation url
         row.country, # country
         row.state, # stateProvince
         row.county, # county
@@ -114,7 +111,7 @@ module Report
     end
 
     # host plus associates
-    # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
+    # https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/#associated-taxa
     def associated_taxa(row)
       host = explode_notes(row)[:host]
       trees_shrubs = explode_notes(row)[:trees_shrubs]
@@ -123,13 +120,6 @@ module Report
       return associates if trees_shrubs.blank?
 
       "#{trees_shrubs}; #{associates}"
-    end
-
-    # text of an anchored link to the MO Observation
-    def verbatim_attributes(row)
-      "<a href='#{HTTP_DOMAIN}/#{row.obs_id}' " \
-      "target='_blank' style='color: blue;'>" \
-      "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
     end
 
     # coordinateUncertaintyInMeters

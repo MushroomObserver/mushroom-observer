@@ -26,6 +26,7 @@ class Components::FormCarouselItem < Components::BaseImage
   prop :upload, _Boolean, default: false
   prop :obs_thumb_id, _Nilable(Integer), default: nil
   prop :camera_info, Hash, default: -> { {} }
+  prop :sibling, _Boolean, default: false
 
   def initialize(index: 0, upload: false, obs_thumb_id: nil, camera_info: {},
                  **props)
@@ -67,7 +68,7 @@ class Components::FormCarouselItem < Components::BaseImage
     ) do
       div(class: "row") do
         render_image_column
-        render_form_column
+        render_form_column unless @sibling
         render_control_buttons
       end
     end
@@ -79,12 +80,16 @@ class Components::FormCarouselItem < Components::BaseImage
   end
 
   def build_item_data
+    status = if @sibling then "sibling"
+             elsif @upload then "upload"
+             else "good"
+             end
     item_data = {
       form_images_target: "item",
       form_exif_target: "item",
       action: "form-exif:populated->form-images#itemExifPopulated",
       image_uuid: @img_id,
-      image_status: @upload ? "upload" : "good"
+      image_status: status
     }
 
     item_data[:geocode] = @camera_info.to_json unless @upload
@@ -124,7 +129,7 @@ class Components::FormCarouselItem < Components::BaseImage
 
   def render_control_buttons
     render_thumbnail_button
-    render_remove_button
+    render_remove_button unless @sibling
   end
 
   def render_thumbnail_button

@@ -1,8 +1,8 @@
 <%# locals: (user: nil, obs: nil, consensus: nil) %>
 
 <%
-namings = obs.namings.sort_by(&:created_at)
-any_names = obs.namings&.length&.positive?
+merged = consensus.merged_namings
+any_names = merged.any?
 %>
 
 <%=
@@ -11,10 +11,12 @@ tag.div(
   class: "list-group list-group-flush"
 ) do
   if any_names
-    namings.each do |naming|
+    merged.each do |merged_naming|
       concat(
         render(partial: "observations/show/namings/row",
-               locals: { **naming_row_content(user, consensus, naming) })
+               locals: {
+                 **naming_row_content(user, consensus, merged_naming)
+               })
       )
     end
   else

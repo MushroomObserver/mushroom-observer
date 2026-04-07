@@ -154,7 +154,7 @@ module Components
 
     def observations_tab
       tab_item(
-        "#{@project.observations.length} #{:OBSERVATIONS.l}",
+        "#{@project.visible_observations.count} #{:OBSERVATIONS.l}",
         observations_path(project: @project),
         "observations"
       )
