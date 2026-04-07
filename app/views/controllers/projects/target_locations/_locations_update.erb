@@ -1,0 +1,10 @@
+<%= turbo_stream.replace("target_locations_widget") do %>
+  <%= render(partial: "projects/target_locations/widget",
+             locals: { project: project }) %>
+<% end %>
+<%= turbo_stream.replace("locations_table") do %>
+  <%= render(partial: "projects/locations/locations_table",
+             locals: { project: project, user: user,
+                       locations: locations }) %>
+<% end %>
+<%= render_turbo_stream_flash_messages %>
