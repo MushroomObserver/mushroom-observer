@@ -114,6 +114,16 @@ module Projects
       assert_not_includes(project.target_names.reload, name)
     end
 
+    def test_destroy_with_invalid_name
+      project = projects(:rare_fungi_project)
+      login("rolf")
+
+      delete(:destroy, params: { project_id: project.id,
+                                 id: 999_999 })
+
+      assert_flash_error
+    end
+
     def test_destroy_as_non_admin
       project = projects(:rare_fungi_project)
       name = names(:coprinus_comatus)

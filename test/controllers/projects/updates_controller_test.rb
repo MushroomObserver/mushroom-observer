@@ -18,6 +18,22 @@ module Projects
       assert_response(:success)
     end
 
+    def test_index_with_pagination
+      # Create extra candidates matching both target name and location
+      burbank = locations(:burbank)
+      name = names(:coprinus_comatus)
+      2.times do
+        Observation.create!(name: name, user: users(:rolf),
+                            location: burbank, when: Time.zone.now)
+      end
+      # Set layout_count to 1 so pagination triggers
+      users(:rolf).update!(layout_count: 1)
+
+      get(:index, params: { project_id: @project.id })
+
+      assert_response(:success)
+    end
+
     def test_index_as_non_admin
       login("mary")
 
@@ -85,7 +101,9 @@ module Projects
     end
 
     def test_clear
-      @project.add_observation(@matching_obs)
+      # Use an obs that matches both target name AND target location
+      candidate = observations(:agaricus_campestris_obs)
+      @project.add_observation(candidate)
 
       delete(:clear, params: { project_id: @project.id })
 
@@ -93,6 +111,7 @@ module Projects
         project_updates_path(project_id: @project.id)
       )
       assert_flash(/Removed/)
+      assert_not_includes(@project.observations.reload, candidate)
     end
 
     def test_add_observation_not_found
