@@ -8,6 +8,6 @@ add_project_banner(@project)
              locals: { project: @project }) %>
 <% end %>
 
-<%= render(partial: "projects/locations/locations_table",
-           locals: { project: @project, locations: @locations,
-                     user: @user }) %>
+<%= render(Components::Projects::LocationsTable.new(
+             project: @project, locations: @locations, user: @user
+           )) %>

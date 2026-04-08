@@ -412,6 +412,48 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     project_target_names.any? || project_target_locations.any?
   end
 
+  # Observations matching target names (with synonyms) AND within
+  # target locations. When only one type of target is set, matches
+  # on that alone.
+  def candidate_observations
+    name_ids = candidate_name_ids
+    loc_ids = candidate_location_ids
+    return Observation.none if name_ids.nil? && loc_ids.nil?
+
+    scope = if name_ids && loc_ids
+              Observation.where(id: name_ids).
+                where(id: loc_ids)
+            elsif name_ids
+              Observation.where(id: name_ids)
+            else
+              Observation.where(id: loc_ids)
+            end
+    scope.order(created_at: :desc)
+  end
+
+  private
+
+  def candidate_name_ids
+    return unless target_names.any?
+
+    Observation.names(lookup: target_name_ids,
+                      include_synonyms: true).select(:id)
+  end
+
+  def candidate_location_ids
+    return unless target_locations.any?
+
+    Observation.within_locations(target_locations).select(:id)
+  end
+
+  public
+
+  delegate :count, to: :candidate_observations, prefix: true
+
+  def new_candidate_observations_count
+    candidate_observations.where.not(id: observation_ids).count
+  end
+
   def self.find_by_title_with_wildcards(str)
     find_using_wildcards("title", str)
   end
@@ -509,8 +551,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def location_count
-    Location.joins(:observations).
-      merge(visible_observations).distinct.count
+    obs_loc_ids = Location.joins(:observations).
+                  merge(visible_observations).distinct.pluck(:id)
+    target_loc_ids = target_location_ids
+    (obs_loc_ids + target_loc_ids).uniq.size
   end
 
   def count_collections(name)

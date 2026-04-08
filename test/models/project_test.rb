@@ -282,4 +282,58 @@ class ProjectTest < UnitTestCase
     empty = projects(:empty_project)
     assert_not(empty.has_targets?)
   end
+
+  def test_candidate_observations
+    proj = projects(:rare_fungi_project)
+    # Project has both target names and target locations, so
+    # candidates must match BOTH (AND logic).
+    candidates = proj.candidate_observations
+
+    # coprinus_comatus_obs matches a target name but is in Glendale,
+    # not within the Burbank target location — should NOT match.
+    coprinus_obs = observations(:coprinus_comatus_obs)
+    assert_not_includes(candidates, coprinus_obs)
+
+    # agaricus_campestris_obs matches target name AND is in Burbank
+    agaricus_obs = observations(:agaricus_campestris_obs)
+    assert_includes(candidates, agaricus_obs)
+
+    # Count should match
+    assert_equal(candidates.count, proj.candidate_observations_count)
+  end
+
+  def test_candidate_observations_empty_targets
+    proj = projects(:empty_project)
+    assert_equal(0, proj.candidate_observations.count)
+  end
+
+  def test_candidate_observations_names_only
+    proj = projects(:rare_fungi_project)
+    # Remove all target locations so only names remain
+    proj.project_target_locations.destroy_all
+    assert(proj.target_names.any?)
+    assert_not(proj.target_locations.any?)
+
+    candidates = proj.candidate_observations
+    coprinus_obs = observations(:coprinus_comatus_obs)
+    assert_includes(candidates, coprinus_obs)
+  end
+
+  def test_candidate_observations_locations_only
+    proj = projects(:rare_fungi_project)
+    # Remove all target names so only locations remain
+    proj.project_target_names.destroy_all
+    assert_not(proj.target_names.any?)
+    assert(proj.target_locations.any?)
+
+    candidates = proj.candidate_observations
+    assert(candidates.count >= 0, "Should query without error")
+  end
+
+  def test_field_slip_prefix_validation
+    proj = Project.new(title: "Test", field_slip_prefix: "bad prefix!")
+    proj.valid?
+    assert(proj.errors[:field_slip_prefix].any?,
+           "Should reject invalid field_slip_prefix")
+  end
 end

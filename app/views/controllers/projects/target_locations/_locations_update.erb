@@ -3,8 +3,14 @@
              locals: { project: project }) %>
 <% end %>
 <%= turbo_stream.replace("locations_table") do %>
-  <%= render(partial: "projects/locations/locations_table",
-             locals: { project: project, user: user,
-                       locations: locations }) %>
+  <%= render(Components::Projects::LocationsTable.new(
+               project: project, locations: locations, user: user
+             )) %>
+<% end %>
+<%= turbo_stream.replace("project_tabs") do %>
+  <%= render(Components::Projects::Tabs.new(
+               project: project, user: user,
+               current_tab: "locations"
+             )) %>
 <% end %>
 <%= render_turbo_stream_flash_messages %>

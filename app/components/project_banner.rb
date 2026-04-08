@@ -16,6 +16,7 @@ module Components
     include Phlex::Rails::Helpers::ContentFor
 
     prop :project, _Nilable(Project)
+    prop :user, _Nilable(User), default: nil
     prop :on_project_page, _Boolean, default: false
     prop :current_tab, _Nilable(String), default: nil
 
@@ -28,7 +29,12 @@ module Components
         render_banner_without_image
       end
 
-      render_project_tabs if project_has_content?
+      div(class: "row") do
+        render(Components::Projects::Tabs.new(
+                 project: @project, user: @user,
+                 current_tab: @current_tab
+               ))
+      end
     end
 
     private
@@ -121,94 +127,6 @@ module Components
       div(class: date_classes) do
         b { @project.date_range }
       end
-    end
-
-    def render_project_tabs
-      div(class: "row") do
-        div(class: "col-xs-12", id: "project_tabs") do
-          ul(class: "nav nav-tabs") do
-            summary_tab
-            observation_tabs if @project.observations.any?
-            species_list_tabs if @project.species_lists.any? &&
-                                 @project.observations.empty?
-          end
-        end
-      end
-    end
-
-    def summary_tab
-      li(class: "nav-item") do
-        a(
-          href: project_path(id: @project.id),
-          class: tab_classes("projects")
-        ) { :SUMMARY.t }
-      end
-    end
-
-    def observation_tabs
-      observations_tab
-      species_lists_tab
-      names_tab
-      locations_tab
-    end
-
-    def observations_tab
-      tab_item(
-        "#{@project.visible_observations.count} #{:OBSERVATIONS.l}",
-        observations_path(project: @project),
-        "observations"
-      )
-    end
-
-    def species_lists_tab
-      tab_item(
-        "#{@project.species_lists.length} #{:SPECIES_LISTS.l}",
-        species_lists_path(project: @project),
-        "species_lists"
-      )
-    end
-
-    def names_tab
-      tab_item(
-        "#{@project.name_count} #{:NAMES.l}",
-        checklist_path(project_id: @project.id),
-        "checklists"
-      )
-    end
-
-    def locations_tab
-      tab_item(
-        "#{@project.location_count} #{:LOCATIONS.l}",
-        project_locations_path(project_id: @project.id),
-        "locations"
-      )
-    end
-
-    def species_list_tabs
-      tab_item(
-        "#{@project.species_lists.length} #{:SPECIES_LISTS.l}",
-        species_lists_path(project: @project),
-        "species_lists"
-      )
-    end
-
-    def tab_item(text, path, tab_name)
-      li(class: "nav-item") do
-        a(href: path, class: tab_classes(tab_name)) { text }
-      end
-    end
-
-    def tab_classes(tab_name)
-      base = "mt-3 nav-link"
-      "#{base} #{"active" if active_tab?(tab_name)}"
-    end
-
-    def active_tab?(tab_name)
-      @current_tab == tab_name
-    end
-
-    def project_has_content?
-      @project.observations.any? || @project.species_lists.any?
     end
   end
 end
