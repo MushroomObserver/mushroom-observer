@@ -58,11 +58,14 @@ module Projects
     def build_index_results
       candidates = @project.candidate_observations
       pagination = build_pagination(candidates)
-      member_ids = @project.observation_ids.to_set
-      { observations: paginated_observations(candidates, pagination),
+      obs_page = paginated_observations(candidates, pagination)
+      page_ids = obs_page.map(&:id)
+      member_ids = @project.observations.where(id: page_ids).
+                   pluck(:id).to_set
+      { observations: obs_page,
         pagination: pagination,
         member_ids: member_ids,
-        new_count: candidates.where.not(id: member_ids.to_a).count,
+        new_count: @project.new_candidate_observations_count,
         base_url: request.path }
     end
 
@@ -91,7 +94,7 @@ module Projects
     end
 
     def render_footer_update(obs)
-      in_project = @project.observations.include?(obs)
+      in_project = @project.observations.exists?(obs.id)
       respond_to do |format|
         format.turbo_stream do
           render(
@@ -108,7 +111,7 @@ module Projects
 
     def bulk_add_candidates
       candidates = @project.candidate_observations.
-                   where.not(id: @project.observation_ids)
+                   where.not(id: @project.observations.select(:id))
       count = 0
       candidates.find_each do |obs|
         @project.add_observation(obs)
@@ -119,7 +122,7 @@ module Projects
 
     def bulk_remove_candidates
       in_project = @project.candidate_observations.
-                   where(id: @project.observation_ids)
+                   where(id: @project.observations.select(:id))
       count = 0
       in_project.find_each do |obs|
         @project.remove_observation(obs)

@@ -461,7 +461,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   delegate :count, to: :candidate_observations, prefix: true
 
   def new_candidate_observations_count
-    candidate_observations.where.not(id: observation_ids).count
+    candidate_observations.where.not(id: observations.select(:id)).count
   end
 
   def self.find_by_title_with_wildcards(str)
@@ -561,10 +561,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def location_count
-    obs_loc_ids = Location.joins(:observations).
-                  merge(visible_observations).distinct.pluck(:id)
-    target_loc_ids = target_location_ids
-    (obs_loc_ids + target_loc_ids).uniq.size
+    obs_locs = Location.joins(:observations).
+               merge(visible_observations).select(:id)
+    Location.where(id: obs_locs).
+      or(Location.where(id: target_location_ids)).
+      distinct.count
   end
 
   def count_collections(name)
