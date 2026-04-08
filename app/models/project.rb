@@ -385,26 +385,36 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Add target name to this project if not already present.
   def add_target_name(name)
-    target_names.push(name) unless target_names.include?(name)
+    project_target_names.find_or_create_by!(name: name)
+    touch
+  rescue ActiveRecord::RecordNotUnique
+    # Already exists, no-op
   end
 
   # Remove target name from this project.
   def remove_target_name(name)
-    target_names.delete(name) if target_names.include?(name)
+    record = project_target_names.find_by(name: name)
+    return unless record
+
+    record.destroy
+    touch
   end
 
   # Add target location to this project if not already present.
   def add_target_location(location)
-    return if target_locations.include?(location)
-
-    target_locations.push(location)
+    project_target_locations.find_or_create_by!(location: location)
+    touch
+  rescue ActiveRecord::RecordNotUnique
+    # Already exists, no-op
   end
 
   # Remove target location from this project.
   def remove_target_location(location)
-    return unless target_locations.include?(location)
+    record = project_target_locations.find_by(location: location)
+    return unless record
 
-    target_locations.delete(location)
+    record.destroy
+    touch
   end
 
   # Does this project have any target names or target locations?
