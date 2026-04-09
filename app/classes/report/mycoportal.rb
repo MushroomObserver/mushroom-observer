@@ -28,6 +28,7 @@ module Report
         "occurrenceID", # GUID. The Obsevation URL. It must never change.
         "sciname", # scientific name without author; not a DwC standard field
         "identificationQualifier",
+        "taxonRemarks",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
         "eventDate",
@@ -55,6 +56,7 @@ module Report
         "https://mushroomobserver.org/obs/#{row.obs_id}", # occurrenceID
         sciname(row), # (mono- or binomial without author)
         identification_qualifier(row), # group, nom. prov., etc.
+        taxon_remarks(row),
         row.user_name_or_login, # recordedBy
         record_number(row), # recordNumber
         row.obs_when, # eventDate
@@ -91,6 +93,10 @@ module Report
       return provisional_identification_qualifier(row) if provisional?(row)
 
       row.name_author&.match(/sensu.*/)&.[](0)
+    end
+
+    def taxon_remarks(_row)
+      nil
     end
 
     # collector's number

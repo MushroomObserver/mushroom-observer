@@ -753,6 +753,7 @@ class ReportTest < UnitTestCase
       occurrenceID: "https://mushroomobserver.org/obs/#{obs.id}",
       sciname: obs.text_name,
       identificationQualifier: nil,
+      taxonRemarks: nil,
       recordedBy: obs.user.legal_name,
       recordNumber: obs.collection_numbers.first&.number || nil,
       eventDate: obs_when.strftime("%Y-%m-%d"),
