@@ -750,6 +750,7 @@ class ReportTest < UnitTestCase
       dbpk: obs.id.to_s,
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
+      occurrenceID: "https://mushroomobserver.org/obs/#{obs.id}",
       sciname: obs.text_name,
       identificationQualifier: nil,
       recordedBy: obs.user.legal_name,

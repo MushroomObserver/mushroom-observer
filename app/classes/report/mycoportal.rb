@@ -25,6 +25,7 @@ module Report
         "dbpk", # observation.id
         "basisOfRecord", # : "HumanObservation"
         "catalogNumber", # "MUOB" + space + observation.id"
+        "occurrenceID", # GUID. The Obsevation URL. It must never change.
         "sciname", # scientific name without author; not a DwC standard field
         "identificationQualifier",
         "recordedBy",
@@ -51,6 +52,7 @@ module Report
         row.obs_id, # (dbpk database primary key)
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
+        "https://mushroomobserver.org/obs/#{row.obs_id}", # occurrenceID
         sciname(row), # (mono- or binomial without author)
         identification_qualifier(row), # group, nom. prov., etc.
         row.user_name_or_login, # recordedBy
