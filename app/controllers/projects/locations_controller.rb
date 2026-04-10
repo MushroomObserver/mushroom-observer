@@ -14,11 +14,14 @@ module Projects
       return unless find_project!
 
       locs = @project.locations.distinct
-      @locations = if User.current_location_format == "scientific"
-                     locs.order(:scientific_name)
-                   else
-                     locs.order(:name)
-                   end
+      locations = if User.current_location_format == "scientific"
+                    locs.order(:scientific_name)
+                  else
+                    locs.order(:name)
+                  end
+      render(Views::Controllers::Projects::Locations::Index.new(
+               project: @project, locations: locations
+             ), layout: true)
     end
 
     private
