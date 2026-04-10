@@ -844,9 +844,9 @@ imported_inat_obs:
   inat_id: 12345
   source: <%= Observation.sources[:mo_inat_import] %>
 
-provisional_obs:
+code_name_obs:
   <<: *DEFAULTS
-  name: provisional_name
+  name: code_name
 
 old_name_obs:
   <<: *DEFAULTS

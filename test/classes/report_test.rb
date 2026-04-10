@@ -532,29 +532,54 @@ class ReportTest < UnitTestCase
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_standard_provisional
-    name = Name.create!(
+  # Code names: text_name contains a single-quote (e.g. sp. 'IN34')
+  # sciname = genus only; identificationQualifier = nil;
+  # taxonRemarks = text_name + " " + author (stripped)
+  def test_mycoportal_code_name_unauthored_no_qualifier
+    obs = Observation.create!(
       user: rolf,
-      rank: "Species",
-      text_name: "Geoglossum sp. 'MI01'",
-      author: "",
-      search_name: "Geoglossum sp. 'MI01'",
-      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
+      when: Time.zone.now,
+      location: locations(:burbank),
+      where: locations(:burbank).name,
+      name: names(:code_name)
     )
-    location = locations(:burbank)
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: location, where: location.name,
-                              name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Geoglossum sp. 'MI01'",
-      identificationQualifier: "nom. prov."
+      sciname: "Cortinarius",
+      identificationQualifier: nil,
+      taxonRemarks: "Cortinarius sp. 'IN34'"
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_standard_provisional_authored
+  def test_mycoportal_code_name_with_author
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Geoglossum sp. 'MI01'",
+      author: "S.D. Russell",
+      search_name: "Geoglossum sp. 'MI01' S.D. Russell",
+      display_name: "**__Geoglossum__** sp. **__'MI01'__** S.D. Russell"
+    )
+    obs = Observation.create!(
+      user: rolf,
+      when: Time.zone.now,
+      location: locations(:burbank),
+      where: locations(:burbank).name,
+      name: name
+    )
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Geoglossum",
+      identificationQualifier: nil,
+      taxonRemarks: "Geoglossum sp. 'MI01' S.D. Russell"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_code_name_with_author_in_taxon_remarks
     name = Name.create!(
       user: rolf,
       rank: "Species",
@@ -569,31 +594,9 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Geoglossum sp. 'MI01'",
-      identificationQualifier: "S.D. Russell nom. prov."
-    ).values
-
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
-  def test_mycoportal_standard_provisional_authored_crypt
-    name = Name.create!(
-      user: rolf,
-      rank: "Species",
-      text_name: "Agaricus sp. 'IN01'",
-      author: "S.D. Russell crypt. temp.",
-      search_name: "Agaricus sp. 'IN01' S.D. Russell crypt. temp.",
-      display_name: "**__Agaricus__** sp. **__'IN01'__** " \
-                    "S.D. Russell crypt. temp."
-    )
-    location = locations(:burbank)
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: location, where: location.name,
-                              name: name)
-
-    expect = hashed_expect(obs).merge(
-      sciname: "Agaricus sp. 'IN01'",
-      identificationQualifier: "S.D. Russell crypt. temp."
+      sciname: "Geoglossum",
+      identificationQualifier: nil,
+      taxonRemarks: "Geoglossum sp. 'MI01' S.D. Russell"
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)

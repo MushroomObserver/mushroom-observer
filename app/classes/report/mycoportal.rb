@@ -76,9 +76,10 @@ module Report
       ]
     end
 
-    # taxon name, without authority or qualifcation (such as "group")
+    # taxon name, without authority or qualification (such as "group")
     def sciname(row)
       text_name = row.name_text_name
+      return text_name.split.first if code_name?(row)
       # The last word in text_name could be Group or Complex
       return text_name_without_last_word(text_name) if group?(row)
 
@@ -88,6 +89,7 @@ module Report
     # Qualifies unpublished MO text_name.
     # Examples: nom. prov., crypt. temp., group, sensu lato, sensu auct.
     def identification_qualifier(row)
+      return nil if code_name?(row)
       return nil unless qualified_name?(row)
       return "group #{row.name_author}".strip if group?(row)
       return provisional_identification_qualifier(row) if provisional?(row)
@@ -95,8 +97,11 @@ module Report
       row.name_author&.match(/sensu.*/)&.[](0)
     end
 
-    def taxon_remarks(_row)
-      nil
+    # Full code name with author, for names using single-quoted epithets
+    def taxon_remarks(row)
+      return unless code_name?(row)
+
+      "#{row.name_text_name} #{row.name_author}".strip
     end
 
     # collector's number
@@ -205,8 +210,12 @@ module Report
         explicit_provisional?(row)
     end
 
+    def code_name?(row)
+      row.name_text_name.match?(/'/)
+    end
+
     def standard_provisional?(row)
-      row.name_text_name.match?(/['"]/)
+      row.name_text_name.match?(/"/)
     end
 
     def explicit_provisional?(row)
