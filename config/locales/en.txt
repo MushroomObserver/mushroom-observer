@@ -1406,7 +1406,7 @@
   source_credit_mo_android_app: Created via the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34
   source_credit_mo_iphone_app: Created via the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34
   source_credit_mo_api: Created via the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
-  source_credit_mo_inat_import: Imported from "iNaturalist":https://www.inaturalist.org via "Import from iNat":https://mushroomobserver.org/articles/39
+  source_credit_mo_inat_import: '"Imported from iNaturalist":https://mushroomobserver.org/articles/39'
 
   ##############################################################################
 
