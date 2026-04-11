@@ -48,9 +48,8 @@ module Report
 
     def image_list
       rows_data =
-        Image.joins(:observations, :license).
+        Image.joins(:observations).
         where(observations: { id: @query.result_ids }).
-        where(license: open_licenses).
         # MCP doesn't care about order, but our tests do.
         order(observation_id: :asc, id: :asc).
         pluck(:observation_id, :id)
@@ -61,10 +60,6 @@ module Report
           csv << formatted_row(row)
         end
       end
-    end
-
-    def open_licenses
-      License.where(License[:url] =~ %r{/(by|by-nc|publicdomain)/})
     end
 
     def formatted_row(row)
