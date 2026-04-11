@@ -595,7 +595,80 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Gymnopus bakerensis",
-      identificationQualifier: "(A.H. Sm.) auct. comb. prov."
+      identificationQualifier: "comb. prov.",
+      taxonRemarks: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  # Provisional names: author matches /\w+\. prov\./
+  # sciname = text_name unchanged; identificationQualifier = matched token;
+  # taxonRemarks = text_name + " " + author (stripped)
+  def test_mycoportal_provisional_bare_nom_prov
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Cortinarius percomis",
+      author: "nom. prov.",
+      search_name: "Cortinarius percomis nom. prov.",
+      display_name: "__Cortinarius__ __percomis__ nom. prov."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius percomis",
+      identificationQualifier: "nom. prov.",
+      taxonRemarks: "Cortinarius percomis nom. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_provisional_authored_nom_prov
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Cortinarius percomis",
+      author: "S.D. Russell nom. prov.",
+      search_name: "Cortinarius percomis S.D. Russell nom. prov.",
+      display_name: "__Cortinarius__ __percomis__ S.D. Russell nom. prov."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius percomis",
+      identificationQualifier: "nom. prov.",
+      taxonRemarks: "Cortinarius percomis S.D. Russell nom. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_provisional_comb_prov
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Cortinarius percomis",
+      author: "(Fr.) auct. comb. prov.",
+      search_name: "Cortinarius percomis (Fr.) auct. comb. prov.",
+      display_name: "__Cortinarius__ __percomis__ (Fr.) auct. comb. prov."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius percomis",
+      identificationQualifier: "comb. prov.",
+      taxonRemarks: "Cortinarius percomis (Fr.) auct. comb. prov."
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)

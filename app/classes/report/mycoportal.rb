@@ -87,19 +87,19 @@ module Report
     end
 
     # Qualifies unpublished MO text_name.
-    # Examples: nom. prov., crypt. temp., group, sensu lato, sensu auct.
+    # Examples: nom. prov., comb. prov., group, sensu lato, sensu auct.
     def identification_qualifier(row)
       return nil unless unregistrable_name?(row)
       return nil if code_name?(row)
       return "group #{row.name_author}".strip if group?(row)
-      return provisional_identification_qualifier(row) if provisional?(row)
+      return prov_token(row) if provisional?(row)
 
       row.name_author&.match(/sensu.*/)&.[](0)
     end
 
-    # Full code name with author, for names using single-quoted epithets
+    # Full name+author for code names and provisional names
     def taxon_remarks(row)
-      return unless code_name?(row)
+      return unless code_name?(row) || provisional?(row)
 
       "#{row.name_text_name} #{row.name_author}".strip
     end
@@ -207,30 +207,15 @@ module Report
     end
 
     def provisional?(row)
-      standard_provisional?(row) ||
-        explicit_provisional?(row)
+      row.name_author&.match?(/\w+\. prov\./)
+    end
+
+    def prov_token(row)
+      row.name_author&.match(/\w+\. prov\./)&.[](0)
     end
 
     def code_name?(row)
       row.name_text_name.match?(/'/)
-    end
-
-    def standard_provisional?(row)
-      row.name_text_name.match?(/"/)
-    end
-
-    def explicit_provisional?(row)
-      row.name_author&.match?(/ (prov|crypt)\./)
-    end
-
-    def provisional_identification_qualifier(row)
-      return "nom. prov." if row.name_author.blank?
-
-      if row.name_author&.match(/(prov|crypt)\./)
-        row.name_author
-      else
-        "#{row.name_author} nom. prov."
-      end
     end
 
     def distance_from_center_to_farthest_corner(row)
