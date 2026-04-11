@@ -91,15 +91,15 @@ module Report
     def identification_qualifier(row)
       return nil unless unregistrable_name?(row)
       return nil if code_name?(row)
-      return "group #{row.name_author}".strip if group?(row)
+      return group_token(row) if group?(row)
       return prov_token(row) if provisional?(row)
 
       row.name_author&.match(/sensu.*/)&.[](0)
     end
 
-    # Full name+author for code names and provisional names
+    # Full name+author for code names, provisional names, and groups
     def taxon_remarks(row)
-      return unless code_name?(row) || provisional?(row)
+      return unless code_name?(row) || provisional?(row) || group?(row)
 
       "#{row.name_text_name} #{row.name_author}".strip
     end
@@ -187,7 +187,11 @@ module Report
     private
 
     def group?(row)
-      row.name_rank == "Group"
+      row.name_text_name.match?(/(group|complex|clade)$/)
+    end
+
+    def group_token(row)
+      row.name_text_name.match(/(group|complex|clade)$/)[0]
     end
 
     def text_name_without_last_word(text_name)

@@ -494,7 +494,8 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Boletus edulis",
-      identificationQualifier: "group"
+      identificationQualifier: "group",
+      taxonRemarks: "Boletus edulis group"
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -510,23 +511,80 @@ class ReportTest < UnitTestCase
       display_name: "**__Tricholoma__** **__caligatum__** group " \
                     "sensu Besette et al."
     )
-    unqualified_name = Name.create!(
-      user: rolf,
-      rank: "Species",
-      text_name: "Tricholoma caligatum",
-      author: "(Viv.) Ricken",
-      search_name: "Tricholoma caligatum (Viv.) Ricken",
-      display_name: "**__Tricholoma__** **__caligatum__** (Viv.) Ricken"
-    )
-
     location = locations(:burbank)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
                               location: location, where: location.name,
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: unqualified_name.text_name,
-      identificationQualifier: "group sensu Besette et al."
+      sciname: "Tricholoma caligatum",
+      identificationQualifier: "group",
+      taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  # Groups: text_name ends in /(group|complex|clade)$/
+  # sciname = text_name without the ending; identificationQualifier = the
+  # ending token only; taxonRemarks = full text_name + author (stripped)
+  def test_mycoportal_group_taxon_remarks
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: names(:boletus_edulis_group))
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Boletus edulis",
+      identificationQualifier: "group",
+      taxonRemarks: "Boletus edulis group"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_group_sensu_id_qualifier_is_token_only
+    name = Name.create!(
+      user: rolf,
+      rank: "Group",
+      text_name: "Tricholoma caligatum group",
+      author: "sensu Besette et al.",
+      search_name: "Tricholoma caligatum group sensu Besette et al.",
+      display_name: "**__Tricholoma__** **__caligatum__** group " \
+                    "sensu Besette et al."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Tricholoma caligatum",
+      identificationQualifier: "group",
+      taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_complex
+    name = Name.create!(
+      user: rolf,
+      rank: "Group",
+      text_name: "Russula emetica complex",
+      author: "",
+      search_name: "Russula emetica complex",
+      display_name: "**__Russula__** **__emetica__** complex"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Russula emetica",
+      identificationQualifier: "complex",
+      taxonRemarks: "Russula emetica complex"
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
