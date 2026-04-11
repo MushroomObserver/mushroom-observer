@@ -61,13 +61,24 @@ module Projects
 
     # Strip checklist annotations: "(count)", "*", "+"
     def lookup_name(entry)
-      cleaned = entry.strip.
-                sub(/\s*\(\d+\)/, "").
-                delete("*+").
-                squish
+      cleaned = strip_annotations(entry).squish
       return if cleaned.blank?
 
       Name.find_by(text_name: cleaned)
+    end
+
+    # Remove "(123)", "*", "+" from pasted checklist text
+    # without using regex on user input
+    def strip_annotations(entry)
+      text = entry.strip.delete("*+")
+      return text unless (paren_start = text.rindex("("))
+
+      paren_end = text.rindex(")")
+      return text unless paren_end && paren_end > paren_start
+
+      inside = text[(paren_start + 1)...paren_end]
+      digits_only = inside.bytes.all? { |b| b.between?(48, 57) }
+      digits_only ? text[0...paren_start] : text
     end
 
     def add_names(names)
