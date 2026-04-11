@@ -119,9 +119,11 @@ rolf_profile_image:
 
 query_first_image:
   <<: *DEFAULTS
+  license: ccby
 
 query_second_image:
   <<: *DEFAULTS
+  license: ccby
 
 locally_sequenced_obs_image:
   <<: *DEFAULTS

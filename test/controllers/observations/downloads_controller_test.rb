@@ -363,9 +363,13 @@ module Observations
         obss_with_images.any? { |obs| obs.images.many? },
         "Test needs query which results in >=1 Observations with many Images"
       )
+      open_license_urls = [%r{/by/}, %r{/by-nc/}, /publicdomain/]
       expect = ["catalogNumber,imageId"]
       obss_with_images.uniq.each do |obs|
-        obs.images.each do |image|
+        open_images = obs.images.select do |img|
+          open_license_urls.any? { |pat| img.license.url.match?(pat) }
+        end
+        open_images.each do |image|
           expect << "MUOB #{obs.id}," \
                     "https://mushroomobserver.org/images/1280/#{image.id}.jpg"
         end
@@ -383,7 +387,8 @@ module Observations
       assert_response(:success)
       rows = @response.body.split("\n")
       assert_equal("catalogNumber,imageId", rows.first, "Wrong header row")
-      assert_equal(obss_with_images.count + 1, rows.count)
+      assert_equal(expect.count, rows.count,
+                   "Row count should match open-license images + header")
       assert_equal(expect, rows, "Wrong MyCoPortal Image List csv")
     end
   end
