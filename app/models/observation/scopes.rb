@@ -483,14 +483,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # multi-observation occurrence. Single-observation occurrences
     # (used for field slip linking) are not filtered.
     scope :exclude_non_primary, lambda {
-      multi_occ_ids = Observation.where.not(occurrence_id: nil).
-                      group(:occurrence_id).
-                      having("COUNT(*) > 1").select(:occurrence_id)
       left_outer_joins(:occurrence).where(
         Observation[:occurrence_id].eq(nil).or(
           Occurrence[:primary_observation_id].eq(Observation[:id])
-        ).or(
-          Observation[:occurrence_id].not_in(multi_occ_ids.arel)
         )
       )
     }
