@@ -355,6 +355,20 @@ class OccurrenceTest < UnitTestCase
     assert_includes(result, obs_no_occ)
   end
 
+  def test_exclude_non_primary_scope_includes_single_obs_occurrence
+    # Create a single-obs occurrence where obs1 is the sole member
+    occ = Occurrence.create!(user: @obs1.user,
+                             primary_observation: @obs1)
+    @obs1.update!(occurrence: occ)
+
+    assert_equal(1, occ.observations.count)
+    assert_equal(@obs1.id, occ.primary_observation_id)
+
+    result = Observation.where(id: @obs1.id).exclude_non_primary
+    assert_includes(result, @obs1,
+                    "Single-obs occurrence should not be excluded")
+  end
+
   # == Phase 6: Shared Consensus Tests ==
 
   def test_shared_consensus_across_occurrence
