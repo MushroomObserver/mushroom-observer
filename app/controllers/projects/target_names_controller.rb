@@ -62,9 +62,9 @@ module Projects
     # Strip checklist annotations: "(count)", "*", "+"
     def lookup_name(entry)
       cleaned = entry.strip.
-                gsub(/\s*\(\d+\)\s*/, " ").
-                gsub(/\s*[*+]\s*/, " ").
-                strip
+                sub(/\s*\(\d+\)/, "").
+                delete("*+").
+                squish
       return if cleaned.blank?
 
       Name.find_by(text_name: cleaned)
