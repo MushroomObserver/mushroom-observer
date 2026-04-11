@@ -83,7 +83,12 @@ module Projects
       candidates.
         offset(pagination.from).
         limit(pagination.num_per_page).
-        includes(:name, :location, :user, :thumb_image)
+        includes(
+          observation_matrix_box_image_includes,
+          :location, :name, :rss_log, :user,
+          { namings: :votes },
+          { occurrence: :observations }, :projects
+        )
     end
 
     def require_admin
