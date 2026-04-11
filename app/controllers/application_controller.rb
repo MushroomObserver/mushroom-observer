@@ -330,7 +330,8 @@ class ApplicationController < ActionController::Base
     # Only want single-project associations
     query_project = query_projects.size > 1 ? nil : query_projects.first
     project_id = params[:project] || query_project
-    # At this point, we still might not have one. That's fine - just return nil.
+    return if project_id.blank?
+
     @project = Project.safe_find(project_id)
   end
 
