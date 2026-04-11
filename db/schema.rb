@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_04_172939) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_07_193046) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -617,6 +617,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_04_172939) do
   create_table "project_species_lists", charset: "utf8mb3", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "species_list_id", null: false
+  end
+
+  create_table "project_target_locations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "location_id", null: false
+    t.index ["location_id"], name: "index_project_target_locations_on_location_id"
+    t.index ["project_id", "location_id"], name: "index_project_target_locations_on_project_id_and_location_id", unique: true
+    t.index ["project_id"], name: "index_project_target_locations_on_project_id"
+  end
+
+  create_table "project_target_names", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "name_id", null: false
+    t.index ["name_id"], name: "index_project_target_names_on_name_id"
+    t.index ["project_id", "name_id"], name: "index_project_target_names_on_project_id_and_name_id", unique: true
+    t.index ["project_id"], name: "index_project_target_names_on_project_id"
   end
 
   create_table "projects", id: :integer, charset: "utf8mb3", force: :cascade do |t|

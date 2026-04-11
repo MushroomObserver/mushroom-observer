@@ -54,6 +54,41 @@ class Checklist
                         base
                       end
     end
+
+    delegate :target_name_ids, to: :@project
+
+    private
+
+    def calc_checklist
+      super
+      merge_target_names_into_taxa
+    end
+
+    def calc_counts
+      super
+      merge_target_names_into_counts
+    end
+
+    def merge_target_names_into_taxa
+      return unless @project.target_names.any?
+
+      # @taxa is {} when empty, array when populated
+      @taxa = [] if @taxa.is_a?(Hash)
+      observed_ids = @taxa.to_set { |entry| entry[1] }
+      @project.target_names.each do |name|
+        next if observed_ids.include?(name.id)
+
+        @taxa << [name.text_name, name.id,
+                  name.deprecated, name.synonym_id]
+      end
+      @taxa.sort_by! { |entry| entry[0] }
+    end
+
+    def merge_target_names_into_counts
+      @project.target_names.each do |name|
+        @counts[name.text_name] ||= 0
+      end
+    end
   end
 
   # Build list of species observed by one SpeciesList.

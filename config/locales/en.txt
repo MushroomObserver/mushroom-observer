@@ -3003,6 +3003,31 @@
   project_alias_updated: Field slip was successfully updated.
   project_alias_no_match: Unable to find [target_type] matching '[term]'
 
+  # Project Target Names
+  project_target_name_add: Add
+  project_target_names_added: "Added target names: [names]."
+  project_target_name_removed: Removed target name "[name]".
+  project_target_name_not_found: No matching names found.
+  project_target_name_confirm_remove: Remove "[name]" from target names?
+
+  # Project Target Locations
+  project_target_locations_title: Target Locations
+  project_target_location_add: Add
+  project_target_locations_added: "Added target locations: [names]."
+  project_target_location_removed: Removed target location "[name]".
+  project_target_location_not_found: No matching locations found.
+  project_target_location_confirm_remove: Remove "[name]" from target locations?
+
+  # Project Updates Tab
+  project_updates_title: Update
+  project_updates_count: "[count] matching observations"
+  project_updates_add_all: Add All
+  project_updates_clear: Clear
+  project_updates_confirm_add_all: Add all matching observations to this project?
+  project_updates_confirm_clear: Remove all matching observations from this project?
+  project_updates_added_all: "Added [count] observations to this project."
+  project_updates_cleared: "Removed [count] observations from this project."
+
   ##############################################################################
 
   # LESS POPULAR PAGES

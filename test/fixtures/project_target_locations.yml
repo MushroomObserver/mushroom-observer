@@ -1,0 +1,5 @@
+# Fixtures for project target locations (rare fungi challenge regions)
+
+rare_fungi_target_burbank:
+  project: rare_fungi_project
+  location: burbank

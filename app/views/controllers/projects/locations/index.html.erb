@@ -1,0 +1,13 @@
+<%
+container_class(:wide)
+add_project_banner(@project)
+%>
+
+<% if @project.is_admin?(@user) %>
+  <%= render(partial: "projects/target_locations/widget",
+             locals: { project: @project }) %>
+<% end %>
+
+<%= render(Components::Projects::LocationsTable.new(
+             project: @project, locations: @locations, user: @user
+           )) %>
