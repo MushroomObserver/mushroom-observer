@@ -534,7 +534,7 @@ class ReportTest < UnitTestCase
 
   # Code names: text_name contains a single-quote (e.g. sp. 'IN34')
   # sciname = genus only; identificationQualifier = nil;
-  # taxonRemarks = text_name + " " + author (stripped)
+  # taxonRemarks = binomial plus author
   def test_mycoportal_code_name_unauthored_no_qualifier
     obs = Observation.create!(
       user: rolf,
@@ -569,29 +569,6 @@ class ReportTest < UnitTestCase
       where: locations(:burbank).name,
       name: name
     )
-
-    expect = hashed_expect(obs).merge(
-      sciname: "Geoglossum",
-      identificationQualifier: nil,
-      taxonRemarks: "Geoglossum sp. 'MI01' S.D. Russell"
-    ).values
-
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
-  def test_mycoportal_code_name_with_author_in_taxon_remarks
-    name = Name.create!(
-      user: rolf,
-      rank: "Species",
-      text_name: "Geoglossum sp. 'MI01'",
-      author: "S.D. Russell",
-      search_name: "Geoglossum sp. 'MI01'",
-      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
-    )
-    location = locations(:burbank)
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: location, where: location.name,
-                              name: name)
 
     expect = hashed_expect(obs).merge(
       sciname: "Geoglossum",

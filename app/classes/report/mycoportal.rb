@@ -89,8 +89,8 @@ module Report
     # Qualifies unpublished MO text_name.
     # Examples: nom. prov., crypt. temp., group, sensu lato, sensu auct.
     def identification_qualifier(row)
+      return nil unless unregistrable_name?(row)
       return nil if code_name?(row)
-      return nil unless qualified_name?(row)
       return "group #{row.name_author}".strip if group?(row)
       return provisional_identification_qualifier(row) if provisional?(row)
 
@@ -194,10 +194,11 @@ module Report
       text_name.split[0...-1].join(" ")
     end
 
-    def qualified_name?(row)
+    def unregistrable_name?(row)
       group?(row) ||
         sensu_non_stricto?(row) ||
-        provisional?(row)
+        provisional?(row) ||
+        code_name?(row)
     end
 
     def sensu_non_stricto?(row)
