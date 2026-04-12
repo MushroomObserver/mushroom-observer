@@ -363,11 +363,11 @@ module Observations
         obss_with_images.any? { |obs| obs.images.many? },
         "Test needs query which results in >=1 Observations with many Images"
       )
-      expect = ["catalogNumber,imageId"]
+      expect = ["catalogNumber,imageId,rights"]
       obss_with_images.uniq.each do |obs|
-        obs.images.each do |image|
-          expect << "MUOB #{obs.id}," \
-                    "https://mushroomobserver.org/images/1280/#{image.id}.jpg"
+        obs.images.includes(:user, :license).find_each do |image|
+          img_url = "https://mushroomobserver.org/images/1280/#{image.id}.jpg"
+          expect << "MUOB #{obs.id},#{img_url},#{image_rights(image)}"
         end
       end
 
@@ -382,9 +382,20 @@ module Observations
 
       assert_response(:success)
       rows = @response.body.split("\n")
-      assert_equal("catalogNumber,imageId", rows.first, "Wrong header row")
+      assert_equal("catalogNumber,imageId,rights", rows.first,
+                   "Wrong header row")
       assert_equal(obss_with_images.count + 1, rows.count)
       assert_equal(expect, rows, "Wrong MyCoPortal Image List csv")
+    end
+
+    private
+
+    def image_rights(image)
+      url = image.license.url
+      abbr = url.match(%r{creativecommons\.org/licenses/([^/]+)})&.
+             then { |m| "CC-#{m[1].upcase}" } ||
+             ("CC0" if url.match?(/public_?domain/i))
+      "© #{image.user.unique_text_name} #{abbr} #{url}"
     end
   end
 end

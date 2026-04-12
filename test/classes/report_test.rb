@@ -731,6 +731,49 @@ class ReportTest < UnitTestCase
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_image_list_header
+    query = Query.lookup(:Observation)
+    body = report_body(Report::MycoportalImageList, query)
+    table = CSV.parse(body, col_sep: ",")
+    assert_equal(
+      %w[catalogNumber imageId rights],
+      table.first,
+      "MycoportalImageList header row should be catalogNumber, imageId, rights"
+    )
+  end
+
+  def test_mycoportal_image_list_cc_license_rights
+    obs = observations(:detailed_unknown_obs)
+    image = images(:in_situ_image)
+    row = mycoportal_image_list_row(obs, image)
+    assert_not_nil(
+      row,
+      "Expected row for obs #{obs.id}, image #{image.id}"
+    )
+    license = licenses(:ccnc30)
+    assert_equal(
+      "© #{users(:mary).unique_text_name} CC-BY-NC-SA #{license.url}",
+      row[2],
+      "rights should combine © user.unique_text_name, license abbreviation, url"
+    )
+  end
+
+  def test_mycoportal_image_list_cc0_rights
+    obs = observations(:peltigera_obs)
+    image = images(:peltigera_image)
+    row = mycoportal_image_list_row(obs, image)
+    assert_not_nil(
+      row,
+      "Expected row for obs #{obs.id}, image #{image.id}"
+    )
+    license = licenses(:publicdomain)
+    assert_equal(
+      "© #{users(:rolf).unique_text_name} CC0 #{license.url}",
+      row[2],
+      "rights for public domain image should use CC0 with url"
+    )
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
@@ -996,6 +1039,15 @@ class ReportTest < UnitTestCase
   end
 
   private
+
+  def mycoportal_image_list_row(obs, image)
+    query = Query.lookup(:Observation)
+    body = report_body(Report::MycoportalImageList, query)
+    table = CSV.parse(body, col_sep: ",")
+    table.find do |r|
+      r[0] == "MUOB #{obs.id}" && r[1].end_with?("/#{image.id}.jpg")
+    end
+  end
 
   def do_csv_test(report_type, obs, expect, user: nil, &block)
     query = Query.lookup(:Observation)

@@ -48,14 +48,15 @@ module Report
 
     def image_list
       rows_data =
-        Image.joins(:observations).
+        Image.joins(:observations, :user, :license).
         where(observations: { id: @query.result_ids }).
         # MCP doesn't care about order, but our tests do.
         order(observation_id: :asc, id: :asc).
-        pluck(:observation_id, :id)
+        pluck(:observation_id, :id,
+              User[:name], User[:login], License[:url])
 
       ::CSV.generate(col_sep: ",", encoding: "UTF-8") do |csv|
-        csv << %w[catalogNumber imageId]
+        csv << %w[catalogNumber imageId rights]
         rows_data.each do |row|
           csv << formatted_row(row)
         end
@@ -63,7 +64,25 @@ module Report
     end
 
     def formatted_row(row)
-      [catalog_number(row.first), large_image_url(row.last)]
+      obs_id, image_id, user_name, user_login, license_url = row
+      [catalog_number(obs_id), large_image_url(image_id),
+       rights(user_name, user_login, license_url)]
+    end
+
+    def rights(user_name, user_login, license_url)
+      "© #{unique_text_name(user_name, user_login)} " \
+        "#{license_abbreviation(license_url)} #{license_url}"
+    end
+
+    def unique_text_name(name, login)
+      name.blank? ? login : "#{name} (#{login})"
+    end
+
+    def license_abbreviation(url)
+      match = url.match(%r{creativecommons\.org/licenses/([^/]+)})
+      return "CC-#{match[1].upcase}" if match
+
+      "CC0" if url.match?(/public_?domain/i)
     end
 
     def catalog_number(observation_id)
