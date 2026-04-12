@@ -604,7 +604,7 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Cortinarius",
-      identificationQualifier: nil,
+      identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
       taxonRemarks: "Cortinarius sp. 'IN34'"
     ).values
 
@@ -630,7 +630,7 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Geoglossum",
-      identificationQualifier: nil,
+      identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
       taxonRemarks: "Geoglossum sp. 'MI01' S.D. Russell"
     ).values
 

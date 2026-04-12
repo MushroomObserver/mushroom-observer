@@ -12,6 +12,8 @@ require "haversine"
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
+    CODE_NAME_QUALIFIER = "code name aff. species"
+
     # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
     # Label names for the columns in the report.
     # https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/data_import_fields/
@@ -90,7 +92,7 @@ module Report
     # Examples: nom. prov., comb. prov., group, sensu lato, sensu auct.
     def identification_qualifier(row)
       return nil unless unregistrable_name?(row)
-      return nil if code_name?(row)
+      return CODE_NAME_QUALIFIER if code_name?(row)
       return group_token(row) if group?(row)
       return prov_token(row) if provisional?(row)
 
