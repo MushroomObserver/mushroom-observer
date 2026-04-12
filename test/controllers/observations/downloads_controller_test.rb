@@ -391,7 +391,8 @@ module Observations
     private
 
     def image_rights(image)
-      image.license.rights_for(image.user.unique_text_name)
+      name = image.copyright_holder.presence || image.user.unique_text_name
+      image.license.rights_for(name)
     end
   end
 end

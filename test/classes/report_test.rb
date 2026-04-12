@@ -750,11 +750,10 @@ class ReportTest < UnitTestCase
       row,
       "Expected row for obs #{obs.id}, image #{image.id}"
     )
-    license = licenses(:ccnc30)
     assert_equal(
-      "© #{users(:mary).unique_text_name} CC-BY-NC-SA #{license.url}",
+      "© #{image.copyright_holder} CC-BY-NC-SA #{licenses(:ccnc30).url}",
       row[2],
-      "rights should combine © user.unique_text_name, license abbreviation, url"
+      "rights should use copyright_holder when present"
     )
   end
 
@@ -766,11 +765,27 @@ class ReportTest < UnitTestCase
       row,
       "Expected row for obs #{obs.id}, image #{image.id}"
     )
-    license = licenses(:publicdomain)
     assert_equal(
-      "© #{users(:rolf).unique_text_name} CC0 #{license.url}",
+      "© #{image.copyright_holder} CC0 #{licenses(:publicdomain).url}",
       row[2],
-      "rights for public domain image should use CC0 with url"
+      "rights should use copyright_holder when present"
+    )
+  end
+
+  def test_mycoportal_image_list_rights_fallback
+    obs = observations(:detailed_unknown_obs)
+    image = Image.create!(user: users(:mary), license: licenses(:ccnc30),
+                          copyright_holder: "")
+    obs.images << image
+    row = mycoportal_image_list_row(obs, image)
+    assert_not_nil(
+      row,
+      "Expected row for obs #{obs.id}, image #{image.id}"
+    )
+    assert_equal(
+      "© #{users(:mary).unique_text_name} CC-BY-NC-SA #{licenses(:ccnc30).url}",
+      row[2],
+      "rights falls back to user.unique_text_name when copyright_holder blank"
     )
   end
 

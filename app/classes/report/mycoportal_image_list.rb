@@ -53,6 +53,7 @@ module Report
         # MCP doesn't care about order, but our tests do.
         order(observation_id: :asc, id: :asc).
         pluck(:observation_id, :id,
+              Image[:copyright_holder],
               User[:name], User[:login], License[:url])
 
       ::CSV.generate(col_sep: ",", encoding: "UTF-8") do |csv|
@@ -64,13 +65,15 @@ module Report
     end
 
     def formatted_row(row)
-      obs_id, image_id, user_name, user_login, license_url = row
+      obs_id, image_id, copyright_holder, user_name, user_login, license_url =
+        row
       [catalog_number(obs_id), large_image_url(image_id),
-       rights(user_name, user_login, license_url)]
+       rights(copyright_holder, user_name, user_login, license_url)]
     end
 
-    def rights(user_name, user_login, license_url)
-      name = unique_text_name(user_name, user_login)
+    def rights(copyright_holder, user_name, user_login, license_url)
+      name = copyright_holder.presence ||
+             unique_text_name(user_name, user_login)
       License.rights_string(name, license_url)
     end
 
