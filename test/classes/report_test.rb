@@ -591,8 +591,9 @@ class ReportTest < UnitTestCase
   end
 
   # Code names: text_name contains a single-quote (e.g. sp. 'IN34')
-  # sciname = genus only; identificationQualifier = nil;
-  # taxonRemarks = binomial plus author
+  # sciname = genus only;
+  # identificationQualifier = Report::Mycoportal::CODE_NAME_QUALIFIER;
+  # taxonRemarks = full text_name plus author
   def test_mycoportal_code_name_unauthored_no_qualifier
     obs = Observation.create!(
       user: rolf,
