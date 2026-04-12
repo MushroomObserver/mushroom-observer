@@ -93,25 +93,25 @@ class LicenseTest < UnitTestCase
 
   def test_rights_for
     license = licenses(:ccnc30)
-    expected = "© Mary Newbie (mary) CC-BY-NC-SA #{license.url}"
-    assert_equal(expected, license.rights_for("Mary Newbie (mary)"),
+    expected = "© Mary Newbie CC-BY-NC-SA #{license.url}"
+    assert_equal(expected, license.rights_for("Mary Newbie"),
                  "Instance method should format © name abbreviation url")
   end
 
   def test_rights_string
     license = licenses(:ccnc30)
-    expected = "© Mary Newbie (mary) CC-BY-NC-SA #{license.url}"
+    expected = "© Mary Newbie CC-BY-NC-SA #{license.url}"
     assert_equal(expected,
-                 License.rights_string("Mary Newbie (mary)", license.url),
+                 License.rights_string("Mary Newbie", license.url),
                  "Class method should format © name abbreviation url")
   end
 
   def test_rights_string_legacy_public_domain
     license = licenses(:legacy_publicdomain)
-    expected = "© Rolf Singer (rolf) CC0 #{license.url}"
+    expected = "© Rolf Singer CC0 #{license.url}"
     assert_equal(
       expected,
-      License.rights_string("Rolf Singer (rolf)", license.url),
+      License.rights_string("Rolf Singer", license.url),
       "rights_string should use CC0 and canonical url for legacy public domain"
     )
   end

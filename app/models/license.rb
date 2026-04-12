@@ -121,8 +121,8 @@ class License < AbstractModel
     self.class.abbreviation_for(url)
   end
 
-  def rights_for(unique_text_name)
-    self.class.rights_string(unique_text_name, url)
+  def rights_for(name)
+    self.class.rights_string(name, url)
   end
 
   def self.abbreviation_for(url)
@@ -132,10 +132,10 @@ class License < AbstractModel
     "CC0" if url.match?(%r{/(publicdomain|cc0)/?})
   end
 
-  # Copyright and license string for a given user / license combination
+  # Copyright and license string for a given rights holder name and license url
   # Used by MyCoPortalImageList report
-  def self.rights_string(unique_text_name, url)
-    "© #{unique_text_name} #{abbreviation_for(url)} #{url}"
+  def self.rights_string(name, url)
+    "© #{name} #{abbreviation_for(url)} #{url}"
   end
 
   ###########
