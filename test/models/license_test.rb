@@ -86,6 +86,9 @@ class LicenseTest < UnitTestCase
     assert_equal("CC0",
                  License.abbreviation_for(licenses(:publicdomain).url),
                  "Class method should return CC0 for public domain url")
+    assert_equal("CC0",
+                 License.abbreviation_for(licenses(:legacy_publicdomain).url),
+                 "Class method should return CC0 for legacy public domain url")
   end
 
   def test_rights_for
@@ -101,6 +104,16 @@ class LicenseTest < UnitTestCase
     assert_equal(expected,
                  License.rights_string("Mary Newbie (mary)", license.url),
                  "Class method should format © name abbreviation url")
+  end
+
+  def test_rights_string_legacy_public_domain
+    license = licenses(:legacy_publicdomain)
+    expected = "© Rolf Singer (rolf) CC0 #{license.url}"
+    assert_equal(
+      expected,
+      License.rights_string("Rolf Singer (rolf)", license.url),
+      "rights_string should use CC0 and canonical url for legacy public domain"
+    )
   end
 
   def test_copyright_text

@@ -39,7 +39,7 @@ class Inat
     end
 
     def current_public_domain
-      ::License.where(::License[:url] =~ %r{/cc0/?}).
+      ::License.where(::License[:url] =~ %r{/(publicdomain|cc0)/?}).
         where(deprecated: false).
         order(id: :asc).last
     end

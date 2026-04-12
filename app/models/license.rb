@@ -89,7 +89,7 @@ class License < AbstractModel
   end
 
   def copyright_text(year, name)
-    if url.match?(%r{/cc0/?})
+    if url.match?(%r{/(publicdomain|cc0)/?})
       "#{"".html_safe}#{:image_show_public_domain.t} #{name}"
     else
       "".html_safe + :image_show_copyright.t.to_s + " &copy;".html_safe +
@@ -129,7 +129,7 @@ class License < AbstractModel
     match = url.match(%r{creativecommons\.org/licenses/([^/]+)})
     return "CC-#{match[1].upcase}" if match
 
-    "CC0" if url.match?(%r{/cc0/?})
+    "CC0" if url.match?(%r{/(publicdomain|cc0)/?})
   end
 
   # Copyright and license string for a given user / license combination

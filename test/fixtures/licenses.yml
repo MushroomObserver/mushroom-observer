@@ -39,6 +39,11 @@ publicdomain:
   url: https://creativecommons.org/public-domain/cc0/
   updated_at: 2013-03-02 09:45:03
 
+legacy_publicdomain:
+  display_name: Public Domain (legacy)
+  url: https://creativecommons.org/publicdomain/zero/1.0/
+  deprecated: true
+
 unused:
   display_name: All Rights Reserved
   url: https://en.wikipedia.org/wiki/All_rights_reserved
