@@ -89,8 +89,7 @@ class License < AbstractModel
   end
 
   def copyright_text(year, name)
-    # match old style `Public_domain` or new style `publicdomain`
-    if url.match?(/public_?domain/i)
+    if url.match?(%r{/cc0/?})
       "#{"".html_safe}#{:image_show_public_domain.t} #{name}"
     else
       "".html_safe + :image_show_copyright.t.to_s + " &copy;".html_safe +
@@ -116,6 +115,27 @@ class License < AbstractModel
 
   def badge_url
     "#{url.sub(LICENSE_URL_WITH_SUBDIR, BADGE_URL_WITH_SUBDIR)}88x31.png"
+  end
+
+  def abbreviation
+    self.class.abbreviation_for(url)
+  end
+
+  def rights_for(unique_text_name)
+    self.class.rights_string(unique_text_name, url)
+  end
+
+  def self.abbreviation_for(url)
+    match = url.match(%r{creativecommons\.org/licenses/([^/]+)})
+    return "CC-#{match[1].upcase}" if match
+
+    "CC0" if url.match?(%r{/cc0/?})
+  end
+
+  # Copyright and license string for a given user / license combination
+  # Used by MyCoPortalImageList report
+  def self.rights_string(unique_text_name, url)
+    "© #{unique_text_name} #{abbreviation_for(url)} #{url}"
   end
 
   ###########

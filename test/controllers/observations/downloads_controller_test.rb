@@ -391,11 +391,7 @@ module Observations
     private
 
     def image_rights(image)
-      url = image.license.url
-      abbr = url.match(%r{creativecommons\.org/licenses/([^/]+)})&.
-             then { |m| "CC-#{m[1].upcase}" } ||
-             ("CC0" if url.match?(/public_?domain/i))
-      "© #{image.user.unique_text_name} #{abbr} #{url}"
+      image.license.rights_for(image.user.unique_text_name)
     end
   end
 end

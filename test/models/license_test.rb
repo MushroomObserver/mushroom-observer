@@ -70,6 +70,39 @@ class LicenseTest < UnitTestCase
     assert_equal(license.display_name, license.text_name)
   end
 
+  def test_abbreviation
+    assert_equal("CC-BY-NC-SA", licenses(:ccnc30).abbreviation,
+                 "Instance method should return CC slug uppercased")
+    assert_equal("CC-BY-SA", licenses(:ccwiki30).abbreviation,
+                 "Instance method should handle by-sa slug")
+    assert_equal("CC0", licenses(:publicdomain).abbreviation,
+                 "Instance method should return CC0 for public domain")
+  end
+
+  def test_abbreviation_for
+    assert_equal("CC-BY-NC-SA",
+                 License.abbreviation_for(licenses(:ccnc30).url),
+                 "Class method should derive abbreviation from url")
+    assert_equal("CC0",
+                 License.abbreviation_for(licenses(:publicdomain).url),
+                 "Class method should return CC0 for public domain url")
+  end
+
+  def test_rights_for
+    license = licenses(:ccnc30)
+    expected = "© Mary Newbie (mary) CC-BY-NC-SA #{license.url}"
+    assert_equal(expected, license.rights_for("Mary Newbie (mary)"),
+                 "Instance method should format © name abbreviation url")
+  end
+
+  def test_rights_string
+    license = licenses(:ccnc30)
+    expected = "© Mary Newbie (mary) CC-BY-NC-SA #{license.url}"
+    assert_equal(expected,
+                 License.rights_string("Mary Newbie (mary)", license.url),
+                 "Class method should format © name abbreviation url")
+  end
+
   def test_copyright_text
     year = 2024
     name = "Jan Borovicka"

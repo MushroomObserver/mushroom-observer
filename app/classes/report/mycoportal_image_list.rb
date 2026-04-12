@@ -70,19 +70,12 @@ module Report
     end
 
     def rights(user_name, user_login, license_url)
-      "© #{unique_text_name(user_name, user_login)} " \
-        "#{license_abbreviation(license_url)} #{license_url}"
+      name = unique_text_name(user_name, user_login)
+      License.rights_string(name, license_url)
     end
 
     def unique_text_name(name, login)
       name.blank? ? login : "#{name} (#{login})"
-    end
-
-    def license_abbreviation(url)
-      match = url.match(%r{creativecommons\.org/licenses/([^/]+)})
-      return "CC-#{match[1].upcase}" if match
-
-      "CC0" if url.match?(/public_?domain/i)
     end
 
     def catalog_number(observation_id)
