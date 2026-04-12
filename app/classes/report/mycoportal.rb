@@ -26,7 +26,7 @@ module Report
         # Not a DwC standard field
         "dbpk", # observation.id
         "basisOfRecord", # : "HumanObservation"
-        "catalogNumber", # "MUOB" + space + observation.id"
+        "catalogNumber", # "MUOB" + space + observation.id
         "occurrenceID", # GUID. The Observation URL. It must never change.
         "sciname", # scientific name without author; not a DwC standard field
         "identificationQualifier",
