@@ -37,6 +37,19 @@ if [ "$EXPECTED_RUBY" != "$CURRENT_RUBY" ]; then
     exit 1
 fi
 
+echo Checking for running background jobs...
+RUNNING_JOBS=$(bundle exec rails runner script/check_running_jobs.rb 2>&1)
+
+if [ -n "$RUNNING_JOBS" ]; then
+    echo ""
+    echo "Deploy aborted: background jobs are currently running."
+    echo ""
+    echo "$RUNNING_JOBS"
+    echo ""
+    echo "Wait for jobs to finish before deploying."
+    exit 1
+fi
+
 tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
 
