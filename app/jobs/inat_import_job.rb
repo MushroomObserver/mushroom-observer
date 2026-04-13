@@ -180,11 +180,16 @@ class InatImportJob < ApplicationJob
   end
 
   def safe_done
+    original_exception = $ERROR_INFO
     done
   rescue StandardError => e
     Rails.logger.error(
       "InatImportJob: done failed for import #{inat_import&.id}: #{e.message}"
     )
+    # Re-raise if done failed on the happy path so the job fails visibly
+    # and SolidQueue can retry. Swallow only when already handling an error,
+    # so the original exception is not masked.
+    raise unless original_exception
   end
 
   def done

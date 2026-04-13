@@ -1121,11 +1121,7 @@ class InatImportJobTest < ActiveJob::TestCase
                    "ended_at should be set after successful job")
   end
 
-  def test_safe_done_marks_import_done_when_done_raises
-    create_ivars_from_filename("calostoma_lutescens")
-    @user.update(inat_username: @inat_import.inat_username)
-    stub_inat_interactions
-
+  def test_safe_done_reraises_when_done_fails_on_happy_path
     job = InatImportJob.new
     job.instance_variable_set(:@inat_import, @inat_import)
     job.define_singleton_method(:done) do
@@ -1138,8 +1134,31 @@ class InatImportJobTest < ActiveJob::TestCase
     rescue StandardError => e
       exception = e
     end
-    assert_nil(exception,
-               "safe_done should swallow done's exception, got: #{exception}")
+    assert_not_nil(exception,
+                   "safe_done should re-raise when done fails with no " \
+                   "original exception in flight")
+  end
+
+  def test_safe_done_swallows_done_failure_when_handling_error
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    job.define_singleton_method(:done) do
+      raise(StandardError.new("done failed"))
+    end
+
+    swallowed = true
+    begin
+      raise(StandardError.new("original error"))
+    rescue StandardError
+      begin
+        job.send(:safe_done)
+      rescue StandardError
+        swallowed = false
+      end
+    end
+    assert(swallowed,
+           "safe_done should swallow done's exception when an error " \
+           "is already in flight")
   end
 
   # -------- Other Utilities
