@@ -1106,6 +1106,36 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # -------- rescue Exception / non_rescuable? tests
+
+  def test_perform_records_unexpected_non_standard_exception
+    create_ivars_from_filename("calostoma_lutescens")
+    stub_token_requests
+    stub_check_username_match(@inat_import.inat_username)
+
+    job = InatImportJob.new
+    job.define_singleton_method(:import_requested_observations) do
+      raise(Exception.new("unexpected bare exception")) # rubocop:disable Lint/RaiseException
+    end
+
+    job.perform(@inat_import)
+
+    @inat_import.reload
+    assert_match(/unexpected bare exception/, @inat_import.response_errors,
+                 "Non-fatal Exception should be recorded in response_errors")
+    assert_equal("Done", @inat_import.state,
+                 "Import should be marked Done after unexpected exception")
+  end
+
+  def test_non_rescuable_true_for_remaining_fatal_types
+    job = InatImportJob.new
+
+    [NoMemoryError.new, SystemStackError.new, LoadError.new].each do |error|
+      assert(job.send(:non_rescuable?, error),
+             "#{error.class} should be non_rescuable")
+    end
+  end
+
   # -------- safe_done tests
 
   def test_safe_done_marks_import_done_normally
