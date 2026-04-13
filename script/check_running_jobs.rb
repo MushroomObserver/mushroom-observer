@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 # Called by deploy.sh to check for running background jobs.
-# Prints job details to stdout if any jobs are running; prints nothing
-# if no jobs are running.
+# Exit codes:
+#   0 - no jobs running
+#   2 - jobs are running (details printed to stdout)
+#   1 - error (rails runner default for unhandled exceptions)
 #
 # Usage: bundle exec rails runner script/check_running_jobs.rb
 
 claimed = SolidQueue::ClaimedExecution.includes(:job).all
-exit if claimed.empty?
+exit(0) if claimed.empty?
 
 def format_duration(total_seconds)
   hours, remainder = total_seconds.divmod(3600)
@@ -41,14 +43,10 @@ def inat_import_line(import, elapsed_str, remaining_str)
   remaining_str ? "#{base} remaining=~#{remaining_str}" : base
 end
 
-def inat_import_details(job, elapsed_str)
-  import_id = inat_import_id(job)
-  return nil unless import_id
-
+def inat_import_details(import_id, elapsed, elapsed_str)
   import = InatImport.find_by(id: import_id)
   return nil unless import
 
-  elapsed = (Time.zone.now - job.created_at).to_i
   remaining = inat_remaining_time(import, elapsed)
   remaining_str = format_duration(remaining) if remaining&.positive?
   inat_import_line(import, elapsed_str, remaining_str)
@@ -61,12 +59,17 @@ claimed.each do |ce|
   elapsed_str = format_duration(elapsed)
 
   if class_name == "InatImportJob"
-    details = inat_import_details(job, elapsed_str)
-    if details
-      puts(details)
-      next
+    import_id = inat_import_id(job)
+    if import_id
+      details = inat_import_details(import_id, elapsed, elapsed_str)
+      if details
+        puts(details)
+        next
+      end
     end
   end
 
   puts("#{class_name}: elapsed=#{elapsed_str}")
 end
+
+exit(2)
