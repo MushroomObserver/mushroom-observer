@@ -9,10 +9,12 @@ class InatImportRecoveryJob < ApplicationJob
 
   def perform
     InatImport.stuck.find_each do |import|
-      import.update(state: "Done", ended_at: Time.zone.now)
-      import.add_response_error(
-        "Import did not complete — the import may have crashed. " \
-        "You can restart the import."
+      crashed_msg = "Import did not complete — the import may have crashed. " \
+                    "You can restart the import."
+      import.update!(
+        state: "Done",
+        ended_at: Time.zone.now,
+        response_errors: "#{import.response_errors}#{crashed_msg}\n"
       )
       Rails.logger.warn(
         "InatImportRecoveryJob: marked stuck import #{import.id} as Done"
