@@ -1132,9 +1132,14 @@ class InatImportJobTest < ActiveJob::TestCase
       raise(StandardError.new("done failed"))
     end
 
-    assert_nothing_raised("safe_done should swallow done's exception") do
+    exception = nil
+    begin
       job.send(:safe_done)
+    rescue StandardError => e
+      exception = e
     end
+    assert_nil(exception,
+               "safe_done should swallow done's exception, got: #{exception}")
   end
 
   # -------- Other Utilities
