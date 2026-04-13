@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "English"
+
 class InatImportJob < ApplicationJob
   attr_accessor :inat_import
 
@@ -26,13 +28,17 @@ class InatImportJob < ApplicationJob
   # and recorded on the import record rather than silently lost.
   rescue Exception => e # rubocop:disable Lint/RescueException
     # Re-raise shutdown signals so the worker shuts down cleanly.
-    # The ensure block has already run at that point.
-    raise if e.is_a?(SignalException) || e.is_a?(SystemExit)
+    # ensure still runs during unwinding; the $ERROR_INFO check below skips
+    # safe_done so the record stays Importing and the recovery job cleans it up.
+    raise if shutdown_signal?(e)
 
     log("Unexpected error: #{e.message}")
     inat_import&.add_response_error(e.message)
   ensure
-    safe_done
+    # Skip safe_done on shutdown signals: leave the record in Importing state
+    # so SolidQueue can requeue the job. The recovery job will finalize it
+    # if the worker is killed before the job can be retried.
+    safe_done unless shutdown_signal?($ERROR_INFO)
   end
 
   private
@@ -163,6 +169,10 @@ class InatImportJob < ApplicationJob
     inat_import.add_response_error(
       :inat_unlicensed_obs_summary.t(count: unlicensed_obs)
     )
+  end
+
+  def shutdown_signal?(error)
+    error.is_a?(SignalException) || error.is_a?(SystemExit)
   end
 
   def safe_done
