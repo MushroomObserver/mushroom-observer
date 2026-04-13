@@ -1129,7 +1129,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     exception = nil
-    begin
+    Rails.logger.stub(:error, nil) do
       job.send(:safe_done)
     rescue StandardError => e
       exception = e
