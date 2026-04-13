@@ -30,7 +30,7 @@ class InatImportJob < ApplicationJob
     # Re-raise shutdown signals so the worker shuts down cleanly.
     # ensure still runs during unwinding; the $ERROR_INFO check below skips
     # safe_done so the record stays Importing and the recovery job cleans it up.
-    raise if shutdown_signal?(e)
+    raise if non_rescuable?(e)
 
     log("Unexpected error: #{e.message}")
     inat_import&.add_response_error(e.message)
@@ -38,7 +38,7 @@ class InatImportJob < ApplicationJob
     # Skip safe_done on shutdown signals: leave the record in Importing state
     # so SolidQueue can requeue the job. The recovery job will finalize it
     # if the worker is killed before the job can be retried.
-    safe_done unless shutdown_signal?($ERROR_INFO)
+    safe_done unless non_rescuable?($ERROR_INFO)
   end
 
   private
@@ -171,8 +171,12 @@ class InatImportJob < ApplicationJob
     )
   end
 
-  def shutdown_signal?(error)
-    error.is_a?(SignalException) || error.is_a?(SystemExit)
+  def non_rescuable?(error)
+    error.is_a?(SignalException) ||
+      error.is_a?(SystemExit) ||
+      error.is_a?(NoMemoryError) ||
+      error.is_a?(SystemStackError) ||
+      error.is_a?(ScriptError)
   end
 
   def safe_done
