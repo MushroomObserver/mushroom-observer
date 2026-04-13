@@ -22,8 +22,17 @@ class InatImportJob < ApplicationJob
   rescue StandardError => e
     log("Error occurred: #{e.message}")
     inat_import.add_response_error(e)
+  # Intentional: catch non-StandardError exceptions so they are logged
+  # and recorded on the import record rather than silently lost.
+  rescue Exception => e # rubocop:disable Lint/RescueException
+    # Re-raise shutdown signals so the worker shuts down cleanly.
+    # The ensure block has already run at that point.
+    raise if e.is_a?(SignalException) || e.is_a?(SystemExit)
+
+    log("Unexpected error: #{e.message}")
+    inat_import&.add_response_error(e.message)
   ensure
-    done
+    safe_done
   end
 
   private
@@ -153,6 +162,14 @@ class InatImportJob < ApplicationJob
 
     inat_import.add_response_error(
       :inat_unlicensed_obs_summary.t(count: unlicensed_obs)
+    )
+  end
+
+  def safe_done
+    done
+  rescue StandardError => e
+    Rails.logger.error(
+      "InatImportJob: done failed for import #{inat_import&.id}: #{e.message}"
     )
   end
 

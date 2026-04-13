@@ -61,6 +61,10 @@ class InatImport < ApplicationRecord
   # (Only gets used once.)
   BASE_AVG_IMPORT_SECONDS = 15
 
+  # An import stuck in Importing state longer than this is assumed to have
+  # crashed. Must match the schedule in config/recurring.yml.
+  STUCK_THRESHOLD = 3.minutes
+
   # Are there enough constraints on which observations to import?
   # See also InatImportsController::Validators#adequately_constrained?
   # Need to make sure that the iNat API query has enough constrains so
@@ -77,6 +81,13 @@ class InatImport < ApplicationRecord
 
   def job_pending?
     %w[Authenticating Importing].include?(state)
+  end
+
+  # True if stuck in Importing state with no recent activity.
+  # updated_at is touched after every observation import, so
+  # no update in longer than STUCK_THRESHOLD indicates a crashed worker.
+  def stuck?
+    Importing? && ended_at.nil? && updated_at < STUCK_THRESHOLD.ago
   end
 
   def add_response_error(error)

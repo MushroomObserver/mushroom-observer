@@ -1106,6 +1106,37 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # -------- safe_done tests
+
+  def test_safe_done_marks_import_done_normally
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    stub_inat_interactions
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_equal("Done", @inat_import.reload.state,
+                 "Import should be Done after successful job")
+    assert_not_nil(@inat_import.ended_at,
+                   "ended_at should be set after successful job")
+  end
+
+  def test_safe_done_marks_import_done_when_done_raises
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    stub_inat_interactions
+
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    job.define_singleton_method(:done) do
+      raise(StandardError.new("done failed"))
+    end
+
+    assert_nothing_raised("safe_done should swallow done's exception") do
+      job.send(:safe_done)
+    end
+  end
+
   # -------- Other Utilities
 
   # Hack to turn results with many pages into results with one page
