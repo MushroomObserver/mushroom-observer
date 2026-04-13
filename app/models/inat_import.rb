@@ -65,6 +65,11 @@ class InatImport < ApplicationRecord
   # crashed. Must match the schedule in config/recurring.yml.
   STUCK_THRESHOLD = 3.minutes
 
+  scope :stuck, lambda {
+    where(state: "Importing", ended_at: nil).
+      where(updated_at: ...STUCK_THRESHOLD.ago)
+  }
+
   # Are there enough constraints on which observations to import?
   # See also InatImportsController::Validators#adequately_constrained?
   # Need to make sure that the iNat API query has enough constrains so
