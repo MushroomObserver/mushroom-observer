@@ -58,12 +58,20 @@ elif [ $RUNNING_JOBS_STATUS -ne 0 ]; then
     exit 1
 fi
 
+echo Stopping solidqueue to prevent new jobs during deploy...
+sudo service solidqueue stop
+if [ $? -ne 0 ]; then
+    echo Failed to stop solidqueue.
+    exit 1
+fi
+
 tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
 
 STASH_RESULT=`git stash`
 if [ $? -ne 0 ]; then
     echo git stash failed.
+    echo Restarting solidqueue... && sudo service solidqueue start
     exit 1
 fi
 
@@ -77,6 +85,7 @@ fi
 echo Getting latest code from github... && git pull
 if [ $? -ne 0 ]; then
     echo git pull failed.
+    echo Restarting solidqueue... && sudo service solidqueue start
     exit 1
 fi
 
@@ -84,6 +93,7 @@ if [ "$STASH_RESULT" != 'No local changes to save' ]; then
     echo Reapply local changes... && git stash pop
     if [ $? -ne 0 ]; then
 	echo Applying the stashed changes failed.
+	echo Restarting solidqueue... && sudo service solidqueue start
 	exit 1
     fi
 fi
@@ -93,7 +103,14 @@ echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
 echo Precompiling assets... && rake assets:precompile && \
 echo Reloading puma... && sudo service puma restart && \
-echo Reloading solidqueue... && sudo service solidqueue restart && \
+echo Starting solidqueue... && sudo service solidqueue start && \
 echo Tagging repo with $tag... && git tag $tag && \
 echo Pushing new tag... && git push --tags && \
 echo SUCCESS\!
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "Deploy failed. Restarting solidqueue with existing code..."
+    sudo service solidqueue start
+    exit 1
+fi
