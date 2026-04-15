@@ -2,31 +2,24 @@
 
 module Projects
   class LocationsController < ApplicationController
+    include Projects::LocationGrouping
+
     before_action :login_required
 
     def index
       return unless find_project!
 
-      @locations = merged_locations
+      @grouped_data, @ungrouped_locations =
+        build_grouped_locations(@project)
+      @obs_counts = observation_counts(@project)
     end
 
     private
 
     def find_project!
-      @project = find_or_goto_index(Project, params[:project_id].to_s)
-    end
-
-    # Merge observation-derived locations with target locations,
-    # removing duplicates.
-    def merged_locations
-      obs_locs = @project.locations.distinct
-      target_locs = @project.target_locations
-      all_locs = (obs_locs.to_a + target_locs.to_a).uniq(&:id)
-      sort_locations(all_locs)
-    end
-
-    def sort_locations(locs)
-      locs.sort_by(&:scientific_name)
+      @project = find_or_goto_index(
+        Project, params[:project_id].to_s
+      )
     end
   end
 end

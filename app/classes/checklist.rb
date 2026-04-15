@@ -44,15 +44,23 @@ class Checklist
 
   # Build list of species observed by one Project.
   class ForProject < Checklist
-    def initialize(project, location = nil)
+    def initialize(project, location = nil,
+                   include_sub_locations: false)
       @project = project
       @location = location
       base = project.visible_observations
-      @observations = if location.present?
-                        base.within_locations([location])
-                      else
-                        base
-                      end
+      @observations =
+        if location.present? && include_sub_locations
+          base.joins(:location).where(
+            Location.arel_table[:name].
+              matches("%, #{location.name}").
+              or(Location.arel_table[:name].eq(location.name))
+          )
+        elsif location.present?
+          base.within_locations([location])
+        else
+          base
+        end
     end
 
     delegate :target_name_ids, to: :@project

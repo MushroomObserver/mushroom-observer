@@ -2,6 +2,8 @@
 
 module Projects
   class TargetLocationsController < ApplicationController
+    include Projects::LocationGrouping
+
     before_action :login_required
     before_action :set_project
     before_action :require_admin
@@ -40,7 +42,9 @@ module Projects
     private
 
     def set_project
-      @project = find_or_goto_index(Project, params[:project_id])
+      @project = find_or_goto_index(
+        Project, params[:project_id]
+      )
     end
 
     def require_admin
@@ -51,7 +55,9 @@ module Projects
     end
 
     def redirect_to_locations
-      redirect_to(project_locations_path(project_id: @project.id))
+      redirect_to(
+        project_locations_path(project_id: @project.id)
+      )
     end
 
     def parse_locations_from_params
@@ -81,19 +87,15 @@ module Projects
     end
 
     def render_locations_update
-      locations = merged_locations
+      grouped, ungrouped = build_grouped_locations(@project)
+      counts = observation_counts(@project)
       render(
         partial: "projects/target_locations/locations_update",
         locals: { project: @project, user: @user,
-                  locations: locations }
+                  grouped_data: grouped,
+                  ungrouped_locations: ungrouped,
+                  obs_counts: counts }
       )
-    end
-
-    def merged_locations
-      obs_locs = @project.locations.distinct.to_a
-      target_locs = @project.target_locations.to_a
-      all_locs = (obs_locs + target_locs).uniq(&:id)
-      all_locs.sort_by(&:scientific_name)
     end
   end
 end
