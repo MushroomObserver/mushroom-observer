@@ -35,6 +35,38 @@ module Projects
       assert_match(target.display_name, @response.body)
     end
 
+    # Exercises grouping logic: assign_to_targets,
+    # most_specific_target, and ungrouped filtering
+    def test_index_groups_sub_locations_under_targets
+      project = projects(:rare_fungi_project)
+      california = locations(:california)
+      albion = locations(:albion) # "Albion, California, USA"
+      nybg = locations(:nybg_location) # New York — not a sub
+
+      # Add California as a target location
+      project.add_target_location(california)
+
+      # Add observations at Albion (sub of California) and NYBG
+      [albion, nybg].each do |loc|
+        obs = Observation.create!(
+          name: names(:fungi), user: users(:rolf),
+          location: loc, when: Time.zone.now
+        )
+        project.observations << obs
+      end
+
+      login
+      get(:index, params: { project_id: project.id })
+      assert_response(:success)
+
+      body = @response.body
+      # Albion grouped under California — chevron present
+      assert_match("target_subs_#{california.id}", body)
+      assert_match(albion.display_name, body)
+      # NYBG appears ungrouped (not a sub of any target)
+      assert_match(nybg.display_name, body)
+    end
+
     def test_index_without_target_locations
       project = projects(:eol_project)
       login
