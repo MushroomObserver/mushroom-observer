@@ -26,7 +26,9 @@ module Components
       private
 
       def admin?
-        @project.is_admin?(@user)
+        return @admin if defined?(@admin)
+
+        @admin = @project.is_admin?(@user)
       end
 
       # --- Target location groups (collapsible) ---

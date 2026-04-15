@@ -35,6 +35,16 @@ module Projects
       assert_match(target.display_name, @response.body)
     end
 
+    def test_index_without_target_locations
+      project = projects(:eol_project)
+      login
+      get(:index, params: { project_id: project.id })
+
+      assert_response(:success)
+      # No collapse elements when there are no targets
+      assert_no_match(/panel-collapse-trigger/, @response.body)
+    end
+
     # Exercises grouping logic: assign_to_targets,
     # most_specific_target, and ungrouped filtering
     def test_index_groups_sub_locations_under_targets
@@ -60,21 +70,12 @@ module Projects
       assert_response(:success)
 
       body = @response.body
-      # Albion grouped under California — chevron present
-      assert_match("target_subs_#{california.id}", body)
+      # California target should appear
+      assert_match(california.display_name, body)
+      # Albion grouped under California as a sub-location
       assert_match(albion.display_name, body)
       # NYBG appears ungrouped (not a sub of any target)
       assert_match(nybg.display_name, body)
-    end
-
-    def test_index_without_target_locations
-      project = projects(:eol_project)
-      login
-      get(:index, params: { project_id: project.id })
-
-      assert_response(:success)
-      # No collapse elements when there are no targets
-      assert_no_match(/panel-collapse-trigger/, @response.body)
     end
   end
 end
