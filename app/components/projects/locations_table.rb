@@ -92,7 +92,6 @@ module Components
           "javascript:void(0)",
           role: :button,
           class: "panel-collapse-trigger collapsed",
-          style: "text-decoration:none;outline:none",
           data: { toggle: "collapse",
                   target: "##{collapse_id}" },
           aria: { expanded: false,

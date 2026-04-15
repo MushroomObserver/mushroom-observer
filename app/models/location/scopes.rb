@@ -32,7 +32,8 @@ module Location::Scopes
     # Locations whose name ends with ", <target.name>"
     # (i.e. sub-locations within a parent region by name hierarchy)
     scope :sub_locations_of, lambda { |target_location|
-      where(Location[:name].matches("%, #{target_location.name}")).
+      escaped = sanitize_sql_like(target_location.name)
+      where(Location[:name].matches("%, #{escaped}")).
         where.not(id: target_location.id)
     }
 

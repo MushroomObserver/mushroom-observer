@@ -4,6 +4,15 @@ body {
   word-wrap: break-word;
 }
 
+// Give focus outlines breathing room so they don't clip text/icons.
+// Uses outline (not box-shadow) so it's not affected by overflow.
+a:focus,
+button:focus,
+.btn:focus,
+[role="button"]:focus {
+  outline-offset: 2px;
+}
+
 blockquote {
   font-size: 100%;
 }

@@ -51,16 +51,23 @@ class Checklist
       base = project.visible_observations
       @observations =
         if location.present? && include_sub_locations
-          base.joins(:location).where(
-            Location.arel_table[:name].
-              matches("%, #{location.name}").
-              or(Location.arel_table[:name].eq(location.name))
-          )
+          sub_location_observations(base, location)
         elsif location.present?
           base.within_locations([location])
         else
           base
         end
+    end
+
+    def sub_location_observations(base, location)
+      escaped = ActiveRecord::Base.sanitize_sql_like(
+        location.name
+      )
+      tbl = Location.arel_table
+      base.joins(:location).where(
+        tbl[:name].matches("%, #{escaped}").
+          or(tbl[:name].eq(location.name))
+      )
     end
 
     delegate :target_name_ids, to: :@project

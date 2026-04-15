@@ -216,6 +216,35 @@ class ChecklistTest < UnitTestCase
     assert_includes(taxa_names, "Agaricus campestris")
   end
 
+  def test_checklist_for_project_include_sub_locations
+    proj = projects(:bolete_project)
+    california = locations(:california)
+    albion = locations(:albion) # "Albion, California, USA"
+
+    # Add observation in Albion (a sub-location of California)
+    obs = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: mary,
+      location: albion,
+      when: Time.zone.now
+    )
+    proj.observations << obs
+
+    # Without include_sub_locations: only GPS box match
+    Checklist::ForProject.new(proj, california)
+    # With include_sub_locations: name suffix match
+    data_with = Checklist::ForProject.new(
+      proj, california, include_sub_locations: true
+    )
+
+    assert_operator(
+      data_with.num_taxa, :>=, 1,
+      "Sub-location obs should appear with include_sub_locations"
+    )
+    taxa_names = data_with.taxa.pluck(0)
+    assert_includes(taxa_names, "Coprinus comatus")
+  end
+
   def test_checklist_for_species_lists
     list = species_lists(:unknown_species_list)
     data = Checklist::ForSpeciesList.new(list)

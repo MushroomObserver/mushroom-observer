@@ -463,7 +463,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def location_suffix_conditions
     tbl = Location.arel_table
     target_locations.map do |tl|
-      tbl[:name].matches("%, #{tl.name}").or(tbl[:name].eq(tl.name))
+      escaped = self.class.sanitize_sql_like(tl.name)
+      tbl[:name].matches("%, #{escaped}").
+        or(tbl[:name].eq(tl.name))
     end.reduce(:or)
   end
 
