@@ -280,4 +280,20 @@ class ImageTest < UnitTestCase
     assert_empty(ImageVote.where(image_id: image_id),
                  "Failed to delete ImageVotes attached to destroyed image!")
   end
+
+  # When no source exists, thumbnail/small return placeholders;
+  # other sizes fall back to the remote source URL.
+  def test_url_placeholder_for_untransferred_missing_images
+    args = { id: 999_999, transferred: false, extension: "jpg" }
+
+    url = Image::URL.new(args.merge(size: :thumbnail))
+    assert_equal("/place_holder_thumb.jpg", url.url)
+
+    url = Image::URL.new(args.merge(size: :small))
+    assert_equal("/place_holder_320.jpg", url.url)
+
+    url = Image::URL.new(args.merge(size: :medium))
+    assert_not_equal("/place_holder_thumb.jpg", url.url)
+    assert_not_equal("/place_holder_320.jpg", url.url)
+  end
 end

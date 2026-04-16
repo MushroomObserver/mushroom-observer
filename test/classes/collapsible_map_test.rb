@@ -11,7 +11,7 @@ class BigDecimal
   end
 end
 
-class CollapsibleMapTest < UnitTestCase # rubocop:disable Style/OneClassPerFile
+class CollapsibleMapTest < UnitTestCase
   def assert_mapset_is_point(mapset, lat, long)
     assert_true(mapset.is_point)
     assert_false(mapset.is_box)

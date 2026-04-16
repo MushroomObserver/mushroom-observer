@@ -181,6 +181,51 @@ class ChecklistTest < UnitTestCase
                    "all_site_taxa_by_user :genera should be a Hash")
     assert_kind_of(Hash, result[:species],
                    "all_site_taxa_by_user :species should be a Hash")
+
+  def test_checklist_for_project_merges_target_names
+    proj = projects(:rare_fungi_project)
+    # Project has target names but no observations
+    data = Checklist::ForProject.new(proj)
+
+    # Target names should appear in taxa with count 0
+    target_text_names = proj.target_names.map(&:text_name)
+    taxa_names = data.taxa.pluck(0)
+    target_text_names.each do |tn|
+      assert_includes(taxa_names, tn,
+                      "Target name '#{tn}' should appear in checklist")
+      assert_equal(0, data.counts[tn],
+                   "Target name '#{tn}' should have count 0")
+    end
+
+    # num_taxa should include the target names
+    assert(data.num_taxa >= target_text_names.size)
+
+    # target_name_ids should be available
+    assert_equal(proj.target_name_ids.sort, data.target_name_ids.sort)
+  end
+
+  def test_checklist_for_project_target_names_with_observations
+    proj = projects(:rare_fungi_project)
+    # Add an observation for one of the target names
+    obs = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: users(:rolf),
+      when: Time.zone.now
+    )
+    proj.observations << obs
+
+    data = Checklist::ForProject.new(proj)
+
+    # Observed target name should have count > 0
+    assert_operator(data.counts["Coprinus comatus"], :>, 0)
+
+    # Unobserved target name should still have count 0
+    assert_equal(0, data.counts["Agaricus campestris"])
+
+    # Both should appear in taxa
+    taxa_names = data.taxa.pluck(0)
+    assert_includes(taxa_names, "Coprinus comatus")
+    assert_includes(taxa_names, "Agaricus campestris")
   end
 
   def test_checklist_for_species_lists

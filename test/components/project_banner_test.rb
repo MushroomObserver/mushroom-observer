@@ -122,11 +122,36 @@ class ProjectBannerTest < ComponentTestCase
     assert_html(html, "a.nav-link[href='/projects/#{project.id}']")
   end
 
-  def test_does_not_render_tabs_when_project_has_no_content
+  def test_renders_names_and_locations_tabs_for_empty_project
     project = projects(:empty_project)
     html = render_banner(project: project)
 
-    assert_no_html(html, "#project_tabs")
+    assert_html(html, "#project_tabs")
+    assert_includes(html, :NAMES.l)
+    assert_includes(html, :LOCATIONS.l)
+    # No targets, so no Update tab
+    assert_not_includes(html, :project_updates_title.l)
+  end
+
+  def test_renders_update_tab_for_admin_with_targets
+    project = projects(:rare_fungi_project)
+    user = users(:rolf) # admin of rare_fungi_project
+    html = render_banner(project: project, user: user)
+
+    assert_html(html, "#project_tabs")
+    assert_includes(html, :project_updates_title.l)
+    assert_html(
+      html,
+      "a[href='/projects/#{project.id}/updates']"
+    )
+  end
+
+  def test_does_not_render_update_tab_for_non_admin
+    project = projects(:rare_fungi_project)
+    user = users(:mary) # not admin
+    html = render_banner(project: project, user: user)
+
+    assert_not_includes(html, :project_updates_title.l)
   end
 
   def test_active_tab_highlights_current_tab
@@ -148,9 +173,10 @@ class ProjectBannerTest < ComponentTestCase
   private
 
   def render_banner(on_project_page: false, project: projects(:eol_project),
-                    current_tab: nil)
+                    user: nil, current_tab: nil)
     render(Components::ProjectBanner.new(on_project_page: on_project_page,
                                          project: project,
+                                         user: user,
                                          current_tab: current_tab))
   end
 end

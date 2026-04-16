@@ -81,6 +81,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
 
+  has_many :project_target_names, dependent: :destroy
+  has_many :target_names, through: :project_target_names, source: :name
+
+  has_many :project_target_locations, dependent: :destroy
+  has_many :target_locations, through: :project_target_locations,
+                              source: :location
+
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
   before_destroy :orphan_drafts
@@ -376,6 +383,87 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     touch
   end
 
+  # Add target name to this project if not already present.
+  def add_target_name(name)
+    project_target_names.find_or_create_by!(name: name)
+    touch
+  rescue ActiveRecord::RecordNotUnique
+    # Already exists, no-op
+  end
+
+  # Remove target name from this project.
+  def remove_target_name(name)
+    record = project_target_names.find_by(name: name)
+    return unless record
+
+    record.destroy
+    touch
+  end
+
+  # Add target location to this project if not already present.
+  def add_target_location(location)
+    project_target_locations.find_or_create_by!(location: location)
+    touch
+  rescue ActiveRecord::RecordNotUnique
+    # Already exists, no-op
+  end
+
+  # Remove target location from this project.
+  def remove_target_location(location)
+    record = project_target_locations.find_by(location: location)
+    return unless record
+
+    record.destroy
+    touch
+  end
+
+  # Does this project have any target names or target locations?
+  def has_targets?
+    project_target_names.any? || project_target_locations.any?
+  end
+
+  # Observations matching target names (with synonyms) AND within
+  # target locations. When only one type of target is set, matches
+  # on that alone.
+  def candidate_observations
+    name_ids = candidate_name_ids
+    loc_ids = candidate_location_ids
+    return Observation.none if name_ids.nil? && loc_ids.nil?
+
+    scope = if name_ids && loc_ids
+              Observation.where(id: name_ids).
+                where(id: loc_ids)
+            elsif name_ids
+              Observation.where(id: name_ids)
+            else
+              Observation.where(id: loc_ids)
+            end
+    scope.order(created_at: :desc)
+  end
+
+  private
+
+  def candidate_name_ids
+    return unless target_names.any?
+
+    Observation.names(lookup: target_name_ids,
+                      include_synonyms: true).select(:id)
+  end
+
+  def candidate_location_ids
+    return unless target_locations.any?
+
+    Observation.within_locations(target_locations).select(:id)
+  end
+
+  public
+
+  delegate :count, to: :candidate_observations, prefix: true
+
+  def new_candidate_observations_count
+    candidate_observations.where.not(id: observations.select(:id)).count
+  end
+
   def self.find_by_title_with_wildcards(str)
     find_using_wildcards("title", str)
   end
@@ -473,8 +561,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def location_count
-    Location.joins(:observations).
-      merge(visible_observations).distinct.count
+    obs_locs = Location.joins(:observations).
+               merge(visible_observations).select(:id)
+    Location.where(id: obs_locs).
+      or(Location.where(id: target_location_ids)).
+      distinct.count
   end
 
   def count_collections(name)

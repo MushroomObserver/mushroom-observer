@@ -478,19 +478,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
 
     # Exclude observations that belong to an occurrence but are not the
-    # primary.  Used by reports/exports to avoid double-counting.
-    # Exclude observations that are non-primary members of a
-    # multi-observation occurrence. Single-observation occurrences
-    # (used for field slip linking) are not filtered.
+    # primary. Used by reports/exports to avoid double-counting.
+    # Invariant: single-observation occurrences always have their sole
+    # observation as primary, so this check covers them correctly.
     scope :exclude_non_primary, lambda {
-      multi_occ_ids = Observation.where.not(occurrence_id: nil).
-                      group(:occurrence_id).
-                      having("COUNT(*) > 1").select(:occurrence_id)
       left_outer_joins(:occurrence).where(
         Observation[:occurrence_id].eq(nil).or(
           Occurrence[:primary_observation_id].eq(Observation[:id])
-        ).or(
-          Observation[:occurrence_id].not_in(multi_occ_ids.arel)
         )
       )
     }

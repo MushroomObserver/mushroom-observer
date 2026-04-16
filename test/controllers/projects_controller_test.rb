@@ -66,7 +66,7 @@ class ProjectsControllerTest < FunctionalTestCase
     p_id = projects(:eol_project).id
     get(:show, params: { id: p_id })
 
-    assert_template("show")
+    assert_response(:success)
     assert_select(
       "a[href*=?]", new_project_admin_request_path(project_id: p_id)
     )
@@ -79,6 +79,20 @@ class ProjectsControllerTest < FunctionalTestCase
                   "H1 title element should exist and contain content")
     assert_select("div#project_banner", true,
                   "Project banner div should be present")
+  end
+
+  def test_show_project_with_join_button
+    project = projects(:open_membership_project)
+    login("rolf") # not a member of open_membership_project
+    assert(project.open_membership)
+    assert_not(project.member?(rolf))
+
+    get(:show, params: { id: project.id })
+
+    assert_response(:success)
+    assert_match(:show_project_join.t, @response.body,
+                 "Join button should be present for non-member " \
+                 "on open project")
   end
 
   def test_show_project_without_banner
@@ -108,7 +122,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login(project.user.login)
     get(:show, params: { id: project.id })
 
-    assert_template("show")
+    assert_response(:success)
     assert_edit_button(project)
   end
 
@@ -119,7 +133,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login(mary.login)
     get(:show, params: { id: project.id })
 
-    assert_template("show")
+    assert_response(:success)
     assert_edit_button(project)
   end
 
@@ -154,14 +168,14 @@ class ProjectsControllerTest < FunctionalTestCase
 
     get(:show, params: { id: project.id })
 
-    assert_template("show")
+    assert_response(:success)
   end
 
   def test_show_project_with_date_range
     project = projects(:pinned_date_range_project)
     login
     get(:show, params: { id: project.id })
-    assert_template("show")
+    assert_response(:success)
     # NOTE: this project has no banner_image
     assert_select("#header", { text: /#{project.date_range}/ },
                   "Date range missing from Project header")

@@ -14,7 +14,7 @@ class MockImageAPI
 end
 
 # test importing iNaturalist Observations to Mushroom Observer
-class InatImportsControllerTest < FunctionalTestCase # rubocop:disable Style/OneClassPerFile
+class InatImportsControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
   include Inat::Constants
 

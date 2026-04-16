@@ -1,0 +1,5 @@
+<%= turbo_stream.replace("update_footer_#{obs.id}") do %>
+  <%= render(Components::Projects::ObsFooter.new(
+               project: project, obs: obs, in_project: in_project
+             )) %>
+<% end %>

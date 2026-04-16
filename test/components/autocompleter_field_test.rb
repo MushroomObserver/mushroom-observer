@@ -255,7 +255,7 @@ class AutocompleterFieldTest < ComponentTestCase
 end
 
 # Test form class to demonstrate textarea autocompleter
-class TestTextareaAutocompleterForm < Components::ApplicationForm # rubocop:disable Style/OneClassPerFile
+class TestTextareaAutocompleterForm < Components::ApplicationForm
   def view_template
     super do
       render(
@@ -270,7 +270,7 @@ class TestTextareaAutocompleterForm < Components::ApplicationForm # rubocop:disa
 end
 
 # Test form class for unknown autocompleter type
-class TestUnknownTypeAutocompleterForm < Components::ApplicationForm # rubocop:disable Style/OneClassPerFile
+class TestUnknownTypeAutocompleterForm < Components::ApplicationForm
   def view_template
     super do
       render(
@@ -284,7 +284,7 @@ class TestUnknownTypeAutocompleterForm < Components::ApplicationForm # rubocop:d
 end
 
 # Test form class for find_text option
-class TestFindTextAutocompleterForm < Components::ApplicationForm # rubocop:disable Style/OneClassPerFile
+class TestFindTextAutocompleterForm < Components::ApplicationForm
   def view_template
     super do
       render(
@@ -299,7 +299,7 @@ class TestFindTextAutocompleterForm < Components::ApplicationForm # rubocop:disa
 end
 
 # Test form class for keep_text option (includes edit button)
-class TestKeepTextAutocompleterForm < Components::ApplicationForm # rubocop:disable Style/OneClassPerFile
+class TestKeepTextAutocompleterForm < Components::ApplicationForm
   def view_template
     super do
       render(
@@ -315,7 +315,7 @@ class TestKeepTextAutocompleterForm < Components::ApplicationForm # rubocop:disa
 end
 
 # Test form class for create_text option (without create param)
-class TestCreateTextAutocompleterForm < Components::ApplicationForm # rubocop:disable Style/OneClassPerFile
+class TestCreateTextAutocompleterForm < Components::ApplicationForm
   def view_template
     super do
       render(
@@ -330,7 +330,7 @@ class TestCreateTextAutocompleterForm < Components::ApplicationForm # rubocop:di
 end
 
 # Test form class for modal create link (with create and create_path)
-class TestModalCreateAutocompleterForm < Components::ApplicationForm # rubocop:disable Style/OneClassPerFile
+class TestModalCreateAutocompleterForm < Components::ApplicationForm
   def view_template
     super do
       render(
@@ -347,7 +347,7 @@ class TestModalCreateAutocompleterForm < Components::ApplicationForm # rubocop:d
 end
 
 # Test form class for between slot
-class TestBetweenSlotAutocompleterForm < Components::ApplicationForm # rubocop:disable Style/OneClassPerFile
+class TestBetweenSlotAutocompleterForm < Components::ApplicationForm
   def view_template
     autocompleter_field(:notes, type: :user, label: "User:") do |f|
       f.with_between { "(Login Name)" }

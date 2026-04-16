@@ -5,6 +5,7 @@ class ObservationsController
   module Index
     def index
       make_name_suggestions
+      set_project_ivar
       build_index_with_query
     end
 

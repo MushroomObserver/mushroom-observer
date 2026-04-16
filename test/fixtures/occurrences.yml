@@ -9,25 +9,25 @@ occ_field_slip_one:
 
 occ_field_slip_no_trust:
   user: rolf
-  primary_observation: observation_with_no_naming
+  primary_observation: untrusted_hidden
   field_slip: field_slip_no_trust
   has_specimen: false
 
 occ_field_slip_two:
   user: roy
-  primary_observation: roys_obs
+  primary_observation: owner_accepts_general_questions
   field_slip: field_slip_two
   has_specimen: false
 
 occ_field_slip_falmouth_one:
   user: rolf
-  primary_observation: falmouth_obs_one
+  primary_observation: falmouth_2022_obs
   field_slip: field_slip_falmouth_one
   has_specimen: false
 
 occ_field_slip_previous:
   user: rolf
-  primary_observation: owner_accepts_general_questions
+  primary_observation: current_obs
   field_slip: field_slip_previous
   has_specimen: false
 
