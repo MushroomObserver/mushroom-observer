@@ -230,8 +230,6 @@ class ChecklistTest < UnitTestCase
     )
     proj.observations << obs
 
-    # Without include_sub_locations: only GPS box match
-    Checklist::ForProject.new(proj, california)
     # With include_sub_locations: name suffix match
     data_with = Checklist::ForProject.new(
       proj, california, include_sub_locations: true
@@ -243,6 +241,43 @@ class ChecklistTest < UnitTestCase
     )
     taxa_names = data_with.taxa.pluck(0)
     assert_includes(taxa_names, "Coprinus comatus")
+  end
+
+  # Verify suffix matching excludes GPS-overlap observations
+  # (the bug that #4126 fixes: e.g., Ohio obs inside WV box)
+  def test_checklist_sub_locations_excludes_gps_overlap
+    proj = projects(:bolete_project)
+    california = locations(:california)
+
+    # Create a non-California location with GPS inside CA box
+    nevada_loc = Location.create!(
+      name: "Reno, Nevada, USA",
+      scientific_name: "USA, Nevada, Reno",
+      north: 39.6, south: 39.4, east: -119.7, west: -119.9,
+      user: mary
+    )
+    overlap_obs = Observation.create!(
+      name: names(:boletus_edulis),
+      user: mary, location: nevada_loc,
+      lat: 39.5, lng: -119.8, when: Time.zone.now
+    )
+    proj.observations << overlap_obs
+
+    # Without sub_locations (GPS bounding box): should include it
+    data_gps = Checklist::ForProject.new(proj, california)
+    assert_includes(
+      data_gps.taxa.pluck(0), "Boletus edulis",
+      "GPS-box match should include obs inside CA bounding box"
+    )
+
+    # With sub_locations (name suffix): should exclude it
+    data_suffix = Checklist::ForProject.new(
+      proj, california, include_sub_locations: true
+    )
+    assert_not_includes(
+      data_suffix.taxa.pluck(0), "Boletus edulis",
+      "Suffix match should exclude Nevada obs despite GPS overlap"
+    )
   end
 
   def test_checklist_for_species_lists
