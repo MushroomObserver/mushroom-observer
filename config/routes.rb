@@ -679,7 +679,12 @@ MushroomObserver::Application.routes.draw do
     resources :locations, only: [:index],
                           controller: "projects/locations"
     resources :members, only: [:new, :create, :edit, :update, :index],
-                        controller: "projects/members", param: :candidate
+                        controller: "projects/members",
+                        param: :candidate do
+      member do
+        get :add_obs_modal
+      end
+    end
     resources :aliases, controller: "projects/aliases"
     resources :target_names, only: [:create, :destroy],
                              controller: "projects/target_names"
