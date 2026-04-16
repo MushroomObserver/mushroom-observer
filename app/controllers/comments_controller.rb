@@ -297,10 +297,15 @@ class CommentsController < ApplicationController
   end
 
   def refresh_comments_or_redirect_to_show
-    # Comment broadcasts are sent from the model
+    # Comment broadcasts are sent from the model.
+    # The turbo_stream response also removes the modal so the
+    # user doesn't have to wait for Action Cable delivery.
     respond_to do |format|
-      # Simply send a head response for turbo here.
-      format.turbo_stream { head(:ok) }
+      format.turbo_stream do
+        render(
+          turbo_stream: turbo_stream.remove("modal_comment")
+        )
+      end
       format.html do
         redirect_to(@target.show_link_args)
       end

@@ -266,6 +266,7 @@ class Comment < AbstractModel
   protected
 
   validate :check_requirements
+  validate :no_recent_duplicate, on: :create
 
   def check_requirements # :nodoc:
     check_user
@@ -291,5 +292,20 @@ class Comment < AbstractModel
     return unless target_type.to_s.size > 30
 
     errors.add(:target_type, :validate_comment_object_type_too_long.t)
+  end
+
+  def no_recent_duplicate
+    return unless user && target && comment.present?
+    return unless recent_identical_comment?
+
+    errors.add(:base, :validate_comment_duplicate.t)
+  end
+
+  def recent_identical_comment?
+    Comment.where(
+      user: user, target_type: target_type,
+      target_id: target_id, summary: summary,
+      comment: comment
+    ).where(created_at: 10.seconds.ago..).exists?
   end
 end

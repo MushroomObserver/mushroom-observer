@@ -303,6 +303,19 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal("New text.", comment.comment)
   end
 
+  def test_create_comment_turbo_stream_removes_modal
+    obs = observations(:minimal_unknown_obs)
+    params = { target: obs.id,
+               type: "Observation",
+               comment: { summary: "Turbo Test",
+                          comment: "Some text." } }
+    login
+    post(:create, params: params, as: :turbo_stream)
+    assert_response(:success)
+    assert_match("modal_comment", @response.body)
+    assert_match("turbo-stream", @response.body)
+  end
+
   def test_comment_broadcast
     obs = observations(:minimal_unknown_obs)
     comment_count = obs.comments.size

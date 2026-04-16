@@ -4183,6 +4183,7 @@
   validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
+  validate_comment_duplicate: Duplicate comment. This comment was already submitted.
   validate_comment_user_missing: "[:validate_missing(field=:user)]"
   validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
   validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
