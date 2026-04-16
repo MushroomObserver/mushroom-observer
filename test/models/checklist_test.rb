@@ -181,6 +181,7 @@ class ChecklistTest < UnitTestCase
                    "all_site_taxa_by_user :genera should be a Hash")
     assert_kind_of(Hash, result[:species],
                    "all_site_taxa_by_user :species should be a Hash")
+  end
 
   def test_checklist_for_project_merges_target_names
     proj = projects(:rare_fungi_project)
