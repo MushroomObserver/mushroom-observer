@@ -212,7 +212,7 @@ module Projects
     # are not already in project.observations.
     #
     # Can't use candidate.observations due to a bug in in_box.
-    # Specifially, candidate.observations.in_box doesn't return
+    # Specifically, candidate.observations.in_box doesn't return
     # the right thing because it incorrectly adds observations not
     # from the candidate if they have no lat/long data.
     def addable_observations(project, candidate)
@@ -223,8 +223,8 @@ module Projects
                          east: loc.east, west: loc.west)
       end
       if project.start_date && project.end_date
-        obs = obs.found_between(project.start_date.strftime("%Y-%m,-%d"),
-                                project.end_date.strftime("%Y-%m,-%d"))
+        obs = obs.found_between(project.start_date.strftime("%Y-%m-%d"),
+                                project.end_date.strftime("%Y-%m-%d"))
       end
       obs.where.not(id: project.observations.select(:id))
     end

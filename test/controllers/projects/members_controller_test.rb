@@ -225,9 +225,8 @@ module Projects
         commit: :change_member_add_obs.l
       }
       put_requires_login(:update, params, target_user.login)
-      expected = :change_member_add_obs_flash.
-                 t(count: target_user.observations.count)
-      assert_flash_text(expected.to_s.gsub(/<[^>]*>/, ""))
+      count = target_user.observations.count
+      assert_flash_text(/Added #{count} Observations/)
     end
 
     # issue #4129: modal returns count of matching obs not in project
