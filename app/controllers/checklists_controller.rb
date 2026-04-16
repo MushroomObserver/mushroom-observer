@@ -41,8 +41,10 @@ class ChecklistsController < ApplicationController
     return unless (@project = find_or_goto_index(Project, proj_id))
 
     @location = Location.safe_find(location_id)
+    sub = params[:sub_locations] == "1"
 
-    Checklist::ForProject.new(@project, @location)
+    Checklist::ForProject.new(@project, @location,
+                              include_sub_locations: sub)
   end
 
   def species_list_checklist(list_id)

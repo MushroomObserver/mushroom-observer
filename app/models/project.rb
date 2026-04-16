@@ -453,7 +453,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def candidate_location_ids
     return unless target_locations.any?
 
-    Observation.within_locations(target_locations).select(:id)
+    scope = Observation.joins(:location).
+            where(location_suffix_conditions)
+    scope = scope.merge(Observation.in_box(**location.bounding_box)) if location
+    scope.select("observations.id")
+  end
+
+  # OR clause: location.name LIKE '%, <target>' OR = '<target>'
+  def location_suffix_conditions
+    tbl = Location.arel_table
+    target_locations.map do |tl|
+      escaped = self.class.sanitize_sql_like(tl.name)
+      tbl[:name].matches("%, #{escaped}").
+        or(tbl[:name].eq(tl.name))
+    end.reduce(:or)
   end
 
   public

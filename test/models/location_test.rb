@@ -620,6 +620,19 @@ class LocationTest < UnitTestCase
     { north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west }
   end
 
+  def test_scope_sub_locations_of
+    california = locations(:california)
+    subs = Location.sub_locations_of(california)
+
+    # Albion, Burbank, etc. end with ", California, USA"
+    assert_includes(subs, locations(:albion))
+    assert_includes(subs, locations(:burbank))
+    # California itself is excluded
+    assert_not_includes(subs, california)
+    # Unrelated locations excluded
+    assert_not_includes(subs, locations(:nybg_location))
+  end
+
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)

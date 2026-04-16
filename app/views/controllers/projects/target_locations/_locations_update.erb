@@ -4,7 +4,11 @@
 <% end %>
 <%= turbo_stream.replace("locations_table") do %>
   <%= render(Components::Projects::LocationsTable.new(
-               project: project, locations: locations, user: user
+               project: project,
+               grouped_data: grouped_data,
+               ungrouped_locations: ungrouped_locations,
+               obs_counts: obs_counts,
+               user: user
              )) %>
 <% end %>
 <%= turbo_stream.replace("project_tabs") do %>

@@ -4,6 +4,26 @@ body {
   word-wrap: break-word;
 }
 
+// Give focus outlines breathing room so they don't clip text/icons.
+a:focus,
+button:focus,
+.btn:focus,
+[role="button"]:focus {
+  outline-offset: 2px;
+}
+
+// Inside matrix boxes, overflow:hidden clips outlines. Use an
+// inset box-shadow instead so the focus indicator is visible.
+.rss-box-details {
+  a:focus,
+  button:focus,
+  .btn:focus,
+  [role="button"]:focus {
+    outline: none;
+    box-shadow: inset 0 0 0 2px rgba($link-color, 0.4);
+  }
+}
+
 blockquote {
   font-size: 100%;
 }
