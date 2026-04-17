@@ -295,17 +295,21 @@ class Comment < AbstractModel
   end
 
   def no_recent_duplicate
-    return unless user && target && comment.present?
-    return unless recent_identical_comment?
+    # Validations run before before_create sets user_id in the standard
+    # controller flow, so fall back to User.current to match the same
+    # identity that will be assigned at save time.
+    effective_user = user || User.current
+    return unless effective_user && target
+    return unless recent_identical_comment?(effective_user)
 
     errors.add(:base, :validate_comment_duplicate.t)
   end
 
-  def recent_identical_comment?
+  def recent_identical_comment?(effective_user)
     Comment.where(
-      user: user, target_type: target_type,
+      user: effective_user, target_type: target_type,
       target_id: target_id, summary: summary,
-      comment: comment
+      comment: comment.to_s
     ).where(created_at: 10.seconds.ago..).exists?
   end
 end
