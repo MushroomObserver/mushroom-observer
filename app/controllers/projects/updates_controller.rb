@@ -115,8 +115,8 @@ module Projects
           )
         end
         format.html do
-          redirect_back(
-            fallback_location: project_updates_path(
+          redirect_back_or_to(
+            project_updates_path(
               project_id: @project.id, show_excluded: show_excluded?
             )
           )
