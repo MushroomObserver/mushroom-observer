@@ -312,6 +312,12 @@ class CommentsControllerTest < FunctionalTestCase
     login
     post(:create, params: params, as: :turbo_stream)
     assert_response(:success)
+    # close_modal triggers Bootstrap cleanup (backdrop + body class);
+    # remove drops the element so the next open fetches a fresh form.
+    assert_match(
+      /<turbo-stream action="close_modal"[^>]*>\s*<template>modal_comment/,
+      @response.body
+    )
     assert_match(
       /<turbo-stream action="remove"[^>]*target="modal_comment"/,
       @response.body
@@ -327,6 +333,10 @@ class CommentsControllerTest < FunctionalTestCase
     put(:update, params: params, as: :turbo_stream)
     assert_response(:success)
     target_id = "modal_comment_#{comment.id}"
+    assert_match(
+      /<turbo-stream action="close_modal"[^>]*>\s*<template>#{target_id}/,
+      @response.body
+    )
     assert_match(
       /<turbo-stream action="remove"[^>]*target="#{target_id}"/,
       @response.body
