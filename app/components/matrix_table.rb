@@ -34,6 +34,9 @@ class Components::MatrixTable < Components::Base
   prop :user, _Nilable(User), default: nil
   prop :cached, _Boolean, default: false
   prop :identify, _Boolean, default: false
+  # Project context — passed through to each MatrixBox so a project admin
+  # sees an Exclude button on the observations grid filtered by project.
+  prop :project, _Nilable(Project), default: nil
 
   def view_template(&block)
     ul(
@@ -59,12 +62,15 @@ class Components::MatrixTable < Components::Base
 
   def render_cached_boxes
     @objects.each do |object|
-      if !@identify && should_cache_object?(object)
+      # Skip fragment cache when @project is present since the admin-only
+      # Exclude button is user-specific and would cache incorrectly.
+      if !@identify && !@project && should_cache_object?(object)
         cache([I18n.locale, object]) do
           MatrixBox(user: @user, object: object)
         end
       else
-        MatrixBox(user: @user, object: object, identify: @identify)
+        MatrixBox(user: @user, object: object,
+                  identify: @identify, project: @project)
       end
     end
   end
@@ -78,7 +84,8 @@ class Components::MatrixTable < Components::Base
 
   def render_matrix_boxes
     @objects.each do |object|
-      MatrixBox(user: @user, object: object, identify: @identify)
+      MatrixBox(user: @user, object: object,
+                identify: @identify, project: @project)
     end
   end
 end
