@@ -62,9 +62,10 @@ class Components::MatrixTable < Components::Base
 
   def render_cached_boxes
     @objects.each do |object|
-      # Skip fragment cache when @project is present since the admin-only
-      # Exclude button is user-specific and would cache incorrectly.
-      if !@identify && !@project && should_cache_object?(object)
+      # Skip fragment cache only when the current user will see the
+      # admin-only Exclude button. Non-admins see the same output as the
+      # non-project case, so caching is still safe for them.
+      if !@identify && !project_admin_view? && should_cache_object?(object)
         cache([I18n.locale, object]) do
           MatrixBox(user: @user, object: object)
         end
@@ -73,6 +74,10 @@ class Components::MatrixTable < Components::Base
                   identify: @identify, project: @project)
       end
     end
+  end
+
+  def project_admin_view?
+    @project&.is_admin?(@user)
   end
 
   def should_cache_object?(object)

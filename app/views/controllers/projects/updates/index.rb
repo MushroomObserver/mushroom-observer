@@ -15,7 +15,8 @@ module Views
             @user = user
             @observations = results[:observations]
             @pagination = results[:pagination]
-            @base_url = results[:base_url]
+            @request_url = results[:request_url]
+            @form_action_url = results[:form_action_url]
             @current_count = results[:current_count]
             @show_excluded = show_excluded
           end
@@ -97,8 +98,8 @@ module Views
 
             render(Components::IndexPaginationNav.new(
                      pagination_data: @pagination,
-                     request_url: @base_url,
-                     form_action_url: @base_url,
+                     request_url: @request_url,
+                     form_action_url: @form_action_url,
                      q_params: nil,
                      letter_param: nil
                    ))

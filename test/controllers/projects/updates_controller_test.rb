@@ -98,14 +98,28 @@ module Projects
       assert_includes(@project.excluded_observations.reload, @matching_obs)
     end
 
+    def test_add_observation_turbo_stream
+      post(:add_observation,
+           params: { project_id: @project.id,
+                     id: @matching_obs.id },
+           as: :turbo_stream)
+
+      assert_response(:success)
+      assert_includes(@project.observations.reload, @matching_obs)
+      assert_includes(@response.body, %(<turbo-stream action="remove"))
+      assert_includes(@response.body, %(<turbo-stream action="update"))
+    end
+
     def test_exclude_observation_turbo_stream
       post(:exclude_observation,
            params: { project_id: @project.id,
-                     id: @matching_obs.id,
-                     format: :turbo_stream })
+                     id: @matching_obs.id },
+           as: :turbo_stream)
 
       assert_response(:success)
       assert_includes(@project.excluded_observations.reload, @matching_obs)
+      assert_includes(@response.body, %(<turbo-stream action="remove"))
+      assert_includes(@response.body, %(<turbo-stream action="update"))
     end
 
     def test_exclude_observation_not_found

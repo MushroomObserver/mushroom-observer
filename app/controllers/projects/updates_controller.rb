@@ -73,7 +73,8 @@ module Projects
       { observations: obs_page,
         pagination: pagination,
         current_count: pagination.num_total,
-        base_url: request.path }
+        request_url: request.fullpath,
+        form_action_url: request.path }
     end
 
     def build_pagination(scope)
