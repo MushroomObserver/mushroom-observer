@@ -90,7 +90,13 @@ export default class extends GeocodeController {
         // Everything except the obs form map: draw the map.
         if (!(this.map_type === "observation" && this.editable)) {
           this.drawMap()
-          this.buildOverlays()
+          // Defer overlays until the map is idle — that's when
+          // map.getProjection() becomes available, which
+          // rectangleTooSmall() needs to decide whether to render
+          // a box vs. fall back to a square marker.
+          google.maps.event.addListenerOnce(this.map, "idle", () => {
+            this.buildOverlays()
+          })
         }
       })
       .catch((e) => {
@@ -180,11 +186,15 @@ export default class extends GeocodeController {
 
   drawMarker(set) {
     this.verbose("map:drawMarker")
+    // Per-marker color comes from the server (Mappable::MapSet#compute_color
+    // for issue #4131). Falls back to the controller default for editable
+    // markers / legacy callers that don't set a color.
+    const color = (set && set.color) || this.marker_color
     const markerOptions = {
       position: { lat: set.lat, lng: set.lng },
       map: this.map,
       draggable: this.editable,
-      background: this.marker_color,
+      icon: this.colored_circle_icon(color),
       zoomOnClick: false
     }
 
@@ -240,9 +250,13 @@ export default class extends GeocodeController {
   // For point markers: make a clickable InfoWindow
   giveMarkerInfoWindow(marker, set) {
     this.verbose("map:giveMarkerInfoWindow")
+    // maxWidth keeps the popup from stretching unnecessarily wide; without
+    // it Google fills the available map width, which leaves a lot of blank
+    // space on the right and pushes the close X far from the content.
     const info_window = new google.maps.InfoWindow({
       content: set.caption,
-      position: { lat: set.lat, lng: set.lng }
+      position: { lat: set.lat, lng: set.lng },
+      maxWidth: 280
     })
 
     google.maps.event.addListener(marker, "click", () => {
@@ -284,10 +298,24 @@ export default class extends GeocodeController {
     const bounds = this.boundsOf(set)
     if (!bounds) return false
 
+    // Per-box color from the server (#4131). Rectangles are group markers
+    // so this is usually GROUP_COLOR, but honor whatever the server set.
+    const color = (set && set.color) || this.marker_color
+
+    // If the rectangle would render sub-pixel at the current zoom, draw
+    // a standard-sized square marker at its center instead so it's still
+    // visible (#4131). Only applies to the info map; editable/location
+    // maps always get the real rectangle.
+    if (this.map_type === "info" && !this.editable &&
+        this.rectangleTooSmall(bounds)) {
+      this.drawBoxAsSquareMarker(set, color)
+      return
+    }
+
     const clickable = this.map_type === "info",
       editable = this.editable && this.map_type !== "observation",
       rectangleOptions = {
-        strokeColor: this.marker_color,
+        strokeColor: color,
         strokeOpacity: 1,
         strokeWeight: 3,
         map: this.map,
@@ -308,6 +336,58 @@ export default class extends GeocodeController {
       this.rectangle = rectangle
       // this.map.fitBounds(bounds) // Only fit bounds if it's a location map
       this.makeRectangleEditable()
+    }
+  }
+
+  // Pixel threshold below which a rectangle collapses into something
+  // indistinguishable from a marker. Swap it for a square marker only
+  // when BOTH dimensions fall below the threshold — otherwise a thin
+  // tall strip or wide flat strip is still a meaningful shape and should
+  // render as the real rectangle.
+  MIN_RECT_PIXELS = 15
+
+  // `bounds` here is the plain {north, south, east, west} object
+  // returned by this.boundsOf(set), NOT a google.maps.LatLngBounds.
+  rectangleTooSmall(bounds) {
+    if (!bounds) return false
+    const projection = this.map.getProjection()
+    if (!projection) return false
+    const zoom = this.map.getZoom()
+    if (zoom === undefined) return false
+    const scale = Math.pow(2, zoom)
+    const ne = projection.fromLatLngToPoint(
+      new google.maps.LatLng(bounds.north, bounds.east)
+    )
+    const sw = projection.fromLatLngToPoint(
+      new google.maps.LatLng(bounds.south, bounds.west)
+    )
+    const widthPx = Math.abs(ne.x - sw.x) * scale
+    const heightPx = Math.abs(sw.y - ne.y) * scale
+    return widthPx < this.MIN_RECT_PIXELS && heightPx < this.MIN_RECT_PIXELS
+  }
+
+  // Draws a square marker at the center of a box that's too small to
+  // render as a rectangle. Visually distinct from single-observation
+  // circle markers (square vs circle signals "group").
+  drawBoxAsSquareMarker(set, color) {
+    const marker = new google.maps.Marker({
+      position: { lat: set.lat, lng: set.lng },
+      map: this.map,
+      title: set.title,
+      icon: this.colored_square_icon(color),
+      zoomOnClick: false
+    })
+    this.giveMarkerInfoWindow(marker, set)
+  }
+
+  colored_square_icon(color) {
+    return {
+      path: "M -6 -6 L 6 -6 L 6 6 L -6 6 z",
+      fillColor: color,
+      fillOpacity: 1,
+      strokeColor: "#ffffff",
+      strokeWeight: 1.5,
+      scale: 1
     }
   }
 
@@ -693,5 +773,19 @@ export default class extends GeocodeController {
     // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
+  }
+
+  // Colored circle icon for google.maps.Marker. Using SymbolPath.CIRCLE
+  // is the most compatible way to get per-marker fill colors on the
+  // classic Marker API without swapping to AdvancedMarkerElement.
+  colored_circle_icon(color) {
+    return {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: color,
+      fillOpacity: 1,
+      strokeColor: "#ffffff",
+      strokeWeight: 1.5,
+      scale: 8
+    }
   }
 }

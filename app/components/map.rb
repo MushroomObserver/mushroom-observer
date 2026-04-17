@@ -21,6 +21,8 @@ class Components::Map < Components::Base
   include Phlex::Rails::Helpers::ContentTag
   include Phlex::Rails::Helpers::LinkTo
 
+  MAX_GROUP_NAMES = 3
+
   prop :objects, _Array(_Any), default: -> { [] }
   prop :user, _Nilable(User), default: nil
   prop :map_div, String, default: "map_div"
@@ -94,6 +96,7 @@ class Components::Map < Components::Base
   def mappable_collection
     collection = Mappable::CollapsibleCollectionOfObjects.new(mappable_objects)
     collection.sets.each_value do |mapset|
+      mapset.color = mapset.compute_color
       mapset.title = mapset_marker_title(mapset)
       mapset.caption = mapset_info_window(mapset)
       mapset.objects = nil
@@ -131,25 +134,57 @@ class Components::Map < Components::Base
     end.uniq
   end
 
-  # Info window content for map marker popup
+  # Info window content for map marker popup. Enhanced for issue #4131
+  # (see MapHelper#mapset_info_window for the parallel implementation
+  # used by non-Phlex callers).
   def mapset_info_window(set)
     lines = []
-    lines << observation_line(set)
+    lines.concat(observation_lines(set)).compact!
     lines << location_line(set)
     lines << mapset_coords(set)
     lines.compact.join("<br>")
   end
 
-  def observation_line(set)
+  def observation_lines(set)
     observations = set.observations
-    return mapset_observation_header(set) if observations.length > 1
-    return mapset_observation_link(observations.first) if single_obs?(set)
-
-    nil
+    if observations.length == 1 && observations.first&.id
+      single_observation_lines(observations.first, set)
+    elsif observations.length > 1
+      [mapset_observation_header(set), *group_name_links(observations)]
+    else
+      []
+    end
   end
 
-  def single_obs?(set)
-    set.observations.length == 1 && set.observations.first&.id
+  def single_observation_lines(obs, _set)
+    [
+      mapset_observation_link(obs),
+      obs_date(obs),
+      consensus_indicator(obs)
+    ].compact
+  end
+
+  def group_name_links(observations)
+    sorted = observations.sort_by { |o| [o.when || Date.new(0), o.id] }.reverse
+    top = sorted.first(MAX_GROUP_NAMES)
+    links = top.map { |o| mapset_observation_link(o) }
+    links << "<span>…</span>" if sorted.length > MAX_GROUP_NAMES
+    links
+  end
+
+  def obs_date(obs)
+    return nil unless obs.respond_to?(:when) && obs.when.present?
+
+    obs.when.web_date.to_s
+  end
+
+  # Plain-text confidence line. The marker color is the visual cue; the
+  # popup just names the percentage.
+  def consensus_indicator(obs)
+    return nil unless obs.respond_to?(:vote_cache)
+
+    pct = ::Vote.percent(obs.vote_cache)
+    ERB::Util.html_escape("#{:Confidence.t}: #{pct.round}%")
   end
 
   def location_line(set)
@@ -165,18 +200,30 @@ class Components::Map < Components::Base
   end
 
   def mapset_observation_header(set)
-    count = set.observations.length
-    "#{:Observations.t}: #{count}"
+    "#{:Observations.t}: #{set.observations.length}"
   end
 
   def mapset_location_header(set)
-    count = set.underlying_locations.length
-    "#{:Locations.t}: #{count}"
+    "#{:Locations.t}: #{set.underlying_locations.length}"
   end
 
+  # Observation link — opens in a new tab (issue #4131 request #2).
+  # Prefers the consensus text_name when available for clarity; falls
+  # back to "Observation #<id>" for callers that didn't load a name.
   def mapset_observation_link(obs)
     url = observation_path(id: obs.id)
-    "<a href=\"#{url}\">#{:Observation.t} ##{obs.id}</a>"
+    label = observation_label(obs)
+    "<a href=\"#{url}\" target=\"_blank\" rel=\"noopener noreferrer\">" \
+      "#{label}</a>"
+  end
+
+  def observation_label(obs)
+    text = obs.respond_to?(:text_name) ? obs.text_name : nil
+    text = obs.name.text_name if text.blank? && obs.respond_to?(:name) &&
+                                 obs.name.respond_to?(:text_name)
+    return ERB::Util.html_escape(text.to_s.t) if text.present?
+
+    "#{:Observation.t} ##{obs.id}"
   end
 
   def mapset_location_link(loc)

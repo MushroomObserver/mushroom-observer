@@ -496,6 +496,7 @@
   citation: citation
   CITATIONS: Citations
   citations: citations
+  Confidence: Confidence
   CONFIDENCE_LEVEL: Confidence Level
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels

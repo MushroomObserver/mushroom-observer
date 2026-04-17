@@ -27,10 +27,19 @@
 #
 module Mappable
   class MapSet
+    # Marker colors used in the map popup enhancement (issue #4131).
+    # Groups / multi-observation / box markers get the neutral blue.
+    # Single-observation markers use a traffic-light palette based on the
+    # consensus vote percentage.
+    GROUP_COLOR = "#3B79CC" # bootstrap primary
+    CONFIRMED_COLOR = "#5CB85C" # >=80% — bootstrap success
+    TENTATIVE_COLOR = "#F0AD4E" # 0<x<80% — bootstrap warning
+    DISPUTED_COLOR  = "#D9534F" # <=0% — bootstrap danger
+
     attr_reader :north, :south, :east, :west, :is_point, :is_box,
                 :north_east, :south_east, :south_west, :north_west, :lat, :lng,
                 :north_south_distance, :east_west_distance, :center, :edges
-    attr_accessor :objects, :title, :caption
+    attr_accessor :objects, :title, :caption, :color
 
     def initialize(objects = [])
       @objects = objects.is_a?(Array) ? objects : [objects]
@@ -60,6 +69,28 @@ module Mappable
     # NOTE: does not update extents!
     def add_objects(objects)
       @objects += objects
+    end
+
+    # True iff the set represents exactly one observation. A set may
+    # also contain a Location object (the obs's location, bucketed
+    # into the same geographic cell), so count observations rather
+    # than all @objects — otherwise single-obs sets that were
+    # bucketed with their location get colored as groups.
+    def single_observation?
+      observations.length == 1
+    end
+
+    # Hex color chosen for the marker/box and the popup dot.
+    # - Blue for groups (>1 observation or location-only).
+    # - Single observations: traffic-light based on consensus %.
+    def compute_color
+      return GROUP_COLOR unless single_observation?
+
+      pct = ::Vote.percent(observations.first.vote_cache)
+      return DISPUTED_COLOR if pct <= 0
+      return CONFIRMED_COLOR if pct >= 80
+
+      TENTATIVE_COLOR
     end
 
     def observations

@@ -59,3 +59,99 @@
   height:      15px;
   background-position: 0px 15px;
 }
+
+//
+// Google Maps InfoWindow popup content (issue #4131).
+// Tighten the default iw chrome and style the .media popup for
+// single-observation markers so the image and text sit snug together.
+//
+.gm-style-iw-c {
+  padding: 0 !important;
+}
+.gm-style-iw-d {
+  overflow: auto !important;
+  padding: 12px 12px 8px;
+}
+.gm-style-iw-chr {
+  // Pull the close-X to the top-right corner without reserving a full
+  // header row above the content.
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+}
+
+.map-popup {
+  font-size: 13px;
+  line-height: 1.35;
+  min-width: 200px;
+  max-width: 320px;
+
+  a { color: $link-color; }
+
+  // Thumbnail link + image — strip everything that could draw an edge
+  // (link underline, Bootstrap .thumbnail styling, focus outline, box
+  // shadow). Do NOT touch .media-left itself — its display:table-cell
+  // is what makes the Bootstrap .media layout keep text on the right.
+  .media-left a,
+  .media-object.map-popup-thumb {
+    display: block !important;
+    text-decoration: none !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .media-object.map-popup-thumb {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 4px !important;
+    margin: 0;
+    vertical-align: top;
+  }
+
+  .media-heading {
+    font-size: 14px;
+    margin: 0 0 2px;
+  }
+
+  .small {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  // "N Observations [Show All] [Map All]" row sits on its own line
+  // with a little breathing room before the name links below it.
+  .map-popup-header {
+    margin-bottom: 8px;
+  }
+
+  // Show All / Map All buttons inside group popups. Native browser
+  // focus outline is distracting when it persists after clicking
+  // inside a small popup; suppress it and use a subtle box-shadow
+  // only on :focus-visible (keyboard-only) for accessibility.
+  .map-popup-btn {
+    margin-left: 6px;
+
+    &:focus { outline: 0; }
+    &:focus-visible {
+      outline: 0;
+      box-shadow: 0 0 0 2px rgba(59, 121, 204, 0.4);
+    }
+  }
+}
+
+.map-popup-single {
+  padding-right: 20px; // room for the close X
+}
+
+.map-popup-group {
+  padding-right: 20px; // room for the close X
+  > span + span::before,
+  > a + a::before {
+    content: none;
+  }
+}

@@ -49,6 +49,7 @@ module MapHelper
   def mappable_collection(objects, args)
     collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
     collection.sets.map do |_key, mapset|
+      mapset.color = mapset.compute_color
       mapset.title = mapset_marker_title(mapset)
       mapset.caption = mapset_info_window(mapset, args)
       mapset.objects = nil # can't delete, it's part of the MapSet object
@@ -104,34 +105,121 @@ module MapHelper
     end.compact_blank.uniq
   end
 
+  # Info window popup content. Enhanced for #4131 to match iNat's
+  # denser layout — Bootstrap .media object with a thumbnail on the
+  # left and details on the right for a single observation; a compact
+  # vertical list for groups.
+  MAX_GROUP_NAMES = 3
+
   def mapset_info_window(set, args)
-    lines = []
+    observations = set.observations
+    if observations.length == 1 && observations.first&.id
+      mapset_single_observation_popup(observations.first, set, args)
+    else
+      mapset_group_popup(set, args)
+    end
+  end
+
+  def mapset_single_observation_popup(obs, set, args)
+    tag.div(class: "media map-popup map-popup-single") do
+      concat(mapset_thumbnail_media_left(obs, args))
+      concat(mapset_single_observation_body(obs, set, args))
+    end
+  end
+
+  def mapset_thumbnail_media_left(obs, args)
+    return safe_join([]) unless obs.respond_to?(:thumb_image_id) &&
+                                obs.thumb_image_id
+
+    q = args[:query_param] ? { q: args[:query_param] } : {}
+    url = observation_path(id: obs.id, params: q)
+    tag.div(class: "media-left pr-2") do
+      link_to(url, target: "_blank", rel: "noopener noreferrer") do
+        image_tag(Image.url(:small, obs.thumb_image_id),
+                  class: "media-object map-popup-thumb",
+                  loading: "lazy")
+      end
+    end
+  end
+
+  def mapset_single_observation_body(obs, set, args)
+    tag.div(class: "media-body") do
+      concat(tag.div(mapset_observation_link(obs, args),
+                     class: "media-heading"))
+      date = mapset_observation_date(obs)
+      concat(tag.div(date, class: "small")) if date
+      conf = mapset_consensus_indicator(obs)
+      concat(tag.div(conf, class: "small")) if conf
+      locations = set.underlying_locations
+      if locations.length == 1 && locations.first&.id
+        concat(tag.div(mapset_location_link(locations.first, args),
+                       class: "small"))
+      end
+      concat(tag.div(mapset_coords(set), class: "small text-muted"))
+    end
+  end
+
+  def mapset_group_popup(set, args)
     observations = set.observations
     locations = set.underlying_locations
+    lines = []
     lines << mapset_observation_header(set) if observations.length > 1
+    lines.concat(mapset_group_name_links(observations, args))
     lines << mapset_location_header(set) if locations.length > 1
-    if observations.length == 1 && observations.first&.id
-      lines << mapset_observation_link(observations.first, args)
-    end
-    if locations.length == 1 && locations.first&.id # obj maybe not saved yet
+    if locations.length == 1 && locations.first&.id
       lines << mapset_location_link(locations.first, args)
     end
     lines << mapset_coords(set)
-    lines.safe_join(safe_br)
+    tag.div(lines.safe_join(safe_br), class: "map-popup map-popup-group")
+  end
+
+  def mapset_group_name_links(observations, args)
+    sorted = observations.sort_by { |o| [o.when || Date.new(0), o.id] }.reverse
+    top = sorted.first(MAX_GROUP_NAMES)
+    links = top.map { |o| mapset_observation_link(o, args) }
+    links << tag.span("…") if sorted.length > MAX_GROUP_NAMES
+    links
+  end
+
+  def mapset_observation_date(obs)
+    return nil if obs.respond_to?(:when) && obs.when.blank?
+    return nil unless obs.respond_to?(:when)
+
+    obs.when.web_date
+  end
+
+  # Plain-text "Confidence: NN%" line. The marker color already conveys
+  # the semantic bucket, so no dot/pill is needed inside the popup.
+  def mapset_consensus_indicator(obs)
+    return nil unless obs.respond_to?(:vote_cache)
+
+    pct = ::Vote.percent(obs.vote_cache)
+    "#{:Confidence.t}: #{pct.round}%"
   end
 
   def mapset_observation_header(set)
     show, map = mapset_associated_links(set, :observation)
-    map_point_text(:Observations.t, set.observations.length, show, map)
+    tag.div(
+      map_point_text(:Observations.t, set.observations.length, show, map),
+      class: "map-popup-header"
+    )
   end
 
   def mapset_location_header(set)
     show, map = mapset_associated_links(set, :location)
-    map_point_text(:Locations.t, set.underlying_locations.length, show, map)
+    tag.div(
+      map_point_text(:Locations.t, set.underlying_locations.length, show, map),
+      class: "map-popup-header"
+    )
   end
 
+  # Count-first phrasing: "2 Observations [Show All] [Map All]".
+  # Show/Map All are rendered as small buttons by
+  # mapset_associated_links_for_type so they have real padding and
+  # don't rely on a focus outline for visual separation.
   def map_point_text(label, count, show, map)
-    label.html_safe << ": " << count.to_s << " (" << show << " | " << map << ")"
+    parts = ["#{count} #{label}".html_safe, show, map]
+    safe_join(parts, " ")
   end
 
   # Links to obs, locs or names within the current mapset, or maps of these
@@ -141,7 +229,9 @@ module MapHelper
     mapset_associated_links_for_type(set, type)
   end
 
-  # Helper for the above
+  # Helper for the above. Renders the two links as small buttons
+  # (btn btn-default btn-xs) so the popup has real spacing without
+  # relying on the focus outline for visual weight (#4131).
   def mapset_associated_links_for_type(set, type)
     query_type = type.to_s.camelize.to_sym
     path_helper = :"#{type.to_s.pluralize}_path"
@@ -149,18 +239,42 @@ module MapHelper
     # This will correctly merge the in_box param into the query.
     query = controller.
             find_or_create_query(query_type, in_box: mapset_box_params(set))
+    btn = "btn btn-default btn-xs map-popup-btn"
     # Add the query params to the link data for debugging.
     # Can remove when we start splatting query params in the URL.
     [link_to(:show_all.t, add_q_param(send(path_helper), query),
-             data: query.params),
+             class: btn, data: query.params),
      link_to(:map_all.t, add_q_param(send(:"map_#{path_helper}"), query),
-             data: query.params)]
+             class: btn, data: query.params)]
   end
 
+  # Observation link in popups. Prefers the consensus text_name when
+  # available (new minimal_observation attr for #4131), falls back to
+  # "Observation #<id>" otherwise (e.g. pre-existing callers that use
+  # full Observation objects or didn't load the name). Always opens in
+  # a new tab — per Jaci's request, clicking should not navigate the
+  # map page away.
   def mapset_observation_link(obs, args)
     params = args[:query_param] ? { q: args[:query_param] } : {}
-    link_to("#{:Observation.t} ##{obs.id}",
-            observation_path(id: obs.id, params: params))
+    label = mapset_observation_label(obs)
+    link_to(label, observation_path(id: obs.id, params: params),
+            target: "_blank", rel: "noopener noreferrer")
+  end
+
+  # Preferred order: display_name (has MO textile markers — bold italic
+  # for non-deprecated names, italic-only for deprecated) → text_name
+  # (plain, wrap in <em>) → "Observation #<id>".
+  def mapset_observation_label(obs)
+    display = obs.respond_to?(:display_name) ? obs.display_name : nil
+    display ||= obs.name.display_name if display.blank? &&
+                                         obs.respond_to?(:name) &&
+                                         obs.name.respond_to?(:display_name)
+    return display.to_s.t if display.present?
+
+    text = obs.respond_to?(:text_name) ? obs.text_name : nil
+    return tag.em(text.to_s) if text.present?
+
+    "#{:Observation.t} ##{obs.id}"
   end
 
   def mapset_location_link(loc, args)
