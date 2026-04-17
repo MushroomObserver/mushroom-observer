@@ -2,10 +2,13 @@
   <%= render(partial: "projects/target_names/widget",
              locals: { project: project }) %>
 <% end %>
-<%= turbo_stream.replace("checklist_panel") do %>
-  <%= render(partial: "checklists/checklist_panel",
-             locals: { project: project, data: data,
-                       user: user }) %>
+<%= turbo_stream.replace("checklist_contents") do %>
+  <%= render(Components::Checklist::Contents.new(
+               data: data,
+               context: Components::Checklist::Context.new(
+                 user: user, project: project
+               )
+             )) %>
 <% end %>
 <%= turbo_stream.replace("project_tabs") do %>
   <%= render(Components::Projects::Tabs.new(

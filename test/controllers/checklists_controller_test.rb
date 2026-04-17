@@ -76,6 +76,35 @@ class ChecklistsControllerTest < FunctionalTestCase
     prove_checklist_content(expect)
   end
 
+  # Issue #4128 — Target/summary copy and three-panel layout for a project
+  # with target names and a mix of observed / unobserved targets.
+  def test_checklist_for_project_renders_target_summary_and_panels
+    project = projects(:rare_fungi_project)
+    # Observe one target (species-level). The other target stays unobserved.
+    obs = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: users(:rolf),
+      when: Time.zone.now
+    )
+    project.observations << obs
+
+    login
+    get(:show, params: { project_id: project.id })
+
+    assert_response(:success)
+    # Line 1 — target-name summary.
+    assert_match(/2 target names.*1 observed.*1 not yet observed/,
+                 @response.body)
+    # Line 2 — observed summary with synonyms-counted-once note.
+    assert_match(/1 species observed.*0 higher-level taxa observed/,
+                 @response.body)
+    # All three panels render with their distinctive headers.
+    assert_match(/Unobserved target names/, @response.body)
+    assert_match(/Species-level taxa/, @response.body)
+    assert_select("#checklist_unobserved_panel")
+    assert_select("#checklist_species_panel")
+  end
+
   # Prove that Site checklist goes to correct page with correct content
   def test_checklist_for_site
     login
