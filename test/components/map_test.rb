@@ -103,7 +103,7 @@ class MapTest < ComponentTestCase
     # Confirmed consensus (>= 80%) → green color.
     obs = build_min_obs(lat: 34.1, lng: -118.3, vote_cache: 2.4,
                         text_name: "Agaricus campestris",
-                        when: Date.new(2024, 5, 1))
+                        observed_on: Date.new(2024, 5, 1))
     caption, color = parse_first_set(render_map_json([obs]))
 
     assert_equal(Mappable::MapSet::CONFIRMED_COLOR, color,
@@ -122,13 +122,13 @@ class MapTest < ComponentTestCase
   def test_multi_observation_popup_lists_recent_names_and_no_date
     obs_a = build_min_obs(lat: 10, lng: 10, vote_cache: 3.0,
                           text_name: "Oldest sp.",
-                          when: Date.new(2020, 1, 1))
+                          observed_on: Date.new(2020, 1, 1))
     obs_b = build_min_obs(lat: 10, lng: 10, vote_cache: 3.0,
                           text_name: "Middle sp.",
-                          when: Date.new(2023, 1, 1))
+                          observed_on: Date.new(2023, 1, 1))
     obs_c = build_min_obs(lat: 10, lng: 10, vote_cache: 3.0,
                           text_name: "Newest sp.",
-                          when: Date.new(2025, 1, 1))
+                          observed_on: Date.new(2025, 1, 1))
     caption, color = parse_first_set(render_map_json([obs_a, obs_b, obs_c]))
 
     assert_equal(Mappable::MapSet::GROUP_COLOR, color)
@@ -145,7 +145,7 @@ class MapTest < ComponentTestCase
     four_obs = Array.new(4) do |i|
       build_min_obs(lat: 5, lng: 5, vote_cache: 3.0,
                     text_name: "Species #{i}",
-                    when: Date.new(2020 + i, 1, 1))
+                    observed_on: Date.new(2020 + i, 1, 1))
     end
     caption, _color = parse_first_set(render_map_json(four_obs))
 
@@ -158,12 +158,14 @@ class MapTest < ComponentTestCase
 
   private
 
-  def build_min_obs(lat:, lng:, vote_cache:, text_name: nil, when: nil)
+  # `observed_on:` avoids `when` — a Ruby keyword that can't be used
+  # as a method argument name — and maps to the model's `when:` attr.
+  def build_min_obs(lat:, lng:, vote_cache:, text_name: nil, observed_on: nil)
     Mappable::MinimalObservation.new(
       id: rand(1_000_000),
       lat: lat, lng: lng,
       name_id: 1, text_name: text_name,
-      when: binding.local_variable_get(:when),
+      when: observed_on,
       vote_cache: vote_cache
     )
   end

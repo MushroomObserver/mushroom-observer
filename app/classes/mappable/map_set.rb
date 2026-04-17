@@ -80,7 +80,7 @@ module Mappable
       observations.length == 1
     end
 
-    # Hex color chosen for the marker/box and the popup dot.
+    # Hex color for the marker or box stroke.
     # - Blue for groups (>1 observation or location-only).
     # - Single observations: traffic-light based on consensus %.
     def compute_color

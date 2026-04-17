@@ -135,9 +135,13 @@ module MapHelper
     url = observation_path(id: obs.id, params: q)
     tag.div(class: "media-left pr-2") do
       link_to(url, target: "_blank", rel: "noopener noreferrer") do
+        # Empty alt: the adjacent taxon-name link inside the same
+        # .media already provides the accessible label, so the
+        # thumbnail is decorative in this context.
         image_tag(Image.url(:small, obs.thumb_image_id),
                   class: "media-object map-popup-thumb",
-                  loading: "lazy")
+                  loading: "lazy",
+                  alt: "")
       end
     end
   end
@@ -190,11 +194,16 @@ module MapHelper
 
   # Plain-text "Confidence: NN%" line. The marker color already conveys
   # the semantic bucket, so no dot/pill is needed inside the popup.
+  #
+  # Use `.floor` so the displayed percentage never crosses a
+  # traffic-light threshold the underlying value hasn't crossed yet
+  # — e.g. 79.6% should show "79%" with an orange marker, never
+  # "80%" (which would look like the green/confirmed bucket).
   def mapset_consensus_indicator(obs)
     return nil unless obs.respond_to?(:vote_cache)
 
     pct = ::Vote.percent(obs.vote_cache)
-    "#{:Confidence.t}: #{pct.round}%"
+    "#{:Confidence.t}: #{pct.floor}%"
   end
 
   def mapset_observation_header(set)

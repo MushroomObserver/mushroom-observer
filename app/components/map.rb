@@ -178,13 +178,15 @@ class Components::Map < Components::Base
     obs.when.web_date.to_s
   end
 
-  # Plain-text confidence line. The marker color is the visual cue; the
-  # popup just names the percentage.
+  # Plain-text confidence line. The marker color is the visual cue;
+  # the popup just names the percentage. `.floor` keeps the text from
+  # crossing a traffic-light threshold ahead of the underlying value
+  # (e.g. 79.6% should read "79%", not "80%").
   def consensus_indicator(obs)
     return nil unless obs.respond_to?(:vote_cache)
 
     pct = ::Vote.percent(obs.vote_cache)
-    ERB::Util.html_escape("#{:Confidence.t}: #{pct.round}%")
+    ERB::Util.html_escape("#{:Confidence.t}: #{pct.floor}%")
   end
 
   def location_line(set)
