@@ -9,5 +9,9 @@ add_project_banner(@project)
 <% end %>
 
 <%= render(Components::Projects::LocationsTable.new(
-             project: @project, locations: @locations, user: @user
+             project: @project,
+             grouped_data: @grouped_data,
+             ungrouped_locations: @ungrouped_locations,
+             obs_counts: @obs_counts,
+             user: @user
            )) %>

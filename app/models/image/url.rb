@@ -20,6 +20,11 @@ class Image
       "thumb" => :thumbnail
     }.freeze
 
+    PLACEHOLDER_URLS = {
+      thumbnail: "/place_holder_thumb.jpg",
+      small: "/place_holder_320.jpg"
+    }.freeze
+
     attr_accessor :size, :id, :transferred, :extension
 
     def initialize(args)
@@ -36,7 +41,7 @@ class Image
       source_order.each do |source|
         return source_url(source) if source_exists?(source)
       end
-      source_url(fallback_source)
+      PLACEHOLDER_URLS[size] || source_url(fallback_source)
     end
 
     def source_exists?(source)

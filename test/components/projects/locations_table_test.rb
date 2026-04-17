@@ -32,10 +32,11 @@ module Projects
     end
 
     def test_non_target_location_has_no_remove_button
-      # Add albion as a non-target observed location
-      project.add_observation(observations(:minimal_unknown_obs))
-      locs = [locations(:burbank), locations(:albion)]
-      html = render_table(user: users(:rolf), locations: locs)
+      # Albion is a non-target observed location
+      html = render_table(
+        user: users(:rolf),
+        ungrouped: [locations(:albion)]
+      )
 
       # Burbank (target) should have remove button
       burbank_id = locations(:burbank).id
@@ -51,16 +52,51 @@ module Projects
       )
     end
 
+    def test_chevron_shown_for_target_with_sub_locations
+      burbank = locations(:burbank)
+      albion = locations(:albion)
+      grouped = [{ target: burbank, sub_locations: [albion] }]
+      html = render_table(
+        user: users(:rolf),
+        grouped: grouped,
+        obs_counts: { burbank.id => 2, albion.id => 3 }
+      )
+
+      # Chevron trigger present
+      assert_html(html, ".panel-collapse-trigger")
+      # Collapse target for sub-locations
+      assert_html(html, "#target_subs_#{burbank.id}")
+      # Aggregated count: 2 + 3 = 5
+      assert_includes(html, "5")
+    end
+
+    def test_no_chevron_for_target_without_sub_locations
+      html = render_table(user: users(:rolf))
+
+      assert_no_html(html, ".panel-collapse-trigger")
+    end
+
     private
 
     def project
       projects(:rare_fungi_project)
     end
 
-    def render_table(user:, locations: [locations(:burbank)])
+    def render_table(user:, grouped: nil, ungrouped: [],
+                     obs_counts: {})
+      grouped ||= default_grouped_data
       render(Components::Projects::LocationsTable.new(
-               project: project, locations: locations, user: user
+               project: project,
+               grouped_data: grouped,
+               ungrouped_locations: ungrouped,
+               obs_counts: obs_counts,
+               user: user
              ))
+    end
+
+    def default_grouped_data
+      burbank = locations(:burbank)
+      [{ target: burbank, sub_locations: [] }]
     end
   end
 end
