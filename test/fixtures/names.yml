@@ -1182,6 +1182,18 @@ basidiomycota:
   updated_at: 2017-12-07 16:09:02
   classification: "Kingdom: _Fungi_"
 
+agaricomycotina:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subphylum] %>
+  text_name: Agaricomycotina
+  display_name: '**__Agaricomycotina__**'
+  search_name: Agaricomycotina
+  sort_name: Agaricomycotina
+  created_at: 2017-12-07 16:09:08
+  updated_at: 2017-12-07 16:09:08
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+
 basidiomycetes:
   <<: *DEFAULTS
   user: rolf
@@ -1192,7 +1204,7 @@ basidiomycetes:
   sort_name: Basidiomycetes
   created_at: 2017-12-07 16:09:03
   updated_at: 2017-12-07 16:09:03
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nSubphylum: _Agaricomycotina_"
 
 agaricales:
   <<: *DEFAULTS
@@ -1241,6 +1253,77 @@ ascomycetes:
   created_at: 2017-12-07 16:09:07
   updated_at: 2017-12-07 16:09:07
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_"
+
+agaricomycotina:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subphylum] %>
+  text_name: Agaricomycotina
+  display_name: '**__Agaricomycotina__**'
+  search_name: Agaricomycotina
+  sort_name: Agaricomycotina
+  created_at: 2017-12-07 16:09:08
+  updated_at: 2017-12-07 16:09:08
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+
+agaricomycetidae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subclass] %>
+  text_name: Agaricomycetidae
+  display_name: '**__Agaricomycetidae__**'
+  search_name: Agaricomycetidae
+  sort_name: Agaricomycetidae
+  created_at: 2017-12-07 16:09:09
+  updated_at: 2017-12-07 16:09:09
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_"
+
+agaricineae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Suborder] %>
+  text_name: Agaricineae
+  display_name: '**__Agaricineae__**'
+  search_name: Agaricineae
+  sort_name: Agaricineae
+  created_at: 2017-12-07 16:09:10
+  updated_at: 2017-12-07 16:09:10
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_"
+
+agaricioideae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subfamily] %>
+  text_name: Agaricioideae
+  display_name: '**__Agaricioideae__**'
+  search_name: Agaricioideae
+  sort_name: Agaricioideae
+  created_at: 2017-12-07 16:09:11
+  updated_at: 2017-12-07 16:09:11
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+agaricini:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subtribe] %>
+  text_name: Agaricini
+  display_name: '**__Agaricini__**'
+  search_name: Agaricini
+  sort_name: Agaricini
+  created_at: 2017-12-07 16:09:12
+  updated_at: 2017-12-07 16:09:12
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_\r\nSubfamily: _Agaricioideae_"
+
+amanita_series_vaginatae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Series] %>
+  text_name: "Amanita ser. Vaginatae"
+  display_name: "**__Amanita__** ser. **__Vaginatae__**"
+  search_name: "Amanita ser. Vaginatae"
+  sort_name: "Amanita  {5ser.  !Vaginatae"
+  created_at: 2017-12-07 16:09:13
+  updated_at: 2017-12-07 16:09:13
 
 lecanorales:
   <<: *DEFAULTS

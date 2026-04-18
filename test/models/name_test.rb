@@ -3758,16 +3758,37 @@ class NameTest < UnitTestCase
       "`subtaxa_of` should not include misspellings"
     )
 
-    # Above-genus: immediate subtaxa of an Order should be Families only
+    # Above-genus: immediate_subtaxa_of returns the next rank down, not all
+    # descendants. One assertion per new intermediate rank.
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:basidiomycota)),
+      names(:agaricomycotina),
+      "`immediate_subtaxa_of` a Phylum should return Subphylum subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:basidiomycetes)),
+      names(:agaricomycetidae),
+      "`immediate_subtaxa_of` a Class should return Subclass subtaxa"
+    )
     immediate_subtaxa_of_agaricales =
       Name.immediate_subtaxa_of(names(:agaricales))
     assert_includes(
-      immediate_subtaxa_of_agaricales, names(:agaricaceae),
-      "`immediate_subtaxa_of` an Order should return immediate Family subtaxa"
+      immediate_subtaxa_of_agaricales, names(:agaricineae),
+      "`immediate_subtaxa_of` an Order should return Suborder subtaxa"
     )
     assert_not_includes(
       immediate_subtaxa_of_agaricales, names(:amanita),
       "`immediate_subtaxa_of` an Order should not include Genus-ranked names"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agaricaceae)),
+      names(:agaricioideae),
+      "`immediate_subtaxa_of` a Family should return Subfamily subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agaricioideae)),
+      names(:agaricini),
+      "`immediate_subtaxa_of` a Subfamily should return Subtribe subtaxa"
     )
   end
 

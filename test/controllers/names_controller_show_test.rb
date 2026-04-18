@@ -384,7 +384,7 @@ class NamesControllerShowTest < FunctionalTestCase
   end
 
   def test_next_and_prev
-    names = Name.order(:text_name, :author).to_a
+    names = Name.order(:sort_name).to_a
     name12 = names[12]
     name13 = names[13]
     name14 = names[14]

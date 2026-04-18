@@ -412,7 +412,7 @@ module Name::Taxonomy
     end
 
     def ranks_above_genus
-      %w[Family Order Class Phylum Kingdom Domain Group]
+      ranks.filter_map { |name, val| name if val > ranks[:Genus] }
     end
 
     def ranks_between_kingdom_and_genus
