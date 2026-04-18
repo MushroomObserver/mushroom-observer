@@ -282,7 +282,7 @@ module Name::Taxonomy
 
   # Pass off to class method of the same name.
   def validate_classification(str = nil)
-    self.class.validate_classification(str || classification)
+    self.class.validate_classification(rank, str || classification)
   end
 
   # Pass off to class method of the same name.
@@ -598,7 +598,7 @@ module Name::Taxonomy
           match = line.match(/^\s*([a-zA-Z]+):\s*_*([a-zA-Z]+)_*\s*$/)
           if match
             line_rank = match[1].downcase.capitalize
-            if (alt_rank = alt_ranks[line_rank])
+            if (alt_rank = alt_ranks[line_rank.to_sym])
               line_rank = alt_rank
             end
             line_name = match[2]

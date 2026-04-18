@@ -1763,6 +1763,34 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_validate_classification_raises_on_duplicate_rank
+    do_validate_classification_test(
+      "Species", "Kingdom: _Fungi_\nKingdom: _Fungi_", false
+    )
+  end
+
+  def test_validate_classification_normalizes_division_to_phylum
+    # Division is a historical synonym for Phylum in some nomenclature systems
+    do_validate_classification_test(
+      "Species",
+      "Kingdom: _Fungi_\nDivision: _Basidiomycota_",
+      "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+    )
+  end
+
+  def test_validate_classification_defaults_to_own_classification
+    name = names(:agaricus_campestris)
+    result = name.validate_classification
+    assert_equal(name.classification, result,
+                 "validate_classification with no arg should use own classification")
+  end
+
+  def test_rank_translated_returns_localized_string
+    name = names(:agaricus_campestris)
+    assert_equal(:rank_species.l, name.rank_translated,
+                 "rank_translated should return localized rank name")
+  end
+
   def test_rank_matchers
     name = names(:fungi)
     assert_not(name.at_or_below_genus?)
@@ -2345,8 +2373,19 @@ class NameTest < UnitTestCase
   end
 
   def test_has_eol_data
-    assert(names(:peltigera).has_eol_data?)
-    assert_not(names(:lactarius_alpigenes).has_eol_data?)
+    assert(names(:peltigera).has_eol_data?,
+           "peltigera should have EoL data via qualifying observation image")
+    assert_not(names(:lactarius_alpigenes).has_eol_data?,
+               "lactarius_alpigenes is deprecated so has no EoL data")
+  end
+
+  def test_has_eol_data_true_via_vetted_description
+    name = names(:peltigera)
+    # peltigera returns true via observations normally; disqualify them
+    # so the descriptions loop is exercised instead
+    name.observations.update_all(vote_cache: 0)
+    assert(name.has_eol_data?,
+           "should return true via vetted description when no observation qualifies")
   end
 
   def test_hiding_authors
