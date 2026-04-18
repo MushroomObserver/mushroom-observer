@@ -416,20 +416,21 @@ module Name::Taxonomy
     end
 
     def ranks_between_kingdom_and_genus
-      %w[Phylum Subphylum Class Subclass Order Suborder Family]
+      ranks.filter_map do |name, val|
+        name if val > ranks[:Genus] && val < ranks[:Kingdom]
+      end
     end
 
     def ranks_above_species
-      %w[Stirps Subsection Section Subgenus Genus
-         Family Order Class Phylum Kingdom Domain]
+      ranks.filter_map { |name, val| name if val > ranks[:Species] }
     end
 
     def ranks_below_genus
-      %w[Form Variety Subspecies Species Stirps Subsection Section Subgenus]
+      ranks.filter_map { |name, val| name if val < ranks[:Genus] }
     end
 
     def ranks_below_species
-      %w[Form Variety Subspecies]
+      ranks.filter_map { |name, val| name if val < ranks[:Species] }
     end
 
     def genus_display_ranks

@@ -1793,6 +1793,17 @@ class NameTest < UnitTestCase
                  "rank_translated should return localized rank name")
   end
 
+  def test_rank_lists_include_intermediate_ranks
+    assert_includes(Name.ranks_above_species, "Series",
+                    "Series should be a rank above species")
+    assert_includes(Name.ranks_above_species, "Group",
+                    "Group should be a rank above species")
+    assert_includes(Name.ranks_below_genus, "Series",
+                    "Series should be a rank below genus")
+    assert_includes(Name.ranks_between_kingdom_and_genus, "Subfamily",
+                    "Subfamily should be a rank between kingdom and genus")
+  end
+
   def test_rank_matchers
     name = names(:fungi)
     assert_not(name.at_or_below_genus?)
