@@ -2852,10 +2852,10 @@ class NameTest < UnitTestCase
       create_test_name("Agaricomycota"),
       create_test_name("Agaricomycotina"),
       create_test_name("Agaricomycetes"),
-      create_test_name("Agaricomycetidae"),
       create_test_name("Agaricales"),
       create_test_name("Agaricineae"),
       create_test_name("Agaricaceae"),
+      create_test_name("Agaricomycetidae"),
       create_test_name("Agaricus group"),
       create_test_name("Agaricus Aaron"),
       create_test_name("Agaricus L."),
@@ -2939,10 +2939,10 @@ class NameTest < UnitTestCase
       create_test_name("Agaricomycota"),
       create_test_name("Agaricomycotina"),
       create_test_name("Agaricomycetes"),
-      create_test_name("Agaricomycetidae"),
       create_test_name("Agaricales"),
       create_test_name("Agaricineae"),
       create_test_name("Agaricaceae"),
+      create_test_name("Agaricomycetidae"),
       create_test_name("Agaricus group"),
       create_test_name("Agaricus Aaron"),
       create_test_name("Agaricus L."),
@@ -2988,11 +2988,14 @@ class NameTest < UnitTestCase
     assert_equal("Section", Name.guess_rank("Hygrocybe sect. Coccineae"))
     assert_equal("Subgenus", Name.guess_rank("Amanita subg. Amanita"))
     assert_equal("Family", Name.guess_rank("Amanitaceae"))
-    assert_equal("Family", Name.guess_rank("Peltigerineae"))
+    assert_equal("Suborder", Name.guess_rank("Peltigerineae"),
+                 "Names ending in -ineae should guess Suborder")
     assert_equal("Order", Name.guess_rank("Peltigerales"))
-    assert_equal("Order", Name.guess_rank("Lecanoromycetidae"))
+    assert_equal("Subclass", Name.guess_rank("Lecanoromycetidae"),
+                 "Names ending in -mycetidae should guess Subclass")
     assert_equal("Class", Name.guess_rank("Lecanoromycetes"))
-    assert_equal("Class", Name.guess_rank("Agaricomycotina"))
+    assert_equal("Subphylum", Name.guess_rank("Agaricomycotina"),
+                 "Names ending in -mycotina should guess Subphylum")
     assert_equal("Phylum", Name.guess_rank("Agaricomycota"))
     assert_equal("Genus", Name.guess_rank("Animalia"))
     assert_equal("Genus", Name.guess_rank("Plantae"))
@@ -3787,7 +3790,7 @@ class NameTest < UnitTestCase
     )
     assert_includes(
       Name.immediate_subtaxa_of(names(:agaricioideae)),
-      names(:agaricini),
+      names(:agaricinae),
       "`immediate_subtaxa_of` a Subfamily should return Subtribe subtaxa"
     )
   end

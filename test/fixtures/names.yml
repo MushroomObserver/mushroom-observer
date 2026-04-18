@@ -1302,14 +1302,14 @@ agaricioideae:
   updated_at: 2017-12-07 16:09:11
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-agaricini:
+agaricinae:
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Subtribe] %>
-  text_name: Agaricini
-  display_name: '**__Agaricini__**'
-  search_name: Agaricini
-  sort_name: Agaricini
+  text_name: Agaricinae
+  display_name: '**__Agaricinae__**'
+  search_name: Agaricinae
+  sort_name: Agaricinae
   created_at: 2017-12-07 16:09:12
   updated_at: 2017-12-07 16:09:12
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_\r\nSubfamily: _Agaricioideae_"
@@ -1321,7 +1321,7 @@ amanita_series_vaginatae:
   text_name: "Amanita ser. Vaginatae"
   display_name: "**__Amanita__** ser. **__Vaginatae__**"
   search_name: "Amanita ser. Vaginatae"
-  sort_name: "Amanita  {5ser.  !Vaginatae"
+  sort_name: "Amanita  {3vser.  Vaginatae"
   created_at: 2017-12-07 16:09:13
   updated_at: 2017-12-07 16:09:13
 
