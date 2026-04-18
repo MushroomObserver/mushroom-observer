@@ -1781,8 +1781,10 @@ class NameTest < UnitTestCase
   def test_validate_classification_defaults_to_own_classification
     name = names(:agaricus_campestris)
     result = name.validate_classification
-    assert_equal(name.classification, result,
-                 "validate_classification with no arg should use own classification")
+    assert_equal(
+      name.classification, result,
+      "validate_classification with no arg should use own classification"
+    )
   end
 
   def test_rank_translated_returns_localized_string
@@ -2384,8 +2386,11 @@ class NameTest < UnitTestCase
     # peltigera returns true via observations normally; disqualify them
     # so the descriptions loop is exercised instead
     name.observations.update_all(vote_cache: 0)
-    assert(name.has_eol_data?,
-           "should return true via vetted description when no observation qualifies")
+    assert(
+      name.has_eol_data?,
+      "`eol_data?` should be true via vetted description " \
+      "when no observation qualifies"
+    )
   end
 
   def test_hiding_authors
