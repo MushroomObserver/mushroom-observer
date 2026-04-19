@@ -2935,7 +2935,8 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. erik Zoom"),
       create_test_name("Agaricus ugliano var. danny Zoom"),
-      # Xyl- names share the stem "Xyl" to verify Family→Subfamily→Tribe→Subtribe order
+      # Xyl- names share the stem "Xyl" to verify
+      # Family→Subfamily→Tribe→Subtribe order
       create_test_name("Xylaceae"),   # family:    Xyl!7
       create_test_name("Xyloideae"),  # subfamily: Xyl!8
       create_test_name("Xyleae"),     # tribe:     Xyl!8a
