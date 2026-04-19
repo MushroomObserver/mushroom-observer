@@ -309,20 +309,24 @@ class NamesControllerCreateTest < FunctionalTestCase
     assert_equal(author, name.author)
   end
 
-  def test_create_name_alt_rank
-    text_name = "Ustilaginomycetes"
-    name = Name.find_by(text_name: text_name)
-    assert_nil(name)
-    params = {
-      name: {
-        text_name: text_name,
-        rank: "Phylum"
-      }
-    }
+  def test_create_name_rejects_wrong_rank_for_suffix
+    # Suffix -mycetes implies Class; submitting as Phylum must be rejected
     login(rolf.login)
-    post(:create, params: params)
-    # Now try to find it
-    assert(name = Name.find_by(text_name: text_name))
+    post(:create, params: { name: { text_name: "Ustilaginomycetes",
+                                    rank: "Phylum" } })
+    assert_nil(Name.find_by(text_name: "Ustilaginomycetes"),
+               "Should not create name when rank conflicts with suffix")
+    assert_flash_error
+  end
+
+  def test_create_name_with_correct_rank_for_suffix
+    # Suffix -mycota implies Phylum; submitting as Phylum must succeed
+    text_name = "Ustilaginomycota"
+    assert_nil(Name.find_by(text_name: text_name))
+    login(rolf.login)
+    post(:create, params: { name: { text_name: text_name, rank: "Phylum" } })
+    name = Name.find_by(text_name: text_name)
+    assert_not_nil(name, "Should create name when rank matches suffix")
     assert_redirected_to(name_path(name.id))
   end
 

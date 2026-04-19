@@ -268,7 +268,7 @@ module Name::Parse
   end
 
   # Parse a name given no additional information. Returns a ParsedName instance.
-  def parse_name(str, rank: "Genus", deprecated: false)
+  def parse_name(str, rank: "Genus", deprecated: false, force_rank: false)
     str = clean_incoming_string(str)
     parse_group(str, deprecated) ||
       parse_subgenus(str, deprecated) ||
@@ -280,7 +280,7 @@ module Name::Parse
       parse_variety(str, deprecated) ||
       parse_form(str, deprecated) ||
       parse_species(str, deprecated) ||
-      parse_genus_or_up(str, deprecated, rank)
+      parse_genus_or_up(str, deprecated, rank, force_rank: force_rank)
   end
 
   # Guess rank of +text_name+.
@@ -355,15 +355,22 @@ module Name::Parse
     result.tr("ë", "e")
   end
 
-  def parse_genus_or_up(str, deprecated = false, rank = "Genus")
+  def parse_genus_or_up(str, deprecated = false, rank = "Genus",
+                        force_rank: false)
     results = nil
     if (match = GENUS_OR_UP_PAT.match(str))
       prov_rank = match[1]
       name = match[2]
       author = match[3]
-      unless Name.ranks_above_genus.include?(rank)
-        rank = guess_rank(name,
-                          prov_rank)
+      guessed = guess_rank(name, prov_rank)
+      if Name.ranks_above_genus.include?(rank)
+        # If the suffix implies a specific rank, it must match what was given.
+        # force_rank: true lets admins override this check.
+        if !force_rank && guessed != "Genus" && guessed != rank
+          raise(RankMessedUp)
+        end
+      else
+        rank = guessed
       end
       (name, author, rank) = fix_autonym(name, author, rank)
       author = standardize_author(author)

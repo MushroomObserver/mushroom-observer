@@ -7,6 +7,7 @@ class Components::NameForm < Components::ApplicationForm
     @name_string = options.delete(:name_string) || ""
     @misspelling = options.delete(:misspelling)
     @correct_spelling = options.delete(:correct_spelling)
+    @approved_rank = options.delete(:approved_rank)
     super(model, **options) # rubocop:disable Style/SuperArguments
   end
 
@@ -14,6 +15,7 @@ class Components::NameForm < Components::ApplicationForm
     super do
       submit(button_text, center: true)
 
+      render_approved_rank_field
       render_admin_locked_checkbox if in_admin_mode?
 
       if !@model.locked || in_admin_mode?
@@ -31,6 +33,12 @@ class Components::NameForm < Components::ApplicationForm
   end
 
   private
+
+  def render_approved_rank_field
+    return unless @approved_rank
+
+    tag.input(type: "hidden", name: "approved_rank", value: @approved_rank)
+  end
 
   def button_text
     @model.new_record? ? :CREATE.l : :SAVE_EDITS.l

@@ -4399,6 +4399,7 @@
   runtime_suggest_multiple_alternates: No [types] match "[match]", maybe you meant one of these?
   runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
   runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
+  runtime_wrong_rank_admin: "Wrong rank for [name]; suffix implies [expect], not [actual]. Submit again to create [name] with rank [actual]."
 
   # These shouldn't need translating, but you are free to override if you need to.
   runtime_edit_article_success: "[:runtime_updated_id(type=:article,value=id)]"
