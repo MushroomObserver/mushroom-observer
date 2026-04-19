@@ -304,13 +304,12 @@ class Name < AbstractModel
     Section: 460,
     Subgenus: 480,
     Genus: 500,
-    # disable cop for readability
-    Subtribe: 520, # -inae
-    Tribe: 540, # -eae
+    Subtribe: 520,  # -inae
+    Tribe: 540,     # -eae (cf. Subfamily Family)
     Subfamily: 560, # -oideae
-    Family: 600, # -aceae
-    Suborder: 650, # -ineae
-    Order: 700, # -ales
+    Family: 600,    # -aceae
+    Suborder: 650,  # -ineae
+    Order: 700,     # -ales
     Subclass: 750,  # -mycetidae
     Class: 800,     # -mycetes
     Subphylum: 850, # -mycotina
