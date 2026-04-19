@@ -37,7 +37,7 @@ class Components::NameForm < Components::ApplicationForm
   def render_approved_rank_field
     return unless @approved_rank
 
-    tag.input(type: "hidden", name: "approved_rank", value: @approved_rank)
+    input(type: "hidden", name: "approved_rank", value: @approved_rank)
   end
 
   def button_text
