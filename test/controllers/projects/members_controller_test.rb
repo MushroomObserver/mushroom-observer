@@ -258,6 +258,41 @@ module Projects
                    "Modal should show 'none' when all obs already added")
     end
 
+    # issue #4129: one-sided date bounds must also constrain the count.
+    # `no_end_date_project` has start_date = tomorrow, end_date = nil.
+    # Every observation in fixtures was recorded in the past, so none
+    # should match a "found on or after tomorrow" lower bound.
+    def test_add_obs_modal_respects_start_date_only
+      target_user = rolf
+      project = projects(:no_end_date_project)
+      project.user_group.users << target_user
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_match(/None of your observations/, @response.body,
+                   "Start-date-only project should exclude obs before start")
+    end
+
+    # `no_start_date_project` has end_date = yesterday, start_date = nil.
+    # Any observation recorded after yesterday should be excluded.
+    def test_add_obs_modal_respects_end_date_only
+      target_user = rolf
+      project = projects(:no_start_date_project)
+      project.user_group.users << target_user
+      # Move all of target_user's obs into the future so the end_date
+      # bound is what filters them out (not some other constraint).
+      target_user.observations.update_all(when: Time.zone.tomorrow)
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_match(/None of your observations/, @response.body,
+                   "End-date-only project should exclude obs after end")
+    end
+
     # issue #4129: modal requires the candidate to match current user
     def test_add_obs_modal_denies_non_self
       target_user = project_members(:eol_member_katrina).user

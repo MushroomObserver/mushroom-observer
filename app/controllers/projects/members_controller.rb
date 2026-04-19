@@ -215,6 +215,11 @@ module Projects
     # Specifically, candidate.observations.in_box doesn't return
     # the right thing because it incorrectly adds observations not
     # from the candidate if they have no lat/long data.
+    #
+    # Date bounds are applied independently — a project may have only a
+    # start_date (bound below) or only an end_date (bound above). Using
+    # the combined `found_between` scope ignored the constraint when
+    # only one bound was set.
     def addable_observations(project, candidate)
       obs = Observation.where(user: candidate)
       loc = project.location
@@ -222,9 +227,11 @@ module Projects
         obs = obs.in_box(north: loc.north, south: loc.south,
                          east: loc.east, west: loc.west)
       end
-      if project.start_date && project.end_date
-        obs = obs.found_between(project.start_date.strftime("%Y-%m-%d"),
-                                project.end_date.strftime("%Y-%m-%d"))
+      if project.start_date
+        obs = obs.found_after(project.start_date.strftime("%Y-%m-%d"))
+      end
+      if project.end_date
+        obs = obs.found_before(project.end_date.strftime("%Y-%m-%d"))
       end
       obs.where.not(id: project.observations.select(:id))
     end
