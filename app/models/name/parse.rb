@@ -54,7 +54,8 @@ module Name::Parse
 
   RANKS_BELOW_GENUS = ["subg.", "subgen.", "subgenus",
                        "sect.", "sect",
-                       "subsect.", "subsect", "ser.", "ser", "series",
+                       "subsect.", "subsect",
+                       "ser.", "ser", "series",
                        "stirps", "sp.",
                        "subsp.", "ssp.", "var.", "var", "v.", "f."].freeze
 
@@ -74,6 +75,9 @@ module Name::Parse
     RankMatcher.new("Subfamily",  /^\S+oideae$/),
     RankMatcher.new("Family",     /^\S+aceae$/),
     RankMatcher.new("Suborder",   /^\S+ineae$/),
+    # Tribe (-eae) must follow Family (-aceae), Subfamily (-oideae), and
+    # Suborder (-ineae) because all three endings also end in -eae.
+    RankMatcher.new("Tribe",      /^\S+eae$/),
     RankMatcher.new("Order",      /^\S+ales$/),
     RankMatcher.new("Subclass",   /^\S+mycetidae$/),
     RankMatcher.new("Class",      /^\S+mycetes$/),
@@ -644,6 +648,8 @@ module Name::Parse
           sub(/(^\S+)oideae$/,       '\1!8'). # subfamily
           sub(/(^\S+)inae$/,         '\1!9'). # subtribe
           sub(/(^\S+)ineae$/,        '\1!6'). # suborder
+          # Tribe (-eae) follows -aceae, -oideae, -ineae (all end in -eae)
+          sub(/(^\S+)eae$/,          '\1!8a'). # tribe
           sub(/(^\S+)ales$/,         '\1!5'). # order
           sub(/(^\S+?)o?mycetidae$/, '\1!4'). # subclass
           sub(/(^\S+?)o?mycetes$/,   '\1!3'). # class

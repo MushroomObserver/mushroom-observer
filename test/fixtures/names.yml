@@ -1176,6 +1176,18 @@ agaricioideae:
   updated_at: 2017-12-07 16:09:11
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
+agariceae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Tribe] %>
+  text_name: Agariceae
+  display_name: '**__Agariceae__**'
+  search_name: Agariceae
+  sort_name: Agariceae
+  created_at: 2017-12-07 16:09:12
+  updated_at: 2017-12-07 16:09:12
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_\r\nSubfamily: _Agaricioideae_"
+
 agaricinae:
   <<: *DEFAULTS
   user: rolf
@@ -1186,7 +1198,7 @@ agaricinae:
   sort_name: Agaricinae
   created_at: 2017-12-07 16:09:12
   updated_at: 2017-12-07 16:09:12
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_\r\nSubfamily: _Agaricioideae_"
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_\r\nSubfamily: _Agaricioideae_\r\nTribe: _Agariceae_"
 
 # This should actually be section Leucoagaricus, but I was too lazy to add the genus Leucoagaricus!
 sect_agaricus:

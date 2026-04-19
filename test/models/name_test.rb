@@ -2934,10 +2934,16 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. erik Zoom"),
-      create_test_name("Agaricus ugliano var. danny Zoom")
+      create_test_name("Agaricus ugliano var. danny Zoom"),
+      # Xyl- names share the stem "Xyl" to verify Family→Subfamily→Tribe→Subtribe order
+      create_test_name("Xylaceae"),   # family:    Xyl!7
+      create_test_name("Xyloideae"),  # subfamily: Xyl!8
+      create_test_name("Xyleae"),     # tribe:     Xyl!8a
+      create_test_name("Xylinae")     # subtribe:  Xyl!9
     ]
     sort_names = names.map(&:sort_name)
-    assert_equal(sort_names, sort_names.sort)
+    assert_equal(sort_names, sort_names.sort,
+                 "Names should sort in rank order within same stem")
   end
 
   def test_skip_notify
@@ -3045,6 +3051,8 @@ class NameTest < UnitTestCase
     assert_equal("Section", Name.guess_rank("Hygrocybe sect. Coccineae"))
     assert_equal("Subgenus", Name.guess_rank("Amanita subg. Amanita"))
     assert_equal("Family", Name.guess_rank("Amanitaceae"))
+    assert_equal("Tribe", Name.guess_rank("Agariceae"),
+                 "Names ending in -eae should guess Tribe, not Family or Genus")
     assert_equal("Suborder", Name.guess_rank("Peltigerineae"),
                  "Names ending in -ineae should guess Suborder")
     assert_equal("Order", Name.guess_rank("Peltigerales"))
@@ -3847,8 +3855,13 @@ class NameTest < UnitTestCase
     )
     assert_includes(
       Name.immediate_subtaxa_of(names(:agaricioideae)),
+      names(:agariceae),
+      "`immediate_subtaxa_of` a Subfamily should return Tribe subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agariceae)),
       names(:agaricinae),
-      "`immediate_subtaxa_of` a Subfamily should return Subtribe subtaxa"
+      "`immediate_subtaxa_of` a Tribe should return Subtribe subtaxa"
     )
   end
 

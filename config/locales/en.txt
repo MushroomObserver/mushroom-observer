@@ -1066,6 +1066,10 @@
   rank_subfamily: subfamily
   RANK_PLURAL_SUBFAMILY: Subfamilies
   rank_plural_subfamily: subfamilies
+  RANK_TRIBE: Tribe
+  rank_tribe: tribe
+  RANK_PLURAL_TRIBE: Tribes
+  rank_plural_tribe: tribes
   RANK_SUBTRIBE: Subtribe
   rank_subtribe: subtribe
   RANK_PLURAL_SUBTRIBE: Subtribes

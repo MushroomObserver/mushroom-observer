@@ -305,18 +305,16 @@ class Name < AbstractModel
     Subgenus: 480,
     Genus: 500,
     # disable cop for readability
-    # rubocop:disable Layout/ExtraSpacing
-    Subtribe: 520,  # -inae
-    # Tribe: 540,   # -eae
+    Subtribe: 520, # -inae
+    Tribe: 540, # -eae
     Subfamily: 560, # -oideae
-    Family: 600,    # -aceae
-    Suborder: 650,  # -ineae
-    Order: 700,     # -ales
+    Family: 600, # -aceae
+    Suborder: 650, # -ineae
+    Order: 700, # -ales
     Subclass: 750,  # -mycetidae
     Class: 800,     # -mycetes
     Subphylum: 850, # -mycotina
     Phylum: 900,    # -mycota
-    # rubocop:enable Layout/ExtraSpacing
     Kingdom: 1000,
     Domain: 1100
   }
