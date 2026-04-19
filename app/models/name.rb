@@ -304,15 +304,16 @@ class Name < AbstractModel
     Section: 460,
     Subgenus: 480,
     Genus: 500,
-    Subtribe: 520,
-    Subfamily: 560,
-    Family: 600,
-    Suborder: 650,
-    Order: 700,
-    Subclass: 750,
-    Class: 800,
-    Subphylum: 850,
-    Phylum: 900,
+    Subtribe: 520,  # -inae
+    # Tribe: 540,   # -eae
+    Subfamily: 560, # -oideae
+    Family: 600,    # -aceae
+    Suborder: 650,  # -ineae
+    Order: 700,     # -ales
+    Subclass: 750,  # -mycetidae
+    Class: 800,     # -mycetes
+    Subphylum: 850, # -mycotina
+    Phylum: 900,    # -mycota
     Kingdom: 1000,
     Domain: 1100
   }

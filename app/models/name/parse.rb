@@ -75,7 +75,7 @@ module Name::Parse
     RankMatcher.new("Family",     /^\S+aceae$/),
     RankMatcher.new("Suborder",   /^\S+ineae$/),
     RankMatcher.new("Order",      /^\S+ales$/),
-    RankMatcher.new("Subclass",   /^\S+idae$/),
+    RankMatcher.new("Subclass",   /^\S+mycetidae$/),
     RankMatcher.new("Class",      /^\S+mycetes$/),
     RankMatcher.new("Subphylum",  /^\S+mycotina$/),
     RankMatcher.new("Phylum",     /^\S+mycota$/),
@@ -645,7 +645,7 @@ module Name::Parse
           sub(/(^\S+)inae$/,         '\1!9'). # subtribe
           sub(/(^\S+)ineae$/,        '\1!6'). # suborder
           sub(/(^\S+)ales$/,         '\1!5'). # order
-          sub(/(^\S+?)idae$/,        '\1!4'). # subclass
+          sub(/(^\S+?)o?mycetidae$/, '\1!4'). # subclass
           sub(/(^\S+?)o?mycetes$/,   '\1!3'). # class
           sub(/(^\S+?)o?mycotina$/,  '\1!2'). # subphylum
           sub(/(^\S+?)o?mycota$/,    '\1!1') # phylum

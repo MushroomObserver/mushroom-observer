@@ -2904,16 +2904,16 @@ class NameTest < UnitTestCase
   def test_name_spaceship_operator
     # names ordered by how spaceship operator is expected to sort them
     names = [
-      create_test_name("Agaricomycota"),
-      create_test_name("Agaricomycotina"),
-      create_test_name("Agaricomycetes"),
-      create_test_name("Agaricales"),
-      create_test_name("Agaricineae"),
-      create_test_name("Agaricaceae"),
-      create_test_name("Agaricomycetidae"),
-      create_test_name("Agaricus group"),
-      create_test_name("Agaricus Aaron"),
-      create_test_name("Agaricus L."),
+      create_test_name("Agaricomycota"), # phylum
+      create_test_name("Agaricomycotina"), # subphylum
+      create_test_name("Agaricomycetes"), # class
+      create_test_name("Agaricomycetidae"), # subclass
+      create_test_name("Agaricales"), # order
+      create_test_name("Agaricineae"), # suborder
+      create_test_name("Agaricaceae"), # family
+      create_test_name("Agaricus group"), # genus group
+      create_test_name("Agaricus Aaron"), # genus author
+      create_test_name("Agaricus L."), # genus
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
       create_test_name("Agaricus Đorn"),
@@ -2991,15 +2991,15 @@ class NameTest < UnitTestCase
   # apparently because "Ś" sorts after "{".
   def test_name_sort_order
     names = [
-      create_test_name("Agaricomycota"),
-      create_test_name("Agaricomycotina"),
-      create_test_name("Agaricomycetes"),
-      create_test_name("Agaricales"),
-      create_test_name("Agaricineae"),
-      create_test_name("Agaricaceae"),
-      create_test_name("Agaricomycetidae"),
-      create_test_name("Agaricus group"),
-      create_test_name("Agaricus Aaron"),
+      create_test_name("Agaricomycota"), # phylum
+      create_test_name("Agaricomycotina"), # subphylum
+      create_test_name("Agaricomycetes"), # class
+      create_test_name("Agaricomycetidae"), # subclass
+      create_test_name("Agaricales"), # order
+      create_test_name("Agaricineae"), # suborder
+      create_test_name("Agaricaceae"), # family
+      create_test_name("Agaricus group"), # genugroup
+      create_test_name("Agaricus Aaron"), # genu
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
@@ -3008,8 +3008,8 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
       create_test_name("Agaricus stirps Arthur"),
-      create_test_name("Agaricus aardvark"),
-      create_test_name("Agaricus aardvark group"),
+      create_test_name("Agaricus aardvark"), # species
+      create_test_name("Agaricus aardvark group"), # (species) group
       create_test_name('Agaricus "sp-LD50"'),
       create_test_name('Agaricus "tree-beard"'),
       create_test_name("Agaricus ugliano Zoom"),
