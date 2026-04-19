@@ -209,19 +209,11 @@ module Projects
     end
 
     # Observations owned by candidate that match project constraints and
-    # are not already in project.observations.
-    #
-    # Can't use candidate.observations due to a bug in in_box.
-    # Specifically, candidate.observations.in_box doesn't return
-    # the right thing because it incorrectly adds observations not
-    # from the candidate if they have no lat/long data.
-    #
-    # Date bounds are applied independently — a project may have only a
-    # start_date (bound below) or only an end_date (bound above). Using
-    # the combined `found_between` scope ignored the constraint when
-    # only one bound was set.
+    # are not already in project.observations. Date bounds are applied
+    # independently so projects with only a start_date or only an
+    # end_date still constrain correctly.
     def addable_observations(project, candidate)
-      obs = Observation.where(user: candidate)
+      obs = candidate.observations
       loc = project.location
       if loc
         obs = obs.in_box(north: loc.north, south: loc.south,
