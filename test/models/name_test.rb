@@ -2920,6 +2920,7 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus ser. Alpha"),
       create_test_name("Agaricus stirps Arthur"),
       # spaceship operator sorts Ś after {. Therefore
       # "Agaricus  {4stirps  Arthur" sorts before
@@ -3007,6 +3008,7 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus ser. Alpha"),
       create_test_name("Agaricus stirps Arthur"),
       create_test_name("Agaricus aardvark"), # species
       create_test_name("Agaricus aardvark group"), # (species) group
