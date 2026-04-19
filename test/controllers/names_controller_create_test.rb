@@ -330,6 +330,30 @@ class NamesControllerCreateTest < FunctionalTestCase
     assert_redirected_to(name_path(name.id))
   end
 
+  def test_create_name_admin_rank_warning_then_force
+    # Admin submits name whose suffix implies a different rank → flash warning
+    text_name = "Bolitinae"
+    make_admin(rolf.login)
+    post(:create, params: { name: { text_name: text_name, rank: "Family" } })
+    assert_nil(Name.find_by(text_name: text_name),
+               "Should not create name on first submit when rank conflicts")
+    assert_flash_warning("Should flash rank warning to admin")
+    assert_select("input[type=hidden][name=approved_rank]",
+                  { count: 1 },
+                  "Form should include approved_rank hidden field")
+
+    # Admin re-submits with approved_rank matching chosen rank → name created
+    assert_difference("Name.count", 1,
+                      "Admin should be able to force-create after warning") do
+      post(:create, params: { name: { text_name: text_name, rank: "Family" },
+                              approved_rank: "Family" })
+    end
+    name = Name.find_by(text_name: text_name)
+    assert_not_nil(name, "Name should exist after admin force-create")
+    assert_equal("Family", name.rank,
+                 "Name should have admin-chosen rank after force-create")
+  end
+
   def test_create_name_with_many_implicit_creates
     text_name = "Some thing ssp. with v. many forma names"
     text_name2 = "Some thing subsp. with var. many f. names"
