@@ -134,7 +134,7 @@ module MapHelper
 
     q = args[:query_param] ? { q: args[:query_param] } : {}
     url = observation_path(id: obs.id, params: q)
-    tag.div(class: "media-left pr-2") do
+    tag.div(class: "media-left") do
       link_to(url, target: "_blank", rel: "noopener noreferrer") do
         # Empty alt: the adjacent taxon-name link inside the same
         # .media already provides the accessible label, so the

@@ -65,9 +65,14 @@ class MapSetTest < UnitTestCase
 
   private
 
+  # Deterministic id counter so tests don't depend on RNG state.
+  def next_obs_id
+    @next_obs_id = (@next_obs_id || 0) + 1
+  end
+
   def build_obs(lat:, lng:, vote_cache: 3.0)
     Mappable::MinimalObservation.new(
-      id: rand(1_000_000), lat: lat, lng: lng,
+      id: next_obs_id, lat: lat, lng: lng,
       name_id: 1, text_name: "Test name",
       when: Time.zone.today, vote_cache: vote_cache
     )
