@@ -103,7 +103,7 @@ class ChecklistsControllerTest < FunctionalTestCase
     # headers. No higher-level taxa in this fixture, so that panel is
     # legitimately absent.
     assert_match(/Unobserved target names/, @response.body)
-    assert_match(/Species-level taxa/, @response.body)
+    assert_match(/Species and below/, @response.body)
     assert_select("#checklist_unobserved_panel")
     assert_select("#checklist_species_panel")
     assert_select("#checklist_higher_panel", count: 0)

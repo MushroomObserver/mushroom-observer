@@ -3141,7 +3141,7 @@
   checklist_target_summary: "[total] target names: [observed] observed, [unobserved] not yet observed."
   checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
   checklist_unobserved_targets: Unobserved target names
-  checklist_species_level: Species-level taxa
+  checklist_species_level: Species and below
   checklist_higher_level: Higher-level taxa
   checklist_taxon: taxon
   checklist_taxa: taxa
