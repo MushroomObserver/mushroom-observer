@@ -223,7 +223,10 @@ class Components::Map < Components::Base
     text = obs.respond_to?(:text_name) ? obs.text_name : nil
     text = obs.name.text_name if text.blank? && obs.respond_to?(:name) &&
                                  obs.name.respond_to?(:text_name)
-    return ERB::Util.html_escape(text.to_s.t) if text.present?
+    # `.t` returns html_safe textile output; don't wrap in html_escape
+    # again (double-escape potential on any `&` the input contains, and
+    # redundant with Rails' safe-buffer handling).
+    return text.to_s.t if text.present?
 
     "#{:Observation.t} ##{obs.id}"
   end

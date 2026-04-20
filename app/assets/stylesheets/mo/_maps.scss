@@ -152,10 +152,16 @@
     display: block !important;
     text-decoration: none !important;
     border: 0 !important;
-    outline: 0 !important;
     box-shadow: none !important;
     padding: 0 !important;
     background: transparent !important;
+  }
+
+  // Suppress only the persistent mouse-click outline; keep the
+  // browser's default keyboard-focus indicator on :focus-visible so
+  // keyboard users still see where focus lands.
+  .media-left a:focus:not(:focus-visible) {
+    outline: 0;
   }
 
   .media-object.map-popup-thumb {
@@ -183,17 +189,18 @@
     margin-bottom: 8px;
   }
 
-  // Show All / Map All buttons inside group popups. Native browser
-  // focus outline is distracting when it persists after clicking
-  // inside a small popup; suppress it and use a subtle box-shadow
-  // only on :focus-visible (keyboard-only) for accessibility.
+  // Show All / Map All buttons inside group popups. The native focus
+  // outline is distracting when it persists after a mouse click in a
+  // small popup; suppress it only for that case via
+  // :focus:not(:focus-visible). Keyboard users still get the browser's
+  // default focus indicator (via :focus-visible), and the rule also
+  // degrades gracefully in browsers without :focus-visible support
+  // (the whole rule is ignored, so outlines remain everywhere).
   .map-popup-btn {
     margin-left: 6px;
 
-    &:focus { outline: 0; }
-    &:focus-visible {
+    &:focus:not(:focus-visible) {
       outline: 0;
-      box-shadow: 0 0 0 2px rgba(59, 121, 204, 0.4);
     }
   }
 }
