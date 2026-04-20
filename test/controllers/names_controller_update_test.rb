@@ -965,6 +965,37 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_flash_text(/#{default_validates_numericality_of_error_message}/)
   end
 
+  def test_update_name_admin_rank_warning_then_force
+    # Admin changes rank to one that conflicts with suffix → flash warning
+    name = names(:agaricales)
+    make_admin(rolf.login)
+    params = {
+      id: name.id,
+      name: {
+        version: name.version,
+        text_name: name.text_name,
+        author: name.author,
+        rank: "Family",
+        deprecated: (name.deprecated ? "true" : "false")
+      }
+    }
+    put(:update, params: params)
+    name.reload
+    assert_equal("Order", name.rank,
+                 "Rank should not change on first submit when rank conflicts")
+    assert_flash_warning("Should flash rank warning to admin")
+    assert_select("input[type=hidden][name=approved_rank]",
+                  { count: 1 },
+                  "Form should include approved_rank hidden field")
+
+    # Admin re-submits with approved_rank matching chosen rank → name updated
+    params[:approved_rank] = "Family"
+    put(:update, params: params)
+    name.reload
+    assert_equal("Family", name.rank,
+                 "Rank should update after admin force-submit")
+  end
+
   def test_update_icn_id_duplicate
     name = names(:stereum_hirsutum)
     name_with_icn_id = names(:coprinus_comatus)

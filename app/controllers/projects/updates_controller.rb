@@ -9,11 +9,13 @@ module Projects
     def index
       results = build_index_results
       render(Views::Controllers::Projects::Updates::Index.new(
-               project: @project, user: @user, results: results
+               project: @project, user: @user, results: results,
+               show_excluded: show_excluded?
              ), layout: true)
     end
 
-    # Single observation add via Turbo
+    # Single observation add via Turbo. If excluded, un-excludes as a side
+    # effect inside Project#add_observation.
     def add_observation
       obs = Observation.safe_find(params[:id])
       if obs
@@ -24,29 +26,23 @@ module Projects
       end
     end
 
-    # Single observation remove via Turbo
-    def remove_observation
+    # Single observation exclude via Turbo.
+    def exclude_observation
       obs = Observation.safe_find(params[:id])
       if obs
-        @project.remove_observation(obs)
+        @project.exclude_observation(obs)
         render_footer_update(obs)
       else
         head(:not_found)
       end
     end
 
-    # Bulk add all candidates
+    # Bulk add all observations on the current filtered list.
     def add_all
-      count = bulk_add_candidates
+      count = bulk_add_candidates(current_scope)
       flash_notice(:project_updates_added_all.t(count: count))
-      redirect_to(project_updates_path(project_id: @project.id))
-    end
-
-    # Bulk remove all candidates from project
-    def clear
-      count = bulk_remove_candidates
-      flash_notice(:project_updates_cleared.t(count: count))
-      redirect_to(project_updates_path(project_id: @project.id))
+      redirect_to(project_updates_path(project_id: @project.id,
+                                       show_excluded: show_excluded?))
     end
 
     private
@@ -55,32 +51,44 @@ module Projects
       @project = find_or_goto_index(Project, params[:project_id])
     end
 
-    def build_index_results
-      candidates = @project.candidate_observations
-      pagination = build_pagination(candidates)
-      obs_page = paginated_observations(candidates, pagination)
-      page_ids = obs_page.map(&:id)
-      member_ids = @project.observations.where(id: page_ids).
-                   pluck(:id).to_set
-      { observations: obs_page,
-        pagination: pagination,
-        member_ids: member_ids,
-        new_count: @project.new_candidate_observations_count,
-        base_url: request.path }
+    def show_excluded?
+      params[:show_excluded].present? &&
+        params[:show_excluded] != "false" &&
+        params[:show_excluded] != "0"
     end
 
-    def build_pagination(candidates)
+    # The observation list the Updates tab is currently showing.
+    def current_scope
+      if show_excluded?
+        @project.excluded_observations.order(created_at: :desc)
+      else
+        @project.new_candidate_observations
+      end
+    end
+
+    def build_index_results
+      scope = current_scope
+      pagination = build_pagination(scope)
+      obs_page = paginated_observations(scope, pagination)
+      { observations: obs_page,
+        pagination: pagination,
+        current_count: pagination.num_total,
+        request_url: request.fullpath,
+        form_action_url: request.path }
+    end
+
+    def build_pagination(scope)
       pagination = PaginationData.new(
         number_arg: :page,
         number: params[:page],
         num_per_page: calc_layout_params["count"]
       )
-      pagination.num_total = candidates.count
+      pagination.num_total = scope.count
       pagination
     end
 
-    def paginated_observations(candidates, pagination)
-      candidates.
+    def paginated_observations(scope, pagination)
+      scope.
         offset(pagination.from).
         limit(pagination.num_per_page).
         includes(
@@ -99,38 +107,40 @@ module Projects
     end
 
     def render_footer_update(obs)
-      in_project = @project.observations.exists?(obs.id)
       respond_to do |format|
         format.turbo_stream do
           render(
             partial: "projects/updates/footer_update",
             locals: { project: @project, obs: obs,
-                      in_project: in_project }
+                      count_label: count_label_for_current_scope }
           )
         end
         format.html do
-          redirect_to(project_updates_path(project_id: @project.id))
+          redirect_back_or_to(
+            project_updates_path(
+              project_id: @project.id, show_excluded: show_excluded?
+            )
+          )
         end
       end
     end
 
-    def bulk_add_candidates
-      candidates = @project.candidate_observations.
-                   where.not(id: @project.observations.select(:id))
-      count = 0
-      candidates.find_each do |obs|
-        @project.add_observation(obs)
-        count += 1
-      end
-      count
+    def count_label_for_current_scope
+      count = current_scope.count
+      key = count_label_key
+      key.t(count: count)
     end
 
-    def bulk_remove_candidates
-      in_project = @project.candidate_observations.
-                   where(id: @project.observations.select(:id))
+    def count_label_key
+      return :project_updates_excluded_count if show_excluded?
+
+      :project_updates_count
+    end
+
+    def bulk_add_candidates(scope)
       count = 0
-      in_project.find_each do |obs|
-        @project.remove_observation(obs)
+      scope.find_each do |obs|
+        @project.add_observation(obs)
         count += 1
       end
       count

@@ -31,6 +31,7 @@ module Name::Parse
   SUBG_ABBR    = / subgenus | subgen\.? | subg\.?          /xi
   SECT_ABBR    = / section | sect\.?                       /xi
   SUBSECT_ABBR = / subsection | subsect\.?                 /xi
+  SER_ABBR     = / series | ser\.?                         /xi
   STIRPS_ABBR  = / stirps                                  /xi
   SP_ABBR      = / species | sp\.?                         /xi
   SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.?   /xi
@@ -40,15 +41,22 @@ module Name::Parse
 
   PROV_RANKS = {
     "Gen." => "Genus",
+    "Subfam." => "Subfamily",
     "Fam." => "Family",
+    "Subtrib." => "Subtribe",
+    "Subord." => "Suborder",
     "Ord." => "Order",
+    "Subcl." => "Subclass",
     "Cl." => "Class",
-    "Phy." => "Plylum"
+    "Subphyl." => "Subphylum",
+    "Phy." => "Phylum"
   }.freeze
 
   RANKS_BELOW_GENUS = ["subg.", "subgen.", "subgenus",
                        "sect.", "sect",
-                       "subsect.", "subsect", "stirps", "sp.",
+                       "subsect.", "subsect",
+                       "ser.", "ser", "series",
+                       "stirps", "sp.",
                        "subsp.", "ssp.", "var.", "var", "v.", "f."].freeze
 
   # Match text_name to rank
@@ -58,16 +66,22 @@ module Name::Parse
     RankMatcher.new("Variety",    / var\. /),
     RankMatcher.new("Subspecies", / subsp\. /),
     RankMatcher.new("Stirps",     / stirps /),
+    RankMatcher.new("Series",     / ser\. /),
     RankMatcher.new("Subsection", / subsect\. /),
     RankMatcher.new("Section",    / sect\. /),
     RankMatcher.new("Subgenus",   / subg\. /),
     RankMatcher.new("Species",    / /),
+    RankMatcher.new("Subtribe",   /^\S+inae$/),
+    RankMatcher.new("Subfamily",  /^\S+oideae$/),
     RankMatcher.new("Family",     /^\S+aceae$/),
-    RankMatcher.new("Family",     /^\S+ineae$/), # :Suborder
+    RankMatcher.new("Suborder",   /^\S+ineae$/),
+    # Tribe (-eae) must follow Family (-aceae), Subfamily (-oideae), and
+    # Suborder (-ineae) because all three endings also end in -eae.
+    RankMatcher.new("Tribe",      /^\S+eae$/),
     RankMatcher.new("Order",      /^\S+ales$/),
-    RankMatcher.new("Order",      /^\S+mycetidae$/), # :Subclass
+    RankMatcher.new("Subclass",   /^\S+mycetidae$/),
     RankMatcher.new("Class",      /^\S+mycetes$/),
-    RankMatcher.new("Class",      /^\S+mycotina$/), # :Subphylum
+    RankMatcher.new("Subphylum",  /^\S+mycotina$/),
     RankMatcher.new("Phylum",     /^\S+mycota$/),
     RankMatcher.new("Phylum",     /^Fossil-/),
     RankMatcher.new("Genus",      //) # match anything else
@@ -78,6 +92,7 @@ module Name::Parse
     RankMatcher.new("Subgenus",   SUBG_ABBR),
     RankMatcher.new("Section",    SECT_ABBR),
     RankMatcher.new("Subsection", SUBSECT_ABBR),
+    RankMatcher.new("Series",     SER_ABBR),
     RankMatcher.new("Stirps",     STIRPS_ABBR),
     RankMatcher.new("Subspecies", SSP_ABBR),
     RankMatcher.new("Variety",    VAR_ABBR),
@@ -95,7 +110,7 @@ module Name::Parse
   CRYPT_ABBR   = / crypt\.? \s temp\.? /xi
 
   ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} |
-                      #{STIRPS_ABBR} /x
+                      #{SER_ABBR} | #{STIRPS_ABBR} /x
   ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
   ANY_NAME_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} |
                       #{GROUP_ABBR} /x
@@ -163,9 +178,14 @@ module Name::Parse
   SUBSECTION_TAXON  = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SERIES_TAXON      = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SER_ABBR} \s #{UPPER_WORD}) ['"]?)/x
   STIRPS_TAXON      = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SER_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) ['"]?)/x
   SPECIES_TAXON     = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} ['"]?)/x
   # rubocop:enable Layout/LineLength
@@ -174,6 +194,7 @@ module Name::Parse
   SUBGENUS_PAT    = /^ #{SUBGENUS_TAXON}    (\s #{AUTHOR_START}.*)? $/x
   SECTION_PAT     = /^ #{SECTION_TAXON}     (\s #{AUTHOR_START}.*)? $/x
   SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
+  SERIES_PAT      = /^ #{SERIES_TAXON}      (\s #{AUTHOR_START}.*)? $/x
   STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
   SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
   SUBSPECIES_PAT  = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
@@ -223,7 +244,7 @@ module Name::Parse
   GROUP_CHUNK     = /\s (?<group_wd>#{GROUP_ABBR}) \b/x
 
   # matches to ranks that are included in the name proper
-  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v|sp|ssp|subsp|s)/i
+  RANK_START_MATCHER = /^(f|sect|ser|stirps|subg|subsect|v|sp|ssp|subsp|s)/i
 
   # convert rank start_match to standard form of rank
   # subspecies is not included because it's the catchall default
@@ -231,6 +252,8 @@ module Name::Parse
     f: "f.",
     sect: "sect.",
     section: "sect.",
+    ser: "ser.",
+    series: "ser.",
     sp: "sp.",
     stirps: "stirps",
     subg: "subg.",
@@ -245,18 +268,19 @@ module Name::Parse
   end
 
   # Parse a name given no additional information. Returns a ParsedName instance.
-  def parse_name(str, rank: "Genus", deprecated: false)
+  def parse_name(str, rank: "Genus", deprecated: false, force_rank: false)
     str = clean_incoming_string(str)
     parse_group(str, deprecated) ||
       parse_subgenus(str, deprecated) ||
       parse_section(str, deprecated) ||
       parse_subsection(str, deprecated) ||
+      parse_series(str, deprecated) ||
       parse_stirps(str, deprecated) ||
       parse_subspecies(str, deprecated) ||
       parse_variety(str, deprecated) ||
       parse_form(str, deprecated) ||
       parse_species(str, deprecated) ||
-      parse_genus_or_up(str, deprecated, rank)
+      parse_genus_or_up(str, deprecated, rank, force_rank: force_rank)
   end
 
   # Guess rank of +text_name+.
@@ -331,15 +355,22 @@ module Name::Parse
     result.tr("ë", "e")
   end
 
-  def parse_genus_or_up(str, deprecated = false, rank = "Genus")
+  def parse_genus_or_up(str, deprecated = false, rank = "Genus",
+                        force_rank: false)
     results = nil
     if (match = GENUS_OR_UP_PAT.match(str))
       prov_rank = match[1]
       name = match[2]
       author = match[3]
-      unless Name.ranks_above_genus.include?(rank)
-        rank = guess_rank(name,
-                          prov_rank)
+      guessed = guess_rank(name, prov_rank)
+      if Name.ranks_above_genus.include?(rank)
+        # If the suffix implies a specific rank, it must match what was given.
+        # force_rank: true lets admins override this check.
+        if !force_rank && guessed != "Genus" && guessed != rank
+          raise(RankMessedUp)
+        end
+      else
+        rank = guessed
       end
       (name, author, rank) = fix_autonym(name, author, rank)
       author = standardize_author(author)
@@ -410,6 +441,10 @@ module Name::Parse
 
   def parse_subsection(str, deprecated = false)
     parse_below_genus(str, deprecated, "Subsection", SUBSECTION_PAT)
+  end
+
+  def parse_series(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Series", SERIES_PAT)
   end
 
   def parse_stirps(str, deprecated = false)
@@ -603,21 +638,30 @@ module Name::Parse
           sub(/^[A-Z][a-z]+\. /, ""). # ignore leading ranks like Gen.
           gsub(/ '([^']*')/, &:downcase). # downcase prov epithets
           delete("'"). # Now ignore quotes
-          sub(" subg. ", "  {1subg.  ").
+          sub(" subg. ",    "  {1subg.  ").
           sub(" sect. ",    "  {2sect.  ").
           sub(" subsect. ", "  {3subsect.  ").
+          # `{3v` to avoid a data migration while making
+          # series sort between subsect & stirps
+          sub(" ser. ",     "  {3vser.  ").
           sub(" stirps ",   "  {4stirps  ").
           sub(" subsp. ",   "  {5subsp.  ").
           sub(" var. ",     "  {6var.  ").
-          sub(" f. ", "  {7f.  ").
+          sub(" f. ",       "  {7f.  ").
           strip.
+          # See Internal Code of Nomenclature for order of ranks and suffixes
+          # https://www.iaptglobal.org/_functions/code/madrid?m=chIII
           sub(/(^\S+)aceae$/,        '\1!7').
-          sub(/(^\S+)ineae$/,        '\1!6').
-          sub(/(^\S+)ales$/,         '\1!5').
-          sub(/(^\S+?)o?mycetidae$/, '\1!4').
-          sub(/(^\S+?)o?mycetes$/,   '\1!3').
-          sub(/(^\S+?)o?mycotina$/,  '\1!2').
-          sub(/(^\S+?)o?mycota$/,    '\1!1')
+          sub(/(^\S+)oideae$/,       '\1!8'). # subfamily
+          sub(/(^\S+)inae$/,         '\1!9'). # subtribe
+          sub(/(^\S+)ineae$/,        '\1!6'). # suborder
+          # Tribe (-eae) follows -aceae, -oideae, -ineae (all end in -eae)
+          sub(/(^\S+)eae$/,          '\1!8a'). # tribe
+          sub(/(^\S+)ales$/,         '\1!5'). # order
+          sub(/(^\S+?)o?mycetidae$/, '\1!4'). # subclass
+          sub(/(^\S+?)o?mycetes$/,   '\1!3'). # class
+          sub(/(^\S+?)o?mycotina$/,  '\1!2'). # subphylum
+          sub(/(^\S+?)o?mycota$/,    '\1!1') # phylum
 
     # put autonyms at the top
     1 while str.sub!(/(^| )([A-Za-z-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4')

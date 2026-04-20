@@ -78,6 +78,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :observations, through: :project_observations
   has_many :locations, through: :observations
 
+  has_many :project_excluded_observations, dependent: :destroy
+  has_many :excluded_observations, through: :project_excluded_observations,
+                                   source: :observation
+
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
 
@@ -321,8 +325,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Add observation (and its images) to this project if not already done so.
+  # If the observation was excluded, remove it from the excluded list.
   # Saves it.
   def add_observation(obs)
+    unexclude_observation(obs)
     return if observations.include?(obs)
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
@@ -338,6 +344,37 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     imgs_to_delete(obs).each { |img| images.delete(img) }
     observations.delete(obs)
     touch
+  end
+
+  # Exclude observation from this project's Updates tab candidate list.
+  # If currently in the project, remove it first.
+  def exclude_observation(obs)
+    remove_observation(obs)
+    return if excluded_observations.include?(obs)
+
+    excluded_observations.push(obs)
+    touch
+  end
+
+  # Un-exclude observation. Does not add it back to the project.
+  def unexclude_observation(obs)
+    return unless excluded_observations.include?(obs)
+
+    excluded_observations.delete(obs)
+    touch
+  end
+
+  # Remove all observations matching the given name (including synonyms)
+  # from both this project's observations and its excluded_observations.
+  def purge_observations_matching_name(name)
+    matching_ids = Observation.names(lookup: [name.id],
+                                     include_synonyms: true).pluck(:id)
+    return if matching_ids.empty?
+
+    observations.where(id: matching_ids).
+      find_each { |obs| remove_observation(obs) }
+    project_excluded_observations.
+      where(observation_id: matching_ids).destroy_all
   end
 
   def imgs_to_delete(obs)
@@ -391,12 +428,15 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     # Already exists, no-op
   end
 
-  # Remove target name from this project.
+  # Remove target name from this project. Also removes observations
+  # matching this name (including synonyms) from both the project's
+  # observations and its excluded_observations lists.
   def remove_target_name(name)
     record = project_target_names.find_by(name: name)
     return unless record
 
     record.destroy
+    purge_observations_matching_name(name)
     touch
   end
 
@@ -473,9 +513,16 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   delegate :count, to: :candidate_observations, prefix: true
 
-  def new_candidate_observations_count
-    candidate_observations.where.not(id: observations.select(:id)).count
+  # Candidate observations not already in the project and not excluded.
+  # Used for the default Updates tab list and its badge count.
+  def new_candidate_observations
+    candidate_observations.
+      where.not(id: observations.select(:id)).
+      where.not(id: excluded_observations.select(:id))
   end
+
+  delegate :count, to: :new_candidate_observations,
+                   prefix: true, allow_nil: false
 
   def self.find_by_title_with_wildcards(str)
     find_using_wildcards("title", str)

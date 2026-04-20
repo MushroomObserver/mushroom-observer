@@ -25,7 +25,8 @@ class PatternSearch::NameTest < UnitTestCase
 
     expect = Name.with_correct_spelling.with_rank_above_genus
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("rank:family-domain")
+    first_above_genus = Name.ranks_above_genus.first.downcase
+    x = PatternSearch::Name.new("rank:#{first_above_genus}-domain")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
