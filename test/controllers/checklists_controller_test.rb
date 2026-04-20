@@ -114,9 +114,12 @@ class ChecklistsControllerTest < FunctionalTestCase
     # link still goes to the observations search.
     unobserved_id = names(:agaricus_campestris).id
     observed_id = names(:coprinus_comatus).id
-    assert_select("#checklist_unobserved_panel a[href='/names/#{unobserved_id}']")
     assert_select(
-      "#checklist_species_panel a[href^='/observations?pattern='][href*='name%3A#{observed_id}']"
+      "#checklist_unobserved_panel a[href='/names/#{unobserved_id}']"
+    )
+    assert_select(
+      "#checklist_species_panel " \
+      "a[href^='/observations?pattern='][href*='name%3A#{observed_id}']"
     )
   end
 
