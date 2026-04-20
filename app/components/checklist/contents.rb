@@ -78,7 +78,8 @@ module Components
         if for_project?
           render_panel_section(:checklist_unobserved_targets,
                                @data.unobserved_target_taxa,
-                               "checklist_unobserved_panel")
+                               "checklist_unobserved_panel",
+                               link_to_name_page: true)
         end
         render_panel_section(:checklist_species_level,
                              @data.species_level_observed_taxa,
@@ -88,13 +89,15 @@ module Components
                              "checklist_higher_panel")
       end
 
-      def render_panel_section(title_key, taxa, panel_id)
+      def render_panel_section(title_key, taxa, panel_id,
+                               link_to_name_page: false)
         return if taxa.empty?
 
         h4 { plain(title_key.t) }
         render(Components::Checklist::Panel.new(
                  data: @data, context: @context,
-                 taxa: taxa, panel_id: panel_id
+                 taxa: taxa, panel_id: panel_id,
+                 link_to_name_page: link_to_name_page
                ))
       end
 
@@ -104,6 +107,18 @@ module Components
           if @data.duplicate_synonyms.present?
             p { plain(:checklist_duplicate_synonyms.l) }
           end
+          render_target_remove_footnote if show_target_remove_footnote?
+        end
+      end
+
+      def show_target_remove_footnote?
+        project_with_targets? && @context.admin?
+      end
+
+      def render_target_remove_footnote
+        p do
+          span(class: "glyphicon glyphicon-remove text-danger")
+          plain(" #{:checklist_target_remove_footnote.l}")
         end
       end
     end

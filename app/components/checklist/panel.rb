@@ -9,12 +9,14 @@ module Components
       register_output_helper :checklist_name_link, mark_safe: true
 
       def initialize(data:, context:, taxa: nil,
-                     panel_id: "checklist_panel")
+                     panel_id: "checklist_panel",
+                     link_to_name_page: false)
         super()
         @data = data
         @context = context
         @taxa = taxa || data.taxa
         @panel_id = panel_id
+        @link_to_name_page = link_to_name_page
       end
 
       def view_template
@@ -33,9 +35,8 @@ module Components
 
       def render_taxon(taxon)
         checklist_name_link(
-          taxon: taxon, data: @data,
-          project: @context.project, user: @context.user,
-          params: @context.link_params
+          taxon: taxon, data: @data, context: @context,
+          link_to_name_page: @link_to_name_page
         )
       end
     end

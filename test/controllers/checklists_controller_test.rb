@@ -107,6 +107,26 @@ class ChecklistsControllerTest < FunctionalTestCase
     assert_select("#checklist_unobserved_panel")
     assert_select("#checklist_species_panel")
     assert_select("#checklist_higher_panel", count: 0)
+    # Legend entry for the red X remove button (admin-only).
+    assert_match(/Remove this target name from the project/, @response.body)
+    # Unobserved-target name link goes to the name page (a project-scoped
+    # observation search would always be empty). Observed-target name
+    # link still goes to the observations search.
+    unobserved_id = names(:agaricus_campestris).id
+    observed_id = names(:coprinus_comatus).id
+    assert_select("#checklist_unobserved_panel a[href='/names/#{unobserved_id}']")
+    assert_select(
+      "#checklist_species_panel a[href^='/observations?pattern='][href*='name%3A#{observed_id}']"
+    )
+  end
+
+  def test_checklist_footnote_hidden_from_non_admin
+    project = projects(:rare_fungi_project)
+    login("mary") # mary is not an admin of rare_fungi_project
+    get(:show, params: { project_id: project.id })
+
+    assert_response(:success)
+    assert_no_match(/Remove this target name from the project/, @response.body)
   end
 
   # Prove that Site checklist goes to correct page with correct content

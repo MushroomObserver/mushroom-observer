@@ -3101,6 +3101,7 @@
   # checklists
   checklist_any_deprecated: "* This name is not considered current on MO"
   checklist_duplicate_synonyms: "+ This name has a synonym in this checklist"
+  checklist_target_remove_footnote: Remove this target name from the project
   checklist_for: Checklist for
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
