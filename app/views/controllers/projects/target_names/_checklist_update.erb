@@ -2,12 +2,20 @@
   <%= render(partial: "projects/target_names/widget",
              locals: { project: project }) %>
 <% end %>
+<%
+# Carry any optional scope fields the caller passed through to the
+# Context so the refreshed checklist panel keeps the same link
+# params (location / sub-locations / show_user / species_list) it
+# had before the target-name change.
+context_args = { user: user, project: project }
+[:location, :show_user, :species_list].each do |key|
+  context_args[key] = local_assigns[key] if local_assigns.key?(key)
+end
+%>
 <%= turbo_stream.replace("checklist_contents") do %>
   <%= render(Components::Checklist::Contents.new(
                data: data,
-               context: Components::Checklist::Context.new(
-                 user: user, project: project
-               )
+               context: Components::Checklist::Context.new(**context_args)
              )) %>
 <% end %>
 <%= turbo_stream.replace("project_tabs") do %>

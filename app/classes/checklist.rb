@@ -121,6 +121,23 @@ class Checklist
       super
       merge_observed_targets_into_taxa
       compute_unobserved_target_taxa
+      # @duplicate_synonyms and @any_deprecated are set by `super` from
+      # the observation-query results only. Recompute them across the
+      # full rendered set (observed + unobserved targets) so the `+`
+      # marker fires for synonym-pairs that appear only among unobserved
+      # targets, and the `*` footnote legend appears when the only
+      # deprecated name on the page is an unobserved target.
+      recompute_rendered_taxa_flags
+    end
+
+    # Tuple shape is [text_name, id, deprecated, synonym_id, rank]
+    # (see calc_taxa and target_tuple).
+    def recompute_rendered_taxa_flags
+      tuples = taxa + unobserved_target_taxa
+      synonym_ids = tuples.filter_map { |tuple| tuple[3] }
+      @duplicate_synonyms =
+        synonym_ids.tally.select { |_id, count| count > 1 }.keys
+      @any_deprecated = tuples.any? { |tuple| tuple[2] }
     end
 
     def calc_counts

@@ -98,11 +98,15 @@ class ChecklistsControllerTest < FunctionalTestCase
     # Line 2 — observed summary with synonyms-counted-once note.
     assert_match(/1 species observed.*0 higher-level taxa observed/,
                  @response.body)
-    # All three panels render with their distinctive headers.
+    # The two panels expected for this setup (one observed species
+    # target + one unobserved target) render with their distinctive
+    # headers. No higher-level taxa in this fixture, so that panel is
+    # legitimately absent.
     assert_match(/Unobserved target names/, @response.body)
     assert_match(/Species-level taxa/, @response.body)
     assert_select("#checklist_unobserved_panel")
     assert_select("#checklist_species_panel")
+    assert_select("#checklist_higher_panel", count: 0)
   end
 
   # Prove that Site checklist goes to correct page with correct content
