@@ -432,6 +432,10 @@ module Name::Taxonomy
       %w[Form Variety Subspecies]
     end
 
+    def genus_display_ranks
+      rank_range("Stirps", "Genus")
+    end
+
     def rank_index(rank)
       Name.all_ranks.index(rank)
     end

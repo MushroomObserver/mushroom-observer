@@ -172,7 +172,8 @@ module Name::Scopes
       #       exclude_original_names: exclude_original)
       name = find_by(text_name: name) if name.is_a?(String)
       scope = if ranks_above_genus.include?(name.rank)
-                subtaxa_of(name).rank(ranks[name.rank] - 1)
+                next_rank = all_ranks[all_ranks.index(name.rank) - 1]
+                subtaxa_of(name).with_rank(next_rank)
               else
                 subtaxa_of(name)
               end

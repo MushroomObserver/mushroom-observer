@@ -292,24 +292,23 @@ class Name < AbstractModel
   extend Parse
   extend Create
 
-  # Do not change the integer associated with a value
   enum :rank, {
-    Form: 1,
-    Variety: 2,
-    Subspecies: 3,
-    Species: 4,
-    Stirps: 5,
-    Subsection: 6,
-    Section: 7,
-    Subgenus: 8,
-    Genus: 9,
-    Family: 10,
-    Order: 11,
-    Class: 12,
-    Phylum: 13,
-    Kingdom: 14,
-    Domain: 15,
-    Group: 16 # used for both "group" and "clade"
+    Form: 100,
+    Variety: 200,
+    Subspecies: 300,
+    Species: 400,
+    Group: 410, # used for both "group" and "clade"
+    Stirps: 420,
+    Subsection: 440,
+    Section: 460,
+    Subgenus: 480,
+    Genus: 500,
+    Family: 600,
+    Order: 700,
+    Class: 800,
+    Phylum: 900,
+    Kingdom: 1000,
+    Domain: 1100
   }
 
   belongs_to :correct_spelling, class_name: "Name"
