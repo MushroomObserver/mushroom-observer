@@ -201,6 +201,11 @@ form {
   overflow-y: auto;
 }
 
+#target_names_widget textarea {
+  min-width: 40em;
+  max-width: 100%;
+}
+
 .panel-body {
   .row:last-child .form-group,
   > .autocompleter:last-child .form-group.dropdown:last-child,

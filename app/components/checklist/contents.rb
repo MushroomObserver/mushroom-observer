@@ -18,7 +18,7 @@ module Components
         div(id: "checklist_contents") do
           render_summary
           render_location_header if @context.location
-          for_project? ? render_project_panels : render_default_panel
+          render_panels
           render_footnotes
         end
       end
@@ -30,10 +30,16 @@ module Components
       end
 
       def render_summary
+        return if @data.num_taxa.zero? && !project_with_targets?
+
         div(class: "my-4") do
-          render_target_summary if for_project? && @data.num_targets.positive?
-          render_observed_summary
+          render_target_summary if project_with_targets?
+          render_observed_summary if @data.num_taxa.positive?
         end
+      end
+
+      def project_with_targets?
+        for_project? && @data.num_targets.positive?
       end
 
       def render_target_summary
@@ -49,20 +55,14 @@ module Components
       end
 
       def render_observed_summary
-        if for_project? && @data.num_taxa.positive?
-          div do
-            plain(
-              :checklist_observed_summary.t(
-                species: @data.num_species_observed,
-                higher: @data.num_higher_level_observed
-              )
-            )
-          end
-        elsif !for_project?
+        higher = @data.num_higher_level_observed
+        div do
           plain(
-            :checklist_summary.t(species: @data.num_species,
-                                 genera: @data.num_genera,
-                                 names: @data.num_taxa)
+            :checklist_observed_summary.t(
+              species: @data.num_species_observed,
+              higher: higher,
+              taxa_word: higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
+            )
           )
         end
       end
@@ -74,10 +74,12 @@ module Components
         end
       end
 
-      def render_project_panels
-        render_panel_section(:checklist_unobserved_targets,
-                             @data.unobserved_target_taxa,
-                             "checklist_unobserved_panel")
+      def render_panels
+        if for_project?
+          render_panel_section(:checklist_unobserved_targets,
+                               @data.unobserved_target_taxa,
+                               "checklist_unobserved_panel")
+        end
         render_panel_section(:checklist_species_level,
                              @data.species_level_observed_taxa,
                              "checklist_species_panel")
@@ -93,13 +95,6 @@ module Components
         render(Components::Checklist::Panel.new(
                  data: @data, context: @context,
                  taxa: taxa, panel_id: panel_id
-               ))
-      end
-
-      def render_default_panel
-        render(Components::Checklist::Panel.new(
-                 data: @data, context: @context,
-                 taxa: @data.taxa, panel_id: "checklist_panel"
                ))
       end
 

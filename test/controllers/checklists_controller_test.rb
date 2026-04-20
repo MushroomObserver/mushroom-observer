@@ -96,7 +96,7 @@ class ChecklistsControllerTest < FunctionalTestCase
     assert_match(/2 target names.*1 observed.*1 not yet observed/,
                  @response.body)
     # Line 2 — observed summary with synonyms-counted-once note.
-    assert_match(/1 species observed.*0 higher-level taxa observed/,
+    assert_match(/1 species and 0 higher-level taxa observed/,
                  @response.body)
     # The two panels expected for this setup (one observed species
     # target + one unobserved target) render with their distinctive

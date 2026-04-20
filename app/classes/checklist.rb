@@ -87,27 +87,6 @@ class Checklist
       num_targets - num_targets_observed
     end
 
-    # Taxa observed at rank <= Species (Form, Variety, Subspecies, Species).
-    def species_level_observed_taxa
-      taxa.select { |tuple| species_level_rank?(tuple[4]) }
-    end
-
-    # Taxa observed at rank > Species (Genus, infrageneric ranks, Group, ...).
-    def higher_level_observed_taxa
-      taxa.reject { |tuple| species_level_rank?(tuple[4]) }
-    end
-
-    # Distinct synonym groups among observed species-level taxa.
-    # Names sharing a synonym_id collapse to one group; records with no
-    # synonym_id are each their own group.
-    def num_species_observed
-      distinct_synonym_group_count(species_level_observed_taxa)
-    end
-
-    def num_higher_level_observed
-      distinct_synonym_group_count(higher_level_observed_taxa)
-    end
-
     # Target name tuples for which no synonym has an observation in the
     # project. Rendered in the "Unobserved targets" panel.
     def unobserved_target_taxa
@@ -222,16 +201,6 @@ class Checklist
         @counts[name.text_name] ||= 0
       end
     end
-
-    def species_level_rank?(rank)
-      return false if rank.blank?
-
-      Name.ranks[rank.to_s] <= Name.ranks[:Species]
-    end
-
-    def distinct_synonym_group_count(tuples)
-      tuples.map { |tuple| tuple[3] || "id:#{tuple[1]}" }.uniq.size
-    end
   end
 
   # Build list of species observed by one SpeciesList.
@@ -257,6 +226,27 @@ class Checklist
   def num_taxa
     calc_checklist unless @taxa
     @taxa.length
+  end
+
+  # Taxa observed at rank <= Species (Form, Variety, Subspecies, Species).
+  def species_level_observed_taxa
+    taxa.select { |tuple| species_level_rank?(tuple[4]) }
+  end
+
+  # Taxa observed at rank > Species (Genus, infrageneric ranks, Group, ...).
+  def higher_level_observed_taxa
+    taxa.reject { |tuple| species_level_rank?(tuple[4]) }
+  end
+
+  # Distinct synonym groups among observed species-level taxa.
+  # Names sharing a synonym_id collapse to one group; records with no
+  # synonym_id are each their own group.
+  def num_species_observed
+    distinct_synonym_group_count(species_level_observed_taxa)
+  end
+
+  def num_higher_level_observed
+    distinct_synonym_group_count(higher_level_observed_taxa)
   end
 
   def genera
@@ -407,6 +397,16 @@ class Checklist
               joins(:name).
               group("names.text_name").
               count
+  end
+
+  def species_level_rank?(rank)
+    return false if rank.blank?
+
+    Name.ranks[rank.to_s] <= Name.ranks[:Species]
+  end
+
+  def distinct_synonym_group_count(tuples)
+    tuples.map { |tuple| tuple[3] || "id:#{tuple[1]}" }.uniq.size
   end
 
   def query(_args = {})

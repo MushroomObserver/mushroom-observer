@@ -12,13 +12,15 @@ heading_links =
     nil
   end
 footer =
-  if @user_stats.checklist[:species].to_i > 0
+  if @life_list.num_taxa.positive?
+    species = @life_list.num_species_observed
+    higher = @life_list.num_higher_level_observed
     [link_to(checklist_path(id: @show_user.id)) do
        tag.strong(:app_life_list.t)
      end, ": ",
      :show_user_life_list.t(
-       genera: @user_stats.checklist[:genera],
-       species: @user_stats.checklist[:species]
+       species: species, higher: higher,
+       taxa_word: higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
      )].safe_join
   else
     nil
