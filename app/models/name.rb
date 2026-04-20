@@ -299,14 +299,21 @@ class Name < AbstractModel
     Species: 400,
     Group: 410, # used for both "group" and "clade"
     Stirps: 420,
+    Series: 430,
     Subsection: 440,
     Section: 460,
     Subgenus: 480,
     Genus: 500,
-    Family: 600,
-    Order: 700,
-    Class: 800,
-    Phylum: 900,
+    Subtribe: 520,  # -inae
+    Tribe: 540,     # -eae (cf. Subfamily Family)
+    Subfamily: 560, # -oideae
+    Family: 600,    # -aceae
+    Suborder: 650,  # -ineae
+    Order: 700,     # -ales
+    Subclass: 750,  # -mycetidae
+    Class: 800,     # -mycetes
+    Subphylum: 850, # -mycotina
+    Phylum: 900,    # -mycota
     Kingdom: 1000,
     Domain: 1100
   }

@@ -1038,18 +1038,42 @@
   rank_phylum: phylum
   RANK_PLURAL_PHYLUM: Phyla
   rank_plural_phylum: phyla
+  RANK_SUBPHYLUM: Subphylum
+  rank_subphylum: subphylum
+  RANK_PLURAL_SUBPHYLUM: Subphyla
+  rank_plural_subphylum: subphyla
   RANK_CLASS: Class
   rank_class: class
   RANK_PLURAL_CLASS: Classes
   rank_plural_class: classes
+  RANK_SUBCLASS: Subclass
+  rank_subclass: subclass
+  RANK_PLURAL_SUBCLASS: Subclasses
+  rank_plural_subclass: subclasses
   RANK_ORDER: Order
   rank_order: order
   RANK_PLURAL_ORDER: Orders
   rank_plural_order: orders
+  RANK_SUBORDER: Suborder
+  rank_suborder: suborder
+  RANK_PLURAL_SUBORDER: Suborders
+  rank_plural_suborder: suborders
   RANK_FAMILY: Family
   rank_family: family
   RANK_PLURAL_FAMILY: Families
   rank_plural_family: families
+  RANK_SUBFAMILY: Subfamily
+  rank_subfamily: subfamily
+  RANK_PLURAL_SUBFAMILY: Subfamilies
+  rank_plural_subfamily: subfamilies
+  RANK_TRIBE: Tribe
+  rank_tribe: tribe
+  RANK_PLURAL_TRIBE: Tribes
+  rank_plural_tribe: tribes
+  RANK_SUBTRIBE: Subtribe
+  rank_subtribe: subtribe
+  RANK_PLURAL_SUBTRIBE: Subtribes
+  rank_plural_subtribe: subtribes
   RANK_GENUS: Genus
   rank_genus: genus
   RANK_PLURAL_GENUS: Genera
@@ -1070,6 +1094,10 @@
   rank_stirps: stirps
   RANK_PLURAL_STIRPS: Stirpes
   rank_plural_stirps: stirpes
+  RANK_SERIES: Series
+  rank_series: series
+  RANK_PLURAL_SERIES: Series
+  rank_plural_series: series
   RANK_SPECIES: Species
   rank_species: species
   RANK_PLURAL_SPECIES: Species
@@ -4371,6 +4399,7 @@
   runtime_suggest_multiple_alternates: No [types] match "[match]", maybe you meant one of these?
   runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
   runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
+  runtime_wrong_rank_admin: "Wrong rank for [name]; suffix implies [expect], not [actual]. Submit again to create [name] with rank [actual]."
 
   # These shouldn't need translating, but you are free to override if you need to.
   runtime_edit_article_success: "[:runtime_updated_id(type=:article,value=id)]"
