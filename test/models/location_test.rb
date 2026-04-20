@@ -13,6 +13,16 @@ class LocationTest < UnitTestCase
     assert_not(Location.dubious_name?(str))
   end
 
+  # Locations are a shared resource; any logged-in user can edit.
+  # (Only nil user is rejected.)
+  def test_can_edit_allows_any_logged_in_user
+    loc = locations(:burbank)
+    assert(loc.can_edit?(rolf), "Creator should be able to edit")
+    assert(loc.can_edit?(mary),
+           "Non-creator logged-in user should be able to edit")
+    assert_not(loc.can_edit?(nil), "Nil user should not be able to edit")
+  end
+
   def test_dubious_name
     bad_location("Albion,California,  USA")
     bad_location("Albion, California")
