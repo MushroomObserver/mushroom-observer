@@ -3035,6 +3035,7 @@
 
   # Project Target Names
   project_target_name_add: Add
+  project_target_names_to_add_label: "Target Names to Add:"
   project_target_names_added: "Added target names: [names]."
   project_target_name_removed: Removed target name "[name]".
   project_target_name_not_found: No matching names found.
