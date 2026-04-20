@@ -81,6 +81,60 @@
   z-index: 2;
 }
 
+// Map container sizing (#4131 follow-up).
+//
+// Keep the 3:2 aspect ratio for narrow viewports, but cap the height
+// relative to the browser window so the map + legend still fit on
+// screen when the window is wide (e.g. a typical laptop where 66% of
+// a wide content column would overflow the viewport).
+//
+// Using CSS aspect-ratio rather than the old padding-bottom trick —
+// padding isn't constrained by max-height, so the previous attempt
+// silently did nothing on wide windows.
+.map-container {
+  aspect-ratio: 3 / 2;
+  max-height: calc(100vh - 240px); // leaves room for nav + title + legend
+  min-height: 300px;
+}
+
+// Legend rendered under every map by MapHelper#map_legend (#4131).
+// Two rows: shape meanings (circle vs. box) then color meanings
+// (consensus bands + group).
+.map-legend {
+  .map-legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 4px;
+  }
+
+  .map-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .map-legend-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #888;
+    background: transparent;
+    flex-shrink: 0;
+  }
+
+  .map-legend-circle {
+    border-radius: 50%;
+  }
+  // .map-legend-box swatch is the default square .map-legend-swatch.
+
+  .map-legend-dot {
+    border: 0;
+    border-radius: 50%;
+  }
+}
+
 .map-popup {
   font-size: 13px;
   line-height: 1.35;

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module MapHelper
+  include MapLegendHelper
+
   # args could include query_param.
   # returns an array of mapsets, each suitable for a marker or box
   def make_map(objects: [], **args)
@@ -32,7 +34,7 @@ module MapHelper
       show_all: :show_all.t,
       map_all: :map_all.t
     }.to_json
-    map_html(map_args)
+    safe_join([map_html(map_args), map_legend])
   end
 
   # Returns a CollapsibleCollection of mapsets, containing all data necessary
@@ -59,8 +61,7 @@ module MapHelper
   end
 
   def map_html(map_args)
-    tag.div(class: "w-100 position-relative",
-            style: "padding-bottom: 66%;") do
+    tag.div(class: "w-100 position-relative map-container") do
       tag.div(
         "",
         id: map_args[:map_div],

@@ -897,6 +897,12 @@
   update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
+  map_legend_circle: Observation with GPS
+  map_legend_box: Location area (no GPS) or group of observations
+  map_legend_confirmed: Confirmed (≥80%)
+  map_legend_tentative: Tentative
+  map_legend_disputed: Disputed (≤0%)
+  map_legend_group: Multiple observations
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon
