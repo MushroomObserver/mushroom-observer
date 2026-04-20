@@ -763,6 +763,8 @@
   edit: edit
   ENABLE: Enable
   enable: enable
+  EXCLUDE: Exclude
+  exclude: exclude
   IMPORT: Import
   INDEX_OBJECT: "[TYPE] [:INDEX]"
   # merge one object into another
@@ -3049,12 +3051,11 @@
   # Project Updates Tab
   project_updates_title: Update
   project_updates_count: "[count] matching observations"
+  project_updates_excluded_count: "[count] excluded observations"
+  project_updates_show_excluded: Show Excluded
   project_updates_add_all: Add All
-  project_updates_clear: Clear
   project_updates_confirm_add_all: Add all matching observations to this project?
-  project_updates_confirm_clear: Remove all matching observations from this project?
   project_updates_added_all: "Added [count] observations to this project."
-  project_updates_cleared: "Removed [count] observations from this project."
 
   ##############################################################################
 

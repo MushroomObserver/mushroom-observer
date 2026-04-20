@@ -19,6 +19,7 @@ flash_error(@error) if @error && @objects.empty?
   <%= render(Components::MatrixTable.new(
     objects: @objects,
     user: @user,
-    cached: true
+    cached: true,
+    project: @project
   )) %>
 <% end %>

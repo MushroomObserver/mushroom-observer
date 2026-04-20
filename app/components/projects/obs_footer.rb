@@ -2,48 +2,49 @@
 
 module Components
   module Projects
-    # Renders Add/Remove button for an observation on the Update tab.
+    # Renders action buttons on a project Updates tab matrix box.
+    # When showing excluded observations, only an Add button is shown
+    # (which also un-excludes). Otherwise, both Add and Exclude are shown.
     class ObsFooter < Components::Base
-      def initialize(project:, obs:, in_project:)
+      def initialize(project:, obs:, show_excluded:)
         super()
         @project = project
         @obs = obs
-        @in_project = in_project
+        @show_excluded = show_excluded
       end
 
       def view_template
-        div(id: "update_footer_#{@obs.id}") do
-          if @in_project
-            render_remove_button
-          else
-            render_add_button
-          end
+        div(id: "update_footer_#{@obs.id}", class: "text-center") do
+          render_add_button
+          render_exclude_button unless @show_excluded
         end
       end
 
       private
 
-      def render_remove_button
-        button_to(
-          :REMOVE.t,
-          remove_observation_project_update_path(
-            project_id: @project.id, id: @obs.id
-          ),
-          method: :delete,
-          class: "btn btn-default btn-sm",
-          data: { turbo: true }
-        )
-      end
-
       def render_add_button
         button_to(
           :ADD.t,
           add_observation_project_update_path(
-            project_id: @project.id, id: @obs.id
+            project_id: @project.id, id: @obs.id,
+            show_excluded: @show_excluded
           ),
           method: :post,
-          class: "btn btn-default btn-sm",
-          data: { turbo: true }
+          class: "btn btn-default btn-sm mx-1",
+          form: { data: { turbo: true } }
+        )
+      end
+
+      def render_exclude_button
+        button_to(
+          :EXCLUDE.t,
+          exclude_observation_project_update_path(
+            project_id: @project.id, id: @obs.id,
+            show_excluded: @show_excluded
+          ),
+          method: :post,
+          class: "btn btn-default btn-sm mx-1",
+          form: { data: { turbo: true } }
         )
       end
     end
