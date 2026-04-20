@@ -1,6 +1,4 @@
-<% heading_links = [
-  icon_link_to(*edit_location_tab(@location))
-]
+<% heading_links = []
 if @location.destroyable? && (in_admin_mode? || @location.user == @user)
   heading_links << destroy_button(target: @location, icon: :delete)
 end
@@ -13,7 +11,9 @@ footer = icon_link_to(*observations_at_location_tab(@location))
       panel_id: "location_coordinates"
     )) do |panel| %>
   <%= panel.with_heading { :COORDINATES.l } %>
-  <%= panel.with_heading_links { heading_links.safe_join(" | ") } %>
+  <% if heading_links.any? %>
+    <%= panel.with_heading_links { heading_links.safe_join(" | ") } %>
+  <% end %>
   <%= panel.with_body do %>
     <div class="text-center mx-auto" style="max-width:30em">
       <div class="text-center my-4">
