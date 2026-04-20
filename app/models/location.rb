@@ -712,7 +712,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # (LocationsController#edit/#update only requires login. Destroy is
   # still owner/admin-only — see can_destroy_location?.)
   def can_edit?(user)
-    user.present?
+    return false unless user
+
+    true
   end
 
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
