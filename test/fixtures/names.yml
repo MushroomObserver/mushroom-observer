@@ -24,13 +24,21 @@
 DEFAULTS: &DEFAULTS
   author:         ""
   citation:       ""
-  notes:          ""
   classification: ""
+  deprecated:     false
+  icn_id:         nil
   lifeform:       " "
+  locked:         false
+  notes:          ""
   rank:           <%= Name.ranks[:Species] %>
+  # Do NOT set a default synonym
+  # Fixture loading is order-dependent.
+  # Some fixtures rely on synonyms.yml (or the opposite side of a has_many)
+  # to set synonym_id after names.yml loads.
+  # An explicit nil in DEFAULTS overwrites those relationships,
+  # breaking tests that expect names to share a synonym group.
   user:           dick
   version:        1
-  locked:         false
 
 fungi:
   <<: *DEFAULTS
@@ -130,30 +138,6 @@ tubaria_furfuracea:
   sort_name: Tubaria furfuracea (Pers.) Gillet
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
-
-agaricus:
-  <<: *DEFAULTS
-  user: rolf
-  text_name: Agaricus
-  display_name: '**__Agaricus__**'
-  search_name: Agaricus
-  sort_name: Agaricus
-  created_at: 2007-03-19 17:20:00
-  updated_at: 2007-03-19 17:20:00
-  rank: <%= Name.ranks[:Genus] %>
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
-
-agaricus_campestris:
-  <<: *DEFAULTS
-  user: rolf
-  text_name: Agaricus campestris
-  author: L.
-  display_name: '**__Agaricus__** **__campestris__** L.'
-  search_name: Agaricus campestris L.
-  sort_name: Agaricus campestris  L.
-  created_at: 2007-03-19 17:20:00
-  updated_at: 2007-03-19 17:20:00
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 conocybe:
   <<: *DEFAULTS
@@ -280,6 +264,7 @@ macrolepiota_rhacodes:
   sort_name: Macrolepiota rhacodes  (Vittad.) Singer
   synonym: macrolepiota_rachodes_synonym
   created_at: 2007-04-30 21:34:00
+  # earlier than rachodes; used in test for best synonym
   updated_at: 2007-04-30 21:34:00
 
 chlorophyllum:
@@ -394,44 +379,6 @@ psalliota:
   sort_name: Psalliota
   created_at: 2007-06-09 08:06:40
   updated_at: 2007-06-09 08:06:40
-
-agaricus_campestrus:
-  <<: *DEFAULTS
-  user: rolf
-  text_name: Agaricus campestrus
-  author: L.
-  display_name: '**__Agaricus__** **__campestrus__** L.'
-  search_name: Agaricus campestrus L.
-  sort_name: Agaricus campestrus  L.
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
-
-agaricus_campestras:
-  <<: *DEFAULTS
-  description: agaricus_campestras_desc
-  user: rolf
-  text_name: Agaricus campestras
-  author: L.
-  display_name: '**__Agaricus__** **__campestras__** L.'
-  search_name: Agaricus campestras L.
-  sort_name: Agaricus campestras  L.
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
-
-agaricus_campestros:
-  <<: *DEFAULTS
-  description: agaricus_campestros_desc
-  user: rolf
-  text_name: Agaricus campestros
-  author: L.
-  display_name: '**__Agaricus__** **__campestros__** L.'
-  search_name: Agaricus campestros L.
-  sort_name: Agaricus campestros  L.
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 coprinellus:
   <<: *DEFAULTS
@@ -896,37 +843,6 @@ abortiporus_biennis_for_eol:
   created_at: 2015-07-05 21:41:10
   updated_at: 2015-07-05 21:41:10
 
-amanita_subgenus_lepidella:
-  <<: *DEFAULTS
-  rank: <%= Name.ranks[:Subgenus] %>
-  text_name: Amanita subg. Lepidella
-  search_name: Amanita subg. Lepidella (E.-J. Gilbert) Veselý emend. Corner & Bas
-  sort_name: Amanita subg. Lepidella  (E.-J. Gilbert) Veselý emend. Corner & Bas
-  display_name: '**__Amanita__** subg. **__Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
-  author: '(E.-J. Gilbert) Veselý emend. Corner & Bas'
-  created_at: 2015-09-17 21:30:01
-  updated_at: 2015-09-17 21:30:01
-
-amanita_boudieri:
-  <<: *DEFAULTS
-  rank: <%= Name.ranks[:Species] %>
-  text_name: Amanita boudieri
-  search_name: Amanita boudieri
-  sort_name: Amanita boudieri
-  display_name: '**__Amanita__** **__boudieri__**'
-  created_at: 2015-09-17 21:30:01
-  updated_at: 2015-09-17 21:30:01
-
-amanita_boudieri_var_beillei:
-  <<: *DEFAULTS
-  rank: <%= Name.ranks[:Variety] %>
-  text_name: Amanita boudieri var. beillei
-  search_name: Amanita boudieri var. beillei
-  sort_name: Amanita boudieri var. beillei
-  display_name: '**__Amanita__** **__boudieri__** var. **__beillei__**'
-  created_at: 2015-09-17 21:30:01
-  updated_at: 2015-09-17 21:30:01
-
 boletus_edulis_group:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Group] %>
@@ -1178,9 +1094,17 @@ basidiomycota:
   display_name: '**__Basidiomycota__**'
   search_name: Basidiomycota
   sort_name: Basidiomycota
-  created_at: 2017-12-07 16:09:02
-  updated_at: 2017-12-07 16:09:02
   classification: "Kingdom: _Fungi_"
+
+agaricomycotina:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subphylum] %>
+  text_name: Agaricomycotina
+  display_name: '**__Agaricomycotina__**'
+  search_name: Agaricomycotina
+  sort_name: Agaricomycotina
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
 
 basidiomycetes:
   <<: *DEFAULTS
@@ -1190,9 +1114,19 @@ basidiomycetes:
   display_name: '**__Basidiomycetes__**'
   search_name: Basidiomycetes
   sort_name: Basidiomycetes
-  created_at: 2017-12-07 16:09:03
-  updated_at: 2017-12-07 16:09:03
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nSubphylum: _Agaricomycotina_"
+
+agaricomycetidae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subclass] %>
+  text_name: Agaricomycetidae
+  display_name: '**__Agaricomycetidae__**'
+  search_name: Agaricomycetidae
+  sort_name: Agaricomycetidae
+  created_at: 2017-12-07 16:09:09
+  updated_at: 2017-12-07 16:09:09
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_"
 
 agaricales:
   <<: *DEFAULTS
@@ -1206,6 +1140,18 @@ agaricales:
   updated_at: 2017-12-07 16:09:04
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_"
 
+agaricineae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Suborder] %>
+  text_name: Agaricineae
+  display_name: '**__Agaricineae__**'
+  search_name: Agaricineae
+  sort_name: Agaricineae
+  created_at: 2017-12-07 16:09:10
+  updated_at: 2017-12-07 16:09:10
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_"
+
 agaricaceae:
   <<: *DEFAULTS
   user: rolf
@@ -1218,6 +1164,150 @@ agaricaceae:
   updated_at: 2017-12-07 16:09:05
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_"
 
+agaricioideae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subfamily] %>
+  text_name: Agaricioideae
+  display_name: '**__Agaricioideae__**'
+  search_name: Agaricioideae
+  sort_name: Agaricioideae
+  created_at: 2017-12-07 16:09:11
+  updated_at: 2017-12-07 16:09:11
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+agariceae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Tribe] %>
+  text_name: Agariceae
+  display_name: '**__Agariceae__**'
+  search_name: Agariceae
+  sort_name: Agariceae
+  created_at: 2017-12-07 16:09:12
+  updated_at: 2017-12-07 16:09:12
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_\r\nSubfamily: _Agaricioideae_"
+
+agaricinae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Subtribe] %>
+  text_name: Agaricinae
+  display_name: '**__Agaricinae__**'
+  search_name: Agaricinae
+  sort_name: Agaricinae
+  created_at: 2017-12-07 16:09:12
+  updated_at: 2017-12-07 16:09:12
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_\r\nSubfamily: _Agaricioideae_\r\nTribe: _Agariceae_"
+
+# This should actually be section Leucoagaricus, but I was too lazy to add the genus Leucoagaricus!
+sect_agaricus:
+  <<: *DEFAULTS
+  created_at: 2007-06-23 20:04:00
+  updated_at: 2007-06-23 20:04:00
+  rank: <%= Name.ranks[:Section] %>
+  text_name:    "Agaricus sect. Agaricus"
+  search_name:  "Agaricus sect. Agaricus"
+  display_name: "**__Agaricus__** sect. **__Agaricus__**"
+  sort_name:    "Agaricus  {2sect.  !Agaricus"
+  classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+agaricus:
+  <<: *DEFAULTS
+  user: rolf
+  text_name: Agaricus
+  display_name: '**__Agaricus__**'
+  search_name: Agaricus
+  sort_name: Agaricus
+  created_at: 2007-03-19 17:20:00
+  updated_at: 2007-03-19 17:20:00
+  rank: <%= Name.ranks[:Genus] %>
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+agaricus_campestris:
+  <<: *DEFAULTS
+  user: rolf
+  text_name: Agaricus campestris
+  author: L.
+  display_name: '**__Agaricus__** **__campestris__** L.'
+  search_name: Agaricus campestris L.
+  sort_name: Agaricus campestris  L.
+  created_at: 2007-03-19 17:20:00
+  updated_at: 2007-03-19 17:20:00
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+agaricus_campestrus:
+  <<: *DEFAULTS
+  user: rolf
+  text_name: Agaricus campestrus
+  author: L.
+  display_name: '**__Agaricus__** **__campestrus__** L.'
+  search_name: Agaricus campestrus L.
+  sort_name: Agaricus campestrus  L.
+  created_at: 2007-06-23 20:04:00
+  updated_at: 2007-06-23 20:04:00
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+agaricus_campestras:
+  <<: *DEFAULTS
+  description: agaricus_campestras_desc
+  user: rolf
+  text_name: Agaricus campestras
+  author: L.
+  display_name: '**__Agaricus__** **__campestras__** L.'
+  search_name: Agaricus campestras L.
+  sort_name: Agaricus campestras  L.
+  created_at: 2007-06-23 20:04:00
+  updated_at: 2007-06-23 20:04:00
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+agaricus_campestros:
+  <<: *DEFAULTS
+  description: agaricus_campestros_desc
+  user: rolf
+  text_name: Agaricus campestros
+  author: L.
+  display_name: '**__Agaricus__** **__campestros__** L.'
+  search_name: Agaricus campestros L.
+  sort_name: Agaricus campestros  L.
+  created_at: 2007-06-23 20:04:00
+  updated_at: 2007-06-23 20:04:00
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+amanita_subgenus_lepidella:
+  <<: *DEFAULTS
+  rank: <%= Name.ranks[:Subgenus] %>
+  text_name: Amanita subg. Lepidella
+  search_name: Amanita subg. Lepidella (E.-J. Gilbert) Veselý emend. Corner & Bas
+  sort_name: Amanita subg. Lepidella  (E.-J. Gilbert) Veselý emend. Corner & Bas
+  display_name: '**__Amanita__** subg. **__Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
+  author: '(E.-J. Gilbert) Veselý emend. Corner & Bas'
+
+amanita_series_vaginatae:
+  <<: *DEFAULTS
+  user: rolf
+  rank: <%= Name.ranks[:Series] %>
+  text_name: "Amanita ser. Vaginatae"
+  display_name: "**__Amanita__** ser. **__Vaginatae__**"
+  search_name: "Amanita ser. Vaginatae"
+  sort_name: "Amanita  {3vser.  Vaginatae"
+
+amanita_boudieri:
+  <<: *DEFAULTS
+  rank: <%= Name.ranks[:Species] %>
+  text_name: Amanita boudieri
+  search_name: Amanita boudieri
+  sort_name: Amanita boudieri
+  display_name: '**__Amanita__** **__boudieri__**'
+
+amanita_boudieri_var_beillei:
+  <<: *DEFAULTS
+  rank: <%= Name.ranks[:Variety] %>
+  text_name: Amanita boudieri var. beillei
+  search_name: Amanita boudieri var. beillei
+  sort_name: Amanita boudieri var. beillei
+  display_name: '**__Amanita__** **__boudieri__** var. **__beillei__**'
+
 ascomycota:
   <<: *DEFAULTS
   user: rolf
@@ -1226,8 +1316,6 @@ ascomycota:
   display_name: '**__Ascomycota__**'
   search_name: Ascomycota
   sort_name: Ascomycota
-  created_at: 2017-12-07 16:09:06
-  updated_at: 2017-12-07 16:09:06
   classification: "Kingdom: _Fungi_"
 
 ascomycetes:
@@ -1275,18 +1363,6 @@ eukarya:
   search_name:       Eukarya
   sort_name:         Eukarya
   display_name: "**__Eukarya_**"
-
-# This should actually be section Leucoagaricus, but I was too lazy to add the genus Leucoagaricus!
-sect_agaricus:
-  <<: *DEFAULTS
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
-  rank: <%= Name.ranks[:Section] %>
-  text_name:    "Agaricus sect. Agaricus"
-  search_name:  "Agaricus sect. Agaricus"
-  display_name: "**__Agaricus__** sect. **__Agaricus__**"
-  sort_name:    "Agaricus  {2sect.  !Agaricus"
-  classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 lycoperdon_perlatum:
   <<: *DEFAULTS

@@ -2,6 +2,8 @@
 
 # rubocop:disable Metrics/ClassLength
 class NamesController < ApplicationController
+  class RankWarning < RuntimeError; end
+
   before_action :store_location, except: [:index]
   before_action :login_required
 
@@ -279,6 +281,8 @@ class NamesController < ApplicationController
     @parse = parse_name
     make_sure_name_doesnt_exist!
     create_new_name
+  rescue RankWarning => e
+    reload_name_form_with_rank_warning(e)
   rescue RuntimeError => e
     reload_name_form_on_error(e)
   end
@@ -294,6 +298,8 @@ class NamesController < ApplicationController
 
     init_edit_name_form
     update_name
+  rescue RankWarning => e
+    reload_name_form_with_rank_warning(e)
   rescue RuntimeError => e
     reload_name_form_on_error(e)
   end
@@ -309,7 +315,15 @@ class NamesController < ApplicationController
   def reload_name_form_on_error(err)
     flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
+    reload_name_form
+  end
 
+  def reload_name_form_with_rank_warning(err)
+    flash_warning(err.to_s)
+    reload_name_form
+  end
+
+  def reload_name_form
     @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
@@ -525,13 +539,40 @@ class NamesController < ApplicationController
     author = params[:name][:author]
     in_str = Name.clean_incoming_string("#{text_name} #{author}")
     in_rank = params[:name][:rank]
-    old_deprecated = @name ? @name.deprecated : false
-    parse = Name.parse_name(in_str, rank: in_rank, deprecated: old_deprecated)
-    if !parse || parse.rank != in_rank
-      rank_tag = :"rank_#{in_rank.to_s.downcase}"
-      raise(:runtime_invalid_for_rank.t(rank: rank_tag, name: in_str))
+    parse = Name.parse_name(in_str,
+                            rank: in_rank,
+                            deprecated: @name&.deprecated || false,
+                            force_rank: admin_rank_approved?(in_rank))
+    return parse if parse&.rank == in_rank
+
+    raise_rank_mismatch_or_invalid(text_name, in_rank, in_str)
+  end
+
+  def admin_rank_approved?(in_rank)
+    in_admin_mode? && params[:approved_rank] == in_rank
+  end
+
+  def raise_rank_mismatch_or_invalid(text_name, in_rank, in_str)
+    guessed = Name.guess_rank(text_name)
+    if guessed && guessed != "Genus" && guessed != in_rank
+      raise(rank_mismatch_error(text_name, in_rank, guessed))
     end
-    parse
+
+    raise(:runtime_invalid_for_rank.t(rank: :"rank_#{in_rank.to_s.downcase}",
+                                      name: in_str))
+  end
+
+  def rank_mismatch_error(text_name, in_rank, guessed)
+    expect = :"rank_#{guessed.downcase}".l
+    actual = :"rank_#{in_rank.to_s.downcase}".l
+    if in_admin_mode?
+      @approved_rank = in_rank
+      RankWarning.new(:runtime_wrong_rank_admin.t(name: text_name,
+                                                  expect: expect,
+                                                  actual: actual))
+    else
+      :runtime_wrong_rank.t(name: text_name, expect: expect, actual: actual)
+    end
   end
 
   def parsed_text_name

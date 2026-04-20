@@ -594,6 +594,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_20_173244) do
     t.index ["target_type", "target_id"], name: "index_project_aliases_on_target_type_and_target_id"
   end
 
+  create_table "project_excluded_observations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "observation_id", null: false
+    t.integer "project_id", null: false
+    t.index ["observation_id"], name: "index_project_excluded_observations_on_observation_id"
+    t.index ["project_id", "observation_id"], name: "index_project_excluded_observations_on_project_and_obs", unique: true
+    t.index ["project_id"], name: "index_project_excluded_observations_on_project_id"
+  end
+
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
