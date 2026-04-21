@@ -99,6 +99,12 @@ class Checklist
       @taxa.sort_by! { |entry| entry[0] }
     end
 
+    # Each row shows its own direct observation count (exact-name
+    # match, inherited from Checklist#calc_counts). Unobserved
+    # targets default to 0 so the "(0)" placeholder renders. The
+    # rollup logic lives on the Update-tab side (candidate_name_ids)
+    # so admins can see which obs are using an old/synonym name and
+    # decide whether to re-identify them.
     def merge_target_names_into_counts
       @project.target_names.each do |name|
         @counts[name.text_name] ||= 0

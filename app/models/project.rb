@@ -364,17 +364,26 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     touch
   end
 
-  # Remove all observations matching the given name (including synonyms)
-  # from both this project's observations and its excluded_observations.
+  # Remove observations that were matching this project via `name` as a
+  # target (directly, via synonyms, or via sub-taxa of either), but
+  # leave any observation whose name is still covered by some other
+  # remaining target. Called after the project_target_name record has
+  # already been destroyed, so `target_name_ids` reflects the
+  # post-removal state.
   def purge_observations_matching_name(name)
-    matching_ids = Observation.names(lookup: [name.id],
-                                     include_synonyms: true).pluck(:id)
-    return if matching_ids.empty?
+    matching_name_ids = expanded_target_name_ids([name.id])
+    if target_name_ids.any?
+      matching_name_ids -= expanded_target_name_ids(target_name_ids)
+    end
+    return if matching_name_ids.empty?
 
-    observations.where(id: matching_ids).
+    # Don't pluck into Ruby — a broad genus target could produce tens
+    # of thousands of ids. Use a subquery relation for both deletions.
+    matching_obs = Observation.where(name_id: matching_name_ids)
+    observations.where(id: matching_obs).
       find_each { |obs| remove_observation(obs) }
     project_excluded_observations.
-      where(observation_id: matching_ids).destroy_all
+      where(observation_id: matching_obs).destroy_all
   end
 
   def imgs_to_delete(obs)
@@ -483,11 +492,31 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   private
 
+  # Same expansion rule as candidate_name_ids: each given name plus
+  # its synonyms plus sub-taxa of both, without expanding synonyms of
+  # sub-taxa. See candidate_name_ids for the rationale on
+  # include_subtaxa_synonyms: false.
+  def expanded_target_name_ids(name_ids)
+    return [] if name_ids.empty?
+
+    Lookup::Names.new(name_ids,
+                      include_synonyms: true,
+                      include_subtaxa: true,
+                      include_subtaxa_synonyms: false).ids
+  end
+
   def candidate_name_ids
     return unless target_names.any?
 
+    # include_subtaxa_synonyms: false skips the final round of synonym
+    # expansion that would otherwise match current-name species whose
+    # deprecated synonym happens to fall under one of our targets
+    # (e.g., an Agaricus target would otherwise pull in Protostropharia
+    # semiglobata via the deprecated "Agaricus semiglobatus").
     Observation.names(lookup: target_name_ids,
-                      include_synonyms: true).select(:id)
+                      include_synonyms: true,
+                      include_subtaxa: true,
+                      include_subtaxa_synonyms: false).select(:id)
   end
 
   def candidate_location_ids

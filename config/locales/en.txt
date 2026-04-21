@@ -1253,6 +1253,7 @@
   search_term_include_all_name_proposals: include_all_name_proposals
   search_term_include_misspellings: include_misspellings
   search_term_include_subtaxa: include_subtaxa
+  search_term_include_subtaxa_synonyms: include_subtaxa_synonyms
   search_term_include_synonyms: include_synonyms
   search_term_is_collection_location: is_collection_location
   search_term_lichen: lichen
@@ -3945,6 +3946,7 @@
   observation_term_exclude_consensus: Exclude Observations whose consensus name is one of these names. (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
   observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
+  observation_term_include_subtaxa_synonyms: Also include observations of synonyms of those subtaxa. Defaults to true when include_synonyms is true and subtaxa expansion is enabled (include_subtaxa or include_immediate_subtaxa); set to false to keep subtaxa confined to the original name's taxonomy.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at a fungarium.
   observation_term_herbaria: "[:observation_term_herbarium]"
@@ -3999,6 +4001,7 @@
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
+  name_term_include_subtaxa_synonyms: "[:observation_term_include_subtaxa_synonyms]"
   name_term_include_immediate_subtaxa: Include immediate subtaxa of the given names.
   name_term_exclude_original_names: Exclude the names entered above.
   name_term_has_observations: Only names for which we have observations?
