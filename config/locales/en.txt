@@ -3946,7 +3946,7 @@
   observation_term_exclude_consensus: Exclude Observations whose consensus name is one of these names. (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
   observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
-  observation_term_include_subtaxa_synonyms: Also include observations of synonyms of those subtaxa. Defaults to true when include_synonyms and include_subtaxa are both true; set to false to keep subtaxa confined to the original name's taxonomy.
+  observation_term_include_subtaxa_synonyms: Also include observations of synonyms of those subtaxa. Defaults to true when include_synonyms is true and subtaxa expansion is enabled (include_subtaxa or include_immediate_subtaxa); set to false to keep subtaxa confined to the original name's taxonomy.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at a fungarium.
   observation_term_herbaria: "[:observation_term_herbarium]"

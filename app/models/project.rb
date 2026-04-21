@@ -377,25 +377,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     end
     return if matching_name_ids.empty?
 
-    matching_obs_ids = Observation.where(name_id: matching_name_ids).pluck(:id)
-    return if matching_obs_ids.empty?
-
-    observations.where(id: matching_obs_ids).
+    # Don't pluck into Ruby — a broad genus target could produce tens
+    # of thousands of ids. Use a subquery relation for both deletions.
+    matching_obs = Observation.where(name_id: matching_name_ids)
+    observations.where(id: matching_obs).
       find_each { |obs| remove_observation(obs) }
     project_excluded_observations.
-      where(observation_id: matching_obs_ids).destroy_all
-  end
-
-  # Same expansion rule as candidate_name_ids: each given name plus
-  # its synonyms plus sub-taxa of both, without expanding synonyms of
-  # sub-taxa.
-  def expanded_target_name_ids(name_ids)
-    return [] if name_ids.empty?
-
-    Lookup::Names.new(name_ids,
-                      include_synonyms: true,
-                      include_subtaxa: true,
-                      include_subtaxa_synonyms: false).ids
+      where(observation_id: matching_obs).destroy_all
   end
 
   def imgs_to_delete(obs)
@@ -503,6 +491,19 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   private
+
+  # Same expansion rule as candidate_name_ids: each given name plus
+  # its synonyms plus sub-taxa of both, without expanding synonyms of
+  # sub-taxa. See candidate_name_ids for the rationale on
+  # include_subtaxa_synonyms: false.
+  def expanded_target_name_ids(name_ids)
+    return [] if name_ids.empty?
+
+    Lookup::Names.new(name_ids,
+                      include_synonyms: true,
+                      include_subtaxa: true,
+                      include_subtaxa_synonyms: false).ids
+  end
 
   def candidate_name_ids
     return unless target_names.any?

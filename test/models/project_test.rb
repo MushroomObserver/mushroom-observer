@@ -334,8 +334,11 @@ class ProjectTest < UnitTestCase
   # genus (Joe's example from #4130: Gloeomucro genus → Gloeomucro flavus).
   def test_candidate_observations_includes_subtaxa_of_genus_target
     proj = projects(:rare_fungi_project)
-    # Drop existing targets, add genus Agaricus as the only target.
+    # Strip all targets and rebuild with just a single genus name so
+    # the assertion tests the name-matching logic in isolation (no
+    # location filter to also satisfy).
     proj.project_target_names.destroy_all
+    proj.project_target_locations.destroy_all
     proj.add_target_name(names(:agaricus))
 
     species_obs = observations(:agaricus_campestris_obs)
@@ -351,6 +354,9 @@ class ProjectTest < UnitTestCase
   def test_candidate_observations_excludes_cross_genus_historical_synonyms
     proj = projects(:rare_fungi_project)
     proj.project_target_names.destroy_all
+    # Clear target_locations too so the test isolates name matching;
+    # obs below is created without a location.
+    proj.project_target_locations.destroy_all
     proj.add_target_name(names(:agaricus))
 
     # Simulate the historical-rename scenario: a current Protostropharia
