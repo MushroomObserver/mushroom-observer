@@ -15,6 +15,7 @@ class Query::NameDescriptions < Query
   query_attr(:names, { lookup: [Name],
                        include_synonyms: :boolean,
                        include_subtaxa: :boolean,
+                       include_subtaxa_synonyms: :boolean,
                        include_immediate_subtaxa: :boolean,
                        exclude_original_names: :boolean })
   query_attr(:name_query, { subquery: :Name })

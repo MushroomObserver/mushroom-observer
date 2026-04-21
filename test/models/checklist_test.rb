@@ -205,6 +205,63 @@ class ChecklistTest < UnitTestCase
     assert_equal(proj.target_name_ids.sort, data.target_name_ids.sort)
   end
 
+  # Issue #4130 — synonym and target rows each show their own direct
+  # count. The Update tab's candidate query rolls up synonyms so those
+  # obs become addable, but once in the project each row stands alone
+  # so admins can see (and re-identify) obs that are still using an
+  # old/synonym name.
+  def test_checklist_shows_target_and_synonym_rows_with_direct_counts
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+
+    synonym = Synonym.create!
+    target_name = Name.create!(
+      user: users(:rolf),
+      text_name: "Phylloporia fakeamplectens",
+      search_name: "Phylloporia fakeamplectens",
+      sort_name: "Phylloporia fakeamplectens",
+      display_name: "__Phylloporia__ __fakeamplectens__",
+      author: "",
+      rank: Name.ranks[:Species],
+      deprecated: false,
+      synonym_id: synonym.id,
+      correct_spelling_id: nil
+    )
+    synonym_name = Name.create!(
+      user: users(:rolf),
+      text_name: "Inonotus fakeamplectens",
+      search_name: "Inonotus fakeamplectens",
+      sort_name: "Inonotus fakeamplectens",
+      display_name: "__Inonotus__ __fakeamplectens__",
+      author: "",
+      rank: Name.ranks[:Species],
+      deprecated: true,
+      synonym_id: synonym.id,
+      correct_spelling_id: nil
+    )
+    proj.add_target_name(target_name)
+
+    2.times do
+      proj.observations << Observation.create!(
+        name: target_name, user: users(:rolf), when: Time.zone.now
+      )
+    end
+    3.times do
+      proj.observations << Observation.create!(
+        name: synonym_name, user: users(:rolf), when: Time.zone.now
+      )
+    end
+
+    data = Checklist::ForProject.new(proj)
+    taxa_names = data.taxa.pluck(0)
+    assert_includes(taxa_names, "Phylloporia fakeamplectens")
+    assert_includes(taxa_names, "Inonotus fakeamplectens")
+    assert_equal(2, data.counts["Phylloporia fakeamplectens"],
+                 "Target row counts only direct obs of the target name")
+    assert_equal(3, data.counts["Inonotus fakeamplectens"],
+                 "Synonym row counts only direct obs of the synonym name")
+  end
+
   def test_checklist_for_project_target_names_with_observations
     proj = projects(:rare_fungi_project)
     # Add an observation for one of the target names

@@ -133,7 +133,8 @@ class Lookup::Names < Lookup
   def add_synonyms_again(names, names_plus_subtaxa)
     if names.length >= names_plus_subtaxa.length
       names
-    elsif @params[:include_synonyms]
+    elsif @params[:include_synonyms] &&
+          @params[:include_subtaxa_synonyms] != false
       add_synonyms(names_plus_subtaxa)
     else
       names_plus_subtaxa
