@@ -53,15 +53,24 @@ module Components
       end
 
       def render_observed_summary
+        text = observed_summary_text
+        return if text.nil?
+
+        div { plain(text) }
+      end
+
+      def observed_summary_text
+        species = @data.num_species_observed
         higher = @data.num_higher_level_observed
-        div do
-          plain(
-            :checklist_observed_summary.t(
-              species: @data.num_species_observed,
-              higher: higher,
-              taxa_word: higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
-            )
-          )
+        taxa_word = higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
+        if species.positive? && higher.positive?
+          :checklist_observed_summary.t(species: species, higher: higher,
+                                        taxa_word: taxa_word)
+        elsif species.positive?
+          :checklist_observed_species_only.t(species: species)
+        elsif higher.positive?
+          :checklist_observed_higher_only.t(higher: higher,
+                                            taxa_word: taxa_word)
         end
       end
 

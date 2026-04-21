@@ -2511,6 +2511,8 @@
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
   show_user_life_list: "[species] species and [higher] higher-level [taxa_word] observed"
+  show_user_life_list_species: "[species] species observed"
+  show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
   sequence_edit_title: Editing [name]
@@ -3140,6 +3142,8 @@
   checklist_for_species_list_title: Checklist for [list]
   checklist_target_summary: "Targets: [total] total, [observed] observed, [unobserved] not yet observed."
   checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_observed_species_only: "[species] species observed (synonyms counted once)."
+  checklist_observed_higher_only: "[higher] higher-level [taxa_word] observed (synonyms counted once)."
   checklist_unobserved_targets: Unobserved target names
   checklist_species_level: Species and below
   checklist_higher_level: Higher-level taxa
