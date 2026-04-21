@@ -93,7 +93,7 @@ class ChecklistsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     # Line 1 — target-name summary.
-    assert_match(/2 target names.*1 observed.*1 not yet observed/,
+    assert_match(/Targets: 2 total.*1 observed.*1 not yet observed/,
                  @response.body)
     # Line 2 — observed summary with synonyms-counted-once note.
     assert_match(/1 species and 0 higher-level taxa observed/,

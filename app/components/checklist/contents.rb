@@ -30,11 +30,9 @@ module Components
       end
 
       def render_summary
-        return if @data.num_taxa.zero? && !project_with_targets?
-
         div(class: "my-4") do
           render_target_summary if project_with_targets?
-          render_observed_summary if @data.num_taxa.positive?
+          render_observed_summary
         end
       end
 
