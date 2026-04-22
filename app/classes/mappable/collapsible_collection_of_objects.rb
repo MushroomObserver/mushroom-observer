@@ -118,26 +118,30 @@ module Mappable
     # Objects may be observations, or Mappable::MinimalLocations/Observations,
     # whose properties are different. Names::MapsController#show sends obs.
     #
-    # For single observations, this always returns points if we have lat/lng...
-    # ignores "dubiousness" when the point disagrees with location.
-    #
-    # For maps of multiple observations, it returns only sets of location boxes.
-    # Even though points are noticeable at any zoom, they may get collapsed with
-    # other nearby points into tiny boxes, becoming undetectable on the map.
+    # Shape semantics:
+    # - Obs with unambiguous GPS → point (circle on the map).
+    # - Obs without GPS but with a known location → box at that
+    #   location's edges (represents the area the obs is known to be
+    #   within, not a pinpoint).
+    # - Bare Location → box at the location's edges.
+    # The old behavior demoted all obs to boxes once the collection
+    # exceeded max_objects; we removed that because the
+    # map_controller.js now falls back to a colored square marker when
+    # multiple points collapse into a sub-pixel box during grouping
+    # (#4131). Obs-with-GPS always stays a circle.
     def init_sets(objects)
       objects = [objects] unless objects.is_a?(Array)
       raise("Tried to create empty map!") if objects.empty?
 
       @sets = {}
       is_collection = objects.many?
-      will_be_grouped = objects.count > @max_objects
       objects.each do |obj|
         loc = obj.location? ? obj : obj.location
         mappable = mappable_location?(is_collection, loc)
         if obj.location? && mappable
           add_box_set(loc, [obj], MAX_PRECISION)
         elsif obj.observation?
-          if (!will_be_grouped || !loc) && obj.lat # && !obj.lat_lng_dubious?
+          if obj.lat && !obj.lat_lng_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
           elsif loc && mappable
             add_box_set(loc, [obj], MAX_PRECISION)
