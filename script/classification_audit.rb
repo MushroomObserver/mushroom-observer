@@ -18,10 +18,17 @@
 #                copy that classification to all members of the group
 #                (including deprecated ones), overwriting any diverging
 #                value.
-#      Reports – Two CSV files in the repo root:
+#      Reports – Three CSV files in the repo root:
 #                  classification_audit_no_classification_genera.csv
 #                  classification_audit_synonym_conflicts.csv
+#                  classification_audit_changes.csv   (per-row log)
 #                Plus baseline and post-run summary counts on stdout.
+#
+#                The changes CSV has one row per candidate name
+#                whose classification was (or would be) touched, with
+#                was_empty and value_changed booleans so you can
+#                filter "null → value" cases separately from
+#                "overwritten with the same value".
 #
 #    Use --dry-run to skip mutations; reports and summaries still print.
 #    See issue #4155 and discussion #4154.
@@ -53,6 +60,8 @@ NO_CLASS_CSV =
   REPORT_DIR.join("classification_audit_no_classification_genera.csv")
 CONFLICTS_CSV =
   REPORT_DIR.join("classification_audit_synonym_conflicts.csv")
+CHANGES_CSV =
+  REPORT_DIR.join("classification_audit_changes.csv")
 BASE_URL = MO.http_domain.presence || "https://mushroomobserver.org"
 
 START = Time.zone.now
@@ -79,6 +88,45 @@ end
 
 def would_str
   DRY_RUN ? "would be " : ""
+end
+
+# Per-change log accumulated across both phases. One row per candidate
+# name whose classification was (or would be) touched. Write-once at
+# end. Columns: phase, name_id, text_name, rank, deprecated,
+# was_empty, value_changed, trigger, url.
+module ChangesLog
+  @rows = []
+
+  class << self
+    attr_reader :rows
+
+    def add(row)
+      @rows << row
+    end
+  end
+end
+
+def url_for_id(id)
+  "#{BASE_URL}/names/#{id}"
+end
+
+def record_change(phase, info)
+  ChangesLog.add([phase, info[:name_id], info[:text_name], info[:rank],
+                  info[:deprecated],
+                  info[:old_cls].to_s.strip.empty?,
+                  normalize(info[:old_cls]) != normalize(info[:new_cls]),
+                  info[:trigger], url_for_id(info[:name_id])])
+end
+
+def write_changes_csv
+  log("Writing #{CHANGES_CSV}")
+  CSV.open(CHANGES_CSV, "w") do |csv|
+    csv << %w[phase name_id text_name rank deprecated
+              was_empty value_changed trigger url]
+    ChangesLog.rows.each { |row| csv << row }
+  end
+  log("  #{ChangesLog.rows.length} change rows recorded")
+  log("")
 end
 
 ################################################################################
@@ -131,11 +179,23 @@ end
 # Phase 1: propagate from genera with classification
 ################################################################################
 
+def record_phase_1_candidates(genus, affected_ids)
+  Name.where(id: affected_ids).
+    pluck(:id, :text_name, :rank, :deprecated, :classification).
+    each do |id, tn, rank, dep, old_cls|
+      record_change(1, name_id: id, text_name: tn, rank: rank,
+                       deprecated: dep, old_cls: old_cls,
+                       new_cls: genus.classification,
+                       trigger: "genus:#{genus.text_name}")
+    end
+end
+
 def process_genus(genus)
   affected_ids = genus.subtaxa_whose_classification_needs_to_be_changed
   return 0 if affected_ids.blank?
 
   vlog("  #{genus.text_name}: #{affected_ids.length} subtaxa/synonyms")
+  record_phase_1_candidates(genus, affected_ids)
   Name.transaction { genus.propagate_classification } unless DRY_RUN
   affected_ids.length
 end
@@ -181,12 +241,22 @@ def synonym_group_canonical_class(members)
   [canonical, source]
 end
 
-def apply_synonym_classification(members, source)
+def record_phase_2_candidates(stale, syn_id, new_cls)
+  stale.each do |n|
+    record_change(2, name_id: n.id, text_name: n.text_name,
+                     rank: n.rank, deprecated: n.deprecated,
+                     old_cls: n.classification, new_cls: new_cls,
+                     trigger: "synonym_id:#{syn_id}")
+  end
+end
+
+def apply_synonym_classification(members, source, syn_id)
   stale = members.reject do |n|
     normalize(n.classification) == normalize(source.classification)
   end
   return 0 if stale.empty?
 
+  record_phase_2_candidates(stale, syn_id, source.classification)
   unless DRY_RUN
     Name.transaction do
       Name.where(id: stale.map(&:id)).
@@ -202,7 +272,7 @@ def process_synonym_group(syn_id)
   return :conflict if canonical.size > 1
   return :skipped if source.nil?
 
-  count = apply_synonym_classification(members, source)
+  count = apply_synonym_classification(members, source, syn_id)
   count.zero? ? :skipped : count
 end
 
@@ -313,5 +383,6 @@ phase_2_propagate_within_synonym_groups
 classification_counts("AFTER")
 report_no_classification_genera
 report_synonym_conflicts
+write_changes_csv
 
 log("classification_audit.rb complete in #{elapsed}s")
