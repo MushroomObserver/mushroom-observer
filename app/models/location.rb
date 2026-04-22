@@ -708,6 +708,15 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       descriptions.empty?
   end
 
+  # Locations are a shared resource: any logged-in user can edit one.
+  # (LocationsController#edit/#update only requires login. Destroy is
+  # still owner/admin-only — see can_destroy_location?.)
+  def can_edit?(user)
+    return false unless user
+
+    true
+  end
+
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved.

@@ -689,11 +689,10 @@ MushroomObserver::Application.routes.draw do
                         controller: "projects/updates" do
       member do
         post :add_observation
-        delete :remove_observation
+        post :exclude_observation
       end
       collection do
         post :add_all
-        delete :clear
       end
     end
     resources :violations, only: [:index], controller: "projects/violations"

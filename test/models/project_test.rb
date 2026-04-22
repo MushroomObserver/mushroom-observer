@@ -336,4 +336,73 @@ class ProjectTest < UnitTestCase
     assert(proj.errors[:field_slip_prefix].any?,
            "Should reject invalid field_slip_prefix")
   end
+
+  def test_exclude_and_unexclude_observation
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+
+    proj.exclude_observation(obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+    assert_not_includes(proj.observations.reload, obs)
+
+    proj.unexclude_observation(obs)
+    assert_not_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_exclude_observation_removes_from_project
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(obs)
+    assert_includes(proj.observations.reload, obs)
+
+    proj.exclude_observation(obs)
+    assert_not_includes(proj.observations.reload, obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_add_observation_removes_from_excluded
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.exclude_observation(obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+
+    proj.add_observation(obs)
+    assert_includes(proj.observations.reload, obs)
+    assert_not_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_new_candidate_observations_excludes_excluded
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    assert_includes(proj.new_candidate_observations, obs)
+
+    proj.exclude_observation(obs)
+    assert_not_includes(proj.new_candidate_observations.reload, obs)
+  end
+
+  def test_new_candidate_observations_excludes_in_project
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(obs)
+    assert_not_includes(proj.new_candidate_observations.reload, obs)
+  end
+
+  def test_remove_target_name_purges_matching_observations
+    proj = projects(:rare_fungi_project)
+    matching_name = names(:agaricus_campestris)
+    added_obs = observations(:agaricus_campestris_obs)
+    excluded_obs = Observation.create!(
+      name: matching_name, user: users(:rolf),
+      location: locations(:burbank), when: Time.zone.now
+    )
+    proj.add_observation(added_obs)
+    proj.exclude_observation(excluded_obs)
+    assert_includes(proj.observations.reload, added_obs)
+    assert_includes(proj.excluded_observations.reload, excluded_obs)
+
+    proj.remove_target_name(matching_name)
+
+    assert_not_includes(proj.observations.reload, added_obs)
+    assert_not_includes(proj.excluded_observations.reload, excluded_obs)
+  end
 end
