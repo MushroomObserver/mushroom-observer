@@ -493,30 +493,21 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   private
 
   # Same expansion rule as candidate_name_ids: each given name plus
-  # its synonyms plus sub-taxa of both, without expanding synonyms of
-  # sub-taxa. See candidate_name_ids for the rationale on
-  # include_subtaxa_synonyms: false.
+  # its synonyms plus sub-taxa of both.
   def expanded_target_name_ids(name_ids)
     return [] if name_ids.empty?
 
     Lookup::Names.new(name_ids,
                       include_synonyms: true,
-                      include_subtaxa: true,
-                      include_subtaxa_synonyms: false).ids
+                      include_subtaxa: true).ids
   end
 
   def candidate_name_ids
     return unless target_names.any?
 
-    # include_subtaxa_synonyms: false skips the final round of synonym
-    # expansion that would otherwise match current-name species whose
-    # deprecated synonym happens to fall under one of our targets
-    # (e.g., an Agaricus target would otherwise pull in Protostropharia
-    # semiglobata via the deprecated "Agaricus semiglobatus").
     Observation.names(lookup: target_name_ids,
                       include_synonyms: true,
-                      include_subtaxa: true,
-                      include_subtaxa_synonyms: false).select(:id)
+                      include_subtaxa: true).select(:id)
   end
 
   def candidate_location_ids

@@ -15,7 +15,7 @@ class Lookup::Names < Lookup
 
     names = add_synonyms_if_necessary(original_names)
     names_plus_subtaxa = add_subtaxa_if_necessary(names)
-    names = add_synonyms_again(names, names_plus_subtaxa)
+    names = add_deprecated_synonyms_of_subtaxa(names, names_plus_subtaxa)
     names -= original_names if @params[:exclude_original_names]
     names.map(&:id)
   end
@@ -130,15 +130,29 @@ class Lookup::Names < Lookup
     end
   end
 
-  def add_synonyms_again(names, names_plus_subtaxa)
-    if names.length >= names_plus_subtaxa.length
-      names
-    elsif @params[:include_synonyms] &&
-          @params[:include_subtaxa_synonyms] != false
-      add_synonyms(names_plus_subtaxa)
-    else
-      names_plus_subtaxa
-    end
+  # After sub-taxa expansion, also include any DEPRECATED synonyms of
+  # the expanded set — these are misspellings and historical name
+  # variants of things that *are* in the target's clade. We do not
+  # re-add non-deprecated synonyms here: doing so would match
+  # current-name species whose deprecated synonym happened to fall
+  # under one of our targets (e.g., an `Agaricus` search would match
+  # Protostropharia semiglobata via the deprecated
+  # `Agaricus semiglobatus`). See discussion #4154.
+  def add_deprecated_synonyms_of_subtaxa(names, names_plus_subtaxa)
+    return names if names.length >= names_plus_subtaxa.length
+    return names_plus_subtaxa unless @params[:include_synonyms]
+
+    names_plus_subtaxa + new_deprecated_synonyms(names_plus_subtaxa)
+  end
+
+  def new_deprecated_synonyms(names_plus_subtaxa)
+    syn_ids = names_plus_subtaxa.pluck(:synonym_id).compact
+    return [] if syn_ids.empty?
+
+    existing_ids = names_plus_subtaxa.to_set(&:id)
+    Name.where(synonym_id: limited_id_set(syn_ids), deprecated: true).
+      distinct.select(*minimal_name_columns).
+      reject { |n| existing_ids.include?(n.id) }
   end
 
   def add_other_spellings(names)

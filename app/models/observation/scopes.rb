@@ -188,7 +188,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       lookup_args = args.slice(:include_synonyms,
                                :include_misspellings,
                                :include_subtaxa,
-                               :include_subtaxa_synonyms,
                                :include_immediate_subtaxa,
                                :exclude_original_names)
       name_ids = Lookup::Names.new(lookup, **lookup_args).ids
