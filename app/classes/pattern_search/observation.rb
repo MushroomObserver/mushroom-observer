@@ -13,7 +13,6 @@ module PatternSearch
       name: [:names, :parse_list_of_names],
       exclude_consensus: [:exclude_consensus, :parse_boolean], # of_look_alikes
       include_subtaxa: [:include_subtaxa, :parse_boolean],
-      include_subtaxa_synonyms: [:include_subtaxa_synonyms, :parse_boolean],
       include_synonyms: [:include_synonyms, :parse_boolean],
       include_all_name_proposals: [:include_all_name_proposals, :parse_boolean],
 
