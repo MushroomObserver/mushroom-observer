@@ -685,6 +685,7 @@ petigera:
   correct_spelling: peltigera
   deprecated: true
   synonym: peltigera_synonym
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   created_at: 2009-01-02 01:01:01
   updated_at: 2009-01-02 01:01:01
   lifeform: " lichen "
