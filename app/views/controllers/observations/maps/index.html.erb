@@ -11,5 +11,6 @@ add_context_nav(observation_maps_tabs(query: @query))
 # overlays on top of obs points (#4131 follow-up).
 %>
 
-<%= make_map(objects: @observations, # CollapsibleCollection
+<%= make_map(objects: @observations,
+             clustering: true,
              query_param: q_param(@query), zoom: 2, map_type: "info") %>

@@ -1,5 +1,6 @@
 import GeocodeController from "controllers/geocode_controller"
 import { Loader } from "@googlemaps/js-api-loader"
+import { MarkerClusterer } from "@googlemaps/markerclusterer"
 
 // Connects to data-controller="map"
 // The connected element can be a map, or in the case of a form with a map UI,
@@ -29,6 +30,12 @@ export default class extends GeocodeController {
     this.collection = this.mapDivTarget.dataset.collection
     if (this.collection)
       this.collection = JSON.parse(this.collection)
+    // Dynamic-clustering mode (#4159). When true, each collection set
+    // is a singleton and the client wraps them in a MarkerClusterer
+    // that regroups them at each zoom level.
+    this.clustering = this.mapDivTarget.dataset.clustering === "true"
+    this.cluster_markers = []
+    this.markerClusterer = null
     this.localized_text = this.mapDivTarget.dataset.localization
     if (this.localized_text)
       this.localized_text = JSON.parse(this.localized_text)
@@ -169,6 +176,75 @@ export default class extends GeocodeController {
         this.drawRectangle(set)
       }
     }
+    if (this.clustering) this.initMarkerClusterer()
+  }
+
+  // Wrap every marker collected during buildOverlays in a
+  // MarkerClusterer. The clusterer handles visibility, so markers
+  // are attached to the map only at zoom levels where they aren't
+  // part of a larger cluster. See #4159.
+  initMarkerClusterer() {
+    if (this.cluster_markers.length === 0) return
+
+    this.markerClusterer = new MarkerClusterer({
+      map: this.map,
+      markers: this.cluster_markers.map((m) => m.marker),
+      renderer: this.clusterRenderer()
+    })
+  }
+
+  clusterRenderer() {
+    return {
+      render: ({ count, position, markers }) => {
+        const color = this.aggregateClusterColor(markers)
+        const label = count > 99 ? "99+" : String(count)
+        const scale = count < 10 ? 14 : count < 100 ? 18 : 22
+        return new google.maps.Marker({
+          position,
+          label: {
+            text: label,
+            color: "#fff",
+            fontSize: "12px",
+            fontWeight: "700"
+          },
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: color,
+            fillOpacity: 0.9,
+            strokeColor: "#fff",
+            strokeWeight: 1.5,
+            scale: scale
+          },
+          title: `${count} observations`,
+          zIndex: 1000 + markers.length
+        })
+      }
+    }
+  }
+
+  // Aggregate consensus-band color across every member of a cluster.
+  // Mirrors Mappable::MapSet#compute_color on the Ruby side — we need
+  // it in JS because cluster membership changes dynamically with
+  // zoom and can't be baked in server-side (#4159).
+  aggregateClusterColor(markers) {
+    const bands = new Set()
+    for (const marker of markers) {
+      const data = marker.moData
+      if (!data) continue
+      const pct = data.vote_pct
+      if (pct == null) continue
+      if (pct <= 0) bands.add("disputed")
+      else if (pct >= 80) bands.add("confirmed")
+      else bands.add("tentative")
+    }
+    if (bands.size === 0) return "#3B79CC"  // location-only fallback
+    if (bands.size > 1) return "#C69B71"    // mixed
+    const band = bands.values().next().value
+    return {
+      confirmed: "#5CB85C",
+      tentative: "#F0AD4E",
+      disputed: "#D9534F"
+    }[band]
   }
 
   isPoint(set) {
@@ -206,7 +282,10 @@ export default class extends GeocodeController {
     const border = (set && set.border_style) || "crisp"
     const markerOptions = {
       position: { lat: set.lat, lng: set.lng },
-      map: this.map,
+      // In clustering mode, don't attach to the map — the
+      // MarkerClusterer decides visibility based on current zoom
+      // (#4159).
+      map: this.clustering ? null : this.map,
       draggable: this.editable,
       icon: this.colored_circle_icon(color, border),
       zoomOnClick: false
@@ -217,6 +296,11 @@ export default class extends GeocodeController {
     }
     const marker = new google.maps.Marker(markerOptions)
     this.marker = marker
+    // Metadata the cluster renderer uses to compute cluster color.
+    marker.moData = {
+      vote_pct: this.votePctFromSet(set),
+      has_gps: border !== "none"
+    }
 
     if (!this.editable && set != null) {
       this.giveMarkerInfoWindow(marker, set)
@@ -225,10 +309,25 @@ export default class extends GeocodeController {
       if (border === "none" && this.hasBoxExtents(set)) {
         this.attachFuzzyBoxOverlay(marker, set)
       }
+      if (this.clustering) {
+        this.cluster_markers.push({ marker, set })
+      }
     } else {
       this.getElevations([set], "point")
       this.makeMarkerEditable(marker)
     }
+  }
+
+  // Reverse-engineer the consensus band color shipped by
+  // MapSet#compute_color. Singleton MapSets (clustering mode) carry
+  // just the color hex; the band is enough for cluster-color math.
+  votePctFromSet(set) {
+    if (!set || !set.color) return null
+    const color = set.color
+    if (color === "#5CB85C") return 90  // confirmed
+    if (color === "#F0AD4E") return 40  // tentative
+    if (color === "#D9534F") return -1  // disputed
+    return null // mixed / location-only
   }
 
   // Only for single markers: listeners for dragging the marker
