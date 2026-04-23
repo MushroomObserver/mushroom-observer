@@ -97,9 +97,9 @@
   min-height: 300px;
 }
 
-// Legend rendered under every map by MapHelper#map_legend (#4131).
-// Two rows: shape meanings (circle vs. box) then color meanings
-// (consensus bands + group).
+// Legend rendered under maps with at least one observation by
+// MapHelper#map_legend (#4159). Three rows: shape (single vs
+// multiple observation), border (precision), and color (consensus).
 .map-legend {
   .map-legend-row {
     display: flex;
@@ -132,6 +132,19 @@
   .map-legend-dot {
     border: 0;
     border-radius: 50%;
+  }
+
+  // Border-style swatches: show the stroke style without implying
+  // a shape.
+  .map-legend-border-crisp {
+    border: 2px solid #555;
+  }
+  .map-legend-border-dashed {
+    border: 2px dashed #555;
+  }
+  .map-legend-border-none {
+    border: 0;
+    background: #C69B71;
   }
 }
 

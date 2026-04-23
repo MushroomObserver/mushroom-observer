@@ -42,7 +42,7 @@ module Mappable
     attr_reader :north, :south, :east, :west, :is_point, :is_box,
                 :north_east, :south_east, :south_west, :north_west, :lat, :lng,
                 :north_south_distance, :east_west_distance, :center, :edges
-    attr_accessor :objects, :title, :caption, :color
+    attr_accessor :objects, :title, :caption, :color, :glyph, :border_style
 
     def initialize(objects = [])
       @objects = objects.is_a?(Array) ? objects : [objects]
@@ -106,6 +106,33 @@ module Mappable
       return :confirmed if pct >= 80
 
       :tentative
+    end
+
+    # Glyph: :dot for a single observation, :square for multiple or
+    # for location-only sets. Part of the issue #4159 "dot = single,
+    # square = multiple" rule.
+    def compute_glyph
+      single_observation? ? :dot : :square
+    end
+
+    # Border style:
+    # :crisp  — every observation has precise GPS (or the set is
+    #           location-only, whose boundary is precise by definition).
+    # :none   — no observation in the set has usable GPS.
+    # :dashed — a mix of precise and location-only observations.
+    def compute_border_style
+      obs = observations
+      return :crisp if obs.empty? # location-only
+
+      with_gps = obs.count { |o| observation_has_gps?(o) }
+      return :crisp if with_gps == obs.length
+      return :none if with_gps.zero?
+
+      :dashed
+    end
+
+    def observation_has_gps?(obs)
+      obs.lat.present? && !obs.lat_lng_dubious?
     end
 
     def observations

@@ -82,6 +82,89 @@ class MapSetTest < UnitTestCase
   end
 
   # ------------------------------------------------------------------
+  # #compute_glyph — issue #4159 ("dot = single, square = multiple")
+  # ------------------------------------------------------------------
+
+  def test_glyph_dot_for_single_observation
+    set = set_of(build_obs(lat: 10, lng: 10))
+    assert_equal(:dot, set.compute_glyph)
+  end
+
+  def test_glyph_square_for_multiple_observations
+    set = set_of(build_obs(lat: 10, lng: 10),
+                 build_obs(lat: 10, lng: 10))
+    assert_equal(:square, set.compute_glyph)
+  end
+
+  def test_glyph_square_for_location_only
+    set = set_of(locations(:burbank))
+    assert_equal(:square, set.compute_glyph)
+  end
+
+  def test_glyph_dot_for_single_obs_bucketed_with_its_location
+    set = set_of(build_obs(lat: 34.1, lng: -118.3),
+                 locations(:burbank))
+    assert_equal(:dot, set.compute_glyph,
+                 "One obs bucketed with its location is still a single obs")
+  end
+
+  # ------------------------------------------------------------------
+  # #compute_border_style — issue #4159
+  # ------------------------------------------------------------------
+
+  def test_border_crisp_when_single_obs_has_gps
+    set = set_of(build_obs(lat: 10, lng: 10))
+    assert_equal(:crisp, set.compute_border_style)
+  end
+
+  def test_border_none_when_single_obs_has_no_gps
+    # Location-only positioning — no lat/lng on the obs.
+    obs = Mappable::MinimalObservation.new(
+      id: 999, lat: nil, lng: nil,
+      location: locations(:burbank),
+      name_id: 1, text_name: "Test", when: Time.zone.today,
+      vote_cache: 3.0
+    )
+    set = set_of(obs)
+    assert_equal(:none, set.compute_border_style)
+  end
+
+  def test_border_crisp_when_all_members_have_gps
+    set = set_of(build_obs(lat: 10, lng: 10),
+                 build_obs(lat: 10.01, lng: 10.01))
+    assert_equal(:crisp, set.compute_border_style)
+  end
+
+  def test_border_none_when_no_member_has_gps
+    a = Mappable::MinimalObservation.new(
+      id: 1, lat: nil, lng: nil, location: locations(:burbank),
+      name_id: 1, text_name: "A", when: Time.zone.today, vote_cache: 3.0
+    )
+    b = Mappable::MinimalObservation.new(
+      id: 2, lat: nil, lng: nil, location: locations(:burbank),
+      name_id: 1, text_name: "B", when: Time.zone.today, vote_cache: 3.0
+    )
+    set = set_of(a, b)
+    assert_equal(:none, set.compute_border_style)
+  end
+
+  def test_border_dashed_when_members_are_mixed_precision
+    precise = build_obs(lat: 34.1, lng: -118.3)
+    fuzzy = Mappable::MinimalObservation.new(
+      id: 999, lat: nil, lng: nil, location: locations(:burbank),
+      name_id: 1, text_name: "Fuzzy", when: Time.zone.today,
+      vote_cache: 3.0
+    )
+    set = set_of(precise, fuzzy)
+    assert_equal(:dashed, set.compute_border_style)
+  end
+
+  def test_border_crisp_for_location_only_set
+    set = set_of(locations(:burbank))
+    assert_equal(:crisp, set.compute_border_style)
+  end
+
+  # ------------------------------------------------------------------
   # Helpers
   # ------------------------------------------------------------------
 

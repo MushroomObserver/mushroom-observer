@@ -152,9 +152,18 @@ export default class extends GeocodeController {
 
     this.verbose("map:buildOverlays")
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
-      // this.verbose({ set })
-      // NOTE: according to the MapSet class, location sets are always is_box.
-      if (this.isPoint(set)) {
+      // Server-computed shape (#4159):
+      //   "dot"    → single observation; render as a circle marker
+      //              (at the obs's GPS point, or the location's
+      //              centroid when the obs has no GPS).
+      //   "square" → multi-observation or location-only; render as
+      //              a rectangle covering the bucket's extents.
+      // Fall back to the pre-#4159 extents-based decision when the
+      // server didn't provide a glyph (e.g., legacy callers, editable
+      // location maps).
+      const glyph = set.glyph ||
+                    (this.isPoint(set) ? "dot" : "square")
+      if (glyph === "dot") {
         this.drawMarker(set)
       } else {
         this.drawRectangle(set)
@@ -164,6 +173,10 @@ export default class extends GeocodeController {
 
   isPoint(set) {
     return (set.north === set.south) && (set.east === set.west)
+  }
+
+  hasBoxExtents(set) {
+    return set && set.north !== set.south && set.east !== set.west
   }
 
   //
@@ -186,15 +199,16 @@ export default class extends GeocodeController {
 
   drawMarker(set) {
     this.verbose("map:drawMarker")
-    // Per-marker color comes from the server (Mappable::MapSet#compute_color
-    // for issue #4131). Falls back to the controller default for editable
-    // markers / legacy callers that don't set a color.
+    // Per-marker color and border style come from the server
+    // (Mappable::MapSet — issues #4131, #4159). Falls back to the
+    // controller default for editable markers / legacy callers.
     const color = (set && set.color) || this.marker_color
+    const border = (set && set.border_style) || "crisp"
     const markerOptions = {
       position: { lat: set.lat, lng: set.lng },
       map: this.map,
       draggable: this.editable,
-      icon: this.colored_circle_icon(color),
+      icon: this.colored_circle_icon(color, border),
       zoomOnClick: false
     }
 
@@ -206,6 +220,11 @@ export default class extends GeocodeController {
 
     if (!this.editable && set != null) {
       this.giveMarkerInfoWindow(marker, set)
+      // Fuzzy single-obs dots (no GPS) show the location's bounding
+      // box as an overlay while their popup is open (#4159).
+      if (border === "none" && this.hasBoxExtents(set)) {
+        this.attachFuzzyBoxOverlay(marker, set)
+      }
     } else {
       this.getElevations([set], "point")
       this.makeMarkerEditable(marker)
@@ -258,6 +277,9 @@ export default class extends GeocodeController {
       position: { lat: set.lat, lng: set.lng },
       maxWidth: 280
     })
+    // Expose on the marker so other code (e.g. fuzzy-box overlays
+    // for #4159) can listen for close events.
+    marker.infoWindow = info_window
 
     google.maps.event.addListener(marker, "click", () => {
       info_window.open({ anchor: marker, map: this.map })
@@ -315,10 +337,13 @@ export default class extends GeocodeController {
 
     const clickable = this.map_type === "info",
       editable = this.editable && this.map_type !== "observation",
+      border = (set && set.border_style) || "crisp",
       rectangleOptions = {
         strokeColor: color,
-        strokeOpacity: 1,
+        strokeOpacity: this.rectangleStrokeOpacity(border),
         strokeWeight: 3,
+        fillColor: color,
+        fillOpacity: border === "none" ? 0.12 : 0,
         map: this.map,
         bounds: bounds,
         clickable: clickable,
@@ -326,6 +351,13 @@ export default class extends GeocodeController {
         editable: editable
       },
       rectangle = new google.maps.Rectangle(rectangleOptions)
+
+    // Dashed rectangles: Google Maps Rectangle has no dashed option,
+    // so overlay a dashed polyline around the edges when the server
+    // marks the set as having mixed precision (#4159).
+    if (border === "dashed") {
+      this.overlayDashedRectangle(bounds, color)
+    }
 
     if (this.map_type === "observation") {
       // that's it. obs rectangles for MO locations are not clickable
@@ -779,14 +811,94 @@ export default class extends GeocodeController {
   // Colored circle icon for google.maps.Marker. Using SymbolPath.CIRCLE
   // is the most compatible way to get per-marker fill colors on the
   // classic Marker API without swapping to AdvancedMarkerElement.
-  colored_circle_icon(color) {
+  //
+  // border: "crisp" → solid white ring around the dot (precise GPS).
+  //         "none"  → no ring (fuzzy / location-only position).
+  // "dashed" doesn't apply to dots (that's reserved for multi-obs
+  // squares); treat as "crisp" if it ever arrives.
+  colored_circle_icon(color, border = "crisp") {
+    const noBorder = border === "none"
     return {
       path: google.maps.SymbolPath.CIRCLE,
       fillColor: color,
       fillOpacity: 1,
-      strokeColor: "#ffffff",
-      strokeWeight: 1.5,
+      strokeColor: noBorder ? color : "#ffffff",
+      strokeOpacity: noBorder ? 0 : 1,
+      strokeWeight: noBorder ? 0 : 1.5,
       scale: 8
     }
+  }
+
+  // When a fuzzy single-obs dot's popup is opened, overlay the
+  // location's bounding box as a faint rectangle so the uncertainty
+  // is still visible. Google auto-closes the previously open
+  // InfoWindow when another opens, but doesn't emit an event on the
+  // old one — so track a single controller-level overlay and clear
+  // it before adding a new one.
+  attachFuzzyBoxOverlay(marker, set) {
+    marker.addListener("click", () => {
+      this.clearFuzzyBoxOverlay()
+      this.fuzzyBoxOverlay = new google.maps.Rectangle({
+        strokeColor: set.color,
+        strokeOpacity: 0.7,
+        strokeWeight: 1.5,
+        fillColor: set.color,
+        fillOpacity: 0.08,
+        bounds: this.boundsOf(set),
+        clickable: false,
+        map: this.map
+      })
+    })
+    if (marker.infoWindow) {
+      marker.infoWindow.addListener("closeclick",
+                                    () => this.clearFuzzyBoxOverlay())
+    }
+  }
+
+  clearFuzzyBoxOverlay() {
+    if (!this.fuzzyBoxOverlay) return
+    this.fuzzyBoxOverlay.setMap(null)
+    this.fuzzyBoxOverlay = null
+  }
+
+  // Rectangle stroke opacity by server-computed border style.
+  // "crisp"  → solid border.
+  // "none"   → suppress the stroke (rectangle survives via a
+  //            semi-transparent fill; see drawRectangle).
+  // "dashed" → base stroke is suppressed; a dashed polyline overlay
+  //            draws the apparent border.
+  rectangleStrokeOpacity(border) {
+    if (border === "none" || border === "dashed") return 0
+    return 1
+  }
+
+  // Draw a dashed polyline around the four edges of a bounding box.
+  // Google Maps Polyline supports dashed strokes via icon repeats
+  // (the solid stroke is hidden with strokeOpacity: 0). Used by
+  // drawRectangle for multi-obs sets with mixed precision.
+  overlayDashedRectangle(bounds, color) {
+    const path = [
+      { lat: bounds.north, lng: bounds.west },
+      { lat: bounds.north, lng: bounds.east },
+      { lat: bounds.south, lng: bounds.east },
+      { lat: bounds.south, lng: bounds.west },
+      { lat: bounds.north, lng: bounds.west }
+    ]
+    return new google.maps.Polyline({
+      path: path,
+      strokeOpacity: 0,
+      icons: [{
+        icon: {
+          path: "M 0,-1 0,1",
+          strokeColor: color,
+          strokeOpacity: 1,
+          scale: 3
+        },
+        offset: "0",
+        repeat: "14px"
+      }],
+      clickable: false,
+      map: this.map
+    })
   }
 }

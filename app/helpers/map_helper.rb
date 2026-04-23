@@ -52,6 +52,8 @@ module MapHelper
     collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
     collection.sets.map do |_key, mapset|
       mapset.color = mapset.compute_color
+      mapset.glyph = mapset.compute_glyph
+      mapset.border_style = mapset.compute_border_style
       mapset.title = mapset_marker_title(mapset)
       mapset.caption = mapset_info_window(mapset, args)
       mapset.objects = nil # can't delete, it's part of the MapSet object

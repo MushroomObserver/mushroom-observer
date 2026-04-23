@@ -899,8 +899,11 @@
   update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
-  map_legend_circle: Observation with GPS
-  map_legend_box: Location area (no GPS) or group of observations
+  map_legend_circle: Single observation
+  map_legend_box: Multiple observations
+  map_legend_border_crisp: All with GPS
+  map_legend_border_dashed: Mix of GPS and location-only
+  map_legend_border_none: All location-only (no GPS)
   map_legend_confirmed: Confirmed (≥80%)
   map_legend_tentative: Tentative
   map_legend_disputed: Disputed (≤0%)
