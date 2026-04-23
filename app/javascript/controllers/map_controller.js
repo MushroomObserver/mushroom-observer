@@ -298,8 +298,9 @@ export default class extends GeocodeController {
     const bounds = this.boundsOf(set)
     if (!bounds) return false
 
-    // Per-box color from the server (#4131). Rectangles are group markers
-    // so this is usually GROUP_COLOR, but honor whatever the server set.
+    // Per-box color from the server: the aggregated consensus color
+    // (#4159), or the location-only blue if no observations were in
+    // the set. Always honor whatever the server computed.
     const color = (set && set.color) || this.marker_color
 
     // If the rectangle would render sub-pixel at the current zoom, draw

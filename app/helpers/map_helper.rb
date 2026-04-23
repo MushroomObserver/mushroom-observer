@@ -34,7 +34,7 @@ module MapHelper
       show_all: :show_all.t,
       map_all: :map_all.t
     }.to_json
-    safe_join([map_html(map_args), map_legend])
+    safe_join([map_html(map_args), map_legend(objects: objects)])
   end
 
   # Returns a CollapsibleCollection of mapsets, containing all data necessary
