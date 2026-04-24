@@ -25,7 +25,7 @@ pin "vanilla-lazyload" # @17.8.5
 pin "lightgallery" # @2.7.2
 pin "lightgallery/plugins/zoom", to: "lightgallery--plugins--zoom.js" # @2.7.2
 pin "@googlemaps/js-api-loader", to: "https://ga.jspm.io/npm:@googlemaps/js-api-loader@1.16.2/dist/index.esm.js"
-pin "@googlemaps/markerclusterer", to: "https://ga.jspm.io/npm:@googlemaps/markerclusterer@2.5.3/dist/index.esm.js"
+pin "@googlemaps/markerclusterer", to: "https://esm.sh/@googlemaps/markerclusterer@2.5.3"
 pin "jstz" # @2.1.1
 
 pin_all_from "app/javascript/src", under: "src", to: "src"

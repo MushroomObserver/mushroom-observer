@@ -42,7 +42,8 @@ module Mappable
     attr_reader :north, :south, :east, :west, :is_point, :is_box,
                 :north_east, :south_east, :south_west, :north_west, :lat, :lng,
                 :north_south_distance, :east_west_distance, :center, :edges
-    attr_accessor :objects, :title, :caption, :color, :glyph, :border_style
+    attr_accessor :objects, :title, :caption, :color, :glyph, :border_style,
+                  :cluster_name, :cluster_url
 
     def initialize(objects = [])
       @objects = objects.is_a?(Array) ? objects : [objects]

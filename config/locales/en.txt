@@ -909,6 +909,7 @@
   map_legend_disputed: Disputed (≤0%)
   map_legend_mixed: Mixed consensus
   map_legend_location_only: Location only (no observations)
+  map_cap_banner: Showing the first [loaded] of [total] observations. Zoom in or narrow your filter to see the rest.
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon

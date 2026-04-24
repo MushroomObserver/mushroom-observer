@@ -234,6 +234,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
   before_save :prefer_minimum_bounding_box_to_earth
+  before_save :set_gps_dubious
 
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
@@ -493,9 +494,34 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     self[:alt] = alt
   end
 
-  # Is lat/lng more than 10% outside of location extents?
+  # Kilometers of slack between an observation's GPS and its
+  # location's bounding box before we consider the GPS "dubious" and
+  # stop matching it in GPS-based searches (issue #4159). At 50 km
+  # the false-positive rate from narrow location bboxes (tight trail
+  # or park polygons with GPS from nearby photos) is low while clear
+  # data errors (hemisphere flips, wrong country, lab-photo GPS) are
+  # still caught.
+  DUBIOUS_GPS_KM = 50
+
+  # Is lat/lng more than DUBIOUS_GPS_KM from the location's bbox?
+  # Reads the cached `gps_dubious` column when populated; falls back
+  # to recomputing for unsaved/just-built records.
   def lat_lng_dubious?
-    lat && location && !location.lat_lng_close?(lat, lng)
+    return compute_gps_dubious? if new_record? || gps_inputs_changed?
+
+    gps_dubious
+  end
+
+  def compute_gps_dubious?
+    return false unless lat && location
+
+    location.km_from_point(lat, lng) > DUBIOUS_GPS_KM
+  end
+
+  def gps_inputs_changed?
+    will_save_change_to_attribute?(:lat) ||
+      will_save_change_to_attribute?(:lng) ||
+      will_save_change_to_attribute?(:location_id)
   end
 
   def place_name_and_coordinates
@@ -1349,5 +1375,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       #            south: -89,
       # Also see ObservationAPI#prefer_minimum_bounding_box_to_earth!
       presence || Location.unknown
+  end
+
+  # Keeps the cached `gps_dubious` column in sync on save. Gates the
+  # re-computation on attribute changes so untouched obs don't pay the
+  # recompute cost on every save.
+  def set_gps_dubious
+    return unless new_record? || gps_inputs_changed?
+
+    self.gps_dubious = compute_gps_dubious?
   end
 end

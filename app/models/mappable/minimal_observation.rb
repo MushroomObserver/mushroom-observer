@@ -30,6 +30,10 @@ module Mappable
     attribute :when, :date
     attribute :vote_cache, :float
     attribute :thumb_image_id, :integer
+    # Cached `gps_dubious` flag from the `observations` table (#4159).
+    # Set by the controller when minimal obs are loaded; the mapping
+    # layer reads it instead of recomputing.
+    attribute :gps_dubious, :boolean, default: false
 
     validates :lat, numericality: { in: -90..90 }
     validates :lng, numericality: { in: -180..180 }
@@ -57,8 +61,14 @@ module Mappable
       true
     end
 
+    # Mirrors Observation#lat_lng_dubious? — reads the cached column
+    # populated by the controller. Falls back to an on-the-fly check
+    # when the attribute wasn't provided (pre-backfill data, specs).
     def lat_lng_dubious?
-      lat && location && !location.lat_lng_close?(lat, lng)
+      return gps_dubious unless gps_dubious.nil?
+      return false unless lat && location
+
+      location.km_from_point(lat, lng) > ::Observation::DUBIOUS_GPS_KM
     end
 
     private

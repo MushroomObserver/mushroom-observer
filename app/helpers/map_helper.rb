@@ -5,8 +5,11 @@ module MapHelper
   include MapPopupHelper
 
   # Upper bound on points for client-side dynamic clustering
-  # (issue #4159). Above this, fall back to server-side bucketing.
-  CLUSTER_MAX_OBJECTS = 20_000
+  # (issue #4159). The controller truncates at this cap and surfaces
+  # a banner so the user knows to narrow by filter or by zooming in.
+  # The client-side viewport refetch (also keyed off this cap) will
+  # pull in the in-viewport subset when the user zooms/pans.
+  CLUSTER_MAX_OBJECTS = 10_000
 
   # args could include query_param.
   # returns an array of mapsets, each suitable for a marker or box
@@ -84,11 +87,38 @@ module MapHelper
       set.glyph = set.compute_glyph
       set.border_style = set.compute_border_style
       set.title = mapset_marker_title(set)
-      set.caption = mapset_info_window(set, args)
+      # caption is intentionally omitted — the client lazy-loads it
+      # from observations/maps#popup on marker click. Rendering N
+      # thumbnail-bearing popups at bulk-fetch time dominated refetch
+      # cost (#4159).
+      set.cluster_name = cluster_object_label(obj)
+      set.cluster_url = cluster_object_url(obj, args)
       set.objects = nil
       sets[singleton_key(obj)] = set
     end
     Mappable::ClusteredCollection.new(sets)
+  end
+
+  # Plain text name grouping-key used by cluster popups — authors are
+  # stripped by using the obs's `text_name` (fall back to the stringified
+  # display_name for locations / unexpected shapes).
+  def cluster_object_label(obj)
+    return obj.text_name if obj.respond_to?(:text_name) &&
+                            obj.text_name.present?
+    return obj.display_name.to_s if obj.respond_to?(:display_name)
+
+    ""
+  end
+
+  def cluster_object_url(obj, args)
+    params = args[:query_param] ? { q: args[:query_param] } : {}
+    if obj.respond_to?(:observation?) && obj.observation?
+      observation_path(id: obj.id, params: params)
+    elsif obj.respond_to?(:location?) && obj.location?
+      location_path(id: obj.id, params: params)
+    else
+      ""
+    end
   end
 
   # Unique key per mappable object for the sets hash. MinimalObservation

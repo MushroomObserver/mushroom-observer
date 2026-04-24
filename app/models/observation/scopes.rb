@@ -324,12 +324,21 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # In these the box.east edge is in the w hemisphere, -180..
     #      and the box.west edge is in the e hemisphere, ..180
     scope :gps_in_box_over_dateline, lambda { |box|
-      where(
-        (Observation[:lat] >= box.south).
-        and(Observation[:lat] <= box.north).
-        and(Observation[:lng] >= box.west).
-        or(Observation[:lng] <= box.east)
-      ).distinct
+      # Exclude obs from the GPS-match path when their GPS shouldn't
+      # be trusted for search: gps_hidden leaks private coords, and
+      # gps_dubious (>50 km from the obs's own location bbox) lets
+      # mislabeled or lab-photo GPS leak into location searches
+      # (#4159). These obs can still match via the location-center
+      # path.
+      where(Observation[:gps_hidden].eq(false).
+            or(Observation[:gps_hidden].eq(nil))).
+        where(Observation[:gps_dubious].eq(false)).
+        where(
+          (Observation[:lat] >= box.south).
+          and(Observation[:lat] <= box.north).
+          and(Observation[:lng] >= box.west).
+          or(Observation[:lng] <= box.east)
+        ).distinct
     }
     scope :cached_location_center_in_box_over_dateline, lambda { |box|
       where(
@@ -368,12 +377,18 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :gps_in_box, lambda { |box|
-      where(
-        (Observation[:lat] >= box.south).
-        and(Observation[:lat] <= box.north).
-        and(Observation[:lng] <= box.east).
-        and(Observation[:lng] >= box.west)
-      ).distinct
+      # Exclude obs from the GPS-match path when their GPS shouldn't
+      # be trusted for search — see gps_in_box_over_dateline above
+      # for the full reasoning (#4159).
+      where(Observation[:gps_hidden].eq(false).
+            or(Observation[:gps_hidden].eq(nil))).
+        where(Observation[:gps_dubious].eq(false)).
+        where(
+          (Observation[:lat] >= box.south).
+          and(Observation[:lat] <= box.north).
+          and(Observation[:lng] <= box.east).
+          and(Observation[:lng] >= box.west)
+        ).distinct
     }
     scope :cached_location_center_in_box, lambda { |box|
       # odd! AR will toss entire condition if below order is west, east

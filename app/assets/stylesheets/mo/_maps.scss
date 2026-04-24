@@ -234,3 +234,64 @@
     content: none;
   }
 }
+
+// Cluster popup (#4159). Members grouped by species, listed with
+// counts on the right and a "Click to zoom in" link underneath.
+.map-popup-cluster {
+  padding-right: 20px; // room for the close X
+  min-width: 260px;
+
+  .map-popup-cluster-header {
+    margin-bottom: 6px;
+  }
+  .map-popup-cluster-title {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  .map-popup-cluster-subtitle {
+    color: #666;
+    font-size: 12px;
+  }
+  .map-popup-cluster-actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .map-popup-cluster-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 240px;
+    overflow-y: auto;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 3px 0;
+      border-bottom: 1px solid #eee;
+
+      &:last-child { border-bottom: 0; }
+    }
+  }
+
+  .map-popup-cluster-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .map-popup-cluster-count {
+    flex: 0 0 auto;
+    color: #2a6f2a;
+    font-size: 13px;
+  }
+  .map-popup-cluster-zoom-row {
+    text-align: center;
+    margin-top: 10px;
+  }
+}

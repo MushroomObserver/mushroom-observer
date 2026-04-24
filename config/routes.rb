@@ -623,6 +623,7 @@ MushroomObserver::Application.routes.draw do
                 shallow: true, controller: "observations/external_links"
 
       get("map", to: "observations/maps#show")
+      get("map_popup", to: "observations/maps#popup")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
       get("emails/new", to: "observations/emails#new",
