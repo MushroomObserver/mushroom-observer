@@ -66,7 +66,11 @@ module MapHelper
       observations: :Observations.t,
       locations: :Locations.t,
       show_all: :show_all.t,
-      map_all: :map_all.t
+      map_all: :map_all.t,
+      # Banner template for viewport-refetch updates (#4159). Client
+      # replaces __LOADED__ / __TOTAL__ with the formatted counts.
+      map_cap_banner: :map_cap_banner.t(loaded: "__LOADED__",
+                                        total: "__TOTAL__")
     }
   end
 

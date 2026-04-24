@@ -32,8 +32,10 @@ module Mappable
     attribute :thumb_image_id, :integer
     # Cached `gps_dubious` flag from the `observations` table (#4159).
     # Set by the controller when minimal obs are loaded; the mapping
-    # layer reads it instead of recomputing.
-    attribute :gps_dubious, :boolean, default: false
+    # layer reads it instead of recomputing. No default — if the
+    # column wasn't provided (e.g. legacy callers, specs), stay nil
+    # so `lat_lng_dubious?` falls back to an on-the-fly computation.
+    attribute :gps_dubious, :boolean
 
     validates :lat, numericality: { in: -90..90 }
     validates :lng, numericality: { in: -180..180 }

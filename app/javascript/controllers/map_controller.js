@@ -601,9 +601,11 @@ export default class extends GeocodeController {
       banner.style.display = ""
       const loaded = Number(data.loaded).toLocaleString()
       const total = Number(data.total).toLocaleString()
-      banner.textContent =
-        `Showing the first ${loaded} of ${total} observations. ` +
-        "Zoom in or narrow your filter to see the rest."
+      const template = (this.localized_text &&
+                        this.localized_text.map_cap_banner) || ""
+      banner.textContent = template.
+        replace("__LOADED__", loaded).
+        replace("__TOTAL__", total)
     } else {
       banner.style.display = "none"
     }

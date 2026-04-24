@@ -340,9 +340,20 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           or(Observation[:lng] <= box.east)
         ).distinct
     }
+    # The "lat IS NULL OR gps_hidden OR gps_dubious" predicate is
+    # Arel-ugly inline, so pull it out. Obs whose GPS isn't
+    # search-trusted — no lat, private, or contradicting the
+    # labeled location — fall back to the location center path so
+    # they stay reachable via in_box (#4159).
+    def self.gps_untrusted_for_search
+      Observation[:lat].eq(nil).
+        or(Observation[:gps_hidden].eq(true)).
+        or(Observation[:gps_dubious].eq(true))
+    end
+
     scope :cached_location_center_in_box_over_dateline, lambda { |box|
       where(
-        Observation[:lat].eq(nil).
+        gps_untrusted_for_search.
         and(Observation[:location_lat] >= box.south).
         and(Observation[:location_lat] <= box.north).
         and(Observation[:location_lng] >= box.west).
@@ -352,7 +363,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :associated_location_center_in_box_over_dateline, lambda { |box|
       left_outer_joins(:location).
         where(
-          Observation[:lat].eq(nil).
+          gps_untrusted_for_search.
           and(Location[:center_lat] >= box.south).
           and(Location[:center_lat] <= box.north).
           and(Location[:center_lng] >= box.west).
@@ -393,7 +404,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :cached_location_center_in_box, lambda { |box|
       # odd! AR will toss entire condition if below order is west, east
       where(
-        Observation[:lat].eq(nil).
+        gps_untrusted_for_search.
         and(Observation[:location_lat] >= box.south).
         and(Observation[:location_lat] <= box.north).
         and(Observation[:location_lng] <= box.east).
@@ -403,7 +414,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :associated_location_center_in_box, lambda { |box|
       left_outer_joins(:location).
         where(
-          Observation[:lat].eq(nil).
+          gps_untrusted_for_search.
           and(Location[:center_lat] >= box.south).
           and(Location[:center_lat] <= box.north).
           and(Location[:center_lng] <= box.east).
