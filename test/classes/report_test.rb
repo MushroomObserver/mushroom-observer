@@ -494,7 +494,8 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Boletus edulis",
-      identificationQualifier: "group"
+      identificationQualifier: "group",
+      taxonRemarks: "Boletus edulis group"
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -510,90 +511,128 @@ class ReportTest < UnitTestCase
       display_name: "**__Tricholoma__** **__caligatum__** group " \
                     "sensu Besette et al."
     )
-    unqualified_name = Name.create!(
-      user: rolf,
-      rank: "Species",
-      text_name: "Tricholoma caligatum",
-      author: "(Viv.) Ricken",
-      search_name: "Tricholoma caligatum (Viv.) Ricken",
-      display_name: "**__Tricholoma__** **__caligatum__** (Viv.) Ricken"
-    )
-
     location = locations(:burbank)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
                               location: location, where: location.name,
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: unqualified_name.text_name,
-      identificationQualifier: "group sensu Besette et al."
+      sciname: "Tricholoma caligatum",
+      identificationQualifier: "group",
+      taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_standard_provisional
+  # Groups: text_name ends in /(group|complex|clade)$/
+  # sciname = text_name without the ending; identificationQualifier = the
+  # ending token only; taxonRemarks = full text_name + author (stripped)
+  def test_mycoportal_group_taxon_remarks
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: names(:boletus_edulis_group))
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Boletus edulis",
+      identificationQualifier: "group",
+      taxonRemarks: "Boletus edulis group"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_group_sensu_id_qualifier_is_token_only
     name = Name.create!(
       user: rolf,
-      rank: "Species",
-      text_name: "Geoglossum sp. 'MI01'",
-      author: "",
-      search_name: "Geoglossum sp. 'MI01'",
-      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
+      rank: "Group",
+      text_name: "Tricholoma caligatum group",
+      author: "sensu Besette et al.",
+      search_name: "Tricholoma caligatum group sensu Besette et al.",
+      display_name: "**__Tricholoma__** **__caligatum__** group " \
+                    "sensu Besette et al."
     )
-    location = locations(:burbank)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: location, where: location.name,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Geoglossum sp. 'MI01'",
-      identificationQualifier: "nom. prov."
+      sciname: "Tricholoma caligatum",
+      identificationQualifier: "group",
+      taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_standard_provisional_authored
+  def test_mycoportal_complex
+    name = Name.create!(
+      user: rolf,
+      rank: "Group",
+      text_name: "Russula emetica complex",
+      author: "",
+      search_name: "Russula emetica complex",
+      display_name: "**__Russula__** **__emetica__** complex"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Russula emetica",
+      identificationQualifier: "complex",
+      taxonRemarks: "Russula emetica complex"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  # Code names: text_name contains a single-quote (e.g. sp. 'IN34')
+  # sciname = genus only;
+  # identificationQualifier = Report::Mycoportal::CODE_NAME_QUALIFIER;
+  # taxonRemarks = full text_name plus author
+  def test_mycoportal_code_name_unauthored_no_qualifier
+    obs = Observation.create!(
+      user: rolf,
+      when: Time.zone.now,
+      location: locations(:burbank),
+      where: locations(:burbank).name,
+      name: names(:code_name)
+    )
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius",
+      identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
+      taxonRemarks: "Cortinarius sp. 'IN34'"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_code_name_with_author
     name = Name.create!(
       user: rolf,
       rank: "Species",
       text_name: "Geoglossum sp. 'MI01'",
       author: "S.D. Russell",
-      search_name: "Geoglossum sp. 'MI01'",
-      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
+      search_name: "Geoglossum sp. 'MI01' S.D. Russell",
+      display_name: "**__Geoglossum__** sp. **__'MI01'__** S.D. Russell"
     )
-    location = locations(:burbank)
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: location, where: location.name,
-                              name: name)
-
-    expect = hashed_expect(obs).merge(
-      sciname: "Geoglossum sp. 'MI01'",
-      identificationQualifier: "S.D. Russell nom. prov."
-    ).values
-
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
-  def test_mycoportal_standard_provisional_authored_crypt
-    name = Name.create!(
+    obs = Observation.create!(
       user: rolf,
-      rank: "Species",
-      text_name: "Agaricus sp. 'IN01'",
-      author: "S.D. Russell crypt. temp.",
-      search_name: "Agaricus sp. 'IN01' S.D. Russell crypt. temp.",
-      display_name: "**__Agaricus__** sp. **__'IN01'__** " \
-                    "S.D. Russell crypt. temp."
+      when: Time.zone.now,
+      location: locations(:burbank),
+      where: locations(:burbank).name,
+      name: name
     )
-    location = locations(:burbank)
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: location, where: location.name,
-                              name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Agaricus sp. 'IN01'",
-      identificationQualifier: "S.D. Russell crypt. temp."
+      sciname: "Geoglossum",
+      identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
+      taxonRemarks: "Geoglossum sp. 'MI01' S.D. Russell"
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -615,7 +654,80 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Gymnopus bakerensis",
-      identificationQualifier: "(A.H. Sm.) auct. comb. prov."
+      identificationQualifier: "comb. prov.",
+      taxonRemarks: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  # Provisional names: author matches /\w+\. prov\./
+  # sciname = text_name unchanged; identificationQualifier = matched token;
+  # taxonRemarks = text_name + " " + author (stripped)
+  def test_mycoportal_provisional_bare_nom_prov
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Cortinarius percomis",
+      author: "nom. prov.",
+      search_name: "Cortinarius percomis nom. prov.",
+      display_name: "__Cortinarius__ __percomis__ nom. prov."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius percomis",
+      identificationQualifier: "nom. prov.",
+      taxonRemarks: "Cortinarius percomis nom. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_provisional_authored_nom_prov
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Cortinarius percomis",
+      author: "S.D. Russell nom. prov.",
+      search_name: "Cortinarius percomis S.D. Russell nom. prov.",
+      display_name: "__Cortinarius__ __percomis__ S.D. Russell nom. prov."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius percomis",
+      identificationQualifier: "nom. prov.",
+      taxonRemarks: "Cortinarius percomis S.D. Russell nom. prov."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_provisional_comb_prov
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Cortinarius percomis",
+      author: "(Fr.) auct. comb. prov.",
+      search_name: "Cortinarius percomis (Fr.) auct. comb. prov.",
+      display_name: "__Cortinarius__ __percomis__ (Fr.) auct. comb. prov."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius percomis",
+      identificationQualifier: "comb. prov.",
+      taxonRemarks: "Cortinarius percomis (Fr.) auct. comb. prov."
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -750,8 +862,10 @@ class ReportTest < UnitTestCase
       dbpk: obs.id.to_s,
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
+      occurrenceID: "https://mushroomobserver.org/obs/#{obs.id}",
       sciname: obs.text_name,
       identificationQualifier: nil,
+      taxonRemarks: nil,
       recordedBy: obs.user.legal_name,
       recordNumber: obs.collection_numbers.first&.number || nil,
       eventDate: obs_when.strftime("%Y-%m-%d"),
