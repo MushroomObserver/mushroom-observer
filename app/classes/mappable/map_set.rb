@@ -108,11 +108,17 @@ module Mappable
       :tentative
     end
 
-    # Glyph: :dot for a single observation, :square for multiple or
-    # for location-only sets. Part of the issue #4159 "dot = single,
-    # square = multiple" rule.
+    # Glyph:
+    #   :dot       — a single observation (rendered as a circle marker)
+    #   :square    — multiple observations (rendered as a square marker
+    #                at the box center on info maps)
+    #   :rectangle — no observations; a location-only set whose box
+    #                should render as the bare outline (#4159).
     def compute_glyph
-      single_observation? ? :dot : :square
+      return :rectangle if observations.empty?
+      return :dot if single_observation?
+
+      :square
     end
 
     # Border style:

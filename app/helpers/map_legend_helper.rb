@@ -59,13 +59,17 @@ module MapLegendHelper
     end
   end
 
+  # The location-only color row is intentionally omitted: the legend
+  # only renders on maps that include at least one observation, and
+  # obs-bearing MapSets always have a consensus band — so the blue
+  # "location-only" color would never appear on a map whose legend is
+  # visible.
   def map_legend_color_entries
     [
       [Mappable::MapSet::CONFIRMED_COLOR, :map_legend_confirmed.t],
       [Mappable::MapSet::TENTATIVE_COLOR, :map_legend_tentative.t],
       [Mappable::MapSet::DISPUTED_COLOR, :map_legend_disputed.t],
-      [Mappable::MapSet::MIXED_COLOR, :map_legend_mixed.t],
-      [Mappable::MapSet::LOCATION_ONLY_COLOR, :map_legend_location_only.t]
+      [Mappable::MapSet::MIXED_COLOR, :map_legend_mixed.t]
     ]
   end
 
