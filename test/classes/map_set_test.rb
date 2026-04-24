@@ -96,9 +96,11 @@ class MapSetTest < UnitTestCase
     assert_equal(:square, set.compute_glyph)
   end
 
-  def test_glyph_square_for_location_only
+  def test_glyph_rectangle_for_location_only
     set = set_of(locations(:burbank))
-    assert_equal(:square, set.compute_glyph)
+    assert_equal(:rectangle, set.compute_glyph,
+                 "Location-only sets render as bare outline rectangles " \
+                 "(#4159) — no center marker.")
   end
 
   def test_glyph_dot_for_single_obs_bucketed_with_its_location

@@ -134,17 +134,22 @@
     border-radius: 50%;
   }
 
-  // Border-style swatches: show the stroke style without implying
-  // a shape.
+  // Border-style swatches. Fill is a neutral gray; the ring color
+  // encodes precision so the legend mirrors the marker rendering:
+  //   crisp  — dark ring  (precise GPS)
+  //   dashed — gray ring  (mixed precision)
+  //   none   — white ring (fuzzy / location-only)
   .map-legend-border-crisp {
-    border: 2px solid #555;
+    border: 2px solid #333;
+    background: #aaa;
   }
   .map-legend-border-dashed {
-    border: 2px dashed #555;
+    border: 2px solid #888;
+    background: #aaa;
   }
   .map-legend-border-none {
-    border: 0;
-    background: #C69B71;
+    border: 2px solid #fff;
+    background: #aaa;
   }
 }
 
