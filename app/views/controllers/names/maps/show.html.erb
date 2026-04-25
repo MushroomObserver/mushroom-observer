@@ -4,8 +4,16 @@ add_page_title(:name_map_title.t(name: @name.display_name))
 add_context_nav(name_map_tabs(name: @name, query: @query))
 %>
 
-<%= make_map(
-  objects: @observations, # CollapsibleCollection
-  query_param: q_param(@query), zoom: 2, map_type: "info",
-  nothing_to_map: :name_map_no_maps.tp(name: @name.display_name)
-) %>
+<div id="map_cap_banner" class="alert alert-warning mt-2"
+     <%= raw('style="display:none"') unless @observations_capped %>>
+  <%= :map_cap_banner.t(
+        loaded: number_with_delimiter(@observations_loaded_count),
+        total: number_with_delimiter(@observations_total_count)
+      ) %>
+</div>
+
+<%= make_map(objects: @observations,
+             clustering: true,
+             capped: @observations_capped,
+             query_param: q_param(@query), zoom: 2, map_type: "info",
+             nothing_to_map: :name_map_no_maps.tp(name: @name.display_name)) %>

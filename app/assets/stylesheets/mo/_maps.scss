@@ -72,6 +72,14 @@
   overflow: auto !important;
   padding: 12px 12px 8px;
 }
+// The InfoWindow content has `overflow: auto`, which clips browser
+// focus rings on links/buttons that sit at the edge of the content
+// box. Pull the outline inside the element so it renders fully
+// without changing its visual weight.
+.gm-style-iw-d a:focus-visible,
+.gm-style-iw-d button:focus-visible {
+  outline-offset: -2px;
+}
 .gm-style-iw-chr {
   // Pull the close-X to the top-right corner without reserving a full
   // header row above the content.
@@ -277,11 +285,12 @@
   }
 
   .map-popup-cluster-name {
+    // Allow long species names to wrap rather than truncating with
+    // ellipsis; the previous `overflow: hidden` was clipping the
+    // focus outline on the link inside.
     flex: 1 1 auto;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word;
   }
   .map-popup-cluster-count {
     flex: 0 0 auto;
