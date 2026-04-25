@@ -12,6 +12,8 @@ require "haversine"
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
+    CODE_NAME_QUALIFIER = "code name aff. species"
+
     # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
     # Label names for the columns in the report.
     # https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/data_import_fields/
@@ -24,9 +26,11 @@ module Report
         # Not a DwC standard field
         "dbpk", # observation.id
         "basisOfRecord", # : "HumanObservation"
-        "catalogNumber", # "MUOB" + space + observation.id"
+        "catalogNumber", # "MUOB" + space + observation.id
+        "occurrenceID", # GUID. The Observation URL. It must never change.
         "sciname", # scientific name without author; not a DwC standard field
         "identificationQualifier",
+        "taxonRemarks",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
         "eventDate",
@@ -51,8 +55,10 @@ module Report
         row.obs_id, # (dbpk database primary key)
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
+        "https://mushroomobserver.org/obs/#{row.obs_id}", # occurrenceID
         sciname(row), # (mono- or binomial without author)
         identification_qualifier(row), # group, nom. prov., etc.
+        taxon_remarks(row),
         row.user_name_or_login, # recordedBy
         record_number(row), # recordNumber
         row.obs_when, # eventDate
@@ -72,9 +78,10 @@ module Report
       ]
     end
 
-    # taxon name, without authority or qualifcation (such as "group")
+    # taxon name, without authority or qualification (such as "group")
     def sciname(row)
       text_name = row.name_text_name
+      return text_name.split.first if code_name?(row)
       # The last word in text_name could be Group or Complex
       return text_name_without_last_word(text_name) if group?(row)
 
@@ -82,13 +89,21 @@ module Report
     end
 
     # Qualifies unpublished MO text_name.
-    # Examples: nom. prov., crypt. temp., group, sensu lato, sensu auct.
+    # Examples: nom. prov., comb. prov., group, sensu lato, sensu auct.
     def identification_qualifier(row)
-      return nil unless qualified_name?(row)
-      return "group #{row.name_author}".strip if group?(row)
-      return provisional_identification_qualifier(row) if provisional?(row)
+      return nil unless unregistrable_name?(row)
+      return CODE_NAME_QUALIFIER if code_name?(row)
+      return group_token(row) if group?(row)
+      return prov_token(row) if provisional?(row)
 
       row.name_author&.match(/sensu.*/)&.[](0)
+    end
+
+    # Full name+author for code names, provisional names, and groups
+    def taxon_remarks(row)
+      return unless code_name?(row) || provisional?(row) || group?(row)
+
+      "#{row.name_text_name} #{row.name_author}".strip
     end
 
     # collector's number
@@ -174,17 +189,22 @@ module Report
     private
 
     def group?(row)
-      row.name_rank == "Group"
+      row.name_text_name.match?(/(group|complex|clade)$/)
+    end
+
+    def group_token(row)
+      row.name_text_name.match(/(group|complex|clade)$/)[0]
     end
 
     def text_name_without_last_word(text_name)
       text_name.split[0...-1].join(" ")
     end
 
-    def qualified_name?(row)
+    def unregistrable_name?(row)
       group?(row) ||
         sensu_non_stricto?(row) ||
-        provisional?(row)
+        provisional?(row) ||
+        code_name?(row)
     end
 
     def sensu_non_stricto?(row)
@@ -193,26 +213,15 @@ module Report
     end
 
     def provisional?(row)
-      standard_provisional?(row) ||
-        explicit_provisional?(row)
+      row.name_author&.match?(/\w+\. prov\./)
     end
 
-    def standard_provisional?(row)
-      row.name_text_name.match?(/['"]/)
+    def prov_token(row)
+      row.name_author&.match(/\w+\. prov\./)&.[](0)
     end
 
-    def explicit_provisional?(row)
-      row.name_author&.match?(/ (prov|crypt)\./)
-    end
-
-    def provisional_identification_qualifier(row)
-      return "nom. prov." if row.name_author.blank?
-
-      if row.name_author&.match(/(prov|crypt)\./)
-        row.name_author
-      else
-        "#{row.name_author} nom. prov."
-      end
+    def code_name?(row)
+      row.name_text_name.match?(/'/)
     end
 
     def distance_from_center_to_farthest_corner(row)
