@@ -22,4 +22,5 @@ add_context_nav(observation_maps_tabs(query: @query))
 <%= make_map(objects: @observations,
              clustering: true,
              capped: @observations_capped,
+             cluster_query_string: @cluster_query_string,
              query_param: q_param(@query), zoom: 2, map_type: "info") %>

@@ -45,6 +45,12 @@ export default class extends GeocodeController {
     this.lastFetchedBounds = null
     this.refetchTimer = 0
     this.refetchInFlight = null
+    // Server-emitted "q[...]=…" base for cluster popup Show All /
+    // Map All links. We can't rebuild this from window.location
+    // alone — the source URL might be a saved-query id (`?q=ABC`)
+    // or, on /names/:id/map, have no q params at all (#4159).
+    this.cluster_query_string =
+      this.mapDivTarget.dataset.clusterQueryString || ""
     // Refetch deferral (#4159): clearing overlays in the middle of
     // reading a popup is jarring, so we park the refetch while an
     // InfoWindow is open and flush it on close.
@@ -374,23 +380,23 @@ export default class extends GeocodeController {
     )
   }
 
-  // Build a Show-All / Map-All URL by preserving the current page's
-  // `q[...]` params (so user/etc. filters carry over) and overriding
-  // `q[in_box][n/s/e/w]` with the cluster outline box. An optional
-  // `name` scopes the result further via `q[names][lookup][]=<name>`
-  // (used by per-species links in the cluster popup); when present,
-  // any existing `q[names]` params are dropped so the species filter
-  // wins.
+  // Build a Show-All / Map-All URL from the server-emitted
+  // `cluster_query_string` (the page's underlying `q[...]` filter
+  // params, with `in_box` already stripped). The bbox of the
+  // clicked cluster is appended as `q[in_box][n/s/e/w]`. An
+  // optional `name` scopes further via `q[names][lookup][]=<name>`,
+  // dropping any existing `q[names]` so the species filter wins.
+  //
+  // Using the server's base instead of `window.location.search`
+  // makes this work for source URLs that don't expose the filters
+  // directly — e.g. `/names/2792/map` (no q params at all) or
+  // `?q=ABC` (a saved-query id) (#4159).
   clusterQueryUrl(path, box, opts = {}) {
-    const params = new URLSearchParams()
-    const current = new URLSearchParams(window.location.search)
-    const IN_BOX_PREFIX = "q[in_box]"
-    const NAMES_PREFIX = "q[names]"
-    for (const [key, value] of current.entries()) {
-      if (!key.startsWith("q[")) continue
-      if (key.startsWith(IN_BOX_PREFIX)) continue
-      if (opts.name && key.startsWith(NAMES_PREFIX)) continue
-      params.append(key, value)
+    const params = new URLSearchParams(this.cluster_query_string)
+    if (opts.name) {
+      for (const key of Array.from(params.keys())) {
+        if (key.startsWith("q[names]")) params.delete(key)
+      }
     }
     params.append("q[in_box][north]", String(box.n))
     params.append("q[in_box][south]", String(box.s))

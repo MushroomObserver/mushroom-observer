@@ -25,6 +25,7 @@ module ClusteredObservationMap
     rows = capped_observation_rows
     record_observation_count_ivars(rows)
     build_minimal_observations_from_rows(rows)
+    @cluster_query_string = cluster_query_string
   end
 
   def capped_observation_rows
@@ -69,6 +70,24 @@ module ClusteredObservationMap
       total: @observations_total_count,
       cap: @observations_cap
     }
+  end
+
+  # URL-encoded base for the cluster popup's Show All / Map All
+  # links. The client uses this instead of `window.location.search`
+  # so the destination URL works no matter how the source page got
+  # to its filters — explicit `q[...]` params, a saved `q=ABC`
+  # identifier, or no URL params at all (e.g. a Names map page that
+  # built its query from `params[:id]`).
+  #
+  # Returns "q[key]=value&…" with `in_box` stripped (the client adds
+  # the cluster's bbox), suitable for handing straight to
+  # URLSearchParams.
+  def cluster_query_string
+    return "" unless @query
+
+    filters = q_param(@query) || {}
+    filters = filters.deep_stringify_keys.except("in_box")
+    { q: filters }.to_query
   end
 
   # The base scope that the cap fetch and the total-count query both
