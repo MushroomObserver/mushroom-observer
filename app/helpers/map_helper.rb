@@ -68,12 +68,13 @@ module MapHelper
       show_all: :show_all.t,
       map_all: :map_all.t,
       # Raw template — the client substitutes `[loaded]` / `[total]`
-      # with the formatted counts on each refetch. We bypass `.t` to
-      # skip textile processing (double-underscore placeholders would
-      # be italicized, etc.). Banner text has no textile markup, so
-      # sending the raw string preserves what the ERB-rendered
-      # version produces (#4159).
-      map_cap_banner: I18n.t(:map_cap_banner)
+      # with the formatted counts on each refetch. We bypass MO's
+      # `:sym.t` extension to skip textile processing (double-
+      # underscore placeholders would be italicized, etc.) and look
+      # up the key directly under MO's locale namespace. Banner text
+      # has no textile markup, so the raw string matches what the
+      # ERB-rendered version produces (#4159).
+      map_cap_banner: I18n.t("#{MO.locale_namespace}.map_cap_banner")
     }
   end
 

@@ -2,16 +2,14 @@
 
 # Legend shown under maps that include at least one observation.
 # Suppressed on location-only maps, where consensus bands are
-# meaningless. Three rows: shape (single vs multiple observation),
-# border (precision of the members), and color (consensus band).
-# See #4159.
+# meaningless. Two rows: border (precision of the members) and
+# color (consensus band). See #4159.
 module MapLegendHelper
   # Pass objects so we can suppress the legend on location-only maps.
   def map_legend(objects: nil)
     return "".html_safe unless legend_applies?(objects)
 
     tag.div(class: "map-legend small text-muted mt-2") do
-      concat(map_legend_shape_row)
       concat(map_legend_border_row)
       concat(map_legend_color_row)
     end
@@ -26,13 +24,6 @@ module MapLegendHelper
     return true if objects.nil?
 
     objects.any? { |o| o.respond_to?(:observation?) && o.observation? }
-  end
-
-  def map_legend_shape_row
-    tag.div(class: "map-legend-row") do
-      concat(map_legend_shape_swatch(:circle, :map_legend_circle.t))
-      concat(map_legend_shape_swatch(:box, :map_legend_box.t))
-    end
   end
 
   def map_legend_border_row
@@ -71,13 +62,6 @@ module MapLegendHelper
       [Mappable::MapSet::DISPUTED_COLOR, :map_legend_disputed.t],
       [Mappable::MapSet::MIXED_COLOR, :map_legend_mixed.t]
     ]
-  end
-
-  def map_legend_shape_swatch(shape, label)
-    tag.span(class: "map-legend-item") do
-      concat(tag.span("", class: "map-legend-swatch map-legend-#{shape}"))
-      concat(label)
-    end
   end
 
   def map_legend_color_swatch(color, label)

@@ -98,8 +98,8 @@
 }
 
 // Legend rendered under maps with at least one observation by
-// MapHelper#map_legend (#4159). Three rows: shape (single vs
-// multiple observation), border (precision), and color (consensus).
+// MapHelper#map_legend (#4159). Two rows: border (precision) and
+// color (consensus).
 .map-legend {
   .map-legend-row {
     display: flex;
@@ -124,32 +124,30 @@
     flex-shrink: 0;
   }
 
-  .map-legend-circle {
-    border-radius: 50%;
-  }
-  // .map-legend-box swatch is the default square .map-legend-swatch.
-
   .map-legend-dot {
     border: 0;
     border-radius: 50%;
   }
 
-  // Border-style swatches. Fill is a neutral gray; the ring color
-  // encodes precision so the legend mirrors the marker rendering:
+  // Border-style swatches mirror the circular markers on the map:
+  // fill is a neutral gray; the ring color encodes precision.
   //   crisp  — dark ring  (precise GPS)
   //   dashed — gray ring  (mixed precision)
   //   none   — white ring (fuzzy / location-only)
+  .map-legend-border-crisp,
+  .map-legend-border-dashed,
+  .map-legend-border-none {
+    border-radius: 50%;
+    background: #aaa;
+  }
   .map-legend-border-crisp {
     border: 2px solid #333;
-    background: #aaa;
   }
   .map-legend-border-dashed {
     border: 2px solid #888;
-    background: #aaa;
   }
   .map-legend-border-none {
     border: 2px solid #fff;
-    background: #aaa;
   }
 }
 
