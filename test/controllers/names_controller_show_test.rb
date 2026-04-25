@@ -199,6 +199,33 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_select("a[href *= 'mycoportal.org']")
   end
 
+  # Regression: the Occurrence Map link in the show page's tabs
+  # should never inherit `q[in_box]` (or any other query context)
+  # from the URL the user arrived on. Otherwise navigating
+  # "name → name → occurrence map" silently restricts the map to
+  # whatever spatial filter happened to be in scope (#4139).
+  def test_occurrence_map_tab_strips_in_box_query_context
+    login
+    name = names(:coprinus_comatus)
+    get(:show, params: {
+          id: name.id,
+          q: { in_box: { north: 40, south: 30, east: -70, west: -80 },
+               model: "Observation" }
+        })
+
+    assert_select(
+      "a[href*='/names/#{name.id}/map']", { minimum: 1 }
+    ) do |links|
+      links.each do |link|
+        href = link["href"]
+        assert_no_match(/in_box/, href,
+                        "Occurrence Map tab link must not inherit " \
+                        "in_box from the URL's query context " \
+                        "(href=#{href.inspect})")
+      end
+    end
+  end
+
   def test_show_name_locked
     name = Name.where(locked: true).first
     # login
