@@ -37,6 +37,7 @@
 
 require_relative("../config/boot")
 require_relative("../config/environment")
+require("csv")
 
 dry_run = false
 verbose = false
@@ -221,7 +222,10 @@ def phase_1_propagate_from_genera
 
   User.current = User.find(WEBMASTER_ID)
   totals = { touched: 0, in_sync: 0 }
-  genera.find_each { |genus| process_genus_safely(genus, totals) }
+  # `each` (not `find_each`) so the `order(:text_name)` from
+  # `genera_with_classification` is honored — `find_each` walks by
+  # primary key and would scramble our log/CSV row order.
+  genera.each { |genus| process_genus_safely(genus, totals) }
   log("  Phase 1 complete: #{totals[:touched]} rows #{would_str}updated; " \
       "#{totals[:in_sync]} genera already in sync")
   log("")
@@ -257,13 +261,22 @@ def apply_synonym_classification(members, source, syn_id)
   return 0 if stale.empty?
 
   record_phase_2_candidates(stale, syn_id, source.classification)
-  unless DRY_RUN
-    Name.transaction do
-      Name.where(id: stale.map(&:id)).
-        update_all(classification: source.classification)
-    end
-  end
+  sync_synonym_classification(stale.map(&:id), source.classification) \
+    unless DRY_RUN
   stale.length
+end
+
+# Mirror Name#propagate_classification (Phase 1's path) — `update_all`
+# skips callbacks, so we manually keep `name_descriptions.classification`
+# and `observations.classification` in sync with `names.classification`.
+def sync_synonym_classification(name_ids, classification)
+  Name.transaction do
+    Name.where(id: name_ids).update_all(classification: classification)
+    NameDescription.where(name_id: name_ids).
+      update_all(classification: classification)
+    Observation.where(name_id: name_ids).
+      update_all(classification: classification)
+  end
 end
 
 def process_synonym_group(syn_id)
@@ -319,7 +332,9 @@ end
 def write_no_class_csv(csv, scope, has_obs)
   csv << %w[id text_name deprecated has_observations url]
   count = 0
-  scope.find_each do |g|
+  # `each` (not `find_each`) so the scope's `order(:text_name)` is
+  # honored in the CSV.
+  scope.each do |g|
     csv << [g.id, g.text_name, g.deprecated, has_obs.include?(g.id),
             show_url(g)]
     count += 1

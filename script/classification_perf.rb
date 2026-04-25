@@ -3,7 +3,7 @@
 
 #  USAGE::
 #
-#    script/classification_perf.rb [-v|--verbose]
+#    script/classification_perf.rb
 #
 #  DESCRIPTION::
 #
@@ -29,17 +29,10 @@ require_relative("../config/environment")
 
 require("benchmark")
 
-verbose = false
-ARGV.each do |flag|
-  case flag
-  when "-v", "--verbose"
-    verbose = true
-  else
-    puts("USAGE: script/classification_perf.rb [-v|--verbose]")
-    exit(1)
-  end
+unless ARGV.empty?
+  puts("USAGE: script/classification_perf.rb")
+  exit(1)
 end
-VERBOSE = verbose
 
 # A mix of ranks where add_higher_names (classification LIKE scan) is the
 # expected bottleneck, plus one genus for add_lower_names (text_name prefix).
@@ -52,7 +45,8 @@ TARGETS = [
   "Amanita muscaria" # Species — for a shallow-subtaxa baseline
 ].freeze
 
-WARMUPS = 1
+# Number of warm trials run per query inside `measure`. The cold trial
+# is captured separately and reported alongside.
 TRIALS = 3
 
 def time_block(&block)
