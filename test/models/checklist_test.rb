@@ -170,25 +170,35 @@ class ChecklistTest < UnitTestCase
     )
   end
 
+  def test_all_site_taxa_by_user
+    result = Checklist.all_site_taxa_by_user
+    assert_equal([:genera, :species, :taxa, :users], result.keys.sort,
+                 "all_site_taxa_by_user should return " \
+                 ":users, :taxa, :genera, :species keys")
+    assert_kind_of(Array, result[:users],
+                   "all_site_taxa_by_user :users should be an Array")
+    assert_kind_of(Hash, result[:genera],
+                   "all_site_taxa_by_user :genera should be a Hash")
+    assert_kind_of(Hash, result[:species],
+                   "all_site_taxa_by_user :species should be a Hash")
+  end
+
   def test_checklist_for_project_merges_target_names
     proj = projects(:rare_fungi_project)
     # Project has target names but no observations
     data = Checklist::ForProject.new(proj)
 
-    # Target names should appear in taxa with count 0
+    # Unobserved targets land in a separate bucket, not in `taxa`.
     target_text_names = proj.target_names.map(&:text_name)
-    taxa_names = data.taxa.pluck(0)
+    unobserved_names = data.unobserved_target_taxa.pluck(0)
+    assert_equal(target_text_names.sort, unobserved_names.sort)
+    assert_empty(data.taxa, "Observed taxa should be empty with no obs")
+
+    # Counts hash still seeds target names at 0 so link labels show "(0)".
     target_text_names.each do |tn|
-      assert_includes(taxa_names, tn,
-                      "Target name '#{tn}' should appear in checklist")
-      assert_equal(0, data.counts[tn],
-                   "Target name '#{tn}' should have count 0")
+      assert_equal(0, data.counts[tn])
     end
 
-    # num_taxa should include the target names
-    assert(data.num_taxa >= target_text_names.size)
-
-    # target_name_ids should be available
     assert_equal(proj.target_name_ids.sort, data.target_name_ids.sort)
   end
 
@@ -204,16 +214,181 @@ class ChecklistTest < UnitTestCase
 
     data = Checklist::ForProject.new(proj)
 
-    # Observed target name should have count > 0
+    # Observed target name has count > 0 and appears in taxa.
     assert_operator(data.counts["Coprinus comatus"], :>, 0)
+    assert_includes(data.taxa.pluck(0), "Coprinus comatus")
 
-    # Unobserved target name should still have count 0
+    # Unobserved target goes to the unobserved bucket, not taxa.
     assert_equal(0, data.counts["Agaricus campestris"])
+    assert_includes(data.unobserved_target_taxa.pluck(0), "Agaricus campestris")
+    assert_not_includes(data.taxa.pluck(0), "Agaricus campestris")
+  end
 
-    # Both should appear in taxa
-    taxa_names = data.taxa.pluck(0)
-    assert_includes(taxa_names, "Coprinus comatus")
-    assert_includes(taxa_names, "Agaricus campestris")
+  # ==========================================================================
+  # Issue #4128 — Summary Line 1: target-name observation counts
+  # ==========================================================================
+
+  # L1-1: 2 targets, 1 observed directly, 1 not.
+  def test_num_targets_observed_direct_match
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:coprinus_comatus))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(2, data.num_targets)
+    assert_equal(1, data.num_targets_observed)
+    assert_equal(1, data.num_targets_unobserved)
+  end
+
+  # L1-2/L1-3: Observation of a synonym (not the target itself) counts
+  # the target as observed.
+  def test_num_targets_observed_via_synonym
+    proj = projects(:rare_fungi_project)
+    # macrolepiota_rachodes and macrolepiota_rhacodes share a synonym group
+    add_target(proj, names(:macrolepiota_rachodes))
+    proj.observations << obs_of(names(:macrolepiota_rhacodes))
+
+    data = Checklist::ForProject.new(proj)
+    # 3 targets now (the 2 rare_fungi + macrolepiota_rachodes);
+    # macrolepiota_rachodes is observed via its synonym.
+    assert_equal(3, data.num_targets)
+    assert_equal(1, data.num_targets_observed)
+    assert_includes(data.unobserved_target_taxa.pluck(0),
+                    "Coprinus comatus")
+    assert_not_includes(data.unobserved_target_taxa.pluck(0),
+                        "Macrolepiota rachodes")
+  end
+
+  # L1-4: Targets exist, zero observations → all unobserved.
+  def test_num_targets_observed_no_observations
+    proj = projects(:rare_fungi_project)
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(0, data.num_targets_observed)
+    assert_equal(2, data.num_targets_unobserved)
+  end
+
+  # L1-5: Observation of a synonym NOT attached to project.observations
+  # does not count the target as observed.
+  def test_synonym_obs_outside_project_does_not_count
+    proj = projects(:rare_fungi_project)
+    add_target(proj, names(:macrolepiota_rachodes))
+    # Create the obs but DO NOT add it to project.observations
+    obs_of(names(:macrolepiota_rhacodes))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(0, data.num_targets_observed)
+    assert_includes(data.unobserved_target_taxa.pluck(0),
+                    "Macrolepiota rachodes")
+  end
+
+  # ==========================================================================
+  # Issue #4128 — Summary Line 2: species/higher counts, synonyms collapsed
+  # ==========================================================================
+
+  # L2-1: Two observed species sharing synonym_id → species count = 1.
+  def test_num_species_observed_collapses_synonyms
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:macrolepiota_rachodes))
+    proj.observations << obs_of(names(:macrolepiota_rhacodes))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(1, data.num_species_observed)
+    assert_equal(0, data.num_higher_level_observed)
+    # Both still appear as rows in the species-level panel.
+    assert_equal(2, data.species_level_observed_taxa.size)
+  end
+
+  # L2-2: Disjoint species + genera counts, no overlap with "genus of species".
+  def test_num_species_and_higher_are_disjoint
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:coprinus_comatus)) # species
+    proj.observations << obs_of(names(:agaricus_campestris)) # species
+    proj.observations << obs_of(names(:agaricus)) # Genus
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(2, data.num_species_observed)
+    assert_equal(1, data.num_higher_level_observed)
+  end
+
+  # L2-5: No observations → both counts are 0.
+  def test_summary_counts_with_no_observations
+    data = Checklist::ForProject.new(projects(:rare_fungi_project))
+    assert_equal(0, data.num_species_observed)
+    assert_equal(0, data.num_higher_level_observed)
+  end
+
+  # L2-6: Group rank is classified as higher-level.
+  def test_group_rank_is_higher_level
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:coprinus_comatus))
+    proj.observations << obs_of(names(:boletus_edulis_group))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(1, data.num_species_observed)
+    assert_equal(1, data.num_higher_level_observed)
+    assert_includes(data.higher_level_observed_taxa.pluck(0),
+                    "Boletus edulis group")
+  end
+
+  # L2-7: Infrageneric ranks (Subgenus, Section, etc.) are higher-level.
+  def test_infrageneric_rank_is_higher_level
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:coprinus_comatus))
+    proj.observations << obs_of(names(:amanita_subgenus_lepidella))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(1, data.num_species_observed)
+    assert_equal(1, data.num_higher_level_observed)
+    assert_includes(data.higher_level_observed_taxa.pluck(0),
+                    "Amanita subg. Lepidella")
+  end
+
+  # ==========================================================================
+  # Issue #4128 — Panel contents
+  # ==========================================================================
+
+  # P-1: Unobserved target appears in unobserved panel only.
+  def test_unobserved_target_in_unobserved_panel_only
+    proj = projects(:rare_fungi_project)
+
+    data = Checklist::ForProject.new(proj)
+    names_in_unobserved = data.unobserved_target_taxa.pluck(0)
+    assert_includes(names_in_unobserved, "Coprinus comatus")
+    assert_not_includes(data.species_level_observed_taxa.pluck(0),
+                        "Coprinus comatus")
+    assert_not_includes(data.higher_level_observed_taxa.pluck(0),
+                        "Coprinus comatus")
+  end
+
+  # P-5: Genus observation lands in higher-level panel.
+  def test_genus_observation_in_higher_panel
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:agaricus))
+
+    data = Checklist::ForProject.new(proj)
+    assert_includes(data.higher_level_observed_taxa.pluck(0), "Agaricus")
+    assert_not_includes(data.species_level_observed_taxa.pluck(0), "Agaricus")
+  end
+
+  # P-7: Variety rank lands in species-level panel.
+  def test_variety_observation_in_species_panel
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:amanita_boudieri_var_beillei))
+
+    data = Checklist::ForProject.new(proj)
+    species_names = data.species_level_observed_taxa.pluck(0)
+    assert_includes(species_names, "Amanita boudieri var. beillei")
+    assert_equal(1, data.num_species_observed)
+  end
+
+  private
+
+  def obs_of(name)
+    Observation.create!(name: name, user: users(:rolf), when: Time.zone.now)
+  end
+
+  def add_target(project, name)
+    ProjectTargetName.create!(project: project, name: name)
   end
 
   def test_checklist_for_project_include_sub_locations

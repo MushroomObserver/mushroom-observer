@@ -16,8 +16,10 @@ module Names
 
       @query = find_or_create_query(:Observation, names: { lookup: @name.id })
       @any_content_filters_applied = check_if_preference_filters_applied
+      # Popups hit `obs.name.display_name` for the species label, so
+      # eager-load :name alongside :location to avoid N+1 (#4131).
       @observations = @query.scope.limit(MO.query_max_array).
-                      includes(:location).
+                      includes(:location, :name).
                       select { |o| o.lat || o.location }
     end
   end

@@ -1763,6 +1763,47 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_validate_classification_raises_on_duplicate_rank
+    do_validate_classification_test(
+      "Species", "Kingdom: _Fungi_\nKingdom: _Fungi_", false
+    )
+  end
+
+  def test_validate_classification_normalizes_division_to_phylum
+    # Division is a historical synonym for Phylum in some nomenclature systems
+    do_validate_classification_test(
+      "Species",
+      "Kingdom: _Fungi_\nDivision: _Basidiomycota_",
+      "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+    )
+  end
+
+  def test_validate_classification_defaults_to_own_classification
+    name = names(:agaricus_campestris)
+    result = name.validate_classification
+    assert_equal(
+      name.classification, result,
+      "validate_classification with no arg should use own classification"
+    )
+  end
+
+  def test_rank_translated_returns_localized_string
+    name = names(:agaricus_campestris)
+    assert_equal(:rank_species.l, name.rank_translated,
+                 "rank_translated should return localized rank name")
+  end
+
+  def test_rank_lists_include_intermediate_ranks
+    assert_includes(Name.ranks_above_species, "Series",
+                    "Series should be a rank above species")
+    assert_includes(Name.ranks_above_species, "Group",
+                    "Group should be a rank above species")
+    assert_includes(Name.ranks_below_genus, "Series",
+                    "Series should be a rank below genus")
+    assert_includes(Name.ranks_between_kingdom_and_genus, "Subfamily",
+                    "Subfamily should be a rank between kingdom and genus")
+  end
+
   def test_rank_matchers
     name = names(:fungi)
     assert_not(name.at_or_below_genus?)
@@ -1793,6 +1834,22 @@ class NameTest < UnitTestCase
     assert(name.below_genus?)
     assert_not(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
+  end
+
+  def test_genus_display_ranks
+    ranks = Name.genus_display_ranks
+    Name.ranks.each do |rank_name, rank_val|
+      if rank_val.between?(Name.ranks[:Stirps], Name.ranks[:Genus])
+        assert_includes(ranks, rank_val,
+                        "genus_display_ranks should include #{rank_name}")
+      end
+    end
+    assert_not_includes(ranks, Name.ranks[:Species],
+                        "genus_display_ranks should not include Species")
+    assert_not_includes(ranks, Name.ranks[:Group],
+                        "genus_display_ranks should not include Group")
+    assert_not_includes(ranks, Name.ranks[:Family],
+                        "genus_display_ranks should not include Family")
   end
 
   # ------------------------------
@@ -2329,8 +2386,22 @@ class NameTest < UnitTestCase
   end
 
   def test_has_eol_data
-    assert(names(:peltigera).has_eol_data?)
-    assert_not(names(:lactarius_alpigenes).has_eol_data?)
+    assert(names(:peltigera).has_eol_data?,
+           "peltigera should have EoL data via qualifying observation image")
+    assert_not(names(:lactarius_alpigenes).has_eol_data?,
+               "lactarius_alpigenes is deprecated so has no EoL data")
+  end
+
+  def test_has_eol_data_true_via_vetted_description
+    name = names(:peltigera)
+    # peltigera returns true via observations normally; disqualify them
+    # so the descriptions loop is exercised instead
+    name.observations.update_all(vote_cache: 0)
+    assert(
+      name.has_eol_data?,
+      "`eol_data?` should be true via vetted description " \
+      "when no observation qualifies"
+    )
   end
 
   def test_hiding_authors
@@ -2833,22 +2904,23 @@ class NameTest < UnitTestCase
   def test_name_spaceship_operator
     # names ordered by how spaceship operator is expected to sort them
     names = [
-      create_test_name("Agaricomycota"),
-      create_test_name("Agaricomycotina"),
-      create_test_name("Agaricomycetes"),
-      create_test_name("Agaricomycetidae"),
-      create_test_name("Agaricales"),
-      create_test_name("Agaricineae"),
-      create_test_name("Agaricaceae"),
-      create_test_name("Agaricus group"),
-      create_test_name("Agaricus Aaron"),
-      create_test_name("Agaricus L."),
+      create_test_name("Agaricomycota"), # phylum
+      create_test_name("Agaricomycotina"), # subphylum
+      create_test_name("Agaricomycetes"), # class
+      create_test_name("Agaricomycetidae"), # subclass
+      create_test_name("Agaricales"), # order
+      create_test_name("Agaricineae"), # suborder
+      create_test_name("Agaricaceae"), # family
+      create_test_name("Agaricus group"), # genus group
+      create_test_name("Agaricus Aaron"), # genus author
+      create_test_name("Agaricus L."), # genus
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
       create_test_name("Agaricus Đorn"),
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus ser. Alpha"),
       create_test_name("Agaricus stirps Arthur"),
       # spaceship operator sorts Ś after {. Therefore
       # "Agaricus  {4stirps  Arthur" sorts before
@@ -2862,10 +2934,17 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. erik Zoom"),
-      create_test_name("Agaricus ugliano var. danny Zoom")
+      create_test_name("Agaricus ugliano var. danny Zoom"),
+      # Xyl- names share the stem "Xyl" to verify
+      # Family→Subfamily→Tribe→Subtribe order
+      create_test_name("Xylaceae"),   # family:    Xyl!7
+      create_test_name("Xyloideae"),  # subfamily: Xyl!8
+      create_test_name("Xyleae"),     # tribe:     Xyl!8a
+      create_test_name("Xylinae")     # subtribe:  Xyl!9
     ]
     sort_names = names.map(&:sort_name)
-    assert_equal(sort_names, sort_names.sort)
+    assert_equal(sort_names, sort_names.sort,
+                 "Names should sort in rank order within same stem")
   end
 
   def test_skip_notify
@@ -2920,15 +2999,15 @@ class NameTest < UnitTestCase
   # apparently because "Ś" sorts after "{".
   def test_name_sort_order
     names = [
-      create_test_name("Agaricomycota"),
-      create_test_name("Agaricomycotina"),
-      create_test_name("Agaricomycetes"),
-      create_test_name("Agaricomycetidae"),
-      create_test_name("Agaricales"),
-      create_test_name("Agaricineae"),
-      create_test_name("Agaricaceae"),
-      create_test_name("Agaricus group"),
-      create_test_name("Agaricus Aaron"),
+      create_test_name("Agaricomycota"), # phylum
+      create_test_name("Agaricomycotina"), # subphylum
+      create_test_name("Agaricomycetes"), # class
+      create_test_name("Agaricomycetidae"), # subclass
+      create_test_name("Agaricales"), # order
+      create_test_name("Agaricineae"), # suborder
+      create_test_name("Agaricaceae"), # family
+      create_test_name("Agaricus group"), # genugroup
+      create_test_name("Agaricus Aaron"), # genu
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
@@ -2936,9 +3015,10 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus ser. Alpha"),
       create_test_name("Agaricus stirps Arthur"),
-      create_test_name("Agaricus aardvark"),
-      create_test_name("Agaricus aardvark group"),
+      create_test_name("Agaricus aardvark"), # species
+      create_test_name("Agaricus aardvark group"), # (species) group
       create_test_name('Agaricus "sp-LD50"'),
       create_test_name('Agaricus "tree-beard"'),
       create_test_name("Agaricus ugliano Zoom"),
@@ -2972,11 +3052,16 @@ class NameTest < UnitTestCase
     assert_equal("Section", Name.guess_rank("Hygrocybe sect. Coccineae"))
     assert_equal("Subgenus", Name.guess_rank("Amanita subg. Amanita"))
     assert_equal("Family", Name.guess_rank("Amanitaceae"))
-    assert_equal("Family", Name.guess_rank("Peltigerineae"))
+    assert_equal("Tribe", Name.guess_rank("Agariceae"),
+                 "Names ending in -eae should guess Tribe, not Family or Genus")
+    assert_equal("Suborder", Name.guess_rank("Peltigerineae"),
+                 "Names ending in -ineae should guess Suborder")
     assert_equal("Order", Name.guess_rank("Peltigerales"))
-    assert_equal("Order", Name.guess_rank("Lecanoromycetidae"))
+    assert_equal("Subclass", Name.guess_rank("Lecanoromycetidae"),
+                 "Names ending in -mycetidae should guess Subclass")
     assert_equal("Class", Name.guess_rank("Lecanoromycetes"))
-    assert_equal("Class", Name.guess_rank("Agaricomycotina"))
+    assert_equal("Subphylum", Name.guess_rank("Agaricomycotina"),
+                 "Names ending in -mycotina should guess Subphylum")
     assert_equal("Phylum", Name.guess_rank("Agaricomycota"))
     assert_equal("Genus", Name.guess_rank("Animalia"))
     assert_equal("Genus", Name.guess_rank("Plantae"))
@@ -3740,6 +3825,44 @@ class NameTest < UnitTestCase
     assert_not_includes(
       subtaxa_of_amanita, mispelled_name,
       "`subtaxa_of` should not include misspellings"
+    )
+
+    # Above-genus: immediate_subtaxa_of returns the next rank down, not all
+    # descendants. One assertion per new intermediate rank.
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:basidiomycota)),
+      names(:agaricomycotina),
+      "`immediate_subtaxa_of` a Phylum should return Subphylum subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:basidiomycetes)),
+      names(:agaricomycetidae),
+      "`immediate_subtaxa_of` a Class should return Subclass subtaxa"
+    )
+    immediate_subtaxa_of_agaricales =
+      Name.immediate_subtaxa_of(names(:agaricales))
+    assert_includes(
+      immediate_subtaxa_of_agaricales, names(:agaricineae),
+      "`immediate_subtaxa_of` an Order should return Suborder subtaxa"
+    )
+    assert_not_includes(
+      immediate_subtaxa_of_agaricales, names(:amanita),
+      "`immediate_subtaxa_of` an Order should not include Genus-ranked names"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agaricaceae)),
+      names(:agaricioideae),
+      "`immediate_subtaxa_of` a Family should return Subfamily subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agaricioideae)),
+      names(:agariceae),
+      "`immediate_subtaxa_of` a Subfamily should return Tribe subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agariceae)),
+      names(:agaricinae),
+      "`immediate_subtaxa_of` a Tribe should return Subtribe subtaxa"
     )
   end
 

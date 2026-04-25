@@ -4,22 +4,23 @@ require("test_helper")
 
 module Projects
   class ObsFooterTest < ComponentTestCase
-    def test_renders_add_button_when_not_in_project
-      html = render_footer(in_project: false)
+    def test_renders_add_and_exclude_buttons_by_default
+      html = render_footer(show_excluded: false)
+
+      assert_html(html, "#update_footer_#{obs.id}")
+      assert_includes(html, :ADD.l)
+      assert_includes(html, :EXCLUDE.l)
+      assert_html(html, "form[action*='add_observation']")
+      assert_html(html, "form[action*='exclude_observation']")
+    end
+
+    def test_renders_only_add_button_when_showing_excluded
+      html = render_footer(show_excluded: true)
 
       assert_html(html, "#update_footer_#{obs.id}")
       assert_includes(html, :ADD.l)
       assert_html(html, "form[action*='add_observation']")
-      assert_no_html(html, "form[action*='remove_observation']")
-    end
-
-    def test_renders_remove_button_when_in_project
-      html = render_footer(in_project: true)
-
-      assert_html(html, "#update_footer_#{obs.id}")
-      assert_includes(html, :REMOVE.l)
-      assert_html(html, "form[action*='remove_observation']")
-      assert_no_html(html, "form[action*='add_observation']")
+      assert_no_html(html, "form[action*='exclude_observation']")
     end
 
     private
@@ -32,9 +33,9 @@ module Projects
       observations(:coprinus_comatus_obs)
     end
 
-    def render_footer(in_project:)
+    def render_footer(show_excluded:)
       render(Components::Projects::ObsFooter.new(
-               project: project, obs: obs, in_project: in_project
+               project: project, obs: obs, show_excluded: show_excluded
              ))
     end
   end

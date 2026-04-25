@@ -7,8 +7,8 @@ module Projects
     def setup
       super
       @project = projects(:rare_fungi_project)
-      # Add an observation matching a target name
-      @matching_obs = observations(:coprinus_comatus_obs)
+      # An observation matching a target name AND target location
+      @matching_obs = observations(:agaricus_campestris_obs)
       login("rolf")
     end
 
@@ -19,14 +19,12 @@ module Projects
     end
 
     def test_index_with_pagination
-      # Create extra candidates matching both target name and location
       burbank = locations(:burbank)
       name = names(:coprinus_comatus)
       2.times do
         Observation.create!(name: name, user: users(:rolf),
                             location: burbank, when: Time.zone.now)
       end
-      # Set layout_count to 1 so pagination triggers
       users(:rolf).update!(layout_count: 1)
 
       get(:index, params: { project_id: @project.id })
@@ -42,8 +40,19 @@ module Projects
       assert_redirected_to(project_path(@project))
     end
 
-    def test_index_shows_matching_observations
+    def test_index_default_hides_excluded
+      @project.exclude_observation(@matching_obs)
+
       get(:index, params: { project_id: @project.id })
+
+      assert_response(:success)
+      assert_not_includes(assigns_matrix_observations, @matching_obs)
+    end
+
+    def test_index_show_excluded
+      @project.exclude_observation(@matching_obs)
+
+      get(:index, params: { project_id: @project.id, show_excluded: "1" })
 
       assert_response(:success)
     end
@@ -58,60 +67,87 @@ module Projects
       assert_includes(@project.observations.reload, @matching_obs)
     end
 
-    def test_add_observation_turbo_stream
+    def test_add_observation_un_excludes
+      @project.exclude_observation(@matching_obs)
+      assert_includes(@project.excluded_observations, @matching_obs)
+
       post(:add_observation,
            params: { project_id: @project.id,
-                     id: @matching_obs.id,
-                     format: :turbo_stream })
+                     id: @matching_obs.id })
 
-      assert_response(:success)
+      assert_not_includes(@project.excluded_observations.reload, @matching_obs)
       assert_includes(@project.observations.reload, @matching_obs)
     end
 
-    def test_remove_observation
-      @project.add_observation(@matching_obs)
-      assert_includes(@project.observations, @matching_obs)
+    def test_exclude_observation
+      post(:exclude_observation,
+           params: { project_id: @project.id,
+                     id: @matching_obs.id })
 
-      delete(:remove_observation,
-             params: { project_id: @project.id,
-                       id: @matching_obs.id })
-
-      assert_not_includes(@project.observations.reload, @matching_obs)
+      assert_includes(@project.excluded_observations.reload, @matching_obs)
     end
 
-    def test_remove_observation_turbo_stream
+    def test_exclude_observation_from_project
       @project.add_observation(@matching_obs)
 
-      delete(:remove_observation,
-             params: { project_id: @project.id,
-                       id: @matching_obs.id,
-                       format: :turbo_stream })
+      post(:exclude_observation,
+           params: { project_id: @project.id,
+                     id: @matching_obs.id })
+
+      assert_not_includes(@project.observations.reload, @matching_obs)
+      assert_includes(@project.excluded_observations.reload, @matching_obs)
+    end
+
+    def test_add_observation_turbo_stream
+      post(:add_observation,
+           params: { project_id: @project.id,
+                     id: @matching_obs.id },
+           as: :turbo_stream)
 
       assert_response(:success)
-      assert_not_includes(@project.observations.reload, @matching_obs)
+      assert_includes(@project.observations.reload, @matching_obs)
+      assert_includes(@response.body, %(<turbo-stream action="remove"))
+      assert_includes(@response.body, %(<turbo-stream action="update"))
+    end
+
+    def test_exclude_observation_turbo_stream
+      post(:exclude_observation,
+           params: { project_id: @project.id,
+                     id: @matching_obs.id },
+           as: :turbo_stream)
+
+      assert_response(:success)
+      assert_includes(@project.excluded_observations.reload, @matching_obs)
+      assert_includes(@response.body, %(<turbo-stream action="remove"))
+      assert_includes(@response.body, %(<turbo-stream action="update"))
+    end
+
+    def test_exclude_observation_not_found
+      post(:exclude_observation,
+           params: { project_id: @project.id,
+                     id: 999_999 })
+
+      assert_response(:not_found)
     end
 
     def test_add_all
       post(:add_all, params: { project_id: @project.id })
 
       assert_redirected_to(
-        project_updates_path(project_id: @project.id)
+        project_updates_path(project_id: @project.id,
+                             show_excluded: false)
       )
       assert_flash(/Added/)
     end
 
-    def test_clear
-      # Use an obs that matches both target name AND target location
-      candidate = observations(:agaricus_campestris_obs)
-      @project.add_observation(candidate)
+    def test_add_all_with_show_excluded
+      @project.exclude_observation(@matching_obs)
 
-      delete(:clear, params: { project_id: @project.id })
+      post(:add_all, params: { project_id: @project.id,
+                               show_excluded: "1" })
 
-      assert_redirected_to(
-        project_updates_path(project_id: @project.id)
-      )
-      assert_flash(/Removed/)
-      assert_not_includes(@project.observations.reload, candidate)
+      assert_includes(@project.observations.reload, @matching_obs)
+      assert_not_includes(@project.excluded_observations.reload, @matching_obs)
     end
 
     def test_add_observation_not_found
@@ -122,12 +158,14 @@ module Projects
       assert_response(:not_found)
     end
 
-    def test_remove_observation_not_found
-      delete(:remove_observation,
-             params: { project_id: @project.id,
-                       id: 999_999 })
+    private
 
-      assert_response(:not_found)
+    # Helper to pull observations from the rendered view for assertions.
+    def assigns_matrix_observations
+      # Parse matrix box ids from response body.
+      response.body.scan(/id="box_(\d+)"/).map do |match|
+        Observation.find(match.first.to_i)
+      end
     end
   end
 end

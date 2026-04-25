@@ -412,6 +412,25 @@ class CollapsibleMapTest < UnitTestCase
     assert_obj_arrays_equal([obs.location], mapset.underlying_locations)
   end
 
+  # Regression for the #4131 follow-up: observations with valid GPS
+  # should stay as point sets even when the collection is larger than
+  # max_map_objects. The pre-fix behavior demoted every obs to a
+  # location box once `objects.count > max_objects`, discarding the
+  # real GPS precision. The small-box → square-marker fallback in
+  # map_controller.js handles the "points collapse to invisible
+  # boxes" concern that motivated the old demotion.
+  def test_mapping_keeps_gps_points_even_in_large_collection
+    obs_with_gps = observations(:unknown_with_lat_lng)
+    assert(obs_with_gps.lat && obs_with_gps.location)
+    # Force the collection to be "large" with a tiny max_objects cap.
+    coll = Mappable::CollapsibleCollectionOfObjects.new([obs_with_gps], 0)
+    mapset = coll.mapsets.first
+    assert_mapset_is_point(mapset, obs_with_gps.lat, obs_with_gps.lng)
+    assert_obj_arrays_equal([obs_with_gps], mapset.observations,
+                            "Obs with GPS should stay a point even when " \
+                            "the collection exceeds max_objects")
+  end
+
   def test_mapping_one_location
     loc = locations(:albion)
     coll = Mappable::CollapsibleCollectionOfObjects.new(loc)

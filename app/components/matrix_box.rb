@@ -35,6 +35,10 @@ class Components::MatrixBox < Components::Base
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
+  # Project context — when an observation matrix box is rendered inside a
+  # project-filtered observations index, a project admin sees an Exclude
+  # button that moves the observation to the project's excluded list.
+  prop :project, _Nilable(Project), default: nil
 
   def view_template(&block)
     if @object
@@ -61,6 +65,7 @@ class Components::MatrixBox < Components::Base
         render_details_section(panel)
         render_log_footer(panel)
         render_identify_footer(panel)
+        render_project_admin_footer(panel)
         render_custom_footer(panel, &custom_footer) if custom_footer
       end
     end
@@ -275,5 +280,26 @@ class Components::MatrixBox < Components::Base
 
   def render_custom_footer(panel, &block)
     panel.with_footer(classes: "text-center", &block)
+  end
+
+  def render_project_admin_footer(panel)
+    return unless show_project_exclude_button?
+
+    panel.with_footer(classes: "text-center") do
+      button_to(
+        :EXCLUDE.t,
+        exclude_observation_project_update_path(
+          project_id: @project.id, id: @data[:what].id
+        ),
+        method: :post,
+        class: "btn btn-default btn-sm",
+        form: { data: { turbo: true } }
+      )
+    end
+  end
+
+  def show_project_exclude_button?
+    @project && @data && @data[:type] == :observation &&
+      @project.is_admin?(@user)
   end
 end

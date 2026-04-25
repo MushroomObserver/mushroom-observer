@@ -1,5 +1,2 @@
-<%= turbo_stream.replace("update_footer_#{obs.id}") do %>
-  <%= render(Components::Projects::ObsFooter.new(
-               project: project, obs: obs, in_project: in_project
-             )) %>
-<% end %>
+<%= turbo_stream.remove("box_#{obs.id}") %>
+<%= turbo_stream.update("project_updates_count", count_label) %>

@@ -496,6 +496,7 @@
   citation: citation
   CITATIONS: Citations
   citations: citations
+  Confidence: Confidence
   CONFIDENCE_LEVEL: Confidence Level
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
@@ -763,6 +764,8 @@
   edit: edit
   ENABLE: Enable
   enable: enable
+  EXCLUDE: Exclude
+  exclude: exclude
   IMPORT: Import
   INDEX_OBJECT: "[TYPE] [:INDEX]"
   # merge one object into another
@@ -896,6 +899,12 @@
   update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
+  map_legend_circle: Observation with GPS
+  map_legend_box: Location area (no GPS) or group of observations
+  map_legend_confirmed: Confirmed (≥80%)
+  map_legend_tentative: Tentative
+  map_legend_disputed: Disputed (≤0%)
+  map_legend_group: Multiple observations
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon
@@ -1038,18 +1047,42 @@
   rank_phylum: phylum
   RANK_PLURAL_PHYLUM: Phyla
   rank_plural_phylum: phyla
+  RANK_SUBPHYLUM: Subphylum
+  rank_subphylum: subphylum
+  RANK_PLURAL_SUBPHYLUM: Subphyla
+  rank_plural_subphylum: subphyla
   RANK_CLASS: Class
   rank_class: class
   RANK_PLURAL_CLASS: Classes
   rank_plural_class: classes
+  RANK_SUBCLASS: Subclass
+  rank_subclass: subclass
+  RANK_PLURAL_SUBCLASS: Subclasses
+  rank_plural_subclass: subclasses
   RANK_ORDER: Order
   rank_order: order
   RANK_PLURAL_ORDER: Orders
   rank_plural_order: orders
+  RANK_SUBORDER: Suborder
+  rank_suborder: suborder
+  RANK_PLURAL_SUBORDER: Suborders
+  rank_plural_suborder: suborders
   RANK_FAMILY: Family
   rank_family: family
   RANK_PLURAL_FAMILY: Families
   rank_plural_family: families
+  RANK_SUBFAMILY: Subfamily
+  rank_subfamily: subfamily
+  RANK_PLURAL_SUBFAMILY: Subfamilies
+  rank_plural_subfamily: subfamilies
+  RANK_TRIBE: Tribe
+  rank_tribe: tribe
+  RANK_PLURAL_TRIBE: Tribes
+  rank_plural_tribe: tribes
+  RANK_SUBTRIBE: Subtribe
+  rank_subtribe: subtribe
+  RANK_PLURAL_SUBTRIBE: Subtribes
+  rank_plural_subtribe: subtribes
   RANK_GENUS: Genus
   rank_genus: genus
   RANK_PLURAL_GENUS: Genera
@@ -1070,6 +1103,10 @@
   rank_stirps: stirps
   RANK_PLURAL_STIRPS: Stirpes
   rank_plural_stirps: stirpes
+  RANK_SERIES: Series
+  rank_series: series
+  RANK_PLURAL_SERIES: Series
+  rank_plural_series: series
   RANK_SPECIES: Species
   rank_species: species
   RANK_PLURAL_SPECIES: Species
@@ -2480,7 +2517,9 @@
   show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
-  show_user_life_list: "[species] species in [genera] genera"
+  show_user_life_list: "[species] species and [higher] higher-level [taxa_word] observed"
+  show_user_life_list_species: "[species] species observed"
+  show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
   sequence_edit_title: Editing [name]
@@ -3005,6 +3044,7 @@
 
   # Project Target Names
   project_target_name_add: Add
+  project_target_names_to_add_label: "Target Names to Add:"
   project_target_names_added: "Added target names: [names]."
   project_target_name_removed: Removed target name "[name]".
   project_target_name_not_found: No matching names found.
@@ -3021,12 +3061,11 @@
   # Project Updates Tab
   project_updates_title: Update
   project_updates_count: "[count] matching observations"
+  project_updates_excluded_count: "[count] excluded observations"
+  project_updates_show_excluded: Show Excluded
   project_updates_add_all: Add All
-  project_updates_clear: Clear
   project_updates_confirm_add_all: Add all matching observations to this project?
-  project_updates_confirm_clear: Remove all matching observations from this project?
   project_updates_added_all: "Added [count] observations to this project."
-  project_updates_cleared: "Removed [count] observations from this project."
 
   ##############################################################################
 
@@ -3101,13 +3140,22 @@
   # checklists
   checklist_any_deprecated: "* This name is not considered current on MO"
   checklist_duplicate_synonyms: "+ This name has a synonym in this checklist"
+  checklist_target_remove_footnote: Remove this target name from the project
   checklist_for: Checklist for
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
   checklist_for_project_location_title: Checklist for [project] at [location]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
-  checklist_summary: "Summary: [names] names including [species] species and [genera] genera"
+  checklist_target_summary: "Targets: [total] total, [observed] observed, [unobserved] not yet observed."
+  checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_observed_species_only: "[species] species observed (synonyms counted once)."
+  checklist_observed_higher_only: "[higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_unobserved_targets: Unobserved target names
+  checklist_species_level: Species and below
+  checklist_higher_level: Higher-level taxa
+  checklist_taxon: taxon
+  checklist_taxa: taxa
 
   # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms. By default the simple clean \"Black on White\" theme is used. However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics. Each color in a mushroom theme was pulled from a photograph included in the site from the given group. The colors attempt to express the characteristic colors of the group. In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"
@@ -4188,6 +4236,7 @@
   validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
+  validate_comment_duplicate: Duplicate comment. This comment was already submitted.
   validate_comment_user_missing: "[:validate_missing(field=:user)]"
   validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
   validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
@@ -4376,6 +4425,7 @@
   runtime_suggest_multiple_alternates: No [types] match "[match]", maybe you meant one of these?
   runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
   runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
+  runtime_wrong_rank_admin: "Wrong rank for [name]; suffix implies [expect], not [actual]. Submit again to create [name] with rank [actual]."
 
   # These shouldn't need translating, but you are free to override if you need to.
   runtime_edit_article_success: "[:runtime_updated_id(type=:article,value=id)]"
