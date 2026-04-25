@@ -201,9 +201,19 @@ form {
   overflow-y: auto;
 }
 
-#target_names_widget textarea {
-  min-width: 40em;
-  max-width: 100%;
+// The containing form uses `form-inline`, which turns .form-group into
+// inline-block/width:auto. Override so the autocompleter wrap and textarea
+// stretch to fill the form width (up to 40em), instead of collapsing to the
+// browser's default textarea size.
+#target_names_widget {
+  .form-group {
+    display: block;
+    width: 100%;
+    max-width: 40em;
+  }
+  textarea {
+    width: 100%;
+  }
 }
 
 .panel-body {

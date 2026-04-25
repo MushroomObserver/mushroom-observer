@@ -496,6 +496,7 @@
   citation: citation
   CITATIONS: Citations
   citations: citations
+  Confidence: Confidence
   CONFIDENCE_LEVEL: Confidence Level
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
@@ -898,6 +899,12 @@
   update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
+  map_legend_circle: Observation with GPS
+  map_legend_box: Location area (no GPS) or group of observations
+  map_legend_confirmed: Confirmed (≥80%)
+  map_legend_tentative: Tentative
+  map_legend_disputed: Disputed (≤0%)
+  map_legend_group: Multiple observations
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon
@@ -2511,6 +2518,8 @@
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
   show_user_life_list: "[species] species and [higher] higher-level [taxa_word] observed"
+  show_user_life_list_species: "[species] species observed"
+  show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
   sequence_edit_title: Editing [name]
@@ -3138,8 +3147,10 @@
   checklist_for_project_location_title: Checklist for [project] at [location]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
-  checklist_target_summary: "[total] target names: [observed] observed, [unobserved] not yet observed."
+  checklist_target_summary: "Targets: [total] total, [observed] observed, [unobserved] not yet observed."
   checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_observed_species_only: "[species] species observed (synonyms counted once)."
+  checklist_observed_higher_only: "[higher] higher-level [taxa_word] observed (synonyms counted once)."
   checklist_unobserved_targets: Unobserved target names
   checklist_species_level: Species and below
   checklist_higher_level: Higher-level taxa
@@ -4220,6 +4231,7 @@
   validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
+  validate_comment_duplicate: Duplicate comment. This comment was already submitted.
   validate_comment_user_missing: "[:validate_missing(field=:user)]"
   validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
   validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"

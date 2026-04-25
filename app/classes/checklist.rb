@@ -93,11 +93,6 @@ class Checklist
 
     def calc_checklist
       super
-      # Base class leaves @taxa as the initial {} when there are no
-      # observation results. ForProject merges/concats it as an Array;
-      # normalize here so no-observation + no-target-name projects don't
-      # hit "{} + []" type mismatches.
-      @taxa = [] if @taxa.is_a?(Hash)
       merge_observed_targets_into_taxa
       compute_unobserved_target_taxa
       # @duplicate_synonyms and @any_deprecated are set by `super` from
@@ -281,10 +276,16 @@ class Checklist
   private
 
   def calc_checklist
-    @taxa = {}
+    # @taxa is normalized to an Array of tuples so callers like
+    # species_level_observed_taxa can always iterate safely. @genera
+    # and @species remain Hashes because downstream code calls
+    # .values.sort on them.
+    @taxa = []
     @genera = {}
     @species = {}
     @annotations = {}
+    @duplicate_synonyms = []
+    @any_deprecated = false
     count_taxa_genera_and_species(query)
   end
 

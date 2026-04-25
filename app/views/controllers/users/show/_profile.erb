@@ -15,13 +15,19 @@ footer =
   if @life_list.num_taxa.positive?
     species = @life_list.num_species_observed
     higher = @life_list.num_higher_level_observed
+    taxa_word = higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
+    text =
+      if species.positive? && higher.positive?
+        :show_user_life_list.t(species: species, higher: higher,
+                               taxa_word: taxa_word)
+      elsif species.positive?
+        :show_user_life_list_species.t(species: species)
+      else
+        :show_user_life_list_higher.t(higher: higher, taxa_word: taxa_word)
+      end
     [link_to(checklist_path(id: @show_user.id)) do
        tag.strong(:app_life_list.t)
-     end, ": ",
-     :show_user_life_list.t(
-       species: species, higher: higher,
-       taxa_word: higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
-     )].safe_join
+     end, ": ", text].safe_join
   else
     nil
   end

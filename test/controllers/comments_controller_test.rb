@@ -303,6 +303,50 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal("New text.", comment.comment)
   end
 
+  def test_create_comment_turbo_stream_removes_modal
+    obs = observations(:minimal_unknown_obs)
+    params = { target: obs.id,
+               type: "Observation",
+               comment: { summary: "Turbo Test",
+                          comment: "Some text." } }
+    login
+    post(:create, params: params, as: :turbo_stream)
+    assert_response(:success)
+    # close_modal triggers Bootstrap cleanup (backdrop + body class);
+    # remove drops the element so the next open fetches a fresh form.
+    assert_match(
+      /<turbo-stream action="close_modal"[^>]*>\s*<template>modal_comment/,
+      @response.body
+    )
+    assert_match(
+      /<turbo-stream action="remove"[^>]*target="modal_comment"/,
+      @response.body
+    )
+  end
+
+  def test_update_comment_turbo_stream_removes_scoped_modal
+    comment = comments(:minimal_unknown_obs_comment_1)
+    login_for(comment)
+    params = { id: comment.id,
+               comment: { summary: "Updated Summary",
+                          comment: "Updated body." } }
+    put(:update, params: params, as: :turbo_stream)
+    assert_response(:success)
+    target_id = "modal_comment_#{comment.id}"
+    assert_match(
+      /<turbo-stream action="close_modal"[^>]*>\s*<template>#{target_id}/,
+      @response.body
+    )
+    assert_match(
+      /<turbo-stream action="remove"[^>]*target="#{target_id}"/,
+      @response.body
+    )
+  end
+
+  def login_for(comment)
+    login(User.find(comment.user_id).login)
+  end
+
   def test_comment_broadcast
     obs = observations(:minimal_unknown_obs)
     comment_count = obs.comments.size

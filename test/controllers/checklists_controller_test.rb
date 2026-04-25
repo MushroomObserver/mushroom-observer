@@ -93,11 +93,12 @@ class ChecklistsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     # Line 1 — target-name summary.
-    assert_match(/2 target names.*1 observed.*1 not yet observed/,
+    assert_match(/Targets: 2 total.*1 observed.*1 not yet observed/,
                  @response.body)
     # Line 2 — observed summary with synonyms-counted-once note.
-    assert_match(/1 species and 0 higher-level taxa observed/,
+    assert_match(/1 species observed \(synonyms counted once\)/,
                  @response.body)
+    assert_no_match(/higher-level/, @response.body)
     # The two panels expected for this setup (one observed species
     # target + one unobserved target) render with their distinctive
     # headers. No higher-level taxa in this fixture, so that panel is
