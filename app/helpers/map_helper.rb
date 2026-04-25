@@ -67,10 +67,13 @@ module MapHelper
       locations: :Locations.t,
       show_all: :show_all.t,
       map_all: :map_all.t,
-      # Banner template for viewport-refetch updates (#4159). Client
-      # replaces __LOADED__ / __TOTAL__ with the formatted counts.
-      map_cap_banner: :map_cap_banner.t(loaded: "__LOADED__",
-                                        total: "__TOTAL__")
+      # Raw template — the client substitutes `[loaded]` / `[total]`
+      # with the formatted counts on each refetch. We bypass `.t` to
+      # skip textile processing (double-underscore placeholders would
+      # be italicized, etc.). Banner text has no textile markup, so
+      # sending the raw string preserves what the ERB-rendered
+      # version produces (#4159).
+      map_cap_banner: I18n.t(:map_cap_banner)
     }
   end
 

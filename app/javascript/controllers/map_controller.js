@@ -347,7 +347,7 @@ export default class extends GeocodeController {
     )
     parts.push('<ul class="map-popup-cluster-list">')
     for (const group of groups) {
-      parts.push(this.renderClusterListItem(group))
+      parts.push(this.renderClusterListItem(group, outlineBox))
     }
     parts.push("</ul>")
     if (canZoom) {
@@ -375,21 +375,30 @@ export default class extends GeocodeController {
   }
 
   // Build a Show-All / Map-All URL by preserving the current page's
-  // `q[...]` params (so user/name/etc. filters carry over) and
-  // overriding `q[in_box][n/s/e/w]` with the cluster outline box.
-  clusterQueryUrl(path, box) {
+  // `q[...]` params (so user/etc. filters carry over) and overriding
+  // `q[in_box][n/s/e/w]` with the cluster outline box. An optional
+  // `name` scopes the result further via `q[names][lookup][]=<name>`
+  // (used by per-species links in the cluster popup); when present,
+  // any existing `q[names]` params are dropped so the species filter
+  // wins.
+  clusterQueryUrl(path, box, opts = {}) {
     const params = new URLSearchParams()
     const current = new URLSearchParams(window.location.search)
     const IN_BOX_PREFIX = "q[in_box]"
+    const NAMES_PREFIX = "q[names]"
     for (const [key, value] of current.entries()) {
-      if (key.startsWith("q[") && !key.startsWith(IN_BOX_PREFIX)) {
-        params.append(key, value)
-      }
+      if (!key.startsWith("q[")) continue
+      if (key.startsWith(IN_BOX_PREFIX)) continue
+      if (opts.name && key.startsWith(NAMES_PREFIX)) continue
+      params.append(key, value)
     }
     params.append("q[in_box][north]", String(box.n))
     params.append("q[in_box][south]", String(box.s))
     params.append("q[in_box][east]", String(box.e))
     params.append("q[in_box][west]", String(box.w))
+    if (opts.name) {
+      params.append("q[names][lookup][]", opts.name)
+    }
     return `${path}?${params.toString()}`
   }
 
@@ -400,11 +409,10 @@ export default class extends GeocodeController {
       const name = data.cluster_name || "Unknown"
       let group = groups.get(name)
       if (!group) {
-        group = { name, count: 0, url: null }
+        group = { name, count: 0 }
         groups.set(name, group)
       }
       group.count += 1
-      if (!group.url && data.cluster_url) group.url = data.cluster_url
     }
     return Array.from(groups.values()).sort((a, b) => {
       if (b.count !== a.count) return b.count - a.count
@@ -412,10 +420,19 @@ export default class extends GeocodeController {
     })
   }
 
-  renderClusterListItem(group) {
+  // Species row links land on the observations index filtered by
+  // this species + the cluster's bounding box — the user's stated
+  // preference over landing on a single arbitrary obs. Preserves the
+  // current page's other q[...] filters via clusterQueryUrl. Falls
+  // back to plain italic text when no outline box is available
+  // (shouldn't happen in practice — cluster popups always have one).
+  renderClusterListItem(group, outlineBox) {
     const name = this.escapeHtml(group.name)
-    const nameHtml = group.url
-      ? `<a href="${group.url}" target="_blank" rel="noopener noreferrer">` +
+    const url = outlineBox &&
+      this.clusterQueryUrl("/observations", outlineBox,
+                           { name: group.name })
+    const nameHtml = url
+      ? `<a href="${url}" target="_blank" rel="noopener noreferrer">` +
         `<i>${name}</i></a>`
       : `<i>${name}</i>`
     return (
@@ -604,8 +621,8 @@ export default class extends GeocodeController {
       const template = (this.localized_text &&
                         this.localized_text.map_cap_banner) || ""
       banner.textContent = template.
-        replace("__LOADED__", loaded).
-        replace("__TOTAL__", total)
+        replace("[loaded]", loaded).
+        replace("[total]", total)
     } else {
       banner.style.display = "none"
     }
@@ -705,10 +722,12 @@ export default class extends GeocodeController {
     this.marker = marker
     // Metadata the cluster renderer / popup uses. `vote_pct` and
     // `has_gps` drive cluster color / border aggregation.
-    // `cluster_name` + `cluster_url` let the popup group by species.
-    // `box` is the set's geographic footprint (a point for GPS obs,
-    // the location bbox for fuzzy obs) so the popup can draw an
-    // outline overlay covering all members (#4159).
+    // `cluster_name` is the species label used for grouping in the
+    // cluster popup. `cluster_url` is `/observations/:id` for the
+    // single-marker lazy popup fetch (markerPopupUrl). `box` is the
+    // set's geographic footprint (a point for GPS obs, the location
+    // bbox for fuzzy obs) so the cluster popup can draw an outline
+    // overlay covering all members (#4159).
     marker.moData = {
       vote_pct: this.votePctFromSet(set),
       has_gps: border !== "none",
