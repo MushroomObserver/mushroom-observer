@@ -139,7 +139,7 @@ module Mappable
     end
 
     def observation_has_gps?(obs)
-      obs.lat.present? && !obs.lat_lng_dubious?
+      obs.lat.present? && obs.lng.present? && !obs.lat_lng_dubious?
     end
 
     def observations

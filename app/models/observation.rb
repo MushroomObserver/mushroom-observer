@@ -513,7 +513,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def compute_gps_dubious?
-    return false unless lat && location
+    return false unless lat && lng && location
 
     location.km_from_point(lat, lng) > DUBIOUS_GPS_KM
   end

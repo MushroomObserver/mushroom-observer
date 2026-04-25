@@ -38,7 +38,8 @@ class GpsDubiousBackfill
   private
 
   def scope
-    Observation.where.not(lat: nil).where.not(location_id: nil)
+    Observation.where.not(lat: nil).where.not(lng: nil).
+      where.not(location_id: nil)
   end
 
   def process(obs)

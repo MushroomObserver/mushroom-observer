@@ -312,7 +312,15 @@ export default class extends GeocodeController {
       if (e === null || b.e > e) e = b.e
       if (w === null || b.w < w) w = b.w
     }
-    return (n !== null) ? { n, s, e, w } : null
+    if (n === null) return null
+    // Naive min/max longitude is wrong for clusters that span the
+    // antimeridian (e.g., a marker near +179° and one near -179°
+    // would compute an outline covering most of the globe). Bail
+    // on the outline in that case rather than drawing a misleading
+    // overlay; doing wrap-aware longitude unioning correctly is a
+    // bigger change for an edge case MO data rarely produces.
+    if ((e - w) > 180) return null
+    return { n, s, e, w }
   }
 
   // Skip drawing the overlay when the outline is the same size as the
@@ -458,12 +466,18 @@ export default class extends GeocodeController {
   // Whether fitBounds on this cluster would actually reveal its members.
   // When every member shares a GPS point, bounds collapse to zero
   // extent and fitBounds pushes to max zoom with a single visible pin.
+  // Wrap-aware longitude span so antimeridian-crossing clusters
+  // (rare in MO data, but possible) aren't classified as "can't
+  // zoom" because of a negative naïve delta.
   clusterCanZoomFurther(bounds) {
     if (!bounds) return false
     const ne = bounds.getNorthEast()
     const sw = bounds.getSouthWest()
     const EPS = 1e-5
-    return (ne.lat() - sw.lat()) > EPS || (ne.lng() - sw.lng()) > EPS
+    const latSpan = ne.lat() - sw.lat()
+    const directLngSpan = Math.abs(ne.lng() - sw.lng())
+    const lngSpan = Math.min(directLngSpan, 360 - directLngSpan)
+    return latSpan > EPS || lngSpan > EPS
   }
 
   clusterRenderer() {
@@ -562,17 +576,22 @@ export default class extends GeocodeController {
            !last.contains(currentBounds.getSouthWest())
   }
 
+  // Build the JSON refetch URL from the server-emitted
+  // `cluster_query_string` (the page's filter set with `in_box`
+  // already stripped) plus the current viewport. Same reasoning as
+  // `clusterQueryUrl`: source URLs that use a saved-query id
+  // (`?q=ABC`) or have no q params (`/names/:id/map`) won't
+  // round-trip through `window.location.search` cleanly — mixing a
+  // scalar `q` with a hash `q[in_box]` produces a URL the server
+  // can't parse as a single query.
   buildRefetchUrl(bounds) {
     const ne = bounds.getNorthEast()
     const sw = bounds.getSouthWest()
-    const params = new URLSearchParams(window.location.search)
-    for (const key of Array.from(params.keys())) {
-      if (key.startsWith("q[in_box]")) params.delete(key)
-    }
-    params.set("q[in_box][north]", String(ne.lat()))
-    params.set("q[in_box][south]", String(sw.lat()))
-    params.set("q[in_box][east]", String(ne.lng()))
-    params.set("q[in_box][west]", String(sw.lng()))
+    const params = new URLSearchParams(this.cluster_query_string)
+    params.append("q[in_box][north]", String(ne.lat()))
+    params.append("q[in_box][south]", String(sw.lat()))
+    params.append("q[in_box][east]", String(ne.lng()))
+    params.append("q[in_box][west]", String(sw.lng()))
     const path = window.location.pathname.replace(/\.json$/, "")
     return `${path}.json?${params.toString()}`
   }

@@ -347,6 +347,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # they stay reachable via in_box (#4159).
     def self.gps_untrusted_for_search
       Observation[:lat].eq(nil).
+        or(Observation[:lng].eq(nil)).
         or(Observation[:gps_hidden].eq(true)).
         or(Observation[:gps_dubious].eq(true))
     end
