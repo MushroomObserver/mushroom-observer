@@ -435,16 +435,20 @@ class Name < AbstractModel
   # Let attached observations update their cache if these fields changed.
   # Also, `touch` if it changes the obs name and should invalidate HTML
   # caches of the observation.
+  #
+  # `classification` is no longer cached on Observation (discussion
+  # #4163) — clade lookups route through `names.classification`
+  # directly via `Observation#one_clade`, so changes here don't need
+  # to fan out to obs rows.
   def update_observation_cache
     touch_cases = text_name_changed? || author_changed? || deprecated_changed?
-    no_touch_cases = lifeform_changed? || classification_changed?
+    no_touch_cases = lifeform_changed?
     return unless touch_cases || no_touch_cases
 
     updates = {}
     updates[:updated_at] = Time.zone.now if touch_cases && !no_touch_cases
     updates[:lifeform] = lifeform if lifeform_changed?
     updates[:text_name] = text_name if text_name_changed?
-    updates[:classification] = classification if classification_changed?
     Observation.where(name_id: id).update_all(updates) if updates.present?
   end
 

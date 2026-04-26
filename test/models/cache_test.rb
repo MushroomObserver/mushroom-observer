@@ -37,9 +37,9 @@ class CacheTest < UnitTestCase
     assert_not_equal(first_updated_at, name.observations.first.updated_at)
   end
 
-  # Prove that changing a name's classification will update
-  # observations.classification for all the attached observations without
-  # changing the updated_at field.
+  # Prove that changing a name's classification via its description
+  # propagates forward to names.classification (which is now the sole
+  # cache — discussion #4163). Observations are no longer cached.
   def test_changing_classification
     name = names(:peltigera)
     desc = name.description
@@ -50,8 +50,8 @@ class CacheTest < UnitTestCase
     new_str = desc.classification.sub("Ascomycota", "Basidiomycota")
     desc.update(classification: new_str)
     assert_equal(new_str, name.reload.classification)
-    assert(name.observations.all? { |o| o.classification == new_str })
-    # Name modification date is updated, but not observations.
+    # Observations don't cache classification anymore — the data lives
+    # on the name and is read from there at query time.
     assert_not_equal(name_updated_at, name.updated_at)
     assert_equal(first_updated_at, name.observations.first.updated_at)
   end
@@ -72,11 +72,13 @@ class CacheTest < UnitTestCase
     assert_names_equal(new_name, obs.reload.name)
     assert_equal(new_name.lifeform, obs.lifeform)
     assert_equal(new_name.text_name, obs.text_name)
-    assert_equal(new_name.classification, obs.classification)
+    # Classification is no longer cached on Observation — discussion #4163.
   end
 
-  # Prove that observation caches are updated when a classification is bulk-
-  # changed in all of a genus's subtaxa (and that updated_at not changed).
+  # Prove that propagating a classification to a genus's subtaxa
+  # updates names.classification on each subtaxon and does not touch
+  # observations.updated_at. Observations no longer cache classification
+  # (discussion #4163), so the assertion is on the names instead.
   def test_propagate_classification
     name = names(:agaricus)
     saved_obs_updated_ats =
@@ -87,8 +89,8 @@ class CacheTest < UnitTestCase
     name.update(classification: new_classification)
     name.propagate_classification
 
-    Observation.names(lookup: "Agaricus", include_subtaxa: 1).each do |obs|
-      assert_equal(new_classification, obs.classification)
+    Name.subtaxa_of_genus_or_below("Agaricus").each do |subtaxon|
+      assert_equal(new_classification, subtaxon.classification)
     end
     assert_equal(
       saved_obs_updated_ats,

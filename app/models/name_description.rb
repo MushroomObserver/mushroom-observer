@@ -268,9 +268,15 @@ class NameDescription < Description
   ##############################################################################
 
   # Make sure the classification cached in Name is kept up to date.
+  # `name.skip_notify` keeps the Name's after_update from firing a
+  # second notification — the description's own `notify_users` already
+  # tells description authors/reviewers/etc. about this edit. The Name
+  # version is still created. (Goes away with the description column —
+  # discussion #4163.)
   def update_classification_cache
     if (name.description_id == id) &&
        (name.classification != classification)
+      name.skip_notify = true
       name.update(classification: classification)
       name.propagate_classification if name.rank == "Genus"
     end

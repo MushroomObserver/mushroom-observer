@@ -213,15 +213,24 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       clades.map! { |val| one_clade(val) }
       or_clause(*clades).distinct
     }
+    # For above-genus clades the membership predicate runs against
+    # `names.classification` (8 MB scan) rather than the now-removed
+    # `observations.classification` cache (was 73 MB). The matching
+    # `name_ids` are then joined back to observations through the
+    # existing `name_id` index. Discussion #4163 — measured 5-9× faster
+    # than the old in-place LIKE on observations even before dropping
+    # the cache.
     scope :one_clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
 
       if Name.ranks_above_genus.include?(rank)
-        where(text_name: text_name).or(
-          where(Observation[:classification].
-          matches("%#{rank}: _#{text_name}_%"))
-        )
+        name_ids = Name.where(text_name: text_name).
+                   or(Name.where(
+                        Name[:classification].
+                          matches("%#{rank}: _#{text_name}_%")
+                      )).select(:id)
+        where(name_id: name_ids)
       else
         where(text_name: text_name).or(
           where(Observation[:text_name].matches("#{text_name} %"))

@@ -2124,6 +2124,11 @@ class NameTest < UnitTestCase
     assert_no_enqueued_jobs do
       desc.save
     end
+    # The classification mirror to Name now creates a Name version
+    # (discussion #4163), bumping the in-memory value on desc.name.
+    # Reload the test's separate `name` reference so its version stays
+    # in sync with what subsequent NameChangeMailer args report.
+    name.reload
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
@@ -2309,8 +2314,11 @@ class NameTest < UnitTestCase
           mailer_args[:receiver] == mary &&
           mailer_args[:name] == name &&
           mailer_args[:description].nil? &&
-          mailer_args[:old_name_ver] == name_version &&
-          mailer_args[:new_name_ver] == name_version + 1 &&
+          # The earlier classification reset bumped Name to
+          # name_version + 1 (discussion #4163); this citation save
+          # bumps to + 2.
+          mailer_args[:old_name_ver] == name_version + 1 &&
+          mailer_args[:new_name_ver] == name_version + 2 &&
           mailer_args[:old_desc_ver].zero? &&
           mailer_args[:new_desc_ver].zero? &&
           mailer_args[:review_status] == "no_change"
@@ -2319,7 +2327,7 @@ class NameTest < UnitTestCase
       name.citation = "Rolf added this."
       name.save
     end
-    assert_equal(name_version + 1, name.version)
+    assert_equal(name_version + 2, name.version)
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)

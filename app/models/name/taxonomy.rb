@@ -323,6 +323,9 @@ module Name::Taxonomy
   # Copy the classification of a genus to all of its children.  Does not change
   # updated_at or rss_log or anything.  Just changes the classification field
   # in the name and default description records.
+  #
+  # The Observation cache write was dropped along with
+  # `observations.classification` itself (discussion #4163).
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != "Genus"
@@ -331,8 +334,6 @@ module Name::Taxonomy
     Name.where(id: subtaxa).
       update_all(classification: classification)
     NameDescription.where(name_id: subtaxa).
-      update_all(classification: classification)
-    Observation.where(name_id: subtaxa).
       update_all(classification: classification)
   end
 
