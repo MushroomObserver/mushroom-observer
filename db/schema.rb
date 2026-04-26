@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_26_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_26_000002) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -549,7 +549,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_26_000001) do
     t.integer "alt"
     t.string "lifeform", limit: 1024
     t.string "text_name", limit: 100
-    t.text "classification"
     t.boolean "gps_hidden", default: false, null: false
     t.integer "source"
     t.datetime "log_updated_at", precision: nil

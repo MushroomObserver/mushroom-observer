@@ -80,8 +80,8 @@ module Names
       assert_equal(new_str, names(:agaricus).classification)
       assert_equal(new_str,
                    names(:agaricus_campestras).description.classification)
-      assert_equal(new_str,
-                   observations(:agaricus_campestras_obs).classification)
+      # Classification is no longer cached on Observation — clade
+      # filtering reads it from `names.classification` now (#4163).
     end
   end
 end
