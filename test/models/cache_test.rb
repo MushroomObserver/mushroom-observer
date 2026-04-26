@@ -37,22 +37,16 @@ class CacheTest < UnitTestCase
     assert_not_equal(first_updated_at, name.observations.first.updated_at)
   end
 
-  # Prove that changing a name's classification via its description
-  # propagates forward to names.classification (which is now the sole
-  # cache — discussion #4163). Observations are no longer cached.
+  # Prove that changing a name's classification doesn't ripple out to
+  # cached columns on observations (discussion #4163 — they no longer
+  # exist) or touch obs updated_at.
   def test_changing_classification
     name = names(:peltigera)
-    desc = name.description
-    assert_not_nil(desc)
     assert_not_empty(name.observations)
-    name_updated_at = name.updated_at
     first_updated_at = name.observations.first.updated_at
-    new_str = desc.classification.sub("Ascomycota", "Basidiomycota")
-    desc.update(classification: new_str)
+    new_str = name.classification.sub("Ascomycota", "Basidiomycota")
+    name.update(classification: new_str)
     assert_equal(new_str, name.reload.classification)
-    # Observations don't cache classification anymore — the data lives
-    # on the name and is read from there at query time.
-    assert_not_equal(name_updated_at, name.updated_at)
     assert_equal(first_updated_at, name.observations.first.updated_at)
   end
 

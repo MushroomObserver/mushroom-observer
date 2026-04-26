@@ -26,7 +26,6 @@
 #
 #  ==== Description Fields
 #  license::          (V) License description info is kept under.
-#  classification::   (V) Taxonomic classification.
 #  gen_desc::         (V) General description.
 #  diag_desc::        (V) Diagnostic description.
 #  distribution::     (V) Distribution.
@@ -155,9 +154,10 @@ class NameDescription < Description
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
   ].freeze
-  ALL_NOTE_FIELDS = (
-    [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
-  ).freeze
+  # `classification` was removed from description content in
+  # discussion #4163 — it lives on Name now and is versioned via
+  # `name_versions` instead of `name_description_versions`.
+  ALL_NOTE_FIELDS = (EOL_NOTE_FIELDS + [:refs, :notes]).freeze
   SEARCHABLE_FIELDS = ALL_NOTE_FIELDS
 
   acts_as_versioned(
@@ -183,7 +183,6 @@ class NameDescription < Description
 
   versioned_class.before_save { |x| x.user_id = User.current_id }
   after_update :notify_users
-  after_save :update_classification_cache
 
   # Don't add any authors until someone has written something "useful".
   def author_worthy?
@@ -267,21 +266,6 @@ class NameDescription < Description
   #
   ##############################################################################
 
-  # Make sure the classification cached in Name is kept up to date.
-  # `name.skip_notify` keeps the Name's after_update from firing a
-  # second notification — the description's own `notify_users` already
-  # tells description authors/reviewers/etc. about this edit. The Name
-  # version is still created. (Goes away with the description column —
-  # discussion #4163.)
-  def update_classification_cache
-    if (name.description_id == id) &&
-       (name.classification != classification)
-      name.skip_notify = true
-      name.update(classification: classification)
-      name.propagate_classification if name.rank == "Genus"
-    end
-  end
-
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
@@ -350,15 +334,7 @@ class NameDescription < Description
     end
   end
 
-  ##############################################################################
-
-  protected
-
-  validate :check_requirements
-  def check_requirements # :nodoc:
-    self.classification = Name.validate_classification(parent.rank,
-                                                       classification)
-  rescue StandardError => e
-    errors.add(:classification, e.to_s)
-  end
+  # `check_requirements` validated the classification syntax on
+  # description save. Both the field and validation moved to Name
+  # (discussion #4163).
 end

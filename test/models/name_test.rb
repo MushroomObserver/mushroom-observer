@@ -2114,7 +2114,6 @@ class NameTest < UnitTestCase
     # Rolf erases notes: no emails (no authors yet), Rolf becomes editor.
     User.current = rolf
     desc.reload
-    desc.classification = ""
     desc.gen_desc = ""
     desc.diag_desc = ""
     desc.distribution = ""
@@ -2124,11 +2123,6 @@ class NameTest < UnitTestCase
     assert_no_enqueued_jobs do
       desc.save
     end
-    # The classification mirror to Name now creates a Name version
-    # (discussion #4163), bumping the in-memory value on desc.name.
-    # Reload the test's separate `name` reference so its version stays
-    # in sync with what subsequent NameChangeMailer args report.
-    name.reload
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
@@ -2314,11 +2308,8 @@ class NameTest < UnitTestCase
           mailer_args[:receiver] == mary &&
           mailer_args[:name] == name &&
           mailer_args[:description].nil? &&
-          # The earlier classification reset bumped Name to
-          # name_version + 1 (discussion #4163); this citation save
-          # bumps to + 2.
-          mailer_args[:old_name_ver] == name_version + 1 &&
-          mailer_args[:new_name_ver] == name_version + 2 &&
+          mailer_args[:old_name_ver] == name_version &&
+          mailer_args[:new_name_ver] == name_version + 1 &&
           mailer_args[:old_desc_ver].zero? &&
           mailer_args[:new_desc_ver].zero? &&
           mailer_args[:review_status] == "no_change"
@@ -2327,7 +2318,7 @@ class NameTest < UnitTestCase
       name.citation = "Rolf added this."
       name.save
     end
-    assert_equal(name_version + 2, name.version)
+    assert_equal(name_version + 1, name.version)
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
@@ -3420,16 +3411,16 @@ class NameTest < UnitTestCase
                  Name.matching_desired_new_parsed_name(parsed).order(:author))
   end
 
+  # Refresh used to copy `name_descriptions.classification` back to
+  # `names.classification` when they diverged. The description column
+  # is gone (#4163) so the method is now a no-op shim — assert it
+  # returns no messages and leaves names unchanged.
   def test_refresh_classification_caches
     name = names(:coprinus_comatus)
-    bad  = name.classification = "Phylum: _Ascomycota_"
-    good = name.description.classification
-    name.save
-    assert_not_equal(good, bad)
-
-    Name.refresh_classification_caches
-    assert_equal(good, name.reload.classification)
-    assert_equal(good, name.description.reload.classification)
+    bad  = "Phylum: _Ascomycota_"
+    name.update_column(:classification, bad)
+    assert_empty(Name.refresh_classification_caches)
+    assert_equal(bad, name.reload.classification)
   end
 
   def test_changing_classification_propagates_to_subtaxa
@@ -3438,8 +3429,7 @@ class NameTest < UnitTestCase
     new_classification = names(:peltigera).classification
     assert_not_equal(new_classification, name.classification)
     assert_not_equal(new_classification, child.classification)
-    name.description.classification = new_classification
-    name.description.save
+    name.change_classification(new_classification)
     assert_equal(new_classification, name.reload.classification)
     assert_equal(new_classification, child.reload.classification)
   end

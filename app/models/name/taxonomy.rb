@@ -309,31 +309,28 @@ module Name::Taxonomy
 
   # Change this name's classification.  Change its synonyms and its parent
   # genus, too, if below genus.  Propagate to subtaxa if at or below genus.
+  # Description-mirror writes were dropped along with the column itself
+  # (discussion #4163).
   def change_classification(new_str)
     # Eager load synonym association to avoid N+1 query in synonyms method
     root = Name.includes(synonym: :names).
            find((below_genus? && accepted_genus || self).id)
     root.synonyms.each do |name|
       name.update(classification: new_str)
-      name.description.update(classification: new_str) if name.description_id
     end
     root.propagate_classification if root.rank == "Genus"
   end
 
   # Copy the classification of a genus to all of its children.  Does not change
   # updated_at or rss_log or anything.  Just changes the classification field
-  # in the name and default description records.
-  #
-  # The Observation cache write was dropped along with
-  # `observations.classification` itself (discussion #4163).
+  # in the name records (discussion #4163 — was also fanning out to
+  # name_descriptions and observations, both since dropped).
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != "Genus"
 
     subtaxa = subtaxa_whose_classification_needs_to_be_changed
     Name.where(id: subtaxa).
-      update_all(classification: classification)
-    NameDescription.where(name_id: subtaxa).
       update_all(classification: classification)
   end
 
@@ -613,19 +610,12 @@ module Name::Taxonomy
       results
     end
 
-    # This is meant to be run nightly to ensure that all the classification
-    # caches are up to date.  It only pays attention to genera or higher.
-    def refresh_classification_caches(dry_run: false)
-      query = Name.has_description_classification_differing
-      msgs = query.map do |name|
-        "Classification for #{name.search_name} didn't match description."
-      end
-      unless dry_run || msgs.none?
-        query.update_all(
-          Name[:classification].eq(NameDescription[:classification]).to_sql
-        )
-      end
-      msgs
+    # Was a nightly job that copied `name_descriptions.classification`
+    # back to `names.classification` when they diverged. The
+    # description column is gone (discussion #4163) so there's nothing
+    # to reconcile — `names.classification` is the only home now.
+    def refresh_classification_caches(_dry_run: false)
+      []
     end
   end
 end

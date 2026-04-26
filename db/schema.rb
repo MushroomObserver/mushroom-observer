@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_26_000002) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_26_000003) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -391,7 +391,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_26_000002) do
     t.text "uses"
     t.text "notes"
     t.text "refs"
-    t.text "classification"
   end
 
   create_table "name_description_writers", charset: "utf8mb3", force: :cascade do |t|
@@ -424,7 +423,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_26_000002) do
     t.text "uses"
     t.text "notes"
     t.text "refs"
-    t.text "classification"
     t.integer "project_id"
   end
 

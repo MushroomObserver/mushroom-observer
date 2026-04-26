@@ -78,10 +78,8 @@ module Names
       assert_redirected_to(name.show_link_args)
       assert_equal(new_str, name.reload.classification)
       assert_equal(new_str, names(:agaricus).classification)
-      assert_equal(new_str,
-                   names(:agaricus_campestras).description.classification)
-      # Classification is no longer cached on Observation — clade
-      # filtering reads it from `names.classification` now (#4163).
+      # Description and Observation no longer carry classification
+      # caches — both columns dropped in discussion #4163.
     end
   end
 end
