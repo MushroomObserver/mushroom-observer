@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_26_000001) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -454,6 +454,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.integer "rank"
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.integer "icn_id"
+    t.text "classification"
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|

@@ -347,6 +347,7 @@ class Name < AbstractModel
       display_name
       author
       citation
+      classification
       deprecated
       correct_spelling
       notes
@@ -364,7 +365,6 @@ class Name < AbstractModel
     # "accepted_name_id",
     "synonym_id",
     "description_id",
-    "classification", # (versioned in the default desc)
     "locked"
   )
 
