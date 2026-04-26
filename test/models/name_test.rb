@@ -3411,18 +3411,6 @@ class NameTest < UnitTestCase
                  Name.matching_desired_new_parsed_name(parsed).order(:author))
   end
 
-  # Refresh used to copy `name_descriptions.classification` back to
-  # `names.classification` when they diverged. The description column
-  # is gone (#4163) so the method is now a no-op shim — assert it
-  # returns no messages and leaves names unchanged.
-  def test_refresh_classification_caches
-    name = names(:coprinus_comatus)
-    bad  = "Phylum: _Ascomycota_"
-    name.update_column(:classification, bad)
-    assert_empty(Name.refresh_classification_caches)
-    assert_equal(bad, name.reload.classification)
-  end
-
   def test_changing_classification_propagates_to_subtaxa
     name  = names(:coprinus)
     child = names(:coprinus_comatus)

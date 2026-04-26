@@ -617,13 +617,5 @@ module Name::Taxonomy
       end
       results
     end
-
-    # Was a nightly job that copied `name_descriptions.classification`
-    # back to `names.classification` when they diverged. The
-    # description column is gone (discussion #4163) so there's nothing
-    # to reconcile — `names.classification` is the only home now.
-    def refresh_classification_caches(_dry_run: false)
-      []
-    end
   end
 end
