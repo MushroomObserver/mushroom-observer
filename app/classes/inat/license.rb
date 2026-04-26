@@ -39,8 +39,7 @@ class Inat
     end
 
     def current_public_domain
-      # match old-style "/Public_domain/" or new style "/publicdomain/"
-      ::License.where(::License[:url] =~ /public_?domain/i).
+      ::License.where(::License[:url] =~ %r{/(publicdomain|cc0)/?}).
         where(deprecated: false).
         order(id: :asc).last
     end

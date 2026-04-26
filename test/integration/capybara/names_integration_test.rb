@@ -178,7 +178,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
   def test_name_pattern_search_with_old_provisional
     old_provisional = 'Cortinarius "sp-IN34"'
-    name = names(:provisional_name)
+    name = names(:code_name)
     login
     visit("/")
     fill_in("pattern_search_pattern", with: old_provisional)

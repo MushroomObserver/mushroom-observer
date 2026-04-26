@@ -496,6 +496,7 @@
   citation: citation
   CITATIONS: Citations
   citations: citations
+  Confidence: Confidence
   CONFIDENCE_LEVEL: Confidence Level
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
@@ -898,6 +899,12 @@
   update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
+  map_legend_circle: Observation with GPS
+  map_legend_box: Location area (no GPS) or group of observations
+  map_legend_confirmed: Confirmed (≥80%)
+  map_legend_tentative: Tentative
+  map_legend_disputed: Disputed (≤0%)
+  map_legend_group: Multiple observations
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon
@@ -2510,7 +2517,9 @@
   show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
-  show_user_life_list: "[species] species in [genera] genera"
+  show_user_life_list: "[species] species and [higher] higher-level [taxa_word] observed"
+  show_user_life_list_species: "[species] species observed"
+  show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
   sequence_edit_title: Editing [name]
@@ -3035,6 +3044,7 @@
 
   # Project Target Names
   project_target_name_add: Add
+  project_target_names_to_add_label: "Target Names to Add:"
   project_target_names_added: "Added target names: [names]."
   project_target_name_removed: Removed target name "[name]".
   project_target_name_not_found: No matching names found.
@@ -3130,13 +3140,22 @@
   # checklists
   checklist_any_deprecated: "* This name is not considered current on MO"
   checklist_duplicate_synonyms: "+ This name has a synonym in this checklist"
+  checklist_target_remove_footnote: Remove this target name from the project
   checklist_for: Checklist for
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
   checklist_for_project_location_title: Checklist for [project] at [location]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
-  checklist_summary: "Summary: [names] names including [species] species and [genera] genera"
+  checklist_target_summary: "Targets: [total] total, [observed] observed, [unobserved] not yet observed."
+  checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_observed_species_only: "[species] species observed (synonyms counted once)."
+  checklist_observed_higher_only: "[higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_unobserved_targets: Unobserved target names
+  checklist_species_level: Species and below
+  checklist_higher_level: Higher-level taxa
+  checklist_taxon: taxon
+  checklist_taxa: taxa
 
   # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms. By default the simple clean \"Black on White\" theme is used. However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics. Each color in a mushroom theme was pulled from a photograph included in the site from the given group. The colors attempt to express the characteristic colors of the group. In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"
@@ -4212,6 +4231,7 @@
   validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
+  validate_comment_duplicate: Duplicate comment. This comment was already submitted.
   validate_comment_user_missing: "[:validate_missing(field=:user)]"
   validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
   validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
