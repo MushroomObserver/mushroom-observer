@@ -1,5 +1,6 @@
 import GeocodeController from "controllers/geocode_controller"
 import { Loader } from "@googlemaps/js-api-loader"
+import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer"
 
 // Connects to data-controller="map"
 // The connected element can be a map, or in the case of a form with a map UI,
@@ -29,6 +30,32 @@ export default class extends GeocodeController {
     this.collection = this.mapDivTarget.dataset.collection
     if (this.collection)
       this.collection = JSON.parse(this.collection)
+    // Dynamic-clustering mode (#4159). When true, each collection set
+    // is a singleton and the client wraps them in a MarkerClusterer
+    // that regroups them at each zoom level.
+    this.clustering = this.mapDivTarget.dataset.clustering === "true"
+    this.cluster_markers = []
+    this.markerClusterer = null
+    // Initial fetch was capped — if so, refetching for smaller
+    // viewports exposes obs that were truncated. Tracked as the
+    // "last fetch" state so pans/zooms that expand or narrow the
+    // viewport know whether to re-request from the server (#4159).
+    this.lastFetchedCapped =
+      this.mapDivTarget.dataset.capped === "true"
+    this.lastFetchedBounds = null
+    this.refetchTimer = 0
+    this.refetchInFlight = null
+    // Server-emitted "q[...]=…" base for cluster popup Show All /
+    // Map All links. We can't rebuild this from window.location
+    // alone — the source URL might be a saved-query id (`?q=ABC`)
+    // or, on /names/:id/map, have no q params at all (#4159).
+    this.cluster_query_string =
+      this.mapDivTarget.dataset.clusterQueryString || ""
+    // Refetch deferral (#4159): clearing overlays in the middle of
+    // reading a popup is jarring, so we park the refetch while an
+    // InfoWindow is open and flush it on close.
+    this.activeInfoWindow = null
+    this.refetchPending = false
     this.localized_text = this.mapDivTarget.dataset.localization
     if (this.localized_text)
       this.localized_text = JSON.parse(this.localized_text)
@@ -96,6 +123,11 @@ export default class extends GeocodeController {
           // a box vs. fall back to a square marker.
           google.maps.event.addListenerOnce(this.map, "idle", () => {
             this.buildOverlays()
+            if (this.clustering) {
+              google.maps.event.addListener(this.map, "idle", () => {
+                this.scheduleViewportRefetch()
+              })
+            }
           })
         }
       })
@@ -152,18 +184,524 @@ export default class extends GeocodeController {
 
     this.verbose("map:buildOverlays")
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
-      // this.verbose({ set })
-      // NOTE: according to the MapSet class, location sets are always is_box.
-      if (this.isPoint(set)) {
+      // Server-computed shape (#4159):
+      //   "dot"       → single observation; circle marker.
+      //   "square"    → multi-observation; fixed-size square marker
+      //                 at the box center on info maps.
+      //   "rectangle" → location-only set; bare outline rectangle at
+      //                 the box extents (no center marker).
+      // Fall back to the pre-#4159 extents-based decision when the
+      // server didn't provide a glyph (e.g., legacy callers, editable
+      // location maps).
+      const glyph = set.glyph ||
+                    (this.isPoint(set) ? "dot" : "square")
+      if (glyph === "dot") {
         this.drawMarker(set)
+      } else if (glyph === "rectangle" && !this.editable) {
+        this.drawLocationOutline(set)
       } else {
         this.drawRectangle(set)
       }
     }
+    if (this.clustering) this.initMarkerClusterer()
+  }
+
+  // Wrap every marker collected during buildOverlays in a
+  // MarkerClusterer. The clusterer handles visibility, so markers
+  // are attached to the map only at zoom levels where they aren't
+  // part of a larger cluster. See #4159.
+  initMarkerClusterer() {
+    if (this.cluster_markers.length === 0) return
+
+    this.markerClusterer = new MarkerClusterer({
+      map: this.map,
+      markers: this.cluster_markers.map((m) => m.marker),
+      renderer: this.clusterRenderer(),
+      // Supercluster's default maxZoom (16) breaks clusters apart
+      // fully zoomed-in, which hides the count badge on stacks of
+      // observations that share a single geographic point (e.g. many
+      // obs at one location centroid, with no GPS or dubious GPS).
+      // Google Maps' max zoom is 22; matching it keeps the "N" badge
+      // visible even when the underlying data can't be separated
+      // spatially (#4159).
+      algorithm: new SuperClusterAlgorithm({ maxZoom: 22 }),
+      // Default behavior zooms in on single click; override with a
+      // popup listing the cluster's members. Zoom is exposed as a link
+      // inside the popup when further zoom would actually separate
+      // them (#4159).
+      onClusterClick: (_event, cluster, _map) => {
+        this.showClusterPopup(cluster)
+      }
+    })
+  }
+
+  showClusterPopup(cluster) {
+    const bounds = cluster.bounds
+    const markers = cluster.markers || []
+    const canZoom = this.clusterCanZoomFurther(bounds)
+    const color = this.aggregateClusterColor(markers)
+    const outlineBox = this.computeClusterOutlineBox(markers)
+    const content = this.buildClusterPopupHtml(markers, canZoom, outlineBox)
+
+    if (this.clusterInfoWindow) this.clusterInfoWindow.close()
+    this.clearFuzzyBoxOverlay()
+
+    this.clusterInfoWindow = new google.maps.InfoWindow({
+      content,
+      position: cluster.position,
+      maxWidth: 320
+    })
+    this.clusterInfoWindow.open({ map: this.map })
+    this.noteInfoWindowOpened(this.clusterInfoWindow)
+
+    if (outlineBox && this.outlineLargerThanClusterBadge(outlineBox, bounds)) {
+      this.fuzzyBoxOverlay = new google.maps.Rectangle({
+        strokeColor: color,
+        strokeOpacity: 1,
+        strokeWeight: 2,
+        fillColor: color,
+        fillOpacity: 0.25,
+        bounds: {
+          north: outlineBox.n, south: outlineBox.s,
+          east: outlineBox.e, west: outlineBox.w
+        },
+        clickable: false,
+        map: this.map
+      })
+    }
+
+    google.maps.event.addListenerOnce(
+      this.clusterInfoWindow, "closeclick", () => {
+        this.clearFuzzyBoxOverlay()
+        this.noteInfoWindowClosed(this.clusterInfoWindow)
+      }
+    )
+    google.maps.event.addListenerOnce(
+      this.clusterInfoWindow, "domready", () => {
+        this.wireClusterZoomLink(bounds)
+      }
+    )
+  }
+
+  wireClusterZoomLink(bounds) {
+    const els = document.getElementsByClassName("map-popup-cluster-zoom")
+    for (const el of els) {
+      el.addEventListener("click", (event) => {
+        event.preventDefault()
+        this.map.fitBounds(bounds)
+        if (this.clusterInfoWindow) this.clusterInfoWindow.close()
+        this.clearFuzzyBoxOverlay()
+      })
+    }
+  }
+
+  // Union of all member boxes. For GPS obs the "box" collapses to a
+  // point (set.north === set.south, etc.), so this degrades gracefully
+  // to the GPS extent. For a Wilder-Ridge-style cluster where every
+  // member uses its location bbox, the union equals that bbox.
+  computeClusterOutlineBox(markers) {
+    let n = null
+    let s = null
+    let e = null
+    let w = null
+    for (const marker of markers) {
+      const b = marker.moData && marker.moData.box
+      if (!b || b.n == null) continue
+      if (n === null || b.n > n) n = b.n
+      if (s === null || b.s < s) s = b.s
+      if (e === null || b.e > e) e = b.e
+      if (w === null || b.w < w) w = b.w
+    }
+    if (n === null) return null
+    // Naive min/max longitude is wrong for clusters that span the
+    // antimeridian (e.g., a marker near +179° and one near -179°
+    // would compute an outline covering most of the globe). Bail
+    // on the outline in that case rather than drawing a misleading
+    // overlay; doing wrap-aware longitude unioning correctly is a
+    // bigger change for an edge case MO data rarely produces.
+    if ((e - w) > 180) return null
+    return { n, s, e, w }
+  }
+
+  // Skip drawing the overlay when the outline is the same size as the
+  // cluster badge itself — an outline that's identical in area to the
+  // marker is visual noise. Compares the outline's extents to the
+  // MarkerClusterer-computed member bounds; if they match within a
+  // small epsilon the outline adds no information.
+  outlineLargerThanClusterBadge(outline, bounds) {
+    if (!bounds) return true
+    const ne = bounds.getNorthEast()
+    const sw = bounds.getSouthWest()
+    const EPS = 1e-4
+    return Math.abs(outline.n - ne.lat()) > EPS ||
+           Math.abs(outline.s - sw.lat()) > EPS ||
+           Math.abs(outline.e - ne.lng()) > EPS ||
+           Math.abs(outline.w - sw.lng()) > EPS
+  }
+
+  // Group cluster markers by species (text_name); sort by obs count
+  // desc, then species name asc. Each list row links to the first
+  // observation of that species.
+  buildClusterPopupHtml(markers, canZoom, outlineBox) {
+    const groups = this.groupClusterMarkersBySpecies(markers)
+    const totalObs = markers.length
+    const speciesCount = groups.length
+
+    const parts = ['<div class="map-popup map-popup-cluster">']
+    parts.push(
+      '<div class="map-popup-cluster-header">' +
+      '<div class="map-popup-cluster-title">' +
+      `<strong>${totalObs} ${totalObs === 1 ? "observation" : "observations"}` +
+      "</strong></div>" +
+      '<div class="map-popup-cluster-subtitle">' +
+      `${speciesCount} ${speciesCount === 1 ? "species" : "species"}` +
+      "</div>" +
+      this.buildClusterActionButtons(outlineBox) +
+      "</div>"
+    )
+    parts.push('<ul class="map-popup-cluster-list">')
+    for (const group of groups) {
+      parts.push(this.renderClusterListItem(group, outlineBox))
+    }
+    parts.push("</ul>")
+    if (canZoom) {
+      parts.push(
+        '<div class="map-popup-cluster-zoom-row">' +
+        '<a href="#" class="map-popup-cluster-zoom">Click to zoom in</a>' +
+        "</div>"
+      )
+    }
+    parts.push("</div>")
+    return parts.join("")
+  }
+
+  buildClusterActionButtons(outlineBox) {
+    if (!outlineBox) return ""
+    const showAll = this.clusterQueryUrl("/observations", outlineBox)
+    const mapAll = this.clusterQueryUrl("/observations/map", outlineBox)
+    const btn = "btn btn-default btn-xs map-popup-btn"
+    return (
+      '<div class="map-popup-cluster-actions">' +
+      `<a href="${showAll}" class="${btn}">Show All</a>` +
+      `<a href="${mapAll}" class="${btn}">Map All</a>` +
+      "</div>"
+    )
+  }
+
+  // Build a Show-All / Map-All URL from the server-emitted
+  // `cluster_query_string` (the page's underlying `q[...]` filter
+  // params, with `in_box` already stripped). The bbox of the
+  // clicked cluster is appended as `q[in_box][n/s/e/w]`. An
+  // optional `name` scopes further via `q[names][lookup][]=<name>`,
+  // dropping any existing `q[names]` so the species filter wins.
+  //
+  // Using the server's base instead of `window.location.search`
+  // makes this work for source URLs that don't expose the filters
+  // directly — e.g. `/names/2792/map` (no q params at all) or
+  // `?q=ABC` (a saved-query id) (#4159).
+  clusterQueryUrl(path, box, opts = {}) {
+    const params = new URLSearchParams(this.cluster_query_string)
+    if (opts.name) {
+      for (const key of Array.from(params.keys())) {
+        if (key.startsWith("q[names]")) params.delete(key)
+      }
+    }
+    params.append("q[in_box][north]", String(box.n))
+    params.append("q[in_box][south]", String(box.s))
+    params.append("q[in_box][east]", String(box.e))
+    params.append("q[in_box][west]", String(box.w))
+    if (opts.name) {
+      params.append("q[names][lookup][]", opts.name)
+    }
+    return `${path}?${params.toString()}`
+  }
+
+  groupClusterMarkersBySpecies(markers) {
+    const groups = new Map()
+    for (const marker of markers) {
+      const data = marker.moData || {}
+      const name = data.cluster_name || "Unknown"
+      let group = groups.get(name)
+      if (!group) {
+        group = { name, count: 0 }
+        groups.set(name, group)
+      }
+      group.count += 1
+    }
+    return Array.from(groups.values()).sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count
+      return a.name.localeCompare(b.name)
+    })
+  }
+
+  // Species row links land on the observations index filtered by
+  // this species + the cluster's bounding box — the user's stated
+  // preference over landing on a single arbitrary obs. Preserves the
+  // current page's other q[...] filters via clusterQueryUrl. Falls
+  // back to plain italic text when no outline box is available
+  // (shouldn't happen in practice — cluster popups always have one).
+  renderClusterListItem(group, outlineBox) {
+    const name = this.escapeHtml(group.name)
+    const url = outlineBox &&
+      this.clusterQueryUrl("/observations", outlineBox,
+                           { name: group.name })
+    const nameHtml = url
+      ? `<a href="${url}" target="_blank" rel="noopener noreferrer">` +
+        `<i>${name}</i></a>`
+      : `<i>${name}</i>`
+    return (
+      "<li>" +
+      `<span class="map-popup-cluster-name">${nameHtml}</span>` +
+      `<strong class="map-popup-cluster-count">${group.count}</strong>` +
+      "</li>"
+    )
+  }
+
+  escapeHtml(text) {
+    const tmp = document.createElement("div")
+    tmp.textContent = text == null ? "" : String(text)
+    return tmp.innerHTML
+  }
+
+  // Whether fitBounds on this cluster would actually reveal its members.
+  // When every member shares a GPS point, bounds collapse to zero
+  // extent and fitBounds pushes to max zoom with a single visible pin.
+  // Wrap-aware longitude span so antimeridian-crossing clusters
+  // (rare in MO data, but possible) aren't classified as "can't
+  // zoom" because of a negative naïve delta.
+  clusterCanZoomFurther(bounds) {
+    if (!bounds) return false
+    const ne = bounds.getNorthEast()
+    const sw = bounds.getSouthWest()
+    const EPS = 1e-5
+    const latSpan = ne.lat() - sw.lat()
+    const directLngSpan = Math.abs(ne.lng() - sw.lng())
+    const lngSpan = Math.min(directLngSpan, 360 - directLngSpan)
+    return latSpan > EPS || lngSpan > EPS
+  }
+
+  clusterRenderer() {
+    return {
+      render: ({ count, position, markers }) => {
+        const color = this.aggregateClusterColor(markers)
+        const border = this.aggregateClusterBorder(markers)
+        return new google.maps.Marker({
+          position,
+          label: {
+            text: String(count),
+            color: "#fff",
+            fontSize: "12px",
+            fontWeight: "700"
+          },
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: color,
+            fillOpacity: 0.9,
+            strokeColor: this.borderStrokeColor(border),
+            strokeOpacity: 1,
+            strokeWeight: 1.5,
+            // Scale up with digit count so the label always fits.
+            scale: this.clusterMarkerScale(count)
+          },
+          title: `${count} observations`,
+          zIndex: 1000 + markers.length
+        })
+      }
+    }
+  }
+
+  clusterMarkerScale(count) {
+    if (count < 10) return 14
+    if (count < 100) return 18
+    if (count < 1000) return 22
+    return 26
+  }
+
+  //
+  //  VIEWPORT REFETCH (#4159) — large obs sets are capped server-side;
+  //  when the user pans/zooms into a smaller viewport we re-query with
+  //  q[in_box] so the truncated obs become visible at the new scale.
+  //
+
+  scheduleViewportRefetch() {
+    if (!this.clustering) return
+    // An open popup (obs detail or cluster summary) means the user is
+    // reading something — tearing markers out from under them is
+    // jarring. Park the refetch until they dismiss the popup.
+    if (this.activeInfoWindow) {
+      this.refetchPending = true
+      return
+    }
+    if (this.refetchTimer) clearTimeout(this.refetchTimer)
+    this.refetchTimer = setTimeout(() => this.refetchForViewport(), 500)
+  }
+
+  refetchForViewport() {
+    const bounds = this.map.getBounds()
+    if (!bounds) return
+    if (!this.viewportRefetchNeeded(bounds)) return
+    if (this.refetchInFlight) this.refetchInFlight.abort()
+
+    const controller = new AbortController()
+    this.refetchInFlight = controller
+    const url = this.buildRefetchUrl(bounds)
+
+    fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal
+    }).
+      then((response) => response.json()).
+      then((data) => this.applyRefetch(data, bounds)).
+      catch((error) => {
+        if (error.name !== "AbortError") {
+          console.error("map refetch failed", error)
+        }
+      }).
+      finally(() => {
+        if (this.refetchInFlight === controller) this.refetchInFlight = null
+      })
+  }
+
+  // Only re-hit the server when it can change the picture:
+  // - last fetch was capped (smaller viewport might expose hidden obs
+  //   or, on zoom-out, pull in obs from newly-visible area), or
+  // - last fetch was bounded and the current viewport extends outside
+  //   that box (we don't have data for the new area).
+  viewportRefetchNeeded(currentBounds) {
+    if (this.lastFetchedCapped) return true
+    const last = this.lastFetchedBounds
+    if (!last) return false // initial fetch was global and not capped
+
+    return !last.contains(currentBounds.getNorthEast()) ||
+           !last.contains(currentBounds.getSouthWest())
+  }
+
+  // Build the JSON refetch URL from the server-emitted
+  // `cluster_query_string` (the page's filter set with `in_box`
+  // already stripped) plus the current viewport. Same reasoning as
+  // `clusterQueryUrl`: source URLs that use a saved-query id
+  // (`?q=ABC`) or have no q params (`/names/:id/map`) won't
+  // round-trip through `window.location.search` cleanly — mixing a
+  // scalar `q` with a hash `q[in_box]` produces a URL the server
+  // can't parse as a single query.
+  buildRefetchUrl(bounds) {
+    const ne = bounds.getNorthEast()
+    const sw = bounds.getSouthWest()
+    const params = new URLSearchParams(this.cluster_query_string)
+    params.append("q[in_box][north]", String(ne.lat()))
+    params.append("q[in_box][south]", String(sw.lat()))
+    params.append("q[in_box][east]", String(ne.lng()))
+    params.append("q[in_box][west]", String(sw.lng()))
+    const path = window.location.pathname.replace(/\.json$/, "")
+    return `${path}.json?${params.toString()}`
+  }
+
+  applyRefetch(data, bounds) {
+    if (!data || !data.collection) return
+    // A popup opened mid-fetch. Drop this payload and mark the
+    // refetch as pending; when the popup closes we'll pull fresh
+    // data for the current viewport (which may have moved further
+    // while the popup was open).
+    if (this.activeInfoWindow) {
+      this.refetchPending = true
+      return
+    }
+
+    this.clearOverlays()
+    this.collection = data.collection
+    this.buildOverlays()
+    this.updateCapBanner(data)
+
+    this.lastFetchedBounds = bounds
+    this.lastFetchedCapped = Boolean(data.capped)
+  }
+
+  clearOverlays() {
+    if (this.markerClusterer) {
+      this.markerClusterer.clearMarkers()
+      this.markerClusterer = null
+    }
+    this.cluster_markers = []
+    this.clearFuzzyBoxOverlay()
+    if (this.clusterInfoWindow) {
+      this.clusterInfoWindow.close()
+      this.clusterInfoWindow = null
+    }
+    this.activeInfoWindow = null
+    // The non-cluster markers/rectangles created by buildOverlays
+    // attach directly to this.map; tracking them individually would
+    // add a lot of bookkeeping, so we clear by iterating the overlay
+    // records we do keep (clusterMarkers, fuzzy box). Anything else
+    // will be GC'd when the new buildOverlays pass replaces the
+    // dataset-driven references.
+  }
+
+  updateCapBanner(data) {
+    const banner = document.getElementById("map_cap_banner")
+    if (!banner) return
+    if (data.capped) {
+      banner.style.display = ""
+      const loaded = Number(data.loaded).toLocaleString()
+      const total = Number(data.total).toLocaleString()
+      const template = (this.localized_text &&
+                        this.localized_text.map_cap_banner) || ""
+      banner.textContent = template.
+        replace("[loaded]", loaded).
+        replace("[total]", total)
+    } else {
+      banner.style.display = "none"
+    }
+  }
+
+  // Aggregate precision state across cluster members. Returns the same
+  // values as MapSet#compute_border_style so the ring colors on the
+  // cluster badge match the per-set markers.
+  aggregateClusterBorder(markers) {
+    let anyGps = false
+    let anyNone = false
+    for (const marker of markers) {
+      const data = marker.moData
+      if (!data) continue
+      if (data.has_gps) anyGps = true
+      else anyNone = true
+      if (anyGps && anyNone) return "dashed"
+    }
+    if (anyGps && !anyNone) return "crisp"
+    if (anyNone && !anyGps) return "none"
+    return "crisp"
+  }
+
+  // Aggregate consensus-band color across every member of a cluster.
+  // Mirrors Mappable::MapSet#compute_color on the Ruby side — we need
+  // it in JS because cluster membership changes dynamically with
+  // zoom and can't be baked in server-side (#4159).
+  aggregateClusterColor(markers) {
+    const bands = new Set()
+    for (const marker of markers) {
+      const data = marker.moData
+      if (!data) continue
+      const pct = data.vote_pct
+      if (pct == null) continue
+      if (pct <= 0) bands.add("disputed")
+      else if (pct >= 80) bands.add("confirmed")
+      else bands.add("tentative")
+    }
+    if (bands.size === 0) return "#3B79CC"  // location-only fallback
+    if (bands.size > 1) return "#C69B71"    // mixed
+    const band = bands.values().next().value
+    return {
+      confirmed: "#5CB85C",
+      tentative: "#F0AD4E",
+      disputed: "#D9534F"
+    }[band]
   }
 
   isPoint(set) {
     return (set.north === set.south) && (set.east === set.west)
+  }
+
+  hasBoxExtents(set) {
+    return set && set.north !== set.south && set.east !== set.west
   }
 
   //
@@ -186,15 +724,19 @@ export default class extends GeocodeController {
 
   drawMarker(set) {
     this.verbose("map:drawMarker")
-    // Per-marker color comes from the server (Mappable::MapSet#compute_color
-    // for issue #4131). Falls back to the controller default for editable
-    // markers / legacy callers that don't set a color.
+    // Per-marker color and border style come from the server
+    // (Mappable::MapSet — issues #4131, #4159). Falls back to the
+    // controller default for editable markers / legacy callers.
     const color = (set && set.color) || this.marker_color
+    const border = (set && set.border_style) || "crisp"
     const markerOptions = {
       position: { lat: set.lat, lng: set.lng },
-      map: this.map,
+      // In clustering mode, don't attach to the map — the
+      // MarkerClusterer decides visibility based on current zoom
+      // (#4159).
+      map: this.clustering ? null : this.map,
       draggable: this.editable,
-      icon: this.colored_circle_icon(color),
+      icon: this.colored_circle_icon(color, border),
       zoomOnClick: false
     }
 
@@ -203,13 +745,50 @@ export default class extends GeocodeController {
     }
     const marker = new google.maps.Marker(markerOptions)
     this.marker = marker
+    // Metadata the cluster renderer / popup uses. `vote_pct` and
+    // `has_gps` drive cluster color / border aggregation.
+    // `cluster_name` is the species label used for grouping in the
+    // cluster popup. `cluster_url` is `/observations/:id` for the
+    // single-marker lazy popup fetch (markerPopupUrl). `box` is the
+    // set's geographic footprint (a point for GPS obs, the location
+    // bbox for fuzzy obs) so the cluster popup can draw an outline
+    // overlay covering all members (#4159).
+    marker.moData = {
+      vote_pct: this.votePctFromSet(set),
+      has_gps: border !== "none",
+      cluster_name: set ? set.cluster_name : null,
+      cluster_url: set ? set.cluster_url : null,
+      box: set
+        ? { n: set.north, s: set.south, e: set.east, w: set.west }
+        : null
+    }
 
     if (!this.editable && set != null) {
       this.giveMarkerInfoWindow(marker, set)
+      // Fuzzy single-obs dots (no GPS) show the location's bounding
+      // box as an overlay while their popup is open (#4159).
+      if (border === "none" && this.hasBoxExtents(set)) {
+        this.attachFuzzyBoxOverlay(marker, set)
+      }
+      if (this.clustering) {
+        this.cluster_markers.push({ marker, set })
+      }
     } else {
       this.getElevations([set], "point")
       this.makeMarkerEditable(marker)
     }
+  }
+
+  // Reverse-engineer the consensus band color shipped by
+  // MapSet#compute_color. Singleton MapSets (clustering mode) carry
+  // just the color hex; the band is enough for cluster-color math.
+  votePctFromSet(set) {
+    if (!set || !set.color) return null
+    const color = set.color
+    if (color === "#5CB85C") return 90  // confirmed
+    if (color === "#F0AD4E") return 40  // tentative
+    if (color === "#D9534F") return -1  // disputed
+    return null // mixed / location-only
   }
 
   // Only for single markers: listeners for dragging the marker
@@ -247,21 +826,94 @@ export default class extends GeocodeController {
     // }, 1000)
   }
 
-  // For point markers: make a clickable InfoWindow
+  // For point markers: make a clickable InfoWindow. In clustering
+  // mode the caption HTML is not shipped in the bulk payload (too
+  // expensive at 10K obs) — we lazy-fetch it from the server on
+  // click and cache on the set so subsequent clicks are instant
+  // (#4159).
   giveMarkerInfoWindow(marker, set) {
     this.verbose("map:giveMarkerInfoWindow")
-    // maxWidth keeps the popup from stretching unnecessarily wide; without
-    // it Google fills the available map width, which leaves a lot of blank
-    // space on the right and pushes the close X far from the content.
     const info_window = new google.maps.InfoWindow({
-      content: set.caption,
+      content: set.caption ||
+               '<div class="map-popup map-popup-loading">Loading…</div>',
       position: { lat: set.lat, lng: set.lng },
       maxWidth: 280
     })
+    marker.infoWindow = info_window
 
     google.maps.event.addListener(marker, "click", () => {
       info_window.open({ anchor: marker, map: this.map })
+      this.noteInfoWindowOpened(info_window)
+      if (!set.caption && this.clustering) {
+        this.loadMarkerPopup(info_window, set)
+      }
     })
+    google.maps.event.addListener(info_window, "closeclick", () => {
+      this.noteInfoWindowClosed(info_window)
+    })
+  }
+
+  noteInfoWindowOpened(info_window) {
+    this.activeInfoWindow = info_window
+  }
+
+  noteInfoWindowClosed(info_window) {
+    if (this.activeInfoWindow === info_window) {
+      this.activeInfoWindow = null
+      this.flushPendingRefetch()
+    }
+  }
+
+  flushPendingRefetch() {
+    if (!this.refetchPending) return
+    this.refetchPending = false
+    this.scheduleViewportRefetch()
+  }
+
+  loadMarkerPopup(info_window, set) {
+    const url = this.markerPopupUrl(set)
+    if (!url) {
+      console.warn("map popup: no URL derived from set", set)
+      info_window.setContent('<div class="map-popup">No details</div>')
+      return
+    }
+    fetch(url, {
+      headers: { Accept: "application/json" },
+      credentials: "same-origin"
+    }).
+      then(async (response) => {
+        if (!response.ok) {
+          const body = await response.text()
+          throw new Error(
+            `map popup HTTP ${response.status} ${url}\n${body.slice(0, 200)}`
+          )
+        }
+        return response.json()
+      }).
+      then((data) => {
+        if (!data || data.html == null) {
+          throw new Error(`map popup: malformed response ${JSON.stringify(data)}`)
+        }
+        set.caption = data.html
+        info_window.setContent(data.html)
+      }).
+      catch((error) => {
+        console.error(error)
+        info_window.setContent(
+          '<div class="map-popup">Error loading details</div>'
+        )
+      })
+  }
+
+  // Clustered singleton sets carry `cluster_url` = /observations/:id.
+  // The popup lives at /observations/:id/map_popup.
+  markerPopupUrl(set) {
+    if (!set || !set.cluster_url) return null
+    const match = set.cluster_url.match(/^(\/observations\/\d+)(\?|$)/)
+    if (!match) return null
+    const base = match[1]
+    const query = set.cluster_url.slice(match[1].length) // preserves ?q=...
+    return `${base}/map_popup${query}`
   }
 
   //
@@ -298,29 +950,32 @@ export default class extends GeocodeController {
     const bounds = this.boundsOf(set)
     if (!bounds) return false
 
-    // Per-box color from the server (#4131). Rectangles are group markers
-    // so this is usually GROUP_COLOR, but honor whatever the server set.
+    // Per-box color from the server: the aggregated consensus color
+    // (#4159), or the location-only blue if no observations were in
+    // the set. Always honor whatever the server computed.
     const color = (set && set.color) || this.marker_color
+    const border = (set && set.border_style) || "crisp"
 
-    // If the rectangle would render sub-pixel at the current zoom, draw
-    // a standard-sized square marker at its center instead so it's still
-    // visible (#4131). Only applies to the info map; editable/location
-    // maps always get the real rectangle.
-    if (this.map_type === "info" && !this.editable &&
-        this.rectangleTooSmall(bounds)) {
-      this.drawBoxAsSquareMarker(set, color)
+    // Info maps: every multi-obs set renders as a fixed-size square
+    // marker at the box's center (#4159). The underlying extents
+    // surface as an outline overlay when the user clicks a
+    // location-only marker and the box is visibly larger than the
+    // marker footprint.
+    if (this.map_type === "info" && !this.editable) {
+      this.drawBoxAsSquareMarker(set, color, border)
       return
     }
 
-    const clickable = this.map_type === "info",
-      editable = this.editable && this.map_type !== "observation",
+    const editable = this.editable && this.map_type !== "observation",
       rectangleOptions = {
         strokeColor: color,
         strokeOpacity: 1,
         strokeWeight: 3,
+        fillColor: color,
+        fillOpacity: 0,
         map: this.map,
         bounds: bounds,
-        clickable: clickable,
+        clickable: false,
         draggable: false,
         editable: editable
       },
@@ -329,13 +984,44 @@ export default class extends GeocodeController {
     if (this.map_type === "observation") {
       // that's it. obs rectangles for MO locations are not clickable
       this.rectangle = rectangle
-    } else if (!this.editable) {
-      // there could be many, does not set this.rectangle
-      this.giveRectangleInfoWindow(rectangle, set)
     } else {
       this.rectangle = rectangle
-      // this.map.fitBounds(bounds) // Only fit bounds if it's a location map
       this.makeRectangleEditable()
+    }
+  }
+
+  // Location-only sets on info maps: draw the box outline at its true
+  // extents with no center marker. Opens the caption in an info window
+  // on click so clustered location maps keep their per-box popup.
+  drawLocationOutline(set) {
+    this.verbose("map:drawLocationOutline")
+    const bounds = this.boundsOf(set)
+    if (!bounds) return false
+
+    const color = (set && set.color) || this.marker_color
+    const rectangle = new google.maps.Rectangle({
+      strokeColor: color,
+      strokeOpacity: 1,
+      strokeWeight: 2,
+      fillColor: color,
+      fillOpacity: 0.25,
+      map: this.map,
+      bounds: bounds,
+      clickable: true,
+      draggable: false,
+      editable: false
+    })
+    if (set && set.caption) {
+      const info_window = new google.maps.InfoWindow({
+        content: set.caption,
+        position: bounds
+          ? { lat: (bounds.north + bounds.south) / 2,
+              lng: (bounds.east + bounds.west) / 2 }
+          : rectangle.getBounds().getCenter()
+      })
+      google.maps.event.addListener(rectangle, "click", () => {
+        info_window.open(this.map, rectangle)
+      })
     }
   }
 
@@ -369,26 +1055,40 @@ export default class extends GeocodeController {
   // Draws a square marker at the center of a box that's too small to
   // render as a rectangle. Visually distinct from single-observation
   // circle markers (square vs circle signals "group").
-  drawBoxAsSquareMarker(set, color) {
+  drawBoxAsSquareMarker(set, color, border = "crisp") {
     const marker = new google.maps.Marker({
       position: { lat: set.lat, lng: set.lng },
       map: this.map,
       title: set.title,
-      icon: this.colored_square_icon(color),
+      icon: this.colored_square_icon(color, border),
       zoomOnClick: false
     })
     this.giveMarkerInfoWindow(marker, set)
+    if (border === "none" && this.hasBoxExtents(set)) {
+      this.attachFuzzyBoxOverlay(marker, set)
+    }
   }
 
-  colored_square_icon(color) {
+  // Square marker used for every multi-obs set on info maps (#4159).
+  // Same fill/ring scheme as the single-obs dot — see
+  // colored_circle_icon.
+  colored_square_icon(color, border = "crisp") {
     return {
       path: "M -6 -6 L 6 -6 L 6 6 L -6 6 z",
       fillColor: color,
       fillOpacity: 1,
-      strokeColor: "#ffffff",
+      strokeColor: this.borderStrokeColor(border),
+      strokeOpacity: 1,
       strokeWeight: 1.5,
       scale: 1
     }
+  }
+
+  // Ring color by precision band (#4159).
+  borderStrokeColor(border) {
+    if (border === "none") return "#ffffff"
+    if (border === "dashed") return "#888888"
+    return "#333333"
   }
 
   // Add listeners to the rectangle for dragging and resizing (possibly also
@@ -409,22 +1109,6 @@ export default class extends GeocodeController {
       })
     })
     // }, 1000)
-  }
-
-  // For rectangles (there could be many on page): make a clickable info window
-  // https://stackoverflow.com/questions/26171285/googlemaps-api-rectangle-and-infowindow-coupling-issue
-  giveRectangleInfoWindow(rectangle, set) {
-    this.verbose("map:giveRectangleInfoWindow")
-    this.verbose(rectangle)
-
-    const center = rectangle.getBounds().getCenter()
-    const info_window = new google.maps.InfoWindow({
-      content: set.caption,
-      position: center
-    })
-    google.maps.event.addListener(rectangle, "click", () => {
-      info_window.open(this.map, rectangle)
-    })
   }
 
   //
@@ -775,17 +1459,57 @@ export default class extends GeocodeController {
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
 
-  // Colored circle icon for google.maps.Marker. Using SymbolPath.CIRCLE
-  // is the most compatible way to get per-marker fill colors on the
-  // classic Marker API without swapping to AdvancedMarkerElement.
-  colored_circle_icon(color) {
+  // Colored circle icon for google.maps.Marker. Fill is always the
+  // consensus color; the ring color encodes precision (#4159):
+  //   crisp  → dark ring   (precise GPS)
+  //   none   → white ring  (fuzzy / location-only)
+  //   dashed → gray ring   (mixed; only applies to multi-obs squares
+  //                         in practice, but harmless on dots too)
+  colored_circle_icon(color, border = "crisp") {
     return {
       path: google.maps.SymbolPath.CIRCLE,
       fillColor: color,
       fillOpacity: 1,
-      strokeColor: "#ffffff",
+      strokeColor: this.borderStrokeColor(border),
+      strokeOpacity: 1,
       strokeWeight: 1.5,
       scale: 8
     }
+  }
+
+  // When a location-only marker's popup is opened, overlay the
+  // region's bounding box as an outline so the uncertainty area is
+  // visible. Skipped when the extents don't render visibly larger
+  // than the marker itself (would just be a same-sized square on top
+  // of the marker). Google auto-closes the previously open
+  // InfoWindow when another opens but doesn't emit an event on the
+  // old one — so track a single controller-level overlay and clear
+  // it before adding a new one.
+  attachFuzzyBoxOverlay(marker, set) {
+    marker.addListener("click", () => {
+      this.clearFuzzyBoxOverlay()
+      const bounds = this.boundsOf(set)
+      if (!bounds || this.rectangleTooSmall(bounds)) return
+      this.fuzzyBoxOverlay = new google.maps.Rectangle({
+        strokeColor: set.color,
+        strokeOpacity: 1,
+        strokeWeight: 2,
+        fillColor: set.color,
+        fillOpacity: 0.25,
+        bounds: bounds,
+        clickable: false,
+        map: this.map
+      })
+    })
+    if (marker.infoWindow) {
+      marker.infoWindow.addListener("closeclick",
+                                    () => this.clearFuzzyBoxOverlay())
+    }
+  }
+
+  clearFuzzyBoxOverlay() {
+    if (!this.fuzzyBoxOverlay) return
+    this.fuzzyBoxOverlay.setMap(null)
+    this.fuzzyBoxOverlay = null
   }
 }

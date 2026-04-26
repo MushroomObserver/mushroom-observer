@@ -131,7 +131,9 @@ class MapTest < ComponentTestCase
                           observed_on: Date.new(2025, 1, 1))
     caption, color = parse_first_set(render_map_json([obs_a, obs_b, obs_c]))
 
-    assert_equal(Mappable::MapSet::GROUP_COLOR, color)
+    # All three members are confirmed (vote_cache 3.0), so the group
+    # inherits the confirmed band's color (#4159).
+    assert_equal(Mappable::MapSet::CONFIRMED_COLOR, color)
     # Most recent first.
     assert(caption.index("Newest sp.") < caption.index("Middle sp."),
            "Group popup should list most recent name first")
