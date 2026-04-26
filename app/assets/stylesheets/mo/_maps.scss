@@ -72,6 +72,14 @@
   overflow: auto !important;
   padding: 12px 12px 8px;
 }
+// The InfoWindow content has `overflow: auto`, which clips browser
+// focus rings on links/buttons that sit at the edge of the content
+// box. Pull the outline inside the element so it renders fully
+// without changing its visual weight.
+.gm-style-iw-d a:focus-visible,
+.gm-style-iw-d button:focus-visible {
+  outline-offset: -2px;
+}
 .gm-style-iw-chr {
   // Pull the close-X to the top-right corner without reserving a full
   // header row above the content.
@@ -97,9 +105,9 @@
   min-height: 300px;
 }
 
-// Legend rendered under every map by MapHelper#map_legend (#4131).
-// Two rows: shape meanings (circle vs. box) then color meanings
-// (consensus bands + group).
+// Legend rendered under maps with at least one observation by
+// MapHelper#map_legend (#4159). Two rows: border (precision) and
+// color (consensus).
 .map-legend {
   .map-legend-row {
     display: flex;
@@ -124,14 +132,30 @@
     flex-shrink: 0;
   }
 
-  .map-legend-circle {
-    border-radius: 50%;
-  }
-  // .map-legend-box swatch is the default square .map-legend-swatch.
-
   .map-legend-dot {
     border: 0;
     border-radius: 50%;
+  }
+
+  // Border-style swatches mirror the circular markers on the map:
+  // fill is a neutral gray; the ring color encodes precision.
+  //   crisp  — dark ring  (precise GPS)
+  //   dashed — gray ring  (mixed precision)
+  //   none   — white ring (fuzzy / location-only)
+  .map-legend-border-crisp,
+  .map-legend-border-dashed,
+  .map-legend-border-none {
+    border-radius: 50%;
+    background: #aaa;
+  }
+  .map-legend-border-crisp {
+    border: 2px solid #333;
+  }
+  .map-legend-border-dashed {
+    border: 2px solid #888;
+  }
+  .map-legend-border-none {
+    border: 2px solid #fff;
   }
 }
 
@@ -214,5 +238,67 @@
   > span + span::before,
   > a + a::before {
     content: none;
+  }
+}
+
+// Cluster popup (#4159). Members grouped by species, listed with
+// counts on the right and a "Click to zoom in" link underneath.
+.map-popup-cluster {
+  padding-right: 20px; // room for the close X
+  min-width: 260px;
+
+  .map-popup-cluster-header {
+    margin-bottom: 6px;
+  }
+  .map-popup-cluster-title {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  .map-popup-cluster-subtitle {
+    color: #666;
+    font-size: 12px;
+  }
+  .map-popup-cluster-actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .map-popup-cluster-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 240px;
+    overflow-y: auto;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 3px 0;
+      border-bottom: 1px solid #eee;
+
+      &:last-child { border-bottom: 0; }
+    }
+  }
+
+  .map-popup-cluster-name {
+    // Allow long species names to wrap rather than truncating with
+    // ellipsis; the previous `overflow: hidden` was clipping the
+    // focus outline on the link inside.
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+  .map-popup-cluster-count {
+    flex: 0 0 auto;
+    color: #2a6f2a;
+    font-size: 13px;
+  }
+  .map-popup-cluster-zoom-row {
+    text-align: center;
+    margin-top: 10px;
   }
 }
