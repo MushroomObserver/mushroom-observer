@@ -325,6 +325,14 @@ module Name::Taxonomy
   # updated_at or rss_log or anything.  Just changes the classification field
   # in the name records (discussion #4163 — was also fanning out to
   # name_descriptions and observations, both since dropped).
+  #
+  # `update_all` bypasses `acts_as_versioned`, so propagated subtaxa
+  # do *not* get a `name_versions` row for the change. This is
+  # intentional: a genus edit can touch tens of thousands of subtaxa
+  # and creating one version row per subtaxon would dominate the
+  # transaction. Direct edits via `Name#change_classification` (or
+  # the audit's per-Name path) still get versioned. See discussion
+  # #4163's "bulk-update paths" caveat.
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != "Genus"
