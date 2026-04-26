@@ -126,15 +126,12 @@ module Names
       @description = NameDescription.new
       @description.name = @name
 
-      # Create new description.
+      # Create new description. NameDescription has no validations
+      # (the only one was the classification syntax check, removed
+      # along with the column in #4163), so save always succeeds.
       @description.attributes = permitted_name_description_params
       @description.source_type = @description.source_type.to_sym
-      if @description.valid?
-        save_new_description_flash_and_redirect
-      else
-        flash_object_errors(@description)
-        render_new
-      end
+      save_new_description_flash_and_redirect
     end
 
     private
@@ -145,10 +142,6 @@ module Names
 
     def find_description_parent
       @name = Name.find(@description.parent_id.to_s)
-    end
-
-    def render_new
-      render("new", location: new_name_description_path(@name.id))
     end
 
     def render_edit
@@ -215,26 +208,22 @@ module Names
     end
 
     # called by :update
+    # NameDescription has no validations after #4163 — save can't
+    # return false, only raise — so the only branch is "no changes
+    # made" vs. "saved successfully".
     def save_updated_description_if_changed_or_flash
-      # No changes made.
-      if !@description.changed?
+      unless @description.changed?
         flash_warning(:runtime_edit_name_description_no_change.t)
-        render_edit
-
-      # Try to save and flash if there were error(s).
-      elsif !@description.save
-        flash_object_errors(@description)
-        render_edit
-
-      # Updated successfully.
-      else
-        flash_notice(
-          :runtime_edit_name_description_success.t(id: @description.id)
-        )
-        log_description_updated
-        resolve_merge_conflicts_and_delete_old_description # does not redirect
-        redirect_to(@description.show_link_args)
+        return render_edit
       end
+
+      @description.save
+      flash_notice(
+        :runtime_edit_name_description_success.t(id: @description.id)
+      )
+      log_description_updated
+      resolve_merge_conflicts_and_delete_old_description # does not redirect
+      redirect_to(@description.show_link_args)
     end
 
     # TODO: should public, public_write and source_type be removed from list?
