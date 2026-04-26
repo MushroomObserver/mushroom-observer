@@ -1106,6 +1106,91 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # -------- rescue Exception / non_rescuable? tests
+
+  def test_perform_records_unexpected_non_standard_exception
+    create_ivars_from_filename("calostoma_lutescens")
+    stub_token_requests
+    stub_check_username_match(@inat_import.inat_username)
+
+    job = InatImportJob.new
+    job.define_singleton_method(:import_requested_observations) do
+      raise(Exception.new("unexpected bare exception")) # rubocop:disable Lint/RaiseException
+    end
+
+    job.perform(@inat_import)
+
+    @inat_import.reload
+    assert_match(/unexpected bare exception/, @inat_import.response_errors,
+                 "Non-fatal Exception should be recorded in response_errors")
+    assert_equal("Done", @inat_import.state,
+                 "Import should be marked Done after unexpected exception")
+  end
+
+  def test_non_rescuable_true_for_remaining_fatal_types
+    job = InatImportJob.new
+
+    [NoMemoryError.new, SystemStackError.new, LoadError.new].each do |error|
+      assert(job.send(:non_rescuable?, error),
+             "#{error.class} should be non_rescuable")
+    end
+  end
+
+  # -------- safe_done tests
+
+  def test_safe_done_marks_import_done_normally
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    stub_inat_interactions
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_equal("Done", @inat_import.reload.state,
+                 "Import should be Done after successful job")
+    assert_not_nil(@inat_import.ended_at,
+                   "ended_at should be set after successful job")
+  end
+
+  def test_safe_done_reraises_when_done_fails_on_happy_path
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    job.define_singleton_method(:done) do
+      raise(StandardError.new("done failed"))
+    end
+
+    exception = nil
+    Rails.logger.stub(:error, nil) do
+      job.send(:safe_done)
+    rescue StandardError => e
+      exception = e
+    end
+    assert_not_nil(exception,
+                   "safe_done should re-raise when done fails with no " \
+                   "original exception in flight")
+  end
+
+  def test_safe_done_swallows_done_failure_when_handling_error
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    job.define_singleton_method(:done) do
+      raise(StandardError.new("done failed"))
+    end
+
+    swallowed = true
+    begin
+      raise(StandardError.new("original error"))
+    rescue StandardError
+      begin
+        job.send(:safe_done)
+      rescue StandardError
+        swallowed = false
+      end
+    end
+    assert(swallowed,
+           "safe_done should swallow done's exception when an error " \
+           "is already in flight")
+  end
+
   # -------- Other Utilities
 
   # Hack to turn results with many pages into results with one page
