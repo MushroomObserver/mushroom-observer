@@ -297,10 +297,23 @@ class CommentsController < ApplicationController
   end
 
   def refresh_comments_or_redirect_to_show
-    # Comment broadcasts are sent from the model
+    # Comment broadcasts are sent from the model.
+    # The turbo_stream response also closes the modal so the
+    # user doesn't have to wait for Action Cable delivery. The
+    # edit modal is "modal_comment_<id>"; the new modal is
+    # "modal_comment".
+    #
+    # `close_modal` runs Bootstrap's `$(el).modal('hide')` which removes
+    # the backdrop and the `modal-open` body class. We follow with
+    # `remove` to drop the modal element so the next "new comment" click
+    # fetches a fresh form.
     respond_to do |format|
-      # Simply send a head response for turbo here.
-      format.turbo_stream { head(:ok) }
+      format.turbo_stream do
+        modal_id = "modal_#{modal_identifier}"
+        render(turbo_stream:
+          turbo_stream.close_modal(modal_id) +
+          turbo_stream.remove(modal_id))
+      end
       format.html do
         redirect_to(@target.show_link_args)
       end

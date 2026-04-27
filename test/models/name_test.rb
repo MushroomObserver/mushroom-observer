@@ -2122,7 +2122,6 @@ class NameTest < UnitTestCase
     # Rolf erases notes: no emails (no authors yet), Rolf becomes editor.
     User.current = rolf
     desc.reload
-    desc.classification = ""
     desc.gen_desc = ""
     desc.diag_desc = ""
     desc.distribution = ""
@@ -3420,26 +3419,13 @@ class NameTest < UnitTestCase
                  Name.matching_desired_new_parsed_name(parsed).order(:author))
   end
 
-  def test_refresh_classification_caches
-    name = names(:coprinus_comatus)
-    bad  = name.classification = "Phylum: _Ascomycota_"
-    good = name.description.classification
-    name.save
-    assert_not_equal(good, bad)
-
-    Name.refresh_classification_caches
-    assert_equal(good, name.reload.classification)
-    assert_equal(good, name.description.reload.classification)
-  end
-
   def test_changing_classification_propagates_to_subtaxa
     name  = names(:coprinus)
     child = names(:coprinus_comatus)
     new_classification = names(:peltigera).classification
     assert_not_equal(new_classification, name.classification)
     assert_not_equal(new_classification, child.classification)
-    name.description.classification = new_classification
-    name.description.save
+    name.change_classification(new_classification)
     assert_equal(new_classification, name.reload.classification)
     assert_equal(new_classification, child.reload.classification)
   end
@@ -3623,6 +3609,75 @@ class NameTest < UnitTestCase
     names(:coprinus_comatus).update(deprecated: true)
     assert_names_equal(names(:stereum), names(:coprinus_comatus).accepted_genus)
     assert_names_equal(names(:stereum), names(:stereum_hirsutum).accepted_genus)
+  end
+
+  # `Name#classification_at_version` (#4166):
+  #   - returns the version row's own classification if it's set
+  #     (recorded source)
+  #   - else walks up to accepted_genus and finds the genus version
+  #     that was current at the time of this version's edit
+  #     (inherited source)
+  #   - else returns no value (page hides the panel)
+  def test_classification_at_version_recorded
+    name = names(:agaricus_campestras)
+    User.current = rolf
+    name.update!(classification: "Phylum: _Basidiomycota_")
+    v = name.versions.find_by(classification: "Phylum: _Basidiomycota_")
+
+    result = name.classification_at_version(v)
+    assert_equal("Phylum: _Basidiomycota_", result[:value])
+    assert_equal(:recorded, result[:source])
+  end
+
+  def test_classification_at_version_inherited_from_genus
+    genus = names(:agaricus)
+    species = names(:agaricus_campestras)
+    User.current = rolf
+    # Genus has a classified version row that pre-dates the species's
+    # NULL-classification version row — simulating the order of events
+    # when propagation silently updated the species without creating
+    # a version.
+    genus.update!(classification: "Phylum: _Basidiomycota_\r\nFamily: _New_")
+    genus_v = genus.versions.order(:version).last
+    genus_v.update_column(:updated_at, 3.days.ago)
+
+    species_v = species.versions.order(:version).first ||
+                species.versions.create!(classification: nil)
+    species_v.update_columns(classification: nil, updated_at: 1.day.ago)
+
+    result = species.classification_at_version(species_v)
+    assert_equal(genus_v.classification, result[:value])
+    assert_equal(:inherited, result[:source])
+    assert_equal(genus.id, result[:inherited_from][:name].id)
+    assert_equal(genus_v.version, result[:inherited_from][:version])
+  end
+
+  def test_classification_at_version_no_history_recoverable
+    # Above-genus name (no genus to walk up to) with NULL classification
+    # on its version row → :none.
+    name = names(:basidiomycota)
+    User.current = rolf
+    name.update!(classification: "Domain: _Eukarya_")
+    v = name.versions.order(:version).last
+    v.update_columns(classification: nil)
+
+    result = name.classification_at_version(v)
+    assert_nil(result[:value])
+    assert_equal(:none, result[:source])
+  end
+
+  # Empty string ≠ NULL: a deliberately-cleared classification should
+  # be reported as :recorded with the empty value, not silently
+  # backfilled from genus inheritance (#4166 Copilot review C5).
+  def test_classification_at_version_empty_string_is_recorded
+    species = names(:agaricus_campestras)
+    species_v = species.versions.order(:version).first ||
+                species.versions.create!(classification: "")
+    species_v.update_columns(classification: "")
+
+    result = species.classification_at_version(species_v)
+    assert_equal("", result[:value])
+    assert_equal(:recorded, result[:source])
   end
 
   def test_multiple_synonyms

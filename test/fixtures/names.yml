@@ -1393,7 +1393,7 @@ somion_unicolor:
   sort_name: Somion unicolor (Fr.)  Spirin & Miettinen
   rank: <%= Name.ranks[:Species] %>
 
-provisional_name:
+code_name:
   <<: *DEFAULTS
   text_name: "Cortinarius sp. 'IN34'"
   display_name: "**__Cortinarius__** sp. **__'IN34'__**"

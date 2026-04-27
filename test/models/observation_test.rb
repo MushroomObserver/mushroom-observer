@@ -1650,6 +1650,74 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  # `gps_hidden` obs keep their private GPS out of the GPS-match path
+  # but remain reachable via their labeled location center. See
+  # Observation::Scopes#gps_in_box / #cached_location_center_in_box
+  # (#4159).
+  def test_scope_in_box_excludes_gps_hidden_from_gps_path
+    burbank = locations(:burbank)
+    lat = burbank.center_lat
+    lng = burbank.center_lng
+    obs_hidden = Observation.create!(
+      user: rolf, when: Time.zone.now,
+      location: burbank, lat: lat, lng: lng, gps_hidden: true
+    )
+    obs_hidden.update_columns(
+      location_lat: burbank.center_lat,
+      location_lng: burbank.center_lng
+    )
+    assert_not(obs_hidden.gps_dubious,
+               "Burbank GPS inside Burbank bbox shouldn't be dubious")
+
+    # gps_in_box directly: hidden obs must be excluded despite having
+    # lat/lng inside the search box (leak prevention).
+    assert_not_includes(
+      Observation.gps_in_box(Mappable::Box.new(**cal_box)).map(&:id),
+      obs_hidden.id,
+      "gps_hidden obs must not match gps_in_box via its private GPS"
+    )
+
+    # End-to-end in_box still finds it — the location center falls in
+    # the cal bbox, so the location-center fallback catches it.
+    assert_includes(
+      Observation.in_box(**cal_box).map(&:id), obs_hidden.id,
+      "gps_hidden obs whose location center is in the box should " \
+      "still be returned by in_box via the location-center path"
+    )
+  end
+
+  # `gps_dubious` obs (GPS >50 km from label bbox) don't match the
+  # GPS path but do match via their labeled location center (#4159).
+  def test_scope_in_box_excludes_gps_dubious_from_gps_path
+    nybg = locations(:nybg_location)
+    burbank = locations(:burbank)
+    # Label = NYBG, GPS = Burbank — they're ~4000 km apart, so
+    # before_save sets gps_dubious = true.
+    obs_dubious = Observation.create!(
+      user: rolf, when: Time.zone.now,
+      location: nybg, lat: burbank.center_lat, lng: burbank.center_lng
+    )
+    obs_dubious.update_columns(
+      location_lat: nybg.center_lat, location_lng: nybg.center_lng
+    )
+    assert(obs_dubious.gps_dubious,
+           "Burbank GPS on an NYBG-labeled obs should be dubious")
+
+    # Must not leak into a California search via the (wrong) GPS.
+    assert_not_includes(
+      Observation.in_box(**cal_box).map(&:id), obs_dubious.id,
+      "gps_dubious obs must not match a California in_box search " \
+      "via its out-of-box GPS"
+    )
+
+    # Still reachable via an NYBG-box search — the label is trusted.
+    assert_includes(
+      Observation.in_box(**nybg_box).map(&:id), obs_dubious.id,
+      "gps_dubious obs should still match in_box when the labeled " \
+      "location center falls in the search box"
+    )
+  end
+
   def test_scope_in_box_with_taxon
     args = { north: "36.2718",
              south: "29.852",

@@ -1,17 +1,21 @@
 # frozen_string_literal: true
 
 module ChecklistHelper
-  def checklist_name_link(taxon:, params:, data:, project: nil,
-                          user: nil)
+  def checklist_name_link(taxon:, data:, context:,
+                          link_to_name_page: false)
     name, name_id, deprecated, synonym_id = taxon
-    link = checklist_name_link_path(name_id, params)
+    link = if link_to_name_page
+             name_path(name_id)
+           else
+             checklist_name_link_path(name_id, context.link_params)
+           end
     content = checklist_name_content(name, name_id, deprecated,
                                      synonym_id, data)
     li_class = target_name?(name_id, data) ? "checklist-target-name" : nil
 
     tag.li(class: li_class) do
       link_to(link) { content } +
-        checklist_target_remove_button(project, name_id, user)
+        checklist_target_remove_button(context, name_id)
     end
   end
 
@@ -24,13 +28,13 @@ module ChecklistHelper
     content
   end
 
-  def checklist_target_remove_button(project, name_id, user)
-    return "".html_safe unless project&.is_admin?(user)
-    return "".html_safe unless target_name_for_project?(project,
+  def checklist_target_remove_button(context, name_id)
+    return "".html_safe unless context.admin?
+    return "".html_safe unless target_name_for_project?(context.project,
                                                         name_id)
 
     button_to(
-      project_target_name_path(project_id: project.id, id: name_id),
+      project_target_name_path(project_id: context.project.id, id: name_id),
       method: :delete,
       class: "btn btn-link text-danger p-0 ml-1",
       form: { data: {

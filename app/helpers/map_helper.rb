@@ -1,18 +1,44 @@
 # frozen_string_literal: true
 
 module MapHelper
+  include MapLegendHelper
+  include MapPopupHelper
+
+  # Upper bound on points for client-side dynamic clustering
+  # (issue #4159). The controller truncates at this cap and surfaces
+  # a banner so the user knows to narrow by filter or by zooming in.
+  # The client-side viewport refetch (also keyed off this cap) will
+  # pull in the in-viewport subset when the user zooms/pans.
+  CLUSTER_MAX_OBJECTS = 10_000
+
   # args could include query_param.
   # returns an array of mapsets, each suitable for a marker or box
   def make_map(objects: [], **args)
     nothing_to_map = args[:nothing_to_map] || :runtime_map_nothing_to_map.t
-    # There's nothing to map if the location is unknown.
-    objects = objects.reject do |obj|
+    objects = reject_unknown_locations(objects)
+    return tag.div(nothing_to_map, class: "w-100") unless objects.any?
+
+    map_args = build_map_args(objects, args, nothing_to_map)
+    safe_join([map_html(map_args), map_legend(objects: objects)])
+  end
+
+  def reject_unknown_locations(objects)
+    objects.reject do |obj|
       name = obj.respond_to?(:location) ? obj.location&.name : obj.name
       Location.is_unknown?(name)
     end
-    return tag.div(nothing_to_map, class: "w-100") unless objects.any?
+  end
 
-    default_args = {
+  def build_map_args(objects, args, nothing_to_map)
+    map_args = default_map_args.
+               merge(args.except(:nothing_to_map, :clustering))
+    add_collection_to_args(map_args, objects, args)
+    map_args[:localization] = build_localization(nothing_to_map).to_json
+    map_args
+  end
+
+  def default_map_args
+    {
       map_div: "map_div",
       controller: "map",
       map_target: "mapDiv",
@@ -21,18 +47,94 @@ module MapHelper
       map_open: true,
       editable: false,
       controls: [:large_map, :map_type].to_json,
-      location_format: User.current_location_format # method has a default
+      location_format: User.current_location_format
     }
-    map_args = default_args.merge(args.except(:nothing_to_map))
-    map_args[:collection] = mappable_collection(objects, map_args).to_json
-    map_args[:localization] = {
+  end
+
+  def add_collection_to_args(map_args, objects, args)
+    if args[:clustering] && objects.size <= CLUSTER_MAX_OBJECTS
+      map_args[:collection] = clustered_collection(objects, map_args).to_json
+      map_args[:clustering] = true
+    else
+      map_args[:collection] = mappable_collection(objects, map_args).to_json
+    end
+  end
+
+  def build_localization(nothing_to_map)
+    {
       nothing_to_map: nothing_to_map,
       observations: :Observations.t,
       locations: :Locations.t,
       show_all: :show_all.t,
-      map_all: :map_all.t
-    }.to_json
-    map_html(map_args)
+      map_all: :map_all.t,
+      # Raw template — the client substitutes `[loaded]` / `[total]`
+      # with the formatted counts on each refetch. We bypass MO's
+      # `:sym.t` extension to skip textile processing (double-
+      # underscore placeholders would be italicized, etc.) and look
+      # up the key directly under MO's locale namespace. Banner text
+      # has no textile markup, so the raw string matches what the
+      # ERB-rendered version produces (#4159).
+      map_cap_banner: I18n.t("#{MO.locale_namespace}.map_cap_banner")
+    }
+  end
+
+  # Clustering mode (issue #4159): skip server-side geographic
+  # bucketing. Each mappable object becomes a singleton MapSet so the
+  # client can feed every observation marker through
+  # @googlemaps/markerclusterer and group them dynamically at zoom.
+  #
+  # Returns a shape compatible with CollapsibleCollectionOfObjects —
+  # a `sets` hash plus the `extents` / `representative_points`
+  # derived attributes — so the existing JS collection consumer
+  # doesn't have to branch on payload shape.
+  def clustered_collection(objects, args)
+    sets = {}
+    objects.each do |obj|
+      set = Mappable::MapSet.new([obj])
+      set.color = set.compute_color
+      set.glyph = set.compute_glyph
+      set.border_style = set.compute_border_style
+      set.title = mapset_marker_title(set)
+      # caption is intentionally omitted — the client lazy-loads it
+      # from observations/maps#popup on marker click. Rendering N
+      # thumbnail-bearing popups at bulk-fetch time dominated refetch
+      # cost (#4159).
+      set.cluster_name = cluster_object_label(obj)
+      set.cluster_url = cluster_object_url(obj, args)
+      set.objects = nil
+      sets[singleton_key(obj)] = set
+    end
+    Mappable::ClusteredCollection.new(sets)
+  end
+
+  # Plain text name grouping-key used by cluster popups — authors are
+  # stripped by using the obs's `text_name` (fall back to the stringified
+  # display_name for locations / unexpected shapes).
+  def cluster_object_label(obj)
+    return obj.text_name if obj.respond_to?(:text_name) &&
+                            obj.text_name.present?
+    return obj.display_name.to_s if obj.respond_to?(:display_name)
+
+    ""
+  end
+
+  def cluster_object_url(obj, args)
+    params = args[:query_param] ? { q: args[:query_param] } : {}
+    if obj.respond_to?(:observation?) && obj.observation?
+      observation_path(id: obj.id, params: params)
+    elsif obj.respond_to?(:location?) && obj.location?
+      location_path(id: obj.id, params: params)
+    else
+      ""
+    end
+  end
+
+  # Unique key per mappable object for the sets hash. MinimalObservation
+  # IDs start at 1; Location objects share the integer space but
+  # carry their own ids.
+  def singleton_key(obj)
+    prefix = obj.respond_to?(:observation?) && obj.observation? ? "o" : "l"
+    "#{prefix}#{obj.id}"
   end
 
   # Returns a CollapsibleCollection of mapsets, containing all data necessary
@@ -49,6 +151,9 @@ module MapHelper
   def mappable_collection(objects, args)
     collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
     collection.sets.map do |_key, mapset|
+      mapset.color = mapset.compute_color
+      mapset.glyph = mapset.compute_glyph
+      mapset.border_style = mapset.compute_border_style
       mapset.title = mapset_marker_title(mapset)
       mapset.caption = mapset_info_window(mapset, args)
       mapset.objects = nil # can't delete, it's part of the MapSet object
@@ -58,8 +163,7 @@ module MapHelper
   end
 
   def map_html(map_args)
-    tag.div(class: "w-100 position-relative",
-            style: "padding-bottom: 66%;") do
+    tag.div(class: "w-100 position-relative map-container") do
       tag.div(
         "",
         id: map_args[:map_div],
@@ -102,111 +206,5 @@ module MapHelper
         end
       end
     end.compact_blank.uniq
-  end
-
-  def mapset_info_window(set, args)
-    lines = []
-    observations = set.observations
-    locations = set.underlying_locations
-    lines << mapset_observation_header(set) if observations.length > 1
-    lines << mapset_location_header(set) if locations.length > 1
-    if observations.length == 1 && observations.first&.id
-      lines << mapset_observation_link(observations.first, args)
-    end
-    if locations.length == 1 && locations.first&.id # obj maybe not saved yet
-      lines << mapset_location_link(locations.first, args)
-    end
-    lines << mapset_coords(set)
-    lines.safe_join(safe_br)
-  end
-
-  def mapset_observation_header(set)
-    show, map = mapset_associated_links(set, :observation)
-    map_point_text(:Observations.t, set.observations.length, show, map)
-  end
-
-  def mapset_location_header(set)
-    show, map = mapset_associated_links(set, :location)
-    map_point_text(:Locations.t, set.underlying_locations.length, show, map)
-  end
-
-  def map_point_text(label, count, show, map)
-    label.html_safe << ": " << count.to_s << " (" << show << " | " << map << ")"
-  end
-
-  # Links to obs, locs or names within the current mapset, or maps of these
-  def mapset_associated_links(set, type)
-    return unless [:observation, :location, :name].include?(type)
-
-    mapset_associated_links_for_type(set, type)
-  end
-
-  # Helper for the above
-  def mapset_associated_links_for_type(set, type)
-    query_type = type.to_s.camelize.to_sym
-    path_helper = :"#{type.to_s.pluralize}_path"
-    # We probably already have a query, from the index that got us here.
-    # This will correctly merge the in_box param into the query.
-    query = controller.
-            find_or_create_query(query_type, in_box: mapset_box_params(set))
-    # Add the query params to the link data for debugging.
-    # Can remove when we start splatting query params in the URL.
-    [link_to(:show_all.t, add_q_param(send(path_helper), query),
-             data: query.params),
-     link_to(:map_all.t, add_q_param(send(:"map_#{path_helper}"), query),
-             data: query.params)]
-  end
-
-  def mapset_observation_link(obs, args)
-    params = args[:query_param] ? { q: args[:query_param] } : {}
-    link_to("#{:Observation.t} ##{obs.id}",
-            observation_path(id: obs.id, params: params))
-  end
-
-  def mapset_location_link(loc, args)
-    params = args[:query_param] ? { q: args[:query_param] } : {}
-    link_to(loc.display_name.t, location_path(id: loc.id, params: params))
-  end
-
-  # These are query params for the links back to MO indexes, slightly enlarged
-  def mapset_box_params(set)
-    { north: tweak_up(set.north, 0.001, 90),
-      south: tweak_down(set.south, 0.001, -90),
-      east: tweak_up(set.east, 0.001, 180),
-      west: tweak_down(set.west, 0.001, -180) }
-  end
-
-  def tweak_up(value, amount, max)
-    [max, value.to_f + amount].min
-  end
-
-  def tweak_down(value, amount, min)
-    [min, value.to_f - amount].max
-  end
-
-  # These are coords printed in text
-  def mapset_coords(set)
-    if set.is_point
-      format_latitude(set.lat) + safe_nbsp + format_longitude(set.lng)
-    else
-      content_tag(:center,
-                  format_latitude(set.north) + safe_br +
-                  format_longitude(set.west) + safe_nbsp +
-                  format_longitude(set.east) + safe_br +
-                  format_latitude(set.south))
-    end
-  end
-
-  def format_latitude(val)
-    format_lxxxitude(val, "N", "S")
-  end
-
-  def format_longitude(val)
-    format_lxxxitude(val, "E", "W")
-  end
-
-  def format_lxxxitude(val, dir1, dir2)
-    deg = val.abs.round(4)
-    "#{deg}°#{val.negative? ? dir2 : dir1}".html_safe
   end
 end

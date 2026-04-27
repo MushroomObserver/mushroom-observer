@@ -225,10 +225,16 @@ module Tabs
       external_name_tab("Wikipedia", name, wikipedia_term_search_url(name))
     end
 
+    # Drop `add_q_param` here so the link always lands on the full
+    # distribution map for the name. Carrying the current query
+    # context inherits whatever filters happen to be in scope —
+    # notably an `in_box` filter from a prior map popup's
+    # Show All / Map All click — which silently restricts the map
+    # to that bbox (issue #4139).
     def occurrence_map_for_name_tab(name)
       InternalLink::Model.new(
         :show_name_distribution_map.t, name,
-        add_q_param(map_name_path(id: name.id)),
+        map_name_path(id: name.id),
         html_options: { data: { action: "links#disable" } }
       ).tab
     end

@@ -59,3 +59,246 @@
   height:      15px;
   background-position: 0px 15px;
 }
+
+//
+// Google Maps InfoWindow popup content (issue #4131).
+// Tighten the default iw chrome and style the .media popup for
+// single-observation markers so the image and text sit snug together.
+//
+.gm-style-iw-c {
+  padding: 0 !important;
+}
+.gm-style-iw-d {
+  overflow: auto !important;
+  padding: 12px 12px 8px;
+}
+// The InfoWindow content has `overflow: auto`, which clips browser
+// focus rings on links/buttons that sit at the edge of the content
+// box. Pull the outline inside the element so it renders fully
+// without changing its visual weight.
+.gm-style-iw-d a:focus-visible,
+.gm-style-iw-d button:focus-visible {
+  outline-offset: -2px;
+}
+.gm-style-iw-chr {
+  // Pull the close-X to the top-right corner without reserving a full
+  // header row above the content.
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+}
+
+// Map container sizing (#4131 follow-up).
+//
+// Keep the 3:2 aspect ratio for narrow viewports, but cap the height
+// relative to the browser window so the map + legend still fit on
+// screen when the window is wide (e.g. a typical laptop where 66% of
+// a wide content column would overflow the viewport).
+//
+// Using CSS aspect-ratio rather than the old padding-bottom trick —
+// padding isn't constrained by max-height, so the previous attempt
+// silently did nothing on wide windows.
+.map-container {
+  aspect-ratio: 3 / 2;
+  max-height: calc(100vh - 240px); // leaves room for nav + title + legend
+  min-height: 300px;
+}
+
+// Legend rendered under maps with at least one observation by
+// MapHelper#map_legend (#4159). Two rows: border (precision) and
+// color (consensus).
+.map-legend {
+  .map-legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 4px;
+  }
+
+  .map-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .map-legend-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #888;
+    background: transparent;
+    flex-shrink: 0;
+  }
+
+  .map-legend-dot {
+    border: 0;
+    border-radius: 50%;
+  }
+
+  // Border-style swatches mirror the circular markers on the map:
+  // fill is a neutral gray; the ring color encodes precision.
+  //   crisp  — dark ring  (precise GPS)
+  //   dashed — gray ring  (mixed precision)
+  //   none   — white ring (fuzzy / location-only)
+  .map-legend-border-crisp,
+  .map-legend-border-dashed,
+  .map-legend-border-none {
+    border-radius: 50%;
+    background: #aaa;
+  }
+  .map-legend-border-crisp {
+    border: 2px solid #333;
+  }
+  .map-legend-border-dashed {
+    border: 2px solid #888;
+  }
+  .map-legend-border-none {
+    border: 2px solid #fff;
+  }
+}
+
+.map-popup {
+  font-size: 13px;
+  line-height: 1.35;
+  min-width: 200px;
+  max-width: 320px;
+
+  a { color: $link-color; }
+
+  // Thumbnail link + image — strip everything that could draw an edge
+  // (link underline, Bootstrap .thumbnail styling, focus outline, box
+  // shadow). Do NOT touch .media-left itself — its display:table-cell
+  // is what makes the Bootstrap .media layout keep text on the right.
+  .media-left a,
+  .media-object.map-popup-thumb {
+    display: block !important;
+    text-decoration: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  // Suppress only the persistent mouse-click outline; keep the
+  // browser's default keyboard-focus indicator on :focus-visible so
+  // keyboard users still see where focus lands.
+  .media-left a:focus:not(:focus-visible) {
+    outline: 0;
+  }
+
+  .media-object.map-popup-thumb {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 4px !important;
+    margin: 0;
+    vertical-align: top;
+  }
+
+  .media-heading {
+    font-size: 14px;
+    margin: 0 0 2px;
+  }
+
+  .small {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  // "N Observations [Show All] [Map All]" row sits on its own line
+  // with a little breathing room before the name links below it.
+  .map-popup-header {
+    margin-bottom: 8px;
+  }
+
+  // Show All / Map All buttons inside group popups. The native focus
+  // outline is distracting when it persists after a mouse click in a
+  // small popup; suppress it only for that case via
+  // :focus:not(:focus-visible). Keyboard users still get the browser's
+  // default focus indicator (via :focus-visible), and the rule also
+  // degrades gracefully in browsers without :focus-visible support
+  // (the whole rule is ignored, so outlines remain everywhere).
+  .map-popup-btn {
+    margin-left: 6px;
+
+    &:focus:not(:focus-visible) {
+      outline: 0;
+    }
+  }
+}
+
+.map-popup-single {
+  padding-right: 20px; // room for the close X
+}
+
+.map-popup-group {
+  padding-right: 20px; // room for the close X
+  > span + span::before,
+  > a + a::before {
+    content: none;
+  }
+}
+
+// Cluster popup (#4159). Members grouped by species, listed with
+// counts on the right and a "Click to zoom in" link underneath.
+.map-popup-cluster {
+  padding-right: 20px; // room for the close X
+  min-width: 260px;
+
+  .map-popup-cluster-header {
+    margin-bottom: 6px;
+  }
+  .map-popup-cluster-title {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  .map-popup-cluster-subtitle {
+    color: #666;
+    font-size: 12px;
+  }
+  .map-popup-cluster-actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .map-popup-cluster-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 240px;
+    overflow-y: auto;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 3px 0;
+      border-bottom: 1px solid #eee;
+
+      &:last-child { border-bottom: 0; }
+    }
+  }
+
+  .map-popup-cluster-name {
+    // Allow long species names to wrap rather than truncating with
+    // ellipsis; the previous `overflow: hidden` was clipping the
+    // focus outline on the link inside.
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+  .map-popup-cluster-count {
+    flex: 0 0 auto;
+    color: #2a6f2a;
+    font-size: 13px;
+  }
+  .map-popup-cluster-zoom-row {
+    text-align: center;
+    margin-top: 10px;
+  }
+}

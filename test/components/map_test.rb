@@ -94,4 +94,92 @@ class MapTest < ComponentTestCase
 
     assert_html(html, "#map_div")
   end
+
+  # ------------------------------------------------------------------
+  # #4131 popup content + marker color
+  # ------------------------------------------------------------------
+
+  def test_single_observation_popup_carries_color_name_date_consensus
+    # Confirmed consensus (>= 80%) → green color.
+    obs = build_min_obs(lat: 34.1, lng: -118.3, vote_cache: 2.4,
+                        text_name: "Agaricus campestris",
+                        observed_on: Date.new(2024, 5, 1))
+    caption, color = parse_first_set(render_map_json([obs]))
+
+    assert_equal(Mappable::MapSet::CONFIRMED_COLOR, color,
+                 "80% consensus should yield green")
+    assert_includes(caption, "Agaricus campestris")
+    assert_includes(caption, 'target="_blank"')
+    assert_includes(caption, 'rel="noopener noreferrer"')
+    assert_match(/May 1, 2024|2024-05-01/, caption)
+    # Plain "Confidence: NN%" text — no pill/dot markup inside the popup;
+    # the marker color on the map is the visual cue.
+    assert_match(/Confidence:\s*80%/, caption)
+    assert_not_includes(caption, "●")
+    assert_not_includes(caption, "nowrap")
+  end
+
+  def test_multi_observation_popup_lists_recent_names_and_no_date
+    obs_a = build_min_obs(lat: 10, lng: 10, vote_cache: 3.0,
+                          text_name: "Oldest sp.",
+                          observed_on: Date.new(2020, 1, 1))
+    obs_b = build_min_obs(lat: 10, lng: 10, vote_cache: 3.0,
+                          text_name: "Middle sp.",
+                          observed_on: Date.new(2023, 1, 1))
+    obs_c = build_min_obs(lat: 10, lng: 10, vote_cache: 3.0,
+                          text_name: "Newest sp.",
+                          observed_on: Date.new(2025, 1, 1))
+    caption, color = parse_first_set(render_map_json([obs_a, obs_b, obs_c]))
+
+    # All three members are confirmed (vote_cache 3.0), so the group
+    # inherits the confirmed band's color (#4159).
+    assert_equal(Mappable::MapSet::CONFIRMED_COLOR, color)
+    # Most recent first.
+    assert(caption.index("Newest sp.") < caption.index("Middle sp."),
+           "Group popup should list most recent name first")
+    assert(caption.index("Middle sp.") < caption.index("Oldest sp."))
+    # No consensus dot / percentage line for groups.
+    assert_no_match(/\d+%/, caption,
+                    "Group popup should omit consensus %")
+  end
+
+  def test_multi_observation_popup_ellipses_beyond_three
+    four_obs = Array.new(4) do |i|
+      build_min_obs(lat: 5, lng: 5, vote_cache: 3.0,
+                    text_name: "Species #{i}",
+                    observed_on: Date.new(2020 + i, 1, 1))
+    end
+    caption, _color = parse_first_set(render_map_json(four_obs))
+
+    assert_includes(caption, "Species 3")
+    assert_includes(caption, "Species 2")
+    assert_includes(caption, "Species 1")
+    assert_not_includes(caption, "Species 0")
+    assert_includes(caption, "…")
+  end
+
+  private
+
+  # `observed_on:` avoids `when` — a Ruby keyword that can't be used
+  # as a method argument name — and maps to the model's `when:` attr.
+  def build_min_obs(lat:, lng:, vote_cache:, text_name: nil, observed_on: nil)
+    Mappable::MinimalObservation.new(
+      id: rand(1_000_000),
+      lat: lat, lng: lng,
+      name_id: 1, text_name: text_name,
+      when: observed_on,
+      vote_cache: vote_cache
+    )
+  end
+
+  def render_map_json(objects)
+    html = render(Components::Map.new(objects: objects))
+    doc = Nokogiri::HTML(html)
+    JSON.parse(doc.at_css("#map_div")["data-collection"])
+  end
+
+  def parse_first_set(collection)
+    set = collection["sets"].values.first
+    [set["caption"], set["color"]]
+  end
 end

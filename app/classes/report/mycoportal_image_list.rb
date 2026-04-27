@@ -48,14 +48,16 @@ module Report
 
     def image_list
       rows_data =
-        Image.joins(:observations).
+        Image.joins(:observations, :user, :license).
         where(observations: { id: @query.result_ids }).
         # MCP doesn't care about order, but our tests do.
         order(observation_id: :asc, id: :asc).
-        pluck(:observation_id, :id)
+        pluck(:observation_id, :id,
+              Image[:copyright_holder],
+              User[:name], User[:login], License[:url])
 
       ::CSV.generate(col_sep: ",", encoding: "UTF-8") do |csv|
-        csv << %w[catalogNumber imageId]
+        csv << %w[catalogNumber imageId rights]
         rows_data.each do |row|
           csv << formatted_row(row)
         end
@@ -63,7 +65,20 @@ module Report
     end
 
     def formatted_row(row)
-      [catalog_number(row.first), large_image_url(row.last)]
+      obs_id, image_id, copyright_holder, user_name, user_login, license_url =
+        row
+      [catalog_number(obs_id), large_image_url(image_id),
+       rights(copyright_holder, user_name, user_login, license_url)]
+    end
+
+    def rights(copyright_holder, user_name, user_login, license_url)
+      name = copyright_holder.presence ||
+             unique_text_name(user_name, user_login)
+      License.rights_string(name, license_url)
+    end
+
+    def unique_text_name(name, login)
+      name.blank? ? login : "#{name} (#{login})"
     end
 
     def catalog_number(observation_id)
