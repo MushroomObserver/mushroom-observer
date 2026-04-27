@@ -123,17 +123,10 @@ module Descriptions::Moves
       #   desc.ok_for_export = src.ok_for_export
       # end
 
-      # This can really gum up the works and it's really hard to figure out
-      # what the problem is when it occurs, since error message is cryptic.
-      if @dest.is_a?(Name) && desc.classification.present?
-        begin
-          Name.validate_classification(@dest.rank, desc.classification)
-        rescue StandardError => e
-          flash_error(:runtime_description_move_invalid_classification.t)
-          flash_error(e.to_s)
-          desc.classification = ""
-        end
-      end
+      # The classification-validation block that lived here is gone
+      # along with the description column itself (discussion #4163).
+      # Classification belongs to Name now, so moving a description
+      # between Names doesn't carry classification with it.
 
       # Okay, *now* we can try to save the new description...
       if desc.save

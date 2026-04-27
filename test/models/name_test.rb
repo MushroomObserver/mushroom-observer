@@ -2114,7 +2114,6 @@ class NameTest < UnitTestCase
     # Rolf erases notes: no emails (no authors yet), Rolf becomes editor.
     User.current = rolf
     desc.reload
-    desc.classification = ""
     desc.gen_desc = ""
     desc.diag_desc = ""
     desc.distribution = ""
@@ -3412,26 +3411,13 @@ class NameTest < UnitTestCase
                  Name.matching_desired_new_parsed_name(parsed).order(:author))
   end
 
-  def test_refresh_classification_caches
-    name = names(:coprinus_comatus)
-    bad  = name.classification = "Phylum: _Ascomycota_"
-    good = name.description.classification
-    name.save
-    assert_not_equal(good, bad)
-
-    Name.refresh_classification_caches
-    assert_equal(good, name.reload.classification)
-    assert_equal(good, name.description.reload.classification)
-  end
-
   def test_changing_classification_propagates_to_subtaxa
     name  = names(:coprinus)
     child = names(:coprinus_comatus)
     new_classification = names(:peltigera).classification
     assert_not_equal(new_classification, name.classification)
     assert_not_equal(new_classification, child.classification)
-    name.description.classification = new_classification
-    name.description.save
+    name.change_classification(new_classification)
     assert_equal(new_classification, name.reload.classification)
     assert_equal(new_classification, child.reload.classification)
   end

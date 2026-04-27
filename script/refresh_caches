@@ -13,7 +13,6 @@
 #    Synonym.make_sure_all_referenced_synonyms_exist
 #    Name.fix_self_referential_misspellings
 #    Name.make_sure_names_are_bolded_correctly
-#    Name.refresh_classification_caches
 #    Name.propagate_generic_classifications (currently disabled)
 #    Observation.make_sure_no_observations_are_misspelled
 #    Observation.refresh_content_filter_caches
@@ -62,8 +61,6 @@ msgs = progress("unused or missing synonyms...",
                 Name, :fix_self_referential_misspellings) +
        progress("misformatted names...",
                 Name, :make_sure_names_are_bolded_correctly) +
-       progress("classification caches...",
-                Name, :refresh_classification_caches) +
        # progress("generic classifications...",
        #          Name, :propagate_generic_classifications) +
        progress("misspelled observations...",

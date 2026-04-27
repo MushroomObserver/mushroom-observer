@@ -36,7 +36,6 @@ class InatObsTest < UnitTestCase
       needs_naming: false,
       # name_id needs work
       name_id: names(:somion_unicolor).id,
-      classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Polyporales_\r\nFamily: _Cerrenaceae_\r\n", # rubocop:disable Layout/LineLength
       lifeform: " ",
 
       # miscellaneous
