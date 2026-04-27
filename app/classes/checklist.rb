@@ -5,11 +5,6 @@
 #  This class calculates a checklist of species observed by users,
 #  projects, etc.
 #
-#  == Class Methods
-#
-#  all_site_taxa_by_user::  Calculate checklist taxon stats for all users
-#                           (only the stats, not the names)
-#
 #  == Methods
 #
 #  num_genera::      Number of genera seen.
@@ -276,62 +271,6 @@ class Checklist
   def counts
     calc_counts unless @counts
     @counts
-  end
-
-  # `+` here is Arel extensions shorthand for `CONCAT`
-  # The group statement is to be sure names without synonyms are sorted
-  # separately in the array by giving all of them negative values in the group.
-  # The idea is that we don't want those with synonyms and those without
-  # to overlap; putting them last is arbitrary.
-  # rubocop:disable Style/StringConcatenation
-  def self.all_site_taxa_by_user
-    synonym_map = {}
-
-    synonyms = Name.connection.select_rows(
-      Name.select(
-        Arel.sql("GROUP_CONCAT(names.id)"),
-        (Name[:deprecated].cast("char") + "," +
-         Name[:text_name].cast("char") + "," +
-         Name[:id].cast("char") + "," +
-         Name[:rank].cast("char")).minimum
-      ).group(
-        Name[:synonym_id].when(present?).then(Name[:synonym_id]).
-        else(Name[:id] * -1)
-      )
-    )
-    synonyms.each do |row|
-      ids, tuple = *row
-      ids.split(",").each { |id| synonym_map[id.to_i] = tuple }
-    end
-
-    calculate_taxa_by_user(synonym_map)
-  end
-  # rubocop:enable Style/StringConcatenation
-
-  private_class_method def self.calculate_taxa_by_user(synonym_map)
-    taxa = {}
-    genera = {}
-    species = {}
-    genus_ranks = Name.genus_display_ranks
-    Observation.select(:user_id, :name_id).each do |row|
-      user_id = row[:user_id]
-      name_id = row[:name_id]
-      _dep, text_name, _id, rank = *synonym_map[name_id].split(",")
-      g, s = *text_name.split
-      taxa[user_id] ||= {}
-      genera[user_id] ||= {}
-      species[user_id] ||= {}
-      taxa[user_id][text_name] = true
-      genera[user_id][g] = true if genus_ranks.include?(rank.to_i)
-      if rank.to_i <= Name.ranks[:Species]
-        species[user_id][[g, s].join(" ")] = true
-      end
-    end
-
-    { users: taxa.keys,
-      taxa: taxa.transform_values(&:size),
-      genera: genera.transform_values(&:size),
-      species: species.transform_values(&:size) }
   end
 
   private
