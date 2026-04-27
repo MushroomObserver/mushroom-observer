@@ -181,6 +181,56 @@ module Name::Taxonomy
       end
   end
 
+  # Best-effort classification value for a given Name version row.
+  #
+  # Discussion #4163 / issue #4166 — `Name#propagate_classification` and
+  # the audit's pre-Phase-3 `update_all` paths bypass `acts_as_versioned`
+  # entirely, so subtaxa version rows often have NULL classification
+  # despite the name having had a real classification at the time.
+  # When that happens we walk one step up to `accepted_genus` and find
+  # the genus version that was current at the time of this version's
+  # edit. The genus's own change history captures the propagation event
+  # we're missing on the subtaxon.
+  #
+  # `version_row` is a `Name::Version` (typically the result of looking
+  # up `name.versions.find_by(version: …)`).
+  #
+  # Returns a Hash:
+  #   { value:, source: :recorded }
+  #     — the version row's own classification was set
+  #   { value:, source: :inherited, inherited_from: { name:, version:,
+  #                                                   edited_at:, user_id: } }
+  #     — value comes from accepted_genus's matching version
+  #   { value: nil, source: :none }
+  #     — no classification recoverable; the show page should hide the
+  #       panel rather than guess
+  #
+  # Only one ancestor step (subtaxon → genus). Genus → family etc. is
+  # left to a richer audit-trail mechanism (#3846, Phase 7).
+  def classification_at_version(version_row)
+    return { value: version_row.classification, source: :recorded } \
+      if version_row.classification.present?
+
+    genus = accepted_genus
+    return { value: nil, source: :none } unless genus
+
+    genus_v = genus.versions.where(updated_at: ..version_row.updated_at).
+              order(version: :desc).first
+    return { value: nil, source: :none } unless genus_v
+    return { value: nil, source: :none } if genus_v.classification.blank?
+
+    {
+      value: genus_v.classification,
+      source: :inherited,
+      inherited_from: {
+        name: genus,
+        version: genus_v.version,
+        edited_at: genus_v.updated_at,
+        user_id: genus_v.user_id
+      }
+    }
+  end
+
   # Returns an Array of all Name's in the rank above that contain this Name.
   # If there are multiple names at a given rank, it prefers accepted, non-sensu
   # names, but beyond that it chooses the first one arbitrarily.  It ignores
