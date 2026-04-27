@@ -52,11 +52,20 @@ QUIET = quiet
 NO_EMAIL = no_email
 
 def stale_observations
+  # Pick one representative Naming per obs (the lowest-id matching one)
+  # so an obs with multiple Namings at its consensus name doesn't show
+  # up multiple times in the alert. Also LEFT JOIN users so we don't
+  # do a `User.find_by` per row when formatting (the alert can list up
+  # to 50 obs).
   sql = <<~SQL.squish
     SELECT obs.id, obs.created_at, obs.updated_at, obs.user_id,
-           obs.source, obs.inat_id, n.id, n.vote_cache
+           obs.source, obs.inat_id, n.id, n.vote_cache, u.login
     FROM observations obs
-    JOIN namings n ON n.observation_id = obs.id AND n.name_id = obs.name_id
+    JOIN namings n ON n.id = (
+      SELECT MIN(n2.id) FROM namings n2
+      WHERE n2.observation_id = obs.id AND n2.name_id = obs.name_id
+    )
+    LEFT JOIN users u ON u.id = obs.user_id
     WHERE ABS(IFNULL(obs.vote_cache, 0)) < 0.01
       AND IFNULL(n.vote_cache, 0) > 0.01
     ORDER BY obs.created_at DESC
@@ -64,17 +73,26 @@ def stale_observations
   ActiveRecord::Base.connection.execute(sql).to_a
 end
 
+# `obs.source` is a Rails enum stored as integer (e.g. 5 for
+# `mo_inat_import`). The raw SQL select returns the integer; map
+# back to the symbolic key for human-readable diagnostics.
+def source_label(source_value)
+  return nil if source_value.nil?
+
+  Observation.sources.key(source_value) ||
+    Observation.sources.key(source_value.to_i)
+end
+
 def format_obs_line(row)
   obs_id, created_at, updated_at, user_id, source, inat_id,
-    naming_id, naming_vc = row
-  user = User.find_by(id: user_id)
-  format("- obs %d: %s/names/observations/%d\n    " \
+    naming_id, naming_vc, user_login = row
+  format("- obs %d: %s\n    " \
          "user %d (%s), created %s, updated %s\n    " \
          "source=%s, inat_id=%s, naming %d vc=%.3f",
-         obs_id, MO.http_domain, obs_id,
-         user_id, user&.login || "?",
+         obs_id, Observation.show_url(obs_id),
+         user_id, user_login || "?",
          created_at, updated_at,
-         source.inspect, inat_id.inspect,
+         source_label(source).inspect, inat_id.inspect,
          naming_id, naming_vc.to_f)
 end
 
