@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "English"
+
 class InatImportJob < ApplicationJob
   attr_accessor :inat_import
 
@@ -22,8 +24,21 @@ class InatImportJob < ApplicationJob
   rescue StandardError => e
     log("Error occurred: #{e.message}")
     inat_import.add_response_error(e)
+  # Intentional: catch non-StandardError exceptions so they are logged
+  # and recorded on the import record rather than silently lost.
+  rescue Exception => e # rubocop:disable Lint/RescueException
+    # Re-raise shutdown signals so the worker shuts down cleanly.
+    # ensure still runs during unwinding; the $ERROR_INFO check below skips
+    # safe_done so the record stays Importing and the recovery job cleans it up.
+    raise if non_rescuable?(e)
+
+    log("Unexpected error: #{e.message}")
+    inat_import&.add_response_error(e.message)
   ensure
-    done
+    # Skip safe_done on shutdown signals: leave the record in Importing state
+    # so SolidQueue can requeue the job. The recovery job will finalize it
+    # if the worker is killed before the job can be retried.
+    safe_done unless non_rescuable?($ERROR_INFO)
   end
 
   private
@@ -154,6 +169,27 @@ class InatImportJob < ApplicationJob
     inat_import.add_response_error(
       :inat_unlicensed_obs_summary.t(count: unlicensed_obs)
     )
+  end
+
+  def non_rescuable?(error)
+    error.is_a?(SignalException) ||
+      error.is_a?(SystemExit) ||
+      error.is_a?(NoMemoryError) ||
+      error.is_a?(SystemStackError) ||
+      error.is_a?(ScriptError)
+  end
+
+  def safe_done
+    original_exception = $ERROR_INFO
+    done
+  rescue StandardError => e
+    Rails.logger.error(
+      "InatImportJob: done failed for import #{inat_import&.id}: #{e.message}"
+    )
+    # Re-raise if done failed on the happy path so the job fails visibly
+    # and SolidQueue can retry. Swallow only when already handling an error,
+    # so the original exception is not masked.
+    raise unless original_exception
   end
 
   def done

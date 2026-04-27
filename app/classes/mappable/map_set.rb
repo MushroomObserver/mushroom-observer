@@ -27,19 +27,23 @@
 #
 module Mappable
   class MapSet
-    # Marker colors used in the map popup enhancement (issue #4131).
-    # Groups / multi-observation / box markers get the neutral blue.
-    # Single-observation markers use a traffic-light palette based on the
-    # consensus vote percentage.
-    GROUP_COLOR = "#3B79CC" # bootstrap primary
+    # Marker colors. Color is driven purely by observation consensus:
+    # a set whose members all fall in the same consensus band gets that
+    # band's traffic-light color; a mix of bands gets MIXED_COLOR. Sets
+    # containing only locations (no observations) fall back to
+    # LOCATION_ONLY_COLOR — there's no vote information to classify.
+    # See issue #4159.
     CONFIRMED_COLOR = "#5CB85C" # >=80% — bootstrap success
     TENTATIVE_COLOR = "#F0AD4E" # 0<x<80% — bootstrap warning
     DISPUTED_COLOR  = "#D9534F" # <=0% — bootstrap danger
+    MIXED_COLOR     = "#C69B71" # observations in different consensus bands
+    LOCATION_ONLY_COLOR = "#3B79CC" # bootstrap primary; no obs to classify
 
     attr_reader :north, :south, :east, :west, :is_point, :is_box,
                 :north_east, :south_east, :south_west, :north_west, :lat, :lng,
                 :north_south_distance, :east_west_distance, :center, :edges
-    attr_accessor :objects, :title, :caption, :color
+    attr_accessor :objects, :title, :caption, :color, :glyph, :border_style,
+                  :cluster_name, :cluster_url
 
     def initialize(objects = [])
       @objects = objects.is_a?(Array) ? objects : [objects]
@@ -81,16 +85,61 @@ module Mappable
     end
 
     # Hex color for the marker or box stroke.
-    # - Blue for groups (>1 observation or location-only).
-    # - Single observations: traffic-light based on consensus %.
+    # Aggregates the consensus bands of the set's observations:
+    # - All observations in the same band → that band's color.
+    # - Observations spanning multiple bands → MIXED_COLOR.
+    # - No observations (location-only set) → LOCATION_ONLY_COLOR.
     def compute_color
-      return GROUP_COLOR unless single_observation?
+      bands = observations.map { |o| consensus_band(o) }.uniq
+      return LOCATION_ONLY_COLOR if bands.empty?
+      return MIXED_COLOR if bands.length > 1
 
-      pct = ::Vote.percent(observations.first.vote_cache)
-      return DISPUTED_COLOR if pct <= 0
-      return CONFIRMED_COLOR if pct >= 80
+      case bands.first
+      when :confirmed then CONFIRMED_COLOR
+      when :tentative then TENTATIVE_COLOR
+      when :disputed then DISPUTED_COLOR
+      end
+    end
 
-      TENTATIVE_COLOR
+    def consensus_band(obs)
+      pct = ::Vote.percent(obs.vote_cache)
+      return :disputed if pct <= 0
+      return :confirmed if pct >= 80
+
+      :tentative
+    end
+
+    # Glyph:
+    #   :dot       — a single observation (rendered as a circle marker)
+    #   :square    — multiple observations (rendered as a square marker
+    #                at the box center on info maps)
+    #   :rectangle — no observations; a location-only set whose box
+    #                should render as the bare outline (#4159).
+    def compute_glyph
+      return :rectangle if observations.empty?
+      return :dot if single_observation?
+
+      :square
+    end
+
+    # Border style:
+    # :crisp  — every observation has precise GPS (or the set is
+    #           location-only, whose boundary is precise by definition).
+    # :none   — no observation in the set has usable GPS.
+    # :dashed — a mix of precise and location-only observations.
+    def compute_border_style
+      obs = observations
+      return :crisp if obs.empty? # location-only
+
+      with_gps = obs.count { |o| observation_has_gps?(o) }
+      return :crisp if with_gps == obs.length
+      return :none if with_gps.zero?
+
+      :dashed
+    end
+
+    def observation_has_gps?(obs)
+      obs.lat.present? && obs.lng.present? && !obs.lat_lng_dubious?
     end
 
     def observations
