@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_20_173244) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -557,6 +557,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_20_173244) do
     t.decimal "location_lat", precision: 15, scale: 10
     t.decimal "location_lng", precision: 15, scale: 10
     t.integer "occurrence_id"
+    t.boolean "gps_dubious", default: false, null: false
     t.index ["location_id"], name: "index_observations_on_location_id"
     t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"

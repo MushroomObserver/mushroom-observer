@@ -134,39 +134,60 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_taxa)
   end
 
-  # Test that checklist uses bounding box matching, not exact location match
+  # Checklist#ForProject filters obs via `within_locations`, which
+  # runs `in_box` under the hood — so obs match not only via exact
+  # `location_id` equality but also via their cached location center
+  # (or their own GPS when the label agrees). Obs whose GPS falls in
+  # the target's bbox but whose label points somewhere else are
+  # `gps_dubious` and deliberately excluded (#4159: label wins).
   def test_checklist_for_project_uses_bounding_box_matching
     proj = projects(:bolete_project)
     target_location = locations(:albion)
 
-    # Create observation with exact location match
+    # Obs with exact location match — counts via cached location center.
     obs_exact = Observation.create!(
       name: names(:coprinus_comatus),
       user: mary,
       location: target_location,
       when: Time.zone.now
     )
+    obs_exact.update_columns(
+      location_lat: target_location.center_lat,
+      location_lng: target_location.center_lng
+    )
     proj.observations << obs_exact
 
-    # Create observation with GPS coords inside bounding box but different
-    # location_id
-    obs_gps_inside = Observation.create!(
+    # Obs at the target with GPS inside the target — GPS and label
+    # agree, so it matches via the GPS path.
+    obs_gps_agreeing = Observation.create!(
       name: names(:coprinus_comatus),
       user: mary,
-      location: locations(:burbank), # Different location
-      lat: target_location.center_lat, # But GPS inside albion's box
+      location: target_location,
+      lat: target_location.center_lat,
       lng: target_location.center_lng,
       when: Time.zone.now
     )
-    proj.observations << obs_gps_inside
+    proj.observations << obs_gps_agreeing
+
+    # Obs at a DIFFERENT location with GPS inside the target's bbox.
+    # GPS disagrees with the label, so it's gps_dubious (#4159) and
+    # excluded from GPS searches. Should NOT be counted here.
+    obs_with_dubious_gps = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: mary,
+      location: locations(:burbank),
+      lat: target_location.center_lat,
+      lng: target_location.center_lng,
+      when: Time.zone.now
+    )
+    proj.observations << obs_with_dubious_gps
 
     data = Checklist::ForProject.new(proj, target_location)
-
-    # Both observations should be counted (bounding box matching)
     assert_equal(
       2, data.counts["Coprinus comatus"],
-      "Checklist should count observations with GPS coords inside bounding " \
-      "box, not just exact location matches"
+      "Checklist should count obs whose label or GPS-agreeing-with-label " \
+      "position falls inside the target, and exclude obs whose GPS " \
+      "contradicts their stated location."
     )
   end
 

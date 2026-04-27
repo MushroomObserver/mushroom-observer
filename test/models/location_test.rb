@@ -555,6 +555,31 @@ class LocationTest < UnitTestCase
                  "Opposite side of globe should not be 'close' to Location.")
   end
 
+  # BoxMethods#km_from_point on a box that straddles the antimeridian
+  # exercises the dateline branch of `lng_inside?`: a point is inside
+  # when it's either >= west (east hemisphere side of the wrap) or
+  # <= east (west hemisphere side). Both "inside" cases must return
+  # zero distance; points outside the wrap must return positive km.
+  def test_km_from_point_on_dateline_wrapping_box
+    loc = locations(:east_lt_west_location)
+    lat = (loc.north + loc.south) / 2.0
+
+    assert_in_delta(
+      0, loc.km_from_point(lat, loc.west + 0.1), 1e-6,
+      "A point east of `west` on a wrapping box is inside the box."
+    )
+    assert_in_delta(
+      0, loc.km_from_point(lat, loc.east - 0.1), 1e-6,
+      "A point west of `east` on a wrapping box is inside the box."
+    )
+
+    # Antipodal longitude (roughly 0° here) is in the non-wrapped gap
+    # between east and west, so it should be clearly outside.
+    assert_operator(loc.km_from_point(lat, 0.0), :>, 0,
+                    "A point in the non-wrapped longitude gap is " \
+                    "outside the box.")
+  end
+
   # ----------------------------------------------------
   #  Scopes
   #    Explicit tests of some scopes to improve coverage

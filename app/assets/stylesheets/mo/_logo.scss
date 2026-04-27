@@ -5,3 +5,11 @@
 #logo_link:hover {
   background-color: transparent;
 }
+
+// The link sits at the top of the sidebar and its parent column has
+// horizontal overflow constraints; the keyboard focus ring renders
+// outside the link's box and gets clipped at the bottom. Pull the
+// outline inside so the full ring is visible.
+#logo_link:focus-visible {
+  outline-offset: -2px;
+}
