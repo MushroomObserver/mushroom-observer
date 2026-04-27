@@ -13,9 +13,17 @@ class Lookup::Names < Lookup
   def lookup_ids
     return [] if @vals.blank?
 
+    # No final pass to re-synonymize the sub-taxa expansion. A
+    # deprecated subtaxon that shares a synonym group with a
+    # current-name species in a different clade would otherwise drag
+    # that unrelated species in (e.g., an `Agaricus` search would
+    # match Protostropharia semiglobata via `Agaricus semiglobatus`).
+    # Deprecated variants that really are in the target clade are
+    # expected to surface through the sub-taxa expansion on their own
+    # classification (see Name#propagate_classification). See
+    # discussion #4154.
     names = add_synonyms_if_necessary(original_names)
-    names_plus_subtaxa = add_subtaxa_if_necessary(names)
-    names = add_synonyms_again(names, names_plus_subtaxa)
+    names = add_subtaxa_if_necessary(names)
     names -= original_names if @params[:exclude_original_names]
     names.map(&:id)
   end
@@ -127,17 +135,6 @@ class Lookup::Names < Lookup
       add_immediate_subtaxa(names)
     else
       names
-    end
-  end
-
-  def add_synonyms_again(names, names_plus_subtaxa)
-    if names.length >= names_plus_subtaxa.length
-      names
-    elsif @params[:include_synonyms] &&
-          @params[:include_subtaxa_synonyms] != false
-      add_synonyms(names_plus_subtaxa)
-    else
-      names_plus_subtaxa
     end
   end
 

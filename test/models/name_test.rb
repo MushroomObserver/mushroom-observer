@@ -1884,8 +1884,14 @@ class NameTest < UnitTestCase
   end
 
   def test_ancestors_2
-    # use Petigera instead of Peltigera because it has no classification string
-    pet = names(:petigera)
+    # Need a deprecated genus with NO classification string to exercise
+    # the fallback path in all_parents / children. Petigera used to
+    # serve this purpose, but it now carries a classification (see
+    # #4154), so we synthesize an equivalent fixture here.
+    pet = create_test_name("Petigera")
+    pet.update!(deprecated: true, classification: nil,
+                correct_spelling: names(:peltigera),
+                synonym_id: names(:peltigera).synonym_id)
     assert_name_arrays_equal([], pet.all_parents)
     assert_name_arrays_equal([], pet.children)
 
@@ -1984,8 +1990,10 @@ class NameTest < UnitTestCase
 
   def test_ancestors_3
     # Names with Ascomycota in classification OR search_name starting with it.
-    # Includes: Ascomycota itself + Ascomycetes through Peltigera.
-    assert_equal(5, Name.classification_has("Ascomycota").count)
+    # Includes: Ascomycota itself + Ascomycetes through Peltigera, plus
+    # Petigera (deprecated misspelling of Peltigera, whose fixture now
+    # also carries the classification — see #4154).
+    assert_equal(6, Name.classification_has("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
