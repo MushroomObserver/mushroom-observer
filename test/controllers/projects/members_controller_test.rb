@@ -163,6 +163,147 @@ module Projects
                    project.observations.count)
     end
 
+    # issue #4129: already-added obs are not re-added by a second click
+    def test_member_add_obs_dedup
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      project.add_observations(target_user.observations)
+      before_count = project.observations.count
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_add_obs.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(before_count, project.observations.count,
+                   "Second add should be a no-op when all already in project")
+    end
+
+    # issue #4129: hard cap limits the number added per click
+    def test_member_add_obs_caps_at_limit
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      assert_operator(target_user.observations.count, :>=, 2,
+                      "Test assumes target user has ≥2 obs not in project")
+      before_count = project.observations.count
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_add_obs.l
+      }
+      Projects::MembersController.stub(:add_obs_batch_limit, 1) do
+        put_requires_login(:update, params, target_user.login)
+      end
+      assert_equal(before_count + 1, project.observations.count,
+                   "Cap should limit one click to add_obs_batch_limit obs")
+    end
+
+    # issue #4129: cap adds most-recent (highest id) first
+    def test_member_add_obs_adds_most_recent_first
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      expected_id = target_user.observations.order(id: :desc).first.id
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_add_obs.l
+      }
+      Projects::MembersController.stub(:add_obs_batch_limit, 1) do
+        put_requires_login(:update, params, target_user.login)
+      end
+      assert_includes(project.observations.reload.map(&:id), expected_id,
+                      "Cap should pick most-recent obs first")
+    end
+
+    # issue #4129: flash reports count actually added
+    def test_member_add_obs_flash_count
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_add_obs.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      count = target_user.observations.count
+      assert_flash_text(/Added #{count} Observations/)
+    end
+
+    # issue #4129: modal returns count of matching obs not in project
+    def test_add_obs_modal_returns_turbo_stream_with_count
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_match(
+        /#{target_user.observations.count}/, @response.body,
+        "Modal body should include count of matching observations"
+      )
+    end
+
+    # issue #4129: modal count excludes observations already in project
+    def test_add_obs_modal_excludes_already_in_project
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      project.add_observations(target_user.observations)
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_match(/None of your observations/, @response.body,
+                   "Modal should show 'none' when all obs already added")
+    end
+
+    # issue #4129: one-sided date bounds must also constrain the count.
+    # `no_end_date_project` has start_date = tomorrow, end_date = nil.
+    # Every observation in fixtures was recorded in the past, so none
+    # should match a "found on or after tomorrow" lower bound.
+    def test_add_obs_modal_respects_start_date_only
+      target_user = rolf
+      project = projects(:no_end_date_project)
+      project.user_group.users << target_user
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_match(/None of your observations/, @response.body,
+                   "Start-date-only project should exclude obs before start")
+    end
+
+    # `no_start_date_project` has end_date = yesterday, start_date = nil.
+    # Any observation recorded after yesterday should be excluded.
+    def test_add_obs_modal_respects_end_date_only
+      target_user = rolf
+      project = projects(:no_start_date_project)
+      project.user_group.users << target_user
+      # Move all of target_user's obs into the future so the end_date
+      # bound is what filters them out (not some other constraint).
+      target_user.observations.update_all(when: Time.zone.tomorrow)
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_match(/None of your observations/, @response.body,
+                   "End-date-only project should exclude obs after end")
+    end
+
+    # issue #4129: modal requires the candidate to match current user
+    def test_add_obs_modal_denies_non_self
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(mary.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_redirected_to(project_members_path(project.id))
+    end
+
     # member sharing matching observations
     def test_member_add_constrainted_obs
       target_user = project_members(:eol_member_katrina).user
