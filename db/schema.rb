@@ -453,6 +453,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_26_000004) do
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.integer "icn_id"
     t.text "classification"
+    t.index ["name_id", "version"], name: "index_name_versions_on_name_id_and_version"
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
