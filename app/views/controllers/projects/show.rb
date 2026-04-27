@@ -167,15 +167,14 @@ module Views
         end
 
         def render_add_obs_button
-          put_button(
-            name: :change_member_add_obs.t,
-            class: "btn btn-default btn-lg",
-            path: project_member_path(
+          modal_link_to(
+            "add_obs",
+            :change_member_add_obs.t,
+            add_obs_modal_project_member_path(
               project_id: @project.id,
-              candidate: @user.id,
-              commit: :change_member_add_obs.l,
-              target: :project_index
-            )
+              candidate: @user.id
+            ),
+            { class: "btn btn-default btn-lg" }
           )
         end
 
