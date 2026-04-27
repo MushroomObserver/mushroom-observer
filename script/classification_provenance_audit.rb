@@ -130,15 +130,26 @@ log("Loading genera into memory…")
 genera_by_text = load_genera_by_text_name
 log("  #{genera_by_text.size} unique genus text_names")
 
-log("Scanning all names…")
+# Bucket non-genus rows row-by-row, but dedupe genera by text_name so
+# Phase 4's "how many genera need classification" answer counts unique
+# taxonomic concepts, not the handful of duplicate accepted/deprecated/
+# sensu rows that share a text_name. (Non-genus duplicates are still
+# row-counted; a similar dedupe pass for those is a separate refinement.)
+log("Scanning non-genus names…")
 counts = Hash.new(0)
 processed = 0
-Name.find_each(batch_size: 5000) do |name|
+Name.where.not(rank: Name.ranks[:Genus]).find_each(batch_size: 5000) do |name|
   bucket = bucket_for(name, lookup_genus(name, genera_by_text))
   counts[bucket] += 1
   processed += 1
   log("  #{processed} processed") if (processed % 20_000).zero?
 end
-log("Scanned #{processed} names")
+log("Scanned #{processed} non-genus names")
+
+log("Bucketing genera (one representative per unique text_name)…")
+genera_by_text.each_value do |_text_name, classification, _deprecated, _author|
+  counts[classification.blank? ? "no_classification" : "genus_curator"] += 1
+end
+log("Bucketed #{genera_by_text.size} unique genus text_names")
 
 report(counts)
