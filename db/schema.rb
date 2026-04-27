@@ -915,7 +915,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.integer "votes", default: 0, null: false
     t.string "languages"
     t.string "bonuses"
-    t.string "checklist"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "user_index"

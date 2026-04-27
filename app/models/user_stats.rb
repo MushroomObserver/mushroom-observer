@@ -65,7 +65,6 @@
 #
 #  languages::
 #  bonuses::
-#  checklists::
 #
 # rubocop:disable Metrics/ClassLength
 class UserStats < ApplicationRecord
@@ -75,7 +74,6 @@ class UserStats < ApplicationRecord
   # automatically with YAML and stored as plain old text strings.
   serialize :languages, type: Hash, coder: YAML
   serialize :bonuses, coder: YAML
-  serialize :checklist, type: Hash, coder: YAML
 
   ALL_FIELDS = {
     name_description_authors: { weight: 100 },
@@ -96,8 +94,7 @@ class UserStats < ApplicationRecord
     comments: { weight: 1 },
     votes: { weight: 1 },
     translation_strings: { weight: 1 },
-    languages: { weight: 0, default: {} },
-    checklist: { weight: 0, default: {} }
+    languages: { weight: 0, default: {} }
   }.freeze
 
   # Sum up all the bonuses the User has earned.
@@ -204,8 +201,6 @@ class UserStats < ApplicationRecord
                        refresh_translation_strings
                      when "languages"
                        refresh_languages
-                     when "checklist"
-                       refresh_checklist
                      when /^(\w+)_versions/
                        parent_type = $LAST_MATCH_INFO[1]
                        refresh_versions(parent_type, field)
@@ -346,18 +341,6 @@ class UserStats < ApplicationRecord
       end
     end
 
-    def refresh_checklist
-      checklist_data = Checklist.all_site_taxa_by_user
-      checklist_data[:users].to_h do |user_id|
-        checklist_hash = {
-          taxa: checklist_data[:taxa][user_id],
-          genera: checklist_data[:genera][user_id],
-          species: checklist_data[:species][user_id]
-        }
-        [user_id, { checklist: checklist_hash }]
-      end
-    end
-
     # For each record we're about to update, check for incomplete entries that
     # the counters may have added - having a `user_id` but lacking an `id`.
     # Check that is an existing user and fill out the rest of the attributes
@@ -481,8 +464,6 @@ class UserStats < ApplicationRecord
               count_translation_strings(user_id, by_lang: false)
             when "languages"
               count_translation_strings(user_id, by_lang: true)
-            when "checklist"
-              count_checklist(user_id)
             when /^(\w+)_versions/
               parent_type = $LAST_MATCH_INFO[1]
               count_versions(parent_type, user_id)
@@ -525,12 +506,6 @@ class UserStats < ApplicationRecord
     all.to_h do |lang|
       [locale_index[lang.language_id], lang.cnt]
     end
-  end
-
-  # Gets checklist counts to save as a serialized hash
-  def count_checklist(user_id)
-    cl = Checklist::ForUser.new(User.find(user_id))
-    { taxa: cl.num_taxa, genera: cl.num_genera, species: cl.num_species }
   end
 
   # This counts versions where the editor was not the original author
