@@ -3603,6 +3603,61 @@ class NameTest < UnitTestCase
     assert_names_equal(names(:stereum), names(:stereum_hirsutum).accepted_genus)
   end
 
+  # `Name#classification_at_version` (#4166):
+  #   - returns the version row's own classification if it's set
+  #     (recorded source)
+  #   - else walks up to accepted_genus and finds the genus version
+  #     that was current at the time of this version's edit
+  #     (inherited source)
+  #   - else returns no value (page hides the panel)
+  def test_classification_at_version_recorded
+    name = names(:agaricus_campestras)
+    User.current = rolf
+    name.update!(classification: "Phylum: _Basidiomycota_")
+    v = name.versions.find_by(classification: "Phylum: _Basidiomycota_")
+
+    result = name.classification_at_version(v)
+    assert_equal("Phylum: _Basidiomycota_", result[:value])
+    assert_equal(:recorded, result[:source])
+  end
+
+  def test_classification_at_version_inherited_from_genus
+    genus = names(:agaricus)
+    species = names(:agaricus_campestras)
+    User.current = rolf
+    # Genus has a classified version row that pre-dates the species's
+    # NULL-classification version row — simulating the order of events
+    # when propagation silently updated the species without creating
+    # a version.
+    genus.update!(classification: "Phylum: _Basidiomycota_\r\nFamily: _New_")
+    genus_v = genus.versions.order(:version).last
+    genus_v.update_column(:updated_at, 3.days.ago)
+
+    species_v = species.versions.order(:version).first ||
+                species.versions.create!(classification: nil)
+    species_v.update_columns(classification: nil, updated_at: 1.day.ago)
+
+    result = species.classification_at_version(species_v)
+    assert_equal(genus_v.classification, result[:value])
+    assert_equal(:inherited, result[:source])
+    assert_equal(genus.id, result[:inherited_from][:name].id)
+    assert_equal(genus_v.version, result[:inherited_from][:version])
+  end
+
+  def test_classification_at_version_no_history_recoverable
+    # Above-genus name (no genus to walk up to) with NULL classification
+    # on its version row → :none.
+    name = names(:basidiomycota)
+    User.current = rolf
+    name.update!(classification: "Domain: _Eukarya_")
+    v = name.versions.order(:version).last
+    v.update_columns(classification: nil)
+
+    result = name.classification_at_version(v)
+    assert_nil(result[:value])
+    assert_equal(:none, result[:source])
+  end
+
   def test_multiple_synonyms
     name1 = names(:chlorophyllum_rachodes)
     name2 = names(:macrolepiota_rachodes)

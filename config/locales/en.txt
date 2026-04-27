@@ -2474,6 +2474,7 @@
 
   # names/versions/show
   show_past_name_title: "[:VERSION] [num]: [name]"
+  show_past_name_classification_inherited: "Inherited from [name]'s reclassification on [date] by [user]"
 
   # names/descriptions/versions/show
   show_past_name_description_title: "[:VERSION] [num]: [name]"
