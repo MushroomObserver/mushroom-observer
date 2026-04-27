@@ -1177,7 +1177,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     swallowed = true
-    begin
+    Rails.logger.stub(:error, nil) do
       raise(StandardError.new("original error"))
     rescue StandardError
       begin
