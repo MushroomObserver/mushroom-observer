@@ -322,7 +322,7 @@ def sync_synonym_classification(name_ids, classification)
     Name.where(id: name_ids).find_each do |name|
       name.skip_notify = true
       name.classification = classification
-      name.save(validate: false)
+      name.save!(validate: false)
     end
   end
 end

@@ -29,7 +29,7 @@ column_classes(:six)
                editor = src[:user_id] && User.find_by(id: src[:user_id]) %>
             <%= tag.p(class: "text-muted small mt-2") do
                   :show_past_name_classification_inherited.t(
-                    name: link_to(src[:name].user_display_name(@user),
+                    name: link_to(src[:name].user_display_name(@user).t,
                                   name_path(src[:name].id)),
                     date: src[:edited_at].to_date.to_s,
                     user: editor ? editor.unique_text_name : "—"

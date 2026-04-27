@@ -187,37 +187,51 @@ module Name::Taxonomy
   # the audit's pre-Phase-3 `update_all` paths bypass `acts_as_versioned`
   # entirely, so subtaxa version rows often have NULL classification
   # despite the name having had a real classification at the time.
-  # When that happens we walk one step up to `accepted_genus` and find
-  # the genus version that was current at the time of this version's
-  # edit. The genus's own change history captures the propagation event
-  # we're missing on the subtaxon.
+  # When that happens we walk one step up to the genus implied by the
+  # version row's own `text_name` (not via today's synonym graph) and
+  # find the genus version that was current at the time of this
+  # version's edit.
+  #
+  # We use `version_row.text_name` rather than `accepted_genus` so the
+  # answer reflects historical state: `synonym_id` is non-versioned on
+  # Name, so today's synonym graph isn't a reliable proxy for the
+  # placement at the time of version_row. Splitting the historical
+  # text_name and looking up the matching genus row gives us the
+  # placement that was actually current then.
   #
   # `version_row` is a `Name::Version` (typically the result of looking
   # up `name.versions.find_by(version: …)`).
   #
   # Returns a Hash:
   #   { value:, source: :recorded }
-  #     — the version row's own classification was set
+  #     — the version row's own classification was set (including the
+  #       case where it was deliberately cleared to "")
   #   { value:, source: :inherited, inherited_from: { name:, version:,
   #                                                   edited_at:, user_id: } }
-  #     — value comes from accepted_genus's matching version
+  #     — value comes from the inferred genus's matching version
   #   { value: nil, source: :none }
   #     — no classification recoverable; the show page should hide the
   #       panel rather than guess
   #
   # Only one ancestor step (subtaxon → genus). Genus → family etc. is
   # left to a richer audit-trail mechanism (#3846, Phase 7).
+  #
+  # Inheritance only fires when the version row's classification is
+  # genuinely NULL. An empty string is treated as "deliberately
+  # cleared" — recorded with no value — so the panel hides rather
+  # than backfilling from genus.
   def classification_at_version(version_row)
-    return { value: version_row.classification, source: :recorded } \
-      if version_row.classification.present?
+    unless version_row.classification.nil?
+      return { value: version_row.classification, source: :recorded }
+    end
 
-    genus = accepted_genus
+    genus = genus_for_version(version_row)
     return { value: nil, source: :none } unless genus
 
     genus_v = genus.versions.where(updated_at: ..version_row.updated_at).
+              where.not(classification: nil).
               order(version: :desc).first
     return { value: nil, source: :none } unless genus_v
-    return { value: nil, source: :none } if genus_v.classification.blank?
 
     {
       value: genus_v.classification,
@@ -229,6 +243,22 @@ module Name::Taxonomy
         user_id: genus_v.user_id
       }
     }
+  end
+
+  # Resolve the genus that was current at the time of `version_row`
+  # by parsing `version_row.text_name` (a versioned attribute) rather
+  # than walking today's synonym graph. Prefers a non-deprecated,
+  # non-sensu Name row when multiple share the genus text_name.
+  def genus_for_version(version_row)
+    return nil unless version_row.text_name.to_s.include?(" ")
+
+    genus_name = version_row.text_name.split(" ", 2).first
+    candidates = Name.with_correct_spelling.where(text_name: genus_name)
+    accepted = candidates.reject(&:deprecated)
+    candidates = accepted if accepted.any?
+    nonsensu = candidates.reject { |n| n.author.to_s.start_with?("sensu ") }
+    candidates = nonsensu if nonsensu.any?
+    candidates.first
   end
 
   # Returns an Array of all Name's in the rank above that contain this Name.

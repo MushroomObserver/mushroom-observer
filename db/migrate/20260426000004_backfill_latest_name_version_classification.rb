@@ -36,9 +36,13 @@ class BackfillLatestNameVersionClassification < ActiveRecord::Migration[7.2]
     SQL
   end
 
+  # Raise immediately rather than first dropping the index. MySQL
+  # auto-commits DDL outside the migration's transaction, so removing
+  # the index and *then* raising would leave the schema partially
+  # rolled back. Dropping the index on rollback also isn't strictly
+  # necessary — it's a perf optimization that doesn't depend on the
+  # backfill, so leaving it in place after a rollback is fine.
   def down
-    remove_index(:name_versions,
-                 name: "index_name_versions_on_name_id_and_version")
     raise(ActiveRecord::IrreversibleMigration.new(
             "Backfilled rows can't be distinguished from regular " \
             "versioned writes after the fact."

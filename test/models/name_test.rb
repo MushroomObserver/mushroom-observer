@@ -3658,6 +3658,20 @@ class NameTest < UnitTestCase
     assert_equal(:none, result[:source])
   end
 
+  # Empty string ≠ NULL: a deliberately-cleared classification should
+  # be reported as :recorded with the empty value, not silently
+  # backfilled from genus inheritance (#4166 Copilot review C5).
+  def test_classification_at_version_empty_string_is_recorded
+    species = names(:agaricus_campestras)
+    species_v = species.versions.order(:version).first ||
+                species.versions.create!(classification: "")
+    species_v.update_columns(classification: "")
+
+    result = species.classification_at_version(species_v)
+    assert_equal("", result[:value])
+    assert_equal(:recorded, result[:source])
+  end
+
   def test_multiple_synonyms
     name1 = names(:chlorophyllum_rachodes)
     name2 = names(:macrolepiota_rachodes)
