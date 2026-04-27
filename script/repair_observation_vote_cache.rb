@@ -66,52 +66,68 @@ def affected_observation_ids
     WHERE ABS(IFNULL(obs.vote_cache, 0)) < 0.01
       AND IFNULL(n.vote_cache, 0) > 0.01
   SQL
-  ActiveRecord::Base.connection.execute(sql).pluck(0)
+  ActiveRecord::Base.connection.select_values(sql)
 end
 
 def recompute_consensus_for(obs)
   Observation::NamingConsensus.new(obs).calc_consensus
 end
 
-# Returns [:repaired, :unchanged] for tally bookkeeping.
-def process_obs(obs, obs_id)
-  if DRY_RUN
-    consensus = Observation::NamingConsensus.new(obs)
-    calc = Observation::ConsensusCalculator.new(consensus.namings)
-    _best, val = calc.calc(User.current)
-    return :unchanged unless val.to_f.abs > 0.01
+EPSILON = 1e-4
 
-    log("  obs #{obs_id}: 0.0 → #{val.round(3)}") if VERBOSE
-  else
-    before = obs.vote_cache
-    recompute_consensus_for(obs)
-    obs.reload
-    return :unchanged if obs.vote_cache == before
+# nil and 0.0 are equivalent for our purposes (both mean "no useful
+# vote_cache recorded"); coerce to compare cleanly.
+def vote_cache_changed?(before, after)
+  (before.to_f - after.to_f).abs > EPSILON
+end
 
-    log("  obs #{obs_id} repaired") if VERBOSE
-  end
+def dry_run_process(obs, obs_id)
+  consensus = Observation::NamingConsensus.new(obs)
+  calc = Observation::ConsensusCalculator.new(consensus.namings)
+  _best, val = calc.calc(User.current)
+  return :unchanged unless val.to_f.abs > EPSILON
+
+  log("  obs #{obs_id}: 0.0 → #{val.round(3)}") if VERBOSE
   :repaired
+end
+
+def live_process(obs, obs_id)
+  before = obs.vote_cache
+  recompute_consensus_for(obs)
+  obs.reload
+  return :unchanged unless vote_cache_changed?(before, obs.vote_cache)
+
+  log("  obs #{obs_id} repaired") if VERBOSE
+  :repaired
+end
+
+# Returns :repaired or :unchanged for tally bookkeeping.
+def process_obs(obs, obs_id)
+  DRY_RUN ? dry_run_process(obs, obs_id) : live_process(obs, obs_id)
 end
 
 ids = affected_observation_ids
 log("Found #{ids.size} observations with stale vote_cache")
 
-tally = { repaired: 0, unchanged: 0, errors: 0 }
+tally = { repaired: 0, unchanged: 0, missing: 0, errors: 0 }
 ids.each_with_index do |obs_id, i|
   log("  #{i}/#{ids.size} processed") if (i % 200).zero? && i.positive?
 
   obs = Observation.find_by(id: obs_id)
-  next unless obs
+  if obs.nil?
+    tally[:missing] += 1
+    log("  ? obs #{obs_id} disappeared between query and load")
+    next
+  end
 
   tally[process_obs(obs, obs_id)] += 1
 rescue StandardError => e
   tally[:errors] += 1
   log("  ! obs #{obs_id}: #{e.class}: #{e.message}")
 end
-repaired = tally[:repaired]
-unchanged = tally[:unchanged]
-errors = tally[:errors]
 
 log("=" * 60)
-log("Done: #{repaired} #{DRY_RUN ? "would be repaired" : "repaired"}, " \
-    "#{unchanged} unchanged, #{errors} errors in #{elapsed}s")
+verb = DRY_RUN ? "would be repaired" : "repaired"
+log("Done: #{tally[:repaired]} #{verb}, " \
+    "#{tally[:unchanged]} unchanged, #{tally[:missing]} missing, " \
+    "#{tally[:errors]} errors in #{elapsed}s")
