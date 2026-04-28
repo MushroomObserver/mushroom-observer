@@ -129,6 +129,13 @@ def record_change(phase, info)
                   info[:trigger], url_for_id(info[:name_id])])
 end
 
+# Names whose classification actually changed during this run.
+# Computed from ChangesLog rows where value_changed (index 6) is true.
+# Drives the end-of-run digest email per affected user (#4169).
+def affected_name_ids
+  ChangesLog.rows.select { |row| row[6] }.to_set { |row| row[1] }
+end
+
 def write_changes_csv
   log("Writing #{CHANGES_CSV}")
   CSV.open(CHANGES_CSV, "w") do |csv|
@@ -453,6 +460,23 @@ log("classification_audit.rb starting " \
     "(#{DRY_RUN ? "DRY RUN" : "LIVE"}, verbose=#{VERBOSE})")
 log("")
 
+def send_audit_digests
+  return log("Skipping digest emails (DRY_RUN)") if DRY_RUN
+
+  affected = affected_name_ids
+  return log("No name classifications changed; no digest emails to send") \
+    if affected.empty?
+
+  log("Queueing digest emails for #{affected.size} affected names")
+  count = NameAuditDigest.send_digests(
+    name_ids: affected.to_a,
+    sender: User.find(WEBMASTER_ID),
+    audit_date: START
+  )
+  log("  #{count} digest emails queued")
+  log("")
+end
+
 classification_counts("BASELINE")
 phase_1_propagate_from_genera
 # Snapshot conflicts BEFORE Phase 2 — once Phase 2's tiebreaker
@@ -464,5 +488,6 @@ phase_2_propagate_within_synonym_groups
 classification_counts("AFTER")
 report_no_classification_genera
 write_changes_csv
+send_audit_digests
 
 log("classification_audit.rb complete in #{elapsed}s")

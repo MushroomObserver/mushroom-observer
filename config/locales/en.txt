@@ -3761,6 +3761,10 @@
   email_subject_naming_for_observer: Research Request
   email_subject_naming_for_tracker: Naming Notification - [name]
   email_subject_name_change: "[name] Has Been Changed"
+  email_subject_name_audit_digest: Classification Updates for [count] Taxa You Watch
+  email_name_audit_digest_intro: "As part of an automated classification audit on [date], [count] names you watch had their classification updated. To see the change for any name, follow the link to the name and then click [Versions]."
+  email_name_audit_digest_versions: Versions
+  email_name_audit_digest_footer: These updates were applied automatically by the classification audit script. The version history is the source of truth — this email is a heads-up. To stop receiving these and other emails from MO, visit your account preferences.
   email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
   email_subject_name_tracker_approval: Research Request Emails Approved for [name]
   email_subject_new_password: New Password
