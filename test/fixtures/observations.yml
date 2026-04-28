@@ -32,7 +32,6 @@ DEFAULTS: &DEFAULTS
   is_collection_location: 1
   lifeform: " "
   text_name: Boletus edulis
-  classification: ""
   rss_log: $LABEL_rss_log
   needs_naming: 1
   source: nil
@@ -85,7 +84,6 @@ coprinus_comatus_obs:
   user: rolf
   name: coprinus_comatus
   text_name: Coprinus comatus
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   location:
   where: Glendale, California
   specimen: 1
@@ -112,7 +110,6 @@ agaricus_campestris_obs:
   user: rolf
   name: agaricus_campestris
   text_name: Agaricus campestris
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From the lawn next door
   thumb_image: agaricus_campestris_image
@@ -132,7 +129,6 @@ agaricus_campestrus_obs:
   user: rolf
   name: agaricus_campestrus
   text_name: Agaricus campestrus
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
@@ -147,7 +143,6 @@ agaricus_campestras_obs:
   user: rolf
   name: agaricus_campestras
   text_name: Agaricus campestras
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
@@ -162,7 +157,6 @@ agaricus_campestros_obs:
   user: rolf
   name: agaricus_campestros
   text_name: Agaricus campestros
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
@@ -333,7 +327,6 @@ peltigera_obs:
   where: "Briceland, California, USA"
   name: peltigera
   text_name: Peltigera
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   specimen: 1
   notes:
     :Other: "Growing on a hardwood"
@@ -356,7 +349,6 @@ peltigera_mary_obs:
   where: "Briceland, California, USA"
   name: peltigera
   text_name: Peltigera
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   specimen: 1
   notes:
     :Other: "Growing on a hardwood"
@@ -734,7 +726,6 @@ chlorophyllum_rachodes_obs:
   log_updated_at: 2023-02-04 04:06:04
   when: 2023-02-04
   name: chlorophyllum_rachodes
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 wolf_fart:
   <<: *DEFAULTS

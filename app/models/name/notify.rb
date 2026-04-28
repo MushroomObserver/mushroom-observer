@@ -26,6 +26,15 @@ module Name::Notify
   def notify_users
     return if skip_notify
     return unless saved_version_changes?
+    # Classification edits are system-curation rather than user-curation:
+    # the propagate-to-subtaxa path uses update_all (no notifications),
+    # and pre-#4163 the only notifying path was through NameDescription
+    # — which most Names don't have. Now that classification is versioned
+    # on Name itself (#4163), saving a classification change would fire
+    # notify_users for every Name; preserve the prior user-facing behavior
+    # by skipping notification when classification is the only versioned
+    # column that changed.
+    return if classification_only_change?
 
     # debugger unless @current_user
     sender = @current_user || User.current
@@ -102,5 +111,14 @@ module Name::Notify
         recipients.delete(interest.user)
       end
     end
+  end
+
+  # True if classification was the only versioned column to change in
+  # this save. Used to suppress notifications for classification-only
+  # edits (manual edits, the inherit/propagate paths, and the
+  # classification audit script).
+  def classification_only_change?
+    versioned_keys = self.class.versioned_columns.map(&:name)
+    (saved_changes.keys & versioned_keys) == ["classification"]
   end
 end

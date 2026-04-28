@@ -305,11 +305,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Cache location and name data used by content filters.
+  # `classification` cache was dropped in discussion #4163 — clade
+  # filtering now reads it from `names.classification` directly.
   def cache_content_filter_data
     if name && name_id_changed?
       self.lifeform = name.lifeform
       self.text_name = name.text_name
-      self.classification = name.classification
     end
     return unless location_id_changed?
 
@@ -334,12 +335,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # This is meant to be run nightly to ensure that the cached name
   # and location data used by content filters is kept in sync.
+  # `classification` is no longer cached on observations (discussion
+  # #4163) — content filters read it from `names.classification`.
   def self.refresh_content_filter_caches(dry_run: false)
     refresh_cached_column(type: "name", foreign: "lifeform",
                           dry_run: dry_run) +
       refresh_cached_column(type: "name", foreign: "text_name",
-                            dry_run: dry_run) +
-      refresh_cached_column(type: "name", foreign: "classification",
                             dry_run: dry_run) +
       refresh_cached_column(type: "location", foreign: "name", local: "where",
                             dry_run: dry_run)

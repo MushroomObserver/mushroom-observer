@@ -238,20 +238,20 @@ module Names
     end
 
     # Edit a draft for a project (POST).
+    # Classification edits no longer go through the description form
+    # (discussion #4163) — the helper now exercises gen_desc and
+    # diag_desc only.
     def edit_draft_post_helper(draft, user, params: {}, permission: true,
                                success: true)
       gen_desc = "This is a very general description."
       assert_not_equal(gen_desc, draft.gen_desc)
       diag_desc = "This is a diagnostic description"
       assert_not_equal(diag_desc, draft.diag_desc)
-      classification = "Family: _Agaricaceae_"
-      assert_not_equal(classification, draft.classification)
       params = {
         id: draft.id,
         description: {
           gen_desc: gen_desc,
-          diag_desc: diag_desc,
-          classification: classification
+          diag_desc: diag_desc
         }.merge(params)
       }
       put_requires_login(:update, params, user.login)
@@ -268,11 +268,9 @@ module Names
       if permission && success
         assert_equal(gen_desc, draft.gen_desc)
         assert_equal(diag_desc, draft.diag_desc)
-        assert_equal(classification, draft.classification)
       else
         assert_not_equal(gen_desc, draft.gen_desc)
         assert_not_equal(diag_desc, draft.diag_desc)
-        assert_not_equal(classification, draft.classification)
       end
     end
 
@@ -409,15 +407,9 @@ module Names
                              dick, permission: false)
     end
 
-    def test_edit_draft_post_bad_classification
-      edit_draft_post_helper(
-        name_descriptions(:draft_coprinus_comatus),
-        rolf,
-        params: { classification: "**Domain**: Eukarya" },
-        permission: true,
-        success: false
-      )
-    end
+    # bad-classification test removed — descriptions no longer carry
+    # classification (discussion #4163). See
+    # Names::ClassificationControllerTest for the validation path.
 
     # ------------------------------
     #  Test creating descriptions.
@@ -567,40 +559,8 @@ module Names
       assert_equal(true, desc.public_write)
     end
 
-    def test_create_name_description_bogus_classification
-      name = names(:agaricus_campestris)
-      login("dick")
-
-      bad_class = "*Order*: Agaricales\r\nFamily: Agaricaceae"
-      good_class = "Family: Agaricaceae\r\nOrder: Agaricales"
-      final_class = "Order: _Agaricales_\r\nFamily: _Agaricaceae_"
-
-      params = {
-        name_id: name.id,
-        description: empty_notes.merge(
-          source_type: "public",
-          source_name: "",
-          public: "1",
-          public_write: "1"
-        )
-      }
-
-      params[:description][:classification] = bad_class
-      post(:create, params: params)
-      assert_flash_error
-      assert_template("names/descriptions/new")
-      assert_select("#name_description_form")
-
-      params[:description][:classification] = good_class
-      post(:create, params: params)
-      assert_flash_success
-      desc = NameDescription.last
-      assert_redirected_to(name_description_path(desc.id))
-
-      name.reload
-      assert_equal(final_class, name.classification)
-      assert_equal(final_class, desc.classification)
-    end
+    # Classification validation moved with the column to Name itself
+    # (discussion #4163) — see Names::ClassificationControllerTest.
 
     def test_create_name_description_source
       login("dick")
@@ -681,33 +641,9 @@ module Names
       )
     end
 
-    # Cover update_classification_cache_and_save_name
-    def test_update_description_changes_classification_cache
-      desc = name_descriptions(:peltigera_desc)
-      name = desc.name
-      name.update(description: desc) # ensure it's the default
-      old_class = name.classification
-
-      # Use the correct format - Rails will reorder as Order before Family
-      new_class = "Order: _Peltigerales_\r\nFamily: _Peltigeraceae_"
-      assert_not_equal(new_class, old_class)
-
-      login("rolf")
-      params = {
-        id: desc.id,
-        description: {
-          classification: new_class,
-          gen_desc: desc.gen_desc,
-          diag_desc: desc.diag_desc
-        }
-      }
-      put(:update, params: params)
-
-      name.reload
-      desc.reload
-      assert_equal(new_class, desc.classification)
-      assert_equal(new_class, name.classification)
-    end
+    # The classification cache write went away with the column itself
+    # (discussion #4163). Classification edits go through
+    # Names::ClassificationController.
 
     # Cover save_updated_description_if_changed_or_flash no changes
     def test_update_description_no_changes
@@ -717,8 +653,7 @@ module Names
         id: desc.id,
         description: {
           gen_desc: desc.gen_desc,
-          diag_desc: desc.diag_desc,
-          classification: desc.classification
+          diag_desc: desc.diag_desc
         }
       }
       put(:update, params: params)

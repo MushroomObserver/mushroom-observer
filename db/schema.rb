@@ -391,7 +391,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
     t.text "uses"
     t.text "notes"
     t.text "refs"
-    t.text "classification"
   end
 
   create_table "name_description_writers", charset: "utf8mb3", force: :cascade do |t|
@@ -424,7 +423,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
     t.text "uses"
     t.text "notes"
     t.text "refs"
-    t.text "classification"
     t.integer "project_id"
   end
 
@@ -454,6 +452,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
     t.integer "rank"
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.integer "icn_id"
+    t.text "classification"
+    t.index ["name_id", "version"], name: "index_name_versions_on_name_id_and_version"
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -549,7 +549,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
     t.integer "alt"
     t.string "lifeform", limit: 1024
     t.string "text_name", limit: 100
-    t.text "classification"
     t.boolean "gps_hidden", default: false, null: false
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
