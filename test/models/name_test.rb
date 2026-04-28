@@ -2963,6 +2963,24 @@ class NameTest < UnitTestCase
     end
   end
 
+  # Classification edits are system-curation rather than
+  # user-curation: pre-#4163, the cache mirror onto Name didn't
+  # generate emails (classification wasn't versioned on Name) and the
+  # propagate-to-subtaxa path uses update_all (no callbacks). Now that
+  # classification is versioned on Name (#4163), guard so that a save
+  # touching only classification still doesn't notify.
+  def test_classification_only_save_does_not_notify
+    User.current = users(:roy)
+    name = names(:coprinus_comatus)
+    new_cls = "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\n" \
+              "Phylum: _TestPhylum_\r\n"
+    assert_not_equal(new_cls, name.classification)
+
+    assert_no_enqueued_jobs do
+      name.update(classification: new_cls)
+    end
+  end
+
   def test_notify_webmaster
     # Test notify_webmaster sends email via deliver_later
     User.current = rolf
