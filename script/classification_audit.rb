@@ -302,19 +302,15 @@ end
 # on, so the smart version browser can't infer historical state from
 # ancestors — we have to record it directly.
 #
-# Two flags on each save:
+# `validate: false` — some legacy Name rows have `author` strings that
+# fail current format rules (grandfathered in from before the
+# validation tightened). We're only touching `classification`; failing
+# the whole batch on an unrelated column would block legitimate audit
+# work.
 #
-# - `skip_notify = true` — suppresses `Name#notify_users` so an audit
-#   run doesn't fire one NameChangeMailer per affected name per
-#   subscriber (would be tens of thousands of emails per run).
-#   `acts_as_versioned` still fires; the version trail is the audit
-#   record. A future "one summary email per user with the list of
-#   affected taxa" mailer is tracked separately (#4169).
-# - `validate: false` — some legacy Name rows have `author` strings
-#   that fail current format rules (grandfathered in from before the
-#   validation tightened). We're only touching `classification`;
-#   failing the whole batch on an unrelated column would block
-#   legitimate audit work.
+# `Name#notify_users` skips classification-only saves at the model
+# level, so per-row save here doesn't generate mail (matches the
+# rest of the propagate / inherit / manual-edit paths).
 #
 # Volume is bounded (~7-10K rows per weekly run on production-scale
 # data), so the slower per-row path is fine. Description and
@@ -322,7 +318,6 @@ end
 def sync_synonym_classification(name_ids, classification)
   Name.transaction do
     Name.where(id: name_ids).find_each do |name|
-      name.skip_notify = true
       name.classification = classification
       name.save!(validate: false)
     end
