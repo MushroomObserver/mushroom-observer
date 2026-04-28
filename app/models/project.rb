@@ -368,7 +368,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Pull image_ids whose owner matches the observation owner (matching
   # add_observation's per-row filter), excluding any (project_id, image_id)
-  # rows that already exist so insert_all doesn't hit the unique index.
+  # rows already in project_images so we don't insert duplicates. (There
+  # is no unique index on project_images, so this dedup is the only
+  # protection — see #4181.)
   def insert_project_images_for(obs_ids)
     image_ids = ObservationImage.
                 joins("INNER JOIN images ON images.id = " \
@@ -386,6 +388,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     rows = image_ids.map { |img_id| { project_id: id, image_id: img_id } }
     ProjectImage.insert_all(rows)
   end
+  private :insert_project_observations, :insert_project_images_for
 
   # Remove observation (and its images) from this project. Saves it.
   def remove_observation(obs)
@@ -433,7 +436,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     observations.where(id: matching_obs).
       find_each { |obs| remove_observation(obs) }
     project_excluded_observations.
-      where(observation_id: matching_obs).destroy_all
+      where(observation_id: matching_obs).delete_all
   end
 
   def imgs_to_delete(obs)
