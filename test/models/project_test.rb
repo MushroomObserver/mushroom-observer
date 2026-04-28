@@ -455,6 +455,55 @@ class ProjectTest < UnitTestCase
     assert_not_includes(proj.new_candidate_observations.reload, obs)
   end
 
+  def test_bulk_add_observations_inserts_obs_and_owner_images
+    proj = projects(:eol_project)
+    minimal = observations(:minimal_unknown_obs)
+    detailed = observations(:detailed_unknown_obs)
+    owner_imgs = detailed.images.select { |i| i.user_id == detailed.user_id }
+    assert(owner_imgs.any?,
+           "fixture must have at least one owner-attributed image")
+
+    count = proj.bulk_add_observations([minimal.id, detailed.id])
+
+    assert_equal(2, count)
+    assert_includes(proj.observations.reload, minimal)
+    assert_includes(proj.observations.reload, detailed)
+    assert_obj_arrays_equal(owner_imgs.sort_by(&:id),
+                            proj.images.reload.sort_by(&:id))
+  end
+
+  def test_bulk_add_observations_is_idempotent
+    proj = projects(:eol_project)
+    obs = observations(:detailed_unknown_obs)
+    proj.add_observation(obs)
+    obs_count_before = proj.observations.reload.size
+    img_count_before = proj.images.reload.size
+
+    count = proj.bulk_add_observations([obs.id])
+
+    assert_equal(0, count)
+    assert_equal(obs_count_before, proj.observations.reload.size)
+    assert_equal(img_count_before, proj.images.reload.size)
+  end
+
+  def test_bulk_add_observations_unexcludes
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.exclude_observation(obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+
+    count = proj.bulk_add_observations([obs.id])
+
+    assert_equal(1, count)
+    assert_includes(proj.observations.reload, obs)
+    assert_not_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_bulk_add_observations_handles_empty_input
+    proj = projects(:eol_project)
+    assert_equal(0, proj.bulk_add_observations([]))
+  end
+
   def test_remove_target_name_purges_matching_observations
     proj = projects(:rare_fungi_project)
     matching_name = names(:agaricus_campestris)

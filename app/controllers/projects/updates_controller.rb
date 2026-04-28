@@ -138,12 +138,7 @@ module Projects
     end
 
     def bulk_add_candidates(scope)
-      count = 0
-      scope.find_each do |obs|
-        @project.add_observation(obs)
-        count += 1
-      end
-      count
+      @project.bulk_add_observations(scope.pluck(:id))
     end
   end
 end

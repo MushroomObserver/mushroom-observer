@@ -71,24 +71,27 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :field_slips, dependent: :nullify
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
-  has_many :project_images, dependent: :destroy
+  # Pure join tables — no destroy callbacks, no further cascades. Use
+  # delete_all so destroying a project with thousands of obs doesn't
+  # load and per-row-DELETE every join row.
+  has_many :project_images, dependent: :delete_all
   has_many :images, through: :project_images
 
-  has_many :project_observations, dependent: :destroy
+  has_many :project_observations, dependent: :delete_all
   has_many :observations, through: :project_observations
   has_many :locations, through: :observations
 
-  has_many :project_excluded_observations, dependent: :destroy
+  has_many :project_excluded_observations, dependent: :delete_all
   has_many :excluded_observations, through: :project_excluded_observations,
                                    source: :observation
 
-  has_many :project_species_lists, dependent: :destroy
+  has_many :project_species_lists, dependent: :delete_all
   has_many :species_lists, through: :project_species_lists
 
-  has_many :project_target_names, dependent: :destroy
+  has_many :project_target_names, dependent: :delete_all
   has_many :target_names, through: :project_target_names, source: :name
 
-  has_many :project_target_locations, dependent: :destroy
+  has_many :project_target_locations, dependent: :delete_all
   has_many :target_locations, through: :project_target_locations,
                               source: :location
 
@@ -335,6 +338,53 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     observations.push(obs)
     imgs.each { |img| images.push(img) }
     touch
+  end
+
+  # Bulk variant of add_observation. Given a list of observation ids,
+  # inserts all needed project_observations / project_images rows in
+  # set-based SQL rather than emitting ~8 queries per observation.
+  # Idempotent: pre-existing project_observations are left alone, and
+  # any project_excluded_observations rows for these ids are dropped
+  # (matching add_observation's un-exclude side effect).
+  def bulk_add_observations(obs_ids)
+    obs_ids = Array(obs_ids).map(&:to_i).uniq
+    return 0 if obs_ids.empty?
+
+    project_excluded_observations.where(observation_id: obs_ids).delete_all
+    new_obs_ids = obs_ids - project_observations.where(observation_id: obs_ids).
+                  pluck(:observation_id)
+    return 0 if new_obs_ids.empty?
+
+    insert_project_observations(new_obs_ids)
+    insert_project_images_for(new_obs_ids)
+    touch
+    new_obs_ids.size
+  end
+
+  def insert_project_observations(obs_ids)
+    rows = obs_ids.map { |obs_id| { project_id: id, observation_id: obs_id } }
+    ProjectObservation.insert_all(rows)
+  end
+
+  # Pull image_ids whose owner matches the observation owner (matching
+  # add_observation's per-row filter), excluding any (project_id, image_id)
+  # rows that already exist so insert_all doesn't hit the unique index.
+  def insert_project_images_for(obs_ids)
+    image_ids = ObservationImage.
+                joins("INNER JOIN images ON images.id = " \
+                      "observation_images.image_id").
+                joins("INNER JOIN observations ON observations.id = " \
+                      "observation_images.observation_id").
+                where(observation_id: obs_ids).
+                where("images.user_id = observations.user_id").
+                distinct.pluck(:image_id)
+    return if image_ids.empty?
+
+    image_ids -= project_images.where(image_id: image_ids).pluck(:image_id)
+    return if image_ids.empty?
+
+    rows = image_ids.map { |img_id| { project_id: id, image_id: img_id } }
+    ProjectImage.insert_all(rows)
   end
 
   # Remove observation (and its images) from this project. Saves it.
