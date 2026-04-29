@@ -1,5 +1,5 @@
 <%= turbo_stream.replace("target_locations_widget") do %>
-  <%= render(Components::Projects::TargetLocationsWidget.new(
+  <%= render(Components::ProjectTargetLocationsWidget.new(
                project: project
              )) %>
 <% end %>
