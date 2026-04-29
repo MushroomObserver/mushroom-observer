@@ -19,6 +19,16 @@ module Views
         end
 
         def view_template
+          render_page_chrome
+          render_target_names_widget if @context.admin?
+          render(Components::Checklist::Contents.new(
+                   data: @data, context: @context
+                 ))
+        end
+
+        private
+
+        def render_page_chrome
           container_class(:full)
           add_project_banner(@context.project) if @context.project
           add_page_title(
@@ -29,24 +39,12 @@ module Views
             checklist_show_tabs(user: @context.show_user,
                                 list: @context.species_list)
           )
-
-          render_target_names_widget if @context.admin?
-          render(Components::Checklist::Contents.new(
-                   data: @data, context: @context
-                 ))
         end
 
-        private
-
-        # Target-names widget is still an ERB partial; render it via
-        # view_context.
         def render_target_names_widget
-          trusted_html(
-            view_context.render(
-              partial: "projects/target_names/widget",
-              locals: { project: @context.project }
-            )
-          )
+          render(Components::Projects::TargetNamesWidget.new(
+                   project: @context.project
+                 ))
         end
       end
     end
