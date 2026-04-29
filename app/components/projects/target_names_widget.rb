@@ -7,30 +7,38 @@ module Components
     # `project_target_names_path` via Turbo, so the surrounding
     # checklist re-renders without a full page reload.
     #
-    # Replaces app/views/controllers/projects/target_names/
-    # _widget.html.erb.
-    class TargetNamesWidget < Components::Base
-      include Phlex::Rails::Helpers::FormWith
+    # Pattern B: creates its own FormObject internally so the view
+    # only needs to pass the `project:` kwarg.
+    class TargetNamesWidget < Components::ApplicationForm
+      # Optional positional model arg is accepted for ModalForm
+      # compatibility (ignored) — see Pattern B in
+      # .claude/phlex_style_guide.md.
+      def initialize(_model = nil, project:, **)
+        @project = project
+        super(FormObject::ProjectTargetNamesAdd.new,
+              id: "target_names_widget", local: false, **)
+      end
 
-      register_output_helper :autocompleter_field, mark_safe: true
-
-      prop :project, Project
+      def around_template
+        @attributes[:class] = "form-inline mb-3"
+        super
+      end
 
       def view_template
-        div(id: "target_names_widget") do
-          form_with(url: project_target_names_path(project_id: @project.id),
-                    method: :post,
-                    class: "form-inline mb-3",
-                    data: { turbo: true }) do |f|
-            autocompleter_field(form: f, field: :names,
-                                type: :name,
-                                textarea: true,
-                                separator: "\n",
-                                label: :project_target_names_to_add_label.t)
-            f.submit(:project_target_name_add.t,
-                     class: "btn btn-default ml-2 mt-2")
-          end
+        super do
+          autocompleter_field(
+            :names,
+            type: :name,
+            textarea: true,
+            separator: "\n",
+            label: :project_target_names_to_add_label.t
+          )
+          submit(:project_target_name_add.t, class: "ml-2 mt-2")
         end
+      end
+
+      def form_action
+        project_target_names_path(project_id: @project.id)
       end
     end
   end

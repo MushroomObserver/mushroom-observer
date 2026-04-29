@@ -9,29 +9,27 @@ module Projects
 
       html = render_widget(project: project)
 
-      # Outer turbo-stream target.
-      assert_html(html, "#target_names_widget")
-
-      # Form posts to the target_names create endpoint with turbo enabled.
+      # Form is the turbo-stream replace target — id matches the
+      # surrounding `turbo_stream.replace("target_names_widget")`.
       expected_path = "/projects/#{project.id}/target_names"
       assert_html(
         html,
-        "form[action='#{expected_path}']" \
+        "form#target_names_widget[action='#{expected_path}']" \
         "[method='post'][data-turbo='true']"
       )
-      # form-inline class preserved from the old ERB.
       assert_html(html, "form.form-inline")
     end
 
-    def test_renders_autocompleter_textarea_for_names
+    def test_renders_autocompleter_textarea_under_form_object_namespace
       project = projects(:rare_fungi_project)
 
       html = render_widget(project: project)
 
-      # Autocompleter wraps a textarea (textarea: true) named :names.
       assert_html(html, ".autocompleter")
-      assert_html(html, "textarea[name='names']")
-      # Stimulus controller for the name autocompleter.
+      # Pattern B FormObject namespaces the textarea name under
+      # `project_target_names_add`. The controller reads it via
+      # `params.dig(:project_target_names_add, :names)`.
+      assert_html(html, "textarea[name='project_target_names_add[names]']")
       assert_html(
         html,
         ".autocompleter[data-controller~='autocompleter--name']"

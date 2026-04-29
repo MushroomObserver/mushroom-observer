@@ -53,9 +53,11 @@ module Projects
     end
 
     # Parse name input: supports comma-separated, newline-separated,
-    # and pasted checklist format with counts like "Name (3) * +"
+    # and pasted checklist format with counts like "Name (3) * +".
+    # Submitted under the `project_target_names_add` namespace by
+    # Components::Projects::TargetNamesWidget (Pattern B form).
     def parse_names_from_params
-      raw = params[:names].to_s
+      raw = params.dig(:project_target_names_add, :names).to_s
       raw.split(/[,\n]/).filter_map { |entry| lookup_name(entry) }
     end
 

@@ -9,24 +9,25 @@ module Projects
 
       html = render_widget(project: project)
 
-      assert_html(html, "#target_locations_widget")
-
       expected_path = "/projects/#{project.id}/target_locations"
       assert_html(
         html,
-        "form[action='#{expected_path}']" \
+        "form#target_locations_widget[action='#{expected_path}']" \
         "[method='post'][data-turbo='true']"
       )
       assert_html(html, "form.form-inline")
     end
 
-    def test_renders_autocompleter_textarea_for_locations
+    def test_renders_autocompleter_textarea_under_form_object_namespace
       project = projects(:rare_fungi_project)
 
       html = render_widget(project: project)
 
       assert_html(html, ".autocompleter")
-      assert_html(html, "textarea[name='locations']")
+      assert_html(
+        html,
+        "textarea[name='project_target_locations_add[locations]']"
+      )
       assert_html(
         html,
         ".autocompleter[data-controller~='autocompleter--location']"
