@@ -142,8 +142,14 @@ module Report
 
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
-      if row.loc_id.present? &&
-         (row.obs_lat.blank? || gps_hidden?(row))
+      return if row.loc_id.blank?
+
+      if gps_hidden?(row)
+        return unless public_lat(row)
+
+        box = loc_box(row)
+        distance_to_farthest_corner(public_lat(row), public_lng(row), box)
+      elsif row.obs_lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
     end
@@ -262,9 +268,22 @@ module Report
     end
 
     def add_gps_hidden!(rows, col)
-      ids = plain_query.where(gps_hidden: true).pluck(:id).to_set
-      vals = rows.map { |r| [r.obs_id, ids.include?(r.obs_id) ? "1" : nil] }
-      add_column!(rows, vals, col)
+      latlng_by_id = gps_hidden_latlng
+      rows.each { |row| set_gps_hidden_vals(row, col, latlng_by_id) }
+    end
+
+    def gps_hidden_latlng
+      plain_query.where(gps_hidden: true).
+        pluck(:id, :lat, :lng).
+        to_h { |id, lat, lng| [id, [lat, lng]] }
+    end
+
+    def set_gps_hidden_vals(row, col, latlng_by_id)
+      return unless (latlng = latlng_by_id[row.obs_id])
+
+      row.add_val("1", col)
+      row.add_val(latlng[0]&.round, col + 1)
+      row.add_val(latlng[1]&.round, col + 2)
     end
 
     def information_withheld(row)
@@ -274,31 +293,11 @@ module Report
     end
 
     def public_lat(row)
-      return loc_center_lat(row) if gps_hidden?(row)
-
-      row.best_lat
+      gps_hidden?(row) ? row.val(5) : row.best_lat
     end
 
     def public_lng(row)
-      return loc_center_lng(row) if gps_hidden?(row)
-
-      row.best_lng
-    end
-
-    def loc_center_lat(row)
-      north = row.loc_north(14)
-      south = row.loc_south(14)
-      return nil unless north && south
-
-      ((north + south) / 2).round(4)
-    end
-
-    def loc_center_lng(row)
-      east = row.loc_east(14)
-      west = row.loc_west(14)
-      return nil unless east && west
-
-      ((east + west) / 2).round(4)
+      gps_hidden?(row) ? row.val(6) : row.best_lng
     end
 
     def explode_notes(row)
