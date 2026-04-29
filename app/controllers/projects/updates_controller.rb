@@ -111,7 +111,7 @@ module Projects
         format.turbo_stream do
           render(
             partial: "projects/updates/footer_update",
-            locals: { project: @project, obs: obs,
+            locals: { project: @project, user: @user, obs: obs,
                       count_label: count_label_for_current_scope }
           )
         end

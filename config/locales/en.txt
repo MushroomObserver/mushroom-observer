@@ -3655,13 +3655,31 @@
   show_project_violation_count: Project has [count] constraint violation(s)
 
   # project/violations/index
-  form_violations_help: Check the Observations to be removed, then Submit
+  form_violations_help: Each row shows an Observation that fails one or more of this Project's constraints. Use the per-row actions to bring it into compliance.
   violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
   form_violations_latitude_none: "Lat: Any"
   form_violations_location_none: "[:LOCATION]: Any"
   form_violations_longitude_none: "Lon: Any"
   form_violations_remove_selected: Remove Selected
   form_violations_show_project: Show Project
+  form_violations_no_violations: No constraint violations.
+  form_violations_th_name: Name
+  form_violations_th_kinds: Violations
+  form_violations_th_details: Details
+  form_violations_th_actions: Actions
+  form_violations_kind_date: Date
+  form_violations_kind_bbox: Location (bbox)
+  form_violations_kind_target_name: Target name
+  form_violations_kind_target_location: Target location
+  form_violations_action_exclude: Exclude
+  form_violations_action_extend: Extend dates
+  form_violations_action_add_target_name: Add Target Name
+  form_violations_action_add_target_location: Add Target Location
+  form_violations_modal_target_location_title: Add Target Location
+  form_violations_modal_target_location_help: Choose a comma-suffix of this Observation's location to add as a Target Location. Suffixes whose Location does not yet exist can be created in a new tab.
+  form_violations_modal_target_location_no_suffixes: This Observation's location has no usable suffixes. Use Exclude instead.
+  form_violations_modal_target_location_create: Create
+  form_violations_modal_target_location_submit: Add Target
 
   # users/by_name
   users_by_name_title: Users by Name

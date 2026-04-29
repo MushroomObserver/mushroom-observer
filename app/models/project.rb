@@ -165,7 +165,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :violations_includes, lambda {
     strict_loading.includes(
-      { observations: [:location, :user] }
+      { observations: [:location, :name, :user] },
+      :target_names, :target_locations
     )
   }
 
@@ -247,9 +248,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def count_violations
-    return out_of_range_observations.count unless location
-
-    out_of_range_observations.to_a.union(out_of_area_observations).size
+    violations.size
   end
 
   def constraints
@@ -257,7 +256,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def constraints?
-    start_date || end_date || location
+    start_date || end_date || location ||
+      target_names.any? || target_locations.any?
   end
 
   # Check if user has permission to edit a given object.
@@ -524,9 +524,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     project_target_names.any? || project_target_locations.any?
   end
 
-  # Observations matching target names (with synonyms) AND within
-  # target locations. When only one type of target is set, matches
-  # on that alone.
+  # Observations matching target names (with synonyms / sub-taxa)
+  # AND within target locations, then further constrained by the
+  # project's date range and (when set) bounding box. When only one
+  # kind of target is set, matches on that alone. The date and bbox
+  # filters mirror the violations-page rule so an obs is a candidate
+  # iff it would NOT be a violation if added.
   def candidate_observations
     name_ids = candidate_name_ids
     loc_ids = candidate_location_ids
@@ -540,7 +543,34 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             else
               Observation.where(id: loc_ids)
             end
+    scope = constrain_to_project_date_range(scope)
+    scope = constrain_to_project_bbox(scope)
     scope.order(created_at: :desc)
+  end
+
+  # GPS-inside-bbox OR (no GPS AND obs.location bbox is fully
+  # contained in project bbox). Mirrors out_of_area_observations'
+  # inverse so candidate_observations and the bbox violation kind
+  # agree on what "in" means.
+  def constrain_to_project_bbox(scope)
+    return scope if location.nil?
+
+    box_kwargs = location.bounding_box
+    m_box = Mappable::Box.new(**box_kwargs)
+    return scope unless m_box.valid?
+
+    gps_in_ids = Observation.gps_in_box(m_box).select(:id)
+    no_gps_in_ids = Observation.where(lat: nil).joins(:location).
+                    merge(Location.in_box(**box_kwargs)).select(:id)
+    scope.where(id: gps_in_ids).or(scope.where(id: no_gps_in_ids))
+  end
+
+  def constrain_to_project_date_range(scope)
+    return scope if start_date.nil? && end_date.nil?
+    return scope.where(Observation[:when].lteq(end_date)) if start_date.nil?
+    return scope.where(Observation[:when].gteq(start_date)) if end_date.nil?
+
+    scope.where(Observation[:when].between(start_date..end_date))
   end
 
   private
@@ -705,13 +735,42 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     observations.where(name:).count
   end
 
+  VIOLATION_KINDS = [:date, :bbox, :target_name, :target_location].freeze
+
+  # One entry per offending observation, with the set of violation
+  # kinds that apply. Sorted alphabetically by obs.name.sort_name so
+  # repeated runs render in a stable order. (Each violation Struct is
+  # `[obs, kinds]`, where `kinds` is a subset of VIOLATION_KINDS.)
+  Violation = Struct.new(:obs, :kinds)
+
   def violations
-    out_of_range_observations.to_a.union(out_of_area_observations)
+    return [] unless constraints?
+
+    rows = visible_observations.includes(:name, :location).
+           filter_map do |obs|
+      kinds = violation_kinds_for(obs)
+      next if kinds.empty?
+
+      Violation.new(obs, kinds)
+    end
+    rows.sort_by { |v| v.obs.name&.sort_name.to_s.downcase }
+  end
+
+  # Returns the kinds of violation that apply to the given observation
+  # (subset of VIOLATION_KINDS). Empty if the observation passes all
+  # configured constraints.
+  def violation_kinds_for(observation)
+    kinds = []
+    kinds << :date if violates_date_range?(observation)
+    kinds << :bbox if violates_location?(observation)
+    kinds << :target_name if violates_target_name?(observation)
+    kinds << :target_location if violates_target_location?(observation)
+    kinds
   end
 
   # Is at least one violation removable by the given user?
   def violations_removable_by_current_user?(user)
-    user_ids = violations.map(&:user_id)
+    user_ids = violations.map { |v| v.obs.user_id }
     return false unless user_ids.any?
 
     admin_group_user_ids.union(user_ids).include?(user.id)
@@ -766,8 +825,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def violates_constraints?(observation)
-    violates_location?(observation) ||
-      violates_date_range?(observation)
+    violation_kinds_for(observation).any?
   end
 
   def violates_location?(observation)
@@ -777,7 +835,49 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def violates_date_range?(observation)
+    return false if start_date.nil? && end_date.nil?
+
     !(start_date..end_date).cover?(observation.when)
+  end
+
+  # Target-name violation: project has a non-empty target_names list
+  # AND the observation's name (with synonyms and sub-taxa expansion,
+  # matching candidate_observations) is not in it.
+  def violates_target_name?(observation)
+    return false unless target_names.any?
+
+    expanded_target_name_id_set.exclude?(observation.name_id)
+  end
+
+  # Target-location violation: project has a non-empty target_locations
+  # list AND no target's name is a comma-suffix (or exact) match of
+  # the obs's location name (or `where`, when there's no location).
+  # GPS overlap with a target_location does NOT satisfy the rule.
+  def violates_target_location?(observation)
+    return false unless target_locations.any?
+
+    !target_location_suffix_match?(observation)
+  end
+
+  def target_location_suffix_match?(observation)
+    name = if observation.location_id
+             observation.location&.name
+           else
+             observation.where
+           end
+    return false if name.blank?
+
+    target_locations.any? do |tl|
+      name == tl.name || name.end_with?(", #{tl.name}")
+    end
+  end
+
+  # Memoized: project's target_names with synonyms + sub-taxa expanded
+  # into a Set of name_ids, matching the candidate_observations rule.
+  # Used by violates_target_name? as a per-obs membership test.
+  def expanded_target_name_id_set
+    @expanded_target_name_id_set ||=
+      expanded_target_name_ids(target_name_ids).to_set
   end
 
   def trackers
