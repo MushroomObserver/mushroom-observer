@@ -785,7 +785,8 @@ class ReportTest < UnitTestCase
       decimalLongitude: loc.center_lng.round(4).to_s,
       minimumElevationInMeters: obs.alt.to_s,
       maximumElevationInMeters: obs.alt.to_s,
-      coordinateUncertaintyInMeters: uncertainty
+      coordinateUncertaintyInMeters: uncertainty,
+      informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -811,7 +812,8 @@ class ReportTest < UnitTestCase
       decimalLongitude: loc.center_lng.round(4).to_s,
       minimumElevationInMeters: obs.alt.to_s,
       maximumElevationInMeters: obs.alt.to_s,
-      coordinateUncertaintyInMeters: uncertainty
+      coordinateUncertaintyInMeters: uncertainty,
+      informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -831,7 +833,8 @@ class ReportTest < UnitTestCase
     )
     expect = hashed_expect(obs).merge(
       stateProvince: "Puerto Rico",
-      locality: "Humacao18.094914, -65.801449"
+      locality: "Humacao18.094914, -65.801449",
+      informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     )
     [:decimalLatitude,
      :decimalLongitude,
@@ -938,6 +941,7 @@ class ReportTest < UnitTestCase
       decimalLatitude: obs_location&.center_lat&.to_s,
       decimalLongitude: obs_location&.center_lng&.to_s,
       coordinateUncertaintyInMeters: default_uncertainty || nil,
+      informationWithheld: nil,
       # if low/high are nil, value must be empty string, not zero
       minimumElevationInMeters: minimum_elevation,
       maximumElevationInMeters: maximum_elevation,

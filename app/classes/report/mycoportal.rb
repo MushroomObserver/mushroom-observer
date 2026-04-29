@@ -13,6 +13,7 @@ require "haversine"
 module Report
   class Mycoportal < CSV
     CODE_NAME_QUALIFIER = "code name aff. species"
+    GPS_HIDDEN_MESSAGE = "Coordinates obscured by observer"
 
     # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
     # Label names for the columns in the report.
@@ -44,6 +45,7 @@ module Report
         "decimalLatitude",
         "decimalLongitude",
         "coordinateUncertaintyInMeters",
+        "informationWithheld",
         "minimumElevationInMeters",
         "maximumElevationInMeters",
         "disposition" # herbaria, "vouchered", or nil
@@ -69,9 +71,10 @@ module Report
         row.state, # stateProvince
         row.county, # county
         row.locality, # locality
-        row.best_lat, # decimalLatitude
-        row.best_lng, # decimalLongitude
+        public_lat(row), # decimalLatitude
+        public_lng(row), # decimalLongitude
         coordinate_uncertainty(row), # coordinateUncertaintyInMeters
+        information_withheld(row), # informationWithheld
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
         disposition(row) # disposition
@@ -140,7 +143,7 @@ module Report
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
       if row.loc_id.present? &&
-         row.obs_lat.blank?
+         (row.obs_lat.blank? || gps_hidden?(row))
         distance_from_center_to_farthest_corner(row)
       end
     end
@@ -166,6 +169,7 @@ module Report
       add_collector_ids!(rows, 1)
       add_herbarium_accession_numbers!(rows, 2)
       add_sequence_ids!(rows, 3)
+      add_gps_hidden!(rows, 4)
     end
 
     def collector_ids(row)
@@ -178,6 +182,10 @@ module Report
 
     def sequence_ids(row)
       row.val(3)
+    end
+
+    def gps_hidden?(row)
+      row.val(4).present?
     end
 
     def sort_before(rows)
@@ -251,6 +259,46 @@ module Report
 
     def distance_to_se_corner(lat, lng, box)
       Haversine.distance(lat, lng, box.south, box.east).to_meters.round
+    end
+
+    def add_gps_hidden!(rows, col)
+      ids = plain_query.where(gps_hidden: true).pluck(:id).to_set
+      vals = rows.map { |r| [r.obs_id, ids.include?(r.obs_id) ? "1" : nil] }
+      add_column!(rows, vals, col)
+    end
+
+    def information_withheld(row)
+      return unless gps_hidden?(row)
+
+      GPS_HIDDEN_MESSAGE
+    end
+
+    def public_lat(row)
+      return loc_center_lat(row) if gps_hidden?(row)
+
+      row.best_lat
+    end
+
+    def public_lng(row)
+      return loc_center_lng(row) if gps_hidden?(row)
+
+      row.best_lng
+    end
+
+    def loc_center_lat(row)
+      north = row.loc_north(14)
+      south = row.loc_south(14)
+      return nil unless north && south
+
+      ((north + south) / 2).round(4)
+    end
+
+    def loc_center_lng(row)
+      east = row.loc_east(14)
+      west = row.loc_west(14)
+      return nil unless east && west
+
+      ((east + west) / 2).round(4)
     end
 
     def explode_notes(row)
