@@ -3668,13 +3668,12 @@
   form_violations_show_project: Show Project
   form_violations_no_violations: No constraint violations.
   form_violations_th_name: Name
-  form_violations_th_kinds: Violations
-  form_violations_th_details: Details
+  form_violations_th_details: Violation Details
   form_violations_th_actions: Actions
   form_violations_kind_date: Date
   form_violations_kind_bbox: Location (bbox)
-  form_violations_kind_target_name: Target name
-  form_violations_kind_target_location: Target location
+  form_violations_kind_target_name: Non-target name
+  form_violations_kind_target_location: Non-target location
   form_violations_action_exclude: Exclude
   form_violations_action_extend: Extend dates
   form_violations_action_add_target_name: Add Target Name

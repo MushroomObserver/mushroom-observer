@@ -61,7 +61,6 @@ class Components::ProjectViolationsForm < Components::Base
       thead do
         tr do
           th { :form_violations_th_name.l }
-          th { :form_violations_th_kinds.l }
           th { :form_violations_th_details.l }
           th { :form_violations_th_actions.l }
         end
@@ -77,7 +76,6 @@ class Components::ProjectViolationsForm < Components::Base
     kinds = violation.kinds
     tr do
       td { render_obs_link(obs) }
-      td { render_kinds(kinds) }
       td { render_details(obs, kinds) }
       td { render_actions(obs, kinds) }
     end
@@ -86,13 +84,6 @@ class Components::ProjectViolationsForm < Components::Base
   def render_obs_link(obs)
     link_to_object(obs, obs.text_name)
     plain(" (#{obs.id})")
-  end
-
-  def render_kinds(kinds)
-    kinds.each do |kind|
-      span(class: "label label-warning") { kind_label(kind) }
-      plain(" ")
-    end
   end
 
   def kind_label(kind)
