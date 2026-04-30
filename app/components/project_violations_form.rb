@@ -224,11 +224,22 @@ class Components::ProjectViolationsForm < Components::Base
   end
 
   def render_suffix_form(obs, suffixes)
+    # Batch-load every Location whose name matches one of this modal's
+    # suffixes in a single query, instead of issuing one query per
+    # suffix inside `render_suffix_choice` (Copilot review on PR #4182).
+    existing = Location.where(name: suffixes).index_by(&:name)
+    # Pre-check the first suffix that has a Location, not the first
+    # suffix overall — otherwise a modal whose most-specific suffix is
+    # missing renders with no enabled radio selected by default and
+    # silent submit becomes a no-op (Copilot review on PR #4182).
+    first_existing = suffixes.find { |s| existing.key?(s) }
     form(method: "post", action: violations_path) do
       render_csrf_and_method
       input(type: "hidden", name: "do", value: "add_target_location")
       input(type: "hidden", name: "obs_id", value: obs.id)
-      div(class: "modal-body") { render_suffix_radios(obs, suffixes) }
+      div(class: "modal-body") do
+        render_suffix_radios(suffixes, existing, first_existing)
+      end
       render_modal_footer
     end
   end
@@ -245,19 +256,20 @@ class Components::ProjectViolationsForm < Components::Base
     end
   end
 
-  def render_suffix_radios(obs, suffixes)
+  def render_suffix_radios(suffixes, existing, first_existing)
     p { :form_violations_modal_target_location_help.l }
-    suffixes.each_with_index do |suffix, i|
-      div(class: "radio") { render_suffix_choice(obs, suffix, i) }
+    suffixes.each do |suffix|
+      div(class: "radio") do
+        render_suffix_choice(suffix, existing[suffix], first_existing == suffix)
+      end
     end
   end
 
-  def render_suffix_choice(_obs, suffix, index)
-    existing = Location.find_by(name: suffix)
+  def render_suffix_choice(suffix, location, checked)
     label do
-      if existing
+      if location
         input(type: "radio", name: "location_id",
-              value: existing.id, checked: index.zero?)
+              value: location.id, checked: checked)
         plain(" #{suffix}")
       else
         input(type: "radio", name: "location_id", disabled: true)

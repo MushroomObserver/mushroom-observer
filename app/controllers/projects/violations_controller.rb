@@ -25,9 +25,9 @@ module Projects
     end
 
     def update
-      return unless find_or_goto_index(Project, params[:project_id])
+      @project = find_or_goto_index(Project, params[:project_id])
+      return unless @project
 
-      @project = Project.find(params[:project_id])
       dispatch_action
 
       redirect_to(project_violations_path(project_id: @project.id))
@@ -35,8 +35,12 @@ module Projects
 
     private
 
+    # Eager-loaded variant of `find_or_goto_index` for the index
+    # action, which renders the full violations list. `find_by`
+    # returns nil rather than raising, so the `||` fallback fires
+    # cleanly on a missing id.
     def find_project!
-      @project = Project.violations_includes.find(params[:project_id]) ||
+      @project = Project.violations_includes.find_by(id: params[:project_id]) ||
                  flash_error_and_goto_index(Project, params[:project_id])
     end
 

@@ -247,8 +247,22 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     obs.user == user || member?(user)
   end
 
+  # SQL-based count over the four violation kinds (#4136). Each branch
+  # plucks ids of OFFENDING observations and merges them into a Set
+  # for dedup; total cost is O(violations) rather than the
+  # O(visible_observations) cost of the full Ruby iteration in
+  # `#violations`. Called from the projects index
+  # (Tabs::ProjectsHelper#violations_button), so any per-project
+  # work multiplies by the number of projects rendered.
   def count_violations
-    violations.size
+    return 0 unless constraints?
+
+    ids = Set.new
+    collect_date_violation_ids(ids)
+    collect_bbox_violation_ids(ids)
+    collect_target_name_violation_ids(ids)
+    collect_target_location_violation_ids(ids)
+    ids.size
   end
 
   def constraints
@@ -612,6 +626,57 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     end.reduce(:or)
   end
 
+  # Same shape as `location_suffix_conditions` but against
+  # `observations.where` (used when an obs has no location_id).
+  def where_suffix_conditions
+    tbl = Observation.arel_table
+    target_locations.map do |tl|
+      escaped = self.class.sanitize_sql_like(tl.name)
+      tbl[:where].matches("%, #{escaped}").
+        or(tbl[:where].eq(tl.name))
+    end.reduce(:or)
+  end
+
+  # ----- helpers for SQL-based count_violations (#4136) -----
+
+  def collect_date_violation_ids(ids)
+    return unless start_date || end_date
+
+    ids.merge(out_of_range_observations.ids)
+  end
+
+  def collect_bbox_violation_ids(ids)
+    return unless location
+
+    ids.merge(obs_geoloc_outside_project_location.ids)
+    ids.merge(obs_without_geoloc_location_not_contained_in_location.ids)
+  end
+
+  def collect_target_name_violation_ids(ids)
+    return unless target_names.any?
+
+    ids.merge(
+      visible_observations.
+        where.not(name_id: expanded_target_name_id_set.to_a).ids
+    )
+  end
+
+  def collect_target_location_violation_ids(ids)
+    return unless target_locations.any?
+
+    passing = passing_target_location_ids
+    ids.merge(visible_observations.where.not(id: passing).ids)
+  end
+
+  def passing_target_location_ids
+    with_loc = visible_observations.joins(:location).
+               where(location_suffix_conditions).
+               pluck("observations.id")
+    without_loc = visible_observations.where(location_id: nil).
+                  where(where_suffix_conditions).pluck(:id)
+    (with_loc + without_loc).uniq
+  end
+
   public
 
   delegate :count, to: :candidate_observations, prefix: true
@@ -834,6 +899,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     !location.found_here?(observation)
   end
 
+  # Ruby 3.4 (and 3.0+) handles beginless/endless ranges in
+  # `Range#cover?` correctly — `(start..nil).cover?(date)`,
+  # `(nil..end).cover?(date)`, and `(...).cover?(nil)` all return
+  # the right boolean without raising. Verified locally; see Copilot
+  # review on PR #4182.
   def violates_date_range?(observation)
     return false if start_date.nil? && end_date.nil?
 
