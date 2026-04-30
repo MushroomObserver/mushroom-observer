@@ -253,14 +253,6 @@ module Name::Scopes
       has_default_description(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
     }
-    # used by Name::Taxonomy
-    scope :has_description_classification_differing, lambda {
-      joins(:description).
-        where(rank: 0..Name.ranks[:Genus]).
-        where(NameDescription[:classification].not_eq(Name[:classification])).
-        where(NameDescription[:classification].not_blank).distinct
-    }
-
     # Query just ignores `has_observations(false)`, so for now we will here too.
     scope :has_observations, lambda { |bool = true|
       return all unless bool

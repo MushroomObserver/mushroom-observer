@@ -2474,6 +2474,7 @@
 
   # names/versions/show
   show_past_name_title: "[:VERSION] [num]: [name]"
+  show_past_name_classification_inherited: "Inherited from [name]'s reclassification on [date] by [user]"
 
   # names/descriptions/versions/show
   show_past_name_description_title: "[:VERSION] [num]: [name]"
@@ -3570,6 +3571,11 @@
   change_member_status_title: Changing [:user] Status of [name] for [title]
   change_member_add_obs: Add My Observations
   change_member_add_obs_flash: Added [count] Observations
+  add_obs_modal_none: None of your observations match this project and aren't already in it.
+  add_obs_modal_all: Found [count] matching observations not already in the project.
+  add_obs_modal_partial: Found [count] matching observations not already in the project. Each click adds up to [limit].
+  add_obs_modal_add_all: Add All
+  add_obs_modal_add_next: Add Next [limit]
   change_member_hidden_gps_trust: Share Hidden GPS
   change_member_hidden_gps_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
   change_member_editing_trust: Allow Editing

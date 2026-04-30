@@ -229,7 +229,7 @@ class LocalizationFilesTest < UnitTestCase
   end
 
   def test_user_data_translations
-    non_integers = [:languages, :checklist]
+    non_integers = [:languages]
     user_tags = UserStats::ALL_FIELDS.except(*non_integers).keys.map do |field|
       :"user_stats_#{field}"
     end

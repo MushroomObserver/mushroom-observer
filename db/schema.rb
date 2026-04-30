@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -391,7 +391,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.text "uses"
     t.text "notes"
     t.text "refs"
-    t.text "classification"
   end
 
   create_table "name_description_writers", charset: "utf8mb3", force: :cascade do |t|
@@ -424,7 +423,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.text "uses"
     t.text "notes"
     t.text "refs"
-    t.text "classification"
     t.integer "project_id"
   end
 
@@ -454,6 +452,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.integer "rank"
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.integer "icn_id"
+    t.text "classification"
+    t.index ["name_id", "version"], name: "index_name_versions_on_name_id_and_version"
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -515,6 +515,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.integer "image_id", default: 0, null: false
     t.integer "observation_id", default: 0, null: false
     t.integer "rank", default: 0, null: false
+    t.index ["image_id"], name: "index_observation_images_on_image_id"
     t.index ["observation_id"], name: "index_observation_images_on_observation_id"
   end
 
@@ -548,7 +549,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.integer "alt"
     t.string "lifeform", limit: 1024
     t.string "text_name", limit: 100
-    t.text "classification"
     t.boolean "gps_hidden", default: false, null: false
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
@@ -692,6 +692,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.integer "glossary_term_id"
     t.integer "article_id"
     t.datetime "created_at", precision: nil, null: false
+    t.index ["observation_id"], name: "index_rss_logs_on_observation_id"
+    t.index ["updated_at"], name: "index_rss_logs_on_updated_at"
   end
 
   create_table "sequences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -915,7 +917,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_24_170000) do
     t.integer "votes", default: 0, null: false
     t.string "languages"
     t.string "bonuses"
-    t.string "checklist"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "user_index"

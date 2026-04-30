@@ -12,6 +12,33 @@ column_classes(:six)
     <%= render(partial: "names/show/nomenclature",
                locals: { name: @name, synonyms: false }) %>
     <%= render(partial: "names/show/lifeform_panel") %>
+    <%
+      version_row = @versions.find { |v| v.version == params[:version].to_i }
+      cls = version_row && @name.classification_at_version(version_row)
+    %>
+    <% if cls && cls[:value].present? %>
+      <%= render(Components::Panel.new(
+            panel_class: "name-section",
+            panel_id: "name_classification"
+          )) do |panel| %>
+        <%= panel.with_heading { :show_name_classification.l } %>
+        <%= panel.with_body do %>
+          <%= cls[:value].tpl %>
+          <% if cls[:source] == :inherited %>
+            <% src = cls[:inherited_from]
+               editor = src[:user_id] && User.find_by(id: src[:user_id]) %>
+            <%= tag.p(class: "text-muted small mt-2") do
+                  :show_past_name_classification_inherited.t(
+                    name: link_to(src[:name].user_display_name(@user).t,
+                                  name_path(src[:name].id)),
+                    date: src[:edited_at].to_date.to_s,
+                    user: editor ? editor.unique_text_name : "—"
+                  )
+                end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
     <% if @name.has_notes? %>
       <%= render(partial: "names/show/notes_panel") %>
     <% end %>
