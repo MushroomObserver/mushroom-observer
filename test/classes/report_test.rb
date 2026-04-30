@@ -773,19 +773,25 @@ class ReportTest < UnitTestCase
   def test_mycoportal_coordinate_uncertainty_lat_lng_hidden
     obs = observations(:trusted_hidden)
     loc = obs.location
+    pub_lat = obs.lat.round
+    pub_lng = obs.lng.round
 
-    # obs lat/lng is in the NE quadrant of loc; so SE corner is the furthest
-    uncertainty = Haversine.distance(loc.center_lat, loc.center_lng,
-                                     loc.south, loc.west).
-                  to_meters.round.to_s
+    # public lat/lng is the real GPS rounded to 0 decimal places.
+    # uncertainty is the max distance to any of the four location corners.
+    uncertainty = [
+      [loc.north, loc.east], [loc.north, loc.west],
+      [loc.south, loc.east], [loc.south, loc.west]
+    ].map do |clat, clng|
+      Haversine.distance(pub_lat, pub_lng, clat, clng).to_meters
+    end.max.round.to_s
 
-    # public lat/lng is the loc center because obs coordinates are hidden.
     expect = hashed_expect(obs).merge(
-      decimalLatitude: loc.center_lat.round(4).to_s,
-      decimalLongitude: loc.center_lng.round(4).to_s,
+      decimalLatitude: pub_lat.to_s,
+      decimalLongitude: pub_lng.to_s,
       minimumElevationInMeters: obs.alt.to_s,
       maximumElevationInMeters: obs.alt.to_s,
-      coordinateUncertaintyInMeters: uncertainty
+      coordinateUncertaintyInMeters: uncertainty,
+      informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -797,21 +803,19 @@ class ReportTest < UnitTestCase
     # There are many (5,285) Obss with gps hidden, but no lat/lng
     obs.update!(location_id: loc.id, where: loc.name,
                 lat: nil, lng: nil)
-    loc = obs.location
-    uncertainty = Haversine.distance(
-      loc.center_lat, loc.center_lng, loc.north, loc.east
-    ).to_meters.round.to_s
 
+    # No GPS → public lat/lng and uncertainty are all nil.
     expect = hashed_expect(obs).merge(
       country: "South Africa",
       stateProvince: "Gauteng",
       county: nil,
       locality: "City of Tshwane Metropolitan Municipality, Pretoria",
-      decimalLatitude: loc.center_lat.round(4).to_s,
-      decimalLongitude: loc.center_lng.round(4).to_s,
+      decimalLatitude: nil,
+      decimalLongitude: nil,
       minimumElevationInMeters: obs.alt.to_s,
       maximumElevationInMeters: obs.alt.to_s,
-      coordinateUncertaintyInMeters: uncertainty
+      coordinateUncertaintyInMeters: nil,
+      informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -829,14 +833,16 @@ class ReportTest < UnitTestCase
       location_lat: nil,
       location_lng: nil
     )
+    # Has GPS but no location: public lat/lng are rounded GPS; no uncertainty.
     expect = hashed_expect(obs).merge(
       stateProvince: "Puerto Rico",
-      locality: "Humacao18.094914, -65.801449"
+      locality: "Humacao18.094914, -65.801449",
+      decimalLatitude: obs.lat.round.to_s,
+      decimalLongitude: obs.lng.round.to_s,
+      coordinateUncertaintyInMeters: nil,
+      informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     )
-    [:decimalLatitude,
-     :decimalLongitude,
-     :coordinateUncertaintyInMeters,
-     :minimumElevationInMeters,
+    [:minimumElevationInMeters,
      :maximumElevationInMeters].each { |key| expect[key] = nil }
     expect = expect.values
 
@@ -938,6 +944,7 @@ class ReportTest < UnitTestCase
       decimalLatitude: obs_location&.center_lat&.to_s,
       decimalLongitude: obs_location&.center_lng&.to_s,
       coordinateUncertaintyInMeters: default_uncertainty || nil,
+      informationWithheld: nil,
       # if low/high are nil, value must be empty string, not zero
       minimumElevationInMeters: minimum_elevation,
       maximumElevationInMeters: maximum_elevation,
