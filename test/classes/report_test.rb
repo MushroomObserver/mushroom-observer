@@ -777,9 +777,13 @@ class ReportTest < UnitTestCase
     pub_lng = obs.lng.round
 
     # public lat/lng is the real GPS rounded to 0 decimal places.
-    # pub_lat is positive, so SE corner (south, east) is farthest.
-    uncertainty = Haversine.distance(pub_lat, pub_lng, loc.south, loc.east).
-                  to_meters.round.to_s
+    # uncertainty is the max distance to any of the four location corners.
+    uncertainty = [
+      [loc.north, loc.east], [loc.north, loc.west],
+      [loc.south, loc.east], [loc.south, loc.west]
+    ].map do |clat, clng|
+      Haversine.distance(pub_lat, pub_lng, clat, clng).to_meters
+    end.max.round.to_s
 
     expect = hashed_expect(obs).merge(
       decimalLatitude: pub_lat.to_s,

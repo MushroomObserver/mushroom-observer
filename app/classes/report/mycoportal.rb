@@ -145,10 +145,10 @@ module Report
       return if row.loc_id.blank?
 
       if gps_hidden?(row)
-        return unless public_lat(row)
+        return unless public_lat(row) && public_lng(row)
 
         box = loc_box(row)
-        distance_to_farthest_corner(public_lat(row), public_lng(row), box)
+        max_distance_to_any_corner(public_lat(row), public_lng(row), box)
       elsif row.obs_lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
@@ -265,6 +265,17 @@ module Report
 
     def distance_to_se_corner(lat, lng, box)
       Haversine.distance(lat, lng, box.south, box.east).to_meters.round
+    end
+
+    def max_distance_to_any_corner(lat, lng, box)
+      box_corners(box).map do |clat, clng|
+        Haversine.distance(lat, lng, clat, clng).to_meters
+      end.max.round
+    end
+
+    def box_corners(box)
+      [[box.north, box.east], [box.north, box.west],
+       [box.south, box.east], [box.south, box.west]]
     end
 
     def add_gps_hidden!(rows, col)
