@@ -112,8 +112,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_redirected_to(articles_path)
 
     # Prove authorized user can go to create_article form
-    login(users(:article_writer).login)
-    make_admin
+    make_admin(users(:article_writer).login)
     get(:new)
     assert_form_action(action: :create) # "new" form posts to :create action
 
@@ -135,8 +134,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_redirected_to(articles_path)
 
     # Prove authorized user can create article
-    login(users(:article_writer).login)
-    make_admin
+    make_admin(users(:article_writer).login)
     get(:edit, params: params)
     assert_form_action(action: :update) # "edit" form posts to :update action
   end
@@ -160,8 +158,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_redirected_to(articles_path)
 
     # Prove authorized user cannot create title-less Article
-    login(user.login)
-    make_admin
+    make_admin(user.login)
     params = {
       article: { title: "", body: body }
     }
@@ -203,8 +200,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_redirected_to(articles_path)
 
     # Prove authorized user can edit article
-    login(users(:article_writer).login)
-    make_admin
+    make_admin(users(:article_writer).login)
     post(:update, params: params)
     article.reload
 
@@ -239,8 +235,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert(Article.exists?(article.id))
 
     # Prove authorized user can destroy article
-    login(article.user.login)
-    make_admin
+    make_admin(users(:article_writer).login)
     delete(:destroy, params: params)
     assert_not(Article.exists?(article.id),
                "Failed to destroy Article #{article.id}, '#{article.title}'")

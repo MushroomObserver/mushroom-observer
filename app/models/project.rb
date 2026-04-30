@@ -192,14 +192,18 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   alias format_name text_name
   alias unique_format_name unique_text_name
 
-  # Is +user+ a member of this Project?
+  # Is +user+ a member of this Project? Reflects actual user_group
+  # membership only — Site Admins (user.admin == true) get no implicit
+  # membership; they self-promote via the Administer Project button.
+  # See issue #4145.
   def member?(user)
-    user && (user_group.users.member?(user) || user.admin)
+    user && user_group.users.member?(user)
   end
 
-  # Is +user+ an admin for this Project?
+  # Is +user+ an admin for this Project? Reflects actual admin_group
+  # membership only — see #member? note about Site Admins.
   def is_admin?(user)
-    user && (admin_group.users.member?(user) || user.admin)
+    user && admin_group.users.member?(user)
   end
   alias admin? is_admin?
 
@@ -229,14 +233,29 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     user_group.users << user unless user_group.users.member?(user)
   end
 
+  # Promote +user+ to Project Admin. Adds to user_group and admin_group,
+  # creates a ProjectMember row matching the default produced by the
+  # add-member flow. Idempotent. Used by the Site Admin self-promotion
+  # action (issue #4145).
+  def add_administrator(user)
+    ProjectMember.find_or_create_by(project: self, user: user) do |pm|
+      pm.trust_level = "editing"
+    end
+    user_group.users << user unless user_group.users.member?(user)
+    admin_group.users << user unless admin_group.users.member?(user)
+    log_add_admin(user)
+  end
+
   def can_leave?(user)
     user && user_group.users.member?(user) && user.id != user_id
   end
 
   def member_status(user)
     return :OWNER.t if user == self.user
+    return :ADMIN.t if is_admin?(user)
+    return :MEMBER.t if member?(user)
 
-    is_admin?(user) ? :ADMIN.t : :MEMBER.t
+    nil
   end
 
   def user_can_add_observation?(obs, user)

@@ -673,6 +673,8 @@ MushroomObserver::Application.routes.draw do
   end
 
   resources :projects do
+    resource :administration, only: [:create],
+                              controller: "projects/administrations"
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"
     resources :field_slips, only: [:new, :create],

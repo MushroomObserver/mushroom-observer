@@ -90,7 +90,7 @@ module Tabs
                  else
                    "btn-default"
                  end
-      classes = "btn btn-lg #{btn_type}"
+      classes = "btn btn-lg #{btn_type} my-2 mr-2"
       link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
               project_violations_path(project_id: project.id),
               { class: classes })

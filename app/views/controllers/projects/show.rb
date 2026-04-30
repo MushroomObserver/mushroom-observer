@@ -99,9 +99,26 @@ module Views
         def render_actions
           div(id: "project_join_trust_edit", class: "mb-4") do
             render_membership_buttons
+            render_administer_button
             render_admin_links
             render_violations_button
           end
+        end
+
+        # Shared classes for every button in render_actions so the row reads
+        # consistently at narrow and wide viewports. Issue #4145.
+        def action_button_class
+          "btn btn-default btn-lg my-2 mr-2"
+        end
+
+        def render_administer_button
+          return unless @user&.admin && !@project.is_admin?(@user)
+
+          post_button(
+            name: :show_project_administer.t,
+            class: action_button_class,
+            path: project_administration_path(project_id: @project.id)
+          )
         end
 
         def render_membership_buttons
@@ -115,7 +132,7 @@ module Views
         def render_join_button
           post_button(
             name: :show_project_join.t,
-            class: "btn btn-default btn-lg",
+            class: action_button_class,
             path: project_members_path(
               project_id: @project.id,
               candidate: @user.id,
@@ -144,7 +161,7 @@ module Views
         def render_member_action(action_key)
           put_button(
             name: action_key.l,
-            class: "btn btn-default btn-lg",
+            class: action_button_class,
             path: project_member_path(
               project_id: @project.id,
               candidate: @user.id,
@@ -157,7 +174,7 @@ module Views
         def render_leave_button
           put_button(
             name: :show_project_leave.t,
-            class: "btn btn-default btn-lg",
+            class: action_button_class,
             path: project_member_path(
               project_id: @project.id,
               candidate: @user.id,
@@ -174,7 +191,7 @@ module Views
               project_id: @project.id,
               candidate: @user.id
             ),
-            { class: "btn btn-default btn-lg" }
+            { class: action_button_class }
           )
         end
 
@@ -186,24 +203,21 @@ module Views
               href: new_project_admin_request_path(
                 project_id: @project.id
               ),
-              class: "btn btn-default btn-lg"
+              class: action_button_class
             ) { plain(:show_project_admin_request.t) }
           end
         end
 
         def render_admin_management_links
-          div(class: "mt-3") do
-            render_members_link
-            whitespace
-            render_aliases_link
-          end
+          render_members_link
+          render_aliases_link
         end
 
         def render_members_link
           count = @project.user_group.users.count
           a(
             href: project_members_path(@project.id),
-            class: "btn btn-default btn-lg"
+            class: action_button_class
           ) { plain("#{count} #{:MEMBERS.l}") }
         end
 
@@ -211,7 +225,7 @@ module Views
           count = @project.aliases.length
           a(
             href: project_aliases_path(project_id: @project.id),
-            class: "btn btn-default btn-lg"
+            class: action_button_class
           ) { plain("#{count} #{:PROJECT_ALIASES.l}") }
         end
 

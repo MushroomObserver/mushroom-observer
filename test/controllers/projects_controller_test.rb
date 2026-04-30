@@ -135,6 +135,41 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_edit_button(project)
+    assert_select(
+      "form[action=?]", project_administration_path(project_id: project.id),
+      false,
+      "Existing project admins should not see the Administer Project button"
+    )
+  end
+
+  def test_show_project_administer_button_for_site_admin
+    project = projects(:eol_project)
+    site_admin = users(:admin)
+    assert_not(project.is_admin?(site_admin),
+               "Test setup: site admin should not yet be a project admin")
+
+    login(site_admin.login)
+    get(:show, params: { id: project.id })
+
+    assert_response(:success)
+    assert_select(
+      "form[action=?]", project_administration_path(project_id: project.id),
+      true,
+      "Site Admin not in admin_group should see the Administer Project button"
+    )
+  end
+
+  def test_show_project_no_administer_button_for_non_site_admin
+    project = projects(:eol_project)
+    login(katrina.login)
+    get(:show, params: { id: project.id })
+
+    assert_response(:success)
+    assert_select(
+      "form[action=?]", project_administration_path(project_id: project.id),
+      false,
+      "Non-site-admin should not see the Administer Project button"
+    )
   end
 
   def test_show_project_with_location
