@@ -76,19 +76,25 @@ class Components::ObservationFormProjects < Components::Base
 
   def render_constraint_alert(level, projects, help_text)
     render(Components::Alert.new(level: level)) do
-      div do
-        plain("#{:form_observations_projects_out_of_range.t(
-          date: @observation.when,
-          place_name: @observation.place_name
-        )}:")
-      end
+      div { plain("#{:form_observations_projects_out_of_range.t}:") }
       ul do
         projects.each do |proj|
-          li { "#{proj.title} (#{proj.constraints})" }
+          li { "#{proj.title} (#{constraint_kind_labels(proj)})" }
         end
       end
       p { help_text }
     end
+  end
+
+  # Joined, localized kind labels for the violations this observation
+  # incurs against `proj` (Non-target name; Out-of-range date; etc.).
+  # Replaces the old `proj.constraints` rendering, which surfaced the
+  # project's date/location *settings* — useless when those are blank
+  # but the observation fails on target_name / target_location.
+  def constraint_kind_labels(proj)
+    proj.violation_kinds_for(@observation).map do |kind|
+      :"form_observations_projects_kind_#{kind}".l
+    end.join("; ")
   end
 
   def render_ignore_checkbox(project_ns)

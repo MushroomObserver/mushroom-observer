@@ -774,6 +774,26 @@
   background-color: orange;
 }
 
+// Project violations page (#4136) — `button_to` renders each per-row
+// action as its own inline form, and the modal trigger is a plain
+// <button>. Adjacent elements touch by default; add a small gap on
+// both axes so the action buttons don't visually merge, including
+// when they wrap to a second line.
+.project-violations td .button_to,
+.project-violations td > button {
+  display: inline-block;
+  // `button_to` wraps its <button> in a <form>, while the modal
+  // trigger is a bare <button>. Without an explicit vertical-align
+  // their baselines differ and the last button sits half a line
+  // higher than its siblings.
+  vertical-align: top;
+  margin: 0 4px 4px 0;
+}
+.project-violations td .button_to:last-child,
+.project-violations td > button:last-child {
+  margin-right: 0;
+}
+
 .opacity-0 {
   opacity: 0 !important;
 }

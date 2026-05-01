@@ -1848,10 +1848,14 @@
   form_observations_original_name: Original Name
 
   form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:SEE_MESSAGE_BELOW]+":#project_messages
-  form_observations_projects_out_of_range: The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)
-  form_observations_projects_out_of_range_help: "Either:\n- Uncheck out-of-range projects; or\n- Change the observation date or location if it is incorrect"
+  form_observations_projects_out_of_range: This observation violates one or more constraints of these checked project(s)
+  form_observations_projects_out_of_range_help: "Either:\n- Uncheck the project(s); or\n- Change the observation to align with project requirements"
   form_observations_projects_out_of_range_admin_help: "; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
   form_observations_projects_ignore_project_constraints: Ignore Project Constraints
+  form_observations_projects_kind_date: Out-of-range date
+  form_observations_projects_kind_bbox: Out-of-bbox location
+  form_observations_projects_kind_target_name: Non-target name
+  form_observations_projects_kind_target_location: Non-target location
 
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:SEE_MESSAGE_BELOW]+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+[:SEE_MESSAGE_BELOW]+":#name_messages
@@ -3655,13 +3659,30 @@
   show_project_violation_count: Project has [count] constraint violation(s)
 
   # project/violations/index
-  form_violations_help: Check the Observations to be removed, then Submit
+  form_violations_help: Each row shows an Observation that fails one or more of this Project's constraints. Use the per-row actions to bring it into compliance.
   violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
   form_violations_latitude_none: "Lat: Any"
   form_violations_location_none: "[:LOCATION]: Any"
   form_violations_longitude_none: "Lon: Any"
   form_violations_remove_selected: Remove Selected
   form_violations_show_project: Show Project
+  form_violations_no_violations: No constraint violations.
+  form_violations_th_name: Name
+  form_violations_th_details: Violation Details
+  form_violations_th_actions: Actions
+  form_violations_kind_date: Date
+  form_violations_kind_bbox: Outside project location
+  form_violations_kind_target_name: Non-target name
+  form_violations_kind_target_location: Non-target location
+  form_violations_action_exclude: Exclude
+  form_violations_action_extend: Extend dates
+  form_violations_action_add_target_name: Add Target Name
+  form_violations_action_add_target_location: Add Target Location
+  form_violations_modal_target_location_title: Add Target Location
+  form_violations_modal_target_location_help: Choose a region of this Observation's location to add as a Target Location. The full location name and any trailing comma-separated regions are offered. Choices whose Location does not yet exist can be created in a new tab.
+  form_violations_modal_target_location_no_suffixes: This Observation's location is not specific enough to add as a Target Location. Either Exclude this Observation, or add a more specific location via the Project Locations page.
+  form_violations_modal_target_location_create: Create
+  form_violations_modal_target_location_submit: Add Target
 
   # users/by_name
   users_by_name_title: Users by Name

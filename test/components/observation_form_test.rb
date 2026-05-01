@@ -121,6 +121,40 @@ class ObservationFormTest < ComponentTestCase
     assert_html(html, "input[name='field_code'][type='text']")
   end
 
+  # #4136: per-project warning annotation lists the violation kinds
+  # that apply to this obs against this project, not the project's
+  # date/location *settings* (which are uninformative when the project
+  # only has target_names / target_locations).
+  def test_constraint_warning_lists_violation_kinds_per_project
+    user = users(:rolf)
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.project_target_locations.destroy_all
+    proj.update!(start_date: nil, end_date: nil, location: nil)
+    proj.add_target_name(names(:agaricus))
+    proj.add_target_location(locations(:burbank))
+    obs = observations(:falmouth_2023_09_obs) # Boletus, Falmouth — neither
+    User.current = user
+
+    html = render_form(
+      observation: obs, user: user, mode: :update,
+      projects: [proj], project_checks: { proj.id => true },
+      suspect_checked_projects: [proj]
+    )
+
+    assert_includes(html, :form_observations_projects_out_of_range.l)
+    assert_includes(html, proj.title)
+    assert_includes(html, :form_observations_projects_kind_target_name.l)
+    assert_includes(html, :form_observations_projects_kind_target_location.l)
+    # Old-style "(Dates: Any; Location: )" annotation should be gone.
+    assert_no_match(/Dates: Any/, html)
+    # Help text reflects the new wording.
+    assert_includes(
+      html,
+      "Change the observation to align with project requirements"
+    )
+  end
+
   private
 
   def render_form(observation:, user:, mode: :create, **extras)
