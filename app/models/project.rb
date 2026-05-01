@@ -71,24 +71,27 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :field_slips, dependent: :nullify
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
-  has_many :project_images, dependent: :destroy
+  # Pure join tables — no destroy callbacks, no further cascades. Use
+  # delete_all so destroying a project with thousands of obs doesn't
+  # load and per-row-DELETE every join row.
+  has_many :project_images, dependent: :delete_all
   has_many :images, through: :project_images
 
-  has_many :project_observations, dependent: :destroy
+  has_many :project_observations, dependent: :delete_all
   has_many :observations, through: :project_observations
   has_many :locations, through: :observations
 
-  has_many :project_excluded_observations, dependent: :destroy
+  has_many :project_excluded_observations, dependent: :delete_all
   has_many :excluded_observations, through: :project_excluded_observations,
                                    source: :observation
 
-  has_many :project_species_lists, dependent: :destroy
+  has_many :project_species_lists, dependent: :delete_all
   has_many :species_lists, through: :project_species_lists
 
-  has_many :project_target_names, dependent: :destroy
+  has_many :project_target_names, dependent: :delete_all
   has_many :target_names, through: :project_target_names, source: :name
 
-  has_many :project_target_locations, dependent: :destroy
+  has_many :project_target_locations, dependent: :delete_all
   has_many :target_locations, through: :project_target_locations,
                               source: :location
 
@@ -337,6 +340,56 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     touch
   end
 
+  # Bulk variant of add_observation. Given a list of observation ids,
+  # inserts all needed project_observations / project_images rows in
+  # set-based SQL rather than emitting ~8 queries per observation.
+  # Idempotent: pre-existing project_observations are left alone, and
+  # any project_excluded_observations rows for these ids are dropped
+  # (matching add_observation's un-exclude side effect).
+  def bulk_add_observations(obs_ids)
+    obs_ids = Array(obs_ids).map(&:to_i).uniq
+    return 0 if obs_ids.empty?
+
+    project_excluded_observations.where(observation_id: obs_ids).delete_all
+    new_obs_ids = obs_ids - project_observations.where(observation_id: obs_ids).
+                  pluck(:observation_id)
+    return 0 if new_obs_ids.empty?
+
+    insert_project_observations(new_obs_ids)
+    insert_project_images_for(new_obs_ids)
+    touch
+    new_obs_ids.size
+  end
+
+  def insert_project_observations(obs_ids)
+    rows = obs_ids.map { |obs_id| { project_id: id, observation_id: obs_id } }
+    ProjectObservation.insert_all(rows)
+  end
+
+  # Pull image_ids whose owner matches the observation owner (matching
+  # add_observation's per-row filter), excluding any (project_id, image_id)
+  # rows already in project_images so we don't insert duplicates. (There
+  # is no unique index on project_images, so this dedup is the only
+  # protection — see #4181.)
+  def insert_project_images_for(obs_ids)
+    image_ids = ObservationImage.
+                joins("INNER JOIN images ON images.id = " \
+                      "observation_images.image_id").
+                joins("INNER JOIN observations ON observations.id = " \
+                      "observation_images.observation_id").
+                where(observation_id: obs_ids).
+                where("images.user_id = observations.user_id").
+                distinct.pluck(:image_id)
+    return if image_ids.empty?
+
+    image_ids -= project_images.where(image_id: image_ids).pluck(:image_id)
+    return if image_ids.empty?
+
+    rows = image_ids.map { |img_id| { project_id: id, image_id: img_id } }
+    ProjectImage.insert_all(rows)
+  end
+  private :insert_project_observations, :insert_project_images_for
+
   # Remove observation (and its images) from this project. Saves it.
   def remove_observation(obs)
     return unless observations.include?(obs)
@@ -364,17 +417,26 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     touch
   end
 
-  # Remove all observations matching the given name (including synonyms)
-  # from both this project's observations and its excluded_observations.
+  # Remove observations that were matching this project via `name` as a
+  # target (directly, via synonyms, or via sub-taxa of either), but
+  # leave any observation whose name is still covered by some other
+  # remaining target. Called after the project_target_name record has
+  # already been destroyed, so `target_name_ids` reflects the
+  # post-removal state.
   def purge_observations_matching_name(name)
-    matching_ids = Observation.names(lookup: [name.id],
-                                     include_synonyms: true).pluck(:id)
-    return if matching_ids.empty?
+    matching_name_ids = expanded_target_name_ids([name.id])
+    if target_name_ids.any?
+      matching_name_ids -= expanded_target_name_ids(target_name_ids)
+    end
+    return if matching_name_ids.empty?
 
-    observations.where(id: matching_ids).
+    # Don't pluck into Ruby — a broad genus target could produce tens
+    # of thousands of ids. Use a subquery relation for both deletions.
+    matching_obs = Observation.where(name_id: matching_name_ids)
+    observations.where(id: matching_obs).
       find_each { |obs| remove_observation(obs) }
     project_excluded_observations.
-      where(observation_id: matching_ids).destroy_all
+      where(observation_id: matching_obs).delete_all
   end
 
   def imgs_to_delete(obs)
@@ -483,11 +545,22 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   private
 
+  # Same expansion rule as candidate_name_ids: each given name plus
+  # its synonyms plus sub-taxa of both.
+  def expanded_target_name_ids(name_ids)
+    return [] if name_ids.empty?
+
+    Lookup::Names.new(name_ids,
+                      include_synonyms: true,
+                      include_subtaxa: true).ids
+  end
+
   def candidate_name_ids
     return unless target_names.any?
 
     Observation.names(lookup: target_name_ids,
-                      include_synonyms: true).select(:id)
+                      include_synonyms: true,
+                      include_subtaxa: true).select(:id)
   end
 
   def candidate_location_ids

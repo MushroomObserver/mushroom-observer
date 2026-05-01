@@ -188,8 +188,12 @@ class Checklist
       [name.text_name, name.id, name.deprecated, name.synonym_id, name.rank]
     end
 
-    # Set 0 count for any target lacking a direct-name observation so the
-    # link displays "(0)" next to the unobserved-target name.
+    # Each row shows its own direct observation count (exact-name
+    # match, inherited from Checklist#calc_counts). Unobserved
+    # targets default to 0 so the "(0)" placeholder renders. The
+    # rollup logic lives on the Update-tab side (candidate_name_ids)
+    # so admins can see which obs are using an old/synonym name and
+    # decide whether to re-identify them.
     def merge_target_names_into_counts
       target_names.each do |name|
         @counts[name.text_name] ||= 0

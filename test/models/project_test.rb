@@ -330,6 +330,74 @@ class ProjectTest < UnitTestCase
     assert(candidates.count >= 0, "Should query without error")
   end
 
+  # Genus-level target should pick up observations of species in that
+  # genus (Joe's example from #4130: Gloeomucro genus → Gloeomucro flavus).
+  def test_candidate_observations_includes_subtaxa_of_genus_target
+    proj = projects(:rare_fungi_project)
+    # Strip all targets and rebuild with just a single genus name so
+    # the assertion tests the name-matching logic in isolation (no
+    # location filter to also satisfy).
+    proj.project_target_names.destroy_all
+    proj.project_target_locations.destroy_all
+    proj.add_target_name(names(:agaricus))
+
+    species_obs = observations(:agaricus_campestris_obs)
+    assert_includes(proj.candidate_observations, species_obs,
+                    "Obs of a species should match its genus as target")
+  end
+
+  # Genus target should NOT pull in current-name species whose deprecated
+  # synonym happens to fall under the target genus. E.g., an Agaricus
+  # target would otherwise match a current Protostropharia species whose
+  # old name was "Agaricus semiglobatus". This caught 21K spurious
+  # observations for the real Agaricus on production.
+  def test_candidate_observations_excludes_cross_genus_historical_synonyms
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    # Clear target_locations too so the test isolates name matching;
+    # obs below is created without a location.
+    proj.project_target_locations.destroy_all
+    proj.add_target_name(names(:agaricus))
+
+    # Simulate the historical-rename scenario: a current Protostropharia
+    # species whose old name would fall under Agaricus via subtaxa
+    # expansion.
+    synonym = Synonym.create!
+    Name.create!(
+      user: users(:rolf),
+      text_name: "Agaricus fakedeprecated",
+      search_name: "Agaricus fakedeprecated",
+      sort_name: "Agaricus fakedeprecated",
+      display_name: "__Agaricus__ __fakedeprecated__",
+      author: "",
+      rank: Name.ranks[:Species],
+      deprecated: true,
+      synonym_id: synonym.id,
+      correct_spelling_id: nil
+    )
+    other_genus = Name.create!(
+      user: users(:rolf),
+      text_name: "Protostropharia fakecurrent",
+      search_name: "Protostropharia fakecurrent",
+      sort_name: "Protostropharia fakecurrent",
+      display_name: "__Protostropharia__ __fakecurrent__",
+      author: "",
+      rank: Name.ranks[:Species],
+      deprecated: false,
+      synonym_id: synonym.id,
+      correct_spelling_id: nil
+    )
+    obs = Observation.create!(
+      name: other_genus, user: users(:rolf), when: Time.zone.now
+    )
+
+    assert_not_includes(
+      proj.candidate_observations, obs,
+      "Current Protostropharia obs should NOT match the Agaricus target " \
+      "just because its deprecated synonym is under Agaricus"
+    )
+  end
+
   def test_field_slip_prefix_validation
     proj = Project.new(title: "Test", field_slip_prefix: "bad prefix!")
     proj.valid?
@@ -387,6 +455,55 @@ class ProjectTest < UnitTestCase
     assert_not_includes(proj.new_candidate_observations.reload, obs)
   end
 
+  def test_bulk_add_observations_inserts_obs_and_owner_images
+    proj = projects(:eol_project)
+    minimal = observations(:minimal_unknown_obs)
+    detailed = observations(:detailed_unknown_obs)
+    owner_imgs = detailed.images.select { |i| i.user_id == detailed.user_id }
+    assert(owner_imgs.any?,
+           "fixture must have at least one owner-attributed image")
+
+    count = proj.bulk_add_observations([minimal.id, detailed.id])
+
+    assert_equal(2, count)
+    assert_includes(proj.observations.reload, minimal)
+    assert_includes(proj.observations.reload, detailed)
+    assert_obj_arrays_equal(owner_imgs.sort_by(&:id),
+                            proj.images.reload.sort_by(&:id))
+  end
+
+  def test_bulk_add_observations_is_idempotent
+    proj = projects(:eol_project)
+    obs = observations(:detailed_unknown_obs)
+    proj.add_observation(obs)
+    obs_count_before = proj.observations.reload.size
+    img_count_before = proj.images.reload.size
+
+    count = proj.bulk_add_observations([obs.id])
+
+    assert_equal(0, count)
+    assert_equal(obs_count_before, proj.observations.reload.size)
+    assert_equal(img_count_before, proj.images.reload.size)
+  end
+
+  def test_bulk_add_observations_unexcludes
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.exclude_observation(obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+
+    count = proj.bulk_add_observations([obs.id])
+
+    assert_equal(1, count)
+    assert_includes(proj.observations.reload, obs)
+    assert_not_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_bulk_add_observations_handles_empty_input
+    proj = projects(:eol_project)
+    assert_equal(0, proj.bulk_add_observations([]))
+  end
+
   def test_remove_target_name_purges_matching_observations
     proj = projects(:rare_fungi_project)
     matching_name = names(:agaricus_campestris)
@@ -404,5 +521,40 @@ class ProjectTest < UnitTestCase
 
     assert_not_includes(proj.observations.reload, added_obs)
     assert_not_includes(proj.excluded_observations.reload, excluded_obs)
+  end
+
+  # Issue #4130: removing a genus target should also purge obs of its
+  # species (which qualified as candidates via the sub-taxa rule), not
+  # just the bare-genus obs.
+  def test_remove_target_name_purges_subtaxa_observations
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.add_target_name(names(:agaricus)) # genus
+    species_obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(species_obs)
+    assert_includes(proj.observations.reload, species_obs)
+
+    proj.remove_target_name(names(:agaricus))
+
+    assert_not_includes(proj.observations.reload, species_obs,
+                        "Species obs qualified via genus target should be " \
+                        "purged when the genus target is removed")
+  end
+
+  # Issue #4130: when a species is still explicitly targeted, removing
+  # a broader (genus) target must leave that species' obs in place.
+  def test_remove_target_name_keeps_obs_still_covered_by_another_target
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.add_target_name(names(:agaricus))            # genus target
+    proj.add_target_name(names(:agaricus_campestris)) # species target
+    species_obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(species_obs)
+
+    proj.remove_target_name(names(:agaricus))
+
+    assert_includes(proj.observations.reload, species_obs,
+                    "Species obs should stay because it's still covered " \
+                    "by the remaining species target")
   end
 end
