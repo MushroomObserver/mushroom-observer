@@ -178,9 +178,9 @@ follow once the safety valve exists.
    `MembersController`) and the "Administer Project" button.**
    - New controller action authorized by `user.admin == true`.
    - Inserts the user into `admin_group` and `user_group` and
-     creates the `ProjectMember` row with `trust_level: "hidden_gps"`,
-     reusing `MembersController#set_status` logic so the data path
-     matches the existing add-member flow exactly.
+     ensures a `ProjectMember` row exists, defaulting to
+     `trust_level: "editing"` on create (matching the existing
+     add-member flow through `update_project_membership`).
    - Sends an email to the project owner via the existing mailer
      infrastructure (new template under `app/views/observer_mailer/`
      or `app/mailers/`, plus locale strings in `en.txt`).

@@ -234,9 +234,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Promote +user+ to Project Admin. Adds to user_group and admin_group,
-  # creates a ProjectMember row matching the default produced by the
-  # add-member flow. Idempotent. Used by the Site Admin self-promotion
-  # action (issue #4145).
+  # and ensures a ProjectMember row exists — defaulting to
+  # `trust_level: "editing"` on create, leaving any existing row's
+  # trust_level alone. Matches the default produced by the add-member
+  # flow. Idempotent. Used by the Site Admin self-promotion action
+  # (issue #4145).
   def add_administrator(user)
     ProjectMember.find_or_create_by(project: self, user: user) do |pm|
       pm.trust_level = "editing"
