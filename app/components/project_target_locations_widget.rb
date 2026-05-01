@@ -28,7 +28,6 @@ class Components::ProjectTargetLocationsWidget < Components::ApplicationForm
         :locations,
         type: :location,
         textarea: true,
-        separator: "\n",
         label: "#{:LOCATIONS.t}:"
       )
       submit(:project_target_location_add.t, class: "ml-2 mt-2")

@@ -28,7 +28,6 @@ class Components::ProjectTargetNamesWidget < Components::ApplicationForm
         :names,
         type: :name,
         textarea: true,
-        separator: "\n",
         label: :project_target_names_to_add_label.t
       )
       submit(:project_target_name_add.t, class: "ml-2 mt-2")
