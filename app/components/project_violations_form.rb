@@ -303,10 +303,19 @@ class Components::ProjectViolationsForm < Components::Base
     suffixes.reject { |s| Location.understood_countries.include?(s) }
   end
 
+  # Returns progressively-shorter trailing slices of a comma-separated
+  # location name, including the full name itself. So
+  # "Berkeley, Alameda Co., California, USA" yields four candidates,
+  # and "California, USA" yields two ("California, USA" and "USA"); the
+  # bare-country entries are filtered out by the caller. JoeCohen review
+  # on PR #4182: the full obs location name itself is a valid target
+  # candidate (e.g. for state- or national-park-level locations like
+  # "California, USA" or "Great Smoky Mountain National Park, USA"), so
+  # the previous "(1..)" range that omitted the full name was wrong.
   def comma_suffixes(name)
     parts = name.split(",").map(&:strip).reject(&:empty?)
-    return [] if parts.length < 2
+    return [] if parts.empty?
 
-    (1..(parts.length - 1)).map { |i| parts[i..].join(", ") }
+    (0..(parts.length - 1)).map { |i| parts[i..].join(", ") }
   end
 end

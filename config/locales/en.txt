@@ -3671,7 +3671,7 @@
   form_violations_th_details: Violation Details
   form_violations_th_actions: Actions
   form_violations_kind_date: Date
-  form_violations_kind_bbox: Location (bbox)
+  form_violations_kind_bbox: Outside project location
   form_violations_kind_target_name: Non-target name
   form_violations_kind_target_location: Non-target location
   form_violations_action_exclude: Exclude
@@ -3679,8 +3679,8 @@
   form_violations_action_add_target_name: Add Target Name
   form_violations_action_add_target_location: Add Target Location
   form_violations_modal_target_location_title: Add Target Location
-  form_violations_modal_target_location_help: Choose a comma-suffix of this Observation's location to add as a Target Location. Suffixes whose Location does not yet exist can be created in a new tab.
-  form_violations_modal_target_location_no_suffixes: This Observation's location has no usable suffixes. Use Exclude instead.
+  form_violations_modal_target_location_help: Choose a region of this Observation's location to add as a Target Location. The full location name and any trailing comma-separated regions are offered. Choices whose Location does not yet exist can be created in a new tab.
+  form_violations_modal_target_location_no_suffixes: This Observation's location is not specific enough to add as a Target Location. Either Exclude this Observation, or add a more specific location via the Project Locations page.
   form_violations_modal_target_location_create: Create
   form_violations_modal_target_location_submit: Add Target
 

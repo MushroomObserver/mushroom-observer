@@ -166,6 +166,30 @@ class ProjectViolationsFormTest < ComponentTestCase
     assert_no_match(/value="add_target_location"/, html)
   end
 
+  # Regression for J1 of PR #4182 review: a 2-part location like
+  # "California, USA" should yield the full name as a candidate. The
+  # earlier (1..) range produced an empty list after the bare-country
+  # filter and the modal showed "Use Exclude instead", which made no
+  # sense for a state-level target.
+  def test_comma_suffixes_includes_full_name
+    component = Components::ProjectViolationsForm.new(
+      project: projects(:rare_fungi_project),
+      violations: [],
+      user: rolf
+    )
+
+    assert_equal(["California, USA", "USA"],
+                 component.send(:comma_suffixes, "California, USA"))
+    assert_equal(
+      ["Berkeley, Alameda Co., California, USA",
+       "Alameda Co., California, USA", "California, USA", "USA"],
+      component.send(:comma_suffixes,
+                     "Berkeley, Alameda Co., California, USA")
+    )
+    assert_equal([], component.send(:comma_suffixes, ""))
+    assert_equal(["USA"], component.send(:comma_suffixes, "USA"))
+  end
+
   def test_target_location_modal_offers_create_for_missing_location
     proj = setup_target_location_violation_project
     target_loc_v =
