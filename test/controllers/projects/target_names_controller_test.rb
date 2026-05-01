@@ -12,7 +12,9 @@ module Projects
       assert_not_includes(project.target_names, name)
 
       post(:create, params: { project_id: project.id,
-                              names: name.text_name })
+                              project_target_names_add: {
+                                names: name.text_name
+                              } })
 
       assert_includes(project.target_names.reload, name)
     end
@@ -23,7 +25,7 @@ module Projects
 
       input = "Peltigera\nBoletus edulis"
       post(:create, params: { project_id: project.id,
-                              names: input })
+                              project_target_names_add: { names: input } })
 
       assert_includes(project.target_names.reload, names(:peltigera))
       assert_includes(project.target_names, names(:boletus_edulis))
@@ -35,7 +37,7 @@ module Projects
 
       input = "Peltigera (3) *\nBoletus edulis (1)"
       post(:create, params: { project_id: project.id,
-                              names: input })
+                              project_target_names_add: { names: input } })
 
       assert_includes(project.target_names.reload, names(:peltigera))
       assert_includes(project.target_names, names(:boletus_edulis))
@@ -47,7 +49,7 @@ module Projects
 
       input = "Peltigera, Boletus edulis"
       post(:create, params: { project_id: project.id,
-                              names: input })
+                              project_target_names_add: { names: input } })
 
       assert_includes(project.target_names.reload, names(:peltigera))
       assert_includes(project.target_names, names(:boletus_edulis))
@@ -59,7 +61,9 @@ module Projects
       login("rolf")
 
       post(:create, params: { project_id: project.id,
-                              names: name.text_name,
+                              project_target_names_add: {
+                                names: name.text_name
+                              },
                               format: :turbo_stream })
 
       assert_response(:success)
@@ -72,7 +76,9 @@ module Projects
       login("mary")
 
       post(:create, params: { project_id: project.id,
-                              names: name.text_name })
+                              project_target_names_add: {
+                                names: name.text_name
+                              } })
 
       assert_redirected_to(checklist_path(project_id: project.id))
       assert_not_includes(project.target_names.reload, name)
@@ -83,7 +89,9 @@ module Projects
       login("rolf")
 
       post(:create, params: { project_id: project.id,
-                              names: "Nonexistent species" })
+                              project_target_names_add: {
+                                names: "Nonexistent species"
+                              } })
 
       assert_flash_error
     end

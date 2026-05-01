@@ -1,6 +1,5 @@
 <%= turbo_stream.replace("target_names_widget") do %>
-  <%= render(partial: "projects/target_names/widget",
-             locals: { project: project }) %>
+  <%= render(Components::ProjectTargetNamesWidget.new(project: project)) %>
 <% end %>
 <%
 # Carry any optional scope fields the caller passed through to the

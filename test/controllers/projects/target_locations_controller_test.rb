@@ -11,8 +11,10 @@ module Projects
 
       assert_not_includes(project.target_locations, location)
 
-      post(:create, params: { project_id: project.id,
-                              locations: location.name })
+      post(:create, params: {
+             project_id: project.id,
+             project_target_locations_add: { locations: location.name }
+           })
 
       assert_includes(project.target_locations.reload, location)
     end
@@ -22,8 +24,10 @@ module Projects
       login("rolf")
 
       input = "#{locations(:albion).name}\n#{locations(:gualala).name}"
-      post(:create, params: { project_id: project.id,
-                              locations: input })
+      post(:create, params: {
+             project_id: project.id,
+             project_target_locations_add: { locations: input }
+           })
 
       assert_includes(project.target_locations.reload,
                       locations(:albion))
@@ -36,9 +40,11 @@ module Projects
       location = locations(:albion)
       login("rolf")
 
-      post(:create, params: { project_id: project.id,
-                              locations: location.name,
-                              format: :turbo_stream })
+      post(:create, params: {
+             project_id: project.id,
+             project_target_locations_add: { locations: location.name },
+             format: :turbo_stream
+           })
 
       assert_response(:success)
       assert_includes(project.target_locations.reload, location)
@@ -49,8 +55,10 @@ module Projects
       location = locations(:albion)
       login("mary")
 
-      post(:create, params: { project_id: project.id,
-                              locations: location.name })
+      post(:create, params: {
+             project_id: project.id,
+             project_target_locations_add: { locations: location.name }
+           })
 
       assert_redirected_to(
         project_locations_path(project_id: project.id)
@@ -62,8 +70,10 @@ module Projects
       project = projects(:rare_fungi_project)
       login("rolf")
 
-      post(:create, params: { project_id: project.id,
-                              locations: "Nonexistent Place" })
+      post(:create, params: {
+             project_id: project.id,
+             project_target_locations_add: { locations: "Nonexistent Place" }
+           })
 
       assert_flash_error
     end
