@@ -13,6 +13,7 @@ require "haversine"
 module Report
   class Mycoportal < CSV
     CODE_NAME_QUALIFIER = "code name aff. species"
+    GPS_HIDDEN_MESSAGE = "Coordinates obscured by observer"
 
     # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
     # Label names for the columns in the report.
@@ -44,6 +45,7 @@ module Report
         "decimalLatitude",
         "decimalLongitude",
         "coordinateUncertaintyInMeters",
+        "informationWithheld",
         "minimumElevationInMeters",
         "maximumElevationInMeters",
         "disposition" # herbaria, "vouchered", or nil
@@ -69,9 +71,10 @@ module Report
         row.state, # stateProvince
         row.county, # county
         row.locality, # locality
-        row.best_lat, # decimalLatitude
-        row.best_lng, # decimalLongitude
+        public_lat(row), # decimalLatitude
+        public_lng(row), # decimalLongitude
         coordinate_uncertainty(row), # coordinateUncertaintyInMeters
+        information_withheld(row), # informationWithheld
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
         disposition(row) # disposition
@@ -139,8 +142,14 @@ module Report
 
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
-      if row.loc_id.present? &&
-         row.obs_lat.blank?
+      return if row.loc_id.blank?
+
+      if gps_hidden?(row)
+        return unless public_lat(row) && public_lng(row)
+
+        box = loc_box(row)
+        max_distance_to_any_corner(public_lat(row), public_lng(row), box)
+      elsif row.obs_lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
     end
@@ -166,6 +175,7 @@ module Report
       add_collector_ids!(rows, 1)
       add_herbarium_accession_numbers!(rows, 2)
       add_sequence_ids!(rows, 3)
+      add_gps_hidden!(rows, 4)
     end
 
     def collector_ids(row)
@@ -178,6 +188,10 @@ module Report
 
     def sequence_ids(row)
       row.val(3)
+    end
+
+    def gps_hidden?(row)
+      row.val(4).present?
     end
 
     def sort_before(rows)
@@ -251,6 +265,50 @@ module Report
 
     def distance_to_se_corner(lat, lng, box)
       Haversine.distance(lat, lng, box.south, box.east).to_meters.round
+    end
+
+    def max_distance_to_any_corner(lat, lng, box)
+      box_corners(box).map do |clat, clng|
+        Haversine.distance(lat, lng, clat, clng).to_meters
+      end.max.round
+    end
+
+    def box_corners(box)
+      [[box.north, box.east], [box.north, box.west],
+       [box.south, box.east], [box.south, box.west]]
+    end
+
+    def add_gps_hidden!(rows, col)
+      latlng_by_id = gps_hidden_latlng
+      rows.each { |row| set_gps_hidden_vals(row, col, latlng_by_id) }
+    end
+
+    def gps_hidden_latlng
+      plain_query.where(gps_hidden: true).
+        pluck(:id, :lat, :lng).
+        to_h { |id, lat, lng| [id, [lat, lng]] }
+    end
+
+    def set_gps_hidden_vals(row, col, latlng_by_id)
+      return unless (latlng = latlng_by_id[row.obs_id])
+
+      row.add_val("1", col)
+      row.add_val(latlng[0]&.round, col + 1)
+      row.add_val(latlng[1]&.round, col + 2)
+    end
+
+    def information_withheld(row)
+      return unless gps_hidden?(row)
+
+      GPS_HIDDEN_MESSAGE
+    end
+
+    def public_lat(row)
+      gps_hidden?(row) ? row.val(5) : row.best_lat
+    end
+
+    def public_lng(row)
+      gps_hidden?(row) ? row.val(6) : row.best_lng
     end
 
     def explode_notes(row)
