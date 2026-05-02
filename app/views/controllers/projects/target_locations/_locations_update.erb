@@ -1,6 +1,7 @@
 <%= turbo_stream.replace("target_locations_widget") do %>
-  <%= render(partial: "projects/target_locations/widget",
-             locals: { project: project }) %>
+  <%= render(Components::ProjectTargetLocationsWidget.new(
+               project: project
+             )) %>
 <% end %>
 <%= turbo_stream.replace("locations_table") do %>
   <%= render(Components::Projects::LocationsTable.new(
@@ -11,10 +12,7 @@
                user: user
              )) %>
 <% end %>
-<%= turbo_stream.replace("project_tabs") do %>
-  <%= render(Components::Projects::Tabs.new(
-               project: project, user: user,
-               current_tab: "locations"
-             )) %>
-<% end %>
+<%= render(partial: "projects/tab_counts_update",
+           locals: { project: project, user: user,
+                     current_tab: "locations" }) %>
 <%= render_turbo_stream_flash_messages %>

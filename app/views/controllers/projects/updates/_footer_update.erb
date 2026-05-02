@@ -1,2 +1,5 @@
 <%= turbo_stream.remove("box_#{obs.id}") %>
 <%= turbo_stream.update("project_updates_count", count_label) %>
+<%= render(partial: "projects/tab_counts_update",
+           locals: { project: project, user: user,
+                     current_tab: "updates" }) %>

@@ -1,6 +1,5 @@
 <%= turbo_stream.replace("target_names_widget") do %>
-  <%= render(partial: "projects/target_names/widget",
-             locals: { project: project }) %>
+  <%= render(Components::ProjectTargetNamesWidget.new(project: project)) %>
 <% end %>
 <%
 # Carry any optional scope fields the caller passed through to the
@@ -18,10 +17,7 @@ end
                context: Components::Checklist::Context.new(**context_args)
              )) %>
 <% end %>
-<%= turbo_stream.replace("project_tabs") do %>
-  <%= render(Components::Projects::Tabs.new(
-               project: project, user: user,
-               current_tab: "checklists"
-             )) %>
-<% end %>
+<%= render(partial: "projects/tab_counts_update",
+           locals: { project: project, user: user,
+                     current_tab: "checklists" }) %>
 <%= render_turbo_stream_flash_messages %>

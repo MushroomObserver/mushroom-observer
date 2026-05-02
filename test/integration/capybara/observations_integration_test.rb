@@ -280,13 +280,19 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     )
 
     within("#project_messages") do # out-of-range warning message
-      assert(has_text?(:form_observations_projects_out_of_range.l(
-                         date: Time.zone.today.web_date,
-                         place_name: last_location.display_name
-                       )),
-             "Missing out-of-range warning with observation date")
-      assert(has_text?(proj.title) && has_text?(proj.constraints),
-             "Warning is missing out-of-range project's title or constraints")
+      assert(has_text?(:form_observations_projects_out_of_range.l),
+             "Missing constraint-violation warning headline")
+      assert(has_text?(proj.title),
+             "Warning is missing out-of-range project's title")
+      # Per-project annotation now lists the violation kinds that
+      # apply to this obs (#4136) instead of the project's
+      # date/location *settings*. past_project has both a date range
+      # and a location, so this obs hits both :date and :bbox.
+      assert(
+        has_text?(:form_observations_projects_kind_date.l) &&
+        has_text?(:form_observations_projects_kind_bbox.l),
+        "Warning should list the kinds of violation per project"
+      )
     end
     # assert_selector("#ignore_project_dates", visible: :hidden)
     assert_selector("##{proj_checkbox}[checked='checked']")

@@ -60,8 +60,10 @@ module Projects
       )
     end
 
+    # Submitted under the `project_target_locations_add` namespace by
+    # Components::ProjectTargetLocationsWidget (Pattern B form).
     def parse_locations_from_params
-      raw = params[:locations].to_s
+      raw = params.dig(:project_target_locations_add, :locations).to_s
       raw.split("\n").filter_map do |entry|
         cleaned = entry.strip
         next if cleaned.blank?

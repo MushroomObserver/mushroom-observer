@@ -11,8 +11,10 @@
 #
 #      Phase 1 – Propagate each genus's classification to its subtaxa
 #                and to deprecated synonyms of those subtaxa (same as
-#                the UI "Propagate Classification" action). Mutations
-#                are attributed to webmaster (user 55281).
+#                the UI "Propagate Classification" action). Uses
+#                Name#propagate_classification, which uses update_all
+#                and therefore does not create per-row name_versions
+#                entries — Phase 1 changes leave no audit trail.
 #      Phase 2 – For each synonym group with at least one non-deprecated
 #                member that has a classification, pick a winning
 #                classification and apply it to every member whose

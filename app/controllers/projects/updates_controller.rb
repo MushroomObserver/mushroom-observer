@@ -111,7 +111,7 @@ module Projects
         format.turbo_stream do
           render(
             partial: "projects/updates/footer_update",
-            locals: { project: @project, obs: obs,
+            locals: { project: @project, user: @user, obs: obs,
                       count_label: count_label_for_current_scope }
           )
         end
@@ -138,12 +138,7 @@ module Projects
     end
 
     def bulk_add_candidates(scope)
-      count = 0
-      scope.find_each do |obs|
-        @project.add_observation(obs)
-        count += 1
-      end
-      count
+      @project.bulk_add_observations(scope.pluck(:id))
     end
   end
 end
