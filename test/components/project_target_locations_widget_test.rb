@@ -31,7 +31,7 @@ class ProjectTargetLocationsWidgetTest < ComponentTestCase
       html,
       ".autocompleter[data-controller~='autocompleter--location']"
     )
-    assert_includes(html, :LOCATIONS.l)
+    assert_includes(html, :project_target_locations_to_add_label.l)
   end
 
   def test_renders_submit_button
@@ -43,6 +43,19 @@ class ProjectTargetLocationsWidgetTest < ComponentTestCase
       html,
       "input[type='submit']" \
       "[value='#{:project_target_location_add.l}']"
+    )
+  end
+
+  # Same shared class as the names widget — see the names-widget
+  # test for context. Issue #4147.
+  def test_form_carries_shared_widget_class
+    project = projects(:rare_fungi_project)
+
+    html = render_widget(project: project)
+
+    assert_html(
+      html,
+      "form#target_locations_widget.form-inline.project-target-widget"
     )
   end
 

@@ -48,6 +48,20 @@ class ProjectTargetNamesWidgetTest < ComponentTestCase
     )
   end
 
+  # The `project-target-widget` class is shared with the locations
+  # widget and is the hook for `_form_elements.scss` to widen the
+  # textarea inside the surrounding form-inline form (#4147).
+  def test_form_carries_shared_widget_class
+    project = projects(:rare_fungi_project)
+
+    html = render_widget(project: project)
+
+    assert_html(
+      html,
+      "form#target_names_widget.form-inline.project-target-widget"
+    )
+  end
+
   private
 
   def render_widget(project:)

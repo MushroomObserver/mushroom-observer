@@ -76,6 +76,57 @@ module Projects
       assert_no_html(html, ".panel-collapse-trigger")
     end
 
+    # Summary line counts targets whose aggregate (target + sub-locations)
+    # obs count is positive. One target with sub-obs, one target with no
+    # obs anywhere → 2 total, 1 with observations, 1 without.
+    def test_summary_counts_targets_by_aggregate_obs
+      burbank = locations(:burbank)
+      california = locations(:california)
+      albion = locations(:albion)
+      grouped = [
+        { target: burbank, sub_locations: [albion] },
+        { target: california, sub_locations: [] }
+      ]
+      # burbank has no direct obs, but albion (its sub) does → with_obs;
+      # california has no obs anywhere → without_obs.
+      obs_counts = { albion.id => 4 }
+      html = render_table(
+        user: users(:rolf), grouped: grouped, obs_counts: obs_counts
+      )
+
+      assert_includes(
+        html,
+        :project_target_locations_summary.l(
+          total: 2, with_obs: 1, without_obs: 1
+        )
+      )
+    end
+
+    def test_summary_hidden_when_no_target_locations
+      html = render_table(
+        user: users(:rolf), grouped: [],
+        ungrouped: [locations(:albion)]
+      )
+
+      assert_not_includes(
+        html, :project_target_locations_summary.l(
+                total: 0, with_obs: 0, without_obs: 0
+              )
+      )
+    end
+
+    def test_admin_sees_remove_footnote
+      html = render_table(user: users(:rolf))
+
+      assert_includes(html, :project_target_locations_remove_footnote.l)
+    end
+
+    def test_non_admin_does_not_see_remove_footnote
+      html = render_table(user: users(:mary))
+
+      assert_not_includes(html, :project_target_locations_remove_footnote.l)
+    end
+
     private
 
     def project
