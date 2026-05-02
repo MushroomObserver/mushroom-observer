@@ -204,8 +204,13 @@ form {
 // The containing form uses `form-inline`, which turns .form-group into
 // inline-block/width:auto. Override so the autocompleter wrap and textarea
 // stretch to fill the form width (up to 40em), instead of collapsing to the
-// browser's default textarea size.
-#target_names_widget {
+// browser's default textarea size. We use ID selectors here (not the
+// shared `.project-target-widget` class) because Bootstrap's
+// `.form-inline .form-group` has class-class specificity (20) — a class
+// rule alone would tie and lose on source order, while id-class
+// specificity (110) reliably wins.
+#target_names_widget,
+#target_locations_widget {
   .form-group {
     display: block;
     width: 100%;

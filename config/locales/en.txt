@@ -3061,10 +3061,13 @@
   # Project Target Locations
   project_target_locations_title: Target Locations
   project_target_location_add: Add
+  project_target_locations_to_add_label: "Target Locations to Add:"
   project_target_locations_added: "Added target locations: [names]."
   project_target_location_removed: Removed target location "[name]".
   project_target_location_not_found: No matching locations found.
   project_target_location_confirm_remove: Remove "[name]" from target locations?
+  project_target_locations_summary: "Target locations: [total] total, [with_obs] with observations, [without_obs] with no observations."
+  project_target_locations_remove_footnote: Remove this target location from the project
 
   # Project Updates Tab
   project_updates_title: Update
@@ -3155,7 +3158,7 @@
   checklist_for_project_location_title: Checklist for [project] at [location]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
-  checklist_target_summary: "Targets: [total] total, [observed] observed, [unobserved] not yet observed."
+  checklist_target_summary: "Target names: [total] total, [observed] observed, [unobserved] not yet observed."
   checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
   checklist_observed_species_only: "[species] species observed (synonyms counted once)."
   checklist_observed_higher_only: "[higher] higher-level [taxa_word] observed (synonyms counted once)."

@@ -18,8 +18,10 @@ module Components
 
       def view_template
         div(id: "locations_table") do
+          render_target_summary if @grouped_data.any?
           render_target_groups if @grouped_data.any?
           render_ungrouped if @ungrouped_locations.any?
+          render_target_remove_footnote if show_target_remove_footnote?
         end
       end
 
@@ -29,6 +31,37 @@ module Components
         return @admin if defined?(@admin)
 
         @admin = @project.is_admin?(@user)
+      end
+
+      # --- Summary line above the table ---
+
+      def render_target_summary
+        total = @grouped_data.size
+        with_obs = @grouped_data.count do |group|
+          target_obs_count(group[:target], group[:sub_locations]).positive?
+        end
+        without_obs = total - with_obs
+
+        div(class: "my-3") do
+          plain(
+            :project_target_locations_summary.l(
+              total: total, with_obs: with_obs, without_obs: without_obs
+            )
+          )
+        end
+      end
+
+      # --- Footnote explaining the red X (admin-only) ---
+
+      def show_target_remove_footnote?
+        @grouped_data.any? && admin?
+      end
+
+      def render_target_remove_footnote
+        p(class: "mt-3") do
+          span(class: "glyphicon glyphicon-remove text-danger")
+          plain(" #{:project_target_locations_remove_footnote.l}")
+        end
       end
 
       # --- Target location groups (collapsible) ---
