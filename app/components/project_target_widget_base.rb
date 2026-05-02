@@ -6,9 +6,9 @@
 # below; the rendering shape is otherwise identical.
 #
 # The DOM id stays distinct per subclass (turbo-stream wrappers
-# replace by id), but both subclasses share the
-# `project-target-widget` class so the textarea-width CSS rule in
-# `_form_elements.scss` applies to both.
+# replace by id), and `_form_elements.scss` targets those ids for the
+# textarea-width override. Both subclasses also share the
+# `project-target-widget` class.
 class Components::ProjectTargetWidgetBase < Components::ApplicationForm
   # Optional positional model arg is accepted for ModalForm
   # compatibility (ignored) — see Pattern B in
