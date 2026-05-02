@@ -18,7 +18,7 @@ module Projects
       @project.add_administrator(@user)
       notify_owner
       flash_notice(
-        :project_administration_promoted_flash.t(title: @project.title)
+        :project_administration_promoted_flash.l(title: @project.title)
       )
       redirect_to(project_path(@project.id))
     end
@@ -30,12 +30,12 @@ module Projects
     end
 
     def must_be_site_admin!
-      flash_error(:permission_denied.t)
-      redirect_to(project_path(params[:project_id]))
+      flash_error(:permission_denied.l)
+      redirect_to(project_path(@project.id))
     end
 
     def already_admin!
-      flash_warning(:project_administration_already_admin_flash.t)
+      flash_warning(:project_administration_already_admin_flash.l)
       redirect_to(project_path(@project.id))
     end
 

@@ -115,7 +115,7 @@ module Views
           return unless @user&.admin && !@project.is_admin?(@user)
 
           post_button(
-            name: :show_project_administer.t,
+            name: :show_project_administer.l,
             class: action_button_class,
             path: project_administration_path(project_id: @project.id)
           )
@@ -131,7 +131,7 @@ module Views
 
         def render_join_button
           post_button(
-            name: :show_project_join.t,
+            name: :show_project_join.l,
             class: action_button_class,
             path: project_members_path(
               project_id: @project.id,
@@ -204,7 +204,7 @@ module Views
                 project_id: @project.id
               ),
               class: action_button_class
-            ) { plain(:show_project_admin_request.t) }
+            ) { plain(:show_project_admin_request.l) }
           end
         end
 
