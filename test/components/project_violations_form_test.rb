@@ -115,6 +115,44 @@ class ProjectViolationsFormTest < ComponentTestCase
     assert_includes(html, :form_violations_action_add_target_location.l)
   end
 
+  # Covers the `suffixes.empty?` branch of render_location_modal_body —
+  # when the obs's location yields no usable suffixes (the only practical
+  # case after the J1 fix is a country-only string like "USA"), the modal
+  # body shows the "no usable suffixes" message and a Cancel button
+  # without rendering a submit form.
+  def test_target_location_modal_no_suffixes_message_for_country_only_where
+    proj = setup_target_location_violation_project
+    target_loc_v =
+      proj.violations.find { |v| v.kinds.include?(:target_location) }
+    assert(target_loc_v, "Setup must produce a target_location violation")
+
+    obs = target_loc_v.obs
+    obs.update!(location_id: nil, where: "USA")
+
+    proj.reload
+    refreshed = proj.violations.find { |v| v.obs.id == obs.id }
+    assert(refreshed,
+           "Obs should still violate target_location after where=USA")
+
+    html = render_form(project: proj, violations: proj.violations,
+                       user: proj.user)
+    modal_id = "location_target_modal_#{obs.id}"
+
+    assert_html(html, "##{modal_id}.modal")
+    assert_includes(
+      html, :form_violations_modal_target_location_no_suffixes.l,
+      "Modal body should show the no-usable-suffixes message"
+    )
+    assert_html(html, "##{modal_id} .modal-footer button[data-dismiss='modal']")
+    modal_pattern = %r{<div[^>]+id="#{modal_id}".*?</div>\s*</div>\s*</div>}m
+    modal_html = html.scan(modal_pattern).first.to_s
+    assert_no_match(
+      /<form[^>]+>[^<]*<input[^>]+name="do"[^>]+value="add_target_location"/m,
+      modal_html,
+      "Empty-suffixes branch must not render an add_target_location form"
+    )
+  end
+
   def test_target_location_modal_excludes_country_suffix
     proj = setup_target_location_violation_project
     target_loc_v =

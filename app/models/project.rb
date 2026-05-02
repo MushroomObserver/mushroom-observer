@@ -265,10 +265,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     ids.size
   end
 
-  def constraints
-    "#{:DATES.t}: #{date_range}; #{:LOCATION.t}: #{place_name}"
-  end
-
   def constraints?
     start_date || end_date || location ||
       target_names.any? || target_locations.any?
@@ -831,14 +827,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     kinds << :target_name if violates_target_name?(observation)
     kinds << :target_location if violates_target_location?(observation)
     kinds
-  end
-
-  # Is at least one violation removable by the given user?
-  def violations_removable_by_current_user?(user)
-    user_ids = violations.map { |v| v.obs.user_id }
-    return false unless user_ids.any?
-
-    admin_group_user_ids.union(user_ids).include?(user.id)
   end
 
   ##############################################################################
