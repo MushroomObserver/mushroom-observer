@@ -694,6 +694,88 @@ class ProjectTest < UnitTestCase
     assert_not_includes(kinds, :target_location)
   end
 
+  # Covers Project#count_violations target_name path
+  # (collect_target_name_violation_ids id-merge against visible obs whose
+  # name_id is outside expanded_target_name_id_set). Project has only
+  # target_names, no other constraints, so that id-merge is the only path
+  # that can fire.
+  def test_count_violations_includes_target_name_violations
+    proj = Project.create!(
+      title: "Target Name Only #{SecureRandom.hex(4)}",
+      user: users(:rolf)
+    )
+    proj.add_target_name(names(:agaricus))
+    off_target = observations(:peltigera_obs)
+    proj.add_observation(off_target)
+
+    assert_equal(1, proj.count_violations,
+                 "Obs with non-target name should count as a violation")
+    assert_equal(proj.violations.size, proj.count_violations)
+    kinds = proj.violation_kinds_for(off_target)
+    assert_includes(kinds, :target_name)
+  end
+
+  # Covers Project#passing_target_location_ids with-loc branch
+  # (joins :location, applies location_suffix_conditions) and
+  # collect_target_location_violation_ids id-merge.
+  def test_count_violations_includes_target_location_violations_with_location
+    proj = Project.create!(
+      title: "Target Loc Only #{SecureRandom.hex(4)}",
+      user: users(:rolf)
+    )
+    proj.add_target_location(locations(:burbank))
+
+    in_burbank = observations(:agaricus_campestris_obs)
+    proj.add_observation(in_burbank)
+    in_falmouth = observations(:falmouth_2023_09_obs)
+    proj.add_observation(in_falmouth)
+
+    violation_obs_ids = proj.violations.map { |v| v.obs.id }
+    assert_includes(violation_obs_ids, in_falmouth.id,
+                    "Obs in Falmouth should violate Burbank target_location")
+    assert_not_includes(violation_obs_ids, in_burbank.id,
+                        "Obs in Burbank should pass via location_id branch")
+    assert_equal(proj.violations.size, proj.count_violations)
+  end
+
+  # Covers Project#passing_target_location_ids without-loc branch
+  # (visible_observations.where(location_id: nil) joined with
+  # where_suffix_conditions) and the observation.where leg of
+  # #target_location_suffix_match?.
+  # Both an obs whose `where` matches and one whose `where` doesn't are
+  # exercised so the boundary of the suffix match is locked down.
+  def test_count_violations_target_location_uses_obs_where_when_no_location
+    proj = Project.create!(
+      title: "Target Loc Where #{SecureRandom.hex(4)}",
+      user: users(:rolf)
+    )
+    proj.add_target_location(locations(:burbank))
+
+    # peltigera_obs: location_id is nil, where = "Briceland, California, USA"
+    # — should NOT match Burbank's suffix and so should violate.
+    off_target = observations(:peltigera_obs)
+    proj.add_observation(off_target)
+
+    on_target = Observation.create!(
+      user: users(:rolf), when: Date.parse("2024-06-01"),
+      name: names(:agaricus), location_id: nil,
+      where: "Burbank, California, USA"
+    )
+    proj.add_observation(on_target)
+
+    violation_obs_ids = proj.violations.map { |v| v.obs.id }
+    assert_includes(
+      violation_obs_ids, off_target.id,
+      "Obs.where=Briceland... should fail target_location suffix match"
+    )
+    assert_not_includes(
+      violation_obs_ids, on_target.id,
+      "Obs.where=Burbank... should pass target_location suffix match"
+    )
+    assert_equal(proj.violations.size, proj.count_violations)
+    assert_includes(proj.violation_kinds_for(off_target), :target_location)
+  end
+
   def test_violations_excludes_excluded_observations
     proj = projects(:falmouth_2023_09_project)
     violation_obs = proj.violations.first.obs
