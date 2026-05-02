@@ -113,7 +113,6 @@ class ArticlesControllerTest < FunctionalTestCase
 
     # Prove authorized user can go to create_article form
     login(users(:article_writer).login)
-    make_admin
     get(:new)
     assert_form_action(action: :create) # "new" form posts to :create action
 
@@ -136,7 +135,6 @@ class ArticlesControllerTest < FunctionalTestCase
 
     # Prove authorized user can create article
     login(users(:article_writer).login)
-    make_admin
     get(:edit, params: params)
     assert_form_action(action: :update) # "edit" form posts to :update action
   end
@@ -161,7 +159,6 @@ class ArticlesControllerTest < FunctionalTestCase
 
     # Prove authorized user cannot create title-less Article
     login(user.login)
-    make_admin
     params = {
       article: { title: "", body: body }
     }
@@ -204,7 +201,6 @@ class ArticlesControllerTest < FunctionalTestCase
 
     # Prove authorized user can edit article
     login(users(:article_writer).login)
-    make_admin
     post(:update, params: params)
     article.reload
 
@@ -239,8 +235,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert(Article.exists?(article.id))
 
     # Prove authorized user can destroy article
-    login(article.user.login)
-    make_admin
+    login(users(:article_writer).login)
     delete(:destroy, params: params)
     assert_not(Article.exists?(article.id),
                "Failed to destroy Article #{article.id}, '#{article.title}'")

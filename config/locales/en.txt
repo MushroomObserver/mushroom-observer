@@ -3549,6 +3549,8 @@
   admin_request_success: Successfully sent admin request for [title]
   admin_request_title: Admin Request for [title]
   admin_request_note: Enter your request below. When you hit "[:SEND]" it will be emailed to to project admins. The email will include your email address so that they can respond to your request.
+  project_administration_promoted_flash: You are now an admin of [title].
+  project_administration_already_admin_flash: You are already an admin of this project.
   author_request_add_author: Make sender an author
   author_request_title: Authorship Request for [title]
   author_request_note: "[:admin_request_note]"
@@ -3643,6 +3645,7 @@
   show_project_add_members: Add Members
   show_project_admin_group: Admin Group
   show_project_admin_request: Admin Request
+  show_project_administer: Administer Project
   show_project_by: Owned By
   show_project_created_at: Created
   show_project_destroy: Destroy Project
@@ -3844,6 +3847,8 @@
 
   # Main message contents.
   email_admin_request_intro: "h2. *Admin Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following request to you regarding [project]:"
+  email_subject_project_administered: Site Admin made themselves an admin of [project]
+  email_project_administered_intro: "h2. *Site Admin Promoted to Project Admin*\n\nThe [:app_title] site admin [site_admin] ([email]) has made themselves a project admin of your project [project]. Site admins use this self-promotion to help configure, moderate, or rescue projects when needed. If you have concerns about this change, please send email to the Site Admin in question or forward this note to webmaster@mushroomobserver.org with your concerns."
   email_author_request_intro: "h2. *Author Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following request to you regarding [object]:"
   email_comment_intro_other: "h2. *Comment on [Type]*\n\nThe following comment was posted on the [:app_title] website regarding the [type] <u>[name]</u>:"
   email_comment_intro_response: "h2. *Comment Response*\n\nThe following comment was posted on the [:app_title] website in response to your comment regarding the [type] <u>[name]</u>:"
