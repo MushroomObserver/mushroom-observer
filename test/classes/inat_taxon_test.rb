@@ -190,6 +190,39 @@ class InatTaxonTest < UnitTestCase
                "Inat::Taxon#name should return nil when no MO Name matches")
   end
 
+  def test_full_name_string_raises_on_genus_lookup_timeout
+    mock_inat_obs = mock_observation("distantes")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+    stub_genus_lookup_timeout(
+      ancestor_ids: inat_taxon[:ancestor_ids].join(",")
+    )
+
+    error = assert_raises(RuntimeError) { inat_taxon.full_name_string }
+    assert_includes(error.message, "iNat genus lookup failed")
+  end
+
+  def test_full_name_string_raises_on_empty_genus_results
+    mock_inat_obs = mock_observation("distantes")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+    stub_genus_lookup_empty_results(
+      ancestor_ids: inat_taxon[:ancestor_ids].join(",")
+    )
+
+    error = assert_raises(RuntimeError) { inat_taxon.full_name_string }
+    assert_includes(error.message, "iNat genus lookup returned no results")
+  end
+
+  def test_full_name_string_raises_on_invalid_genus_json
+    mock_inat_obs = mock_observation("distantes")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+    stub_genus_lookup_invalid_json(
+      ancestor_ids: inat_taxon[:ancestor_ids].join(",")
+    )
+
+    error = assert_raises(RuntimeError) { inat_taxon.full_name_string }
+    assert_includes(error.message, "iNat genus lookup failed")
+  end
+
   def mock_observation(filename)
     mock_search = File.read("test/inat/#{filename}.txt")
     # Inat::Obs.new(File.read("test/inat/#{filename}.txt"))

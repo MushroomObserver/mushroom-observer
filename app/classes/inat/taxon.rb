@@ -105,20 +105,39 @@ class Inat
     # the iNat API observation request.
     # The latter proved too complex and unreliable.
     def infrageneric_name_string
+      "#{ancestor_genus_name} #{@taxon[:rank]} #{@taxon[:name]}"
+    end
+
+    # Fetch the genus name for an infrageneric taxon from the iNat taxa API.
+    # Raises RuntimeError on network/timeout errors, malformed JSON, or when
+    # the API returns no matching genus — the error propagates to the import
+    # job's StandardError handler in ObservationImporter#import_one_result.
+    def ancestor_genus_name
       ancestor_ids = self[:ancestor_ids].join(",")
+      results = fetch_genus_lookup_results(ancestor_ids)
+      if results.blank?
+        raise("iNat genus lookup returned no results for " \
+              "#{@taxon[:rank]} #{@taxon[:name]}")
+      end
+
+      results.first[:name]
+    rescue RestClient::Exception, JSON::ParserError => e
+      raise("iNat genus lookup failed for #{@taxon[:rank]} " \
+            "#{@taxon[:name]} (#{e.class}): #{e.message}")
+    end
+
+    def fetch_genus_lookup_results(ancestor_ids)
       params = { id: ancestor_ids, rank: "genus" }
       url = "#{API_BASE}/taxa?#{params.to_query}"
 
-      res = RestClient::Request.execute(
+      response = RestClient::Request.execute(
         method: :get,
         url: url,
-        headers: { Accept: "application/json" }
+        headers: { Accept: "application/json" },
+        open_timeout: 5,
+        timeout: 10
       )
-      genus = JSON.parse(
-        res.body, symbolize_names: true
-      )[:results].first[:name]
-
-      "#{genus} #{@taxon[:rank]} #{@taxon[:name]}"
+      JSON.parse(response.body, symbolize_names: true)[:results]
     end
 
     def infrageneric?
