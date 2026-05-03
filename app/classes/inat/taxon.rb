@@ -57,6 +57,8 @@ class Inat
     # Handles special cases: infrageneric names (which need the genus prepended)
     # and infraspecific names (which need the rank inserted).
     def full_name_string
+      return monomial_complex_name_string if monomial_complex?
+
       # iNat infrageneric Observation ID's need special handling because
       # iNat does not provide a name string which includes the genus.
       return infrageneric_name_string if infrageneric?
@@ -74,9 +76,11 @@ class Inat
 
     def complex? = @taxon[:rank] == "complex"
 
+    def monomial_complex? = complex? && @taxon[:name].exclude?(" ")
+
     def matching_group_names
       # MO equivalent could be "group", "clade", or "complex"
-      ::Name.where(::Name[:text_name] =~ /^#{@taxon[:name]}/).
+      ::Name.where(::Name[:text_name] =~ /^#{full_name_string}/).
         where(rank: "Group", correct_spelling_id: nil).
         order(deprecated: :asc)
     end
@@ -92,6 +96,27 @@ class Inat
         # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
         where.not(::Name[:author] =~ /^sensu /).
         order(deprecated: :asc)
+    end
+
+    # Get the genus of an iNat monomial complex via an API query
+    # requesting the taxon's ancestor which has rank: genus.
+    # Returns e.g. "Amanita mappae" (no "complex" suffix —
+    # create_mo_name appends it).
+    def monomial_complex_name_string
+      ancestor_ids = self[:ancestor_ids].join(",")
+      params = { id: ancestor_ids, rank: "genus" }
+      url = "#{API_BASE}/taxa?#{params.to_query}"
+
+      res = RestClient::Request.execute(
+        method: :get,
+        url: url,
+        headers: { Accept: "application/json" }
+      )
+      genus = JSON.parse(
+        res.body, symbolize_names: true
+      )[:results].first[:name]
+
+      "#{genus} #{@taxon[:name].downcase}"
     end
 
     # Get the genus of an iNat infrageneric taxon via an API query

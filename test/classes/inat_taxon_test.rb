@@ -155,6 +155,61 @@ class InatTaxonTest < UnitTestCase
     )
   end
 
+  def test_maps_inat_monomial_complex_to_existing_mo_group
+    name = Name.create(
+      text_name: "Amanita mappae complex", author: "",
+      search_name: "Amanita mappae complex",
+      display_name: "**__Amanita mappae__** complex",
+      rank: "Group",
+      user: users(:rolf)
+    )
+    mock_inat_obs = mock_observation("mappae_complex")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+    ancestor_ids = inat_taxon[:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Amanita" }] }
+    )
+
+    assert_equal(name, inat_taxon.name,
+                 "iNat monomial complex should map to MO " \
+                 "'<genus> <epithet.downcase> complex' Group Name")
+  end
+
+  def test_full_name_string_for_monomial_complex
+    mock_inat_obs = mock_observation("mappae_complex")
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
+    stub_genus_lookup(
+      ancestor_ids: inat_taxon[:ancestor_ids].join(","),
+      body: { results: [{ name: "Amanita" }] }
+    )
+
+    assert_equal("Amanita mappae", inat_taxon.full_name_string,
+                 "Monomial complex full_name_string should be " \
+                 "'<genus> <epithet.downcase>' without 'complex' suffix")
+  end
+
+  def test_maps_inat_monomial_complex_ident_to_mo_group
+    name = Name.create(
+      text_name: "Amanita mappae complex", author: "",
+      search_name: "Amanita mappae complex",
+      display_name: "**__Amanita mappae__** complex",
+      rank: "Group",
+      user: users(:rolf)
+    )
+    mock_inat_obs = mock_observation("mappae_complex")
+    ident_taxon = Inat::Taxon.new(mock_inat_obs[:identifications].last[:taxon])
+    ancestor_ids = ident_taxon[:ancestor_ids].join(",")
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids,
+      body: { results: [{ name: "Amanita" }] }
+    )
+
+    assert_equal(name, ident_taxon.name,
+                 "iNat monomial complex identification should map to " \
+                 "MO Group Name")
+  end
+
   def test_maps_inat_complex_to_existing_mo_group
     name = Name.create(
       text_name: "Xeromphalina campanella group", author: "",
