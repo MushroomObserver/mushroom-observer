@@ -80,7 +80,7 @@ class Inat
 
     def matching_group_names
       # MO equivalent could be "group", "clade", or "complex"
-      ::Name.where(::Name[:text_name] =~ /^#{full_name_string}/).
+      ::Name.where(::Name[:text_name] =~ /^#{Regexp.escape(full_name_string)}/).
         where(rank: "Group", correct_spelling_id: nil).
         order(deprecated: :asc)
     end
