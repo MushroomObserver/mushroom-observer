@@ -99,29 +99,12 @@ class Inat
         order(deprecated: :asc)
     end
 
-    # Get the genus of an iNat monomial complex via an API query
-    # requesting the taxon's ancestor which has rank: genus.
     # Returns e.g. "Amanita mappae" (no "complex" suffix —
     # create_mo_name appends it).
     def monomial_complex_name_string
-      ancestor_ids = self[:ancestor_ids].join(",")
-      params = { id: ancestor_ids, rank: "genus" }
-      url = "#{API_BASE}/taxa?#{params.to_query}"
-
-      res = RestClient::Request.execute(
-        method: :get,
-        url: url,
-        headers: { Accept: "application/json" }
-      )
-      genus = JSON.parse(
-        res.body, symbolize_names: true
-      )[:results].first[:name]
-
-      "#{genus} #{@taxon[:name].downcase}"
+      "#{ancestor_genus_name} #{@taxon[:name].downcase}"
     end
 
-    # Get the genus of an iNat infrageneric taxon via an API query
-    # requesting the taxon's ancestor which has rank: genus.
     # NOTE: 2025-10-29 jdc
     # iNat infrageneric name strings lack the genus.
     # They're just the epithet, e.g. "Validae",
@@ -131,20 +114,15 @@ class Inat
     # the iNat API observation request.
     # The latter proved too complex and unreliable.
     def infrageneric_name_string
-      ancestor_ids = self[:ancestor_ids].join(",")
-      params = { id: ancestor_ids, rank: "genus" }
-      url = "#{API_BASE}/taxa?#{params.to_query}"
+      "#{ancestor_genus_name} #{@taxon[:rank]} #{@taxon[:name]}"
+    end
 
-      res = RestClient::Request.execute(
-        method: :get,
-        url: url,
-        headers: { Accept: "application/json" }
-      )
-      genus = JSON.parse(
-        res.body, symbolize_names: true
-      )[:results].first[:name]
-
-      "#{genus} #{@taxon[:rank]} #{@taxon[:name]}"
+    # Look up the genus ancestor of this taxon via the iNat taxa API.
+    def ancestor_genus_name
+      path = "taxa?#{{ id: self[:ancestor_ids].join(","),
+                       rank: "genus" }.to_query}"
+      res = Inat::APIRequest.new(nil).request(path: path)
+      JSON.parse(res.body, symbolize_names: true)[:results].first[:name]
     end
 
     def infrageneric?
