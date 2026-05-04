@@ -61,6 +61,18 @@ module Projects
       assert_flash_error
     end
 
+    # Exercises the user_defaults branch of compute_image_ivars
+    # for a project that has no banner image set.
+    def test_show_renders_for_imageless_project
+      project = projects(:empty_project)
+      assert_nil(project.image, "Test needs a project with no image")
+      login(project.user.login)
+      get(:show, params: { project_id: project.id })
+
+      assert_response(:success)
+      assert_select("form[action=?]", project_path(project.id))
+    end
+
     def test_show_requires_login
       get(:show, params: { project_id: @project.id })
 

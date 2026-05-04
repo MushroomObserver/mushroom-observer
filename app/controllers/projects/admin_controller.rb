@@ -20,10 +20,6 @@ module Projects
              ), layout: true)
     end
 
-    def controller_model_name
-      "Project"
-    end
-
     private
 
     def find_project!
