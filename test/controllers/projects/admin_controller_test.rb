@@ -16,18 +16,41 @@ module Projects
       get(:show, params: { project_id: @project.id })
 
       assert_response(:success)
-      assert_select("a[href=?]",
-                    edit_project_path(@project.id),
-                    true,
-                    "Edit Project link should be present")
+      # Details sub-tab embeds the project edit form
+      assert_select("form[action=?]", project_path(@project.id),
+                    true, "Edit form should be present")
+      assert_select("input[name='project[title]'][value=?]",
+                    @project.title, true,
+                    "Title field should be pre-filled")
+      # Sub-tabs link to Members and Aliases
       assert_select("a[href=?]",
                     project_members_path(@project.id),
-                    true,
-                    "Members link should be present")
+                    true, "Members sub-tab should link to members page")
       assert_select("a[href=?]",
                     project_aliases_path(project_id: @project.id),
-                    true,
-                    "Project Aliases link should be present")
+                    true, "Aliases sub-tab should link to aliases page")
+      # Danger Zone with Delete Project
+      assert_select("#project_danger_zone", true,
+                    "Danger Zone section should be present")
+    end
+
+    def test_show_renders_admin_subtabs_with_details_active
+      login(@admin.login)
+      get(:show, params: { project_id: @project.id })
+
+      assert_response(:success)
+      assert_select("#project_admin_subtabs .nav-link.active",
+                    { text: :show_project_admin_details_tab.l },
+                    "Details sub-tab should be marked active")
+    end
+
+    def test_show_form_has_dirty_form_controller
+      login(@admin.login)
+      get(:show, params: { project_id: @project.id })
+
+      assert_response(:success)
+      assert_select("form[data-controller~='dirty-form']", true,
+                    "Edit form should have the dirty-form Stimulus controller")
     end
 
     def test_show_redirects_non_admin

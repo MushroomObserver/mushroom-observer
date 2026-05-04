@@ -3,10 +3,28 @@
 # Phlex form for creating/editing projects.
 # Replaces the ERB partial projects/_form.html.erb.
 class Components::ProjectForm < Components::ApplicationForm
-  def initialize(model, dates_any: true, upload_params: nil, **)
+  def initialize(model, dates_any: true, upload_params: nil,
+                 dirty_form: false, **)
     @dates_any = dates_any
     @upload_params = upload_params
+    @dirty_form = dirty_form
     super(model, **)
+  end
+
+  # Adds the dirty-form Stimulus controller to the rendered <form>
+  # tag when the caller opts in. Used on the Admin/Details tab to
+  # warn the user before navigating away from unsaved changes.
+  def around_template
+    if @dirty_form
+      @attributes[:data] ||= {}
+      existing = @attributes[:data][:controller]
+      @attributes[:data][:controller] =
+        [existing, "dirty-form"].compact.join(" ").strip
+      @attributes[:data][:action] =
+        [@attributes[:data][:action],
+         "submit->dirty-form#allowSubmit"].compact.join(" ").strip
+    end
+    super
   end
 
   def view_template

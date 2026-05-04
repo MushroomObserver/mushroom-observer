@@ -5,6 +5,12 @@ module Projects
     before_action :login_required
     before_action :set_project_alias, only: [:show, :edit, :update, :destroy]
 
+    # Aliases lives under the project Admin tab now (issue #4148).
+    def active_project_tab
+      "admin"
+    end
+    helper_method :active_project_tab
+
     def index
       @project = Project.find(params[:project_id])
       @project_aliases = ProjectAlias.where(project: @project).order(name: :asc)

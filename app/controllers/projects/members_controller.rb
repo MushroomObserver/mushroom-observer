@@ -11,6 +11,12 @@ module Projects
   class MembersController < ApplicationController
     before_action :login_required
 
+    # Members lives under the project Admin tab now (issue #4148).
+    def active_project_tab
+      "admin"
+    end
+    helper_method :active_project_tab
+
     def index
       return unless find_project!
 

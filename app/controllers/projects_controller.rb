@@ -91,16 +91,12 @@ class ProjectsController < ApplicationController
   #   Renders edit_project again.
   #   Outputs: @project
   # def edit_project
+  # The Admin tab's Details sub-tab is now the canonical edit URL.
+  # Redirect any legacy /projects/:id/edit links there. Issue #4148.
   def edit
-    image_ivars
     return unless find_project_and_where!
 
-    @start_date_fixed = @project.start_date.present?
-    @end_date_fixed = @project.end_date.present?
-    @project_dates_any = !@start_date_fixed && !@end_date_fixed
-    return render_edit_form if permission!(@project)
-
-    redirect_to(project_path(@project.id))
+    redirect_to(project_admin_path(project_id: @project.id))
   end
 
   def create
@@ -190,9 +186,16 @@ class ProjectsController < ApplicationController
            ), layout: true)
   end
 
+  # Re-renders the Admin/Details page on validation failure so the
+  # user sees the same sub-tab/Admin context they submitted from.
+  # Issue #4148.
   def render_edit_form
-    render(Views::Controllers::Projects::Edit.new(
-             project: @project, dates_any: @project_dates_any,
+    @start_date_fixed = @project.start_date.present?
+    @end_date_fixed = @project.end_date.present?
+    @project_dates_any = !@start_date_fixed && !@end_date_fixed
+    render(Views::Controllers::Projects::Admin::Show.new(
+             project: @project, user: @user,
+             dates_any: @project_dates_any,
              upload_params: upload_params_hash
            ), layout: true)
   end

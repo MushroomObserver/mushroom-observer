@@ -399,35 +399,18 @@ class ProjectsControllerTest < FunctionalTestCase
     add_project_helper("The Test Coverage Project", "")
   end
 
-  def test_edit_project_by_owner
+  # The legacy /projects/:id/edit URL now redirects to the canonical
+  # /projects/:id/admin (Admin tab Details sub-tab). Issue #4148.
+  def test_edit_project_redirects_to_admin
     project = projects(:two_list_project)
-    # `requires_user` calls `either_requires_either` which calls
-    # `assert_request` which requires that
-    # the request pass with the supplied user, and
-    # fail with an unsupplied user, who is either
-    #   mary if the suppled user was rolf, or
-    #   rolf if the supplied user was other than mary or rolf
     assert(project.user == mary && !project.admin?(rolf),
            "Test needs different fixtures")
-    project_id = project.id.to_s
-    params = { id: project_id }
-
-    requires_user(:edit, { action: :show }, params, "mary")
-
-    assert_form_action(action: :update, id: project.id.to_s)
-  end
-
-  def test_edit_project_any_date
-    project = projects(:bolete_project)
-    assert_true(project.start_date.nil? && project.end_date.nil?,
-                "Test needs Project with nil start and end dates")
     params = { id: project.id.to_s }
 
-    login(project.user.login)
-    post(:edit, params: params)
+    login(mary.login)
+    get(:edit, params: params)
 
-    assert_select("#project_dates_any_true[checked]", true,
-                  "'Any' radio button should be selected")
+    assert_redirected_to(project_admin_path(project_id: project.id))
   end
 
   def test_edit_project_empty_name
@@ -478,8 +461,10 @@ class ProjectsControllerTest < FunctionalTestCase
     patch(:update, params: params)
 
     assert_flash_error("Missing flash error when Project ends before it starts")
-    assert_select("#title", { text: /Edit Project/ },
-                  "It should return to form if Project ends before it starts")
+    # On validation failure the Admin/Details page is re-rendered so
+    # the user can correct the dates without leaving the Admin tab.
+    assert_select("input[name='project[title]']", true,
+                  "Form should be re-rendered after validation failure")
   end
 
   def test_destroy_project

@@ -3665,6 +3665,9 @@
   show_project_violation_count: Project has [count] constraint violation(s)
   show_project_admin_title: Project Admin
   show_project_admin_tab: Admin
+  show_project_admin_details_tab: Details
+  show_project_admin_danger_zone: Danger Zone
+  show_project_admin_destroy_help: Deleting a project cannot be undone. The project's observations stay on the site, but the project, its members list, aliases, and constraints are removed.
   show_project_trust_settings: Trust Settings
   show_project_trust_settings_title: Trust Settings for [project]
   trust_settings_help: Trust controls how much project admins can do with your observations. Each level includes everything in the levels above it.
