@@ -9,11 +9,9 @@ class Inat::APIRequest
   end
 
   def request(path:, method: :get, payload: {}, headers: {})
-    headers = {
-      authorization: "Bearer #{@token}",
-      content_type: :json,
-      accept: :json
-    }.merge(headers)
+    default_headers = { content_type: :json, accept: :json }
+    default_headers[:authorization] = "Bearer #{@token}" if @token.present?
+    headers = default_headers.merge(headers)
 
     RestClient::Request.execute(
       method: method,
