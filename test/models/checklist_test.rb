@@ -304,8 +304,10 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_targets_unobserved)
   end
 
-  # L1-2/L1-3: Observation of a synonym (not the target itself) counts
-  # the target as observed.
+  # L1-2/L1-3: Observation of a synonym (not the target itself) does
+  # not count the target as observed; the target stays in the
+  # Unobserved panel and gets the `+` marker via duplicate_synonyms.
+  # Issue #4152.
   def test_num_targets_observed_via_synonym
     proj = projects(:rare_fungi_project)
     # macrolepiota_rachodes and macrolepiota_rhacodes share a synonym group
@@ -313,14 +315,24 @@ class ChecklistTest < UnitTestCase
     proj.observations << obs_of(names(:macrolepiota_rhacodes))
 
     data = Checklist::ForProject.new(proj)
-    # 3 targets now (the 2 rare_fungi + macrolepiota_rachodes);
-    # macrolepiota_rachodes is observed via its synonym.
+    # 3 targets now (the 2 rare_fungi + macrolepiota_rachodes); none of
+    # them has a direct observation, so all three are unobserved.
     assert_equal(3, data.num_targets)
-    assert_equal(1, data.num_targets_observed)
+    assert_equal(0, data.num_targets_observed)
+    assert_equal(3, data.num_targets_unobserved)
     assert_includes(data.unobserved_target_taxa.pluck(0),
                     "Coprinus comatus")
-    assert_not_includes(data.unobserved_target_taxa.pluck(0),
-                        "Macrolepiota rachodes")
+    assert_includes(data.unobserved_target_taxa.pluck(0),
+                    "Macrolepiota rachodes",
+                    "Synonym-only-observed target stays in Unobserved")
+    # Target's synonym observation populates @taxa with the synonym's
+    # row, but the target itself does not appear in the observed taxa.
+    assert_not_includes(data.taxa.pluck(0), "Macrolepiota rachodes")
+    assert_includes(data.taxa.pluck(0), "Macrolepiota rhacodes")
+    # Both rows share the synonym_id so both rows show the `+` marker.
+    target_synonym_id = names(:macrolepiota_rachodes).synonym_id
+    assert_includes(data.duplicate_synonyms, target_synonym_id,
+                    "+ marker should fire for the shared synonym group")
   end
 
   # L1-4: Targets exist, zero observations → all unobserved.
@@ -344,6 +356,32 @@ class ChecklistTest < UnitTestCase
     assert_equal(0, data.num_targets_observed)
     assert_includes(data.unobserved_target_taxa.pluck(0),
                     "Macrolepiota rachodes")
+  end
+
+  # Issue #4152 edge case: both names of a synonym pair are targets,
+  # only one (A) is directly observed. A appears observed; B stays
+  # in Unobserved; both rows share the synonym group so both get `+`.
+  def test_target_pair_one_directly_observed
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+
+    name_a = names(:macrolepiota_rhacodes) # the directly-observed one
+    name_b = names(:macrolepiota_rachodes) # synonym, also a target
+    add_target(proj, name_a)
+    add_target(proj, name_b)
+    proj.observations << obs_of(name_a)
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(2, data.num_targets)
+    assert_equal(1, data.num_targets_observed,
+                 "Only A is directly observed")
+    assert_includes(data.taxa.pluck(0), name_a.text_name)
+    assert_not_includes(data.taxa.pluck(0), name_b.text_name)
+    assert_includes(data.unobserved_target_taxa.pluck(0),
+                    name_b.text_name,
+                    "Synonym-only target B stays in Unobserved")
+    assert_includes(data.duplicate_synonyms, name_a.synonym_id,
+                    "+ marker should fire across both panels")
   end
 
   # ==========================================================================
