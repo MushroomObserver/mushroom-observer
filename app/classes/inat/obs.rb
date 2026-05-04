@@ -304,13 +304,22 @@ class Inat
       "\n#{
         self[:identifications].each_with_object([]) do |ident, ary|
           ident_taxon = Inat::Taxon.new(ident[:taxon])
-          display_name = ident_taxon.name&.text_name || ident[:taxon][:name]
-          ary << "&nbsp;&nbsp;_#{display_name}_ " \
+          display = ident_display(ident_taxon, ident[:taxon])
+          ary << "&nbsp;&nbsp;#{display} " \
                  "by #{ident[:user][:login]} " \
                  "#{ident[:created_at_details][:date]}"
         end.join("\n")
       }"
     end
+
+    def ident_display(taxon, taxon_hash)
+      if taxon.importable?
+        "_#{taxon.name&.text_name || taxon_hash[:name]}_"
+      else
+        "\"_#{taxon_hash[:name]}_\":#{SITE}/taxa/#{taxon_hash[:id]}"
+      end
+    end
+    private :ident_display
 
     def lat_lon_accuracy
       "#{self[:location]} +/-#{self[:public_positional_accuracy]} m"

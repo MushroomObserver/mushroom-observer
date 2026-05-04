@@ -405,6 +405,16 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  def test_suggested_id_names_links_unimportable_taxon_to_inat
+    obs = mock_observation("ceanothus_cordulatus")
+    ident_taxon = obs[:identifications].first[:taxon]
+    expected_link =
+      "\"_#{ident_taxon[:name]}_\":#{SITE}/taxa/#{ident_taxon[:id]}"
+
+    assert_includes(obs.suggested_id_names, expected_link,
+                    "Non-importable ident taxon should link to iNat taxa page")
+  end
+
   def mock_observation(filename)
     mock_search = File.read("test/inat/#{filename}.txt")
     Inat::Obs.new(
