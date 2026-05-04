@@ -35,8 +35,8 @@ class Inat
     # disable cop to facilitate comparing numbers to iNat url's & documentation
     FUNGI_TAXON_ID = 47170 # rubocop:disable Style/NumericLiterals
     MYCETOZOA_TAXON_ID = 47685 # rubocop:disable Style/NumericLiterals
-    IMPORTABLE_TAXON_IDS_ARG = [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].join(",").
-                               freeze
+    IMPORTABLE_TAXON_IDS = [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].freeze
+    IMPORTABLE_TAXON_IDS_ARG = IMPORTABLE_TAXON_IDS.join(",").freeze
 
     # base url for iNat CC-licensed and public domain photos
     LICENSED_PHOTO_BASE =

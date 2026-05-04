@@ -108,6 +108,7 @@ class Inat
     def create_missing_identification_names
       inat_obs[:identifications].each do |ident|
         taxon = Inat::Taxon.new(ident[:taxon])
+        next unless taxon.importable?
         next if taxon.name.present?
 
         create_mo_name(taxon)

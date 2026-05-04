@@ -68,6 +68,13 @@ class Inat
       @taxon[:name]
     end
 
+    def importable?
+      ancestor_ids = @taxon[:ancestor_ids]
+      return false if ancestor_ids.blank?
+
+      ancestor_ids.intersect?(IMPORTABLE_TAXON_IDS)
+    end
+
     #########
 
     private

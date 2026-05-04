@@ -341,27 +341,8 @@ class Inat
 
     def importable? = taxon_importable? && observed_on_present?
 
-    def taxon_importable? = fungi? || slime_mold?
+    def taxon_importable? = @obs_taxon.importable?
     def observed_on_present? = !observed_on_missing?
     def observed_on_missing? = self.when.nil?
-
-    ##########
-
-    private
-
-    # ----- Other
-
-    def fungi?
-      # !! makes it return a boolean
-      !!@obs.dig(:taxon, :ancestor_ids)&.include?(
-        Inat::Constants::FUNGI_TAXON_ID
-      )
-    end
-
-    def slime_mold?
-      !!@obs.dig(:taxon, :ancestor_ids)&.include?(
-        Inat::Constants::MYCETOZOA_TAXON_ID
-      )
-    end
   end
 end
