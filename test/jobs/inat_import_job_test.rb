@@ -536,6 +536,8 @@ class InatImportJobTest < ActiveJob::TestCase
     ident_taxon[:ancestor_ids] = [48460, 47126, 211194, 47125, 47124, 47132] # rubocop:disable Style/NumericLiterals
     @mock_inat_response = JSON.generate(parsed_response)
 
+    assert_not(Name.exists?(text_name: "Quercus alba"),
+               "Test requires 'Quercus alba' to not exist in MO before import")
     stub_inat_interactions
 
     assert_no_difference(

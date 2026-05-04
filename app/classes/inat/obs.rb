@@ -299,8 +299,6 @@ class Inat
     private :copyright
 
     def suggested_id_names
-      # Get unique suggested taxon ids
-      # (iNat allows multiple suggestions for a single observation)
       "\n#{
         self[:identifications].each_with_object([]) do |ident, ary|
           ident_taxon = Inat::Taxon.new(ident[:taxon])
