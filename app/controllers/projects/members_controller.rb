@@ -137,7 +137,8 @@ module Projects
           render(Components::TrustSettingsModal.new(
                    project: @project,
                    candidate: @project_member.user,
-                   current_trust_level: current_trust_level
+                   current_trust_level:
+                     @project_member.trust_level || "no_trust"
                  ), layout: false)
         end
       end
@@ -163,11 +164,6 @@ module Projects
 
       @project_member = @project.project_members.find_by(user: user) ||
                         ProjectMember.new(project: @project, user: user)
-    end
-
-    def current_trust_level
-      member = @project.project_members.find_by(user: @user)
-      member&.trust_level || "no_trust"
     end
 
     # Redirects back to show_project.

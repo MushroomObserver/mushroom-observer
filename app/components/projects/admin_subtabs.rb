@@ -42,7 +42,7 @@ module Components
       end
 
       def aliases_subtab
-        count = @project.aliases.length
+        count = @project.aliases.count
         subtab_item("#{count} #{:PROJECT_ALIASES.l}",
                     project_aliases_path(project_id: @project.id),
                     "aliases")
