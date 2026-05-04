@@ -6,15 +6,6 @@ module Tabs
       [projects_index_tab]
     end
 
-    def project_form_edit_tabs(project:)
-      links = [
-        projects_index_tab,
-        object_return_tab(project)
-      ]
-      links << destroy_project_tab(project) if permission?(project)
-      links
-    end
-
     def projects_index_tabs
       [new_project_tab]
     end
@@ -47,12 +38,6 @@ module Tabs
                        edit_project_path(project.id)).tab
     end
 
-    def destroy_project_tab(project)
-      InternalLink::Model.new(:destroy_object.t(TYPE: Project),
-                              project, project,
-                              html_options: { button: :destroy }).tab
-    end
-
     def projects_for_user_tab(user)
       InternalLink.new(
         :app_your_projects.l, projects_path(member: user.id)
@@ -74,8 +59,6 @@ module Tabs
         render(Components::ProjectBanner.new(
                  project: project,
                  user: User.current,
-                 on_project_page: controller.controller_name == "projects" &&
-                                  action_name == "show",
                  current_tab: active_project_tab
                ))
       end

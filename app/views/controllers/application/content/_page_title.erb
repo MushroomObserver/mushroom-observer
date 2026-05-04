@@ -5,7 +5,9 @@ title = yield(:title)
 show_title_classes = %w[
   show_title_nav d-flex justify-content-between pl-3
 ]
-on_project_page = controller.controller_name == "projects" && action_name == "show"
+on_project_page = content_for?(:project_banner) &&
+                  (controller.controller_path == "projects" ||
+                   controller.controller_path.start_with?("projects/"))
 %>
 
 <%= tag.div(class: "row", id: "title_bar") do %>

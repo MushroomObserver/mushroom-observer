@@ -23,6 +23,9 @@ module Views
             add_project_banner(@project)
             container_class(:wide)
 
+            render(Components::Projects::AdminSubtabs.new(
+                     project: @project, current_subtab: "members"
+                   ))
             render(Components::ProjectMemberForm.new(
                      @project_member, project: @project
                    ))

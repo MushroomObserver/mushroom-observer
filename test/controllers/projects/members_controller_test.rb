@@ -293,6 +293,30 @@ module Projects
                    "End-date-only project should exclude obs after end")
     end
 
+    # issue #4148: trust modal returns the modal component for the member
+    def test_trust_modal_returns_turbo_stream_for_member
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(target_user.login)
+      get(:trust_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_match(/modal_trust_settings/, @response.body,
+                   "Modal markup should be returned in turbo stream")
+    end
+
+    # issue #4148: trust modal denies users acting on behalf of others
+    def test_trust_modal_denies_non_self
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(mary.login)
+      get(:trust_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_redirected_to(project_members_path(project.id))
+    end
+
     # issue #4129: modal requires the candidate to match current user
     def test_add_obs_modal_denies_non_self
       target_user = project_members(:eol_member_katrina).user

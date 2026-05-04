@@ -11,6 +11,12 @@ module Projects
   class MembersController < ApplicationController
     before_action :login_required
 
+    # Members lives under the project Admin tab now (issue #4148).
+    def active_project_tab
+      "admin"
+    end
+    helper_method :active_project_tab
+
     def index
       return unless find_project!
 
@@ -112,6 +118,27 @@ module Projects
                    candidate: @project_member.user,
                    count: count,
                    batch_limit: self.class.add_obs_batch_limit
+                 ), layout: false)
+        end
+      end
+    end
+
+    # Turbo-stream modal with three radio buttons for setting the
+    # current user's trust_level on this project. See issue #4148.
+    def trust_modal
+      return unless find_project!
+      return unless find_project_member!
+      unless @project.member?(@user) && @user == @project_member.user
+        return must_be_project_admin!(@project.id)
+      end
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(Components::TrustSettingsModal.new(
+                   project: @project,
+                   candidate: @project_member.user,
+                   current_trust_level:
+                     @project_member.trust_level || "no_trust"
                  ), layout: false)
         end
       end

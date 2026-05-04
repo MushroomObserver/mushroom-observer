@@ -673,6 +673,8 @@ MushroomObserver::Application.routes.draw do
   end
 
   resources :projects do
+    resource :admin, only: [:show],
+                     controller: "projects/admin"
     resource :administration, only: [:create],
                               controller: "projects/administrations"
     resources :admin_requests, only: [:new, :create],
@@ -686,6 +688,7 @@ MushroomObserver::Application.routes.draw do
                         param: :candidate do
       member do
         get :add_obs_modal
+        get :trust_modal
       end
     end
     resources :aliases, controller: "projects/aliases"
