@@ -7,7 +7,6 @@ module Views
       # Replaces show.html.erb.
       class Show < Views::Base
         register_output_helper :add_show_title
-        register_output_helper :add_edit_icons
         register_output_helper :add_project_banner
         register_output_helper :post_button, mark_safe: true
         register_output_helper :violations_button, mark_safe: true
@@ -24,7 +23,6 @@ module Views
 
         def view_template
           add_show_title(@project.title, @project)
-          add_edit_icons(@project, @user)
           add_project_banner(@project)
           container_class(:wide)
 
@@ -142,32 +140,20 @@ module Views
         end
 
         def render_member_buttons
-          render_trust_buttons
+          render_trust_settings_button
           render_leave_button if @project.can_leave?(@user)
           render_add_obs_button
         end
 
-        def render_trust_buttons
-          if @project.trusted_by?(@user)
-            render_member_action(:change_member_status_revoke_trust)
-          else
-            render_member_action(:change_member_hidden_gps_trust)
-          end
-          return if @project.can_edit_content?(@user)
-
-          render_member_action(:change_member_editing_trust)
-        end
-
-        def render_member_action(action_key)
-          put_button(
-            name: action_key.l,
-            class: action_button_class,
-            path: project_member_path(
+        def render_trust_settings_button
+          modal_link_to(
+            "trust_settings",
+            :show_project_trust_settings.l,
+            trust_modal_project_member_path(
               project_id: @project.id,
-              candidate: @user.id,
-              commit: action_key.l,
-              target: :project_index
-            )
+              candidate: @user.id
+            ),
+            { class: action_button_class }
           )
         end
 
@@ -196,37 +182,14 @@ module Views
         end
 
         def render_admin_links
-          if permission?(@project)
-            render_admin_management_links
-          else
-            a(
-              href: new_project_admin_request_path(
-                project_id: @project.id
-              ),
-              class: action_button_class
-            ) { plain(:show_project_admin_request.l) }
-          end
-        end
+          return if permission?(@project)
 
-        def render_admin_management_links
-          render_members_link
-          render_aliases_link
-        end
-
-        def render_members_link
-          count = @project.user_group.users.count
           a(
-            href: project_members_path(@project.id),
+            href: new_project_admin_request_path(
+              project_id: @project.id
+            ),
             class: action_button_class
-          ) { plain("#{count} #{:MEMBERS.l}") }
-        end
-
-        def render_aliases_link
-          count = @project.aliases.length
-          a(
-            href: project_aliases_path(project_id: @project.id),
-            class: action_button_class
-          ) { plain("#{count} #{:PROJECT_ALIASES.l}") }
+          ) { plain(:show_project_admin_request.l) }
         end
 
         def render_violations_button

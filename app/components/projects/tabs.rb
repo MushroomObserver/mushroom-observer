@@ -21,6 +21,7 @@ module Components
             else
               non_observation_tabs
             end
+            admin_tab
           end
         end
       end
@@ -40,6 +41,14 @@ module Components
         names_tab
         locations_tab
         update_tab
+      end
+
+      def admin_tab
+        return unless @project.is_admin?(@user)
+
+        tab_item(:show_project_admin_tab.l,
+                 project_admin_path(project_id: @project.id),
+                 "admin")
       end
 
       def summary_tab

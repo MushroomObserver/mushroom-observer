@@ -123,7 +123,11 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_response(:success)
-    assert_edit_button(project)
+    assert_select(
+      "a[href=?]", project_admin_path(project_id: project.id),
+      true,
+      "Project owner should see Admin tab linking to admin page"
+    )
   end
 
   def test_show_project_logged_in_admin
@@ -134,7 +138,11 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_response(:success)
-    assert_edit_button(project)
+    assert_select(
+      "a[href=?]", project_admin_path(project_id: project.id),
+      true,
+      "Project admin should see Admin tab linking to admin page"
+    )
     assert_select(
       "form[action=?]", project_administration_path(project_id: project.id),
       false,

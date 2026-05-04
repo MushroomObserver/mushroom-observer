@@ -117,6 +117,26 @@ module Projects
       end
     end
 
+    # Turbo-stream modal with three radio buttons for setting the
+    # current user's trust_level on this project. See issue #4148.
+    def trust_modal
+      return unless find_project!
+      return unless find_project_member!
+      unless @project.member?(@user) && @user == @project_member.user
+        return must_be_project_admin!(@project.id)
+      end
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(Components::TrustSettingsModal.new(
+                   project: @project,
+                   candidate: @project_member.user,
+                   current_trust_level: current_trust_level
+                 ), layout: false)
+        end
+      end
+    end
+
     private
 
     def render_member_edit_form
@@ -137,6 +157,11 @@ module Projects
 
       @project_member = @project.project_members.find_by(user: user) ||
                         ProjectMember.new(project: @project, user: user)
+    end
+
+    def current_trust_level
+      member = @project.project_members.find_by(user: @user)
+      member&.trust_level || "no_trust"
     end
 
     # Redirects back to show_project.

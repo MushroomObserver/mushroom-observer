@@ -74,8 +74,6 @@ module Tabs
         render(Components::ProjectBanner.new(
                  project: project,
                  user: User.current,
-                 on_project_page: controller.controller_name == "projects" &&
-                                  action_name == "show",
                  current_tab: active_project_tab
                ))
       end

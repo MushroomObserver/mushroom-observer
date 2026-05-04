@@ -3663,6 +3663,18 @@
   show_project_summary: Summary
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
+  show_project_admin_title: Project Admin
+  show_project_admin_tab: Admin
+  show_project_trust_settings: Trust Settings
+  show_project_trust_settings_title: Trust Settings for [project]
+  trust_settings_help: Trust controls how much project admins can do with your observations. Each level includes everything in the levels above it.
+  trust_settings_no_trust_label: No Trust
+  trust_settings_no_trust_help: Project admins cannot see any of your hidden GPS coordinates and cannot edit your observations.
+  trust_settings_hidden_gps_label: Share Hidden GPS
+  trust_settings_hidden_gps_help: Project admins can see your hidden GPS coordinates for observations in this project. They cannot edit your observations.
+  trust_settings_editing_label: Allow Editing
+  trust_settings_editing_help: Project admins can see your hidden GPS coordinates and edit your observations in this project.
+  trust_settings_save: Save Trust Settings
 
   # project/violations/index
   form_violations_help: Each row shows an Observation that fails one or more of this Project's constraints. Use the per-row actions to bring it into compliance.

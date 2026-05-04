@@ -57,7 +57,8 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     login(project.user.login)
 
     visit(project_path(project))
-    click_on(:show_project_edit.l)
+    click_on(:show_project_admin_tab.l)
+    click_on(:edit_object.t(type: :project))
     choose("project_dates_any_true")
     assert_selector(
       "input[type='radio'][id='project_dates_any_true'][checked='checked']"
@@ -78,7 +79,8 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     login(project.user.login)
 
     visit(project_path(project))
-    click_on(:show_project_edit.l)
+    click_on(:show_project_admin_tab.l)
+    click_on(:edit_object.t(type: :project))
     click_on(:SAVE_EDITS.l)
 
     project.reload

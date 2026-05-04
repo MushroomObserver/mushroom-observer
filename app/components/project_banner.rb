@@ -2,14 +2,12 @@
 
 module Components
   # Renders a project banner with title, location, date range, tabs,
-  # and optional banner image
+  # and optional banner image. Used on every project page so the
+  # banner looks the same regardless of which tab is selected.
   #
   # @example Basic usage in helper
   #   content_for(:project_banner) do
-  #     render(Components::ProjectBanner.new(
-  #       project: @project,
-  #       on_project_page: true
-  #     ))
+  #     render(Components::ProjectBanner.new(project: @project))
   #   end
   #
   class ProjectBanner < Base
@@ -17,7 +15,6 @@ module Components
 
     prop :project, _Nilable(Project)
     prop :user, _Nilable(User), default: nil
-    prop :on_project_page, _Boolean, default: false
     prop :current_tab, _Nilable(String), default: nil
 
     def view_template
@@ -44,7 +41,7 @@ module Components
         div(class: "col-xs-12", id: "project_banner") do
           img(src: @project.image.large_url, class: "banner-image")
           div(class: "bottom-left ml-3 mb-3 p-2") do
-            render_banner_title_with_icons(with_overlay_styling: true)
+            render_banner_title(with_overlay_styling: true)
             render_project_location(with_overlay_styling: true)
             render_project_date_range(with_overlay_styling: true)
           end
@@ -56,7 +53,7 @@ module Components
       div(class: "row") do
         div(class: "col-xs-12", id: "project_banner") do
           div(class: "pl-3 mt-3") do
-            render_banner_title_with_icons(with_overlay_styling: false)
+            render_banner_title(with_overlay_styling: false)
           end
           if project_subtitle?
             div(class: "pl-3 mb-3") do
@@ -68,22 +65,17 @@ module Components
       end
     end
 
-    def render_banner_title_with_icons(with_overlay_styling:)
+    def render_banner_title(with_overlay_styling:)
       title_classes = if with_overlay_styling
                         "h3 banner-image-text"
                       else
                         "h3 page-title mb-4"
                       end
 
-      h1(class: title_classes, id: title_id) do
-        if @on_project_page
-          div(class: "d-flex align-items-center") do
-            show_title_id_badge(@project)
-            plain(" ")
-            link_to_object(@project)
-            show_page_edit_icons
-          end
-        else
+      h1(class: title_classes, id: "title") do
+        div(class: "d-flex align-items-center") do
+          show_title_id_badge(@project)
+          plain(" ")
           link_to_object(@project)
         end
       end
@@ -91,10 +83,6 @@ module Components
 
     def project_subtitle?
       @project.location || (@project.start_date && @project.end_date)
-    end
-
-    def title_id
-      @on_project_page ? "title" : "banner_title"
     end
 
     def render_project_location(with_overlay_styling:)
