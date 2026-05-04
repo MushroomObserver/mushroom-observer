@@ -523,6 +523,31 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  def test_unimportable_identification_taxon_not_created
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+
+    # Replace the fungi identification taxon with a plant one
+    parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
+    ident_taxon =
+      parsed_response[:results].first[:identifications].first[:taxon]
+    ident_taxon[:name] = "Quercus alba"
+    # disable cop to facilitate comparing numbers to iNat ids
+    ident_taxon[:ancestor_ids] = [48460, 47126, 211194, 47125, 47124, 47132] # rubocop:disable Style/NumericLiterals
+    @mock_inat_response = JSON.generate(parsed_response)
+
+    assert_not(Name.exists?(text_name: "Quercus alba"),
+               "Test requires 'Quercus alba' to not exist in MO before import")
+    stub_inat_interactions
+
+    assert_no_difference(
+      "Name.where(text_name: \"Quercus alba\").count",
+      "Should not create MO Name for non-fungi identification taxon"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+  end
+
   def test_import_zero_results
     create_ivars_from_filename("zero_results")
     @inat_import.update(inat_ids: "123", token: "MockCode")

@@ -235,6 +235,18 @@ class InatTaxonTest < UnitTestCase
     assert_equal("Xeromphalina campanella", inat_taxon.full_name_string)
   end
 
+  def test_importable
+    fungi_obs = mock_observation("somion_unicolor")
+    fungi_ident_taxon = Inat::Taxon.new(fungi_obs[:identifications].last[:taxon])
+    assert(fungi_ident_taxon.importable?,
+           "Fungi identification taxon should be importable")
+
+    plant_obs = mock_observation("ceanothus_cordulatus")
+    plant_ident_taxon = Inat::Taxon.new(plant_obs[:identifications].last[:taxon])
+    assert_not(plant_ident_taxon.importable?,
+               "Plant identification taxon should not be importable")
+  end
+
   def test_returns_nil_when_no_mo_match
     assert_not(Name.exists?(text_name: "Calostoma lutescens"),
                "Test needs iNat taxon without an MO matching Name")
