@@ -484,16 +484,6 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_species_observed)
   end
 
-  private
-
-  def obs_of(name)
-    Observation.create!(name: name, user: users(:rolf), when: Time.zone.now)
-  end
-
-  def add_target(project, name)
-    ProjectTargetName.create!(project: project, name: name)
-  end
-
   def test_checklist_for_project_include_sub_locations
     proj = projects(:bolete_project)
     california = locations(:california)
@@ -573,5 +563,15 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_species)
     assert_equal(["Coprinus"], data.genera)
     assert_equal([["Coprinus comatus", obs.name_id]], data.species)
+  end
+
+  private
+
+  def obs_of(name)
+    Observation.create!(name: name, user: users(:rolf), when: Time.zone.now)
+  end
+
+  def add_target(project, name)
+    ProjectTargetName.create!(project: project, name: name)
   end
 end
