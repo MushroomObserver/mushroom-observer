@@ -84,7 +84,6 @@ gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
 # minimal two way bridge between the V8 JavaScript engine and Ruby
-# Locked here at "0.18.1" because "0.19.0" will not compile for nimmolo
 gem("mini_racer")
 
 # Add Arel helpers for more concise query syntax in Arel
