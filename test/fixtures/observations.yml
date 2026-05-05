@@ -32,7 +32,6 @@ DEFAULTS: &DEFAULTS
   is_collection_location: 1
   lifeform: " "
   text_name: Boletus edulis
-  classification: ""
   rss_log: $LABEL_rss_log
   needs_naming: 1
   source: nil
@@ -52,7 +51,7 @@ minimal_unknown_obs:
   species_lists: unknown_species_list
   herbarium_records: interesting_unknown
   collection_numbers: minimal_unknown_coll_num
-  field_slip: field_slip_one
+  occurrence: occ_field_slip_one
   source: <%= Observation.sources[:mo_website] %>
 
 detailed_unknown_obs:
@@ -85,7 +84,6 @@ coprinus_comatus_obs:
   user: rolf
   name: coprinus_comatus
   text_name: Coprinus comatus
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   location:
   where: Glendale, California
   specimen: 1
@@ -112,7 +110,6 @@ agaricus_campestris_obs:
   user: rolf
   name: agaricus_campestris
   text_name: Agaricus campestris
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From the lawn next door
   thumb_image: agaricus_campestris_image
@@ -132,7 +129,6 @@ agaricus_campestrus_obs:
   user: rolf
   name: agaricus_campestrus
   text_name: Agaricus campestrus
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
@@ -147,7 +143,6 @@ agaricus_campestras_obs:
   user: rolf
   name: agaricus_campestras
   text_name: Agaricus campestras
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
@@ -162,7 +157,6 @@ agaricus_campestros_obs:
   user: rolf
   name: agaricus_campestros
   text_name: Agaricus campestros
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
@@ -298,7 +292,7 @@ untrusted_hidden:
   user: katrina
   name: fungi
   text_name: Fungi
-  field_slip: field_slip_no_trust
+  occurrence: occ_field_slip_no_trust
   gps_hidden: true
   lat: 41.6055
   lng: -70.5055
@@ -333,7 +327,6 @@ peltigera_obs:
   where: "Briceland, California, USA"
   name: peltigera
   text_name: Peltigera
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   specimen: 1
   notes:
     :Other: "Growing on a hardwood"
@@ -356,7 +349,6 @@ peltigera_mary_obs:
   where: "Briceland, California, USA"
   name: peltigera
   text_name: Peltigera
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   specimen: 1
   notes:
     :Other: "Growing on a hardwood"
@@ -441,7 +433,7 @@ owner_accepts_general_questions:
   log_updated_at: 2020-07-08 04:06:04
   when: 2020-07-08
   user: roy # roy has email_general_questions == true
-  field_slip: field_slip_two
+  occurrence: occ_field_slip_two
 
 owner_refuses_general_questions:
   <<: *DEFAULTS
@@ -734,7 +726,6 @@ chlorophyllum_rachodes_obs:
   log_updated_at: 2023-02-04 04:06:04
   when: 2023-02-04
   name: chlorophyllum_rachodes
-  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 wolf_fart:
   <<: *DEFAULTS
@@ -801,7 +792,7 @@ falmouth_2022_obs:
   when: 2022-09-15 # outside of dates of falmouth_2023_09_project
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   location: falmouth
-  field_slip: field_slip_falmouth_one
+  occurrence: occ_field_slip_falmouth_one
   lat: 41.5862
   lng: -70.5976
   gps_hidden: false
@@ -820,7 +811,7 @@ current_obs:
   user: katrina
   where: Salt Point State Park, Sonoma Co., California, USA
   location: salt_point
-  field_slip: field_slip_previous
+  occurrence: occ_field_slip_previous
   notes:
     :Collector: _user katrina_
 
@@ -831,7 +822,7 @@ newbie_obs:
 
 recorder_obs:
   <<: *DEFAULTS
-  field_slip: field_slip_by_recorder
+  occurrence: occ_field_slip_by_recorder
   notes:
     :Collector: Foray Collector
 
@@ -844,9 +835,9 @@ imported_inat_obs:
   inat_id: 12345
   source: <%= Observation.sources[:mo_inat_import] %>
 
-provisional_obs:
+code_name_obs:
   <<: *DEFAULTS
-  name: provisional_name
+  name: code_name
 
 old_name_obs:
   <<: *DEFAULTS

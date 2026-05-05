@@ -13,7 +13,7 @@ class MockStorage
   end
 end
 
-class MockBucket # rubocop:disable Style/OneClassPerFile
+class MockBucket
   def initialize
     @files = {}
   end
@@ -23,7 +23,7 @@ class MockBucket # rubocop:disable Style/OneClassPerFile
   end
 end
 
-class MockFile # rubocop:disable Style/OneClassPerFile
+class MockFile
   def download(path)
     # Simulate file download by creating a test file
     FileUtils.mkdir_p(File.dirname(path))
@@ -31,7 +31,7 @@ class MockFile # rubocop:disable Style/OneClassPerFile
   end
 end
 
-class ImageLoaderJobTest < ActiveJob::TestCase # rubocop:disable Style/OneClassPerFile
+class ImageLoaderJobTest < ActiveJob::TestCase
   include GeneralExtensions
 
   def setup

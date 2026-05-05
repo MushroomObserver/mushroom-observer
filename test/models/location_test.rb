@@ -13,6 +13,16 @@ class LocationTest < UnitTestCase
     assert_not(Location.dubious_name?(str))
   end
 
+  # Locations are a shared resource; any logged-in user can edit.
+  # (Only nil user is rejected.)
+  def test_can_edit_allows_any_logged_in_user
+    loc = locations(:burbank)
+    assert(loc.can_edit?(rolf), "Creator should be able to edit")
+    assert(loc.can_edit?(mary),
+           "Non-creator logged-in user should be able to edit")
+    assert_not(loc.can_edit?(nil), "Nil user should not be able to edit")
+  end
+
   def test_dubious_name
     bad_location("Albion,California,  USA")
     bad_location("Albion, California")
@@ -545,6 +555,31 @@ class LocationTest < UnitTestCase
                  "Opposite side of globe should not be 'close' to Location.")
   end
 
+  # BoxMethods#km_from_point on a box that straddles the antimeridian
+  # exercises the dateline branch of `lng_inside?`: a point is inside
+  # when it's either >= west (east hemisphere side of the wrap) or
+  # <= east (west hemisphere side). Both "inside" cases must return
+  # zero distance; points outside the wrap must return positive km.
+  def test_km_from_point_on_dateline_wrapping_box
+    loc = locations(:east_lt_west_location)
+    lat = (loc.north + loc.south) / 2.0
+
+    assert_in_delta(
+      0, loc.km_from_point(lat, loc.west + 0.1), 1e-6,
+      "A point east of `west` on a wrapping box is inside the box."
+    )
+    assert_in_delta(
+      0, loc.km_from_point(lat, loc.east - 0.1), 1e-6,
+      "A point west of `east` on a wrapping box is inside the box."
+    )
+
+    # Antipodal longitude (roughly 0° here) is in the non-wrapped gap
+    # between east and west, so it should be clearly outside.
+    assert_operator(loc.km_from_point(lat, 0.0), :>, 0,
+                    "A point in the non-wrapped longitude gap is " \
+                    "outside the box.")
+  end
+
   # ----------------------------------------------------
   #  Scopes
   #    Explicit tests of some scopes to improve coverage
@@ -618,6 +653,19 @@ class LocationTest < UnitTestCase
 
   def north_southerthan_south_box
     { north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west }
+  end
+
+  def test_scope_sub_locations_of
+    california = locations(:california)
+    subs = Location.sub_locations_of(california)
+
+    # Albion, Burbank, etc. end with ", California, USA"
+    assert_includes(subs, locations(:albion))
+    assert_includes(subs, locations(:burbank))
+    # California itself is excluded
+    assert_not_includes(subs, california)
+    # Unrelated locations excluded
+    assert_not_includes(subs, locations(:nybg_location))
   end
 
   # supplements API tests

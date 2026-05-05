@@ -213,15 +213,24 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       clades.map! { |val| one_clade(val) }
       or_clause(*clades).distinct
     }
+    # For above-genus clades the membership predicate runs against
+    # `names.classification` (8 MB scan) rather than the now-removed
+    # `observations.classification` cache (was 73 MB). The matching
+    # `name_ids` are then joined back to observations through the
+    # existing `name_id` index. Discussion #4163 — measured 5-9× faster
+    # than the old in-place LIKE on observations even before dropping
+    # the cache.
     scope :one_clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
 
       if Name.ranks_above_genus.include?(rank)
-        where(text_name: text_name).or(
-          where(Observation[:classification].
-          matches("%#{rank}: _#{text_name}_%"))
-        )
+        name_ids = Name.where(text_name: text_name).
+                   or(Name.where(
+                        Name[:classification].
+                          matches("%#{rank}: _#{text_name}_%")
+                      )).select(:id)
+        where(name_id: name_ids)
       else
         where(text_name: text_name).or(
           where(Observation[:text_name].matches("#{text_name} %"))
@@ -324,16 +333,37 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # In these the box.east edge is in the w hemisphere, -180..
     #      and the box.west edge is in the e hemisphere, ..180
     scope :gps_in_box_over_dateline, lambda { |box|
-      where(
-        (Observation[:lat] >= box.south).
-        and(Observation[:lat] <= box.north).
-        and(Observation[:lng] >= box.west).
-        or(Observation[:lng] <= box.east)
-      ).distinct
+      # Exclude obs from the GPS-match path when their GPS shouldn't
+      # be trusted for search: gps_hidden leaks private coords, and
+      # gps_dubious (>50 km from the obs's own location bbox) lets
+      # mislabeled or lab-photo GPS leak into location searches
+      # (#4159). These obs can still match via the location-center
+      # path.
+      where(Observation[:gps_hidden].eq(false).
+            or(Observation[:gps_hidden].eq(nil))).
+        where(Observation[:gps_dubious].eq(false)).
+        where(
+          (Observation[:lat] >= box.south).
+          and(Observation[:lat] <= box.north).
+          and(Observation[:lng] >= box.west).
+          or(Observation[:lng] <= box.east)
+        ).distinct
     }
+    # The "lat IS NULL OR gps_hidden OR gps_dubious" predicate is
+    # Arel-ugly inline, so pull it out. Obs whose GPS isn't
+    # search-trusted — no lat, private, or contradicting the
+    # labeled location — fall back to the location center path so
+    # they stay reachable via in_box (#4159).
+    def self.gps_untrusted_for_search
+      Observation[:lat].eq(nil).
+        or(Observation[:lng].eq(nil)).
+        or(Observation[:gps_hidden].eq(true)).
+        or(Observation[:gps_dubious].eq(true))
+    end
+
     scope :cached_location_center_in_box_over_dateline, lambda { |box|
       where(
-        Observation[:lat].eq(nil).
+        gps_untrusted_for_search.
         and(Observation[:location_lat] >= box.south).
         and(Observation[:location_lat] <= box.north).
         and(Observation[:location_lng] >= box.west).
@@ -343,7 +373,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :associated_location_center_in_box_over_dateline, lambda { |box|
       left_outer_joins(:location).
         where(
-          Observation[:lat].eq(nil).
+          gps_untrusted_for_search.
           and(Location[:center_lat] >= box.south).
           and(Location[:center_lat] <= box.north).
           and(Location[:center_lng] >= box.west).
@@ -368,17 +398,23 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :gps_in_box, lambda { |box|
-      where(
-        (Observation[:lat] >= box.south).
-        and(Observation[:lat] <= box.north).
-        and(Observation[:lng] <= box.east).
-        and(Observation[:lng] >= box.west)
-      ).distinct
+      # Exclude obs from the GPS-match path when their GPS shouldn't
+      # be trusted for search — see gps_in_box_over_dateline above
+      # for the full reasoning (#4159).
+      where(Observation[:gps_hidden].eq(false).
+            or(Observation[:gps_hidden].eq(nil))).
+        where(Observation[:gps_dubious].eq(false)).
+        where(
+          (Observation[:lat] >= box.south).
+          and(Observation[:lat] <= box.north).
+          and(Observation[:lng] <= box.east).
+          and(Observation[:lng] >= box.west)
+        ).distinct
     }
     scope :cached_location_center_in_box, lambda { |box|
       # odd! AR will toss entire condition if below order is west, east
       where(
-        Observation[:lat].eq(nil).
+        gps_untrusted_for_search.
         and(Observation[:location_lat] >= box.south).
         and(Observation[:location_lat] <= box.north).
         and(Observation[:location_lng] <= box.east).
@@ -388,7 +424,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :associated_location_center_in_box, lambda { |box|
       left_outer_joins(:location).
         where(
-          Observation[:lat].eq(nil).
+          gps_untrusted_for_search.
           and(Location[:center_lat] >= box.south).
           and(Location[:center_lat] <= box.north).
           and(Location[:center_lng] <= box.east).
@@ -444,16 +480,61 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_images, lambda { |bool = true|
       presence_condition(Observation[:thumb_image_id], bool:)
     }
-    # content filter
-    scope :has_specimen,
-          ->(bool = true) { where(specimen: bool) }
+    # content filter — uses occurrence-level has_specimen when available
+    scope :has_specimen, lambda { |bool = true|
+      occ_specimen = Occurrence.where(
+        Occurrence[:id].eq(Observation[:occurrence_id])
+      ).select(:has_specimen).arel
+      coalesce = Arel::Nodes::NamedFunction.new(
+        "COALESCE", [Arel.sql("(#{occ_specimen.to_sql})"),
+                     Observation[:specimen]]
+      )
+      where(coalesce.eq(bool))
+    }
+
+    # content filter — true if observation belongs to a
+    # multi-observation occurrence (not just a field slip link)
+    scope :has_occurrence, lambda { |bool = true|
+      multi_occ_ids = Observation.where.not(occurrence_id: nil).
+                      group(:occurrence_id).
+                      having("COUNT(*) > 1").select(:occurrence_id)
+      if bool
+        where(Observation[:occurrence_id].in(multi_occ_ids.arel))
+      else
+        where(
+          Observation[:occurrence_id].eq(nil).or(
+            Observation[:occurrence_id].not_in(multi_occ_ids.arel)
+          )
+        )
+      end
+    }
 
     scope :has_sequences, lambda { |bool = true|
       joined_relation_condition(:sequences, bool:)
     }
 
+    # Exclude observations that belong to an occurrence but are not the
+    # primary. Used by reports/exports to avoid double-counting.
+    # Invariant: single-observation occurrences always have their sole
+    # observation as primary, so this check covers them correctly.
+    scope :exclude_non_primary, lambda {
+      left_outer_joins(:occurrence).where(
+        Observation[:occurrence_id].eq(nil).or(
+          Occurrence[:primary_observation_id].eq(Observation[:id])
+        )
+      )
+    }
+
     scope :has_field_slip, lambda { |bool = true|
-      presence_condition(Observation[:field_slip_id], bool:)
+      if bool
+        joins(:occurrence).where.not(occurrences: { field_slip_id: nil })
+      else
+        left_outer_joins(:occurrence).where(
+          Observation[:occurrence_id].eq(nil).or(
+            Occurrence[:field_slip_id].eq(nil)
+          )
+        )
+      end
     }
     # Deprecated: use has_field_slip. Kept for backwards compatibility
     # with existing bookmarked searches and URLs.
@@ -508,7 +589,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :show_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
-        :field_slip,
         { comments: :user },
         { external_links: { external_site: { project: :user_group } } },
         { herbarium_records: [{ herbarium: :curators }, :user] },
@@ -517,6 +597,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         :location,
         { name: { synonym: :names } },
         { namings: [:name, :user, { votes: [:observation, :user] }] },
+        { occurrence: :field_slip },
         { projects: :admin_group },
         :rss_log,
         :sequences,
@@ -552,7 +633,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :edit_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
-        :field_slip,
         { external_links: { external_site: { project: :user_group } } },
         { herbarium_records: [{ herbarium: :curators }, :user] },
         { images: [:image_votes, :license, :projects, :user] },
@@ -571,6 +651,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
   module ClassMethods
     # class methods here, `self` included
+
+    # Given an array of observation IDs, return a hash mapping each
+    # non-primary observation ID to its occurrence's primary observation
+    # ID.  Used by Query::Modules::Results to substitute non-primary
+    # observations with their primary representative.
     def parse_name_and_rank(val)
       return [val.text_name, val.rank] if val.is_a?(Name)
 

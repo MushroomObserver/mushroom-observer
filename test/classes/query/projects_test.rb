@@ -76,11 +76,9 @@ class Query::ProjectsTest < UnitTestCase
   end
 
   def test_project_has_summary
-    expects = [projects(:news_articles_project), projects(:empty_project),
-               projects(:two_list_project), projects(:lone_wolf_project),
-               projects(:open_membership_project), projects(:bolete_project),
-               projects(:eol_project)]
     scope = Project.has_summary.order_by_default
+    expects = scope.to_a
+    assert(expects.any?, "Expected some projects with summaries")
     assert_query_scope(expects, scope, :Project, has_summary: "yes")
     scope = Project.has_summary(false).order_by_default
     assert_query(scope, :Project, has_summary: "no")

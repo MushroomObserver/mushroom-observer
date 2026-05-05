@@ -1,0 +1,51 @@
+<%
+  intro = :"email_occurrence_#{@action}_intro".l(
+    name: @observation.user_unique_format_name(@user),
+    user: @sender.legal_name
+  )
+
+  fields = ""
+  fields += "*#{:Time.l}:* #{Time.zone.now.email_time}\n"
+  fields += "*#{:By.l}:* #{@sender.legal_name}" \
+            " (#{@sender.login})\n" if @sender
+
+  handy_links = :email_handy_links.l
+
+  links = []
+  links.push([:email_links_show_object.t(type: :observation),
+    "#{MO.http_domain}/#{@observation.id}"])
+  if @observation.occurrence_id
+    links.push([:email_links_show_object.t(type: :occurrence),
+      "#{MO.http_domain}/occurrences/#{@observation.occurrence_id}"])
+  end
+  links.push([:email_links_latest_changes.t,
+    MO.http_domain])
+
+if @user.email_html %>
+<html>
+<head>
+<title><%= "#{:app_title.t}: #{@title}" %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<%= fields.tp %>
+<%= handy_links.tp %>
+<ul type=none>
+<% links.each do |label, url| %>
+<li><%= label %>: <%= link_to(url, url) %></li>
+<% end %>
+</ul>
+<br/>
+</body>
+</html>
+<% else %><%= intro.tp.html_to_ascii %>
+
+<%= fields.tp.html_to_ascii %>
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = "".html_safe
+  links.each do |label, url|
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
+  end
+  result %>
+<% end %>

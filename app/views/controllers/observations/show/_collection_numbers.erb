@@ -1,4 +1,4 @@
-<%# locals: (obs: nil, user: nil) %>
+<%# locals: (obs: nil, user: nil, has_sibling_records: false) %>
 
 <%
 numbers  = obs.collection_numbers
@@ -52,7 +52,8 @@ can_edit = in_admin_mode? || obs.can_edit?(user)
 
     elsif numbers.none? && can_edit
       [
-        :show_observation_no_collection_numbers.t,
+        has_sibling_records ? "#{:Collection_numbers.t}:" :
+                              :show_observation_no_collection_numbers.t,
         " [",
         modal_link_to("collection_number",
                       *new_collection_number_tab(obs)),

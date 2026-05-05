@@ -5,9 +5,9 @@ require("test_helper")
 # Simple smoke tests for article form submission
 class ArticlesIntegrationTest < CapybaraIntegrationTestCase
   def test_create_article
-    # Login as admin (articles require admin mode)
-    login(users(:admin))
-    first("button", text: "Turn on Admin Mode").click
+    # Login as a member of the News Articles project (the only thing
+    # gating article create/edit/destroy after issue #4145).
+    login(users(:article_writer))
 
     # Visit the new article page
     visit(new_article_path)
@@ -33,9 +33,8 @@ class ArticlesIntegrationTest < CapybaraIntegrationTestCase
   end
 
   def test_edit_article
-    # Login as admin
-    login(users(:admin))
-    first("button", text: "Turn on Admin Mode").click
+    # Login as a member of the News Articles project.
+    login(users(:article_writer))
     article = articles(:premier_article)
 
     # Visit the edit article page

@@ -36,18 +36,18 @@ class ProjectBannerTest < ComponentTestCase
     assert_html(html, "h1.h3.page-title")
   end
 
-  def test_title_id_is_title_when_on_project_page
-    html = render_banner(on_project_page: true)
+  def test_title_id_is_consistent_across_pages
+    html = render_banner
 
     assert_html(html, "h1#title")
     assert_no_html(html, "h1#banner_title")
   end
 
-  def test_title_id_is_banner_title_when_not_on_project_page
-    html = render_banner(on_project_page: false)
+  def test_title_includes_id_badge
+    project = projects(:eol_project)
+    html = render_banner(project: project)
 
-    assert_html(html, "h1#banner_title")
-    assert_no_html(html, "h1#title")
+    assert_html(html, "h1#title .badge.badge-id")
   end
 
   def test_renders_banner_image_when_project_has_image
@@ -122,11 +122,53 @@ class ProjectBannerTest < ComponentTestCase
     assert_html(html, "a.nav-link[href='/projects/#{project.id}']")
   end
 
-  def test_does_not_render_tabs_when_project_has_no_content
+  def test_renders_names_and_locations_tabs_for_empty_project
     project = projects(:empty_project)
     html = render_banner(project: project)
 
-    assert_no_html(html, "#project_tabs")
+    assert_html(html, "#project_tabs")
+    assert_includes(html, :NAMES.l)
+    assert_includes(html, :LOCATIONS.l)
+    # No targets, so no Update tab
+    assert_not_includes(html, :project_updates_title.l)
+  end
+
+  def test_renders_update_tab_for_admin_with_targets
+    project = projects(:rare_fungi_project)
+    user = users(:rolf) # admin of rare_fungi_project
+    html = render_banner(project: project, user: user)
+
+    assert_html(html, "#project_tabs")
+    assert_includes(html, :project_updates_title.l)
+    assert_html(
+      html,
+      "a[href='/projects/#{project.id}/updates']"
+    )
+  end
+
+  def test_does_not_render_update_tab_for_non_admin
+    project = projects(:rare_fungi_project)
+    user = users(:mary) # not admin
+    html = render_banner(project: project, user: user)
+
+    assert_not_includes(html, :project_updates_title.l)
+  end
+
+  def test_renders_admin_tab_for_admin
+    project = projects(:rare_fungi_project)
+    user = users(:rolf) # admin of rare_fungi_project
+    html = render_banner(project: project, user: user)
+
+    assert_html(html, "a[href='/projects/#{project.id}/admin']")
+    assert_includes(html, :show_project_admin_tab.l)
+  end
+
+  def test_does_not_render_admin_tab_for_non_admin
+    project = projects(:rare_fungi_project)
+    user = users(:mary) # not admin of rare_fungi_project
+    html = render_banner(project: project, user: user)
+
+    assert_no_html(html, "a[href='/projects/#{project.id}/admin']")
   end
 
   def test_active_tab_highlights_current_tab
@@ -147,10 +189,10 @@ class ProjectBannerTest < ComponentTestCase
 
   private
 
-  def render_banner(on_project_page: false, project: projects(:eol_project),
-                    current_tab: nil)
-    render(Components::ProjectBanner.new(on_project_page: on_project_page,
-                                         project: project,
+  def render_banner(project: projects(:eol_project),
+                    user: nil, current_tab: nil)
+    render(Components::ProjectBanner.new(project: project,
+                                         user: user,
                                          current_tab: current_tab))
   end
 end

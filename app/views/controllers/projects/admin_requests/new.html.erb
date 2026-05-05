@@ -1,8 +1,0 @@
-<%
-  add_page_title(:admin_request_title.t(title: @project.title))
-%>
-
-<%= render(Components::ProjectAdminRequestForm.new(
-      FormObject::EmailRequest.new,
-      project: @project
-    )) %>

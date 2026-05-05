@@ -172,7 +172,8 @@ module Name::Scopes
       #       exclude_original_names: exclude_original)
       name = find_by(text_name: name) if name.is_a?(String)
       scope = if ranks_above_genus.include?(name.rank)
-                subtaxa_of(name).rank(ranks[name.rank] - 1)
+                next_rank = all_ranks[all_ranks.index(name.rank) - 1]
+                subtaxa_of(name).with_rank(next_rank)
               else
                 subtaxa_of(name)
               end
@@ -252,14 +253,6 @@ module Name::Scopes
       has_default_description(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
     }
-    # used by Name::Taxonomy
-    scope :has_description_classification_differing, lambda {
-      joins(:description).
-        where(rank: 0..Name.ranks[:Genus]).
-        where(NameDescription[:classification].not_eq(Name[:classification])).
-        where(NameDescription[:classification].not_blank).distinct
-    }
-
     # Query just ignores `has_observations(false)`, so for now we will here too.
     scope :has_observations, lambda { |bool = true|
       return all unless bool

@@ -275,7 +275,7 @@ class ParallelTestConfigServiceTest < UnitTestCase
 end
 
 # Mock output handler for testing
-class MockOutputHandler # rubocop:disable Style/OneClassPerFile
+class MockOutputHandler
   delegate :puts, :print, to: :@output
 
   def initialize(output)

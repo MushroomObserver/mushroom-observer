@@ -365,6 +365,10 @@
   OBSERVATIONS: Observations
   observations: observations
   OBSERVATION_FIELDS: Observation Fields
+  OCCURRENCE: Occurrence
+  occurrence: occurrence
+  OCCURRENCES: Occurrences
+  occurrences: occurrences
   of: of
   PAST_LOCATION: Location Change
   past_location: location change
@@ -492,6 +496,7 @@
   citation: citation
   CITATIONS: Citations
   citations: citations
+  Confidence: Confidence
   CONFIDENCE_LEVEL: Confidence Level
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
@@ -759,6 +764,8 @@
   edit: edit
   ENABLE: Enable
   enable: enable
+  EXCLUDE: Exclude
+  exclude: exclude
   IMPORT: Import
   INDEX_OBJECT: "[TYPE] [:INDEX]"
   # merge one object into another
@@ -892,6 +899,15 @@
   update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
+  map_legend_border_crisp: All with GPS
+  map_legend_border_dashed: Mix of GPS and location-only
+  map_legend_border_none: All location-only (no GPS)
+  map_legend_confirmed: Confirmed (≥80%)
+  map_legend_tentative: Tentative
+  map_legend_disputed: Disputed (≤0%)
+  map_legend_mixed: Mixed consensus
+  map_legend_location_only: Location only (no observations)
+  map_cap_banner: Showing the first [loaded] of [total] observations. Zoom in or narrow your filter to see the rest.
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon
@@ -1034,18 +1050,42 @@
   rank_phylum: phylum
   RANK_PLURAL_PHYLUM: Phyla
   rank_plural_phylum: phyla
+  RANK_SUBPHYLUM: Subphylum
+  rank_subphylum: subphylum
+  RANK_PLURAL_SUBPHYLUM: Subphyla
+  rank_plural_subphylum: subphyla
   RANK_CLASS: Class
   rank_class: class
   RANK_PLURAL_CLASS: Classes
   rank_plural_class: classes
+  RANK_SUBCLASS: Subclass
+  rank_subclass: subclass
+  RANK_PLURAL_SUBCLASS: Subclasses
+  rank_plural_subclass: subclasses
   RANK_ORDER: Order
   rank_order: order
   RANK_PLURAL_ORDER: Orders
   rank_plural_order: orders
+  RANK_SUBORDER: Suborder
+  rank_suborder: suborder
+  RANK_PLURAL_SUBORDER: Suborders
+  rank_plural_suborder: suborders
   RANK_FAMILY: Family
   rank_family: family
   RANK_PLURAL_FAMILY: Families
   rank_plural_family: families
+  RANK_SUBFAMILY: Subfamily
+  rank_subfamily: subfamily
+  RANK_PLURAL_SUBFAMILY: Subfamilies
+  rank_plural_subfamily: subfamilies
+  RANK_TRIBE: Tribe
+  rank_tribe: tribe
+  RANK_PLURAL_TRIBE: Tribes
+  rank_plural_tribe: tribes
+  RANK_SUBTRIBE: Subtribe
+  rank_subtribe: subtribe
+  RANK_PLURAL_SUBTRIBE: Subtribes
+  rank_plural_subtribe: subtribes
   RANK_GENUS: Genus
   rank_genus: genus
   RANK_PLURAL_GENUS: Genera
@@ -1066,6 +1106,10 @@
   rank_stirps: stirps
   RANK_PLURAL_STIRPS: Stirpes
   rank_plural_stirps: stirpes
+  RANK_SERIES: Series
+  rank_series: series
+  RANK_PLURAL_SERIES: Series
+  rank_plural_series: series
   RANK_SPECIES: Species
   rank_species: species
   RANK_PLURAL_SPECIES: Species
@@ -1210,6 +1254,7 @@
   search_term_has_name: has_name
   search_term_has_notes: has_notes
   search_term_has_observations: has_observations
+  search_term_has_occurrence: has_occurrence
   search_term_has_public_lat_lng: has_public_lat_lng
   search_term_has_sequence: has_sequence
   search_term_has_specimen: has_specimen
@@ -1335,6 +1380,12 @@
   log_herbarium_record_updated: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_updated_at: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
+  log_occurrence_added: "Added to occurrence by [user]."
+  log_occurrence_removed: "Removed from occurrence by [user]."
+  log_occurrence_updated: "Occurrence updated by [user]."
+  log_field_slip_added: "Added to field slip [name] by [user]."
+  log_field_slip_removed: "Removed from field slip [name] by [user]."
+  log_field_slip_updated: "Field slip [name] updated by [user]."
   log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
@@ -1395,7 +1446,7 @@
   source_credit_mo_android_app: Created via the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34
   source_credit_mo_iphone_app: Created via the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34
   source_credit_mo_api: Created via the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
-  source_credit_mo_inat_import: Imported from "iNaturalist":https://www.inaturalist.org via "Import from iNat":https://mushroomobserver.org/articles/39
+  source_credit_mo_inat_import: '"Imported from iNaturalist":https://mushroomobserver.org/articles/39'
 
   ##############################################################################
 
@@ -1586,8 +1637,8 @@
   download_observations_adolf: The Adolf Special™
   download_observations_darwin: Darwin Core
   download_observations_fundis: FunDiS
-  download_observations_mycoportal: MyCoPortal
-  download_observations_mycoportal_images: Images for MyCoPortal
+  download_observations_mycoportal: MyCoPortal Data
+  download_observations_mycoportal_images: MyCoPortal Images
   download_observations_symbiota: Symbiota
   download_observations_encoding: Choose character encoding
   download_observations_ascii: ASCII (no accents)
@@ -1752,6 +1803,8 @@
 
   # observations/_form_observations
   form_observations_field_code: for field slip
+  form_observations_field_slip_code: Field Slip Code
+  edit_observation_field_slip_invalid: 'Invalid field slip code "[code]".'
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
@@ -1795,10 +1848,14 @@
   form_observations_original_name: Original Name
 
   form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:SEE_MESSAGE_BELOW]+":#project_messages
-  form_observations_projects_out_of_range: The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)
-  form_observations_projects_out_of_range_help: "Either:\n- Uncheck out-of-range projects; or\n- Change the observation date or location if it is incorrect"
+  form_observations_projects_out_of_range: This observation violates one or more constraints of these checked project(s)
+  form_observations_projects_out_of_range_help: "Either:\n- Uncheck the project(s); or\n- Change the observation to align with project requirements"
   form_observations_projects_out_of_range_admin_help: "; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
   form_observations_projects_ignore_project_constraints: Ignore Project Constraints
+  form_observations_projects_kind_date: Out-of-range date
+  form_observations_projects_kind_bbox: Out-of-bbox location
+  form_observations_projects_kind_target_name: Non-target name
+  form_observations_projects_kind_target_location: Non-target location
 
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:SEE_MESSAGE_BELOW]+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+[:SEE_MESSAGE_BELOW]+":#name_messages
@@ -2385,7 +2442,8 @@
   show_observation_no_herbarium_records: No [:herbarium_records]
   show_observation_remove_herbarium_record: Remove fungarium record from this observation?
   show_observation_add_sequence: Add [:SEQUENCE]
-  show_observation_no_sequences: No [:sequences]
+  show_observation_dna_sequences: DNA sequences
+  show_observation_no_sequences: No DNA sequences
   show_observation_archive_link: Show Archive Record
   show_observation_blast_link: Run BLAST®
   show_observation_more_like_this: More like this
@@ -2420,6 +2478,7 @@
 
   # names/versions/show
   show_past_name_title: "[:VERSION] [num]: [name]"
+  show_past_name_classification_inherited: "Inherited from [name]'s reclassification on [date] by [user]"
 
   # names/descriptions/versions/show
   show_past_name_description_title: "[:VERSION] [num]: [name]"
@@ -2466,7 +2525,9 @@
   show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
-  show_user_life_list: "[species] species in [genera] genera"
+  show_user_life_list: "[species] species and [higher] higher-level [taxa_word] observed"
+  show_user_life_list_species: "[species] species observed"
+  show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
   sequence_edit_title: Editing [name]
@@ -2744,7 +2805,7 @@
   herbarium_record_user: Record Creator
   herbarium_record_notes: Fungarium Record Notes
 
-  herbarium_record_collection: Collection Record
+  herbarium_record_collection: Find in MyCoPortal
 
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record
@@ -2898,7 +2959,7 @@
   field_slip_code: Field Slip Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
   field_slip_constraint_violation: The selected observation violates one or more project constraints
-  field_slip_created: Field slip was successfully created.
+  field_slip_created: Field slip [code] was successfully created.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
   field_slip_creator: Creator
@@ -2915,6 +2976,9 @@
   field_slip_last_obs: Switch to Last Observation
   field_slip_new: Record Field Slip
   field_slip_no_observation: No Observation found
+  field_slip_select_observations: Select Observations to Associate
+  field_slip_save_with_observations: Save with Selected Observations
+  field_slip_via_occurrence: via occurrence
   field_slip_no_project: No Project found
   field_slip_nil_project: "(No Project)"
   field_slip_other_codes: Other Codes
@@ -2925,12 +2989,49 @@
   field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
 
-  field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
   field_slip_show: Show [:FIELD_SLIP]
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: Welcome to the [TITLE] Project!
   field_slips_max_for_project: You may create up to [MAX] slips for this project.
   field_slips_for_project_title: Create Field Slips for the
+
+  occurrence_already_exists: This observation already belongs to an occurrence.
+  occurrence_created: "Occurrence #[ID] created."
+  occurrence_locations_differ: "Note: The observations in this occurrence have different locations."
+  occurrence_need_two: You must include at least one additional observation to create an occurrence.
+  occurrence_observation_not_found: Observation not found.
+  create_occurrence_title: Create Occurrence
+  create_occurrence_source: Source Observation
+  create_occurrence_primary: Primary
+  create_occurrence_submit: Create Occurrence
+  in_existing_occurrence: In existing occurrence
+  occurrence_field_slip_conflict: "Field slip code conflict: [codes]"
+  matrix_box_occurrence: See matching observations
+  naming_see_matching_observations_reasons: See Matching Observations to Edit Other Reasons
+  show_observation_add_matching_observations: Add Matching Observations
+  show_observation_matching_observations: Matching Observations
+  show_observation_from_sibling: "(MO [id])"
+  show_occurrence_title: Occurrence
+  show_occurrence_location_differs: Location information differs across observations in this occurrence.
+  show_occurrence_primary: Primary
+  edit_occurrence_submit: Save Changes
+  edit_occurrence_remove: Remove
+  edit_occurrence_add_heading: Add Recently Viewed Observations
+  edit_occurrence_add: Add
+  edit_occurrence_location: "Location:"
+  edit_occurrence_details_heading: Primary Observation Details
+  edit_occurrence_no_edit_permission: You don't have permission to edit this observation's details.
+  occurrence_updated: Occurrence updated.
+  occurrence_destroyed: Occurrence destroyed.
+  occurrence_not_found: Occurrence not found.
+  occurrence_resolve_projects_title: "Add Observations to Projects"
+  occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
+  occurrence_resolve_projects_projects: "Projects:"
+  occurrence_resolve_projects_species_lists: "Species Lists:"
+  occurrence_resolve_projects_cancel: Cancel
+  occurrence_resolve_projects_add_all: Add All
+  occurrence_resolve_projects_done: "Primary observation added to [count] projects/lists."
+  occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
   field_slips_project_update_fail: Unable to update [TITLE] Project
@@ -2948,6 +3049,34 @@
   project_alias_type: Alias Type
   project_alias_updated: Field slip was successfully updated.
   project_alias_no_match: Unable to find [target_type] matching '[term]'
+
+  # Project Target Names
+  project_target_name_add: Add
+  project_target_names_to_add_label: "Target Names to Add:"
+  project_target_names_added: "Added target names: [names]."
+  project_target_name_removed: Removed target name "[name]".
+  project_target_name_not_found: No matching names found.
+  project_target_name_confirm_remove: Remove "[name]" from target names?
+
+  # Project Target Locations
+  project_target_locations_title: Target Locations
+  project_target_location_add: Add
+  project_target_locations_to_add_label: "Target Locations to Add:"
+  project_target_locations_added: "Added target locations: [names]."
+  project_target_location_removed: Removed target location "[name]".
+  project_target_location_not_found: No matching locations found.
+  project_target_location_confirm_remove: Remove "[name]" from target locations?
+  project_target_locations_summary: "Target locations: [total] total, [with_obs] with observations, [without_obs] with no observations."
+  project_target_locations_remove_footnote: Remove this target location from the project
+
+  # Project Updates Tab
+  project_updates_title: Update
+  project_updates_count: "[count] matching observations"
+  project_updates_excluded_count: "[count] excluded observations"
+  project_updates_show_excluded: Show Excluded
+  project_updates_add_all: Add All
+  project_updates_confirm_add_all: Add all matching observations to this project?
+  project_updates_added_all: "Added [count] observations to this project."
 
   ##############################################################################
 
@@ -3004,6 +3133,10 @@
   advanced_search_filter_has_specimen_off: Include both observations with and without specimens
   advanced_search_filter_has_specimen_yes: Exclude observations without specimens
   advanced_search_filter_has_specimen_no: Exclude observations with specimens
+  advanced_search_filter_has_occurrence: Filter observations based on whether they belong to an occurrence
+  advanced_search_filter_has_occurrence_off: Include all observations regardless of occurrence status
+  advanced_search_filter_has_occurrence_yes: Only observations that belong to an occurrence
+  advanced_search_filter_has_occurrence_no: Exclude observations that belong to an occurrence
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
@@ -3018,13 +3151,22 @@
   # checklists
   checklist_any_deprecated: "* This name is not considered current on MO"
   checklist_duplicate_synonyms: "+ This name has a synonym in this checklist"
+  checklist_target_remove_footnote: Remove this target name from the project
   checklist_for: Checklist for
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
   checklist_for_project_location_title: Checklist for [project] at [location]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
-  checklist_summary: "Summary: [names] names including [species] species and [genera] genera"
+  checklist_target_summary: "Target names: [total] total, [observed] observed, [unobserved] not yet observed."
+  checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_observed_species_only: "[species] species observed (synonyms counted once)."
+  checklist_observed_higher_only: "[higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_unobserved_targets: Unobserved target names
+  checklist_species_level: Species and below
+  checklist_higher_level: Higher-level taxa
+  checklist_taxon: taxon
+  checklist_taxa: taxa
 
   # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms. By default the simple clean \"Black on White\" theme is used. However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics. Each color in a mushroom theme was pulled from a photograph included in the site from the given group. The colors attempt to express the characteristic colors of the group. In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"
@@ -3410,6 +3552,8 @@
   admin_request_success: Successfully sent admin request for [title]
   admin_request_title: Admin Request for [title]
   admin_request_note: Enter your request below. When you hit "[:SEND]" it will be emailed to to project admins. The email will include your email address so that they can respond to your request.
+  project_administration_promoted_flash: You are now an admin of [title].
+  project_administration_already_admin_flash: You are already an admin of this project.
   author_request_add_author: Make sender an author
   author_request_title: Authorship Request for [title]
   author_request_note: "[:admin_request_note]"
@@ -3436,6 +3580,11 @@
   change_member_status_title: Changing [:user] Status of [name] for [title]
   change_member_add_obs: Add My Observations
   change_member_add_obs_flash: Added [count] Observations
+  add_obs_modal_none: None of your observations match this project and aren't already in it.
+  add_obs_modal_all: Found [count] matching observations not already in the project.
+  add_obs_modal_partial: Found [count] matching observations not already in the project. Each click adds up to [limit].
+  add_obs_modal_add_all: Add All
+  add_obs_modal_add_next: Add Next [limit]
   change_member_hidden_gps_trust: Share Hidden GPS
   change_member_hidden_gps_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
   change_member_editing_trust: Allow Editing
@@ -3499,6 +3648,7 @@
   show_project_add_members: Add Members
   show_project_admin_group: Admin Group
   show_project_admin_request: Admin Request
+  show_project_administer: Administer Project
   show_project_by: Owned By
   show_project_created_at: Created
   show_project_destroy: Destroy Project
@@ -3513,15 +3663,47 @@
   show_project_summary: Summary
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
+  show_project_admin_title: Project Admin
+  show_project_admin_tab: Admin
+  show_project_admin_details_tab: Details
+  show_project_admin_danger_zone: Danger Zone
+  show_project_admin_destroy_help: Deleting a project cannot be undone. The project's observations stay on the site, but the project, its members list, aliases, and constraints are removed.
+  show_project_trust_settings: Trust Settings
+  show_project_trust_settings_title: Trust Settings for [project]
+  trust_settings_help: Trust controls how much project admins can do with your observations. Each level includes everything in the levels above it.
+  trust_settings_no_trust_label: No Trust
+  trust_settings_no_trust_help: Project admins cannot see any of your hidden GPS coordinates and cannot edit your observations.
+  trust_settings_hidden_gps_label: Share Hidden GPS
+  trust_settings_hidden_gps_help: Project admins can see your hidden GPS coordinates for observations in this project. They cannot edit your observations.
+  trust_settings_editing_label: Allow Editing
+  trust_settings_editing_help: Project admins can see your hidden GPS coordinates and edit your observations in this project.
+  trust_settings_save: Save Trust Settings
 
   # project/violations/index
-  form_violations_help: Check the Observations to be removed, then Submit
+  form_violations_help: Each row shows an Observation that fails one or more of this Project's constraints. Use the per-row actions to bring it into compliance.
   violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
   form_violations_latitude_none: "Lat: Any"
   form_violations_location_none: "[:LOCATION]: Any"
   form_violations_longitude_none: "Lon: Any"
   form_violations_remove_selected: Remove Selected
   form_violations_show_project: Show Project
+  form_violations_no_violations: No constraint violations.
+  form_violations_th_name: Name
+  form_violations_th_details: Violation Details
+  form_violations_th_actions: Actions
+  form_violations_kind_date: Date
+  form_violations_kind_bbox: Outside project location
+  form_violations_kind_target_name: Non-target name
+  form_violations_kind_target_location: Non-target location
+  form_violations_action_exclude: Exclude
+  form_violations_action_extend: Extend dates
+  form_violations_action_add_target_name: Add Target Name
+  form_violations_action_add_target_location: Add Target Location
+  form_violations_modal_target_location_title: Add Target Location
+  form_violations_modal_target_location_help: Choose a region of this Observation's location to add as a Target Location. The full location name and any trailing comma-separated regions are offered. Choices whose Location does not yet exist can be created in a new tab.
+  form_violations_modal_target_location_no_suffixes: This Observation's location is not specific enough to add as a Target Location. Either Exclude this Observation, or add a more specific location via the Project Locations page.
+  form_violations_modal_target_location_create: Create
+  form_violations_modal_target_location_submit: Add Target
 
   # users/by_name
   users_by_name_title: Users by Name
@@ -3624,6 +3806,10 @@
   email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
   email_subject_name_tracker_approval: Research Request Emails Approved for [name]
   email_subject_new_password: New Password
+  email_subject_occurrence_added: "[:OBSERVATION] Added to [:OCCURRENCE], [name]"
+  email_subject_occurrence_removed: "[:OBSERVATION] Removed from [:OCCURRENCE], [name]"
+  email_occurrence_added_intro: "Your observation [name] has been added to an [:OCCURRENCE] by [user]."
+  email_occurrence_removed_intro: "Your observation [name] has been removed from an [:OCCURRENCE] by [user]."
   email_subject_observation_change: "[:OBSERVATION] Changed, [name]"
   email_subject_observation_destroy: "[:OBSERVATION] Destroyed, [name]"
   email_subject_observation_question: Question About [name]
@@ -3679,6 +3865,8 @@
 
   # Main message contents.
   email_admin_request_intro: "h2. *Admin Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following request to you regarding [project]:"
+  email_subject_project_administered: Site Admin made themselves an admin of [project]
+  email_project_administered_intro: "h2. *Site Admin Promoted to Project Admin*\n\nThe [:app_title] site admin [site_admin] ([email]) has made themselves a project admin of your project [project]. Site admins use this self-promotion to help configure, moderate, or rescue projects when needed. If you have concerns about this change, please send email to the Site Admin in question or forward this note to webmaster@mushroomobserver.org with your concerns."
   email_author_request_intro: "h2. *Author Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following request to you regarding [object]:"
   email_comment_intro_other: "h2. *Comment on [Type]*\n\nThe following comment was posted on the [:app_title] website regarding the [type] <u>[name]</u>:"
   email_comment_intro_response: "h2. *Comment Response*\n\nThe following comment was posted on the [:app_title] website in response to your comment regarding the [type] <u>[name]</u>:"
@@ -3861,6 +4049,7 @@
   observation_term_has_field_slips: "[:query_term_has_field_slips]"
   observation_term_has_collection_numbers: "[:query_term_has_collection_numbers]"
   observation_term_has_specimen: Has a specimen?
+  observation_term_has_occurrence: Belongs to an occurrence? ("yes" or "no")
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: "[:query_term_has_notes]"
@@ -4095,6 +4284,7 @@
   validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
+  validate_comment_duplicate: Duplicate comment. This comment was already submitted.
   validate_comment_user_missing: "[:validate_missing(field=:user)]"
   validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
   validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
@@ -4283,6 +4473,7 @@
   runtime_suggest_multiple_alternates: No [types] match "[match]", maybe you meant one of these?
   runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
   runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
+  runtime_wrong_rank_admin: "Wrong rank for [name]; suffix implies [expect], not [actual]. Submit again to create [name] with rank [actual]."
 
   # These shouldn't need translating, but you are free to override if you need to.
   runtime_edit_article_success: "[:runtime_updated_id(type=:article,value=id)]"
@@ -4652,6 +4843,7 @@
   query_has_images: has images
   query_has_name: has name
   query_has_notes: has notes
+  query_has_occurrence: has occurrence
   query_has_notes_fields: has notes fields
   query_has_observations: has observations
   query_has_public_lat_lng: public geolocation

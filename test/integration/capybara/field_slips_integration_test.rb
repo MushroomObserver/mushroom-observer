@@ -30,7 +30,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
 
     fill_in(:field_slip_code.t, with: @field_slip.code)
     select(@field_slip.project.title, from: :PROJECT.t)
-    click_on(:field_slip_keep_obs.t)
+    click_on(:SAVE_EDITS.t)
 
     assert_selector(class: "alert", text: :field_slip_updated.t)
   end

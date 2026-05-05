@@ -25,5 +25,8 @@ xml.tag!(
   xml_string(xml, :uses, object.uses)
   xml_string(xml, :notes, object.notes)
   xml_string(xml, :refs, object.refs)
-  xml_string(xml, :classification, object.classification)
+  # Classification moved off the description in discussion #4163;
+  # serve `name.classification` so API consumers keep getting the
+  # field they expect.
+  xml_string(xml, :classification, object.name&.classification)
 end

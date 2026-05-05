@@ -126,15 +126,12 @@ module Names
       @description = NameDescription.new
       @description.name = @name
 
-      # Create new description.
+      # Create new description. NameDescription has no validations
+      # (the only one was the classification syntax check, removed
+      # along with the column in #4163), so save always succeeds.
       @description.attributes = permitted_name_description_params
       @description.source_type = @description.source_type.to_sym
-      if @description.valid?
-        save_new_description_flash_and_redirect
-      else
-        flash_object_errors(@description)
-        render_new
-      end
+      save_new_description_flash_and_redirect
     end
 
     private
@@ -147,10 +144,6 @@ module Names
       @name = Name.find(@description.parent_id.to_s)
     end
 
-    def render_new
-      render("new", location: new_name_description_path(@name.id))
-    end
-
     def render_edit
       render("edit", location: edit_name_description_path(@name.id))
     end
@@ -161,7 +154,6 @@ module Names
       @description.save
 
       set_default_description_if_public
-      update_parent_classification_cache
       @name.save if @name.changed?
       log_description_created
       flash_notice(:runtime_name_description_success.t(id: @description.id))
@@ -175,15 +167,6 @@ module Names
       return unless !@name.description && @description.fully_public?
 
       @name.description = @description
-    end
-
-    # called by :create
-    # Keep the parent's classification cache up to date.
-    def update_parent_classification_cache
-      return unless (@name.description == @description) &&
-                    (@name.classification != @description.classification)
-
-      @name.classification = @description.classification
     end
 
     public
@@ -225,45 +208,33 @@ module Names
     end
 
     # called by :update
+    # NameDescription has no validations after #4163 — save can't
+    # return false, only raise — so the only branch is "no changes
+    # made" vs. "saved successfully".
     def save_updated_description_if_changed_or_flash
-      # No changes made.
-      if !@description.changed?
+      unless @description.changed?
         flash_warning(:runtime_edit_name_description_no_change.t)
-        render_edit
-
-      # Try to save and flash if there were error(s).
-      elsif !@description.save
-        flash_object_errors(@description)
-        render_edit
-
-      # Updated successfully.
-      else
-        flash_notice(
-          :runtime_edit_name_description_success.t(id: @description.id)
-        )
-        update_classification_cache_and_save_name
-        log_description_updated
-        resolve_merge_conflicts_and_delete_old_description # does not redirect
-        redirect_to(@description.show_link_args)
+        return render_edit
       end
-    end
 
-    # Update name's classification cache.
-    def update_classification_cache_and_save_name
-      name = @description.name
-      if (name.description == @description) &&
-         (name.classification != @description.classification)
-        name.classification = @description.classification
-        name.save if name.changed?
-      end
+      @description.save
+      flash_notice(
+        :runtime_edit_name_description_success.t(id: @description.id)
+      )
+      log_description_updated
+      resolve_merge_conflicts_and_delete_old_description # does not redirect
+      redirect_to(@description.show_link_args)
     end
 
     # TODO: should public, public_write and source_type be removed from list?
     # They should be individually checked and set, since we
     # don't want them to have arbitrary values
+    #
+    # `:classification` was removed in discussion #4163 — classification
+    # is edited via `Names::ClassificationController` and lives on Name.
     def permitted_name_description_params
       params.required(:description).
-        permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
+        permit(:gen_desc, :diag_desc, :distribution, :habitat,
                :look_alikes, :uses, :refs, :notes, :source_name, :project_id,
                :source_type, :public, :public_write)
     end

@@ -4,4 +4,5 @@ add_context_nav(name_form_new_tabs)
 %>
 
 <%= render(Components::NameForm.new(@name, user: @user,
-                                    name_string: @name_string)) %>
+                                    name_string: @name_string,
+                                    approved_rank: @approved_rank)) %>

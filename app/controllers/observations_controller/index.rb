@@ -5,6 +5,7 @@ class ObservationsController
   module Index
     def index
       make_name_suggestions
+      set_project_ivar
       build_index_with_query
     end
 
@@ -202,7 +203,7 @@ class ObservationsController
       [observation_matrix_box_image_includes,
        :location, :name,
        { namings: :votes },
-       :projects, :rss_log, :user]
+       { occurrence: :observations }, :projects, :rss_log, :user]
     end
   end
 end

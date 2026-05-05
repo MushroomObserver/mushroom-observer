@@ -1,30 +1,25 @@
 # frozen_string_literal: true
 
-#  ==== Manage Project Locations
-#  index::
-#
-#  In the future may add ability to create aliases
-
 module Projects
-  # Index for project locations
   class LocationsController < ApplicationController
+    include Projects::LocationGrouping
+
     before_action :login_required
 
     def index
       return unless find_project!
 
-      locs = @project.locations.distinct
-      @locations = if User.current_location_format == "scientific"
-                     locs.order(:scientific_name)
-                   else
-                     locs.order(:name)
-                   end
+      @grouped_data, @ungrouped_locations =
+        build_grouped_locations(@project)
+      @obs_counts = observation_counts(@project)
     end
 
     private
 
     def find_project!
-      @project = find_or_goto_index(Project, params[:project_id].to_s)
+      @project = find_or_goto_index(
+        Project, params[:project_id].to_s
+      )
     end
   end
 end

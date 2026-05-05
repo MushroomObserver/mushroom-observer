@@ -40,5 +40,30 @@ module Names
         end
       end
     end
+
+    # When a version row's classification is NULL but the name's
+    # accepted_genus has a classified version that brackets this
+    # version's edit time, the version page should render the genus's
+    # classification with an "Inherited from …" annotation (#4166).
+    def test_show_past_name_classification_inherited_from_genus
+      genus = names(:agaricus)
+      species = names(:agaricus_campestras)
+      User.current = rolf
+      genus.update!(classification: "Phylum: _Basidiomycota_\r\nFamily: _New_")
+      genus.versions.order(:version).last.update_column(
+        :updated_at, 3.days.ago
+      )
+      species_v = species.versions.order(:version).first ||
+                  species.versions.create!(classification: nil)
+      species_v.update_columns(classification: nil, updated_at: 1.day.ago)
+
+      login
+      get(:show, params: { id: species.id, version: species_v.version })
+      assert_response(:success)
+      assert_select("#name_classification") do
+        assert_match(/Basidiomycota/, response.body)
+        assert_match(/Inherited from/, response.body)
+      end
+    end
   end
 end

@@ -7,7 +7,9 @@
 
 <% Query::Filter.all.each do |filter| %>
 
-<% if filter.type == :boolean && filter.prefs_vals.one? %>
+<% if filter.type == :boolean && filter.prefs_vals.empty? %>
+  <%# Skip filters with no user preference options (e.g., has_occurrence) %>
+<% elsif filter.type == :boolean && filter.prefs_vals.one? %>
 <%= render(partial: "account/preferences/filters/checkbox",
                locals: { filter: filter, f: f }) %>
 <% elsif filter.type == :boolean && filter.prefs_vals.size > 1 %>

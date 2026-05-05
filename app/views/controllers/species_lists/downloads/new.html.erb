@@ -6,8 +6,7 @@ add_context_nav(species_list_download_tabs(list: @list))
 query_param = q_param(@query)
 %>
 
-<%= render(partial: "species_lists/downloads/form_print_labels",
-           locals: { query_param: query_param }) %>
+<%= render(Components::PrintLabelsForm.new(query_param: query_param)) %>
 
 <%= render(partial: "species_lists/downloads/form_species_list_report",
            locals: { query_param: query_param }) %>

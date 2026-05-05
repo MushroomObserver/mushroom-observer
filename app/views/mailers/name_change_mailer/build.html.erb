@@ -62,6 +62,11 @@
         many_liners.push([("form_names_" + field.to_s).to_sym.t, new_val]) if new_val != old_val
       end
     end
+    # Classification lives on Name now (discussion #4163) — surface
+    # diffs at the Name level instead of via NameDescription's note fields.
+    if new_name.classification != old_name.classification
+      many_liners.push([:form_names_classification.t, new_name.classification])
+    end
   else
     intro = :email_object_new_intro.l(
       type: :name,

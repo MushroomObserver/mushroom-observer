@@ -25,6 +25,12 @@
     text-overflow: ellipsis;
     padding: 4px;
 
+    // overflow: hidden above clips the keyboard focus ring at the
+    // item's edges. Pull the outline inside so it renders fully.
+    &:focus-visible {
+      outline-offset: -2px;
+    }
+
     &.active,
     &:hover,
     &:focus,

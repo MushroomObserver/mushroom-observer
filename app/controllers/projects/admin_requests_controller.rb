@@ -13,7 +13,9 @@ module Projects
     #   @project
     # def admin_request
     def new
-      nil unless find_project!
+      return unless find_project!
+
+      render_admin_request_form
     end
 
     # Redirects back to show_project.
@@ -27,7 +29,7 @@ module Projects
 
       if message.blank?
         flash_error(:runtime_missing.t(field: :request_message.l))
-        render(:new) and return
+        return render_admin_request_form
       end
 
       @project.admin_group.users.each do |receiver|
@@ -40,6 +42,12 @@ module Projects
     end
 
     private
+
+    def render_admin_request_form
+      render(Views::Controllers::Projects::AdminRequests::New.new(
+               project: @project
+             ), layout: true)
+    end
 
     def find_project!
       @project = find_or_goto_index(Project, params[:project_id].to_s)

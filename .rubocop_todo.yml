@@ -98,6 +98,7 @@ Metrics/AbcSize:
     - 'app/controllers/concerns/descriptions/publish.rb'
     - 'app/controllers/concerns/locationable.rb'
     - 'app/controllers/field_slips_controller.rb'
+    - 'app/controllers/field_slips_controller/observation_handling.rb'
     - 'app/controllers/herbaria/curators_controller.rb'
     - 'app/controllers/herbarium_records_controller.rb'
     - 'app/controllers/images/votes_controller.rb'

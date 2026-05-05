@@ -191,7 +191,35 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :collection_numbers, through: :observation_collection_numbers
-  belongs_to :field_slip, optional: true
+  belongs_to :occurrence, optional: true
+
+  # Field slip reached through occurrence (no longer a direct FK)
+  def field_slip
+    occurrence&.field_slip
+  end
+
+  def field_slip_id
+    occurrence&.field_slip_id
+  end
+
+  # Backward-compatible writer: creates/reuses an occurrence to
+  # link this observation to the given field slip.
+  def field_slip=(slip)
+    if slip.nil?
+      # Detach: handled by clearing occurrence
+      return
+    end
+
+    old_occ = occurrence
+    occ = slip.occurrence
+    occ ||= Occurrence.create!(
+      user: user || User.current,
+      primary_observation: self,
+      field_slip: slip
+    )
+    self.occurrence = occ
+    cleanup_old_occurrence(old_occ, occ)
+  end
 
   has_many :observation_herbarium_records, dependent: :destroy
   has_many :herbarium_records, through: :observation_herbarium_records
@@ -206,12 +234,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
   before_save :prefer_minimum_bounding_box_to_earth
+  before_save :set_gps_dubious
 
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
+  after_update :update_occurrence_specimen_cache
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
+  after_destroy :cleanup_occurrence
   after_commit :flush_observation_change_emails, on: [:create, :update]
 
   # Automatically (but silently) log destruction.
@@ -274,11 +305,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Cache location and name data used by content filters.
+  # `classification` cache was dropped in discussion #4163 — clade
+  # filtering now reads it from `names.classification` directly.
   def cache_content_filter_data
     if name && name_id_changed?
       self.lifeform = name.lifeform
       self.text_name = name.text_name
-      self.classification = name.classification
     end
     return unless location_id_changed?
 
@@ -303,12 +335,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # This is meant to be run nightly to ensure that the cached name
   # and location data used by content filters is kept in sync.
+  # `classification` is no longer cached on observations (discussion
+  # #4163) — content filters read it from `names.classification`.
   def self.refresh_content_filter_caches(dry_run: false)
     refresh_cached_column(type: "name", foreign: "lifeform",
                           dry_run: dry_run) +
       refresh_cached_column(type: "name", foreign: "text_name",
-                            dry_run: dry_run) +
-      refresh_cached_column(type: "name", foreign: "classification",
                             dry_run: dry_run) +
       refresh_cached_column(type: "location", foreign: "name", local: "where",
                             dry_run: dry_run)
@@ -463,9 +495,34 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     self[:alt] = alt
   end
 
-  # Is lat/lng more than 10% outside of location extents?
+  # Kilometers of slack between an observation's GPS and its
+  # location's bounding box before we consider the GPS "dubious" and
+  # stop matching it in GPS-based searches (issue #4159). At 50 km
+  # the false-positive rate from narrow location bboxes (tight trail
+  # or park polygons with GPS from nearby photos) is low while clear
+  # data errors (hemisphere flips, wrong country, lab-photo GPS) are
+  # still caught.
+  DUBIOUS_GPS_KM = 50
+
+  # Is lat/lng more than DUBIOUS_GPS_KM from the location's bbox?
+  # Reads the cached `gps_dubious` column when populated; falls back
+  # to recomputing for unsaved/just-built records.
   def lat_lng_dubious?
-    lat && location && !location.lat_lng_close?(lat, lng)
+    return compute_gps_dubious? if new_record? || gps_inputs_changed?
+
+    gps_dubious
+  end
+
+  def compute_gps_dubious?
+    return false unless lat && lng && location
+
+    location.km_from_point(lat, lng) > DUBIOUS_GPS_KM
+  end
+
+  def gps_inputs_changed?
+    will_save_change_to_attribute?(:lat) ||
+      will_save_change_to_attribute?(:lng) ||
+      will_save_change_to_attribute?(:location_id)
   end
 
   def place_name_and_coordinates
@@ -829,13 +886,27 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       images.delete(img)
       track_change(:removed_image)
       if thumb_image_id == img.id
-        update(thumb_image: images.empty? ? nil : images.first)
+        update(thumb_image: next_thumb_image)
       else
         # Touch to trigger after_commit within proper transaction flow
         touch
       end
     end
     img
+  end
+
+  # Next thumbnail candidate: oldest own image first, then occurrence
+  def next_thumb_image
+    own = images.loaded? ? images.min_by(&:id) : images.order(:id).first
+    return own if own
+    return nil unless occurrence
+
+    Image.joins(:observation_images).
+      where(observation_images: {
+              observation_id: Observation.where(occurrence_id: occurrence_id).
+                              where.not(id: id).select(:id)
+            }).
+      order(:id).first
   end
 
   # Determines if an obs can have the Naming "_Imageless_"
@@ -954,6 +1025,49 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # This must be sent immediately since the observation won't exist after.
   def notify_users_before_destroy
     send_observation_destroyed_emails
+  end
+
+  # Update occurrence's cached has_specimen when specimen changes.
+  def update_occurrence_specimen_cache
+    return unless saved_change_to_specimen? && occurrence
+
+    occurrence.recompute_has_specimen!
+  end
+
+  # Clean up occurrence after an observation is destroyed.
+  # Reassigns default if needed, then destroys if < 2 obs remain.
+  def cleanup_occurrence
+    return unless occurrence_id
+
+    occ = Occurrence.find_by(id: occurrence_id)
+    return unless occ
+
+    reassign_occurrence_primary(occ) if occ.primary_observation_id == id
+    return unless Occurrence.exists?(occ.id)
+
+    occ.reload
+    occ.destroy_if_incomplete!
+  end
+
+  # When an observation moves to a new occurrence, clean up the old one.
+  def cleanup_old_occurrence(old_occ, new_occ)
+    return unless old_occ && old_occ.id != new_occ.id
+
+    old_occ.reload
+    reassign_occurrence_primary(old_occ) if old_occ.primary_observation_id == id
+    return unless Occurrence.exists?(old_occ.id)
+
+    old_occ.reload
+    old_occ.destroy_if_incomplete!
+  end
+
+  def reassign_occurrence_primary(occ)
+    next_obs = occ.observations.order(:created_at).first
+    if next_obs
+      occ.update!(primary_observation: next_obs)
+    else
+      occ.destroy!
+    end
   end
 
   # Track a pending change for email notification batching.
@@ -1262,5 +1376,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       #            south: -89,
       # Also see ObservationAPI#prefer_minimum_bounding_box_to_earth!
       presence || Location.unknown
+  end
+
+  # Keeps the cached `gps_dubious` column in sync on save. Gates the
+  # re-computation on attribute changes so untouched obs don't pay the
+  # recompute cost on every save.
+  def set_gps_dubious
+    return unless new_record? || gps_inputs_changed?
+
+    self.gps_dubious = compute_gps_dubious?
   end
 end

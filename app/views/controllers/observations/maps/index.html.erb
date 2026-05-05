@@ -4,9 +4,23 @@ container_class(:full)
 add_index_title(@query, map: true)
 add_context_nav(observation_maps_tabs(query: @query))
 
-objects = @observations
-objects += @locations if @locations.any?
+# Pass only the observations. CollapsibleCollectionOfObjects#init_sets
+# turns obs-with-GPS into a point and obs-without-GPS into a box built
+# from the obs's .location, so the locations are already implicitly
+# represented. Unioning @locations in addition produced duplicate box
+# overlays on top of obs points (#4131 follow-up).
 %>
 
-<%= make_map(objects: objects, # CollapsibleCollection
+<div id="map_cap_banner" class="alert alert-warning mt-2"
+     <%= raw('style="display:none"') unless @observations_capped %>>
+  <%= :map_cap_banner.t(
+        loaded: number_with_delimiter(@observations_loaded_count),
+        total: number_with_delimiter(@observations_total_count)
+      ) %>
+</div>
+
+<%= make_map(objects: @observations,
+             clustering: true,
+             capped: @observations_capped,
+             cluster_query_string: @cluster_query_string,
              query_param: q_param(@query), zoom: 2, map_type: "info") %>

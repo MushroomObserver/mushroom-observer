@@ -36,7 +36,6 @@ class InatObsTest < UnitTestCase
       needs_naming: false,
       # name_id needs work
       name_id: names(:somion_unicolor).id,
-      classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Polyporales_\r\nFamily: _Cerrenaceae_\r\n", # rubocop:disable Layout/LineLength
       lifeform: " ",
 
       # miscellaneous
@@ -404,6 +403,16 @@ class InatObsTest < UnitTestCase
       copyright,
       "Licensed obs should include license code and URL"
     )
+  end
+
+  def test_suggested_id_names_links_unimportable_taxon_to_inat
+    obs = mock_observation("ceanothus_cordulatus")
+    ident_taxon = obs[:identifications].first[:taxon]
+    expected_link =
+      "\"_#{ident_taxon[:name]}_\":#{SITE}/taxa/#{ident_taxon[:id]}"
+
+    assert_includes(obs.suggested_id_names, expected_link,
+                    "Non-importable ident taxon should link to iNat taxa page")
   end
 
   def mock_observation(filename)

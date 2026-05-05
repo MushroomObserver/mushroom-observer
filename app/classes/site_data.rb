@@ -90,8 +90,11 @@ class SiteData
       Sequence.select(:observation_id).distinct.count
     when :listed_taxa
       Name.count
+    when :observations
+      Observation.exclude_non_primary.count
     when :observed_taxa
-      Observation.select(:name_id).distinct.count
+      Observation.exclude_non_primary.
+        select(:name_id).distinct.count
     when :contributing_users
       User.where(contribution: 1..).count
     when :users

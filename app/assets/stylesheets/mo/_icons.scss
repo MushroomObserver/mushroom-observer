@@ -124,6 +124,8 @@
 // This is for the stateful icon_link_to helper
 .icon-link,
 .panel-collapse-trigger {
+  text-decoration: none;
+
   .active-icon, .active-label {
     display: none;
   }
@@ -137,6 +139,13 @@
       display: inline-block;
     }
   }
+}
+
+// Bootstrap collapse sets display:block, which breaks
+// table-row-group semantics on <tbody>. Override so
+// collapsed tbody rows render correctly when expanded.
+tbody.collapse.in {
+  display: table-row-group;
 }
 
 // Fix for weird inherited indent from .name-section p

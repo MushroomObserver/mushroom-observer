@@ -9,7 +9,7 @@ class FileUpload
   end
 end
 
-class JpegUpload < FileUpload # rubocop:disable Style/OneClassPerFile
+class JpegUpload < FileUpload
   def initialize(filename)
     super(filename, "image/jpeg")
   end

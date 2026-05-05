@@ -40,8 +40,9 @@ module ObservationsController::Show
     @consensus     = Observation::NamingConsensus.new(@observation)
     @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
-    @comments      = @observation.comments&.sort_by(&:created_at)&.reverse
-    @images        = @observation.images_sorted
+    @comments = @observation.comments&.sort_by(&:created_at)&.reverse
+    load_occurrence_data
+    @images = occurrence_images
   end
 
   # Tell search engines what the "correct" URL is for this page.
@@ -51,6 +52,34 @@ module ObservationsController::Show
   end
 
   private
+
+  def load_occurrence_data
+    @occurrence = @observation.occurrence
+    return unless @occurrence
+
+    @sibling_observations = @occurrence.observations.
+                            where.not(id: @observation.id).
+                            includes(
+                              :collection_numbers,
+                              { external_links: :external_site },
+                              { herbarium_records: [
+                                { herbarium: :curators }, :user
+                              ] },
+                              { images: [:image_votes, :license, :user] },
+                              :location, :name, :sequences,
+                              :thumb_image, :user
+                            ).to_a
+  end
+
+  def occurrence_images
+    return @observation.images_sorted unless @occurrence
+
+    primary_images = @observation.images_sorted
+    sibling_images = @sibling_observations.
+                     flat_map(&:images).uniq -
+                     primary_images
+    primary_images + sibling_images
+  end
 
   def load_observation_for_show_observation_page
     includes = @user ? "show_includes" : "not_logged_in_show_includes" # scopes

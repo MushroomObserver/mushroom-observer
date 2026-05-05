@@ -18,64 +18,71 @@ action = controller.action_name
 
 <% if field_slip.code %>
   <%= form_with(model: field_slip) do |form| %>
-    <%= hidden_field_tag(:species_list, @species_list) %>
-    <%= text_field_with_label(form:, field: :code, label: "#{:field_slip_code.t}:") %>
-    <% if field_slip.projects %>
-      <%= select_with_label(form:, field: :project_id, inline: true,
-                            selected: field_slip.project&.id,
-                            label: :Project.t + ":",
-                            options: field_slip.projects) %>
+    <div class="col-md-6">
+      <%= hidden_field_tag(:species_list, @species_list) %>
+      <%= text_field_with_label(form:, field: :code,
+                                label: "#{:field_slip_code.t}:") %>
+      <% if field_slip.projects %>
+        <%= select_with_label(form:, field: :project_id, inline: true,
+                              selected: field_slip.project&.id,
+                              label: :Project.t + ":",
+                              options: field_slip.projects) %>
+      <% end %>
+
+      <%= date_select_with_label(form:, field: :date,
+                                 label: "#{:DATE.t}:",
+                                 object: field_slip, inline: true,
+                                 order: [:year, :month, :day],
+                                 selected: field_slip.date,
+                                 start_year: Date.today.year - 10,
+                                 end_year: Date.today.year + 10) %>
+      <%= autocompleter_field(form:, field: :collector,
+                              label: :COLLECTOR.t + ":", type: :user) %>
+      <%= autocompleter_field(form:, field: :location,
+                              value: field_slip.location_name,
+                              hidden_value: field_slip.location_id,
+                              label: :LOCATION.t + ":",
+                              type: :location) %>
+      <%= autocompleter_field(form:, field: :field_slip_name,
+                              label: :ID.t + ":",
+                              type: :name) %>
+      <%= autocompleter_field(form:, field: :field_slip_id_by,
+                              label: :ID_BY.t + ":", type: :user) %>
+      <%= text_field_with_label(form:, field: :other_codes,
+                                label: "#{:field_slip_other_codes.t}" \
+                                       " (#{:field_slip_other_example.t}):") %>
+      <%= check_box_with_label(form:, field: :inat,
+                               label: :field_slip_other_inat.t) %>
+
+      <%= submit_button(form:, button: :field_slip_quick_create_obs.t,
+                        class: "mb-5") if action == "new" %>
+
+      <%= render(partial: "shared/notes_fields",
+                 locals: { form:, fields: field_slip.notes_fields }) %>
+
+      <%= submit_button(form:, button: :field_slip_add_images.t,
+                        class: "mt-5") if action == "new" %>
+    </div>
+
+    <% if action == "new" && @recent_observations&.any? %>
+      <div class="clearfix"></div>
+      <%= render(partial: "field_slips/recent_observations",
+                 locals: { observations: @recent_observations,
+                           form: form }) %>
+    <% elsif action == "edit" %>
+      <div class="clearfix"></div>
+      <%= render(partial: "field_slips/edit_observations",
+                 locals: { field_slip: field_slip,
+                           recent: @recent_observations || [],
+                           form: form }) %>
     <% end %>
 
-    <%= date_select_with_label(form:, field: :date, label: "#{:DATE.t}:",
-                               object: field_slip, inline: true,
-                               order: [:year, :month, :day],
-                               selected: field_slip.date,
-                               start_year: Date.today.year - 10,
-                               end_year: Date.today.year + 10) %>
-    <%= autocompleter_field(form:, field: :collector,
-                            label: :COLLECTOR.t + ":", type: :user) %>
-    <%= autocompleter_field(form:, field: :location,
-                            value: field_slip.location_name, hidden_value: field_slip.location_id,
-                            label: :LOCATION.t + ":", type: :location) %>
-    <%= autocompleter_field(form:, field: :field_slip_name,
-                            label: :ID.t + ":",
-                            type: :name) %>
-    <%= autocompleter_field(form:, field: :field_slip_id_by,
-                            label: :ID_BY.t + ":", type: :user) %>
-    <%= text_field_with_label(form:, field: :other_codes,
-                              label: "#{:field_slip_other_codes.t} (#{:field_slip_other_example.t}):") %>
-    <%= check_box_with_label(form:, field: :inat,
-                             label: :field_slip_other_inat.t ) %>
-
-    <%= submit_button(form:, button: :field_slip_quick_create_obs.t,
-                      class: "mb-5") if action == "new" %>
-
-    <%= render(partial: "shared/notes_fields",
-               locals: { form:, fields: field_slip.notes_fields }) %>
-
-    <%= submit_button(form:, button: :field_slip_add_images.t,
-                      class: "mt-5") if action == "new" %>
-
-    <%= tag.div(class: "row mt-5") do %>
-      <% if field_slip.observation %>
-        <%= tag.div(class: "col-sm-6") do
-          render(partial: "field_slips/obs_thumbnail",
-                 locals: { obs: field_slip.observation, form:,
-                           button: :field_slip_keep_obs.t })
-        end %>
-      <% end %>
-      <% obs = previous_observation(field_slip.observation, @user)
-         if obs %>
-        <%= tag.div(class: "col-sm-6") do
-          render(partial: "field_slips/obs_thumbnail",
-                 locals: { obs:, form:, button: :field_slip_last_obs.t })
-        end %>
-      <% end %>
+    <% if action == "edit" %>
+      <%= submit_button(form:, button: :SAVE_EDITS.t,
+                        class: "my-3") %>
+      <%= submit_button(form:, button: :field_slip_create_obs.t,
+                        class: "my-3") %>
     <% end %>
-
-    <%= submit_button(form:, button: :field_slip_create_obs.t,
-                      class: "my-5") if action == "edit" %>
 
   <% end %>
 <% else %>

@@ -15,14 +15,9 @@ module Tabs
       # next and index from there to navigate through all the rest for this obs.
       sq_query = Query.lookup(:Sequence, observations: obs.id)
       locus = seq.locus.truncate(seq.locus_width)
-      txt = if seq.deposit?
-              "#{locus} - #{seq.archive} ##{seq.accession}"
-            else
-              "#{locus} - MO ##{seq.id}"
-            end
 
       InternalLink::Model.new(
-        txt.t, seq,
+        locus.t, seq,
         add_q_param(seq.show_link_args, sq_query),
         alt_title: :show_object.t(TYPE: Sequence)
       ).tab

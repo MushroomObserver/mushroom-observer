@@ -694,6 +694,19 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:OBSERVATIONS.l)
   end
 
+  def test_index_project_banner_from_query_param
+    project = projects(:eol_project)
+
+    login
+    get(:index, params: {
+          q: { model: "Observation", projects: [project.id] }
+        })
+
+    assert_response(:success)
+    assert_equal(project.id, assigns(:project)&.id,
+                 "@project should be set from query params")
+  end
+
   def test_index_project_without_observations
     project = projects(:empty_project)
 

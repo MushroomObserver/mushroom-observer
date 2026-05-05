@@ -20,7 +20,7 @@ module DateExtensionsInterfaceTest
 end
 
 # test public interface of class which includes time
-module TimeExtensionsInterfaceTest # rubocop:disable Style/OneClassPerFile
+module TimeExtensionsInterfaceTest
   def test_responds_to_api_time
     assert_respond_to(@object, :api_time)
   end
@@ -35,7 +35,7 @@ module TimeExtensionsInterfaceTest # rubocop:disable Style/OneClassPerFile
 end
 
 # test MO extensions to Rails' TimeWithZone class
-class TimeWithZoneExtensionsTest < ActiveSupport::TestCase # rubocop:disable Style/OneClassPerFile
+class TimeWithZoneExtensionsTest < ActiveSupport::TestCase
   include DateExtensionsInterfaceTest
   include TimeExtensionsInterfaceTest
 
@@ -46,7 +46,7 @@ class TimeWithZoneExtensionsTest < ActiveSupport::TestCase # rubocop:disable Sty
 end
 
 # test MO extensions to Ruby's Date class
-class DateExtensionsTest < ActiveSupport::TestCase # rubocop:disable Style/OneClassPerFile
+class DateExtensionsTest < ActiveSupport::TestCase
   include DateExtensionsInterfaceTest
 
   def setup
@@ -56,7 +56,7 @@ class DateExtensionsTest < ActiveSupport::TestCase # rubocop:disable Style/OneCl
 end
 
 # test MO extensions to Ruby's DateTime class
-class DateTimeExtensionsTest < ActiveSupport::TestCase # rubocop:disable Style/OneClassPerFile
+class DateTimeExtensionsTest < ActiveSupport::TestCase
   include DateExtensionsInterfaceTest
   include TimeExtensionsInterfaceTest
 

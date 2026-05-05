@@ -299,18 +299,25 @@ class Inat
     private :copyright
 
     def suggested_id_names
-      # Get unique suggested taxon ids
-      # (iNat allows multiple suggestions for a single observation)
       "\n#{
         self[:identifications].each_with_object([]) do |ident, ary|
           ident_taxon = Inat::Taxon.new(ident[:taxon])
-          display_name = ident_taxon.name&.text_name || ident[:taxon][:name]
-          ary << "&nbsp;&nbsp;_#{display_name}_ " \
+          display = ident_display(ident_taxon, ident[:taxon])
+          ary << "&nbsp;&nbsp;#{display} " \
                  "by #{ident[:user][:login]} " \
                  "#{ident[:created_at_details][:date]}"
         end.join("\n")
       }"
     end
+
+    def ident_display(taxon, taxon_hash)
+      if taxon.importable?
+        "_#{taxon.name&.text_name || taxon_hash[:name]}_"
+      else
+        "\"_#{taxon_hash[:name]}_\":#{SITE}/taxa/#{taxon_hash[:id]}"
+      end
+    end
+    private :ident_display
 
     def lat_lon_accuracy
       "#{self[:location]} +/-#{self[:public_positional_accuracy]} m"
@@ -341,27 +348,8 @@ class Inat
 
     def importable? = taxon_importable? && observed_on_present?
 
-    def taxon_importable? = fungi? || slime_mold?
+    def taxon_importable? = @obs_taxon.importable?
     def observed_on_present? = !observed_on_missing?
     def observed_on_missing? = self.when.nil?
-
-    ##########
-
-    private
-
-    # ----- Other
-
-    def fungi?
-      # !! makes it return a boolean
-      !!@obs.dig(:taxon, :ancestor_ids)&.include?(
-        Inat::Constants::FUNGI_TAXON_ID
-      )
-    end
-
-    def slime_mold?
-      !!@obs.dig(:taxon, :ancestor_ids)&.include?(
-        Inat::Constants::MYCETOZOA_TAXON_ID
-      )
-    end
   end
 end

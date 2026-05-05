@@ -309,21 +309,49 @@ class NamesControllerCreateTest < FunctionalTestCase
     assert_equal(author, name.author)
   end
 
-  def test_create_name_alt_rank
-    text_name = "Ustilaginomycetes"
-    name = Name.find_by(text_name: text_name)
-    assert_nil(name)
-    params = {
-      name: {
-        text_name: text_name,
-        rank: "Phylum"
-      }
-    }
+  def test_create_name_rejects_wrong_rank_for_suffix
+    # Suffix -mycetes implies Class; submitting as Phylum must be rejected
     login(rolf.login)
-    post(:create, params: params)
-    # Now try to find it
-    assert(name = Name.find_by(text_name: text_name))
+    post(:create, params: { name: { text_name: "Ustilaginomycetes",
+                                    rank: "Phylum" } })
+    assert_nil(Name.find_by(text_name: "Ustilaginomycetes"),
+               "Should not create name when rank conflicts with suffix")
+    assert_flash_error
+  end
+
+  def test_create_name_with_correct_rank_for_suffix
+    # Suffix -mycota implies Phylum; submitting as Phylum must succeed
+    text_name = "Ustilaginomycota"
+    assert_nil(Name.find_by(text_name: text_name))
+    login(rolf.login)
+    post(:create, params: { name: { text_name: text_name, rank: "Phylum" } })
+    name = Name.find_by(text_name: text_name)
+    assert_not_nil(name, "Should create name when rank matches suffix")
     assert_redirected_to(name_path(name.id))
+  end
+
+  def test_create_name_admin_rank_warning_then_force
+    # Admin submits name whose suffix implies a different rank → flash warning
+    text_name = "Bolitinae"
+    make_admin(rolf.login)
+    post(:create, params: { name: { text_name: text_name, rank: "Family" } })
+    assert_nil(Name.find_by(text_name: text_name),
+               "Should not create name on first submit when rank conflicts")
+    assert_flash_warning("Should flash rank warning to admin")
+    assert_select("input[type=hidden][name=approved_rank]",
+                  { count: 1 },
+                  "Form should include approved_rank hidden field")
+
+    # Admin re-submits with approved_rank matching chosen rank → name created
+    assert_difference("Name.count", 1,
+                      "Admin should be able to force-create after warning") do
+      post(:create, params: { name: { text_name: text_name, rank: "Family" },
+                              approved_rank: "Family" })
+    end
+    name = Name.find_by(text_name: text_name)
+    assert_not_nil(name, "Name should exist after admin force-create")
+    assert_equal("Family", name.rank,
+                 "Name should have admin-chosen rank after force-create")
   end
 
   def test_create_name_with_many_implicit_creates

@@ -122,6 +122,29 @@ class InatImportTest < ActiveSupport::TestCase
                  "response_errors should be initialized to empty string")
   end
 
+  def test_stuck_when_importing_and_stale
+    import = inat_imports(:katrina_inat_import)
+    import.update_column(:updated_at,
+                         InatImport::STUCK_THRESHOLD.ago - 1.second)
+
+    assert(import.stuck?,
+           "Import in Importing state with stale updated_at should be stuck")
+  end
+
+  def test_not_stuck_when_importing_but_recent
+    import = inat_imports(:katrina_inat_import)
+    import.update_column(:updated_at, Time.zone.now)
+
+    assert_not(import.stuck?,
+               "Import with recent updated_at should not be stuck")
+  end
+
+  def test_not_stuck_when_done
+    import = inat_imports(:lone_wolf_import)
+
+    assert_not(import.stuck?, "Done import should not be stuck")
+  end
+
   def test_add_response_error_without_prior_errors
     import = InatImport.new(user: users(:rolf))
     import.save!

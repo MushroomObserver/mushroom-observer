@@ -77,6 +77,10 @@ class API2Controller < ApplicationController
     rest_query(:observation)
   end
 
+  def occurrences
+    rest_query(:occurrence)
+  end
+
   def projects
     rest_query(:project)
   end

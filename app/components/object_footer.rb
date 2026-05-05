@@ -110,7 +110,9 @@ module Components
 
     # Renders creation and update info for non-versioned objects
     def render_non_versioned_metadata
-      if @obj.created_at
+      if @obj.respond_to?(:user) && @obj.user
+        render_created_by
+      elsif @obj.created_at
         trusted_html(:footer_created_at.t(date: @obj.created_at.web_time))
       end
 

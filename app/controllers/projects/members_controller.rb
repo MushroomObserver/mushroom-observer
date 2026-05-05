@@ -11,11 +11,21 @@ module Projects
   class MembersController < ApplicationController
     before_action :login_required
 
+    # Members lives under the project Admin tab now (issue #4148).
+    def active_project_tab
+      "admin"
+    end
+    helper_method :active_project_tab
+
     def index
       return unless find_project!
 
-      @users = @project.user_group.users.includes(:image)
-      @project_member = ProjectMember.new(project: @project)
+      users = @project.user_group.users.includes(:image)
+      project_member = ProjectMember.new(project: @project)
+      render(Views::Controllers::Projects::Members::Index.new(
+               project: @project, users: users,
+               project_member: project_member, user: @user
+             ), layout: true)
     end
 
     # View that lists all verified users with links to add each as a member.
@@ -32,9 +42,13 @@ module Projects
         return must_be_project_admin!(@project.id)
       end
 
-      @users =
+      users =
         User.where.not(verified: nil).order(last_login: :desc).limit(100).to_a
-      @project_member = ProjectMember.new(project: @project)
+      project_member = ProjectMember.new(project: @project)
+      render(Views::Controllers::Projects::Members::New.new(
+               project: @project, users: users,
+               project_member: project_member, user: @user
+             ), layout: true)
     end
 
     def create
@@ -63,7 +77,9 @@ module Projects
     def edit
       return unless find_project!
       return unless find_project_member!
-      return if @project.is_admin?(@user) || @user == @project_member.user
+      if @project.is_admin?(@user) || @user == @project_member.user
+        return render_member_edit_form
+      end
 
       must_be_project_admin!(@project.id)
     end
@@ -78,7 +94,65 @@ module Projects
       update_membership(@project, @project_member.user)
     end
 
+    # Per-click cap on "Add My Observations". Method (not constant) so
+    # tests can stub it via Minitest stub. See issue #4129.
+    def self.add_obs_batch_limit
+      100
+    end
+
+    # Turbo-stream modal showing how many of the candidate's observations
+    # match current project constraints and aren't already in the project.
+    # See issue #4129.
+    def add_obs_modal
+      return unless find_project!
+      return unless find_project_member!
+      unless @project.member?(@user) && @user == @project_member.user
+        return must_be_project_admin!(@project.id)
+      end
+
+      count = addable_observations(@project, @project_member.user).count
+      respond_to do |format|
+        format.turbo_stream do
+          render(Components::AddObsModal.new(
+                   project: @project,
+                   candidate: @project_member.user,
+                   count: count,
+                   batch_limit: self.class.add_obs_batch_limit
+                 ), layout: false)
+        end
+      end
+    end
+
+    # Turbo-stream modal with three radio buttons for setting the
+    # current user's trust_level on this project. See issue #4148.
+    def trust_modal
+      return unless find_project!
+      return unless find_project_member!
+      unless @project.member?(@user) && @user == @project_member.user
+        return must_be_project_admin!(@project.id)
+      end
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(Components::TrustSettingsModal.new(
+                   project: @project,
+                   candidate: @project_member.user,
+                   current_trust_level:
+                     @project_member.trust_level || "no_trust"
+                 ), layout: false)
+        end
+      end
+    end
+
     private
+
+    def render_member_edit_form
+      render(Views::Controllers::Projects::Members::Edit.new(
+               project: @project,
+               project_member: @project_member,
+               user: @user
+             ), layout: true)
+    end
 
     def find_project!
       @project = find_or_goto_index(Project, params[:project_id].to_s)
@@ -151,26 +225,34 @@ module Projects
     end
 
     def add_observations(project, candidate)
-      # Returns the count of observations added.
-      #
-      # Can't use candidate.observations due to a bug in in_box.
-      # Specifially, candidate.observations.in_box doesn't return
-      # the right thing because it incorrectly adds observations not
-      # from the candidate if they have no lat/long data.
-      obs = Observation.all
+      # Returns the count of observations added. Caps each click at
+      # add_obs_batch_limit most-recent matching observations so the
+      # request stays synchronous.
+      obs = addable_observations(project, candidate).
+            order(id: :desc).limit(self.class.add_obs_batch_limit)
+      before = project.observations.count
+      project.add_observations(obs)
+      project.observations.count - before
+    end
+
+    # Observations owned by candidate that match project constraints and
+    # are not already in project.observations. Date bounds are applied
+    # independently so projects with only a start_date or only an
+    # end_date still constrain correctly.
+    def addable_observations(project, candidate)
+      obs = candidate.observations
       loc = project.location
       if loc
         obs = obs.in_box(north: loc.north, south: loc.south,
                          east: loc.east, west: loc.west)
       end
-      if project.start_date && project.end_date
-        obs = obs.found_between(project.start_date.strftime("%Y-%m,-%d"),
-                                project.end_date.strftime("%Y-%m,-%d"))
+      if project.start_date
+        obs = obs.found_after(project.start_date.strftime("%Y-%m-%d"))
       end
-      obs = obs.where(user: candidate)
-      before = project.observations.count
-      project.add_observations(obs)
-      project.observations.count - before
+      if project.end_date
+        obs = obs.found_before(project.end_date.strftime("%Y-%m-%d"))
+      end
+      obs.where.not(id: project.observations.select(:id))
     end
 
     def set_trust(project, user, trust_level)

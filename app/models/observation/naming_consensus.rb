@@ -59,17 +59,34 @@ class Observation
     attr_accessor :observation, :namings, :votes, :consensus_changed
 
     def initialize(observation)
-      # @observation = ::Observation.naming_includes.find(observation.id)
       @observation = observation
-      @namings = observation.namings
-      @votes = @namings.map(&:votes).flatten
+      load_namings_and_votes
       @consensus_changed = false
     end
 
     def reload_namings_and_votes!
-      obs = ::Observation.naming_includes.find(@observation.id)
-      @namings = obs.namings
-      @votes = @namings.map(&:votes).flatten
+      @merged_namings = nil
+      @weight_boost = nil
+      if multi_observation_occurrence?
+        load_occurrence_namings
+      else
+        obs = ::Observation.naming_includes.find(@observation.id)
+        @namings = obs.namings
+        @votes = @namings.flat_map(&:votes)
+      end
+    end
+
+    # Namings deduplicated by name_id, wrapped in MergedNaming
+    def merged_namings
+      @merged_namings ||= build_merged_namings
+    end
+
+    # All observations sharing this consensus (occurrence or just self)
+    def occurrence_observations
+      return [observation] unless observation.occurrence_id
+
+      @occurrence_observations ||=
+        observation.occurrence.observations.to_a
     end
 
     ############################################################################
@@ -226,35 +243,12 @@ class Observation
     #   end
     #
     # only executed on VotesController#index
+    # Accepts a Naming or MergedNaming. Uses .votes from the object.
     def calc_vote_table(naming)
-      # Initialize table.
-      table = {}
-      Vote.opinion_menu.each do |str, val|
-        table[str] = {
-          num: 0,
-          wgt: 0.0,
-          value: val,
-          votes: []
-        }
-      end
-
-      # Gather votes, doing a weighted sum in the process.
-      tot_sum = 0
-      tot_wgt = 0
-      naming.votes.each do |v|
-        str = Vote.confidence(v.value)
-        wgt = v.user_weight
-        table[str][:num] += 1
-        table[str][:wgt] += wgt
-        table[str][:votes] << v
-        tot_sum += v.value * wgt
-        tot_wgt += wgt
-      end
-      val = tot_sum.to_f / (tot_wgt + 1.0)
-
-      # Update vote_cache if it's wrong.
-      naming.update!(vote_cache: val) if (naming.vote_cache - val).abs > 1e-4
-
+      table = init_vote_table
+      populate_vote_table(table, naming.votes)
+      update_naming_vote_cache(naming, table) unless
+        naming.is_a?(::Observation::MergedNaming)
       table
     end
 
@@ -295,36 +289,15 @@ class Observation
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
       best, best_val = calculator.calc(User.current)
-      old = @observation.name
-      if old != best || @observation.vote_cache != best_val
-        # If naming generic or specific, and vote positive, needs_naming = 0
-        needs_naming = !best.above_genus? && best_val&.positive? ? 0 : 1
-        @observation.update(name: best, vote_cache: best_val,
-                            needs_naming: needs_naming)
-      end
-      return unless best != old
-
-      @consensus_changed = true
-      @observation.reload.announce_consensus_change(old, best)
+      update_all_observations_consensus(best, best_val)
     end
 
     def user_calc_consensus(current_user)
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
       best, best_val = calculator.calc(current_user)
-      old = @observation.name
-      if old != best || @observation.vote_cache != best_val
-        # If naming generic or specific, and vote positive, needs_naming = 0
-        needs_naming = !best.above_genus? && best_val&.positive? ? 0 : 1
-        @observation.current_user = current_user
-        @observation.update(name: best, vote_cache: best_val,
-                            needs_naming: needs_naming)
-      end
-      return unless best != old
-
-      @consensus_changed = true
-      @observation.reload.user_announce_consensus_change(old, best,
-                                                         current_user)
+      update_all_observations_consensus(best, best_val,
+                                        current_user: current_user)
     end
 
     # We interpret any naming vote to mean the user has reviewed the obs.
@@ -360,6 +333,124 @@ class Observation
     end
 
     private
+
+    def update_all_observations_consensus(best, best_val,
+                                          current_user: nil)
+      needs_naming = !best.above_genus? && best_val&.positive? ? 0 : 1
+      occurrence_observations.each do |obs|
+        update_single_obs_consensus(obs, best, best_val,
+                                    needs_naming, current_user)
+      end
+    end
+
+    def update_single_obs_consensus(obs, best, best_val,
+                                    needs_naming, current_user)
+      old = obs.name
+      return if old == best && obs.vote_cache == best_val
+
+      obs.current_user = current_user if current_user
+      obs.update(name: best, vote_cache: best_val,
+                 needs_naming: needs_naming)
+      return unless old != best
+
+      @consensus_changed = true if obs.id == @observation.id
+      if current_user
+        obs.reload.user_announce_consensus_change(
+          old, best, current_user
+        )
+      else
+        obs.reload.announce_consensus_change(old, best)
+      end
+    end
+
+    def init_vote_table
+      table = {}
+      Vote.opinion_menu.each do |str, val|
+        table[str] = { num: 0, wgt: 0.0, value: val, votes: [] }
+      end
+      table
+    end
+
+    def populate_vote_table(table, vote_list)
+      vote_list.each do |v|
+        str = Vote.confidence(v.value)
+        wgt = v.user_weight
+        table[str][:num] += 1
+        table[str][:wgt] += wgt
+        table[str][:votes] << v
+      end
+    end
+
+    def weight_boost
+      @weight_boost ||= Vote::WeightBoost.new(@namings)
+    end
+
+    def update_naming_vote_cache(naming, table)
+      tot_sum = 0.0
+      tot_wgt = 0.0
+      table.each_value do |row|
+        row[:votes].each do |v|
+          wgt = v.user_weight
+          eff_wgt = weight_boost.effective_weight(
+            v.user_id, v.value, wgt, v.naming_id
+          )
+          tot_sum += v.value * wgt
+          tot_wgt += eff_wgt
+        end
+      end
+      val = tot_wgt.positive? ? tot_sum / (tot_wgt + 1.0) : 0.0
+      naming.update!(vote_cache: val) if
+        (naming.vote_cache - val).abs > 1e-4
+    end
+
+    def build_merged_namings
+      grouped = @namings.group_by(&:name_id)
+      grouped.map do |_name_id, group|
+        ::Observation::MergedNaming.new(
+          group, observation: @observation,
+                 occurrence: @observation.occurrence,
+                 boost: weight_boost
+        )
+      end.sort_by(&:created_at)
+    end
+
+    def load_namings_and_votes
+      if multi_observation_occurrence?
+        load_occurrence_namings
+      else
+        use_local_namings
+      end
+    end
+
+    def multi_observation_occurrence?
+      return false unless @observation.occurrence_id
+
+      occ = @observation.occurrence
+      if occ.observations.loaded?
+        occ.observations.size > 1
+      else
+        occ.observations.many?
+      end
+    end
+
+    # Use the observation's already-loaded namings when available.
+    # Only query the DB when namings aren't eager-loaded.
+    def use_local_namings
+      if @observation.namings.loaded?
+        @namings = @observation.namings
+      else
+        obs = ::Observation.naming_includes.find(@observation.id)
+        @namings = obs.namings
+      end
+      @votes = @namings.flat_map(&:votes)
+    end
+
+    def load_occurrence_namings
+      obs_ids = occurrence_observations.map(&:id)
+      @namings = Naming.where(observation_id: obs_ids).
+                 includes(:name, :user, votes: [:observation, :user])
+      @votes = @namings.flat_map(&:votes)
+    end
 
     def find_matches
       matches = @namings.select { |n| n.name_id == @observation.name_id }

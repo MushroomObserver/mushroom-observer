@@ -1,0 +1,18 @@
+<%= turbo_stream.replace("target_locations_widget") do %>
+  <%= render(Components::ProjectTargetLocationsWidget.new(
+               project: project
+             )) %>
+<% end %>
+<%= turbo_stream.replace("locations_table") do %>
+  <%= render(Components::Projects::LocationsTable.new(
+               project: project,
+               grouped_data: grouped_data,
+               ungrouped_locations: ungrouped_locations,
+               obs_counts: obs_counts,
+               user: user
+             )) %>
+<% end %>
+<%= render(partial: "projects/tab_counts_update",
+           locals: { project: project, user: user,
+                     current_tab: "locations" }) %>
+<%= render_turbo_stream_flash_messages %>

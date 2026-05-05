@@ -36,7 +36,7 @@ module Projects
       login("rolf")
       post(:create, params: params)
       assert_flash_error
-      assert_template(:new)
+      assert_response(:success)
     end
   end
 end

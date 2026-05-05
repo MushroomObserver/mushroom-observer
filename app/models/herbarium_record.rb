@@ -104,7 +104,7 @@ class HerbariumRecord < AbstractModel
   end
 
   def accession_at_herbarium
-    "__#{accession_number}__ @ #{herbarium.try(&:format_name)}"
+    "#{accession_number} @ #{herbarium.try(&:format_name)}"
   end
 
   def mcp_url

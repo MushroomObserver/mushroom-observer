@@ -14,6 +14,7 @@ module Observations::Namings
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       obs = Observation.naming_includes.find(params[:observation_id])
       @consensus = Observation::NamingConsensus.new(obs)
+      @display_naming = find_merged_naming || @naming
 
       respond_to do |format|
         format.turbo_stream do
@@ -24,7 +25,8 @@ module Observations::Namings
           render(partial: "shared/modal",
                  locals: {
                    identifier: identifier, title: title, subtitle: subtitle,
-                   body: "observations/namings/votes/table", naming: @naming,
+                   body: "observations/namings/votes/table",
+                   naming: @display_naming,
                    consensus: @consensus
                  })
         end
@@ -73,9 +75,30 @@ module Observations::Namings
       raise("Bad value.") unless value
 
       @consensus = ::Observation::NamingConsensus.new(observation)
-      @consensus.change_vote(@naming, value, @user) # 2nd load (namings.reload)
-      @observation = load_observation_naming_includes # 3rd load
+      @consensus.change_vote(@naming, value, @user)
+      propagate_vote_to_siblings(@naming, value, @consensus)
+      @observation = load_observation_naming_includes # reload
       respond_to_new_votes
+    end
+
+    def find_merged_naming
+      @consensus.merged_namings.find do |mn|
+        mn.name_id == @naming.name_id
+      end
+    end
+
+    def propagate_vote_to_siblings(naming, value, consensus)
+      return unless naming.observation.occurrence_id
+
+      sibling_namings = consensus.namings.select do |n|
+        n.name_id == naming.name_id && n.id != naming.id
+      end
+      sibling_namings.each do |sib_naming|
+        sib_consensus = ::Observation::NamingConsensus.new(
+          sib_naming.observation
+        )
+        sib_consensus.change_vote(sib_naming, value, @user)
+      end
     end
 
     def load_observation_naming_includes

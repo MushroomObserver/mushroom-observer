@@ -20,6 +20,7 @@ class Components::ObservationForm < Components::ApplicationForm
     user: nil,
     location: nil,
     good_images: [],
+    sibling_images: [],
     exif_data: {},
     given_name: nil,
     place_name: nil,
@@ -42,7 +43,8 @@ class Components::ObservationForm < Components::ApplicationForm
     list_checks: {},
     error_checked_projects: [],
     suspect_checked_projects: [],
-    field_code: nil
+    field_code: nil,
+    field_code_locked: false
   }.freeze
 
   def initialize(model, **attrs)
@@ -60,7 +62,6 @@ class Components::ObservationForm < Components::ApplicationForm
   end
 
   def view_template
-    render_field_code if @field_code
     submit(button_name, center: true)
     render_images_details_panel
     render_naming_specimen_panel
@@ -123,13 +124,6 @@ class Components::ObservationForm < Components::ApplicationForm
     }
   end
 
-  # --- Field Code ---
-
-  def render_field_code
-    p { "#{:form_observations_field_code.t} #{@field_code}" }
-    input(type: "hidden", name: "field_code", value: @field_code)
-  end
-
   # --- Images + Details Panel ---
 
   def render_images_details_panel
@@ -162,6 +156,7 @@ class Components::ObservationForm < Components::ApplicationForm
                     id: "observation_images") do
       FormCarousel(
         images: @good_images,
+        sibling_images: @sibling_images,
         exif_data: @exif_data,
         obs_thumb_id: model.thumb_image_id,
         user: @user
@@ -245,6 +240,8 @@ class Components::ObservationForm < Components::ApplicationForm
         form: self,
         observation: model,
         mode: @mode,
+        field_code: @field_code_locked ? @field_code : editable_field_code,
+        field_code_locked: @field_code_locked,
         collectors_name: @collectors_name,
         collectors_number: @collectors_number,
         herbarium_name: @herbarium_name,
@@ -252,6 +249,13 @@ class Components::ObservationForm < Components::ApplicationForm
         accession_number: @accession_number
       )
     end
+  end
+
+  # Field code for the editable input. Nil when locked (QR workflow).
+  def editable_field_code
+    return nil if @field_code_locked
+
+    @field_code || (model.persisted? ? model.field_slip&.code : nil)
   end
 
   # --- Notes Panel ---

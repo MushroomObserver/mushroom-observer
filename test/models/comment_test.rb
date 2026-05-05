@@ -43,22 +43,22 @@ class CommentTest < UnitTestCase
 
   def do_highlight_comment_where_everyone_opts_out(obs)
     opt_out_of_comment_responses(mary, dick, katrina)
-    do_comment_test(0, obs, rolf, "@mary", "what about this?")
+    do_comment_test(0, obs, rolf, "@mary", "opts out test")
   end
 
   def do_highlight_comment_where_mary_opts_in(obs)
     opt_in_to_comment_responses(mary)
     opt_out_of_comment_responses(dick, katrina)
-    do_comment_test(1, obs, rolf, "@mary", "what about this?")
+    do_comment_test(1, obs, rolf, "@mary", "mary opts in test")
     do_comment_test(1, obs, rolf, "checked", "My name is @rolf.")
     do_comment_test(1, obs, rolf, "checked",
-                    "@dick - yes\n\n@mary - no\n\n@katrina - maybe")
+                    "@dick - yes\n\n@mary - no\n\n@katrina - 1")
   end
 
   def do_highlight_comment_where_everyone_opts_in(obs)
     opt_in_to_comment_responses(mary, dick, katrina)
     do_comment_test(3, obs, rolf, "checked",
-                    "@dick - yes\n\n@mary - no\n\n@katrina - maybe")
+                    "@dick - yes\n\n@mary - no\n\n@katrina - 2")
   end
 
   def test_comment_notification
@@ -184,6 +184,39 @@ class CommentTest < UnitTestCase
     actual_count = enqueued_jobs.size - job_start
     assert_equal(expected_count, actual_count,
                  "Expected #{expected_count} emails, got #{actual_count}")
+  end
+
+  def test_no_recent_duplicate_comment
+    obs = observations(:minimal_unknown_obs)
+    # Mirror the controller flow: no explicit user on the Comment;
+    # validations must consult User.current because user_id is only set
+    # in before_create (after validation).
+    attrs = { target: obs, summary: "Dup test", comment: "Same body" }
+    old_user = User.current
+    User.current = rolf
+
+    Comment.create!(attrs)
+
+    dup = Comment.new(attrs)
+    assert_not(dup.valid?, "Identical comment should be invalid")
+    assert(dup.errors[:base].any?, "Should have base error")
+  ensure
+    User.current = old_user
+  end
+
+  def test_no_recent_duplicate_comment_with_blank_body
+    obs = observations(:minimal_unknown_obs)
+    attrs = { target: obs, summary: "Summary only", comment: "" }
+    old_user = User.current
+    User.current = rolf
+
+    Comment.create!(attrs)
+
+    dup = Comment.new(attrs)
+    assert_not(dup.valid?, "Identical summary-only comment should be invalid")
+    assert(dup.errors[:base].any?, "Should have base error")
+  ensure
+    User.current = old_user
   end
 
   def test_polymorphic_joins

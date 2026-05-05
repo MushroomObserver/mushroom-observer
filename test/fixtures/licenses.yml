@@ -36,8 +36,13 @@ ccbync:
 
 publicdomain:
   display_name: Public Domain
-  url: https://wiki.creativecommons.org/Public_domain/
+  url: https://creativecommons.org/public-domain/cc0/
   updated_at: 2013-03-02 09:45:03
+
+legacy_publicdomain:
+  display_name: Public Domain (legacy)
+  url: https://creativecommons.org/publicdomain/zero/1.0/
+  deprecated: true
 
 unused:
   display_name: All Rights Reserved

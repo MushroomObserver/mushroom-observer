@@ -145,17 +145,17 @@ class LookupTest < UnitTestCase
 
     assert_lookup_names([name2], ["Peltigera"])
     assert_lookup_names([name3], ["Petigera"])
-    assert_lookup_names([name1, name2, name4, name5, name6, name7],
+    assert_lookup_names([name1, name2, name3, name4, name5, name6, name7],
                         ["Peltigeraceae"],
                         include_subtaxa: true)
     assert_lookup_names([name1, name2, name3, name4, name5, name6, name7],
                         ["Peltigeraceae"],
                         include_subtaxa: true,
                         include_synonyms: true)
-    assert_lookup_names([name1, name2],
+    assert_lookup_names([name1, name2, name3],
                         ["Peltigeraceae"],
                         include_immediate_subtaxa: true)
-    assert_lookup_names([name1, name2, name4, name5, name6, name7],
+    assert_lookup_names([name1, name2, name3, name4, name5, name6, name7],
                         ["Peltigera"],
                         include_subtaxa: true)
     assert_lookup_names([name2, name4, name6],

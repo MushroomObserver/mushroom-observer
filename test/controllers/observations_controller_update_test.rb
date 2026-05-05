@@ -565,4 +565,123 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: obs.id)
     assert_equal(notes, obs.reload.notes)
   end
+
+  # Covers ensure_thumb_image falling back to sibling occurrence images
+  # when all own images are removed.
+  def test_update_observation_thumb_falls_back_to_sibling_image
+    obs = observations(:detailed_unknown_obs)
+    sibling = observations(:minimal_unknown_obs)
+    sibling_img = images(:in_situ_image)
+
+    # Build an occurrence linking obs and sibling
+    occ = Occurrence.create!(
+      user: obs.user, primary_observation: obs
+    )
+    obs.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+
+    # Attach sibling_img to sibling (ensure it's there)
+    unless sibling.image_ids.include?(sibling_img.id)
+      sibling.images << sibling_img
+    end
+
+    # Remove all of obs's own images
+    own_ids = obs.image_ids
+    login(obs.user.login)
+    put(:update, params: {
+          id: obs.id,
+          observation: {
+            place_name: obs.place_name,
+            when: obs.when,
+            notes: obs.notes.to_h,
+            specimen: obs.specimen,
+            thumb_image_id: "",
+            good_image_ids: ""
+          }
+        })
+
+    obs.reload
+    assert_empty(obs.image_ids & own_ids,
+                 "Own images should have been removed")
+    assert_not_nil(obs.thumb_image_id,
+                   "thumb should fall back to sibling image")
+    assert_includes(
+      occ.observations.joins(:images).pluck("images.id"),
+      obs.thumb_image_id,
+      "thumb should be a sibling occurrence image"
+    )
+  end
+
+  # ---------- field slip code on update ----------
+
+  def test_update_adds_field_slip_code
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    fs = field_slips(:field_slip_no_obs)
+    # Detach from any existing occurrence
+    obs.update!(occurrence: nil)
+
+    put(:update, params: {
+          id: obs.id,
+          observation: obs_params(obs),
+          field_code: fs.code
+        })
+    obs.reload
+    assert_not_nil(obs.occurrence,
+                   "Observation should have an occurrence")
+    assert_equal(fs.id, obs.occurrence.field_slip_id,
+                 "Occurrence should link to the field slip")
+  end
+
+  def test_update_clears_field_slip_code
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    fs = field_slips(:field_slip_no_obs)
+
+    # Assign a field slip (detach from old occurrence first)
+    obs.update!(occurrence: nil)
+    obs.field_slip = fs
+    obs.save!
+    assert_not_nil(obs.reload.occurrence_id)
+
+    put(:update, params: {
+          id: obs.id,
+          observation: obs_params(obs),
+          field_code: ""
+        })
+    obs.reload
+    assert_nil(obs.occurrence_id,
+               "Observation should have no occurrence")
+  end
+
+  def test_update_invalid_field_slip_code
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    original_occ_id = obs.occurrence_id
+
+    # Code with only digits fails FieldSlip validation
+    put(:update, params: {
+          id: obs.id,
+          observation: obs_params(obs),
+          field_code: "12345"
+        })
+    assert_flash_error
+    obs.reload
+    assert_equal(original_occ_id, obs.occurrence_id,
+                 "Observation should remain unchanged")
+  end
+
+  private
+
+  def obs_params(obs)
+    {
+      place_name: obs.place_name,
+      "when(1i)" => obs.when.year.to_s,
+      "when(2i)" => obs.when.month.to_s,
+      "when(3i)" => obs.when.day.to_s,
+      specimen: obs.specimen,
+      thumb_image_id: obs.thumb_image_id.to_s,
+      good_image_ids: obs.image_ids.join(" ")
+    }
+  end
 end

@@ -93,13 +93,12 @@ class Name
     def move_primary_description(old_name)
       return unless !description && old_name.description
 
-      # Move old_name's description to self if self lacks one
+      # Move old_name's description to self if self lacks one.
+      # The classification reconciliation that used to live here was
+      # tied to `name_descriptions.classification` — which is gone
+      # along with the column (discussion #4163). Classification stays
+      # whatever `self.classification` already says.
       self.description = old_name.description
-      # Update the classification cache if that changed in the process.
-      if description &&
-         (classification != description.classification)
-        self.classification = description.classification
-      end
     end
 
     def move_versions(old_name)

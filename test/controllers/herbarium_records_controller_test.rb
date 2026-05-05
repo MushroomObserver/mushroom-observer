@@ -308,7 +308,13 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:create, params:)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
-    herbarium = Herbarium.reorder(created_at: :desc)[0]
+    # Look up by the attribute the test controls, not by
+    # `reorder(created_at: :desc)`: MySQL DATETIME is second-precision, so
+    # the new herbarium ties with fixture-loaded herbaria and the
+    # tiebreaker is implementation-defined (flaky).
+    herbarium = Herbarium.find_by(name: mary.personal_herbarium_name)
+    assert_not_nil(herbarium,
+                   "Mary's personal herbarium should have been created")
     assert(herbarium.curators.member?(mary))
   end
 

@@ -97,17 +97,11 @@ module Names::Descriptions
       assert_flash_success
     end
 
-    def test_move_description_clashing_classifications
+    # Classification-clash check on move went away with the column
+    # itself (discussion #4163). A description move no longer carries
+    # classification with it, so there's nothing to clash with.
+    def test_move_description_to_compatible_target
       login("dick")
-      params = {
-        id: peltigera_desc.id,
-        description_move_or_merge: { target: names(:basidiomycota).id,
-                                     delete: 0 }
-      }
-      post(:create, params: params)
-      assert_flash_text(/The classification has incorrect syntax/)
-
-      # Now try compatible classification
       params = {
         id: peltigera_desc.id,
         description_move_or_merge: { target: coprinus_name.id, delete: 0 }

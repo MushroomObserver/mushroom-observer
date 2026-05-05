@@ -224,4 +224,596 @@ class ProjectTest < UnitTestCase
       "whose Loc is contained in Proj location"
     )
   end
+
+  def test_add_and_remove_target_names
+    proj = projects(:rare_fungi_project)
+    coprinus = names(:coprinus_comatus)
+    agaricus = names(:agaricus_campestris)
+    peltigera = names(:peltigera)
+
+    assert_includes(proj.target_names, coprinus)
+    assert_includes(proj.target_names, agaricus)
+
+    # Add new target name
+    proj.add_target_name(peltigera)
+    assert_includes(proj.target_names.reload, peltigera)
+
+    # Idempotent — adding again does nothing
+    proj.add_target_name(peltigera)
+    assert_equal(1, proj.target_names.where(id: peltigera.id).count)
+
+    # Remove target name
+    proj.remove_target_name(peltigera)
+    assert_not_includes(proj.target_names.reload, peltigera)
+
+    # Removing non-member does nothing
+    proj.remove_target_name(peltigera)
+    assert_not_includes(proj.target_names, peltigera)
+  end
+
+  def test_add_and_remove_target_locations
+    proj = projects(:rare_fungi_project)
+    burbank = locations(:burbank)
+    albion = locations(:albion)
+
+    assert_includes(proj.target_locations, burbank)
+
+    # Add new target location
+    proj.add_target_location(albion)
+    assert_includes(proj.target_locations.reload, albion)
+
+    # Idempotent
+    proj.add_target_location(albion)
+    assert_equal(1, proj.target_locations.where(id: albion.id).count)
+
+    # Remove target location
+    proj.remove_target_location(albion)
+    assert_not_includes(proj.target_locations.reload, albion)
+
+    # Removing non-member does nothing
+    proj.remove_target_location(albion)
+    assert_not_includes(proj.target_locations, albion)
+  end
+
+  def test_has_targets
+    proj = projects(:rare_fungi_project)
+    assert(proj.has_targets?)
+
+    empty = projects(:empty_project)
+    assert_not(empty.has_targets?)
+  end
+
+  def test_candidate_observations
+    proj = projects(:rare_fungi_project)
+    # Project has both target names and target locations, so
+    # candidates must match BOTH (AND logic).
+    candidates = proj.candidate_observations
+
+    # coprinus_comatus_obs matches a target name but is in Glendale,
+    # not within the Burbank target location — should NOT match.
+    coprinus_obs = observations(:coprinus_comatus_obs)
+    assert_not_includes(candidates, coprinus_obs)
+
+    # agaricus_campestris_obs matches target name AND is in Burbank
+    agaricus_obs = observations(:agaricus_campestris_obs)
+    assert_includes(candidates, agaricus_obs)
+
+    # Count should match
+    assert_equal(candidates.count, proj.candidate_observations_count)
+  end
+
+  def test_candidate_observations_empty_targets
+    proj = projects(:empty_project)
+    assert_equal(0, proj.candidate_observations.count)
+  end
+
+  def test_candidate_observations_names_only
+    proj = projects(:rare_fungi_project)
+    # Remove all target locations so only names remain
+    proj.project_target_locations.destroy_all
+    assert(proj.target_names.any?)
+    assert_not(proj.target_locations.any?)
+
+    candidates = proj.candidate_observations
+    coprinus_obs = observations(:coprinus_comatus_obs)
+    assert_includes(candidates, coprinus_obs)
+  end
+
+  def test_candidate_observations_locations_only
+    proj = projects(:rare_fungi_project)
+    # Remove all target names so only locations remain
+    proj.project_target_names.destroy_all
+    assert_not(proj.target_names.any?)
+    assert(proj.target_locations.any?)
+
+    candidates = proj.candidate_observations
+    assert(candidates.count >= 0, "Should query without error")
+  end
+
+  # Genus-level target should pick up observations of species in that
+  # genus (Joe's example from #4130: Gloeomucro genus → Gloeomucro flavus).
+  def test_candidate_observations_includes_subtaxa_of_genus_target
+    proj = projects(:rare_fungi_project)
+    # Strip all targets and rebuild with just a single genus name so
+    # the assertion tests the name-matching logic in isolation (no
+    # location filter to also satisfy).
+    proj.project_target_names.destroy_all
+    proj.project_target_locations.destroy_all
+    proj.add_target_name(names(:agaricus))
+
+    species_obs = observations(:agaricus_campestris_obs)
+    assert_includes(proj.candidate_observations, species_obs,
+                    "Obs of a species should match its genus as target")
+  end
+
+  # Genus target should NOT pull in current-name species whose deprecated
+  # synonym happens to fall under the target genus. E.g., an Agaricus
+  # target would otherwise match a current Protostropharia species whose
+  # old name was "Agaricus semiglobatus". This caught 21K spurious
+  # observations for the real Agaricus on production.
+  def test_candidate_observations_excludes_cross_genus_historical_synonyms
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    # Clear target_locations too so the test isolates name matching;
+    # obs below is created without a location.
+    proj.project_target_locations.destroy_all
+    proj.add_target_name(names(:agaricus))
+
+    # Simulate the historical-rename scenario: a current Protostropharia
+    # species whose old name would fall under Agaricus via subtaxa
+    # expansion.
+    synonym = Synonym.create!
+    Name.create!(
+      user: users(:rolf),
+      text_name: "Agaricus fakedeprecated",
+      search_name: "Agaricus fakedeprecated",
+      sort_name: "Agaricus fakedeprecated",
+      display_name: "__Agaricus__ __fakedeprecated__",
+      author: "",
+      rank: Name.ranks[:Species],
+      deprecated: true,
+      synonym_id: synonym.id,
+      correct_spelling_id: nil
+    )
+    other_genus = Name.create!(
+      user: users(:rolf),
+      text_name: "Protostropharia fakecurrent",
+      search_name: "Protostropharia fakecurrent",
+      sort_name: "Protostropharia fakecurrent",
+      display_name: "__Protostropharia__ __fakecurrent__",
+      author: "",
+      rank: Name.ranks[:Species],
+      deprecated: false,
+      synonym_id: synonym.id,
+      correct_spelling_id: nil
+    )
+    obs = Observation.create!(
+      name: other_genus, user: users(:rolf), when: Time.zone.now
+    )
+
+    assert_not_includes(
+      proj.candidate_observations, obs,
+      "Current Protostropharia obs should NOT match the Agaricus target " \
+      "just because its deprecated synonym is under Agaricus"
+    )
+  end
+
+  def test_field_slip_prefix_validation
+    proj = Project.new(title: "Test", field_slip_prefix: "bad prefix!")
+    proj.valid?
+    assert(proj.errors[:field_slip_prefix].any?,
+           "Should reject invalid field_slip_prefix")
+  end
+
+  def test_exclude_and_unexclude_observation
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+
+    proj.exclude_observation(obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+    assert_not_includes(proj.observations.reload, obs)
+
+    proj.unexclude_observation(obs)
+    assert_not_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_exclude_observation_removes_from_project
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(obs)
+    assert_includes(proj.observations.reload, obs)
+
+    proj.exclude_observation(obs)
+    assert_not_includes(proj.observations.reload, obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_add_observation_removes_from_excluded
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.exclude_observation(obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+
+    proj.add_observation(obs)
+    assert_includes(proj.observations.reload, obs)
+    assert_not_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_new_candidate_observations_excludes_excluded
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    assert_includes(proj.new_candidate_observations, obs)
+
+    proj.exclude_observation(obs)
+    assert_not_includes(proj.new_candidate_observations.reload, obs)
+  end
+
+  def test_new_candidate_observations_excludes_in_project
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(obs)
+    assert_not_includes(proj.new_candidate_observations.reload, obs)
+  end
+
+  def test_bulk_add_observations_inserts_obs_and_owner_images
+    proj = projects(:eol_project)
+    minimal = observations(:minimal_unknown_obs)
+    detailed = observations(:detailed_unknown_obs)
+    owner_imgs = detailed.images.select { |i| i.user_id == detailed.user_id }
+    assert(owner_imgs.any?,
+           "fixture must have at least one owner-attributed image")
+
+    count = proj.bulk_add_observations([minimal.id, detailed.id])
+
+    assert_equal(2, count)
+    assert_includes(proj.observations.reload, minimal)
+    assert_includes(proj.observations.reload, detailed)
+    assert_obj_arrays_equal(owner_imgs.sort_by(&:id),
+                            proj.images.reload.sort_by(&:id))
+  end
+
+  def test_bulk_add_observations_is_idempotent
+    proj = projects(:eol_project)
+    obs = observations(:detailed_unknown_obs)
+    proj.add_observation(obs)
+    obs_count_before = proj.observations.reload.size
+    img_count_before = proj.images.reload.size
+
+    count = proj.bulk_add_observations([obs.id])
+
+    assert_equal(0, count)
+    assert_equal(obs_count_before, proj.observations.reload.size)
+    assert_equal(img_count_before, proj.images.reload.size)
+  end
+
+  def test_bulk_add_observations_unexcludes
+    proj = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    proj.exclude_observation(obs)
+    assert_includes(proj.excluded_observations.reload, obs)
+
+    count = proj.bulk_add_observations([obs.id])
+
+    assert_equal(1, count)
+    assert_includes(proj.observations.reload, obs)
+    assert_not_includes(proj.excluded_observations.reload, obs)
+  end
+
+  def test_bulk_add_observations_handles_empty_input
+    proj = projects(:eol_project)
+    assert_equal(0, proj.bulk_add_observations([]))
+  end
+
+  def test_remove_target_name_purges_matching_observations
+    proj = projects(:rare_fungi_project)
+    matching_name = names(:agaricus_campestris)
+    added_obs = observations(:agaricus_campestris_obs)
+    excluded_obs = Observation.create!(
+      name: matching_name, user: users(:rolf),
+      location: locations(:burbank), when: Time.zone.now
+    )
+    proj.add_observation(added_obs)
+    proj.exclude_observation(excluded_obs)
+    assert_includes(proj.observations.reload, added_obs)
+    assert_includes(proj.excluded_observations.reload, excluded_obs)
+
+    proj.remove_target_name(matching_name)
+
+    assert_not_includes(proj.observations.reload, added_obs)
+    assert_not_includes(proj.excluded_observations.reload, excluded_obs)
+  end
+
+  # Issue #4130: removing a genus target should also purge obs of its
+  # species (which qualified as candidates via the sub-taxa rule), not
+  # just the bare-genus obs.
+  def test_remove_target_name_purges_subtaxa_observations
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.add_target_name(names(:agaricus)) # genus
+    species_obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(species_obs)
+    assert_includes(proj.observations.reload, species_obs)
+
+    proj.remove_target_name(names(:agaricus))
+
+    assert_not_includes(proj.observations.reload, species_obs,
+                        "Species obs qualified via genus target should be " \
+                        "purged when the genus target is removed")
+  end
+
+  # Issue #4130: when a species is still explicitly targeted, removing
+  # a broader (genus) target must leave that species' obs in place.
+  def test_remove_target_name_keeps_obs_still_covered_by_another_target
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.add_target_name(names(:agaricus))            # genus target
+    proj.add_target_name(names(:agaricus_campestris)) # species target
+    species_obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(species_obs)
+
+    proj.remove_target_name(names(:agaricus))
+
+    assert_includes(proj.observations.reload, species_obs,
+                    "Species obs should stay because it's still covered " \
+                    "by the remaining species target")
+  end
+
+  # ------------------------------------------------------------------
+  #  #4136 expanded violation concept
+  # ------------------------------------------------------------------
+
+  def test_violation_kinds_for_target_name_mismatch
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.project_target_locations.destroy_all
+    proj.update!(start_date: nil, end_date: nil, location: nil)
+    proj.add_target_name(names(:agaricus))
+    off_target = observations(:peltigera_obs)
+    proj.add_observation(off_target)
+
+    kinds = proj.violation_kinds_for(off_target)
+
+    assert_includes(kinds, :target_name)
+    assert_not_includes(kinds, :date)
+    assert_not_includes(kinds, :bbox)
+    assert(proj.violates_constraints?(off_target))
+  end
+
+  def test_violation_kinds_for_target_name_passes_subtaxa
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.project_target_locations.destroy_all
+    proj.update!(start_date: nil, end_date: nil, location: nil)
+    proj.add_target_name(names(:agaricus))
+    species_obs = observations(:agaricus_campestris_obs)
+    proj.add_observation(species_obs)
+
+    kinds = proj.violation_kinds_for(species_obs)
+
+    assert_not_includes(
+      kinds, :target_name,
+      "Sub-taxa of target genus should not be a target_name " \
+      "violation (#4130 + #4136 combined)"
+    )
+  end
+
+  def test_violation_kinds_for_target_location_mismatch
+    proj = build_target_location_project
+    california_loc = locations(:california)
+    obs_in_ca = observations(:california_obs)
+    proj.add_target_location(california_loc)
+    obs_outside = observations(:falmouth_2023_09_obs)
+    proj.add_observation(obs_in_ca)
+    proj.add_observation(obs_outside)
+
+    assert_not_includes(proj.violation_kinds_for(obs_in_ca), :target_location)
+    assert_includes(proj.violation_kinds_for(obs_outside), :target_location)
+  end
+
+  def test_violations_sorted_by_sort_name
+    proj = projects(:falmouth_2023_09_project)
+    sort_names = proj.violations.map { |v| v.obs.name&.sort_name.to_s.downcase }
+
+    assert_equal(sort_names, sort_names.sort,
+                 "Violations should be sorted by obs.name.sort_name")
+  end
+
+  def test_count_violations_matches_violations_size
+    proj = projects(:falmouth_2023_09_project)
+
+    assert_equal(proj.violations.size, proj.count_violations)
+  end
+
+  def test_candidate_observations_respects_date_range
+    proj = build_target_name_project_with_dates
+    in_range = observations(:agaricus_campestris_obs)
+    in_range.update!(when: proj.start_date + 1.day)
+    out_of_range = observations(:agaricus_campestrus_obs)
+    out_of_range.update!(when: proj.end_date + 10.days)
+
+    candidate_ids = proj.candidate_observations.pluck(:id)
+
+    assert_includes(candidate_ids, in_range.id)
+    assert_not_includes(
+      candidate_ids, out_of_range.id,
+      "Out-of-date-range obs should be filtered from candidates"
+    )
+  end
+
+  def test_candidate_observations_respects_bbox_with_gps
+    proj = build_target_name_project_with_location
+    inside = observations(:agaricus_campestris_obs)
+    inside.update!(lat: proj.location.center_lat,
+                   lng: proj.location.center_lng,
+                   gps_hidden: false, gps_dubious: false)
+    outside = observations(:agaricus_campestrus_obs)
+    outside.update!(lat: 0.0, lng: 0.0,
+                    gps_hidden: false, gps_dubious: false)
+
+    candidate_ids = proj.candidate_observations.pluck(:id)
+
+    assert_includes(candidate_ids, inside.id)
+    assert_not_includes(candidate_ids, outside.id,
+                        "GPS outside project bbox should be filtered out")
+  end
+
+  # Q9: an obs with no GPS but whose Location is fully contained in the
+  # project's bbox should pass the candidate filter, mirroring the
+  # violations-side rule.
+  def test_candidate_observations_includes_no_gps_with_location_in_bbox
+    proj = build_target_name_project_with_location
+    inside = observations(:agaricus_campestris_obs)
+    burbank_sub = locations(:burbank) # by definition contained in itself
+    inside.update!(lat: nil, lng: nil, location: burbank_sub)
+
+    candidate_ids = proj.candidate_observations.pluck(:id)
+
+    assert_includes(
+      candidate_ids, inside.id,
+      "Obs without GPS but with location contained in project bbox " \
+      "should remain a candidate"
+    )
+  end
+
+  def test_violation_kinds_combine_date_and_target_name
+    proj = projects(:rare_fungi_project)
+    proj.project_target_locations.destroy_all
+    proj.project_target_names.destroy_all
+    proj.update!(location: nil,
+                 start_date: Date.parse("2030-01-01"),
+                 end_date: Date.parse("2030-12-31"))
+    proj.add_target_name(names(:agaricus))
+    off_target = observations(:peltigera_obs) # not Agaricus, not in 2030
+    proj.add_observation(off_target)
+
+    kinds = proj.violation_kinds_for(off_target)
+
+    assert_includes(kinds, :date)
+    assert_includes(kinds, :target_name)
+    assert_not_includes(kinds, :bbox)
+    assert_not_includes(kinds, :target_location)
+  end
+
+  # Covers Project#count_violations target_name path
+  # (collect_target_name_violation_ids id-merge against visible obs whose
+  # name_id is outside expanded_target_name_id_set). Project has only
+  # target_names, no other constraints, so that id-merge is the only path
+  # that can fire.
+  def test_count_violations_includes_target_name_violations
+    proj = Project.create!(
+      title: "Target Name Only #{SecureRandom.hex(4)}",
+      user: users(:rolf)
+    )
+    proj.add_target_name(names(:agaricus))
+    off_target = observations(:peltigera_obs)
+    proj.add_observation(off_target)
+
+    assert_equal(1, proj.count_violations,
+                 "Obs with non-target name should count as a violation")
+    assert_equal(proj.violations.size, proj.count_violations)
+    kinds = proj.violation_kinds_for(off_target)
+    assert_includes(kinds, :target_name)
+  end
+
+  # Covers Project#passing_target_location_ids with-loc branch
+  # (joins :location, applies location_suffix_conditions) and
+  # collect_target_location_violation_ids id-merge.
+  def test_count_violations_includes_target_location_violations_with_location
+    proj = Project.create!(
+      title: "Target Loc Only #{SecureRandom.hex(4)}",
+      user: users(:rolf)
+    )
+    proj.add_target_location(locations(:burbank))
+
+    in_burbank = observations(:agaricus_campestris_obs)
+    proj.add_observation(in_burbank)
+    in_falmouth = observations(:falmouth_2023_09_obs)
+    proj.add_observation(in_falmouth)
+
+    violation_obs_ids = proj.violations.map { |v| v.obs.id }
+    assert_includes(violation_obs_ids, in_falmouth.id,
+                    "Obs in Falmouth should violate Burbank target_location")
+    assert_not_includes(violation_obs_ids, in_burbank.id,
+                        "Obs in Burbank should pass via location_id branch")
+    assert_equal(proj.violations.size, proj.count_violations)
+  end
+
+  # Covers Project#passing_target_location_ids without-loc branch
+  # (visible_observations.where(location_id: nil) joined with
+  # where_suffix_conditions) and the observation.where leg of
+  # #target_location_suffix_match?.
+  # Both an obs whose `where` matches and one whose `where` doesn't are
+  # exercised so the boundary of the suffix match is locked down.
+  def test_count_violations_target_location_uses_obs_where_when_no_location
+    proj = Project.create!(
+      title: "Target Loc Where #{SecureRandom.hex(4)}",
+      user: users(:rolf)
+    )
+    proj.add_target_location(locations(:burbank))
+
+    # peltigera_obs: location_id is nil, where = "Briceland, California, USA"
+    # — should NOT match Burbank's suffix and so should violate.
+    off_target = observations(:peltigera_obs)
+    proj.add_observation(off_target)
+
+    on_target = Observation.create!(
+      user: users(:rolf), when: Date.parse("2024-06-01"),
+      name: names(:agaricus), location_id: nil,
+      where: "Burbank, California, USA"
+    )
+    proj.add_observation(on_target)
+
+    violation_obs_ids = proj.violations.map { |v| v.obs.id }
+    assert_includes(
+      violation_obs_ids, off_target.id,
+      "Obs.where=Briceland... should fail target_location suffix match"
+    )
+    assert_not_includes(
+      violation_obs_ids, on_target.id,
+      "Obs.where=Burbank... should pass target_location suffix match"
+    )
+    assert_equal(proj.violations.size, proj.count_violations)
+    assert_includes(proj.violation_kinds_for(off_target), :target_location)
+  end
+
+  def test_violations_excludes_excluded_observations
+    proj = projects(:falmouth_2023_09_project)
+    violation_obs = proj.violations.first.obs
+
+    proj.exclude_observation(violation_obs)
+
+    assert_not_includes(proj.violations.map(&:obs), violation_obs,
+                        "Excluded obs should not surface as a violation")
+  end
+
+  private
+
+  def build_target_location_project
+    Project.create!(
+      title: "Target Loc #{SecureRandom.hex(4)}",
+      open_membership: true,
+      user: users(:rolf)
+    )
+  end
+
+  def build_target_name_project_with_dates
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.project_target_locations.destroy_all
+    proj.update!(location: nil,
+                 start_date: Date.parse("2010-01-01"),
+                 end_date: Date.parse("2010-12-31"))
+    proj.add_target_name(names(:agaricus))
+    proj
+  end
+
+  def build_target_name_project_with_location
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+    proj.project_target_locations.destroy_all
+    proj.update!(location: locations(:burbank),
+                 start_date: nil, end_date: nil)
+    proj.add_target_name(names(:agaricus))
+    proj
+  end
 end

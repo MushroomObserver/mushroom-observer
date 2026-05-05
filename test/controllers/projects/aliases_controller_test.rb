@@ -141,7 +141,6 @@ module Projects
            })
 
       assert_response(:success)
-      assert_template(:new)
     end
 
     def test_update_modifies_project_alias_with_valid_params
@@ -167,7 +166,6 @@ module Projects
             })
 
       assert_response(:success)
-      assert_template(:edit)
     end
 
     def test_update_can_use_turbo_to_modify_project_alias

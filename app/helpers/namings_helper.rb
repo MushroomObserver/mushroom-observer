@@ -24,24 +24,49 @@ module NamingsHelper
 
   # NEW - needs a current consensus object
   def naming_row_content(user, consensus, naming)
-    vote = consensus.users_vote(naming, user) || Vote.new(value: 0)
+    primary = naming_or_primary(naming)
+    vote = best_user_vote(naming, user, consensus)
     consensus_favorite = consensus.consensus_naming
-    favorite = consensus.owners_favorite?(naming)
+    favorite = consensus.owners_favorite?(primary)
 
+    local = if naming.is_a?(Observation::MergedNaming)
+              naming.local_naming
+            else
+              naming
+            end
     {
-      id: naming.id,
-      name: naming_name_html(user, naming),
+      id: primary.id,
+      name: naming_name_html(user, local || primary, editable: local),
       proposer: naming_proposer_html(naming),
       vote_tally: vote_tally_html(naming),
-      your_vote: your_vote_html(naming, vote),
-      eyes: vote_icons_html(naming, consensus_favorite, favorite),
+      your_vote: your_vote_html(primary, vote),
+      eyes: vote_icons_html(primary, consensus_favorite, favorite),
       reasons: reasons_html(naming)
     }
   end
 
+  # Get the user's best vote across merged namings, or from consensus
+  def best_user_vote(naming, user, consensus)
+    if naming.is_a?(Observation::MergedNaming)
+      naming.users_best_vote(user) || Vote.new(value: 0)
+    else
+      consensus.users_vote(naming, user) || Vote.new(value: 0)
+    end
+  end
+
+  # Extract the primary Naming from a MergedNaming or pass through
+  def naming_or_primary(naming)
+    if naming.is_a?(Observation::MergedNaming)
+      naming.primary_naming
+    else
+      naming
+    end
+  end
+
   # N+1: should not be checking permission here
-  def naming_name_html(user, naming)
-    if permission?(naming)
+  def naming_name_html(user, naming, editable: naming)
+    proposer_links = ""
+    if editable && permission?(naming)
       edit_link = modal_link_to(
         "obs_#{naming.observation_id}_naming_#{naming.id}",
         *edit_naming_tab(naming)
@@ -50,8 +75,6 @@ module NamingsHelper
       proposer_links = tag.div(class: "text-nowrap") do
         ["[", edit_link, "|", delete_link, "]"].safe_join(" ")
       end
-    else
-      proposer_links = ""
     end
 
     [naming_name_link(user, naming), " ", proposer_links].safe_join
@@ -90,19 +113,35 @@ module NamingsHelper
 
   # N+1: naming includes user
   def naming_proposer_html(naming)
-    user_link = user_link(naming.user, naming.user.login,
-                          { class: "btn btn-link text-wrap text-left px-0" })
+    if naming.is_a?(Observation::MergedNaming) &&
+       naming.multiple_proposers?
+      occ = naming.observation.occurrence
+      link = link_to(:show_observation_matching_observations.l,
+                     occurrence_path(occ),
+                     class: "btn btn-link text-wrap text-left px-0")
+      return [tag.small("#{:show_namings_user.t}: ",
+                        class: "visible-xs-inline mr-4"),
+              link].safe_join
+    end
 
-    # row props have mobile-friendly labels
-    [tag.small("#{:show_namings_user.t}: ", class: "visible-xs-inline mr-4"),
+    proposer = naming.user
+    user_link = user_link(proposer, proposer.login,
+                          { class: "btn btn-link text-wrap " \
+                                   "text-left px-0" })
+
+    [tag.small("#{:show_namings_user.t}: ",
+               class: "visible-xs-inline mr-4"),
      user_link].safe_join
   end
 
   # N+1: naming includes votes. Should have been reloaded by VotesController.
   def vote_tally_html(naming)
+    primary = naming_or_primary(naming)
+    all_votes = naming.votes
     vote_tally =
-      (if naming.votes&.length&.positive?
-         "#{naming_votes_link(naming)} (#{num_votes_html(naming)})"
+      (if all_votes&.length&.positive?
+         "#{naming_votes_link(naming, primary)} " \
+         "(#{num_votes_html(naming)})"
        else
          "(#{:show_namings_no_votes.t})"
        end).html_safe # has links
@@ -116,13 +155,14 @@ module NamingsHelper
   # N+1: naming vote percent
   # Makes a link to observation_naming_vote_path for no-js.
   # The controller will render a modal if turbo request
-  def naming_votes_link(naming)
+  def naming_votes_link(naming, primary = nil)
+    primary ||= naming
     percent = "#{naming.vote_percent.round}%"
 
-    modal_link_to("naming_votes_#{naming.id}", h(percent),
+    modal_link_to("naming_votes_#{primary.id}", h(percent),
                   observation_naming_votes_path(
-                    observation_id: naming.observation_id,
-                    naming_id: naming.id
+                    observation_id: primary.observation_id,
+                    naming_id: primary.id
                   ),
                   class: "vote-percent btn btn-link px-0")
   end
@@ -130,7 +170,8 @@ module NamingsHelper
   # N+1: naming includes votes
   def num_votes_html(naming)
     tag.span(naming.votes&.length,
-             class: "vote-number", data: { id: naming.id })
+             class: "vote-number",
+             data: { id: naming_or_primary(naming).id })
   end
 
   # row props have mobile-friendly labels
@@ -232,15 +273,39 @@ module NamingsHelper
   end
 
   def reasons_html(naming)
-    reasons = naming.reasons_array.select(&:used?).map do |reason|
-      if reason.notes.blank?
-        reason.label.t
-      else
-        "#{reason.label.l}: #{reason.notes.to_s.html_safe}".tl # may have links
-      end
+    if naming.is_a?(Observation::MergedNaming)
+      merged_reasons_html(naming)
+    else
+      simple_reasons_html(naming.reasons_array.select(&:used?))
     end
+  end
 
-    reasons.map { |reason| content_tag(:div, reason) }.safe_join
+  def merged_reasons_html(merged_naming)
+    merged_naming.grouped_reasons.map do |obs, reasons|
+      parts = []
+      if obs
+        obs_link = link_to("MO #{obs.id}",
+                           permanent_observation_path(obs.id))
+        parts << tag.div(tag.small(
+                           "From ".html_safe + obs_link + ":".html_safe,
+                           class: "text-muted"
+                         ), class: "mt-2")
+      end
+      parts << simple_reasons_html(reasons)
+      parts.safe_join
+    end.safe_join
+  end
+
+  def simple_reasons_html(reasons)
+    reasons.map do |reason|
+      text = if reason.notes.blank?
+               reason.label.t
+             else
+               "#{reason.label.l}: " \
+               "#{reason.notes.to_s.html_safe}".tl
+             end
+      content_tag(:div, text)
+    end.safe_join
   end
 
   def observation_naming_buttons(user, obs)

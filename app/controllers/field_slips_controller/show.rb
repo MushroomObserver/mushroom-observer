@@ -17,7 +17,9 @@ module FieldSlipsController::Show
 
   def handle_by_code
     @field_slip = FieldSlip.find_by(code: params[:id].upcase)
-    obs = @field_slip&.observation
+    return unless @field_slip&.observations&.any?
+
+    obs = @field_slip.observation
     field_slip_redirect(obs.id) if obs
   end
 

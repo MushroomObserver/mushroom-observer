@@ -37,7 +37,7 @@ class FieldSlipNotesBuilder
     codes = @params[:field_slip][:other_codes]
     return codes unless @params[:field_slip][:inat] == "1"
 
-    "\"iNat ##{codes}\":https://www.inaturalist.org/observations/#{codes}"
+    "\"iNat #{codes}\":https://www.inaturalist.org/observations/#{codes}"
   end
 
   def update_notes_fields(notes)

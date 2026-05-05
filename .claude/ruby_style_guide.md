@@ -101,14 +101,14 @@ end
 ```erb
 <%# Good %>
 <%= render(Components::MatrixTable.new(objects: @objects)) %>
-<%= link_to(:BACK.t, observations_path) %>
+<%= link_to(:BACK.l, observations_path) %>
 <%= tag.div(class: "alert") do %>
   <%= flash_message %>
 <% end %>
 
 <%# Bad %>
 <%= render Components::MatrixTable.new(objects: @objects) %>
-<%= link_to :BACK.t, observations_path %>
+<%= link_to :BACK.l, observations_path %>
 <%= tag.div class: "alert" do %>
   <%= flash_message %>
 <% end %>
@@ -223,6 +223,55 @@ git add config/locales/en.yml  # Never commit .yml files
 - Editing `.yml` files directly causes changes to be lost on next update
 - All `.yml` files are in `.gitignore` and should remain uncommitted
 
+### Prefer `.l` over `.t` for plain-text labels
+
+When localizing a Symbol for a plain-text label, button name, flash
+message, or anything else that contains no textile markup
+(`*bold*`, `_italic_`, `_link_`, `[obj_link]`, etc.), use `.l` —
+not `.t`.
+
+`.t` runs the textile parser over the localized string. For plain
+text the textile pass is wasted work, and consistency makes it
+easier to scan code for places that intentionally render markup.
+
+```ruby
+# Good
+flash_error(:permission_denied.l)
+flash_notice(:project_created_flash.l(title: project.title))
+post_button(name: :show_project_join.l, path: ...)
+link_to(:BACK.l, observations_path)
+
+# Bad - .t for plain text labels
+flash_error(:permission_denied.t)
+post_button(name: :show_project_join.t, path: ...)
+link_to(:BACK.t, observations_path)
+```
+
+**The `Symbol` extension variants** (see `app/extensions/symbol.rb`):
+
+| Method | Behavior | Use for |
+|---|---|---|
+| `.l`   | localize (plain) | labels, buttons, flash messages, anything without markup |
+| `.t`   | localize + textilize, no paragraphs, no obj links | inline copy with `*bold*`/`_italic_` but no links or paragraph breaks |
+| `.tl`  | + obj links | inline copy that should auto-link `_observation_123_`-style references |
+| `.tp`  | + paragraphs | body copy that needs paragraph wrapping but no auto-links |
+| `.tpl` | + paragraphs + obj links | body copy with paragraphs and auto-links (mailer bodies, project summaries) |
+
+**Defaults and edge cases:**
+- New code defaults to `.l` unless the locale string actually
+  contains textile markup. If unsure, grep the key in
+  `config/locales/en.txt` and check the value.
+- When editing a file for any other reason, opportunistically
+  flip obvious `.t` → `.l` calls on plain-text labels. Don't
+  start a wide sweep just for this — fold it into work you're
+  already doing.
+- For `flash_notice` / `flash_error` / `flash_warning` /
+  `post_button(name: ...)` / `link_to`-style label args,
+  almost always `.l`.
+- Strings rendered into a paragraph or textile context (mailer
+  body templates, project summaries, comments, help blocks) keep
+  their `.tp` / `.tpl` / `.t` variant.
+
 ## Code Quality and Linting
 
 ### RuboCop Compliance
@@ -277,4 +326,5 @@ The key principles are:
 3. **Use Rails-preferred assertions** (`assert_no_match`, `assert_not_equal`, etc.) instead of MiniTest refute methods
 4. **Run the full test suite** before creating any PR with production Rails code changes
 5. **Edit `en.txt` for text strings**, run `rails lang:update`, never commit `.yml` files
-6. **All new code must pass RuboCop** - refactor instead of disabling cops
+6. **Use `.l` for plain-text labels**, reserve `.t` / `.tp` / `.tpl` for strings that contain textile markup
+7. **All new code must pass RuboCop** - refactor instead of disabling cops

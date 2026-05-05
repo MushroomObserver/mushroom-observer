@@ -25,11 +25,23 @@ class ChecklistsController < ApplicationController
             else
               Checklist::ForSite.new
             end
+    return unless @data
+
+    render(Views::Controllers::Checklists::Show.new(
+             data: @data, context: checklist_context
+           ), layout: true)
   end
 
   ##############################################################################
 
   private
+
+  def checklist_context
+    Components::Checklist::Context.new(
+      user: @user, project: @project, show_user: @show_user,
+      location: @location, species_list: @species_list
+    )
+  end
 
   def user_checklist(user_id)
     return unless (@show_user = find_or_goto_index(User, user_id))
@@ -41,8 +53,10 @@ class ChecklistsController < ApplicationController
     return unless (@project = find_or_goto_index(Project, proj_id))
 
     @location = Location.safe_find(location_id)
+    sub = params[:sub_locations] == "1"
 
-    Checklist::ForProject.new(@project, @location)
+    Checklist::ForProject.new(@project, @location,
+                              include_sub_locations: sub)
   end
 
   def species_list_checklist(list_id)

@@ -8,33 +8,36 @@ require "haversine"
 
 # MyCoPortal is built on Symbiota
 # https://symbiota.org/
-# https://biokic.github.io/symbiota-docs/
+# https://docs.symbiota.org/
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
-    # http_domain for links to Observations
-    HTTP_DOMAIN = "https://mushroomobserver.org"
+    CODE_NAME_QUALIFIER = "code name aff. species"
+    GPS_HIDDEN_MESSAGE = "Coordinates obscured by observer"
 
+    # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
     # Label names for the columns in the report.
-    # Some Symbiota Standard Fields
-    # https://biokic.github.io/symbiota-docs/editor/edit/fields/#standard-fields
-    # plus some MyCoPortal-specific fields
+    # https://docs.symbiota.org/Collection_Manager_Guide/Importing_Uploading/data_import_fields/
+    # See also https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/
     # Includes only fields needed for upload to MyCoPortal.
     # MyCoPortal fills in other fields automatically.
     def labels
       [
-        "dbpk", # MCP-specific; MO observation.id; was "mushroomObserverId",
-        "basisOfRecord", # : "HumanObservation",
-        "catalogNumber", # "MUOB" + space + observation.id"
-        "sciname",
+        # dbpk (database primary key); required for snapshot collections;
+        # Not a DwC standard field
+        "dbpk", # observation.id
+        "basisOfRecord", # : "HumanObservation"
+        "catalogNumber", # "MUOB" + space + observation.id
+        "occurrenceID", # GUID. The Observation URL. It must never change.
+        "sciname", # scientific name without author; not a DwC standard field
         "identificationQualifier",
+        "taxonRemarks",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
         "eventDate",
         "substrate",
         "occurrenceRemarks", # MO observation.notes; was fieldNotes
         "associatedTaxa", # was "host"
-        "verbatimAttributes", # anchored link to obs; was observationUrl
         "country",
         "stateProvince",
         "county",
@@ -42,6 +45,7 @@ module Report
         "decimalLatitude",
         "decimalLongitude",
         "coordinateUncertaintyInMeters",
+        "informationWithheld",
         "minimumElevationInMeters",
         "maximumElevationInMeters",
         "disposition" # herbaria, "vouchered", or nil
@@ -50,34 +54,37 @@ module Report
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
-        row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
+        row.obs_id, # (dbpk database primary key)
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
+        "https://mushroomobserver.org/obs/#{row.obs_id}", # occurrenceID
         sciname(row), # (mono- or binomial without author)
         identification_qualifier(row), # group, nom. prov., etc.
+        taxon_remarks(row),
         row.user_name_or_login, # recordedBy
         record_number(row), # recordNumber
         row.obs_when, # eventDate
         substrate(row),
         occurence_remarks(row), # notes minus substrate and associatedTaxa
         associated_taxa(row), # was`host`
-        verbatim_attributes(row), # anchored link to MO observation url
         row.country, # country
         row.state, # stateProvince
         row.county, # county
         row.locality, # locality
-        row.best_lat, # decimalLatitude
-        row.best_lng, # decimalLongitude
+        public_lat(row), # decimalLatitude
+        public_lng(row), # decimalLongitude
         coordinate_uncertainty(row), # coordinateUncertaintyInMeters
+        information_withheld(row), # informationWithheld
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
         disposition(row) # disposition
       ]
     end
 
-    # taxon name, without authority or qualifcation (such as "group")
+    # taxon name, without authority or qualification (such as "group")
     def sciname(row)
       text_name = row.name_text_name
+      return text_name.split.first if code_name?(row)
       # The last word in text_name could be Group or Complex
       return text_name_without_last_word(text_name) if group?(row)
 
@@ -85,13 +92,21 @@ module Report
     end
 
     # Qualifies unpublished MO text_name.
-    # Examples: nom. prov., crypt. temp., group, sensu lato, sensu auct.
+    # Examples: nom. prov., comb. prov., group, sensu lato, sensu auct.
     def identification_qualifier(row)
-      return nil unless qualified_name?(row)
-      return "group #{row.name_author}".strip if group?(row)
-      return provisional_identification_qualifier(row) if provisional?(row)
+      return nil unless unregistrable_name?(row)
+      return CODE_NAME_QUALIFIER if code_name?(row)
+      return group_token(row) if group?(row)
+      return prov_token(row) if provisional?(row)
 
       row.name_author&.match(/sensu.*/)&.[](0)
+    end
+
+    # Full name+author for code names, provisional names, and groups
+    def taxon_remarks(row)
+      return unless code_name?(row) || provisional?(row) || group?(row)
+
+      "#{row.name_text_name} #{row.name_author}".strip
     end
 
     # collector's number
@@ -114,7 +129,7 @@ module Report
     end
 
     # host plus associates
-    # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
+    # https://docs.symbiota.org/Editor_Guide/Editing_Searching_Records/symbiota_data_fields/#associated-taxa
     def associated_taxa(row)
       host = explode_notes(row)[:host]
       trees_shrubs = explode_notes(row)[:trees_shrubs]
@@ -125,17 +140,16 @@ module Report
       "#{trees_shrubs}; #{associates}"
     end
 
-    # text of an anchored link to the MO Observation
-    def verbatim_attributes(row)
-      "<a href='#{HTTP_DOMAIN}/#{row.obs_id}' " \
-      "target='_blank' style='color: blue;'>" \
-      "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
-    end
-
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
-      if row.loc_id.present? &&
-         row.obs_lat.blank?
+      return if row.loc_id.blank?
+
+      if gps_hidden?(row)
+        return unless public_lat(row) && public_lng(row)
+
+        box = loc_box(row)
+        max_distance_to_any_corner(public_lat(row), public_lng(row), box)
+      elsif row.obs_lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
     end
@@ -161,6 +175,7 @@ module Report
       add_collector_ids!(rows, 1)
       add_herbarium_accession_numbers!(rows, 2)
       add_sequence_ids!(rows, 3)
+      add_gps_hidden!(rows, 4)
     end
 
     def collector_ids(row)
@@ -175,6 +190,10 @@ module Report
       row.val(3)
     end
 
+    def gps_hidden?(row)
+      row.val(4).present?
+    end
+
     def sort_before(rows)
       rows.sort_by(&:obs_id)
     end
@@ -184,17 +203,22 @@ module Report
     private
 
     def group?(row)
-      row.name_rank == "Group"
+      row.name_text_name.match?(/(group|complex|clade)$/)
+    end
+
+    def group_token(row)
+      row.name_text_name.match(/(group|complex|clade)$/)[0]
     end
 
     def text_name_without_last_word(text_name)
       text_name.split[0...-1].join(" ")
     end
 
-    def qualified_name?(row)
+    def unregistrable_name?(row)
       group?(row) ||
         sensu_non_stricto?(row) ||
-        provisional?(row)
+        provisional?(row) ||
+        code_name?(row)
     end
 
     def sensu_non_stricto?(row)
@@ -203,26 +227,15 @@ module Report
     end
 
     def provisional?(row)
-      standard_provisional?(row) ||
-        explicit_provisional?(row)
+      row.name_author&.match?(/\w+\. prov\./)
     end
 
-    def standard_provisional?(row)
-      row.name_text_name.match?(/['"]/)
+    def prov_token(row)
+      row.name_author&.match(/\w+\. prov\./)&.[](0)
     end
 
-    def explicit_provisional?(row)
-      row.name_author&.match?(/ (prov|crypt)\./)
-    end
-
-    def provisional_identification_qualifier(row)
-      return "nom. prov." if row.name_author.blank?
-
-      if row.name_author&.match(/(prov|crypt)\./)
-        row.name_author
-      else
-        "#{row.name_author} nom. prov."
-      end
+    def code_name?(row)
+      row.name_text_name.match?(/'/)
     end
 
     def distance_from_center_to_farthest_corner(row)
@@ -252,6 +265,50 @@ module Report
 
     def distance_to_se_corner(lat, lng, box)
       Haversine.distance(lat, lng, box.south, box.east).to_meters.round
+    end
+
+    def max_distance_to_any_corner(lat, lng, box)
+      box_corners(box).map do |clat, clng|
+        Haversine.distance(lat, lng, clat, clng).to_meters
+      end.max.round
+    end
+
+    def box_corners(box)
+      [[box.north, box.east], [box.north, box.west],
+       [box.south, box.east], [box.south, box.west]]
+    end
+
+    def add_gps_hidden!(rows, col)
+      latlng_by_id = gps_hidden_latlng
+      rows.each { |row| set_gps_hidden_vals(row, col, latlng_by_id) }
+    end
+
+    def gps_hidden_latlng
+      plain_query.where(gps_hidden: true).
+        pluck(:id, :lat, :lng).
+        to_h { |id, lat, lng| [id, [lat, lng]] }
+    end
+
+    def set_gps_hidden_vals(row, col, latlng_by_id)
+      return unless (latlng = latlng_by_id[row.obs_id])
+
+      row.add_val("1", col)
+      row.add_val(latlng[0]&.round, col + 1)
+      row.add_val(latlng[1]&.round, col + 2)
+    end
+
+    def information_withheld(row)
+      return unless gps_hidden?(row)
+
+      GPS_HIDDEN_MESSAGE
+    end
+
+    def public_lat(row)
+      gps_hidden?(row) ? row.val(5) : row.best_lat
+    end
+
+    def public_lng(row)
+      gps_hidden?(row) ? row.val(6) : row.best_lng
     end
 
     def explode_notes(row)

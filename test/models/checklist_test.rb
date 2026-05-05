@@ -134,39 +134,389 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_taxa)
   end
 
-  # Test that checklist uses bounding box matching, not exact location match
+  # Checklist#ForProject filters obs via `within_locations`, which
+  # runs `in_box` under the hood — so obs match not only via exact
+  # `location_id` equality but also via their cached location center
+  # (or their own GPS when the label agrees). Obs whose GPS falls in
+  # the target's bbox but whose label points somewhere else are
+  # `gps_dubious` and deliberately excluded (#4159: label wins).
   def test_checklist_for_project_uses_bounding_box_matching
     proj = projects(:bolete_project)
     target_location = locations(:albion)
 
-    # Create observation with exact location match
+    # Obs with exact location match — counts via cached location center.
     obs_exact = Observation.create!(
       name: names(:coprinus_comatus),
       user: mary,
       location: target_location,
       when: Time.zone.now
     )
+    obs_exact.update_columns(
+      location_lat: target_location.center_lat,
+      location_lng: target_location.center_lng
+    )
     proj.observations << obs_exact
 
-    # Create observation with GPS coords inside bounding box but different
-    # location_id
-    obs_gps_inside = Observation.create!(
+    # Obs at the target with GPS inside the target — GPS and label
+    # agree, so it matches via the GPS path.
+    obs_gps_agreeing = Observation.create!(
       name: names(:coprinus_comatus),
       user: mary,
-      location: locations(:burbank), # Different location
-      lat: target_location.center_lat, # But GPS inside albion's box
+      location: target_location,
+      lat: target_location.center_lat,
       lng: target_location.center_lng,
       when: Time.zone.now
     )
-    proj.observations << obs_gps_inside
+    proj.observations << obs_gps_agreeing
+
+    # Obs at a DIFFERENT location with GPS inside the target's bbox.
+    # GPS disagrees with the label, so it's gps_dubious (#4159) and
+    # excluded from GPS searches. Should NOT be counted here.
+    obs_with_dubious_gps = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: mary,
+      location: locations(:burbank),
+      lat: target_location.center_lat,
+      lng: target_location.center_lng,
+      when: Time.zone.now
+    )
+    proj.observations << obs_with_dubious_gps
 
     data = Checklist::ForProject.new(proj, target_location)
-
-    # Both observations should be counted (bounding box matching)
     assert_equal(
       2, data.counts["Coprinus comatus"],
-      "Checklist should count observations with GPS coords inside bounding " \
-      "box, not just exact location matches"
+      "Checklist should count obs whose label or GPS-agreeing-with-label " \
+      "position falls inside the target, and exclude obs whose GPS " \
+      "contradicts their stated location."
+    )
+  end
+
+  def test_checklist_for_project_merges_target_names
+    proj = projects(:rare_fungi_project)
+    # Project has target names but no observations
+    data = Checklist::ForProject.new(proj)
+
+    # Unobserved targets land in a separate bucket, not in `taxa`.
+    target_text_names = proj.target_names.map(&:text_name)
+    unobserved_names = data.unobserved_target_taxa.pluck(0)
+    assert_equal(target_text_names.sort, unobserved_names.sort)
+    assert_empty(data.taxa, "Observed taxa should be empty with no obs")
+
+    # Counts hash still seeds target names at 0 so link labels show "(0)".
+    target_text_names.each do |tn|
+      assert_equal(0, data.counts[tn])
+    end
+
+    assert_equal(proj.target_name_ids.sort, data.target_name_ids.sort)
+  end
+
+  # Issue #4130 — synonym and target rows each show their own direct
+  # count. The Update tab's candidate query rolls up synonyms so those
+  # obs become addable, but once in the project each row stands alone
+  # so admins can see (and re-identify) obs that are still using an
+  # old/synonym name.
+  def test_checklist_shows_target_and_synonym_rows_with_direct_counts
+    proj = projects(:rare_fungi_project)
+    proj.project_target_names.destroy_all
+
+    synonym = Synonym.create!
+    target_name = Name.create!(
+      user: users(:rolf),
+      text_name: "Phylloporia fakeamplectens",
+      search_name: "Phylloporia fakeamplectens",
+      sort_name: "Phylloporia fakeamplectens",
+      display_name: "__Phylloporia__ __fakeamplectens__",
+      author: "",
+      rank: Name.ranks[:Species],
+      deprecated: false,
+      synonym_id: synonym.id,
+      correct_spelling_id: nil
+    )
+    synonym_name = Name.create!(
+      user: users(:rolf),
+      text_name: "Inonotus fakeamplectens",
+      search_name: "Inonotus fakeamplectens",
+      sort_name: "Inonotus fakeamplectens",
+      display_name: "__Inonotus__ __fakeamplectens__",
+      author: "",
+      rank: Name.ranks[:Species],
+      deprecated: true,
+      synonym_id: synonym.id,
+      correct_spelling_id: nil
+    )
+    proj.add_target_name(target_name)
+
+    2.times do
+      proj.observations << Observation.create!(
+        name: target_name, user: users(:rolf), when: Time.zone.now
+      )
+    end
+    3.times do
+      proj.observations << Observation.create!(
+        name: synonym_name, user: users(:rolf), when: Time.zone.now
+      )
+    end
+
+    data = Checklist::ForProject.new(proj)
+    taxa_names = data.taxa.pluck(0)
+    assert_includes(taxa_names, "Phylloporia fakeamplectens")
+    assert_includes(taxa_names, "Inonotus fakeamplectens")
+    assert_equal(2, data.counts["Phylloporia fakeamplectens"],
+                 "Target row counts only direct obs of the target name")
+    assert_equal(3, data.counts["Inonotus fakeamplectens"],
+                 "Synonym row counts only direct obs of the synonym name")
+  end
+
+  def test_checklist_for_project_target_names_with_observations
+    proj = projects(:rare_fungi_project)
+    # Add an observation for one of the target names
+    obs = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: users(:rolf),
+      when: Time.zone.now
+    )
+    proj.observations << obs
+
+    data = Checklist::ForProject.new(proj)
+
+    # Observed target name has count > 0 and appears in taxa.
+    assert_operator(data.counts["Coprinus comatus"], :>, 0)
+    assert_includes(data.taxa.pluck(0), "Coprinus comatus")
+
+    # Unobserved target goes to the unobserved bucket, not taxa.
+    assert_equal(0, data.counts["Agaricus campestris"])
+    assert_includes(data.unobserved_target_taxa.pluck(0), "Agaricus campestris")
+    assert_not_includes(data.taxa.pluck(0), "Agaricus campestris")
+  end
+
+  # ==========================================================================
+  # Issue #4128 — Summary Line 1: target-name observation counts
+  # ==========================================================================
+
+  # L1-1: 2 targets, 1 observed directly, 1 not.
+  def test_num_targets_observed_direct_match
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:coprinus_comatus))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(2, data.num_targets)
+    assert_equal(1, data.num_targets_observed)
+    assert_equal(1, data.num_targets_unobserved)
+  end
+
+  # L1-2/L1-3: Observation of a synonym (not the target itself) counts
+  # the target as observed.
+  def test_num_targets_observed_via_synonym
+    proj = projects(:rare_fungi_project)
+    # macrolepiota_rachodes and macrolepiota_rhacodes share a synonym group
+    add_target(proj, names(:macrolepiota_rachodes))
+    proj.observations << obs_of(names(:macrolepiota_rhacodes))
+
+    data = Checklist::ForProject.new(proj)
+    # 3 targets now (the 2 rare_fungi + macrolepiota_rachodes);
+    # macrolepiota_rachodes is observed via its synonym.
+    assert_equal(3, data.num_targets)
+    assert_equal(1, data.num_targets_observed)
+    assert_includes(data.unobserved_target_taxa.pluck(0),
+                    "Coprinus comatus")
+    assert_not_includes(data.unobserved_target_taxa.pluck(0),
+                        "Macrolepiota rachodes")
+  end
+
+  # L1-4: Targets exist, zero observations → all unobserved.
+  def test_num_targets_observed_no_observations
+    proj = projects(:rare_fungi_project)
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(0, data.num_targets_observed)
+    assert_equal(2, data.num_targets_unobserved)
+  end
+
+  # L1-5: Observation of a synonym NOT attached to project.observations
+  # does not count the target as observed.
+  def test_synonym_obs_outside_project_does_not_count
+    proj = projects(:rare_fungi_project)
+    add_target(proj, names(:macrolepiota_rachodes))
+    # Create the obs but DO NOT add it to project.observations
+    obs_of(names(:macrolepiota_rhacodes))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(0, data.num_targets_observed)
+    assert_includes(data.unobserved_target_taxa.pluck(0),
+                    "Macrolepiota rachodes")
+  end
+
+  # ==========================================================================
+  # Issue #4128 — Summary Line 2: species/higher counts, synonyms collapsed
+  # ==========================================================================
+
+  # L2-1: Two observed species sharing synonym_id → species count = 1.
+  def test_num_species_observed_collapses_synonyms
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:macrolepiota_rachodes))
+    proj.observations << obs_of(names(:macrolepiota_rhacodes))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(1, data.num_species_observed)
+    assert_equal(0, data.num_higher_level_observed)
+    # Both still appear as rows in the species-level panel.
+    assert_equal(2, data.species_level_observed_taxa.size)
+  end
+
+  # L2-2: Disjoint species + genera counts, no overlap with "genus of species".
+  def test_num_species_and_higher_are_disjoint
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:coprinus_comatus)) # species
+    proj.observations << obs_of(names(:agaricus_campestris)) # species
+    proj.observations << obs_of(names(:agaricus)) # Genus
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(2, data.num_species_observed)
+    assert_equal(1, data.num_higher_level_observed)
+  end
+
+  # L2-5: No observations → both counts are 0.
+  def test_summary_counts_with_no_observations
+    data = Checklist::ForProject.new(projects(:rare_fungi_project))
+    assert_equal(0, data.num_species_observed)
+    assert_equal(0, data.num_higher_level_observed)
+  end
+
+  # L2-6: Group rank is classified as higher-level.
+  def test_group_rank_is_higher_level
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:coprinus_comatus))
+    proj.observations << obs_of(names(:boletus_edulis_group))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(1, data.num_species_observed)
+    assert_equal(1, data.num_higher_level_observed)
+    assert_includes(data.higher_level_observed_taxa.pluck(0),
+                    "Boletus edulis group")
+  end
+
+  # L2-7: Infrageneric ranks (Subgenus, Section, etc.) are higher-level.
+  def test_infrageneric_rank_is_higher_level
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:coprinus_comatus))
+    proj.observations << obs_of(names(:amanita_subgenus_lepidella))
+
+    data = Checklist::ForProject.new(proj)
+    assert_equal(1, data.num_species_observed)
+    assert_equal(1, data.num_higher_level_observed)
+    assert_includes(data.higher_level_observed_taxa.pluck(0),
+                    "Amanita subg. Lepidella")
+  end
+
+  # ==========================================================================
+  # Issue #4128 — Panel contents
+  # ==========================================================================
+
+  # P-1: Unobserved target appears in unobserved panel only.
+  def test_unobserved_target_in_unobserved_panel_only
+    proj = projects(:rare_fungi_project)
+
+    data = Checklist::ForProject.new(proj)
+    names_in_unobserved = data.unobserved_target_taxa.pluck(0)
+    assert_includes(names_in_unobserved, "Coprinus comatus")
+    assert_not_includes(data.species_level_observed_taxa.pluck(0),
+                        "Coprinus comatus")
+    assert_not_includes(data.higher_level_observed_taxa.pluck(0),
+                        "Coprinus comatus")
+  end
+
+  # P-5: Genus observation lands in higher-level panel.
+  def test_genus_observation_in_higher_panel
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:agaricus))
+
+    data = Checklist::ForProject.new(proj)
+    assert_includes(data.higher_level_observed_taxa.pluck(0), "Agaricus")
+    assert_not_includes(data.species_level_observed_taxa.pluck(0), "Agaricus")
+  end
+
+  # P-7: Variety rank lands in species-level panel.
+  def test_variety_observation_in_species_panel
+    proj = projects(:rare_fungi_project)
+    proj.observations << obs_of(names(:amanita_boudieri_var_beillei))
+
+    data = Checklist::ForProject.new(proj)
+    species_names = data.species_level_observed_taxa.pluck(0)
+    assert_includes(species_names, "Amanita boudieri var. beillei")
+    assert_equal(1, data.num_species_observed)
+  end
+
+  private
+
+  def obs_of(name)
+    Observation.create!(name: name, user: users(:rolf), when: Time.zone.now)
+  end
+
+  def add_target(project, name)
+    ProjectTargetName.create!(project: project, name: name)
+  end
+
+  def test_checklist_for_project_include_sub_locations
+    proj = projects(:bolete_project)
+    california = locations(:california)
+    albion = locations(:albion) # "Albion, California, USA"
+
+    # Add observation in Albion (a sub-location of California)
+    obs = Observation.create!(
+      name: names(:coprinus_comatus),
+      user: mary,
+      location: albion,
+      when: Time.zone.now
+    )
+    proj.observations << obs
+
+    # With include_sub_locations: name suffix match
+    data_with = Checklist::ForProject.new(
+      proj, california, include_sub_locations: true
+    )
+
+    assert_operator(
+      data_with.num_taxa, :>=, 1,
+      "Sub-location obs should appear with include_sub_locations"
+    )
+    taxa_names = data_with.taxa.pluck(0)
+    assert_includes(taxa_names, "Coprinus comatus")
+  end
+
+  # Verify suffix matching excludes GPS-overlap observations
+  # (the bug that #4126 fixes: e.g., Ohio obs inside WV box)
+  def test_checklist_sub_locations_excludes_gps_overlap
+    proj = projects(:bolete_project)
+    california = locations(:california)
+
+    # Create a non-California location with GPS inside CA box
+    nevada_loc = Location.create!(
+      name: "Reno, Nevada, USA",
+      scientific_name: "USA, Nevada, Reno",
+      north: 39.6, south: 39.4, east: -119.7, west: -119.9,
+      user: mary
+    )
+    overlap_obs = Observation.create!(
+      name: names(:boletus_edulis),
+      user: mary, location: nevada_loc,
+      lat: 39.5, lng: -119.8, when: Time.zone.now
+    )
+    proj.observations << overlap_obs
+
+    # Without sub_locations (GPS bounding box): should include it
+    data_gps = Checklist::ForProject.new(proj, california)
+    assert_includes(
+      data_gps.taxa.pluck(0), "Boletus edulis",
+      "GPS-box match should include obs inside CA bounding box"
+    )
+
+    # With sub_locations (name suffix): should exclude it
+    data_suffix = Checklist::ForProject.new(
+      proj, california, include_sub_locations: true
+    )
+    assert_not_includes(
+      data_suffix.taxa.pluck(0), "Boletus edulis",
+      "Suffix match should exclude Nevada obs despite GPS overlap"
     )
   end
 

@@ -37,12 +37,44 @@ if [ "$EXPECTED_RUBY" != "$CURRENT_RUBY" ]; then
     exit 1
 fi
 
+echo Checking for running background jobs...
+RUNNING_JOBS_OUTPUT=$(bundle exec rails runner script/check_running_jobs.rb 2>&1)
+RUNNING_JOBS_STATUS=$?
+
+if [ $RUNNING_JOBS_STATUS -eq 2 ]; then
+    echo ""
+    echo "Deploy aborted: background jobs are currently running."
+    echo ""
+    echo "$RUNNING_JOBS_OUTPUT"
+    echo ""
+    echo "Wait for jobs to finish before deploying."
+    exit 1
+elif [ $RUNNING_JOBS_STATUS -ne 0 ]; then
+    echo ""
+    echo "Deploy aborted: failed to check for running background jobs."
+    echo ""
+    echo "$RUNNING_JOBS_OUTPUT"
+    echo ""
+    exit 1
+fi
+
+echo Stopping solidqueue to prevent new jobs during deploy...
+sudo service solidqueue stop
+if [ $? -ne 0 ]; then
+    echo Failed to stop solidqueue.
+    exit 1
+fi
+
 tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
+
+echo Stopping puma to update code... && sudo service puma stop
 
 STASH_RESULT=`git stash`
 if [ $? -ne 0 ]; then
     echo git stash failed.
+    echo Restarting puma... && sudo service puma start
+    echo Restarting solidqueue... && sudo service solidqueue start
     exit 1
 fi
 
@@ -56,6 +88,8 @@ fi
 echo Getting latest code from github... && git pull
 if [ $? -ne 0 ]; then
     echo git pull failed.
+    echo Restarting puma... && sudo service puma start
+    echo Restarting solidqueue... && sudo service solidqueue start
     exit 1
 fi
 
@@ -63,6 +97,8 @@ if [ "$STASH_RESULT" != 'No local changes to save' ]; then
     echo Reapply local changes... && git stash pop
     if [ $? -ne 0 ]; then
 	echo Applying the stashed changes failed.
+        echo Restarting puma... && sudo service puma start
+	echo Restarting solidqueue... && sudo service solidqueue start
 	exit 1
     fi
 fi
@@ -71,8 +107,16 @@ echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
 echo Precompiling assets... && rake assets:precompile && \
-echo Reloading puma... && sudo service puma restart && \
-echo Reloading solidqueue... && sudo service solidqueue restart && \
+echo Starting puma... && sudo service puma start && \
+echo Starting solidqueue... && sudo service solidqueue start && \
 echo Tagging repo with $tag... && git tag $tag && \
 echo Pushing new tag... && git push --tags && \
 echo SUCCESS\!
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "Deploy failed. Restarting puma and solidqueue with existing code..."
+    sudo service puma start
+    sudo service solidqueue start
+    exit 1
+fi

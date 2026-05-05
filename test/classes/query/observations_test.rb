@@ -806,4 +806,77 @@ class Query::ObservationsTest < UnitTestCase
       :Observation, sequence_query: { locus_has: "LSU", by_users: dick.id }
     )
   end
+
+  # == Phase 4: Occurrence Visibility Rule ==
+
+  def test_observation_query_substitutes_non_primary_with_primary
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: obs1)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    query = Query.lookup(:Observation,
+                         id_in_set: [obs1.id, obs2.id])
+    ids = query.result_ids
+
+    # obs2 (non-primary) should be replaced by obs1 (primary)
+    assert_includes(ids, obs1.id)
+    assert_not_includes(ids, obs2.id)
+    # No duplicates
+    assert_equal(ids.uniq, ids)
+  end
+
+  def test_observation_query_preserves_order_after_substitution
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: obs1)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    query = Query.lookup(:Observation,
+                         id_in_set: [obs3.id, obs2.id, obs1.id])
+    ids = query.result_ids
+
+    # obs2 should be replaced by obs1; obs3 is unrelated
+    assert_includes(ids, obs3.id)
+    assert_includes(ids, obs1.id)
+    assert_not_includes(ids, obs2.id)
+    # obs3 should come first (it was first in the set)
+    assert_equal(obs3.id, ids.first)
+  end
+
+  def test_observation_query_deduplicates_after_substitution
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: obs1)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+    obs3.update!(occurrence: occ)
+
+    # All three are in the query; obs2 and obs3 both map to obs1
+    query = Query.lookup(:Observation,
+                         id_in_set: [obs1.id, obs2.id, obs3.id])
+    ids = query.result_ids
+
+    assert_equal(1, ids.size)
+    assert_equal(obs1.id, ids.first)
+  end
+
+  def test_observation_query_num_results_reflects_substitution
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: obs1)
+    obs1.update!(occurrence: occ)
+    obs2.update!(occurrence: occ)
+
+    query = Query.lookup(:Observation,
+                         id_in_set: [obs1.id, obs2.id, obs3.id])
+
+    # 3 raw matches, but obs2 collapses into obs1 → 2 results
+    assert_equal(2, query.num_results)
+  end
 end

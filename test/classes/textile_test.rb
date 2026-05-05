@@ -9,7 +9,7 @@ class Textile
   end
 end
 
-class TextileTest < UnitTestCase # rubocop:disable Style/OneClassPerFile
+class TextileTest < UnitTestCase
   EXPLICIT_OBJECT_MARKUP = [
     "_observation 123_", # lower case explicit tag
     "_term bar code_",

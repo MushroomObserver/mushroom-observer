@@ -85,6 +85,18 @@ module API2InlineHelper
     xml_string(xml, :code, field_slip.code)
   end
 
+  def json_occurrence(occurrence)
+    strip_hash(id: occurrence.id,
+               primary_observation_id: occurrence.primary_observation_id,
+               has_specimen: occurrence.has_specimen)
+  end
+
+  def xml_occurrence(xml, occurrence)
+    xml_integer(xml, :primary_observation_id,
+                occurrence.primary_observation_id)
+    xml_boolean(xml, :has_specimen, occurrence.has_specimen)
+  end
+
   def json_herbarium(herbarium)
     strip_hash(id: herbarium.id,
                code: herbarium.code.to_s,

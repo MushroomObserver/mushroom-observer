@@ -50,6 +50,7 @@ ACTIONS = {
     names: {},
     name_descriptions: {},
     observations: {},
+    occurrences: {},
     projects: {},
     sequences: {},
     species_lists: {},
@@ -385,6 +386,13 @@ MushroomObserver::Application.routes.draw do
   end
   resources :field_slips
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
+  resources :occurrences, only: [:new, :create, :show, :edit, :update,
+                                 :destroy] do
+    member do
+      get :resolve_projects
+      post :resolve_projects
+    end
+  end
 
   # ----- Field Slip Job Trackers: show for json -------------------------------
   resources :field_slip_job_trackers, only: [:show]
@@ -615,6 +623,7 @@ MushroomObserver::Application.routes.draw do
                 shallow: true, controller: "observations/external_links"
 
       get("map", to: "observations/maps#show")
+      get("map_popup", to: "observations/maps#popup")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
       get("emails/new", to: "observations/emails#new",
@@ -664,6 +673,10 @@ MushroomObserver::Application.routes.draw do
   end
 
   resources :projects do
+    resource :admin, only: [:show],
+                     controller: "projects/admin"
+    resource :administration, only: [:create],
+                              controller: "projects/administrations"
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"
     resources :field_slips, only: [:new, :create],
@@ -671,8 +684,28 @@ MushroomObserver::Application.routes.draw do
     resources :locations, only: [:index],
                           controller: "projects/locations"
     resources :members, only: [:new, :create, :edit, :update, :index],
-                        controller: "projects/members", param: :candidate
+                        controller: "projects/members",
+                        param: :candidate do
+      member do
+        get :add_obs_modal
+        get :trust_modal
+      end
+    end
     resources :aliases, controller: "projects/aliases"
+    resources :target_names, only: [:create, :destroy],
+                             controller: "projects/target_names"
+    resources :target_locations, only: [:create, :destroy],
+                                 controller: "projects/target_locations"
+    resources :updates, only: [:index],
+                        controller: "projects/updates" do
+      member do
+        post :add_observation
+        post :exclude_observation
+      end
+      collection do
+        post :add_all
+      end
+    end
     resources :violations, only: [:index], controller: "projects/violations"
   end
   # resourceful route won't work because it requires an additional id

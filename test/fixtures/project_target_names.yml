@@ -1,0 +1,9 @@
+# Fixtures for project target names (rare fungi challenge targets)
+
+rare_fungi_target_coprinus_comatus:
+  project: rare_fungi_project
+  name: coprinus_comatus
+
+rare_fungi_target_agaricus_campestris:
+  project: rare_fungi_project
+  name: agaricus_campestris

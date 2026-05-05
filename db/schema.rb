@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -391,7 +391,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.text "uses"
     t.text "notes"
     t.text "refs"
-    t.text "classification"
   end
 
   create_table "name_description_writers", charset: "utf8mb3", force: :cascade do |t|
@@ -424,7 +423,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.text "uses"
     t.text "notes"
     t.text "refs"
-    t.text "classification"
     t.integer "project_id"
   end
 
@@ -454,6 +452,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.integer "rank"
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.integer "icn_id"
+    t.text "classification"
+    t.index ["name_id", "version"], name: "index_name_versions_on_name_id_and_version"
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -515,6 +515,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.integer "image_id", default: 0, null: false
     t.integer "observation_id", default: 0, null: false
     t.integer "rank", default: 0, null: false
+    t.index ["image_id"], name: "index_observation_images_on_image_id"
     t.index ["observation_id"], name: "index_observation_images_on_observation_id"
   end
 
@@ -548,7 +549,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.integer "alt"
     t.string "lifeform", limit: 1024
     t.string "text_name", limit: 100
-    t.text "classification"
     t.boolean "gps_hidden", default: false, null: false
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
@@ -556,11 +556,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.integer "inat_id"
     t.decimal "location_lat", precision: 15, scale: 10
     t.decimal "location_lng", precision: 15, scale: 10
-    t.integer "field_slip_id"
-    t.index ["field_slip_id"], name: "index_observations_on_field_slip_id"
+    t.integer "occurrence_id"
+    t.boolean "gps_dubious", default: false, null: false
     t.index ["location_id"], name: "index_observations_on_location_id"
     t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"
+    t.index ["occurrence_id"], name: "index_observations_on_occurrence_id"
+  end
+
+  create_table "occurrences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "primary_observation_id"
+    t.boolean "has_specimen", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "field_slip_id"
+    t.index ["field_slip_id"], name: "index_occurrences_on_field_slip_id", unique: true
+    t.index ["primary_observation_id"], name: "index_occurrences_on_primary_observation_id"
+    t.index ["user_id"], name: "index_occurrences_on_user_id"
   end
 
   create_table "original_image_requests", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -580,6 +593,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.index ["name", "project_id"], name: "index_project_aliases_on_name_and_project_id", unique: true
     t.index ["project_id"], name: "index_project_aliases_on_project_id"
     t.index ["target_type", "target_id"], name: "index_project_aliases_on_target_type_and_target_id"
+  end
+
+  create_table "project_excluded_observations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "observation_id", null: false
+    t.integer "project_id", null: false
+    t.index ["observation_id"], name: "index_project_excluded_observations_on_observation_id"
+    t.index ["project_id", "observation_id"], name: "index_project_excluded_observations_on_project_and_obs", unique: true
+    t.index ["project_id"], name: "index_project_excluded_observations_on_project_id"
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
@@ -605,6 +626,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
   create_table "project_species_lists", charset: "utf8mb3", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "species_list_id", null: false
+  end
+
+  create_table "project_target_locations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "location_id", null: false
+    t.index ["location_id"], name: "index_project_target_locations_on_location_id"
+    t.index ["project_id", "location_id"], name: "index_project_target_locations_on_project_id_and_location_id", unique: true
+    t.index ["project_id"], name: "index_project_target_locations_on_project_id"
+  end
+
+  create_table "project_target_names", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "name_id", null: false
+    t.index ["name_id"], name: "index_project_target_names_on_name_id"
+    t.index ["project_id", "name_id"], name: "index_project_target_names_on_project_id_and_name_id", unique: true
+    t.index ["project_id"], name: "index_project_target_names_on_project_id"
   end
 
   create_table "projects", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -655,6 +692,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.integer "glossary_term_id"
     t.integer "article_id"
     t.datetime "created_at", precision: nil, null: false
+    t.index ["observation_id"], name: "index_rss_logs_on_observation_id"
+    t.index ["updated_at"], name: "index_rss_logs_on_updated_at"
   end
 
   create_table "sequences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -878,7 +917,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_31_000001) do
     t.integer "votes", default: 0, null: false
     t.string "languages"
     t.string "bonuses"
-    t.string "checklist"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "user_index"

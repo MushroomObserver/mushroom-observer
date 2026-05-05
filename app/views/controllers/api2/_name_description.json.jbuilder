@@ -23,5 +23,8 @@ json.look_alikes(object.look_alikes.to_s.tl_for_api) \
 json.uses(object.uses.to_s.tl_for_api) if object.uses.present?
 json.notes(object.notes.to_s.tl_for_api) if object.notes.present?
 json.refs(object.refs.to_s.tl_for_api) if object.refs.present?
-json.classification(object.classification.to_s.tl_for_api) \
-  if object.classification.present?
+# Classification moved off the description in discussion #4163;
+# serve `name.classification` so API consumers keep getting the field
+# they expect.
+json.classification(object.name.classification.to_s.tl_for_api) \
+  if object.name&.classification.present?

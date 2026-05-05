@@ -1,10 +1,23 @@
-# Use Dependabot to regularly update dependencies
+# Use Dependabot to update packages in ecosystems
+# https://docs.github.com/en/code-security/concepts/supply-chain-security/about-the-dependabot-yml-file
+
+# Update gem dependencies
 # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates
 # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates
-
 version: 2
 updates:
   - package-ecosystem: "bundler"
     directory: "/"
     schedule:
+      interval: "weekly"
+
+# Update GitHub Actions
+# https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/keeping-your-actions-up-to-date-with-dependabot
+version: 2
+updates:
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every week
       interval: "weekly"

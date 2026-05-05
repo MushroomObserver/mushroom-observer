@@ -32,7 +32,7 @@ class PatternSearch::ObservationTest < UnitTestCase
 
   def test_observation_search_for_old_provisional
     x = PatternSearch::Observation.new('Cortinarius "sp-IN34"')
-    assert_obj_arrays_equal([observations(:provisional_obs)],
+    assert_obj_arrays_equal([observations(:code_name_obs)],
                             x.query.results, :sort)
   end
 

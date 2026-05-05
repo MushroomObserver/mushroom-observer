@@ -66,7 +66,7 @@ class ProjectsControllerTest < FunctionalTestCase
     p_id = projects(:eol_project).id
     get(:show, params: { id: p_id })
 
-    assert_template("show")
+    assert_response(:success)
     assert_select(
       "a[href*=?]", new_project_admin_request_path(project_id: p_id)
     )
@@ -79,6 +79,20 @@ class ProjectsControllerTest < FunctionalTestCase
                   "H1 title element should exist and contain content")
     assert_select("div#project_banner", true,
                   "Project banner div should be present")
+  end
+
+  def test_show_project_with_join_button
+    project = projects(:open_membership_project)
+    login("rolf") # not a member of open_membership_project
+    assert(project.open_membership)
+    assert_not(project.member?(rolf))
+
+    get(:show, params: { id: project.id })
+
+    assert_response(:success)
+    assert_match(:show_project_join.t, @response.body,
+                 "Join button should be present for non-member " \
+                 "on open project")
   end
 
   def test_show_project_without_banner
@@ -108,8 +122,12 @@ class ProjectsControllerTest < FunctionalTestCase
     login(project.user.login)
     get(:show, params: { id: project.id })
 
-    assert_template("show")
-    assert_edit_button(project)
+    assert_response(:success)
+    assert_select(
+      "a[href=?]", project_admin_path(project_id: project.id),
+      true,
+      "Project owner should see Admin tab linking to admin page"
+    )
   end
 
   def test_show_project_logged_in_admin
@@ -119,8 +137,47 @@ class ProjectsControllerTest < FunctionalTestCase
     login(mary.login)
     get(:show, params: { id: project.id })
 
-    assert_template("show")
-    assert_edit_button(project)
+    assert_response(:success)
+    assert_select(
+      "a[href=?]", project_admin_path(project_id: project.id),
+      true,
+      "Project admin should see Admin tab linking to admin page"
+    )
+    assert_select(
+      "form[action=?]", project_administration_path(project_id: project.id),
+      false,
+      "Existing project admins should not see the Administer Project button"
+    )
+  end
+
+  def test_show_project_administer_button_for_site_admin
+    project = projects(:eol_project)
+    site_admin = users(:admin)
+    assert_not(project.is_admin?(site_admin),
+               "Test setup: site admin should not yet be a project admin")
+
+    login(site_admin.login)
+    get(:show, params: { id: project.id })
+
+    assert_response(:success)
+    assert_select(
+      "form[action=?]", project_administration_path(project_id: project.id),
+      true,
+      "Site Admin not in admin_group should see the Administer Project button"
+    )
+  end
+
+  def test_show_project_no_administer_button_for_non_site_admin
+    project = projects(:eol_project)
+    login(katrina.login)
+    get(:show, params: { id: project.id })
+
+    assert_response(:success)
+    assert_select(
+      "form[action=?]", project_administration_path(project_id: project.id),
+      false,
+      "Non-site-admin should not see the Administer Project button"
+    )
   end
 
   def test_show_project_with_location
@@ -154,14 +211,14 @@ class ProjectsControllerTest < FunctionalTestCase
 
     get(:show, params: { id: project.id })
 
-    assert_template("show")
+    assert_response(:success)
   end
 
   def test_show_project_with_date_range
     project = projects(:pinned_date_range_project)
     login
     get(:show, params: { id: project.id })
-    assert_template("show")
+    assert_response(:success)
     # NOTE: this project has no banner_image
     assert_select("#header", { text: /#{project.date_range}/ },
                   "Date range missing from Project header")
@@ -342,35 +399,18 @@ class ProjectsControllerTest < FunctionalTestCase
     add_project_helper("The Test Coverage Project", "")
   end
 
-  def test_edit_project_by_owner
+  # The legacy /projects/:id/edit URL now redirects to the canonical
+  # /projects/:id/admin (Admin tab Details sub-tab). Issue #4148.
+  def test_edit_project_redirects_to_admin
     project = projects(:two_list_project)
-    # `requires_user` calls `either_requires_either` which calls
-    # `assert_request` which requires that
-    # the request pass with the supplied user, and
-    # fail with an unsupplied user, who is either
-    #   mary if the suppled user was rolf, or
-    #   rolf if the supplied user was other than mary or rolf
     assert(project.user == mary && !project.admin?(rolf),
            "Test needs different fixtures")
-    project_id = project.id.to_s
-    params = { id: project_id }
-
-    requires_user(:edit, { action: :show }, params, "mary")
-
-    assert_form_action(action: :update, id: project.id.to_s)
-  end
-
-  def test_edit_project_any_date
-    project = projects(:bolete_project)
-    assert_true(project.start_date.nil? && project.end_date.nil?,
-                "Test needs Project with nil start and end dates")
     params = { id: project.id.to_s }
 
-    login(project.user.login)
-    post(:edit, params: params)
+    login(mary.login)
+    get(:edit, params: params)
 
-    assert_select("#project_dates_any_true[checked]", true,
-                  "'Any' radio button should be selected")
+    assert_redirected_to(project_admin_path(project_id: project.id))
   end
 
   def test_edit_project_empty_name
@@ -421,8 +461,10 @@ class ProjectsControllerTest < FunctionalTestCase
     patch(:update, params: params)
 
     assert_flash_error("Missing flash error when Project ends before it starts")
-    assert_select("#title", { text: /Edit Project/ },
-                  "It should return to form if Project ends before it starts")
+    # On validation failure the Admin/Details page is re-rendered so
+    # the user can correct the dates without leaving the Admin tab.
+    assert_select("input[name='project[title]']", true,
+                  "Form should be re-rendered after validation failure")
   end
 
   def test_destroy_project

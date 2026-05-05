@@ -46,7 +46,7 @@ module Tabs
       cn_query = Query.lookup(:CollectionNumber, observations: obs.id)
 
       InternalLink::Model.new(
-        tag.i(c_n.format_name.t), c_n,
+        c_n.format_name.t, c_n,
         add_q_param(c_n.show_link_args, cn_query)
       ).tab
     end

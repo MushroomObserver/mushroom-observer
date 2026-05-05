@@ -38,7 +38,10 @@ obs_locals = { obs: @observation, consensus: @consensus, user: @user }
 
   <%= tag.div(class: yield(:right_columns)) do %>
     <%= render(partial: "observations/show/observation_details",
-               locals: obs_locals.merge(sites: @other_sites)) %>
+               locals: obs_locals.merge(
+                 sites: @other_sites,
+                 siblings: @sibling_observations || []
+               )) %>
     <% if @user %>
       <%= render(partial: "observations/show/name_info", locals: obs_locals) %>
 
@@ -46,6 +49,11 @@ obs_locals = { obs: @observation, consensus: @consensus, user: @user }
         <%= render(partial: "observations/show/species_lists",
                    locals: obs_locals) %>
       <% end %>
+
+      <%= render(partial: "observations/show/associated_observations",
+                 locals: { obs: @observation, occurrence: @occurrence,
+                           siblings: @sibling_observations || [],
+                           user: @user }) %>
     <% end %>
   <% end %>
 <% end %>

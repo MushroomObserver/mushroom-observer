@@ -155,6 +155,40 @@ module Mappable
       expanded.contains?(pt_lat, pt_lng)
     end
 
+    # Great-circle-ish distance in km from the nearest edge of this
+    # bbox to the given point. Returns 0 when the point is inside.
+    # Handles east<west (antimeridian-wrapping) bboxes. Used by
+    # Observation#set_gps_dubious for #4159.
+    KM_PER_DEGREE = 111.0
+
+    def km_from_point(pt_lat, pt_lng)
+      km_lat = lat_degrees_from_point(pt_lat) * KM_PER_DEGREE
+      km_lng = lng_degrees_from_point(pt_lng) * KM_PER_DEGREE *
+               Math.cos(pt_lat * Math::PI / 180.0)
+      Math.sqrt((km_lat * km_lat) + (km_lng * km_lng))
+    end
+
+    def lat_degrees_from_point(pt_lat)
+      return south - pt_lat if pt_lat < south
+      return pt_lat - north if pt_lat > north
+
+      0.0
+    end
+
+    def lng_degrees_from_point(pt_lng)
+      return 0.0 if lng_inside?(pt_lng)
+
+      d_east = (pt_lng - east).abs % 360
+      d_west = (pt_lng - west).abs % 360
+      [d_east, 360 - d_east, d_west, 360 - d_west].min
+    end
+
+    def lng_inside?(pt_lng)
+      return pt_lng.between?(west, east) if east >= west
+
+      pt_lng >= west || pt_lng <= east
+    end
+
     # These (or Arel equivalents) are necessary for update_all to be efficient.
     # Used in update_box_area_and_center_columns to populate or restore columns.
     module ClassMethods

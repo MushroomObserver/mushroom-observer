@@ -78,10 +78,8 @@ module Names
       assert_redirected_to(name.show_link_args)
       assert_equal(new_str, name.reload.classification)
       assert_equal(new_str, names(:agaricus).classification)
-      assert_equal(new_str,
-                   names(:agaricus_campestras).description.classification)
-      assert_equal(new_str,
-                   observations(:agaricus_campestras_obs).classification)
+      # Description and Observation no longer carry classification
+      # caches — both columns dropped in discussion #4163.
     end
   end
 end

@@ -114,7 +114,7 @@ module Names::Classification
       new_str = "#{parent1.classification}\r\nFamily: _Agaricaceae_\r\n"
       assert_equal(new_str, name.reload.classification)
       assert_equal(new_str, names(:boletus_edulis).classification)
-      assert_equal(new_str, observations(:boletus_edulis_obs).classification)
+      # Classification is no longer cached on Observation (#4163).
     end
   end
 end

@@ -1,6 +1,15 @@
 <%
   add_page_title("#{:field_slip_editing.t}: #{@field_slip.code}")
   add_context_nav(field_slip_edit_tabs(@field_slip))
+  container_class(:full)
 %>
 
 <%= render("form", field_slip: @field_slip) %>
+<% if @field_slip_project_gaps&.any? %>
+  <%= render(Components::OccurrenceResolveModal.new(
+               gaps: @field_slip_project_gaps,
+               primary: @field_slip_occurrence.primary_observation,
+               user: @user,
+               occurrence: @field_slip_occurrence
+             )) %>
+<% end %>

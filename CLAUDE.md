@@ -44,6 +44,9 @@ bin/rails test test/models/observation_test.rb
 # Run single test by name (use -n flag, NOT RSpec-style syntax)
 bin/rails test test/models/observation_test.rb -n test_scope_needs_naming
 
+# Run multiple specific tests — use a regex; multiple -n flags drop all but last
+bin/rails test test/models/name_test.rb -n /test_name_(spaceship_operator|sort_order)/
+
 # Run tests in a directory
 bin/rails test test/components/
 

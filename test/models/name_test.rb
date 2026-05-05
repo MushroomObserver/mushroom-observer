@@ -1763,6 +1763,47 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_validate_classification_raises_on_duplicate_rank
+    do_validate_classification_test(
+      "Species", "Kingdom: _Fungi_\nKingdom: _Fungi_", false
+    )
+  end
+
+  def test_validate_classification_normalizes_division_to_phylum
+    # Division is a historical synonym for Phylum in some nomenclature systems
+    do_validate_classification_test(
+      "Species",
+      "Kingdom: _Fungi_\nDivision: _Basidiomycota_",
+      "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+    )
+  end
+
+  def test_validate_classification_defaults_to_own_classification
+    name = names(:agaricus_campestris)
+    result = name.validate_classification
+    assert_equal(
+      name.classification, result,
+      "validate_classification with no arg should use own classification"
+    )
+  end
+
+  def test_rank_translated_returns_localized_string
+    name = names(:agaricus_campestris)
+    assert_equal(:rank_species.l, name.rank_translated,
+                 "rank_translated should return localized rank name")
+  end
+
+  def test_rank_lists_include_intermediate_ranks
+    assert_includes(Name.ranks_above_species, "Series",
+                    "Series should be a rank above species")
+    assert_includes(Name.ranks_above_species, "Group",
+                    "Group should be a rank above species")
+    assert_includes(Name.ranks_below_genus, "Series",
+                    "Series should be a rank below genus")
+    assert_includes(Name.ranks_between_kingdom_and_genus, "Subfamily",
+                    "Subfamily should be a rank between kingdom and genus")
+  end
+
   def test_rank_matchers
     name = names(:fungi)
     assert_not(name.at_or_below_genus?)
@@ -1793,6 +1834,22 @@ class NameTest < UnitTestCase
     assert(name.below_genus?)
     assert_not(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
+  end
+
+  def test_genus_display_ranks
+    ranks = Name.genus_display_ranks
+    Name.ranks.each do |rank_name, rank_val|
+      if rank_val.between?(Name.ranks[:Stirps], Name.ranks[:Genus])
+        assert_includes(ranks, rank_val,
+                        "genus_display_ranks should include #{rank_name}")
+      end
+    end
+    assert_not_includes(ranks, Name.ranks[:Species],
+                        "genus_display_ranks should not include Species")
+    assert_not_includes(ranks, Name.ranks[:Group],
+                        "genus_display_ranks should not include Group")
+    assert_not_includes(ranks, Name.ranks[:Family],
+                        "genus_display_ranks should not include Family")
   end
 
   # ------------------------------
@@ -1827,8 +1884,14 @@ class NameTest < UnitTestCase
   end
 
   def test_ancestors_2
-    # use Petigera instead of Peltigera because it has no classification string
-    pet = names(:petigera)
+    # Need a deprecated genus with NO classification string to exercise
+    # the fallback path in all_parents / children. Petigera used to
+    # serve this purpose, but it now carries a classification (see
+    # #4154), so we synthesize an equivalent fixture here.
+    pet = create_test_name("Petigera")
+    pet.update!(deprecated: true, classification: nil,
+                correct_spelling: names(:peltigera),
+                synonym_id: names(:peltigera).synonym_id)
     assert_name_arrays_equal([], pet.all_parents)
     assert_name_arrays_equal([], pet.children)
 
@@ -1927,8 +1990,10 @@ class NameTest < UnitTestCase
 
   def test_ancestors_3
     # Names with Ascomycota in classification OR search_name starting with it.
-    # Includes: Ascomycota itself + Ascomycetes through Peltigera.
-    assert_equal(5, Name.classification_has("Ascomycota").count)
+    # Includes: Ascomycota itself + Ascomycetes through Peltigera, plus
+    # Petigera (deprecated misspelling of Peltigera, whose fixture now
+    # also carries the classification — see #4154).
+    assert_equal(6, Name.classification_has("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -2057,7 +2122,6 @@ class NameTest < UnitTestCase
     # Rolf erases notes: no emails (no authors yet), Rolf becomes editor.
     User.current = rolf
     desc.reload
-    desc.classification = ""
     desc.gen_desc = ""
     desc.diag_desc = ""
     desc.distribution = ""
@@ -2329,8 +2393,22 @@ class NameTest < UnitTestCase
   end
 
   def test_has_eol_data
-    assert(names(:peltigera).has_eol_data?)
-    assert_not(names(:lactarius_alpigenes).has_eol_data?)
+    assert(names(:peltigera).has_eol_data?,
+           "peltigera should have EoL data via qualifying observation image")
+    assert_not(names(:lactarius_alpigenes).has_eol_data?,
+               "lactarius_alpigenes is deprecated so has no EoL data")
+  end
+
+  def test_has_eol_data_true_via_vetted_description
+    name = names(:peltigera)
+    # peltigera returns true via observations normally; disqualify them
+    # so the descriptions loop is exercised instead
+    name.observations.update_all(vote_cache: 0)
+    assert(
+      name.has_eol_data?,
+      "`eol_data?` should be true via vetted description " \
+      "when no observation qualifies"
+    )
   end
 
   def test_hiding_authors
@@ -2833,22 +2911,23 @@ class NameTest < UnitTestCase
   def test_name_spaceship_operator
     # names ordered by how spaceship operator is expected to sort them
     names = [
-      create_test_name("Agaricomycota"),
-      create_test_name("Agaricomycotina"),
-      create_test_name("Agaricomycetes"),
-      create_test_name("Agaricomycetidae"),
-      create_test_name("Agaricales"),
-      create_test_name("Agaricineae"),
-      create_test_name("Agaricaceae"),
-      create_test_name("Agaricus group"),
-      create_test_name("Agaricus Aaron"),
-      create_test_name("Agaricus L."),
+      create_test_name("Agaricomycota"), # phylum
+      create_test_name("Agaricomycotina"), # subphylum
+      create_test_name("Agaricomycetes"), # class
+      create_test_name("Agaricomycetidae"), # subclass
+      create_test_name("Agaricales"), # order
+      create_test_name("Agaricineae"), # suborder
+      create_test_name("Agaricaceae"), # family
+      create_test_name("Agaricus group"), # genus group
+      create_test_name("Agaricus Aaron"), # genus author
+      create_test_name("Agaricus L."), # genus
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
       create_test_name("Agaricus Đorn"),
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus ser. Alpha"),
       create_test_name("Agaricus stirps Arthur"),
       # spaceship operator sorts Ś after {. Therefore
       # "Agaricus  {4stirps  Arthur" sorts before
@@ -2862,10 +2941,17 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. erik Zoom"),
-      create_test_name("Agaricus ugliano var. danny Zoom")
+      create_test_name("Agaricus ugliano var. danny Zoom"),
+      # Xyl- names share the stem "Xyl" to verify
+      # Family→Subfamily→Tribe→Subtribe order
+      create_test_name("Xylaceae"),   # family:    Xyl!7
+      create_test_name("Xyloideae"),  # subfamily: Xyl!8
+      create_test_name("Xyleae"),     # tribe:     Xyl!8a
+      create_test_name("Xylinae")     # subtribe:  Xyl!9
     ]
     sort_names = names.map(&:sort_name)
-    assert_equal(sort_names, sort_names.sort)
+    assert_equal(sort_names, sort_names.sort,
+                 "Names should sort in rank order within same stem")
   end
 
   def test_skip_notify
@@ -2882,6 +2968,24 @@ class NameTest < UnitTestCase
       name.update(
         Name.parse_name("Coprinus comatus  (O.F. Müll.) Pers.").params
       )
+    end
+  end
+
+  # Classification edits are system-curation rather than
+  # user-curation: pre-#4163, the cache mirror onto Name didn't
+  # generate emails (classification wasn't versioned on Name) and the
+  # propagate-to-subtaxa path uses update_all (no callbacks). Now that
+  # classification is versioned on Name (#4163), guard so that a save
+  # touching only classification still doesn't notify.
+  def test_classification_only_save_does_not_notify
+    User.current = users(:roy)
+    name = names(:coprinus_comatus)
+    new_cls = "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\n" \
+              "Phylum: _TestPhylum_\r\n"
+    assert_not_equal(new_cls, name.classification)
+
+    assert_no_enqueued_jobs do
+      name.update(classification: new_cls)
     end
   end
 
@@ -2920,15 +3024,15 @@ class NameTest < UnitTestCase
   # apparently because "Ś" sorts after "{".
   def test_name_sort_order
     names = [
-      create_test_name("Agaricomycota"),
-      create_test_name("Agaricomycotina"),
-      create_test_name("Agaricomycetes"),
-      create_test_name("Agaricomycetidae"),
-      create_test_name("Agaricales"),
-      create_test_name("Agaricineae"),
-      create_test_name("Agaricaceae"),
-      create_test_name("Agaricus group"),
-      create_test_name("Agaricus Aaron"),
+      create_test_name("Agaricomycota"), # phylum
+      create_test_name("Agaricomycotina"), # subphylum
+      create_test_name("Agaricomycetes"), # class
+      create_test_name("Agaricomycetidae"), # subclass
+      create_test_name("Agaricales"), # order
+      create_test_name("Agaricineae"), # suborder
+      create_test_name("Agaricaceae"), # family
+      create_test_name("Agaricus group"), # genugroup
+      create_test_name("Agaricus Aaron"), # genu
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
@@ -2936,9 +3040,10 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus ser. Alpha"),
       create_test_name("Agaricus stirps Arthur"),
-      create_test_name("Agaricus aardvark"),
-      create_test_name("Agaricus aardvark group"),
+      create_test_name("Agaricus aardvark"), # species
+      create_test_name("Agaricus aardvark group"), # (species) group
       create_test_name('Agaricus "sp-LD50"'),
       create_test_name('Agaricus "tree-beard"'),
       create_test_name("Agaricus ugliano Zoom"),
@@ -2972,11 +3077,16 @@ class NameTest < UnitTestCase
     assert_equal("Section", Name.guess_rank("Hygrocybe sect. Coccineae"))
     assert_equal("Subgenus", Name.guess_rank("Amanita subg. Amanita"))
     assert_equal("Family", Name.guess_rank("Amanitaceae"))
-    assert_equal("Family", Name.guess_rank("Peltigerineae"))
+    assert_equal("Tribe", Name.guess_rank("Agariceae"),
+                 "Names ending in -eae should guess Tribe, not Family or Genus")
+    assert_equal("Suborder", Name.guess_rank("Peltigerineae"),
+                 "Names ending in -ineae should guess Suborder")
     assert_equal("Order", Name.guess_rank("Peltigerales"))
-    assert_equal("Order", Name.guess_rank("Lecanoromycetidae"))
+    assert_equal("Subclass", Name.guess_rank("Lecanoromycetidae"),
+                 "Names ending in -mycetidae should guess Subclass")
     assert_equal("Class", Name.guess_rank("Lecanoromycetes"))
-    assert_equal("Class", Name.guess_rank("Agaricomycotina"))
+    assert_equal("Subphylum", Name.guess_rank("Agaricomycotina"),
+                 "Names ending in -mycotina should guess Subphylum")
     assert_equal("Phylum", Name.guess_rank("Agaricomycota"))
     assert_equal("Genus", Name.guess_rank("Animalia"))
     assert_equal("Genus", Name.guess_rank("Plantae"))
@@ -3327,26 +3437,13 @@ class NameTest < UnitTestCase
                  Name.matching_desired_new_parsed_name(parsed).order(:author))
   end
 
-  def test_refresh_classification_caches
-    name = names(:coprinus_comatus)
-    bad  = name.classification = "Phylum: _Ascomycota_"
-    good = name.description.classification
-    name.save
-    assert_not_equal(good, bad)
-
-    Name.refresh_classification_caches
-    assert_equal(good, name.reload.classification)
-    assert_equal(good, name.description.reload.classification)
-  end
-
   def test_changing_classification_propagates_to_subtaxa
     name  = names(:coprinus)
     child = names(:coprinus_comatus)
     new_classification = names(:peltigera).classification
     assert_not_equal(new_classification, name.classification)
     assert_not_equal(new_classification, child.classification)
-    name.description.classification = new_classification
-    name.description.save
+    name.change_classification(new_classification)
     assert_equal(new_classification, name.reload.classification)
     assert_equal(new_classification, child.reload.classification)
   end
@@ -3530,6 +3627,75 @@ class NameTest < UnitTestCase
     names(:coprinus_comatus).update(deprecated: true)
     assert_names_equal(names(:stereum), names(:coprinus_comatus).accepted_genus)
     assert_names_equal(names(:stereum), names(:stereum_hirsutum).accepted_genus)
+  end
+
+  # `Name#classification_at_version` (#4166):
+  #   - returns the version row's own classification if it's set
+  #     (recorded source)
+  #   - else walks up to accepted_genus and finds the genus version
+  #     that was current at the time of this version's edit
+  #     (inherited source)
+  #   - else returns no value (page hides the panel)
+  def test_classification_at_version_recorded
+    name = names(:agaricus_campestras)
+    User.current = rolf
+    name.update!(classification: "Phylum: _Basidiomycota_")
+    v = name.versions.find_by(classification: "Phylum: _Basidiomycota_")
+
+    result = name.classification_at_version(v)
+    assert_equal("Phylum: _Basidiomycota_", result[:value])
+    assert_equal(:recorded, result[:source])
+  end
+
+  def test_classification_at_version_inherited_from_genus
+    genus = names(:agaricus)
+    species = names(:agaricus_campestras)
+    User.current = rolf
+    # Genus has a classified version row that pre-dates the species's
+    # NULL-classification version row — simulating the order of events
+    # when propagation silently updated the species without creating
+    # a version.
+    genus.update!(classification: "Phylum: _Basidiomycota_\r\nFamily: _New_")
+    genus_v = genus.versions.order(:version).last
+    genus_v.update_column(:updated_at, 3.days.ago)
+
+    species_v = species.versions.order(:version).first ||
+                species.versions.create!(classification: nil)
+    species_v.update_columns(classification: nil, updated_at: 1.day.ago)
+
+    result = species.classification_at_version(species_v)
+    assert_equal(genus_v.classification, result[:value])
+    assert_equal(:inherited, result[:source])
+    assert_equal(genus.id, result[:inherited_from][:name].id)
+    assert_equal(genus_v.version, result[:inherited_from][:version])
+  end
+
+  def test_classification_at_version_no_history_recoverable
+    # Above-genus name (no genus to walk up to) with NULL classification
+    # on its version row → :none.
+    name = names(:basidiomycota)
+    User.current = rolf
+    name.update!(classification: "Domain: _Eukarya_")
+    v = name.versions.order(:version).last
+    v.update_columns(classification: nil)
+
+    result = name.classification_at_version(v)
+    assert_nil(result[:value])
+    assert_equal(:none, result[:source])
+  end
+
+  # Empty string ≠ NULL: a deliberately-cleared classification should
+  # be reported as :recorded with the empty value, not silently
+  # backfilled from genus inheritance (#4166 Copilot review C5).
+  def test_classification_at_version_empty_string_is_recorded
+    species = names(:agaricus_campestras)
+    species_v = species.versions.order(:version).first ||
+                species.versions.create!(classification: "")
+    species_v.update_columns(classification: "")
+
+    result = species.classification_at_version(species_v)
+    assert_equal("", result[:value])
+    assert_equal(:recorded, result[:source])
   end
 
   def test_multiple_synonyms
@@ -3740,6 +3906,44 @@ class NameTest < UnitTestCase
     assert_not_includes(
       subtaxa_of_amanita, mispelled_name,
       "`subtaxa_of` should not include misspellings"
+    )
+
+    # Above-genus: immediate_subtaxa_of returns the next rank down, not all
+    # descendants. One assertion per new intermediate rank.
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:basidiomycota)),
+      names(:agaricomycotina),
+      "`immediate_subtaxa_of` a Phylum should return Subphylum subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:basidiomycetes)),
+      names(:agaricomycetidae),
+      "`immediate_subtaxa_of` a Class should return Subclass subtaxa"
+    )
+    immediate_subtaxa_of_agaricales =
+      Name.immediate_subtaxa_of(names(:agaricales))
+    assert_includes(
+      immediate_subtaxa_of_agaricales, names(:agaricineae),
+      "`immediate_subtaxa_of` an Order should return Suborder subtaxa"
+    )
+    assert_not_includes(
+      immediate_subtaxa_of_agaricales, names(:amanita),
+      "`immediate_subtaxa_of` an Order should not include Genus-ranked names"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agaricaceae)),
+      names(:agaricioideae),
+      "`immediate_subtaxa_of` a Family should return Subfamily subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agaricioideae)),
+      names(:agariceae),
+      "`immediate_subtaxa_of` a Subfamily should return Tribe subtaxa"
+    )
+    assert_includes(
+      Name.immediate_subtaxa_of(names(:agariceae)),
+      names(:agaricinae),
+      "`immediate_subtaxa_of` a Tribe should return Subtribe subtaxa"
     )
   end
 

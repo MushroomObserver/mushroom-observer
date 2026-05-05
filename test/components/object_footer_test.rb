@@ -46,6 +46,22 @@ class ObjectFooterTest < ComponentTestCase
     assert_includes(html, "2024-01-20")
   end
 
+  def test_non_versioned_object_with_user_shows_creator
+    creator = users(:rolf)
+    obj = TestObject.new(
+      created_at: Time.zone.parse("2024-01-15 10:00:00"),
+      user: creator
+    )
+
+    html = render_component(Components::ObjectFooter.new(
+                              user: users(:mary),
+                              obj: obj
+                            ))
+
+    assert_includes(html, creator.unique_text_name)
+    assert_includes(html, "2024-01-15")
+  end
+
   def test_non_versioned_object_without_timestamps
     obj = TestObject.new(created_at: nil, updated_at: nil)
 

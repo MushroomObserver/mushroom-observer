@@ -158,14 +158,35 @@ class FormCarouselTest < ComponentTestCase
                   child_selector: ".carousel-indicators")
   end
 
+  def test_renders_sibling_images_from_occurrence
+    # Create an occurrence with two observations that have images
+    obs2 = observations(:two_img_obs)
+    sibling_imgs = obs2.images.to_a
+    assert(sibling_imgs.any?, "Sibling should have images")
+
+    html = render_carousel(sibling_images: sibling_imgs)
+
+    # Should render both own and sibling carousel items
+    items = html.scan("carousel-item").size
+    expected = @images.size + sibling_imgs.size
+    assert_equal(expected, items,
+                 "Should render items for own + sibling images")
+
+    # Sibling thumbnails should also appear
+    thumbnails = html.scan("carousel-indicators").size
+    assert(thumbnails.positive?,
+           "Should have thumbnail navigation")
+  end
+
   private
 
   def render_carousel(images: @images, exif_data: @exif_data,
                       carousel_id: "observation_upload_images_carousel",
-                      obs_thumb_id: nil)
+                      obs_thumb_id: nil, sibling_images: [])
     render(Components::FormCarousel.new(
              user: @user,
              images: images,
+             sibling_images: sibling_images,
              exif_data: exif_data,
              carousel_id: carousel_id,
              obs_thumb_id: obs_thumb_id

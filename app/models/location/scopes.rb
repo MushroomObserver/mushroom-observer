@@ -29,6 +29,14 @@ module Location::Scopes
         where(Location[:name].matches("%#{region}"))
       end
     }
+    # Locations whose name ends with ", <target.name>"
+    # (i.e. sub-locations within a parent region by name hierarchy)
+    scope :sub_locations_of, lambda { |target_location|
+      escaped = sanitize_sql_like(target_location.name)
+      where(Location[:name].matches("%, #{escaped}")).
+        where.not(id: target_location.id)
+    }
+
     scope :name_has,
           ->(phrase) { search_columns(Location[:name], phrase) }
     # Used by Lookup::Locations

@@ -68,5 +68,99 @@ module Observations
         "Non-owner map of hidden observation should not include geoloc with lng"
       )
     end
+
+    # Lazy-loaded single-observation popup used by the cluster map (#4159).
+    # Exercises the `popup` action end-to-end: builds a MinimalObservation
+    # + MapSet and renders `mapset_info_window` as a JSON `html` payload.
+    def test_map_observation_popup
+      obs = observations(:unknown_with_lat_lng)
+      login
+      get(:popup, params: { id: obs.id })
+
+      assert_response(:success)
+      json = JSON.parse(@response.body)
+      assert_kind_of(String, json["html"],
+                     "popup JSON should carry a rendered html string")
+      assert_includes(json["html"], obs.name.text_name,
+                      "popup html should render the observation's name")
+      assert_includes(
+        json["html"], "/observations/#{obs.id}",
+        "popup html should link back to the observation show page"
+      )
+    end
+
+    # With a `q[...]` param present, the action must convert
+    # ActionController::Parameters to a plain Hash before handing it
+    # to URL helpers inside `mapset_info_window`. Regression guard
+    # against "unable to convert unpermitted parameters to hash".
+    def test_map_observation_popup_with_query_param
+      obs = observations(:unknown_with_lat_lng)
+      login
+      get(:popup,
+          params: { id: obs.id, q: { model: "Observation" } })
+
+      assert_response(:success)
+      json = JSON.parse(@response.body)
+      assert_match(
+        /q(%5B|\[)model(%5D|\])/, json["html"],
+        "popup links should carry the q[model] query param through"
+      )
+    end
+
+    # JSON format on the index action is the refetch path used by the
+    # client-side viewport listener (#4159). Covers
+    # map_refetch_payload end-to-end.
+    def test_map_observations_json_refetch_payload
+      login
+      get(:index, format: :json)
+
+      assert_response(:success)
+      json = JSON.parse(@response.body)
+      %w[collection capped loaded total cap].each do |key|
+        assert(json.key?(key),
+               "JSON refetch payload should include #{key}")
+      end
+      assert_kind_of(Hash, json["collection"])
+      assert_equal(MapHelper::CLUSTER_MAX_OBJECTS, json["cap"])
+    end
+
+    # When the result set exceeds the cap, the controller runs the
+    # extra COUNT(*) query to populate `total` for the banner. We
+    # exercise that branch by temporarily shrinking the cap so any
+    # multi-obs fixture set overflows.
+    def test_map_observations_json_capped_runs_total_count
+      login
+      with_cluster_max_objects(1) do
+        get(:index, format: :json)
+      end
+
+      assert_response(:success)
+      json = JSON.parse(@response.body)
+      assert(json["capped"],
+             "cap of 1 should produce a capped response")
+      assert_equal(1, json["loaded"],
+                   "loaded count should be clamped to the cap")
+      assert_equal(1, json["cap"])
+      assert_operator(
+        json["total"], :>, json["loaded"],
+        "capped payload should surface the true total from " \
+        "count_observations_matching_query"
+      )
+    end
+
+    private
+
+    # Swap `MapHelper::CLUSTER_MAX_OBJECTS` for the duration of a
+    # block. `remove_const` before `const_set` avoids the
+    # "already-initialized constant" warning.
+    def with_cluster_max_objects(value)
+      original = MapHelper::CLUSTER_MAX_OBJECTS
+      MapHelper.send(:remove_const, :CLUSTER_MAX_OBJECTS)
+      MapHelper.const_set(:CLUSTER_MAX_OBJECTS, value)
+      yield
+    ensure
+      MapHelper.send(:remove_const, :CLUSTER_MAX_OBJECTS)
+      MapHelper.const_set(:CLUSTER_MAX_OBJECTS, original)
+    end
   end
 end

@@ -123,15 +123,25 @@ class NameFormTest < ComponentTestCase
     assert_not_includes(html, "name[misspelling]")
   end
 
+  def test_form_with_approved_rank
+    html = render_form(model: Name.new(rank: "Family"),
+                       name_string: "Bolitinae",
+                       approved_rank: "Family")
+
+    assert_html(html, "input[type=hidden][name=approved_rank][value=Family]")
+  end
+
   private
 
-  def render_form(model:, name_string:, misspelling: nil, correct_spelling: nil)
+  def render_form(model:, name_string:, misspelling: nil,
+                  correct_spelling: nil, approved_rank: nil)
     render(Components::NameForm.new(
              model,
              user: @user,
              name_string: name_string,
              misspelling: misspelling,
-             correct_spelling: correct_spelling
+             correct_spelling: correct_spelling,
+             approved_rank: approved_rank
            ))
   end
 end
