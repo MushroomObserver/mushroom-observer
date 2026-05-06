@@ -346,6 +346,29 @@ class InatObsTest < UnitTestCase
   end
   private :strip_html_comments
 
+  # Re-imports of obs that previously had a MO back-link written into the
+  # iNat description (legacy MO/Pulk's mirror script behavior) leak the
+  # back-link line back into MO Notes. Strip those lines on import. (#4221)
+  def test_notes_strip_mo_back_link_annotations
+    mock_obs = mock_observation("tremella_mesenterica")
+    mock_obs[:description] =
+      "real iNat content\r\n\r\n" \
+      "Imported by Mushroom Observer 2024-12-17\r\n" \
+      "https://mushroomobserver.org/observations/568131\r\n" \
+      "more iNat content"
+
+    cleaned = strip_html_comments(mock_obs.notes[:Other])
+
+    assert_not_includes(cleaned, "Imported by Mushroom Observer",
+                        "Should strip 'Imported by Mushroom Observer' lines")
+    assert_not_includes(cleaned, "mushroomobserver.org",
+                        "Should strip MO back-link URL lines")
+    assert_includes(cleaned, "real iNat content",
+                    "Should preserve user-authored content above annotation")
+    assert_includes(cleaned, "more iNat content",
+                    "Should preserve user-authored content below annotation")
+  end
+
   def test_sequences
     mock_inat_obs = mock_observation("lycoperdon")
     assert(mock_inat_obs.sequences.one?)
