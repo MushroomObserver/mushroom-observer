@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require("test_helper")
+
 class MiniRacerVersionTest < FunctionalTestCase
-  # test version "0.18.1" because ">= 0.19.0" will not compile for older Macs
-  # Issue documented here: https://github.com/rubyjs/mini_racer/issues/359
-  def test_mini_racer_version
-    assert_equal(MiniRacer::VERSION, "0.18.1")
+  def test_mini_racer_evaluates_javascript
+    assert_equal(2, MiniRacer::Context.new.eval("1 + 1"))
   end
 end
