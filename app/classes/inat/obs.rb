@@ -111,10 +111,10 @@ class Inat
     # them here so the user-visible notes stay clean.
     MO_BACK_LINK_LINE_PATTERN = %r{
       ^[ \t]*
-      (?:Imported\s+by\s+Mushroom\s+Observer.*
+      (?:Imported\s+by\s+Mushroom\s+Observer\s+\d{4}-\d{2}-\d{2}
        | https?://(?:www\.)?mushroomobserver\.org/(?:obs|observations)/\d+/?)
       [ \t]*\n?
-    }ix
+    }x
 
     def cleaned_description
       description = self[:description]

@@ -369,6 +369,21 @@ class InatObsTest < UnitTestCase
                     "Should preserve user-authored content below annotation")
   end
 
+  # The back-link strip must only match the canonical
+  # "Imported by Mushroom Observer YYYY-MM-DD" annotation, not any user-
+  # authored sentence that happens to start with that phrase.
+  def test_notes_preserves_user_text_starting_with_back_link_phrase
+    mock_obs = mock_observation("tremella_mesenterica")
+    user_line = "Imported by Mushroom Observer? No, collected by hand."
+    mock_obs[:description] = "before\r\n#{user_line}\r\nafter"
+
+    cleaned = strip_html_comments(mock_obs.notes[:Other])
+
+    assert_includes(cleaned, user_line,
+                    "Should preserve user text that starts with the " \
+                    "back-link phrase but isn't the canonical annotation")
+  end
+
   def test_sequences
     mock_inat_obs = mock_observation("lycoperdon")
     assert(mock_inat_obs.sequences.one?)
