@@ -72,18 +72,22 @@ class Checklist
       target_names.size
     end
 
-    # Target names with at least one observation — direct or via a synonym
-    # in this project's observations — counted by target name record.
+    # Number of target names with at least one observation whose
+    # consensus name is the target name itself. Observations using a
+    # synonym do not count — see issue #4152. The goal is to encourage
+    # admins and members to re-identify obs to match the project's
+    # target names rather than letting synonyms silently satisfy them.
     def num_targets_observed
-      observed_target_name_ids.size
+      directly_observed_target_name_ids.size
     end
 
     def num_targets_unobserved
       num_targets - num_targets_observed
     end
 
-    # Target name tuples for which no synonym has an observation in the
-    # project. Rendered in the "Unobserved targets" panel.
+    # Target name tuples without a direct observation in the project.
+    # Includes targets whose synonym was observed — those are surfaced
+    # with the `+` marker via duplicate_synonyms (see #4152).
     def unobserved_target_taxa
       calc_checklist unless defined?(@unobserved_target_taxa)
       @unobserved_target_taxa
@@ -93,13 +97,12 @@ class Checklist
 
     def calc_checklist
       super
-      merge_observed_targets_into_taxa
       compute_unobserved_target_taxa
       # @duplicate_synonyms and @any_deprecated are set by `super` from
       # the observation-query results only. Recompute them across the
       # full rendered set (observed + unobserved targets) so the `+`
-      # marker fires for synonym-pairs that appear only among unobserved
-      # targets, and the `*` footnote legend appears when the only
+      # marker fires for synonym-pairs that span observed and unobserved
+      # panels, and the `*` footnote legend appears when the only
       # deprecated name on the page is an unobserved target.
       recompute_rendered_taxa_flags
     end
@@ -123,60 +126,27 @@ class Checklist
       @target_names ||= @project.target_names.to_a
     end
 
-    # Target name ids whose synonym group intersects with the project's
-    # observed name ids. A name without a synonym_id forms a group of one.
-    def observed_target_name_ids
-      @observed_target_name_ids ||= compute_observed_target_name_ids
+    # Target name ids whose own name appears as the consensus name of
+    # at least one observation in the project. Synonym observations do
+    # not count — see issue #4152.
+    def directly_observed_target_name_ids
+      @directly_observed_target_name_ids ||=
+        compute_directly_observed_target_name_ids
     end
 
-    def compute_observed_target_name_ids
+    def compute_directly_observed_target_name_ids
       return Set.new if target_names.empty?
 
       obs_name_ids = @observations.distinct.pluck(:name_id).to_set
       return Set.new if obs_name_ids.empty?
 
-      syn_ids = target_names.filter_map(&:synonym_id).uniq
-      siblings_by_syn = syn_ids.any? ? sibling_ids_by_synonym(syn_ids) : {}
-
       target_names.filter_map do |name|
-        target_observed?(name, obs_name_ids, siblings_by_syn) ? name.id : nil
+        name.id if obs_name_ids.include?(name.id)
       end.to_set
     end
 
-    def sibling_ids_by_synonym(syn_ids)
-      Name.where(synonym_id: syn_ids).
-        group_by(&:synonym_id).
-        transform_values { |names| names.map(&:id) }
-    end
-
-    def target_observed?(name, obs_name_ids, siblings_by_syn)
-      if name.synonym_id
-        (siblings_by_syn[name.synonym_id] || []).
-          any? { |id| obs_name_ids.include?(id) }
-      else
-        obs_name_ids.include?(name.id)
-      end
-    end
-
-    # Add observed-via-synonym targets to @taxa so they appear in the
-    # appropriate panel alongside query-observed names. Targets whose own
-    # name_id is already in @taxa are left alone.
-    def merge_observed_targets_into_taxa
-      return if target_names.empty?
-
-      taxa_ids = @taxa.to_set { |entry| entry[1] }
-      observed = observed_target_name_ids
-      target_names.each do |name|
-        next if taxa_ids.include?(name.id)
-        next unless observed.include?(name.id)
-
-        @taxa << target_tuple(name)
-      end
-      @taxa.sort_by! { |entry| entry[0] }
-    end
-
     def compute_unobserved_target_taxa
-      observed = observed_target_name_ids
+      observed = directly_observed_target_name_ids
       @unobserved_target_taxa =
         target_names.
         reject { |name| observed.include?(name.id) }.
