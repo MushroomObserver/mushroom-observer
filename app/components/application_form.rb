@@ -176,9 +176,6 @@ class Components::ApplicationForm < Superform::Rails::Form
                                    **ac_options)
     end
 
-    # Alias for backwards compatibility
-    alias hidden read_only
-
     def static(wrapper_options: {}, **attributes)
       StaticTextField.new(self, attributes: attributes,
                                 wrapper_options: wrapper_options)
