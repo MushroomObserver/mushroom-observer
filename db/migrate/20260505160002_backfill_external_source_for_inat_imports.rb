@@ -1,22 +1,27 @@
 # frozen_string_literal: true
 
-# Backfills the new external-source columns for existing iNat imports.
+# Backfills the new external-source columns for every observation
+# that links to an iNat record via the legacy `inat_id` column.
 #
-# Before this migration: iNat-imported observations carried
+# Before this migration: most iNat-linked observations carried
 # `source = 5` (the `mo_inat_import` enum value) and their iNat
-# observation number in `inat_id`.
+# observation number in `inat_id`. A small number of rows had a
+# non-import entry-agent (e.g. `mo_website`) but were nonetheless
+# linked to an iNat record through `inat_id` — typically because
+# the user attached the iNat link after creating the obs natively.
 #
-# After this migration: those same rows carry `source_id` pointing
-# at the iNaturalist row in `sources`, `external_id` holding the
-# stringified iNat observation number, and `source = NULL`. The
-# entry-agent enum no longer has an `import` value — the two-axis
-# model in #4208 expresses "this is an import" through
-# `source_id IS NOT NULL`, not through the entry-agent column.
+# After this migration: every row with `inat_id IS NOT NULL`
+# carries `source_id` pointing at the iNaturalist row in `sources`
+# and `external_id` holding the stringified iNat observation
+# number. The entry-agent column (`source`) is cleared only for
+# rows that had `source = 5` — the `mo_inat_import` enum value is
+# being dropped because the two-axis model in #4208 expresses
+# "this is an import" through `source_id IS NOT NULL`, not the
+# entry-agent column. Rows with a non-import entry agent keep it.
 #
-# Native MO observations (web/android/iphone/api entries) are
-# untouched. The `inat_id` column stays in place for now; a
-# follow-up PR drops it once this backfill is verified in
-# production.
+# Native MO observations without an iNat link are untouched. The
+# `inat_id` column stays in place for now; a follow-up PR drops it
+# once this backfill is verified in production.
 class BackfillExternalSourceForInatImports < ActiveRecord::Migration[7.2]
   INAT_ENUM_VALUE = 5
 
@@ -28,13 +33,19 @@ class BackfillExternalSourceForInatImports < ActiveRecord::Migration[7.2]
     raise("iNaturalist source row missing — run CreateSources first.") \
       if inat_source_id.blank?
 
+    # Set source_id + external_id on every iNat-linked obs.
     execute(<<~SQL.squish)
       UPDATE observations
          SET source_id = #{inat_source_id},
-             external_id = CAST(inat_id AS CHAR),
-             source = NULL
+             external_id = CAST(inat_id AS CHAR)
+       WHERE inat_id IS NOT NULL
+    SQL
+
+    # Clear the entry-agent column only for the dropped enum value.
+    execute(<<~SQL.squish)
+      UPDATE observations
+         SET source = NULL
        WHERE source = #{INAT_ENUM_VALUE}
-         AND inat_id IS NOT NULL
     SQL
   end
 
@@ -45,11 +56,19 @@ class BackfillExternalSourceForInatImports < ActiveRecord::Migration[7.2]
 
     return if inat_source_id.blank?
 
+    # Restore mo_inat_import only on rows that have no other entry
+    # agent — those are the ones we cleared in `up`.
     execute(<<~SQL.squish)
       UPDATE observations
-         SET source = #{INAT_ENUM_VALUE},
-             external_id = NULL,
-             source_id = NULL
+         SET source = #{INAT_ENUM_VALUE}
+       WHERE source_id = #{inat_source_id}
+         AND source IS NULL
+    SQL
+
+    execute(<<~SQL.squish)
+      UPDATE observations
+         SET source_id = NULL,
+             external_id = NULL
        WHERE source_id = #{inat_source_id}
     SQL
   end

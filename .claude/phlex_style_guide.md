@@ -29,6 +29,7 @@ fields. **Always use these helpers** instead of the verbose
 text_field(:name, label: "Name:", size: 40)
 textarea_field(:notes, label: "Notes:", rows: 6)
 checkbox_field(:approved, label: "Approved")
+radio_field(:status, ["active", "Active"], ["inactive", "Inactive"])
 select_field(:rank, rank_options, label: "Rank:")
 static_field(:display_name, label: "Name:", value: @model.name, inline: true)
 read_only_field(:locked_field, label: "Value:", value: @value)
@@ -36,6 +37,56 @@ read_only_field(:locked_field, label: "Value:", value: @value)
 # Bad - Verbose render(field(...)) pattern
 render(field(:name).text(wrapper_options: { label: "Name:" }, size: 40))
 render(field(:notes).textarea(wrapper_options: { label: "Notes:" }, rows: 6))
+```
+
+### NEVER hand-roll form-control HTML inside a form component
+
+**HARD RULE**: Inside any class that extends `Components::ApplicationForm`, do
+NOT emit raw `input`, `select`, `textarea`, or `option` Phlex tags for form
+controls. Every form control must be rendered through one of:
+
+1. An `ApplicationForm` field helper (`text_field`, `radio_field`,
+   `checkbox_field`, `select_field`, `date_field`, `autocompleter_field`,
+   `static_field`, `read_only_field`, `submit`, `upload_fields`, etc.) — for
+   fields that ARE attributes of the form's model / FormObject.
+2. A `FieldProxy` + the matching field class (`RadioField`, `TextField`,
+   `CheckboxField`, `SelectField`, …) — for fields that are NOT attributes of
+   the model (UI state passed in from the controller, transient toggles,
+   etc.). See `FieldProxy: Form Fields Outside a Form Context` below for the
+   API; the same proxy is used inside a form when the field isn't on the
+   model.
+
+**Why this rule exists**: The field helpers and field classes generate the
+exact Bootstrap markup, ARIA attributes, ID/name conventions, and Stimulus
+hooks the rest of the app expects. Hand-rolled `input`s skip all of that and
+have to be deduplicated later (this rule was added after a Phlex conversion
+hand-rolled radio buttons for a non-model field; see PR #4224).
+
+**Decision tree** when adding a field to an `ApplicationForm` subclass:
+
+```
+Is the field an attribute of the form's model / FormObject?
+├── Yes → use the matching `ApplicationForm` helper (`radio_field`, etc.).
+└── No  → can the field be added to a FormObject without bloating it?
+         ├── Yes → add it to the FormObject and use the helper.
+         └── No  → wrap it with FieldProxy and render the field class.
+                    NEVER hand-roll the HTML.
+```
+
+**Reference example** for the non-model-field case (`ProjectForm` —
+`dates_any` is UI state, not a `Project` column):
+
+```ruby
+def render_dates_any_radios
+  proxy = Components::ApplicationForm::FieldProxy.new(
+    "project", :dates_any, @dates_any
+  )
+  render(Components::ApplicationForm::RadioField.new(
+           proxy,
+           ["false", range_label],
+           ["true", any_label]
+         ))
+end
 ```
 
 ### Pattern B Forms: Internal FormObject Creation
@@ -521,18 +572,30 @@ def normalize_link(link)
 end
 ```
 
-### FieldProxy: Form Fields Outside a Form Context
+### FieldProxy: Fields Without a Superform Field Backing
 
-When you need to render Superform field components (e.g., `TextField`,
-`RadioField`) **outside** of a `Superform::Rails::Form`, use `FieldProxy`.
-This is common in feedback components and image field editors that render
-form inputs without owning the `<form>` tag.
+`FieldProxy` is the escape hatch for any form field that can't be reached via
+`field(:attr)` on the form's model / FormObject. It provides the same interface
+as `Superform::Field` (`key`, `value`, `dom.id`, `dom.name`, `dom.value`) so
+the existing field classes (`TextField`, `RadioField`, `CheckboxField`,
+`SelectField`, …) render identical Bootstrap markup whether or not the field
+is model-backed.
 
-`FieldProxy` provides the same interface as `Superform::Field` (`key`, `value`,
-`dom.id`, `dom.name`, `dom.value`) so field components work identically.
+There are two situations where `FieldProxy` is the right answer:
+
+1. **Outside a Superform form.** Feedback / editor components that render
+   form inputs without owning the `<form>` tag — e.g., `FormImageFields`,
+   `FormListFeedback`, `FormNameFeedback`.
+2. **Inside a Superform form, for a field that isn't on the model.** UI
+   state passed from the controller, transient toggles, derived values,
+   etc. — e.g., `dates_any` in `ProjectForm`. The form helpers (`radio_field`,
+   `text_field`, …) all call `field(field_name)` on the model and will fail
+   for fields the model doesn't expose. **Do NOT hand-roll `input` tags as
+   a workaround.** Use `FieldProxy`. See the "NEVER hand-roll form-control
+   HTML" rule above.
 
 ```ruby
-# Create a proxy for a namespaced field
+# Outside-form usage (FormNameFeedback)
 proxy = Components::ApplicationForm::FieldProxy.new(
   "chosen_multiple_names", name.id
 )
@@ -541,7 +604,17 @@ render(Components::ApplicationForm::RadioField.new(
   wrapper_options: { wrap_class: "my-1 mr-4 d-inline-block" }
 ))
 
-# For image fields, use the factory method
+# Inside-form usage for a non-model field (ProjectForm).
+# `dates_any` is UI state from the controller, not a Project attribute,
+# so `field(:dates_any)` can't read it.
+proxy = Components::ApplicationForm::FieldProxy.new(
+  "project", :dates_any, @dates_any
+)
+render(Components::ApplicationForm::RadioField.new(
+  proxy, ["false", range_label], ["true", any_label]
+))
+
+# Image fields have a factory method
 proxy = ApplicationForm.image_field_proxy(:good_image, 123, :notes, "text")
 render(Components::ApplicationForm::TextField.new(
   proxy,
@@ -549,11 +622,6 @@ render(Components::ApplicationForm::TextField.new(
   wrapper_options: { label: "Notes:" }
 ))
 ```
-
-**When to use FieldProxy:**
-- Components that render form inputs but don't own the `<form>` tag
-  (e.g., `FormImageFields`, `FormListFeedback`, `FormNameFeedback`)
-- Standalone radio groups or other inputs outside a Superform form
 
 **Never use `fields_for`** — use `FieldProxy` or Superform's `namespace`
 method instead.

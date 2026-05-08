@@ -201,7 +201,7 @@ class ObservationsController
     # `can_edit?` for an image.
     def observation_index_includes
       [observation_matrix_box_image_includes,
-       :location, :name,
+       :external_source, :location, :name,
        { namings: :votes },
        { occurrence: :observations }, :projects, :rss_log, :user]
     end

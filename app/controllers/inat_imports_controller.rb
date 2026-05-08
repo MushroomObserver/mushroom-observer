@@ -201,10 +201,15 @@ class InatImportsController < ApplicationController
   def warn_about_listed_previous_imports
     return if importing_all? || !listing_ids?
 
-    previous_imports = Observation.where(inat_id: inat_id_list)
+    previous_imports = previously_imported_observations
     return if previous_imports.none?
 
     flash_warning(:inat_previous_import.t(count: previous_imports.count))
+  end
+
+  def previously_imported_observations
+    Observation.where(external_source: Source.inaturalist,
+                      external_id: inat_id_list.map(&:to_s))
   end
 
   def assure_user_has_inat_import_api_key
@@ -248,7 +253,7 @@ class InatImportsController < ApplicationController
 
   def clean_inat_ids
     inat_ids = sanitize_inat_ids(params[:inat_ids])
-    previous_imports = Observation.where(inat_id: inat_id_list)
+    previous_imports = previously_imported_observations
     return inat_ids if previous_imports.none?
 
     remove_previously_imported_ids(inat_ids, previous_imports)
@@ -259,7 +264,7 @@ class InatImportsController < ApplicationController
   # NOTE: Also useful in manual testing when writes of iNat obss are
   # commented out temporarily. jdc 2026-01-15
   def remove_previously_imported_ids(inat_ids, previous_imports)
-    previous_ids = previous_imports.pluck(:inat_id).map(&:to_s)
+    previous_ids = previous_imports.pluck(:external_id)
     remaining_ids =
       inat_ids.split(",").map(&:strip).reject { |id| previous_ids.include?(id) }
     remaining_ids.join(",")

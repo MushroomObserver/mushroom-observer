@@ -62,8 +62,8 @@ class Inat
         specimen: inat_obs.specimen?,
         text_name: text_name,
         notes: inat_obs.notes,
-        source: inat_obs.source,
-        inat_id: inat_obs[:id] }
+        external_source: Source.inaturalist,
+        external_id: inat_obs[:id].to_s }
     end
 
     # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.

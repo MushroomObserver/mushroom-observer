@@ -2069,8 +2069,10 @@ class ObservationTest < UnitTestCase
     assert_equal(:source_credit_mo_iphone_app, obs.source_credit)
 
     obs = observations(:imported_inat_obs)
-    assert_equal("mo_inat_import", obs.source)
-    assert_equal(:source_credit_mo_inat_import, obs.source_credit)
+    assert_nil(obs.source)
+    assert_equal(sources(:inaturalist), obs.external_source)
+    assert_match(/Imported from "iNaturalist"/, obs.source_credit)
+    assert(obs.source_noteworthy?)
   end
 
   def test_hidden_location

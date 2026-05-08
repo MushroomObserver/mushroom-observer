@@ -142,7 +142,8 @@ class HerbariumRecordsController < ApplicationController
 
   def herbarium_record_includes
     [:user,
-     { observations: [:user, observation_matrix_box_image_includes] }]
+     { observations: [:external_source, :user,
+                      observation_matrix_box_image_includes] }]
   end
 
   def default_herbarium_record

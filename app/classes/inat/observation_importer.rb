@@ -30,6 +30,7 @@ class Inat
       @inat_obs = Inat::Obs.new(result)
       return if unimportable?
       return if date_missing?
+      return if already_imported?
 
       builder = create_mo_observation
       return unless @observation
@@ -56,6 +57,24 @@ class Inat
       true
     end
 
+    # Last-line-of-defense check against duplicate imports.
+    # Upstream filters (iNat-side `without_field` and the controller's
+    # `clean_inat_ids`) miss observations whose back-link write to iNat
+    # failed silently after a prior import, and the controller filter
+    # is bypassed entirely on import-all runs. The unique index on
+    # (source_id, external_id) is the actual race-safety guarantee;
+    # this pre-check just keeps benign duplicates from emitting noisy
+    # RecordNotUnique exceptions.
+    def already_imported?
+      return false unless Observation.exists?(
+        source_id: Source.inaturalist.id,
+        external_id: @inat_obs[:id].to_s
+      )
+
+      log("Skipped #{@inat_obs[:id]} already imported")
+      true
+    end
+
     def log_with_response_error(msg)
       log(msg)
       @inat_import.add_response_error(msg)
@@ -68,6 +87,12 @@ class Inat
       )
       @observation = builder.mo_observation
       builder
+    rescue ActiveRecord::RecordNotUnique
+      # The (source_id, external_id) unique index caught a race
+      # between simultaneous jobs after `already_imported?` returned
+      # false. Treat the same as the pre-check skip.
+      log("Skipped #{@inat_obs[:id]} already imported (race)")
+      nil
     rescue StandardError => e
       log_with_response_error(
         "Failed to import iNat #{@inat_obs[:id]}: #{e.message}"

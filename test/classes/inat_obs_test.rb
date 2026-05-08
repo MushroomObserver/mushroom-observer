@@ -41,8 +41,7 @@ class InatObsTest < UnitTestCase
       # miscellaneous
       specimen: false,
       # notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
-      notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." }, # rubocop:disable Layout/LineLength
-      source: "mo_inat_import"
+      notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." } # rubocop:disable Layout/LineLength
       # thumb_image_id: 1659475,
       # vote_cache: 2.51504,
       # num_views: 78,
@@ -53,7 +52,7 @@ class InatObsTest < UnitTestCase
 
     # mapping to MO Observation attributes, other than name attributes
     # Name attributes mappings are tested in InatTaxonTest
-    %w[gps_hidden lat lng source when where].
+    %w[gps_hidden lat lng when where].
       each do |attribute|
         assert_equal(expected_mapping.send(attribute),
                      mock_inat_obs.send(attribute))
@@ -345,6 +344,44 @@ class InatObsTest < UnitTestCase
     str.gsub(/<!---.*?--->/m, "")
   end
   private :strip_html_comments
+
+  # Re-imports of obs that previously had a MO back-link written into the
+  # iNat description (legacy MO/Pulk's mirror script behavior) leak the
+  # back-link line back into MO Notes. Strip those lines on import. (#4221)
+  def test_notes_strip_mo_back_link_annotations
+    mock_obs = mock_observation("tremella_mesenterica")
+    mock_obs[:description] =
+      "real iNat content\r\n\r\n" \
+      "Imported by Mushroom Observer 2024-12-17\r\n" \
+      "https://mushroomobserver.org/observations/568131\r\n" \
+      "more iNat content"
+
+    cleaned = strip_html_comments(mock_obs.notes[:Other])
+
+    assert_not_includes(cleaned, "Imported by Mushroom Observer",
+                        "Should strip 'Imported by Mushroom Observer' lines")
+    assert_not_includes(cleaned, "mushroomobserver.org",
+                        "Should strip MO back-link URL lines")
+    assert_includes(cleaned, "real iNat content",
+                    "Should preserve user-authored content above annotation")
+    assert_includes(cleaned, "more iNat content",
+                    "Should preserve user-authored content below annotation")
+  end
+
+  # The back-link strip must only match the canonical
+  # "Imported by Mushroom Observer YYYY-MM-DD" annotation, not any user-
+  # authored sentence that happens to start with that phrase.
+  def test_notes_preserves_user_text_starting_with_back_link_phrase
+    mock_obs = mock_observation("tremella_mesenterica")
+    user_line = "Imported by Mushroom Observer? No, collected by hand."
+    mock_obs[:description] = "before\r\n#{user_line}\r\nafter"
+
+    cleaned = strip_html_comments(mock_obs.notes[:Other])
+
+    assert_includes(cleaned, user_line,
+                    "Should preserve user text that starts with the " \
+                    "back-link phrase but isn't the canonical annotation")
+  end
 
   def test_sequences
     mock_inat_obs = mock_observation("lycoperdon")

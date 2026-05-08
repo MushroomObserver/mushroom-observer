@@ -54,7 +54,11 @@
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
-#  inat_id:                 iNaturalist id of corresponding Observation
+#  source_id::              FK to Source for external imports (iNat, etc.)
+#  external_id::            Source-system id (iNat obs number, etc.)
+#  last_synced_at::         When the sync job last refreshed this obs
+#  inat_id::                iNaturalist id (deprecated; superseded by
+#                           external_id, will be dropped post-deploy)
 #
 #  ==== "Fake" attributes
 #  place_name::             Wrapper on top of +where+ and +location+.
@@ -163,6 +167,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
+  # Avoids colliding with the `source` enum below (entry agent vs.
+  # external data source — see #4208 two-axis model).
+  belongs_to :external_source, class_name: "Source",
+                               foreign_key: :source_id, optional: true,
+                               inverse_of: :observations
 
   # Has to go before "has many interests" or interests will be destroyed
   # before it has a chance to notify the interested users of the destruction.
@@ -943,24 +952,38 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Which agent created this observation?
+  # The `mo_inat_import` value (5) was retired in #4209; iNat-imported
+  # observations are now identified by `external_source.present?`,
+  # not by an entry-agent enum value.
   enum :source, {
     mo_website: 1,
     mo_android_app: 2,
     mo_iphone_app: 3,
-    mo_api: 4,
-    mo_inat_import: 5
+    mo_api: 4
   }
 
-  # Message to use to credit the agent which created this observation.
-  # Intended to be used with .tpl to render as HTML:
+  # Message to use to credit the source of this observation.
+  # External imports take precedence over the entry agent: an obs
+  # synced from iNat surfaces as "Imported from iNaturalist" even if
+  # the user originally created it via mo_website. Returns nil when
+  # there's nothing noteworthy to credit.
+  # Intended for use with .tpl to render as HTML:
   #   <%= observation.source_credit.tpl %>
   def source_credit
-    :"source_credit_#{source}" if source.present?
+    if external_source
+      :source_credit_external.l(name: external_source.name,
+                                url: external_source.url.to_s)
+    elsif source.present?
+      :"source_credit_#{source}"
+    end
   end
 
   # Do we want to prominantly advertise the source of this observation?
+  # Reads source_id (the column) directly to avoid loading the
+  # external_source association when only the predicate is needed —
+  # source_credit takes care of the actual association load.
   def source_noteworthy?
-    source.present? && source != "mo_website"
+    source_id.present? || (source.present? && source != "mo_website")
   end
 
   ##############################################################################

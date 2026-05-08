@@ -832,8 +832,8 @@ imported_inat_obs:
   created_at: 2025-08-01 04:05:03
   updated_at: 2025-08-01 04:05:03
   log_updated_at: 2025-08-01 04:05:03
-  inat_id: 12345
-  source: <%= Observation.sources[:mo_inat_import] %>
+  external_source: inaturalist
+  external_id: "12345"
 
 code_name_obs:
   <<: *DEFAULTS
