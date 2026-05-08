@@ -30,6 +30,7 @@ class Inat
       @inat_obs = Inat::Obs.new(result)
       return if unimportable?
       return if date_missing?
+      return if already_imported?
 
       builder = create_mo_observation
       return unless @observation
@@ -53,6 +54,19 @@ class Inat
       log_with_response_error(
         "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
       )
+      true
+    end
+
+    # Last-line-of-defense check against duplicate imports.
+    # Upstream filters (iNat-side `without_field` and the controller's
+    # `clean_inat_ids`) miss observations whose back-link write to iNat
+    # failed silently after a prior import, and the controller filter
+    # is bypassed entirely on import-all runs. Skip silently — already
+    # imported is benign, not a user-actionable error.
+    def already_imported?
+      return false unless Observation.exists?(inat_id: @inat_obs[:id])
+
+      log("Skipped #{@inat_obs[:id]} already imported")
       true
     end
 
