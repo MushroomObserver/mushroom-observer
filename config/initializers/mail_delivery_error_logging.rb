@@ -13,10 +13,9 @@ Rails.application.config.after_initialize do
     msg << " params=#{params.inspect}" if params.present?
     msg << " error=#{exception.class}: " \
            "#{exception.message}"
-    Rails.root.join("log/email-debug.log").
-      open("a:utf-8") do |fh|
-        fh.puts("#{Time.zone.now} #{msg}")
-      end
+    MO.email_debug_log_path.open("a:utf-8") do |fh|
+      fh.puts("#{Time.zone.now} #{msg}")
+    end
     raise(exception)
   end
 end

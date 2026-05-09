@@ -212,6 +212,16 @@ MushroomObserver::Application.configure do
     format(IMAGE_CONFIG_DATA.config["local_image_files"], root: MO.root)
   end
 
+  # Path to the mail-delivery debug log. Per-worker in test mode so
+  # parallel workers don't write to a shared file (the
+  # MailDeliveryErrorLoggingTest reads this file by offset and would
+  # see other workers' lines if they shared it).
+  def config.email_debug_log_path
+    suffix = IMAGE_CONFIG_DATA.database_worker_number
+    name = suffix ? "email-debug-#{suffix}.log" : "email-debug.log"
+    MO.root.join("log", name)
+  end
+
   # Definition of image sources.  Keys are :test, :read and :write.  Values are
   # URLs.  Leave :write blank for read-only sources.  :transferred_flag tells MO
   # to test for existence of file by using image#transferred flag.
