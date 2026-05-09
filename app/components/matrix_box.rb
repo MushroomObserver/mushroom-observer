@@ -217,8 +217,28 @@ class Components::MatrixBox < Components::Base
 
     div(class: "small mt-3") do
       div(class: "source-credit") do
-        small { target.source_credit.tpl }
+        small { render_source_credit_inner(target) }
       end
+    end
+  end
+
+  # External imports get a Phlex-rendered link so we can set
+  # target="_blank" / rel="noopener" — textile has no syntax for
+  # those attributes. Enum credits keep going through .tpl.
+  def render_source_credit_inner(target)
+    if target.respond_to?(:external_credit_link) &&
+       (link = target.external_credit_link)
+      render_external_credit_link(link)
+    else
+      target.source_credit.tpl
+    end
+  end
+
+  def render_external_credit_link(link)
+    if link[:url].present?
+      a(href: link[:url], target: "_blank", rel: "noopener") { link[:text] }
+    else
+      plain(link[:text])
     end
   end
 

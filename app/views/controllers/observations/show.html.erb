@@ -24,6 +24,8 @@ show_lists = @user # && @observation.species_lists.any?
 obs_locals = { obs: @observation, consensus: @consensus, user: @user }
 %>
 
+<%= render(Components::ImportedSourceBanner.new(observation: @observation)) %>
+
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
     <%= render(Components::Carousel.new(
@@ -69,7 +71,10 @@ obs_locals = { obs: @observation, consensus: @consensus, user: @user }
                locals: { object: @observation, comments: @comments,
                          controls: @user, limit: nil }) %>
 
-    <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
+    <%# External-source credit is rendered in the banner above. %>
+    <% if @observation.source_noteworthy? && !@observation.external_source %>
+      <%= @observation.source_credit.tpl %>
+    <% end %>
   <% end %>
 
   <% if @user %>

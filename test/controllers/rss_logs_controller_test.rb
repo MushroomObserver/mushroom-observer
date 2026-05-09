@@ -157,8 +157,12 @@ class RssLogsControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: { type: "observation" } })
 
-    assert_includes(@response.body, obs.source_credit.tpl,
-                    "RssLog is missing Source credit")
+    assert_match(/Imported from iNaturalist/, @response.body,
+                 "RssLog is missing Source credit")
+    expected_url = obs.external_source.observation_url(obs.external_id)
+    assert_match(/href="#{Regexp.escape(expected_url)}"[^>]*target="_blank"/,
+                 @response.body,
+                 "External-source credit should open in a new tab")
   end
 
   def test_rss_log_display_source_credit_updated_observation
@@ -173,8 +177,8 @@ class RssLogsControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: { type: "observation" } })
 
-    assert_includes(@response.body, obs.source_credit.tpl,
-                    "RssLog is missing Source credit")
+    assert_match(/Imported from iNaturalist/, @response.body,
+                 "RssLog is missing Source credit")
   end
 
   def test_type_filter_rejects_invalid_types

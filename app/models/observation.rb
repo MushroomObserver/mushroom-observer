@@ -986,6 +986,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # Structured form of source_credit for external imports — returns
+  # { text:, url: } so renderers can build the link element with
+  # whatever attributes they need (e.g. target="_blank" for off-site).
+  # Returns nil for non-external observations; callers fall back to
+  # source_credit (textile / enum) in that case.
+  def external_credit_link
+    return nil unless external_source
+
+    {
+      text: :source_credit_external_text.l(name: external_source.name),
+      url: external_source.observation_url(external_id)
+    }
+  end
+
   # Do we want to prominently advertise the source of this observation?
   # Reads source_id (the column) directly to avoid loading the
   # external_source association when only the predicate is needed —
