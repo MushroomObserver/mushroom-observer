@@ -28,6 +28,7 @@ class Inat
 
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
+      @observation = nil
       return if unimportable?
       return if date_missing?
       return if already_imported?
@@ -67,12 +68,19 @@ class Inat
     # RecordNotUnique exceptions.
     def already_imported?
       return false unless Observation.exists?(
-        source_id: Source.inaturalist.id,
+        source_id: inat_source.id,
         external_id: @inat_obs[:id].to_s
       )
 
       log("Skipped #{@inat_obs[:id]} already imported")
       true
+    end
+
+    # Cached iNaturalist Source row for this importer instance — avoids
+    # one find_by per imported observation across already_imported? and
+    # the builder's new_obs_params.
+    def inat_source
+      @inat_source ||= Source.inaturalist
     end
 
     def log_with_response_error(msg)
@@ -83,7 +91,8 @@ class Inat
     def create_mo_observation
       builder = Inat::MoObservationBuilder.new(
         inat_obs: @inat_obs, user: @user,
-        import_others: @inat_import.import_others
+        import_others: @inat_import.import_others,
+        inat_source: inat_source
       )
       @observation = builder.mo_observation
       builder
@@ -91,9 +100,11 @@ class Inat
       # The (source_id, external_id) unique index caught a race
       # between simultaneous jobs after `already_imported?` returned
       # false. Treat the same as the pre-check skip.
+      @observation = nil
       log("Skipped #{@inat_obs[:id]} already imported (race)")
       nil
     rescue StandardError => e
+      @observation = nil
       log_with_response_error(
         "Failed to import iNat #{@inat_obs[:id]}: #{e.message}"
       )

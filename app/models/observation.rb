@@ -971,10 +971,18 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #   <%= observation.source_credit.tpl %>
   def source_credit
     if external_source
-      :source_credit_external.l(name: external_source.name,
-                                url: external_source.url.to_s)
+      external_source_credit
     elsif source.present?
       :"source_credit_#{source}"
+    end
+  end
+
+  def external_source_credit
+    if external_source.url.present?
+      :source_credit_external.l(name: external_source.name,
+                                url: external_source.url)
+    else
+      :source_credit_external_no_url.l(name: external_source.name)
     end
   end
 

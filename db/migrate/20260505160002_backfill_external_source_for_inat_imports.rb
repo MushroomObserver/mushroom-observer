@@ -49,6 +49,15 @@ class BackfillExternalSourceForInatImports < ActiveRecord::Migration[7.2]
     SQL
   end
 
+  # Rollback is intentionally lossy. `up` cleared `source` only on
+  # rows that had `source = 5`, but it doesn't record which iNat-
+  # linked rows started with `source = 5` versus `source = NULL`.
+  # `down` restores `source = 5` on every iNat-linked row whose
+  # `source` is currently NULL — which would mis-classify any row
+  # that was already `source = NULL` before `up` ran. (As of the
+  # production data this affects zero rows; the only non-import
+  # entry agent that ever appeared on an iNat-linked row was
+  # mo_website, and that row keeps its entry agent through `up`.)
   def down
     inat_source_id = select_value(<<~SQL.squish)
       SELECT id FROM sources WHERE name = 'iNaturalist'
@@ -56,8 +65,6 @@ class BackfillExternalSourceForInatImports < ActiveRecord::Migration[7.2]
 
     return if inat_source_id.blank?
 
-    # Restore mo_inat_import only on rows that have no other entry
-    # agent — those are the ones we cleared in `up`.
     execute(<<~SQL.squish)
       UPDATE observations
          SET source = #{INAT_ENUM_VALUE}

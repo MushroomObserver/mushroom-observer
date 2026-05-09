@@ -8,10 +8,11 @@ class Inat
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
     NAMING_VOTE = Vote::MAXIMUM_VOTE
 
-    def initialize(inat_obs:, user:, import_others: false)
+    def initialize(inat_obs:, user:, import_others: false, inat_source: nil)
       @inat_obs = inat_obs
       @user = user
       @import_others = import_others
+      @inat_source = inat_source || Source.inaturalist
       @skipped_images = 0
       @unlicensed_obs = inat_obs[:license_code].blank? ? 1 : 0
     end
@@ -62,7 +63,7 @@ class Inat
         specimen: inat_obs.specimen?,
         text_name: text_name,
         notes: inat_obs.notes,
-        external_source: Source.inaturalist,
+        external_source: @inat_source,
         external_id: inat_obs[:id].to_s }
     end
 
