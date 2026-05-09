@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require("pathname")
 require("yaml")
 
 class ImageConfigData
@@ -215,11 +216,16 @@ MushroomObserver::Application.configure do
   # Path to the mail-delivery debug log. Per-worker in test mode so
   # parallel workers don't write to a shared file (the
   # MailDeliveryErrorLoggingTest reads this file by offset and would
-  # see other workers' lines if they shared it).
+  # see other workers' lines if they shared it). Returned as a
+  # Pathname for callers that want to call open/exist?/etc. on it.
   def config.email_debug_log_path
-    suffix = IMAGE_CONFIG_DATA.database_worker_number
-    name = suffix ? "email-debug-#{suffix}.log" : "email-debug.log"
-    MO.root.join("log", name)
+    name = if env == "test" &&
+              (worker_num = IMAGE_CONFIG_DATA.database_worker_number)
+             "email-debug-#{worker_num}.log"
+           else
+             "email-debug.log"
+           end
+    Pathname.new("#{root}/log/#{name}")
   end
 
   # Definition of image sources.  Keys are :test, :read and :write.  Values are
