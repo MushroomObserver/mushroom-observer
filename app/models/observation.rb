@@ -965,8 +965,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Message to use to credit the source of this observation.
   # External imports take precedence over the entry agent: an obs
   # synced from iNat surfaces as "Imported from iNaturalist" even if
-  # the user originally created it via mo_website. Returns nil when
-  # there's nothing noteworthy to credit.
+  # the user originally created it via mo_website. Returns nil only
+  # when neither external_source nor source is present.
   # Intended for use with .tpl to render as HTML:
   #   <%= observation.source_credit.tpl %>
   def source_credit
