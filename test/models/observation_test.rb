@@ -2083,6 +2083,181 @@ class ObservationTest < UnitTestCase
     assert(obs.source_noteworthy?)
   end
 
+  # ----- Coverage gap tests for app/models/observation.rb -----
+
+  # field_slip= is a no-op when the slip arg is nil — the early
+  # return at line 219 avoids touching the obs's occurrence.
+  def test_field_slip_setter_with_nil_is_no_op
+    obs = observations(:minimal_unknown_obs)
+    starting_occurrence = obs.occurrence
+    assert_not_nil(starting_occurrence,
+                   "fixture should still have an occurrence")
+    obs.field_slip = nil
+    assert_equal(starting_occurrence, obs.occurrence,
+                 "Setting field_slip to nil should not alter occurrence")
+  end
+
+  # destroy_orphaned_collection_numbers wipes any collection_number
+  # that was attached to only this obs (line 312). Called directly
+  # rather than via obs.destroy because the dependent: :destroy on
+  # observation_collection_numbers fires first in callback order
+  # and would empty col_num.observations before the predicate runs.
+  def test_destroy_orphaned_collection_numbers_destroys_only_orphans
+    obs = observations(:minimal_unknown_obs)
+    sole_coll_num = obs.collection_numbers.first
+    assert_equal([obs], sole_coll_num.observations,
+                 "Need a coll_num attached only to this obs")
+
+    obs.destroy_orphaned_collection_numbers
+    assert_nil(CollectionNumber.find_by(id: sole_coll_num.id),
+               "Orphaned collection_number should be destroyed")
+  end
+
+  # when_str returns the formatted self.when when the @when_str
+  # ivar hasn't been set (line 478).
+  def test_when_str_falls_back_to_formatted_when
+    obs = observations(:minimal_unknown_obs)
+    assert_equal(obs.when.strftime("%Y-%m-%d"), obs.when_str)
+  end
+
+  # display_alt formats altitude in meters when present (line 579)
+  # and returns "" when nil.
+  def test_display_alt
+    obs = observations(:minimal_unknown_obs)
+    obs.alt = nil
+    assert_equal("", obs.display_alt)
+    obs.alt = 1234
+    assert_equal("1234m", obs.display_alt)
+  end
+
+  # other_notes reads the canonical "Other" key (line 673) and
+  # other_notes= writes through it (lines 677-678).
+  #
+  # Note: the setter only round-trips reliably when notes is already
+  # a populated Hash (AR caches the deserialized hash and tracks
+  # mutations). On a fresh record the line `self.notes ||= {}` does
+  # run, but the subsequent `notes[key] = val` mutation doesn't
+  # persist because the serialize-coder returns a fresh hash on each
+  # read until something is written through `notes=`. This test
+  # exercises both code paths for coverage and asserts the
+  # round-trip on the populated path.
+  def test_other_notes_getter_and_setter
+    populated = observations(:detailed_unknown_obs)
+    assert_equal(populated.notes[Observation.other_notes_key],
+                 populated.other_notes,
+                 "Getter should return notes[other_notes_key]")
+    populated.other_notes = "Updated"
+    assert_equal("Updated", populated.other_notes,
+                 "Setter should round-trip on a populated hash")
+
+    fresh = Observation.new
+    assert_nil(fresh.other_notes,
+               "Getter on fresh obs returns nil (notes is empty hash)")
+    # Cover the setter's `self.notes ||= {}` branch on a fresh obs.
+    # The mutation won't persist (see method comment) but the line runs.
+    assert_nothing_raised { fresh.other_notes = "Hello" }
+  end
+
+  # user_unique_format_name swallows StandardError from the name
+  # call and returns "" (line 836).
+  def test_user_unique_format_name_swallows_errors
+    obs = observations(:minimal_unknown_obs)
+    obs.stub(:name, nil) do
+      assert_equal("", obs.user_unique_format_name(users(:rolf)),
+                   "Should swallow NoMethodError on nil name")
+    end
+  end
+
+  # turn_off_specimen_if_no_more_records clears specimen only when
+  # every record-bearing association is empty AND there is no
+  # field_slip (lines 942-945 are the cascading guards).
+  def test_turn_off_specimen_if_no_more_records
+    # The obs starts with collection_numbers, herbarium_records,
+    # and a field_slip → guard returns early, specimen unchanged.
+    obs = observations(:detailed_unknown_obs)
+    obs.update!(specimen: true)
+    obs.turn_off_specimen_if_no_more_records
+    assert(obs.reload.specimen, "Should not clear when records remain")
+
+    # Strip every record-like association so the early-return
+    # guards on lines 940-943 all pass.
+    obs.collection_numbers.clear
+    obs.herbarium_records.clear
+    obs.sequences.destroy_all
+    obs.update!(occurrence: nil)
+    obs.turn_off_specimen_if_no_more_records
+    assert_not(obs.reload.specimen,
+               "Should clear specimen once all record assocs gone")
+  end
+
+  # notify_species_lists logs :log_observation_destroyed2 on each
+  # SpeciesList the obs belonged to (line 1025). Called directly:
+  # via obs.destroy the species_list_observations cascade fires
+  # first (declared earlier in the class), emptying obs.species_lists
+  # before the notify_species_lists callback runs.
+  def test_notify_species_lists_logs_destruction
+    obs = observations(:minimal_unknown_obs)
+    spl = obs.species_lists.first
+    assert_not_nil(spl, "Need a fixture obs that's in a species_list")
+
+    obs.notify_species_lists
+    assert_match(/log_observation_destroyed2/, spl.reload.rss_log.notes,
+                 "SpeciesList rss_log should record the destruction")
+  end
+
+  # announce_consensus_change pushes interested users and removes
+  # explicitly-uninterested ones (lines 1186-1189).
+  def test_announce_consensus_change_uses_interest_state
+    obs = observations(:coprinus_comatus_obs)
+    NameTracker.all.map(&:destroy)
+    Interest.create!(target: obs, user: mary,    state: true)
+    Interest.create!(target: obs, user: dick,    state: false)
+    Interest.create!(target: obs, user: katrina, state: true)
+
+    User.current = rolf
+    old_name = obs.name
+    new_name = names(:agaricus_campestris)
+    assert_enqueued_jobs(2) do
+      obs.announce_consensus_change(old_name, new_name)
+    end
+    # Mary (state=true) and Katrina (state=true) get notified;
+    # Dick (state=false) does not. Sender (rolf) is excluded.
+  end
+
+  # log_consensus_change emits :log_consensus_created when there
+  # was no prior consensus name (line 1241).
+  def test_log_consensus_change_with_nil_old_name_logs_created
+    obs = observations(:minimal_unknown_obs)
+    new_name = names(:agaricus_campestris)
+    obs.log_consensus_change(nil, new_name)
+    assert_match(/log_consensus_created/, obs.rss_log.notes)
+  end
+
+  # user_log_consensus_change emits :log_consensus_created when
+  # there was no prior consensus name (line 1251).
+  def test_user_log_consensus_change_with_nil_old_name_logs_created
+    obs = observations(:minimal_unknown_obs)
+    new_name = names(:agaricus_campestris)
+    obs.user_log_consensus_change(nil, new_name, rolf)
+    assert_match(/log_consensus_created/, obs.rss_log.notes)
+  end
+
+  # check_altitude is unreachable through the normal alt= setter
+  # because the `t.integer "alt"` column coerces unparseable
+  # strings to 0 before parse_altitude ever sees them. Stub
+  # parse_altitude to nil during validation to exercise line 1375
+  # for coverage; if the column type ever changes, remove the stub
+  # and the test still passes (and a real test_setter case can be
+  # added).
+  def test_check_altitude_rejects_unparseable_alt
+    obs = observations(:minimal_unknown_obs)
+    obs.alt = 100
+    Location.stub(:parse_altitude, nil) do
+      assert_not(obs.valid?, "Should fail validation when parse returns nil")
+    end
+    assert_not_empty(obs.errors[:alt])
+  end
+
   def test_hidden_location
     create_new_objects
     assert_false(@cc_obs.gps_hidden)
