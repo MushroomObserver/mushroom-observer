@@ -64,7 +64,7 @@ class ApplicationMailer < ActionMailer::Base
       value = v.nil? || v.instance_of?(String) ? v : v.id
       msg << " #{k}=#{value}"
     end
-    Rails.root.join("log/email-debug.log").open("a:utf-8") do |fh|
+    MO.email_debug_log_path.open("a:utf-8") do |fh|
       fh.puts("#{Time.zone.now} #{msg}")
     end
   end

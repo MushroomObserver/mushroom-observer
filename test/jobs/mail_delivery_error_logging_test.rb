@@ -6,7 +6,9 @@ require("net/smtp")
 class MailDeliveryErrorLoggingTest < ActiveJob::TestCase
   def setup
     super
-    @log_path = Rails.root.join("log/email-debug.log")
+    # Per-worker path so parallel workers don't pollute each other's
+    # offset-based log delta. See MO.email_debug_log_path.
+    @log_path = MO.email_debug_log_path
     @log_offset = File.exist?(@log_path) ? File.size(@log_path) : 0
   end
 
