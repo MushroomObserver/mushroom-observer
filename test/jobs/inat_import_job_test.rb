@@ -652,6 +652,36 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Should log a skip message when the obs is already imported")
   end
 
+  # If a simultaneous import job inserts the same iNat obs between
+  # already_imported? and Observation.create!, the unique index on
+  # (source_id, external_id) raises RecordNotUnique. The importer
+  # should swallow it and log a "race" skip — same effect as the
+  # already_imported? pre-check.
+  def test_import_handles_record_not_unique_race
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    Location.create(user: @user,
+                    name: "Sevier Co., Tennessee, USA",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+
+    stub_inat_interactions
+
+    inat_id = @parsed_results.first[:id]
+    Observation.stub(:create, ->(*) { raise(ActiveRecord::RecordNotUnique) }) do
+      assert_no_difference(
+        "Observation.count",
+        "RecordNotUnique race must not leak a partial obs"
+      ) do
+        InatImportJob.perform_now(@inat_import)
+      end
+    end
+
+    assert_match(/Skipped #{inat_id} already imported \(race\)/,
+                 job_log_file.read,
+                 "Should log a race-skip when RecordNotUnique fires")
+  end
+
   def test_import_update_inat_username_if_job_succeeds
     updated_inat_username = "updatedInatUsername"
 

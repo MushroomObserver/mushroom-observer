@@ -2071,7 +2071,15 @@ class ObservationTest < UnitTestCase
     obs = observations(:imported_inat_obs)
     assert_nil(obs.source)
     assert_equal(sources(:inaturalist), obs.external_source)
-    assert_match(/Imported from "iNaturalist"/, obs.source_credit)
+    assert_match(/Imported from "iNaturalist":/, obs.source_credit)
+    assert(obs.source_noteworthy?)
+  end
+
+  def test_source_credit_external_source_without_url
+    obs = observations(:imported_inat_obs)
+    obs.external_source.update!(url: nil)
+    assert_equal("Imported from iNaturalist", obs.source_credit,
+                 "Should fall back to non-linked text when source.url blank")
     assert(obs.source_noteworthy?)
   end
 
