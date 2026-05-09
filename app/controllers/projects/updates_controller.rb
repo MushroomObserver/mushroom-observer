@@ -93,7 +93,7 @@ module Projects
         limit(pagination.num_per_page).
         includes(
           observation_matrix_box_image_includes,
-          :location, :name, :rss_log, :user,
+          :external_source, :location, :name, :rss_log, :user,
           { namings: :votes },
           { occurrence: :observations }, :projects
         )

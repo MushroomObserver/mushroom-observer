@@ -42,9 +42,10 @@ class ObservationLabels::Fields
     id, url = mo_url(observation)
     qr_list << ObservationLabels::QRCodeField.new("MO: #{id}", url)
 
-    # Add iNaturalist URL if observation has inat_id
-    inat_id = observation.inat_id
-    if inat_id
+    # Add iNaturalist URL if observation links to iNat
+    if observation.external_source &&
+       observation.external_source.name == Source::INATURALIST_NAME
+      inat_id = observation.external_id
       inat_url = "https://www.inaturalist.org/observations/#{inat_id}"
       qr_list << ObservationLabels::QRCodeField.new("iNat: #{inat_id}",
                                                     inat_url)

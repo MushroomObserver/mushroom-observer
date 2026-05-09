@@ -254,8 +254,8 @@ class InatImportsControllerTest < FunctionalTestCase
       where: "North Falmouth, Massachusetts, USA",
       user: user,
       when: "2024-09-08",
-      source: Observation.sources[:mo_inat_import],
-      inat_id: inat_id
+      external_source: Source.inaturalist,
+      external_id: inat_id
     )
     estimate_response = { total_results: 1 }.to_json
 
@@ -284,8 +284,8 @@ class InatImportsControllerTest < FunctionalTestCase
       where: "North Falmouth, Massachusetts, USA",
       user: user,
       when: "2024-09-08",
-      source: Observation.sources[:mo_inat_import],
-      inat_id: inat_id
+      external_source: Source.inaturalist,
+      external_id: inat_id
     )
 
     params = { inat_username: "anything", inat_ids: inat_id,

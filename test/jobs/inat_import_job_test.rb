@@ -635,7 +635,8 @@ class InatImportJobTest < ActiveJob::TestCase
     inat_id = @parsed_results.first[:id]
     Observation.create!(
       user: @user, when: Time.zone.today, where: "Earth",
-      name: Name.unknown, source: "mo_inat_import", inat_id: inat_id
+      name: Name.unknown,
+      external_source: Source.inaturalist, external_id: inat_id.to_s
     )
 
     stub_inat_interactions
@@ -649,6 +650,36 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_match(/Skipped #{inat_id} already imported/, job_log_file.read,
                  "Should log a skip message when the obs is already imported")
+  end
+
+  # If a simultaneous import job inserts the same iNat obs between
+  # already_imported? and Observation.create!, the unique index on
+  # (source_id, external_id) raises RecordNotUnique. The importer
+  # should swallow it and log a "race" skip — same effect as the
+  # already_imported? pre-check.
+  def test_import_handles_record_not_unique_race
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    Location.create(user: @user,
+                    name: "Sevier Co., Tennessee, USA",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+
+    stub_inat_interactions
+
+    inat_id = @parsed_results.first[:id]
+    Observation.stub(:create, ->(*) { raise(ActiveRecord::RecordNotUnique) }) do
+      assert_no_difference(
+        "Observation.count",
+        "RecordNotUnique race must not leak a partial obs"
+      ) do
+        InatImportJob.perform_now(@inat_import)
+      end
+    end
+
+    assert_match(/Skipped #{inat_id} already imported \(race\)/,
+                 job_log_file.read,
+                 "Should log a race-skip when RecordNotUnique fires")
   end
 
   def test_import_update_inat_username_if_job_succeeds
@@ -1037,7 +1068,8 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     inat_id = @parsed_results.first[:id]
-    obs = Observation.find_by(inat_id: inat_id)
+    obs = Observation.find_by(external_source: Source.inaturalist,
+                              external_id: inat_id.to_s)
     assert_not_nil(obs, "Cannot find imported Observation")
     assert(obs.external_links.none?,
            "Observation should have no ExternalLink when creation fails")
@@ -1090,7 +1122,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def standard_assertions(obs:, user: @user, name: nil, loc: nil)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
-    assert_equal("mo_inat_import", obs.source)
+    assert_nil(obs.source, "Imported obs should have no entry-agent source")
+    assert_equal(Source.inaturalist, obs.external_source,
+                 "Imported obs should link to iNaturalist Source")
     assert_equal(loc, obs.location) if loc
 
     expected_photo_count = expected_imported_photo_count
@@ -1131,7 +1165,9 @@ class InatImportJobTest < ActiveJob::TestCase
       "MO Observation should have ExternalLink to iNat observation"
     )
 
-    assert(obs.inat_id.present?, "Failed to set Observation inat_id")
+    assert(obs.external_id.present?, "Failed to set Observation external_id")
+    assert_equal(Source.inaturalist, obs.external_source,
+                 "Imported obs should link to iNaturalist Source")
 
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
     assert_empty(

@@ -207,8 +207,6 @@ class Inat
       # field.present? && field[:value] == "Yes"
     end
 
-    def source = "mo_inat_import"
-
     def when
       observed_on = @obs[:observed_on_details]
       return nil if observed_on.nil?

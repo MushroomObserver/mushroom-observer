@@ -41,8 +41,7 @@ class InatObsTest < UnitTestCase
       # miscellaneous
       specimen: false,
       # notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
-      notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." }, # rubocop:disable Layout/LineLength
-      source: "mo_inat_import"
+      notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." } # rubocop:disable Layout/LineLength
       # thumb_image_id: 1659475,
       # vote_cache: 2.51504,
       # num_views: 78,
@@ -53,7 +52,7 @@ class InatObsTest < UnitTestCase
 
     # mapping to MO Observation attributes, other than name attributes
     # Name attributes mappings are tested in InatTaxonTest
-    %w[gps_hidden lat lng source when where].
+    %w[gps_hidden lat lng when where].
       each do |attribute|
         assert_equal(expected_mapping.send(attribute),
                      mock_inat_obs.send(attribute))
