@@ -986,7 +986,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # Do we want to prominantly advertise the source of this observation?
+  # Do we want to prominently advertise the source of this observation?
   # Reads source_id (the column) directly to avoid loading the
   # external_source association when only the predicate is needed —
   # source_credit takes care of the actual association load.
