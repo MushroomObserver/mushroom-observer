@@ -208,8 +208,14 @@ class InatImportsController < ApplicationController
   end
 
   def previously_imported_observations
-    Observation.where(external_source: Source.inaturalist,
+    return Observation.none if inat_id_list.blank?
+
+    Observation.where(external_source: inat_source,
                       external_id: inat_id_list.map(&:to_s))
+  end
+
+  def inat_source
+    @inat_source ||= Source.inaturalist
   end
 
   def assure_user_has_inat_import_api_key
