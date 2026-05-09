@@ -44,4 +44,18 @@ class Source < AbstractModel
   def self.inaturalist
     find_by!(name: INATURALIST_NAME)
   end
+
+  # URL for the per-observation page on this source, e.g. the
+  # iNat observation page for an iNat-imported obs. Returns the
+  # source's homepage URL when the per-observation pattern isn't
+  # known, or nil if there's nothing usable. Used by
+  # Observation#source_credit to link the credit text.
+  def observation_url(external_id)
+    case name
+    when INATURALIST_NAME
+      "https://www.inaturalist.org/observations/#{external_id}"
+    else
+      url.presence
+    end
+  end
 end

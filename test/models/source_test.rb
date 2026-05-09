@@ -43,4 +43,22 @@ class SourceTest < UnitTestCase
       inat.destroy!
     end
   end
+
+  def test_observation_url_for_inaturalist
+    assert_equal(
+      "https://www.inaturalist.org/observations/12345",
+      Source.inaturalist.observation_url(12_345)
+    )
+  end
+
+  def test_observation_url_unknown_source_falls_back_to_homepage
+    src = Source.create!(name: "MyCoPortal",
+                         url: "https://mycoportal.org")
+    assert_equal("https://mycoportal.org", src.observation_url("anything"))
+  end
+
+  def test_observation_url_returns_nil_when_no_url_known
+    src = Source.create!(name: "BlankSource")
+    assert_nil(src.observation_url("anything"))
+  end
 end
