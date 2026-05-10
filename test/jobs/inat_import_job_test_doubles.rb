@@ -29,8 +29,8 @@ module InatImportJobTestDoubles
   })
     stub_request(:post, "#{SITE}/oauth/token").
       with(
-        body: { "client_id" => Rails.application.credentials.inat.id,
-                "client_secret" => Rails.application.credentials.inat.secret,
+        body: { "client_id" => APP_ID,
+                "client_secret" => APP_SECRET,
                 "code" => "MockCode",
                 "grant_type" => "authorization_code",
                 "redirect_uri" => REDIRECT_URI }
