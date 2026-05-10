@@ -17,11 +17,12 @@ class Inat
     # iNat's id for the MO application
     # Differs in production vs. test & development.
     # Safe-navigated so module load doesn't crash when credentials
-    # can't be decrypted (e.g. CI runs for PRs from forked repos,
-    # which GitHub Actions doesn't pass repo secrets to). Tests
-    # that actually exercise iNat OAuth still need real credentials
-    # or stubs; those that don't (the vast majority) don't care
-    # about the value here.
+    # can't be decrypted — e.g. CI runs for PRs from forked repos,
+    # because GitHub Actions does not pass repo secrets to
+    # workflows triggered by fork PRs. Tests that actually
+    # exercise iNat OAuth still need real credentials or stubs;
+    # those that don't (the vast majority) don't care about the
+    # value here.
     APP_ID = Rails.application.credentials.inat&.id
 
     # URL to obtain authorization (an "Authorization Code")
