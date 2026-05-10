@@ -47,10 +47,10 @@ module Report
         row.user_login,
         row.user_name,
         row.obs_when,
-        row.val(1),
+        row.val(:field_slips),
         row.obs_specimen,
-        row.val(2),
-        row.val(3),
+        row.val(:herbarium_labels),
+        row.val(:collector_ids),
         row.name_id,
         row.name_text_name,
         row.name_author,
@@ -78,9 +78,9 @@ module Report
     end
 
     def extend_data!(rows)
-      add_field_slips!(rows, 1)
-      add_herbarium_labels!(rows, 2)
-      add_collector_ids!(rows, 3)
+      add_field_slips!(rows, :field_slips)
+      add_herbarium_labels!(rows, :herbarium_labels)
+      add_collector_ids!(rows, :collector_ids)
     end
 
     def sort_after(rows)
