@@ -8,8 +8,9 @@ class ImportedSourceBannerTest < ComponentTestCase
     html = render(Components::ImportedSourceBanner.new(observation: obs))
 
     assert_html(html, "div.imported-source-banner")
-    assert_html(html, "a[href*='inaturalist.org/observations/'][target='_blank']" \
-                      "[rel='noopener']")
+    selector = "a[href*='inaturalist.org/observations/']" \
+               "[target='_blank'][rel='noopener']"
+    assert_html(html, selector)
     assert_match(/Imported from iNaturalist/, html)
     # (?) help link to article 39, on-site, NOT a new tab.
     assert_html(html, "a[href='/articles/39']")
