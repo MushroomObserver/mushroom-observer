@@ -18,8 +18,7 @@ class Components::OccurrenceForm < Components::ApplicationForm
   def view_template
     hidden_field(:observation_id)
     render_observation_grid
-    input(type: "submit", value: :create_occurrence_submit.l,
-          class: "btn btn-default center-block my-3")
+    submit(:create_occurrence_submit.l, center: true)
   end
 
   def form_action
