@@ -78,7 +78,7 @@ See our [Codeclimate configuration file](/.codeclimate.yml) for more details.
 ### [RuboCop][RuboCop]
 
 We use [RuboCop][RuboCop] and extensions to help with
-code quality and consistentcy of style.
+code quality and consistency of style.
 See our [RuboCop configuration file](/.rubocop.yml) for more details.
 [RuboCop][RuboCop] is run as part of our CI, and also can be run locally.
 (We are a long way from where we want to be.
