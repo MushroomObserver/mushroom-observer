@@ -1101,6 +1101,47 @@ class ReportTest < UnitTestCase
     assert_equal({ foo: "bar" }, row.send(:notes_to_hash))
   end
 
+  # Defensive: assert that every row produced by an actual report
+  # query contains every BASE_KEYS column. Under the old positional
+  # scheme the same failure mode showed up as misalignment; under
+  # the named-hash scheme it would silently degrade to nil values.
+  # BaseTable#verify_row_keys! raises loudly if any column is
+  # missing; this test exercises that path against several real
+  # report shapes and ensures the only nils in obs-level columns
+  # are ones we genuinely expect to be nil per the fixture.
+  def test_all_base_columns_present_after_select_all
+    report_classes = [
+      Report::Raw, Report::Mycoportal, Report::Fundis, Report::Symbiota
+    ]
+    report_classes.each do |klass|
+      query = Query.lookup_and_save(:Observation)
+      report = klass.new(query: query)
+      raw_rows = report.send(:all_rows)
+      assert(raw_rows.any?, "#{klass} all_rows returned no data; " \
+                            "test would not exercise key check")
+      raw_rows.each do |raw|
+        keys = raw.keys.map(&:to_s)
+        missing = Report::Row::BASE_KEYS - keys
+        assert_empty(missing,
+                     "#{klass} row missing expected columns: " \
+                     "#{missing.inspect}. Got keys: #{keys.inspect}.")
+      end
+    end
+  end
+
+  # Direct sanity check of BaseTable's defensive guard: it should
+  # raise if a raw row is missing any BASE_KEYS entry.
+  def test_verify_row_keys_raises_on_missing_column
+    query = Query.lookup_and_save(:Observation)
+    report = Report::Raw.new(query: query)
+    incomplete = { "obs_id" => 1 } # missing everything else
+
+    error = assert_raises(RuntimeError) do
+      report.send(:verify_row_keys!, incomplete)
+    end
+    assert_match(/missing expected columns/, error.message)
+  end
+
   def test_export_formatted_handles_hash_correctly
     result = Observation.export_formatted({ cap: "red", stem: "white" })
     assert_match(/cap: red/, result)

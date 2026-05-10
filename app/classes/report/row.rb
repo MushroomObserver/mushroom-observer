@@ -5,18 +5,13 @@ module Report
   # produced by `select_all(...).to_a` (one Hash per row).
   #
   # The base set of columns is defined by Report::BaseTable's SELECT
-  # aliases:
-  #   obs_id, obs_when, obs_lat, obs_lng, obs_alt, obs_specimen,
-  #   obs_is_collection_location, obs_vote_cache, obs_thumb_image_id,
-  #   obs_notes, obs_updated_at,
-  #   user_id, user_login, user_name,
-  #   name_id, name_text_name, name_author, name_rank,
-  #   loc_id, loc_name, loc_north, loc_south, loc_east, loc_west,
-  #   loc_high, loc_low,
-  #   obs_where  (only populated for the without-location query)
+  # aliases (see BASE_KEYS below). For without-location obs the
+  # `loc_name` slot is populated with `observations.where` (the
+  # user-typed place string) and the lat/lng/high/low slots are
+  # blank — mirroring the legacy positional layout.
   #
   # Subclasses can attach extra named values via Row#add_val(value, key)
-  # and read them back via Row#val(key). Keys are symbols.
+  # and read them back via Row#val(key). Extension keys are symbols.
   #
   # Switched from positional Array storage to named Hash storage in
   # #3637 to eliminate intermittent column-misalignment errors that
@@ -38,9 +33,15 @@ module Report
       @vals = vals.to_h
     end
 
-    # Generic getter — returns nil if the column wasn't selected.
+    # Generic getter — returns nil only when neither a string-keyed
+    # nor symbol-keyed entry exists. Distinguishes "missing column"
+    # from "present-but-false/nil" via `key?` checks so a stored
+    # `false` doesn't get masked.
     def [](key)
-      @vals[key.to_s] || @vals[key.to_sym]
+      return @vals[key.to_s] if @vals.key?(key.to_s)
+      return @vals[key.to_sym] if @vals.key?(key.to_sym)
+
+      nil
     end
 
     # Storage for the lat/lng tweaker (ProjectTweaker), which may
@@ -48,6 +49,9 @@ module Report
     def []=(key, value)
       @vals[key.to_s] = value
     end
+
+    # Used by BaseTable's defensive key-presence check.
+    delegate :keys, to: :@vals
 
     def obs_id
       self["obs_id"].presence&.to_i

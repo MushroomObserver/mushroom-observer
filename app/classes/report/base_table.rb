@@ -26,7 +26,10 @@ module Report
 
     def formatted_rows
       tweaker = ProjectTweaker.new(user:)
-      rows = all_rows.map { |row| Row.new(tweaker.tweak(row)) }
+      rows = all_rows.map do |raw|
+        verify_row_keys!(raw)
+        Row.new(tweaker.tweak(raw))
+      end
       rows = sort_before(rows)
       extend_data!(rows)
       sort_after(rows.map { |row| format_row(row) })
@@ -34,6 +37,23 @@ module Report
 
     def all_rows
       rows_with_location + rows_without_location
+    end
+
+    # Catch select_all returning a row that's missing one or more
+    # of the columns our SELECT requested — the failure mode #3637
+    # was added to detect (intermittent column drop / misalignment).
+    # Under named-hash storage a missing key only becomes a silent
+    # nil downstream, so this guard surfaces it loudly at the row
+    # boundary instead.
+    def verify_row_keys!(raw)
+      missing = Row::BASE_KEYS - raw.keys.map(&:to_s)
+      return if missing.empty?
+
+      raise(
+        "Report::BaseTable row missing expected columns: " \
+        "#{missing.inspect}. Got keys: #{raw.keys.inspect}. " \
+        "Row: #{raw.inspect}"
+      )
     end
 
     private
