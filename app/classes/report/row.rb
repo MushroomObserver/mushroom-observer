@@ -33,25 +33,13 @@ module Report
       @vals = vals.to_h
     end
 
-    # Generic getter — returns nil only when neither a string-keyed
-    # nor symbol-keyed entry exists. Distinguishes "missing column"
-    # from "present-but-false/nil" via `key?` checks so a stored
-    # `false` doesn't get masked.
+    # Generic getter for a base column. Distinguishes "missing
+    # column" from "present-but-false/nil" via `key?` so a stored
+    # `false` isn't masked into nil. Returns nil for missing keys
+    # (the implicit value of the falsey `if`).
     def [](key)
-      return @vals[key.to_s] if @vals.key?(key.to_s)
-      return @vals[key.to_sym] if @vals.key?(key.to_sym)
-
-      nil
+      @vals[key.to_s] if @vals.key?(key.to_s)
     end
-
-    # Storage for the lat/lng tweaker (ProjectTweaker), which may
-    # override the public lat/lng with project-trusted values.
-    def []=(key, value)
-      @vals[key.to_s] = value
-    end
-
-    # Used by BaseTable's defensive key-presence check.
-    delegate :keys, to: :@vals
 
     def obs_id
       self["obs_id"].presence&.to_i
