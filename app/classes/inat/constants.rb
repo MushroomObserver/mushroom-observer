@@ -15,8 +15,14 @@ class Inat
     REDIRECT_URI = Rails.configuration.redirect_uri
 
     # iNat's id for the MO application
-    # Differs in production vs. test & development
-    APP_ID = Rails.application.credentials.inat.id
+    # Differs in production vs. test & development.
+    # Safe-navigated so module load doesn't crash when credentials
+    # can't be decrypted (e.g. CI runs for PRs from forked repos,
+    # which GitHub Actions doesn't pass repo secrets to). Tests
+    # that actually exercise iNat OAuth still need real credentials
+    # or stubs; those that don't (the vast majority) don't care
+    # about the value here.
+    APP_ID = Rails.application.credentials.inat&.id
 
     # URL to obtain authorization (an "Authorization Code")
     # to allow MO to access an iNat user's private data
