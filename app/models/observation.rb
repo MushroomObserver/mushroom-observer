@@ -1001,11 +1001,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Do we want to prominently advertise the source of this observation?
-  # Reads source_id (the column) directly to avoid loading the
-  # external_source association when only the predicate is needed —
-  # source_credit takes care of the actual association load.
+  # When source_id is set, requires the Source row to actually load —
+  # an orphaned source_id (Source row deleted) shouldn't produce a
+  # noteworthy banner whose contents would render as nothing.
   def source_noteworthy?
-    source_id.present? || (source.present? && source != "mo_website")
+    return true if source_id.present? && external_source.present?
+
+    source.present? && source != "mo_website"
   end
 
   ##############################################################################

@@ -9,7 +9,7 @@ class ImportedSourceBannerTest < ComponentTestCase
 
     assert_html(html, "div.imported-source-banner")
     selector = "a[href*='inaturalist.org/observations/']" \
-               "[target='_blank'][rel='noopener']"
+               "[target='_blank'][rel='noopener noreferrer']"
     assert_html(html, selector)
     assert_match(/Imported from iNaturalist/, html)
     # (?) help link to article 39, on-site, NOT a new tab.

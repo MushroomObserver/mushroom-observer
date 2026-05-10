@@ -297,7 +297,7 @@ class MatrixBoxTest < ComponentTestCase
   end
 
   # External-source credit renders the link with target="_blank" /
-  # rel="noopener" so it opens in a new tab (off-site).
+  # rel="noopener noreferrer" so it opens in a new tab (off-site).
   def test_external_source_credit_renders_new_tab_link
     obs = observations(:imported_inat_obs)
     component = Components::MatrixBox.new(user: @user, object: obs)
@@ -305,10 +305,8 @@ class MatrixBoxTest < ComponentTestCase
 
     assert_includes(html, "Imported from iNaturalist")
     expected_url = obs.external_source.observation_url(obs.external_id)
-    assert_match(/href="#{Regexp.escape(expected_url)}"[^>]*target="_blank"/,
-                 html, "Should open in a new tab")
-    assert_match(/target="_blank"[^>]*rel="noopener"/, html,
-                 "noopener should be set alongside target=_blank")
+    assert_html(html, "a[href='#{expected_url}'][target='_blank']" \
+                      "[rel='noopener noreferrer']")
   end
 
   # External source whose observation_url returns nil falls back

@@ -36,7 +36,8 @@ class Components::ImportedSourceBanner < Components::Base
 
   def render_credit(link)
     if link[:url].present?
-      a(href: link[:url], target: "_blank", rel: "noopener") { link[:text] }
+      a(href: link[:url], target: "_blank",
+        rel: "noopener noreferrer") { link[:text] }
     else
       plain(link[:text])
     end

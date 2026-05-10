@@ -160,9 +160,11 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_match(/Imported from iNaturalist/, @response.body,
                  "RssLog is missing Source credit")
     expected_url = obs.external_source.observation_url(obs.external_id)
-    assert_match(/href="#{Regexp.escape(expected_url)}"[^>]*target="_blank"/,
-                 @response.body,
-                 "External-source credit should open in a new tab")
+    assert_select(
+      "a[href=?][target=?][rel=?]",
+      expected_url, "_blank", "noopener noreferrer", true,
+      "External-source credit should open in a new tab"
+    )
   end
 
   def test_rss_log_display_source_credit_updated_observation
