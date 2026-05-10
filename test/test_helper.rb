@@ -182,13 +182,24 @@ module ActiveSupport
 
     # Add more helper methods to be used by all tests here...
 
-    # Standard setup to run before every test.  Sets the locale, timezone,
-    # and makes sure User doesn't think a user is logged in.
-    def setup
-      # Disable cop; there's no block in which to limit the time zone change
-      I18n.locale = :en if I18n.locale != :en # rubocop:disable Rails/I18nLocaleAssignment
-      # Disable cop; there's no block in which to limit the time zone change
-      Time.zone = "America/New_York" # rubocop:disable Rails/TimeZoneAssignment
+    # Standard setup to run before every test. Sets the locale,
+    # timezone, makes sure User doesn't think a user is logged in,
+    # and clears Symbol.missing_tags so the teardown assertion only
+    # sees tags raised by the test that just ran.
+    #
+    # Registered as a `setup do` callback rather than `def setup`
+    # so it runs unconditionally — many test classes override
+    # `def setup` without calling `super`, which previously
+    # bypassed these resets and let global state (most notably
+    # I18n.locale and Symbol.missing_tags) leak between tests
+    # within a parallel worker. See #4238.
+    setup do
+      # rubocop:disable Rails/I18nLocaleAssignment
+      I18n.locale = :en if I18n.locale != :en
+      # rubocop:enable Rails/I18nLocaleAssignment
+      # rubocop:disable Rails/TimeZoneAssignment
+      Time.zone = "America/New_York"
+      # rubocop:enable Rails/TimeZoneAssignment
       User.current = nil
       clear_logs unless defined?(@@cleared_logs)
       Symbol.missing_tags = []
