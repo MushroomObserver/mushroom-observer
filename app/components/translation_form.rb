@@ -251,13 +251,23 @@ class Components::TranslationForm < Components::ApplicationForm
   # --- Locale select ---
 
   def render_locale_select
-    select(
-      name: :locale,
-      class: "form-control",
-      data: locale_select_data
-    ) do
-      render_locale_options
-    end
+    proxy = Components::ApplicationForm::FieldProxy.new(
+      nil, "locale", @lang.locale
+    )
+    render(Components::ApplicationForm::SelectField.new(
+             proxy,
+             collection: locale_options,
+             # id: nil drops the FieldProxy-supplied id so the rendered
+             # <select> matches the original markup (no id attribute).
+             attributes: { id: nil, data: locale_select_data },
+             wrapper_options: { label: false }
+           ))
+  end
+
+  def locale_options
+    # Language.menu_options returns [name, locale]; Superform expects
+    # [value, label], so swap to [locale, name].
+    Language.menu_options.map { |name, locale| [locale, name] }
   end
 
   def locale_select_data
@@ -266,17 +276,5 @@ class Components::TranslationForm < Components::ApplicationForm
       translation_target: "localeSelect",
       action: "translation#changeLocale"
     }
-  end
-
-  def render_locale_options
-    Language.menu_options.each do |name, locale|
-      if locale == @lang.locale
-        option(value: locale, selected: true) do
-          plain(name)
-        end
-      else
-        option(value: locale) { plain(name) }
-      end
-    end
   end
 end

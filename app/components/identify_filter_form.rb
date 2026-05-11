@@ -17,8 +17,6 @@
 #       )) %>
 #
 class Components::IdentifyFilterForm < Components::ApplicationForm
-  VALID_TYPES = [:clade, :region].freeze
-
   def initialize(model, **)
     super(model, id: "identify_filter", **)
   end
@@ -57,8 +55,7 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def _method_field; end
 
   def selected
-    type = model.type&.to_sym
-    VALID_TYPES.include?(type) ? type : :clade
+    model.type.to_sym
   end
 
   def initial_controller
@@ -117,20 +114,16 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   # --- Type select (bare, no form-group wrapper) ---
 
   def render_type_select
-    select(name: "filter[type]", id: "filter_type",
-           class: "form-control",
-           data: dual_target("select").merge(
-             action: "autocompleter--clade#swap " \
-                     "autocompleter--region#swap"
-           )) do
-      type_options.each do |label, val|
-        option(value: val, selected: val == selected) { label }
-      end
-    end
+    select_field(:type, type_options, label: false,
+                                      data: dual_target("select").merge(
+                                        action: "autocompleter--clade#swap " \
+                                                "autocompleter--region#swap"
+                                      ))
   end
 
+  # Superform expects [value, label].
   def type_options
-    [[:CLADE.l, :clade], [:REGION.l, :region]]
+    [[:clade, :CLADE.l], [:region, :REGION.l]]
   end
 
   # --- Dual-target helpers ---
