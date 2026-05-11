@@ -26,7 +26,7 @@ class Components::TranslationForm < Components::ApplicationForm
 
   def view_template
     super do
-      input(type: "hidden", name: "tag", value: @tag)
+      render_hidden_tag_field
       render_language_header
       render_tag_textareas
       render_buttons
@@ -38,6 +38,14 @@ class Components::TranslationForm < Components::ApplicationForm
 
   def form_action
     translation_path(@tag, for_page: @for_page)
+  end
+
+  def render_hidden_tag_field
+    proxy = Components::ApplicationForm::FieldProxy.new(nil, "tag", @tag)
+    render(Components::ApplicationForm::TextField.new(
+             proxy,
+             attributes: { type: "hidden" }
+           ))
   end
 
   def form_dataset

@@ -64,8 +64,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_submit
-    input(type: "submit", value: :edit_occurrence_submit.l,
-          class: "btn btn-default center-block my-3")
+    submit(:edit_occurrence_submit.l, center: true)
   end
 
   def render_obs_box(obs)
