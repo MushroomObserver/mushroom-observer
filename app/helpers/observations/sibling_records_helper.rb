@@ -19,10 +19,7 @@ module Observations::SiblingRecordsHelper
   def sibling_sequences(siblings)
     sibling_record_list(siblings, :sequences) do |seq, sib|
       parts = [link_to(seq.format_name, sequence_path(seq.id))]
-      if seq.deposit?
-        parts << link_to(seq.bases_trimmed, seq.deposit_url,
-                         target: "_blank", rel: "noopener")
-      end
+      parts << sibling_sequence_archive_link(seq) if seq.deposit?
       parts << sibling_attribution(sib)
       parts.safe_join(" ")
     end
@@ -53,6 +50,12 @@ module Observations::SiblingRecordsHelper
       items.map { |rec, sib| tag.li { yield(rec, sib) } }.
         safe_join
     end
+  end
+
+  def sibling_sequence_archive_link(seq)
+    link = link_to(:show_observation_archive_link.t, seq.accession_url,
+                   target: "_blank", rel: "noopener")
+    "[".html_safe + link + "]".html_safe
   end
 
   def sibling_herbarium_record_content(record, sibling)
