@@ -1,10 +1,24 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Bootstrap checkbox field component with checkbox wrapper and slots
+  # Bootstrap checkbox field component.
+  #
+  # **Boolean mode** (no positional options): renders the canonical Rails
+  # hidden+checkbox pair wrapped in a single `<div class="checkbox"><label>`.
+  # Delegates the input rendering to `Superform::Rails::Components::Checkbox`
+  # (boolean branch), so we inherit the hidden-field convention and
+  # checked-state computation.
+  #
+  # **Array mode** (options passed): renders a group of checkboxes for a
+  # single multi-valued field via `Superform::Rails::Components::Checkboxes`,
+  # wrapping each option in its own `<div class="checkbox"><label>`.
+  # The caller must back this with a FormObject attribute that's array-typed
+  # (returns `[]` not `nil` when empty) so upstream `Checkbox` picks the
+  # array branch — otherwise it'll fall back to boolean rendering per option.
   class CheckboxField < Superform::Rails::Components::Checkbox
     include Phlex::Slotable
     include FieldWithHelp
+    include Components::TrustedHtml
 
     slot :between
     slot :append
@@ -14,29 +28,38 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options
 
-    def initialize(field, *options, attributes: {}, wrapper_options: {})
-      super(field, *options, attributes: attributes)
+    def initialize(field, *options, wrapper_options: {}, **attributes)
+      @options = options
       @wrapper_options = wrapper_options
+      # Upstream 0.7 Checkbox#initialize is (field, index: nil, **attributes).
+      super(field, **attributes)
     end
 
-    def view_template
-      render_with_wrapper do
-        # Inherits proper checkbox behavior from Superform
-        # (hidden input + checked)
-        super
+    def view_template(&block)
+      if @options.any?
+        render_array_mode
+      elsif block
+        # Block mode: caller drives rendering via `cb.option(value)` for
+        # one or more checkboxes inside MO's standard wrapper. Used for
+        # matrix-style layouts where one checkbox_field call produces
+        # exactly one cell of a larger group.
+        render_boolean_with_wrapper { yield(self) }
+      else
+        render_boolean_with_wrapper { super }
       end
     end
 
-    # Override Superform's option to skip its label wrapper, since
-    # render_with_wrapper already provides one. Avoids invalid nested labels.
+    # Render a single array-mode checkbox (name="…[]"). Intended for use
+    # inside a block passed to `checkbox_field`, when the caller wants
+    # one cell of a larger checkbox matrix.
     def option(value)
       input(
-        **attributes,
         type: :checkbox,
-        id: "#{dom.id}_#{value}",
-        name: "#{dom.name}[]",
+        id: "#{field.dom.id}_#{value}",
+        name: "#{field.dom.name}[]",
         value: value.to_s,
-        checked: checked_in_array?(value)
+        checked: checked_in_array?(value),
+        **@attributes.except(:id, :name, :value, :type, :checked)
       )
       return unless block_given?
 
@@ -45,10 +68,44 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
-    def render_with_wrapper(&checkbox_block)
-      div(class: checkbox_class) do
+    # --- Array mode ---
+
+    def render_array_mode
+      render(checkboxes_component) do |choice|
+        render_checkbox_option(choice)
+      end
+    end
+
+    def checkboxes_component
+      Superform::Rails::Components::Checkboxes.new(
+        field, options: @options, **@attributes
+      )
+    end
+
+    def render_checkbox_option(choice)
+      div(class: option_wrap_class) do
+        label do
+          render(choice.build_input(**@attributes))
+          whitespace
+          trusted_html(choice.text)
+        end
+      end
+    end
+
+    def checked_in_array?(value)
+      field_value = field.value
+      return false if field_value.nil?
+
+      field_value = [field_value] unless field_value.is_a?(Array)
+      field_value.map(&:to_s).include?(value.to_s)
+    end
+
+    # --- Boolean mode wrapper ---
+
+    def render_boolean_with_wrapper(&checkbox_block)
+      div(class: boolean_wrap_class) do
         label(for: checkbox_id, **label_attributes) do
-          render_content(&checkbox_block)
+          render_boolean_content(&checkbox_block)
           render_help_in_label_row
         end
         render_help_after_field
@@ -56,13 +113,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Use custom ID if provided, otherwise use Superform's generated ID
-    def checkbox_id
-      attributes[:id] || field.dom.id
-    end
-
     # MO's default render order is checkbox-then-label
-    def render_content
+    def render_boolean_content
       text = label_text
       if label_position_before?
         if text
@@ -81,7 +133,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Pass `label_position: :before` to render label-then-checkbox
+    # Use custom ID if provided, otherwise use Superform's generated ID
+    def checkbox_id
+      @attributes[:id] || field.dom.id
+    end
+
     def label_position_before?
       wrapper_options[:label_position] == :before
     end
@@ -93,34 +149,27 @@ class Components::ApplicationForm < Superform::Rails::Form
       label_option.is_a?(String) ? label_option : field.key.to_s.humanize
     end
 
-    def checkbox_class
+    def boolean_wrap_class
       classes = "checkbox"
       classes += " #{wrapper_options[:wrap_class]}" if wrap_class?
       classes
     end
+
+    # Each per-option label gets its own .checkbox wrapper too
+    alias option_wrap_class boolean_wrap_class
 
     def wrap_class?
       wrapper_options[:wrap_class].present?
     end
 
     def label_attributes
-      {}.tap do |attrs|
-        attrs[:class] = wrapper_options[:label_class] if label_class?
-        attrs[:data] = wrapper_options[:label_data] if label_data?
-        attrs[:aria] = wrapper_options[:label_aria] if label_aria?
+      attrs = {}
+      [:label_class, :label_data, :label_aria].each do |opt|
+        next unless wrapper_options[opt]
+
+        attrs[opt.to_s.sub("label_", "").to_sym] = wrapper_options[opt]
       end
-    end
-
-    def label_class?
-      wrapper_options[:label_class]
-    end
-
-    def label_data?
-      wrapper_options[:label_data]
-    end
-
-    def label_aria?
-      wrapper_options[:label_aria]
+      attrs
     end
   end
 end

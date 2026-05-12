@@ -42,10 +42,7 @@ class Components::TranslationForm < Components::ApplicationForm
 
   def render_hidden_tag_field
     proxy = Components::ApplicationForm::FieldProxy.new(nil, "tag", @tag)
-    render(Components::ApplicationForm::TextField.new(
-             proxy,
-             attributes: { type: "hidden" }
-           ))
+    render(Components::ApplicationForm::HiddenField.new(proxy))
   end
 
   def form_dataset
@@ -132,12 +129,10 @@ class Components::TranslationForm < Components::ApplicationForm
   def build_textarea_component(proxy, rows, ttag)
     Components::ApplicationForm::TextareaField.new(
       proxy,
-      attributes: {
-        rows: rows,
-        data: {
-          translation_target: "textarea",
-          action: "translation#formChanged"
-        }
+      rows: rows,
+      data: {
+        translation_target: "textarea",
+        action: "translation#formChanged"
       },
       wrapper_options: { label: ttag }
     )

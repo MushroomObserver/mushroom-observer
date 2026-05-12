@@ -15,8 +15,10 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options
 
-    def initialize(field, collection:, attributes:, wrapper_options: {})
-      super(field, collection: collection, attributes: attributes)
+    def initialize(field, collection:, wrapper_options: {}, **attributes)
+      # Upstream Superform 0.7 renamed `collection:` to `options:` and
+      # deprecated passing `attributes:` as a keyword. Spread instead.
+      super(field, options: collection, **attributes)
       @wrapper_options = wrapper_options
     end
 
@@ -28,7 +30,7 @@ class Components::ApplicationForm < Superform::Rails::Form
           select(**select_attrs, class: select_classes, &options_block)
         else
           select(**select_attrs, class: select_classes) do
-            options(*@collection)
+            options(*@options)
           end
         end
       end

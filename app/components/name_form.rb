@@ -40,10 +40,7 @@ class Components::NameForm < Components::ApplicationForm
     proxy = Components::ApplicationForm::FieldProxy.new(
       nil, "approved_rank", @approved_rank
     )
-    render(Components::ApplicationForm::TextField.new(
-             proxy,
-             attributes: { type: "hidden" }
-           ))
+    render(Components::ApplicationForm::HiddenField.new(proxy))
   end
 
   def button_text
