@@ -5,6 +5,42 @@ module Report
   class BaseTable < Base
     attr_accessor :query
 
+    OBS_SIMPLE_SELECTS = {
+      obs_id: :id,
+      obs_when: :when,
+      obs_alt: :alt,
+      obs_specimen: :specimen,
+      obs_is_collection_location: :is_collection_location,
+      obs_vote_cache: :vote_cache,
+      obs_thumb_image_id: :thumb_image_id,
+      obs_notes: :notes,
+      obs_updated_at: :updated_at
+    }.freeze
+
+    USER_SELECTS = {
+      user_id: :id,
+      user_login: :login,
+      user_name: :name
+    }.freeze
+
+    NAME_SELECTS = {
+      name_id: :id,
+      name_text_name: :text_name,
+      name_author: :author,
+      name_rank: :rank
+    }.freeze
+
+    LOCATION_SELECTS = {
+      loc_id: :id,
+      loc_name: :name,
+      loc_north: :north,
+      loc_south: :south,
+      loc_east: :east,
+      loc_west: :west,
+      loc_high: :high,
+      loc_low: :low
+    }.freeze
+
     def initialize(args)
       super
       self.query = args[:query]
@@ -83,21 +119,13 @@ module Report
     end
 
     def observation_selects
-      cols = obs_simple_selects
-      cols.insert(2, public_latlng_spec(:lat).as("obs_lat"),
-                  public_latlng_spec(:lng).as("obs_lng"))
-      cols.freeze
+      obs_simple_selects +
+        [public_latlng_spec(:lat).as("obs_lat"),
+         public_latlng_spec(:lng).as("obs_lng")]
     end
 
     def obs_simple_selects
-      [[:id, "obs_id"], [:when, "obs_when"], [:alt, "obs_alt"],
-       [:specimen, "obs_specimen"],
-       [:is_collection_location, "obs_is_collection_location"],
-       [:vote_cache, "obs_vote_cache"],
-       [:thumb_image_id, "obs_thumb_image_id"],
-       [:notes, "obs_notes"],
-       [:updated_at, "obs_updated_at"]].
-        map { |attr, alias_| Observation[attr].as(alias_) }
+      OBS_SIMPLE_SELECTS.map { |aliaz, attr| Observation[attr].as(aliaz.to_s) }
     end
 
     def public_latlng_spec(col)
@@ -107,50 +135,30 @@ module Report
     end
 
     def user_selects
-      [
-        User[:id].as("user_id"),
-        User[:login].as("user_login"),
-        User[:name].as("user_name")
-      ].freeze
+      USER_SELECTS.map { |aliaz, attr| User[attr].as(aliaz.to_s) }
     end
 
     def name_selects
-      [
-        Name[:id].as("name_id"),
-        Name[:text_name].as("name_text_name"),
-        Name[:author].as("name_author"),
-        Name[:rank].as("name_rank")
-      ].freeze
+      NAME_SELECTS.map { |aliaz, attr| Name[attr].as(aliaz.to_s) }
     end
 
     # For observations with no Location row, fill the loc_name slot
     # with `observations.where` (the user-typed place string). This
     # preserves the legacy behavior where row.loc_name returned the
-    # `where` text for without-location obs.
+    # `where` text for without-location obs. The other loc_* slots
+    # come back as empty strings so the row still has every key.
     def blanks_for_location
-      [
-        Arel::Nodes.build_quoted("").as("loc_id"),
-        Observation[:where].as("loc_name"),
-        Arel::Nodes.build_quoted("").as("loc_north"),
-        Arel::Nodes.build_quoted("").as("loc_south"),
-        Arel::Nodes.build_quoted("").as("loc_east"),
-        Arel::Nodes.build_quoted("").as("loc_west"),
-        Arel::Nodes.build_quoted("").as("loc_high"),
-        Arel::Nodes.build_quoted("").as("loc_low")
-      ].freeze
+      LOCATION_SELECTS.keys.map do |aliaz|
+        if aliaz == :loc_name
+          Observation[:where].as(aliaz.to_s)
+        else
+          Arel::Nodes.build_quoted("").as(aliaz.to_s)
+        end
+      end
     end
 
     def location_selects
-      [
-        Location[:id].as("loc_id"),
-        Location[:name].as("loc_name"),
-        Location[:north].as("loc_north"),
-        Location[:south].as("loc_south"),
-        Location[:east].as("loc_east"),
-        Location[:west].as("loc_west"),
-        Location[:high].as("loc_high"),
-        Location[:low].as("loc_low")
-      ].freeze
+      LOCATION_SELECTS.map { |aliaz, attr| Location[attr].as(aliaz.to_s) }
     end
 
     # Extension column key for row.add_val / row.val.
