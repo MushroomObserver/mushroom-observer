@@ -145,10 +145,7 @@ class Components::DescriptionForm < Components::ApplicationForm
 
   def render_flat_hidden_field(name, value)
     proxy = Components::ApplicationForm::FieldProxy.new(nil, name, value)
-    render(Components::ApplicationForm::TextField.new(
-             proxy,
-             attributes: { type: "hidden" }
-           ))
+    render(Components::ApplicationForm::HiddenField.new(proxy))
   end
 
   # --- Helper methods ---

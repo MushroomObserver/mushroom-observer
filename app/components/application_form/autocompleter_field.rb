@@ -31,7 +31,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                 :custom_controller_id, :map_outlet
 
     def initialize(field, type:, textarea: false, **options)
-      super(field, attributes: {})
+      super(field)
       @autocompleter_type = type
       @textarea = textarea
       extract_options(options)

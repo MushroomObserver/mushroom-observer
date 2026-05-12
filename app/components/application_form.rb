@@ -123,38 +123,34 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Override the Field class to use our custom components
   class Field < Superform::Rails::Form::Field
     def text(wrapper_options: {}, **attributes)
-      TextField.new(self, attributes: attributes,
-                          wrapper_options: wrapper_options)
+      TextField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     def textarea(wrapper_options: {}, **attributes)
-      TextareaField.new(self, attributes: attributes,
-                              wrapper_options: wrapper_options)
+      TextareaField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     def file(wrapper_options: {}, **attributes)
-      FileField.new(self, attributes: attributes,
-                          wrapper_options: wrapper_options)
+      FileField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     def checkbox(*options, wrapper_options: {}, **attributes)
-      CheckboxField.new(self, *options, attributes: attributes,
-                                        wrapper_options: wrapper_options)
+      CheckboxField.new(self, *options,
+                        wrapper_options: wrapper_options, **attributes)
     end
 
     def radio(*options, wrapper_options: {}, **attributes)
-      RadioField.new(self, *options, attributes: attributes,
-                                     wrapper_options: wrapper_options)
+      RadioField.new(self, *options,
+                     wrapper_options: wrapper_options, **attributes)
     end
 
     def select(options, wrapper_options: {}, **attributes)
-      SelectField.new(self, collection: options, attributes: attributes,
-                            wrapper_options: wrapper_options)
+      SelectField.new(self, collection: options,
+                            wrapper_options: wrapper_options, **attributes)
     end
 
     def read_only(wrapper_options: {}, **attributes)
-      ReadOnlyField.new(self, attributes: attributes,
-                              wrapper_options: wrapper_options)
+      ReadOnlyField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     # Autocompleter-specific options that should NOT go in field attributes
@@ -177,13 +173,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def static(wrapper_options: {}, **attributes)
-      StaticTextField.new(self, attributes: attributes,
-                                wrapper_options: wrapper_options)
+      StaticTextField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     def date(wrapper_options: {}, **attributes)
-      DateField.new(self, attributes: attributes,
-                          wrapper_options: wrapper_options)
+      DateField.new(self, wrapper_options: wrapper_options, **attributes)
     end
   end
 

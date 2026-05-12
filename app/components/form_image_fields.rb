@@ -53,7 +53,7 @@ class Components::FormImageFields < Components::Base
     field = image_field_proxy(:notes, @image&.notes)
     render(Components::ApplicationForm::TextareaField.new(
              field,
-             attributes: { rows: 2 },
+             rows: 2,
              wrapper_options: { label: :form_images_notes.l }
            ))
   end
@@ -62,7 +62,7 @@ class Components::FormImageFields < Components::Base
     field = image_field_proxy(:when, @image&.when)
     render(Components::ApplicationForm::DateField.new(
              field,
-             attributes: { value: @image&.when },
+             value: @image&.when,
              wrapper_options: { label: :form_images_when_taken.l }
            ))
   end
@@ -71,7 +71,6 @@ class Components::FormImageFields < Components::Base
     field = image_field_proxy(:copyright_holder, @image&.copyright_holder)
     render(Components::ApplicationForm::TextField.new(
              field,
-             attributes: {},
              wrapper_options: { label: :form_images_copyright_holder.l }
            ))
   end
@@ -81,7 +80,6 @@ class Components::FormImageFields < Components::Base
     render(Components::ApplicationForm::SelectField.new(
              field,
              collection: superform_license_options,
-             attributes: {},
              wrapper_options: { label: :form_images_select_license.t.html_safe } # rubocop:disable Rails/OutputSafety
            ))
   end
@@ -90,7 +88,7 @@ class Components::FormImageFields < Components::Base
     field = image_field_proxy(:original_name, @image&.original_name)
     render(Components::ApplicationForm::TextField.new(
              field,
-             attributes: { size: 40 },
+             size: 40,
              wrapper_options: { label: :form_images_original_name.l }
            ))
   end

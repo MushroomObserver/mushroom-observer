@@ -25,11 +25,9 @@ class Components::ObservationFormUpload < Components::Base
     render(
       Components::ApplicationForm::FileField.new(
         field_proxy,
-        attributes: {
-          multiple: true,
-          controller: "form-images",
-          action: "change->form-images#addSelectedFiles"
-        },
+        multiple: true,
+        controller: "form-images",
+        action: "change->form-images#addSelectedFiles",
         wrapper_options: { label: false }
       )
     )
