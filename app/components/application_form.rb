@@ -468,18 +468,31 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param options [Hash] submit button options
   # @option options [Boolean] :center center the button (default false)
   # @option options [String] :submits_with text shown while submitting
+  # @option options [String] :btn_class Bootstrap button class
+  #   (default `"btn-default"`). Pass the full class name, e.g.
+  #   `"btn-outline-default"` to match the top-nav search bar style.
+  # @option options [Symbol] :as `:input` (default) renders `<input
+  #   type="submit">`; `:button` renders `<button type="submit">value</button>`.
+  #   Default stays `:input` because most controller/system tests look for
+  #   `input[type='submit']` selectors.
   # @option options [String] :class additional CSS classes
   # @option options [Hash] :data additional data attributes
-  def submit(value = submit_value, center: false, submits_with: nil, **options)
+  def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
+             btn_class: "btn-default", as: :input, **options)
     submits_with ||= :SUBMITTING.l
-    classes = %w[btn btn-default]
+    classes = ["btn", btn_class]
     classes << "center-block my-3" if center
     classes << options[:class] if options[:class].present?
 
     data = { turbo_submits_with: submits_with,
              disable_with: value }.merge(options[:data] || {})
+    merged = options.merge(class: classes.join(" "), data: data)
 
-    super(value, **options.merge(class: classes.join(" "), data: data))
+    if as == :button
+      button(type: "submit", name: "commit", **merged) { value }
+    else
+      super(value, **merged)
+    end
   end
 
   # Renders image upload fields in a :upload namespace

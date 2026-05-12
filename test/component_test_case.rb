@@ -336,6 +336,63 @@ class ComponentTestCase < UnitTestCase
     puts("=" * 60)
   end
 
+  # Assert that the subtree rooted at +selector+ is structurally
+  # equivalent between two HTML strings.
+  #
+  # Compares element name, attribute set (order-agnostic), attribute
+  # values, text content, and child structure recursively. Attribute
+  # order does NOT affect equivalence — only attribute presence and
+  # values do. This is the right helper when verifying that a Phlex
+  # refactor preserves the markup contract a JS/CSS layer depends on:
+  # missing classes, missing attributes, and nesting changes will all
+  # fail the assertion; cosmetic attribute reordering won't.
+  #
+  # Pair with `compare_html_elements` (also in this file) — that helper
+  # prints a side-by-side diff for interactive debugging but doesn't
+  # assert and IS attribute-order sensitive (compares via `to_html`).
+  # Use `compare_html_elements` when investigating; use this one in a
+  # checked-in test.
+  #
+  # @param expected_html [String] HTML rendered by the pre-change code.
+  # @param actual_html [String] HTML rendered by the post-change code.
+  # @param selector [String] CSS selector identifying the element whose
+  #   subtree should be compared. Only the first match in each HTML
+  #   string is examined.
+  # @param label [String, nil] Human-readable identifier used in the
+  #   failure message and the names of the dumped HTML files.
+  # @param strip_csrf [Boolean] When true (default), the value of any
+  #   `<input name="authenticity_token">` is replaced with a constant
+  #   before comparison so per-render CSRF rotation doesn't cause
+  #   spurious failures. Set false to compare tokens verbatim.
+  #
+  # On failure, both subtrees are written to /tmp/html_parity_*.html
+  # for inspection and the assertion message names the first mismatch
+  # (element name, attribute set, attribute value, text, child count)
+  # along with the path from the selector root to the differing node.
+  CSRF_INPUT_RE =
+    /(<input[^>]*?name="authenticity_token"[^>]*?value=")[^"]+(")/
+
+  def assert_html_element_equivalent(expected_html, actual_html,
+                                     selector:, label: nil,
+                                     strip_csrf: true)
+    expected_subtree = extract_subtree(expected_html, selector, strip_csrf)
+    actual_subtree = extract_subtree(actual_html, selector, strip_csrf)
+    assert(expected_subtree,
+           "Expected HTML had no element matching #{selector.inspect}")
+    assert(actual_subtree,
+           "Actual HTML had no element matching #{selector.inspect}")
+
+    diff = html_node_diff(expected_subtree, actual_subtree, "")
+    return if diff.nil?
+
+    dump_label = sanitize_filename(label || selector)
+    File.write("/tmp/html_parity_expected_#{dump_label}.html",
+               expected_subtree.to_html)
+    File.write("/tmp/html_parity_actual_#{dump_label}.html",
+               actual_subtree.to_html)
+    flunk("HTML subtree mismatch (#{label || selector}): #{diff}")
+  end
+
   private
 
   # Helper to compare attributes between two Nokogiri elements
@@ -360,5 +417,79 @@ class ComponentTestCase < UnitTestCase
         puts("  #{key}: ✗ ERB=#{erb_val.inspect} vs Phlex=#{phlex_val.inspect}")
       end
     end
+  end
+
+  # --- assert_html_element_equivalent support ---
+
+  def extract_subtree(html, selector, strip_csrf)
+    src = strip_csrf ? html.gsub(CSRF_INPUT_RE, '\1CSRF\2') : html
+    Nokogiri::HTML5.fragment(src).at_css(selector)
+  end
+
+  # Returns a path-prefixed diff string on the first mismatch found
+  # walking +expected+ and +actual+ in lockstep, or nil if equivalent.
+  def html_node_diff(expected, actual, path)
+    return name_mismatch(expected, actual, path) \
+      if expected.name != actual.name
+
+    here = "#{path}<#{expected.name}>"
+    attr_diff = html_attribute_diff(expected, actual, here)
+    return attr_diff if attr_diff
+
+    expected_leaf = expected.element_children.empty?
+    actual_leaf = actual.element_children.empty?
+    if expected_leaf != actual_leaf
+      return "#{here}: structure differs (one has element children, " \
+             "the other doesn't)"
+    end
+    return html_text_diff(expected, actual, here) if expected_leaf
+
+    html_children_diff(expected, actual, here)
+  end
+
+  def name_mismatch(expected, actual, path)
+    "#{path}: element name #{expected.name.inspect} != #{actual.name.inspect}"
+  end
+
+  def html_attribute_diff(expected, actual, here)
+    expected_attrs = expected.attributes.transform_values(&:value)
+    actual_attrs = actual.attributes.transform_values(&:value)
+    missing = expected_attrs.keys - actual_attrs.keys
+    return "#{here}: missing attributes #{missing.inspect}" if missing.any?
+
+    extra = actual_attrs.keys - expected_attrs.keys
+    return "#{here}: unexpected attributes #{extra.inspect}" if extra.any?
+
+    expected_attrs.each do |k, v|
+      next if v == actual_attrs[k]
+
+      return "#{here}: attribute #{k}=#{v.inspect} != " \
+             "#{actual_attrs[k].inspect}"
+    end
+    nil
+  end
+
+  def html_text_diff(expected, actual, here)
+    return nil if expected.content == actual.content
+
+    "#{here}: text #{expected.content.inspect} != #{actual.content.inspect}"
+  end
+
+  def html_children_diff(expected, actual, here)
+    e_kids = expected.element_children
+    a_kids = actual.element_children
+    if e_kids.size != a_kids.size
+      return "#{here}: child element count #{e_kids.size} != #{a_kids.size}"
+    end
+
+    e_kids.each_with_index do |child, i|
+      sub = html_node_diff(child, a_kids[i], "#{here}[#{i}]")
+      return sub if sub
+    end
+    nil
+  end
+
+  def sanitize_filename(str)
+    str.to_s.gsub(/[^A-Za-z0-9._-]/, "_")
   end
 end

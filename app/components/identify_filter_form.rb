@@ -17,8 +17,6 @@
 #       )) %>
 #
 class Components::IdentifyFilterForm < Components::ApplicationForm
-  VALID_TYPES = [:clade, :region].freeze
-
   def initialize(model, **)
     super(model, id: "identify_filter", **)
   end
@@ -26,9 +24,9 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def view_template
     super do
       render_autocompleter_wrap
-      render_type_select
-      submit(:SEARCH.l)
-      submit(:CLEAR.l)
+      render_type_select_group
+      submit(:SEARCH.l, btn_class: "btn-outline-default", class: "px-2")
+      submit(:CLEAR.l, btn_class: "btn-outline-default", class: "px-2")
     end
   end
 
@@ -46,7 +44,10 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def form_attributes
     {
       id: @attributes[:id],
-      class: "navbar-form navbar-left",
+      # Match the top-nav search bar layout: flexbox row with `gap-2`
+      # between items, no padding on the form so it sits flush in its
+      # `#search_nav` container.
+      class: "navbar-flex flex-grow-1 navbar-form px-0 gap-2",
       data: { controller: initial_controller,
               type: selected }
     }
@@ -57,8 +58,7 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def _method_field; end
 
   def selected
-    type = model.type&.to_sym
-    VALID_TYPES.include?(type) ? type : :clade
+    model.type.to_sym
   end
 
   def initial_controller
@@ -67,8 +67,12 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
 
   # --- Autocompleter section ---
 
+  # Term input lives inside a `d-flex flex-grow-1` form-group so it
+  # expands to fill the row; the type select and submit buttons keep
+  # their natural width.
   def render_autocompleter_wrap
-    div(class: "form-group has-feedback has-search dropdown",
+    div(class: "form-group has-feedback has-search d-flex " \
+               "flex-grow-1 mb-0 dropdown",
         data: dual_target("wrap")) do
       render_search_icon
       render_hidden_field
@@ -89,7 +93,7 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def render_term_field
     text_field(:term, label: false,
                       placeholder: :filter_by.l,
-                      size: 42,
+                      class: "flex-grow-1",
                       autocomplete: "one-time-code",
                       data: dual_target("input"))
   end
@@ -114,23 +118,23 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
     end
   end
 
-  # --- Type select (bare, no form-group wrapper) ---
+  # --- Type select (in form-group to align in the navbar flex row) ---
 
-  def render_type_select
-    select(name: "filter[type]", id: "filter_type",
-           class: "form-control",
-           data: dual_target("select").merge(
-             action: "autocompleter--clade#swap " \
-                     "autocompleter--region#swap"
-           )) do
-      type_options.each do |label, val|
-        option(value: val, selected: val == selected) { label }
-      end
-    end
+  def render_type_select_group
+    div(class: "form-group text-nowrap mb-0") { render_type_select }
   end
 
+  def render_type_select
+    select_field(:type, type_options, label: false,
+                                      data: dual_target("select").merge(
+                                        action: "autocompleter--clade#swap " \
+                                                "autocompleter--region#swap"
+                                      ))
+  end
+
+  # Superform expects [value, label].
   def type_options
-    [[:CLADE.l, :clade], [:REGION.l, :region]]
+    [[:clade, :CLADE.l], [:region, :REGION.l]]
   end
 
   # --- Dual-target helpers ---
