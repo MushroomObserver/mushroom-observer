@@ -1,8 +1,16 @@
 # frozen_string_literal: true
 
-# Form for editing an Occurrence: change primary observation and
-# remove observations. Renders a grid of observation boxes with
-# Primary radio buttons and Remove checkboxes.
+# Form for editing an Occurrence: change primary observation, remove
+# observations, edit the primary observation's location/date inline.
+#
+# Uses the `Occurrence` AR model directly (same pattern as
+# `ObservationForm`). `@occurrence.persisted?` is true so Superform
+# auto-emits PATCH — no manual `_method=patch` override needed.
+# The inline primary-obs edit fields ride under
+# `occurrence[primary_observation][...]`, with Superform auto-resolving
+# field values through the `primary_observation` AR association. The
+# controller applies the params to the primary observation manually
+# (permission check + `where`-text mirror on location change).
 class Components::OccurrenceEditForm < Components::ApplicationForm
   def initialize(occurrence:, observations:, candidates:,
                  user:, **)
@@ -10,17 +18,14 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     @observations = observations
     @candidates = candidates
     @user = user
-    form_object = FormObject::Occurrence.new(
-      observation_id: occurrence.primary_observation_id,
-      primary_observation_id: occurrence.primary_observation_id
-    )
-    super(form_object, **)
+    super(occurrence, data: { controller: "occurrence-edit-form" }, **)
   end
 
   def view_template
     super do
       render_details_section
-      render_submit
+      submit(:edit_occurrence_submit.l, center: true)
+      render_blank_observation_ids_hidden
       render_observation_grid
       render_candidate_section if @candidates.any?
     end
@@ -32,26 +37,17 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
 
   private
 
-  def form_tag(&block)
-    form(action: form_action, method: :post,
-         **form_attributes, &block)
-  end
-
-  def form_attributes
-    {
-      id: "occurrence_edit_form",
-      data: { controller: "occurrence-edit-form" }
-    }
-  end
-
-  def hidden_method_field
-    input(type: "hidden", name: "_method", value: "patch")
+  # Rails idiom: a hidden blank ensures the param is present (as an
+  # empty array) even when every checkbox is unchecked.
+  def render_blank_observation_ids_hidden
+    render(Components::ApplicationForm::HiddenField.new(
+             Components::ApplicationForm::FieldProxy.new(
+               nil, "occurrence[observation_ids][]", ""
+             )
+           ))
   end
 
   def render_observation_grid
-    hidden_method_field
-    # Ensure observation_ids param exists even when all unchecked
-    input(type: "hidden", name: "observation_ids[]", value: "")
     ul(
       class: "row list-unstyled mt-3",
       data: {
@@ -63,10 +59,6 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     end
   end
 
-  def render_submit
-    submit(:edit_occurrence_submit.l, center: true)
-  end
-
   def render_obs_box(obs)
     MatrixBox(user: @user, object: obs, votes: false) do
       block_given? ? yield : render_obs_controls(obs)
@@ -74,74 +66,58 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_obs_controls(obs)
-    is_primary = obs.id == @occurrence.primary_observation_id
-    render_include_checkbox(obs, checked: true)
-    br
-    render_primary_radio(obs, checked: is_primary)
+    render_include_checkbox(obs)
+    render_primary_radio(obs)
     render_occurrence_warning(obs)
   end
 
-  def render_primary_radio(obs, checked:)
-    label do
-      input(
-        type: "radio",
-        name: "occurrence[primary_observation_id]",
-        value: obs.id,
-        checked: checked || nil,
-        data: {
-          action: "occurrence-edit-form#primarySelected"
-        }
-      )
-      whitespace
-      plain(:create_occurrence_primary.l)
+  def render_primary_radio(obs)
+    render(Components::ApplicationForm::RadioField.new(
+             field(:primary_observation_id),
+             [obs.id, :create_occurrence_primary.l],
+             wrapper_options: { wrap_class: "my-0" },
+             data: { action: "occurrence-edit-form#primarySelected" }
+           ))
+  end
+
+  def render_include_checkbox(obs)
+    render(Components::ApplicationForm::CheckboxField.new(
+             field(:observation_ids),
+             wrapper_options: { label: false, wrap_class: "my-0" },
+             data: { action: "occurrence-edit-form#includeToggled" }
+           )) do |cb|
+      cb.option(obs.id) { "Include" }
     end
   end
 
-  def render_include_checkbox(obs, checked:)
-    label do
-      input(
-        type: "checkbox",
-        name: "observation_ids[]",
-        value: obs.id,
-        checked: checked || nil,
-        data: {
-          action: "occurrence-edit-form#includeToggled"
-        }
-      )
-      whitespace
-      plain("Include")
-    end
-  end
+  # --- Primary-obs inline edit section ---
 
   def render_details_section
     locations = distinct_locations
     h4(class: "mt-4") { plain(:edit_occurrence_details_heading.l) }
-    render_location_select(locations) if locations.size > 1
-    render_date_input
-  end
-
-  def render_location_select(locations)
-    current_loc = primary_obs.location_id
-    label(for: "primary_obs_location_id") { plain(:edit_occurrence_location.l) }
-    select(name: "primary_obs[location_id]",
-           id: "primary_obs_location_id",
-           class: "form-control") do
-      locations.each do |name, id|
-        option(value: id,
-               selected: (id == current_loc) || nil) { plain(name) }
-      end
+    namespace(:primary_observation) do |attrs_ns|
+      render_location_select(attrs_ns, locations) if locations.size > 1
+      render_date_field(attrs_ns)
     end
   end
 
-  def render_date_input
-    label(for: "primary_obs_when", class: "mt-2") { plain("#{:WHEN.l}:") }
-    input(
-      type: "date",
-      name: "primary_obs[when]",
-      id: "primary_obs_when",
-      value: primary_obs.when.to_s,
-      class: "form-control"
-    )
+  def render_location_select(attrs_ns, locations)
+    render(attrs_ns.field(:location_id).select(
+             location_options(locations),
+             wrapper_options: { label: :edit_occurrence_location.l }
+           ))
+  end
+
+  def render_date_field(attrs_ns)
+    render(attrs_ns.field(:when).date(
+             wrapper_options: { label: :WHEN.l, inline: true }
+           ))
+  end
+
+  # Superform expects `[value, label]`; Rails' select helper returns
+  # `[label, value]`, so swap.
+  def location_options(locations)
+    locations.map { |name, id| [id, name] }
   end
 
   def distinct_locations
@@ -155,11 +131,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     end
   end
 
-  def primary_obs
-    default_id = @occurrence.primary_observation_id
-    @observations.find { |o| o.id == default_id } ||
-      @observations.first
-  end
+  # --- Candidates ---
 
   def render_candidate_section
     h4(class: "mt-4") { plain(:edit_occurrence_add_heading.l) }
@@ -171,15 +143,12 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
       }
     ) do
       @candidates.each do |obs|
-        render_obs_box(obs) do
-          render_include_checkbox(obs, checked: false)
-          br
-          render_primary_radio(obs, checked: false)
-          render_occurrence_warning(obs)
-        end
+        render_obs_box(obs) { render_obs_controls(obs) }
       end
     end
   end
+
+  # --- Occurrence warnings (shared by edit + candidate sections) ---
 
   def render_occurrence_warning(obs)
     fs = obs.field_slip

@@ -38,9 +38,11 @@ class OccurrencesController < ApplicationController
   private
 
   def find_source_observation!
-    id = params.dig(:occurrence, :observation_id) ||
-         params[:observation_id]
-    obs = Observation.safe_find(id)
+    # `params[:observation_id]` is the URL query string (?observation_id=)
+    # used by the `new` action and on create-validation failures. The
+    # source obs is no longer carried as a form field, so we don't need
+    # to look under `params[:occurrence]`.
+    obs = Observation.safe_find(params[:observation_id])
     return obs if obs
 
     flash_error(:occurrence_observation_not_found.t)
@@ -58,7 +60,7 @@ class OccurrencesController < ApplicationController
   end
 
   def build_selected_observations
-    ids = Array(params[:observation_ids]).map(&:to_i)
+    ids = Array(params.dig(:occurrence, :observation_ids)).map(&:to_i)
     ids |= [@source_obs.id] # always include source
     obs = Observation.where(id: ids).
           includes({ occurrence: :field_slip }, :user,
