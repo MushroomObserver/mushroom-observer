@@ -23,10 +23,9 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
 
   def view_template
     super do
-      render_autocompleter_wrap
-      render_type_select
-      submit(:SEARCH.l)
-      submit(:CLEAR.l)
+      render_search_input_group
+      submit(:SEARCH.l, class: "ml-2")
+      submit(:CLEAR.l, class: "ml-2")
     end
   end
 
@@ -44,7 +43,7 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def form_attributes
     {
       id: @attributes[:id],
-      class: "navbar-form navbar-left",
+      class: "navbar-form navbar-left pl-0",
       data: { controller: initial_controller,
               type: selected }
     }
@@ -62,14 +61,18 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
     "autocompleter--#{selected}"
   end
 
-  # --- Autocompleter section ---
+  # --- Search input group ---
 
-  def render_autocompleter_wrap
-    div(class: "form-group has-feedback has-search dropdown",
+  # Bootstrap 3 input-group binds the term text input and the type
+  # select into a single visual control with no gap between them.
+  # (The original ERB had this wrapper; the Phlex conversion lost it.)
+  def render_search_input_group
+    div(class: "input-group has-feedback has-search dropdown",
         data: dual_target("wrap")) do
       render_search_icon
       render_hidden_field
       render_term_field
+      render_type_select_addon
       render_dropdown
     end
   end
@@ -111,7 +114,11 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
     end
   end
 
-  # --- Type select (bare, no form-group wrapper) ---
+  # --- Type select (bare, joined to the term input via .input-group-btn) ---
+
+  def render_type_select_addon
+    span(class: "input-group-btn") { render_type_select }
+  end
 
   def render_type_select
     select_field(:type, type_options, label: false,
