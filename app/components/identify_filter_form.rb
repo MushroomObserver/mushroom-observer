@@ -23,9 +23,10 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
 
   def view_template
     super do
-      render_search_input_group
-      submit(:SEARCH.l, class: "ml-2")
-      submit(:CLEAR.l, class: "ml-2")
+      render_autocompleter_wrap
+      render_type_select_group
+      submit(:SEARCH.l, btn_class: "btn-outline-default", class: "px-2")
+      submit(:CLEAR.l, btn_class: "btn-outline-default", class: "px-2")
     end
   end
 
@@ -43,7 +44,10 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def form_attributes
     {
       id: @attributes[:id],
-      class: "navbar-form navbar-left pl-0",
+      # Match the top-nav search bar layout: flexbox row with `gap-2`
+      # between items, no padding on the form so it sits flush in its
+      # `#search_nav` container.
+      class: "navbar-flex flex-grow-1 navbar-form px-0 gap-2",
       data: { controller: initial_controller,
               type: selected }
     }
@@ -61,18 +65,18 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
     "autocompleter--#{selected}"
   end
 
-  # --- Search input group ---
+  # --- Autocompleter section ---
 
-  # Bootstrap 3 input-group binds the term text input and the type
-  # select into a single visual control with no gap between them.
-  # (The original ERB had this wrapper; the Phlex conversion lost it.)
-  def render_search_input_group
-    div(class: "input-group has-feedback has-search dropdown",
+  # Term input lives inside a `d-flex flex-grow-1` form-group so it
+  # expands to fill the row; the type select and submit buttons keep
+  # their natural width.
+  def render_autocompleter_wrap
+    div(class: "form-group has-feedback has-search d-flex " \
+               "flex-grow-1 mb-0 dropdown",
         data: dual_target("wrap")) do
       render_search_icon
       render_hidden_field
       render_term_field
-      render_type_select_addon
       render_dropdown
     end
   end
@@ -89,7 +93,7 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
   def render_term_field
     text_field(:term, label: false,
                       placeholder: :filter_by.l,
-                      size: 42,
+                      class: "flex-grow-1",
                       autocomplete: "one-time-code",
                       data: dual_target("input"))
   end
@@ -114,10 +118,10 @@ class Components::IdentifyFilterForm < Components::ApplicationForm
     end
   end
 
-  # --- Type select (bare, joined to the term input via .input-group-btn) ---
+  # --- Type select (in form-group to align in the navbar flex row) ---
 
-  def render_type_select_addon
-    span(class: "input-group-btn") { render_type_select }
+  def render_type_select_group
+    div(class: "form-group text-nowrap mb-0") { render_type_select }
   end
 
   def render_type_select
