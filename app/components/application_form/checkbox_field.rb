@@ -83,13 +83,27 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_checkbox_option(choice)
+      value_str = choice.value.to_s
       div(class: option_wrap_class) do
         label do
-          render(choice.build_input(**@attributes))
+          # Mirrors RadioField: stringify value, use value-derived index so
+          # the rendered id is value-based (matching MO's convention used
+          # for the block-mode `option(value)` path), not upstream's
+          # default array-position index.
+          render(Superform::Rails::Components::Checkbox.new(
+                   field,
+                   value: value_str,
+                   index: index_for(value_str),
+                   **@attributes
+                 ))
           whitespace
           trusted_html(choice.text)
         end
       end
+    end
+
+    def index_for(value_str)
+      value_str.parameterize(separator: "_")
     end
 
     def checked_in_array?(value)
