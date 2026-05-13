@@ -117,7 +117,7 @@ module AutocompleterHelper
 
   def autocompleter_has_id_indicator(target_key)
     link_icon(:check, title: :autocompleter_has_id.l,
-                      class: "ml-3 px-2 text-success has-id-indicator",
+                      class: "px-2 text-success has-id-indicator",
                       data: { target_key => "hasIdIndicator" })
   end
 
