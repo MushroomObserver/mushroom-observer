@@ -227,7 +227,7 @@ class Resender
     lines << ""
     lines << "If you have forgotten the password for any of these, you " \
             "can request a new one here:"
-    lines << "  #{MO.http_domain}/account/login/email_new_password"
+    lines << "  #{MO.http_domain}/account/email_new_password"
     lines.join("\n")
   end
 
