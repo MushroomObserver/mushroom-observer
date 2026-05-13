@@ -27,7 +27,7 @@ export default class extends Controller {
   #selectFirstIncludedPrimary() {
     const items = this.element.querySelectorAll("li")
     for (const item of items) {
-      const cb = item.querySelector("input[name='observation_ids[]']")
+      const cb = item.querySelector("input[name='occurrence[observation_ids][]']")
       const radio = item.querySelector("input[type='radio']")
       if (cb?.checked && radio) {
         radio.checked = true
@@ -44,7 +44,7 @@ export default class extends Controller {
 
   #findCheckbox(element) {
     return element.closest("li")?.querySelector(
-      "input[name='observation_ids[]']"
+      "input[name='occurrence[observation_ids][]']"
     )
   }
 }
