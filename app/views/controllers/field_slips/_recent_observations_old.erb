@@ -1,0 +1,42 @@
+<%# locals: (observations: [], form: nil) %>
+
+<div class="mt-5">
+  <strong><%= :field_slip_select_observations.t %>:</strong>
+  <ul class="row list-unstyled mt-3"
+      data-controller="matrix-table field-slip-form"
+      data-action="resize@window->matrix-table#rearrange">
+    <% observations.each do |obs| %>
+      <%= render(Components::MatrixBox.new(
+                   user: @user, object: obs, votes: false)) do %>
+        <label>
+          <%= check_box_tag("observation_ids[]", obs.id,
+                            false,
+                            id: "obs_include_#{obs.id}",
+                            data: { action:
+                              "field-slip-form#includeToggled" }) %>
+          Include
+        </label>
+        <br>
+        <label>
+          <%= radio_button_tag(
+                "field_slip[primary_observation_id]",
+                obs.id, false,
+                id: "obs_primary_#{obs.id}",
+                data: { action:
+                  "field-slip-form#primarySelected" }) %>
+          <%= :create_occurrence_primary.t %>
+        </label>
+        <% if obs.field_slip %>
+          <br>
+          <small>
+            <%= link_to("Field Slip: #{obs.field_slip.code}",
+                        field_slip_path(obs.field_slip)) %>
+          </small>
+        <% end %>
+      <% end %>
+    <% end %>
+  </ul>
+  <%= submit_button(form: form,
+                    button: :field_slip_save_with_observations.t,
+                    class: "mt-3 mb-5") %>
+</div>
