@@ -4280,4 +4280,19 @@ class NameTest < UnitTestCase
     name = names(:lactarius_subalpinus)
     assert_not(name.update(search_name: ""))
   end
+
+  # Regression test for https://github.com/MushroomObserver/mushroom-observer/issues/4252
+  # Versions must record who made each edit, not the name's original creator.
+  def test_version_records_editor_not_creator
+    name = names(:coprinus_comatus)
+    assert_equal(rolf.id, name.user_id,
+                 "Fixture name should be created by rolf")
+
+    name.notes = "Updated by a different user"
+    name.save_with_log(mary)
+
+    last_version = name.versions.reload.last
+    assert_equal(mary.id, last_version.user_id,
+                 "Last version user_id should be the editor (mary), not the creator (rolf)")
+  end
 end
