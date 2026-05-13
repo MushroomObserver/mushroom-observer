@@ -201,7 +201,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def hidden_field(field_name, **options)
       if field_name.is_a?(String)
         proxy = FieldProxy.new(nil, field_name, options[:value])
-        render(HiddenField.new(proxy))
+        render(HiddenField.new(proxy, **options))
       else
         render(field(field_name).text(**options, type: "hidden"))
       end
