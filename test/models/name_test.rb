@@ -4293,6 +4293,7 @@ class NameTest < UnitTestCase
 
     last_version = name.versions.reload.last
     assert_equal(mary.id, last_version.user_id,
-                 "Last version user_id should be the editor (mary), not the creator (rolf)")
+                 "Last version user_id should be the editor (mary), " \
+                 "not the creator (rolf)")
   end
 end
