@@ -74,7 +74,7 @@
 #       submit
 #     end
 #   end
-class Components::ApplicationForm < Superform::Rails::Form
+class Components::ApplicationForm < Superform::Rails::Form # rubocop:disable Metrics/ClassLength
   include Phlex::Slotable
   include Phlex::Rails::Helpers::TurboFrameTag
 
@@ -342,11 +342,38 @@ class Components::ApplicationForm < Superform::Rails::Form
     render(field_component)
   end
 
-  # Hidden field (no label or wrapper)
-  # @param field_name [Symbol] the field name
-  # @param options [Hash] all field options
-  def hidden_field(field_name, **)
-    render(field(field_name).text(**, type: "hidden"))
+  # Hidden field. Two modes based on the type of the first argument:
+  #
+  # **Symbol** (the common case) — the field is a model / FormObject
+  # attribute. The HTML `name` is auto-namespaced under the form's
+  # model (e.g. `name="occurrence[observation_id]"`):
+  #
+  #     hidden_field(:project_id)
+  #     hidden_field(:project_id, value: 42)
+  #
+  # **String** — the caller controls the full HTML `name` attribute.
+  # Use this for form-context params that aren't on the model
+  # (e.g. a flat redirect-back id) and for Rails' has_many array
+  # notation (`field[]`):
+  #
+  #     hidden_field("observation_id", value: @source_obs.id)
+  #     hidden_field("occurrence[observation_ids][]", value: obs.id)
+  #     hidden_field("occurrence[observation_ids][]", value: "")
+  #
+  # The string mode uses `FieldProxy` internally; the symbol mode
+  # routes through Superform's `field(...)` for `value`-from-model
+  # resolution. Mix freely on the same form.
+  #
+  # @param field_name [Symbol, String] model attribute name (Symbol)
+  #   or full raw HTML `name` (String)
+  # @param options [Hash] HTML attributes (`value:`, `data:`, etc.)
+  def hidden_field(field_name, **options)
+    if field_name.is_a?(String)
+      proxy = FieldProxy.new(nil, field_name, options[:value])
+      render(HiddenField.new(proxy))
+    else
+      render(field(field_name).text(**options, type: "hidden"))
+    end
   end
 
   # Number field with label and Bootstrap form-group wrapper

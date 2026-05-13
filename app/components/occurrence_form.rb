@@ -34,11 +34,7 @@ class Components::OccurrenceForm < Components::ApplicationForm
   # the controller can identify the source obs on POST — needed for the
   # `redirect back to /occurrences/new?observation_id=X` error path.
   def render_source_obs_id_hidden
-    render(Components::ApplicationForm::HiddenField.new(
-             Components::ApplicationForm::FieldProxy.new(
-               nil, "observation_id", @source_obs.id
-             )
-           ))
+    hidden_field("observation_id", value: @source_obs.id)
   end
 
   def render_observation_grid
@@ -72,11 +68,7 @@ class Components::OccurrenceForm < Components::ApplicationForm
   # so `occurrence[observation_ids][]=source.id` always submits, then
   # show the "Source" label and the (checked) primary radio.
   def render_source_controls(obs)
-    render(Components::ApplicationForm::HiddenField.new(
-             Components::ApplicationForm::FieldProxy.new(
-               nil, "occurrence[observation_ids][]", obs.id
-             )
-           ))
+    hidden_field("occurrence[observation_ids][]", value: obs.id)
     strong { plain(:create_occurrence_source.l) }
     render_primary_radio(obs)
   end
@@ -91,11 +83,9 @@ class Components::OccurrenceForm < Components::ApplicationForm
   # name="occurrence[observation_ids][]" value="...">` wrapped in
   # MO's `.checkbox` div. The block becomes the label text.
   def render_include_checkbox(obs)
-    render(Components::ApplicationForm::CheckboxField.new(
-             field(:observation_ids),
-             wrapper_options: { label: false, wrap_class: "my-0" },
-             data: { action: "occurrence-form#includeToggled" }
-           )) do |cb|
+    checkbox_field(:observation_ids,
+                   label: false, wrap_class: "my-0",
+                   data: { action: "occurrence-form#includeToggled" }) do |cb|
       cb.option(obs.id) { "Include" }
     end
   end
@@ -104,12 +94,10 @@ class Components::OccurrenceForm < Components::ApplicationForm
   # field; only the option whose value matches `field.value`
   # (i.e. the source on initial render) gets `checked`.
   def render_primary_radio(obs)
-    render(Components::ApplicationForm::RadioField.new(
-             field(:primary_observation_id),
-             [obs.id, :create_occurrence_primary.l],
-             wrapper_options: { wrap_class: "my-0" },
-             data: primary_radio_data(obs)
-           ))
+    radio_field(:primary_observation_id,
+                [obs.id, :create_occurrence_primary.l],
+                wrap_class: "my-0",
+                data: primary_radio_data(obs))
   end
 
   def primary_radio_data(obs)

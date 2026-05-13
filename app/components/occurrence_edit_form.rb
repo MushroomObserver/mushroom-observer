@@ -40,11 +40,7 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   # Rails idiom: a hidden blank ensures the param is present (as an
   # empty array) even when every checkbox is unchecked.
   def render_blank_observation_ids_hidden
-    render(Components::ApplicationForm::HiddenField.new(
-             Components::ApplicationForm::FieldProxy.new(
-               nil, "occurrence[observation_ids][]", ""
-             )
-           ))
+    hidden_field("occurrence[observation_ids][]", value: "")
   end
 
   def render_observation_grid
@@ -72,20 +68,16 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
   end
 
   def render_primary_radio(obs)
-    render(Components::ApplicationForm::RadioField.new(
-             field(:primary_observation_id),
-             [obs.id, :create_occurrence_primary.l],
-             wrapper_options: { wrap_class: "my-0" },
-             data: { action: "occurrence-edit-form#primarySelected" }
-           ))
+    radio_field(:primary_observation_id,
+                [obs.id, :create_occurrence_primary.l],
+                wrap_class: "my-0",
+                data: { action: "occurrence-edit-form#primarySelected" })
   end
 
   def render_include_checkbox(obs)
-    render(Components::ApplicationForm::CheckboxField.new(
-             field(:observation_ids),
-             wrapper_options: { label: false, wrap_class: "my-0" },
-             data: { action: "occurrence-edit-form#includeToggled" }
-           )) do |cb|
+    data = { action: "occurrence-edit-form#includeToggled" }
+    checkbox_field(:observation_ids,
+                   label: false, wrap_class: "my-0", data: data) do |cb|
       cb.option(obs.id) { "Include" }
     end
   end
