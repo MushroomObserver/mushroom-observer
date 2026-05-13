@@ -9,13 +9,12 @@
 # editing form with all field-slip attributes, notes, and (depending
 # on action / context) one of the two observation-matrix sections.
 class Components::FieldSlipForm < Components::ApplicationForm
-  def initialize(model, action:, species_list: nil, recent_observations: [],
-                 user: nil, **)
+  def initialize(model, action:, **options)
     @action = action
-    @species_list = species_list
-    @recent_observations = recent_observations
-    @user = user
-    super(model, **)
+    @species_list = options.delete(:species_list)
+    @recent_observations = options.delete(:recent_observations) || []
+    @user = options.delete(:user)
+    super(model, **options)
   end
 
   def view_template
@@ -116,8 +115,9 @@ class Components::FieldSlipForm < Components::ApplicationForm
   end
 
   def project_options
-    # FieldSlip#projects is the available list; Superform expects [value, label].
-    model.projects.map { |p| [p.id, p.title] }
+    # FieldSlip#projects returns `[title, id]` pairs from `pluck`;
+    # Superform expects `[value, label]`, so swap.
+    model.projects.map { |title, id| [id, title] }
   end
 
   def render_date_field
