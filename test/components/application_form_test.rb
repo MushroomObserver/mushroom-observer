@@ -131,6 +131,26 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, "Option 3")
   end
 
+  # Regression: a [nil, "Label"] pair must render `<option value="">Label`,
+  # not `<option>Label` (which would submit "Label" as the value).
+  # Phlex's HTML DSL omits nil-valued attributes by default, so SelectField
+  # has to coerce nil keys to "" to match Rails' select-helper behavior.
+  def test_select_field_nil_key_renders_empty_value_attribute
+    options = [[nil, "(No Project)"], ["778455076", "EOL Project"]]
+    form = render_form do
+      select_field(:number, options, label: "Project")
+    end
+
+    assert_match(
+      %r{<option[^>]*value=""[^>]*>\(No Project\)</option>}, form,
+      "nil option key must render as value=\"\" so the browser submits " \
+      "an empty string instead of the option's text content"
+    )
+    assert_match(
+      %r{<option[^>]*value="778455076"[^>]*>EOL Project</option>}, form
+    )
+  end
+
   # Slot tests
   def test_text_field_with_between_slot
     form = render_form do
