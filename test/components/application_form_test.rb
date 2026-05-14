@@ -80,6 +80,52 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, 'rows="10"')
   end
 
+  # Regression: `prefs: true` auto-resolves the label from the
+  # `prefs_<field>` i18n key, matching ERB
+  # `auto_label_if_form_is_account_prefs`. Six helpers honor this:
+  # text_field, textarea_field, select_field, checkbox_field,
+  # radio_field, number_field — same set as ERB.
+  def test_text_field_prefs_auto_resolves_label_from_i18n
+    form = render_form do
+      text_field(:login, prefs: true)
+    end
+
+    # `:prefs_login.t` → "Login" (config/locales/en.txt)
+    assert_match(%r{<label[^>]*>\s*Login\s*</label>}, form)
+  end
+
+  def test_checkbox_field_prefs_auto_resolves_label_from_i18n
+    form = render_form do
+      checkbox_field(:no_emails, prefs: true)
+    end
+
+    # `:prefs_no_emails.t` → "Opt out of _all_ email from MO."
+    assert_includes(form, "Opt out of")
+  end
+
+  def test_auto_label_for_prefs_returns_options_unchanged_when_no_prefs
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+
+    result = form.send(:auto_label_for_prefs, :name, label: "Original")
+    assert_equal({ label: "Original" }, result,
+                 "Without :prefs, options should be untouched")
+  end
+
+  def test_auto_label_for_prefs_drops_prefs_key_when_resolving
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+
+    result = form.send(:auto_label_for_prefs, :login,
+                       prefs: true, class: "extra")
+    assert_equal("Login", result[:label])
+    assert_not(result.key?(:prefs),
+               ":prefs should be removed after resolution so it " \
+               "doesn't leak into wrapper_options downstream")
+    assert_equal("extra", result[:class],
+                 "Unrelated options should pass through")
+  end
+
   # Checkbox field tests - CollectionNumber doesn't have boolean fields,
   # so we'll just test the rendering with a placeholder field
   def test_checkbox_field_renders_with_basic_options
