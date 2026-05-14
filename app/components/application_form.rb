@@ -528,7 +528,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #
   # @example
   #   proxy = FieldProxy.new("observation[good_image][123]", :notes, "text")
-  #   render(TextField.new(proxy, attributes: {}, wrapper_options: {}))
+  #   render(TextField.new(proxy, wrapper_options: {}))
   class FieldProxy
     attr_reader :key, :value, :dom
 
