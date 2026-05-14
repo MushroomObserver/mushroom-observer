@@ -38,7 +38,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Compares as strings to handle boolean values (Phlex omits value="false")
     def options(*collection)
       map_options(collection).each do |key, value|
-        option(selected: option_selected?(key), value: key) { value }
+        # Coerce nil → "" so `<option value="">` renders (not `<option>`).
+        # Phlex's HTML DSL omits nil-valued attributes; the browser would
+        # then submit the option's text content. Matches Rails select-helper
+        # behavior so callers passing `[nil, "Label"]` get the expected
+        # empty-string submission.
+        option_value = key.nil? ? "" : key
+        option(selected: option_selected?(key), value: option_value) { value }
       end
     end
 

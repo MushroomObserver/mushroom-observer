@@ -254,7 +254,8 @@ class Components::TranslationForm < Components::ApplicationForm
              collection: locale_options,
              # id: nil drops the FieldProxy-supplied id so the rendered
              # <select> matches the original markup (no id attribute).
-             attributes: { id: nil, data: locale_select_data },
+             id: nil,
+             data: locale_select_data,
              wrapper_options: { label: false }
            ))
   end

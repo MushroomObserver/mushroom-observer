@@ -159,7 +159,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def input_data_attributes
-      { target_attr_key => "input", autocompleter: true }.merge(extra_data)
+      # Use string "true" (not boolean true) so Phlex emits
+      # `data-autocompleter="true"` instead of the boolean shorthand
+      # `data-autocompleter`. Matches ERB `autocompleter_field` helper output.
+      # Functionally equivalent — autocompleter base_controller overwrites this
+      # to `"connected"` on connect — but normalizes the rendered HTML between
+      # the two emission paths.
+      { target_attr_key => "input", autocompleter: "true" }.merge(extra_data)
     end
 
     def autocompleter_wrapper_options
