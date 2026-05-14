@@ -64,7 +64,7 @@ class OccurrencesController < ApplicationController
     ids |= [@source_obs.id] # always include source
     obs = Observation.where(id: ids).
           includes({ occurrence: :field_slip }, :user,
-                   :location, :name, :thumb_image).to_a
+                   :location, :name, :thumb_image, :rss_log).to_a
 
     if obs.size < 2
       flash_error(:occurrence_need_two.t)

@@ -17,9 +17,12 @@ class OccurrenceFormSystemTest < ApplicationSystemTestCase
     visit("/occurrences/new?observation_id=#{obs1.id}")
     assert_selector("#occurrence_form")
 
-    # Check Include for a recent observation
+    # Check Include for a recent observation. The Phlex create form
+    # namespaces the field as `occurrence[observation_ids][]` (via
+    # `checkbox_field(:observation_ids)`), distinct from the flat
+    # `observation_ids[]` emitted by OccurrenceResolveForm.
     checkboxes = all(
-      "input[name='observation_ids[]'][type='checkbox']"
+      "input[name='occurrence[observation_ids][]'][type='checkbox']"
     )
     assert(checkboxes.any?, "Expected recent observation checkboxes")
     checkboxes.first.check
