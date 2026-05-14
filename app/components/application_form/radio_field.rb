@@ -24,7 +24,12 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   proxy = FieldProxy.new("chosen_name", :name_id)
   #   RadioField.new(proxy, [1, "Opt 1"], [2, "Opt 2"])
   class RadioField < Phlex::HTML
+    include Phlex::Slotable
     include Components::TrustedHtml
+
+    slot :between
+
+    public :between_slot
 
     attr_reader :wrapper_options, :field, :attributes
 
@@ -71,8 +76,20 @@ class Components::ApplicationForm < Superform::Rails::Form
                  ))
           whitespace
           trusted_html(choice.text)
+          render_between_slot
         end
       end
+    end
+
+    # `between` content is rendered after the label text inside each
+    # option's `<label>`, wrapped in `<div class="d-inline-block ml-3">`
+    # — matching ERB `radio_with_label`'s `between:` shape. Applied
+    # uniformly to every option (one slot per RadioField call). For
+    # per-option metadata, supply different content per call site.
+    def render_between_slot
+      return unless between_slot
+
+      div(class: "d-inline-block ml-3") { render(between_slot) }
     end
 
     def index_for(value_str)

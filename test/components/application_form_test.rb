@@ -625,6 +625,26 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "input[type='radio'][id='collection_number_number_2']")
   end
 
+  # Regression: RadioField `between` slot renders after each option's
+  # label text inside the `<label>`, wrapped in `<div class="d-inline-block
+  # ml-3">`. Matches ERB `radio_with_label`'s `between:` shape. Applied
+  # uniformly to every option (one slot per RadioField call).
+  def test_radio_field_with_between_slot
+    form = render_form do
+      component = Components::ApplicationForm::RadioField.new(
+        field(:number), [1, "A"], [2, "B"]
+      )
+      component.with_between do
+        span(class: "help-note") { "(see notes)" }
+      end
+      render(component)
+    end
+
+    assert_html(form, "div.radio div.d-inline-block.ml-3 span.help-note",
+                count: 2)
+    assert_includes(form, "(see notes)")
+  end
+
   # Regression: array-mode checkbox per-option labels also carry `for=`,
   # AND the inputs get value-suffixed ids (so multiple options don't
   # collide). MO's CheckboxField bypasses upstream's Checkbox component
