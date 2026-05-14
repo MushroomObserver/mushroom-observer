@@ -77,6 +77,7 @@
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
   include Phlex::Rails::Helpers::TurboFrameTag
+  include UploadHelpers
 
   # Automatically set form ID based on class name unless explicitly provided
   # @param model [ActiveRecord::Base] the model object for the form
@@ -199,6 +200,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @yield [field_component] Optional block to set slots: `with_between`,
   #   `with_append` (after input, end of form-group), `with_help`
   def text_field(field_name, **options)
+    options = auto_label_for_prefs(field_name, options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -221,6 +223,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @yield [field_component] Optional block to set slots: `with_between`,
   #   `with_append`, `with_help`
   def textarea_field(field_name, **options)
+    options = auto_label_for_prefs(field_name, options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -244,6 +247,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @yield [field_component] Optional block to set slots: `with_between`,
   #   `with_append`, `with_help`
   def checkbox_field(field_name, **options, &block)
+    options = auto_label_for_prefs(field_name, options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -264,6 +268,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @example
   #   radio_field(:target, [1, "Option 1"], [2, "Option 2"])
   def radio_field(field_name, *options, **kwargs)
+    kwargs = auto_label_for_prefs(field_name, kwargs)
     wrapper_opts = kwargs.slice(*WRAPPER_OPTIONS)
     field_opts = kwargs.except(*WRAPPER_OPTIONS)
 
@@ -282,6 +287,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @yield [field_component] Optional block to set slots: `with_between`,
   #   `with_append`, `with_help`
   def select_field(field_name, options_list, **options)
+    options = auto_label_for_prefs(field_name, options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -353,6 +359,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @yield [field_component] Optional block to set slots: `with_between`,
   #   `with_append`, `with_help`
   def number_field(field_name, **options)
+    options = auto_label_for_prefs(field_name, options)
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -497,74 +504,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
   end
 
-  # Renders image upload fields in a :upload namespace
-  # Creates params[:model][:upload][image], etc. (nested under form model)
-  # Pass a block to render content in the file field's between slot.
-  def upload_fields(file_field_label: "#{:IMAGE.l}:", **args, &between_block)
-    args => {
-      copyright_holder:, copyright_year:, licenses:, upload_license_id:
-    }
+  # Image upload helpers (`upload_fields`, `image_namespace`, and their
+  # private renderers) live in `application_form/upload_helpers.rb` and
+  # are mixed in via `include UploadHelpers` at the top of this class.
 
-    namespace(:upload) do |upload|
-      render_upload_image_field(upload, file_field_label, &between_block)
-      render_upload_copyright_holder(upload, copyright_holder)
-      render_upload_year(upload, copyright_year)
-      render_upload_license(upload, licenses, upload_license_id)
-    end
-  end
-
-  # Creates a namespace for image fields indexed by image ID.
-  # Generates params like: observation[good_image][123][notes]
-  # @param type [Symbol] :good_image or :image (for existing vs new uploads)
-  # @param image_id [Integer, String] the image ID
-  # @yield [namespace] the nested namespace for field building
-  def image_namespace(type, image_id, &block)
-    namespace(type) do |type_ns|
-      type_ns.namespace(image_id.to_s, &block)
-    end
-  end
-
-  # Lightweight field proxy for use outside of form rendering context.
-  # Provides the same interface as Superform::Field for field components.
-  # Unlike Superform fields, these can be created and rendered many times.
-  #
-  # @example
-  #   proxy = FieldProxy.new("observation[good_image][123]", :notes, "text")
-  #   render(TextField.new(proxy, wrapper_options: {}))
-  class FieldProxy
-    attr_reader :key, :value, :dom
-
-    def initialize(namespace, field_key, field_value = nil)
-      @key = field_key
-      @value = field_value
-      @dom = DOMProxy.new(namespace, field_key, field_value)
-    end
-
-    # Minimal DOM proxy that provides id, name, value for field components
-    class DOMProxy
-      def initialize(namespace, field_key, field_value)
-        @namespace = namespace
-        @field_key = field_key
-        @field_value = field_value
-      end
-
-      def id
-        return @field_key.to_s if @namespace.blank?
-
-        "#{@namespace}_#{@field_key}".tr("[]", "_").gsub(/__+/, "_")
-      end
-
-      def name
-        return @field_key.to_s if @namespace.blank?
-
-        "#{@namespace}[#{@field_key}]"
-      end
-
-      def value
-        @field_value.to_s
-      end
-    end
-  end
+  # `FieldProxy` (and its inner `DOMProxy`) live in
+  # `application_form/field_proxy.rb` — Zeitwerk autoloads them. Use the
+  # `image_field_proxy` factory below for image-field convenience.
 
   # Factory method to create a FieldProxy for image fields
   # @param type [Symbol] :good_image or :image
@@ -586,59 +532,14 @@ class Components::ApplicationForm < Superform::Rails::Form
     field_component.with_help { help_content }
   end
 
-  def render_upload_image_field(upload, label, &between_block)
-    file_component = upload.field(:image).file(
-      wrapper_options: { label: label }
-    )
-    file_component.with_between(&between_block) if between_block
-    render(file_component)
-  end
+  # Mirrors ERB `auto_label_if_form_is_account_prefs`: when `prefs: true`
+  # is present, resolve the label from the `prefs_<field>` i18n key and
+  # drop the `:prefs` option so it doesn't flow downstream. Used by the
+  # same set of helpers the ERB applies it to: text, textarea, select,
+  # checkbox, radio, number.
+  def auto_label_for_prefs(field_name, options)
+    return options if options[:prefs].blank?
 
-  def render_upload_copyright_holder(upload, holder)
-    render(
-      upload.field(:copyright_holder).text(
-        wrapper_options: { label: "#{:image_copyright_holder.l}:",
-                           inline: true },
-        value: holder
-      )
-    )
-  end
-
-  def render_upload_year(upload, year)
-    render(
-      upload.field(:copyright_year).select(
-        upload_year_options,
-        wrapper_options: { label: "#{:WHEN.l}:", inline: true },
-        selected: year
-      )
-    )
-  end
-
-  def render_upload_license(upload, licenses, selected_id)
-    # Superform expects [value, display] but Rails returns [display, value]
-    # So we need to swap them
-    swapped_licenses = licenses.map { |display, value| [value, display] }
-
-    license_select = upload.field(:license_id).select(
-      swapped_licenses,
-      wrapper_options: { label: "#{:LICENSE.l}:", inline: true },
-      selected: selected_id
-    )
-
-    license_select.with_append { render_copyright_warning }
-
-    render(license_select)
-  end
-
-  def render_copyright_warning
-    div(class: "help-block") do
-      plain("(")
-      plain(:image_copyright_warning.t)
-      plain(")")
-    end
-  end
-
-  def upload_year_options
-    (1980..Time.zone.now.year).to_a.reverse.map { |y| [y.to_s, y] }
+    options.merge(label: :"prefs_#{field_name}".t).except(:prefs)
   end
 end
