@@ -679,6 +679,27 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "textarea")
   end
 
+  # Regression: ReadOnlyField label should carry `for=` pointing at the
+  # hidden input's id, matching the ERB `form.label(field, ...)` output.
+  def test_read_only_field_label_has_for_attribute
+    form = render_form do
+      read_only_field(:number, label: "Number:", value: "42")
+    end
+
+    assert_html(form, "label[for='collection_number_number']")
+    assert_html(form, "input[type='hidden'][id='collection_number_number']")
+  end
+
+  # Regression: StaticTextField label should carry `for=` pointing at the
+  # field's dom id (even though there's no input — matches ERB output).
+  def test_static_field_label_has_for_attribute
+    form = render_form do
+      static_field(:number, label: "Number:", value: "42")
+    end
+
+    assert_html(form, "label[for='collection_number_number']")
+  end
+
   private
 
   def render_form(local: true, &block)
