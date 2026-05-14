@@ -224,10 +224,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     wrapper_opts = options.slice(*WRAPPER_OPTIONS)
     field_opts = options.except(*WRAPPER_OPTIONS)
 
-    # Handle monospace option
-    if wrapper_opts.delete(:monospace)
-      field_opts[:class] = class_names(field_opts[:class], "text-monospace")
-    end
+    # `monospace:` is handled by TextareaField itself via wrapper_options.
 
     field_component = field(field_name).textarea(
       wrapper_options: wrapper_opts,
