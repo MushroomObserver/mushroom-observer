@@ -27,11 +27,13 @@ class OccurrenceEditFormTest < ComponentTestCase
     assert_html(html, "input[type='hidden']" \
                       "[name='_method'][value='patch']")
 
-    # Stimulus controller
+    # Stimulus controller (shared with OccurrenceForm; edit mode selects
+    # the "first-included" fallback strategy).
     doc = Nokogiri::HTML(html)
     form = doc.at_css("form#occurrence_edit_form")
-    assert_equal("occurrence-edit-form",
-                 form["data-controller"])
+    assert_equal("occurrence-form", form["data-controller"])
+    assert_equal("first-included",
+                 form["data-occurrence-form-fallback-value"])
 
     # Submit button
     assert_html(html, "input[type='submit']",
@@ -41,7 +43,7 @@ class OccurrenceEditFormTest < ComponentTestCase
 
     # Empty hidden observation_ids[] for unchecked state
     assert_html(html, "input[type='hidden']" \
-                      "[name='observation_ids[]']" \
+                      "[name='occurrence[observation_ids][]']" \
                       "[value='']")
   end
 
@@ -51,11 +53,11 @@ class OccurrenceEditFormTest < ComponentTestCase
     # Both observations have Include checkboxes (checked)
     assert_html(html,
                 "input[type='checkbox']" \
-                "[name='observation_ids[]']" \
+                "[name='occurrence[observation_ids][]']" \
                 "[value='#{@obs1.id}'][checked]")
     assert_html(html,
                 "input[type='checkbox']" \
-                "[name='observation_ids[]']" \
+                "[name='occurrence[observation_ids][]']" \
                 "[value='#{@obs2.id}'][checked]")
 
     # Primary radio: obs1 is primary (checked), obs2 is not
@@ -82,10 +84,21 @@ class OccurrenceEditFormTest < ComponentTestCase
       html, :edit_occurrence_details_heading.l
     )
 
-    # Date input with primary obs date
-    assert_html(html, "input[type='date']" \
-                      "[name='primary_obs[when]']" \
-                      "[id='primary_obs_when']")
+    # Date is rendered as MO's 3-select picker (year text + month + day),
+    # matching MO convention. Day select carries the `_3i` Rails-compatible
+    # name suffix.
+    assert_html(
+      html,
+      "select[name='occurrence[primary_observation][when(3i)]']"
+    )
+    assert_html(
+      html,
+      "select[name='occurrence[primary_observation][when(2i)]']"
+    )
+    assert_html(
+      html,
+      "input[type='text'][name='occurrence[primary_observation][when(1i)]']"
+    )
   end
 
   def test_location_select_with_multiple_locations
@@ -95,7 +108,8 @@ class OccurrenceEditFormTest < ComponentTestCase
     html = render_edit_form
 
     # Location select appears when multiple locations
-    assert_html(html, "select[name='primary_obs[location_id]']")
+    assert_html(html,
+                "select[name='occurrence[primary_observation][location_id]']")
     assert_includes(html, :edit_occurrence_location.l)
   end
 
@@ -105,7 +119,7 @@ class OccurrenceEditFormTest < ComponentTestCase
     html = render_edit_form
 
     assert_no_html(
-      html, "select[name='primary_obs[location_id]']"
+      html, "select[name='occurrence[primary_observation][location_id]']"
     )
   end
 
@@ -122,7 +136,7 @@ class OccurrenceEditFormTest < ComponentTestCase
     doc = Nokogiri::HTML(html)
     cbox = doc.at_css(
       "input[type='checkbox']" \
-      "[name='observation_ids[]']" \
+      "[name='occurrence[observation_ids][]']" \
       "[value='#{candidate.id}']"
     )
     assert(cbox, "Expected checkbox for candidate")
@@ -188,7 +202,7 @@ class OccurrenceEditFormTest < ComponentTestCase
 
     doc = Nokogiri::HTML(html)
     sel = doc.at_css(
-      "select[name='primary_obs[location_id]']"
+      "select[name='occurrence[primary_observation][location_id]']"
     )
     assert(sel, "Expected location select element")
     opts = sel.css("option")
@@ -227,7 +241,7 @@ class OccurrenceEditFormTest < ComponentTestCase
     assert_nil(radio["checked"],
                "Candidate radio should be unchecked")
     assert_equal(
-      "occurrence-edit-form#primarySelected",
+      "occurrence-form#primarySelected",
       radio["data-action"]
     )
   end
@@ -243,7 +257,7 @@ class OccurrenceEditFormTest < ComponentTestCase
     )
     assert(cb, "Expected include checkbox")
     assert_equal(
-      "occurrence-edit-form#includeToggled",
+      "occurrence-form#includeToggled",
       cb["data-action"]
     )
 

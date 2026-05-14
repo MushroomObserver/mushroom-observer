@@ -17,10 +17,10 @@ class OccurrenceFormTest < ComponentTestCase
     assert_html(html, "form#occurrence_form[action='/occurrences']" \
                       "[method='post']")
 
-    # Hidden fields
+    # Flat hidden carries the source obs id for the error-redirect path.
     assert_html(html,
                 "input[type='hidden']" \
-                "[name='occurrence[observation_id]']" \
+                "[name='observation_id']" \
                 "[value='#{@source.id}']")
 
     # Submit button
@@ -31,9 +31,9 @@ class OccurrenceFormTest < ComponentTestCase
   def test_source_observation_box
     html = render_form
 
-    # Source obs has hidden observation_ids[] field (always included)
+    # Source obs has hidden observation_ids array element (always included)
     assert_html(html, "input[type='hidden']" \
-                      "[name='observation_ids[]']" \
+                      "[name='occurrence[observation_ids][]']" \
                       "[value='#{@source.id}']")
 
     # Source obs label
@@ -50,7 +50,7 @@ class OccurrenceFormTest < ComponentTestCase
 
     # Recent obs has Include checkbox
     assert_html(html, "input[type='checkbox']" \
-                      "[name='observation_ids[]']" \
+                      "[name='occurrence[observation_ids][]']" \
                       "[value='#{@recent.id}']")
 
     # Recent obs primary radio is not checked
@@ -125,7 +125,7 @@ class OccurrenceFormTest < ComponentTestCase
     # Include checkbox has stimulus action
     cb = doc.at_css(
       "input[type='checkbox']" \
-      "[name='observation_ids[]']" \
+      "[name='occurrence[observation_ids][]']" \
       "[value='#{@recent.id}']"
     )
     assert(cb, "Expected include checkbox for recent obs")
@@ -135,6 +135,20 @@ class OccurrenceFormTest < ComponentTestCase
     label = cb.parent
     assert_equal("label", label.name)
     assert_includes(label.text, "Include")
+  end
+
+  def test_matrix_ul_stimulus_wiring
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    # Matrix <ul> hosts the unified occurrence-form controller and pins
+    # the "source" fallback strategy (revert primary to the source obs
+    # when the current primary's Include is unchecked).
+    ul = doc.at_css("ul.row.list-unstyled")
+    assert(ul, "Expected matrix <ul>")
+    assert_includes(ul["data-controller"].split(/\s+/), "occurrence-form")
+    assert_equal("source",
+                 ul["data-occurrence-form-fallback-value"])
   end
 
   def test_primary_radio_stimulus_data

@@ -7,8 +7,9 @@ paths: app/components/**/*.rb, app/views/**/*.erb
 Before writing ANY Phlex form component, you MUST:
 
 1. Read `.claude/phlex_style_guide.md` in full
-2. Read `app/components/application_form.rb` to understand available field
-   helpers and the base class API
+2. Read `app/components/application_form.rb` for the base class API, then
+   `app/components/application_form/field_helpers.rb` for all available
+   field helpers (`text_field`, `textarea_field`, `checkbox_field`, etc.)
 3. Read an existing form component as a reference (e.g.
    `app/components/herbarium_form.rb`, `app/components/name_form.rb`)
 
