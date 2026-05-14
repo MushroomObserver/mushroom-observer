@@ -126,15 +126,26 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   end
 
   # Bootstrap radio: form, field, value, label, class, checked
+  #
+  # The label's `for=` matches the id Rails' `radio_button` generates for
+  # the input — which sanitizes the value (lowercase, spaces → underscores,
+  # special chars stripped). Without sanitization here, a value like
+  # "Hello World" or a non-trivial symbol would yield a label
+  # `for="field_Hello World"` while the input id is `"field_hello_world"`,
+  # breaking label click-focus and screen-reader association.
+  # `parameterize(separator: "_")` is the public-API equivalent of Rails'
+  # internal `sanitized_value` and matches Phlex `RadioField`'s `index_for`.
   def radio_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_help_block(args)
     opts = separate_field_options_from_args(args, [:value])
 
     wrap_class = form_group_wrap_class(args, "radio")
+    value_id_suffix = args[:value].to_s.parameterize(separator: "_")
+    label_for = "#{args[:field]}_#{value_id_suffix}"
 
     tag.div(class: wrap_class) do
-      concat(args[:form].label("#{args[:field]}_#{args[:value]}") do
+      concat(args[:form].label(label_for) do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
         if args[:between].present?
