@@ -27,11 +27,13 @@ class OccurrenceEditFormTest < ComponentTestCase
     assert_html(html, "input[type='hidden']" \
                       "[name='_method'][value='patch']")
 
-    # Stimulus controller
+    # Stimulus controller (shared with OccurrenceForm; edit mode selects
+    # the "first-included" fallback strategy).
     doc = Nokogiri::HTML(html)
     form = doc.at_css("form#occurrence_edit_form")
-    assert_equal("occurrence-edit-form",
-                 form["data-controller"])
+    assert_equal("occurrence-form", form["data-controller"])
+    assert_equal("first-included",
+                 form["data-occurrence-form-fallback-value"])
 
     # Submit button
     assert_html(html, "input[type='submit']",
@@ -239,7 +241,7 @@ class OccurrenceEditFormTest < ComponentTestCase
     assert_nil(radio["checked"],
                "Candidate radio should be unchecked")
     assert_equal(
-      "occurrence-edit-form#primarySelected",
+      "occurrence-form#primarySelected",
       radio["data-action"]
     )
   end
@@ -255,7 +257,7 @@ class OccurrenceEditFormTest < ComponentTestCase
     )
     assert(cb, "Expected include checkbox")
     assert_equal(
-      "occurrence-edit-form#includeToggled",
+      "occurrence-form#includeToggled",
       cb["data-action"]
     )
 

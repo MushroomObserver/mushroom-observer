@@ -18,7 +18,10 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     @observations = observations
     @candidates = candidates
     @user = user
-    super(occurrence, data: { controller: "occurrence-edit-form" }, **)
+    super(occurrence,
+          data: { controller: "occurrence-form",
+                  "occurrence-form-fallback-value": "first-included" },
+          **)
   end
 
   def view_template
@@ -71,11 +74,11 @@ class Components::OccurrenceEditForm < Components::ApplicationForm
     radio_field(:primary_observation_id,
                 [obs.id, :create_occurrence_primary.l],
                 wrap_class: "my-0",
-                data: { action: "occurrence-edit-form#primarySelected" })
+                data: { action: "occurrence-form#primarySelected" })
   end
 
   def render_include_checkbox(obs)
-    data = { action: "occurrence-edit-form#includeToggled" }
+    data = { action: "occurrence-form#includeToggled" }
     checkbox_field(:observation_ids,
                    label: false, wrap_class: "my-0", data: data) do |cb|
       cb.option(obs.id) { "Include" }

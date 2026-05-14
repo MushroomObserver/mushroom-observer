@@ -43,7 +43,8 @@ class Components::OccurrenceForm < Components::ApplicationForm
       class: "row list-unstyled mt-3",
       data: {
         controller: "matrix-table occurrence-form",
-        action: "resize@window->matrix-table#rearrange"
+        action: "resize@window->matrix-table#rearrange",
+        "occurrence-form-fallback-value": "source"
       }
     ) do
       all_obs.each { |obs| render_obs_box(obs) }

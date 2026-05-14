@@ -137,6 +137,20 @@ class OccurrenceFormTest < ComponentTestCase
     assert_includes(label.text, "Include")
   end
 
+  def test_matrix_ul_stimulus_wiring
+    html = render_form
+    doc = Nokogiri::HTML(html)
+
+    # Matrix <ul> hosts the unified occurrence-form controller and pins
+    # the "source" fallback strategy (revert primary to the source obs
+    # when the current primary's Include is unchecked).
+    ul = doc.at_css("ul.row.list-unstyled")
+    assert(ul, "Expected matrix <ul>")
+    assert_includes(ul["data-controller"].split(/\s+/), "occurrence-form")
+    assert_equal("source",
+                 ul["data-occurrence-form-fallback-value"])
+  end
+
   def test_primary_radio_stimulus_data
     html = render_form
     doc = Nokogiri::HTML(html)
