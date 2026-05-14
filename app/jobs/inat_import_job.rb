@@ -54,7 +54,7 @@ class InatImportJob < ApplicationJob
     token_service = Inat::APIToken.new(
       app_id: APP_ID, site: SITE,
       redirect_uri: REDIRECT_URI,
-      secret: Rails.application.credentials.inat.secret
+      secret: APP_SECRET
     )
     token = token_service.obtain_api_token(inat_import.token)
     inat_import.update(token: token)

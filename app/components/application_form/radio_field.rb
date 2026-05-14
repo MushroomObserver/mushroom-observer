@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Bootstrap radio button group component with radio wrapper per option
+  # Bootstrap radio button group component.
   #
-  # Renders each option as:
+  # Each option renders as:
   #   <div class="radio">
   #     <label><input type="radio" ...> label text</label>
   #   </div>
   #
-  # Accepts a Superform field or a FieldProxy for standalone use.
+  # Delegates per-option markup generation to
+  # `Superform::Rails::Components::Radios`, using its block form so we can
+  # wrap each option in the Bootstrap `.radio` div and emit HTML-safe label
+  # text via `trusted_html`. The component works equally with a Superform
+  # field or a `FieldProxy` (standalone use outside a form).
   #
   # @example Superform field
   #   field(:target).radio(
@@ -24,8 +28,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options, :field, :attributes
 
-    def initialize(field, *collection, attributes: {},
-                   wrapper_options: {})
+    def initialize(field, *collection, wrapper_options: {}, **attributes)
       super()
       @field = field
       @collection = collection
@@ -34,39 +37,50 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template
-      map_options(@collection).each do |value, label_text|
-        render_radio_option(value, label_text)
+      render(radios_component) do |choice|
+        render_choice(choice)
       end
     end
 
     private
 
-    def render_radio_option(value, label_text)
+    def radios_component
+      Superform::Rails::Components::Radios.new(
+        @field, options: @collection, **@attributes
+      )
+    end
+
+    def render_choice(choice)
+      value_str = choice.value.to_s
       div(class: radio_class) do
         label do
-          input(**radio_attributes(value))
+          # Stringify value so Phlex doesn't dasherize symbols
+          # (e.g. `:mycoportal_image_list` → `"mycoportal-image-list"`).
+          # Use a value-derived index so the rendered id is value-based
+          # (`field_id_<value>`), matching MO's pre-upstream convention
+          # used by JS/CSS, rather than upstream's default index-based id.
+          # `checked` is computed here because upstream Radio's
+          # `field.value == @value` doesn't coerce types — MO routinely
+          # pairs boolean/symbol field values with string option values.
+          render(Superform::Rails::Components::Radio.new(
+                   @field,
+                   value: value_str,
+                   index: index_for(value_str),
+                   checked: option_checked?(value_str),
+                   **@attributes
+                 ))
           whitespace
-          trusted_html(label_text)
+          trusted_html(choice.text)
         end
       end
     end
 
-    def radio_attributes(value)
-      @attributes.merge(
-        type: :radio,
-        name: field.dom.name,
-        id: radio_id(value),
-        value: value.to_s,
-        checked: option_checked?(value)
-      )
+    def index_for(value_str)
+      value_str.parameterize(separator: "_")
     end
 
-    def radio_id(value)
-      "#{field.dom.id}_#{value.to_s.parameterize(separator: "_")}"
-    end
-
-    def option_checked?(value)
-      field.value.to_s == value.to_s
+    def option_checked?(value_str)
+      @field.value.to_s == value_str
     end
 
     def radio_class
@@ -75,10 +89,6 @@ class Components::ApplicationForm < Superform::Rails::Form
         classes += " #{wrapper_options[:wrap_class]}"
       end
       classes
-    end
-
-    def map_options(collection)
-      Superform::Rails::OptionMapper.new(collection)
     end
   end
 end

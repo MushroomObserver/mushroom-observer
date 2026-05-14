@@ -6,9 +6,12 @@ module Admin
   class BlockedIpsControllerTest < FunctionalTestCase
     def setup
       super
-      # Ensure blocked_ips.txt exists (may not exist on CI)
+      # Ensure these files exist (may not on CI; ip_stats_file may
+      # also have been deleted by IpStatsTest's teardown earlier in
+      # the same parallel worker — see #4238).
       FileUtils.touch(MO.blocked_ips_file)
       FileUtils.touch(MO.okay_ips_file)
+      FileUtils.touch(MO.ip_stats_file)
       # Reset IpStats to ensure clean state, especially when running
       # in parallel with other tests that modify blocked_ips.txt
       IpStats.reset!

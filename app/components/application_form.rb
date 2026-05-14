@@ -123,38 +123,34 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Override the Field class to use our custom components
   class Field < Superform::Rails::Form::Field
     def text(wrapper_options: {}, **attributes)
-      TextField.new(self, attributes: attributes,
-                          wrapper_options: wrapper_options)
+      TextField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     def textarea(wrapper_options: {}, **attributes)
-      TextareaField.new(self, attributes: attributes,
-                              wrapper_options: wrapper_options)
+      TextareaField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     def file(wrapper_options: {}, **attributes)
-      FileField.new(self, attributes: attributes,
-                          wrapper_options: wrapper_options)
+      FileField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     def checkbox(*options, wrapper_options: {}, **attributes)
-      CheckboxField.new(self, *options, attributes: attributes,
-                                        wrapper_options: wrapper_options)
+      CheckboxField.new(self, *options,
+                        wrapper_options: wrapper_options, **attributes)
     end
 
     def radio(*options, wrapper_options: {}, **attributes)
-      RadioField.new(self, *options, attributes: attributes,
-                                     wrapper_options: wrapper_options)
+      RadioField.new(self, *options,
+                     wrapper_options: wrapper_options, **attributes)
     end
 
     def select(options, wrapper_options: {}, **attributes)
-      SelectField.new(self, collection: options, attributes: attributes,
-                            wrapper_options: wrapper_options)
+      SelectField.new(self, collection: options,
+                            wrapper_options: wrapper_options, **attributes)
     end
 
     def read_only(wrapper_options: {}, **attributes)
-      ReadOnlyField.new(self, attributes: attributes,
-                              wrapper_options: wrapper_options)
+      ReadOnlyField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     # Autocompleter-specific options that should NOT go in field attributes
@@ -177,13 +173,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def static(wrapper_options: {}, **attributes)
-      StaticTextField.new(self, attributes: attributes,
-                                wrapper_options: wrapper_options)
+      StaticTextField.new(self, wrapper_options: wrapper_options, **attributes)
     end
 
     def date(wrapper_options: {}, **attributes)
-      DateField.new(self, attributes: attributes,
-                          wrapper_options: wrapper_options)
+      DateField.new(self, wrapper_options: wrapper_options, **attributes)
     end
   end
 
@@ -474,18 +468,31 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param options [Hash] submit button options
   # @option options [Boolean] :center center the button (default false)
   # @option options [String] :submits_with text shown while submitting
+  # @option options [String] :btn_class Bootstrap button class
+  #   (default `"btn-default"`). Pass the full class name, e.g.
+  #   `"btn-outline-default"` to match the top-nav search bar style.
+  # @option options [Symbol] :as `:input` (default) renders `<input
+  #   type="submit">`; `:button` renders `<button type="submit">value</button>`.
+  #   Default stays `:input` because most controller/system tests look for
+  #   `input[type='submit']` selectors.
   # @option options [String] :class additional CSS classes
   # @option options [Hash] :data additional data attributes
-  def submit(value = submit_value, center: false, submits_with: nil, **options)
+  def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
+             btn_class: "btn-default", as: :input, **options)
     submits_with ||= :SUBMITTING.l
-    classes = %w[btn btn-default]
+    classes = ["btn", btn_class]
     classes << "center-block my-3" if center
     classes << options[:class] if options[:class].present?
 
     data = { turbo_submits_with: submits_with,
              disable_with: value }.merge(options[:data] || {})
+    merged = options.merge(class: classes.join(" "), data: data)
 
-    super(value, **options.merge(class: classes.join(" "), data: data))
+    if as == :button
+      button(type: "submit", name: "commit", **merged) { value }
+    else
+      super(value, **merged)
+    end
   end
 
   # Renders image upload fields in a :upload namespace

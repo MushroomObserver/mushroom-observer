@@ -2,7 +2,6 @@
 
 #  custom_file_field            # stylable file input field with
 #                               # client-side size validation
-#  date_select_opts
 
 # helpers for form tags
 
@@ -264,20 +263,22 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     { include_blank: args[:include_blank], selected: args[:selected] }
   end
 
-  # MO mostly uses year-input_controller to switch the year selects to
-  # text inputs, but you can pass data: { controller: "" } to get a year select.
-  # The three "selects" will always be inline, but pass inline: true to make
-  # the label and selects inline.
-  # The form label does not correspond exactly to any of the three fields, so
-  # it identifies the wrapping div. (That's also valid HTML.)
+  # Bootstrap 3-input date helper: day select + month select + year text
+  # input. Replaces Rails' `date_select` (which emits three selects)
+  # because a fixed-range year dropdown is awkward for old-date scenarios
+  # (e.g. an observation from 30 years ago that falls outside the default
+  # 20-year range). The text-input year sidesteps that entirely.
+  #
+  # Day/month/year emit element IDs `{form_id}_3i`/`_2i`/`_1i` and names
+  # `{form_name}[{field}(3i)]`/`(2i)]`/`(1i)]` to match Rails' multi-
+  # parameter date attribute convention, so controller-side param parsing
+  # is unchanged. The wrapping div uses the bare form-field id so a
+  # `<label for="…">` click focuses the day select first.
   # https://stackoverflow.com/a/16426122/3357635
   def date_select_with_label(**args)
     args = check_for_optional_or_required_note(args)
     args = check_for_help_block(args)
-    opts = separate_field_options_from_args(args, [:object, :data])
-    opts[:class] = "form-control"
-    opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
-    date_opts = date_select_opts(args)
+    date = date_field_selected_value(args)
     wrap_class = form_group_wrap_class(args)
     selects_class = "form-inline date-selects"
     selects_class += " d-inline-block" if args[:inline] == true
@@ -286,48 +287,71 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
-      date_select_div(args, date_opts, opts, selects_class)
+      concat(date_field_inputs_div(args, date, selects_class))
       concat(args[:append]) if args[:append].present?
     end
   end
 
-  # The index arg is for multiple date_selects in a form
-  def date_select_opts(args = {})
+  # Resolve the date to display: the explicit `selected:`, then the
+  # object's value for the field, then today.
+  def date_field_selected_value(args)
     field = args[:field] || :when
-    obj = args[:object] || args[:form]&.object || nil
-    start_year = args[:start_year] || 20.years.ago.year
-    end_year = args[:end_year] || Time.zone.now.year
-    selected = args[:selected] || Time.zone.today
-    # The field may not be an attribute of the object
-    if obj.present? && obj.respond_to?(field)
-      init_year = obj.try(&field.to_sym).try(&:year)
-      selected = obj.try(&field.to_sym) || Time.zone.today
-    end
-    if init_year && init_year < start_year && init_year > 1900
-      start_year = init_year
-    end
-    opts = { start_year:, end_year:, selected:,
-             include_blank: args[:include_blank], default: args[:default],
-             order: args[:order] || [:day, :month, :year] }
-    opts[:index] = args[:index] if args[:index].present?
-    opts
+    obj = args[:object] || args[:form]&.object
+    return args[:selected] if args[:selected]
+    return obj.try(&field.to_sym) || Time.zone.today if obj.respond_to?(field)
+
+    Time.zone.today
   end
 
-  # If there's no form object_name, we need a name and id for the fields.
-  # Turns out you have to use a different Rails helper, select_date, for this.
-  def date_select_div(args, date_opts, opts, selects_class)
-    if args[:form].object_name.present?
-      identifier = [args[:form]&.object_name, args[:index],
-                    args[:field]].compact.join("_")
-      concat(tag.div(class: selects_class, id: identifier) do
-        concat(args[:form].date_select(args[:field], date_opts, opts))
-      end)
-    else
-      concat(tag.div(class: selects_class, id: args[:field]) do
-        concat(select_date(date_opts[:selected],
-                           date_opts.merge(prefix: args[:field]), opts))
-      end)
+  def date_field_inputs_div(args, date, selects_class)
+    identifier = [args[:form]&.object_name, args[:index],
+                  args[:field]].compact_blank.join("_")
+    tag.div(class: selects_class, id: identifier) do
+      concat(date_field_day_select(args, date, identifier))
+      concat(date_field_month_select(args, date, identifier))
+      concat(date_field_year_input(args, date, identifier))
     end
+  end
+
+  def date_field_day_select(args, date, identifier)
+    tag.select(id: "#{identifier}_3i",
+               name: date_field_param_name(args, "3i"),
+               class: "form-control mr-2") do
+      (1..31).each do |day|
+        concat(tag.option(day, value: day,
+                               selected: day == date.day))
+      end
+    end
+  end
+
+  def date_field_month_select(args, date, identifier)
+    tag.select(id: "#{identifier}_2i",
+               name: date_field_param_name(args, "2i"),
+               class: "form-control mr-2") do
+      (1..12).each do |m|
+        concat(tag.option(Date::MONTHNAMES[m], value: m,
+                                               selected: m == date.month))
+      end
+    end
+  end
+
+  def date_field_year_input(args, date, identifier)
+    tag.input(type: "text",
+              id: "#{identifier}_1i",
+              name: date_field_param_name(args, "1i"),
+              class: "form-control",
+              size: 4,
+              value: date.year)
+  end
+
+  # `{object_name}[{field}(Ni)]` — matches Rails' date_select output so
+  # multi-parameter date attribute parsing on the controller stays
+  # identical. Falls back to bare `{field}(Ni)` for object-less forms.
+  def date_field_param_name(args, suffix)
+    prefix = args[:form]&.object_name
+    return "#{args[:field]}(#{suffix})" if prefix.blank?
+
+    "#{prefix}[#{args[:field]}(#{suffix})]"
   end
 
   # Bootstrap number_field

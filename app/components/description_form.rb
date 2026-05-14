@@ -139,8 +139,13 @@ class Components::DescriptionForm < Components::ApplicationForm
   # --- Merge fields ---
 
   def render_merge_fields
-    input(type: "hidden", name: "old_desc_id", value: @old_desc_id)
-    input(type: "hidden", name: "delete_after", value: @delete_after)
+    render_flat_hidden_field("old_desc_id", @old_desc_id)
+    render_flat_hidden_field("delete_after", @delete_after)
+  end
+
+  def render_flat_hidden_field(name, value)
+    proxy = Components::ApplicationForm::FieldProxy.new(nil, name, value)
+    render(Components::ApplicationForm::HiddenField.new(proxy))
   end
 
   # --- Helper methods ---

@@ -37,7 +37,10 @@ class Components::NameForm < Components::ApplicationForm
   def render_approved_rank_field
     return unless @approved_rank
 
-    input(type: "hidden", name: "approved_rank", value: @approved_rank)
+    proxy = Components::ApplicationForm::FieldProxy.new(
+      nil, "approved_rank", @approved_rank
+    )
+    render(Components::ApplicationForm::HiddenField.new(proxy))
   end
 
   def button_text

@@ -53,6 +53,19 @@ class SiblingRecordsHelperTest < ActionView::TestCase
     assert_nil(result)
   end
 
+  def test_sibling_sequences_with_deposit_links_to_archive
+    seq = sequences(:deposited_sequence)
+    sibling = seq.observation
+    html = sibling_sequences([sibling])
+
+    assert_match(:show_observation_archive_link.t, html)
+    assert_match(CGI.escapeHTML(seq.accession_url), html)
+    assert_match('target="_blank"', html)
+    assert_match('rel="noopener"', html)
+    assert_match(%r{\[<a [^>]*>#{:show_observation_archive_link.t}</a>\]},
+                 html)
+  end
+
   def test_sibling_external_link_items_with_links
     el = external_links(:coprinus_comatus_obs_mycoportal_link)
     sibling = el.observation

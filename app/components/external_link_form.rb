@@ -34,12 +34,8 @@ class Components::ExternalLinkForm < Components::ApplicationForm
   end
 
   def render_hidden_fields
-    input(type: "hidden", name: "external_link[user_id]", value: @user&.id)
-    input(
-      type: "hidden",
-      name: "external_link[observation_id]",
-      value: @observation.id
-    )
+    hidden_field(:user_id, value: @user&.id)
+    hidden_field(:observation_id, value: @observation.id)
   end
 
   def render_site_select

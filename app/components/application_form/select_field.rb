@@ -15,22 +15,20 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options
 
-    def initialize(field, collection:, attributes:, wrapper_options: {})
-      super(field, collection: collection, attributes: attributes)
+    def initialize(field, collection:, wrapper_options: {}, **attributes)
+      # Upstream Superform 0.7 renamed `collection:` to `options:` and
+      # deprecated passing `attributes:` as a keyword. Spread instead.
+      super(field, options: collection, **attributes)
       @wrapper_options = wrapper_options
     end
 
     def view_template(&options_block)
-      render_with_wrapper do
-        # Exclude `selected` from select tag attrs - it's used by options()
-        select_attrs = attributes.except(:selected)
-        if options_block
-          select(**select_attrs, class: select_classes, &options_block)
-        else
-          select(**select_attrs, class: select_classes) do
-            options(*@collection)
-          end
-        end
+      # `label: false` skips the form-group wrapper (bare select),
+      # matching TextField's behavior.
+      if wrapper_options[:label] == false
+        render_select(&options_block)
+      else
+        render_with_wrapper { render_select(&options_block) }
       end
     end
 
@@ -40,7 +38,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Compares as strings to handle boolean values (Phlex omits value="false")
     def options(*collection)
       map_options(collection).each do |key, value|
-        option(selected: option_selected?(key), value: key) { value }
+        # Coerce nil → "" so `<option value="">` renders (not `<option>`).
+        # Phlex's HTML DSL omits nil-valued attributes; the browser would
+        # then submit the option's text content. Matches Rails select-helper
+        # behavior so callers passing `[nil, "Label"]` get the expected
+        # empty-string submission.
+        option_value = key.nil? ? "" : key
+        option(selected: option_selected?(key), value: option_value) { value }
       end
     end
 
@@ -55,30 +59,39 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
+    def render_select(&options_block)
+      # Exclude `selected` from select tag attrs - it's used by options()
+      select_attrs = attributes.except(:selected)
+      if options_block
+        select(**select_attrs, class: select_classes, &options_block)
+      else
+        select(**select_attrs, class: select_classes) do
+          # Upstream Superform 0.7 stores options on `@options` (was
+          # `@collection` in the fork).
+          options(*@options)
+        end
+      end
+    end
+
     def select_classes
       class_names(attributes[:class], "form-control")
     end
 
-    # rubocop:disable Metrics/AbcSize
     def render_with_wrapper
-      label_option = wrapper_options[:label]
-      show_label = label_option != false
-      label_text = if label_option.is_a?(String)
-                     label_option
-                   else
-                     field.key.to_s.humanize
-                   end
       inline = wrapper_options[:inline] || false
-      wrap_class = wrapper_options[:wrap_class]
-
-      div(class: form_group_class("form-group", inline, wrap_class)) do
-        render_label_row(label_text, inline) if show_label
+      div(class: form_group_class("form-group", inline,
+                                  wrapper_options[:wrap_class])) do
+        render_label_row(label_text, inline)
         yield
         render_help_after_field
         render(append_slot) if append_slot
       end
     end
-    # rubocop:enable Metrics/AbcSize
+
+    def label_text
+      label_option = wrapper_options[:label]
+      label_option.is_a?(String) ? label_option : field.key.to_s.humanize
+    end
 
     def form_group_class(base, inline, wrap_class)
       classes = base
