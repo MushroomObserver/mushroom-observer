@@ -82,24 +82,41 @@ class Components::ApplicationForm < Superform::Rails::Form
       )
     end
 
+    # Emit the array-mode input directly rather than delegating to
+    # upstream's `Superform::Rails::Components::Checkbox`. Upstream's
+    # `Checkbox` decides which of {boolean, collection, array} branch
+    # to render based on `field.parent.is_a?(Superform::Field)`; when
+    # called from this iteration the parent is the form root, so
+    # upstream picks the boolean branch — which renders all per-option
+    # inputs with the bare `dom.id` (duplicate ids) and a hidden 0/1
+    # pair per option (wrong for an array submission).
+    #
+    # The shape emitted here mirrors MO's existing block-mode
+    # `option(value)` helper above: one `<input type="checkbox"
+    # id="{field_id}_{index}" name="{field_name}[]" value="{value}">`
+    # per option, wrapped in a `<label for="{id}">` so click-focus and
+    # screen-reader association both work.
     def render_checkbox_option(choice)
       value_str = choice.value.to_s
+      input_id = option_input_id(value_str)
       div(class: option_wrap_class) do
-        label do
-          # Mirrors RadioField: stringify value, use value-derived index so
-          # the rendered id is value-based (matching MO's convention used
-          # for the block-mode `option(value)` path), not upstream's
-          # default array-position index.
-          render(Superform::Rails::Components::Checkbox.new(
-                   field,
-                   value: value_str,
-                   index: index_for(value_str),
-                   **@attributes
-                 ))
+        label(for: input_id) do
+          input(
+            type: :checkbox,
+            id: input_id,
+            name: "#{field.dom.name}[]",
+            value: value_str,
+            checked: checked_in_array?(choice.value),
+            **@attributes.except(:id, :name, :value, :type, :checked)
+          )
           whitespace
           trusted_html(choice.text)
         end
       end
+    end
+
+    def option_input_id(value_str)
+      "#{field.dom.id}_#{index_for(value_str)}"
     end
 
     def index_for(value_str)

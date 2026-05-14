@@ -72,12 +72,74 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, "text-monospace")
   end
 
+  # Regression: TextareaField applies `text-monospace` when instantiated
+  # directly with `wrapper_options[:monospace]` — not just via the helper.
+  # Matches ERB `text_area_with_label`'s `:monospace` semantics so direct
+  # component callers (e.g. FieldProxy-backed textareas) get parity.
+  def test_textarea_field_monospace_at_component_level
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+    field = form.field(:notes)
+    component = Components::ApplicationForm::TextareaField.new(
+      field, wrapper_options: { label: "Notes", monospace: true }
+    )
+
+    html = render(component)
+    assert_html(html, "textarea.form-control.text-monospace")
+  end
+
   def test_textarea_field_with_rows
     form = render_form do
       textarea_field(:notes, label: "Notes", rows: 10)
     end
 
     assert_includes(form, 'rows="10"')
+  end
+
+  # Regression: `prefs: true` auto-resolves the label from the
+  # `prefs_<field>` i18n key, matching ERB
+  # `auto_label_if_form_is_account_prefs`. Six helpers honor this:
+  # text_field, textarea_field, select_field, checkbox_field,
+  # radio_field, number_field — same set as ERB.
+  def test_text_field_prefs_auto_resolves_label_from_i18n
+    form = render_form do
+      text_field(:login, prefs: true)
+    end
+
+    # `:prefs_login.t` → "Login" (config/locales/en.txt)
+    assert_match(%r{<label[^>]*>\s*Login\s*</label>}, form)
+  end
+
+  def test_checkbox_field_prefs_auto_resolves_label_from_i18n
+    form = render_form do
+      checkbox_field(:no_emails, prefs: true)
+    end
+
+    # `:prefs_no_emails.t` → "Opt out of _all_ email from MO."
+    assert_includes(form, "Opt out of")
+  end
+
+  def test_auto_label_for_prefs_returns_options_unchanged_when_no_prefs
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+
+    result = form.send(:auto_label_for_prefs, :name, label: "Original")
+    assert_equal({ label: "Original" }, result,
+                 "Without :prefs, options should be untouched")
+  end
+
+  def test_auto_label_for_prefs_drops_prefs_key_when_resolving
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+
+    result = form.send(:auto_label_for_prefs, :login,
+                       prefs: true, class: "extra")
+    assert_equal("Login", result[:label])
+    assert_not(result.key?(:prefs),
+               ":prefs should be removed after resolution so it " \
+               "doesn't leak into wrapper_options downstream")
+    assert_equal("extra", result[:class],
+                 "Unrelated options should pass through")
   end
 
   # Checkbox field tests - CollectionNumber doesn't have boolean fields,
@@ -611,6 +673,63 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "div.radio.ml-4", count: 2)
   end
 
+  # Regression: each per-option label carries `for=` pointing at its
+  # input's id (matching ERB radio_with_label, which uses
+  # form.label("#{field}_#{value}")).
+  def test_radio_field_per_option_label_has_for_attribute
+    form = render_form do
+      radio_field(:number, [1, "A"], [2, "B"])
+    end
+
+    assert_html(form, "label[for='collection_number_number_1']")
+    assert_html(form, "label[for='collection_number_number_2']")
+    assert_html(form, "input[type='radio'][id='collection_number_number_1']")
+    assert_html(form, "input[type='radio'][id='collection_number_number_2']")
+  end
+
+  # Regression: RadioField `between` slot renders after each option's
+  # label text inside the `<label>`, wrapped in `<div class="d-inline-block
+  # ml-3">`. Matches ERB `radio_with_label`'s `between:` shape. Applied
+  # uniformly to every option (one slot per RadioField call).
+  def test_radio_field_with_between_slot
+    form = render_form do
+      component = Components::ApplicationForm::RadioField.new(
+        field(:number), [1, "A"], [2, "B"]
+      )
+      component.with_between do
+        span(class: "help-note") { "(see notes)" }
+      end
+      render(component)
+    end
+
+    assert_html(form, "div.radio div.d-inline-block.ml-3 span.help-note",
+                count: 2)
+    assert_includes(form, "(see notes)")
+  end
+
+  # Regression: array-mode checkbox per-option labels also carry `for=`,
+  # AND the inputs get value-suffixed ids (so multiple options don't
+  # collide). MO's CheckboxField bypasses upstream's Checkbox component
+  # for this case because upstream mis-detects array mode when the
+  # field's parent isn't another Superform::Field. Array mode is reached
+  # via `field(:foo).checkbox([v, label], …)` directly.
+  def test_checkbox_field_array_mode_per_option_label_has_for_attribute
+    form = render_form do
+      render(field(:number).checkbox([1, "A"], [2, "B"]))
+    end
+
+    assert_html(form, "label[for='collection_number_number_1']")
+    assert_html(form, "label[for='collection_number_number_2']")
+    assert_html(form, "input[type='checkbox'][id='collection_number_number_1']")
+    assert_html(form, "input[type='checkbox'][id='collection_number_number_2']")
+    # Each option submits its own value under `field[]`
+    array_name = "collection_number[number][]"
+    assert_html(form,
+                "input[type='checkbox'][name='#{array_name}'][value='1']")
+    assert_html(form,
+                "input[type='checkbox'][name='#{array_name}'][value='2']")
+  end
+
   # RadioField standalone tests (via FieldProxy)
   def test_radio_field_with_field_proxy
     proxy = Components::ApplicationForm::FieldProxy.new(
@@ -677,6 +796,27 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     assert_html(form, "textarea")
+  end
+
+  # Regression: ReadOnlyField label should carry `for=` pointing at the
+  # hidden input's id, matching the ERB `form.label(field, ...)` output.
+  def test_read_only_field_label_has_for_attribute
+    form = render_form do
+      read_only_field(:number, label: "Number:", value: "42")
+    end
+
+    assert_html(form, "label[for='collection_number_number']")
+    assert_html(form, "input[type='hidden'][id='collection_number_number']")
+  end
+
+  # Regression: StaticTextField label should carry `for=` pointing at the
+  # field's dom id (even though there's no input — matches ERB output).
+  def test_static_field_label_has_for_attribute
+    form = render_form do
+      static_field(:number, label: "Number:", value: "42")
+    end
+
+    assert_html(form, "label[for='collection_number_number']")
   end
 
   private

@@ -39,4 +39,42 @@ class FormsHelperTest < ActionView::TestCase
     assert_includes(html, "change-&gt;file-input#validate",
                     "Should trigger validation on change")
   end
+
+  # Regression: label `for=` must match the id Rails' `radio_button`
+  # generates. Rails' internal `sanitized_value` lowercases the value,
+  # replaces whitespace with underscores, and strips other non-word
+  # chars; values like "Hello World" or symbols with special chars
+  # would otherwise produce a `for=` that doesn't match the input id.
+  def test_radio_with_label_for_attr_matches_sanitized_radio_button_id
+    form = ActionView::Helpers::FormBuilder.new(
+      :widget, nil, self, {}
+    )
+
+    # Mixed-case value with whitespace — exercises the sanitization
+    html = radio_with_label(
+      form: form, field: :flavor, value: "Hello World", label: "Pick one"
+    )
+
+    # Rails sanitizes "Hello World" → "hello_world" for the input id;
+    # our label `for=` uses `parameterize(separator: "_")` to match.
+    assert_match(/type="radio"[^>]+id="widget_flavor_hello_world"/, html,
+                 "Radio input id should be Rails-sanitized form of value")
+    assert_match(/<label[^>]+for="widget_flavor_hello_world"/, html,
+                 "Label `for=` must match the radio input's sanitized id")
+  end
+
+  # Simpler symbol-value case — the common pattern in MO callers
+  # (e.g. :txt, :rtf, :csv from species_lists/downloads).
+  def test_radio_with_label_for_attr_with_symbol_value
+    form = ActionView::Helpers::FormBuilder.new(
+      :report, nil, self, {}
+    )
+
+    html = radio_with_label(
+      form: form, field: :type, value: :txt, label: "Plain Text"
+    )
+
+    assert_match(/type="radio"[^>]+id="report_type_txt"/, html)
+    assert_match(/<label[^>]+for="report_type_txt"/, html)
+  end
 end

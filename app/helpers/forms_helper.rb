@@ -8,20 +8,29 @@
 module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
+  #
+  # Emits both `data-turbo-submits-with` (Turbo's in-flight label) and
+  # `data-disable-with` (rails-ujs's in-flight label). MO uses
+  # `Turbo.config.forms.mode = "optin"`, so non-Turbo forms rely on the
+  # rails-ujs path. Pass `disable_with:` to override the disabled-state
+  # text; defaults to the button label (just disable, no text change).
+  # Matches the Phlex `Components::ApplicationForm#submit` data emission.
   def submit_button(**args)
     unless args[:form].is_a?(ActionView::Helpers::FormBuilder)
       return args[:button]
     end
 
-    # custom text for the button while submitting
     submits_with = args[:submits_with] || submits_default_text(args[:button])
+    disable_with = args[:disable_with] || args[:button]
     data = args[:data] || {}
 
-    opts = args.except(:form, :button, :class, :center, :data, :submits_with)
+    opts = args.except(:form, :button, :class, :center, :data,
+                       :submits_with, :disable_with)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
-    opts[:data] = { turbo_submits_with: submits_with }.deep_merge(data)
+    opts[:data] = { turbo_submits_with: submits_with,
+                    disable_with: disable_with }.deep_merge(data)
 
     args[:form].submit(args[:button], opts)
   end
@@ -117,15 +126,26 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   end
 
   # Bootstrap radio: form, field, value, label, class, checked
+  #
+  # The label's `for=` matches the id Rails' `radio_button` generates for
+  # the input — which sanitizes the value (lowercase, spaces → underscores,
+  # special chars stripped). Without sanitization here, a value like
+  # "Hello World" or a non-trivial symbol would yield a label
+  # `for="field_Hello World"` while the input id is `"field_hello_world"`,
+  # breaking label click-focus and screen-reader association.
+  # `parameterize(separator: "_")` is the public-API equivalent of Rails'
+  # internal `sanitized_value` and matches Phlex `RadioField`'s `index_for`.
   def radio_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_help_block(args)
     opts = separate_field_options_from_args(args, [:value])
 
     wrap_class = form_group_wrap_class(args, "radio")
+    value_id_suffix = args[:value].to_s.parameterize(separator: "_")
+    label_for = "#{args[:field]}_#{value_id_suffix}"
 
     tag.div(class: wrap_class) do
-      concat(args[:form].label("#{args[:field]}_#{args[:value]}") do
+      concat(args[:form].label(label_for) do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
         if args[:between].present?
@@ -208,7 +228,22 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # The label row for autocompleters is potentially complicated, many buttons.
   # Content for `between` and `label_after` come right after the label on left,
   # content for `label_end` is at the end of the same line, right justified.
+  #
+  # Short-circuits to a bare `<label>` when no between/label_after/label_end
+  # content is supplied. The flex wrapper has nothing to space in that case
+  # and adds no visible layout, so emitting the wrapper just produces a
+  # `<div class="d-flex"><div><label/></div><div></div></div>` shape that
+  # has to be normalized away in ERB↔Phlex parity tests. Matches Phlex's
+  # `FieldLabelRow#simple_label?` short-circuit. The `help:` case is
+  # already routed through `args[:between]` by `check_for_help_block`, so
+  # the `between.blank?` check naturally retains the wrapper when help is
+  # present.
   def text_label_row(args, label_opts)
+    if args[:between].blank? && args[:label_after].blank? &&
+       args[:label_end].blank?
+      return args[:form].label(args[:field], args[:label], label_opts)
+    end
+
     display = args[:inline] == true ? "d-inline-flex" : "d-flex"
     tag.div(class: "#{display} justify-content-between") do
       concat(tag.div do
@@ -399,9 +434,17 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   #   end
   # end
 
-  # We have fields like this. Prints a static value for submitted field,
-  # from either a "text" option (first choice) or a "value" option
-  def hidden_field_with_label(**args)
+  # Renders a labeled, non-editable display of a value plus a real
+  # `<input type="hidden">` carrying the same value, so the user can
+  # see what's being submitted but can't change it. The Phlex analogue
+  # is `Components::ApplicationForm::ReadOnlyField`; this is the ERB
+  # equivalent (NOT to be confused with a bare hidden input, which is
+  # `f.hidden_field` / Phlex's `HiddenField`).
+  #
+  # Renamed from `hidden_field_with_label` (which mis-described the
+  # output — it emits a visible static-text display in addition to the
+  # hidden input).
+  def read_only_field_with_label(**args)
     opts = separate_field_options_from_args(args)
     text = opts[:text] || opts[:value] || ""
 

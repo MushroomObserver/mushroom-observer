@@ -31,6 +31,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     #   `with_between`, `with_append` (after input, end of form-group),
     #   `with_help`
     def text_field(field_name, **options)
+      options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -53,12 +54,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @yield [field_component] Optional block to set slots:
     #   `with_between`, `with_append`, `with_help`
     def textarea_field(field_name, **options)
+      options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      if wrapper_opts.delete(:monospace)
-        field_opts[:class] = class_names(field_opts[:class], "text-monospace")
-      end
+      # `monospace:` is handled by TextareaField itself via wrapper_options.
 
       field_component = field(field_name).textarea(
         wrapper_options: wrapper_opts,
@@ -78,6 +78,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @yield [field_component] Optional block to set slots:
     #   `with_between`, `with_append`, `with_help`
     def checkbox_field(field_name, **options, &block)
+      options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -93,16 +94,17 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Radio button group with Bootstrap radio wrapper per option
     # @param field_name [Symbol] the field name
-    # @param options [Array<Array>] list of [value, label] pairs
-    # @param wrapper_options [Hash] wrapper options (wrap_class, etc.)
+    # @param choices [Array<Array>] list of [value, label] pairs
+    # @param options [Hash] wrapper + HTML options (wrap_class, etc.)
     # @example
     #   radio_field(:target, [1, "Option 1"], [2, "Option 2"])
-    def radio_field(field_name, *options, **kwargs)
-      wrapper_opts = kwargs.slice(*WRAPPER_OPTIONS)
-      field_opts = kwargs.except(*WRAPPER_OPTIONS)
+    def radio_field(field_name, *choices, **options)
+      options = auto_label_for_prefs(field_name, options)
+      wrapper_opts = options.slice(*WRAPPER_OPTIONS)
+      field_opts = options.except(*WRAPPER_OPTIONS)
 
       render(field(field_name).radio(
-               *options,
+               *choices,
                wrapper_options: wrapper_opts,
                **field_opts
              ))
@@ -116,6 +118,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @yield [field_component] Optional block to set slots:
     #   `with_between`, `with_append`, `with_help`
     def select_field(field_name, options_list, **options)
+      options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -214,6 +217,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @yield [field_component] Optional block to set slots:
     #   `with_between`, `with_append`, `with_help`
     def number_field(field_name, **options)
+      options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
@@ -334,15 +338,20 @@ class Components::ApplicationForm < Superform::Rails::Form
     #   `<button type="submit">value</button>`.
     # @option options [String] :class additional CSS classes
     # @option options [Hash] :data additional data attributes
+    # `disable_with:` overrides the `data-disable-with` text (rails-ujs's
+    # disabled-state label for non-Turbo submits). Defaults to the button
+    # label (just disable, no text swap).
     def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
-               btn_class: "btn-default", as: :input, **options)
+               disable_with: nil, btn_class: "btn-default", as: :input,
+               **options)
       submits_with ||= :SUBMITTING.l
+      disable_with ||= value
       classes = ["btn", btn_class]
       classes << "center-block my-3" if center
       classes << options[:class] if options[:class].present?
 
       data = { turbo_submits_with: submits_with,
-               disable_with: value }.merge(options[:data] || {})
+               disable_with: disable_with }.merge(options[:data] || {})
       merged = options.merge(class: classes.join(" "), data: data)
 
       if as == :button
@@ -359,6 +368,17 @@ class Components::ApplicationForm < Superform::Rails::Form
       return if help_content.blank?
 
       field_component.with_help { help_content }
+    end
+
+    # Mirrors ERB `auto_label_if_form_is_account_prefs`: when `prefs: true`
+    # is present, resolve the label from the `prefs_<field>` i18n key and
+    # drop the `:prefs` option so it doesn't flow downstream. Used by the
+    # same set of helpers the ERB applies it to: text, textarea, select,
+    # checkbox, radio, number.
+    def auto_label_for_prefs(field_name, options)
+      return options if options[:prefs].blank?
+
+      options.merge(label: :"prefs_#{field_name}".t).except(:prefs)
     end
   end
 end
