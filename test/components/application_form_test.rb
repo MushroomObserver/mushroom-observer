@@ -611,6 +611,43 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "div.radio.ml-4", count: 2)
   end
 
+  # Regression: each per-option label carries `for=` pointing at its
+  # input's id (matching ERB radio_with_label, which uses
+  # form.label("#{field}_#{value}")).
+  def test_radio_field_per_option_label_has_for_attribute
+    form = render_form do
+      radio_field(:number, [1, "A"], [2, "B"])
+    end
+
+    assert_html(form, "label[for='collection_number_number_1']")
+    assert_html(form, "label[for='collection_number_number_2']")
+    assert_html(form, "input[type='radio'][id='collection_number_number_1']")
+    assert_html(form, "input[type='radio'][id='collection_number_number_2']")
+  end
+
+  # Regression: array-mode checkbox per-option labels also carry `for=`,
+  # AND the inputs get value-suffixed ids (so multiple options don't
+  # collide). MO's CheckboxField bypasses upstream's Checkbox component
+  # for this case because upstream mis-detects array mode when the
+  # field's parent isn't another Superform::Field. Array mode is reached
+  # via `field(:foo).checkbox([v, label], …)` directly.
+  def test_checkbox_field_array_mode_per_option_label_has_for_attribute
+    form = render_form do
+      render(field(:number).checkbox([1, "A"], [2, "B"]))
+    end
+
+    assert_html(form, "label[for='collection_number_number_1']")
+    assert_html(form, "label[for='collection_number_number_2']")
+    assert_html(form, "input[type='checkbox'][id='collection_number_number_1']")
+    assert_html(form, "input[type='checkbox'][id='collection_number_number_2']")
+    # Each option submits its own value under `field[]`
+    array_name = "collection_number[number][]"
+    assert_html(form,
+                "input[type='checkbox'][name='#{array_name}'][value='1']")
+    assert_html(form,
+                "input[type='checkbox'][name='#{array_name}'][value='2']")
+  end
+
   # RadioField standalone tests (via FieldProxy)
   def test_radio_field_with_field_proxy
     proxy = Components::ApplicationForm::FieldProxy.new(

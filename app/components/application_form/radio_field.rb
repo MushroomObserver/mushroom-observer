@@ -53,7 +53,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_choice(choice)
       value_str = choice.value.to_s
       div(class: radio_class) do
-        label do
+        label(for: option_input_id(value_str)) do
           # Stringify value so Phlex doesn't dasherize symbols
           # (e.g. `:mycoportal_image_list` → `"mycoportal-image-list"`).
           # Use a value-derived index so the rendered id is value-based
@@ -77,6 +77,10 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def index_for(value_str)
       value_str.parameterize(separator: "_")
+    end
+
+    def option_input_id(value_str)
+      "#{@field.dom.id}_#{index_for(value_str)}"
     end
 
     def option_checked?(value_str)
