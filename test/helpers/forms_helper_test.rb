@@ -39,4 +39,67 @@ class FormsHelperTest < ActionView::TestCase
     assert_includes(html, "change-&gt;file-input#validate",
                     "Should trigger validation on change")
   end
+
+  # Regression: number_field_with_label uses the flex `text_label_row`
+  # so a help-button / between / label_end ride next to the label,
+  # matching `text_field_with_label`.
+  def test_number_field_with_label_uses_label_row
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = number_field_with_label(
+      form: form, field: :layout_count, label: "Layout count",
+      between: "(per page)"
+    )
+
+    assert_match(/<div class="d-flex justify-content-between">/, html)
+    assert_match(%r{<label[^>]+>Layout count</label>}, html)
+    assert_includes(html, "(per page)")
+  end
+
+  def test_number_field_with_label_defaults_min_to_1
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = number_field_with_label(
+      form: form, field: :layout_count, label: "Layout count"
+    )
+
+    # Attribute order is Rails-dependent; assert both attrs present on
+    # the same input tag without pinning their order.
+    assert_match(/<input[^>]+min="1"/, html)
+    assert_match(/<input[^>]+type="number"/, html)
+  end
+
+  # Regression: password_field_with_label uses the flex `text_label_row`
+  # so a help-button / between / label_end ride next to the label.
+  def test_password_field_with_label_uses_label_row
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = password_field_with_label(
+      form: form, field: :password, label: "Password",
+      between: "(at least 8 chars)"
+    )
+
+    assert_match(/<div class="d-flex justify-content-between">/, html)
+    assert_match(%r{<label[^>]+>Password</label>}, html)
+    assert_includes(html, "(at least 8 chars)")
+  end
+
+  def test_password_field_with_label_defaults_value_to_empty_string
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = password_field_with_label(
+      form: form, field: :password, label: "Password"
+    )
+
+    assert_match(/<input[^>]+value=""/, html)
+    assert_match(/<input[^>]+type="password"/, html)
+  end
 end
