@@ -399,9 +399,17 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   #   end
   # end
 
-  # We have fields like this. Prints a static value for submitted field,
-  # from either a "text" option (first choice) or a "value" option
-  def hidden_field_with_label(**args)
+  # Renders a labeled, non-editable display of a value plus a real
+  # `<input type="hidden">` carrying the same value, so the user can
+  # see what's being submitted but can't change it. The Phlex analogue
+  # is `Components::ApplicationForm::ReadOnlyField`; this is the ERB
+  # equivalent (NOT to be confused with a bare hidden input, which is
+  # `f.hidden_field` / Phlex's `HiddenField`).
+  #
+  # Renamed from `hidden_field_with_label` (which mis-described the
+  # output — it emits a visible static-text display in addition to the
+  # hidden input).
+  def read_only_field_with_label(**args)
     opts = separate_field_options_from_args(args)
     text = opts[:text] || opts[:value] || ""
 
