@@ -477,15 +477,20 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   `input[type='submit']` selectors.
   # @option options [String] :class additional CSS classes
   # @option options [Hash] :data additional data attributes
+  # `disable_with:` overrides the `data-disable-with` text (rails-ujs's
+  # disabled-state label for non-Turbo submits). Defaults to the button
+  # label (just disable, no text swap).
   def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
-             btn_class: "btn-default", as: :input, **options)
+             disable_with: nil, btn_class: "btn-default", as: :input,
+             **options)
     submits_with ||= :SUBMITTING.l
+    disable_with ||= value
     classes = ["btn", btn_class]
     classes << "center-block my-3" if center
     classes << options[:class] if options[:class].present?
 
     data = { turbo_submits_with: submits_with,
-             disable_with: value }.merge(options[:data] || {})
+             disable_with: disable_with }.merge(options[:data] || {})
     merged = options.merge(class: classes.join(" "), data: data)
 
     if as == :button
