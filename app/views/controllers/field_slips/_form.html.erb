@@ -32,10 +32,7 @@ action = controller.action_name
       <%= date_select_with_label(form:, field: :date,
                                  label: "#{:DATE.t}:",
                                  object: field_slip, inline: true,
-                                 order: [:year, :month, :day],
-                                 selected: field_slip.date,
-                                 start_year: Date.today.year - 10,
-                                 end_year: Date.today.year + 10) %>
+                                 selected: field_slip.date) %>
       <%= autocompleter_field(form:, field: :collector,
                               label: :COLLECTOR.t + ":", type: :user) %>
       <%= autocompleter_field(form:, field: :location,
