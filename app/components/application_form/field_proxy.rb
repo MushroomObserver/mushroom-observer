@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Lightweight field proxy for use outside of form rendering context.
+  # Lightweight field proxy for use outside of a form rendering context.
   # Provides the same interface as Superform::Field for field components.
   # Unlike Superform fields, these can be created and rendered many times.
   #
@@ -15,6 +15,17 @@ class Components::ApplicationForm < Superform::Rails::Form
       @key = field_key
       @value = field_value
       @dom = DOMProxy.new(namespace, field_key, field_value)
+    end
+
+    # Factory method to create a FieldProxy for image fields.
+    # @param type [Symbol] :good_image or :image
+    # @param image_id [Integer, String] the image ID
+    # @param field_key [Symbol] the field name (:notes, :when, etc.)
+    # @param value [Object] the field value
+    # @return [FieldProxy] a field proxy for use with field components
+    def self.image_proxy(type, image_id, field_key, value = nil)
+      namespace = "observation[#{type}][#{image_id}]"
+      new(namespace, field_key, value)
     end
 
     # Minimal DOM proxy that provides id, name, value for field components

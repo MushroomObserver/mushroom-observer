@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Image-upload-specific helpers extracted from ApplicationForm to keep
-  # the main class focused on field helpers. Only forms that handle image
-  # uploads need these. Included into ApplicationForm via
-  # `include UploadHelpers` in application_form.rb.
+  # Mixin providing image-upload form helpers.
+  # Included by Components::ApplicationForm; requires the including class
+  # to provide Superform's +namespace+, +field+, and +render+ methods.
   module UploadHelpers
-    # Renders image upload fields in a :upload namespace
+    # Renders image upload fields in a :upload namespace.
     # Creates params[:model][:upload][image], etc. (nested under form model)
     # Pass a block to render content in the file field's between slot.
     def upload_fields(file_field_label: "#{:IMAGE.l}:", **args, &between_block)

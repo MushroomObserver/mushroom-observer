@@ -105,7 +105,7 @@ class Components::OccurrenceResolveForm < Components::Base
             value: obs.id)
     end
     input(type: "hidden",
-          name: "occurrence[observation_id]",
+          name: "observation_id",
           value: @selected.first.id)
     input(type: "hidden",
           name: "occurrence[primary_observation_id]",

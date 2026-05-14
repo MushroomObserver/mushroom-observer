@@ -41,7 +41,7 @@ class OccurrenceResolveFormTest < ComponentTestCase
                 "[value='#{@obs2.id}']")
     assert_html(html,
                 "input[type='hidden']" \
-                "[name='occurrence[observation_id]']" \
+                "[name='observation_id']" \
                 "[value='#{@obs1.id}']")
     assert_html(html,
                 "input[type='hidden']" \
@@ -136,7 +136,7 @@ class OccurrenceResolveFormTest < ComponentTestCase
     # observation_id hidden field
     obs_id_field = doc.at_css(
       "input[type='hidden']" \
-      "[name='occurrence[observation_id]']"
+      "[name='observation_id']"
     )
     assert(obs_id_field,
            "Expected observation_id hidden field")
