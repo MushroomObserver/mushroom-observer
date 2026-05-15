@@ -89,8 +89,12 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
+    # Only emit an outer-wrap id when the caller explicitly passes one
+    # (matches ERB `autocompleter_field`). Forms that need a stable
+    # CSS-selector handle (e.g. map outlets) pass `controller_id:`;
+    # forms that don't shouldn't get noise.
     def controller_id
-      custom_controller_id || "#{field.dom.id}_autocompleter"
+      custom_controller_id
     end
 
     def controller_data
@@ -183,8 +187,12 @@ class Components::ApplicationForm < Superform::Rails::Form
         render_label_after
       end
 
-      # Add label_end buttons to label_end slot
-      field_component.with_label_end { render_label_end }
+      # Add label_end buttons to label_end slot — only when content is
+      # actually present. Registering an empty slot makes
+      # `label_end_present?` return true and forces the label row into
+      # the d-flex path with an empty right side (see
+      # FieldLabelRow#render_label_row).
+      field_component.with_label_end { render_label_end } if create_text
 
       # Pass through help slot to inner field
       field_component.with_help { render(help_slot) } if help_slot

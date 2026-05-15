@@ -451,9 +451,25 @@ class ComponentTestCase < UnitTestCase
     "#{path}: element name #{expected.name.inspect} != #{actual.name.inspect}"
   end
 
+  # HTML boolean attributes: presence == true regardless of value, so
+  # Rails' `selected="selected"` and Phlex's `selected=""` (or bare
+  # `selected`) are semantically identical. The parity helper treats
+  # these as equal when both sides have the attribute present.
+  HTML_BOOLEAN_ATTRS = %w[
+    selected checked disabled readonly required multiple autofocus
+    hidden async defer ismap loop muted novalidate open reversed
+  ].freeze
+  private_constant :HTML_BOOLEAN_ATTRS
+
   def html_attribute_diff(expected, actual, here)
     expected_attrs = expected.attributes.transform_values(&:value)
     actual_attrs = actual.attributes.transform_values(&:value)
+    # Treat `attr=""` and a missing attribute as equivalent for these
+    # keys. Both Rails (omit on nil) and Superform (`attr=""` on nil)
+    # are valid; the rendered behavior is identical. This avoids
+    # cosmetic-only parity diffs.
+    expected_attrs = strip_blank_optional_attrs(expected_attrs)
+    actual_attrs = strip_blank_optional_attrs(actual_attrs)
     missing = expected_attrs.keys - actual_attrs.keys
     return "#{here}: missing attributes #{missing.inspect}" if missing.any?
 
@@ -462,11 +478,20 @@ class ComponentTestCase < UnitTestCase
 
     expected_attrs.each do |k, v|
       next if v == actual_attrs[k]
+      next if HTML_BOOLEAN_ATTRS.include?(k)
 
       return "#{here}: attribute #{k}=#{v.inspect} != " \
              "#{actual_attrs[k].inspect}"
     end
     nil
+  end
+
+  # Attributes whose blank-string presence is equivalent to absence.
+  BLANK_EQUIVALENT_ATTRS = %w[value placeholder title].freeze
+  private_constant :BLANK_EQUIVALENT_ATTRS
+
+  def strip_blank_optional_attrs(attrs)
+    attrs.reject { |k, v| BLANK_EQUIVALENT_ATTRS.include?(k) && v == "" }
   end
 
   def html_text_diff(expected, actual, here)

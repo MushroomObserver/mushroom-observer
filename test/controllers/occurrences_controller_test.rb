@@ -49,8 +49,8 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_create_requires_login
     post_requires_login(
       :create,
-      observation_ids: [@obs1.id, @obs2.id],
-      occurrence: { observation_id: @obs1.id,
+      observation_id: @obs1.id,
+      occurrence: { observation_ids: [@obs1.id, @obs2.id],
                     primary_observation_id: @obs1.id }
     )
   end
@@ -92,8 +92,8 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_create_with_missing_source_observation
     login("rolf")
     post(:create, params: {
-           observation_ids: [-1, @obs2.id],
-           occurrence: { observation_id: -1,
+           observation_id: -1,
+           occurrence: { observation_ids: [-1, @obs2.id],
                          primary_observation_id: -1 }
          })
     assert_redirected_to(observations_path)
@@ -139,9 +139,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Now POST as the browser would with one recent obs checked
     assert_difference("Occurrence.count", 1) do
       post(:create, params: {
-             observation_ids: [@obs1.id.to_s, @obs2.id.to_s],
+             observation_id: @obs1.id.to_s,
              occurrence: {
-               observation_id: @obs1.id.to_s,
+               observation_ids: [@obs1.id.to_s, @obs2.id.to_s],
                primary_observation_id: @obs1.id.to_s
              }
            })
@@ -170,9 +170,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_response(:success)
     body = @response.body
     # Source obs hidden field nested under occurrence[]
-    assert_match(/name="occurrence\[observation_id\]"/, body)
+    assert_match(/name="observation_id"/, body)
     # observation_ids[] at top level
-    assert_match(/name="observation_ids\[\]"/, body)
+    assert_match(/name="occurrence\[observation_ids\]\[\]"/, body)
     # primary_observation_id nested under occurrence[]
     assert_match(
       /name="occurrence\[primary_observation_id\]"/, body
@@ -209,9 +209,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     # Only the source observation, no additional selections
     post(:create, params: {
-           observation_ids: [],
+           observation_id: @obs1.id,
            occurrence: {
-             observation_id: @obs1.id,
+             observation_ids: [],
              primary_observation_id: @obs1.id
            }
          })
@@ -467,8 +467,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Include only obs1 and obs3 (exclude obs2)
     patch(:update, params: {
             id: occ.id,
-            observation_ids: [@obs1.id, obs3.id],
-            occurrence: { primary_observation_id: @obs1.id }
+            occurrence: { observation_ids: [@obs1.id, obs3.id],
+                          primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_equal(2, occ.observations.count)
@@ -483,8 +483,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Include only obs1 (exclude obs2)
     patch(:update, params: {
             id: occ.id,
-            observation_ids: [@obs1.id],
-            occurrence: { primary_observation_id: @obs1.id }
+            occurrence: { observation_ids: [@obs1.id],
+                          primary_observation_id: @obs1.id }
           })
     assert_not(Occurrence.exists?(occ.id))
   end
@@ -510,8 +510,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Include obs2 and obs3, exclude obs1 (mary's obs)
     patch(:update, params: {
             id: occ.id,
-            observation_ids: [@obs2.id, obs3.id],
-            occurrence: { primary_observation_id: @obs2.id }
+            occurrence: { observation_ids: [@obs2.id, obs3.id],
+                          primary_observation_id: @obs2.id }
           })
     occ.reload
     assert_not_includes(occ.observations, @obs1)
@@ -524,8 +524,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Any logged-in user can edit occurrences
     patch(:update, params: {
             id: occ.id,
-            observation_ids: [@obs1.id, obs3.id],
-            occurrence: { primary_observation_id: @obs1.id }
+            occurrence: { observation_ids: [@obs1.id, obs3.id],
+                          primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_not_includes(occ.observations, @obs2)
@@ -540,8 +540,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Include all existing + obs3
     patch(:update, params: {
             id: occ.id,
-            observation_ids: [@obs1.id, @obs2.id, obs3.id],
-            occurrence: { primary_observation_id: @obs1.id }
+            occurrence: { observation_ids: [@obs1.id, @obs2.id, obs3.id],
+                          primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_equal(3, occ.observations.count)
@@ -560,8 +560,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Include all existing + obs3 (which brings obs4 via merge)
     patch(:update, params: {
             id: occ1.id,
-            observation_ids: [@obs1.id, @obs2.id, obs3.id],
-            occurrence: { primary_observation_id: @obs1.id }
+            occurrence: { observation_ids: [@obs1.id, @obs2.id, obs3.id],
+                          primary_observation_id: @obs1.id }
           })
     occ1.reload
     assert_equal(4, occ1.observations.count)
@@ -584,8 +584,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Include all existing + obs3 (should fail: conflict)
     patch(:update, params: {
             id: occ.id,
-            observation_ids: [@obs1.id, @obs2.id, obs3.id],
-            occurrence: { primary_observation_id: @obs1.id }
+            occurrence: { observation_ids: [@obs1.id, @obs2.id, obs3.id],
+                          primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_equal(2, occ.observations.count)
@@ -617,8 +617,8 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     patch(:update, params: {
             id: occ.id,
-            occurrence: { primary_observation_id: obs_a.id },
-            primary_obs: { location_id: loc2.id }
+            occurrence: { primary_observation_id: obs_a.id,
+                          primary_observation: { location_id: loc2.id } }
           })
     obs_a.reload
     assert_equal(loc2, obs_a.location)
@@ -634,8 +634,8 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     patch(:update, params: {
             id: occ.id,
-            occurrence: { primary_observation_id: obs_a.id },
-            primary_obs: { when: new_date }
+            occurrence: { primary_observation_id: obs_a.id,
+                          primary_observation: { when: new_date } }
           })
     obs_a.reload
     assert_equal(Date.parse(new_date), obs_a.when)
@@ -654,8 +654,10 @@ class OccurrencesControllerTest < FunctionalTestCase
     original_loc = obs_mary.location_id
     patch(:update, params: {
             id: occ.id,
-            occurrence: { primary_observation_id: obs_mary.id },
-            primary_obs: { location_id: locations(:falmouth).id }
+            occurrence: {
+              primary_observation_id: obs_mary.id,
+              primary_observation: { location_id: locations(:falmouth).id }
+            }
           })
     obs_mary.reload
     assert_equal(original_loc, obs_mary.location_id)
@@ -672,9 +674,14 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_response(:success)
     body = @response.body
     # Location dropdown present when locations differ
-    assert_match(/primary_obs\[location_id\]/, body)
-    # Date and create button always present
-    assert_match(/primary_obs\[when\]/, body)
+    assert_match(
+      /occurrence\[primary_observation\]\[location_id\]/, body
+    )
+    # Date inputs always present (3-select via MO's DateField).
+    # `when(1i)` is the year suffix Rails uses for composite date params.
+    assert_match(
+      /occurrence\[primary_observation\]\[when\(1i\)\]/, body
+    )
   end
 
   # ---------- destroy action ----------
@@ -760,8 +767,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Remove obs2, add obs4
     patch(:update, params: {
             id: occ.id,
-            observation_ids: [@obs1.id, obs3.id, obs4.id],
-            occurrence: { primary_observation_id: @obs1.id }
+            occurrence: { observation_ids: [@obs1.id, obs3.id, obs4.id],
+                          primary_observation_id: @obs1.id }
           })
     occ.reload
     assert_includes(occ.observations, obs4,
@@ -778,8 +785,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Include a "0" id (empty checkbox) - should be ignored
     patch(:update, params: {
             id: occ.id,
-            observation_ids: ["0", @obs1.id.to_s, @obs2.id.to_s],
-            occurrence: { primary_observation_id: @obs1.id }
+            occurrence: { observation_ids: ["0", @obs1.id.to_s, @obs2.id.to_s],
+                          primary_observation_id: @obs1.id }
           })
     occ.reload
     # obs3 was excluded, but the "0" should not cause issues
@@ -798,8 +805,8 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     patch(:update, params: {
             id: occ.id,
-            occurrence: { primary_observation_id: obs_a.id },
-            primary_obs: { location_id: loc.id }
+            occurrence: { primary_observation_id: obs_a.id,
+                          primary_observation: { location_id: loc.id } }
           })
     obs_a.reload
     assert_equal(loc, obs_a.location)
@@ -814,8 +821,8 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     patch(:update, params: {
             id: occ.id,
-            occurrence: { primary_observation_id: obs_a.id },
-            primary_obs: { when: "2024-12-25" }
+            occurrence: { primary_observation_id: obs_a.id,
+                          primary_observation: { when: "2024-12-25" } }
           })
     obs_a.reload
     assert_equal(Date.parse("2024-12-25"), obs_a.when)
@@ -830,8 +837,8 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     patch(:update, params: {
             id: occ.id,
-            occurrence: { primary_observation_id: obs_a.id },
-            primary_obs: { when: "not-a-date" }
+            occurrence: { primary_observation_id: obs_a.id,
+                          primary_observation: { when: "not-a-date" } }
           })
     obs_a.reload
     assert_equal(original_date, obs_a.when,
@@ -847,8 +854,8 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     patch(:update, params: {
             id: occ.id,
-            occurrence: { primary_observation_id: obs_a.id },
-            primary_obs: { when: "" }
+            occurrence: { primary_observation_id: obs_a.id,
+                          primary_observation: { when: "" } }
           })
     obs_a.reload
     assert_equal(original_date, obs_a.when)
@@ -868,10 +875,10 @@ class OccurrencesControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: occ.id,
             occurrence: {
-              primary_observation_id: obs_mary.id
-            },
-            primary_obs: {
-              location_id: locations(:falmouth).id
+              primary_observation_id: obs_mary.id,
+              primary_observation: {
+                location_id: locations(:falmouth).id
+              }
             }
           })
     obs_mary.reload
@@ -981,9 +988,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     @obs2.update!(field_slip: fs2)
 
     post(:create, params: {
-           observation_ids: [@obs1.id, @obs2.id],
+           observation_id: @obs1.id,
            occurrence: {
-             observation_id: @obs1.id,
+             observation_ids: [@obs1.id, @obs2.id],
              primary_observation_id: @obs1.id
            }
          })
@@ -999,9 +1006,9 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_create_source_observation_not_found
     login("rolf")
     post(:create, params: {
-           observation_ids: [@obs2.id],
+           observation_id: 0,
            occurrence: {
-             observation_id: 0,
+             observation_ids: [@obs2.id],
              primary_observation_id: 0
            }
          })
@@ -1015,9 +1022,9 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_create_build_selected_under_two
     login("rolf")
     post(:create, params: {
-           observation_ids: [],
+           observation_id: @obs1.id,
            occurrence: {
-             observation_id: @obs1.id,
+             observation_ids: [],
              primary_observation_id: @obs1.id
            }
          })
@@ -1030,13 +1037,14 @@ class OccurrencesControllerTest < FunctionalTestCase
   private
 
   # Mirrors actual Superform output: observation_id and
-  # primary_observation_id nested under occurrence[],
-  # observation_ids[] at top level (raw input elements).
+  # `observation_id` is a flat form-context param (used by the
+  # controller to redirect back to /occurrences/new on errors).
+  # Everything else lives under `occurrence[...]` per Rails idiom.
   def create_params(source, obs_list, primary: source)
     {
-      observation_ids: obs_list.map(&:id),
+      observation_id: source.id,
       occurrence: {
-        observation_id: source.id,
+        observation_ids: obs_list.map(&:id),
         primary_observation_id: primary.id
       }
     }

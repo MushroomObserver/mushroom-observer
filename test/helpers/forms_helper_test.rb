@@ -39,4 +39,153 @@ class FormsHelperTest < ActionView::TestCase
     assert_includes(html, "change-&gt;file-input#validate",
                     "Should trigger validation on change")
   end
+
+  # Regression: label `for=` must match the id Rails' `radio_button`
+  # generates. Rails' internal `sanitized_value` lowercases the value,
+  # replaces whitespace with underscores, and strips other non-word
+  # chars; values like "Hello World" or symbols with special chars
+  # would otherwise produce a `for=` that doesn't match the input id.
+  def test_radio_with_label_for_attr_matches_sanitized_radio_button_id
+    form = ActionView::Helpers::FormBuilder.new(
+      :widget, nil, self, {}
+    )
+
+    # Mixed-case value with whitespace — exercises the sanitization
+    html = radio_with_label(
+      form: form, field: :flavor, value: "Hello World", label: "Pick one"
+    )
+
+    # Rails sanitizes "Hello World" → "hello_world" for the input id;
+    # our label `for=` uses `parameterize(separator: "_")` to match.
+    assert_match(/type="radio"[^>]+id="widget_flavor_hello_world"/, html,
+                 "Radio input id should be Rails-sanitized form of value")
+    assert_match(/<label[^>]+for="widget_flavor_hello_world"/, html,
+                 "Label `for=` must match the radio input's sanitized id")
+  end
+
+  # Simpler symbol-value case — the common pattern in MO callers
+  # (e.g. :txt, :rtf, :csv from species_lists/downloads).
+  def test_radio_with_label_for_attr_with_symbol_value
+    form = ActionView::Helpers::FormBuilder.new(
+      :report, nil, self, {}
+    )
+
+    html = radio_with_label(
+      form: form, field: :type, value: :txt, label: "Plain Text"
+    )
+
+    assert_match(/type="radio"[^>]+id="report_type_txt"/, html)
+    assert_match(/<label[^>]+for="report_type_txt"/, html)
+  end
+
+  # Regression: number_field_with_label uses the flex `text_label_row`
+  # so a help-button / between / label_end ride next to the label,
+  # matching `text_field_with_label`.
+  # `between:` content rides next to the label inside a wrap div, but
+  # the wrap is `<div>` (not `<div class="d-flex justify-content-between">`)
+  # when there's no `label_end:` — flex-between is meaningless without a
+  # right-side counterpart. See the matching `text_label_row` branch.
+  def test_number_field_with_label_uses_label_row
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = number_field_with_label(
+      form: form, field: :layout_count, label: "Layout count",
+      between: "(per page)"
+    )
+
+    assert_no_match(/<div class="d-flex justify-content-between">/, html)
+    assert_match(%r{<label[^>]+>Layout count</label>}, html)
+    assert_includes(html, "(per page)")
+  end
+
+  def test_number_field_with_label_defaults_min_to_1
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = number_field_with_label(
+      form: form, field: :layout_count, label: "Layout count"
+    )
+
+    # Attribute order is Rails-dependent; assert both attrs present on
+    # the same input tag without pinning their order.
+    assert_match(/<input[^>]+min="1"/, html)
+    assert_match(/<input[^>]+type="number"/, html)
+  end
+
+  # `between:` only (no `label_end:`) goes inline next to the label
+  # in a plain `<div>` — no d-flex/justify-content-between wrap
+  # (which would orphan the label since there's no right-side content).
+  def test_password_field_with_label_uses_label_row
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = password_field_with_label(
+      form: form, field: :password, label: "Password",
+      between: "(at least 8 chars)"
+    )
+
+    assert_no_match(/<div class="d-flex justify-content-between">/, html)
+    assert_match(%r{<label[^>]+>Password</label>}, html)
+    assert_includes(html, "(at least 8 chars)")
+  end
+
+  # When `label_end:` is present, ERB *does* use d-flex/
+  # justify-content-between to space the label area (left) and
+  # label_end content (right) — the canonical use of the flex wrap.
+  def test_text_label_row_uses_d_flex_when_label_end_present
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = password_field_with_label(
+      form: form, field: :password, label: "Password",
+      label_end: '<a href="#">Forgot?</a>'.html_safe
+    )
+
+    assert_match(/<div class="d-flex justify-content-between">/, html)
+    assert_includes(html, 'href="#"')
+    assert_includes(html, "Forgot?")
+  end
+
+  # `select_with_label`'s `selected:` and `include_blank:` kwargs are
+  # Rails `select`-helper options — they must NOT leak onto the
+  # `<select>` element itself as invalid HTML attributes.
+  def test_select_with_label_does_not_leak_select_helper_opts
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = select_with_label(
+      form: form, field: :locale, label: "Locale",
+      options: [%w[English en], %w[French fr]],
+      selected: "fr", include_blank: true
+    )
+
+    assert_no_match(/<select[^>]+\bselected=/, html,
+                    "selected:` must not leak onto the <select> tag")
+    assert_no_match(/<select[^>]+\binclude_blank=/, html,
+                    "include_blank:` must not leak onto the <select> tag")
+    # But the option for "fr" must still be marked selected, and the
+    # blank option must be present — confirming the kwargs were routed
+    # through select_opts, not stripped wholesale.
+    assert_match(/<option selected="selected" value="fr">French/, html)
+    assert_match(/<option value="" /, html)
+  end
+
+  def test_password_field_with_label_defaults_value_to_empty_string
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = password_field_with_label(
+      form: form, field: :password, label: "Password"
+    )
+
+    assert_match(/<input[^>]+value=""/, html)
+    assert_match(/<input[^>]+type="password"/, html)
+  end
 end

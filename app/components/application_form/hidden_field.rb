@@ -24,11 +24,16 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template
+      # Rails' `hidden_field_tag` defaults `autocomplete="off"` (browsers
+      # otherwise repopulate hidden fields on back-button, which can
+      # break stale-state-sensitive forms). Match that default; let the
+      # caller override via `autocomplete:`.
       input(
         type: "hidden",
         id: @field.dom.id,
         name: @field.dom.name,
         value: @attributes.fetch(:value) { @field.value },
+        autocomplete: "off",
         **@attributes.except(:value)
       )
     end

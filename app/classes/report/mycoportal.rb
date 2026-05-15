@@ -172,26 +172,26 @@ module Report
     # extended data used to calculate some values
     # See app/classes/report/base_table.rb
     def extend_data!(rows)
-      add_collector_ids!(rows, 1)
-      add_herbarium_accession_numbers!(rows, 2)
-      add_sequence_ids!(rows, 3)
-      add_gps_hidden!(rows, 4)
+      add_collector_ids!(rows, :collector_ids)
+      add_herbarium_accession_numbers!(rows, :herbarium_accession_numbers)
+      add_sequence_ids!(rows, :sequence_ids)
+      add_gps_hidden!(rows)
     end
 
     def collector_ids(row)
-      row.val(1)
+      row.val(:collector_ids)
     end
 
     def herbarium_accession_numbers(row)
-      row.val(2)
+      row.val(:herbarium_accession_numbers)
     end
 
     def sequence_ids(row)
-      row.val(3)
+      row.val(:sequence_ids)
     end
 
     def gps_hidden?(row)
-      row.val(4).present?
+      row.val(:gps_hidden_flag).present?
     end
 
     def sort_before(rows)
@@ -278,9 +278,9 @@ module Report
        [box.south, box.east], [box.south, box.west]]
     end
 
-    def add_gps_hidden!(rows, col)
+    def add_gps_hidden!(rows)
       latlng_by_id = gps_hidden_latlng
-      rows.each { |row| set_gps_hidden_vals(row, col, latlng_by_id) }
+      rows.each { |row| set_gps_hidden_vals(row, latlng_by_id) }
     end
 
     def gps_hidden_latlng
@@ -289,12 +289,12 @@ module Report
         to_h { |id, lat, lng| [id, [lat, lng]] }
     end
 
-    def set_gps_hidden_vals(row, col, latlng_by_id)
+    def set_gps_hidden_vals(row, latlng_by_id)
       return unless (latlng = latlng_by_id[row.obs_id])
 
-      row.add_val("1", col)
-      row.add_val(latlng[0]&.round, col + 1)
-      row.add_val(latlng[1]&.round, col + 2)
+      row.add_val("1", :gps_hidden_flag)
+      row.add_val(latlng[0]&.round, :gps_hidden_lat)
+      row.add_val(latlng[1]&.round, :gps_hidden_lng)
     end
 
     def information_withheld(row)
@@ -304,11 +304,11 @@ module Report
     end
 
     def public_lat(row)
-      gps_hidden?(row) ? row.val(5) : row.best_lat
+      gps_hidden?(row) ? row.val(:gps_hidden_lat) : row.best_lat
     end
 
     def public_lng(row)
-      gps_hidden?(row) ? row.val(6) : row.best_lng
+      gps_hidden?(row) ? row.val(:gps_hidden_lng) : row.best_lng
     end
 
     def explode_notes(row)

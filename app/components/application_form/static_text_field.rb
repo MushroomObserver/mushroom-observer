@@ -52,7 +52,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_label(text, _inline)
-      label(class: "mr-3") { text } if text
+      label(for: field.dom.id, class: "mr-3") { text } if text
     end
   end
 end

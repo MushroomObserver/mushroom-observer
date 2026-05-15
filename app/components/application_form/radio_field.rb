@@ -24,7 +24,13 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   proxy = FieldProxy.new("chosen_name", :name_id)
   #   RadioField.new(proxy, [1, "Opt 1"], [2, "Opt 2"])
   class RadioField < Phlex::HTML
+    include Phlex::Slotable
     include Components::TrustedHtml
+
+    slot :between
+    slot :append
+
+    public :between_slot, :append_slot
 
     attr_reader :wrapper_options, :field, :attributes
 
@@ -40,6 +46,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(radios_component) do |choice|
         render_choice(choice)
       end
+      # `append_slot` content is emitted once, *after* the entire radio
+      # group. Differs from ERB `radio_with_label`'s per-option `append:`
+      # because the Phlex helper is per-group (one call renders every
+      # option) — append-after-each isn't a coherent concept here.
+      render(append_slot) if append_slot
     end
 
     private
@@ -53,7 +64,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_choice(choice)
       value_str = choice.value.to_s
       div(class: radio_class) do
-        label do
+        label(for: option_input_id(value_str)) do
           # Stringify value so Phlex doesn't dasherize symbols
           # (e.g. `:mycoportal_image_list` → `"mycoportal-image-list"`).
           # Use a value-derived index so the rendered id is value-based
@@ -71,12 +82,28 @@ class Components::ApplicationForm < Superform::Rails::Form
                  ))
           whitespace
           trusted_html(choice.text)
+          render_between_slot
         end
       end
     end
 
+    # `between` content is rendered after the label text inside each
+    # option's `<label>`, wrapped in `<div class="d-inline-block ml-3">`
+    # — matching ERB `radio_with_label`'s `between:` shape. Applied
+    # uniformly to every option (one slot per RadioField call). For
+    # per-option metadata, supply different content per call site.
+    def render_between_slot
+      return unless between_slot
+
+      div(class: "d-inline-block ml-3") { render(between_slot) }
+    end
+
     def index_for(value_str)
       value_str.parameterize(separator: "_")
+    end
+
+    def option_input_id(value_str)
+      "#{@field.dom.id}_#{index_for(value_str)}"
     end
 
     def option_checked?(value_str)

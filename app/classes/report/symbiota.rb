@@ -67,10 +67,11 @@ module Report
     end
 
     def collector_and_number(row)
-      if row.val(2).blank?
+      collectors = row.val(:collector_ids)
+      if collectors.blank?
         [row.user_name_or_login, "MUOB #{row.obs_id}"]
       else
-        row.val(2).split("\n").min_by(&:to_i).split("\t")[1..2]
+        collectors.split("\n").min_by(&:to_i).split("\t")[1..2]
       end
     end
 
@@ -101,7 +102,7 @@ module Report
     end
 
     def image_urls(row)
-      row.val(1).to_s.split(", ").sort_by(&:to_i).
+      row.val(:image_ids).to_s.split(", ").sort_by(&:to_i).
         map { |id| image_url(id) }.join(" ")
     end
 
@@ -115,7 +116,7 @@ module Report
     def disposition(row)
       return nil unless row.obs_specimen
 
-      str = row.val(3).to_s.split("\n").map do |val|
+      str = row.val(:herbarium_accession_numbers).to_s.split("\n").map do |val|
         # ignore accession number because our data is garbage
         val.split("\t").first
       end.join("; ")
@@ -129,9 +130,9 @@ module Report
     end
 
     def extend_data!(rows)
-      add_image_ids!(rows, 1)
-      add_collector_ids!(rows, 2)
-      add_herbarium_accession_numbers!(rows, 3)
+      add_image_ids!(rows, :image_ids)
+      add_collector_ids!(rows, :collector_ids)
+      add_herbarium_accession_numbers!(rows, :herbarium_accession_numbers)
     end
   end
 end
