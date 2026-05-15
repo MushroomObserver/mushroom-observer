@@ -11,7 +11,9 @@ class ImportedSourceBannerTest < ComponentTestCase
     selector = "a[href*='inaturalist.org/observations/']" \
                "[target='_blank'][rel='noopener noreferrer']"
     assert_html(html, selector)
-    assert_match(/Imported from iNaturalist/, html)
+    # Link text includes the external (iNat) id so users can see / search
+    # for the specific record on the source platform.
+    assert_match(/Imported from iNaturalist #{obs.external_id}/, html)
     # (?) help link to article 39, on-site, NOT a new tab.
     assert_html(html, "a[href='/articles/39']")
     assert_html(html, "span.glyphicon.glyphicon-question-sign")
@@ -27,7 +29,7 @@ class ImportedSourceBannerTest < ComponentTestCase
     html = render(Components::ImportedSourceBanner.new(observation: obs))
 
     assert_html(html, "div.imported-source-banner")
-    assert_match(/Imported from BlankSource/, html)
+    assert_match(/Imported from BlankSource #{obs.external_id}/, html)
     assert_no_match(/<a[^>]*target="_blank"/, html,
                     "Should not render a target=_blank link without a URL")
     # Help link still appears.
