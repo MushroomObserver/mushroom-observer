@@ -36,6 +36,10 @@ class Components::FormNotes < Components::Base
   # rendered in the panel's collapse target. ObservationForm uses this
   # in single-part mode to add the prose "what to put in notes" copy
   # on top of the textile help.
+  #
+  # Pass a Proc when the override emits Phlex DSL (e.g. `p { ... }`)
+  # so rendering is deferred to the right buffer. Passing a plain
+  # String/SafeBuffer also works for static content.
   prop :help_content, _Nilable(_Any), default: nil
 
   def view_template
@@ -71,7 +75,7 @@ class Components::FormNotes < Components::Base
       # Collapse target lives in the body; the trigger in the heading
       # opens it via `target_id`. They don't have to be adjacent.
       CollapseHelpBlock(target_id: help_target_id) do
-        help_block_content
+        render_help_block_content
       end
       div(class: @indent) do
         @form.namespace(:notes) do |notes_ns|
@@ -81,11 +85,18 @@ class Components::FormNotes < Components::Base
     end
   end
 
-  # Default to bare textile help; callers (currently single-part-mode
-  # observation) can supply richer copy that also explains what to put
-  # in the notes field.
-  def help_block_content
-    @help_content || :shared_textile_help.l
+  # Help-block content has three input shapes:
+  #   - nil → default `:shared_textile_help.l` text
+  #   - Proc → instance_exec in FormNotes context so any Phlex DSL
+  #     inside (e.g. `p { ... }`) emits to the collapse-block buffer
+  #     at render time, not at panel-build time
+  #   - String / SafeBuffer → emit as-is
+  def render_help_block_content
+    case @help_content
+    when nil  then plain(:shared_textile_help.l)
+    when Proc then instance_exec(&@help_content)
+    else           plain(@help_content)
+    end
   end
 
   # Derive the collapse target id from `panel_id` so multiple notes

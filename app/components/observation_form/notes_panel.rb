@@ -49,11 +49,17 @@ class Components::ObservationForm < Components::ApplicationForm
         model.notes.present?
     end
 
+    # Deferred Proc — `FormNotes` runs this in its own render context
+    # so the `<p>` tags emit to the collapse-block buffer. Returning
+    # an eager `[p {...}, p {...}].safe_join` would side-effect emit
+    # to the form buffer at panel-build time instead, placing the
+    # help paragraphs above the notes panel (a real bug; spotted by
+    # visual review of the rendered observation form).
     def observation_notes_help
-      [
-        p { :form_observations_notes_help.t },
+      proc do
+        p { :form_observations_notes_help.t }
         p { :shared_textile_help.l }
-      ].safe_join
+      end
     end
   end
 end
