@@ -81,6 +81,10 @@ class FormsHelperTest < ActionView::TestCase
   # Regression: number_field_with_label uses the flex `text_label_row`
   # so a help-button / between / label_end ride next to the label,
   # matching `text_field_with_label`.
+  # `between:` content rides next to the label inside a wrap div, but
+  # the wrap is `<div>` (not `<div class="d-flex justify-content-between">`)
+  # when there's no `label_end:` — flex-between is meaningless without a
+  # right-side counterpart. See the matching `text_label_row` branch.
   def test_number_field_with_label_uses_label_row
     form = ActionView::Helpers::FormBuilder.new(
       :user, nil, self, {}
@@ -91,7 +95,7 @@ class FormsHelperTest < ActionView::TestCase
       between: "(per page)"
     )
 
-    assert_match(/<div class="d-flex justify-content-between">/, html)
+    assert_no_match(/<div class="d-flex justify-content-between">/, html)
     assert_match(%r{<label[^>]+>Layout count</label>}, html)
     assert_includes(html, "(per page)")
   end
@@ -111,8 +115,9 @@ class FormsHelperTest < ActionView::TestCase
     assert_match(/<input[^>]+type="number"/, html)
   end
 
-  # Regression: password_field_with_label uses the flex `text_label_row`
-  # so a help-button / between / label_end ride next to the label.
+  # `between:` only (no `label_end:`) goes inline next to the label
+  # in a plain `<div>` — no d-flex/justify-content-between wrap
+  # (which would orphan the label since there's no right-side content).
   def test_password_field_with_label_uses_label_row
     form = ActionView::Helpers::FormBuilder.new(
       :user, nil, self, {}
@@ -123,9 +128,52 @@ class FormsHelperTest < ActionView::TestCase
       between: "(at least 8 chars)"
     )
 
-    assert_match(/<div class="d-flex justify-content-between">/, html)
+    assert_no_match(/<div class="d-flex justify-content-between">/, html)
     assert_match(%r{<label[^>]+>Password</label>}, html)
     assert_includes(html, "(at least 8 chars)")
+  end
+
+  # When `label_end:` is present, ERB *does* use d-flex/
+  # justify-content-between to space the label area (left) and
+  # label_end content (right) — the canonical use of the flex wrap.
+  def test_text_label_row_uses_d_flex_when_label_end_present
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = password_field_with_label(
+      form: form, field: :password, label: "Password",
+      label_end: '<a href="#">Forgot?</a>'.html_safe
+    )
+
+    assert_match(/<div class="d-flex justify-content-between">/, html)
+    assert_includes(html, 'href="#"')
+    assert_includes(html, "Forgot?")
+  end
+
+  # `select_with_label`'s `selected:` and `include_blank:` kwargs are
+  # Rails `select`-helper options — they must NOT leak onto the
+  # `<select>` element itself as invalid HTML attributes.
+  def test_select_with_label_does_not_leak_select_helper_opts
+    form = ActionView::Helpers::FormBuilder.new(
+      :user, nil, self, {}
+    )
+
+    html = select_with_label(
+      form: form, field: :locale, label: "Locale",
+      options: [%w[English en], %w[French fr]],
+      selected: "fr", include_blank: true
+    )
+
+    assert_no_match(/<select[^>]+\bselected=/, html,
+                    "selected:` must not leak onto the <select> tag")
+    assert_no_match(/<select[^>]+\binclude_blank=/, html,
+                    "include_blank:` must not leak onto the <select> tag")
+    # But the option for "fr" must still be marked selected, and the
+    # blank option must be present — confirming the kwargs were routed
+    # through select_opts, not stripped wholesale.
+    assert_match(/<option selected="selected" value="fr">French/, html)
+    assert_match(/<option value="" /, html)
   end
 
   def test_password_field_with_label_defaults_value_to_empty_string

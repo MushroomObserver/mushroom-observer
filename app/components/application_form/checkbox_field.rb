@@ -45,8 +45,19 @@ class Components::ApplicationForm < Superform::Rails::Form
         # exactly one cell of a larger group.
         render_boolean_with_wrapper { yield(self) }
       else
-        render_boolean_with_wrapper { super }
+        render_boolean_with_wrapper { render_boolean_inputs }
       end
+    end
+
+    # Replaces the upstream `Superform::Rails::Components::Checkbox`
+    # boolean-mode rendering so the hidden sidecar gets `autocomplete="off"`
+    # (matching Rails' `form.check_box` output — browsers otherwise
+    # repopulate the hidden's "0" on back-button and silently clobber a
+    # checked box).
+    def render_boolean_inputs
+      input(name: field.dom.name, type: :hidden, value: "0",
+            autocomplete: "off")
+      input(type: :checkbox, value: "1", **attributes)
     end
 
     # Render a single array-mode checkbox (name="…[]"). Intended for use

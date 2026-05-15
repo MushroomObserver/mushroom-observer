@@ -244,6 +244,18 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       return args[:form].label(args[:field], args[:label], label_opts)
     end
 
+    # Mirrors Phlex `FieldLabelRow#render_label_row`: if there's no
+    # label_end content, skip the d-flex wrap entirely —
+    # `justify-content-between` is meaningless without a right-side
+    # counterpart. Just emit a plain `<div>` holding the label + extras.
+    if args[:label_end].blank?
+      return tag.div do
+        concat(args[:form].label(args[:field], args[:label], label_opts))
+        concat(args[:between]) if args[:between].present?
+        concat(args[:label_after]) if args[:label_after].present?
+      end
+    end
+
     display = args[:inline] == true ? "d-inline-flex" : "d-flex"
     tag.div(class: "#{display} justify-content-between") do
       concat(tag.div do
@@ -251,9 +263,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
         concat(args[:between]) if args[:between].present?
         concat(args[:label_after]) if args[:label_after].present?
       end)
-      concat(tag.div do
-        concat(args[:label_end]) if args[:label_end].present?
-      end)
+      concat(tag.div { concat(args[:label_end]) })
     end
   end
 
@@ -266,8 +276,12 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     args = check_for_optional_or_required_note(args)
     args = check_for_help_block(args)
 
+    # `:selected` and `:include_blank` are Rails `select`-helper options
+    # (already captured in `select_opts`); strip them so they don't leak
+    # onto the `<select>` element as invalid HTML attributes.
     opts = separate_field_options_from_args(
-      args, [:options, :select_opts, :start_year, :end_year]
+      args, [:options, :select_opts, :start_year, :end_year,
+             :selected, :include_blank]
     )
     opts[:class] = "form-control"
     opts[:class] += " w-auto" if args[:width] == :auto

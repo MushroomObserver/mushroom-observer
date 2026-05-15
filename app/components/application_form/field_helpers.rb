@@ -12,7 +12,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
                        :wrap_data, :between, :button, :button_data,
                        :button_text, :addon, :monospace, :label_class,
-                       :label_data, :label_aria, :label_position].freeze
+                       :label_data, :label_aria, :label_position,
+                       :width].freeze
 
     # Text field with label and Bootstrap form-group wrapper
     # @param field_name [Symbol] the field name
@@ -208,6 +209,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     #   or full raw HTML `name` (String)
     # @param options [Hash] HTML attributes (`value:`, `data:`, etc.)
     def hidden_field(field_name, **options)
+      # Default `autocomplete="off"` to match Rails' `hidden_field` /
+      # `hidden_field_tag` (browsers otherwise repopulate hidden fields
+      # on back-button). Caller can override with `autocomplete:`.
+      options = { autocomplete: "off" }.merge(options)
       if field_name.is_a?(String)
         proxy = FieldProxy.new(nil, field_name, options[:value])
         render(HiddenField.new(proxy, **options))
