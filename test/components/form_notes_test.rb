@@ -36,8 +36,10 @@ class FormNotesTest < ComponentTestCase
     # Help-collapse trigger appears in the panel heading area, not
     # inside the body (no duplicate "Notes:" title beneath the panel
     # heading). The trigger's href/aria-controls point at the help
-    # block whose id derives from panel_id.
-    assert_html(html, "a.info-collapse-trigger[href='#test_notes_help']")
+    # block whose id derives from panel_id, and `ml-2` puts a small
+    # gap between the heading title and the icon.
+    assert_html(html,
+                "a.info-collapse-trigger.ml-2[href='#test_notes_help']")
     assert_no_html(html,
                    "#test_notes_fields a.info-collapse-trigger",
                    "trigger must be in the panel heading, not the body")
@@ -64,21 +66,20 @@ class FormNotesTest < ComponentTestCase
 
   # --- Single-part mode ---
 
-  def test_single_part_mode_renders_one_large_textarea_with_help
+  def test_single_part_mode_renders_one_large_textarea
     html = render(SinglePartFormNotes.new(Observation.new, action: "/t"))
 
-    # No panel-level help trigger in single-part mode — help is
-    # attached to the lone textarea directly via its help slot.
-    # (The textarea's own `with_help` slot may render a field-level
-    # info-collapse-trigger, but no panel-targeting one.)
-    assert_no_html(html, "a.info-collapse-trigger[href='#test_notes_help']")
-    # No panel-level collapse help block either.
-    assert_no_html(html, "div#test_notes_help.collapse")
+    # The help trigger lives in the panel heading (same as multi-part).
+    # Context is clearer with the trigger next to "Notes" than buried
+    # next to the textarea.
+    assert_html(html,
+                "a.info-collapse-trigger.ml-2[href='#test_notes_help']")
+    # The collapse target carries the caller's override content.
+    assert_html(html, "#test_notes_fields div#test_notes_help.collapse")
+    assert_includes(html, "SINGLE_PART_HELP_MARKER")
     # The lone textarea is rows=10.
     assert_html(html,
                 "textarea[name='observation[notes][other]'][rows='10']")
-    # Caller-supplied help block renders via the textarea's help slot.
-    assert_includes(html, "SINGLE_PART_HELP_MARKER")
     # Textarea label exists for screen readers but is visually hidden:
     # the panel heading already says "Notes", so the field's own
     # visible label would be a duplicate.
@@ -142,7 +143,7 @@ class SinglePartFormNotes < Components::ApplicationForm
                panel_id: "test_notes",
                expanded: true,
                single_part_mode: true,
-               single_part_help: "SINGLE_PART_HELP_MARKER".html_safe
+               help_content: "SINGLE_PART_HELP_MARKER".html_safe
              ))
     end
   end

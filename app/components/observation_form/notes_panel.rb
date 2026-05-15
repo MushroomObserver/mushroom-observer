@@ -22,7 +22,7 @@ class Components::ObservationForm < Components::ApplicationForm
         panel_id: "observation_notes",
         expanded: notes_panel_expanded?,
         single_part_mode: single_notes_part?,
-        single_part_help: single_notes_part? ? observation_notes_help : nil
+        help_content: single_notes_part? ? observation_notes_help : nil
       )
     end
 
