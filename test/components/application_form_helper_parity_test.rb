@@ -94,6 +94,46 @@ class ApplicationFormHelperParityTest < ComponentTestCase
     assert_html(html, "div.autocompleter#my_autocompleter_id")
   end
 
+  # --- RadioField: `:append` slot renders after the whole group --------
+
+  def test_radio_field_append_slot_renders_after_last_option
+    html = render(RadioFieldAppendForm.new(Comment.new, action: "/t"))
+
+    # All three radio options must appear, followed by the appended
+    # content — Phlex `RadioField` is per-group, so `append_slot`
+    # lands once after the final `<div class="radio">` wrap.
+    radios = html.scan('<div class="radio">')
+    assert_equal(3, radios.size, "expected 3 radio option wraps")
+
+    # The append marker must come *after* the last radio's closing
+    # </div>, not interleaved with options.
+    last_radio_end = html.rindex("</div>", html.index("after-radios"))
+    assert(last_radio_end,
+           "append content should be emitted after the radio group")
+    assert_html(html, "div.after-radios", text: "after the group")
+  end
+
+  # --- DateField: `:between` slot renders inline with the label --------
+
+  def test_date_field_between_renders_inline_with_label
+    html = render(DateFieldBetweenForm.new(Comment.new, action: "/t"))
+
+    # `between:` should appear inside the label row, not in a separate
+    # row or as a sibling of the date selects. FieldLabelRow handles
+    # this for DateField via `wrapper_options[:between]`.
+    assert_includes(html, "(picker note)")
+
+    # The between content must come BEFORE the date-selects div —
+    # confirming it's part of the label row, not appended after.
+    between_pos = html.index("(picker note)")
+    selects_pos = html.index("date-selects")
+    assert(between_pos && selects_pos,
+           "both between content and date-selects should be present")
+    assert(between_pos < selects_pos,
+           "between content must render in the label row " \
+           "(before the date-selects)")
+  end
+
   # --- AutocompleterField: no d-flex when label_end is empty -------------
 
   def test_autocompleter_field_no_d_flex_when_no_create_text
@@ -158,6 +198,24 @@ class SelectFieldNoWidthForm < Components::ApplicationForm
   def view_template
     super do
       select_field(:summary, [%w[a A], %w[b B]], label: "S:")
+    end
+  end
+end
+
+class RadioFieldAppendForm < Components::ApplicationForm
+  def view_template
+    super do
+      radio_field(:summary, [1, "One"], [2, "Two"], [3, "Three"]) do |f|
+        f.with_append { div(class: "after-radios") { "after the group" } }
+      end
+    end
+  end
+end
+
+class DateFieldBetweenForm < Components::ApplicationForm
+  def view_template
+    super do
+      date_field(:created_at, label: "When:", between: "(picker note)")
     end
   end
 end

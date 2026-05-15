@@ -104,11 +104,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      render(field(field_name).radio(
-               *choices,
-               wrapper_options: wrapper_opts,
-               **field_opts
-             ))
+      field_component = field(field_name).radio(
+        *choices,
+        wrapper_options: wrapper_opts,
+        **field_opts
+      )
+
+      yield(field_component) if block_given?
+
+      render(field_component)
     end
 
     # Select field with label and Bootstrap form-group wrapper
