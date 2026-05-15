@@ -28,8 +28,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Components::TrustedHtml
 
     slot :between
+    slot :append
 
-    public :between_slot
+    public :between_slot, :append_slot
 
     attr_reader :wrapper_options, :field, :attributes
 
@@ -45,6 +46,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(radios_component) do |choice|
         render_choice(choice)
       end
+      # `append_slot` content is emitted once, *after* the entire radio
+      # group. Differs from ERB `radio_with_label`'s per-option `append:`
+      # because the Phlex helper is per-group (one call renders every
+      # option) — append-after-each isn't a coherent concept here.
+      render(append_slot) if append_slot
     end
 
     private

@@ -74,7 +74,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def select_classes
-      class_names(attributes[:class], "form-control")
+      # `width: :auto` adds Bootstrap's `w-auto` so the select shrinks
+      # to its content width instead of filling the form-group.
+      # Matches ERB `select_with_label`'s `width: :auto` branch.
+      base = ["form-control"]
+      base << "w-auto" if wrapper_options[:width] == :auto
+      class_names(attributes[:class], *base)
     end
 
     def render_with_wrapper

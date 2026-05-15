@@ -12,7 +12,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
                        :wrap_data, :between, :button, :button_data,
                        :button_text, :addon, :monospace, :label_class,
-                       :label_data, :label_aria, :label_position].freeze
+                       :label_data, :label_aria, :label_position,
+                       :width].freeze
 
     # Text field with label and Bootstrap form-group wrapper
     # @param field_name [Symbol] the field name
@@ -103,11 +104,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      render(field(field_name).radio(
-               *choices,
-               wrapper_options: wrapper_opts,
-               **field_opts
-             ))
+      field_component = field(field_name).radio(
+        *choices,
+        wrapper_options: wrapper_opts,
+        **field_opts
+      )
+
+      yield(field_component) if block_given?
+
+      render(field_component)
     end
 
     # Select field with label and Bootstrap form-group wrapper
@@ -208,6 +213,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     #   or full raw HTML `name` (String)
     # @param options [Hash] HTML attributes (`value:`, `data:`, etc.)
     def hidden_field(field_name, **options)
+      # Default `autocomplete="off"` to match Rails' `hidden_field` /
+      # `hidden_field_tag` (browsers otherwise repopulate hidden fields
+      # on back-button). Caller can override with `autocomplete:`.
+      options = { autocomplete: "off" }.merge(options)
       if field_name.is_a?(String)
         proxy = FieldProxy.new(nil, field_name, options[:value])
         render(HiddenField.new(proxy, **options))

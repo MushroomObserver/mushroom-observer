@@ -56,14 +56,18 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def form_group_class(wrap_class)
       classes = "form-group"
+      classes += " form-inline" if wrapper_options[:inline]
       classes += " #{wrap_class}" if wrap_class.present?
       classes
     end
 
     def render_date_selects
       # Wrapper carries the form-field id so a `<label for="…">` click
-      # focuses the day select first.
-      div(class: "form-inline date-selects", id: field_id) do
+      # focuses the day select first. `d-inline-block` keeps the
+      # selects on the same line as the label when `inline: true`.
+      classes = "form-inline date-selects"
+      classes += " d-inline-block" if wrapper_options[:inline]
+      div(class: classes, id: field_id) do
         render_day_select
         render_month_select
         render_year_input
