@@ -953,61 +953,61 @@ class ReportTest < UnitTestCase
   end
 
   def test_rounding_of_latitudes_etc
-    row = Report::Row.new(vals = [])
-    vals[2] = 1.20456
+    row = Report::Row.new("obs_lat" => 1.20456)
     assert_equal(1.2, row.obs_lat(2))
     assert_equal(1.205, row.obs_lat(3))
     assert_equal(1.2046, row.obs_lat(4))
-    vals[2] = -123.00045
+    row = Report::Row.new("obs_lat" => -123.00045)
     assert_equal(-123, row.obs_lat(3))
     assert_equal(-123.0005, row.obs_lat(4))
     assert_equal(-123.00045, row.obs_lat(5))
-    vals[4] = 123.4999
-    assert_equal(123, row.obs_alt)
-    vals[4] = -123.5000
-    assert_equal(-124, row.obs_alt)
+    assert_equal(123, Report::Row.new("obs_alt" => 123.4999).obs_alt)
+    assert_equal(-124, Report::Row.new("obs_alt" => -123.5).obs_alt)
   end
 
   def test_cleaning_of_notes
-    row = Report::Row.new(vals = [])
-    vals[9] = { Observation.other_notes_key => " abc  def " }.to_yaml
+    notes = { Observation.other_notes_key => " abc  def " }.to_yaml
+    row = Report::Row.new("obs_notes" => notes)
     assert_equal("abc  def", row.obs_notes)
   end
 
   def test_split_date
-    row = Report::Row.new(vals = [])
-    vals[1] = "2017-01-03"
+    row = Report::Row.new("obs_when" => "2017-01-03")
     assert_equal("2017", row.year)
     assert_equal("1", row.month)
     assert_equal("3", row.day)
   end
 
   def test_loc_name_sci
-    row = Report::Row.new(vals = [])
-    vals[19] = "Park, Random, Some, Alameda Co., California, USA"
+    row = Report::Row.new(
+      "loc_name" => "Park, Random, Some, Alameda Co., California, USA"
+    )
     assert_equal("USA, California, Alameda Co., Some, Random, Park",
                  row.loc_name_sci)
   end
 
   def test_split_location
-    row = Report::Row.new(vals = [])
-    vals[19] = "Park, Random, Some, Alameda Co., California, USA"
+    row = Report::Row.new(
+      "loc_name" => "Park, Random, Some, Alameda Co., California, USA"
+    )
     assert_equal("USA", row.country)
     assert_equal("California", row.state)
     assert_equal("Alameda", row.county)
     assert_equal("Some, Random, Park", row.locality)
     assert_equal("Alameda Co., Some, Random, Park", row.locality_with_county)
 
-    row = Report::Row.new(vals = [])
-    vals[19] = "Big Branch, Saint Tammany Parish, Louisiana, USA"
+    row = Report::Row.new(
+      "loc_name" => "Big Branch, Saint Tammany Parish, Louisiana, USA"
+    )
     assert_equal("USA", row.country)
     assert_equal("Louisiana", row.state)
     assert_equal("Saint Tammany", row.county)
     assert_equal("Big Branch", row.locality)
     assert_equal("Saint Tammany Parish, Big Branch", row.locality_with_county)
 
-    row = Report::Row.new(vals = [])
-    vals[19] = "Central Park, Los Angeles, California, USA"
+    row = Report::Row.new(
+      "loc_name" => "Central Park, Los Angeles, California, USA"
+    )
     assert_equal("USA", row.country)
     assert_equal("California", row.state)
     assert_nil(row.county)
@@ -1095,77 +1095,51 @@ class ReportTest < UnitTestCase
     assert_equal(obs.lng.to_s, table[idx + 1][LONG_INDEX])
   end
 
-  # Test column validation for parallel testing race conditions
-  def test_row_detects_notes_column_misalignment
-    # Simulate misaligned columns where notes is Time instead of String/Hash
-    misaligned_vals = Array.new(26)
-    misaligned_vals[0] = 123 # obs_id
-    misaligned_vals[9] = Time.current # Should be notes (String/Hash), not Time
-
-    error = assert_raises(RuntimeError) do
-      Report::Row.new(misaligned_vals)
-    end
-
-    assert_match(/Column misalignment detected/, error.message)
-    assert_match(/Expected @vals\[9\] \(notes\)/, error.message)
-    assert_match(%r{to be String/Hash}, error.message)
-  end
-
-  def test_row_detects_updated_at_column_misalignment
-    # Simulate misaligned columns where updated_at is Hash instead of Time
-    misaligned_vals = Array.new(26)
-    misaligned_vals[0] = 123 # obs_id
-    misaligned_vals[10] = { foo: "bar" } # Should be Time, not Hash
-
-    error = assert_raises(RuntimeError) do
-      Report::Row.new(misaligned_vals)
-    end
-
-    assert_match(/Column misalignment detected/, error.message)
-    assert_match(/Expected @vals\[10\] \(updated_at\)/, error.message)
-    assert_match(%r{to be Time/DateTime/String}, error.message)
-  end
-
-  def test_row_detects_name_text_name_column_misalignment
-    # Simulate misaligned columns where name_text_name is numeric
-    misaligned_vals = Array.new(26)
-    misaligned_vals[0] = 123 # obs_id
-    misaligned_vals[15] = 456 # Should be String, not Numeric
-
-    error = assert_raises(RuntimeError) do
-      Report::Row.new(misaligned_vals)
-    end
-
-    assert_match(/Column misalignment detected/, error.message)
-    assert_match(/Expected @vals\[15\] \(name_text_name\)/, error.message)
-    assert_match(/to be String/, error.message)
-  end
-
-  def test_notes_to_hash_handles_time_gracefully
-    # Simulate a case where column misalignment wasn't caught
-    # and notes_to_hash gets a Time object
-    row = Report::Row.allocate # Skip initialize validation
-    row.instance_variable_set(:@vals, Array.new(26))
-    row.instance_variable_get(:@vals)[9] = Time.current
-
-    # Should return empty hash instead of crashing
-    result = row.send(:notes_to_hash)
-    assert_equal({}, result)
-  end
-
+  # Notes hash short-circuit (no YAML parse needed when already a Hash).
   def test_notes_to_hash_handles_hash_correctly
-    row = Report::Row.allocate # Skip initialize validation
-    row.instance_variable_set(:@vals, Array.new(26))
-    row.instance_variable_get(:@vals)[9] = { foo: "bar" }
-
-    result = row.send(:notes_to_hash)
-    assert_equal({ foo: "bar" }, result)
+    row = Report::Row.new("obs_notes" => { foo: "bar" })
+    assert_equal({ foo: "bar" }, row.send(:notes_to_hash))
   end
 
-  def test_export_formatted_handles_time_gracefully
-    # Should return empty string instead of crashing
-    result = Observation.export_formatted(Time.current)
-    assert_equal("", result)
+  # Defensive: assert that every row produced by an actual report
+  # query contains every BASE_KEYS column. Under the old positional
+  # scheme the same failure mode showed up as misalignment; under
+  # the named-hash scheme it would silently degrade to nil values.
+  # BaseTable#verify_row_keys! raises loudly if any column is
+  # missing; this test exercises that path against several real
+  # report shapes and ensures the only nils in obs-level columns
+  # are ones we genuinely expect to be nil per the fixture.
+  def test_all_base_columns_present_after_select_all
+    report_classes = [
+      Report::Raw, Report::Mycoportal, Report::Fundis, Report::Symbiota
+    ]
+    report_classes.each do |klass|
+      query = Query.lookup_and_save(:Observation)
+      report = klass.new(query: query)
+      raw_rows = report.send(:all_rows)
+      assert(raw_rows.any?, "#{klass} all_rows returned no data; " \
+                            "test would not exercise key check")
+      raw_rows.each do |raw|
+        keys = raw.keys.map(&:to_s)
+        missing = Report::Row::BASE_KEYS - keys
+        assert_empty(missing,
+                     "#{klass} row missing expected columns: " \
+                     "#{missing.inspect}. Got keys: #{keys.inspect}.")
+      end
+    end
+  end
+
+  # Direct sanity check of BaseTable's defensive guard: it should
+  # raise if a raw row is missing any BASE_KEYS entry.
+  def test_verify_row_keys_raises_on_missing_column
+    query = Query.lookup_and_save(:Observation)
+    report = Report::Raw.new(query: query)
+    incomplete = { "obs_id" => 1 } # missing everything else
+
+    error = assert_raises(RuntimeError) do
+      report.send(:verify_row_keys!, incomplete)
+    end
+    assert_match(/missing expected columns/, error.message)
   end
 
   def test_export_formatted_handles_hash_correctly
@@ -1231,10 +1205,9 @@ class ReportTest < UnitTestCase
   end
 
   def do_split_test(name, author, rank, expect)
-    row = Report::Row.new(vals = [])
-    vals[15] = name
-    vals[16] = author
-    vals[17] = Name.ranks[rank]
+    row = Report::Row.new("name_text_name" => name,
+                          "name_author" => author,
+                          "name_rank" => Name.ranks[rank])
     assert_equal(expect[:genus].to_s, row.genus.to_s)
     assert_equal(expect[:species].to_s, row.species.to_s)
     assert_equal(expect[:subspecies].to_s, row.subspecies.to_s)
