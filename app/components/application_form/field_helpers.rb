@@ -165,6 +165,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
+      # Match ERB `password_field_with_label`: default the input value
+      # to "" (prevents Rails from filling the field with the model's
+      # stored password hash when the form re-renders after a
+      # validation error).
+      field_opts[:value] = "" unless field_opts.key?(:value)
+
       field_component = field(field_name).text(
         wrapper_options: wrapper_opts,
         type: "password",
@@ -220,6 +226,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
+
+      # Match ERB `number_field_with_label`: default `min: 1`. Callers
+      # who want a different minimum pass `min: <n>` explicitly; `min:
+      # nil` opts out.
+      field_opts[:min] = 1 unless field_opts.key?(:min)
 
       field_component = field(field_name).text(
         wrapper_options: wrapper_opts,

@@ -389,7 +389,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     "#{prefix}[#{args[:field]}(#{suffix})]"
   end
 
-  # Bootstrap number_field
+  # Bootstrap number_field. Uses `text_label_row` so a help-button /
+  # between / label_end can ride next to the label like `text_field_with_label`.
   def number_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_help_block(args)
@@ -398,14 +399,17 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     opts[:min] ||= 1
 
     wrap_class = form_group_wrap_class(args)
+    label_opts = field_label_opts(args)
 
     tag.div(class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(text_label_row(args, label_opts))
       concat(args[:form].number_field(args[:field], opts))
     end
   end
 
-  # Bootstrap password_field
+  # Bootstrap password_field. Uses `text_label_row` so a help-button /
+  # between / label_end can ride next to the label like
+  # `text_field_with_label`.
   def password_field_with_label(**args)
     args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
@@ -413,9 +417,10 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     opts[:value] ||= ""
 
     wrap_class = form_group_wrap_class(args)
+    label_opts = field_label_opts(args)
 
     tag.div(class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(text_label_row(args, label_opts))
       concat(args[:form].password_field(args[:field], opts))
     end
   end

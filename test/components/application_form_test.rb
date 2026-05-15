@@ -273,6 +273,26 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, 'type="password"')
   end
 
+  # Regression: Phlex password_field defaults `value: ""` to prevent
+  # Rails from re-populating the field with the stored password hash
+  # on form re-render. Matches ERB password_field_with_label.
+  def test_password_field_defaults_value_to_empty_string
+    form = render_form do
+      password_field(:password, label: "Password")
+    end
+
+    assert_html(form, "input[type='password'][value='']")
+  end
+
+  # Regression: explicit `value:` override is respected.
+  def test_password_field_explicit_value_overrides_default
+    form = render_form do
+      password_field(:password, label: "Password", value: "stored-hash")
+    end
+
+    assert_html(form, "input[type='password'][value='stored-hash']")
+  end
+
   # Hidden field tests
   def test_hidden_field_renders_without_wrapper
     form = render_form do
@@ -294,6 +314,25 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, "Count")
     assert_includes(form, "form-control")
     assert_includes(form, 'type="number"')
+  end
+
+  # Regression: Phlex number_field defaults `min: 1`. Matches ERB
+  # number_field_with_label's `opts[:min] ||= 1`.
+  def test_number_field_defaults_min_to_1
+    form = render_form do
+      number_field(:count, label: "Count")
+    end
+
+    assert_html(form, "input[type='number'][min='1']")
+  end
+
+  # Regression: explicit `min:` override is respected.
+  def test_number_field_explicit_min_overrides_default
+    form = render_form do
+      number_field(:count, label: "Count", min: 0)
+    end
+
+    assert_html(form, "input[type='number'][min='0']")
   end
 
   # Test select with custom options block - renders component directly
