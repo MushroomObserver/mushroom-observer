@@ -36,6 +36,18 @@ class ImportedSourceBannerTest < ComponentTestCase
     assert_html(html, "a[href='/articles/39']")
   end
 
+  def test_renders_without_trailing_id_when_external_id_blank
+    obs = observations(:imported_inat_obs)
+    obs.update!(external_id: nil)
+
+    html = render(Components::ImportedSourceBanner.new(observation: obs))
+
+    assert_html(html, "div.imported-source-banner")
+    # Covers credit_text's no-id branch: text falls back to link[:text]
+    # alone (no trailing space + id).
+    assert_match(%r{Imported from iNaturalist</a>}, html)
+  end
+
   def test_renders_nothing_for_non_external_observation
     obs = observations(:detailed_unknown_obs) # source: mo_website
     assert_nil(obs.external_source)
