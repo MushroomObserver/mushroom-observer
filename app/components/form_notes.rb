@@ -90,7 +90,14 @@ class Components::FormNotes < Components::Base
 
   def render_part(notes_ns, part)
     textarea = notes_ns.field(part.key).textarea(
-      wrapper_options: { label: part.label },
+      wrapper_options: {
+        label: part.label,
+        # In single-part mode the panel heading already says "Notes",
+        # so the textarea's visible label would be a duplicate. Hide
+        # it visually but keep the `<label for="…">` association for
+        # screen readers.
+        label_sr_only: @single_part_mode
+      },
       value: part.value,
       rows: row_count
     )

@@ -79,6 +79,14 @@ class FormNotesTest < ComponentTestCase
                 "textarea[name='observation[notes][other]'][rows='10']")
     # Caller-supplied help block renders via the textarea's help slot.
     assert_includes(html, "SINGLE_PART_HELP_MARKER")
+    # Textarea label exists for screen readers but is visually hidden:
+    # the panel heading already says "Notes", so the field's own
+    # visible label would be a duplicate.
+    assert_html(html,
+                "label.sr-only[for='observation_notes_other']")
+    assert_no_html(html,
+                   "label.mr-3[for='observation_notes_other']",
+                   "single-part textarea label must be sr-only, not mr-3")
   end
 end
 

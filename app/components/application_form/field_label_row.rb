@@ -19,7 +19,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       elsif label_extras_present?
         render_label_with_help(label_text)
       else
-        label(for: field.dom.id, class: "mr-3") do
+        label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)
         end
       end
@@ -40,6 +40,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       has_between || has_help
     end
 
+    # `wrapper_options[:label_sr_only] == true` hides the label
+    # visually (Bootstrap's `sr-only`) but keeps the `<label for="…">`
+    # association for screen readers. Use when the field's visible
+    # label would be redundant — e.g. when a panel heading already
+    # names the only field in the panel.
+    def label_class
+      wrapper_options[:label_sr_only] ? "sr-only" : "mr-3"
+    end
+
     def render_label_flex_row(label_text, inline)
       display = inline ? "d-inline-flex" : "d-flex"
       div(class: "#{display} justify-content-between") do
@@ -50,7 +59,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_label_with_help(label_text)
       div do
-        label(for: field.dom.id, class: "mr-3") do
+        label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)
         end
         render_help_in_label_row
