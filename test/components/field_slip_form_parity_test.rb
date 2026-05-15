@@ -13,41 +13,12 @@ require "test_helper"
 # ERB had. Delete this file (and the `*_old.html.erb` snapshots)
 # once the Phlex form ships.
 #
-# === TODO before this test is useful ===
-#
-# `assert_html_element_equivalent` (added in #4246) is currently
-# strict about full-subtree equivalence, which falsely flags MO's
-# Phlex `TextField` against MO's ERB `text_field_with_label`:
-#
-#   - The Phlex `FieldLabelRow` module short-circuits to a plain
-#     `<label class="mr-3">…</label>` when `simple_label?` is true
-#     (no `help:`, `between:`, or `label_end` slot). This is
-#     intentional leanness.
-#   - The ERB helper *always* wraps the label in
-#     `<div class="d-flex justify-content-between">
-#        <div><label/></div>
-#        <div></div>           <!-- empty when no help icon -->
-#      </div>`
-#     even when the right-hand `<div>` is empty.
-#
-# So when a Phlex form field has no help/between/label_end, the
-# ERB version emits an empty `<div></div>` of dead scaffolding that
-# the Phlex version (correctly) omits. The parity test should
-# tolerate that *specific* empty-label-row shape, but NOT tolerate
-# missing markup when the label row carries real UI (help icon,
-# autocompleter feedback icon, etc.) — those affordances must
-# round-trip exactly.
-#
-# Suggested fix (next session): teach this test (or extend
-# `assert_html_element_equivalent` with an opt-in) to normalize the
-# "empty label-row wrapper" before comparison, e.g. collapse a
-# `<div class="d-flex justify-content-between">
-#    <div><label.../></div>
-#    <div></div>
-#  </div>`
-# into a bare `<label.../>` on whichever side has the wrapper. Then
-# any non-empty `<div>` content inside the row will fail the
-# comparison (which is exactly what we want).
+# Mode selection differs between ERB and Phlex:
+#   - ERB reads `controller.action_name` (stubbed below).
+#   - Phlex derives from `model.new_record?` (MO convention; cf.
+#     `description_form.rb`). So "new" mode is tested with an
+#     unsaved `FieldSlip.new` carrying the fixture's attributes,
+#     and "edit" mode with the saved fixture itself.
 class FieldSlipFormParityTest < ComponentTestCase
   def setup
     super
@@ -72,8 +43,8 @@ class FieldSlipFormParityTest < ComponentTestCase
   # the id mismatch doesn't drown out the meaningful diffs.
 
   def test_new_with_recent_obs_left_column
-    erb = render_erb(action: "new")
-    phlex = render_phlex(action: "new")
+    erb = render_erb(action: "new", field_slip: new_field_slip_like_fixture)
+    phlex = render_phlex(field_slip: new_field_slip_like_fixture)
     assert_html_element_equivalent(erb, phlex,
                                    selector: "div.col-md-6",
                                    label: "new-with-recent / left col")
@@ -83,19 +54,27 @@ class FieldSlipFormParityTest < ComponentTestCase
 
   private
 
-  def render_erb(action:)
+  # Unsaved record carrying the same attribute values as
+  # `field_slips(:field_slip_one)` — for testing the "new" mode parity.
+  # Both ERB (via stubbed `controller.action_name`) and Phlex (via
+  # `model.new_record?`) will render the new layout.
+  def new_field_slip_like_fixture
+    saved = field_slips(:field_slip_one)
+    FieldSlip.new(saved.attributes.except("id", "created_at", "updated_at"))
+  end
+
+  def render_erb(action:, field_slip:)
     stub_action(action)
     @controller.instance_variable_set(:@recent_observations, @recent)
-    @controller.instance_variable_set(:@field_slip, @field_slip)
+    @controller.instance_variable_set(:@field_slip, field_slip)
     @controller.instance_variable_set(:@user, @user)
     view_context.render(partial: "field_slips/form_old",
-                        locals: { field_slip: @field_slip,
+                        locals: { field_slip: field_slip,
                                   species_list: nil })
   end
 
-  def render_phlex(action:)
-    render(Components::FieldSlipForm.new(@field_slip,
-                                         action: action,
+  def render_phlex(field_slip:)
+    render(Components::FieldSlipForm.new(field_slip,
                                          recent_observations: @recent,
                                          user: @user))
   end

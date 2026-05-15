@@ -9,8 +9,7 @@
 # editing form with all field-slip attributes, notes, and (depending
 # on action / context) one of the two observation-matrix sections.
 class Components::FieldSlipForm < Components::ApplicationForm
-  def initialize(model, action:, **options)
-    @action = action
+  def initialize(model, **options)
     @species_list = options.delete(:species_list)
     @recent_observations = options.delete(:recent_observations) || []
     @user = options.delete(:user)
@@ -61,22 +60,25 @@ class Components::FieldSlipForm < Components::ApplicationForm
   def render_main_form
     render_errors if model.errors.any?
     div(class: "col-md-6") do
-      hidden_field("species_list", value: @species_list) if @species_list
+      # Always emit (matching ERB `hidden_field_tag`): the param key
+      # has to exist on submit; an empty value is fine and the form
+      # context (`?species_list=...`) is what carries the actual id.
+      hidden_field("species_list", value: @species_list)
       render_left_column_fields
-      render_submit_quick_create if create_action?
+      render_submit_quick_create if new_record?
       render_notes_panel
-      render_submit_add_images if create_action?
+      render_submit_add_images if new_record?
     end
     render_observations_section
-    render_edit_action_submits if edit_action?
+    render_edit_action_submits unless new_record?
   end
 
-  def create_action?
-    @action == "new"
-  end
-
-  def edit_action?
-    @action == "edit"
+  # MO convention (cf. `description_form.rb`): forms distinguish "new"
+  # vs "edit" rendering via the model's persistence state. Naturally
+  # handles the create/update re-render paths too — validation failure
+  # leaves persistence state unchanged.
+  def new_record?
+    model.new_record?
   end
 
   # --- Errors ---
@@ -191,10 +193,10 @@ class Components::FieldSlipForm < Components::ApplicationForm
   # --- Observation matrix section ---
 
   def render_observations_section
-    if create_action? && @recent_observations.any?
+    if new_record? && @recent_observations.any?
       div(class: "clearfix")
       render_new_action_matrix
-    elsif edit_action?
+    elsif !new_record?
       div(class: "clearfix")
       render_edit_action_matrices
     end
