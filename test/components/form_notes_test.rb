@@ -28,14 +28,23 @@ class FormNotesTest < ComponentTestCase
 
   # --- Multi-part mode ---
 
-  def test_multi_part_renders_general_help_and_one_textarea_per_part
+  def test_multi_part_help_trigger_lives_in_heading_block_in_body
     html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
 
     # Inner notes div derives id from panel_id.
     assert_html(html, "#test_notes_fields")
-    # General-help paragraph (NOTES strong + collapse trigger + textile
-    # help) appears in multi-part mode.
-    assert_html(html, "#test_notes_fields > p strong", text: :NOTES.l)
+    # Help-collapse trigger appears in the panel heading area, not
+    # inside the body (no duplicate "Notes:" title beneath the panel
+    # heading). The trigger's href/aria-controls point at the help
+    # block whose id derives from panel_id.
+    assert_html(html, "a.info-collapse-trigger[href='#test_notes_help']")
+    assert_no_html(html,
+                   "#test_notes_fields a.info-collapse-trigger",
+                   "trigger must be in the panel heading, not the body")
+    assert_no_html(html, "#test_notes_fields > p strong",
+                   "panel body must not repeat the 'Notes:' title")
+    # The collapse help block lives in the body, keyed by the same id.
+    assert_html(html, "#test_notes_fields div#test_notes_help.collapse")
     # One textarea per part, namespaced under `notes`, rows=1.
     assert_html(html,
                 "textarea[name='observation[notes][habitat]'][rows='1']")
@@ -58,8 +67,13 @@ class FormNotesTest < ComponentTestCase
   def test_single_part_mode_renders_one_large_textarea_with_help
     html = render(SinglePartFormNotes.new(Observation.new, action: "/t"))
 
-    # No general-help paragraph in single-part mode.
-    assert_no_html(html, "#test_notes_fields > p strong")
+    # No panel-level help trigger in single-part mode — help is
+    # attached to the lone textarea directly via its help slot.
+    # (The textarea's own `with_help` slot may render a field-level
+    # info-collapse-trigger, but no panel-targeting one.)
+    assert_no_html(html, "a.info-collapse-trigger[href='#test_notes_help']")
+    # No panel-level collapse help block either.
+    assert_no_html(html, "div#test_notes_help.collapse")
     # The lone textarea is rows=10.
     assert_html(html,
                 "textarea[name='observation[notes][other]'][rows='10']")

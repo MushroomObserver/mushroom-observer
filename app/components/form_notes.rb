@@ -38,7 +38,7 @@ class Components::FormNotes < Components::Base
 
   def view_template
     render(panel) do |p|
-      p.with_heading { :NOTES.l }
+      p.with_heading { render_heading }
       p.with_body(collapse: true) { render_notes_inner }
     end
   end
@@ -54,9 +54,26 @@ class Components::FormNotes < Components::Base
     )
   end
 
+  # Heading is just "Notes" + (in multi-part mode) a help-trigger
+  # icon that toggles the collapse block in the body. We don't repeat
+  # the title inside the body — the panel heading already says it.
+  def render_heading
+    plain(:NOTES.l)
+    return if @single_part_mode
+
+    whitespace
+    CollapseInfoTrigger(target_id: help_target_id)
+  end
+
   def render_notes_inner
     div(id: "#{@panel_id}_fields") do
-      render_general_help unless @single_part_mode
+      # Collapse target lives in the body; the trigger in the heading
+      # opens it via `target_id`. They don't have to be adjacent.
+      unless @single_part_mode
+        CollapseHelpBlock(target_id: help_target_id) do
+          :shared_textile_help.l
+        end
+      end
       div(class: @indent) do
         @form.namespace(:notes) do |notes_ns|
           @parts.each { |part| render_part(notes_ns, part) }
@@ -65,14 +82,10 @@ class Components::FormNotes < Components::Base
     end
   end
 
-  def render_general_help
-    p do
-      strong(class: "mr-3") { "#{:NOTES.l}:" }
-      CollapseInfoTrigger(target_id: "notes_help")
-      CollapseHelpBlock(target_id: "notes_help") do
-        :shared_textile_help.l
-      end
-    end
+  # Derive the collapse target id from `panel_id` so multiple notes
+  # panels on the same page don't share a target.
+  def help_target_id
+    "#{@panel_id}_help"
   end
 
   def render_part(notes_ns, part)
