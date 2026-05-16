@@ -13,7 +13,10 @@ class Components::FieldSlipForm < Components::ApplicationForm
     @species_list = options.delete(:species_list)
     @recent_observations = options.delete(:recent_observations) || []
     @user = options.delete(:user)
-    super(model, **options)
+    # Explicit splat: bare `super` would forward the *original* kwargs
+    # including the FieldSlipForm-only keys deleted above, which would
+    # confuse the upstream initializer.
+    super(model, **options) # rubocop:disable Style/SuperArguments
   end
 
   def view_template
@@ -160,19 +163,24 @@ class Components::FieldSlipForm < Components::ApplicationForm
   # --- Notes ---
 
   def render_notes_panel
-    div(id: "field_slip_notes_fields") do
-      namespace(:notes) do |notes_ns|
-        model.notes_fields.each { |part| render_notes_field(notes_ns, part) }
-      end
-    end
+    FormNotes(
+      form: self,
+      parts: field_slip_note_parts,
+      panel_id: "field_slip_notes",
+      expanded: true
+    )
   end
 
-  def render_notes_field(notes_ns, part)
-    render(notes_ns.field(part.name).textarea(
-             wrapper_options: { label: "#{part.label}:" },
-             value: part.value,
-             rows: 1
-           ))
+  # Normalize FieldSlip's `NoteField` objects (`.name`/`.value`/`.label`)
+  # into the uniform `FormNotes::Part` shape the shared component consumes.
+  def field_slip_note_parts
+    model.notes_fields.map do |part|
+      Components::FormNotes::Part.new(
+        key: part.name,
+        value: part.value,
+        label: "#{part.label}:"
+      )
+    end
   end
 
   # --- Submit buttons (matching ERB layout) ---

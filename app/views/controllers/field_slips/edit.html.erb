@@ -4,7 +4,11 @@
   container_class(:full)
 %>
 
-<%= render("form", field_slip: @field_slip) %>
+<%= render(Components::FieldSlipForm.new(
+             @field_slip,
+             recent_observations: @recent_observations,
+             user: @user
+           )) %>
 <% if @field_slip_project_gaps&.any? %>
   <%= render(Components::OccurrenceResolveModal.new(
                gaps: @field_slip_project_gaps,
