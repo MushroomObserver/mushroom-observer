@@ -43,12 +43,16 @@ class Components::ObservationFormUpload < Components::Base
     )
   end
 
+  # Static hidden sidecar for `observation[thumb_image_id]`. Ensures
+  # the param is *always* submitted (defaulting to ""), so removing
+  # the currently-selected thumb image without picking another one
+  # clears the model field rather than retaining a now-deleted image
+  # id. The actual thumb selection is the checked radio in
+  # `FormCarouselItem#button_to_set_thumb_img`; the radios share the
+  # same `name`, are posted AFTER this hidden in form order, and the
+  # checked one's value wins in Rails' param parsing.
   def render_thumb_image_id_field
-    render(
-      @form.field(:thumb_image_id).text(
-        type: "hidden",
-        data: { form_images_target: "thumbImageId" }
-      )
-    )
+    input(type: "hidden", name: "observation[thumb_image_id]",
+          value: "", autocomplete: "off")
   end
 end

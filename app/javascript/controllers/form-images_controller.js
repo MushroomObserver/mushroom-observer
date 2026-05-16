@@ -47,8 +47,7 @@ const internalConfig = {
 // Connects to data-controller="form-images"
 export default class extends Controller {
   static targets = ["form", "carousel", "item", "thumbnail", "removeImg",
-    "imageGpsMap", "goodImageIds", "thumbImageId", "thumbImgRadio",
-    "thumbImgBtn"]
+    "imageGpsMap", "goodImageIds"]
 
   initialize() {
   }
@@ -129,29 +128,6 @@ export default class extends Controller {
     const dataTransfer = e.dataTransfer;
     if (dataTransfer.files.length > 0)
       this.addFiles(dataTransfer.files);
-  }
-
-  // Deactivate other radio buttons manually because they are not grouped (?)
-  setObsThumbnail(event) {
-    // event.target is the label.btn clicked to make whichever the default image
-    // but could also be any descendant element
-    const button = event.target.closest('.thumb_img_btn'),
-      radio = button.querySelector('input[type="radio"]');
-    // reset selections
-    this.thumbImgBtnTargets.forEach((elem) => {
-      elem.classList.remove('active');
-    });
-    // reset the checked default thumbnail
-    this.thumbImgRadioTargets.forEach((elem) => {
-      elem.removeAttribute('checked');
-    });
-
-    // set selection...
-    button.classList.add('active');
-    button.querySelector(
-      'input[type="radio"][name="thumb_image_id"]'
-    ).setAttribute('checked', '');
-    this.thumbImageIdTarget.setAttribute('value', radio.value);
   }
 
   addSelectedFiles(event) {
@@ -420,21 +396,21 @@ export default class extends Controller {
   // This is for detaching an image already attached to the observation.
   // (not a fileStore item), on the obs edit form. It just removes the item
   // from the carousel and id from "good_images". Has no effect until submit.
+  //
+  // The thumb-image radio for the removed image goes away with the
+  // carousel item. If it was the checked one, no radio is now
+  // checked — the static hidden sidecar with value="" wins on
+  // submit, so the server-side `thumb_image_id` gets cleared. No
+  // explicit JS handling needed.
   removeAttachedItem(event) {
     const _good_images = this.goodImageIdsTarget.value,
       _good_image_vals = _good_images.split(" "),
       // event.target may be a nested span without data, so get data from button
-      _image_id = event.target.closest("button").dataset.imageId,
-      // This is the observation's designated thumbnail id
-      _thumb_id = this.thumbImageIdTarget.value;
+      _image_id = event.target.closest("button").dataset.imageId;
 
     const _new = _good_image_vals.filter(item => item !== _image_id).join(" ");
     this.goodImageIdsTarget.value = _new;
 
-    // clear hidden_field value for observation thumbnail_id
-    if (_thumb_id == _image_id) {
-      this.thumbImageIdTarget.value = "";
-    }
     document.getElementById("carousel_item_" + _image_id).remove();
     document.getElementById("carousel_thumbnail_" + _image_id).remove();
 
@@ -549,22 +525,31 @@ export default class extends Controller {
     }
   }
 
-  // add the image to `good_images` and maybe set the thumb_image_id
+  // Add the uploaded image's id to `good_images` and update the
+  // carousel-item radio's value, its id, and the wrapping label's
+  // `for=` to point at the new image.
+  //
+  // At render time the radio's `value` was `"true"` and its `id`
+  // was `thumb_image_id_<UUID>` (UUID generated client-side per
+  // upload). Once we have a real image id from the server, we
+  // switch to `value="<image.id>"` and `id="thumb_image_id_<image.id>"`
+  // so:
+  //   - the submitted `observation[thumb_image_id]` value is real,
+  //   - tests can find the radio by its predictable image-id-based id,
+  //   - the label's `for=` stays in sync with the input's id.
   updateObsImages(item, image) {
-    // #good_images is a hidden field
     const _good_image_vals = this.goodImageIdsTarget.value || "";
     const _radio = item.dom_element.querySelector(
-      'input[type="radio"][name="thumb_image_id"]'
-    )
+      'input[type="radio"][name="observation[thumb_image_id]"]'
+    );
+    const _label = _radio.closest("label");
+    const _new_id = `thumb_image_id_${image.id}`;
 
-    // add id to the good images form field.
-    this.goodImageIdsTarget.value = [_good_image_vals, image.id].join(' ').trim();
+    this.goodImageIdsTarget.value = [_good_image_vals, image.id].join(" ").trim();
 
-    // set the hidden thumb_image_id field if the item's radio is checked
-    if (_radio.checked) {
-      _radio.value = image.id; // it's grabbing the val from the radio
-      this.thumbImageIdTarget.value = image.id; // does not matter!
-    }
+    _radio.value = image.id;
+    _radio.id = _new_id;
+    if (_label) _label.htmlFor = _new_id;
   }
 
   removeItem(item) {
