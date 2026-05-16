@@ -17,6 +17,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       @dom = DOMProxy.new(namespace, field_key, field_value)
     end
 
+    # FieldProxy stands in for a Superform::Field outside a form
+    # context, where the field has no parent. Superform's
+    # `Checkbox#collection?` checks `field.parent.is_a?(Superform::Field)`
+    # to decide whether to render array-mode markup; returning nil here
+    # routes to the boolean branch, which is what FieldProxy-backed
+    # standalone checkboxes want.
+    def parent
+      nil
+    end
+
     # Factory method to create a FieldProxy for image fields.
     # @param type [Symbol] :good_image or :image
     # @param image_id [Integer, String] the image ID
