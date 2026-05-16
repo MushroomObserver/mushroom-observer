@@ -153,10 +153,19 @@ class Components::FormCarouselItem < Components::BaseImage
     value = @img_instance&.id || "true"
     checked = @obs_thumb_id&.== @img_instance&.id
 
+    # `id:` uses `@img_id` (unique per carousel item: image id for
+    # server-rendered, UUID for upload placeholders) rather than
+    # `value` (which is the literal string "true" for all
+    # placeholders). Unique ids matter for the label `for=`
+    # association (clicking the second placeholder's label otherwise
+    # activates the first's radio) and for Capybara test selectors.
+    # `value:` stays as "true" / image id; the JS post-upload hook
+    # (`form-images#updateObsImages`) updates both the radio's value
+    # AND its id to the real image id once assigned.
     render(Components::ApplicationForm::ButtonStyleRadio.new(
              name: "observation[thumb_image_id]",
              value: value,
-             id: "thumb_image_id_#{value}",
+             id: "thumb_image_id_#{@img_id}",
              checked: checked,
              label: { class: "btn btn-default btn-sm thumb_img_btn" },
              class: "mr-3"

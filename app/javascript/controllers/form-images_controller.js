@@ -526,22 +526,30 @@ export default class extends Controller {
   }
 
   // Add the uploaded image's id to `good_images` and update the
-  // carousel-item radio's value to point at the new id. (At upload
-  // time the radio's value was the placeholder; once we have a real
-  // id, the radio needs it so that submitting with this item checked
-  // posts the real `thumb_image_id`.) No separate hidden field to
-  // sync now — the radio itself is the form field.
+  // carousel-item radio's value, its id, and the wrapping label's
+  // `for=` to point at the new image.
+  //
+  // At render time the radio's `value` was `"true"` and its `id`
+  // was `thumb_image_id_<UUID>` (UUID generated client-side per
+  // upload). Once we have a real image id from the server, we
+  // switch to `value="<image.id>"` and `id="thumb_image_id_<image.id>"`
+  // so:
+  //   - the submitted `observation[thumb_image_id]` value is real,
+  //   - tests can find the radio by its predictable image-id-based id,
+  //   - the label's `for=` stays in sync with the input's id.
   updateObsImages(item, image) {
-    // #good_images is a hidden field
     const _good_image_vals = this.goodImageIdsTarget.value || "";
     const _radio = item.dom_element.querySelector(
       'input[type="radio"][name="observation[thumb_image_id]"]'
-    )
+    );
+    const _label = _radio.closest("label");
+    const _new_id = `thumb_image_id_${image.id}`;
 
-    // add id to the good images form field.
-    this.goodImageIdsTarget.value = [_good_image_vals, image.id].join(' ').trim();
+    this.goodImageIdsTarget.value = [_good_image_vals, image.id].join(" ").trim();
 
     _radio.value = image.id;
+    _radio.id = _new_id;
+    if (_label) _label.htmlFor = _new_id;
   }
 
   removeItem(item) {
