@@ -22,7 +22,7 @@ class Components::ObservationForm < Components::ApplicationForm
         panel_id: "observation_notes",
         expanded: notes_panel_expanded?,
         single_part_mode: single_notes_part?,
-        help_content: single_notes_part? ? observation_notes_help : nil
+        above_help: single_notes_part? ? observation_above_notes_help : nil
       )
     end
 
@@ -49,17 +49,14 @@ class Components::ObservationForm < Components::ApplicationForm
         model.notes.present?
     end
 
-    # Deferred Proc — `FormNotes` runs this in its own render context
-    # so the `<p>` tags emit to the collapse-block buffer. Returning
-    # an eager `[p {...}, p {...}].safe_join` would side-effect emit
-    # to the form buffer at panel-build time instead, placing the
-    # help paragraphs above the notes panel (a real bug; spotted by
-    # visual review of the rendered observation form).
-    def observation_notes_help
-      proc do
-        p { :form_observations_notes_help.t }
-        p { :shared_textile_help.l }
-      end
+    # Deferred Proc — `FormNotes` `instance_exec`s this in its own
+    # render context so the `<p>` tag emits to the help-block buffer
+    # at render time (an eager `tag.p(...)` returned here would be
+    # built outside that buffer and require safe-joining). FormNotes
+    # adds the textile-formatting help itself below the field, so
+    # this only includes the prose "what to put in notes" copy.
+    def observation_above_notes_help
+      proc { p { :form_observations_notes_help.t } }
     end
   end
 end

@@ -5,18 +5,21 @@
 # Shared between forms that have user-configurable notes "parts"
 # (currently observation; field-slip migration is in flight).
 # Owns:
-#   - The Panel (collapsible card with heading) — every form's notes
-#     section renders inside this same wrap shape; callers don't
-#     configure it beyond `panel_id:` and `expanded:`.
-#   - A `<div id="...">` inside the panel body holding either an
-#     empty-state-aware general-help paragraph plus a row of small
-#     textareas (one per part), or a single 10-row textarea with an
-#     inline help block (when `single_part_mode: true`).
+#   - The Panel (collapsible card with "Notes" heading and caret).
+#   - The panel body, containing (in order):
+#     - `above_help` prose (single-part mode only) — explains what to
+#       put in the notes field. Skipped for multi-part mode since
+#       custom-notes-fields users probably know what they're doing.
+#     - One textarea per part (per the `Part` adapter), namespaced
+#       under `:notes`.
+#     - Textile-formatting help, always shown at the bottom.
+#
+# Help content lives inline in the panel body — no collapse-trigger
+# in the heading. The panel's own caret already shows/hides everything.
 #
 # Callers normalize their domain parts (observation strings, field-slip
 # `NotesFieldPart` objects, etc.) into uniform `Part` structs before
-# passing — see `ObservationForm#observation_form_note_parts` for the
-# canonical example.
+# passing — see `ObservationForm#observation_form_note_parts`.
 class Components::FormNotes < Components::Base
   # Normalized shape for one notes part. `key` becomes the
   # Superform field key under `:notes` (`form[notes][<key>]`),
@@ -32,19 +35,19 @@ class Components::FormNotes < Components::Base
   prop :expanded, _Boolean, default: false
   prop :indent, String, default: ""
   prop :single_part_mode, _Boolean, default: false
-  # Override the default help block content (`:shared_textile_help.l`)
-  # rendered in the panel's collapse target. ObservationForm uses this
-  # in single-part mode to add the prose "what to put in notes" copy
-  # on top of the textile help.
+  # Prose help shown above the textarea in single-part mode (e.g.
+  # "Please include any additional information you can think of...").
+  # Ignored in multi-part mode — multi-part-fields users typically
+  # know what each field is for.
   #
-  # Pass a Proc when the override emits Phlex DSL (e.g. `p { ... }`)
-  # so rendering is deferred to the right buffer. Passing a plain
+  # Pass a Proc when the help emits Phlex DSL (e.g. `p { ... }`)
+  # so rendering is deferred to the right buffer. A plain
   # String/SafeBuffer also works for static content.
-  prop :help_content, _Nilable(_Any), default: nil
+  prop :above_help, _Nilable(_Any), default: nil
 
   def view_template
     render(panel) do |p|
-      p.with_heading { render_heading }
+      p.with_heading { plain(:NOTES.l) }
       p.with_body(collapse: true) { render_notes_inner }
     end
   end
@@ -60,49 +63,31 @@ class Components::FormNotes < Components::Base
     )
   end
 
-  # Heading is "Notes" + a help-trigger icon that toggles the
-  # collapse block in the body. `ml-2` puts a small gap between
-  # title and trigger; the trigger has no built-in margin (its
-  # usual placement is adjacent to a `<strong>` label that supplies
-  # its own `mr-3`).
-  def render_heading
-    plain(:NOTES.l)
-    CollapseInfoTrigger(target_id: help_target_id, extra_class: "ml-2")
-  end
-
   def render_notes_inner
     div(id: "#{@panel_id}_fields") do
-      # Collapse target lives in the body; the trigger in the heading
-      # opens it via `target_id`. They don't have to be adjacent.
-      CollapseHelpBlock(target_id: help_target_id) do
-        render_help_block_content
-      end
+      render_above_help if @single_part_mode && @above_help
       div(class: @indent) do
         @form.namespace(:notes) do |notes_ns|
           @parts.each { |part| render_part(notes_ns, part) }
         end
       end
+      render_textile_help
     end
   end
 
-  # Help-block content has three input shapes:
-  #   - nil → default `:shared_textile_help.l` text
-  #   - Proc → instance_exec in FormNotes context so any Phlex DSL
-  #     inside (e.g. `p { ... }`) emits to the collapse-block buffer
-  #     at render time, not at panel-build time
-  #   - String / SafeBuffer → emit as-is
-  def render_help_block_content
-    case @help_content
-    when nil  then plain(:shared_textile_help.l)
-    when Proc then instance_exec(&@help_content)
-    else           plain(@help_content)
+  def render_above_help
+    div(class: "help-block") do
+      case @above_help
+      when Proc then instance_exec(&@above_help)
+      else           plain(@above_help)
+      end
     end
   end
 
-  # Derive the collapse target id from `panel_id` so multiple notes
-  # panels on the same page don't share a target.
-  def help_target_id
-    "#{@panel_id}_help"
+  # Always-shown textile-formatting help, at the bottom of the body.
+  # Same content for both modes.
+  def render_textile_help
+    div(class: "help-block") { :shared_textile_help.l }
   end
 
   def render_part(notes_ns, part)

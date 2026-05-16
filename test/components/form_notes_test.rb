@@ -20,33 +20,22 @@ class FormNotesTest < ComponentTestCase
 
     # Panel uses panel_id as its outer element id.
     assert_html(html, "div#test_notes")
-    # Heading slot is filled with the localized NOTES label.
+    # Heading slot is filled with the localized NOTES label and
+    # nothing else — no help icon or collapse trigger in the heading.
     assert_includes(html, :NOTES.l)
+    assert_no_html(html, ".panel-heading a.info-collapse-trigger",
+                   "no in-header help trigger — help is inline in body")
     # Body collapse target is derived from panel_id.
     assert_html(html, "#test_notes_inner")
   end
 
   # --- Multi-part mode ---
 
-  def test_multi_part_help_trigger_lives_in_heading_block_in_body
+  def test_multi_part_renders_textareas_and_textile_help_below
     html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
 
     # Inner notes div derives id from panel_id.
     assert_html(html, "#test_notes_fields")
-    # Help-collapse trigger appears in the panel heading area, not
-    # inside the body (no duplicate "Notes:" title beneath the panel
-    # heading). The trigger's href/aria-controls point at the help
-    # block whose id derives from panel_id, and `ml-2` puts a small
-    # gap between the heading title and the icon.
-    assert_html(html,
-                "a.info-collapse-trigger.ml-2[href='#test_notes_help']")
-    assert_no_html(html,
-                   "#test_notes_fields a.info-collapse-trigger",
-                   "trigger must be in the panel heading, not the body")
-    assert_no_html(html, "#test_notes_fields > p strong",
-                   "panel body must not repeat the 'Notes:' title")
-    # The collapse help block lives in the body, keyed by the same id.
-    assert_html(html, "#test_notes_fields div#test_notes_help.collapse")
     # One textarea per part, namespaced under `notes`, rows=1.
     assert_html(html,
                 "textarea[name='observation[notes][habitat]'][rows='1']")
@@ -55,6 +44,23 @@ class FormNotesTest < ComponentTestCase
     # Each part's label appears (caller-supplied trailing colon).
     assert_includes(html, "Habitat notes:")
     assert_includes(html, "Substrate notes:")
+    # Textile help is always rendered at the bottom of the body.
+    assert_html(html, "#test_notes_fields div.help-block")
+    # No `above_help` in multi-part mode even if the caller passes
+    # one — multi-part users typically know what each field is for.
+    assert_no_html(html,
+                   "#test_notes_fields > div.help-block:first-child")
+  end
+
+  def test_multi_part_textile_help_renders_below_textareas
+    html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
+
+    # The textile help is the last child of the notes-fields div,
+    # below all the textareas (not above them).
+    fields_div = Nokogiri::HTML5.fragment(html).at_css("#test_notes_fields")
+    last_child = fields_div.element_children.last
+    assert_equal("div", last_child.name)
+    assert_includes(last_child["class"] || "", "help-block")
   end
 
   def test_multi_part_respects_indent
@@ -69,14 +75,6 @@ class FormNotesTest < ComponentTestCase
   def test_single_part_mode_renders_one_large_textarea
     html = render(SinglePartFormNotes.new(Observation.new, action: "/t"))
 
-    # The help trigger lives in the panel heading (same as multi-part).
-    # Context is clearer with the trigger next to "Notes" than buried
-    # next to the textarea.
-    assert_html(html,
-                "a.info-collapse-trigger.ml-2[href='#test_notes_help']")
-    # The collapse target carries the caller's override content.
-    assert_html(html, "#test_notes_fields div#test_notes_help.collapse")
-    assert_includes(html, "SINGLE_PART_HELP_MARKER")
     # The lone textarea is rows=10.
     assert_html(html,
                 "textarea[name='observation[notes][other]'][rows='10']")
@@ -88,6 +86,35 @@ class FormNotesTest < ComponentTestCase
     assert_no_html(html,
                    "label.mr-3[for='observation_notes_other']",
                    "single-part textarea label must be sr-only, not mr-3")
+  end
+
+  def test_single_part_mode_renders_above_help_above_textarea
+    html = render(SinglePartFormNotes.new(Observation.new, action: "/t"))
+
+    # Caller-supplied prose help renders ABOVE the textarea, inline
+    # (no collapse wrapping — visible whenever the panel is open).
+    assert_includes(html, "ABOVE_HELP_MARKER")
+    above_help_pos = html.index("ABOVE_HELP_MARKER")
+    textarea_pos = html.index("<textarea")
+    assert(above_help_pos < textarea_pos,
+           "above_help must render before the textarea")
+  end
+
+  def test_single_part_mode_textile_help_renders_below_textarea
+    html = render(SinglePartFormNotes.new(Observation.new, action: "/t"))
+
+    # Textile help still renders below the textarea — same as
+    # multi-part mode. Above-help is the only extra in single-part.
+    # The notes-fields body div's children, in order:
+    #   [0] above_help  [1] textareas-wrap  [2] textile help-block
+    fields = Nokogiri::HTML5.fragment(html).at_css("#test_notes_fields")
+    children = fields.element_children
+    assert_equal(3, children.size,
+                 "expected above-help, textareas wrap, textile help")
+    assert_includes(children.first["class"] || "", "help-block",
+                    "first child should be the above-help block")
+    assert_includes(children.last["class"] || "", "help-block",
+                    "last child should be the textile help block")
   end
 end
 
@@ -143,7 +170,7 @@ class SinglePartFormNotes < Components::ApplicationForm
                panel_id: "test_notes",
                expanded: true,
                single_part_mode: true,
-               help_content: "SINGLE_PART_HELP_MARKER".html_safe
+               above_help: "ABOVE_HELP_MARKER".html_safe
              ))
     end
   end
