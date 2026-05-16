@@ -54,10 +54,37 @@ class Components::ApplicationForm < Superform::Rails::Form
     # (matching Rails' `form.check_box` output — browsers otherwise
     # repopulate the hidden's "0" on back-button and silently clobber a
     # checked box).
+    #
+    # `checked_value:` and `unchecked_value:` kwargs mirror Rails'
+    # `form.check_box(field, options, checked, unchecked)` positional
+    # args, so callers can use "yes"/"no" or other non-boolean values
+    # without falling back to bare `input(type: :checkbox)`.
     def render_boolean_inputs
-      input(name: field.dom.name, type: :hidden, value: "0",
-            autocomplete: "off")
-      input(type: :checkbox, value: "1", **attributes)
+      input(name: field.dom.name, type: :hidden,
+            value: unchecked_value, autocomplete: "off")
+      input(type: :checkbox, value: checked_value, **checkbox_attributes)
+    end
+
+    def checked_value
+      @attributes[:checked_value] || "1"
+    end
+
+    def unchecked_value
+      @attributes[:unchecked_value] || "0"
+    end
+
+    # Strip the custom-value kwargs before splatting into `<input>`
+    # (`checked_value`/`unchecked_value` aren't valid HTML attributes).
+    # When the caller passes a custom `checked_value`, recompute
+    # `checked` via string comparison (Superform's default
+    # `field_attributes` uses `field.value` directly, which is correct
+    # for the boolean "1"/"0" case but wrong for "yes"/"no" etc.).
+    def checkbox_attributes
+      attrs = attributes.except(:checked_value, :unchecked_value)
+      if @attributes.key?(:checked_value)
+        attrs[:checked] = field.value.to_s == checked_value.to_s
+      end
+      attrs
     end
 
     # Render a single array-mode checkbox (name="…[]"). Intended for use
