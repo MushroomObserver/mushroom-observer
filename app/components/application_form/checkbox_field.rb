@@ -54,10 +54,20 @@ class Components::ApplicationForm < Superform::Rails::Form
     # (matching Rails' `form.check_box` output — browsers otherwise
     # repopulate the hidden's "0" on back-button and silently clobber a
     # checked box).
+    #
+    # When `disabled: true` is passed, the hidden sidecar is omitted —
+    # disabled inputs aren't submitted, so the sidecar would be dead
+    # markup (and the checkbox itself never toggles).
     def render_boolean_inputs
-      input(name: field.dom.name, type: :hidden, value: "0",
-            autocomplete: "off")
+      unless disabled?
+        input(name: field.dom.name, type: :hidden, value: "0",
+              autocomplete: "off")
+      end
       input(type: :checkbox, value: "1", **attributes)
+    end
+
+    def disabled?
+      @attributes[:disabled] == true
     end
 
     # Render a single array-mode checkbox (name="…[]"). Intended for use
