@@ -1,7 +1,7 @@
 <%
   add_page_title("#{:field_slip_new.t}: #{@field_slip.code}")
   add_context_nav([field_slips_index_tab])
-  container_class(:text)
+  container_class(:full)
 %>
 
 <%= render(Components::FieldSlipForm.new(

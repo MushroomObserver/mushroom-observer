@@ -62,19 +62,23 @@ class Components::FieldSlipForm < Components::ApplicationForm
 
   def render_main_form
     render_errors if model.errors.any?
-    # No column wrapper — width is capped by the view's
-    # `container_class(:text)`. Form contents flow at the page's
-    # natural width.
+    # Width-cap the texty fields to a comfortable reading width
+    # (`.container-text`), but keep the observation matrix full-
+    # width. Both must live inside the same `<form>` so the matrix
+    # submits with the rest — hence the in-form wrap rather than a
+    # page-level `container_class(:text)`.
     #
     # `species_list` hidden field always emitted (matching ERB
     # `hidden_field_tag`): the param key has to exist on submit; an
     # empty value is fine and the form context (`?species_list=...`)
     # is what carries the actual id.
     hidden_field("species_list", value: @species_list)
-    render_left_column_fields
-    render_submit_quick_create if new_record?
-    render_notes_panel
-    render_submit_add_images if new_record?
+    div(class: "container-text") do
+      render_left_column_fields
+      render_submit_quick_create if new_record?
+      render_notes_panel
+      render_submit_add_images if new_record?
+    end
     render_observations_section
     render_edit_action_submits unless new_record?
   end
