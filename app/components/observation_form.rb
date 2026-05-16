@@ -15,6 +15,8 @@
 #   ))
 #
 class Components::ObservationForm < Components::ApplicationForm
+  include NotesPanel
+
   FORM_ATTR_DEFAULTS = {
     mode: nil,
     user: nil,
@@ -258,16 +260,7 @@ class Components::ObservationForm < Components::ApplicationForm
     @field_code || (model.persisted? ? model.field_slip&.code : nil)
   end
 
-  # --- Notes Panel ---
-
-  def render_notes_panel
-    ObservationFormNotes(
-      form: self,
-      observation: model,
-      user: @user,
-      mode: @mode
-    )
-  end
+  # --- Notes Panel — see ObservationForm::NotesPanel mixin --- ---
 
   # --- Projects Panel ---
 

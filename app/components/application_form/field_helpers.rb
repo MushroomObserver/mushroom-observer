@@ -13,7 +13,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                        :wrap_data, :between, :button, :button_data,
                        :button_text, :addon, :monospace, :label_class,
                        :label_data, :label_aria, :label_position,
-                       :width].freeze
+                       :width, :label_sr_only].freeze
 
     # Text field with label and Bootstrap form-group wrapper
     # @param field_name [Symbol] the field name
