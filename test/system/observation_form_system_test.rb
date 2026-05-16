@@ -460,11 +460,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#added_images", visible: :visible, wait: 3)
     assert_selector(".carousel-item[data-image-status='upload']",
                     text: /Coprinus_comatus/, wait: 3)
-    # Set the first (last) one as the thumb_image
+    # Set the first (last) one as the thumb_image. The visual
+    # "pressed" swap is CSS-only (`:has(input:checked)`), driven by
+    # the radio's checked state — so click the radio directly via
+    # `choose`. The radio's hidden inside a `.btn`-styled label;
+    # `visible: :all` because the radio itself isn't styled visible.
     within(first_image_wrapper) do
       thumb_button = find(".thumb_img_btn")
       scroll_to(thumb_button, align: :center)
-      thumb_button.trigger("click")
+      radio = thumb_button.find("input[type='radio']", visible: :all)
+      choose(radio[:id], visible: :all)
       assert_text(:image_add_default.l)
       assert_no_text(:image_set_default.l)
     end
