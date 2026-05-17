@@ -221,10 +221,26 @@ module Header
       end
     end
 
+    # Space-separated RssLog type tag list (e.g. "species_list project").
+    # Looks each tag up in the canonical all-caps plural translation
+    # (`SPECIES_LISTS`, `PROJECTS`, etc.) by pluralizing (lowercase)
+    # then upcasing — the reverse order leaves a trailing lowercase
+    # `s` (`SPECIES_LISTs`) since ActiveSupport's Inflector adds `s`
+    # in lowercase regardless of input case. `all` is the sentinel
+    # for "all types" — no plural; use `:ALL` directly.
+    #
+    # Was `val.titleize.split.join(", ")` which split "Species List
+    # Project" into four comma-separated tokens.
+    def type_tags_to_label(val)
+      val.split.map do |tag|
+        (tag == "all" ? :ALL : tag.pluralize.upcase.to_sym).t
+      end.join(", ")
+    end
+
     # For values that aren't ids, just join and maybe truncate
     def param_val_itself(key, val, truncate)
-      if key == :type # lowercase strings joined by spaces
-        string = val.titleize.split.join(", ")
+      if key == :type
+        string = type_tags_to_label(val)
       elsif val.is_a?(Array)
         string = truncate ? val.first(CAPTION_TRUNCATE) : val
         string = string.join(", ")

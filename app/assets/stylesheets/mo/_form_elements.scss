@@ -49,7 +49,10 @@ $btn-active-variants: (
   success: ($btn-success-color, $btn-success-bg, $btn-success-border),
   info: ($btn-info-color, $btn-info-bg, $btn-info-border),
   warning: ($btn-warning-color, $btn-warning-bg, $btn-warning-border),
-  danger: ($btn-danger-color, $btn-danger-bg, $btn-danger-border)
+  danger: ($btn-danger-color, $btn-danger-bg, $btn-danger-border),
+  // MO's `.btn-outline-default` (see `_links_buttons_alerts.scss`)
+  // — uses input vars rather than the BS3 button vars.
+  outline-default: ($input-color, $input-bg, $input-border)
 );
 
 @each $variant, $colors in $btn-active-variants {
@@ -74,6 +77,14 @@ $btn-active-variants: (
   input[type=checkbox] {
     vertical-align: text-top;
   }
+}
+
+// Button-styled filter checkboxes (rss-log type filters etc.):
+// CSS-only "pressed" state via `:has()` matching the inner checked
+// input — no JS to toggle `.active`. Same pattern as
+// `.thumb_img_btn` in `_carousel.scss`.
+.filter-checkbox:has(input[type="checkbox"]:checked) {
+  @include button-active-state;
 }
 
 // Remove browser default gradients on select elements

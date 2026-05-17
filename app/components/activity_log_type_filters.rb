@@ -31,16 +31,29 @@ class Components::ActivityLogTypeFilters < Components::Base
   end
 
   def render_filter_buttons
-    div(class: "btn-group pb-1 hidden-xs text-nowrap") do
+    # "Show:" label sits OUTSIDE the .btn-group: BS3 `.btn-group`
+    # floats and inline-blocks its children expecting `.btn`-shaped
+    # elements, and a non-`.btn` span inside breaks the layout (the
+    # span ends up after the group). Sibling-of-group keeps it
+    # inline-aligned without being subject to the group's layout
+    # rules.
+    div(class: "px-3 pb-1 hidden-xs text-nowrap") do
       render_show_label
-      render_everything_button
-      render_type_buttons
-      render_submit_button
+      div(class: "btn-group") do
+        render_everything_button
+        render_type_buttons
+        render_submit_button
+      end
     end
   end
 
+  # Inline label for the whole filter group. Was rendered as a
+  # disabled btn-default to share vertical rhythm with the other
+  # button-styled controls, but that's misleading (looks like a
+  # button you can't press). Plain text with `text-muted` and
+  # margin matches the BS3 caption-style without the affordance.
   def render_show_label
-    span(class: "btn btn-default btn-sm disabled") { :rss_show.t }
+    span(class: "text-muted mr-2") { :rss_show.t }
   end
 
   def render_everything_button
@@ -55,16 +68,29 @@ class Components::ActivityLogTypeFilters < Components::Base
     end
   end
 
+  # "Apply" reads more naturally than "Submit" for a filter-
+  # narrowing action where there's nothing being created. The
+  # filter buttons use `.btn-outline-default` (subtle, input-
+  # style); the Apply button uses the solid `.btn-default` so it
+  # stands out as the commit action.
   def render_submit_button
-    input(type: "submit", value: :SUBMIT.t, class: "btn btn-default btn-sm")
+    input(type: "submit", value: :APPLY.t,
+          class: "btn btn-default btn-sm")
   end
 
-  # Individual type checkbox styled as button
+  # Individual type checkbox styled as a Bootstrap button. Routes
+  # through `ButtonStyleCheckbox` so the markup stays in lockstep
+  # with the rest of MO's button-style radio/checkbox helpers
+  # (BS3/4/5 migration changes one file, not many). The "pressed"
+  # active state is CSS-only via `.filter-checkbox:has(input:checked)`
+  # in `_form_elements.scss`.
   def render_type_checkbox(type)
-    label(class: type_button_classes(type)) do
-      input(type: "checkbox", name: "q[type][]", value: type,
-            checked: type_checked?(type), id: "type_#{type}",
-            class: "mt-0 mr-2")
+    render(Components::ApplicationForm::ButtonStyleCheckbox.new(
+             name: "q[type][]", value: type,
+             id: "type_#{type}", checked: type_checked?(type),
+             label: { class: type_button_classes },
+             class: "mt-0 mr-2"
+           )) do
       filter_for_type(type)
     end
   end
@@ -92,14 +118,18 @@ class Components::ActivityLogTypeFilters < Components::Base
   # CSS class helpers
 
   def everything_button_classes
-    class_names("btn btn-default btn-sm", { active: @types == ["all"] })
+    class_names("btn btn-outline-default btn-sm",
+                { active: @types == ["all"] })
   end
 
-  def type_button_classes(type)
-    class_names(
-      "btn btn-default btn-sm filter-checkbox my-0",
-      { active: @types == [type] }
-    )
+  # No server-side `active:` class — the SCSS rule
+  # `.filter-checkbox:has(input:checked)` paints the pressed visual
+  # whenever the inner checkbox is checked. Side effect: multi-
+  # selected filters now ALL show as active (previously, only
+  # sole-selected types did because of the strict `@types == [type]`
+  # check). Honest UX — selected = visually active.
+  def type_button_classes
+    "btn btn-outline-default btn-sm filter-checkbox my-0"
   end
 
   # Query param helpers
