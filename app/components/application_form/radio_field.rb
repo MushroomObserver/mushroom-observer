@@ -88,11 +88,23 @@ class Components::ApplicationForm < Superform::Rails::Form
           render_choice_label(choice, opts)
           render_between_slot
         end
-        # `append` is a sibling of `<label>` inside `.radio` — keeps
-        # links/buttons out of the label so a stray click doesn't
-        # activate the radio. HTML-safe content; callers typically
-        # build it with `capture { a(...) }` or a sub-component.
-        trusted_html(opts[:append]) if opts[:append]
+        render_choice_append(opts)
+      end
+    end
+
+    # `append` is a sibling of `<label>` inside `.radio` — keeps
+    # links/buttons out of the label so a stray click doesn't
+    # activate the radio. Accepts either a `Proc`/lambda (invoked in
+    # RadioField's Phlex render context — full DSL) or an html_safe
+    # `SafeBuffer` (emitted via `trusted_html`).
+    def render_choice_append(opts)
+      append = opts[:append]
+      return unless append
+
+      if append.respond_to?(:call)
+        instance_exec(&append)
+      else
+        trusted_html(append)
       end
     end
 

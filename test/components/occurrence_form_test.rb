@@ -135,6 +135,17 @@ class OccurrenceFormTest < ComponentTestCase
     label = cb.parent
     assert_equal("label", label.name)
     assert_includes(label.text, "Include")
+
+    # Regression: #4286 — clicking the "Include" text must toggle the
+    # nested checkbox. Per HTML spec, a <label> with `for=` pointing at
+    # a non-existent id does NOT fall back to its nested input, so the
+    # wrapper must either omit `for=` (and rely on DOM nesting) or
+    # match the actual input's id.
+    return unless label["for"]
+
+    assert_equal(cb["id"], label["for"],
+                 "Label `for` must match the nested checkbox id, " \
+                 "otherwise label clicks don't toggle the checkbox")
   end
 
   def test_matrix_ul_stimulus_wiring
