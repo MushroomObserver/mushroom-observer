@@ -24,7 +24,7 @@ module Report
       obs_is_collection_location obs_vote_cache obs_thumb_image_id
       obs_notes obs_updated_at
       user_id user_login user_name
-      name_id name_text_name name_author name_rank
+      name_id name_text_name name_search_name name_author name_rank
       loc_id loc_name loc_north loc_south loc_east loc_west
       loc_high loc_low
     ].freeze
@@ -116,6 +116,10 @@ module Report
 
     def name_text_name
       self["name_text_name"].presence&.to_s
+    end
+
+    def name_search_name
+      self["name_search_name"].presence&.to_s
     end
 
     def name_author

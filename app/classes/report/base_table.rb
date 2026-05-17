@@ -26,6 +26,7 @@ module Report
     NAME_SELECTS = {
       name_id: :id,
       name_text_name: :text_name,
+      name_search_name: :search_name,
       name_author: :author,
       name_rank: :rank
     }.freeze

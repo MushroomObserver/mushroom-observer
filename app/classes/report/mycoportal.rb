@@ -106,7 +106,7 @@ module Report
     def taxon_remarks(row)
       return unless code_name?(row) || provisional?(row) || group?(row)
 
-      "#{row.name_text_name} #{row.name_author}".strip
+      row.name_search_name
     end
 
     # collector's number

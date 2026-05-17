@@ -527,7 +527,7 @@ class ReportTest < UnitTestCase
 
   # Groups: text_name ends in /(group|complex|clade)$/
   # sciname = text_name without the ending; identificationQualifier = the
-  # ending token only; taxonRemarks = full text_name + author (stripped)
+  # ending token only; taxonRemarks = search_name
   def test_mycoportal_group_taxon_remarks
     obs = Observation.create!(user: rolf, when: Time.zone.now,
                               location: locations(:burbank),
@@ -593,7 +593,7 @@ class ReportTest < UnitTestCase
   # Code names: text_name contains a single-quote (e.g. sp. 'IN34')
   # sciname = genus only;
   # identificationQualifier = Report::Mycoportal::CODE_NAME_QUALIFIER;
-  # taxonRemarks = full text_name plus author
+  # taxonRemarks = search_name
   def test_mycoportal_code_name_unauthored_no_qualifier
     obs = Observation.create!(
       user: rolf,
@@ -663,7 +663,7 @@ class ReportTest < UnitTestCase
 
   # Provisional names: author matches /\w+\. prov\./
   # sciname = text_name unchanged; identificationQualifier = matched token;
-  # taxonRemarks = text_name + " " + author (stripped)
+  # taxonRemarks = search_name
   def test_mycoportal_provisional_bare_nom_prov
     name = Name.create!(
       user: rolf,
