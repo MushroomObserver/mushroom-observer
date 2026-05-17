@@ -314,6 +314,20 @@ class OccurrencesControllerTest < FunctionalTestCase
     get(:resolve_projects, params: { id: occ.id })
 
     assert_response(:success)
+    # Components::Modal wrapping (auto-open, modal-lg, id) — these are
+    # the markers proving the new modal composition rendered, not the
+    # pre-refactor hand-rolled markup or no modal at all.
+    assert_match(
+      /<div [^>]*id="modal_resolve_projects"[^>]*class="modal fade in"/,
+      @response.body
+    )
+    assert_match(/<div class="modal-dialog modal-lg"/, @response.body)
+    assert_match(/<div class="modal-backdrop fade in"/, @response.body)
+    # Form is inside modal-body, with the edit-mode submit button name.
+    assert_match(
+      /name="resolution".*value="add_all"|value="add_all".*name="resolution"/,
+      @response.body
+    )
   end
 
   # ---------- project confirmation ----------
@@ -327,6 +341,13 @@ class OccurrencesControllerTest < FunctionalTestCase
     end
     assert_response(:success) # renders confirmation modal
     assert_match(/Add All/, @response.body)
+    # Components::Modal wrapping markup (auto-open, modal-lg, id) —
+    # proves the create-mode view file's modal composition rendered.
+    assert_match(/id="modal_resolve_projects"[^>]*class="modal fade in"/,
+                 @response.body)
+    assert_match(/<div class="modal-dialog modal-lg"/, @response.body)
+    # Create-mode submit uses project_resolution (vs edit's resolution).
+    assert_match(/name="project_resolution"/, @response.body)
   end
 
   def test_create_with_add_all_adds_to_projects

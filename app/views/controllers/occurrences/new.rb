@@ -33,9 +33,17 @@ module Views
         private
 
         def render_project_modal
-          render(Components::OccurrenceResolveForm.modal(
-                   **@project_confirm, user: @user
-                 ))
+          render(Components::Modal.new(
+                   id: "modal_resolve_projects",
+                   title: :occurrence_resolve_projects_title.l,
+                   dialog_class: "modal-dialog modal-lg",
+                   auto_open: true,
+                   user: @user
+                 )) do |m|
+            m.with_body do
+              render(Components::OccurrenceResolveForm.new(**@project_confirm))
+            end
+          end
         end
       end
     end

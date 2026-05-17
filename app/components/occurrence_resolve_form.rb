@@ -1,34 +1,48 @@
 # frozen_string_literal: true
 
 # Form content for the project membership confirmation modal.
-# Renders the intro text, project list, and Cancel/Add All buttons.
+# Renders the intro text, project list, and Cancel/Add All buttons —
+# but no modal chrome. Callers wrap this in `Components::Modal` with
+# `auto_open: true` to get the auto-opening Bootstrap modal (see
+# `field_slips/new.html.erb` and `edit.html.erb`).
 #
-# Use .modal() to get the full modal wrapper that auto-opens:
-#   render(Components::OccurrenceResolveForm.modal(gaps:, ...))
-class Components::OccurrenceResolveForm < Components::Base
-  register_value_helper :form_authenticity_token
-
-  # Returns a component that wraps the form in a Bootstrap modal.
-  def self.modal(gaps:, primary:, user:, selected: nil,
-                 occurrence: nil)
-    Components::OccurrenceResolveModal.new(
-      gaps: gaps, primary: primary, user: user,
-      selected: selected, occurrence: occurrence
-    )
-  end
-
-  def initialize(gaps:, primary:, selected: nil, occurrence: nil)
-    super()
+# Two render modes:
+#   - "create" (when `selected:` is passed) — POSTs the selected
+#     `observation_ids[]` + `observation_id` + the primary observation
+#     to `/occurrences` to create a new Occurrence with project
+#     resolutions.
+#   - "edit" (default) — POSTs to the resolve_projects action on the
+#     existing `@occurrence`.
+#
+# Inherits `Components::ApplicationForm` (Superform) so the `<form>`
+# tag, CSRF token, and `_method` hidden field are emitted
+# automatically — no manual `authenticity_token_field` boilerplate.
+class Components::OccurrenceResolveForm < Components::ApplicationForm
+  def initialize(gaps:, primary:, selected: nil, occurrence: nil, **)
     @gaps = gaps
     @primary = primary
     @selected = selected
     @occurrence = occurrence
+    # Superform requires a model. We don't bind any fields to it
+    # (all this form's inputs are hidden, posted with explicit
+    # `name=`), so anything callable for `dom.id` works. Use the
+    # occurrence in edit mode, a placeholder Occurrence otherwise.
+    super(@occurrence || Occurrence.new, **)
   end
 
   def view_template
     render_intro
     render_project_list
-    render_form
+    super { render_form_body }
+  end
+
+  # Superform calls this to compute the `<form action=…>` URL.
+  def form_action
+    if @selected
+      occurrences_path
+    else
+      resolve_projects_occurrence_path(@occurrence)
+    end
   end
 
   private
@@ -51,32 +65,31 @@ class Components::OccurrenceResolveForm < Components::Base
     end
   end
 
-  def render_form
+  def render_form_body
+    selected_hidden_fields if @selected
+    render_buttons(cancel_path)
+  end
+
+  def cancel_path
     if @selected
-      render_create_form
+      new_occurrence_path(observation_id: @selected.first.id)
     else
-      render_edit_form
+      occurrence_path(@occurrence)
     end
   end
 
-  def render_create_form
-    form(action: occurrences_path, method: "post") do
-      authenticity_token_field
-      selected_hidden_fields
-      render_buttons(
-        new_occurrence_path(observation_id: @selected.first.id)
-      )
+  def selected_hidden_fields
+    # `occurrence[observation_ids][]` — the controller reads
+    # `params.dig(:occurrence, :observation_ids)`. A flat
+    # `observation_ids[]` here would silently break submission
+    # (controller gets `nil`, treats it as an empty selection).
+    @selected.each do |obs|
+      hidden_field("occurrence[observation_ids][]", value: obs.id)
     end
-  end
-
-  def render_edit_form
-    form(
-      action: resolve_projects_occurrence_path(@occurrence),
-      method: "post"
-    ) do
-      authenticity_token_field
-      render_buttons(occurrence_path(@occurrence))
-    end
+    # `observation_id` is the source obs (top-level param), not
+    # nested under `occurrence[]` — separate from the selected list.
+    hidden_field("observation_id", value: @selected.first.id)
+    hidden_field("occurrence[primary_observation_id]", value: @primary.id)
   end
 
   def render_buttons(cancel_path)
@@ -85,30 +98,11 @@ class Components::OccurrenceResolveForm < Components::Base
         data: { dismiss: "modal" }) do
         :occurrence_resolve_projects_cancel.l
       end
-      button(type: "submit",
-             name: @selected ? "project_resolution" : "resolution",
-             value: "add_all",
-             class: "btn btn-primary") do
-        :occurrence_resolve_projects_add_all.l
-      end
+      submit(
+        :occurrence_resolve_projects_add_all.l,
+        as: :button, btn_class: "btn-primary", value: "add_all",
+        name: @selected ? "project_resolution" : "resolution"
+      )
     end
-  end
-
-  def authenticity_token_field
-    input(type: "hidden", name: "authenticity_token",
-          value: form_authenticity_token)
-  end
-
-  def selected_hidden_fields
-    @selected.each do |obs|
-      input(type: "hidden", name: "occurrence[observation_ids][]",
-            value: obs.id)
-    end
-    input(type: "hidden",
-          name: "observation_id",
-          value: @selected.first.id)
-    input(type: "hidden",
-          name: "occurrence[primary_observation_id]",
-          value: @primary.id)
   end
 end
