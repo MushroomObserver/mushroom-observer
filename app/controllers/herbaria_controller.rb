@@ -385,6 +385,14 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def redirect_to_create_location_or_referrer_or_show_location
+    # Turbo-stream callers (the herbarium-create modal embedded in the
+    # obs form, project pages, etc.) should never get a redirect:
+    # we're in a modal that needs to close + update the parent page.
+    # `show_modal_flash_or_show_herbarium` dispatches on format and
+    # renders `_update_observation.erb` for turbo_stream, which closes
+    # the modal and populates the obs-form's herbarium fields.
+    return show_modal_flash_or_show_herbarium if request.format.turbo_stream?
+
     redirect_to_create_location || redirect_to_referrer ||
       show_modal_flash_or_show_herbarium
   end

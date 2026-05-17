@@ -27,16 +27,16 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_naming_specimen")
     scroll_to(find("#observation_naming_specimen"), align: :top)
     check("observation_specimen")
-    assert_selector("#herbarium_record_herbarium_name")
+    assert_selector("#observation_herbarium_record_herbarium_name")
     assert_selector(".create-link", text: :create_herbarium.l)
     click_link(:create_herbarium.l)
 
     assert_selector("#modal_herbarium")
     create_herbarium_with_new_location
 
-    assert_no_selector("#modal_herbarium")
-    assert_field("herbarium_record_herbarium_name",
-                 with: "Herbarium des Cévennes")
+    assert_no_selector("#modal_herbarium", wait: 15)
+    assert_field("observation_herbarium_record_herbarium_name",
+                 with: "Herbarium des Cévennes", wait: 15)
   end
 
   # Verify validation errors appear inside the modal, not on the page
@@ -141,6 +141,13 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
 
       # Verify autocompleter switched to location_google mode
       assert_selector("[data-type='location_google']", wait: 5)
+
+      # In a real browser the user's focus/click sequence fires
+      # `ourClick` on the place-name input after the mode swap,
+      # which triggers `scheduleGoogleRefresh` → geocoding. The
+      # JS-driven `execute_script("...click()")` above bypasses
+      # those events, so we have to fire one manually here.
+      find_field("herbarium_place_name").click
 
       # Wait for hidden ID to be set (proves geocoding worked)
       assert_field("herbarium_location_id", with: "-1", type: :hidden, wait: 10)
