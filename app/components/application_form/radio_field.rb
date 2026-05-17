@@ -23,6 +23,23 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @example Standalone with FieldProxy
   #   proxy = FieldProxy.new("chosen_name", :name_id)
   #   RadioField.new(proxy, [1, "Opt 1"], [2, "Opt 2"])
+  #
+  # @example Per-choice options (third element of the tuple):
+  #   RadioField.new(field,
+  #     [1, "Existing"],
+  #     [2, "Placeholder", { disabled: true,
+  #                          append: -> { a(href: …) { "Create" } } }],
+  #     [3, nil, { label_block: -> {
+  #       strong { "Bold label" }
+  #       div(class: "ml-4 text-muted") { "Help text below" }
+  #     }}]
+  #   )
+  #   # → `disabled` adds the attr to the input; `append` runs as
+  #   #   `trusted_html` after the `<label>` (sibling — keeps links
+  #   #   out of the label so a stray click doesn't activate the radio);
+  #   #   `label_block` is invoked inside `<label>` via instance_exec in
+  #   #   RadioField's Phlex context, replacing the text label for that
+  #   #   one option (compound multi-element labels without string-building).
   class RadioField < Phlex::HTML
     include Phlex::Slotable
     include Components::TrustedHtml
@@ -37,7 +54,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def initialize(field, *collection, wrapper_options: {}, **attributes)
       super()
       @field = field
-      @collection = collection
+      @collection, @per_choice_opts = split_per_choice_opts(collection)
       @attributes = attributes
       @wrapper_options = wrapper_options
     end
@@ -63,28 +80,67 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_choice(choice)
       value_str = choice.value.to_s
+      opts = @per_choice_opts[value_str] || {}
       div(class: radio_class) do
         label(for: option_input_id(value_str)) do
-          # Stringify value so Phlex doesn't dasherize symbols
-          # (e.g. `:mycoportal_image_list` → `"mycoportal-image-list"`).
-          # Use a value-derived index so the rendered id is value-based
-          # (`field_id_<value>`), matching MO's pre-upstream convention
-          # used by JS/CSS, rather than upstream's default index-based id.
-          # `checked` is computed here because upstream Radio's
-          # `field.value == @value` doesn't coerce types — MO routinely
-          # pairs boolean/symbol field values with string option values.
-          render(Superform::Rails::Components::Radio.new(
-                   @field,
-                   value: value_str,
-                   index: index_for(value_str),
-                   checked: option_checked?(value_str),
-                   **@attributes
-                 ))
+          render_choice_radio(value_str, opts)
           whitespace
-          trusted_html(choice.text)
+          render_choice_label(choice, opts)
           render_between_slot
         end
+        # `append` is a sibling of `<label>` inside `.radio` — keeps
+        # links/buttons out of the label so a stray click doesn't
+        # activate the radio. HTML-safe content; callers typically
+        # build it with `capture { a(...) }` or a sub-component.
+        trusted_html(opts[:append]) if opts[:append]
       end
+    end
+
+    def render_choice_radio(value_str, opts)
+      # Stringify value so Phlex doesn't dasherize symbols
+      # (e.g. `:mycoportal_image_list` → `"mycoportal-image-list"`).
+      # Use a value-derived index so the rendered id is value-based
+      # (`field_id_<value>`), matching MO's pre-upstream convention
+      # used by JS/CSS, rather than upstream's default index-based id.
+      # `checked` is computed here because upstream Radio's
+      # `field.value == @value` doesn't coerce types — MO routinely
+      # pairs boolean/symbol field values with string option values.
+      render(Superform::Rails::Components::Radio.new(
+               @field,
+               value: value_str,
+               index: index_for(value_str),
+               checked: option_checked?(value_str),
+               disabled: opts[:disabled],
+               **@attributes
+             ))
+    end
+
+    # `label_block:` takes precedence over `choice.text` and runs in
+    # RadioField's Phlex render context — gives callers the full Phlex
+    # DSL for compound labels (e.g. `strong { ... } div { ... }`)
+    # without forcing them to pre-build an html_safe string.
+    def render_choice_label(choice, opts)
+      if opts[:label_block]
+        instance_exec(&opts[:label_block])
+      else
+        trusted_html(choice.text)
+      end
+    end
+
+    # Accept either `[value, label]` (the original two-tuple) or
+    # `[value, label, opts]` (extended) per choice. Strip the opts so
+    # Superform's `Radios` iteration sees the plain two-tuples it
+    # expects; remember opts indexed by stringified value for
+    # `render_choice` to look up.
+    def split_per_choice_opts(collection)
+      pairs = []
+      opts_by_value = {}
+      collection.each do |entry|
+        value, label, opts = entry
+        pairs << [value, label]
+        opts_by_value[value.to_s] = opts if opts
+      end
+      [pairs, opts_by_value]
     end
 
     # `between` content is rendered after the label text inside each
