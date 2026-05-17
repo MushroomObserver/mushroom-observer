@@ -72,7 +72,8 @@ class Components::ImagesToRemoveForm < Components::ApplicationForm
     )
     render(Components::ApplicationForm::CheckboxField.new(
              proxy,
-             wrapper_options: { label: "#{:image.t} ##{image.id}" },
+             wrapper_options: { label: "#{:image.t} ##{image.id}",
+                                wrap_class: "my-0" },
              checked_value: "yes",
              unchecked_value: "no"
            ))
