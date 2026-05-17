@@ -14,7 +14,7 @@ module Observations
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(Components::ModalForm.new(
+          render(Components::ModalTurboForm.new(
                    identifier: "observation_email",
                    title: :ask_observation_question_title.t(
                      name: @observation.unique_format_name

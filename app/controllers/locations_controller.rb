@@ -499,7 +499,7 @@ class LocationsController < ApplicationController
   end
 
   def render_modal_location_form
-    render(Components::ModalForm.new(
+    render(Components::ModalTurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
