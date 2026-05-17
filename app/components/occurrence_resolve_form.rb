@@ -101,7 +101,7 @@ class Components::OccurrenceResolveForm < Components::Base
 
   def selected_hidden_fields
     @selected.each do |obs|
-      input(type: "hidden", name: "observation_ids[]",
+      input(type: "hidden", name: "occurrence[observation_ids][]",
             value: obs.id)
     end
     input(type: "hidden",

@@ -70,6 +70,30 @@ class RadioFieldTest < ComponentTestCase
                 text: "Help text")
   end
 
+  def test_per_choice_append_accepts_proc
+    append_block = -> { a(href: "/from_proc") { "Create" } }
+    html = render_field([
+                          [1, "A"],
+                          [2, "B", { append: append_block }]
+                        ])
+
+    # Proc invoked in RadioField's Phlex render context — sibling of
+    # the label, inside .radio, just like the SafeBuffer form.
+    assert_html(html, ".radio > a[href='/from_proc']", text: "Create")
+    assert_no_html(html, "label[for='target_2'] a[href='/from_proc']")
+  end
+
+  def test_per_choice_nil_opts_tolerated
+    # `[value, label, nil]` 3-tuple should be treated the same as
+    # `[value, label]` — split_per_choice_opts skips the assignment.
+    html = render_field([[1, "A"], [2, "B", nil]])
+
+    assert_html(html, "input[type='radio'][value='1']")
+    assert_html(html, "input[type='radio'][value='2']")
+    assert_includes(html, "A")
+    assert_includes(html, "B")
+  end
+
   def test_per_choice_label_block_takes_precedence_over_text
     block = -> { span { "From block" } }
     html = render_field([
