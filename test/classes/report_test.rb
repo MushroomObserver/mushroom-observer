@@ -809,11 +809,12 @@ class ReportTest < UnitTestCase
   # Excluded names: observations are omitted from the report entirely
   def test_mycoportal_omits_excluded_text_names
     Report::Mycoportal::EXCLUDED_TEXT_NAMES.each do |text_name|
-      name = Name.create!(
-        user: rolf, rank: "Species",
-        text_name: text_name, search_name: text_name,
-        display_name: text_name
-      )
+      name = Name.find_by(text_name: text_name) ||
+             Name.create!(
+               user: rolf, rank: "Species",
+               text_name: text_name, search_name: text_name,
+               display_name: text_name
+             )
       obs = Observation.create!(user: rolf, when: Time.zone.now,
                                 location: locations(:burbank),
                                 where: locations(:burbank).name,
