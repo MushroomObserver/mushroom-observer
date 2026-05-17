@@ -13,6 +13,18 @@
       font-size: 90% !important
     }
   }
+
+  // When the row has a sibling button-link next to the label (e.g.
+  // a "Create" link on placeholder rows in the project-violations
+  // target-location modal), flex-layout the row so the label and
+  // the button stay on the same line regardless of label wrap.
+  // Default inline-block flow puts the button on a new line at
+  // x=0 when the label wraps — confusing visually.
+  &:has(> a.btn) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
 
 // Theme- AND variant-aware "pressed" styles for button-styled

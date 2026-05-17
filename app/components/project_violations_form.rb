@@ -258,29 +258,42 @@ class Components::ProjectViolationsForm < Components::Base
 
   def render_suffix_radios(suffixes, existing, first_existing)
     p { :form_violations_modal_target_location_help.l }
-    suffixes.each do |suffix|
-      div(class: "radio") do
-        render_suffix_choice(suffix, existing[suffix], first_existing == suffix)
+    field = Components::ApplicationForm::FieldProxy.new(
+      nil, "location_id", first_existing && existing[first_existing]&.id
+    )
+    render(Components::ApplicationForm::RadioField.new(
+             field, *suffix_choices(suffixes, existing)
+           ))
+  end
+
+  # Each suffix becomes a `[value, label, opts]` choice for
+  # `RadioField`. Existing-location rows submit the location id;
+  # placeholder rows are disabled (so they're inert / not submitted)
+  # and `append:` a "Create" link as a sibling of the label inside
+  # the `.radio` wrap — kept outside `<label>` so clicking the link
+  # doesn't accidentally toggle the radio.
+  def suffix_choices(suffixes, existing)
+    suffixes.map do |suffix|
+      location = existing[suffix]
+      if location
+        [location.id, " #{suffix}"]
+      else
+        [suffix, " #{suffix}",
+         { disabled: true, append: suffix_create_link(suffix) }]
       end
     end
   end
 
-  def render_suffix_choice(suffix, location, checked)
-    label do
-      if location
-        input(type: "radio", name: "location_id",
-              value: location.id, checked: checked)
-        plain(" #{suffix}")
-      else
-        input(type: "radio", name: "location_id", disabled: true)
-        plain(" #{suffix} ")
-        a(
-          href: new_location_path(display_name: suffix),
-          target: "_blank", rel: "noopener",
-          class: "btn btn-default btn-xs"
-        ) { :form_violations_modal_target_location_create.l }
-      end
-    end
+  def suffix_create_link(suffix)
+    # HTML-safe string built via Rails `tag.a` (returns SafeBuffer)
+    # so `RadioField` can emit it via `trusted_html`. Leading space
+    # gives a small gap between the disabled label text and the link.
+    " ".html_safe + helpers.tag.a(
+      :form_violations_modal_target_location_create.l,
+      href: new_location_path(display_name: suffix),
+      target: "_blank", rel: "noopener",
+      class: "btn btn-default btn-xs"
+    )
   end
 
   def render_csrf_and_method
