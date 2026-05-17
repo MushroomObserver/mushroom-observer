@@ -1,0 +1,149 @@
+# frozen_string_literal: true
+
+# General Bootstrap 3 modal wrapper. Encapsulates the
+# `modal > modal-dialog > modal-content > header / body / footer`
+# nesting and the close-button / title boilerplate so callers can
+# focus on the modal's content.
+#
+# Use this directly when you have a modal whose body is arbitrary
+# content (forms, text, lists). For controller-rendered turbo-stream
+# form modals with section-update auto-close, prefer
+# `Components::ModalTurboForm`, which composes this and adds the
+# turbo-modal lifecycle wiring.
+#
+# Other modal-like components (`AddObsModal`, `ModalConfirm`,
+# `ModalProgressSpinner`) predate this and inline their own modal
+# markup; converting them is left as a follow-up.
+#
+# @example simple modal with body + footer
+#   render(Components::Modal.new(
+#     id: "modal_thing", title: "Pick a thing", user: @user
+#   )) do |m|
+#     m.with_body { p { "..." } }
+#     m.with_footer do
+#       button(type: "submit", class: "btn btn-primary") { "OK" }
+#       button(type: "button", class: "btn btn-default",
+#              data: { dismiss: "modal" }) { :CANCEL.l }
+#     end
+#   end
+#
+# @example auto-opening modal (e.g. server-rendered for an action)
+#   render(Components::Modal.new(
+#     id: "modal_resolve", title: "Confirm", user: @user, auto_open: true
+#   )) do |m|
+#     m.with_body { render(...) }
+#   end
+class Components::Modal < Components::Base
+  include Phlex::Slotable
+
+  prop :id, String
+  prop :title, _Nilable(String), default: nil
+  # Bootstrap modal-dialog size variants: "modal-dialog",
+  # "modal-dialog modal-lg", "modal-dialog modal-sm".
+  prop :dialog_class, String, default: "modal-dialog"
+  # When `true`, the modal is shown immediately on page load
+  # (server-rendered for a redirect-like response, e.g.
+  # `OccurrenceResolveModal`'s auto-open pattern). Adds the
+  # backdrop, the `fade in` class, and the `display: block` style.
+  prop :auto_open, _Boolean, default: false
+  prop :user, _Nilable(User), default: nil
+  # Extra CSS class(es) appended to the modal root, e.g. `modal-form`
+  # (used by `ModalTurboForm` for turbo-stream form modals).
+  prop :extra_class, _Nilable(String), default: nil
+  prop :extra_data, Hash, default: -> { {} }
+  # Override the auto-generated DOM ids for the title and body
+  # elements. Defaults are `<id>_title` and `<id>_body`; pass
+  # explicit values when external CSS/JS/turbo-stream targets rely
+  # on specific ids (e.g. `ModalTurboForm` preserves its
+  # `modal_<identifier>_body` convention).
+  prop :title_id, _Nilable(String), default: nil
+  prop :body_id, _Nilable(String), default: nil
+
+  slot :title_content
+  slot :body
+  slot :footer
+
+  public :title_content_slot, :body_slot, :footer_slot
+
+  def view_template(&block)
+    yield(self) if block
+    render_backdrop if @auto_open
+    div(id: @id, class: modal_class, role: "dialog",
+        style: (@auto_open ? "display: block;" : nil),
+        aria: { labelledby: resolved_title_id },
+        data: modal_data) do
+      div(class: @dialog_class, role: "document") do
+        div(class: "modal-content") do
+          render_header
+          render_body
+          render_footer
+        end
+      end
+    end
+  end
+
+  private
+
+  def render_backdrop
+    div(class: "modal-backdrop fade in")
+  end
+
+  def modal_class
+    classes = ["modal"]
+    classes << "fade in" if @auto_open
+    classes << "fade" unless @auto_open
+    classes << @extra_class if @extra_class.present?
+    classes.join(" ")
+  end
+
+  def modal_data
+    data = { controller: "modal" }
+    data[:modal_user_value] = @user.id if @user
+    data.merge(@extra_data)
+  end
+
+  def resolved_title_id
+    @title_id || "#{@id}_title"
+  end
+
+  def resolved_body_id
+    @body_id || "#{@id}_body"
+  end
+
+  def render_header
+    div(class: "modal-header") do
+      close_button
+      h4(class: "modal-title", id: resolved_title_id) do
+        if title_content_slot
+          render(title_content_slot)
+        elsif @title
+          # Titles often come from MO's `.t` (textilize), which returns
+          # HTML-safe strings with rendered tags (`<i>`, `<b>`). Plain
+          # strings get escaped — preserves the original ModalForm
+          # behavior (which used `{ @title }` block emission).
+          trusted_html(@title)
+        end
+      end
+    end
+  end
+
+  def close_button
+    button(type: :button, class: "close",
+           data: { dismiss: "modal" },
+           aria: { label: :CLOSE.l }) do
+      span(aria: { hidden: "true" }) { "×" }
+    end
+  end
+
+  def render_body
+    return unless body_slot
+
+    div(class: "modal-body", id: resolved_body_id) { render(body_slot) }
+  end
+
+  def render_footer
+    return unless footer_slot
+
+    div(class: "modal-footer") { render(footer_slot) }
+  end
+end

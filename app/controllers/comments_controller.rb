@@ -253,7 +253,7 @@ class CommentsController < ApplicationController
   # we give users the option to edit any number of their own comments on a
   # show page. "comment" disambiguates :new, because :edit always has id
   def render_modal_comment_form
-    render(Components::ModalForm.new(
+    render(Components::ModalTurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,

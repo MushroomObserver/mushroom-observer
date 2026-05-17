@@ -6,7 +6,7 @@
 end %>
 
 <%= turbo_stream.replace("#{identifier}_form") do
-  Components::ModalForm.render_form(self,
+  Components::ModalTurboForm.render_form(self,
                                     model: form_locals[:model],
                                     form_locals: form_locals)
 end %>

@@ -12,7 +12,7 @@ module Admin
         respond_to do |format|
           format.html
           format.turbo_stream do
-            render(Components::ModalForm.new(
+            render(Components::ModalTurboForm.new(
                      identifier: "webmaster_question_email",
                      title: :ask_webmaster_title.l,
                      user: @user,

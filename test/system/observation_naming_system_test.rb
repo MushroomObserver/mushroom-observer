@@ -141,12 +141,20 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     end
     assert_selector("#modal_obs_#{obs.id}_naming_#{nam.id}", wait: 9)
     assert_selector("#obs_#{obs.id}_naming_#{nam.id}_form", wait: 9)
-    # Verify vote and reasons fields are visible (not collapsed)
+    # Verify vote field renders and the BS3 collapse toggle expands
+    # the reasons textarea when its checkbox is toggled on.
     within("#obs_#{obs.id}_naming_#{nam.id}_form") do
       assert_selector("#naming_vote_value", wait: 4)
-      # Reasons textareas should be expanded (have "in" class for Bootstrap 3)
-      # when editing an existing naming that has reasons checked
-      assert_selector("[id^='reasons_'][id$='_notes'].in", wait: 4)
+      # All reason textareas exist (some may already be expanded if
+      # their reason is server-rendered as `used?`).
+      assert_selector("[id^='naming_reasons_'][id$='_notes']", wait: 4)
+      # Find a reason whose textarea is currently collapsed, toggle
+      # its checkbox, and verify the textarea expands. Use reason 4
+      # (no-default) — reason 1 is pre-checked server-side for new
+      # namings (NAMING_RECOGNIZED_BY_SIGHT default).
+      assert_selector("#naming_reasons_4_notes", visible: false)
+      find("#naming_reasons_4_check").click
+      assert_selector("#naming_reasons_4_notes.in", wait: 4)
     end
     within("#modal_obs_#{obs.id}_naming_#{nam.id}") do
       find(:css, ".close").click

@@ -14,7 +14,7 @@ module Users
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(Components::ModalForm.new(
+          render(Components::ModalTurboForm.new(
                    identifier: "user_question_email",
                    title: :ask_user_question_title.t(user: @target.legal_name),
                    user: @user,

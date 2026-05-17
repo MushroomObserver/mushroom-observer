@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ModalFormTest < ComponentTestCase
+class ModalTurboFormTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -40,7 +40,7 @@ class ModalFormTest < ComponentTestCase
     sequence = sequences(:local_sequence)
     obs = sequence.observation
 
-    html = render(Components::ModalForm.new(
+    html = render(Components::ModalTurboForm.new(
                     identifier: "sequence_#{sequence.id}",
                     title: "Edit Sequence",
                     user: @user,
@@ -56,7 +56,7 @@ class ModalFormTest < ComponentTestCase
   private
 
   def render_modal(identifier:, title:)
-    render(Components::ModalForm.new(
+    render(Components::ModalTurboForm.new(
              identifier: identifier,
              title: title,
              user: @user

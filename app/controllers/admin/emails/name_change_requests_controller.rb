@@ -21,7 +21,7 @@ module Admin
         respond_to do |format|
           format.html
           format.turbo_stream do
-            render(Components::ModalForm.new(
+            render(Components::ModalTurboForm.new(
                      identifier: "name_change_request_email",
                      title: :email_name_change_request_title.l,
                      user: @user,

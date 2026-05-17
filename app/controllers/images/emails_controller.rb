@@ -15,7 +15,7 @@ module Images
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(Components::ModalForm.new(
+          render(Components::ModalTurboForm.new(
                    identifier: "commercial_inquiry_email",
                    title: :commercial_inquiry_title.t(
                      name: @image.unique_format_name
