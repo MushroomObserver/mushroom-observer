@@ -30,14 +30,18 @@ class OccurrenceResolveFormTest < ComponentTestCase
     # Form posts to occurrences_path
     assert_html(html, "form[action='/occurrences'][method='post']")
 
-    # Hidden fields for selected observations
+    # Hidden fields for selected observations — must use the namespaced
+    # `occurrence[observation_ids][]` shape because OccurrencesController#create
+    # reads `params.dig(:occurrence, :observation_ids)` (PR #4250).
+    # Flat `observation_ids[]` would be silently ignored and the controller
+    # would flash "must include at least one additional observation".
     assert_html(html,
                 "input[type='hidden']" \
-                "[name='observation_ids[]']" \
+                "[name='occurrence[observation_ids][]']" \
                 "[value='#{@obs1.id}']")
     assert_html(html,
                 "input[type='hidden']" \
-                "[name='observation_ids[]']" \
+                "[name='occurrence[observation_ids][]']" \
                 "[value='#{@obs2.id}']")
     assert_html(html,
                 "input[type='hidden']" \
@@ -163,7 +167,7 @@ class OccurrenceResolveFormTest < ComponentTestCase
     # No observation_ids hidden fields in edit flow
     obs_ids = doc.css(
       "input[type='hidden']" \
-      "[name='observation_ids[]']"
+      "[name='occurrence[observation_ids][]']"
     )
     assert_equal(0, obs_ids.size,
                  "Edit flow should not have obs hidden fields")
