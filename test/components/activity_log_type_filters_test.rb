@@ -15,22 +15,24 @@ class ActivityLogTypeFiltersTest < ComponentTestCase
   def test_renders_show_label
     html = render_component(nil, ["all"])
 
-    assert_html(html, "span.btn.btn-default.btn-sm.disabled",
-                text: :rss_show.t)
+    # Was styled as a disabled btn-default — misleading affordance.
+    # Now a plain `text-muted` span: visibly a label, not a button.
+    assert_html(html, "span.text-muted", text: :rss_show.t)
   end
 
   def test_renders_everything_button_active_when_all_types
     html = render_component(nil, ["all"])
 
     # When all types, everything button should be active (no link)
-    assert_html(html, "span.btn.btn-default.btn-sm.active", text: :rss_all.t)
+    assert_html(html, "span.btn.btn-outline-default.btn-sm.active",
+                text: :rss_all.t)
   end
 
   def test_renders_everything_button_as_link_when_not_all
     html = render_component(nil, ["observation"])
 
     # When not all types, everything button should have a link
-    assert_html(html, "span.btn.btn-default.btn-sm a.filter-only",
+    assert_html(html, "span.btn.btn-outline-default.btn-sm a.filter-only",
                 text: :rss_all.t)
   end
 
@@ -43,7 +45,7 @@ class ActivityLogTypeFiltersTest < ComponentTestCase
       assert_html(html, "input[type='checkbox'][name='q[type][]']" \
                         "[value='#{type_str}'][id='type_#{type_str}']")
       # Check label exists
-      assert_html(html, "label.btn.btn-default.btn-sm.filter-checkbox")
+      assert_html(html, "label.btn.btn-outline-default.btn-sm.filter-checkbox")
     end
   end
 
@@ -66,14 +68,21 @@ class ActivityLogTypeFiltersTest < ComponentTestCase
     assert_no_html(html, "input[type='checkbox'][value='name'][checked]")
   end
 
-  def test_active_class_on_single_selected_type
+  def test_selected_type_checkbox_drives_active_state_via_css
     html = render_component(nil, ["observation"])
 
-    # The observation label should have active class
-    assert_html(html, "label.active:has(input[value='observation'])")
-
-    # The name label should NOT have active class
-    assert_html(html, "label:not(.active):has(input[value='name'])")
+    # No server-side `.active` class anymore — the CSS rule
+    # `.filter-checkbox:has(input[type="checkbox"]:checked)` paints
+    # the "pressed" visual using theme-aware custom properties.
+    # The structural check: selected type's checkbox is checked
+    # inside a `.filter-checkbox` label; unselected isn't. CSS
+    # handles the visual.
+    assert_html(html,
+                "label.filter-checkbox " \
+                "input[type='checkbox'][value='observation'][checked]")
+    assert_no_html(html,
+                   "label.filter-checkbox " \
+                   "input[type='checkbox'][value='name'][checked]")
   end
 
   def test_type_filter_link_present_when_not_selected
@@ -87,8 +96,13 @@ class ActivityLogTypeFiltersTest < ComponentTestCase
   def test_renders_submit_button
     html = render_component(nil, ["all"])
 
+    # "Apply" reads better than "Submit" for a filter-narrowing
+    # action. Filter buttons use `.btn-outline-default` (subtle);
+    # the Apply button uses solid `.btn-default` so it stands out
+    # as the commit action.
     assert_html(html,
-                "input[type='submit'][value='#{:SUBMIT.t}'].btn.btn-default")
+                "input[type='submit'][value='#{:APPLY.t}']" \
+                ".btn.btn-default")
   end
 
   # NOTE: Testing with a real query requires the controller to have q_param
