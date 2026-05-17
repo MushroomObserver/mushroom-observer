@@ -733,6 +733,140 @@ class ReportTest < UnitTestCase
     do_mycoportal_csv_test(obs, expect)
   end
 
+  # Gen. code names: sciname = unquoted genus; identificationQualifier =
+  # "aff. species"; taxonRemarks = search_name
+  def test_mycoportal_gen_name
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Gen. 'Mycena' sp. 'acicula-PNW01'",
+      author: "",
+      search_name: "Gen. 'Mycena' sp. 'acicula-PNW01'",
+      display_name: "Gen. 'Mycena' sp. 'acicula-PNW01'"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Mycena",
+      identificationQualifier: "aff. species",
+      taxonRemarks: "Gen. 'Mycena' sp. 'acicula-PNW01'"
+    ).values
+
+    do_mycoportal_csv_test(obs, expect)
+  end
+
+  # Infrageneric names (Stirps–Subgenus): sciname = genus;
+  # identificationQualifier = "aff. <rank>"; taxonRemarks = search_name
+  def test_mycoportal_infrageneric_section
+    name = Name.create!(
+      user: rolf,
+      rank: "Section",
+      text_name: "Agaricus sect. Agaricus",
+      author: "Fr.",
+      search_name: "Agaricus sect. Agaricus Fr.",
+      display_name: "**__Agaricus__** sect. **__Agaricus__** Fr."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Agaricus",
+      identificationQualifier: "aff. section",
+      taxonRemarks: "Agaricus sect. Agaricus Fr."
+    ).values
+
+    do_mycoportal_csv_test(obs, expect)
+  end
+
+  def test_mycoportal_nom_ined
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Cortinarius variicolor",
+      author: "nom. ined.",
+      search_name: "Cortinarius variicolor nom. ined.",
+      display_name: "__Cortinarius__ __variicolor__ nom. ined."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius",
+      identificationQualifier: "aff. species",
+      taxonRemarks: "Cortinarius variicolor nom. ined."
+    ).values
+
+    do_mycoportal_csv_test(obs, expect)
+  end
+
+  # Excluded names: observations are omitted from the report entirely
+  def test_mycoportal_omits_excluded_text_names
+    Report::Mycoportal::EXCLUDED_TEXT_NAMES.each do |text_name|
+      name = Name.create!(
+        user: rolf, rank: "Species",
+        text_name: text_name, search_name: text_name,
+        display_name: text_name
+      )
+      obs = Observation.create!(user: rolf, when: Time.zone.now,
+                                location: locations(:burbank),
+                                where: locations(:burbank).name,
+                                name: name)
+      query = Query.lookup(:Observation)
+      body = report_body(Report::Mycoportal, query)
+      table = ::CSV.parse(body, col_sep: ",")
+      row = table.find { |r| r[2] == "MUOB #{obs.id}" }
+      assert_nil(row, "#{text_name.inspect} obs should be omitted from report")
+    end
+  end
+
+  def test_mycoportal_omits_non_fungal_kingdom
+    name = Name.create!(
+      user: rolf, rank: "Species",
+      text_name: "Rosa canina",
+      author: "L.",
+      search_name: "Rosa canina L.",
+      display_name: "__Rosa__ __canina__ L.",
+      classification: "Kingdom: _Plantae_\nPhylum: _Tracheophyta_"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+    query = Query.lookup(:Observation)
+    body = report_body(Report::Mycoportal, query)
+    table = ::CSV.parse(body, col_sep: ",")
+    row = table.find { |r| r[2] == "MUOB #{obs.id}" }
+    assert_nil(row, "Non-fungal (Plantae) obs should be omitted from report")
+  end
+
+  def test_mycoportal_includes_unknown_kingdom
+    name = Name.create!(
+      user: rolf, rank: "Species",
+      text_name: "Incertae sedis",
+      author: "",
+      search_name: "Incertae sedis",
+      display_name: "Incertae sedis",
+      classification: nil
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+    query = Query.lookup(:Observation)
+    body = report_body(Report::Mycoportal, query)
+    table = ::CSV.parse(body, col_sep: ",")
+    row = table.find { |r| r[2] == "MUOB #{obs.id}" }
+    assert_not_nil(row,
+                   "Obs with nil classification should be included in report")
+  end
+
   def test_mycoportal_identification_qualifier_sensu_non_stricto
     name = names(:coprinus_sensu_lato)
     location = locations(:burbank)
@@ -887,6 +1021,33 @@ class ReportTest < UnitTestCase
       "© #{image.copyright_holder} CC0 #{licenses(:publicdomain).url}",
       row[2],
       "rights should use copyright_holder when present"
+    )
+  end
+
+  def test_mycoportal_image_list_since_excludes_older_images
+    obs = observations(:detailed_unknown_obs)
+    image = Image.create!(user: users(:rolf), license: licenses(:ccnc30),
+                          copyright_holder: "Test",
+                          created_at: Time.zone.parse("2025-01-15 12:00:00"))
+    obs.images << image
+    query = Query.lookup(:Observation)
+
+    since_before = Time.zone.parse("2025-01-15 11:00:00")
+    body = Report::MycoportalImageList.new(query: query,
+                                           since: since_before).body
+    table = CSV.parse(body, col_sep: ",")
+    assert_not_nil(
+      table.find { |r| r[1]&.end_with?("/#{image.id}.jpg") },
+      "Image created after 'since' should be included"
+    )
+
+    since_after = Time.zone.parse("2025-01-15 13:00:00")
+    body = Report::MycoportalImageList.new(query: query,
+                                           since: since_after).body
+    table = CSV.parse(body, col_sep: ",")
+    assert_nil(
+      table.find { |r| r[1]&.end_with?("/#{image.id}.jpg") },
+      "Image created before 'since' should be excluded"
     )
   end
 

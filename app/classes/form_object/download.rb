@@ -4,4 +4,5 @@
 class FormObject::Download < FormObject::Base
   attribute :format, :string, default: "raw"
   attribute :encoding, :string, default: "UTF-8"
+  attribute :since, :string, default: nil
 end
