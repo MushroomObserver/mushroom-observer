@@ -403,7 +403,7 @@ class ReportTest < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     expect = hashed_expect(obs).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_notes_and_images
@@ -423,7 +423,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "Habitat: lawn Other: First line. Second line."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_sequence
@@ -434,7 +434,7 @@ class ReportTest < UnitTestCase
       locality: "North Falmouth, 68 Bay Rd., MO Inc."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_agaricus_campestrus_obs
@@ -443,7 +443,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "From somewhere else"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_compress_consecutive_whitespace
@@ -463,7 +463,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "Habitat: lawn Other: 1st line. 2nd line. 3rd line."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_associated_taxa_trees_shrubs_host
@@ -482,7 +482,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "other remarks"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_group
@@ -498,7 +498,7 @@ class ReportTest < UnitTestCase
       taxonRemarks: "Boletus edulis group"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_group_sensu
@@ -522,7 +522,7 @@ class ReportTest < UnitTestCase
       taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   # Groups: text_name ends in /(group|complex|clade)$/
@@ -540,7 +540,7 @@ class ReportTest < UnitTestCase
       taxonRemarks: "Boletus edulis group"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_group_sensu_id_qualifier_is_token_only
@@ -564,7 +564,7 @@ class ReportTest < UnitTestCase
       taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_complex
@@ -587,7 +587,7 @@ class ReportTest < UnitTestCase
       taxonRemarks: "Russula emetica complex"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   # Code names: text_name contains a single-quote (e.g. sp. 'IN34')
@@ -609,7 +609,7 @@ class ReportTest < UnitTestCase
       taxonRemarks: "Cortinarius sp. 'IN34'"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_code_name_with_author
@@ -635,7 +635,7 @@ class ReportTest < UnitTestCase
       taxonRemarks: "Geoglossum sp. 'MI01' S.D. Russell"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_explicit_provisional
@@ -653,16 +653,16 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Gymnopus bakerensis",
-      identificationQualifier: "comb. prov.",
+      sciname: "Gymnopus",
+      identificationQualifier: "aff. species",
       taxonRemarks: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
-  # Provisional names: author matches /\w+\. prov\./
-  # sciname = text_name unchanged; identificationQualifier = matched token;
+  # Unpublished names (nom. prov., comb. prov., nom. ined., etc.):
+  # sciname = genus; identificationQualifier = "aff. <rank>";
   # taxonRemarks = search_name
   def test_mycoportal_provisional_bare_nom_prov
     name = Name.create!(
@@ -679,12 +679,12 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Cortinarius percomis",
-      identificationQualifier: "nom. prov.",
+      sciname: "Cortinarius",
+      identificationQualifier: "aff. species",
       taxonRemarks: "Cortinarius percomis nom. prov."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_provisional_authored_nom_prov
@@ -702,12 +702,12 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Cortinarius percomis",
-      identificationQualifier: "nom. prov.",
+      sciname: "Cortinarius",
+      identificationQualifier: "aff. species",
       taxonRemarks: "Cortinarius percomis S.D. Russell nom. prov."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_provisional_comb_prov
@@ -725,12 +725,12 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Cortinarius percomis",
-      identificationQualifier: "comb. prov.",
+      sciname: "Cortinarius",
+      identificationQualifier: "aff. species",
       taxonRemarks: "Cortinarius percomis (Fr.) auct. comb. prov."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_identification_qualifier_sensu_non_stricto
@@ -744,14 +744,14 @@ class ReportTest < UnitTestCase
       identificationQualifier: "sensu lato"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_no_lat_lng
     obs = observations(:minimal_unknown_obs)
     expect = hashed_expect(obs).merge.values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_public
@@ -767,7 +767,7 @@ class ReportTest < UnitTestCase
     expect[:coordinateUncertaintyInMeters] = nil
     expect = expect.values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_hidden
@@ -794,7 +794,7 @@ class ReportTest < UnitTestCase
       informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_nil_lat_lng_hidden
@@ -818,7 +818,7 @@ class ReportTest < UnitTestCase
       informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_hidden_nil_location
@@ -846,7 +846,7 @@ class ReportTest < UnitTestCase
      :maximumElevationInMeters].each { |key| expect[key] = nil }
     expect = expect.values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_image_list_header
@@ -1163,9 +1163,22 @@ class ReportTest < UnitTestCase
     query = Query.lookup(:Observation)
     body = report_body(report_type, query, user:)
     table = CSV.parse(body, col_sep: report_type.separator)
-    assert_equal(query.num_results + 1, table.count)
+    assert_equal(query.num_results + 1, table.count,
+                 "#{report_type} row count should equal query results + header")
     idx = query.results.sort_by(&block).index(obs)
-    assert_equal(expect, table[idx + 1])
+    assert_equal(expect, table[idx + 1],
+                 "#{report_type} row for obs #{obs.id} should match expected")
+  end
+
+  # Mycoportal filters some observations via include_row?, so row count !=
+  # query.num_results. Find the specific row by its catalogNumber instead.
+  def do_mycoportal_csv_test(obs, expect)
+    query = Query.lookup(:Observation)
+    body = report_body(Report::Mycoportal, query)
+    table = CSV.parse(body, col_sep: ",")
+    row = table.find { |r| r[2] == "MUOB #{obs.id}" }
+    assert_not_nil(row, "Expected Mycoportal row for obs #{obs.id}")
+    assert_equal(expect, row, "Mycoportal row for obs #{obs.id} should match")
   end
 
   def report_body(report_type, query, user: nil)

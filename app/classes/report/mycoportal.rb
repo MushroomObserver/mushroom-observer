@@ -14,6 +14,11 @@ module Report
   class Mycoportal < CSV
     CODE_NAME_QUALIFIER = "code name aff. species"
     GPS_HIDDEN_MESSAGE = "Coordinates obscured by observer"
+    EXCLUDED_TEXT_NAMES = (
+      %w[Duplicate Undetermined Eukarya Eukaryota] +
+      ["Mixed collection", "Non-fungal", "Slime-flux"]
+    ).freeze
+    INFRAGENERIC_RANKS = %w[Stirps Series Subsection Section Subgenus].freeze
 
     # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
     # Label names for the columns in the report.
@@ -84,7 +89,10 @@ module Report
     # taxon name, without authority or qualification (such as "group")
     def sciname(row)
       text_name = row.name_text_name
-      return text_name.split.first if code_name?(row)
+      return genus_from_gen_name(text_name) if gen_name?(row)
+      return text_name.split.first if infrageneric?(row) ||
+                                      unpublished_name?(row) ||
+                                      code_name?(row)
       # The last word in text_name could be Group or Complex
       return text_name_without_last_word(text_name) if group?(row)
 
@@ -92,19 +100,19 @@ module Report
     end
 
     # Qualifies unpublished MO text_name.
-    # Examples: nom. prov., comb. prov., group, sensu lato, sensu auct.
+    # Examples: aff. species, aff. section, group, sensu lato, sensu auct.
     def identification_qualifier(row)
+      return "aff. #{row.name_rank.downcase}" if reduce_to_genus?(row)
       return nil unless unregistrable_name?(row)
       return CODE_NAME_QUALIFIER if code_name?(row)
       return group_token(row) if group?(row)
-      return prov_token(row) if provisional?(row)
 
       row.name_author&.match(/sensu.*/)&.[](0)
     end
 
-    # Full name+author for code names, provisional names, and groups
+    # search_name for genus-reduced, code, and group names
     def taxon_remarks(row)
-      return unless code_name?(row) || provisional?(row) || group?(row)
+      return unless reduce_to_genus?(row) || code_name?(row) || group?(row)
 
       row.name_search_name
     end
@@ -167,48 +175,33 @@ module Report
       "vouchered"
     end
 
-    ####### Additional columns and utilities
-
     # extended data used to calculate some values
     # See app/classes/report/base_table.rb
     def extend_data!(rows)
+      add_name_kingdoms!(rows)
       add_collector_ids!(rows, :collector_ids)
       add_herbarium_accession_numbers!(rows, :herbarium_accession_numbers)
       add_sequence_ids!(rows, :sequence_ids)
       add_gps_hidden!(rows)
     end
 
-    def collector_ids(row)
-      row.val(:collector_ids)
+    def include_row?(row)
+      return false if EXCLUDED_TEXT_NAMES.include?(row.name_text_name)
+
+      kingdom = row.val(:name_kingdom)
+      kingdom.nil? || kingdom.match?(/\A(Fungi|Protozoa)\z/)
     end
 
-    def herbarium_accession_numbers(row)
-      row.val(:herbarium_accession_numbers)
-    end
-
-    def sequence_ids(row)
-      row.val(:sequence_ids)
-    end
-
-    def gps_hidden?(row)
-      row.val(:gps_hidden_flag).present?
-    end
-
-    def sort_before(rows)
-      rows.sort_by(&:obs_id)
-    end
-
-    ##########
+    def collector_ids(row) = row.val(:collector_ids)
+    def herbarium_accession_numbers(row) = row.val(:herbarium_accession_numbers)
+    def sequence_ids(row) = row.val(:sequence_ids)
+    def gps_hidden?(row) = row.val(:gps_hidden_flag).present?
+    def sort_before(rows) = rows.sort_by(&:obs_id)
 
     private
 
-    def group?(row)
-      row.name_text_name.match?(/(group|complex|clade)$/)
-    end
-
-    def group_token(row)
-      row.name_text_name.match(/(group|complex|clade)$/)[0]
-    end
+    def group?(row) = row.name_text_name.match?(/(group|complex|clade)$/)
+    def group_token(row) = row.name_text_name.match(/(group|complex|clade)$/)[0]
 
     def text_name_without_last_word(text_name)
       text_name.split[0...-1].join(" ")
@@ -217,7 +210,7 @@ module Report
     def unregistrable_name?(row)
       group?(row) ||
         sensu_non_stricto?(row) ||
-        provisional?(row) ||
+        unpublished_name?(row) ||
         code_name?(row)
     end
 
@@ -226,16 +219,30 @@ module Report
         row.name_author.match(/sensu(?!.*stricto)/)
     end
 
-    def provisional?(row)
-      row.name_author&.match?(/\w+\. prov\./)
+    def gen_name?(row) = row.name_text_name.start_with?("Gen. ")
+    def infrageneric?(row) = INFRAGENERIC_RANKS.include?(row.name_rank)
+    def genus_from_gen_name(text_name) = text_name.match(/'([^']+)'/)[1]
+    def code_name?(row) = row.name_text_name.match?(/'/)
+
+    def unpublished_name?(row)
+      row.name_author.to_s.match?(/\w+\.\s*prov\.|nom\.\s*ined/i)
     end
 
-    def prov_token(row)
-      row.name_author&.match(/\w+\. prov\./)&.[](0)
+    def reduce_to_genus?(row)
+      gen_name?(row) || infrageneric?(row) || unpublished_name?(row)
     end
 
-    def code_name?(row)
-      row.name_text_name.match?(/'/)
+    def add_name_kingdoms!(rows)
+      name_data = Name.where(id: rows.map(&:name_id).uniq).
+                  pluck(:id, :rank, :text_name, :classification)
+      kingdoms = name_data.to_h { |id, *rest| [id, kingdom_from(*rest)] }
+      rows.each { |row| row.add_val(kingdoms[row.name_id], :name_kingdom) }
+    end
+
+    def kingdom_from(rank_int, text_name, classif)
+      return text_name if Name.ranks.key(rank_int).to_s == "Kingdom"
+
+      classif.to_s.match(/Kingdom: _?([A-Za-z]+)_?/)&.[](1)
     end
 
     def distance_from_center_to_farthest_corner(row)

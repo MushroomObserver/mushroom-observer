@@ -69,8 +69,11 @@ module Report
       end
       rows = sort_before(rows)
       extend_data!(rows)
+      rows.select! { |row| include_row?(row) }
       sort_after(rows.map { |row| format_row(row) })
     end
+
+    def include_row?(_row) = true
 
     def all_rows
       rows_with_location + rows_without_location
