@@ -117,7 +117,11 @@ class Components::Modal < Components::Base
         if title_content_slot
           render(title_content_slot)
         elsif @title
-          plain(@title)
+          # Titles often come from MO's `.t` (textilize), which returns
+          # HTML-safe strings with rendered tags (`<i>`, `<b>`). Plain
+          # strings get escaped — preserves the original ModalForm
+          # behavior (which used `{ @title }` block emission).
+          trusted_html(@title)
         end
       end
     end
