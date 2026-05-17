@@ -42,8 +42,12 @@ class Components::ApplicationForm < Superform::Rails::Form
         # Block mode: caller drives rendering via `cb.option(value)` for
         # one or more checkboxes inside MO's standard wrapper. Used for
         # matrix-style layouts where one checkbox_field call produces
-        # exactly one cell of a larger group.
-        render_boolean_with_wrapper { yield(self) }
+        # exactly one cell of a larger group. `label_for: nil` because the
+        # caller's input id (`field.dom.id + "_" + value`) isn't knowable
+        # here — falling through to DOM nesting keeps label clicks working
+        # (HTML spec: a <label> with no `for=` toggles its first nested
+        # form control).
+        render_boolean_with_wrapper(label_for: nil) { yield(self) }
       else
         render_boolean_with_wrapper { render_boolean_inputs }
       end
@@ -181,9 +185,11 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # --- Boolean mode wrapper ---
 
-    def render_boolean_with_wrapper(&checkbox_block)
+    def render_boolean_with_wrapper(label_for: checkbox_id, &checkbox_block)
       div(class: boolean_wrap_class) do
-        label(for: checkbox_id, **label_attributes) do
+        label_attrs = label_attributes
+        label_attrs = label_attrs.merge(for: label_for) if label_for
+        label(**label_attrs) do
           render_boolean_content(&checkbox_block)
           render_help_in_label_row
         end
