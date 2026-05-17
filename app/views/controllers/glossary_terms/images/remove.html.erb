@@ -5,9 +5,10 @@ add_page_title(:image_remove_title.t(name: @object.unique_format_name))
 add_context_nav(glossary_term_image_form_tabs(term: @object))
 
 container_class(:full)
-form_action = { controller: "/glossary_terms/images", action: :detach,
-                id: @object.id }
 %>
 
-<%= render(partial: "shared/images_to_remove",
-           locals: { form_action: form_action }) %>
+<%= render(Components::ImagesToRemoveForm.new(
+             @object,
+             form_action: detach_image_from_glossary_term_path(@object.id),
+             user: @user
+           )) %>
