@@ -67,7 +67,8 @@ class ImageUploadSystemTest < ApplicationSystemTestCase
     begin
       # Attach the non-image file and expect an alert
       alert_text = accept_alert do
-        attach_file("upload_image", text_file.path, visible: false)
+        attach_file("project_upload_image", text_file.path,
+                    visible: false)
       end
 
       assert_equal("Please select an image file (JPG, PNG, GIF, etc.)",
