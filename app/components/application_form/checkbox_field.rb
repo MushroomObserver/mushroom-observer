@@ -59,9 +59,15 @@ class Components::ApplicationForm < Superform::Rails::Form
     # `form.check_box(field, options, checked, unchecked)` positional
     # args, so callers can use "yes"/"no" or other non-boolean values
     # without falling back to bare `input(type: :checkbox)`.
+    #
+    # When `disabled: true` is passed, the hidden sidecar is omitted —
+    # disabled inputs aren't submitted, so the sidecar would be dead
+    # markup (and the checkbox itself never toggles).
     def render_boolean_inputs
-      input(name: field.dom.name, type: :hidden,
-            value: unchecked_value, autocomplete: "off")
+      unless disabled?
+        input(name: field.dom.name, type: :hidden,
+              value: unchecked_value, autocomplete: "off")
+      end
       input(type: :checkbox, value: checked_value, **checkbox_attributes)
     end
 
@@ -85,6 +91,10 @@ class Components::ApplicationForm < Superform::Rails::Form
         attrs[:checked] = field.value.to_s == checked_value.to_s
       end
       attrs
+    end
+
+    def disabled?
+      @attributes[:disabled] == true
     end
 
     # Render a single array-mode checkbox (name="…[]"). Intended for use

@@ -61,13 +61,21 @@ module APIKeysHelper
     end
   end
 
+  # Read-only ✓ indicator shown for verified keys. Renders MO's
+  # canonical `<div class="checkbox"><label><input type="checkbox"
+  # checked disabled></label></div>` shape via the centralized
+  # `CheckboxField` so the markup stays in lockstep with form-mode
+  # checkboxes (BS3/4/5 migration changes one file, not many).
+  # The `disabled:` mode skips the hidden sidecar — the input is
+  # never submitted, so the sidecar would just be noise.
   def api_keys_dummy_verified_check_box(key)
-    tag.div(class: "checkbox my-0", id: "verified_key_#{key.id}") do
-      tag.label(:verified) do
-        check_box_tag(:verified, "verified", true, disabled: true)
-        # concat(:verified.l)
-      end
-    end
+    render(Components::ApplicationForm::CheckboxField.new(
+             Components::ApplicationForm::FieldProxy.new(
+               nil, "verified_key_#{key.id}", true
+             ),
+             wrapper_options: { label: false, wrap_class: "my-0" },
+             disabled: true
+           ))
   end
 
   # This table cell is operated by Bootstrap collapse.js.

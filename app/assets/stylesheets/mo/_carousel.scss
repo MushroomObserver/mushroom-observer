@@ -232,7 +232,17 @@
     display: none;
   }
 
-  &.active {
+  // CSS-only "pressed" state via `:has()` — no JS needed to toggle
+  // `.active`. The browser handles the radio group (clicking one
+  // unchecks the others), so this selector matches whichever label
+  // wraps the currently-checked radio. The `button-active-state`
+  // mixin (in `_form_elements.scss`) pulls active-state colors
+  // from theme-aware custom properties scoped to whichever
+  // `.btn-{variant}` class the element has — no more hardcoded
+  // default-theme grays leaking through in dark themes.
+  &:has(input[type="radio"]:checked) {
+    @include button-active-state;
+
     .set_thumb_img_text {
       display: none;
     }
