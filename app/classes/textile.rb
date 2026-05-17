@@ -415,8 +415,6 @@ class Textile < String
   # Ruby does not allow variable length lookbehinds.
   # They might be avoided via the (nontrivial) changes suggested here:
   # https://github.com/MushroomObserver/mushroom-observer/pull/1528#issuecomment-1608114858
-  # rubocop:disable Style/RegexpLiteral
-  # cop gives false positive
   IMPLICIT_TERM_PATTERN = /
     (?<! x{NAME) # discard match if it follows MO internal object tag
     (?<! x{GLOSSARY_TERM)
@@ -435,7 +433,6 @@ class Textile < String
 
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
   /x
-  # rubocop:enable Style/RegexpLiteral
   private_constant(:IMPLICIT_TERM_PATTERN)
 
   def convert_implicit_terms_to_tagged_glossary_terms!
