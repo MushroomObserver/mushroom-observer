@@ -226,14 +226,18 @@ module Header
     # (`SPECIES_LISTS`, `PROJECTS`, etc.) by pluralizing (lowercase)
     # then upcasing — the reverse order leaves a trailing lowercase
     # `s` (`SPECIES_LISTs`) since ActiveSupport's Inflector adds `s`
-    # in lowercase regardless of input case. `all` is the sentinel
-    # for "all types" — no plural; use `:ALL` directly.
+    # in lowercase regardless of input case. `all` and `none` are
+    # sentinels (no plural form) — use `:ALL` / `:NONE` directly.
+    # The `none` sentinel arises when the controller sanitizes
+    # invalid type tags down to `"none"` (see RssLogsController).
     #
     # Was `val.titleize.split.join(", ")` which split "Species List
     # Project" into four comma-separated tokens.
+    SENTINEL_TYPE_TAGS = { "all" => :ALL, "none" => :NONE }.freeze
+
     def type_tags_to_label(val)
       val.split.map do |tag|
-        (tag == "all" ? :ALL : tag.pluralize.upcase.to_sym).t
+        (SENTINEL_TYPE_TAGS[tag] || tag.pluralize.upcase.to_sym).t
       end.join(", ")
     end
 
