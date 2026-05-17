@@ -78,7 +78,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :images, through: :project_images
 
   has_many :project_observations, dependent: :delete_all
-  has_many :observations, through: :project_observations
+  has_many :observations, through: :project_observations,
+                          after_add: :invalidate_visible_observations_cache!,
+                          after_remove: :invalidate_visible_observations_cache!
   has_many :locations, through: :observations
 
   has_many :project_excluded_observations, dependent: :delete_all
@@ -160,7 +162,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
-      :location
+      :admin_group,
+      :location,
+      :species_lists,
+      :target_locations,
+      :target_names,
+      :user,
+      :user_group
     )
   }
   scope :violations_includes, lambda {
@@ -388,6 +396,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     insert_project_observations(new_obs_ids)
     insert_project_images_for(new_obs_ids)
+    invalidate_visible_observations_cache!
     touch
     new_obs_ids.size
   end
@@ -857,8 +866,33 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Observations excluding non-primary members of multi-obs occurrences.
+  #
+  # The underlying `exclude_non_primary` scope adds a LEFT OUTER JOIN on
+  # `occurrences` with an `(occurrence_id IS NULL OR primary = id)` OR
+  # predicate, which the planner can't serve from the
+  # `(project_id, observation_id)` index. On big projects the dedup
+  # scan runs to 0.3-1.7s and is invoked separately by every show-page
+  # widget (tab counts, checklist, location count, constraint
+  # violations). Pluck the visible IDs once per Project instance and
+  # have every downstream query use a flat PK lookup. Mutators that
+  # add/remove/exclude observations call
+  # `invalidate_visible_observations_cache!` so the memo stays
+  # consistent within a single Project instance.
   def visible_observations
-    observations.exclude_non_primary
+    Observation.where(id: visible_observation_ids)
+  end
+
+  def visible_observation_ids
+    @visible_observation_ids ||=
+      observations.exclude_non_primary.pluck(:id)
+  end
+
+  # Wired as `after_add` / `after_remove` on the `observations`
+  # association, so the splat absorbs the record-arg that AR passes.
+  # Also called directly from `bulk_add_observations`, which uses
+  # `ProjectObservation.insert_all` and so bypasses the callbacks.
+  def invalidate_visible_observations_cache!(*)
+    @visible_observation_ids = nil
   end
 
   def out_of_range_observations
