@@ -31,7 +31,7 @@ class ModalTest < ComponentTestCase
 
     # Default styling: fade in (not auto-open)
     assert_includes(html, "class=\"modal fade\"")
-    refute_includes(html, "modal-backdrop")
+    assert_not_includes(html, "modal-backdrop")
   end
 
   def test_renders_html_safe_title_unescaped
@@ -44,7 +44,7 @@ class ModalTest < ComponentTestCase
     html = render(Components::Modal.new(id: "modal_html", title: title))
 
     assert_html(html, ".modal-title > b > i", text: "Xylaria polymorpha")
-    refute_includes(html, "&lt;b&gt;")
+    assert_not_includes(html, "&lt;b&gt;")
   end
 
   def test_auto_open_adds_backdrop_and_display_block
@@ -83,6 +83,6 @@ class ModalTest < ComponentTestCase
     end
 
     assert_html(html, ".modal-title > strong", text: "custom")
-    refute_includes(html, "ignored")
+    assert_not_includes(html, "ignored")
   end
 end
