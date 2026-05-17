@@ -58,7 +58,13 @@ class FieldSlipsControllerTest < FunctionalTestCase
     get(:new, params: { code: code })
     assert_response(:success)
     assert(response.body.include?(project.title))
-    assert_select('input[name="field_slip[collector]"]:not([value])')
+    # Collector input is present and empty. Phlex/Superform emits
+    # `value=""` for nil-valued fields where Rails' form_with would
+    # omit the attribute; both are functionally equivalent.
+    assert_select('input[name="field_slip[collector]"]') do |inputs|
+      assert_empty(inputs.first["value"].to_s,
+                   "collector input should be empty")
+    end
   end
 
   def test_should_create_field_slip_with_last_viewed_obs

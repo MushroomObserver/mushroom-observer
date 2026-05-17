@@ -33,7 +33,6 @@ class Components::FormNotes < Components::Base
   # live in).
   prop :panel_id, String
   prop :expanded, _Boolean, default: false
-  prop :indent, String, default: ""
   prop :single_part_mode, _Boolean, default: false
   # Prose help shown above the textarea in single-part mode (e.g.
   # "Please include any additional information you can think of...").
@@ -66,10 +65,8 @@ class Components::FormNotes < Components::Base
   def render_notes_inner
     div(id: "#{@panel_id}_fields") do
       render_above_help if @single_part_mode && @above_help
-      div(class: @indent) do
-        @form.namespace(:notes) do |notes_ns|
-          @parts.each { |part| render_part(notes_ns, part) }
-        end
+      @form.namespace(:notes) do |notes_ns|
+        @parts.each { |part| render_part(notes_ns, part) }
       end
       render_textile_help
     end

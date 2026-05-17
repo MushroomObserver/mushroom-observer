@@ -63,13 +63,6 @@ class FormNotesTest < ComponentTestCase
     assert_includes(last_child["class"] || "", "help-block")
   end
 
-  def test_multi_part_respects_indent
-    html = render(IndentedFormNotes.new(Observation.new, action: "/t"))
-
-    # Inner div wrapping textareas gets the caller's indent class.
-    assert_html(html, "#test_notes_fields > div.ml-5")
-  end
-
   # --- Single-part mode ---
 
   def test_single_part_mode_renders_one_large_textarea
@@ -135,23 +128,6 @@ class MultiPartFormNotes < Components::ApplicationForm
                ],
                panel_id: "test_notes",
                expanded: true
-             ))
-    end
-  end
-end
-
-class IndentedFormNotes < Components::ApplicationForm
-  def view_template
-    super do
-      render(Components::FormNotes.new(
-               form: self,
-               parts: [
-                 Components::FormNotes::Part.new(
-                   key: :habitat, value: "", label: "Habitat:"
-                 )
-               ],
-               panel_id: "test_notes",
-               indent: "ml-5"
              ))
     end
   end
