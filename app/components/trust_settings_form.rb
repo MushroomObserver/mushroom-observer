@@ -34,19 +34,39 @@ class Components::TrustSettingsForm < Components::ApplicationForm
       level: "editing" }
   ].freeze
 
-  def initialize(candidate, project:, current_trust_level: "no_trust", **)
+  # Declares to ModalTurboForm that this form renders its own
+  # `.modal-body` and `.modal-footer` divs (so the form tag spans
+  # both — submit in the footer is naturally inside the form).
+  def self.owns_modal_sections?
+    true
+  end
+
+  def initialize(candidate, project:, current_trust_level: "no_trust",
+                 modal_ids: {}, **)
     @project = project
     @current_trust_level = current_trust_level
+    @body_id = modal_ids[:body]
+    @flash_id = modal_ids[:flash]
     # Superform uses the model for `dom.id` + the `persisted?` check
     # that picks PATCH vs POST. The candidate is the natural choice
     # here — it's the user whose membership is being updated.
     super(candidate, **)
   end
 
+  # The form (Superform's default view_template) wraps both modal
+  # sections so the submit button in `.modal-footer` is naturally
+  # inside the form — same HTML structure as the pre-Phlex modal.
+  # ModalTurboForm renders this via Modal's `:form_content` slot
+  # when `form_owns_modal_sections: true`.
   def view_template
-    hidden_field("target", value: "project_index")
-    render_options
-    render_footer_buttons
+    super do
+      hidden_field("target", value: "project_index")
+      div(class: "modal-body", id: @body_id) do
+        div(id: @flash_id) if @flash_id
+        render_options
+      end
+      div(class: "modal-footer") { render_footer_buttons }
+    end
   end
 
   def form_action
@@ -59,7 +79,8 @@ class Components::TrustSettingsForm < Components::ApplicationForm
     p { plain(:trust_settings_help.l) }
     field = commit_field
     render(Components::ApplicationForm::RadioField.new(
-             field, *radio_choices
+             field, *radio_choices,
+             wrapper_options: { wrap_class: "mb-2" }
            ))
   end
 
@@ -95,22 +116,17 @@ class Components::TrustSettingsForm < Components::ApplicationForm
   end
 
   def render_footer_buttons
-    # Mirror the original modal-footer button row (right-aligned,
-    # top margin) without an actual `.modal-footer` div — Modal
-    # renders its own `.modal-footer` as a sibling of `.modal-body`,
-    # so the form (inside `.modal-body`) can't span it.
-    div(class: "text-right mt-3") do
-      button(type: :button, class: "btn btn-default mr-2",
-             data: { dismiss: "modal" }) do
-        plain(:CANCEL.l)
-      end
-      # `name: "save"` overrides Superform's default `name: "commit"`
-      # to avoid colliding with the radio group's own `commit` name —
-      # the controller switches on params[:commit] from the radios.
-      submit(
-        :trust_settings_save.l,
-        as: :button, name: "save", btn_class: "btn-primary"
-      )
+    button(type: :button, class: "btn btn-default",
+           data: { dismiss: "modal" }) do
+      plain(:CANCEL.l)
     end
+    whitespace
+    # `name: "save"` overrides Superform's default `name: "commit"`
+    # to avoid colliding with the radio group's own `commit` name —
+    # the controller switches on params[:commit] from the radios.
+    submit(
+      :trust_settings_save.l,
+      as: :button, name: "save", btn_class: "btn-primary"
+    )
   end
 end

@@ -76,11 +76,25 @@ class Components::ModalTurboForm < Components::Base
              title_id: "#{modal_id}_header",
              body_id: "#{modal_id}_body"
            )) do |m|
-      m.with_body { render_body_contents }
+      if form_owns_modal_sections?
+        m.with_form_content { render_form_component }
+      else
+        m.with_body { render_body_contents }
+      end
     end
   end
 
   private
+
+  # A form class can opt into rendering its own `.modal-body` and
+  # `.modal-footer` divs (so the `<form>` spans both — submit in the
+  # footer is naturally inside the form) by declaring a class method
+  # `owns_modal_sections?` returning truthy. This auto-detection
+  # keeps the controller call site unchanged when migrating a form.
+  def form_owns_modal_sections?
+    @form_class.respond_to?(:owns_modal_sections?) &&
+      @form_class.owns_modal_sections?
+  end
 
   def modal_id
     "modal_#{@identifier}"
@@ -101,10 +115,18 @@ class Components::ModalTurboForm < Components::Base
   def render_form_component
     if @form_class
       params = merged_locals.except(:model).merge(local: false)
+      params[:modal_ids] = modal_ids if form_owns_modal_sections?
       render(@form_class.new(@model, **params))
     else
       self.class.render_form(self, model: @model, form_locals: merged_locals)
     end
+  end
+
+  # When the form owns its own `.modal-body` / `.modal-footer` divs,
+  # it needs the id for `.modal-body` (so external turbo-streams can
+  # target it) and the id of the flash slot inside the body.
+  def modal_ids
+    { body: "#{modal_id}_body", flash: "#{modal_id}_flash" }
   end
 
   def merged_locals
