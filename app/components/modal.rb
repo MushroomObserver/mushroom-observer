@@ -33,6 +33,29 @@
 #   )) do |m|
 #     m.with_body { render(...) }
 #   end
+#
+# @example form-wrapped body + footer (form spans both — submit button
+#   in `.modal-footer` is naturally inside the form)
+#
+#   When set, `with_form_content` REPLACES `with_body` and `with_footer`.
+#   The caller renders a single component (typically an ApplicationForm
+#   subclass) that emits its own `<div class="modal-body">` and
+#   `<div class="modal-footer">` inside the form's yield, so the form
+#   tag wraps both:
+#
+#       <div class="modal-content">
+#         <div class="modal-header">...</div>
+#         <form ...>
+#           <div class="modal-body">...fields...</div>
+#           <div class="modal-footer">...buttons...</div>
+#         </form>
+#       </div>
+#
+#   render(Components::Modal.new(
+#     id: "modal_x", title: "Edit thing", user: @user
+#   )) do |m|
+#     m.with_form_content { render(Components::ThingForm.new(@thing)) }
+#   end
 class Components::Modal < Components::Base
   include Phlex::Slotable
 
@@ -62,8 +85,14 @@ class Components::Modal < Components::Base
   slot :title_content
   slot :body
   slot :footer
+  # When set, REPLACES body+footer slots. Caller renders a single
+  # component (typically a form) that emits its own `.modal-body` and
+  # `.modal-footer` divs, so a single `<form>` tag can wrap both —
+  # keeps the submit button (in `.modal-footer`) naturally inside the
+  # form. See the form-wrapped example in the class docstring.
+  slot :form_content
 
-  public :title_content_slot, :body_slot, :footer_slot
+  public :title_content_slot, :body_slot, :footer_slot, :form_content_slot
 
   def view_template(&block)
     yield(self) if block
@@ -75,8 +104,7 @@ class Components::Modal < Components::Base
       div(class: @dialog_class, role: "document") do
         div(class: "modal-content") do
           render_header
-          render_body
-          render_footer
+          render_content
         end
       end
     end
@@ -132,6 +160,15 @@ class Components::Modal < Components::Base
            data: { dismiss: "modal" },
            aria: { label: :CLOSE.l }) do
       span(aria: { hidden: "true" }) { "×" }
+    end
+  end
+
+  def render_content
+    if form_content_slot
+      render(form_content_slot)
+    else
+      render_body
+      render_footer
     end
   end
 
