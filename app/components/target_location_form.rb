@@ -72,13 +72,13 @@ class Components::TargetLocationForm < Components::ApplicationForm
   def initialize(obs:, project:, **)
     @obs = obs
     @project = project
-    # method: :put — the route is PUT-only (Superform would default to
-    # PATCH for a persisted model and the request would route-mismatch).
     # The project is the thing being mutated (a target_location entry
     # is added to its target_locations list), so it's the natural
     # Superform "model" for dom.id. No fields bind to it — every
-    # input is named explicitly.
-    super(project, method: :put, **)
+    # input is named explicitly. Superform picks PATCH for the
+    # persisted Project model; `project_violations_update_path` accepts
+    # both PATCH and PUT (the legacy button_to calls still use PUT).
+    super(project, **)
   end
 
   def form_action

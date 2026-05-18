@@ -90,16 +90,18 @@ class TargetLocationFormTest < ComponentTestCase
                 "[data-dismiss='modal']")
   end
 
-  def test_form_action_is_violations_path_with_put_method
+  def test_form_action_is_violations_path_with_patch_method
     html = render_form
 
     expected_action = "/projects/#{@project.id}/violations"
     assert_html(html,
                 "form[action='#{expected_action}'][method='post']")
-    # Route is PUT-only; Superform would default to PATCH for the
-    # persisted Project model, so we explicitly set method: :put.
+    # Superform picks PATCH for the persisted Project model. The route
+    # accepts both PATCH and PUT — see config/routes.rb where
+    # `project_violations_update` is registered with
+    # `via: [:put, :patch]`.
     assert_html(html,
-                "input[type='hidden'][name='_method'][value='put']")
+                "input[type='hidden'][name='_method'][value='patch']")
   end
 
   def test_hidden_do_and_obs_id_fields_are_namespaced_under_project
