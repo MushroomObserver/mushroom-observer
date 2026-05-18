@@ -30,10 +30,27 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
     super(@occurrence || Occurrence.new, **)
   end
 
+  # Declares to Modal that this form renders its own `.modal-body`
+  # and `.modal-footer` divs (via Modal's `:form_content` slot, added
+  # in #4293) so the form tag wraps both — submit in `.modal-footer`
+  # is naturally inside the form.
+  def self.owns_modal_sections?
+    true
+  end
+
+  # The form (Superform's default view_template) wraps both modal
+  # sections. Intro + project list live in `.modal-body`; Cancel /
+  # Add All live in `.modal-footer`. Hidden fields go at the top of
+  # the form (next to Superform's CSRF + `_method` inputs).
   def view_template
-    render_intro
-    render_project_list
-    super { render_form_body }
+    super do
+      selected_hidden_fields if @selected
+      div(class: "modal-body") do
+        render_intro
+        render_project_list
+      end
+      div(class: "modal-footer") { render_buttons }
+    end
   end
 
   # Superform calls this to compute the `<form action=…>` URL.
@@ -65,11 +82,6 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
     end
   end
 
-  def render_form_body
-    selected_hidden_fields if @selected
-    render_buttons(cancel_path)
-  end
-
   def cancel_path
     if @selected
       new_occurrence_path(observation_id: @selected.first.id)
@@ -92,17 +104,16 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
     hidden_field("occurrence[primary_observation_id]", value: @primary.id)
   end
 
-  def render_buttons(cancel_path)
-    div(class: "text-right mt-3") do
-      a(href: cancel_path, class: "btn btn-default mr-3",
-        data: { dismiss: "modal" }) do
-        :occurrence_resolve_projects_cancel.l
-      end
-      submit(
-        :occurrence_resolve_projects_add_all.l,
-        as: :button, btn_class: "btn-primary", value: "add_all",
-        name: @selected ? "project_resolution" : "resolution"
-      )
+  def render_buttons
+    a(href: cancel_path, class: "btn btn-default",
+      data: { dismiss: "modal" }) do
+      :occurrence_resolve_projects_cancel.l
     end
+    whitespace
+    submit(
+      :occurrence_resolve_projects_add_all.l,
+      as: :button, btn_class: "btn-primary", value: "add_all",
+      name: @selected ? "project_resolution" : "resolution"
+    )
   end
 end
