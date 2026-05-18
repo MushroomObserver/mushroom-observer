@@ -238,10 +238,59 @@ module Projects
           params: { project_id: project.id, candidate: target_user.id },
           format: :turbo_stream)
       assert_response(:success)
+      count = target_user.observations.count
       assert_select(
         "#modal_add_obs .modal-body",
-        { text: /#{target_user.observations.count}/ },
+        { text: /#{count}/ },
         "Modal body should include count of matching observations"
+      )
+      # Positive count → submit button rendered as button_to (its own
+      # <form> with PUT) inside .modal-footer, labelled "Add All" when
+      # count fits in one batch.
+      assert_select("#modal_add_obs .modal-footer form button.btn-primary",
+                    { text: /#{:add_obs_modal_add_all.l}/, count: 1 },
+                    "Modal footer should have an Add All submit button")
+      # Cancel button always present (covers both positive + zero cases).
+      assert_select(
+        "#modal_add_obs .modal-footer button[data-dismiss='modal']",
+        { count: 1 }, "Modal footer should have a Cancel button"
+      )
+    end
+
+    # Covers the over-batch_limit branch of body_text + submit_label
+    # (previously covered by the deleted AddObsModalTest).
+    def test_add_obs_modal_caps_submit_label_at_batch_limit
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(target_user.login)
+      Projects::MembersController.stub(:add_obs_batch_limit, 1) do
+        get(:add_obs_modal,
+            params: { project_id: project.id, candidate: target_user.id },
+            format: :turbo_stream)
+      end
+      assert_response(:success)
+      # Over-limit branch: body text is "X observations match. We'll
+      # add the first N" (partial), submit label is "Add Next N".
+      assert_select(
+        "#modal_add_obs .modal-footer form button.btn-primary",
+        { text: /#{:add_obs_modal_add_next.l(limit: 1)}/, count: 1 },
+        "Modal footer should show 'Add Next N' when count > batch_limit"
+      )
+    end
+
+    # Zero-count branch: no submit button rendered.
+    def test_add_obs_modal_omits_submit_when_none_match
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      project.add_observations(target_user.observations)
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_select(
+        "#modal_add_obs .modal-footer button.btn-primary", false,
+        "Zero-count modal must not render a submit button"
       )
     end
 
