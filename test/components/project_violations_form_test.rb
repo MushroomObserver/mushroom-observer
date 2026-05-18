@@ -59,7 +59,8 @@ class ProjectViolationsFormTest < ComponentTestCase
     # and a <button type=submit>Label</button>.
     assert_includes(html, :form_violations_action_exclude.l)
     assert_html(html, "form.button_to[action$='/violations']")
-    assert_html(html, "input[type='hidden'][name='do'][value='exclude']")
+    assert_html(html,
+                "input[type='hidden'][name='project[do]'][value='exclude']")
     assert_html(html, "input[type='hidden'][name='_method'][value='put']")
   end
 
@@ -72,7 +73,8 @@ class ProjectViolationsFormTest < ComponentTestCase
                        user: proj.user)
 
     assert_includes(html, :form_violations_action_extend.l)
-    assert_html(html, "input[type='hidden'][name='do'][value='extend']")
+    assert_html(html,
+                "input[type='hidden'][name='project[do]'][value='extend']")
   end
 
   def test_admin_sees_add_target_name_button_on_target_name_violation
@@ -85,7 +87,8 @@ class ProjectViolationsFormTest < ComponentTestCase
 
     assert_includes(html, :form_violations_action_add_target_name.l)
     assert_html(html,
-                "input[type='hidden'][name='do'][value='add_target_name']")
+                "input[type='hidden'][name='project[do]']" \
+                "[value='add_target_name']")
   end
 
   def test_target_location_modal_renders_for_admin
@@ -104,12 +107,13 @@ class ProjectViolationsFormTest < ComponentTestCase
     assert_html(
       html,
       "#location_target_modal_#{obs_id} " \
-      "input[type='hidden'][name='do'][value='add_target_location']"
+      "input[type='hidden'][name='project[do]']" \
+      "[value='add_target_location']"
     )
     assert_html(
       html,
       "#location_target_modal_#{obs_id} " \
-      "input[type='hidden'][name='obs_id'][value='#{obs_id}']"
+      "input[type='hidden'][name='project[obs_id]'][value='#{obs_id}']"
     )
     # Modal trigger button is rendered too.
     assert_includes(html, :form_violations_action_add_target_location.l)
@@ -146,7 +150,7 @@ class ProjectViolationsFormTest < ComponentTestCase
     assert_html(html, "##{modal_id} .modal-footer button[data-dismiss='modal']")
     assert_no_html(
       html,
-      "##{modal_id} input[name='do'][value='add_target_location']",
+      "##{modal_id} input[name='project[do]'][value='add_target_location']",
       "Empty-suffixes branch must not render an add_target_location form"
     )
   end
@@ -187,42 +191,22 @@ class ProjectViolationsFormTest < ComponentTestCase
                        user: users(:roy))
 
     # Exclude button is keyed by obs_id; the form contains an
-    # `input[name='obs_id'][value='<id>']`.
+    # `input[name='project[obs_id]'][value='<id>']`. After the
+    # namespacing pass, all action params live under `project[...]`
+    # so they share a single dispatch shape in the controller.
     assert_html(
-      html, "input[name='obs_id'][value='#{own_violation.obs.id}']"
+      html,
+      "input[name='project[obs_id]'][value='#{own_violation.obs.id}']"
     )
     assert_no_html(
-      html, "input[name='obs_id'][value='#{others_violation.obs.id}']",
+      html,
+      "input[name='project[obs_id]'][value='#{others_violation.obs.id}']",
       "Other user's obs should not have an Exclude form for non-admin"
     )
     # Admin-only actions are not rendered for non-admin.
     assert_no_html(html, "input[value='extend']")
     assert_no_html(html, "input[value='add_target_name']")
     assert_no_html(html, "input[value='add_target_location']")
-  end
-
-  # Regression for J1 of PR #4182 review: a 2-part location like
-  # "California, USA" should yield the full name as a candidate. The
-  # earlier (1..) range produced an empty list after the bare-country
-  # filter and the modal showed "Use Exclude instead", which made no
-  # sense for a state-level target.
-  def test_comma_suffixes_includes_full_name
-    component = Components::ProjectViolationsForm.new(
-      project: projects(:rare_fungi_project),
-      violations: [],
-      user: rolf
-    )
-
-    assert_equal(["California, USA", "USA"],
-                 component.send(:comma_suffixes, "California, USA"))
-    assert_equal(
-      ["Berkeley, Alameda Co., California, USA",
-       "Alameda Co., California, USA", "California, USA", "USA"],
-      component.send(:comma_suffixes,
-                     "Berkeley, Alameda Co., California, USA")
-    )
-    assert_equal([], component.send(:comma_suffixes, ""))
-    assert_equal(["USA"], component.send(:comma_suffixes, "USA"))
   end
 
   def test_target_location_modal_offers_create_for_missing_location

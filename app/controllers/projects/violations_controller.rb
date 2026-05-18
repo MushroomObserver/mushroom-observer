@@ -44,8 +44,12 @@ module Projects
                  flash_error_and_goto_index(Project, params[:project_id])
     end
 
+    # All action params (`do`, `obs_id`, `location_id`) are namespaced
+    # under `params[:project]` — the form's Superform model is Project,
+    # and the button_to calls in `Components::ProjectViolationsForm`
+    # POST `params: { project: { do: ..., obs_id: ... } }` to match.
     def dispatch_action
-      case params[:do]
+      case params.dig(:project, :do)
       when "exclude" then handle_exclude
       when "extend" then handle_extend
       when "add_target_name" then handle_add_target_name
@@ -54,8 +58,12 @@ module Projects
       end
     end
 
+    def project_obs_id
+      params.dig(:project, :obs_id)
+    end
+
     def handle_exclude
-      obs = Observation.safe_find(params[:obs_id])
+      obs = Observation.safe_find(project_obs_id)
       return unless obs && permitted_to_exclude?(obs)
 
       @project.exclude_observation(obs)
@@ -64,7 +72,7 @@ module Projects
     def handle_extend
       return unless admin?
 
-      obs = Observation.safe_find(params[:obs_id])
+      obs = Observation.safe_find(project_obs_id)
       return unless obs&.when
 
       extend_project_dates_to_include(obs.when)
@@ -73,7 +81,7 @@ module Projects
     def handle_add_target_name
       return unless admin?
 
-      obs = Observation.safe_find(params[:obs_id])
+      obs = Observation.safe_find(project_obs_id)
       name = obs&.name
       return unless name
 
@@ -83,7 +91,7 @@ module Projects
     def handle_add_target_location
       return unless admin?
 
-      location = Location.safe_find(params[:location_id])
+      location = Location.safe_find(params.dig(:project, :location_id))
       return unless location
 
       @project.add_target_location(location)

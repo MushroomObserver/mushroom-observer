@@ -1,0 +1,173 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+# Tests for Components::TargetLocationForm (extracted from
+# Components::ProjectViolationsForm in #4XXX). Covers the form's
+# isolated behavior — modal-body/footer structure, namespaced field
+# names, suffix computation, and the per-row choice/append behavior.
+# Integration with ProjectViolationsForm is covered by that
+# component's own test file.
+class TargetLocationFormTest < ComponentTestCase
+  def setup
+    super
+    @project = projects(:falmouth_2023_09_project)
+    @obs = observations(:falmouth_2023_09_obs)
+  end
+
+  # ---------- class-level helpers ----------
+
+  def test_comma_suffixes_includes_full_name
+    # Regression for J1 of PR #4182 review: a 2-part location like
+    # "California, USA" must yield the full name as a candidate. The
+    # earlier `(1..)` range produced an empty list after the
+    # bare-country filter and the modal showed "Use Exclude instead",
+    # which made no sense for a state-level target.
+    assert_equal(
+      ["California, USA", "USA"],
+      Components::TargetLocationForm.comma_suffixes("California, USA")
+    )
+    assert_equal(
+      ["Berkeley, Alameda Co., California, USA",
+       "Alameda Co., California, USA",
+       "California, USA", "USA"],
+      Components::TargetLocationForm.comma_suffixes(
+        "Berkeley, Alameda Co., California, USA"
+      )
+    )
+    assert_equal([], Components::TargetLocationForm.comma_suffixes(""))
+    assert_equal(["USA"],
+                 Components::TargetLocationForm.comma_suffixes("USA"))
+  end
+
+  def test_suffixes_for_filters_bare_country
+    # `suffixes_for` runs `comma_suffixes` then drops any suffix that
+    # is a bare country name — so "California, USA" yields just
+    # `["California, USA"]` (the bare "USA" tail is filtered).
+    obs = mock_obs(where: "California, USA")
+    assert_equal(["California, USA"],
+                 Components::TargetLocationForm.suffixes_for(obs))
+  end
+
+  def test_suffixes_for_returns_empty_for_country_only_where
+    obs = mock_obs(where: "USA")
+    assert_equal([], Components::TargetLocationForm.suffixes_for(obs))
+  end
+
+  def test_suffixes_for_returns_empty_for_blank_where
+    obs = mock_obs(where: "")
+    assert_equal([], Components::TargetLocationForm.suffixes_for(obs))
+  end
+
+  def test_applicable_true_when_suffixes_exist
+    obs = mock_obs(where: "Berkeley, California, USA")
+    assert(Components::TargetLocationForm.applicable?(obs))
+  end
+
+  def test_applicable_false_when_no_suffixes
+    obs = mock_obs(where: "USA")
+    assert_not(Components::TargetLocationForm.applicable?(obs))
+  end
+
+  def test_owns_modal_sections_class_method_returns_true
+    # Modal's :form_content slot pattern — callers (Project's modal
+    # wrapper) auto-detect this to switch slots.
+    assert(Components::TargetLocationForm.owns_modal_sections?)
+  end
+
+  # ---------- view_template structure ----------
+
+  def test_form_wraps_modal_body_and_modal_footer
+    html = render_form
+
+    # The form spans both modal sections — submit in .modal-footer is
+    # naturally inside the form (Modal :form_content slot pattern).
+    assert_html(html, "form > .modal-body")
+    assert_html(html, "form > .modal-footer")
+    assert_html(html, "form > .modal-footer button[type='submit']")
+    assert_html(html,
+                "form > .modal-footer button[type='button']" \
+                "[data-dismiss='modal']")
+  end
+
+  def test_form_action_is_violations_path_with_put_method
+    html = render_form
+
+    expected_action = "/projects/#{@project.id}/violations"
+    assert_html(html,
+                "form[action='#{expected_action}'][method='post']")
+    # Route is PUT-only; Superform would default to PATCH for the
+    # persisted Project model, so we explicitly set method: :put.
+    assert_html(html,
+                "input[type='hidden'][name='_method'][value='put']")
+  end
+
+  def test_hidden_do_and_obs_id_fields_are_namespaced_under_project
+    # All action params live under `project[...]` — the Project is the
+    # Superform model, so Superform auto-namespaces. The controller
+    # reads `params.dig(:project, :do)`, `params.dig(:project, :obs_id)`.
+    html = render_form
+
+    assert_html(html,
+                "input[type='hidden'][name='project[do]']" \
+                "[value='add_target_location']")
+    assert_html(html,
+                "input[type='hidden'][name='project[obs_id]']" \
+                "[value='#{@obs.id}']")
+  end
+
+  def test_location_id_radio_is_namespaced_under_project
+    # Same namespacing for the radio (location_id) — the FieldProxy
+    # derives its `name` attribute from `field(:location_id).dom.name`
+    # so the radio submits as `project[location_id]`.
+    html = render_form
+
+    assert_html(html,
+                "input[type='radio'][name='project[location_id]']")
+  end
+
+  # ---------- body contents ----------
+
+  def test_help_paragraph_renders_inside_modal_body
+    html = render_form
+    assert_html(html, ".modal-body > p",
+                text: :form_violations_modal_target_location_help.l)
+  end
+
+  def test_renders_one_radio_per_suffix
+    html = render_form
+
+    expected_count = Components::TargetLocationForm.suffixes_for(@obs).size
+    assert_html(html,
+                ".modal-body input[type='radio'][name='project[location_id]']",
+                count: expected_count)
+  end
+
+  # ---------- footer buttons ----------
+
+  def test_footer_has_submit_and_cancel_buttons
+    html = render_form
+    assert_html(html,
+                ".modal-footer button[type='submit']",
+                text: :form_violations_modal_target_location_submit.l)
+    assert_html(html,
+                ".modal-footer button[type='button'][data-dismiss='modal']",
+                text: :CANCEL.l)
+  end
+
+  private
+
+  def render_form
+    render(Components::TargetLocationForm.new(
+             obs: @obs, project: @project
+           ))
+  end
+
+  # Lightweight stand-in: TargetLocationForm.suffixes_for only reads
+  # `obs.location_id`, `obs.location.name`, and `obs.where` — a Struct
+  # works without needing a fully-built Observation fixture for each
+  # `comma_suffixes` permutation.
+  def mock_obs(where:)
+    Struct.new(:location_id, :location, :where).new(nil, nil, where)
+  end
+end
