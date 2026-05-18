@@ -82,6 +82,92 @@ the lookup so a nil return fails with a clear message instead of a cryptic
 - `assert_nil(value)`
 - `assert_response(:success)`
 
+## FORBIDDEN: assertions against rendered HTML body
+
+**Never** assert on rendered HTML markup with regex or by probing the
+raw response body. This is an absolute rule — not "where convenient,"
+not "in this file only."
+
+```ruby
+# ❌ FORBIDDEN — regex on @response.body
+assert_match(/<input name="foo"/, @response.body)
+assert_no_match(/error/, @response.body)
+
+# ❌ FORBIDDEN — aliasing @response.body to a local doesn't make it ok
+body = @response.body
+assert_match(/something/, body)
+
+# ❌ FORBIDDEN — `assert_select("body", text: /.../)` defeats the point.
+# The "body" selector matches the entire <body> element, so the regex
+# still scans the full document text and failure messages still dump
+# the whole body. Use a SPECIFIC element selector.
+assert_select("body", text: /something/)
+
+# ❌ FORBIDDEN in component tests — regex on the rendered string
+assert_match(/<a class="btn"/, html)
+
+# ❌ FORBIDDEN — substring check on raw HTML
+assert_includes(@response.body, "<label>Email</label>")
+assert_includes(html, :some_label.l)  # text lives in SOME element — find it
+```
+
+Use the selector-based helpers instead:
+
+```ruby
+# ✅ Controller tests — assert_select with a SPECIFIC selector
+assert_select("input[name='foo']")
+assert_select("#error_explanation", count: 0)
+assert_select("a[href*=?]", profile_path(user))
+assert_select("label", text: :some_label.l)
+
+# ✅ Component tests — assert_html (Nokogiri CSS)
+assert_html(html, "input[name='model[field]']")
+assert_html(html, ".btn-primary", text: :submit.l)
+assert_html(html, "label", text: :some_label.l)
+assert_no_html(html, "#modal_overlay")
+```
+
+Translation strings are not an exception. Every visible string lives
+in some element — a `<p>`, `<button>`, `<label>`, `<h3>`, `.alert`,
+`.flash-notice`, etc. Find that element and use it as the selector.
+If you genuinely cannot identify the wrapping element, read the
+component / view to find it. "I don't know what element it's in" is
+not a reason to fall back to a body-wide assertion.
+
+**Why this matters:**
+
+1. **Failure messages.** A failed `assert_match(/foo/, @response.body)`
+   dumps the entire response body into the log — useless CI signal.
+   A failed `assert_select("input[name='foo']")` says exactly that:
+   "0 matches for `input[name='foo']`." Actionable.
+2. **Robustness.** Whitespace changes, attribute reordering, and HTML
+   encoding can all silently break a regex without changing the
+   rendered page. CSS selectors are stable against those.
+3. **Intent.** `assert_select("input[name='foo']")` says what you
+   actually mean — "there's an input named foo." A regex like
+   `/<input name="foo"/` is a literal-text accident waiting to break.
+4. **Speed (sometimes).** For controller tests with multiple
+   assertions on the same response, `assert_select` parses once via
+   Nokogiri and reuses the DOM, while each `assert_match` re-scans the
+   full body string. (For component tests, `assert_html` re-parses on
+   each call — the speed argument doesn't apply there.)
+
+**Non-HTML payloads.** This rule is about rendered HTML. For JSON use
+`response.parsed_body`. For redirects use `assert_redirected_to`. For
+CSV parse it. Never reach for raw `@response.body` in those cases
+either.
+
+**Pre-extracted text is fine.** If you've already pulled a small
+element's text out via a selector (e.g.
+`css_select(".rss-what").text`), regex / includes against that
+extracted string is fine — the haystack is one element's text, not
+the whole document.
+
+**Cleanup expectation.** If you find existing forbidden patterns
+near your edit, fix them. Don't leave them in place "because the PR
+isn't about that" — every PR that touches a test file is the right
+place to clean up whatever forbidden assertions live in it.
+
 ## Running Specific Test Suites
 - All tests: `bin/rails test`
 - Controllers: `bin/rails test:controllers`
