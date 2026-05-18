@@ -19,7 +19,14 @@ class ChecklistsControllerTest < FunctionalTestCase
 
   def test_checklist_marks_deprecated
     login
-    observation = Observation.joins(:name).find_by(name: { deprecated: true })
+    # Order by id so the picked observation is the same under every test
+    # seed / parallel-worker assignment. Previously an unordered `find_by`
+    # returned different rows depending on MySQL's implementation-defined
+    # ordering, which silently varied which user's checklist was
+    # rendered and which branches of Components::Checklist::Contents got
+    # covered.
+    observation = Observation.joins(:name).where(name: { deprecated: true }).
+                  order(:id).first
     user = observation.user
     get(:show, params: { user_id: user.id })
     assert_select(".checklist a", text: /\) \*\z/)
