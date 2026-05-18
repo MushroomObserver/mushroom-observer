@@ -253,7 +253,7 @@ module Account
     def test_has_bulk_license_updater
       login
       get(:edit)
-      assert_match(images_edit_licenses_path, response.body)
+      assert_select("a[href='#{images_edit_licenses_path}']")
     end
 
     def test_no_email_hooks

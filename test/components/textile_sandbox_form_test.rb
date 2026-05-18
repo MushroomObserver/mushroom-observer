@@ -26,8 +26,8 @@ class TextileSandboxFormTest < ComponentTestCase
     # Quick reference section
     assert_html(html, "body", text: "#{:sandbox_quick_ref.t}:")
     assert_html(html, "pre")
-    assert_match(/&micro;/, html)
-    assert_match(/&deg;/, html)
+    assert_includes(html, "&micro;")
+    assert_includes(html, "&deg;")
 
     # More help and web references
     assert_html(html, "body", text: "#{:sandbox_more_help.t}:")
@@ -82,7 +82,7 @@ class TextileSandboxFormTest < ComponentTestCase
     assert_html(html, ".sandbox li:nth-child(3)", text: "Meow")
 
     # Should NOT contain escaped HTML
-    assert_no_match(/&lt;/, html)
+    assert_not_includes(html, "&lt;")
   end
 
   def test_form_with_html_codes_result
@@ -93,13 +93,13 @@ class TextileSandboxFormTest < ComponentTestCase
     assert_html(html, "code")
 
     # HTML should be escaped once (not double-escaped)
-    assert_match(/&lt;div class=&quot;textile&quot;&gt;/, html)
-    assert_match(/&lt;ol&gt;/, html)
-    assert_match(%r{&lt;li&gt;Woof&lt;/li&gt;}, html)
+    assert_includes(html, "&lt;div class=&quot;textile&quot;&gt;")
+    assert_includes(html, "&lt;ol&gt;")
+    assert_includes(html, "&lt;li&gt;Woof&lt;/li&gt;")
 
     # Should NOT contain double-escaped HTML
-    assert_no_match(/&amp;lt;/, html)
-    assert_no_match(/&amp;quot;/, html)
+    assert_not_includes(html, "&amp;lt;")
+    assert_not_includes(html, "&amp;quot;")
   end
 
   private

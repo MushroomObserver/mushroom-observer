@@ -111,10 +111,11 @@ class MapTest < ComponentTestCase
     assert_includes(caption, "Agaricus campestris")
     assert_includes(caption, 'target="_blank"')
     assert_includes(caption, 'rel="noopener noreferrer"')
-    assert_match(/May 1, 2024|2024-05-01/, caption)
+    caption_text = Nokogiri::HTML(caption).text
+    assert_match(/May 1, 2024|2024-05-01/, caption_text)
     # Plain "Confidence: NN%" text — no pill/dot markup inside the popup;
     # the marker color on the map is the visual cue.
-    assert_match(/Confidence:\s*80%/, caption)
+    assert_match(/Confidence:\s*80%/, caption_text)
     assert_not_includes(caption, "●")
     assert_not_includes(caption, "nowrap")
   end
@@ -139,7 +140,7 @@ class MapTest < ComponentTestCase
            "Group popup should list most recent name first")
     assert(caption.index("Middle sp.") < caption.index("Oldest sp."))
     # No consensus dot / percentage line for groups.
-    assert_no_match(/\d+%/, caption,
+    assert_no_match(/\d+%/, Nokogiri::HTML(caption).text,
                     "Group popup should omit consensus %")
   end
 

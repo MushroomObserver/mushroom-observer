@@ -15,14 +15,20 @@ class NameEditSynonymFormTest < ComponentTestCase
       current_synonyms: [@name, @synonym1, @synonym2]
     )
 
-    # The label should contain IN ORDER: checkbox, link, id badge
-    label_pattern = %r{<label[^>]*>.*?
-      <input[^>]*type="checkbox"[^>]*>.*?
-      <a\s+href="/names/#{@synonym1.id}"[^>]*>.*?</a>\s*
-      <button[^>]*class="[^"]*badge[^"]*"[^>]*>#{@synonym1.id}</button>
-    }mx
-    assert_match(label_pattern, html,
+    # The label for @synonym1 should contain IN ORDER:
+    # checkbox, link, id badge.
+    doc = Nokogiri::HTML(html)
+    label = doc.css("label").find do |lbl|
+      lbl.at_css("a[href='/names/#{@synonym1.id}']")
+    end
+    assert(label, "Expected a label containing the synonym link")
+
+    types = label.css("input[type='checkbox'], a, button").map(&:name)
+    assert_equal(%w[input a button], types,
                  "Label should contain checkbox, then link, then id badge")
+    assert_html(label.to_html, "a[href='/names/#{@synonym1.id}']")
+    assert_html(label.to_html, "button.badge",
+                text: @synonym1.id.to_s)
   end
 
   def test_proposed_synonyms_have_same_label_format

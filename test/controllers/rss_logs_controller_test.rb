@@ -157,8 +157,11 @@ class RssLogsControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: { type: "observation" } })
 
-    assert_match(/Imported from iNaturalist/, @response.body,
-                 "RssLog is missing Source credit")
+    assert_select(
+      ".source-credit",
+      { text: /Imported from iNaturalist/ },
+      "RssLog is missing Source credit"
+    )
     expected_url = obs.external_source.observation_url(obs.external_id)
     assert_select(
       "a[href=?][target=?][rel=?]",
@@ -179,8 +182,11 @@ class RssLogsControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: { type: "observation" } })
 
-    assert_match(/Imported from iNaturalist/, @response.body,
-                 "RssLog is missing Source credit")
+    assert_select(
+      ".source-credit",
+      { text: /Imported from iNaturalist/ },
+      "RssLog is missing Source credit"
+    )
   end
 
   def test_type_filter_rejects_invalid_types

@@ -187,8 +187,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # there's no banner for this project
     assert_page_title(:SPECIES_LISTS.l)
     spl = project.species_lists.first
-    assert_match(spl.title, @response.body)
-    assert_select("a[href*='species_lists/#{spl.id}?project=#{project.id}']")
+    assert_select(
+      "a[href*='species_lists/#{spl.id}?project=#{project.id}']",
+      text: /#{Regexp.escape(spl.title)}/
+    )
   end
 
   def test_index_for_project_with_no_lists
@@ -260,7 +262,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = spl.projects[0]
 
     get(:show, params: { id: spl.id, project: project.id })
-    assert_match(project.title, @response.body)
+    assert_select("#project_banner",
+                  text: /#{Regexp.escape(project.title)}/)
     assert_select("h1#title", /#{spl.title}/,
                   "H1 title element should exist and contain content")
   end
@@ -294,19 +297,22 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_obj_arrays_equal([], spl.projects)
 
+    proj1_re = /#{Regexp.escape(proj1.title)}/
+    proj2_re = /#{Regexp.escape(proj2.title)}/
+
     get(:show, params: { id: spl.id })
-    assert_no_match(proj1.title.t, @response.body)
-    assert_no_match(proj2.title.t, @response.body)
+    assert_select("#list_details", text: proj1_re, count: 0)
+    assert_select("#list_details", text: proj2_re, count: 0)
 
     proj1.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_match(proj1.title.t, @response.body)
-    assert_no_match(proj2.title.t, @response.body)
+    assert_select("#list_details", text: proj1_re)
+    assert_select("#list_details", text: proj2_re, count: 0)
 
     proj2.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_match(proj1.title.t, @response.body)
-    assert_match(proj2.title.t, @response.body)
+    assert_select("#list_details", text: proj1_re)
+    assert_select("#list_details", text: proj2_re)
   end
 
   def test_show_species_list_edit_links
@@ -392,7 +398,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:unknown_species_list)
     get(:new, params: { clone: spl.id })
     assert_response(:success)
-    assert_match(spl.where, @response.body)
+    # Clone pre-fills the place_name autocompleter with the spl's location
+    assert_select(
+      "input[name='species_list[place_name]'][value=?]", spl.where
+    )
   end
 
   # Test constructing species_lists in various ways.

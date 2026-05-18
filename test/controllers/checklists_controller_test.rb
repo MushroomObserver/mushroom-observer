@@ -22,7 +22,7 @@ class ChecklistsControllerTest < FunctionalTestCase
     observation = Observation.joins(:name).find_by(name: { deprecated: true })
     user = observation.user
     get(:show, params: { user_id: user.id })
-    assert_match(") *</a>", @response.body)
+    assert_select(".checklist a", text: /\) \*\z/)
   end
 
   # Prove that Species List checklist goes to correct page with correct content
@@ -49,7 +49,7 @@ class ChecklistsControllerTest < FunctionalTestCase
                       { project_id: project.id } } }).distinct
 
     get(:show, params: { project_id: project.id })
-    assert_match(/\(1\)/, @response.body)
+    assert_select(".checklist a", text: /\(1\)/)
 
     prove_checklist_content(expect)
   end
@@ -64,9 +64,9 @@ class ChecklistsControllerTest < FunctionalTestCase
                            location: location } }).distinct
 
     get(:show, params: { project_id: project.id, location_id: location.id })
-    assert_match(/\(1\)/, @response.body)
-    assert_match("location%3A#{location.id}", @response.body)
-    assert_match(/#{:checklist_for.t}/, @response.body)
+    assert_select(".checklist a", text: /\(1\)/)
+    assert_select(".checklist a[href*='location%3A#{location.id}']")
+    assert_select("h4", text: /#{:checklist_for.t}/)
     assert_select("li.nav-item") do
       assert_select(
         "a.nav-link.active[href='/projects/#{project.id}/locations']",
@@ -93,23 +93,26 @@ class ChecklistsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     # Line 1 — target-name summary.
-    assert_match(/Target names: 2 total.*1 observed.*1 not yet observed/,
-                 @response.body)
+    assert_select(
+      "#checklist_contents div",
+      text: /Target names: 2 total.*1 observed.*1 not yet observed/
+    )
     # Line 2 — observed summary with synonyms-counted-once note.
-    assert_match(/1 species observed \(synonyms counted once\)/,
-                 @response.body)
-    assert_no_match(/higher-level/, @response.body)
+    assert_select("#checklist_contents div",
+                  text: /1 species observed \(synonyms counted once\)/)
+    assert_select("#checklist_contents", text: /higher-level/, count: 0)
     # The two panels expected for this setup (one observed species
     # target + one unobserved target) render with their distinctive
     # headers. No higher-level taxa in this fixture, so that panel is
     # legitimately absent.
-    assert_match(/Unobserved target names/, @response.body)
-    assert_match(/Species and below/, @response.body)
+    assert_select("h4", text: /Unobserved target names/)
+    assert_select("h4", text: /Species and below/)
     assert_select("#checklist_unobserved_panel")
     assert_select("#checklist_species_panel")
     assert_select("#checklist_higher_panel", count: 0)
     # Legend entry for the red X remove button (admin-only).
-    assert_match(/Remove this target name from the project/, @response.body)
+    assert_select("#checklist_contents p",
+                  text: /Remove this target name from the project/)
     # Unobserved-target name link goes to the name page (a project-scoped
     # observation search would always be empty). Observed-target name
     # link still goes to the observations search.
@@ -130,7 +133,8 @@ class ChecklistsControllerTest < FunctionalTestCase
     get(:show, params: { project_id: project.id })
 
     assert_response(:success)
-    assert_no_match(/Remove this target name from the project/, @response.body)
+    assert_select("#checklist_contents p",
+                  text: /Remove this target name from the project/, count: 0)
   end
 
   # Prove that Site checklist goes to correct page with correct content

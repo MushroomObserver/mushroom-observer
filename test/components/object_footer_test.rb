@@ -154,7 +154,8 @@ class ObjectFooterTest < ComponentTestCase
 
     assert_includes(html, "footer-view-stats")
     # Should show version number
-    assert_match(/Version.*2.*of.*3/, html)
+    footer_text = Nokogiri::HTML(html).text
+    assert_match(/Version.*2.*of.*3/, footer_text)
     # Should show modified date and user link
     assert_includes(html, "2024-01-15")
     # Should have a user link (verifies user_link was called)
@@ -181,7 +182,7 @@ class ObjectFooterTest < ComponentTestCase
 
     assert_includes(html, "footer-view-stats")
     # Should show version number
-    assert_match(/Version.*1.*of.*2/, html)
+    assert_match(/Version.*1.*of.*2/, Nokogiri::HTML(html).text)
     # Should not show modified line since updated_at is nil
     assert_not_includes(html, "Mary")
   end
@@ -203,7 +204,7 @@ class ObjectFooterTest < ComponentTestCase
 
     assert_includes(html, "footer-view-stats")
     # Should show "once" for single view
-    assert_match(/once/i, html)
+    assert_match(/once/i, Nokogiri::HTML(html).text)
     assert_includes(html, "2024-01-20")
   end
 
@@ -260,7 +261,7 @@ class ObjectFooterTest < ComponentTestCase
 
     assert_includes(html, "footer-view-stats")
     # Should show "never" when user hasn't viewed
-    assert_match(/never/i, html)
+    assert_match(/never/i, Nokogiri::HTML(html).text)
   end
 
   def test_with_rss_log_link
@@ -276,8 +277,8 @@ class ObjectFooterTest < ComponentTestCase
 
     assert_includes(html, "footer-view-stats")
     # Should include link to activity log
-    assert_includes(html, "activity_logs/123")
-    assert_match(/log/i, html)
+    assert_html(html, "a[href*='activity_logs/123']")
+    assert_match(/log/i, Nokogiri::HTML(html).text)
   end
 
   def test_without_rss_log_link

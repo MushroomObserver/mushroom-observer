@@ -238,8 +238,9 @@ module Projects
           params: { project_id: project.id, candidate: target_user.id },
           format: :turbo_stream)
       assert_response(:success)
-      assert_match(
-        /#{target_user.observations.count}/, @response.body,
+      assert_select(
+        "#modal_add_obs .modal-body",
+        { text: /#{target_user.observations.count}/ },
         "Modal body should include count of matching observations"
       )
     end
@@ -254,8 +255,11 @@ module Projects
           params: { project_id: project.id, candidate: target_user.id },
           format: :turbo_stream)
       assert_response(:success)
-      assert_match(/None of your observations/, @response.body,
-                   "Modal should show 'none' when all obs already added")
+      assert_select(
+        "#modal_add_obs .modal-body",
+        { text: /None of your observations/ },
+        "Modal should show 'none' when all obs already added"
+      )
     end
 
     # issue #4129: one-sided date bounds must also constrain the count.
@@ -271,8 +275,11 @@ module Projects
           params: { project_id: project.id, candidate: target_user.id },
           format: :turbo_stream)
       assert_response(:success)
-      assert_match(/None of your observations/, @response.body,
-                   "Start-date-only project should exclude obs before start")
+      assert_select(
+        "#modal_add_obs .modal-body",
+        { text: /None of your observations/ },
+        "Start-date-only project should exclude obs before start"
+      )
     end
 
     # `no_start_date_project` has end_date = yesterday, start_date = nil.
@@ -289,8 +296,11 @@ module Projects
           params: { project_id: project.id, candidate: target_user.id },
           format: :turbo_stream)
       assert_response(:success)
-      assert_match(/None of your observations/, @response.body,
-                   "End-date-only project should exclude obs after end")
+      assert_select(
+        "#modal_add_obs .modal-body",
+        { text: /None of your observations/ },
+        "End-date-only project should exclude obs after end"
+      )
     end
 
     # issue #4148: trust modal returns the modal component for the member
@@ -302,8 +312,8 @@ module Projects
           params: { project_id: project.id, candidate: target_user.id },
           format: :turbo_stream)
       assert_response(:success)
-      assert_match(/modal_trust_settings/, @response.body,
-                   "Modal markup should be returned in turbo stream")
+      assert_select("#modal_trust_settings", { minimum: 1 },
+                    "Modal markup should be returned in turbo stream")
     end
 
     # issue #4148: trust modal denies users acting on behalf of others
@@ -514,7 +524,8 @@ module Projects
       get(:index, params: { project_id: eol_project.id })
 
       member = eol_project.project_members.first
-      assert_match(member.user.name, @response.body)
+      assert_select("table.table-project-members",
+                    text: /#{Regexp.escape(member.user.name)}/)
       assert_response(:success)
     end
   end

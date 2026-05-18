@@ -51,17 +51,14 @@ class APIKeyFormTest < ComponentTestCase
     html = render_form_with_cancel
 
     # Should have exactly one label
-    label_count = html.scan("<label").length
-    assert_equal(1, label_count, "Should have exactly one label")
+    assert_html(html, "label", count: 1)
 
-    # Label should be outside input-group and have correct for attribute
-    pattern = %r{<label[^>]*for="api_key_notes"[^>]*>.*?</label>.*?
-                 <div\sclass="input-group">}mx
-    assert_match(pattern, html)
+    # Label should have correct for attribute and be outside .input-group
+    assert_html(html, "label[for='api_key_notes']")
+    assert_no_html(html, ".input-group label[for='api_key_notes']")
 
-    # Input should not be wrapped in form-group
-    assert_no_match(/<div class="input-group">.*?<div class="form-group">/m,
-                    html)
+    # Input should not be wrapped in form-group inside input-group
+    assert_no_html(html, ".input-group .form-group")
   end
 
   private

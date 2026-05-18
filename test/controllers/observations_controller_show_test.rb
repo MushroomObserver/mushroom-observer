@@ -79,17 +79,20 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     obs = observations(:template_and_orphaned_notes_scrambled_obs)
     get(:show, params: { id: obs.id })
-    assert_match("+photo", @response.body)
-    assert_match("/lookups/lookup_user/rolf", @response.body)
-    assert_no_match("orphaned_caption_1", @response.body)
-    assert_match("orphaned caption 1", @response.body)
+    assert_select("#observation_notes", text: /\+photo/)
+    assert_select("#observation_notes a[href*='/lookups/lookup_user/rolf']")
+    # Underscored key should NOT appear; humanized label SHOULD appear
+    assert_select("#observation_notes", text: /orphaned_caption_1/,
+                                        count: 0)
+    assert_select("#observation_notes", text: /orphaned caption 1/)
   end
 
   def test_show_observation_with_simple_notes
     login
     obs = observations(:coprinus_comatus_obs)
     get(:show, params: { id: obs.id })
-    assert_match("<p>Notes:<br />", @response.body)
+    # Simple-notes path renders <div class="textile"><p>Notes:<br/>…</p></div>
+    assert_select("div.textile p", text: /Notes:/)
   end
 
   def test_show_project_observation
@@ -97,7 +100,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:owner_accepts_general_questions)
     project = obs.projects[0]
     get(:show, params: { id: obs.id })
-    assert_match(project.title, @response.body)
+    assert_select("#observation_projects",
+                  text: /#{Regexp.escape(project.title)}/)
   end
 
   def test_show_observation_change_thumbnail_size
@@ -112,41 +116,48 @@ class ObservationsControllerShowTest < FunctionalTestCase
   def test_show_observation_vague_location
     login
     obs1 = observations(:california_obs)
+    vague_re = /#{Regexp.escape(:show_observation_vague_location.l)}/
+    improve_re = /#{Regexp.escape(:show_observation_improve_location.l)}/
     get(:show, params: { id: obs1.id })
-    assert_match(:show_observation_vague_location.l, @response.body)
-    assert_no_match(:show_observation_improve_location.l, @response.body)
+    # Nested <p> inside #observation_where gets hoisted out by the
+    # HTML5 parser; assert on the <em> within the ml-3 paragraph.
+    assert_select("p.ml-3 em", text: vague_re)
+    assert_select("p.ml-3 em", text: improve_re, count: 0)
 
     # Make sure it suggests choosing a better location if owner is current user
     login("dick")
     get(:show, params: { id: obs1.id })
-    assert_match(:show_observation_vague_location.l, @response.body)
-    assert_match(:show_observation_improve_location.l, @response.body)
+    assert_select("p.ml-3 em", text: vague_re)
+    assert_select("p.ml-3 em", text: improve_re)
 
     # Make sure it doesn't show for observations with non-vague location
     obs2 = observations(:amateur_obs)
     get(:show, params: { id: obs2.id })
-    assert_no_match(:show_observation_vague_location.l, @response.body)
+    assert_select("p.ml-3 em", text: vague_re, count: 0)
   end
 
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_lng)
+    gps_re = /34\.1622|118\.3521/
+    hidden_re = /#{Regexp.escape(:show_observation_gps_hidden.l)}/
+
     login
     get(:show, params: { id: obs.id })
-    assert_match(/34.1622|118.3521/, @response.body)
+    assert_select("#observation_where_gps", text: gps_re)
 
     obs.update(gps_hidden: true)
     get(:show, params: { id: obs.id })
-    assert_no_match(/34.1622|118.3521/, @response.body)
+    assert_select("#observation_where_gps", text: gps_re, count: 0)
 
     login("mary")
     get(:show, params: { id: obs.id })
-    assert_match(/34.1622|118.3521/, @response.body)
-    assert_match(:show_observation_gps_hidden.t, @response.body)
+    assert_select("#observation_where_gps", text: gps_re)
+    assert_select("#observation_where_gps i", text: hidden_re)
 
     login("roy")
     get(:show, params: { id: obs.id })
-    assert_match(/34.1622|118.3521/, @response.body)
-    assert_match(:show_observation_gps_hidden.t, @response.body)
+    assert_select("#observation_where_gps", text: gps_re)
+    assert_select("#observation_where_gps i", text: hidden_re)
   end
 
   def test_show_obs_view_stats
@@ -201,7 +212,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_select(
+      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/
+    )
     assert_select("a[href=?]", herbarium_record.mcp_url, true,
                   "Missing link to MyCoPortal record")
   end
@@ -221,7 +234,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_select(
+      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/
+    )
     assert_select("a[href=?]", herbarium_record.mcp_url, true,
                   "Missing link to MyCoPortal record")
   end
@@ -239,7 +254,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_no_match(:herbarium_record_collection.l, @response.body)
+    assert_select(
+      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/, count: 0
+    )
     assert_select(
       "a[href=?]", herbarium_record.mcp_url, false,
       "Obs shouldn't link to MyCoPortal for Herbarium Record in a Herbarium " \
@@ -457,7 +474,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("a[href=?]",
                   reuse_images_for_observation_path(obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })
-    assert_match(obs.location.name, response.body)
+    assert_select(
+      "input[name='observation[place_name]'][value=?]", obs.location.name
+    )
     assert_response(:success)
 
     login("dick") # Project permission

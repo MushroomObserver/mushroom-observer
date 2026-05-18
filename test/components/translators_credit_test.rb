@@ -95,7 +95,8 @@ class TranslatorsCreditTest < ComponentTestCase
         # Should include "and others" text
         # (translation key :app_translators_credit_and_others)
         # Text varies by locale but structure is consistent
-        assert_match(/and others|et autres/, html)
+        text = Nokogiri::HTML(html).text
+        assert_match(/and others|et autres/, text)
       end
     end
   end
@@ -105,7 +106,8 @@ class TranslatorsCreditTest < ComponentTestCase
       html = render_component
 
       # Should not include "and others" text when < 5 contributors
-      assert_no_match(/and others|et autres/, html)
+      text = Nokogiri::HTML(html).text
+      assert_no_match(/and others|et autres/, text)
     end
   end
 

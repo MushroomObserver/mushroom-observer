@@ -26,9 +26,10 @@ class VisualModelFormTest < ComponentTestCase
     assert_html(html, "#error_explanation")
     assert_html(html, "h2")
     assert_html(html, "li")
-    assert_match(/1 #{:error.t}/, html)
-    assert_match(/#{:visual_model_errors.t}/, html)
-    assert_match(/Name can.{1,6}t be blank/, html)
+    error_text = Nokogiri::HTML(html).at_css("#error_explanation").text
+    assert_includes(error_text, "1 #{:error.t}")
+    assert_includes(error_text, :visual_model_errors.t)
+    assert_match(/Name can.{1,6}t be blank/, error_text)
   end
 
   private

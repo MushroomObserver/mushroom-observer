@@ -1310,14 +1310,19 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     get(:new, params: { notes: { Field_Slip_ID: name.text_name } })
 
-    assert_match(name.text_name, @response.body)
+    # Name should be pre-filled in the naming autocompleter
+    assert_select(
+      "input[name='observation[naming][name]'][value=?]", name.text_name
+    )
   end
 
   def test_collector_to_observation
     login("katrina")
     get(:new, params: { notes: { Collector: mary.textile_name } })
 
-    assert_match(mary.textile_name, @response.body)
+    # Collector value should populate the notes textarea
+    assert_select("textarea[name='observation[notes][Collector]']",
+                  text: /#{Regexp.escape(mary.textile_name)}/)
   end
 
   # Prove that notes are saved with template keys first, in the order listed in
@@ -1359,14 +1364,13 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           notes: { Field_Slip_ID: "_#{name.text_name}_" }
         })
     assert_response(:success)
-    body = @response.body
 
-    # Name should be pre-filled
-    assert_match(/#{name.text_name}/, body)
+    # Name should be pre-filled into the naming name input
+    assert_select("input[value=?]", name.text_name, { minimum: 1 },
+                  "Name should be pre-filled into the form")
 
-    # Should NOT show "not recognized" or "deprecated" warnings
-    assert_no_match(/does not recognize/, body)
-    assert_no_match(/is deprecated/, body)
+    # Should NOT show any name_messages warning/error alert
+    assert_select("#name_messages", count: 0)
   end
 
   def test_new_from_field_slip_no_warning_without_name
@@ -1374,6 +1378,6 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     get(:new, params: { field_code: "TEST-001" })
     assert_response(:success)
 
-    assert_no_match(/name_messages/, @response.body)
+    assert_select("#name_messages", count: 0)
   end
 end
