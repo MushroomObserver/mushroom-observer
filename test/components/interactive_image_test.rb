@@ -16,7 +16,7 @@ class InteractiveImageTest < ComponentTestCase
     assert_includes(html, "image_#{@image.id}")
     assert_includes(html, "interactive_image_#{@image.id}")
     # Should have the lazy loading image with the image_X class
-    assert_match(/class="[^"]*image_#{@image.id}[^"]*"/, html)
+    assert_html(html, "img.image_#{@image.id}")
   end
 
   def test_renders_with_custom_size
@@ -54,19 +54,14 @@ class InteractiveImageTest < ComponentTestCase
     html = render_image
 
     # Should have theater button with data-sub-html attribute
-    assert_includes(html, 'class="theater-btn"')
-    assert_match(/data-sub-html="[^"]*caption-image-links[^"]*"/, html)
+    assert_html(html, "a.theater-btn[data-sub-html]")
 
     # The data-sub-html should contain the image links from LightboxCaption
-    assert_match(
-      %r{data-sub-html="[^"]*/images/#{@image.id}/original[^"]*"},
-      html
-    )
-    assert_match(
-      %r{data-sub-html="[^"]*/images/#{@image.id}/exif[^"]*"},
-      html
-    )
-    assert_match(/data-sub-html="[^"]*lightbox_link[^"]*"/, html)
+    sub_html = Nokogiri::HTML(html).at_css("a.theater-btn")["data-sub-html"]
+    assert_includes(sub_html, "caption-image-links")
+    assert_includes(sub_html, "/images/#{@image.id}/original")
+    assert_includes(sub_html, "/images/#{@image.id}/exif")
+    assert_includes(sub_html, "lightbox_link")
   end
 
   private

@@ -123,18 +123,13 @@ class OccurrencesControllerTest < FunctionalTestCase
     # First, render the new form
     get(:new, params: { observation_id: @obs1.id })
     assert_response(:success)
-    body = @response.body
 
     # Extract the form action and method
-    assert_match(%r{action="/occurrences"}, body,
-                 "Form should POST to /occurrences")
-    assert_match(/method="post"/, body,
-                 "Form should use POST method")
+    assert_select("form#occurrence_form[action='/occurrences'][method='post']",
+                  { count: 1 }, "Form should POST to /occurrences")
     # Verify no nested forms (button_to inside form breaks submission)
-    occ_form = body[%r{(<form[^>]*id="occurrence_form"[^>]*>.*?</form>)}m]
-    nested = occ_form&.scan(/<form[^>]*>/)
-    assert_equal(1, nested&.length,
-                 "Form should have no nested <form> elements")
+    assert_select("form#occurrence_form form", { count: 0 },
+                  "Form should have no nested <form> elements")
 
     # Now POST as the browser would with one recent obs checked
     assert_difference("Occurrence.count", 1) do
@@ -157,26 +152,20 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     get(:new, params: { observation_id: @obs1.id })
     assert_response(:success)
-    body = @response.body
-    assert_match(/data-controller=".*occurrence-form.*"/, body)
-    assert_match(
-      /data-occurrence-form-target="sourceRadio"/, body
-    )
+    assert_select("[data-controller~='occurrence-form']")
+    assert_select("[data-occurrence-form-target='sourceRadio']")
   end
 
   def test_new_form_field_names
     login("rolf")
     get(:new, params: { observation_id: @obs1.id })
     assert_response(:success)
-    body = @response.body
     # Source obs hidden field nested under occurrence[]
-    assert_match(/name="observation_id"/, body)
+    assert_select("input[name='observation_id']")
     # observation_ids[] at top level
-    assert_match(/name="occurrence\[observation_ids\]\[\]"/, body)
+    assert_select("input[name='occurrence[observation_ids][]']")
     # primary_observation_id nested under occurrence[]
-    assert_match(
-      /name="occurrence\[primary_observation_id\]"/, body
-    )
+    assert_select("input[name='occurrence[primary_observation_id]']")
   end
 
   def test_create_warns_if_locations_differ
@@ -317,17 +306,11 @@ class OccurrencesControllerTest < FunctionalTestCase
     # Components::Modal wrapping (auto-open, modal-lg, id) — these are
     # the markers proving the new modal composition rendered, not the
     # pre-refactor hand-rolled markup or no modal at all.
-    assert_match(
-      /<div [^>]*id="modal_resolve_projects"[^>]*class="modal fade in"/,
-      @response.body
-    )
-    assert_match(/<div class="modal-dialog modal-lg"/, @response.body)
-    assert_match(/<div class="modal-backdrop fade in"/, @response.body)
+    assert_select("div#modal_resolve_projects.modal.fade.in")
+    assert_select("div.modal-dialog.modal-lg")
+    assert_select("div.modal-backdrop.fade.in")
     # Form is inside modal-body, with the edit-mode submit button name.
-    assert_match(
-      /name="resolution".*value="add_all"|value="add_all".*name="resolution"/,
-      @response.body
-    )
+    assert_select("[name='resolution'][value='add_all']")
   end
 
   # ---------- project confirmation ----------
@@ -340,14 +323,13 @@ class OccurrencesControllerTest < FunctionalTestCase
       post(:create, params: create_params(@obs1, [@obs1, obs3]))
     end
     assert_response(:success) # renders confirmation modal
-    assert_match(/Add All/, @response.body)
+    assert_select("#modal_resolve_projects", text: /Add All/)
     # Components::Modal wrapping markup (auto-open, modal-lg, id) —
     # proves the create-mode view file's modal composition rendered.
-    assert_match(/id="modal_resolve_projects"[^>]*class="modal fade in"/,
-                 @response.body)
-    assert_match(/<div class="modal-dialog modal-lg"/, @response.body)
+    assert_select("div#modal_resolve_projects.modal.fade.in")
+    assert_select("div.modal-dialog.modal-lg")
     # Create-mode submit uses project_resolution (vs edit's resolution).
-    assert_match(/name="project_resolution"/, @response.body)
+    assert_select("[name='project_resolution']")
   end
 
   def test_create_with_add_all_adds_to_projects
@@ -416,7 +398,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = create_occurrence(@obs1, @obs2)
     get(:show, params: { id: occ.id })
     assert_response(:success)
-    assert_match(@obs1.format_name.t, @response.body)
+    # Observation name is rendered inside a MatrixBox title link.
+    assert_select(".matrix-box",
+                  text: /#{Regexp.escape(@obs1.format_name.t.html_to_ascii)}/)
   end
 
   def test_show_missing_occurrence
@@ -431,7 +415,10 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = create_occurrence(@obs1, @obs2)
     get(:show, params: { id: occ.id })
     assert_response(:success)
-    assert_match(:show_occurrence_location_differs.l, @response.body)
+    assert_select(
+      ".alert-warning",
+      text: /#{Regexp.escape(:show_occurrence_location_differs.l)}/
+    )
   end
 
   # ---------- edit action ----------
@@ -447,9 +434,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = create_occurrence(@obs1, @obs2)
     get(:edit, params: { id: occ.id })
     assert_response(:success)
-    body = @response.body
-    assert_match(/occurrence\[primary_observation_id\]/, body)
-    assert_match(/observation_ids/, body)
+    assert_select("[name='occurrence[primary_observation_id]']")
+    assert_select("[name*='observation_ids']")
   end
 
   def test_edit_allowed_for_non_creator
@@ -624,7 +610,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     )
     get(:edit, params: { id: occ.id })
     assert_response(:success)
-    assert_match(/observation_ids/, @response.body)
+    assert_select("input[name='occurrence[observation_ids][]']")
   end
 
   # ---------- update: location/date/create obs ----------
@@ -693,16 +679,11 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     get(:edit, params: { id: occ.id })
     assert_response(:success)
-    body = @response.body
     # Location dropdown present when locations differ
-    assert_match(
-      /occurrence\[primary_observation\]\[location_id\]/, body
-    )
+    assert_select("[name='occurrence[primary_observation][location_id]']")
     # Date inputs always present (3-select via MO's DateField).
     # `when(1i)` is the year suffix Rails uses for composite date params.
-    assert_match(
-      /occurrence\[primary_observation\]\[when\(1i\)\]/, body
-    )
+    assert_select("[name='occurrence[primary_observation][when(1i)]']")
   end
 
   # ---------- destroy action ----------
@@ -930,9 +911,8 @@ class OccurrencesControllerTest < FunctionalTestCase
 
     get(:edit, params: { id: occ.id })
     assert_response(:success)
-    body = @response.body
-    assert_match(/observation_ids/, body,
-                 "Should show candidate checkboxes")
+    assert_select("[name*='observation_ids']", { minimum: 1 },
+                  "Should show candidate checkboxes")
   end
 
   def test_edit_excludes_current_observations_from_candidates

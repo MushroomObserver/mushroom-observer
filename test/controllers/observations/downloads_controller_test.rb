@@ -277,8 +277,9 @@ module Observations
       get(:print_labels, params: { q: query.id.alphabetize })
       # \pard is paragraph command in rtf, one paragraph per result
       assert_equal(query.num_results, @response.body.scan("\\pard").size)
-      assert_match(/314159/, @response.body) # make sure fundis id in there!
-      assert_match(/Mary Newbie 174/, @response.body) # and collection number!
+      # RTF (not HTML) — use string search rather than assert_select
+      assert_includes(@response.body, "314159") # fundis id
+      assert_includes(@response.body, "Mary Newbie 174") # collection number
 
       # Alternative entry point.
       post(
@@ -316,8 +317,9 @@ module Observations
       get(:print_labels, params: { q: query.id.alphabetize })
       trusted_hidden = observations(:trusted_hidden)
       untrusted_hidden = observations(:untrusted_hidden)
-      assert_match(/#{trusted_hidden.lat}/, @response.body)
-      assert_no_match(/#{untrusted_hidden.lat}/, @response.body)
+      # RTF (not HTML) — use string search rather than assert_select
+      assert_includes(@response.body, trusted_hidden.lat.to_s)
+      assert_not_includes(@response.body, untrusted_hidden.lat.to_s)
     end
 
     # Print labels for all observations just to be sure all cases (more or less)

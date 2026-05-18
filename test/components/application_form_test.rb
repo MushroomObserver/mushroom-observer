@@ -107,7 +107,7 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     # `:prefs_login.t` → "Login" (config/locales/en.txt)
-    assert_match(%r{<label[^>]*>\s*Login\s*</label>}, form)
+    assert_html(form, "label", text: "Login")
   end
 
   def test_checkbox_field_prefs_auto_resolves_label_from_i18n
@@ -161,7 +161,7 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     # Should still have Bootstrap checkbox wrapper and label element
-    assert_match(/<div class="checkbox m-0">/, form)
+    assert_html(form, "div.checkbox.m-0")
     assert_html(form, "label.p-0")
     assert_includes(form, 'type="checkbox"')
     # But should NOT have label text
@@ -174,7 +174,7 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     # wrap_class should be on wrapper div, not the input
-    assert_match(/<div class="checkbox mt-3">/, form)
+    assert_html(form, "div.checkbox.mt-3")
   end
 
   # Select field tests
@@ -203,13 +203,11 @@ class ApplicationFormTest < ComponentTestCase
       select_field(:number, options, label: "Project")
     end
 
-    assert_match(
-      %r{<option[^>]*value=""[^>]*>\(No Project\)</option>}, form,
-      "nil option key must render as value=\"\" so the browser submits " \
-      "an empty string instead of the option's text content"
+    assert_html(
+      form, "option[value='']", text: "(No Project)"
     )
-    assert_match(
-      %r{<option[^>]*value="778455076"[^>]*>EOL Project</option>}, form
+    assert_html(
+      form, "option[value='778455076']", text: "EOL Project"
     )
   end
 
@@ -443,7 +441,11 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "input[name='collection_number[when(1i)]'][size='4']")
 
     # Verify order: day, month, year (3i before 2i before 1i)
-    assert_match(/_3i.*_2i.*_1i/m, form)
+    day_pos = form.index("_3i")
+    month_pos = form.index("_2i")
+    year_pos = form.index("_1i")
+    assert(day_pos < month_pos && month_pos < year_pos,
+           "Expected order day(_3i), month(_2i), year(_1i)")
   end
 
   def test_date_field_with_append_slot
@@ -499,7 +501,7 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     # Should NOT have file-input controller on wrapper
-    assert_no_match(/data-controller=['"]file-input['"]/, form)
+    assert_no_html(form, "[data-controller='file-input']")
 
     # Should have custom action
     assert_includes(form, "change->form-images#addSelectedFiles")

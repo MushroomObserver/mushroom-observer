@@ -38,9 +38,12 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     user.save!
     params = { id: obs.id }
     get(:edit, params:)
-    assert_no_match(/\[#{key}\]/, @response.body, 1)
-    assert_match(/\[#{key.upcase}\]/, @response.body)
-    assert_match(/\[#{alt_option.tr(" ", "_")}\]/, @response.body, 1)
+    assert_select("textarea[name='observation[notes][#{key}]']",
+                  count: 0)
+    assert_select("textarea[name='observation[notes][#{key.upcase}]']")
+    assert_select(
+      "textarea[name='observation[notes][#{alt_option.tr(" ", "_")}]']"
+    )
   end
 
   def test_collector_can_edit_observation

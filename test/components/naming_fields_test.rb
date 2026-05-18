@@ -46,11 +46,15 @@ class NamingFieldsTest < ComponentTestCase
     html = render_naming_form(create: true)
 
     # Should use the namespaced target format for autocompleter--name controller
-    assert_match(/data-autocompleter--name-target=.collapseFields/, html,
-                 "collapseFields should use autocompleter--name-target")
+    assert_html(
+      html, "[data-autocompleter--name-target='collapseFields']",
+      attribute: { "data-autocompleter--name-target" => "collapseFields" }
+    )
     # Should NOT use the old non-namespaced format
-    assert_no_match(/data-autocompleter-target=.collapseFields/, html,
-                    "Should not use non-namespaced autocompleter-target")
+    assert_no_html(
+      html, "[data-autocompleter-target='collapseFields']",
+      "Should not use non-namespaced autocompleter-target"
+    )
   end
 
   private

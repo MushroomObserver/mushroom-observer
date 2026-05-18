@@ -13,12 +13,13 @@ class ImportedSourceBannerTest < ComponentTestCase
     assert_html(html, selector)
     # Link text includes the external (iNat) id so users can see / search
     # for the specific record on the source platform.
-    assert_match(/Imported from iNaturalist #{obs.external_id}/, html)
+    assert_html(html, selector,
+                text: "Imported from iNaturalist #{obs.external_id}")
     # (?) help link to article 39, on-site, NOT a new tab.
     assert_html(html, "a[href='/articles/39']")
     assert_html(html, "span.glyphicon.glyphicon-question-sign")
-    assert_no_match(%r{href="/articles/39"[^>]*target=}, html,
-                    "Help link should not open in a new tab")
+    assert_no_html(html, "a[href='/articles/39'][target]",
+                   "Help link should not open in a new tab")
   end
 
   def test_renders_plain_text_when_no_observation_url
@@ -28,10 +29,10 @@ class ImportedSourceBannerTest < ComponentTestCase
 
     html = render(Components::ImportedSourceBanner.new(observation: obs))
 
-    assert_html(html, "div.imported-source-banner")
-    assert_match(/Imported from BlankSource #{obs.external_id}/, html)
-    assert_no_match(/<a[^>]*target="_blank"/, html,
-                    "Should not render a target=_blank link without a URL")
+    assert_html(html, "div.imported-source-banner",
+                text: "Imported from BlankSource #{obs.external_id}")
+    assert_no_html(html, "a[target='_blank']",
+                   "Should not render a target=_blank link without a URL")
     # Help link still appears.
     assert_html(html, "a[href='/articles/39']")
   end
@@ -42,10 +43,18 @@ class ImportedSourceBannerTest < ComponentTestCase
 
     html = render(Components::ImportedSourceBanner.new(observation: obs))
 
-    assert_html(html, "div.imported-source-banner")
     # Covers credit_text's no-id branch: text falls back to link[:text]
     # alone (no trailing space + id).
-    assert_match(%r{Imported from iNaturalist</a>}, html)
+    assert_html(
+      html,
+      "div.imported-source-banner a[href*='inaturalist.org/observations/']",
+      text: "Imported from iNaturalist"
+    )
+    link = Nokogiri::HTML(html).at_css(
+      "div.imported-source-banner a[href*='inaturalist.org/observations/']"
+    )
+    assert_equal("Imported from iNaturalist", link.text.strip,
+                 "Link text should not include trailing id space")
   end
 
   def test_renders_nothing_for_non_external_observation

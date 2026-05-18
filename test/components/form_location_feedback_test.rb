@@ -30,8 +30,8 @@ class FormLocationFeedbackTest < ComponentTestCase
   def test_renders_html_entities_without_double_escaping
     html = render_feedback(["Unknown country &#8216;Test&#8217;".html_safe])
 
-    assert_match(/&#8216;/, html)
-    assert_no_match(/&amp;#8216;/, html)
+    assert_includes(html, "&#8216;")
+    assert_not_includes(html, "&amp;#8216;")
   end
 
   def test_accepts_symbol_button_parameter
@@ -40,8 +40,8 @@ class FormLocationFeedbackTest < ComponentTestCase
                     button: :CREATE
                   ))
 
-    assert_html(html, ".alert-warning#dubious_location_messages")
-    assert_match(/#{:CREATE.l}/, html)
+    assert_html(html, ".alert-warning#dubious_location_messages",
+                text: :CREATE.l)
   end
 
   private

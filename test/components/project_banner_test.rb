@@ -176,7 +176,7 @@ class ProjectBannerTest < ComponentTestCase
     html = render_banner(project: project, current_tab: "observations")
 
     # Observations tab should have active class
-    assert_match(/observations.*active/i, html)
+    assert_html(html, "a.nav-link.active[href*='observations']")
   end
 
   def test_summary_tab_active_for_projects_controller

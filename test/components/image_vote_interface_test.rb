@@ -14,7 +14,7 @@ class ImageCaptionVoteInterfaceTest < ComponentTestCase
 
     assert_includes(html, "image_vote_#{@image.id}")
     assert_includes(html, "vote-meter")
-    assert_match(/image-vote/, html)
+    assert_includes(html, "image-vote")
   end
 
   def test_renders_nothing_with_votes_disabled

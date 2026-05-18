@@ -30,7 +30,8 @@ module Projects
       get(:index, params: { project_id: @project.id })
       assert_response(:success)
       assert_not_nil(assigns(:project_aliases))
-      assert_match(location.display_name, @response.body)
+      assert_select("#index_project_alias_table",
+                    text: /#{Regexp.escape(location.display_name)}/)
     end
 
     def test_show_displays_the_requested_project_alias

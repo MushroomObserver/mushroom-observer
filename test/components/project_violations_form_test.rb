@@ -48,7 +48,7 @@ class ProjectViolationsFormTest < ComponentTestCase
     html = render_form(project: proj, violations: [], user: proj.user)
 
     assert_includes(html, :form_violations_no_violations.l)
-    assert_no_match(/<table/, html)
+    assert_no_html(html, "table")
   end
 
   def test_admin_sees_exclude_buttons
@@ -144,11 +144,9 @@ class ProjectViolationsFormTest < ComponentTestCase
       "Modal body should show the no-usable-suffixes message"
     )
     assert_html(html, "##{modal_id} .modal-footer button[data-dismiss='modal']")
-    modal_pattern = %r{<div[^>]+id="#{modal_id}".*?</div>\s*</div>\s*</div>}m
-    modal_html = html.scan(modal_pattern).first.to_s
-    assert_no_match(
-      /<form[^>]+>[^<]*<input[^>]+name="do"[^>]+value="add_target_location"/m,
-      modal_html,
+    assert_no_html(
+      html,
+      "##{modal_id} input[name='do'][value='add_target_location']",
       "Empty-suffixes branch must not render an add_target_location form"
     )
   end
@@ -170,9 +168,9 @@ class ProjectViolationsFormTest < ComponentTestCase
     assert_not(skip_if_no_country,
                "Test setup expects fixture with a country tail (got: #{place})")
 
-    assert_no_match(
-      /<input[^>]*type="radio"[^>]*value="#{Regexp.escape(bare_country)}"/,
+    assert_no_html(
       html,
+      "input[type='radio'][value='#{bare_country}']",
       "Bare-country suffix should not appear as a selectable radio"
     )
   end
@@ -190,18 +188,17 @@ class ProjectViolationsFormTest < ComponentTestCase
 
     # Exclude button is keyed by obs_id; the form contains an
     # `input[name='obs_id'][value='<id>']`.
-    assert_match(
-      /name="obs_id"[^>]*value="#{own_violation.obs.id}"/, html,
-      "Own obs should have an Exclude form"
+    assert_html(
+      html, "input[name='obs_id'][value='#{own_violation.obs.id}']"
     )
-    assert_no_match(
-      /name="obs_id"[^>]*value="#{others_violation.obs.id}"/, html,
+    assert_no_html(
+      html, "input[name='obs_id'][value='#{others_violation.obs.id}']",
       "Other user's obs should not have an Exclude form for non-admin"
     )
     # Admin-only actions are not rendered for non-admin.
-    assert_no_match(/value="extend"/, html)
-    assert_no_match(/value="add_target_name"/, html)
-    assert_no_match(/value="add_target_location"/, html)
+    assert_no_html(html, "input[value='extend']")
+    assert_no_html(html, "input[value='add_target_name']")
+    assert_no_html(html, "input[value='add_target_location']")
   end
 
   # Regression for J1 of PR #4182 review: a 2-part location like
@@ -249,10 +246,75 @@ class ProjectViolationsFormTest < ComponentTestCase
 
     # Disabled radio plus a Create link to /locations/new with the suffix.
     assert_html(html, "input[type='radio'][disabled]")
-    assert_match(
-      %r{<a [^>]*href="/locations/new\?display_name=[^"]*"[^>]*target="_blank"},
-      html, "Create link to /locations/new should appear for missing suffix"
+    assert_html(
+      html,
+      "a[href^='/locations/new?display_name='][target='_blank']"
     )
+  end
+
+  # Coverage gaps surfaced in audit of merged #4277: the existing-
+  # location branch of `suffix_choices`, the `suffix_create_link`
+  # attributes, the `render_suffix_radios` help-text emission, and
+  # the `first_existing` preselect (the Copilot review fix).
+
+  def test_existing_location_suffix_renders_enabled_radio_with_id
+    # When a comma-suffix of the obs's location matches an existing
+    # Location, render an ENABLED radio whose value is that
+    # location's id (NOT disabled, no `append:` Create link). This
+    # is the other branch of `suffix_choices` — currently uncovered.
+    proj = setup_target_location_violation_project
+    target_loc_v =
+      proj.violations.find { |v| v.kinds.include?(:target_location) }
+    obs = target_loc_v.obs
+
+    # Find at least one suffix of the obs's location that matches an
+    # existing Location. If none, the test scenario isn't satisfiable
+    # for the current fixture state — skip.
+    place = obs.location_id ? obs.location.name : obs.where
+    suffixes = place.split(",").each_index.map do |i|
+      place.split(",")[i..].join(",").strip
+    end
+    existing = Location.where(name: suffixes).first
+    skip("No fixture location matches a suffix of #{place.inspect}") \
+      unless existing
+
+    html = render_form(project: proj, violations: proj.violations,
+                       user: proj.user)
+
+    # Radio for the existing-location row: value=location.id, enabled.
+    assert_html(
+      html,
+      "#location_target_modal_#{obs.id} " \
+      "input[type='radio'][value='#{existing.id}']:not([disabled])"
+    )
+  end
+
+  def test_suffix_create_link_has_target_blank_and_btn_class
+    proj = setup_target_location_violation_project
+
+    html = render_form(project: proj, violations: proj.violations,
+                       user: proj.user)
+
+    # The Create link on placeholder rows: target="_blank" +
+    # rel="noopener" (so the popup can't manipulate opener) +
+    # `.btn-default.btn-xs` styling. Currently only target="_blank"
+    # was asserted by the existing test.
+    assert_html(
+      html,
+      "a[target='_blank'][rel='noopener'].btn.btn-default.btn-xs"
+    )
+  end
+
+  def test_suffix_radios_render_help_paragraph
+    proj = setup_target_location_violation_project
+
+    html = render_form(project: proj, violations: proj.violations,
+                       user: proj.user)
+
+    # Help paragraph rendered above the radio group (inside the
+    # modal-body). Wrapped in a `<p>`, not just plain text — without
+    # this users see a list of radios with no explanation.
+    assert_html(html, "p", text: :form_violations_modal_target_location_help.l)
   end
 
   private

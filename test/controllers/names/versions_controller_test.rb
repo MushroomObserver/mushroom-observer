@@ -60,10 +60,8 @@ module Names
       login
       get(:show, params: { id: species.id, version: species_v.version })
       assert_response(:success)
-      assert_select("#name_classification") do
-        assert_match(/Basidiomycota/, response.body)
-        assert_match(/Inherited from/, response.body)
-      end
+      assert_select("#name_classification", text: /Basidiomycota/)
+      assert_select("#name_classification", text: /Inherited from/)
     end
   end
 end

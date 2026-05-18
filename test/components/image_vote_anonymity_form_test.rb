@@ -35,8 +35,8 @@ class ImageVoteAnonymityFormTest < ComponentTestCase
     html = render_form(num_anonymous: 0, num_public: 10)
 
     # Public button should be disabled when there are no anonymous votes
-    button_value = Regexp.escape(:image_vote_anonymity_make_public.l)
-    assert_match(/<input[^>]*disabled[^>]*value="#{button_value}"/, html)
+    button_value = :image_vote_anonymity_make_public.l
+    assert_html(html, "input[disabled][value='#{button_value}']")
   end
 
   private

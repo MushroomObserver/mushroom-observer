@@ -570,15 +570,41 @@ class API2ControllerTest < FunctionalTestCase
   def test_get_observation_with_gps_hidden
     obs = observations(:unknown_with_lat_lng)
     get(:observations, params: { id: obs.id, detail: :high, format: :json })
-    assert_match(/34.1622|118.3521/, @response.body)
+    assert_observation_lat_lng_visible_json
     get(:observations, params: { id: obs.id, detail: :high, format: :xml })
-    assert_match(/34.1622|118.3521/, @response.body)
+    assert_observation_lat_lng_visible_xml
 
     obs.update(gps_hidden: true)
     get(:observations, params: { id: obs.id, detail: :high, format: :json })
-    assert_no_match(/34.1622|118.3521/, @response.body)
+    assert_observation_lat_lng_hidden_json
     get(:observations, params: { id: obs.id, detail: :high, format: :xml })
-    assert_no_match(/34.1622|118.3521/, @response.body)
+    assert_observation_lat_lng_hidden_xml
+  end
+
+  def assert_observation_lat_lng_visible_json
+    result = response.parsed_body["results"][0]
+    assert_equal("34.1622", result["latitude"].to_s)
+    assert_equal("-118.3521", result["longitude"].to_s)
+  end
+
+  def assert_observation_lat_lng_visible_xml
+    doc = REXML::Document.new(response.body)
+    result = doc.root.elements["results/result"]
+    assert_equal("34.1622", result.elements["latitude"]&.get_text.to_s)
+    assert_equal("-118.3521", result.elements["longitude"]&.get_text.to_s)
+  end
+
+  def assert_observation_lat_lng_hidden_json
+    result = response.parsed_body["results"][0]
+    assert_nil(result["latitude"])
+    assert_nil(result["longitude"])
+  end
+
+  def assert_observation_lat_lng_hidden_xml
+    doc = REXML::Document.new(response.body)
+    result = doc.root.elements["results/result"]
+    assert_nil(result.elements["latitude"])
+    assert_nil(result.elements["longitude"])
   end
 
   def test_get_empty_results
