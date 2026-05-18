@@ -34,14 +34,15 @@ class AutologinIntegrationTest < IntegrationTestCase
     sess.get("/account/preferences/edit")
     if user
       # Autologin succeeded — preferences-edit form is rendered.
-      sess.assert_select("form[action*='account/preferences/edit']")
-      sess.assert_select("form[action*='account/login/new']", count: 0)
+      # form_with model: @user, url: account_preferences_path posts to
+      # /account/preferences (PATCH via _method hidden field).
+      sess.assert_select("form[action='/account/preferences']")
+      sess.assert_select("#account_login_form", count: 0)
       assert_users_equal(user, sess.assigns(:user))
     else
       # No autologin — login form is rendered instead.
-      sess.assert_select("form[action*='account/preferences/edit']",
-                         count: 0)
-      sess.assert_select("form[action*='account/login/new']")
+      sess.assert_select("form[action='/account/preferences']", count: 0)
+      sess.assert_select("#account_login_form")
     end
   end
 end
