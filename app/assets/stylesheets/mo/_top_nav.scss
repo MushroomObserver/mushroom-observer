@@ -171,6 +171,16 @@
   }
 }
 
+// `.glyphicon { top: 3px }` (mo/_icons.scss) is calibrated for
+// glyphs sitting inline with body text, but it leaves the `+` in
+// the green nav_create button (#3930) visibly below center —
+// noticeable both in the icon-only mobile view and alongside the
+// "Add" text on tablet/desktop. Pin the `+` to the button's
+// natural baseline here.
+#top_nav .btn-success.top_nav_button .glyphicon {
+  top: 1px;
+}
+
 #index_bar {
   @extend .d-flex, .justify-content-between, .flex-wrap, .border-bottom;
   border-bottom-color: $navbar-default-border;
