@@ -121,6 +121,112 @@ with model as the first positional argument. Pattern B forms ignore this model
 - Form owns its FormObject creation logic
 - Works with both direct rendering and ModalForm turbo_stream responses
 
+### Form Inside a Modal
+
+When a Superform is rendered inside a Bootstrap modal, the `<form>` tag's
+relationship to `.modal-body` / `.modal-footer` matters. The two options:
+
+| Form shape | What the form owns | Modal slot |
+|---|---|---|
+| Form has a distinct footer-button row (submit + cancel separated from fields) | Both `.modal-body` AND `.modal-footer` | `:form_content` slot |
+| Form is all body content (e.g. one inline submit button below the fields) | Just `.modal-body` (or nothing — Modal renders it) | `:body` slot |
+
+#### Pattern A: form spans `.modal-body` + `.modal-footer` (BS3 footer chrome)
+
+Forms with submit/cancel buttons that should sit in `.modal-footer` (top
+border, right alignment, button spacing) must have the `<form>` tag wrap
+**both** modal sections, so the submit button in `.modal-footer` is
+naturally inside the form. Anything else either drops `.modal-footer`
+entirely (and synthesizes ad-hoc `text-right mt-3` chrome — anti-pattern)
+or requires HTML5 `form="<id>"` attributes on out-of-form buttons.
+
+To use this pattern:
+
+1. **Declare** the form opts in via a class method:
+
+    ```ruby
+    class Components::TrustSettingsForm < Components::ApplicationForm
+      # Tells ModalTurboForm (and any Modal caller) to render this form
+      # via Modal's :form_content slot, not :body.
+      def self.owns_modal_sections?
+        true
+      end
+      # ...
+    end
+    ```
+
+2. **Emit both divs inside `view_template`**, using Superform's yield so
+   the `<form>` opens before `.modal-body` and closes after `.modal-footer`:
+
+    ```ruby
+    def view_template
+      super do
+        hidden_field(:do, value: "add_target_location")
+        div(class: "modal-body", id: @body_id) do
+          div(id: @flash_id) if @flash_id
+          render_fields
+        end
+        div(class: "modal-footer") { render_footer_buttons }
+      end
+    end
+    ```
+
+3. **Accept `modal_ids: { body:, flash: }`** in the initializer. ModalTurboForm
+   passes this automatically when it detects `owns_modal_sections?`. The two ids
+   serve different purposes — drop either and you silently break a feature:
+
+    | id | What targets it |
+    |---|---|
+    | `body_id` | Turbo-stream re-renders that replace `.modal-body` after a server action — without the id, the stream can't find its target. |
+    | `flash_id` | `_modal_form_reload.erb` injects in-modal validation flash messages into this slot on submit failure — without the id, validation errors disappear. |
+
+    ```ruby
+    def initialize(model, modal_ids: {}, **)
+      @body_id  = modal_ids[:body]
+      @flash_id = modal_ids[:flash]
+      super(model, **)
+    end
+    ```
+
+4. **Render via Modal's `:form_content` slot** (ModalTurboForm does this
+   automatically when `owns_modal_sections?` is true; for direct
+   `Components::Modal.new` callers, do it yourself):
+
+    ```ruby
+    render(Components::Modal.new(id: "modal_x", title: "Edit", user: @user)) do |m|
+      m.with_form_content { render(Components::ThingForm.new(@thing)) }
+    end
+    ```
+
+#### Pattern B: form lives inside `.modal-body`
+
+When the form has no distinct footer-button row — e.g. a one-button
+confirmation form, or fields with an inline submit at the bottom — render
+the form via Modal's regular `:body` slot. Don't declare
+`owns_modal_sections?`. The form is just content; Modal handles all
+chrome around it.
+
+```ruby
+render(Components::Modal.new(id: "modal_y", title: "Pick")) do |m|
+  m.with_body { render(Components::SimpleForm.new(@thing)) }
+end
+```
+
+#### Modal Form Anti-Patterns
+
+- **Synthesizing footer chrome inside `.modal-body`.** Don't add a
+  `<div class="text-right mt-3">` button row at the bottom of `.modal-body`
+  as a stand-in for `.modal-footer`. That drops the BS3 footer styling
+  (top border, padding, alignment) and produces visible drift from the
+  pre-Phlex chrome. If you need a button row, use Pattern A.
+- **Splitting the form across two slots.** Don't put fields in
+  `with_body` and buttons in `with_footer` — the submit button ends up
+  outside the `<form>` and clicking it submits nothing. Either span both
+  via `:form_content` (Pattern A) or keep everything in `:body` (Pattern B).
+- **Dropping `body_id` or `flash_id`.** Both kwargs are load-bearing
+  (turbo-stream targets, in-modal flash). If your form doesn't need them
+  for any reason, document why — don't silently omit.
+
 ### Form Objects
 
 When a form doesn't map directly to an ActiveRecord model (e.g., action forms,
@@ -595,7 +701,15 @@ There are two situations where `FieldProxy` is the right answer:
    HTML" rule above.
 
 ```ruby
-# Outside-form usage (FormNameFeedback)
+# Outside-form usage (FormNameFeedback).
+#
+# `wrapper_options: { wrap_class: ... }` adds CSS classes to each
+# choice's `<div class="radio">` (or `<div class="checkbox">`) wrapper.
+# Use this to preserve pre-refactor row spacing — pre-Phlex ERB modals
+# and forms often put `.mb-2` on per-row `.radio` / `.checkbox` wrappers
+# for vertical spacing, and Superform's default omits it. Without
+# `wrap_class:`, an ERB → Phlex conversion silently loses that spacing
+# (caught only by HTML-parity diff against the pre-refactor markup).
 proxy = Components::ApplicationForm::FieldProxy.new(
   "chosen_multiple_names", name.id
 )

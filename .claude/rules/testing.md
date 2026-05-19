@@ -174,6 +174,73 @@ place to clean up whatever forbidden assertions live in it.
 - Models: `bin/rails test test/models/`
 - Coverage: `bin/rails test:coverage`
 
+## Verify per-file coverage on every open PR
+
+The goal isn't "the lines I added are covered" — it's **"every Ruby
+file I touched is at 100% line coverage, before AND after my change."**
+Diff coverage (the coveralls bot's headline percentage) only counts
+the lines you added or modified; it'll happily report 100% on a PR
+that leaves unrelated code in the touched files uncovered.
+
+What to do, after the coveralls bot comments on the PR:
+
+1. Pull the per-file numbers from the build's `source_files.json`:
+
+    ```bash
+    BUILD_ID=$(gh pr view <PR> --json comments \
+      --jq '.comments[] | select(.author.login=="coveralls") | .body' |
+      grep -oE "coveralls.io/builds/[0-9]+" | tail -1 |
+      grep -oE "[0-9]+$")
+
+    gh pr view <PR> --json files \
+      --jq '.files[] | select(.changeType!="DELETED") | .path' |
+      grep -E '\.rb$' |
+      while read -r path; do
+        curl -s "https://coveralls.io/builds/${BUILD_ID}/source_files.json?per_page=1000" |
+          python3 -c "
+import sys, json, os
+d = json.load(sys.stdin)
+src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
+f = next((x for x in src if x['name'] == os.environ['P']), None)
+if f:
+  cov, rel, miss = f['covered_line_count'], f['relevant_line_count'], f['missed_line_count']
+  pct = 100.0 * cov / rel if rel else 0
+  flag = '' if miss == 0 else f'  MISSED {miss}'
+  print(f\"{os.environ['P']}: {cov}/{rel} ({pct:.1f}%){flag}\")
+else:
+  print(f\"{os.environ['P']}: <not instrumented>\")
+" P="$path"
+      done
+    ```
+
+2. **Every Ruby file in the PR should report 100% coverage.** ERB,
+   config, Markdown, etc. show up as `<not instrumented>` — that's
+   expected; SimpleCov only instruments Ruby.
+
+3. **If a file is below 100%, fix the gap in the same PR.** Either add
+   tests that exercise the uncovered branches, or remove the dead code.
+   Don't ship a PR that drops a file from 100% to 96% — the slack
+   accumulates branch by branch and eventually nothing is testable
+   in isolation.
+
+4. If a file in the touched set was already below 100% on `main`
+   before your PR, that's not your bug to fix in this PR — but
+   surface it in the PR description so reviewers know.
+
+Why both numbers matter:
+
+- **Diff coverage** confirms your changes are tested. Easy to game
+  (write tests that touch every added line without exercising real
+  behavior).
+- **Per-file coverage** confirms the file as a whole is testable.
+  A file at 100% has every method, every branch, every guard reachable
+  from a test — which is what gives you confidence that the next
+  refactor won't silently drop a behavior.
+
+For local checking before pushing, SimpleCov writes `coverage/index.html`
+and `coverage/.last_run.json` after each test run. Open the HTML report
+or jq the JSON to find missed lines on any file.
+
 ## Component Test Structure
 
 **IMPORTANT**: Follow this pattern for all Phlex component tests.
