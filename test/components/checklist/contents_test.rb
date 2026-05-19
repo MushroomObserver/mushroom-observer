@@ -11,46 +11,51 @@ require("test_helper")
 # `Observation.joins(:name).find_by(name: { deprecated: true })` in
 # `test_checklist_marks_deprecated` happened to return — an unordered
 # `find_by` whose result varied with test seed / parallel-worker
-# state. See #4XXX for the diagnosis.
+# state. See PR #4301 for the diagnosis.
 class Components::Checklist::ContentsTest < ComponentTestCase
+  SUMMARY_SELECTOR = "#checklist_contents .my-4 > div"
+
   # Both species and higher-level observed → :checklist_observed_summary
   # branch (lines 67-68 in contents.rb).
   def test_summary_both_species_and_higher_observed
     html = render_contents(num_species: 2, num_higher: 3)
+    expected = :checklist_observed_summary.l(
+      species: 2, higher: 3, taxa_word: :checklist_taxa.l
+    )
 
     assert_html(html, "#checklist_contents")
-    # The combined-summary string interpolates "[species] species and
-    # [higher] higher-level [taxa_word] observed". Match the shape
-    # without coupling to exact wording or punctuation.
-    assert_match(/2 species and 3 higher-level taxa observed/, html)
+    assert_html(html, SUMMARY_SELECTOR, text: expected)
   end
 
   # higher == 1 → :checklist_taxon (singular). Locks in the
   # singular/plural switch on line 65 of contents.rb.
   def test_summary_uses_singular_taxon_when_higher_is_one
     html = render_contents(num_species: 1, num_higher: 1)
+    expected = :checklist_observed_summary.l(
+      species: 1, higher: 1, taxa_word: :checklist_taxon.l
+    )
 
-    assert_match(/1 species and 1 higher-level taxon observed/, html)
+    assert_html(html, SUMMARY_SELECTOR, text: expected)
   end
 
   # species > 0, higher == 0 → :checklist_observed_species_only branch
   # (line 70 in contents.rb).
   def test_summary_species_only
     html = render_contents(num_species: 3, num_higher: 0)
+    expected = :checklist_observed_species_only.l(species: 3)
 
-    assert_match(/3 species observed/, html)
-    assert_no_match(/higher-level/, html)
+    assert_html(html, SUMMARY_SELECTOR, text: expected)
   end
 
   # species == 0, higher > 0 → :checklist_observed_higher_only branch
   # (line 72 in contents.rb). The whole reason this file exists.
   def test_summary_higher_only
     html = render_contents(num_species: 0, num_higher: 2)
+    expected = :checklist_observed_higher_only.l(
+      higher: 2, taxa_word: :checklist_taxa.l
+    )
 
-    assert_match(/2 higher-level taxa observed/, html)
-    # No "N species observed" copy — the species-only branch must not
-    # fire when num_species is zero.
-    assert_no_match(/\d+ species observed/, html)
+    assert_html(html, SUMMARY_SELECTOR, text: expected)
   end
 
   # Both counts zero → observed_summary_text returns nil and the
@@ -59,7 +64,9 @@ class Components::Checklist::ContentsTest < ComponentTestCase
     html = render_contents(num_species: 0, num_higher: 0)
 
     assert_html(html, "#checklist_contents")
-    assert_no_match(/observed \(synonyms counted once\)/, html)
+    # `for_project?` is false for our stub, so render_target_summary is
+    # also skipped — `.my-4` has no inner divs at all.
+    assert_html(html, SUMMARY_SELECTOR, count: 0)
   end
 
   # Stub responding to every method `Components::Checklist::Contents`
