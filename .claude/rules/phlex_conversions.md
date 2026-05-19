@@ -37,3 +37,32 @@ After writing the component:
 5. Self-review the component diff for any literal `input(`, `select(`,
    `textarea(`, or `option(` calls. If present, replace each with the
    helper or FieldProxy pattern before opening the PR.
+6. **If the component replaces an ERB modal or form, run an HTML-parity
+   diff against the pre-refactor markup before opening the PR.** Use the
+   diff harness pattern from `.claude/rules/testing.md`
+   ("Debugging Phlex Component Conversions / The HTML Diff Technique"):
+   keep a renamed `_Old` copy of the original component on the branch,
+   write a one-off test that renders both with identical inputs and
+   writes them to `/tmp/foo_old.html` + `/tmp/foo_new.html`, then `diff`
+   the formatted output.
+
+   For every difference, decide:
+   - **Preserve** it via `wrapper_options: { wrap_class: ... }` on
+     collection fields, `wrap_class:` on field helpers, explicit Phlex
+     `class:` attrs, or whatever knob the new component exposes. Common
+     drops to look for: `.mb-2` on `.radio` / `.checkbox` rows,
+     `text-right`/`mt-3` on button rows, custom `data-*` attributes,
+     ARIA labels, the modal's `.modal-header` vs. `.modal-body` /
+     `.modal-footer` placement of submit buttons. See
+     `phlex_style_guide.md` — `Form Inside a Modal` for the modal-form
+     case specifically.
+   - **Call it out** explicitly in the PR description if you're
+     intentionally changing the markup (e.g. adding `.fade` for animation
+     consistency, dropping an unused id). Reviewers shouldn't have to
+     spot drift in a diff that calls itself "no functional change".
+
+   This is mandatory for modal/form ERB→Phlex conversions — the visual
+   contract there is easy to drift on, and reviewers can't catch it
+   without the diff (controller / component tests are happy with either
+   markup). For non-form, non-modal components the diff is still a good
+   habit but isn't required.
