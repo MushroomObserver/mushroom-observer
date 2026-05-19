@@ -708,9 +708,16 @@ MushroomObserver::Application.routes.draw do
     end
     resources :violations, only: [:index], controller: "projects/violations"
   end
-  # resourceful route won't work because it requires an additional id
-  put("/projects/:project_id/violations", to: "projects/violations#update",
-                                          as: "project_violations_update")
+  # resourceful route won't work because it requires an additional id.
+  # Accept both PATCH and PUT — PATCH is the Rails-idiomatic verb for
+  # updates and what Superform defaults to for a persisted model
+  # (e.g. TargetLocationForm). PUT is kept so the legacy button_to
+  # calls (Exclude/Extend/Add Target Name) and any external callers
+  # continue to work without modification.
+  match("/projects/:project_id/violations",
+        to: "projects/violations#update",
+        as: "project_violations_update",
+        via: [:put, :patch])
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications

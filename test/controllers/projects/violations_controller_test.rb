@@ -57,7 +57,8 @@ module Projects
     def test_update_exclude
       project = projects(:falmouth_2023_09_project)
       victim = project.violations.first.obs
-      params = { project_id: project.id, do: "exclude", obs_id: victim.id }
+      params = { project_id: project.id,
+                 project: { do: "exclude", obs_id: victim.id } }
 
       login(project.user.login)
       put(:update, params: params)
@@ -73,7 +74,8 @@ module Projects
         project.violations.find { |v| v.kinds.include?(:date) }
       assert(future_violation, "Test needs a date violation in fixtures")
       victim = future_violation.obs
-      params = { project_id: project.id, do: "extend", obs_id: victim.id }
+      params = { project_id: project.id,
+                 project: { do: "extend", obs_id: victim.id } }
 
       login(project.user.login)
       put(:update, params: params)
@@ -92,8 +94,9 @@ module Projects
       off_target = observations(:peltigera_obs)
       proj.add_observation(off_target)
 
-      params = { project_id: proj.id, do: "add_target_name",
-                 obs_id: off_target.id }
+      params = { project_id: proj.id,
+                 project: { do: "add_target_name",
+                            obs_id: off_target.id } }
       login(proj.user.login)
       put(:update, params: params)
 
@@ -111,8 +114,10 @@ module Projects
       proj.add_observation(elsewhere)
       new_target = locations(:falmouth)
 
-      params = { project_id: proj.id, do: "add_target_location",
-                 obs_id: elsewhere.id, location_id: new_target.id }
+      params = { project_id: proj.id,
+                 project: { do: "add_target_location",
+                            obs_id: elsewhere.id,
+                            location_id: new_target.id } }
       login(proj.user.login)
       put(:update, params: params)
 
@@ -129,8 +134,9 @@ module Projects
       victim = proj.violations.first.obs
 
       login(stranger.login)
-      put(:update, params: { project_id: proj.id, do: "extend",
-                             obs_id: victim.id })
+      put(:update, params: { project_id: proj.id,
+                             project: { do: "extend",
+                                        obs_id: victim.id } })
 
       proj.reload
       assert_equal(original_start, proj.start_date,
@@ -143,8 +149,9 @@ module Projects
       victim = proj.violations.first.obs
 
       login(victim.user.login)
-      put(:update, params: { project_id: proj.id, do: "exclude",
-                             obs_id: victim.id })
+      put(:update, params: { project_id: proj.id,
+                             project: { do: "exclude",
+                                        obs_id: victim.id } })
 
       assert_redirected_to(project_violations_path(project_id: proj.id))
       assert_includes(proj.excluded_observations, victim,
@@ -159,8 +166,9 @@ module Projects
       assert_not(proj.is_admin?(stranger))
 
       login(stranger.login)
-      put(:update, params: { project_id: proj.id, do: "exclude",
-                             obs_id: victim.id })
+      put(:update, params: { project_id: proj.id,
+                             project: { do: "exclude",
+                                        obs_id: victim.id } })
 
       assert_not_includes(proj.excluded_observations, victim,
                           "Stranger cannot exclude someone else's obs")
@@ -168,7 +176,8 @@ module Projects
 
     def test_update_nonexistent_project
       id = -1
-      params = { project_id: id, do: "exclude", obs_id: 0 }
+      params = { project_id: id,
+                 project: { do: "exclude", obs_id: 0 } }
       login
       put(:update, params: params)
       assert_redirected_to(projects_path)

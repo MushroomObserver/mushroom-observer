@@ -20,8 +20,6 @@
 # Exclude is offered to admins and the obs's own user. The other
 # actions are admin-only because they mutate project-level config.
 class Components::ProjectViolationsForm < Components::Base
-  register_value_helper :form_authenticity_token
-
   prop :project, Project
   prop :violations, _Array(Project::Violation)
   prop :user, User
@@ -136,7 +134,7 @@ class Components::ProjectViolationsForm < Components::Base
     button_to(
       :form_violations_action_exclude.l, violations_path,
       method: :put, class: "btn btn-default btn-xs",
-      params: { do: "exclude", obs_id: obs.id }
+      params: { project: { do: "exclude", obs_id: obs.id } }
     )
   end
 
@@ -144,7 +142,7 @@ class Components::ProjectViolationsForm < Components::Base
     button_to(
       :form_violations_action_extend.l, violations_path,
       method: :put, class: "btn btn-default btn-xs",
-      params: { do: "extend", obs_id: obs.id }
+      params: { project: { do: "extend", obs_id: obs.id } }
     )
   end
 
@@ -152,7 +150,7 @@ class Components::ProjectViolationsForm < Components::Base
     button_to(
       :form_violations_action_add_target_name.l, violations_path,
       method: :put, class: "btn btn-default btn-xs",
-      params: { do: "add_target_name", obs_id: obs.id }
+      params: { project: { do: "add_target_name", obs_id: obs.id } }
     )
   end
 
@@ -175,160 +173,41 @@ class Components::ProjectViolationsForm < Components::Base
     end
   end
 
+  # Per-obs modal. When the obs has usable suffixes, the body+footer
+  # are owned by TargetLocationForm via Modal's `:form_content` slot
+  # (so the form spans both — submit in the footer is naturally inside
+  # the form). When there are no usable suffixes (e.g. obs.where is
+  # just a country), there's nothing to submit, so render a static
+  # message body + Cancel-only footer instead.
   def render_location_modal(obs)
-    div(
-      class: "modal fade",
-      id: location_modal_id(obs),
-      tabindex: "-1",
-      role: "dialog",
-      aria: { labelledby: "#{location_modal_id(obs)}_label" }
-    ) do
-      div(class: "modal-dialog", role: "document") do
-        div(class: "modal-content") do
-          render_location_modal_header(obs)
-          render_location_modal_body(obs)
+    render(Components::Modal.new(
+             id: location_modal_id(obs),
+             title: :form_violations_modal_target_location_title.l,
+             user: @user
+           )) do |m|
+      if Components::TargetLocationForm.applicable?(obs)
+        m.with_form_content do
+          render(Components::TargetLocationForm.new(
+                   obs: obs, project: @project
+                 ))
         end
-      end
-    end
-  end
-
-  def render_location_modal_header(obs)
-    div(class: "modal-header") do
-      button(
-        type: "button", class: "close",
-        data: { dismiss: "modal" }, aria: { label: :CLOSE.l }
-      ) do
-        span(aria: { hidden: "true" }) { "×" }
-      end
-      h4(class: "modal-title", id: "#{location_modal_id(obs)}_label") do
-        plain(:form_violations_modal_target_location_title.l)
-      end
-    end
-  end
-
-  def render_location_modal_body(obs)
-    suffixes = location_suffixes_for(obs)
-    if suffixes.empty?
-      div(class: "modal-body") do
-        p { :form_violations_modal_target_location_no_suffixes.l }
-      end
-      div(class: "modal-footer") do
-        button(
-          type: "button", class: "btn btn-default",
-          data: { dismiss: "modal" }
-        ) { :CANCEL.l }
-      end
-    else
-      render_suffix_form(obs, suffixes)
-    end
-  end
-
-  def render_suffix_form(obs, suffixes)
-    # Batch-load every Location whose name matches one of this modal's
-    # suffixes in a single query, instead of issuing one query per
-    # suffix inside `render_suffix_choice` (Copilot review on PR #4182).
-    existing = Location.where(name: suffixes).index_by(&:name)
-    # Pre-check the first suffix that has a Location, not the first
-    # suffix overall — otherwise a modal whose most-specific suffix is
-    # missing renders with no enabled radio selected by default and
-    # silent submit becomes a no-op (Copilot review on PR #4182).
-    first_existing = suffixes.find { |s| existing.key?(s) }
-    form(method: "post", action: violations_path) do
-      render_csrf_and_method
-      input(type: "hidden", name: "do", value: "add_target_location")
-      input(type: "hidden", name: "obs_id", value: obs.id)
-      div(class: "modal-body") do
-        render_suffix_radios(suffixes, existing, first_existing)
-      end
-      render_modal_footer
-    end
-  end
-
-  def render_modal_footer
-    div(class: "modal-footer") do
-      button(
-        type: "submit", class: "btn btn-primary"
-      ) { :form_violations_modal_target_location_submit.l }
-      button(
-        type: "button", class: "btn btn-default",
-        data: { dismiss: "modal" }
-      ) { :CANCEL.l }
-    end
-  end
-
-  def render_suffix_radios(suffixes, existing, first_existing)
-    p { :form_violations_modal_target_location_help.l }
-    field = Components::ApplicationForm::FieldProxy.new(
-      nil, "location_id", first_existing && existing[first_existing]&.id
-    )
-    render(Components::ApplicationForm::RadioField.new(
-             field, *suffix_choices(suffixes, existing)
-           ))
-  end
-
-  # Each suffix becomes a `[value, label, opts]` choice for
-  # `RadioField`. Existing-location rows submit the location id;
-  # placeholder rows are disabled (so they're inert / not submitted)
-  # and `append:` a "Create" link as a sibling of the label inside
-  # the `.radio` wrap — kept outside `<label>` so clicking the link
-  # doesn't accidentally toggle the radio.
-  def suffix_choices(suffixes, existing)
-    suffixes.map do |suffix|
-      location = existing[suffix]
-      if location
-        [location.id, " #{suffix}"]
       else
-        [suffix, " #{suffix}",
-         { disabled: true, append: suffix_create_link(suffix) }]
+        render_no_suffixes_slots(m)
       end
     end
   end
 
-  def suffix_create_link(suffix)
-    # HTML-safe string built via Rails `tag.a` (returns SafeBuffer)
-    # so `RadioField` can emit it via `trusted_html`. Leading space
-    # gives a small gap between the disabled label text and the link.
-    " ".html_safe + helpers.tag.a(
-      :form_violations_modal_target_location_create.l,
-      href: new_location_path(display_name: suffix),
-      target: "_blank", rel: "noopener",
-      class: "btn btn-default btn-xs"
-    )
-  end
-
-  def render_csrf_and_method
-    input(type: "hidden", name: "_method", value: "put")
-    input(type: "hidden", name: "authenticity_token",
-          value: form_authenticity_token)
+  def render_no_suffixes_slots(modal)
+    modal.with_body do
+      p { :form_violations_modal_target_location_no_suffixes.l }
+    end
+    modal.with_footer do
+      button(type: "button", class: "btn btn-default",
+             data: { dismiss: "modal" }) { :CANCEL.l }
+    end
   end
 
   def location_modal_id(obs)
     "location_target_modal_#{obs.id}"
-  end
-
-  # Return the comma-suffixes of the obs's location (or where), excluding
-  # any suffix that is a bare country name (Q3 of #4136 design).
-  def location_suffixes_for(obs)
-    name = obs.location_id ? obs.location&.name : obs.where
-    return [] if name.blank?
-
-    suffixes = comma_suffixes(name)
-    suffixes.reject { |s| Location.understood_countries.include?(s) }
-  end
-
-  # Returns progressively-shorter trailing slices of a comma-separated
-  # location name, including the full name itself. So
-  # "Berkeley, Alameda Co., California, USA" yields four candidates,
-  # and "California, USA" yields two ("California, USA" and "USA"); the
-  # bare-country entries are filtered out by the caller. JoeCohen review
-  # on PR #4182: the full obs location name itself is a valid target
-  # candidate (e.g. for state- or national-park-level locations like
-  # "California, USA" or "Great Smoky Mountain National Park, USA"), so
-  # the previous "(1..)" range that omitted the full name was wrong.
-  def comma_suffixes(name)
-    parts = name.split(",").map(&:strip).reject(&:empty?)
-    return [] if parts.empty?
-
-    (0..(parts.length - 1)).map { |i| parts[i..].join(", ") }
   end
 end
