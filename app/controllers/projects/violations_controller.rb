@@ -26,16 +26,23 @@ module Projects
     # admins frequently create missing suffix Locations in a separate
     # tab and need the modal's radios to pick those up without
     # reloading the violations page.
+    #
+    # Uses a narrow `find_by` (Copilot review on PR #4307) rather than
+    # the index action's `violations_includes` scope — this endpoint
+    # renders one obs's suffix radios, so eager-loading the whole
+    # observations list per click would be wasteful on large projects.
+    # Any missing-id / non-admin case returns :not_found rather than
+    # redirecting; the trigger is a turbo-stream fetch, so the
+    # redirect-to-index fallback from `find_project!` doesn't fit.
     def target_location_modal
-      return unless find_project!
-
+      project = Project.find_by(id: params[:project_id])
       obs = Observation.safe_find(params[:obs_id])
-      return head(:not_found) unless obs && @project.is_admin?(@user)
+      return head(:not_found) unless project && obs && project.is_admin?(@user)
 
       respond_to do |format|
         format.turbo_stream do
           render(Components::TargetLocationModal.new(
-                   project: @project, obs: obs, user: @user
+                   project: project, obs: obs, user: @user
                  ), layout: false)
         end
       end

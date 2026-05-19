@@ -225,5 +225,15 @@ module Projects
 
       assert_response(:not_found)
     end
+
+    def test_target_location_modal_404s_for_missing_project
+      obs = observations(:falmouth_2023_09_obs)
+      login(users(:rolf).login)
+      get(:target_location_modal,
+          params: { project_id: -1, obs_id: obs.id },
+          format: :turbo_stream)
+
+      assert_response(:not_found)
+    end
   end
 end

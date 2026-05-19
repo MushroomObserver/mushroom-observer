@@ -27,8 +27,6 @@ export default class extends Controller {
   // a Stimulus shortcut that calls event.preventDefault()
   showModal() {
     if (this.alwaysFreshValue) {
-      const existing = document.getElementById(this.modalSelector)
-      if (existing) { existing.remove() }
       this.fetchModalAndAppendToBody()
       return
     }
@@ -45,19 +43,31 @@ export default class extends Controller {
   // https://discuss.hotwired.dev/t/is-this-correct-a-stimulus-controller-to-use-turbo-stream-get-requests-to-avoid-updating-browser-history/4146
   // NOTE: Above example presumes a pre-existing modal, but the idea is similar.
   // We use requestjs to streamline the fetch syntax
+  //
+  // In `alwaysFresh` mode, a stale prior copy is "stashed" (id renamed)
+  // BEFORE the fetch so the fresh response can claim the canonical id
+  // without collision, and only removed once the fetch succeeds. If
+  // the fetch fails (network error, 404, etc.) the stash is restored
+  // so the user can still reopen the previously-loaded modal (Copilot
+  // review on PR #4307).
   async fetchModalAndAppendToBody() {
-    // console.log(destination)
+    const stash = this.alwaysFreshValue
+      ? document.getElementById(this.modalSelector)
+      : null
+    if (stash) { stash.id = `${this.modalSelector}_stale` }
 
     const response = await get(this.destination,
       { responseKind: "turbo-stream" })
 
     if (response.ok) {
-      // console.log(response)
+      if (stash) { stash.remove() }
       // turbo-stream prints the modal in the page already, but outside body
       // so we just have to move it.
       const _modal = document.getElementById(this.modalSelector)
       document.body.appendChild(_modal)
       $(_modal).modal('show')
+    } else if (stash) {
+      stash.id = this.modalSelector
     }
   }
 }
