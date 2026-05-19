@@ -91,7 +91,11 @@ class ProjectViolationsFormTest < ComponentTestCase
                 "[value='add_target_name']")
   end
 
-  def test_target_location_modal_renders_for_admin
+  # Post-#4304: the modal itself is fetched on demand from
+  # `target_location_modal_project_violations_path` and never appears
+  # in the eagerly-rendered violations form. What this form *does*
+  # emit is the trigger link with the modal-toggle wiring.
+  def test_admin_sees_add_target_location_trigger
     proj = setup_target_location_violation_project
     target_loc_v =
       proj.violations.find { |v| v.kinds.include?(:target_location) }
@@ -102,81 +106,21 @@ class ProjectViolationsFormTest < ComponentTestCase
     html = render_form(project: proj, violations: proj.violations,
                        user: proj.user)
     obs_id = target_loc_v.obs.id
+    modal_id = "location_target_modal_#{obs_id}"
+    href = "/projects/#{proj.id}/violations/" \
+           "target_location_modal?obs_id=#{obs_id}"
 
-    assert_html(html, "#location_target_modal_#{obs_id}.modal")
+    assert_html(html, "a[href='#{href}']",
+                text: :form_violations_action_add_target_location.l)
     assert_html(
       html,
-      "#location_target_modal_#{obs_id} " \
-      "input[type='hidden'][name='project[do]']" \
-      "[value='add_target_location']"
+      "a[data-controller='modal-toggle']" \
+      "[data-modal='#{modal_id}']" \
+      "[data-action='modal-toggle#showModal:prevent']" \
+      "[data-modal-toggle-always-fresh-value='true']"
     )
-    assert_html(
-      html,
-      "#location_target_modal_#{obs_id} " \
-      "input[type='hidden'][name='project[obs_id]'][value='#{obs_id}']"
-    )
-    # Modal trigger button is rendered too.
-    assert_includes(html, :form_violations_action_add_target_location.l)
-  end
-
-  # Covers the `suffixes.empty?` branch of render_location_modal_body —
-  # when the obs's location yields no usable suffixes (the only practical
-  # case after the J1 fix is a country-only string like "USA"), the modal
-  # body shows the "no usable suffixes" message and a Cancel button
-  # without rendering a submit form.
-  def test_target_location_modal_no_suffixes_message_for_country_only_where
-    proj = setup_target_location_violation_project
-    target_loc_v =
-      proj.violations.find { |v| v.kinds.include?(:target_location) }
-    assert(target_loc_v, "Setup must produce a target_location violation")
-
-    obs = target_loc_v.obs
-    obs.update!(location_id: nil, where: "USA")
-
-    proj.reload
-    refreshed = proj.violations.find { |v| v.obs.id == obs.id }
-    assert(refreshed,
-           "Obs should still violate target_location after where=USA")
-
-    html = render_form(project: proj, violations: proj.violations,
-                       user: proj.user)
-    modal_id = "location_target_modal_#{obs.id}"
-
-    assert_html(html, "##{modal_id}.modal")
-    assert_includes(
-      html, :form_violations_modal_target_location_no_suffixes.l,
-      "Modal body should show the no-usable-suffixes message"
-    )
-    assert_html(html, "##{modal_id} .modal-footer button[data-dismiss='modal']")
-    assert_no_html(
-      html,
-      "##{modal_id} input[name='project[do]'][value='add_target_location']",
-      "Empty-suffixes branch must not render an add_target_location form"
-    )
-  end
-
-  def test_target_location_modal_excludes_country_suffix
-    proj = setup_target_location_violation_project
-    target_loc_v =
-      proj.violations.find { |v| v.kinds.include?(:target_location) }
-    assert(target_loc_v, "Setup must produce a target_location violation")
-
-    html = render_form(project: proj, violations: proj.violations,
-                       user: proj.user)
-    obs = target_loc_v.obs
-    place = obs.location_id ? obs.location.name : obs.where
-    bare_country = place.split(",").last&.strip
-
-    skip_if_no_country = bare_country.blank? ||
-                         Location.understood_countries.exclude?(bare_country)
-    assert_not(skip_if_no_country,
-               "Test setup expects fixture with a country tail (got: #{place})")
-
-    assert_no_html(
-      html,
-      "input[type='radio'][value='#{bare_country}']",
-      "Bare-country suffix should not appear as a selectable radio"
-    )
+    # And the modal itself is NOT in this view — it's fetched on demand.
+    assert_no_html(html, "##{modal_id}")
   end
 
   def test_non_admin_only_sees_exclude_for_own_obs
@@ -209,97 +153,14 @@ class ProjectViolationsFormTest < ComponentTestCase
     assert_no_html(html, "input[value='add_target_location']")
   end
 
-  def test_target_location_modal_offers_create_for_missing_location
-    proj = setup_target_location_violation_project
-    target_loc_v =
-      proj.violations.find { |v| v.kinds.include?(:target_location) }
-    assert(target_loc_v, "Setup must produce a target_location violation")
-
-    obs = target_loc_v.obs
-    place = obs.location_id ? obs.location.name : obs.where
-    place_parts = place.split(",").map(&:strip)
-    # Pick the most-specific suffix that has multiple comma segments
-    # and isn't a bare country.
-    candidate_suffix = place_parts[1..].join(", ")
-    return if candidate_suffix.blank? ||
-              Location.understood_countries.include?(candidate_suffix)
-    return if Location.find_by(name: candidate_suffix)
-
-    html = render_form(project: proj, violations: proj.violations,
-                       user: proj.user)
-
-    # Disabled radio plus a Create link to /locations/new with the suffix.
-    assert_html(html, "input[type='radio'][disabled]")
-    assert_html(
-      html,
-      "a[href^='/locations/new?display_name='][target='_blank']"
-    )
-  end
-
-  # Coverage gaps surfaced in audit of merged #4277: the existing-
-  # location branch of `suffix_choices`, the `suffix_create_link`
-  # attributes, the `render_suffix_radios` help-text emission, and
-  # the `first_existing` preselect (the Copilot review fix).
-
-  def test_existing_location_suffix_renders_enabled_radio_with_id
-    # When a comma-suffix of the obs's location matches an existing
-    # Location, render an ENABLED radio whose value is that
-    # location's id (NOT disabled, no `append:` Create link). This
-    # is the other branch of `suffix_choices` — currently uncovered.
-    proj = setup_target_location_violation_project
-    target_loc_v =
-      proj.violations.find { |v| v.kinds.include?(:target_location) }
-    obs = target_loc_v.obs
-
-    # Find at least one suffix of the obs's location that matches an
-    # existing Location. If none, the test scenario isn't satisfiable
-    # for the current fixture state — skip.
-    place = obs.location_id ? obs.location.name : obs.where
-    suffixes = place.split(",").each_index.map do |i|
-      place.split(",")[i..].join(",").strip
-    end
-    existing = Location.where(name: suffixes).first
-    skip("No fixture location matches a suffix of #{place.inspect}") \
-      unless existing
-
-    html = render_form(project: proj, violations: proj.violations,
-                       user: proj.user)
-
-    # Radio for the existing-location row: value=location.id, enabled.
-    assert_html(
-      html,
-      "#location_target_modal_#{obs.id} " \
-      "input[type='radio'][value='#{existing.id}']:not([disabled])"
-    )
-  end
-
-  def test_suffix_create_link_has_target_blank_and_btn_class
-    proj = setup_target_location_violation_project
-
-    html = render_form(project: proj, violations: proj.violations,
-                       user: proj.user)
-
-    # The Create link on placeholder rows: target="_blank" +
-    # rel="noopener" (so the popup can't manipulate opener) +
-    # `.btn-default.btn-xs` styling. Currently only target="_blank"
-    # was asserted by the existing test.
-    assert_html(
-      html,
-      "a[target='_blank'][rel='noopener'].btn.btn-default.btn-xs"
-    )
-  end
-
-  def test_suffix_radios_render_help_paragraph
-    proj = setup_target_location_violation_project
-
-    html = render_form(project: proj, violations: proj.violations,
-                       user: proj.user)
-
-    # Help paragraph rendered above the radio group (inside the
-    # modal-body). Wrapped in a `<p>`, not just plain text — without
-    # this users see a list of radios with no explanation.
-    assert_html(html, "p", text: :form_violations_modal_target_location_help.l)
-  end
+  # Tests that previously asserted modal *contents* on this view —
+  # Create-link attrs, existing-radio enabled state, help paragraph,
+  # country-suffix filtering, no-suffixes message — moved to:
+  #   - test/components/target_location_form_test.rb (form internals)
+  #   - test/components/target_location_modal_test.rb (modal wrapper +
+  #     no-suffixes branch)
+  # because the modal is now fetched on demand and isn't part of this
+  # view's HTML output (#4304).
 
   private
 

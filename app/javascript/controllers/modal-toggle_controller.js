@@ -8,7 +8,14 @@ import { get } from "@rails/request.js"
 // open a herbarium record form, close it and go back to the collection number
 // and find the form form as you left it, or vice versa, until you submit.
 // Connects to data-controller="modal-toggle"
+//
+// `alwaysFresh` (data-modal-toggle-always-fresh-value="true") drops the
+// "reuse existing DOM" shortcut and re-fetches the modal every time the
+// trigger is clicked. Used by the Add-Target-Location modal (#4304),
+// whose radio state depends on Location rows that admins frequently
+// create in a separate tab between opens.
 export default class extends Controller {
+  static values = { alwaysFresh: Boolean }
 
   connect() {
     this.element.dataset.modalToggle = "connected";
@@ -19,6 +26,12 @@ export default class extends Controller {
   // NOTE: the button must pass :prevent with the action,
   // a Stimulus shortcut that calls event.preventDefault()
   showModal() {
+    if (this.alwaysFreshValue) {
+      const existing = document.getElementById(this.modalSelector)
+      if (existing) { existing.remove() }
+      this.fetchModalAndAppendToBody()
+      return
+    }
     // check if modal already exists in DOM (eg if user has closed it)
     if (document.getElementById(this.modalSelector)) {
       // if so, show.

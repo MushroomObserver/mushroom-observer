@@ -20,6 +20,27 @@ module Projects
       build_index_with_query
     end
 
+    # GET-only turbo-stream endpoint that renders the Add-Target-Location
+    # modal for one obs (#4304). Called by the modal-toggle controller
+    # in always-fresh mode so each open reflects current DB state —
+    # admins frequently create missing suffix Locations in a separate
+    # tab and need the modal's radios to pick those up without
+    # reloading the violations page.
+    def target_location_modal
+      return unless find_project!
+
+      obs = Observation.safe_find(params[:obs_id])
+      return head(:not_found) unless obs && @project.is_admin?(@user)
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(Components::TargetLocationModal.new(
+                   project: @project, obs: obs, user: @user
+                 ), layout: false)
+        end
+      end
+    end
+
     def controller_model_name
       "Project"
     end

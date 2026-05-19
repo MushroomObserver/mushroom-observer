@@ -37,7 +37,6 @@ class Components::ProjectViolationsForm < Components::Base
 
     help_block(:div, :form_violations_help.l)
     render_violations_table
-    render_location_modals
   end
 
   private
@@ -154,60 +153,26 @@ class Components::ProjectViolationsForm < Components::Base
     )
   end
 
+  # The modal markup itself is no longer rendered eagerly — each
+  # click hits `Projects::ViolationsController#target_location_modal`
+  # which renders a fresh `Components::TargetLocationModal` via
+  # turbo-stream. The `modal-toggle` Stimulus controller fetches the
+  # response and appends to body; `modal-toggle-always-fresh-value`
+  # removes any stale prior copy first so DB state from the other tab
+  # (a newly-created suffix Location) is picked up on reopen (#4304).
   def render_add_target_location_trigger(obs)
-    button(
-      type: "button",
+    link_to(
+      :form_violations_action_add_target_location.l,
+      target_location_modal_project_violations_path(
+        project_id: @project.id, obs_id: obs.id
+      ),
       class: "btn btn-default btn-xs",
       data: {
-        toggle: "modal",
-        target: "##{location_modal_id(obs)}"
+        modal: Components::TargetLocationModal.modal_id_for(obs),
+        controller: "modal-toggle",
+        action: "modal-toggle#showModal:prevent",
+        modal_toggle_always_fresh_value: true
       }
-    ) { :form_violations_action_add_target_location.l }
-  end
-
-  def render_location_modals
-    @violations.each do |v|
-      next unless admin? && v.kinds.include?(:target_location)
-
-      render_location_modal(v.obs)
-    end
-  end
-
-  # Per-obs modal. When the obs has usable suffixes, the body+footer
-  # are owned by TargetLocationForm via Modal's `:form_content` slot
-  # (so the form spans both — submit in the footer is naturally inside
-  # the form). When there are no usable suffixes (e.g. obs.where is
-  # just a country), there's nothing to submit, so render a static
-  # message body + Cancel-only footer instead.
-  def render_location_modal(obs)
-    render(Components::Modal.new(
-             id: location_modal_id(obs),
-             title: :form_violations_modal_target_location_title.l,
-             user: @user
-           )) do |m|
-      if Components::TargetLocationForm.applicable?(obs)
-        m.with_form_content do
-          render(Components::TargetLocationForm.new(
-                   obs: obs, project: @project
-                 ))
-        end
-      else
-        render_no_suffixes_slots(m)
-      end
-    end
-  end
-
-  def render_no_suffixes_slots(modal)
-    modal.with_body do
-      p { :form_violations_modal_target_location_no_suffixes.l }
-    end
-    modal.with_footer do
-      button(type: "button", class: "btn btn-default",
-             data: { dismiss: "modal" }) { :CANCEL.l }
-    end
-  end
-
-  def location_modal_id(obs)
-    "location_target_modal_#{obs.id}"
+    )
   end
 end

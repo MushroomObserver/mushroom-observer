@@ -706,7 +706,14 @@ MushroomObserver::Application.routes.draw do
         post :add_all
       end
     end
-    resources :violations, only: [:index], controller: "projects/violations"
+    resources :violations, only: [:index],
+                           controller: "projects/violations" do
+      collection do
+        # GET endpoint that returns the Add-Target-Location modal as a
+        # turbo-stream so each open sees fresh DB state (#4304).
+        get :target_location_modal
+      end
+    end
   end
   # resourceful route won't work because it requires an additional id.
   # Accept both PATCH and PUT — PATCH is the Rails-idiomatic verb for
