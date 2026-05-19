@@ -6,20 +6,36 @@ class ModalProgressSpinnerTest < ComponentTestCase
   def test_renders_non_dismissible_modal_with_spinner
     html = render(Components::ModalProgressSpinner.new)
 
-    # Modal structure with non-dismissible settings
-    assert_html(html, "#modal_progress_spinner.modal",
-                attribute: { "data-controller": "modal" })
-    assert_html(html, "#modal_progress_spinner",
-                attribute: { "data-keyboard": "false" })
-    assert_html(html, "#modal_progress_spinner",
-                attribute: { "data-backdrop": "static" })
+    # Modal root: default `modal` Stimulus controller, non-dismissible
+    # settings (no keyboard ESC, static backdrop = no click-outside).
+    assert_html(html, "#modal_progress_spinner.modal" \
+                      "[data-controller='modal']" \
+                      "[data-keyboard='false']" \
+                      "[data-backdrop='static']")
 
-    # Caption and spinner elements
-    assert_html(html, "#modal_progress_spinner_caption")
-    assert_html(html, ".spinner-right.mx-2")
-
-    # Listens for section update to auto-hide
+    # Listens for section-update to auto-hide programmatically.
     assert_html(html,
+                "#modal_progress_spinner" \
                 "[data-action*='section-update:updated@window->modal#hide']")
+
+    # Small dialog variant.
+    assert_html(html, ".modal-dialog.modal-sm")
+
+    # Headerless + footerless: just a centered body with caption + spinner.
+    assert_no_html(html, "#modal_progress_spinner .modal-header")
+    assert_no_html(html, "#modal_progress_spinner .modal-footer")
+
+    # aria-labelledby points to the caption inside the body (the
+    # caption text is what announces the in-progress operation).
+    assert_html(html,
+                "#modal_progress_spinner" \
+                "[aria-labelledby='modal_progress_spinner_caption']")
+
+    # Body: text-center class + caption span + spinner span.
+    assert_html(html,
+                "#modal_progress_spinner_body.modal-body.text-center " \
+                "> #modal_progress_spinner_caption")
+    assert_html(html,
+                "#modal_progress_spinner_body > span.spinner-right.mx-2")
   end
 end

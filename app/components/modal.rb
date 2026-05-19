@@ -81,6 +81,23 @@ class Components::Modal < Components::Base
   # `modal_<identifier>_body` convention).
   prop :title_id, _Nilable(String), default: nil
   prop :body_id, _Nilable(String), default: nil
+  # Stimulus controller wired to the modal root. Defaults to `modal`
+  # (the standard show/hide controller). Override for singleton layout
+  # modals with their own controllers (e.g. `confirm-modal` for the
+  # Turbo confirm dialog). Multiple controllers can be passed as a
+  # space-separated string.
+  prop :controller, String, default: "modal"
+  # Render the `.modal-header` div (close button + title). Set to
+  # false for headerless modals where the "title" element lives
+  # inside the body for Stimulus targeting (`ModalConfirm`) or where
+  # the modal has no user-visible title at all (`ModalProgressSpinner`).
+  # `aria-labelledby` is still emitted on the modal root; point it at
+  # the in-body element via `title_id:`.
+  prop :header, _Boolean, default: true
+  # Extra CSS class(es) appended to the `.modal-body` div, e.g.
+  # `"py-4"` for ModalConfirm or `"text-center"` for
+  # ModalProgressSpinner. Joined with the base `"modal-body"`.
+  prop :body_class, _Nilable(String), default: nil
 
   slot :title_content
   slot :body
@@ -103,7 +120,7 @@ class Components::Modal < Components::Base
         data: modal_data) do
       div(class: @dialog_class, role: "document") do
         div(class: "modal-content") do
-          render_header
+          render_header if @header
           render_content
         end
       end
@@ -125,7 +142,7 @@ class Components::Modal < Components::Base
   end
 
   def modal_data
-    data = { controller: "modal" }
+    data = { controller: @controller }
     data[:modal_user_value] = @user.id if @user
     data.merge(@extra_data)
   end
@@ -175,7 +192,11 @@ class Components::Modal < Components::Base
   def render_body
     return unless body_slot
 
-    div(class: "modal-body", id: resolved_body_id) { render(body_slot) }
+    div(class: body_classes, id: resolved_body_id) { render(body_slot) }
+  end
+
+  def body_classes
+    @body_class ? "modal-body #{@body_class}" : "modal-body"
   end
 
   def render_footer
