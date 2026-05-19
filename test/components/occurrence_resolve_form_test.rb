@@ -185,7 +185,15 @@ class OccurrenceResolveFormTest < ComponentTestCase
 
     assert_html(html, "form > .modal-body > p",
                 text: :occurrence_resolve_projects_intro.l)
-    assert_html(html, "form > .modal-body > ul > li > a",
+    # Project list uses `ul.list-unstyled` (no bullets, no left
+    # padding). Each row is a flex container with a clickable id-badge
+    # button (Stimulus clipboard target) followed by the project link.
+    assert_html(html, "form > .modal-body > ul.list-unstyled > li.d-flex")
+    assert_html(html,
+                ".modal-body > ul > li > button.badge.badge-id" \
+                "[data-controller='clipboard']",
+                text: @project.id.to_s)
+    assert_html(html, ".modal-body > ul > li > a",
                 text: @project.title)
     assert_html(html, "form > .modal-footer > button[type='submit']",
                 text: :occurrence_resolve_projects_add_all.l)

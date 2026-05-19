@@ -73,9 +73,13 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
     return unless projects&.any?
 
     strong { :occurrence_resolve_projects_projects.l }
-    ul do
+    # `list-unstyled` drops the bullet + left padding. Each row is a
+    # flex container so the id badge (button) sits inline with the
+    # project-title link.
+    ul(class: "list-unstyled mt-2") do
       projects.each do |project|
-        li do
+        li(class: "d-flex align-items-center mb-1") do
+          show_title_id_badge(project, "rss-id mr-3")
           a(href: project_path(project)) { plain(project.title) }
         end
       end
