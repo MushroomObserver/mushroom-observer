@@ -31,7 +31,7 @@ module Header
       assert_equal("", html)
     end
 
-    def test_nav_create_returns_blank_for_non_createable_controller
+    def test_nav_create_returns_blank_for_non_creatable_controller
       # `comments` is in NAV_INDEXABLES but not NAV_CREATABLES.
       html = nav_create(@user, stub_controller("comments"))
 
