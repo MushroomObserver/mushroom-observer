@@ -59,6 +59,11 @@ module Header
 
     # Descriptions also don't get a create button
     # Herbarium records are created via Observations, not from the index
+    #
+    # Renders a solid-green "Add" button with `aria-label` / `title` =
+    # "New Observation" / "New Name" / etc. (#3930). Visible "Add"
+    # keeps the button narrow in the top-nav rubric while screen
+    # readers and hover-tooltips still get the per-controller noun.
     def nav_create(user, controller)
       unless user &&
              controller.methods.include?(:new) &&
@@ -67,11 +72,15 @@ module Header
       end
 
       obj_name = controller.controller_model_name.underscore.upcase.to_sym.l
+      full_label = [:NEW.l, obj_name].safe_join(" ")
 
       link_to(
-        link_icon(:add, title: [:NEW.l, obj_name].safe_join(" ")),
+        :ADD.l,
         { controller: "/#{controller.controller_path}", action: :new },
-        class: "btn btn-sm btn-outline-default ml-1 mr-0 mx-sm-3 top_nav_button"
+        class: "btn btn-success btn-sm ml-1 mr-0 mx-sm-3 top_nav_button",
+        title: full_label,
+        aria: { label: full_label },
+        data: { toggle: "tooltip" }
       )
     end
 
