@@ -113,7 +113,7 @@ module Projects
       count = addable_observations(@project, @project_member.user).count
       respond_to do |format|
         format.turbo_stream do
-          render(Components::AddObsModal.new(
+          render(Views::Controllers::Projects::Members::AddObsModal.new(
                    project: @project,
                    candidate: @project_member.user,
                    count: count,

@@ -238,10 +238,145 @@ module Projects
           params: { project_id: project.id, candidate: target_user.id },
           format: :turbo_stream)
       assert_response(:success)
+      count = target_user.observations.count
       assert_select(
         "#modal_add_obs .modal-body",
-        { text: /#{target_user.observations.count}/ },
+        { text: /#{count}/ },
         "Modal body should include count of matching observations"
+      )
+      # Positive count → submit button rendered as button_to (its own
+      # <form> with PUT) inside .modal-footer, labelled "Add All" when
+      # count fits in one batch.
+      assert_select("#modal_add_obs .modal-footer form button.btn-primary",
+                    { text: /#{:add_obs_modal_add_all.l}/, count: 1 },
+                    "Modal footer should have an Add All submit button")
+      # Cancel button always present (covers both positive + zero cases).
+      assert_select(
+        "#modal_add_obs .modal-footer button[data-dismiss='modal']",
+        { count: 1 }, "Modal footer should have a Cancel button"
+      )
+    end
+
+    # Covers the over-batch_limit branch of body_text + submit_label
+    # (previously covered by the deleted AddObsModalTest).
+    def test_add_obs_modal_caps_submit_label_at_batch_limit
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(target_user.login)
+      Projects::MembersController.stub(:add_obs_batch_limit, 1) do
+        get(:add_obs_modal,
+            params: { project_id: project.id, candidate: target_user.id },
+            format: :turbo_stream)
+      end
+      assert_response(:success)
+      # Over-limit branch: body text is "X observations match. We'll
+      # add the first N" (partial), submit label is "Add Next N".
+      assert_select(
+        "#modal_add_obs .modal-footer form button.btn-primary",
+        { text: /#{:add_obs_modal_add_next.l(limit: 1)}/, count: 1 },
+        "Modal footer should show 'Add Next N' when count > batch_limit"
+      )
+    end
+
+    # Zero-count branch: no submit button rendered.
+    def test_add_obs_modal_omits_submit_when_none_match
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      project.add_observations(target_user.observations)
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_select(
+        "#modal_add_obs .modal-footer button.btn-primary", false,
+        "Zero-count modal must not render a submit button"
+      )
+    end
+
+    # Modal chrome from Components::Modal — header rendered with the
+    # `change_member_add_obs` i18n title. Locks in the title-passthrough
+    # path of the new Phlex view.
+    def test_add_obs_modal_renders_title_in_modal_header
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+      assert_select(
+        "#modal_add_obs .modal-header h4.modal-title",
+        { text: /#{:change_member_add_obs.l}/, count: 1 },
+        "Modal header should render the translated title"
+      )
+    end
+
+    # Submit is rendered via `put_button` → button_to. `commit` and
+    # `target` are passed as query params on the form's action URL
+    # (not POST-body hidden fields), so the controller's #update branch
+    # gets them via `params[:commit]` and `params[:target]`.
+    def test_add_obs_modal_submit_form_posts_with_required_params
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(target_user.login)
+      get(:add_obs_modal,
+          params: { project_id: project.id, candidate: target_user.id },
+          format: :turbo_stream)
+      assert_response(:success)
+
+      base_action =
+        project_member_path(project_id: project.id, candidate: target_user.id)
+      # Form action begins with the project_member update path and
+      # carries `commit` + `target` as query params.
+      assert_select(
+        "#modal_add_obs .modal-footer form[action^='#{base_action}?']" \
+        "[method='post']", { count: 1 },
+        "Submit form should POST to the project_member update path"
+      )
+      form_action_attr = css_select(
+        "#modal_add_obs .modal-footer form"
+      ).first["action"]
+      query = Rack::Utils.parse_nested_query(form_action_attr.split("?", 2)[1])
+      # `commit` is what MembersController#update_trust_status switches on
+      # to dispatch to #add_observations. Skipping it would silently fall
+      # through to the no-op else branch.
+      assert_equal(:change_member_add_obs.l, query["commit"],
+                   "Submit URL must carry the dispatch-keyed commit param")
+      # `target=project_index` redirects back to the project show, not
+      # the members index.
+      assert_equal("project_index", query["target"],
+                   "Submit URL must request the project_index redirect")
+      # Rails' button_to overrides POST → PUT with a hidden field.
+      assert_select(
+        "#modal_add_obs .modal-footer form " \
+        "input[type='hidden'][name='_method'][value='put']", { count: 1 }
+      )
+    end
+
+    # Over-limit body text branch — covers the `add_obs_modal_partial`
+    # i18n message that the submit-label test doesn't reach.
+    def test_add_obs_modal_body_shows_partial_message_when_over_limit
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      login(target_user.login)
+      Projects::MembersController.stub(:add_obs_batch_limit, 1) do
+        get(:add_obs_modal,
+            params: { project_id: project.id, candidate: target_user.id },
+            format: :turbo_stream)
+      end
+      assert_response(:success)
+      count = target_user.observations.count
+      # Partial message includes the total count and the batch limit.
+      assert_select(
+        "#modal_add_obs .modal-body",
+        { text: /#{count}/ },
+        "Over-limit body should mention the total count"
+      )
+      assert_select(
+        "#modal_add_obs .modal-body",
+        { text: /1/ },
+        "Over-limit body should mention the batch limit"
       )
     end
 
