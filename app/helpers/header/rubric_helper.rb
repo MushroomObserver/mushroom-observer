@@ -60,29 +60,48 @@ module Header
     # Descriptions also don't get a create button
     # Herbarium records are created via Observations, not from the index
     #
-    # Renders a solid-green "Add" button with `aria-label` / `title` =
-    # "New Observation" / "New Name" / etc. (#3930). Visible "Add"
-    # keeps the button narrow in the top-nav rubric while screen
-    # readers and hover-tooltips still get the per-controller noun.
+    # Renders a solid-green button with `aria-label` / `title` =
+    # "New Observation" / "New Name" / etc. (#3930). On phones
+    # (below `$screen-sm-min` / 768px) the button is just the `+`
+    # glyph — long localizations like "Listes d'observations
+    # [Ajouter]" don't fit alongside the page rubric on a 360px
+    # viewport (matches iNat's mobile pattern). On `sm` and above
+    # the "Add" label appears next to the glyph.
     def nav_create(user, controller)
-      unless user &&
-             controller.methods.include?(:new) &&
-             NAV_CREATABLES.include?(controller.controller_name)
-        return ""
-      end
-
-      obj_name = controller.controller_model_name.underscore.upcase.to_sym.l
-      full_label = [:NEW.l, obj_name].safe_join(" ")
+      return "" unless nav_create_visible?(user, controller)
 
       link_to(
-        :ADD.l,
         { controller: "/#{controller.controller_path}", action: :new },
+        nav_create_link_options(controller)
+      ) { nav_create_content }
+    end
+
+    private
+
+    def nav_create_visible?(user, controller)
+      user && controller.methods.include?(:new) &&
+        NAV_CREATABLES.include?(controller.controller_name)
+    end
+
+    def nav_create_link_options(controller)
+      obj_name = controller.controller_model_name.underscore.upcase.to_sym.l
+      full_label = [:NEW.l, obj_name].safe_join(" ")
+      {
         class: "btn btn-success btn-sm ml-1 mr-0 mx-sm-3 top_nav_button",
         title: full_label,
         aria: { label: full_label },
         data: { toggle: "tooltip" }
-      )
+      }
     end
+
+    def nav_create_content
+      safe_join([
+                  link_icon(:add),
+                  tag.span(:ADD.l, class: "d-none d-sm-inline ml-1")
+                ])
+    end
+
+    public
 
     NAV_CREATABLES = %w[
       observations names species_lists projects locations images herbaria

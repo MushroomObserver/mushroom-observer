@@ -55,21 +55,34 @@ module Header
       html = nav_create(@user, stub_controller("observations"))
       a = anchor(html)
 
-      # Visible text is the short word "Add". Screen-reader users
-      # and hover-tooltip viewers get the full "New Observation" via
-      # aria-label and title.
-      assert_equal(:ADD.l, a.text.strip)
+      # Screen-reader users and hover-tooltip viewers get the full
+      # "New Observation" via aria-label and title. (Visible content
+      # is just `+` on phones and `+ Add` on tablet+; either way
+      # aria-label overrides the link's accessible name.)
       assert_equal("New Observation", a["aria-label"])
       assert_equal("New Observation", a["title"])
     end
 
-    def test_nav_create_drops_the_plus_glyph
-      # Pre-#3930 the button rendered a `glyphicon-plus` inside a
-      # `link-icon` span. The new button is text-only.
+    def test_nav_create_renders_plus_glyph
+      # The `+` icon is always present; the "Add" word only appears
+      # at `sm` and above.
       doc = Nokogiri::HTML(nav_create(@user, stub_controller("observations")))
+      glyph = doc.at_css("a .glyphicon-plus.link-icon")
 
-      assert_empty(doc.css(".glyphicon-plus"))
-      assert_empty(doc.css(".link-icon"))
+      assert_not_nil(glyph, "Expected `+` glyph inside the button")
+    end
+
+    def test_nav_create_hides_add_text_below_sm_breakpoint
+      # The "Add" word lives in a `d-none d-sm-inline` span so it's
+      # hidden below `$screen-sm-min` (768px) and visible at `sm`+.
+      # Matches iNat's mobile pattern of collapsing the create CTA
+      # to its icon — see the discussion on PR #4302.
+      doc = Nokogiri::HTML(nav_create(@user, stub_controller("observations")))
+      span = doc.at_css("a span.d-none.d-sm-inline")
+
+      assert_not_nil(span,
+                     "Expected `Add` text in a `d-none d-sm-inline` span")
+      assert_equal(:ADD.l, span.text.strip)
     end
 
     private
