@@ -68,11 +68,19 @@ fi
 tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
 
+# Put up the maintenance page BEFORE stopping puma so users hit a
+# friendly 503 (and DigitalOcean's /test check stays green) rather than
+# a broken connection during the restart window. Removed in the success
+# path at the bottom and in every failure-recovery branch below (#4312).
+echo Putting up maintenance page... && \
+  cp public/maintenance.html.tmpl public/maintenance.html
+
 echo Stopping puma to update code... && sudo service puma stop
 
 STASH_RESULT=`git stash`
 if [ $? -ne 0 ]; then
     echo git stash failed.
+    echo Taking down maintenance page... && rm -f public/maintenance.html
     echo Restarting puma... && sudo service puma start
     echo Restarting solidqueue... && sudo service solidqueue start
     exit 1
@@ -88,6 +96,7 @@ fi
 echo Getting latest code from github... && git pull
 if [ $? -ne 0 ]; then
     echo git pull failed.
+    echo Taking down maintenance page... && rm -f public/maintenance.html
     echo Restarting puma... && sudo service puma start
     echo Restarting solidqueue... && sudo service solidqueue start
     exit 1
@@ -97,6 +106,7 @@ if [ "$STASH_RESULT" != 'No local changes to save' ]; then
     echo Reapply local changes... && git stash pop
     if [ $? -ne 0 ]; then
 	echo Applying the stashed changes failed.
+	echo Taking down maintenance page... && rm -f public/maintenance.html
         echo Restarting puma... && sudo service puma start
 	echo Restarting solidqueue... && sudo service solidqueue start
 	exit 1
@@ -109,6 +119,7 @@ echo Updating translations... && rake lang:update && \
 echo Precompiling assets... && rake assets:precompile && \
 echo Starting puma... && sudo service puma start && \
 echo Starting solidqueue... && sudo service solidqueue start && \
+echo Taking down maintenance page... && rm -f public/maintenance.html && \
 echo Tagging repo with $tag... && git tag $tag && \
 echo Pushing new tag... && git push --tags && \
 echo SUCCESS\!
@@ -116,6 +127,7 @@ echo SUCCESS\!
 if [ $? -ne 0 ]; then
     echo ""
     echo "Deploy failed. Restarting puma and solidqueue with existing code..."
+    rm -f public/maintenance.html
     sudo service puma start
     sudo service solidqueue start
     exit 1
