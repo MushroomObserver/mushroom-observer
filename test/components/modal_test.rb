@@ -86,6 +86,53 @@ class ModalTest < ComponentTestCase
     assert_not_includes(html, "ignored")
   end
 
+  def test_controller_prop_overrides_default_modal_controller
+    # Singleton layout modals (e.g. ModalConfirm) need their own
+    # Stimulus controller, not the default `modal`. Passing
+    # `controller: "confirm-modal"` replaces the data-controller attr.
+    html = render(Components::Modal.new(
+                    id: "modal_c", title: "t",
+                    controller: "confirm-modal"
+                  ))
+
+    assert_html(html, ".modal[data-controller='confirm-modal']")
+    # Default `modal` controller is NOT present alongside.
+    assert_no_html(html, ".modal[data-controller='modal']")
+  end
+
+  def test_header_false_omits_modal_header_div
+    # Headerless modals (ModalConfirm renders its title in the body for
+    # Stimulus targeting; ModalProgressSpinner has no title at all)
+    # need to suppress the entire `.modal-header` div.
+    html = render(Components::Modal.new(
+                    id: "modal_h", title: "ignored", header: false
+                  )) do |m|
+      m.with_body { "<p>just body</p>".html_safe }
+    end
+
+    assert_no_html(html, ".modal-header")
+    # Body still renders normally.
+    assert_html(html, ".modal-body > p", text: "just body")
+    # aria-labelledby still emitted (callers point it at an in-body
+    # element via `title_id:`).
+    assert_html(html, ".modal[aria-labelledby='modal_h_title']")
+  end
+
+  def test_body_class_appends_to_modal_body
+    # `body_class:` adds extra CSS classes to `.modal-body` while
+    # keeping the base `modal-body` class. Used by ModalConfirm
+    # (`py-4`) and ModalProgressSpinner (`text-center`).
+    html = render(Components::Modal.new(
+                    id: "modal_b", title: "t", body_class: "py-4 text-center"
+                  )) do |m|
+      m.with_body { "x".html_safe }
+    end
+
+    assert_html(html, ".modal-body.py-4.text-center")
+    # Body still has the base modal-body class plus the body_id.
+    assert_html(html, "#modal_b_body.modal-body")
+  end
+
   def test_form_content_slot_replaces_body_and_footer
     # `with_form_content` lets the caller render a single component
     # (typically a form) that emits its own `.modal-body` and
