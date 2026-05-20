@@ -757,7 +757,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
           })()
         JS
         break if ready
-        sleep 0.1
+
+        sleep(0.1)
       end
     end
 
