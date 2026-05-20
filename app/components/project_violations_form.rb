@@ -155,9 +155,10 @@ class Components::ProjectViolationsForm < Components::Base
 
   # The modal markup itself is no longer rendered eagerly — each
   # click hits `Projects::ViolationsController#target_location_modal`
-  # which renders a fresh `Components::TargetLocationModal` via
-  # turbo-stream. The `modal-toggle` Stimulus controller fetches the
-  # response and appends to body; `modal-toggle-always-fresh-value`
+  # which renders a fresh
+  # `Views::Controllers::Projects::Violations::TargetLocationModal`
+  # via turbo-stream. The `modal-toggle` Stimulus controller fetches
+  # the response and appends to body; `modal-toggle-always-fresh-value`
   # removes any stale prior copy first so DB state from the other tab
   # (a newly-created suffix Location) is picked up on reopen (#4304).
   def render_add_target_location_trigger(obs)
@@ -168,7 +169,7 @@ class Components::ProjectViolationsForm < Components::Base
       ),
       class: "btn btn-default btn-xs",
       data: {
-        modal: Components::TargetLocationModal.modal_id_for(obs),
+        modal: Components::TargetLocationForm.modal_id_for(obs),
         controller: "modal-toggle",
         action: "modal-toggle#showModal:prevent",
         modal_toggle_always_fresh_value: true

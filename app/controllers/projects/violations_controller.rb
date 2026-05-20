@@ -41,9 +41,12 @@ module Projects
 
       respond_to do |format|
         format.turbo_stream do
-          render(Components::TargetLocationModal.new(
-                   project: project, obs: obs, user: @user
-                 ), layout: false)
+          render(
+            Views::Controllers::Projects::Violations::TargetLocationModal.new(
+              project: project, obs: obs, user: @user
+            ),
+            layout: false
+          )
         end
       end
     end

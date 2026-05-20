@@ -43,6 +43,16 @@ class Components::TargetLocationForm < Components::ApplicationForm
     suffixes_for(obs).any?
   end
 
+  # Stable id for the Bootstrap modal that hosts this form. Lives on
+  # the form (not the modal wrapper) because it's tied to the form's
+  # contract — `Components::ProjectViolationsForm` uses it to compute
+  # the modal-toggle trigger's target id without instantiating the
+  # modal, and the on-demand turbo-stream endpoint uses it to render
+  # a modal with a predictable id. Per Nimmo's review on PR #4307.
+  def self.modal_id_for(obs)
+    "location_target_modal_#{obs.id}"
+  end
+
   # Suffixes of obs's location/where, excluding any bare-country
   # suffix (Q3 of #4136). Public class method so callers can call
   # `applicable?` without instantiating the form.

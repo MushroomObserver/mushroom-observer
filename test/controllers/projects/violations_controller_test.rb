@@ -199,9 +199,57 @@ module Projects
           format: :turbo_stream)
 
       assert_response(:success)
-      modal_id = Components::TargetLocationModal.modal_id_for(obs)
+      modal_id = Components::TargetLocationForm.modal_id_for(obs)
+      # form-content branch — obs has usable suffixes, so the modal
+      # renders the TargetLocationForm with body+footer inside <form>.
       assert_select("##{modal_id}", { count: 1 },
                     "Endpoint must render the Add-Target-Location modal")
+      assert_select("##{modal_id} form > .modal-body", { count: 1 })
+      assert_select("##{modal_id} form > .modal-footer", { count: 1 })
+      assert_select(
+        "##{modal_id} input[type=hidden][name='project[do]']" \
+        "[value=add_target_location]",
+        { count: 1 }
+      )
+      assert_select(
+        "##{modal_id} input[type=hidden][name='project[obs_id]']" \
+        "[value='#{obs.id}']",
+        { count: 1 }
+      )
+    end
+
+    # No-usable-suffixes branch (country-only `where`) — the modal
+    # renders a static body + Cancel-only footer instead of a form.
+    # Folded into the controller test (per #4300's pattern of moving
+    # one-controller-action modal coverage to its controller test)
+    # after `Components::TargetLocationModal` moved to
+    # `Views::Controllers::Projects::Violations::TargetLocationModal`.
+    def test_target_location_modal_renders_no_suffixes_branch
+      project = projects(:rare_fungi_project)
+      project.project_target_locations.destroy_all
+      project.add_target_location(locations(:burbank))
+      project.update!(start_date: nil, end_date: nil, location: nil)
+      obs = observations(:falmouth_2023_09_obs)
+      obs.update!(location_id: nil, where: "USA")
+      project.add_observation(obs)
+
+      login(project.user.login)
+      get(:target_location_modal,
+          params: { project_id: project.id, obs_id: obs.id },
+          format: :turbo_stream)
+
+      assert_response(:success)
+      modal_id = Components::TargetLocationForm.modal_id_for(obs)
+      assert_select(
+        "##{modal_id} .modal-body p",
+        { text: :form_violations_modal_target_location_no_suffixes.l }
+      )
+      assert_select(
+        "##{modal_id} .modal-footer button[data-dismiss=modal]",
+        { text: :CANCEL.l }
+      )
+      assert_select("##{modal_id} form", { count: 0 },
+                    "No form when there's nothing to submit")
     end
 
     def test_target_location_modal_404s_for_non_admin
