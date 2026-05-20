@@ -108,7 +108,12 @@ export default class extends GeocodeController {
       this.mapBounds = this.boundsOf(this.collection.extents)
     }
 
-    loader
+    // Store the loader promise so `openMap()` can await it before
+    // calling `drawMap()`. Without this gate, clicking the "Open Map"
+    // button before the Google Maps API finishes loading throws an
+    // uncaught `google is not defined` from `new google.maps.Map(...)`
+    // and leaves the controller permanently broken (no retry).
+    this.googleMapsReady = loader
       .load()
       .then((google) => {
         if (this.needElevationsValue == true)
@@ -130,6 +135,7 @@ export default class extends GeocodeController {
             }
           })
         }
+        return google
       })
       .catch((e) => {
         console.error("error loading gmaps: " + e)
@@ -1309,17 +1315,29 @@ export default class extends GeocodeController {
     this.opened = true
     this.controlWrapTarget.classList.add("map-open")
 
+    // Defer `drawMap()` until the google.maps API is loaded. The
+    // button can be clicked the instant the controller connects,
+    // which is well before the Google Maps loader resolves; calling
+    // `new google.maps.Map(...)` before the API loads threw a silent
+    // `google is not defined` and left `this.map` permanently
+    // undefined. Awaiting the stored loader promise makes the open
+    // robust regardless of the page-load / click timing.
     if (this.map == undefined) {
-      this.drawMap()
-      this.makeMapClickable()
-    } else if (this.mapBounds) {
-      this.map.fitBounds(this.mapBounds)
+      this.googleMapsReady.then(() => {
+        this.drawMap()
+        this.makeMapClickable()
+        setTimeout(() => {
+          this.checkForMarker()
+          this.checkForBox() // regardless if point
+        }, 500) // wait for map to open
+      })
+    } else {
+      if (this.mapBounds) this.map.fitBounds(this.mapBounds)
+      setTimeout(() => {
+        this.checkForMarker()
+        this.checkForBox()
+      }, 500)
     }
-
-    setTimeout(() => {
-      this.checkForMarker()
-      this.checkForBox() // regardless if point
-    }, 500) // wait for map to open
   }
 
   makeMapClickable() {
