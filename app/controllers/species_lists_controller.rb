@@ -230,7 +230,13 @@ class SpeciesListsController < ApplicationController
 
     @place_name = @species_list.place_name
     @dubious_where_reasons = []
-    unless (@place_name != params[:approved_where]) &&
+    # `approved_where` lives under the species_list namespace (post-Phlex)
+    # so the dubious-confirmation flag travels with the form's other
+    # fields as a regular form param. The pre-Phlex form passed this
+    # value as a top-level URL query param; the new SpeciesListForm
+    # posts it as a hidden field via `hidden_field(:approved_where, ...)`.
+    approved_where = params.dig(:species_list, :approved_where)
+    unless (@place_name != approved_where) &&
            @species_list.location_id.nil?
       return
     end

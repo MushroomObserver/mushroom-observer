@@ -33,7 +33,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def assert_edit_species_list
     assert_template("edit")
-    assert_template("species_lists/_form")
+    # The pre-Phlex `species_lists/_form` partial was folded into
+    # `Components::SpeciesListForm` (a Phlex component rendered by
+    # `edit.html.erb` directly). Phlex components don't show up in
+    # `assert_template`, so assert the form's root element instead.
+    assert_select("form#species_list_form", { count: 1 },
+                  "Expected SpeciesListForm to render")
   end
 
   def assert_project_checks(project_states)
@@ -493,8 +498,17 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal("rolf", spl.user.login)
     requires_user(:edit, { action: :show }, params)
     assert_edit_species_list
-    assert_form_action({ action: :update, id: spl.id,
-                         approved_where: "Burbank, California, USA" })
+    # Form action is now the bare resource path; `approved_where` is
+    # carried as a hidden field under the species_list namespace
+    # (post-Phlex conversion). See `Components::SpeciesListForm` and
+    # `species_lists_controller#validate_place_name`.
+    assert_form_action({ action: :update, id: spl.id })
+    assert_select(
+      "input[type='hidden'][name='species_list[approved_where]']" \
+      "[value='Burbank, California, USA']",
+      { count: 1 },
+      "Expected approved_where hidden field carrying the place_name"
+    )
   end
 
   def test_edit_with_projects
