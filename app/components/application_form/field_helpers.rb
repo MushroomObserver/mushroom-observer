@@ -217,18 +217,19 @@ class Components::ApplicationForm < Superform::Rails::Form
       # `hidden_field_tag` (browsers otherwise repopulate hidden fields
       # on back-button). Caller can override with `autocomplete:`.
       options = { autocomplete: "off" }.merge(options)
-      if field_name.is_a?(String)
-        proxy = FieldProxy.new(nil, field_name, options[:value])
-        render(HiddenField.new(proxy, **options))
-      else
-        # Symbol path goes through Superform's field machinery so the
-        # value auto-reads from the model / FormObject when no explicit
-        # `value:` is passed (e.g. `hidden_field(:project_id)` reading
-        # `form.model.project_id`). `TextField`'s view_template
-        # special-cases `type: "hidden"` to skip the `form-control`
-        # class and the form-group wrapper.
-        render(field(field_name).text(**options, type: "hidden"))
-      end
+      # Both paths render through `HiddenField` — the dedicated
+      # hidden-input component. `HiddenField` only needs `.dom.id`,
+      # `.dom.name`, `.value` on its `field` argument; Superform's
+      # `Field` and our `FieldProxy` both provide them. So the
+      # Symbol path can pass the Superform field directly — no
+      # FieldProxy rebuild, value auto-reads from model / FormObject
+      # via the field's own `.value`.
+      f = if field_name.is_a?(String)
+            FieldProxy.new(nil, field_name, options[:value])
+          else
+            field(field_name)
+          end
+      render(HiddenField.new(f, **options))
     end
 
     # Number field with label and Bootstrap form-group wrapper

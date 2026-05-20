@@ -304,12 +304,11 @@ class ApplicationFormTest < ComponentTestCase
 
   # Regression: hidden inputs used to emit `class="form-control"` —
   # harmless visually (hidden inputs don't render) but wrong markup,
-  # and made the Symbol path (which routes through
-  # `field(:x).text(type: "hidden")` → TextField) inconsistent with
-  # the String path (which routes through HiddenField, no class).
-  # `TextField#view_template` now special-cases `type: "hidden"` to
-  # skip the class — fixes both the Symbol-keyed `hidden_field` call
-  # and any direct caller of `field(:x).text(type: "hidden")`.
+  # and inconsistent between Symbol and String paths (Symbol detoured
+  # through TextField; String through HiddenField). Both paths now
+  # route through `HiddenField`, the dedicated hidden-input component.
+  # The Symbol path passes Superform's `field(:x)` directly — same
+  # `.dom.id`/`.dom.name`/`.value` interface as `FieldProxy`.
   def test_hidden_field_symbol_key_does_not_emit_form_control
     form = render_form do
       hidden_field(:secret, value: "x")
@@ -350,8 +349,9 @@ class ApplicationFormTest < ComponentTestCase
   # Most callers in the codebase rely on the Symbol path auto-reading
   # the value from the form's model/FormObject (e.g.
   # `description_form.rb hidden_field(:project_id)` reads
-  # `form.model.project_id`). Going through `field(:x).text(...)`
-  # preserves that.
+  # `form.model.project_id`). Passing Superform's `field(:x)` directly
+  # to HiddenField preserves that — `HiddenField` reads `.value` off
+  # the field, and Superform's field knows the model's value.
   def test_hidden_field_symbol_key_auto_reads_value_from_model
     # `@collection_number.name` == "Rolf Singer" per the fixture.
     form = render_form do

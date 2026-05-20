@@ -23,29 +23,19 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template
-      # Hidden inputs don't render visibly and don't get styled, so
-      # they skip the `form-control` class — emitting it produced
-      # weird markup (`<input type="hidden" class="form-control">`)
-      # and made symbol-keyed `hidden_field(:foo)` inconsistent with
-      # string-keyed `hidden_field("foo")` (which routes through
-      # `HiddenField`, no class).
-      if attributes[:type] == "hidden"
-        input(**attributes)
-      elsif wrapper_options[:label] == false
-        # `label: false` skips the form-group wrapper but the visible
-        # input still wants Bootstrap styling.
-        render_styled_input
+      # Hidden fields and label:false don't get wrappers
+      if attributes[:type] == "hidden" || wrapper_options[:label] == false
+        input(**attributes, class: class_names(attributes[:class],
+                                               "form-control"))
       else
-        render_with_wrapper { render_styled_input }
+        render_with_wrapper do
+          input(**attributes, class: class_names(attributes[:class],
+                                                 "form-control"))
+        end
       end
     end
 
     private
-
-    def render_styled_input
-      input(**attributes, class: class_names(attributes[:class],
-                                             "form-control"))
-    end
 
     def render_with_wrapper(&field_input)
       div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
