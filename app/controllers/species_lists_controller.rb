@@ -270,10 +270,9 @@ class SpeciesListsController < ApplicationController
     @species_list.title = @species_list.title.to_s.strip_squeeze
   end
 
-  def update_redirect_and_flash_notices(create_or_update, sorter = nil)
+  def update_redirect_and_flash_notices(create_or_update)
     log_and_flash_notices(create_or_update)
     update_projects(@species_list, params[:project])
-    construct_observations(@species_list, sorter) if sorter
 
     if @species_list.location_id.nil?
       redirect_to(new_location_path(where: @place_name,
@@ -293,30 +292,6 @@ class SpeciesListsController < ApplicationController
       @species_list.log(:log_species_list_updated)
       flash_notice(:runtime_species_list_edit_success.t(id: id))
     end
-  end
-
-  # Creates observations for names written in
-  # Uses the member instance vars, as well as:
-  #   params[:chosen_approved_names]    Names from radio boxes.
-  def construct_observations(spl, sorter)
-    # Put together a list of arguments to use when creating new observations.
-    spl_args = init_spl_args(spl)
-
-    # This updates certain observation namings already in the list.  It looks
-    # for namings that are deprecated, then replaces them with approved
-    # synonyms which the user has chosen via radio boxes in
-    # params[:chosen_approved_names].
-    update_namings(spl)
-
-    # Add all names from text box into species_list. Creates a new observation
-    # for each name.  ("single names" are names that matched a single name
-    # uniquely.)
-    sorter.single_names.each do |name, timestamp|
-      spl_args[:when] = timestamp || spl.when
-      spl.construct_observation(name, spl_args)
-    end
-
-    spl_args[:when] = spl.when
   end
 
   def update_projects(spl, checks)
