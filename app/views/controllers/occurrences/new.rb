@@ -40,7 +40,7 @@ module Views
                    auto_open: true,
                    user: @user
                  )) do |m|
-            m.with_body do
+            m.with_form_content do
               render(Components::OccurrenceResolveForm.new(**@project_confirm))
             end
           end

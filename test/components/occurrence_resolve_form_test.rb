@@ -173,6 +173,40 @@ class OccurrenceResolveFormTest < ComponentTestCase
                  "Edit flow should not have obs hidden fields")
   end
 
+  def test_form_wraps_modal_body_and_modal_footer
+    # Per the Modal :form_content slot pattern (#4293), the form spans
+    # both `.modal-body` (intro + project list) and `.modal-footer`
+    # (cancel + submit) — submit lives in the footer but is naturally
+    # inside the form.
+    gaps = { projects: [@project] }
+    html = render_resolve_form(
+      gaps: gaps, primary: @obs1, selected: [@obs1, @obs2]
+    )
+
+    assert_html(html, "form > .modal-body > p",
+                text: :occurrence_resolve_projects_intro.l)
+    # Project list uses `ul.list-unstyled` (no bullets, no left
+    # padding). Each row is a flex container with a clickable id-badge
+    # button (Stimulus clipboard target) followed by the project link.
+    assert_html(html, "form > .modal-body > ul.list-unstyled > li.d-flex")
+    assert_html(html,
+                ".modal-body > ul > li > button.badge.badge-id" \
+                "[data-controller='clipboard']",
+                text: @project.id.to_s)
+    assert_html(html, ".modal-body > ul > li > a",
+                text: @project.title)
+    assert_html(html, "form > .modal-footer > button[type='submit']",
+                text: :occurrence_resolve_projects_add_all.l)
+    assert_html(html, "form > .modal-footer > a[data-dismiss='modal']",
+                text: :occurrence_resolve_projects_cancel.l)
+  end
+
+  def test_owns_modal_sections_class_method_returns_true
+    # ModalTurboForm and similar wrappers auto-detect this to choose
+    # Modal's :form_content slot. Locks the contract in.
+    assert(Components::OccurrenceResolveForm.owns_modal_sections?)
+  end
+
   def test_multiple_projects_listed
     proj2 = projects(:bolete_project)
     gaps = { projects: [@project, proj2] }
