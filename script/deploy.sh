@@ -70,17 +70,23 @@ echo Going for it\!
 
 # Put up the maintenance page BEFORE stopping puma so users hit a
 # friendly 503 (and DigitalOcean's /test check stays green) rather than
-# a broken connection during the restart window. Removed in the success
-# path at the bottom and in every failure-recovery branch below (#4312).
-echo Putting up maintenance page... && \
-  cp public/maintenance.html.tmpl public/maintenance.html
+# a broken connection during the restart window (#4312). The trap below
+# guarantees the sentinel is removed on ANY exit path — normal success,
+# explicit `exit 1` in a failure branch, or signal (Ctrl-C / TERM) —
+# so a half-failed or interrupted deploy can't strand the site behind
+# the maintenance page.
+echo Putting up maintenance page...
+if ! cp public/maintenance.html.tmpl public/maintenance.html; then
+    echo Failed to copy maintenance template. Aborting before touching puma.
+    exit 1
+fi
+trap 'rm -f public/maintenance.html' EXIT INT TERM
 
 echo Stopping puma to update code... && sudo service puma stop
 
 STASH_RESULT=`git stash`
 if [ $? -ne 0 ]; then
     echo git stash failed.
-    echo Taking down maintenance page... && rm -f public/maintenance.html
     echo Restarting puma... && sudo service puma start
     echo Restarting solidqueue... && sudo service solidqueue start
     exit 1
@@ -96,7 +102,6 @@ fi
 echo Getting latest code from github... && git pull
 if [ $? -ne 0 ]; then
     echo git pull failed.
-    echo Taking down maintenance page... && rm -f public/maintenance.html
     echo Restarting puma... && sudo service puma start
     echo Restarting solidqueue... && sudo service solidqueue start
     exit 1
@@ -106,13 +111,18 @@ if [ "$STASH_RESULT" != 'No local changes to save' ]; then
     echo Reapply local changes... && git stash pop
     if [ $? -ne 0 ]; then
 	echo Applying the stashed changes failed.
-	echo Taking down maintenance page... && rm -f public/maintenance.html
         echo Restarting puma... && sudo service puma start
 	echo Restarting solidqueue... && sudo service solidqueue start
 	exit 1
     fi
 fi
 
+# Restart puma BEFORE removing the maintenance page so users don't
+# briefly see "broken connection" between sentinel removal and puma
+# accepting connections. The trap at the top of the script takes the
+# sentinel down on EXIT (success or failure), but we want it down
+# immediately on success — so do it explicitly right after puma is
+# back, then let the trap no-op on exit.
 echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
@@ -127,7 +137,6 @@ echo SUCCESS\!
 if [ $? -ne 0 ]; then
     echo ""
     echo "Deploy failed. Restarting puma and solidqueue with existing code..."
-    rm -f public/maintenance.html
     sudo service puma start
     sudo service solidqueue start
     exit 1
