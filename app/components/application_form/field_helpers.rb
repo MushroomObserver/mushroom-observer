@@ -221,6 +221,12 @@ class Components::ApplicationForm < Superform::Rails::Form
         proxy = FieldProxy.new(nil, field_name, options[:value])
         render(HiddenField.new(proxy, **options))
       else
+        # Symbol path goes through Superform's field machinery so the
+        # value auto-reads from the model / FormObject when no explicit
+        # `value:` is passed (e.g. `hidden_field(:project_id)` reading
+        # `form.model.project_id`). `TextField`'s view_template
+        # special-cases `type: "hidden"` to skip the `form-control`
+        # class and the form-group wrapper.
         render(field(field_name).text(**options, type: "hidden"))
       end
     end
