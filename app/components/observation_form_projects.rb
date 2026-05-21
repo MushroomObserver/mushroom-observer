@@ -3,12 +3,26 @@
 # Projects section of the observation form.
 # Renders a collapsible panel with project checkboxes and constraint messages.
 #
+# Wire shape: `observation[project_ids][]=<id>` (Rails-idiomatic
+# has_many-through array). Checkedness defaults to
+# `model.project_ids`; on a failure-reload the controller passes
+# `submitted_project_ids:` (the user's just-submitted array) and the
+# form uses that instead — preserves the user's choices without
+# writing them to the DB (Rails' `*_ids=` setter is instant on a
+# persisted record).
+#
+# `ignore_proj_conflicts` (the "ignore project warnings" checkbox)
+# now lives under `observation[ignore_proj_conflicts]` rather than
+# its own `project[]` namespace.
+#
 # @param form [Components::ApplicationForm] the parent form
 # @param observation [Observation] the observation model
 # @param user [User] the current user
 # @param button_name [String] submit button text for messages
 # @param projects [Array<Project>] available projects
-# @param project_checks [Hash] project_id => checked state
+# @param submitted_project_ids [Array<String>, nil] user's just-
+#   submitted project_ids (failure-reload path); nil on normal
+#   render — form falls back to `observation.project_ids`.
 # @param error_checked_projects [Array<Project>] projects with constraint errors
 # @param suspect_checked_projects [Array<Project>] projects with warnings
 class Components::ObservationFormProjects < Components::Base
@@ -17,7 +31,7 @@ class Components::ObservationFormProjects < Components::Base
   prop :user, User
   prop :button_name, String
   prop :projects, _Array(Project)
-  prop :project_checks, Hash
+  prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
   prop :error_checked_projects, _Array(Project), default: -> { [] }
   prop :suspect_checked_projects, _Array(Project), default: -> { [] }
 
@@ -35,26 +49,32 @@ class Components::ObservationFormProjects < Components::Base
       panel_id: "observation_projects",
       collapsible: true,
       collapse_target: "#observation_projects_inner",
-      expanded: @project_checks.any?
+      expanded: any_checked?
     )
   end
 
-  def render_body
-    @form.namespace(:project) do |project_ns|
-      render_constraint_messages(project_ns)
-      render_help_text
-      render_project_checkboxes(project_ns)
+  def any_checked?
+    if @submitted_project_ids
+      @submitted_project_ids.compact_blank.any?
+    else
+      @observation.project_ids.any?
     end
   end
 
-  def render_constraint_messages(project_ns)
+  def render_body
+    render_constraint_messages
+    render_help_text
+    render_project_checkboxes
+  end
+
+  def render_constraint_messages
     return unless constraint_issues?
 
     div(id: "project_messages") do
       render_error_alert if @error_checked_projects.any?
       render_warning_alert if @suspect_checked_projects.any?
     end
-    render_ignore_checkbox(project_ns)
+    render_ignore_checkbox
   end
 
   def constraint_issues?
@@ -88,45 +108,52 @@ class Components::ObservationFormProjects < Components::Base
 
   # Joined, localized kind labels for the violations this observation
   # incurs against `proj` (Non-target name; Out-of-range date; etc.).
-  # Replaces the old `proj.constraints` rendering, which surfaced the
-  # project's date/location *settings* — useless when those are blank
-  # but the observation fails on target_name / target_location.
   def constraint_kind_labels(proj)
     proj.violation_kinds_for(@observation).map do |kind|
       :"form_observations_projects_kind_#{kind}".l
     end.join("; ")
   end
 
-  def render_ignore_checkbox(project_ns)
-    render(project_ns.field(:ignore_proj_conflicts).checkbox(
-             wrapper_options: {
-               label: :form_observations_projects_ignore_project_constraints.t
-             }
-           ))
+  def render_ignore_checkbox
+    @form.checkbox_field(
+      :ignore_proj_conflicts,
+      label: :form_observations_projects_ignore_project_constraints.t
+    )
   end
 
   def render_help_text
     p { :form_observations_project_help.t }
   end
 
-  def render_project_checkboxes(project_ns)
+  def render_project_checkboxes
     div(class: "overflow-scroll-checklist") do
-      @projects.each do |project|
-        render_project_checkbox(project_ns, project)
+      # Sentinel: ensures `observation[project_ids]` is always present
+      # in params even when every checkbox is unchecked (Rack drops
+      # empty arrays). Controller `compact_blank`s this empty value.
+      input(type: "hidden", name: "observation[project_ids][]",
+            value: "", autocomplete: "off")
+      @projects.each { |project| render_project_checkbox(project) }
+    end
+  end
+
+  def render_project_checkbox(project)
+    @form.checkbox_field(
+      :project_ids,
+      label: false,
+      disabled: !project.user_can_add_observation?(@observation, @user)
+    ) do |cb|
+      cb.option(project.id, checked: project_checked?(project.id)) do
+        whitespace
+        plain(project.title)
       end
     end
   end
 
-  def render_project_checkbox(project_ns, project)
-    field_name = :"id_#{project.id}"
-    checked = @project_checks[project.id]
-    disabled = !project.user_can_add_observation?(@observation, @user)
-
-    render(project_ns.field(field_name).checkbox(
-             wrapper_options: { label: project.title },
-             checked: checked,
-             disabled: disabled,
-             id: "project_id_#{project.id}"
-           ))
+  def project_checked?(project_id)
+    if @submitted_project_ids
+      @submitted_project_ids.map(&:to_i).include?(project_id.to_i)
+    else
+      @observation.project_ids.include?(project_id)
+    end
   end
 end

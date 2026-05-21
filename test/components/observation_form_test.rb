@@ -136,9 +136,10 @@ class ObservationFormTest < ComponentTestCase
     obs = observations(:falmouth_2023_09_obs) # Boletus, Falmouth — neither
     User.current = user
 
+    obs.project_ids = [proj.id]
     html = render_form(
       observation: obs, user: user, mode: :update,
-      projects: [proj], project_checks: { proj.id => true },
+      projects: [proj],
       suspect_checked_projects: [proj]
     )
 
@@ -166,9 +167,7 @@ class ObservationFormTest < ComponentTestCase
              good_images: [],
              exif_data: {},
              projects: [],
-             project_checks: {},
              lists: [],
-             list_checks: {},
              error_checked_projects: [],
              suspect_checked_projects: [],
              **extras

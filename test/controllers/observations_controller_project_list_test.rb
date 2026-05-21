@@ -52,7 +52,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     post(:create,
          params: {
            naming: { name: "Screwy Name" }, # (ensures it will fail)
-           project: { "id_#{@proj1.id}" => "0" }
+           observation: { project_ids: [""] }
          })
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
   end
@@ -71,9 +71,9 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
         id: @obs2.id,
         observation: {
           place_name: "blah blah blah", # (ensures it will fail)
-          good_image_ids: @obs2_img_ids.join(" ") # necessary?
-        },
-        project: { "id_#{@proj1.id}" => "1" }
+          good_image_ids: @obs2_img_ids.join(" "), # necessary?
+          project_ids: [@proj1.id.to_s]
+        }
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
@@ -82,9 +82,9 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       params: {
         id: @obs2.id,
         observation: {
-          good_image_ids: @obs2_img_ids.join(" ") # necessary?
-        },
-        project: { "id_#{@proj1.id}" => "1" }
+          good_image_ids: @obs2_img_ids.join(" "), # necessary?
+          project_ids: [@proj1.id.to_s]
+        }
       }
     )
     assert_response(:redirect)
@@ -102,11 +102,8 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
         id: @obs1.id,
         observation: {
           place_name: "blah blah blah", # (ensures it will fail)
-          good_image_ids: @obs1_img_ids.join(" ")
-        },
-        project: {
-          "id_#{@proj1.id}" => "1",
-          "id_#{@proj2.id}" => "0"
+          good_image_ids: @obs1_img_ids.join(" "),
+          project_ids: [@proj1.id.to_s]
         }
       }
     )
@@ -116,11 +113,8 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       params: {
         id: @obs1.id,
         observation: {
-          good_image_ids: @obs1_img_ids.join(" ")
-        },
-        project: {
-          "id_#{@proj1.id}" => "1",
-          "id_#{@proj2.id}" => "1"
+          good_image_ids: @obs1_img_ids.join(" "),
+          project_ids: [@proj1.id.to_s, @proj2.id.to_s]
         }
       }
     )
@@ -151,7 +145,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
 
   def assert_project_checks(project_states)
     project_states.each do |id, state|
-      assert_checkbox_state("project_id_#{id}", state)
+      assert_checkbox_state("observation_project_ids_#{id}", state)
     end
   end
 
@@ -164,8 +158,10 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: obs.id,
-        observation: { place_name: obs.place_name },
-        project: { "id_#{project.id}" => "1" }
+        observation: {
+          place_name: obs.place_name,
+          project_ids: [project.id.to_s]
+        }
       }
     )
     assert_flash_warning
@@ -174,10 +170,10 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: obs.id,
-        observation: { place_name: obs.place_name },
-        project: {
-          "id_#{project.id}" => "1",
-          :ignore_proj_conflicts => "1"
+        observation: {
+          place_name: obs.place_name,
+          project_ids: [project.id.to_s],
+          ignore_proj_conflicts: "1"
         }
       }
     )
@@ -197,8 +193,10 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: obs.id,
-        observation: { place_name: obs.place_name },
-        project: { "id_#{project.id}" => "1" }
+        observation: {
+          place_name: obs.place_name,
+          project_ids: [project.id.to_s]
+        }
       }
     )
     assert_no_flash
@@ -214,8 +212,10 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: obs.id,
-        observation: { place_name: obs.place_name },
-        project: { "id_#{project.id}" => "1" }
+        observation: {
+          place_name: obs.place_name,
+          project_ids: [project.id.to_s]
+        }
       }
     )
     assert_response(:redirect)
@@ -263,7 +263,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :create,
       params: {
         naming: { name: "Screwy Name" }, # (ensures it will fail)
-        list: { "id_#{@spl2.id}" => "0" }
+        observation: { species_list_ids: [""] }
       }
     )
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
@@ -288,8 +288,10 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: @obs1.id,
-        observation: { place_name: "blah blah blah" }, # (ensures it will fail)
-        list: { "id_#{@spl1.id}" => "1" }
+        observation: {
+          place_name: "blah blah blah", # (ensures it will fail)
+          species_list_ids: [@spl1.id.to_s]
+        }
       }
     )
     assert_equal(spl_start_length, @spl1.reload.observations.length)
@@ -298,7 +300,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       :update,
       params: {
         id: @obs1.id,
-        list: { "id_#{@spl1.id}" => "1" }
+        observation: { species_list_ids: [@spl1.id.to_s] }
       }
     )
     assert_equal(spl_start_length + 1, @spl1.reload.observations.length)
@@ -336,7 +338,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
 
   def assert_list_checks(list_states)
     list_states.each do |id, state|
-      assert_checkbox_state("list_id_#{id}", state)
+      assert_checkbox_state("observation_species_list_ids_#{id}", state)
     end
   end
 end
