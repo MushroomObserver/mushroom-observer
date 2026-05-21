@@ -440,12 +440,16 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # Page heading: "About <Full Name (login)>" via the i18n template.
-  # Doc title: just the unique-text-name (plain).
+  # Both the page heading and the browser tab title use the
+  # "About <Full Name (login)>" i18n template — the "About" prefix
+  # is the show-page's identity (vs. e.g. an edit page).
   def page_title(_user = nil)
     :show_user_about.t(user: unique_text_name)
   end
-  alias document_title unique_text_name
+
+  def document_title
+    :show_user_about.t(user: unique_text_name)
+  end
 
   def format_name
     unique_text_name

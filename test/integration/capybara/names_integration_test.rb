@@ -186,11 +186,10 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    title =
-      "Mushroom Observer: Name #{name.id}: #{name.user_display_name(rolf)}".
-      t.as_displayed
-
-    assert_title(title)
+    # Browser tab title is plain text — built from `name.text_name`
+    # (the denormalized DB column) via `Name#document_title`.
+    # No textile / smart-quote conversion.
+    assert_title("Mushroom Observer: Name #{name.id}: #{name.text_name}")
   end
 
   def test_lifeform_edit
