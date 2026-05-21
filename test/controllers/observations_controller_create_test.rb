@@ -1380,4 +1380,99 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     assert_select("#name_messages", count: 0)
   end
+
+  # Stub-based regression coverage for the
+  # `validate_observation` / `validate_naming` / `validate_vote`
+  # failure branches (`@any_errors = true; false`). Observation,
+  # Naming, and Vote have no `validates` clauses, so the only way
+  # to reach those branches is by forcing `valid?` to return false
+  # on the in-controller instance. We intercept `.new` to swap in
+  # a pre-stubbed instance.
+  def test_create_observation_fails_validation
+    login("rolf")
+    stub_valid_false_on(Observation) do
+      post(:create, params: create_params_with_name)
+    end
+    assert_response(:success)
+  end
+
+  def test_create_observation_fails_naming_validation
+    login("rolf")
+    stub_valid_false_on(Naming) do
+      post(:create, params: create_params_with_name)
+    end
+    assert_response(:success)
+  end
+
+  def test_create_observation_fails_vote_validation
+    login("rolf")
+    stub_valid_false_on(Vote) do
+      post(:create, params: create_params_with_name)
+    end
+    assert_response(:success)
+  end
+
+  # `try_to_save_image` flash-error branch (when image.save fails).
+  # The existing `test_image_upload_when_*` tests trigger the
+  # process_image failure path; this one targets the save-failure
+  # path with a forced `save => false` on the in-flight Image.
+  def test_create_observation_image_save_fails
+    login("rolf")
+    setup_image_dirs
+    file = Rack::Test::UploadedFile.new(
+      Rails.root.join("test/images/Coprinus_comatus.jpg"), "image/jpeg"
+    )
+    params = create_params_with_name.merge(
+      observation: create_params_with_name[:observation].merge(
+        image: { "0": { image: file, copyright_holder: "zuul",
+                        when: Time.zone.now } }
+      )
+    )
+
+    stub_save_false_on(Image) do
+      post(:create, params: params)
+    end
+
+    # Image was added to @bad_images (didn't save), so any flash
+    # errors from `flash_object_errors(image)` should be present.
+    assert_response(:success)
+  end
+
+  private
+
+  def create_params_with_name
+    {
+      observation: {
+        when: Time.zone.now,
+        place_name: "Somewhere, Massachusetts, USA",
+        specimen: "0",
+        thumb_image_id: "0"
+      },
+      naming: { name: "Agaricus campestris", vote: { value: "3" } }
+    }
+  end
+
+  # Stub `klass.new(*args)` so every instance built inside the
+  # controller has `valid?` returning false. MiniTest's `stub` can't
+  # do "any_instance" — we intercept the constructor and stub the
+  # one instance after it's built.
+  def stub_valid_false_on(klass, &block)
+    stub_new_with(klass, :valid?, false, &block)
+  end
+
+  def stub_save_false_on(klass, &block)
+    stub_new_with(klass, :save, false, &block)
+  end
+
+  def stub_new_with(klass, method_name, return_value)
+    original_new = klass.method(:new)
+    klass.define_singleton_method(:new) do |*args, **kwargs|
+      obj = original_new.call(*args, **kwargs)
+      obj.define_singleton_method(method_name) { |*| return_value }
+      obj
+    end
+    yield
+  ensure
+    klass.singleton_class.remove_method(:new)
+  end
 end

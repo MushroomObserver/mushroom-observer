@@ -101,6 +101,39 @@ module Observations
              "Failed to remove image from project")
     end
 
+    # Mirrors test_update_image_unchanged_remove_from_project but
+    # tests the ADD branch in `attach_images_to_projects_and_flash_
+    # notices`. The user adds the image to a project they're a
+    # member of by submitting `project_ids: [<id>]` for a project
+    # the image isn't yet in.
+    def test_update_image_unchanged_add_to_project
+      project = projects(:eol_project)
+      user = users(:rolf) # member of eol_project
+      image = images(:commercial_inquiry_image) # rolf's, no projects
+      assert(user.projects_member.include?(project))
+      assert_empty(image.projects, "Test wants image with no projects yet")
+
+      params = {
+        "id" => image.id,
+        "image" => {
+          "when(1i)" => image.when.year.to_s,
+          "when(2i)" => image.when.month.to_s,
+          "when(3i)" => image.when.day.to_s,
+          "copyright_holder" => image.copyright_holder,
+          "notes" => image.notes,
+          "original_name" => image.original_name,
+          "license" => image.license,
+          project_ids: [project.id.to_s]
+        }
+      }
+      login(user.login)
+
+      put(:update, params: params)
+
+      assert(project.reload.images.include?(image),
+             "Failed to add image to project")
+    end
+
     def test_update_image_save_fail
       image = images(:turned_over_image)
       assert_not_empty(image.projects,
