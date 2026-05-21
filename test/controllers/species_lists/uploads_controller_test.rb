@@ -79,7 +79,11 @@ module SpeciesLists
 
     def assert_edit_species_list
       assert_template("species_lists/edit")
-      assert_template("species_lists/_form")
+      # `species_lists/_form` partial folded into
+      # `Components::SpeciesListForm`. Phlex components don't show in
+      # `assert_template`; assert the form's root element instead.
+      assert_select("form#species_list_form", { count: 1 },
+                    "Expected SpeciesListForm to render")
     end
   end
 end

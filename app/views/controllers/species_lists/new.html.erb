@@ -2,9 +2,14 @@
 add_new_title(:create_object, :SPECIES_LIST)
 add_context_nav(species_list_form_new_tabs)
 container_class(:text)
-
-action = species_lists_path(approved_where: @place_name)
 %>
 
-<%= render(partial: "species_lists/form",
-           locals: { button: :CREATE, action: action }) %>
+<%= render(Components::SpeciesListForm.new(
+             @species_list,
+             projects: @projects,
+             project_checks: @project_checks,
+             dubious_where_reasons: @dubious_where_reasons,
+             user: @user,
+             button: :CREATE,
+             clone_id: @clone_id
+           )) %>

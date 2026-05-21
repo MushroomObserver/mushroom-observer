@@ -28,12 +28,21 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def assert_create_species_list
     assert_template("new")
-    assert_template("species_lists/_form")
+    # See `assert_edit_species_list` below: `species_lists/_form` was
+    # folded into `Components::SpeciesListForm`. Phlex components don't
+    # show in `assert_template`; assert the form's root element.
+    assert_select("form#species_list_form", { count: 1 },
+                  "Expected SpeciesListForm to render")
   end
 
   def assert_edit_species_list
     assert_template("edit")
-    assert_template("species_lists/_form")
+    # The pre-Phlex `species_lists/_form` partial was folded into
+    # `Components::SpeciesListForm` (a Phlex component rendered by
+    # `edit.html.erb` directly). Phlex components don't show up in
+    # `assert_template`, so assert the form's root element instead.
+    assert_select("form#species_list_form", { count: 1 },
+                  "Expected SpeciesListForm to render")
   end
 
   def assert_project_checks(project_states)
@@ -404,6 +413,85 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  # Cover `check_for_clone`: when create is posted with `clone_id`,
+  # all observations from the clone source are copied onto the new
+  # species list. (Pre-Phlex this was uncovered.)
+  def test_create_with_clone_id_copies_observations
+    source = species_lists(:unknown_species_list)
+    assert(source.observations.any?,
+           "Test needs a source species_list with observations")
+    login("rolf")
+    post(:create, params: {
+           clone_id: source.id,
+           species_list: {
+             title: "Clone target",
+             place_name: "Burbank, California, USA",
+             approved_where: "Burbank, California, USA",
+             "when(1i)" => "2024", "when(2i)" => "1", "when(3i)" => "1",
+             notes: ""
+           }
+         })
+    spl = SpeciesList.find_by(title: "Clone target")
+    assert_not_nil(spl, "Cloned species_list should be saved")
+    # check_for_clone copies the source's obs onto the new list
+    assert_equal(source.observations.to_a.sort_by(&:id),
+                 spl.observations.to_a.sort_by(&:id),
+                 "Cloned list should carry the source obs")
+  end
+
+  # Cover the dubious_where_reasons computation in validate_place_name:
+  # when the typed place_name doesn't match the form's approved_where
+  # AND the location_id isn't set yet, the controller runs
+  # `Location.dubious_name?` and re-renders the form with the warnings.
+  def test_create_with_dubious_place_name_renders_warning
+    login("rolf")
+    # A bare country with a typo is dubious. Omit `approved_where` so
+    # the comparison `@place_name != approved_where` triggers the
+    # dubious check.
+    post(:create, params: {
+           species_list: {
+             title: "Dubious place test",
+             place_name: "Buurbnak, California, USAA",
+             "when(1i)" => "2024", "when(2i)" => "1", "when(3i)" => "1",
+             notes: ""
+           }
+         })
+    # No save (validation re-renders the form).
+    assert_nil(SpeciesList.find_by(title: "Dubious place test"))
+    assert_response(:success)
+    # `@dubious_where_reasons` was populated and is now in the
+    # FormLocationFeedback component.
+    assert_select("#dubious_location_messages")
+  end
+
+  # Cover the `redirect_to(new_location_path(...))` branch in
+  # `update_redirect_and_flash_notices`: when a save succeeds but the
+  # place_name didn't resolve to an existing Location (location_id is
+  # still nil), the controller redirects to /locations/new so the
+  # user can create the missing Location.
+  def test_create_with_unknown_place_redirects_to_new_location
+    login("rolf")
+    novel = "Nowhere-In-Particular-#{SecureRandom.hex(4)}, USA"
+    # Pass `approved_where` matching place_name so the dubious check
+    # is skipped — exercises the "save succeeded but no Location"
+    # branch instead of the dubious branch.
+    post(:create, params: {
+           species_list: {
+             title: "Novel place test",
+             place_name: novel,
+             approved_where: novel,
+             "when(1i)" => "2024", "when(2i)" => "1", "when(3i)" => "1",
+             notes: ""
+           }
+         })
+    spl = SpeciesList.find_by(title: "Novel place test")
+    assert_not_nil(spl, "Species list should save with unresolved place")
+    assert_nil(spl.location_id,
+               "Test scenario requires unresolved location_id")
+    assert_redirected_to(new_location_path(where: novel,
+                                           set_species_list: spl.id))
+  end
+
   # Test constructing species_lists in various ways.
   def test_construct_species_list
     list_title = "List Title"
@@ -493,8 +581,17 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal("rolf", spl.user.login)
     requires_user(:edit, { action: :show }, params)
     assert_edit_species_list
-    assert_form_action({ action: :update, id: spl.id,
-                         approved_where: "Burbank, California, USA" })
+    # Form action is now the bare resource path; `approved_where` is
+    # carried as a hidden field under the species_list namespace
+    # (post-Phlex conversion). See `Components::SpeciesListForm` and
+    # `species_lists_controller#validate_place_name`.
+    assert_form_action({ action: :update, id: spl.id })
+    assert_select(
+      "input[type='hidden'][name='species_list[approved_where]']" \
+      "[value='Burbank, California, USA']",
+      { count: 1 },
+      "Expected approved_where hidden field carrying the place_name"
+    )
   end
 
   def test_edit_with_projects

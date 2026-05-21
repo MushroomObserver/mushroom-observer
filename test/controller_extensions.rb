@@ -675,20 +675,20 @@ module ControllerExtensions
     case state
     when :checked_but_disabled
       assert_select("input##{actual_id}", 1)
-      assert_select("input##{actual_id}[checked=checked]", 1)
-      assert_select("input##{actual_id}[disabled=disabled]", 1)
+      assert_select("input##{actual_id}[checked]", 1)
+      assert_select("input##{actual_id}[disabled]", 1)
     when :unchecked_but_disabled
       assert_select("input##{actual_id}", 1)
-      assert_select("input##{actual_id}[checked=checked]", 0)
-      assert_select("input##{actual_id}[disabled=disabled]", 1)
+      assert_select("input##{actual_id}[checked]", 0)
+      assert_select("input##{actual_id}[disabled]", 1)
     when :checked, true
       assert_select("input##{actual_id}", 1)
-      assert_select("input##{actual_id}[checked=checked]", 1)
-      assert_select("input##{actual_id}[disabled=disabled]", 0)
+      assert_select("input##{actual_id}[checked]", 1)
+      assert_select("input##{actual_id}[disabled]", 0)
     when :unchecked, false
       assert_select("input##{actual_id}", 1)
-      assert_select("input##{actual_id}[checked=checked]", 0)
-      assert_select("input##{actual_id}[disabled=disabled]", 0)
+      assert_select("input##{actual_id}[checked]", 0)
+      assert_select("input##{actual_id}[disabled]", 0)
     when :no_field
       # For :no_field, check that no checkbox matches this ID pattern
       not_found = find_checkbox_id(id) == id.to_s &&
