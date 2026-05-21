@@ -40,9 +40,9 @@ class Components::ObservationForm < Components::ApplicationForm
     herbarium_id: nil,
     accession_number: nil,
     projects: [],
-    project_checks: {},
+    submitted_project_ids: nil,
     lists: [],
-    list_checks: {},
+    submitted_list_ids: nil,
     error_checked_projects: [],
     suspect_checked_projects: [],
     field_code: nil,
@@ -276,7 +276,7 @@ class Components::ObservationForm < Components::ApplicationForm
       user: @user,
       button_name: button_name,
       projects: @projects,
-      project_checks: @project_checks,
+      submitted_project_ids: @submitted_project_ids,
       error_checked_projects: @error_checked_projects,
       suspect_checked_projects: @suspect_checked_projects
     )
@@ -291,8 +291,9 @@ class Components::ObservationForm < Components::ApplicationForm
   def render_lists_panel
     ObservationFormLists(
       form: self,
+      observation: model,
       lists: @lists,
-      list_checks: @list_checks
+      submitted_list_ids: @submitted_list_ids
     )
   end
 end

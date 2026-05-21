@@ -657,6 +657,30 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
                "Observation should have no occurrence")
   end
 
+  # Force `@observation.save` to return false on the update path so
+  # we exercise the `save_observation` failure branch (flash_error
+  # + `@any_errors = true`). Must pass changed attributes — the
+  # save path is guarded by `@observation.changed?`.
+  def test_update_observation_save_fails
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    params_with_change = obs_params(obs).merge(notes: { Other: "Changed" })
+
+    obs.stub(:save, false) do
+      # `find_observation!` calls Observation.edit_includes.safe_find.
+      Observation.stub(:edit_includes, Observation) do
+        Observation.stub(:safe_find, obs) do
+          put(:update,
+              params: { id: obs.id, observation: params_with_change })
+        end
+      end
+    end
+
+    assert_flash_text(:runtime_no_save_observation.t)
+    # Re-renders the edit form rather than redirecting.
+    assert_response(:success)
+  end
+
   def test_update_invalid_field_slip_code
     obs = observations(:minimal_unknown_obs)
     login(obs.user.login)

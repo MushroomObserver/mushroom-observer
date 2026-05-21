@@ -11,26 +11,32 @@
 # - Optional `clone_id` posted at the top level (NOT under
 #   `species_list[...]`) via the String-keyed `hidden_field`. The
 #   controller reads `params[:clone_id]`.
-# - Project membership posted as `project[id_<project.id>]=1` (per the
-#   pre-refactor `fields_for(:project) { check_box_with_label(:"id_#{id}") }`
-#   shape). The controller's `update_projects(spl, params[:project])`
-#   walks `@projects` and toggles membership for each id. Switching to
-#   Rails' `project_ids` collection setter would simplify this but
-#   touches the controller's permission edge case (disabled checkboxes
-#   for projects the user isn't permitted to modify); deferred to a
-#   follow-up PR.
+# - Project membership posted as `species_list[project_ids][]=<id>`
+#   (Rails-idiomatic has_many-through wire shape, via Superform's
+#   array-mode CheckboxField). The controller's `update_projects`
+#   walks `@user.projects_member` and toggles each project based on
+#   whether its id is in the submitted array; non-member projects the
+#   SL belongs to are preserved by omission (disabled checkboxes don't
+#   submit per HTML spec, and the iteration excludes them anyway).
 class Components::SpeciesListForm < Components::ApplicationForm
   # Controller-passed render state is bundled into the `**state` splat
   # so the init stays under Metrics/ParameterLists. Callers still pass
-  # each piece as a named kwarg (projects:, project_checks:,
-  # dubious_where_reasons:, clone_id:) — the splat just collects them.
+  # each piece as a named kwarg (projects:, dubious_where_reasons:,
+  # clone_id:, submitted_project_ids:) — the splat just collects them.
+  #
+  # Checkedness for project rows defaults to `model.project_ids`. On a
+  # failure-reload the controller passes `submitted_project_ids:` (the
+  # user's just-submitted array) — used in preference to the model so
+  # we don't have to write the user's choices to the DB just to render
+  # them back (Rails' has_many-through setter would do that instantly
+  # on a persisted record, even though the save itself failed).
   def initialize(species_list, user:, button:, **state)
     @user = user
     @button = button
     @projects = state[:projects] || []
-    @project_checks = state[:project_checks] || {}
     @dubious_where_reasons = state[:dubious_where_reasons] || []
     @clone_id = state[:clone_id]
+    @submitted_project_ids = state[:submitted_project_ids]
     super(species_list)
   end
 
@@ -98,37 +104,42 @@ class Components::SpeciesListForm < Components::ApplicationForm
         plain(:form_species_lists_project_help.t)
       end
       div(class: "form-group") do
+        # Sentinel: ensures `species_list[project_ids]` is always
+        # present in params even when every checkbox is unchecked
+        # (Rack drops keys with empty arrays). The controller's
+        # `compact_blank` strips this empty value.
+        input(type: "hidden", name: "species_list[project_ids][]",
+              value: "", autocomplete: "off")
         @projects.each { |project| render_project_checkbox(project) }
       end
     end
   end
 
-  # Each project checkbox lives outside the model's namespace — posted
-  # as `project[id_<id>]=1/0` (not `species_list[project_ids][]=<id>`).
-  # `FieldProxy.new("project", :"id_<id>", current_value)` gives a
-  # CheckboxField input with the right `name=` / `id=` derived via
-  # `dom.name` / `dom.id`. The hidden sidecar carries the "0" for
-  # unchecked rows so `params[:project]["id_<id>"]` is always present
-  # for the controller's `checks["id_#{p.id}"] == "1"` check.
-  #
-  # `checked_value: "1"` is load-bearing. MO's CheckboxField only
-  # routes through the string-compare `checked = field.value.to_s ==
-  # checked_value.to_s` when `checked_value:` is passed explicitly.
-  # Without it, Superform's parent Checkbox emits `checked: field.value`
-  # directly — and `"0"` is truthy in Ruby, so the unchecked rows
-  # would render with a `checked` attribute. Setting `checked_value`
-  # forces MO's correct boolean recomputation.
+  # One block-mode `checkbox_field(:project_ids)` per project so each
+  # gets its own `<div class="checkbox"><label>` wrapper and can carry
+  # its own `disabled:` flag. `cb.option(project.id)` emits
+  # `<input type="checkbox" name="species_list[project_ids][]"
+  # value="<id>" checked? disabled?>` — Superform's array-mode pattern.
+  # Checkedness is computed against `model.project_ids` (the
+  # has_many-through reader returning the current attached id array),
+  # so we no longer need `@project_checks`.
   def render_project_checkbox(project)
-    proxy = Components::ApplicationForm::FieldProxy.new(
-      "project", :"id_#{project.id}",
-      @project_checks[project.id] ? "1" : "0"
-    )
-    render(Components::ApplicationForm::CheckboxField.new(
-             proxy,
-             checked_value: "1",
-             disabled: cannot_modify_project?(project),
-             wrapper_options: { label: project.title }
-           ))
+    checkbox_field(:project_ids,
+                   label: false,
+                   disabled: cannot_modify_project?(project)) do |cb|
+      cb.option(project.id, checked: project_checked?(project.id)) do
+        whitespace
+        plain(project.title)
+      end
+    end
+  end
+
+  def project_checked?(project_id)
+    if @submitted_project_ids
+      @submitted_project_ids.map(&:to_i).include?(project_id.to_i)
+    else
+      model.project_ids.include?(project_id)
+    end
   end
 
   # Mirrors the pre-refactor disable condition: the species list's

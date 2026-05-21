@@ -71,11 +71,12 @@ module ObservationsController::New
     @vote.value = 3.0
   end
 
+  # `@observation` is a fresh `Observation.new` here, so assigning
+  # `project_ids =` stays in-memory until save (Rails' has_many-
+  # through `*_ids=` only commits on a persisted parent).
   def init_project_vars_for_new
     init_project_vars
-    @projects.each do |proj|
-      @project_checks[proj.id] = proj.current?
-    end
+    @observation.project_ids = @projects.select(&:current?).map(&:id)
   end
 
   def defaults_from_last_observation_created
@@ -93,12 +94,8 @@ module ObservationsController::New
       @observation.when = last_observation.when
     end
 
-    @project_checks = {}
-    last_observation.projects.find_each do |project|
-      next unless project.current?
-
-      @project_checks[project.id] = true
-    end
+    @observation.project_ids =
+      last_observation.projects.find_each.select(&:current?).map(&:id)
 
     last_observation.species_lists.each do |list|
       add_list(list)
@@ -109,20 +106,25 @@ module ObservationsController::New
     return unless list && permission?(list)
 
     @lists << list unless @lists.include?(list)
-    @list_checks[list.id] = true
+    ids = @observation.species_list_ids
+    @observation.species_list_ids = ids | [list.id]
   end
 
+  # Adding a field-slip project: always check it; for other already-
+  # checked projects, keep them checked UNLESS they have their own
+  # field_slip_prefix (in which case adding a new field-slip project
+  # supersedes them — original ERB had this exclusive behavior).
   def add_field_slip_project(code)
     project = FieldSlip.find_by(code: code)&.project
     return unless project&.current? || project&.admin?(@user)
     return unless project&.member?(@user)
 
     @projects.append(project) unless @projects.include?(project)
-    @projects.each do |proj|
-      @project_checks[proj.id] = (proj == project) ||
-                                 (@project_checks[proj.id] &&
-                                  proj.field_slip_prefix.nil?)
-    end
+    current_ids = @observation.project_ids
+    @observation.project_ids = @projects.select do |proj|
+      proj == project ||
+        (current_ids.include?(proj.id) && proj.field_slip_prefix.nil?)
+    end.map(&:id)
   end
 
   def check_location

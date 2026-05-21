@@ -75,12 +75,12 @@ module ObservationsController::Validators
     params.dig(:observation, :herbarium_record) || params[:herbarium_record]
   end
 
-  def project_params
-    params.dig(:observation, :project) || params[:project]
-  end
-
-  def list_params
-    params.dig(:observation, :list) || params[:list]
+  # Submitted project_ids array (post-Phlex shape:
+  # `observation[project_ids][]=<id>`). `compact_blank` strips the
+  # form's sentinel hidden input (value=""), leaving the integer-
+  # string IDs the user checked.
+  def submitted_project_ids
+    params.dig(:observation, :project_ids)&.compact_blank
   end
 
   # The form may be in a state where it has an existing MO Location name in the
@@ -116,8 +116,8 @@ module ObservationsController::Validators
   end
 
   def validate_projects
-    proj_params = project_params
-    return true if proj_params.blank?
+    ids = submitted_project_ids
+    return true if ids.blank?
 
     conflicting_projects = checked_project_conflicts - @observation.projects
     @error_checked_projects = conflicting_projects.reject do |proj|
@@ -129,7 +129,7 @@ module ObservationsController::Validators
       return false
     end
 
-    return true if proj_params[:ignore_proj_conflicts] == "1"
+    return true if params.dig(:observation, :ignore_proj_conflicts) == "1"
 
     @suspect_checked_projects = conflicting_projects - @error_checked_projects
     if @suspect_checked_projects.any?
@@ -142,16 +142,10 @@ module ObservationsController::Validators
   end
 
   def checked_project_conflicts
-    proj_params = project_params
-    return [] unless proj_params
+    ids = submitted_project_ids
+    return [] if ids.blank?
 
-    checked_proj_check_boxes = proj_params.select { |_, v| v == "1" }.keys
-    return [] if checked_proj_check_boxes.none?
-
-    checked_proj_ids =
-      checked_proj_check_boxes.map { |str| str.gsub("id_", "") }
-    # Get the AR records so that we can call Project methods on them
-    Project.where(id: checked_proj_ids).includes(:location).select do |proj|
+    Project.where(id: ids).includes(:location).select do |proj|
       proj.violates_constraints?(@observation)
     end
   end

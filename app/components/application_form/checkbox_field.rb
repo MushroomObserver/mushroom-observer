@@ -104,14 +104,22 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Render a single array-mode checkbox (name="…[]"). Intended for use
     # inside a block passed to `checkbox_field`, when the caller wants
     # one cell of a larger checkbox matrix.
-    def option(value)
+    #
+    # `**overrides` lets the caller override any of the input
+    # attributes per option — most commonly `checked:` (when the
+    # caller has external state for checkedness that doesn't match
+    # `model.<assoc>_ids`, e.g. failure-reload showing the user's
+    # submitted choices without writing them to the DB) and
+    # `disabled:` (per-row permission gates).
+    def option(value, **overrides)
       input(
         type: :checkbox,
         id: "#{field.dom.id}_#{value}",
         name: "#{field.dom.name}[]",
         value: value.to_s,
         checked: checked_in_array?(value),
-        **@attributes.except(:id, :name, :value, :type, :checked)
+        **@attributes.except(:id, :name, :value, :type, :checked),
+        **overrides
       )
       return unless block_given?
 

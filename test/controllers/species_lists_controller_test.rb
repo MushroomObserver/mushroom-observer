@@ -47,7 +47,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def assert_project_checks(project_states)
     project_states.each do |id, state|
-      assert_checkbox_state("project_id_#{id}", state)
+      assert_checkbox_state("species_list_project_ids_#{id}", state)
     end
   end
 
@@ -559,11 +559,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
         title: "List with Project",
         "when(1i)" => "2025",
         "when(2i)" => "3",
-        "when(3i)" => "14"
-      },
-      project: rolf.projects_member.to_h do |obj|
-                 ["id_#{obj.id}", "1"]
-               end
+        "when(3i)" => "14",
+        project_ids: rolf.projects_member.map { |p| p.id.to_s }
+      }
     }
     login("rolf")
     post(:create, params: params)
@@ -598,11 +596,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:reused_list)
     count = spl.projects.count
     login(spl.user.login)
+    # `project_ids: [""]` matches what the form submits when every
+    # checkbox is unchecked — the sentinel hidden input ensures the
+    # key is present. The controller's `compact_blank` strips the
+    # empty value; the iterator then removes every member project.
     params = { id: spl.id,
-               project: spl.projects.to_h do |obj|
-                          ["id_#{obj.id}", "0"]
-                        end,
-               species_list: { title: spl.title } }
+               species_list: { title: spl.title, project_ids: [""] } }
     put(:update, params:)
     spl.reload
     assert(spl.projects.count < count)
@@ -630,7 +629,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:new)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :unchecked)
     post(:create,
-         params: { project: { "id_#{@proj1.id}" => "1" } })
+         params: { species_list: { project_ids: [@proj1.id.to_s] } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
@@ -641,7 +640,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:new)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
     post(:create,
-         params: { project: { "id_#{@proj1.id}" => "1" } })
+         params: { species_list: { project_ids: [@proj1.id.to_s] } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
     # should have different default if recently create list attached to project
@@ -670,10 +669,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
       :update,
       params: {
         id: @spl2.id,
-        species_list: { title: "" }, # causes failure
-        project: {
-          "id_#{@proj1.id}" => "1",
-          "id_#{@proj2.id}" => "0"
+        species_list: {
+          title: "", # causes failure
+          project_ids: [@proj1.id.to_s]
         }
       }
     )
