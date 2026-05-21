@@ -66,7 +66,7 @@ class Components::ImageEditForm < Components::ApplicationForm
   end
 
   def render_project_checkboxes
-    div(class: "form-group form-inline") do
+    div(class: "form-group") do
       p(class: "font-weight-bold") { plain("#{:PROJECTS.t}:") }
       div(class: "help-note mr-3") do
         trusted_html(:form_images_project_help.t)
@@ -99,7 +99,7 @@ class Components::ImageEditForm < Components::ApplicationForm
       submit(:SAVE_EDITS.l)
       link_to(:cancel_and_show.t(type: :image),
               image_path(model.id),
-              class: "btn btn-default")
+              class: "btn btn-default ml-2")
     end
   end
 
