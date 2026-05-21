@@ -76,6 +76,10 @@ module Observations
              "Test needs Project fixture that has an Image")
       image = project.images.first
       user = image.user
+      # `project_ids: [""]` is the sentinel-only submission — the
+      # form's hidden sentinel ensures the key is present in params
+      # even when every checkbox is unchecked. The controller's
+      # `compact_blank` strips the empty, leaving `[]` → remove all.
       params = {
         "id" => image.id,
         "image" => {
@@ -85,9 +89,9 @@ module Observations
           "copyright_holder" => image.copyright_holder,
           "notes" => image.notes,
           "original_name" => image.original_name,
-          "license" => image.license
-        },
-        project: project
+          "license" => image.license,
+          project_ids: [""]
+        }
       }
       login(user.login)
 
@@ -173,7 +177,7 @@ module Observations
 
     def assert_project_checks(project_states)
       project_states.each do |id, state|
-        assert_checkbox_state("project_id_#{id}", state)
+        assert_checkbox_state("image_project_ids_#{id}", state)
       end
     end
 

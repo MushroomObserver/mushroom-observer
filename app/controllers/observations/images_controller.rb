@@ -52,13 +52,14 @@ module Observations
       License.available_names_and_ids(@image.license)
     end
 
+    # Checkedness is read off `obs_or_img.project_ids` directly by
+    # the Phlex form (Rails' has_many-through reader returning the
+    # in-memory id array) — no separate `@project_checks` needed.
     def init_project_vars_for_add_or_edit(obs_or_img)
       @projects = @user.projects_member(order: :title,
                                         include: :user_group)
-      @project_checks = {}
       obs_or_img.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
-        @project_checks[proj.id] = true
       end
     end
 
@@ -82,9 +83,16 @@ module Observations
       else
         @image.log_update
         flash_notice(:runtime_image_edit_success.t(id: @image.id))
-        update_related_projects(@image, params[:project])
+        update_related_projects(@image, submitted_project_ids)
         true
       end
+    end
+
+    # Submitted project_ids array from the new `image[project_ids][]`
+    # wire shape. `compact_blank` strips the form's sentinel hidden
+    # input (value=""), leaving just the integer-string IDs.
+    def submitted_project_ids
+      params.dig(:image, :project_ids)&.compact_blank
     end
 
     def image_data_changed?
@@ -96,15 +104,19 @@ module Observations
     end
 
     def update_projects_and_flash_notice!
-      if update_related_projects(@image, params[:project])
+      if update_related_projects(@image, submitted_project_ids)
         flash_notice(:runtime_image_edit_success.t(id: @image.id))
       else
         flash_notice(:runtime_no_changes.t)
       end
     end
 
-    def update_related_projects(img, checks)
-      return false unless checks
+    # `submitted_ids` is the `image[project_ids][]` array from the
+    # form. Toggles each project that's *eligible* (user's member
+    # projects plus any project attached to an obs containing this
+    # image — see the long comment below for the reuse-flow nuance).
+    def update_related_projects(img, submitted_ids)
+      return false unless submitted_ids
 
       # Here's the problem: User can add image to obs he doesn't own
       # if it is attached to one of his projects.
@@ -113,8 +125,8 @@ module Observations
       # We want the image to be attached even to these projects by default,
       # however we want to give the user the ability NOT to attach his images
       # to these projects which he doesn't belong to.
-      # This means we need to consider checkboxes not only of  user's projects,
-      # but also all  projects of the observation, as well.  Once it is detached
+      # This means we need to consider checkboxes not only of user's projects,
+      # but also all projects of the observation, as well. Once it is detached
       # from one of these projects the user isn't on,
       # the checkbox will no longer show
       # up on the edit_image form, preventing a user from attaching images to
@@ -128,15 +140,16 @@ module Observations
         end
       end
 
-      attach_images_to_projects_and_flash_notices(img, projects, checks)
+      attach_images_to_projects_and_flash_notices(img, projects, submitted_ids)
     end
 
     # Returns true if any changes made, false if none
-    def attach_images_to_projects_and_flash_notices(img, projects, checks)
+    def attach_images_to_projects_and_flash_notices(img, projects, ids)
+      desired = ids.map(&:to_i)
       any_changes = false
       projects.each do |project|
         before = img.projects.include?(project)
-        after = checks["id_#{project.id}"] == "1"
+        after = desired.include?(project.id)
         next if before == after
 
         if after
@@ -153,19 +166,20 @@ module Observations
       any_changes
     end
 
+    # Failure-reload: capture the user's submitted project_ids for the
+    # form. We DON'T set `obs_or_img.project_ids = …` — that would
+    # instantly commit join-table changes on a persisted record
+    # (Rails has_many-through `*_ids=` is INSERT/DELETE immediately),
+    # even though the save itself failed.
     def init_project_vars_for_reload(obs_or_img)
       # (Note: In practice, this is never called for add_image,
       # so obs_or_img is always an image.)
       @projects = @user.projects_member(order: :title,
                                         include: :user_group)
-      @project_checks = {}
       obs_or_img.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
       end
-      @projects.each do |proj|
-        @project_checks[proj.id] =
-          params.dig(:project, "id_#{proj.id}") == "1"
-      end
+      @submitted_project_ids = params.dig(:image, :project_ids)
     end
 
     public
