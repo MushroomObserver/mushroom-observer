@@ -93,40 +93,46 @@ class SpeciesListFormTest < ComponentTestCase
   def test_renders_project_checkboxes_when_projects_provided
     proj1 = projects(:eol_project)
     proj2 = projects(:bolete_project)
-    html = render_form(
-      species_list: SpeciesList.new,
-      projects: [proj1, proj2],
-      project_checks: { proj1.id => true, proj2.id => false }
-    )
+    spl = SpeciesList.new
+    spl.project_ids = [proj1.id]
+    html = render_form(species_list: spl, projects: [proj1, proj2])
 
-    # Each project gets `name="project[id_<id>]"` (NOT under
-    # species_list namespace — the controller reads `params[:project]`).
-    # Checked state follows @project_checks; unchecked rows must NOT
-    # render the `checked` attribute (the `checked_value: "1"` opt in
-    # SpeciesListForm forces MO's CheckboxField string-compare so "0"
-    # truthiness doesn't trigger a spurious checked).
+    # Each project gets `name="species_list[project_ids][]"` (array
+    # shape) with `value="<id>"`. Checkedness follows
+    # `model.project_ids`; unchecked rows must NOT render the
+    # `checked` attribute.
     assert_html(html,
-                "input[type='checkbox'][name='project[id_#{proj1.id}]']" \
+                "input[type='checkbox']" \
+                "[name='species_list[project_ids][]'][value='#{proj1.id}']" \
                 "[checked]",
                 count: 1)
     assert_html(html,
-                "input[type='checkbox'][name='project[id_#{proj2.id}]']",
+                "input[type='checkbox']" \
+                "[name='species_list[project_ids][]'][value='#{proj2.id}']",
                 count: 1)
-    assert_no_html(html,
-                   "input[type='checkbox'][name='project[id_#{proj2.id}]']" \
-                   "[checked]")
-    # Hidden sidecars carry the "0" so params[:project] is populated
-    # for both checked and unchecked rows.
-    assert_html(html,
-                "input[type='hidden'][name='project[id_#{proj1.id}]']" \
-                "[value='0']")
+    assert_no_html(
+      html,
+      "input[type='checkbox']" \
+      "[name='species_list[project_ids][]'][value='#{proj2.id}'][checked]"
+    )
+    # One sentinel hidden input (value="") ensures the key is always
+    # present in params even when every checkbox is unchecked — Rack
+    # drops empty arrays otherwise. No per-project hidden sidecars
+    # (disabled checkboxes also don't submit; non-member projects the
+    # SL belongs to are preserved by the controller's iterator
+    # over @user.projects_member).
+    assert_html(
+      html,
+      "input[type='hidden'][name='species_list[project_ids][]'][value='']",
+      count: 1
+    )
   end
 
   def test_project_section_omitted_when_no_projects
     html = render_form(species_list: SpeciesList.new, projects: [])
 
     # No "Projects:" label, no project checkboxes, no help-note.
-    assert_no_html(html, "input[name^='project[id_']")
+    assert_no_html(html, "input[name='species_list[project_ids][]']")
   end
 
   def test_project_checkbox_disabled_for_non_owner_non_member
@@ -141,17 +147,21 @@ class SpeciesListFormTest < ComponentTestCase
     html = render_form(
       species_list: rolf_list,
       user: users(:dick),
-      projects: [eol_proj, bolete_proj],
-      project_checks: {}
+      projects: [eol_proj, bolete_proj]
     )
 
-    assert_html(html,
-                "input[type='checkbox'][name='project[id_#{eol_proj.id}]']" \
-                "[disabled]")
+    assert_html(
+      html,
+      "input[type='checkbox']" \
+      "[name='species_list[project_ids][]'][value='#{eol_proj.id}']" \
+      "[disabled]"
+    )
     bolete_id = bolete_proj.id
     assert_no_html(
       html,
-      "input[type='checkbox'][name='project[id_#{bolete_id}]'][disabled]"
+      "input[type='checkbox']" \
+      "[name='species_list[project_ids][]'][value='#{bolete_id}']" \
+      "[disabled]"
     )
   end
 
@@ -163,14 +173,48 @@ class SpeciesListFormTest < ComponentTestCase
     html = render_form(
       species_list: rolf_list,
       user: users(:rolf),
-      projects: [not_a_member_proj],
-      project_checks: {}
+      projects: [not_a_member_proj]
     )
 
     assert_no_html(
       html,
-      "input[type='checkbox'][name='project[id_#{not_a_member_proj.id}]']" \
+      "input[type='checkbox']" \
+      "[name='species_list[project_ids][]'][value='#{not_a_member_proj.id}']" \
       "[disabled]"
+    )
+  end
+
+  # On a failure-reload the controller passes the user's just-submitted
+  # `project_ids` as `submitted_project_ids:` (so we don't have to
+  # write them to the DB just to render them back — Rails'
+  # has_many-through `*_ids=` setter is instant on a persisted record).
+  # The form uses that array for checkedness in preference to
+  # `model.project_ids`.
+  def test_submitted_project_ids_overrides_model_for_checkedness
+    proj1 = projects(:eol_project)
+    proj2 = projects(:bolete_project)
+    spl = species_lists(:first_species_list)
+    # Force model state: spl belongs to proj1 only.
+    spl.projects = [proj1]
+    # User just submitted proj2 only (different from model's state).
+    html = render_form(
+      species_list: spl,
+      projects: [proj1, proj2],
+      submitted_project_ids: [proj2.id.to_s]
+    )
+
+    # proj2 should be checked (matches submitted, not model).
+    assert_html(
+      html,
+      "input[type='checkbox']" \
+      "[name='species_list[project_ids][]'][value='#{proj2.id}'][checked]",
+      count: 1
+    )
+    # proj1 should NOT be checked (matches submitted, not model).
+    assert_no_html(
+      html,
+      "input[type='checkbox']" \
+      "[name='species_list[project_ids][]'][value='#{proj1.id}'][checked]"
     )
   end
 
@@ -189,7 +233,7 @@ class SpeciesListFormTest < ComponentTestCase
 
   def render_form(species_list:, **)
     defaults = {
-      projects: [], project_checks: {}, dubious_where_reasons: [],
+      projects: [], dubious_where_reasons: [],
       user: @user, button: :CREATE, clone_id: nil
     }
     render(Components::SpeciesListForm.new(species_list,

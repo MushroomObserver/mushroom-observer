@@ -7,8 +7,8 @@ container_class(:text)
 <%= render(Components::SpeciesListForm.new(
              @species_list,
              projects: @projects,
-             project_checks: @project_checks,
              dubious_where_reasons: @dubious_where_reasons,
+             submitted_project_ids: @submitted_project_ids,
              user: @user,
              button: :CREATE,
              clone_id: @clone_id

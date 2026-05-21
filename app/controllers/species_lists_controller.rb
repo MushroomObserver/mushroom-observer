@@ -272,7 +272,7 @@ class SpeciesListsController < ApplicationController
 
   def update_redirect_and_flash_notices(create_or_update)
     log_and_flash_notices(create_or_update)
-    update_projects(@species_list, params[:project])
+    update_projects(@species_list, params.dig(:species_list, :project_ids))
 
     if @species_list.location_id.nil?
       redirect_to(new_location_path(where: @place_name,
@@ -294,14 +294,20 @@ class SpeciesListsController < ApplicationController
     end
   end
 
-  def update_projects(spl, checks)
-    return unless checks
+  # `submitted_ids` is the `species_list[project_ids][]` array from
+  # the form: the projects the user wants the SL attached to. Only
+  # projects in `@user.projects_member` are toggled — non-member
+  # projects the SL belongs to are preserved by omission (disabled
+  # checkboxes don't submit, and the iteration excludes them anyway).
+  def update_projects(spl, submitted_ids)
+    return unless submitted_ids
 
+    desired = submitted_ids.compact_blank.map(&:to_i)
     any_changes = false
     Project.where(id: @user.projects_member.map(&:id)).
       includes(:species_lists).find_each do |project|
       before = spl.projects.include?(project)
-      after = checks["id_#{project.id}"] == "1"
+      after = desired.include?(project.id)
       next if before == after
 
       change_project_species_lists(
