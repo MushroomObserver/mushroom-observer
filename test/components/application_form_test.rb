@@ -637,6 +637,40 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "input[data-turbo-submits-with='Saving...']")
   end
 
+  # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
+  # button shows "Updating" in-flight, anything else shows "Submitting".
+  def test_submit_default_submits_with_for_update_button
+    form = render_form { submit(:UPDATE.l) }
+
+    assert_html(form, "input[data-turbo-submits-with='#{:UPDATING.l}']")
+  end
+
+  def test_submit_default_submits_with_for_create_button
+    form = render_form { submit(:CREATE.l) }
+
+    assert_html(form, "input[data-turbo-submits-with='#{:SUBMITTING.l}']")
+  end
+
+  # `between_class` (FieldWithHelp) mirrors ERB:
+  # inline rows pick "mr-3"; block rows pick "form-between".
+  def test_between_class_block_field_with_help
+    form = render_form do
+      text_field(:name, label: "Name:", help: "Help text")
+    end
+
+    assert_html(form, "span.form-between")
+    assert_no_html(form, "span.form-between.mr-3")
+  end
+
+  def test_between_class_inline_field_with_help
+    form = render_form do
+      text_field(:name, inline: true, label: "Name:", help: "Help text")
+    end
+
+    assert_html(form, "span.mr-3")
+    assert_no_html(form, "span.form-between")
+  end
+
   def test_submit_with_custom_data_attributes
     form = render_form do
       submit("Save", data: { confirm: "Are you sure?" })

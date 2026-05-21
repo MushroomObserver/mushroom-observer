@@ -371,7 +371,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
                disable_with: nil, btn_class: "btn-default", as: :input,
                **options)
-      submits_with ||= :SUBMITTING.l
+      submits_with ||= default_submits_with(value)
       disable_with ||= value
       classes = ["btn", btn_class]
       classes << "center-block my-3" if center
@@ -389,6 +389,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     private
+
+    # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
+    # button shows "Updating" while in-flight; anything else shows
+    # "Submitting".
+    def default_submits_with(value)
+      value == :UPDATE.l ? :UPDATING.l : :SUBMITTING.l
+    end
 
     # Convert help: option to with_help slot for help icon rendering
     def set_help_slot(field_component, help_content)
