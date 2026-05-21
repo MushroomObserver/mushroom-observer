@@ -83,10 +83,6 @@ module ObservationsController::Validators
     params.dig(:observation, :project_ids)&.compact_blank
   end
 
-  def submitted_list_ids
-    params.dig(:observation, :species_list_ids)&.compact_blank
-  end
-
   # The form may be in a state where it has an existing MO Location name in the
   # `place_name` field, but not the corresponding MO location_id. It could be
   # because of user trying to create a duplicate, or because the user had a

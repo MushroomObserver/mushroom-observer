@@ -121,14 +121,10 @@ module ObservationsController::New
 
     @projects.append(project) unless @projects.include?(project)
     current_ids = @observation.project_ids
-    new_ids = @projects.filter_map do |proj|
-      next proj.id if proj == project
-      next nil unless current_ids.include?(proj.id)
-      next nil unless proj.field_slip_prefix.nil?
-
-      proj.id
-    end
-    @observation.project_ids = new_ids
+    @observation.project_ids = @projects.select do |proj|
+      proj == project ||
+        (current_ids.include?(proj.id) && proj.field_slip_prefix.nil?)
+    end.map(&:id)
   end
 
   def check_location
