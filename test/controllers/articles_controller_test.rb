@@ -63,7 +63,10 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
     get(:show, params: { id: article.id })
-    assert_select("a", text: "New Article")
+    # nav_create renders the new-article button with visible "Add" and
+    # `aria-label="New Article"` (#3930). Assert against the aria-label
+    # since that's the stable accessibility contract.
+    assert_select("a[href='/articles/new'][aria-label='New Article']")
     assert_select("a", text: :edit_object.t(type: :article))
     assert_select(".destroy_article_link_#{article.id}", true,
                   "Page is missing Destroy button")

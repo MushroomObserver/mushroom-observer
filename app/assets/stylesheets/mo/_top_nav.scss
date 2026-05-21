@@ -152,16 +152,33 @@
   }
 }
 
-// Very small - get rid of button borders in top nav
+// Very small - tighten top-nav button padding, and drop the
+// border/background on incidental top-nav buttons (sort, scan-QR, etc.)
+// so they read as bare icons on phones. The `nav_create` button
+// (`btn-success`, see #3930) keeps its solid green styling on
+// phones too — losing it here would re-create the unclear-CTA
+// problem that motivated the redesign.
 @media screen and (max-width: $screen-xs-min) {
   #top_nav {
     .top_nav_button {
-      border-color: transparent;
-      background-color: transparent;
       padding-left: 0.5rem;
       padding-right: 0.5rem;
     }
+    .top_nav_button:not(.btn-success) {
+      border-color: transparent;
+      background-color: transparent;
+    }
   }
+}
+
+// `.glyphicon { top: 3px }` (mo/_icons.scss) is calibrated for
+// glyphs sitting inline with body text, but it leaves the `+` in
+// the green nav_create button (#3930) visibly below center —
+// noticeable both in the icon-only mobile view and alongside the
+// "Add" text on tablet/desktop. Pin the `+` to the button's
+// natural baseline here.
+#top_nav .btn-success.top_nav_button .glyphicon {
+  top: 1px;
 }
 
 #index_bar {
