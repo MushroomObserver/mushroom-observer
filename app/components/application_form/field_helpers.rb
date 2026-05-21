@@ -217,12 +217,19 @@ class Components::ApplicationForm < Superform::Rails::Form
       # `hidden_field_tag` (browsers otherwise repopulate hidden fields
       # on back-button). Caller can override with `autocomplete:`.
       options = { autocomplete: "off" }.merge(options)
-      if field_name.is_a?(String)
-        proxy = FieldProxy.new(nil, field_name, options[:value])
-        render(HiddenField.new(proxy, **options))
-      else
-        render(field(field_name).text(**options, type: "hidden"))
-      end
+      # Both paths render through `HiddenField` — the dedicated
+      # hidden-input component. `HiddenField` only needs `.dom.id`,
+      # `.dom.name`, `.value` on its `field` argument; Superform's
+      # `Field` and our `FieldProxy` both provide them. So the
+      # Symbol path can pass the Superform field directly — no
+      # FieldProxy rebuild, value auto-reads from model / FormObject
+      # via the field's own `.value`.
+      f = if field_name.is_a?(String)
+            FieldProxy.new(nil, field_name, options[:value])
+          else
+            field(field_name)
+          end
+      render(HiddenField.new(f, **options))
     end
 
     # Number field with label and Bootstrap form-group wrapper
@@ -364,7 +371,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
                disable_with: nil, btn_class: "btn-default", as: :input,
                **options)
-      submits_with ||= :SUBMITTING.l
+      submits_with ||= default_submits_with(value)
       disable_with ||= value
       classes = ["btn", btn_class]
       classes << "center-block my-3" if center
@@ -382,6 +389,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     private
+
+    # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
+    # button shows "Updating" while in-flight; anything else shows
+    # "Submitting".
+    def default_submits_with(value)
+      value == :UPDATE.l ? :UPDATING.l : :SUBMITTING.l
+    end
 
     # Convert help: option to with_help slot for help icon rendering
     def set_help_slot(field_component, help_content)

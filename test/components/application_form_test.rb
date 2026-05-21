@@ -302,6 +302,82 @@ class ApplicationFormTest < ComponentTestCase
     assert_not_includes(form, "form-group")
   end
 
+  # Regression: hidden inputs used to emit `class="form-control"` —
+  # harmless visually (hidden inputs don't render) but wrong markup,
+  # and inconsistent between Symbol and String paths (Symbol detoured
+  # through TextField; String through HiddenField). Both paths now
+  # route through `HiddenField`, the dedicated hidden-input component.
+  # The Symbol path passes Superform's `field(:x)` directly — same
+  # `.dom.id`/`.dom.name`/`.value` interface as `FieldProxy`.
+  def test_hidden_field_symbol_key_does_not_emit_form_control
+    form = render_form do
+      hidden_field(:secret, value: "x")
+    end
+    doc = Nokogiri::HTML(form)
+    input = doc.at_css("input[type='hidden'][name*='secret']")
+    assert(input, "Hidden input must render")
+    assert_not_includes(input["class"] || "", "form-control",
+                        "Symbol-keyed hidden_field must not emit form-control")
+  end
+
+  def test_hidden_field_string_key_does_not_emit_form_control
+    form = render_form do
+      hidden_field("approved_where", value: "x")
+    end
+    doc = Nokogiri::HTML(form)
+    input = doc.at_css("input[type='hidden'][name='approved_where']")
+    assert(input, "Hidden input must render")
+    assert_not_includes(input["class"] || "", "form-control",
+                        "String-keyed hidden_field must not emit form-control")
+  end
+
+  # Symbol-keyed `hidden_field` keeps Superform's namespaced name
+  # (e.g. `<model_name>[<field>]`) — the whole point of going through
+  # `field(...)` rather than the raw String path. Locks that in.
+  def test_hidden_field_symbol_key_uses_superform_namespace
+    form = render_form do
+      hidden_field(:secret, value: "x")
+    end
+    # The render_form helper builds an anonymous form whose model
+    # defaults to a Collection Number; the form's namespace is
+    # "collection_number". The hidden field should be namespaced
+    # under it.
+    assert_match(/name="collection_number\[secret\]"/, form,
+                 "Symbol-keyed hidden_field must namespace under the model")
+  end
+
+  # Most callers in the codebase rely on the Symbol path auto-reading
+  # the value from the form's model/FormObject (e.g.
+  # `description_form.rb hidden_field(:project_id)` reads
+  # `form.model.project_id`). Passing Superform's `field(:x)` directly
+  # to HiddenField preserves that — `HiddenField` reads `.value` off
+  # the field, and Superform's field knows the model's value.
+  def test_hidden_field_symbol_key_auto_reads_value_from_model
+    # `@collection_number.name` == "Rolf Singer" per the fixture.
+    form = render_form do
+      hidden_field(:name) # no explicit value:
+    end
+    doc = Nokogiri::HTML(form)
+    input = doc.at_css("input[type='hidden'][name='collection_number[name]']")
+    assert(input, "Hidden input must render")
+    assert_equal("Rolf Singer", input["value"],
+                 "Symbol-keyed hidden_field with no value: must auto-read " \
+                 "from the form's model/FormObject")
+  end
+
+  # Caller's explicit `value:` always wins, even when the model has
+  # a value for the attribute. (HiddenField's `@attributes.fetch(:value)`
+  # uses the override before falling back to `@field.value`.)
+  def test_hidden_field_symbol_key_explicit_value_overrides_model
+    form = render_form do
+      hidden_field(:name, value: "OVERRIDE")
+    end
+    doc = Nokogiri::HTML(form)
+    input = doc.at_css("input[type='hidden'][name='collection_number[name]']")
+    assert_equal("OVERRIDE", input["value"],
+                 "Explicit value: must override the model's value")
+  end
+
   # Number field tests
   def test_number_field_renders_with_basic_options
     form = render_form do
@@ -559,6 +635,40 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     assert_html(form, "input[data-turbo-submits-with='Saving...']")
+  end
+
+  # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
+  # button shows "Updating" in-flight, anything else shows "Submitting".
+  def test_submit_default_submits_with_for_update_button
+    form = render_form { submit(:UPDATE.l) }
+
+    assert_html(form, "input[data-turbo-submits-with='#{:UPDATING.l}']")
+  end
+
+  def test_submit_default_submits_with_for_create_button
+    form = render_form { submit(:CREATE.l) }
+
+    assert_html(form, "input[data-turbo-submits-with='#{:SUBMITTING.l}']")
+  end
+
+  # `between_class` (FieldWithHelp) mirrors ERB:
+  # inline rows pick "mr-3"; block rows pick "form-between".
+  def test_between_class_block_field_with_help
+    form = render_form do
+      text_field(:name, label: "Name:", help: "Help text")
+    end
+
+    assert_html(form, "span.form-between")
+    assert_no_html(form, "span.form-between.mr-3")
+  end
+
+  def test_between_class_inline_field_with_help
+    form = render_form do
+      text_field(:name, inline: true, label: "Name:", help: "Help text")
+    end
+
+    assert_html(form, "span.mr-3")
+    assert_no_html(form, "span.form-between")
   end
 
   def test_submit_with_custom_data_attributes
