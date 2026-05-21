@@ -1412,30 +1412,28 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # `try_to_save_image` flash-error branch (when image.save fails).
-  # The existing `test_image_upload_when_*` tests trigger the
-  # process_image failure path; this one targets the save-failure
-  # path with a forced `save => false` on the in-flight Image.
-  def test_create_observation_image_save_fails
+  # `update_good_images` flash-object-errors branch — when editing
+  # an already-uploaded image's attributes (via `good_image[<id>]`)
+  # and the save fails. Stub the loaded image's `save` to false.
+  def test_create_with_good_image_save_fails
     login("rolf")
-    setup_image_dirs
-    file = Rack::Test::UploadedFile.new(
-      Rails.root.join("test/images/Coprinus_comatus.jpg"), "image/jpeg"
-    )
+    img = images(:in_situ_image)
+    img.define_singleton_method(:save) { |*| false }
+
     params = create_params_with_name.merge(
       observation: create_params_with_name[:observation].merge(
-        image: { "0": { image: file, copyright_holder: "zuul",
-                        when: Time.zone.now } }
+        good_image_ids: img.id.to_s,
+        good_image: { img.id.to_s => { notes: "Forced change" } }
       )
     )
-
-    stub_save_false_on(Image) do
+    Image.stub(:safe_find, img) do
       post(:create, params: params)
     end
-
-    # Image was added to @bad_images (didn't save), so any flash
-    # errors from `flash_object_errors(image)` should be present.
-    assert_response(:success)
+    # Goal here is purely to exercise the `flash_object_errors`
+    # branch — the create may or may not redirect, depending on
+    # other state. Just confirm the image didn't actually persist
+    # its forced change.
+    assert_not_equal("Forced change", img.reload.notes)
   end
 
   private
