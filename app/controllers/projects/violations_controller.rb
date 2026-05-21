@@ -20,6 +20,37 @@ module Projects
       build_index_with_query
     end
 
+    # GET-only turbo-stream endpoint that renders the Add-Target-Location
+    # modal for one obs (#4304). Called by the modal-toggle controller
+    # in always-fresh mode so each open reflects current DB state —
+    # admins frequently create missing suffix Locations in a separate
+    # tab and need the modal's radios to pick those up without
+    # reloading the violations page.
+    #
+    # Uses a narrow `find_by` (Copilot review on PR #4307) rather than
+    # the index action's `violations_includes` scope — this endpoint
+    # renders one obs's suffix radios, so eager-loading the whole
+    # observations list per click would be wasteful on large projects.
+    # Any missing-id / non-admin case returns :not_found rather than
+    # redirecting; the trigger is a turbo-stream fetch, so the
+    # redirect-to-index fallback from `find_project!` doesn't fit.
+    def target_location_modal
+      project = Project.find_by(id: params[:project_id])
+      obs = Observation.safe_find(params[:obs_id])
+      return head(:not_found) unless project && obs && project.is_admin?(@user)
+
+      respond_to do |format|
+        format.turbo_stream do
+          render(
+            Views::Controllers::Projects::Violations::TargetLocationModal.new(
+              project: project, obs: obs, user: @user
+            ),
+            layout: false
+          )
+        end
+      end
+    end
+
     def controller_model_name
       "Project"
     end

@@ -43,6 +43,16 @@ class Components::TargetLocationForm < Components::ApplicationForm
     suffixes_for(obs).any?
   end
 
+  # Stable id for the Bootstrap modal that hosts this form. Lives on
+  # the form (not the modal wrapper) because it's tied to the form's
+  # contract — `Components::ProjectViolationsForm` uses it to compute
+  # the modal-toggle trigger's target id without instantiating the
+  # modal, and the on-demand turbo-stream endpoint uses it to render
+  # a modal with a predictable id. Per Nimmo's review on PR #4307.
+  def self.modal_id_for(obs)
+    "location_target_modal_#{obs.id}"
+  end
+
   # Suffixes of obs's location/where, excluding any bare-country
   # suffix (Q3 of #4136). Public class method so callers can call
   # `applicable?` without instantiating the form.
@@ -149,13 +159,35 @@ class Components::TargetLocationForm < Components::ApplicationForm
   end
 
   def suffix_create_link(suffix)
-    # HTML-safe string built via Rails `tag.a` (returns SafeBuffer)
-    # so `RadioField` can emit it via `trusted_html`. Leading space
-    # gives a small gap between the disabled label text and the link.
-    " ".html_safe + helpers.tag.a(
+    # `view_context.tag.a(...)` returns a SafeBuffer string without
+    # writing to the Phlex output buffer — exactly what RadioField's
+    # `:append` per-choice option needs, so the link renders inside
+    # the disabled row's `.radio` div (per-row append) and not eagerly
+    # at the call site of `suffix_options` above the radio group.
+    #
+    # Phlex's own output helpers (`link_to`, etc.) write to the buffer
+    # at call time, which is wrong shape here. The previous
+    # implementation used `helpers.tag.a` for this property; switched
+    # to `view_context.tag.a` to drop the deprecated `helpers`
+    # accessor while preserving the return-a-string behavior.
+    #
+    # `where:` (not `display_name:`) is the param
+    # `LocationsController#new` reads to pre-populate the form's
+    # display-name field — the `display_name` accessor only exists on
+    # nested form params (#4304).
+    #
+    # We dismiss the modal via `data-action="click->modal#hide"`
+    # instead of Bootstrap's `data-dismiss="modal"` because
+    # Bootstrap 3's dismiss handler chain ends up preventing the
+    # link's default `target="_blank"` action, suppressing the new
+    # tab. `modal#hide` calls `$(modal).modal('hide')` without
+    # passing the event, so no preventDefault — the link's new tab
+    # opens *and* the modal closes.
+    " ".html_safe + view_context.tag.a(
       :form_violations_modal_target_location_create.l,
-      href: new_location_path(display_name: suffix),
+      href: new_location_path(where: suffix),
       target: "_blank", rel: "noopener",
+      data: { action: "click->modal#hide" },
       class: "btn btn-default btn-xs"
     )
   end
