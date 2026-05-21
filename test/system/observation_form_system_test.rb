@@ -507,7 +507,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(projects, align: :top)
 
     # Inherited project constraints maybe messing with this observation - clear
-    all('[id^="project_id_"]', visible: :all).each do |project_checkbox|
+    all('[id^="observation_project_ids_"]', visible: :all).each do |project_checkbox|
       project_checkbox.trigger("click") if project_checkbox.checked?
     end
     naming = find("#observation_naming_specimen")
