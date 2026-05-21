@@ -132,9 +132,17 @@ module Header
     end
 
     # contents of the <title> in html <head>
+    #
+    # The doc title is plain text — the browser tab doesn't render
+    # HTML — so any markup in the source string surfaces literally
+    # ("_Russula_" or "<i>Russula</i>"). We textilize first so
+    # textile-source markers (`_x_`, `*x*`, etc.) get converted to
+    # HTML, then strip both the resulting tags AND any already-
+    # rendered HTML (e.g. an `.t.small_author` upstream). Finally
+    # decode HTML entities (`&amp;` → `&`).
     def title_tag_contents(title, action: controller.action_name)
       if title.present?
-        title.strip_html.unescape_html # removes tags and special chars
+        title.to_s.t.strip_html.unescape_html
       else
         action.tr("_", " ").titleize
       end
