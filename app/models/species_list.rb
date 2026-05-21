@@ -246,6 +246,17 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     title
   end
 
+  # Page heading + browser tab title — both plain `title`. (Can't
+  # `alias` to `title` — the AR column accessor isn't defined yet
+  # at class-load time.)
+  def page_title(_user = nil)
+    title
+  end
+
+  def document_title
+    title
+  end
+
   # Return formatted title with id appended to make unique.
   def unique_format_name
     title = self.title

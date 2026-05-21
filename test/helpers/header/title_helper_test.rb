@@ -20,40 +20,37 @@ module Header
       assert_equal("Blah Blah", title_tag_contents(title, action: action_name))
     end
 
-    # Regression for #4316 — browser tab title was showing literal
-    # textile source ("_Russula_") or escaped HTML tags
-    # ("<i>Russula</i>") because the `<title>` element renders as
-    # plain text. Fix textilizes first, then strips tags.
+    # Regression for #4316 — browser tab `<title>` was showing
+    # literal textile source ("_Russula_") or escaped HTML tags
+    # ("<i>Russula</i>"). Fixed by routing each model's
+    # `document_title` method through `document_title_for`, which
+    # returns plain text (no textile, no HTML).
 
-    def test_title_tag_contents_strips_textile_source
-      assert_equal("Russula virescens",
-                   title_tag_contents("_Russula virescens_"))
+    def test_document_title_for_observation_returns_plain_text_name
+      obs = observations(:minimal_unknown_obs)
+      # No textile markers, no HTML tags.
+      assert_equal(obs.text_name, document_title_for(obs))
+      assert_no_match(/[_*<>]/, document_title_for(obs))
     end
 
-    def test_title_tag_contents_strips_already_rendered_html
-      assert_equal("Russula virescens Pers.",
-                   title_tag_contents(
-                     "<i>Russula virescens</i> Pers.".html_safe
-                   ))
+    def test_document_title_for_species_list_returns_title
+      spl = species_lists(:first_species_list)
+      assert_equal(spl.title, document_title_for(spl))
     end
 
-    def test_title_tag_contents_passes_plain_text_through
-      assert_equal("Cape Cod Specimens",
-                   title_tag_contents("Cape Cod Specimens"))
+    def test_document_title_for_falls_back_to_type_tag
+      # An object without a `document_title` method gets
+      # AbstractModel's default — the localized type-tag label.
+      pub = publications(:one_pub)
+      assert_equal(:PUBLICATION.l, document_title_for(pub))
     end
 
-    def test_title_tag_contents_handles_mixed_markup
-      # Pre-rendered <i> on the binomial + textile-source italics on
-      # the author (the exact shape that lands in obs edit titles).
-      assert_equal(
-        "Russula virescens Pers.",
-        title_tag_contents("<i>Russula virescens</i> _Pers._".html_safe)
-      )
-    end
-
-    def test_title_tag_contents_decodes_entities
-      assert_equal("Brachen & Co.",
-                   title_tag_contents("Brachen &amp; Co."))
+    def test_show_document_title_composes_type_id_and_plain_name
+      obs = observations(:minimal_unknown_obs)
+      title = show_document_title(document_title_for(obs), obs)
+      # "OBSERVATION <id>: <text_name>" — all plain text.
+      assert_match(/\A#{:OBSERVATION.l} #{obs.id}: /, title)
+      assert_no_match(/[_*<>]/, title)
     end
   end
 end

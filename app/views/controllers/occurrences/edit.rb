@@ -20,9 +20,7 @@ module Views
 
         def view_template
           container_class(:wide)
-          view_context.add_edit_title(
-            :show_occurrence_title.t, @occurrence
-          )
+          view_context.add_edit_title(@occurrence, user: @user)
           render(Components::OccurrenceEditForm.new(
                    occurrence: @occurrence,
                    observations: @observations,

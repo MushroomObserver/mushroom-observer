@@ -103,6 +103,13 @@ class HerbariumRecord < AbstractModel
     herbarium_label
   end
 
+  # Page heading uses the textilized herbarium_label (binomial inside
+  # gets italicized). Doc title uses the plain accession string.
+  def page_title(_user = nil)
+    herbarium_label.t
+  end
+  alias document_title herbarium_label
+
   def accession_at_herbarium
     "#{accession_number} @ #{herbarium.try(&:format_name)}"
   end

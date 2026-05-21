@@ -440,6 +440,13 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # Page heading: "About <Full Name (login)>" via the i18n template.
+  # Doc title: just the unique-text-name (plain).
+  def page_title(_user = nil)
+    :show_user_about.t(user: unique_text_name)
+  end
+  alias document_title unique_text_name
+
   def format_name
     unique_text_name
   end

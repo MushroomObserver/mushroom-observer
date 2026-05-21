@@ -17,8 +17,7 @@ module Views
 
         def view_template
           container_class(:wide)
-          view_context.add_show_title(:show_occurrence_title.t,
-                                      @occurrence)
+          view_context.add_show_title(@occurrence, user: @user)
           add_edit_and_destroy_icons
           render_location_warning
           render_observation_grid

@@ -372,18 +372,24 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     display_name
   end
 
+  # Page heading + browser tab title. `display_name` is plain text
+  # for the visible heading (place name; no textile); `text_name` is
+  # the ASCII form for the doc title.
+  alias page_title display_name
+  alias document_title text_name
+
   def textile_name
     display_name
   end
 
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
-    text_name + " (#{id || "?"})"
+    string_with_id(text_name)
   end
 
   # Same as +format_name+ but with id tacked on.
   def unique_format_name
-    format_name + " (#{id || "?"})"
+    string_with_id(format_name)
   end
 
   # Info to include about each location in merge requests.

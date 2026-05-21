@@ -143,6 +143,17 @@ class Herbarium < AbstractModel
     code.blank? ? name : "#{name} (#{code})"
   end
 
+  # Page heading + browser tab title — `format_name` includes the
+  # institution code suffix when present (already plain text, no
+  # markup).
+  def page_title(_user = nil)
+    format_name
+  end
+
+  def document_title
+    format_name
+  end
+
   def unique_format_name
     "#{format_name} (#{id})"
   end

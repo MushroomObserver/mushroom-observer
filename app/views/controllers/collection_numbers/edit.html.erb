@@ -1,6 +1,6 @@
 <%
 container_class(:full)
-add_edit_title(@collection_number.format_name.t, @collection_number)
+add_edit_title(@collection_number)
 add_context_nav(collection_number_form_edit_tabs(
   back: @back, c_n: @collection_number, obj: @back_object
 ))
