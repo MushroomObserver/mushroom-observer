@@ -197,12 +197,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Same as +text_name+ but with id tacked on to make unique.
   def unique_text_name
-    "#{text_name} (#{id || "?"})"
+    string_with_id(text_name)
   end
 
   # Need these to be compatible with Comment.
   alias format_name text_name
   alias unique_format_name unique_text_name
+
+  # Page heading + browser tab title — both plain `title`. (Can't
+  # `alias` to `title` — the AR column accessor isn't defined yet
+  # at class-load time.)
+  def page_title(_user = nil)
+    title
+  end
+
+  def document_title
+    title
+  end
 
   # Is +user+ a member of this Project? Reflects actual user_group
   # membership only — Site Admins (user.admin == true) get no implicit

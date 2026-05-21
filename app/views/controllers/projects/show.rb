@@ -22,7 +22,7 @@ module Views
         end
 
         def view_template
-          add_show_title(@project.title, @project)
+          add_show_title(@project)
           add_project_banner(@project)
           container_class(:wide)
 

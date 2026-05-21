@@ -89,6 +89,14 @@ class CollectionNumber < AbstractModel
     "#{name_was} #{number_was}"
   end
 
+  # Page heading + browser tab title — `format_name` is plain text
+  # (collector "name number"). The view applies `.t` on the page-
+  # title side to keep the binomial-in-name italicized.
+  def page_title(_user = nil)
+    format_name.t
+  end
+  alias document_title format_name
+
   def can_edit?(user)
     return false unless user
 

@@ -107,6 +107,11 @@ class Sequence < AbstractModel
     locus.truncate(locus_width, separator: " ")
   end
 
+  # Page heading + browser tab title — `format_name` is already
+  # plain text (truncated locus identifier).
+  alias page_title format_name
+  alias document_title format_name
+
   # used in views and by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
     format_name + " (Sequence #{id || "?"})"
