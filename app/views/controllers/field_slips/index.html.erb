@@ -22,16 +22,14 @@ project_title = @query&.params_cache&.dig(:project)&.title || ""
       </div>
     <% end %>
   <% else %>
-    <%= form_with(
-      method: :get, url: field_slips_path, class: "form-inline"
-    ) do |form| %>
-      <%= tag.div(class: "d-flex gap-2") do %>
-        <%= autocompleter_field(form:, field: :project_name, type: :project,
-                                hidden_name: :project, inline: true,
-                                value: project_title,
-                                label: "#{:field_slip_filter_by.l}:") %>
-        <%= submit_button(form:, button: "Filter") %>
-      <% end %>
+    <%= render(Components::InlineFilterForm.new(
+                 url: field_slips_path,
+                 submit_text: "Filter")) do |form| %>
+      <%= autocompleter_field(form:, field: :project_name, type: :project,
+                              hidden_name: :project, inline: true,
+                              value: project_title, size: 60,
+                              class: "mb-0",
+                              label: "#{:field_slip_filter_by.l}:") %>
     <% end %>
   <% end %>
 <% end %>
