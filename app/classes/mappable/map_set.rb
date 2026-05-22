@@ -39,6 +39,12 @@ module Mappable
     MIXED_COLOR     = "#C69B71" # observations in different consensus bands
     LOCATION_ONLY_COLOR = "#3B79CC" # bootstrap primary; no obs to classify
 
+    # Decimal places kept when emitting marker coordinates to the JS map.
+    # At 6 places the worst-case rounding error is ~5.5 cm, well below GPS
+    # accuracy, so the cluster popup's Show All / Map All box no longer
+    # rounds an obs's own coordinate outside the box it builds (#4318).
+    COORD_PRECISION = 6
+
     attr_reader :north, :south, :east, :west, :is_point, :is_box,
                 :north_east, :south_east, :south_west, :north_west, :lat, :lng,
                 :north_south_distance, :east_west_distance, :center, :edges
@@ -161,8 +167,8 @@ module Mappable
     end
 
     def update_extents_with_point(loc)
-      lat = loc.lat.to_f.round(4)
-      lng = loc.lng.to_f.round(4)
+      lat = loc.lat.to_f.round(COORD_PRECISION)
+      lng = loc.lng.to_f.round(COORD_PRECISION)
       if @north
         @north = lat if lat > @north
         @south = lat if lat < @south
@@ -191,10 +197,10 @@ module Mappable
     end
 
     def update_extents_with_box(loc)
-      n = loc.north.to_f.round(4)
-      s = loc.south.to_f.round(4)
-      e = loc.east.to_f.round(4)
-      w = loc.west.to_f.round(4)
+      n = loc.north.to_f.round(COORD_PRECISION)
+      s = loc.south.to_f.round(COORD_PRECISION)
+      e = loc.east.to_f.round(COORD_PRECISION)
+      w = loc.west.to_f.round(COORD_PRECISION)
       if @north
         @north = n if n > @north
         @south = s if s < @south
@@ -250,11 +256,11 @@ module Mappable
       if @north && @south
         @is_point = @north ? (@north - @south) < MO.box_epsilon : false
         @is_box = @north ? (@north - @south) >= MO.box_epsilon : false
-        @lat = ((@north + @south) / 2.0).round(4)
+        @lat = ((@north + @south) / 2.0).round(COORD_PRECISION)
         @north_south_distance = @north ? @north - @south : nil
       end
       if @east && @west
-        @lng = ((@east + @west) / 2.0).round(4)
+        @lng = ((@east + @west) / 2.0).round(COORD_PRECISION)
         @lng += 180 if @west > @east
         @east_west_distance = if @west > @east
                                 @east - @west + 360

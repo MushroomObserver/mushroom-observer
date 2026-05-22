@@ -412,14 +412,31 @@ export default class extends GeocodeController {
         if (key.startsWith("q[names]")) params.delete(key)
       }
     }
-    params.append("q[in_box][north]", String(box.n))
-    params.append("q[in_box][south]", String(box.s))
-    params.append("q[in_box][east]", String(box.e))
-    params.append("q[in_box][west]", String(box.w))
+    // Buffer the box edges before building the in_box query. A cluster
+    // whose members share one point (a point-geometry location, or GPS
+    // obs at a single spot) yields a zero-area box; without a buffer the
+    // server's in_box compares an obs's full-precision coordinate against
+    // a box edge sitting exactly on its emitted (rounded) value and can
+    // exclude it, so Show All / Map All return nothing (#4318).
+    //
+    // PAD expands a point cluster's query box to roughly an 8 ft square
+    // (~53 sq ft) — about as tight as GPS data supports, and a 20x margin
+    // over the 6-decimal emission rounding error — instead of the
+    // ~12 acres a 0.001 deg buffer would cover. Keeping it small limits
+    // Show All to the obs that actually shared the spot.
+    const PAD = 0.00001
+    params.append("q[in_box][north]", String(this.clamp(box.n + PAD, -90, 90)))
+    params.append("q[in_box][south]", String(this.clamp(box.s - PAD, -90, 90)))
+    params.append("q[in_box][east]", String(this.clamp(box.e + PAD, -180, 180)))
+    params.append("q[in_box][west]", String(this.clamp(box.w - PAD, -180, 180)))
     if (opts.name) {
       params.append("q[names][lookup][]", opts.name)
     }
     return `${path}?${params.toString()}`
+  }
+
+  clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value))
   }
 
   groupClusterMarkersBySpecies(markers) {
