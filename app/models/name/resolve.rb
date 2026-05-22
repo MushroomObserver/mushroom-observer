@@ -27,6 +27,7 @@ module Name::Resolve
                            user_id: ver.user_id).none?
       UserStats.update_contribution(:add, :name_versions, user_id)
     end
+    ver.save
   end
 
   module ClassMethods

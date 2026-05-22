@@ -413,16 +413,6 @@ class Name < AbstractModel
   # destruction as a merge and orphan the log.
   self.autolog_events = [:destroyed]
 
-  # Callbacks whenever new version is created.
-  versioned_class.before_save do |ver|
-    # ver.user_id = @current_user || 0
-    # if (ver.version != 1) &&
-    #    Name::Version.where(name_id: ver.name_id,
-    #                        user_id: ver.user_id).none?
-    #   UserStats.update_contribution(:add, :name_versions)
-    # end
-  end
-
   # This is called before a name is created to let us populate things like
   # classification and lifeform from the parent (if infrageneric only).
   def inherit_stuff
