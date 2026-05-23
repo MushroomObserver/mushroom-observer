@@ -599,8 +599,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { q: q_param })
 
-    assert_response(:success, "Expected success — Integer NoMethodError means " \
-                              "symbolize_keys is missing in query_from_q_param_hash")
+    assert_response(:success,
+                    "Expected success — Integer NoMethodError means " \
+                    "symbolize_keys is missing in query_from_q_param_hash")
     assert_page_title(:OBSERVATIONS.l, "Should be on the observations index")
     assert_displayed_filters(location.display_name,
                              "Location filter should appear in #filters")
