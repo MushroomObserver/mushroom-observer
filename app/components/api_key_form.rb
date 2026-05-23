@@ -70,15 +70,13 @@ class Components::APIKeyForm < Components::ApplicationForm
     text_field(:notes, label: "#{:NOTES.t}:", wrap_class: "mt-3")
     div(class: "text-center mt-3") do
       submit(:UPDATE.l)
-      # The original ERB layout has a 5em gap between the two
-      # buttons. Preserved here.
-      span(style: "margin-left:5em")
-      # NOTE: Cancel is a real submit button (matches the pre-Phlex
-      # ERB). Clicking it submits the form and the controller does
-      # an update with current values — effectively a no-op when the
-      # user hasn't changed anything. The "cancel" label is somewhat
-      # misleading; cleanup is a follow-up.
-      submit(:CANCEL.l)
+      # Cancel is a real navigation link (was a submit button in the
+      # pre-Phlex ERB — clicking it actually submitted the form and
+      # the controller did an update with current values, the
+      # opposite of what a Cancel button should do). Now it just
+      # navigates back to the index without touching anything.
+      link_to(:CANCEL.l, account_api_keys_path,
+              class: "btn btn-default ml-3")
     end
   end
 

@@ -79,12 +79,19 @@ class APIKeyFormTest < ComponentTestCase
     assert_includes(html, key.key)
   end
 
-  def test_edit_layout_renders_update_and_cancel_submit_buttons
+  def test_edit_layout_renders_update_submit_and_cancel_link
     key = api_keys(:rolfs_api_key)
     html = render_edit_form(key)
 
+    # Update is a real submit button on the form.
     assert_html(html, "input[type='submit'][value='#{:UPDATE.l}']")
-    assert_html(html, "input[type='submit'][value='#{:CANCEL.l}']")
+    # Cancel is a navigation link back to the index — NOT a submit.
+    # (Pre-Phlex was a submit, which paradoxically meant clicking
+    # Cancel ran an update via the controller's update action.)
+    assert_html(html, "a.btn.btn-default[href='/account/api_keys']",
+                text: :CANCEL.l)
+    assert_no_html(html,
+                   "input[type='submit'][value='#{:CANCEL.l}']")
   end
 
   def test_edit_layout_renders_notes_input_under_api_key_scope
