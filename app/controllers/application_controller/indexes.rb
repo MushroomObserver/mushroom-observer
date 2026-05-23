@@ -49,17 +49,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     current_params.each do |subaction|
       next if params[subaction].blank?
 
-      # May go through #sorted_index to create the query, before #filtered_index
-      query, display_opts = send(index_param_method_or_default(subaction))
-
-      # Some actions may redirect instead of returning a query, such as pattern
-      # searches when they resolve to a single object or get no results.
-      # So if we had the param, but got a blank query, we should bail to allow
-      # the redirect without rendering a blank index.
-      return nil if query.blank?
-
-      # If we have a query, display it.
-      return filtered_index(query, display_opts)
+      return filtered_subaction_index(subaction)
     end
 
     # Otherwise, display the unfiltered index.
@@ -265,6 +255,19 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   private ##########
+
+  def filtered_subaction_index(subaction)
+    # May go through #sorted_index to create the query, before #filtered_index
+    query, display_opts = send(index_param_method_or_default(subaction))
+
+    # Some actions may redirect instead of returning a query, such as pattern
+    # searches when they resolve to a single object or get no results.
+    # In Rails 7.2.3+, redirect_to returns the status code (Integer), so
+    # performed? guards against treating that as a query.
+    return nil if performed? || query.blank?
+
+    filtered_index(query, display_opts)
+  end
 
   def show_index_setup(query, display_opts)
     store_location
