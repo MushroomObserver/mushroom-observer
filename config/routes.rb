@@ -306,7 +306,10 @@ MushroomObserver::Application.routes.draw do
                                       as: "resend_verification_email")
 
     resources :api_keys, only: [:index, :create, :edit, :update, :destroy]
-    patch("api_keys/:id/activate", to: "api_keys#activate",
+    # Accept both GET (email links — clients can only do GET) and
+    # PATCH (in-app turbo button on the index page) for activate.
+    match("api_keys/:id/activate", to: "api_keys#activate",
+                                   via: [:get, :patch],
                                    as: "activate_api_key")
   end
 
