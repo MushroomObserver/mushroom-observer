@@ -61,6 +61,52 @@ class APIKeyFormTest < ComponentTestCase
     assert_no_html(html, ".input-group .form-group")
   end
 
+  # Edit-layout tests — the persisted-model branch renders a
+  # metadata table (created, last_used, num_uses, API key value)
+  # plus the notes input plus Update / Cancel submit buttons. Used
+  # by `account/api_keys/edit.html.erb` (the no-JS fallback view).
+
+  def test_edit_layout_renders_metadata_table_for_persisted_key
+    key = api_keys(:rolfs_api_key)
+    html = render_edit_form(key)
+
+    assert_html(html, "table")
+    assert_includes(html, :CREATED.l)
+    assert_includes(html, :account_api_keys_last_used_column_label.l)
+    assert_includes(html, :account_api_keys_num_uses_column_label.l)
+    assert_includes(html, :API_KEY.l)
+    # The API key's raw key value is shown so the user can copy it.
+    assert_includes(html, key.key)
+  end
+
+  def test_edit_layout_renders_update_and_cancel_submit_buttons
+    key = api_keys(:rolfs_api_key)
+    html = render_edit_form(key)
+
+    assert_html(html, "input[type='submit'][value='#{:UPDATE.l}']")
+    assert_html(html, "input[type='submit'][value='#{:CANCEL.l}']")
+  end
+
+  def test_edit_layout_renders_notes_input_under_api_key_scope
+    key = api_keys(:rolfs_api_key)
+    html = render_edit_form(key)
+
+    # Critical: the input must post under `api_key[notes]` so the
+    # controller's `params[:api_key].permit(:notes)` picks it up.
+    # The pre-Phlex ERB used `scope: :key` which posted under
+    # `key[notes]` — a latent bug; Superform derives the scope from
+    # the model class (`APIKey` → `:api_key`).
+    assert_html(html, "input[name='api_key[notes]']")
+  end
+
+  def test_persisted_model_uses_patch_method
+    key = api_keys(:rolfs_api_key)
+    html = render_edit_form(key)
+
+    assert_html(html,
+                "input[type='hidden'][name='_method'][value='patch']")
+  end
+
   private
 
   def render_form_without_cancel
@@ -79,6 +125,15 @@ class APIKeyFormTest < ComponentTestCase
       id: "new_api_key_form",
       cancel_target: "test_target",
       cancel_parent: "test_parent"
+    )
+    render(form)
+  end
+
+  def render_edit_form(key)
+    form = Components::APIKeyForm.new(
+      key,
+      action: "/account/api_keys/#{key.id}",
+      id: "account_edit_api_key_form"
     )
     render(form)
   end
