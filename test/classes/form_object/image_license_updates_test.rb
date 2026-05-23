@@ -47,8 +47,8 @@ class FormObject::ImageLicenseUpdatesTest < ActiveSupport::TestCase
                "license_count" => 1, "licenses" => [] }]
     )
 
-    assert_equal(form.rows[0], form.send("0"))
-    assert_equal(form.rows[1], form.send("1"))
+    assert_equal(form.rows[0], form.send(:"0"))
+    assert_equal(form.rows[1], form.send(:"1"))
     assert(form.respond_to?(:"0"))
     assert(form.respond_to?(:"1"))
   end
