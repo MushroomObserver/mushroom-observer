@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
+# Views and Components namespaces bootstrapped together in this initializer.
+# Both extend Phlex::Kit so callers can render via `render Views::Foo` and
+# `render Components::Bar` shorthand (no `.new(...)`) inside a Phlex render
+# context.
 module Views
+  extend Phlex::Kit
 end
 
-# Views and Components namespaces bootstrapped together in this initializer
 module Components # rubocop:disable Style/OneClassPerFile
   extend Phlex::Kit
 end
