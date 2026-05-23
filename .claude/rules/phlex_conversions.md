@@ -52,6 +52,59 @@ Example of the single-use pattern: see
 table chunk, rendered by both the index page and the post-CUD
 turbo_stream response, both within the api_keys controller.
 
+## Collapse deep namespaces in `Views::Controllers::*`
+
+The `Views::Controllers::<Controller>::<Name>` namespace is four levels
+deep for most controllers (deeper for nested controllers like
+`Account::APIKeys`). **Do not** indent four times. Open the whole chain
+in a single declaration:
+
+```ruby
+# DO
+module Views::Controllers::Account::APIKeys
+  class Table < Views::Base
+    def view_template
+      # ...
+    end
+  end
+end
+
+# DON'T
+module Views
+  module Controllers
+    module Account
+      module APIKeys
+        class Table < Views::Base
+          def view_template
+            # ...                  # body buried at 10 spaces
+          end
+        end
+      end
+    end
+  end
+end
+```
+
+This works because the parent namespaces (`Views`, `Views::Controllers`,
+etc.) are already autoloadable — Zeitwerk discovers them from the
+directory structure once `app/views/` is registered with
+`namespace: Views` in `config/initializers/phlex.rb`. Ruby will resolve
+the chain when it evaluates the `module` line.
+
+Apply the same shorthand in tests:
+
+```ruby
+module Views::Controllers::Account::APIKeys
+  class TableTest < ComponentTestCase
+    # ...
+  end
+end
+```
+
+Inside the namespace, sibling classes reference each other unqualified:
+`render(Form.new(...))` rather than the full
+`render(Views::Controllers::Account::APIKeys::Form.new(...))`.
+
 ## Phlex Form Conversions
 
 Before writing ANY Phlex form component, you MUST:
