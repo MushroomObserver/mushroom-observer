@@ -755,6 +755,13 @@
   background: none !important;
 }
 
+// Locks column widths to the first row's natural content. Use when
+// later rows can swap in wider content (e.g. an inline edit form)
+// and you don't want the columns to reflow on every state change.
+.table-layout-fixed {
+  table-layout: fixed;
+}
+
 .bg-visible {
   background: rgba($black, 0.3);
 }

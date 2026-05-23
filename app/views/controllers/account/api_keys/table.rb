@@ -42,7 +42,7 @@ module Views
             render(Components::Table.new(
                      sorted_keys,
                      id: "account_api_keys_table",
-                     class: "table-striped"
+                     class: "table-striped table-layout-fixed"
                    )) do |t|
               register_table_columns(t)
             end
