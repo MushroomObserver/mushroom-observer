@@ -7,7 +7,7 @@ add_context_nav(account_api_tabs)
 
 <%= :account_api_keys_help.tp %>
 
-<%= render(Components::APIKeyForm.new(
+<%= render(Views::Controllers::Account::APIKeys::Form.new(
              @key,
              action: account_api_key_path(id: @key.id),
              id: "account_edit_api_key_form")) %>

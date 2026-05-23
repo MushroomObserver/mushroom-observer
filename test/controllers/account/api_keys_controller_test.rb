@@ -63,7 +63,7 @@ module Account
       get(:new)
 
       assert_response(:success)
-      # Renders the standalone Phlex APIKeyForm (notes input + submit).
+      # Renders the standalone Phlex Form view (notes input + submit).
       assert_select("input[name='api_key[notes]']")
       assert_select("input[type='submit']")
       # Posts to the same `create` action as the inline form.
