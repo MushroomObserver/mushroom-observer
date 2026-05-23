@@ -19,6 +19,13 @@ module Account
       @key = APIKey.new
     end
 
+    # No-JS fallback edit view. Loads the key for the standalone
+    # edit page (see `edit.html.erb`). The inline-on-index edit UI
+    # is JS-driven and doesn't need this action.
+    def edit
+      verify_user_owns_key
+    end
+
     def create
       @key = APIKey.new
 
