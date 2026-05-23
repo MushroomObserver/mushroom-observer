@@ -110,6 +110,6 @@ class Components::APIKeyForm < Components::ApplicationForm
   end
 
   def submits_text
-    :show_namings_saving.l
+    :SAVING.l
   end
 end

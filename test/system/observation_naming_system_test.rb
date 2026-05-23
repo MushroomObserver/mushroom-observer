@@ -97,7 +97,7 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     end
     assert_selector("#modal_progress_spinner", wait: 4)
     assert_selector("#modal_progress_spinner_caption",
-                    text: /#{:show_namings_saving.l}/)
+                    text: /#{:SAVING.l}/)
 
     assert_no_selector("#modal_progress_spinner")
     assert_selector("#title", text: /#{nam.text_name}/)
