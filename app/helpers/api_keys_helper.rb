@@ -1,42 +1,6 @@
 # frozen_string_literal: true
 
 module APIKeysHelper
-  def api_keys_edit_form_headers
-    [
-      :account_api_keys_active_column_label.t,
-      :CREATED.t,
-      :account_api_keys_last_used_column_label.t,
-      :account_api_keys_num_uses_column_label.t,
-      :API_KEY.t,
-      :NOTES.t,
-      ""
-    ]
-  end
-
-  def api_keys_edit_form_rows(user)
-    rows = []
-
-    api_keys_sorted(user).each do |key|
-      # These are the fields in each row
-      verified = api_key_id_verified_or_activate(key)
-      last_used = key.last_used ? key.last_used.web_date : "--"
-      num_uses = key.num_uses.positive? ? key.num_uses : "--"
-      edit_section = api_keys_notes_section(key)
-      remove_button = api_keys_remove_button(key)
-      rows << [
-        verified,
-        key.created_at.web_date,
-        last_used,
-        num_uses,
-        h(key.key),
-        edit_section,
-        remove_button
-      ]
-    end
-    rows << api_keys_new_form_row
-    rows
-  end
-
   def api_keys_sorted(user)
     user.api_keys.sort_by do |key|
       last_use = begin
@@ -149,15 +113,18 @@ module APIKeysHelper
                    target: account_api_key_path(key.id))
   end
 
-  def api_keys_new_form_row
-    tag.td(colspan: 7) do
-      tag.div(class: "panel-group border-none mb-0", id: "new_key_row") do
-        tag.div(class: "panel border-none") do
-          [
-            api_keys_new_button_container,
-            api_keys_new_form_container
-          ].safe_join
-        end
+  # Renders as a sibling block below the api_keys table (was an
+  # in-table `<td colspan=7>` row when the table was built with the
+  # generic `make_table` helper; the Phlex `Components::Table`
+  # doesn't natively span a row, so the panel now lives just below
+  # the table instead).
+  def api_keys_new_form_panel
+    tag.div(class: "panel-group border-none mb-0", id: "new_key_row") do
+      tag.div(class: "panel border-none") do
+        [
+          api_keys_new_button_container,
+          api_keys_new_form_container
+        ].safe_join
       end
     end
   end
@@ -169,14 +136,19 @@ module APIKeysHelper
 
     tag.div(class: "panel-collapse collapse in no-transition",
             id: "new_key_button_container") do
-      button_tag(button_text,
-                 type: :button, id: "new_key_button",
-                 class: "btn btn-default collapsed",
-                 aria: { expanded: "false",
-                         controls: "new_key_form_container" },
-                 data: { toggle: "collapse",
-                         target: "#new_key_form_container",
-                         parent: "#new_key_row" })
+      # Rendered as a real `<a href=/new>` link so it gracefully
+      # falls back to the standalone create page when JS is
+      # disabled. With JS, Bootstrap collapse.js intercepts the
+      # click via `data-toggle="collapse"` and prevents the
+      # default navigation.
+      link_to(button_text, new_account_api_key_path,
+              id: "new_key_button",
+              class: "btn btn-default collapsed",
+              aria: { expanded: "false",
+                      controls: "new_key_form_container" },
+              data: { toggle: "collapse",
+                      target: "#new_key_form_container",
+                      parent: "#new_key_row" })
     end
   end
 

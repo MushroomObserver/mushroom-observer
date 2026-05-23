@@ -305,7 +305,7 @@ MushroomObserver::Application.routes.draw do
     post("verify/resend_email(/:id)", to: "verifications#resend_email",
                                       as: "resend_verification_email")
 
-    resources :api_keys, only: [:index, :create, :edit, :update, :destroy]
+    resources :api_keys, except: :show
     # Accept both GET (email links — clients can only do GET) and
     # PATCH (in-app turbo button on the index page) for activate.
     match("api_keys/:id/activate", to: "api_keys#activate",

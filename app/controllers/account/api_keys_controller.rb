@@ -11,6 +11,14 @@ module Account
     # an activate button if the key is not verified (created by another app)
     def index; end
 
+    # No-JS fallback for users whose browsers can't run the
+    # inline-collapse "+ Add Key" panel on the index page. Renders
+    # the standalone create form (see `new.html.erb`); submit posts
+    # to `create` the same way as the inline form.
+    def new
+      @key = APIKey.new
+    end
+
     def create
       @key = APIKey.new
 
