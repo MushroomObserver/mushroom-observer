@@ -19,8 +19,11 @@ class AccountAPIKeysSystemTest < ApplicationSystemTestCase
       assert_selector("#notes_#{marys_api_key.id} span.current_notes",
                       text: marys_api_key.notes.t.as_displayed)
     end
-    # Add a new api key
-    click_button("new_key_button")
+    # Add a new api key — the trigger is a real `<a>` link (so it
+    # falls back to /account/api_keys/new without JS); with JS,
+    # Bootstrap collapse.js intercepts the click to expand the
+    # inline form.
+    find("#new_key_button").click
     assert_selector("#new_api_key_form")
     within("#new_api_key_form") do
       fill_in("api_key_notes", with: "New key idea")

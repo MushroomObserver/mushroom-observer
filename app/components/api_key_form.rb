@@ -2,14 +2,18 @@
 
 # Form for creating or editing an API key.
 #
-# Three layouts:
-# - Edit (model persisted): metadata table + notes + Update / Cancel.
-#   Used by `account/api_keys/edit.html.erb` — a no-JS fallback view.
-# - Inline create (`cancel_target:` set): input-group with cancel
-#   icon + notes input + Create button. Used by JS-driven inline
-#   create UI (collapse toggle to dismiss).
-# - Standalone create (no cancel_target, model new): notes input +
-#   centered Create button. Used by `account/api_keys/new.html.erb`.
+# Four layouts:
+# - Standalone edit (persisted, no cancel_target): metadata table +
+#   notes + Update / Cancel link. Used by `edit.html.erb` (no-JS
+#   fallback).
+# - Inline edit (persisted + cancel_target): input-group with cancel
+#   icon + notes input + Save button. Used by the JS-driven per-row
+#   notes editor on the index page.
+# - Inline create (new + cancel_target): input-group with cancel
+#   icon + notes input + Create button. Used by the JS-driven inline
+#   create UI on the index page (collapse toggle to dismiss).
+# - Standalone create (new, no cancel_target): notes input +
+#   centered Create button. Used by `new.html.erb` (no-JS fallback).
 class Components::APIKeyForm < Components::ApplicationForm
   def initialize(model, cancel_target: nil, cancel_parent: nil, **)
     @cancel_target = cancel_target
@@ -19,7 +23,7 @@ class Components::APIKeyForm < Components::ApplicationForm
 
   def view_template
     if model.persisted?
-      render_edit_layout
+      @cancel_target ? render_inline_edit_layout : render_edit_layout
     elsif @cancel_target
       render_table_layout
     else
@@ -40,6 +44,25 @@ class Components::APIKeyForm < Components::ApplicationForm
 
       span(class: "input-group-btn") do
         submit(:CREATE.l, submits_with: submits_text)
+      end
+    end
+  end
+
+  # Per-row inline edit: no label (the read-only notes line above
+  # the form serves as the visual label), Save button instead of
+  # Create. The notes input gets a per-key id so multiple inline
+  # forms on the same page don't collide (Superform's default id is
+  # class-based, not record-based).
+  def render_inline_edit_layout
+    div(class: "input-group") do
+      render_cancel_button
+
+      text_field(:notes, label: false,
+                         id: "api_key_#{model.id}_notes",
+                         class: "form-control border-none")
+
+      span(class: "input-group-btn") do
+        submit(:SAVE.l, submits_with: submits_text)
       end
     end
   end

@@ -114,6 +114,49 @@ class APIKeyFormTest < ComponentTestCase
                 "input[type='hidden'][name='_method'][value='patch']")
   end
 
+  # Inline-edit-layout tests — the persisted + cancel_target branch
+  # renders the per-row notes editor that swaps into the accordion's
+  # edit pane on the index page.
+
+  def test_inline_edit_layout_renders_input_group_with_save_and_cancel
+    key = api_keys(:rolfs_api_key)
+    html = render_inline_edit_form(key)
+
+    assert_html(html, ".input-group .input-group-btn")
+    # Cancel button (button, not submit) with the per-row collapse
+    # data attributes to swap back to the view pane.
+    assert_html(html,
+                ".input-group button[type='button']" \
+                "[data-toggle='collapse']" \
+                "[data-target='#view_notes_#{key.id}_container']" \
+                "[data-parent='#notes_#{key.id}']")
+    # Save submit (not Update — that's the standalone-edit layout).
+    assert_html(html,
+                "input[type='submit'][value='#{:SAVE.l}']")
+    assert_no_html(html,
+                   "input[type='submit'][value='#{:UPDATE.l}']")
+  end
+
+  def test_inline_edit_notes_input_has_per_key_id_to_avoid_collisions
+    key = api_keys(:rolfs_api_key)
+    html = render_inline_edit_form(key)
+
+    # Per-key id so multiple inline-edit forms on the index page
+    # don't share #api_key_notes (Superform's default class-based id).
+    assert_html(html,
+                "input[name='api_key[notes]']" \
+                "[id='api_key_#{key.id}_notes']")
+  end
+
+  def test_inline_edit_layout_omits_standalone_edit_metadata_table
+    key = api_keys(:rolfs_api_key)
+    html = render_inline_edit_form(key)
+
+    # The standalone-edit layout renders a metadata table (created /
+    # last_used / num_uses / API key); inline edit must not.
+    assert_no_html(html, "table")
+  end
+
   private
 
   def render_form_without_cancel
@@ -141,6 +184,17 @@ class APIKeyFormTest < ComponentTestCase
       key,
       action: "/account/api_keys/#{key.id}",
       id: "account_edit_api_key_form"
+    )
+    render(form)
+  end
+
+  def render_inline_edit_form(key)
+    form = Components::APIKeyForm.new(
+      key,
+      action: "/account/api_keys/#{key.id}",
+      id: "edit_api_key_#{key.id}_form",
+      cancel_target: "view_notes_#{key.id}_container",
+      cancel_parent: "notes_#{key.id}"
     )
     render(form)
   end
