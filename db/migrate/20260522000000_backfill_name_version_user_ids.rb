@@ -9,15 +9,13 @@ class BackfillNameVersionUserIds < ActiveRecord::Migration[7.2]
   def up
     user_cache = {}
 
-    Name.includes(:rss_log).find_each do |name|
+    Name.includes(:rss_log, :versions).find_each do |name|
       next unless name.rss_log
 
-      # parse_log returns [tag, args, time] newest-first; reverse for
-      # chronological order so we can reason about ordering.
-      entries = name.rss_log.parse_log.reverse
+      entries = name.rss_log.parse_log
       next if entries.empty?
 
-      versions = Name::Version.where(name_id: name.id).order(:version).to_a
+      versions = name.versions.sort_by(&:version)
       next if versions.empty?
 
       versions.each do |version|
@@ -27,7 +25,14 @@ class BackfillNameVersionUserIds < ActiveRecord::Migration[7.2]
         # Both timestamps are second-precision; they should differ by ≤ 1 s
         # since save_version and user_log run in the same request.  We use a
         # generous 120 s window to absorb slow servers or retries.
-        match = entries.min_by { |_, _, t| (t - version.updated_at).abs }
+        #
+        # user_log runs after save_version, so the rss_log entry is always at
+        # or after version.updated_at. Ties are broken by preferring entries
+        # at/after the version time (diff >= 0 beats diff < 0).
+        match = entries.min_by do |_, _, t|
+          diff = t - version.updated_at
+          [diff.abs, diff.negative? ? 1 : 0]
+        end
         next unless match
 
         _, args, time = match
@@ -36,7 +41,7 @@ class BackfillNameVersionUserIds < ActiveRecord::Migration[7.2]
         login = args[:user].to_s
         next if login.blank? || login == "."
 
-        user = user_cache[login] ||= User.find_by(login: login)
+        user = user_cache.fetch(login) { user_cache[login] = User.find_by(login: login) }
         next unless user
         next if version.user_id == user.id
 
