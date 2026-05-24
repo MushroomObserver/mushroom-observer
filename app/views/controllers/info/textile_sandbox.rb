@@ -31,7 +31,7 @@ module Views
           add_page_title(:sandbox_title.t)
           help_block(:div, :sandbox_header.tp)
 
-          render(Components::TextileSandboxForm.new(
+          render(Views::Controllers::Info::TextileSandboxForm.new(
                    @textile_sandbox,
                    show_result: @show_result,
                    submit_type: @submit_type
