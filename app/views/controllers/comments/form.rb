@@ -1,0 +1,42 @@
+# frozen_string_literal: true
+
+module Views::Controllers::Comments
+  # Form for creating or editing a Comment. Rendered directly by the
+  # comments controller's `new.html.erb` and `edit.html.erb`, and
+  # also looked up dynamically by `Components::ModalTurboForm` via
+  # `form_component_class_for(comment)`.
+  class Form < ::Components::ApplicationForm
+    def view_template
+      render_summary_field
+      render_comment_field
+      submit(submit_text, center: true)
+    end
+
+    private
+
+    def form_action
+      if @model.persisted?
+        comment_path(id: @model.id)
+      else
+        comments_path(target: @model.target_id, type: @model.target_type)
+      end
+    end
+
+    def render_summary_field
+      text_field(:summary, label: "#{:form_comments_summary.t}:",
+                           size: 80,
+                           data: { autofocus: true })
+    end
+
+    def render_comment_field
+      textarea_field(:comment, label: "#{:form_comments_comment.t}:",
+                               rows: 10) do |f|
+        f.with_help { :shared_textile_help.l }
+      end
+    end
+
+    def submit_text
+      @model.persisted? ? :SAVE_EDITS.l : :CREATE.l
+    end
+  end
+end

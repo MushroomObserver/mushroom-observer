@@ -4,6 +4,6 @@ add_context_nav(comment_form_edit_tabs(comment: @comment))
 %>
 
 <!--[form:comment]-->
-<%= render(Components::CommentForm.new(@comment, local: true)) %>
+<%= render(Views::Controllers::Comments::Form.new(@comment, local: true)) %>
 <!--[eoform:comment]-->
 <%= render(partial: "comments/object", object: @target) %>

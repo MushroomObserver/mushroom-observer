@@ -40,11 +40,18 @@ class Components::ModalTurboForm < Components::Base
   prop :form_locals, Hash, default: -> { {} }
   prop :form_class, _Nilable(Class), default: nil
 
-  # Returns the form component class for a given model.
-  # e.g., Comment -> Components::CommentForm
+  # Returns the form view/component class for a given model. Prefers
+  # the post-move `Views::Controllers::<Controller>::Form` location,
+  # falls back to the legacy `Components::<Model>Form` for forms not
+  # yet moved to `app/views/`. See `.claude/rules/phlex_conversions.md`
+  # for the move rule.
+  # e.g., Comment -> Views::Controllers::Comments::Form
+  #       (or Components::CommentForm pre-move)
   def self.form_component_class_for(model)
     model_name = model.class.name.demodulize
-    "Components::#{model_name}Form".constantize
+    controller = model_name.tableize.camelize
+    "Views::Controllers::#{controller}::Form".safe_constantize ||
+      "Components::#{model_name}Form".constantize
   end
 
   # Renders the form component for a model. Used here and by
