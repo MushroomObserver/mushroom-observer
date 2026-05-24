@@ -1,8 +1,111 @@
 ---
-paths: app/components/**/*.rb, app/views/**/*.erb
+paths: app/components/**/*.rb, app/views/**/*.rb, app/views/**/*.erb
 ---
 
-# Phlex Form Conversions
+# Phlex Conversions
+
+## Decide first: reusable or single-use?
+
+The first decision when converting an ERB helper / partial / template to
+Phlex is **where the new Phlex class lives**. Make this decision before
+writing any code — it determines the namespace, the file path, the test
+location, and how reviewers reason about reuse.
+
+- **Reusable component** → `app/components/<name>.rb`, class
+  `Components::<Name>` (flat namespace), tests in `test/components/`.
+  Use this when the class is genuinely intended to be rendered from more
+  than one controller, or one obvious second caller already exists.
+
+- **Single-use view file** → `app/views/controllers/<controller>/<name>.rb`,
+  class `Views::Controllers::<Controller>::<Name>` (deep namespace
+  mirroring the controller tree), tests in `test/views/controllers/...`.
+  Use this when the class only renders for one controller's pages,
+  including the case where the only "second caller" is a turbo_stream
+  response in that same controller.
+
+Both inherit from `Phlex::HTML` via `Components::Base` (`Views::Base` is
+a thin subclass). The split is for organization and intent, not
+capability — they can do the same things.
+
+Why this matters:
+
+- **`app/views/` stays organized like the ERB tree it replaces.** A
+  Phlex single-use view sits next to the action templates it serves —
+  the same place a partial used to live. Reviewers find it where they
+  expect.
+- **`app/components/` stays small and meaningful.** It contains real
+  building blocks, not page-specific fragments. Putting a page-specific
+  fragment there implies "reuse me elsewhere" — an invitation that
+  rarely turns out well.
+- **Eventually action templates themselves migrate to Phlex.** When
+  `index.html.erb` becomes `index.rb`, it joins the same
+  `app/views/controllers/<controller>/` directory as the partial-
+  equivalents already there. The structure scales.
+
+If a single-use class becomes reusable later, move it: rename file,
+flatten namespace, update callers. Cheap refactor. Don't speculatively
+put a single-use class in `app/components/` "just in case."
+
+Example of the single-use pattern: see
+`app/views/controllers/account/api_keys/table.rb`
+(`Views::Controllers::Account::APIKeys::Table`) — the api_keys index
+table chunk, rendered by both the index page and the post-CUD
+turbo_stream response, both within the api_keys controller.
+
+## Collapse deep namespaces in `Views::Controllers::*`
+
+The `Views::Controllers::<Controller>::<Name>` namespace is four levels
+deep for most controllers (deeper for nested controllers like
+`Account::APIKeys`). **Do not** indent four times. Open the whole chain
+in a single declaration:
+
+```ruby
+# DO
+module Views::Controllers::Account::APIKeys
+  class Table < Views::Base
+    def view_template
+      # ...
+    end
+  end
+end
+
+# DON'T
+module Views
+  module Controllers
+    module Account
+      module APIKeys
+        class Table < Views::Base
+          def view_template
+            # ...                  # body buried at 10 spaces
+          end
+        end
+      end
+    end
+  end
+end
+```
+
+This works because the parent namespaces (`Views`, `Views::Controllers`,
+etc.) are already autoloadable — Zeitwerk discovers them from the
+directory structure once `app/views/` is registered with
+`namespace: Views` in `config/initializers/phlex.rb`. Ruby will resolve
+the chain when it evaluates the `module` line.
+
+Apply the same shorthand in tests:
+
+```ruby
+module Views::Controllers::Account::APIKeys
+  class TableTest < ComponentTestCase
+    # ...
+  end
+end
+```
+
+Inside the namespace, sibling classes reference each other unqualified:
+`render(Form.new(...))` rather than the full
+`render(Views::Controllers::Account::APIKeys::Form.new(...))`.
+
+## Phlex Form Conversions
 
 Before writing ANY Phlex form component, you MUST:
 

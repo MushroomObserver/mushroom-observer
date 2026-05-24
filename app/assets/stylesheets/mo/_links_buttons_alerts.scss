@@ -45,6 +45,19 @@
     background-image: none;
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   }
+
+  // Override BS3's default `.btn.disabled` opacity dim. For outline
+  // buttons, the disabled state usually IS the selected/current
+  // state (e.g. the active status button in a filter group), so the
+  // label still describes what the user is looking at — we want it
+  // legible, not greyed out. Cursor still signals non-clickability.
+  &.disabled,
+  &[disabled],
+  &[aria-disabled="true"] {
+    color: $input-color;
+    opacity: 1;
+    cursor: not-allowed;
+  }
 }
 
 .btn-constraint-warning {

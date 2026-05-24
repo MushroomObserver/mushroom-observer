@@ -83,11 +83,10 @@ class Components::ApplicationForm < Superform::Rails::Form
   include FieldHelpers
   include UploadHelpers
 
-  # Automatically set form ID based on the model class unless one is
-  # explicitly provided.
+  # Automatically derive a form id from the class unless one is
+  # explicitly provided. See `derive_form_id` for the rule.
   # @param model [ActiveRecord::Base] the model object for the form
-  # @param id [String] optional form ID (auto-generated from the
-  #   model class name if nil)
+  # @param id [String] optional form ID
   # @param local [Boolean] if true, renders non-turbo form (default: true)
   # @param options [Hash] additional options passed to Superform
   def initialize(model, id: nil, local: true, **options)
