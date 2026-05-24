@@ -40,6 +40,7 @@ class Components::Base < Phlex::HTML
   register_value_helper :q_param
   register_value_helper :add_args_to_url
   register_value_helper :controller_name
+  register_value_helper :controller_path
   register_value_helper :params
 
   # Enable fragment caching
