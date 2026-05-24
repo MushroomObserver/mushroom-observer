@@ -7,7 +7,7 @@ add_context_nav(herbarium_record_form_new_tabs(obs: @observation))
 <div class="row">
   <div class="col-xs-12 col-sm-7">
     <span class="text-larger mb-3"><%= :Observation.t %> #<%= @observation.id %></span><!-- .text-larger -->
-    <%= render(Components::HerbariumRecordForm.new(
+    <%= render(Views::Controllers::HerbariumRecords::Form.new(
           @herbarium_record, observation: @observation
         )) %>
   </div>
