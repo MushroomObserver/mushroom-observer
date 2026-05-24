@@ -3,4 +3,4 @@
   add_context_nav(license_form_edit_tabs(license: @license))
 %>
 
-<%= render(Components::LicenseForm.new(@license)) %>
+<%= render(Views::Controllers::Licenses::Form.new(@license)) %>
