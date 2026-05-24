@@ -49,7 +49,7 @@ module OccurrencesController::Show
     others = @occurrence.observations.
              where.not(id: default.id).
              order(:created_at).
-             includes(:name, :user, :location, :thumb_image)
+             includes(:name, :user, :location, :thumb_image, :rss_log)
     [default] + others.to_a
   end
 
