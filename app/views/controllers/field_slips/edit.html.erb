@@ -4,7 +4,7 @@
   container_class(:full)
 %>
 
-<%= render(Components::FieldSlipForm.new(
+<%= render(Views::Controllers::FieldSlips::Form.new(
              @field_slip,
              recent_observations: @recent_observations,
              user: @user
