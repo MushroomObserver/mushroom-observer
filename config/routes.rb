@@ -419,8 +419,9 @@ MushroomObserver::Application.routes.draw do
                             as: "bulk_filename_purge")
     get("/licenses/edit", to: "/images/licenses#edit",
                           as: "edit_licenses")
-    put("/licenses", to: "/images/licenses#update",
-                     as: "license_updater")
+    match("/licenses", to: "/images/licenses#update",
+                       via: [:put, :patch],
+                       as: "license_updater")
     get("/votes/anonymity", to: "/images/votes/anonymity#edit",
                             as: "edit_vote_anonymity")
     match("/votes/anonymity", to: "/images/votes/anonymity#update",

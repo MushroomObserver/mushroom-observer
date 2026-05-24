@@ -13,16 +13,23 @@ module Images
 
     # was #license_updater.
     def edit
-      # Gather data for form.
-      @data = Image.licenses_for_user_by_type(@user) # license_data
+      @form = build_form_object
     end
 
     # process_license_changes
     def update
       Image.process_license_changes_for_user(@user, params[:updates])
 
-      @data = Image.licenses_for_user_by_type(@user) # license_data
+      @form = build_form_object
       render(:edit, location: images_edit_licenses_path)
+    end
+
+    private
+
+    def build_form_object
+      FormObject::ImageLicenseUpdates.new(
+        data: Image.licenses_for_user_by_type(@user)
+      )
     end
   end
 end
