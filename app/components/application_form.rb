@@ -18,20 +18,22 @@
 #   end
 #
 # @example Deriving action URL from model (eliminates passing action from view)
-#   class LicenseForm < Components::ApplicationForm
-#     def view_template
-#       text_field(:display_name)
-#       submit
-#     end
+#   module Views::Controllers::Licenses
+#     class Form < ::Components::ApplicationForm
+#       def view_template
+#         text_field(:display_name)
+#         submit
+#       end
 #
-#     def form_action
-#       model.persisted? ? view_context.license_path(model) :
-#                          view_context.licenses_path
+#       def form_action
+#         model.persisted? ? view_context.license_path(model) :
+#                            view_context.licenses_path
+#       end
 #     end
 #   end
 #
 #   # In new.html.erb and edit.html.erb, just render the form directly:
-#   <%= render(Components::LicenseForm.new(@license)) %>
+#   <%= render(Views::Controllers::Licenses::Form.new(@license)) %>
 #
 # @example Deriving action URL from model associations
 #   # For forms where the action depends on an associated model
