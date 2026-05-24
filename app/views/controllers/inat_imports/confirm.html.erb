@@ -3,7 +3,7 @@
   add_context_nav(inat_import_form_new_tabs)
 %>
 
-<%= render(Components::InatImportConfirmForm.new(
+<%= render(Views::Controllers::InatImports::ConfirmForm.new(
       @confirm_form, estimate: @estimate,
       unlicensed_obs: @unlicensed_obs,
       inat_import: @inat_import
