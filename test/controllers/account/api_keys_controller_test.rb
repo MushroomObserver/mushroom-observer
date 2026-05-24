@@ -55,6 +55,21 @@ module Account
       assert_select("[data-role='edit_api_key']", count: 1)
     end
 
+    # No-JS fallback. The "+ Add Key" button on the index page is a
+    # link to this route; with JS, Bootstrap collapse intercepts the
+    # click. Without JS, navigation succeeds and lands here.
+    def test_new_renders_standalone_create_form
+      login("mary")
+      get(:new)
+
+      assert_response(:success)
+      # Renders the standalone Phlex Form view (notes input + submit).
+      assert_select("input[name='api_key[notes]']")
+      assert_select("input[type='submit']")
+      # Posts to the same `create` action as the inline form.
+      assert_select("form[action='#{account_api_keys_path}']")
+    end
+
     def test_update_api_key
       key = mary.api_keys.create(notes: "app name")
 

@@ -11,6 +11,21 @@ module Account
     # an activate button if the key is not verified (created by another app)
     def index; end
 
+    # No-JS fallback for users whose browsers can't run the
+    # inline-collapse "+ Add Key" panel on the index page. Renders
+    # the standalone create form (see `new.html.erb`); submit posts
+    # to `create` the same way as the inline form.
+    def new
+      @key = APIKey.new
+    end
+
+    # No-JS fallback edit view. Loads the key for the standalone
+    # edit page (see `edit.html.erb`). The inline-on-index edit UI
+    # is JS-driven and doesn't need this action.
+    def edit
+      verify_user_owns_key
+    end
+
     def create
       @key = APIKey.new
 

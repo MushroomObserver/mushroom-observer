@@ -1,6 +1,7 @@
 <%
-  activate_url = "#{MO.http_domain}/account/api_key/activate/#{@api_key.id}"
-  manager_url = "#{MO.http_domain}/account/api_keys"
+  activate_url = account_activate_api_key_url(@api_key,
+                                              host: MO.http_domain)
+  manager_url = account_api_keys_url(host: MO.http_domain)
   intro = :email_verify_api_key_intro.tp(
     user: @user.login,
     app_user: @app_user.login,

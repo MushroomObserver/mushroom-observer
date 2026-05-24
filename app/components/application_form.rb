@@ -89,7 +89,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param local [Boolean] if true, renders non-turbo form (default: true)
   # @param options [Hash] additional options passed to Superform
   def initialize(model, id: nil, local: true, **options)
-    # Generate ID from class name: Components::APIKeyForm -> "api_key_form"
+    # Generate ID from class name: Components::HerbariumForm -> "herbarium_form"
     # For anonymous classes (tests), default to "application_form"
     auto_id = id || self.class.name&.demodulize&.underscore ||
               "application_form"

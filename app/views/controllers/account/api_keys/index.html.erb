@@ -6,4 +6,4 @@ container_class(:full)
 
 <%= tag.div(:account_api_keys_help.tp, class: "container-text") %>
 
-<%= render(partial: "account/api_keys/table") %>
+<%= render(Views::Controllers::Account::APIKeys::Table.new(user: @user)) %>
