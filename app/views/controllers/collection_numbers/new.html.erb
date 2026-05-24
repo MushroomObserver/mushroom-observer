@@ -6,7 +6,7 @@ add_context_nav(collection_number_form_new_tabs(obs: @observation))
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(Components::CollectionNumberForm.new(
+    <%= render(Views::Controllers::CollectionNumbers::Form.new(
           @collection_number, observation: @observation
         )) %>
   </div>
