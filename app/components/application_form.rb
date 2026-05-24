@@ -91,29 +91,44 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param local [Boolean] if true, renders non-turbo form (default: true)
   # @param options [Hash] additional options passed to Superform
   def initialize(model, id: nil, local: true, **options)
-    # Derive form id from the MODEL class, not the form class, so the
-    # id is stable regardless of where the form class lives.
-    # `Components::HerbariumForm` and `Views::Controllers::Herbaria::Form`
-    # both derive "herbarium_form" from a `Herbarium` model. Falls back
-    # to the form class name for anonymous models (rare in tests);
-    # ultimately to "application_form".
+    # Auto-derive a form id. Prefer the form class name when it's
+    # specific (`Components::HerbariumForm` -> "herbarium_form";
+    # `Components::NamePropagateLifeformForm` ->
+    # "name_propagate_lifeform_form" — multiple Name-model forms
+    # need distinct ids). For post-move `Views::Controllers::*::Form`
+    # classes the class name yields just "form", so derive the id
+    # from the controller segment of the namespace instead
+    # (`Views::Controllers::Comments::Form` -> parent "Comments" ->
+    # "comment_form"). Ultimately fall back to "application_form"
+    # for anonymous test classes with no name and no model.
     auto_id = id || derive_form_id(model) || "application_form"
     @turbo_stream = !local
     super(model, **options.merge(id: auto_id))
   end
 
   def derive_form_id(model)
-    model_name = model_class_name(model)
-    return "#{model_name}_form" if model_name
+    class_id = self.class.name&.demodulize&.underscore
+    return class_id if class_id && class_id != "form"
 
-    self.class.name&.demodulize&.underscore
+    controller_segment_form_id ||
+      model_class_form_id(model)
   end
 
-  def model_class_name(model)
+  # For a class like `Views::Controllers::Account::APIKeys::Form`,
+  # the parent module ("APIKeys") is the controller segment. Singular
+  # + "_form" gives the conventional id ("api_key_form").
+  def controller_segment_form_id
+    segments = self.class.name&.split("::")
+    return nil unless segments && segments.length >= 2
+
+    "#{segments[-2].underscore.singularize}_form"
+  end
+
+  def model_class_form_id(model)
     return nil unless model
 
-    klass_name = model.class.name
-    klass_name&.demodulize&.underscore
+    name = model.class.name&.demodulize&.underscore
+    name && "#{name}_form"
   end
 
   def around_template
