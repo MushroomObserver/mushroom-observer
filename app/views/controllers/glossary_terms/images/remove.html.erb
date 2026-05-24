@@ -7,7 +7,7 @@ add_context_nav(glossary_term_image_form_tabs(term: @object))
 container_class(:full)
 %>
 
-<%= render(Components::ImagesToRemoveForm.new(
+<%= render(Views::Controllers::GlossaryTerms::Images::RemoveForm.new(
              @object,
              form_action: detach_image_from_glossary_term_path(@object.id),
              user: @user
