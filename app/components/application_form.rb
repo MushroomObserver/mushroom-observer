@@ -83,18 +83,51 @@ class Components::ApplicationForm < Superform::Rails::Form
   include FieldHelpers
   include UploadHelpers
 
-  # Automatically set form ID based on class name unless explicitly provided
+  # Automatically derive a form id from the class unless one is
+  # explicitly provided. See `derive_form_id` for the rule.
   # @param model [ActiveRecord::Base] the model object for the form
-  # @param id [String] optional form ID (auto-generated from class name if nil)
+  # @param id [String] optional form ID
   # @param local [Boolean] if true, renders non-turbo form (default: true)
   # @param options [Hash] additional options passed to Superform
   def initialize(model, id: nil, local: true, **options)
-    # Generate ID from class name: Components::HerbariumForm -> "herbarium_form"
-    # For anonymous classes (tests), default to "application_form"
-    auto_id = id || self.class.name&.demodulize&.underscore ||
-              "application_form"
+    # Auto-derive a form id. Prefer the form class name when it's
+    # specific (`Components::HerbariumForm` -> "herbarium_form";
+    # `Components::NamePropagateLifeformForm` ->
+    # "name_propagate_lifeform_form" — multiple Name-model forms
+    # need distinct ids). For post-move `Views::Controllers::*::Form`
+    # classes the class name yields just "form", so derive the id
+    # from the controller segment of the namespace instead
+    # (`Views::Controllers::Comments::Form` -> parent "Comments" ->
+    # "comment_form"). Ultimately fall back to "application_form"
+    # for anonymous test classes with no name and no model.
+    auto_id = id || derive_form_id(model) || "application_form"
     @turbo_stream = !local
     super(model, **options.merge(id: auto_id))
+  end
+
+  def derive_form_id(model)
+    class_id = self.class.name&.demodulize&.underscore
+    return class_id if class_id && class_id != "form"
+
+    controller_segment_form_id ||
+      model_class_form_id(model)
+  end
+
+  # For a class like `Views::Controllers::Account::APIKeys::Form`,
+  # the parent module ("APIKeys") is the controller segment. Singular
+  # + "_form" gives the conventional id ("api_key_form").
+  def controller_segment_form_id
+    segments = self.class.name&.split("::")
+    return nil unless segments && segments.length >= 2
+
+    "#{segments[-2].underscore.singularize}_form"
+  end
+
+  def model_class_form_id(model)
+    return nil unless model
+
+    name = model.class.name&.demodulize&.underscore
+    name && "#{name}_form"
   end
 
   def around_template

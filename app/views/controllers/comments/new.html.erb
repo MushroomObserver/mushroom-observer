@@ -7,7 +7,7 @@ add_context_nav(comment_form_new_tabs(target: @target))
 <div class="row">
   <div class="col-xs-12 col-sm-8">
     <!--[form:comment]-->
-    <%= render(Components::CommentForm.new(@comment, local: true)) %>
+    <%= render(Views::Controllers::Comments::Form.new(@comment, local: true)) %>
     <!--[eoform:comment]-->
     <%= render(partial: "comments/object", object: @target) %>
   </div>
