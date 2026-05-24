@@ -93,7 +93,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @param options [Hash] additional options passed to Superform
   def initialize(model, id: nil, local: true, **options)
     # Auto-derive a form id. Prefer the form class name when it's
-    # specific (`Components::HerbariumForm` -> "herbarium_form";
+    # specific (`Components::NameForm` -> "name_form";
     # `Components::NamePropagateLifeformForm` ->
     # "name_propagate_lifeform_form" — multiple Name-model forms
     # need distinct ids). For post-move `Views::Controllers::*::Form`

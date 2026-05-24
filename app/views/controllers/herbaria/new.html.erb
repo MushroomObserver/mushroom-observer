@@ -4,4 +4,4 @@ add_new_title(:new_object, :HERBARIUM)
 add_context_nav(herbarium_form_new_tabs)
 %>
 
-<%= render(Components::HerbariumForm.new(@herbarium, user: @user, local: true)) %>
+<%= render(Views::Controllers::Herbaria::Form.new(@herbarium, user: @user, local: true)) %>
