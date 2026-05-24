@@ -53,7 +53,7 @@ end %>
   <%= tag.div(class: "col-xs-6 translation_container") do
     tag.div(id: "translation_ui") do
       if @edit_tags.any?
-        concat(render(Components::TranslationForm.new(
+        concat(render(Views::Controllers::Translations::Form.new(
           lang: @lang, tag: @tag,
           edit_tags: @edit_tags,
           strings: @strings,
