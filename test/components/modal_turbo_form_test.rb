@@ -58,25 +58,18 @@ class ModalTurboFormTest < ComponentTestCase
   # derivation, legacy Components fallback).
 
   def test_form_class_lookup_uses_controller_path_for_namespaced_controllers
-    # Stub a Views::Controllers::Projects::Members::Form class so we
-    # can test that a namespaced controller_path resolves to it,
-    # even though the model class (`ProjectMember`) wouldn't on its
-    # own (`.demodulize` strips the namespace; we need the path).
-    stub_const("Views::Controllers::Projects", Module.new)
-    stub_const("Views::Controllers::Projects::Members", Module.new)
-    klass = Class.new
-    Views::Controllers::Projects::Members.const_set(:Form, klass)
-
+    # `Views::Controllers::Account::APIKeys::Form` is the canonical
+    # real namespaced-controller view on main (post #4321). The
+    # model-only fallback path can't reach it — `APIKey.demodulize`
+    # is "APIKey" -> "ApiKeys", which is the wrong namespace.
+    # Only the controller_path lookup gets it right.
     resolved = Components::ModalTurboForm.form_component_class_for(
-      ProjectMember.new, controller_path: "projects/members"
+      APIKey.new, controller_path: "account/api_keys"
     )
-    assert_equal(klass, resolved)
-  ensure
-    Views::Controllers::Projects::Members.send(:remove_const, :Form)
-    Views::Controllers.send(:remove_const, :Projects)
+    assert_equal(Views::Controllers::Account::APIKeys::Form, resolved)
   end
 
-  def test_form_component_class_for_falls_back_to_model_name_derivation
+  def test_form_class_lookup_falls_back_to_model_name_derivation
     # No controller_path given. Comment model -> Comments::Form.
     resolved = Components::ModalTurboForm.form_component_class_for(
       Comment.new
@@ -84,7 +77,7 @@ class ModalTurboFormTest < ComponentTestCase
     assert_equal(Views::Controllers::Comments::Form, resolved)
   end
 
-  def test_form_component_class_for_falls_back_to_legacy_components
+  def test_form_class_lookup_falls_back_to_legacy_components
     # No view file exists for Project (yet); should fall back to the
     # legacy Components::ProjectForm.
     resolved = Components::ModalTurboForm.form_component_class_for(
@@ -94,19 +87,6 @@ class ModalTurboFormTest < ComponentTestCase
   end
 
   private
-
-  def stub_const(qualified_name, value)
-    parts = qualified_name.split("::")
-    parent = parts[0..-2].inject(Object) do |mod, name|
-      if mod.const_defined?(name)
-        mod.const_get(name)
-      else
-        mod.const_set(name,
-                      Module.new)
-      end
-    end
-    parent.const_set(parts[-1], value) unless parent.const_defined?(parts[-1])
-  end
 
   def render_modal(identifier:, title:)
     render(Components::ModalTurboForm.new(
