@@ -8,7 +8,7 @@ add_context_nav(
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(Components::HerbariumRecordForm.new(
+    <%= render(Views::Controllers::HerbariumRecords::Form.new(
           @herbarium_record, back: @back
         )) %>
   </div>
