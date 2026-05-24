@@ -42,15 +42,20 @@ class Components::ModalTurboForm < Components::Base
 
   # Returns the form view/component class for a given model. Prefers
   # the post-move `Views::Controllers::<Controller>::Form` location,
-  # falls back to the legacy `Components::<Model>Form` for forms not
-  # yet moved to `app/views/`. See `.claude/rules/phlex_conversions.md`
-  # for the move rule.
-  # e.g., Comment -> Views::Controllers::Comments::Form
-  #       (or Components::CommentForm pre-move)
-  def self.form_component_class_for(model)
+  # using the caller's `controller_path` so namespaced controllers
+  # like `projects/members` map to `Views::Controllers::Projects::Members::Form`.
+  # Falls back to model-based derivation when no controller_path is
+  # given, then to the legacy `Components::<Model>Form`.
+  # See `.claude/rules/phlex_conversions.md` for the move rule.
+  def self.form_component_class_for(model, controller_path: nil)
+    if controller_path
+      klass = "Views::Controllers::#{controller_path.camelize}::Form".
+              safe_constantize
+      return klass if klass
+    end
     model_name = model.class.name.demodulize
-    controller = model_name.tableize.camelize
-    "Views::Controllers::#{controller}::Form".safe_constantize ||
+    "Views::Controllers::#{model_name.tableize.camelize}::Form".
+      safe_constantize ||
       "Components::#{model_name}Form".constantize
   end
 
@@ -59,12 +64,14 @@ class Components::ModalTurboForm < Components::Base
   # `ModalTurboForm` instance, so it calls this class method).
   #
   # @param view_context [ActionView::Base] view context from the
-  #   calling template (in ERB, `self`)
+  #   calling template (in ERB, `self`; in Phlex, the component)
   # @param model [ActiveRecord::Base] the model instance for the form
   # @param form_locals [Hash] additional params passed to the form
   # @return [String] the rendered HTML
   def self.render_form(view_context, model:, form_locals: {})
-    component_class = form_component_class_for(model)
+    component_class = form_component_class_for(
+      model, controller_path: view_context.try(:controller_path)
+    )
     params = form_locals.except(:model).merge(local: false)
     view_context.render(component_class.new(model, **params))
   end

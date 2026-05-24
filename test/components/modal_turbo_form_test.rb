@@ -53,6 +53,39 @@ class ModalTurboFormTest < ComponentTestCase
     assert_html(html, "textarea[name='sequence[locus]']")
   end
 
+  # Direct tests of the `form_component_class_for` lookup — covers
+  # the three resolution paths (caller's controller_path, model-name
+  # derivation, legacy Components fallback).
+
+  def test_form_class_lookup_uses_controller_path_for_namespaced_controllers
+    # `Views::Controllers::Account::APIKeys::Form` is the canonical
+    # real namespaced-controller view on main (post #4321). The
+    # model-only fallback path can't reach it — `APIKey.demodulize`
+    # is "APIKey" -> "ApiKeys", which is the wrong namespace.
+    # Only the controller_path lookup gets it right.
+    resolved = Components::ModalTurboForm.form_component_class_for(
+      APIKey.new, controller_path: "account/api_keys"
+    )
+    assert_equal(Views::Controllers::Account::APIKeys::Form, resolved)
+  end
+
+  def test_form_class_lookup_falls_back_to_model_name_derivation
+    # No controller_path given. Comment model -> Comments::Form.
+    resolved = Components::ModalTurboForm.form_component_class_for(
+      Comment.new
+    )
+    assert_equal(Views::Controllers::Comments::Form, resolved)
+  end
+
+  def test_form_class_lookup_falls_back_to_legacy_components
+    # No view file exists for Project (yet); should fall back to the
+    # legacy Components::ProjectForm.
+    resolved = Components::ModalTurboForm.form_component_class_for(
+      Project.new
+    )
+    assert_equal(Components::ProjectForm, resolved)
+  end
+
   private
 
   def render_modal(identifier:, title:)
