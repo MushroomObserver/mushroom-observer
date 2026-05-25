@@ -49,7 +49,7 @@ class Components::ImageEditForm < Components::ApplicationForm
     date_field(:when, inline: true,
                       label: "#{:form_images_when_taken.l}:",
                       help: :form_images_when_help.t)
-    select_field(:license_id, @licenses,
+    select_field(:license_id, superform_license_options,
                  label: "#{:LICENSE.t}:",
                  help: :form_images_license_help.t)
     # Two-paragraph help: notes-specific + textile-syntax help.
@@ -107,6 +107,10 @@ class Components::ImageEditForm < Components::ApplicationForm
   # only the image owner OR a member of the project can toggle.
   def cannot_modify_project?(project)
     model.user_id != @user.id && !project.member?(@user)
+  end
+
+  def superform_license_options
+    @licenses.map { |display, id| [id, display] }
   end
 
   def project_checked?(project_id)

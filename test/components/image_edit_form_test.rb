@@ -34,6 +34,18 @@ class ImageEditFormTest < ComponentTestCase
     assert_html(html, "select[name='image[when(2i)]']")
   end
 
+  def test_license_select_shows_name_not_id
+    img = images(:agaricus_campestris_image)
+    html = render_form(image: img)
+
+    # Each option's value attribute must be the numeric ID and
+    # its visible text must be the license name — not the reverse.
+    @licenses.each do |name, id|
+      selector = "select[name='image[license_id]'] option[value='#{id}']"
+      assert_html(html, selector, text: name)
+    end
+  end
+
   def test_no_project_section_when_no_projects
     img = images(:agaricus_campestris_image)
     html = render_form(image: img, projects: [])
