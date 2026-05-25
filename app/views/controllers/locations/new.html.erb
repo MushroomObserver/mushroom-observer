@@ -4,7 +4,7 @@ add_new_title(:create_object, :LOCATION)
 add_context_nav(location_form_new_tabs(location: @location))
 %>
 
-<%= render(Components::LocationForm.new(
+<%= render(Views::Controllers::Locations::Form.new(
       @location,
       display_name: @display_name,
       original_name: @original_name,
