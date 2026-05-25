@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-# Renders naming reason checkboxes and collapsible textareas.
-# Used in naming form to allow users to provide notes for each reason.
+# Renders naming reason checkboxes and collapsible textareas. Used
+# inside `Views::Controllers::Observations::Namings::Fields` to let
+# users provide notes for each reason.
 #
 # @param reasons [Hash] the naming reasons from Naming#init_reasons
 # @param naming_ns [Superform::Namespace] the naming namespace
-class Components::NamingReasonsFields < Components::Base
+class Views::Controllers::Observations::Namings::ReasonsFields < Views::Base
   prop :reasons, Hash
   prop :naming_ns, _Any
 

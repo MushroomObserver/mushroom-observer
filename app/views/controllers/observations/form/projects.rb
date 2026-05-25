@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Projects section of the observation form.
-# Renders a collapsible panel with project checkboxes and constraint messages.
+# Projects section of the observation form. Collapsible panel with
+# project checkboxes and constraint messages. Sub-component of
+# `Views::Controllers::Observations::Form`.
 #
 # Wire shape: `observation[project_ids][]=<id>` (Rails-idiomatic
 # has_many-through array). Checkedness defaults to
@@ -25,7 +26,7 @@
 #   render — form falls back to `observation.project_ids`.
 # @param error_checked_projects [Array<Project>] projects with constraint errors
 # @param suspect_checked_projects [Array<Project>] projects with warnings
-class Components::ObservationFormProjects < Components::Base
+class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :form, _Any
   prop :observation, Observation
   prop :user, User

@@ -151,7 +151,7 @@ module Views::Controllers::Observations
     def render_upload_body(panel)
       panel.with_body(collapse: true, classes: "border-bottom",
                       id: "observation_upload") do
-        ObservationFormUpload(form: self, good_images: @good_images)
+        render(Upload.new(form: self, good_images: @good_images))
       end
     end
 
@@ -171,15 +171,15 @@ module Views::Controllers::Observations
     def render_details_body(panel)
       panel.with_body(collapse: true, classes: "border-top",
                       id: "observation_details") do
-        ObservationFormDetails(
-          form: self,
-          observation: model,
-          mode: @mode,
-          button_name: button_name,
-          location: @location,
-          default_place_name: @default_place_name,
-          dubious_where_reasons: @dubious_where_reasons
-        )
+        render(Details.new(
+                 form: self,
+                 observation: model,
+                 mode: @mode,
+                 button_name: button_name,
+                 location: @location,
+                 default_place_name: @default_place_name,
+                 dubious_where_reasons: @dubious_where_reasons
+               ))
       end
     end
 
@@ -224,34 +224,35 @@ module Views::Controllers::Observations
 
     def render_naming_column
       div(class: "col-xs-12 col-md-6") do
-        NamingFields(
-          form: self,
-          vote: @vote,
-          given_name: @given_name || "",
-          reasons: @reasons,
-          show_reasons: false,
-          context: "blank",
-          create: true,
-          name_help: :form_naming_name_help_leave_blank.t,
-          unfocused: true
-        )
+        render(Views::Controllers::Observations::Namings::Fields.new(
+                 form: self,
+                 vote: @vote,
+                 given_name: @given_name || "",
+                 reasons: @reasons,
+                 show_reasons: false,
+                 context: "blank",
+                 create: true,
+                 name_help: :form_naming_name_help_leave_blank.t,
+                 unfocused: true
+               ))
       end
     end
 
     def render_specimen_column
+      code = @field_code_locked ? @field_code : editable_field_code
       div(class: "col-xs-12 col-md-6") do
-        ObservationFormSpecimen(
-          form: self,
-          observation: model,
-          mode: @mode,
-          field_code: @field_code_locked ? @field_code : editable_field_code,
-          field_code_locked: @field_code_locked,
-          collectors_name: @collectors_name,
-          collectors_number: @collectors_number,
-          herbarium_name: @herbarium_name,
-          herbarium_id: @herbarium_id,
-          accession_number: @accession_number
-        )
+        render(Specimen.new(
+                 form: self,
+                 observation: model,
+                 mode: @mode,
+                 field_code: code,
+                 field_code_locked: @field_code_locked,
+                 collectors_name: @collectors_name,
+                 collectors_number: @collectors_number,
+                 herbarium_name: @herbarium_name,
+                 herbarium_id: @herbarium_id,
+                 accession_number: @accession_number
+               ))
       end
     end
 
@@ -272,16 +273,16 @@ module Views::Controllers::Observations
     end
 
     def render_projects_panel
-      ObservationFormProjects(
-        form: self,
-        observation: model,
-        user: @user,
-        button_name: button_name,
-        projects: @projects,
-        submitted_project_ids: @submitted_project_ids,
-        error_checked_projects: @error_checked_projects,
-        suspect_checked_projects: @suspect_checked_projects
-      )
+      render(Projects.new(
+               form: self,
+               observation: model,
+               user: @user,
+               button_name: button_name,
+               projects: @projects,
+               submitted_project_ids: @submitted_project_ids,
+               error_checked_projects: @error_checked_projects,
+               suspect_checked_projects: @suspect_checked_projects
+             ))
     end
 
     # --- Species Lists Panel ---
@@ -291,12 +292,12 @@ module Views::Controllers::Observations
     end
 
     def render_lists_panel
-      ObservationFormLists(
-        form: self,
-        observation: model,
-        lists: @lists,
-        submitted_list_ids: @submitted_list_ids
-      )
+      render(Lists.new(
+               form: self,
+               observation: model,
+               lists: @lists,
+               submitted_list_ids: @submitted_list_ids
+             ))
     end
   end
 end

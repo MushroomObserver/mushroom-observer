@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-# Upload section of the observation form.
-# Renders image select button and hidden fields for image management.
+# Upload section of the observation form. Renders image select
+# button and hidden fields for image management. Sub-component of
+# `Views::Controllers::Observations::Form`.
 #
 # @param form [Components::ApplicationForm] the parent form
 # @param good_images [Array<Image>] already uploaded images
-class Components::ObservationFormUpload < Components::Base
+class Views::Controllers::Observations::Form::Upload < Views::Base
   prop :form, _Any
   prop :good_images, _Array(Image), default: -> { [] }
 

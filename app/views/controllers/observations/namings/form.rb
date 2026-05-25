@@ -114,7 +114,7 @@ module Views::Controllers::Observations::Namings
     end
 
     def render_naming_fields
-      render(Components::NamingFields.new(
+      render(Fields.new(
                form: self,
                vote: @vote,
                given_name: @given_name,

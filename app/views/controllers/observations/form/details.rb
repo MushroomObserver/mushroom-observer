@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Details section of the observation form.
-# Renders date, location autocomplete, lat/lng/alt, and related checkboxes.
+# Details section of the observation form: date, location
+# autocomplete, lat/lng/alt, related checkboxes, and an embedded
+# map. Sub-component of `Views::Controllers::Observations::Form`.
 #
 # @param form [Components::ApplicationForm] the parent form
 # @param observation [Observation] the observation model
@@ -10,8 +11,7 @@
 # @param location [Location] optional associated location
 # @param default_place_name [String] default place name value
 # @param dubious_where_reasons [Array] location feedback reasons
-#
-class Components::ObservationFormDetails < Components::Base
+class Views::Controllers::Observations::Form::Details < Views::Base
   prop :form, _Any
   prop :observation, Observation
   prop :mode, _Nilable(Symbol), default: :create

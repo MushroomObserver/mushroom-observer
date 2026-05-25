@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Specimen section of the observation form.
-# Renders specimen checkbox and collapsible collection number/herbarium fields.
+# Specimen section of the observation form. Renders specimen
+# checkbox and collapsible collection number / herbarium fields.
+# Sub-component of `Views::Controllers::Observations::Form`.
 #
 # @param form [Components::ApplicationForm] the parent form
 # @param observation [Observation] the observation model
@@ -11,7 +12,7 @@
 # @param herbarium_name [String] default herbarium name
 # @param herbarium_id [Integer] default herbarium ID
 # @param accession_number [String] default accession number
-class Components::ObservationFormSpecimen < Components::Base
+class Views::Controllers::Observations::Form::Specimen < Views::Base
   prop :form, _Any
   prop :observation, Observation
   prop :mode, _Nilable(Symbol), default: :create
