@@ -391,10 +391,14 @@ MushroomObserver::Application.routes.draw do
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
   resources :occurrences, only: [:new, :create, :show, :edit, :update,
                                  :destroy] do
-    member do
-      get :resolve_projects
-      post :resolve_projects
-    end
+    # The projects collection of an occurrence is a singular nested
+    # resource (each occurrence has one such collection — the union
+    # of projects across its observations). #update applies the
+    # user's resolution choice from the modal. No #edit: gap
+    # resolution is reached via the parent occurrence's #edit, which
+    # auto-opens the modal when `@project_gaps` are present.
+    resource :projects, only: :update,
+                        controller: "occurrences/projects"
   end
 
   # ----- Field Slip Job Trackers: show for json -------------------------------

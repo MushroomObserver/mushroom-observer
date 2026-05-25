@@ -15,4 +15,20 @@ class FormObject::OccurrenceProjects < FormObject::Base
   attribute :resolution, :string
   attribute :primary_observation_id, :integer
   attribute :observation_ids, default: -> { [] }
+
+  # Edit-mode flag controlling `persisted?`. The form posts to
+  # `/occurrences/:occurrence_id/projects` (a nested singular
+  # resource) which expects PATCH — Superform picks PATCH when
+  # `model.persisted?` is true. Constructor kwarg, not an
+  # `attribute`, so it isn't serialized into the form as a hidden
+  # input. Defaults to false; create-mode renders post to
+  # `/occurrences` (POST).
+  def initialize(for_update: false, **attrs)
+    @for_update = for_update
+    super(**attrs)
+  end
+
+  def persisted?
+    @for_update
+  end
 end

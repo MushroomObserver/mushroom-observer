@@ -10,8 +10,10 @@
 #   - "create" (when `selected:` is passed) — POSTs the selection
 #     state + resolution to `/occurrences` to create a new Occurrence
 #     with project resolutions.
-#   - "edit" (default) — POSTs to the resolve_projects action on the
-#     existing `@occurrence`.
+#   - "edit" (default) — PATCHes the nested projects resource on the
+#     existing `@occurrence`
+#     (`/occurrences/:occurrence_id/projects`, handled by
+#     `Occurrences::ProjectsController#update`).
 #
 # Bound to `FormObject::OccurrenceProjects` (a PORO carrying
 # the selection state + resolution choice). All POSTed data lives
@@ -58,14 +60,17 @@ class Components::OccurrenceProjectsForm < Components::ApplicationForm
     if @selected
       occurrences_path
     else
-      resolve_projects_occurrence_path(@occurrence)
+      occurrence_projects_path(@occurrence)
     end
   end
 
   private
 
   def build_form_object
-    return FormObject::OccurrenceProjects.new unless @selected
+    # `for_update: true` flips the FormObject's `persisted?` so
+    # Superform emits `_method=patch` for edit mode — the nested
+    # projects resource expects PATCH. Create mode stays POST.
+    return FormObject::OccurrenceProjects.new(for_update: true) unless @selected
 
     FormObject::OccurrenceProjects.new(
       observation_ids: @selected.map(&:id),
@@ -125,8 +130,9 @@ class Components::OccurrenceProjectsForm < Components::ApplicationForm
     a(href: cancel_path, class: "btn btn-default",
       data: { dismiss: "modal" }) { :CANCEL.l }
     whitespace
-    # Skip = proceed without backfilling projects. The controller's
-    # apply_project_resolution / handle_resolution only act on
+    # Skip = proceed without backfilling projects. Both controllers
+    # (`OccurrencesController#create` and
+    # `Occurrences::ProjectsController#update`) only act on
     # `value="add_all"`, so any other present value (here "skip") is
     # treated as "create/keep the occurrence, leave projects alone".
     submit(:SKIP.l,

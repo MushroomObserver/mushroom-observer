@@ -86,17 +86,16 @@ class OccurrenceProjectsFormTest < ComponentTestCase
       gaps: gaps, primary: @obs1, occurrence: occ
     )
 
-    # Form posts to resolve_projects_occurrence_path
+    # Form PATCHes the nested projects resource:
+    # /occurrences/:occurrence_id/projects → Occurrences::ProjectsController#update.
     assert_html(
       html,
-      "form[action='/occurrences/#{occ.id}" \
-      "/resolve_projects'][method='post']"
+      "form[action='/occurrences/#{occ.id}/projects'][method='post']"
     )
-
-    # No `_method=patch` override — the resolve_projects route only
-    # accepts POST. Passing the persisted occurrence to Superform
-    # would silently emit `_method=patch` and break submission.
-    assert_no_html(html, "input[name='_method'][value='patch']")
+    # PATCH is emitted via Rails' `_method` override (HTML forms can
+    # only natively POST or GET). The FormObject's `for_update: true`
+    # flips `persisted?` so Superform picks PATCH.
+    assert_html(html, "input[name='_method'][value='patch']")
 
     # Cancel link points to occurrence show page
     assert_html(

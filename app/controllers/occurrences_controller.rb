@@ -5,7 +5,6 @@
 class OccurrencesController < ApplicationController
   include Show
   include Edit
-  include ResolveProjects
 
   before_action :login_required
 
