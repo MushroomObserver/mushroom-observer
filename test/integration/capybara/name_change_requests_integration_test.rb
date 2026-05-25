@@ -37,7 +37,7 @@ class NameChangeRequestsIntegrationTest < CapybaraIntegrationTestCase
         args[0] == "WebmasterMailer" && args[1] == "build"
       }
     ) do
-      within("#name_change_request_form") do
+      within("#admin_email_name_change_request_form") do
         click_commit
       end
       # Wait for redirect

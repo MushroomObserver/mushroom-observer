@@ -95,7 +95,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Auto-derive a form id. Prefer the form class name when it's
     # specific (`Components::NameForm` -> "name_form";
     # `Components::NamePropagateLifeformForm` ->
-    # "name_propagate_lifeform_form" — multiple Name-model forms
+    # "name_lifeform_propagate_form" — multiple Name-model forms
     # need distinct ids). For post-move `Views::Controllers::*::Form`
     # classes the class name yields just "form", so derive the id
     # from the controller segment of the namespace instead
@@ -108,21 +108,49 @@ class Components::ApplicationForm < Superform::Rails::Form
   end
 
   def derive_form_id(model)
+    views_id = views_controller_form_id
+    return views_id if views_id
+
+    # `Components::FooForm` (and other non-Views classes) — use the
+    # class name directly.
     class_id = self.class.name&.demodulize&.underscore
     return class_id if class_id && class_id != "form"
 
-    controller_segment_form_id ||
-      model_class_form_id(model)
+    # Fallback (test classes with no name, etc.): derive from model.
+    model_class_form_id(model)
   end
 
-  # For a class like `Views::Controllers::Account::APIKeys::Form`,
-  # the parent module ("APIKeys") is the controller segment. Singular
-  # + "_form" gives the conventional id ("api_key_form").
-  def controller_segment_form_id
-    segments = self.class.name&.split("::")
-    return nil unless segments && segments.length >= 2
+  # For `Views::Controllers::*` classes, mirror the full controller
+  # path in the id so it telegraphs where the form lives in the
+  # directory tree. Each path segment is singularized; the class
+  # name is appended (or replaced with "form" if the class is the
+  # bare `Form`).
+  #
+  #   Views::Controllers::Account::APIKeys::Form
+  #     → account_api_key_form
+  #   Views::Controllers::Admin::Donations::ReviewForm
+  #     → admin_donation_review_form
+  #   Views::Controllers::Admin::BlockedIps::Manager
+  #     → admin_blocked_ip_manager
+  #   Views::Controllers::Names::Synonyms::Approve::Form
+  #     → name_synonym_approve_form
+  def views_controller_form_id
+    segments = views_controller_segments
+    return nil unless segments
 
-    "#{segments[-2].underscore.singularize}_form"
+    path_parts = segments[2..-2].map { |s| s.underscore.singularize }
+    class_part = segments.last.underscore
+    suffix = class_part == "form" ? "form" : class_part
+    "#{path_parts.join("_")}_#{suffix}"
+  end
+
+  def views_controller_segments
+    segments = self.class.name&.split("::")
+    return nil unless segments && segments.length >= 4 &&
+                      segments[0] == "Views" &&
+                      segments[1] == "Controllers"
+
+    segments
   end
 
   def model_class_form_id(model)

@@ -970,7 +970,97 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "label[for='collection_number_number']")
   end
 
+  # ----- derive_form_id -----
+  #
+  # The form id flows through `ApplicationForm#derive_form_id`, which
+  # picks the first non-nil of:
+  #   1. `views_controller_form_id` — if the class lives under
+  #      `Views::Controllers::*`, derive from the full controller
+  #      path so the id mirrors the directory structure.
+  #   2. The class's own demodulized name, if it's not the bare
+  #      "Form" (e.g. `Components::HerbariumForm` -> "herbarium_form").
+  #   3. `model_class_form_id` — for anonymous test classes / etc.,
+  #      derive from the model's class name.
+  #   4. Ultimate fallback: the literal string "application_form".
+
+  def test_derive_form_id_uses_all_controller_segments
+    klass = stub_views_controller_form("Names", "Synonyms", "Approve")
+    assert_equal("name_synonym_approve_form",
+                 instance_id_for(klass, Name.new))
+  end
+
+  def test_derive_form_id_appends_specific_class_name_to_segments
+    klass = stub_views_controller_form("Admin", "Donations",
+                                       class_name: "ReviewForm")
+    assert_equal("admin_donation_review_form",
+                 instance_id_for(klass, Donation.new))
+  end
+
+  def test_derive_form_id_singularizes_each_path_segment
+    klass = stub_views_controller_form("Account", "APIKeys")
+    assert_equal("account_api_key_form",
+                 instance_id_for(klass, APIKey.new))
+  end
+
+  def test_derive_form_id_for_components_uses_class_name
+    # Stand-in for `Components::HerbariumForm` (no Views::Controllers
+    # prefix) — derive from the class's own demodulized name.
+    klass = Class.new(Components::ApplicationForm)
+    Components.const_set(:HerbariumFormStub, klass)
+    begin
+      assert_equal("herbarium_form_stub",
+                   instance_id_for(klass, Herbarium.new))
+    ensure
+      Components.send(:remove_const, :HerbariumFormStub)
+    end
+  end
+
+  def test_derive_form_id_falls_back_to_model_class_when_class_has_no_name
+    # Anonymous form class (no name) + a real model → derive from the
+    # model class name.
+    klass = Class.new(Components::ApplicationForm)
+    assert_equal("herbarium_form",
+                 instance_id_for(klass, Herbarium.new))
+  end
+
+  def test_derive_form_id_ultimate_fallback_is_application_form
+    # Anonymous class with no model — falls all the way through to
+    # the literal "application_form" sentinel.
+    klass = Class.new(Components::ApplicationForm)
+    form = klass.allocate
+    assert_equal("application_form", form.derive_form_id(nil) ||
+                                     "application_form")
+  end
+
   private
+
+  # Build a stub class registered under
+  # `Views::Controllers::<seg1>::<seg2>::...::<class_name>` so the
+  # heuristic sees a realistic class name. Cleans up after itself via
+  # ObjectSpace constants when the test ends? No — caller is expected
+  # to use the returned class transiently in one assertion.
+  def stub_views_controller_form(*segments, class_name: "Form")
+    parent = Views::Controllers
+    segments.each do |seg|
+      parent = if parent.const_defined?(seg, false)
+                 parent.const_get(seg)
+               else
+                 parent.const_set(seg, Module.new)
+               end
+    end
+    if parent.const_defined?(class_name, false)
+      parent.const_get(class_name)
+    else
+      parent.const_set(class_name, Class.new(Components::ApplicationForm))
+    end
+  end
+
+  # Allocates a form of `klass` without calling `initialize` (avoids
+  # the Superform wiring we don't need) and asks it for its
+  # auto-derived form id given `model`.
+  def instance_id_for(klass, model)
+    klass.allocate.derive_form_id(model)
+  end
 
   def render_form(local: true, &block)
     form = TestFormClass.new(@collection_number,

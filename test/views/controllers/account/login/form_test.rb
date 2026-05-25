@@ -14,7 +14,7 @@ module Views::Controllers::Account::Login
       assert_html(@html, "label[for='user_login']", text: :login_user.l)
       assert_html(@html, "input[name='user[login]']")
       # With a pre-filled login, autofocus moves to the password
-      # field (login_form: autofocus on login when blank, else on
+      # field (account_login_form: autofocus on login when blank, else on
       # password). The fixture has `login: "testuser"`.
       assert_html(@html,
                   "input[name='user[password]'][data-autofocus]")
@@ -65,7 +65,7 @@ module Views::Controllers::Account::Login
     private
 
     def render_form
-      render(Form.new(@model, action: "/test_action", id: "login_form"))
+      render(Form.new(@model, action: "/test_action", id: "account_login_form"))
     end
   end
 end

@@ -9,7 +9,7 @@ module Views::Controllers::Names::Synonyms::Approve
       html = render_form(name: name)
 
       # Form structure and action
-      assert_html(html, "form#name_approve_synonym_form")
+      assert_html(html, "form#name_synonym_approve_form")
       assert_html(html, "form[action*='/names/#{name.id}/synonyms/approve']")
       assert_html(html, "input[type='submit'][value='#{:APPROVE.l}']")
 

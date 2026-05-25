@@ -13,7 +13,7 @@ module Views::Controllers::Admin::Banners
       html = render_form
 
       # Form structure
-      assert_html(html, "#banner_form")
+      assert_html(html, "#admin_banner_form")
       assert_html(html, "form[action='/admin/banners']")
       assert_html(html, "form[method='post']")
 

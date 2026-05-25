@@ -20,7 +20,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
         is_misspelling: is_misspelling,
         comment: comment
       )
-      super(form_object, id: "name_deprecate_synonym_form", **)
+      super(form_object, **)
     end
     # rubocop:enable Metrics/ParameterLists
 

@@ -18,7 +18,7 @@ module Views::Controllers::Names::Synonyms
         synonym_members: synonym_members,
         deprecate_all: deprecate_all
       )
-      super(form_object, id: "name_edit_synonym_form", **)
+      super(form_object, **)
     end
     # rubocop:enable Metrics/ParameterLists
 

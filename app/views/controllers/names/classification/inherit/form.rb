@@ -11,7 +11,7 @@ module Views::Controllers::Names::Classification::Inherit
       @message = message
 
       form_object = FormObject::InheritClassification.new(parent: parent)
-      super(form_object, id: "name_inherit_classification_form", **)
+      super(form_object, **)
     end
 
     def view_template
