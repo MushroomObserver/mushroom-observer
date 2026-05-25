@@ -26,7 +26,7 @@ module Admin
                      title: :email_name_change_request_title.l,
                      user: @user,
                      model: FormObject::EmailRequest.new,
-                     form_class: Components::NameChangeRequestForm,
+                     form_class: Views::Controllers::Admin::Emails::NameChangeRequests::Form,
                      form_locals: {
                        name: @name,
                        new_name_with_icn_id: @new_name_with_icn_id

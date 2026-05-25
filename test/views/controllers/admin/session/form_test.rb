@@ -1,0 +1,45 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+module Views::Controllers::Admin::Session
+  class FormTest < ComponentTestCase
+    def setup
+      super
+      @form = FormObject::AdminSession.new
+    end
+
+    def test_renders_form_structure
+      html = render_form
+
+      # Form structure
+      assert_html(html, "#admin_switch_users_form")
+      assert_html(html, "form[action='/admin/session']")
+
+      # User autocompleter field
+      assert_html(html, "[data-controller*='autocompleter--user']")
+      assert_html(html, "[data-type='user']")
+
+      # Label
+      assert_html(html, "label[for='admin_session_user']",
+                  text: :LOGIN_NAME.l)
+
+      # Submit button
+      assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")
+    end
+
+    def test_renders_with_prefilled_user
+      @form = FormObject::AdminSession.new(user: "rolf")
+      html = render_form
+
+      assert_html(html,
+                  "input[name='admin_session[user]'][value='rolf']")
+    end
+
+    private
+
+    def render_form
+      render(Form.new(@form))
+    end
+  end
+end

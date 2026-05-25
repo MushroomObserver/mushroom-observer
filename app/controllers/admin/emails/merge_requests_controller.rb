@@ -23,7 +23,7 @@ module Admin
                      title: :email_merge_request_title.t(type: @model.type_tag),
                      user: @user,
                      model: FormObject::EmailRequest.new,
-                     form_class: Components::MergeRequestForm,
+                     form_class: Views::Controllers::Admin::Emails::MergeRequests::Form,
                      form_locals: { old_obj: @old_obj, new_obj: @new_obj,
                                     model_class: @model }
                    ), layout: false)
