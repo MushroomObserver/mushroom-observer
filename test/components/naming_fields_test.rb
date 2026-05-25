@@ -59,9 +59,9 @@ class NamingFieldsTest < ComponentTestCase
 
   private
 
-  # Render NamingFields via NamingForm which provides the form_namespace
+  # Render NamingFields via the namings form which provides the form_namespace
   def render_naming_form(create: true, show_reasons: true, context: "lightbox")
-    component = Components::NamingForm.new(
+    component = Views::Controllers::Observations::Namings::Form.new(
       @naming,
       observation: observations(:minimal_unknown_obs),
       vote: @vote,

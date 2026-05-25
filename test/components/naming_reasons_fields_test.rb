@@ -54,7 +54,7 @@ class NamingReasonsFieldsTest < ComponentTestCase
   private
 
   def render_form_with_reasons(reasons: nil)
-    form = Components::NamingForm.new(
+    form = Views::Controllers::Observations::Namings::Form.new(
       @naming,
       observation: @observation,
       reasons: reasons || @naming.init_reasons,
