@@ -13,7 +13,7 @@ add_context_nav(name_forms_return_tabs(name: @name))
   end %>
 </div>
 
-<%= render(Components::NameTrackerForm.new(
+<%= render(Views::Controllers::Names::Trackers::Form.new(
       @name_tracker,
       note_template: @note_template
     )) %>

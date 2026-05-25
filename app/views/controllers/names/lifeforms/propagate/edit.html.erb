@@ -5,7 +5,7 @@ add_context_nav(name_forms_return_tabs(name: @name))
 container_class(:text_image)
 %>
 
-<%= render(Components::NamePropagateLifeformForm.new(
+<%= render(Views::Controllers::Names::Lifeforms::Propagate::Form.new(
       FormObject::PropagateLifeform.new,
       name: @name
     )) %>

@@ -6,7 +6,7 @@ add_context_nav(name_forms_return_tabs(name: @name))
 container_class(:text)
 %>
 
-<%= render(Components::NameInheritClassificationForm.new(
+<%= render(Views::Controllers::Names::Classification::Inherit::Form.new(
       name: @name,
       parent: @parent_text_name,
       options: @options,

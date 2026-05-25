@@ -4,7 +4,7 @@ add_context_nav(name_forms_return_tabs(name: @name))
 container_class(:text_image)
 %>
 
-<%= render(Components::NameEditSynonymForm.new(
+<%= render(Views::Controllers::Names::Synonyms::Form.new(
       name: @name,
       synonym_members: @list_members,
       deprecate_all: @deprecate_all,

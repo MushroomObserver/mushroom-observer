@@ -51,7 +51,7 @@
 #   end
 #
 #   # In the view, no need to pass action:
-#   <%= render(Components::NameTrackerForm.new(
+#   <%= render(Views::Controllers::Names::Trackers::Form.new(
 #     @name_tracker || NameTracker.new(name: @name)
 #   )) %>
 #
