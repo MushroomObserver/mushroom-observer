@@ -17,7 +17,7 @@ show_lists = @user # && @observation.species_lists.any?
 obs_locals = { obs: @observation, consensus: @consensus, user: @user }
 %>
 
-<%= render(Components::ImportedSourceBanner.new(observation: @observation)) %>
+<%= render(Views::Controllers::Observations::ImportedSourceBanner.new(observation: @observation)) %>
 
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>

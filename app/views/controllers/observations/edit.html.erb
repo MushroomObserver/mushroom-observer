@@ -4,7 +4,7 @@ add_context_nav(observation_form_edit_tabs(obs: @observation))
 container_class(:wide)
 %>
 
-<%= render(Components::ObservationForm.new(
+<%= render(Views::Controllers::Observations::Form.new(
       @observation,
       mode: :update,
       user: @user,

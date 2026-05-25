@@ -6,7 +6,7 @@ container_class(:wide)
 
 <div class="row">
   <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
-    <%= render(Components::ImageEditForm.new(
+    <%= render(Views::Controllers::Observations::Images::Form.new(
                  @image,
                  user: @user,
                  licenses: @licenses,
