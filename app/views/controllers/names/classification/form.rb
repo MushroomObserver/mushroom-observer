@@ -6,7 +6,7 @@ module Views::Controllers::Names::Classification
   class Form < ::Components::ApplicationForm
     def initialize(name, **)
       @name = name
-      super(name, id: "name_classification_form")
+      super(name)
     end
 
     def view_template

@@ -9,7 +9,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
       html = render_form(name: name)
 
       # Form structure and action
-      assert_html(html, "form#name_deprecate_synonym_form")
+      assert_html(html, "form#name_synonym_deprecate_form")
       assert_html(html, "form[action*='/names/#{name.id}/synonyms/deprecate']")
       assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")
 

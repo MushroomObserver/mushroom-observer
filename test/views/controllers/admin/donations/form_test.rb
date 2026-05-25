@@ -49,7 +49,7 @@ module Views::Controllers::Admin::Donations
     def render_form
       render(Form.new(@donation,
                       action: "/test_action",
-                      id: "donation_form"))
+                      id: "admin_donation_form"))
     end
   end
 end

@@ -8,7 +8,7 @@ module Views::Controllers::Names::Trackers
   class Form < ::Components::ApplicationForm
     def initialize(model, note_template: nil, **)
       @note_template = note_template
-      super(model, id: "name_tracker_form", **)
+      super(model, **)
     end
 
     def view_template

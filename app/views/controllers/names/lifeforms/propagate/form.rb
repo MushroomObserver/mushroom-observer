@@ -6,7 +6,7 @@ module Views::Controllers::Names::Lifeforms::Propagate
   class Form < ::Components::ApplicationForm
     def initialize(model, name:, **)
       @name = name
-      super(model, id: "name_propagate_lifeform_form", **)
+      super(model, **)
     end
 
     def view_template

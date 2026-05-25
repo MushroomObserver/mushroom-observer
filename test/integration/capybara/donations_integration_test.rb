@@ -18,7 +18,7 @@ class DonationsIntegrationTest < CapybaraIntegrationTestCase
     fill_in("donation_amount", with: "100.00")
 
     # Submit the form
-    within("#donation_form") do
+    within("#admin_donation_form") do
       click_commit
     end
 

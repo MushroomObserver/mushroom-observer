@@ -9,7 +9,7 @@ module Views::Controllers::Names::Classification::Inherit
       html = render_form(name: name)
 
       # Form structure and action
-      assert_html(html, "form#name_inherit_classification_form")
+      assert_html(html, "form#name_classification_inherit_form")
       assert_html(html,
                   "form[action*='/names/#{name.id}/classification/inherit']")
       assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")

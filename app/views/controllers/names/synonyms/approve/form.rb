@@ -7,7 +7,7 @@ module Views::Controllers::Names::Synonyms::Approve
     def initialize(model, name:, approved_names: nil, **)
       @name = name
       @approved_names = approved_names
-      super(model, id: "name_approve_synonym_form", **)
+      super(model, **)
     end
 
     def view_template
