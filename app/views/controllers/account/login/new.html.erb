@@ -1,6 +1,6 @@
 <% add_page_title(:login_please_login.t) %>
 
-<%= render(Components::LoginForm.new(
+<%= render(Views::Controllers::Account::Login::Form.new(
       FormObject::Login.new(login: @login, remember_me: @remember),
       action: account_login_path,
       id: "account_login_form"
