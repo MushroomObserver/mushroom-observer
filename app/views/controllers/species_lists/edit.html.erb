@@ -4,7 +4,7 @@ add_context_nav(species_list_form_edit_tabs(list: @species_list))
 container_class(:text)
 %>
 
-<%= render(Components::SpeciesListForm.new(
+<%= render(Views::Controllers::SpeciesLists::Form.new(
              @species_list,
              projects: @projects,
              dubious_where_reasons: @dubious_where_reasons,
