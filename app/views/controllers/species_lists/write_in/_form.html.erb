@@ -4,7 +4,7 @@
 
   <%= submit_button(form: f, button: button.l, center: true) %>
 
-  <%= render(Components::FormListFeedback.new(
+  <%= render(Views::Controllers::SpeciesLists::WriteIn::ListFeedback.new(
     new_names: @new_names,
     deprecated_names: @deprecated_names,
     multiple_names: @multiple_names
