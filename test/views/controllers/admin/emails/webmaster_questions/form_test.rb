@@ -23,16 +23,16 @@ module Views::Controllers::Admin::Emails::WebmasterQuestions
       assert_html(@html, "label[for='email_reply_to']",
                   text: :ask_webmaster_your_email.l)
       assert_html(@html,
-                  "input[name='email[reply_to]'][size='60']")
-      assert_includes(@html, @user_email)
+                  "input[name='email[reply_to]'][size='60']",
+                  attribute: { value: @user_email })
     end
 
     def test_renders_form_with_question_field
       assert_html(@html, "label[for='email_message']",
                   text: :ask_webmaster_question.l)
       assert_html(@html,
-                  "textarea[name='email[message]'][rows='10']")
-      assert_includes(@html, @message)
+                  "textarea[name='email[message]'][rows='10']",
+                  text: @message)
     end
 
     def test_renders_submit_button

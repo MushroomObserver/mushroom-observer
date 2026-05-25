@@ -55,9 +55,15 @@ module Views::Controllers::Admin::Donations
       html = render_form
 
       assert_html(html, "table.table")
+      # Pull all td texts in the table and check each donation's id +
+      # amount appears in some cell (assert_html's at_css would only
+      # check the first td).
+      td_texts = Nokogiri::HTML(html).css("table.table td").map(&:text)
       @donations.each do |d|
-        assert_includes(html, d.id.to_s)
-        assert_includes(html, d.amount.to_s)
+        assert(td_texts.any? { |t| t.include?(d.id.to_s) },
+               "Expected a td containing donation id #{d.id}")
+        assert(td_texts.any? { |t| t.include?(d.amount.to_s) },
+               "Expected a td containing donation amount #{d.amount}")
       end
     end
 

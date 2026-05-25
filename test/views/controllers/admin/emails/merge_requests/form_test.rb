@@ -27,14 +27,19 @@ module Views::Controllers::Admin::Emails::MergeRequests
     def test_renders_old_object_field
       html = render_form
 
-      assert_includes(html, :NAME.l)
-      assert_includes(html, @old_name.unique_format_name.t)
+      assert_html(html, "label[for='email_old_obj']",
+                  text: "#{:NAME.l}:")
+      assert_html(html, "label[for='email_old_obj'] + p.form-control-static",
+                  text: @old_name.unique_format_name.t.as_displayed)
     end
 
     def test_renders_new_object_field
       html = render_form
 
-      assert_includes(html, @new_name.unique_format_name.t)
+      assert_html(html, "label[for='email_new_obj']",
+                  text: "#{:NAME.l}:")
+      assert_html(html, "label[for='email_new_obj'] + p.form-control-static",
+                  text: @new_name.unique_format_name.t.as_displayed)
     end
 
     def test_renders_message_field

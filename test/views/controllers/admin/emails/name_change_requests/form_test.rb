@@ -25,17 +25,24 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
 
     def test_renders_current_name_field
       html = render_form
+      value = "#{@name.unique_search_name}[##{@name.icn_id}]"
 
-      assert_includes(html, :NAME.l)
-      assert_includes(html, @name.unique_search_name)
-      assert_includes(html, "[##{@name.icn_id}]")
+      assert_html(html, "label[for='email_name']", text: "#{:NAME.l}:")
+      assert_html(html, "label[for='email_name'] + p.form-control-static",
+                  text: value)
     end
 
     def test_renders_new_name_hidden_field
       html = render_form
 
-      assert_includes(html, :new_name.l)
-      assert_includes(html, @new_name_with_icn_id)
+      assert_html(html, "label[for='email_new_name_with_icn_id']",
+                  text: "#{:new_name.l}:")
+      assert_html(html, "label[for='email_new_name_with_icn_id'] " \
+                        "+ p.form-control-static",
+                  text: @new_name_with_icn_id)
+      assert_html(html,
+                  "input[type='hidden']" \
+                  "[name='email[new_name_with_icn_id]']")
     end
 
     def test_renders_message_field

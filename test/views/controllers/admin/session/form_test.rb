@@ -21,7 +21,8 @@ module Views::Controllers::Admin::Session
       assert_html(html, "[data-type='user']")
 
       # Label
-      assert_includes(html, :LOGIN_NAME.l)
+      assert_html(html, "label[for='admin_session_user']",
+                  text: :LOGIN_NAME.l)
 
       # Submit button
       assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")

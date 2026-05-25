@@ -29,7 +29,8 @@ module Views::Controllers::Admin::Banners
       @banner = banners(:one)
       html = render_form
 
-      assert_includes(html, @banner.message)
+      assert_html(html, "textarea[name='banner[message]']",
+                  text: @banner.message)
     end
 
     private

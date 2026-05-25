@@ -19,8 +19,8 @@ module Views::Controllers::Admin::Users
 
     def test_renders_form_with_val_textarea
       assert_html(@html,
-                  "textarea[name='user_stats[val]'][rows='5']")
-      assert_includes(@html, @user_stats.formatted_bonuses)
+                  "textarea[name='user_stats[val]'][rows='5']",
+                  text: @user_stats.formatted_bonuses)
     end
 
     def test_renders_submit_button
