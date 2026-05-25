@@ -2,4 +2,4 @@
 add_page_title(:signup_title.t)
 %>
 
-<%= render(Components::AccountSignupForm.new(@new_user)) %>
+<%= render(Views::Controllers::Account::Form.new(@new_user)) %>
