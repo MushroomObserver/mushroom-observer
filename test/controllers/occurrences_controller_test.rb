@@ -385,6 +385,20 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_redirected_to(occurrence_path(occ))
   end
 
+  def test_resolve_projects_post_skip
+    # Skip button: explicit `resolution=skip` is functionally equivalent
+    # to omitting the param (both fall through `handle_resolution`'s
+    # `if`), but the dedicated test documents the modal's Skip flow.
+    login("rolf")
+    obs3 = observations(:detailed_unknown_obs)
+    project = projects(:bolete_project)
+    occ = create_occurrence(@obs1, obs3)
+    post(:resolve_projects,
+         params: { id: occ.id, resolution: "skip" })
+    assert_not_includes(@obs1.reload.projects, project)
+    assert_redirected_to(occurrence_path(occ))
+  end
+
   # ---------- show action ----------
 
   def test_show_requires_login

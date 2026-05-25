@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Form content for the project membership confirmation modal.
-# Renders the intro text, project list, and Cancel/Add All buttons —
-# but no modal chrome. Callers wrap this in `Components::Modal` with
-# `auto_open: true` to get the auto-opening Bootstrap modal (see
-# `field_slips/new.html.erb` and `edit.html.erb`).
+# Renders the intro text, project list, and Cancel/Skip/Add All
+# buttons — but no modal chrome. Callers wrap this in
+# `Components::Modal` with `auto_open: true` to get the auto-opening
+# Bootstrap modal (see `field_slips/new.html.erb` and `edit.html.erb`).
 #
 # Two render modes:
 #   - "create" (when `selected:` is passed) — POSTs the selected
@@ -40,8 +40,8 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
 
   # The form (Superform's default view_template) wraps both modal
   # sections. Intro + project list live in `.modal-body`; Cancel /
-  # Add All live in `.modal-footer`. Hidden fields go at the top of
-  # the form (next to Superform's CSRF + `_method` inputs).
+  # Skip / Add All live in `.modal-footer`. Hidden fields go at the
+  # top of the form (next to Superform's CSRF + `_method` inputs).
   def view_template
     super do
       selected_hidden_fields if @selected
@@ -72,7 +72,7 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
     projects = @gaps[:projects]
     return unless projects&.any?
 
-    strong { :occurrence_resolve_projects_projects.l }
+    strong { "#{:PROJECTS.l}:" }
     # `list-unstyled` drops the bullet + left padding. Each row is a
     # flex container so the id badge (button) sits inline with the
     # project-title link.
@@ -110,14 +110,26 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
 
   def render_buttons
     a(href: cancel_path, class: "btn btn-default",
-      data: { dismiss: "modal" }) do
-      :occurrence_resolve_projects_cancel.l
-    end
+      data: { dismiss: "modal" }) { :CANCEL.l }
+    whitespace
+    # Skip = proceed without backfilling projects. The controller's
+    # apply_project_resolution / handle_resolution only act on
+    # `value="add_all"`, so any other present value (here "skip") is
+    # treated as "create/keep the occurrence, leave projects alone".
+    submit(
+      :SKIP.l,
+      as: :button, btn_class: "btn-default", value: "skip",
+      name: resolution_param_name
+    )
     whitespace
     submit(
-      :occurrence_resolve_projects_add_all.l,
+      :ADD_ALL.l,
       as: :button, btn_class: "btn-primary", value: "add_all",
-      name: @selected ? "project_resolution" : "resolution"
+      name: resolution_param_name
     )
+  end
+
+  def resolution_param_name
+    @selected ? "project_resolution" : "resolution"
   end
 end

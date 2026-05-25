@@ -815,6 +815,8 @@
   RECORD: Record
   IDENTIFY: Identify
   ADD_TO: Add to
+  ADD_ALL: Add All
+  SKIP: Skip
 
   # Common adjectives.
   ANONYMOUS: Anonymous
@@ -3029,10 +3031,6 @@
   occurrence_not_found: Occurrence not found.
   occurrence_resolve_projects_title: "Add Observations to Projects"
   occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
-  occurrence_resolve_projects_projects: "Projects:"
-  occurrence_resolve_projects_species_lists: "Species Lists:"
-  occurrence_resolve_projects_cancel: Cancel
-  occurrence_resolve_projects_add_all: Add All
   occurrence_resolve_projects_done: "Primary observation added to [count] projects/lists."
   occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
   field_slips_created_job: Created job for [filename]

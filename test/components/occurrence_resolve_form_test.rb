@@ -18,12 +18,11 @@ class OccurrenceResolveFormTest < ComponentTestCase
     )
 
     # Intro text
-    assert_includes(html, :occurrence_resolve_projects_intro.l)
+    assert_html(html, ".modal-body > p",
+                text: :occurrence_resolve_projects_intro.l)
 
-    # Project list
-    assert_includes(
-      html, :occurrence_resolve_projects_projects.l
-    )
+    # Project list heading
+    assert_html(html, ".modal-body > strong", text: "#{:PROJECTS.l}:")
     assert_html(html, "a[href='/projects/#{@project.id}']",
                 text: @project.title)
 
@@ -57,15 +56,22 @@ class OccurrenceResolveFormTest < ComponentTestCase
       html,
       "a.btn[href='/occurrences/new" \
       "?observation_id=#{@obs1.id}']",
-      text: :occurrence_resolve_projects_cancel.l
+      text: :CANCEL.l
     )
+
+    # Skip button — proceed without backfilling projects
+    assert_html(html,
+                "button[type='submit']" \
+                "[name='project_resolution']" \
+                "[value='skip']",
+                text: :SKIP.l)
 
     # Add All button with project_resolution name
     assert_html(html,
                 "button[type='submit']" \
                 "[name='project_resolution']" \
                 "[value='add_all']",
-                text: :occurrence_resolve_projects_add_all.l)
+                text: :ADD_ALL.l)
   end
 
   def test_edit_flow
@@ -87,15 +93,22 @@ class OccurrenceResolveFormTest < ComponentTestCase
     # Cancel link points to occurrence show page
     assert_html(
       html, "a.btn[href='/occurrences/#{occ.id}']",
-      text: :occurrence_resolve_projects_cancel.l
+      text: :CANCEL.l
     )
+
+    # Skip button — leave projects alone, redirect to occurrence show
+    assert_html(html,
+                "button[type='submit']" \
+                "[name='resolution']" \
+                "[value='skip']",
+                text: :SKIP.l)
 
     # Add All button with resolution name (not project_resolution)
     assert_html(html,
                 "button[type='submit']" \
                 "[name='resolution']" \
                 "[value='add_all']",
-                text: :occurrence_resolve_projects_add_all.l)
+                text: :ADD_ALL.l)
   end
 
   def test_no_project_list_when_empty
@@ -105,12 +118,11 @@ class OccurrenceResolveFormTest < ComponentTestCase
     )
 
     # Intro text still renders
-    assert_includes(html, :occurrence_resolve_projects_intro.l)
+    assert_html(html, ".modal-body > p",
+                text: :occurrence_resolve_projects_intro.l)
 
     # No project list heading
-    assert_not_includes(
-      html, :occurrence_resolve_projects_projects.l
-    )
+    assert_no_html(html, ".modal-body > strong")
   end
 
   def test_create_flow_hidden_fields_and_buttons
@@ -195,10 +207,14 @@ class OccurrenceResolveFormTest < ComponentTestCase
                 text: @project.id.to_s)
     assert_html(html, ".modal-body > ul > li > a",
                 text: @project.title)
-    assert_html(html, "form > .modal-footer > button[type='submit']",
-                text: :occurrence_resolve_projects_add_all.l)
+    assert_html(html,
+                "form > .modal-footer > button[value='add_all']",
+                text: :ADD_ALL.l)
+    assert_html(html,
+                "form > .modal-footer > button[value='skip']",
+                text: :SKIP.l)
     assert_html(html, "form > .modal-footer > a[data-dismiss='modal']",
-                text: :occurrence_resolve_projects_cancel.l)
+                text: :CANCEL.l)
   end
 
   def test_owns_modal_sections_class_method_returns_true
