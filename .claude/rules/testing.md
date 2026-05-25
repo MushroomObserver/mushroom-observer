@@ -217,15 +217,14 @@ else:
    config, Markdown, etc. show up as `<not instrumented>` — that's
    expected; SimpleCov only instruments Ruby.
 
-3. **If a file is below 100%, fix the gap in the same PR.** Either add
-   tests that exercise the uncovered branches, or remove the dead code.
-   Don't ship a PR that drops a file from 100% to 96% — the slack
-   accumulates branch by branch and eventually nothing is testable
-   in isolation.
-
-4. If a file in the touched set was already below 100% on `main`
-   before your PR, that's not your bug to fix in this PR — but
-   surface it in the PR description so reviewers know.
+3. **Every PR should lever coverage upward.** If a touched file is
+   below 100%, fix the gap in the same PR — even if the uncovered
+   lines were already missed on `main` before your edit. Either add
+   tests that exercise the uncovered branches, or remove the dead
+   code. The reasoning: a PR that touches a file is the right place
+   to bring it to 100%; deferring it means the gap survives every
+   future PR that touches the file until someone finally signs up to
+   fix it. Touch it, finish it.
 
 Why both numbers matter:
 
