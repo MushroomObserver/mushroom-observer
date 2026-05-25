@@ -59,7 +59,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
     params = create_params(@obs1, [@obs1, obs3])
-    params[:project_resolution] = "add_all"
+    params[:occurrence_projects] = { resolution: "add_all" }
     assert_difference("Occurrence.count", 1) do
       post(:create, params: params)
     end
@@ -178,7 +178,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
     params = create_params(@obs1, [@obs1, obs3])
-    params[:project_resolution] = "add_all"
+    params[:occurrence_projects] = { resolution: "add_all" }
     post(:create, params: params)
     assert_flash_success
   end
@@ -224,7 +224,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     project = projects(:bolete_project)
     params = create_params(@obs1, [@obs1, @obs3])
-    params[:project_resolution] = "add_all"
+    params[:occurrence_projects] = { resolution: "add_all" }
 
     assert_difference("Occurrence.count", 1) do
       post(:create, params: params)
@@ -239,7 +239,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_create_with_project_resolution_skip
     login("rolf")
     params = create_params(@obs1, [@obs1, @obs3])
-    params[:project_resolution] = "skip"
+    params[:occurrence_projects] = { resolution: "skip" }
 
     assert_difference("Occurrence.count", 1) do
       post(:create, params: params)
@@ -284,7 +284,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
 
     post(:resolve_projects,
-         params: { id: occ.id, resolution: "add_all" })
+         params: { id: occ.id,
+                   occurrence_projects: { resolution: "add_all" } })
 
     assert_redirected_to(occurrence_path(occ))
     @obs1.reload
@@ -309,8 +310,10 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_select("div#modal_resolve_projects.modal.fade.in")
     assert_select("div.modal-dialog.modal-lg")
     assert_select("div.modal-backdrop.fade.in")
-    # Form is inside modal-body, with the edit-mode submit button name.
-    assert_select("[name='resolution'][value='add_all']")
+    # Form is inside modal-body, posted under the FormObject's namespace.
+    assert_select(
+      "[name='occurrence_projects[resolution]'][value='add_all']"
+    )
   end
 
   # ---------- project confirmation ----------
@@ -328,8 +331,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     # proves the create-mode view file's modal composition rendered.
     assert_select("div#modal_resolve_projects.modal.fade.in")
     assert_select("div.modal-dialog.modal-lg")
-    # Create-mode submit uses project_resolution (vs edit's resolution).
-    assert_select("[name='project_resolution']")
+    # Both Skip and Add All buttons post under the FormObject's
+    # namespace (`occurrence_projects[resolution]`).
+    assert_select("[name='occurrence_projects[resolution]']", count: 2)
   end
 
   def test_create_with_add_all_adds_to_projects
@@ -337,7 +341,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     obs3 = observations(:detailed_unknown_obs) # in bolete_project
     project = projects(:bolete_project)
     params = create_params(@obs1, [@obs1, obs3])
-    params[:project_resolution] = "add_all"
+    params[:occurrence_projects] = { resolution: "add_all" }
     assert_difference("Occurrence.count", 1) do
       post(:create, params: params)
     end
@@ -370,7 +374,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
     occ = create_occurrence(@obs1, obs3)
     post(:resolve_projects,
-         params: { id: occ.id, resolution: "add_all" })
+         params: { id: occ.id,
+                   occurrence_projects: { resolution: "add_all" } })
     assert_includes(@obs1.reload.projects, project)
     assert_redirected_to(occurrence_path(occ))
   end
@@ -394,7 +399,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
     occ = create_occurrence(@obs1, obs3)
     post(:resolve_projects,
-         params: { id: occ.id, resolution: "skip" })
+         params: { id: occ.id,
+                   occurrence_projects: { resolution: "skip" } })
     assert_not_includes(@obs1.reload.projects, project)
     assert_redirected_to(occurrence_path(occ))
   end

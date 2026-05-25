@@ -59,8 +59,24 @@ class OccurrencesController < ApplicationController
       filter_map(&:observation)
   end
 
+  # Reads a field that comes from either the new-form (params under
+  # `occurrence[*]`) or the project-confirmation modal (params under
+  # `occurrence_projects[*]`). Both POST to `#create` with the
+  # same selection data — only the wrapping namespace differs.
+  def occurrence_form_param(key)
+    params.dig(:occurrence, key) ||
+      params.dig(:occurrence_projects, key)
+  end
+
+  # Resolution choice ("skip" or "add_all") from the confirmation
+  # modal. Bound under `occurrence_projects[resolution]` so the
+  # initial new-form post (which has no resolution) reads as nil.
+  def project_resolution_param
+    params.dig(:occurrence_projects, :resolution)
+  end
+
   def build_selected_observations
-    ids = Array(params.dig(:occurrence, :observation_ids)).map(&:to_i)
+    ids = Array(occurrence_form_param(:observation_ids)).map(&:to_i)
     ids |= [@source_obs.id] # always include source
     obs = Observation.where(id: ids).
           includes({ occurrence: :field_slip }, :user,
@@ -79,7 +95,7 @@ class OccurrencesController < ApplicationController
   def create_occurrence(selected)
     primary_obs = resolve_primary_observation(selected)
     gaps = preview_project_gaps(primary_obs, selected)
-    if gaps.any? && !params[:project_resolution]
+    if gaps.any? && project_resolution_param.blank?
       render_project_confirmation(gaps, selected, primary_obs)
       return
     end
@@ -97,8 +113,7 @@ class OccurrencesController < ApplicationController
   end
 
   def resolve_primary_observation(selected)
-    primary_id = params.dig(:occurrence,
-                            :primary_observation_id).to_i
+    primary_id = occurrence_form_param(:primary_observation_id).to_i
     selected.find { |o| o.id == primary_id } || @source_obs
   end
 
@@ -168,7 +183,7 @@ class OccurrencesController < ApplicationController
 
   def apply_project_resolution(occ, gaps)
     return if gaps.empty?
-    return unless params[:project_resolution] == "add_all"
+    return unless project_resolution_param == "add_all"
 
     occ.add_all_to_collections(projects: gaps[:projects] || [])
   end

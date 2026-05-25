@@ -7,27 +7,27 @@
 # Bootstrap modal (see `field_slips/new.html.erb` and `edit.html.erb`).
 #
 # Two render modes:
-#   - "create" (when `selected:` is passed) — POSTs the selected
-#     `observation_ids[]` + `observation_id` + the primary observation
-#     to `/occurrences` to create a new Occurrence with project
-#     resolutions.
+#   - "create" (when `selected:` is passed) — POSTs the selection
+#     state + resolution to `/occurrences` to create a new Occurrence
+#     with project resolutions.
 #   - "edit" (default) — POSTs to the resolve_projects action on the
 #     existing `@occurrence`.
 #
-# Inherits `Components::ApplicationForm` (Superform) so the `<form>`
-# tag, CSRF token, and `_method` hidden field are emitted
-# automatically — no manual `authenticity_token_field` boilerplate.
-class Components::OccurrenceResolveForm < Components::ApplicationForm
+# Bound to `FormObject::OccurrenceProjects` (a PORO carrying
+# the selection state + resolution choice). All POSTed data lives
+# under the `occurrence_projects[*]` namespace except the
+# source obs (`observation_id`, top-level) — which the new-form also
+# posts top-level. The controller reads from either namespace via
+# `occurrence_form_param` so the same code handles the initial new-
+# form post (`occurrence[*]`) and the modal repost
+# (`occurrence_projects[*]`).
+class Components::OccurrenceProjectsForm < Components::ApplicationForm
   def initialize(gaps:, primary:, selected: nil, occurrence: nil, **)
     @gaps = gaps
     @primary = primary
     @selected = selected
     @occurrence = occurrence
-    # Superform requires a model. We don't bind any fields to it
-    # (all this form's inputs are hidden, posted with explicit
-    # `name=`), so anything callable for `dom.id` works. Use the
-    # occurrence in edit mode, a placeholder Occurrence otherwise.
-    super(@occurrence || Occurrence.new, **)
+    super(build_form_object, **)
   end
 
   # Declares to Modal that this form renders its own `.modal-body`
@@ -64,6 +64,15 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
 
   private
 
+  def build_form_object
+    return FormObject::OccurrenceProjects.new unless @selected
+
+    FormObject::OccurrenceProjects.new(
+      observation_ids: @selected.map(&:id),
+      primary_observation_id: @primary.id
+    )
+  end
+
   def render_intro
     p { :occurrence_resolve_projects_intro.l }
   end
@@ -95,17 +104,21 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
   end
 
   def selected_hidden_fields
-    # `occurrence[observation_ids][]` — the controller reads
-    # `params.dig(:occurrence, :observation_ids)`. A flat
-    # `observation_ids[]` here would silently break submission
-    # (controller gets `nil`, treats it as an empty selection).
+    # `observation_ids[]` is multi-valued — emit one hidden input per
+    # selected obs. Bound via the String path under
+    # `occurrence_projects[observation_ids][]`.
     @selected.each do |obs|
-      hidden_field("occurrence[observation_ids][]", value: obs.id)
+      hidden_field(
+        "occurrence_projects[observation_ids][]", value: obs.id
+      )
     end
-    # `observation_id` is the source obs (top-level param), not
-    # nested under `occurrence[]` — separate from the selected list.
+    # primary_observation_id is bound via the Symbol path — emits
+    # `occurrence_projects[primary_observation_id]`
+    # automatically from the FormObject's model_name.
+    hidden_field(:primary_observation_id)
+    # observation_id (source obs) is top-level, matching the new-form
+    # contract. Not a field of the resolve form object.
     hidden_field("observation_id", value: @selected.first.id)
-    hidden_field("occurrence[primary_observation_id]", value: @primary.id)
   end
 
   def render_buttons
@@ -116,20 +129,12 @@ class Components::OccurrenceResolveForm < Components::ApplicationForm
     # apply_project_resolution / handle_resolution only act on
     # `value="add_all"`, so any other present value (here "skip") is
     # treated as "create/keep the occurrence, leave projects alone".
-    submit(
-      :SKIP.l,
-      as: :button, btn_class: "btn-default", value: "skip",
-      name: resolution_param_name
-    )
+    submit(:SKIP.l,
+           as: :button, btn_class: "btn-default", value: "skip",
+           name: "occurrence_projects[resolution]")
     whitespace
-    submit(
-      :ADD_ALL.l,
-      as: :button, btn_class: "btn-primary", value: "add_all",
-      name: resolution_param_name
-    )
-  end
-
-  def resolution_param_name
-    @selected ? "project_resolution" : "resolution"
+    submit(:ADD_ALL.l,
+           as: :button, btn_class: "btn-primary", value: "add_all",
+           name: "occurrence_projects[resolution]")
   end
 end

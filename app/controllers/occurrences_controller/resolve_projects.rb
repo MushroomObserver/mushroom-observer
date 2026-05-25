@@ -23,7 +23,8 @@ module OccurrencesController::ResolveProjects
   private
 
   def handle_resolution
-    if params[:resolution] == "add_all"
+    resolution = params.dig(:occurrence_projects, :resolution)
+    if resolution == "add_all"
       projects = @gaps[:projects] || []
       @occurrence.add_all_to_collections(projects: projects)
       flash_notice(:occurrence_resolve_projects_all_done.t(

@@ -44,7 +44,7 @@ module Views
                    user: @user
                  )) do |m|
             m.with_form_content do
-              render(Components::OccurrenceResolveForm.new(**@project_confirm))
+              render(Components::OccurrenceProjectsForm.new(**@project_confirm))
             end
           end
         end

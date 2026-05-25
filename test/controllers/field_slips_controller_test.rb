@@ -1010,7 +1010,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
   # but not the view-render branch. This test PUTs through the
   # controller flow that sets `@field_slip_project_gaps`, then asserts
   # the response renders `Components::Modal` wrapping the
-  # OccurrenceResolveForm — the view-level contract in
+  # OccurrenceProjectsForm — the view-level contract in
   # `field_slips/edit.html.erb` that no other test exercises.
   def test_update_with_project_gaps_renders_modal
     login("rolf")
@@ -1044,8 +1044,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
     )
     assert_select(".modal-dialog.modal-lg")
     assert_select(".modal-backdrop.fade.in")
-    # Edit-mode submit button name (vs create's project_resolution).
-    assert_select("[name='resolution']")
+    # Resolve modal's submit buttons (Skip + Add All) are posted under
+    # the FormObject's namespace.
+    assert_select("[name='occurrence_projects[resolution]']", count: 2)
   end
 
   def test_check_field_slip_project_gaps_no_gaps
