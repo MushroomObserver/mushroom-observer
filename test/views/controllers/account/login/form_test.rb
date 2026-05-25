@@ -45,13 +45,21 @@ module Views::Controllers::Account::Login
     end
 
     def test_renders_help_text
-      # Renders the webmaster-question link from the textile help.
-      assert_html(@html, "a[href*='webmaster_questions']")
+      # Form wraps each help block in an id'd `.form-group` containing
+      # `.textile` (from `.tp`); scope to the id to check both the full
+      # localized text and the embedded link.
+      assert_html(@html, "#login_having_problems .textile",
+                  text: :login_having_problems.tp.as_displayed)
+      assert_html(@html,
+                  "#login_having_problems a[href*='webmaster_questions']")
     end
 
     def test_renders_forgot_login_text
-      # Renders the email-new-password link from the textile help.
-      assert_html(@html, "a[href='/account/email_new_password']")
+      assert_html(@html, "#login_forgot_password .textile",
+                  text: :login_forgot_password.tp.as_displayed)
+      assert_html(@html,
+                  "#login_forgot_password " \
+                  "a[href='/account/email_new_password']")
     end
 
     private

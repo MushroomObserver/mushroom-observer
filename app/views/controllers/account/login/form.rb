@@ -32,13 +32,13 @@ module Views::Controllers::Account::Login
     end
 
     def render_forgot_login_text
-      div(class: "form-group mt-3") do
+      div(class: "form-group mt-3", id: "login_forgot_password") do
         raw(:login_forgot_password.tp) # rubocop:disable Rails/OutputSafety
       end
     end
 
     def render_help_text
-      div(class: "form-group mt-3") do
+      div(class: "form-group mt-3", id: "login_having_problems") do
         raw(:login_having_problems.tp) # rubocop:disable Rails/OutputSafety
       end
     end
