@@ -22,7 +22,7 @@ module Images
                    ),
                    user: @user,
                    model: FormObject::EmailRequest.new,
-                   form_class: Components::CommercialInquiryForm,
+                   form_class: Views::Controllers::Images::Emails::Form,
                    form_locals: { image: @image, user: @user }
                  ), layout: false)
         end
