@@ -5,6 +5,6 @@ add_page_title(:download_observations_title.t)
 # add_context_nav(observation_download_tabs)
 %>
 
-<%= render(Components::ObservationsDownloadForm.new(
+<%= render(Views::Controllers::Observations::Downloads::Form.new(
       query_param: q_param
     )) %>
