@@ -131,6 +131,84 @@ While writing the component, for **every** form control you add, follow the
   proceeding. (This rule was added after PR #4224 had to undo a hand-rolled
   radio group from PR #4076.)
 
+### Watch for a decorative `Model.new` passed to `super`
+
+If your form has bound fields, pass the real model (or a real FormObject)
+that actually backs them. The anti-pattern is passing a throwaway
+`Foo.new` *just* to make Superform happy, then hand-rolling every input
+with raw `name=` strings.
+
+```ruby
+# ❌ Anti-pattern. The Occurrence is decorative — nothing binds to it.
+class Components::OccurrenceResolveForm < Components::ApplicationForm
+  def initialize(gaps:, primary:, selected: nil, **)
+    @gaps = gaps; @primary = primary; @selected = selected
+    super(Occurrence.new, **)
+  end
+
+  def selected_hidden_fields
+    # Hand-rolled because nothing binds to the model:
+    @selected.each { |obs| hidden_field("occurrence[observation_ids][]", value: obs.id) }
+    hidden_field("occurrence[primary_observation_id]", value: @primary.id)
+  end
+end
+
+# ✅ Fix: introduce a FormObject that *actually* represents the form's data.
+class FormObject::OccurrenceProjects < FormObject::Base
+  attribute :resolution, :string
+  attribute :primary_observation_id, :integer
+  attribute :observation_ids, default: -> { [] }
+end
+
+class Components::OccurrenceProjectsForm < Components::ApplicationForm
+  def initialize(gaps:, primary:, selected: nil, **)
+    # ...
+    super(build_form_object, **)
+  end
+
+  def selected_hidden_fields
+    hidden_field(:primary_observation_id)   # Symbol path → bound + namespaced
+    # ...
+  end
+end
+```
+
+**Why it matters:**
+
+- Misleading: a reader sees `Occurrence.new` and thinks "this form
+  edits an Occurrence." It doesn't.
+- Defeats Superform: the `<form_name>[<field>]` param namespacing,
+  PATCH-vs-POST method picking via `model.persisted?`, and field
+  binding all stop working as designed.
+- Often comes with a route mismatch: the decorative model
+  silently flips `_method=patch` on or off (depending on
+  `persisted?`), so the form submits to the wrong HTTP verb.
+
+**Fuzzy cases.** It isn't always black-and-white. Real forms sometimes
+sit on a gradient between "this is an `X` form" and "this is an
+operation that incidentally touches `X`." Some signs you're in fuzzy
+territory:
+
+- Most fields bind to the model, but one or two are operation-specific
+  (e.g. a `confirm_email` checkbox on an Account edit form). Stay on
+  the real model and let those one-offs ride along — they don't
+  justify a FormObject.
+- The form's params end up shaped exactly like `<model_name>[...]`
+  by design, even though the data is operation state. Then the model
+  *is* a fair stand-in for what the controller will read; passing it
+  isn't decorative.
+- The model is real but most fields don't bind to it directly — the
+  form is mostly hidden re-submissions of selection state plus a
+  resolution choice. That's the case where a FormObject is the right
+  fix (e.g. `FormObject::OccurrenceProjects`).
+
+If the decision isn't obvious, ask: *would a future reader, looking at
+the constructor's first argument, infer what the form does?* If not,
+the model is decorative — refactor.
+
+(Rule added after the `OccurrenceResolveForm` → `OccurrenceProjectsForm`
+refactor in #4345.)
+
 After writing the component:
 
 4. Write a component test in `test/components/` following the patterns in
