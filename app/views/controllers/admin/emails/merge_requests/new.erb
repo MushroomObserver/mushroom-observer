@@ -3,7 +3,7 @@ add_page_title(:email_merge_request_title.t(type: @model.type_tag))
 add_context_nav(email_merge_request_tabs(old_obj: @old_obj))
 %>
 
-<%= render(Components::MergeRequestForm.new(
+<%= render(Views::Controllers::Admin::Emails::MergeRequests::Form.new(
       FormObject::EmailRequest.new,
       old_obj: @old_obj,
       new_obj: @new_obj,

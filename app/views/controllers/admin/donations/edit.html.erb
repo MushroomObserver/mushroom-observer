@@ -4,7 +4,7 @@ add_page_title(:review_donations_title.l)
 add_context_nav(admin_donations_form_edit_tabs)
 %>
 
-<%= render(Components::DonationsReviewForm.new(
+<%= render(Views::Controllers::Admin::Donations::ReviewForm.new(
       FormObject::ReviewDonations.new,
       donations: @donations
     )) %>
