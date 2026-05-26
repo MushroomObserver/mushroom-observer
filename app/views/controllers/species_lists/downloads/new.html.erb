@@ -8,8 +8,11 @@ query_param = q_param(@query)
 
 <%= render(Views::Controllers::SpeciesLists::Downloads::Form.new(query_param: query_param)) %>
 
-<%= render(partial: "species_lists/downloads/form_species_list_report",
-           locals: { query_param: query_param }) %>
+<%= render(Views::Controllers::SpeciesLists::Downloads::ReportForm.new(
+             list: @list,
+             query_param: query_param,
+             selected: @type
+           )) %>
 
 <%= render(Views::Controllers::Observations::Downloads::Form.new(
       query_param: query_param,
