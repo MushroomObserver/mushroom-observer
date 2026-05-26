@@ -82,11 +82,10 @@ module Views::Controllers::Account
     end
 
     def theme_options
-      # Superform expects [value, display] format (opposite of Rails).
       # "RANDOM" is a sentinel value that triggers random theme
       # selection.
-      [["RANDOM", :theme_random.l]] +
-        MO.themes.map { |t| [t, t.to_sym.l] }
+      [[:theme_random.l, "RANDOM"]] +
+        MO.themes.map { |t| [t.to_sym.l, t] }
     end
   end
 end
