@@ -265,7 +265,7 @@ module ApplicationController::Queries
     return nil if q_param[:model].blank?
 
     Query.lookup(q_param[:model].to_sym,
-                 **q_param.except(:model).to_unsafe_hash)
+                 **q_param.except(:model).to_unsafe_hash.symbolize_keys)
   end
 
   # Add a :q param to a path helper like `names_path`,

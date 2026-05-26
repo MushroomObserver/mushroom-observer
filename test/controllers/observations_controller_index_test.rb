@@ -586,6 +586,28 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_results(count:)
   end
 
+  # Regression: query_from_q_param_hash must call symbolize_keys on
+  # to_unsafe_hash before passing to Query.lookup. Without it, string-keyed
+  # params from the URL bypass the attribute slice and produce a query with
+  # no filter, or cause a TypeError in Ruby 3.4+.
+  # This is the param format produced by clicking "Show Observations at
+  # this Location" from a location show page.
+  def test_index_q_param_hash_with_locations
+    location = locations(:burbank)
+    q_param = { model: "Observation", locations: [location.id] }
+
+    login
+    get(:index, params: { q: q_param })
+
+    assert_response(:success,
+                    "Expected success — Integer NoMethodError means " \
+                    "symbolize_keys is missing in query_from_q_param_hash")
+    assert_page_title(:OBSERVATIONS.l, "Should be on the observations index")
+    assert_displayed_filters(location.display_name,
+                             "Location filter should appear in #filters")
+    assert_results(count: Observation.locations(location).count)
+  end
+
   def test_index_where
     location = locations(:obs_default_location)
 
