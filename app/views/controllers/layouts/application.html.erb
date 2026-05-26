@@ -33,7 +33,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
       <div class="row row-offcanvas row-offcanvas-left"
          data-nav-target="offcanvas">
 
-        <%= render(Components::ApplicationSidebar.new(
+        <%= render(Views::Layouts::ApplicationSidebar.new(
           user: @user,
           browser: browser,
           request: request,
@@ -50,7 +50,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
               data-controller="lightgallery">
 
             <%# unless @user&.verified? %>
-            <%# render(Components::LoginLayout.new) %>
+            <%# render(Views::Layouts::LoginWelcome.new) %>
             <%# end %>
 
             <!--MAIN_PAGE_CONTENT-->
