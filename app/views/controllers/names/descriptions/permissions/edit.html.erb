@@ -3,7 +3,7 @@ add_page_title(@description.format_name.t)
 add_context_nav(name_description_form_permissions_tabs(description: @description))
 %>
 
-<%= render(Components::Descriptions::PermissionsForm.new(
+<%= render(Views::Controllers::Descriptions::Permissions::Form.new(
              description: @description,
              groups: @groups,
              data: @data

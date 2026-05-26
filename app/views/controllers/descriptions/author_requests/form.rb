@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-module Components::Descriptions
-  # Form to request authorship of a description.
-  # Sends an email to the authors/reviewers.
-  class AuthorRequestForm < Components::ApplicationForm
+module Views::Controllers::Descriptions::AuthorRequests
+  # Form to request authorship of a description. Sends an email to the
+  # authors/reviewers. Posts to `Descriptions::AuthorRequestsController`.
+  class Form < ::Components::ApplicationForm
     def initialize(model, object:, action:, **)
       @object = object
       super(model, action: action, **)

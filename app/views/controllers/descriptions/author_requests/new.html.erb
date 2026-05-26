@@ -2,7 +2,7 @@
 add_page_title(:author_request_title.t(title: @object.format_name))
 %>
 
-<%= render(Components::Descriptions::AuthorRequestForm.new(
+<%= render(Views::Controllers::Descriptions::AuthorRequests::Form.new(
       FormObject::EmailRequest.new,
       object: @object,
       action: description_author_requests_path(id: @object.id, type: @object.type_tag)
