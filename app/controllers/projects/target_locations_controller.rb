@@ -61,7 +61,8 @@ module Projects
     end
 
     # Submitted under the `project_target_locations_add` namespace by
-    # Views::Controllers::Projects::Locations::TargetLocationsWidget (Pattern B form).
+    # `Views::Controllers::Projects::Locations::TargetLocationsWidget`
+    # (Pattern B form).
     def parse_locations_from_params
       raw = params.dig(:project_target_locations_add, :locations).to_s
       raw.split("\n").filter_map do |entry|
