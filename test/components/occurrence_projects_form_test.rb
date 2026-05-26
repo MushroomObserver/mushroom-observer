@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class OccurrenceResolveFormTest < ComponentTestCase
+class OccurrenceProjectsFormTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -18,38 +18,40 @@ class OccurrenceResolveFormTest < ComponentTestCase
     )
 
     # Intro text
-    assert_includes(html, :occurrence_resolve_projects_intro.l)
+    assert_html(html, ".modal-body > p",
+                text: :occurrence_resolve_projects_intro.l)
 
-    # Project list
-    assert_includes(
-      html, :occurrence_resolve_projects_projects.l
-    )
+    # Project list heading
+    assert_html(html, ".modal-body > strong", text: "#{:PROJECTS.l}:")
     assert_html(html, "a[href='/projects/#{@project.id}']",
                 text: @project.title)
 
     # Form posts to occurrences_path
     assert_html(html, "form[action='/occurrences'][method='post']")
 
-    # Hidden fields for selected observations — must use the namespaced
-    # `occurrence[observation_ids][]` shape because OccurrencesController#create
-    # reads `params.dig(:occurrence, :observation_ids)` (PR #4250).
-    # Flat `observation_ids[]` would be silently ignored and the controller
-    # would flash "must include at least one additional observation".
+    # Hidden fields for selected observations — namespaced under
+    # `occurrence_projects[*]` (the FormObject's param key).
+    # OccurrencesController#create reads via `occurrence_form_param` so
+    # it accepts either this or the new-form's `occurrence[*]` shape.
     assert_html(html,
                 "input[type='hidden']" \
-                "[name='occurrence[observation_ids][]']" \
+                "[name='occurrence_projects[observation_ids][]']" \
                 "[value='#{@obs1.id}']")
     assert_html(html,
                 "input[type='hidden']" \
-                "[name='occurrence[observation_ids][]']" \
+                "[name='occurrence_projects[observation_ids][]']" \
                 "[value='#{@obs2.id}']")
+    # observation_id (source obs) stays top-level — matches the new-
+    # form's contract; the controller reads `params[:observation_id]`
+    # for `find_source_observation!`.
     assert_html(html,
                 "input[type='hidden']" \
                 "[name='observation_id']" \
                 "[value='#{@obs1.id}']")
     assert_html(html,
                 "input[type='hidden']" \
-                "[name='occurrence[primary_observation_id]']" \
+                "[name='occurrence_projects" \
+                "[primary_observation_id]']" \
                 "[value='#{@obs1.id}']")
 
     # Cancel link points to new_occurrence_path
@@ -57,15 +59,22 @@ class OccurrenceResolveFormTest < ComponentTestCase
       html,
       "a.btn[href='/occurrences/new" \
       "?observation_id=#{@obs1.id}']",
-      text: :occurrence_resolve_projects_cancel.l
+      text: :CANCEL.l
     )
 
-    # Add All button with project_resolution name
+    # Skip button — proceed without backfilling projects
     assert_html(html,
                 "button[type='submit']" \
-                "[name='project_resolution']" \
+                "[name='occurrence_projects[resolution]']" \
+                "[value='skip']",
+                text: :SKIP.l)
+
+    # Add All button
+    assert_html(html,
+                "button[type='submit']" \
+                "[name='occurrence_projects[resolution]']" \
                 "[value='add_all']",
-                text: :occurrence_resolve_projects_add_all.l)
+                text: :ADD_ALL.l)
   end
 
   def test_edit_flow
@@ -77,25 +86,36 @@ class OccurrenceResolveFormTest < ComponentTestCase
       gaps: gaps, primary: @obs1, occurrence: occ
     )
 
-    # Form posts to resolve_projects_occurrence_path
+    # Form PATCHes the nested projects resource:
+    # /occurrences/:occurrence_id/projects → Occurrences::ProjectsController#update.
     assert_html(
       html,
-      "form[action='/occurrences/#{occ.id}" \
-      "/resolve_projects'][method='post']"
+      "form[action='/occurrences/#{occ.id}/projects'][method='post']"
     )
+    # PATCH is emitted via Rails' `_method` override (HTML forms can
+    # only natively POST or GET). The FormObject's `for_update: true`
+    # flips `persisted?` so Superform picks PATCH.
+    assert_html(html, "input[name='_method'][value='patch']")
 
     # Cancel link points to occurrence show page
     assert_html(
       html, "a.btn[href='/occurrences/#{occ.id}']",
-      text: :occurrence_resolve_projects_cancel.l
+      text: :CANCEL.l
     )
 
-    # Add All button with resolution name (not project_resolution)
+    # Skip button — leave projects alone, redirect to occurrence show
     assert_html(html,
                 "button[type='submit']" \
-                "[name='resolution']" \
+                "[name='occurrence_projects[resolution]']" \
+                "[value='skip']",
+                text: :SKIP.l)
+
+    # Add All button
+    assert_html(html,
+                "button[type='submit']" \
+                "[name='occurrence_projects[resolution]']" \
                 "[value='add_all']",
-                text: :occurrence_resolve_projects_add_all.l)
+                text: :ADD_ALL.l)
   end
 
   def test_no_project_list_when_empty
@@ -105,12 +125,11 @@ class OccurrenceResolveFormTest < ComponentTestCase
     )
 
     # Intro text still renders
-    assert_includes(html, :occurrence_resolve_projects_intro.l)
+    assert_html(html, ".modal-body > p",
+                text: :occurrence_resolve_projects_intro.l)
 
     # No project list heading
-    assert_not_includes(
-      html, :occurrence_resolve_projects_projects.l
-    )
+    assert_no_html(html, ".modal-body > strong")
   end
 
   def test_create_flow_hidden_fields_and_buttons
@@ -131,7 +150,7 @@ class OccurrenceResolveFormTest < ComponentTestCase
     # Primary observation hidden field
     primary_field = doc.at_css(
       "input[type='hidden']" \
-      "[name='occurrence[primary_observation_id]']"
+      "[name='occurrence_projects[primary_observation_id]']"
     )
     assert(primary_field,
            "Expected primary observation hidden field")
@@ -167,7 +186,7 @@ class OccurrenceResolveFormTest < ComponentTestCase
     # No observation_ids hidden fields in edit flow
     obs_ids = doc.css(
       "input[type='hidden']" \
-      "[name='occurrence[observation_ids][]']"
+      "[name='occurrence_projects[observation_ids][]']"
     )
     assert_equal(0, obs_ids.size,
                  "Edit flow should not have obs hidden fields")
@@ -195,16 +214,20 @@ class OccurrenceResolveFormTest < ComponentTestCase
                 text: @project.id.to_s)
     assert_html(html, ".modal-body > ul > li > a",
                 text: @project.title)
-    assert_html(html, "form > .modal-footer > button[type='submit']",
-                text: :occurrence_resolve_projects_add_all.l)
+    assert_html(html,
+                "form > .modal-footer > button[value='add_all']",
+                text: :ADD_ALL.l)
+    assert_html(html,
+                "form > .modal-footer > button[value='skip']",
+                text: :SKIP.l)
     assert_html(html, "form > .modal-footer > a[data-dismiss='modal']",
-                text: :occurrence_resolve_projects_cancel.l)
+                text: :CANCEL.l)
   end
 
   def test_owns_modal_sections_class_method_returns_true
     # ModalTurboForm and similar wrappers auto-detect this to choose
     # Modal's :form_content slot. Locks the contract in.
-    assert(Components::OccurrenceResolveForm.owns_modal_sections?)
+    assert(Components::OccurrenceProjectsForm.owns_modal_sections?)
   end
 
   def test_multiple_projects_listed
@@ -226,7 +249,7 @@ class OccurrenceResolveFormTest < ComponentTestCase
 
   def render_resolve_form(gaps:, primary:, selected: nil,
                           occurrence: nil)
-    render(Components::OccurrenceResolveForm.new(
+    render(Components::OccurrenceProjectsForm.new(
              gaps: gaps, primary: primary,
              selected: selected, occurrence: occurrence
            ))

@@ -22,7 +22,10 @@ module Views
         def view_template
           container_class(:full)
           add_new_title(:create_occurrence_title, :OCCURRENCE)
-          render(Components::OccurrenceForm.new(
+          render(Views::Controllers::Occurrences::Form.new(
+                   model: Occurrence.new(
+                     primary_observation: @source_obs
+                   ),
                    source_obs: @source_obs,
                    recent_observations: @recent_observations,
                    user: @user
@@ -41,7 +44,7 @@ module Views
                    user: @user
                  )) do |m|
             m.with_form_content do
-              render(Components::OccurrenceResolveForm.new(**@project_confirm))
+              render(Components::OccurrenceProjectsForm.new(**@project_confirm))
             end
           end
         end

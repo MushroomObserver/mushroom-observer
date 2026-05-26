@@ -21,8 +21,8 @@ module Views
         def view_template
           container_class(:wide)
           view_context.add_edit_title(@occurrence, user: @user)
-          render(Components::OccurrenceEditForm.new(
-                   occurrence: @occurrence,
+          render(Views::Controllers::Occurrences::Form.new(
+                   model: @occurrence,
                    observations: @observations,
                    candidates: @candidates,
                    user: @user
@@ -41,7 +41,7 @@ module Views
                    user: @user
                  )) do |m|
             m.with_form_content do
-              render(Components::OccurrenceResolveForm.new(
+              render(Components::OccurrenceProjectsForm.new(
                        gaps: @project_gaps,
                        primary: @occurrence.primary_observation,
                        occurrence: @occurrence

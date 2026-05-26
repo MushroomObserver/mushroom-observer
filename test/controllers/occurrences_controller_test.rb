@@ -59,7 +59,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
     params = create_params(@obs1, [@obs1, obs3])
-    params[:project_resolution] = "add_all"
+    params[:occurrence_projects] = { resolution: "add_all" }
     assert_difference("Occurrence.count", 1) do
       post(:create, params: params)
     end
@@ -178,7 +178,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
     params = create_params(@obs1, [@obs1, obs3])
-    params[:project_resolution] = "add_all"
+    params[:occurrence_projects] = { resolution: "add_all" }
     post(:create, params: params)
     assert_flash_success
   end
@@ -224,7 +224,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     login("rolf")
     project = projects(:bolete_project)
     params = create_params(@obs1, [@obs1, @obs3])
-    params[:project_resolution] = "add_all"
+    params[:occurrence_projects] = { resolution: "add_all" }
 
     assert_difference("Occurrence.count", 1) do
       post(:create, params: params)
@@ -239,7 +239,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_create_with_project_resolution_skip
     login("rolf")
     params = create_params(@obs1, [@obs1, @obs3])
-    params[:project_resolution] = "skip"
+    params[:occurrence_projects] = { resolution: "skip" }
 
     assert_difference("Occurrence.count", 1) do
       post(:create, params: params)
@@ -276,43 +276,6 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # == Coverage: resolve_projects extra paths ==
-
-  def test_resolve_projects_add_all_resolves_gaps
-    login("rolf")
-    occ = create_occurrence(@obs1, @obs3)
-    project = projects(:bolete_project)
-
-    post(:resolve_projects,
-         params: { id: occ.id, resolution: "add_all" })
-
-    assert_redirected_to(occurrence_path(occ))
-    @obs1.reload
-    assert_includes(
-      @obs1.projects, project,
-      "All obs should be added to project"
-    )
-    @obs3.reload
-    assert_includes(@obs3.projects, project)
-  end
-
-  def test_resolve_projects_get_renders_edit_with_gaps
-    login("rolf")
-    occ = create_occurrence(@obs1, @obs3)
-
-    get(:resolve_projects, params: { id: occ.id })
-
-    assert_response(:success)
-    # Components::Modal wrapping (auto-open, modal-lg, id) — these are
-    # the markers proving the new modal composition rendered, not the
-    # pre-refactor hand-rolled markup or no modal at all.
-    assert_select("div#modal_resolve_projects.modal.fade.in")
-    assert_select("div.modal-dialog.modal-lg")
-    assert_select("div.modal-backdrop.fade.in")
-    # Form is inside modal-body, with the edit-mode submit button name.
-    assert_select("[name='resolution'][value='add_all']")
-  end
-
   # ---------- project confirmation ----------
 
   def test_create_shows_project_confirmation
@@ -328,8 +291,9 @@ class OccurrencesControllerTest < FunctionalTestCase
     # proves the create-mode view file's modal composition rendered.
     assert_select("div#modal_resolve_projects.modal.fade.in")
     assert_select("div.modal-dialog.modal-lg")
-    # Create-mode submit uses project_resolution (vs edit's resolution).
-    assert_select("[name='project_resolution']")
+    # Both Skip and Add All buttons post under the FormObject's
+    # namespace (`occurrence_projects[resolution]`).
+    assert_select("[name='occurrence_projects[resolution]']", count: 2)
   end
 
   def test_create_with_add_all_adds_to_projects
@@ -337,51 +301,13 @@ class OccurrencesControllerTest < FunctionalTestCase
     obs3 = observations(:detailed_unknown_obs) # in bolete_project
     project = projects(:bolete_project)
     params = create_params(@obs1, [@obs1, obs3])
-    params[:project_resolution] = "add_all"
+    params[:occurrence_projects] = { resolution: "add_all" }
     assert_difference("Occurrence.count", 1) do
       post(:create, params: params)
     end
     occ = Occurrence.last
     assert_includes(@obs1.reload.projects, project,
                     "All obs should be added to all projects")
-    assert_redirected_to(occurrence_path(occ))
-  end
-
-  # ---------- resolve_projects action ----------
-
-  def test_resolve_projects_get_with_gaps
-    login("rolf")
-    obs3 = observations(:detailed_unknown_obs)
-    occ = create_occurrence(@obs1, obs3)
-    get(:resolve_projects, params: { id: occ.id })
-    assert_response(:success)
-  end
-
-  def test_resolve_projects_get_no_gaps
-    login("rolf")
-    occ = create_occurrence(@obs1, @obs2)
-    get(:resolve_projects, params: { id: occ.id })
-    assert_redirected_to(occurrence_path(occ))
-  end
-
-  def test_resolve_projects_post_add_all
-    login("rolf")
-    obs3 = observations(:detailed_unknown_obs)
-    project = projects(:bolete_project)
-    occ = create_occurrence(@obs1, obs3)
-    post(:resolve_projects,
-         params: { id: occ.id, resolution: "add_all" })
-    assert_includes(@obs1.reload.projects, project)
-    assert_redirected_to(occurrence_path(occ))
-  end
-
-  def test_resolve_projects_post_cancel
-    login("rolf")
-    obs3 = observations(:detailed_unknown_obs)
-    project = projects(:bolete_project)
-    occ = create_occurrence(@obs1, obs3)
-    post(:resolve_projects, params: { id: occ.id })
-    assert_not_includes(@obs1.reload.projects, project)
     assert_redirected_to(occurrence_path(occ))
   end
 
@@ -1071,14 +997,12 @@ class OccurrencesControllerTest < FunctionalTestCase
     )
   end
 
-  # After create/update, redirect goes to either occurrence show or
-  # resolve_projects (if project membership gaps exist).
+  # After create/update with no project gaps, redirect goes to the
+  # occurrence show page. (With gaps, the controller re-renders the
+  # edit page with the modal overlaid — no redirect — but the
+  # callers of this helper hit the gap-free path.)
   def assert_occurrence_redirect(occ)
-    show = occurrence_path(occ)
-    resolve = resolve_projects_occurrence_path(occ)
-    assert_includes([show, resolve], @response.redirect_url.split("?").first.
-                    sub(%r{^https?://[^/]+}, ""),
-                    "Expected redirect to occurrence show or resolve_projects")
+    assert_redirected_to(occurrence_path(occ))
   end
 
   def create_occurrence(primary_obs, *other_obs)
