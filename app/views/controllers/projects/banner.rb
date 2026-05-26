@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
-module Components
-  # Renders a project banner with title, location, date range, tabs,
-  # and optional banner image. Used on every project page so the
-  # banner looks the same regardless of which tab is selected.
-  #
-  # @example Basic usage in helper
-  #   content_for(:project_banner) do
-  #     render(Components::ProjectBanner.new(project: @project))
-  #   end
-  #
-  class ProjectBanner < Base
+# Renders a project banner with title, location, date range, tabs,
+# and optional banner image. Rendered on every project page (and
+# the per-project checklist show page) via the `add_project_banner`
+# helper so the banner looks the same regardless of which tab is
+# selected.
+#
+# @example Basic usage in helper
+#   content_for(:project_banner) do
+#     render(Views::Controllers::Projects::Banner.new(project: @project))
+#   end
+module Views::Controllers::Projects
+  class Banner < Views::Base
     include Phlex::Rails::Helpers::ContentFor
 
     prop :project, _Nilable(Project)
@@ -27,7 +28,7 @@ module Components
       end
 
       div(class: "row") do
-        render(Views::Controllers::Projects::Tabs.new(
+        render(Tabs.new(
                  project: @project, user: @user,
                  current_tab: @current_tab
                ))

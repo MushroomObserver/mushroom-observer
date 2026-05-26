@@ -56,7 +56,7 @@ module Tabs
 
     def add_project_banner(project)
       content_for(:project_banner) do
-        render(Components::ProjectBanner.new(
+        render(Views::Controllers::Projects::Banner.new(
                  project: project,
                  user: User.current,
                  current_tab: active_project_tab
