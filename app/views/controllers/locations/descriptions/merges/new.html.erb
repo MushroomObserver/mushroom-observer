@@ -5,4 +5,6 @@ add_context_nav(
 )
 %>
 
-<%= render(Components::Descriptions::MergeForm.new(@description, user: @user)) %>
+<%= render(Views::Controllers::Descriptions::Merges::Form.new(
+             @description, user: @user
+           )) %>
