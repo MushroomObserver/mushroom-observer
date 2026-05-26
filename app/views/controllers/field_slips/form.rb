@@ -85,7 +85,7 @@ module Views::Controllers::FieldSlips
       render_edit_action_submits unless new_record?
     end
 
-    # MO convention (cf. `description_form.rb`): forms distinguish
+    # MO convention (cf. `descriptions/form.rb`): forms distinguish
     # "new" vs "edit" rendering via the model's persistence state.
     # Naturally handles the create/update re-render paths too —
     # validation failure leaves persistence state unchanged.

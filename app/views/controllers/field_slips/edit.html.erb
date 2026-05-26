@@ -18,7 +18,7 @@
                user: @user
              )) do |m|
         m.with_form_content do
-          render(Components::OccurrenceProjectsForm.new(
+          render(Views::Controllers::Occurrences::Projects::Form.new(
                    gaps: @field_slip_project_gaps,
                    primary: @field_slip_occurrence.primary_observation,
                    occurrence: @field_slip_occurrence

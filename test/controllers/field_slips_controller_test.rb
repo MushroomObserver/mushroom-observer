@@ -1010,8 +1010,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
   # but not the view-render branch. This test PUTs through the
   # controller flow that sets `@field_slip_project_gaps`, then asserts
   # the response renders `Components::Modal` wrapping the
-  # OccurrenceProjectsForm — the view-level contract in
-  # `field_slips/edit.html.erb` that no other test exercises.
+  # `Views::Controllers::Occurrences::Projects::Form` — the view-level
+  # contract in `field_slips/edit.html.erb` that no other test
+  # exercises.
   def test_update_with_project_gaps_renders_modal
     login("rolf")
     fs = field_slips(:field_slip_no_obs)

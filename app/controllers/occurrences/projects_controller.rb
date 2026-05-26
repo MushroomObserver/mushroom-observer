@@ -3,7 +3,8 @@
 # Resolves project membership gaps on an Occurrence — the nested
 # singular resource at `/occurrences/:occurrence_id/projects`.
 # Reached only via PATCH from the auto-opening confirmation modal
-# (`Components::OccurrenceProjectsForm`), which renders inside the
+# (`Views::Controllers::Occurrences::Projects::Form`), which renders
+# inside the
 # parent occurrence's edit page (and field_slips' new/edit) when
 # `project_membership_gaps` are detected after a successful update.
 #
