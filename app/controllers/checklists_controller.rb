@@ -37,7 +37,7 @@ class ChecklistsController < ApplicationController
   private
 
   def checklist_context
-    Components::Checklist::Context.new(
+    Views::Controllers::Checklists::Context.new(
       user: @user, project: @project, show_user: @show_user,
       location: @location, species_list: @species_list
     )

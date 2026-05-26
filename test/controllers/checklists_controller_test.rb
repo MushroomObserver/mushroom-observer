@@ -23,8 +23,8 @@ class ChecklistsControllerTest < FunctionalTestCase
     # seed / parallel-worker assignment. Previously an unordered `find_by`
     # returned different rows depending on MySQL's implementation-defined
     # ordering, which silently varied which user's checklist was
-    # rendered and which branches of Components::Checklist::Contents got
-    # covered.
+    # rendered and which branches of
+    # `Views::Controllers::Checklists::Contents` got covered.
     observation = Observation.joins(:name).where(name: { deprecated: true }).
                   order(:id).first
     user = observation.user

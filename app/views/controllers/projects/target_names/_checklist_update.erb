@@ -14,9 +14,11 @@ context_args = { user: user, project: project }
 end
 %>
 <%= turbo_stream.replace("checklist_contents") do %>
-  <%= render(Components::Checklist::Contents.new(
+  <%= render(Views::Controllers::Checklists::Contents.new(
                data: data,
-               context: Components::Checklist::Context.new(**context_args)
+               context: Views::Controllers::Checklists::Context.new(
+                 **context_args
+               )
              )) %>
 <% end %>
 <%= render(partial: "projects/tab_counts_update",
