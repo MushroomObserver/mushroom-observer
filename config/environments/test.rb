@@ -118,12 +118,12 @@ MushroomObserver::Application.configure do
   # Set log level.
   config.log_level = :ERROR
 
-  # Suppress template digesting errors for Phlex components
-  # (Phlex components don't have ERB templates to digest)
+  # Suppress template digesting errors for Phlex components and Views
+  # (Phlex components and Views don't have ERB templates to digest)
   config.action_view.logger = Logger.new($stdout).tap do |logger|
     logger.level = Logger::ERROR
 
-    # Filter out the Phlex component template errors
+    # Filter out the Phlex component and Views template errors
     original_formatter = Logger::Formatter.new
     logger.formatter = proc do |severity, datetime, progname, msg|
       next if msg.to_s.match?(
