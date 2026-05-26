@@ -218,13 +218,13 @@ class Components::DescriptionForm < Components::ApplicationForm
 
   def source_type_options_all
     Description::ALL_SOURCE_TYPES.map do |type|
-      [type, :"form_description_source_#{type}".l]
+      [:"form_description_source_#{type}".l, type]
     end
   end
 
   def source_type_options_basic
     Description::BASIC_SOURCE_TYPES.map do |type|
-      [type, :"form_description_source_#{type}".l]
+      [:"form_description_source_#{type}".l, type]
     end
   end
 
