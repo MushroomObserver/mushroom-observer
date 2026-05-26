@@ -7,4 +7,7 @@ add_page_title(:species_list_add_remove_title.t)
 add_context_nav(species_list_form_observations_tabs)
 %>
 
-<%= render(partial: "species_lists/observations/form") %>
+<%= render(Views::Controllers::SpeciesLists::Observations::Form.new(
+             prefill_value: @id,
+             num_results: @query.num_results
+           )) %>

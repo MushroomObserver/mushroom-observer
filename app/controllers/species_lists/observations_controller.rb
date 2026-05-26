@@ -12,7 +12,7 @@ module SpeciesLists
     # :add_remove_observations
     # Form to add or remove the current *query* of observations
     def edit
-      @id = params[:species_list].to_s
+      @id = species_list_query_param
       @query = find_obs_query_or_redirect
     end
 
@@ -20,7 +20,7 @@ module SpeciesLists
     # PUT endpoint — via params[:commit], either add or remove a
     #                *query* of observations from a species_list
     def update
-      id = params[:species_list].to_s
+      id = species_list_query_param
       return unless (spl = find_list_or_reload_form!(id))
 
       query = find_obs_query_or_redirect(spl)
@@ -51,8 +51,19 @@ module SpeciesLists
 
       flash_error(:species_list_add_remove_bad_name.t(name: id.inspect))
       # id is guaranteed by .to_s not to be nil, but may be a blank string
-      redirect_to(species_lists_edit_observations_path(species_list: id))
+      redirect_to(
+        species_lists_edit_observations_path(species_list: { title: id })
+      )
       nil
+    end
+
+    # Read the destination species-list identifier from either the
+    # form POST shape (`species_list[title]`) or the URL/GET shape
+    # (`?species_list[title]=...`). Both are the model-namespaced
+    # value the autocompleter writes; the title can also be a
+    # numeric id for direct URL access.
+    def species_list_query_param
+      params.dig(:species_list, :title).to_s
     end
 
     def lookup_species_list_by_id_or_name(str)
