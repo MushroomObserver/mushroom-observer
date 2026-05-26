@@ -111,6 +111,37 @@ class ImagesControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  # Regression for #4360: a cross-model q param (Observation query
+  # landing on the Images index) used to silently fall back to the
+  # full unfiltered Image index — a >60s response that could trigger
+  # downtime alerts. The query-coercion bridge in
+  # `find_new_query_for_model` should map the Observation query to an
+  # Image query via the `observation_query` subquery instead.
+  def test_index_cross_model_q_param_with_hits
+    pattern = "USA"
+    params = { q: { model: :Observation, pattern: } }
+
+    login
+    get(:index, params:)
+
+    assert_template("index", partial: "_image")
+    # Should NOT have flashed "no matches" — the bridge produces hits.
+    assert_no_flash
+  end
+
+  def test_index_cross_model_q_param_no_hits_flashes_error
+    pattern = "nothingMatchesAxotl"
+    params = { q: { model: :Observation, pattern: } }
+
+    login
+    get(:index, params:)
+
+    # Zero matching Observations → zero matching Images → "no matches"
+    # flash, not a silent fall-back to the unfiltered Image index.
+    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_template("index")
+  end
+
   def test_show_image
     image = images(:peltigera_image)
     assert(ImageVote.where(image: image).many?,
