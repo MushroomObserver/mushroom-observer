@@ -68,7 +68,7 @@ module Views::Controllers::Projects
     private
 
     def render_subtabs(project:, current_subtab:)
-      render(Views::Controllers::Projects::AdminSubtabs.new(
+      render(AdminSubtabs.new(
                project: project, current_subtab: current_subtab
              ))
     end

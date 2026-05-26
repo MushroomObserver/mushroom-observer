@@ -101,7 +101,7 @@ module Views::Controllers::Projects
 
     def render_form(model:, dates_any: true, upload_params: nil)
       User.current = @user
-      render(Views::Controllers::Projects::Form.new(
+      render(Form.new(
                model,
                enctype: "multipart/form-data",
                dates_any: dates_any,

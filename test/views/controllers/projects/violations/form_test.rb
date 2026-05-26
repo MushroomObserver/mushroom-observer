@@ -169,7 +169,7 @@ module Views::Controllers::Projects::Violations
     private
 
     def render_form(violations:, project: @project, user: @admin)
-      render(Views::Controllers::Projects::Violations::Form.new(
+      render(Form.new(
                project: project, violations: violations, user: user
              ))
     end

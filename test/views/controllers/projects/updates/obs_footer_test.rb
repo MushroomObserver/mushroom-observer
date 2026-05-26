@@ -35,7 +35,7 @@ module Views::Controllers::Projects::Updates
       end
 
       def render_footer(show_excluded:)
-        render(Views::Controllers::Projects::Updates::ObsFooter.new(
+        render(ObsFooter.new(
                  project: project, obs: obs, show_excluded: show_excluded
                ))
       end

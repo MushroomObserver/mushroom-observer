@@ -63,8 +63,8 @@ module Views::Controllers::Projects::Members
     private
 
     def render_form(project_member)
-      render(Views::Controllers::Projects::Members::Form.new(project_member,
-                                                             project: @project))
+      render(Form.new(project_member,
+                      project: @project))
     end
   end
 end

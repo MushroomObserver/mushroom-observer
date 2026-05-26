@@ -57,7 +57,7 @@ module Views::Controllers::Projects::FieldSlips
       model = FormObject::ProjectFieldSlip.new(
         field_slips: field_slips
       )
-      render(Views::Controllers::Projects::FieldSlips::Form.new(
+      render(Form.new(
                model, project: @project
              ))
     end
