@@ -30,13 +30,13 @@ module Views
 
           def view_template
             render(Components::Modal.new(
-                     id: Components::TargetLocationForm.modal_id_for(@obs),
+                     id: Views::Controllers::Projects::Violations::TargetLocationForm.modal_id_for(@obs),
                      title: :form_violations_modal_target_location_title.l,
                      user: @user
                    )) do |m|
-              if Components::TargetLocationForm.applicable?(@obs)
+              if Views::Controllers::Projects::Violations::TargetLocationForm.applicable?(@obs)
                 m.with_form_content do
-                  render(Components::TargetLocationForm.new(
+                  render(Views::Controllers::Projects::Violations::TargetLocationForm.new(
                            obs: @obs, project: @project
                          ))
                 end

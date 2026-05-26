@@ -31,10 +31,10 @@ module Views
               )
             )
 
-            render(Components::ProjectMemberForm.new(
+            render(Views::Controllers::Projects::Members::Form.new(
                      @project_member, project: @project
                    ))
-            render(Components::ProjectGroups.new(
+            render(Views::Controllers::Projects::Members::Groups.new(
                      project: @project, user: @user
                    ))
           end

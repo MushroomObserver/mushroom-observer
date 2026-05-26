@@ -1,7 +1,7 @@
 <%=
   id = "target_project_alias_#{@project_alias.target_id}"
   turbo_stream.replace(id) do
-    render(Components::ProjectAliases.new(
+    render(Views::Controllers::Projects::Aliases::Widget.new(
       project: @project_alias.project,
       target: @project_alias.target
     ))

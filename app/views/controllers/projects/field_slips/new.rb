@@ -58,7 +58,7 @@ module Views
           end
 
           def render_form
-            render(Components::ProjectFieldSlipForm.new(
+            render(Views::Controllers::Projects::FieldSlips::Form.new(
                      FormObject::ProjectFieldSlip.new(
                        field_slips: default_count
                      ),
@@ -98,7 +98,7 @@ module Views
           def render_tracker_rows
             @project.trackers.order(id: :desc).each do |t|
               render(
-                Components::ProjectFieldSlipTrackerRow.new(
+                Views::Controllers::Projects::FieldSlips::TrackerRow.new(
                   tracker: t, user: @user
                 )
               )

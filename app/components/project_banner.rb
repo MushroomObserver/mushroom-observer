@@ -27,7 +27,7 @@ module Components
       end
 
       div(class: "row") do
-        render(Components::Projects::Tabs.new(
+        render(Views::Controllers::Projects::Tabs.new(
                  project: @project, user: @user,
                  current_tab: @current_tab
                ))

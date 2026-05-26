@@ -77,7 +77,7 @@ module Projects
 
     # All action params (`do`, `obs_id`, `location_id`) are namespaced
     # under `params[:project]` — the form's Superform model is Project,
-    # and the button_to calls in `Components::ProjectViolationsForm`
+    # and the button_to calls in `Views::Controllers::Projects::Violations::Form`
     # POST `params: { project: { do: ..., obs_id: ... } }` to match.
     def dispatch_action
       case params.dig(:project, :do)

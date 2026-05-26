@@ -21,7 +21,7 @@ module Views
           add_new_title(:create_object, :PROJECT)
           add_context_nav(project_form_new_tabs)
 
-          render(Components::ProjectForm.new(
+          render(Views::Controllers::Projects::Form.new(
                    @project,
                    enctype: "multipart/form-data",
                    dates_any: @dates_any,

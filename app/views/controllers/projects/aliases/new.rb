@@ -23,7 +23,7 @@ module Views
             add_page_title(:project_alias_new.l)
             container_class(:text)
 
-            render(Components::ProjectAliasForm.new(
+            render(Views::Controllers::Projects::Aliases::Form.new(
                      @project_alias, user: @user,
                                      local: true
                    ))

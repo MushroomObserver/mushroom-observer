@@ -141,7 +141,7 @@ module Projects
                    ),
                    user: @user,
                    model: @project_member.user,
-                   form_class: Components::TrustSettingsForm,
+                   form_class: Views::Controllers::Projects::Members::TrustSettings,
                    form_locals: {
                      project: @project,
                      current_trust_level:

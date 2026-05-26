@@ -199,7 +199,7 @@ module Projects
           format: :turbo_stream)
 
       assert_response(:success)
-      modal_id = Components::TargetLocationForm.modal_id_for(obs)
+      modal_id = Views::Controllers::Projects::Violations::TargetLocationForm.modal_id_for(obs)
       # form-content branch — obs has usable suffixes, so the modal
       # renders the TargetLocationForm with body+footer inside <form>.
       assert_select("##{modal_id}", { count: 1 },
@@ -239,7 +239,7 @@ module Projects
           format: :turbo_stream)
 
       assert_response(:success)
-      modal_id = Components::TargetLocationForm.modal_id_for(obs)
+      modal_id = Views::Controllers::Projects::Violations::TargetLocationForm.modal_id_for(obs)
       assert_select(
         "##{modal_id} .modal-body p",
         { text: :form_violations_modal_target_location_no_suffixes.l }

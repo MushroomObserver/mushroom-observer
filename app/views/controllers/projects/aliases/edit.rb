@@ -25,7 +25,7 @@ module Views
             )
             container_class(:text)
 
-            render(Components::ProjectAliasForm.new(
+            render(Views::Controllers::Projects::Aliases::Form.new(
                      @project_alias, user: @user,
                                      local: true
                    ))
