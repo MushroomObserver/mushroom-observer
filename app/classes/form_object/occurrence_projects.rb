@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Form object for the project-membership confirmation modal posted by
-# `Components::OccurrenceProjectsForm`. Represents the collection of
+# `Views::Controllers::Occurrences::Projects::Form`. Represents the
+# collection of
 # projects spanning an occurrence's observations, plus the user's
 # choice for resolving gaps (`"skip"` or `"add_all"`).
 #

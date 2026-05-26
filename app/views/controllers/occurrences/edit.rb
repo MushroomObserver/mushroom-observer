@@ -41,7 +41,7 @@ module Views
                    user: @user
                  )) do |m|
             m.with_form_content do
-              render(Components::OccurrenceProjectsForm.new(
+              render(Views::Controllers::Occurrences::Projects::Form.new(
                        gaps: @project_gaps,
                        primary: @occurrence.primary_observation,
                        occurrence: @occurrence

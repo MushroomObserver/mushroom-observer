@@ -9,7 +9,7 @@ add_edit_title(@external_link)
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(Components::ExternalLinkForm.new(
+    <%= render(Views::Controllers::Observations::ExternalLinks::Form.new(
           @external_link,
           observation: @observation,
           sites: [@site],

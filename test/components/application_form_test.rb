@@ -345,7 +345,7 @@ class ApplicationFormTest < ComponentTestCase
 
   # Most callers in the codebase rely on the Symbol path auto-reading
   # the value from the form's model/FormObject (e.g.
-  # `description_form.rb hidden_field(:project_id)` reads
+  # `descriptions/form.rb hidden_field(:project_id)` reads
   # `form.model.project_id`). Passing Superform's `field(:x)` directly
   # to HiddenField preserves that — `HiddenField` reads `.value` off
   # the field, and Superform's field knows the model's value.

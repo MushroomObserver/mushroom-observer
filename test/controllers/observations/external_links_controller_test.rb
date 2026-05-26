@@ -22,7 +22,7 @@ module Observations
 
       assert_response(:success)
       assert_select(".modal-form")
-      assert_select("form#external_link_form")
+      assert_select("form#observation_external_link_form")
     end
 
     def setup_create_test
@@ -158,7 +158,7 @@ module Observations
 
       assert_response(:success)
       assert_select(".modal-form")
-      assert_select("form#external_link_form")
+      assert_select("form#observation_external_link_form")
     end
 
     def test_update_external_link
