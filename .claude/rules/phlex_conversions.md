@@ -11,17 +11,44 @@ Phlex is **where the new Phlex class lives**. Make this decision before
 writing any code — it determines the namespace, the file path, the test
 location, and how reviewers reason about reuse.
 
-- **Reusable component** → `app/components/<name>.rb`, class
-  `Components::<Name>` (flat namespace), tests in `test/components/`.
-  Use this when the class is genuinely intended to be rendered from more
-  than one controller, or one obvious second caller already exists.
+**Default placement when converting an ERB view to Phlex.** ERB files
+living under `app/views/` get converted to Phlex classes under
+`app/views/controllers/<controller>/<name>.rb`. This applies to
+*everything* in the views tree — forms, tables, panels, sidebars, navs,
+modals, headers, page wrappers, footers, list rows, partials of any
+kind. The default is the views tree, not `app/components/`.
 
-- **Single-use view file** → `app/views/controllers/<controller>/<name>.rb`,
-  class `Views::Controllers::<Controller>::<Name>` (deep namespace
-  mirroring the controller tree), tests in `test/views/controllers/...`.
-  Use this when the class only renders for one controller's pages,
-  including the case where the only "second caller" is a turbo_stream
-  response in that same controller.
+**Exception: true UI primitives.** If while converting you extract a
+chunk that's a genuine, reusable UI building block — a button group, a
+badge, an alert, a generic widget that you'd recognize as a
+"component" regardless of where it happens to be rendered today —
+that piece can live in `app/components/` even if only one caller
+currently exists. The "speculated future caller" carve-out applies
+*only* to recognizably-generic UI primitives. It does NOT apply to
+page-specific fragments wearing component clothing (e.g. a
+`Components::WhateverShowDetails` that only ever renders one
+controller's show page — that's a view, put it in
+`app/views/controllers/`).
+
+Heuristic: would a reader who doesn't know this codebase look at the
+class name and the file's contents and say "yes, that's a component"?
+If yes, `app/components/`. If they'd say "that's the
+`whatever_controller`'s `show` page", `app/views/controllers/`.
+
+- **Single-use view file (default for ERB conversions)** →
+  `app/views/controllers/<controller>/<name>.rb`, class
+  `Views::Controllers::<Controller>::<Name>` (deep namespace mirroring
+  the controller tree), tests in `test/views/controllers/...`. Use this
+  when the class only renders for one controller's pages, including
+  the case where the only "second caller" is a turbo_stream response
+  in that same controller.
+
+- **Reusable component (UI primitives or genuinely multi-caller)** →
+  `app/components/<name>.rb`, class `Components::<Name>` (flat
+  namespace), tests in `test/components/`. Use this for true UI
+  building blocks (button groups, badges, alerts, etc.) regardless of
+  current caller count, OR for non-primitive classes that already have
+  a concrete second caller.
 
 Both inherit from `Phlex::HTML` via `Components::Base` (`Views::Base` is
 a thin subclass). The split is for organization and intent, not
