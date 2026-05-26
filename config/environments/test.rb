@@ -126,9 +126,9 @@ MushroomObserver::Application.configure do
     # Filter out the Phlex component template errors
     original_formatter = Logger::Formatter.new
     logger.formatter = proc do |severity, datetime, progname, msg|
-      if msg.to_s.include?("Couldn't find template for digesting: Components/")
-        next
-      end
+      next if msg.to_s.match?(
+        %r{Couldn't find template for digesting: (Components|Views)/}
+      )
 
       original_formatter.call(severity, datetime, progname, msg)
     end
