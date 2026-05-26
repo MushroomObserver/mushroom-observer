@@ -42,6 +42,6 @@ if rails_env == "production"
     # expiry thread tries to use the inherited cache connection.
     # Surfaced by Trilogy 2.11.0 which now raises explicitly on
     # concurrent connection use (previously silent/undefined behavior).
-    ActiveRecord::Base.clear_all_connections!
+    ActiveRecord::Base.connection_handler.clear_all_connections!
   end
 end
