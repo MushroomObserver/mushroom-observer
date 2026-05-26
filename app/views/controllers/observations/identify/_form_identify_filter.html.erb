@@ -1,4 +1,4 @@
-<%= render(Components::IdentifyFilterForm.new(
+<%= render(Views::Controllers::Observations::Identify::Form.new(
       FormObject::IdentifyFilter.new(
         type: params.dig(:filter, :type),
         term: params.dig(:filter, :term)

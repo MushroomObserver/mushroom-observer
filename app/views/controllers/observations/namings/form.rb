@@ -1,0 +1,129 @@
+# frozen_string_literal: true
+
+# Form for proposing or editing a naming on an observation. Rendered
+# by `Observations::NamingsController#{new,edit}`.
+#
+# @param naming [Naming] the naming model
+# @param observation [Observation] the parent observation
+# @param vote [Vote] the vote object (defaults to new Vote)
+# @param given_name [String] the name typed by user
+# @param reasons [Hash] the naming reasons
+# @param feedback [Hash] name feedback options:
+#   - :names - matched Name objects
+#   - :valid_names - valid synonym Name objects
+#   - :suggest_corrections - whether to suggest corrections
+#   - :parent_deprecated - deprecated parent Name
+# @param show_reasons [Boolean] whether to show reason fields
+# @param context [String] form context ("blank", "lightbox", etc.)
+# @param local [Boolean] if true, non-turbo form
+module Views::Controllers::Observations::Namings
+  class Form < ::Components::ApplicationForm
+    def initialize(naming, **kwargs)
+      extract_kwargs(naming, kwargs)
+      # Dynamic per-observation form id — can't be auto-derived; pass
+      # explicitly so multiple namings on one obs (lightbox / matrix-
+      # box renders) don't collide on the same DOM id.
+      super(naming, id: form_id_value, local: @local, **kwargs)
+    end
+
+    def view_template
+      render_name_feedback if @given_name.present?
+      render_naming_fields
+      render_sibling_reasons_note unless @create
+      submit(button_name, center: true)
+    end
+
+    # Override form_action to derive URL from observation
+    def form_action
+      if @create
+        observation_namings_path(
+          observation_id: @observation.id,
+          approved_name: @given_name
+        )
+      else
+        observation_naming_path(
+          observation_id: @observation.id,
+          id: @naming_id,
+          approved_name: @given_name
+        )
+      end
+    end
+
+    private
+
+    def extract_kwargs(naming, kwargs)
+      extract_form_data(kwargs)
+      extract_display_options(naming, kwargs)
+    end
+
+    def extract_form_data(kwargs)
+      @observation = kwargs.delete(:observation)
+      @vote = kwargs.delete(:vote) || Vote.new
+      @given_name = kwargs.delete(:given_name) || ""
+      @feedback = kwargs.delete(:feedback) || {}
+    end
+
+    def extract_display_options(naming, kwargs)
+      @reasons = kwargs.delete(:reasons) || naming.init_reasons
+      @show_reasons = kwargs.delete(:show_reasons) != false
+      @context = kwargs.delete(:context)
+      @local = kwargs.delete(:local) != false
+      @create = naming.new_record?
+      @naming_id = naming.id
+    end
+
+    def form_id_value
+      if @create
+        "obs_#{@observation.id}_naming_form"
+      else
+        "obs_#{@observation.id}_naming_#{@naming_id}_form"
+      end
+    end
+
+    def button_name
+      @create ? :CREATE.l : :SAVE_EDITS.l
+    end
+
+    def render_name_feedback
+      render(Components::FormNameFeedback.new(
+               button_name: button_name,
+               given_name: @given_name,
+               names: @feedback[:names],
+               valid_names: @feedback[:valid_names],
+               suggest_corrections: @feedback[:suggest_corrections] || false,
+               parent_deprecated: @feedback[:parent_deprecated]
+             ))
+    end
+
+    def render_sibling_reasons_note
+      return unless @observation.occurrence_id
+
+      occ = @observation.occurrence
+      name_id = model.name_id
+      has_sibling_reasons = occ.observations.
+                            where.not(id: @observation.id).
+                            joins(:namings).
+                            where(namings: { name_id: name_id }).any?
+      return unless has_sibling_reasons
+
+      p(class: "text-center text-muted mt-3") do
+        a(href: occurrence_path(occ)) do
+          plain(:naming_see_matching_observations_reasons.l)
+        end
+      end
+    end
+
+    def render_naming_fields
+      render(Fields.new(
+               form: self,
+               vote: @vote,
+               given_name: @given_name,
+               reasons: @reasons,
+               show_reasons: @show_reasons,
+               context: @context,
+               create: @create,
+               add_namespace: false
+             ))
+    end
+  end
+end

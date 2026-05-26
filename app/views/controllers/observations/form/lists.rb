@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Species lists section of the observation form.
-# Renders a collapsible panel with species list checkboxes.
+# Species lists section of the observation form. Collapsible panel
+# with species list checkboxes. Sub-component of
+# `Views::Controllers::Observations::Form`.
 #
 # Wire shape: `observation[species_list_ids][]=<id>`. Checkedness
 # defaults to `model.species_list_ids`; failure-reload uses
@@ -14,7 +15,7 @@
 # @param submitted_list_ids [Array<String>, nil] user's just-
 #   submitted species_list_ids on failure-reload; nil on normal
 #   render.
-class Components::ObservationFormLists < Components::Base
+class Views::Controllers::Observations::Form::Lists < Views::Base
   prop :form, _Any
   prop :observation, Observation
   prop :lists, _Array(SpeciesList)

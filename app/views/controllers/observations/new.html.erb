@@ -4,7 +4,7 @@ add_context_nav(observation_form_new_tabs)
 container_class(:wide)
 %>
 
-<%= render(Components::ObservationForm.new(
+<%= render(Views::Controllers::Observations::Form.new(
       @observation,
       mode: :create,
       user: @user,

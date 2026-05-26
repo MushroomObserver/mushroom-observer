@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
-# Renders naming fields (name autocompleter, vote, reasons) for embedding
-# in Superform-based forms. For ERB forms, use the _fields.erb partial.
+# Renders naming fields (name autocompleter, vote, reasons) for
+# embedding in Superform-based forms. Used by both
+# `Views::Controllers::Observations::Form` (the obs new/edit form's
+# Identification + Specimen panel) and
+# `Views::Controllers::Observations::Namings::Form` (the standalone
+# naming new/edit form for an existing observation).
 #
 # @param form [Components::ApplicationForm] the parent form
 # @param vote [Vote] the vote object
@@ -12,7 +16,7 @@
 # @param create [Boolean] whether this is a new naming
 # @param name_help [String] help text for the name field
 # @param unfocused [Boolean] if true, don't autofocus any field
-class Components::NamingFields < Components::Base
+class Views::Controllers::Observations::Namings::Fields < Views::Base
   prop :form, _Any
   prop :vote, _Nilable(Vote), default: -> { Vote.new }
   prop :given_name, String, default: ""
@@ -78,10 +82,12 @@ class Components::NamingFields < Components::Base
   def render_reasons_field
     return unless @reasons
 
-    render(Components::NamingReasonsFields.new(
-             reasons: @reasons,
-             naming_ns: @naming_ns
-           ))
+    render(
+      Views::Controllers::Observations::Namings::ReasonsFields.new(
+        reasons: @reasons,
+        naming_ns: @naming_ns
+      )
+    )
   end
 
   def collapse_class
