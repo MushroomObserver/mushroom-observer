@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-module Sidebar
+module Views::Layouts::Sidebar
   class AdminTest < ComponentTestCase
     include Tabs::Sidebar::AdminHelper
     include Rails.application.routes.url_helpers
@@ -68,7 +68,7 @@ module Sidebar
         heading: "list-group-item disabled font-weight-bold",
         admin: "list-group-item admin"
       }
-      render(Components::Sidebar::Admin.new(
+      render(Admin.new(
                heading_key: :app_admin,
                tabs: sidebar_admin_tabs,
                classes: classes

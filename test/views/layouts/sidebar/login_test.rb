@@ -2,9 +2,9 @@
 
 require "test_helper"
 
-module Sidebar
-  class LatestTest < ComponentTestCase
-    include Tabs::Sidebar::LatestHelper
+module Views::Layouts::Sidebar
+  class LoginTest < ComponentTestCase
+    include Tabs::Sidebar::LoginHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -21,17 +21,16 @@ module Sidebar
       super
     end
 
-    def test_renders_heading_and_links
+    def test_renders_heading_with_icon_and_links
       html = render_component
 
-      # Should have heading with "Latest:" text
-      assert_includes(html, :app_latest.t)
+      # Should have heading with icon and "Account:" text
+      assert_includes(html, :app_account.t)
+      assert_html(html, "i.glyphicon.glyphicon-user")
 
       # Should include navigation links
-      assert_html(html, "#nav_articles_link")
-      assert_html(html, "#nav_activity_logs_link")
-      assert_html(html, "#nav_images_link")
-      assert_html(html, "#nav_comments_link")
+      assert_html(html, "#nav_login_link")
+      assert_html(html, "#nav_signup_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")
@@ -47,31 +46,24 @@ module Sidebar
       assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 
-    def test_renders_only_news_link_for_guest_users
-      html = render_component(user: nil)
+    def test_heading_contains_icon_and_span
+      html = render_component
 
-      # Should have heading
-      assert_includes(html, :app_latest.t)
-
-      # Should have news link (available to all)
-      assert_html(html, "#nav_articles_link")
-
-      # Should NOT have user-only links
-      assert_no_html(html, "#nav_activity_logs_link")
-      assert_no_html(html, "#nav_images_link")
-      assert_no_html(html, "#nav_comments_link")
+      # Should have icon before text
+      assert_html(html, "div.list-group-item i.glyphicon.glyphicon-user")
+      assert_html(html, "div.list-group-item span")
     end
 
     private
 
-    def render_component(user: users(:rolf))
+    def render_component
       classes = {
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent"
       }
-      render(Components::Sidebar::Section.new(
-               heading_key: :app_latest,
-               tabs: sidebar_latest_tabs(user),
+      render(Login.new(
+               heading_key: :app_account,
+               tabs: sidebar_login_tabs,
                classes: classes
              ))
     end
