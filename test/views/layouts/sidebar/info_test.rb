@@ -2,9 +2,9 @@
 
 require "test_helper"
 
-module Sidebar
-  class LoginTest < ComponentTestCase
-    include Tabs::Sidebar::LoginHelper
+module Views::Layouts::Sidebar
+  class InfoTest < ComponentTestCase
+    include Tabs::Sidebar::InfoHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -21,16 +21,25 @@ module Sidebar
       super
     end
 
-    def test_renders_heading_with_icon_and_links
+    def test_renders_heading_and_links
       html = render_component
 
-      # Should have heading with icon and "Account:" text
-      assert_includes(html, :app_account.t)
-      assert_html(html, "i.glyphicon.glyphicon-user")
+      # Should have heading with "More:" text
+      assert_includes(html, :app_more.t)
 
       # Should include navigation links
-      assert_html(html, "#nav_login_link")
-      assert_html(html, "#nav_signup_link")
+      assert_html(html, "#nav_mobile_app_link")
+      assert_html(html, "#nav_intro_link")
+      assert_html(html, "#nav_how_to_use_link")
+      assert_html(html, "#nav_donate_link")
+      assert_html(html, "#nav_how_to_help_link")
+      assert_html(html, "#nav_bug_report_link")
+      assert_html(html, "#nav_ask_webmaster_link")
+      assert_html(html, "#nav_contributors_link")
+      assert_html(html, "#nav_site_stats_link")
+      assert_html(html, "#nav_translators_note_link")
+      assert_html(html, "#nav_publications_link")
+      assert_html(html, "#nav_privacy_policy_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")
@@ -46,14 +55,6 @@ module Sidebar
       assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 
-    def test_heading_contains_icon_and_span
-      html = render_component
-
-      # Should have icon before text
-      assert_html(html, "div.list-group-item i.glyphicon.glyphicon-user")
-      assert_html(html, "div.list-group-item span")
-    end
-
     private
 
     def render_component
@@ -61,9 +62,9 @@ module Sidebar
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent"
       }
-      render(Components::Sidebar::Login.new(
-               heading_key: :app_account,
-               tabs: sidebar_login_tabs,
+      render(Section.new(
+               heading_key: :app_more,
+               tabs: sidebar_info_tabs,
                classes: classes
              ))
     end

@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-module Sidebar
+module Views::Layouts::Sidebar
   class LanguagesTest < ComponentTestCase
     Browser = Struct.new(:bot?) do
       def bot?
@@ -55,7 +55,7 @@ module Sidebar
 
     def render_component(browser: mock_human_browser)
       render(
-        Components::Sidebar::Languages.new(
+        Languages.new(
           browser: browser,
           request: mock_request,
           languages: mock_languages

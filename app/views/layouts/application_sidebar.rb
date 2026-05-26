@@ -70,13 +70,13 @@ class Views::Layouts::ApplicationSidebar < Views::Base
     # This cache depends on user status and locale
     cache([I18n.locale, user_status_string(@user), "login"]) do
       if @in_admin_mode
-        render(Components::Sidebar::Admin.new(
+        render(Views::Layouts::Sidebar::Admin.new(
                  heading_key: :app_admin,
                  tabs: sidebar_admin_tabs,
                  classes: classes
                ))
       elsif @user.nil?
-        render(Components::Sidebar::Login.new(
+        render(Views::Layouts::Sidebar::Login.new(
                  heading_key: :app_account,
                  tabs: sidebar_login_tabs,
                  classes: classes
@@ -96,14 +96,14 @@ class Views::Layouts::ApplicationSidebar < Views::Base
     # (i.e. cache invalidated if query record updated, or new ID).
     # cache([@user, current_query_record]) do
     if @user
-      render(Components::Sidebar::User.new(
+      render(Views::Layouts::Sidebar::User.new(
                user: @user,
                classes: classes,
                in_admin_mode: @in_admin_mode
              ))
     end
 
-    render(Components::Sidebar::Section.new(
+    render(Views::Layouts::Sidebar::Section.new(
              heading_key: :app_observations_left,
              tabs: sidebar_observations_tabs(@user),
              classes: classes
@@ -111,7 +111,7 @@ class Views::Layouts::ApplicationSidebar < Views::Base
 
     return unless @user
 
-    render(Components::Sidebar::Section.new(
+    render(Views::Layouts::Sidebar::Section.new(
              heading_key: :app_species_list,
              tabs: sidebar_species_lists_tabs(@user),
              classes: classes
@@ -123,21 +123,21 @@ class Views::Layouts::ApplicationSidebar < Views::Base
   def render_info_sections
     # This cache depends on user status and locale
     cache([I18n.locale, user_status_string(@user), "links"]) do
-      render(Components::Sidebar::Section.new(
+      render(Views::Layouts::Sidebar::Section.new(
                heading_key: :app_latest,
                tabs: sidebar_latest_tabs(@user),
                classes: classes
              ))
 
       if @user
-        render(Components::Sidebar::Section.new(
+        render(Views::Layouts::Sidebar::Section.new(
                  heading_key: :INDEXES,
                  tabs: sidebar_indexes_tabs,
                  classes: classes
                ))
       end
 
-      render(Components::Sidebar::Section.new(
+      render(Views::Layouts::Sidebar::Section.new(
                heading_key: :app_more,
                tabs: sidebar_info_tabs,
                classes: classes
@@ -150,7 +150,7 @@ class Views::Layouts::ApplicationSidebar < Views::Base
   def render_languages_section
     return if @browser.bot?
 
-    render(Components::Sidebar::Languages.new(
+    render(Views::Layouts::Sidebar::Languages.new(
              browser: @browser,
              request: @request,
              languages: @languages

@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-module Sidebar
+module Views::Layouts::Sidebar
   class UserTest < ComponentTestCase
     def setup
       super
@@ -76,7 +76,7 @@ module Sidebar
         mobile_only: "mobile-only"
       }
       render(
-        Components::Sidebar::User.new(
+        User.new(
           user: @user,
           classes: classes,
           in_admin_mode: in_admin_mode

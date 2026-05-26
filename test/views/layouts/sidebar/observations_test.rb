@@ -2,9 +2,9 @@
 
 require "test_helper"
 
-module Sidebar
-  class InfoTest < ComponentTestCase
-    include Tabs::Sidebar::InfoHelper
+module Views::Layouts::Sidebar
+  class ObservationsTest < ComponentTestCase
+    include Tabs::Sidebar::ObservationsHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -24,22 +24,14 @@ module Sidebar
     def test_renders_heading_and_links
       html = render_component
 
-      # Should have heading with "More:" text
-      assert_includes(html, :app_more.t)
+      # Should have heading with "Observations:" text
+      assert_includes(html, :app_observations_left.t)
 
       # Should include navigation links
-      assert_html(html, "#nav_mobile_app_link")
-      assert_html(html, "#nav_intro_link")
-      assert_html(html, "#nav_how_to_use_link")
-      assert_html(html, "#nav_donate_link")
-      assert_html(html, "#nav_how_to_help_link")
-      assert_html(html, "#nav_bug_report_link")
-      assert_html(html, "#nav_ask_webmaster_link")
-      assert_html(html, "#nav_contributors_link")
-      assert_html(html, "#nav_site_stats_link")
-      assert_html(html, "#nav_translators_note_link")
-      assert_html(html, "#nav_publications_link")
-      assert_html(html, "#nav_privacy_policy_link")
+      assert_html(html, "#nav_observations_link")
+      assert_html(html, "#nav_new_observation_link")
+      assert_html(html, "#nav_your_observations_link")
+      assert_html(html, "#nav_identify_observations_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")
@@ -55,16 +47,31 @@ module Sidebar
       assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 
+    def test_renders_only_latest_link_for_guest_users
+      html = render_component(user: nil)
+
+      # Should have heading
+      assert_includes(html, :app_observations_left.t)
+
+      # Should have latest observations link (available to all)
+      assert_html(html, "#nav_observations_link")
+
+      # Should NOT have user-only links
+      assert_no_html(html, "#nav_new_observation_link")
+      assert_no_html(html, "#nav_your_observations_link")
+      assert_no_html(html, "#nav_identify_observations_link")
+    end
+
     private
 
-    def render_component
+    def render_component(user: users(:rolf))
       classes = {
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent"
       }
-      render(Components::Sidebar::Section.new(
-               heading_key: :app_more,
-               tabs: sidebar_info_tabs,
+      render(Section.new(
+               heading_key: :app_observations_left,
+               tabs: sidebar_observations_tabs(user),
                classes: classes
              ))
     end
