@@ -1,5 +1,7 @@
 <%= turbo_stream.replace("target_names_widget") do %>
-  <%= render(Components::ProjectTargetNamesWidget.new(project: project)) %>
+  <%= render(Views::Controllers::Projects::TargetNames::Form.new(
+               project: project
+             )) %>
 <% end %>
 <%
 # Carry any optional scope fields the caller passed through to the

@@ -9,7 +9,7 @@
 # replace by id), and `_form_elements.scss` targets those ids for the
 # textarea-width override. Both subclasses also share the
 # `project-target-widget` class.
-class Components::ProjectTargetWidgetBase < Components::ApplicationForm
+class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationForm
   # Optional positional model arg is accepted for ModalForm
   # compatibility (ignored) — see Pattern B in
   # .claude/phlex_style_guide.md.

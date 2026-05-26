@@ -7,9 +7,9 @@
 #
 # Pattern B: creates its own FormObject internally so the view
 # only needs to pass the `project:` kwarg. Shared shape lives in
-# `Components::ProjectTargetWidgetBase`.
-class Views::Controllers::Projects::Locations::TargetLocationsWidget <
-      Components::ProjectTargetWidgetBase
+# `Views::Controllers::Projects::TargetWidgetBase`.
+class Views::Controllers::Projects::TargetLocations::Form <
+      Views::Controllers::Projects::TargetWidgetBase
   def form_action
     project_target_locations_path(project_id: @project.id)
   end

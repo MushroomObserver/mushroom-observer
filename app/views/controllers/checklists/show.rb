@@ -42,7 +42,7 @@ module Views
         end
 
         def render_target_names_widget
-          render(Components::ProjectTargetNamesWidget.new(
+          render(Views::Controllers::Projects::TargetNames::Form.new(
                    project: @context.project
                  ))
         end
