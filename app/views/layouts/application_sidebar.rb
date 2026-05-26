@@ -26,8 +26,6 @@ class Views::Layouts::ApplicationSidebar < Views::Base
   prop :in_admin_mode, _Nilable(_Boolean), default: false
   prop :languages, _Array(Language)
 
-  register_value_helper :content_for
-
   def view_template
     nav(id: "sidebar",
         class: "sidebar-offcanvas col-xs-8 col-sm-2 hidden-print") do

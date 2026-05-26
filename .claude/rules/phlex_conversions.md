@@ -132,6 +132,84 @@ Inside the namespace, sibling classes reference each other unqualified:
 `render(Form.new(...))` rather than the full
 `render(Views::Controllers::Account::APIKeys::Form.new(...))`.
 
+## Helpers in Phlex views: when to move vs. register
+
+When converting an action template to Phlex, you'll often find page
+logic spread between the ERB and `app/helpers/...` modules. The
+helpers either need to move into the Phlex view class (cleaner) or
+stay registered as helpers (looser coupling). Choosing wrong leads
+to nasty failures, so:
+
+**Move a helper method into the Phlex view when** its body is
+self-contained — symbol/translation lookups, model attribute reads,
+plain Ruby. No calls to *other* helper methods.
+
+Example — `checklist_show_title` (used by
+`Views::Controllers::Checklists::Show`) is pure `:foo.t` lookups.
+Moves cleanly as a private method on the view class.
+
+```ruby
+# Before — in app/helpers/tabs/checklists_helper.rb
+def checklist_show_title(user:, list:)
+  if user      then :checklist_for_user_title.t(user: user.legal_name)
+  elsif list   then :checklist_for_species_list_title.t(list: list.title)
+  else              :checklist_for_site_title.t
+  end
+end
+
+# After — inline in Views::Controllers::Checklists::Show
+private def checklist_show_title
+  user, list = @context.show_user, @context.species_list
+  if user      then :checklist_for_user_title.t(user: user.legal_name)
+  elsif list   then :checklist_for_species_list_title.t(list: list.title)
+  else              :checklist_for_site_title.t
+  end
+end
+```
+
+**Keep it registered (do NOT move) when** the body calls other
+helper methods — e.g. tab builders that compose
+`user_profile_tab`, `show_object_tab`, `email_user_question_tab`,
+etc. across multiple `Tabs::*Helper` modules.
+
+```ruby
+# Stays in app/helpers/tabs/checklists_helper.rb — calls helpers
+# in Users / Info / SpeciesLists / etc. modules
+def checklist_show_tabs(user:, list:)
+  if user    then checklist_for_user_tabs(user)
+  ...
+end
+
+# In the Phlex view class:
+register_value_helper :checklist_show_tabs
+```
+
+**Why "moving multi-helper methods" doesn't work yet.** Inside a
+Phlex view, `helpers.foo(...)` only resolves to *registered*
+helpers; everything else surfaces as
+`NoMethodError: private method 'foo' called for an instance of ...`.
+So if you move `checklist_show_tabs` into the view but its body
+still calls `user_profile_tab(user)` etc., you'd have to:
+
+- register each transitively-used helper (cascading; one move
+  drags in 5–10 registrations), or
+- `include Tabs::UsersHelper`, `include Tabs::InfoHelper`, … —
+  multiple module includes per view to restore helper-chain
+  transparency.
+
+Neither is paying for itself today. **Eventually** we want a
+mechanism that exposes the full tab-helper namespace to Phlex
+views without explicit `helpers.*` or per-method registration; until
+then, leave multi-helper methods registered.
+
+Heuristic to apply during a conversion:
+
+- Body is `:symbol.t(...)`, model attribute reads, plain Ruby? →
+  **move into the view** as a private method.
+- Body calls *any* method that isn't on `self` or a Ruby standard
+  library? → **leave in the helper module**, `register_value_helper`
+  on the view.
+
 ## Phlex Form Conversions
 
 Before writing ANY Phlex form component, you MUST:
