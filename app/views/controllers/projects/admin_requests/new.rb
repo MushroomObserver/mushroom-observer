@@ -19,7 +19,7 @@ module Views
               :admin_request_title.t(title: @project.title)
             )
 
-            render(Components::ProjectAdminRequestForm.new(
+            render(Views::Controllers::Projects::AdminRequests::Form.new(
                      FormObject::EmailRequest.new,
                      project: @project
                    ))

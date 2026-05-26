@@ -93,7 +93,7 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
     project.project_target_names.destroy_all
     obs = observations(:falmouth_2023_09_obs)
     project.add_observation(obs)
-    [project, obs, Components::TargetLocationForm.modal_id_for(obs),
+    [project, obs, Views::Controllers::Projects::Violations::TargetLocationForm.modal_id_for(obs),
      "Massachusetts, USA"]
   end
 

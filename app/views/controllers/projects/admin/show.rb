@@ -28,7 +28,7 @@ module Views
             add_page_title(:show_project_admin_title.l)
             container_class(:wide)
 
-            render(Components::Projects::AdminSubtabs.new(
+            render(Views::Controllers::Projects::AdminSubtabs.new(
                      project: @project, current_subtab: "details"
                    ))
             render_form
@@ -38,7 +38,7 @@ module Views
           private
 
           def render_form
-            render(Components::ProjectForm.new(
+            render(Views::Controllers::Projects::Form.new(
                      @project,
                      enctype: "multipart/form-data",
                      dates_any: @dates_any,

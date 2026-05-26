@@ -11,7 +11,7 @@ flash_error(@error) if @error && @objects.empty?
 <%= paginated_results do %>
   <%= tag.div(class: "list-group") do %>
     <% @objects.each do |project| %>
-      <%= render(Components::ProjectListItem.new(project: project)) %>
+      <%= render(Views::Controllers::Projects::ListItem.new(project: project)) %>
     <% end %>
   <% end %>
 <% end %>

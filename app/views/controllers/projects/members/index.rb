@@ -23,10 +23,10 @@ module Views
             add_project_banner(@project)
             container_class(:wide)
 
-            render(Components::Projects::AdminSubtabs.new(
+            render(Views::Controllers::Projects::AdminSubtabs.new(
                      project: @project, current_subtab: "members"
                    ))
-            render(Components::ProjectMemberForm.new(
+            render(Views::Controllers::Projects::Members::Form.new(
                      @project_member, project: @project
                    ))
             render_table
@@ -88,7 +88,7 @@ module Views
 
           def render_aliases_cell(user)
             td(class: "align-middle") do
-              render(Components::ProjectAliases.new(
+              render(Views::Controllers::Projects::Aliases::Widget.new(
                        project: @project, target: user
                      ))
             end

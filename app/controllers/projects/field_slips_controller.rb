@@ -55,7 +55,7 @@ module Projects
           render(turbo_stream: turbo_stream.prepend(
             :field_slip_job_trackers # the id of the div to append to
           ) do
-            helpers.render(Components::ProjectFieldSlipTrackerRow.new(
+            helpers.render(Views::Controllers::Projects::FieldSlips::TrackerRow.new(
                              tracker: tracker, user: @user
                            ))
           end)

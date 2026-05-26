@@ -31,7 +31,7 @@ module Views
             )
             container_class(:wide)
 
-            render(Components::ProjectMemberForm.new(
+            render(Views::Controllers::Projects::Members::Form.new(
                      @project_member, project: @project
                    ))
             render_users_table

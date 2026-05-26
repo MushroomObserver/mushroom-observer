@@ -3,7 +3,7 @@
     after any add / remove / exclude / target-list mutation
     (#4136 Q6). Callers pass `project`, `user`, and `current_tab`. %>
 <%= turbo_stream.replace("project_tabs") do %>
-  <%= render(Components::Projects::Tabs.new(
+  <%= render(Views::Controllers::Projects::Tabs.new(
                project: project, user: user,
                current_tab: current_tab
              )) %>

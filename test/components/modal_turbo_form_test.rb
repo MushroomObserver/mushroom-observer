@@ -79,11 +79,11 @@ class ModalTurboFormTest < ComponentTestCase
 
   def test_form_class_lookup_falls_back_to_legacy_components
     # No view file exists for Project (yet); should fall back to the
-    # legacy Components::ProjectForm.
+    # legacy Views::Controllers::Projects::Form.
     resolved = Components::ModalTurboForm.form_component_class_for(
       Project.new
     )
-    assert_equal(Components::ProjectForm, resolved)
+    assert_equal(Views::Controllers::Projects::Form, resolved)
   end
 
   private

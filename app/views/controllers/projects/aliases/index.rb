@@ -24,7 +24,7 @@ module Views
             add_page_title(:PROJECT_ALIASES.l)
             container_class(:wide)
 
-            render(Components::Projects::AdminSubtabs.new(
+            render(Views::Controllers::Projects::AdminSubtabs.new(
                      project: @project, current_subtab: "aliases"
                    ))
 

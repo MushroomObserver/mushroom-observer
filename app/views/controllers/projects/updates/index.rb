@@ -111,7 +111,7 @@ module Views
                 render(Components::MatrixBox.new(
                          user: @user, object: obs
                        )) do
-                  render(Components::Projects::ObsFooter.new(
+                  render(Views::Controllers::Projects::Updates::ObsFooter.new(
                            project: @project, obs: obs,
                            show_excluded: @show_excluded
                          ))

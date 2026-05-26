@@ -4,12 +4,12 @@ add_project_banner(@project)
 %>
 
 <% if @project.is_admin?(@user) %>
-  <%= render(Components::ProjectTargetLocationsWidget.new(
+  <%= render(Views::Controllers::Projects::Locations::TargetLocationsWidget.new(
                project: @project
              )) %>
 <% end %>
 
-<%= render(Components::Projects::LocationsTable.new(
+<%= render(Views::Controllers::Projects::Locations::Table.new(
              project: @project,
              grouped_data: @grouped_data,
              ungrouped_locations: @ungrouped_locations,
