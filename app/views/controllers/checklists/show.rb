@@ -21,9 +21,9 @@ module Views
         def view_template
           render_page_chrome
           render_target_names_widget if @context.admin?
-          render(Components::Checklist::Contents.new(
-                   data: @data, context: @context
-                 ))
+          # Sibling reference in the `Views::Controllers::Checklists`
+          # module — resolves to `Checklists::Contents`.
+          render(Contents.new(data: @data, context: @context))
         end
 
         private
@@ -42,7 +42,7 @@ module Views
         end
 
         def render_target_names_widget
-          render(Components::ProjectTargetNamesWidget.new(
+          render(Views::Controllers::Projects::TargetNames::Form.new(
                    project: @context.project
                  ))
         end

@@ -1,5 +1,5 @@
 <%= turbo_stream.replace("target_locations_widget") do %>
-  <%= render(Views::Controllers::Projects::Locations::TargetLocationsWidget.new(
+  <%= render(Views::Controllers::Projects::TargetLocations::Form.new(
                project: project
              )) %>
 <% end %>

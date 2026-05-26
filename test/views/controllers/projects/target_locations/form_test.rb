@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-module Views::Controllers::Projects::Locations
-  class TargetLocationsWidgetTest < ComponentTestCase
+module Views::Controllers::Projects::TargetLocations
+  class FormTest < ComponentTestCase
     def test_renders_form_with_correct_action_and_turbo
       project = projects(:rare_fungi_project)
 
@@ -62,8 +62,10 @@ module Views::Controllers::Projects::Locations
 
     private
 
+    # Sibling reference within the namespace — `Form` resolves to
+    # `Views::Controllers::Projects::TargetLocations::Form`.
     def render_widget(project:)
-      render(TargetLocationsWidget.new(project: project))
+      render(Form.new(project: project))
     end
   end
 end

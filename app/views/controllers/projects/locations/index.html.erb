@@ -4,7 +4,7 @@ add_project_banner(@project)
 %>
 
 <% if @project.is_admin?(@user) %>
-  <%= render(Views::Controllers::Projects::Locations::TargetLocationsWidget.new(
+  <%= render(Views::Controllers::Projects::TargetLocations::Form.new(
                project: @project
              )) %>
 <% end %>
