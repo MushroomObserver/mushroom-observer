@@ -79,7 +79,7 @@ class Components::FormImageFields < Components::Base
     field = image_field_proxy(:license_id, selected_license)
     render(Components::ApplicationForm::SelectField.new(
              field,
-             collection: superform_license_options,
+             collection: license_options,
              wrapper_options: { label: :form_images_select_license.t.html_safe } # rubocop:disable Rails/OutputSafety
            ))
   end
@@ -96,11 +96,6 @@ class Components::FormImageFields < Components::Base
   def image_field_proxy(field_key, value)
     type = @upload ? :image : :good_image
     ApplicationForm.image_field_proxy(type, @img_id, field_key, value)
-  end
-
-  # Superform expects [value, display] but Rails returns [display, value]
-  def superform_license_options
-    license_options.map { |display, value| [value, display] }
   end
 
   def license_options

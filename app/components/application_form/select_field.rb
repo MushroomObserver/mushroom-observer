@@ -32,25 +32,40 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Override to use `selected` attribute if field.value is nil or an array.
-    # Arrays occur with range fields (e.g., confidence: [-3.0, -1.0]) where we
-    # pass individual `selected` values for each select in the range pair.
-    # Compares as strings to handle boolean values (Phlex omits value="false")
+    # Renders the options.
+    #
+    # IMPORTANT: This wrapper accepts Rails-helper-shape `[label, value]`
+    # pairs (e.g. `[["Member", "member"], ["Admin", "admin"]]`), NOT
+    # Superform's native `[value, label]` shape. Callers can hand
+    # this method the same arrays they'd pass to Rails'
+    # `select_tag` / `options_for_select` — no swap needed.
+    #
+    # The pair is flipped internally so we still produce
+    # `<option value="value">label</option>` markup. (Superform
+    # 0.7's `Choices::Mapper` yields generic `[a, b]` pairs; we
+    # interpret those as `[label, value]` here.)
+    #
+    # Also overrides Superform's `options(*collection)` to use the
+    # wrapper's `selected:` attribute when `field.value` is nil or an
+    # array (arrays occur with range fields, e.g.
+    # `confidence: [-3.0, -1.0]`). Compares as strings to handle
+    # boolean values (Phlex omits `value="false"`).
     def options(*collection)
-      map_options(collection).each do |key, value|
-        # Coerce nil → "" so `<option value="">` renders (not `<option>`).
-        # Phlex's HTML DSL omits nil-valued attributes; the browser would
-        # then submit the option's text content. Matches Rails select-helper
-        # behavior so callers passing `[nil, "Label"]` get the expected
-        # empty-string submission.
-        option_value = key.nil? ? "" : key
-        option(selected: option_selected?(key), value: option_value) { value }
+      map_options(collection).each do |label, value|
+        # Coerce nil → "" so `<option value="">` renders (not
+        # `<option>`). Phlex's HTML DSL omits nil-valued attributes;
+        # the browser would then submit the option's text content.
+        # Matches Rails select-helper behavior so callers passing
+        # `["Label", nil]` get the expected empty-string submission.
+        option_value = value.nil? ? "" : value
+        option(selected: option_selected?(value),
+               value: option_value) { label }
       end
     end
 
-    def option_selected?(key)
+    def option_selected?(value)
       val = use_selected_attribute? ? attributes[:selected] : field.value
-      val.to_s == key.to_s
+      val.to_s == value.to_s
     end
 
     def use_selected_attribute?

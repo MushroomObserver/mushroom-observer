@@ -75,8 +75,8 @@ module Views::Controllers::Projects::Aliases
 
     def target_type_options
       [
-        ["location", :LOCATION.l],
-        ["user", :USER.l]
+        [:LOCATION.l, "location"],
+        [:USER.l, "user"]
       ]
     end
 

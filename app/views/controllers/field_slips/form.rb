@@ -122,16 +122,12 @@ module Views::Controllers::FieldSlips
     end
 
     def render_project_select
-      select_field(:project_id, project_options,
+      # `FieldSlip#projects` returns Rails-shape `[[title, id], ...]`
+      # — pass through to SelectField.
+      select_field(:project_id, model.projects,
                    inline: true,
                    label: "#{:Project.t}:",
                    selected: model.project&.id)
-    end
-
-    def project_options
-      # FieldSlip#projects returns `[title, id]` pairs from `pluck`;
-      # Superform expects `[value, label]`, so swap.
-      model.projects.map { |title, id| [id, title] }
     end
 
     def render_date_field

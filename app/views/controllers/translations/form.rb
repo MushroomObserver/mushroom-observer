@@ -251,9 +251,11 @@ module Views::Controllers::Translations
       proxy = Components::ApplicationForm::FieldProxy.new(
         nil, "locale", @lang.locale
       )
+      # `Language.menu_options` returns Rails-shape `[[name, locale], ...]`
+      # — pass through to SelectField.
       render(Components::ApplicationForm::SelectField.new(
                proxy,
-               collection: locale_options,
+               collection: Language.menu_options,
                # id: nil drops the FieldProxy-supplied id so the
                # rendered <select> matches the original markup (no id
                # attribute).
@@ -261,12 +263,6 @@ module Views::Controllers::Translations
                data: locale_select_data,
                wrapper_options: { label: false }
              ))
-    end
-
-    def locale_options
-      # Language.menu_options returns [name, locale]; Superform
-      # expects [value, label], so swap to [locale, name].
-      Language.menu_options.map { |name, locale| [locale, name] }
     end
 
     def locale_select_data

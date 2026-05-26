@@ -129,9 +129,8 @@ module Views::Controllers::Observations::Identify
                                         ))
     end
 
-    # Superform expects [value, label].
     def type_options
-      [[:clade, :CLADE.l], [:region, :REGION.l]]
+      [[:CLADE.l, :clade], [:REGION.l, :region]]
     end
 
     # --- Dual-target helpers ---

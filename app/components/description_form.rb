@@ -91,15 +91,11 @@ class Components::DescriptionForm < Components::ApplicationForm
   # --- License field ---
 
   def render_license_field
-    select_field(:license_id, license_options, label: "#{:License.l}:") do
+    # `@licenses` is Rails-shape `[[label, id], ...]` from
+    # `License.available_names_and_ids`; pass through.
+    select_field(:license_id, @licenses, label: "#{:License.l}:") do
       help_block(:p, :form_description_license_help.t)
     end
-  end
-
-  def license_options
-    # @licenses comes as [[label, id], ...] from License.available_names_and_ids
-    # Superform expects [[value, label], ...]
-    @licenses.map { |label, id| [id, label] }
   end
 
   # --- Note fields ---
@@ -222,13 +218,13 @@ class Components::DescriptionForm < Components::ApplicationForm
 
   def source_type_options_all
     Description::ALL_SOURCE_TYPES.map do |type|
-      [type, :"form_description_source_#{type}".l]
+      [:"form_description_source_#{type}".l, type]
     end
   end
 
   def source_type_options_basic
     Description::BASIC_SOURCE_TYPES.map do |type|
-      [type, :"form_description_source_#{type}".l]
+      [:"form_description_source_#{type}".l, type]
     end
   end
 

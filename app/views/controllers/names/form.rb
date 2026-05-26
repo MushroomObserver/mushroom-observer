@@ -198,14 +198,12 @@ module Views::Controllers::Names
     end
 
     def rank_options
-      # Superform expects [value, label]
-      Name.all_ranks.map { |r| [r, rank_as_string(r)] }
+      Name.all_ranks.map { |r| [rank_as_string(r), r] }
     end
 
     def status_options
-      # Superform expects [value, label]
       # Use strings because Phlex omits value attribute for boolean false
-      [["false", :ACCEPTED.l], ["true", :DEPRECATED.l]]
+      [[:ACCEPTED.l, "false"], [:DEPRECATED.l, "true"]]
     end
 
     def show_misspelling_fields?

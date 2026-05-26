@@ -162,8 +162,10 @@ module Views::Controllers::Occurrences
     end
 
     def render_location_select(attrs_ns, locations)
+      # `locations` is already Rails-shape `[[name, id], ...]` from
+      # `distinct_locations` — pass straight through to SelectField.
       render(attrs_ns.field(:location_id).select(
-               location_options(locations),
+               locations,
                wrapper_options: { label: :edit_occurrence_location.l }
              ))
     end
@@ -172,12 +174,6 @@ module Views::Controllers::Occurrences
       render(attrs_ns.field(:when).date(
                wrapper_options: { label: :WHEN.l, inline: true }
              ))
-    end
-
-    # Superform expects `[value, label]`; Rails' select helper
-    # returns `[label, value]`, so swap.
-    def location_options(locations)
-      locations.map { |name, id| [id, name] }
     end
 
     def distinct_locations

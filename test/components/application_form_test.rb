@@ -193,22 +193,19 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, "Option 3")
   end
 
-  # Regression: a [nil, "Label"] pair must render `<option value="">Label`,
-  # not `<option>Label` (which would submit "Label" as the value).
-  # Phlex's HTML DSL omits nil-valued attributes by default, so SelectField
-  # has to coerce nil keys to "" to match Rails' select-helper behavior.
-  def test_select_field_nil_key_renders_empty_value_attribute
-    options = [[nil, "(No Project)"], ["778455076", "EOL Project"]]
+  # Regression: a `[Label, nil]` pair (Rails-shape, value is nil) must
+  # render `<option value="">Label`, not `<option>Label` (which would
+  # submit "Label" as the value). Phlex's HTML DSL omits nil-valued
+  # attributes by default, so SelectField coerces nil values to "" to
+  # match Rails' select-helper behavior.
+  def test_select_field_nil_value_renders_empty_value_attribute
+    options = [["(No Project)", nil], ["EOL Project", "778455076"]]
     form = render_form do
       select_field(:number, options, label: "Project")
     end
 
-    assert_html(
-      form, "option[value='']", text: "(No Project)"
-    )
-    assert_html(
-      form, "option[value='778455076']", text: "EOL Project"
-    )
+    assert_html(form, "option[value='']", text: "(No Project)")
+    assert_html(form, "option[value='778455076']", text: "EOL Project")
   end
 
   # Slot tests

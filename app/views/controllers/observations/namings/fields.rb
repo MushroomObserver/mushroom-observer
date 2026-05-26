@@ -94,12 +94,9 @@ class Views::Controllers::Observations::Namings::Fields < Views::Base
     @context == "blank" ? "collapse" : nil
   end
 
+  # `Vote.{confidence,opinion}_menu` are already Rails-shape
+  # `[[label, value], ...]` pairs — pass through to SelectField.
   def confidence_menu
-    # Superform expects [value, label] but Rails returns [label, value]
-    raw_menu.map { |label, value| [value, label] }
-  end
-
-  def raw_menu
     if @vote&.value&.nonzero?
       Vote.confidence_menu
     else
