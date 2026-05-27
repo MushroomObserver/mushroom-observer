@@ -7,9 +7,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   class AutocompleterField < Superform::Rails::Components::Input
     include Phlex::Slotable
 
-    register_output_helper :link_icon
     register_output_helper :icon_link_to
-    register_output_helper :modal_link_to
 
     # Types with dedicated Stimulus controllers
     SUPPORTED_TYPE_CONTROLLERS = [

@@ -4,8 +4,6 @@ module Views::Controllers::Herbaria::CuratorRequests
   # Form for requesting to be a herbarium curator. Rendered by the
   # herbaria/curator_requests controller's `new.html.erb`.
   class Form < ::Components::ApplicationForm
-    register_value_helper :herbaria_curator_requests_path
-
     def initialize(model, herbarium:, back: nil, q_param: nil, **options)
       @herbarium = herbarium
       @back = back

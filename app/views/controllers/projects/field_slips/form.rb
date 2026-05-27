@@ -4,8 +4,6 @@
 # `Projects::FieldSlipsController#new`.
 module Views::Controllers::Projects::FieldSlips
   class Form < ::Components::ApplicationForm
-    register_value_helper :project_field_slips_path
-
     def initialize(model, project:, **)
       @project = project
       super(model, local: false, **)

@@ -5,8 +5,6 @@ module Views::Controllers::Checklists
   # #checklist_contents so the target-names turbo-stream can replace
   # the whole block when a target is added or removed.
   class Contents < ::Components::Base
-    register_output_helper :location_link, mark_safe: true
-
     def initialize(data:, context:)
       super()
       @data = data

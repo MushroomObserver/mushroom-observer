@@ -176,7 +176,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Use register_value_helper for helpers that return values (not HTML)
   register_value_helper :in_admin_mode?
   register_value_helper :pluralize
-  register_value_helper :url_for
   register_value_helper :rank_as_string
   register_output_helper :help_note, mark_safe: true
 

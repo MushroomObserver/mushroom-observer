@@ -6,8 +6,6 @@ module Views::Controllers::Info
   # codes. Rendered by `Views::Controllers::Info::TextileSandbox`
   # (the textile_sandbox page view).
   class TextileSandboxForm < ::Components::ApplicationForm
-    register_value_helper :asset_path
-
     # @param model [FormObject::TextileSandbox] struct with code attribute
     # @param show_result [Boolean] whether to show the rendered result
     #   above form

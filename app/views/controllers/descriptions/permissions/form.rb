@@ -12,7 +12,6 @@ module Views::Controllers::Descriptions::Permissions
   # writeins.
   class Form < ::Components::ApplicationForm
     register_value_helper :in_admin_mode?
-    register_output_helper :user_link, mark_safe: true
 
     WRITEIN_ROWS = 6
 
@@ -75,32 +74,6 @@ module Views::Controllers::Descriptions::Permissions
                      label_class: "p-0") do |cb|
         cb.option(group.id)
       end
-    end
-
-    def group_checked?(group, type)
-      if locked_all_users_group?(group)
-        type != :admin
-      elsif locked_reviewers_group?(group)
-        type == :admin
-      else
-        @description.send(:"#{type}_groups").include?(group)
-      end
-    end
-
-    def group_locked?(group)
-      locked_all_users_group?(group) || locked_reviewers_group?(group)
-    end
-
-    def locked_all_users_group?(group)
-      group.name == "all users" &&
-        @description.source_type.to_s == "public" &&
-        !in_admin_mode?
-    end
-
-    def locked_reviewers_group?(group)
-      group.name == "reviewers" &&
-        @description.source_type.to_s == "public" &&
-        !in_admin_mode?
     end
 
     def render_group_name(group)
@@ -186,16 +159,13 @@ module Views::Controllers::Descriptions::Permissions
                      label_class: "p-0")
     end
 
-    def name_description?
-      @description.is_a?(NameDescription)
-    end
-
+    # Only a NameDescription path exists — there is no
+    # `Locations::Descriptions::PermissionsController` (no route, no
+    # controller, no callers). The `else` branch this method used to
+    # carry referenced a `permissions_location_description_path` that
+    # would have raised NoMethodError if ever rendered.
     def form_action
-      if name_description?
-        permissions_name_description_path(@description.id)
-      else
-        permissions_location_description_path(@description.id)
-      end
+      permissions_name_description_path(@description.id)
     end
   end
 end
