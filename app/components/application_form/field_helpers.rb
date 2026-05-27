@@ -72,18 +72,33 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(field_component)
     end
 
-    # Checkbox field with label and Bootstrap checkbox wrapper
+    # Checkbox field with label and Bootstrap checkbox wrapper.
+    #
+    # Three call styles:
+    # - Boolean: `checkbox_field(:public, label: "Public")` — one
+    #   checkbox bound to a single field on the model.
+    # - Array (multi-value collection):
+    #   `checkbox_field(:tag_ids, ["Foo", 1], ["Bar", 2])` —
+    #   renders N checkboxes that post as `model[tag_ids][]=<value>`
+    #   for each checked option. Pairs are `[label, value]`,
+    #   matching `select_field` and `radio_field`.
+    # - Block (matrix layout):
+    #   `checkbox_field(:foo) { |cb| cb.option(value) }` — caller
+    #   drives per-cell rendering inside the standard wrapper.
+    #
     # @param field_name [Symbol] the field name
+    # @param choices [Array<Array>] optional `[label, value]` pairs
+    #   that switch the component into array (collection) mode.
     # @param options [Hash] all field and wrapper options
     # Wrapper options: :label, :prefs, :class_name
-    # @yield [field_component] Optional block to set slots:
-    #   `with_between`, `with_append`, `with_help`
-    def checkbox_field(field_name, **options, &block)
+    # @yield [field_component] Optional block — see `Field#checkbox`.
+    def checkbox_field(field_name, *choices, **options, &block)
       options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
       field_component = field(field_name).checkbox(
+        *choices,
         wrapper_options: wrapper_opts,
         **field_opts
       )

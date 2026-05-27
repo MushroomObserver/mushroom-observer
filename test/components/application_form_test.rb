@@ -177,6 +177,37 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "div.checkbox.mt-3")
   end
 
+  # Collection mode: `checkbox_field(:field, [label, value], ...)`
+  # renders N checkboxes that post as `model[field][]=<value>` for
+  # each checked option. Pairs are `[label, value]` — matching
+  # `select_field` and `radio_field`. Previously this API path was
+  # unreachable: callers had to bypass `checkbox_field` and call
+  # `field(:foo).checkbox(...)` directly.
+  def test_checkbox_field_array_mode_renders_one_checkbox_per_choice
+    form = render_form do
+      checkbox_field(:placeholder,
+                     ["Foo", 1],
+                     ["Bar", 2],
+                     ["Baz", 3])
+    end
+
+    # Each option becomes a checkbox with the field name suffixed `[]`
+    # so the controller receives an array of selected values. Values
+    # are the SECOND element of each pair (Rails shape).
+    name_attr = "#{@collection_number.class.model_name.singular}" \
+                "[placeholder][]"
+    assert_html(form,
+                "input[type='checkbox'][name='#{name_attr}'][value='1']")
+    assert_html(form,
+                "input[type='checkbox'][name='#{name_attr}'][value='2']")
+    assert_html(form,
+                "input[type='checkbox'][name='#{name_attr}'][value='3']")
+    # Labels (first element of each pair) render alongside each input.
+    assert_includes(form, "Foo")
+    assert_includes(form, "Bar")
+    assert_includes(form, "Baz")
+  end
+
   # Select field tests
   def test_select_field_renders_with_basic_options
     options = [["Option 1", "1"], ["Option 2", "2"], ["Option 3", "3"]]
@@ -863,7 +894,8 @@ class ApplicationFormTest < ComponentTestCase
   # via `field(:foo).checkbox([v, label], …)` directly.
   def test_checkbox_field_array_mode_per_option_label_has_for_attribute
     form = render_form do
-      render(field(:number).checkbox([1, "A"], [2, "B"]))
+      # Rails-shape pairs: `[label, value]` (matches `select_field`).
+      render(field(:number).checkbox(["A", 1], ["B", 2]))
     end
 
     assert_html(form, "label[for='collection_number_number_1']")
