@@ -2,14 +2,6 @@
 
 # View Helpers for Projects
 module ProjectsHelper
-  def field_slip_link(tracker, user)
-    if tracker.status == "Done" && user == tracker.user
-      link_to(tracker.filename, tracker.link)
-    else
-      tracker.filename
-    end
-  end
-
   def edit_project_alias_link(project_id, name, id)
     tag.span(id: "project_alias_#{id}") do
       modal_link_to(
