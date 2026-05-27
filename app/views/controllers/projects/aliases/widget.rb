@@ -7,8 +7,6 @@
 # alongside the action views (edit, index, new, show).
 module Views::Controllers::Projects::Aliases
   class Widget < Views::Base
-    register_output_helper :edit_project_alias_link, mark_safe: true
-    register_output_helper :new_project_alias_link, mark_safe: true
     register_output_helper :destroy_button, mark_safe: true
 
     def initialize(project:, target:)
@@ -21,9 +19,7 @@ module Views::Controllers::Projects::Aliases
       div(id: "target_project_alias_#{@target.id}") do
         render_existing_aliases
         br if alias_data.any?
-        new_project_alias_link(
-          @project.id, @target.id, @target.class
-        )
+        render_new_link
         br
       end
     end
@@ -36,7 +32,7 @@ module Views::Controllers::Projects::Aliases
 
     def render_existing_aliases
       alias_data.each do |name, id|
-        edit_project_alias_link(@project.id, name, id)
+        render_edit_link(name, id)
         destroy_button(
           target: project_alias_path(
             project_id: @project.id, id: id
@@ -44,6 +40,24 @@ module Views::Controllers::Projects::Aliases
           icon: :delete
         )
         br
+      end
+    end
+
+    def render_edit_link(name, id)
+      span(id: "project_alias_#{id}") do
+        modal_link_to(
+          "project_alias_#{id}",
+          *edit_project_alias_tab(@project.id, name, id)
+        )
+      end
+    end
+
+    def render_new_link
+      span(id: "project_alias") do
+        modal_link_to(
+          "project_alias",
+          *new_project_alias_tab(@project.id, @target.id, @target.class)
+        )
       end
     end
   end

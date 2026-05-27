@@ -4,6 +4,50 @@ paths: app/components/**/*.rb, app/views/**/*.rb, app/views/**/*.erb
 
 # Phlex Conversions
 
+## The scope is the ERB **and** its helpers — every time
+
+Every Phlex conversion PR has two halves, and both are in scope. The
+loud half is the ERB file you're replacing. The quiet half is the
+helper code that ERB calls — `app/helpers/<thing>_helper.rb` methods,
+private partial-builders, hash/array-shape "data" methods, anything
+the ERB pulls in to render itself. **Inline every helper you can on
+the same PR.**
+
+Why this is non-negotiable:
+
+- The point of moving to Phlex is to put *all* of a page's rendering
+  logic in one Ruby class — methods, conditionals, helpers, the lot.
+  If you leave the helper behind, you've moved the markup but
+  scattered the logic across two files. Reviewers and future readers
+  still have to chase the same render across the same two places.
+- ERB-era helpers were the workaround for ERB being a bad place to
+  write Ruby. In a Phlex view, you have private methods, normal
+  control flow, and `register_*_helper` for the cases where you
+  really do need the Rails helper context. Most helpers stop earning
+  their keep the moment the view becomes Phlex.
+- Helpers accumulate quietly. A "just the markup" conversion that
+  defers the helper to a later PR almost always leaves the helper
+  there permanently — there's no natural next trigger to come back
+  to it. Touch it now, finish it.
+
+Apply the move-vs-register heuristic in "Moving a helper into a Phlex
+view" below to every helper the ERB calls:
+
+- Self-contained body (`:symbol.t` lookups, model attribute reads,
+  plain Ruby, calls only to itself) → **inline as a private method
+  on the new Phlex view** (or extract a sibling Phlex class if the
+  helper is doing something a class deserves to own — e.g. row
+  construction for a table → an `Aliases::Table` view).
+- Body composes other helpers (tab builders, etc.) → leave registered
+  for now (`register_value_helper`), with a comment.
+
+By the end of the PR, the helper file should be measurably smaller —
+ideally empty and deleted. PR descriptions should call out the
+helper-side cleanup explicitly so reviewers can see both halves of
+the work. If you find yourself opening a follow-up PR purely to
+inline helpers from a conversion you just shipped, the conversion
+was incomplete.
+
 ## Decide first: reusable or single-use?
 
 The first decision when converting an ERB helper / partial / template to
