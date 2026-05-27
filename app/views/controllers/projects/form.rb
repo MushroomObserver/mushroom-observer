@@ -94,18 +94,14 @@ module Views::Controllers::Projects
     end
 
     # `dates_any` is UI state passed in from the controller, not a Project
-    # attribute, so we can't use `field(:dates_any)`. FieldProxy gives
-    # RadioField the field name, value, and namespace it needs without
-    # a model accessor.
+    # attribute, so we use the String form of `radio_field` to emit
+    # `name="project[dates_any]"` without trying to bind through
+    # Superform's `field(...)`.
     def render_dates_any_radios
-      proxy = Components::ApplicationForm::FieldProxy.new(
-        "project", :dates_any, @dates_any
-      )
-      render(Components::ApplicationForm::RadioField.new(
-               proxy,
-               ["false", range_label],
-               ["true", any_label]
-             ))
+      radio_field("project[dates_any]",
+                  ["false", range_label],
+                  ["true", any_label],
+                  value: @dates_any)
     end
 
     def range_label

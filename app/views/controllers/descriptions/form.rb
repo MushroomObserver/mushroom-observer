@@ -143,13 +143,8 @@ module Views::Controllers::Descriptions
     # --- Merge fields ---
 
     def render_merge_fields
-      render_flat_hidden_field("old_desc_id", @old_desc_id)
-      render_flat_hidden_field("delete_after", @delete_after)
-    end
-
-    def render_flat_hidden_field(name, value)
-      proxy = Components::ApplicationForm::FieldProxy.new(nil, name, value)
-      render(Components::ApplicationForm::HiddenField.new(proxy))
+      hidden_field("old_desc_id", value: @old_desc_id)
+      hidden_field("delete_after", value: @delete_after)
     end
 
     # --- Helper methods ---

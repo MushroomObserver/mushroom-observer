@@ -75,17 +75,9 @@ module Views::Controllers::Projects::Members
 
     def render_options
       p { plain(:trust_settings_help.l) }
-      field = commit_field
-      render(Components::ApplicationForm::RadioField.new(
-               field, *radio_choices,
-               wrapper_options: { wrap_class: "mb-2" }
-             ))
-    end
-
-    def commit_field
-      Components::ApplicationForm::FieldProxy.new(
-        nil, "commit", current_commit_value
-      )
+      radio_field("commit", *radio_choices,
+                  value: current_commit_value,
+                  wrap_class: "mb-2")
     end
 
     # Map current_trust_level back to the commit-label that would

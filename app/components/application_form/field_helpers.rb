@@ -36,7 +36,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      field_component = field(field_name).text(
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.text(
         wrapper_options: wrapper_opts,
         **field_opts
       )
@@ -61,7 +62,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       # `monospace:` is handled by TextareaField itself via wrapper_options.
 
-      field_component = field(field_name).textarea(
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.textarea(
         wrapper_options: wrapper_opts,
         **field_opts
       )
@@ -97,10 +99,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      field_component = field(field_name).checkbox(
+      # In collection/block mode (`*choices` or `&block`), `value:` is
+      # the array-of-checked-ids that drives `checked` state, NOT a
+      # value attribute on every input — strip it. In boolean mode it
+      # IS the checkbox's submitted value when checked, so leave it.
+      collection_mode = choices.any? || block
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.checkbox(
         *choices,
         wrapper_options: wrapper_opts,
-        **field_opts
+        **(collection_mode ? field_opts.except(:value) : field_opts)
       )
 
       set_help_slot(field_component, wrapper_opts[:help])
@@ -119,10 +127,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      field_component = field(field_name).radio(
+      # `value:` (String-form path) only carries the selected option for
+      # `option_checked?`; strip it from the attributes the field
+      # forwards onto each `<input type="radio">` (where `value=` is
+      # the per-option value, not the field's currently-selected value).
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.radio(
         *choices,
         wrapper_options: wrapper_opts,
-        **field_opts
+        **field_opts.except(:value)
       )
 
       yield(field_component) if block_given?
@@ -142,10 +155,14 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      field_component = field(field_name).select(
+      # `value:` only carries the selected option in the String-form
+      # path; `<select>` itself takes no `value=` attribute, so drop
+      # it from the attributes forwarded to the element.
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.select(
         options_list,
         wrapper_options: wrapper_opts,
-        **field_opts
+        **field_opts.except(:value)
       )
 
       yield(field_component) if block_given?
@@ -164,7 +181,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      field_component = field(field_name).date(
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.date(
         wrapper_options: wrapper_opts,
         **field_opts
       )
@@ -191,7 +209,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       # validation error).
       field_opts[:value] = "" unless field_opts.key?(:value)
 
-      field_component = field(field_name).text(
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.text(
         wrapper_options: wrapper_opts,
         type: "password",
         **field_opts
@@ -232,18 +251,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       # `hidden_field_tag` (browsers otherwise repopulate hidden fields
       # on back-button). Caller can override with `autocomplete:`.
       options = { autocomplete: "off" }.merge(options)
-      # Both paths render through `HiddenField` — the dedicated
-      # hidden-input component. `HiddenField` only needs `.dom.id`,
-      # `.dom.name`, `.value` on its `field` argument; Superform's
-      # `Field` and our `FieldProxy` both provide them. So the
-      # Symbol path can pass the Superform field directly — no
-      # FieldProxy rebuild, value auto-reads from model / FormObject
-      # via the field's own `.value`.
-      f = if field_name.is_a?(String)
-            FieldProxy.new(nil, field_name, options[:value])
-          else
-            field(field_name)
-          end
+      f = resolve_field(field_name, value: options[:value])
       render(HiddenField.new(f, **options))
     end
 
@@ -263,7 +271,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       # nil` opts out.
       field_opts[:min] = 1 unless field_opts.key?(:min)
 
-      field_component = field(field_name).text(
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.text(
         wrapper_options: wrapper_opts,
         type: "number",
         **field_opts
@@ -286,7 +295,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*static_wrapper_opts)
       field_opts = options.except(*static_wrapper_opts)
 
-      field_component = field(field_name).static(
+      f = resolve_field(field_name, value: wrapper_opts[:value])
+      field_component = f.static(
         wrapper_options: wrapper_opts,
         **field_opts
       )
@@ -308,7 +318,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*read_only_wrapper_opts)
       field_opts = options.except(*read_only_wrapper_opts)
 
-      field_component = field(field_name).read_only(
+      f = resolve_field(field_name, value: wrapper_opts[:value])
+      field_component = f.read_only(
         wrapper_options: wrapper_opts,
         **field_opts
       )
@@ -333,7 +344,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      field_component = field(field_name).file(
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.file(
         wrapper_options: wrapper_opts,
         **field_opts
       )
@@ -355,7 +367,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      field_component = field(field_name).autocompleter(
+      f = resolve_field(field_name, value: field_opts[:value])
+      field_component = f.autocompleter(
         type: type,
         textarea: textarea,
         wrapper_options: wrapper_opts,
@@ -428,6 +441,24 @@ class Components::ApplicationForm < Superform::Rails::Form
       return options if options[:prefs].blank?
 
       options.merge(label: :"prefs_#{field_name}".t).except(:prefs)
+    end
+
+    # Resolve a field name to a field object the factory methods can
+    # call (`.text`, `.textarea`, `.checkbox`, etc.). Symbol → model-
+    # bound `Superform::Field` (value reads through the field's own
+    # `.value` from the form's model / FormObject). String → standalone
+    # `FieldProxy` carrying the raw `name=` attribute and an explicit
+    # value (no model behind it).
+    #
+    # Lets the `*_field` helpers handle both bound and non-bound fields
+    # through a single dispatch shape — same precedent `hidden_field`
+    # has established.
+    def resolve_field(field_name, value: nil)
+      if field_name.is_a?(String)
+        FieldProxy.new(nil, field_name, value)
+      else
+        field(field_name)
+      end
     end
   end
 end

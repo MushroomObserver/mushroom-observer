@@ -64,8 +64,11 @@ module Views::Controllers::Admin::Donations
     end
 
     def render_checkbox(donation)
+      # Field id is the donation id (an Integer) under the form's
+      # `reviewed[...]` namespace. Symbols can't start with a digit,
+      # so spell the full raw `name=` explicitly.
       checkbox_field(
-        donation.id.to_s,
+        "reviewed[#{donation.id}]",
         checked: donation.reviewed,
         label: false
       )
