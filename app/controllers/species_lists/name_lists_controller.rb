@@ -10,14 +10,13 @@ module SpeciesLists
     # Uses same private methods as create/edit
     def new
       # Names are passed in as string, one name per line.
-      results = params[:results] || ""
-      @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }
+      @name_strings = name_lister_strings
+      render_new_page
     end
 
     def create
       # Names are passed in as string, one name per line.
-      results = params[:results] || ""
-      @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }
+      @name_strings = name_lister_strings
 
       # (make this an instance var to give unit test access)
       @names = parse_names
@@ -33,11 +32,32 @@ module SpeciesLists
         render_name_list_as_csv(@names)
       else
         flash_error(:name_lister_bad_submit.t(button: params[:commit]))
-        render("new")
+        render_new_page
       end
     end
 
     private
+
+    def render_new_page
+      render(
+        Views::Controllers::SpeciesLists::NameLists::New.new(
+          name_strings: @name_strings,
+          user: @user
+        ),
+        layout: true
+      )
+    end
+
+    # Read the newline-separated name string posted by
+    # `Views::Controllers::SpeciesLists::NameLists::Form` under the
+    # `name_lister[results]` namespace.
+    def name_lister_results
+      params.dig(:name_lister, :results).to_s
+    end
+
+    def name_lister_strings
+      name_lister_results.chomp.split("\n").map { |n| n.to_s.chomp }
+    end
 
     def parse_names
       @name_strings.map do |str|
@@ -57,7 +77,7 @@ module SpeciesLists
 
       @species_list = SpeciesList.new
       init_project_vars_for_create
-      @list_members = params[:results].tr("|", " ").delete("*")
+      @list_members = name_lister_results.tr("|", " ").delete("*")
       render("species_lists/new")
     end
 

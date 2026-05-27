@@ -16,12 +16,14 @@ module SpeciesLists
       get(:new)
 
       params = {
-        results: [
-          "Amanita baccata|sensu Borealis*",
-          "Coprinus comatus*",
-          "Fungi*",
-          "Lactarius alpigenes"
-        ].join("\n")
+        name_lister: {
+          results: [
+            "Amanita baccata|sensu Borealis*",
+            "Coprinus comatus*",
+            "Fungi*",
+            "Lactarius alpigenes"
+          ].join("\n")
+        }
       }
 
       post(:create,
@@ -51,7 +53,9 @@ module SpeciesLists
 
       post(:create, params: { commit: "bogus" })
       assert_flash_error
-      assert_template("new")
+      # The Phlex `new.rb` re-renders on a bogus commit — assert via
+      # the form id since `assert_template` doesn't see Phlex views.
+      assert_select("form#name_lister_form")
     end
 
     def assert_create_species_list
