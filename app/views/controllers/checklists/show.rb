@@ -3,8 +3,6 @@
 # Phlex view for the checklist page. Replaces show.html.erb.
 module Views::Controllers::Checklists
   class Show < Views::Base
-    register_value_helper :checklist_show_tabs
-
     def initialize(data:, context:)
       super()
       @data = data

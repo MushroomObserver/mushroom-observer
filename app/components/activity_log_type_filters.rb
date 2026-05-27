@@ -7,8 +7,6 @@
 #   render(Components::ActivityLogTypeFilters.new(query:, types:))
 #
 class Components::ActivityLogTypeFilters < Components::Base
-  register_value_helper :q_param
-
   prop :query, _Nilable(Query)
   prop :types, _Array(String)
 

@@ -8,7 +8,6 @@
 module Views::Controllers::Projects::FieldSlips
   class TrackerRow < Views::Base
     register_value_helper :field_slip_link
-    register_value_helper :field_slip_job_tracker_path
     include Phlex::Rails::Helpers::NumberWithPrecision
 
     def initialize(tracker:, user:)

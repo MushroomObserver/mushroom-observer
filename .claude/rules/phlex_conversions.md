@@ -132,7 +132,42 @@ Inside the namespace, sibling classes reference each other unqualified:
 `render(Form.new(...))` rather than the full
 `render(Views::Controllers::Account::APIKeys::Form.new(...))`.
 
-## Helpers in Phlex views: when to move vs. register
+## Helpers available everywhere — no per-class registration
+
+A handful of helper sources are wired into the Phlex base classes:
+
+- **`Components::Base`** registers app-wide helpers: `q_param`,
+  `add_q_param`, `url_for`, `permission?`, `link_to_object`,
+  `user_link`, `location_link`, `link_icon`, `help_block`,
+  `make_table`, etc. — see the registration block at the top of
+  `app/components/base.rb` for the full list.
+- **`Components::Base`** also includes `Phlex::Rails::Helpers::Routes`
+  (every named route helper — `foo_path`, `bar_url`),
+  `Phlex::Rails::Helpers::AssetPath` (`asset_path`),
+  `Phlex::Rails::Helpers::LinkTo` (`link_to`),
+  `Phlex::Rails::Helpers::ButtonTo` (`button_to`),
+  `Phlex::Rails::Helpers::ClassNames` (`class_names`), and
+  `Phlex::Rails::Helpers::TurboFrameTag` (`turbo_frame_tag`).
+- **`Views::Base`** layers on the page-chrome helpers:
+  `add_page_title`, `add_new_title`, `add_edit_title`,
+  `add_context_nav`, `add_project_banner`, `container_class`,
+  `content_for`.
+- **`Views::Base`** also includes every top-level `Tabs::*Helper`
+  module via a `to_prepare` hook in `config/initializers/phlex.rb`.
+  Any tab builder (`object_return_tab(...)`,
+  `species_lists_index_tabs(...)`, `inat_import_form_new_tabs(...)`,
+  etc.) is callable from any view as if it were a class method.
+  Nested modules under `Tabs::Sidebar::*`, `Tabs::Locations::*`,
+  `Tabs::Names::*` are NOT auto-included — they stay scoped to
+  their specific callers.
+
+**Don't `register_value_helper`** for anything in those buckets.
+The registration is a no-op duplicate.
+
+If your view needs a helper that isn't in any of those buckets, it
+falls into the move-vs-register decision below.
+
+## Moving a helper into a Phlex view
 
 When converting an action template to Phlex, you'll often find page
 logic spread between the ERB and `app/helpers/...` modules. The
