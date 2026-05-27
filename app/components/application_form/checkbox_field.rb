@@ -29,7 +29,16 @@ class Components::ApplicationForm < Superform::Rails::Form
     attr_reader :wrapper_options
 
     def initialize(field, *options, wrapper_options: {}, **attributes)
-      @options = options
+      # MO convention: array-mode options arrive as Rails-shape
+      # `[label, value]` pairs (matching `select_field` and
+      # `radio_field`'s positional-choices shape). Flip to
+      # Superform-shape `[value, label]` for the underlying
+      # `Choices::Mapper` to unpack correctly. Non-pair options
+      # (bare values, hashes) pass through unchanged — Mapper handles
+      # them itself.
+      @options = options.map do |opt|
+        opt.is_a?(Array) && opt.size == 2 ? [opt[1], opt[0]] : opt
+      end
       @wrapper_options = wrapper_options
       # Upstream 0.7 Checkbox#initialize is (field, index: nil, **attributes).
       super(field, **attributes)
