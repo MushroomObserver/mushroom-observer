@@ -7,7 +7,6 @@
 # reference this view by its full namespace.
 module Views::Controllers::Projects::FieldSlips
   class TrackerRow < Views::Base
-    register_value_helper :field_slip_link
     include Phlex::Rails::Helpers::NumberWithPrecision
 
     def initialize(tracker:, user:)
@@ -18,7 +17,7 @@ module Views::Controllers::Projects::FieldSlips
 
     def view_template
       tr(id: dom_id(@tracker), **tracker_data) do
-        render_link_cell { field_slip_link(@tracker, @user) }
+        render_link_cell { render_field_slip_link }
         render_link_cell { render_user_link }
         render_elapsed_time_cell
         render_pages_cell
@@ -73,6 +72,17 @@ module Views::Controllers::Projects::FieldSlips
       return unless @tracker.user
 
       user_link(@tracker.user_id, @tracker.user.login)
+    end
+
+    # Inlined from `ProjectsHelper#field_slip_link` — this was the
+    # only caller, and the helper's body is small enough that a
+    # private method keeps the rendering logic local.
+    def render_field_slip_link
+      if @tracker.status == "Done" && @user == @tracker.user
+        link_to(@tracker.filename, @tracker.link)
+      else
+        plain(@tracker.filename)
+      end
     end
   end
 end
