@@ -1,9 +1,22 @@
 # frozen_string_literal: true
 
+# Abstract base class for all `Views::Controllers::*` Phlex view
+# classes (and other classes under `Views::*` that render content).
+#
+# Inherits from `Components::Base` so view classes get the same
+# Phlex/Rails wiring as ordinary components. Pre-registers the
+# page-chrome helpers every action view uses — title, context nav,
+# container class, project banner — so subclasses don't have to
+# repeat `register_value_helper` calls for each one.
 class Views::Base < Components::Base
-  # The `Views::Base` is an abstract class for all your views.
-
-  # By default, it inherits from `Components::Base`, but you
-  # can change that to `Phlex::HTML` if you want to keep views and
-  # components independent.
+  # All MO page-chrome helpers are side-effect-only (they call
+  # `content_for(...)`), so they're value helpers — their return
+  # value isn't inserted into rendered output.
+  register_value_helper :add_page_title
+  register_value_helper :add_new_title
+  register_value_helper :add_edit_title
+  register_value_helper :add_context_nav
+  register_value_helper :add_project_banner
+  register_value_helper :container_class
+  register_value_helper :content_for
 end
