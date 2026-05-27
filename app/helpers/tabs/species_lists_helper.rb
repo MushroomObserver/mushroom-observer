@@ -84,7 +84,10 @@ module Tabs
       InternalLink::Model.new(
         :species_list_show_add_remove_from_another_list.t, list,
         add_q_param(
-          species_lists_edit_observations_path(species_list: list.id), query
+          species_lists_edit_observations_path(
+            species_list: { title: list.id }
+          ),
+          query
         )
       ).tab
     end

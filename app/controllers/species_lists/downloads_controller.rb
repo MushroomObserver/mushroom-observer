@@ -13,15 +13,25 @@ module SpeciesLists
     # Template shows three forms: print_labels, make_report, and download obs
     def new
       @list = find_species_list!
-      @type = params[:type] || "txt"
+      @type = species_list_report_format || "txt"
       @format = params[:format] || "raw"
       @encoding = params[:encoding] || "UTF-8"
       @query = lookup_species_list_query(@list)
+      render(
+        Views::Controllers::SpeciesLists::Downloads::New.new(
+          list: @list,
+          query: @query,
+          type: @type,
+          format: @format,
+          encoding: @encoding
+        ),
+        layout: true
+      )
     end
 
     def create
       @list = find_species_list!
-      @type = params[:type] || "txt"
+      @type = species_list_report_format || "txt"
       @format = params[:format] || "raw"
       @encoding = params[:encoding] || "UTF-8"
       @query = lookup_species_list_query(@list)
@@ -47,7 +57,7 @@ module SpeciesLists
       return unless (@species_list = find_species_list!)
 
       names = @species_list.names
-      case params[:type]
+      case species_list_report_format
       when "txt"
         render_name_list_as_txt(names)
       when "rtf"
@@ -55,9 +65,18 @@ module SpeciesLists
       when "csv"
         render_name_list_as_csv(names)
       else
-        flash_error(:make_report_not_supported.t(type: params[:type]))
+        flash_error(
+          :make_report_not_supported.t(type: species_list_report_format)
+        )
         redirect_to(species_list_path(params[:id].to_s))
       end
+    end
+
+    # Read the report-format choice posted by
+    # `Views::Controllers::SpeciesLists::Downloads::ReportForm` under
+    # the `species_list_report[format]` namespace.
+    def species_list_report_format
+      params.dig(:species_list_report, :format)
     end
 
     ############################################################################

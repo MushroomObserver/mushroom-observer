@@ -12,6 +12,12 @@ module SpeciesLists
         query = create_query(:Observation, species_lists: @species_list,
                                            order_by: :name)
         @observation_list = query.results
+        render(
+          Views::Controllers::SpeciesLists::Uploads::New.new(
+            species_list: @species_list
+          ),
+          layout: true
+        )
       else
         redirect_to(species_list_path(@species_list))
       end
