@@ -15,6 +15,7 @@ module SpeciesLists
         @projects = projects_to_manage
         @object_states = manage_object_states
         @project_states = manage_project_states
+        render_edit_page
       else
         redirect_to(species_list_path(@list.id))
       end
@@ -47,18 +48,26 @@ module SpeciesLists
 
     def manage_object_states
       {
-        list: params[:objects_list] == "1",
-        obs: params[:objects_obs] == "1",
-        img: params[:objects_img] == "1"
+        list: submitted_param(:objects_list) == "1",
+        obs: submitted_param(:objects_obs) == "1",
+        img: submitted_param(:objects_img) == "1"
       }
     end
 
     def manage_project_states
+      ids = submitted_param(:project_ids) || []
       states = {}
       @projects.each do |proj|
-        states[proj.id] = params["projects_#{proj.id}"] == "1"
+        states[proj.id] = ids.include?(proj.id.to_s)
       end
       states
+    end
+
+    # The form posts under the `species_list_projects[*]` namespace
+    # via `FormObject::SpeciesListProjects` /
+    # `Views::Controllers::SpeciesLists::Projects::Form`.
+    def submitted_param(key)
+      params.dig(:species_list_projects, key)
     end
 
     def commit_and_redirect
@@ -79,7 +88,19 @@ module SpeciesLists
       else
         flash_error("Invalid submit button: #{params[:commit].inspect}")
       end
-      render(:edit)
+      render_edit_page
+    end
+
+    def render_edit_page
+      render(
+        Views::Controllers::SpeciesLists::Projects::Edit.new(
+          list: @list,
+          projects: @projects,
+          object_states: @object_states,
+          project_states: @project_states
+        ),
+        layout: true
+      )
     end
 
     def attach_objects_to_projects
