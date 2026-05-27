@@ -38,6 +38,22 @@ module Tabs
                        edit_project_path(project.id)).tab
     end
 
+    def edit_project_alias_tab(project_id, name, id)
+      InternalLink::Model.new(
+        name, ProjectAlias,
+        edit_project_alias_path(project_id:, id:),
+        alt_title: :EDIT.t
+      ).tab
+    end
+
+    def new_project_alias_tab(project_id, target_id, target_type)
+      InternalLink::Model.new(
+        :ADD.t, ProjectAlias,
+        new_project_alias_path(project_id:, target_id:, target_type:),
+        html_options: { class: "btn btn-default" }
+      ).tab
+    end
+
     def projects_for_user_tab(user)
       InternalLink.new(
         :app_your_projects.l, projects_path(member: user.id)
