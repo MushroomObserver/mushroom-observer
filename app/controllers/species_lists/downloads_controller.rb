@@ -17,6 +17,16 @@ module SpeciesLists
       @format = params[:format] || "raw"
       @encoding = params[:encoding] || "UTF-8"
       @query = lookup_species_list_query(@list)
+      render(
+        Views::Controllers::SpeciesLists::Downloads::New.new(
+          list: @list,
+          query: @query,
+          type: @type,
+          format: @format,
+          encoding: @encoding
+        ),
+        layout: true
+      )
     end
 
     def create

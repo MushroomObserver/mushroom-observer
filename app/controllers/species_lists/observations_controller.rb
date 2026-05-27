@@ -14,6 +14,15 @@ module SpeciesLists
     def edit
       @id = species_list_query_param
       @query = find_obs_query_or_redirect
+      return unless @query
+
+      render(
+        Views::Controllers::SpeciesLists::Observations::Edit.new(
+          prefill_value: @id,
+          num_results: @query.num_results
+        ),
+        layout: true
+      )
     end
 
     # :post_add_remove_observations
