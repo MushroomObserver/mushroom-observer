@@ -131,13 +131,14 @@ module Views::Controllers::Projects::Violations
 
     def render_suffix_radios
       p { :form_violations_modal_target_location_help.l }
-      # `radio_field` with the String-form name produces the
-      # Superform-namespaced `project[location_id]` (cribbed from
-      # `field(:location_id).dom.name`) without going through
-      # Superform's `field(:x).radio(...)` — Project doesn't define
-      # a `location_id` attribute and Superform's `option_checked?`
-      # reads from the model, so pre-selection would never fire.
-      # The String form keeps explicit value control.
+      # The Superform-namespaced name (`project[location_id]`) without
+      # going through `field(:location_id).radio(...)` — Project doesn't
+      # define a `location_id` attribute and Superform's
+      # `option_checked?` reads from the model, so pre-selection would
+      # never fire. Routing through `radio_field` with the String name
+      # plus explicit `value:` keeps the namespacing while setting the
+      # pre-selected option. (Follow-up PR will let
+      # `radio_field(:location_id, …, value: …)` work directly.)
       radio_field(field(:location_id).dom.name,
                   *suffix_choices,
                   value: first_existing && existing[first_existing]&.id)

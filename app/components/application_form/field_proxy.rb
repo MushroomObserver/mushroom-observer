@@ -60,9 +60,19 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
 
       def id
-        return @field_key.to_s if @namespace.blank?
-
-        "#{@namespace}_#{@field_key}".tr("[]", "_").gsub(/__+/, "_")
+        # When `field_key` is a String containing the full raw `name=`
+        # attribute (with `[...]` segments), we still need to normalize
+        # it to a valid HTML id — otherwise a name like
+        # `"reviewed[385495444]"` would produce an `id` with literal
+        # brackets, and Capybara / `getElementById` lookups would fail.
+        # Applies the same `[]`→`_` normalization the namespaced case
+        # uses, then strips trailing `_` (from a trailing `]`).
+        raw = if @namespace.blank?
+                @field_key.to_s
+              else
+                "#{@namespace}_#{@field_key}"
+              end
+        raw.tr("[]", "_").gsub(/__+/, "_").chomp("_")
       end
 
       def name
