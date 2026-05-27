@@ -208,6 +208,37 @@ class ApplicationFormHelperParityTest < ComponentTestCase
     assert_html(html,
                 "div.autocompleter[data-controller='autocompleter--name']")
   end
+
+  # --- Symbol + explicit value: overrides model attribute ---------------
+  #
+  # Matches Rails ERB's `f.text_field :foo, value: "override"` —
+  # explicit `value:` wins over the model. Routes the field through
+  # `FieldProxy` with the Superform-namespaced name so the override
+  # works for radio/select/checkbox-collection mode too (those drive
+  # selection from the field's value, not from a per-input attribute).
+
+  def test_text_field_symbol_with_value_overrides_model
+    # Comment has `summary` attribute. Model gives "from-model";
+    # caller passes `value: "from-caller"` — explicit wins.
+    html = render(TextFieldSymbolOverrideForm.new(
+                    Comment.new(summary: "from-model"), action: "/t"
+                  ))
+
+    assert_html(html, "input[name='comment[summary]'][value='from-caller']")
+  end
+
+  def test_radio_field_symbol_with_value_selects_non_model_attribute
+    # Comment has no `target_id` attribute. With Symbol path and
+    # explicit `value: 2`, the option whose value is "2" pre-selects.
+    html = render(RadioFieldSymbolOverrideForm.new(Comment.new, action: "/t"))
+
+    assert_html(html,
+                "input[type='radio'][name='comment[target_id]']" \
+                "[value='2'][checked]")
+    assert_html(html,
+                "input[type='radio'][name='comment[target_id]']" \
+                "[value='1']:not([checked])")
+  end
 end
 
 # --- Test form classes -------------------------------------------------
@@ -348,6 +379,24 @@ class AutocompleterFieldStringNameForm < Components::ApplicationForm
       autocompleter_field("list[members]", type: :name, textarea: true,
                                            value: "alpha",
                                            label: "Names:")
+    end
+  end
+end
+
+# Symbol + explicit value: form fixtures — caller-supplied `value:`
+# overrides whatever the form's model attribute would produce.
+
+class TextFieldSymbolOverrideForm < Components::ApplicationForm
+  def view_template
+    super { text_field(:summary, value: "from-caller", label: "Summary:") }
+  end
+end
+
+class RadioFieldSymbolOverrideForm < Components::ApplicationForm
+  def view_template
+    super do
+      radio_field(:target_id, [1, "One"], [2, "Two"], value: 2,
+                                                      label: "Target:")
     end
   end
 end

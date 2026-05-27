@@ -444,18 +444,30 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # Resolve a field name to a field object the factory methods can
-    # call (`.text`, `.textarea`, `.checkbox`, etc.). Symbol → model-
-    # bound `Superform::Field` (value reads through the field's own
-    # `.value` from the form's model / FormObject). String → standalone
-    # `FieldProxy` carrying the raw `name=` attribute and an explicit
-    # value (no model behind it).
+    # call (`.text`, `.textarea`, `.checkbox`, etc.). Three paths:
     #
-    # Lets the `*_field` helpers handle both bound and non-bound fields
-    # through a single dispatch shape — same precedent `hidden_field`
-    # has established.
+    # - **String** (e.g. `"member[lat]"`): standalone `FieldProxy`
+    #   carrying the raw `name=` attribute and the given value. No
+    #   model binding.
+    # - **Symbol + explicit `value:`** (e.g. `text_field(:foo, value: x)`):
+    #   route through `FieldProxy` with the Superform-namespaced name
+    #   (`field(:foo).dom.name`) so the explicit `value:` overrides
+    #   whatever `model.foo` would have produced. Matches Rails ERB's
+    #   `f.text_field :foo, value: "override"` semantics, and lets
+    #   forms use Symbol keys for fields whose `name=` belongs in the
+    #   form's namespace but whose value comes from outside the model.
+    # - **Symbol** (no `value:`): model-bound `Superform::Field`. Value
+    #   reads through the field's own `.value` from the form's model
+    #   / FormObject.
+    #
+    # Lets the `*_field` helpers handle bound and non-bound fields
+    # through a single dispatch shape — the same precedent
+    # `hidden_field` established.
     def resolve_field(field_name, value: nil)
       if field_name.is_a?(String)
         FieldProxy.new(nil, field_name, value)
+      elsif !value.nil?
+        FieldProxy.new(nil, field(field_name).dom.name, value)
       else
         field(field_name)
       end
