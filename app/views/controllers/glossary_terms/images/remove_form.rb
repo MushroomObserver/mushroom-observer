@@ -70,16 +70,11 @@ module Views::Controllers::GlossaryTerms::Images
     # `glossary_terms/images_controller.rb#detach`). Wraps each
     # checkbox in MO's standard `.checkbox` BS3 markup.
     def render_select_checkbox(image)
-      proxy = Components::ApplicationForm::FieldProxy.new(
-        "selected", image.id, nil
-      )
-      render(Components::ApplicationForm::CheckboxField.new(
-               proxy,
-               wrapper_options: { label: "#{:image.t} ##{image.id}",
-                                  wrap_class: "my-0" },
-               checked_value: "yes",
-               unchecked_value: "no"
-             ))
+      checkbox_field("selected[#{image.id}]",
+                     label: "#{:image.t} ##{image.id}",
+                     wrap_class: "my-0",
+                     checked_value: "yes",
+                     unchecked_value: "no")
     end
   end
 end

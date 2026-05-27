@@ -267,19 +267,15 @@ module Views::Controllers::FieldSlips
       # FieldSlip submits matrix params as flat `observation_ids[]`
       # and namespaced `field_slip[primary_observation_id]` — both
       # unchanged from the ERB version, so the controller doesn't
-      # need to move. Since FieldSlip doesn't have its own
-      # `observation_ids=` accessor (the join is via the occurrence),
-      # we use `FieldProxy` directly instead of `field(:foo).checkbox`.
-      obs_ids_proxy = Components::ApplicationForm::FieldProxy.new(
-        nil, "observation_ids", checked_ids
-      )
-      primary_proxy = Components::ApplicationForm::FieldProxy.new(
-        "field_slip", :primary_observation_id, primary_id
-      )
+      # need to move. FieldSlip doesn't have an `observation_ids=`
+      # accessor (the join is via the occurrence), so we drive both
+      # fields through the String form of `checkbox_field` /
+      # `radio_field` — raw `name=` attribute, value carried by the
+      # `value:` option, no Superform model binding.
+      @checked_ids = checked_ids
+      @primary_id = primary_id
       ul(class: "row list-unstyled mt-3", data: matrix_data) do
-        observations.each do |obs|
-          render_observation_row(obs, obs_ids_proxy, primary_proxy)
-        end
+        observations.each { |obs| render_observation_row(obs) }
       end
     end
 
@@ -290,37 +286,33 @@ module Views::Controllers::FieldSlips
       }
     end
 
-    def render_observation_row(obs, obs_ids_proxy, primary_proxy)
+    def render_observation_row(obs)
       MatrixBox(user: @user, object: obs, votes: false) do
-        render_include_checkbox(obs, obs_ids_proxy)
-        render_primary_radio(obs, primary_proxy)
+        render_include_checkbox(obs)
+        render_primary_radio(obs)
         render_field_slip_link(obs.field_slip) if obs.field_slip
       end
     end
 
     # `cb.option(obs.id)` renders one `<input type="checkbox"
     # name="observation_ids[]" value="…">`. CheckboxField looks up
-    # `checked` via membership of `obs.id` in `obs_ids_proxy.value`
-    # (the array of currently-checked ids).
-    def render_include_checkbox(obs, obs_ids_proxy)
-      data = { action: "field-slip-form#includeToggled" }
-      render(Components::ApplicationForm::CheckboxField.new(
-               obs_ids_proxy,
-               wrapper_options: { label: false, wrap_class: "my-0" },
-               data: data
-             )) do |cb|
+    # `checked` via membership of `obs.id` in the field's value (the
+    # array of currently-checked ids passed as `value:` here).
+    def render_include_checkbox(obs)
+      checkbox_field("observation_ids",
+                     value: @checked_ids,
+                     label: false, wrap_class: "my-0",
+                     data: { action: "field-slip-form#includeToggled" }) do |cb|
         cb.option(obs.id) { "Include" }
       end
     end
 
-    def render_primary_radio(obs, primary_proxy)
-      data = { action: "field-slip-form#primarySelected" }
-      render(Components::ApplicationForm::RadioField.new(
-               primary_proxy,
-               [obs.id, :create_occurrence_primary.t],
-               wrapper_options: { wrap_class: "my-0" },
-               data: data
-             ))
+    def render_primary_radio(obs)
+      radio_field("field_slip[primary_observation_id]",
+                  [obs.id, :create_occurrence_primary.t],
+                  value: @primary_id,
+                  wrap_class: "my-0",
+                  data: { action: "field-slip-form#primarySelected" })
     end
 
     def render_field_slip_link(field_slip)

@@ -99,11 +99,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
+      # In collection/block mode (`*choices` or `&block`), `value:` is
+      # the array-of-checked-ids that drives `checked` state, NOT a
+      # value attribute on every input — strip it. In boolean mode it
+      # IS the checkbox's submitted value when checked, so leave it.
+      collection_mode = choices.any? || block
       f = resolve_field(field_name, value: field_opts[:value])
       field_component = f.checkbox(
         *choices,
         wrapper_options: wrapper_opts,
-        **field_opts
+        **(collection_mode ? field_opts.except(:value) : field_opts)
       )
 
       set_help_slot(field_component, wrapper_opts[:help])
@@ -122,11 +127,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
+      # `value:` (String-form path) only carries the selected option for
+      # `option_checked?`; strip it from the attributes the field
+      # forwards onto each `<input type="radio">` (where `value=` is
+      # the per-option value, not the field's currently-selected value).
       f = resolve_field(field_name, value: field_opts[:value])
       field_component = f.radio(
         *choices,
         wrapper_options: wrapper_opts,
-        **field_opts
+        **field_opts.except(:value)
       )
 
       yield(field_component) if block_given?
@@ -146,11 +155,14 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
+      # `value:` only carries the selected option in the String-form
+      # path; `<select>` itself takes no `value=` attribute, so drop
+      # it from the attributes forwarded to the element.
       f = resolve_field(field_name, value: field_opts[:value])
       field_component = f.select(
         options_list,
         wrapper_options: wrapper_opts,
-        **field_opts
+        **field_opts.except(:value)
       )
 
       yield(field_component) if block_given?

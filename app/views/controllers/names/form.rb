@@ -39,10 +39,7 @@ module Views::Controllers::Names
     def render_approved_rank_field
       return unless @approved_rank
 
-      proxy = Components::ApplicationForm::FieldProxy.new(
-        nil, "approved_rank", @approved_rank
-      )
-      render(Components::ApplicationForm::HiddenField.new(proxy))
+      hidden_field("approved_rank", value: @approved_rank)
     end
 
     def button_text

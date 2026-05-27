@@ -131,22 +131,16 @@ module Views::Controllers::Projects::Violations
 
     def render_suffix_radios
       p { :form_violations_modal_target_location_help.l }
-      # Use a FieldProxy with the Superform-namespaced name
-      # (`project[location_id]`, derived from
-      # `field(:location_id).dom.name`) so the radio's `name` attr
-      # matches the rest of the form's namespacing. We can't go
-      # through Superform's `field(:x).radio(...)` directly because
-      # Project doesn't define a `location_id` attribute and
-      # Superform's option_checked? reads from the model —
-      # pre-selection would never fire. The FieldProxy keeps
-      # explicit value control.
-      proxy = Components::ApplicationForm::FieldProxy.new(
-        nil, field(:location_id).dom.name,
-        first_existing && existing[first_existing]&.id
-      )
-      render(Components::ApplicationForm::RadioField.new(
-               proxy, *suffix_choices
-             ))
+      # `radio_field` with the String-form name produces the
+      # Superform-namespaced `project[location_id]` (cribbed from
+      # `field(:location_id).dom.name`) without going through
+      # Superform's `field(:x).radio(...)` — Project doesn't define
+      # a `location_id` attribute and Superform's `option_checked?`
+      # reads from the model, so pre-selection would never fire.
+      # The String form keeps explicit value control.
+      radio_field(field(:location_id).dom.name,
+                  *suffix_choices,
+                  value: first_existing && existing[first_existing]&.id)
     end
 
     # Each suffix becomes a `[value, label, opts]` choice for
