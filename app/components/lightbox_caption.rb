@@ -39,6 +39,13 @@ class Components::LightboxCaption < Components::Base
   prop :obs, _Union(Observation, Hash), default: -> { {} }
   prop :identify, _Boolean, default: false
   prop :observation_view, _Nilable(ObservationView), default: nil
+  # Propagated from the parent `BaseImage` (carousel /
+  # interactive-image). When the parent disables votes — e.g. the
+  # profile-images reuse page passes `votes: false` because it
+  # doesn't pre-load `:image_votes` — the lightbox caption must
+  # also skip the vote section. Otherwise `ImageVoteInterface`
+  # calls `Image#users_vote(@user)` and triggers a Bullet N+1.
+  prop :votes, _Boolean, default: true
 
   def view_template
     if @obs.is_a?(Observation)
@@ -212,10 +219,11 @@ class Components::LightboxCaption < Components::Base
   # Vote interface inside the lightbox overlay — same component that
   # renders below carousel/interactive images. Gated on `@user` to match
   # `images/show/_image_panel.html.erb`'s "login required to vote" rule;
-  # anonymous viewers see no vote UI. Skipped when no image is in scope
-  # (obs-only captions in pre-render contexts).
+  # anonymous viewers see no vote UI. Also skipped when `@votes` is
+  # false (parent opted out — see prop doc above) or no image is in
+  # scope (obs-only pre-render contexts).
   def render_vote_section
-    return unless @user && @image
+    return unless @votes && @user && @image
 
     div(class: "mt-3 text-center") do
       ImageVoteInterface(

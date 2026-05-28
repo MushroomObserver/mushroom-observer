@@ -133,15 +133,29 @@ class LightboxCaptionTest < ComponentTestCase
     assert_no_html(html, ".vote-section")
   end
 
+  # `votes: false` propagates from the parent `BaseImage` and
+  # suppresses the lightbox vote section — needed on pages that
+  # don't pre-load `:image_votes` (e.g. account/profile/images
+  # reuse page), otherwise `Image#users_vote(@user)` triggers a
+  # Bullet N+1 inside the vote interface.
+  def test_does_not_render_vote_section_when_votes_disabled
+    html = render_caption(votes: false)
+
+    assert_no_html(html, ".vote-section")
+    assert_no_html(html, ".vote-meter")
+  end
+
   private
 
-  def render_caption(user: @user, image: @image, obs: @obs, identify: false)
+  def render_caption(user: @user, image: @image, obs: @obs,
+                     identify: false, votes: true)
     render(Components::LightboxCaption.new(
              user: user,
              image: image,
              image_id: (image || @image).id,
              obs: obs,
-             identify: identify
+             identify: identify,
+             votes: votes
            ))
   end
 end
