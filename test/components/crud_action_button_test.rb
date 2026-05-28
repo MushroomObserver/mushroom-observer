@@ -164,4 +164,29 @@ class LinkHelperButtonTest < ComponentTestCase
     assert_html(html, "input[name='_method'][value='put']")
     assert_html(html, "button", text: "Replace")
   end
+
+  # GET method emits a plain `<a>` (link_to), not a `<form><button>`
+  # (button_to). GET is idempotent so the form wrapper is overkill —
+  # the anchor lets right-click "save link as" / "open in new tab"
+  # work and keeps the element inline. Same html_options shape (class,
+  # title, tooltip data) as the form-button branch.
+  def test_get_method_emits_link_not_form
+    html = render(Components::CrudActionButton.new(
+                    name: "Download",
+                    target: "/items/1/download",
+                    method: :get,
+                    icon: :download
+                  ))
+
+    assert_html(html, "a[href='/items/1/download']")
+    assert_no_html(html, "form")
+    assert_no_html(html, "button")
+    # tooltip data attrs match the form-button branch
+    assert_html(html, "a[title='Download']")
+    assert_html(html, "a[data-toggle='tooltip']")
+    assert_html(html, "a[data-placement='top']")
+    # icon body and sr-only label still emitted
+    assert_html(html, "a span.sr-only", text: "Download")
+    assert_html(html, "a span.glyphicon-download-alt")
+  end
 end

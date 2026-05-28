@@ -246,43 +246,36 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
                        confirm: :are_you_sure.l, **args)
   end
 
-  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  # GET-style edit button — emits `<a>` (link_to), not a form-wrapped
+  # button. Delegates to `Components::CrudActionButton` with
+  # `method: :get`; the component dispatches GET to `link_to`. Used
+  # to be a hand-rolled `button_atts` + `link_to` block that leaked
+  # the `:icon` kwarg into the rendered `<a>` as an invalid HTML
+  # attribute — fixed for free by going through the component.
   def edit_button(target:, name: nil, **args)
-    # target could just be a path
     name ||= if target.is_a?(String)
                :EDIT.l
              else
                :edit_object.t(type: target.type_tag)
              end
-    path, identifier, icon, content = button_atts(:edit, target, args, name)
-
-    html_options = {
-      class: class_names(identifier, args[:class]), # usually also btn
-      title: name, data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args.except(:class, :back))
-
-    link_to(path, html_options) do
-      [content, icon].safe_join
-    end
+    crud_action_button(target:, name:, method: :get, action: :edit, **args)
   end
 
-  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  # GET-style download link for a species_list — emits `<a>` via
+  # `Components::CrudActionButton`'s GET branch. The path is built
+  # from a String (the `new_download_species_list_path`) rather than
+  # a model target because the route shape doesn't match
+  # `download_<resource>_path` — there's a `new_download_species_list`
+  # named route, but `download_species_list` is the index path.
   def download_button(target:, name: :DOWNLOAD.t, **args)
-    # necessary if nil/empty string passed
     name = :DOWNLOAD.t if name.blank?
-    path, identifier, icon, content = button_atts(
-      :download,
-      new_download_species_list_path(id: target.id), args, name
+    crud_action_button(
+      name:,
+      target: new_download_species_list_path(id: target.id),
+      method: :get,
+      action: :download,
+      **args
     )
-
-    html_options = {
-      class: class_names(identifier, args[:class]), # usually also btn
-      title: name, data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args.except(:class, :back))
-
-    link_to(path, html_options) do
-      [content, icon].safe_join
-    end
   end
 
   # Attempts to put together some common button attributes. Overrides available.
