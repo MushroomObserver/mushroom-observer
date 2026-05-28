@@ -4,8 +4,6 @@ module Views::Controllers::Projects::Members
   # Phlex view for the add members page.
   # Replaces members/new.html.erb.
   class New < Views::Base
-    register_output_helper :post_button, mark_safe: true
-
     def initialize(project:, users:, project_member:,
                    user:)
       super()
@@ -59,13 +57,13 @@ module Views::Controllers::Projects::Members
         td { user_link(user, user.login) }
         td { plain(user.name) }
         td do
-          post_button(
-            name: :ADD.t,
-            path: project_members_path(
-              project_id: @project.id,
-              candidate: user.id
-            )
-          )
+          render(Components::CrudButton::Post.new(
+                   name: :ADD.t,
+                   target: project_members_path(
+                     project_id: @project.id,
+                     candidate: user.id
+                   )
+                 ))
         end
       end
     end

@@ -229,53 +229,45 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   #   )
   #
   def destroy_button(target:, name: nil, **args)
-    name ||= if target.is_a?(String)
-               :DESTROY.l
-             else
-               :destroy_object.t(type: target.type_tag)
-             end
-    args[:class] = class_names(args[:class], "text-danger")
-
-    # Add back param for SHOW_OBS_EDITABLES (like edit_button does)
+    # The `back:` arg defaults from SHOW_OBS_EDITABLES context — kept
+    # in the helper layer because it reads controller/action_name,
+    # which the Phlex component doesn't easily see.
     unless target.is_a?(String) || target.is_a?(Hash)
       back_args = add_back_param_to_button_atts(:destroy)
       args[:back] = back_args[:back] if back_args[:back]
     end
-
-    crud_action_button(method: :delete, name:, target:, action: :destroy,
-                       confirm: :are_you_sure.l, **args)
+    render(Components::CrudButton::Delete.new(
+             target: target, name: name, **args
+           ))
   end
 
-  # GET-style edit button — emits `<a>` (link_to), not a form-wrapped
-  # button. Delegates to `Components::CrudActionButton` with
-  # `method: :get`; the component dispatches GET to `link_to`. Used
-  # to be a hand-rolled `button_atts` + `link_to` block that leaked
-  # the `:icon` kwarg into the rendered `<a>` as an invalid HTML
-  # attribute — fixed for free by going through the component.
+  # GET-style edit link — emits `<a>` (link_to), not a form-wrapped
+  # button. Delegates to `Components::CrudButton::Edit`, which carries
+  # the `action: :edit`/`icon: :edit` defaults. Callers wanting a
+  # text-only edit link pass `icon: nil`.
   def edit_button(target:, name: nil, **args)
     name ||= if target.is_a?(String)
                :EDIT.l
              else
                :edit_object.t(type: target.type_tag)
              end
-    crud_action_button(target:, name:, method: :get, action: :edit, **args)
+    render(Components::CrudButton::Edit.new(
+             target: target, name: name, **args
+           ))
   end
 
   # GET-style download link for a species_list — emits `<a>` via
-  # `Components::CrudActionButton`'s GET branch. The path is built
-  # from a String (the `new_download_species_list_path`) rather than
-  # a model target because the route shape doesn't match
+  # `Components::CrudButton::Download`. The path is built explicitly
+  # as a String because the route shape doesn't match
   # `download_<resource>_path` — there's a `new_download_species_list`
   # named route, but `download_species_list` is the index path.
   def download_button(target:, name: :DOWNLOAD.t, **args)
     name = :DOWNLOAD.t if name.blank?
-    crud_action_button(
-      name:,
-      target: new_download_species_list_path(id: target.id),
-      method: :get,
-      action: :download,
-      **args
-    )
+    render(Components::CrudButton::Download.new(
+             target: new_download_species_list_path(id: target.id),
+             name: name,
+             **args
+           ))
   end
 
   # Attempts to put together some common button attributes. Overrides available.
@@ -351,34 +343,23 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   # Refactor to accept a tab array
 
   # POST to a path; used instead of a link because POST link requires js
-  def post_button(name:, path:, **, &block)
-    crud_action_button(method: :post, name:, target: path, **, &block)
+  def post_button(name:, path:, **args, &block)
+    render(Components::CrudButton::Post.new(
+             name: name, target: path, **args, &block
+           ))
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
-  def put_button(name:, path:, **, &block)
-    crud_action_button(method: :put, name:, target: path, **, &block)
+  def put_button(name:, path:, **args, &block)
+    render(Components::CrudButton::Put.new(
+             name: name, target: path, **args, &block
+           ))
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
-  def patch_button(name:, path:, **, &block)
-    crud_action_button(method: :patch, name:, target: path, **, &block)
-  end
-
-  # crud_action_button(method: :patch,
-  #                    name: herbarium.name.t,
-  #                    target: @herbarium,  # or a path string
-  #                    confirm: :are_you_sure.t,
-  #                    action: :remove)  # optional, defaults to method
-  # Pass a block and a name if you want an icon with tooltip
-  def crud_action_button(**, &block)
-    render(Components::CrudActionButton.new(**, &block))
-  end
-
-  def button_link(title, path, **args)
-    classes = %w[btn btn-default]
-    args[:class] = class_names(classes, args[:class])
-
-    link_to(title, path, **args)
+  def patch_button(name:, path:, **args, &block)
+    render(Components::CrudButton::Patch.new(
+             name: name, target: path, **args, &block
+           ))
   end
 end

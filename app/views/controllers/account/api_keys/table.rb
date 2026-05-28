@@ -6,9 +6,6 @@ module Views::Controllers::Account::APIKeys
   # Shared between the index page render and the post-CUD
   # turbo_stream response (which replaces just this block).
   class Table < Views::Base
-    register_output_helper :destroy_button, mark_safe: true
-    register_output_helper :patch_button, mark_safe: true
-
     def initialize(user:)
       super()
       @user = user
@@ -78,10 +75,12 @@ module Views::Controllers::Account::APIKeys
         if key.verified
           render_verified_check_box(key)
         else
-          patch_button(name: :ACTIVATE.l,
-                       class: "btn btn-default",
-                       id: "activate_api_key_#{key.id}",
-                       path: account_activate_api_key_path(key.id))
+          render(Components::CrudButton::Patch.new(
+                   name: :ACTIVATE.l,
+                   target: account_activate_api_key_path(key.id),
+                   class: "btn btn-default",
+                   id: "activate_api_key_#{key.id}"
+                 ))
         end
       end
     end
@@ -137,10 +136,15 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_remove_button(key)
-      destroy_button(name: :REMOVE.l, icon: :remove,
-                     id: "remove_api_key_#{key.id}",
-                     class: "btn btn-link text-danger",
-                     target: account_api_key_path(key.id))
+      # `btn: "btn btn-outline-default"` comes from `CrudButton::Delete`.
+      # `icon: :remove` overrides the default `:delete` glyph to match
+      # the table's "REMOVE" label.
+      render(Components::CrudButton::Delete.new(
+               target: account_api_key_path(key.id),
+               name: :REMOVE.l,
+               icon: :remove,
+               id: "remove_api_key_#{key.id}"
+             ))
     end
 
     def render_new_form_panel

@@ -82,7 +82,7 @@ module Tabs
         target: collection_number_path(c_n.id, observation_id: obs.id),
         confirm: :show_observation_remove_collection_number.l,
         class: "remove_collection_number_link_#{c_n.id}",
-        icon: :remove
+        icon: :remove, btn: nil
       )
     end
   end

@@ -14,7 +14,8 @@ type = @object.type_tag
     | <%= destroy_button(name: :review_authors_remove_author.t,
                          target: description_authors_path(
                            id: @object.id, type: type, remove: u.id
-                         )) %>
+                         ),
+                         btn: nil) %>
     <br/>
   <% end %>
 </p>

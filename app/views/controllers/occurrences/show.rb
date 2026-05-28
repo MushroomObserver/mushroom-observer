@@ -13,18 +13,14 @@ module Views::Controllers::Occurrences
 
     def view_template
       container_class(:wide)
-      view_context.add_show_title(@occurrence, user: @user)
-      add_edit_and_destroy_icons
+      add_show_title(@occurrence, user: @user)
+      add_edit_icons(@occurrence, @user)
       render_location_warning
       render_observation_grid
       render(Components::ObjectFooter.new(user: @user, obj: @occurrence))
     end
 
     private
-
-    def add_edit_and_destroy_icons
-      view_context.add_edit_icons(@occurrence, @user)
-    end
 
     def render_location_warning
       return unless locations_differ?

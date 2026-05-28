@@ -291,8 +291,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # plucks ids of OFFENDING observations and merges them into a Set
   # for dedup; total cost is O(violations) rather than the
   # O(visible_observations) cost of the full Ruby iteration in
-  # `#violations`. Called from the projects index
-  # (Tabs::ProjectsHelper#violations_button), so any per-project
+  # `#violations`. Called from the project show page's
+  # `render_violations_button` (inlined from the former
+  # `Tabs::ProjectsHelper#violations_button`), so any per-project
   # work multiplies by the number of projects rendered.
   def count_violations
     return 0 unless constraints?

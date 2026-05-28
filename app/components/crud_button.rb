@@ -15,7 +15,7 @@
 #   CSRF/turbo wiring.
 #
 # Usage:
-#   render(Components::CrudActionButton.new(
+#   render(Components::CrudButton.new(
 #     name: :REMOVE.l,
 #     target: @herbarium,  # or a path string
 #     method: :patch,
@@ -24,7 +24,7 @@
 #     icon: :remove
 #   ))
 #
-class Components::CrudActionButton < Components::Base
+class Components::CrudButton < Components::Base
   # Actions that map to a Rails-generated named route prefix. Anything
   # else (HTTP-verb actions like `:patch`, or undefined custom actions)
   # gets the bare resource path; the HTTP method is set separately via
@@ -63,12 +63,37 @@ class Components::CrudActionButton < Components::Base
     button_to(path, button_html_options) { button_content }
   end
 
+  # `<a>` html options. Tooltip data attrs are emitted only when an
+  # `icon:` was passed — for icon-only buttons the tooltip is the
+  # accessible label; for text links the tooltip would just duplicate
+  # the visible label, so we skip it. The `btn:` kwarg lets callers
+  # default into a button-style class (e.g. `"btn btn-default"`)
+  # without needing to spell out the full `class:`.
   def link_html_options
+    base = { class: merged_class }
+    base.merge!(tooltip_data) if @args[:icon]
+    base.deep_merge(@args.except(*ignored_arg_keys))
+  end
+
+  # Shared class string for both branches: identifier + caller-supplied
+  # `btn:` (button-shape default, e.g. `"btn btn-outline-default"`) +
+  # caller-supplied `class:` (sizing/spacing, e.g. `"btn-sm"`).
+  def merged_class
+    class_names(identifier, @args[:btn], @args[:class])
+  end
+
+  # Keys consumed by CrudButton itself — must be stripped before
+  # `@args` is merged into the underlying `link_to` / `button_to`
+  # call, otherwise they'd leak through as HTML attributes.
+  def ignored_arg_keys
+    [:class, :icon, :action, :back, :btn]
+  end
+
+  def tooltip_data
     {
-      class: class_names(identifier, @args[:class]),
       title: @name,
       data: { toggle: "tooltip", placement: "top", title: @name }
-    }.deep_merge(@args.except(:class, :icon, :action, :back))
+    }
   end
 
   def button_html_options
@@ -83,10 +108,10 @@ class Components::CrudActionButton < Components::Base
 
     {
       method: @method,
-      class: class_names(identifier, @args[:class]),
+      class: merged_class,
       form: { data: form_data },
       data: button_data
-    }.merge(@args.except(:class, :icon, :action, :back))
+    }.merge(@args.except(*ignored_arg_keys))
   end
 
   def button_content

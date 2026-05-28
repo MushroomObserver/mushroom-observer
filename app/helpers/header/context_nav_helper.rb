@@ -105,7 +105,12 @@ module Header
       when :post
         button_to(str, url, **kwargs)
       when :destroy
-        destroy_button(name: str, target: args[:target] || url, **kwargs)
+        # Context-nav destroy tabs render as plain `[ DESTROY ]`-style
+        # text links — opt out of `CrudButton::Delete`'s default icon
+        # AND button-frame via `icon: nil` + `btn: nil` (callers can
+        # override either by passing the kwarg).
+        destroy_button(name: str, target: args[:target] || url,
+                       **kwargs.reverse_merge(icon: nil, btn: nil))
       when :put
         put_button(name: str, path: url, **kwargs)
       when :patch

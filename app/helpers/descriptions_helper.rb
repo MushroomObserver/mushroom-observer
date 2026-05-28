@@ -39,7 +39,7 @@ module DescriptionsHelper
     links = []
     (text, path, args) = *edit_description_tab(user, desc, type)
     links << icon_link_to(text, path, **args) if user_writer?(user, desc)
-    links << destroy_button(target: desc, icon: :delete) if user_is_admin?(
+    links << destroy_button(target: desc, btn: nil) if user_is_admin?(
       user, desc
     )
     links

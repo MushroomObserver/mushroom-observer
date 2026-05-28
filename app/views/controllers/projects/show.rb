@@ -4,10 +4,6 @@ module Views::Controllers::Projects
   # Phlex view for the project show page.
   # Replaces show.html.erb.
   class Show < Views::Base
-    register_output_helper :add_show_title
-    register_output_helper :post_button, mark_safe: true
-    register_output_helper :violations_button, mark_safe: true
-    register_value_helper :permission!
     def initialize(project:, user:, drafts:, comments:)
       super()
       @project = project
@@ -107,11 +103,11 @@ module Views::Controllers::Projects
     def render_administer_button
       return unless @user&.admin && !@project.is_admin?(@user)
 
-      post_button(
-        name: :show_project_administer.l,
-        class: action_button_class,
-        path: project_administration_path(project_id: @project.id)
-      )
+      render(Components::CrudButton::Post.new(
+               name: :show_project_administer.l,
+               target: project_administration_path(project_id: @project.id),
+               class: action_button_class
+             ))
     end
 
     def render_membership_buttons
@@ -123,15 +119,15 @@ module Views::Controllers::Projects
     end
 
     def render_join_button
-      post_button(
-        name: :show_project_join.l,
-        class: action_button_class,
-        path: project_members_path(
-          project_id: @project.id,
-          candidate: @user.id,
-          target: :project_index
-        )
-      )
+      render(Components::CrudButton::Post.new(
+               name: :show_project_join.l,
+               target: project_members_path(
+                 project_id: @project.id,
+                 candidate: @user.id,
+                 target: :project_index
+               ),
+               class: action_button_class
+             ))
     end
 
     def render_member_buttons
@@ -153,15 +149,15 @@ module Views::Controllers::Projects
     end
 
     def render_leave_button
-      put_button(
-        name: :show_project_leave.t,
-        class: action_button_class,
-        path: project_member_path(
-          project_id: @project.id,
-          candidate: @user.id,
-          target: :project_index
-        )
-      )
+      render(Components::CrudButton::Put.new(
+               name: :show_project_leave.t,
+               target: project_member_path(
+                 project_id: @project.id,
+                 candidate: @user.id,
+                 target: :project_index
+               ),
+               class: action_button_class
+             ))
     end
 
     def render_add_obs_button
@@ -187,10 +183,20 @@ module Views::Controllers::Projects
       ) { plain(:show_project_admin_request.l) }
     end
 
+    # Inlined from `Tabs::ProjectsHelper#violations_button` — single
+    # caller, and not a CrudButton candidate (it's a count-badge link
+    # with `btn-warning` styling when constraints are violated, not
+    # an action button).
     def render_violations_button
       return unless @project.constraints?
 
-      violations_button(@project)
+      count = @project.count_violations
+      btn_type = count.positive? ? "btn-warning" : "btn-default"
+      link_to(
+        "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
+        project_violations_path(project_id: @project.id),
+        class: "btn btn-lg #{btn_type} my-2 mr-2"
+      )
     end
 
     def render_comments
