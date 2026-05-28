@@ -305,15 +305,23 @@ Do NOT skip these reads even if the conversion seems straightforward.
 While writing the component, for **every** form control you add, follow the
 "NEVER hand-roll form-control HTML" decision tree in `phlex_style_guide.md`:
 
-- Field is on the model / FormObject? → use the matching `*_field` helper.
-- Field isn't on the model? → wrap it with
-  `Components::ApplicationForm::FieldProxy` and render the matching field
-  class (`RadioField`, `TextField`, `CheckboxField`, `SelectField`, …).
+- Field is on the model / FormObject? → `text_field(:foo)` (Symbol,
+  model-bound).
+- Field's `name=` belongs in the form's namespace but value comes from
+  outside the model? → `text_field(:foo, value: …)` (Symbol + explicit
+  `value:`).
+- Field's `name=` is under a different namespace or top-level? →
+  `text_field("namespace[foo]", value: …)` (String, raw `name=`).
+- Outside a form? → `Components::ApplicationForm::FieldProxy.new(...) +
+  render(Components::ApplicationForm::TextField.new(proxy, ...))` —
+  used by feedback / editor components that don't own the `<form>` tag.
 - **Never** emit raw `input`, `select`, `textarea`, or `option` tags from a
   form component. If you find yourself reaching for them, you're missing
-  one of the two paths above. Re-read the FieldProxy section before
-  proceeding. (This rule was added after PR #4224 had to undo a hand-rolled
-  radio group from PR #4076.)
+  one of the four paths above. Re-read the FieldProxy section in
+  `phlex_style_guide.md` before proceeding. (This rule was added after PR
+  #4224 had to undo a hand-rolled radio group from PR #4076. The
+  Symbol+`value:` and String paths landed in PRs #4382 and #4384 to make
+  non-model-bound fields go through the same helpers.)
 
 ### Watch for a decorative `Model.new` passed to `super`
 

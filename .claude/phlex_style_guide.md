@@ -43,51 +43,56 @@ render(field(:notes).textarea(wrapper_options: { label: "Notes:" }, rows: 6))
 
 **HARD RULE**: Inside any class that extends `Components::ApplicationForm`, do
 NOT emit raw `input`, `select`, `textarea`, or `option` Phlex tags for form
-controls. Every form control must be rendered through one of:
+controls. Every form control goes through an `ApplicationForm` field helper
+(`text_field`, `textarea_field`, `radio_field`, `checkbox_field`,
+`select_field`, `date_field`, `number_field`, `password_field`, `file_field`,
+`hidden_field`, `autocompleter_field`, `static_field`, `read_only_field`,
+`submit`, `upload_fields`).
 
-1. An `ApplicationForm` field helper (`text_field`, `radio_field`,
-   `checkbox_field`, `select_field`, `date_field`, `autocompleter_field`,
-   `static_field`, `read_only_field`, `submit`, `upload_fields`, etc.) — for
-   fields that ARE attributes of the form's model / FormObject.
-2. A `FieldProxy` + the matching field class (`RadioField`, `TextField`,
-   `CheckboxField`, `SelectField`, …) — for fields that are NOT attributes of
-   the model (UI state passed in from the controller, transient toggles,
-   etc.). See `FieldProxy: Form Fields Outside a Form Context` below for the
-   API; the same proxy is used inside a form when the field isn't on the
-   model.
+The helpers accept the field name as either a Symbol or a String, with three
+distinct paths covering every case you'll hit (PRs #4382, #4384):
 
-**Why this rule exists**: The field helpers and field classes generate the
-exact Bootstrap markup, ARIA attributes, ID/name conventions, and Stimulus
-hooks the rest of the app expects. Hand-rolled `input`s skip all of that and
-have to be deduplicated later (this rule was added after a Phlex conversion
-hand-rolled radio buttons for a non-model field; see PR #4224).
+| First arg | When to use | Example |
+|---|---|---|
+| **Symbol** | The field IS an attribute of the form's model / FormObject. Value reads from the model. | `text_field(:title)` |
+| **Symbol + explicit `value:`** | The field's `name=` belongs in the form's namespace, but the value comes from somewhere other than the model (controller-supplied state, derived value, etc.). Explicit value wins over `model.foo`. | `radio_field(:dates_any, *choices, value: @dates_any)` |
+| **String** | The field's `name=` is under a different namespace from the form's model, or a top-level param. Raw `name=` attribute, value from `value:`. | `text_field("member[lat]", value: @member_lat)` `hidden_field("approved_rank", value: x)` |
+
+**Why this rule exists**: The field helpers generate the exact Bootstrap
+markup, ARIA attributes, ID/name conventions, and Stimulus hooks the rest of
+the app expects. Hand-rolled `input`s skip all of that (rule added after PR
+#4224 had to undo hand-rolled radios for a non-model field).
 
 **Decision tree** when adding a field to an `ApplicationForm` subclass:
 
 ```
 Is the field an attribute of the form's model / FormObject?
-├── Yes → use the matching `ApplicationForm` helper (`radio_field`, etc.).
-└── No  → can the field be added to a FormObject without bloating it?
-         ├── Yes → add it to the FormObject and use the helper.
-         └── No  → wrap it with FieldProxy and render the field class.
+├── Yes → `text_field(:foo)` (Symbol, model-bound).
+└── No  → does the field's `name=` belong in the form's namespace?
+         ├── Yes → `text_field(:foo, value: …)`
+         │         (Symbol + value:, name stays namespaced, explicit value).
+         └── No  → `text_field("namespace[foo]", value: …)`
+                    (String, raw `name=`, explicit value).
                     NEVER hand-roll the HTML.
 ```
 
 **Reference example** for the non-model-field case (`ProjectForm` —
-`dates_any` is UI state, not a `Project` column):
+`dates_any` is UI state, not a `Project` column; the `name=` still belongs
+under `project[...]` so the Symbol-with-value form is the right shape):
 
 ```ruby
 def render_dates_any_radios
-  proxy = Components::ApplicationForm::FieldProxy.new(
-    "project", :dates_any, @dates_any
-  )
-  render(Components::ApplicationForm::RadioField.new(
-           proxy,
-           ["false", range_label],
-           ["true", any_label]
-         ))
+  radio_field(:dates_any,
+              ["false", range_label],
+              ["true", any_label],
+              value: @dates_any)
 end
 ```
+
+If you need to construct a `FieldProxy` by hand — outside a Superform form,
+or for a fine-grained case the helpers don't cover — see
+[FieldProxy: Fields Without a Superform Field Backing](#fieldproxy-fields-without-a-superform-field-backing)
+below.
 
 ### Pattern B Forms: Internal FormObject Creation
 
@@ -680,25 +685,46 @@ end
 
 ### FieldProxy: Fields Without a Superform Field Backing
 
-`FieldProxy` is the escape hatch for any form field that can't be reached via
-`field(:attr)` on the form's model / FormObject. It provides the same interface
-as `Superform::Field` (`key`, `value`, `dom.id`, `dom.name`, `dom.value`) so
-the existing field classes (`TextField`, `RadioField`, `CheckboxField`,
-`SelectField`, …) render identical Bootstrap markup whether or not the field
-is model-backed.
+`FieldProxy` is the underlying mechanism for any form field that can't be
+reached via `field(:attr)` on the form's model / FormObject. It provides
+the same interface as `Superform::Field` (`key`, `value`, `dom.id`,
+`dom.name`, `dom.value`) so the field classes (`TextField`, `RadioField`,
+`CheckboxField`, `SelectField`, …) render identical Bootstrap markup
+whether or not the field is model-backed.
 
-There are two situations where `FieldProxy` is the right answer:
+Most of the time you don't construct one by hand. Inside an
+`ApplicationForm` subclass, the **field helpers accept either a Symbol or
+a String** and dispatch through `FieldProxy` for you (PRs #4382, #4384):
 
-1. **Outside a Superform form.** Feedback / editor components that render
-   form inputs without owning the `<form>` tag — e.g., `FormImageFields`,
-   `FormListFeedback`, `FormNameFeedback`.
-2. **Inside a Superform form, for a field that isn't on the model.** UI
-   state passed from the controller, transient toggles, derived values,
-   etc. — e.g., `dates_any` in `ProjectForm`. The form helpers (`radio_field`,
-   `text_field`, …) all call `field(field_name)` on the model and will fail
-   for fields the model doesn't expose. **Do NOT hand-roll `input` tags as
-   a workaround.** Use `FieldProxy`. See the "NEVER hand-roll form-control
-   HTML" rule above.
+```ruby
+# Symbol — model-bound (Symbol path, today's default).
+text_field(:title)
+
+# Symbol + explicit `value:` — overrides the model's value.
+# `name=` is the Superform-namespaced `model_name[foo]`; value comes
+# from the caller, not from `model.foo`. Use this when the field's
+# name belongs in the form's namespace but the value comes from
+# somewhere else (controller-supplied state, etc.).
+radio_field(:dates_any, ["false", range_label], ["true", any_label],
+            value: @dates_any)
+
+# String — raw HTML `name=`, no model namespacing, value from caller.
+# Use this for fields under a different namespace from the form's
+# model, or top-level params:
+text_field("member[lat]", value: @member_lat, size: 8)
+hidden_field("approved_rank", value: @approved_rank)
+checkbox_field("reviewed[#{donation.id}]", checked: donation.reviewed)
+```
+
+The helpers in scope today: `text_field`, `textarea_field`,
+`checkbox_field`, `radio_field`, `select_field`, `date_field`,
+`number_field`, `password_field`, `file_field`, `hidden_field`,
+`autocompleter_field`, `static_field`, `read_only_field`.
+
+**When you DO construct `FieldProxy` directly**: when you're rendering
+form inputs *outside* an `ApplicationForm` subclass (no surrounding
+`<form>` tag, no field helpers available) — e.g., feedback / editor
+components like `FormImageFields`, `FormNameFeedback`, `FormListFeedback`.
 
 ```ruby
 # Outside-form usage (FormNameFeedback).
@@ -707,25 +733,13 @@ There are two situations where `FieldProxy` is the right answer:
 # choice's `<div class="radio">` (or `<div class="checkbox">`) wrapper.
 # Use this to preserve pre-refactor row spacing — pre-Phlex ERB modals
 # and forms often put `.mb-2` on per-row `.radio` / `.checkbox` wrappers
-# for vertical spacing, and Superform's default omits it. Without
-# `wrap_class:`, an ERB → Phlex conversion silently loses that spacing
-# (caught only by HTML-parity diff against the pre-refactor markup).
+# for vertical spacing, and Superform's default omits it.
 proxy = Components::ApplicationForm::FieldProxy.new(
   "chosen_multiple_names", name.id
 )
 render(Components::ApplicationForm::RadioField.new(
   proxy, *options,
   wrapper_options: { wrap_class: "my-1 mr-4 d-inline-block" }
-))
-
-# Inside-form usage for a non-model field (ProjectForm).
-# `dates_any` is UI state from the controller, not a Project attribute,
-# so `field(:dates_any)` can't read it.
-proxy = Components::ApplicationForm::FieldProxy.new(
-  "project", :dates_any, @dates_any
-)
-render(Components::ApplicationForm::RadioField.new(
-  proxy, ["false", range_label], ["true", any_label]
 ))
 
 # Image fields have a factory method
@@ -737,8 +751,8 @@ render(Components::ApplicationForm::TextField.new(
 ))
 ```
 
-**Never use `fields_for`** — use `FieldProxy` or Superform's `namespace`
-method instead.
+**Never use `fields_for`** — use the String / Symbol+value forms of the
+field helpers, or Superform's `namespace` method.
 
 ### Phlex Built-in Helpers
 
