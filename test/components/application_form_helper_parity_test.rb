@@ -207,6 +207,16 @@ class ApplicationFormHelperParityTest < ComponentTestCase
     assert_html(html, "textarea[name='list[members]']", text: "alpha")
     assert_html(html,
                 "div.autocompleter[data-controller='autocompleter--name']")
+    # Hidden-id input must be derived correctly from the namespaced
+    # String name — its `name` is `<namespace>[<key>_id]`, not
+    # `<namespace>[<key>]` or anything else. (Earlier
+    # implementations used `field.dom.name.sub(/\[#{field.key}\]$/, …)`
+    # which silently fell through when `field.key` was a String
+    # containing brackets, leaving the hidden input with the same
+    # name as the visible input.)
+    assert_html(html,
+                "input[type='hidden'][name='list[members_id]']" \
+                "[id='list_members_id']")
   end
 
   # --- Symbol + explicit value: overrides model attribute ---------------
