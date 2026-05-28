@@ -49,7 +49,7 @@ tag.div(
               modal_link_to(dom_id(comment), *edit_comment_tab(comment)),
               "|",
               destroy_button(name: :comment_show_destroy.t, target: comment,
-                             icon: :delete, data: { turbo: true }),
+                             btn: nil, data: { turbo: true }),
               "]",
             ].safe_join(" ")
           end)

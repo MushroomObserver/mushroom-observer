@@ -22,7 +22,6 @@ class Components::Base < Phlex::HTML
   register_output_helper :location_link, mark_safe: true
   register_output_helper :user_link, mark_safe: true
   register_output_helper :modal_link_to, mark_safe: true
-  register_output_helper :put_button, mark_safe: true
   register_output_helper :link_icon, mark_safe: true
   register_output_helper :make_table, mark_safe: true
   register_output_helper :help_block_with_arrow, mark_safe: true
@@ -41,6 +40,7 @@ class Components::Base < Phlex::HTML
   register_value_helper :add_args_to_url
   register_value_helper :controller_name
   register_value_helper :controller_path
+  register_value_helper :action_name
   register_value_helper :params
 
   # Enable fragment caching

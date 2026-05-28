@@ -98,7 +98,13 @@ class ArticlesControllerTest < FunctionalTestCase
     tab2 = @controller.helpers.link_to(
       :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
     )
-    tab3 = @controller.helpers.destroy_button(target: article)
+    # `context_nav_links` routes destroy tabs through `crud_button_or_link`,
+    # which defaults `icon: nil, btn: nil` for `:destroy` so context-nav
+    # `[ DESTROY ]` tabs render as plain text links (no btn frame, no
+    # glyphicon). Build the expected tab the same way for the comparison.
+    tab3 = @controller.helpers.destroy_button(
+      target: article, icon: nil, btn: nil
+    )
 
     assert_includes(tabs, tab1)
     assert_includes(tabs, tab2)

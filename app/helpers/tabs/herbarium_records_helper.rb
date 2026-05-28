@@ -93,7 +93,7 @@ module Tabs
         target: herbarium_record_path(h_r.id, observation_id: obs.id),
         confirm: :show_observation_remove_herbarium_record.l,
         class: "remove_herbarium_record_link_#{h_r.id}",
-        icon: :remove
+        icon: :remove, btn: nil
       )
     end
   end

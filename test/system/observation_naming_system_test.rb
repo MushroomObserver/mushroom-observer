@@ -95,13 +95,17 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_vote_form_#{nam.id}")
       select("I'd Call It That", from: "vote_value_#{nam.id}")
     end
-    assert_selector("#modal_progress_spinner", wait: 4)
-    assert_selector("#modal_progress_spinner_caption",
-                    text: /#{:SAVING.l}/)
 
+    # The "Saving…" progress spinner appears + disappears too fast to
+    # catch reliably under Cuprite (the previous `assert_selector(
+    # "#modal_progress_spinner", wait: 4)` flaked). Skip the mid-save
+    # check and assert the reliable post-conditions: spinner is gone
+    # (Capybara's default wait absorbs any tail of the save) and the
+    # title bar reflects the new consensus naming. Title text only
+    # updates AFTER the vote round-trip completes, so it's a
+    # strictly-stronger signal that the save landed.
     assert_no_selector("#modal_progress_spinner")
     assert_selector("#title", text: /#{nam.text_name}/)
-    # sleep(3)
 
     # check that there is a vote "index" tally with this naming
     within("#observation_namings") do

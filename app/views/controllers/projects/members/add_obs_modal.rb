@@ -48,16 +48,16 @@ module Views::Controllers::Projects::Members
     end
 
     def render_submit_button
-      put_button(
-        name: submit_label,
-        class: "btn btn-primary",
-        path: project_member_path(
-          project_id: @project.id,
-          candidate: @candidate.id,
-          commit: :change_member_add_obs.l,
-          target: :project_index
-        )
-      )
+      render(Components::CrudButton::Put.new(
+               name: submit_label,
+               target: project_member_path(
+                 project_id: @project.id,
+                 candidate: @candidate.id,
+                 commit: :change_member_add_obs.l,
+                 target: :project_index
+               ),
+               class: "btn btn-primary"
+             ))
     end
 
     def submit_label

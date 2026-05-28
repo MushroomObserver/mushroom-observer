@@ -7,8 +7,6 @@
 # alongside the action views (edit, index, new, show).
 module Views::Controllers::Projects::Aliases
   class Widget < Views::Base
-    register_output_helper :destroy_button, mark_safe: true
-
     def initialize(project:, target:)
       super()
       @project = project
@@ -33,12 +31,13 @@ module Views::Controllers::Projects::Aliases
     def render_existing_aliases
       alias_data.each do |name, id|
         render_edit_link(name, id)
-        destroy_button(
-          target: project_alias_path(
-            project_id: @project.id, id: id
-          ),
-          icon: :delete
-        )
+        span(class: "mx-2")
+        render(Components::CrudButton::Delete.new(
+                 target: project_alias_path(
+                   project_id: @project.id, id: id
+                 ),
+                 btn: nil
+               ))
         br
       end
     end

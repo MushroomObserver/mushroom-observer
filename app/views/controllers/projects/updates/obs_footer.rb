@@ -25,29 +25,25 @@ module Views::Controllers::Projects::Updates
     private
 
     def render_add_button
-      button_to(
-        :ADD.t,
-        add_observation_project_update_path(
-          project_id: @project.id, id: @obs.id,
-          show_excluded: @show_excluded
-        ),
-        method: :post,
-        class: "btn btn-default btn-sm mx-1",
-        form: { data: { turbo: true } }
-      )
+      render(Components::CrudButton::Post.new(
+               name: :ADD.t,
+               target: add_observation_project_update_path(
+                 project_id: @project.id, id: @obs.id,
+                 show_excluded: @show_excluded
+               ),
+               btn: "btn btn-default", class: "btn-sm mx-1"
+             ))
     end
 
     def render_exclude_button
-      button_to(
-        :EXCLUDE.t,
-        exclude_observation_project_update_path(
-          project_id: @project.id, id: @obs.id,
-          show_excluded: @show_excluded
-        ),
-        method: :post,
-        class: "btn btn-default btn-sm mx-1",
-        form: { data: { turbo: true } }
-      )
+      render(Components::CrudButton::Post.new(
+               name: :EXCLUDE.t,
+               target: exclude_observation_project_update_path(
+                 project_id: @project.id, id: @obs.id,
+                 show_excluded: @show_excluded
+               ),
+               btn: "btn btn-default", class: "btn-sm mx-1"
+             ))
     end
   end
 end

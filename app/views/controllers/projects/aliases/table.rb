@@ -10,9 +10,6 @@
 # so the helper module can shed the rendering concerns.
 module Views::Controllers::Projects::Aliases
   class Table < Views::Base
-    register_output_helper :edit_button, mark_safe: true
-    register_output_helper :destroy_button, mark_safe: true
-
     TABLE_ID = "index_project_alias_table"
     TABLE_CLASS = "table table-striped table-project-members mt-3"
 
@@ -64,19 +61,20 @@ module Views::Controllers::Projects::Aliases
     # one buffer.
     def actions_cell(alias_)
       capture do
-        edit_button(
-          target: edit_project_alias_path(
-            project_id: alias_.project_id, id: alias_.id
-          ),
-          icon: :edit
-        )
+        render(Components::CrudButton::Edit.new(
+                 target: edit_project_alias_path(
+                   project_id: alias_.project_id, id: alias_.id
+                 ),
+                 name: :edit_object.t(type: :project_alias),
+                 btn: nil
+               ))
         span(class: "mx-2")
-        destroy_button(
-          target: project_alias_path(
-            project_id: alias_.project_id, id: alias_.id
-          ),
-          icon: :delete
-        )
+        render(Components::CrudButton::Delete.new(
+                 target: project_alias_path(
+                   project_id: alias_.project_id, id: alias_.id
+                 ),
+                 btn: nil
+               ))
       end
     end
   end

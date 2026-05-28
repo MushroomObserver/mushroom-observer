@@ -7,7 +7,6 @@ module Views::Controllers::Projects::Admin
   # the form so the user can swap to Members or Aliases without
   # leaving the Admin context.
   class Show < Views::Base
-    register_output_helper :destroy_button, mark_safe: true
     def initialize(project:, user:, dates_any:, upload_params:)
       super()
       @project = project
@@ -54,13 +53,15 @@ module Views::Controllers::Projects::Admin
 
     def render_destroy
       p { plain(:show_project_admin_destroy_help.l) }
-      # The destroy_button helper auto-applies text-danger, which
-      # provides the red color cue against a default button bg.
-      destroy_button(
-        target: @project,
-        name: :destroy_object.t(type: :project),
-        class: "btn btn-default btn-lg"
-      )
+      # Danger Zone overrides the default outline button entirely —
+      # this is a primary, page-level destructive action and we want
+      # a filled, large button. Everything goes through `btn:` since
+      # it's a full override of `CrudButton::Delete`'s default.
+      render(Components::CrudButton::Delete.new(
+               target: @project,
+               name: :destroy_object.t(type: :project),
+               btn: "btn btn-default btn-lg"
+             ))
     end
   end
 end
