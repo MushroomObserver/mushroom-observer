@@ -28,6 +28,16 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.server = :puma
     # Capybara.current_driver = :mo_cuprite
     Capybara.server_host = "localhost"
+    # Bind to 3000 (not the OS-assigned ephemeral port that would
+    # otherwise be Capybara's default) because the Google Maps API
+    # key the front-end uses is HTTP-Referer-restricted in Google
+    # Cloud Console to `http://localhost:3000/*`. Tests that
+    # exercise the Maps geocoder / autocompleter would otherwise
+    # be rejected by Google's API. **Stop your `bin/rails server`
+    # before running system tests** to avoid `Errno::EADDRINUSE`.
+    # If the Maps key's referer restriction is ever broadened to
+    # `http://localhost:*/*`, this can become `nil` (ephemeral) and
+    # tests will run alongside a running dev server.
     Capybara.server_port = 3000
     # Normalize whitespaces when using `has_text?` and similar matchers,
     # i.e., ignore newlines, trailing spaces, etc.

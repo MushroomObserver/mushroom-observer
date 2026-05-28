@@ -4,10 +4,13 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap autocompleter input field component with dropdown suggestions
   # Wraps a text input with Stimulus autocompleter controller
   # rubocop:disable Metrics/ClassLength
-  class AutocompleterField < Superform::Rails::Components::Input
+  # Inherits from `Components::Input` (MO's thin subclass of
+  # Superform's `Components::Input`) to pick up the shared MO
+  # output-helper registrations — `link_icon` (used by
+  # `render_has_id_indicator`), `icon_link_to`, and `modal_link_to`
+  # (used by the create-link block).
+  class AutocompleterField < ::Components::Input
     include Phlex::Slotable
-
-    register_output_helper :icon_link_to
 
     # Types with dedicated Stimulus controllers
     SUPPORTED_TYPE_CONTROLLERS = [
