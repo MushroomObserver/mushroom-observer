@@ -7,6 +7,7 @@ module SpeciesLists
     def new
       @species_list = SpeciesList.find(params[:id])
       init_member_vars_for_create
+      render_new_page
     end
 
     def create
@@ -21,6 +22,34 @@ module SpeciesLists
     include SpeciesLists::SharedPrivateMethods # shared private methods
 
     private
+
+    # MO doesn't wire `Phlex::Rails::Resolver`, so a bare `render(:new)`
+    # can't resolve the Phlex action view at `species_lists/write_in/new.rb`.
+    # Construct it explicitly with the instance state the ERB used to read.
+    def render_new_page
+      render(
+        Views::Controllers::SpeciesLists::WriteIn::New.new(
+          species_list: @species_list,
+          user: @user,
+          button: :ADD,
+          new_names: @new_names,
+          deprecated_names: @deprecated_names,
+          multiple_names: @multiple_names,
+          dubious_where_reasons: @dubious_where_reasons,
+          list_members: @list_members,
+          place_name: @place_name,
+          member_vote: @member_vote,
+          member_notes: @member_notes,
+          member_notes_parts: @member_notes_parts,
+          member_lat: @member_lat,
+          member_lng: @member_lng,
+          member_alt: @member_alt,
+          member_is_collection_location: @member_is_collection_location,
+          member_specimen: @member_specimen
+        ),
+        layout: true
+      )
+    end
 
     def init_member_vars_for_create
       @member_vote = Vote.maximum_vote
@@ -75,7 +104,13 @@ module SpeciesLists
       init_name_vars_from_sorter(@species_list, sorter)
       init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
-      render(:new)
+      # Member notes parts are derived from the list, not from params;
+      # the reload path didn't populate them explicitly under ERB
+      # (the template called `@species_list.form_notes_parts(@user)`
+      # inline). Set them here so the Phlex view's constructor can
+      # carry them.
+      @member_notes_parts = @species_list.form_notes_parts(@user)
+      render_new_page
     end
 
     def list_without_underscores
