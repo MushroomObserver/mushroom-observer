@@ -47,6 +47,7 @@ class Components::LightboxCaption < Components::Base
       render_image_caption
     end
 
+    render_vote_section
     render_image_links
   end
 
@@ -206,6 +207,23 @@ class Components::LightboxCaption < Components::Base
 
   def render_image_caption
     div(class: "image-notes") { @image.notes.tl.truncate_html(300) }
+  end
+
+  # Vote interface inside the lightbox overlay — same component that
+  # renders below carousel/interactive images. Gated on `@user` to match
+  # `images/show/_image_panel.html.erb`'s "login required to vote" rule;
+  # anonymous viewers see no vote UI. Skipped when no image is in scope
+  # (obs-only captions in pre-render contexts).
+  def render_vote_section
+    return unless @user && @image
+
+    div(class: "mt-3 text-center") do
+      ImageVoteInterface(
+        user: @user,
+        image: @image,
+        votes: true
+      )
+    end
   end
 
   def render_image_links

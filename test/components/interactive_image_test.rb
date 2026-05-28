@@ -25,16 +25,28 @@ class InteractiveImageTest < ComponentTestCase
     assert_includes(html, "image-sizer")
   end
 
+  # The vote section is rendered by `BaseImage#render_image_vote_section`,
+  # which dispatches to `Components::ImageVoteInterface`. Verify the
+  # dispatch actually happens (the previous version of this test only
+  # asserted the unrelated `image-sizer` and missed a regression where
+  # the sub-component call was malformed and silently no-op'd).
   def test_renders_with_votes_enabled
     html = render_image(votes: true)
 
     assert_includes(html, "image-sizer")
+    assert_html(html, "div.vote-section#image_vote_#{@image.id}")
+    assert_html(html, ".vote-meter.progress")
+    assert_html(html, ".vote-buttons")
+    assert_html(html, ".image-vote-links#image_vote_links_#{@image.id}")
   end
 
   def test_renders_with_votes_disabled
     html = render_image(votes: false)
 
     assert_includes(html, "image-sizer")
+    # No vote section at all when votes: false.
+    assert_no_html(html, ".vote-section")
+    assert_no_html(html, ".vote-meter")
   end
 
   def test_renders_with_custom_link
