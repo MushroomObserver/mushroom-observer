@@ -18,11 +18,14 @@ class Components::CrudButton
   #     target: new_download_species_list_path(id: @sl.id)
   #   ))
   class Download < Components::CrudButton::Get
-    def initialize(target:, name:, **args)
+    def initialize(target:, name: nil, **args)
       # `unless args.key?(:icon)` (not `||=`) so callers can opt out of
       # the default icon by passing `icon: nil` explicitly.
       args[:icon] = :download unless args.key?(:icon)
-      super(target: target, name: name, action: :download, **args)
+      super(target: target,
+            name: name.presence || :DOWNLOAD.t,
+            action: :download,
+            **args)
     end
   end
 end

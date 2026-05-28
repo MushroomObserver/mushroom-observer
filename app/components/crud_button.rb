@@ -31,6 +31,18 @@ class Components::CrudButton < Components::Base
   # `method:`. See `target_path` / `path_prefix` below.
   NAMED_ROUTE_ACTIONS = [:edit, :new, :download].freeze
 
+  # Controllers whose edit/destroy actions can be reached either from
+  # the parent obs `show` page or from their own `index` page — the
+  # `?back=show|index` query string round-trips that context so the
+  # controller can redirect back to where the user came from after the
+  # edit/destroy. When `Components::CrudButton::{Edit,Delete}` is
+  # rendered from one of these controllers, the appropriate `back:`
+  # default is injected automatically (unless the caller passes
+  # `back:` explicitly). See `default_back_param` below.
+  SHOW_OBS_EDITABLES = %w[
+    collection_numbers herbarium_records sequences external_links
+  ].freeze
+
   def initialize(name:, target:, method: :post, confirm: nil, **args, &block)
     super()
     @name = name
@@ -153,9 +165,34 @@ class Components::CrudButton < Components::Base
     # (`:edit`, `:new`, `:download`) prefix the route helper
     # name (`edit_herbarium_path`, etc.) — Rails generates those
     # paths for the standard RESTful named routes.
-    path_args = @args[:back] ? { back: @args[:back] } : {}
     send(:"#{path_prefix}#{@target.type_tag}_path",
          @target.id, **path_args)
+  end
+
+  def path_args
+    back = @args[:back] || default_back_param
+    back ? { back: back } : {}
+  end
+
+  # For `:edit`/`:destroy` actions on a model target rendered from a
+  # `SHOW_OBS_EDITABLES` controller, default `back:` to the current
+  # action (`:show` or `:index`) so the controller can redirect back
+  # to the originating page after the edit/destroy. Caller's
+  # explicit `back:` always wins (handled in `path_args` above).
+  # Returns nil otherwise.
+  def default_back_param
+    return nil unless back_eligible?
+    return nil unless SHOW_OBS_EDITABLES.include?(controller_name)
+
+    case action_name
+    when "show" then :show
+    when "index" then :index
+    end
+  end
+
+  def back_eligible?
+    [:edit, :destroy].include?(@args[:action]) &&
+      !@target.is_a?(String) && !@target.is_a?(Hash)
   end
 
   def path_prefix

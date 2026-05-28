@@ -11,7 +11,7 @@
 #  heads up about button_to input vs button
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
-module LinkHelper # rubocop:disable Metrics/ModuleLength
+module LinkHelper
   # Call `link_to` with query params added.
   # Should now take exactly the same args as `link_to`.
   # You can pass a hash to `path`, but not separate args. Can take a block.
@@ -229,13 +229,6 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   #   )
   #
   def destroy_button(target:, name: nil, **args)
-    # The `back:` arg defaults from SHOW_OBS_EDITABLES context — kept
-    # in the helper layer because it reads controller/action_name,
-    # which the Phlex component doesn't easily see.
-    unless target.is_a?(String) || target.is_a?(Hash)
-      back_args = add_back_param_to_button_atts(:destroy)
-      args[:back] = back_args[:back] if back_args[:back]
-    end
     render(Components::CrudButton::Delete.new(
              target: target, name: name, **args
            ))
@@ -243,14 +236,10 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
 
   # GET-style edit link — emits `<a>` (link_to), not a form-wrapped
   # button. Delegates to `Components::CrudButton::Edit`, which carries
-  # the `action: :edit`/`icon: :edit` defaults. Callers wanting a
-  # text-only edit link pass `icon: nil`.
+  # the `action: :edit`/`icon: :edit` defaults and (for model targets
+  # rendered from SHOW_OBS_EDITABLES controllers) the `?back=show|index`
+  # query param. Callers wanting a text-only edit link pass `icon: nil`.
   def edit_button(target:, name: nil, **args)
-    name ||= if target.is_a?(String)
-               :EDIT.l
-             else
-               :edit_object.t(type: target.type_tag)
-             end
     render(Components::CrudButton::Edit.new(
              target: target, name: name, **args
            ))
@@ -261,83 +250,12 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   # as a String because the route shape doesn't match
   # `download_<resource>_path` — there's a `new_download_species_list`
   # named route, but `download_species_list` is the index path.
-  def download_button(target:, name: :DOWNLOAD.t, **args)
-    name = :DOWNLOAD.t if name.blank?
+  def download_button(target:, name: nil, **args)
     render(Components::CrudButton::Download.new(
              target: new_download_species_list_path(id: target.id),
              name: name,
              **args
            ))
-  end
-
-  # Attempts to put together some common button attributes. Overrides available.
-  def button_atts(action, target, args, name)
-    if target.is_a?(String) || target.is_a?(Hash) # eg { controller:, action: }
-      path = target # ignores `action`
-      identifier = "" # can send one via args[:class]
-    else
-      prefix = action == :destroy ? "" : "#{action}_"
-      path_args = add_back_param_to_button_atts(action)
-      path = send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
-      identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
-    end
-    if args[:icon]
-      icon = link_icon(args[:icon])
-      content = tag.span(name, class: "sr-only")
-    else
-      icon = ""
-      content = name
-    end
-    [path, identifier, icon, content]
-  end
-
-  SHOW_OBS_EDITABLES = %w[
-    collection_numbers herbarium_records sequences external_links
-  ].freeze
-
-  # This allows expected and tested behavior of either
-  # - returning to :show or :index of these types of records
-  # - returning to the :show page of the observation they're associated with
-  # depending on what page the form request originated.
-  def add_back_param_to_button_atts(action)
-    return {} unless [:edit, :destroy].include?(action) &&
-                     SHOW_OBS_EDITABLES.include?(controller.controller_name)
-
-    case action_name
-    when "show"
-      { back: :show }
-    when "index"
-      { back: :index }
-    end
-  end
-
-  # Refactor to accept a tab array
-  # Note `link_to` - not a <button> element, but an <a> because it's a GET
-  def add_button(path:, name: :ADD.t, **args, &block)
-    content = block ? capture(&block) : ""
-    html_options = {
-      class: "", # usually also btn
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args)
-
-    link_to(path, html_options) do
-      [content, link_icon(:add)].safe_join
-    end
-  end
-
-  # Refactor to accept a tab array
-  # TODO: Change translations BACK to PREV, or make a BACK TO translation
-  # Note `link_to` - not a <button> element, but an <a> because it's a GET
-  def back_button(path:, name: :BACK.t, **args, &block)
-    content = block ? capture(&block) : ""
-    html_options = {
-      class: "", # usually also btn
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args)
-
-    link_to(path, html_options) do
-      [content, link_icon(:back)].safe_join
-    end
   end
 
   # Refactor to accept a tab array
