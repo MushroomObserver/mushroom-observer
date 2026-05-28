@@ -467,7 +467,18 @@ class Components::ApplicationForm < Superform::Rails::Form
       if field_name.is_a?(String)
         FieldProxy.new(nil, field_name, value)
       elsif !value.nil?
-        FieldProxy.new(nil, field(field_name).dom.name, value)
+        # Symbol + value: build a FieldProxy that mirrors what
+        # `field(field_name)` would have produced — namespace and key
+        # kept SEPARATE so downstream components can slice
+        # `dom.name` back into "model prefix" + "field key"
+        # (matters for AutocompleterField's `model_namespace` and
+        # `default_hidden_field_name`, which split on `[<key>]$`).
+        # Walking `field(...).dom.name` and stripping the bracketed
+        # field-key suffix recovers the namespace.
+        superform_name = field(field_name).dom.name
+        key_suffix = "[#{field_name}]"
+        namespace = superform_name.delete_suffix(key_suffix)
+        FieldProxy.new(namespace, field_name, value)
       else
         field(field_name)
       end
