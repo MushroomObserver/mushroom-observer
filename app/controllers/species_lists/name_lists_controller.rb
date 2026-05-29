@@ -78,7 +78,19 @@ module SpeciesLists
       @species_list = SpeciesList.new
       init_project_vars_for_create
       @list_members = name_lister_results.tr("|", " ").delete("*")
-      render("species_lists/new")
+      # `species_lists/new.html.erb` is now Phlex (see #4389) — render
+      # the class directly with the form props the page needs. Sub-
+      # controllers don't pre-populate `dubious_where_reasons` or
+      # `submitted_project_ids` (no form re-render path here), so
+      # pass the empty defaults the form's parity with the main
+      # `new` page expects.
+      render(Views::Controllers::SpeciesLists::New.new(
+               species_list: @species_list,
+               projects: @projects,
+               dubious_where_reasons: [],
+               submitted_project_ids: nil,
+               user: @user
+             ))
     end
 
     ############################################################################

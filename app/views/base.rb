@@ -25,5 +25,17 @@ class Views::Base < Components::Base
   register_value_helper :add_pagination
   register_value_helper :add_sorter
   register_value_helper :container_class
+  register_value_helper :column_classes
   register_value_helper :content_for
+  register_value_helper :flash_error
+  # `paginated_results` takes a block and emits the surrounding
+  # pagination HTML around it — output helper, mark_safe so Phlex
+  # trusts the returned SafeBuffer.
+  register_output_helper :paginated_results, mark_safe: true
+  # `controller` (the ActionController instance) is referenced from
+  # tab-helper methods like
+  # `Tabs::ProjectsHelper#project_species_list_locations_button`
+  # which pass it to `InternalLink::RelatedQuery.new`. ERB views
+  # have it for free; Phlex views need it registered.
+  register_value_helper :controller
 end

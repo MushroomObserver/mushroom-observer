@@ -1,0 +1,29 @@
+# frozen_string_literal: true
+
+module Views::Controllers::SpeciesLists
+  module Search
+    # Search form for species_lists. Wraps `Components::SearchForm`
+    # with the page chrome (title, container width).
+    class New < Views::Base
+      def initialize(search:, controller:, local: nil)
+        super()
+        @search = search
+        @controller = controller
+        @local = local
+      end
+
+      def view_template
+        add_new_title(:search_object, :SPECIES_LISTS)
+        container_class(:wide)
+
+        div(id: "species_lists_search_container") do
+          render(Components::SearchForm.new(
+                   @search,
+                   search_controller: @controller,
+                   local: @local != false
+                 ))
+        end
+      end
+    end
+  end
+end

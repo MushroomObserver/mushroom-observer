@@ -7,7 +7,14 @@
 #  for the one exception).  In the end all these Name's cause rudimentary
 #  Observation's to spring into existence.
 #
-class SpeciesListsController < ApplicationController
+class SpeciesListsController < ApplicationController # rubocop:disable Metrics/ClassLength
+  # `Metrics/ClassLength` disabled — this controller serves the full
+  # SpeciesList CRUD surface (index, show, new, create, edit, update,
+  # destroy, clear) plus the Phlex view-render hooks (`render_index_view`,
+  # `render_phlex_new`, `render_phlex_edit`) the no-Phlex-resolver
+  # convention requires. Splitting into action-class modules is the
+  # other option and is uglier. Reconsider after #4386 / #4387 era
+  # if more action conversions push us further over.
   before_action :login_required
   before_action :require_successful_user, only: [:new, :create]
   before_action :store_location, only: [:show]
@@ -28,6 +35,18 @@ class SpeciesListsController < ApplicationController
   def index
     set_project_ivar
     build_index_with_query
+  end
+
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class. Other
+  # actions in this controller render Phlex explicitly from the
+  # action method; index needs the hook because it routes through
+  # `show_index_of_objects` which calls render itself.
+  def render_index_view
+    render(Views::Controllers::SpeciesLists::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, project: @project, error: @error
+           ))
   end
 
   private
@@ -100,12 +119,22 @@ class SpeciesListsController < ApplicationController
     end
 
     init_ivars_for_show
+    render(Views::Controllers::SpeciesLists::Show.new(
+             species_list: @species_list,
+             user: @user,
+             query: @query,
+             pagination_data: @pagination_data,
+             objects: @objects,
+             comments: @comments,
+             project: @project
+           ))
   end
 
   def new
     @species_list = SpeciesList.new
     init_project_vars_for_create
     init_list_for_clone(params[:clone]) if params[:clone].present?
+    render_phlex_new
   end
 
   def edit
@@ -114,6 +143,7 @@ class SpeciesListsController < ApplicationController
     if permission!(@species_list)
       @place_name = @species_list.place_name
       init_project_vars_for_edit(@species_list)
+      render_phlex_edit
     else
       redirect_to(species_list_path(@species_list))
     end
@@ -218,7 +248,35 @@ class SpeciesListsController < ApplicationController
     return if redirected
 
     init_project_vars_for_reload(@species_list)
-    render(create_or_update == :create ? :new : :edit)
+    if create_or_update == :create
+      render_phlex_new
+    else
+      render_phlex_edit
+    end
+  end
+
+  # MO doesn't wire a Phlex view resolver, so the controller renders
+  # each action's Phlex view explicitly. `process_species_list` also
+  # uses these on the failure-reload path. `species_list_form_view`
+  # returns the 5 form props shared between new + edit + reload —
+  # spread into each call via `**`.
+  def species_list_form_view
+    { species_list: @species_list, projects: @projects,
+      dubious_where_reasons: @dubious_where_reasons,
+      submitted_project_ids: @submitted_project_ids,
+      user: @user }
+  end
+
+  def render_phlex_new
+    render(Views::Controllers::SpeciesLists::New.new(
+             **species_list_form_view, clone_id: @clone_id
+           ))
+  end
+
+  def render_phlex_edit
+    render(Views::Controllers::SpeciesLists::Edit.new(
+             **species_list_form_view
+           ))
   end
 
   def validate_place_name

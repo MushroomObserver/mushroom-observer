@@ -59,10 +59,9 @@ module SpeciesLists
     end
 
     def assert_create_species_list
-      assert_template("species_lists/new")
-      # `species_lists/_form` partial folded into
-      # `Components::SpeciesListForm`. Phlex components don't show in
-      # `assert_template`; assert the form's root element instead.
+      # `species_lists/new.html.erb` is now Phlex (see #4389) — Phlex
+      # views don't show up in `assert_template`. The form has a
+      # unique `#species_list_form` id; that's the action marker.
       assert_select("form#species_list_form", { count: 1 },
                     "Expected SpeciesListForm to render")
     end

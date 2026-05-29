@@ -434,8 +434,50 @@ After writing the component:
      consistency, dropping an unused id). Reviewers shouldn't have to
      spot drift in a diff that calls itself "no functional change".
 
-   This is mandatory for modal/form ERB→Phlex conversions — the visual
-   contract there is easy to drift on, and reviewers can't catch it
-   without the diff (controller / component tests are happy with either
-   markup). For non-form, non-modal components the diff is still a good
-   habit but isn't required.
+   **This is mandatory for every ERB → Phlex conversion** — modals,
+   forms, partials, action templates, all of them. Selector-based
+   component tests pass with either markup; only a literal HTML diff
+   catches whitespace/attribute/wrapper drift that bites users in the
+   browser. No skimping.
+
+   **Ordering**: write and pass the parity test BEFORE deleting the
+   ERB. The harness has to render the ERB partial via
+   `controller.view_context.render(partial: "foo/bar")`, which
+   needs the file on disk. Convert → parity test → confirm green
+   → delete ERB. Never delete first.
+
+   For the diff harness in this codebase: the test controller used by
+   `ComponentTestCase` doesn't inherit `ApplicationController`'s
+   `append_view_path Rails.root.join("app/views/controllers")`, so a
+   parity test that renders an ERB partial via `view_context.render(
+   partial: "foo/bar")` needs to add that path itself, e.g. in
+   `setup` (or use `view_paths.unshift(...)`). Without it,
+   `ActionView::MissingTemplate` fires for paths under
+   `app/views/controllers/`.
+
+## Addendum: No Phlex view resolver
+
+When converting an action template (ERB → `Views::Controllers::<Foo>::<Action>`),
+the controller's implicit `render(:new)` must be changed to an explicit
+`render(Views::Controllers::<Foo>::New.new(...))`. There is no
+"resolver" wired into MO that lets `render(:new)` find a Phlex class
+automatically — you have to point at the class and pass props.
+
+The `phlex-rails` gem at version 2.4.0 (MO's installed version)
+ships no `Phlex::Rails::Resolver` — zero references to "Resolver" in
+either `phlex` or `phlex-rails`. The auto-ivar-copying pattern some
+older Phlex 1.x guides describe was never part of the 2.x gem.
+Hand-rolling one is possible (custom `ActionView::Resolver` reading
+`controller.view_assigns`), but the ivar-push mechanism conflicts
+with MO's `prop :foo, Literal::…` convention — bare ivars arrive
+without prop declarations, lose type validation, and break the
+explicit-prop test ergonomics every existing Phlex view in MO
+depends on. The per-conversion cost of "explicit `render(…)`" is
+one or two lines in the controller; net win is small and would
+fragment the codebase across two render styles.
+
+**Convention**: every action-template conversion changes the
+controller to `render(Views::Controllers::<Foo>::<Action>.new(
+attr: @ivar, …))`, lifting the ERB-era ivars into explicit props on
+the new class. See any existing `app/views/controllers/**/<action>.rb`
+for examples.

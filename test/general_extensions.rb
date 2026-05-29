@@ -489,7 +489,13 @@ module GeneralExtensions
     login if do_login
     get(:index, params: { by: sort_order })
 
-    assert_template("index")
+    # `assert_template("index")` doesn't work for Phlex action views
+    # (they render outside the ActionView template lookup chain).
+    # The `application/_top_nav.erb` layout stamps a unique
+    # `<body class="<controller_name>__<action_name>">` class on
+    # every page — use that as the action marker, works for both
+    # ERB and Phlex views.
+    assert_select("body.#{@controller.controller_name}__index")
     assert_sorted_by(sort_order.to_s)
   end
 
