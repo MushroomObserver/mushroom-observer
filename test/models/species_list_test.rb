@@ -158,4 +158,74 @@ class SpeciesListTest < UnitTestCase
       "SpeciesList#location_id should change upon defining that Location"
     )
   end
+
+  # Sync semantics: nil submission means "form had no project_ids field" —
+  # treat as no-op, don't tear down existing memberships.
+  def test_sync_projects_with_nil_submission_returns_no_changes
+    list = species_lists(:unknown_species_list)
+    user = users(:rolf)
+
+    assert_empty(list.sync_projects(nil, user: user))
+  end
+
+  # Empty array means the form posted `project_ids[]` but nothing was
+  # checked. Existing memberships in member projects should be removed.
+  def test_sync_projects_empty_submission_removes_member_project_memberships
+    project = projects(:eol_project)
+    user = project.user_group.users.first
+    list = species_lists(:unknown_species_list)
+    project.add_species_list(list)
+    list.reload
+
+    changes = list.sync_projects([], user: user)
+
+    assert_equal(1, changes.length)
+    assert_equal([project, :removed], changes.first)
+    assert_not_includes(list.reload.projects, project)
+  end
+
+  # Newly-checked project shows up in the submitted ids — model
+  # mutates the join and returns `[project, :added]`.
+  def test_sync_projects_adds_newly_submitted_member_project
+    project = projects(:eol_project)
+    user = project.user_group.users.first
+    list = species_lists(:query_first_list)
+    assert_not_includes(list.projects, project)
+
+    changes = list.sync_projects([project.id.to_s], user: user)
+
+    assert_equal([[project, :added]], changes)
+    assert_includes(list.reload.projects, project)
+  end
+
+  # Non-member projects already attached to the list are NOT touched
+  # (the form disables those checkboxes; even an empty submission
+  # shouldn't strip them).
+  def test_sync_projects_leaves_non_member_projects_alone
+    project = projects(:eol_project)
+    # `zero_user` is intentionally a member of zero projects.
+    user = users(:zero_user)
+    assert_empty(user.projects_member,
+                 "Test setup: zero_user must be in no projects")
+    list = species_lists(:unknown_species_list)
+    project.add_species_list(list)
+
+    changes = list.sync_projects([], user: user)
+
+    assert_empty(changes)
+    assert_includes(list.reload.projects, project)
+  end
+
+  # Membership unchanged → no change reported.
+  def test_sync_projects_is_idempotent_when_submission_matches
+    project = projects(:eol_project)
+    user = project.user_group.users.first
+    list = species_lists(:unknown_species_list)
+    project.add_species_list(list)
+    list.reload
+
+    changes = list.sync_projects([project.id.to_s], user: user)
+
+    assert_empty(changes)
+  end
 end
