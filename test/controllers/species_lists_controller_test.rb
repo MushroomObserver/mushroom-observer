@@ -36,11 +36,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
   end
 
   def assert_edit_species_list
-    assert_template("edit")
-    # The pre-Phlex `species_lists/_form` partial was folded into
-    # `Components::SpeciesListForm` (a Phlex component rendered by
-    # `edit.html.erb` directly). Phlex components don't show up in
-    # `assert_template`, so assert the form's root element instead.
+    # `edit.html.erb` and its child form partial are both Phlex now
+    # (`Views::Controllers::SpeciesLists::Edit` →
+    # `Components::SpeciesListForm`). Phlex views don't appear in
+    # `assert_template`'s rendered-list — use the layout's
+    # `<body class="species_lists__edit">` action marker instead.
+    assert_select("body.species_lists__edit")
     assert_select("form#species_list_form", { count: 1 },
                   "Expected SpeciesListForm to render")
   end
@@ -236,7 +237,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(rolf.login)
     get(:show, params: { id: list.id })
 
-    assert_template(:show)
+    assert_select("body.species_lists__show")
     assert_template("comments/_comments_for_object")
     assert_select(
       "form:match('action', ?)",
@@ -255,7 +256,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(list.user.login)
     get(:show, params: { id: list.id })
 
-    assert_template(:show)
+    assert_select("body.species_lists__show")
     assert_template("comments/_comments_for_object")
     assert_select(
       "form:match('action', ?)",
@@ -363,7 +364,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:SpeciesList, order_by: "reverse_user")
     params = { q: @controller.q_param(query) }
     get(:index, params:)
-    assert_template(:index)
+    assert_select("body.species_lists__index")
 
     get(:show, params: params.merge(id: query.result_ids[0], flow: :next))
     assert_redirected_to(params.merge(action: :show, id: query.result_ids[1]))

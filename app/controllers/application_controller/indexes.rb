@@ -250,8 +250,18 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
       show_action_redirect(query)
     else
       calc_pages_and_objects(query, display_opts)
-      render(action: :index) # must be explicit for names' `test_index` action
+      render_index_view
     end
+  end
+
+  # Render the index view. Default renders the ERB action template
+  # (was `render(action: :index)` — must be explicit for names'
+  # `test_index` action). Controllers that have converted their
+  # index template to Phlex override this to render the class
+  # directly with explicit props. Transitional hook so the rest of
+  # the index machinery doesn't need to know about Phlex.
+  def render_index_view
+    render(action: :index)
   end
 
   private ##########

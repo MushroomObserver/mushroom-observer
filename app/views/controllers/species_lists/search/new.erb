@@ -1,12 +1,13 @@
-<%
-add_new_title(:search_object, :SPECIES_LISTS)
-container_class(:wide)
-%>
-
-<div id="species_lists_search_container">
-  <%= render(Components::SearchForm.new(
-        @search,
-        search_controller: controller,
-        local: @local != false
-      )) %>
-</div>
+<%# Thin shim: `Searchable#new` (in `app/controllers/concerns/searchable.rb`)
+does `format.html` with no block, which uses ActionView's implicit
+render lookup — and Searchable is shared across multiple search
+controllers. Rather than wire a `render_search_new_view` hook through
+the concern now (that pattern lives in `ApplicationController::Indexes`
+already; see `render_index_view`), render the Phlex view from here
+until another search controller migrates and a shared hook is
+worthwhile. %>
+<%= render(Views::Controllers::SpeciesLists::Search::New.new(
+             search: @search,
+             controller: controller,
+             local: @local
+           )) %>
