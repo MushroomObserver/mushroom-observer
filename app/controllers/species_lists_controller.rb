@@ -7,27 +7,10 @@
 #  for the one exception).  In the end all these Name's cause rudimentary
 #  Observation's to spring into existence.
 #
-class SpeciesListsController < ApplicationController # rubocop:disable Metrics/ClassLength
-  # `Metrics/ClassLength` disabled — this controller serves the full
-  # SpeciesList CRUD surface (index, show, new, create, edit, update,
-  # destroy, clear) plus the Phlex view-render hooks (`render_index_view`,
-  # `render_phlex_new`, `render_phlex_edit`) the no-Phlex-resolver
-  # convention requires. Splitting into action-class modules is the
-  # other option and is uglier. Reconsider after #4386 / #4387 era
-  # if more action conversions push us further over.
+class SpeciesListsController < ApplicationController
   before_action :login_required
   before_action :require_successful_user, only: [:new, :create]
   before_action :store_location, only: [:show]
-  # Bullet wants us to eager load synonyms for @deprecated_names in
-  # edit_species_list, and I thought it would be possible, but I can't
-  # get it to work.  Seems toooo minor to waste any more time on.
-  # Also, as of 20231212, it wants a cached column for Observation.name,
-  # but this is not as simple as an AR default column_cache because count
-  # needs to be recalculated whenever an observation's consensus name
-  # changes, not just on create or destroy of the Observation.name.
-  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
-    :create, :update
-  ]
 
   ##############################################################################
   # INDEX
@@ -111,11 +94,9 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     return unless (@species_list = find_species_list!)
 
     set_project_ivar
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, SpeciesList, params[:id]) and return
-    when "prev"
-      redirect_to_next_object(:prev, SpeciesList, params[:id]) and return
+    if %w[next prev].include?(params[:flow])
+      return redirect_to_next_object(params[:flow].to_sym,
+                                     SpeciesList, params[:id])
     end
 
     init_ivars_for_show
@@ -288,19 +269,11 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
     @place_name = @species_list.place_name
     @dubious_where_reasons = []
-    # `approved_where` lives under the species_list namespace (post-Phlex)
-    # so the dubious-confirmation flag travels with the form's other
-    # fields as a regular form param. The pre-Phlex form passed this
-    # value as a top-level URL query param; the new SpeciesListForm
-    # posts it as a hidden field via `hidden_field(:approved_where, ...)`.
-    approved_where = params.dig(:species_list, :approved_where)
-    unless (@place_name != approved_where) &&
-           @species_list.location_id.nil?
-      return
-    end
+    return if @species_list.location_id
 
     @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @place_name
+      user: @user, place_name: @place_name,
+      approved: params.dig(:species_list, :approved_where)
     )
   end
 
