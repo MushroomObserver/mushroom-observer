@@ -353,28 +353,20 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   end
 
   # `submitted_ids` is the `species_list[project_ids][]` array from
-  # the form: the projects the user wants the SL attached to. Only
-  # projects in `@user.projects_member` are toggled — non-member
-  # projects the SL belongs to are preserved by omission (disabled
-  # checkboxes don't submit, and the iteration excludes them anyway).
+  # the form. Delegate the actual sync to `SpeciesList#sync_projects`
+  # and flash the per-change notification + the trailing "and the
+  # observations too" hint.
   def update_projects(spl, submitted_ids)
-    return unless submitted_ids
+    changes = spl.sync_projects(submitted_ids, user: @user)
+    changes.each { |project, change| flash_project_change(project, change) }
+    return if changes.empty?
 
-    desired = submitted_ids.compact_blank.map(&:to_i)
-    any_changes = false
-    Project.where(id: @user.projects_member.map(&:id)).
-      includes(:species_lists).find_each do |project|
-      before = spl.projects.include?(project)
-      after = desired.include?(project.id)
-      next if before == after
+    flash_notice(:species_list_show_manage_observations_too.t)
+  end
 
-      change_project_species_lists(
-        project: project, spl: spl, change: (after ? :add : :remove)
-      )
-      any_changes = true
-    end
-
-    flash_notice(:species_list_show_manage_observations_too.t) if any_changes
+  def flash_project_change(project, change)
+    key = change == :added ? :attached_to_project : :removed_from_project
+    flash_notice(key.t(object: :species_list, project: project.title))
   end
 
   def init_list_for_clone(clone_id)
@@ -385,18 +377,6 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     @species_list.place_name = clone.place_name
     @species_list.location = clone.location
     @species_list.title = clone.title
-  end
-
-  def change_project_species_lists(project:, spl:, change: :add)
-    if change == :add
-      project.add_species_list(spl)
-      flash_notice(:attached_to_project.t(object: :species_list,
-                                          project: project.title))
-    else
-      project.remove_species_list(spl)
-      flash_notice(:removed_from_project.t(object: :species_list,
-                                           project: project.title))
-    end
   end
 
   def permitted_species_list_args
