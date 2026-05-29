@@ -1,9 +1,28 @@
 # PR body formatting
 
-When using `gh pr create` or `gh pr edit`, **always** write the body to
-a file first and pass it via `--body-file`. Never use a HEREDOC
-(`$(cat <<'EOF' ... EOF)`) for a PR body that contains backticks for
-code formatting.
+When using `gh pr create` or `gh pr edit`, **always** write the body to a file first and pass it via `--body-file`. Never use a HEREDOC (`$(cat <<'EOF' ... EOF)`) for a PR body that contains backticks for code formatting.
+
+## No hard-wrapped paragraphs
+
+**Never hard-wrap a paragraph at ~70-72 columns.** Write each paragraph as a single logical line in the source. The only line breaks in a Markdown body should be: between paragraphs (one blank line), in code blocks, in lists, in tables. Inside a paragraph: no breaks.
+
+GitHub renders soft-wrapped paragraphs perfectly. Hard-wrapping does nothing for the reader and makes the body harder to edit, harder to diff, and harder to copy a sentence out of. The user has flagged this enough times that it's a hard rule.
+
+Wrong:
+
+```
+Adds `Location.dubious_reasons_for(user:, place_name:, approved:)` that
+encapsulates the `user_format` + `dubious_name?(…, true)` pattern that
+lived as 2-3 lines in 4 controllers across 6 call sites.
+```
+
+Right:
+
+```
+Adds `Location.dubious_reasons_for(user:, place_name:, approved:)` that encapsulates the `user_format` + `dubious_name?(…, true)` pattern that lived as 2-3 lines in 4 controllers across 6 call sites.
+```
+
+Lists and tables and code blocks still use their natural line structure — this rule is about prose paragraphs only.
 
 ## Why
 
