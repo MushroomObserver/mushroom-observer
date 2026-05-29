@@ -4,9 +4,12 @@ require("test_helper")
 
 module Components::ContextNav
   # Tests for the mobile (`xs`-only) sidebar that renders into
-  # `content_for(:context_nav_mobile)`. Sidebar collapses every link
-  # tuple to an `active_link_to` — ignoring `args[:button]` — so the
-  # mobile menu stays a flat list, matching pre-Phlex behavior.
+  # `content_for(:context_nav_mobile)`. Sidebar dispatches each link
+  # tuple via `LinkRendering#render_crud_button_or_link` (same as
+  # `TopBar`) so destroy / post / put / patch tuples render as their
+  # actual forms — pre-Phlex `sidebar_nav_link` collapsed everything
+  # to plain links, which was a bug (mobile users couldn't trigger
+  # the action). Fixed in this PR.
   class SidebarTest < ComponentTestCase
     def setup
       super
@@ -19,46 +22,64 @@ module Components::ContextNav
       assert_equal("", html)
     end
 
-    def test_renders_heading_and_link_rows
+    def test_renders_heading_and_plain_link_rows
       html = render_sidebar(simple_links)
 
-      # Heading: "Context Actions:" inside a list-group-item / heading
-      # div, mobile-only.
-      assert_html(html, "div.list-group-item.disabled.font-weight-bold.visible-xs",
+      # Heading row.
+      heading_classes =
+        "div.list-group-item.disabled.font-weight-bold.visible-xs"
+      assert_html(html, heading_classes,
                   text: "#{:app_context_actions.t}:")
-      # Each link becomes its own indented + mobile-only row.
+      # Each plain link is its own indented + mobile-only row.
       assert_html(html, "a.list-group-item.indent.visible-xs",
                   count: simple_links.length)
     end
 
-    # Sidebar deliberately collapses `button: :destroy` to a plain
-    # link (no form, no destroy mechanics) — this matches the
-    # pre-Phlex `sidebar_nav_link` shape, and the mobile menu has
-    # no good place for confirm dialogs anyway.
-    def test_destroy_tuple_renders_as_plain_link_in_sidebar
+    # `button: :destroy` now dispatches through `CrudButton::Delete`
+    # (with the `icon: nil` + `btn: nil` context-nav opt-outs from
+    # `LinkRendering`) — sidebar users get a working REMOVE form.
+    def test_destroy_tuple_renders_as_form_in_sidebar
       links = [[nil, @article, { button: :destroy }]]
       html = render_sidebar(links)
 
-      assert_no_html(html, "form")
+      assert_html(html, "form[action='#{view_context.article_path(@article)}']")
+      assert_html(html, "input[name='_method'][value='delete']")
     end
 
-    # Every sidebar link gets the Stimulus `nav-active` data attrs
-    # so the controller can highlight the current-page link.
-    def test_links_have_nav_active_data_attributes
+    # `button: :post` dispatches through Rails' `button_to` → form.
+    def test_post_tuple_renders_as_form_in_sidebar
+      links = [["Submit", "/items", { button: :post }]]
+      html = render_sidebar(links)
+
+      assert_html(html, "form[action='/items']")
+      assert_html(html, "button", text: "Submit")
+    end
+
+    # Plain anchor links get the Stimulus `nav-active` data attrs so
+    # the current-page link is highlighted. Forms / buttons aren't
+    # navigated to in the same sense, so they don't get those attrs.
+    def test_plain_links_have_nav_active_data_attributes
       html = render_sidebar(simple_links)
 
       assert_html(html, "a[data-nav-active-target='link']")
       assert_html(html, "a[data-action='nav-active#navigate']")
     end
 
-    def test_strips_d_block_class_from_buttons
-      links = [["Click", "/items", { button: :post, class: "d-block other-class" }]]
+    def test_button_tuples_do_not_get_nav_active_data_attributes
+      links = [[nil, @article, { button: :destroy }]]
       html = render_sidebar(links)
 
-      # The link still renders (sidebar collapses buttons to links),
-      # but the d-block was stripped out per pre-Phlex parity.
-      assert_html(html, "a.other-class")
-      assert_no_html(html, "a.d-block")
+      assert_no_html(html, "form[data-nav-active-target]")
+      assert_no_html(html, "button[data-nav-active-target]")
+    end
+
+    def test_strips_d_block_class_from_buttons
+      links = [["Click", "/items",
+                { button: :post, class: "d-block other-class" }]]
+      html = render_sidebar(links)
+
+      assert_html(html, "button.other-class")
+      assert_no_html(html, "button.d-block")
     end
 
     private

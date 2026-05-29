@@ -3,10 +3,13 @@
 # Mobile (`xs`-only) sidebar version of the context-nav menu —
 # rendered into `content_for(:context_nav_mobile)` by
 # `add_context_nav(links)`. Renders the same `[text, url, args]`
-# tuples as `TopBar`, but flattened into indented `active_link_to`
-# rows under a heading (no dropdown, no per-link button dispatch —
-# the sidebar always uses `link_to` even when the tuple says
-# `button: :destroy`, matching pre-Phlex behavior).
+# tuples as `TopBar`, flattened into indented rows under a heading
+# (no dropdown). Dispatches each tuple through
+# `LinkRendering#render_crud_button_or_link` so `button: :destroy` /
+# `:post` / `:put` / `:patch` actually render as their respective
+# forms — pre-Phlex `sidebar_nav_link` collapsed every tuple to a
+# plain `active_link_to`, which meant mobile users couldn't trigger
+# destroy / post actions from the sidebar at all. Fixed here.
 class Components::ContextNav::Sidebar < Components::Base
   include Components::ContextNav::LinkRendering
 
@@ -46,25 +49,25 @@ class Components::ContextNav::Sidebar < Components::Base
     end
   end
 
-  # Pre-Phlex `sidebar_nav_link` always used `active_link_to` —
-  # ignoring `args[:button]` — so `[ DESTROY ]` / `[ POST ]` tabs
-  # collapse to plain text links in the mobile sidebar. Preserved
-  # for parity.
   def render_sidebar_link(link)
     str, url, args = link
-    kwargs = sidebar_link_kwargs(args || {})
-    link_to(str, url, kwargs)
+    args ||= {}
+    kwargs = sidebar_link_kwargs(args)
+    render_crud_button_or_link(str, url, args, kwargs)
   end
 
   # Builds the kwargs hash for one sidebar link: indent + mobile-only
-  # classes, the nav-active Stimulus data attrs (inlined from
-  # `LinkHelper#active_link_to`), and a button-specific d-block strip.
+  # classes, the nav-active Stimulus data attrs (only for plain anchor
+  # links — buttons / forms aren't tracked by `nav-active`), and a
+  # button-specific d-block strip.
   def sidebar_link_kwargs(args)
     kwargs = merge_context_nav_link_args(
       args,
       class: class_names(CSS_CLASSES[:indent], CSS_CLASSES[:mobile_only])
     )
     strip_d_block_for_button!(kwargs, args)
+    return kwargs if args[:button].present?
+
     kwargs[:data] = (kwargs[:data] || {}).merge(
       nav_active_target: "link",
       action: "nav-active#navigate"
