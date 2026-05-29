@@ -100,15 +100,7 @@ class SpeciesListsController < ApplicationController
     end
 
     init_ivars_for_show
-    render(Views::Controllers::SpeciesLists::Show.new(
-             species_list: @species_list,
-             user: @user,
-             query: @query,
-             pagination_data: @pagination_data,
-             objects: @objects,
-             comments: @comments,
-             project: @project
-           ))
+    render_phlex_show
   end
 
   def new
@@ -246,6 +238,15 @@ class SpeciesListsController < ApplicationController
       dubious_where_reasons: @dubious_where_reasons,
       submitted_project_ids: @submitted_project_ids,
       user: @user }
+  end
+
+  def render_phlex_show
+    render(Views::Controllers::SpeciesLists::Show.new(
+             species_list: @species_list, user: @user, query: @query,
+             pagination_data: @pagination_data, objects: @objects,
+             comments: @comments, object_names: @object_names,
+             project: @project
+           ))
   end
 
   def render_phlex_new

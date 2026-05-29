@@ -12,7 +12,7 @@ module Views::Controllers::SpeciesLists
     # needs; `ParameterLists` isn't on the CLAUDE.md "always refactor"
     # list.
     def initialize(species_list:, user:, query:, pagination_data:,
-                   objects:, comments:, project: nil)
+                   objects:, comments:, object_names:, project: nil)
       super()
       @species_list = species_list
       @user = user
@@ -20,6 +20,7 @@ module Views::Controllers::SpeciesLists
       @pagination_data = pagination_data
       @objects = objects
       @comments = comments
+      @object_names = object_names
       @project = project
     end
     # rubocop:enable Metrics/ParameterLists
@@ -70,14 +71,12 @@ module Views::Controllers::SpeciesLists
       end
     end
 
-    # `shared/list_search` is still an ERB partial. Wrap the rendered
-    # string in `trusted_html` because Rails returns it SafeBuffer-
-    # tagged and Phlex's `plain` would re-escape.
     def render_list_search
-      trusted_html(
-        view_context.render(partial: "shared/list_search",
-                            locals: { object: @species_list })
-      )
+      render(Components::ListSearch.new(
+               object: @species_list,
+               object_names: @object_names,
+               project: @project
+             ))
     end
 
     def render_observations

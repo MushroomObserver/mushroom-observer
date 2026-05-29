@@ -4,12 +4,13 @@ module Views::Controllers::Projects
   # Phlex view for the project show page.
   # Replaces show.html.erb.
   class Show < Views::Base
-    def initialize(project:, user:, drafts:, comments:)
+    def initialize(project:, user:, drafts:, comments:, object_names:)
       super()
       @project = project
       @user = user
       @drafts = drafts
       @comments = comments
+      @object_names = object_names
     end
 
     def view_template
@@ -29,12 +30,11 @@ module Views::Controllers::Projects
     private
 
     def render_list_search
-      trusted_html(
-        view_context.render(
-          partial: "shared/list_search",
-          locals: { object: @project }
-        )
-      )
+      render(Components::ListSearch.new(
+               object: @project,
+               object_names: @object_names,
+               project: @project
+             ))
     end
 
     def render_summary_panel

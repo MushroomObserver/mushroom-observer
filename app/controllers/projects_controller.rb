@@ -54,7 +54,8 @@ class ProjectsController < ApplicationController
     set_ivars_for_show
     render(Views::Controllers::Projects::Show.new(
              project: @project, user: @user,
-             drafts: @drafts, comments: @comments
+             drafts: @drafts, comments: @comments,
+             object_names: @object_names
            ), layout: true)
   end
 
