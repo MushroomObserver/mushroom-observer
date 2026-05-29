@@ -46,8 +46,9 @@ module Components::ContextNav
     def test_dropdown_toggle_shows_context_actions_label
       html = render_top_bar(simple_links)
 
-      assert_html(html, "a.dropdown-toggle span[data-dropdown-current-target='title']",
-                  text: :app_context_actions.l)
+      title_sel =
+        "a.dropdown-toggle span[data-dropdown-current-target='title']"
+      assert_html(html, title_sel, text: :app_context_actions.l)
     end
 
     # `args[:button] => :destroy` routes through `CrudButton::Delete`
