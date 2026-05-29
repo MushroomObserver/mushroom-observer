@@ -299,8 +299,9 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
       return
     end
 
-    db_name = Location.user_format(@user, @place_name)
-    @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    @dubious_where_reasons = Location.dubious_reasons_for(
+      user: @user, place_name: @place_name
+    )
   end
 
   def check_for_clone
