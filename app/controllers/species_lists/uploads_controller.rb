@@ -33,7 +33,16 @@ module SpeciesLists
         @species_list.process_file_data(@user, sorter)
         init_name_vars_from_sorter(@species_list, sorter)
         init_project_vars_for_edit(@species_list)
-        render("species_lists/edit")
+        # `species_lists/edit.html.erb` is now Phlex (see #4389) — render
+        # the class directly. No form re-render path here, so the
+        # dubious-where / submitted-project ivars stay empty.
+        render(Views::Controllers::SpeciesLists::Edit.new(
+                 species_list: @species_list,
+                 projects: @projects,
+                 dubious_where_reasons: [],
+                 submitted_project_ids: nil,
+                 user: @user
+               ))
       else
         redirect_to(species_list_path(@species_list))
       end
