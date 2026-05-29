@@ -13,7 +13,10 @@ column_classes(:nine_three)
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
 
-    <%= render(partial: "species_lists/details") %>
+    <%= render(Views::Controllers::SpeciesLists::Details.new(
+                 species_list: @species_list,
+                 query: @query
+               )) %>
 
     <%= tag.div(id: "project_species_list_buttons") do
       project_species_list_buttons(@species_list, @query).safe_join
@@ -26,12 +29,13 @@ column_classes(:nine_three)
       <%= tag.div(class: "list-group") do %>
         <% if @objects.any? %>
           <% @objects.each do |observation| %>
-            <%= render(
-              partial: "species_lists/observation",
-              locals: { observation:, user: @user,
-                        species_list: @species_list,
-                        image: observation.thumb_image.present?,
-                        remove: permission?(@species_list) }) %>
+            <%= render(Views::Controllers::SpeciesLists::Observation.new(
+                         observation: observation,
+                         user: @user,
+                         species_list: @species_list,
+                         image: observation.thumb_image.present?,
+                         remove: permission?(@species_list)
+                       )) %>
           <% end %>
         <% else %>
           <%= tag.div(:species_list_show_no_members.tp) %>

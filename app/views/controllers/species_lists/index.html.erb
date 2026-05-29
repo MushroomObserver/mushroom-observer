@@ -11,9 +11,12 @@ flash_error(@error) if @error && @objects.empty?
 <%= paginated_results do %>
   <% if @objects.any? %>
     <%= tag.div(class: "list-group") do %>
-      <%= render(partial: "species_list",
-          collection: @objects, as: :species_list,
-	  project: @project) %>
+      <% @objects.each do |species_list| %>
+        <%= render(Views::Controllers::SpeciesLists::Listing.new(
+                     species_list: species_list,
+                     project: @project
+                   )) %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>
