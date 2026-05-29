@@ -205,11 +205,10 @@ module SpeciesLists
 
     def validate_place_name
       @place_name = params[:place_name] || @species_list.place_name
-      @dubious_where_reasons = []
-      return if @place_name == params[:approved_where]
-
-      db_name = Location.user_format(@user, @place_name)
-      @dubious_where_reasons = Location.dubious_name?(db_name, true)
+      @dubious_where_reasons = Location.dubious_reasons_for(
+        user: @user, place_name: @place_name,
+        approved: params[:approved_where]
+      )
     end
 
     def init_member_vars_for_reload

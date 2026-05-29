@@ -573,6 +573,26 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     provide_reasons ? reasons : reasons.any?
   end
 
+  # Reasons the given `place_name` looks "dubious" for the given user
+  # (typos, mismatched country, etc.) -- returns an array of reasons.
+  # Empty array means the name is clean; non-empty means the form
+  # should re-render and ask the user to confirm.
+  #
+  # `approved:` is the value of the `approved_where` form field the
+  # user submitted to skip this check after confirming. When non-nil
+  # and equal to `place_name`, returns `[]` immediately.
+  #
+  # Centralizes a pattern that lived as 2-3 lines in 4 controllers:
+  #   db_name = Location.user_format(user, place_name)
+  #   Location.dubious_name?(db_name, true)
+  # with an optional "skip if approved" gate around it.
+  def self.dubious_reasons_for(user:, place_name:, approved: nil)
+    return [] if !approved.nil? && place_name == approved
+
+    db_name = user_format(user, place_name)
+    dubious_name?(db_name, true) || []
+  end
+
   def self.check_for_empty_name(name)
     return [] if name.present?
 

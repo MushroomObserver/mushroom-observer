@@ -69,6 +69,45 @@ class LocationTest < UnitTestCase
     good_location("Guanajuato, Mexico")
   end
 
+  def test_dubious_reasons_for_returns_empty_when_approved_matches
+    # When `approved:` equals `place_name`, the dubious check is short-
+    # circuited even for an obviously bad name.
+    bad_name = "Albion, California" # missing country -- normally dubious
+    reasons = Location.dubious_reasons_for(
+      user: rolf, place_name: bad_name, approved: bad_name
+    )
+    assert_equal([], reasons)
+  end
+
+  def test_dubious_reasons_for_runs_check_when_approved_differs
+    # When `approved:` does not match `place_name`, the dubious check
+    # runs and returns the reasons.
+    bad_name = "Albion, California"
+    reasons = Location.dubious_reasons_for(
+      user: rolf, place_name: bad_name, approved: "Something Else"
+    )
+    assert_not_empty(reasons)
+  end
+
+  def test_dubious_reasons_for_returns_empty_for_clean_name
+    reasons = Location.dubious_reasons_for(
+      user: rolf, place_name: "Albion, California, USA"
+    )
+    assert_equal([], reasons)
+  end
+
+  def test_dubious_reasons_for_normalizes_falsy_to_empty_array
+    # Defensive: if `dubious_name?` ever returns a falsy value, the
+    # helper still returns an array so callers can use `.empty?`
+    # without nil-checks.
+    Location.stub(:dubious_name?, nil) do
+      reasons = Location.dubious_reasons_for(
+        user: rolf, place_name: "Anywhere"
+      )
+      assert_equal([], reasons)
+    end
+  end
+
   def test_understood_country
     assert(Location.understood_country?("USA"))
     assert(Location.understood_country?("Afghanistan"))

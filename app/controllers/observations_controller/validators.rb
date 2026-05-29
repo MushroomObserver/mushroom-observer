@@ -107,8 +107,9 @@ module ObservationsController::Validators
       return true
     end
 
-    name = Location.user_format(@user, @observation.place_name)
-    @dubious_where_reasons = Location.dubious_name?(name, true)
+    @dubious_where_reasons = Location.dubious_reasons_for(
+      user: @user, place_name: @observation.place_name
+    )
     return true if @dubious_where_reasons.empty?
 
     @any_errors = true
