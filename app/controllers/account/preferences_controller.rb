@@ -6,6 +6,7 @@ module Account
 
     def edit
       load_user_licenses
+      render_edit
     end
 
     def update
@@ -17,7 +18,7 @@ module Account
       if prefs_changed_successfully
         redirect_to(action: :edit)
       else
-        render(action: :edit) # render to get the errors to display
+        render_edit # render to get the errors to display
       end
     end
 
@@ -27,11 +28,10 @@ module Account
       user = User.safe_find(params[:id])
       return redirect_to("/") unless permitted_user_with_valid_email_type?(user)
 
-      @note = email_note
       @user.send(email_type_setter, false)
       if @user.save
         flash_notice(success.t(name: @user.unique_text_name))
-        render(action: :no_email)
+        render_no_email(email_note)
       else
         # Probably should write a better error message here...
         flash_object_errors(@user)
@@ -65,6 +65,18 @@ module Account
     ].freeze
 
     private
+
+    def render_edit
+      render(Views::Controllers::Account::Preferences::Edit.new(
+               user: @user, licenses: @licenses
+             ))
+    end
+
+    def render_no_email(note)
+      render(Views::Controllers::Account::Preferences::NoEmail.new(
+               user: @user, note: note
+             ))
+    end
 
     def load_user_licenses
       @licenses = License.available_names_and_ids(@user&.license)
