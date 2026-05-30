@@ -63,6 +63,39 @@ class AccountPreferencesFormTest < ComponentTestCase
                 "select[name='user[votes_anonymous]'] option[value='old']")
   end
 
+  def test_privacy_section_renders_three_retroactive_buttons_inline
+    html = render_form
+
+    # All three retroactive triggers are now `<a class="btn
+    # btn-outline-default">` rendered inside the Privacy section via
+    # the related select's `with_append` slot — not `button_to` forms
+    # sitting outside the prefs `<form>`.
+
+    # Vote anonymity: plain GET to the edit page. The pre-Phlex
+    # `put_button` pointed at the PUT update URL with an unmatched
+    # `commit` param and always flashed an error — fixed by routing
+    # through the edit page that has its own "Make Public" button.
+    assert_html(html,
+                "a.btn.btn-outline-default[href='/images/votes/anonymity']")
+    assert_no_html(html, "a[href='/images/votes/anonymity']" \
+                         "[data-turbo-method]")
+
+    # License: plain GET to the bulk-license edit form. The pre-Phlex
+    # `put_button` PUT-ed a GET-only route and 404'd — fixed by going
+    # through the edit page which owns the actual update form.
+    assert_html(html,
+                "a.btn.btn-outline-default[href='/images/licenses/edit']")
+    assert_no_html(html, "a[href='/images/licenses/edit']" \
+                         "[data-turbo-method]")
+
+    # Filename purge: the only one without an edit page — direct
+    # mutation. Stays a PUT, gated by a turbo-confirm.
+    assert_html(html,
+                "a.btn.btn-outline-default[href='/images/purge_filenames']" \
+                "[data-turbo-method='put']" \
+                "[data-turbo-confirm]")
+  end
+
   def test_privacy_no_grandfather_anonymous_option_for_post_cutoff_users
     @user.created_at = Time.zone.parse(MO.vote_cutoff) + 1.day
     html = render_form

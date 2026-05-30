@@ -17,25 +17,10 @@
 # `update_content_filter` private method writes them back to the
 # hash.
 class Components::AccountPreferencesForm < Components::ApplicationForm
-  # Five `[group_heading_key, [field_syms...]]` pairs that drive the
-  # email-prefs section. Each entry renders a "Group Name: (please
-  # notify)" heading row followed by one checkbox per field. Order
-  # matches the pre-Phlex partial.
-  EMAIL_GROUPS = [
-    [:prefs_email_comments,
-     [:email_comments_owner, :email_comments_response]],
-    [:prefs_email_observations,
-     [:email_observations_consensus, :email_observations_naming]],
-    [:prefs_email_names,
-     [:email_names_admin, :email_names_author,
-      :email_names_editor, :email_names_reviewer]],
-    [:prefs_email_locations,
-     [:email_locations_admin, :email_locations_author,
-      :email_locations_editor]],
-    [:prefs_email_general,
-     [:email_general_feature, :email_general_commercial,
-      :email_general_question]]
-  ].freeze
+  # Email-section logic (EMAIL_GROUPS constant + two render methods)
+  # lives in its own concern to keep this class under the
+  # `Metrics/ClassLength` limit.
+  include EmailSection
 
   def initialize(user, licenses:, **)
     @licenses = licenses
@@ -79,14 +64,55 @@ class Components::AccountPreferencesForm < Components::ApplicationForm
       plain(:prefs_privacy.t)
     end
     select_field(:votes_anonymous, anon_values,
-                 prefs: true, width: :auto)
-    select_field(:keep_filenames, filename_values,
-                 label: :prefs_keep_image_filenames.l, width: :auto)
-    select_field(:license_id, @licenses,
-                 label: "#{:LICENSE.l}:", width: :auto) do |f|
-      f.with_between { render_license_note }
+                 prefs: true, inline: true, width: :auto) do |f|
+      f.with_append { render_vote_anonymity_link }
     end
+    select_field(:keep_filenames, filename_values,
+                 label: :prefs_keep_image_filenames.l,
+                 inline: true, width: :auto) do |f|
+      f.with_append { render_filename_purge_link }
+    end
+    render_license_id_select
     submit(:SAVE_EDITS.l, center: true)
+  end
+
+  def render_license_id_select
+    select_field(:license_id, @licenses,
+                 label: "#{:LICENSE.l}:",
+                 inline: true, width: :auto) do |f|
+      f.with_between { render_license_note }
+      f.with_append { render_bulk_license_link }
+    end
+  end
+
+  # Retroactive image-pref triggers, one per Privacy select. Two are
+  # plain GET links to their edit pages (the destination owns the
+  # form that does the real mutation); pre-Phlex these were
+  # `put_button`s, one of which 404'd against a GET-only route and
+  # the other of which always flashed an "invalid submit button"
+  # error. Filename purge is the only direct mutation — no edit page
+  # exists — so it stays a PUT, gated by the existing
+  # `prefs_bulk_filename_purge_confirm` string.
+  def render_vote_anonymity_link
+    retroactive_link(:prefs_change_image_vote_anonymity.t,
+                     images_edit_vote_anonymity_path)
+  end
+
+  def render_bulk_license_link
+    retroactive_link(:bulk_license_link.t, images_edit_licenses_path)
+  end
+
+  def render_filename_purge_link
+    retroactive_link(
+      :prefs_bulk_filename_purge.t,
+      images_bulk_filename_purge_path,
+      data: { turbo_method: :put,
+              turbo_confirm: :prefs_bulk_filename_purge_confirm.l }
+    )
+  end
+
+  def retroactive_link(text, href, **)
+    link_to(text, href, class: "btn btn-outline-default ml-3", **)
   end
 
   def anon_values
@@ -293,34 +319,5 @@ class Components::AccountPreferencesForm < Components::ApplicationForm
     p(class: "help-note mr-3") do
       plain(:prefs_notes_template_explanation.t)
     end
-  end
-
-  # ====================================================================
-  # Email
-  # ====================================================================
-
-  def render_email_section
-    h5(class: "mt-4 font-weight-bold") { plain(:prefs_email_prefs.t) }
-    checkbox_field(:no_emails, prefs: true)
-    checkbox_field(:email_html, prefs: true)
-    EMAIL_GROUPS.each do |(label_key, fields)|
-      render_email_group(label_key, fields)
-    end
-    div(class: "help-block mt-4") { trusted_html(:prefs_email_note.tp) }
-    submit(:SAVE_EDITS.l, center: true)
-  end
-
-  # One email-preferences subsection: a labeled "[Group Name]: (please
-  # notify)" header followed by the boolean checkboxes for that group.
-  def render_email_group(label_key, fields)
-    div(class: "mt-4") do
-      plain("#{label_key.t}: ")
-      span(class: "help-note mr-3") do
-        plain("(")
-        trusted_html(:prefs_email_please_notify.t)
-        plain(")")
-      end
-    end
-    fields.each { |field| checkbox_field(field, prefs: true) }
   end
 end
