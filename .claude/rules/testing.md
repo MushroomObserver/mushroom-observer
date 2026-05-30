@@ -244,6 +244,87 @@ or jq the JSON to find missed lines on any file.
 
 **IMPORTANT**: Follow this pattern for all Phlex component tests.
 
+### Don't pin cosmetic CSS classes
+
+Component test selectors should **not** include Bootstrap styling /
+spacing / typography classes — `.btn`, `.btn-default`,
+`.btn-outline-default`, `.btn-sm`, `.btn-lg`, `.mt-2`, `.ml-3`,
+`.px-4`, `.py-4`, `.help-note`, `.help-block`, `.font-weight-bold`,
+`.text-*`, etc. They're decoration; a Bootstrap-version upgrade or
+a designer's tweak will rename them, and every test that pinned the
+old name will fail.
+
+A component test asserts the *contract* of a component — what it
+does, what it submits, what it links to, what it triggers, what it
+makes visible. The visual styling is what designers and Bootstrap
+upgrades own.
+
+**Drop:**
+- All `.btn` family classes (`.btn`, `.btn-default`,
+  `.btn-outline-default`, `.btn-sm`, `.btn-lg`, `.btn-link`, etc.).
+- Spacing utilities (`.m{tbrlxy}-*`, `.p{tbrlxy}-*`, `.mt-3`,
+  `.py-4`, etc.).
+- Typography (`.help-note`, `.help-block`, `.font-weight-bold`,
+  `.text-muted`, `.lead`, etc.).
+- Bootstrap layout helpers that are pure styling (`.row`, `.col-*`).
+
+**Keep:**
+- HTML attributes that drive behavior — `href`, `data-*` (Stimulus
+  targets / actions, Turbo method / confirm, etc.), `name`, `type`,
+  `value`, `aria-*`, `target`, `rel`, `id`.
+- Visibility classes — `.d-none`, `.hidden`, `[hidden]` carry real
+  state.
+- Structural Bootstrap component slots that the Phlex wrapper depends
+  on — `.modal-body`, `.modal-footer`, `.panel-heading`, `.input-group`.
+  Use them when asserting placement (`.modal-body > p[data-*]`); drop
+  them when asserting existence (`p[data-*]` alone is just as good).
+
+Examples:
+
+```ruby
+# ❌ Pins styling — breaks on Bootstrap upgrade.
+assert_html(html, "a.btn.btn-sm.btn-outline-default[href='/foo']")
+assert_html(html, "p.help-note", text: :explanation.l)
+assert_html(html, "div.help-block.mt-4")
+
+# ✅ Pins behavior + structure — survives styling churn.
+assert_html(html, "a[href='/foo']")            # contract: where it goes
+assert_html(html, "a[href='/foo'][target='_blank']")  # contract: new tab
+assert_includes(html, :explanation.l)          # contract: text appears
+assert_html(html, "p[data-confirm-modal-target='message']")
+                                               # contract: Stimulus wiring
+```
+
+For visibility behavior, `.d-none` and friends are fair game because
+they describe a state, not paint:
+
+```ruby
+# ✅ Fine — `.d-none` is a behavior assertion, not a paint job.
+assert_html(html, ".create-button.d-none")    # button is initially hidden
+```
+
+When a component genuinely needs a class on its element to function
+(a Stimulus controller's CSS hook, an SVG transform target, etc.),
+test the `data-controller=` / `data-*-target=` attribute that actually
+drives it, not the class name on the same element.
+
+**Exception: styling-abstraction components.** Tests for components
+whose *job* is to produce specific Bootstrap classes — `CrudButton`
+(variant + size of the rendered button), `Panel` / `Modal` /
+`ModalConfirm` (Bootstrap slot structure), `Alert`, the
+`ApplicationForm` field helpers' wrapper options (`:monospace` →
+`text-monospace`, `:center` → `center-block`, `wrap_class: "x"` →
+`x`, `:button` → `input-group` / `input-group-btn`, etc.) — *should*
+assert on those classes. The class output IS the contract of the
+unit. When Bootstrap upgrades, both the helper and these tests
+update together.
+
+Heuristic: would dropping the class assertion gut the test? If yes,
+keep it. If the test was "verify a button styled this way exists",
+that IS the contract — the class assertion stays. If the test was
+"verify the page renders some content" and the class on the
+surrounding element is incidental, drop it.
+
 ### Consolidate Assertions Per Render
 
 Render once, assert many things. Don't create separate test methods that render

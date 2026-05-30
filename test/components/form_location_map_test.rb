@@ -14,8 +14,9 @@ class FormLocationMapTest < ComponentTestCase
                 attribute: { "data-map-type" => "location",
                              "data-location-format" => "postal" })
 
-    # Button group with toggle and clear buttons
-    assert_html(html, "div.btn-group[role='group']")
+    # Button group with toggle and clear buttons. `role='group'` is
+    # the ARIA contract; `.btn-group` is Bootstrap-styling decoration.
+    assert_html(html, "div[role='group']")
     assert_html(html, "span.map-show")
     assert_html(html, "span.map-hide")
     assert_html(html, "button.map-clear[type='button']",

@@ -48,6 +48,10 @@ class FormNotesTest < ComponentTestCase
     assert_html(html, "#test_notes_fields div.help-block")
     # No `above_help` in multi-part mode even if the caller passes
     # one — multi-part users typically know what each field is for.
+    # `.help-block` here is used as the IDENTIFIER of the textile-
+    # help div (no other selector marks it). Per the cosmetic-
+    # classes rule, identifier classes that mark a specific
+    # element are fair game; pure decoration is not.
     assert_no_html(html,
                    "#test_notes_fields > div.help-block:first-child")
   end
@@ -73,12 +77,10 @@ class FormNotesTest < ComponentTestCase
                 "textarea[name='observation[notes][other]'][rows='10']")
     # Textarea label exists for screen readers but is visually hidden:
     # the panel heading already says "Notes", so the field's own
-    # visible label would be a duplicate.
-    assert_html(html,
-                "label.sr-only[for='observation_notes_other']")
-    assert_no_html(html,
-                   "label.mr-3[for='observation_notes_other']",
-                   "single-part textarea label must be sr-only, not mr-3")
+    # visible label would be a duplicate. `.sr-only` IS a visibility
+    # behavior class (per the cosmetic-classes rule, behavior classes
+    # are kept) — it's what makes the label invisible-to-sighted-users.
+    assert_html(html, "label.sr-only[for='observation_notes_other']")
   end
 
   def test_single_part_mode_renders_above_help_above_textarea
