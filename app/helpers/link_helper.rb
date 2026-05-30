@@ -27,14 +27,13 @@ module LinkHelper
   # Make a link that is a target for the stimulus "nav-active_controller"
   # (The controller adds .active class if it's a link to the current page,
   # and updates the active link when navigating. Allows nav to be cached!)
-  def active_link_to(text = nil, path = nil, **opts, &block)
-    link = block ? text : path # because positional
+  # Delegates to `Components::ActiveLink` — render the component
+  # directly in Phlex views.
+  def active_link_to(text = nil, path = nil, **, &block)
+    link_path = block ? text : path # positional: block ⇒ first arg is path
     content = block ? capture(&block) : text
-    opts[:data] = (opts[:data] || {}).merge(
-      { nav_active_target: "link", action: "nav-active#navigate" }
-    )
 
-    link_to(link, opts) { content }
+    render(Components::ActiveLink.new(content, link_path, **))
   end
 
   # mixes in "active" class
@@ -46,7 +45,7 @@ module LinkHelper
   end
 
   # Link should be to a controller action that renders the form in the modal.
-  # Stimulus modal-toggle controller fetches the form from the link as a .
+  # Stimulus modal-toggle controller fetches the form from the link as a
   # turbo-stream response. It also checks if it needs to generate a modal, or
   # just show the one in progress.
   # NOTE: Needs a modal `identifier`, in case of multiple form modals
@@ -54,18 +53,10 @@ module LinkHelper
   # Links with data-turbo-frame do a direct page update, and if turbo doesn't
   # find the frame already on the page it's appended after body! That may be
   # why it's appended to the page and not returned to the stimulus caller
+  # Delegates to `Components::ModalLink` — render the component
+  # directly in Phlex views.
   def modal_link_to(identifier, name, path, args)
-    args = args.deep_merge({ data: {
-                             modal: "modal_#{identifier}",
-                             controller: "modal-toggle",
-                             action: "modal-toggle#showModal:prevent"
-                           } })
-
-    if args[:icon].present?
-      icon_link_to(name, path, **args)
-    else
-      link_to(name, path, **args)
-    end
+    render(Components::ModalLink.new(identifier, name, path, **args))
   end
 
   # Icon link with optional active state. (Tooltip title must be
@@ -110,18 +101,11 @@ module LinkHelper
            ))
   end
 
+  # Renders an `<a>` for an `ExternalLink` AR record. Delegates to
+  # `Components::ExternalLink` — render the component directly in
+  # Phlex views.
   def external_link(link)
-    case link.external_site.name
-    when "iNaturalist"
-      concat(
-        link_to(
-          "iNat #{link.url.sub(link.external_site.base_url, "")}", link.url
-        )
-      )
-    else
-      concat(link_to(:on_site.t(site: link.external_site.name), link.url))
-      concat(tag.small(" #{link.created_at.web_date}"))
-    end
+    render(Components::ExternalLink.new(link: link))
   end
 
   # NOTE: Specific to glyphicons
