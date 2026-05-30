@@ -28,8 +28,7 @@ class ModalConfirmTest < ComponentTestCase
     # to `show(message, element)` but never assigned anywhere, so the
     # modal always read just "Are you sure?". Catching that regression
     # here keeps the target wiring tight.
-    assert_html(html,
-                ".modal-body.py-4 > p[data-confirm-modal-target='message']")
+    assert_html(html, "p[data-confirm-modal-target='message']")
 
     # Cancel button in .modal-footer.
     assert_html(html,

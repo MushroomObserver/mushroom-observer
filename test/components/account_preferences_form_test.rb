@@ -66,17 +66,18 @@ class AccountPreferencesFormTest < ComponentTestCase
   def test_privacy_section_renders_three_retroactive_buttons_inline
     html = render_form
 
-    # All three retroactive triggers are now `<a class="btn
-    # btn-outline-default">` rendered inside the Privacy section via
-    # the related select's `with_append` slot — not `button_to` forms
-    # sitting outside the prefs `<form>`.
+    # All three retroactive triggers are now `<a>`s rendered inside
+    # the Privacy section via the related select's `with_append` slot
+    # — not `button_to` forms sitting outside the prefs `<form>`.
+    # The visual styling (`.btn.btn-sm.btn-outline-default`) is not
+    # asserted: contract-only assertions here keep the tests stable
+    # through the upcoming Bootstrap upgrade.
 
     # Vote anonymity: plain GET to the edit page. The pre-Phlex
     # `put_button` pointed at the PUT update URL with an unmatched
     # `commit` param and always flashed an error — fixed by routing
     # through the edit page that has its own "Make Public" button.
-    assert_html(html,
-                "a.btn.btn-outline-default[href='/images/votes/anonymity']",
+    assert_html(html, "a[href='/images/votes/anonymity']",
                 text: :prefs_change_image_vote_anonymity.l)
     assert_no_html(html, "a[href='/images/votes/anonymity']" \
                          "[data-turbo-method]")
@@ -84,8 +85,7 @@ class AccountPreferencesFormTest < ComponentTestCase
     # License: plain GET to the bulk-license edit form. The pre-Phlex
     # `put_button` PUT-ed a GET-only route and 404'd — fixed by going
     # through the edit page which owns the actual update form.
-    assert_html(html,
-                "a.btn.btn-outline-default[href='/images/licenses/edit']",
+    assert_html(html, "a[href='/images/licenses/edit']",
                 text: :bulk_license_link.l)
     assert_no_html(html, "a[href='/images/licenses/edit']" \
                          "[data-turbo-method]")
@@ -95,10 +95,9 @@ class AccountPreferencesFormTest < ComponentTestCase
     # confirm string so a future trim of the i18n entry doesn't
     # silently downgrade the warning the user sees.
     confirm = :prefs_bulk_filename_purge_confirm.l
-    assert_html(html,
-                "a.btn.btn-outline-default[href='/images/purge_filenames']" \
-                "[data-turbo-method='put']" \
-                "[data-turbo-confirm='#{confirm}']",
+    assert_html(html, "a[href='/images/purge_filenames']" \
+                      "[data-turbo-method='put']" \
+                      "[data-turbo-confirm='#{confirm}']",
                 text: :prefs_bulk_filename_purge.l)
   end
 

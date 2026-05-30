@@ -64,12 +64,11 @@ class Components::AccountPreferencesForm < Components::ApplicationForm
       plain(:prefs_privacy.t)
     end
     select_field(:votes_anonymous, anon_values,
-                 prefs: true, inline: true, width: :auto) do |f|
+                 prefs: true, width: :auto) do |f|
       f.with_append { render_vote_anonymity_link }
     end
     select_field(:keep_filenames, filename_values,
-                 label: :prefs_keep_image_filenames.l,
-                 inline: true, width: :auto) do |f|
+                 label: :prefs_keep_image_filenames.l, width: :auto) do |f|
       f.with_append { render_filename_purge_link }
     end
     render_license_id_select
@@ -78,8 +77,7 @@ class Components::AccountPreferencesForm < Components::ApplicationForm
 
   def render_license_id_select
     select_field(:license_id, @licenses,
-                 label: "#{:LICENSE.l}:",
-                 inline: true, width: :auto) do |f|
+                 label: "#{:LICENSE.l}:", width: :auto) do |f|
       f.with_between { render_license_note }
       f.with_append { render_bulk_license_link }
     end
@@ -112,7 +110,7 @@ class Components::AccountPreferencesForm < Components::ApplicationForm
   end
 
   def retroactive_link(text, href, **)
-    link_to(text, href, class: "btn btn-outline-default ml-3", **)
+    link_to(text, href, class: "btn btn-sm btn-outline-default mt-2", **)
   end
 
   def anon_values
