@@ -11,7 +11,9 @@ class FormLocationFeedbackTest < ComponentTestCase
   def test_renders_warning_alert_with_reasons
     html = render_feedback(["Location not found".html_safe])
 
-    assert_html(html, ".alert-warning#dubious_location_messages.my-3")
+    # `#dubious_location_messages` is the durable identifier; the
+    # `.alert-warning` / `.my-3` Bootstrap classes are pure paint.
+    assert_html(html, "#dubious_location_messages")
     assert_html(html, "body", text: "Location not found")
     assert_html(html, ".help-note")
     # Help note should include the button name

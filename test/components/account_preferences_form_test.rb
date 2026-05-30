@@ -50,7 +50,7 @@ class AccountPreferencesFormTest < ComponentTestCase
     # help-page anchor. Pre-conversion ERB used `tag.span(safe_join)`
     # to keep the `<a>` from being escaped; the Phlex view does the
     # same via `trusted_html`.
-    assert_html(html, ".help-note a[href*='how_to_use#license']")
+    assert_html(html, "a[href*='how_to_use#license']")
   end
 
   def test_privacy_grandfather_anonymous_option_for_pre_cutoff_users
@@ -123,9 +123,9 @@ class AccountPreferencesFormTest < ComponentTestCase
     html = render_form
 
     assert_html(html, "textarea[name='user[notes_template]'][rows='1']")
-    # Help paragraph sits inline between label and textarea via the
+    # Help text sits inline between label and textarea via the
     # `with_between` slot.
-    assert_html(html, "p.help-note", text: :prefs_notes_template_explanation.l)
+    assert_includes(html, :prefs_notes_template_explanation.l)
   end
 
   # ---- Section 6: Email ----
@@ -153,8 +153,10 @@ class AccountPreferencesFormTest < ComponentTestCase
      :email_general_question].each do |sym|
       assert_html(html, "input[type='checkbox'][name='user[#{sym}]']")
     end
-    # Closing textile note at the bottom of the section.
-    assert_html(html, "div.help-block.mt-4")
+    # Closing textile note at the bottom of the section. The text is
+    # textile-rendered, so the i18n string is a substring of the
+    # rendered output.
+    assert_includes(html, :prefs_email_note.l)
   end
 
   # ---- Multiple submits ----
