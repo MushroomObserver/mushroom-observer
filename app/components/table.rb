@@ -51,22 +51,26 @@ class Components::Table < Components::Base
   # Define a column with header text and content block or method symbol.
   # @param header [String] the column header text
   # @param class [String] CSS class for the th/td elements
-  # @param method [Symbol] method to call on each row (alternative to block)
+  # @param attributes [Hash] arbitrary HTML attrs (e.g. `width: "33%"`,
+  #   `data: { foo: "bar" }`) forwarded to both the `<th>` and `<td>`
+  #   elements for this column
   # @yield [row] block that receives each row and returns cell content
   # @return [nil] returns nil to prevent ERB output
   #
   # @example With block
   #   t.column("Name") { |user| user.name }
   #
-  # @example With method symbol
-  #   t.column("Name", &:name)
-  #
   # @example With class
   #   t.column("Actions", class: "text-right") { |user| remove_button(user) }
   #
-  def column(header, class: nil, &content)
-    @columns << { header: header, class: binding.local_variable_get(:class),
-                  content: content }
+  # @example With per-column width
+  #   t.column("Name", width: "33%") { |user| user.name }
+  #
+  def column(header, class: nil, **attributes, &content)
+    klass = binding.local_variable_get(:class)
+    attrs = attributes.dup
+    attrs[:class] = klass if klass
+    @columns << { header: header, attributes: attrs, content: content }
     nil
   end
 

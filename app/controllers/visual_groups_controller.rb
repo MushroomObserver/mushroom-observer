@@ -6,6 +6,9 @@ class VisualGroupsController < ApplicationController
   # GET /visual_groups or /visual_groups.json
   def index
     @visual_model = VisualModel.find(params[:visual_model_id])
+    render(Views::Controllers::VisualGroups::Index.new(
+             visual_model: @visual_model
+           ))
   end
 
   # GET /visual_groups/1 or /visual_groups/1.json
@@ -14,12 +17,19 @@ class VisualGroupsController < ApplicationController
     @visual_group = VisualGroup.find(params[:id])
     @vals = calc_show_vals
     setup_pagination
+    render(Views::Controllers::VisualGroups::Show.new(
+             visual_group: @visual_group, user: @user, filter: @filter,
+             pagination_data: @pagination_data, subset: @subset
+           ))
   end
 
   # GET /visual_groups/new
   def new
     @visual_model = VisualModel.find(params[:visual_model_id])
     @visual_group = VisualGroup.new
+    render(Views::Controllers::VisualGroups::New.new(
+             visual_model: @visual_model, visual_group: @visual_group
+           ))
   end
 
   # GET /visual_groups/1/edit
@@ -31,7 +41,8 @@ class VisualGroupsController < ApplicationController
     @vals = calc_edit_vals
     setup_pagination
     render(Views::Controllers::VisualGroups::Edit.new(
-             visual_group: @visual_group, filter: @filter, status: @status,
+             visual_group: @visual_group, user: @user,
+             filter: @filter, status: @status,
              pagination_data: @pagination_data, subset: @subset
            ))
   end

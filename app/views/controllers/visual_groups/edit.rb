@@ -2,17 +2,17 @@
 
 # Action view for `visual_groups#edit`. Replaces the 94-line
 # `edit.html.erb`. The form itself is already Phlex
-# (`Views::Controllers::VisualGroups::Form`). The image matrix grid
-# is still ERB (`_image_matrix.html.erb`) — kept via the
-# `view_context.render(partial: …)` bridge to keep the scope tight;
-# can move to Phlex in a follow-up.
+# (`Views::Controllers::VisualGroups::Form`). The image-matrix grid
+# lives in `Views::Controllers::VisualGroups::ImageMatrix` and is
+# shared with the show page.
 module Views::Controllers::VisualGroups
   class Edit < Views::Base
     prop :visual_group, VisualGroup
+    prop :user, _Nilable(User)
     prop :filter, _Nilable(String)
     prop :status, String
     prop :pagination_data, _Nilable(PaginationData)
-    prop :subset, _Nilable(_Array(_Any))
+    prop :subset, _Array(_Any), default: -> { [] }
 
     STATUSES = [
       ["needs_review", :visual_group_needs_review],
@@ -26,13 +26,16 @@ module Views::Controllers::VisualGroups
 
       div(class: "container-text") do
         render_top_nav
-        render(Views::Controllers::VisualGroups::Form.new(
-                 @visual_group, visual_model: @visual_group.visual_model
-               ))
+        render(Form.new(@visual_group,
+                        visual_model: @visual_group.visual_model))
         render_filter_section
         render_status_count
       end
-      render_image_matrix
+      render(ImageMatrix.new(
+               user: @user, visual_group: @visual_group,
+               subset: @subset, status: @status,
+               pagination_data: @pagination_data
+             ))
       render_bottom_nav
     end
 
@@ -159,19 +162,6 @@ module Views::Controllers::VisualGroups
     def render_status_count
       count = @visual_group.image_count(@status)
       p { plain(:"visual_group_count_#{@status}".t(count: count)) }
-    end
-
-    # `_image_matrix.html.erb` renders all-Phlex inner components
-    # (`MatrixTable` / `MatrixBox` / `Panel` / `InteractiveImage`) plus
-    # the `visual_group_status_links` ERB helper. Bridge via
-    # `view_context.render(partial: …)` to keep this PR's scope to the
-    # action template; the partial-to-Phlex conversion can land later.
-    def render_image_matrix
-      trusted_html(
-        view_context.render(partial: "visual_groups/image_matrix",
-                            locals: { visual_group: @visual_group,
-                                      status: @status })
-      )
     end
   end
 end
