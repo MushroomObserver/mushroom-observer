@@ -66,39 +66,47 @@ class AccountPreferencesFormTest < ComponentTestCase
   def test_privacy_section_renders_three_retroactive_buttons_inline
     html = render_form
 
-    # All three retroactive triggers are now `<a>`s rendered inside
-    # the Privacy section via the related select's `with_append` slot
-    # — not `button_to` forms sitting outside the prefs `<form>`.
-    # The visual styling (`.btn.btn-sm.btn-outline-default`) is not
-    # asserted: contract-only assertions here keep the tests stable
-    # through the upcoming Bootstrap upgrade.
+    # All three retroactive triggers are now `<a>`s inside the
+    # Privacy section, each rendered as the input-group addon of its
+    # related select via the `:button` / `:button_href` wrapper
+    # options. The visual styling (`.btn.*`) is not asserted —
+    # contract-only assertions here keep the tests stable through
+    # the upcoming Bootstrap upgrade.
 
-    # Vote anonymity: plain GET to the edit page. The pre-Phlex
+    # Vote anonymity: GET to the edit page. The pre-Phlex
     # `put_button` pointed at the PUT update URL with an unmatched
     # `commit` param and always flashed an error — fixed by routing
     # through the edit page that has its own "Make Public" button.
-    assert_html(html, "a[href='/images/votes/anonymity']",
-                text: :prefs_change_image_vote_anonymity.l)
+    # Opens in a new tab (it navigates AWAY and doesn't apply the
+    # adjacent select's value, so the new-tab signal disambiguates
+    # from an in-page Save).
+    assert_html(html, "a[href='/images/votes/anonymity']" \
+                      "[target='_blank'][rel='noopener noreferrer']" \
+                      "[title='#{:opens_in_new_tab.l}']")
     assert_no_html(html, "a[href='/images/votes/anonymity']" \
                          "[data-turbo-method]")
+    assert_includes(html, :prefs_apply_to_votes.l)
 
-    # License: plain GET to the bulk-license edit form. The pre-Phlex
-    # `put_button` PUT-ed a GET-only route and 404'd — fixed by going
-    # through the edit page which owns the actual update form.
-    assert_html(html, "a[href='/images/licenses/edit']",
-                text: :bulk_license_link.l)
+    # License: same GET-to-edit-page treatment as vote anonymity.
+    # Pre-Phlex `put_button` PUT-ed a GET-only route and 404'd.
+    assert_html(html, "a[href='/images/licenses/edit']" \
+                      "[target='_blank'][rel='noopener noreferrer']" \
+                      "[title='#{:opens_in_new_tab.l}']")
     assert_no_html(html, "a[href='/images/licenses/edit']" \
                          "[data-turbo-method]")
+    assert_includes(html, :prefs_apply_to_images.l)
 
     # Filename purge: the only one without an edit page — direct
-    # mutation. Stays a PUT, gated by a turbo-confirm. Pin the full
-    # confirm string so a future trim of the i18n entry doesn't
-    # silently downgrade the warning the user sees.
+    # mutation. Stays a PUT, gated by a turbo-confirm. No new tab —
+    # the action fires in place. Pin the full confirm string so a
+    # future trim of the i18n entry doesn't silently downgrade the
+    # warning the user sees.
     confirm = :prefs_bulk_filename_purge_confirm.l
     assert_html(html, "a[href='/images/purge_filenames']" \
                       "[data-turbo-method='put']" \
-                      "[data-turbo-confirm='#{confirm}']",
-                text: :prefs_bulk_filename_purge.l)
+                      "[data-turbo-confirm='#{confirm}']")
+    assert_no_html(html, "a[href='/images/purge_filenames'][target]")
+    assert_includes(html, :prefs_purge_filenames.l)
   end
 
   # ---- Pre-filled state from @user ----

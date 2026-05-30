@@ -6,6 +6,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Slotable
     include FieldWithHelp
     include FieldLabelRow
+    include InputGroupAddon
 
     slot :between
     slot :append
@@ -97,14 +98,24 @@ class Components::ApplicationForm < Superform::Rails::Form
       class_names(attributes[:class], *base)
     end
 
-    def render_with_wrapper
+    def render_with_wrapper(&block)
       inline = wrapper_options[:inline] || false
       div(class: form_group_class("form-group", inline,
                                   wrapper_options[:wrap_class])) do
         render_label_row(label_text, inline)
-        yield
+        render_select_field(&block)
         render_help_after_field
         render(append_slot) if append_slot
+      end
+    end
+
+    def render_select_field(&block)
+      if wrapper_options[:button]
+        render_input_group_button(&block)
+      elsif wrapper_options[:addon]
+        render_input_group_addon(&block)
+      else
+        yield
       end
     end
 

@@ -59,58 +59,71 @@ class Components::AccountPreferencesForm < Components::ApplicationForm
   # Privacy
   # ====================================================================
 
+  # Each Privacy select renders inline with a retroactive-trigger
+  # addon via the input-group `:button` wrapper option. Two of the
+  # three triggers are GET links to their respective edit pages —
+  # they navigate AWAY from the prefs form and do NOT apply the
+  # neighbouring select's value, so they open in a new tab and carry
+  # a glyph + accessible title saying so. The filename-purge trigger
+  # is the only in-page mutation, so it stays a same-tab PUT gated
+  # by a turbo-confirm.
   def render_privacy_section
     div(class: "form-group mt-3 font-weight-bold") do
       plain(:prefs_privacy.t)
     end
-    select_field(:votes_anonymous, anon_values,
-                 prefs: true, width: :auto) do |f|
-      f.with_append { render_vote_anonymity_link }
-    end
-    select_field(:keep_filenames, filename_values,
-                 label: :prefs_keep_image_filenames.l, width: :auto) do |f|
-      f.with_append { render_filename_purge_link }
-    end
+    render_votes_anonymous_select
+    render_keep_filenames_select
     render_license_id_select
     submit(:SAVE_EDITS.l, center: true)
   end
 
+  def render_votes_anonymous_select
+    addon = external_addon(:prefs_apply_to_votes.t,
+                           images_edit_vote_anonymity_path)
+    select_field(:votes_anonymous, anon_values, prefs: true, **addon)
+  end
+
+  def render_keep_filenames_select
+    # Reuses the `:new_window` glyph the two external triggers carry,
+    # even though this one doesn't navigate. The icon signals "this
+    # click opens something" (in this case the turbo-confirm modal),
+    # which softens the "destructive button" read. No `target=_blank`
+    # / `rel` / new-tab `title` here — those would be lies.
+    select_field(:keep_filenames, filename_values,
+                 label: :prefs_keep_image_filenames.l,
+                 button: :prefs_purge_filenames.t,
+                 button_href: images_bulk_filename_purge_path,
+                 button_class: addon_button_class,
+                 button_icon: :new_window,
+                 button_data: filename_purge_data)
+  end
+
+  def filename_purge_data
+    { turbo_method: :put,
+      turbo_confirm: :prefs_bulk_filename_purge_confirm.l }
+  end
+
   def render_license_id_select
+    addon = external_addon(:prefs_apply_to_images.t,
+                           images_edit_licenses_path)
     select_field(:license_id, @licenses,
-                 label: "#{:LICENSE.l}:", width: :auto) do |f|
+                 label: "#{:LICENSE.l}:", **addon) do |f|
       f.with_between { render_license_note }
-      f.with_append { render_bulk_license_link }
     end
   end
 
-  # Retroactive image-pref triggers, one per Privacy select. Two are
-  # plain GET links to their edit pages (the destination owns the
-  # form that does the real mutation); pre-Phlex these were
-  # `put_button`s, one of which 404'd against a GET-only route and
-  # the other of which always flashed an "invalid submit button"
-  # error. Filename purge is the only direct mutation — no edit page
-  # exists — so it stays a PUT, gated by the existing
-  # `prefs_bulk_filename_purge_confirm` string.
-  def render_vote_anonymity_link
-    retroactive_link(:prefs_change_image_vote_anonymity.t,
-                     images_edit_vote_anonymity_path)
+  # Shared shape for the two GET retroactive triggers: button text +
+  # href, opened in a new tab (rel-hardened), with a `new-window`
+  # glyph + accessible tooltip so the new-tab signal isn't only
+  # visual.
+  def external_addon(text, href)
+    { button: text, button_href: href, button_class: addon_button_class,
+      button_target: "_blank", button_rel: "noopener noreferrer",
+      button_title: :opens_in_new_tab.t, button_icon: :new_window }
   end
 
-  def render_bulk_license_link
-    retroactive_link(:bulk_license_link.t, images_edit_licenses_path)
-  end
-
-  def render_filename_purge_link
-    retroactive_link(
-      :prefs_bulk_filename_purge.t,
-      images_bulk_filename_purge_path,
-      data: { turbo_method: :put,
-              turbo_confirm: :prefs_bulk_filename_purge_confirm.l }
-    )
-  end
-
-  def retroactive_link(text, href, **)
-    link_to(text, href, class: "btn btn-sm btn-outline-default mt-2", **)
+  def addon_button_class
+    "btn btn-sm btn-outline-default"
   end
 
   def anon_values
