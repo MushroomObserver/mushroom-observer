@@ -26,7 +26,10 @@ class Components::ModalConfirm < Components::Base
              body_class: "py-4",
              title_id: TITLE_ID
            )) do |m|
-      m.with_body { render_title }
+      m.with_body do
+        render_title
+        render_message
+      end
       m.with_footer { render_buttons }
     end
   end
@@ -38,6 +41,16 @@ class Components::ModalConfirm < Components::Base
        data: { confirm_modal_target: "title" }) do
       plain(:are_you_sure.l)
     end
+  end
+
+  # The Stimulus controller sets this paragraph's textContent to the
+  # element's `data-turbo-confirm` value when the modal opens, so the
+  # caller's longer explanation actually reaches the user. Starts
+  # empty — Turbo always passes a message when invoking the confirm
+  # callback, so there's no static fallback to render here.
+  def render_message
+    p(class: "mt-2 mb-0",
+      data: { confirm_modal_target: "message" })
   end
 
   def render_buttons

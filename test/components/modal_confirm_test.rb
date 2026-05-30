@@ -22,6 +22,15 @@ class ModalConfirmTest < ComponentTestCase
                 "[data-confirm-modal-target='title']",
                 text: :are_you_sure.l)
 
+    # Message paragraph (initially empty). The Stimulus controller
+    # fills its textContent with the element's `data-turbo-confirm`
+    # value when the modal opens — previously the message was passed
+    # to `show(message, element)` but never assigned anywhere, so the
+    # modal always read just "Are you sure?". Catching that regression
+    # here keeps the target wiring tight.
+    assert_html(html,
+                ".modal-body.py-4 > p[data-confirm-modal-target='message']")
+
     # Cancel button in .modal-footer.
     assert_html(html,
                 ".modal-footer > button[data-action='confirm-modal#cancel']",
