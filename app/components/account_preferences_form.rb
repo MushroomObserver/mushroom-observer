@@ -17,25 +17,10 @@
 # `update_content_filter` private method writes them back to the
 # hash.
 class Components::AccountPreferencesForm < Components::ApplicationForm
-  # Five `[group_heading_key, [field_syms...]]` pairs that drive the
-  # email-prefs section. Each entry renders a "Group Name: (please
-  # notify)" heading row followed by one checkbox per field. Order
-  # matches the pre-Phlex partial.
-  EMAIL_GROUPS = [
-    [:prefs_email_comments,
-     [:email_comments_owner, :email_comments_response]],
-    [:prefs_email_observations,
-     [:email_observations_consensus, :email_observations_naming]],
-    [:prefs_email_names,
-     [:email_names_admin, :email_names_author,
-      :email_names_editor, :email_names_reviewer]],
-    [:prefs_email_locations,
-     [:email_locations_admin, :email_locations_author,
-      :email_locations_editor]],
-    [:prefs_email_general,
-     [:email_general_feature, :email_general_commercial,
-      :email_general_question]]
-  ].freeze
+  # Email-section logic (EMAIL_GROUPS constant + two render methods)
+  # lives in its own concern to keep this class under the
+  # `Metrics/ClassLength` limit.
+  include EmailSection
 
   def initialize(user, licenses:, **)
     @licenses = licenses
@@ -74,19 +59,71 @@ class Components::AccountPreferencesForm < Components::ApplicationForm
   # Privacy
   # ====================================================================
 
+  # Each Privacy select renders inline with a retroactive-trigger
+  # addon via the input-group `:button` wrapper option. Two of the
+  # three triggers are GET links to their respective edit pages —
+  # they navigate AWAY from the prefs form and do NOT apply the
+  # neighbouring select's value, so they open in a new tab and carry
+  # a glyph + accessible title saying so. The filename-purge trigger
+  # is the only in-page mutation, so it stays a same-tab PUT gated
+  # by a turbo-confirm.
   def render_privacy_section
     div(class: "form-group mt-3 font-weight-bold") do
       plain(:prefs_privacy.t)
     end
-    select_field(:votes_anonymous, anon_values,
-                 prefs: true, width: :auto)
+    render_votes_anonymous_select
+    render_keep_filenames_select
+    render_license_id_select
+    submit(:SAVE_EDITS.l, center: true)
+  end
+
+  def render_votes_anonymous_select
+    addon = external_addon(:prefs_apply_to_votes.t,
+                           images_edit_vote_anonymity_path)
+    select_field(:votes_anonymous, anon_values, prefs: true, **addon)
+  end
+
+  def render_keep_filenames_select
+    # Reuses the `:new_window` glyph the two external triggers carry,
+    # even though this one doesn't navigate. The icon signals "this
+    # click opens something" (in this case the turbo-confirm modal),
+    # which softens the "destructive button" read. No `target=_blank`
+    # / `rel` / new-tab `title` here — those would be lies.
     select_field(:keep_filenames, filename_values,
-                 label: :prefs_keep_image_filenames.l, width: :auto)
+                 label: :prefs_keep_image_filenames.l,
+                 button: :prefs_purge_filenames.t,
+                 button_href: images_bulk_filename_purge_path,
+                 button_class: addon_button_class,
+                 button_icon: :new_window,
+                 button_data: filename_purge_data)
+  end
+
+  def filename_purge_data
+    { turbo_method: :put,
+      turbo_confirm: :prefs_bulk_filename_purge_confirm.l }
+  end
+
+  def render_license_id_select
+    addon = external_addon(:prefs_apply_to_images.t,
+                           images_edit_licenses_path)
     select_field(:license_id, @licenses,
-                 label: "#{:LICENSE.l}:", width: :auto) do |f|
+                 label: "#{:LICENSE.l}:", **addon) do |f|
       f.with_between { render_license_note }
     end
-    submit(:SAVE_EDITS.l, center: true)
+  end
+
+  # Shared shape for the two GET retroactive triggers: button text +
+  # href, opened in a new tab (rel-hardened), with a `new-window`
+  # glyph + accessible tooltip so the new-tab signal isn't only
+  # visual.
+  def external_addon(text, href)
+    { button: text, button_href: href, button_class: addon_button_class,
+      button_target: "_blank", button_rel: "noopener noreferrer",
+      button_title: :opens_in_new_tab.t, button_icon: :new_window }
+  end
+
+  def addon_button_class
+    "btn btn-sm btn-outline-default"
   end
 
   def anon_values
@@ -293,34 +330,5 @@ class Components::AccountPreferencesForm < Components::ApplicationForm
     p(class: "help-note mr-3") do
       plain(:prefs_notes_template_explanation.t)
     end
-  end
-
-  # ====================================================================
-  # Email
-  # ====================================================================
-
-  def render_email_section
-    h5(class: "mt-4 font-weight-bold") { plain(:prefs_email_prefs.t) }
-    checkbox_field(:no_emails, prefs: true)
-    checkbox_field(:email_html, prefs: true)
-    EMAIL_GROUPS.each do |(label_key, fields)|
-      render_email_group(label_key, fields)
-    end
-    div(class: "help-block mt-4") { trusted_html(:prefs_email_note.tp) }
-    submit(:SAVE_EDITS.l, center: true)
-  end
-
-  # One email-preferences subsection: a labeled "[Group Name]: (please
-  # notify)" header followed by the boolean checkboxes for that group.
-  def render_email_group(label_key, fields)
-    div(class: "mt-4") do
-      plain("#{label_key.t}: ")
-      span(class: "help-note mr-3") do
-        plain("(")
-        trusted_html(:prefs_email_please_notify.t)
-        plain(")")
-      end
-    end
-    fields.each { |field| checkbox_field(field, prefs: true) }
   end
 end

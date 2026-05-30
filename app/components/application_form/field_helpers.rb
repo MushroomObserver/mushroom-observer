@@ -11,7 +11,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Wrapper option keys that should not be passed to the field itself
     WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
                        :wrap_data, :between, :button, :button_data,
-                       :button_text, :addon, :monospace, :label_class,
+                       :button_text, :button_href, :button_class,
+                       :button_target, :button_rel, :button_title,
+                       :button_icon, :addon, :monospace, :label_class,
                        :label_data, :label_aria, :label_position,
                        :width, :label_sr_only].freeze
 

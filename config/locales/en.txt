@@ -927,6 +927,7 @@
   attached_to_project: Attached [object] to "[project]".
   and_num_more: And [num] more...
   are_you_sure: Are you sure?
+  opens_in_new_tab: Opens in a new tab
   click_for_map: Click for map
   CREATED_BY: Created by
   EDITING: Editing
@@ -2179,6 +2180,9 @@
   prefs_bulk_filename_purge_confirm: Are you sure you want to purge all image filenames from our database? This action cannot be undone. Please note that no one but you is able to see these filenames, anyway.
   prefs_bulk_filename_purge_success: Successfully purged all image filenames from our database.
   prefs_change_image_vote_anonymity: Change Image Vote Anonymity
+  prefs_apply_to_votes: Apply to votes
+  prefs_purge_filenames: Purge filenames
+  prefs_apply_to_images: Apply to images
   prefs_license_note: Default "license":/info/how_to_use#license you want for new images.
 
   prefs_email_please_notify: Please notify me when...

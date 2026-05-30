@@ -207,6 +207,7 @@ module LinkHelper
     mobile: "phone",
     project: "th-list",
     download: "download-alt",
+    new_window: "new-window",
     search: "search",
     prev: "triangle-left",
     next: "triangle-right",
