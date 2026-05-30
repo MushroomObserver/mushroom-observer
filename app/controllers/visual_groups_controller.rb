@@ -30,6 +30,10 @@ class VisualGroupsController < ApplicationController
     @status = status_from_params(params)
     @vals = calc_edit_vals
     setup_pagination
+    render(Views::Controllers::VisualGroups::Edit.new(
+             visual_group: @visual_group, filter: @filter, status: @status,
+             pagination_data: @pagination_data, subset: @subset
+           ))
   end
 
   def setup_pagination
