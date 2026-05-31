@@ -58,5 +58,32 @@ module Header
       assert_includes(tabs, tab4)
       assert_includes(tabs, tab5)
     end
+
+    # add_context_nav accepts a single Tab::Base — the foundational
+    # Tab POROs PR's promise to the helpers-to-POROs migration.
+    def test_add_context_nav_with_tab_base
+      project = projects(:bolete_project)
+      add_context_nav(Tab::Project::Summary.new(project: project))
+
+      assert_not_nil(content_for(:context_nav))
+    end
+
+    # add_context_nav accepts a Tab::Collection — Collections are
+    # Enumerable, so the helper iterates and calls #to_a on each.
+    def test_add_context_nav_with_tab_collection
+      project = projects(:bolete_project)
+      collection = Tab::Project::AdminSubtabs.new(project: project)
+      add_context_nav(collection)
+
+      assert_not_nil(content_for(:context_nav))
+    end
+
+    # Legacy Array of [text, url, args] tuples still works
+    # (backwards compat for existing helpers/tabs/* callers).
+    def test_add_context_nav_with_legacy_array
+      add_context_nav([["Foo", "/foo", { class: "foo_link" }]])
+
+      assert_not_nil(content_for(:context_nav))
+    end
   end
 end

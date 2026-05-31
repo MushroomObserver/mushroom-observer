@@ -16,20 +16,39 @@
 #     HTML strings for each link tuple, useful when the caller wants
 #     to wrap them in their own (non-dropdown) layout.
 #
-# Both take an array of `InternalLink.tab` tuples:
-#   [text, url, args]
-# where `args[:button]` (`:post` / `:destroy` / `:put` / `:patch` / nil)
-# chooses the HTML element.
+# `add_context_nav` accepts any of:
+#   - an `Array` of `InternalLink.tab` tuples `[text, url, args]`
+#     (the legacy shape; `app/helpers/tabs/*_helper.rb` methods
+#     return this)
+#   - a `Tab::Collection` (each yielded `Tab::Base` is converted
+#     via `#to_a`)
+#   - a single `Tab::Base` instance (wrapped as a one-element list)
+# where `args[:button]` (`:post` / `:destroy` / `:put` / `:patch` /
+# nil) chooses the HTML element.
 module Header
   module ContextNavHelper
     def add_context_nav(links)
-      return unless links.present? && links.compact.length.positive?
+      links = normalize_context_nav_links(links)
+      return unless links&.compact&.any?
 
       links = links.compact
       top_bar_html = render(Components::ContextNav::TopBar.new(links: links))
       sidebar_html = render(Components::ContextNav::Sidebar.new(links: links))
       content_for(:context_nav) { top_bar_html }
       content_for(:context_nav_mobile) { sidebar_html }
+    end
+
+    # Convert Tab::Base / Tab::Collection inputs to the legacy
+    # `[text, url, args]` tuple array shape the rest of this helper
+    # (and `Components::ContextNav::TopBar` / `Sidebar`) consume.
+    # Pass-through for nil and Array (legacy callers unchanged).
+    def normalize_context_nav_links(links)
+      case links
+      when nil then nil
+      when ::Tab::Collection then links.map(&:to_a)
+      when ::Tab::Base then [links.to_a]
+      else links
+      end
     end
 
     # Returns an array of pre-rendered HTML strings — one per link

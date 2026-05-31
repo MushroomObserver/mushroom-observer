@@ -20,11 +20,10 @@ module Views::Controllers::Projects
       div(class: "row") do
         div(class: "col-xs-12 pl-4 mt-2 mb-3",
             id: "project_admin_subtabs") do
-          render(Components::NavTabs.new(current: @current_subtab)) do |tabs|
-            tabs.tab(*project_admin_details_tab(@project), key: "details")
-            tabs.tab(*project_admin_members_tab(@project), key: "members")
-            tabs.tab(*project_admin_aliases_tab(@project), key: "aliases")
-          end
+          render(Components::NavTabs.new(
+                   current: @current_subtab,
+                   tabs: ::Tab::Project::AdminSubtabs.new(project: @project)
+                 ))
         end
       end
     end

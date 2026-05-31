@@ -29,6 +29,13 @@
 #     tabs.tab("#{n} #{:OBS.l}", observations_path(...), key: "obs")
 #   end
 #
+# @example With a Tab::Collection (preferred for multi-tab strips)
+#   render(Components::NavTabs.new(
+#     current: @current_tab,
+#     link_class: "mt-3",
+#     tabs: Tab::Project::Banner.new(project: @project, user: @user)
+#   ))
+#
 # @example With wrapper chrome at the call site
 #   div(class: "col-xs-12", id: "project_tabs") do
 #     render(Components::NavTabs.new(current: @current_tab,
@@ -43,12 +50,17 @@ class Components::NavTabs < Components::Base
   # @param attributes [Hash] arbitrary HTML attrs forwarded to the
   #   `<ul>` element (`data:`, ARIA, etc.). The `class:` is always
   #   `"nav nav-tabs"` and is not overridable from here.
-  def initialize(current: nil, link_class: nil, attributes: {})
+  # @param tabs [Tab::Collection, Enumerable<Tab::Base>, nil]
+  #   pre-built tabs to render. Any block passed to `view_template`
+  #   runs *after* these, so a Collection + ad-hoc `tabs.tab(...)`
+  #   calls compose cleanly.
+  def initialize(current: nil, link_class: nil, attributes: {}, tabs: nil)
     super()
     @current = current
     @link_class = link_class
     @attributes = attributes
     @tabs = []
+    Array(tabs).each { |t| tab(t) } if tabs
   end
 
   def view_template(&block)
@@ -61,39 +73,41 @@ class Components::NavTabs < Components::Base
     end
   end
 
-  # Register a tab. Three call shapes:
+  # Register a tab. Four call shapes:
+  #
+  # **Tab PORO** (preferred):
+  #
+  #     tabs.tab(Tab::Project::Summary.new(project: @project))
+  #     tabs.tab(Tab::Project::Summary.new(project: @project),
+  #              key: "projects")   # override auto-derived nav_key
   #
   # **Bare text + path:**
   #
   #     tabs.tab("Details", details_path, key: "details")
   #
-  # **InternalLink object** (MO's tab-builder convention — carries the
-  # auto-generated `<thing>_link` test-selector class and any
-  # other html_options the link declared):
+  # **InternalLink object** (the manual builder version of Tab):
   #
   #     tabs.tab(InternalLink.new("Details", details_path), key: "details")
   #
-  # **Array splat from an MO tab helper** — the existing
-  # `app/helpers/tabs/<thing>_helper.rb` methods return
-  # `[title, url, html_options]` (the `InternalLink#tab` shape):
+  # **Array splat from a legacy `app/helpers/tabs/*_helper.rb` method**
+  # (the `[title, url, html_options]` shape):
   #
   #     tabs.tab(*projects_index_tab, key: "index")
   #
-  # In all three shapes, `current:` (ctor) is matched against `key:`
-  # to decide which tab gets `.active`. With an InternalLink object
-  # or a 3-element splat, the carried `html_options` merge onto the
-  # rendered `<a>` — its `:class` appends to the `nav-link`
-  # (+ optional `link_class:`) base; other attrs pass through.
+  # In all shapes, `current:` (ctor) is matched against `key:` (per
+  # tab) to decide which tab gets `.active`. With a Tab PORO, `key:`
+  # defaults to `tab.nav_key` (the underscored demodulized class name);
+  # pass `key: ...` to override. With an InternalLink or 3-arg splat
+  # the carried `html_options[:class]` appends to `nav-link`
+  # (+ optional `link_class:`); other attrs pass through.
   #
-  # **`html_options[:class]` from InternalLink must NOT carry
-  # Bootstrap nav-tab classes** (`nav-link`, `active`, `mt-3`, etc.)
-  # — those are NavTabs' responsibility. The class slot in
-  # html_options is for identifier / behavior classes only (e.g.
-  # `InternalLink`'s auto-generated `<title>_link` for test
-  # selectors, or a Stimulus hook class). Tab styling is owned by
-  # the component so the same InternalLink object can render
-  # correctly in any tab context (top-level tabs, sub-tabs,
-  # future panel-tab triggers).
+  # **`html_options[:class]` from InternalLink / Tab POROs must NOT
+  # carry Bootstrap nav-tab classes** (`nav-link`, `active`, `mt-3`)
+  # — those are NavTabs' responsibility. The class slot is for
+  # identifier / behavior classes only (auto-generated `<thing>_link`
+  # for test selectors, Stimulus hooks, etc.). Tab styling is owned
+  # by the component so the same PORO renders correctly in any tab
+  # context.
   #
   # @return [nil] to prevent ERB output
   def tab(text_or_link, path = nil, html_options = {}, key: nil)
@@ -101,10 +115,24 @@ class Components::NavTabs < Components::Base
     nil
   end
 
+  # Append every tab in an Enumerable (typically a `Tab::Collection`).
+  # Equivalent to `each { |t| tab(t) }`; provided for readability when
+  # mixing a Collection with ad-hoc `tab(...)` calls inside the
+  # `view_template` block.
+  def add_all(collection)
+    collection.each { |t| tab(t) }
+    nil
+  end
+
   private
 
   def build_tab(text_or_link, path, html_options, key)
-    if text_or_link.is_a?(::InternalLink)
+    case text_or_link
+    when ::Tab::Base
+      title, url, opts = text_or_link.to_a
+      { text: title, path: url,
+        key: key || text_or_link.nav_key, link_attrs: opts }
+    when ::InternalLink
       title, url, opts = text_or_link.tab
       { text: title, path: url, key: key, link_attrs: opts }
     else

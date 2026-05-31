@@ -46,7 +46,8 @@ module Views::Controllers::Projects::Aliases
       span(id: "project_alias_#{id}") do
         modal_link_to(
           "project_alias_#{id}",
-          *edit_project_alias_tab(@project.id, name, id)
+          *::Tab::Project::AliasEdit.new(project_id: @project.id,
+                                         name: name, id: id).to_a
         )
       end
     end
@@ -55,7 +56,9 @@ module Views::Controllers::Projects::Aliases
       span(id: "project_alias") do
         modal_link_to(
           "project_alias",
-          *new_project_alias_tab(@project.id, @target.id, @target.class)
+          *::Tab::Project::AliasNew.new(project_id: @project.id,
+                                        target_id: @target.id,
+                                        target_type: @target.class).to_a
         )
       end
     end

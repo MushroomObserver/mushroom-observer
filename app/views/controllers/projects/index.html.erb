@@ -1,6 +1,6 @@
 <%
 add_index_title(@query)
-add_context_nav(projects_index_tabs)
+add_context_nav(Tab::Project::IndexNav.new)
 add_sorter(@query, projects_index_sorts)
 add_pagination(@pagination_data)
 container_class(:text_image)
