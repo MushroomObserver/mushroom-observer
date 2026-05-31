@@ -102,10 +102,11 @@ module LinkHelper
   end
 
   # Renders an `<a>` for an `ExternalLink` AR record. Delegates to
-  # `Components::ExternalLink` — render the component directly in
-  # Phlex views.
+  # `Components::ExternalSiteLink` — render the component directly
+  # in Phlex views. (Component is named for the destination — an
+  # external site — to avoid collision with the AR model.)
   def external_link(link)
-    render(Components::ExternalLink.new(link: link))
+    render(Components::ExternalSiteLink.new(link: link))
   end
 
   # NOTE: Specific to glyphicons

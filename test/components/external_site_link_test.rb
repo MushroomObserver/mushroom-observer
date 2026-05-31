@@ -2,10 +2,10 @@
 
 require("test_helper")
 
-class ExternalLinkComponentTest < ComponentTestCase
+class ExternalSiteLinkTest < ComponentTestCase
   def test_inat_link_renders_inat_label_and_id_no_date
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
-    html = render(Components::ExternalLink.new(link: link))
+    html = render(Components::ExternalSiteLink.new(link: link))
 
     # iNat URLs render as "iNat <id>" where <id> is the URL minus the
     # iNat base URL. No date suffix on iNat — they're already date-
@@ -16,7 +16,7 @@ class ExternalLinkComponentTest < ComponentTestCase
 
   def test_other_site_renders_on_site_label_and_date
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
-    html = render(Components::ExternalLink.new(link: link))
+    html = render(Components::ExternalSiteLink.new(link: link))
 
     # Non-iNat sites render with "On <site>" label + a small element
     # carrying the link's creation date.
