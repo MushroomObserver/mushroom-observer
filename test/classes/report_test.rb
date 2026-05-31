@@ -485,6 +485,10 @@ class ReportTest < UnitTestCase
     do_mycoportal_csv_test(obs, expect)
   end
 
+  # Groups: text_name ends in /(group|complex|clade)$/
+  # sciname = text_name without the ending;
+  # identificationQualifier = the ending token (e.g., "group")
+  # taxonRemarks = search_name
   def test_mycoportal_group
     location = locations(:burbank)
     name = names(:boletus_edulis_group)
@@ -520,24 +524,6 @@ class ReportTest < UnitTestCase
       sciname: "Tricholoma caligatum",
       identificationQualifier: "group",
       taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
-    ).values
-
-    do_mycoportal_csv_test(obs, expect)
-  end
-
-  # Groups: text_name ends in /(group|complex|clade)$/
-  # sciname = text_name without the ending; identificationQualifier = the
-  # ending token only; taxonRemarks = search_name
-  def test_mycoportal_group_taxon_remarks
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: locations(:burbank),
-                              where: locations(:burbank).name,
-                              name: names(:boletus_edulis_group))
-
-    expect = hashed_expect(obs).merge(
-      sciname: "Boletus edulis",
-      identificationQualifier: "group",
-      taxonRemarks: "Boletus edulis group"
     ).values
 
     do_mycoportal_csv_test(obs, expect)
