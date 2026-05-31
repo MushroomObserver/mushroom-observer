@@ -112,7 +112,8 @@ module Report
 
     # search_name for genus-reduced, code, and group names
     def taxon_remarks(row)
-      return unless reduce_to_genus?(row) || code_name?(row) || group?(row)
+      return unless reduce_to_genus?(row) || code_name?(row) ||
+                    group?(row) || sensu_non_stricto?(row)
 
       row.name_search_name
     end
