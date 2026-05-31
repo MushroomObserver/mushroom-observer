@@ -82,6 +82,25 @@ class Tab::Base
     to_internal_link.tab
   end
 
+  # Append a `q=<value>` query param to a path string. Pass the
+  # caller-side `q_param` (already resolved — Tab POROs are
+  # request-agnostic, so the caller is responsible for asking the
+  # request context what `q_param` is). When `q_param_value` is nil
+  # or blank, the original path returns unchanged.
+  #
+  # Use from a Tab PORO's `#path` method when the tab's URL needs to
+  # carry the current Query through (e.g. "back to filtered index"
+  # links on a show page).
+  def with_q_param(path, q_param_value)
+    return path if q_param_value.blank?
+
+    uri = URI.parse(path)
+    parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
+    parsed["q"] = q_param_value
+    uri.query = Rack::Utils.build_query(parsed)
+    uri.to_s
+  end
+
   # Stable key NavTabs matches against `current:` to decide `.active`.
   # Defaults to `alt_title` when set (the same short identifier used
   # for the selector class) — this aligns with the existing MO

@@ -26,7 +26,7 @@ module Tabs
       ]
       if permission?(list)
         links += [
-          edit_species_list_tab(list)
+          ::Tab::SpeciesList::Edit.new(list: list).to_a
         ]
       end
       links

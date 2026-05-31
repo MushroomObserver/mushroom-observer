@@ -40,7 +40,11 @@ module Views::Controllers::SpeciesLists
       add_interest_icons(@user, @species_list)
       add_edit_icons(@species_list, @user)
       add_context_nav(
-        species_list_show_tabs(list: @species_list, query: @query)
+        ::Tab::SpeciesList::Show.new(
+          list: @species_list,
+          can_manage: permission?(@species_list),
+          q_param: q_param
+        )
       )
       # `add_pager_for` walks prev/next species_lists — not pages of
       # observations within this list (which `add_pagination` does).
