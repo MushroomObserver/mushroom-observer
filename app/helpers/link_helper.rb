@@ -68,48 +68,19 @@ module LinkHelper
     end
   end
 
-  # Icon link with optional active state. (Tooltip title must be swapped in JS.)
-  # Now also accepts active state options: active_icon, active_content
-  # NOTE: Takes same args as link_to, e.g.
-  # icon_link_to(text, path, **args). Can also print a button_to.
+  # Icon link with optional active state. (Tooltip title must be
+  # swapped in JS.) Takes same args as `link_to`, e.g.
+  # `icon_link_to(text, path, **args)`. Can also print a `button_to`
+  # via `button_to: true`. Delegates to `Components::IconLink` —
+  # render the component directly in Phlex views.
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text
 
-    link_path = block ? text : path # because positional
+    link_path = block ? text : path # positional: block ⇒ first arg is path
     content = block ? capture(&block) : text
-    opts = block ? path : options # because positional
-    icon_type = opts[:icon]
-    return link_to(link, opts) { content } if icon_type.blank?
+    opts = block ? path : options
 
-    opts[:role] = "button" if opts[:button_to]
-    active_icon = opts[:active_icon]
-    active_content = opts[:active_content]
-    stateful = active_icon && active_content
-    icon_class = class_names(opts[:icon_class], "px-2")
-    icon_active_class = class_names(icon_class, "active-icon")
-    label_show_classes = "pl-2 d-none d-sm-inline font-weight-bold"
-    label_class = opts[:show_text] ? label_show_classes : "sr-only"
-    label_active_class = class_names(label_class, "active-label")
-
-    link_opts = {
-      title: content, # title is what shows up in tooltip
-      class: class_names("icon-link", opts[:class]),
-      data: { toggle: "tooltip", title: content, # needed for swapping only
-              active_title: opts[:active_content] }
-    }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
-                             :active_icon, :active_content, :button_to))
-
-    inner_html = capture do
-      concat(link_icon(icon_type, class: icon_class))
-      concat(link_icon(active_icon, class: icon_active_class)) if stateful
-      concat(tag.span(content, class: label_class))
-      concat(tag.span(active_content, class: label_active_class)) if stateful
-    end
-    if opts[:button_to]
-      button_to(inner_html, link_path, **link_opts)
-    else
-      link_to(inner_html, link_path, **link_opts)
-    end
+    render(Components::IconLink.new(content, link_path, **opts))
   end
 
   # NOTE: above re: MO tabs
@@ -123,21 +94,20 @@ module LinkHelper
     icon_link_to(add_q_param(link), opts) { content }
   end
 
-  # pass title if it's a plain button (say for collapse) but you want a tooltip
+  # Glyphicon `<span>` with the MO `link-icon` class. Pass `title:`
+  # for a tooltip + screen-reader label. Delegates to
+  # `Components::LinkIcon` — render the component directly in Phlex
+  # views.
   def link_icon(type, **args)
-    return "" unless (glyph = LINK_ICON_INDEX[type])
+    return "" unless LINK_ICON_INDEX[type]
 
-    text = ""
-    args[:class] = class_names("glyphicon glyphicon-#{glyph} link-icon",
-                               args[:class])
-
-    if args[:title].present?
-      title = args[:title]
-      args[:data] = { toggle: "tooltip" }.merge(args[:data] || {})
-      text = tag.span(title, class: "sr-only")
-    end
-
-    tag.span(text, **args)
+    render(Components::LinkIcon.new(
+             type: type,
+             title: args[:title],
+             html_class: args[:class],
+             data: args[:data] || {},
+             attributes: args.except(:title, :class, :data)
+           ))
   end
 
   def external_link(link)
