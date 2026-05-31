@@ -375,8 +375,15 @@ module ApplicationController::Queries
   #     redirect_to_next_object(:next, Image, params[:id].to_s)
   #   end
   #
+  # Returns truthy on both branches so callers chaining `... and return`
+  # don't silently fall through when the object isn't found (the
+  # not-found path internally redirects to the index via
+  # `find_or_goto_index`; before this change it then returned nil
+  # because of the implicit-return guard, which combined with the
+  # caller's `and return` walked control into `show`'s body without
+  # `@object` set).
   def redirect_to_next_object(method, model, id)
-    return unless (object = find_or_goto_index(model, id))
+    return true unless (object = find_or_goto_index(model, id))
 
     next_params = find_query_and_next_object(object, method, id)
     object = next_params[:object]
