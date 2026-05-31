@@ -1,9 +1,41 @@
 # frozen_string_literal: true
 
+# Abstract base class for all `Views::Controllers::*` Phlex view
+# classes (and other classes under `Views::*` that render content).
+#
+# Inherits from `Components::Base` so view classes get the same
+# Phlex/Rails wiring as ordinary components. Pre-registers the
+# page-chrome helpers every action view uses — title, context nav,
+# container class, project banner — so subclasses don't have to
+# repeat `register_value_helper` calls for each one.
 class Views::Base < Components::Base
-  # The `Views::Base` is an abstract class for all your views.
-
-  # By default, it inherits from `Components::Base`, but you
-  # can change that to `Phlex::HTML` if you want to keep views and
-  # components independent.
+  # All MO page-chrome helpers are side-effect-only (they call
+  # `content_for(...)`), so they're value helpers — their return
+  # value isn't inserted into rendered output.
+  register_value_helper :add_page_title
+  register_value_helper :add_new_title
+  register_value_helper :add_edit_title
+  register_value_helper :add_show_title
+  register_value_helper :add_index_title
+  register_value_helper :add_context_nav
+  register_value_helper :add_project_banner
+  register_value_helper :add_edit_icons
+  register_value_helper :add_interest_icons
+  register_value_helper :add_pager_for
+  register_value_helper :add_pagination
+  register_value_helper :add_sorter
+  register_value_helper :container_class
+  register_value_helper :column_classes
+  register_value_helper :content_for
+  register_value_helper :flash_error
+  # `paginated_results` takes a block and emits the surrounding
+  # pagination HTML around it — output helper, mark_safe so Phlex
+  # trusts the returned SafeBuffer.
+  register_output_helper :paginated_results, mark_safe: true
+  # `controller` (the ActionController instance) is referenced from
+  # tab-helper methods like
+  # `Tabs::ProjectsHelper#project_species_list_locations_button`
+  # which pass it to `InternalLink::RelatedQuery.new`. ERB views
+  # have it for free; Phlex views need it registered.
+  register_value_helper :controller
 end

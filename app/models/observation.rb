@@ -812,6 +812,17 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     name.user_observation_name(user)
   end
 
+  # Plain-text title for the browser tab `<title>`. `text_name` is
+  # the denormalized binomial-only column — no author, no id, no
+  # markup. The title helper prepends "OBSERVATION <id>:" so we
+  # don't need those here. (The visible page heading is built by
+  # `header/title_helper#page_title_for` via `observation_show_title`
+  # — wraps the consensus name in a link, which is view-layer work
+  # that can't live cleanly on the model.)
+  def document_title
+    text_name
+  end
+
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
     string_with_id(name.observation_name)

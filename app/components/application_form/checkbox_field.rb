@@ -29,7 +29,16 @@ class Components::ApplicationForm < Superform::Rails::Form
     attr_reader :wrapper_options
 
     def initialize(field, *options, wrapper_options: {}, **attributes)
-      @options = options
+      # MO convention: array-mode options arrive as Rails-shape
+      # `[label, value]` pairs (matching `select_field` and
+      # `radio_field`'s positional-choices shape). Flip to
+      # Superform-shape `[value, label]` for the underlying
+      # `Choices::Mapper` to unpack correctly. Non-pair options
+      # (bare values, hashes) pass through unchanged — Mapper handles
+      # them itself.
+      @options = options.map do |opt|
+        opt.is_a?(Array) && opt.size == 2 ? [opt[1], opt[0]] : opt
+      end
       @wrapper_options = wrapper_options
       # Upstream 0.7 Checkbox#initialize is (field, index: nil, **attributes).
       super(field, **attributes)
@@ -104,14 +113,22 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Render a single array-mode checkbox (name="…[]"). Intended for use
     # inside a block passed to `checkbox_field`, when the caller wants
     # one cell of a larger checkbox matrix.
-    def option(value)
+    #
+    # `**overrides` lets the caller override any of the input
+    # attributes per option — most commonly `checked:` (when the
+    # caller has external state for checkedness that doesn't match
+    # `model.<assoc>_ids`, e.g. failure-reload showing the user's
+    # submitted choices without writing them to the DB) and
+    # `disabled:` (per-row permission gates).
+    def option(value, **overrides)
       input(
         type: :checkbox,
         id: "#{field.dom.id}_#{value}",
         name: "#{field.dom.name}[]",
         value: value.to_s,
         checked: checked_in_array?(value),
-        **@attributes.except(:id, :name, :value, :type, :checked)
+        **@attributes.except(:id, :name, :value, :type, :checked),
+        **overrides
       )
       return unless block_given?
 

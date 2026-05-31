@@ -1,5 +1,7 @@
 <%= turbo_stream.replace("target_names_widget") do %>
-  <%= render(Components::ProjectTargetNamesWidget.new(project: project)) %>
+  <%= render(Views::Controllers::Projects::TargetNames::Form.new(
+               project: project
+             )) %>
 <% end %>
 <%
 # Carry any optional scope fields the caller passed through to the
@@ -12,9 +14,11 @@ context_args = { user: user, project: project }
 end
 %>
 <%= turbo_stream.replace("checklist_contents") do %>
-  <%= render(Components::Checklist::Contents.new(
+  <%= render(Views::Controllers::Checklists::Contents.new(
                data: data,
-               context: Components::Checklist::Context.new(**context_args)
+               context: Views::Controllers::Checklists::Context.new(
+                 **context_args
+               )
              )) %>
 <% end %>
 <%= render(partial: "projects/tab_counts_update",

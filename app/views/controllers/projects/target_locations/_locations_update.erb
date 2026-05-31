@@ -1,10 +1,10 @@
 <%= turbo_stream.replace("target_locations_widget") do %>
-  <%= render(Components::ProjectTargetLocationsWidget.new(
+  <%= render(Views::Controllers::Projects::TargetLocations::Form.new(
                project: project
              )) %>
 <% end %>
 <%= turbo_stream.replace("locations_table") do %>
-  <%= render(Components::Projects::LocationsTable.new(
+  <%= render(Views::Controllers::Projects::Locations::Table.new(
                project: project,
                grouped_data: grouped_data,
                ungrouped_locations: ungrouped_locations,

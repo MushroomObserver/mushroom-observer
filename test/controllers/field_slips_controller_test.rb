@@ -58,7 +58,13 @@ class FieldSlipsControllerTest < FunctionalTestCase
     get(:new, params: { code: code })
     assert_response(:success)
     assert(response.body.include?(project.title))
-    assert_select('input[name="field_slip[collector]"]:not([value])')
+    # Collector input is present and empty. Phlex/Superform emits
+    # `value=""` for nil-valued fields where Rails' form_with would
+    # omit the attribute; both are functionally equivalent.
+    assert_select('input[name="field_slip[collector]"]') do |inputs|
+      assert_empty(inputs.first["value"].to_s,
+                   "collector input should be empty")
+    end
   end
 
   def test_should_create_field_slip_with_last_viewed_obs
@@ -430,7 +436,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
     fs = field_slips(:field_slip_project_orphan)
     get(:show, params: { id: fs.id })
     assert_response(:success)
-    assert_match(/#{:field_slip_edit.t}/, @response.body)
+    assert_select("a[href='#{edit_field_slip_path(fs)}']",
+                  text: /#{:field_slip_edit.t}/)
   end
 
   def test_should_get_edit
@@ -997,6 +1004,50 @@ class FieldSlipsControllerTest < FunctionalTestCase
     gaps = occ.project_membership_gaps
     assert(gaps.any?, "Should detect project gaps")
     assert(gaps[:projects]&.include?(project))
+  end
+
+  # Coverage gap: the existing detect-gaps test verifies the gap data
+  # but not the view-render branch. This test PUTs through the
+  # controller flow that sets `@field_slip_project_gaps`, then asserts
+  # the response renders `Components::Modal` wrapping the
+  # `Views::Controllers::Occurrences::Projects::Form` — the view-level
+  # contract in `field_slips/edit.html.erb` that no other test
+  # exercises.
+  def test_update_with_project_gaps_renders_modal
+    login("rolf")
+    fs = field_slips(:field_slip_no_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs) # in bolete_project
+    [obs2, obs3].each { |obs| obs.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(
+      user: rolf, primary_observation: obs2, field_slip: fs
+    )
+    obs2.update!(occurrence: occ)
+    obs3.update!(occurrence: occ)
+
+    # PUT update — must include `observation_ids` to trigger the
+    # sync_selected_observations path → check_field_slip_project_gaps
+    # → @field_slip_project_gaps set → render(:edit) instead of redirect.
+    put(:update,
+        params: {
+          id: fs.id,
+          observation_ids: [obs2.id.to_s, obs3.id.to_s],
+          field_slip: { code: fs.code }
+        })
+
+    assert_response(:success)
+    # Components::Modal markup proves the new modal composition
+    # rendered, not just that we got a 200.
+    assert_select(
+      "#modal_resolve_projects.modal.fade.in",
+      { count: 1 },
+      "Expected Components::Modal for project-gaps overlay"
+    )
+    assert_select(".modal-dialog.modal-lg")
+    assert_select(".modal-backdrop.fade.in")
+    # Resolve modal's submit buttons (Skip + Add All) are posted under
+    # the FormObject's namespace.
+    assert_select("[name='occurrence_projects[resolution]']", count: 2)
   end
 
   def test_check_field_slip_project_gaps_no_gaps

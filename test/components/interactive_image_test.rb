@@ -16,7 +16,7 @@ class InteractiveImageTest < ComponentTestCase
     assert_includes(html, "image_#{@image.id}")
     assert_includes(html, "interactive_image_#{@image.id}")
     # Should have the lazy loading image with the image_X class
-    assert_match(/class="[^"]*image_#{@image.id}[^"]*"/, html)
+    assert_html(html, "img.image_#{@image.id}")
   end
 
   def test_renders_with_custom_size
@@ -25,16 +25,28 @@ class InteractiveImageTest < ComponentTestCase
     assert_includes(html, "image-sizer")
   end
 
+  # The vote section is rendered by `BaseImage#render_image_vote_section`,
+  # which dispatches to `Components::ImageVoteInterface`. Verify the
+  # dispatch actually happens (the previous version of this test only
+  # asserted the unrelated `image-sizer` and missed a regression where
+  # the sub-component call was malformed and silently no-op'd).
   def test_renders_with_votes_enabled
     html = render_image(votes: true)
 
     assert_includes(html, "image-sizer")
+    assert_html(html, "div.vote-section#image_vote_#{@image.id}")
+    assert_html(html, ".vote-meter.progress")
+    assert_html(html, ".vote-buttons")
+    assert_html(html, ".image-vote-links#image_vote_links_#{@image.id}")
   end
 
   def test_renders_with_votes_disabled
     html = render_image(votes: false)
 
     assert_includes(html, "image-sizer")
+    # No vote section at all when votes: false.
+    assert_no_html(html, ".vote-section")
+    assert_no_html(html, ".vote-meter")
   end
 
   def test_renders_with_custom_link
@@ -54,19 +66,14 @@ class InteractiveImageTest < ComponentTestCase
     html = render_image
 
     # Should have theater button with data-sub-html attribute
-    assert_includes(html, 'class="theater-btn"')
-    assert_match(/data-sub-html="[^"]*caption-image-links[^"]*"/, html)
+    assert_html(html, "a.theater-btn[data-sub-html]")
 
     # The data-sub-html should contain the image links from LightboxCaption
-    assert_match(
-      %r{data-sub-html="[^"]*/images/#{@image.id}/original[^"]*"},
-      html
-    )
-    assert_match(
-      %r{data-sub-html="[^"]*/images/#{@image.id}/exif[^"]*"},
-      html
-    )
-    assert_match(/data-sub-html="[^"]*lightbox_link[^"]*"/, html)
+    sub_html = Nokogiri::HTML(html).at_css("a.theater-btn")["data-sub-html"]
+    assert_includes(sub_html, "caption-image-links")
+    assert_includes(sub_html, "/images/#{@image.id}/original")
+    assert_includes(sub_html, "/images/#{@image.id}/exif")
+    assert_includes(sub_html, "lightbox_link")
   end
 
   private

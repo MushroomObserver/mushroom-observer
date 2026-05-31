@@ -143,6 +143,18 @@ class Herbarium < AbstractModel
     code.blank? ? name : "#{name} (#{code})"
   end
 
+  # Page heading: textilize so apostrophes etc. become smart-quoted
+  # (and bold/italic markers, if any user typed them into the name,
+  # render correctly). Doc title is plain `format_name` — the
+  # browser tab doesn't render HTML or smart-quote.
+  def page_title(_user = nil)
+    format_name.t
+  end
+
+  def document_title
+    format_name
+  end
+
   def unique_format_name
     "#{format_name} (#{id})"
   end

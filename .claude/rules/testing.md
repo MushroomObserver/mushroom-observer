@@ -82,15 +82,248 @@ the lookup so a nil return fails with a clear message instead of a cryptic
 - `assert_nil(value)`
 - `assert_response(:success)`
 
+## FORBIDDEN: assertions against rendered HTML body
+
+**Never** assert on rendered HTML markup with regex or by probing the
+raw response body. This is an absolute rule — not "where convenient,"
+not "in this file only."
+
+```ruby
+# ❌ FORBIDDEN — regex on @response.body
+assert_match(/<input name="foo"/, @response.body)
+assert_no_match(/error/, @response.body)
+
+# ❌ FORBIDDEN — aliasing @response.body to a local doesn't make it ok
+body = @response.body
+assert_match(/something/, body)
+
+# ❌ FORBIDDEN — `assert_select("body", text: /.../)` defeats the point.
+# The "body" selector matches the entire <body> element, so the regex
+# still scans the full document text and failure messages still dump
+# the whole body. Use a SPECIFIC element selector.
+assert_select("body", text: /something/)
+
+# ❌ FORBIDDEN in component tests — regex on the rendered string
+assert_match(/<a class="btn"/, html)
+
+# ❌ FORBIDDEN — substring check on raw HTML
+assert_includes(@response.body, "<label>Email</label>")
+assert_includes(html, :some_label.l)  # text lives in SOME element — find it
+```
+
+Use the selector-based helpers instead:
+
+```ruby
+# ✅ Controller tests — assert_select with a SPECIFIC selector
+assert_select("input[name='foo']")
+assert_select("#error_explanation", count: 0)
+assert_select("a[href*=?]", profile_path(user))
+assert_select("label", text: :some_label.l)
+
+# ✅ Component tests — assert_html (Nokogiri CSS)
+assert_html(html, "input[name='model[field]']")
+assert_html(html, ".btn-primary", text: :submit.l)
+assert_html(html, "label", text: :some_label.l)
+assert_no_html(html, "#modal_overlay")
+```
+
+Translation strings are not an exception. Every visible string lives
+in some element — a `<p>`, `<button>`, `<label>`, `<h3>`, `.alert`,
+`.flash-notice`, etc. Find that element and use it as the selector.
+If you genuinely cannot identify the wrapping element, read the
+component / view to find it. "I don't know what element it's in" is
+not a reason to fall back to a body-wide assertion.
+
+**Why this matters:**
+
+1. **Failure messages.** A failed `assert_match(/foo/, @response.body)`
+   dumps the entire response body into the log — useless CI signal.
+   A failed `assert_select("input[name='foo']")` says exactly that:
+   "0 matches for `input[name='foo']`." Actionable.
+2. **Robustness.** Whitespace changes, attribute reordering, and HTML
+   encoding can all silently break a regex without changing the
+   rendered page. CSS selectors are stable against those.
+3. **Intent.** `assert_select("input[name='foo']")` says what you
+   actually mean — "there's an input named foo." A regex like
+   `/<input name="foo"/` is a literal-text accident waiting to break.
+4. **Speed (sometimes).** For controller tests with multiple
+   assertions on the same response, `assert_select` parses once via
+   Nokogiri and reuses the DOM, while each `assert_match` re-scans the
+   full body string. (For component tests, `assert_html` re-parses on
+   each call — the speed argument doesn't apply there.)
+
+**Non-HTML payloads.** This rule is about rendered HTML. For JSON use
+`response.parsed_body`. For redirects use `assert_redirected_to`. For
+CSV parse it. Never reach for raw `@response.body` in those cases
+either.
+
+**Pre-extracted text is fine.** If you've already pulled a small
+element's text out via a selector (e.g.
+`css_select(".rss-what").text`), regex / includes against that
+extracted string is fine — the haystack is one element's text, not
+the whole document.
+
+**Cleanup expectation.** If you find existing forbidden patterns
+near your edit, fix them. Don't leave them in place "because the PR
+isn't about that" — every PR that touches a test file is the right
+place to clean up whatever forbidden assertions live in it.
+
 ## Running Specific Test Suites
 - All tests: `bin/rails test`
 - Controllers: `bin/rails test:controllers`
 - Models: `bin/rails test test/models/`
 - Coverage: `bin/rails test:coverage`
 
+## Verify per-file coverage on every open PR
+
+The goal isn't "the lines I added are covered" — it's **"every Ruby
+file I touched is at 100% line coverage, before AND after my change."**
+Diff coverage (the coveralls bot's headline percentage) only counts
+the lines you added or modified; it'll happily report 100% on a PR
+that leaves unrelated code in the touched files uncovered.
+
+What to do, after the coveralls bot comments on the PR:
+
+1. Pull the per-file numbers from the build's `source_files.json`:
+
+    ```bash
+    BUILD_ID=$(gh pr view <PR> --json comments \
+      --jq '.comments[] | select(.author.login=="coveralls") | .body' |
+      grep -oE "coveralls.io/builds/[0-9]+" | tail -1 |
+      grep -oE "[0-9]+$")
+
+    gh pr view <PR> --json files \
+      --jq '.files[] | select(.changeType!="DELETED") | .path' |
+      grep -E '\.rb$' |
+      while read -r path; do
+        curl -s "https://coveralls.io/builds/${BUILD_ID}/source_files.json?per_page=1000" |
+          python3 -c "
+import sys, json, os
+d = json.load(sys.stdin)
+src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
+f = next((x for x in src if x['name'] == os.environ['P']), None)
+if f:
+  cov, rel, miss = f['covered_line_count'], f['relevant_line_count'], f['missed_line_count']
+  pct = 100.0 * cov / rel if rel else 0
+  flag = '' if miss == 0 else f'  MISSED {miss}'
+  print(f\"{os.environ['P']}: {cov}/{rel} ({pct:.1f}%){flag}\")
+else:
+  print(f\"{os.environ['P']}: <not instrumented>\")
+" P="$path"
+      done
+    ```
+
+2. **Every Ruby file in the PR should report 100% coverage.** ERB,
+   config, Markdown, etc. show up as `<not instrumented>` — that's
+   expected; SimpleCov only instruments Ruby.
+
+3. **Every PR should lever coverage upward.** If a touched file is
+   below 100%, fix the gap in the same PR — even if the uncovered
+   lines were already missed on `main` before your edit. Either add
+   tests that exercise the uncovered branches, or remove the dead
+   code. The reasoning: a PR that touches a file is the right place
+   to bring it to 100%; deferring it means the gap survives every
+   future PR that touches the file until someone finally signs up to
+   fix it. Touch it, finish it.
+
+Why both numbers matter:
+
+- **Diff coverage** confirms your changes are tested. Easy to game
+  (write tests that touch every added line without exercising real
+  behavior).
+- **Per-file coverage** confirms the file as a whole is testable.
+  A file at 100% has every method, every branch, every guard reachable
+  from a test — which is what gives you confidence that the next
+  refactor won't silently drop a behavior.
+
+For local checking before pushing, SimpleCov writes `coverage/index.html`
+and `coverage/.last_run.json` after each test run. Open the HTML report
+or jq the JSON to find missed lines on any file.
+
 ## Component Test Structure
 
 **IMPORTANT**: Follow this pattern for all Phlex component tests.
+
+### Don't pin cosmetic CSS classes
+
+Component test selectors should **not** include Bootstrap styling /
+spacing / typography classes — `.btn`, `.btn-default`,
+`.btn-outline-default`, `.btn-sm`, `.btn-lg`, `.mt-2`, `.ml-3`,
+`.px-4`, `.py-4`, `.help-note`, `.help-block`, `.font-weight-bold`,
+`.text-*`, etc. They're decoration; a Bootstrap-version upgrade or
+a designer's tweak will rename them, and every test that pinned the
+old name will fail.
+
+A component test asserts the *contract* of a component — what it
+does, what it submits, what it links to, what it triggers, what it
+makes visible. The visual styling is what designers and Bootstrap
+upgrades own.
+
+**Drop:**
+- All `.btn` family classes (`.btn`, `.btn-default`,
+  `.btn-outline-default`, `.btn-sm`, `.btn-lg`, `.btn-link`, etc.).
+- Spacing utilities (`.m{tbrlxy}-*`, `.p{tbrlxy}-*`, `.mt-3`,
+  `.py-4`, etc.).
+- Typography (`.help-note`, `.help-block`, `.font-weight-bold`,
+  `.text-muted`, `.lead`, etc.).
+- Bootstrap layout helpers that are pure styling (`.row`, `.col-*`).
+
+**Keep:**
+- HTML attributes that drive behavior — `href`, `data-*` (Stimulus
+  targets / actions, Turbo method / confirm, etc.), `name`, `type`,
+  `value`, `aria-*`, `target`, `rel`, `id`.
+- Visibility classes — `.d-none`, `.hidden`, `[hidden]` carry real
+  state.
+- Structural Bootstrap component slots that the Phlex wrapper depends
+  on — `.modal-body`, `.modal-footer`, `.panel-heading`, `.input-group`.
+  Use them when asserting placement (`.modal-body > p[data-*]`); drop
+  them when asserting existence (`p[data-*]` alone is just as good).
+
+Examples:
+
+```ruby
+# ❌ Pins styling — breaks on Bootstrap upgrade.
+assert_html(html, "a.btn.btn-sm.btn-outline-default[href='/foo']")
+assert_html(html, "p.help-note", text: :explanation.l)
+assert_html(html, "div.help-block.mt-4")
+
+# ✅ Pins behavior + structure — survives styling churn.
+assert_html(html, "a[href='/foo']")            # contract: where it goes
+assert_html(html, "a[href='/foo'][target='_blank']")  # contract: new tab
+assert_includes(html, :explanation.l)          # contract: text appears
+assert_html(html, "p[data-confirm-modal-target='message']")
+                                               # contract: Stimulus wiring
+```
+
+For visibility behavior, `.d-none` and friends are fair game because
+they describe a state, not paint:
+
+```ruby
+# ✅ Fine — `.d-none` is a behavior assertion, not a paint job.
+assert_html(html, ".create-button.d-none")    # button is initially hidden
+```
+
+When a component genuinely needs a class on its element to function
+(a Stimulus controller's CSS hook, an SVG transform target, etc.),
+test the `data-controller=` / `data-*-target=` attribute that actually
+drives it, not the class name on the same element.
+
+**Exception: styling-abstraction components.** Tests for components
+whose *job* is to produce specific Bootstrap classes — `CrudButton`
+(variant + size of the rendered button), `Panel` / `Modal` /
+`ModalConfirm` (Bootstrap slot structure), `Alert`, the
+`ApplicationForm` field helpers' wrapper options (`:monospace` →
+`text-monospace`, `:center` → `center-block`, `wrap_class: "x"` →
+`x`, `:button` → `input-group` / `input-group-btn`, etc.) — *should*
+assert on those classes. The class output IS the contract of the
+unit. When Bootstrap upgrades, both the helper and these tests
+update together.
+
+Heuristic: would dropping the class assertion gut the test? If yes,
+keep it. If the test was "verify a button styled this way exists",
+that IS the contract — the class assertion stays. If the test was
+"verify the page renders some content" and the class on the
+surrounding element is incidental, drop it.
 
 ### Consolidate Assertions Per Render
 

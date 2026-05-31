@@ -113,7 +113,7 @@ module Projects
       count = addable_observations(@project, @project_member.user).count
       respond_to do |format|
         format.turbo_stream do
-          render(Components::AddObsModal.new(
+          render(Views::Controllers::Projects::Members::AddObsModal.new(
                    project: @project,
                    candidate: @project_member.user,
                    count: count,
@@ -128,17 +128,25 @@ module Projects
     def trust_modal
       return unless find_project!
       return unless find_project_member!
-      unless @project.member?(@user) && @user == @project_member.user
-        return must_be_project_admin!(@project.id)
-      end
+
+      allowed = @project.member?(@user) && @user == @project_member.user
+      return must_be_project_admin!(@project.id) unless allowed
 
       respond_to do |format|
         format.turbo_stream do
-          render(Components::TrustSettingsModal.new(
-                   project: @project,
-                   candidate: @project_member.user,
-                   current_trust_level:
-                     @project_member.trust_level || "no_trust"
+          render(Components::ModalTurboForm.new(
+                   identifier: "trust_settings",
+                   title: :show_project_trust_settings_title.l(
+                     project: @project.title
+                   ),
+                   user: @user,
+                   model: @project_member.user,
+                   form_class: Views::Controllers::Projects::Members::TrustSettings,
+                   form_locals: {
+                     project: @project,
+                     current_trust_level:
+                       @project_member.trust_level || "no_trust"
+                   }
                  ), layout: false)
         end
       end

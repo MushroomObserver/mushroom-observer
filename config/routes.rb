@@ -305,8 +305,11 @@ MushroomObserver::Application.routes.draw do
     post("verify/resend_email(/:id)", to: "verifications#resend_email",
                                       as: "resend_verification_email")
 
-    resources :api_keys, only: [:index, :create, :edit, :update, :destroy]
-    patch("api_keys/:id/activate", to: "api_keys#activate",
+    resources :api_keys, except: :show
+    # Accept both GET (email links — clients can only do GET) and
+    # PATCH (in-app turbo button on the index page) for activate.
+    match("api_keys/:id/activate", to: "api_keys#activate",
+                                   via: [:get, :patch],
                                    as: "activate_api_key")
   end
 
@@ -388,10 +391,14 @@ MushroomObserver::Application.routes.draw do
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
   resources :occurrences, only: [:new, :create, :show, :edit, :update,
                                  :destroy] do
-    member do
-      get :resolve_projects
-      post :resolve_projects
-    end
+    # The projects collection of an occurrence is a singular nested
+    # resource (each occurrence has one such collection — the union
+    # of projects across its observations). #update applies the
+    # user's resolution choice from the modal. No #edit: gap
+    # resolution is reached via the parent occurrence's #edit, which
+    # auto-opens the modal when `@project_gaps` are present.
+    resource :projects, only: :update,
+                        controller: "occurrences/projects"
   end
 
   # ----- Field Slip Job Trackers: show for json -------------------------------
@@ -416,8 +423,9 @@ MushroomObserver::Application.routes.draw do
                             as: "bulk_filename_purge")
     get("/licenses/edit", to: "/images/licenses#edit",
                           as: "edit_licenses")
-    put("/licenses", to: "/images/licenses#update",
-                     as: "license_updater")
+    match("/licenses", to: "/images/licenses#update",
+                       via: [:put, :patch],
+                       as: "license_updater")
     get("/votes/anonymity", to: "/images/votes/anonymity#edit",
                             as: "edit_vote_anonymity")
     match("/votes/anonymity", to: "/images/votes/anonymity#update",
@@ -706,11 +714,25 @@ MushroomObserver::Application.routes.draw do
         post :add_all
       end
     end
-    resources :violations, only: [:index], controller: "projects/violations"
+    resources :violations, only: [:index],
+                           controller: "projects/violations" do
+      collection do
+        # GET endpoint that returns the Add-Target-Location modal as a
+        # turbo-stream so each open sees fresh DB state (#4304).
+        get :target_location_modal
+      end
+    end
   end
-  # resourceful route won't work because it requires an additional id
-  put("/projects/:project_id/violations", to: "projects/violations#update",
-                                          as: "project_violations_update")
+  # resourceful route won't work because it requires an additional id.
+  # Accept both PATCH and PUT — PATCH is the Rails-idiomatic verb for
+  # updates and what Superform defaults to for a persisted model
+  # (e.g. TargetLocationForm). PUT is kept so the legacy button_to
+  # calls (Exclude/Extend/Add Target Name) and any external callers
+  # continue to work without modification.
+  match("/projects/:project_id/violations",
+        to: "projects/violations#update",
+        as: "project_violations_update",
+        via: [:put, :patch])
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications

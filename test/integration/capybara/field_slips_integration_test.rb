@@ -54,7 +54,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     visit("/qr/NFAL-0001")
     click_on(:field_slip_add_images.l)
 
-    project_checkbox = "project_id_#{project.id}"
+    project_checkbox = "observation_project_ids_#{project.id}"
     check(project_checkbox)
     assert_selector("##{project_checkbox}[checked='checked']")
     fill_in(:WHERE.l, with: wrong_location.name, visible: :any)

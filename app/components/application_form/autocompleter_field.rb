@@ -4,12 +4,13 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap autocompleter input field component with dropdown suggestions
   # Wraps a text input with Stimulus autocompleter controller
   # rubocop:disable Metrics/ClassLength
-  class AutocompleterField < Superform::Rails::Components::Input
+  # Inherits from `Components::Input` (MO's thin subclass of
+  # Superform's `Components::Input`) to pick up the shared MO
+  # output-helper registrations — `link_icon` (used by
+  # `render_has_id_indicator`), `icon_link_to`, and `modal_link_to`
+  # (used by the create-link block).
+  class AutocompleterField < ::Components::Input
     include Phlex::Slotable
-
-    register_output_helper :link_icon
-    register_output_helper :icon_link_to
-    register_output_helper :modal_link_to
 
     # Types with dedicated Stimulus controllers
     SUPPORTED_TYPE_CONTROLLERS = [
@@ -346,13 +347,41 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{model_prefix}_#{hidden_name}"
     end
 
-    # Strips field key suffix from dom.id to get model prefix
-    # e.g., "herbarium_place_name" -> "herbarium"
-    def model_prefix
-      field.dom.id.to_s.sub(/_#{field.key}$/, "")
+    # Returns the model prefix and leaf-key segments of the field's
+    # `dom.name`. Splits on the LAST `[…]` group so the result is
+    # correct whether `field.key` is a Symbol (model-bound, leaf
+    # only) or a String that already contains the full namespaced
+    # name (e.g. `"list[members]"` from the String-form field
+    # helpers). Examples:
+    #
+    # | dom.name                  | namespace      | leaf      |
+    # | `species_list[place_name]`| `species_list` | `place_name` |
+    # | `list[members]`           | `list`         | `members` |
+    # | `member[notes][Cap]`      | `member[notes]`| `Cap`     |
+    # | `approved_rank` (no `[]`) | `""`           | `approved_rank` |
+    def name_parts
+      @name_parts ||= begin
+                        name = field.dom.name.to_s
+                        match = name.match(/\A(.*)\[([^\[\]]+)\]\z/)
+                        match ? [match[1], match[2]] : ["", name]
+                      end
     end
 
-    # Converts brackets in field key to underscores for param parsing.
+    def model_namespace
+      name_parts[0]
+    end
+
+    def leaf_key
+      name_parts[1]
+    end
+
+    # Strips bracket characters and collapses runs to single underscores
+    # so the prefix is a valid HTML id segment. `model_namespace` of
+    # `"member[notes]"` becomes `"member_notes"`.
+    def model_prefix
+      model_namespace.tr("[]", "_").gsub(/__+/, "_").chomp("_")
+    end
+
     def hidden_field_name
       return custom_hidden_field_name if hidden_name
 
@@ -363,15 +392,10 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{model_namespace}[#{hidden_name}]"
     end
 
-    # Strips field key suffix from dom.name to get model namespace
-    # e.g., "herbarium[place_name]" -> "herbarium"
-    def model_namespace
-      field.dom.name.to_s.sub(/\[#{field.key}\]$/, "")
-    end
-
     def default_hidden_field_name
-      key = field.key.to_s.tr("[]", "_").chomp("_")
-      field.dom.name.sub(/\[#{field.key}\]$/, "[#{key}_id]")
+      return "#{leaf_key}_id" if model_namespace.empty?
+
+      "#{model_namespace}[#{leaf_key}_id]"
     end
     # rubocop:enable Metrics/ClassLength
   end

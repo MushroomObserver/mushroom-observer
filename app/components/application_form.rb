@@ -18,20 +18,22 @@
 #   end
 #
 # @example Deriving action URL from model (eliminates passing action from view)
-#   class LicenseForm < Components::ApplicationForm
-#     def view_template
-#       text_field(:display_name)
-#       submit
-#     end
+#   module Views::Controllers::Licenses
+#     class Form < ::Components::ApplicationForm
+#       def view_template
+#         text_field(:display_name)
+#         submit
+#       end
 #
-#     def form_action
-#       model.persisted? ? view_context.license_path(model) :
-#                          view_context.licenses_path
+#       def form_action
+#         model.persisted? ? view_context.license_path(model) :
+#                            view_context.licenses_path
+#       end
 #     end
 #   end
 #
 #   # In new.html.erb and edit.html.erb, just render the form directly:
-#   <%= render(Components::LicenseForm.new(@license)) %>
+#   <%= render(Views::Controllers::Licenses::Form.new(@license)) %>
 #
 # @example Deriving action URL from model associations
 #   # For forms where the action depends on an associated model
@@ -49,7 +51,7 @@
 #   end
 #
 #   # In the view, no need to pass action:
-#   <%= render(Components::NameTrackerForm.new(
+#   <%= render(Views::Controllers::Names::Trackers::Form.new(
 #     @name_tracker || NameTracker.new(name: @name)
 #   )) %>
 #
@@ -83,18 +85,79 @@ class Components::ApplicationForm < Superform::Rails::Form
   include FieldHelpers
   include UploadHelpers
 
-  # Automatically set form ID based on class name unless explicitly provided
+  # Automatically derive a form id from the class unless one is
+  # explicitly provided. See `derive_form_id` for the rule.
   # @param model [ActiveRecord::Base] the model object for the form
-  # @param id [String] optional form ID (auto-generated from class name if nil)
+  # @param id [String] optional form ID
   # @param local [Boolean] if true, renders non-turbo form (default: true)
   # @param options [Hash] additional options passed to Superform
   def initialize(model, id: nil, local: true, **options)
-    # Generate ID from class name: Components::APIKeyForm -> "api_key_form"
-    # For anonymous classes (tests), default to "application_form"
-    auto_id = id || self.class.name&.demodulize&.underscore ||
-              "application_form"
+    # Auto-derive a form id. Prefer the form class name when it's
+    # specific (`Components::NameForm` -> "name_form";
+    # `Components::NamePropagateLifeformForm` ->
+    # "name_lifeform_propagate_form" — multiple Name-model forms
+    # need distinct ids). For post-move `Views::Controllers::*::Form`
+    # classes the class name yields just "form", so derive the id
+    # from the controller segment of the namespace instead
+    # (`Views::Controllers::Comments::Form` -> parent "Comments" ->
+    # "comment_form"). Ultimately fall back to "application_form"
+    # for anonymous test classes with no name and no model.
+    auto_id = id || derive_form_id(model) || "application_form"
     @turbo_stream = !local
     super(model, **options.merge(id: auto_id))
+  end
+
+  def derive_form_id(model)
+    views_id = views_controller_form_id
+    return views_id if views_id
+
+    # `Components::FooForm` (and other non-Views classes) — use the
+    # class name directly.
+    class_id = self.class.name&.demodulize&.underscore
+    return class_id if class_id && class_id != "form"
+
+    # Fallback (test classes with no name, etc.): derive from model.
+    model_class_form_id(model)
+  end
+
+  # For `Views::Controllers::*` classes, mirror the full controller
+  # path in the id so it telegraphs where the form lives in the
+  # directory tree. Each path segment is singularized; the class
+  # name is appended (or replaced with "form" if the class is the
+  # bare `Form`).
+  #
+  #   Views::Controllers::Account::APIKeys::Form
+  #     → account_api_key_form
+  #   Views::Controllers::Admin::Donations::ReviewForm
+  #     → admin_donation_review_form
+  #   Views::Controllers::Admin::BlockedIps::Manager
+  #     → admin_blocked_ip_manager
+  #   Views::Controllers::Names::Synonyms::Approve::Form
+  #     → name_synonym_approve_form
+  def views_controller_form_id
+    segments = views_controller_segments
+    return nil unless segments
+
+    path_parts = segments[2..-2].map { |s| s.underscore.singularize }
+    class_part = segments.last.underscore
+    suffix = class_part == "form" ? "form" : class_part
+    "#{path_parts.join("_")}_#{suffix}"
+  end
+
+  def views_controller_segments
+    segments = self.class.name&.split("::")
+    return nil unless segments && segments.length >= 4 &&
+                      segments[0] == "Views" &&
+                      segments[1] == "Controllers"
+
+    segments
+  end
+
+  def model_class_form_id(model)
+    return nil unless model
+
+    name = model.class.name&.demodulize&.underscore
+    name && "#{name}_form"
   end
 
   def around_template
@@ -113,7 +176,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Use register_value_helper for helpers that return values (not HTML)
   register_value_helper :in_admin_mode?
   register_value_helper :pluralize
-  register_value_helper :url_for
   register_value_helper :rank_as_string
   register_output_helper :help_note, mark_safe: true
 

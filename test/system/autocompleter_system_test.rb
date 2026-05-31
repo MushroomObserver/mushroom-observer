@@ -448,7 +448,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector("#species_list_observations_form")
 
     # The species_list autocompleter should work
-    field = find_field("species_list")
+    field = find_field("species_list[title]")
     field.click
     @browser.keyboard.type("query")
     assert_selector(".auto_complete", wait: 5)
@@ -456,7 +456,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     @browser.keyboard.type(:down, :tab)
 
     # Should have selected a species list
-    assert_field("species_list", with: /Query/i)
+    assert_field("species_list[title]", with: /Query/i)
   end
 
   # Verify editing selected value clears the has-id state

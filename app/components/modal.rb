@@ -33,6 +33,29 @@
 #   )) do |m|
 #     m.with_body { render(...) }
 #   end
+#
+# @example form-wrapped body + footer (form spans both — submit button
+#   in `.modal-footer` is naturally inside the form)
+#
+#   When set, `with_form_content` REPLACES `with_body` and `with_footer`.
+#   The caller renders a single component (typically an ApplicationForm
+#   subclass) that emits its own `<div class="modal-body">` and
+#   `<div class="modal-footer">` inside the form's yield, so the form
+#   tag wraps both:
+#
+#       <div class="modal-content">
+#         <div class="modal-header">...</div>
+#         <form ...>
+#           <div class="modal-body">...fields...</div>
+#           <div class="modal-footer">...buttons...</div>
+#         </form>
+#       </div>
+#
+#   render(Components::Modal.new(
+#     id: "modal_x", title: "Edit thing", user: @user
+#   )) do |m|
+#     m.with_form_content { render(Components::ThingForm.new(@thing)) }
+#   end
 class Components::Modal < Components::Base
   include Phlex::Slotable
 
@@ -58,12 +81,35 @@ class Components::Modal < Components::Base
   # `modal_<identifier>_body` convention).
   prop :title_id, _Nilable(String), default: nil
   prop :body_id, _Nilable(String), default: nil
+  # Stimulus controller wired to the modal root. Defaults to `modal`
+  # (the standard show/hide controller). Override for singleton layout
+  # modals with their own controllers (e.g. `confirm-modal` for the
+  # Turbo confirm dialog). Multiple controllers can be passed as a
+  # space-separated string.
+  prop :controller, String, default: "modal"
+  # Render the `.modal-header` div (close button + title). Set to
+  # false for headerless modals where the "title" element lives
+  # inside the body for Stimulus targeting (`ModalConfirm`) or where
+  # the modal has no user-visible title at all (`ModalProgressSpinner`).
+  # `aria-labelledby` is still emitted on the modal root; point it at
+  # the in-body element via `title_id:`.
+  prop :header, _Boolean, default: true
+  # Extra CSS class(es) appended to the `.modal-body` div, e.g.
+  # `"py-4"` for ModalConfirm or `"text-center"` for
+  # ModalProgressSpinner. Joined with the base `"modal-body"`.
+  prop :body_class, _Nilable(String), default: nil
 
   slot :title_content
   slot :body
   slot :footer
+  # When set, REPLACES body+footer slots. Caller renders a single
+  # component (typically a form) that emits its own `.modal-body` and
+  # `.modal-footer` divs, so a single `<form>` tag can wrap both —
+  # keeps the submit button (in `.modal-footer`) naturally inside the
+  # form. See the form-wrapped example in the class docstring.
+  slot :form_content
 
-  public :title_content_slot, :body_slot, :footer_slot
+  public :title_content_slot, :body_slot, :footer_slot, :form_content_slot
 
   def view_template(&block)
     yield(self) if block
@@ -74,9 +120,8 @@ class Components::Modal < Components::Base
         data: modal_data) do
       div(class: @dialog_class, role: "document") do
         div(class: "modal-content") do
-          render_header
-          render_body
-          render_footer
+          render_header if @header
+          render_content
         end
       end
     end
@@ -97,7 +142,7 @@ class Components::Modal < Components::Base
   end
 
   def modal_data
-    data = { controller: "modal" }
+    data = { controller: @controller }
     data[:modal_user_value] = @user.id if @user
     data.merge(@extra_data)
   end
@@ -135,10 +180,23 @@ class Components::Modal < Components::Base
     end
   end
 
+  def render_content
+    if form_content_slot
+      render(form_content_slot)
+    else
+      render_body
+      render_footer
+    end
+  end
+
   def render_body
     return unless body_slot
 
-    div(class: "modal-body", id: resolved_body_id) { render(body_slot) }
+    div(class: body_classes, id: resolved_body_id) { render(body_slot) }
+  end
+
+  def body_classes
+    @body_class ? "modal-body #{@body_class}" : "modal-body"
   end
 
   def render_footer

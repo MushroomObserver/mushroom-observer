@@ -28,17 +28,27 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def assert_create_species_list
     assert_template("new")
-    assert_template("species_lists/_form")
+    # See `assert_edit_species_list` below: `species_lists/_form` was
+    # folded into `Components::SpeciesListForm`. Phlex components don't
+    # show in `assert_template`; assert the form's root element.
+    assert_select("form#species_list_form", { count: 1 },
+                  "Expected SpeciesListForm to render")
   end
 
   def assert_edit_species_list
-    assert_template("edit")
-    assert_template("species_lists/_form")
+    # `edit.html.erb` and its child form partial are both Phlex now
+    # (`Views::Controllers::SpeciesLists::Edit` →
+    # `Components::SpeciesListForm`). Phlex views don't appear in
+    # `assert_template`'s rendered-list — use the layout's
+    # `<body class="species_lists__edit">` action marker instead.
+    assert_select("body.species_lists__edit")
+    assert_select("form#species_list_form", { count: 1 },
+                  "Expected SpeciesListForm to render")
   end
 
   def assert_project_checks(project_states)
     project_states.each do |id, state|
-      assert_checkbox_state("project_id_#{id}", state)
+      assert_checkbox_state("species_list_project_ids_#{id}", state)
     end
   end
 
@@ -187,8 +197,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # there's no banner for this project
     assert_page_title(:SPECIES_LISTS.l)
     spl = project.species_lists.first
-    assert_match(spl.title, @response.body)
-    assert_select("a[href*='species_lists/#{spl.id}?project=#{project.id}']")
+    assert_select(
+      "a[href*='species_lists/#{spl.id}?project=#{project.id}']",
+      text: /#{Regexp.escape(spl.title)}/
+    )
   end
 
   def test_index_for_project_with_no_lists
@@ -225,7 +237,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(rolf.login)
     get(:show, params: { id: list.id })
 
-    assert_template(:show)
+    assert_select("body.species_lists__show")
     assert_template("comments/_comments_for_object")
     assert_select(
       "form:match('action', ?)",
@@ -244,7 +256,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(list.user.login)
     get(:show, params: { id: list.id })
 
-    assert_template(:show)
+    assert_select("body.species_lists__show")
     assert_template("comments/_comments_for_object")
     assert_select(
       "form:match('action', ?)",
@@ -260,7 +272,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = spl.projects[0]
 
     get(:show, params: { id: spl.id, project: project.id })
-    assert_match(project.title, @response.body)
+    assert_select("#project_banner",
+                  text: /#{Regexp.escape(project.title)}/)
     assert_select("h1#title", /#{spl.title}/,
                   "H1 title element should exist and contain content")
   end
@@ -294,19 +307,22 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_obj_arrays_equal([], spl.projects)
 
+    proj1_re = /#{Regexp.escape(proj1.title)}/
+    proj2_re = /#{Regexp.escape(proj2.title)}/
+
     get(:show, params: { id: spl.id })
-    assert_no_match(proj1.title.t, @response.body)
-    assert_no_match(proj2.title.t, @response.body)
+    assert_select("#list_details", text: proj1_re, count: 0)
+    assert_select("#list_details", text: proj2_re, count: 0)
 
     proj1.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_match(proj1.title.t, @response.body)
-    assert_no_match(proj2.title.t, @response.body)
+    assert_select("#list_details", text: proj1_re)
+    assert_select("#list_details", text: proj2_re, count: 0)
 
     proj2.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_match(proj1.title.t, @response.body)
-    assert_match(proj2.title.t, @response.body)
+    assert_select("#list_details", text: proj1_re)
+    assert_select("#list_details", text: proj2_re)
   end
 
   def test_show_species_list_edit_links
@@ -348,7 +364,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:SpeciesList, order_by: "reverse_user")
     params = { q: @controller.q_param(query) }
     get(:index, params:)
-    assert_template(:index)
+    assert_select("body.species_lists__index")
 
     get(:show, params: params.merge(id: query.result_ids[0], flow: :next))
     assert_redirected_to(params.merge(action: :show, id: query.result_ids[1]))
@@ -392,7 +408,89 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:unknown_species_list)
     get(:new, params: { clone: spl.id })
     assert_response(:success)
-    assert_match(spl.where, @response.body)
+    # Clone pre-fills the place_name autocompleter with the spl's location
+    assert_select(
+      "input[name='species_list[place_name]'][value=?]", spl.where
+    )
+  end
+
+  # Cover `check_for_clone`: when create is posted with `clone_id`,
+  # all observations from the clone source are copied onto the new
+  # species list. (Pre-Phlex this was uncovered.)
+  def test_create_with_clone_id_copies_observations
+    source = species_lists(:unknown_species_list)
+    assert(source.observations.any?,
+           "Test needs a source species_list with observations")
+    login("rolf")
+    post(:create, params: {
+           clone_id: source.id,
+           species_list: {
+             title: "Clone target",
+             place_name: "Burbank, California, USA",
+             approved_where: "Burbank, California, USA",
+             "when(1i)" => "2024", "when(2i)" => "1", "when(3i)" => "1",
+             notes: ""
+           }
+         })
+    spl = SpeciesList.find_by(title: "Clone target")
+    assert_not_nil(spl, "Cloned species_list should be saved")
+    # check_for_clone copies the source's obs onto the new list
+    assert_equal(source.observations.to_a.sort_by(&:id),
+                 spl.observations.to_a.sort_by(&:id),
+                 "Cloned list should carry the source obs")
+  end
+
+  # Cover the dubious_where_reasons computation in validate_place_name:
+  # when the typed place_name doesn't match the form's approved_where
+  # AND the location_id isn't set yet, the controller runs
+  # `Location.dubious_name?` and re-renders the form with the warnings.
+  def test_create_with_dubious_place_name_renders_warning
+    login("rolf")
+    # A bare country with a typo is dubious. Omit `approved_where` so
+    # the comparison `@place_name != approved_where` triggers the
+    # dubious check.
+    post(:create, params: {
+           species_list: {
+             title: "Dubious place test",
+             place_name: "Buurbnak, California, USAA",
+             "when(1i)" => "2024", "when(2i)" => "1", "when(3i)" => "1",
+             notes: ""
+           }
+         })
+    # No save (validation re-renders the form).
+    assert_nil(SpeciesList.find_by(title: "Dubious place test"))
+    assert_response(:success)
+    # `@dubious_where_reasons` was populated and is now in the
+    # FormLocationFeedback component.
+    assert_select("#dubious_location_messages")
+  end
+
+  # Cover the `redirect_to(new_location_path(...))` branch in
+  # `update_redirect_and_flash_notices`: when a save succeeds but the
+  # place_name didn't resolve to an existing Location (location_id is
+  # still nil), the controller redirects to /locations/new so the
+  # user can create the missing Location.
+  def test_create_with_unknown_place_redirects_to_new_location
+    login("rolf")
+    novel = "Nowhere-In-Particular-#{SecureRandom.hex(4)}, USA"
+    # Pass `approved_where` matching place_name so the dubious check
+    # is skipped — exercises the "save succeeded but no Location"
+    # branch instead of the dubious branch.
+    post(:create, params: {
+           species_list: {
+             title: "Novel place test",
+             place_name: novel,
+             approved_where: novel,
+             "when(1i)" => "2024", "when(2i)" => "1", "when(3i)" => "1",
+             notes: ""
+           }
+         })
+    spl = SpeciesList.find_by(title: "Novel place test")
+    assert_not_nil(spl, "Species list should save with unresolved place")
+    assert_nil(spl.location_id,
+               "Test scenario requires unresolved location_id")
+    assert_redirected_to(new_location_path(where: novel,
+                                           set_species_list: spl.id))
   end
 
   # Test constructing species_lists in various ways.
@@ -462,11 +560,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
         title: "List with Project",
         "when(1i)" => "2025",
         "when(2i)" => "3",
-        "when(3i)" => "14"
-      },
-      project: rolf.projects_member.to_h do |obj|
-                 ["id_#{obj.id}", "1"]
-               end
+        "when(3i)" => "14",
+        project_ids: rolf.projects_member.map { |p| p.id.to_s }
+      }
     }
     login("rolf")
     post(:create, params: params)
@@ -484,19 +580,29 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal("rolf", spl.user.login)
     requires_user(:edit, { action: :show }, params)
     assert_edit_species_list
-    assert_form_action({ action: :update, id: spl.id,
-                         approved_where: "Burbank, California, USA" })
+    # Form action is now the bare resource path; `approved_where` is
+    # carried as a hidden field under the species_list namespace
+    # (post-Phlex conversion). See `Components::SpeciesListForm` and
+    # `species_lists_controller#validate_place_name`.
+    assert_form_action({ action: :update, id: spl.id })
+    assert_select(
+      "input[type='hidden'][name='species_list[approved_where]']" \
+      "[value='Burbank, California, USA']",
+      { count: 1 },
+      "Expected approved_where hidden field carrying the place_name"
+    )
   end
 
   def test_edit_with_projects
     spl = species_lists(:reused_list)
     count = spl.projects.count
     login(spl.user.login)
+    # `project_ids: [""]` matches what the form submits when every
+    # checkbox is unchecked — the sentinel hidden input ensures the
+    # key is present. The controller's `compact_blank` strips the
+    # empty value; the iterator then removes every member project.
     params = { id: spl.id,
-               project: spl.projects.to_h do |obj|
-                          ["id_#{obj.id}", "0"]
-                        end,
-               species_list: { title: spl.title } }
+               species_list: { title: spl.title, project_ids: [""] } }
     put(:update, params:)
     spl.reload
     assert(spl.projects.count < count)
@@ -524,7 +630,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:new)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :unchecked)
     post(:create,
-         params: { project: { "id_#{@proj1.id}" => "1" } })
+         params: { species_list: { project_ids: [@proj1.id.to_s] } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
@@ -535,7 +641,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:new)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
     post(:create,
-         params: { project: { "id_#{@proj1.id}" => "1" } })
+         params: { species_list: { project_ids: [@proj1.id.to_s] } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
     # should have different default if recently create list attached to project
@@ -564,10 +670,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
       :update,
       params: {
         id: @spl2.id,
-        species_list: { title: "" }, # causes failure
-        project: {
-          "id_#{@proj1.id}" => "1",
-          "id_#{@proj2.id}" => "0"
+        species_list: {
+          title: "", # causes failure
+          project_ids: [@proj1.id.to_s]
         }
       }
     )

@@ -2,16 +2,6 @@
 
 module Tabs
   module ChecklistsHelper
-    def checklist_show_title(user:, list:)
-      if user
-        :checklist_for_user_title.t(user: user.legal_name)
-      elsif list
-        :checklist_for_species_list_title.t(list: list.title)
-      else
-        :checklist_for_site_title.t
-      end
-    end
-
     def checklist_show_tabs(user:, list:)
       if user
         checklist_for_user_tabs(user)

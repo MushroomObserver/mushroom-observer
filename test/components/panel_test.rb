@@ -247,9 +247,9 @@ class PanelTest < ComponentTestCase
 
     # List group should be direct child of panel, not wrapped in panel-body
     assert_includes(html, "list-group")
-    assert_no_match(/<div class="panel-body">.*<ul class="list-group">/m, html)
-    # Panel should contain list-group directly
-    pattern = /<div class="panel panel-default">.*<ul class="list-group">/m
-    assert_match(pattern, html)
+    # ul.list-group should NOT be inside .panel-body
+    assert_no_html(html, ".panel-body ul.list-group")
+    # ul.list-group should be a (descendant) child of .panel.panel-default
+    assert_html(html, ".panel.panel-default > ul.list-group")
   end
 end

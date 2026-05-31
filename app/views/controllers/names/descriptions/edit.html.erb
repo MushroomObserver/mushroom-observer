@@ -4,7 +4,7 @@ add_context_nav(name_description_form_edit_tabs(description: @description,
                                                 user: @user))
 %>
 
-<%= render(Components::DescriptionForm.new(
+<%= render(Views::Controllers::Descriptions::Form.new(
              @description,
              licenses: @licenses,
              user: @user,

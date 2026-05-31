@@ -312,6 +312,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     title_subjects || :image.l
   end
 
+  # Page heading (rendered HTML — textile applied + author wrapping).
+  # User arg is ignored — images aggregate multiple obs's names, no
+  # single user preference applies.
+  def page_title(_user = nil)
+    format_name.t.small_author
+  end
+
+  # Plain-text title for the browser tab `<title>`. Mirrors
+  # `unique_text_name` but without the trailing "(<id>)" — the title
+  # helper prepends "IMAGE <id>:" so we'd otherwise duplicate the id.
+  def document_title
+    title_subjects(:text_name).presence || :image.l
+  end
+
   # How this image is refered to in the rss logs.
   def log_name
     "##{id || was || "?"}"

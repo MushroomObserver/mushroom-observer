@@ -1,6 +1,6 @@
 <%
 container_class(:wide)
-add_edit_title(@sequence.format_name, @sequence)
+add_edit_title(@sequence)
 add_context_nav(sequence_form_tabs(obj: @back_object))
 
 obs = @sequence.observation
@@ -10,7 +10,8 @@ obs = @sequence.observation
   <div class="col-xs-12 col-sm-7">
     <%= render(partial: "sequences/observation_title",
                locals: { observation: obs }) %>
-    <%= render(Components::SequenceForm.new(@sequence, back: @back)) %>
+    <%= render(Views::Controllers::Sequences::Form.new(@sequence,
+                                                       back: @back)) %>
 
     <div class="small">
       <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>

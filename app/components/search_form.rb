@@ -20,10 +20,10 @@ class Components::SearchForm < Components::ApplicationForm
 
   register_output_helper :search_bar_toggle
 
-  # Boolean select option styles
+  # Boolean select option styles. Rails-shape `[label, value]` pairs.
   BOOL_OPTIONS = {
-    nil_yes: [["", ""], ["true", "yes"]],
-    nil_boolean: [["", ""], ["true", "yes"], ["false", "no"]]
+    nil_yes: [["", ""], ["yes", "true"]],
+    nil_boolean: [["", ""], ["yes", "true"], ["no", "false"]]
   }.freeze
 
   # Additional wrapper options for search-specific fields
@@ -252,7 +252,9 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def render_select_misspellings(field_name:)
-    # Superform uses [value, label] order (opposite of Rails)
+    # Rails-shape `[label, value]`. Label == value here, so the
+    # ordering doesn't matter visually — listed as
+    # `[label, value]` for consistency with everything else.
     # Valid values from query_attr: [:no, :include, :only]
     options = [%w[no no], %w[include include], %w[only only]]
     select_field(field_name, options,
@@ -302,9 +304,9 @@ class Components::SearchForm < Components::ApplicationForm
   end
 
   def render_select_confidence_range(field_name:)
-    # Superform uses [value, label] - Vote.opinion_menu returns [label, value]
-    options = [[nil, ""]] +
-              Vote.opinion_menu.map { |label, value| [value, label] }
+    # `Vote.opinion_menu` already returns Rails-shape `[[label, value], ...]`
+    # — pass through to our SelectField wrapper as-is.
+    options = [["", nil]] + Vote.opinion_menu
     value, range_value = sorted_confidence_range(field_value(field_name))
 
     render(ApplicationForm::SelectRangeField.new(

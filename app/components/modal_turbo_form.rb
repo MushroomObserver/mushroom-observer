@@ -40,11 +40,23 @@ class Components::ModalTurboForm < Components::Base
   prop :form_locals, Hash, default: -> { {} }
   prop :form_class, _Nilable(Class), default: nil
 
-  # Returns the form component class for a given model.
-  # e.g., Comment -> Components::CommentForm
-  def self.form_component_class_for(model)
+  # Returns the form view/component class for a given model. Prefers
+  # the post-move `Views::Controllers::<Controller>::Form` location,
+  # using the caller's `controller_path` so namespaced controllers
+  # like `projects/members` map to `Views::Controllers::Projects::Members::Form`.
+  # Falls back to model-based derivation when no controller_path is
+  # given, then to the legacy `Components::<Model>Form`.
+  # See `.claude/rules/phlex_conversions.md` for the move rule.
+  def self.form_component_class_for(model, controller_path: nil)
+    if controller_path
+      klass = "Views::Controllers::#{controller_path.camelize}::Form".
+              safe_constantize
+      return klass if klass
+    end
     model_name = model.class.name.demodulize
-    "Components::#{model_name}Form".constantize
+    "Views::Controllers::#{model_name.tableize.camelize}::Form".
+      safe_constantize ||
+      "Components::#{model_name}Form".constantize
   end
 
   # Renders the form component for a model. Used here and by
@@ -52,12 +64,14 @@ class Components::ModalTurboForm < Components::Base
   # `ModalTurboForm` instance, so it calls this class method).
   #
   # @param view_context [ActionView::Base] view context from the
-  #   calling template (in ERB, `self`)
+  #   calling template (in ERB, `self`; in Phlex, the component)
   # @param model [ActiveRecord::Base] the model instance for the form
   # @param form_locals [Hash] additional params passed to the form
   # @return [String] the rendered HTML
   def self.render_form(view_context, model:, form_locals: {})
-    component_class = form_component_class_for(model)
+    component_class = form_component_class_for(
+      model, controller_path: view_context.try(:controller_path)
+    )
     params = form_locals.except(:model).merge(local: false)
     view_context.render(component_class.new(model, **params))
   end
@@ -76,11 +90,25 @@ class Components::ModalTurboForm < Components::Base
              title_id: "#{modal_id}_header",
              body_id: "#{modal_id}_body"
            )) do |m|
-      m.with_body { render_body_contents }
+      if form_owns_modal_sections?
+        m.with_form_content { render_form_component }
+      else
+        m.with_body { render_body_contents }
+      end
     end
   end
 
   private
+
+  # A form class can opt into rendering its own `.modal-body` and
+  # `.modal-footer` divs (so the `<form>` spans both — submit in the
+  # footer is naturally inside the form) by declaring a class method
+  # `owns_modal_sections?` returning truthy. This auto-detection
+  # keeps the controller call site unchanged when migrating a form.
+  def form_owns_modal_sections?
+    @form_class.respond_to?(:owns_modal_sections?) &&
+      @form_class.owns_modal_sections?
+  end
 
   def modal_id
     "modal_#{@identifier}"
@@ -101,10 +129,18 @@ class Components::ModalTurboForm < Components::Base
   def render_form_component
     if @form_class
       params = merged_locals.except(:model).merge(local: false)
+      params[:modal_ids] = modal_ids if form_owns_modal_sections?
       render(@form_class.new(@model, **params))
     else
       self.class.render_form(self, model: @model, form_locals: merged_locals)
     end
+  end
+
+  # When the form owns its own `.modal-body` / `.modal-footer` divs,
+  # it needs the id for `.modal-body` (so external turbo-streams can
+  # target it) and the id of the flash slot inside the body.
+  def modal_ids
+    { body: "#{modal_id}_body", flash: "#{modal_id}_flash" }
   end
 
   def merged_locals

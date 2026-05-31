@@ -11,7 +11,9 @@ class FormLocationFeedbackTest < ComponentTestCase
   def test_renders_warning_alert_with_reasons
     html = render_feedback(["Location not found".html_safe])
 
-    assert_html(html, ".alert-warning#dubious_location_messages.my-3")
+    # `#dubious_location_messages` is the durable identifier; the
+    # `.alert-warning` / `.my-3` Bootstrap classes are pure paint.
+    assert_html(html, "#dubious_location_messages")
     assert_html(html, "body", text: "Location not found")
     assert_html(html, ".help-note")
     # Help note should include the button name
@@ -30,8 +32,8 @@ class FormLocationFeedbackTest < ComponentTestCase
   def test_renders_html_entities_without_double_escaping
     html = render_feedback(["Unknown country &#8216;Test&#8217;".html_safe])
 
-    assert_match(/&#8216;/, html)
-    assert_no_match(/&amp;#8216;/, html)
+    assert_includes(html, "&#8216;")
+    assert_not_includes(html, "&amp;#8216;")
   end
 
   def test_accepts_symbol_button_parameter
@@ -40,8 +42,8 @@ class FormLocationFeedbackTest < ComponentTestCase
                     button: :CREATE
                   ))
 
-    assert_html(html, ".alert-warning#dubious_location_messages")
-    assert_match(/#{:CREATE.l}/, html)
+    assert_html(html, ".alert-warning#dubious_location_messages",
+                text: :CREATE.l)
   end
 
   private

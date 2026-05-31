@@ -52,11 +52,13 @@ module ObservationsController::EditAndUpdate
                    flash_error_and_goto_index(Observation, params[:id])
   end
 
+  # Edit-mode: just build the union of projects to display. The
+  # form reads checkedness off `obs.project_ids` directly (no
+  # separate `@project_checks` state needed post-array-shape).
   def init_project_vars_for_edit(obs)
     init_project_vars
     obs.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
-      @project_checks[proj.id] = true
     end
   end
 
@@ -64,7 +66,6 @@ module ObservationsController::EditAndUpdate
     init_list_vars
     obs.species_lists.each do |list|
       @lists << list unless @lists.include?(list)
-      @list_checks[list.id] = true
     end
   end
 

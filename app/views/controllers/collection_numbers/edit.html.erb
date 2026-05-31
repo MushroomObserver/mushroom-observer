@@ -1,6 +1,6 @@
 <%
 container_class(:full)
-add_edit_title(@collection_number.format_name.t, @collection_number)
+add_edit_title(@collection_number)
 add_context_nav(collection_number_form_edit_tabs(
   back: @back, c_n: @collection_number, obj: @back_object
 ))
@@ -8,7 +8,7 @@ add_context_nav(collection_number_form_edit_tabs(
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(Components::CollectionNumberForm.new(
+    <%= render(Views::Controllers::CollectionNumbers::Form.new(
           @collection_number, back: @back
         )) %>
   </div>

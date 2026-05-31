@@ -5,9 +5,20 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Provides the same interface as Superform::Field for field components.
   # Unlike Superform fields, these can be created and rendered many times.
   #
-  # @example
+  # @example Hand-built (still works; equivalent to the helper below)
   #   proxy = FieldProxy.new("observation[good_image][123]", :notes, "text")
   #   render(TextField.new(proxy, wrapper_options: {}))
+  #
+  # @example Via the form's field helpers with a String `field_name`
+  #   text_field("observation[good_image][123][notes]", value: "text")
+  #   # Internally: FieldProxy.new(nil, "observation[...]", "text").text(...)
+  #
+  # Mirrors `Field`'s factory-method surface (`text`, `textarea`,
+  # `checkbox`, `radio`, `select`, `autocompleter`, `date`, `file`,
+  # `read_only`, `static`) so the form's `*_field` helpers can dispatch
+  # Symbol → `field(name)` (model-bound) and String → `FieldProxy.new(...)`
+  # (raw `name=` attribute) through one code path. Same precedent
+  # `hidden_field` has established; this generalizes it.
   class FieldProxy
     attr_reader :key, :value, :dom
 
@@ -26,6 +37,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     def parent
       nil
     end
+
+    include FieldFactoryMethods
 
     # Factory method to create a FieldProxy for image fields.
     # @param type [Symbol] :good_image or :image
@@ -47,9 +60,19 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
 
       def id
-        return @field_key.to_s if @namespace.blank?
-
-        "#{@namespace}_#{@field_key}".tr("[]", "_").gsub(/__+/, "_")
+        # When `field_key` is a String containing the full raw `name=`
+        # attribute (with `[...]` segments), we still need to normalize
+        # it to a valid HTML id — otherwise a name like
+        # `"reviewed[385495444]"` would produce an `id` with literal
+        # brackets, and Capybara / `getElementById` lookups would fail.
+        # Applies the same `[]`→`_` normalization the namespaced case
+        # uses, then strips trailing `_` (from a trailing `]`).
+        raw = if @namespace.blank?
+                @field_key.to_s
+              else
+                "#{@namespace}_#{@field_key}"
+              end
+        raw.tr("[]", "_").gsub(/__+/, "_").chomp("_")
       end
 
       def name

@@ -9,7 +9,7 @@ gem("sorted_set")
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-# gem("rails", "~> 7.2.2.1")
+# gem("rails", "~> 7.0")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
 # NOTE: Remember to require the classes also, in config/application.rb
@@ -19,19 +19,19 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable", "~> 7.2.2.1")
-  # gem("actionmailbox", "~> 7.2.2.1")
-  gem("actionmailer", "~> 7.2.2.1")
-  gem("actionpack", "~> 7.2.2.1")
-  # gem("actiontext", "~> 7.2.2.1")
-  gem("actionview", "~> 7.2.2.1")
-  gem("activejob", "~> 7.2.2.1")
-  gem("activemodel", "~> 7.2.2.1")
-  gem("activerecord", "~> 7.2.2.2")
-  # gem("activestorage", "~> 7.2.2.1")
-  gem("activesupport", "~> 7.2.2.1")
+  gem("actioncable", "~> 7.0")
+  # gem("actionmailbox", "~> 7.0")
+  gem("actionmailer", "~> 7.0")
+  gem("actionpack", "~> 7.0")
+  # gem("actiontext", "~> 7.0")
+  gem("actionview", "~> 7.0")
+  gem("activejob", "~> 7.0")
+  gem("activemodel", "~> 7.0")
+  gem("activerecord", "~> 7.0")
+  # gem("activestorage", "~> 7.0")
+  gem("activesupport", "~> 7.0")
   gem("bundler")
-  gem("railties", "~> 7.2.2.1")
+  gem("railties", "~> 7.0")
 end
 
 # Use trilogy as db connector

@@ -65,7 +65,11 @@ module Account
       assert_input_value(:user_image_size, "medium")
       assert_input_value(:user_has_images, "")
       assert_input_value(:user_has_specimen, "")
-      assert_input_value(:user_lichen, nil)
+      # Phlex's `select_field` marks the empty-value "filter off" option
+      # as selected when `content_filter[:lichen]` is nil (post-conversion).
+      # ERB's pre-conversion output left the option unmarked. Visually
+      # identical (browsers default to first option either way).
+      assert_input_value(:user_lichen, "")
       assert_input_value(:user_region, "")
       assert_input_value(:user_clade, "")
 
@@ -253,7 +257,7 @@ module Account
     def test_has_bulk_license_updater
       login
       get(:edit)
-      assert_match(images_edit_licenses_path, response.body)
+      assert_select("a[href='#{images_edit_licenses_path}']")
     end
 
     def test_no_email_hooks
@@ -271,13 +275,12 @@ module Account
         :general_commercial,
         :general_question
       ].each do |type|
-        assert_request(
-          action: "no_email",
-          params: { id: rolf.id, type: type },
-          require_login: true,
-          require_user: :index,
-          result: "no_email"
-        )
+        login("rolf")
+        get(:no_email, params: { id: rolf.id, type: type })
+        # Phlex view, so `assert_template` would no-op; use a body
+        # marker class instead.
+        assert_response(:success)
+        assert_select("body.preferences__no_email")
         assert_not(rolf.reload.send(:"email_#{type}"))
       end
     end

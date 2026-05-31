@@ -156,6 +156,99 @@ class ApplicationFormHelperParityTest < ComponentTestCase
     # wrap is justified: label area left, create button right.
     assert_html(html, "div.d-flex.justify-content-between")
   end
+
+  # --- String field_name: raw `name=` (no model binding) -----------------
+  #
+  # Each `*_field` helper accepts the same Symbol/String pair as
+  # `hidden_field`: Symbol → bound to the form's model; String → raw
+  # HTML `name` attribute, value carried via the `value:` option.
+  # Lets non-bound fields (operation state, nested namespaces) go
+  # through the same helpers as model attributes.
+
+  def test_text_field_accepts_string_name
+    html = render(TextFieldStringNameForm.new(Comment.new, action: "/t"))
+
+    assert_html(html, "input[type='text'][name='member[lat]'][value='39.2']")
+  end
+
+  def test_textarea_field_accepts_string_name
+    html = render(
+      TextareaFieldStringNameForm.new(Comment.new, action: "/t")
+    )
+
+    assert_html(html, "textarea[name='member[notes][Cap]']", text: "soft")
+  end
+
+  def test_checkbox_field_accepts_string_name
+    html = render(
+      CheckboxFieldStringNameForm.new(Comment.new, action: "/t")
+    )
+
+    assert_html(html,
+                "input[type='checkbox'][name='member[specimen]']" \
+                "[value='1'][checked]")
+  end
+
+  def test_select_field_accepts_string_name
+    html = render(
+      SelectFieldStringNameForm.new(Comment.new, action: "/t")
+    )
+
+    assert_html(html, "select[name='member[value]']")
+    assert_html(html, "select[name='member[value]'] option[value='2']",
+                text: "Two")
+  end
+
+  def test_autocompleter_field_accepts_string_name_textarea
+    html = render(
+      AutocompleterFieldStringNameForm.new(Comment.new, action: "/t")
+    )
+
+    assert_html(html, "textarea[name='list[members]']", text: "alpha")
+    assert_html(html,
+                "div.autocompleter[data-controller='autocompleter--name']")
+    # Hidden-id input must be derived correctly from the namespaced
+    # String name — its `name` is `<namespace>[<key>_id]`, not
+    # `<namespace>[<key>]` or anything else. (Earlier
+    # implementations used `field.dom.name.sub(/\[#{field.key}\]$/, …)`
+    # which silently fell through when `field.key` was a String
+    # containing brackets, leaving the hidden input with the same
+    # name as the visible input.)
+    assert_html(html,
+                "input[type='hidden'][name='list[members_id]']" \
+                "[id='list_members_id']")
+  end
+
+  # --- Symbol + explicit value: overrides model attribute ---------------
+  #
+  # Matches Rails ERB's `f.text_field :foo, value: "override"` —
+  # explicit `value:` wins over the model. Routes the field through
+  # `FieldProxy` with the Superform-namespaced name so the override
+  # works for radio/select/checkbox-collection mode too (those drive
+  # selection from the field's value, not from a per-input attribute).
+
+  def test_text_field_symbol_with_value_overrides_model
+    # Comment has `summary` attribute. Model gives "from-model";
+    # caller passes `value: "from-caller"` — explicit wins.
+    html = render(TextFieldSymbolOverrideForm.new(
+                    Comment.new(summary: "from-model"), action: "/t"
+                  ))
+
+    assert_html(html, "input[name='comment[summary]'][value='from-caller']")
+  end
+
+  def test_radio_field_symbol_with_value_selects_non_model_attribute
+    # Comment has no `target_id` attribute. With Symbol path and
+    # explicit `value: 2`, the option whose value is "2" pre-selects.
+    html = render(RadioFieldSymbolOverrideForm.new(Comment.new, action: "/t"))
+
+    assert_html(html,
+                "input[type='radio'][name='comment[target_id]']" \
+                "[value='2'][checked]")
+    assert_html(html,
+                "input[type='radio'][name='comment[target_id]']" \
+                "[value='1']:not([checked])")
+  end
 end
 
 # --- Test form classes -------------------------------------------------
@@ -251,6 +344,69 @@ class AutocompleterCreateForm < Components::ApplicationForm
                create_text: "Create new",
                wrapper_options: { label: "Name" }
              ))
+    end
+  end
+end
+
+# String-`field_name` form fixtures — each helper accepts a raw HTML
+# `name=` (e.g. nested non-model namespaces like `member[lat]`,
+# `list[members]`) just like `hidden_field` already does.
+
+class TextFieldStringNameForm < Components::ApplicationForm
+  def view_template
+    super { text_field("member[lat]", value: "39.2", label: "Lat:") }
+  end
+end
+
+class TextareaFieldStringNameForm < Components::ApplicationForm
+  def view_template
+    super { textarea_field("member[notes][Cap]", value: "soft", rows: 1) }
+  end
+end
+
+class CheckboxFieldStringNameForm < Components::ApplicationForm
+  def view_template
+    super do
+      checkbox_field("member[specimen]", value: "1", checked: true,
+                                         label: "Specimen?")
+    end
+  end
+end
+
+class SelectFieldStringNameForm < Components::ApplicationForm
+  def view_template
+    super do
+      select_field("member[value]",
+                   [["One", 1], ["Two", 2], ["Three", 3]],
+                   label: "Confidence:")
+    end
+  end
+end
+
+class AutocompleterFieldStringNameForm < Components::ApplicationForm
+  def view_template
+    super do
+      autocompleter_field("list[members]", type: :name, textarea: true,
+                                           value: "alpha",
+                                           label: "Names:")
+    end
+  end
+end
+
+# Symbol + explicit value: form fixtures — caller-supplied `value:`
+# overrides whatever the form's model attribute would produce.
+
+class TextFieldSymbolOverrideForm < Components::ApplicationForm
+  def view_template
+    super { text_field(:summary, value: "from-caller", label: "Summary:") }
+  end
+end
+
+class RadioFieldSymbolOverrideForm < Components::ApplicationForm
+  def view_template
+    super do
+      radio_field(:target_id, [1, "One"], [2, "Two"], value: 2,
+                                                      label: "Target:")
     end
   end
 end

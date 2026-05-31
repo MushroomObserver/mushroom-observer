@@ -38,6 +38,22 @@ module Tabs
                        edit_project_path(project.id)).tab
     end
 
+    def edit_project_alias_tab(project_id, name, id)
+      InternalLink::Model.new(
+        name, ProjectAlias,
+        edit_project_alias_path(project_id:, id:),
+        alt_title: :EDIT.t
+      ).tab
+    end
+
+    def new_project_alias_tab(project_id, target_id, target_type)
+      InternalLink::Model.new(
+        :ADD.t, ProjectAlias,
+        new_project_alias_path(project_id:, target_id:, target_type:),
+        html_options: { class: "btn btn-default" }
+      ).tab
+    end
+
     def projects_for_user_tab(user)
       InternalLink.new(
         :app_your_projects.l, projects_path(member: user.id)
@@ -56,27 +72,12 @@ module Tabs
 
     def add_project_banner(project)
       content_for(:project_banner) do
-        render(Components::ProjectBanner.new(
+        render(Views::Controllers::Projects::Banner.new(
                  project: project,
                  user: User.current,
                  current_tab: active_project_tab
                ))
       end
-    end
-
-    def violations_button(project)
-      return unless project.constraints?
-
-      violations_count = project.count_violations
-      btn_type = if violations_count.positive?
-                   "btn-warning"
-                 else
-                   "btn-default"
-                 end
-      classes = "btn btn-lg #{btn_type} my-2 mr-2"
-      link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
-              project_violations_path(project_id: project.id),
-              { class: classes })
     end
 
     def project_species_list_buttons(list, query)
@@ -89,24 +90,30 @@ module Tabs
        project_species_list_images_button(query)]
     end
 
-    def project_button_args
-      { class: "btn-lg my-3 mr-3" }
+    # Shared button shape for the species-list / observations buttons row
+    # rendered above an observation listing. Tabs::ProjectsHelper is the
+    # last surviving caller of `Components::CrudButton::Get` in btn-frame
+    # text-link mode (the `button_link` helper used to wrap this), so the
+    # styling lives here rather than as a CrudButton default.
+    def project_button(name, path)
+      render(Components::CrudButton::Get.new(
+               name: name,
+               target: path,
+               btn: "btn btn-default",
+               class: "btn-lg my-3 mr-3"
+             ))
     end
 
     def project_species_list_map_button(query)
-      button_link(:MAP.l, add_q_param(map_observations_path, query),
-                  **project_button_args)
+      project_button(:MAP.l, add_q_param(map_observations_path, query))
     end
 
     def project_species_list_observations_button(query)
-      button_link(:OBSERVATIONS.l, add_q_param(observations_path, query),
-                  **project_button_args)
+      project_button(:OBSERVATIONS.l, add_q_param(observations_path, query))
     end
 
     def project_species_list_names_button(list)
-      button_link(:NAMES.l,
-                  checklist_path(species_list_id: list.id),
-                  **project_button_args)
+      project_button(:NAMES.l, checklist_path(species_list_id: list.id))
     end
 
     def project_species_list_locations_button(query)
@@ -115,7 +122,7 @@ module Tabs
       locations_url = InternalLink::RelatedQuery.new(
         Location, :Observation, query, controller
       ).url
-      button_link(:LOCATIONS.l, locations_url, **project_button_args)
+      project_button(:LOCATIONS.l, locations_url)
     end
 
     def project_species_list_images_button(query)
@@ -124,7 +131,7 @@ module Tabs
       images_url = InternalLink::RelatedQuery.new(
         Image, :Observation, query, controller
       ).url
-      button_link(:IMAGES.l, images_url, **project_button_args)
+      project_button(:IMAGES.l, images_url)
     end
 
     def project_observation_buttons(project, query)
@@ -132,16 +139,14 @@ module Tabs
 
       _img_name, img_link, = related_images_tab(:Observation, query)
       buttons = [
-        button_link(:MAP.t, add_q_param(map_observations_path, query),
-                    **project_button_args),
-        button_link(:IMAGES.l, img_link, **project_button_args),
-        button_link(:DOWNLOAD.l,
-                    add_q_param(new_observations_download_path, query),
-                    **project_button_args)
+        project_button(:MAP.t, add_q_param(map_observations_path, query)),
+        project_button(:IMAGES.l, img_link),
+        project_button(:DOWNLOAD.l,
+                       add_q_param(new_observations_download_path, query))
       ]
       if project.field_slip_prefix
-        buttons << button_link(:FIELD_SLIPS.t, field_slips_path(project:),
-                               **project_button_args)
+        buttons << project_button(:FIELD_SLIPS.t,
+                                  field_slips_path(project:))
       end
 
       # Download Observations

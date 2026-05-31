@@ -3,7 +3,7 @@ add_page_title(:email_name_change_request_title.t)
 add_context_nav(email_name_change_request_tabs(name: @name))
 %>
 
-<%= render(Components::NameChangeRequestForm.new(
+<%= render(Views::Controllers::Admin::Emails::NameChangeRequests::Form.new(
       FormObject::EmailRequest.new,
       name: @name,
       new_name_with_icn_id: @new_name_with_icn_id,

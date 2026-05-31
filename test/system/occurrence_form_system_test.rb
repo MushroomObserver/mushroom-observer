@@ -19,9 +19,10 @@ class OccurrenceFormSystemTest < ApplicationSystemTestCase
 
     # Check Include for a recent observation. The Phlex create form
     # namespaces the field as `occurrence[observation_ids][]` (via
-    # `checkbox_field(:observation_ids)`). OccurrenceResolveForm
-    # emits hidden fields with the same name so its Add All submission
-    # goes through the same controller param path (#4284).
+    # `checkbox_field(:observation_ids)`).
+    # `Views::Controllers::Occurrences::Projects::Form` emits hidden
+    # fields with the same name so its Add All submission goes through
+    # the same controller param path (#4284).
     checkboxes = all(
       "input[name='occurrence[observation_ids][]'][type='checkbox']"
     )

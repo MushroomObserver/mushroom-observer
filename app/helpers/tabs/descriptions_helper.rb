@@ -8,8 +8,8 @@ module Tabs
       type = desc.parent.type_tag
       admin = user_is_admin?(user, desc)
       [
-        user_writer?(user, desc) ? edit_button(target: desc, icon: :edit) : nil,
-        admin ? destroy_button(target: desc, icon: :delete) : nil,
+        user_writer?(user, desc) ? edit_button(target: desc, btn: nil) : nil,
+        admin ? destroy_button(target: desc, btn: nil) : nil,
         icon_link_to(*clone_description_tab(desc, type)),
         icon_link_to(*move_description_tab(desc, type, admin)),
         icon_link_to(*merge_description_tab(desc, type, admin)),

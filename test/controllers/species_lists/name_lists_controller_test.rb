@@ -16,12 +16,14 @@ module SpeciesLists
       get(:new)
 
       params = {
-        results: [
-          "Amanita baccata|sensu Borealis*",
-          "Coprinus comatus*",
-          "Fungi*",
-          "Lactarius alpigenes"
-        ].join("\n")
+        name_lister: {
+          results: [
+            "Amanita baccata|sensu Borealis*",
+            "Coprinus comatus*",
+            "Fungi*",
+            "Lactarius alpigenes"
+          ].join("\n")
+        }
       }
 
       post(:create,
@@ -51,12 +53,17 @@ module SpeciesLists
 
       post(:create, params: { commit: "bogus" })
       assert_flash_error
-      assert_template("new")
+      # The Phlex `new.rb` re-renders on a bogus commit — assert via
+      # the form id since `assert_template` doesn't see Phlex views.
+      assert_select("form#name_lister_form")
     end
 
     def assert_create_species_list
-      assert_template("species_lists/new")
-      assert_template("species_lists/_form")
+      # `species_lists/new.html.erb` is now Phlex (see #4389) — Phlex
+      # views don't show up in `assert_template`. The form has a
+      # unique `#species_list_form` id; that's the action marker.
+      assert_select("form#species_list_form", { count: 1 },
+                    "Expected SpeciesListForm to render")
     end
   end
 end

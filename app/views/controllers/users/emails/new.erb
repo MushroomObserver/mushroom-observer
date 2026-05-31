@@ -1,6 +1,6 @@
 <% add_page_title(:ask_user_question_title.t(user: @target.legal_name)) %>
 
-<%= render(Components::UserQuestionForm.new(
+<%= render(Views::Controllers::Users::Emails::Form.new(
       target: @target,
       local: true
     )) %>

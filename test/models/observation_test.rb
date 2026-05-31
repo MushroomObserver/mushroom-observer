@@ -146,6 +146,38 @@ class ObservationTest < UnitTestCase
     assert_equal(true, old_2nd_choice.favorite)
   end
 
+  def test_clean_votes_destroys_other_users_votes_when_name_changes
+    # `NamingConsensus#clean_votes` is called by NamingsController#update
+    # when a user renames a naming — votes by anyone else become stale
+    # (they voted on a different identification) so we destroy them,
+    # but preserve the editor's own vote.
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+    consensus = Observation::NamingConsensus.new(obs)
+    user_ids = naming.votes.map(&:user_id)
+    assert_includes(user_ids, rolf.id, "fixture: rolf voted")
+    assert_includes(user_ids, mary.id, "fixture: mary voted")
+
+    consensus.clean_votes(naming, names(:agaricus_campestris), rolf)
+
+    remaining = naming.votes.reload.map(&:user_id)
+    assert_includes(remaining, rolf.id, "editor's vote preserved")
+    assert_not_includes(remaining, mary.id, "other user's vote destroyed")
+  end
+
+  def test_clean_votes_noop_when_name_unchanged
+    # No-op early return when the new name matches the current one.
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+    consensus = Observation::NamingConsensus.new(obs)
+    before = naming.votes.count
+
+    consensus.clean_votes(naming, naming.name, rolf)
+
+    assert_equal(before, naming.votes.reload.count,
+                 "no votes destroyed when name didn't change")
+  end
+
   # Prove that when all an Observation's Namings are deprecated,
   # calc_consensus returns the synonym of the consensus with the highest vote.
   def test_calc_consensus_all_namings_deprecated

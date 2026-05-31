@@ -221,10 +221,30 @@ module Header
       end
     end
 
+    # Space-separated RssLog type tag list (e.g. "species_list project").
+    # Looks each tag up in the canonical all-caps plural translation
+    # (`SPECIES_LISTS`, `PROJECTS`, etc.) by pluralizing (lowercase)
+    # then upcasing — the reverse order leaves a trailing lowercase
+    # `s` (`SPECIES_LISTs`) since ActiveSupport's Inflector adds `s`
+    # in lowercase regardless of input case. `all` and `none` are
+    # sentinels (no plural form) — use `:ALL` / `:NONE` directly.
+    # The `none` sentinel arises when the controller sanitizes
+    # invalid type tags down to `"none"` (see RssLogsController).
+    #
+    # Was `val.titleize.split.join(", ")` which split "Species List
+    # Project" into four comma-separated tokens.
+    SENTINEL_TYPE_TAGS = { "all" => :ALL, "none" => :NONE }.freeze
+
+    def type_tags_to_label(val)
+      val.split.map do |tag|
+        (SENTINEL_TYPE_TAGS[tag] || tag.pluralize.upcase.to_sym).t
+      end.join(", ")
+    end
+
     # For values that aren't ids, just join and maybe truncate
     def param_val_itself(key, val, truncate)
-      if key == :type # lowercase strings joined by spaces
-        string = val.titleize.split.join(", ")
+      if key == :type
+        string = type_tags_to_label(val)
       elsif val.is_a?(Array)
         string = truncate ? val.first(CAPTION_TRUNCATE) : val
         string = string.join(", ")

@@ -1,58 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>The page you were looking for doesn't exist (404)</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found &middot; Mushroom Observer</title>
+<style>
+  /* Amanita theme palette, hard-coded since static pages can't @import SCSS. */
+  :root {
+    --bg: #383138;
+    --text: #cdcec9;
+    --heading: #ebcc79;
+    --link: #aa9a83;
+    --link-hover: #ebe4de;
+    --muted: #aa9a83;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
   body {
-    background-color: #EFEFEF;
-    color: #2E2F30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .container {
+    max-width: 720px;
+    width: 100%;
     text-align: center;
-    font-family: arial, sans-serif;
   }
-
-  div.dialog {
-    width: 25em;
-    margin: 4em auto 0 auto;
-    border: 1px solid #CCC;
-    border-right-color: #999;
-    border-left-color: #999;
-    border-bottom-color: #BBB;
-    border-top: #B00100 solid 4px;
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    background-color: white;
-    padding: 7px 4em 0 4em;
+  .logo {
+    max-width: 320px;
+    width: 80%;
+    height: auto;
+    margin: 0 auto 2rem;
+    display: block;
   }
-
   h1 {
-    font-size: 100%;
-    color: #730E15;
-    line-height: 1.5em;
+    color: var(--heading);
+    font-size: 2rem;
+    margin: 0 0 1.5rem;
+    font-weight: 400;
   }
-
-  body > p {
-    width: 33em;
-    margin: 0 auto 1em;
-    padding: 1em 0;
-    background-color: #F7F7F7;
-    border: 1px solid #CCC;
-    border-right-color: #999;
-    border-bottom-color: #999;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-top-color: #DADADA;
-    color: #666;
-    box-shadow:0 3px 8px rgba(50, 50, 50, 0.17);
+  p {
+    font-size: 1.125rem;
+    margin: 0 0 1rem;
   }
-  </style>
+  a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  a:hover { color: var(--link-hover); }
+  @media (min-width: 720px) {
+    h1 { font-size: 2.5rem; }
+    .logo { max-width: 400px; }
+  }
+</style>
 </head>
-
 <body>
-  <!-- This file lives in public/404.html -->
-  <div class="dialog">
-    <h1>The page you were looking for doesn't exist.</h1>
-    <p>You may have mistyped the address or the page may have moved.</p>
+  <div class="container">
+    <img class="logo" src="/MO-Full-Logo-Dark-400.png" alt="Mushroom Observer">
+    <h1>We can't find that page</h1>
+    <p>
+      The URL may be mistyped, or the content may have been moved or deleted.
+    </p>
+    <p>
+      Try going back, or start from the <a href="/">home page</a>.
+    </p>
   </div>
-  <p>If you are the application owner check the logs for more information.</p>
 </body>
 </html>

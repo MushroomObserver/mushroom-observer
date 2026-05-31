@@ -33,12 +33,16 @@ class AutologinIntegrationTest < IntegrationTestCase
     sess.cookies["mo_user"] = cookies["mo_user"]
     sess.get("/account/preferences/edit")
     if user
-      sess.assert_match("account/preferences/edit", sess.response.body)
-      sess.assert_no_match("account/login/new", sess.response.body)
+      # Autologin succeeded — preferences-edit form is rendered.
+      # form_with model: @user, url: account_preferences_path posts to
+      # /account/preferences (PATCH via _method hidden field).
+      sess.assert_select("form[action='/account/preferences']")
+      sess.assert_select("#account_login_form", count: 0)
       assert_users_equal(user, sess.assigns(:user))
     else
-      sess.assert_no_match("account/preferences/edit", sess.response.body)
-      sess.assert_match("account/login/new", sess.response.body)
+      # No autologin — login form is rendered instead.
+      sess.assert_select("form[action='/account/preferences']", count: 0)
+      sess.assert_select("#account_login_form")
     end
   end
 end

@@ -209,9 +209,10 @@ class LocationsController < ApplicationController
     init_caller_ivars_for_new
 
     # Render a blank form.
-    user_format = Location.user_format(@user, @display_name)
     if @display_name
-      @dubious_where_reasons = Location.dubious_name?(user_format, true)
+      @dubious_where_reasons = Location.dubious_reasons_for(
+        user: @user, place_name: @display_name
+      )
     end
     @location = Location.new
 
@@ -240,7 +241,7 @@ class LocationsController < ApplicationController
 
     # Need to create location.
     else
-      done = create_location_ivar_and_save(done, db_name)
+      done = create_location_ivar_and_save(done)
     end
 
     # If done, update any observations at @display_name,
@@ -278,7 +279,7 @@ class LocationsController < ApplicationController
       update_location_merge(merge)
     else
       email_admin_location_change if nontrivial_location_change?
-      update_location_change(db_name)
+      update_location_change
     end
   end
 
@@ -366,15 +367,14 @@ class LocationsController < ApplicationController
     @set_herbarium    = params[:set_herbarium]
   end
 
-  def create_location_ivar_and_save(done, db_name)
+  def create_location_ivar_and_save(done)
     @location = Location.new(permitted_location_params)
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
-    @dubious_where_reasons = []
-    if @display_name != @approved_name
-      @dubious_where_reasons = Location.dubious_name?(db_name, true)
-    end
+    @dubious_where_reasons = Location.dubious_reasons_for(
+      user: @user, place_name: @display_name, approved: @approved_name
+    )
 
     if @dubious_where_reasons.empty?
       if @location.save
@@ -434,17 +434,17 @@ class LocationsController < ApplicationController
   end
 
   # Just change this location in place.
-  def update_location_change(db_name)
+  def update_location_change
     @dubious_where_reasons = []
     @location.notes = params[:location][:notes].to_s.strip
     @location.locked = params[:location][:locked] == "1" if in_admin_mode?
-    determine_and_check_location(db_name) if !@location.locked || in_admin_mode?
+    determine_and_check_location if !@location.locked || in_admin_mode?
     return render_edit unless @dubious_where_reasons.empty?
 
     save_flash_and_redirect_or_render!
   end
 
-  def determine_and_check_location(db_name)
+  def determine_and_check_location
     @location.north = params[:location][:north] if params[:location][:north]
     @location.south = params[:location][:south] if params[:location][:south]
     @location.east  = params[:location][:east]  if params[:location][:east]
@@ -452,9 +452,10 @@ class LocationsController < ApplicationController
     @location.high  = params[:location][:high]  if params[:location][:high]
     @location.low   = params[:location][:low]   if params[:location][:low]
     @location.display_name = @display_name
-    return unless @display_name != params[:approved_where]
-
-    @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    @dubious_where_reasons = Location.dubious_reasons_for(
+      user: @user, place_name: @display_name,
+      approved: params[:approved_where]
+    )
   end
 
   def save_flash_and_redirect_or_render!

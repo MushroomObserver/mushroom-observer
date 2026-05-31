@@ -167,6 +167,38 @@ class MapSetTest < UnitTestCase
   end
 
   # ------------------------------------------------------------------
+  # Coordinate precision emitted to the JS map — issue #4318
+  #
+  # Marker coordinates feed the cluster popup's Show All / Map All
+  # in_box query. Rounding them to only 4 places (~5.5 m) forced a
+  # large query buffer; 6 places (~5.5 cm) lets the buffer shrink
+  # while still re-including each obs's own coordinate.
+  # ------------------------------------------------------------------
+
+  def test_point_coordinates_keep_six_decimal_places
+    set = set_of(build_obs(lat: 12.3456789, lng: -45.9876543))
+
+    assert_equal(12.345679, set.lat)
+    assert_equal(-45.987654, set.lng)
+    assert_equal(12.345679, set.north)
+    assert_equal(-45.987654, set.east)
+  end
+
+  def test_box_coordinates_keep_six_decimal_places
+    loc = Mappable::MinimalLocation.new(
+      id: 1, name: "Somewhere, Test",
+      north: 12.3456789, south: 12.3454321,
+      east: -45.9876543, west: -45.9879876
+    )
+    set = set_of(loc)
+
+    assert_equal(12.345679, set.north)
+    assert_equal(12.345432, set.south)
+    assert_equal(-45.987654, set.east)
+    assert_equal(-45.987988, set.west)
+  end
+
+  # ------------------------------------------------------------------
   # Helpers
   # ------------------------------------------------------------------
 

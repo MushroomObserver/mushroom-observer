@@ -184,6 +184,40 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     show_link_args.tap { |result| result[:project] = project.id if project }
   end
 
+  # Sync this species_list's project membership against
+  # `submitted_project_ids` (typically the `project_ids[]` array a
+  # form posted). Only toggles among projects the given `user` is a
+  # member of — non-member projects already attached to the list are
+  # preserved (the form disables those checkboxes; the iteration
+  # excludes them too).
+  #
+  # Returns an array of `[project, :added | :removed]` pairs so the
+  # caller can emit per-change notifications. Returns `[]` when
+  # `submitted_project_ids` is nil (no `project_ids[]` field on the
+  # submission), or when nothing actually changed.
+  def sync_projects(submitted_project_ids, user:)
+    return [] if submitted_project_ids.nil?
+
+    desired_ids = submitted_project_ids.compact_blank.map(&:to_i)
+    member_project_ids = user.projects_member.map(&:id)
+    changes = []
+    Project.where(id: member_project_ids).
+      includes(:species_lists).find_each do |project|
+      before = projects.include?(project)
+      after = desired_ids.include?(project.id)
+      next if before == after
+
+      if after
+        project.add_species_list(self)
+        changes << [project, :added]
+      else
+        project.remove_species_list(self)
+        changes << [project, :removed]
+      end
+    end
+    changes
+  end
+
   def self.find_by_title_with_wildcards(str)
     find_using_wildcards("title", str)
   end
@@ -243,6 +277,17 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Alias for title.
   def format_name
+    title
+  end
+
+  # Page heading + browser tab title — both plain `title`. (Can't
+  # `alias` to `title` — the AR column accessor isn't defined yet
+  # at class-load time.)
+  def page_title(_user = nil)
+    title
+  end
+
+  def document_title
     title
   end
 

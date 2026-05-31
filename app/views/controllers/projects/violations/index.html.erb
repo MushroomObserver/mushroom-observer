@@ -3,6 +3,6 @@
   container_class(:wide)
 %>
 
-<%= render(Components::ProjectViolationsForm.new(
+<%= render(Views::Controllers::Projects::Violations::Form.new(
       project: @project, violations: @violations, user: @user
     )) %>

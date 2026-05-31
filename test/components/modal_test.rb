@@ -85,4 +85,102 @@ class ModalTest < ComponentTestCase
     assert_html(html, ".modal-title > strong", text: "custom")
     assert_not_includes(html, "ignored")
   end
+
+  def test_controller_prop_overrides_default_modal_controller
+    # Singleton layout modals (e.g. ModalConfirm) need their own
+    # Stimulus controller, not the default `modal`. Passing
+    # `controller: "confirm-modal"` replaces the data-controller attr.
+    html = render(Components::Modal.new(
+                    id: "modal_c", title: "t",
+                    controller: "confirm-modal"
+                  ))
+
+    assert_html(html, ".modal[data-controller='confirm-modal']")
+    # Default `modal` controller is NOT present alongside.
+    assert_no_html(html, ".modal[data-controller='modal']")
+  end
+
+  def test_header_false_omits_modal_header_div
+    # Headerless modals (ModalConfirm renders its title in the body for
+    # Stimulus targeting; ModalProgressSpinner has no title at all)
+    # need to suppress the entire `.modal-header` div.
+    html = render(Components::Modal.new(
+                    id: "modal_h", title: "ignored", header: false
+                  )) do |m|
+      m.with_body { "<p>just body</p>".html_safe }
+    end
+
+    assert_no_html(html, ".modal-header")
+    # Body still renders normally.
+    assert_html(html, ".modal-body > p", text: "just body")
+    # aria-labelledby still emitted (callers point it at an in-body
+    # element via `title_id:`).
+    assert_html(html, ".modal[aria-labelledby='modal_h_title']")
+  end
+
+  def test_body_class_appends_to_modal_body
+    # `body_class:` adds extra CSS classes to `.modal-body` while
+    # keeping the base `modal-body` class. Used by ModalConfirm
+    # (`py-4`) and ModalProgressSpinner (`text-center`).
+    html = render(Components::Modal.new(
+                    id: "modal_b", title: "t", body_class: "py-4 text-center"
+                  )) do |m|
+      m.with_body { "x".html_safe }
+    end
+
+    assert_html(html, ".modal-body.py-4.text-center")
+    # Body still has the base modal-body class plus the body_id.
+    assert_html(html, "#modal_b_body.modal-body")
+  end
+
+  def test_form_content_slot_replaces_body_and_footer
+    # `with_form_content` lets the caller render a single component
+    # (typically a form) that emits its own `.modal-body` and
+    # `.modal-footer`, so a single `<form>` tag wraps both — keeping
+    # the submit button (in `.modal-footer`) naturally inside the form.
+    html = render(Components::Modal.new(
+                    id: "modal_form", title: "Edit"
+                  )) do |m|
+      m.with_form_content do
+        '<form action="/x" method="post">' \
+          '<div class="modal-body"><input name="foo"></div>' \
+          '<div class="modal-footer">' \
+          '<button type="submit">Save</button>' \
+          "</div>" \
+          "</form>".html_safe
+      end
+    end
+
+    # Modal chrome is still rendered (header + close button).
+    assert_html(html, ".modal#modal_form .modal-content > .modal-header")
+    # The form_content output replaces the default body+footer slot
+    # rendering — there is exactly one `.modal-body` and one
+    # `.modal-footer`, and both live inside the same `<form>`.
+    assert_html(html, ".modal-content > form[action='/x']", count: 1)
+    assert_html(html, ".modal-content > form > .modal-body > input[name='foo']")
+    assert_html(html,
+                ".modal-content > form > .modal-footer > button[type='submit']",
+                text: "Save")
+    # The submit button is inside the form (HTML5 form submission works
+    # without needing `form='id'` attribute association on the button).
+    assert_html(html, "form > .modal-footer button[type='submit']")
+  end
+
+  def test_form_content_slot_supersedes_body_and_footer_slots
+    # When both `with_form_content` and the body/footer slots are set,
+    # `with_form_content` wins. (Callers shouldn't mix them; this just
+    # documents the precedence so a stray `with_body` call doesn't
+    # silently double-render.)
+    html = render(Components::Modal.new(
+                    id: "modal_either", title: "T"
+                  )) do |m|
+      m.with_body { "<p>should-not-appear</p>".html_safe }
+      m.with_footer { "<button>also-not</button>".html_safe }
+      m.with_form_content { "<form><p>wins</p></form>".html_safe }
+    end
+
+    assert_html(html, ".modal-content > form > p", text: "wins")
+    assert_no_html(html, ".modal-body")
+    assert_no_html(html, ".modal-footer")
+  end
 end

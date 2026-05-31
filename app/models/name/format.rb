@@ -39,15 +39,15 @@ module Name::Format
 
   # Tack id on to end of +format_name+.
   def unique_format_name
-    display_name + " (#{id || "?"})"
+    string_with_id(display_name)
   end
 
   def user_unique_format_name(user)
-    user_display_name(user) + " (#{id || "?"})"
+    string_with_id(user_display_name(user))
   end
 
   def unique_search_name
-    "#{search_name} (#{id || "?"})"
+    string_with_id(search_name)
   end
 
   # (This gives us the ability to format names slightly differently when
@@ -118,7 +118,7 @@ module Name::Format
 
   # Tack id on to end of +text_name+.
   def unique_text_name
-    real_text_name + " (#{id || "?"})"
+    string_with_id(real_text_name)
   end
 
   def user_real_text_name(user)
@@ -135,6 +135,22 @@ module Name::Format
 
   def real_search_name
     Name.display_to_real_search(self)
+  end
+
+  # Page heading (rendered HTML — textile applied + author wrapping).
+  # `user` arg lets us respect hide_authors prefs without falling
+  # through `display_name`'s `User.current` (deprecated). When nil
+  # we use the raw display_name (no user-specific transforms).
+  def page_title(user = nil)
+    user_display_name(user).t.small_author
+  end
+
+  # Plain-text title for the browser tab `<title>`. Helper prepends
+  # the type-tag + id; `text_name` is the binomial-only column.
+  # (Can't `alias` to AR column from a module — accessor not in
+  # scope at class-load.)
+  def document_title
+    text_name
   end
 
   def sensu_stricto

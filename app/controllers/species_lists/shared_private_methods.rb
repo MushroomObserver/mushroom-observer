@@ -88,37 +88,48 @@ module SpeciesLists
       end
     end
 
+    # `@projects` is the list of projects to display as checkboxes.
+    # Checkedness is read off `@species_list.project_ids` directly
+    # (Rails' has_many-through reader returning the in-memory id array).
     def init_project_vars
       @projects = @user.projects_member(order: :title,
                                         include: { user_group: :users })
-      @project_checks = {}
     end
 
+    # Pre-seed `project_ids` from the user's most recent observation
+    # (if created in the last hour) — soft hint that a list created
+    # right after an observation likely belongs in the same projects.
+    # Safe to use the setter directly here: `@species_list` is a fresh
+    # `SpeciesList.new` (not persisted), so the assignment stays
+    # in-memory until `save`.
     def init_project_vars_for_create
       init_project_vars
       last_obs = Observation.recent_by_user(@user).last
       return unless last_obs && last_obs.created_at > 1.hour.ago
 
-      last_obs.projects.each { |proj| @project_checks[proj.id] = true }
+      @species_list.project_ids = last_obs.project_ids
     end
 
     def init_project_vars_for_edit(spl)
       init_project_vars
       spl.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
-        @project_checks[proj.id] = true
       end
     end
 
+    # On failure-reload the form needs to show the user's just-
+    # submitted project_ids as checked. We CAN'T set
+    # `spl.project_ids = submitted` here — on a persisted SL that
+    # would commit the join-table changes immediately, even though
+    # the save itself failed (Rails has_many-through `*_ids=` is
+    # instant). Instead, the controller passes `@submitted_project_ids`
+    # to the form via the view, and the form uses it for checkedness.
     def init_project_vars_for_reload(spl)
       init_project_vars
       spl.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
       end
-      @projects.each do |proj|
-        @project_checks[proj.id] = params[:project] &&
-                                   params[:project]["id_#{proj.id}"] == "1"
-      end
+      @submitted_project_ids = params.dig(:species_list, :project_ids)
     end
   end
 end

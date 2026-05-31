@@ -18,7 +18,9 @@ module Projects
       assert_not_nil(assigns(:project_aliases))
       url = "/projects/#{@project.id}/aliases/#{@project_alias.id}/edit"
       assert_select("table.table-project-members") do
-        assert_select("a[href='#{url}']", text: "Edit")
+        # sr-only label inside the icon-only edit link — more
+        # descriptive than the prior `:EDIT.l` for accessibility.
+        assert_select("a[href='#{url}']", text: /Edit Project Alias/)
       end
     end
 
@@ -30,7 +32,8 @@ module Projects
       get(:index, params: { project_id: @project.id })
       assert_response(:success)
       assert_not_nil(assigns(:project_aliases))
-      assert_match(location.display_name, @response.body)
+      assert_select("#index_project_alias_table",
+                    text: /#{Regexp.escape(location.display_name)}/)
     end
 
     def test_show_displays_the_requested_project_alias

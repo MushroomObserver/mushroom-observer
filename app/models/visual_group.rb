@@ -12,6 +12,16 @@ class VisualGroup < AbstractModel
     without: /\t/, message: proc { :cannot_include_tabs.t }
   }
 
+  # Page heading + browser tab title — both just `name`. (Can't
+  # `alias` to AR column — accessor not defined at class-load.)
+  def page_title(_user = nil)
+    name
+  end
+
+  def document_title
+    name
+  end
+
   def image_count(status = true)
     return visual_group_images.count if status.nil? || status == "needs_review"
 

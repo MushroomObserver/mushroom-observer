@@ -1,9 +1,9 @@
 <%
-add_edit_title(@name.user_display_name(@user), @name)
+add_edit_title(@name, user: @user)
 add_context_nav(name_form_edit_tabs(name: @name))
 %>
 
-<%= render(Components::NameForm.new(@name, user: @user,
+<%= render(Views::Controllers::Names::Form.new(@name, user: @user,
                                     name_string: @name_string,
                                     misspelling: @misspelling,
                                     correct_spelling: @correct_spelling)) %>

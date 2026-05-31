@@ -233,7 +233,7 @@ module NamingsHelper
   def naming_vote_form_localizations
     {
       lose_changes: :show_namings_lose_changes.l.tr("\n", " "),
-      saving: :show_namings_saving.l
+      saving: :SAVING.l
     }.to_json
   end
 

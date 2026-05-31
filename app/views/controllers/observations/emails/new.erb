@@ -4,7 +4,7 @@ add_page_title(:ask_observation_question_title.t(
 ))
 %>
 
-<%= render(Components::ObserverQuestionForm.new(
+<%= render(Views::Controllers::Observations::Emails::Form.new(
       observation: @observation,
       local: true
     )) %>

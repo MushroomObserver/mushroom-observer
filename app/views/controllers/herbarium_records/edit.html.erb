@@ -1,10 +1,6 @@
 <%
 container_class(:wide)
-add_edit_title(
-  [@herbarium_record.format_name.t,
-   @herbarium_record.herbarium_label].safe_join(" "),
-  @herbarium_record
-)
+add_edit_title(@herbarium_record)
 add_context_nav(
   herbarium_record_form_edit_tabs(back: @back, back_object: @back_object)
 )
@@ -12,7 +8,7 @@ add_context_nav(
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(Components::HerbariumRecordForm.new(
+    <%= render(Views::Controllers::HerbariumRecords::Form.new(
           @herbarium_record, back: @back
         )) %>
   </div>

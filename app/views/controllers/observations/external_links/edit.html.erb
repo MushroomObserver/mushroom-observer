@@ -1,6 +1,6 @@
 <%
 container_class(:full)
-add_edit_title(:EXTERNAL_LINK.l, @external_link)
+add_edit_title(@external_link)
 # add_context_nav(
 #   external_link_form_edit_tabs(back: @back, link: @external_link,
 #                                obj: @back_object)
@@ -9,7 +9,7 @@ add_edit_title(:EXTERNAL_LINK.l, @external_link)
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(Components::ExternalLinkForm.new(
+    <%= render(Views::Controllers::Observations::ExternalLinks::Form.new(
           @external_link,
           observation: @observation,
           sites: [@site],

@@ -49,17 +49,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     current_params.each do |subaction|
       next if params[subaction].blank?
 
-      # May go through #sorted_index to create the query, before #filtered_index
-      query, display_opts = send(index_param_method_or_default(subaction))
-
-      # Some actions may redirect instead of returning a query, such as pattern
-      # searches when they resolve to a single object or get no results.
-      # So if we had the param, but got a blank query, we should bail to allow
-      # the redirect without rendering a blank index.
-      return nil if query.blank?
-
-      # If we have a query, display it.
-      return filtered_index(query, display_opts)
+      return filtered_subaction_index(subaction)
     end
 
     # Otherwise, display the unfiltered index.
@@ -260,11 +250,34 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
       show_action_redirect(query)
     else
       calc_pages_and_objects(query, display_opts)
-      render(action: :index) # must be explicit for names' `test_index` action
+      render_index_view
     end
   end
 
+  # Render the index view. Default renders the ERB action template
+  # (was `render(action: :index)` — must be explicit for names'
+  # `test_index` action). Controllers that have converted their
+  # index template to Phlex override this to render the class
+  # directly with explicit props. Transitional hook so the rest of
+  # the index machinery doesn't need to know about Phlex.
+  def render_index_view
+    render(action: :index)
+  end
+
   private ##########
+
+  def filtered_subaction_index(subaction)
+    # May go through #sorted_index to create the query, before #filtered_index
+    query, display_opts = send(index_param_method_or_default(subaction))
+
+    # Some actions may redirect instead of returning a query, such as pattern
+    # searches when they resolve to a single object or get no results.
+    # In Rails 7.2.3+, redirect_to returns the status code (Integer), so
+    # performed? guards against treating that as a query.
+    return nil if performed? || query.blank?
+
+    filtered_index(query, display_opts)
+  end
 
   def show_index_setup(query, display_opts)
     store_location

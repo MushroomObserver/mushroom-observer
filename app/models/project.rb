@@ -78,7 +78,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :images, through: :project_images
 
   has_many :project_observations, dependent: :delete_all
-  has_many :observations, through: :project_observations
+  has_many :observations, through: :project_observations,
+                          after_add: :invalidate_visible_observations_cache!,
+                          after_remove: :invalidate_visible_observations_cache!
   has_many :locations, through: :observations
 
   has_many :project_excluded_observations, dependent: :delete_all
@@ -160,7 +162,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
-      :location
+      :admin_group,
+      :location,
+      :species_lists,
+      :target_locations,
+      :target_names,
+      :user,
+      :user_group
     )
   }
   scope :violations_includes, lambda {
@@ -189,12 +197,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Same as +text_name+ but with id tacked on to make unique.
   def unique_text_name
-    "#{text_name} (#{id || "?"})"
+    string_with_id(text_name)
   end
 
   # Need these to be compatible with Comment.
   alias format_name text_name
   alias unique_format_name unique_text_name
+
+  # Page heading + browser tab title — both plain `title`. (Can't
+  # `alias` to `title` — the AR column accessor isn't defined yet
+  # at class-load time.)
+  def page_title(_user = nil)
+    title
+  end
+
+  def document_title
+    title
+  end
 
   # Is +user+ a member of this Project? Reflects actual user_group
   # membership only — Site Admins (user.admin == true) get no implicit
@@ -272,8 +291,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # plucks ids of OFFENDING observations and merges them into a Set
   # for dedup; total cost is O(violations) rather than the
   # O(visible_observations) cost of the full Ruby iteration in
-  # `#violations`. Called from the projects index
-  # (Tabs::ProjectsHelper#violations_button), so any per-project
+  # `#violations`. Called from the project show page's
+  # `render_violations_button` (inlined from the former
+  # `Tabs::ProjectsHelper#violations_button`), so any per-project
   # work multiplies by the number of projects rendered.
   def count_violations
     return 0 unless constraints?
@@ -388,6 +408,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     insert_project_observations(new_obs_ids)
     insert_project_images_for(new_obs_ids)
+    invalidate_visible_observations_cache!
     touch
     new_obs_ids.size
   end
@@ -857,8 +878,33 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Observations excluding non-primary members of multi-obs occurrences.
+  #
+  # The underlying `exclude_non_primary` scope adds a LEFT OUTER JOIN on
+  # `occurrences` with an `(occurrence_id IS NULL OR primary = id)` OR
+  # predicate, which the planner can't serve from the
+  # `(project_id, observation_id)` index. On big projects the dedup
+  # scan runs to 0.3-1.7s and is invoked separately by every show-page
+  # widget (tab counts, checklist, location count, constraint
+  # violations). Pluck the visible IDs once per Project instance and
+  # have every downstream query use a flat PK lookup. Mutators that
+  # add/remove/exclude observations call
+  # `invalidate_visible_observations_cache!` so the memo stays
+  # consistent within a single Project instance.
   def visible_observations
-    observations.exclude_non_primary
+    Observation.where(id: visible_observation_ids)
+  end
+
+  def visible_observation_ids
+    @visible_observation_ids ||=
+      observations.exclude_non_primary.pluck(:id)
+  end
+
+  # Wired as `after_add` / `after_remove` on the `observations`
+  # association, so the splat absorbs the record-arg that AR passes.
+  # Also called directly from `bulk_add_observations`, which uses
+  # `ProjectObservation.insert_all` and so bypasses the callbacks.
+  def invalidate_visible_observations_cache!(*)
+    @visible_observation_ids = nil
   end
 
   def out_of_range_observations
