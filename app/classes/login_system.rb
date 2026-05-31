@@ -86,12 +86,22 @@ module LoginSystem
   end
 
   # move to the last store_location call or to the passed default one
+  #
+  # Always returns truthy so callers can chain `... and return` safely
+  # — otherwise the assignment-to-nil in the `else` branch leaks out
+  # as a falsy return value, the `and return` short-circuits, and the
+  # caller silently keeps executing past the redirect. (See the
+  # SearchController#pattern 500 incident on 2026-05-31 — production
+  # log showed a successful `Redirected to ...observations?...`
+  # followed milliseconds later by `Completed 500 Internal Server
+  # Error` because control fell through to a `send(:"_path")` call.)
   def redirect_back_or_default(default)
     if session["return-to"].nil?
       redirect_to(default)
     else
-      redirect_to(session["return-to"])
+      url = session["return-to"]
       session["return-to"] = nil
+      redirect_to(url)
     end
   end
 end
