@@ -13,10 +13,9 @@ module Views::Controllers::Images::Licenses
   # `FormObject::ImageLicenseRow` and overrides Superform's default
   # scope so the wire shape stays `params[:updates]`.
   #
-  # `Components::Table` would be a natural fit for the table
-  # structure, but it doesn't support a per-row wrapper (we need
-  # `namespace(idx)` around each `<tr>` to scope the form fields).
-  # Rendering the table inline with Phlex primitives instead.
+  # Uses `Components::Table`'s row mode so each `<tr>` can be wrapped
+  # in Superform's `namespace(idx)` — that's what makes the row's
+  # field names emit as `updates[<idx>][<field>]`.
   class Form < ::Components::ApplicationForm
     def view_template
       super do
@@ -31,23 +30,13 @@ module Views::Controllers::Images::Licenses
     private
 
     def render_table
-      table(class: "table-striped table-license-updater") do
-        render_table_head
-        tbody do
-          model.rows.each.with_index do |row, idx|
-            render_row(row, idx)
-          end
-        end
-      end
-    end
-
-    def render_table_head
-      thead do
-        tr do
-          th { :image_updater_count.t }
-          th { :image_updater_holder.t }
-          th { :image_updater_license.t }
-        end
+      render(Components::Table.new(model.rows,
+                                   class: "table-striped " \
+                                          "table-license-updater")) do |t|
+        t.column(:image_updater_count.t)
+        t.column(:image_updater_holder.t)
+        t.column(:image_updater_license.t)
+        t.row { |row, idx| render_row(row, idx) }
       end
     end
 
@@ -55,7 +44,8 @@ module Views::Controllers::Images::Licenses
       # Each row submits as `updates[<idx>][<field>]`. `namespace`
       # creates the sub-scope; field renderers inside use the
       # namespace builder so the emitted `name=` attributes nest
-      # correctly.
+      # correctly. The block runs in the Form's closure, so
+      # `namespace` resolves to Superform's namespace method.
       namespace(idx.to_s) do |row_ns|
         tr do
           td { plain(row.license_count.to_s) }

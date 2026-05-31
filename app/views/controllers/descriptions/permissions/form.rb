@@ -10,6 +10,15 @@ module Views::Controllers::Descriptions::Permissions
   # writein_name[1]) that don't map to model attributes. We use
   # checkbox_field on the FormObject and autocompleter_field for the
   # writeins.
+  #
+  # NOTE: Does NOT use `Components::Table` — the body has TWO row
+  # shapes (one per existing group + N write-in rows that don't
+  # correspond to a row object). Components::Table's row mode could
+  # cover this with a flatten-and-tag trick, but the two row types
+  # are different enough (group cells bind to existing group data;
+  # write-in rows are blank slots with autocompleter fields) that
+  # the resulting `row { ... }` block would mostly be a case-switch
+  # on the row shape. Hand-rolled is clearer.
   class Form < ::Components::ApplicationForm
     register_value_helper :in_admin_mode?
 

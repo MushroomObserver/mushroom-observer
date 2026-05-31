@@ -455,6 +455,51 @@ After writing the component:
    `ActionView::MissingTemplate` fires for paths under
    `app/views/controllers/`.
 
+## Tables in Phlex views: try `Components::Table` first
+
+Before reaching for `table { thead { tr { ... } }; tbody { @rows.each { ... } } }` in a Phlex view, check whether `Components::Table` fits. It keeps Bootstrap table markup consistent, supports per-column `class:` + arbitrary HTML attrs (`width:`, `data:`, etc.) via `t.column(header, **attrs) { |row| cell }`, and reads more clearly than hand-rolled rows.
+
+### Column mode (uniform rows — the common case)
+
+```ruby
+render(Components::Table.new(@users,
+                             class: "table-striped my-table")) do |t|
+  t.column(:NAME.t) { |u| link_to(u.login, u) }
+  t.column(:ROLE.t, class: "text-center") { |u| u.role }
+  t.column(:ACTIONS.t, width: "100") { |u| destroy_button(target: u) }
+end
+```
+
+Per-column `class:` / arbitrary attrs land on both the `<th>` and `<td>` of that column.
+
+### Row mode (Stimulus-rooted rows, Superform `namespace(idx)`, etc.)
+
+When each `<tr>` needs its own data attributes — most commonly because the row IS a Phlex component that emits its own `<tr id="..." data-controller="...">`, or because each row needs Superform's `namespace(idx)` wrapping to scope its field names — use row mode: define columns for the header only (no content block), then provide a single `t.row { |row, idx| ... }` block that renders the whole `<tr>`.
+
+```ruby
+render(Components::Table.new(@trackers,
+                             tbody_id: "field_slip_job_trackers")) do |t|
+  t.column(:FILENAME.t, scope: "col")
+  t.column(:STATUS.t,   scope: "col", class: "text-right")
+  t.row { |tracker| render(TrackerRow.new(tracker: tracker, user: @user)) }
+end
+```
+
+`tbody_id:` puts an `id=` on the `<tbody>` (use this when the tbody is a Turbo Stream target — `turbo_stream.prepend(:field_slip_job_trackers) { ... }` to append a new row from an action response).
+
+The row block runs in the caller's closure, so anything in scope at the render site is reachable inside the block — including methods on the form this table happens to be nested inside (e.g. Superform's `namespace(idx)`).
+
+### Skip `Components::Table` (with a `# NOTE:` comment explaining why) when the table needs:
+
+- **Multiple `<tbody>` elements** — e.g. one tbody per group, with sub-rows in a separate `tbody.collapse` (Bootstrap accordion-in-table). Components::Table's single-tbody model can't express this.
+- **Stimulus / Turbo data attrs on the `<table>` tag itself** — `<table data-controller="name-list" ...>` with table-level wiring. (Currently `Components::Table` doesn't forward arbitrary attrs to the `<table>`; a small extension would unlock this case.)
+- **Mixed-shape rows that don't share an iteration source** — e.g. one row per existing group + N blank "write-in" rows. Row mode handles mixed shapes when they share a row sequence, but two different sources of rows is awkward.
+- **A table that isn't really "rows of data"** — e.g. a 3-column layout shell wrapping unrelated panels with a `colspan` footer. Components::Table's purpose is rows of data; bending it elsewhere creates worse abstractions than `table { ... }` directly.
+
+If you find yourself wanting a feature Components::Table doesn't have, prefer adding a small primitive to the component (the `tbody_id:` kind of thing) over a one-off escape hatch in your view. Anything more invasive — multi-tbody support, table-level Stimulus rooting — is a real design discussion, not a quick add.
+
+`Components::Table` is at `app/components/table.rb`; tests in `test/components/table_test.rb`.
+
 ## Addendum: No Phlex view resolver
 
 When converting an action template (ERB → `Views::Controllers::<Foo>::<Action>`),

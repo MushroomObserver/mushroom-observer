@@ -55,27 +55,16 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_violations_table
-      table(class: "table table-striped project-violations") do
-        thead do
-          tr do
-            th { :form_violations_th_name.l }
-            th { :form_violations_th_details.l }
-            th { :form_violations_th_actions.l }
-          end
+      render(Components::Table.new(@violations,
+                                   class: "table-striped " \
+                                          "project-violations")) do |t|
+        t.column(:form_violations_th_name.l) { |v| render_obs_link(v.obs) }
+        t.column(:form_violations_th_details.l) do |v|
+          render_details(v.obs, v.kinds)
         end
-        tbody do
-          @violations.each { |v| render_row(v) }
+        t.column(:form_violations_th_actions.l) do |v|
+          render_actions(v.obs, v.kinds)
         end
-      end
-    end
-
-    def render_row(violation)
-      obs = violation.obs
-      kinds = violation.kinds
-      tr do
-        td { render_obs_link(obs) }
-        td { render_details(obs, kinds) }
-        td { render_actions(obs, kinds) }
       end
     end
 

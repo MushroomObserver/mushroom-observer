@@ -3,6 +3,12 @@
 # Renders the project locations table with target location grouping,
 # collapsible sub-locations, and aliases. Rendered from the
 # locations index and the target_locations turbo_stream re-render.
+#
+# NOTE: Does NOT use `Components::Table` — the table has multiple
+# `<tbody>` elements (one per location group + a separate
+# `<tbody class="collapse">` per group holding the sub-locations
+# the Bootstrap accordion toggle expands), which Components::Table's
+# single-tbody model can't express. Hand-rolled here.
 module Views::Controllers::Projects::Locations
   class Table < Views::Base
     def initialize(project:, grouped_data:,

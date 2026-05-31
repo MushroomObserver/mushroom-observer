@@ -31,41 +31,23 @@ module Views::Controllers::Projects::Members
     private
 
     def render_users_table
-      table(class: "table table-striped " \
-                   "table-project-members mt-3") do
-        render_table_header
-        tbody do
-          @users.sort_by(&:login).each do |u|
-            render_user_row(u)
-          end
-        end
+      render(Components::Table.new(@users.sort_by(&:login),
+                                   class: "table-striped " \
+                                          "table-project-members mt-3")) do |t|
+        t.column(:Login_name.t) { |u| user_link(u, u.login) }
+        t.column(:Full_name.t) { |u| plain(u.name) }
+        t.column(nil) { |u| render_add_button(u) }
       end
     end
 
-    def render_table_header
-      thead do
-        tr do
-          th { plain(:Login_name.t) }
-          th { plain(:Full_name.t) }
-          th
-        end
-      end
-    end
-
-    def render_user_row(user)
-      tr do
-        td { user_link(user, user.login) }
-        td { plain(user.name) }
-        td do
-          render(Components::CrudButton::Post.new(
-                   name: :ADD.t,
-                   target: project_members_path(
-                     project_id: @project.id,
-                     candidate: user.id
-                   )
-                 ))
-        end
-      end
+    def render_add_button(user)
+      render(Components::CrudButton::Post.new(
+               name: :ADD.t,
+               target: project_members_path(
+                 project_id: @project.id,
+                 candidate: user.id
+               )
+             ))
     end
   end
 end
