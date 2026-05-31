@@ -92,9 +92,13 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       # vs our database which has "Burbank, California, USA" (without county)
       fill_in("herbarium_place_name", with: "burbank")
 
-      # Wait for geocoding to complete - verify Google's format appears
+      # Wait for geocoding to complete - verify Google's format appears.
+      # Wait is 20s (not the test default ~2s, not even 10s) because the
+      # roundtrip is a live Google Geocoding API call — in full-suite runs
+      # with browser under load (and Google occasionally rate-limiting), 10s
+      # was flaky enough to bite the species_lists PR (#4405) CI run.
       assert_field("herbarium_place_name",
-                   with: "Burbank, Los Angeles Co., California, USA", wait: 10)
+                   with: "Burbank, Los Angeles Co., California, USA", wait: 20)
 
       # Hidden ID should be -1 (new location marker) since this is geocoded
       assert_field("herbarium_location_id", with: "-1", type: :hidden)

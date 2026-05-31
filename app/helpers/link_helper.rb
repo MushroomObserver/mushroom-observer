@@ -105,8 +105,16 @@ module LinkHelper
   # `Components::ExternalSiteLink` — render the component directly
   # in Phlex views. (Component is named for the destination — an
   # external site — to avoid collision with the AR model.)
+  #
+  # `concat` preserves the long-standing side-effect emission
+  # contract of this helper, so ERB callers can write a bare
+  # `external_link(link)` line inside a `tag.li(...) do ... end`
+  # block (no `<%= %>` / `concat` wrapping needed at the call
+  # site). The previous ERB-only helper used `concat` for this
+  # reason; the Phlex-component refactor (PR #4401) accidentally
+  # dropped the `concat` and the lone caller fell silent.
   def external_link(link)
-    render(Components::ExternalSiteLink.new(link: link))
+    concat(render(Components::ExternalSiteLink.new(link: link)))
   end
 
   # NOTE: Specific to glyphicons
