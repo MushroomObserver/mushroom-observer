@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ExternalLinkTest < ComponentTestCase
+class ExternalLinkComponentTest < ComponentTestCase
   def test_inat_link_renders_inat_label_and_id_no_date
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
     html = render(Components::ExternalLink.new(link: link))
