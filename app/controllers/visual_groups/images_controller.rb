@@ -12,13 +12,24 @@ module VisualGroups
       return unless visual_group
 
       included = update_visual_group_image(visual_group, image_id, status)
-      # this is a turbo response
-      render(partial: "visual_groups/images/update",
-             locals: { visual_group: visual_group,
-                       image_id: image_id, status: included })
+      render_status_links_replace(visual_group, image_id, included)
     end
 
     private
+
+    # Turbo response: replace just the status-links block for the
+    # image whose status flipped. The same Phlex view renders both
+    # in the matrix grid and here, so the replacement is identical
+    # to what the next full page-load would emit.
+    def render_status_links_replace(visual_group, image_id, included)
+      links_view = Views::Controllers::VisualGroups::StatusLinks.new(
+        visual_group: visual_group, image_id: image_id.to_i,
+        status: included
+      )
+      render(turbo_stream: turbo_stream.replace(
+        "visual_group_status_links_#{image_id}", links_view
+      ))
+    end
 
     def update_visual_group_image(visual_group, image_id, status)
       vgi = visual_group.visual_group_images.find_by(image_id: image_id)
