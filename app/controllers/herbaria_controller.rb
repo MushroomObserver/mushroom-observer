@@ -122,7 +122,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     @herbarium = Herbarium.new
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_form }
-      format.html
+      format.html do
+        render(Views::Controllers::Herbaria::New.new(
+                 herbarium: @herbarium, user: @user
+               ))
+      end
     end
   end
 
@@ -133,7 +137,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     set_up_herbarium_for_edit
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_form }
-      format.html
+      format.html do
+        render(Views::Controllers::Herbaria::Edit.new(
+                 herbarium: @herbarium, user: @user, top_users: @top_users
+               ))
+      end
     end
   end
 
@@ -414,7 +422,20 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
     respond_to do |format|
       format.turbo_stream { reload_herbarium_modal_form_and_flash }
-      format.html { render(action) }
+      format.html { render(phlex_form_view_for(action)) }
+    end
+  end
+
+  def phlex_form_view_for(action)
+    case action
+    when :new
+      Views::Controllers::Herbaria::New.new(
+        herbarium: @herbarium, user: @user
+      )
+    when :edit
+      Views::Controllers::Herbaria::Edit.new(
+        herbarium: @herbarium, user: @user, top_users: @top_users
+      )
     end
   end
 

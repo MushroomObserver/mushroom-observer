@@ -19,6 +19,11 @@ module Herbaria
     # Linked from herbarium show page
     def new
       @herbarium = find_or_goto_index(Herbarium, params[:id])
+      return unless @herbarium
+
+      render(Views::Controllers::Herbaria::CuratorRequests::New.new(
+               herbarium: @herbarium, back: @back
+             ))
     end
 
     # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
