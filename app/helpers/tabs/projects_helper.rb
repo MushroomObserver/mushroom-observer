@@ -60,6 +60,100 @@ module Tabs
       ).tab
     end
 
+    # --- Project banner top-level tabs (rendered by
+    # `Views::Controllers::Projects::Tabs` via Components::NavTabs).
+    # Each method returns an `InternalLink#tab` array; the view picks
+    # which to render based on project state. `alt_title:` keeps the
+    # auto-generated `<thing>_link` test-selector class stable across
+    # count changes ("3 Observations" → still `observations_link`,
+    # not `3_observations_link`).
+
+    def project_summary_tab(project)
+      InternalLink.new(
+        :SUMMARY.t, project_path(id: project.id), alt_title: "summary"
+      ).tab
+    end
+
+    def project_observations_tab(project)
+      count = project.visible_observations.count
+      InternalLink.new(
+        "#{count} #{:OBSERVATIONS.l}",
+        observations_path(project: project),
+        alt_title: "observations"
+      ).tab
+    end
+
+    def project_species_lists_tab(project)
+      count = project.species_lists.length
+      InternalLink.new(
+        "#{count} #{:SPECIES_LISTS.l}",
+        species_lists_path(project: project),
+        alt_title: "species_lists"
+      ).tab
+    end
+
+    def project_names_tab(project)
+      InternalLink.new(
+        "#{project.name_count} #{:NAMES.l}",
+        checklist_path(project_id: project.id),
+        alt_title: "checklists"
+      ).tab
+    end
+
+    def project_locations_tab(project)
+      InternalLink.new(
+        "#{project.location_count} #{:LOCATIONS.l}",
+        project_locations_path(project_id: project.id),
+        alt_title: "locations"
+      ).tab
+    end
+
+    def project_updates_tab(project)
+      count = project.new_candidate_observations_count
+      InternalLink.new(
+        "#{count} #{:project_updates_title.l}",
+        project_updates_path(project_id: project.id),
+        alt_title: "updates"
+      ).tab
+    end
+
+    def project_admin_tab(project)
+      InternalLink.new(
+        :show_project_admin_tab.l,
+        project_admin_path(project_id: project.id),
+        alt_title: "admin"
+      ).tab
+    end
+
+    # --- Project Admin sub-tabs (rendered by
+    # `Views::Controllers::Projects::AdminSubtabs` via NavTabs).
+
+    def project_admin_details_tab(project)
+      InternalLink.new(
+        :show_project_admin_details_tab.l,
+        project_admin_path(project_id: project.id),
+        alt_title: "details"
+      ).tab
+    end
+
+    def project_admin_members_tab(project)
+      count = project.user_group.users.count
+      InternalLink.new(
+        "#{count} #{:MEMBERS.l}",
+        project_members_path(project.id),
+        alt_title: "members"
+      ).tab
+    end
+
+    def project_admin_aliases_tab(project)
+      count = project.aliases.count
+      InternalLink.new(
+        "#{count} #{:PROJECT_ALIASES.l}",
+        project_aliases_path(project_id: project.id),
+        alt_title: "aliases"
+      ).tab
+    end
+
     # Add some alternate sorting criteria.
     def projects_index_sorts
       [
