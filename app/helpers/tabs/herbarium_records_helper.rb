@@ -13,8 +13,8 @@ module Tabs
           object_return_tab(obs)
         ]
       end
-      links << new_herbarium_tab
-      links << nonpersonal_herbaria_index_tab
+      links << ::Tab::Herbarium::New.new.to_a
+      links << ::Tab::Herbarium::NonpersonalIndex.new(q_param: q_param).to_a
     end
 
     def herbarium_records_index_sorts
@@ -29,14 +29,14 @@ module Tabs
     end
 
     def herbarium_record_show_tabs
-      [nonpersonal_herbaria_index_tab]
+      [::Tab::Herbarium::NonpersonalIndex.new(q_param: q_param).to_a]
     end
 
     def herbarium_record_form_new_tabs(obs:)
       [
         object_return_tab(obs),
-        new_herbarium_tab,
-        nonpersonal_herbaria_index_tab
+        ::Tab::Herbarium::New.new.to_a,
+        ::Tab::Herbarium::NonpersonalIndex.new(q_param: q_param).to_a
       ]
     end
 
@@ -47,8 +47,8 @@ module Tabs
       elsif back_object
         links << object_return_tab(back_object)
       end
-      links << new_herbarium_tab
-      links << nonpersonal_herbaria_index_tab
+      links << ::Tab::Herbarium::New.new.to_a
+      links << ::Tab::Herbarium::NonpersonalIndex.new(q_param: q_param).to_a
     end
 
     def herbarium_record_tab(h_r, obs)

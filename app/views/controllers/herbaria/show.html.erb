@@ -2,7 +2,7 @@
 add_show_title(@herbarium)
 add_edit_icons(@herbarium, @user)
 add_pager_for(@herbarium)
-add_context_nav(herbarium_show_tabs)
+add_context_nav(Tab::Herbarium::Show.new(q_param: q_param))
 container_class(:wide)
 
 map = @herbarium.location

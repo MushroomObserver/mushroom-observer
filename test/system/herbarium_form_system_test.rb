@@ -92,16 +92,20 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       # vs our database which has "Burbank, California, USA" (without county)
       fill_in("herbarium_place_name", with: "burbank")
 
-      # Wait for geocoding to complete - verify Google's format appears.
-      # Wait is 20s (not the test default ~2s, not even 10s) because the
-      # roundtrip is a live Google Geocoding API call — in full-suite runs
-      # with browser under load (and Google occasionally rate-limiting), 10s
-      # was flaky enough to bite the species_lists PR (#4405) CI run.
+      # Stepwise diagnostic for a live Google Geocoding API roundtrip
+      # (test default ~2s + even 10s have flaked under full-suite
+      # load — see PR #4405 / #4406):
+      #
+      # 1. Hidden ID transitions blank → "-1" once JS has ANY Google
+      #    response. If THIS fails, Google API itself is slow/dead —
+      #    distinct from "JS race lost the field update."
+      # 2. Field text gets the full geocoded string.
+      #
+      # Same order as `create_herbarium_with_new_location` below.
+      assert_field("herbarium_location_id", with: "-1", type: :hidden,
+                                            wait: 15)
       assert_field("herbarium_place_name",
-                   with: "Burbank, Los Angeles Co., California, USA", wait: 20)
-
-      # Hidden ID should be -1 (new location marker) since this is geocoded
-      assert_field("herbarium_location_id", with: "-1", type: :hidden)
+                   with: "Burbank, Los Angeles Co., California, USA", wait: 10)
     end
   end
 

@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
-# Custom Tabset Helpers for Herbaria views
-# NOTE: this uses ids not classes for identifiers, change this
 module Tabs
   module HerbariaHelper
-    def herbaria_index_tabs(query: nil)
-      links ||= []
-      links << if query&.params&.dig(:nonpersonal)
-                 herbaria_index_tab
-               else
-                 labeled_nonpersonal_herbaria_index_tab
-               end
-      links << new_herbarium_tab
-    end
+    # The tab definitions migrated to PORO classes under
+    # `app/classes/tab/herbarium/*.rb` — 5 single Tab POROs (`New`,
+    # `ListAll`, `Return`, `NonpersonalIndex`,
+    # `LabeledNonpersonalIndex`) + 5 `Tab::Collection` subclasses
+    # (`Index`, `Show`, `FormNew`, `FormEdit`, `CuratorRequest`).
+    # `Tabs::HerbariumRecordsHelper` still `include`s this module for
+    # the `*_index_sorts` definitions below; the include can drop
+    # when the sorts also relocate (PR 4 of the migration plan).
 
     def herbaria_index_sorts(query: nil)
       if query&.params&.dig(:nonpersonal)
@@ -37,63 +34,6 @@ module Tabs
       # must dup a frozen array, this is new ruby 3 policy
       sorts = full_herbaria_index_sorts.map(&:clone)
       sorts.reject! { |x| x[0] == "user" }
-    end
-
-    def herbarium_show_tabs
-      [nonpersonal_herbaria_index_tab]
-    end
-
-    def herbarium_form_new_tabs
-      [nonpersonal_herbaria_index_tab]
-    end
-
-    def herbarium_form_edit_tabs(herbarium:)
-      [
-        herbarium_return_tab(herbarium),
-        nonpersonal_herbaria_index_tab
-      ]
-    end
-
-    def herbaria_curator_request_tabs(herbarium:)
-      [
-        herbarium_return_tab(herbarium),
-        nonpersonal_herbaria_index_tab
-      ]
-    end
-
-    def new_herbarium_tab
-      InternalLink::Model.new(
-        :create_herbarium.l, Herbarium,
-        new_herbarium_path, alt_title: "new_herbarium"
-      ).tab
-    end
-
-    def herbaria_index_tab
-      InternalLink::Model.new(
-        :herbarium_index_list_all_herbaria.l, Herbarium, herbaria_path
-      ).tab
-    end
-
-    def herbarium_return_tab(herbarium)
-      InternalLink::Model.new(
-        :cancel_and_show.t(type: :herbarium), herbarium,
-        herbarium_path(herbarium)
-      ).tab
-    end
-
-    def nonpersonal_herbaria_index_tab
-      InternalLink.new(
-        :herbarium_index.t,
-        add_q_param(herbaria_path(nonpersonal: true)),
-        alt_title: "nonpersonal_herbaria_index"
-      ).tab
-    end
-
-    def labeled_nonpersonal_herbaria_index_tab
-      InternalLink.new(
-        :herbarium_index_nonpersonal_herbaria.l,
-        herbaria_path(nonpersonal: true)
-      ).tab
     end
   end
 end
