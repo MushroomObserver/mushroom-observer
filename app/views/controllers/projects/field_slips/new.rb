@@ -59,43 +59,35 @@ module Views::Controllers::Projects::FieldSlips
              ))
     end
 
+    # Each `<tr>` is a Stimulus root rendered by `TrackerRow` —
+    # `data-controller="field-slip-job"` + per-tracker data attrs the
+    # JS uses to mutate cells in place as job state changes. The
+    # `tbody#field_slip_job_trackers` is also a Turbo Stream target
+    # (`field_slips_controller#create` does
+    # `turbo_stream.prepend(:field_slip_job_trackers) { ... }` to
+    # append a newly-created tracker without a full page refresh).
+    #
+    # Uses `Components::Table`'s row mode: `column(header, …)`
+    # defines just the `<th>` chrome; `row { |tracker| … }` renders
+    # the entire `<tr>` per tracker via `TrackerRow`.
     def render_tracker_table
-      table(class: "table mt-3") do
-        render_tracker_header
-        tbody(id: "field_slip_job_trackers") do
-          render_tracker_rows
+      render(Components::Table.new(
+               @project.trackers.order(id: :desc),
+               class: "mt-3", tbody_id: "field_slip_job_trackers"
+             )) do |table|
+        define_tracker_columns(table)
+        table.row do |tracker|
+          render(TrackerRow.new(tracker: tracker, user: @user))
         end
       end
     end
 
-    def render_tracker_header
-      thead do
-        tr do
-          th(scope: "col") { plain(:FILENAME.t) }
-          th(scope: "col", class: "text-center") do
-            plain(:USER.t)
-          end
-          th(scope: "col", class: "text-center") do
-            plain(:SECONDS.t)
-          end
-          th(scope: "col", class: "text-center") do
-            plain(:PAGES.t)
-          end
-          th(scope: "col", class: "text-right") do
-            plain(:STATUS.t)
-          end
-        end
-      end
-    end
-
-    def render_tracker_rows
-      @project.trackers.order(id: :desc).each do |t|
-        render(
-          Views::Controllers::Projects::FieldSlips::TrackerRow.new(
-            tracker: t, user: @user
-          )
-        )
-      end
+    def define_tracker_columns(table)
+      table.column(:FILENAME.t, scope: "col")
+      table.column(:USER.t, scope: "col", class: "text-center")
+      table.column(:SECONDS.t, scope: "col", class: "text-center")
+      table.column(:PAGES.t, scope: "col", class: "text-center")
+      table.column(:STATUS.t, scope: "col", class: "text-right")
     end
   end
 end
