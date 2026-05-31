@@ -6,8 +6,6 @@
 # current query of observations.
 module Views::Controllers::SpeciesLists::Observations
   class Edit < Views::Base
-    register_value_helper :species_list_form_observations_tabs
-
     def initialize(prefill_value:, num_results:)
       super()
       @prefill_value = prefill_value
@@ -16,7 +14,9 @@ module Views::Controllers::SpeciesLists::Observations
 
     def view_template
       add_page_title(:species_list_add_remove_title.t)
-      add_context_nav(species_list_form_observations_tabs)
+      add_context_nav(::Tab::SpeciesList::FormObservations.new(
+                        q_param: q_param
+                      ))
       # Sibling reference within the module.
       render(Form.new(
                prefill_value: @prefill_value,

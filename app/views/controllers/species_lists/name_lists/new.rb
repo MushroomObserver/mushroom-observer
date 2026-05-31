@@ -14,8 +14,6 @@
 # `attributes:`.
 module Views::Controllers::SpeciesLists::NameLists
   class New < Views::Base
-    register_value_helper :species_list_form_name_list_tabs
-
     def initialize(name_strings:, user:)
       super()
       @name_strings = name_strings
@@ -24,7 +22,7 @@ module Views::Controllers::SpeciesLists::NameLists
 
     def view_template
       add_page_title(:name_lister_title.t)
-      add_context_nav(species_list_form_name_list_tabs)
+      add_context_nav(::Tab::SpeciesList::FormNameList.new)
       container_class(:full)
       render_noscript
       render_lister_table
