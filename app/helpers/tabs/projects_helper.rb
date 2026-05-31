@@ -2,13 +2,22 @@
 
 module Tabs
   module ProjectsHelper
-    def project_form_new_tabs
-      [projects_index_tab]
-    end
-
-    def projects_index_tabs
-      [new_project_tab]
-    end
+    # The single-tab + simple collection definitions for projects
+    # migrated to PORO classes under `app/classes/tab/project/*.rb`:
+    #
+    # - Banner tabs (Summary, Observations, SpeciesLists, Names,
+    #   Locations, Updates, Admin) + Banner Collection
+    # - Admin sub-tabs (AdminDetails, AdminMembers, AdminAliases)
+    #   + AdminSubtabs Collection
+    # - Form / index / alias action-nav tabs (Index, New,
+    #   ChangeMemberStatus, ForUser, AliasEdit, AliasNew) +
+    #   FormNew / IndexNav Collections
+    #
+    # Two collection methods below (`project_members_form_new_tabs`,
+    # `project_member_form_edit_tabs`) call cross-helper composers
+    # (`object_return_tab` from `Tabs::GeneralHelper`); they stay
+    # as helpers until PR 4 of the migration converts general_helper.
+    # Same story for the non-tab utility methods further down.
 
     def project_members_form_new_tabs(project:)
       [object_return_tab(project)]
@@ -16,142 +25,12 @@ module Tabs
 
     def project_member_form_edit_tabs(project:)
       links = [
-        projects_index_tab,
+        ::Tab::Project::Index.new.to_a,
         object_return_tab(project)
       ]
       return unless permission?(project)
 
-      # Note this is just an edit_project_tab with different wording
-      links << change_member_status_tab(project)
-    end
-
-    def projects_index_tab
-      InternalLink.new(:cancel_to_index.t(type: :PROJECT), projects_path).tab
-    end
-
-    def new_project_tab
-      InternalLink.new(:list_projects_add_project.t, new_project_path).tab
-    end
-
-    def change_member_status_tab(project)
-      InternalLink.new(:change_member_status_edit.t,
-                       edit_project_path(project.id)).tab
-    end
-
-    def edit_project_alias_tab(project_id, name, id)
-      InternalLink::Model.new(
-        name, ProjectAlias,
-        edit_project_alias_path(project_id:, id:),
-        alt_title: :EDIT.t
-      ).tab
-    end
-
-    def new_project_alias_tab(project_id, target_id, target_type)
-      InternalLink::Model.new(
-        :ADD.t, ProjectAlias,
-        new_project_alias_path(project_id:, target_id:, target_type:),
-        html_options: { class: "btn btn-default" }
-      ).tab
-    end
-
-    def projects_for_user_tab(user)
-      InternalLink.new(
-        :app_your_projects.l, projects_path(member: user.id)
-      ).tab
-    end
-
-    # --- Project banner top-level tabs (rendered by
-    # `Views::Controllers::Projects::Tabs` via Components::NavTabs).
-    # Each method returns an `InternalLink#tab` array; the view picks
-    # which to render based on project state. `alt_title:` keeps the
-    # auto-generated `<thing>_link` test-selector class stable across
-    # count changes ("3 Observations" → still `observations_link`,
-    # not `3_observations_link`).
-
-    def project_summary_tab(project)
-      InternalLink.new(
-        :SUMMARY.t, project_path(id: project.id), alt_title: "summary"
-      ).tab
-    end
-
-    def project_observations_tab(project)
-      count = project.visible_observations.count
-      InternalLink.new(
-        "#{count} #{:OBSERVATIONS.l}",
-        observations_path(project: project),
-        alt_title: "observations"
-      ).tab
-    end
-
-    def project_species_lists_tab(project)
-      count = project.species_lists.length
-      InternalLink.new(
-        "#{count} #{:SPECIES_LISTS.l}",
-        species_lists_path(project: project),
-        alt_title: "species_lists"
-      ).tab
-    end
-
-    def project_names_tab(project)
-      InternalLink.new(
-        "#{project.name_count} #{:NAMES.l}",
-        checklist_path(project_id: project.id),
-        alt_title: "checklists"
-      ).tab
-    end
-
-    def project_locations_tab(project)
-      InternalLink.new(
-        "#{project.location_count} #{:LOCATIONS.l}",
-        project_locations_path(project_id: project.id),
-        alt_title: "locations"
-      ).tab
-    end
-
-    def project_updates_tab(project)
-      count = project.new_candidate_observations_count
-      InternalLink.new(
-        "#{count} #{:project_updates_title.l}",
-        project_updates_path(project_id: project.id),
-        alt_title: "updates"
-      ).tab
-    end
-
-    def project_admin_tab(project)
-      InternalLink.new(
-        :show_project_admin_tab.l,
-        project_admin_path(project_id: project.id),
-        alt_title: "admin"
-      ).tab
-    end
-
-    # --- Project Admin sub-tabs (rendered by
-    # `Views::Controllers::Projects::AdminSubtabs` via NavTabs).
-
-    def project_admin_details_tab(project)
-      InternalLink.new(
-        :show_project_admin_details_tab.l,
-        project_admin_path(project_id: project.id),
-        alt_title: "details"
-      ).tab
-    end
-
-    def project_admin_members_tab(project)
-      count = project.user_group.users.count
-      InternalLink.new(
-        "#{count} #{:MEMBERS.l}",
-        project_members_path(project.id),
-        alt_title: "members"
-      ).tab
-    end
-
-    def project_admin_aliases_tab(project)
-      count = project.aliases.count
-      InternalLink.new(
-        "#{count} #{:PROJECT_ALIASES.l}",
-        project_aliases_path(project_id: project.id),
-        alt_title: "aliases"
-      ).tab
+      links << ::Tab::Project::ChangeMemberStatus.new(project: project).to_a
     end
 
     # Add some alternate sorting criteria.

@@ -2,6 +2,8 @@
 
 module Projects
   class TargetNamesController < ApplicationController
+    include Projects::TabCountsRefreshable
+
     before_action :login_required
     before_action :set_project
     before_action :require_admin
@@ -100,10 +102,25 @@ module Projects
 
     def render_checklist_update
       data = Checklist::ForProject.new(@project)
-      render(
-        partial: "projects/target_names/checklist_update",
-        locals: { project: @project, data: data, user: @user }
-      )
+      render(turbo_stream: [
+               turbo_stream.replace(
+                 "target_names_widget",
+                 Views::Controllers::Projects::TargetNames::Form.new(
+                   project: @project
+                 )
+               ),
+               turbo_stream.replace(
+                 "checklist_contents",
+                 Views::Controllers::Checklists::Contents.new(
+                   data: data,
+                   context: Views::Controllers::Checklists::Context.new(
+                     user: @user, project: @project
+                   )
+                 )
+               ),
+               turbo_stream_project_tabs("checklists"),
+               helpers.render_turbo_stream_flash_messages
+             ])
     end
   end
 end

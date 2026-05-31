@@ -6,7 +6,7 @@ module Tabs
       [
         user_observations_tab(user, :app_your_observations.t),
         comments_for_user_tab(user, :app_comments_for_you.t),
-        projects_for_user_tab(user),
+        ::Tab::Project::ForUser.new(user: user).to_a,
         species_lists_for_user_tab(user),
         account_show_interests_tab,
         account_edit_profile_tab,

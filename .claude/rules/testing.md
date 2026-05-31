@@ -423,6 +423,61 @@ assert_html(html, "input[type='file'][name='project[upload][image]']")
 assert_html(html, "textarea[name='email[message]'][rows='10']")
 ```
 
+### Always assert paths via route helpers, never hardcoded URLs
+
+When a test asserts that an element points at a route — `href=`, a
+PORO's `#path`, a form `action=`, a controller's `redirect_to` target
+— use the Rails path helper, NOT a literal URL string.
+
+```ruby
+# ❌ Bad — brittle to route changes (e.g. mount-prefix shifts,
+# `:project_id` → `:id` renames, scope/namespace additions).
+# Also harder to read: "what does this route mean?"
+assert_equal("/projects/#{project.id}/admin", tab.path)
+assert_html(html, "a[href='/checklist?project_id=#{p.id}']")
+assert_html(html, "form[action='/projects/#{p.id}/members']")
+assert_redirected_to("/observations?project=#{p.id}")
+
+# ✅ Good — uses the same route helper the production code uses.
+# A route rename breaks both at once → CI catches the drift.
+assert_equal(project_admin_path(project_id: project.id), tab.path)
+assert_html(html, "a[href='#{checklist_path(project_id: p.id)}']")
+assert_html(html, "form[action='#{project_members_path(p.id)}']")
+assert_redirected_to(observations_path(project: p))
+```
+
+For Phlex component tests inheriting `ComponentTestCase`, route
+helpers are available through the test controller's view context. For
+PORO unit tests (under `test/classes/`), `include
+Rails.application.routes.url_helpers` in the test class:
+
+```ruby
+class Tab::Project::TabsTest < UnitTestCase
+  include Rails.application.routes.url_helpers
+  # ...
+end
+```
+
+Why this matters:
+
+1. **Route renames are caught.** If `project_admin_path` becomes
+   `project_administration_path`, every hardcoded `/projects/.../admin`
+   in tests stays "green" while production breaks. Tests that go
+   through the helper fail loudly on the rename.
+2. **Reads as intent, not implementation.** `project_admin_path(...)`
+   says "the admin page for a project"; `/projects/123/admin` says
+   "a slash-projects-slash-id-slash-admin URL." The helper is the
+   contract.
+3. **No URL-encoding gotchas.** Helpers handle param escaping
+   correctly; hand-built URLs miss `Rack::Utils.escape` on query
+   values and accidentally pass when the literal happens to match
+   what Rails generates.
+4. **Mount-prefix safety.** If the app ever gets a `/v2/...` mount
+   prefix, route helpers update automatically; hardcoded URLs don't.
+
+This is the same rule as `assert_redirected_to` — never pass a string
+when a helper is available.
+
 ### When to Create Separate Tests
 
 Create separate test methods when:

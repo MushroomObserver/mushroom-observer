@@ -3,6 +3,7 @@
 module Projects
   class TargetLocationsController < ApplicationController
     include Projects::LocationGrouping
+    include Projects::TabCountsRefreshable
 
     before_action :login_required
     before_action :set_project
@@ -92,13 +93,24 @@ module Projects
     def render_locations_update
       grouped, ungrouped = build_grouped_locations(@project)
       counts = observation_counts(@project)
-      render(
-        partial: "projects/target_locations/locations_update",
-        locals: { project: @project, user: @user,
-                  grouped_data: grouped,
-                  ungrouped_locations: ungrouped,
-                  obs_counts: counts }
-      )
+      render(turbo_stream: [
+               turbo_stream.replace(
+                 "target_locations_widget",
+                 Views::Controllers::Projects::TargetLocations::Form.new(
+                   project: @project
+                 )
+               ),
+               turbo_stream.replace(
+                 "locations_table",
+                 Views::Controllers::Projects::Locations::Table.new(
+                   project: @project, grouped_data: grouped,
+                   ungrouped_locations: ungrouped, obs_counts: counts,
+                   user: @user
+                 )
+               ),
+               turbo_stream_project_tabs("locations"),
+               helpers.render_turbo_stream_flash_messages
+             ])
     end
   end
 end

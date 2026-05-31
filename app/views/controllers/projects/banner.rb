@@ -28,10 +28,14 @@ module Views::Controllers::Projects
       end
 
       div(class: "row") do
-        render(Tabs.new(
-                 project: @project, user: @user,
-                 current_tab: @current_tab
-               ))
+        div(class: "col-xs-12", id: "project_tabs") do
+          render(Components::NavTabs.new(
+                   current: @current_tab, link_class: "mt-3",
+                   tabs: ::Tab::Project::Banner.new(
+                     project: @project, user: @user
+                   )
+                 ))
+        end
       end
     end
 

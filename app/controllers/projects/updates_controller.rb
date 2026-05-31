@@ -2,6 +2,8 @@
 
 module Projects
   class UpdatesController < ApplicationController
+    include Projects::TabCountsRefreshable
+
     before_action :login_required
     before_action :set_project
     before_action :require_admin
@@ -109,11 +111,12 @@ module Projects
     def render_footer_update(obs)
       respond_to do |format|
         format.turbo_stream do
-          render(
-            partial: "projects/updates/footer_update",
-            locals: { project: @project, user: @user, obs: obs,
-                      count_label: count_label_for_current_scope }
-          )
+          render(turbo_stream: [
+                   turbo_stream.remove("box_#{obs.id}"),
+                   turbo_stream.update("project_updates_count",
+                                       count_label_for_current_scope),
+                   turbo_stream_project_tabs("updates")
+                 ])
         end
         format.html do
           redirect_back_or_to(
