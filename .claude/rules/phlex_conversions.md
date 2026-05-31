@@ -74,6 +74,28 @@ page-specific fragments wearing component clothing (e.g. a
 controller's show page — that's a view, put it in
 `app/views/controllers/`).
 
+**Reusable Bootstrap components are a Phlex goal in this codebase.**
+One of the reasons we moved to Phlex is to grow a library of
+reusable Bootstrap building blocks — `Components::Table`,
+`Components::Panel`, `Components::CrudButton::*`, `Components::Modal`,
+`Components::NavTabs`, etc. — so that the next view doesn't reach
+for raw `<ul class="nav nav-tabs">` / `<table>` / `<div class="panel">`
+markup. If a view uses a recognizable Bootstrap pattern (nav-tabs,
+panel, button group, modal, table, alert, breadcrumb, badge,
+progress bar, pagination strip — basically anything from
+[the Bootstrap component docs](https://getbootstrap.com/docs/3.4/components/))
+and there's no component for it yet, **extract one** as part of the
+conversion, even if there's only one caller right now. The next
+view that needs the same pattern shouldn't have to copy markup; it
+should reach for `render(Components::TheThing.new(...))` and have
+the Bootstrap classes / structure already baked in.
+
+Conversely, if a component already exists for the Bootstrap
+pattern you're rendering (`Components::Table`, `Components::Panel`,
+`Components::CrudButton::*`, etc.), use it rather than hand-rolling
+the markup — see the Tables / Tabs / etc. sections below for the
+specific guidance and component APIs.
+
 Heuristic: would a reader who doesn't know this codebase look at the
 class name and the file's contents and say "yes, that's a component"?
 If yes, `app/components/`. If they'd say "that's the

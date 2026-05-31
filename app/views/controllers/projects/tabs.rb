@@ -15,97 +15,66 @@ module Views::Controllers::Projects
 
     def view_template
       div(class: "col-xs-12", id: "project_tabs") do
-        ul(class: "nav nav-tabs") do
-          summary_tab
+        render(Components::NavTabs.new(current: @current_tab,
+                                       link_class: "mt-3")) do |tabs|
+          summary_tab(tabs)
           if @project.observations.any?
-            observation_tabs
+            observation_tabs(tabs)
           else
-            non_observation_tabs
+            non_observation_tabs(tabs)
           end
-          admin_tab
+          admin_tab(tabs)
         end
       end
     end
 
     private
 
-    def non_observation_tabs
-      species_list_tabs if @project.species_lists.any?
-      names_tab
-      locations_tab
-      update_tab
+    def non_observation_tabs(tabs)
+      species_lists_tab(tabs) if @project.species_lists.any?
+      names_tab(tabs)
+      locations_tab(tabs)
+      update_tab(tabs)
     end
 
-    def observation_tabs
-      observations_tab
-      species_lists_tab
-      names_tab
-      locations_tab
-      update_tab
+    def observation_tabs(tabs)
+      observations_tab(tabs)
+      species_lists_tab(tabs)
+      names_tab(tabs)
+      locations_tab(tabs)
+      update_tab(tabs)
     end
 
-    def admin_tab
+    def admin_tab(tabs)
       return unless @project.is_admin?(@user)
 
-      tab_item(:show_project_admin_tab.l,
-               project_admin_path(project_id: @project.id),
-               "admin")
+      tabs.tab(*project_admin_tab(@project), key: "admin")
     end
 
-    def summary_tab
-      tab_item(:SUMMARY.t, project_path(id: @project.id),
-               "projects")
+    def summary_tab(tabs)
+      tabs.tab(*project_summary_tab(@project), key: "projects")
     end
 
-    def observations_tab
-      count = @project.visible_observations.count
-      tab_item("#{count} #{:OBSERVATIONS.l}",
-               observations_path(project: @project),
-               "observations")
+    def observations_tab(tabs)
+      tabs.tab(*project_observations_tab(@project), key: "observations")
     end
 
-    def species_lists_tab
-      count = @project.species_lists.length
-      tab_item("#{count} #{:SPECIES_LISTS.l}",
-               species_lists_path(project: @project),
-               "species_lists")
+    def species_lists_tab(tabs)
+      tabs.tab(*project_species_lists_tab(@project), key: "species_lists")
     end
 
-    def names_tab
-      tab_item("#{@project.name_count} #{:NAMES.l}",
-               checklist_path(project_id: @project.id),
-               "checklists")
+    def names_tab(tabs)
+      tabs.tab(*project_names_tab(@project), key: "checklists")
     end
 
-    def locations_tab
-      tab_item("#{@project.location_count} #{:LOCATIONS.l}",
-               project_locations_path(project_id: @project.id),
-               "locations")
+    def locations_tab(tabs)
+      tabs.tab(*project_locations_tab(@project), key: "locations")
     end
 
-    def update_tab
-      return unless @project.has_targets? &&
-                    @project.is_admin?(@user)
+    def update_tab(tabs)
+      return unless @project.has_targets? && @project.is_admin?(@user)
 
-      count = @project.new_candidate_observations_count
-      tab_item("#{count} #{:project_updates_title.l}",
-               project_updates_path(project_id: @project.id),
-               "updates")
-    end
-
-    def species_list_tabs
-      species_lists_tab
-    end
-
-    def tab_item(text, path, tab_name)
-      li(class: "nav-item") do
-        a(href: path, class: tab_classes(tab_name)) { text }
-      end
-    end
-
-    def tab_classes(tab_name)
-      base = "mt-3 nav-link"
-      "#{base} #{"active" if @current_tab == tab_name}"
+      tabs.tab(*project_updates_tab(@project), key: "updates")
     end
   end
 end
