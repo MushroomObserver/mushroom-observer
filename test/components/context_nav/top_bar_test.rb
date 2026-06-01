@@ -73,6 +73,25 @@ module Components::ContextNav
       assert_html(html, "button", text: "Click")
     end
 
+    # `args[:button] => :put` dispatches through `CrudButton::Put`,
+    # used by Tab::Description::MakeDefault / PublishDraft etc.
+    def test_put_button_renders_as_form
+      links = [["Make Default", "/x/1/make_default", { button: :put }]]
+      html = render_top_bar(links)
+
+      assert_html(html, "form[action='/x/1/make_default']")
+      assert_html(html, "input[name='_method'][value='put']")
+    end
+
+    # `args[:button] => :patch` dispatches through `CrudButton::Patch`.
+    def test_patch_button_renders_as_form
+      links = [["Update", "/x/1", { button: :patch }]]
+      html = render_top_bar(links)
+
+      assert_html(html, "form[action='/x/1']")
+      assert_html(html, "input[name='_method'][value='patch']")
+    end
+
     # Plain links (no `args[:button]`) render as `<a>`.
     def test_plain_link_renders_as_anchor
       links = [["Edit", "/items/1/edit", { class: "edit_item_link" }]]

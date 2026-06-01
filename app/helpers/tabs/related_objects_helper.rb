@@ -35,13 +35,6 @@ module Tabs
       )&.to_a
     end
 
-    def related_names_tab(type, current_query)
-      ::Tab::Related::Query.for(
-        model: Name, filter: type,
-        current_query: current_query, controller: controller
-      )&.to_a
-    end
-
     def related_observations_tab(type, current_query)
       ::Tab::Related::Query.for(
         model: Observation, filter: type,
