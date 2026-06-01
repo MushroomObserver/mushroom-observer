@@ -2,58 +2,47 @@
 
 module Tabs
   module GeneralHelper
-    def search_tab_for(site_symbol, search_string)
-      return unless (url = external_search_urls[site_symbol])
+    # The tab definitions migrated to PORO classes:
+    # - `Tab::Object::Return`, `Tab::Object::Show`,
+    #   `Tab::Object::ShowParent`, `Tab::Object::Index` for the four
+    #   polymorphic "act on any object" tabs
+    # - `Tab::ExternalSearch` for the parameterized external search
+    #   link (Google_Maps / Google_Search / Wikipedia)
+    #
+    # The methods below remain as thin legacy-shape adapters so
+    # existing helper-chain callers (Phlex views, ERB templates,
+    # and other `Tabs::*Helper` methods that compose this one)
+    # keep working unchanged. Each PR that migrates a downstream
+    # domain (observations, names, locations) replaces these calls
+    # with direct PORO instantiation; once all downstream callers
+    # migrate, this file can be deleted.
 
-      InternalLink.new(
-        site_symbol.to_s.titlecase, "#{url}#{search_string}",
-        html_options: { id: "search_link_to_#{site_symbol}_#{search_string}" }
-      ).tab
+    def search_tab_for(site_symbol, search_string)
+      return unless ::Tab::ExternalSearch::URLS.key?(site_symbol)
+
+      ::Tab::ExternalSearch.new(site: site_symbol,
+                                query: search_string).to_a
     end
 
-    # Dictionary of urls for searches on external sites
     def external_search_urls
-      {
-        Google_Maps: "https://maps.google.com/maps?q=",
-        Google_Search: "https://www.google.com/search?q=",
-        Wikipedia: "https://en.wikipedia.org/w/index.php?search="
-      }.freeze
+      ::Tab::ExternalSearch::URLS
     end
 
     def object_return_tab(obj, text = nil)
-      text ||= :cancel_and_show.t(type: obj.type_tag)
-
-      InternalLink::Model.new(
-        text, obj, obj.show_link_args,
-        html_options: { class: "#{obj.type_tag}_return_link" }
-      ).tab
+      ::Tab::Object::Return.new(object: obj, title: text).to_a
     end
 
     def show_object_tab(obj, text = nil)
-      text ||= :show_object.t(type: obj.type_tag)
-
-      InternalLink::Model.new(
-        text, obj, obj.show_link_args,
-        html_options: { class: "#{obj.type_tag}_link" }
-      ).tab
+      ::Tab::Object::Show.new(object: obj, title: text).to_a
     end
 
     def show_parent_tab(obj, text = nil)
-      text ||= :show_object.t(type: obj.parent.type_tag)
-
-      InternalLink::Model.new(
-        text, obj, obj.parent.show_link_args,
-        html_options: { class: "parent_#{obj.parent.type_tag}_link" }
-      ).tab
+      ::Tab::Object::ShowParent.new(object: obj, title: text).to_a
     end
 
     def object_index_tab(obj, text = nil)
-      text ||= :list_objects.t(type: obj.type_tag)
-
-      InternalLink::Model.new(
-        text, obj, add_q_param(obj.index_link_args),
-        html_options: { class: "#{obj.type_tag.to_s.pluralize}_index_link" }
-      ).tab
+      ::Tab::Object::Index.new(object: obj, q_param: q_param,
+                               title: text).to_a
     end
   end
 end

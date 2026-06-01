@@ -2,38 +2,51 @@
 
 module Tabs
   module RelatedObjectsHelper
-    # These build links for indexes of a related object, filtered by the
-    # current query (or indexes of the same object, from a map). This new
-    # joined filtered query is passed as a new, provisional `q` - it is not
-    # saved as a QueryRecord because it's derived from that original query.
+    # The related-query tab definitions migrated to
+    # `Tab::Related::Query` (under `app/classes/tab/related/query.rb`).
+    # Use `Tab::Related::Query.for(model:, filter:, current_query:,
+    # controller:)` from new code — the factory returns nil when no
+    # bridge exists between `filter` and `model.name.to_sym`
+    # (matching the original `return unless ...` guard).
     #
-    # The `model` is the index you want, the `type` is the filtering subquery.
+    # The methods below remain as thin legacy-shape adapters during
+    # the migration. Each downstream helper / view that consumed
+    # them migrates to the PORO directly; once all callers have
+    # migrated, this file can be deleted.
+
     def related_objects_tab(model, type, current_query)
-      InternalLink::RelatedQuery.new(model, type, current_query, controller).tab
+      ::Tab::Related::Query.new(
+        model: model, filter: type,
+        current_query: current_query, controller: controller
+      ).to_a
     end
 
     def related_images_tab(type, current_query)
-      return unless current_query && Query.related?(:Image, type)
-
-      related_objects_tab(Image, type, current_query)
+      ::Tab::Related::Query.for(
+        model: Image, filter: type,
+        current_query: current_query, controller: controller
+      )&.to_a
     end
 
     def related_locations_tab(type, current_query)
-      return unless current_query && Query.related?(:Location, type)
-
-      related_objects_tab(Location, type, current_query)
+      ::Tab::Related::Query.for(
+        model: Location, filter: type,
+        current_query: current_query, controller: controller
+      )&.to_a
     end
 
     def related_names_tab(type, current_query)
-      return unless current_query && Query.related?(:Name, type)
-
-      related_objects_tab(Name, type, current_query)
+      ::Tab::Related::Query.for(
+        model: Name, filter: type,
+        current_query: current_query, controller: controller
+      )&.to_a
     end
 
     def related_observations_tab(type, current_query)
-      return unless current_query && Query.related?(:Observation, type)
-
-      related_objects_tab(Observation, type, current_query)
+      ::Tab::Related::Query.for(
+        model: Observation, filter: type,
+        current_query: current_query, controller: controller
+      )&.to_a
     end
   end
 end
