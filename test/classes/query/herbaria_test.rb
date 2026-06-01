@@ -32,6 +32,16 @@ class Query::HerbariaTest < UnitTestCase
     assert_query(expects, :Herbarium, order_by: :name)
   end
 
+  # Herbarium overrides AbstractModel's `order_by_user` (which joins
+  # on `:user`) because it has `:personal_user` instead. Private
+  # class method, so `send(:order_by_user)` is the supported way to
+  # exercise it directly; Query's `order_by(:user)` dispatcher hits
+  # the same method via `private_methods(false)`.
+  def test_herbarium_order_by_user
+    expects = Herbarium.send(:order_by_user)
+    assert_query(expects, :Herbarium, order_by: :user)
+  end
+
   def test_herbarium_nonpersonal
     expects = Herbarium.nonpersonal.order_by_default
     assert_query(expects, :Herbarium, nonpersonal: true)

@@ -32,34 +32,25 @@ module PanelHelper
     content_tag(element, html_options) { content }
   end
 
-  # draw a help block with an arrow
+  # draw a help block with an arrow. `direction` is "up", "down", or nil
+  # (no arrow). Production callers never pass mobile: — the arrow is
+  # always xs-hidden.
   def help_block_with_arrow(direction = nil, **args, &block)
     div_class = "well well-sm mb-3 help-block position-relative"
     div_class += " mt-3" if direction == "up"
 
     tag.div(class: div_class, id: args[:id]) do
       concat(capture(&block).to_s)
-      if direction
-        arrow_class = "arrow-#{direction}"
-        arrow_class += " hidden-xs" unless args[:mobile]
-        concat(tag.div("", class: arrow_class))
-      end
+      concat(tag.div("", class: "arrow-#{direction} hidden-xs")) if direction
     end
   end
 
-  def collapse_help_block(direction = nil, string = nil, **args, &block)
-    div_class = "well well-sm mb-3 help-block position-relative"
-    div_class += " mt-3" if direction == "up"
-    content = block ? capture(&block) : string
-
+  # Wraps a Bootstrap-collapse div around a help block. Only the
+  # block-form / no-direction shape is actually used today.
+  def collapse_help_block(**args, &block)
     tag.div(class: "collapse", id: args[:id]) do
-      tag.div(class: div_class) do
-        concat(content)
-        if direction
-          arrow_class = "arrow-#{direction}"
-          arrow_class += " hidden-xs" unless args[:mobile]
-          concat(tag.div("", class: arrow_class))
-        end
+      tag.div(class: "well well-sm mb-3 help-block position-relative") do
+        concat(capture(&block))
       end
     end
   end
