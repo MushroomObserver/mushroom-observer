@@ -91,13 +91,27 @@ class Tab::Base
   # Use from a Tab PORO's `#path` method when the tab's URL needs to
   # carry the current Query through (e.g. "back to filtered index"
   # links on a show page).
+  #
+  # Accepts either:
+  # - a String q_param (the alphabetized-id form — `?q=ABCDE`), or
+  # - a Hash q_param (the model+params form returned by
+  #   `Query#q_param` — `?q[model]=Observation&q[locations][]=1`)
+  #
+  # Uses Rails' `Hash#to_query` (not `Rack::Utils.build_query`)
+  # because Rack stringifies a nested Hash value as a literal Ruby
+  # `inspect` rep; `to_query` recurses correctly into nested
+  # hashes and arrays. Caught by the related_records integration
+  # tests that exercise `Tab::Location::ObservationsAt` — Query#q_param
+  # returns a Hash for newly-created queries, and the resulting URL
+  # was an unparseable literal Ruby Hash rep encoded with `+` for
+  # whitespace.
   def with_q_param(path, q_param_value)
     return path if q_param_value.blank?
 
     uri = URI.parse(path)
     parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
     parsed["q"] = q_param_value
-    uri.query = Rack::Utils.build_query(parsed)
+    uri.query = parsed.to_query
     uri.to_s
   end
 
