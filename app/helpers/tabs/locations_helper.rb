@@ -1,134 +1,112 @@
 # frozen_string_literal: true
 
-# html used in tabsets
 module Tabs
   module LocationsHelper
-    # link attribute arrays (each tab returns array)
-    def locations_index_tabs(query:)
-      [
-        new_location_tab,
-        map_locations_tab(query),
-        location_countries_tab,
-        related_observations_tab(:Location, query)
-      ]
-    end
+    # The tab definitions migrated to PORO classes under
+    # `app/classes/tab/location/*.rb` — 11 single Tab POROs +
+    # 7 `Tab::Collection` subclasses (IndexActions, VersionActions,
+    # MapActions, CountriesActions, FormNew, FormEdit,
+    # ExternalSearch).
+    #
+    # The methods below remain as thin legacy-shape adapters so
+    # existing helper-chain callers (Phlex views, ERB templates,
+    # and `Tabs::ObservationsHelper` / `Tabs::NamesHelper` etc.
+    # composers) keep working unchanged. Each downstream PR that
+    # migrates a caller replaces these calls with direct PORO
+    # instantiation; once all callers migrate, the file can be
+    # deleted (the `locations_index_sorts` non-tab utility
+    # relocates to a new `app/helpers/locations_helper.rb` then).
+
+    # -------- single tabs ----------------------------------------
 
     def new_location_tab
-      InternalLink::Model.new(
-        :show_location_create.t, Location,
-        new_location_path,
-        html_options: { icon: :add }
-      ).tab
+      ::Tab::Location::New.new.to_a
     end
 
     def map_locations_tab(query)
-      InternalLink.new(
-        :list_place_names_map.t, add_q_param(map_locations_path, query)
-      ).tab
+      ::Tab::Location::Map.new(q_param: q_param(query)).to_a
     end
 
     def location_countries_tab
-      InternalLink.new(
-        :list_countries.t, location_countries_path
-      ).tab
+      ::Tab::Location::Countries.new.to_a
     end
 
     def edit_location_tab(location)
-      InternalLink::Model.new(
-        :show_location_edit.t, location,
-        edit_location_path(location.id),
-        html_options: { icon: :edit }
-      ).tab
+      ::Tab::Location::Edit.new(location: location).to_a
     end
-
-    # Dead code
-    # def destroy_location_tab(location)
-    #   InternalLink::Model.new(
-    #     :show_location_destroy.t, location, location,
-    #     html_options: { button: :destroy }
-    #   ).tab
-    # end
 
     def location_reverse_order_tab(location)
-      InternalLink::Model.new(
-        :show_location_reverse.t, location,
-        reverse_name_order_location_path(location.id),
-        html_options: { icon: :back }
-      ).tab
+      ::Tab::Location::ReverseOrder.new(location: location).to_a
     end
 
-    # description tabs:
     def location_show_description_tab(location)
       return unless location&.description
 
-      InternalLink::Model.new(
-        :show_name_see_more.l, location,
-        location_description_path(location.description.id),
-        html_options: { icon: :list }
-      ).tab
+      ::Tab::Location::ShowDescription.new(location: location).to_a
     end
 
     def location_edit_description_tab(location)
       return unless location&.description
 
-      InternalLink::Model.new(
-        :EDIT.l, location,
-        edit_location_description_path(location.description.id),
-        html_options: { icon: :edit }
-      ).tab
+      ::Tab::Location::EditDescription.new(location: location).to_a
     end
 
     def location_new_description_tab(location)
-      InternalLink::Model.new(
-        :show_name_create_description.l, location,
-        new_location_description_path(location.id),
-        html_options: { icon: :add }
-      ).tab
-    end
-
-    def location_version_tabs(location:)
-      [location_versions_tab(location)]
+      ::Tab::Location::NewDescription.new(location: location).to_a
     end
 
     def location_versions_tab(location)
-      InternalLink::Model.new(
-        :show_location.t(location: location.display_name), location,
-        location_path(location.id),
-        alt_title: :show_object.t(TYPE: Location)
-      ).tab
+      ::Tab::Location::Versions.new(location: location).to_a
     end
 
     def locations_index_tab
-      InternalLink::Model.new(
-        :all_objects.t(type: :location), Location,
-        locations_path
-      ).tab
+      ::Tab::Location::Index.new.to_a
     end
 
     def observations_at_location_tab(location)
-      query = Query.lookup(:Observation, locations: location.id)
+      ::Tab::Location::ObservationsAt.new(location: location).to_a
+    end
 
-      InternalLink::Model.new(
-        show_obs_link_title_with_count(location), location,
-        add_q_param(observations_path, query),
-        alt_title: :show_location_observations.t,
-        html_options: { icon: :observations, show_text: true }
-      ).tab
+    # -------- collections ----------------------------------------
+
+    # Collections delegate to `.map(&:to_a)` to return legacy
+    # `[title, url, opts]` array-of-arrays — Tab::Collection.to_a
+    # would return Tab::Base instances which the legacy
+    # `add_context_nav([...])` path doesn't recognize.
+
+    def locations_index_tabs(query:)
+      ::Tab::Location::IndexActions.new(query: query,
+                                        q_param: q_param(query),
+                                        controller: controller).map(&:to_a)
+    end
+
+    def location_version_tabs(location:)
+      ::Tab::Location::VersionActions.new(location: location).map(&:to_a)
     end
 
     def location_map_tabs(query:)
-      [
-        locations_index_tab,
-        related_observations_tab(:Location, query),
-        related_locations_tab(:Location, query) # index of same locations
-      ]
+      ::Tab::Location::MapActions.new(query: query,
+                                      controller: controller).map(&:to_a)
     end
 
     def location_countries_tabs
-      [locations_index_tab]
+      ::Tab::Location::CountriesActions.new.map(&:to_a)
     end
 
-    # Add some alternate sorting criteria.
+    def location_form_new_tabs(location:)
+      ::Tab::Location::FormNew.new(location: location).map(&:to_a)
+    end
+
+    def location_form_edit_tabs(location:)
+      ::Tab::Location::FormEdit.new(location: location).map(&:to_a)
+    end
+
+    def location_search_tabs(name)
+      ::Tab::Location::ExternalSearch.new(name: name).map(&:to_a)
+    end
+
+    # -------- non-tab utility (stays a helper) -------------------
+
     def locations_index_sorts(query: nil)
       rss_log = query&.params&.dig(:order_by) == :rss_log
       [
@@ -138,32 +116,6 @@ module Tabs
         ["num_views", :sort_by_num_views.t],
         ["box_area", :sort_by_box_area.t]
       ]
-    end
-
-    # link attribute arrays
-    def location_form_new_tabs(location:)
-      tabs = [locations_index_tab]
-      tabs += location_search_tabs(location.name) if location&.name
-      tabs
-    end
-
-    def location_form_edit_tabs(location:)
-      tabs = [
-        locations_index_tab,
-        object_return_tab(location)
-      ]
-      tabs += location_search_tabs(location.name) if location&.name
-      tabs
-    end
-
-    # Array of link attribute arrays to searches on external sites;
-    # Shown on create/edit location pages
-    def location_search_tabs(name)
-      search_string = name.gsub(" Co.", " County").gsub(", USA", "").
-                      tr(" ", "+").gsub(",", "%2C")
-      external_search_urls.each_with_object([]) do |site, link_array|
-        link_array << search_tab_for(site.first, search_string)
-      end
     end
   end
 end
