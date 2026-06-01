@@ -90,6 +90,7 @@ module Report
     def sciname(row)
       text_name = row.name_text_name
       return genus_from_gen_name(text_name) if gen_name?(row)
+      return sciname_from_sp_code_name(text_name) if sp_code_name?(row)
       return text_name.split.first if infrageneric?(row) ||
                                       unpublished_name?(row) ||
                                       code_name?(row)
@@ -203,27 +204,25 @@ module Report
 
     def group?(row) = row.name_text_name.match?(/(group|complex|clade)$/)
     def group_token(row) = row.name_text_name.match(/(group|complex|clade)$/)[0]
-
-    def text_name_without_last_word(text_name)
-      text_name.split[0...-1].join(" ")
-    end
+    def text_name_without_last_word(text_name) = text_name.gsub(/ \S+$/, "")
 
     def unregistrable_name?(row)
-      group?(row) ||
-        sensu_non_stricto?(row) ||
-        unpublished_name?(row) ||
-        code_name?(row)
+      group?(row) || sensu_non_stricto?(row) ||
+        unpublished_name?(row) || code_name?(row)
     end
 
-    def sensu_non_stricto?(row)
-      row.name_author.present? &&
-        row.name_author.match(/sensu(?!.*stricto)/)
-    end
+    def sensu_non_stricto?(row) = row.name_author&.match?(/sensu(?!.*stricto)/)
 
     def gen_name?(row) = row.name_text_name.start_with?("Gen. ")
     def infrageneric?(row) = INFRAGENERIC_RANKS.include?(row.name_rank)
     def genus_from_gen_name(text_name) = text_name.match(/'([^']+)'/)[1]
     def code_name?(row) = row.name_text_name.match?(/'/)
+    def sp_code_name?(row) = row.name_text_name.match?(/\A\S+ sp\. '[a-z]{5,}-/)
+
+    def sciname_from_sp_code_name(text_name)
+      m = text_name.match(/\A(\S+) sp\. '([a-z]{5,})-/)
+      "#{m[1]} #{m[2]}"
+    end
 
     def unpublished_name?(row)
       row.name_author.to_s.match?(/\w+\.\s*prov\.|nom\.\s*ined/i)

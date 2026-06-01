@@ -598,6 +598,29 @@ class ReportTest < UnitTestCase
     do_mycoportal_csv_test(obs, expect)
   end
 
+  def test_mycoportal_code_name_sp_lowercase_epithet
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Mycena sp. 'acicula-PNW01'",
+      author: "",
+      search_name: "Mycena sp. 'acicula-PNW01'",
+      display_name: "**__Mycena__** sp. **__'acicula-PNW01'__**"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Mycena acicula", # binomial if genuine epithet present
+      identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
+      taxonRemarks: name.search_name
+    ).values
+
+    do_mycoportal_csv_test(obs, expect)
+  end
+
   # Unpublished names (nom. prov., comb. prov., nom. ined., etc.):
   # sciname = genus; identificationQualifier = "aff. <rank>";
   # taxonRemarks = search_name
