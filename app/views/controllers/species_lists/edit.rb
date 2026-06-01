@@ -17,7 +17,7 @@ module Views::Controllers::SpeciesLists
 
     def view_template
       add_edit_title(@species_list)
-      add_context_nav(species_list_form_edit_tabs(list: @species_list))
+      add_context_nav(::Tab::SpeciesList::FormEdit.new(list: @species_list))
       container_class(:text)
 
       render(Views::Controllers::SpeciesLists::Form.new(

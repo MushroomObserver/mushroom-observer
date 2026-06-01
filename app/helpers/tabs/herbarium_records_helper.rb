@@ -4,8 +4,6 @@
 #
 module Tabs
   module HerbariumRecordsHelper
-    include HerbariaHelper
-
     def herbarium_records_index_tabs(obs:)
       links = []
       if obs.present?

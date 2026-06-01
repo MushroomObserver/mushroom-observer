@@ -18,7 +18,7 @@ module Views::Controllers::SpeciesLists
     def view_template
       add_project_banner(@project) if @project
       add_index_title(@query)
-      add_sorter(@query, species_lists_index_sorts(query: @query))
+      add_sorter(@query, sort_options)
       add_pagination(@pagination_data)
       container_class(:wide)
 
@@ -28,6 +28,17 @@ module Views::Controllers::SpeciesLists
     end
 
     private
+
+    def sort_options
+      rss_log = @query&.params&.dig(:order_by) == :rss_log
+      [
+        ["title",      :sort_by_title.t],
+        ["date",       :sort_by_date.t],
+        ["user",       :sort_by_user.t],
+        ["created_at", :sort_by_created_at.t],
+        [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t]
+      ]
+    end
 
     def render_list
       return unless @objects.any?

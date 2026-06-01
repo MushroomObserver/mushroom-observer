@@ -4,8 +4,6 @@
 # edit.html.erb — page chrome plus the inline `Form`.
 module Views::Controllers::SpeciesLists::Projects
   class Edit < Views::Base
-    register_value_helper :species_list_edit_project_tabs
-
     def initialize(list:, projects:, object_states:, project_states:)
       super()
       @list = list
@@ -16,7 +14,7 @@ module Views::Controllers::SpeciesLists::Projects
 
     def view_template
       add_page_title(:species_list_projects_title.t(list: @list.title))
-      add_context_nav(species_list_edit_project_tabs(list: @list))
+      add_context_nav(::Tab::SpeciesList::FormEditProject.new(list: @list))
 
       div(class: "help-block mt-3") do
         trusted_html(:species_list_projects_help.tp)
