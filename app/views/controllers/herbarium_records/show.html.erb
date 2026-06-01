@@ -2,7 +2,7 @@
 add_show_title(@herbarium_record)
 add_edit_icons(@herbarium_record, @user)
 add_pager_for(@herbarium_record)
-add_context_nav(herbarium_record_show_tabs)
+add_context_nav(Tab::HerbariumRecord::ShowActions.new(q_param: q_param))
 column_classes(:six)
 
 herbarium = @herbarium_record.herbarium

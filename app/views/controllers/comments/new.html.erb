@@ -1,7 +1,7 @@
 <%
 container_class(:full)
-add_page_title(comment_form_new_title(target: @target))
-add_context_nav(comment_form_new_tabs(target: @target))
+add_page_title(:comment_add_title.t(name: @target.unique_format_name))
+add_context_nav(Tab::Comment::FormNew.new(target: @target))
 %>
 
 <div class="row">

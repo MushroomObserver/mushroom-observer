@@ -1,0 +1,40 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+module Tab::Image
+  class CollectionsTest < UnitTestCase
+    def setup
+      @image = images(:in_situ_image)
+    end
+
+    def test_show_actions_with_observation_and_permission
+      tabs = Tab::Image::ShowActions.new(
+        image: @image, permission: true
+      ).to_a
+
+      # observation_tabs (3) + eol_tab (if present) + mod_tabs (2)
+      # + commercial_tab (if email_general_commercial). The in_situ_image
+      # has exactly one observation.
+      classes = tabs.map(&:class)
+      assert_includes(classes, Tab::Object::Show)
+      assert_includes(classes, Tab::Image::NameGoogleImages)
+      assert_includes(classes, Tab::Image::Edit)
+      assert_includes(classes, Tab::Image::Destroy)
+    end
+
+    def test_show_actions_no_permission
+      tabs = Tab::Image::ShowActions.new(image: @image).to_a
+
+      classes = tabs.map(&:class)
+      assert_not_includes(classes, Tab::Image::Edit)
+      assert_not_includes(classes, Tab::Image::Destroy)
+    end
+
+    def test_exif_show
+      tabs = Tab::Image::EXIFShow.new(image: @image).to_a
+
+      assert_equal([Tab::Object::Return], tabs.map(&:class))
+    end
+  end
+end

@@ -1,7 +1,7 @@
 <%
 container_class(:full)
 add_new_title(:add_object, :COLLECTION_NUMBER)
-add_context_nav(collection_number_form_new_tabs(obs: @observation))
+add_context_nav(Tab::CollectionNumber::FormNew.new(observation: @observation))
 %>
 
 <div class="row">

@@ -1,7 +1,9 @@
 <%
 container_class(:full)
 add_new_title(:add_object, :HERBARIUM_RECORD)
-add_context_nav(herbarium_record_form_new_tabs(obs: @observation))
+add_context_nav(Tab::HerbariumRecord::FormNew.new(
+  observation: @observation, q_param: q_param
+))
 %>
 
 <div class="row">
