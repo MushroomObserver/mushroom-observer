@@ -6,7 +6,7 @@ on [MyCoPortal] (MCP).
 
 ## Summary
 
-1. [Determine the starting date](#determine-the-starting-date).
+1. [Determine the starting date](#determine-the-starting-date-and-highest-image-already-imported).
 2. [Create import files](#create-import-files).
 3. [Import the files to MCP](#import-the-files-to-mcp).
 
@@ -15,9 +15,27 @@ on [MyCoPortal] (MCP).
 
 ## Details
 
-### Determine the starting date
+### Overview of initial goal
 
-* Login to [MyCoPortal] with an account which has privileges to manage the MUOB collection.
+The initial goal is: create two import files: a data file and and image file.
+
+* The data file contains Observation data (other than images) for all
+qualifying Observations (high enough confidence, etc.)
+which were created or modified after our last update of MCP records.
+* The image files has image data limited to:
+  * the Observations in the data file,
+  * but only for images created after the last image (by image id)
+imported to MCP.
+
+It is important to limit the image file for two reasons:
+
+* MCP will end up with duplicate images if the image file includes
+images which were already uploaded.
+* It expedites the update.
+
+### Determine the starting date and highest image already imported
+
+* Login to [MyCoPortal] with an account with privileges to manage the MUOB collection.
 * Go to the [MUOB Collection Profile].
 * Toggle "**Manager's Control Panel**" to reveal `Administration Control Panel`.
 
@@ -43,16 +61,17 @@ The list will begin like this:
 
 * Open that file and scroll to the bottom.
 
-> [!IMPORTANT]
+[!IMPORTANT]
  Note two things from the Image Mapping File:
->
-> 1. The MUOB number after the final `Processing Catalog Number`.
->    This is the `Observation.id` of the most-recent Observation imported to MCP
->    in the last incremental update.
-> 2. The `created_at` timestamp of the most-recently-processed image entry
->    (shown on the line beginning with the last `#N:` entry, or from the file
->    metadata). This is the **images since** cutoff you will use when creating
->    the image list file.
+
+1. The MUOB number after the final `Processing Catalog Number`.
+This is the `Observation.id` of the most-recent Observation imported to MCP
+in the last incremental update.
+
+2. The `created_at` timestamp of the most-recently-processed image entry
+(shown on the line beginning with the last `#N:` entry, or from the file
+metadata). This is the **images since** cutoff you will use when creating
+the image list file.
 
 ### Create import files
 
