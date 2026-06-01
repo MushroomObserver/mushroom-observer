@@ -1,7 +1,7 @@
 <%
 add_page_title(:image_reuse_title.t(name: @object.unique_format_name))
 
-add_context_nav(glossary_term_image_form_tabs(term: @object))
+add_context_nav(Tab::GlossaryTerm::ImageForm.new(term: @object))
 container_class(:full)
 
 form_action = { controller: "/glossary_terms/images", action: :attach,
