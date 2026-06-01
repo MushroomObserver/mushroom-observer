@@ -15,7 +15,7 @@ html = add_list_of_projects(object, type, html, projects) if projects.present?
 <%= render(Components::Panel.new(panel_id: "alt_descriptions")) do |panel| %>
   <%= panel.with_heading { :show_name_descriptions.l } %>
   <%= panel.with_heading_links do
-        icon_link_to(*create_description_tab(object, type))
+        icon_link_to(*Tab::Description::Create.new(parent: object).to_a)
       end %>
   <%= panel.with_body { html.html_safe } %>
 <% end %>

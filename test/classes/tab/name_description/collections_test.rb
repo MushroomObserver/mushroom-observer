@@ -16,18 +16,27 @@ module Tab::NameDescription
       assert_equal([Tab::Object::Return], tabs.map(&:class))
     end
 
-    def test_form_edit
+    def test_form_edit_non_admin
       tabs = Tab::NameDescription::FormEdit.new(
         description: @description
       ).to_a
 
       # 2 Object::Return tabs: name + the description itself.
-      # The "adjust permissions" tab is appended by the helper
-      # delegator (still depends on the unconverted
-      # descriptions_helper#adjust_description_permissions_tab).
       assert_equal([Tab::Object::Return, Tab::Object::Return],
                    tabs.map(&:class))
       assert_equal(:show_object.t(type: :name), tabs[0].title)
+    end
+
+    def test_form_edit_admin
+      tabs = Tab::NameDescription::FormEdit.new(
+        description: @description, admin: true
+      ).to_a
+
+      assert_equal(
+        [Tab::Object::Return, Tab::Object::Return,
+         Tab::Description::AdjustPermissions],
+        tabs.map(&:class)
+      )
     end
 
     def test_form_permissions
