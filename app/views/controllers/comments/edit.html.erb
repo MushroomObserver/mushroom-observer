@@ -1,6 +1,6 @@
 <%
-add_page_title(comment_form_edit_title(target: @target))
-add_context_nav(comment_form_edit_tabs(comment: @comment))
+add_page_title(:comment_edit_title.t(name: @target.unique_format_name))
+add_context_nav(Tab::Comment::FormEdit.new(comment: @comment))
 %>
 
 <!--[form:comment]-->

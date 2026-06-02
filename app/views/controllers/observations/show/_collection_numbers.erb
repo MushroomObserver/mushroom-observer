@@ -18,8 +18,10 @@ can_edit = in_admin_mode? || obs.can_edit?(user)
             "#{:Collection_numbers.t}:",
             [ # any html helper has to be safe_joined separately
               "[",
-              modal_link_to("collection_number",
-                            *new_collection_number_tab(obs)),
+              modal_link_to(
+                "collection_number",
+                *Tab::CollectionNumber::New.new(observation: obs).to_a
+              ),
               "]"
             ].safe_join
           ].safe_join(" ")
@@ -28,10 +30,16 @@ can_edit = in_admin_mode? || obs.can_edit?(user)
           numbers.map do |number|
             tag.li(id: "collection_number_#{number.id}") do
               [
-                link_to(*show_collection_number_tab(number, obs)),
+                link_to(*Tab::CollectionNumber::Show.new(
+                  collection_number: number, observation: obs
+                ).to_a),
                 "[",
-                modal_link_to("collection_number_#{number.id}",
-                              *edit_collection_number_tab(number, obs)),
+                modal_link_to(
+                  "collection_number_#{number.id}",
+                  *Tab::CollectionNumber::Edit.new(
+                    collection_number: number, observation: obs
+                  ).to_a
+                ),
                 "|",
                 remove_collection_number_button(number, obs),
                 "]"
@@ -46,7 +54,9 @@ can_edit = in_admin_mode? || obs.can_edit?(user)
         numbers.length > 1 ? "#{:Collection_numbers.t}:" :
                              "#{:Collection_number.t}:",
         numbers.map do |number|
-          link_to(*show_collection_number_tab(number, obs))
+          link_to(*Tab::CollectionNumber::Show.new(
+            collection_number: number, observation: obs
+          ).to_a)
         end.safe_join(", ")
       ].safe_join(" ")
 
@@ -55,8 +65,10 @@ can_edit = in_admin_mode? || obs.can_edit?(user)
         has_sibling_records ? "#{:Collection_numbers.t}:" :
                               :show_observation_no_collection_numbers.t,
         " [",
-        modal_link_to("collection_number",
-                      *new_collection_number_tab(obs)),
+        modal_link_to(
+          "collection_number",
+          *Tab::CollectionNumber::New.new(observation: obs).to_a
+        ),
         "]"
       ].safe_join
     end

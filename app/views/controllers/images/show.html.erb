@@ -1,7 +1,9 @@
 <%
 add_show_title(@image)
 add_pager_for(@image)
-add_context_nav(show_image_tabs(image: @image))
+add_context_nav(Tab::Image::ShowActions.new(
+  image: @image, permission: permission?(@image)
+))
 container_class(:full)
 column_classes(:six)
 %>

@@ -1,7 +1,7 @@
 <%
 container_class(:full)
 add_new_title(:add_object, :SEQUENCE)
-add_context_nav(sequence_form_tabs(obj: @observation))
+add_context_nav(Tab::Sequence::Form.new(back_object: @observation))
 %>
 
 <div class="row">

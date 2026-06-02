@@ -2,7 +2,9 @@
 container_class(:wide)
 # the no_hits_title.
 add_index_title(@query)
-add_context_nav(collection_numbers_index_tabs(obs: @observation))
+add_context_nav(Tab::CollectionNumber::IndexActions.new(
+  observation: @observation
+))
 add_sorter(@query, collection_numbers_index_sorts)
 add_pagination(@pagination_data)
 

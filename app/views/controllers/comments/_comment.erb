@@ -46,7 +46,8 @@ tag.div(
                           data: { user_specific: comment.user.id }) do
             [
               "[",
-              modal_link_to(dom_id(comment), *edit_comment_tab(comment)),
+              modal_link_to(dom_id(comment),
+                            *Tab::Comment::Edit.new(comment: comment).to_a),
               "|",
               destroy_button(name: :comment_show_destroy.t, target: comment,
                              btn: nil, data: { turbo: true }),

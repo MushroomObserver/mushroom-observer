@@ -2,6 +2,15 @@
 
 # helpers for new Sequence view
 module SequencesHelper
+  def sequences_index_sorts
+    [
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["user",        :USER.t],
+      ["observation", :OBSERVATION.t]
+    ].freeze
+  end
+
   def sequence_accession_link(sequence)
     link_to(truncate(sequence.accession, length: sequence.locus_width / 2).t,
             sequence.accession_url, target: "_blank", rel: "noopener")

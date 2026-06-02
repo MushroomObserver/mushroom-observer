@@ -1,8 +1,10 @@
 <%
 container_class(:full)
 add_edit_title(@collection_number)
-add_context_nav(collection_number_form_edit_tabs(
-  back: @back, c_n: @collection_number, obj: @back_object
+add_context_nav(Tab::CollectionNumber::FormEdit.new(
+  collection_number: @collection_number,
+  back: @back, back_object: @back_object,
+  q_param: q_param
 ))
 %>
 
