@@ -7,7 +7,10 @@ heading = [
 heading_links =
   if @show_user != @user && !@show_user.no_emails &&
      @show_user.email_general_question
-    modal_link_to("user_question_email", *email_user_question_tab(@show_user))
+    modal_link_to(
+      "user_question_email",
+      *Tab::User::EmailQuestion.new(user: @show_user).to_a
+    )
   else
     nil
   end
@@ -76,7 +79,9 @@ footer =
     <% end %>
 
     <%= tag.div(class: "mt-3") do %>
-      <% links = user_profile_tabs(show_user: @show_user, user: @user) %>
+      <% links = Tab::User::ProfileActions.new(
+             show_user: @show_user, user: @user, admin: in_admin_mode?
+           ).map(&:to_a) %>
       <% links = context_nav_links(links) %>
       <%= tag.ul(class: "list-unstyled mb-0") do %>
         <% links.reject(&:nil?).each do |link| %>

@@ -177,6 +177,16 @@ class AccountControllerTest < FunctionalTestCase
     assert_head_title(:welcome_no_user_title.l)
   end
 
+  # Welcome page when logged in uses the user-branch title
+  # (`account_welcome_title(@user)` → `:email_welcome.t`).
+  def test_logged_in_user_welcome
+    login("rolf")
+    get(:welcome)
+
+    assert_response(:success)
+    assert_head_title(:email_welcome.l(user: users(:rolf).legal_name))
+  end
+
   def test_block_known_evil_signups
     params = {
       login: "newbob",

@@ -23,9 +23,12 @@ module Views::Controllers::Checklists
       container_class(:full)
       add_project_banner(@context.project) if @context.project
       add_page_title(checklist_show_title)
+      list = @context.species_list
       add_context_nav(
-        checklist_show_tabs(user: @context.show_user,
-                            list: @context.species_list)
+        Tab::Checklist::ShowActions.new(
+          user: @context.show_user, list: list,
+          permission: list ? permission?(list) : false
+        )
       )
     end
 
