@@ -69,17 +69,6 @@ class Herbarium < AbstractModel
   scope :order_by_default,
         -> { order_by(::Query::Herbaria.default_order) }
 
-  # AbstractModel's `order_by_user` joins on `:user`; Herbarium has
-  # `:personal_user` instead (only set for personal herbaria; nil
-  # for institutional ones). Override here so the "user" sort on
-  # the herbaria index works for the full (mixed) listing.
-  scope :order_by_user, lambda {
-    joins(:personal_user).distinct.order(
-      User[:name].when(nil).then(User[:login]).when("").then(User[:login]).
-      else(User[:name]).asc
-    )
-  }
-
   scope :nonpersonal, lambda { |bool = true|
     if bool.to_s.to_boolean == true
       where(personal_user_id: nil)
@@ -278,6 +267,23 @@ class Herbarium < AbstractModel
         includeothercatnum: 1 }
 
     "#{base_url}?#{search_params.to_query}"
+  end
+
+  # AbstractModel's `order_by_user` joins on `:user`; Herbarium has
+  # `:personal_user` (only set for personal herbaria; nil for
+  # institutional ones). Override so the "user" sort on the herbaria
+  # index works for the full (mixed) listing. Private class method
+  # because Query's `order_by(:user)` dispatcher checks
+  # `private_methods(false)` on the model.
+  class << self
+    private
+
+    def order_by_user
+      joins(:personal_user).distinct.order(
+        User[:name].when(nil).then(User[:login]).when("").then(User[:login]).
+          else(User[:name]).asc
+      )
+    end
   end
 
   private

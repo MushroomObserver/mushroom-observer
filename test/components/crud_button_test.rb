@@ -371,6 +371,15 @@ class CrudButtonParityTest < ComponentTestCase
     assert_html(html, "a span.sr-only", text: "Edit it")
   end
 
+  # String/Hash targets have no recoverable type, so `default_name`
+  # falls back to the generic `:EDIT.l` instead of
+  # `:edit_object.t(type: …)`.
+  def test_edit_button_string_target_default_name
+    html = view_context.edit_button(target: "/items/42/edit")
+
+    assert_html(html, "a span.sr-only", text: :EDIT.l)
+  end
+
   # post_button: form, no `_method` field (POST is default), no
   # confirm, button body is the name verbatim.
   def test_post_button_parity

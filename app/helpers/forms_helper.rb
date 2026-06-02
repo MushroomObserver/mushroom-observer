@@ -113,18 +113,6 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
   # Makes an element that looks like a bootstrap button but works as a checkbox.
   # Only works within a .btn-group wrapper. NOTE: Different from a check_box!
-  def check_button_with_label(**args)
-    args = auto_label_if_form_is_account_prefs(args)
-    opts = separate_field_options_from_args(args)
-
-    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
-
-    args[:form].label(args[:field], class: wrap_class) do
-      [args[:form].check_box(args[:field], opts.merge(class: "mt-0 mr-2")),
-       args[:label]].safe_join
-    end
-  end
-
   # Bootstrap radio: form, field, value, label, class, checked
   #
   # The label's `for=` matches the id Rails' `radio_button` generates for
@@ -158,18 +146,6 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
   # Makes an element that looks like a bootstrap button but works as a radio.
   # Only works within a .btn-group wrapper. NOTE: Different from a radio_button!
-  def radio_button_with_label(**args)
-    args = auto_label_if_form_is_account_prefs(args)
-    opts = separate_field_options_from_args(args)
-
-    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
-
-    args[:form].label(args[:field], class: wrap_class) do
-      [args[:form].radio_button(args[:field], opts.merge(class: "mt-0 mr-2")),
-       args[:label]].safe_join
-    end
-  end
-
   # Bootstrap text_field
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
@@ -312,97 +288,6 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     { include_blank: args[:include_blank], selected: args[:selected] }
   end
 
-  # Bootstrap 3-input date helper: day select + month select + year text
-  # input. Replaces Rails' `date_select` (which emits three selects)
-  # because a fixed-range year dropdown is awkward for old-date scenarios
-  # (e.g. an observation from 30 years ago that falls outside the default
-  # 20-year range). The text-input year sidesteps that entirely.
-  #
-  # Day/month/year emit element IDs `{form_id}_3i`/`_2i`/`_1i` and names
-  # `{form_name}[{field}(3i)]`/`(2i)]`/`(1i)]` to match Rails' multi-
-  # parameter date attribute convention, so controller-side param parsing
-  # is unchanged. The wrapping div uses the bare form-field id so a
-  # `<label for="…">` click focuses the day select first.
-  # https://stackoverflow.com/a/16426122/3357635
-  def date_select_with_label(**args)
-    args = check_for_optional_or_required_note(args)
-    args = check_for_help_block(args)
-    date = date_field_selected_value(args)
-    wrap_class = form_group_wrap_class(args)
-    selects_class = "form-inline date-selects"
-    selects_class += " d-inline-block" if args[:inline] == true
-    label_opts = { class: "mr-3" }
-    label_opts[:index] = args[:index] if args[:index].present?
-    tag.div(class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
-      concat(args[:between]) if args[:between].present?
-      concat(date_field_inputs_div(args, date, selects_class))
-      concat(args[:append]) if args[:append].present?
-    end
-  end
-
-  # Resolve the date to display: the explicit `selected:`, then the
-  # object's value for the field, then today.
-  def date_field_selected_value(args)
-    field = args[:field] || :when
-    obj = args[:object] || args[:form]&.object
-    return args[:selected] if args[:selected]
-    return obj.try(&field.to_sym) || Time.zone.today if obj.respond_to?(field)
-
-    Time.zone.today
-  end
-
-  def date_field_inputs_div(args, date, selects_class)
-    identifier = [args[:form]&.object_name, args[:index],
-                  args[:field]].compact_blank.join("_")
-    tag.div(class: selects_class, id: identifier) do
-      concat(date_field_day_select(args, date, identifier))
-      concat(date_field_month_select(args, date, identifier))
-      concat(date_field_year_input(args, date, identifier))
-    end
-  end
-
-  def date_field_day_select(args, date, identifier)
-    tag.select(id: "#{identifier}_3i",
-               name: date_field_param_name(args, "3i"),
-               class: "form-control mr-2") do
-      (1..31).each do |day|
-        concat(tag.option(day, value: day,
-                               selected: day == date.day))
-      end
-    end
-  end
-
-  def date_field_month_select(args, date, identifier)
-    tag.select(id: "#{identifier}_2i",
-               name: date_field_param_name(args, "2i"),
-               class: "form-control mr-2") do
-      (1..12).each do |m|
-        concat(tag.option(Date::MONTHNAMES[m], value: m,
-                                               selected: m == date.month))
-      end
-    end
-  end
-
-  def date_field_year_input(args, date, identifier)
-    tag.input(type: "text",
-              id: "#{identifier}_1i",
-              name: date_field_param_name(args, "1i"),
-              class: "form-control",
-              size: 4,
-              value: date.year)
-  end
-
-  # `{object_name}[{field}(Ni)]` — matches Rails' date_select output so
-  # multi-parameter date attribute parsing on the controller stays
-  # identical. Falls back to bare `{field}(Ni)` for object-less forms.
-  def date_field_param_name(args, suffix)
-    prefix = args[:form]&.object_name
-    return "#{args[:field]}(#{suffix})" if prefix.blank?
-
-    "#{prefix}[#{args[:field]}(#{suffix})]"
-  end
-
   # Bootstrap number_field. Uses `text_label_row` so a help-button /
   # between / label_end can ride next to the label like `text_field_with_label`.
   def number_field_with_label(**args)
@@ -463,49 +348,6 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Renamed from `hidden_field_with_label` (which mis-described the
   # output — it emits a visible static-text display in addition to the
   # hidden input).
-  def read_only_field_with_label(**args)
-    opts = separate_field_options_from_args(args)
-    text = opts[:text] || opts[:value] || ""
-
-    wrap_class = form_group_wrap_class(args)
-
-    tag.div(class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(tag.p(text, class: "form-control-static"))
-      concat(args[:form].hidden_field(args[:field], opts))
-    end
-  end
-
-  # Bootstrap allows you to style static text like this:
-  def static_text_with_label(**args)
-    opts = separate_field_options_from_args(args)
-    opts[:class] = "form-control-static"
-    text = opts[:text] || opts[:value] || ""
-    opts.delete(:value)
-
-    wrap_class = form_group_wrap_class(args)
-
-    tag.div(class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(tag.p(text, **opts))
-    end
-  end
-
-  # Bootstrap url_field
-  def url_field_with_label(**args)
-    args = check_for_help_block(args)
-    opts = separate_field_options_from_args(args)
-    opts[:class] = "form-control"
-    opts[:value] ||= ""
-
-    wrap_class = form_group_wrap_class(args)
-
-    tag.div(class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(args[:form].url_field(args[:field], opts))
-    end
-  end
-
   # Bootstrap file input field with client-side size validation.
   # This could be redone as an input group with a "browse" button, in BS4.
   def file_field_with_label(**args)
@@ -631,7 +473,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     end
     args[:append] = capture do
       concat(args[:append])
-      concat(collapse_help_block(nil, id:) do
+      concat(collapse_help_block(id:) do
         concat(args[:help])
       end)
     end
