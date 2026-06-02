@@ -31,48 +31,12 @@ module Tabs
                                           q_param: q_param).to_a
     end
 
-    def observations_of_name_tab(name)
-      ::Tab::Observation::OfName.new(name: name).to_a
-    end
-
-    def observations_of_look_alikes_tab(name)
-      ::Tab::Observation::OfLookAlikes.new(name: name).to_a
-    end
-
-    def observations_of_related_taxa_tab(name)
-      ::Tab::Observation::OfRelatedTaxa.new(name: name).to_a
-    end
-
     def observation_hide_thumbnail_map_tab(obs)
       ::Tab::Observation::HideThumbnailMap.new(observation: obs).to_a
     end
 
     def reuse_images_for_observation_tab(obs)
       ::Tab::Observation::ReuseImages.new(observation: obs).to_a
-    end
-
-    def map_observations_tab(query)
-      ::Tab::Observation::Map.new(q_param: q_param(query)).to_a
-    end
-
-    def observations_add_to_list_tab(query)
-      ::Tab::Observation::AddToList.new(q_param: q_param(query)).to_a
-    end
-
-    def observations_download_as_csv_tab(query)
-      ::Tab::Observation::DownloadCSV.new(q_param: q_param(query)).to_a
-    end
-
-    def observations_index_tab
-      ::Tab::Observation::Index.new(q_param: q_param).to_a
-    end
-
-    def edit_observation_tab(obs)
-      ::Tab::Observation::Edit.new(observation: obs).to_a
-    end
-
-    def new_inat_import_tab(query: nil)
-      ::Tab::Observation::InatImport.new(q_param: q_param(query)).to_a
     end
 
     # -------- collections ----------------------------------------

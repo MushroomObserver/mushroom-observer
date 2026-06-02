@@ -19,22 +19,6 @@ module Tabs
 
     # -------- single tabs ----------------------------------------
 
-    def new_location_tab
-      ::Tab::Location::New.new.to_a
-    end
-
-    def map_locations_tab(query)
-      ::Tab::Location::Map.new(q_param: q_param(query)).to_a
-    end
-
-    def location_countries_tab
-      ::Tab::Location::Countries.new.to_a
-    end
-
-    def edit_location_tab(location)
-      ::Tab::Location::Edit.new(location: location).to_a
-    end
-
     def location_reverse_order_tab(location)
       ::Tab::Location::ReverseOrder.new(location: location).to_a
     end
@@ -49,18 +33,6 @@ module Tabs
       return unless location&.description
 
       ::Tab::Location::EditDescription.new(location: location).to_a
-    end
-
-    def location_new_description_tab(location)
-      ::Tab::Location::NewDescription.new(location: location).to_a
-    end
-
-    def location_versions_tab(location)
-      ::Tab::Location::Versions.new(location: location).to_a
-    end
-
-    def locations_index_tab
-      ::Tab::Location::Index.new.to_a
     end
 
     def observations_at_location_tab(location)

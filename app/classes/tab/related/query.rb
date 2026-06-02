@@ -30,26 +30,8 @@ class Tab::Related::Query < Tab::Base
     @controller = controller
   end
 
-  def title
-    internal_link.tab[0]
-  end
-
-  def path
-    internal_link.tab[1]
-  end
-
-  def html_options
-    internal_link.tab[2] || {}
-  end
-
   def to_internal_link
-    internal_link
-  end
-
-  private
-
-  def internal_link
-    @internal_link ||= ::InternalLink::RelatedQuery.new(
+    @to_internal_link ||= ::InternalLink::RelatedQuery.new(
       @model, @filter, @current_query, @controller
     )
   end

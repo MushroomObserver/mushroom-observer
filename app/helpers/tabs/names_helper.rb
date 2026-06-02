@@ -16,10 +16,6 @@ module Tabs
       ::Tab::Name::Edit.new(name: name).to_a
     end
 
-    def new_name_tab
-      ::Tab::Name::New.new.to_a
-    end
-
     def edit_synonym_form_tab(name)
       return unless in_admin_mode? || !name.locked
 
@@ -95,12 +91,6 @@ module Tabs
 
     def names_index_tab
       ::Tab::Name::Index.new.to_a
-    end
-
-    def all_names_tab(query)
-      return unless query&.params&.dig(:has_observations)
-
-      ::Tab::Name::All.new.to_a
     end
 
     # -------- 3 external tabs that observations composers use ----
