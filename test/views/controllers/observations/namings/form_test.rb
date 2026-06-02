@@ -102,6 +102,43 @@ module Views::Controllers::Observations::Namings
       assert_no_html(html, "form[data-turbo]")
     end
 
+    # The "see matching observations reasons" link in
+    # `render_sibling_reasons_note` requires three conditions: edit mode,
+    # the observation belongs to an Occurrence, and at least one other
+    # observation in that Occurrence has a Naming for the same name_id.
+    # No existing fixture combo satisfies all three (every occurrence
+    # fixture is a singleton over its observations), so we build the
+    # scenario on the fly — per `test/fixtures/observations.yml`'s own
+    # guidance to prefer in-test creation over one-off fixtures.
+    def test_sibling_observation_link_renders_in_edit_mode
+      user = users(:rolf)
+      name = names(:coprinus_comatus)
+
+      # Put the edit-target observation into a fresh Occurrence.
+      occurrence = Occurrence.create!(
+        user: user, primary_observation: @observation
+      )
+      @observation.update!(occurrence: occurrence)
+
+      # A sibling observation in the same Occurrence, with a Naming for
+      # the same Name as the one being edited — this satisfies the
+      # `has_sibling_reasons` guard.
+      sibling = Observation.create!(
+        user: user, when: Time.zone.today, where: "Sibling Site, Earth",
+        text_name: "Coprinus comatus", name: name
+      )
+      sibling.update!(occurrence: occurrence)
+      Naming.create!(observation: sibling, user: user, name: name)
+
+      naming = namings(:coprinus_comatus_naming)
+      vote = votes(:coprinus_comatus_owner_vote)
+      html = render_form(model: naming, vote: vote)
+
+      assert_html(html,
+                  "a[href='#{view_context.occurrence_path(occurrence)}']",
+                  text: :naming_see_matching_observations_reasons.l)
+    end
+
     private
 
     # rubocop:disable Metrics/ParameterLists
