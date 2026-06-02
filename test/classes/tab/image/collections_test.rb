@@ -58,5 +58,15 @@ module Tab::Image
 
       assert_not_includes(tabs.map(&:class), Tab::Image::CommercialInquiry)
     end
+
+    # Image has an EOL link → `eol_tab` instantiates `Tab::Image::Eol`.
+    # No fixture image has an `eol_url` (it requires a Triple record),
+    # so stub it on this image to exercise the instantiation branch.
+    def test_show_actions_includes_eol_tab_when_image_has_eol_url
+      @image.define_singleton_method(:eol_url) { "https://eol.org/foo" }
+      tabs = Tab::Image::ShowActions.new(image: @image).to_a
+
+      assert_includes(tabs.map(&:class), Tab::Image::Eol)
+    end
   end
 end
