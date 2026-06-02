@@ -19,10 +19,10 @@ module Tab::Naming
       )
 
       assert_equal("Propose", tab.title)
-      assert_equal(
-        routes.new_observation_naming_path(observation_id: 42, context: "blank"),
-        tab.path
+      expected = routes.new_observation_naming_path(
+        observation_id: 42, context: "blank"
       )
+      assert_equal(expected, tab.path)
       assert_equal("btn propose-naming-link", tab.html_options[:class])
       assert_equal(:add, tab.html_options[:icon])
       assert_equal(Naming, tab.model)

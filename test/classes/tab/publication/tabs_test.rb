@@ -25,6 +25,16 @@ module Tab::Publication
       assert_equal(:add_object.t(type: :PUBLICATION), tab.title)
       assert_equal(routes.new_publication_path, tab.path)
     end
+
+    # Regression: the i18n `[type]` interpolation in `:add_object`
+    # must resolve to "Publication" — an earlier bug rendered the
+    # literal `[TYPE]` when the type kwarg got dropped.
+    def test_new_title_interpolates_type
+      title = Tab::Publication::New.new.title
+
+      assert_match(/Add Publication/i, title)
+      assert_no_match(/\[TYPE\]/i, title)
+    end
   end
 
   class CollectionsTest < UnitTestCase
