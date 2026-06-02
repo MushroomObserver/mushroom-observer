@@ -79,6 +79,26 @@ module Views::Controllers::Descriptions::Merges
       assert_html(html, "form[action*='/merges']")
     end
 
+    # When the parent has exactly one other description, default_checked?
+    # is true and default_target_id pre-selects that lone radio button.
+    def test_single_merge_target_auto_selects
+      # coprinus_comatus has 2 descriptions: coprinus_comatus_desc and
+      # draft_coprinus_comatus. Rendering the form FOR coprinus_comatus_desc
+      # leaves draft_coprinus_comatus as the sole merge target.
+      desc = name_descriptions(:coprinus_comatus_desc)
+      target = name_descriptions(:draft_coprinus_comatus)
+
+      html = render_form(desc)
+
+      # Exactly one merge target rendered, and it is auto-checked.
+      assert_html(html, "input[type='radio']" \
+                        "[name='description_move_or_merge[target]']",
+                  count: 1)
+      assert_html(html, "input[type='radio']" \
+                        "[name='description_move_or_merge[target]']" \
+                        "[value='#{target.id}'][checked]")
+    end
+
     private
 
     # Sibling reference within the namespace — `Form` resolves to
