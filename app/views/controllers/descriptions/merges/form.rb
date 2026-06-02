@@ -42,7 +42,8 @@ module Views::Controllers::Descriptions::Merges
     end
 
     def default_target_id
-      merges.first&.id
+      # default_checked? guarantees merges.length == 1, so .first is safe.
+      merges.first.id
     end
 
     def render_delete_checkbox
@@ -57,19 +58,8 @@ module Views::Controllers::Descriptions::Merges
       @merges ||= @description.parent.descriptions - [@description]
     end
 
-    def moves
-      return @moves ||= [] unless name_description?
-
-      @moves ||= begin
-                   result = @description.parent.synonyms -
-                            [@description.parent]
-                   result.reject!(&:is_misspelling?)
-                   result
-                 end
-    end
-
     def default_checked?
-      merges.length == 1 && moves.empty?
+      merges.length == 1
     end
 
     def description_title(user, desc)

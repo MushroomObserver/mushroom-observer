@@ -61,6 +61,28 @@ module Views::Controllers::Descriptions::Moves
       assert_no_html(html, "input[type='submit']")
     end
 
+    # When the parent has exactly one non-misspelling synonym,
+    # default_checked? is true and default_target_id pre-selects that
+    # lone move target. No fixture matches this shape, so we create a
+    # NameDescription on lactifluus_alpinus (paired with the deprecated
+    # but non-misspelling lactifluus_subalpinus).
+    def test_single_move_target_auto_selects
+      parent = names(:lactifluus_alpinus)
+      target = names(:lactifluus_subalpinus)
+      desc = NameDescription.create!(name: parent, user: @user,
+                                     source_type: "public")
+
+      html = render_form(desc)
+
+      # Exactly one move target rendered, and it is auto-checked.
+      assert_html(html, "input[type='radio']" \
+                        "[name='description_move_or_merge[target]']",
+                  count: 1)
+      assert_html(html, "input[type='radio']" \
+                        "[name='description_move_or_merge[target]']" \
+                        "[value='#{target.id}'][checked]")
+    end
+
     # MoveForm only makes sense for NameDescriptions since Locations
     # don't have synonyms. No location test.
 

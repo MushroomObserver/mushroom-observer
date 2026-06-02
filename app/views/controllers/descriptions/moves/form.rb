@@ -36,7 +36,8 @@ module Views::Controllers::Descriptions::Moves
     end
 
     def default_target_id
-      sorted_moves.first&.id
+      # default_checked? guarantees moves.length == 1, so .first is safe.
+      sorted_moves.first.id
     end
 
     def render_delete_checkbox
@@ -45,10 +46,6 @@ module Views::Controllers::Descriptions::Moves
 
     def render_submit
       submit(:SUBMIT.l, center: true)
-    end
-
-    def merges
-      @merges ||= @description.parent.descriptions - [@description]
     end
 
     def moves
@@ -69,7 +66,7 @@ module Views::Controllers::Descriptions::Moves
     end
 
     def default_checked?
-      merges.empty? && moves.length == 1
+      moves.length == 1
     end
 
     def name_description?
