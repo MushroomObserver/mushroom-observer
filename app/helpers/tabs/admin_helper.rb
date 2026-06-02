@@ -19,20 +19,5 @@ module Tabs
         :create_donation_tab.t, Donation, new_admin_donations_path
       ).tab
     end
-
-    # Overridden by SupportHelper#admin_review_donations_tab
-    # def admin_review_donations_tab
-    #   InternalLink::Model.new(
-    #     :review_donations_tab.t, Donation, edit_admin_donations_path
-    #   ).tab
-    # end
-
-    def admin_test_tabs
-      [
-        ["Action One", "/"],
-        ["Action Two", "/"],
-        ["Action Three", "/"]
-      ]
-    end
   end
 end
