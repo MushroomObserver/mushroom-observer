@@ -44,6 +44,7 @@ module Tab::Image
       assert_equal(
         routes.new_commercial_inquiry_for_image_path(@image.id), tab.path
       )
+      assert_equal(@image, tab.model)
     end
 
     def test_name_google_images
@@ -60,6 +61,7 @@ module Tab::Image
 
       assert_equal("Test Again", tab.title)
       assert_equal({ action: :test_add_image }, tab.path)
+      assert_equal({ class: "test_add_image_report_link" }, tab.html_options)
     end
   end
 end

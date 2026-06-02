@@ -71,5 +71,19 @@ module Tab::HerbariumRecord
         tabs.map(&:class)
       )
     end
+
+    # back != "index" AND back_object nil → back_link returns nil and the
+    # leading slot is compacted out, leaving just the standard 2 herbaria
+    # tabs.
+    def test_form_edit_no_back_link
+      tabs = Tab::HerbariumRecord::FormEdit.new(
+        back: "show", back_object: nil
+      ).to_a
+
+      assert_equal(
+        [Tab::Herbarium::New, Tab::Herbarium::NonpersonalIndex],
+        tabs.map(&:class)
+      )
+    end
   end
 end

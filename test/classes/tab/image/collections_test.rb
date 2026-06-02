@@ -36,5 +36,17 @@ module Tab::Image
 
       assert_equal([Tab::Object::Return], tabs.map(&:class))
     end
+
+    # Image with no observations: `observation_tabs` returns []; no
+    # Show / NameGoogleImages tabs appear, but eol / commercial_tab
+    # still can.
+    def test_show_actions_no_observations
+      orphan = images(:disconnected_coprinus_comatus_image)
+      tabs = Tab::Image::ShowActions.new(image: orphan).to_a
+
+      classes = tabs.map(&:class)
+      assert_not_includes(classes, Tab::Object::Show)
+      assert_not_includes(classes, Tab::Image::NameGoogleImages)
+    end
   end
 end

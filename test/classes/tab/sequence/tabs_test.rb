@@ -56,6 +56,7 @@ module Tab::Sequence
 
       assert_equal(:edit_object.t(type: :sequence), tab.title)
       assert_equal(@sequence.edit_link_args.merge(back: :show), tab.path)
+      assert_equal(@sequence, tab.model)
     end
 
     def test_destroy
@@ -68,6 +69,7 @@ module Tab::Sequence
         routes.observation_path(@sequence.observation),
         tab.html_options[:back]
       )
+      assert_equal(@sequence, tab.model)
     end
 
     def test_archive
@@ -76,6 +78,7 @@ module Tab::Sequence
       assert_equal(:show_observation_archive_link.t, tab.title)
       assert_equal(@sequence.accession_url, tab.path)
       assert_equal("_blank", tab.html_options[:target])
+      assert_equal(@sequence, tab.model)
     end
 
     def test_blast
@@ -83,6 +86,8 @@ module Tab::Sequence
 
       assert_equal(:show_observation_blast_link.t, tab.title)
       assert_equal(@sequence.blast_url, tab.path)
+      assert_equal("_blank", tab.html_options[:target])
+      assert_equal(@sequence, tab.model)
     end
   end
 end

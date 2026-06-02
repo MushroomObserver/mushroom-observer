@@ -78,6 +78,7 @@ module Tab::CollectionNumber
       assert_equal(:delete_collection_number.l, tab.title)
       assert_equal(@collection_number, tab.path)
       assert_equal(:destroy, tab.html_options[:button])
+      assert_equal(@collection_number, tab.model)
     end
 
     def test_back_to_index
@@ -87,6 +88,7 @@ module Tab::CollectionNumber
 
       assert_equal(:edit_collection_number_back_to_index.l, tab.title)
       assert_equal(@collection_number.index_link_args, tab.path)
+      assert_equal(@collection_number, tab.model)
     end
   end
 end
