@@ -1,6 +1,6 @@
 <%
   add_page_title("#{:field_slip_editing.t}: #{@field_slip.code}")
-  add_context_nav(field_slip_edit_tabs(@field_slip))
+  add_context_nav(Tab::FieldSlip::FormEdit.new(field_slip: @field_slip))
   container_class(:full)
 %>
 

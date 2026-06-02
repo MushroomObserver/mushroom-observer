@@ -11,7 +11,10 @@ tag.div(
       concat("#{:EXTERNAL_LINKS.l}: ")
       concat(
         [ "[",
-          modal_link_to("external_link", *new_external_link_tab(obs: obs)),
+          modal_link_to(
+            "external_link",
+            *Tab::ExternalLink::New.new(observation: obs).to_a
+          ),
           "] "
         ].safe_join("")
       ) if sites.any?
@@ -25,8 +28,10 @@ tag.div(
             concat(
               [
                 " [",
-                modal_link_to("external_link_#{link.id}",
-                              *edit_external_link_tab(link: link)),
+                modal_link_to(
+                  "external_link_#{link.id}",
+                  *Tab::ExternalLink::Edit.new(link: link).to_a
+                ),
                 "|",
                 destroy_button(
                   name: :destroy_object.t(type: :external_link),

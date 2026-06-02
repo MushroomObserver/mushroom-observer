@@ -3,7 +3,7 @@
 module Tabs
   module UsersHelper
     def user_show_tabs
-      [site_contributors_tab]
+      [::Tab::Contributor::Index.new.to_a]
     end
 
     def user_profile_tabs(show_user:, user:)

@@ -34,15 +34,9 @@ module Tabs
 
     def checklist_for_site_tabs
       [
-        site_contributors_tab,
-        info_site_stats_tab
+        ::Tab::Contributor::Index.new.to_a,
+        ::Tab::Info::SiteStats.new.to_a
       ]
-    end
-
-    def site_checklist_tab
-      InternalLink.new(
-        :site_stats_observed_taxa.t, checklist_path
-      ).tab
     end
   end
 end

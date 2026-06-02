@@ -1,6 +1,6 @@
 <%
   add_page_title("#{:field_slip_new.t}: #{@field_slip.code}")
-  add_context_nav([field_slips_index_tab])
+  add_context_nav(Tab::FieldSlip::Index.new)
   container_class(:full)
 %>
 

@@ -1,7 +1,7 @@
 <%
 add_page_title(:donate_title.l)
 
-add_context_nav(support_donate_tabs)
+add_context_nav(Tab::Support::DonateActions.new(admin: in_admin_mode?))
 
 amounts = [25.00, 50.00, 100.00, 200.00].freeze
 

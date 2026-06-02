@@ -69,7 +69,7 @@ module NamingsHelper
     if editable && permission?(naming)
       edit_link = modal_link_to(
         "obs_#{naming.observation_id}_naming_#{naming.id}",
-        *edit_naming_tab(naming)
+        *Tab::Naming::Edit.new(naming: naming).to_a
       )
       delete_link = naming_destroy_button(naming)
       proposer_links = tag.div(class: "text-nowrap") do
@@ -324,13 +324,15 @@ module NamingsHelper
 
   public
 
-  # The new_naming_tab now has an icon. icon buttons send icon: true
+  # The Tab::Naming::New PORO carries an icon by default. icon buttons
+  # send icon: true; text-only callers strip it back out.
   def propose_naming_link(obs_id, text: :create_naming.t,
                           context: "namings_table", icon: false,
                           btn_class: "btn btn-primary my-3")
-    name, path, args = *new_naming_tab(
-      obs_id, text: text, btn_class: btn_class, context: context
-    )
+    name, path, args = *Tab::Naming::New.new(
+      observation_id: obs_id, text: text,
+      context: context, btn_class: btn_class
+    ).to_a
     args = args.merge({ icon: nil }) unless icon
 
     modal_link_to("obs_#{obs_id}_naming", name, path, args)

@@ -1,7 +1,7 @@
 <%
   container_class(:wide)
   add_page_title(license_show_title(@license))
-  add_context_nav(license_show_tabs(@license))
+  add_context_nav(Tab::License::ShowActions.new(license: @license))
 %>
 
 <div>
