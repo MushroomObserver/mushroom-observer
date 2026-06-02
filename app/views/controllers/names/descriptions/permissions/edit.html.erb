@@ -1,6 +1,8 @@
 <%
 add_page_title(@description.format_name.t)
-add_context_nav(name_description_form_permissions_tabs(description: @description))
+add_context_nav(Tab::NameDescription::FormPermissions.new(
+  description: @description
+))
 %>
 
 <%= render(Views::Controllers::Descriptions::Permissions::Form.new(

@@ -1,6 +1,8 @@
 <%
 add_page_title(:merge_descriptions_title.t(object: @description.format_name))
-add_context_nav(name_description_form_permissions_tabs(description: @description))
+add_context_nav(Tab::NameDescription::FormPermissions.new(
+  description: @description
+))
 %>
 
 <%= render(Views::Controllers::Descriptions::Merges::Form.new(
