@@ -48,5 +48,15 @@ module Tab::Image
       assert_not_includes(classes, Tab::Object::Show)
       assert_not_includes(classes, Tab::Image::NameGoogleImages)
     end
+
+    # Owner opted out of commercial email → CommercialInquiry tab
+    # filtered out by `commercial_tab`'s early return. No fixture
+    # user has `email_general_commercial: false`, so flip it in-memory.
+    def test_show_actions_owner_opted_out_of_commercial
+      @image.user.email_general_commercial = false
+      tabs = Tab::Image::ShowActions.new(image: @image).to_a
+
+      assert_not_includes(tabs.map(&:class), Tab::Image::CommercialInquiry)
+    end
   end
 end
