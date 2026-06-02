@@ -6,8 +6,6 @@
 # (`Views::Controllers::Observations::Downloads::Form`).
 module Views::Controllers::SpeciesLists::Downloads
   class New < Views::Base
-    register_value_helper :object_return_tab
-
     def initialize(list:, query:, type:, format:, encoding:)
       super()
       @list = list
@@ -19,10 +17,7 @@ module Views::Controllers::SpeciesLists::Downloads
 
     def view_template
       add_page_title(:species_list_download_title.t)
-      # `species_list_download_tabs` was a one-line helper that just
-      # wrapped `object_return_tab` in an array — inlined here since
-      # this is the only caller.
-      add_context_nav([object_return_tab(@list)])
+      add_context_nav(Tab::Object::Return.new(object: @list))
 
       query_param = q_param(@query)
 

@@ -14,7 +14,9 @@ column_classes(:eight_four)
       <% end %>
 
       <%= tag.div(id: "external_searches") do %>
-        <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
+        <%= tag.p(link_to(*Tab::ExternalSearch.new(
+              site: :Wikipedia, query: @glossary_term.name
+            ).to_a)) %>
       <% end %>
     <% end %>
 

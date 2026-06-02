@@ -1,6 +1,6 @@
 <%
 add_page_title(:review_authors_title.t(name: @object.format_name))
-add_context_nav(author_review_tabs(obj: @object))
+add_context_nav(Tab::Description::AuthorReview.new(object: @object))
 
 type = @object.type_tag
 %>

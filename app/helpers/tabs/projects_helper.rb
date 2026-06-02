@@ -13,20 +13,14 @@ module Tabs
     #   ChangeMemberStatus, ForUser, AliasEdit, AliasNew) +
     #   FormNew / IndexNav Collections
     #
-    # Two collection methods below (`project_members_form_new_tabs`,
-    # `project_member_form_edit_tabs`) call cross-helper composers
-    # (`object_return_tab` from `Tabs::GeneralHelper`); they stay
-    # as helpers until PR 4 of the migration converts general_helper.
-    # Same story for the non-tab utility methods further down.
-
     def project_members_form_new_tabs(project:)
-      [object_return_tab(project)]
+      [::Tab::Object::Return.new(object: project).to_a]
     end
 
     def project_member_form_edit_tabs(project:)
       links = [
         ::Tab::Project::Index.new.to_a,
-        object_return_tab(project)
+        ::Tab::Object::Return.new(object: project).to_a
       ]
       return unless permission?(project)
 

@@ -1,6 +1,6 @@
 <%
 add_page_title(:email_name_change_request_title.t)
-add_context_nav(email_name_change_request_tabs(name: @name))
+add_context_nav(Tab::Email::NameChangeRequest.new(name: @name))
 %>
 
 <%= render(Views::Controllers::Admin::Emails::NameChangeRequests::Form.new(
