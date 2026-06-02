@@ -6,10 +6,6 @@ module DescriptionsHelper
     desc.writer?(user) || in_admin_mode?
   end
 
-  def is_admin?(desc)
-    desc.is_admin?(User.current) || in_admin_mode?
-  end
-
   def user_is_admin?(user, desc)
     desc.is_admin?(user) || in_admin_mode?
   end
@@ -83,12 +79,13 @@ module DescriptionsHelper
     parent = description.parent
     type = parent.type_tag
 
+    # Else branch (`:private.l`) is unreachable — the controller
+    # bounces non-readers via `user_has_permission_to_see_description?`
+    # before this view ever renders.
     read = if description.reader_groups.include?(UserGroup.all_users)
              :public.l
-           elsif in_admin_mode? || description.is_reader?(user)
-             :restricted.l
            else
-             :private.l
+             :restricted.l
            end
 
     write = if description.writer_groups.include?(UserGroup.all_users)
@@ -265,20 +262,5 @@ module DescriptionsHelper
     result += " (#{permit})" unless /(^| )#{permit}( |$)/i.match?(result)
 
     t(result)
-  end
-
-  # Helpers for description forms
-
-  # Source type options for description forms.
-  def source_type_options_all
-    Description::ALL_SOURCE_TYPES.map do |type|
-      [:"form_description_source_#{type}".l, type]
-    end
-  end
-
-  def source_type_options_basic
-    Description::BASIC_SOURCE_TYPES.map do |type|
-      [:"form_description_source_#{type}".l, type]
-    end
   end
 end
