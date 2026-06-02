@@ -3,14 +3,14 @@
 module Tabs
   module AdminHelper
     def admin_donations_form_edit_tabs
-      links = support_governance_tabs
+      links = ::Tab::Support::GovernanceActions.new.map(&:to_a)
       links << admin_create_donation_tab
       links
     end
 
     def admin_donations_form_new_tabs
-      links = support_governance_tabs
-      links << admin_review_donations_tab
+      links = ::Tab::Support::GovernanceActions.new.map(&:to_a)
+      links << ::Tab::Support::ReviewDonations.new.to_a
       links
     end
 

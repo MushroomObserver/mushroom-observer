@@ -2,6 +2,27 @@
 
 # helpers for show License view
 module LicensesHelper
+  # "Editing: Creative Commons Non-commercial v3.0 (#nnn)" textilized
+  def license_edit_title(license)
+    capture do
+      concat("#{:EDITING.l}: ")
+      concat(license_show_title(license))
+    end
+  end
+
+  def license_show_title(license)
+    [
+      license.display_name,
+      license_title_id(license)
+    ].safe_join(" ")
+  end
+
+  def license_title_id(license)
+    tag.span(class: "smaller") do
+      tag.span("#(#{license.id || "?"}):")
+    end
+  end
+
   def license_date(date)
     date.strftime("%Y-%m-%d %H:%M:%S")
   end

@@ -13,7 +13,7 @@ module Views::Controllers::InatImports
 
     def view_template
       add_page_title(:inat_import_create_title.l)
-      add_context_nav(inat_import_form_new_tabs)
+      add_context_nav(Tab::InatImport::FormNew.new)
       render(Views::Controllers::InatImports::Form.new(
                @form, super_importer: @super_importer
              ))

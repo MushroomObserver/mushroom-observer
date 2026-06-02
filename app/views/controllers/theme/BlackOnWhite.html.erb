@@ -1,7 +1,7 @@
 <%
 add_page_title(:theme_black_on_white.tl)
 
-tabs = add_context_nav(theme_show_tabs)
+add_context_nav(Tab::Theme::ShowActions.new)
 %>
 
 <%= :theme_black_on_white_description.tp(link: "XXX").sub("XXX", link_to("**__Amanita__**".t, action: :Amanita)).html_safe %>
