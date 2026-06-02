@@ -2,7 +2,7 @@
 # Edit form is a no-JS fallback view (the index page handles edit
 # inline for JS users).
 add_page_title(:account_api_keys_title.t)
-add_context_nav(account_api_tabs)
+add_context_nav(Tab::Account::APIActions.new)
 %>
 
 <%= :account_api_keys_help.tp %>

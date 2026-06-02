@@ -12,8 +12,6 @@ module Views::Layouts::Sidebar
   #   ))
   class User < ::Components::Base
     include Tabs::Sidebar::UserHelper
-    include Tabs::AccountHelper
-    include Tabs::UsersHelper
     include Rails.application.routes.url_helpers
 
     prop :user, ::User

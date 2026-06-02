@@ -4,13 +4,17 @@ module Tabs
   module UserNavHelper
     def user_logged_in_tabs(user)
       [
-        user_observations_tab(user, :app_your_observations.t),
-        comments_for_user_tab(user, :app_comments_for_you.t),
+        ::Tab::User::Observations.new(
+          user: user, text: :app_your_observations.t
+        ).to_a,
+        ::Tab::User::CommentsFor.new(
+          user: user, text: :app_comments_for_you.t
+        ).to_a,
         ::Tab::Project::ForUser.new(user: user).to_a,
         ::Tab::SpeciesList::ForUser.new(user: user).to_a,
-        account_show_interests_tab,
-        account_edit_profile_tab,
-        account_edit_preferences_tab
+        ::Tab::Account::ShowInterests.new.to_a,
+        ::Tab::Account::EditProfile.new.to_a,
+        ::Tab::Account::EditPreferences.new.to_a
       ]
     end
 

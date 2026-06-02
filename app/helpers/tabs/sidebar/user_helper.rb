@@ -5,10 +5,12 @@ module Tabs
     module UserHelper
       def sidebar_user_tabs(user)
         [
-          comments_for_user_tab(user, :app_comments_for_you.t),
-          account_show_interests_tab,
-          user_summary_tab(user),
-          account_edit_preferences_tab,
+          ::Tab::User::CommentsFor.new(
+            user: user, text: :app_comments_for_you.t
+          ).to_a,
+          ::Tab::Account::ShowInterests.new.to_a,
+          ::Tab::User::Summary.new(user: user).to_a,
+          ::Tab::Account::EditPreferences.new.to_a,
           join_mailing_list_tab
         ]
       end
