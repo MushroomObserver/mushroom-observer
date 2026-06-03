@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-# "MyCoPortal" external-site link for a Name. Composed by
-# observations name-links panel (via `Tab::Observation::*` once
-# that migrates). Mirrors `Tabs::NamesHelper#mycoportal_name_tab`.
+# "MyCoPortal" external-site link for a Name. Composed by the
+# names show page and by observations' web-name-links composer.
 class Tab::Name::Mycoportal < Tab::Name::ExternalBase
   def title
     "MyCoPortal"
