@@ -184,7 +184,12 @@ that leaves unrelated code in the touched files uncovered.
 
 What to do, after the coveralls bot comments on the PR:
 
-1. Pull the per-file numbers from the build's `source_files.json`:
+1. Pull the per-file numbers from the build's `source_files.json`.
+   The endpoint is paginated; MO's build returns 1000+ files across
+   multiple pages, and **Phlex views (`app/views/**/*.rb`) consistently
+   land on page 2**. A single-page fetch will report them as
+   `<not instrumented>` — a false negative. Fetch every page first,
+   then look up:
 
     ```bash
     BUILD_ID=$(gh pr view <PR> --json comments \
@@ -192,30 +197,55 @@ What to do, after the coveralls bot comments on the PR:
       grep -oE "coveralls.io/builds/[0-9]+" | tail -1 |
       grep -oE "[0-9]+$")
 
+    # Paginate. per_page=2000 covers MO's current build in two pages;
+    # the loop walks until a page returns 0 source_files, so it scales.
+    rm -f /tmp/cov_files.json
+    page=1
+    while : ; do
+      curl -s "https://coveralls.io/builds/${BUILD_ID}/source_files.json?per_page=2000&page=${page}" \
+        > "/tmp/cov_page_${page}.json"
+      count=$(python3 -c "
+import json
+with open('/tmp/cov_page_${page}.json') as f: d = json.load(f)
+src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
+print(len(src))
+")
+      [ "$count" = "0" ] && break
+      page=$((page + 1))
+      [ "$page" -gt 10 ] && break  # safety
+    done
+
     gh pr view <PR> --json files \
       --jq '.files[] | select(.changeType!="DELETED") | .path' |
-      grep -E '\.rb$' |
-      while read -r path; do
-        curl -s "https://coveralls.io/builds/${BUILD_ID}/source_files.json?per_page=1000" |
-          python3 -c "
-import sys, json, os
-d = json.load(sys.stdin)
-src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
-f = next((x for x in src if x['name'] == os.environ['P']), None)
-if f:
-  cov, rel, miss = f['covered_line_count'], f['relevant_line_count'], f['missed_line_count']
-  pct = 100.0 * cov / rel if rel else 0
-  flag = '' if miss == 0 else f'  MISSED {miss}'
-  print(f\"{os.environ['P']}: {cov}/{rel} ({pct:.1f}%){flag}\")
-else:
-  print(f\"{os.environ['P']}: <not instrumented>\")
-" P="$path"
-      done
+      grep -E '\.rb$' > /tmp/touched_files.txt
+
+    python3 <<'PY'
+import json, glob, os
+files = []
+for path in sorted(glob.glob('/tmp/cov_page_*.json')):
+    with open(path) as f: d = json.load(f)
+    src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
+    files.extend(src)
+by_name = {x['name']: x for x in files}
+with open('/tmp/touched_files.txt') as f:
+    paths = [p.strip() for p in f if p.strip()]
+for p in paths:
+    f = by_name.get(p)
+    if f:
+        cov, rel, miss = f['covered_line_count'], f['relevant_line_count'], f['missed_line_count']
+        pct = 100.0 * cov / rel if rel else 0
+        flag = '' if miss == 0 else f'  MISSED {miss}'
+        print(f"{p}: {cov}/{rel} ({pct:.1f}%){flag}")
+    else:
+        print(f"{p}: <not instrumented>")
+PY
     ```
 
 2. **Every Ruby file in the PR should report 100% coverage.** ERB,
    config, Markdown, etc. show up as `<not instrumented>` — that's
-   expected; SimpleCov only instruments Ruby.
+   expected; SimpleCov only instruments Ruby. If a file you know is
+   tracked elsewhere (a Phlex view, a model) shows `<not instrumented>`,
+   suspect pagination — re-check that every page got fetched.
 
 3. **Every PR should lever coverage upward.** If a touched file is
    below 100%, fix the gap in the same PR — even if the uncovered
