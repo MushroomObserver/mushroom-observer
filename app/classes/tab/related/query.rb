@@ -32,4 +32,14 @@ class Tab::Related::Query < Tab::Base
       @model, @filter, @current_query, @controller
     )
   end
+
+  # `Tab::Related::Query` overrides `to_internal_link` rather than
+  # implementing `path` directly (the URL is computed inside
+  # `InternalLink::RelatedQuery`). Delegate `#path` to the
+  # internal link's `#url` so callers that want just the URL —
+  # e.g. `Tab::Related::Query.for(...)&.path` — work without
+  # routing through `.to_a` and destructuring.
+  def path
+    to_internal_link.url
+  end
 end
