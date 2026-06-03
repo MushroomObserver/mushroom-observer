@@ -10,8 +10,8 @@ module Views::Layouts::Sidebar
   # @example Direct usage
   #   render(Views::Layouts::Sidebar::Section.new(
   #     heading_key: :INDEXES,
-  #     tabs: sidebar_indexes_tabs,
-  #     classes: sidebar_css_classes
+  #     tabs: Tab::Sidebar::IndexesActions.new.map(&:to_a),
+  #     classes: Views::Layouts::Sidebar::CSS_CLASSES
   #   ))
   class Section < ::Components::Base
     prop :user, _Nilable(::User), default: nil

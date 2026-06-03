@@ -11,8 +11,6 @@
 #     in_admin_mode: in_admin_mode?
 #   )) %>
 class Views::Layouts::ApplicationSidebar < Views::Base
-  include SidebarHelper
-
   prop :user, _Nilable(::User), default: nil
   prop :browser, _Any
   prop :request, _Any
@@ -39,7 +37,7 @@ class Views::Layouts::ApplicationSidebar < Views::Base
   private
 
   def classes
-    @classes ||= sidebar_css_classes
+    Views::Layouts::Sidebar::CSS_CLASSES
   end
 
   def render_logo

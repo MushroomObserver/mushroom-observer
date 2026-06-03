@@ -4,7 +4,6 @@ require "test_helper"
 
 module Views::Layouts::Sidebar
   class IndexesTest < ComponentTestCase
-    include Tabs::Sidebar::IndexesHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -57,7 +56,7 @@ module Views::Layouts::Sidebar
       }
       render(Section.new(
                heading_key: :INDEXES,
-               tabs: sidebar_indexes_tabs,
+               tabs: Tab::Sidebar::IndexesActions.new.map(&:to_a),
                classes: classes
              ))
     end

@@ -4,7 +4,6 @@ require "test_helper"
 
 module Views::Layouts::Sidebar
   class ObservationsTest < ComponentTestCase
-    include Tabs::Sidebar::ObservationsHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -71,7 +70,8 @@ module Views::Layouts::Sidebar
       }
       render(Section.new(
                heading_key: :app_observations_left,
-               tabs: sidebar_observations_tabs(user),
+               tabs: Tab::Sidebar::ObservationsActions.new(user: user).
+                     map(&:to_a),
                classes: classes
              ))
     end

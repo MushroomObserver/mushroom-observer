@@ -7,7 +7,7 @@ module Views::Layouts::Sidebar
   # @example Basic usage
   #   render(Views::Layouts::Sidebar::User.new(
   #     user: @user,
-  #     classes: sidebar_css_classes,
+  #     classes: Views::Layouts::Sidebar::CSS_CLASSES,
   #     in_admin_mode: in_admin_mode?
   #   ))
   class User < ::Components::Base

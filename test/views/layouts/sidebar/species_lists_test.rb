@@ -4,7 +4,6 @@ require "test_helper"
 
 module Views::Layouts::Sidebar
   class SpeciesListsTest < ComponentTestCase
-    include Tabs::Sidebar::SpeciesListsHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -69,7 +68,8 @@ module Views::Layouts::Sidebar
       }
       render(Section.new(
                heading_key: :app_species_list,
-               tabs: sidebar_species_lists_tabs(user),
+               tabs: Tab::Sidebar::SpeciesListsActions.new(user: user).
+                     map(&:to_a),
                classes: classes
              ))
     end

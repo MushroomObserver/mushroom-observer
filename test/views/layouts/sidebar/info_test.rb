@@ -4,7 +4,6 @@ require "test_helper"
 
 module Views::Layouts::Sidebar
   class InfoTest < ComponentTestCase
-    include Tabs::Sidebar::InfoHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -64,7 +63,7 @@ module Views::Layouts::Sidebar
       }
       render(Section.new(
                heading_key: :app_more,
-               tabs: sidebar_info_tabs,
+               tabs: Tab::Sidebar::InfoActions.new.map(&:to_a),
                classes: classes
              ))
     end
