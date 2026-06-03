@@ -104,7 +104,10 @@ module Tabs
     def project_observation_buttons(project, query)
       return unless project
 
-      _img_name, img_link, = related_images_tab(:Observation, query)
+      img_link = Tab::Related::Query.for(
+        model: Image, filter: :Observation,
+        current_query: query, controller: controller
+      )&.path
       buttons = [
         project_button(:MAP.t, add_q_param(map_observations_path, query)),
         project_button(:IMAGES.l, img_link),
