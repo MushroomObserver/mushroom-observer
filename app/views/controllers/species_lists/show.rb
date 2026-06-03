@@ -67,12 +67,51 @@ module Views::Controllers::SpeciesLists
              ))
     end
 
+    # Buttons row above the species-list's observation listing.
+    # When no list is set there's nothing to render — preserves the
+    # pre-Phlex `project_species_list_buttons(list, query)` guard
+    # which returned nil for a nil list. Map / Observations / Names
+    # always render; Locations / Images render only when the active
+    # query supports the Location-via-Observation bridge (the
+    # related-query for the two cross-domain indexes).
     def render_project_buttons
+      return unless @species_list
+
       div(id: "project_species_list_buttons") do
-        trusted_html(
-          project_species_list_buttons(@species_list, @query).safe_join
-        )
+        project_button(:MAP.l, add_q_param(map_observations_path, @query))
+        project_button(:OBSERVATIONS.l,
+                       add_q_param(observations_path, @query))
+        project_button(:NAMES.l,
+                       checklist_path(species_list_id: @species_list.id))
+        render_locations_button
+        render_images_button
       end
+    end
+
+    def render_locations_button
+      return unless related_to_locations?
+
+      url = InternalLink::RelatedQuery.new(
+        Location, :Observation, @query, controller
+      ).url
+      project_button(:LOCATIONS.l, url)
+    end
+
+    def render_images_button
+      return unless related_to_locations?
+
+      url = InternalLink::RelatedQuery.new(
+        Image, :Observation, @query, controller
+      ).url
+      project_button(:IMAGES.l, url)
+    end
+
+    def related_to_locations?
+      @query && Query.related?(:Location, :Observation)
+    end
+
+    def project_button(name, target)
+      render(Components::ProjectButton.new(name: name, target: target))
     end
 
     def render_list_search
