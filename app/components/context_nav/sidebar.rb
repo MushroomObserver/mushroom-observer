@@ -13,20 +13,7 @@
 class Components::ContextNav::Sidebar < Components::Base
   include Components::ContextNav::LinkRendering
 
-  # Inlined from `SidebarHelper#sidebar_css_classes` (single relevant
-  # caller after the conversion). Bootstrap 3 / list-group classes
-  # the mobile sidebar shares with other `_sidebar.*` partials. Kept
-  # as a frozen literal so subclasses can `merge` for variants
-  # without mutating the canonical set.
-  CSS_CLASSES = {
-    wrapper: "navbar navbar-inverse sidebar-nav list-group",
-    heading: "list-group-item disabled font-weight-bold",
-    item: "list-group-item",
-    admin: "list-group-item list-group-item-danger indent",
-    indent: "list-group-item indent",
-    mobile_only: "visible-xs",
-    desktop_only: "hidden-xs"
-  }.freeze
+  CSS_CLASSES = Views::Layouts::Sidebar::CSS_CLASSES
 
   def initialize(links:)
     super()

@@ -7,8 +7,8 @@ module Views::Layouts::Sidebar
   # @example Basic usage
   #   render(Views::Layouts::Sidebar::Admin.new(
   #     heading_key: :app_admin,
-  #     tabs: sidebar_admin_tabs,
-  #     classes: sidebar_css_classes
+  #     tabs: Tab::Sidebar::AdminActions.new.map(&:to_a),
+  #     classes: Views::Layouts::Sidebar::CSS_CLASSES
   #   ))
   class Admin < Section
     include Rails.application.routes.url_helpers

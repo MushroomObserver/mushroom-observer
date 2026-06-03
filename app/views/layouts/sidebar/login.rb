@@ -7,8 +7,8 @@ module Views::Layouts::Sidebar
   # @example Basic usage
   #   render(Views::Layouts::Sidebar::Login.new(
   #     heading_key: :app_account,
-  #     tabs: sidebar_login_tabs,
-  #     classes: sidebar_css_classes
+  #     tabs: Tab::Sidebar::LoginActions.new.map(&:to_a),
+  #     classes: Views::Layouts::Sidebar::CSS_CLASSES
   #   ))
   class Login < Section
     def view_template
