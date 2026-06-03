@@ -12,13 +12,6 @@
 #   )) %>
 class Views::Layouts::ApplicationSidebar < Views::Base
   include SidebarHelper
-  include Tabs::Sidebar::AdminHelper
-  include Tabs::Sidebar::IndexesHelper
-  include Tabs::Sidebar::InfoHelper
-  include Tabs::Sidebar::LatestHelper
-  include Tabs::Sidebar::LoginHelper
-  include Tabs::Sidebar::ObservationsHelper
-  include Tabs::Sidebar::SpeciesListsHelper
 
   prop :user, _Nilable(::User), default: nil
   prop :browser, _Any
@@ -70,13 +63,13 @@ class Views::Layouts::ApplicationSidebar < Views::Base
       if @in_admin_mode
         render(Views::Layouts::Sidebar::Admin.new(
                  heading_key: :app_admin,
-                 tabs: sidebar_admin_tabs,
+                 tabs: Tab::Sidebar::AdminActions.new.map(&:to_a),
                  classes: classes
                ))
       elsif @user.nil?
         render(Views::Layouts::Sidebar::Login.new(
                  heading_key: :app_account,
-                 tabs: sidebar_login_tabs,
+                 tabs: Tab::Sidebar::LoginActions.new.map(&:to_a),
                  classes: classes
                ))
       end
@@ -103,7 +96,9 @@ class Views::Layouts::ApplicationSidebar < Views::Base
 
     render(Views::Layouts::Sidebar::Section.new(
              heading_key: :app_observations_left,
-             tabs: sidebar_observations_tabs(@user),
+             tabs: Tab::Sidebar::ObservationsActions.new(
+               user: @user
+             ).map(&:to_a),
              classes: classes
            ))
 
@@ -111,7 +106,9 @@ class Views::Layouts::ApplicationSidebar < Views::Base
 
     render(Views::Layouts::Sidebar::Section.new(
              heading_key: :app_species_list,
-             tabs: sidebar_species_lists_tabs(@user),
+             tabs: Tab::Sidebar::SpeciesListsActions.new(
+               user: @user
+             ).map(&:to_a),
              classes: classes
            ))
 
@@ -121,28 +118,29 @@ class Views::Layouts::ApplicationSidebar < Views::Base
   def render_info_sections
     # This cache depends on user status and locale
     cache([I18n.locale, user_status_string(@user), "links"]) do
-      render(Views::Layouts::Sidebar::Section.new(
-               heading_key: :app_latest,
-               tabs: sidebar_latest_tabs(@user),
-               classes: classes
-             ))
-
-      if @user
-        render(Views::Layouts::Sidebar::Section.new(
-                 heading_key: :INDEXES,
-                 tabs: sidebar_indexes_tabs,
-                 classes: classes
-               ))
-      end
-
-      render(Views::Layouts::Sidebar::Section.new(
-               heading_key: :app_more,
-               tabs: sidebar_info_tabs,
-               classes: classes
-             ))
-
+      render_section(:app_latest, latest_tabs)
+      render_section(:INDEXES, indexes_tabs) if @user
+      render_section(:app_more, info_tabs)
       render_languages_section
     end
+  end
+
+  def render_section(heading_key, tabs)
+    render(Views::Layouts::Sidebar::Section.new(
+             heading_key: heading_key, tabs: tabs, classes: classes
+           ))
+  end
+
+  def latest_tabs
+    Tab::Sidebar::LatestActions.new(user: @user).map(&:to_a)
+  end
+
+  def indexes_tabs
+    Tab::Sidebar::IndexesActions.new.map(&:to_a)
+  end
+
+  def info_tabs
+    Tab::Sidebar::InfoActions.new.map(&:to_a)
   end
 
   def render_languages_section

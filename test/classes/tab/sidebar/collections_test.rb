@@ -1,0 +1,124 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+# Smoke tests for each sidebar Collection. Single-tab POROs aren't
+# tested individually — each is a one-line `:KEY.t` + path + id;
+# composition tests below pin the wiring.
+module Tab::Sidebar
+  class CollectionsTest < UnitTestCase
+    def setup
+      @user = users(:rolf)
+    end
+
+    def test_admin_actions
+      tabs = Tab::Sidebar::AdminActions.new.to_a
+
+      assert_equal(
+        [Tab::Sidebar::Admin::Jobs,
+         Tab::Sidebar::Admin::BlockedIps,
+         Tab::Sidebar::Admin::SwitchUsers,
+         Tab::Sidebar::Admin::Users,
+         Tab::Sidebar::Admin::Banners,
+         Tab::Sidebar::Admin::Licenses],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_login_actions
+      tabs = Tab::Sidebar::LoginActions.new.to_a
+
+      assert_equal(
+        [Tab::Sidebar::Login, Tab::Sidebar::Signup],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_indexes_actions
+      tabs = Tab::Sidebar::IndexesActions.new.to_a
+
+      assert_equal(
+        [Tab::Sidebar::Indexes::Glossary,
+         Tab::Sidebar::Indexes::Herbaria,
+         Tab::Sidebar::Indexes::Locations,
+         Tab::Sidebar::Indexes::Names,
+         Tab::Sidebar::Indexes::Projects],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_info_actions
+      tabs = Tab::Sidebar::InfoActions.new.to_a
+
+      assert_equal(12, tabs.length)
+      assert_equal(Tab::Sidebar::Info::MobileApp, tabs.first.class)
+      assert_equal(Tab::Sidebar::Info::PrivacyPolicy, tabs.last.class)
+    end
+
+    def test_latest_actions_no_user
+      tabs = Tab::Sidebar::LatestActions.new.to_a
+
+      assert_equal([Tab::Sidebar::Latest::News], tabs.map(&:class))
+    end
+
+    def test_latest_actions_with_user
+      tabs = Tab::Sidebar::LatestActions.new(user: @user).to_a
+
+      assert_equal(
+        [Tab::Sidebar::Latest::News,
+         Tab::Sidebar::Latest::Changes,
+         Tab::Sidebar::Latest::Images,
+         Tab::Sidebar::Latest::Comments],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_observations_actions_no_user
+      tabs = Tab::Sidebar::ObservationsActions.new.to_a
+
+      assert_equal([Tab::Sidebar::Observations::Latest], tabs.map(&:class))
+    end
+
+    def test_observations_actions_with_user
+      tabs = Tab::Sidebar::ObservationsActions.new(user: @user).to_a
+
+      assert_equal(
+        [Tab::Sidebar::Observations::Latest,
+         Tab::Sidebar::Observations::New,
+         Tab::Sidebar::Observations::Yours,
+         Tab::Sidebar::Observations::Identify],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_species_lists_actions_no_user
+      tabs = Tab::Sidebar::SpeciesListsActions.new.to_a
+
+      assert_equal([Tab::Sidebar::SpeciesLists::All], tabs.map(&:class))
+    end
+
+    def test_species_lists_actions_with_user
+      tabs = Tab::Sidebar::SpeciesListsActions.new(user: @user).to_a
+
+      assert_equal(
+        [Tab::Sidebar::SpeciesLists::Yours,
+         Tab::Sidebar::SpeciesLists::All,
+         Tab::Sidebar::SpeciesLists::New],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_user_actions
+      tabs = Tab::Sidebar::UserActions.new(user: @user).to_a
+
+      assert_equal(
+        [Tab::User::CommentsFor,
+         Tab::Account::ShowInterests,
+         Tab::User::Summary,
+         Tab::Account::EditPreferences,
+         Tab::Sidebar::User::JoinMailingList],
+        tabs.map(&:class)
+      )
+    end
+  end
+end
