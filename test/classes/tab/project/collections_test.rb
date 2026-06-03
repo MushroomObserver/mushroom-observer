@@ -144,5 +144,41 @@ module Tab::Project
 
       assert_equal([Tab::Project::Index], tabs.map(&:class))
     end
+
+    # Members::FormNew: a single "cancel and show project" link.
+    def test_members_form_new_collection
+      project = projects(:bolete_project)
+      tabs = Tab::Project::Members::FormNew.new(project: project).to_a
+
+      assert_equal([Tab::Object::Return], tabs.map(&:class))
+    end
+
+    # Members::FormEdit with permission: cancel-to-index +
+    # cancel-and-show + edit-project-link.
+    def test_members_form_edit_collection_with_permission
+      project = projects(:bolete_project)
+      tabs = Tab::Project::Members::FormEdit.new(
+        project: project, permission: true
+      ).to_a
+
+      assert_equal(
+        [Tab::Project::Index,
+         Tab::Object::Return,
+         Tab::Project::ChangeMemberStatus],
+        tabs.map(&:class)
+      )
+    end
+
+    # Members::FormEdit without permission: empty (the controller
+    # gates access upstream; this is defensive — preserves the
+    # pre-conversion helper's `return unless permission?` behavior).
+    def test_members_form_edit_collection_without_permission_is_empty
+      project = projects(:bolete_project)
+      tabs = Tab::Project::Members::FormEdit.new(
+        project: project, permission: false
+      ).to_a
+
+      assert_empty(tabs)
+    end
   end
 end

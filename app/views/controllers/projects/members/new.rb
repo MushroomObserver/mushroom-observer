@@ -17,9 +17,7 @@ module Views::Controllers::Projects::Members
       add_page_title(
         :add_members_title.t(title: @project.title)
       )
-      add_context_nav(
-        project_members_form_new_tabs(project: @project)
-      )
+      add_context_nav(Tab::Project::Members::FormNew.new(project: @project))
       container_class(:wide)
 
       render(Views::Controllers::Projects::Members::Form.new(
