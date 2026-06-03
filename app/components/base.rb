@@ -47,10 +47,8 @@ class Components::Base < Phlex::HTML
     Rails.cache
   end
 
-  if Rails.env.development?
-    def before_template
-      comment { "Before #{self.class.name}" }
-      super
-    end
+  def before_template
+    comment { "Before #{self.class.name}" } if Rails.env.development?
+    super
   end
 end
