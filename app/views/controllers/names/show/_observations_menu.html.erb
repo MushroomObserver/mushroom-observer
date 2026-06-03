@@ -37,21 +37,31 @@ heading_link = icon_link_to(*tracker_tab.to_a)
         concat(tag.p("#{:research_links.l}:"))
         concat(tag.div(class: "pl-3") do
           if @name.classification =~ /Phylum: _Ascomycota_/
-            concat(tag.p(link_to(*ascomycete_org_name_tab(@name))))
+            concat(tag.p(link_to(
+              *Tab::Name::AscomyceteOrg.new(name: @name).to_a
+            )))
           end
-          concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
-          concat(tag.p(link_to(*gbif_name_tab(@name))))
+          if @name.eol_url
+            concat(tag.p(link_to(*Tab::Name::Eol.new(name: @name).to_a)))
+          end
+          concat(tag.p(link_to(*Tab::Name::Gbif.new(name: @name).to_a)))
           concat(tag.p(link_to(
             *Tab::Name::UserGoogleImages.new(name: @name, user: @user).to_a
           )))
-          concat(tag.p(link_to(*google_name_tab(@name))))
-          concat(tag.p(link_to(*inat_name_tab(@name))))
+          concat(tag.p(link_to(
+            *Tab::Name::GoogleSearch.new(name: @name).to_a
+          )))
+          concat(tag.p(link_to(*Tab::Name::Inat.new(name: @name).to_a)))
           if @name.searchable_in_registry?
-            concat(tag.p(link_to(*mushroomexpert_name_tab(@name))))
+            concat(tag.p(link_to(
+              *Tab::Name::MushroomExpert.new(name: @name).to_a
+            )))
             concat(tag.p(link_to(*Tab::Name::Mycoportal.new(name: @name).to_a)))
           end
-          concat(tag.p(link_to(*ncbi_nucleotide_term_tab(@name))))
-          concat(tag.p(link_to(*wikipedia_term_tab(@name))))
+          concat(tag.p(link_to(
+            *Tab::Name::NcbiNucleotide.new(name: @name).to_a
+          )))
+          concat(tag.p(link_to(*Tab::Name::Wikipedia.new(name: @name).to_a)))
         end)
       end)
     end %>
