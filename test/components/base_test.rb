@@ -47,29 +47,21 @@ class BaseTest < ComponentTestCase
     assert_equal(Rails.cache, component.cache_store)
   end
 
+  # The before_template hook emits a "<!-- Before ClassName -->"
+  # comment in development so reviewers can see which component
+  # rendered which DOM region; in test/prod it's a no-op.
   def test_before_template_adds_comment_in_development
-    # Stub Rails.env.development? to return true
     Rails.env.stub(:development?, true) do
-      # Create a component class that will have before_template defined
-      component_class = Class.new(Components::Base) do
-        # Re-define before_template since it's only defined when
-        # Rails.env.development? is true at class load time
-        def before_template
-          comment { "Before #{self.class.name}" }
-          super
-        end
+      html = render_component(TestComponent.new)
 
-        def view_template
-          div { "content" }
-        end
-      end
-
-      html = render_component(component_class.new)
-
-      # Should include HTML comment with class name
       assert_includes(html, "<!--")
-      assert_includes(html, "Before")
-      assert_includes(html, "content")
+      assert_includes(html, "Before #{TestComponent.name}")
     end
+  end
+
+  def test_before_template_no_comment_outside_development
+    html = render_component(TestComponent.new)
+
+    assert_not_includes(html, "<!-- Before")
   end
 end

@@ -1,7 +1,7 @@
 <%
 add_page_title(:name_approve_title.t(name: @name.display_name))
 
-add_context_nav(name_forms_return_tabs(name: @name))
+add_context_nav(Tab::Name::FormsReturn.new(name: @name))
 %>
 
 <%= render(Views::Controllers::Names::Synonyms::Approve::Form.new(

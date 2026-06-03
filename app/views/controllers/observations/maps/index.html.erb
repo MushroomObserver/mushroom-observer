@@ -2,7 +2,9 @@
 container_class(:full)
 
 add_index_title(@query, map: true)
-add_context_nav(observation_maps_tabs(query: @query))
+add_context_nav(Tab::Observation::MapsActions.new(
+                  query: @query, controller: controller
+                ))
 
 # Pass only the observations. CollapsibleCollectionOfObjects#init_sets
 # turns obs-with-GPS into a point and obs-without-GPS into a box built

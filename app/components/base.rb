@@ -33,7 +33,6 @@ class Components::Base < Phlex::HTML
   register_value_helper :url_for
   register_value_helper :image_vote_as_short_string
   register_value_helper :image_vote_as_help_string
-  register_value_helper :send_observer_question_tab
   register_value_helper :sequence_archive_options
   register_value_helper :add_q_param
   register_value_helper :q_param
@@ -48,10 +47,8 @@ class Components::Base < Phlex::HTML
     Rails.cache
   end
 
-  if Rails.env.development?
-    def before_template
-      comment { "Before #{self.class.name}" }
-      super
-    end
+  def before_template
+    comment { "Before #{self.class.name}" } if Rails.env.development?
+    super
   end
 end

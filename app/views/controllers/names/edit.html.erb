@@ -1,6 +1,6 @@
 <%
 add_edit_title(@name, user: @user)
-add_context_nav(name_form_edit_tabs(name: @name))
+add_context_nav(Tab::Name::FormEdit.new(name: @name, q_param: q_param))
 %>
 
 <%= render(Views::Controllers::Names::Form.new(@name, user: @user,

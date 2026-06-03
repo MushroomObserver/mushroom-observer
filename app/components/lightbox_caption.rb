@@ -188,7 +188,7 @@ class Components::LightboxCaption < Components::Base
     plain(" [")
     modal_link_to(
       "observation_email",
-      *send_observer_question_tab(@obs)
+      *Tab::Observation::SendQuestion.new(observation: @obs).to_a
     )
     plain("]")
   end

@@ -1,7 +1,9 @@
 <%
 container_class(:full)
 add_page_title(:map_observation_title.t(id: @observation.id))
-add_context_nav(observation_maps_tabs(query: @query))
+add_context_nav(Tab::Observation::MapsActions.new(
+                  query: @query, controller: controller
+                ))
 %>
 
 <%= make_map(objects: @observations, # it's an array, just one MinimalMapObs

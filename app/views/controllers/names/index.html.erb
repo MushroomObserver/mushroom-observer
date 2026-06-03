@@ -1,7 +1,9 @@
 <%
 container_class(:text_image)
 add_index_title(@query)
-add_context_nav(all_names_index_tabs(query: @query))
+add_context_nav(Tab::Name::IndexActions.new(
+                  query: @query, controller: controller
+                ))
 add_sorter(@query, names_index_sorts(query: @query))
 # Let test_index test pass args to pagination_links.
 args = @test_pagination_args || {}
