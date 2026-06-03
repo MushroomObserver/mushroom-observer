@@ -41,10 +41,14 @@ module LocationsHelper
   end
 
   # Sort options passed to `add_sorter` from the Locations index.
-  # When the query is currently ordered by rss_log, "Updated" maps
-  # to the rss_log timestamp instead of the location's updated_at.
+  # When the active query is itself ordered by rss_log, "Updated"
+  # maps to the rss_log timestamp instead of the location's
+  # updated_at. (The pre-relocate version compared against the
+  # Symbol `:rss_log`, but `query.params[:order_by]` is stored as
+  # a String — the predicate never fired. Fixed here so the
+  # documented intent actually takes effect.)
   def locations_index_sorts(query: nil)
-    rss_log = query&.params&.dig(:order_by) == :rss_log
+    rss_log = query&.params&.dig(:order_by) == "rss_log"
     [
       ["name", :sort_by_name.t],
       ["created_at", :sort_by_created_at.t],
