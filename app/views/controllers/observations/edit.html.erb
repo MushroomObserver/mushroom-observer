@@ -1,6 +1,6 @@
 <%
 add_edit_title(@observation, user: @user)
-add_context_nav(observation_form_edit_tabs(obs: @observation))
+add_context_nav(Tab::Observation::FormEdit.new(observation: @observation))
 container_class(:wide)
 %>
 
