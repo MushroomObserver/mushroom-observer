@@ -20,7 +20,7 @@ class Components::InlineModLinksTest < ComponentTestCase
                     target: cn, observation: @obs, user: stranger
                   ))
 
-    assert_no_html(html, "span.ml-3")
+    assert_no_html(html, "span.ml-2")
     assert_equal("", html.strip)
   end
 
@@ -32,9 +32,9 @@ class Components::InlineModLinksTest < ComponentTestCase
                     target: cn, observation: obs, user: cn.user
                   ))
 
-    assert_includes(html, "[ ")
-    assert_includes(html, " | ")
-    assert_includes(html, " ]")
+    assert_includes(html, "[")
+    assert_includes(html, "|")
+    assert_includes(html, "]")
     # Edit → ModalLink, modal_identifier carries the record's id
     assert_html(html,
                 "a[data-modal='modal_collection_number_#{cn.id}']")
@@ -91,7 +91,7 @@ class Components::InlineModLinksTest < ComponentTestCase
     assert_no_html(html, "[data-modal]")
   end
 
-  def test_indent_false_skips_ml3_wrapper
+  def test_indent_false_skips_ml2_wrapper
     cn = collection_numbers(:detailed_unknown_coll_num_one)
     obs = cn.observations.first
 
@@ -100,9 +100,9 @@ class Components::InlineModLinksTest < ComponentTestCase
                     indent: false
                   ))
 
-    assert_no_html(html, "span.ml-3")
+    assert_no_html(html, "span.ml-2")
     # Still bracketed
-    assert_includes(html, "[ ")
+    assert_includes(html, "[")
   end
 
   def test_extras_rendered_before_edit_destroy
@@ -116,7 +116,7 @@ class Components::InlineModLinksTest < ComponentTestCase
                   ))
 
     # Three items → two `|` separators
-    assert_equal(2, html.scan(" | ").size)
+    assert_equal(2, html.scan("|").size)
     assert_html(html, "a[href='/archive']")
   end
 end

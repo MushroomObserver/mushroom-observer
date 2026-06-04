@@ -47,13 +47,18 @@ class Components::InlineModLinks < Components::Base
 
   private
 
+  # Brackets and pipe-divider sit flush against the buttons —
+  # the buttons themselves already carry `px-2` horizontal
+  # padding from `link-icon px-2`, so adding `[ ` / ` | ` / ` ]`
+  # spaces visually double-pads the group. Match the rendered
+  # spacing to the button padding.
   def render_items(items)
-    plain("[ ")
+    plain("[")
     items.each_with_index do |item, idx|
-      plain(" | ") if idx.positive?
+      plain("|") if idx.positive?
       render_item(item)
     end
-    plain(" ]")
+    plain("]")
   end
 
   def render_item(item)
