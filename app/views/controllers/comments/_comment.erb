@@ -44,16 +44,12 @@ tag.div(
           end)
           concat(tag.span(class: "text-nowrap",
                           data: { user_specific: comment.user.id }) do
-            [
-              "[",
-              modal_link_to(dom_id(comment),
-                            *Tab::Comment::Edit.new(comment: comment).to_a),
-              "|",
-              destroy_button(name: :comment_show_destroy.t, target: comment,
-                             btn: nil, data: { turbo: true }),
-              "]",
-            ].safe_join(" ")
-          end)
+            # `controls` is a boolean-ish guard ("show this section?");
+            # the User instance comes from the controller's `@user`.
+            render(Components::InlineModLinks.new(
+                     target: comment, user: @user, indent: false
+                   ))
+          end) if controls
           concat(tag.div(comment.created_at.web_time,
                          class: "float-sm-right text-nowrap small"))
         end)

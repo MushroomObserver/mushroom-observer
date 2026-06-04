@@ -66,14 +66,11 @@ module NamingsHelper
   # N+1: should not be checking permission here
   def naming_name_html(user, naming, editable: naming)
     proposer_links = ""
-    if editable && permission?(naming)
-      edit_link = modal_link_to(
-        "obs_#{naming.observation_id}_naming_#{naming.id}",
-        *Tab::Naming::Edit.new(naming: naming).to_a
-      )
-      delete_link = naming_destroy_button(naming)
+    if editable
       proposer_links = tag.div(class: "text-nowrap") do
-        ["[", edit_link, "|", delete_link, "]"].safe_join(" ")
+        render(Components::InlineModLinks.new(
+                 target: naming, user: user, indent: false
+               ))
       end
     end
 
