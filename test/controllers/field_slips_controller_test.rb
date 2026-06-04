@@ -447,6 +447,24 @@ class FieldSlipsControllerTest < FunctionalTestCase
     )
   end
 
+  # update re-renders :edit on validation failure without running edit,
+  # so current_user must be set in the before_action, not the edit action,
+  # for the Project dropdown to still list member-projects. See #4436.
+  def test_update_validation_failure_rerenders_with_member_projects
+    slip = field_slips(:field_slip_one) # owner mary
+    bolete = projects(:bolete_project)  # mary is a member
+    login(slip.user.login)
+
+    # code with only digits/dots/dashes fails the format validation
+    patch(:update, params: { id: slip.id, field_slip: { code: "123" } })
+
+    assert_response(:unprocessable_content)
+    assert_select(
+      "select[name=?] option[value=?]",
+      "field_slip[project_id]", bolete.id.to_s
+    )
+  end
+
   def test_should_show_field_slip_and_allow_owner_to_change
     field_slip = field_slips(:field_slip_no_trust)
     login(field_slip.user.login)

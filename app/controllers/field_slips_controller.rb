@@ -37,10 +37,6 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips/1/edit
   def edit
-    # Needed so the Project dropdown lists the editing user's
-    # member-projects (FieldSlip#find_projects keys off current_user).
-    # new/create already do this; edit omitted it. See #4436.
-    @field_slip.current_user = @user
     @recent_observations = recent_edit_observations
   end
 
@@ -127,6 +123,11 @@ class FieldSlipsController < ApplicationController
 
   def set_field_slip
     @field_slip = FieldSlip.find(params[:id])
+    # Set for every edit/update/destroy flow (not just the edit action):
+    # update's validation-failure path re-renders :edit without running
+    # edit, and update_project runs on a code change during update — both
+    # need current_user for the Project dropdown / association. See #4436.
+    @field_slip.current_user = @user
   end
 
   # Gate edit/update/destroy. Site admins (admin mode) may always act,
