@@ -14,8 +14,11 @@ add_context_nav(Tab::Comment::FormNew.new(target: @target))
 
   <% if @target.is_a?(Observation) %>
     <div class="col-xs-12 col-sm-4">
-      <%= render(partial: "observations/show/images",
-                 locals: { obs: @target, thumb_size_control: false }) %>
+      <%= render(
+            Views::Controllers::Observations::Show::ImagesPanel.new(
+              obs: @target, images: @target.images_sorted, user: @user
+            )
+          ) %>
     </div>
   <% end %>
 </div>

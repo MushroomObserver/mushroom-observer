@@ -177,6 +177,7 @@ module Observations
     def naming_phlex_props
       {
         observation: @observation,
+        user: @user,
         naming: @naming,
         vote: @vote,
         given_name: @given_name,

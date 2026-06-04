@@ -168,7 +168,18 @@ class Components::InlineModLinks < Components::Base
     case @target
     when ::NameDescription
       @target.writer?(@user) || in_admin_mode?
+    when ::CollectionNumber
+      # CollectionNumber: edit gated by the OBS's edit permission
+      # — the pre-Phlex `_collection_numbers.erb` precomputed
+      # `can_edit = in_admin_mode? || obs.can_edit?(user)` once
+      # for the whole list and didn't recheck per-record.
+      @observation &&
+        (@observation.can_edit?(@user) || in_admin_mode?)
     else
+      # HerbariumRecord / Sequence / ExternalLink: per-record
+      # edit permission (`record.can_edit?(user)`). Important
+      # for HRs and EL: a user with edit permission on the OBS
+      # may not own every record attached to it.
       @target.can_edit?(@user) || in_admin_mode?
     end
   end
@@ -177,11 +188,8 @@ class Components::InlineModLinks < Components::Base
     case @target
     when ::NameDescription
       @target.is_admin?(@user) || in_admin_mode?
-    when ::CollectionNumber, ::HerbariumRecord
-      @observation &&
-        (@observation.can_edit?(@user) || in_admin_mode?)
     else
-      @target.can_edit?(@user) || in_admin_mode?
+      can_edit?
     end
   end
 end

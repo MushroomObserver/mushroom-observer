@@ -27,18 +27,27 @@ obs_locals = { obs: @observation, consensus: @consensus, user: @user }
           carousel_id: "observation_images",
           user: @user,
           title: :IMAGES.t,
-          links: observation_show_image_links(obs: @observation)
+          links: (permission?(@observation) ?
+                  icon_link_to(*Tab::Observation::ReuseImages.new(
+                    observation: @observation
+                  ).to_a) : "")
         )) %>
   <% end %>
 
   <%= tag.div(class: yield(:right_columns)) do %>
-    <%= render(partial: "observations/show/observation_details",
-               locals: obs_locals.merge(
-                 sites: @other_sites,
-                 siblings: @sibling_observations || []
-               )) %>
+    <%= render(
+          Views::Controllers::Observations::Show::ObservationDetailsPanel.new(
+            obs: @observation, consensus: @consensus, user: @user,
+            sites: @other_sites&.to_a,
+            siblings: @sibling_observations || []
+          )
+        ) %>
     <% if @user %>
-      <%= render(partial: "observations/show/name_info", locals: obs_locals) %>
+      <%= render(
+            Views::Controllers::Observations::Show::NameInfoPanel.new(
+              obs: @observation, user: @user
+            )
+          ) %>
 
       <% if show_lists %>
         <%= render(

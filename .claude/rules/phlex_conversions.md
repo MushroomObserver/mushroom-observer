@@ -101,6 +101,73 @@ This rule was added after a conversion shipped a
 `Views::Controllers::Descriptions::List` — the helper that PR was
 nominally trying to deprecate. Don't repeat that mistake.
 
+## ALWAYS use concrete prop types — never `_Any` when the type is known
+
+Phlex props validate at construction time when you give them a
+concrete type (`prop :user, ::User`, `prop :siblings,
+_Array(::Observation)`). A wrong-type arg fails loudly at the
+construction site instead of at the first method call that
+trips over `nil`. That's most of the value of having props at
+all — `_Any` throws the typecheck away.
+
+**Hard rule:** when you know the class an arg will hold, use it
+literally:
+
+```ruby
+# ✅ DO — concrete classes catch caller mistakes at construction
+prop :obs, ::Observation
+prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
+prop :siblings, _Array(::Observation), default: -> { [] }
+prop :sites, _Nilable(_Array(::ExternalSite)), default: nil
+
+# ❌ DON'T — `_Any` accepts anything, including nil, and fails
+# silently with a NoMethodError two methods later
+prop :consensus, _Nilable(_Any), default: nil
+prop :siblings, _Array(_Any), default: -> { [] }
+prop :sites, _Nilable(_Any), default: nil
+```
+
+Use `_Any` only when the arg genuinely can be any type and the
+view has explicit polymorphic handling for each shape
+(e.g. `Components::InlineModLinks#target` — different classes go
+through different `case`-branches). If you find yourself
+reaching for `_Any` to silence a typecheck error, the answer is
+almost always to figure out the right concrete type instead.
+
+## ALWAYS convert `assert_template` to a CSS-identifier assertion
+
+`assert_template("foo/show/_bar")` only works for ERB partials —
+Phlex components / views are rendered directly via `render(...)`,
+not through ActionView's template-lookup machinery, so the
+assertion will *always* fail after the conversion. **Do not
+delete or comment out** the assertion when this happens — that
+silently drops the coverage. Instead, replace it with an
+`assert_select` (controller tests) or `assert_html` (component
+tests) against a CSS selector that proves the same content
+rendered:
+
+```ruby
+# Before — partial-template assertion
+assert_template("observations/show/_thumbnail_map")
+
+# After — assert the panel's stable ID rendered
+assert_select("#observation_thumbnail_map")
+```
+
+Prefer a stable ID (`id="observation_thumbnail_map"`) when the
+panel has one; otherwise an identifier class
+(`.show_images`, `.observation_collection_numbers`); as a last
+resort, an unambiguous descendant selector. The goal is to pin
+the rendered DOM identity — the same thing the template
+assertion was implicitly checking when ActionView resolved the
+partial.
+
+This rule was added after the obs-show partials sweep dropped a
+batch of `assert_template` calls without replacing them — the
+tests passed but no longer verified the panel rendered at all.
+Re-deriving the coverage from the rendered HTML is the contract;
+the partial path was an implementation detail.
+
 ## Decide first: reusable or single-use?
 
 The first decision when converting an ERB helper / partial / template to

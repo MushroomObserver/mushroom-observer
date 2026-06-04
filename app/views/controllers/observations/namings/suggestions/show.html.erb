@@ -76,8 +76,13 @@ container_class(:double)
 
 </div>
 <div class="col-sm-4 float-sm-right">
-  <%= render(partial: "observations/show/images",
-               locals: { obs: @observation }) %>
+  <%= render(
+        Views::Controllers::Observations::Show::ImagesPanel.new(
+          obs: @observation,
+          images: @observation.images_sorted,
+          user: @user
+        )
+      ) %>
 </div>
 </div>
 <!--.row-->

@@ -8,9 +8,10 @@ module Views::Controllers::Observations::Namings
     # rubocop:disable Metrics/ParameterLists
     # See sibling `New#initialize` for the same param-list rationale.
     def initialize(observation:, naming:, vote:, given_name:, reasons:,
-                   feedback: {})
+                   user: nil, feedback: {})
       super()
       @observation = observation
+      @user = user
       @naming = naming
       @vote = vote
       @given_name = given_name
@@ -41,10 +42,9 @@ module Views::Controllers::Observations::Namings
     end
 
     def render_observation_details
-      trusted_html(
-        view_context.render(partial: "observations/show/observation_details",
-                            locals: { obs: @observation })
-      )
+      render(Views::Controllers::Observations::Show::ObservationDetailsPanel.new(
+               obs: @observation, user: @user
+             ))
     end
 
     def render_naming_form
@@ -61,11 +61,11 @@ module Views::Controllers::Observations::Namings
     end
 
     def render_images
-      trusted_html(
-        view_context.render(partial: "observations/show/images",
-                            locals: { obs: @observation,
-                                      thumb_size_control: false })
-      )
+      render(Views::Controllers::Observations::Show::ImagesPanel.new(
+               obs: @observation,
+               images: @observation.images_sorted,
+               user: @user
+             ))
     end
   end
 end
