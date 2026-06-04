@@ -66,40 +66,15 @@ module NamingsHelper
   # N+1: should not be checking permission here
   def naming_name_html(user, naming, editable: naming)
     proposer_links = ""
-    if editable && permission?(naming)
-      edit_link = modal_link_to(
-        "obs_#{naming.observation_id}_naming_#{naming.id}",
-        *Tab::Naming::Edit.new(naming: naming).to_a
-      )
-      delete_link = naming_destroy_button(naming)
+    if editable
       proposer_links = tag.div(class: "text-nowrap") do
-        ["[", edit_link, "|", delete_link, "]"].safe_join(" ")
+        render(Components::InlineModLinks.new(
+                 target: naming, user: user, indent: false
+               ))
       end
     end
 
     [naming_name_link(user, naming), " ", proposer_links].safe_join
-  end
-
-  # see link_helper.rb destroy_button
-  # Different from regular destroy button because of necessarily nested route
-  def naming_destroy_button(naming)
-    name = :DESTROY.t
-    path = observation_naming_path(observation_id: naming.observation_id,
-                                   id: naming.id)
-    identifier = "destroy_naming_link_#{naming.id}"
-    icon = link_icon(:remove)
-    content = tag.span(name, class: "sr-only")
-
-    html_options = {
-      method: :delete, title: name,
-      class: class_names(identifier, "text-danger"),
-      form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }
-
-    button_to(path, html_options) do
-      [content, icon].safe_join
-    end
   end
 
   # N+1: naming includes name

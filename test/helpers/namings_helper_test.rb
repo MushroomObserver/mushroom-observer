@@ -6,6 +6,7 @@ require("test_helper")
 class NamingsHelperTest < ActionView::TestCase
   include NamingsHelper
   include ObjectLinkHelper
+  include LinkHelper
 
   def setup
     @obs1 = observations(:minimal_unknown_obs)
@@ -121,6 +122,23 @@ class NamingsHelperTest < ActionView::TestCase
     assert_match("Sibling reason text", html)
     assert_match("MO #{@obs2.id}", html,
                  "Should include sibling observation link")
+  end
+
+  # -- naming_or_primary --
+
+  def test_naming_or_primary_with_regular_naming_returns_self
+    naming = namings(:coprinus_comatus_naming)
+    assert_equal(naming, naming_or_primary(naming))
+  end
+
+  # -- reasons_html --
+
+  # Hits the non-MergedNaming `else` branch
+  # (`simple_reasons_html(naming.reasons_array.select(&:used?))`).
+  def test_reasons_html_with_regular_naming
+    naming = namings(:coprinus_comatus_naming)
+    html = reasons_html(naming)
+    assert(html.is_a?(String) || html.is_a?(ActiveSupport::SafeBuffer))
   end
 
   private

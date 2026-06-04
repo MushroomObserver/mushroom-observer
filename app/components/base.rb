@@ -30,6 +30,7 @@ class Components::Base < Phlex::HTML
 
   # Register custom value helpers (return values)
   register_value_helper :permission?
+  register_value_helper :in_admin_mode?
   register_value_helper :url_for
   register_value_helper :image_vote_as_short_string
   register_value_helper :image_vote_as_help_string

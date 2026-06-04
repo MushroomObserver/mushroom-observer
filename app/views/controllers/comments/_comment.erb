@@ -44,16 +44,30 @@ tag.div(
           end)
           concat(tag.span(class: "text-nowrap",
                           data: { user_specific: comment.user.id }) do
-            [
-              "[",
-              modal_link_to(dom_id(comment),
-                            *Tab::Comment::Edit.new(comment: comment).to_a),
-              "|",
-              destroy_button(name: :comment_show_destroy.t, target: comment,
-                             btn: nil, data: { turbo: true }),
-              "]",
-            ].safe_join(" ")
-          end)
+            # Two render contexts, two permission strategies:
+            #
+            # - Normal request — `@user` is the current viewer.
+            #   `InlineModLinks` gates on
+            #   `target.user == @user || in_admin_mode?` and the
+            #   links don't appear in the HTML for non-authors
+            #   at all (defense in depth even with the CSS
+            #   hidden-by-default).
+            # - Action Cable broadcast (from the model's
+            #   `after_create_commit` / `after_update_commit`
+            #   callbacks) — `@user` is nil. Fall back to
+            #   `comment.user` so the gate passes; the markup
+            #   gets broadcast unconditionally. The surrounding
+            #   span's `data-user-specific` attribute teams up
+            #   with the site-wide `[data-user-specific]:not(…)`
+            #   CSS rule (`_user_specific_css.html.erb`) to hide
+            #   for everyone except the comment's author on the
+            #   receiving end. Admin mode bypasses the CSS so
+            #   admins still see them.
+            render(Components::InlineModLinks.new(
+                     target: comment, user: @user || comment.user,
+                     indent: false
+                   ))
+          end) if controls
           concat(tag.div(comment.created_at.web_time,
                          class: "float-sm-right text-nowrap small"))
         end)
