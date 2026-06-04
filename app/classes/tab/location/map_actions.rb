@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 # Action-nav for the locations map page. Composes the back-to-index
-# tab plus related-query bridges. Replaces
-# `Tabs::LocationsHelper#location_map_tabs`.
+# tab plus related-query bridges.
 class Tab::Location::MapActions < Tab::Collection
   def initialize(query: nil, controller: nil)
     super()

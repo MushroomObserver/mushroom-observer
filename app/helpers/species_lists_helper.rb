@@ -6,7 +6,7 @@ module SpeciesListsHelper
   # (`Views::Controllers::SpeciesLists::Index`) inlines this array
   # in a private method.
   def species_lists_index_sorts(query: nil)
-    rss_log = query&.params&.dig(:order_by) == :rss_log
+    rss_log = query&.params&.dig(:order_by) == "rss_log"
     [
       ["title",      :sort_by_title.t],
       ["date",       :sort_by_date.t],
