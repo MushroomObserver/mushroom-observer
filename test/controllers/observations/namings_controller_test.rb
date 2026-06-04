@@ -734,7 +734,14 @@ module Observations
     end
 
     def assert_edit
-      assert_template("observations/namings/edit")
+      # Phlex view renders outside the ActionView template lookup
+      # chain, so `assert_template` doesn't fire for the Phlex
+      # `Views::Controllers::Observations::Namings::Edit`. The
+      # body class is also not useful as a marker here — failed
+      # `update` requests re-render the Edit view but the body
+      # class stays `namings__update` (the request's action_name).
+      # Pin the Edit-specific page title instead.
+      assert_head_title(:edit_naming_title.l(id: assigns(:observation).id))
       assert_template("observations/show/_observation_details")
       assert_template("observations/show/_images")
     end

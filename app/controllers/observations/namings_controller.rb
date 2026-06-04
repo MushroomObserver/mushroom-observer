@@ -26,7 +26,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
-        format.html
+        format.html { render_phlex_new }
       end
     end
 
@@ -62,7 +62,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
-        format.html
+        format.html { render_phlex_edit }
       end
     end
 
@@ -164,6 +164,29 @@ module Observations
       }
     end
 
+    def render_phlex_new
+      render(Views::Controllers::Observations::Namings::New.new(
+               **naming_phlex_props
+             ), layout: true)
+    end
+
+    def render_phlex_edit
+      render(Views::Controllers::Observations::Namings::Edit.new(
+               **naming_phlex_props
+             ), layout: true)
+    end
+
+    def naming_phlex_props
+      {
+        observation: @observation,
+        naming: @naming,
+        vote: @vote,
+        given_name: @given_name,
+        reasons: @reasons,
+        feedback: naming_feedback
+      }
+    end
+
     def modal_identifier
       case action_name
       when "new", "create"
@@ -176,9 +199,9 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        helpers.naming_form_new_title(obs: @observation)
+        :create_naming_title.t(id: @observation.id)
       when "edit", "update"
-        helpers.naming_form_edit_title(obs: @observation)
+        :edit_naming_title.t(id: @observation.id)
       end
     end
 
@@ -267,14 +290,13 @@ module Observations
     end
 
     def respond_to_form_errors
-      redo_action = case action_name
-                    when "create"
-                      :new
-                    when "update"
-                      :edit
-                    end
       respond_to do |format|
-        format.html { render(action: redo_action) and return }
+        format.html do
+          case action_name
+          when "create" then render_phlex_new
+          when "update" then render_phlex_edit
+          end and return
+        end
         format.turbo_stream do
           render(
             partial: "shared/modal_form_reload",
