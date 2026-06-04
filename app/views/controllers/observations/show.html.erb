@@ -41,14 +41,19 @@ obs_locals = { obs: @observation, consensus: @consensus, user: @user }
       <%= render(partial: "observations/show/name_info", locals: obs_locals) %>
 
       <% if show_lists %>
-        <%= render(partial: "observations/show/species_lists",
-                   locals: obs_locals) %>
+        <%= render(
+              Views::Controllers::Observations::Show::SpeciesListsPanel.new(
+                obs: @observation, user: @user
+              )
+            ) %>
       <% end %>
 
-      <%= render(partial: "observations/show/associated_observations",
-                 locals: { obs: @observation, occurrence: @occurrence,
-                           siblings: @sibling_observations || [],
-                           user: @user }) %>
+      <%= render(
+            Views::Controllers::Observations::Show::AssociatedObservationsPanel.new(
+              obs: @observation, occurrence: @occurrence,
+              siblings: @sibling_observations || [], user: @user
+            )
+          ) %>
     <% end %>
   <% end %>
 <% end %>

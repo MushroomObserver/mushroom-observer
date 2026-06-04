@@ -16,8 +16,11 @@ flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @objects.empty? && @name_suggestions.any? %>
-  <%= render(partial: "observations/show/name_suggestions",
-             locals: { names: @name_suggestions }) %>
+  <%= render(
+        Views::Controllers::Observations::Show::NameSuggestionsAlert.new(
+          names: @name_suggestions
+        )
+      ) %>
 <% end %>
 
 <%= paginated_results do %>
