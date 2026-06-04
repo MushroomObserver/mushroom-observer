@@ -1,0 +1,75 @@
+<%# locals: (obs: nil, consensus: nil, user: nil, sites: nil, siblings: []) %>
+
+<%
+# The basic info of the observation. Sections get updated by JS
+siblings ||= []
+%>
+
+<%= render(Components::Panel.new(
+      panel_id: "observation_details",
+      panel_class: "name-section"
+    )) do |panel| %>
+  <%= panel.with_heading { :show_observation_details.l } %>
+  <%= panel.with_heading_links { obs_details_links(obs) } if user %>
+  <%= panel.with_body do %>
+    <%= observation_details_when_where_who(obs:, user:) %>
+
+    <% if user %>
+      <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
+        if obs.occurrence&.has_specimen || obs.specimen
+          :show_observation_specimen_available.t
+        else
+          :show_observation_specimen_not_available.t
+        end
+      end %>
+    <% end %>
+
+    <%= observation_details_notes(obs: obs) %>
+
+    <% if user && obs.projects.present? %>
+      <%= tag.div(class: "obs-projects", id: "observation_projects") do
+        concat([tag.span("#{:PROJECTS.t}:"), tag.br].safe_join)
+        obs.projects.each do |project|
+          concat(tag.div(link_to_object(project), class: "indent"))
+        end
+      end %>
+    <% end %>
+
+    <% if user && obs.field_slip %>
+      <%= tag.div(class: "obs-field-slips",
+                  id: "observation_field_slips") do
+        concat(tag.span("#{:FIELD_SLIP.t}: "))
+        concat(link_to_object(obs.field_slip))
+      end %>
+    <% end %>
+
+    <%
+    has_sib_cns = siblings.any? { |s| s.collection_numbers.any? }
+    has_sib_hrs = siblings.any? { |s| s.herbarium_records.any? }
+    has_sib_seqs = siblings.any? { |s| s.sequences.any? }
+    has_sib_els = siblings.any? { |s| s.external_links.any? }
+    %>
+    <% if user %>
+      <%= render(partial: "legacy_partials/collection_numbers",
+                locals: { obs:, user:,
+                          has_sibling_records: has_sib_cns }) %>
+      <%= sibling_collection_numbers(siblings) %>
+
+      <%= render(partial: "legacy_partials/herbarium_records",
+                locals: { obs:, user:,
+                          has_sibling_records: has_sib_hrs }) %>
+      <%= sibling_herbarium_records(siblings) %>
+
+      <%= render(partial: "legacy_partials/sequences",
+                locals: { obs:, user:,
+                          has_sibling_records: has_sib_seqs }) %>
+      <%= sibling_sequences(siblings) %>
+    <% end %>
+
+    <% if user && (obs.external_links.any? || sites.any? ||
+                   has_sib_els) %>
+      <%= render(partial: "legacy_partials/external_links",
+                locals: { obs:, user:, sites:, siblings: }) %>
+    <% end %>
+  <% end %>
+<% end %>

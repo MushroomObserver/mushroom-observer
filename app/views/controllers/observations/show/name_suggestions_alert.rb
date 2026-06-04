@@ -8,10 +8,13 @@
 # or a link to the observations search filtered by the name (when
 # there are observations).
 class Views::Controllers::Observations::Show::NameSuggestionsAlert < Views::Base
-  # Hash of { Name => Integer } — the name and the count of
-  # observations of that name. Zero-count entries link to the
-  # name's show page; non-zero to the observations search.
-  prop :names, Hash
+  # Pairs of `[Name, count]` — see
+  # `ObservationsController::Index#make_name_suggestions`. The
+  # controller builds an `Array<[Name, Integer]>` rather than a
+  # Hash because the iteration order is sort-stable (sort by
+  # `Name#sort_name` and preserve). Zero-count entries link to
+  # the name's show page; non-zero to the observations search.
+  prop :names, _Array(_Tuple(::Name, Integer))
 
   def view_template
     render(Components::Alert.new(level: :warning)) do

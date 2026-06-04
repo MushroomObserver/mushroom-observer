@@ -3,7 +3,8 @@
 require("test_helper")
 require_relative("parity_helper")
 
-# Smoke + parity for `Views::Controllers::Observations::Show::AssociatedObservationsPanel`.
+# Smoke + HTML parity for
+# `Views::Controllers::Observations::Show::AssociatedObservationsPanel`.
 class Views::Controllers::Observations::Show::AssociatedObservationsPanelTest <
   ComponentTestCase
   include Views::Controllers::Observations::Show::ParityHelper
@@ -34,6 +35,42 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanelTest <
         "a[href='#{routes.permanent_observation_path(sib.id)}']"
       )
     end
+  end
+
+  # ---- parity ----
+
+  def test_parity_no_siblings
+    erb_html = render_legacy_erb(
+      "associated_observations",
+      obs: @obs, occurrence: nil, siblings: [], user: @user
+    )
+    phlex_html = render(panel_with(siblings: [], occurrence: nil))
+
+    assert_html_element_equivalent(
+      erb_html, phlex_html, selector: "#associated_observations",
+                            label: "associated_observations no-siblings"
+    )
+  end
+
+  def test_parity_with_siblings
+    occurrence = Occurrence.joins(:observations).group("occurrences.id").
+                 having("count(observations.id) > 1").first ||
+                 skip("Need an occurrence with multiple observations")
+    siblings = occurrence.observations.to_a
+
+    erb_html = render_legacy_erb(
+      "associated_observations",
+      obs: @obs, occurrence: occurrence,
+      siblings: siblings, user: @user
+    )
+    phlex_html = render(panel_with(
+                          occurrence: occurrence, siblings: siblings
+                        ))
+
+    assert_html_element_equivalent(
+      erb_html, phlex_html, selector: "#associated_observations",
+                            label: "associated_observations with-siblings"
+    )
   end
 
   private

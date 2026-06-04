@@ -91,7 +91,12 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
   def render_tab_link(tab)
     content, path, opts = tab.to_a
     classes = ["d-block", opts[:class]].compact.join(" ").strip
-    attrs = opts.except(:class).merge(href: url_for(path), class: classes)
+    # `:button` is consumed by `context_nav_link` to switch to
+    # `button_to`; `:target` is stripped (these tabs aren't the
+    # "open in new tab" kind). Match the legacy helper's
+    # `merge_context_nav_link_args` filter so attrs line up.
+    attrs = opts.except(:class, :button, :target).
+            merge(href: url_for(path), class: classes)
     a(**attrs) { trusted_html(content) }
   end
 end

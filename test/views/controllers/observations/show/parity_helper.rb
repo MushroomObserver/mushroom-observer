@@ -1,33 +1,50 @@
 # frozen_string_literal: true
 
+require_relative("legacy_helpers")
+
 # Shared harness for the observations/show partial → Phlex parity
-# tests. Each subclass renders both the legacy ERB partial AND the
-# new Phlex view with identical inputs, then asserts the two
+# tests. Each test class renders both the legacy ERB partial AND
+# the new Phlex view with identical inputs, then asserts the two
 # subtrees are structurally equivalent via
 # `assert_html_element_equivalent` (attribute-order-agnostic,
 # CSRF-normalized).
 #
-# Used by `app/views/controllers/observations/show/*.rb` parity
-# tests during the partial-conversion sweep. Once all callers point
-# at the Phlex view and the ERB is deleted, the corresponding
-# parity test should be deleted along with it.
+# Because the ERB partials and their helpers were deleted when
+# the Phlex panels landed, both are preserved as test-only
+# fixtures:
+# - `test/views/controllers/observations/show/legacy_partials/*.erb`
+# - `test/views/controllers/observations/show/legacy_helpers.rb`
+#
+# When this PR merges and the parity tests have served their
+# purpose, both fixtures + the parity-test files can be deleted
+# together — they're transient verification, not permanent
+# coverage. (The panels themselves have their own component-level
+# test files; the parity-test gap is closed once the panels are
+# the only thing rendering this markup in production.)
 module Views::Controllers::Observations::Show::ParityHelper
   def setup
     super
     @user = users(:rolf)
     @obs = observations(:detailed_unknown_obs)
-    # The test controller used by ComponentTestCase doesn't inherit
-    # ApplicationController's `append_view_path(app/views/controllers)`,
-    # so a parity test rendering an ERB partial via `view_context.render(
-    # partial: "foo/bar")` needs to add that path itself.
+    # Add the legacy-partials directory to the controller's view
+    # paths so `render_legacy_erb("foo")` resolves to
+    # `legacy_partials/_foo.erb`.
     controller.prepend_view_path(
-      Rails.root.join("app/views/controllers").to_s
+      Rails.root.join("test/views/controllers/observations/show").to_s
     )
+    # Mix the restored deleted helpers into the test controller so
+    # the legacy ERB partials can resolve them.
+    helper_mod = Views::Controllers::Observations::Show::LegacyHelpers
+    controller.class.helper(helper_mod)
   end
 
   private
 
-  def render_erb_partial(name, locals)
-    view_context.render(partial: "observations/show/#{name}", locals: locals)
+  # Render a legacy ERB partial preserved as a test fixture under
+  # `legacy_partials/_<name>.erb`.
+  def render_legacy_erb(name, locals = {})
+    view_context.render(
+      partial: "legacy_partials/#{name}", locals: locals
+    )
   end
 end
