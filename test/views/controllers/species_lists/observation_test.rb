@@ -18,11 +18,11 @@ module Views::Controllers::SpeciesLists
       html = render_row
 
       assert_html(html, ".list-group-item .row")
-      obs_path = view_context.observation_path(id: @observation.id)
+      obs_path = routes.observation_path(id: @observation.id)
       assert_html(html, "a[href='#{obs_path}']")
       # Always renders the who+when line.
       assert_html(html,
-                  "a[href='#{view_context.user_path(@observation.user.id)}']")
+                  "a[href='#{routes.user_path(@observation.user.id)}']")
     end
 
     # When `image: true` the row is two-column (image + details);
@@ -50,7 +50,7 @@ module Views::Controllers::SpeciesLists
       html = render_row(remove: true)
 
       assert_html(html, ".manage_observation")
-      remove_path = view_context.observation_species_list_path(
+      remove_path = routes.observation_species_list_path(
         id: @observation.id,
         species_list_id: @species_list.id,
         commit: "remove"

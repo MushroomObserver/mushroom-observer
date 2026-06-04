@@ -39,7 +39,7 @@ module Views::Controllers::SpeciesLists
       html = render_listing(observation: @observation, remove: true)
 
       assert_html(html, ".list_manage form")
-      remove_path = view_context.observation_species_list_path(
+      remove_path = routes.observation_species_list_path(
         id: @observation.id,
         species_list_id: @species_list.id,
         commit: "remove"
@@ -55,7 +55,7 @@ module Views::Controllers::SpeciesLists
       html = render_listing(observation: @observation, add: true)
 
       assert_html(html, ".list_manage form")
-      add_path = view_context.observation_species_list_path(
+      add_path = routes.observation_species_list_path(
         id: @observation.id,
         species_list_id: @species_list.id,
         commit: "add"

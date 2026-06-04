@@ -135,7 +135,7 @@ module Views::Controllers::Observations::Namings
       html = render_form(model: naming, vote: vote)
 
       assert_html(html,
-                  "a[href='#{view_context.occurrence_path(occurrence)}']",
+                  "a[href='#{routes.occurrence_path(occurrence)}']",
                   text: :naming_see_matching_observations_reasons.l)
     end
 
