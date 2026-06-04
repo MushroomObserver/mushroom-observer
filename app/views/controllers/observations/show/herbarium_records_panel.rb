@@ -4,128 +4,126 @@
 # `CollectionNumbersPanel` but for `HerbariumRecord`s, with an
 # additional "search MCP" indented link for records whose
 # herbarium is `web_searchable?`. Replaces `_herbarium_records.erb`.
-module Views::Controllers::Observations::Show
-  class HerbariumRecordsPanel < Views::Base
-    prop :obs, ::Observation
-    prop :user, _Nilable(::User), default: nil
-    prop :has_sibling_records, _Boolean, default: false
+class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Base
+  prop :obs, ::Observation
+  prop :user, _Nilable(::User), default: nil
+  prop :has_sibling_records, _Boolean, default: false
 
-    def view_template
-      div(
-        id: "observation_herbarium_records",
-        class: "obs-herbarium",
-        data: { controller: "section-update",
-                section_update_user_value: @user&.id }
-      ) do
-        render_body
+  def view_template
+    div(
+      id: "observation_herbarium_records",
+      class: "obs-herbarium",
+      data: { controller: "section-update",
+              section_update_user_value: @user&.id }
+    ) do
+      render_body
+    end
+  end
+
+  private
+
+  def render_body
+    records = @obs.herbarium_records
+    if records.any? && can_add?
+      render_editable_list(records)
+    elsif records.any?
+      render_readonly_list(records)
+    elsif can_add?
+      render_empty_with_new_link
+    end
+  end
+
+  # Editable when admin, obs owner, or any curated herbarium.
+  def can_add?
+    in_admin_mode? || @obs.can_edit?(@user) ||
+      @user&.curated_herbaria&.any?
+  end
+
+  def render_editable_list(records)
+    div do
+      plain("#{:Herbarium_records.t}: ")
+      render_new_link
+    end
+    ul(class: "tight-list") do
+      records.each { |r| render_editable_row(r) }
+    end
+  end
+
+  def render_editable_row(record)
+    li(id: "herbarium_record_#{record.id}") do
+      render_show_link(record)
+      render(Components::InlineModLinks.new(
+               target: record, observation: @obs, user: @user
+             ))
+      render_mcp_search_link(record) if record.herbarium.web_searchable?
+    end
+  end
+
+  def render_show_link(record)
+    content, path, opts = ::Tab::HerbariumRecord::Show.new(
+      herbarium_record: record, observation: @obs
+    ).to_a
+    a(href: url_for(path), **opts) { trusted_html(content) }
+  end
+
+  def render_mcp_search_link(record)
+    br
+    span(class: "indent") do
+      a(href: record.herbarium.mcp_url(record.accession_number),
+        target: "_blank", rel: "noopener") do
+        plain(:herbarium_record_collection.t)
       end
     end
+  end
 
-    private
-
-    def render_body
-      records = @obs.herbarium_records
-      if records.any? && can_add?
-        render_editable_list(records)
-      elsif records.any?
-        render_readonly_list(records)
-      elsif can_add?
-        render_empty_with_new_link
-      end
+  # Read-only list: column-stacked link list (matches pre-Phlex
+  # shape — `tag.div` heading + tight-list with show-link + br +
+  # MCP search link when web-searchable).
+  def render_readonly_list(records)
+    div { plain("#{:Herbarium_record.t}:") }
+    ul(class: "tight-list") do
+      records.each { |record| render_readonly_row(record) }
     end
+  end
 
-    # Editable when admin, obs owner, or any curated herbarium.
-    def can_add?
-      in_admin_mode? || @obs.can_edit?(@user) ||
-        @user&.curated_herbaria&.any?
-    end
-
-    def render_editable_list(records)
-      div do
-        plain("#{:Herbarium_records.t}: ")
-        render_new_link
-      end
-      ul(class: "tight-list") do
-        records.each { |r| render_editable_row(r) }
-      end
-    end
-
-    def render_editable_row(record)
-      li(id: "herbarium_record_#{record.id}") do
-        render_show_link(record)
-        render(Components::InlineModLinks.new(
-                 target: record, observation: @obs, user: @user
-               ))
-        render_mcp_search_link(record) if record.herbarium.web_searchable?
-      end
-    end
-
-    def render_show_link(record)
-      content, path, opts = ::Tab::HerbariumRecord::Show.new(
-        herbarium_record: record, observation: @obs
-      ).to_a
-      a(href: url_for(path), **opts) { trusted_html(content) }
-    end
-
-    def render_mcp_search_link(record)
-      br
-      span(class: "indent") do
+  def render_readonly_row(record)
+    li(id: "herbarium_record_#{record.id}") do
+      render_show_link(record)
+      if record.herbarium.web_searchable?
+        br
         a(href: record.herbarium.mcp_url(record.accession_number),
           target: "_blank", rel: "noopener") do
-          plain(:herbarium_record_collection.t)
+          plain("#{record.herbarium.code} " \
+                "#{:herbarium_record_collection.t}")
         end
       end
     end
+  end
 
-    # Read-only list: column-stacked link list (matches pre-Phlex
-    # shape — `tag.div` heading + tight-list with show-link + br +
-    # MCP search link when web-searchable).
-    def render_readonly_list(records)
-      div { plain("#{:Herbarium_record.t}:") }
-      ul(class: "tight-list") do
-        records.each { |record| render_readonly_row(record) }
-      end
-    end
+  def render_empty_with_new_link
+    label = if @has_sibling_records
+              "#{:Herbarium_records.t}: "
+            else
+              "#{:show_observation_no_herbarium_records.t} "
+            end
+    plain(label)
+    plain("[ ")
+    render_new_modal_link
+    plain(" ]")
+  end
 
-    def render_readonly_row(record)
-      li(id: "herbarium_record_#{record.id}") do
-        render_show_link(record)
-        if record.herbarium.web_searchable?
-          br
-          a(href: record.herbarium.mcp_url(record.accession_number),
-            target: "_blank", rel: "noopener") do
-            plain("#{record.herbarium.code} " \
-                  "#{:herbarium_record_collection.t}")
-          end
-        end
-      end
-    end
+  def render_new_link
+    plain("[ ")
+    render_new_modal_link
+    plain(" ]")
+  end
 
-    def render_empty_with_new_link
-      label = if @has_sibling_records
-                "#{:Herbarium_records.t}: "
-              else
-                "#{:show_observation_no_herbarium_records.t} "
-              end
-      plain(label)
-      plain("[ ")
-      render_new_modal_link
-      plain(" ]")
-    end
-
-    def render_new_link
-      plain("[ ")
-      render_new_modal_link
-      plain(" ]")
-    end
-
-    def render_new_modal_link
-      name, path, opts = ::Tab::HerbariumRecord::New.new(
-        observation: @obs
-      ).to_a
-      render(Components::ModalLink.new(
-               "herbarium_record", name, path, **opts
-             ))
-    end
+  def render_new_modal_link
+    name, path, opts = ::Tab::HerbariumRecord::New.new(
+      observation: @obs
+    ).to_a
+    render(Components::ModalLink.new(
+             "herbarium_record", name, path, **opts
+           ))
   end
 end

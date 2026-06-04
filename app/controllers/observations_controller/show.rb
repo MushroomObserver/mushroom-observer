@@ -43,6 +43,14 @@ module ObservationsController::Show
     @comments = @observation.comments&.sort_by(&:created_at)&.reverse
     load_occurrence_data
     @images = occurrence_images
+
+    render(Views::Controllers::Observations::Show.new(
+             observation: @observation, user: @user,
+             consensus: @consensus, comments: @comments || [],
+             images: @images || [], other_sites: @other_sites,
+             sibling_observations: @sibling_observations,
+             occurrence: @occurrence, owner_name: @owner_name
+           ), layout: true)
   end
 
   # Tell search engines what the "correct" URL is for this page.

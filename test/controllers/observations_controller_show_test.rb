@@ -273,7 +273,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
 
     assert_response(:success)
-    assert_template("observations/show")
+    # `observations/show` is a Phlex view now — pin the body class
+    # that Rails layouts emit from `controller_name__action_name`.
+    assert_select("body.observations__show")
   end
 
   ##############################################################################
@@ -295,7 +297,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def assert_show_observation
-    assert_template("observations/show")
+    # `observations/show` is a Phlex view now — pin the body class
+    # Rails layouts emit from `controller_name__action_name`
+    # instead of `assert_template`.
+    assert_select("body.observations__show")
     assert_template("comments/_comments_for_object")
     # Phlex panels — assert against their stable IDs (no template
     # lookup): _name_info / _observation_details / _namings /
@@ -919,7 +924,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: obs.id })
     assert_response(:success)
-    assert_template("show")
+    assert_select("body.observations__show")
     assert_select("form#naming_vote_form_#{naming1.id} " \
                   "select#vote_value_#{naming1.id}>" \
                   "option[selected=selected][value='#{vote1.value}']")

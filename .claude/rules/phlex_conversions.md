@@ -265,6 +265,67 @@ Example of the single-use pattern: see
 table chunk, rendered by both the index page and the post-CUD
 turbo_stream response, both within the api_keys controller.
 
+## Action-template + sub-partial organization
+
+An action template (`show.html.erb`, `new.html.erb`,
+`edit.html.erb`, …) usually has several sub-partials it composes
+(`_some_panel.erb`, `_some_row.erb`, …). When Phlexifying:
+
+- **Action template becomes a class** at `app/views/controllers/
+  <controller>/<action>.rb`, named `Views::Controllers::<C>::<A>`.
+  That's the class the controller renders.
+- **Sub-partials become sibling classes under the same action
+  namespace**, file-wise nested in `app/views/controllers/
+  <controller>/<action>/<name>.rb`, class-wise
+  `Views::Controllers::<C>::<A>::<Name>`.
+
+The action class and its sub-partial classes live in the **same
+constant** (the action is both a class AND a namespace — Ruby
+allows nested constants under a class just as under a module).
+File layout:
+
+```
+app/views/controllers/observations/
+  show.rb                          # class Views::Controllers::Observations::Show
+  show/
+    observation_details_panel.rb   # class Show::ObservationDetailsPanel
+    name_info_panel.rb             # class Show::NameInfoPanel
+    collection_numbers_panel.rb    # class Show::CollectionNumbersPanel
+    sibling_records.rb             # module Show::SiblingRecords (mixin)
+    …
+```
+
+Zeitwerk handles this fine: when the action class is referenced,
+it autoloads `show.rb`; when a sub-partial constant is
+referenced (`Show::FooPanel`), it autoloads the file under
+`show/`. The action class doesn't need to declare any of the
+sub-partials — they're discovered by the autoloader on demand.
+
+When the action class renders a sub-partial, qualify the
+constant from the namespace root the first time it's referenced
+inside another sub-partial:
+
+```ruby
+# In Show::ObservationDetailsPanel:
+render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(...))
+```
+
+The bare `CollectionNumbersPanel` form would resolve via Ruby's
+lexical scope from `Show::ObservationDetailsPanel`, but
+Zeitwerk's autoload-on-undefined-constant doesn't fire on
+unqualified references inside another constant's body —
+preferring the qualified form keeps things robust.
+
+Reference: `Views::Controllers::SpeciesLists::Show` and its
+siblings (`SpeciesLists::Details`, `SpeciesLists::Listing`,
+`SpeciesLists::Observation`) are the older pattern where
+sub-classes are flat siblings of the action class rather than
+nested under it; that's also valid, but for **action-specific**
+sub-partials (the obs-show case), nesting under the action
+class keeps the directory structure mirroring the ERB partial
+layout and makes the "which page does this belong to?" question
+trivial from the constant name alone.
+
 ## Collapse deep namespaces in `Views::Controllers::*`
 
 The `Views::Controllers::<Controller>::<Name>` namespace is four levels

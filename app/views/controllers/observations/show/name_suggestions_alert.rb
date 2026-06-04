@@ -7,42 +7,40 @@
 # the name's show page (when there are no observations of that name)
 # or a link to the observations search filtered by the name (when
 # there are observations).
-module Views::Controllers::Observations::Show
-  class NameSuggestionsAlert < Views::Base
-    # Hash of { Name => Integer } — the name and the count of
-    # observations of that name. Zero-count entries link to the
-    # name's show page; non-zero to the observations search.
-    prop :names, Hash
+class Views::Controllers::Observations::Show::NameSuggestionsAlert < Views::Base
+  # Hash of { Name => Integer } — the name and the count of
+  # observations of that name. Zero-count entries link to the
+  # name's show page; non-zero to the observations search.
+  prop :names, Hash
 
-    def view_template
-      render(Components::Alert.new(level: :warning)) do
-        p { plain("#{:list_observations_suggestions.t}:") }
-        @names.each { |name, count| render_row(name, count) }
-      end
+  def view_template
+    render(Components::Alert.new(level: :warning)) do
+      p { plain("#{:list_observations_suggestions.t}:") }
+      @names.each { |name, count| render_row(name, count) }
     end
+  end
 
-    private
+  private
 
-    def render_row(name, count)
-      div(class: "pl-3") do
-        count.zero? ? render_name_link(name) : render_obs_link(name, count)
-      end
+  def render_row(name, count)
+    div(class: "pl-3") do
+      count.zero? ? render_name_link(name) : render_obs_link(name, count)
     end
+  end
 
-    def render_name_link(name)
-      plain("#{:list_observation_name.t}: ")
-      a(href: url_for(name.show_link_args)) do
-        trusted_html(name.display_name.t)
-      end
-      plain(" (0)")
+  def render_name_link(name)
+    plain("#{:list_observation_name.t}: ")
+    a(href: url_for(name.show_link_args)) do
+      trusted_html(name.display_name.t)
     end
+    plain(" (0)")
+  end
 
-    def render_obs_link(name, count)
-      plain("#{:list_observation_observations.t} ")
-      a(href: observations_path(pattern: name.text_name)) do
-        trusted_html(name.display_name.t)
-      end
-      plain(" (#{count})")
+  def render_obs_link(name, count)
+    plain("#{:list_observation_observations.t} ")
+    a(href: observations_path(pattern: name.text_name)) do
+      trusted_html(name.display_name.t)
     end
+    plain(" (#{count})")
   end
 end
