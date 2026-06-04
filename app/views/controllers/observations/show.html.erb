@@ -78,8 +78,11 @@ obs_locals = { obs: @observation, consensus: @consensus, user: @user }
   <% if @user %>
     <%= tag.div(class: yield(:right_columns)) do %>
       <% if show_map %>
-        <%= render(partial: "observations/show/thumbnail_map",
-                   locals: obs_locals) %>
+        <%= render(
+              Views::Controllers::Observations::Show::ThumbnailMapPanel.new(
+                obs: @observation, user: @user
+              )
+            ) %>
       <% end %>
     <% end %>
   <% end %>

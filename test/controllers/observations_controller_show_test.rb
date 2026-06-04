@@ -300,7 +300,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_template("observations/show/_observation_details")
     # assert_template("observations/show/_namings") now a helper
     assert_template("comments/_comments_for_object")
-    assert_template("observations/show/_thumbnail_map")
+    # _thumbnail_map / _associated_observations / _name_suggestions
+    # / _species_lists are Phlex now — no ActionView template lookup.
   end
 
   # Refactored for CRUD routes in :collection_numbers or :herbarium_records
