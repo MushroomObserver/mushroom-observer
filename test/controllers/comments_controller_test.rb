@@ -391,7 +391,7 @@ class CommentsControllerTest < FunctionalTestCase
     # with `data-modal="modal_comment_<id>"`. Pin both as the
     # contract.
     assert_match(/data-modal="modal_comment_#{comment.id}"/, html)
-    assert_match(%r{<input[^>]*name="_method"[^>]*value="delete"}, html)
+    assert_match(/<input[^>]*name="_method"[^>]*value="delete"/, html)
   end
 
   # Companion: in a regular page-render context (not a broadcast),

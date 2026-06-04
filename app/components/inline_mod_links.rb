@@ -84,6 +84,7 @@ class Components::InlineModLinks < Components::Base
       modal_id: :modal_id_naming,
       destroy_path: :path_observation_naming,
       destroy_name: :name_destroy_object,
+      destroy_class: :class_destroy_naming,
       can_edit: :can_edit_via_owner?
     },
     ::Comment => {
@@ -93,7 +94,10 @@ class Components::InlineModLinks < Components::Base
       destroy_name: :name_destroy_object,
       can_edit: :can_edit_via_owner?
     },
-    ::NameDescription => {
+    # Both `NameDescription` and `LocationDescription` inherit
+    # from `Description`. Keyed on the parent so the ancestor
+    # walk in `#handler` resolves either subclass.
+    ::Description => {
       edit: :icon_link_edit,
       tab: :tab_description_edit,
       destroy_path: :path_target,
@@ -138,7 +142,16 @@ class Components::InlineModLinks < Components::Base
     end
   end
 
-  def handler = TARGET_HANDLERS.fetch(@target.class)
+  # Walk the target's ancestor chain looking for a matching
+  # handler. Lets `LocationDescription` and `NameDescription`
+  # share the `::Description` parent entry, and gives future
+  # subclasses of any supported model the right behavior for free.
+  def handler
+    @handler ||= @target.class.ancestors.lazy.
+                 map { |k| TARGET_HANDLERS[k] }.find(&:itself) ||
+                 raise(KeyError.new("No InlineModLinks handler for " \
+                                 "#{@target.class}"))
+  end
 
   def edit_component
     return nil unless can_edit?
@@ -294,6 +307,14 @@ class Components::InlineModLinks < Components::Base
 
   def class_destroy_external_link
     "destroy_external_link_link_#{@target.id}"
+  end
+
+  # The pre-Phlex `naming_destroy_button` set this class
+  # explicitly so the namings integration tests could click it
+  # via `find_button(class: "destroy_naming_link_<id>")`. Keep
+  # the identifier hook.
+  def class_destroy_naming
+    "destroy_naming_link_#{@target.id}"
   end
 
   # ---- :destroy_confirm handlers ----------------------------
