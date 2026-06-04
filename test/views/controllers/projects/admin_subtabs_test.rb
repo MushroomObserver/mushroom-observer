@@ -5,7 +5,7 @@ require("test_helper")
 module Views::Controllers::Projects
   # Tests for the project Admin sub-tabs component (issue #4148).
   class Views::Controllers::Projects::AdminSubtabsTest < ComponentTestCase
-    def test_renders_three_subtabs
+    def test_renders_four_subtabs
       project = projects(:eol_project)
       html = render_subtabs(project: project, current_subtab: "details")
 
@@ -17,6 +17,8 @@ module Views::Controllers::Projects
                   text: :show_project_admin_details_tab.l)
       assert_html(html, "a[href='/projects/#{project.id}/members']")
       assert_html(html, "a[href='/projects/#{project.id}/aliases']")
+      assert_html(html, "a[href='/field_slips?project=#{project.id}']",
+                  text: "#{project.field_slips.count} #{:FIELD_SLIPS.l}")
     end
 
     def test_details_active_when_current

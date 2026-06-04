@@ -20,6 +20,13 @@ project_title = @query&.params_cache&.dig(:project)&.title || ""
                       { class: "btn btn-default" }) %>
         <% end %>
       </div>
+    <% elsif @project.is_admin?(@user) %>
+      <div class="alert alert-info mt-3" id="field_slip_no_prefix_nudge">
+        <%= :show_project_field_slip_no_prefix.t %>
+        <%= link_to(:show_project_field_slip_set_prefix.t,
+                    project_admin_path(project_id: @project.id),
+                    { class: "alert-link" }) %>
+      </div>
     <% end %>
   <% else %>
     <%= render(Components::InlineFilterForm.new(

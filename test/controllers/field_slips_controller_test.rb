@@ -28,6 +28,45 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # eol_project: admins rolf + mary; katrina is a member but not admin.
+  def test_index_nudges_admin_to_set_missing_prefix
+    project = projects(:eol_project)
+    project.update!(field_slip_prefix: nil)
+    login(users(:rolf).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select(
+      "#field_slip_no_prefix_nudge a[href=?]",
+      project_admin_path(project_id: project.id), true,
+      "Admin should be nudged to the Admin Details page to set a prefix"
+    )
+  end
+
+  def test_index_prefix_nudge_hidden_from_non_admin
+    project = projects(:eol_project)
+    project.update!(field_slip_prefix: nil)
+    login(users(:katrina).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select("#field_slip_no_prefix_nudge", false,
+                  "Non-admin should not see the set-prefix nudge")
+  end
+
+  def test_index_no_nudge_when_prefix_present
+    project = projects(:eol_project) # has prefix EOL
+    login(users(:rolf).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select("#field_slip_no_prefix_nudge", false,
+                  "No nudge when the project already has a prefix")
+  end
+
   def test_should_get_new
     requires_login(:new)
     assert_response(:success)

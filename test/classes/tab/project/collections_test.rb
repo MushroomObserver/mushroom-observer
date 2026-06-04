@@ -117,7 +117,7 @@ module Tab::Project
       collection.each { |t| assert_kind_of(Tab::Base, t) }
     end
 
-    # AdminSubtabs: always Details, Members, Aliases in that order.
+    # AdminSubtabs: always Details, Members, Aliases, Field Slips.
     def test_admin_subtabs_order
       bolete = projects(:bolete_project)
       tabs = Tab::Project::AdminSubtabs.new(project: bolete).to_a
@@ -125,9 +125,20 @@ module Tab::Project
       assert_equal(
         [Tab::Project::AdminDetails,
          Tab::Project::AdminMembers,
-         Tab::Project::AdminAliases],
+         Tab::Project::AdminAliases,
+         Tab::Project::AdminFieldSlips],
         tabs.map(&:class)
       )
+    end
+
+    def test_admin_field_slips_tab
+      bolete = projects(:bolete_project)
+      tab = Tab::Project::AdminFieldSlips.new(project: bolete)
+
+      assert_equal("#{bolete.field_slips.count} #{:FIELD_SLIPS.l}", tab.title)
+      assert_equal(routes.field_slips_path(project: bolete.id), tab.path)
+      assert_equal("field_slips", tab.alt_title)
+      assert_equal("field_slips", tab.nav_key)
     end
 
     # IndexNav: the "Add Project" action-nav collection for the
@@ -179,6 +190,12 @@ module Tab::Project
       ).to_a
 
       assert_empty(tabs)
+    end
+
+    private
+
+    def routes
+      Rails.application.routes.url_helpers
     end
   end
 end
