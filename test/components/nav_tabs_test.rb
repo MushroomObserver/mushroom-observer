@@ -111,11 +111,12 @@ class NavTabsTest < ComponentTestCase
                     current: "members", tabs: collection
                   ))
 
-    # Collection contributed 3 tabs; the one keyed "members" is active.
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 3)
+    # Collection contributed 4 tabs; the one keyed "members" is active.
+    assert_html(html, "ul.nav-tabs > li.nav-item", count: 4)
     assert_html(html, "a.nav-link.active.members_link")
     assert_html(html, "a.nav-link.details_link")
     assert_html(html, "a.nav-link.aliases_link")
+    assert_html(html, "a.nav-link.field_slips_link")
   end
 
   def test_accepts_raw_internal_link_with_html_options
@@ -140,11 +141,12 @@ class NavTabsTest < ComponentTestCase
       tabs.tab("Extra", "/extra", key: "extra")
     end
 
-    # Collection's 3 tabs + 1 ad-hoc = 4 total, in declaration order.
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 4)
+    # Collection's 4 tabs + 1 ad-hoc = 5 total, in declaration order.
+    assert_html(html, "ul.nav-tabs > li.nav-item", count: 5)
     assert_html(html, "a.nav-link.details_link")
     assert_html(html, "a.nav-link.members_link")
     assert_html(html, "a.nav-link.aliases_link")
+    assert_html(html, "a.nav-link.field_slips_link")
     assert_html(html, "a.nav-link[href='/extra']", text: "Extra")
   end
 

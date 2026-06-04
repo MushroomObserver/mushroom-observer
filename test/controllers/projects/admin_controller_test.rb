@@ -29,6 +29,9 @@ module Projects
       assert_select("a[href=?]",
                     project_aliases_path(project_id: @project.id),
                     true, "Aliases sub-tab should link to aliases page")
+      assert_select("a[href=?]",
+                    field_slips_path(project: @project.id),
+                    true, "Field Slips sub-tab should link to field slips")
       # Danger Zone with Delete Project
       assert_select("#project_danger_zone", true,
                     "Danger Zone section should be present")
