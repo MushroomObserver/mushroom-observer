@@ -38,15 +38,7 @@ module Tabs
       context_nav_links(web, { class: "d-block" }).reject(&:empty?)
     end
 
-    # -------- non-tab title + utility ----------------------------
-
-    def naming_form_new_title(obs:)
-      :create_naming_title.t(id: obs.id)
-    end
-
-    def naming_form_edit_title(obs:)
-      :edit_naming_title.t(id: obs.id)
-    end
+    # -------- non-tab utility ------------------------------------
 
     def observations_index_sorts
       [["rss_log", :sort_by_activity.l],
