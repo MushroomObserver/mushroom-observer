@@ -203,32 +203,65 @@ module ObservationsHelper
   end
 
   def observation_details_who(obs:, user:)
-    obs_user = obs.user
-    html = [
-      "#{:WHO.t}:",
-      if user
-        user_link(obs_user)
-      else
-        obs_user.unique_text_name
-      end
-    ]
-    if user && obs_user != user && !obs_user&.no_emails &&
-       obs_user&.email_general_question
-
-      html += [
-        "[",
-        modal_link_to("observation_email", *send_observer_question_tab(obs)),
-        "]"
-      ]
-    end
-
     tag.p(class: "obs-who", id: "observation_who") do
-      html.safe_join(" ")
+      concat(observation_collector_html(obs: obs, user: user))
+      if obs.collector_differs_from_creator?
+        concat(tag.br)
+        concat(observation_entered_by_html(obs: obs, user: user))
+      end
     end
   end
 
+  # "Collector:" line. When the collector is the entering user the
+  # "ask a question" email link rides here; when they differ it moves
+  # to the "Entered by:" line (you email the MO account, not a name).
+  def observation_collector_html(obs:, user:)
+    html = ["#{:COLLECTOR.t}:",
+            observation_collector_identity(obs: obs, user: user)]
+    unless obs.collector_differs_from_creator?
+      html += observer_question_link(obs: obs, user: user)
+    end
+    html.safe_join(" ")
+  end
+
+  def observation_entered_by_html(obs:, user:)
+    html = ["#{:ENTERED_BY.t}:", entering_user_link(obs: obs, user: user)]
+    html += observer_question_link(obs: obs, user: user)
+    html.safe_join(" ")
+  end
+
+  # The collector identity: a linked MO user when known, else the
+  # free-text collector string, else the entering user (legacy rows).
+  def observation_collector_identity(obs:, user:)
+    if obs.collector_user
+      user ? user_link(obs.collector_user) : obs.collector_user.unique_text_name
+    elsif obs.collector.present?
+      obs.collector
+    else
+      entering_user_link(obs: obs, user: user)
+    end
+  end
+
+  def entering_user_link(obs:, user:)
+    user ? user_link(obs.user) : obs.user.unique_text_name
+  end
+
+  def observer_question_link(obs:, user:)
+    obs_user = obs.user
+    return [] unless user && obs_user != user && !obs_user&.no_emails &&
+                     obs_user&.email_general_question
+
+    ["[",
+     modal_link_to("observation_email", *send_observer_question_tab(obs)),
+     "]"]
+  end
+
   def observation_details_notes(obs:)
-    notes = obs.notes
+    # When the collector column is populated it renders on its own
+    # show-page line, so suppress the duplicate notes key (kept in notes
+    # for imported-snapshot fidelity). Legacy rows without the column
+    # still render the Collector note as before. See #4211.
+    notes = obs.collector.present? ? obs.notes.except(:Collector) : obs.notes
     return "" if notes == Observation.no_notes
     return "#{:NOTES.t}:\n#{notes[:Other]}".tpl if notes.keys == [:Other]
 

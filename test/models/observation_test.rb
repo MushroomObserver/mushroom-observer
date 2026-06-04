@@ -2368,4 +2368,60 @@ class ObservationTest < UnitTestCase
     assert_nil(@cc_obs.location_lng,
                "Removing location should clear cached coordinates")
   end
+
+  # --- Collector identity (#4211) ---
+
+  def new_collector_obs(**attrs)
+    Observation.create!({ user: mary, when: Time.zone.now,
+                          where: "Anywhere", name: names(:fungi) }.merge(attrs))
+  end
+
+  def test_collector_defaults_to_creator
+    obs = new_collector_obs
+    assert_equal(mary.unique_text_name, obs.collector)
+    assert_equal(mary.id, obs.collector_user_id)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_matching_creator_sets_fk
+    obs = new_collector_obs(collector: mary.unique_text_name)
+    assert_equal(mary.id, obs.collector_user_id)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_free_text_clears_fk_and_differs
+    obs = new_collector_obs(collector: "Jane Forager")
+    assert_equal("Jane Forager", obs.collector)
+    assert_nil(obs.collector_user_id)
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_unchanged_save_preserves_resolved_fk
+    # Simulates a backfilled foray row: collector resolves to a
+    # different MO user than the one who entered the record.
+    obs = new_collector_obs
+    obs.update_columns(collector: rolf.unique_text_name,
+                       collector_user_id: rolf.id)
+    obs.reload.update!(where: "Somewhere else")
+    assert_equal(rolf.id, obs.collector_user_id,
+                 "Editing an unrelated field must not clear the collector FK")
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_textile_links_known_user
+    obs = Observation.new(user: mary, collector_user: rolf,
+                          collector: rolf.unique_text_name)
+    assert_equal(rolf.textile_name, obs.collector_textile)
+  end
+
+  def test_collector_textile_plain_string
+    obs = Observation.new(user: mary, collector: "Jane Forager")
+    assert_equal("Jane Forager", obs.collector_textile)
+  end
+
+  def test_collector_textile_legacy_notes_fallback
+    obs = Observation.new(user: mary, collector: nil,
+                          notes: { Collector: "_user mary_" })
+    assert_equal("_user mary_", obs.collector_textile)
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_05_160002) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_02_000000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -561,6 +561,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_05_160002) do
     t.bigint "source_id"
     t.string "external_id", limit: 64
     t.datetime "last_synced_at"
+    t.string "collector", limit: 1024
+    t.integer "collector_user_id"
+    t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
     t.index ["location_id"], name: "index_observations_on_location_id"
     t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"
@@ -1026,6 +1029,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_05_160002) do
   end
 
   add_foreign_key "observations", "sources"
+  add_foreign_key "observations", "users", column: "collector_user_id"
   add_foreign_key "project_aliases", "projects"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

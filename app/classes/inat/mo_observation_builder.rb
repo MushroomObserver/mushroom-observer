@@ -63,6 +63,7 @@ class Inat
         specimen: inat_obs.specimen?,
         text_name: text_name,
         notes: inat_obs.notes,
+        collector: inat_obs.collector,
         external_source: @inat_source,
         external_id: inat_obs[:id].to_s }
     end

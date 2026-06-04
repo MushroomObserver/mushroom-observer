@@ -31,6 +31,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_left_column
     render_date_field
+    render_collector_field
     div(id: "observation_where") do
       render_location_feedback
       render_location_autocompleter
@@ -43,6 +44,15 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_date_field
     @form.date_field(:when, label: "#{:WHEN.l}:", wrap_class: "mb-3")
+  end
+
+  def render_collector_field
+    @form.text_field(
+      :collector,
+      label: "#{:COLLECTOR.l}:",
+      wrap_class: "mb-3",
+      help: :form_observations_collector_help.t
+    )
   end
 
   def render_location_feedback

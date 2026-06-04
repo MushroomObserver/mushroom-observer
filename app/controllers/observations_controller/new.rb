@@ -39,6 +39,9 @@ module ObservationsController::New
       @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
     end
     @observation.place_name = params[:place_name]
+    # Prefill the editable collector with the entering user; they record
+    # someone else here when entering on a collector's behalf (#4211).
+    @observation.collector = @user.unique_text_name
     init_naming_and_vote
     @names       = nil
     @valid_names = nil

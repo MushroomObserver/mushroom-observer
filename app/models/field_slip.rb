@@ -204,7 +204,7 @@ class FieldSlip < AbstractModel
   end
 
   def collector
-    observation&.collector
+    observation&.collector_textile
   end
 
   def date

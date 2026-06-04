@@ -457,8 +457,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     field_slip = field_slips(:field_slip_by_recorder)
     login(field_slip.user.login)
     get(:edit, params: { id: field_slip.id })
-    assert_match(field_slip.observation.collector,
-                 @response.body)
+    assert_input_value(:field_slip_collector, field_slip.collector)
   end
 
   def test_should_show_previous_field_slip_location

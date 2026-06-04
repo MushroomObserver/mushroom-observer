@@ -74,6 +74,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.notes.to_s.include?("Observation Fields: none"),
            "Notes should indicate if there were no iNat 'Observation Fields'")
 
+    assert(obs.collector.present?, "Import should populate the collector")
+    assert_equal(obs.notes[:Collector], obs.collector,
+                 "Import should copy the iNat collector into the column")
+    assert_nil(obs.collector_user_id,
+               "Imported collector leaves the FK null until claimed (#4217)")
+
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
                  "Failed to update user's inat_import count")
