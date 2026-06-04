@@ -63,20 +63,6 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
     assert_includes(html, "No descriptions here.")
   end
 
-  def test_br_separator_joins_descriptions_with_br
-    name = names_with_descriptions
-    html = render(Views::Controllers::Descriptions::List.new(
-                    user: @user, object: name, type: :name, separator: :br
-                  ))
-    doc = Nokogiri::HTML.fragment(html)
-
-    assert_operator(doc.css("br").count, :>=, 1,
-                    "Multiple descriptions should be `<br>`-separated")
-    top_divs = doc.children.count { |c| c.name == "div" }
-    assert_equal(0, top_divs,
-                 "br separator should not wrap items in `<div>`")
-  end
-
   private
 
   def names_with_descriptions

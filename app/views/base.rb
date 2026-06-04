@@ -38,4 +38,11 @@ class Views::Base < Components::Base
   # → Locations / Images links). ERB views have it for free; Phlex
   # views need it registered.
   register_value_helper :controller
+
+  # Stable request-context predicate exposed to all Phlex views.
+  # Reads `session[:admin]` via `ApplicationController::Authentication`
+  # (`base.helper_method(:permission?, :reviewer?, :in_admin_mode?)`),
+  # so ERB views see it for free. Phlex needs the explicit register.
+  # Matches `register_value_helper :permission?` in `Components::Base`.
+  register_value_helper :in_admin_mode?
 end
