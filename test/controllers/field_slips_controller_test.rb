@@ -410,6 +410,26 @@ class FieldSlipsControllerTest < FunctionalTestCase
     # assert_redirected_to edit_field_slip_url(id: @field_slip.id)
   end
 
+  # Site admin (admin mode) can edit a slip they couldn't otherwise edit,
+  # matching the edit-icon visibility rule. See #4436.
+  def test_admin_mode_allows_edit
+    slip = field_slips(:field_slip_no_trust) # owner katrina (no_trust)
+    make_admin("rolf")
+
+    get(:edit, params: { id: slip.id })
+
+    assert_response(:success)
+  end
+
+  def test_edit_redirects_when_not_permitted
+    slip = field_slips(:field_slip_no_trust)
+    login("dick") # not owner, not project admin, not site admin
+
+    get(:edit, params: { id: slip.id })
+
+    assert_redirected_to(field_slip_url(id: slip.id))
+  end
+
   def test_should_show_field_slip_and_allow_owner_to_change
     field_slip = field_slips(:field_slip_no_trust)
     login(field_slip.user.login)
@@ -598,7 +618,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   def test_check_name_handles_textile_formats
-    login
+    # Admin mode: this test edits slips across projects/owners (incl. a
+    # non-member's), exercising name formatting, not the permission gate.
+    make_admin
 
     # Test "_name Xxx yyy_" format - should create naming with correct name
     fs1 = field_slips(:field_slip_one)
