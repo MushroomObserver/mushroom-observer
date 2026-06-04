@@ -4,7 +4,6 @@ require "test_helper"
 
 module Views::Layouts::Sidebar
   class LatestTest < ComponentTestCase
-    include Tabs::Sidebar::LatestHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -71,7 +70,7 @@ module Views::Layouts::Sidebar
       }
       render(Section.new(
                heading_key: :app_latest,
-               tabs: sidebar_latest_tabs(user),
+               tabs: Tab::Sidebar::LatestActions.new(user: user).map(&:to_a),
                classes: classes
              ))
     end

@@ -1,10 +1,17 @@
 <%# Nomenclature partial; used by:
     show_name, show_past_name, and add_comment (via _object) %>
 <%
-approve = icon_link_to(*approve_synonym_form_tab(name))
-deprecate = icon_link_to(*deprecate_synonym_form_tab(name))
-synonyms = icon_link_to(*edit_synonym_form_tab(name))
-edit = icon_link_to(*edit_name_tab(name))
+unlocked = in_admin_mode? || !name.locked
+approve = if unlocked && name.deprecated && name.correct_spelling_id.nil?
+            icon_link_to(*Tab::Name::Approve.new(name: name).to_a)
+          end
+deprecate = if unlocked && !name.deprecated
+              icon_link_to(*Tab::Name::Deprecate.new(name: name).to_a)
+            end
+synonyms = if unlocked
+             icon_link_to(*Tab::Name::EditSynonym.new(name: name).to_a)
+           end
+edit = icon_link_to(*Tab::Name::Edit.new(name: name).to_a)
 heading_links = edit
 synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
 %>
@@ -47,18 +54,18 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
         if name.icn_id?
           [
             tag.p do
-              [link_to(*index_fungorum_record_tab(name)),
+              [link_to(*Tab::Name::IndexFungorumRecord.new(name: name).to_a),
               "Index Fungorum"].safe_join(" ")
             end,
             tag.p do
-              [link_to(*mycobank_record_tab(name)),
+              [link_to(*Tab::Name::MycobankRecord.new(name: name).to_a),
               "MycoBank"].safe_join(" ")
             end,
             tag.p do
               if name.at_or_below_species?
-                link_to(*fungorum_gsd_synonymy_tab(name))
+                link_to(*Tab::Name::FungorumGsdSynonymy.new(name: name).to_a)
               elsif ["Genus", "Family"].include?(name.rank)
-                link_to(*fungorum_sf_synonymy_tab(name))
+                link_to(*Tab::Name::FungorumSfSynonymy.new(name: name).to_a)
               end
             end
           ].safe_join
@@ -68,15 +75,19 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
               ["#{:ICN_ID.l}:",
               tag.em(:show_name_icn_id_missing.l)].safe_join(" ")
             end,
-            tag.p(link_to(*index_fungorum_search_page_tab)),
-            tag.p(link_to(*index_fungorum_name_search_tab(name))),
-            tag.p(link_to(*mycobank_name_search_tab(name)))
+            tag.p(link_to(*Tab::Name::IndexFungorumSearchPage.new.to_a)),
+            tag.p(link_to(
+              *Tab::Name::IndexFungorumNameSearch.new(name: name).to_a
+            )),
+            tag.p(link_to(*Tab::Name::MycobankSearch.new(name: name).to_a))
           ].safe_join
         elsif name.searchable_in_registry?
           [
-            tag.p(link_to(*index_fungorum_search_page_tab)),
-            tag.p(link_to(*index_fungorum_name_search_tab(name))),
-            tag.p(link_to(*mycobank_basic_search_tab))
+            tag.p(link_to(*Tab::Name::IndexFungorumSearchPage.new.to_a)),
+            tag.p(link_to(
+              *Tab::Name::IndexFungorumNameSearch.new(name: name).to_a
+            )),
+            tag.p(link_to(*Tab::Name::MycobankBasicSearch.new.to_a))
           ].safe_join
         end
       end)

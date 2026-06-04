@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action-nav for the locations index page. Replaces
-# `Tabs::LocationsHelper#locations_index_tabs`.
+# Action-nav for the locations index page.
 class Tab::Location::IndexActions < Tab::Collection
   def initialize(query: nil, q_param: nil, controller: nil)
     super()

@@ -2,114 +2,24 @@
 
 module Tabs
   module ObservationsHelper
-    # The single Tab + Collection definitions migrated to PORO
-    # classes under `app/classes/tab/observation/*.rb` (15 single
-    # Tabs + 12 Collections). The methods below remain as thin
-    # legacy-shape adapters so existing helper-chain callers
-    # (mostly ERB views + the `*_helper.rb` modules that compose
-    # this one) keep working unchanged.
-    #
-    # Two HTML composers (`name_links_on_mo`, `user_name_links_web`)
-    # remain at the helper layer because they pre-render their
-    # constituent tabs to HTML strings via `context_nav_links`. They
-    # call the new PORO Collections internally. Same for
-    # `obs_name_description_tabs` which composes
-    # `app/helpers/descriptions_helper.rb#list_descriptions`
-    # (returns pre-rendered HTML strings) and stays as helper until
-    # descriptions_helper itself migrates.
+    # All tab definitions have migrated to PORO classes under
+    # `app/classes/tab/observation/*.rb` and callers sweep them
+    # directly. The HTML composers + non-tab utilities below
+    # remain here pending relocation to
+    # `app/helpers/observations_helper.rb` (and, in the case of
+    # `obs_name_description_tabs`, the migration of
+    # `descriptions_helper#list_descriptions`).
 
-    # -------- single tabs ----------------------------------------
-
-    def send_observer_question_tab(obs)
-      ::Tab::Observation::SendQuestion.new(observation: obs).to_a
-    end
-
-    def observation_manage_lists_tab(obs, user)
-      return unless user&.species_list_ids&.any?
-
-      ::Tab::Observation::ManageLists.new(observation: obs,
-                                          q_param: q_param).to_a
-    end
-
-    def observation_hide_thumbnail_map_tab(obs)
-      ::Tab::Observation::HideThumbnailMap.new(observation: obs).to_a
-    end
-
-    def reuse_images_for_observation_tab(obs)
-      ::Tab::Observation::ReuseImages.new(observation: obs).to_a
-    end
-
-    # -------- collections ----------------------------------------
-
-    def obs_related_name_tabs(user, name)
-      ::Tab::Observation::RelatedNameTabs.new(user: user,
-                                              name: name).map(&:to_a)
-    end
-
-    def user_observation_web_name_tabs(user, name)
-      ::Tab::Observation::WebNameTabs.new(user: user,
-                                          name: name).map(&:to_a)
-    end
-
-    def observations_index_tabs(query:)
-      ::Tab::Observation::IndexActions.new(
-        query: query, where: params[:where],
-        q_param: q_param(query), controller: controller
-      ).map(&:to_a)
-    end
-
-    def observations_related_query_tabs(query)
-      ::Tab::Observation::RelatedQueryActions.new(
-        query: query, controller: controller
-      ).map(&:to_a)
-    end
-
-    def observation_form_new_tabs
-      ::Tab::Observation::FormNew.new(q_param: q_param).map(&:to_a)
-    end
-
-    def observation_form_edit_tabs(obs:)
-      ::Tab::Observation::FormEdit.new(observation: obs).map(&:to_a)
-    end
-
-    def observation_maps_tabs(query:)
-      ::Tab::Observation::MapsActions.new(
-        query: query, controller: controller
-      ).map(&:to_a)
-    end
-
-    def naming_form_new_tabs(obs:)
-      ::Tab::Observation::NamingForm.new(observation: obs).map(&:to_a)
-    end
-
-    def naming_form_edit_tabs(obs:)
-      ::Tab::Observation::NamingForm.new(observation: obs).map(&:to_a)
-    end
-
-    def naming_suggestion_tabs(obs:)
-      ::Tab::Observation::NamingForm.new(observation: obs).map(&:to_a)
-    end
-
-    def observation_list_tabs(obs:)
-      ::Tab::Observation::ListActions.new(observation: obs).map(&:to_a)
-    end
-
-    def observation_images_edit_tabs(image:)
-      ::Tab::Observation::ImagesEdit.new(image: image).map(&:to_a)
-    end
-
-    def observation_images_reuse_tabs(obs:)
-      ::Tab::Observation::ImagesReuse.new(observation: obs).map(&:to_a)
-    end
-
-    # -------- HTML composers (stay at helper layer) --------------
+    # -------- HTML composers -------------------------------------
 
     def name_links_on_mo(user:, name:)
-      tabs = context_nav_links(obs_related_name_tabs(user, name),
-                               { class: "d-block" })
+      related = Tab::Observation::RelatedNameTabs.new(
+        user: user, name: name
+      ).map(&:to_a)
+      occ_map = Tab::Name::OccurrenceMap.new(name: name).to_a
+      tabs = context_nav_links(related, { class: "d-block" })
       tabs += obs_name_description_tabs(user, name)
-      tabs += context_nav_links([occurrence_map_for_name_tab(name)],
-                                { class: "d-block" })
+      tabs += context_nav_links([occ_map], { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
@@ -122,20 +32,13 @@ module Tabs
     end
 
     def user_name_links_web(user, name:)
-      tabs = context_nav_links(user_observation_web_name_tabs(user, name),
-                               { class: "d-block" })
-      tabs.reject(&:empty?)
+      web = Tab::Observation::WebNameTabs.new(
+        user: user, name: name
+      ).map(&:to_a)
+      context_nav_links(web, { class: "d-block" }).reject(&:empty?)
     end
 
-    # -------- non-tab title + utility (stay at helper layer) -----
-
-    def naming_form_new_title(obs:)
-      :create_naming_title.t(id: obs.id)
-    end
-
-    def naming_form_edit_title(obs:)
-      :edit_naming_title.t(id: obs.id)
-    end
+    # -------- non-tab utility ------------------------------------
 
     def observations_index_sorts
       [["rss_log", :sort_by_activity.l],

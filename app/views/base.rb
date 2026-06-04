@@ -33,9 +33,16 @@ class Views::Base < Components::Base
   # trusts the returned SafeBuffer.
   register_output_helper :paginated_results, mark_safe: true
   # `controller` (the ActionController instance) is referenced from
-  # tab-helper methods like
-  # `Tabs::ProjectsHelper#project_species_list_locations_button`
-  # which pass it to `InternalLink::RelatedQuery.new`. ERB views
-  # have it for free; Phlex views need it registered.
+  # Phlex views that build `InternalLink::RelatedQuery.new(...)` to
+  # compute cross-model "related index" URLs (e.g. species-list show
+  # → Locations / Images links). ERB views have it for free; Phlex
+  # views need it registered.
   register_value_helper :controller
+
+  # Stable request-context predicate exposed to all Phlex views.
+  # Reads `session[:admin]` via `ApplicationController::Authentication`
+  # (`base.helper_method(:permission?, :reviewer?, :in_admin_mode?)`),
+  # so ERB views see it for free. Phlex needs the explicit register.
+  # Matches `register_value_helper :permission?` in `Components::Base`.
+  register_value_helper :in_admin_mode?
 end

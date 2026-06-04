@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 # "MycoBank search" external-site link for a Name. Composed by
-# observations name-links panel. Mirrors
-# `Tabs::NamesHelper#mycobank_name_search_tab`.
+# the names show page nomenclature panel.
 class Tab::Name::MycobankSearch < Tab::Name::ExternalBase
   MYCOBANK_HOST = "https://www.mycobank.org/"
   MYCOBANK_BASIC_SEARCH_PATH = "page/Basic%20names%20search"

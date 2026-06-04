@@ -137,5 +137,135 @@ module Tab::Name
       assert_equal(:google_images.t, tab.title)
       assert_includes(tab.path, "images.google.com")
     end
+
+    def test_eol_external_link
+      tab = Tab::Name::Eol.new(name: @name)
+
+      assert_equal("EOL", tab.title)
+      assert_equal(@name.eol_url, tab.path)
+      assert_equal(:_blank, tab.html_options[:target])
+    end
+
+    def test_gbif_external_link
+      tab = Tab::Name::Gbif.new(name: @name)
+
+      assert_equal("GBIF", tab.title)
+      assert_includes(tab.path, "gbif.org")
+      assert_includes(tab.path, @name.sensu_stricto)
+    end
+
+    def test_google_search_external_link_non_group_rank
+      tab = Tab::Name::GoogleSearch.new(name: @name)
+
+      assert_equal(:google_name_search.l, tab.title)
+      assert_includes(tab.path, "google.com/search")
+      assert_not_includes(tab.path, "Clade")
+    end
+
+    def test_google_search_external_link_group_rank
+      group = names(:boletus_edulis_group)
+      tab = Tab::Name::GoogleSearch.new(name: group)
+
+      assert_includes(tab.path, "Clade")
+    end
+
+    def test_inat_external_link
+      tab = Tab::Name::Inat.new(name: @name)
+
+      assert_equal("iNaturalist", tab.title)
+      assert_includes(tab.path, "inaturalist.org")
+    end
+
+    def test_ascomycete_org_external_link
+      tab = Tab::Name::AscomyceteOrg.new(name: @name)
+
+      assert_equal("Ascomycete.org", tab.title)
+      assert_includes(tab.path, "ascomycete.org")
+    end
+
+    def test_mushroom_expert_external_link
+      tab = Tab::Name::MushroomExpert.new(name: @name)
+
+      assert_equal("MushroomExpert", tab.title)
+      assert_includes(tab.path, "mushroomexpert.com")
+    end
+
+    def test_ncbi_nucleotide_external_link
+      tab = Tab::Name::NcbiNucleotide.new(name: @name)
+
+      assert_equal("NCBI Nucleotide", tab.title)
+      assert_includes(tab.path, "ncbi.nlm.nih.gov")
+    end
+
+    def test_wikipedia_external_link
+      tab = Tab::Name::Wikipedia.new(name: @name)
+
+      assert_equal("Wikipedia", tab.title)
+      assert_includes(tab.path, "wikipedia.org")
+    end
+
+    def test_index_fungorum_record_external_link
+      name = names(:coprinus_comatus)
+      tab = Tab::Name::IndexFungorumRecord.new(name: name)
+
+      assert_equal("[##{name.icn_id}]", tab.title)
+      assert_equal("index_fungorum_record", tab.alt_title)
+      assert_includes(tab.path, "indexfungorum.org")
+      assert_includes(tab.path, name.icn_id.to_s)
+    end
+
+    def test_index_fungorum_name_search_external_link
+      tab = Tab::Name::IndexFungorumNameSearch.new(name: @name)
+
+      assert_equal(:index_fungorum_web_search.l, tab.title)
+      assert_includes(tab.path, "duckduckgo.com")
+      assert_includes(tab.path, "indexfungorum.org")
+    end
+
+    def test_index_fungorum_search_page_external_link
+      tab = Tab::Name::IndexFungorumSearchPage.new
+
+      assert_equal(:index_fungorum_search.l, tab.title)
+      assert_includes(tab.path, "indexfungorum.org/Names/Names.asp")
+      # No name → no model → plain InternalLink (not InternalLink::Model)
+      assert_nil(tab.model)
+    end
+
+    def test_mycobank_record_external_link
+      name = names(:coprinus_comatus)
+      tab = Tab::Name::MycobankRecord.new(name: name)
+
+      assert_equal("[##{name.icn_id}]", tab.title)
+      assert_equal(:mycobank.t, tab.alt_title)
+      assert_includes(tab.path, "mycobank.org/MB/#{name.icn_id}")
+    end
+
+    def test_mycobank_basic_search_external_link
+      tab = Tab::Name::MycobankBasicSearch.new
+
+      assert_equal(:mycobank_search.l, tab.title)
+      assert_includes(tab.path, "mycobank.org")
+      assert_nil(tab.model)
+    end
+
+    def test_fungorum_gsd_synonymy_external_link
+      name = names(:coprinus_comatus)
+      tab = Tab::Name::FungorumGsdSynonymy.new(name: name)
+
+      assert_equal(:gsd_species_synonymy.l, tab.title)
+      assert_includes(tab.path, "speciesfungorum.org")
+      assert_includes(tab.path, "GSDspecies.asp")
+      assert_includes(tab.path, name.icn_id.to_s)
+    end
+
+    def test_fungorum_sf_synonymy_external_link
+      name = names(:tubaria)
+      tab = Tab::Name::FungorumSfSynonymy.new(name: name)
+
+      assert_equal(:sf_species_synonymy.l, tab.title)
+      assert_includes(tab.path, "speciesfungorum.org")
+      assert_includes(tab.path, "SynSpecies.asp")
+      assert_includes(tab.path, name.icn_id.to_s)
+    end
   end
 end

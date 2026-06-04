@@ -125,7 +125,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     session.visit(url)
     # show n.d link should be restricted
     assert(session.has_link?(href: name_description_path(draft.id),
-                             text: /Restricted/))
+                             text: /restricted/i))
     assert(session.has_link?(href: edit_name_description_path(draft.id)))
     session.assert_no_text(/#{draft.gen_desc}/)
     assert(session.has_link?(
@@ -163,11 +163,24 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     )
   end
 
-  # Knows it exists but can't even view it.
+  # Knows it exists but can't even view it. The draft's title is
+  # surfaced as plain text (so the user knows it exists), NOT as a
+  # link — clicking would just hit the show controller's read
+  # check and flash an error. Verify the controller still enforces
+  # that, just via a direct visit instead of a click.
   def check_another_user(url, draft:, session:)
     session.visit(url)
-    assert(session.has_link?(href: name_description_path(draft.id)))
-    session.first(:link, href: name_description_path(draft.id)).click
+    # Non-readers see the draft's title as plain text (so they
+    # know it exists), NOT as a clickable link — clicking would
+    # just bounce off the show controller's read check with a
+    # flash error.
+    session.assert_no_selector(
+      "a[href='#{name_description_path(draft.id)}']"
+    )
+    session.assert_text(draft.source_name)
+    # Verify the show controller still enforces read perms when
+    # they paste the URL directly.
+    session.visit(name_description_path(draft.id))
     assert_flash_error(session: session)
   end
 

@@ -48,6 +48,59 @@ the work. If you find yourself opening a follow-up PR purely to
 inline helpers from a conversion you just shipped, the conversion
 was incomplete.
 
+## `register_value_helper` is a code smell — ask before you reach for it
+
+The conversion goal is to **eliminate** the helper, not paper it
+over with a thin Phlex wrapper that still depends on it. Every
+`register_value_helper :foo` line says "this view depends on
+`foo` as a contract" and gives future readers a reason to leave
+`foo` alone. That defeats the refactor.
+
+**Hard rule:** before adding a `register_value_helper` line, **stop
+and ask the user**. Lead the ask with the reminder that this
+refactor is about refactoring helpers, not just views, and
+explain why you think this specific helper can't be inlined.
+Default to inlining the helper's logic as private methods on the
+new view (per the move-vs-register heuristic above). The user has
+to explicitly approve the registration — the default answer is
+"no."
+
+The carve-outs above ("Body composes other helpers → leave
+registered for now") still exist, but treat them as the exception
+that needs justification, not the easy path. The kinds of helpers
+that may be OK to register (when nothing else works):
+
+- **Stable request-context predicates** that all controllers expose
+  and that no refactor will ever delete — `in_admin_mode?`,
+  `reviewer?`, `permission?`, `controller`, `params`,
+  `add_page_title`. These are already registered in
+  `Components::Base` / `Views::Base` / `Components::ApplicationForm`;
+  if a new view needs one of those that isn't yet registered on the
+  base class, registering it on the appropriate base (so the whole
+  class hierarchy benefits) is the right move. Ask first to confirm
+  the scope (base class vs single view).
+- **Helpers whose body itself composes 5+ other helpers** AND none
+  of those helpers are domain helpers the user is trying to delete.
+  Rare in this codebase.
+
+**Domain helpers the user is actively trying to delete**
+(`list_descriptions`, every `tabs/*_helper.rb` method,
+`add_list_of_projects`, etc.) **never** belong in
+`register_value_helper`. Inline the logic into the new view as
+private methods, even if it makes the view 100+ lines. The Phlex
+view owning its own render chain is the whole point.
+
+**Never call `helpers.foo` from inside a Phlex view.** It's not a
+substitute for registering — it's worse (silent runtime
+dispatch into ActionView, brittle across Phlex versions). If
+`foo` needs to be reachable from the view, either inline it or go
+through the proper registration channels.
+
+This rule was added after a conversion shipped a
+`register_value_helper :list_descriptions` in
+`Views::Controllers::Descriptions::List` — the helper that PR was
+nominally trying to deprecate. Don't repeat that mistake.
+
 ## Decide first: reusable or single-use?
 
 The first decision when converting an ERB helper / partial / template to

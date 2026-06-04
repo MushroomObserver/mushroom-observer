@@ -4,7 +4,6 @@ require "test_helper"
 
 module Views::Layouts::Sidebar
   class LoginTest < ComponentTestCase
-    include Tabs::Sidebar::LoginHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -63,7 +62,7 @@ module Views::Layouts::Sidebar
       }
       render(Login.new(
                heading_key: :app_account,
-               tabs: sidebar_login_tabs,
+               tabs: Tab::Sidebar::LoginActions.new.map(&:to_a),
                classes: classes
              ))
     end

@@ -58,7 +58,7 @@ module Components::ContextNav
       links = [[nil, @article, { button: :destroy }]]
       html = render_top_bar(links)
 
-      assert_html(html, "form[action='#{view_context.article_path(@article)}']")
+      assert_html(html, "form[action='#{routes.article_path(@article)}']")
       assert_html(html, "input[name='_method'][value='delete']")
       assert_no_html(html, ".glyphicon-remove-circle")
       assert_no_html(html, ".btn.btn-outline-default")

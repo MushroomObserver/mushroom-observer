@@ -41,7 +41,7 @@ module Views::Controllers::SpeciesLists
     def test_renders_download_button_with_correct_path
       html = render_details
 
-      path = view_context.new_download_species_list_path(
+      path = routes.new_download_species_list_path(
         id: @species_list.id
       )
       assert_html(html, "a[href='#{path}']")
@@ -58,7 +58,7 @@ module Views::Controllers::SpeciesLists
       assert_includes(html, "#{:PROJECTS.t}:")
       # And each project shows up as a link_to_object.
       assert_html(html,
-                  "a[href='#{view_context.project_path(project.id)}']")
+                  "a[href='#{routes.project_path(project.id)}']")
     end
 
     def test_does_not_render_projects_when_empty

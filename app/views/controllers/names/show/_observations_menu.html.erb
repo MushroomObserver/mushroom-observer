@@ -1,7 +1,12 @@
 <%#  This is just a two-column panel %>
 <%
 heading = :about_this_taxon.l
-heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
+tracker_tab = if NameTracker.find_by(name_id: @name.id, user_id: @user.id)
+                Tab::Name::EditTracker.new(name: @name)
+              else
+                Tab::Name::NewTracker.new(name: @name)
+              end
+heading_link = icon_link_to(*tracker_tab.to_a)
 %>
 
 <%= render(Components::Panel.new(
@@ -24,7 +29,7 @@ heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
           end) if @has_subtaxa
         end)
         concat(tag.div(class: "py-3") do
-          concat(tag.p(link_to(*occurrence_map_for_name_tab(@name))))
+          concat(tag.p(link_to(*Tab::Name::OccurrenceMap.new(name: @name).to_a)))
         end)
       end)
 
@@ -32,19 +37,31 @@ heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
         concat(tag.p("#{:research_links.l}:"))
         concat(tag.div(class: "pl-3") do
           if @name.classification =~ /Phylum: _Ascomycota_/
-            concat(tag.p(link_to(*ascomycete_org_name_tab(@name))))
+            concat(tag.p(link_to(
+              *Tab::Name::AscomyceteOrg.new(name: @name).to_a
+            )))
           end
-          concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
-          concat(tag.p(link_to(*gbif_name_tab(@name))))
-          concat(tag.p(link_to(*user_google_images_for_name_tab(@user, @name))))
-          concat(tag.p(link_to(*google_name_tab(@name))))
-          concat(tag.p(link_to(*inat_name_tab(@name))))
+          if @name.eol_url
+            concat(tag.p(link_to(*Tab::Name::Eol.new(name: @name).to_a)))
+          end
+          concat(tag.p(link_to(*Tab::Name::Gbif.new(name: @name).to_a)))
+          concat(tag.p(link_to(
+            *Tab::Name::UserGoogleImages.new(name: @name, user: @user).to_a
+          )))
+          concat(tag.p(link_to(
+            *Tab::Name::GoogleSearch.new(name: @name).to_a
+          )))
+          concat(tag.p(link_to(*Tab::Name::Inat.new(name: @name).to_a)))
           if @name.searchable_in_registry?
-            concat(tag.p(link_to(*mushroomexpert_name_tab(@name))))
-            concat(tag.p(link_to(*mycoportal_name_tab(@name))))
+            concat(tag.p(link_to(
+              *Tab::Name::MushroomExpert.new(name: @name).to_a
+            )))
+            concat(tag.p(link_to(*Tab::Name::Mycoportal.new(name: @name).to_a)))
           end
-          concat(tag.p(link_to(*ncbi_nucleotide_term_tab(@name))))
-          concat(tag.p(link_to(*wikipedia_term_tab(@name))))
+          concat(tag.p(link_to(
+            *Tab::Name::NcbiNucleotide.new(name: @name).to_a
+          )))
+          concat(tag.p(link_to(*Tab::Name::Wikipedia.new(name: @name).to_a)))
         end)
       end)
     end %>

@@ -1,7 +1,10 @@
 <%
 container_class(:full)
 add_index_title(@query)
-add_context_nav(locations_index_tabs(query: @query))
+add_context_nav(Tab::Location::IndexActions.new(
+                  query: @query, q_param: q_param(@query),
+                  controller: controller
+                ))
 all_links = if (params[:id].present? ||
                 params[:by].present? ||
                 params[:by_user].present?)

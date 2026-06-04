@@ -1,6 +1,6 @@
 <%
 add_edit_title(@image)
-add_context_nav(observation_images_edit_tabs(image: @image))
+add_context_nav(Tab::Observation::ImagesEdit.new(image: @image))
 container_class(:wide)
 %>
 

@@ -3,8 +3,7 @@
 # Collection of external-site search links (Google_Maps /
 # Google_Search / Wikipedia) for a location name, with the name
 # pre-massaged for URL use (county suffix shortened, "USA" trimmed,
-# spaces → "+", commas → "%2C"). Replaces
-# `Tabs::LocationsHelper#location_search_tabs`.
+# spaces → "+", commas → "%2C").
 class Tab::Location::ExternalSearch < Tab::Collection
   def initialize(name:)
     super()

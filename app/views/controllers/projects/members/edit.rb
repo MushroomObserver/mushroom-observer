@@ -18,11 +18,10 @@ module Views::Controllers::Projects::Members
           title: @project.title
         )
       )
-      add_context_nav(
-        project_member_form_edit_tabs(
-          project: @project
-        )
-      )
+      add_context_nav(Tab::Project::Members::FormEdit.new(
+                        project: @project,
+                        permission: permission?(@project)
+                      ))
 
       render(Views::Controllers::Projects::Members::Form.new(
                @project_member, project: @project

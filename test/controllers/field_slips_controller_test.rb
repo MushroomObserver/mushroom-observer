@@ -28,6 +28,45 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # eol_project: admins rolf + mary; katrina is a member but not admin.
+  def test_index_nudges_admin_to_set_missing_prefix
+    project = projects(:eol_project)
+    project.update!(field_slip_prefix: nil)
+    login(users(:rolf).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select(
+      "#field_slip_no_prefix_nudge a[href=?]",
+      project_admin_path(project_id: project.id), true,
+      "Admin should be nudged to the Admin Details page to set a prefix"
+    )
+  end
+
+  def test_index_prefix_nudge_hidden_from_non_admin
+    project = projects(:eol_project)
+    project.update!(field_slip_prefix: nil)
+    login(users(:katrina).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select("#field_slip_no_prefix_nudge", false,
+                  "Non-admin should not see the set-prefix nudge")
+  end
+
+  def test_index_no_nudge_when_prefix_present
+    project = projects(:eol_project) # has prefix EOL
+    login(users(:rolf).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select("#field_slip_no_prefix_nudge", false,
+                  "No nudge when the project already has a prefix")
+  end
+
   def test_should_get_new
     requires_login(:new)
     assert_response(:success)
@@ -410,6 +449,61 @@ class FieldSlipsControllerTest < FunctionalTestCase
     # assert_redirected_to edit_field_slip_url(id: @field_slip.id)
   end
 
+  # Site admin (admin mode) can edit a slip they couldn't otherwise edit,
+  # matching the edit-icon visibility rule. See #4436.
+  def test_admin_mode_allows_edit
+    slip = field_slips(:field_slip_no_trust) # owner katrina (no_trust)
+    make_admin("rolf")
+
+    get(:edit, params: { id: slip.id })
+
+    assert_response(:success)
+  end
+
+  def test_edit_redirects_when_not_permitted
+    slip = field_slips(:field_slip_no_trust)
+    login("dick") # not owner, not project admin, not site admin
+
+    get(:edit, params: { id: slip.id })
+
+    assert_redirected_to(field_slip_url(id: slip.id))
+  end
+
+  # The Project dropdown must list the editing user's member-projects,
+  # not just the slip's own project. Regression: edit omitted setting
+  # current_user, so find_projects ran against a nil user. See #4436.
+  def test_edit_project_dropdown_lists_editor_member_projects
+    slip = field_slips(:field_slip_one) # owner mary, project eol_project
+    bolete = projects(:bolete_project)  # mary is a member, not the slip's proj
+    login(slip.user.login)
+
+    get(:edit, params: { id: slip.id })
+
+    assert_response(:success)
+    assert_select(
+      "select[name=?] option[value=?]",
+      "field_slip[project_id]", bolete.id.to_s
+    )
+  end
+
+  # update re-renders :edit on validation failure without running edit,
+  # so current_user must be set in the before_action, not the edit action,
+  # for the Project dropdown to still list member-projects. See #4436.
+  def test_update_validation_failure_rerenders_with_member_projects
+    slip = field_slips(:field_slip_one) # owner mary
+    bolete = projects(:bolete_project)  # mary is a member
+    login(slip.user.login)
+
+    # code with only digits/dots/dashes fails the format validation
+    patch(:update, params: { id: slip.id, field_slip: { code: "123" } })
+
+    assert_response(:unprocessable_content)
+    assert_select(
+      "select[name=?] option[value=?]",
+      "field_slip[project_id]", bolete.id.to_s
+    )
+  end
+
   def test_should_show_field_slip_and_allow_owner_to_change
     field_slip = field_slips(:field_slip_no_trust)
     login(field_slip.user.login)
@@ -597,7 +691,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   def test_check_name_handles_textile_formats
-    login
+    # Admin mode: this test edits slips across projects/owners (incl. a
+    # non-member's), exercising name formatting, not the permission gate.
+    make_admin
 
     # Test "_name Xxx yyy_" format - should create naming with correct name
     fs1 = field_slips(:field_slip_one)

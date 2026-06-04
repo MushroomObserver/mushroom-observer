@@ -1,6 +1,6 @@
 <%
 add_new_title(:create_object, :OBSERVATION)
-add_context_nav(observation_form_new_tabs)
+add_context_nav(Tab::Observation::FormNew.new(q_param: q_param))
 container_class(:wide)
 %>
 

@@ -7,11 +7,10 @@ module Views::Layouts::Sidebar
   # @example Basic usage
   #   render(Views::Layouts::Sidebar::User.new(
   #     user: @user,
-  #     classes: sidebar_css_classes,
+  #     classes: Views::Layouts::Sidebar::CSS_CLASSES,
   #     in_admin_mode: in_admin_mode?
   #   ))
   class User < ::Components::Base
-    include Tabs::Sidebar::UserHelper
     include Rails.application.routes.url_helpers
 
     prop :user, ::User
@@ -52,7 +51,8 @@ module Views::Layouts::Sidebar
     end
 
     def render_tabs
-      sidebar_user_tabs(@user).compact.each do |link|
+      Tab::Sidebar::UserActions.new(user: @user).filter_map(&:to_a).
+        each do |link|
         render_nav_link(link)
       end
     end

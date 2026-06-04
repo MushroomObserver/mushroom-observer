@@ -1,6 +1,6 @@
 <%
 add_edit_title(@location)
-add_context_nav(location_form_edit_tabs(location: @location))
+add_context_nav(Tab::Location::FormEdit.new(location: @location))
 
 container_class(:full)
 %>

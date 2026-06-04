@@ -53,27 +53,28 @@ class NamesControllerShowTest < FunctionalTestCase
 
     ##### External research links
     [
-      ["GBIF", gbif_name_search_url(name)],
-      ["Google Search", google_name_search_url(name)],
-      ["iNat", inat_name_search_url(name)],
-      ["MushroomExpert", mushroomexpert_name_web_search_url(name)],
-      ["MyCoPortal", mycoportal_url(name)],
-      ["NCBI", ncbi_nucleotide_term_search_url(name)],
-      ["Wikipedia", wikipedia_term_search_url(name)]
+      ["GBIF", Tab::Name::Gbif.new(name: name).path],
+      ["Google Search", Tab::Name::GoogleSearch.new(name: name).path],
+      ["iNat", Tab::Name::Inat.new(name: name).path],
+      ["MushroomExpert", Tab::Name::MushroomExpert.new(name: name).path],
+      ["MyCoPortal", Tab::Name::Mycoportal.new(name: name).path],
+      ["NCBI", Tab::Name::NcbiNucleotide.new(name: name).path],
+      ["Wikipedia", Tab::Name::Wikipedia.new(name: name).path]
     ].each do |site, link|
       assert_external_link(site, link)
     end
 
     assert_select(
-      "body a[href='#{ascomycete_org_name_url(name)}']", false,
+      "body a[href='#{Tab::Name::AscomyceteOrg.new(name: name).path}']", false,
       "Page should not have a link to Ascomycete.org"
     )
 
     ##### External nomenclature links
     [
-      ["IF record", index_fungorum_record_url(name.icn_id)],
-      ["MB record", mycobank_record_url(name.icn_id)],
-      ["GSD Synonymy record", species_fungorum_gsd_synonymy(name.icn_id)]
+      ["IF record", Tab::Name::IndexFungorumRecord.new(name: name).path],
+      ["MB record", Tab::Name::MycobankRecord.new(name: name).path],
+      ["GSD Synonymy record",
+       Tab::Name::FungorumGsdSynonymy.new(name: name).path]
     ].each do |site, link|
       assert_external_link(site, link)
     end
@@ -94,7 +95,8 @@ class NamesControllerShowTest < FunctionalTestCase
     login
     get(:show, params: { id: name.id })
 
-    assert_external_link("Ascomycete.org", ascomycete_org_name_url(name))
+    assert_external_link("Ascomycete.org",
+                         Tab::Name::AscomyceteOrg.new(name: name).path)
   end
 
   def test_show_name_genus_with_icn_id
@@ -103,7 +105,8 @@ class NamesControllerShowTest < FunctionalTestCase
     login
     get(:show, params: { id: name.id })
     assert_select(
-      "body a[href='#{species_fungorum_sf_synonymy(name.icn_id)}']", true,
+      "body a[href='#{Tab::Name::FungorumSfSynonymy.new(name: name).path}']",
+      true,
       "Page is missing a link to SF Synonymy record"
     )
   end
@@ -123,23 +126,26 @@ class NamesControllerShowTest < FunctionalTestCase
     )
     assert_select(
       "#nomenclature a:match('href',?)",
-      /#{index_fungorum_search_page_url}/,
+      /#{Tab::Name::IndexFungorumSearchPage.new.path}/,
       { count: 1 },
       "Nomenclature section is missing a link to IF search page"
     )
     assert_select(
-      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      "#nomenclature " \
+      "a[href='#{Tab::Name::IndexFungorumNameSearch.new(name: name).path}']",
       true,
       "Nomenclature section is missing a link to Index Fungorum web search"
     )
     assert_select(
-      "#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
+      "#nomenclature a:match('href',?)",
+      /#{Tab::Name::MycobankSearch.new(name: name).path}/,
       { count: 1 },
       "Nomenclature section should have link to MB search"
     )
 
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", false,
+      "body a[href='#{Tab::Name::IndexFungorumRecord.new(name: name).path}']",
+      false,
       "Page should not have link to IF record"
     )
   end
@@ -153,24 +159,27 @@ class NamesControllerShowTest < FunctionalTestCase
     assert(/#{:ICN_ID.l}/ !~ @response.body,
            "Page should not have ICN identifier label")
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", false,
+      "body a[href='#{Tab::Name::IndexFungorumRecord.new(name: name).path}']",
+      false,
       "Page should not have link to IF record"
     )
 
     # but it makes sense to link to search pages in fungal registries
     assert_select(
       "#nomenclature a:match('href',?)",
-      /#{index_fungorum_search_page_url}/,
+      /#{Tab::Name::IndexFungorumSearchPage.new.path}/,
       { count: 1 },
       "Nomenclature section should have link to IF search page"
     )
     assert_select(
-      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      "#nomenclature " \
+      "a[href='#{Tab::Name::IndexFungorumNameSearch.new(name: name).path}']",
       true,
       "Nomenclature section is missing a link to Index Fungorum web search"
     )
     assert_select(
-      "#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,
+      "#nomenclature a:match('href',?)",
+      /#{Tab::Name::MycobankBasicSearch.new.path}/,
       { count: 1 },
       "Nomenclature section should have link to MB search"
     )

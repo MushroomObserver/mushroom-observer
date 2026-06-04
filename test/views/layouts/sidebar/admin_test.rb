@@ -4,7 +4,6 @@ require "test_helper"
 
 module Views::Layouts::Sidebar
   class AdminTest < ComponentTestCase
-    include Tabs::Sidebar::AdminHelper
     include Rails.application.routes.url_helpers
 
     def setup
@@ -70,7 +69,7 @@ module Views::Layouts::Sidebar
       }
       render(Admin.new(
                heading_key: :app_admin,
-               tabs: sidebar_admin_tabs,
+               tabs: Tab::Sidebar::AdminActions.new.map(&:to_a),
                classes: classes
              ))
     end

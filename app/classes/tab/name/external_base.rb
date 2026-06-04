@@ -4,8 +4,14 @@
 # EOL, etc.). Carries the shared `target=_blank` / `rel=noopener`
 # attrs and model = the Name. Subclasses implement `#title` and
 # `#path` (the external URL). `#alt_title` is optional.
+#
+# `name:` is optional so this class also covers the search-page
+# externals (Index Fungorum search, MycoBank basic search) that
+# don't have a per-Name URL — when `name` is nil, `model` returns
+# nil and the rendered link uses plain `InternalLink` (no model
+# selector class).
 class Tab::Name::ExternalBase < Tab::Base
-  def initialize(name:)
+  def initialize(name: nil)
     super()
     @name = name
   end

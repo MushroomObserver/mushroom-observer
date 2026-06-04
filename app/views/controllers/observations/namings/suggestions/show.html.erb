@@ -9,7 +9,7 @@ show_title = observation_show_title(
 add_page_title(show_title, [:OBSERVATION.l, show_title].safe_join(" "))
 num_images = @observation.images.length
 
-add_context_nav(naming_suggestion_tabs(obs: @observation))
+add_context_nav(Tab::Observation::NamingForm.new(observation: @observation))
 container_class(:double)
 %>
 

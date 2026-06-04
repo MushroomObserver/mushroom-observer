@@ -298,6 +298,17 @@ class LocationsControllerTest < FunctionalTestCase
     check_index_sorting
   end
 
+  # Render the index against a query whose `order_by` is already
+  # rss_log — exercises the `rss_log` branch of `LocationsHelper#
+  # locations_index_sorts` end-to-end through the controller.
+  def test_index_with_rss_log_ordered_query_renders
+    query = Query.lookup_and_save(Location, order_by: :rss_log)
+    login
+    get(:index, params: { q: query.id.alphabetize })
+
+    assert_select("body.#{@controller.controller_name}__index")
+  end
+
   def test_index_sorted_by_box_area
     check_index_sorted_by(:reverse_box_area, do_login: true)
   end

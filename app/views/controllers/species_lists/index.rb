@@ -30,7 +30,7 @@ module Views::Controllers::SpeciesLists
     private
 
     def sort_options
-      rss_log = @query&.params&.dig(:order_by) == :rss_log
+      rss_log = @query&.params&.dig(:order_by) == "rss_log"
       [
         ["title",      :sort_by_title.t],
         ["date",       :sort_by_date.t],

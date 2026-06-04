@@ -3,7 +3,12 @@ add_project_banner(@project) if @project
 project_observation_buttons(@project, @query)
 container_class(:full)
 add_index_title(@query) # note default above is non-nil
-add_context_nav(observations_index_tabs(query: @query)) if @objects.any?
+if @objects.any?
+  add_context_nav(Tab::Observation::IndexActions.new(
+                    query: @query, where: params[:where],
+                    q_param: q_param(@query), controller: controller
+                  ))
+end
 add_sorter(@query, observations_index_sorts)
 add_pagination(@pagination_data)
 

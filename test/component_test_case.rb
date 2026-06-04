@@ -18,6 +18,15 @@ class ComponentTestCase < UnitTestCase
   # Get the Rails view context needed for components to access helpers
   delegate :view_context, to: :controller
 
+  # Route helpers — `routes.foo_path(...)` rather than the longer
+  # `view_context.foo_path(...)`. NOT a module include because
+  # `include Rails.application.routes.url_helpers` makes MiniTest
+  # treat any helper named `test_*_path` / `test_*_url` (e.g. for a
+  # `/test` resource) as a test method, causing spurious runs.
+  def routes
+    Rails.application.routes.url_helpers
+  end
+
   def setup
     super
     controller.request = ActionDispatch::TestRequest.create

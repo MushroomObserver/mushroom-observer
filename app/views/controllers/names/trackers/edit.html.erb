@@ -1,6 +1,6 @@
 <%
 add_page_title(:email_tracking_title.t(name: @name.display_name))
-add_context_nav(name_forms_return_tabs(name: @name))
+add_context_nav(Tab::Name::FormsReturn.new(name: @name))
 %>
 
 <div class="mt-5 mb-5">

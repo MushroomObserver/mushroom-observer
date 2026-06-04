@@ -139,7 +139,7 @@ module ObservationsHelper
   def observation_show_image_links(obs:)
     return "" unless permission?(obs)
 
-    icon_link_to(*reuse_images_for_observation_tab(obs))
+    icon_link_to(*Tab::Observation::ReuseImages.new(observation: obs).to_a)
   end
 
   # The following sections of the observation_details partial are also needed as
@@ -252,7 +252,10 @@ module ObservationsHelper
                      obs_user&.email_general_question
 
     ["[",
-     modal_link_to("observation_email", *send_observer_question_tab(obs)),
+     modal_link_to(
+       "observation_email",
+       *Tab::Observation::SendQuestion.new(observation: obs).to_a
+     ),
      "]"]
   end
 

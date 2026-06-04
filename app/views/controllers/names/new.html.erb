@@ -1,6 +1,6 @@
 <%
 add_new_title(:create_object, :NAME)
-add_context_nav(name_form_new_tabs)
+add_context_nav(Tab::Name::FormNew.new)
 %>
 
 <%= render(Views::Controllers::Names::Form.new(@name, user: @user,
