@@ -430,6 +430,23 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to(field_slip_url(id: slip.id))
   end
 
+  # The Project dropdown must list the editing user's member-projects,
+  # not just the slip's own project. Regression: edit omitted setting
+  # current_user, so find_projects ran against a nil user. See #4436.
+  def test_edit_project_dropdown_lists_editor_member_projects
+    slip = field_slips(:field_slip_one) # owner mary, project eol_project
+    bolete = projects(:bolete_project)  # mary is a member, not the slip's proj
+    login(slip.user.login)
+
+    get(:edit, params: { id: slip.id })
+
+    assert_response(:success)
+    assert_select(
+      "select[name=?] option[value=?]",
+      "field_slip[project_id]", bolete.id.to_s
+    )
+  end
+
   def test_should_show_field_slip_and_allow_owner_to_change
     field_slip = field_slips(:field_slip_no_trust)
     login(field_slip.user.login)

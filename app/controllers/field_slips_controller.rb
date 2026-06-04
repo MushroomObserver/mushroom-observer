@@ -37,6 +37,10 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips/1/edit
   def edit
+    # Needed so the Project dropdown lists the editing user's
+    # member-projects (FieldSlip#find_projects keys off current_user).
+    # new/create already do this; edit omitted it. See #4436.
+    @field_slip.current_user = @user
     @recent_observations = recent_edit_observations
   end
 
