@@ -2,11 +2,11 @@
 
 require("test_helper")
 
-# Component-level smoke tests for `Views::Controllers::Descriptions::List`. The
-# component is a thin wrapper around `DescriptionsHelper#list_descriptions`
-# (registered as a value-helper); these tests cover the wrapper's two
-# observable behaviors: each description gets wrapped in its own `<div>`,
-# and an object with no descriptions renders nothing.
+# Component-level smoke tests for `Views::Controllers::Descriptions::List`.
+# Covers: each visible description gets its own `<div>`, readable ones
+# render as `<a class="description_link_#{id}">`, non-readable ones
+# render as plain text (no `<a>`), and an object with no descriptions
+# renders nothing (or the `empty_text` fallback).
 class Views::Controllers::Descriptions::ListTest < ComponentTestCase
   def setup
     super
@@ -28,15 +28,23 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
                  doc.children.count { |c| c.name == "div" })
   end
 
-  def test_each_div_contains_a_description_link
+  def test_readable_descriptions_render_as_links
     name = names_with_descriptions
 
     html = render(Views::Controllers::Descriptions::List.new(
                     user: @user, object: name, type: :name
                   ))
 
-    name.descriptions.each do |desc|
+    readable, unreadable = name.descriptions.partition do |desc|
+      desc.is_reader?(@user)
+    end
+    assert(readable.any?, "Need at least one description rolf can read")
+
+    readable.each do |desc|
       assert_html(html, "a.description_link_#{desc.id}")
+    end
+    unreadable.each do |desc|
+      assert_no_html(html, "a.description_link_#{desc.id}")
     end
   end
 
@@ -61,20 +69,6 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
                   ))
 
     assert_includes(html, "No descriptions here.")
-  end
-
-  def test_br_separator_joins_descriptions_with_br
-    name = names_with_descriptions
-    html = render(Views::Controllers::Descriptions::List.new(
-                    user: @user, object: name, type: :name, separator: :br
-                  ))
-    doc = Nokogiri::HTML.fragment(html)
-
-    assert_operator(doc.css("br").count, :>=, 1,
-                    "Multiple descriptions should be `<br>`-separated")
-    top_divs = doc.children.count { |c| c.name == "div" }
-    assert_equal(0, top_divs,
-                 "br separator should not wrap items in `<div>`")
   end
 
   private

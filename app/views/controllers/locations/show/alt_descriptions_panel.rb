@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
 # "Descriptions" panel on the Location show page. Renders the
-# `Views::Controllers::Descriptions::List` (with `<br>` separators —
-# matches the pre-Phlex `safe_join(safe_br)` shape) inside a
+# `Views::Controllers::Descriptions::List` inside a
 # `Components::Panel`; the panel heading carries a "create new
 # description" icon-link. When the caller passes a `projects:`
 # array, appends a "create draft for project" row at the bottom.
 # Replaces `_alt_descriptions_panel.html.erb`.
+#
+# The pre-Phlex partial used `safe_join(safe_br)` to vertically
+# separate descriptions while the names panel used `<div>` wrapping.
+# The visual result is identical; standardize on `<div>` to match
+# the names panel and keep `Descriptions::List` shape-agnostic.
 module Views::Controllers::Locations::Show
   class AltDescriptionsPanel < Views::Base
     prop :user, _Nilable(::User), default: nil
@@ -22,8 +26,6 @@ module Views::Controllers::Locations::Show
       end
     end
 
-    INDENT = '<span class="ml-3">&nbsp;</span>'.html_safe
-
     private
 
     def heading_links
@@ -34,14 +36,10 @@ module Views::Controllers::Locations::Show
     def render_body
       render(Views::Controllers::Descriptions::List.new(
                user: @user, object: @object, type: @object.type_tag,
-               current: @current, separator: :br,
-               empty_text: empty_text
+               current: @current,
+               empty_text: :"show_#{@object.type_tag}_no_descriptions".t
              ))
       render_projects_list if @projects.present?
-    end
-
-    def empty_text
-      INDENT + :"show_#{@object.type_tag}_no_descriptions".t
     end
 
     def render_projects_list
@@ -49,11 +47,12 @@ module Views::Controllers::Locations::Show
         plain("#{:show_name_create_draft.l}: ")
         @projects.each do |project|
           br
-          trusted_html(INDENT)
           tab = Tab::Description::NewForProject.new(
             parent: @object, project: project
           ).to_a
-          a(href: tab[1], **tab[2].except(:icon)) { plain(tab[0]) }
+          a(href: tab[1], class: class_names("ml-3", tab[2][:class])) do
+            plain(tab[0])
+          end
         end
       end
     end
