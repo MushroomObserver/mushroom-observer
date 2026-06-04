@@ -20,7 +20,7 @@
 # "detach from this observation" target (record itself survives);
 # `Sequence` / `ExternalLink` / `NameDescription` get a true DELETE
 # — and the right permission check. Returns nothing when the user
-# can't edit; pass `indent: false` to skip the leading `.ml-3`
+# can't edit; pass `indent: false` to skip the leading `.ml-2`
 # wrapper.
 #
 class Components::InlineModLinks < Components::Base
@@ -39,7 +39,7 @@ class Components::InlineModLinks < Components::Base
     return if items.empty?
 
     if @indent
-      span(class: "ml-3") { render_items(items) }
+      span(class: "ml-2") { render_items(items) }
     else
       render_items(items)
     end
