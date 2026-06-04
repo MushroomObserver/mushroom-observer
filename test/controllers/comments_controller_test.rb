@@ -360,4 +360,68 @@ class CommentsControllerTest < FunctionalTestCase
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)
   end
+
+  # The `after_create_commit` broadcast renders `_comment.erb`
+  # without a request context — `@user` is nil. The mod-links
+  # span (`[ edit | destroy ]`) still has to be in the broadcast
+  # markup so the comment's author can interact with their just-
+  # created comment; client-side CSS (`[data-user-specific]:not(…)`)
+  # hides it for everyone else.
+  def test_comment_broadcast_includes_mod_links_for_author
+    obs = observations(:minimal_unknown_obs)
+    login("rolf")
+    payloads = capture_turbo_stream_broadcasts([obs, :comments]) do
+      post(:create, params: {
+             target: obs.id, type: "Observation",
+             comment: { summary: "Mod-links test",
+                        comment: "Body" }
+           })
+    end
+    comment = ::Comment.find_by(summary: "Mod-links test")
+    assert_not_nil(comment, "Comment didn't save")
+
+    # `capture_turbo_stream_broadcasts` returns
+    # `Nokogiri::XML::Element` nodes (the `<turbo-stream>` wrappers).
+    html = payloads.last.to_html
+    # The mod-links span carries `data-user-specific` keyed to
+    # the comment's author id — that's the CSS's selector hook.
+    assert_match(/data-user-specific="#{comment.user.id}"/, html)
+    # `Components::InlineModLinks` emits a `<form>` with the
+    # delete-method input for destroy, and the edit modal anchor
+    # with `data-modal="modal_comment_<id>"`. Pin both as the
+    # contract.
+    assert_match(/data-modal="modal_comment_#{comment.id}"/, html)
+    assert_match(%r{<input[^>]*name="_method"[^>]*value="delete"}, html)
+  end
+
+  # Companion: in a regular page-render context (not a broadcast),
+  # `@user` is set. `InlineModLinks` gates server-side on
+  # owner-or-admin — the mod-links HTML doesn't appear at all
+  # for non-authors. The `data-user-specific` CSS would have
+  # hidden them anyway, but defense in depth is better when the
+  # logic is cheap (one `==` comparison) — and a non-author
+  # snooping the page source no longer sees affordances they
+  # can't actually use.
+  def test_comments_page_omits_mod_links_for_non_author
+    obs = observations(:detailed_unknown_obs)
+    comment = obs.comments.find { |c| c.user != users(:rolf) } ||
+              skip("Need a comment authored by a user other than rolf")
+    login("rolf")
+
+    get(:show, params: { id: comment.id })
+    assert_response(:success)
+
+    # The mod-links span has `data-user-specific` keyed to the
+    # COMMENT AUTHOR's id (not rolf). Rolf isn't the author, so
+    # the InlineModLinks render should produce no edit/destroy
+    # affordances at all — neither the modal-link edit anchor
+    # nor the destroy form.
+    assert_select(
+      "a[data-modal='modal_comment_#{comment.id}']", count: 0
+    )
+    assert_select(
+      "form[action='/comments/#{comment.id}'] " \
+      "input[name='_method'][value='delete']", count: 0
+    )
+  end
 end
