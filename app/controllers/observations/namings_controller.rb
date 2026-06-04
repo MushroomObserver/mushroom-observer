@@ -111,14 +111,12 @@ module Observations
       @observation = Observation.show_includes.find(params[:observation_id])
     end
 
-    # There seems to be a chance the id will be blank, although i believe not.
+    # `params[:id]` is guaranteed by the `:edit`/`:update`/`:destroy`
+    # routes (`resources :namings`) — let `find` raise on the
+    # impossible blank-id case rather than dead-code a consensus
+    # fallback for it.
     def naming_from_params
-      if params[:id].blank?
-        @consensus = Observation::NamingConsensus.new(@observation)
-        @consensus.consensus_naming
-      else
-        @observation.namings.find(params[:id])
-      end
+      @observation.namings.find(params[:id])
     end
 
     def init_edit_ivars
