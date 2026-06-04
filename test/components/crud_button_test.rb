@@ -41,7 +41,7 @@ class CrudButtonTest < ComponentTestCase
 
     # Should build path from model
     assert_html(html,
-                "form[action='#{view_context.herbarium_path(herbarium)}']")
+                "form[action='#{routes.herbarium_path(herbarium)}']")
     assert_html(html, "input[name='_method'][value='delete']")
     # Should build identifier class from action and model
     assert_html(html, ".destroy_herbarium_link_#{herbarium.id}")
@@ -83,7 +83,7 @@ class CrudButtonTest < ComponentTestCase
 
     # Should build path: herbarium_path(herbarium.id) - method is separate
     assert_html(html,
-                "form[action='#{view_context.herbarium_path(herbarium)}']")
+                "form[action='#{routes.herbarium_path(herbarium)}']")
     # Should build identifier from method: patch_herbarium_link_123
     assert_html(html, ".patch_herbarium_link_#{herbarium.id}")
   end
@@ -168,7 +168,7 @@ class LinkHelperButtonTest < ComponentTestCase
     html = view_context.destroy_button(target: herbarium)
 
     assert_html(html,
-                "form[action='#{view_context.herbarium_path(herbarium)}']")
+                "form[action='#{routes.herbarium_path(herbarium)}']")
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".destroy_herbarium_link_#{herbarium.id}")
     assert_html(html, ".text-danger")
@@ -251,7 +251,7 @@ class LinkHelperButtonTest < ComponentTestCase
     html = view_context.edit_button(target: herbarium)
 
     assert_html(html,
-                "a[href='#{view_context.edit_herbarium_path(herbarium)}']")
+                "a[href='#{routes.edit_herbarium_path(herbarium)}']")
     assert_no_html(html, "form")
     assert_html(html, ".edit_herbarium_link_#{herbarium.id}")
     assert_html(html, "a span.glyphicon-edit")
@@ -264,7 +264,7 @@ class LinkHelperButtonTest < ComponentTestCase
     herbarium = herbaria(:nybg_herbarium)
     html = view_context.edit_button(target: herbarium, icon: nil)
 
-    path = view_context.edit_herbarium_path(herbarium)
+    path = routes.edit_herbarium_path(herbarium)
     assert_html(html, "a[href='#{path}']",
                 text: :edit_object.t(type: :herbarium))
     assert_no_html(html, "a span.glyphicon")
@@ -295,7 +295,7 @@ class LinkHelperButtonTest < ComponentTestCase
     species_list = species_lists(:first_species_list)
     html = view_context.download_button(target: species_list)
 
-    path = view_context.new_download_species_list_path(id: species_list.id)
+    path = routes.new_download_species_list_path(id: species_list.id)
     assert_html(html, "a[href='#{path}']")
     assert_no_html(html, "form")
     assert_html(html, "a span.glyphicon-download-alt")
@@ -320,7 +320,7 @@ class CrudButtonParityTest < ComponentTestCase
     )
 
     assert_html(html,
-                "form[action='#{view_context.herbarium_path(herbarium)}']")
+                "form[action='#{routes.herbarium_path(herbarium)}']")
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".destroy_herbarium_link_#{herbarium.id}")
     assert_html(html, ".text-danger")
@@ -352,7 +352,7 @@ class CrudButtonParityTest < ComponentTestCase
     html = view_context.edit_button(target: herbarium)
 
     assert_html(html,
-                "a[href='#{view_context.edit_herbarium_path(herbarium)}']")
+                "a[href='#{routes.edit_herbarium_path(herbarium)}']")
     assert_no_html(html, "form")
     assert_html(html, ".edit_herbarium_link_#{herbarium.id}")
     assert_html(html, "a span.glyphicon-edit")

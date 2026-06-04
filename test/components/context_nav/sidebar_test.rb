@@ -42,7 +42,7 @@ module Components::ContextNav
       links = [[nil, @article, { button: :destroy }]]
       html = render_sidebar(links)
 
-      assert_html(html, "form[action='#{view_context.article_path(@article)}']")
+      assert_html(html, "form[action='#{routes.article_path(@article)}']")
       assert_html(html, "input[name='_method'][value='delete']")
     end
 
