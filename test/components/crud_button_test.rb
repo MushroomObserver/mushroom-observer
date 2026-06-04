@@ -160,12 +160,18 @@ class CrudButtonTest < ComponentTestCase
   end
 end
 
-class LinkHelperButtonTest < ComponentTestCase
-  # Test the helper wrappers that delegate to the component
-
-  def test_destroy_button_helper
+# `Components::CrudButton` subclasses (`Delete`, `Edit`, `Download`,
+# `Post`, `Put`, `Patch`) — verify each subclass's destroy / edit /
+# fetch defaults stack correctly on top of the base `CrudButton`
+# rendering. These were previously routed through the
+# `LinkHelper#destroy_button` / `#edit_button` / etc. ERB helper
+# wrappers (now thin one-liners that just `render(...)` the same
+# component subclasses); the helpers stay in `link_helper.rb` for
+# ERB callers but the tests render the components directly.
+class CrudButtonSubclassesTest < ComponentTestCase
+  def test_delete_with_model_target
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(target: herbarium)
+    html = render(Components::CrudButton::Delete.new(target: herbarium))
 
     assert_html(html,
                 "form[action='#{routes.herbarium_path(herbarium)}']")
@@ -175,18 +181,20 @@ class LinkHelperButtonTest < ComponentTestCase
     assert_html(html, "[data-turbo-confirm]")
   end
 
-  def test_destroy_button_with_custom_name
+  def test_delete_with_custom_name
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(target: herbarium, name: "Delete it")
+    html = render(
+      Components::CrudButton::Delete.new(target: herbarium, name: "Delete it")
+    )
 
     assert_html(html, "button", text: "Delete it")
   end
 
-  # Default icon. `CrudButton::Delete` auto-applies `icon: :delete`,
-  # which renders the remove-circle glyphicon + sr-only label wrapper.
-  def test_destroy_button_default_icon
+  # Default icon. `Delete` auto-applies `icon: :delete`, which
+  # renders the remove-circle glyphicon + sr-only label wrapper.
+  def test_delete_default_icon
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(target: herbarium)
+    html = render(Components::CrudButton::Delete.new(target: herbarium))
 
     assert_html(html, "button span.glyphicon-remove-circle")
     assert_html(html, "button span.sr-only")
@@ -194,40 +202,45 @@ class LinkHelperButtonTest < ComponentTestCase
 
   # Opt out of the default icon by passing `icon: nil`. Used by the
   # context-nav `[ DESTROY ]` text-link rendering path.
-  def test_destroy_button_icon_nil_opts_out
+  def test_delete_icon_nil_opts_out
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(target: herbarium, icon: nil)
+    html = render(
+      Components::CrudButton::Delete.new(target: herbarium, icon: nil)
+    )
 
     assert_no_html(html, "button span.glyphicon")
     assert_no_html(html, "button span.sr-only")
-    # button still renders the destroy machinery
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".text-danger")
   end
 
   # Explicit icon override (e.g. `:remove`) wins over the default.
-  def test_destroy_button_icon_override
+  def test_delete_icon_override
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(target: herbarium, icon: :remove)
+    html = render(
+      Components::CrudButton::Delete.new(target: herbarium, icon: :remove)
+    )
 
     assert_html(html, "button span.glyphicon-remove-circle")
   end
 
-  # Default btn frame. `CrudButton::Delete` auto-applies
+  # Default btn frame. `Delete` auto-applies
   # `btn: "btn btn-outline-default"` for a consistent outline frame
   # across destroy buttons.
-  def test_destroy_button_default_btn_frame
+  def test_delete_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(target: herbarium)
+    html = render(Components::CrudButton::Delete.new(target: herbarium))
 
     assert_html(html, "button.btn.btn-outline-default")
   end
 
   # Opt out of the btn frame via `btn: nil` — icon-only inline
   # destroys in dense table cells / list rows.
-  def test_destroy_button_btn_nil_opts_out_of_frame
+  def test_delete_btn_nil_opts_out_of_frame
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(target: herbarium, btn: nil)
+    html = render(
+      Components::CrudButton::Delete.new(target: herbarium, btn: nil)
+    )
 
     assert_no_html(html, "button.btn-outline-default")
     assert_no_html(html, "button.btn")
@@ -238,31 +251,52 @@ class LinkHelperButtonTest < ComponentTestCase
 
   # Caller `class:` layers on top of the `btn:` default — e.g.
   # `btn-sm` combines with the outline frame.
-  def test_destroy_button_class_layered_on_btn_default
+  def test_delete_class_layered_on_btn_default
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(target: herbarium, class: "btn-sm")
+    html = render(
+      Components::CrudButton::Delete.new(target: herbarium, class: "btn-sm")
+    )
 
     assert_html(html, "button.btn.btn-outline-default.btn-sm")
   end
 
-  # Edit-button default: GET + edit_<type>_path + icon :edit.
-  def test_edit_button_helper_defaults
+  # Delete with a String target: caller controls the path entirely,
+  # no identifier class is built, but delete-action defaults
+  # (text-danger, confirm, icon) still apply. `default_name` falls
+  # back to `:DESTROY.l` since there's no type to interpolate.
+  def test_delete_with_string_target
+    html = render(
+      Components::CrudButton::Delete.new(target: "/items/42", name: "Destroy")
+    )
+
+    assert_html(html, "form[action='/items/42']")
+    assert_html(html, "input[name='_method'][value='delete']")
+    assert_html(html, ".text-danger")
+    assert_no_html(html, ".destroy_link_")
+    assert_html(html, "button span.glyphicon-remove-circle")
+  end
+
+  # Edit default: GET + `edit_<type>_path` + icon `:edit`.
+  def test_edit_with_model_target
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.edit_button(target: herbarium)
+    html = render(Components::CrudButton::Edit.new(target: herbarium))
 
     assert_html(html,
                 "a[href='#{routes.edit_herbarium_path(herbarium)}']")
     assert_no_html(html, "form")
     assert_html(html, ".edit_herbarium_link_#{herbarium.id}")
     assert_html(html, "a span.glyphicon-edit")
-    assert_html(html, "a span.sr-only")
+    assert_html(html, "a span.sr-only",
+                text: :edit_object.t(type: :herbarium))
     assert_html(html, "a[data-toggle='tooltip']")
   end
 
   # `icon: nil` opt-out for text-only edit links.
-  def test_edit_button_icon_nil_opts_out
+  def test_edit_icon_nil_opts_out
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.edit_button(target: herbarium, icon: nil)
+    html = render(
+      Components::CrudButton::Edit.new(target: herbarium, icon: nil)
+    )
 
     path = routes.edit_herbarium_path(herbarium)
     assert_html(html, "a[href='#{path}']",
@@ -273,117 +307,72 @@ class LinkHelperButtonTest < ComponentTestCase
   end
 
   # Edit shares Delete's btn-frame default (`btn btn-outline-default`).
-  def test_edit_button_default_btn_frame
+  def test_edit_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.edit_button(target: herbarium)
+    html = render(Components::CrudButton::Edit.new(target: herbarium))
 
     assert_html(html, "a.btn.btn-outline-default")
   end
 
   # `btn: nil` opt-out — icon-only inline edits in dense table rows.
-  def test_edit_button_btn_nil_opts_out_of_frame
+  def test_edit_btn_nil_opts_out_of_frame
     herbarium = herbaria(:nybg_herbarium)
-    html = view_context.edit_button(target: herbarium, btn: nil)
+    html = render(
+      Components::CrudButton::Edit.new(target: herbarium, btn: nil)
+    )
 
     assert_no_html(html, "a.btn-outline-default")
     assert_no_html(html, "a.btn")
     assert_html(html, "a span.glyphicon-edit")
   end
 
-  # Download-button default: GET + explicit path + icon :download.
-  def test_download_button_helper_defaults
-    species_list = species_lists(:first_species_list)
-    html = view_context.download_button(target: species_list)
-
-    path = routes.new_download_species_list_path(id: species_list.id)
-    assert_html(html, "a[href='#{path}']")
-    assert_no_html(html, "form")
-    assert_html(html, "a span.glyphicon-download-alt")
-    assert_html(html, "a span.sr-only")
-  end
-end
-
-# Parity spot checks: verify the new component subclass output
-# matches the contract LinkHelper used to produce. Each test renders
-# through `view_context.<helper>` and asserts the structural pieces
-# (path, method, identifier class, body content) that downstream
-# templates / styles / Stimulus controllers depend on.
-class CrudButtonParityTest < ComponentTestCase
-  # destroy_button with a model target: form action is bare
-  # `<resource>_path` (no `destroy_` prefix), `_method=delete`, the
-  # identifier class is `destroy_<type>_link_<id>`, text-danger is
-  # applied, the default delete icon renders.
-  def test_destroy_button_model_target_parity
-    herbarium = herbaria(:nybg_herbarium)
-    html = view_context.destroy_button(
-      target: herbarium, name: "Destroy"
-    )
-
-    assert_html(html,
-                "form[action='#{routes.herbarium_path(herbarium)}']")
-    assert_html(html, "input[name='_method'][value='delete']")
-    assert_html(html, ".destroy_herbarium_link_#{herbarium.id}")
-    assert_html(html, ".text-danger")
-    assert_html(html, "[data-turbo-confirm]")
-    assert_html(html, "button span.glyphicon-remove-circle")
-    assert_html(html, "button span.sr-only", text: "Destroy")
-  end
-
-  # destroy_button with a String target: caller controls the path
-  # entirely, no identifier class is built, but delete-action defaults
-  # (text-danger, confirm, icon) still apply.
-  def test_destroy_button_string_target_parity
-    html = view_context.destroy_button(
-      target: "/items/42", name: "Destroy"
-    )
-
-    assert_html(html, "form[action='/items/42']")
-    assert_html(html, "input[name='_method'][value='delete']")
-    assert_html(html, ".text-danger")
-    assert_no_html(html, ".destroy_link_")
-    assert_html(html, "button span.glyphicon-remove-circle")
-  end
-
-  # edit_button with model target: link to `edit_<resource>_path`,
-  # identifier class `edit_<type>_link_<id>`, edit-icon glyph + sr-only
-  # label, tooltip data attrs.
-  def test_edit_button_model_target_parity
-    herbarium = herbaria(:nybg_herbarium)
-    html = view_context.edit_button(target: herbarium)
-
-    assert_html(html,
-                "a[href='#{routes.edit_herbarium_path(herbarium)}']")
-    assert_no_html(html, "form")
-    assert_html(html, ".edit_herbarium_link_#{herbarium.id}")
-    assert_html(html, "a span.glyphicon-edit")
-    assert_html(html, "a span.sr-only",
-                text: :edit_object.t(type: :herbarium))
-  end
-
-  # edit_button with String target + explicit `class:` override.
-  def test_edit_button_string_target_with_class_parity
-    html = view_context.edit_button(
-      target: "/items/42/edit", name: "Edit it", class: "btn btn-link"
-    )
+  # Edit with String target + explicit `class:` override.
+  def test_edit_with_string_target_and_class
+    html = render(Components::CrudButton::Edit.new(
+                    target: "/items/42/edit", name: "Edit it",
+                    class: "btn btn-link"
+                  ))
 
     assert_html(html, "a.btn.btn-link[href='/items/42/edit']")
     assert_html(html, "a span.glyphicon-edit")
     assert_html(html, "a span.sr-only", text: "Edit it")
   end
 
-  # String/Hash targets have no recoverable type, so `default_name`
+  # String / Hash targets have no recoverable type, so `default_name`
   # falls back to the generic `:EDIT.l` instead of
   # `:edit_object.t(type: …)`.
-  def test_edit_button_string_target_default_name
-    html = view_context.edit_button(target: "/items/42/edit")
+  def test_edit_with_string_target_default_name
+    html = render(
+      Components::CrudButton::Edit.new(target: "/items/42/edit")
+    )
 
     assert_html(html, "a span.sr-only", text: :EDIT.l)
   end
 
-  # post_button: form, no `_method` field (POST is default), no
-  # confirm, button body is the name verbatim.
-  def test_post_button_parity
-    html = view_context.post_button(name: "Create", path: "/items")
+  # Download: GET + explicit path + icon `:download`. The species
+  # list controller's named route is `new_download_species_list_path`,
+  # which doesn't match the standard `download_<resource>_path`
+  # shape that `target: model` would auto-resolve to — callers
+  # therefore pass an explicit path String. (The
+  # `LinkHelper#download_button` helper does the path-resolution
+  # for ERB callers; Phlex callers go through this path directly.)
+  def test_download_with_explicit_path
+    species_list = species_lists(:first_species_list)
+    path = routes.new_download_species_list_path(id: species_list.id)
+    html = render(Components::CrudButton::Download.new(target: path))
+
+    assert_html(html, "a[href='#{path}']")
+    assert_no_html(html, "form")
+    assert_html(html, "a span.glyphicon-download-alt")
+    assert_html(html, "a span.sr-only")
+  end
+
+  # Post: form, no `_method` field (POST is default), no confirm,
+  # button body is the name verbatim.
+  def test_post
+    html = render(
+      Components::CrudButton::Post.new(name: "Create", target: "/items")
+    )
 
     assert_html(html, "form[action='/items'][data-turbo='true']")
     assert_no_html(html, "input[name='_method']")
@@ -391,12 +380,12 @@ class CrudButtonParityTest < ComponentTestCase
     assert_html(html, "button", text: "Create")
   end
 
-  # put_button + confirm: form action, _method=put, turbo-confirm
-  # title and button data, body text.
-  def test_put_button_with_confirm_parity
-    html = view_context.put_button(
-      name: "Replace", path: "/items/1", confirm: "Sure?"
-    )
+  # Put + confirm: form action, `_method=put`, turbo-confirm title
+  # and button data, body text.
+  def test_put_with_confirm
+    html = render(Components::CrudButton::Put.new(
+                    name: "Replace", target: "/items/1", confirm: "Sure?"
+                  ))
 
     assert_html(html, "form[action='/items/1']")
     assert_html(html, "input[name='_method'][value='put']")
@@ -406,12 +395,13 @@ class CrudButtonParityTest < ComponentTestCase
     assert_html(html, "button", text: "Replace")
   end
 
-  # patch_button with custom class: form, _method=patch, class
-  # applied to the button.
-  def test_patch_button_with_class_parity
-    html = view_context.patch_button(
-      name: "Update", path: "/items/1", class: "btn btn-primary"
-    )
+  # Patch with custom class: form, `_method=patch`, class applied to
+  # the button.
+  def test_patch_with_class
+    html = render(Components::CrudButton::Patch.new(
+                    name: "Update", target: "/items/1",
+                    class: "btn btn-primary"
+                  ))
 
     assert_html(html, "form[action='/items/1']")
     assert_html(html, "input[name='_method'][value='patch']")
