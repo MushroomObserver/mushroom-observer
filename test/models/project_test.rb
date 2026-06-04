@@ -786,7 +786,71 @@ class ProjectTest < UnitTestCase
                         "Excluded obs should not surface as a violation")
   end
 
+  # --- trusted_by? requires membership (#4436) ---
+
+  def test_trusted_by_trusting_member
+    assert(projects(:eol_project).trusted_by?(mary)) # editing member
+  end
+
+  def test_trusted_by_no_trust_member_is_false
+    assert_not(projects(:eol_project).trusted_by?(katrina)) # no_trust member
+  end
+
+  def test_trusted_by_non_member_is_false
+    project = projects(:eol_project)
+    assert_not(project.member?(dick))
+    assert_not(project.trusted_by?(dick),
+               "A non-member must not be trusted (escalation guard)")
+  end
+
+  # --- adopt_matching_field_slips (#4436) ---
+
+  def test_adopt_matching_field_slips_member_owned
+    project = projects(:eol_project) # prefix EOL, mary is editing member
+    slip = orphan_field_slip("EOL-9001", mary)
+
+    adopted = project.adopt_matching_field_slips
+
+    assert_equal([slip], adopted)
+    assert_equal(project.id, slip.reload.project_id)
+  end
+
+  def test_adopt_skips_non_member_owned
+    project = projects(:eol_project)
+    assert_not(project.member?(dick))
+    slip = orphan_field_slip("EOL-9002", dick)
+
+    assert_empty(project.adopt_matching_field_slips)
+    assert_nil(slip.reload.project_id)
+  end
+
+  def test_adopt_skips_non_matching_prefix
+    project = projects(:eol_project)
+    slip = orphan_field_slip("XYZ-9003", mary)
+
+    project.adopt_matching_field_slips
+
+    assert_nil(slip.reload.project_id)
+  end
+
+  def test_setting_prefix_adopts_member_orphans
+    project = projects(:bolete_project) # mary is editing member
+    slip = orphan_field_slip("BOLNEW-1", mary)
+
+    project.update!(field_slip_prefix: "BOLNEW")
+
+    assert_equal(project.id, slip.reload.project_id,
+                 "Adding a prefix should claim a member's matching orphan")
+  end
+
   private
+
+  # A field slip with no project, regardless of prefix matching.
+  def orphan_field_slip(code, owner)
+    slip = FieldSlip.create!(code: code, user: owner)
+    slip.update_column(:project_id, nil)
+    slip
+  end
 
   def build_target_location_project
     Project.create!(

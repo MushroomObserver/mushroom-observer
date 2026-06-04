@@ -100,6 +100,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
   before_destroy :orphan_drafts
+  # Adding/changing a prefix retroactively claims previously-orphaned
+  # field slips whose code matches — but only member-owned ones. See
+  # #adopt_matching_field_slips and #4436.
+  after_save :adopt_matching_field_slips,
+             if: :saved_change_to_field_slip_prefix?
   validates :field_slip_prefix, uniqueness: true, allow_blank: true
   validates :field_slip_prefix,
             allow_blank: true,
@@ -230,9 +235,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
   alias admin? is_admin?
 
+  # A user trusts this project (allowing project admins to edit their
+  # content) only when they are an actual member whose trust_level is
+  # not "no_trust". A non-member is NOT trusted — otherwise merely
+  # associating their content with a project would hand its admins edit
+  # rights without consent. See #4436.
   def trusted_by?(user)
     member = project_members.find_by(user: user)
-    member&.trust_level != "no_trust"
+    member.present? && member.trust_level != "no_trust"
   end
 
   def can_edit?(user)
@@ -1011,6 +1021,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def can_add_field_slip?(user)
     member?(user) || can_join?(user)
+  end
+
+  # Associate previously-orphaned field slips (no project) whose code
+  # matches this project's prefix, restricted to slips whose owner is
+  # already a member — so adding a prefix can't silently claim a
+  # non-member's field slips and hand admins edit rights over them.
+  # Returns the slips actually adopted. Idempotent. See #4436.
+  def adopt_matching_field_slips
+    prefix = field_slip_prefix
+    return [] if prefix.blank?
+
+    FieldSlip.orphaned_with_code_prefix(prefix).select do |slip|
+      next false unless FieldSlip.prefix_for_code(slip.code) == prefix
+      next false unless member?(slip.user)
+
+      slip.update_column(:project_id, id)
+    end
   end
 
   def alias_data(target)

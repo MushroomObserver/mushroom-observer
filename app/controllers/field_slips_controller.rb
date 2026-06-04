@@ -9,6 +9,7 @@ class FieldSlipsController < ApplicationController
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :set_field_slip, only: [:edit, :update, :destroy]
+  before_action :require_edit_permission, only: [:edit, :update, :destroy]
   before_action :login_required, except: [:show]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
@@ -36,10 +37,6 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips/1/edit
   def edit
-    unless @field_slip.can_edit?(@user)
-      return redirect_to(field_slip_url(id: @field_slip.id))
-    end
-
     @recent_observations = recent_edit_observations
   end
 
@@ -82,10 +79,6 @@ class FieldSlipsController < ApplicationController
 
   # DELETE /field_slips/1 or /field_slips/1.json
   def destroy
-    unless @field_slip.can_edit?(@user)
-      return redirect_to(field_slip_url(id: @field_slip.id))
-    end
-
     @field_slip.destroy!
     respond_to do |format|
       format.html do
@@ -130,6 +123,19 @@ class FieldSlipsController < ApplicationController
 
   def set_field_slip
     @field_slip = FieldSlip.find(params[:id])
+    # Set for every edit/update/destroy flow (not just the edit action):
+    # update's validation-failure path re-renders :edit without running
+    # edit, and update_project runs on a code change during update — both
+    # need current_user for the Project dropdown / association. See #4436.
+    @field_slip.current_user = @user
+  end
+
+  # Gate edit/update/destroy. Site admins (admin mode) may always act,
+  # matching the edit-icon visibility rule in add_edit_icons. See #4436.
+  def require_edit_permission
+    return if in_admin_mode? || @field_slip.can_edit?(@user)
+
+    redirect_to(field_slip_url(id: @field_slip.id))
   end
 
   def html_create
