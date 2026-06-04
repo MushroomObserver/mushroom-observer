@@ -40,14 +40,10 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def render_new_link
-    plain("[ ")
-    name, path, opts = ::Tab::ExternalLink::New.new(
-      observation: @obs
-    ).to_a
-    render(Components::ModalLink.new(
-             "external_link", name, path, **opts
+    render(Components::InlineAddLink.new(
+             modal_id: "external_link",
+             tab: ::Tab::ExternalLink::New.new(observation: @obs)
            ))
-    plain(" ] ")
   end
 
   def list_visible?

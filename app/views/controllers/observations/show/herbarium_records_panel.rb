@@ -107,23 +107,13 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
               "#{:show_observation_no_herbarium_records.t} "
             end
     plain(label)
-    plain("[ ")
-    render_new_modal_link
-    plain(" ]")
+    render_new_link
   end
 
   def render_new_link
-    plain("[ ")
-    render_new_modal_link
-    plain(" ]")
-  end
-
-  def render_new_modal_link
-    name, path, opts = ::Tab::HerbariumRecord::New.new(
-      observation: @obs
-    ).to_a
-    render(Components::ModalLink.new(
-             "herbarium_record", name, path, **opts
+    render(Components::InlineAddLink.new(
+             modal_id: "herbarium_record",
+             tab: ::Tab::HerbariumRecord::New.new(observation: @obs)
            ))
   end
 end

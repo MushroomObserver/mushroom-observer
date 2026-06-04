@@ -82,7 +82,7 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Ba
     end
   end
 
-  # No records yet but user can add: status text + `[ new ]`.
+  # No records yet but user can add: status text + `[+]`.
   def render_empty_with_new_link
     label = if @has_sibling_records
               "#{:Collection_numbers.t}: "
@@ -90,23 +90,13 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Ba
               "#{:show_observation_no_collection_numbers.t} "
             end
     plain(label)
-    plain("[ ")
-    render_new_modal_link
-    plain(" ]")
+    render_new_link
   end
 
   def render_new_link
-    plain("[ ")
-    render_new_modal_link
-    plain(" ]")
-  end
-
-  def render_new_modal_link
-    name, path, opts = ::Tab::CollectionNumber::New.new(
-      observation: @obs
-    ).to_a
-    render(Components::ModalLink.new(
-             "collection_number", name, path, **opts
+    render(Components::InlineAddLink.new(
+             modal_id: "collection_number",
+             tab: ::Tab::CollectionNumber::New.new(observation: @obs)
            ))
   end
 end

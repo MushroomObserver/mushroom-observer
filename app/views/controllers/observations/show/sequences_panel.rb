@@ -47,14 +47,10 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
   end
 
   def render_new_link
-    plain("[ ")
-    name, path, opts = ::Tab::Sequence::New.new(
-      observation: @obs
-    ).to_a
-    render(Components::ModalLink.new(
-             "sequence", name, path, **opts
+    render(Components::InlineAddLink.new(
+             modal_id: "sequence",
+             tab: ::Tab::Sequence::New.new(observation: @obs)
            ))
-    plain(" ]")
   end
 
   def render_list

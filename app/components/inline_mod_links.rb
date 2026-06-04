@@ -115,6 +115,10 @@ class Components::InlineModLinks < Components::Base
       target: destroy_target,
       name: destroy_name,
       icon: :remove,
+      # Match `Components::IconLink`'s `px-2` icon padding so the
+      # destroy icon doesn't hug the surrounding `|` divider while
+      # the edit `IconLink` next to it has breathing room.
+      icon_class: "px-2",
       btn: nil,
       class: destroy_class,
       confirm: destroy_confirm

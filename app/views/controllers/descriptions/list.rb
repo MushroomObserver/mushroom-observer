@@ -85,7 +85,7 @@ module Views::Controllers::Descriptions
         trusted_html(description_title(desc))
       else
         render_link(desc)
-        render_mod_links(desc)
+        render(Components::InlineModLinks.new(target: desc, user: @user))
       end
     end
 
@@ -94,31 +94,6 @@ module Views::Controllers::Descriptions
         class: "description_link_#{desc.id}") do
         trusted_html(description_title(desc))
       end
-    end
-
-    def render_mod_links(desc)
-      writer = writer?(desc)
-      admin = admin?(desc)
-      return unless writer || admin
-
-      span(class: "ml-3") do
-        plain("[ ")
-        render_edit_link(desc) if writer
-        plain(" | ") if writer && admin
-        render_destroy_button(desc) if admin
-        plain(" ]")
-      end
-    end
-
-    def render_edit_link(desc)
-      content, path, opts = ::Tab::Description::Edit.new(
-        description: desc
-      ).to_a
-      render(Components::IconLink.new(content, path, **opts))
-    end
-
-    def render_destroy_button(desc)
-      render(Components::CrudButton::Delete.new(target: desc, btn: nil))
     end
 
     # Wraps `Description#partial_format_name` with a rough-permissions
@@ -153,20 +128,13 @@ module Views::Controllers::Descriptions
       end
     end
 
-    # `reader?` / `writer?` / `admin?` all fall back to `in_admin_mode?`
-    # so admins see drafts as "restricted" (not "private"), can hit Edit,
-    # and can hit Destroy. Matches the pre-Phlex `user_reader?` /
-    # `user_writer?` / `user_is_admin?` helpers.
+    # `reader?` falls back to `in_admin_mode?` so admins see
+    # drafts as "restricted" (not "private") and can click
+    # through. Edit / destroy permissions are owned by
+    # `Components::InlineModLinks` (`writer?` / `is_admin?`
+    # branches there).
     def reader?(desc)
       desc.is_reader?(@user) || in_admin_mode?
-    end
-
-    def writer?(desc)
-      desc.writer?(@user) || in_admin_mode?
-    end
-
-    def admin?(desc)
-      desc.is_admin?(@user) || in_admin_mode?
     end
   end
 end
