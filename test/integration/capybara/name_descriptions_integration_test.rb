@@ -125,7 +125,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     session.visit(url)
     # show n.d link should be restricted
     assert(session.has_link?(href: name_description_path(draft.id),
-                             text: /Restricted/))
+                             text: /restricted/i))
     assert(session.has_link?(href: edit_name_description_path(draft.id)))
     session.assert_no_text(/#{draft.gen_desc}/)
     assert(session.has_link?(

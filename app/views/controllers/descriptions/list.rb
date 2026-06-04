@@ -78,13 +78,13 @@ module Views::Controllers::Descriptions
     end
 
     def render_link(desc)
-      # The pre-Phlex `description_link` helper had an
-      # `return result if result.match?("(#{:private.t})$")` guard
-      # meant to skip the link when the title ended in "(private)",
-      # but Ruby's `String#match?` treats the bare `(` as a regex
-      # group rather than a literal — the guard never fired in
-      # practice. Don't reintroduce the (buggy) early return; always
-      # render the link so behavior matches the pre-conversion view.
+      # The pre-Phlex `description_link` helper had a guard meant to
+      # skip the `<a>` when the title ended in "(private)" — but
+      # `description_title` was wrapping its return in a Rails
+      # `translation_missing` span (see `description_title` below),
+      # so the title never literally ended in "(private)" and the
+      # guard never fired in practice. Don't reintroduce the dead
+      # branch; always render the link.
       a(href: url_for(desc.show_link_args),
         class: "description_link_#{desc.id}") do
         trusted_html(description_title(desc))
@@ -118,7 +118,17 @@ module Views::Controllers::Descriptions
 
     # Wraps `Description#partial_format_name` with a rough-permissions
     # suffix ("(public)", "(restricted)", "(private)"). Returns a
-    # `.t`-translated SafeBuffer so callers can `trusted_html` it.
+    # textile-processed SafeBuffer so callers can `trusted_html` it.
+    #
+    # Pre-Phlex this method called Rails' helper `t(result)` on a
+    # free-text string, which always hit `I18n.t` as a missing
+    # translation and wrapped the title in
+    # `<span class="translation_missing">…</span>` with title-cased
+    # fallback ("Eol Project (Restricted)"). That span shipped to
+    # every show-name / show-location page with an alt description.
+    # `String#t` (textile, MO's `app/extensions/string.rb#t`) is what
+    # this method was always meant to call — it does textile
+    # processing without the missing-translation wrapper.
     def description_title(desc)
       result = desc.partial_format_name
       permit = title_permission_label(desc)
@@ -131,11 +141,19 @@ module Views::Controllers::Descriptions
         :default.l
       elsif desc.public
         :public.l
-      elsif desc.is_reader?(@user)
+      elsif reader?(desc)
         :restricted.l
       else
         :private.l
       end
+    end
+
+    # `reader?` / `writer?` / `admin?` all fall back to `in_admin_mode?`
+    # so admins see drafts as "restricted" (not "private"), can hit Edit,
+    # and can hit Destroy. Matches the pre-Phlex `user_reader?` /
+    # `user_writer?` / `user_is_admin?` helpers.
+    def reader?(desc)
+      desc.is_reader?(@user) || in_admin_mode?
     end
 
     def writer?(desc)
