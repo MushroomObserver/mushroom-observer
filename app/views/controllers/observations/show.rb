@@ -22,7 +22,6 @@ module Views::Controllers::Observations
   class Show < Views::Base
     register_value_helper :add_owner_naming
     register_value_helper :link_to_display_name_brief_authors
-    register_value_helper :session
     register_output_helper :flash_notices_html, mark_safe: true
     # `tpl` on a SafeBuffer goes through MO's textile path; needed
     # for `@observation.source_credit.tpl` below. Not a Phlex
@@ -192,12 +191,14 @@ module Views::Controllers::Observations
              ))
     end
 
+    # Only called from inside the `if @user` branch of
+    # `render_secondary_row`, so `@user` is always truthy here.
+    # The legacy ERB computed a `show_map` value with a
+    # `!@user`-then-session fallback, but the value was only used
+    # inside its own `if @user` block — the fallback branch was
+    # never reachable. Mirror reality.
     def show_thumbnail_map?
-      if @user
-        @user.thumbnail_maps
-      else
-        !session[:hide_thumbnail_maps]
-      end
+      @user.thumbnail_maps
     end
 
     def render_footer

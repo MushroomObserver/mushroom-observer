@@ -77,28 +77,6 @@ module NamingsHelper
     [naming_name_link(user, naming), " ", proposer_links].safe_join
   end
 
-  # see link_helper.rb destroy_button
-  # Different from regular destroy button because of necessarily nested route
-  def naming_destroy_button(naming)
-    name = :DESTROY.t
-    path = observation_naming_path(observation_id: naming.observation_id,
-                                   id: naming.id)
-    identifier = "destroy_naming_link_#{naming.id}"
-    icon = link_icon(:remove)
-    content = tag.span(name, class: "sr-only")
-
-    html_options = {
-      method: :delete, title: name,
-      class: class_names(identifier, "text-danger"),
-      form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }
-
-    button_to(path, html_options) do
-      [content, icon].safe_join
-    end
-  end
-
   # N+1: naming includes name
   def naming_name_link(user, naming)
     Textile.register_name(naming.name)
