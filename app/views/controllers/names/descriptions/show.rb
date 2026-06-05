@@ -7,8 +7,8 @@ module Views::Controllers::Names::Descriptions
   class Show < Views::Base
     prop :description, ::NameDescription
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+    # Controller always passes — no need for a default fallback.
+    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy)
     prop :projects, _Nilable(_Array(::Project)), default: nil
 
     def view_template

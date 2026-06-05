@@ -165,7 +165,14 @@ module Locations
 
       find_description_parent
       find_licenses
-      @description.attributes = permitted_location_description_params
+      # `.compact` drops permitted params whose value is `nil` — which
+      # only happens when the corresponding form input wasn't rendered
+      # (conditional fields). Form inputs always submit at least an
+      # empty string, so intentional user-blanking flows through and
+      # marks the model as changed.
+      @description.assign_attributes(
+        permitted_location_description_params.compact
+      )
 
       modify_description_permissions
       save_if_changes_made_or_flash
